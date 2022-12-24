@@ -115,11 +115,14 @@ module internal Basic =
         /// 최초 시작이 OR 로 시작하면 우측으로 1 column 들여쓰기 한다.
         let indent = 0  // if getDepthFirstLogical expr = Some(Op.Or) then 1 else 0
 
-        let result = rng (x+indent) y expr
         let result =
-            match expr with
-            | FlatTerminal _ -> { result with NextX = result.NextX + 1 }
-            | _ -> result
+            let rslt = rng (x+indent) y expr
+            if rslt.NextX = x then
+                { rslt with NextX = x + 1 }
+            else
+                rslt
+
+        noop()
 
         /// 좌표 * xml 결과 문자열
         let positionedRungXmls, newY =

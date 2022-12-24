@@ -281,7 +281,7 @@ open PLC.CodeGen.Common.FlatExpressionModule
             File.WriteAllText(outputFile, xml)
 
         [<Test>]
-        member __.``TIMER: Many AND RungIn Condition test`` () =
+        member __.``TIMER: Many1 AND RungIn Condition test`` () =
             let storages = Storages()
             let code = codeForBits + """
                 ton myTon = createTON(2000us,
@@ -299,6 +299,46 @@ open PLC.CodeGen.Common.FlatExpressionModule
                     $myBit13 &&
                     $myBit14 &&
                     $myBit15 &&
+                    $myBit16    );
+"""
+            let statements = parseCode storages code
+            let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+            File.WriteAllText(outputFile, xml)
+        [<Test>]
+        member __.``XX TIMER: Many2 AND RungIn Condition test`` () =
+            let storages = Storages()
+            let code = codeForBits + """
+                ton myTon = createTON(2000us,
+                    $myBit00 &&
+                    $myBit01 &&
+                    $myBit02 &&
+                    $myBit03 &&
+                    $myBit04 &&
+                    $myBit05 &&
+                    $myBit06 &&
+                    $myBit07 &&
+                    $myBit10 &&
+                    $myBit11 &&
+                    $myBit12 &&
+                    $myBit13 &&
+                    $myBit14 &&
+                    $myBit15 &&
+
+                    $myBit00 &&
+                    $myBit01 &&
+                    $myBit02 &&
+                    $myBit03 &&
+                    $myBit04 &&
+                    $myBit05 &&
+                    $myBit06 &&
+                    $myBit07 &&
+                    $myBit10 &&
+                    $myBit11 &&
+                    $myBit12 &&
+                    $myBit13 &&
+                    $myBit14 &&
+                    $myBit15 &&
+
                     $myBit16    );
 """
             let statements = parseCode storages code

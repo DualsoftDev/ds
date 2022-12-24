@@ -195,14 +195,14 @@ module internal Command =
             //createFBParameterXml (cmd.CoilTerminalTag.PLCTagName)  (x+1) (y)
         ]
 
-
+    // <timer>
     let drawCommand(cmd:XgiCommand, x, y) =
         let results = ResizeArray<PositionedRungXml>()
 
         //FunctionBlock, Function 까지 연장선 긋기
         let needNewLineFeed = (x % minFBCellX) >= 6
         let numLineSpan = x / minFBCellX
-        let mutable newX = System.Math.Max( x + 1, (1 + numLineSpan) * minFBCellX  - 3)
+        let mutable newX = max (x + 1) ((1 + numLineSpan) * minFBCellX  - 3)
         if x  < newX - 1 then
             //newX <- getFBCellX x
             results.Add( {Position = coord newX y; Xml=mutiEndLine x  (newX - 1) y})

@@ -31,6 +31,8 @@ open System.Text.RegularExpressions
 
         let saveTestResult testFunctionName xml =
             File.WriteAllText($@"{xmlDir}\{testFunctionName}.xml", xml)
+            let answerXml = File.ReadAllText($@"{xmlAnswerDir}\{testFunctionName}.xml")
+            answerXml === xml
 
         (* 테스트 수행 후, XG5000 에서 Project > Open project 를 누르고, outputFile 을 지정하여 open 한다.
             XG5000 의 project 탐색 창의 Scan Program / DsLogic / Program 을 double click 하여 생성된 rung 을 육안 검사한다.
@@ -130,7 +132,7 @@ open System.Text.RegularExpressions
             saveTestResult (get_current_function_name()) xml
 
         [<Test>]
-        member __.``Or Many test`` () =
+        member __.``XX Or Many test`` () =
             let storages = Storages()
             let code = codeForBits + """
                 $myBit17 :=
@@ -167,39 +169,6 @@ open System.Text.RegularExpressions
                             && $myBit13
                             && ($myBit14 || $myBit15 || $myBit16)
                             ;
-"""
-            let statements = parseCode storages code
-            let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
-            saveTestResult (get_current_function_name()) xml
-            ()
-
-
-        [<Test>]
-        member __.``Negation1 test`` () =
-            let storages = Storages()
-            let code = """
-                bool myBit00 = createTag("%IX0.0.0", false);
-                bool myBit01 = createTag("%IX0.0.1", false);
-
-                $myBit01 := ! $myBit00;
-"""
-            let statements = parseCode storages code
-            let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
-            saveTestResult (get_current_function_name()) xml
-
-        [<Test>]
-        member __.``Negation2 test`` () =
-            let storages = Storages()
-            let code = """
-                bool myBit00 = createTag("%IX0.0.0", false);
-                bool myBit01 = createTag("%IX0.0.1", false);
-                bool myBit02 = createTag("%IX0.0.2", false);
-                bool myBit03 = createTag("%IX0.0.3", false);
-                bool myBit04 = createTag("%IX0.0.4", false);
-                bool myBit05 = createTag("%IX0.0.5", false);
-
-                $myBit02 := ! ($myBit00 || $myBit01);
-                $myBit05 := ! ($myBit03 && $myBit04);
 """
             let statements = parseCode storages code
             let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
@@ -249,6 +218,39 @@ open System.Text.RegularExpressions
             ()
 
         [<Test>]
+        member __.``Negation1 test`` () =
+            let storages = Storages()
+            let code = """
+                bool myBit00 = createTag("%IX0.0.0", false);
+                bool myBit01 = createTag("%IX0.0.1", false);
+
+                $myBit01 := ! $myBit00;
+"""
+            let statements = parseCode storages code
+            let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+            saveTestResult (get_current_function_name()) xml
+
+        [<Test>]
+        member __.``Negation2 test`` () =
+            let storages = Storages()
+            let code = """
+                bool myBit00 = createTag("%IX0.0.0", false);
+                bool myBit01 = createTag("%IX0.0.1", false);
+                bool myBit02 = createTag("%IX0.0.2", false);
+                bool myBit03 = createTag("%IX0.0.3", false);
+                bool myBit04 = createTag("%IX0.0.4", false);
+                bool myBit05 = createTag("%IX0.0.5", false);
+
+                $myBit02 := ! ($myBit00 || $myBit01);
+                $myBit05 := ! ($myBit03 && $myBit04);
+"""
+            let statements = parseCode storages code
+            let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+            saveTestResult (get_current_function_name()) xml
+            ()
+
+
+        [<Test>]
         member __.``Negation3 test`` () =
             let storages = Storages()
             let code = """
@@ -267,7 +269,7 @@ open System.Text.RegularExpressions
             saveTestResult (get_current_function_name()) xml
 
         [<Test>]
-        member __.``XX Timer test`` () =
+        member __.``Timer test`` () =
             let storages = Storages()
             let code = """
                 bool myQBit0 = createTag("%QX0.1.0", false);
@@ -299,7 +301,7 @@ open System.Text.RegularExpressions
             saveTestResult (get_current_function_name()) xml
 
         [<Test>]
-        member __.``XX TIMER= Many2 AND RungIn Condition test`` () =
+        member __.``TIMER= Many2 AND RungIn Condition test`` () =
             let storages = Storages()
             let code = codeForBits + """
                 ton myTon = createTON(2000us,
@@ -358,7 +360,7 @@ open System.Text.RegularExpressions
 
 
         [<Test>]
-        member __.``XXX TIMER= Many And, OR RungIn Condition test`` () =
+        member __.``XX TIMER= Many And, OR RungIn Condition test`` () =
             let storages = Storages()
             let code = codeForBits + """
                 ton myTon = createTON(2000us,

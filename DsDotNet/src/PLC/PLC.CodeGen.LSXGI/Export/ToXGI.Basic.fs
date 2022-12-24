@@ -23,6 +23,7 @@ module internal Basic =
     /// xml 및 다음 y 좌표 반환
     let rung x y expr (cmdExp:XgiCommand) : PositionedRungXml =
 
+        noop()
 
         /// x y 위치에서 expression 표현하기 위한 정보 반환
         /// {| Xml=[|c, str|]; NextX=sx; NextY=maxY; VLineUpRightMaxY=maxY |}
@@ -117,10 +118,12 @@ module internal Basic =
 
         let result =
             let rslt = rng (x+indent) y expr
-            if rslt.NextX = x then
-                { rslt with NextX = x + 1 }
-            else
-                rslt
+            match expr with
+            | FlatNary(Neg, FlatTerminal _::[])  -> rslt
+            | FlatNary(Neg, FlatNary(Or, _)::[]) -> rslt
+            | FlatNary(Neg, _) -> rslt
+            | _ when rslt.NextX = x -> { rslt with NextX = x + 1 }
+            | _ -> rslt
 
         noop()
 

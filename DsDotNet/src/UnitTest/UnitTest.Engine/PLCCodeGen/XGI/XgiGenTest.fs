@@ -1,7 +1,6 @@
 namespace T.PLC.XGI
 
 open System.IO
-open System.Reflection
 
 open NUnit.Framework
 
@@ -12,14 +11,17 @@ open Engine.Common.FS
 open PLC.CodeGen.Common.QGraph
 open PLC.CodeGen.LSXGI
 open PLC.CodeGen.Common.FlatExpressionModule
-open System.Text.RegularExpressions
-
 
 //[<AutoOpen>]
 //module XGI =
 
     type XgiGenerationTest() =
         do Fixtures.SetUpTest()
+
+        let setRuntimeTarget() =
+            let runtimeTargetBackup = RuntimeTarget
+            RuntimeTarget <- XGI
+            disposable { RuntimeTarget <- runtimeTargetBackup }
 
         let projectDir =
             let src = __SOURCE_DIRECTORY__
@@ -84,6 +86,14 @@ open System.Text.RegularExpressions
             bool myBit16 = createTag("%IX0.0.14", false);
             bool myBit17 = createTag("%IX0.0.15", false);
 """
+        let mutable runtimeTarget = RuntimeTarget
+        [<SetUp>]
+        member __.Setup () =
+            RuntimeTarget <- XGI
+
+        [<TearDown>]
+        member __.TearDown () =
+            RuntimeTarget <- runtimeTarget
 
         [<Test>]
         member __.``AndOr simple test`` () =
@@ -373,6 +383,29 @@ open System.Text.RegularExpressions
                     ($myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
                     || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16)
                     &&
+                    ($myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
+                    || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16)
+
+                    );
+"""
+            let statements = parseCode storages code
+            let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+            saveTestResult (get_current_function_name()) xml
+
+        [<Test>]
+        member __.``XX TIMER= Many And, OR RungIn Condition test2`` () =
+            let storages = Storages()
+            let code = codeForBits + """
+                ton myTon = createTON(2000us,
+                    ($myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
+                    || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16)
+                    && $myBit00 &&
+                    ($myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
+                    || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16)
+                    && $myBit00 &&
+                    ($myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
+                    || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16)
+                    && $myBit00 &&
                     ($myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
                     || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16)
 

@@ -7,6 +7,7 @@ open Engine.Common.FS
 open PLC.CodeGen.Common.QGraph
 open System.Collections.Generic
 open Engine.Core
+open PLC.CodeGen.Common.K
 
 module LsXGI =
 
@@ -40,6 +41,10 @@ module LsXGI =
 
 
     let generateXml (opt:CodeGenerationOption) (storages:Storages) (commentedStatements:CommentedStatement list) : string =
+        match RuntimeTarget with
+        | XGI -> ()
+        | _ -> failwith $"ERROR: Require XGI Runtime target.  Current runtime target = {RuntimeTarget}"
+
         let prologComments = ["DS Logic for XGI"]
 
         // todo : Timer 및 Counter 도 PLC XGI 에 변수로 등록하여야 한다.

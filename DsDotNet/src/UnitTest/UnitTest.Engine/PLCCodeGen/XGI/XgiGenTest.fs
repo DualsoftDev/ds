@@ -12,6 +12,7 @@ open Engine.Common.FS
 open PLC.CodeGen.Common.QGraph
 open PLC.CodeGen.LSXGI
 open PLC.CodeGen.Common.FlatExpressionModule
+open System.Text.RegularExpressions
 
 
 //[<AutoOpen>]
@@ -19,6 +20,17 @@ open PLC.CodeGen.Common.FlatExpressionModule
 
     type XgiGenerationTest() =
         do Fixtures.SetUpTest()
+
+        let projectDir =
+            let src = __SOURCE_DIRECTORY__
+            let key = @"UnitTest\UnitTest.Engine"
+            let tail = src.IndexOf(key) + key.Length
+            src.Substring(0, tail)
+        let xmlDir = Path.Combine(projectDir, "XgiXmls")
+        let xmlAnswerDir = Path.Combine(xmlDir, "Answers")
+
+        let saveTestResult testFunctionName xml =
+            File.WriteAllText($@"{xmlDir}\{testFunctionName}.xml", xml)
 
         (* 테스트 수행 후, XG5000 에서 Project > Open project 를 누르고, outputFile 을 지정하여 open 한다.
             XG5000 의 project 탐색 창의 Scan Program / DsLogic / Program 을 double click 하여 생성된 rung 을 육안 검사한다.
@@ -73,14 +85,13 @@ open PLC.CodeGen.Common.FlatExpressionModule
 
         [<Test>]
         member __.``AndOr simple test`` () =
-            //generatePLCByModel
             let storages = Storages()
             let code = """
                 bool myBit0 = createTag("%IX0.0.0", false);
                 bool myBit1 = createTag("%IX0.0.1", false);
                 bool myBit2 = createTag("%IX0.0.2", false);
 
-                bool myBit7 = createTag("%IX0.0.7", false);
+                bool myBit7 = createTag("%QX0.1.0", false);
 
                 $myBit7 := ($myBit0 || $myBit1) && $myBit2;
 """
@@ -89,9 +100,7 @@ open PLC.CodeGen.Common.FlatExpressionModule
             statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
             let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
-            File.WriteAllText(outputFile, xml)
-            tracefn "%s" xml
-            ()
+            saveTestResult (get_current_function_name()) xml
 
 
         [<Test>]
@@ -118,7 +127,7 @@ open PLC.CodeGen.Common.FlatExpressionModule
 """
             let statements = parseCode storages code
             let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
-            File.WriteAllText(outputFile, xml)
+            saveTestResult (get_current_function_name()) xml
 
         [<Test>]
         member __.``Or Many test`` () =
@@ -144,7 +153,7 @@ open PLC.CodeGen.Common.FlatExpressionModule
 """
             let statements = parseCode storages code
             let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
-            File.WriteAllText(outputFile, xml)
+            saveTestResult (get_current_function_name()) xml
 
         [<Test>]
         member __.``AndOr2 test`` () =
@@ -161,8 +170,7 @@ open PLC.CodeGen.Common.FlatExpressionModule
 """
             let statements = parseCode storages code
             let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
-            File.WriteAllText(outputFile, xml)
-            tracefn "%s" xml
+            saveTestResult (get_current_function_name()) xml
             ()
 
 
@@ -177,8 +185,7 @@ open PLC.CodeGen.Common.FlatExpressionModule
 """
             let statements = parseCode storages code
             let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
-            File.WriteAllText(outputFile, xml)
-            ()
+            saveTestResult (get_current_function_name()) xml
 
         [<Test>]
         member __.``Negation2 test`` () =
@@ -196,7 +203,7 @@ open PLC.CodeGen.Common.FlatExpressionModule
 """
             let statements = parseCode storages code
             let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
-            File.WriteAllText(outputFile, xml)
+            saveTestResult (get_current_function_name()) xml
             ()
 
         [<Test>]
@@ -257,8 +264,7 @@ open PLC.CodeGen.Common.FlatExpressionModule
 """
             let statements = parseCode storages code
             let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
-            File.WriteAllText(outputFile, xml)
-            ()
+            saveTestResult (get_current_function_name()) xml
 
         [<Test>]
         member __.``XX Timer test`` () =
@@ -278,95 +284,98 @@ open PLC.CodeGen.Common.FlatExpressionModule
             //statements.Length === 2      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
             let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
-            File.WriteAllText(outputFile, xml)
+            saveTestResult (get_current_function_name()) xml
 
         [<Test>]
-        member __.``TIMER: Many1 AND RungIn Condition test`` () =
+        member __.``TIMER= Many1 AND RungIn Condition test`` () =
             let storages = Storages()
             let code = codeForBits + """
                 ton myTon = createTON(2000us,
-                    $myBit00 &&
-                    $myBit01 &&
-                    $myBit02 &&
-                    $myBit03 &&
-                    $myBit04 &&
-                    $myBit05 &&
-                    $myBit06 &&
-                    $myBit07 &&
-                    $myBit10 &&
-                    $myBit11 &&
-                    $myBit12 &&
-                    $myBit13 &&
-                    $myBit14 &&
-                    $myBit15 &&
-                    $myBit16    );
+                    $myBit00 && $myBit01 && $myBit02 && $myBit03 && $myBit04 && $myBit05 && $myBit06 && $myBit07
+                    && $myBit10 && $myBit11 && $myBit12 && $myBit13 && $myBit14 && $myBit15 && $myBit16    );
 """
             let statements = parseCode storages code
             let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
-            File.WriteAllText(outputFile, xml)
+            saveTestResult (get_current_function_name()) xml
+
         [<Test>]
-        member __.``XX TIMER: Many2 AND RungIn Condition test`` () =
+        member __.``XX TIMER= Many2 AND RungIn Condition test`` () =
             let storages = Storages()
             let code = codeForBits + """
                 ton myTon = createTON(2000us,
-                    $myBit00 &&
-                    $myBit01 &&
-                    $myBit02 &&
-                    $myBit03 &&
-                    $myBit04 &&
-                    $myBit05 &&
-                    $myBit06 &&
-                    $myBit07 &&
-                    $myBit10 &&
-                    $myBit11 &&
-                    $myBit12 &&
-                    $myBit13 &&
-                    $myBit14 &&
-                    $myBit15 &&
+                    // 산전 limit : 가로로 31개
+                    //let coilCellX = 31
+                    $myBit00 && $myBit01 && $myBit02 && $myBit03 && $myBit04 && $myBit05 && $myBit06 && $myBit07
+                    && $myBit10 && $myBit11 && $myBit12 && $myBit13 && $myBit14 && $myBit15 &&
 
-                    $myBit00 &&
-                    $myBit01 &&
-                    $myBit02 &&
-                    $myBit03 &&
-                    $myBit04 &&
-                    $myBit05 &&
-                    $myBit06 &&
-                    $myBit07 &&
+                    $myBit00 && $myBit01 && $myBit02 && $myBit03 && $myBit04 && $myBit05 && $myBit06 && $myBit07 &&
                     $myBit10 &&
                     $myBit11 &&
                     $myBit12 &&
                     $myBit13 &&
-                    $myBit14 &&
-                    $myBit15 &&
+                    //$myBit14 &&
+                    //$myBit15 &&
 
                     $myBit16    );
 """
             let statements = parseCode storages code
             let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
-            File.WriteAllText(outputFile, xml)
+            saveTestResult (get_current_function_name()) xml
 
 
         [<Test>]
-        member __.``TIMER: Many OR RungIn Condition test`` () =
+        member __.``TIMER= Many1 OR RungIn Condition test`` () =
             let storages = Storages()
             let code = codeForBits + """
                 ton myTon = createTON(2000us,
-                    $myBit00 ||
-                    $myBit01 ||
-                    $myBit02 ||
-                    $myBit03 ||
-                    $myBit04 ||
-                    $myBit05 ||
-                    $myBit06 ||
-                    $myBit07 ||
-                    $myBit10 ||
-                    $myBit11 ||
-                    $myBit12 ||
-                    $myBit13 ||
-                    $myBit14 ||
-                    $myBit15 ||
-                    $myBit16    );
+                    $myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
+                    || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16    );
 """
             let statements = parseCode storages code
             let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
-            File.WriteAllText(outputFile, xml)
+            saveTestResult (get_current_function_name()) xml
+
+
+        [<Test>]
+        member __.``TIMER= Many2 OR RungIn Condition test`` () =
+            let storages = Storages()
+            let code = codeForBits + """
+                ton myTon = createTON(2000us,
+                    $myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
+                    || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16 ||
+
+                    $myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
+                    || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16 ||
+
+                    $myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
+                    || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16
+
+                    );
+"""
+            let statements = parseCode storages code
+            let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+            saveTestResult (get_current_function_name()) xml
+
+
+        [<Test>]
+        member __.``XXX TIMER= Many And, OR RungIn Condition test`` () =
+            let storages = Storages()
+            let code = codeForBits + """
+                ton myTon = createTON(2000us,
+                    ($myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
+                    || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16)
+                    &&
+                    ($myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
+                    || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16)
+                    &&
+                    ($myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
+                    || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16)
+                    &&
+                    ($myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
+                    || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16)
+
+                    );
+"""
+            let statements = parseCode storages code
+            let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+            saveTestResult (get_current_function_name()) xml

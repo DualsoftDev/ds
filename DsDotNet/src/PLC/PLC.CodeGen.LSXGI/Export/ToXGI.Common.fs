@@ -36,8 +36,11 @@ module internal Common =
     /// 좌표 반환 : 1, 4, 7, 11, ...
     /// 논리 좌표 x y 를 LS 산전 XGI 수치 좌표계로 반환
     let coord x y : EncodedXYCoordinate = x*3 + y*1024 + 1
-    /// 산전 limit : 가로로 31개
-    let coilCellX = 31
+
+    /// 산전 limit : 가로로 29개 (31개)
+    /// 라인별로 연결 화살표도 Cell 을 차지하는 것을 고려했을 때, 실제 Output Coil 에 사용될 수 있는
+    /// input tag 의 가로 최대 갯수는 29개 이다.
+    let coilCellX = 29
     /// 최소기본 FB 위치 : 가로로  9 포인트
     let minFBCellX = 9
     /// 조건이 9 이상이면 뒤로 증가

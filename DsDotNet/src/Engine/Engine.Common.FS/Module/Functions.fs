@@ -214,6 +214,13 @@ module Functions =
             .Any(fun n -> n.StartsWith("Microsoft.VisualStudio.TestPlatform."))
             ;
 
+    let get_current_function_name() =
+        let stackTrace = new System.Diagnostics.StackTrace()
+        let stackFrame = stackTrace.GetFrame(1)
+        let methodBase = stackFrame.GetMethod()
+        methodBase.Name
+
+
     module private TestMe =
         let test() =
             // [1..10] 중에서 두번째로 나오는 3의 배수만 filter

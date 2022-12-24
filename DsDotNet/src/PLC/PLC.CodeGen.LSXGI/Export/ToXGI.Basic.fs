@@ -116,14 +116,28 @@ module internal Basic =
         /// 최초 시작이 OR 로 시작하면 우측으로 1 column 들여쓰기 한다.
         let indent = 0  // if getDepthFirstLogical expr = Some(Op.Or) then 1 else 0
 
-        let result =
-            let rslt = rng (x+indent) y expr
+        /// OR 로만(Neg 은 포함가능) 연결된 것인지 검사
+        let (|FlatNaryOROnly|_|) (expr:FlatExpression) =
+            let rec helper (fe:FlatExpression) =
+                match fe with
+                | FlatNary(Or, head::tail) -> helper head
+                | FlatTerminal _ -> Some()
+                | _ -> None
+
             match expr with
-            | FlatNary(Neg, FlatTerminal _::[])  -> rslt
-            | FlatNary(Neg, FlatNary(Or, _)::[]) -> rslt
-            | FlatNary(Neg, _) -> rslt
-            | _ when rslt.NextX = x -> { rslt with NextX = x + 1 }
-            | _ -> rslt
+            | FlatTerminal _ -> None    // 맨 처음부터 terminal 이 오는 것은 OR only 로 보지 않음
+            | _ -> helper expr
+
+        let result = rng (x+indent) y expr
+
+        let needStayColumn =
+            match expr with
+            //| FlatNary(Neg, FlatTerminal _::[])  -> rslt
+            //| FlatNary(Neg, FlatNary(Or, _)::[]) -> rslt
+            | FlatNaryOROnly -> true
+            | FlatNary(Neg, _) -> true
+            | _ when result.NextX = x -> false
+            | _ -> true
 
         noop()
 
@@ -134,10 +148,10 @@ module internal Basic =
                 [
                     yield! result.RungInfos
 
-                    if indent = 1 then
-                        assert(false)   // indent 가 필요하면, 사용할 코드.  현재는 indent 0 으로 fix
-                        let c = coord x y
-                        { Position = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c "Param=\"0\"" "" }
+                    //if indent = 1 then
+                    //    assert(false)   // indent 가 필요하면, 사용할 코드.  현재는 indent 0 으로 fix
+                    //    let c = coord x y
+                    //    { Position = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c "Param=\"0\"" "" }
 
                     let drawCoil(x, y) =
                         let lengthParam =
@@ -151,13 +165,20 @@ module internal Basic =
                         ]
                         0, results
 
-                    let nx = result.NextX
+                    let nx = (if needStayColumn then 0 else 1) + result.NextX
+
+                    let nx, lineStartX =
+                        let x = result.NextX
+                        match needStayColumn with
+                        | true -> x, x + 1
+                        | false -> x + 1, x + 1
+
                     let newY, posiRungXmls =
                         match cmdExp.CommandType with
                         | CoilCmd (cc) ->
                             drawCoil(nx, y)
                         | ( FunctionCmd _ | FunctionBlockCmd _ )
-                            -> drawCommand(cmdExp, nx, y)
+                            -> drawCommand(cmdExp, nx, y, lineStartX)
 
                     yield! posiRungXmls
                     newPositionY <- newY

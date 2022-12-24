@@ -132,7 +132,7 @@ open System.Text.RegularExpressions
             saveTestResult (get_current_function_name()) xml
 
         [<Test>]
-        member __.``XX Or Many test`` () =
+        member __.``OR Many test`` () =
             let storages = Storages()
             let code = codeForBits + """
                 $myBit17 :=
@@ -360,7 +360,7 @@ open System.Text.RegularExpressions
 
 
         [<Test>]
-        member __.``XX TIMER= Many And, OR RungIn Condition test`` () =
+        member __.``TIMER= Many And, OR RungIn Condition test`` () =
             let storages = Storages()
             let code = codeForBits + """
                 ton myTon = createTON(2000us,

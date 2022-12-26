@@ -94,14 +94,9 @@ module CoreModule =
         member val ApiResetInfos = HashSet<ApiResetInfo>()
         ///시스템 전체시작 버튼누름시 수행되야하는 Real목록
         member val StartPoints = createQualifiedNamedHashSet<Real>()
-
-
         ///시스템 버튼 소속 Flow 정보
-        member val EmergencyButtons = ButtonDic()
-        member val AutoButtons      = ButtonDic()
-        member val StartButtons     = ButtonDic()
-        member val ResetButtons     = ButtonDic()
-
+        member val ButtonSet = ButtonSet()
+      
 
     type Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
@@ -114,6 +109,20 @@ module CoreModule =
             let flow = Flow(name, system)
             system.Flows.Add(flow) |> verifyM $"Duplicated flow name [{name}]"
             flow
+
+
+    and ButtonSet() =
+            
+        ///시스템 버튼 소속 Flow 정보
+        member val AutoButtons       =  ButtonDic()    //자동 버튼
+        member val ManualButtons     =  ButtonDic()    //수동 버튼
+        member val EmergencyButtons  =  ButtonDic()    //비상 버튼
+        member val StopButtons       =  ButtonDic()    //정지 버튼
+        member val StartButtons      =  ButtonDic()    //시작 버튼
+        member val StartDryButtons   =  ButtonDic()    //시운전 시작 버튼
+        member val ClearButtons      =  ButtonDic()    //해지 버튼
+
+
 
     and AliasDef(aliasKey:Fqdn, target:AliasTargetWrapper option, mnemonics:string []) =
         member _.AliasKey = aliasKey
@@ -376,10 +385,14 @@ module CoreModule =
             if x <> flow.System then failwithf $"button [{btnName}] in flow ({flow.System.Name} != {x.Name}) is not same system"
             let dicButton =
                 match btnType with
-                | DuStartBTN       -> x.StartButtons
-                | DuClearBTN       -> x.ResetButtons
-                | DuEmergencyBTN   -> x.EmergencyButtons
-                | DuAutoBTN        -> x.AutoButtons
+                | DuAutoBTN          -> x.ButtonSet.AutoButtons     
+                | DuManualBTN        -> x.ButtonSet.ManualButtons   
+                | DuEmergencyBTN     -> x.ButtonSet.EmergencyButtons
+                | DuStopBTN          -> x.ButtonSet.StopButtons     
+                | DuStartBTN         -> x.ButtonSet.StartButtons    
+                | DuStartDryBTN      -> x.ButtonSet.StartDryButtons 
+                | DuClearBTN         -> x.ButtonSet.ClearButtons    
+
 
             match dicButton.TryFind btnName with
             | Some btn -> btn.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"

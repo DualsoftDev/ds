@@ -79,10 +79,13 @@ module ImportViewModule =
 
         let newNode = ViewNode("Buttons", BUTTON)
 
-        system.AutoButtons.Where(fun w->w.Value.Contains(flow))     |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuAutoBTN)) |>ignore)
-        system.ResetButtons.Where(fun w->w.Value.Contains(flow))    |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuClearBTN)) |>ignore)
-        system.StartButtons.Where(fun w->w.Value.Contains(flow))    |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuStartBTN)) |>ignore)
-        system.EmergencyButtons.Where(fun w->w.Value.Contains(flow))|> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuEmergencyBTN)) |>ignore)
+        system.ButtonSet.AutoButtons.Where(fun w->w.Value.Contains(flow))       |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuAutoBTN)) |>ignore)
+        system.ButtonSet.ClearButtons.Where(fun w->w.Value.Contains(flow))      |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuClearBTN)) |>ignore)
+        system.ButtonSet.StartButtons.Where(fun w->w.Value.Contains(flow))      |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuStartBTN)) |>ignore)
+        system.ButtonSet.EmergencyButtons.Where(fun w->w.Value.Contains(flow))  |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuEmergencyBTN)) |>ignore)
+        system.ButtonSet.ManualButtons.Where(fun w->w.Value.Contains(flow))     |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuManualBTN)) |>ignore)
+        system.ButtonSet.StopButtons.Where(fun w->w.Value.Contains(flow))       |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuStopBTN)) |>ignore)
+        system.ButtonSet.StartDryButtons.Where(fun w->w.Value.Contains(flow))   |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuStartDryBTN)) |>ignore)
         
         if newNode.Singles.Count > 0
         then node.Singles.Add(newNode) |> ignore

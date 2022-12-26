@@ -76,8 +76,17 @@ namespace Engine
         StartBTN_FF = { F2 };
         StartBTN1 = { F1; };
     }
-    [reset] = {
-        ResetBTN = { F1; F2; F3; F5; };
+    [clear] = {
+        ClearBTN = { F1;F2;F3;F5; }
+    }
+    [manual] = {
+        ManualBTN = { F1;F5; }
+    }
+    [stop] = {
+        StopBTN = { F1;F2;F5; }
+    }
+    [startdry] = {
+        StartDryBTN = { F5; }
     }
 }
 

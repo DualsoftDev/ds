@@ -179,10 +179,13 @@ module internal ToDsTextModule =
                             yield $"{tab2}{k} = {lb} {flows} {rb}"
                         yield $"{tab}{rb}"
                 ] |> combineLines
-            yield buttonsToDs("auto" , system.AutoButtons)
-            yield buttonsToDs("emg"  , system.EmergencyButtons)
-            yield buttonsToDs("start", system.StartButtons)
-            yield buttonsToDs("reset", system.ResetButtons)
+            yield buttonsToDs("auto",       system.ButtonSet.AutoButtons     )
+            yield buttonsToDs("manual",     system.ButtonSet.ManualButtons   )
+            yield buttonsToDs("emg",        system.ButtonSet.EmergencyButtons)
+            yield buttonsToDs("stop",       system.ButtonSet.StopButtons     )
+            yield buttonsToDs("start",      system.ButtonSet.StartButtons    )
+            yield buttonsToDs("startdry",   system.ButtonSet.StartDryButtons )
+            yield buttonsToDs("clear",      system.ButtonSet.ClearButtons    )
 
             (* prop
                     safety

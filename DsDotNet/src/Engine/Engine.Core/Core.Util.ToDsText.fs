@@ -183,8 +183,8 @@ module internal ToDsTextModule =
             yield buttonsToDs("manual",     system.ButtonSet.ManualButtons   )
             yield buttonsToDs("emg",        system.ButtonSet.EmergencyButtons)
             yield buttonsToDs("stop",       system.ButtonSet.StopButtons     )
-            yield buttonsToDs("start",      system.ButtonSet.StartButtons    )
-            yield buttonsToDs("startdry",   system.ButtonSet.StartDryButtons )
+            yield buttonsToDs("run",        system.ButtonSet.RunButtons    )
+            yield buttonsToDs("dryrun",     system.ButtonSet.DryRunButtons )
             yield buttonsToDs("clear",      system.ButtonSet.ClearButtons    )
 
             (* prop

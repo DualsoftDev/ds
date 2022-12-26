@@ -23,11 +23,11 @@ module EtcListenerModule =
                 match first with
                 | :? EmergencyButtonBlockContext -> system.ButtonSet.EmergencyButtons
                 | :? AutoButtonBlockContext      -> system.ButtonSet.AutoButtons
-                | :? StartButtonBlockContext     -> system.ButtonSet.StartButtons
+                | :? RunButtonBlockContext       -> system.ButtonSet.RunButtons
                 | :? ClearButtonBlockContext     -> system.ButtonSet.ClearButtons
                 | :? ManualButtonBlockContext    -> system.ButtonSet.ManualButtons
                 | :? StopButtonBlockContext      -> system.ButtonSet.StopButtons
-                | :? StartdryButtonBlockContext  -> system.ButtonSet.StartDryButtons
+                | :? DryrunButtonBlockContext    -> system.ButtonSet.DryRunButtons
                 | _ -> failwith "ERROR"
 
             let category = first.GetChild(1).GetText();       // [| '[', category, ']', buttonBlock |] 에서 category 만 추려냄 (e.g 'emg')

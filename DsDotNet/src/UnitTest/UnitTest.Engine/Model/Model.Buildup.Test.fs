@@ -176,11 +176,11 @@ module ModelBuildupTests1 =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
             system.AddButton(BtnType.DuEmergencyBTN, "STOP", flow)
-            system.AddButton(BtnType.DuStartBTN, "START", flow)
+            system.AddButton(BtnType.DuRunBTN, "START", flow)
 
             let flow2 = Flow.Create("F2", system)
             system.AddButton(BtnType.DuEmergencyBTN, "STOP2", flow2)
-            system.AddButton(BtnType.DuStartBTN, "START2", flow2)
+            system.AddButton(BtnType.DuRunBTN, "START2", flow2)
 
             let generated = system.ToDsText()
             let answer = """
@@ -198,7 +198,7 @@ module ModelBuildupTests1 =
         STOP = { F; }
         STOP2 = { F2; }
     }
-    [start] = {
+    [run] = {
         START = { F; }
         START2 = { F2; }
     }

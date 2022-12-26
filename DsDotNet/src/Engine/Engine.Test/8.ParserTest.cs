@@ -72,7 +72,7 @@ namespace Engine
         AutoBTN = { F2 };
         AutoBTN2 = { F1; F3; F5; };
     }
-    [start] = {
+    [run] = {
         StartBTN_FF = { F2 };
         StartBTN1 = { F1; };
     }
@@ -85,7 +85,7 @@ namespace Engine
     [stop] = {
         StopBTN = { F1;F2;F5; }
     }
-    [startdry] = {
+    [dryrun] = {
         StartDryBTN = { F5; }
     }
 }

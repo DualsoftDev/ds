@@ -255,7 +255,7 @@ module PPTObjectModule =
             let btn =  if shape.CheckNoSmoking() then Some(BtnType.DuEmergencyBTN)
                        elif shape.CheckDonutShape() then Some(BtnType.DuAutoBTN)
                        elif shape.CheckBevelShape() then Some(BtnType.DuClearBTN)
-                       elif shape.CheckBlockArc() then Some(BtnType.DuStartBTN)
+                       elif shape.CheckBlockArc() then Some(BtnType.DuRunBTN)
                        else None
             btnType    <- btn
                

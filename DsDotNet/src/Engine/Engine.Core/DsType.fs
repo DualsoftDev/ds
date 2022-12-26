@@ -59,8 +59,8 @@ module DsType =
         | DuManualBTN           //수동 버튼
         | DuEmergencyBTN        //비상 버튼
         | DuStopBTN             //정지 버튼
-        | DuStartBTN            //시작 버튼
-        | DuStartDryBTN         //시운전 시작 버튼
+        | DuRunBTN              //운전 버튼
+        | DuDryRunBTN           //시운전 시작 버튼
         | DuClearBTN            //해지 버튼
 
 

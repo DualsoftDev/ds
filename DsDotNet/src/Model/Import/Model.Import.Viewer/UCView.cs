@@ -222,7 +222,7 @@ namespace Dual.Model.Import
                         if (viewNode.BtnType.Value == BtnType.DuAutoBTN) nNode.Attr.FillColor = Color.DarkGoldenrod;
                         if (viewNode.BtnType.Value == BtnType.DuClearBTN) nNode.Attr.FillColor = Color.DarkOliveGreen;
                         if (viewNode.BtnType.Value == BtnType.DuEmergencyBTN) nNode.Attr.FillColor = Color.MediumVioletRed;
-                        if (viewNode.BtnType.Value == BtnType.DuStartBTN) nNode.Attr.FillColor = Color.BlueViolet;
+                        if (viewNode.BtnType.Value == BtnType.DuRunBTN) nNode.Attr.FillColor = Color.BlueViolet;
                     }
 
                 }

@@ -207,11 +207,11 @@ module ModelComponentAnswers =
     [stop] = {
         StopBTN = { F1;F2;F5; }
     }
-    [start] = {
+    [run] = {
         StartBTN_FF = { F2; }
         StartBTN1 = { F1; }
     }
-    [startdry] = {
+    [dryrun] = {
         StartDryBTN = { F5; }
     }
     [clear] = {

@@ -43,7 +43,7 @@ module ExportIOTable =
             dt.Rows.Add(TextEmgBtn,  btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
         for btn in  sys.ButtonSet.AutoButtons do
             dt.Rows.Add(TextAutoBtn,  btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
-        for btn in  sys.ButtonSet.StartButtons do
+        for btn in  sys.ButtonSet.RunButtons do
             dt.Rows.Add(TextStartBtn,  btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
         for btn in  sys.ButtonSet.ClearButtons do
             dt.Rows.Add(TextResetBtn,  btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
@@ -51,7 +51,7 @@ module ExportIOTable =
             dt.Rows.Add(TextResetBtn,  btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
         for btn in  sys.ButtonSet.StopButtons    do
             dt.Rows.Add(TextResetBtn,  btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
-        for btn in  sys.ButtonSet.StartDryButtons do
+        for btn in  sys.ButtonSet.DryRunButtons do
             dt.Rows.Add(TextResetBtn,  btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
 
         dt.Rows.Add("'-", "'-","'-", "'-", "'-","'-", "'-","'-") |> ignore

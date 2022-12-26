@@ -118,8 +118,8 @@ module CoreModule =
         member val ManualButtons     =  ButtonDic()    //수동 버튼
         member val EmergencyButtons  =  ButtonDic()    //비상 버튼
         member val StopButtons       =  ButtonDic()    //정지 버튼
-        member val RunButtons      =  ButtonDic()      //운전 버튼
-        member val DryRunButtons   =  ButtonDic()      //시운전 시작 버튼
+        member val RunButtons        =  ButtonDic()      //운전 버튼
+        member val DryRunButtons     =  ButtonDic()      //시운전 시작 버튼
         member val ClearButtons      =  ButtonDic()    //해지 버튼
 
 

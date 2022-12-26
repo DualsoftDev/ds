@@ -80,7 +80,7 @@ module ImportViewModule =
         let newNode = ViewNode("Buttons", BUTTON)
 
         system.AutoButtons.Where(fun w->w.Value.Contains(flow))     |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuAutoBTN)) |>ignore)
-        system.ResetButtons.Where(fun w->w.Value.Contains(flow))    |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuResetBTN)) |>ignore)
+        system.ResetButtons.Where(fun w->w.Value.Contains(flow))    |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuClearBTN)) |>ignore)
         system.StartButtons.Where(fun w->w.Value.Contains(flow))    |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuStartBTN)) |>ignore)
         system.EmergencyButtons.Where(fun w->w.Value.Contains(flow))|> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuEmergencyBTN)) |>ignore)
         

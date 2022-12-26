@@ -46,6 +46,7 @@ open Engine.Parser.FS
             let fails = [
                 "Counter declaration error"      , "ctu myCtu1 = createCTU(100us, $tag1, $tag1, $tag1, $tag1)"    // 'Counter declaration error: ctu myCounter = createCTU(100us, $tag1, $tag1, $tag1, $tag1)'
                 "Unable to cast"                 , "ctu myCtu2 = createCTU(100us, $tagDouble)"                    // 'Unable to cast object of type 'DuTerminal[System.Double]' to type 'IExpression`1[System.Boolean]'.'
+        //<<help kwak>> 예외나는데 ShouldFailWithSubstringT 에서 처리가  안되네요
                 "The index was outside the range", "ctu myTon1 = createTON()"                                     // 'The index was outside the range of elements in the list. (Parameter 'n')'
                 "Unable to cast"                 , "ctu myTon2 = createTON(100us, $tag1)"                         // 'Unable to cast object of type 'DuFunction[Engine.Core.ExpressionModule+Timer]' to type 'Expression`1[Engine.Core.ExpressionModule+Counter]'.'
                 "Failed to find"                 , "ctu myTon3 = createTON(100us, $undefinedTag)"                 // 'Failed to find variable/tag name in $undefinedTag'

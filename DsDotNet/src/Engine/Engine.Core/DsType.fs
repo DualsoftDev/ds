@@ -56,7 +56,7 @@ module DsType =
     ///BtnType  종류
     type BtnType =
         | DuStartBTN            //시작 버튼
-        | DuResetBTN            //리셋 버튼
+        | DuClearBTN            //해지 버튼
         | DuAutoBTN             //자동 버튼
         | DuEmergencyBTN        //비상 버튼
 

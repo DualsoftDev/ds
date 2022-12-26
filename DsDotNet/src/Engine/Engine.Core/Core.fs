@@ -377,7 +377,7 @@ module CoreModule =
             let dicButton =
                 match btnType with
                 | DuStartBTN       -> x.StartButtons
-                | DuResetBTN       -> x.ResetButtons
+                | DuClearBTN       -> x.ResetButtons
                 | DuEmergencyBTN   -> x.EmergencyButtons
                 | DuAutoBTN        -> x.AutoButtons
 

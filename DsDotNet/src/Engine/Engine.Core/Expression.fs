@@ -119,6 +119,7 @@ module ExpressionModule =
     let (|CommentAndStatement|) = function | CommentedStatement(x, y) -> x, y
     let commentAndStatement = (|CommentAndStatement|)
     let withNoComment statement = CommentedStatement("", statement)
+    let withExpressionComment (statement: Statement) = CommentedStatement(statement.ToText(), statement)
 
     type Statement with
         member x.Do() =

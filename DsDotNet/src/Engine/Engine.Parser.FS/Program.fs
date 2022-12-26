@@ -110,7 +110,91 @@ C4 > C5;
     [external file="station.ds" ip="192.168.0.2"] C;
 }
 """
+    let CpuTestText = """
+[sys ip = 192.168.0.1] My = {
+    [flow] MyFlow = {
+        Seg1 > Seg2 > Ap;
+        Seg1 = {
+            Ap > Am;
+        }
+    }
+    [flow] "Flow.Complex" = {
+        "#Seg.Complex#" => Seg;
+        "#Seg.Complex#" = {
+            Ap > Am;
+        }
+    }
 
+    [flow] F = {        // GVT.Flow
+        C1, C2 > C3, C4 |> C5;
+C3 > C5 > C6;
+C4 > C5;
+        Main        // GVT.{ Segment | Parenting }
+        > R3        // GVT.{ Segment }
+        ;
+        Main = {        // GVT.{ Segment | Parenting }
+            // diamond
+            Ap1 > Am1 > Bm1;
+            Ap1 > Bp1 > Bm1;
+
+            // diamond 2nd
+            Bm1 >               // GVT.{ Child | Call | Aliased }
+            Ap2 > Am2 > Bm2;
+            Ap2 > Bp2 > Bm2;
+
+            Ap>Am>Bp>Bm;
+            Bm2
+            > Ap             // GVT.{ Child | Call }
+            ;
+        }
+        R1              // define my local terminal real segment    // GVT.{ Segment }
+            //> C."+"     // direct interface call wrapper segment    // GVT.{ Call }
+            > Main2     // aliased to my real segment               // GVT.{ Segment | Aliased }
+            > Ap1       // aliased to interface                     // GVT.{ Segment | Aliased | Call }
+            ;
+        R2;
+
+        [aliases] = {
+            Main.Ap = { Ap1; Ap2; }
+            Main.Am = { Am1; Am2; }
+            Main.Bp = { Bp1; Bp2; }
+            Main.Bm = { Bm1; Bm2; }
+            Main = { Main2; }
+        }
+        // Flow 내의 safety 는 지원하지 않음
+        //[safety] = {
+        //    F.Main = { Ap; }
+        //}
+    }
+
+    [jobs] = {
+        Ap = { A."+"(%Q1, %I1); }
+        Am = { A."-"(%Q2, %I2); }
+        Bp = { B."+"(%Q3, %I3); }
+        Bm = { B."-"(%Q4, %I4); }
+    }
+
+    [emg] = {
+        EMGBTN = { F; };
+        //EmptyButton = {};
+        //NonExistingFlowButton = { F1; };
+    }
+    [prop] = {
+        // safety : Real|Call = { (Real|Call)* }
+        [safety] = {
+            F.Main = { F.Main.Ap; }
+            F.Main.Am = { F.Main; }
+        }
+        [layouts] = {
+            F.Main.Ap = (1309,405,205,83)
+        }
+    }
+
+    [device file="cylinder.ds"] A;
+    [device file="cylinder.ds"] B;
+    [external file="station.ds" ip="192.168.0.2"] C;
+}
+"""
     let CodeElementsText = """
 [sys] My = {
     [flow] F = {

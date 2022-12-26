@@ -3,9 +3,44 @@ namespace Engine.CodeGenCPU
 open System.Linq
 open System.Runtime.CompilerServices
 open Engine.Core
+open System
 
 [<AutoOpen>]
 module ConvertUtil =
+    
+    [<Flags>]
+    type ConvertType = 
+    |CvtReal                = 0b00000001  
+    |CvtRealEx              = 0b00000010  
+    |CvtCall                = 0b00000100  
+    |CvtAlias               = 0b00001000  
+    |CvtAliasForCall        = 0b00100000  
+    |CvtAliasForReal        = 0b01000000  
+    |CvtAliasForRealEx      = 0b10000000  
+    |CvtV                   = 0b11111111  
+
+    //RC      //Real, Call as RC
+    //RCA     //Real, Call, Alias(Call) as RCA
+    //RRA     //Real, RealExF, Alias(Real) as RRA
+    //CA      //Call, Alias(Call) as CA 
+    //V       //Real, RealExF, Call, Alias as V
+
+    let ConvertTypeCheck (v:Vertex) (vaild:ConvertType) = 
+        let isVaildVertex =
+            match v with
+            | :? Real   -> vaild.HasFlag(ConvertType.CvtReal)
+            | :? RealEx -> vaild.HasFlag(ConvertType.CvtRealEx) 
+            | :? Call   -> vaild.HasFlag(ConvertType.CvtCall)
+            | :? Alias as a  -> 
+                match a.TargetWrapper with
+                | DuAliasTargetReal ar   -> vaild.HasFlag(ConvertType.CvtAliasForReal)
+                | DuAliasTargetCall ac   -> vaild.HasFlag(ConvertType.CvtAliasForCall)
+                | DuAliasTargetRealEx ao -> vaild.HasFlag(ConvertType.CvtAliasForRealEx)
+            |_ -> failwith "Error"
+
+        if not <| isVaildVertex 
+        then failwith $"{v.Name} can't applies to [{vaild}] case"
+       
     [<Extension>]
     type ConvertUtilExt =
 

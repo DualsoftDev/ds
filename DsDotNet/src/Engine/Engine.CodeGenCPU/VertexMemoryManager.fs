@@ -8,14 +8,14 @@ open Engine.Core
 [<AutoOpen>]
 module VertexMemoryManagerModule =
 
-//   타입 | 구분    | Tag   | Port | Force HMI |
-//______________________________________________
-//   PLAN | Start	| ST    | SP   | SF        |
-//   PLAN | Reset	| RT	| RP   | RF        |
-//   PLAN | End	    | ET	| EP   | EF        |
-//______________________________________________
-// ACTION | IN	    | API. I| -	   | API. I    |
-// ACTION | OUT	    | API. O| -	   | API. O    |
+    //   타입 | 구분    | Tag   | Port | Force HMI |
+    //______________________________________________
+    //   PLAN | Start	| ST    | SP   | SF        |
+    //   PLAN | Reset	| RT	| RP   | RF        |
+    //   PLAN | End	    | ET	| EP   | EF        |
+    //______________________________________________
+    // ACTION | IN	    | API. I| -	   | API. I    |
+    // ACTION | OUT	    | API. O| -	   | API. O    |
 
     /// Vertex Manager : 소속되어 있는 DsBit 를 관리하는 컨테이어
     type VertexMemoryManager (v:Vertex)  =
@@ -51,6 +51,7 @@ module VertexMemoryManagerModule =
             member x.Vertex = v
 
         member x.Name  = name
+        member x.Vertex  = v
 
         //Tag 약어 변수는 수식정의시 사용
         ///Segment Start Tag

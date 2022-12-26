@@ -246,6 +246,12 @@ module CoreModule =
         | DuAliasTargetReal of Real
         | DuAliasTargetCall of Call
         | DuAliasTargetRealEx of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
+        member x.RealTarget() =
+            match x with | DuAliasTargetReal   r -> Some r |_ -> None
+        member x.CallTarget() =
+            match x with | DuAliasTargetCall   c -> Some c |_ -> None
+        member x.RealExTarget() =
+            match x with | DuAliasTargetRealEx rx -> Some rx |_ -> None
 
     and SafetyCondition =
         | DuSafetyConditionReal of Real

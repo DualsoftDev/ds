@@ -6,24 +6,26 @@ open System
 module  TagModule =
 
     type TagFlag =
-    | R
-    | G
-    | F
-    | H
-    | Origin
-    | Pause
-    | ErrorTx
-    | ErrorRx
-    | Relay
-    | ET        //EndTag
-    | RT        //ResetTag
-    | ST        //StartTag
-    | EP        //EndPort
-    | RP        //ResetPort
-    | SP        //StartPort
-    | EF        //EndForce
-    | RF        //ResetForce
-    | SF        //StartForce
+    | R             // Ready Status
+    | G             // Going  Status
+    | F             // Finish Status 
+    | H             // Homing  Status
+    | Origin        // Origin Monitor
+    | Pause         // Pause Monitor
+    | ErrorTx       // Error Tx Monitor
+    | ErrorRx       // Error Rx Monitor
+    | RelayReal     // Real Init Relay
+    | RelayCall     // Call Done Relay
+    | RelayGoing    // Going Relay
+    | ET            // End Tag
+    | RT            // Reset Tag
+    | ST            // Start Tag
+    | EP            // End Port
+    | RP            // Reset Port
+    | SP            // Start Port
+    | EF            // End Force
+    | RF            // Reset Force
+    | SF            // Start Force
 
     [<AbstractClass>]
     type Tag<'T when 'T:equality> (name, initValue:'T)  =
@@ -57,9 +59,6 @@ module  TagModule =
                  | F -> ChangeStatusEvent (v, Finish)
                  | H -> ChangeStatusEvent (v, Homing)
                  | _->()
-
-
-
 
     //bitFlag
     //[<Flags>]

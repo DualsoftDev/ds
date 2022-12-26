@@ -8,15 +8,6 @@ open Engine.Core
 module ConvertUtil =
     [<Extension>]
     type ConvertUtilExt =
-        //[<Extension>] static member GetVertices(sys:DsSystem) =
-        //                sys.Flows.SelectMany(fun flow->
-        //                    flow.Graph.Vertices
-        //                        |> Seq.collect(fun v ->
-        //                            match v with
-        //                            | :? Real as r -> r.Graph.Vertices.ToArray() @ [r]
-        //                            | _ -> [|v|])
-        //                       )
-
 
         [<Extension>]
         static member FindEdgeSources(graph:DsGraph, target:Vertex, edgeType:ModelingEdgeType): Vertex seq =
@@ -35,12 +26,12 @@ module ConvertUtil =
 
     // vertex 를 coin 입장에서 봤을 때의 extension methods
     type Vertex with
-        member coin.GetCoinTags(memory:VertexMemoryManager, isInTag:bool) : TagBase<bool> seq =
+        member coin.GetCoinTags(memory:VertexMemoryManager, isInTag:bool) : Tag<bool> seq =
             match coin with
             | :? Call as c ->
                 [ for j in c.CallTarget.JobDefs do
                     let typ = if isInTag then "I" else "O"
-                    PlcTag( $"{j.ApiName}_{typ}", "", false) :> TagBase<bool>
+                    PlcTag( $"{j.ApiName}_{typ}", "", false) :> Tag<bool>
                 ]
             | :? Alias as a ->
                 match a.TargetWrapper with
@@ -50,7 +41,7 @@ module ConvertUtil =
             | _ -> failwith "Error"
 
 
-        member coin.GetTxRxTags(isTx:bool, memory:VertexMemoryManager) : TagBase<bool> seq =
+        member coin.GetTxRxTags(isTx:bool, memory:VertexMemoryManager) : Tag<bool> seq =
             let getVertexManager(v:Vertex) = v.VertexMemoryManager :?> VertexMemoryManager
 
             match coin with
@@ -62,7 +53,7 @@ module ConvertUtil =
                         else
                             j.ApiItem.RXs.Select(fun s -> (getVertexManager s).EndTag)
                     )
-                    .Cast<TagBase<bool>>()
+                    .Cast<Tag<bool>>()
             | :? Alias as a ->
                 match a.TargetWrapper with
                 | DuAliasTargetReal ar    -> ar.GetCoinTags(memory, isTx)

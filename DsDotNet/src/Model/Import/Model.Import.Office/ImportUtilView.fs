@@ -41,6 +41,7 @@ module ImportViewModule =
 
     let ConvertFlow(flow:Flow, dummys:pptDummy seq)  =
         let newNode = ViewNode()
+        newNode.Flow <- Some flow
         let edgeInfos = flow.ModelingEdges
         let lands = flow.Graph.Islands
         let dicV = flow.Graph.Vertices |> Seq.map(fun v-> v, ViewNode(v)) |> dict
@@ -129,6 +130,10 @@ module ImportViewModule =
     [<Extension>]
     type ImportViewUtil =
         [<Extension>] 
+        static member ConvertViewNodes (mySys:DsSystem) = 
+                    mySys.Flows.Select(fun f ->ConvertFlow (f, []))
+    
+        [<Extension>] 
         static member MakeGraphView (doc:pptDoc, mySys:DsSystem) =
                 let dicVertex = doc.DicVertex
                 let dicFlow = doc.DicFlow
@@ -143,7 +148,7 @@ module ImportViewModule =
                         UpdateBtnNodes(flow.System, flow, flowNode)
                         UpdateApiItems(flow.System, page, doc.DicNodes.Values.Where(fun f->f.NodeType = IF), flowNode)
 
-                        flowNode.Page <- page; flowNode.Flow <- Some(flow)
+                        flowNode.Page <- page; //flowNode.Flow <- Some(flow)
                         flowNode)
 
                 let viewNodes =  getFlowNodes(mySys.Flows)

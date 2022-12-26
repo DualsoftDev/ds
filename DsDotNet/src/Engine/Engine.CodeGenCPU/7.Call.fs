@@ -11,45 +11,44 @@ type VertexMemoryManager with
     member call.CreateCallStartRung(srcs:VertexMemoryManager seq, real:VertexMemoryManager): CommentedStatement =
         let sets  =
             [   for s in srcs do
-                    s.Relay
+                    s.RelayCallDone
                 real.Going
-            ].ToTags()
-        let rsts  = [call.Relay].ToTags()
-        let statement = call.StartTag <== FuncExt.GetNoRelayExpr(sets, rsts)
+            ].ToAnd()
+        let rsts  = [call.RelayCallDone].ToAnd()
+        let statement = call.StartTag.GetRung(Some sets, Some rsts)
         statement |> withNoComment
 
 
     ///C2 Call 작업완료 Statement 만들기
-    member call.CreateCallRelayRung(srcs:VertexMemoryManager seq, tags:TagBase<bool> seq, parentReal:VertexMemoryManager): CommentedStatement =
-        let sets  = [ for s in srcs -> s.Relay :> TagBase<bool> ] @ List.ofSeq tags
-        let rsts  = [parentReal.Homing].ToTags()
-        let relay = call.Relay
+    member call.CreateCallRelayRung(srcs:VertexMemoryManager seq, tags:Tag<bool> seq, parentReal:VertexMemoryManager): CommentedStatement =
+        let sets  = srcs.Select(fun s -> s.RelayCallDone).Cast<Tag<bool>>() |> Seq.append tags  |> tags2AndExpr 
+        let rsts  = [parentReal.Homing]
 
-        let statement = call.Relay <== FuncExt.GetRelayExpr(sets, rsts, relay)
+        let statement = call.RelayCallDone.GetRelay(sets, rsts.ToAnd())
         statement |> withNoComment
 
     ///C3 Call 시작출력 Statement 만들기
-    member call.CreateOutputRungs(tags:TagBase<bool> seq) : CommentedStatement seq =
+    member call.CreateOutputRungs(tags:Tag<bool> seq) : CommentedStatement seq =
         [ for outTag in tags do
             let statement = outTag <== tag2expr call.StartTag
             statement |> withNoComment ]
 
     ///C4 Call Start to Api TX.Start Statement 만들기
-    member call.CreateLinkTxRungs(tags:TagBase<bool> seq) : CommentedStatement seq =
+    member call.CreateLinkTxRungs(tags:Tag<bool> seq) : CommentedStatement seq =
         [ for txTag in tags do
             let statement = txTag <== tag2expr call.StartTag
             statement |> withNoComment ]
 
     //C5 Call End from  Api RX.End  Statement 만들기
-    member call.TryCreateLinkRxStatement(tags:TagBase<bool> seq): CommentedStatement option =
+    member call.TryCreateLinkRxStatement(tags:Tag<bool> seq): CommentedStatement option =
         if tags.Any() then
-            let statement = call.EndTag <== FuncExt.GetAnd(tags)
+            let statement = call.EndTag <== tags2AndExpr tags 
             statement |> withNoComment |> Some
         else
             None
 
     //C6 Call Tx ~ Rx 내용없을시 Coin Start-End 직접연결
     member call.CreateDirectLinkRung(): CommentedStatement  =
-        let statement = call.EndTag <== FuncExt.GetAnd([call.StartTag])
+        let statement = call.EndTag <== [call.StartTag].ToAnd()
         statement |> withNoComment
 

@@ -170,19 +170,35 @@ module internal ToDsTextModule =
 
 
 
-            let buttonsToDs(category:string, btns:ButtonDic) =
+            let buttonsToDs(category:string, btns:ButtonDef seq) =
                 [
-                    if btns.Count > 0 then
+                    if btns.length() > 0 then
                         yield $"{tab}[{category}] = {lb}"
-                        for KeyValue(k, v) in btns do
-                            let flows = (v.Select(fun f -> f.NameComponents.Skip(1).Combine()) |> String.concat ";") + ";"
-                            yield $"{tab2}{k} = {lb} {flows} {rb}"
+                        for btn in btns do
+                            let flows = (btn.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine()) |> String.concat ";") + ";"
+                            yield $"{tab2}{btn.Name} = {lb} {flows} {rb}"
                         yield $"{tab}{rb}"
                 ] |> combineLines
-            yield buttonsToDs("auto" , system.AutoButtons)
-            yield buttonsToDs("emg"  , system.EmergencyButtons)
-            yield buttonsToDs("start", system.StartButtons)
-            yield buttonsToDs("reset", system.ResetButtons)
+            yield buttonsToDs("auto",       system.AutoButtons       )
+            yield buttonsToDs("manual",     system.ManualButtons     )
+            yield buttonsToDs("emg",        system.EmergencyButtons  )
+            yield buttonsToDs("stop",       system.StopButtons       )
+            yield buttonsToDs("run",        system.RunButtons        )
+            yield buttonsToDs("dryrun",     system.DryRunButtons     )
+            yield buttonsToDs("clear",      system.ClearButtons      )
+
+            let LampsToDs(category:string, lamps:LampDef seq) =
+                [
+                    if lamps.length() > 0 then
+                        yield $"{tab}[{category}] = {lb}"
+                        for lamp in lamps do
+                            yield $"{tab2}{lamp.Name} = {lb} {lamp.SettingFlow} {rb}"
+                        yield $"{tab}{rb}"
+                ] |> combineLines
+            yield LampsToDs("runlamp",       system.RunModeLamps    )
+            yield LampsToDs("dryrunlamp",     system.DryRunModeLamps )
+            yield LampsToDs("manuallamp",        system.ManualModeLamps )
+            yield LampsToDs("stoplamp",       system.StopModeLamps   )
 
             (* prop
                     safety

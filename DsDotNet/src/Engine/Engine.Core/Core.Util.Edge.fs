@@ -4,6 +4,7 @@ open System.Linq
 open System.Runtime.CompilerServices
 open System.Collections.Generic
 open Engine.Common.FS
+open Engine.Common.FS
 
 
 [<AutoOpen>]
@@ -49,6 +50,25 @@ module EdgeModule =
             edges.Except(ofStrongResetEdge edges)
     let ofNotResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
             edges.Except(ofResetEdge edges)
+
+
+    let ofRealVertex (xs:Vertex seq)   = xs.Where(fun v -> v :? Real).Cast<Real>()
+    let ofRealExVertex (xs:Vertex seq) = xs.Where(fun v -> v :? RealEx).Cast<RealEx>()
+    let ofCallVertex (xs:Vertex seq)   = xs.Where(fun v -> v :? Call).Cast<Call>()
+    let ofAliasVertex (xs:Vertex seq)  = xs.Where(fun v -> v :? Alias).Cast<Alias>()
+
+    let ofAliasForCallVertex (xs:Vertex seq) =  
+        xs |> ofAliasVertex 
+        |> Seq.collect(fun a -> a.TargetWrapper.CallTarget() |> Option.toList)
+        
+    let ofAliasForRealVertex (xs:Vertex seq) = 
+        xs |> ofAliasVertex 
+        |> Seq.collect(fun a -> a.TargetWrapper.RealTarget() |> Option.toList)
+
+    let ofAliasForRealExVertex (xs:Vertex seq) =
+        xs |> ofAliasVertex 
+        |> Seq.collect(fun a -> a.TargetWrapper.RealExTarget() |> Option.toList)
+
 
     /// 상호 reset 정보(Mutual Reset Info) 확장
     let internal createMRIEdgesTransitiveClosure4Graph(graph:Graph<'V, 'E>, edgeCreator:'V*'V*EdgeType -> IEdge<'V>) =
@@ -137,7 +157,15 @@ type EdgeExt =
     [<Extension>] static member ToText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (edge:'E) = toText edge
     [<Extension>] static member GetVertices(edges:IEdge<'V> seq) = edges.Collect(fun e -> e.GetVertices())
     [<Extension>] static member GetVertices(x:DsSystem) =  getVerticesOfSystem x
-    
+    [<Extension>] static member GetReals(xs:Vertex seq) =  ofRealVertex xs
+    [<Extension>] static member GetCalls(xs:Vertex seq) =  ofCallVertex xs
+    [<Extension>] static member GetRealEx(xs:Vertex seq) =  ofRealExVertex xs
+    [<Extension>] static member GetAliases(xs:Vertex seq) =  ofAliasVertex xs
+    [<Extension>] static member GetAliasTargetTypeReals(xs:Vertex seq) =  ofAliasForRealVertex xs
+    [<Extension>] static member GetAliasTargetTypeRealExs(xs:Vertex seq) =  ofAliasForRealExVertex xs
+    [<Extension>] static member GetAliasTargetTypeCalls(xs:Vertex seq) =  ofAliasForCallVertex xs
+                                          
+                                          
     [<Extension>] static member OfStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofStrongResetEdge edges
     [<Extension>] static member OfWeakResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofWeakResetEdge edges
     [<Extension>] static member OfNotResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofNotResetEdge edges

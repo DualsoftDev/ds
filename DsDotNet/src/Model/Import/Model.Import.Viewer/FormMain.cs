@@ -20,6 +20,7 @@ using static Engine.Core.Interface;
 
 using static Engine.Cpu.RunTime;
 using static Model.Import.Office.ViewModule;
+using static Engine.CodeGenCPU.CpuLoader;
 
 namespace Dual.Model.Import
 {
@@ -35,6 +36,8 @@ namespace Dual.Model.Import
         public bool Busy = false;
         private CancellationTokenSource _cts = new CancellationTokenSource();
 
+
+        private DsSystem _HelpSystem;
         private DsSystem SelectedSystem => (comboBox_System.SelectedItem as SystemView).System;
 
 
@@ -281,7 +284,7 @@ namespace Dual.Model.Import
         {
             SystemView sysView = comboBox_System.SelectedItem as SystemView;
 
-            var rungs = CpuLoader.LoadStatements(sysView.System);
+            var rungs = Cpu.LoadStatements(sysView.System);
             var storages = new Dictionary<string, IStorage>();
             _myCPU = new DsCPU(storages, "", rungs.Select(s => s.Item2.statement));
             _myCPU.Run();

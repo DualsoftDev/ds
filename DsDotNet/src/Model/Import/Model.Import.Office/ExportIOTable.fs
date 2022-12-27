@@ -40,13 +40,19 @@ module ExportIOTable =
                     dt.Rows.Add(rowTemp) |> ignore)
        
         for btn in  sys.EmergencyButtons do
-            dt.Rows.Add(TextEmgBtn,  btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
+            dt.Rows.Add(TextEmgBtn,  btn.Name  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
         for btn in  sys.AutoButtons do
-            dt.Rows.Add(TextAutoBtn,  btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
-        for btn in  sys.StartButtons do
-            dt.Rows.Add(TextStartBtn,  btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
-        for btn in  sys.ResetButtons do
-            dt.Rows.Add(TextResetBtn,  btn.Key  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
+            dt.Rows.Add(TextAutoBtn,  btn.Name  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
+        for btn in  sys.RunButtons do
+            dt.Rows.Add(TextStartBtn,  btn.Name  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
+        for btn in  sys.ClearButtons do
+            dt.Rows.Add(TextResetBtn,  btn.Name  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
+        for btn in  sys.ManualButtons do
+            dt.Rows.Add(TextResetBtn,  btn.Name  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
+        for btn in  sys.StopButtons    do
+            dt.Rows.Add(TextResetBtn,  btn.Name  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
+        for btn in  sys.DryRunButtons do
+            dt.Rows.Add(TextResetBtn,  btn.Name  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
 
         dt.Rows.Add("'-", "'-","'-", "'-", "'-","'-", "'-","'-") |> ignore
         dt.Rows.Add("'-", "'-","'-", "'-", "'-","'-", "'-","'-") |> ignore

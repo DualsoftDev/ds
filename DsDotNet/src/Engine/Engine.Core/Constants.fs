@@ -155,11 +155,7 @@ module DsTextExport =
 [<AutoOpen>]
 module DsTextProperty =
     //button
-    let [<Literal>] TextEmergencyBTN = "emg_in"
-    let [<Literal>] TextAutoBTN      = "auto_in"
-    let [<Literal>] TextResetBTN     = "reset_in"
-    let [<Literal>] TextStartBTN     = "start_in"
-
+ 
     let [<Literal>] TextFlow    = "flow"
     let [<Literal>] TextSystem  = "sys"
     let [<Literal>] TextAddress = "addresses"

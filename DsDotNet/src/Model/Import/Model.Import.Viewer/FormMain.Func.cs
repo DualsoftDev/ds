@@ -14,6 +14,7 @@ using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
 using static Model.Import.Office.ImportM;
+using static Model.Import.Office.ImportViewModule;
 using static Model.Import.Office.ViewModule;
 using Color = System.Drawing.Color;
 
@@ -194,13 +195,9 @@ namespace Dual.Model.Import
             splitContainer1.Panel1Collapsed = false;
 
             this.Size = new Size(1600, 1000);
-            //if (_Demo.Systems.Count == 0)
-            //    _Demo = ImportCheck.GetDemoModel("test");
-
-            //_Demo.Systems.OrderBy(sys => sys.Name).ToList()
-            //      .ForEach(sys =>
-            //          CreateNewTabViewer(sys, null)
-            //      );
+            _HelpSystem = ImportCheck.GetDemoModel("test");
+            var viewNodes = ImportViewUtil.ConvertViewNodes(_HelpSystem);
+            UpdateGraphUI(viewNodes);
         }
 
         internal void RefreshGraph()
@@ -228,7 +225,7 @@ namespace Dual.Model.Import
             //T9_Group
             //T10_Button
             //T11_SubLoading
-            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\")) + "src\\UnitTest\\UnitTest.Engine\\ImportOffice\\Sample\\TEST.pptx";
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\")) + "src\\UnitTest\\UnitTest.Engine\\ImportOffice\\Sample\\s.pptx";
             bool debug = File.Exists(path);
             if (debug)
             {

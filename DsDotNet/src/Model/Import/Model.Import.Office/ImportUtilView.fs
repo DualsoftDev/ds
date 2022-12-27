@@ -41,6 +41,7 @@ module ImportViewModule =
 
     let ConvertFlow(flow:Flow, dummys:pptDummy seq)  =
         let newNode = ViewNode()
+        newNode.Flow <- Some flow
         let edgeInfos = flow.ModelingEdges
         let lands = flow.Graph.Islands
         let dicV = flow.Graph.Vertices |> Seq.map(fun v-> v, ViewNode(v)) |> dict
@@ -79,10 +80,13 @@ module ImportViewModule =
 
         let newNode = ViewNode("Buttons", BUTTON)
 
-        system.AutoButtons.Where(fun w->w.Value.Contains(flow))     |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuAutoBTN)) |>ignore)
-        system.ResetButtons.Where(fun w->w.Value.Contains(flow))    |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuResetBTN)) |>ignore)
-        system.StartButtons.Where(fun w->w.Value.Contains(flow))    |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuStartBTN)) |>ignore)
-        system.EmergencyButtons.Where(fun w->w.Value.Contains(flow))|> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuEmergencyBTN)) |>ignore)
+        system.AutoButtons.Where(fun w->w.SettingFlows.Contains(flow))       |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuAutoBTN)) |>ignore)
+        system.ClearButtons.Where(fun w->w.SettingFlows.Contains(flow))      |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuClearBTN)) |>ignore)
+        system.RunButtons.Where(fun w->w.SettingFlows.Contains(flow))      |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuRunBTN)) |>ignore)
+        system.EmergencyButtons.Where(fun w->w.SettingFlows.Contains(flow))  |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuEmergencyBTN)) |>ignore)
+        system.ManualButtons.Where(fun w->w.SettingFlows.Contains(flow))     |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuManualBTN)) |>ignore)
+        system.StopButtons.Where(fun w->w.SettingFlows.Contains(flow))       |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuStopBTN)) |>ignore)
+        system.DryRunButtons.Where(fun w->w.SettingFlows.Contains(flow))   |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuDryRunBTN)) |>ignore)
         
         if newNode.Singles.Count > 0
         then node.Singles.Add(newNode) |> ignore
@@ -126,6 +130,10 @@ module ImportViewModule =
     [<Extension>]
     type ImportViewUtil =
         [<Extension>] 
+        static member ConvertViewNodes (mySys:DsSystem) = 
+                    mySys.Flows.Select(fun f ->ConvertFlow (f, []))
+    
+        [<Extension>] 
         static member MakeGraphView (doc:pptDoc, mySys:DsSystem) =
                 let dicVertex = doc.DicVertex
                 let dicFlow = doc.DicFlow
@@ -140,7 +148,7 @@ module ImportViewModule =
                         UpdateBtnNodes(flow.System, flow, flowNode)
                         UpdateApiItems(flow.System, page, doc.DicNodes.Values.Where(fun f->f.NodeType = IF), flowNode)
 
-                        flowNode.Page <- page; flowNode.Flow <- Some(flow)
+                        flowNode.Page <- page; //flowNode.Flow <- Some(flow)
                         flowNode)
 
                 let viewNodes =  getFlowNodes(mySys.Flows)

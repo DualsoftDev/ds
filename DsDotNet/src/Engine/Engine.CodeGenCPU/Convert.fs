@@ -92,7 +92,7 @@ module CpuConvertModule =
 
             //F2. Real 자신의 Reset going relay  Statement 만들기
         let srcs = getSrcMemorys(real, graph, ResetEdge)
-        let goingRelays = srcs.Select(fun c -> c, DsTag($"{c.Name}(gr)", false)) |> dict
+        let goingRelays = srcs.Select(fun c -> c, DsTag($"{c.Name}(gr)", false) :> Tag<bool>) |> dict
         let f2s = srcs.Select(fun c ->
                     c.CreateResetGoingRung(vm, goingRelays[c]))
 

@@ -137,11 +137,15 @@ interfaceBlock
 
 
 
-buttonsBlocks:emergencyButtonBlock|autoButtonBlock|startButtonBlock|resetButtonBlock;
-    emergencyButtonBlock :'[' ('emg_in'|'emg') ']'     EQ buttonBlock;
-    autoButtonBlock      :'[' ('auto_in'|'auto') ']'   EQ buttonBlock;
-    startButtonBlock     :'[' ('start_in'|'start') ']' EQ buttonBlock;
-    resetButtonBlock     :'[' ('reset_in'|'reset') ']' EQ buttonBlock;
+buttonsBlocks:emergencyButtonBlock|autoButtonBlock|runButtonBlock|clearButtonBlock|manualButtonBlock|stopButtonBlock|dryrunButtonBlock;
+    emergencyButtonBlock :'[' ('emg_in'|'emg') ']'       EQ buttonBlock;
+    autoButtonBlock      :'[' ('auto_in'|'auto') ']'     EQ buttonBlock;
+    clearButtonBlock     :'[' ('clear_in'|'clear') ']'   EQ buttonBlock;
+    manualButtonBlock    :'[' ('manual_in'|'manual') ']' EQ buttonBlock;
+    stopButtonBlock      :'[' ('stop_in'|'stop') ']'     EQ buttonBlock;
+    runButtonBlock       :'[' ('run_in'|'run') ']'       EQ buttonBlock;
+    dryrunButtonBlock    :'[' ('dryrun_in'|'dryrun') ']' EQ buttonBlock;
+    
     buttonBlock: LBRACE (() | ((SEIMCOLON)* buttonDef)* (SEIMCOLON)*) RBRACE;
     buttonDef: buttonName EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
     buttonName: identifier1;

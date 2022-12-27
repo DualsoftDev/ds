@@ -55,10 +55,20 @@ module DsType =
 
     ///BtnType  종류
     type BtnType =
-        | DuStartBTN            //시작 버튼
-        | DuResetBTN            //리셋 버튼
         | DuAutoBTN             //자동 버튼
+        | DuManualBTN           //수동 버튼
         | DuEmergencyBTN        //비상 버튼
+        | DuStopBTN             //정지 버튼
+        | DuRunBTN              //운전 버튼
+        | DuDryRunBTN           //시운전 시작 버튼
+        | DuClearBTN            //해지 버튼
+
+    ///LampType  종류
+    type LampType =
+        | DuRunModeLamp     //운전모드 램프
+        | DuDryRunModeLamp  //시 운전모드  램프
+        | DuManualModeLamp  //수동 모드 램프
+        | DuStopModeLamp    //정지 모드 램프
 
 
     ///ExcelCase 입력 종류

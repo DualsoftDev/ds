@@ -8,19 +8,21 @@ open Engine.Common.FS
 
 [<AutoOpen>]
 module CoreExtensionsForCodeGenCPU =
-    let private tagsToArguments (xs:TagBase<'T> seq) : Expression<'T> list =
-        xs.Select(tag2expr) |> List.ofSeq
-
-    let private tags2LogicalAndOrExpr (fLogical: IExpression list -> Expression<bool>) (FList(ts:TagBase<bool> list)) : Expression<bool> =
+    //let private tagsToArguments (xs:TagBase<'T> seq) : Expression<'T> list =
+    //    xs.Select(tag2expr) |> List.ofSeq
+    let private tags2LogicalAndOrExpr (fLogical: IExpression list -> Expression<bool>) (FList(ts:Tag<bool> list)) : Expression<bool> =
         match ts with
         | [] -> failwith "tags2AndExpr: Empty list"
         | t :: [] -> tag2expr t
-        | _ -> ts |> tagsToArguments |> List.cast<IExpression> |> fLogical
+        | _ -> ts.Select(tag2expr) 
+                |> List.ofSeq 
+                |> List.cast<IExpression>
+                |> fLogical
 
     /// Tag<'T> (들)로부터 AND Expression<'T> 생성
     let tags2AndExpr = tags2LogicalAndOrExpr fLogicalAnd
-    /// Tag<'T> (들)로부터 AND Expression<'T> 생성
-    let tags2OrExpr = tags2LogicalAndOrExpr fLogicalOr
+    /// Tag<'T> (들)로부터 OR  Expression<'T> 생성
+    let tags2OrExpr  = tags2LogicalAndOrExpr fLogicalOr
 
     /// boolean AND operator
     let (<&&>) (left: Expression<bool>) (right: Expression<bool>) = fLogicalAnd [ left; right ]
@@ -30,31 +32,27 @@ module CoreExtensionsForCodeGenCPU =
     let (!!)   (exp: Expression<bool>) = fLogicalNot [exp]
     /// Assign statement
     let (<==)  (storage: IStorage) (exp: IExpression) = DuAssign(exp, storage)
-
+    
     [<Extension>]
     type FuncExt =
-        [<Extension>] static member ToTags (xs:#TagBase<'T> seq)  = xs.Cast<TagBase<_>>()
-        [<Extension>] static member ToExpr (x:TagBase<bool>)      = tag2expr x
-        [<Extension>] static member GetAnd (xs:TagBase<bool> seq) = tags2AndExpr xs
-        [<Extension>] static member GetOr  (xs:TagBase<bool> seq) = tags2OrExpr xs
-
-    [<RequireQualifiedAccess>]
-    module FuncExt =
-        let GetRelayRung(set:Expression<bool>, rst:Expression<bool>, relay:TagBase<bool>): Statement =
-            relay <== ((set <||> relay.ToExpr()) <&&> (rst))
-
-        //[sets and]--|----- ! [rsts or] ----- (relay)
-        //|relay|-----|
-        let GetRelayExpr(sets:TagBase<bool> seq, rsts:TagBase<bool> seq, relay:TagBase<bool>): Expression<bool> =
-            (sets.GetAnd() <||> relay.ToExpr()) <&&> (!! rsts.GetOr())
-
-        //[sets and]--|----- ! [rsts or] ----- (coil)
-        let GetNoRelayExpr(sets:TagBase<bool> seq, rsts:TagBase<bool> seq): Expression<bool> =
-            sets.GetAnd() <&&> (!! rsts.GetOr())
-
-        //[sets and]--|-----  [rsts and] ----- (relay)
-        //|relay|-----|
-        let GetRelayExprReverseReset(sets:TagBase<bool> seq, reversedResets:TagBase<bool> seq, relay:TagBase<bool>): Expression<bool> =
-            (sets.GetAnd() <||> relay.ToExpr()) <&&> (reversedResets.GetOr())
-
-
+        [<Extension>] static member ToAnd (xs:DsBit seq)        = xs.Cast<Tag<bool>>() |> tags2AndExpr
+        [<Extension>] static member ToAnd (xs:PlcTag<bool> seq) = xs.Cast<Tag<bool>>() |> tags2AndExpr
+        [<Extension>] static member ToAnd (xs:Tag<bool> seq)    = xs |> tags2AndExpr
+        [<Extension>] static member ToOr  (xs:DsBit seq)        = xs.Cast<Tag<bool>>() |> tags2OrExpr
+        [<Extension>] static member ToOr  (xs:PlcTag<bool> seq) = xs.Cast<Tag<bool>>() |> tags2OrExpr
+        [<Extension>] static member ToOr  (xs:Tag<bool> seq)    = xs |> tags2OrExpr
+        
+        ///Create None Relay Coil Statement
+        [<Extension>]
+        static member GetRung (coil:TagBase<bool>, sets:Expression<bool> option, rsts:Expression<bool> option) = 
+            match sets, rsts with
+            | Some(s), Some(r) -> coil <== (s <&&> (!! r))
+            | Some(s), None    -> coil <== s
+            | None   , Some(r) -> coil <== !! r
+            | None   , None    -> failwith "Rung: Empty expresstion"
+                     
+        ///Create Relay Coil Statement
+        [<Extension>]
+        static member GetRelay (coil:TagBase<bool>, sets:Expression<bool>, rsts:Expression<bool>) = 
+                      coil <== (sets <||> tag2expr coil <&&> (!! rsts))
+        

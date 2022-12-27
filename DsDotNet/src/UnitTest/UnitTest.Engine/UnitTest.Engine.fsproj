@@ -51,6 +51,8 @@
 		<Compile Include="Model\FqdnParseTest.fs" />
 		<Compile Include="Model\SystemBuilderTest.fs" />
 		<Compile Include="Model\LoadConfigTest.fs" />
+		<Compile Include="Cpu\MonitorTest.fs" />
+		<Compile Include="Cpu\StatusTest.fs" />
 		<None Include="Libraries\systemLH.ds" />
 		<None Include="Libraries\systemRH.ds" />
 		<None Include="Libraries\HmiCodeGenExample\FactoryIO\Assy.ds" />

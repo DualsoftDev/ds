@@ -19,12 +19,15 @@ module EtcListenerModule =
         member x.ProcessButtonsBlocks(ctx:ButtonsBlocksContext) =
             let first = ctx.TryFindFirstChild<ParserRuleContext>().Value     // {Emergency, Auto, Start, Reset}ButtonsContext
             let system = x.TheSystem
-            let targetDic =
+            let targetBtnType =
                 match first with
-                | :? EmergencyButtonBlockContext -> system.EmergencyButtons
-                | :? AutoButtonBlockContext      -> system.AutoButtons
-                | :? StartButtonBlockContext     -> system.StartButtons
-                | :? ResetButtonBlockContext     -> system.ResetButtons
+                | :? AutoButtonBlockContext ->      DuAutoBTN
+                | :? ManualButtonBlockContext ->    DuManualBTN
+                | :? EmergencyButtonBlockContext -> DuEmergencyBTN
+                | :? StopButtonBlockContext    ->   DuStopBTN
+                | :? RunButtonBlockContext    ->    DuRunBTN
+                | :?  DryrunButtonBlockContext ->   DuDryRunBTN
+                | :? ClearButtonBlockContext  ->    DuClearBTN
                 | _ -> failwith "ERROR"
 
             let category = first.GetChild(1).GetText();       // [| '[', category, ']', buttonBlock |] 에서 category 만 추려냄 (e.g 'emg')
@@ -43,14 +46,10 @@ module EtcListenerModule =
                         .Tap(fun flowName -> verifyM $"Flow [{flowName}] not exists!" (system.Flows.Any(fun f -> f.Name = flowName)))
                         .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName))
                         .ToArray()
-
-
-                if not (targetDic.ContainsKey(buttonName)) then
-                    targetDic.Add(buttonName, new HashSet<Flow>())
-
-                flows.ForEach(fun flow ->
-                    targetDic[buttonName].Add(flow) |> verifyM $"Flow [{flow.Name}] already added!"
-                        )
+                if flows.Length > 0
+                then flows.ForEach(fun flow -> system.AddButton(targetBtnType, buttonName, flow))
+                else system.Buttons.Add(ButtonDef(buttonName, targetBtnType, "주소처리","주소처리", new HashSet<Flow>())) |> ignore
+                
 
 
         member x.ProcessSafetyBlock(ctx:SafetyBlockContext) =
@@ -110,17 +109,17 @@ module EtcListenerModule =
                     safetyConditions.Iter(fun sc -> holder.SafetyConditions.Add(sc) |> verifyM $"Duplicated safety condition[{ (sc.Core :?> INamed).Name}]")
                 } |> ignore
 
-        member private x.CreateFunctionApplication(context:FunApplicationContext):FunctionApplication =
-            let funName = context.TryFindFirstChild<FunNameContext>().Value.GetText()
-            let argGroups =
-                context.Descendants<ArgumentGroupContext>()
-                    .Select(fun argGrpCtx ->
-                        argGrpCtx.Descendants<ArgumentContext>()
-                            .Select(fun arg -> arg.GetText())
-                            .ToArray())
-                    .ToArray()
+        //member private x.CreateFunctionApplication(context:FunApplicationContext):FunctionApplication =
+        //    let funName = context.TryFindFirstChild<FunNameContext>().Value.GetText()
+        //    let argGroups =
+        //        context.Descendants<ArgumentGroupContext>()
+        //            .Select(fun argGrpCtx ->
+        //                argGrpCtx.Descendants<ArgumentContext>()
+        //                    .Select(fun arg -> arg.GetText())
+        //                    .ToArray())
+        //            .ToArray()
 
-            FunctionApplication(funName, argGroups)
+        //    FunctionApplication(funName, argGroups)
 
         //DsSystem.OriginalCodeBlocks 여기에 저장 및 불러오기로 이동
         //member x.ProcessVariableDef(context:VariableDefContext) =

@@ -304,7 +304,7 @@ module OriginModule =
                             allNodes.Add(jobName, NeedCheck)
             if not (allNodes.ContainsKey(jobName)) then
                 allNodes.Add(jobName, NotCare)
-        allNodes
+        allNodes, allJobs
 
     /// Get aliases in front of graph
     let getAliasHeads
@@ -338,7 +338,7 @@ module OriginModule =
         |> Map.ofList
 
     /// Get origin status of child nodes
-    let getOrigins (graph:DsGraph) =
+    let private getOrigins (graph:DsGraph) =
         let rawResets = graph |> getAllResets
         let mutualResets = rawResets |> getMutualResets
         let oneWayResets = rawResets |> getOneWayResets mutualResets
@@ -399,21 +399,29 @@ module OriginModule =
         // To do...
         ()
 
-[<Extension>]
-type OriginHelper =
-    /// Get origin status of child nodes
-    [<Extension>] 
-    static member GetOrigins(graph:DsGraph) = getOrigins graph
+    [<Extension>]
+    type OriginHelper =
+        /// Get origin status of child nodes
+        [<Extension>] 
+        static member GetOrigins(graph:DsGraph) = 
+            getOrigins graph |> fun (allNodes, allJobs) -> allNodes
+        [<Extension>] 
+        static member GetOriginsWithJobDefs(graph:DsGraph) = 
+            let allNodes, allJobs = getOrigins graph 
+            allNodes |> Seq.map(fun node -> 
+                            let jobDef = allJobs.Where(fun j -> j.ApiName = node.Key).First()
+                            jobDef, node.Value )
+                     |> Tuple.toDictionary
 
-    /// Get node index map(key:name, value:idx)
-    [<Extension>] 
-    static member GetIndexedMap(graph:DsGraph) = getIndexedMap graph
+        /// Get node index map(key:name, value:idx)
+        [<Extension>] 
+        static member GetIndexedMap(graph:DsGraph) = getIndexedMap graph
 
-    /// Get reset informations from graph
-    [<Extension>] 
-    static member GetAllResets(graph:DsGraph) = getAllResets graph
+        /// Get reset informations from graph
+        [<Extension>] 
+        static member GetAllResets(graph:DsGraph) = getAllResets graph
 
-    /// Get pre-calculated targets that
-    /// child segments to be 'ON' in progress(Theta)
-    [<Extension>] 
-    static member GetThetaTargets(graph:DsGraph) = getThetaTargets graph
+        /// Get pre-calculated targets that
+        /// child segments to be 'ON' in progress(Theta)
+        [<Extension>] 
+        static member GetThetaTargets(graph:DsGraph) = getThetaTargets graph

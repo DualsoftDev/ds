@@ -9,3 +9,4 @@ DsDotNet/bin/
 DsDotNet/obj/
 Grammar/CsParser/obj/
 Grammar/CsParser/bin/
+/DsDotNet/src/UnitTest/UnitTest.Engine/XgiXmls/*.xml

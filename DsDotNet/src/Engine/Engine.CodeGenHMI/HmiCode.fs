@@ -24,6 +24,9 @@ module HmiGenModule =
         | Emergency  = 13
         | Auto       = 14
         | Clear      = 15
+        | Stop       = 16
+        | Manual     = 17
+        | StartDry   = 18
 
     type Info = {
         name:string;
@@ -172,9 +175,11 @@ module HmiGenModule =
             for sys in model.Systems do
                 let groupBtnCombiner = addGroupButtons sys
                 addSystemFlowReal sys
-                groupBtnCombiner sys.AutoButtons ButtonType.Auto
-                groupBtnCombiner sys.ResetButtons ButtonType.Clear
-                groupBtnCombiner sys.EmergencyButtons ButtonType.Emergency
+                //<<shin>>
+                //groupBtnCombiner sys.AutoButtons ButtonType.Auto
+                //groupBtnCombiner sys.ClearButtons ButtonType.Clear
+                //groupBtnCombiner sys.EmergencyButtons ButtonType.Emergency
+                //<<shin>>
                 let btnTgtMap =
                     new Dictionary<ButtonType, ResizeArray<string>>()
                 for flow in sys.Flows do

@@ -69,20 +69,52 @@ namespace Engine
     }
     [auto] = {
         //AutoBTN2;     Empty not allowed
-        AutoBTN = { F2 };
+        AutoBTN = { F2(%Q1, %I1) }; //주소 반영 필요
         AutoBTN2 = { F1; F3; F5; };
     }
-    [start] = {
+    [run] = {
         StartBTN_FF = { F2 };
         StartBTN1 = { F1; };
     }
-    [reset] = {
-        ResetBTN = { F1; F2; F3; F5; };
+    [clear] = {
+        ClearBTN = { F1;F2;F3;F5; }
+    }
+    [manual] = {
+        ManualBTN = { F1;F5; }
+    }
+    [stop] = {
+        StopBTN = { F1;F2;F5; }
+    }
+    [dryrun] = {
+        StartDryBTN = { F5; }
     }
 }
 
 ";
 
+        public static string Lamps = @"
+[sys] My = {
+    [flow] F1 = { A > B; }
+    [flow] F2 = { A > B; }
+    [flow] F3 = { A > B; }
+    [flow] F4 = { A > B; }
+    [flow] F5 = { A > B; }
+    [runlamp] = {
+        EmptyButton = {};
+        RunMode = { F3(%Q1) };
+    }
+    [manuallamp] = {
+        AutoMde = { F2(%Q1) };
+    }
+    [stoplamp] = {
+        AutoMde = { F3(%Q1) };
+    }
+    [dryrunlamp] = {
+        AutoMde = { F5() };
+    }
+}
+
+";
         public static string Ppt = @"
 [sys] MY = {
     [flow] F1 = {

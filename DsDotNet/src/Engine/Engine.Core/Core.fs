@@ -139,7 +139,7 @@ module CoreModule =
         member _.ParentNPureNames = ([parent.GetCore().Name] @ names).ToArray()
         override x.GetRelativeName(referencePath:Fqdn) = x.PureNames.Combine()
 
-        member val VertexMemoryManager = getNull<IVertexMemoryManager>() with get, set
+        member val VertexManager = getNull<IVertexManager>() with get, set
 
     // Subclasses = {Call | Real | RealOtherFlow}
     type ISafetyConditoinHolder =
@@ -269,7 +269,7 @@ module CoreModule =
                 logWarn $"Suspicious segment name [{name}]. Check it."
 
             let segment = Real(name, flow)
-            segment.VertexMemoryManager <- fwdCreateVertexMemoryManager(segment)
+            segment.VertexManager <- fwdCreateVertexManager(segment)
             flow.Graph.AddVertex(segment) |> verifyM $"Duplicated segment name [{name}]"
             segment
 
@@ -278,14 +278,14 @@ module CoreModule =
         static member Create(otherFlowReal:Real, parent:ParentWrapper) =
             let ofn, ofrn = otherFlowReal.Flow.Name, otherFlowReal.Name
             let ofr = RealOtherFlow( [| ofn; ofrn |], otherFlowReal, parent)
-            ofr.VertexMemoryManager <- otherFlowReal.VertexMemoryManager
+            ofr.VertexManager <- otherFlowReal.VertexManager
             parent.GetGraph().AddVertex(ofr) |> verifyM $"Duplicated other flow real call [{ofn}.{ofrn}]"
             ofr
 
     type Call with
         static member Create(target:Job, parent:ParentWrapper) =
             let call = Call(target, parent)
-            call.VertexMemoryManager <- fwdCreateVertexMemoryManager(call)
+            call.VertexManager <- fwdCreateVertexManager(call)
             parent.GetGraph().AddVertex(call) |> verifyM $"Duplicated call name [{target.Name}]"
             call
 
@@ -309,7 +309,7 @@ module CoreModule =
 
             createAliasDefOnDemand()
             let alias = Alias(name, target, parent)
-            alias.VertexMemoryManager <- target.GetTarget().VertexMemoryManager
+            alias.VertexManager <- target.GetTarget().VertexManager
             parent.GetGraph().AddVertex(alias) |> verifyM $"Duplicated alias name [{name}]"
             alias
 

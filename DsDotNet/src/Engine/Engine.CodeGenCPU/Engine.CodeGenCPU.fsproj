@@ -8,9 +8,10 @@
 	</PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Core.Extensions.fs" />
-    <Compile Include="VertexMemoryManager.fs" />
+    <Compile Include="VertexManager.fs" />
     <Compile Include="ConvertUtil.fs" />
+    <Compile Include="Core.Extensions.fs" />
+    <Compile Include="VertexManager.Extension.fs" />
     <Compile Include="1.Port.fs" />
     <Compile Include="2.Flow.fs" />
     <Compile Include="3.Status.fs" />
@@ -24,7 +25,7 @@
     <Compile Include="11.Link.fs" />
     <Compile Include="12.System.fs" />
     <Compile Include="13.Extension.fs" />
-    <Compile Include="Convert.fs" />
+    <Compile Include="Convert.fsx" />
     <Compile Include="Loader.fs" />
 	<Compile Include="EntryPoint.fs" />
 	<Content Include="FodyWeavers.xml" />

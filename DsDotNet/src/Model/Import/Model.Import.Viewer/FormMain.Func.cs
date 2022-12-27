@@ -4,7 +4,6 @@ using Engine.Core;
 using Model.Import.Office;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -15,7 +14,6 @@ using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
 using static Model.Import.Office.ImportM;
 using static Model.Import.Office.ImportViewModule;
-using static Model.Import.Office.ViewModule;
 using Color = System.Drawing.Color;
 
 namespace Dual.Model.Import
@@ -113,7 +111,7 @@ namespace Dual.Model.Import
             {
                 textLines.ToList().ForEach(f =>
                 {
-                    int pro = 50 + Convert.ToInt32(Convert.ToSingle(lineCur++) / (lineCnt) * 50f);
+                    int pro = 50 + System.Convert.ToInt32(System.Convert.ToSingle(lineCur++) / (lineCnt) * 50f);
                     if (bShowLine) richTextBox_ds.AppendText(lineCur.ToString("000") + ";");
 
                     if (color == Color.Transparent)

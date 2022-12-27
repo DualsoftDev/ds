@@ -4,31 +4,36 @@ module Engine.CodeGenCPU.ConvertFlow
 open System.Linq
 open Engine.CodeGenCPU
 open Engine.Core
+open Engine.Common.FS
 
-type VertexMemoryManager with
-        ///F1. Real 자신의    Start Statement 만들기
-    member pReal.TryCreateRealStartRung(srcs:VertexMemoryManager seq): CommentedStatement option =
+type VertexManager with
+
+    member v.F1_RootStart(): CommentedStatement option =
+        let srcs = v.Flow.Graph.FindEdgeSources(v.Vertex, StartEdge).Select(getVM)
         if srcs.Any() then
-            let sets  = srcs.Select(fun f->f.EndTag).ToAnd()
-            let rsts  = [pReal.EndTag].ToAnd()
-            let statement = pReal.StartTag.GetRelay (sets, rsts); 
-            statement |> withNoComment |> Some //pReal.Pause _Auto 로 변경 필요
+            let sets  = srcs.Select(fun f->f.EndPort).ToAnd()
+            let rsts  = v.ET
+            (sets, rsts) ==| (v.StartTag, "F1") |> Some
         else
             None
-        ///F2. Real 자신의 Reset going relay  Statement 만들기
-    member realSrc.CreateResetGoingRung(realTgt:VertexMemoryManager , going:Tag<bool>) : CommentedStatement =
-        let sets  = [realSrc.Going].ToAnd()
-        let rsts  = [realTgt.Homing].ToAnd()
-        let statement = going.GetRelay(sets, rsts) //pReal.Pause _Auto 로 변경 필요
-        statement |> withNoComment
 
-        ///F3. Real 자신의    Reset Statement 만들기
-    member real.TryCreateRealResetRung(goingSrcs:Tag<bool> seq): CommentedStatement option =
-        if goingSrcs.Any() then
-            //going relay srcs
-            let sets  =  tags2AndExpr goingSrcs 
-            let rsts  = !! [real.EndTag].ToAnd()
-            let statement = real.ResetTag.GetRelay(sets, rsts)
-            statement |> withNoComment |> Some //pReal.Pause _Auto 로 변경 필요
-        else
-            None
+    member v.F2_RootReset() : CommentedStatement list =
+        let srcs = v.Flow.Graph.FindEdgeSources(v.Vertex, ResetEdge).Select(getVM)
+        
+        let goingRelays = srcs.Select(fun c -> DsTag($"{c.Name}(gr)", false) :> Tag<bool>) 
+        let sets  = goingRelays |> toAnd
+        let rsts  = v.H
+        let grs =  
+            srcs.Select(fun c ->
+                    c.RelayGoing <== (sets <&&> ((!!)rsts))) |> Seq.toList
+        grs  //RootReset 추가 필요
+        |> List.map(fun statement -> statement |> withExpressionComment "F2")
+
+    //member v.F3_RootReset(): CommentedStatement option =
+    //    if goingSrcs.Any() then
+    //        //going relay srcs
+    //        let sets  =  toAnd goingSrcs 
+    //        let rsts  = !! [real.EndTag].ToAnd()
+    //        (sets, rsts) ==| (real.ResetTag, "") |> Some
+    //    else
+    //        None

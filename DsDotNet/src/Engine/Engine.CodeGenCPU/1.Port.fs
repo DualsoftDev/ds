@@ -3,23 +3,62 @@ module Engine.CodeGenCPU.ConvertPort
 
 open Engine.CodeGenCPU
 open Engine.Core
+open Engine.Common.FS
+open System.Linq
 
-type VertexMemoryManager with
+//Port 처리 Set 공용 함수
+let private getSetBits(v:VertexManager) (rse:SRE) (convert:ConvertType) =
+    let shareds =  
+        match convert with
+        | ConvertType.RealPure -> v.GetSharedReal() 
+        | ConvertType.CallPure -> v.GetSharedCall() 
+        | _ ->  failwith "Error"
+
+    let setBits =  
+        match rse with
+        |Start -> (shareds |> startTags ) @ [v.StartTag;v.StartForce]
+        |Reset -> (shareds |> resetTags ) @ [v.ResetTag;v.ResetForce]
+        |End   -> (shareds |> endTags   ) @ [v.EndTag;v.EndForce]    
+
+    setBits.Cast<Tag<bool>>() |> toAnd
+//Port 처리 Rst 공용 함수
+let private getRstBits(v:VertexManager) =
+    v.System._off.ToExpr
+
+type VertexManager with
     
-    member Real.P1_RealStartPort(srcs:Tag<bool> seq): Statement =
-        Real.StartPort <== srcs.ToAnd()
+    member v.P1_RealStartPort(): CommentedStatement =
+        let sets = getSetBits v SRE.Start RealPure
+        let rsts = getRstBits v
+         
+        (sets, rsts) --| (v.StartPort, "P1")
 
-    member Real.P2_RealResetPort(srcs:Tag<bool> seq): Statement =
-        Real.ResetPort <== srcs.ToAnd()
+    member v.P2_RealResetPort(): CommentedStatement =
+        let sets = getSetBits v SRE.Reset RealPure
+        let rsts = getRstBits v
+         
+        (sets, rsts) --| (v.ResetPort, "P2")
 
-    member Real.P3_RealEndPort(srcs:Tag<bool> seq): Statement =
-        Real.EndPort <==  srcs.ToAnd()
-   
-    member Call.P4_CallStartPort(srcs:Tag<bool> seq): Statement =
-        Call.StartPort <== srcs.ToAnd()
+    member v.P3_RealEndPort(): CommentedStatement =
+        let sets = getSetBits v SRE.End RealPure
+        let rsts = getRstBits v
+         
+        (sets, rsts) --| (v.ResetPort, "P3")
 
-    member Call.P5_CallResetPort(srcs:Tag<bool> seq): Statement =
-        Call.ResetPort <== srcs.ToAnd()
+    member v.P4_CallStartPort(): CommentedStatement =
+        let sets = getSetBits v SRE.Start CallPure
+        let rsts = getRstBits v
+         
+        (sets, rsts) --| (v.StartPort, "P4")
 
-    member Call.P6_CallEndPort(srcs:Tag<bool> seq): Statement =
-        Call.EndPort <==  srcs.ToAnd()
+    member v.P5_CallResetPort(): CommentedStatement =
+        let sets = getSetBits v SRE.Reset CallPure
+        let rsts = getRstBits v
+         
+        (sets, rsts) --| (v.ResetPort, "P5")
+
+    member v.P6_CallEndPort(): CommentedStatement =
+        let sets = getSetBits v SRE.End CallPure
+        let rsts = getRstBits v
+         
+        (sets, rsts) --| (v.ResetPort, "P6")

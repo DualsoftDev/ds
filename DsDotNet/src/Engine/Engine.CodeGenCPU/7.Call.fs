@@ -6,26 +6,24 @@ open Engine.CodeGenCPU
 open Engine.Core
 
 
-type VertexMemoryManager with
+type VertexManager with
     ///C1 Call 시작조건 Statement 만들기
-    member call.CreateCallStartRung(srcs:VertexMemoryManager seq, real:VertexMemoryManager): CommentedStatement =
+    member call.CreateCallStartRung(srcs:VertexManager seq, real:VertexManager): CommentedStatement =
         let sets  =
             [   for s in srcs do
                     s.RelayCallDone
                 real.Going
             ].ToAnd()
         let rsts  = [call.RelayCallDone].ToAnd()
-        let statement = call.StartTag.GetRung(Some sets, Some rsts)
-        statement |> withNoComment
+        (sets, rsts) --| (call.StartTag, "")
 
 
     ///C2 Call 작업완료 Statement 만들기
-    member call.CreateCallRelayRung(srcs:VertexMemoryManager seq, tags:Tag<bool> seq, parentReal:VertexMemoryManager): CommentedStatement =
-        let sets  = srcs.Select(fun s -> s.RelayCallDone).Cast<Tag<bool>>() |> Seq.append tags  |> tags2AndExpr 
+    member call.CreateCallRelayRung(srcs:VertexManager seq, tags:Tag<bool> seq, parentReal:VertexManager): CommentedStatement =
+        let sets  = srcs.Select(fun s -> s.RelayCallDone).Cast<Tag<bool>>() |> Seq.append tags  |> toAnd 
         let rsts  = [parentReal.Homing]
 
-        let statement = call.RelayCallDone.GetRelay(sets, rsts.ToAnd())
-        statement |> withNoComment
+        (sets, rsts.ToAnd()) ==|  (call.RelayCallDone , "")
 
     ///C3 Call 시작출력 Statement 만들기
     member call.CreateOutputRungs(tags:Tag<bool> seq) : CommentedStatement seq =
@@ -42,7 +40,7 @@ type VertexMemoryManager with
     //C5 Call End from  Api RX.End  Statement 만들기
     member call.TryCreateLinkRxStatement(tags:Tag<bool> seq): CommentedStatement option =
         if tags.Any() then
-            let statement = call.EndTag <== tags2AndExpr tags 
+            let statement = call.EndTag <== toAnd tags 
             statement |> withNoComment |> Some
         else
             None

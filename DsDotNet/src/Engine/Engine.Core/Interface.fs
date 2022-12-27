@@ -33,6 +33,6 @@ module Interface =
         abstract DataType : System.Type
         abstract ToBoxedExpression : unit -> obj    /// IExpression<'T> 의 boxed 형태의 expression 생성
 
-    type IVertexMemoryManager =
+    type IVertexManager =
         abstract Vertex: IVertex
-    let mutable fwdCreateVertexMemoryManager = let dummy (vertex:IVertex) : IVertexMemoryManager = failwith "Should be reimplemented." in dummy
+    let mutable fwdCreateVertexManager = let dummy (vertex:IVertex) : IVertexManager = failwith "Should be reimplemented." in dummy

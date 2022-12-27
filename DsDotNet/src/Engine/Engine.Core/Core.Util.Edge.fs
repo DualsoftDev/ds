@@ -52,22 +52,17 @@ module EdgeModule =
             edges.Except(ofResetEdge edges)
 
 
-    let ofRealVertex (xs:Vertex seq)   = xs.Where(fun v -> v :? Real).Cast<Real>()
-    let ofRealExVertex (xs:Vertex seq) = xs.Where(fun v -> v :? RealEx).Cast<RealEx>()
-    let ofCallVertex (xs:Vertex seq)   = xs.Where(fun v -> v :? Call).Cast<Call>()
-    let ofAliasVertex (xs:Vertex seq)  = xs.Where(fun v -> v :? Alias).Cast<Alias>()
-
     let ofAliasForCallVertex (xs:Vertex seq) =  
-        xs |> ofAliasVertex 
-        |> Seq.collect(fun a -> a.TargetWrapper.CallTarget() |> Option.toList)
+        xs.OfType<Alias>()
+        |> Seq.filter(fun a -> a.TargetWrapper.CallTarget().IsSome)
         
     let ofAliasForRealVertex (xs:Vertex seq) = 
-        xs |> ofAliasVertex 
-        |> Seq.collect(fun a -> a.TargetWrapper.RealTarget() |> Option.toList)
+        xs.OfType<Alias>()
+        |> Seq.filter(fun a -> a.TargetWrapper.RealTarget().IsSome)
 
     let ofAliasForRealExVertex (xs:Vertex seq) =
-        xs |> ofAliasVertex 
-        |> Seq.collect(fun a -> a.TargetWrapper.RealExTarget() |> Option.toList)
+        xs.OfType<Alias>()
+        |> Seq.filter(fun a -> a.TargetWrapper.RealExTarget().IsSome)
 
 
     /// 상호 reset 정보(Mutual Reset Info) 확장
@@ -141,6 +136,14 @@ module EdgeModule =
         let flowVertices = system.Flows.SelectMany(fun f -> f.Graph.Vertices.Cast<Vertex>())
         realVertices @ flowVertices
 
+    let getVerticesOfFlow(flow:Flow) =
+        let realVertices = 
+            flow.Graph.Vertices.OfType<Real>()
+                .SelectMany(fun r -> r.Graph.Vertices.Cast<Vertex>())
+
+        let flowVertices =  flow.Graph.Vertices.Cast<Vertex>()
+        realVertices @ flowVertices
+        
     type DsSystem with
         member x.CreateMRIEdgesTransitiveClosure() = createMRIEdgesTransitiveClosure4System x
         member x.ValidateGraph() = validateGraphOfSystem x
@@ -157,14 +160,10 @@ type EdgeExt =
     [<Extension>] static member ToText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (edge:'E) = toText edge
     [<Extension>] static member GetVertices(edges:IEdge<'V> seq) = edges.Collect(fun e -> e.GetVertices())
     [<Extension>] static member GetVertices(x:DsSystem) =  getVerticesOfSystem x
-    [<Extension>] static member GetReals(xs:Vertex seq) =  ofRealVertex xs
-    [<Extension>] static member GetCalls(xs:Vertex seq) =  ofCallVertex xs
-    [<Extension>] static member GetRealEx(xs:Vertex seq) =  ofRealExVertex xs
-    [<Extension>] static member GetAliases(xs:Vertex seq) =  ofAliasVertex xs
-    [<Extension>] static member GetAliasTargetTypeReals(xs:Vertex seq) =  ofAliasForRealVertex xs
-    [<Extension>] static member GetAliasTargetTypeRealExs(xs:Vertex seq) =  ofAliasForRealExVertex xs
-    [<Extension>] static member GetAliasTargetTypeCalls(xs:Vertex seq) =  ofAliasForCallVertex xs
-                                          
+    [<Extension>] static member GetVerticesWithInReal(x:Flow) =  getVerticesOfFlow x
+    [<Extension>] static member GetAliasTypeReals(xs:Vertex seq)   = ofAliasForRealVertex xs
+    [<Extension>] static member GetAliasTypeRealExs(xs:Vertex seq) = ofAliasForRealExVertex xs
+    [<Extension>] static member GetAliasTypeCalls(xs:Vertex seq)   = ofAliasForCallVertex xs
                                           
     [<Extension>] static member OfStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofStrongResetEdge edges
     [<Extension>] static member OfWeakResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofWeakResetEdge edges

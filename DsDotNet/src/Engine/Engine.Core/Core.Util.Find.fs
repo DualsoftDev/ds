@@ -100,7 +100,30 @@ module internal ModelFindModule =
 
     let tryFindAliasDefWithMnemonic (flow:Flow) aliasMnemonic =
         flow.AliasDefs.Values.TryFind(fun ad -> ad.Mnemonincs.Contains(aliasMnemonic))
+    
+    let getVertexSharedReal(real:Real) = 
+        let sheredAlias = 
+            real.Flow.Graph.Vertices
+                .GetAliasTypeReals()
+                .Where(fun a -> a.TargetWrapper.RealTarget().Value = real)
+                .Cast<Vertex>()
 
+        let sheredRealEx = 
+            real.Flow.System.GetVertices()
+                .OfType<RealEx>()
+                .Where(fun w-> w.Real = real)
+                .Cast<Vertex>()
+    
+        sheredAlias @ sheredRealEx
+
+    let getVertexSharedCall(call:Call) = 
+        let sheredAlias = 
+            call.Parent.GetFlow().GetVerticesWithInReal()
+              .GetAliasTypeCalls()
+              .Where(fun a -> a.TargetWrapper.CallTarget().Value = call)
+              .Cast<Vertex>()
+       
+        sheredAlias 
 
     type DsSystem with
         member x.TryFindGraphVertex(Fqdn(fqdn)) = tryFindGraphVertex x fqdn
@@ -124,3 +147,7 @@ type FindExtension =
     [<Extension>] static member TryFindExportApiItem(x:DsSystem, Fqdn(apiPath)) = tryFindExportApiItem x apiPath
     [<Extension>] static member TryFindGraphVertex  (x:DsSystem, Fqdn(fqdn)) = tryFindGraphVertex x fqdn
     [<Extension>] static member TryFindGraphVertex<'V when 'V :> IVertex>(x:DsSystem, Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn
+    
+    [<Extension>] static member GetVertexSharedReal (x:Real) = getVertexSharedReal x
+    [<Extension>] static member GetVertexSharedCall (x:Call) = getVertexSharedCall x
+

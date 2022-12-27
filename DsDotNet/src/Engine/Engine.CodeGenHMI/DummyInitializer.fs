@@ -4,11 +4,11 @@ open Engine.Core
 
 module ModuleInitializer =
     type VMM (v:IVertex) =
-        interface IVertexMemoryManager with
+        interface IVertexManager with
             member x.Vertex = v
         
     let Initialize() =
-        let createVertexMemoryManager (vertex:IVertex) : IVertexMemoryManager =
+        let createVertexManager (vertex:IVertex) : IVertexManager =
             new VMM(vertex)
 
-        fwdCreateVertexMemoryManager <- createVertexMemoryManager
+        fwdCreateVertexManager <- createVertexManager

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 
-using static Engine.CodeGenCPU.VertexMemoryManagerModule;
+using static Engine.CodeGenCPU.VertexManagerModule;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.EdgeExt;
@@ -286,7 +286,7 @@ namespace Dual.Model.Import
 
             var rungs = Cpu.LoadStatements(sysView.System);
             var storages = new Dictionary<string, IStorage>();
-            _myCPU = new DsCPU(storages, "", rungs.Select(s => s.Item2.statement));
+            _myCPU = new DsCPU(storages, "", rungs.Select(s => s.statement));
             _myCPU.Run();
 
             _DicVertex = new Dictionary<Vertex, ViewNode>();
@@ -303,15 +303,15 @@ namespace Dual.Model.Import
                     if (v is Real)
                     {
                         comboBox_Segment.Items
-                        .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = v.VertexMemoryManager as VertexMemoryManager });
+                        .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = v.VertexManager as VertexManager });
                     }
                 });
 
             var text = rungs.Select(rung =>
             {
-                var description = rung.Item1;
-                var statement = rung.Item2;
-                return $"***{description}***\t{rung.Item2.statement.ToText().Replace("%", " ")}";
+                var description = rung.comment;
+                var statement = rung.statement;
+                return $"***{description.Replace("%", " ").Replace("$", " ")}";
             });
             StartResetBtnUpdate(true);
 

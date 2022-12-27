@@ -6,7 +6,7 @@ open System.Text.RegularExpressions
 open Engine.Core
 
 [<AutoOpen>]
-module VertexMemoryManagerModule =
+module VertexManagerModule =
 
     //   타입 | 구분    | Tag   | Port | Force HMI |
     //______________________________________________
@@ -16,9 +16,9 @@ module VertexMemoryManagerModule =
     //______________________________________________
     // ACTION | IN	    | API. I| -	   | API. I    |
     // ACTION | OUT	    | API. O| -	   | API. O    |
-
+    
     /// Vertex Manager : 소속되어 있는 DsBit 를 관리하는 컨테이어
-    type VertexMemoryManager (v:Vertex)  =
+    type VertexManager (v:Vertex)  =
         let name = v.QualifiedName
         let bit name flag = DsBit(name, false, v, flag)
         
@@ -43,15 +43,17 @@ module VertexMemoryManagerModule =
         let resetPortBit  = bit $"{name}(RP)" TagFlag.RP
         let startPortBit  = bit $"{name}(SP)" TagFlag.SP
 
-        let endForceBit   = bit $"{name}(EP)" TagFlag.EF
-        let resetForceBit = bit $"{name}(RP)" TagFlag.RF
-        let startForceBit = bit $"{name}(SP)" TagFlag.SF
+        let endForceBit   = bit $"{name}(EF)" TagFlag.EF
+        let resetForceBit = bit $"{name}(RF)" TagFlag.RF
+        let startForceBit = bit $"{name}(SF)" TagFlag.SF
 
-        interface IVertexMemoryManager with
+        interface IVertexManager with
             member x.Vertex = v
 
         member x.Name  = name
         member x.Vertex  = v
+        member x.Flow    = v.Parent.GetFlow()
+        member x.System  = v.Parent.GetFlow().System
 
         //Tag 약어 변수는 수식정의시 사용
         ///Segment Start Tag
@@ -94,7 +96,7 @@ module VertexMemoryManagerModule =
         member x.RelayCallDone      = relayCallBit
         member x.CR                 = relayCallBit |> tag2expr
         ///Going Relay 
-        member x.RrelayGoing        = relayGoingBit 
+        member x.RelayGoing          = relayGoingBit 
         member x.GR                 = relayGoingBit |> tag2expr
 
         //Status 

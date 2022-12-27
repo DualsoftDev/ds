@@ -4,25 +4,16 @@ module Engine.CodeGenCPU.ConvertStatus
 open Engine.CodeGenCPU
 open Engine.Core
 
-type VertexMemoryManager with
-    //----------------------
-        //  Status   SP  RP  ET
-        //----------------------
-        //    R      x   -   x
-        //           o   o   x
-        //    G      o   x   x
-        //    F      -   x   o
-        //    H      -   o   o
-        //----------------------
-    /// vertex 의 RGFH status 를 update 하는 rungs/statements 만들기
-    member v.CreateRGFHRungs(): CommentedStatement list =
-    
-        let rungR = v.Ready   <== (      ( (!!) v.SP                  <&&> (!!) v.EP )
-                                    <||> (      v.SP <&&>       v.RP  <&&> (!!) v.EP ))
-        let rungG = v.Going   <==        (      v.SP <&&>  (!!) v.RP  <&&> (!!) v.EP )
-        let rungF = v.Finish  <==        (                 (!!) v.RP  <&&>      v.EP )
-        let rungH = v.Homing  <==        (                      v.RP  <&&>      v.EP )
+type VertexManager with
 
-        [ rungR; rungG; rungF; rungH ]
-        |> List.map(fun statement -> CommentedStatement("", statement))
-
+    /// vertex 의 RGFH status 를 update 하는 rungs/statements 만들기                   
+    member v.S1_Ready_Going_Finish_Homing(): CommentedStatement list =            //  Status   SP  RP  ET
+                                                                                  //----------------------
+        let r = v.Ready  <== (      ( (!!) v.SP                  <&&> (!!) v.EP ) //    R      x   -   x  
+                               <||> (      v.SP <&&>       v.RP  <&&> (!!) v.EP ))//           o   o   x                                                    
+        let g = v.Going  <==        (      v.SP <&&>  (!!) v.RP  <&&> (!!) v.EP ) //    G      o   x   x                                                  
+        let f = v.Finish <==        (                 (!!) v.RP  <&&>      v.EP ) //    F      -   x   o                                                 
+        let h = v.Homing <==        (                      v.RP  <&&>      v.EP ) //    H      -   o   o                                                                               
+                                                                                        
+        [ r; g; f; h ]
+        |> List.map(fun statement -> statement |> withExpressionComment "S1")

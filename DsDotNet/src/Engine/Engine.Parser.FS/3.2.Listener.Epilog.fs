@@ -19,15 +19,15 @@ module EtcListenerModule =
         member x.ProcessButtonsBlocks(ctx:ButtonsBlocksContext) =
             let first = ctx.TryFindFirstChild<ParserRuleContext>().Value     // {Emergency, Auto, Start, Reset}ButtonsContext
             let system = x.TheSystem
-            let targetDic =
+            let targetBtnType =
                 match first with
-                | :? EmergencyButtonBlockContext -> system.ButtonSet.EmergencyButtons
-                | :? AutoButtonBlockContext      -> system.ButtonSet.AutoButtons
-                | :? RunButtonBlockContext       -> system.ButtonSet.RunButtons
-                | :? ClearButtonBlockContext     -> system.ButtonSet.ClearButtons
-                | :? ManualButtonBlockContext    -> system.ButtonSet.ManualButtons
-                | :? StopButtonBlockContext      -> system.ButtonSet.StopButtons
-                | :? DryrunButtonBlockContext    -> system.ButtonSet.DryRunButtons
+                | :? AutoButtonBlockContext ->      DuAutoBTN
+                | :? ManualButtonBlockContext ->    DuManualBTN
+                | :? EmergencyButtonBlockContext -> DuEmergencyBTN
+                | :? StopButtonBlockContext    ->   DuStopBTN
+                | :? RunButtonBlockContext    ->    DuRunBTN
+                | :?  DryrunButtonBlockContext ->   DuDryRunBTN
+                | :? ClearButtonBlockContext  ->    DuClearBTN
                 | _ -> failwith "ERROR"
 
             let category = first.GetChild(1).GetText();       // [| '[', category, ']', buttonBlock |] 에서 category 만 추려냄 (e.g 'emg')
@@ -46,14 +46,10 @@ module EtcListenerModule =
                         .Tap(fun flowName -> verifyM $"Flow [{flowName}] not exists!" (system.Flows.Any(fun f -> f.Name = flowName)))
                         .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName))
                         .ToArray()
-
-
-                if not (targetDic.ContainsKey(buttonName)) then
-                    targetDic.Add(buttonName, new HashSet<Flow>())
-
-                flows.ForEach(fun flow ->
-                    targetDic[buttonName].Add(flow) |> verifyM $"Flow [{flow.Name}] already added!"
-                        )
+                if flows.Length > 0
+                then flows.ForEach(fun flow -> system.AddButton(targetBtnType, buttonName, flow))
+                else system.Buttons.Add(ButtonDef(buttonName, targetBtnType, "주소처리","주소처리", new HashSet<Flow>())) |> ignore
+                
 
 
         member x.ProcessSafetyBlock(ctx:SafetyBlockContext) =

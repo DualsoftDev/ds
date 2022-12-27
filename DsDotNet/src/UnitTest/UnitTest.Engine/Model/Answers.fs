@@ -174,6 +174,29 @@ module ModelComponentAnswers =
 [device file="cylinder.ds"] A;
 }
 """
+    let answerLamps= """
+[sys] My = {
+    [flow] F1 = { A > B; }
+    [flow] F2 = { A > B; }
+    [flow] F3 = { A > B; }
+    [flow] F4 = { A > B; }
+    [flow] F5 = { A > B; }
+    [runlamp] = {
+        EmptyButton = {};
+        RunMode = { F3(%Q1) };
+    }
+    [manuallamp] = {
+        ManualModeMode = { F2(%Q1) };
+    }
+    [stoplamp] = {
+        StopMode = { F3(%Q1) };
+    }
+    [dryrunlamp] = {
+        DryRunMode = { F5() };
+    }
+}
+"""
+
     let answerButtons = """
 [sys] My = {
     [flow] F1 = {

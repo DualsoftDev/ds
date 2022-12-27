@@ -202,7 +202,7 @@ module ModelBuildupTests1 =
         START = { F; }
         START2 = { F2; }
     }
-    [device file="cylinder.ds"] A;
+    [device file="cylinder.ds"] A; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\cylinder.ds
 }
 """
             logDebug $"{generated}"

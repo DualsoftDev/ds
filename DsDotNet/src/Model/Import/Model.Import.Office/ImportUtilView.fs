@@ -80,13 +80,13 @@ module ImportViewModule =
 
         let newNode = ViewNode("Buttons", BUTTON)
 
-        system.ButtonSet.AutoButtons.Where(fun w->w.Value.Contains(flow))       |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuAutoBTN)) |>ignore)
-        system.ButtonSet.ClearButtons.Where(fun w->w.Value.Contains(flow))      |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuClearBTN)) |>ignore)
-        system.ButtonSet.RunButtons.Where(fun w->w.Value.Contains(flow))      |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuRunBTN)) |>ignore)
-        system.ButtonSet.EmergencyButtons.Where(fun w->w.Value.Contains(flow))  |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuEmergencyBTN)) |>ignore)
-        system.ButtonSet.ManualButtons.Where(fun w->w.Value.Contains(flow))     |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuManualBTN)) |>ignore)
-        system.ButtonSet.StopButtons.Where(fun w->w.Value.Contains(flow))       |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuStopBTN)) |>ignore)
-        system.ButtonSet.DryRunButtons.Where(fun w->w.Value.Contains(flow))   |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Key, DuDryRunBTN)) |>ignore)
+        system.AutoButtons.Where(fun w->w.SettingFlows.Contains(flow))       |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuAutoBTN)) |>ignore)
+        system.ClearButtons.Where(fun w->w.SettingFlows.Contains(flow))      |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuClearBTN)) |>ignore)
+        system.RunButtons.Where(fun w->w.SettingFlows.Contains(flow))      |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuRunBTN)) |>ignore)
+        system.EmergencyButtons.Where(fun w->w.SettingFlows.Contains(flow))  |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuEmergencyBTN)) |>ignore)
+        system.ManualButtons.Where(fun w->w.SettingFlows.Contains(flow))     |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuManualBTN)) |>ignore)
+        system.StopButtons.Where(fun w->w.SettingFlows.Contains(flow))       |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuStopBTN)) |>ignore)
+        system.DryRunButtons.Where(fun w->w.SettingFlows.Contains(flow))   |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuDryRunBTN)) |>ignore)
         
         if newNode.Singles.Count > 0
         then node.Singles.Add(newNode) |> ignore

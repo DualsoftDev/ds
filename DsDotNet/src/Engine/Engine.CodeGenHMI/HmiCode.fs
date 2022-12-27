@@ -175,9 +175,11 @@ module HmiGenModule =
             for sys in model.Systems do
                 let groupBtnCombiner = addGroupButtons sys
                 addSystemFlowReal sys
-                groupBtnCombiner sys.ButtonSet.AutoButtons ButtonType.Auto
-                groupBtnCombiner sys.ButtonSet.ClearButtons ButtonType.Clear
-                groupBtnCombiner sys.ButtonSet.EmergencyButtons ButtonType.Emergency
+                //<<shin>>
+                //groupBtnCombiner sys.AutoButtons ButtonType.Auto
+                //groupBtnCombiner sys.ClearButtons ButtonType.Clear
+                //groupBtnCombiner sys.EmergencyButtons ButtonType.Emergency
+                //<<shin>>
                 let btnTgtMap =
                     new Dictionary<ButtonType, ResizeArray<string>>()
                 for flow in sys.Flows do

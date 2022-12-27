@@ -87,9 +87,11 @@ module CoreModule =
         member val ApiResetInfos = HashSet<ApiResetInfo>()
         ///시스템 전체시작 버튼누름시 수행되야하는 Real목록
         member val StartPoints = createQualifiedNamedHashSet<Real>()
-        ///시스템 버튼 소속 Flow 정보
-        member val ButtonSet = ButtonSet()
-      
+        ///시스템 버튼 소속 Flows 정보
+        member val Buttons = HashSet<ButtonDef>()
+        ///시스템 램프 소속 Flow 정보
+        member val Lamps   = HashSet<LampDef>()
+        
 
     type Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
@@ -103,26 +105,27 @@ module CoreModule =
             system.Flows.Add(flow) |> verifyM $"Duplicated flow name [{name}]"
             flow
 
+    and ButtonDef (name:string, btnType:BtnType, inTag:TagAddress, outTag:TagAddress, flows:HashSet<Flow>) =
+        member x.Name = name
+        member x.ButtonType = btnType
+        ///버튼 동작을 위한 외부 IO 입력 주소
+        member val InTag   = inTag  with get,set
+        ///버튼 동작을 위한 외부 IO 출력 주소
+        member val OutTag   = outTag  with get,set
+        member val SettingFlows  = flows with get, set
 
-    and ButtonSet() =
-            
-        ///시스템 버튼 소속 Flow 정보
-        member val AutoButtons       =  ButtonDic()    //자동 버튼
-        member val ManualButtons     =  ButtonDic()    //수동 버튼
-        member val EmergencyButtons  =  ButtonDic()    //비상 버튼
-        member val StopButtons       =  ButtonDic()    //정지 버튼
-        member val RunButtons        =  ButtonDic()      //운전 버튼
-        member val DryRunButtons     =  ButtonDic()      //시운전 시작 버튼
-        member val ClearButtons      =  ButtonDic()    //해지 버튼
-
-
+    and LampDef (name:string, lampType:LampType, outTag:TagAddress, flow:Flow) =
+        member x.Name = name
+        member x.LampType = lampType
+        ///램프 동작을 위한 외부 IO 출력 주소
+        member val OutTag   = outTag  with get,set
+        ///단일 Flow 단위로 Lamp 상태 출력
+        member val SettingFlow  = flow with get, set
 
     and AliasDef(aliasKey:Fqdn, target:AliasTargetWrapper option, mnemonics:string []) =
         member _.AliasKey = aliasKey
         member val AliasTarget = target with get, set
         member val Mnemonincs = mnemonics |> ResizeArray
-
-
 
     /// leaf or stem(parenting)
     /// Graph 상의 vertex 를 점유하는 named object : Real, Alias, Call
@@ -222,7 +225,6 @@ module CoreModule =
     (* Abbreviations *)
 
     type DsGraph = Graph<Vertex, Edge>
-    and ButtonDic = Dictionary<string, HashSet<Flow>>
     and Direct = Real
 
     and Edge private (source:Vertex, target:Vertex, edgeType:EdgeType) =
@@ -382,17 +384,20 @@ module CoreModule =
     type DsSystem with
         member x.AddButton(btnType:BtnType, btnName: string, flow:Flow) =
             if x <> flow.System then failwithf $"button [{btnName}] in flow ({flow.System.Name} != {x.Name}) is not same system"
-            let dicButton =
-                match btnType with
-                | DuAutoBTN          -> x.ButtonSet.AutoButtons     
-                | DuManualBTN        -> x.ButtonSet.ManualButtons   
-                | DuEmergencyBTN     -> x.ButtonSet.EmergencyButtons
-                | DuStopBTN          -> x.ButtonSet.StopButtons     
-                | DuRunBTN           -> x.ButtonSet.RunButtons    
-                | DuDryRunBTN        -> x.ButtonSet.DryRunButtons 
-                | DuClearBTN         -> x.ButtonSet.ClearButtons    
 
+            match x.Buttons.TryFind(fun f -> f.Name =  btnName) with
+            | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
+            | None -> x.Buttons.Add(ButtonDef(btnName, btnType, "", "", HashSet[|flow|])) |> verifyM $"Duplicated ButtonDef [{btnName}]"
+        
+        member x.AutoButtons      = x.Buttons.Where(fun f->f.ButtonType = DuAutoBTN)
+        member x.ManualButtons    = x.Buttons.Where(fun f->f.ButtonType = DuManualBTN)
+        member x.EmergencyButtons = x.Buttons.Where(fun f->f.ButtonType = DuEmergencyBTN)
+        member x.StopButtons      = x.Buttons.Where(fun f->f.ButtonType = DuStopBTN)
+        member x.RunButtons       = x.Buttons.Where(fun f->f.ButtonType = DuRunBTN)
+        member x.DryRunButtons    = x.Buttons.Where(fun f->f.ButtonType = DuDryRunBTN)
+        member x.ClearButtons     = x.Buttons.Where(fun f->f.ButtonType = DuClearBTN)   
 
-            match dicButton.TryFind btnName with
-            | Some btn -> btn.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
-            | None -> dicButton.Add(btnName, HashSet[|flow|] )
+        member x.RunModeLamps     = x.Lamps.Where(fun f->f.LampType = DuRunModeLamp)   
+        member x.DryRunModeLamps  = x.Lamps.Where(fun f->f.LampType = DuDryRunModeLamp)   
+        member x.StopModeLamps    = x.Lamps.Where(fun f->f.LampType = DuStopModeLamp)   
+        member x.ManualModeLamps  = x.Lamps.Where(fun f->f.LampType = DuManualModeLamp)

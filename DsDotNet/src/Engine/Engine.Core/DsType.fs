@@ -63,6 +63,13 @@ module DsType =
         | DuDryRunBTN           //시운전 시작 버튼
         | DuClearBTN            //해지 버튼
 
+    ///LampType  종류
+    type LampType =
+        | DuRunModeLamp     //운전모드 램프
+        | DuDryRunModeLamp  //시 운전모드  램프
+        | DuManualModeLamp  //수동 모드 램프
+        | DuStopModeLamp    //정지 모드 램프
+
 
     ///ExcelCase 입력 종류
     type ExcelCase =

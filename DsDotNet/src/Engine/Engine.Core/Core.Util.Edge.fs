@@ -58,20 +58,16 @@ module EdgeModule =
     let ofAliasVertex (xs:Vertex seq)  = xs.Where(fun v -> v :? Alias).Cast<Alias>()
 
     let ofAliasForCallVertex (xs:Vertex seq) =  
-        xs |> ofAliasVertex |> Seq.map(fun a -> a.TargetWrapper.CallTarget())
-            |> Seq.filter(fun f -> f.IsSome)
-            |> Seq.map(fun f -> f.Value)
-
+        xs |> ofAliasVertex 
+        |> Seq.collect(fun a -> a.TargetWrapper.CallTarget() |> Option.toList)
+        
     let ofAliasForRealVertex (xs:Vertex seq) = 
-        xs |> ofAliasVertex |> Seq.map(fun a -> a.TargetWrapper.RealTarget())
-            |> Seq.filter(fun f -> f.IsSome)
-            |> Seq.map(fun f -> f.Value)
+        xs |> ofAliasVertex 
+        |> Seq.collect(fun a -> a.TargetWrapper.RealTarget() |> Option.toList)
 
     let ofAliasForRealExVertex (xs:Vertex seq) =
-        xs |> ofAliasVertex |> Seq.map(fun a -> a.TargetWrapper.RealExTarget())
-            |> Seq.filter(fun f -> f.IsSome)
-            |> Seq.map(fun f -> f.Value)
-           
+        xs |> ofAliasVertex 
+        |> Seq.collect(fun a -> a.TargetWrapper.RealExTarget() |> Option.toList)
 
 
     /// 상호 reset 정보(Mutual Reset Info) 확장

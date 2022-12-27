@@ -83,13 +83,6 @@ module CoreModule =
         member val OriginalCodeBlocks = ResizeArray<string>()
         member val Statements = ResizeArray<Statement>()
 
-        //DsSystem.OriginalCodeBlocks 여기에 저장 및 불러오기로 이동
-        //[<Obsolete("삭제 대상")>] member val Variables = ResizeArray<VariableData>()
-        //JobDef 여기에 저장 및 불러오기로 이동
-        //[<Obsolete("삭제 대상")>] member val Commands = ResizeArray<Command>()
-        //JobDef 여기에 저장 및 불러오기로 이동
-        //[<Obsolete("삭제 대상")>] member val Observes = ResizeArray<Observe>()
-
         member val ApiItems = createNamedHashSet<ApiItem>()
         member val ApiResetInfos = HashSet<ApiResetInfo>()
         ///시스템 전체시작 버튼누름시 수행되야하는 Real목록

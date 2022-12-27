@@ -8,7 +8,7 @@ open Engine.CodeGenCPU
 type VertexMemoryManager with
    
     member Real.M1_OriginMonitor(): Statement  = 
-        ConvertTypeCheck Real.Vertex (ConvertType.CvtCall ||| ConvertType.CvtAlias)
+        ConvertTypeCheck Real.Vertex (ConvertType.CvRealPure)
 
         let real = Real.Vertex :?> Real
         let jobDefInfos = OriginHelper.GetOriginsWithJobDefs real.Graph

@@ -10,14 +10,14 @@ module ConvertUtil =
     
     [<Flags>]
     type ConvertType = 
-    |CvtReal                = 0b00000001  
-    |CvtRealEx              = 0b00000010  
-    |CvtCall                = 0b00000100  
-    |CvtAlias               = 0b00001000  
-    |CvtAliasForCall        = 0b00100000  
-    |CvtAliasForReal        = 0b01000000  
-    |CvtAliasForRealEx      = 0b10000000  
-    |CvtV                   = 0b11111111  
+    |CvRealPure            = 0b00000001  
+    |CvRealEx              = 0b00000010  
+    |CvCall                = 0b00000100  
+    |CvAlias               = 0b00001000  
+    |CvAliasForCall        = 0b00100000  
+    |CvAliasForReal        = 0b01000000  
+    |CvAliasForRealEx      = 0b10000000  
+    |CvV                   = 0b11111111  
 
     //RC      //Real, Call as RC
     //RCA     //Real, Call, Alias(Call) as RCA
@@ -28,14 +28,14 @@ module ConvertUtil =
     let ConvertTypeCheck (v:Vertex) (vaild:ConvertType) = 
         let isVaildVertex =
             match v with
-            | :? Real   -> vaild.HasFlag(ConvertType.CvtReal)
-            | :? RealEx -> vaild.HasFlag(ConvertType.CvtRealEx) 
-            | :? Call   -> vaild.HasFlag(ConvertType.CvtCall)
+            | :? Real   -> vaild.HasFlag(ConvertType.CvRealPure)
+            | :? RealEx -> vaild.HasFlag(ConvertType.CvRealEx) 
+            | :? Call   -> vaild.HasFlag(ConvertType.CvCall)
             | :? Alias as a  -> 
                 match a.TargetWrapper with
-                | DuAliasTargetReal ar   -> vaild.HasFlag(ConvertType.CvtAliasForReal)
-                | DuAliasTargetCall ac   -> vaild.HasFlag(ConvertType.CvtAliasForCall)
-                | DuAliasTargetRealEx ao -> vaild.HasFlag(ConvertType.CvtAliasForRealEx)
+                | DuAliasTargetReal ar   -> vaild.HasFlag(ConvertType.CvAliasForReal)
+                | DuAliasTargetCall ac   -> vaild.HasFlag(ConvertType.CvAliasForCall)
+                | DuAliasTargetRealEx ao -> vaild.HasFlag(ConvertType.CvAliasForRealEx)
             |_ -> failwith "Error"
 
         if not <| isVaildVertex 

@@ -113,17 +113,17 @@ module EtcListenerModule =
                     safetyConditions.Iter(fun sc -> holder.SafetyConditions.Add(sc) |> verifyM $"Duplicated safety condition[{ (sc.Core :?> INamed).Name}]")
                 } |> ignore
 
-        member private x.CreateFunctionApplication(context:FunApplicationContext):FunctionApplication =
-            let funName = context.TryFindFirstChild<FunNameContext>().Value.GetText()
-            let argGroups =
-                context.Descendants<ArgumentGroupContext>()
-                    .Select(fun argGrpCtx ->
-                        argGrpCtx.Descendants<ArgumentContext>()
-                            .Select(fun arg -> arg.GetText())
-                            .ToArray())
-                    .ToArray()
+        //member private x.CreateFunctionApplication(context:FunApplicationContext):FunctionApplication =
+        //    let funName = context.TryFindFirstChild<FunNameContext>().Value.GetText()
+        //    let argGroups =
+        //        context.Descendants<ArgumentGroupContext>()
+        //            .Select(fun argGrpCtx ->
+        //                argGrpCtx.Descendants<ArgumentContext>()
+        //                    .Select(fun arg -> arg.GetText())
+        //                    .ToArray())
+        //            .ToArray()
 
-            FunctionApplication(funName, argGroups)
+        //    FunctionApplication(funName, argGroups)
 
         //DsSystem.OriginalCodeBlocks 여기에 저장 및 불러오기로 이동
         //member x.ProcessVariableDef(context:VariableDefContext) =

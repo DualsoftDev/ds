@@ -4,6 +4,7 @@ open System.Diagnostics
 open System
 open System.Text.RegularExpressions
 open Engine.Core
+open System.Collections.Generic
 
 [<AutoOpen>]
 module VertexManagerModule =
@@ -20,32 +21,38 @@ module VertexManagerModule =
     /// Vertex Manager : 소속되어 있는 DsBit 를 관리하는 컨테이어
     type VertexManager (v:Vertex)  =
         let name = v.QualifiedName
-        let bit name flag = DsBit(name, false, v, flag)
+        let goingRelays = HashSet<DsBit>()
+        let bit mark flag = DsBit($"{name}({mark})", false, v, flag)
         
-        let readyBit   = bit $"{name}(R)"  TagFlag.R
-        let goingBit   = bit $"{name}(G)"  TagFlag.G
-        let finishBit  = bit $"{name}(F)"  TagFlag.F
-        let homingBit  = bit $"{name}(H)"  TagFlag.H
-        let originBit  = bit $"{name}(0G)" TagFlag.Origin
-        let pauseBit   = bit $"{name}(PA)" TagFlag.Pause
-        let errorTxBit = bit $"{name}(E1)" TagFlag.ErrorTx
-        let errorRxBit = bit $"{name}(E2)" TagFlag.ErrorRx
+        let readyBit      = bit "R"  TagFlag.R
+        let goingBit      = bit "G"  TagFlag.G
+        let finishBit     = bit "F"  TagFlag.F
+        let homingBit     = bit "H"  TagFlag.H
+        let originBit     = bit "0G" TagFlag.Origin
+        let pauseBit      = bit "PA" TagFlag.Pause
+        let errorTxBit    = bit "E1" TagFlag.ErrorTx
+        let errorRxBit    = bit "E2" TagFlag.ErrorRx
 
-        let relayRealBit  = bit $"{name}(RR)" TagFlag.RelayReal
-        let relayCallBit  = bit $"{name}(CR)" TagFlag.RelayCall
-        let relayGoingBit = bit $"{name}(GR)" TagFlag.RelayGoing
+        let relayRealBit  = bit "RR" TagFlag.RelayReal
+        let relayCallBit  = bit "CR" TagFlag.RelayCall
+     
 
-        let endTagBit     = bit $"{name}(ET)" TagFlag.ET
-        let resetTagBit   = bit $"{name}(RT)" TagFlag.RT
-        let startTagBit   = bit $"{name}(ST)" TagFlag.ST
+        let endTagBit     = bit "ET" TagFlag.ET
+        let resetTagBit   = bit "RT" TagFlag.RT
+        let startTagBit   = bit "ST" TagFlag.ST
 
-        let endPortBit    = bit $"{name}(EP)" TagFlag.EP
-        let resetPortBit  = bit $"{name}(RP)" TagFlag.RP
-        let startPortBit  = bit $"{name}(SP)" TagFlag.SP
+        let endPortBit    = bit "EP" TagFlag.EP
+        let resetPortBit  = bit "RP" TagFlag.RP
+        let startPortBit  = bit "SP" TagFlag.SP
 
-        let endForceBit   = bit $"{name}(EF)" TagFlag.EF
-        let resetForceBit = bit $"{name}(RF)" TagFlag.RF
-        let startForceBit = bit $"{name}(SF)" TagFlag.SF
+        let endForceBit   = bit "EF" TagFlag.EF
+        let resetForceBit = bit "RF" TagFlag.RF
+        let startForceBit = bit "SF" TagFlag.SF
+
+        let pulseBit      = bit "PUL" TagFlag.Pulse
+        let counterBit    = bit "CTR" TagFlag.Counter
+        let timerTxBit    = bit "TTX" TagFlag.TimerTx
+        let timerRxBit    = bit "TRX" TagFlag.TimerRx
 
         interface IVertexManager with
             member x.Vertex = v
@@ -54,76 +61,76 @@ module VertexManagerModule =
         member x.Vertex  = v
         member x.Flow    = v.Parent.GetFlow()
         member x.System  = v.Parent.GetFlow().System
+        ///Always ON System Bit
+        member x.ON   = x.System._on
+        ///Always OFF System Bit
+        member x.OFF  = x.System._off
 
-        //Tag 약어 변수는 수식정의시 사용
         ///Segment Start Tag
-        member x.StartTag   = startTagBit
-        member x.ST         = startTagBit |> tag2expr
+        member x.ST         = startTagBit
         ///Segment Reset Tag
         member x.ResetTag   = resetTagBit
-        member x.RT         = resetTagBit |> tag2expr
+        member x.RT         = resetTagBit 
         ///Segment End Tag
         member x.EndTag     = endTagBit  
-        member x.ET         = endTagBit   |> tag2expr
+        member x.ET         = endTagBit   
 
         //Port
         ///Segment Start Port
-        member x.StartPort  = startPortBit 
-        member x.SP         = startPortBit  |> tag2expr
+        member x.SP         = startPortBit  
         ///Segment Reset Port
-        member x.ResetPort  = resetPortBit 
-        member x.RP         = resetPortBit  |> tag2expr
+        member x.RP         = resetPortBit  
         ///Segment End Port
-        member x.EndPort    = endPortBit     
-        member x.EP         = endPortBit    |> tag2expr
+        member x.EP         = endPortBit    
 
         //Force
         ///StartForce HMI
-        member x.StartForce = startForceBit 
-        member x.SF         = startForceBit  |> tag2expr
+        member x.SF         = startForceBit 
         ///ResetForce HMI
-        member x.ResetForce = resetForceBit 
-        member x.RF         = resetForceBit  |> tag2expr
+        member x.RF         = resetForceBit 
         ///EndForce HMI
-        member x.EndForce   = endForceBit   
-        member x.EF         = endForceBit    |> tag2expr
+        member x.EF         = endForceBit   
 
         //Relay
         ///Real Init Relay  
-        member x.RelayRealInitStart = relayRealBit 
-        member x.RR                 = relayRealBit  |> tag2expr
+        member x.RR         = relayRealBit  
         ///Call Done Relay 
-        member x.RelayCallDone      = relayCallBit
-        member x.CR                 = relayCallBit |> tag2expr
+        member x.CR         = relayCallBit 
         ///Going Relay 
-        member x.RelayGoing          = relayGoingBit 
-        member x.GR                 = relayGoingBit |> tag2expr
-
+        member x.GR(tgt:Vertex) = 
+           let gr =   bit $"GR_{tgt.Name}" TagFlag.RelayGoing
+           goingRelays.Add gr |> ignore; gr
+           
         //Status 
         ///Ready Status
-        member x.Ready  = readyBit  
-        member x.R      = readyBit  |> tag2expr
+        member x.R      = readyBit  
         ///Going Status
-        member x.Going  = goingBit  
-        member x.G      = goingBit  |> tag2expr
+        member x.G      = goingBit  
         ///Finish Status
-        member x.Finish = finishBit 
-        member x.F      = finishBit  |> tag2expr
+        member x.F      = finishBit 
         ///Homing Status
-        member x.Homing = homingBit 
-        member x.H      = homingBit  |> tag2expr
+        member x.H      = homingBit 
 
         //Monitor 
         ///Origin Monitor
-        member x.Origin  =  originBit 
-        member x.OG      =  originBit  |> tag2expr
+        member x.OG      =  originBit 
         ///Pause Monitor
-        member x.Pause   =  pauseBit  
-        member x.PA      =  pauseBit   |> tag2expr
+        member x.PA      =  pauseBit  
         ///Error Tx Monitor
-        member x.ErrorTx =  errorTxBit
-        member x.E1      =  errorTxBit |> tag2expr
+        member x.E1      =  errorTxBit
         ///Error Rx Monitor
-        member x.ErrorRx =  errorRxBit
-        member x.E2      =  errorRxBit |> tag2expr 
+        member x.E2      =  errorRxBit
 
+        //DummyBit
+        ///PulseStart  
+        member x.PUL        = pulseBit  
+        ///Ring Counter // counter TAG로 수정필요
+        member x.CTR        = counterBit 
+        ///TimerTx  // timer TAG로 수정필요
+        member x.TTX        = timerTxBit 
+        ///TimerRx   // timer TAG로 수정필요
+        member x.TRX        = timerRxBit 
+           
+          
+        
+         

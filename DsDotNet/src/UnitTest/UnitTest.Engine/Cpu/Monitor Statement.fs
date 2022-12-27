@@ -11,7 +11,7 @@ open Engine.Cpu
 open Engine.CodeGenCPU
 open System.Linq
 
-type MonitorTest() =
+type MonitorStatement() =
     do Fixtures.SetUpTest()
 
     let getCpuTestSample () =
@@ -23,13 +23,15 @@ type MonitorTest() =
         sys, flow, real
 
     [<Test>]
-    member __.``1 Origin Monitor`` () =
+    member __.``M1 Origin Monitor`` () =
         let sys, flow, real = getCpuTestSample()
         let realM = real.VertexManager :?> VertexManager
         let test = realM.M1_OriginMonitor()
         Eq  1 1 
 
-    [<Test>]
-    member __.``2 Pause Monitor`` () =
-        Eq 1 1
+    [<Test>] member __.``M2 Pause Monitor`` () =  Eq 1 1 //test ahn
+    [<Test>] member __.``M3 Error TX Monitor`` () =  Eq 1 1 //test ahn
+    [<Test>] member __.``M4 Error RX Monitor`` () =  Eq 1 1 //test ahn
+    
+       
           

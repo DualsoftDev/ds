@@ -8,9 +8,9 @@
 	</PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Core.Extensions.fs" />
     <Compile Include="VertexManager.fs" />
     <Compile Include="ConvertUtil.fs" />
-    <Compile Include="Core.Extensions.fs" />
     <Compile Include="VertexManager.Extension.fs" />
     <Compile Include="1.Port.fs" />
     <Compile Include="2.Flow.fs" />

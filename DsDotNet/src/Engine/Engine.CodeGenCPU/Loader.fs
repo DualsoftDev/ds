@@ -15,17 +15,34 @@ module CpuLoader =
             if IsSpec v (RealPure ||| CallPure ||| AliasForCall)
             then
                 yield! vm.S1_Ready_Going_Finish_Homing()
+                yield vm.M2_PauseMonitor()
+                yield vm.M3_ErrorTXMonitor()
+                yield vm.M4_ErrorRXMonitor()
+
+            if IsSpec v (CallPure ||| AliasForCall)
+            then
+                yield vm.C1_CallActionOut()
+                yield vm.C2_CallInitialComplete()
+                yield vm.C3_CallTailComplete()
+                yield vm.C4_CallTx()
+                yield vm.C5_CallRx()
 
             if IsSpec v VertexAll
             then
-                yield! vm.F1_RootStart() |> Option.toList
-          //      yield! vm.F2_RootReset()
+                yield! vm.F1_RootStart() 
+                yield! vm.F2_RootReset()
 
             if IsSpec v RealPure
             then 
+                yield vm.M1_OriginMonitor()
                 yield vm.P1_RealStartPort()
                 yield vm.P2_RealResetPort()
                 yield vm.P3_RealEndPort()
+
+                for coin in (v :?> Real).Graph.Vertices.Select(getVM) do
+                yield coin.D1_DAGInitialStart()
+                yield coin.D2_DAGTailStart()
+
 
             if IsSpec v CallPure
             then
@@ -35,18 +52,31 @@ module CpuLoader =
 
         ]
     let private applyBtnLampSpec(s:DsSystem) = []
-    let private applyOperationModeSpec(s:DsSystem) = []
+    ///flow 별 운영모드 적용
+    let private applyOperationModeSpec(f:Flow) = 
+        [
+            yield f.O1_EmergencyOperationMode()
+            yield f.O2_StopOperationMode()
+            yield f.O3_ManualOperationMode()
+            yield f.O4_RunOperationMode()
+            yield f.O5_DryRunOperationMode()
+        ]
     let private applyTimerCounterSpec(s:DsSystem) = []
         
 
     let private convertSystem(sys:DsSystem) =
         [
+            //시스템 적용
+            yield! applyBtnLampSpec sys
+           
+            //Flow 적용
+            for f in sys.Flows
+             do yield! applyOperationModeSpec f
+
+            //Vertex 적용
             for v in sys.GetVertices()
              do yield! applyVertexSpec v
-
-
-            yield! applyBtnLampSpec sys
-            yield! applyOperationModeSpec sys
+             
             yield! applyTimerCounterSpec sys
         ]
 

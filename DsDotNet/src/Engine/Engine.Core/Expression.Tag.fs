@@ -17,6 +17,10 @@ module  TagModule =
     | RelayReal     // Real Init Relay
     | RelayCall     // Call Done Relay
     | RelayGoing    // Going Relay
+    | Pulse         // Start Pulse
+    | Counter       // Ring Counter 
+    | TimerTx       // Timer Command Delay
+    | TimerRx       // Timer Observe Delay
     | ET            // End Tag
     | RT            // Reset Tag
     | ST            // Start Tag
@@ -31,6 +35,7 @@ module  TagModule =
     type Tag<'T when 'T:equality> (name, initValue:'T)  =
         inherit TagBase<'T>(name, initValue)
         override x.ToBoxedExpression() = tag2expr x
+        member x.Expr = tag2expr x
 
     type Variable<'T when 'T:equality> (name, initValue:'T)  =
         inherit VariableBase<'T>(name, initValue)

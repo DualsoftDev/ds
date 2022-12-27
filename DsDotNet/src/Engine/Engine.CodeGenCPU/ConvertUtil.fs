@@ -9,6 +9,41 @@ open Engine.Common.FS
 [<AutoOpen>]
 module ConvertUtil =
 
+    let getVM(v:Vertex) = v.VertexManager :?> VertexManager
+    let rec getCoinTags(v:Vertex, isInTag:bool) : Tag<bool> seq =
+            match v with
+            | :? Call as c ->
+                [ for j in c.CallTarget.JobDefs do
+                    let typ = if isInTag then "I" else "O"
+                    PlcTag( $"{j.ApiName}_{typ}", "", false) :> Tag<bool>
+                ]
+            | :? Alias as a ->
+                match a.TargetWrapper with
+                | DuAliasTargetReal ar    -> getCoinTags( ar, isInTag)
+                | DuAliasTargetCall ac    -> getCoinTags( ac, isInTag)
+                | DuAliasTargetRealEx ao  -> getCoinTags( ao, isInTag)
+            | _ -> failwith "Error"
+
+    let getTxRxTags(v:Vertex, isTx:bool) : Tag<bool> seq =
+        match v with
+        | :? Call as c ->
+            c.CallTarget.JobDefs
+                .SelectMany(fun j->
+                    if isTx then
+                        j.ApiItem.TXs.Select(getVM).Select(fun f->f.ST.Expr)
+                    else
+                        j.ApiItem.RXs.Select(getVM).Select(fun f->f.ET.Expr)
+                )
+                .Cast<Tag<bool>>()
+        | :? Alias as a ->
+            match a.TargetWrapper with
+            | DuAliasTargetReal ar    -> getCoinTags(ar, isTx)
+            | DuAliasTargetCall ac    -> getCoinTags(ac, isTx)
+            | DuAliasTargetRealEx ao  -> getCoinTags(ao, isTx)
+        | _ -> failwith "Error"
+    
+
+
     [<AutoOpen>]
     type SRE = 
     |Start
@@ -48,7 +83,6 @@ module ConvertUtil =
         isVaildVertex
         //if not <| isVaildVertex 
         //then failwith $"{v.Name} can't applies to [{vaild}] case"
-    let getVM(v:Vertex) = v.VertexManager :?> VertexManager
 
     let private tags2LogicalAndOrExpr (fLogical: IExpression list -> Expression<bool>) (FList(ts:Tag<bool> list)) : Expression<bool> =
         match ts with
@@ -68,7 +102,8 @@ module ConvertUtil =
     let (!!)   (exp: Expression<bool>) = fLogicalNot [exp]
     /// Assign statement
     let (<==)  (storage: IStorage) (exp: IExpression) = DuAssign(exp, storage)
-    let (==>)  (exp: IExpression) (storage: IStorage) = DuAssign(exp, storage)
+    /// Assign Puls statement  : Pulse Coil 타입 필요
+    let (<=!)  (storage: IStorage) (exp: IExpression) = DuAssign(exp, storage)
 
 
     /// Create None Relay Coil Statement
@@ -77,8 +112,10 @@ module ConvertUtil =
     /// Create Relay Coil Statement                                                      
     let (==|) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool> , comment:string) =
         coil <== (sets <||> tag2expr coil <&&> (!! rsts)) |> withExpressionComment comment
-          
-    
+     /// Create None Relay Pulse Coil Statement
+    let (--!) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool>, comment:string) = 
+        coil <=! (sets <&&> (!! rsts)) |> withExpressionComment comment
+
     /// Tag<'T> (들)로부터 AND Expression<'T> 생성
     let toAnd = tags2LogicalAndOrExpr fLogicalAnd
     /// Tag<'T> (들)로부터 OR  Expression<'T> 생성

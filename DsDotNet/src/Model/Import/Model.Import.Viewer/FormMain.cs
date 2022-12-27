@@ -222,8 +222,8 @@ namespace Dual.Model.Import
             if (segHMI == null) return;
 
             var ucView = SelectedView;
-            segHMI.VertexM.ResetTag.Value = false;
-            segHMI.VertexM.StartTag.Value = true;
+            segHMI.VertexM.RT.Value = false;
+            segHMI.VertexM.ST.Value = true;
         }
 
         private void button_reset_Click(object sender, EventArgs e)
@@ -232,8 +232,8 @@ namespace Dual.Model.Import
             if (segHMI == null) return;
 
             var ucView = SelectedView;
-            segHMI.VertexM.ResetTag.Value = true;
-            segHMI.VertexM.StartTag.Value = false;
+            segHMI.VertexM.RT.Value = true;
+            segHMI.VertexM.ST.Value = false;
         }
 
 
@@ -306,13 +306,14 @@ namespace Dual.Model.Import
                         .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = v.VertexManager as VertexManager });
                     }
                 });
-
+            int cnt = 0;
             var text = rungs.Select(rung =>
             {
                 var description = rung.comment;
                 var statement = rung.statement;
-                return $"***{description.Replace("%", " ").Replace("$", " ")}";
+                return $"{cnt++}\tSpec:{description.Replace("%", " ").Replace("$", " ")}";
             });
+            
             StartResetBtnUpdate(true);
 
             UpdateCpuUI(text);

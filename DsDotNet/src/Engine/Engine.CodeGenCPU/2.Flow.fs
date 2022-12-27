@@ -8,32 +8,30 @@ open Engine.Common.FS
 
 type VertexManager with
 
-    member v.F1_RootStart(): CommentedStatement option =
+    member v.F1_RootStart(): CommentedStatement list =
         let srcs = v.Flow.Graph.FindEdgeSources(v.Vertex, StartEdge).Select(getVM)
         if srcs.Any() then
-            let sets  = srcs.Select(fun f->f.EndPort).ToAnd()
-            let rsts  = v.ET
-            (sets, rsts) ==| (v.StartTag, "F1") |> Some
-        else
-            None
+            let sets  = srcs.Select(fun f->f.EP).ToAnd()
+            let rsts  = v.OFF.Expr
+            [ 
+                //root 시작조건 이벤트 Pulse 처리
+                (sets, rsts) --! (v.PUL, "F1") 
+                //Pulse start Tag relay
+                (v.PUL.Expr, v.H.Expr) ==| (v.ST, "F1") 
+            ]
+        else []
 
     member v.F2_RootReset() : CommentedStatement list =
-        let srcs = v.Flow.Graph.FindEdgeSources(v.Vertex, ResetEdge).Select(getVM)
-        
-        let goingRelays = srcs.Select(fun c -> DsTag($"{c.Name}(gr)", false) :> Tag<bool>) 
-        let sets  = goingRelays |> toAnd
-        let rsts  = v.H
-        let grs =  
-            srcs.Select(fun c ->
-                    c.RelayGoing <== (sets <&&> ((!!)rsts))) |> Seq.toList
-        grs  //RootReset 추가 필요
-        |> List.map(fun statement -> statement |> withExpressionComment "F2")
+        let srcs = v.Flow.Graph.FindEdgeSources(v.Vertex, ResetEdge)
+                    .Select(getVM)
+                    .Select(fun s -> s, s.GR(v.Vertex))
 
-    //member v.F3_RootReset(): CommentedStatement option =
-    //    if goingSrcs.Any() then
-    //        //going relay srcs
-    //        let sets  =  toAnd goingSrcs 
-    //        let rsts  = !! [real.EndTag].ToAnd()
-    //        (sets, rsts) ==| (real.ResetTag, "") |> Some
-    //    else
-    //        None
+        if srcs.Any() then
+            let sets  = srcs.Select(fun (src, gr) -> gr).ToAnd()
+            let rsts  = (!!)v.EP.Expr
+
+            //going relay rungs
+            srcs.Select(fun (src, gr) -> (src.G.Expr, v.H.Expr) ==| (gr, "F2"))
+            |> Seq.append [(sets, rsts) ==| (v.RT, "F2")] //reset tag  
+            |> Seq.toList
+        else []

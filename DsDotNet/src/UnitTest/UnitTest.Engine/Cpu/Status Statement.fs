@@ -9,22 +9,22 @@ open Engine.Core
 open Engine.Cpu
 
 
-type StatusTest() =
+type StatusStatement() =
     do Fixtures.SetUpTest()
 
     [<Test>]
-    member __.``1 Ready`` () =
+    member __.``S1 Ready`` () =
         Eq 1 1
 
     [<Test>]
-    member __.``2 Going`` () =
+    member __.``S2 Going`` () =
         Eq 1 1
           
     [<Test>]
-    member __.``3 Finish`` () =
+    member __.``S3 Finish`` () =
         Eq 1 1
           
     [<Test>]
-    member __.``4 Homing`` () =
+    member __.``S4 Homing`` () =
         Eq 1 1
           

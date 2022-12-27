@@ -14,5 +14,7 @@
         "Upper+" = { Assy."m+" ~ Assy."us+" }
         "Upper-" = { Assy.중력 ~ Assy."us-" }
         JobClear = { Assy."work end" ~ _ }
+		"Upper+" <||> "Upper-";
+		"JobClear" |> "DownConv+" |> "UpConv+";
     }
 }

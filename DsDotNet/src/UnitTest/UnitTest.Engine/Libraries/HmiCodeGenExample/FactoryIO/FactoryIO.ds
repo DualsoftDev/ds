@@ -57,8 +57,8 @@
         "StartSubGoSub~_" = { _ ~ _ }
         "StartMainGoMain~_" = { _ ~ _ }
     }
-    [device file="Main.ds"] Line_Main; // E:\FactoryIO\Lib\Main.pptx
-    [device file="Assy.ds"] Line_Assy; // E:\FactoryIO\Lib\Assy.pptx
+    [external file="Main.ds" ip="localhost"] Line_Main; // E:\FactoryIO\Lib\Main.pptx
+    [external file="Assy.ds" ip="localhost"] Line_Assy; // E:\FactoryIO\Lib\Assy.pptx
     [device file="Lib/Sub.ds"] Line_Sub; // E:\FactoryIO\Lib\Sub.pptx
     [device file="Lib/Robot.ds"] Line_Robot; // E:\FactoryIO\Lib\Robot.pptx
 }

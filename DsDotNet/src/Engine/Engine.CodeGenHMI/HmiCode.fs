@@ -6,27 +6,27 @@ open Engine.Core
 [<AutoOpen>]
 module HmiGenModule =
     type Category =
-        | None       = 0
-        | System     = 1
-        | Flow       = 2
-        | Real       = 3
-        | Job        = 4
-        | Device     = 5
-        | Interface  = 6
-        | Button     = 7
+        | None      = 0
+        | System    = 1
+        | Flow      = 2
+        | Real      = 3
+        | Job       = 4
+        | Device    = 5
+        | Interface = 6
+        | Button    = 7
     and ButtonType =
-        | None       = 0
-        | Start      = 8
-        | Reset      = 9
-        | On         = 10
-        | Off        = 11
-        | Run        = 12
-        | Emergency  = 13
-        | Auto       = 14
-        | Clear      = 15
-        | Stop       = 16
-        | Manual     = 17
-        | StartDry   = 18
+        | None      = 0
+        | Start     = 8
+        | Reset     = 9
+        | On        = 10
+        | Off       = 11
+        | Run       = 12
+        | DryRun    = 13
+        | Emergency = 14
+        | Auto      = 15
+        | Manual    = 16
+        | Clear     = 17
+        | Stop      = 18
 
     type Info = {
         name:string;
@@ -80,20 +80,26 @@ module HmiGenModule =
 
         let addGroupButtons
                 (system:DsSystem)
-                (buttonsInFlow:Dictionary<string, HashSet<Flow>>)
+                (buttonsInFlow:ButtonDef seq(*Dictionary<string, HashSet<Flow>>*))
                 buttonType =
-            for KeyValue(btnName, btnValue) in buttonsInFlow do
-                let flowNames = [ for flow in btnValue do flow.QualifiedName ]
-                addFlowButton btnName system.Name flowNames buttonType
+            for btn in buttonsInFlow do
+                let flowNames = [ 
+                    for flow in btn.SettingFlows do flow.QualifiedName 
+                ]
+                addFlowButton btn.Name system.Name flowNames buttonType
 
         let addUnionButtons
                 (system:DsSystem) (flow:Flow)
                 (btnTargetMap:Dictionary<ButtonType, ResizeArray<string>>) =
             let flowName = $"{flow.QualifiedName}"
             let btnNames = [
+                "RUNof",    ButtonType.Run;
+                "DRYRUNof", ButtonType.DryRun;
                 "EMSTOPof", ButtonType.Emergency;
-                "ATMANUof", ButtonType.Auto;
-                "CLEAR_of", ButtonType.Clear;
+                "AUTOof",   ButtonType.Auto;
+                "MANUALof", ButtonType.Manual;
+                "CLEARof",  ButtonType.Clear;
+                "STOPof",   ButtonType.Stop;
             ]
             for name, btnType in btnNames do
                 let btnName = $"{name}__{flowName}"
@@ -108,20 +114,25 @@ module HmiGenModule =
                 |> Seq.map(fun info -> info.Value.name)
             let buttons = [
                 "RUN",    ButtonType.Run;
+                "DRYRUN", ButtonType.DryRun;
                 "EMSTOP", ButtonType.Emergency;
-                "ATMANU", ButtonType.Auto;
+                "AUTO",   ButtonType.Auto;
+                "MANUAL", ButtonType.Manual;
                 "CLEAR",  ButtonType.Clear;
+                "STOP",   ButtonType.Stop;
             ]
             for button, btnType in buttons do
                 addButton button null btnType
                 match btnType with
-                | ButtonType.Run ->
+                | ButtonType.Run | ButtonType.DryRun ->
                     for sys in model.Systems do
                         for sp in sys.StartPoints do
                             hmiInfos[button].targets.Add(sp.QualifiedName)
-                | ButtonType.Emergency | ButtonType.Auto | ButtonType.Clear ->
+                | ButtonType.Emergency | ButtonType.Auto | ButtonType.Manual
+                | ButtonType.Clear | ButtonType.Stop ->
                     for flow in flowNames do hmiInfos[button].targets.Add(flow)
                 | _ ->
+                    printfn "%A" btnType
                     failwith "type error"
 
         let addInterface (api:ApiItem) (usedIn:string) =
@@ -175,11 +186,13 @@ module HmiGenModule =
             for sys in model.Systems do
                 let groupBtnCombiner = addGroupButtons sys
                 addSystemFlowReal sys
-                //<<shin>>
-                //groupBtnCombiner sys.AutoButtons ButtonType.Auto
-                //groupBtnCombiner sys.ClearButtons ButtonType.Clear
-                //groupBtnCombiner sys.EmergencyButtons ButtonType.Emergency
-                //<<shin>>
+                groupBtnCombiner sys.RunButtons ButtonType.Run
+                groupBtnCombiner sys.DryRunButtons ButtonType.DryRun
+                groupBtnCombiner sys.AutoButtons ButtonType.Auto
+                groupBtnCombiner sys.ManualButtons ButtonType.Manual
+                groupBtnCombiner sys.ClearButtons ButtonType.Clear
+                groupBtnCombiner sys.StopButtons ButtonType.Stop
+                groupBtnCombiner sys.EmergencyButtons ButtonType.Emergency
                 let btnTgtMap =
                     new Dictionary<ButtonType, ResizeArray<string>>()
                 for flow in sys.Flows do

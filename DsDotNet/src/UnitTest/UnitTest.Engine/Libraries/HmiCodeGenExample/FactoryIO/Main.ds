@@ -12,5 +12,7 @@
         PartOff = { Main."Part Remove" ~ _ }
         "Clamp+" = { Main."v+" ~ Main."s+" }
         "Clamp-" = { Main."v-" ~ Main."s-" }
+		"Clamp+" <||> "Clamp-";
+		PartOff |> "Conv+";
     }
 }

@@ -124,7 +124,7 @@ jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing)* RBRACE;
 
 
 interfaceBlock
-    : '[' 'interfaces' ']' (identifier1)? '=' LBRACE (interfaceListing)* RBRACE;
+    : '[' 'interfaces' ']' '=' LBRACE (interfaceListing)* RBRACE;
     interfaceListing: (interfaceDef (';')?) | interfaceResetDef;
 
     // A23 = { M.U ~ S.S3U ~ _ }

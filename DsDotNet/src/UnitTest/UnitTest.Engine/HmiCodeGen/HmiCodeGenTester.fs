@@ -53,4 +53,3 @@ module HmiCodeGenTestModule =
                     "test_sample\device\MovingLifter2.ds";
                 ]
                 "answer_test_sample.json"
-

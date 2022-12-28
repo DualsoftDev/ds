@@ -9,13 +9,30 @@ open System
 [<AutoOpen>]
 module ConvertCoreExt =
     
-    let private getButtonIOs(flow:Flow, btns:ButtonDef seq) : ButtonDef seq = 
+    let private getButtonInputs(flow:Flow, btns:ButtonDef seq) : PlcTag<bool> seq = 
             btns.Where(fun b -> b.SettingFlows.Contains(flow))
+                .Where(fun b -> b.InTag.IsSome)
+                .Select(fun b -> b.InTag).Cast<PlcTag<bool>>()
 
-    type InOut = | In | Out
+    let private getButtonOutputs(flow:Flow, btns:ButtonDef seq) : PlcTag<bool> seq = 
+            btns.Where(fun b -> b.SettingFlows.Contains(flow))
+                .Where(fun b -> b.OutTag.IsSome)
+                .Select(fun b -> b.OutTag).Cast<PlcTag<bool>>()
 
-    let private getIOs(name, address, inOut:InOut): PlcTag<bool>   =  
-            PlcTag(name, address, false)
+    let private getLampOutputs(flow:Flow, btns:LampDef seq) : PlcTag<bool> seq = 
+            btns.Where(fun b -> b.SettingFlow = flow)
+                .Where(fun b -> b.OutTag.IsSome)
+                .Select(fun b -> b.OutTag).Cast<PlcTag<bool>>()
+
+    type InOut = | In | Out | Memory
+    let private getIOs(name, address, inOut:InOut): ITagWithAddress option  =  
+            let plcName = match inOut with 
+                          | In  -> $"{name}_I" 
+                          | Out -> $"{name}_I" 
+                          | Memory -> failwith "error: Memory not supported "
+
+            if address = "" then None
+                            else Some (PlcTag(plcName, address, false) :> ITagWithAddress)
                           
     type DsSystem with
         member s._on     = DsTag<bool>("_on", false)
@@ -35,25 +52,22 @@ module ConvertCoreExt =
         member s._s      = DsTag<int> ("_s", 0)
         member s._ms     = DsTag<int> ("_ms", 0)
 
-        //member s.GenerationLampIO() = 
-        //    s.Lamps.Where(fun w->w.OutTag.IsNone)
-        //           .ForEach(fun l->l.OutTag  <- Some (getIOs($"{l.Name}_O", l.OutAddress)))
+        member s.GenerationLampIO() =
+            s.SystemLamps.Where(fun w -> w.OutTag.IsNone)
+                   .ForEach(fun b->b.OutTag  <- getIOs(b.Name, b.OutAddress, In))
 
         member s.GenerationButtonIO() = 
-            s.Buttons.Where(fun w -> w.OutTag.IsNone)
-                     .ForEach(fun b->b.OutTag <- Some (PlcTag($"{b.Name}_I", b.OutAddress, false)))
-            s.Buttons.Where(fun w -> w.InTag.IsNone)
-                     .ForEach(fun b->b.InTag  <- Some (PlcTag($"{b.Name}_O", b.InAddress, false)))
-        
+            s.SystemButtons.Where(fun w -> w.InTag.IsNone)
+                     .ForEach(fun b->b.InTag  <- getIOs(b.Name, b.OutAddress, In))
+            s.SystemButtons.Where(fun w -> w.OutTag.IsNone)
+                     .ForEach(fun b->b.OutTag <- getIOs(b.Name, b.OutAddress, Out))
+            
         member s.GenerationJobIO() = 
             let jobDefs = s.Jobs |> Seq.collect(fun j -> j.JobDefs)
             jobDefs.Where(fun w -> w.InTag.IsNone)
-                   .ForEach(fun jdef->jdef.InTag <- Some (PlcTag($"{jdef.ApiName}_I", jdef.InAddress, false)))
+                   .ForEach(fun jdef->jdef.InTag <- getIOs(jdef.ApiName, jdef.InAddress, In))
             jobDefs.Where(fun w -> w.OutTag.IsNone)
-                   .ForEach(fun jdef->jdef.OutTag <- Some (PlcTag($"{jdef.ApiName}_O", jdef.OutAddress, false)))
-
-
-
+                   .ForEach(fun jdef->jdef.OutTag <- getIOs(jdef.ApiName, jdef.OutAddress, Out))
 
 //운영 모드 는 Flow 별로 제공된 모드 On/Off 상태 나타낸다.
     type Flow with
@@ -70,13 +84,24 @@ module ConvertCoreExt =
         member f.clear  = DsTag<bool>("clear", false)
         member f.dryrun = DsTag<bool>("dryrun", false)  
 
-        member f.autoINs    = getButtonIOs (f, f.System.AutoButtons     ) 
-        member f.manualIOs  = getButtonIOs (f, f.System.ManualButtons   ) 
-        member f.emgIOs     = getButtonIOs (f, f.System.EmergencyButtons) 
-        member f.stopIOs    = getButtonIOs (f, f.System.StopButtons     ) 
-        member f.runIOs     = getButtonIOs (f, f.System.RunButtons      ) 
-        member f.dryIOs     = getButtonIOs (f, f.System.DryRunButtons   ) 
-        member f.clearIOs   = getButtonIOs (f, f.System.ClearButtons    ) 
-        
+        //버튼 IO PLC TAG
+        member f.autoIns    = getButtonInputs  (f, f.System.AutoButtons) 
+        member f.autoOuts   = getButtonOutputs (f, f.System.AutoButtons) 
+        member f.manualIns  = getButtonInputs (f, f.System.ManualButtons) 
+        member f.manualOuts = getButtonOutputs (f, f.System.ManualButtons) 
+        member f.emgIns     = getButtonInputs (f, f.System.EmergencyButtons) 
+        member f.emgOuts    = getButtonOutputs (f, f.System.EmergencyButtons) 
+        member f.stopIns    = getButtonInputs (f, f.System.StopButtons) 
+        member f.stopOuts   = getButtonOutputs (f, f.System.StopButtons) 
+        member f.runIns     = getButtonInputs (f, f.System.RunButtons) 
+        member f.runOuts    = getButtonOutputs (f, f.System.RunButtons) 
+        member f.dryIns     = getButtonInputs (f, f.System.DryRunButtons) 
+        member f.dryOuts    = getButtonOutputs (f, f.System.DryRunButtons) 
+        member f.clearIns   = getButtonInputs (f, f.System.ClearButtons) 
+        member f.clearOuts  = getButtonOutputs (f, f.System.ClearButtons) 
 
-
+        //램프 IO PLC TAG
+        member f.runModelampOuts    = getLampOutputs (f, f.System.RunModeLamps) 
+        member f.dryrunModelampOuts = getLampOutputs (f, f.System.DryRunModeLamps) 
+        member f.manualModelampOuts = getLampOutputs (f, f.System.ManualModeLamps) 
+        member f.stopModelampOuts   = getLampOutputs (f, f.System.StopModeLamps) 

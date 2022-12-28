@@ -87,10 +87,10 @@ module CoreModule =
         member val ApiResetInfos = HashSet<ApiResetInfo>()
         ///시스템 전체시작 버튼누름시 수행되야하는 Real목록
         member val StartPoints = createQualifiedNamedHashSet<Real>()
-        ///시스템 버튼 소속 Flows 정보
-        member val Buttons = HashSet<ButtonDef>()
-        ///시스템 램프 소속 Flow 정보
-        member val Lamps   = HashSet<LampDef>()
+        ///시스템 버튼 소속 Flows 정보 setting은 AddButton 사용
+        member val internal Buttons = HashSet<ButtonDef>()
+        ///시스템 램프 소속 Flow 정보  setting은 AddLamp 사용
+        member val internal Lamps   = HashSet<LampDef>()
         
 
     type Flow private (name:string, system:DsSystem) =
@@ -395,13 +395,35 @@ module CoreModule =
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 
     type DsSystem with
-        member x.AddButton(btnType:BtnType, btnName: string, flow:Flow) =
-            if x <> flow.System then failwithf $"button [{btnName}] in flow ({flow.System.Name} != {x.Name}) is not same system"
+        member x.AddButton(btnType:BtnType, btnName:string, inAddress:TagAddress, outAddress:TagAddress, flow:Flow) =
+            if x <> flow.System 
+            then failwithf $"button [{btnName}] in flow ({flow.System.Name} != {x.Name}) is not same system"
+
+            let getUsedFlow (btn:BtnType) =
+                x.Buttons.Where(fun f->f.ButtonType = btn)
+                |> Seq.collect(fun b -> b.SettingFlows)
+
+            if btnType = DuAutoBTN 
+            then not <| getUsedFlow(DuAutoBTN).Contains(flow)
+                 |> verifyM $"AutoBTN {btnName} is assigned to a single flow : Duplicated flow [{flow.Name}]"
+            if btnType = DuManualBTN 
+            then not <| getUsedFlow(DuManualBTN).Contains(flow)
+                 |> verifyM $"ManualBTN {btnName} is assigned to a single flow : Duplicated flow [{flow.Name}]"
 
             match x.Buttons.TryFind(fun f -> f.Name =  btnName) with
             | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
-            | None -> x.Buttons.Add(ButtonDef(btnName, btnType, "", "", HashSet[|flow|])) |> verifyM $"Duplicated ButtonDef [{btnName}]"
+            | None -> x.Buttons.Add(ButtonDef(btnName, btnType, inAddress, outAddress, HashSet[|flow|]))
+                      |> verifyM $"Duplicated ButtonDef [{btnName}]"
         
+        member x.AddLamp(lampType:LampType, lampName: string, flow:Flow) =
+            if x <> flow.System 
+            then failwithf $"button [{lampName}] in flow ({flow.System.Name} != {x.Name}) is not same system"
+            x.Lamps.Add(LampDef(lampName, lampType, "", flow))
+
+
+        member x.SystemButtons    = x.Buttons |> Seq.map(fun btn  -> btn) //read only
+        member x.SystemLamps      = x.Lamps   |> Seq.map(fun lamp -> lamp)//read only
+
         member x.AutoButtons      = x.Buttons.Where(fun f->f.ButtonType = DuAutoBTN)
         member x.ManualButtons    = x.Buttons.Where(fun f->f.ButtonType = DuManualBTN)
         member x.EmergencyButtons = x.Buttons.Where(fun f->f.ButtonType = DuEmergencyBTN)

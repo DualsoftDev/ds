@@ -182,7 +182,7 @@ module ModelComponentAnswers =
     [flow] F4 = { A > B; }
     [flow] F5 = { A > B; }
     [runlamp] = {
-        EmptyButton = {};
+        EmptyButton = {}; // Empty flow not allowed
         RunMode = { F3(%Q1) };
     }
     [manuallamp] = {
@@ -222,8 +222,8 @@ module ModelComponentAnswers =
         ManualBTN = { F1;F5; }
     }
     [emg] = {
-        EmptyButton = { ; }
-        EmptyButton2 = { ; }
+        EmptyButton = { ; } // Empty flow not allowed
+        EmptyButton2 = { ; } // Empty flow not allowed
         EMGBTN3 = { F3;F5; }
         EMGBTN = { F1;F2;F3;F5; }
     }

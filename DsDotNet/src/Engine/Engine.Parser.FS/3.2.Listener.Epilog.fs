@@ -47,8 +47,9 @@ module EtcListenerModule =
                         .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName))
                         .ToArray()
                 if flows.Length > 0
-                then flows.ForEach(fun flow -> system.AddButton(targetBtnType, buttonName, flow))
-                else system.Buttons.Add(ButtonDef(buttonName, targetBtnType, "주소처리","주소처리", new HashSet<Flow>())) |> ignore
+                then flows.ForEach(fun flow -> system.AddButton(targetBtnType, buttonName, "주소처리", "주소처리", flow))
+                //Flow가 정의 안된 빈 버튼은 허용안함
+                //else system.Buttons.Add(ButtonDef(buttonName, targetBtnType, "주소처리","주소처리", new HashSet<Flow>())) |> ignore
                 
 
 

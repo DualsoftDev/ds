@@ -65,6 +65,11 @@ module CpuLoader =
         
 
     let private convertSystem(sys:DsSystem) =
+
+        sys.GenerationButtonIO()
+        sys.GenerationLampIO()
+        sys.GenerationJobIO()
+
         [
             //시스템 적용
             yield! applyBtnLampSpec sys

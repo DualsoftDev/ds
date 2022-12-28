@@ -55,10 +55,10 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ipSpec ']' externalSystemN
 //     addressesBlock
 //         : LBRACE (addressDef)* RBRACE
 //         ;
-//     addressDef: apiPath '=' addressTxRx;        // A.+ = (%Q1234.2343; %I1234.2343)
-        addressTxRx: LPARENTHESIS tx COMMA rx RPARENTHESIS (SEIMCOLON)?;
-        tx: addressItem;
-        rx: addressItem;
+//     addressDef: apiPath '=' addressInOut;        // A.+ = (%Q1234.2343; %I1234.2343)
+        addressInOut: LPARENTHESIS inAddr COMMA outAddr RPARENTHESIS (SEIMCOLON)?;
+        inAddr: addressItem;
+        outAddr: addressItem;
         addressItem: tagAddress | funAddress;
         tagAddress: TAG_ADDRESS;
         funAddress: IDENTIFIER1;
@@ -118,7 +118,7 @@ jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing)* RBRACE;
     callListing:
         jobName '=' LBRACE (callApiDef)? ( ';' callApiDef)* (';')+ RBRACE;
     jobName: etcName1;
-    callApiDef: callKey addressTxRx;
+    callApiDef: callKey addressInOut;
     callKey: identifier12;
 
 
@@ -147,7 +147,7 @@ buttonsBlocks:emergencyButtonBlock|autoButtonBlock|runButtonBlock|clearButtonBlo
     dryrunButtonBlock    :'[' ('dryrun_in'|'dryrun') ']' EQ buttonBlock;
     
     buttonBlock: LBRACE (() | ((SEIMCOLON)* buttonDef)* (SEIMCOLON)*) RBRACE;
-    buttonDef: buttonName EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
+    buttonDef: buttonName EQ LBRACE (() | (flowName|flowName addressInOut) (SEIMCOLON (flowName|flowName addressInOut))* (SEIMCOLON)?) RBRACE;
     buttonName: identifier1;
     flowName : identifier1;
 

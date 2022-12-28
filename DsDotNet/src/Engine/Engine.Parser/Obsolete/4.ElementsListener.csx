@@ -252,10 +252,10 @@ partial class ElementsListener : dsParserBaseListener
         }
 
         //[addresses] = {
-        //    A.F.Am = (%Q123.23, , %I12.1);        // FQSegmentName = (Start, Reset, End) Tag address
-        //    A.F.Ap = (%Q123.24, , %I12.2);
-        //    B.F.Bm = (%Q123.25, , %I12.3);
-        //    B.F.Bp = (%Q123.26, , %I12.4);
+        //    A.F.Am = (%I12.1, , %Q123.23);        // FQSegmentName = (Start, Reset, End) Tag address
+        //    A.F.Ap = (%I12.2, , %Q123.24);
+        //    B.F.Bm = (%I12.3, , %Q123.25);
+        //    B.F.Bp = (%I12.4, , %Q123.26);
         //}
         var addresses = Descendants<AddressesContext>(ctx).ToArray();
         if (addresses.Length > 1)

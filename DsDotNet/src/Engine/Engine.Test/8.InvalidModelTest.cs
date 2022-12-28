@@ -48,8 +48,8 @@ namespace Engine
         }
     }
     [jobs] = {
-        Ap = { A.""+""(%Q1, %I1); }
-        Am = { A.""-""(%Q2, %I2); }
+        Ap = { A.""+""(%I1, %Q1); }
+        Am = { A.""-""(%I2, %Q2); }
     }
     [device file=""cylinder.ds""] A;
 }

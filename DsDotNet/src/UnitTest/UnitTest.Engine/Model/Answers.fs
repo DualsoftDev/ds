@@ -38,10 +38,10 @@ module ModelAnswers =
         }
     }
     [jobs] = {
-        Ap = { A."+"(%Q1, %I1); }
-        Am = { A."-"(%Q2, %I2); }
-        Bp = { B."+"(%Q3, %I3); }
-        Bm = { B."-"(%Q4, %I4); }
+        Ap = { A."+"(%I1, %Q1); }
+        Am = { A."-"(%I2, %Q2); }
+        Bp = { B."+"(%I3, %Q3); }
+        Bm = { B."-"(%I4, %Q4); }
     }
 
     [prop] = {
@@ -92,10 +92,10 @@ module ModelAnswers =
         }
     }
     [jobs] = {
-        Ap = { A."+"(%Q1, %I1); }
-        Am = { A."-"(%Q2, %I2); }
-        Bp = { B."+"(%Q3, %I3); }
-        Bm = { B."-"(%Q4, %I4); }
+        Ap = { A."+"(%I1, %Q1); }
+        Am = { A."-"(%I2, %Q2); }
+        Bp = { B."+"(%I3, %Q3); }
+        Bm = { B."-"(%I4, %Q4); }
     }
     [emg] = {
         EMGBTN = { F; }
@@ -145,9 +145,9 @@ module ModelAnswers =
     Fp > Fm > Gm;
 }
 [jobs] = {
-    Fp = { F."+"(%Q1, %I1); }
-    Fm = { F."-"(%Q2, %I2); }
-    Gm = { G."-"(%Q3, %I3); }
+    Fp = { F."+"(%I1, %Q1); }
+    Fm = { F."-"(%I2, %Q2); }
+    Gm = { G."-"(%I3, %Q3); }
 }
 [device file="cylinder.ds"] F;
 [device file="cylinder.ds"] G;
@@ -168,8 +168,8 @@ module ModelComponentAnswers =
     }
 }
 [jobs] = {
-    Ap = { A."+"(%Q1, %I1); }
-    Am = { A."-"(%Q2, %I2); }
+    Ap = { A."+"(%I1, %Q1); }
+    Am = { A."-"(%I2, %Q2); }
 }
 [device file="cylinder.ds"] A;
 }
@@ -261,8 +261,8 @@ module ModelComponentAnswers =
     }
 
     [jobs] = {
-        RunR = { sysR.RUN(%Q1, %I1); }
-        RunL = { sysL.RUN(%Q2, %I2); }
+        RunR = { sysR.RUN(%I1, %Q1); }
+        RunL = { sysL.RUN(%I2, %Q2); }
     }
     [external file="systemRH.ds" ip="localhost"] sysR;
     [external file="systemLH.ds" ip="localhost"] sysL;
@@ -288,8 +288,8 @@ module ModelComponentAnswers =
         }
     }
     [jobs] = {
-        C1 = { B."+"(%Q1, %I1); A."+"(%Q1, %I1); }
-        C2 = { A."-"(%Q3, _); B."-"(%Q3, _); }
+        C1 = { B."+"(%I1, %Q1); A."+"(%I1, %Q1); }
+        C2 = { A."-"(_, %Q3); B."-"(_, %Q3); }
     }
     [device file="cylinder.ds"] B;
     [external file="cylinder.ds" ip="192.168.0.1"] A;

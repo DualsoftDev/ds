@@ -194,8 +194,8 @@ module CoreModule =
 
 
     type TagAddress = string
-    /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%Q1, %I1); } }
-    type JobDef (api:ApiItem, outAddress:TagAddress, inAddress:TagAddress, observe:string, command:string, deviceName:string) =
+    /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
+    type JobDef (api:ApiItem, inAddress:TagAddress, outAddress:TagAddress, observe:string, command:string, deviceName:string) =
         member _.ApiItem = api
         member val InAddress   = inAddress  with get,set
         member val OutAddress  = outAddress with get,set

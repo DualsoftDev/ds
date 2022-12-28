@@ -56,8 +56,8 @@ module ModelBuildupTests1 =
         }
     }
     [jobs] = {
-        Ap = { A."+"(%Q1, %I1); }
-        Am = { A."-"(%Q2, %I2); }
+        Ap = { A."+"(%I1, %Q1); }
+        Am = { A."-"(%I2, %Q2); }
     }
     [device file="cylinder.ds"] A;
 }
@@ -96,8 +96,8 @@ module ModelBuildupTests1 =
         }
     }
     [jobs] = {
-        Ap = { A."+"(%Q1, %I1); }
-        Am = { A."-"(%Q2, %I2); }
+        Ap = { A."+"(%I1, %Q1); }
+        Am = { A."-"(%I2, %Q2); }
     }
     [device file="cylinder.ds"] A;
 }
@@ -126,8 +126,8 @@ module ModelBuildupTests1 =
         F.Main > R3;		// F.Main(RealOtherFlow)> R3(Real);
     }
     [jobs] = {
-        Ap = { A."+"(%Q1, %I1); }
-        Am = { A."-"(%Q2, %I2); }
+        Ap = { A."+"(%I1, %Q1); }
+        Am = { A."-"(%I2, %Q2); }
     }
     [device file="cylinder.ds"] A;
 }
@@ -155,8 +155,8 @@ module ModelBuildupTests1 =
             Main2; // island
     }
     [jobs] = {
-        Ap = { A."+"(%Q1, %I1); }
-        Am = { A."-"(%Q2, %I2); }
+        Ap = { A."+"(%I1, %Q1); }
+        Am = { A."-"(%I2, %Q2); }
     }
     [interfaces] = {
         Adv = { F.Main ~ F.Main }
@@ -191,8 +191,8 @@ module ModelBuildupTests1 =
     [flow] F2 = {
     }
     [jobs] = {
-        Ap = { A."+"(%Q1, %I1); }
-        Am = { A."-"(%Q2, %I2); }
+        Ap = { A."+"(%I1, %Q1); }
+        Am = { A."-"(%I2, %Q2); }
     }
     [emg] = {
         STOP = { F; }
@@ -260,8 +260,8 @@ module ModelBuildupTests1 =
 //            Main; // island
 //    }
 //    [jobs] = {
-//        Ap = { A."+"(%Q1, %I1); }
-//        Am = { A."-"(%Q2, %I2); }
+//        Ap = { A."+"(%I1, %Q1); }
+//        Am = { A."-"(%I2, %Q2); }
 //    }
 //    [device file="cylinder.ds"] A;
 //    [variables] = {

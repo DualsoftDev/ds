@@ -138,14 +138,26 @@ module PPTUtil =
                 let h = Convert.ToSingle(wh.Cy.Value)/Convert.ToSingle(cy)*fullHDy|> Convert.ToInt32 
                 System.Drawing.Rectangle(x,y,w,h)
     
-
         [<Extension>] 
-        static member CheckBevelShape(shape:Shape) = 
+        static member CheckRound(geometry:#Drawing.PresetGeometry) = 
+                         let shapeGuide = geometry.Descendants<Drawing.AdjustValueList>().First().Descendants<Drawing.ShapeGuide>()
+                         shapeGuide.Any()|>not || shapeGuide.First().Formula.Value = "val 0" |> not
+                      
+        [<Extension>] 
+        static member CheckBevelShapeRound(shape:Shape) = 
             if(Office.CheckShape(shape) |> not) then false
             else
                 let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
-                (  geometry.Preset.Value = Drawing.ShapeTypeValues.Bevel
-                )    
+                let round =  geometry.CheckRound()
+                geometry.Preset.Value = Drawing.ShapeTypeValues.Bevel && round
+
+        [<Extension>] 
+        static member CheckBevelShapePlate(shape:Shape) = 
+            if(Office.CheckShape(shape) |> not) then false
+            else
+                let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
+                let notRound =  geometry.CheckRound() |> not
+                geometry.Preset.Value = Drawing.ShapeTypeValues.Bevel && notRound
   
         [<Extension>] 
         static member CheckDonutShape(shape:Shape) = 
@@ -156,11 +168,7 @@ module PPTUtil =
                 (  geometry.Preset.Value = Drawing.ShapeTypeValues.Donut
                 )  
 
-        [<Extension>] 
-        static member CheckRound(geometry:#Drawing.PresetGeometry) = 
-                         let shapeGuide = geometry.Descendants<Drawing.AdjustValueList>().First().Descendants<Drawing.ShapeGuide>()
-                         shapeGuide.Any()|>not || shapeGuide.First().Formula.Value = "val 0" |> not
-                      
+      
 
         [<Extension>] 
         static member CheckEllipse(shape:Shape) = 
@@ -234,14 +242,6 @@ module PPTUtil =
                     let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
                     geometry.Preset.Value = Drawing.ShapeTypeValues.Cube
         
-        [<Extension>] 
-        static member CheckButtonShape(shape:Shape) = 
-                    if (shape.CheckDonutShape()      
-                        || shape.CheckBlockArc()      
-                        || shape.CheckNoSmoking()     
-                        || shape.CheckBevelShape())    
-                    then true
-                    else false
                 
         [<Extension>] 
         static member IsDashShape(shape:Shape) = 
@@ -249,8 +249,6 @@ module PPTUtil =
             else 
                 let presetDash = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.Outline>().FirstOrDefault().Descendants<Drawing.PresetDash>()
                 presetDash.Any() && presetDash.FirstOrDefault().Val.Value = Drawing.PresetLineDashValues.Solid |>not
-
-       
 
         [<Extension>] 
         static member IsDashLine(conn:ConnectionShape) = 
@@ -320,10 +318,8 @@ module PPTUtil =
         static member IsAbleShape(shape:Shape) = 
                     if (shape.CheckRectangle()      //real
                     || shape.CheckEllipse()         //call
-                    || shape.CheckDonutShape()      //auto/manual
-                    || shape.CheckBevelShape()      //clear
-                    || shape.CheckBlockArc()      //start
-                    || shape.CheckNoSmoking()       //emg
+                    || shape.CheckBevelShapeRound()      //btn
+                    || shape.CheckBevelShapePlate()      //lamp
                     || shape.CheckFoldedCornerRound()    //copy_value
                     || shape.CheckFoldedCornerPlate()    //copy_ref
                     || shape.CheckHomePlate()      //interface

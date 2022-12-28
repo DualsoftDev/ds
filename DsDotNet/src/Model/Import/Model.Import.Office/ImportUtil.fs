@@ -120,22 +120,29 @@ module ImportU =
         [<Extension>]
         static member MakeButtons (doc:pptDoc, mySys:DsSystem) =
             let dicFlow = doc.DicFlow
-
+            
             doc.Nodes
-            |> Seq.filter(fun node -> node.BtnType.IsSome)
+            |> Seq.filter(fun node -> node.ButtonDefs.any())
             |> Seq.iter(fun node ->
                     let flow = dicFlow.[node.PageNum]
-
-                    //Start, Reset, Auto, Emg 버튼
-                    if(node.BtnType.Value = BtnType.DuRunBTN)
-                    then mySys.AddButton(BtnType.DuRunBTN, node.Name, "","", flow)
-                    if(node.BtnType.Value = BtnType.DuClearBTN)
-                    then mySys.AddButton(BtnType.DuClearBTN,node.Name,"","", flow)
-                    if(node.BtnType.Value = BtnType.DuAutoBTN)
-                    then mySys.AddButton(BtnType.DuAutoBTN,node.Name, "","",flow)
-                    if(node.BtnType.Value = BtnType.DuEmergencyBTN)
-                    then mySys.AddButton(BtnType.DuEmergencyBTN ,node.Name, "","",flow)
+                    node.ButtonDefs.ForEach(fun b -> 
+                        mySys.AddButton(b.Value, b.Key, "","", flow)
                     )
+            )
+
+        //EMG & Start & Auto 리스트 만들기
+        [<Extension>]
+        static member MakeLamps (doc:pptDoc, mySys:DsSystem) =
+            let dicFlow = doc.DicFlow
+            
+            doc.Nodes
+            |> Seq.filter(fun node -> node.LampDefs.any())
+            |> Seq.iter(fun node ->
+                    let flow = dicFlow.[node.PageNum]
+                    node.LampDefs.ForEach(fun l -> 
+                        mySys.AddLamp(l.Value, l.Key, "", flow)
+                    )
+            )
 
 
         //real call alias  만들기
@@ -360,6 +367,8 @@ module ImportU =
             doc.MakeFlows(sys) |> ignore
             //EMG & Start & Auto 리스트 만들기
             doc.MakeButtons(sys)
+            //run / stop mode  램프 리스트 만들기
+            doc.MakeLamps(sys)
             //segment 리스트 만들기
             doc.MakeSegment(sys)
             //Edge  만들기

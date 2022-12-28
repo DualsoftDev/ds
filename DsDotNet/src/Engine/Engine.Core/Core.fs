@@ -234,7 +234,6 @@ module CoreModule =
             system.ApiResetInfos.Add(ri) |> verifyM $"Duplicated interface ResetInfo [{ri.ToDsText()}]"
             ri
 
-
     (* Abbreviations *)
 
     type DsGraph = Graph<Vertex, Edge>
@@ -271,11 +270,42 @@ module CoreModule =
         | DuParentFlow of Flow //Real/Call/Alias 의 부모
         | DuParentReal of Real //Call/Alias      의 부모
 
+    type ParentWrapper with
+        member x.GetCore() =
+            match x with
+            | DuParentFlow f -> f :> FqdnObject
+            | DuParentReal r -> r
+        member x.GetFlow() =
+            match x with
+            | DuParentFlow f -> f
+            | DuParentReal r -> r.Flow
+        member x.GetSystem() =
+            match x with
+            | DuParentFlow f -> f.System
+            | DuParentReal r -> r.Flow.System
+        member x.GetGraph():DsGraph =
+            match x with
+            | DuParentFlow f -> f.Graph
+            | DuParentReal r -> r.Graph
+        member x.GetModelingEdges() =
+            match x with
+            | DuParentFlow f -> f.ModelingEdges
+            | DuParentReal r -> r.ModelingEdges
 
-    (*
-     * Extension methods
-     *)
+    type SafetyCondition with
+        member x.Core:obj =
+            match x with
+            | DuSafetyConditionReal real -> real
+            | DuSafetyConditionCall call -> call
+            | DuSafetyConditionRealEx  realOtherFlow -> realOtherFlow
 
+    type AliasTargetWrapper with
+        member x.GetTarget() : Vertex =
+            match x with
+            | DuAliasTargetReal real -> real
+            | DuAliasTargetCall call -> call
+            | DuAliasTargetRealEx otherFlowReal -> otherFlowReal
+    
     type Real with
         static member Create(name: string, flow) =
             if (name.Contains ".") (*&& not <| (name.StartsWith("\"") && name.EndsWith("\""))*) then
@@ -286,6 +316,13 @@ module CoreModule =
             flow.Graph.AddVertex(segment) |> verifyM $"Duplicated segment name [{name}]"
             segment
 
+        member x.GetAliasTargetToDs(aliasFlow:Flow) =
+                if x.Flow <> aliasFlow
+                then [|x.Flow.Name; x.Name|]  //other flow
+                else [| x.Name |]             //my    flow
+        member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
+
+
     type RealEx = RealOtherFlow
     type RealOtherFlow with
         static member Create(otherFlowReal:Real, parent:ParentWrapper) =
@@ -295,12 +332,21 @@ module CoreModule =
             parent.GetGraph().AddVertex(ofr) |> verifyM $"Duplicated other flow real call [{ofn}.{ofrn}]"
             ofr
 
+        member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
+
     type Call with
         static member Create(target:Job, parent:ParentWrapper) =
             let call = Call(target, parent)
             call.VertexManager <- fwdCreateVertexManager(call)
             parent.GetGraph().AddVertex(call) |> verifyM $"Duplicated call name [{target.Name}]"
             call
+
+        member x.GetAliasTargetToDs() =
+            match x.Parent.GetCore() with
+                | :? Flow as f -> [x.Name].ToArray()
+                | :? Real as r -> x.ParentNPureNames
+                | _->failwith "Error"
+        member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 
 
     type Alias with
@@ -338,100 +384,3 @@ module CoreModule =
             ai4e.AddTXs txs |> ignore
             ai4e.AddRXs rxs |> ignore
             ai4e
-
-    type SafetyCondition with
-        member x.Core:obj =
-            match x with
-            | DuSafetyConditionReal real -> real
-            | DuSafetyConditionCall call -> call
-            | DuSafetyConditionRealEx  realOtherFlow -> realOtherFlow
-
-    type ParentWrapper with
-        member x.GetCore() =
-            match x with
-            | DuParentFlow f -> f :> FqdnObject
-            | DuParentReal r -> r
-        member x.GetFlow() =
-            match x with
-            | DuParentFlow f -> f
-            | DuParentReal r -> r.Flow
-        member x.GetSystem() =
-            match x with
-            | DuParentFlow f -> f.System
-            | DuParentReal r -> r.Flow.System
-        member x.GetGraph():DsGraph =
-            match x with
-            | DuParentFlow f -> f.Graph
-            | DuParentReal r -> r.Graph
-        member x.GetModelingEdges() =
-            match x with
-            | DuParentFlow f -> f.ModelingEdges
-            | DuParentReal r -> r.ModelingEdges
-
-
-    type AliasTargetWrapper with
-        member x.GetTarget() : Vertex =
-            match x with
-            | DuAliasTargetReal real -> real
-            | DuAliasTargetCall call -> call
-            | DuAliasTargetRealEx otherFlowReal -> otherFlowReal
-
-    type Call with
-        member x.GetAliasTargetToDs() =
-            match x.Parent.GetCore() with
-                | :? Flow as f -> [x.Name].ToArray()
-                | :? Real as r -> x.ParentNPureNames
-                | _->failwith "Error"
-        member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
-
-    type Real with
-        member x.GetAliasTargetToDs(aliasFlow:Flow) =
-                if x.Flow <> aliasFlow
-                then [|x.Flow.Name; x.Name|]  //other flow
-                else [| x.Name |]             //my    flow
-        member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
-
-    type RealOtherFlow with
-        member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
-
-    type DsSystem with
-        member x.AddButton(btnType:BtnType, btnName:string, inAddress:TagAddress, outAddress:TagAddress, flow:Flow) =
-            if x <> flow.System 
-            then failwithf $"button [{btnName}] in flow ({flow.System.Name} != {x.Name}) is not same system"
-
-            let getUsedFlow (btn:BtnType) =
-                x.Buttons.Where(fun f->f.ButtonType = btn)
-                |> Seq.collect(fun b -> b.SettingFlows)
-
-            if btnType = DuAutoBTN 
-            then not <| getUsedFlow(DuAutoBTN).Contains(flow)
-                 |> verifyM $"AutoBTN {btnName} is assigned to a single flow : Duplicated flow [{flow.Name}]"
-            if btnType = DuManualBTN 
-            then not <| getUsedFlow(DuManualBTN).Contains(flow)
-                 |> verifyM $"ManualBTN {btnName} is assigned to a single flow : Duplicated flow [{flow.Name}]"
-
-            match x.Buttons.TryFind(fun f -> f.Name = btnName) with
-            | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
-            | None -> x.Buttons.Add(ButtonDef(btnName, btnType, inAddress, outAddress, HashSet[|flow|])) |> verifyM $"Duplicated ButtonDef [{btnName}]"
-            
-        member x.AddLamp(lmpType:LampType, lmpName: string, addr:string, flow:Flow) =
-            if x <> flow.System then failwithf $"lamp [{lmpName}] in flow ({flow.System.Name} != {x.Name}) is not same system"
-
-            match x.Lamps.TryFind(fun f -> f.Name = lmpName) with
-            | Some lmp -> lmp.SettingFlow <- flow
-            | None -> x.Lamps.Add(LampDef(lmpName, lmpType, addr, flow)) |> verifyM $"Duplicated LampDef [{lmpName}]"
-        
-        member x.SystemButtons    = x.Buttons |> Seq.map(fun btn  -> btn) //read only
-        member x.SystemLamps      = x.Lamps   |> Seq.map(fun lamp -> lamp)//read only
-        member x.AutoButtons      = x.Buttons.Where(fun f->f.ButtonType = DuAutoBTN)
-        member x.ManualButtons    = x.Buttons.Where(fun f->f.ButtonType = DuManualBTN)
-        member x.EmergencyButtons = x.Buttons.Where(fun f->f.ButtonType = DuEmergencyBTN)
-        member x.StopButtons      = x.Buttons.Where(fun f->f.ButtonType = DuStopBTN)
-        member x.RunButtons       = x.Buttons.Where(fun f->f.ButtonType = DuRunBTN)
-        member x.DryRunButtons    = x.Buttons.Where(fun f->f.ButtonType = DuDryRunBTN)
-        member x.ClearButtons     = x.Buttons.Where(fun f->f.ButtonType = DuClearBTN)   
-
-        member x.RunModeLamps     = x.Lamps.Where(fun f->f.LampType = DuRunModeLamp)   
-        member x.DryRunModeLamps  = x.Lamps.Where(fun f->f.LampType = DuDryRunModeLamp)   
-        member x.StopModeLamps    = x.Lamps.Where(fun f->f.LampType = DuStopModeLamp)   
-        member x.ManualModeLamps  = x.Lamps.Where(fun f->f.LampType = DuManualModeLamp)

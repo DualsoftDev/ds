@@ -156,7 +156,29 @@ module PPTObjectModule =
         | REAL        
         | DUMMY       
         | BUTTON       
+        | LAMP       
         | ACTIVESYS       -> checkDotErr()
+
+    let getBtnType(key:string) =
+        match key with
+        | "A"      -> BtnType.DuAutoBTN
+        | "M"      -> BtnType.DuManualBTN
+        | "E"      -> BtnType.DuEmergencyBTN
+        | "S"      -> BtnType.DuStopBTN
+        | "C"      -> BtnType.DuClearBTN
+        | "R"      -> BtnType.DuRunBTN
+        | "D"      -> BtnType.DuDryRunBTN
+        | "H"      -> BtnType.DuHomeBTN
+        | _     ->  failwith $"{key} is Error Type"
+
+    let getLampType(key:string) =
+        match key with
+        | "R"      -> LampType.DuRunModeLamp
+        | "S"      -> LampType.DuStopModeLamp
+        | "M"      -> LampType.DuDryRunModeLamp
+        | "E"      -> LampType.DuEmergencyLamp
+        | "D"      -> LampType.DuDryRunModeLamp
+        | _     ->  failwith $"{key} is Error Type"
 
     let IsDummyShape(shape:Shape) = shape.IsDashShape() && (shape.CheckRectangle()||shape.CheckEllipse())
 
@@ -170,13 +192,18 @@ module PPTObjectModule =
         let copySystems = Dictionary<string, string>() //copyName, orgiName
         let safeties    = HashSet<string>()
         let jobInfos = Dictionary<string, HashSet<string>>()  // jobBase, api SystemNames
-        
+        let buttonDefs = Dictionary<string, BtnType>()
+        let lampDefs   = Dictionary<string, LampType>()
+
         let mutable name = ""
         let mutable ifName    = ""
         let mutable ifTXs    = HashSet<string>()
         let mutable ifRXs    = HashSet<string>()
         let mutable nodeType:NodeType = NodeType.REAL
         let mutable btnType:BtnType option = None 
+        let mutable lampType:LampType option = None 
+
+
 
         let trimSpace(text:string) =   text.TrimStart(' ').TrimEnd(' ')
         let trimStartEndSeq(texts:string seq) =  texts  |> Seq.map(fun name -> trimSpace name)
@@ -233,7 +260,8 @@ module PPTObjectModule =
                 elif(shape.CheckFoldedCornerRound()) then COPY_VALUE
                 elif(shape.CheckFoldedCornerPlate()) then COPY_REF
                 elif(shape.CheckEllipse())      then CALL
-                elif(shape.CheckButtonShape())  then  BUTTON
+                elif(shape.CheckBevelShapePlate())  then  LAMP
+                elif(shape.CheckBevelShapeRound())  then  BUTTON
                 elif(shape.CheckCube())  then  ACTIVESYS
                 else  shape.ErrorName(ErrID._1, iPage)
 
@@ -250,25 +278,24 @@ module PPTObjectModule =
                      GetSquareBrackets(name, false)
                         |> fun text -> 
                             updateCopySys  (text ,(GetBracketsReplaceName(name) |> trimSpace), number)
-            |_ -> ()
+            |BUTTON -> 
+                      shape.InnerText.Split(']').Where(fun w->w <> "")
+                      |> Seq.map(fun f->  GetSquareBrackets(f+"]", false), GetBracketsReplaceName(f+"]")  |> getBtnType)
+                      |> Seq.iter(fun (name, typ) -> buttonDefs.Add(name, typ))
 
-            let btn =  if shape.CheckNoSmoking() then Some(BtnType.DuEmergencyBTN)
-                       elif shape.CheckDonutShape() then Some(BtnType.DuRunBTN)
-                       elif shape.CheckBevelShape() then Some(BtnType.DuClearBTN)
-                       elif shape.CheckBlockArc() then Some(BtnType.DuAutoBTN)
-                       else None
-            btnType    <- btn
-               
+            |LAMP ->  shape.InnerText.Split(']').Where(fun w->w <> "")
+                      |> Seq.map(fun f->  GetSquareBrackets(f+"]", false), GetBracketsReplaceName(f+"]") |> getLampType)
+                      |> Seq.iter(fun (name, typ) -> lampDefs.Add(name, typ))
+            |_ -> ()
 
         member x.PageNum = iPage
         member x.Shape = shape
         member x.CopySys  = copySystems
         member x.JobInfos  = jobInfos
         member x.Safeties = safeties
-        member x.IfName      = ifName
-        member x.IfTXs       = ifTXs
-        member x.IfRXs       = ifRXs
-        member x.BtnType = btnType
+        member x.IfName  = ifName
+        member x.IfTXs   = ifTXs
+        member x.IfRXs   = ifRXs
         member x.NodeType = nodeType
         member x.PageTitle    = pageTitle
 
@@ -279,6 +306,10 @@ module PPTObjectModule =
         member x.IsAlias :bool   = x.Alias.IsSome
         member val Alias :pptNode  option = None with get, set
         member val AliasNumber :int = 0 with get, set
+
+        member val ButtonDefs = buttonDefs
+        member val LampDefs   = lampDefs
+
         member x.GetRectangle (sildeSize:int*int) =  shape.GetPosition(sildeSize)
 
     and

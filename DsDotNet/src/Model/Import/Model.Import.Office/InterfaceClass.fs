@@ -17,6 +17,7 @@ module InterfaceClass =
         | COPY_REF           //시스템참조
         | DUMMY         //그룹더미
         | BUTTON        //버튼 emg,start, ...
+        | LAMP          //램프 runmode,stopmode, ...
         | ACTIVESYS        //model ppt active  system
         with
             member x.IsReal = x = REAL || x = REALEx

@@ -99,9 +99,12 @@ module ConvertCoreExt =
         member f.dryOuts    = getButtonOutputs (f, f.System.DryRunButtons) 
         member f.clearIns   = getButtonInputs (f, f.System.ClearButtons) 
         member f.clearOuts  = getButtonOutputs (f, f.System.ClearButtons) 
+        member f.homeIns    = getButtonInputs (f, f.System.HomeButtons) 
+        member f.homeOuts   = getButtonOutputs (f, f.System.HomeButtons) 
 
         //램프 IO PLC TAG
         member f.runModelampOuts    = getLampOutputs (f, f.System.RunModeLamps) 
         member f.dryrunModelampOuts = getLampOutputs (f, f.System.DryRunModeLamps) 
         member f.manualModelampOuts = getLampOutputs (f, f.System.ManualModeLamps) 
         member f.stopModelampOuts   = getLampOutputs (f, f.System.StopModeLamps) 
+        member f.emergencylampOuts  = getLampOutputs (f, f.System.EmergencyModeLamps) 

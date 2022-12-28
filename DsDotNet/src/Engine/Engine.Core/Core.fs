@@ -105,20 +105,28 @@ module CoreModule =
             system.Flows.Add(flow) |> verifyM $"Duplicated flow name [{name}]"
             flow
 
-    and ButtonDef (name:string, btnType:BtnType, inTag:TagAddress, outTag:TagAddress, flows:HashSet<Flow>) =
+    and ButtonDef (name:string, btnType:BtnType, inAddress:TagAddress, outAddress:TagAddress, flows:HashSet<Flow>) =
         member x.Name = name
         member x.ButtonType = btnType
         ///버튼 동작을 위한 외부 IO 입력 주소
-        member val InTag   = inTag  with get,set
+        member val InAddress = inAddress with get,set
         ///버튼 동작을 위한 외부 IO 출력 주소
-        member val OutTag   = outTag  with get,set
+        member val OutAddress = outAddress  with get,set
+
+        //CPU 생성시 할당됨 InTag
+        member val InTag:ITagWithAddress option = None  with get,set
+        //CPU 생성시 할당됨 OutTag
+        member val OutTag:ITagWithAddress option = None   with get,set
         member val SettingFlows  = flows with get, set
 
-    and LampDef (name:string, lampType:LampType, outTag:TagAddress, flow:Flow) =
+    and LampDef (name:string, lampType:LampType, outAddress:TagAddress, flow:Flow) =
         member x.Name = name
         member x.LampType = lampType
         ///램프 동작을 위한 외부 IO 출력 주소
-        member val OutTag   = outTag  with get,set
+        member val OutAddress = outAddress  with get,set
+
+        //CPU 생성시 할당됨 OutTag
+        member val OutTag:ITagWithAddress option = None  with get,set
         ///단일 Flow 단위로 Lamp 상태 출력
         member val SettingFlow  = flow with get, set
 
@@ -187,10 +195,15 @@ module CoreModule =
 
     type TagAddress = string
     /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%Q1, %I1); } }
-    type JobDef (api:ApiItem, outTag:TagAddress, inTag:TagAddress, observe:string, command:string, deviceName:string) =
+    type JobDef (api:ApiItem, outAddress:TagAddress, inAddress:TagAddress, observe:string, command:string, deviceName:string) =
         member _.ApiItem = api
-        member val InTag   = inTag  with get,set
-        member val OutTag  = outTag with get,set
+        member val InAddress   = inAddress  with get,set
+        member val OutAddress  = outAddress with get,set
+        //CPU 생성시 할당됨 InTag
+        member val InTag:ITagWithAddress option = None  with get,set
+        //CPU 생성시 할당됨 OutTag
+        member val OutTag:ITagWithAddress option = None   with get,set
+
         //$ton 200      //ls xgk 명령어를 따른다.
         member val ObserveInTimming   = observe with get,set //todo ToDsText, parsing
         //$mov 100 R200 //ls xgk 명령어를 따른다.

@@ -11,8 +11,9 @@ type Flow with
     
     member f.O1_EmergencyOperationMode(): CommentedStatement =
         //ahn : emg IO 입력 추가필요
-        let sets = f.System._emg.Expr <||> f.emg.Expr
-        let rsts = f.System._off.Expr
+        let sys = f.System
+        let sets = sys._emg.Expr <||> f.emg.Expr
+        let rsts = sys._off.Expr
          
         (sets, rsts) --| (f.eop, "O1")
 

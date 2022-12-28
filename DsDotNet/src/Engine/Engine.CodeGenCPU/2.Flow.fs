@@ -13,6 +13,7 @@ type VertexManager with
         if srcs.Any() then
             let sets  = srcs.Select(fun f->f.EP).ToAnd()
             let rsts  = v.H.Expr
+            //root 시작조건 처리
             (sets, rsts) ==| (v.ST, "F1")  |> Some
         else None
 

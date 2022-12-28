@@ -74,8 +74,8 @@ module ImportIOTable =
                         match ExcelCaseToType($"{row.[(int)IOColumn.Case]}") with
                         |ExcelCase.ExcelAddress  -> 
                             let jobDef = dicJob.[$"{row.[(int)IOColumn.Name]}"]
-                            jobDef.InTag  <- $"{row.[(int)IOColumn.Input]}"
-                            jobDef.OutTag <- $"{row.[(int)IOColumn.Output]}"
+                            jobDef.InAddress  <- $"{row.[(int)IOColumn.Input]}"
+                            jobDef.OutAddress <- $"{row.[(int)IOColumn.Output]}"
 
                         |ExcelCase.ExcelVariable -> 
                             let name      = $"{row.[(int)IOColumn.Name]}"

@@ -142,7 +142,7 @@ module internal ToDsTextModule =
 
             if system.Jobs.Any() then
                 let addressPrint (addr:string) = if addr = "" then "_" else addr
-                let print (ai:JobDef) = $"{ai.ApiName}({addressPrint ai.OutTag}, {addressPrint ai.InTag})"
+                let print (ai:JobDef) = $"{ai.ApiName}({addressPrint ai.OutAddress}, {addressPrint ai.InAddress})"
                 yield $"{tab}[jobs] = {lb}"
                 for c in system.Jobs do
                     let ais = c.JobDefs.Select(print).JoinWith("; ") + ";"

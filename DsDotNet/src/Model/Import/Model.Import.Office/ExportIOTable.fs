@@ -24,7 +24,7 @@ module ExportIOTable =
         dt.Columns.Add($"{IOColumn.Observe}"    , typeof<string>) |>ignore
 
         let rowItems(jobDef:JobDef) =
-            ["주소";  jobDef.ApiName; "IO"; "bit"; jobDef.OutTag  ; jobDef.InTag; jobDef.CommandOutTimming; jobDef.ObserveInTimming]
+            ["주소";  jobDef.ApiName; "IO"; "bit"; jobDef.OutAddress  ; jobDef.InAddress; jobDef.CommandOutTimming; jobDef.ObserveInTimming]
 
         let rows =
             seq {

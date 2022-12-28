@@ -98,7 +98,7 @@ module ModelAnswers =
         Bm = { B."-"(%I4, %Q4); }
     }
     [emg] = {
-        EMGBTN = { F; }
+        EMGBTN(_, _) = { F; }
     }
     [prop] = {
         [safety] = {

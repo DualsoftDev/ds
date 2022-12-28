@@ -195,14 +195,14 @@ module ModelBuildupTests1 =
         Am = { A."-"(%I2, %Q2); }
     }
     [emg] = {
-        STOP = { F; }
-        STOP2 = { F2; }
+        STOP(%I1, %Q1) = { F; }
+        STOP2(%I1, %Q1) = { F2; }
     }
     [run] = {
-        START = { F; }
-        START2 = { F2; }
+        START(%I1, %Q1) = { F; }
+        START2(%I1, %Q1) = { F2; }
     }
-    [device file="cylinder.ds"] A; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\cylinder.ds
+    [device file="cylinder.ds"] A; // E:\projects\dualsoft\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\cylinder.ds
 }
 """
             logDebug $"{generated}"

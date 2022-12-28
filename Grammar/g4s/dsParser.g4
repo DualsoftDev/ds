@@ -137,7 +137,7 @@ interfaceBlock
 
 
 
-buttonsBlocks:emergencyButtonBlock|autoButtonBlock|runButtonBlock|clearButtonBlock|manualButtonBlock|stopButtonBlock|dryrunButtonBlock;
+buttonsBlocks:emergencyButtonBlock|autoButtonBlock|runButtonBlock|clearButtonBlock|manualButtonBlock|stopButtonBlock|dryrunButtonBlock|homeButtonBlock;
     emergencyButtonBlock :'[' ('emg_in'|'emg') ']'       EQ buttonBlock;
     autoButtonBlock      :'[' ('auto_in'|'auto') ']'     EQ buttonBlock;
     clearButtonBlock     :'[' ('clear_in'|'clear') ']'   EQ buttonBlock;
@@ -145,6 +145,7 @@ buttonsBlocks:emergencyButtonBlock|autoButtonBlock|runButtonBlock|clearButtonBlo
     stopButtonBlock      :'[' ('stop_in'|'stop') ']'     EQ buttonBlock;
     runButtonBlock       :'[' ('run_in'|'run') ']'       EQ buttonBlock;
     dryrunButtonBlock    :'[' ('dryrun_in'|'dryrun') ']' EQ buttonBlock;
+    homeButtonBlock      :'[' ('home_in'|'home') ']'     EQ buttonBlock;
     
     buttonBlock: LBRACE (() | ((SEIMCOLON)* buttonDef)* (SEIMCOLON)*) RBRACE;
     buttonDef: btnNameAddr EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
@@ -153,11 +154,12 @@ buttonsBlocks:emergencyButtonBlock|autoButtonBlock|runButtonBlock|clearButtonBlo
     flowName : identifier1;
 
 
-lampBlocks:runLampBlock|dryrunLampBlock|manualLampBlock|stopLampBlock;
-    runLampBlock    : '[' 'runlamp' ']'    EQ lampBlock;
-    dryrunLampBlock : '[' 'dryrunlamp' ']' EQ lampBlock;
-    manualLampBlock : '[' 'manuallamp' ']' EQ lampBlock;
-    stopLampBlock   : '[' 'stoplamp' ']'   EQ lampBlock;
+lampBlocks:runLampBlock|dryrunLampBlock|manualLampBlock|stopLampBlock|emergencyLampBlock;
+    runLampBlock       : '[' 'runlamp' ']'       EQ lampBlock;
+    dryrunLampBlock    : '[' 'dryrunlamp' ']'    EQ lampBlock;
+    manualLampBlock    : '[' 'manuallamp' ']'    EQ lampBlock;
+    stopLampBlock      : '[' 'stoplamp' ']'      EQ lampBlock;
+    emergencyLampBlock : '[' 'emergencylamp' ']' EQ lampBlock;
     
     lampBlock: LBRACE (() | ((SEIMCOLON)* lampDef)* (SEIMCOLON)*) RBRACE;
     lampDef: lampName EQ LBRACE (() | flowName addrDef) RBRACE;

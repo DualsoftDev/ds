@@ -33,7 +33,15 @@ module ConvertCoreExt =
 
             if address = "" then None
                             else Some (PlcTag(plcName, address, false) :> ITagWithAddress)
-                          
+
+    let private getAutoManualIOs(autoIns:PlcTag<bool> seq, manualIns:PlcTag<bool> seq, sysOff:DsTag<bool>) =
+          if autoIns.Count() > 1 || manualIns.Count() > 1
+          then failwith "Error : One button(auto or manual) must be assigned to one flow"
+
+          let auto    = if autoIns.Any()   then  autoIns.Head().Expr else sysOff.Expr
+          let manual  = if manualIns.Any() then  manualIns.ToAnd()   else sysOff.Expr
+          auto, manual
+
     type DsSystem with
         member s._on     = DsTag<bool>("_on", false)
         member s._off    = DsTag<bool>("_off", false)
@@ -68,6 +76,11 @@ module ConvertCoreExt =
                    .ForEach(fun jdef->jdef.InTag <- getIOs(jdef.ApiName, jdef.InAddress, In))
             jobDefs.Where(fun w -> w.OutTag.IsNone)
                    .ForEach(fun jdef->jdef.OutTag <- getIOs(jdef.ApiName, jdef.OutAddress, Out))
+
+
+        //[auto, manual] system HMI 두개다 선택이 안됨
+        member s.ModeNoExpr = !!s._auto.Expr <&&> !!s._manual.Expr
+
 
 //운영 모드 는 Flow 별로 제공된 모드 On/Off 상태 나타낸다.
     type Flow with
@@ -108,3 +121,32 @@ module ConvertCoreExt =
         member f.manualModelampOuts = getLampOutputs (f, f.System.ManualModeLamps) 
         member f.stopModelampOuts   = getLampOutputs (f, f.System.StopModeLamps) 
         member f.emergencylampOuts  = getLampOutputs (f, f.System.EmergencyModeLamps) 
+        
+        //[auto, manual] HW Input 두개다 선택이 안됨
+        member f.ModeNoHWExpr = 
+                let auto, manual = getAutoManualIOs (f.autoIns, f.manualIns, f.System._off)
+                !!auto <&&> !!manual
+
+        member f.ModeManualHWExpr = 
+                let auto, manual = getAutoManualIOs (f.autoIns, f.manualIns, f.System._off)
+                !!auto <&&> manual
+
+        member f.ModeAutoHWExpr = 
+                let auto, manual = getAutoManualIOs (f.autoIns, f.manualIns, f.System._off)
+                auto <&&> !!manual
+
+
+        member f.RunExpr = f.System._run.Expr <||> f.run.Expr 
+                           <||> if f.runIns.any() 
+                                then f.runIns.ToOr() else f.System._off.Expr
+
+        member f.StopExpr = f.System._stop.Expr <||> f.stop.Expr 
+                           <||> if f.stopIns.any() 
+                                then f.stopIns.ToOr() else f.System._off.Expr
+        
+        //test ahn : plctag b접점 옵션 반영필요
+        member f.EmgExpr = f.System._emg.Expr <||> f.emg.Expr 
+                           <||> if f.emgIns.any() 
+                                then f.emgIns.ToOr() else f.System._off.Expr
+
+

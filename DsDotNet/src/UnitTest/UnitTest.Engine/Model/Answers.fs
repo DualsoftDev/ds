@@ -192,16 +192,19 @@ module ModelComponentAnswers =
         A > B;		// A(Real)> B(Real);
     }
     [runlamp] = {
-        RunMode = { F3 (%Q1) }
+        RunMode(%Q1) = { F3  }
     }
     [dryrunlamp] = {
         DryRunMode = { F5 () }
     }
     [manuallamp] = {
-        ManualMode = { F2 (%Q1) }
+        ManualMode(%Q1) = { F2  }
     }
     [stoplamp] = {
-        StopMode = { F3 (%Q1) }
+        StopMode(%Q1) = { F3  }
+    }
+    [emglamp] = {
+        EmgMode(%Q1) = { F3  }
     }
 }
 """
@@ -248,6 +251,9 @@ module ModelComponentAnswers =
     }
     [clear] = {
         ClearBTN(_, _) = { F1;F2;F3;F5; }
+    }
+    [home] = {
+        HomeBTN(_, _) = { F1;F2;F3;F5; }
     }
 }
 """

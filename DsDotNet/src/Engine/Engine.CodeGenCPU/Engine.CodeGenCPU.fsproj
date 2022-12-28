@@ -8,6 +8,7 @@
 	</PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Expression.Extension.fs" />
     <Compile Include="Core.Extensions.fs" />
     <Compile Include="VertexManager.fs" />
     <Compile Include="ConvertUtil.fs" />

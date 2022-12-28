@@ -56,58 +56,84 @@ namespace Engine
 
         public static string Buttons = @"
 [sys] My = {
-    [flow] F1 = { A > B; }
-    [flow] F2 = { A > B; }
-    [flow] F3 = { A > B; }
-    [flow] F4 = { A > B; }
-    [flow] F5 = { A > B; }
-    [emg] = {
-        EmptyButton(_, _) = {};  // Empty flow not allowed
-        EmptyButton2(_, _) = {}  // Empty flow not allowed
-        EMGBTN3(_, _) = { F3; F5 };
-        EMGBTN(_, _) = { F1; F2; F3; F5; };
+    [flow] F1 = {
+        A > B;		// A(Real)> B(Real);
+    }
+    [flow] F2 = {
+        A > B;		// A(Real)> B(Real);
+    }
+    [flow] F3 = {
+        A > B;		// A(Real)> B(Real);
+    }
+    [flow] F4 = {
+        A > B;		// A(Real)> B(Real);
+    }
+    [flow] F5 = {
+        A > B;		// A(Real)> B(Real);
     }
     [auto] = {
-        AutoBTN(%I1, %Q1) = { F2 }; //주소 반영 필요
-        AutoBTN2(%I2, %Q2) = { F1; F3; F5; };
-    }
-    [run] = {
-        StartBTN_FF(_, _) = { F2 };
-        StartBTN1(_, _) = { F1; };
-    }
-    [clear] = {
-        ClearBTN(_, _) = { F1;F2;F3;F5; }
+        AutoBTN(%I1, %Q1) = { F2; }
+        AutoBTN2(%I2, %Q2) = { F1;F3;F5; }
     }
     [manual] = {
         ManualBTN(_, _) = { F1;F5; }
     }
+    [emg] = {
+        EmptyButton(_, _) = { ; }
+        EmptyButton2(_, _) = { ; }
+        EMGBTN3(_, _) = { F3;F5; }
+        EMGBTN(_, _) = { F1;F2;F3;F5; }
+    }
     [stop] = {
         StopBTN(_, _) = { F1;F2;F5; }
     }
+    [run] = {
+        StartBTN_FF(_, _) = { F2; }
+        StartBTN1(_, _) = { F1; }
+    }
     [dryrun] = {
         StartDryBTN(_, _) = { F5; }
+    }
+    [clear] = {
+        ClearBTN(_, _) = { F1;F2;F3;F5; }
+    }
+    [home] = {
+        HomeBTN(_, _) = { F1;F2;F3;F5; }
     }
 }
 ";
 
         public static string Lamps = @"
 [sys] My = {
-    [flow] F1 = { A > B; }
-    [flow] F2 = { A > B; }
-    [flow] F3 = { A > B; }
-    [flow] F4 = { A > B; }
-    [flow] F5 = { A > B; }
+    [flow] F1 = {
+        A > B;		// A(Real)> B(Real);
+    }
+    [flow] F2 = {
+        A > B;		// A(Real)> B(Real);
+    }
+    [flow] F3 = {
+        A > B;		// A(Real)> B(Real);
+    }
+    [flow] F4 = {
+        A > B;		// A(Real)> B(Real);
+    }
+    [flow] F5 = {
+        A > B;		// A(Real)> B(Real);
+    }
     [runlamp] = {
-        RunMode = { F3(%Q1) };
-    }
-    [manuallamp] = {
-        ManualMode = { F2(%Q1) };
-    }
-    [stoplamp] = {
-        StopMode = { F3(%Q1) };
+        RunMode(%Q1) = { F3  }
     }
     [dryrunlamp] = {
-        DryRunMode = { F5() };
+        DryRunMode = { F5 () }
+    }
+    [manuallamp] = {
+        ManualMode(%Q1) = { F2  }
+    }
+    [stoplamp] = {
+        StopMode(%Q1) = { F3  }
+    }
+    [emglamp] = {
+        EmgMode(%Q1) = { F3  }
     }
 }
 ";

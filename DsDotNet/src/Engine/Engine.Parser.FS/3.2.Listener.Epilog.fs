@@ -46,7 +46,7 @@ module EtcListenerModule =
                         .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName))
                         .ToArray()
                 if flows.Length > 0
-                then flows.ForEach(fun flow -> system.AddButton(targetBtnType, buttonName, flow))
+                then flows.ForEach(fun flow -> system.AddButton(targetBtnType, buttonName, "주소처리", "주소처리", flow))
                 else system.Buttons.Add(ButtonDef(buttonName, targetBtnType, "주소처리","주소처리", new HashSet<Flow>())) |> ignore
 
         member x.ProcessLampBlocks(ctx:LampBlocksContext) =

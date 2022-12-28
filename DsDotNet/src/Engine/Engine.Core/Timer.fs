@@ -63,7 +63,7 @@ module rec TimerModule =
                     ts.DN.Value <- true
 
         let accumulate() =
-            tracefn "Accumutating from %A" ts.ACC.Value
+            //tracefn "Accumutating from %A" ts.ACC.Value
             match tt with
             | TON -> accumulateTON()
             | TOF -> accumulateTOF()

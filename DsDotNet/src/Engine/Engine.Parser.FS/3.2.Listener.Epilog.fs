@@ -21,15 +21,14 @@ module EtcListenerModule =
             let system = x.TheSystem
             let targetBtnType =
                 match first with
-                | :? AutoButtonBlockContext ->      DuAutoBTN
-                | :? ManualButtonBlockContext ->    DuManualBTN
+                | :? AutoButtonBlockContext      -> DuAutoBTN
+                | :? ManualButtonBlockContext    -> DuManualBTN
                 | :? EmergencyButtonBlockContext -> DuEmergencyBTN
-                | :? StopButtonBlockContext    ->   DuStopBTN
-                | :? RunButtonBlockContext    ->    DuRunBTN
-                | :?  DryrunButtonBlockContext ->   DuDryRunBTN
-                | :? ClearButtonBlockContext  ->    DuClearBTN
-                | _ -> failwith "ERROR"
-
+                | :? StopButtonBlockContext      -> DuStopBTN
+                | :? RunButtonBlockContext       -> DuRunBTN
+                | :?  DryrunButtonBlockContext   -> DuDryRunBTN
+                | :? ClearButtonBlockContext     -> DuClearBTN
+                | _ -> failwith "button type error"
             let category = first.GetChild(1).GetText();       // [| '[', category, ']', buttonBlock |] 에서 category 만 추려냄 (e.g 'emg')
             let key = (system, category)
             if x.ButtonCategories.Contains(key) then
@@ -49,8 +48,31 @@ module EtcListenerModule =
                 if flows.Length > 0
                 then flows.ForEach(fun flow -> system.AddButton(targetBtnType, buttonName, flow))
                 else system.Buttons.Add(ButtonDef(buttonName, targetBtnType, "주소처리","주소처리", new HashSet<Flow>())) |> ignore
-                
 
+        member x.ProcessLampBlocks(ctx:LampBlocksContext) =
+            let first = ctx.TryFindFirstChild<ParserRuleContext>().Value
+            let system = x.TheSystem
+            let targetLmpType =
+                match first with
+                | :? RunLampBlockContext    -> DuRunModeLamp
+                | :? DryrunLampBlockContext -> DuDryRunModeLamp
+                | :? ManualLampBlockContext -> DuManualModeLamp
+                | :? StopLampBlockContext   -> DuStopModeLamp
+                | _ -> failwith "lamp type error"
+
+            let lampDefs = first.Descendants<LampDefContext>().ToArray()
+            for ld in lampDefs do
+                let lampName = ld.TryFindFirstChild<LampNameContext>().Value.GetText()
+                let flowName = ld.TryFindFirstChild<FlowNameContext>().Value.GetText()
+                let addrCtx  = ld.TryFindFirstChild<AddressItemContext>()
+                let address = 
+                    match addrCtx with
+                    | Some addr -> addr.GetText()
+                    | None -> null
+                let flow = system.TryFindFlow flowName
+                match flow with
+                | Some f -> system.AddLamp(targetLmpType, lampName, address, f)
+                | None -> failwith "no flow error"
 
         member x.ProcessSafetyBlock(ctx:SafetyBlockContext) =
             let safetyDefs = ctx.Descendants<SafetyDefContext>()

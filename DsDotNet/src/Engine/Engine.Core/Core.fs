@@ -398,9 +398,16 @@ module CoreModule =
         member x.AddButton(btnType:BtnType, btnName: string, flow:Flow) =
             if x <> flow.System then failwithf $"button [{btnName}] in flow ({flow.System.Name} != {x.Name}) is not same system"
 
-            match x.Buttons.TryFind(fun f -> f.Name =  btnName) with
+            match x.Buttons.TryFind(fun f -> f.Name = btnName) with
             | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
             | None -> x.Buttons.Add(ButtonDef(btnName, btnType, "", "", HashSet[|flow|])) |> verifyM $"Duplicated ButtonDef [{btnName}]"
+            
+        member x.AddLamp(lmpType:LampType, lmpName: string, addr:string, flow:Flow) =
+            if x <> flow.System then failwithf $"lamp [{lmpName}] in flow ({flow.System.Name} != {x.Name}) is not same system"
+
+            match x.Lamps.TryFind(fun f -> f.Name = lmpName) with
+            | Some lmp -> lmp.SettingFlow <- flow
+            | None -> x.Lamps.Add(LampDef(lmpName, lmpType, addr, flow)) |> verifyM $"Duplicated LampDef [{lmpName}]"
         
         member x.AutoButtons      = x.Buttons.Where(fun f->f.ButtonType = DuAutoBTN)
         member x.ManualButtons    = x.Buttons.Where(fun f->f.ButtonType = DuManualBTN)

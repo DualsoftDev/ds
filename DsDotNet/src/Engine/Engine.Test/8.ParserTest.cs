@@ -100,7 +100,6 @@ namespace Engine
     [flow] F4 = { A > B; }
     [flow] F5 = { A > B; }
     [runlamp] = {
-        EmptyButton = {};
         RunMode = { F3(%Q1) };
     }
     [manuallamp] = {

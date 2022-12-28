@@ -176,23 +176,32 @@ module ModelComponentAnswers =
 """
     let answerLamps= """
 [sys] My = {
-    [flow] F1 = { A > B; }
-    [flow] F2 = { A > B; }
-    [flow] F3 = { A > B; }
-    [flow] F4 = { A > B; }
-    [flow] F5 = { A > B; }
+    [flow] F1 = {
+        A > B;		// A(Real)> B(Real);
+    }
+    [flow] F2 = {
+        A > B;		// A(Real)> B(Real);
+    }
+    [flow] F3 = {
+        A > B;		// A(Real)> B(Real);
+    }
+    [flow] F4 = {
+        A > B;		// A(Real)> B(Real);
+    }
+    [flow] F5 = {
+        A > B;		// A(Real)> B(Real);
+    }
     [runlamp] = {
-        EmptyButton = {};
-        RunMode = { F3(%Q1) };
-    }
-    [manuallamp] = {
-        ManualMode = { F2(%Q1) };
-    }
-    [stoplamp] = {
-        StopMode = { F3(%Q1) };
+        RunMode = { F3 (%Q1) }
     }
     [dryrunlamp] = {
-        DryRunMode = { F5() };
+        DryRunMode = { F5 () }
+    }
+    [manuallamp] = {
+        ManualMode = { F2 (%Q1) }
+    }
+    [stoplamp] = {
+        StopMode = { F3 (%Q1) }
     }
 }
 """

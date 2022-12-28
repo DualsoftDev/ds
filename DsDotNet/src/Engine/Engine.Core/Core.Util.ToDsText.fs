@@ -179,26 +179,26 @@ module internal ToDsTextModule =
                             yield $"{tab2}{btn.Name} = {lb} {flows} {rb}"
                         yield $"{tab}{rb}"
                 ] |> combineLines
-            yield buttonsToDs("auto",       system.AutoButtons       )
-            yield buttonsToDs("manual",     system.ManualButtons     )
-            yield buttonsToDs("emg",        system.EmergencyButtons  )
-            yield buttonsToDs("stop",       system.StopButtons       )
-            yield buttonsToDs("run",        system.RunButtons        )
-            yield buttonsToDs("dryrun",     system.DryRunButtons     )
-            yield buttonsToDs("clear",      system.ClearButtons      )
+            yield buttonsToDs("auto",   system.AutoButtons       )
+            yield buttonsToDs("manual", system.ManualButtons     )
+            yield buttonsToDs("emg",    system.EmergencyButtons  )
+            yield buttonsToDs("stop",   system.StopButtons       )
+            yield buttonsToDs("run",    system.RunButtons        )
+            yield buttonsToDs("dryrun", system.DryRunButtons     )
+            yield buttonsToDs("clear",  system.ClearButtons      )
 
-            let LampsToDs(category:string, lamps:LampDef seq) =
+            let lampsToDs(category:string, lamps:LampDef seq) =
                 [
                     if lamps.length() > 0 then
                         yield $"{tab}[{category}] = {lb}"
                         for lamp in lamps do
-                            yield $"{tab2}{lamp.Name} = {lb} {lamp.SettingFlow} {rb}"
+                            yield $"{tab2}{lamp.Name} = {lb} {lamp.SettingFlow.Name} ({lamp.OutAddress}) {rb}"
                         yield $"{tab}{rb}"
                 ] |> combineLines
-            yield LampsToDs("runlamp",       system.RunModeLamps    )
-            yield LampsToDs("dryrunlamp",     system.DryRunModeLamps )
-            yield LampsToDs("manuallamp",        system.ManualModeLamps )
-            yield LampsToDs("stoplamp",       system.StopModeLamps   )
+            yield lampsToDs("runlamp",    system.RunModeLamps    )
+            yield lampsToDs("dryrunlamp", system.DryRunModeLamps )
+            yield lampsToDs("manuallamp", system.ManualModeLamps )
+            yield lampsToDs("stoplamp",   system.StopModeLamps   )
 
             (* prop
                     safety

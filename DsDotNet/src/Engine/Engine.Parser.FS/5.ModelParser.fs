@@ -24,6 +24,9 @@ module ModelParser =
         for ctx in sysctx.Descendants<ButtonsBlocksContext>() do
             listener.ProcessButtonsBlocks(ctx)
 
+        for ctx in sysctx.Descendants<LampBlocksContext>() do
+            listener.ProcessLampBlocks(ctx)
+
         for ctx in sysctx.Descendants<SafetyBlockContext>() do
             listener.ProcessSafetyBlock(ctx)
 

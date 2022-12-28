@@ -231,8 +231,8 @@ module ModelComponentAnswers =
         ManualBTN = { F1;F5; }
     }
     [emg] = {
-        EmptyButton = { ; }
-        EmptyButton2 = { ; }
+        EmptyButton = { ; } // Empty flow not allowed
+        EmptyButton2 = { ; } // Empty flow not allowed
         EMGBTN3 = { F3;F5; }
         EMGBTN = { F1;F2;F3;F5; }
     }

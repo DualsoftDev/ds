@@ -62,8 +62,8 @@ namespace Engine
     [flow] F4 = { A > B; }
     [flow] F5 = { A > B; }
     [emg] = {
-        EmptyButton = {};
-        EmptyButton2 = {}
+        EmptyButton = {};  // Empty flow not allowed
+        EmptyButton2 = {}  // Empty flow not allowed
         EMGBTN3 = { F3; F5 };
         EMGBTN = { F1; F2; F3; F5; };
     }

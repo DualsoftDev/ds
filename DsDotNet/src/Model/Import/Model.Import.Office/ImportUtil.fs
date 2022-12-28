@@ -128,13 +128,13 @@ module ImportU =
 
                     //Start, Reset, Auto, Emg 버튼
                     if(node.BtnType.Value = BtnType.DuRunBTN)
-                    then mySys.AddButton(BtnType.DuRunBTN, node.Name, flow)
+                    then mySys.AddButton(BtnType.DuRunBTN, node.Name, "","", flow)
                     if(node.BtnType.Value = BtnType.DuClearBTN)
-                    then mySys.AddButton(BtnType.DuClearBTN,node.Name, flow)
+                    then mySys.AddButton(BtnType.DuClearBTN,node.Name,"","", flow)
                     if(node.BtnType.Value = BtnType.DuAutoBTN)
-                    then mySys.AddButton(BtnType.DuAutoBTN,node.Name, flow)
+                    then mySys.AddButton(BtnType.DuAutoBTN,node.Name, "","",flow)
                     if(node.BtnType.Value = BtnType.DuEmergencyBTN)
-                    then mySys.AddButton(BtnType.DuEmergencyBTN ,node.Name, flow)
+                    then mySys.AddButton(BtnType.DuEmergencyBTN ,node.Name, "","",flow)
                     )
 
 

@@ -9,38 +9,15 @@ open System
 [<AutoOpen>]
 module ConvertCoreExt =
     
-    let private getButtonInputs(flow:Flow, btns:ButtonDef seq) : PlcTag<bool> seq = 
-            btns.Where(fun b -> b.SettingFlows.Contains(flow))
-                .Where(fun b -> b.InTag.IsSome)
-                .Select(fun b -> b.InTag).Cast<PlcTag<bool>>()
-
-    let private getButtonOutputs(flow:Flow, btns:ButtonDef seq) : PlcTag<bool> seq = 
-            btns.Where(fun b -> b.SettingFlows.Contains(flow))
-                .Where(fun b -> b.OutTag.IsSome)
-                .Select(fun b -> b.OutTag).Cast<PlcTag<bool>>()
-
-    let private getLampOutputs(flow:Flow, btns:LampDef seq) : PlcTag<bool> seq = 
-            btns.Where(fun b -> b.SettingFlow = flow)
-                .Where(fun b -> b.OutTag.IsSome)
-                .Select(fun b -> b.OutTag).Cast<PlcTag<bool>>()
-
     type InOut = | In | Out | Memory
     let private getIOs(name, address, inOut:InOut): ITagWithAddress option  =  
             let plcName = match inOut with 
                           | In  -> $"{name}_I" 
-                          | Out -> $"{name}_I" 
+                          | Out -> $"{name}_O" 
                           | Memory -> failwith "error: Memory not supported "
 
             if address = "" then None
                             else Some (PlcTag(plcName, address, false) :> ITagWithAddress)
-
-    let private getAutoManualIOs(autoIns:PlcTag<bool> seq, manualIns:PlcTag<bool> seq, sysOff:DsTag<bool>) =
-          if autoIns.Count() > 1 || manualIns.Count() > 1
-          then failwith "Error : One button(auto or manual) must be assigned to one flow"
-
-          let auto    = if autoIns.Any()   then  autoIns.Head().Expr else sysOff.Expr
-          let manual  = if manualIns.Any() then  manualIns.ToAnd()   else sysOff.Expr
-          auto, manual
 
     type DsSystem with
         member s._on     = DsTag<bool>("_on", false)
@@ -77,10 +54,33 @@ module ConvertCoreExt =
             jobDefs.Where(fun w -> w.OutTag.IsNone)
                    .ForEach(fun jdef->jdef.OutTag <- getIOs(jdef.ApiName, jdef.OutAddress, Out))
 
-
         //[auto, manual] system HMI 두개다 선택이 안됨
         member s.ModeNoExpr = !!s._auto.Expr <&&> !!s._manual.Expr
+    
 
+
+    let private getButtonInputs(flow:Flow, btns:ButtonDef seq) : PlcTag<bool> seq = 
+            btns.Where(fun b -> b.SettingFlows.Contains(flow))
+                .Where(fun b -> b.InTag.IsSome)
+                .Select(fun b -> b.InTag).Cast<PlcTag<bool>>()
+
+    let private getButtonOutputs(flow:Flow, btns:ButtonDef seq) : PlcTag<bool> seq = 
+            btns.Where(fun b -> b.SettingFlows.Contains(flow))
+                .Where(fun b -> b.OutTag.IsSome)
+                .Select(fun b -> b.OutTag).Cast<PlcTag<bool>>()
+
+    let private getLampOutputs(flow:Flow, btns:LampDef seq) : PlcTag<bool> seq = 
+            btns.Where(fun b -> b.SettingFlow = flow)
+                .Where(fun b -> b.OutTag.IsSome)
+                .Select(fun b -> b.OutTag).Cast<PlcTag<bool>>()
+    
+    let private getAutoManualIOs(autoIns:PlcTag<bool> seq, manualIns:PlcTag<bool> seq, sysOff:DsTag<bool>) =
+          if autoIns.Count() > 1 || manualIns.Count() > 1
+          then failwith "Error : One button(auto or manual) must be assigned to one flow"
+
+          let auto    = if autoIns.Any()   then  autoIns.Head().Expr else sysOff.Expr
+          let manual  = if manualIns.Any() then  manualIns.ToAnd()   else sysOff.Expr
+          auto, manual
 
 //운영 모드 는 Flow 별로 제공된 모드 On/Off 상태 나타낸다.
     type Flow with
@@ -127,25 +127,35 @@ module ConvertCoreExt =
                 let auto, manual = getAutoManualIOs (f.autoIns, f.manualIns, f.System._off)
                 !!auto <&&> !!manual
 
-        member f.ModeManualHWExpr = 
+        member f.ModeManualHwExpr = 
                 let auto, manual = getAutoManualIOs (f.autoIns, f.manualIns, f.System._off)
                 !!auto <&&> manual
 
-        member f.ModeAutoHWExpr = 
+        member f.ModeAutoHwExpr = 
                 let auto, manual = getAutoManualIOs (f.autoIns, f.manualIns, f.System._off)
                 auto <&&> !!manual
 
-
-        member f.RunExpr = f.System._run.Expr <||> f.run.Expr 
+         member f.ModeAutoSwHMIExpr   =  f.auto.Expr <&&> !!f.manual.Expr
+         member f.ModeManualSwHMIExpr =  !!f.auto.Expr <&&> f.manual.Expr
+                
+        member f.RunExpr = f.System._run.Expr 
+                           <||> f.run.Expr 
                            <||> if f.runIns.any() 
                                 then f.runIns.ToOr() else f.System._off.Expr
 
-        member f.StopExpr = f.System._stop.Expr <||> f.stop.Expr 
+        member f.DryRunExpr = f.System._dryrun.Expr 
+                           <||> f.dryrun.Expr 
+                           <||> if f.dryIns.any() 
+                                then f.dryIns.ToOr() else f.System._off.Expr
+
+        member f.StopExpr = f.System._stop.Expr 
+                           <||> f.stop.Expr 
                            <||> if f.stopIns.any() 
                                 then f.stopIns.ToOr() else f.System._off.Expr
         
         //test ahn : plctag b접점 옵션 반영필요
-        member f.EmgExpr = f.System._emg.Expr <||> f.emg.Expr 
+        member f.EmgExpr = f.System._emg.Expr 
+                           <||> f.emg.Expr 
                            <||> if f.emgIns.any() 
                                 then f.emgIns.ToOr() else f.System._off.Expr
 

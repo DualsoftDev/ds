@@ -61,11 +61,13 @@ module CpuLoader =
             yield f.O4_RunOperationMode()
             yield f.O5_DryRunOperationMode()
         ]
+
     let private applyTimerCounterSpec(s:DsSystem) = []
         
 
     let private convertSystem(sys:DsSystem) =
 
+        //DsSystem 물리 IO 생성
         sys.GenerationButtonIO()
         sys.GenerationLampIO()
         sys.GenerationJobIO()
@@ -89,5 +91,5 @@ module CpuLoader =
     type Cpu =
 
         [<Extension>]
-        static member LoadStatements         (system:DsSystem) = convertSystem(system)
+        static member LoadStatements (system:DsSystem) = convertSystem(system)
         

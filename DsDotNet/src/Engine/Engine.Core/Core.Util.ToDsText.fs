@@ -178,8 +178,8 @@ module internal ToDsTextModule =
                                     flows + ";"
                                 else
                                     ""
-                            let inAddr = if btn.InAddress <> null then btn.InAddress else "_"
-                            let outAddr = if btn.OutAddress <> null then btn.OutAddress else "_"
+                            let inAddr = if btn.InAddress <> null && btn.InAddress <> "" then btn.InAddress else "_"
+                            let outAddr = if btn.OutAddress <> null && btn.OutAddress <> "" then btn.OutAddress else "_"
                             yield $"{tab2}{btn.Name}({inAddr}, {outAddr}) = {lb} {flowTexts} {rb}"
                         yield $"{tab}{rb}"
                 ] |> combineLines

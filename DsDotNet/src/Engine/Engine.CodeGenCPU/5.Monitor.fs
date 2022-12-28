@@ -10,7 +10,7 @@ type VertexManager with
         //test ahn
     member v.M1_OriginMonitor(): CommentedStatement  = 
         let real = v.Vertex :?> Real
-        //let jobDefInfos = OriginHelper.GetOriginsWithJobDefs real.Graph
+        let jobDefInfos = OriginHelper.GetOriginsWithJobDefs real.Graph
         
         (v.OG.Expr, v.OFF.Expr) --| (v.OG, "M1" )
 

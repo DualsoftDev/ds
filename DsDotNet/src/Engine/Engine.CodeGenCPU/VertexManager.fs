@@ -65,6 +65,16 @@ module VertexManagerModule =
         member x.ON   = x.System._on
         ///Always OFF System Bit
         member x.OFF  = x.System._off
+        
+        //Relay
+        ///Real Init Relay  
+        member x.RR         = relayRealBit  
+        ///Call Done Relay 
+        member x.CR         = relayCallBit 
+        ///Going Relay   //리셋 인과에 따라 필요
+        member x.GR(tgt:Vertex) = 
+           let gr =   bit $"GR_{tgt.Name}" TagFlag.RelayGoing
+           goingRelays.Add gr |> ignore; gr
 
         ///Segment Start Tag
         member x.ST         = startTagBit
@@ -72,7 +82,6 @@ module VertexManagerModule =
         member x.ResetTag   = resetTagBit
         member x.RT         = resetTagBit 
         ///Segment End Tag
-        member x.EndTag     = endTagBit  
         member x.ET         = endTagBit   
 
         //Port
@@ -91,15 +100,6 @@ module VertexManagerModule =
         ///EndForce HMI
         member x.EF         = endForceBit   
 
-        //Relay
-        ///Real Init Relay  
-        member x.RR         = relayRealBit  
-        ///Call Done Relay 
-        member x.CR         = relayCallBit 
-        ///Going Relay 
-        member x.GR(tgt:Vertex) = 
-           let gr =   bit $"GR_{tgt.Name}" TagFlag.RelayGoing
-           goingRelays.Add gr |> ignore; gr
            
         //Status 
         ///Ready Status

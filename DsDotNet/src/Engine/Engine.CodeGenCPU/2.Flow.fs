@@ -8,14 +8,22 @@ open Engine.Common.FS
 
 type VertexManager with
 
-    member v.F1_RootStart(): CommentedStatement list =
+    member v.F1_RootStart(): CommentedStatement Option =
+        let srcs = v.Flow.Graph.FindEdgeSources(v.Vertex, StartEdge).Select(getVM)
+        if srcs.Any() then
+            let sets  = srcs.Select(fun f->f.EP).ToAnd()
+            let rsts  = v.H.Expr
+            (sets, rsts) ==| (v.ST, "F1")  |> Some
+        else None
+
+     member v.F1_RootStartOptionPulse(): CommentedStatement list =
         let srcs = v.Flow.Graph.FindEdgeSources(v.Vertex, StartEdge).Select(getVM)
         if srcs.Any() then
             let sets  = srcs.Select(fun f->f.EP).ToAnd()
             let rsts  = v.OFF.Expr
             [ 
                 //root 시작조건 이벤트 Pulse 처리
-                (sets, rsts) --! (v.PUL, "F1") 
+                (sets, rsts) --^ (v.PUL, "F1") 
                 //Pulse start Tag relay
                 (v.PUL.Expr, v.H.Expr) ==| (v.ST, "F1") 
             ]

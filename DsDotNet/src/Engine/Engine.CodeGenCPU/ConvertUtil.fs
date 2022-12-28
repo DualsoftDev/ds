@@ -113,7 +113,7 @@ module ConvertUtil =
     let (==|) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool> , comment:string) =
         coil <== (sets <||> tag2expr coil <&&> (!! rsts)) |> withExpressionComment comment
      /// Create None Relay Pulse Coil Statement
-    let (--!) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool>, comment:string) = 
+    let (--^) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool>, comment:string) = 
         coil <=! (sets <&&> (!! rsts)) |> withExpressionComment comment
 
     /// Tag<'T> (들)로부터 AND Expression<'T> 생성

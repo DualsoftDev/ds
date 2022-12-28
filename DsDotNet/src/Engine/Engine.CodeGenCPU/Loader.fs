@@ -29,7 +29,7 @@ module CpuLoader =
 
             if IsSpec v VertexAll
             then
-                yield! vm.F1_RootStart() 
+                yield! vm.F1_RootStart() |> Option.toList
                 yield! vm.F2_RootReset()
 
             if IsSpec v RealPure

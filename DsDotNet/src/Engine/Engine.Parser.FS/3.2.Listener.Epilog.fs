@@ -65,6 +65,7 @@ module EtcListenerModule =
                 | :? DryrunLampBlockContext -> DuDryRunModeLamp
                 | :? ManualLampBlockContext -> DuManualModeLamp
                 | :? StopLampBlockContext   -> DuStopModeLamp
+                | :? EmgLampBlockContext    -> DuEmergencyLamp
                 | _ -> failwith "lamp type error"
 
             let lampDefs = first.Descendants<LampDefContext>().ToArray()

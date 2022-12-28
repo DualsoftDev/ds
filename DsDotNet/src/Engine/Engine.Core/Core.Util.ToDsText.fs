@@ -172,32 +172,45 @@ module internal ToDsTextModule =
                     if btns.length() > 0 then
                         yield $"{tab}[{category}] = {lb}"
                         for btn in btns do
-                            let flows = (btn.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine()) |> String.concat ";") + ";"
+                            let flows = (btn.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine()) |> String.concat ";")
+                            let flowTexts = 
+                                if flows.Count() > 0 then
+                                    flows + ";"
+                                else
+                                    ""
                             let inAddr = if btn.InAddress <> null then btn.InAddress else "_"
                             let outAddr = if btn.OutAddress <> null then btn.OutAddress else "_"
-                            yield $"{tab2}{btn.Name}({inAddr}, {outAddr}) = {lb} {flows} {rb}"
+                            yield $"{tab2}{btn.Name}({inAddr}, {outAddr}) = {lb} {flowTexts} {rb}"
                         yield $"{tab}{rb}"
                 ] |> combineLines
-            yield buttonsToDs("auto",   system.AutoButtons       )
-            yield buttonsToDs("manual", system.ManualButtons     )
-            yield buttonsToDs("emg",    system.EmergencyButtons  )
-            yield buttonsToDs("stop",   system.StopButtons       )
-            yield buttonsToDs("run",    system.RunButtons        )
-            yield buttonsToDs("dryrun", system.DryRunButtons     )
-            yield buttonsToDs("clear",  system.ClearButtons      )
+            yield buttonsToDs("auto",   system.AutoButtons      )
+            yield buttonsToDs("manual", system.ManualButtons    )
+            yield buttonsToDs("emg",    system.EmergencyButtons )
+            yield buttonsToDs("stop",   system.StopButtons      )
+            yield buttonsToDs("run",    system.RunButtons       )
+            yield buttonsToDs("dryrun", system.DryRunButtons    )
+            yield buttonsToDs("clear",  system.ClearButtons     )
+            yield buttonsToDs("home",   system.HomeButtons      )
 
             let lampsToDs(category:string, lamps:LampDef seq) =
                 [
                     if lamps.length() > 0 then
                         yield $"{tab}[{category}] = {lb}"
                         for lamp in lamps do
-                            yield $"{tab2}{lamp.Name} = {lb} {lamp.SettingFlow.Name} ({lamp.OutAddress}) {rb}"
+                            let addr = 
+                                if lamp.OutAddress <> null then
+                                    $"({lamp.OutAddress})"
+                                else
+                                    ""
+                                
+                            yield $"{tab2}{lamp.Name}{addr} = {lb} {lamp.SettingFlow.Name} {rb}"
                         yield $"{tab}{rb}"
                 ] |> combineLines
-            yield lampsToDs("runlamp",    system.RunModeLamps    )
-            yield lampsToDs("dryrunlamp", system.DryRunModeLamps )
-            yield lampsToDs("manuallamp", system.ManualModeLamps )
-            yield lampsToDs("stoplamp",   system.StopModeLamps   )
+            yield lampsToDs("runlamp",    system.RunModeLamps       )
+            yield lampsToDs("dryrunlamp", system.DryRunModeLamps    )
+            yield lampsToDs("manuallamp", system.ManualModeLamps    )
+            yield lampsToDs("stoplamp",   system.StopModeLamps      )
+            yield lampsToDs("emglamp",    system.EmergencyModeLamps )
 
             (* prop
                     safety

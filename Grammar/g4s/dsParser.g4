@@ -154,15 +154,15 @@ buttonsBlocks:emergencyButtonBlock|autoButtonBlock|runButtonBlock|clearButtonBlo
     flowName : identifier1;
 
 
-lampBlocks:runLampBlock|dryrunLampBlock|manualLampBlock|stopLampBlock|emergencyLampBlock;
-    runLampBlock       : '[' 'runlamp' ']'       EQ lampBlock;
-    dryrunLampBlock    : '[' 'dryrunlamp' ']'    EQ lampBlock;
-    manualLampBlock    : '[' 'manuallamp' ']'    EQ lampBlock;
-    stopLampBlock      : '[' 'stoplamp' ']'      EQ lampBlock;
-    emergencyLampBlock : '[' 'emergencylamp' ']' EQ lampBlock;
+lampBlocks:runLampBlock|dryrunLampBlock|manualLampBlock|stopLampBlock|emgLampBlock;
+    runLampBlock    : '[' 'runlamp' ']'    EQ lampBlock;
+    dryrunLampBlock : '[' 'dryrunlamp' ']' EQ lampBlock;
+    manualLampBlock : '[' 'manuallamp' ']' EQ lampBlock;
+    stopLampBlock   : '[' 'stoplamp' ']'   EQ lampBlock;
+    emgLampBlock    : '[' 'emglamp' ']'    EQ lampBlock;
     
     lampBlock: LBRACE (() | ((SEIMCOLON)* lampDef)* (SEIMCOLON)*) RBRACE;
-    lampDef: lampName EQ LBRACE (() | flowName addrDef) RBRACE;
+    lampDef: (lampName|lampName addrDef) EQ LBRACE (() | flowName) RBRACE;
     addrDef: LPARENTHESIS (() | addressItem) RPARENTHESIS;
     lampName: identifier1;
     

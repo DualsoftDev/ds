@@ -192,19 +192,19 @@ module ModelComponentAnswers =
         A > B;		// A(Real)> B(Real);
     }
     [runlamp] = {
-        RunMode(%Q1) = { F3  }
+        RunMode(%Q1) = { F3 }
     }
     [dryrunlamp] = {
-        DryRunMode = { F5 () }
+        DryRunMode = { F5 }
     }
     [manuallamp] = {
-        ManualMode(%Q1) = { F2  }
+        ManualMode(%Q1) = { F2 }
     }
     [stoplamp] = {
-        StopMode(%Q1) = { F3  }
+        StopMode(%Q1) = { F3 }
     }
     [emglamp] = {
-        EmgMode(%Q1) = { F3  }
+        EmgMode(%Q1) = { F3 }
     }
 }
 """
@@ -234,8 +234,8 @@ module ModelComponentAnswers =
         ManualBTN(_, _) = { F1;F5; }
     }
     [emg] = {
-        EmptyButton(_, _) = { ; }
-        EmptyButton2(_, _) = { ; }
+        EmptyButton(_, _) = {  }
+        EmptyButton2(_, _) = {  }
         EMGBTN3(_, _) = { F3;F5; }
         EMGBTN(_, _) = { F1;F2;F3;F5; }
     }

@@ -36,7 +36,7 @@ RUNLAMP: 'runlamp';
 DRYRUNLAMP: 'dryrunlamp';
 MANUALLAMP: 'manuallamp';
 STOPLAMP: 'stoplamp';
-EMERGENCYLAMP: 'emergencylamp';
+EMGLAMP: 'emglamp';
 VARIABLES: 'variables';
 COMMANDS: 'commands';
 OBSERVES: 'observes';

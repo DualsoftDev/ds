@@ -62,34 +62,32 @@ namespace Engine
     [flow] F4 = { A > B; }
     [flow] F5 = { A > B; }
     [emg] = {
-        EmptyButton = {};  // Empty flow not allowed
-        EmptyButton2 = {}  // Empty flow not allowed
-        EMGBTN3 = { F3; F5 };
-        EMGBTN = { F1; F2; F3; F5; };
+        EmptyButton(_, _) = {};  // Empty flow not allowed
+        EmptyButton2(_, _) = {}  // Empty flow not allowed
+        EMGBTN3(_, _) = { F3; F5 };
+        EMGBTN(_, _) = { F1; F2; F3; F5; };
     }
     [auto] = {
-        //AutoBTN2;     Empty not allowed
-        AutoBTN = { F2(%I1, %Q1) }; //주소 반영 필요
-        AutoBTN2 = { F1; F3; F5; };
+        AutoBTN(%I1, %Q1) = { F2 }; //주소 반영 필요
+        AutoBTN2(%I2, %Q2) = { F1; F3; F5; };
     }
     [run] = {
-        StartBTN_FF = { F2 };
-        StartBTN1 = { F1; };
+        StartBTN_FF(_, _) = { F2 };
+        StartBTN1(_, _) = { F1; };
     }
     [clear] = {
-        ClearBTN = { F1;F2;F3;F5; }
+        ClearBTN(_, _) = { F1;F2;F3;F5; }
     }
     [manual] = {
-        ManualBTN = { F1;F5; }
+        ManualBTN(_, _) = { F1;F5; }
     }
     [stop] = {
-        StopBTN = { F1;F2;F5; }
+        StopBTN(_, _) = { F1;F2;F5; }
     }
     [dryrun] = {
-        StartDryBTN = { F5; }
+        StartDryBTN(_, _) = { F5; }
     }
 }
-
 ";
 
         public static string Lamps = @"

@@ -167,16 +167,15 @@ module internal ToDsTextModule =
 
                 yield $"{tab}{rb}"
 
-
-
-
             let buttonsToDs(category:string, btns:ButtonDef seq) =
                 [
                     if btns.length() > 0 then
                         yield $"{tab}[{category}] = {lb}"
                         for btn in btns do
                             let flows = (btn.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine()) |> String.concat ";") + ";"
-                            yield $"{tab2}{btn.Name} = {lb} {flows} {rb}"
+                            let inAddr = if btn.InAddress <> null then btn.InAddress else "_"
+                            let outAddr = if btn.OutAddress <> null then btn.OutAddress else "_"
+                            yield $"{tab2}{btn.Name}({inAddr}, {outAddr}) = {lb} {flows} {rb}"
                         yield $"{tab}{rb}"
                 ] |> combineLines
             yield buttonsToDs("auto",   system.AutoButtons       )

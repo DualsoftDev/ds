@@ -224,30 +224,30 @@ module ModelComponentAnswers =
         A > B;		// A(Real)> B(Real);
     }
     [auto] = {
-        AutoBTN = { F2; }
-        AutoBTN2 = { F1;F3;F5; }
+        AutoBTN(%I1, %Q1) = { F2; }
+        AutoBTN2(%I2, %Q2) = { F1;F3;F5; }
     }
     [manual] = {
-        ManualBTN = { F1;F5; }
+        ManualBTN(_, _) = { F1;F5; }
     }
     [emg] = {
-        EmptyButton = { ; } // Empty flow not allowed
-        EmptyButton2 = { ; } // Empty flow not allowed
-        EMGBTN3 = { F3;F5; }
-        EMGBTN = { F1;F2;F3;F5; }
+        EmptyButton(_, _) = { ; }
+        EmptyButton2(_, _) = { ; }
+        EMGBTN3(_, _) = { F3;F5; }
+        EMGBTN(_, _) = { F1;F2;F3;F5; }
     }
     [stop] = {
-        StopBTN = { F1;F2;F5; }
+        StopBTN(_, _) = { F1;F2;F5; }
     }
     [run] = {
-        StartBTN_FF = { F2; }
-        StartBTN1 = { F1; }
+        StartBTN_FF(_, _) = { F2; }
+        StartBTN1(_, _) = { F1; }
     }
     [dryrun] = {
-        StartDryBTN = { F5; }
+        StartDryBTN(_, _) = { F5; }
     }
     [clear] = {
-        ClearBTN = { F1;F2;F3;F5; }
+        ClearBTN(_, _) = { F1;F2;F3;F5; }
     }
 }
 """

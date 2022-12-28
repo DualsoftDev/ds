@@ -147,7 +147,8 @@ buttonsBlocks:emergencyButtonBlock|autoButtonBlock|runButtonBlock|clearButtonBlo
     dryrunButtonBlock    :'[' ('dryrun_in'|'dryrun') ']' EQ buttonBlock;
     
     buttonBlock: LBRACE (() | ((SEIMCOLON)* buttonDef)* (SEIMCOLON)*) RBRACE;
-    buttonDef: buttonName EQ LBRACE (() | (flowName|flowName addressInOut) (SEIMCOLON (flowName|flowName addressInOut))* (SEIMCOLON)?) RBRACE;
+    buttonDef: btnNameAddr EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
+    btnNameAddr: buttonName addressInOut;
     buttonName: identifier1;
     flowName : identifier1;
 

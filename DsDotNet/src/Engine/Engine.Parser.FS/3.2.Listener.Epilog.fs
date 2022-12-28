@@ -38,7 +38,13 @@ module EtcListenerModule =
 
             let buttonDefs = first.Descendants<ButtonDefContext>().ToArray()
             for bd in buttonDefs do
-                let buttonName = bd.TryFindFirstChild<ButtonNameContext>().Value.GetText()
+                let btnNameAddr = bd.TryFindFirstChild<BtnNameAddrContext>().Value
+                let btnName, addrIn, addrOut = 
+                    match btnNameAddr.ChildCount with
+                    | 2 -> 
+                        let inOutCtx = btnNameAddr.GetChild(1) :?> AddressInOutContext
+                        btnNameAddr.GetChild(0).GetText(), inOutCtx.GetChild(1).GetText(), inOutCtx.GetChild(3).GetText()
+                    | _ -> btnNameAddr.GetChild(0).GetText(), null, null
                 let flows =
                     bd.Descendants<FlowNameContext>()
                         .Select(fun flowCtx -> flowCtx.GetText())
@@ -46,8 +52,8 @@ module EtcListenerModule =
                         .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName))
                         .ToArray()
                 if flows.Length > 0
-                then flows.ForEach(fun flow -> system.AddButton(targetBtnType, buttonName, "주소처리", "주소처리", flow))
-                else system.Buttons.Add(ButtonDef(buttonName, targetBtnType, "주소처리","주소처리", new HashSet<Flow>())) |> ignore
+                then flows.ForEach(fun flow -> system.AddButton(targetBtnType, btnName, addrIn, addrOut, flow))
+                else system.Buttons.Add(ButtonDef(btnName, targetBtnType, null, null, new HashSet<Flow>())) |> ignore
 
         member x.ProcessLampBlocks(ctx:LampBlocksContext) =
             let first = ctx.TryFindFirstChild<ParserRuleContext>().Value

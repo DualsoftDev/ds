@@ -127,7 +127,7 @@ module OriginModule =
             |> Seq.map(fun route ->
                 route
                 |> Seq.map(fun v ->
-                    let c = v :?> Call
+                    let c = getVertexTarget v
                     c.CallTarget.JobDefs
                 )
                 |> List.ofSeq

@@ -22,8 +22,8 @@ namespace Engine
         //}
     }
     [jobs] = {
-        Ap = { A.""+""(%Q1, %I1); }
-        Am = { A.""-""(%Q2, %I2); }
+        Ap = { A.""+""(%I1, %Q1); }
+        Am = { A.""-""(%I2, %Q2); }
     }
 
     [prop] = {
@@ -47,8 +47,8 @@ namespace Engine
         }
     }
     [jobs] = {
-        Ap = { A.""+""(%Q1, %I1); }
-        Am = { A.""-""(%Q2, %I2); }
+        Ap = { A.""+""(%I1, %Q1); }
+        Am = { A.""-""(%I2, %Q2); }
     }
     [device file=""cylinder.ds""] A;
 }
@@ -69,7 +69,7 @@ namespace Engine
     }
     [auto] = {
         //AutoBTN2;     Empty not allowed
-        AutoBTN = { F2(%Q1, %I1) }; //주소 반영 필요
+        AutoBTN = { F2(%I1, %Q1) }; //주소 반영 필요
         AutoBTN2 = { F1; F3; F5; };
     }
     [run] = {
@@ -233,8 +233,8 @@ namespace Engine
         A, Ap > C |> Ap;
     }
     [jobs] = {
-        Ap = { A.""+""(%Q1, %I1); }
-        //Am = { A.""-""(%Q2, %I2); }  //사용 안되면 정의 불가
+        Ap = { A.""+""(%I1, %Q1); }
+        //Am = { A.""-""(%I2, %Q2); }  //사용 안되면 정의 불가
     }
     [device file=""cylinder.ds""] A;
 }
@@ -339,8 +339,8 @@ namespace Engine
     }
     
     [jobs] = {
-        RunR = { sysR.RUN(%Q1, %I1); }
-        RunL = { sysL.RUN(%Q2, %I2); }
+        RunR = { sysR.RUN(%I1, %Q1); }
+        RunL = { sysL.RUN(%I2, %Q2); }
     }
     [external file=""systemRH.ds"" ip=""localhost""] sysR;
     [external file=""systemLH.ds"" ip=""localhost""] sysL;
@@ -366,8 +366,8 @@ namespace Engine
         }
     }
     [jobs] = {
-        C1 = { B.""+""(%Q1, %I1); A.""+""(%Q999.2343, _); }
-        C2 = { A.""-""(%Q3, _); B.""-""(_, %I1); }
+        C1 = { B.""+""(%I1, %Q1); A.""+""(_, %Q999.2343); }
+        C2 = { A.""-""(_, %Q3); B.""-""(%I1, _); }
     }
     [external file=""cylinder.ds"" ip=""192.168.0.1""] A;
     [device file=""cylinder.ds""] B;
@@ -439,8 +439,8 @@ namespace Engine
         }
     }
     [jobs] = {
-        Ap = { A.""+""(%Q1, %I1); }
-        Am = { A.""-""(%Q2, %I2); }
+        Ap = { A.""+""(%I1, %Q1); }
+        Am = { A.""-""(%I2, %Q2); }
     }
     [device file=""cylinder.ds""] A;
 }

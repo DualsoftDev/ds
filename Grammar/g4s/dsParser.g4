@@ -27,7 +27,7 @@ system: '[' sysHeader ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
     sysHeader: SYS ipSpec?;
     sysBlock
         : LBRACE (  flowBlock | jobBlock | loadDeviceBlock | loadExternalSystemBlock
-                    | interfaceBlock | buttonsBlocks | propsBlock
+                    | interfaceBlock | buttonsBlocks | lampBlocks | propsBlock
                     | codeBlock
                     | variableBlock | commandBlock | observeBlock )*
           RBRACE       // identifier1Listing|parenting|causal|call
@@ -152,6 +152,17 @@ buttonsBlocks:emergencyButtonBlock|autoButtonBlock|runButtonBlock|clearButtonBlo
     flowName : identifier1;
 
 
+lampBlocks:runLampBlock|dryrunLampBlock|manualLampBlock|stopLampBlock;
+    runLampBlock    : '[' 'runlamp' ']'    EQ lampBlock;
+    dryrunLampBlock : '[' 'dryrunlamp' ']' EQ lampBlock;
+    manualLampBlock : '[' 'manuallamp' ']' EQ lampBlock;
+    stopLampBlock   : '[' 'stoplamp' ']'   EQ lampBlock;
+    
+    lampBlock: LBRACE (() | ((SEIMCOLON)* lampDef)* (SEIMCOLON)*) RBRACE;
+    lampDef: lampName EQ LBRACE (() | flowName addrDef) RBRACE;
+    addrDef: LPARENTHESIS (() | addressItem) RPARENTHESIS;
+    lampName: identifier1;
+    
 
 // B.F1 > Set1F <| T.A21;
 causal: causalPhrase SEIMCOLON;

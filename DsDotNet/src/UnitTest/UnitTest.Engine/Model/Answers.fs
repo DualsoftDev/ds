@@ -186,7 +186,7 @@ module ModelComponentAnswers =
         RunMode = { F3(%Q1) };
     }
     [manuallamp] = {
-        ManualModeMode = { F2(%Q1) };
+        ManualMode = { F2(%Q1) };
     }
     [stoplamp] = {
         StopMode = { F3(%Q1) };

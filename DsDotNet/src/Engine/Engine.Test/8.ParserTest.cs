@@ -104,16 +104,15 @@ namespace Engine
         RunMode = { F3(%Q1) };
     }
     [manuallamp] = {
-        AutoMde = { F2(%Q1) };
+        ManualMode = { F2(%Q1) };
     }
     [stoplamp] = {
-        AutoMde = { F3(%Q1) };
+        StopMode = { F3(%Q1) };
     }
     [dryrunlamp] = {
-        AutoMde = { F5() };
+        DryRunMode = { F5() };
     }
 }
-
 ";
         public static string Ppt = @"
 [sys] MY = {

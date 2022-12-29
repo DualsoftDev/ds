@@ -121,6 +121,7 @@
 
 		<ProjectReference Include="..\..\PLC\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
 		<ProjectReference Include="..\..\PLC\PLC.CodeGen.LSXGI\PLC.CodeGen.LSXGI.fsproj" />
+		<ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
 		<!--
 		-->
 		<!--<ProjectReference Include="..\..\Model\Import\Model.Import.Office\Model.Import.Office.fsproj" />-->

@@ -1,9 +1,14 @@
 namespace T
 
+open System
 open System.IO
 open log4net
 open log4net.Config
+open Engine.Core
 open Engine.Common.FS
+open FsUnit.Xunit
+open Engine.Common
+open System.Linq
 
 // FsUnit/XUnit 사용법:
 // https://github.com/fsprojects/FsUnit/tree/master/tests/FsUnit.Xunit.Test
@@ -32,3 +37,12 @@ module Fixtures =
             ()
 
             Engine.CodeGenCPU.ModuleInitializer.Initialize()
+
+        //interface IDisposable with
+        //    member __.Dispose () =
+        //        //CLEAN UP TEST DATA OR WHATEVER YOU NEED TO CLEANUP YOUR TESTS
+        //        ()
+
+
+
+

@@ -4,7 +4,6 @@ namespace T
 open Engine.Core
 open Engine.Common.FS
 open NUnit.Framework
-open System.Collections.Generic
 open Engine.Parser.FS
 open Model.Import.Office
 

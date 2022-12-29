@@ -29,6 +29,7 @@
 	<ItemGroup>
 		<Compile Include="TestFixture.fs" />
 		<Compile Include="XgiGenTest.fs" />
+		<Compile Include="TimerTest.fs" />
 		<None Include="App.config" />
 		<Compile Include="Main.fs" />
 	</ItemGroup>

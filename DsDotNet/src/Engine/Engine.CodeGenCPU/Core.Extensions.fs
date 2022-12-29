@@ -10,14 +10,17 @@ open System
 module ConvertCoreExt =
     
     type InOut = | In | Out | Memory
-    let private getIOs(name, address, inOut:InOut): ITagWithAddress option  =  
-            let plcName = match inOut with 
-                          | In  -> $"{name}_I" 
-                          | Out -> $"{name}_O" 
-                          | Memory -> failwith "error: Memory not supported "
+    let private getIOs(name, address, inOut:InOut): ITagWithAddress   =  
+        let plcName = match inOut with 
+                        | In  -> $"{name}_I" 
+                        | Out -> $"{name}_O" 
+                        | Memory -> failwith "error: Memory not supported "
 
-            if address = "" then None
-                            else Some (PlcTag(plcName, address, false) :> ITagWithAddress)
+        (PlcTag(plcName, address, false) :> ITagWithAddress)
+            //if address = "" then None
+            //                else Some (PlcTag(plcName, address, false) :> ITagWithAddress)
+
+
 
     type DsSystem with
         member s._on     = DsTag<bool>("_on", false)
@@ -38,20 +41,20 @@ module ConvertCoreExt =
         member s._ms     = DsTag<int> ("_ms", 0)
 
         member s.GenerationLampIO() =
-            s.SystemLamps.Where(fun w -> w.OutTag.IsNone)
+            s.SystemLamps
                    .ForEach(fun b->b.OutTag  <- getIOs(b.Name, b.OutAddress, In))
 
         member s.GenerationButtonIO() = 
-            s.SystemButtons.Where(fun w -> w.InTag.IsNone)
-                     .ForEach(fun b->b.InTag  <- getIOs(b.Name, b.OutAddress, In))
-            s.SystemButtons.Where(fun w -> w.OutTag.IsNone)
+            s.SystemButtons
+                     .ForEach(fun b-> b.InTag  <- getIOs(b.Name, b.OutAddress, In))
+            s.SystemButtons
                      .ForEach(fun b->b.OutTag <- getIOs(b.Name, b.OutAddress, Out))
             
         member s.GenerationJobIO() = 
             let jobDefs = s.Jobs |> Seq.collect(fun j -> j.JobDefs)
-            jobDefs.Where(fun w -> w.InTag.IsNone)
+            jobDefs
                    .ForEach(fun jdef->jdef.InTag <- getIOs(jdef.ApiName, jdef.InAddress, In))
-            jobDefs.Where(fun w -> w.OutTag.IsNone)
+            jobDefs
                    .ForEach(fun jdef->jdef.OutTag <- getIOs(jdef.ApiName, jdef.OutAddress, Out))
 
         //[auto, manual] system HMI 두개다 선택이 안됨
@@ -61,18 +64,18 @@ module ConvertCoreExt =
 
     let private getButtonInputs(flow:Flow, btns:ButtonDef seq) : PlcTag<bool> seq = 
             btns.Where(fun b -> b.SettingFlows.Contains(flow))
-                .Where(fun b -> b.InTag.IsSome)
-                .Select(fun b -> b.InTag).Cast<PlcTag<bool>>()
+                .Select(fun b -> b.InTag)
+                .Cast<PlcTag<bool>>()   
 
     let private getButtonOutputs(flow:Flow, btns:ButtonDef seq) : PlcTag<bool> seq = 
             btns.Where(fun b -> b.SettingFlows.Contains(flow))
-                .Where(fun b -> b.OutTag.IsSome)
-                .Select(fun b -> b.OutTag).Cast<PlcTag<bool>>()
+                .Select(fun b -> b.OutTag)
+                .Cast<PlcTag<bool>>()   
 
     let private getLampOutputs(flow:Flow, btns:LampDef seq) : PlcTag<bool> seq = 
             btns.Where(fun b -> b.SettingFlow = flow)
-                .Where(fun b -> b.OutTag.IsSome)
-                .Select(fun b -> b.OutTag).Cast<PlcTag<bool>>()
+                .Select(fun b -> b.OutTag)
+                .Cast<PlcTag<bool>>()   
     
     let private getAutoManualIOs(autoIns:PlcTag<bool> seq, manualIns:PlcTag<bool> seq, sysOff:DsTag<bool>) =
           if autoIns.Count() > 1 || manualIns.Count() > 1
@@ -160,3 +163,12 @@ module ConvertCoreExt =
                                 then f.emgIns.ToOr() else f.System._off.Expr
 
 
+    type Call with
+        member c.INs   = c.CallTarget.JobDefs.Select(fun j -> j.InTag).Cast<PlcTag<bool>>()
+        member c.OUTs  = c.CallTarget.JobDefs.Select(fun j -> j.OutTag).Cast<PlcTag<bool>>()
+        
+    type Real with
+        member r.CoinRelays = r.Graph.Vertices
+                                 .Select(fun f->f.VertexManager)
+                                 .Cast<VertexManager>().Select(fun f->f.CR)
+                             

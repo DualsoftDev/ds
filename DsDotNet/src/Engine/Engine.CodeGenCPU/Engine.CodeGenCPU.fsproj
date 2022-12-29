@@ -9,8 +9,8 @@
 
   <ItemGroup>
     <Compile Include="Expression.Extension.fs" />
-    <Compile Include="Core.Extensions.fs" />
     <Compile Include="VertexManager.fs" />
+    <Compile Include="Core.Extensions.fs" />
     <Compile Include="VertexManager.Extension.fs" />
     <Compile Include="Code.SpecUtil.fs" />
     <Compile Include="Code.ConvertUtil.fs" />

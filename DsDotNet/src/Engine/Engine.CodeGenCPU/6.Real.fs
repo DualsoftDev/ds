@@ -23,12 +23,15 @@ type VertexManager with
     //    (sets, rsts) ==| (realTag.RR, "")
 
 
-          //test ahn
     member v.R1_RealInitialStart(): CommentedStatement  = 
-        (v.PA.Expr, v.OFF.Expr) --| (v.PA, "R1" )
+        let sets = v.G.Expr <&&> v.OG.Expr  
+        let rsts = v.H.Expr
 
-          //test ahn
+        (sets, rsts) ==| (v.RR, "R1" )
+
     member v.R2_RealJobComplete(): CommentedStatement  = 
-        (v.PA.Expr, v.OFF.Expr) --| (v.PA, "R2" )
+        let real = v.Vertex :?> Real
+        let sets = real.CoinRelays.ToAnd()
+        let rsts = v.System._off.Expr
 
-        
+        (sets, rsts) --| (v.ET, "R2" )

@@ -114,9 +114,9 @@ module CoreModule =
         member val OutAddress = outAddress  with get,set
 
         //CPU 생성시 할당됨 InTag
-        member val InTag:ITagWithAddress option = None  with get,set
+        member val InTag = getNull<ITagWithAddress>() with get, set
         //CPU 생성시 할당됨 OutTag
-        member val OutTag:ITagWithAddress option = None   with get,set
+        member val OutTag = getNull<ITagWithAddress>() with get, set
         member val SettingFlows  = flows with get, set
 
     and LampDef (name:string, lampType:LampType, outAddress:TagAddress, flow:Flow) =
@@ -126,7 +126,7 @@ module CoreModule =
         member val OutAddress = outAddress  with get,set
 
         //CPU 생성시 할당됨 OutTag
-        member val OutTag:ITagWithAddress option = None  with get,set
+        member val OutTag = getNull<ITagWithAddress>() with get, set
         ///단일 Flow 단위로 Lamp 상태 출력
         member val SettingFlow  = flow with get, set
 
@@ -200,9 +200,9 @@ module CoreModule =
         member val InAddress   = inAddress  with get,set
         member val OutAddress  = outAddress with get,set
         //CPU 생성시 할당됨 InTag
-        member val InTag:ITagWithAddress option = None  with get,set
+        member val InTag = getNull<ITagWithAddress>() with get, set
         //CPU 생성시 할당됨 OutTag
-        member val OutTag:ITagWithAddress option = None   with get,set
+        member val OutTag = getNull<ITagWithAddress>() with get, set
 
         //$ton 200      //ls xgk 명령어를 따른다.
         member val ObserveInTimming   = observe with get,set //todo ToDsText, parsing

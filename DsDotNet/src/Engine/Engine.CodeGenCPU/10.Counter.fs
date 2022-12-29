@@ -11,6 +11,6 @@ open Engine.CodeGenCPU
 type VertexManager with
        //test ahn
     member v.C1_FinishRingCounter(): CommentedStatement  = 
-        (v.PA.Expr, v.OFF.Expr) --| (v.PA, "C1" )
+        (v.PA.Expr, v.System._off.Expr) --| (v.PA, "C1" )
 
         

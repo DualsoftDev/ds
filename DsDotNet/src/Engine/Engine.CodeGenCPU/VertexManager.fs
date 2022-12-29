@@ -61,10 +61,7 @@ module VertexManagerModule =
         member x.Vertex  = v
         member x.Flow    = v.Parent.GetFlow()
         member x.System  = v.Parent.GetFlow().System
-        ///Always ON System Bit
-        member x.ON   = x.System._on
-        ///Always OFF System Bit
-        member x.OFF  = x.System._off
+       
         
         //Relay
         ///Real Init Relay  

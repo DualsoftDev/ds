@@ -21,7 +21,7 @@ type VertexManager with
         let srcs = v.Flow.Graph.FindEdgeSources(v.Vertex, StartEdge).Select(getVM)
         if srcs.Any() then
             let sets  = srcs.Select(fun f->f.EP).ToAnd()
-            let rsts  = v.OFF.Expr
+            let rsts  = v.System._off.Expr
             [ 
                 //root 시작조건 이벤트 Pulse 처리
                 (sets, rsts) --^ (v.PUL, "F1") 

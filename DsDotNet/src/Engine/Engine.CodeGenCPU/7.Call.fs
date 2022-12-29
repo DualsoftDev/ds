@@ -52,17 +52,17 @@ type VertexManager with
 
               //test ahn
     member v.C1_CallActionOut(): CommentedStatement  = 
-        (v.PA.Expr, v.OFF.Expr) --| (v.PA, "C1" )
+        (v.PA.Expr, v.System._off.Expr) --| (v.PA, "C1" )
           //test ahn
     member v.C2_CallInitialComplete(): CommentedStatement  = 
-        (v.PA.Expr, v.OFF.Expr) --| (v.PA, "C2" )
+        (v.PA.Expr, v.System._off.Expr) --| (v.PA, "C2" )
           //test ahn
     member v.C3_CallTailComplete(): CommentedStatement  = 
-        (v.PA.Expr, v.OFF.Expr) --| (v.PA, "C3" )
+        (v.PA.Expr, v.System._off.Expr) --| (v.PA, "C3" )
                   //test ahn
     member v.C4_CallTx(): CommentedStatement  = 
-        (v.PA.Expr, v.OFF.Expr) --| (v.PA, "C4" )
+        (v.PA.Expr, v.System._off.Expr) --| (v.PA, "C4" )
                   //test ahn
     member v.C5_CallRx(): CommentedStatement  = 
-        (v.PA.Expr, v.OFF.Expr) --| (v.PA, "C5" )
+        (v.PA.Expr, v.System._off.Expr) --| (v.PA, "C5" )
     

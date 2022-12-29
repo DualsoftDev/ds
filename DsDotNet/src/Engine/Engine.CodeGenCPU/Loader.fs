@@ -16,8 +16,10 @@ module CpuLoader =
             then
                 yield! vm.S1_Ready_Going_Finish_Homing()
                 yield vm.M2_PauseMonitor()
-                yield vm.M3_ErrorTXMonitor()
-                yield vm.M4_ErrorRXMonitor()
+                yield vm.M3_CallErrorTXMonitor()
+                yield vm.M4_CallErrorRXMonitor()
+                yield vm.M5_RealErrorTXMonitor()
+                yield vm.M6_RealErrorRXMonitor()
 
             if IsSpec v (CallPure ||| AliasForCall)
             then

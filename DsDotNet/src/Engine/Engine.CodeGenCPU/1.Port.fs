@@ -22,7 +22,7 @@ let private getSetBits(v:VertexManager) (rse:SREType) (convert:ConvertType) =
 
     setBits.Cast<Tag<bool>>() |> toAnd
 //Port 처리 Rst 공용 함수
-let private getRstBits(v:VertexManager) = v.OFF.Expr
+let private getRstBits(v:VertexManager) = v.System._on.Expr
     
 
 type VertexManager with

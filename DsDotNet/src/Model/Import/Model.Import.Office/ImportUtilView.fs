@@ -75,7 +75,19 @@ module ImportViewModule =
         |> Seq.iter(fun e-> newNode.Edges.Add(e) |>ignore)
 
         newNode
+        
+    let UpdateLampNodes(system:DsSystem, flow:Flow, node:ViewNode)  =
+        let newNode = ViewNode("Lamps", LAMP)
 
+        system.EmergencyModeLamps.Where(fun w->w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuEmergencyLamp)) |>ignore)
+        system.DryRunModeLamps.Where(fun w->   w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuDryRunModeLamp)) |>ignore)
+        system.ManualModeLamps.Where(fun w->   w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuManualModeLamp)) |>ignore)
+        system.RunModeLamps.Where(fun w->      w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuDryRunModeLamp)) |>ignore)
+        system.StopModeLamps.Where(fun w->     w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuStopModeLamp)) |>ignore)
+        
+        if newNode.Singles.Count > 0
+        then node.Singles.Add(newNode) |> ignore
+    
     let UpdateBtnNodes(system:DsSystem, flow:Flow, node:ViewNode)  =
 
         let newNode = ViewNode("Buttons", BUTTON)
@@ -87,6 +99,7 @@ module ImportViewModule =
         system.ManualButtons.Where(fun w->w.SettingFlows.Contains(flow))     |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuManualBTN)) |>ignore)
         system.StopButtons.Where(fun w->w.SettingFlows.Contains(flow))       |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuStopBTN)) |>ignore)
         system.DryRunButtons.Where(fun w->w.SettingFlows.Contains(flow))   |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuDryRunBTN)) |>ignore)
+        system.HomeButtons.Where(fun w->w.SettingFlows.Contains(flow))   |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuHomeBTN)) |>ignore)
         
         if newNode.Singles.Count > 0
         then node.Singles.Add(newNode) |> ignore
@@ -145,6 +158,7 @@ module ImportViewModule =
                         let dummys = doc.Dummys.Where(fun f->f.Page = page)
                         let flowNode = ConvertFlow(flow, dummys)
 
+                        UpdateLampNodes(flow.System, flow, flowNode)
                         UpdateBtnNodes(flow.System, flow, flowNode)
                         UpdateApiItems(flow.System, page, doc.DicNodes.Values.Where(fun f->f.NodeType = IF), flowNode)
 

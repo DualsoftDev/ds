@@ -12,12 +12,12 @@ open System.Linq
 module rec ViewModule = 
 
    
-    type ViewNode(name:string, nodeType:NodeType, coreVertex:Vertex option, btnType:BtnType option)  = 
+    type ViewNode(name:string, nodeType:NodeType, coreVertex:Vertex option, btnType:BtnType option, lampType:LampType option)  = 
 
-        new () = ViewNode("", REAL, None, None)
-        new (nodeType) = ViewNode("", nodeType, None, None)
-        new (name, nodeType) = ViewNode(name, nodeType, None, None)
-        new (name) = ViewNode(name, REAL, None, None)
+        new () = ViewNode("", REAL, None, None, None)
+        new (nodeType) = ViewNode("", nodeType, None, None, None)
+        new (name, nodeType) = ViewNode(name, nodeType, None, None, None)
+        new (name) = ViewNode(name, REAL, None, None, None)
         new (coreVertex:Vertex) = 
               let name = 
                   match coreVertex  with
@@ -27,9 +27,10 @@ module rec ViewModule =
                                        | DuAliasTargetRealEx o -> o.Name
                     | _ -> coreVertex.Name
                 
-              ViewNode(name, REAL, Some(coreVertex),  None)
+              ViewNode(name, REAL, Some(coreVertex),  None, None)
             
-        new (name, btnType:BtnType) = ViewNode(name, BUTTON, None, Some(btnType))
+        new (name, btnType:BtnType) = ViewNode(name, BUTTON, None, Some(btnType), None)
+        new (name, lampType:LampType) = ViewNode(name, LAMP, None, None, Some(lampType))
 
         member val Edges = HashSet<ModelingEdgeInfo<ViewNode>>()
         member val Singles = HashSet<ViewNode>()
@@ -44,6 +45,7 @@ module rec ViewModule =
 
         member x.CoreVertex = coreVertex
         member x.BtnType =  btnType
+        member x.LampType =  lampType
         member x.IsChildExist =  x.Edges.Count>0 || x.Singles.Count>0
         member x.Name =  name
         member x.UIKey = if coreVertex.IsSome

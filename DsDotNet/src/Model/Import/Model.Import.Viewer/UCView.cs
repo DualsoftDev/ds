@@ -222,9 +222,29 @@ namespace Dual.Model.Import
                         if (viewNode.BtnType.Value == BtnType.DuAutoBTN) nNode.Attr.FillColor = Color.DarkGoldenrod;
                         if (viewNode.BtnType.Value == BtnType.DuClearBTN) nNode.Attr.FillColor = Color.DarkOliveGreen;
                         if (viewNode.BtnType.Value == BtnType.DuEmergencyBTN) nNode.Attr.FillColor = Color.MediumVioletRed;
-                        if (viewNode.BtnType.Value == BtnType.DuRunBTN) nNode.Attr.FillColor = Color.BlueViolet;
+                        if (viewNode.BtnType.Value == BtnType.DuManualBTN) nNode.Attr.FillColor = Color.Violet;
+                        if (viewNode.BtnType.Value == BtnType.DuDryRunBTN) nNode.Attr.FillColor = Color.CadetBlue;
+                        if (viewNode.BtnType.Value == BtnType.DuHomeBTN) nNode.Attr.FillColor = Color.Brown  ;
+                        if (viewNode.BtnType.Value == BtnType.DuRunBTN) nNode.Attr.FillColor = Color.DodgerBlue;
+                        if (viewNode.BtnType.Value == BtnType.DuStopBTN) nNode.Attr.FillColor = Color.Firebrick;
                     }
-
+                }
+                if (viewNode.NodeType == NodeType.LAMP)
+                {
+                    if (viewNode.IsChildExist)
+                    {
+                        nNode.Attr.FillColor = Color.DarkGray;
+                        nNode.Attr.Shape = Shape.Box;
+                    }
+                    else
+                    {
+                        nNode.Attr.Shape = Shape.Box;
+                        if (viewNode.LampType.Value == LampType.DuStopModeLamp) nNode.Attr.FillColor = Color.Firebrick;
+                        if (viewNode.LampType.Value == LampType.DuEmergencyLamp) nNode.Attr.FillColor = Color.MediumVioletRed;
+                        if (viewNode.LampType.Value == LampType.DuDryRunModeLamp) nNode.Attr.FillColor = Color.CadetBlue;
+                        if (viewNode.LampType.Value == LampType.DuRunModeLamp) nNode.Attr.FillColor = Color.DodgerBlue;
+                        if (viewNode.LampType.Value == LampType.DuManualModeLamp) nNode.Attr.FillColor = Color.Violet;
+                    }
                 }
                 if (viewNode.NodeType == NodeType.REAL)
                     nNode.Attr.Shape = Shape.Box;

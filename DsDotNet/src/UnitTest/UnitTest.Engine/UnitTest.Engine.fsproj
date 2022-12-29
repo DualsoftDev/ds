@@ -96,7 +96,6 @@
 		<None Include="Obsolete\test.ipynb" />
 		<Compile Include="Origins\OriginTester.fs" />
 		<Compile Include="HmiCodeGen\HmiCodeGenTester.fs" />
-		<Compile Include="PLCCodeGen\XGI\XgiGenTest.fs" />
 		<None Include="ScratchPad.fsx" />
 		<None Include="App.config" />
 		<Compile Include="Main.fs" />

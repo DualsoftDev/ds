@@ -1,10 +1,9 @@
-namespace T.PLC.XGI
+namespace T
 
 open System.IO
 
 open NUnit.Framework
 
-open T
 open Engine.Parser.FS
 open Engine.Core
 open Engine.Common.FS
@@ -26,7 +25,7 @@ open System.Globalization
 
         let projectDir =
             let src = __SOURCE_DIRECTORY__
-            let key = @"UnitTest\UnitTest.Engine"
+            let key = @"UnitTest\UnitTest.PLC.Xgi"
             let tail = src.IndexOf(key) + key.Length
             src.Substring(0, tail)
         let xmlDir = Path.Combine(projectDir, "XgiXmls")

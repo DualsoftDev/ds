@@ -5,9 +5,7 @@ open NUnit.Framework
 open T
 open Engine.Core
 open T.Expression
-open System.Collections.Generic
 open Engine.Parser.FS
-open FSharp.Data.HtmlAttribute
 open Engine.Common.FS
 
 //[<AutoOpen>]

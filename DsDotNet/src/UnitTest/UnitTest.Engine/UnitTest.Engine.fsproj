@@ -39,15 +39,6 @@
 		<Compile Include="Model\Model.fs" />
 		<Compile Include="Model\Model.Buildup.Test.fs" />
 		<Compile Include="Model\ModelGraph.fs" />
-		<Compile Include="Expression\ExpressionTest.fs" />
-		<Compile Include="Expression\ComparisonTest.fs" />
-		<Compile Include="Expression\CustomFunctionTest.fs" />
-		<Compile Include="Expression\CodeTest.fs" />
-		<Compile Include="Expression\CpuTest.fsx" />
-		<Compile Include="Expression\TimerTest.fs" />
-		<Compile Include="Expression\CounterTest.fs" />
-		<Compile Include="Expression\StatementTest.fs" />
-		<Compile Include="Expression\DeclarationTest.fs" />
 		<Compile Include="Model\FqdnParseTest.fs" />
 		<Compile Include="Model\SystemBuilderTest.fs" />
 		<Compile Include="Model\LoadConfigTest.fs" />

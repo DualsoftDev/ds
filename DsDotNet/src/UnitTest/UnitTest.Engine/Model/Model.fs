@@ -7,30 +7,9 @@ open Engine.Core
 open Engine.Common.FS
 open NUnit.Framework
 open Engine.Parser.FS
-open System.Text.RegularExpressions
 
 [<AutoOpen>]
 module private ModelComparisonHelper =
-    let (=~=) (xs:string) (ys:string) =
-        let removeComment input =
-            let blockComments = @"/\*(.*?)\*/"
-            let lineComments = @"//(.*?)$"
-            Regex.Replace(input, $"{blockComments}|{lineComments}", "", RegexOptions.Singleline)
-
-        let toArray (xs:string) =
-            xs.SplitByLine()
-                .Select(removeComment)
-                .Select(fun x -> x.Trim())
-                |> Seq.where(fun x -> x.Any() && not <| x.StartsWith("//"))
-                |> Array.ofSeq
-        let xs = toArray xs
-        let ys = toArray ys
-        for (x, y) in Seq.zip xs ys do
-            if x.Trim() <> y.Trim() then
-                failwithf "[%s] <> [%s]" x y
-        xs.Length === ys.Length
-
-
     let parseText (systemRepo:ShareableSystemRepository) referenceDir text =
         let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
         helper.TheSystem

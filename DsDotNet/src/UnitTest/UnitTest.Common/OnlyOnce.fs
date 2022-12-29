@@ -4,10 +4,13 @@ namespace T
 open System
 open System.Linq
 open FsUnit.Xunit
+open System.Text.RegularExpressions
+open Engine.Common.FS
 
 [<AutoOpen>]
 module Base =
-    let private tracefn fmt = Printf.kprintf System.Diagnostics.Trace.WriteLine fmt
+    //let private tracefn fmt = Printf.kprintf System.Diagnostics.Trace.WriteLine fmt
+
     /// should equal
     let ShouldEqual x y                    = y |> should equal x
     let Eq x y                             = y |> should equal x
@@ -58,3 +61,21 @@ module Base =
     let SetEq (xs:'a seq) (ys:'a seq) =
         (xs.Count() = ys.Count() && xs |> Seq.forall(fun x -> ys.Contains(x)) ) |> ShouldBeTrue
 
+    let (=~=) (xs:string) (ys:string) =
+        let removeComment input =
+            let blockComments = @"/\*(.*?)\*/"
+            let lineComments = @"//(.*?)$"
+            Regex.Replace(input, $"{blockComments}|{lineComments}", "", RegexOptions.Singleline)
+
+        let toArray (xs:string) =
+            xs.SplitByLine()
+                .Select(removeComment)
+                .Select(fun x -> x.Trim())
+                |> Seq.where(fun x -> x.Any() && not <| x.StartsWith("//"))
+                |> Array.ofSeq
+        let xs = toArray xs
+        let ys = toArray ys
+        for (x, y) in Seq.zip xs ys do
+            if x.Trim() <> y.Trim() then
+                failwithf "[%s] <> [%s]" x y
+        xs.Length === ys.Length

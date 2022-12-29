@@ -23,6 +23,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\..\Engine\Engine.Common.FS\Engine.Common.FS.fsproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Reference Include="log4net">
 	    <HintPath>..\..\..\exLib\log4net.dll</HintPath>
 	  </Reference>

@@ -21,6 +21,10 @@ module internal Common =
 
     type RungInfosWithNextPosition = {
         RungInfos:CoordinatedRungXml list
+        X: int
+        Y: int
+        SpanX: int
+        SpanY: int
         NextX: int
         NextY: int
         VLineUpRightMaxY: int

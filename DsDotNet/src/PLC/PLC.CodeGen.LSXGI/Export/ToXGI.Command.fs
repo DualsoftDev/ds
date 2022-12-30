@@ -200,9 +200,10 @@ module internal Command =
         let results = ResizeArray<CoordinatedRungXml>()
 
         //FunctionBlock, Function 까지 연장선 긋기
-        let needNewLineFeed = (x % minFBCellX) >= 6
+
+        //let needNewLineFeed = (x % minFBCellX) >= 6
         let numLineSpan = x / minFBCellX
-        let mutable newX = max (x + 1) ((1 + numLineSpan) * minFBCellX  - 3)
+        let newX = max (x + 1) ((1 + numLineSpan) * minFBCellX  - 3)
         if x  < newX - 1 then
             //newX <- getFBCellX x
             results.Add( {Coordinate = coord newX y; Xml = mutiEndLine lineConnectionStartX  (newX - 1) y})

@@ -23,7 +23,7 @@ module internal Common =
     let dq = "\""
 
     /// rung 을 구성하는 element (접점)의 XML 표현 문자열 반환
-    let elementFull elementType coordi param tag : XmlOutput =
+    let elementFull (elementType:int) coordi (param:string) (tag:string) : XmlOutput =
         $"\t\t<Element ElementType={dq}{elementType}{dq} Coordinate={dq}{coordi}{dq} {param}>{tag}</Element>"
 
     /// rung 을 구성하는 element (접점)의 XML 표현 문자열 반환

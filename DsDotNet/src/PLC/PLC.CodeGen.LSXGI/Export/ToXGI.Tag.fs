@@ -82,10 +82,13 @@ module XGITag = //IEC61131Tag =
 
 
 
-    /// name, comment, device, address 를 받아서 SymbolInfo 를 생성한다.
-    let createSymbol name comment device kind  address plctype devicePos addressIEC : SymbolInfo =
+    /// devicePos, addressIEC, name, comment, device, kind, address, plcType 를 받아서 SymbolInfo 를 생성한다.
+    let createSymbolWithDetail devicePos addressIEC name comment device kind  address plcType : SymbolInfo =
         {   Name=name; Comment=comment; Device=device; Kind = kind;
-            Type=plctype; State=0; Address=address; DevicePos=devicePos; AddressIEC=addressIEC}
+            Type=plcType; State=0; Address=address; DevicePos=devicePos; AddressIEC=addressIEC}
+
+    /// name, comment, device, kind, address, plcType 를 받아서 SymbolInfo 를 생성한다.
+    let createSymbol = createSymbolWithDetail -1 ""
 
     let copyLocal2GlobalSymbol (s:SymbolInfo) =
         { s with Kind = int Variable.Kind.VAR_GLOBAL; State=0; }

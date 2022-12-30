@@ -232,7 +232,7 @@ open Engine.Common.FS
             let storages = Storages()
             let code = """
                 bool myBit0 = createTag("%MX0.0.0", false);
-                ton myTon = createTON(2000us, $myBit0);
+                ton myTon = createTON(2000us, $x0);
 """
 
             let runtimeTargetBackup = RuntimeTarget
@@ -248,7 +248,7 @@ open Engine.Common.FS
             let storages = Storages()
             let code = """
                 bool myBit0 = createTag("%MX0.0.0", false);
-                ton myTon = createTON(2000us, $myBit0);
+                ton myTon = createTON(2000us, $x0);
 """
 
             let runtimeTargetBackup = RuntimeTarget

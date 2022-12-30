@@ -19,13 +19,13 @@ type XgiGenerationTest() =
     member __.``AndOr simple test`` () =
         let storages = Storages()
         let code = """
-            bool myBit0 = createTag("%IX0.0.0", false);
-            bool myBit1 = createTag("%IX0.0.1", false);
-            bool myBit2 = createTag("%IX0.0.2", false);
+            bool x0 = createTag("%IX0.0.0", false);
+            bool x1 = createTag("%IX0.0.1", false);
+            bool x2 = createTag("%IX0.0.2", false);
 
-            bool myBit7 = createTag("%QX0.1.0", false);
+            bool x7 = createTag("%QX0.1.0", false);
 
-            $myBit7 := ($myBit0 || $myBit1) && $myBit2;
+            $x7 := ($x0 || $x1) && $x2;
 """
         let statements = parseCode storages code
         storages.Count === 4
@@ -39,22 +39,22 @@ type XgiGenerationTest() =
     member __.``And Many test`` () =
         let storages = Storages()
         let code = codeForBits + """
-            $myBit17 :=
-                $myBit00 &&
-                $myBit01 &&
-                $myBit02 &&
-                $myBit03 &&
-                $myBit04 &&
-                $myBit05 &&
-                $myBit06 &&
-                $myBit07 &&
-                $myBit10 &&
-                $myBit11 &&
-                $myBit12 &&
-                $myBit13 &&
-                $myBit14 &&
-                $myBit15 &&
-                $myBit16
+            $x17 :=
+                $x00 &&
+                $x01 &&
+                $x02 &&
+                $x03 &&
+                $x04 &&
+                $x05 &&
+                $x06 &&
+                $x07 &&
+                $x10 &&
+                $x11 &&
+                $x12 &&
+                $x13 &&
+                $x14 &&
+                $x15 &&
+                $x16
                 ;
 """
         let statements = parseCode storages code
@@ -65,22 +65,22 @@ type XgiGenerationTest() =
     member __.``OR Many test`` () =
         let storages = Storages()
         let code = codeForBits + """
-            $myBit17 :=
-                $myBit00 ||
-                $myBit01 ||
-                $myBit02 ||
-                $myBit03 ||
-                $myBit04 ||
-                $myBit05 ||
-                $myBit06 ||
-                $myBit07 ||
-                $myBit10 ||
-                $myBit11 ||
-                $myBit12 ||
-                $myBit13 ||
-                $myBit14 ||
-                $myBit15 ||
-                $myBit16
+            $x17 :=
+                $x00 ||
+                $x01 ||
+                $x02 ||
+                $x03 ||
+                $x04 ||
+                $x05 ||
+                $x06 ||
+                $x07 ||
+                $x10 ||
+                $x11 ||
+                $x12 ||
+                $x13 ||
+                $x14 ||
+                $x15 ||
+                $x16
                 ;
 """
         let statements = parseCode storages code
@@ -91,13 +91,13 @@ type XgiGenerationTest() =
     member __.``AndOr2 test`` () =
         let storages = Storages()
         let code = codeForBits + """
-            $myBit07 :=    (($myBit00 || $myBit01) && $myBit02)
-                        ||  $myBit03
-                        || ($myBit04 && $myBit05 && $myBit06)
+            $x07 :=    (($x00 || $x01) && $x02)
+                        ||  $x03
+                        || ($x04 && $x05 && $x06)
                         ;
-            $myBit17 :=    (($myBit10 && $myBit11) || $myBit12)
-                        && $myBit13
-                        && ($myBit14 || $myBit15 || $myBit16)
+            $x17 :=    (($x10 && $x11) || $x12)
+                        && $x13
+                        && ($x14 || $x15 || $x16)
                         ;
 """
         let statements = parseCode storages code
@@ -151,10 +151,10 @@ type XgiGenerationTest() =
     member __.``Negation1 test`` () =
         let storages = Storages()
         let code = """
-            bool myBit00 = createTag("%IX0.0.0", false);
-            bool myBit01 = createTag("%IX0.0.1", false);
+            bool x00 = createTag("%IX0.0.0", false);
+            bool x01 = createTag("%IX0.0.1", false);
 
-            $myBit01 := ! $myBit00;
+            $x01 := ! $x00;
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
@@ -164,15 +164,15 @@ type XgiGenerationTest() =
     member __.``Negation2 test`` () =
         let storages = Storages()
         let code = """
-            bool myBit00 = createTag("%IX0.0.0", false);
-            bool myBit01 = createTag("%IX0.0.1", false);
-            bool myBit02 = createTag("%IX0.0.2", false);
-            bool myBit03 = createTag("%IX0.0.3", false);
-            bool myBit04 = createTag("%IX0.0.4", false);
-            bool myBit05 = createTag("%IX0.0.5", false);
+            bool x00 = createTag("%IX0.0.0", false);
+            bool x01 = createTag("%IX0.0.1", false);
+            bool x02 = createTag("%IX0.0.2", false);
+            bool x03 = createTag("%IX0.0.3", false);
+            bool x04 = createTag("%IX0.0.4", false);
+            bool x05 = createTag("%IX0.0.5", false);
 
-            $myBit02 := ! ($myBit00 || $myBit01);
-            $myBit05 := ! ($myBit03 && $myBit04);
+            $x02 := ! ($x00 || $x01);
+            $x05 := ! ($x03 && $x04);
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
@@ -184,15 +184,15 @@ type XgiGenerationTest() =
     member __.``Negation3 test`` () =
         let storages = Storages()
         let code = """
-            bool myBit00 = createTag("%IX0.0.0", false);
-            bool myBit01 = createTag("%IX0.0.1", false);
-            bool myBit02 = createTag("%IX0.0.2", false);
-            bool myBit03 = createTag("%IX0.0.3", false);
-            bool myBit04 = createTag("%IX0.0.4", false);
-            bool myBit05 = createTag("%IX0.0.5", false);
+            bool x00 = createTag("%IX0.0.0", false);
+            bool x01 = createTag("%IX0.0.1", false);
+            bool x02 = createTag("%IX0.0.2", false);
+            bool x03 = createTag("%IX0.0.3", false);
+            bool x04 = createTag("%IX0.0.4", false);
+            bool x05 = createTag("%IX0.0.5", false);
 
-            $myBit02 := ! (! $myBit00 || $myBit01);
-            $myBit05 := ! ($myBit03 && ! $myBit04);
+            $x02 := ! (! $x00 || $x01);
+            $x05 := ! ($x03 && ! $x04);
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)

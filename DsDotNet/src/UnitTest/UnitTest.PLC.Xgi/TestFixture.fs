@@ -10,6 +10,8 @@ open log4net.Config
 open Engine.Common.FS
 open Engine.Core
 open PLC.CodeGen.Common.QGraph
+open PLC.CodeGen.LSXGI
+open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 
 // FsUnit/XUnit 사용법:
 // https://github.com/fsprojects/FsUnit/tree/master/tests/FsUnit.Xunit.Test
@@ -105,25 +107,45 @@ module XgiGenerationTestModule =
         }
 
     let codeForBits = """
-        bool myBit00 = createTag("%IX0.0.0", false);
-        bool myBit01 = createTag("%IX0.0.1", false);
-        bool myBit02 = createTag("%IX0.0.2", false);
-        bool myBit03 = createTag("%IX0.0.3", false);
-        bool myBit04 = createTag("%IX0.0.4", false);
-        bool myBit05 = createTag("%IX0.0.5", false);
-        bool myBit06 = createTag("%IX0.0.6", false);
-        bool myBit07 = createTag("%IX0.0.7", false);
+        bool x00 = createTag("%IX0.0.0", false);
+        bool x01 = createTag("%IX0.0.1", false);
+        bool x02 = createTag("%IX0.0.2", false);
+        bool x03 = createTag("%IX0.0.3", false);
+        bool x04 = createTag("%IX0.0.4", false);
+        bool x05 = createTag("%IX0.0.5", false);
+        bool x06 = createTag("%IX0.0.6", false);
+        bool x07 = createTag("%IX0.0.7", false);
 
-        bool myBit10 = createTag("%IX0.0.8", false);
-        bool myBit11 = createTag("%IX0.0.9", false);
-        bool myBit12 = createTag("%IX0.0.10", false);
-        bool myBit13 = createTag("%IX0.0.11", false);
-        bool myBit14 = createTag("%IX0.0.12", false);
-        bool myBit15 = createTag("%IX0.0.13", false);
-        bool myBit16 = createTag("%IX0.0.14", false);
-        bool myBit17 = createTag("%IX0.0.15", false);
+        bool x10 = createTag("%IX0.0.8", false);
+        bool x11 = createTag("%IX0.0.9", false);
+        bool x12 = createTag("%IX0.0.10", false);
+        bool x13 = createTag("%IX0.0.11", false);
+        bool x14 = createTag("%IX0.0.12", false);
+        bool x15 = createTag("%IX0.0.13", false);
+        bool x16 = createTag("%IX0.0.14", false);
+        bool x17 = createTag("%IX0.0.15", false);
 """
+    let pointAt (elementType:ElementType) (tag:ITag) (x:int) (y:int) : XmlOutput =
+        let xx = x*3 + 1
+        let yy = y*1024
+        let coordi = xx + yy
+        coordi === coord x y
 
+        let nElementType = int elementType
+        let str = elementBody nElementType coordi "BOOL"
+
+        (* see elementFull
+            /// rung 을 구성하는 element (접점)의 XML 표현 문자열 반환
+            let elementFull elementType coordi param tag : XmlOutput =
+                $"\t\t<Element ElementType={dq}{elementType}{dq} Coordinate={dq}{coordi}{dq} {param}>{tag}</Element>"
+        *)
+
+        elementFull nElementType coordi "" tag.Name
+
+    let contactAt (tag:ITag) (x:int) (y:int) = pointAt ElementType.ContactMode tag x y
+    let coilAt (tag:ITag) (y:int) = pointAt ElementType.CoilMode tag coilCellX y    // coilCellX = 31
+        
+    
 
 
 

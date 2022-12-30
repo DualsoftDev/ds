@@ -24,13 +24,13 @@ type XgiTimerTest() =
         let storages = Storages()
         let code = """
             bool myQBit0 = createTag("%QX0.1.0", false);
-            bool myBit0 = createTag("%IX0.0.0", false);
-            bool myBit1 = createTag("%IX0.0.1", false);
-            bool myBit2 = createTag("%IX0.0.2", false);
+            bool x0 = createTag("%IX0.0.0", false);
+            bool x1 = createTag("%IX0.0.1", false);
+            bool x2 = createTag("%IX0.0.2", false);
 
-            bool myBit7 = createTag("%IX0.0.7", false);
+            bool x7 = createTag("%IX0.0.7", false);
             ton myTon = createTON(2000us, $myQBit0);
-            $myBit7 := ($myBit0 || $myBit1) && $myBit2;
+            $x7 := ($x0 || $x1) && $x2;
 """
         let statements = parseCode storages code
         //storages.Count === 12
@@ -44,8 +44,8 @@ type XgiTimerTest() =
         let storages = Storages()
         let code = codeForBits + """
             ton myTon = createTON(2000us,
-                $myBit00 && $myBit01 && $myBit02 && $myBit03 && $myBit04 && $myBit05 && $myBit06 && $myBit07
-                && $myBit10 && $myBit11 && $myBit12 && $myBit13 && $myBit14 && $myBit15 && $myBit16    );
+                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07
+                && $x10 && $x11 && $x12 && $x13 && $x14 && $x15 && $x16    );
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
@@ -58,18 +58,18 @@ type XgiTimerTest() =
             ton myTon = createTON(2000us,
                 // 산전 limit : 가로로 31개
                 //let coilCellX = 31
-                $myBit00 && $myBit01 && $myBit02 && $myBit03 && $myBit04 && $myBit05 && $myBit06 && $myBit07
-                && $myBit10 && $myBit11 && $myBit12 && $myBit13 && $myBit14 && $myBit15 &&
+                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07
+                && $x10 && $x11 && $x12 && $x13 && $x14 && $x15 &&
 
-                $myBit00 && $myBit01 && $myBit02 && $myBit03 && $myBit04 && $myBit05 && $myBit06 && $myBit07 &&
-                $myBit10 &&
-                $myBit11 &&
-                $myBit12 &&
-                $myBit13 &&
-                //$myBit14 &&
-                //$myBit15 &&
+                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 &&
+                $x10 &&
+                $x11 &&
+                $x12 &&
+                $x13 &&
+                //$x14 &&
+                //$x15 &&
 
-                $myBit16    );
+                $x16    );
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
@@ -81,8 +81,8 @@ type XgiTimerTest() =
         let storages = Storages()
         let code = codeForBits + """
             ton myTon = createTON(2000us,
-                $myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
-                || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16    );
+                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
+                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16    );
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
@@ -94,14 +94,14 @@ type XgiTimerTest() =
         let storages = Storages()
         let code = codeForBits + """
             ton myTon = createTON(2000us,
-                $myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
-                || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16 ||
+                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
+                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16 ||
 
-                $myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
-                || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16 ||
+                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
+                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16 ||
 
-                $myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
-                || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16
+                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
+                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16
 
                 );
 """
@@ -115,17 +115,17 @@ type XgiTimerTest() =
         let storages = Storages()
         let code = codeForBits + """
             ton myTon = createTON(2000us,
-                ($myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
-                || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16)
+                ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
+                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16)
                 &&
-                ($myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
-                || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16)
+                ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
+                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16)
                 &&
-                ($myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
-                || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16)
+                ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
+                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16)
                 &&
-                ($myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
-                || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16)
+                ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
+                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16)
 
                 );
 """
@@ -138,17 +138,17 @@ type XgiTimerTest() =
         let storages = Storages()
         let code = codeForBits + """
             ton myTon = createTON(2000us,
-                ($myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
-                || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16)
-                && $myBit00 &&
-                ($myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
-                || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16)
-                && $myBit00 &&
-                ($myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
-                || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16)
-                && $myBit00 &&
-                ($myBit00 || $myBit01 || $myBit02 || $myBit03 || $myBit04 || $myBit05 || $myBit06 || $myBit07
-                || $myBit10 || $myBit11 || $myBit12 || $myBit13 || $myBit14 || $myBit15 || $myBit16)
+                ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
+                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16)
+                && $x00 &&
+                ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
+                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16)
+                && $x00 &&
+                ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
+                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16)
+                && $x00 &&
+                ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
+                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16)
 
                 );
 """

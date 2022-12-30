@@ -16,7 +16,7 @@ module internal Common =
     }
 
     type CoordinatedRungXmlsWithNewY = {
-        NewY: int
+        SpanY: int
         PositionedRungXmls: CoordinatedRungXml list
     }
 
@@ -80,13 +80,15 @@ module internal Common =
     let createFB funcFind func (inst:string) tag x y : CoordinatedRungXml =
         let instFB = if(inst <> "") then (inst + ",VAR") else ","
         let c = coord x y
-        let fbBody = sprintf "Param=\"%s\"" ((FB.getFBXML( funcFind ,func ,instFB, FB.getFBIndex tag)))
-        { Coordinate = c; Xml = elementFull (int ElementType.VertFBMode) c fbBody inst }
+        let fbBody = sprintf "Param=\"%s\"" (FB.getFBXML( funcFind, func, instFB, FB.getFBIndex tag))
+        let xml = elementFull (int ElementType.VertFBMode) c fbBody inst
+        { Coordinate = c; Xml = xml }
 
     /// 함수 파라메터 그리기
     let createFBParameterXml tag x y=
         let c = coord x y
-        { Coordinate = c; Xml = elementFull (int ElementType.VariableMode) c "" tag }
+        let xml = elementFull (int ElementType.VariableMode) c "" tag
+        { Coordinate = c; Xml = xml }
 
     let drawRising (x, y) =
         let cellX = getFBCellX x

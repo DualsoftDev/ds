@@ -156,5 +156,8 @@ module internal Basic =
                 |> Seq.map (fun ri -> ri.Xml)  //snd
                 |> String.concat "\r\n"
 
-        { Xml = xml; Coordinate = result.SpanY + y }
+        let c =
+            let spanY = max result.SpanY commandHeight
+            coord x (spanY + y)
+        { Xml = xml; Coordinate = c }
 

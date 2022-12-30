@@ -85,23 +85,23 @@ module internal Command =
     let drawCmdTimer(timerStatement:TimerStatement, x, y) : CoordinatedRungXmlsWithNewY =
         let time:int = int timerStatement.Timer.PRE.Value
         //let coil:IExpressionTerminal =
-        let funcSizeY = 3
+        let fbSpanY = 2
         //Command 속성입력
-        { NewY = funcSizeY-1; PositionedRungXmls = [createFBParameterXml $"T#{time}MS" (x-1) (y+1)]}
-        //{ NewY = funcSizeY-1; PositionedRungXmls = [createFBParameterXml $"T#{time}MS" x y]}
+        { SpanY = fbSpanY; PositionedRungXmls = [createFBParameterXml $"T#{time}MS" (x-1) (y+1)]}
+        //{ NewY = fbSpanY; PositionedRungXmls = [createFBParameterXml $"T#{time}MS" x y]}
 
     let drawCmdCounter(coil:IExpressionTerminal, reset:IExpressionTerminal, count:int, x, y) : CoordinatedRungXmlsWithNewY =
-        let funcSizeY = 4
+        let fbSpanY = 3
         //Command 속성입력
         let results = [
             createFBParameterXml reset.PLCTagName (x-1) (y+1)
             createFBParameterXml $"{count}" (x-1) (y+2)
         ]
 
-        { NewY = funcSizeY-1; PositionedRungXmls = results}
+        { SpanY = fbSpanY; PositionedRungXmls = results}
 
     let drawCmdCompare(coil:IExpressionTerminal, opComp:OpComp, leftA:CommandTag, leftB:CommandTag, x, y) : CoordinatedRungXmlsWithNewY =
-        let funcSizeY = 4
+        let fbSpanY = 3
 
         if(leftA.Size() <> leftB.Size())
         then failwithlog (sprintf "Tag Compare size error %s(%s),  %s(%s)" (leftA.ToText()) (leftA.SizeString) (leftB.ToText()) (leftB.SizeString))
@@ -120,11 +120,11 @@ module internal Command =
             createFBParameterXml (coil.PLCTagName)  (x+1) (y+1)
         ]
 
-        { NewY = funcSizeY - 1; PositionedRungXmls = results}
+        { SpanY = fbSpanY; PositionedRungXmls = results}
 
     let drawCmdAdd(tagCoil:IExpressionTerminal, targetTag:CommandTag, addValue:int, xInit, y, (pulse:bool)): CoordinatedRungXmlsWithNewY =
         let mutable x = xInit
-        let funcSizeY = 4
+        let fbSpanY = 4
 
         let func = "ADD"
         //test ahn : Rear UINT SINT 등등 타입 추가  필요
@@ -134,7 +134,7 @@ module internal Command =
         let results = [
             if pulse then
                 x <- xInit + 1
-                yield! drawPulseCoil (xInit, y, tagCoil, funcSizeY)
+                yield! drawPulseCoil (xInit, y, tagCoil, fbSpanY)
             else
                 x <- xInit
                 //Command 결과출력
@@ -150,8 +150,8 @@ module internal Command =
             createFBParameterXml (addValue.ToString())   (x-1) (y+2)
         ]
 
-        let newY = if pulse then funcSizeY else funcSizeY-1
-        { NewY = newY; PositionedRungXmls = results}
+        let newY = if pulse then fbSpanY else fbSpanY-1
+        { SpanY = newY; PositionedRungXmls = results}
 
 
     let drawCmdCopy(tagCoil:IExpressionTerminal, fromTag:CommandTag, toTag:CommandTag, xInit, y, (pulse:bool)) : CoordinatedRungXmlsWithNewY =
@@ -159,7 +159,7 @@ module internal Command =
             failwithlog $"Tag Compare size error {fromTag.ToText()}{fromTag.SizeString},  {toTag.ToText()}({toTag.SizeString})"
 
         let mutable x = xInit
-        let funcSizeY = 3
+        let fbSpanY = 3
         let func = "MOVE"
         let funcFind = func + "_" + fromTag.SizeString
 
@@ -167,7 +167,7 @@ module internal Command =
             if pulse then
                 //Pulse Command 결과출력
                 x <- xInit + 1
-                yield! drawPulseCoil (xInit, y, tagCoil, funcSizeY)
+                yield! drawPulseCoil (xInit, y, tagCoil, fbSpanY)
             else
                 //Command 결과출력
                 x <- xInit
@@ -180,8 +180,8 @@ module internal Command =
             createFBParameterXml (toTag.ToText())  (x+1) (y+1)
         ]
 
-        let newY = if pulse then funcSizeY else funcSizeY-1
-        { NewY = newY; PositionedRungXmls = results}
+        let spanY = if pulse then fbSpanY else fbSpanY-1
+        { SpanY = spanY; PositionedRungXmls = results}
 
 
 
@@ -217,7 +217,7 @@ module internal Command =
         let newX = x + 1
 
         //FunctionBlock, Function 그리기
-        let { NewY = newY; PositionedRungXmls = result} =
+        let { SpanY = spanY; PositionedRungXmls = result} =
             match cmd.CommandType with
             | FunctionCmd (fc) ->
                 match fc with
@@ -239,6 +239,6 @@ module internal Command =
 
         results.AddRange(result)
 
-        newY, (results |> List.ofSeq)
+        spanY, (results |> List.ofSeq)
 
 

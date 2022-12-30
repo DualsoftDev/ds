@@ -137,7 +137,8 @@ module internal XgiFile =
     let private generateRungs (prologComments:string seq) (commentedStatements:CommentedStatement seq) : XmlOutput =
         let xmlRung (expr:FlatExpression) xgiCommand y : RungGenerationInfo =
             let {Coordinate=posi; Xml=xml} = rung 0 y expr xgiCommand
-            { Xmls = [$"\t<Rung BlockMask={dq}0{dq}>\r\n{xml}\t</Rung>"]; Y = posi}
+            let yy = (posi / 1024)// + 1
+            { Xmls = [$"\t<Rung BlockMask={dq}0{dq}>\r\n{xml}\t</Rung>"]; Y = yy}
 
         let mutable rgi:RungGenerationInfo = {Xmls = []; Y = 0}
 
@@ -162,7 +163,8 @@ module internal XgiFile =
                 let flatExpr = expr.Flatten() :?> FlatExpression
                 let command:XgiCommand = CoilCmd(CoilMode(target)) |> XgiCommand
                 let rgiSub = xmlRung flatExpr command rgi.Y
-                rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
+                //rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
+                rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgiSub.Y}
 
             // <kwak> <timer>
             | DuTimer timerStatement ->
@@ -193,7 +195,7 @@ module internal XgiFile =
             //    else
             //        xmlRung expr stmt.Command y
 
-        let rungEnd = generateEnd rgi.Y
+        let rungEnd = generateEnd (rgi.Y + 1)
         rgi <- rgi.Add(rungEnd)
         rgi.Xmls |> List.rev |> String.concat "\r\n"
 

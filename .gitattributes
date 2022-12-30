@@ -1,2 +1,2 @@
 *.xml text eol=crlf
-.gitattributes text eol=crlf
+.gitattributes text eol=lf

@@ -16,6 +16,24 @@ type XgiGenerationTest() =
     inherit XgiTestClass()
 
     [<Test>]
+    member __.``OR simple test`` () =
+        let storages = Storages()
+        let code = """
+            bool x0 = createTag("%IX0.0.0", false);
+            bool x1 = createTag("%IX0.0.1", false);
+
+            bool x7 = createTag("%QX0.1.0", false);
+
+            $x7 := ($x0 || $x1);
+"""
+        let statements = parseCode storages code
+        storages.Count === 3
+        statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
+
+        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
+
+    [<Test>]
     member __.``AndOr simple test`` () =
         let storages = Storages()
         let code = """

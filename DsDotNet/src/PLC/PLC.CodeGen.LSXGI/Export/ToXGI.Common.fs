@@ -33,15 +33,14 @@ module internal Common =
     let hlineEmpty c = element (int ElementType.HorzLineMode) c
     let hline c = element (int ElementType.MultiHorzLineMode) c
     /// 좌표 c 에서 시작하는 수직 line
-    let vline c = element (int ElementType.LineType_Start) c
+    let vline c = element (int ElementType.VertLineMode) c
     /// 좌표 반환 : 1, 4, 7, 11, ...
     /// 논리 좌표 x y 를 LS 산전 XGI 수치 좌표계로 반환
     let coord x y : EncodedXYCoordinate = x*3 + y*1024 + 1
 
-    /// 산전 limit : 가로로 29개 (31개)
-    /// 라인별로 연결 화살표도 Cell 을 차지하는 것을 고려했을 때, 실제 Output Coil 에 사용될 수 있는
-    /// input tag 의 가로 최대 갯수는 29개 이다.
+    /// 산전 limit : contact 기준 가로로 최대 31개[0..30] + coil 1개[31]
     let coilCellX = 31
+    let maxNumHorizontalContact = 31
     /// 최소기본 FB 위치 : 가로로  9 포인트
     let minFBCellX = 9
     /// 조건이 9 이상이면 뒤로 증가

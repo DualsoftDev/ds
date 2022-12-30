@@ -135,7 +135,7 @@ module XgiGenerationTestModule =
         bool x21 = createTag("%IX0.1.5", false);
         bool x22 = createTag("%IX0.1.6", false);
         bool x23 = createTag("%IX0.1.7", false);
-        
+
         bool x24 = createTag("%IX0.1.8", false);
         bool x25 = createTag("%IX0.1.9", false);
         bool x26 = createTag("%IX0.1.10", false);
@@ -164,10 +164,13 @@ module XgiGenerationTestModule =
 
         elementFull nElementType coordi "" tag.Name
 
+    /// x, y 위치에 contact 생성하기 위한 xml 문자열 반환
     let contactAt (tag:ITag) (x:int) (y:int) = pointAt ElementType.ContactMode tag x y
+
+    /// y line 에 coil 생성하기 위한 xml 문자열 반환
     let coilAt (tag:ITag) (y:int) = pointAt ElementType.CoilMode tag coilCellX y    // coilCellX = 31
-        
-    
+
+
 
 
 

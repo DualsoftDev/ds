@@ -1,5 +1,6 @@
 namespace T
 
+open System.Linq
 open NUnit.Framework
 open Engine.Core
 open Engine.Common.FS
@@ -123,7 +124,7 @@ type XgiRungTest() =
 		<MemberInitValues/>
 		<MemberComments/>
 	</Symbol>"""
-        
+
         let symbolsLocalXml = XGITag.generateSymbolVars ([ symbolInfo ], false)
 
         symbolsLocalXml =~= """<LocalVar Version="Ver 1.0" Count="1">
@@ -138,12 +139,11 @@ type XgiRungTest() =
 <TempVar Count="0"></TempVar>
 </LocalVar>"""
 
-    [<Test>]
-    member __.``Generate ANDs variables test``() =
+    member __.PrepareWithSymbols(numTags:int) =
         let storages = Storages()
         let q = PlcTag("myQ0", "%QX0.1.0", false)
         let statements_ = parseCode storages codeForBits31
-        let iTags = storages.Values.ToEnumerable<PlcTag<bool>>().ToArray()
+        let iTags = storages.Values.ToEnumerable<PlcTag<bool>>().Take(numTags).ToArray()
         let symbolInfos =
             let kind = int Variable.Kind.VAR
             let plcType = "BOOL"
@@ -153,6 +153,12 @@ type XgiRungTest() =
                 XGITag.createSymbol q.Name "Fake Comment" "Q" kind q.Address plcType
             ]
         let localSymbolsXml = XGITag.generateSymbolVars(symbolInfos, false)
+        iTags, q, localSymbolsXml
+
+
+    [<Test>]
+    member x.``Generate ANDsMax(=31) variables test``() =
+        let iTags, q, localSymbolsXml = x.PrepareWithSymbols(31)
 
         let rungs =
             [
@@ -166,12 +172,13 @@ type XgiRungTest() =
                     contactAt t x y     // <Element ElementType="6" Coordinate="1025">myBit00</Element>
                     x <- x + 1
 
+                (* 꽉 채운 경우에는 HorzLineMode 및 MultiHorzLineMode 가 들어갈 공간이 없으므로 사용하지 않는다. *)
                 //let xy = coord x y
                 //$""" <Element ElementType="1" Coordinate="{xy}"></Element>"""
                 //x <- x + 1
                 //let xy = coord x y
                 //$""" <Element ElementType="2" Coordinate="{xy}" Param="84"></Element>"""
-            
+
                 coilAt q 1
 
                 """
@@ -179,6 +186,161 @@ type XgiRungTest() =
 <Rung BlockMask="0">
     <Element ElementType="2" Coordinate="2049" Param="90"></Element>
     <Element ElementType="33" Coordinate="2142" Param="END">END</Element>
+</Rung>"""
+            ] |> String.concat "\r\n"
+
+        let xml = wrapWithXml rungs localSymbolsXml emptySymbolsGlobalXml None
+        saveTestResult (get_current_function_name ()) xml
+
+
+    [<Test>]
+    member x.``Generate ANDs30 variables test``() =
+        let iTags, q, localSymbolsXml = x.PrepareWithSymbols(30)
+
+        let rungs =
+            [
+                """
+<Rung BlockMask="0"><Element ElementType="63" Coordinate="1">DS Logic for XGI</Element></Rung>
+<Rung BlockMask="0">
+"""
+                let y = 1
+                let mutable x = 0
+                for t in iTags.Take(30) do
+                    contactAt t x y     // <Element ElementType="6" Coordinate="1025">myBit00</Element>
+                    x <- x + 1
+
+                (* 꽉 채우고, 한 칸 빌 경우에는 HorzLineMode 만 사용한다. *)
+                let xy = coord x y
+                $""" <Element ElementType="1" Coordinate="{xy}"></Element>"""
+                //x <- x + 1
+                //let xy = coord x y
+                //$""" <Element ElementType="2" Coordinate="{xy}" Param="84"></Element>"""
+
+                coilAt q 1
+
+                """
+</Rung>
+<Rung BlockMask="0">
+    <Element ElementType="2" Coordinate="2049" Param="90"></Element>
+    <Element ElementType="33" Coordinate="2142" Param="END">END</Element>
+</Rung>"""
+            ] |> String.concat "\r\n"
+
+        let xml = wrapWithXml rungs localSymbolsXml emptySymbolsGlobalXml None
+        saveTestResult (get_current_function_name ()) xml
+
+
+    [<Test>]
+    member x.``Generate ANDs29 variables test``() =
+        let iTags, q, localSymbolsXml = x.PrepareWithSymbols(29)
+
+        let rungs =
+            [
+                """
+<Rung BlockMask="0"><Element ElementType="63" Coordinate="1">DS Logic for XGI</Element></Rung>
+<Rung BlockMask="0">
+"""
+                let y = 1
+                let mutable x = 0
+                for t in iTags.Take(29) do
+                    contactAt t x y     // <Element ElementType="6" Coordinate="1025">myBit00</Element>
+                    x <- x + 1
+
+                (* 꽉 채우고, 두 칸 이상 빌 경우에는 HorzLineMode 및 MultiHorzLineMode 를 모두 사용한다. *)
+                let xy = coord x y
+                $""" <Element ElementType="1" Coordinate="{xy}"></Element>"""
+                x <- x + 1
+                let xy = coord x y
+                $""" <Element ElementType="2" Coordinate="{xy}" Param="84"></Element>"""
+
+                coilAt q 1
+
+                """
+</Rung>
+<Rung BlockMask="0">
+    <Element ElementType="2" Coordinate="2049" Param="90"></Element>
+    <Element ElementType="33" Coordinate="2142" Param="END">END</Element>
+</Rung>"""
+            ] |> String.concat "\r\n"
+
+        let xml = wrapWithXml rungs localSymbolsXml emptySymbolsGlobalXml None
+        saveTestResult (get_current_function_name ()) xml
+
+
+
+    [<Test>]
+    member x.``Generate OR2 variables test``() =
+        let iTags, q, localSymbolsXml = x.PrepareWithSymbols(2)
+
+        let rungs =
+            [
+                """
+<Rung BlockMask="0"><Element ElementType="63" Coordinate="1">DS Logic for XGI</Element></Rung>
+<Rung BlockMask="0">
+"""
+                let mutable y = 1
+                for t in iTags do
+                    contactAt t 0 y     // <Element ElementType="6" Coordinate="1025">myBit00</Element>
+                    if y = 1 then
+                        (* VertLineMode 로 시작하면 HorzLineMode 없이, 바로 MultiHorzLineMode 가 와야 한다. *)
+                        let xy = coord 1 1 - 1      // 1027
+                        $"""<Element ElementType="0" Coordinate="{xy}" />"""     // VertLineMode = 0
+                        let xy = coord 1 1          // 1028
+                        let width = (maxNumHorizontalContact - 2) * 3    // 87
+                        //$""" <Element ElementType="1" Coordinate="{xy} Param={width}"></Element>"""
+                        //let xy = coord 31 1
+                        $""" <Element ElementType="2" Coordinate="{xy}" Param="{width}"></Element>"""       // MultiHorzLineMode = 2
+
+                    y <- y + 1
+
+
+
+                coilAt q 1
+
+                let xyEndS, xyEndE = coord 0 y, coord maxNumHorizontalContact y
+                $"""
+</Rung>
+<Rung BlockMask="0">
+    <Element ElementType="2" Coordinate="{xyEndS}" Param="90"></Element>
+    <Element ElementType="33" Coordinate="{xyEndE}" Param="END">END</Element>
+</Rung>"""
+            ] |> String.concat "\r\n"
+
+        let xml = wrapWithXml rungs localSymbolsXml emptySymbolsGlobalXml None
+        saveTestResult (get_current_function_name ()) xml
+
+    [<Test>]
+    member x.``Generate ORs variables test``() =
+        let iTags, q, localSymbolsXml = x.PrepareWithSymbols(31)
+
+        let rungs =
+            [
+                """
+<Rung BlockMask="0"><Element ElementType="63" Coordinate="1">DS Logic for XGI</Element></Rung>
+<Rung BlockMask="0">
+"""
+                let mutable y = 1
+                for t in iTags do
+                    contactAt t 0 y     // <Element ElementType="6" Coordinate="1025">myBit00</Element>
+                    if y < 31 then
+                        (* VertLineMode 로 시작하면 HorzLineMode 없이, 바로 MultiHorzLineMode 가 와야 한다. *)
+                        let xy = coord 1 y - 1      // 1027
+                        $"""<Element ElementType="0" Coordinate="{xy}" />"""     // VertLineMode = 0
+                    if y = 1 then
+                        let xy = coord 1 1          // 1028
+                        let width = (maxNumHorizontalContact - 2) * 3    // 87 = (31-2) * 3
+                        $""" <Element ElementType="2" Coordinate="{xy}" Param="{width}"></Element>"""       // MultiHorzLineMode = 2
+
+                    y <- y + 1
+
+                coilAt q 1
+
+                let xyEndS, xyEndE = coord 0 y, coord coilCellX y
+                $"""
+</Rung>
+<Rung BlockMask="0">
+    <Element ElementType="2" Coordinate="{xyEndS}" Param="90"></Element>
+    <Element ElementType="33" Coordinate="{xyEndE}" Param="END">END</Element>
 </Rung>"""
             ] |> String.concat "\r\n"
 

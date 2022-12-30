@@ -111,7 +111,6 @@ module EtcListenerModule =
                     return system.Lamps.Add(ld)
                 } |> ignore
             )
-            printfn ""
 
         member x.ProcessSafetyBlock(ctx:SafetyBlockContext) =
             let safetyDefs = ctx.Descendants<SafetyDefContext>()

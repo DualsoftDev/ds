@@ -408,10 +408,12 @@ module OriginModule =
         [<Extension>] 
         static member GetOriginsWithJobDefs(graph:DsGraph) = 
             let allNodes, allJobs = getOrigins graph 
-            allNodes |> Seq.map(fun node -> 
-                            let jobDef = allJobs.Where(fun j -> j.ApiName = node.Key).First()
-                            jobDef, node.Value )
-                     |> Tuple.toDictionary
+            allNodes 
+            |> Seq.map(fun node -> 
+                allJobs.Where(fun j -> j.ApiName = node.Key).First(),
+                node.Value 
+            )
+            |> Tuple.toDictionary
 
         /// Get node index map(key:name, value:idx)
         [<Extension>] 

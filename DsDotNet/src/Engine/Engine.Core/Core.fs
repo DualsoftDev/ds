@@ -248,7 +248,7 @@ module CoreModule =
             edge
 
         override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
-
+        
     and AliasTargetWrapper =
         | DuAliasTargetReal of Real
         | DuAliasTargetCall of Call

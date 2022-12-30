@@ -6,10 +6,12 @@ open Engine.Core
 open Engine.CodeGenCPU
 
 let getOriginIOs(real:Real, initialType:InitialType) =
-    let ios = (OriginHelper.GetOriginsWithJobDefs real.Graph)
-                .Where(fun w-> w.Value = initialType)
-                .Select(fun s-> s.Key.InTag)
-                .Cast<PlcTag<bool>>()
+    let origins = OriginHelper.GetOriginsWithJobDefs real.Graph
+    let ios = 
+        origins
+            .Where(fun w-> w.Value = initialType)
+            .Select(fun s-> s.Key.InTag)
+            .Cast<PlcTag<bool>>()
     ios
 
 let getNeedCheckExpr(interlocks:PlcTag<bool> seq) =

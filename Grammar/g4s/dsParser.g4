@@ -163,7 +163,7 @@ lampBlocks:runLampBlock|dryrunLampBlock|manualLampBlock|stopLampBlock|emgLampBlo
     
     lampBlock: LBRACE (() | ((SEIMCOLON)* lampDef)* (SEIMCOLON)*) RBRACE;
     lampDef: (lampName|lampName addrDef) EQ LBRACE (() | flowName) RBRACE;
-    addrDef: LPARENTHESIS (() | addressItem) RPARENTHESIS;
+    addrDef: LPARENTHESIS addressItem RPARENTHESIS;
     lampName: identifier1;
     
 

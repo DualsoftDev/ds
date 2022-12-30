@@ -13,11 +13,10 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module EtcListenerModule =
-
     (* 모든 vertex 가 생성 된 이후, edge 연결 작업 수행 *)
     type DsParserListener with
         member x.ProcessButtonsBlocks(ctx:ButtonsBlocksContext) =
-            let first = ctx.TryFindFirstChild<ParserRuleContext>().Value     // {Emergency, Auto, Start, Reset}ButtonsContext
+            let first = ctx.TryFindFirstChild<ParserRuleContext>().Value // {Emergency, Auto, Start, Reset}ButtonsContext
             let system = x.TheSystem
             let targetBtnType =
                 match first with
@@ -38,23 +37,44 @@ module EtcListenerModule =
                 x.ButtonCategories.Add(key) |> ignore
 
             let buttonDefs = first.Descendants<ButtonDefContext>().ToArray()
-            for bd in buttonDefs do
-                let btnNameAddr = bd.TryFindFirstChild<BtnNameAddrContext>().Value
-                let btnName, addrIn, addrOut = 
-                    match btnNameAddr.ChildCount with
-                    | 2 -> 
-                        let inOutCtx = btnNameAddr.GetChild(1) :?> AddressInOutContext
-                        btnNameAddr.GetChild(0).GetText(), inOutCtx.GetChild(1).GetText(), inOutCtx.GetChild(3).GetText()
-                    | _ -> btnNameAddr.GetChild(0).GetText(), null, null
-                let flows =
-                    bd.Descendants<FlowNameContext>()
-                        .Select(fun flowCtx -> flowCtx.GetText())
-                        .Tap(fun flowName -> verifyM $"Flow [{flowName}] not exists!" (system.Flows.Any(fun f -> f.Name = flowName)))
-                        .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName))
-                        .ToArray()
-                if flows.Length > 0
-                then flows.ForEach(fun flow -> system.AddButton(targetBtnType, btnName, addrIn, addrOut, flow))
-                else system.Buttons.Add(ButtonDef(btnName, targetBtnType, null, null, new HashSet<Flow>())) |> ignore
+            let flowBtnInfo = [
+                for bd in buttonDefs do
+                option {
+                    let! btnNameAddr    = bd.TryFindFirstChild<BtnNameAddrContext>()
+                    let! btnNameCtx     = btnNameAddr.TryFindFirstChild<ButtonNameContext>()
+                    let btnName         = btnNameCtx.GetText()
+                    let addrIn, addrOut = 
+                        match btnNameAddr.ChildCount with
+                        | 2 -> 
+                            option {
+                                let! inOutCtx = btnNameAddr.TryFindFirstChild<AddressInOutContext>()
+                                let! inCtx    = inOutCtx.TryFindFirstChild<InAddrContext>()
+                                let! outCtx   = inOutCtx.TryFindFirstChild<OutAddrContext>()
+                                return inCtx.GetText(), outCtx.GetText()
+                            } |> Option.get
+                        | _ -> 
+                            null, null
+                    let flows =
+                        bd.Descendants<FlowNameContext>()
+                            .Select(fun flowCtx -> flowCtx.GetText())
+                            .Tap(fun flowName -> verifyM $"Flow [{flowName}] not exists!" (system.Flows.Any(fun f -> f.Name = flowName)))
+                            .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName))
+                            .ToHashSet()
+                                
+                    flows |> Seq.iter(fun f -> printfn "%A %A %A %A" f.Name targetBtnType addrIn addrOut)
+                    if flows.Count > 0 then
+                        return ButtonDef(btnName, targetBtnType, addrIn, addrOut, flows)
+                    else
+                        return ButtonDef(btnName, targetBtnType, null, null, new HashSet<Flow>())
+                }
+            ]
+            flowBtnInfo
+            |> List.iter(fun btnDef -> 
+                option {
+                    let! bd = btnDef
+                    return system.Buttons.Add(bd)
+                } |> ignore
+            )
 
         member x.ProcessLampBlocks(ctx:LampBlocksContext) =
             let first = ctx.TryFindFirstChild<ParserRuleContext>().Value
@@ -69,18 +89,29 @@ module EtcListenerModule =
                 | _ -> failwith "lamp type error"
 
             let lampDefs = first.Descendants<LampDefContext>().ToArray()
-            for ld in lampDefs do
-                let lampName = ld.TryFindFirstChild<LampNameContext>().Value.GetText()
-                let flowName = ld.TryFindFirstChild<FlowNameContext>().Value.GetText()
-                let addrCtx  = ld.TryFindFirstChild<AddressItemContext>()
-                let address = 
-                    match addrCtx with
-                    | Some addr -> addr.GetText()
-                    | None -> null
-                let flow = system.TryFindFlow flowName
-                match flow with
-                | Some f -> system.AddLamp(targetLmpType, lampName, address, f)
-                | None -> failwith "no flow error"
+            let flowLampInfo = [
+                for ld in lampDefs do
+                option {
+                    let! lampNameCtx = ld.TryFindFirstChild<LampNameContext>()
+                    let! flowNameCtx = ld.TryFindFirstChild<FlowNameContext>()
+                    let  addressCtx  = ld.TryFindFirstChild<AddressItemContext>()
+                    let! flow = flowNameCtx.GetText() |> system.TryFindFlow
+                    let lampName = lampNameCtx.GetText()
+                    let address = 
+                        match addressCtx with
+                        | Some addr -> addr.GetText()
+                        | None -> null
+                    return LampDef(lampName, targetLmpType, address, flow)
+                }
+            ]
+            flowLampInfo
+            |> List.iter(fun lmpDef ->
+                option {
+                    let! ld = lmpDef
+                    return system.Lamps.Add(ld)
+                } |> ignore
+            )
+            printfn ""
 
         member x.ProcessSafetyBlock(ctx:SafetyBlockContext) =
             let safetyDefs = ctx.Descendants<SafetyDefContext>()

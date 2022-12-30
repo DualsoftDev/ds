@@ -119,30 +119,9 @@ module internal Basic =
         /// 최초 시작이 OR 로 시작하면 우측으로 1 column 들여쓰기 한다.
         let indent = 0  // if getDepthFirstLogical expr = Some(Op.Or) then 1 else 0
 
-        /// OR 로만(Neg 은 포함가능) 연결된 것인지 검사
-        let (|FlatNaryOROnly|_|) (expr:FlatExpression) =
-            let rec helper (fe:FlatExpression) =
-                match fe with
-                | FlatNary(Or, head::tail) -> helper head
-                | FlatTerminal _ -> Some()
-                | _ -> None
-
-            match expr with
-            | FlatTerminal _ -> None    // 맨 처음부터 terminal 이 오는 것은 OR only 로 보지 않음
-            | _ -> helper expr
-
         let result = rng (x+indent) y expr
 
         noop()
-
-        let needStayColumn =
-            match expr with
-            //| FlatNary(Neg, FlatTerminal _::[])  -> rslt
-            //| FlatNary(Neg, FlatNary(Or, _)::[]) -> rslt
-            | FlatNaryOROnly -> true
-            | FlatNary(Neg, _) -> true
-            | _ when result.NextX = x -> false
-            | _ -> true
 
         /// 좌표 * xml 결과 문자열
         let positionedRungXmls, newY =
@@ -168,20 +147,13 @@ module internal Basic =
                         ]
                         0, results
 
-                    let nx = (if needStayColumn then 0 else 1) + result.NextX
-
-                    let nx, lineStartX =
-                        let x = result.NextX
-                        match needStayColumn with
-                        | true -> x, x + 1
-                        | false -> x + 1, x + 1
-
+                    let nx = x + result.SpanX
                     let newY, posiRungXmls =
                         match cmdExp.CommandType with
                         | CoilCmd (cc) ->
-                            drawCoil(nx, y)
-                        | ( FunctionCmd _ | FunctionBlockCmd _ )
-                            -> drawCommand(cmdExp, nx, y, lineStartX)
+                            drawCoil(nx-1, y)
+                        | ( FunctionCmd _ | FunctionBlockCmd _ ) ->
+                            drawCommand(cmdExp, nx, y)
 
                     yield! posiRungXmls
                     newPositionY <- newY

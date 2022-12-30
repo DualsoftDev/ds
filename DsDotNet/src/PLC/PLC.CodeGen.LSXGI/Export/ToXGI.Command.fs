@@ -196,19 +196,25 @@ module internal Command =
         ]
 
     // <timer>
-    let drawCommand(cmd:XgiCommand, x, y, lineConnectionStartX) =       // lineConnectionStartX : 일반적으로 x+1
+    let drawCommand(cmd:XgiCommand, x, y) =
         let results = ResizeArray<CoordinatedRungXml>()
+        let c = coord x y
+        results.Add( {Coordinate = c; Xml = hlineEmpty c})
+        noop()
+        //results.Add( {Coordinate = coord (x-1) y; Xml = mutiEndLine (x-1)  x y})
 
         //FunctionBlock, Function 까지 연장선 긋기
 
-        //let needNewLineFeed = (x % minFBCellX) >= 6
-        let numLineSpan = x / minFBCellX
-        let newX = max (x + 1) ((1 + numLineSpan) * minFBCellX  - 3)
-        if x  < newX - 1 then
-            //newX <- getFBCellX x
-            results.Add( {Coordinate = coord newX y; Xml = mutiEndLine lineConnectionStartX  (newX - 1) y})
-        //else
-        //    results.Add( {Position = coord newX y; Xml=mutiEndLine (x + 1) (minFBCellX + newX - 1) y})
+        ////let needNewLineFeed = (x % minFBCellX) >= 6
+        //let numLineSpan = x / minFBCellX
+        //let newX = max (x + 1) ((1 + numLineSpan) * minFBCellX  - 3)
+        //if x  < newX - 1 then
+        //    //newX <- getFBCellX x
+        //    results.Add( {Coordinate = coord newX y; Xml = mutiEndLine lineConnectionStartX  (newX - 1) y})
+        ////else
+        ////    results.Add( {Position = coord newX y; Xml=mutiEndLine (x + 1) (minFBCellX + newX - 1) y})
+
+        let newX = x + 1
 
         //FunctionBlock, Function 그리기
         let { NewY = newY; PositionedRungXmls = result} =

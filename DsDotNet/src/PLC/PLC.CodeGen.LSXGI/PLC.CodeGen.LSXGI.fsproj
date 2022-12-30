@@ -9,6 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Include="AssemblyInfo.fs" />
 		<Compile Include="Address.Convert.fs" />
 		<Compile Include="FromXGI.fs" />
 		<Compile Include="ToXGI.Spec.fs" />

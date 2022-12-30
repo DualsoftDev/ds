@@ -223,7 +223,7 @@ module internal XgiFile =
     //
     // symbolsLocal = "<LocalVar Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </LocalVar>
     // symbolsGlobal = "<GlobalVariable Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </GlobalVariable>
-    let wrapWithXml rungs symbolsLocal symbolsGlobal (existingLSISprj:string option) =
+    let wrapWithXml (rungs:XmlOutput) symbolsLocal symbolsGlobal (existingLSISprj:string option) =
         let xdoc =
             existingLSISprj
             |> Option.map DsXml.load
@@ -498,7 +498,7 @@ module internal XgiFile =
                         //    | Some tt when tt.Equals TagType.Instance -> Variable.Kind.VAR
                         //    | _-> Variable.Kind.VAR_EXTERNAL
 
-                        XGITag.createSymbol name comment device ((int)kind) addr plcType -1 "" //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
+                        XGITag.createSymbol name comment device ((int)kind) addr plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
                     | DuTimer timer ->
                         let device, addr = "", ""
                         let kind = Variable.Kind.VAR
@@ -506,7 +506,7 @@ module internal XgiFile =
                             match timer.Type with
                             | TON | TOF | RTO -> timer.Type.ToString()
 
-                        XGITag.createSymbol timer.Name $"TIMER {timer.Name}" device ((int)kind) addr plcType -1 "" //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
+                        XGITag.createSymbol timer.Name $"TIMER {timer.Name}" device ((int)kind) addr plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
                     | DuCounter counter ->
                         failwith "Not Yet"
                         ()

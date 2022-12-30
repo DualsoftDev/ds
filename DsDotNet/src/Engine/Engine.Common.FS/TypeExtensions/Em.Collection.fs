@@ -42,7 +42,11 @@ type SeqExt =
     [<Extension>] static member GroupByToDictionary<'V, 'K when 'K: equality>(xs:'V seq, keySelector:'V->'K) = groupByToDictionary xs keySelector
     [<Extension>] static member ToFSharpList(xs:'a seq)  = List.ofSeq xs
     [<Extension>] static member ToArray(xs:'a seq)      = Array.ofSeq xs
+    [<Extension>] static member ToEnumerable<'a>(xs:System.Collections.IEnumerable) = seq { for x in xs -> x :?> 'a }
     [<Extension>] static member ToResizeArray(xs:'a seq) = xs |> ResizeArray
+
+    [<Extension>] static member Repeat(xs:'a seq) = seq {while true do yield! xs}
+
     (*  List.fold (+) 0 [1; 2; 3] = ((0 + 1) + 2) + 3
         List.foldBack (+) [1; 2; 3] 0 = 1 + (2 + (3 + 0))   *)
     /// [x] -> (acc -> x -> acc) -> acc -> acc

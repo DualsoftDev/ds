@@ -223,7 +223,7 @@ module internal XgiFile =
     //
     // symbolsLocal = "<LocalVar Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </LocalVar>
     // symbolsGlobal = "<GlobalVariable Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </GlobalVariable>
-    let wrapWithXml rungs symbolsLocal symbolsGlobal (existingLSISprj:string option) =
+    let wrapWithXml (rungs:XmlOutput) symbolsLocal symbolsGlobal (existingLSISprj:string option) =
         let xdoc =
             existingLSISprj
             |> Option.map DsXml.load

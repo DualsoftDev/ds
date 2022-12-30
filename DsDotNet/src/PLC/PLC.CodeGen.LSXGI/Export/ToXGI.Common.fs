@@ -7,6 +7,7 @@ open Engine.Core
 
 [<AutoOpen>]
 module internal Common =
+    /// XmlOutput = string
     type XmlOutput = string
     type EncodedXYCoordinate = int
     type PositionedRungXml = {

@@ -139,8 +139,8 @@ module internal XgiFile =
         member x.Add(xml) = {Xmls = xml::x.Xmls; Y = x.Y + 1 }
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
     let private generateRungs (prologComments:string seq) (commentedStatements:CommentedStatement seq) : XmlOutput =
-        let xmlRung (expr:FlatExpression) xgiCommand y : RungGenerationInfo=
-            let {Position=posi; Xml=xml} = rung 0 y expr xgiCommand
+        let xmlRung (expr:FlatExpression) xgiCommand y : RungGenerationInfo =
+            let {Coordinate=posi; Xml=xml} = rung 0 y expr xgiCommand
             { Xmls = [$"\t<Rung BlockMask={dq}0{dq}>\r\n{xml}\t</Rung>"]; Y = posi}
 
         let mutable rgi:RungGenerationInfo = {Xmls = []; Y = 0}

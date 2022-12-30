@@ -1,23 +1,29 @@
 namespace PLC.CodeGen.LSXGI
 
 open Engine.Common.FS
-open PLC.CodeGen.Common
-open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 open Engine.Core
+open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 
 [<AutoOpen>]
 module internal Common =
     /// XmlOutput = string
     type XmlOutput = string
     type EncodedXYCoordinate = int
-    type PositionedRungXml = {
-        Position: EncodedXYCoordinate   // int
+    type CoordinatedRungXml = {
+        Coordinate: EncodedXYCoordinate   // int
         Xml: XmlOutput                  // string
     }
 
-    type PositionedRungXmlsWithNewY = {
+    type CoordinatedRungXmlsWithNewY = {
         NewY: int
-        PositionedRungXmls: PositionedRungXml list
+        PositionedRungXmls: CoordinatedRungXml list
+    }
+
+    type RungInfosWithNextPosition = {
+        RungInfos:CoordinatedRungXml list
+        NextX: int
+        NextY: int
+        VLineUpRightMaxY: int
     }
 
     let dq = "\""
@@ -61,22 +67,22 @@ module internal Common =
             failwithlogf "endX startX [%d > %d]" endX startX
 
     /// 함수 그리기
-    let createFB funcFind func (inst:string) tag x y : PositionedRungXml =
+    let createFB funcFind func (inst:string) tag x y : CoordinatedRungXml =
         let instFB = if(inst <> "") then (inst + ",VAR") else ","
         let c = coord x y
         let fbBody = sprintf "Param=\"%s\"" ((FB.getFBXML( funcFind ,func ,instFB, FB.getFBIndex tag)))
-        { Position = c; Xml = elementFull (int ElementType.VertFBMode) c fbBody inst }
+        { Coordinate = c; Xml = elementFull (int ElementType.VertFBMode) c fbBody inst }
 
     /// 함수 파라메터 그리기
     let createFBParameterXml tag x y=
         let c = coord x y
-        { Position = c; Xml = elementFull (int ElementType.VariableMode) c "" tag }
+        { Coordinate = c; Xml = elementFull (int ElementType.VariableMode) c "" tag }
 
     let drawRising (x, y) =
         let cellX = getFBCellX x
         let c = coord (cellX) y
-        [   { Position = c; Xml = risingline c}
-            { Position = c; Xml = mutiEndLine x (cellX-1) y}
+        [   { Coordinate = c; Xml = risingline c}
+            { Coordinate = c; Xml = mutiEndLine x (cellX-1) y}
         ]
 
     /// x y 위치에서 수직으로 n 개의 line 을 긋는다
@@ -84,19 +90,19 @@ module internal Common =
         [
             if x >= 0 then
                 let c = coord x y
-                yield { Position = c; Xml = $"<!-- vlineDownTo {x} {y} {n} -->" }
+                yield { Coordinate = c; Xml = $"<!-- vlineDownTo {x} {y} {n} -->" }
                 for n in [0.. n-1] do
                     let c = 2 + coord x (y + n)
-                    yield { Position = c; Xml = vline c }
+                    yield { Coordinate = c; Xml = vline c }
         ]
 
     let drawPulseCoil (x, y, tagCoil:IExpressionTerminal, funSize:int) =
         let newX = getFBCellX (x-1)
         let newY = y + funSize
         [
-            { Position = coord x y; Xml = risingline (coord x y)}
-            { Position = coord newX newY; Xml = mutiEndLine (x) (newX - 1) newY}
-            { Position = coord coilCellX newY; Xml = elementBody (int ElementType.CoilMode) (coord coilCellX newY) (tagCoil.PLCTagName)}
+            { Coordinate = coord x y; Xml = risingline (coord x y)}
+            { Coordinate = coord newX newY; Xml = mutiEndLine (x) (newX - 1) newY}
+            { Coordinate = coord coilCellX newY; Xml = elementBody (int ElementType.CoilMode) (coord coilCellX newY) (tagCoil.PLCTagName)}
             yield! vlineDownTo (x-1) y funSize
         ]
 

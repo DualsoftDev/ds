@@ -82,7 +82,7 @@ module internal Command =
         | NE -> XgiCommand(FunctionCmd(FunctionPure.CompareNE(tag, (tagA, tagB))))
 
     // <timer>
-    let drawCmdTimer(timerStatement:TimerStatement, x, y) : PositionedRungXmlsWithNewY =
+    let drawCmdTimer(timerStatement:TimerStatement, x, y) : CoordinatedRungXmlsWithNewY =
         let time:int = int timerStatement.Timer.PRE.Value
         //let coil:IExpressionTerminal =
         let funcSizeY = 3
@@ -90,7 +90,7 @@ module internal Command =
         { NewY = funcSizeY-1; PositionedRungXmls = [createFBParameterXml $"T#{time}MS" (x-1) (y+1)]}
         //{ NewY = funcSizeY-1; PositionedRungXmls = [createFBParameterXml $"T#{time}MS" x y]}
 
-    let drawCmdCounter(coil:IExpressionTerminal, reset:IExpressionTerminal, count:int, x, y) : PositionedRungXmlsWithNewY =
+    let drawCmdCounter(coil:IExpressionTerminal, reset:IExpressionTerminal, count:int, x, y) : CoordinatedRungXmlsWithNewY =
         let funcSizeY = 4
         //Command 속성입력
         let results = [
@@ -100,7 +100,7 @@ module internal Command =
 
         { NewY = funcSizeY-1; PositionedRungXmls = results}
 
-    let drawCmdCompare(coil:IExpressionTerminal, opComp:OpComp, leftA:CommandTag, leftB:CommandTag, x, y) : PositionedRungXmlsWithNewY =
+    let drawCmdCompare(coil:IExpressionTerminal, opComp:OpComp, leftA:CommandTag, leftB:CommandTag, x, y) : CoordinatedRungXmlsWithNewY =
         let funcSizeY = 4
 
         if(leftA.Size() <> leftB.Size())
@@ -122,7 +122,7 @@ module internal Command =
 
         { NewY = funcSizeY - 1; PositionedRungXmls = results}
 
-    let drawCmdAdd(tagCoil:IExpressionTerminal, targetTag:CommandTag, addValue:int, xInit, y, (pulse:bool)): PositionedRungXmlsWithNewY =
+    let drawCmdAdd(tagCoil:IExpressionTerminal, targetTag:CommandTag, addValue:int, xInit, y, (pulse:bool)): CoordinatedRungXmlsWithNewY =
         let mutable x = xInit
         let funcSizeY = 4
 
@@ -154,7 +154,7 @@ module internal Command =
         { NewY = newY; PositionedRungXmls = results}
 
 
-    let drawCmdCopy(tagCoil:IExpressionTerminal, fromTag:CommandTag, toTag:CommandTag, xInit, y, (pulse:bool)) : PositionedRungXmlsWithNewY =
+    let drawCmdCopy(tagCoil:IExpressionTerminal, fromTag:CommandTag, toTag:CommandTag, xInit, y, (pulse:bool)) : CoordinatedRungXmlsWithNewY =
         if fromTag.Size() <> toTag.Size() then
             failwithlog $"Tag Compare size error {fromTag.ToText()}{fromTag.SizeString},  {toTag.ToText()}({toTag.SizeString})"
 
@@ -197,7 +197,7 @@ module internal Command =
 
     // <timer>
     let drawCommand(cmd:XgiCommand, x, y, lineConnectionStartX) =       // lineConnectionStartX : 일반적으로 x+1
-        let results = ResizeArray<PositionedRungXml>()
+        let results = ResizeArray<CoordinatedRungXml>()
 
         //FunctionBlock, Function 까지 연장선 긋기
         let needNewLineFeed = (x % minFBCellX) >= 6
@@ -205,7 +205,7 @@ module internal Command =
         let mutable newX = max (x + 1) ((1 + numLineSpan) * minFBCellX  - 3)
         if x  < newX - 1 then
             //newX <- getFBCellX x
-            results.Add( {Position = coord newX y; Xml = mutiEndLine lineConnectionStartX  (newX - 1) y})
+            results.Add( {Coordinate = coord newX y; Xml = mutiEndLine lineConnectionStartX  (newX - 1) y})
         //else
         //    results.Add( {Position = coord newX y; Xml=mutiEndLine (x + 1) (minFBCellX + newX - 1) y})
 

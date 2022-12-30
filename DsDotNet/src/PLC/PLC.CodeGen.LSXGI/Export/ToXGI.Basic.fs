@@ -13,29 +13,20 @@ module internal Basic =
         | _ -> None
 
 
-    type RungInfoWithNextPosition = {
-        RungInfos:PositionedRungXml list
-        NextX: int
-        NextY: int
-        VLineUpRightMaxY: int
-    }
     /// Flat expression 을 논리 Cell 좌표계 x y 에서 시작하는 rung 를 작성한다.
     /// xml 및 다음 y 좌표 반환
-    let rung x y expr (cmdExp:XgiCommand) : PositionedRungXml =
-
-        noop()
-
+    let rung x y expr (cmdExp:XgiCommand) : CoordinatedRungXml =
         /// x y 위치에서 expression 표현하기 위한 정보 반환
         /// {| Xml=[|c, str|]; NextX=sx; NextY=maxY; VLineUpRightMaxY=maxY |}
         /// - Xml : 좌표 * 결과 xml 문자열
         /// - NextX : 다음 element 의 시작 x 위치
         /// - VLineUpRightMaxY : 수직 라인을 그을 때, 우측 최상단 종점의 y 좌표
-        let rec rng x y (expr:FlatExpression) =
+        let rec rng x y (expr:FlatExpression) : RungInfosWithNextPosition =
 
             let c = coord x y
             /// 좌표 * 결과 xml 문자열 보관 장소
-            let rungInfos = ResizeArray<PositionedRungXml>()
-            { Position = c; Xml = $"<!-- {x} {y} {expr.ToText()} -->" } |> rungInfos.Add
+            let rungInfos = ResizeArray<CoordinatedRungXml>()
+            { Coordinate = c; Xml = $"<!-- {x} {y} {expr.ToText()} -->" } |> rungInfos.Add
 
             match expr with
             | FlatTerminal(id, pulse, neg) ->
@@ -47,7 +38,7 @@ module internal Basic =
                     | false, false  -> ElementType.ContactMode
                     |> int
                 let str = elementBody mode c (id.PLCTagName)
-                { RungInfos = [{ Position = c; Xml = str}]; NextX=x; NextY=y; VLineUpRightMaxY=y }
+                { RungInfos = [{ Coordinate = c; Xml = str}]; NextX=x; NextY=y; VLineUpRightMaxY=y }
 
             | FlatNary(And, exprs) ->
                 let mutable sx = x
@@ -84,7 +75,7 @@ module internal Basic =
                         let param = sprintf "Param=\"%d\"" ((maxX - x)*3)
                         let mode = int ElementType.MultiHorzLineMode
                         let c = coord x y
-                        { Position = c; Xml = elementFull mode c param "" })
+                        { Coordinate = c; Xml = elementFull mode c param "" })
                     |> rungInfos.AddRange
 
                 // 좌측 vertical lines
@@ -107,7 +98,7 @@ module internal Basic =
 
             | FlatZero ->
                 let str = hlineEmpty c
-                { RungInfos=[{ Position = c; Xml = str}]; NextX=x; NextY=y; VLineUpRightMaxY=y }
+                { RungInfos=[{ Coordinate = c; Xml = str}]; NextX=x; NextY=y; VLineUpRightMaxY=y }
 
             | _ ->
                 failwithlog "Unknown FlatExpression case"
@@ -159,9 +150,9 @@ module internal Basic =
                             $"Param={dq}{param}{dq}"
                         let results = [
                             let c = coord (x+1) y
-                            { Position = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam "" }
+                            { Coordinate = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam "" }
                             let c = coord coilCellX y
-                            { Position = c; Xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.PLCTagName) }
+                            { Coordinate = c; Xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.PLCTagName) }
                         ]
                         0, results
 
@@ -188,9 +179,9 @@ module internal Basic =
 
         let xml =
             positionedRungXmls
-                |> Seq.sortBy (fun ri -> ri.Position)   // fst
+                |> Seq.sortBy (fun ri -> ri.Coordinate)   // fst
                 |> Seq.map (fun ri -> ri.Xml)  //snd
                 |> String.concat "\r\n"
 
-        { Xml = xml; Position = result.NextY + newY }
+        { Xml = xml; Coordinate = result.NextY + newY }
 

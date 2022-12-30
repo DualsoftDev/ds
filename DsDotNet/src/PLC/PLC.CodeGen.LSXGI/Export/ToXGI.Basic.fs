@@ -144,7 +144,7 @@ module internal Basic =
         /// 좌표 * xml 결과 문자열
         let positionedRungXmls, newY =
             let mutable newPositionY = 0
-            let posiRunXmls =
+            let posiRungXmls =
                 [
                     yield! result.RungInfos
 
@@ -183,7 +183,7 @@ module internal Basic =
                     yield! posiRungXmls
                     newPositionY <- newY
                 ]
-            posiRunXmls, newPositionY
+            posiRungXmls, newPositionY
 
 
         let xml =

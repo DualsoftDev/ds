@@ -23,7 +23,7 @@ module internal Basic =
         /// - NextX : 다음 element 의 시작 x 위치
         /// - VLineUpRightMaxY : 수직 라인을 그을 때, 우측 최상단 종점의 y 좌표
         let rec rng x y (expr:FlatExpression) : RungInfosWithNextPosition =
-            let baseRIWNP = { RungInfos = []; X=x; Y=y; SpanX=1; SpanY=1; NextX=x; NextY=y; VLineUpRightMaxY=y }
+            let baseRIWNP = { RungInfos = []; X=x; Y=y; SpanX=1; SpanY=1; VLineUpRightMaxY=y }
             let c = coord x y
             /// 좌표 * 결과 xml 문자열 보관 장소
             let rungInfos = ResizeArray<CoordinatedRungXml>()
@@ -43,60 +43,68 @@ module internal Basic =
 
             | FlatNary(And, exprs) ->
                 let mutable sx = x
-                let mutable maxY = y
                 let subRungInfos:RungInfosWithNextPosition list =
                     [
                         for exp in exprs do
                             let sub = rng sx y exp
-                            sx <- sub.NextX + 1
-                            maxY <- max maxY sub.NextY
+                            sx <- sx + sub.SpanX
                             rungInfos.AddRange(sub.RungInfos)
                             yield sub
                     ]
                 let spanX = subRungInfos.Sum(fun sri-> sri.SpanX)
                 let spanY = subRungInfos.Max(fun sri-> sri.SpanY)
-                sx <- sx - 1    // for loop 에서 마지막 +1 된 것 revert
-                { baseRIWNP with RungInfos=rungInfos.ToFSharpList(); SpanX=spanX; SpanY=spanY; NextX=sx; NextY=maxY; VLineUpRightMaxY=maxY }
+                { baseRIWNP with RungInfos=rungInfos.ToFSharpList(); SpanX=spanX; SpanY=spanY; VLineUpRightMaxY=y+spanY }
 
             | FlatNary(Or, exprs) ->
                 let mutable sy = y
                 let mutable vLineUpMaxY = y
-                let mutable maxX = x
-                /// OR 로 묶인 block 들의 종료 위치 정보 x * y
-                let endInfo = ResizeArray<int*int>()
+
+                ///// OR 로 묶인 block 들의 종료 위치 정보 x * y
+                //let endInfo = ResizeArray<int*int>()
                 let subRungInfos:RungInfosWithNextPosition list =
                     [
                         for exp in exprs do
                             let sub = rng x sy exp
-                            endInfo.Add((sub.NextX, sy))
-                            sy <- sub.NextY + 1
-                            vLineUpMaxY <- max vLineUpMaxY sub.VLineUpRightMaxY
-                            maxX <- max maxX sub.NextX
+                            //endInfo.Add((sub.SpanX, sy))
+                            sy <- sy + sub.SpanY
+                            //vLineUpMaxY <- max vLineUpMaxY sub.VLineUpRightMaxY
                             rungInfos.AddRange(sub.RungInfos)
                             yield sub
                     ]
                 let spanX = subRungInfos.Max(fun sri-> sri.SpanX)
                 let spanY = subRungInfos.Sum(fun sri-> sri.SpanY)
-                sy <- sy - 1    // for loop 에서 마지막 +1 된 것 revert
 
-                // short end 우측 확장 연결 정보를 xml 에 저장
-                endInfo
-                    |> Seq.filter (fun (x, y) -> x < maxX)
-                    |> Seq.map (fun (x, y) ->
-                        let x = x + 1
-                        let param = sprintf "Param=\"%d\"" ((maxX - x)*3)
-                        let mode = int ElementType.MultiHorzLineMode
-                        let c = coord x y
-                        { Coordinate = c; Xml = elementFull mode c param "" })
-                    |> rungInfos.AddRange
+                [
+                    for ri in subRungInfos do
+                        if ri.SpanX < spanX then
+                            let param =
+                                let span = (spanX - ri.SpanX - 1) * 3
+                                $"Param={dq}{span}{dq}"
+                            let mode = int ElementType.MultiHorzLineMode
+                            let c = coord (ri.X+ri.SpanX) ri.Y
+                            { Coordinate = c; Xml = elementFull mode c param "" }
+                ] |> rungInfos.AddRange
+
+                ////sy <- sy - 1    // for loop 에서 마지막 +1 된 것 revert
+                //let maxX = x + spanX
+                //// short end 우측 확장 연결 정보를 xml 에 저장
+                //endInfo
+                //    |> Seq.filter (fun (x, y) -> x < maxX)
+                //    |> Seq.map (fun (x, y) ->
+                //        let x = x + 1
+                //        let param = sprintf "Param=\"%d\"" ((maxX - x)*3)
+                //        let mode = int ElementType.MultiHorzLineMode
+                //        let c = coord x y
+                //        { Coordinate = c; Xml = elementFull mode c param "" })
+                //    |> rungInfos.AddRange
 
                 // 좌측 vertical lines
-                vlineDownTo (x-1) y (sy-y) |> rungInfos.AddRange
+                vlineDownTo (x-1) y (spanY-1) |> rungInfos.AddRange
 
                 // 우측 vertical lines
-                vlineDownTo maxX y (vLineUpMaxY-y) |> rungInfos.AddRange
+                vlineDownTo (x+spanX-1) y (spanY-1) |> rungInfos.AddRange
 
-                { baseRIWNP with RungInfos=rungInfos.ToFSharpList(); SpanX=spanX; SpanY=spanY; NextX=maxX; NextY=sy; VLineUpRightMaxY=y }
+                { baseRIWNP with RungInfos=rungInfos.ToFSharpList(); SpanX=spanX; SpanY=spanY; VLineUpRightMaxY=y }
 
 
             // terminal case
@@ -110,7 +118,7 @@ module internal Basic =
 
             | FlatZero ->
                 let str = hlineEmpty c
-                { baseRIWNP with RungInfos=[{ Coordinate = c; Xml = str}]; SpanX=0; SpanY=0; NextX=x; NextY=y; VLineUpRightMaxY=y }
+                { baseRIWNP with RungInfos=[{ Coordinate = c; Xml = str}]; SpanX=0; SpanY=0; VLineUpRightMaxY=y }
 
             | _ ->
                 failwithlog "Unknown FlatExpression case"
@@ -167,5 +175,5 @@ module internal Basic =
                 |> Seq.map (fun ri -> ri.Xml)  //snd
                 |> String.concat "\r\n"
 
-        { Xml = xml; Coordinate = result.NextY + newY }
+        { Xml = xml; Coordinate = result.SpanY + newY }
 

@@ -25,8 +25,6 @@ module internal Common =
         Y: int
         SpanX: int
         SpanY: int
-        NextX: int
-        NextY: int
         VLineUpRightMaxY: int
     }
 

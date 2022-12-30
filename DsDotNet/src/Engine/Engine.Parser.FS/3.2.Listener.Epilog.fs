@@ -61,7 +61,6 @@ module EtcListenerModule =
                             .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName))
                             .ToHashSet()
                                 
-                    flows |> Seq.iter(fun f -> printfn "%A %A %A %A" f.Name targetBtnType addrIn addrOut)
                     if flows.Count > 0 then
                         return ButtonDef(btnName, targetBtnType, addrIn, addrOut, flows)
                     else
@@ -75,6 +74,10 @@ module EtcListenerModule =
                     return system.Buttons.Add(bd)
                 } |> ignore
             )
+            flowBtnInfo
+            |> List.choose id
+            |> List.map(system.Buttons.Add)
+            |> ignore
 
         member x.ProcessLampBlocks(ctx:LampBlocksContext) =
             let first = ctx.TryFindFirstChild<ParserRuleContext>().Value
@@ -105,12 +108,9 @@ module EtcListenerModule =
                 }
             ]
             flowLampInfo
-            |> List.iter(fun lmpDef ->
-                option {
-                    let! ld = lmpDef
-                    return system.Lamps.Add(ld)
-                } |> ignore
-            )
+            |> List.choose id
+            |> List.map(system.Lamps.Add)
+            |> ignore
 
         member x.ProcessSafetyBlock(ctx:SafetyBlockContext) =
             let safetyDefs = ctx.Descendants<SafetyDefContext>()

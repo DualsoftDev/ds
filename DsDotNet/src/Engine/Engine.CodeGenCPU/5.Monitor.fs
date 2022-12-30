@@ -25,6 +25,7 @@ type VertexManager with
    
     member v.M1_OriginMonitor(): CommentedStatement  = 
         let real = v.Vertex :?> Real
+        real.Parent.GetSystem().GenerationJobIO()
         let ons    = getOriginIOs (real, InitialType.On)
         let offs   = getOriginIOs (real, InitialType.Off)
         let checks = getOriginIOs (real, InitialType.NeedCheck)

@@ -116,15 +116,37 @@ module XgiGenerationTestModule =
         bool x06 = createTag("%IX0.0.6", false);
         bool x07 = createTag("%IX0.0.7", false);
 
-        bool x10 = createTag("%IX0.0.8", false);
-        bool x11 = createTag("%IX0.0.9", false);
-        bool x12 = createTag("%IX0.0.10", false);
-        bool x13 = createTag("%IX0.0.11", false);
-        bool x14 = createTag("%IX0.0.12", false);
-        bool x15 = createTag("%IX0.0.13", false);
-        bool x16 = createTag("%IX0.0.14", false);
-        bool x17 = createTag("%IX0.0.15", false);
+        bool x08 = createTag("%IX0.0.8", false);
+        bool x09 = createTag("%IX0.0.9", false);
+        bool x10 = createTag("%IX0.0.10", false);
+        bool x11 = createTag("%IX0.0.11", false);
+        bool x12 = createTag("%IX0.0.12", false);
+        bool x13 = createTag("%IX0.0.13", false);
+        bool x14 = createTag("%IX0.0.14", false);
+        bool x15 = createTag("%IX0.0.15", false);
 """
+
+    let codeForBits31 = codeForBits + """
+        bool x16 = createTag("%IX0.1.0", false);
+        bool x17 = createTag("%IX0.1.1", false);
+        bool x18 = createTag("%IX0.1.2", false);
+        bool x19 = createTag("%IX0.1.3", false);
+        bool x20 = createTag("%IX0.1.4", false);
+        bool x21 = createTag("%IX0.1.5", false);
+        bool x22 = createTag("%IX0.1.6", false);
+        bool x23 = createTag("%IX0.1.7", false);
+        
+        bool x24 = createTag("%IX0.1.8", false);
+        bool x25 = createTag("%IX0.1.9", false);
+        bool x26 = createTag("%IX0.1.10", false);
+        bool x27 = createTag("%IX0.1.11", false);
+        bool x28 = createTag("%IX0.1.12", false);
+        bool x29 = createTag("%IX0.1.13", false);
+        bool x30 = createTag("%IX0.1.14", false);
+        bool x31 = createTag("%IX0.1.15", false);
+"""
+
+
     let pointAt (elementType:ElementType) (tag:ITag) (x:int) (y:int) : XmlOutput =
         let xx = x*3 + 1
         let yy = y*1024

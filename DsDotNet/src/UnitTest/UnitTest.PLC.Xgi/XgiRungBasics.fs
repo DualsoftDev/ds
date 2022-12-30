@@ -1,11 +1,8 @@
 namespace T
 
-open System.Linq
 open NUnit.Framework
 open Engine.Core
 open Engine.Common.FS
-open PLC.CodeGen.LSXGI
-open Engine.Core.TagModule
 open PLC.CodeGen.LSXGI
 open Engine.Parser.FS
 
@@ -144,17 +141,18 @@ type XgiRungTest() =
     [<Test>]
     member __.``Generate ANDs variables test``() =
         let storages = Storages()
-        let statements_ = parseCode storages codeForBits
-        let tags = storages.Values.ToEnumerable<PlcTag<bool>>().ToArray()
+        let q = PlcTag("myQ0", "%QX0.1.0", false)
+        let statements_ = parseCode storages codeForBits31
+        let iTags = storages.Values.ToEnumerable<PlcTag<bool>>().ToArray()
         let symbolInfos =
-            [   for t in tags do
-                    let kind = int Variable.Kind.VAR
-                    let plcType = "BOOL"
+            let kind = int Variable.Kind.VAR
+            let plcType = "BOOL"
+            [   for t in iTags do
                     XGITag.createSymbol t.Name "Fake Comment" "I" kind t.Address plcType
+
+                XGITag.createSymbol q.Name "Fake Comment" "Q" kind q.Address plcType
             ]
         let localSymbolsXml = XGITag.generateSymbolVars(symbolInfos, false)
-
-        let tag31 = tags.Repeat().Take(31).ToArray()
 
         let rungs =
             [
@@ -164,7 +162,7 @@ type XgiRungTest() =
 """
                 let y = 1
                 let mutable x = 0
-                for t in tag31 do
+                for t in iTags do
                     contactAt t x y     // <Element ElementType="6" Coordinate="1025">myBit00</Element>
                     x <- x + 1
 
@@ -174,7 +172,7 @@ type XgiRungTest() =
                 //let xy = coord x y
                 //$""" <Element ElementType="2" Coordinate="{xy}" Param="84"></Element>"""
             
-                coilAt tag31[0] 1
+                coilAt q 1
 
                 """
 </Rung>
@@ -186,18 +184,3 @@ type XgiRungTest() =
 
         let xml = wrapWithXml rungs localSymbolsXml emptySymbolsGlobalXml None
         saveTestResult (get_current_function_name ()) xml
-        ()            
-
-    //    let simplestProgramXml =
-    //        """
-    //        <Rung BlockMask="0"><Element ElementType="63" Coordinate="1">DS Logic for XGI</Element></Rung>
-    //        <Rung BlockMask="0">
-    //            <Element ElementType="6" Coordinate="1025">myBit00</Element>
-    //            <Element ElementType="1" Coordinate="1028"></Element>
-    //            <Element ElementType="2" Coordinate="1031" Param="84"></Element>
-    //            <Element ElementType="14" Coordinate="1118">myBit01</Element>
-    //        </Rung>
-    //        <Rung BlockMask="0"><Element ElementType="2" Coordinate="2049" Param="90"></Element>
-    //            <Element ElementType="33" Coordinate="2142" Param="END">END</Element>
-    //        </Rung>
-    //"""

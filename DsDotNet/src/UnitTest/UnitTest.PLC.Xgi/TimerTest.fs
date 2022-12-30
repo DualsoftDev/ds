@@ -45,7 +45,7 @@ type XgiTimerTest() =
         let code = codeForBits + """
             ton myTon = createTON(2000us,
                 $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07
-                && $x10 && $x11 && $x12 && $x13 && $x14 && $x15 && $x16    );
+                && $x08 && $x09 && $x10 && $x11 && $x12 && $x13 && $x14    );
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
@@ -59,17 +59,17 @@ type XgiTimerTest() =
                 // 산전 limit : 가로로 31개
                 //let coilCellX = 31
                 $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07
-                && $x10 && $x11 && $x12 && $x13 && $x14 && $x15 &&
+                && $x08 && $x09 && $x10 && $x11 && $x12 && $x13 && 
 
                 $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 &&
+                $x08 &&
+                $x09 &&
                 $x10 &&
                 $x11 &&
-                $x12 &&
-                $x13 &&
-                //$x14 &&
-                //$x15 &&
+                //$x12 &&
+                //$x13 &&
 
-                $x16    );
+                $x14    );
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
@@ -82,7 +82,7 @@ type XgiTimerTest() =
         let code = codeForBits + """
             ton myTon = createTON(2000us,
                 $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16    );
+                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14    );
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
@@ -95,13 +95,13 @@ type XgiTimerTest() =
         let code = codeForBits + """
             ton myTon = createTON(2000us,
                 $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16 ||
+                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14 ||
 
                 $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16 ||
+                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14 ||
 
                 $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16
+                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14
 
                 );
 """
@@ -116,16 +116,16 @@ type XgiTimerTest() =
         let code = codeForBits + """
             ton myTon = createTON(2000us,
                 ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16)
+                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
                 &&
                 ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16)
+                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
                 &&
                 ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16)
+                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
                 &&
                 ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16)
+                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
 
                 );
 """
@@ -139,16 +139,16 @@ type XgiTimerTest() =
         let code = codeForBits + """
             ton myTon = createTON(2000us,
                 ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16)
+                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
                 && $x00 &&
                 ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16)
+                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
                 && $x00 &&
                 ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16)
+                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
                 && $x00 &&
                 ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-                || $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16)
+                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
 
                 );
 """

@@ -39,7 +39,7 @@ type XgiGenerationTest() =
     member __.``And Many test`` () =
         let storages = Storages()
         let code = codeForBits + """
-            $x17 :=
+            $x15 :=
                 $x00 &&
                 $x01 &&
                 $x02 &&
@@ -48,13 +48,13 @@ type XgiGenerationTest() =
                 $x05 &&
                 $x06 &&
                 $x07 &&
+                $x08 &&
+                $x09 &&
                 $x10 &&
                 $x11 &&
                 $x12 &&
                 $x13 &&
-                $x14 &&
-                $x15 &&
-                $x16
+                $x14
                 ;
 """
         let statements = parseCode storages code
@@ -65,7 +65,7 @@ type XgiGenerationTest() =
     member __.``OR Many test`` () =
         let storages = Storages()
         let code = codeForBits + """
-            $x17 :=
+            $x15 :=
                 $x00 ||
                 $x01 ||
                 $x02 ||
@@ -74,13 +74,13 @@ type XgiGenerationTest() =
                 $x05 ||
                 $x06 ||
                 $x07 ||
+                $x08 ||
+                $x09 ||
                 $x10 ||
                 $x11 ||
                 $x12 ||
                 $x13 ||
-                $x14 ||
-                $x15 ||
-                $x16
+                $x14
                 ;
 """
         let statements = parseCode storages code
@@ -95,9 +95,9 @@ type XgiGenerationTest() =
                         ||  $x03
                         || ($x04 && $x05 && $x06)
                         ;
-            $x17 :=    (($x10 && $x11) || $x12)
-                        && $x13
-                        && ($x14 || $x15 || $x16)
+            $x15 :=    (($x08 && $x09) || $x10)
+                        && $x11
+                        && ($x12 || $x13 || $x14)
                         ;
 """
         let statements = parseCode storages code

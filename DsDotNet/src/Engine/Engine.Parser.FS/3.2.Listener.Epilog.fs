@@ -94,14 +94,14 @@ module EtcListenerModule =
                 option {
                     let! lampNameCtx = ld.TryFindFirstChild<LampNameContext>()
                     let! flowNameCtx = ld.TryFindFirstChild<FlowNameContext>()
-                    let  addressCtx  = ld.TryFindFirstChild<AddressItemContext>()
-                    let! flow = flowNameCtx.GetText() |> system.TryFindFlow
-                    let lampName = lampNameCtx.GetText()
+                    let  addrCtx  = ld.TryFindFirstChild<AddressItemContext>()
+                    let! flow   = flowNameCtx.GetText() |> system.TryFindFlow
+                    let lmpName = lampNameCtx.GetText()
                     let address = 
-                        match addressCtx with
+                        match addrCtx with
                         | Some addr -> addr.GetText()
                         | None -> null
-                    return LampDef(lampName, targetLmpType, address, flow)
+                    return LampDef(lmpName, targetLmpType, address, flow)
                 }
             ]
             flowLampInfo

@@ -68,13 +68,6 @@ module EtcListenerModule =
                 }
             ]
             flowBtnInfo
-            |> List.iter(fun btnDef -> 
-                option {
-                    let! bd = btnDef
-                    return system.Buttons.Add(bd)
-                } |> ignore
-            )
-            flowBtnInfo
             |> List.choose id
             |> List.map(system.Buttons.Add)
             |> ignore

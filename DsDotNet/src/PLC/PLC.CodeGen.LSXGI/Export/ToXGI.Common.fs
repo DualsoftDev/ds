@@ -11,6 +11,7 @@ module internal Common =
     type EncodedXYCoordinate = int
     type CoordinatedRungXml = {
         Coordinate: EncodedXYCoordinate   // int
+        //SpanY: int
         Xml: XmlOutput                  // string
     }
 
@@ -27,6 +28,13 @@ module internal Common =
         SpanY: int
         VLineUpRightMaxY: int
     }
+
+    type RungGenerationInfo = {
+        Xmls: XmlOutput list   // Rung 별 누적 xml.  역순으로 추가.  꺼낼 때 뒤집어야..
+        Y: int }
+    with
+        member me.Add(xml) = { Xmls = xml::me.Xmls; Y = me.Y + 1 }
+
 
     let dq = "\""
 

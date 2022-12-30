@@ -57,10 +57,6 @@ module internal Basic =
 
             | FlatNary(Or, exprs) ->
                 let mutable sy = y
-                let mutable vLineUpMaxY = y
-
-                ///// OR 로 묶인 block 들의 종료 위치 정보 x * y
-                //let endInfo = ResizeArray<int*int>()
                 let subRungInfos:RungInfosWithNextPosition list =
                     [
                         for exp in exprs do
@@ -84,19 +80,6 @@ module internal Basic =
                             let c = coord (ri.X+ri.SpanX) ri.Y
                             { Coordinate = c; Xml = elementFull mode c param "" }
                 ] |> rungInfos.AddRange
-
-                ////sy <- sy - 1    // for loop 에서 마지막 +1 된 것 revert
-                //let maxX = x + spanX
-                //// short end 우측 확장 연결 정보를 xml 에 저장
-                //endInfo
-                //    |> Seq.filter (fun (x, y) -> x < maxX)
-                //    |> Seq.map (fun (x, y) ->
-                //        let x = x + 1
-                //        let param = sprintf "Param=\"%d\"" ((maxX - x)*3)
-                //        let mode = int ElementType.MultiHorzLineMode
-                //        let c = coord x y
-                //        { Coordinate = c; Xml = elementFull mode c param "" })
-                //    |> rungInfos.AddRange
 
                 // 좌측 vertical lines
                 vlineDownTo (x-1) y (spanY-1) |> rungInfos.AddRange
@@ -131,42 +114,40 @@ module internal Basic =
 
         noop()
 
+        let mutable commandHeight = 0
         /// 좌표 * xml 결과 문자열
-        let positionedRungXmls, newY =
-            let mutable newPositionY = 0
-            let posiRungXmls =
-                [
-                    yield! result.RungInfos
+        let positionedRungXmls =
+            [
+                yield! result.RungInfos
 
-                    //if indent = 1 then
-                    //    assert(false)   // indent 가 필요하면, 사용할 코드.  현재는 indent 0 으로 fix
-                    //    let c = coord x y
-                    //    { Position = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c "Param=\"0\"" "" }
+                //if indent = 1 then
+                //    assert(false)   // indent 가 필요하면, 사용할 코드.  현재는 indent 0 으로 fix
+                //    let c = coord x y
+                //    { Position = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c "Param=\"0\"" "" }
 
-                    let drawCoil(x, y) =
-                        let lengthParam =
-                            let param = 3 * (coilCellX-x-2)
-                            $"Param={dq}{param}{dq}"
-                        let results = [
-                            let c = coord (x+1) y
-                            { Coordinate = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam "" }
-                            let c = coord coilCellX y
-                            { Coordinate = c; Xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.PLCTagName) }
-                        ]
-                        0, results
+                let drawCoil(x, y) =
+                    let lengthParam =
+                        let param = 3 * (coilCellX-x-2)
+                        $"Param={dq}{param}{dq}"
+                    let results = [
+                        let c = coord (x+1) y
+                        { Coordinate = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam "" }
+                        let c = coord coilCellX y
+                        { Coordinate = c; Xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.PLCTagName) }
+                    ]
+                    1, results
 
-                    let nx = x + result.SpanX
-                    let newY, posiRungXmls =
-                        match cmdExp.CommandType with
-                        | CoilCmd (cc) ->
-                            drawCoil(nx-1, y)
-                        | ( FunctionCmd _ | FunctionBlockCmd _ ) ->
-                            drawCommand(cmdExp, nx, y)
+                let nx = x + result.SpanX
+                let commandSpanY, posiRungXmls =
+                    match cmdExp.CommandType with
+                    | CoilCmd (cc) ->
+                        drawCoil(nx-1, y)
+                    | ( FunctionCmd _ | FunctionBlockCmd _ ) ->
+                        drawCommand(cmdExp, nx, y)
 
-                    yield! posiRungXmls
-                    newPositionY <- newY
-                ]
-            posiRungXmls, newPositionY
+                commandHeight <- commandSpanY
+                yield! posiRungXmls
+            ]
 
 
         let xml =
@@ -175,5 +156,5 @@ module internal Basic =
                 |> Seq.map (fun ri -> ri.Xml)  //snd
                 |> String.concat "\r\n"
 
-        { Xml = xml; Coordinate = result.SpanY + newY }
+        { Xml = xml; Coordinate = result.SpanY + y }
 

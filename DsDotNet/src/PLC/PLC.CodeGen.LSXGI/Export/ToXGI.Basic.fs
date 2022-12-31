@@ -16,12 +16,11 @@ module internal Basic =
 
     /// Flat expression 을 논리 Cell 좌표계 x y 에서 시작하는 rung 를 작성한다.
     /// xml 및 다음 y 좌표 반환
-    let rung x y expr (cmdExp:XgiCommand) : CoordinatedRungXml =
+    let rung x y (expr:FlatExpression) (cmdExp:XgiCommand) : CoordinatedRungXml =
+
         /// x y 위치에서 expression 표현하기 위한 정보 반환
         /// {| Xml=[|c, str|]; NextX=sx; NextY=maxY; VLineUpRightMaxY=maxY |}
         /// - Xml : 좌표 * 결과 xml 문자열
-        /// - NextX : 다음 element 의 시작 x 위치
-        /// - VLineUpRightMaxY : 수직 라인을 그을 때, 우측 최상단 종점의 y 좌표
         let rec rng x y (expr:FlatExpression) : RungInfosWithSpan =
             let baseRIWNP = { RungInfos = []; X=x; Y=y; SpanX=1; SpanY=1; }
             let c = coord x y
@@ -86,11 +85,10 @@ module internal Basic =
                 // ```OR variable length 역삼각형 test```
                 let lowestY =
                     subRungInfos
-                        .Where(fun sri -> sri.SpanX = spanX)
+                        .Where(fun sri -> sri.SpanX <= spanX)
                         .Max(fun sri -> sri.Y)
                 // 우측 vertical lines
-                //vlineDownTo (x+spanX-1) y (lowestY-y) |> rungInfos.AddRange
-                vlineDownTo (x+spanX-1) y (spanY-1) |> rungInfos.AddRange
+                vlineDownTo (x+spanX-1) y (lowestY-y) |> rungInfos.AddRange
 
 
                 { baseRIWNP with RungInfos=rungInfos.ToFSharpList(); SpanX=spanX; SpanY=spanY; }

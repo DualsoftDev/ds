@@ -231,7 +231,7 @@ open Engine.Common.FS
         member __.``TIMER structure WINDOWS platform test`` () =
             let storages = Storages()
             let code = """
-                bool myBit0 = createTag("%MX0.0.0", false);
+                bool x0 = createTag("%MX0.0.0", false);
                 ton myTon = createTON(2000us, $x0);
 """
 
@@ -247,7 +247,7 @@ open Engine.Common.FS
         member __.``TIMER structure XGI platform test`` () =
             let storages = Storages()
             let code = """
-                bool myBit0 = createTag("%MX0.0.0", false);
+                bool x0 = createTag("%MX0.0.0", false);
                 ton myTon = createTON(2000us, $x0);
 """
 

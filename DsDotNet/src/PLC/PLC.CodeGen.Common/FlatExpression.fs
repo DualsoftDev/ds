@@ -1,9 +1,7 @@
 namespace PLC.CodeGen.Common
 
 open System.Diagnostics
-open System.Runtime.CompilerServices
 open Engine.Common.FS
-open System
 open Engine.Core
 
 [<AutoOpen>]
@@ -77,15 +75,22 @@ module FlatExpressionModule =
                 | _ -> failwith "ERROR"
             FlatNary(op, fs.Arguments |> map flattenExpression |> Seq.cast<FlatExpression> |> Seq.toList)
 
-    //type IExpression with
-    //    member x.Flatten() =
-    //        match x with
-    //type Statement with
-    //    member x.Flatten() =
-    //        match x with
-    //        | DuAssign (expr, target) -> ()
-    //        | DuVarDecl (expr, target) -> ()
-    //        | DuTimer timerStatement -> ()
-    //        | DuCounter counterStatement -> ()
-    //        | DuCopy (condition, source, target) -> ()
-
+    ///// expression 이 차지하는 가로, 세로 span 의 width 와 height 를 반환한다.
+    //let precalculateSpan (expr:FlatExpression) =
+    //    let rec helper (expr:FlatExpression): int*int =
+    //        match expr with
+    //        | FlatTerminal _ -> 1, 1
+    //        | FlatNary(And, ands) ->
+    //            let spanXYs = ands |> map helper
+    //            let spanX = spanXYs |> map fst |> List.sum
+    //            let spanY = spanXYs |> map snd |> List.max
+    //            spanX, spanY
+    //        | FlatNary(Or, ors) ->
+    //            let spanXYs = ors |> map helper
+    //            let spanX = spanXYs |> map fst |> List.max
+    //            let spanY = spanXYs |> map snd |> List.sum
+    //            spanX, spanY
+    //        | FlatNary(Neg, neg::[]) ->
+    //            helper neg
+    //        | _ -> failwith "ERROR"
+    //    helper expr

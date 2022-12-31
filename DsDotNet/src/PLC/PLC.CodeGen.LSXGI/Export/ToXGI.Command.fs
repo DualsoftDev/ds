@@ -30,21 +30,21 @@ module internal Command =
             match cmdType with
             | FunctionBlockCmd (fbc) ->
                 match fbc with
-                | TimerMode(_) -> fbc.GetInstanceText(), VarType.TON
-                | CounterMode(tag, resetTag, count) -> fbc.GetInstanceText(), VarType.CTU_INT
+                | TimerMode _ -> fbc.GetInstanceText(), VarType.TON
+                | CounterMode _ -> fbc.GetInstanceText(), VarType.CTU_INT
             |_-> failwithlog "do not make instanceTag"
 
         member x.LDEnum with get() =
             match cmdType with
                 | CoilCmd (cc) ->
                     match cc with
-                    | CoilMode(_)       -> ElementType.CoilMode
-                    | ClosedCoilMode(_) -> ElementType.ClosedCoilMode
-                    | SetCoilMode(_)    -> ElementType.SetCoilMode
-                    | ResetCoilMode(_)  -> ElementType.ResetCoilMode
-                    | PulseCoilMode(_)  -> ElementType.PulseCoilMode
-                    | NPulseCoilMode(_) -> ElementType.NPulseCoilMode
-                | (FunctionCmd (_) | FunctionBlockCmd (_))
+                    | CoilMode _       -> ElementType.CoilMode
+                    | ClosedCoilMode _ -> ElementType.ClosedCoilMode
+                    | SetCoilMode _    -> ElementType.SetCoilMode
+                    | ResetCoilMode _  -> ElementType.ResetCoilMode
+                    | PulseCoilMode _  -> ElementType.PulseCoilMode
+                    | NPulseCoilMode _ -> ElementType.NPulseCoilMode
+                | (FunctionCmd  _ | FunctionBlockCmd  _)
                     -> ElementType.VertFBMode
 
             /// Coil의 부정 Command를 반환한다.
@@ -67,7 +67,7 @@ module internal Command =
     let createOutputNPulse(tag)  = XgiCommand(CoilCmd(CoilOutput.NPulseCoilMode(tag)))
 
     //let createOutputTime(tag, time)                 = XgiCommand(FunctionBlockCmd(FunctionBlock.TimerMode(tag, time)))
-    let createOutputCount(tag, resetTag, cnt)         = XgiCommand(FunctionBlockCmd(FunctionBlock.CounterMode(tag, resetTag, cnt)))
+    //let createOutputCount(tag, resetTag, cnt)         = XgiCommand(FunctionBlockCmd(FunctionBlock.CounterMode(tag, resetTag, cnt)))
     let createOutputCopy(tag, tagA, tagB)             = XgiCommand(FunctionCmd(FunctionPure.CopyMode(tag, (tagA, tagB))))
     let createOutputAdd(tag, targetTag, addValue:int) = XgiCommand(FunctionCmd(FunctionPure.Add(tag, targetTag, addValue)))
 
@@ -86,11 +86,13 @@ module internal Command =
         let fbSpanY = 2
         { SpanY = fbSpanY; PositionedRungXmls = [createFBParameterXml $"T#{time}MS" (x-1) (y+1)]}
 
-    let drawCmdCounter(coil:IExpressionTerminal, reset:IExpressionTerminal, count:int, x, y) : CoordinatedRungXmlsWithNewY =
+    let drawCmdCounter(counterStatement:CounterStatement, x, y) : CoordinatedRungXmlsWithNewY =
+        let count = int counterStatement.Counter.PRE.Value
+        let reset = counterStatement.Counter.RES.Name
         let fbSpanY = 3
         //Command 속성입력
         let results = [
-            createFBParameterXml reset.PLCTagName (x-1) (y+1)
+            createFBParameterXml reset (x-1) (y+1)
             createFBParameterXml $"{count}" (x-1) (y+2)
         ]
 
@@ -218,7 +220,7 @@ module internal Command =
                 results.AddRange(drawFunctionBlockInstance(cmd, newX, y)) //Command 객체생성
                 match fbc with
                 | TimerMode(timerStatement) -> drawCmdTimer(timerStatement, newX, y)     // <timer>
-                | CounterMode(cmdCoil, resetTag, count) -> drawCmdCounter(cmdCoil, resetTag, count, newX, y)
+                | CounterMode(counterStatement) -> drawCmdCounter(counterStatement, newX, y)
             | _ ->
                 failwithlog "Unknown CommandType"
 

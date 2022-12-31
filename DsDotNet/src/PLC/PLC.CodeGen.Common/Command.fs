@@ -97,24 +97,31 @@ module Command =
     ///FunctionBlocks은 Timer와 같은 현재 측정 시간을 저장하는 Instance가 필요있는 Command 해당
     and FunctionBlock =
         | TimerMode of TimerStatement //endTag, time
-        | CounterMode of IExpressionTerminal *  CommandTag  * int  //endTag, countResetTag, count
+        | CounterMode of CounterStatement   // IExpressionTerminal *  CommandTag  * int  //endTag, countResetTag, count
     with
         member x.GetInstanceText() =
             match x with
-            | TimerMode(timerStruct) -> timerStruct.Timer.Name
-            | CounterMode(tag, resetTag, count) ->  $"XXXXXXX_{tag.PLCTagName}"
+            | TimerMode timerStatement -> timerStatement.Timer.Name
+            | CounterMode counterStatement ->  counterStatement.Counter.Name
         member x.UsedCommandTags() =
+            failwith "Need check"
             match x with
             //| TimerMode(tag, time) -> [ tag ]
-            | TimerMode(timerStruct) -> failwith "ERROR"
-            | CounterMode(tag, resetTag, count) -> [ tag; resetTag ]
+            | TimerMode timerStatement ->
+                timerStatement.RungInCondition
+                |> Option.toList
+                |> List.cast<IExpressionTerminal>
+            | CounterMode counterStatement ->
+                [ counterStatement.UpCondition; counterStatement.ResetCondition ]
+                |> List.choose id
+                |> List.map (fun x -> x :?> IExpressionTerminal)
 
         interface IFunctionCommand with
             member this.TerminalEndTag: IExpressionTerminal =
                 match this with
                 //| TimerMode(tag, time) -> tag
-                | TimerMode(timerStruct) -> timerStruct.Timer.DN
-                | CounterMode(tag, resetTag, count) -> tag
+                | TimerMode timerStatement -> timerStatement.Timer.DN
+                | CounterMode counterStatement -> counterStatement.Counter.DN
 
 
     /// 실행을 가지는 type
@@ -136,5 +143,5 @@ module Command =
 
     let createPLCCommandAdd(endTag, tag, value)          = FunctionPure.Add(endTag, tag, value)
     //let createPLCCommandTimer(endTag, time)              = FunctionBlock.TimerMode(endTag, time)
-    let createPLCCommandCounter(endTag, resetTag, count) = FunctionBlock.CounterMode(endTag, resetTag , count)
+    //let createPLCCommandCounter(endTag, resetTag, count) = FunctionBlock.CounterMode(endTag, resetTag , count)
 

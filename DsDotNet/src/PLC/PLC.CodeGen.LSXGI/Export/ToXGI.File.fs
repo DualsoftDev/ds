@@ -171,7 +171,21 @@ module internal XgiFile =
                 let rgiSub = xmlRung rungin command rgi.Y
                 rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
-            | ( DuCounter _ | DuCopy _ ) ->
+            | DuCounter counterStatement ->
+                let cs = counterStatement
+                let rungIn =
+                    match cs.Counter.Type with
+                    | (CTU | CTUD | CTR) -> cs.UpCondition
+                    | CTD -> cs.DownCondition
+
+                let rungin = rungIn.Value :> IExpression
+                let rungin = rungin.Flatten() :?> FlatExpression
+
+                let command:XgiCommand = FunctionBlockCmd(CounterMode(counterStatement)) |> XgiCommand
+                let rgiSub = xmlRung rungin command rgi.Y
+                rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
+
+            | DuCopy _ ->
                 failwith "Not yet"
 
             | DuVarDecl _ -> failwith "ERROR: Invalid"
@@ -488,8 +502,13 @@ module internal XgiFile =
 
                         XGITag.createSymbol timer.Name $"TIMER {timer.Name}" device ((int)kind) addr plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
                     | DuCounter counter ->
-                        failwith "Not Yet"
-                        ()
+                        let device, addr = "", ""
+                        let kind = Variable.Kind.VAR
+                        let plcType =
+                            match counter.Type with
+                            | CTU | CTD | CTUD | CTR -> counter.Type.ToString()
+
+                        XGITag.createSymbol counter.Name $"TIMER {counter.Name}" device ((int)kind) addr plcType
             ]
 
         /// Symbol table 정의 XML 문자열

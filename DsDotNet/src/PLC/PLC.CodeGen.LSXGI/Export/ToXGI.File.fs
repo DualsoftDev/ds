@@ -1,6 +1,5 @@
 namespace PLC.CodeGen.LSXGI
 
-open System.IO
 open System.Reflection
 open Engine.Common.FS
 open Engine.Core
@@ -8,7 +7,6 @@ open PLC.CodeGen.LSXGI
 open PLC.CodeGen.Common
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 open PLC.CodeGen.Common.NewIEC61131
-open PLC.CodeGen.Common.QGraph
 
 [<AutoOpen>]
 module internal XgiFile =
@@ -156,8 +154,6 @@ module internal XgiFile =
                 let xml =getCommentRung rgi.Y cmt
                 rgi <- rgi.Add(xml)
 
-
-            //<kwak> 대체 version
             match stmt with
             | DuAssign (expr, (:? IExpressionTerminal as target)) ->
                 let flatExpr = expr.Flatten() :?> FlatExpression
@@ -180,20 +176,6 @@ module internal XgiFile =
 
             | DuVarDecl _ -> failwith "ERROR: Invalid"
             | _  -> failwith "ERROR"
-
-
-            //<kwak> origina version
-            //let expr = stmt.Condition |> FlatExpressionM.flatten
-            //let xml, y' =
-            //    if(getXGIMaxX 0 expr > XGIMaxX) then
-            //        let exprNew =  stmt.Condition |> ExpressionM.mkNeg |> FlatExpressionM.flatten
-            //        if(getXGIMaxX 0 exprNew > XGIMaxX) then
-            //            failwithlog $"Or Expreesion Limit {XGIMaxX}"
-            //        else
-            //            let commandNew = stmt.Command.ReverseCmd()
-            //            xmlRung exprNew commandNew y
-            //    else
-            //        xmlRung expr stmt.Command y
 
         let rungEnd = generateEnd (rgi.Y + 1)
         rgi <- rgi.Add(rungEnd)

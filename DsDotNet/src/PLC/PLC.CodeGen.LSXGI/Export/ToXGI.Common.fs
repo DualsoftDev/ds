@@ -11,7 +11,6 @@ module internal Common =
     type EncodedXYCoordinate = int
     type CoordinatedRungXml = {
         Coordinate: EncodedXYCoordinate   // int
-        //SpanY: int
         Xml: XmlOutput                  // string
     }
 

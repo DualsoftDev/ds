@@ -3,7 +3,6 @@ namespace PLC.CodeGen.LSXGI
 open Engine.Common.FS
 open PLC.CodeGen.Common
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
-open Config.POU.Program.LDRoutine
 open Engine.Core
 
 [<AutoOpen>]
@@ -84,11 +83,8 @@ module internal Command =
     // <timer>
     let drawCmdTimer(timerStatement:TimerStatement, x, y) : CoordinatedRungXmlsWithNewY =
         let time:int = int timerStatement.Timer.PRE.Value
-        //let coil:IExpressionTerminal =
         let fbSpanY = 2
-        //Command 속성입력
         { SpanY = fbSpanY; PositionedRungXmls = [createFBParameterXml $"T#{time}MS" (x-1) (y+1)]}
-        //{ NewY = fbSpanY; PositionedRungXmls = [createFBParameterXml $"T#{time}MS" x y]}
 
     let drawCmdCounter(coil:IExpressionTerminal, reset:IExpressionTerminal, count:int, x, y) : CoordinatedRungXmlsWithNewY =
         let fbSpanY = 3
@@ -200,19 +196,8 @@ module internal Command =
         let results = ResizeArray<CoordinatedRungXml>()
         let c = coord x y
         results.Add( {Coordinate = c; Xml = hlineEmpty c})
-        noop()
-        //results.Add( {Coordinate = coord (x-1) y; Xml = mutiEndLine (x-1)  x y})
 
         //FunctionBlock, Function 까지 연장선 긋기
-
-        ////let needNewLineFeed = (x % minFBCellX) >= 6
-        //let numLineSpan = x / minFBCellX
-        //let newX = max (x + 1) ((1 + numLineSpan) * minFBCellX  - 3)
-        //if x  < newX - 1 then
-        //    //newX <- getFBCellX x
-        //    results.Add( {Coordinate = coord newX y; Xml = mutiEndLine lineConnectionStartX  (newX - 1) y})
-        ////else
-        ////    results.Add( {Position = coord newX y; Xml=mutiEndLine (x + 1) (minFBCellX + newX - 1) y})
 
         let newX = x + 1
 

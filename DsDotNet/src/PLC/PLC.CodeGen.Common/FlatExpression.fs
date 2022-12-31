@@ -11,7 +11,7 @@ module FlatExpressionModule =
     type Op =
         | And | Or | Neg | OpUnit
     with
-        member x.ToText() = ""
+        member x.ToText() = sprintf "%A" x
         member x.Negate() =
             match x with
             | And -> Or
@@ -26,6 +26,7 @@ module FlatExpressionModule =
         interface IExpressionTerminal with
             member x.PLCTagName = "FALSE"
 
+    [<DebuggerDisplay("{ToText()}")>]
     type FlatExpression =
         /// pulse identifier 및 negation 여부 (pulse coil 은 지원하지 않을 예정)
         | FlatTerminal  of tag:IExpressionTerminal * pulse:bool * negated:bool

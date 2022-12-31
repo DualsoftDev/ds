@@ -19,13 +19,12 @@ module internal Common =
         PositionedRungXmls: CoordinatedRungXml list
     }
 
-    type RungInfosWithNextPosition = {
+    type RungInfosWithSpan = {
         RungInfos:CoordinatedRungXml list
         X: int
         Y: int
         SpanX: int
         SpanY: int
-        VLineUpRightMaxY: int
     }
 
     type RungGenerationInfo = {

@@ -106,6 +106,48 @@ type XgiGenerationTest() =
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
+    member __.``X OR variable length 역삼각형 test`` () =
+        let storages = Storages()
+        let code = codeForBits + """
+            $x15 :=
+                $x00
+                || ( ( $x01 || $x02 ) && $x03 )
+                ;
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
+
+    [<Test>]
+    member __.``X OR variable length test`` () =
+        let storages = Storages()
+        let code = codeForBits + """
+            $x15 :=
+                $x00
+                || ( $x10 && $x11 && $x12 && $x13 && $x14)
+                || ( $x06 && $x07 && $x08 && $x09 )
+                || ( $x03 && $x04 && $x05 )
+                || ( $x01 && $x02 )
+                || $x00
+                ;
+            $x15 :=
+                $x00
+                || ( $x01 && $x02 )
+                || ( $x03 && $x04 && $x05 )
+                || ( $x06 && $x07 && $x08 && $x09 )
+                || ( $x10 && $x11 && $x12 && $x13 && $x14)
+                || ( $x06 && $x07 && $x08 && $x09 )
+                || ( $x03 && $x04 && $x05 )
+                || ( $x01 && $x02 )
+                || $x00
+                ;
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
+
+
+    [<Test>]
     member __.``AndOr2 test`` () =
         let storages = Storages()
         let code = codeForBits + """

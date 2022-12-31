@@ -22,11 +22,12 @@ module internal Basic =
         /// - Xml : 좌표 * 결과 xml 문자열
         /// - NextX : 다음 element 의 시작 x 위치
         /// - VLineUpRightMaxY : 수직 라인을 그을 때, 우측 최상단 종점의 y 좌표
-        let rec rng x y (expr:FlatExpression) : RungInfosWithNextPosition =
-            let baseRIWNP = { RungInfos = []; X=x; Y=y; SpanX=1; SpanY=1; VLineUpRightMaxY=y }
+        let rec rng x y (expr:FlatExpression) : RungInfosWithSpan =
+            let baseRIWNP = { RungInfos = []; X=x; Y=y; SpanX=1; SpanY=1; }
             let c = coord x y
             /// 좌표 * 결과 xml 문자열 보관 장소
             let rungInfos = ResizeArray<CoordinatedRungXml>()
+            let xxx = expr.ToText()
             { Coordinate = c; Xml = $"<!-- {x} {y} {expr.ToText()} -->" } |> rungInfos.Add
 
             match expr with
@@ -43,7 +44,7 @@ module internal Basic =
 
             | FlatNary(And, exprs) ->
                 let mutable sx = x
-                let subRungInfos:RungInfosWithNextPosition list =
+                let subRungInfos:RungInfosWithSpan list =
                     [
                         for exp in exprs do
                             let sub = rng sx y exp
@@ -53,17 +54,15 @@ module internal Basic =
                     ]
                 let spanX = subRungInfos.Sum(fun sri-> sri.SpanX)
                 let spanY = subRungInfos.Max(fun sri-> sri.SpanY)
-                { baseRIWNP with RungInfos=rungInfos.ToFSharpList(); SpanX=spanX; SpanY=spanY; VLineUpRightMaxY=y+spanY }
+                { baseRIWNP with RungInfos=rungInfos.ToFSharpList(); SpanX=spanX; SpanY=spanY; }
 
             | FlatNary(Or, exprs) ->
                 let mutable sy = y
-                let subRungInfos:RungInfosWithNextPosition list =
+                let subRungInfos:RungInfosWithSpan list =
                     [
                         for exp in exprs do
                             let sub = rng x sy exp
-                            //endInfo.Add((sub.SpanX, sy))
                             sy <- sy + sub.SpanY
-                            //vLineUpMaxY <- max vLineUpMaxY sub.VLineUpRightMaxY
                             rungInfos.AddRange(sub.RungInfos)
                             yield sub
                     ]
@@ -84,10 +83,17 @@ module internal Basic =
                 // 좌측 vertical lines
                 vlineDownTo (x-1) y (spanY-1) |> rungInfos.AddRange
 
+                // ```OR variable length 역삼각형 test```
+                let lowestY =
+                    subRungInfos
+                        .Where(fun sri -> sri.SpanX = spanX)
+                        .Max(fun sri -> sri.Y)
                 // 우측 vertical lines
+                //vlineDownTo (x+spanX-1) y (lowestY-y) |> rungInfos.AddRange
                 vlineDownTo (x+spanX-1) y (spanY-1) |> rungInfos.AddRange
 
-                { baseRIWNP with RungInfos=rungInfos.ToFSharpList(); SpanX=spanX; SpanY=spanY; VLineUpRightMaxY=y }
+
+                { baseRIWNP with RungInfos=rungInfos.ToFSharpList(); SpanX=spanX; SpanY=spanY; }
 
 
             // terminal case
@@ -101,7 +107,7 @@ module internal Basic =
 
             | FlatZero ->
                 let str = hlineEmpty c
-                { baseRIWNP with RungInfos=[{ Coordinate = c; Xml = str}]; SpanX=0; SpanY=0; VLineUpRightMaxY=y }
+                { baseRIWNP with RungInfos=[{ Coordinate = c; Xml = str}]; SpanX=0; SpanY=0; }
 
             | _ ->
                 failwithlog "Unknown FlatExpression case"

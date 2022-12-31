@@ -5,6 +5,8 @@ open NUnit.Framework
 open T
 open Engine.Core
 open T.Expression
+open Engine.Common.FS
+open Engine.Parser.FS
 
 
 //[<AutoOpen>]
@@ -202,3 +204,40 @@ open T.Expression
             ctr.RES.Value === true
             ctr.PRE.Value === 100us
             ctr.ACC.Value === 0us
+
+
+
+
+        member __.CommonPinNames = [ "RES"; "CU"; "CD"; "OV"; "UN" ]
+
+        [<Test>]
+        member x.``COUNTER structure WINDOWS platform test`` () =
+            let storages = Storages()
+            let code = """
+                bool x0 = createTag("%MX0.0.0", false);
+                ctu myCTU = createCTU(2000us, $x0);
+"""
+
+            let runtimeTargetBackup = RuntimeTarget
+            RuntimeTarget <- WINDOWS
+            disposable { RuntimeTarget <- runtimeTargetBackup } |> ignore
+
+            let statement = parseCode storages code
+            [ "DN"; "PRE"; "ACC"; yield! x.CommonPinNames ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === true)
+            [ "Q"; "PT"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === false)
+
+        [<Test>]
+        member x.``COUNTER structure XGI platform test`` () =
+            let storages = Storages()
+            let code = """
+                bool x0 = createTag("%MX0.0.0", false);
+                ctu myCTU = createCTU(2000us, $x0);
+"""
+
+            let runtimeTargetBackup = RuntimeTarget
+            RuntimeTarget <- XGI
+            disposable { RuntimeTarget <- runtimeTargetBackup } |> ignore
+
+            let statement = parseCode storages code
+            [ "Q"; "PT"; "ET"; yield! x.CommonPinNames ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === true)
+            [ "DN"; "PRE"; "ACC"; ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === false)

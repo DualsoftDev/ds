@@ -58,6 +58,8 @@ module LsXGI =
                 .Select(fun struc -> struc.Name)
                 |> HashSet
                 ;
+
+        let storagesBoolTags = storages.Values.OfType<PlcTag<bool>>().ToArray()
         let xgiSymbols =
             [   for s in storages.Values do
                     match s with
@@ -68,8 +70,12 @@ module LsXGI =
                             ()
                         else
                             XgiSymbol.DuTag t
-                    | :? TimerStruct as ts -> XgiSymbol.DuTimer ts
-                    | :? CounterBaseStruct as cs -> XgiSymbol.DuCounter cs
+                    | :? TimerStruct as ts ->
+                        XgiSymbol.DuTimer ts
+                        //yield! storagesBoolTags.Where(fun t -> t.Name.StartsWith(ts.Name)).Select(fun t -> XgiSymbol.DuTag t)
+                    | :? CounterBaseStruct as cs ->
+                        XgiSymbol.DuCounter cs
+                        //yield! storagesBoolTags.Where(fun t -> t.Name.StartsWith(cs.Name)).Select(fun t -> XgiSymbol.DuTag t)
                     | _ -> failwith "ERROR"
             ]
 

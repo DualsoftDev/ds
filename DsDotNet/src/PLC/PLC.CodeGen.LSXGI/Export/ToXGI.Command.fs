@@ -88,7 +88,17 @@ module internal Command =
 
     let drawCmdCounter(counterStatement:CounterStatement, x, y) : CoordinatedRungXmlsWithNewY =
         let count = int counterStatement.Counter.PRE.Value
-        let reset = counterStatement.Counter.RES.Name
+
+        // 임시 :
+        // todo : 산전 xgi 의 경우, cu 를 제외한 나머지는 expression 으로 받을 수 없다.
+        // ResetTag 등으로 개정된 statement 구조를 만들어야 함
+
+        //let reset = counterStatement.Counter.RES.Name
+        let reset =
+            let exp = counterStatement.ResetCondition.Value :?> Expression<bool>
+            match exp with
+            | DuTerminal (DuTag t) -> t.Name
+            | _ -> failwith "ERROR"
         let fbSpanY = 3
         //Command 속성입력
         let results = [

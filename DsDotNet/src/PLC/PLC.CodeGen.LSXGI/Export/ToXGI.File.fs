@@ -430,6 +430,7 @@ module internal XgiFile =
         //    ] |> Tuple.toDictionary
 
         let symbolInfos =
+            let kindVar = int Variable.Kind.VAR
             [
                 for s in xgiSymbols do
                     match s with
@@ -448,7 +449,7 @@ module internal XgiFile =
                             | "W" -> "WORD"
                             | "L" -> "DWORD"
                             | _ -> failwith "ERROR"
-                        let comment, kind = "FAKECOMMENT", Variable.Kind.VAR
+                        let comment = "FAKECOMMENT"
 
                         //<kwak>
                         //let name, comment = t.FullName, t.Tag
@@ -492,23 +493,21 @@ module internal XgiFile =
                         //    | Some tt when tt.Equals TagType.Instance -> Variable.Kind.VAR
                         //    | _-> Variable.Kind.VAR_EXTERNAL
 
-                        XGITag.createSymbol name comment device ((int)kind) addr plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
+                        XGITag.createSymbol name comment device kindVar addr plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
                     | DuTimer timer ->
                         let device, addr = "", ""
-                        let kind = Variable.Kind.VAR
                         let plcType =
                             match timer.Type with
                             | TON | TOF | RTO -> timer.Type.ToString()
 
-                        XGITag.createSymbol timer.Name $"TIMER {timer.Name}" device ((int)kind) addr plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
+                        XGITag.createSymbol timer.Name $"TIMER {timer.Name}" device kindVar addr plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
                     | DuCounter counter ->
                         let device, addr = "", ""
-                        let kind = Variable.Kind.VAR
                         let plcType =
                             match counter.Type with
-                            | CTU | CTD | CTUD | CTR -> counter.Type.ToString()
+                            | CTU | CTD | CTUD | CTR -> $"{counter.Type}_INT"       // todo: CTU_{INT, UINT, .... } 등의 종류가 있음...
 
-                        XGITag.createSymbol counter.Name $"TIMER {counter.Name}" device ((int)kind) addr plcType
+                        XGITag.createSymbol counter.Name $"COUNTER {counter.Name}" device kindVar addr plcType
             ]
 
         /// Symbol table 정의 XML 문자열

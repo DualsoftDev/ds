@@ -30,11 +30,7 @@ module RuntimeGeneratorModule =
         | (WINDOWS | AB) -> "TT"
         | _ -> "_TT"
 
-    let nameRES() =
-        match RuntimeTarget with
-        | (WINDOWS | AB) -> "RES"
-        | _ -> "_RES"
-
+    let nameRES() = "RES"
 
     let nameCU() =
         match RuntimeTarget with

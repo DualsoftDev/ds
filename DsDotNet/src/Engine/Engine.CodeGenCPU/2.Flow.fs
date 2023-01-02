@@ -17,6 +17,8 @@ type VertexManager with
             (sets, rsts) ==| (v.ST, "F1")  |> Some
         else None
 
+
+    //option Spec 확정 필요  
      member v.F1_RootStartOptionPulse(): CommentedStatement list =
         let srcs = v.Flow.Graph.FindEdgeSources(v.Vertex, StartEdge).Select(getVM)
         if srcs.Any() then

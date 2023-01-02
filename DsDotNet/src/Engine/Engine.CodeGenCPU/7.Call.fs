@@ -50,10 +50,17 @@ type VertexManager with
     //    let statement = call.EndTag <== [call.ST].ToAnd()
     //    statement |> withNoComment
 
-              //test ahn
-    member v.C1_CallActionOut(): CommentedStatement  = 
-        (v.PA.Expr, v.System._off.Expr) --| (v.PA, "C1" )
-          //test ahn
+    member v.C1_CallActionOut(): CommentedStatement list = 
+        let call = v.Vertex :?> Call
+        
+        let sets = v.ST.Expr <||> v.GetSharedCall().Select(fun s->s.ST).ToOr()
+        let rsts = if call.MutualResetOuts.Any() then call.MutualResetOuts.ToOr() else v.System._off.Expr
+        [
+            for out in call.OUTs do
+                yield (sets, rsts) --| (out, "C1" )
+        ]
+
+          //test ahn 
     member v.C2_CallInitialComplete(): CommentedStatement  = 
         (v.PA.Expr, v.System._off.Expr) --| (v.PA, "C2" )
           //test ahn

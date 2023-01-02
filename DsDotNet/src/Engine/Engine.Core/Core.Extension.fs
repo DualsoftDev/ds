@@ -15,19 +15,19 @@ module CoreExtensionModule =
 
     type DsSystem with
         member x.AddButton(btnType:BtnType, btnName:string, inAddress:TagAddress, outAddress:TagAddress, flow:Flow) =
-            if x <> flow.System 
-            then failwithf $"button [{btnName}] in flow ({flow.System.Name} != {x.Name}) is not same system"
+            let checkSystem() =
+                if x <> flow.System 
+                then failwithf $"button [{btnName}] in flow ({flow.System.Name} != {x.Name}) is not same system"
 
-            let getUsedFlow (btn:BtnType) =
-                x.Buttons.Where(fun f->f.ButtonType = btn)
-                |> Seq.collect(fun b -> b.SettingFlows)
-
-            if btnType = DuAutoBTN 
-            then not <| getUsedFlow(DuAutoBTN).Contains(flow)
-                 |> verifyM $"AutoBTN {btnName} is assigned to a single flow : Duplicated flow [{flow.Name}]"
-            if btnType = DuManualBTN 
-            then not <| getUsedFlow(DuManualBTN).Contains(flow)
-                 |> verifyM $"ManualBTN {btnName} is assigned to a single flow : Duplicated flow [{flow.Name}]"
+            let checkUsedFlow() =
+                let flows = x.Buttons.Where(fun f->f.ButtonType = btnType)
+                            |> Seq.collect(fun b -> b.SettingFlows)
+                flows.Contains(flow) |> not 
+                |> verifyM $"{btnType} {btnName} is assigned to a single flow : Duplicated flow [{flow.Name}]"
+                 
+            checkSystem()
+            if btnType = DuAutoBTN || btnType = DuManualBTN 
+            then checkUsedFlow()
 
             match x.Buttons.TryFind(fun f -> f.Name = btnName) with
             | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
@@ -58,3 +58,20 @@ module CoreExtensionModule =
         member x.StopModeLamps      = getLamps(x, DuStopModeLamp)   
         member x.ManualModeLamps    = getLamps(x, DuManualModeLamp)   
         member x.EmergencyModeLamps = getLamps(x, DuEmergencyLamp)
+
+
+        member x.GetMutualResetApis(src:ApiItem) = 
+            let getMutual(apiInfo:ApiResetInfo) = 
+                match src.Name = apiInfo.Operand1, src.Name = apiInfo.Operand2 with
+                |true, false -> Some apiInfo.Operand2
+                |false, true -> Some apiInfo.Operand1
+                |_ -> None
+
+            x.ApiResetInfos.Select(getMutual).Where(fun w-> w.IsSome)
+                .Select(fun s->x.ApiItems.Find(fun f->f.Name = s.Value))
+
+        member x.JobDefs = x.Jobs |> Seq.collect(fun s->s.JobDefs)
+
+    type Call with
+        member x.System = x.Parent.GetSystem()
+       

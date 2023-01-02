@@ -25,12 +25,12 @@ type VertexManager with
    
     member v.M1_OriginMonitor(): CommentedStatement  = 
         let real = v.Vertex :?> Real
-        real.Parent.GetSystem().GenerationJobIO()
         let ons    = getOriginIOs (real, InitialType.On)
         let offs   = getOriginIOs (real, InitialType.Off)
         let checks = getOriginIOs (real, InitialType.NeedCheck)
         let locks  = getNeedCheckExpr (checks)
-
+        //test ahn 인터락 원위치 필요
+        
         let onExpr   = if ons.Any() then ons.ToAnd() else v.System._on.Expr
         let lockExpr = if locks.Any() then locks.ToOr() else v.System._on.Expr
         let rsts     = if offs.Any() then offs.ToAnd() else v.System._off.Expr
@@ -61,21 +61,18 @@ type VertexManager with
         (sets, rsts) ==| (v.E2, "M4" )
 
 
-        //test ahn
     member v.M5_RealErrorTXMonitor(): CommentedStatement  = 
         let real = v.Vertex :?> Real
-        let sets = v.Flow.eop.Expr <||> v.Flow.sop.Expr   //test ahn timmer 적용
-        let rsts = v.Flow.clear.Expr <||> v.System._clear.Expr
+        let sets = if real.ErrorTXs.Any() then real.ErrorTXs.ToOr() else v.System._off.Expr 
+        let rsts = v.System._off.Expr
 
         (sets, rsts) ==| (v.E1, "M5" )
 
 
-        //test ahn
     member v.M6_RealErrorRXMonitor(): CommentedStatement  = 
         let real = v.Vertex :?> Real
-        let sets = v.Flow.clear.Expr <||> v.System._clear.Expr
-        let rsts = v.Flow.clear.Expr <||> v.System._clear.Expr
+        let sets = if real.ErrorRXs.Any() then real.ErrorRXs.ToOr() else v.System._off.Expr 
+        let rsts = v.System._off.Expr
 
-        (sets, rsts) ==| (v.E2, "M7" )
-   
-   
+        (sets, rsts) ==| (v.E2, "M6" )
+

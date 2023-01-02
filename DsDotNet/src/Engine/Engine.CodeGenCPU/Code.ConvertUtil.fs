@@ -9,7 +9,6 @@ open Engine.Common.FS
 [<AutoOpen>]
 module CodeConvertUtil =
 
-    let getVM(v:Vertex) = v.VertexManager :?> VertexManager
     let rec getCoinTags(v:Vertex, isInTag:bool) : Tag<bool> seq =
             match v with
             | :? Call as c ->

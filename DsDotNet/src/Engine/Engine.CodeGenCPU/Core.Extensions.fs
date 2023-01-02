@@ -17,9 +17,8 @@ module ConvertCoreExt =
                         | Memory -> failwith "error: Memory not supported "
 
         (PlcTag(plcName, address, false) :> ITagWithAddress)
-            //if address = "" then None
-            //                else Some (PlcTag(plcName, address, false) :> ITagWithAddress)
 
+    let getVM(v:Vertex) = v.VertexManager :?> VertexManager
 
 
     type DsSystem with
@@ -166,9 +165,16 @@ module ConvertCoreExt =
     type Call with
         member c.INs   = c.CallTarget.JobDefs.Select(fun j -> j.InTag).Cast<PlcTag<bool>>()
         member c.OUTs  = c.CallTarget.JobDefs.Select(fun j -> j.OutTag).Cast<PlcTag<bool>>()
+        member c.MutualResetOuts = 
+            c.CallTarget.JobDefs
+                .SelectMany(fun j -> j.ApiItem.System.GetMutualResetApis(j.ApiItem))
+                .SelectMany(fun a -> c.System.JobDefs.Where(fun w-> w.ApiItem = a))
+                .Select(fun j -> j.OutTag).Cast<PlcTag<bool>>()
+                .Cast<PlcTag<bool>>()
         
     type Real with
-        member r.CoinRelays = r.Graph.Vertices
-                                 .Select(fun f->f.VertexManager)
-                                 .Cast<VertexManager>().Select(fun f->f.CR)
+        member r.CoinRelays = r.Graph.Vertices.Select(getVM).Select(fun f->f.CR)
+        member r.ErrorTXs = r.Graph.Vertices.Select(getVM).Select(fun f->f.E1)
+        member r.ErrorRXs = r.Graph.Vertices.Select(getVM).Select(fun f->f.E2)
+
                              

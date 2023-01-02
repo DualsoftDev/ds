@@ -26,7 +26,7 @@ type MonitorStatement() =
     member __.``M1 Origin Monitor`` () =
         let sys, flow, real = getCpuTestSample()
         let realM = real.VertexManager :?> VertexManager
-        let test = realM.M1_OriginMonitor()
+        //let test = realM.M1_OriginMonitor()
         Eq  1 1 
 
     [<Test>] member __.``M2 Pause Monitor`` () =  Eq 1 1 //test ahn

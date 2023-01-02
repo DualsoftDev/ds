@@ -23,7 +23,7 @@ open PLC.CodeGen.Common
 [<AutoOpen>]
 module rec TypeConvertorModule =
     type IXgiStatement = interface end
-    type TempTagCreator = unit -> PlcTag<bool>  // name -> address -> PlcTag<bool>
+    type TempTagCreator = string -> PlcTag<bool>  // name -> address -> PlcTag<bool>
     type CommentedXgiStatement = CommentedXgiStatement of comment:string * statement:XgiStatement
     let (|CommentAndXgiStatement|) = function | CommentedXgiStatement(x, y) -> x, y
     let commentAndXgiStatement = (|CommentAndXgiStatement|)
@@ -35,21 +35,25 @@ module rec TypeConvertorModule =
         member val ExtendedStatements = ResizeArray<XgiStatement>()
 
 
-    let private expandExpression (store:XgiStatementExptender) (exp:IExpression<bool> option) : Terminal<bool> option =
+    let private expandExpression (store:XgiStatementExptender) (exp:IExpression<bool> option) (nameHint:string) : Terminal<bool> option =
         let helper (tempTagCreator:TempTagCreator) =
             match exp with
             | Some (:? Expression<bool> as exp) ->
                 match exp with
                 | DuTerminal t -> Some t
                 | DuFunction _ ->
-                    let temp = tempTagCreator() // "temp" "%MX0.0.1"
+                    let temp = tempTagCreator nameHint // "temp" "%MX0.0.1"
                     store.TemporaryTags.Add temp
                     let assign = DuXgiAssign <| XgiAssignStatement(exp, temp)
                     store.ExtendedStatements.Add assign
                     Some (DuTag temp)
             | _ ->
                 None
-        let tagCreator() = PlcTag<bool>("temp", "%MX0", false)
+        let tagCreator =
+            let mutable n = 0
+            fun nameHint ->
+                n <- n + 1
+                PlcTag<bool>($"temp{nameHint}{n}", "%MX0", false)
         helper tagCreator
 
 
@@ -61,7 +65,7 @@ module rec TypeConvertorModule =
     type XgiTimerStatement(ts:TimerStatement) as this =
         inherit XgiStatementExptender()
         //let reset = lazy ( expandExpression this ts.ResetCondition )
-        let reset = expandExpression this ts.ResetCondition
+        let reset = expandExpression this ts.ResetCondition "RES"
         member _.Timer = ts.Timer
         member _.RungInCondition:IExpression<bool> = ts.RungInCondition.Value
         member _.Reset:Terminal<bool> option = reset
@@ -70,22 +74,22 @@ module rec TypeConvertorModule =
         inherit XgiStatementExptender()
         let typ = cs.Counter.Type
         let expand = expandExpression this
-        let reset = expand cs.ResetCondition
-        let cu, cd =
+        let reset = expand cs.ResetCondition "RES"
+        let cu, cd, ld =
             match typ with
-            | CTU -> None, None
-            | CTR -> None, None
-            | (CTUD | CTD) -> None, expand cs.DownCondition
+            | ( CTU | CTD | CTR ) -> None, None, None
+            | CTUD -> None, expand cs.DownCondition "CD", None//expand cs.LoadCondition
 
         member _.Counter = cs.Counter
         member _.RungInCondition:IExpression<bool> =
             match typ with
-            | CTU | CTUD | CTR -> cs.UpCondition.Value
+            | ( CTU | CTUD | CTR ) -> cs.UpCondition.Value
             | CTD -> cs.DownCondition.Value
 
         member _.Reset:Terminal<bool> option = reset
         member _.CountUp:Terminal<bool> option = cu
         member _.CountDown:Terminal<bool> option = cd
+        member _.Load:Terminal<bool> option = ld
 
     type XgiCopyStatement(condition:IExpression<bool>, source:IExpression, target:IStorage) =
         interface IXgiStatement

@@ -10,6 +10,8 @@ module internal Command =
     /// Rung 의 Command 정의를 위한 type.
     //Command = CoilCmd or FunctionCmd or FunctionBlockCmd
     type XgiCommand(cmdType:CommandTypes) =
+        do
+            noop()
         member x.CommandType with get() = cmdType
         member x.CoilTerminalTag with get() =
             /// Terminal End Tag
@@ -30,8 +32,22 @@ module internal Command =
             match cmdType with
             | FunctionBlockCmd (fbc) ->
                 match fbc with
-                | TimerMode _ -> fbc.GetInstanceText(), VarType.TON
-                | CounterMode _ -> fbc.GetInstanceText(), VarType.CTU_INT
+                | TimerMode ts ->
+                    let varType =
+                        match ts.Timer.Type with
+                        | TON -> VarType.TON
+                        | TOF -> VarType.TOFF
+                        | RTO -> VarType.TMR
+                    fbc.GetInstanceText(), varType
+
+                | CounterMode cs ->
+                    let varType =
+                        match cs.Counter.Type with
+                        | CTU -> VarType.CTU_INT
+                        | CTD -> VarType.CTD_INT
+                        | CTUD -> VarType.CTUD_INT
+                        | CTR ->  VarType.CTR_INT
+                    fbc.GetInstanceText(), varType
             |_-> failwithlog "do not make instanceTag"
 
         member x.LDEnum with get() =
@@ -88,12 +104,24 @@ module internal Command =
 
     let drawCmdCounter(counterStatement:XgiCounterStatement, x, y) : CoordinatedRungXmlsWithNewY =
         let count = int counterStatement.Counter.PRE.Value
+        let typ = counterStatement.Counter.Type
 
         // 임시 :
         // todo : 산전 xgi 의 경우, cu 를 제외한 나머지는 expression 으로 받을 수 없다.
         // ResetTag 등으로 개정된 statement 구조를 만들어야 함
 
         //let reset = counterStatement.Counter.RES.Name
+
+        let createParam (t:Terminal<bool> option) x y =
+            match t with
+            | Some t ->
+                let name =
+                    match t with
+                    | DuTag t -> t.Name
+                    | _ -> failwith "ERROR: need check"
+                [ createFBParameterXml name x y ]
+            | None -> []
+
         let reset =
             match counterStatement.Reset with
             | Some(DuTag t) -> t.Name
@@ -101,11 +129,22 @@ module internal Command =
             //| DuLiteral of 'T
             //| DuVariable of VariableBase<'T>
 
-        let fbSpanY = 3
+        let fbSpanY =
+            match typ with
+            | CTUD -> 5
+            | (CTU | CTD | CTR) -> 3
+
         //Command 속성입력
         let results = [
-            createFBParameterXml reset (x-1) (y+1)
-            createFBParameterXml $"{count}" (x-1) (y+2)
+            match typ with
+            | (CTU | CTD | CTR) ->
+                createFBParameterXml reset      (x-1) (y+1)
+                createFBParameterXml $"{count}" (x-1) (y+2)
+            | CTUD ->
+                yield! (createParam counterStatement.CountDown (x-1) (y+1))
+                yield! (createParam counterStatement.Reset     (x-1) (y+2))
+                yield! (createParam counterStatement.Load      (x-1) (y+3))
+                createFBParameterXml $"{count}" (x-1) (y+4)
         ]
 
         { SpanY = fbSpanY; PositionedRungXmls = results}

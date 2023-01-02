@@ -112,6 +112,8 @@ module ExpressionModule =
         UpCondition: IExpression<bool> option
         DownCondition: IExpression<bool> option
         ResetCondition:  IExpression<bool> option
+        // XGI only
+        //LoadCondition: IExpression<bool> option
     }
 
     type Statement =

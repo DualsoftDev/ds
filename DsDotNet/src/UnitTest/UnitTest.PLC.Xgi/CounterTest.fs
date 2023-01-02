@@ -40,7 +40,7 @@ type XgiCounterTest() =
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
-    member __.``Counter CTUD simple test`` () =
+    member __.``X Counter CTUD simple test`` () =
         let storages = Storages()
         let code = """
             bool cu = createTag("%IX0.0.0", false);
@@ -53,7 +53,7 @@ type XgiCounterTest() =
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
-    member __.``Counter CTU with conditional test`` () =
+    member __.``X Counter CTU with conditional test`` () =
         let storages = Storages()
         let code = """
             bool cu1 = createTag("%IX0.0.0", false);
@@ -72,7 +72,7 @@ type XgiCounterTest() =
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
-    member __.``Counter CTD with conditional test`` () =
+    member __.``X Counter CTD with conditional test`` () =
         let storages = Storages()
         let code = """
             bool cu1 = createTag("%IX0.0.0", false);

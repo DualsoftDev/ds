@@ -63,7 +63,7 @@ type VertexManager with
 
         //test ahn
     member v.M5_RealErrorTXMonitor(): CommentedStatement  = 
-        let call = v.Vertex :?> Call
+        let real = v.Vertex :?> Real
         let sets = v.Flow.eop.Expr <||> v.Flow.sop.Expr   //test ahn timmer 적용
         let rsts = v.Flow.clear.Expr <||> v.System._clear.Expr
 
@@ -72,9 +72,8 @@ type VertexManager with
 
         //test ahn
     member v.M6_RealErrorRXMonitor(): CommentedStatement  = 
-        let call = v.Vertex :?> Call
-        let sets = (v.G.Expr <&&> call.INs.ToOr())
-                   <||> (v.H.Expr <&&> !!call.INs.ToOr())
+        let real = v.Vertex :?> Real
+        let sets = v.Flow.clear.Expr <||> v.System._clear.Expr
         let rsts = v.Flow.clear.Expr <||> v.System._clear.Expr
 
         (sets, rsts) ==| (v.E2, "M7" )

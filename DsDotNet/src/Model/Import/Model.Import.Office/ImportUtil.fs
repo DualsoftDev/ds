@@ -98,6 +98,46 @@ module ImportU =
                     ApiItem.Create(apiName, sys) |> ignore
             )
 
+        //Interface Reset 정보 만들기
+        [<Extension>]
+        static member MakeInterfaceResets (doc :pptDoc, sys:DsSystem) =
+            let resets  = HashSet<string*string>()
+            doc.Edges
+                |> Seq.filter(fun edge -> edge.IsInterfaceEdge)
+                |> Seq.iter(fun edge ->
+                    let src = edge.StartNode
+                    let tgt = edge.EndNode
+                    //인터페이스는 인터페이스끼리 인과가능
+                    if(src.NodeType = IF && src.NodeType = tgt.NodeType|>not)
+                    then Office.ErrorConnect(edge.ConnectionShape, ErrID._37, src.Name, tgt.Name, edge.PageNum)
+                    //인터페이스 인과는 약 리셋 불가 
+                    if (edge.Causal = InterlockWeak || edge.Causal = ResetEdge)
+                    then Office.ErrorConnect(edge.ConnectionShape, ErrID._11, src.Name, tgt.Name, edge.PageNum)
+
+                    if (edge.Causal = Interlock) //인터락 AugmentedTransitiveClosure 타입 만들기 재료
+                    then resets.Add(src.Name, tgt.Name) |> ignore
+                    else sys.ApiResetInfos.Add(ApiResetInfo.Create(sys, edge.StartNode.Name, edge.Causal ,edge.EndNode.Name ))|>ignore
+                    )
+
+            let dicIL = Dictionary<int, HashSet<string>>()
+
+            let updateILInfo(src, tgt) =
+                match dicIL.TryFind(fun dic -> dic.Value.Contains(src) 
+                                            || dic.Value.Contains(tgt)) with
+                |Some dic -> dic.Value.Add(src) |> ignore;dic.Value.Add(tgt) |> ignore
+                |None -> dicIL.Add(dicIL.length(), [src;tgt] |> HashSet)
+            
+            let createInterlockInfos(src, tgt) =
+                let mei = ApiResetInfo.Create(sys, src, Interlock ,tgt )
+                sys.ApiResetInfos.Add(mei)|>ignore
+
+            resets.ForEach(fun rst ->  updateILInfo rst)
+            dicIL.ForEach(fun dic-> 
+                dic.Value 
+                |> Seq.pairwiseWindingFull  //2개식 조합
+                |> Seq.iter(fun (src, tgt) -> createInterlockInfos (src, tgt)))
+              
+
         //MFlow 리스트 만들기
         [<Extension>]
         static member MakeFlows (doc:pptDoc, sys:DsSystem) =
@@ -239,50 +279,38 @@ module ImportU =
                     |None ->       flow.CreateEdge(mei)
 
                 pptEdges
+                    |> Seq.filter(fun edge -> not <| edge.IsInterfaceEdge)
                     |> Seq.iter(fun edge ->
                         let flow = dicFlow.[edge.PageNum]
+                        
+                        let srcDummy = dummys.TryFindDummy(edge.StartNode)
+                        let tgtDummy = dummys.TryFindDummy(edge.EndNode)
 
-
-                        if(edge.StartNode.NodeType = IF && edge.StartNode.NodeType = edge.EndNode.NodeType|>not)
-                        then Office.ErrorConnect(edge.ConnectionShape, ErrID._37, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
-
-                        if(edge.StartNode.NodeType = IF || edge.EndNode.NodeType = IF)
-                        then
-                            //인터페이스 인과는 약 리셋 불가 //ahn
-                            if (edge.Causal = InterlockWeak || edge.Causal = ResetEdge)
-                            then Office.ErrorConnect(edge.ConnectionShape, ErrID._11, edge.StartNode.Name, edge.EndNode.Name, edge.PageNum)
-
-                            mySys.ApiResetInfos.Add(ApiResetInfo.Create(mySys, edge.StartNode.Name, edge.Causal ,edge.EndNode.Name ))|>ignore
-
-                        else
-                            let srcDummy = dummys.TryFindDummy(edge.StartNode)
-                            let tgtDummy = dummys.TryFindDummy(edge.EndNode)
-
-                            if(srcDummy.IsNonNull())
+                        if(srcDummy.IsNonNull())
+                            then
+                                let tgt = if tgtDummy.IsNull() then edge.EndNode.Key else tgtDummy.DummyNodeKey
+                                srcDummy.AddOutEdge(edge.Causal, tgt)
+                            else
+                                if(tgtDummy.IsNonNull())
                                 then
-                                    let tgt = if tgtDummy.IsNull() then edge.EndNode.Key else tgtDummy.DummyNodeKey
-                                    srcDummy.AddOutEdge(edge.Causal, tgt)
-                                else
-                                    if(tgtDummy.IsNonNull())
-                                    then
-                                        let src = if srcDummy.IsNull() then edge.StartNode.Key else srcDummy.DummyNodeKey
-                                        tgtDummy.AddInEdge(edge.Causal, src)
+                                    let src = if srcDummy.IsNull() then edge.StartNode.Key else srcDummy.DummyNodeKey
+                                    tgtDummy.AddInEdge(edge.Causal, src)
 
 
-                            let getVertexs(pptNodes:pptNode seq) =
-                                pptNodes.Select(fun s-> dicVertex.[s.Key])
+                        let getVertexs(pptNodes:pptNode seq) =
+                            pptNodes.Select(fun s-> dicVertex.[s.Key])
 
-                            let srcs = if(dummys.IsMember(edge.StartNode))
-                                        then dummys.GetMembers(edge.StartNode) |> getVertexs
-                                        else [dicVertex.[edge.StartNode.Key]]
+                        let srcs = if(dummys.IsMember(edge.StartNode))
+                                    then dummys.GetMembers(edge.StartNode) |> getVertexs
+                                    else [dicVertex.[edge.StartNode.Key]]
 
-                            let tgts = if(dummys.IsMember(edge.EndNode))
-                                        then dummys.GetMembers(edge.EndNode)   |> getVertexs
-                                        else [dicVertex.[edge.EndNode.Key]]
+                        let tgts = if(dummys.IsMember(edge.EndNode))
+                                    then dummys.GetMembers(edge.EndNode)   |> getVertexs
+                                    else [dicVertex.[edge.EndNode.Key]]
 
-                            convertEdge(edge, flow, srcs, tgts) |> ignore
+                        convertEdge(edge, flow, srcs, tgts) |> ignore
 
-                            )
+                    )
 
 
         //Safety 만들기

@@ -324,6 +324,7 @@ module PPTObjectModule =
         member x.PageNum = iPage
         member x.ConnectionShape = conn
         member x.Id = iEdge
+        member x.IsInterfaceEdge:bool = x.StartNode.NodeType = IF || x.EndNode.NodeType = IF 
         member x.StartNode:pptNode = if(reverse) then eNode else sNode
         member x.EndNode:pptNode =   if(reverse) then sNode else eNode
         member x.ParentId = 0 //reserve

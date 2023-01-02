@@ -81,6 +81,7 @@ module ImportM =
 
             //ExternalSystem 위하여 인터페이스는 공통으로 시스템 생성시 만들어 줌
             doc.MakeInterfaces(theSys)
+            doc.MakeInterfaceResets(theSys)
 
             if paras.LoadingType <> DuExternal   
             then //External system 은 Interfaces만 만들고 나중에 buildSystem 수행

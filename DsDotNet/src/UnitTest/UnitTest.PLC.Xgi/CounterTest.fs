@@ -16,18 +16,20 @@ type XgiCounterTest() =
 
 
     [<Test>]
-    member __.``Counter test`` () =
+    member __.``X Counter test`` () =
         let storages = Storages()
         let code = """
             bool myQBit0 = createTag("%QX0.1.0", false);
             bool cu1 = createTag("%IX0.0.0", false);
             bool cu2 = createTag("%IX0.0.1", false);
             bool cu3 = createTag("%IX0.0.2", false);
-            bool res = createTag("%IX0.0.2", false);
+            bool res0 = createTag("%IX0.0.2", false);
+            bool res1 = createTag("%IX0.0.2", false);
+            bool res2 = createTag("%IX0.0.2", false);
 
             bool x7 = createTag("%IX0.0.7", false);
-            ctu myCTU = createCTU(2000us, ($cu1 && $cu2) || $cu3, $res);
-            $x7 := (($cu1 && $cu2) || $cu3 || $res) && $cu1;
+            ctu myCTU = createCTU(2000us, ($cu1 && $cu2) || $cu3, ($res0 || $res1) && $res2 );
+            $x7 := (($cu1 && $cu2) || $cu3 || ($res0 || $res1) && $res2) && $cu1;
 """
         let statements = parseCode storages code
         //storages.Count === 12

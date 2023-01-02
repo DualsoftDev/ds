@@ -58,10 +58,40 @@ module LsXGI =
                 .Select(fun struc -> struc.Name)
                 |> HashSet
                 ;
+        let commentedXgiStatements:CommentedXgiStatement list =
+            commentedStatements
+            |> map commentedStatement2CommentedXgiStatement
 
-        let storagesBoolTags = storages.Values.OfType<PlcTag<bool>>().ToArray()
+        let xgiStatements:XgiStatement list =
+            commentedXgiStatements
+            |> map (fun (CommentedXgiStatement(cmt, stmt)) -> stmt)
+
+        let extendedXgiStatements =
+            xgiStatements
+            |> map (fun x -> x.GetStatement())
+            |> List.ofType<XgiStatementExptender>
+
+        let newStorages:IStorage list =
+            let temporaryTags =
+                extendedXgiStatements
+                |> Seq.collect(fun xgi -> xgi.TemporaryTags)
+                |> Seq.cast<IStorage>
+                |> Seq.distinct
+            storages.Values @ temporaryTags
+            |> List.ofSeq
+
+        let newCommentedStatements: CommentedXgiStatement list  =
+            let extendedStatements =
+                [   for xgi in extendedXgiStatements do
+                    for s in xgi.ExtendedStatements do
+                        CommentedXgiStatement("Augmented", s)
+                ]
+
+            commentedXgiStatements @ extendedStatements
+
+        noop()
         let xgiSymbols =
-            [   for s in storages.Values do
+            [   for s in newStorages do
                     match s with
                     | :? ITagWithAddress as t ->
                         let name = (t :> INamed).Name
@@ -72,12 +102,10 @@ module LsXGI =
                             XgiSymbol.DuTag t
                     | :? TimerStruct as ts ->
                         XgiSymbol.DuTimer ts
-                        //yield! storagesBoolTags.Where(fun t -> t.Name.StartsWith(ts.Name)).Select(fun t -> XgiSymbol.DuTag t)
                     | :? CounterBaseStruct as cs ->
                         XgiSymbol.DuCounter cs
-                        //yield! storagesBoolTags.Where(fun t -> t.Name.StartsWith(cs.Name)).Select(fun t -> XgiSymbol.DuTag t)
                     | _ -> failwith "ERROR"
             ]
 
-        let xml = generateXGIXmlFromStatement prologComments commentedStatements xgiSymbols unusedTags existingLSISprj
+        let xml = generateXGIXmlFromStatement prologComments newCommentedStatements xgiSymbols unusedTags existingLSISprj
         xml

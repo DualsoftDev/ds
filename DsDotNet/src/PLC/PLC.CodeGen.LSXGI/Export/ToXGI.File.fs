@@ -132,7 +132,7 @@ module internal XgiFile =
 
 
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
-    let private generateRungs (prologComments:string seq) (commentedStatements:CommentedStatement seq) : XmlOutput =
+    let private generateRungs (prologComments:string seq) (commentedStatements:CommentedXgiStatement seq) : XmlOutput =
         let xmlRung (expr:FlatExpression) xgiCommand y : RungGenerationInfo =
             let {Coordinate=posi; Xml=xml} = rung 0 y expr xgiCommand
             let yy = (posi / 1024)// + 1
@@ -147,7 +147,7 @@ module internal XgiFile =
             rgi <- rgi.Add(xml)
 
         // Rung 별로 생성
-        for CommentAndStatement(cmt, stmt) in commentedStatements do
+        for CommentAndXgiStatement(cmt, stmt) in commentedStatements do
 
             // 다중 라인 설명문을 하나의 설명문 rung 에..
             if cmt.NonNullAny() then
@@ -155,7 +155,9 @@ module internal XgiFile =
                 rgi <- rgi.Add(xml)
 
             match stmt with
-            | DuAssign (expr, (:? IExpressionTerminal as target)) ->
+            | DuXgiAssign assign ->
+                let expr = assign.Expression
+                let target = assign.Target :?> IExpressionTerminal
                 let flatExpr = expr.Flatten() :?> FlatExpression
                 let command:XgiCommand = CoilCmd(CoilMode(target)) |> XgiCommand
                 let rgiSub = xmlRung flatExpr command rgi.Y
@@ -163,33 +165,23 @@ module internal XgiFile =
                 rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgiSub.Y}
 
             // <kwak> <timer>
-            | DuTimer timerStatement ->
-                let rungin = timerStatement.RungInCondition.Value :> IExpression
+            | DuXgiTimer timerStatement ->
+                let rungin = timerStatement.RungInCondition :> IExpression
                 let rungin = rungin.Flatten() :?> FlatExpression
 
                 let command:XgiCommand = FunctionBlockCmd(TimerMode(timerStatement)) |> XgiCommand
                 let rgiSub = xmlRung rungin command rgi.Y
                 rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
-            | DuCounter counterStatement ->
+            | DuXgiCounter counterStatement ->
                 let cs = counterStatement
-                let rungIn =
-                    match cs.Counter.Type with
-                    | (CTU | CTUD | CTR) -> cs.UpCondition
-                    | CTD -> cs.DownCondition
-
-                let rungin = rungIn.Value :> IExpression
-                let rungin = rungin.Flatten() :?> FlatExpression
-
+                let rungIn = cs.RungInCondition.Flatten() :?> FlatExpression
                 let command:XgiCommand = FunctionBlockCmd(CounterMode(counterStatement)) |> XgiCommand
-                let rgiSub = xmlRung rungin command rgi.Y
+                let rgiSub = xmlRung rungIn command rgi.Y
                 rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
-            | DuCopy _ ->
+            | _ ->
                 failwith "Not yet"
-
-            | DuVarDecl _ -> failwith "ERROR: Invalid"
-            | _  -> failwith "ERROR"
 
         let rungEnd = generateEnd (rgi.Y + 1)
         rgi <- rgi.Add(rungEnd)
@@ -342,7 +334,7 @@ module internal XgiFile =
         | DuCounter of CounterBaseStruct
 
 
-    let generateXGIXmlFromStatement (prologComments:string seq) (commentedStatements:CommentedStatement seq) (xgiSymbols:XgiSymbol seq) (unusedTags:ITagWithAddress seq) (existingLSISprj:string option) =
+    let generateXGIXmlFromStatement (prologComments:string seq) (commentedStatements:CommentedXgiStatement seq) (xgiSymbols:XgiSymbol seq) (unusedTags:ITagWithAddress seq) (existingLSISprj:string option) =
         // TODO : 하드 코딩...  PLC memory 설정을 어디선가 받아서 처리해야 함.
 
         /// PLC memory manager

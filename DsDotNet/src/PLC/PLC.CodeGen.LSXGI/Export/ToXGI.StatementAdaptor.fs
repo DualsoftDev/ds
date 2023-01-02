@@ -1,6 +1,7 @@
 namespace PLC.CodeGen.LSXGI
 
 open Engine.Core
+open PLC.CodeGen.Common
 
 (*
     - Timer 나 Counter 의 Rung In Condition 은 expression 을 받을 수 있으나,
@@ -23,11 +24,15 @@ open Engine.Core
 module rec TypeConvertorModule =
     type IXgiStatement = interface end
     type TempTagCreator = unit -> PlcTag<bool>  // name -> address -> PlcTag<bool>
+    type CommentedXgiStatement = CommentedXgiStatement of comment:string * statement:XgiStatement
+    let (|CommentAndXgiStatement|) = function | CommentedXgiStatement(x, y) -> x, y
+    let commentAndXgiStatement = (|CommentAndXgiStatement|)
+
     [<AbstractClass>]
     type XgiStatementExptender() =
         interface IXgiStatement
         member val TemporaryTags = ResizeArray<PlcTag<bool>>()
-        member val ExtendedStatements = ResizeArray<IXgiStatement>()
+        member val ExtendedStatements = ResizeArray<XgiStatement>()
 
 
     let private expandExpression (store:XgiStatementExptender) (exp:IExpression<bool> option) : Terminal<bool> option =
@@ -39,12 +44,12 @@ module rec TypeConvertorModule =
                 | DuFunction _ ->
                     let temp = tempTagCreator() // "temp" "%MX0.0.1"
                     store.TemporaryTags.Add temp
-                    let assign = XgiAssignStatement(exp, temp)
+                    let assign = DuXgiAssign <| XgiAssignStatement(exp, temp)
                     store.ExtendedStatements.Add assign
                     Some (DuTag temp)
             | _ ->
                 None
-        let tagCreator() = PlcTag<bool>("temp", "%MX0.0.0", false)
+        let tagCreator() = PlcTag<bool>("temp", "%MX0", false)
         helper tagCreator
 
 
@@ -65,14 +70,14 @@ module rec TypeConvertorModule =
         inherit XgiStatementExptender()
         let typ = cs.Counter.Type
         let expand = expandExpression this
-        let failCall() = failwith "INTERNAL ERROR"      // RungInCondition 을 써야 하는 곳에 CU 를 썼다거나... CTU 에서 CD 를 사용하려한다거나..
         let reset = expand cs.ResetCondition
         let cu, cd =
             match typ with
-            | CTU -> failCall(), failCall()
-            | CTR -> failCall(), failCall()
-            | (CTUD | CTD) -> failCall(), expand cs.DownCondition
+            | CTU -> None, None
+            | CTR -> None, None
+            | (CTUD | CTD) -> None, expand cs.DownCondition
 
+        member _.Counter = cs.Counter
         member _.RungInCondition:IExpression<bool> =
             match typ with
             | CTU | CTUD | CTR -> cs.UpCondition.Value
@@ -93,6 +98,13 @@ module rec TypeConvertorModule =
         | DuXgiTimer of XgiTimerStatement
         | DuXgiCounter of XgiCounterStatement
         | DuXgiCopy of XgiCopyStatement
+    with
+        member x.GetStatement():IXgiStatement =
+            match x with
+            | DuXgiAssign s -> s
+            | DuXgiTimer  s -> s
+            | DuXgiCounter  s -> s
+            | DuXgiCopy  s -> s
 
 
     let private statement2XgiStatement (statement:Statement) : XgiStatement =
@@ -103,3 +115,63 @@ module rec TypeConvertorModule =
         | DuCopy (exp, src, tgt) -> DuXgiCopy   (XgiCopyStatement(exp, src, tgt))
         | DuVarDecl _            -> failwith "ERROR"
 
+    let internal commentedStatement2CommentedXgiStatement (CommentedStatement(comment, statement)) : CommentedXgiStatement =
+        let xgiStatement = statement2XgiStatement statement
+        CommentedXgiStatement(comment, xgiStatement)
+
+
+
+    (* Moved from Command.fs *)
+
+    ///FunctionBlocks은 Timer와 같은 현재 측정 시간을 저장하는 Instance가 필요있는 Command 해당
+    type FunctionBlock =
+        | TimerMode of XgiTimerStatement //endTag, time
+        | CounterMode of XgiCounterStatement   // IExpressionTerminal *  CommandTag  * int  //endTag, countResetTag, count
+    with
+        member x.GetInstanceText() =
+            match x with
+            | TimerMode timerStatement -> timerStatement.Timer.Name
+            | CounterMode counterStatement ->  counterStatement.Counter.Name
+        member x.UsedCommandTags() : IExpressionTerminal list =
+            failwith "Need check"
+
+
+            //match x with
+            ////| TimerMode(tag, time) -> [ tag ]
+            //| TimerMode timerStatement ->
+            //    timerStatement.RungInCondition
+            //    |> Option.toList
+            //    |> List.cast<IExpressionTerminal>
+            //| CounterMode counterStatement ->
+            //    [ counterStatement.UpCondition; counterStatement.ResetCondition ]
+            //    |> List.choose id
+            //    |> List.map (fun x -> x :?> IExpressionTerminal)
+
+        interface IFunctionCommand with
+            member this.TerminalEndTag: IExpressionTerminal =
+                match this with
+                //| TimerMode(tag, time) -> tag
+                | TimerMode timerStatement -> timerStatement.Timer.DN
+                | CounterMode counterStatement -> counterStatement.Counter.DN
+
+
+    /// 실행을 가지는 type
+    type CommandTypes =
+        | CoilCmd          of CoilOutput
+        | FunctionCmd      of FunctionPure
+        /// Timer, Counter 등
+        | FunctionBlockCmd of FunctionBlock
+
+    let createPLCCommandCopy(endTag, from, toTag) = FunctionPure.CopyMode(endTag, (from, toTag))
+    let createPLCCommandCompare(endTag, op, left, right) =
+        match op with
+        | GT ->FunctionPure.CompareGT(endTag, (left, right))
+        | GE ->FunctionPure.CompareGE(endTag, (left, right))
+        | EQ ->FunctionPure.CompareEQ(endTag, (left, right))
+        | LE ->FunctionPure.CompareLE(endTag, (left, right))
+        | LT ->FunctionPure.CompareLT(endTag, (left, right))
+        | NE ->FunctionPure.CompareNE(endTag, (left, right))
+
+    let createPLCCommandAdd(endTag, tag, value)          = FunctionPure.Add(endTag, tag, value)
+    //let createPLCCommandTimer(endTag, time)              = FunctionBlock.TimerMode(endTag, time)
+    //let createPLCCommandCounter(endTag, resetTag, count) = FunctionBlock.CounterMode(endTag, resetTag , count)

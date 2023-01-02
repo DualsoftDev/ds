@@ -81,12 +81,12 @@ module internal Command =
         | NE -> XgiCommand(FunctionCmd(FunctionPure.CompareNE(tag, (tagA, tagB))))
 
     // <timer>
-    let drawCmdTimer(timerStatement:TimerStatement, x, y) : CoordinatedRungXmlsWithNewY =
+    let drawCmdTimer(timerStatement:XgiTimerStatement, x, y) : CoordinatedRungXmlsWithNewY =
         let time:int = int timerStatement.Timer.PRE.Value
         let fbSpanY = 2
         { SpanY = fbSpanY; PositionedRungXmls = [createFBParameterXml $"T#{time}MS" (x-1) (y+1)]}
 
-    let drawCmdCounter(counterStatement:CounterStatement, x, y) : CoordinatedRungXmlsWithNewY =
+    let drawCmdCounter(counterStatement:XgiCounterStatement, x, y) : CoordinatedRungXmlsWithNewY =
         let count = int counterStatement.Counter.PRE.Value
 
         // 임시 :
@@ -95,10 +95,12 @@ module internal Command =
 
         //let reset = counterStatement.Counter.RES.Name
         let reset =
-            let exp = counterStatement.ResetCondition.Value :?> Expression<bool>
-            match exp with
-            | DuTerminal (DuTag t) -> t.Name
-            | _ -> failwith "ERROR"
+            match counterStatement.Reset with
+            | Some(DuTag t) -> t.Name
+            | _ -> failwith "ERROR: need check"
+            //| DuLiteral of 'T
+            //| DuVariable of VariableBase<'T>
+
         let fbSpanY = 3
         //Command 속성입력
         let results = [

@@ -16,11 +16,8 @@ module CpuLoader =
             then
                 yield! vm.S1_Ready_Going_Finish_Homing()
                 yield vm.M2_PauseMonitor()
-                yield vm.M3_CallErrorTXMonitor()
-                yield vm.M4_CallErrorRXMonitor()
-                yield vm.M5_RealErrorTXMonitor()
-                yield vm.M6_RealErrorRXMonitor()
 
+   
             if IsSpec v (CallPure ||| AliasForCall)
             then
                 yield vm.C1_CallActionOut()
@@ -28,6 +25,8 @@ module CpuLoader =
                 yield vm.C3_CallTailComplete()
                 yield vm.C4_CallTx()
                 yield vm.C5_CallRx()
+                yield vm.M3_CallErrorTXMonitor()
+                yield vm.M4_CallErrorRXMonitor()
 
             if IsSpec v VertexAll
             then
@@ -36,10 +35,13 @@ module CpuLoader =
 
             if IsSpec v RealPure
             then 
-                yield vm.M1_OriginMonitor()
                 yield vm.P1_RealStartPort()
                 yield vm.P2_RealResetPort()
                 yield vm.P3_RealEndPort()
+                yield vm.M1_OriginMonitor()
+                yield vm.M5_RealErrorTXMonitor()
+                yield vm.M6_RealErrorRXMonitor()
+
 
                 for coin in (v :?> Real).Graph.Vertices.Select(getVM) do
                 yield coin.D1_DAGInitialStart()

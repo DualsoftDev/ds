@@ -133,7 +133,6 @@ module Config =
         | TMR           = 1002 //적산 타이머 Melsec : ST
         | CTU_INT       = 1003 //가산 카운터 int 타입
 
-
         | TOFF          = 1010
         | CTD_INT       = 1011
         | CTUD_INT      = 1012

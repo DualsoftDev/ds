@@ -47,4 +47,8 @@
 	  <ProjectReference Include="..\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Documents\" />
+	</ItemGroup>
+
 </Project>

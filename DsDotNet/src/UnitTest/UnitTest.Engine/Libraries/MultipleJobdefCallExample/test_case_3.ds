@@ -7,7 +7,7 @@
             S101_Copy2_Func2 > S101_Copy2_Func1, S101_Copy1_Func1, S101_Copy1_Func6 > S101_Copy1_Func5;
         }
 		R2 = {
-			S101_Copy1_Func2 > S101_Copy1_Func3 > S101_Copy1_Func4;
+			S101_Copy1_Func1, S101_Copy1_Func2, S101_Copy1_Func3 > S101_Copy1_Func4, S101_Copy1_Func5;
 		}
     }
     [flow] S102 = {

@@ -75,12 +75,11 @@ module OriginTestModule =
                 seq {
                     KeyValuePair("S101_Copy2.Func1", Off);
                     KeyValuePair("S101_Copy2.Func2", On);
-                    KeyValuePair("S101_Copy1.Func1", Off);
-                    KeyValuePair("S101_Copy1.Func2", On);
-                    KeyValuePair("S101_Copy1.Func3", Off);
-                    KeyValuePair("S101_Copy1.Func4", NeedCheck);
-                    KeyValuePair("S101_Copy1.Func5", NeedCheck);
+                    KeyValuePair("S101_Copy1.Func1", NeedCheck);
+                    KeyValuePair("S101_Copy1.Func3", NotCare);
                     KeyValuePair("S101_Copy1.Func6", Off);
+                    KeyValuePair("S101_Copy1.Func5", NotCare);
+                    KeyValuePair("S101_Copy1.Func2", NeedCheck);
                     KeyValuePair("S102_SystemA1.Func1", Off);
                     KeyValuePair("S102_SystemA1.Func2", On);
                     KeyValuePair("S102_SystemA2.Func1", On);
@@ -125,17 +124,19 @@ module OriginTestModule =
                 seq {
                     KeyValuePair("S101_Copy2.Func2", Off);
                     KeyValuePair("S101_Copy2.Func1", On);
-                    KeyValuePair("S101_Copy1.Func5", NeedCheck);
-                    KeyValuePair("S101_Copy1.Func1", NeedCheck);
+                    KeyValuePair("S101_Copy1.Func5", NotCare);
+                    KeyValuePair("S101_Copy1.Func1", NotCare);
                     KeyValuePair("S101_Copy1.Func6", Off);
+                    KeyValuePair("S101_Copy1.Func1", NeedCheck);
+                    KeyValuePair("S101_Copy1.Func4", NeedCheck);
+                    KeyValuePair("S101_Copy1.Func5", NeedCheck);
                     KeyValuePair("S101_Copy1.Func2", NeedCheck);
                     KeyValuePair("S101_Copy1.Func3", NeedCheck);
-                    KeyValuePair("S101_Copy1.Func4", NeedCheck);
                     KeyValuePair("S102_SystemA1.Func1", Off);
                     KeyValuePair("S102_SystemA1.Func2", On);
-                    KeyValuePair("S102_SystemA2.Func2", NeedCheck);
+                    KeyValuePair("S102_SystemA2.Func2", NotCare);
                     KeyValuePair("S102_SystemA3.Func2", On);
-                    KeyValuePair("S102_SystemA4.Func2", NeedCheck);
+                    KeyValuePair("S102_SystemA4.Func2", NotCare);
                     KeyValuePair("S102_SystemA5.Func2", On);
                     KeyValuePair("S102_SystemA3.Func1", Off);
                     KeyValuePair("S102_SystemA5.Func1", Off);

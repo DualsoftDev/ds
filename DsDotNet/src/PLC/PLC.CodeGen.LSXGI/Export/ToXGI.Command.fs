@@ -30,8 +30,22 @@ module internal Command =
             match cmdType with
             | FunctionBlockCmd (fbc) ->
                 match fbc with
-                | TimerMode _ -> fbc.GetInstanceText(), VarType.TON
-                | CounterMode _ -> fbc.GetInstanceText(), VarType.CTU_INT
+                | TimerMode ts ->
+                    let varType =
+                        match ts.Timer.Type with
+                        | TON -> VarType.TON
+                        | TOF -> VarType.TOFF
+                        | RTO -> VarType.TMR
+                    fbc.GetInstanceText(), varType
+
+                | CounterMode cs ->
+                    let varType =
+                        match cs.Counter.Type with
+                        | CTU -> VarType.CTU_INT
+                        | CTD -> VarType.CTD_INT
+                        | CTUD -> VarType.CTUD_INT
+                        | CTR ->  VarType.CTR_INT
+                    fbc.GetInstanceText(), varType
             |_-> failwithlog "do not make instanceTag"
 
         member x.LDEnum with get() =
@@ -88,6 +102,7 @@ module internal Command =
 
     let drawCmdCounter(counterStatement:CounterStatement, x, y) : CoordinatedRungXmlsWithNewY =
         let count = int counterStatement.Counter.PRE.Value
+        let typ = counterStatement.Counter.Type
 
         // 임시 :
         // todo : 산전 xgi 의 경우, cu 를 제외한 나머지는 expression 으로 받을 수 없다.
@@ -99,11 +114,22 @@ module internal Command =
             match exp with
             | DuTerminal (DuTag t) -> t.Name
             | _ -> failwith "ERROR"
-        let fbSpanY = 3
+
+        let fbSpanY =
+            match typ with
+            | CTUD -> 5
+            | (CTU | CTD | CTR) -> 3
+
         //Command 속성입력
         let results = [
-            createFBParameterXml reset (x-1) (y+1)
-            createFBParameterXml $"{count}" (x-1) (y+2)
+            match typ with
+            | (CTU | CTD | CTR) ->
+                createFBParameterXml reset      (x-1) (y+1)
+                createFBParameterXml $"{count}" (x-1) (y+2)
+            | CTUD ->
+                // todo: y+1 부터 순차적으로 CD, RESET, LOAD, COUNT
+                createFBParameterXml reset      (x-1) (y+1)
+                createFBParameterXml $"{count}" (x-1) (y+2)
         ]
 
         { SpanY = fbSpanY; PositionedRungXmls = results}

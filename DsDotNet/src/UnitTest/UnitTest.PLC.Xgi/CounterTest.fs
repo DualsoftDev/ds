@@ -16,23 +16,77 @@ type XgiCounterTest() =
 
 
     [<Test>]
-    member __.``Counter test`` () =
+    member __.``Counter CTU simple test`` () =
         let storages = Storages()
         let code = """
-            bool myQBit0 = createTag("%QX0.1.0", false);
+            bool cu = createTag("%IX0.0.0", false);
+            bool res = createTag("%IX0.0.1", false);
+            ctu myCTU = createCTU(2000us, $cu, $res);
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
+
+    [<Test>]
+    member __.``Counter CTD simple test`` () =
+        let storages = Storages()
+        let code = """
+            bool cd = createTag("%IX0.0.0", false);
+            bool res = createTag("%IX0.0.1", false);
+            ctd myCTD = createCTD(2000us, $cd, $res);
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
+
+    [<Test>]
+    member __.``Counter CTUD simple test`` () =
+        let storages = Storages()
+        let code = """
+            bool cu = createTag("%IX0.0.0", false);
+            bool cd = createTag("%IX0.0.1", false);
+            bool res = createTag("%IX0.0.2", false);
+            ctud myCTUD = createCTUD(2000us, $cu, $cd, $res);
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
+
+    [<Test>]
+    member __.``Counter CTU with conditional test`` () =
+        let storages = Storages()
+        let code = """
             bool cu1 = createTag("%IX0.0.0", false);
             bool cu2 = createTag("%IX0.0.1", false);
             bool cu3 = createTag("%IX0.0.2", false);
-            bool res = createTag("%IX0.0.2", false);
+            bool res0 = createTag("%IX0.0.2", false);
+            bool res1 = createTag("%IX0.0.2", false);
+            bool res2 = createTag("%IX0.0.2", false);
 
             bool x7 = createTag("%IX0.0.7", false);
-            ctu myCTU = createCTU(2000us, ($cu1 && $cu2) || $cu3, $res);
-            $x7 := (($cu1 && $cu2) || $cu3 || $res) && $cu1;
+            ctu myCTU = createCTU(2000us, ($cu1 && $cu2) || $cu3, ($res0 || $res1) && $res2 );
+            $x7 := (($cu1 && $cu2) || $cu3 || ($res0 || $res1) && $res2) && $cu1;
 """
         let statements = parseCode storages code
-        //storages.Count === 12
-        //statements.Length === 2      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
+        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
 
+    [<Test>]
+    member __.``Counter CTD with conditional test`` () =
+        let storages = Storages()
+        let code = """
+            bool cu1 = createTag("%IX0.0.0", false);
+            bool cu2 = createTag("%IX0.0.1", false);
+            bool cu3 = createTag("%IX0.0.2", false);
+            bool res0 = createTag("%IX0.0.2", false);
+            bool res1 = createTag("%IX0.0.2", false);
+            bool res2 = createTag("%IX0.0.2", false);
+
+            bool x7 = createTag("%IX0.0.7", false);
+            ctd myCTD = createCTD(2000us, ($cu1 && $cu2) || $cu3, ($res0 || $res1) && $res2 );
+            $x7 := (($cu1 && $cu2) || $cu3 || ($res0 || $res1) && $res2) && $cu1;
+"""
+        let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 

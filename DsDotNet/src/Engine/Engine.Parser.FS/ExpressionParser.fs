@@ -153,7 +153,10 @@ module rec ExpressionParser =
 
     let private getFirstChildExpressionContext (ctx:ParserRuleContext) : ExprContext = ctx.children.OfType<ExprContext>().First()
 
-    let private (|UnitValue|) (x:IExpression) = x.BoxedEvaluatedValue :?> CountUnitType
+    let private (|UnitValue|_|) (x:IExpression) =
+        match x.BoxedEvaluatedValue with
+        | :? CountUnitType as value -> Some value
+        | _ -> None
     let private (|BoolExp|) (x:IExpression) = x :?> IExpression<bool>
 
     let private parseCounterStatement (storages:Storages) (ctx:CounterDeclContext) : Statement =
@@ -172,10 +175,15 @@ module rec ExpressionParser =
                 | CTU, "createCTU", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::[] ->
                     CounterStatement.CreateCTU(storages, name, preset, rungInCondtion, resetCondition)
 
-                | CTD, "createCTD", (UnitValue preset)::(BoolExp rungInCondtion)::(UnitValue accum)::[] ->
-                    CounterStatement.CreateCTD(storages, name, preset, rungInCondtion, accum)
-                | CTD, "createCTD", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::(UnitValue accum)::[] ->
-                    CounterStatement.CreateCTD(storages, name, preset, rungInCondtion, resetCondition, accum)
+                | CTD, "createCTD", (UnitValue preset)::(BoolExp rungInCondtion)::[] ->
+                    CounterStatement.CreateCTD(storages, name, preset, rungInCondtion, 0us)
+                | CTD, "createCTD", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::[] ->
+                    CounterStatement.CreateCTD(storages, name, preset, rungInCondtion, resetCondition, 0us)
+
+                | CTUD, "createCTUD", (UnitValue preset)::(BoolExp countUpCondition)::(BoolExp countDownCondition)::[] ->
+                    CounterStatement.CreateCTUD(storages, name, preset, countUpCondition, countDownCondition, 0us)
+                | CTUD, "createCTUD", (UnitValue preset)::(BoolExp countUpCondition)::(BoolExp countDownCondition)::(BoolExp resetCondition)::[] ->
+                    CounterStatement.CreateCTUD(storages, name, preset, countUpCondition, countDownCondition, resetCondition, 0us)
 
                 | CTUD, "createCTUD", (UnitValue preset)::(BoolExp countUpCondition)::(BoolExp countDownCondition)::(UnitValue accum)::[] ->
                     CounterStatement.CreateCTUD(storages, name, preset, countUpCondition, countDownCondition, accum)

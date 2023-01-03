@@ -9,10 +9,11 @@ open System.Linq
 //Port 처리 Set 공용 함수
 let private getSetBits(v:VertexManager) (rse:SREType) (convert:ConvertType) =
     let shareds =  
-        match convert with
-        | ConvertType.RealPure -> v.GetSharedReal() 
-        | ConvertType.CallPure -> v.GetSharedCall() 
-        | _ ->  failwith "Error"
+        if convert =  ConvertType.RealInFlow 
+        then v.GetSharedReal() 
+        elif convert = (ConvertType.CallInFlow  |||  ConvertType.CallInReal)
+        then v.GetSharedCall() 
+        else failwith "Error"
 
     let setBits =  
         match rse with
@@ -28,37 +29,37 @@ let private getRstBits(v:VertexManager) = v.System._on.Expr
 type VertexManager with
     
     member v.P1_RealStartPort(): CommentedStatement =
-        let sets = getSetBits v SREType.Start RealPure
+        let sets = getSetBits v SREType.Start RealInFlow
         let rsts = getRstBits v
          
         (sets, rsts) --| (v.SP, "P1")
 
     member v.P2_RealResetPort(): CommentedStatement =
-        let sets = getSetBits v SREType.Reset RealPure
+        let sets = getSetBits v SREType.Reset RealInFlow
         let rsts = getRstBits v
          
         (sets, rsts) --| (v.RP, "P2")
 
     member v.P3_RealEndPort(): CommentedStatement =
-        let sets = getSetBits v SREType.End RealPure
+        let sets = getSetBits v SREType.End RealInFlow
         let rsts = getRstBits v
          
         (sets, rsts) --| (v.EP, "P3")
 
     member v.P4_CallStartPort(): CommentedStatement =
-        let sets = getSetBits v SREType.Start CallPure
+        let sets = getSetBits v SREType.Start (CallInFlow  ||| CallInReal)
         let rsts = getRstBits v
          
         (sets, rsts) --| (v.SP, "P4")
 
     member v.P5_CallResetPort(): CommentedStatement =
-        let sets = getSetBits v SREType.Reset CallPure
+        let sets = getSetBits v SREType.Reset (CallInFlow  ||| CallInReal)
         let rsts = getRstBits v
          
         (sets, rsts) --| (v.RP, "P5")
 
     member v.P6_CallEndPort(): CommentedStatement =
-        let sets = getSetBits v SREType.End CallPure
+        let sets = getSetBits v SREType.End (CallInFlow  ||| CallInReal)
         let rsts = getRstBits v
          
         (sets, rsts) --| (v.EP, "P6")

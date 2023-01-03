@@ -163,8 +163,12 @@ module ConvertCoreExt =
 
 
     type Call with
-        member c.INs   = c.CallTarget.JobDefs.Select(fun j -> j.InTag).Cast<PlcTag<bool>>()
-        member c.OUTs  = c.CallTarget.JobDefs.Select(fun j -> j.OutTag).Cast<PlcTag<bool>>()
+        member c.INs  = c.CallTarget.JobDefs.Select(fun j -> j.InTag).Cast<PlcTag<bool>>()
+        member c.OUTs = c.CallTarget.JobDefs.Select(fun j -> j.OutTag).Cast<PlcTag<bool>>()
+        member c.TXs  = c.CallTarget.JobDefs |> Seq.collect(fun (j: JobDef) -> j.ApiItem.TXs) 
+                                             |> Seq.cast<PlcTag<bool>>
+        member c.RXs  = c.CallTarget.JobDefs |> Seq.collect(fun (j: JobDef) -> j.ApiItem.RXs) 
+                                             |> Seq.cast<PlcTag<bool>>
         member c.MutualResetOuts = 
             c.CallTarget.JobDefs
                 .SelectMany(fun j -> j.ApiItem.System.GetMutualResetApis(j.ApiItem))

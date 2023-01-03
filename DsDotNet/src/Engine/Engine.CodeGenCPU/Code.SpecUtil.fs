@@ -18,31 +18,40 @@ module CodeSpecUtil =
     [<Flags>]
     [<AutoOpen>]
     type ConvertType = 
-    |RealPure            = 0b00000001  
-    |RealExPure          = 0b00000010  
-    |CallPure            = 0b00000100  
-    |AliasPure           = 0b00001000  
-    |AliasForCall        = 0b00100000  
-    |AliasForReal        = 0b01000000  
-    |AliasForRealEx      = 0b10000000  
-    |VertexAll           = 0b11111111  
-    //RC      //Real, Call as RC
-    //RCA     //Real, Call, Alias(Call) as RCA
-    //RRA     //Real, RealExF, Alias(Real) as RRA
-    //CA      //Call, Alias(Call) as CA 
-    //V       //Real, RealExF, Call, Alias as V
-
+    |RealInFlow          = 0b000000001  
+    |RealExFlow          = 0b000000010  
+    |CallInFlow          = 0b000000100  
+    |CallInReal          = 0b000000100  
+    |AliasCallInReal     = 0b000001000  
+    |AliasRealInReal     = 0b000010000  
+    |AliasRealExInReal   = 0b000100000 
+    |AliasCallInFlow     = 0b001000000  
+    |AliasRealInFlow     = 0b010000000  
+    |AliasRealExInFlow   = 0b100000000  
+    |VertexAll           = 0b111111111  
+   
     let IsSpec (v:Vertex) (vaild:ConvertType) = 
         let isVaildVertex =
             match v with
-            | :? Real   -> vaild.HasFlag(RealPure)
-            | :? RealEx -> vaild.HasFlag(RealExPure) 
-            | :? Call   -> vaild.HasFlag(CallPure)
+            | :? Real   -> vaild.HasFlag(RealInFlow)
+            | :? RealEx -> vaild.HasFlag(RealExFlow) 
+            | :? Call as c  -> 
+                match c.Parent with
+                |DuParentFlow f-> vaild.HasFlag(CallInFlow)
+                |DuParentReal r-> vaild.HasFlag(CallInReal)
+
             | :? Alias as a  -> 
-                match a.TargetWrapper with
-                | DuAliasTargetReal ar   -> vaild.HasFlag(AliasForReal)
-                | DuAliasTargetCall ac   -> vaild.HasFlag(AliasForCall)
-                | DuAliasTargetRealEx ao -> vaild.HasFlag(AliasForRealEx)
+                 match a.Parent with
+                 |DuParentFlow f-> 
+                     match a.TargetWrapper with
+                     | DuAliasTargetReal ar   -> vaild.HasFlag(AliasRealInFlow)
+                     | DuAliasTargetRealEx ao -> vaild.HasFlag(AliasRealExInFlow)
+                     | DuAliasTargetCall ac   -> vaild.HasFlag(AliasCallInFlow)
+                 |DuParentReal r-> 
+                     match a.TargetWrapper with
+                     | DuAliasTargetReal ar   -> vaild.HasFlag(AliasRealInReal)
+                     | DuAliasTargetRealEx ao -> vaild.HasFlag(AliasRealExInReal)
+                     | DuAliasTargetCall ac   -> vaild.HasFlag(AliasCallInReal)
             |_ -> failwith "Error"
 
         isVaildVertex

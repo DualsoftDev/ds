@@ -7,24 +7,34 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module CpuLoader =
-
+    let callTypeAll = CallInReal||| CallInFlow ||| AliasCallInFlow ||| AliasCallInReal
+    let realTypeAll = RealInFlow||| RealExFlow
     ///Vertex 타입이 Spec에 해당하면 적용
     let private applyVertexSpec(v:Vertex) = 
         let vm = v.VertexManager :?> VertexManager
         [
-            if IsSpec v (RealPure ||| CallPure ||| AliasForCall)
+        
+            if IsSpec v (CallInReal ||| CallInFlow) 
+            then
+                yield vm.P4_CallStartPort()
+                yield vm.P5_CallResetPort()
+                yield vm.P6_CallEndPort()
+
+            if IsSpec v (RealInFlow ||| callTypeAll)
             then
                 yield! vm.S1_Ready_Going_Finish_Homing()
-
                 yield vm.M2_PauseMonitor()
-
    
-            if IsSpec v (CallPure ||| AliasForCall)
+
+            if IsSpec v (CallInReal)
             then
                 yield! vm.C1_CallActionOut()
-                yield vm.C2_CallInitialComplete()
+
+            if IsSpec v (CallInReal ||| AliasCallInReal)
+            then
+                yield vm.C2_CallHeadComplete()
                 yield vm.C3_CallTailComplete()
-                yield vm.C4_CallTx()
+                yield! vm.C4_CallTx()
                 yield vm.C5_CallRx()
 
                 yield vm.M3_CallErrorTXMonitor()
@@ -35,7 +45,7 @@ module CpuLoader =
                 yield! vm.F1_RootStart() |> Option.toList
                 yield! vm.F2_RootReset()
 
-            if IsSpec v RealPure
+            if IsSpec v RealInFlow
             then 
                 yield vm.P1_RealStartPort()
                 yield vm.P2_RealResetPort()
@@ -48,18 +58,9 @@ module CpuLoader =
                 yield vm.R1_RealInitialStart()
                 yield vm.R2_RealJobComplete()
 
-
                 for coin in (v :?> Real).Graph.Vertices.Select(getVM) do
                     yield coin.D1_DAGInitialStart()
                     yield coin.D2_DAGTailStart()
-
-
-            if IsSpec v CallPure
-            then
-                yield vm.P4_CallStartPort()
-                yield vm.P5_CallResetPort()
-                yield vm.P6_CallEndPort()
-
         ]
     let private applyBtnLampSpec(s:DsSystem) = []
     ///flow 별 운영모드 적용

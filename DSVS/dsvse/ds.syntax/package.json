@@ -33,8 +33,11 @@
             {
                 "language": "ds",
                 "scopeName": "source.ds",
-                "path": "./syntaxes/ds.tmLanguage.json"
+                "path": "./syntaxes/tmLanguage"
             }
         ]
+    },
+    "devDependencies": {
+        "@types/node": "^18.11.18"
     }
 }

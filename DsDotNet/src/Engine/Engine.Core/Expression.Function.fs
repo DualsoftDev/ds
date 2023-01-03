@@ -15,7 +15,8 @@ module ExpressionFunctionModule =
     let private castTo<'T> (x:obj) = x :?> 'T
     let private evalTo<'T> (x:IExpression) = x |> evalArg |> castTo<'T>
 
-
+    let [<Literal>] FunctionNameRising  = "rising"
+    let [<Literal>] FunctionNameFalling = "falling"
 
     let createBinaryExpression (opnd1:IExpression) (op:string) (opnd2:IExpression) : IExpression =
         let t1 = opnd1.DataType
@@ -60,6 +61,10 @@ module ExpressionFunctionModule =
         |> iexpr
 
     let createUnaryExpression (op:string) (opnd:IExpression) : IExpression =
+        (* unary operator 처리.
+           - '! $myTag' 처럼  괄호 없이도 사용가능한 것들만 정의한다.
+           - 괄호도 허용하려면 createCustomFunctionExpression 에서도 정의해야 한다. '! ($myTag)'
+         *)
         match op with
         | ("~" | "~~~" ) -> fBitwiseNot [opnd]
         | "!"  -> fLogicalNot [opnd]
@@ -91,12 +96,19 @@ module ExpressionFunctionModule =
 
         | ("&&" | "and") -> fLogicalAnd args
         | ("||" | "or")  -> fLogicalOr  args
-        | ("!"  | "not") -> fLogicalNot args
+        | ("!"  | "not") -> fLogicalNot args        // 따로 or 같이??? neg 는 contact 이나 coil 하나만 받아서 rung 생성하는 용도, not 은 expression 을 받아서 평가하는 용도
 
         | ("&" | "&&&") -> fBitwiseAnd  args
         | ("|" | "|||") -> fBitwiseOr   args
         | ("^" | "^^^") -> fBitwiseXor  args
         | ("~" | "~~~") -> fBitwiseNot  args
+
+        | FunctionNameRising  -> fRising  args
+        | FunctionNameFalling -> fFalling args
+        //| "neg"     -> fNegate  args
+        //| "set"     -> fSet     args
+        //| "reset"   -> fReset   args
+
 
         | ("bool"   | "toBool") -> fCastBool    args |> iexpr
         | ("sbyte"  | "toSByte" | "toInt8")     -> fCastInt8   args |> iexpr
@@ -320,6 +332,11 @@ module ExpressionFunctionModule =
         let fLogicalAnd     args: Expression<bool> = cf _logicalAnd     "&&" args
         let fLogicalOr      args: Expression<bool> = cf _logicalOr      "||" args
         let fLogicalNot     args: Expression<bool> = cf _logicalNot     "!"  args
+
+
+        let fRising         args: Expression<bool> = cf _rising      FunctionNameRising args
+        let fFalling        args: Expression<bool> = cf _falling     FunctionNameFalling args
+
         let fSin            args = cf _sin            "sin"    args
         let fCos            args = cf _cos            "cos"    args
         let fTan            args = cf _tan            "tan"    args
@@ -479,6 +496,10 @@ module ExpressionFunctionModule =
         let _logicalAnd (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce( && )
         let _logicalOr  (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce( || )
         let _logicalNot (args:Args) = args.Select(evalArg).Cast<bool>().Expect1() |> not
+
+        let _rising (args:Args) : bool = false//failwith "ERROR"   //args.Select(evalArg).Cast<bool>().Expect1() |> not
+        let _falling (args:Args) : bool = false// failwith "ERROR"  //args.Select(evalArg).Cast<bool>().Expect1() |> not
+
 
         let _shiftLeftInt8    (args:Args) = let n, shift = args.ExpectTyped2<int8,   int>() in n <<< shift
         let _shiftLeftUInt8   (args:Args) = let n, shift = args.ExpectTyped2<uint8,  int>() in n <<< shift

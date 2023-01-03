@@ -23,11 +23,11 @@ module CounterStatementModule =
         let accum = accum |? 0us
         let cs =    // counter structure
             match typ with
-            | CTU  -> new CTUStruct(typ, storages, name, preset, accum) :> CounterBaseStruct
-            | CTD  -> new CTDStruct(typ, storages, name, preset, accum)
-            | CTUD -> new CTUDStruct(typ, storages, name, preset, accum)
-            | CTR  -> new CTRStruct(typ, storages, name, preset, accum)
-        let counter = new Counter(typ, cs)
+            | CTU  -> CTUStruct.Create(typ, storages, name, preset, accum) :> CounterBaseStruct
+            | CTD  -> CTDStruct.Create(typ, storages, name, preset, accum)
+            | CTUD -> CTUDStruct.Create(typ, storages, name, preset, accum)
+            | CTR  -> CTRStruct.Create(typ, storages, name, preset, accum)
+        let counter = new Counter   (typ, cs)
 
         let statements = ResizeArray<Statement>()
         match countUpCondition with

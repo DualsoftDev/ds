@@ -64,7 +64,6 @@ module PLCGenerationTestModule =
         RuntimeTarget <- runtimeTarget
         disposable { RuntimeTarget <- runtimeTargetBackup }
 
-
 [<AutoOpen>]
 module XgiGenerationTestModule =
     let projectDir =

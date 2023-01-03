@@ -28,6 +28,7 @@ type XgiCounterTest() =
 
     [<Test>]
     member __.``Counter CTD simple test`` () =
+        use _ = setRuntimeTarget XGI
         let storages = Storages()
         let code = """
             bool cd = createTag("%IX0.0.0", false);

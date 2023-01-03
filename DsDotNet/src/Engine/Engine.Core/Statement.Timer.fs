@@ -19,7 +19,7 @@ module TimerStatementModule =
         if preset < MinTickInterval then
             failwith <| sprintf "Timer Resolution Error: Preset value should be larger than %A" MinTickInterval
 
-        let ts = TimerStruct(typ, storages, name, preset, 0us)
+        let ts = TimerStruct.Create(typ, storages, name, preset, 0us)
         let timer = new Timer(typ, ts)
 
         let statements = ResizeArray<Statement>()

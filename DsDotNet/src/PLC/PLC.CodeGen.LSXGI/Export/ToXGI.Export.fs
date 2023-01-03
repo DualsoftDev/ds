@@ -47,9 +47,6 @@ module LsXGI =
 
         let prologComments = ["DS Logic for XGI"]
 
-        // todo : Timer 및 Counter 도 PLC XGI 에 변수로 등록하여야 한다.
-        // <Symbol Name="T_myTon" Kind="1" Type="TON" State="0" Address="" Trigger="" InitValue="" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
-
         let unusedTags:ITagWithAddress list = []
         let existingLSISprj = None
 
@@ -58,8 +55,30 @@ module LsXGI =
                 .Select(fun struc -> struc.Name)
                 |> HashSet
                 ;
+
+        (* Timer 및 Counter 의 Rung In Condition 을 제외한 부수의 조건들이 직접 tag 가 아닌 condition expression 으로
+            존재하는 경우, condition 들을 임시 tag 에 assign 하는 rung 으로 분리해서 저장.
+            => 새로운 임시 tag 와 새로운 임시 tag 에 저장하기 위한 rung 들이 추가된다.
+        *)
+
+        let newCommentedStatements = ResizeArray<CommentedXgiStatement>()
+        let newStorages = ResizeArray<IStorage>(storages.Values)
+        for cmtSt in commentedStatements do
+            let xgiCmtStmt = commentedStatement2CommentedXgiStatement cmtSt
+            let (CommentedXgiStatement(cmt, xgiStmts)) = xgiCmtStmt
+            match xgiStmts.GetStatement() with
+            | :? XgiStatementExptender as extended ->
+                for ext in extended.ExtendedStatements do
+                    CommentedXgiStatement(cmt, ext) |> newCommentedStatements.Add
+                extended.TemporaryTags |> Seq.cast<IStorage> |> newStorages.AddRange
+            | _ -> ()
+
+            newCommentedStatements.Add xgiCmtStmt
+
+        noop()
+
         let xgiSymbols =
-            [   for s in storages.Values do
+            [   for s in newStorages do
                     match s with
                     | :? ITagWithAddress as t ->
                         let name = (t :> INamed).Name
@@ -68,10 +87,12 @@ module LsXGI =
                             ()
                         else
                             XgiSymbol.DuTag t
-                    | :? TimerStruct as ts -> XgiSymbol.DuTimer ts
-                    | :? CounterBaseStruct as cs -> XgiSymbol.DuCounter cs
+                    | :? TimerStruct as ts ->
+                        XgiSymbol.DuTimer ts
+                    | :? CounterBaseStruct as cs ->
+                        XgiSymbol.DuCounter cs
                     | _ -> failwith "ERROR"
             ]
 
-        let xml = generateXGIXmlFromStatement prologComments commentedStatements xgiSymbols unusedTags existingLSISprj
+        let xml = generateXGIXmlFromStatement prologComments newCommentedStatements xgiSymbols unusedTags existingLSISprj
         xml

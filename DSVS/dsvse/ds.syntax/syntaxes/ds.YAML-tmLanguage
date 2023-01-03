@@ -1,11 +1,10 @@
 ---
-
 name: ds
-comment: DS language syntax.  Do *NOT* modify auto-generated JSON file.
+comment: DS language syntax.  Do *NOT* modify auto-generated tmLanguage file.
 scopeName: source.ds
 fileTypes: [ds]
-foldingStartMarker: '\{\s*$'
-foldingStopMarker: '^\s*\}'
+# foldingStartMarker: '\{\s*$'
+# foldingStopMarker: '^\s*\}'
 
 # foldingStartMarker: '^\s*[{\[\`](?!.*[}\]\`],?\s*$)|[{\[\`]\s*$'
 # foldingStopMarker: '^\s*[}\]\`]'
@@ -13,342 +12,294 @@ foldingStopMarker: '^\s*\}'
 # 원본 참조
 # https://github.com/inkle/ink-tmlanguage/blob/master/grammars/Ink.YAML-tmLanguage
 
+variables:
+  compo: '(?:[^\\\s][^\\\s]*)'
+  words: '[가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*'
+  identifier1: '{{compo}}'
+  identifier2: '{{compo}}\.{{compo}}'
+  identifier3: '{{compo}}\.{{compo}}\.{{compo}}'
+  identifier4: '{{compo}}\.{{compo}}\.{{compo}}\.{{compo}}'
+  identifiers: '{{compo}}\.{{compo}}*'
+  
+  #System
+  ipSpec: '(?:ip|host)\s*=\s*(?:{{identifier1}})}*'
+  systemHeader: '(\[\s*sys\s*({{ipSpec}})*\s*\])\s*({{identifier1}})\s*=\s*'
 
+  #flow
+  flowHeader: '(\[\s*flow\s*\])\s*({{identifier1}})\s*(=)\s*'
+
+  #parents
+  parentHeader: '({{identifier1}})\s*=\s*'
+
+  #aliases
+  aliasHeader: '(\[\s*aliases\s*\])\s*=\s*'
+
+# Before we dive into the meat, a bit of syntax to remember:
+#
+# (?<=): Positive lookbehind, non capturing unless it's within a group
+# (?<!): Negative lookbehind, non capturing unless it's within a group
+# (?=): Positive lookahead, non capturing unless it's within a group
+# (?!): Negative lookahead, non capturing unless it's within a group
+# (?:): Non capturing group
+# (?x): Ignore subsequent spaces (useful for multiline-formatted regex)
+#
+# >-: YAML multi-line string, turning line breaks into spaces
 
 patterns:
-#- include: '#number'
-#- include: '#causals'
-- include: '#systems'
-- include: '#layouts'
-- include: '#addresses'
 - include: '#comments'
-- include: '#parents'
-#- include: '#tasks'
-#- include: '#flows'
-#- include: '#macros'
+- include: '#systems'
+# - include: '#segment'
+
 
 
 repository:
   comments: # Inline (//) and block (/* */) comments. Comments can happen anywhere.
     patterns:
     - name: comment.block.ds
-      begin: /\*
+      begin: (/\*)
       beginCaptures:
-        '0': { name: punctuation.definition.comment.ds }
-      end: \*/
+        '1': { name: 'punctuation.definition.comment.ds' }
+      end: (\*/)
       endCaptures:
-        '0': { name: punctuation.definition.comment.ds }
-    - begin: (^\s+)?(?=//)
+        '1': { name: 'punctuation.definition.comment.ds' }
+    - name: comment.line.ds
+      begin: (\/\/)
       beginCaptures:
-        '1': { name: punctuation.whitespace.comment.leading.ds }
+        '1': { name: 'punctuation.definition.comment.ds' }
       end: (?=$)
-      patterns:
-      - name: comment.block.documentation.ds
-        begin: (?<!/)///(?!/)
-        beginCaptures:
-          '0': { name: punctuation.definition.comment.ds }
-        end: (?=$)
-        
-        
-      - name: comment.line.double-slash.ds
-        begin: (?<!/)//(?:(?!/)|(?=//))
-        beginCaptures:
-          '0': { name: punctuation.definition.comment.ds }
-        end: (?=$)
 
   systems:
     patterns:
       - comment: system-multi-line
         name: system.multi.ds
-        begin: \[\s*(sys)\s*\]\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\s*=\s*(\{)(?=[^\}]*$)
+        begin: '{{systemHeader}}(\{)(?=[^\}]*$)'
         beginCaptures:
-          '1': {name: entity.name.type.other.ds}
-          '2': {name: entity.name.function.control.ds}
+          '1': {name: entity.name.type.system.header.ds}
+          '2': {name: entity.name.tag.ip.spec.ds}
+          '3': {name: entity.name.variable.system.name.ds}
+          '4': {name: punctuation.brace.system.start.ds}
         end: (^\s*\})
         endCaptures:
-          '1': {name: punctuation.brace.end.ds}
-        patterns:  
-        - include: '#tasks'
-        - include: '#flows'           
-        #- include: '#comments'
-        - include: '#accessDefs'
-        - include: '#macros'
-        - include: '#causals'
-        - include: '#imports'
+          '1': {name: punctuation.brace.system.end.ds}
+        patterns:             
+          - include: '#comments'
+          - include: '#flows'
+          - include: '#jobs'
            
       - comment: system-single-line
         name: system.single.ds
-        begin: \[\s*(sys)\s*\]\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\s*=\s*\{
+        begin: '{{systemHeader}}(\{)'
         beginCaptures:
-          '1': {name: entity.name.type.other.ds}
-          '2': {name: entity.name.function.control.ds}
-        end: \}
-        patterns:          
-        - name: punctuation.separator.array.ds
-          match: ";"
-        - include: '#segment'
-        - name: invalid.illegal.expected-array-separator.json
-          match: '[^\s\}]'
-
-  tasks:
-    patterns:
-      - comment: multi-line tasks
-        name: tasks.multi.ds
-        begin: \[\s*(task)\s*\]\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\s*=\s*(\{)(?=[^\}]*$)
-        beginCaptures:
-          '1': {name: entity.name.type.other.ds}
-          '2': {name: entity.name.function.control.ds}
-        end: (^\s*\})
+          '1': {name: entity.name.type.system.header.ds}
+          '2': {name: entity.name.tag.ip.spec.ds}
+          '3': {name: entity.name.variable.system.name.ds}
+          '4': {name: punctuation.brace.system.start.ds}
+        end: (\})
         endCaptures:
-          '2': {name: punctuation.brace.tasks.end.ds}
-        patterns:
-        #- include: '#segment'
-        - include: '#segments'         
-        #- include: '#comments'
-        - include: '#accessDefs'
-        - include: '#callSegmentDefs'
-        - include: '#macros'    
-        #- include: '#causals'
-        - include: '#imports'
-
-        
-      - comment: single-line tasks
-        name: tasks.single.ds
-        begin: \[\s*(task)\s*\]\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\s*=\s*\{
-        beginCaptures:
-          '1': {name: entity.name.type.other.ds}
-          '2': {name: entity.name.function.control.ds}
-        end: \}
+          '1': {name: punctuation.brace.system.end.ds}
         patterns:          
-        - name: punctuation.separator.array.ds
-          match: ";"
-        - include: '#segment'
-        - name: invalid.illegal.expected-array-separator.json
-          match: '[^\s\}]'
+          - name: punctuation.separator.array.ds
+            match: ";"
+          - name: invalid.illegal.expected-array-separator.json
+            match: '[^\s\}]'
+          - include: '#comments'
+          - include: '#flows'
+          - include: '#jobs'
 
   flows:
     patterns:
-      - comment: multi-line flows
-        name: flows.multi.ds
-        begin: \[\s*(flow)\s*\]\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\s*=\s*(\{)(?=[^\}]*$)
+      - comment: flow-multi-line
+        name: flow.multi.ds
+        begin: '{{flowHeader}}(\{)(?=[^\}]*$)'
         beginCaptures:
-          '1': {name: entity.name.type.other.ds}
-          '2': {name: entity.name.function.control.ds}
-        end: (?<=\s*\})
+          '1': {name: entity.name.type.flow.header.ds}
+          '2': {name: entity.name.variable.flow.name.ds}
+          '3': {name: entity.name.type.flow.equal.ds}
+          '4': {name: punctuation.brace.flow.start.ds}
+        end: (^\s*\})
         endCaptures:
-          '1': {name: punctuation.flows.brace.end.ds}
+          '1': {name: punctuation.brace.flow.end.ds}
         patterns:
-        #- include: '#segment'
-         
-        - include: '#segments'
-         
-        #- include: '#comments'
-        - include: '#accessDefs'
-        - include: '#macros'
-        - include: '#causals'
-        - include: '#imports'
+        - include: '#comments'
+        - include: '#aliases'
         - include: '#parents'
-
-      - comment: single-line flows
-        name: flows.single.ds
-        begin: \[\s*(flow)\s*\]\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\s*=\s*\{
+        - include: '#causals'
+        - include: '#segment'
+      - comment: flow-single-line
+        name: flow.single.ds
+        begin: '{{flowHeader}}\{'
         beginCaptures:
-          '1': {name: entity.name.type.other.ds}
-          '2': {name: entity.name.function.control.ds}
-        end: (\})
+          '1': {name: entity.name.type.flow.header.ds}
+          '2': {name: entity.name.variable.flow.name.ds}
+        end: \}
+        endCaptures:
+          '1': {name: punctuation.brace.end.ds}
         patterns:          
         - name: punctuation.separator.array.ds
           match: ";"
-        - include: '#segment'
+        - name: invalid.illegal.expected-array-separator.json
+          match: '[^\s\}]' 
+
+  aliases:
+    patterns:
+      - comment: aliases-multi-line
+        name: aliase.multi.ds
+        begin: '{{aliasHeader}}(\{)(?=[^\}]*$)'
+        beginCaptures:
+          '1': {name: entity.name.type.aliase.header.ds}
+          '2': {name: punctuation.brace.aliase.start.ds}
+        end: (^\s*\})
+        endCaptures:
+          '1': {name: punctuation.brace.flow.end.ds}
+        patterns:
+        - include: '#comments'
         - include: '#causals'
-        - name: invalid.illegal.flows.expected-array-separator.json
+        - include: '#segment'
+      - comment: aliases-single-line
+        name: aliase.single.ds
+        begin: '{{aliasHeader}}\{'
+        beginCaptures:
+          '1': {name: entity.name.type.aliase.header.ds}
+        end: \}
+        endCaptures:
+          '1': {name: punctuation.brace.end.ds}
+        patterns:          
+        - name: punctuation.separator.array.ds
+          match: ";"
+        - name: invalid.illegal.expected-array-separator.json
           match: '[^\s\}]'
 
   parents:
     patterns:
-    - name: meta.structure.parents.ds
-      begin: ([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\s*=\s*(\{)
-      beginCaptures:
-        '1': {name: variable.other.function.type.parents.ds}
-      end: (^\s*\})
-      patterns:
-      - include: '#segment'
-      #- include: '#segments'
-      #- include: '#accessDefs'
-      #- include: '#macros'
-      - include: '#causals'
-      #- include: '#imports'
-
-
-
-  accessDefs:
-      patterns:
-      - name: access.ds
-        begin: \[\s*(accsre|accsr|accre|accse|accs|accr|acce)\s*\]\s*=\s*(\{)
+      - comment: parents-multi-line
+        name: parent.multi.ds
+        begin: '{{parentHeader}}(\{)(?=[^\}]*$)'
         beginCaptures:
-          '1': {name: keyword.other.accessSRE.ds}      
+          '1': {name: entity.name.variable.parent.name.ds}
+          '2': {name: punctuation.brace.parent.start.ds}
         end: (^\s*\})
+        endCaptures:
+          '1': {name: punctuation.brace.flow.end.ds}
         patterns:
-          - name: punctuation.brace.separator.ds
-            match: ;
-          - include: '#segment'
-          #- include: '#comments'
-      #- include: '#comments'
-      - include: $self
-
-  #  macros:
-  #    patterns:
-  #    - name: macro2.ds
-  #      begin: (\@|\#)\s*([가-힣a-zA-Z][가-힣a-zA-Z_0-9]*)*\s*\(\s*[가-힣a-zA-Z_0-9]*\s*\)
-  #      patterns:
-  #        - include: '#callSegmentDefs'
-  #        - include: '#causals'
-  #        - include: '#comments'
-
-  callSegmentDefs:
-    patterns:
-    - name: call.segment.ds
-      begin: ([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)\s*=\s*(\{)(?=[^\}]*$)
-      beginCaptures:
-        '1': {name: keyword.control.callSegment.ds}
-      end: (^\s*\})
-      patterns:
-        - name: punctuation.comma.ds
-          match: '\,'
-        - name: keyword.other.callSegment.ds
-          match: '\~'
+        - include: '#comments'
+        - include: '#causals'
         - include: '#segment'
+      - comment: parents-single-line
+        name: parent.single.ds
+        begin: '{{parentHeader}}\{'
+        beginCaptures:
+          '1': {name: entity.name.variable.parent.name.ds}
+          '2': {name: entity.name.variable.parent.name.ds}
+        end: \}
+        endCaptures:
+          '1': {name: punctuation.brace.end.ds}
+        patterns:          
+        - name: punctuation.separator.array.ds
+          match: ";"
         - name: invalid.illegal.expected-array-separator.json
-          match: '[;<>\|]'
+          match: '[^\s\}]'
+        - include: '#comments'
+        - include: '#causals'
+        - include: '#segment'
+
+  jobs:
+    patterns:
+      - comment: jobs-multi-line
+        name: jobs.multi.ds
+        begin: (\[\s*jobs\s*\])\s*(=)\s*(\{)(?=[^\}]*$)
+        beginCaptures:
+          '1': {name: entity.name.type.jobs.header.ds}
+        end: (^\s*\})
+        endCaptures:
+          '1': {name: punctuation.brace.end.ds}
+        patterns:
+        - include: '#comments'
+        - include: '#parents'
+
+      - comment: jobs-single-line
+        name: jobs.single.ds
+        begin: (\[\s*jobs\s*\])\s*(=)\s*\{
+        beginCaptures:
+          '1': {name: entity.name.type.jobs.header.ds}
+        end: \}
+        endCaptures:
+          '1': {name: punctuation.brace.end.ds}
+        patterns:          
+        - name: punctuation.separator.array.ds
+          match: ";"
+        - name: invalid.illegal.expected-array-separator.json
+          match: '[^\s\}]'
+
 
   causals:
     patterns:
       - name: punctuation.andmark.ds
-        match: '\,'
+        match: ','
       - name: punctuation.ormark.ds
         match: '\?'
-      - include: '#segment'
       - name: invalid.illegal.expected-array-separator.json
         match: '(<\|>)'   
       - name: keyword.other.causal.ds
-        match: '(<\|\|>)|(<\|)|(\|>)|<|>'
+        match: '(<\|\|>)|(<\|)|(\|>)|<|>|(=>)|(<=)'
 
-  imports:
-    patterns:
-    - name: import.ds
-      begin: \s*(!#import)\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*) (as) ([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*) (from) (\"[^\"]+\")
-      beginCaptures:
-        '1': {name: keyword.other.import.ds}
-        '2': {name: variable.other}
-        '3': {name: keyword.other.import.ds}
-        '4': {name: variable.other}
-        '5': {name: keyword.other.import.ds}
-        '6': {name: string.quoted.double.ds}
-      end: ';'
-
-    - name: import.ds
-      begin: \s*(!#import)\s*\{
-      beginCaptures:
-        '1': {name: keyword.other.import.ds}
-      end: \}\s*(from)\s*(\"[^\"]+\")\s*;
-      endCaptures:
-        '1': {name: keyword.other.import.ds}
-        '2': {name: string.quoted.double.ds}
-      patterns:
-      - name: keyword.other.as.ds
-        match: 'as'
-      - name: punctuation.comma.ds
-        match: '\,'
-      - include: '#segment'
-      #- include: '#comments'
-
-
-  macros:
-    patterns:
-    - name: access.ds
-      begin: (#|@)\s*([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*)*\s*(\()
-      beginCaptures:
-        '1': {name: keyword.other.accessMacro.ds}      
-      end: (\))
-      patterns:
-        - name: punctuation.brace.separator.ds
-          match: ;
-        - name: 'variable.other.words.ds'
-          match: '\b[가-힣a-zA-Z_0-9]*\b'
-        - include: '#segment'
-        #- include: '#comments'
-    #- include: '#comments'
-    - include: $self
 
   segment:
     patterns:
     - name: 'variable.other.segment.withdot.ds'
-      match: '\b[가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*\.[가-힣a-zA-Z_][\.가-힣a-zA-Z_0-9]*\b'
+      match: '{{identifiers}}'
     - name: 'variable.other.segment.ds'
-      match: '\b[가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*\b'
+      match: '{{identifier1}}'
     - include: '#comments'
-    - name: invalid.illegal.segment.expected-array-separator.json
-      match: '[^\s\{\};=<>|&~\(\)\{1,1}]'
+    - name: punctuation.separator.array.ds
+      match: ";"
 
 
-  segments:
-    - name: meta.structure.array.ds
-      begin: \{
-      beginCaptures:
-        '1': { name: 'punctuation.definition.macro.start.ds' }
-      end: \}
-      endCaptures:
-        '1': { name: 'punctuation.definition.macro.end.ds' } 
-      patterns:
-      #- include: '#comments'
-      - include: '#segment'
-      - name: punctuation.comma.ds
-        match: '\,'
-      - include: '#macros'
-      - name: punctuation.separator.array.ds
-        match: ";"
-      - name: invalid.illegal.segments.expected-array-separator.json
-        match: '[^\s\]]'
 
-  layouts:
-    patterns:
-    - name: layouts.ds
-      begin: \[\s*(layouts)\s*\]\s*=\s*(\{)(?=[^\}]*$)
-      beginCaptures:
-        '1': {name: keyword.control.layouts.ds}
-      end: (^\s*\})
-      patterns:
-        - include: '#number'
-        - name: punctuation.comma.ds
-          match: '\,'
-        - name: punctuation.equal.ds
-          match: '='
-        - include: '#segment'
-        - name: invalid.illegal.expected-array-separator.json
-          match: '[;<>\|]'
+  # segments:
+  #   - name: meta.structure.segments.array.ds
+  #     begin: (\{)
+  #     beginCaptures:
+  #       '1': { name: 'punctuation.definition.macro.start.ds' }
+  #     end: (\})
+  #     endCaptures:
+  #       '1': { name: 'punctuation.definition.macro.end.ds' } 
+  #     patterns:
+  #     - name: punctuation.separator.array.ds
+  #       match: ";"
+  #     - name: invalid.illegal.expected-array-separator.json
+  #       match: '[^\s\]]'
+  #     - include: '#comments'
+  #     - include: '#segment'
+  #     - include: '#causals'
 
+  # reals:
+  #   - comment: system-multi-line
+  #     name: real.single.ds
+  #     begin: ([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]* | \"\s*(~(\"|\\|\r|\n)|\\(\"|\\))*\s*\")\s*(=)\s*(\{)(?=[^\}]*$)
+  #     beginCaptures:
+  #       '1': {name: entity.name.variable.real.name.ds}
+  #     end: (^\s*\})
+  #     endCaptures:
+  #       '1': {name: punctuation.brace.end.ds}
+  #     patterns:
+  #     - include: '#comments'
+  #     - include: '#segment'
+  #     - include: '#segments'
+  #     - include: '#causals'
 
-  addresses:
-    patterns:
-    - name: addresses.ds
-      begin: \[\s*(addresses|address)\s*\]\s*=\s*(\{)(?=[^\}]*$)
-      beginCaptures:
-        '1': {name: keyword.control.addresses.ds}
-      end: (^\s*\})
-      patterns:
-        - include: '#number'
-        - name: punctuation.comma.ds
-          match: '\,'
-        - name: punctuation.equal.ds
-          match: '='
-        - include: '#segment'
-        - name: invalid.illegal.expected-array-separator.json
-          match: '[;<>\|]'
-
-  number:
-    patterns:
-    - name: constant.numeric.json
-      match: '\b([0-9][0-9]*)\b'
-
-
+  #   - comment: flow-single-line
+  #     name: flow.single.ds
+  #     begin: ([가-힣a-zA-Z_][가-힣a-zA-Z_0-9]* | \"\s*(~(\"|\\|\r|\n)|\\(\"|\\))*\s*\")\s*(=)\s*\{
+  #     beginCaptures:
+  #       '1': {name: entity.name.variable.real.name.ds}
+  #     end: \}
+  #     endCaptures:
+  #       '1': {name: punctuation.brace.end.ds}
+  #     patterns:          
+  #     - name: punctuation.separator.array.ds
+  #       match: ";"
+  #     - name: invalid.illegal.expected-array-separator.json
+  #       match: '[^\s\}]' 
+    # - name: invalid.illegal.expected-array-separator.json
+    # match: '[^\s\{\};=<>\|&~\(\)]'
 ...

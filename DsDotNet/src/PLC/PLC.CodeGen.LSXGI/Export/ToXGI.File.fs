@@ -132,7 +132,7 @@ module internal XgiFile =
 
 
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
-    let private generateRungs (prologComments:string seq) (commentedStatements:CommentedStatement seq) : XmlOutput =
+    let private generateRungs (prologComments:string seq) (commentedStatements:CommentedXgiStatement seq) : XmlOutput =
         let xmlRung (expr:FlatExpression) xgiCommand y : RungGenerationInfo =
             let {Coordinate=posi; Xml=xml} = rung 0 y expr xgiCommand
             let yy = (posi / 1024)// + 1
@@ -147,7 +147,7 @@ module internal XgiFile =
             rgi <- rgi.Add(xml)
 
         // Rung 별로 생성
-        for CommentAndStatement(cmt, stmt) in commentedStatements do
+        for CommentAndXgiStatement(cmt, stmt) in commentedStatements do
 
             // 다중 라인 설명문을 하나의 설명문 rung 에..
             if cmt.NonNullAny() then
@@ -155,7 +155,9 @@ module internal XgiFile =
                 rgi <- rgi.Add(xml)
 
             match stmt with
-            | DuAssign (expr, (:? IExpressionTerminal as target)) ->
+            | DuXgiAssign assign ->
+                let expr = assign.Expression
+                let target = assign.Target :?> IExpressionTerminal
                 let flatExpr = expr.Flatten() :?> FlatExpression
                 let command:XgiCommand = CoilCmd(CoilMode(target)) |> XgiCommand
                 let rgiSub = xmlRung flatExpr command rgi.Y
@@ -163,19 +165,23 @@ module internal XgiFile =
                 rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgiSub.Y}
 
             // <kwak> <timer>
-            | DuTimer timerStatement ->
-                let rungin = timerStatement.RungInCondition.Value :> IExpression
+            | DuXgiTimer timerStatement ->
+                let rungin = timerStatement.RungInCondition :> IExpression
                 let rungin = rungin.Flatten() :?> FlatExpression
 
                 let command:XgiCommand = FunctionBlockCmd(TimerMode(timerStatement)) |> XgiCommand
                 let rgiSub = xmlRung rungin command rgi.Y
                 rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
-            | ( DuCounter _ | DuCopy _ ) ->
-                failwith "Not yet"
+            | DuXgiCounter counterStatement ->
+                let cs = counterStatement
+                let rungIn = cs.RungInCondition.Flatten() :?> FlatExpression
+                let command:XgiCommand = FunctionBlockCmd(CounterMode(counterStatement)) |> XgiCommand
+                let rgiSub = xmlRung rungIn command rgi.Y
+                rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
-            | DuVarDecl _ -> failwith "ERROR: Invalid"
-            | _  -> failwith "ERROR"
+            | _ ->
+                failwith "Not yet"
 
         let rungEnd = generateEnd (rgi.Y + 1)
         rgi <- rgi.Add(rungEnd)
@@ -328,7 +334,7 @@ module internal XgiFile =
         | DuCounter of CounterBaseStruct
 
 
-    let generateXGIXmlFromStatement (prologComments:string seq) (commentedStatements:CommentedStatement seq) (xgiSymbols:XgiSymbol seq) (unusedTags:ITagWithAddress seq) (existingLSISprj:string option) =
+    let generateXGIXmlFromStatement (prologComments:string seq) (commentedStatements:CommentedXgiStatement seq) (xgiSymbols:XgiSymbol seq) (unusedTags:ITagWithAddress seq) (existingLSISprj:string option) =
         // TODO : 하드 코딩...  PLC memory 설정을 어디선가 받아서 처리해야 함.
 
         /// PLC memory manager
@@ -416,6 +422,7 @@ module internal XgiFile =
         //    ] |> Tuple.toDictionary
 
         let symbolInfos =
+            let kindVar = int Variable.Kind.VAR
             [
                 for s in xgiSymbols do
                     match s with
@@ -434,7 +441,7 @@ module internal XgiFile =
                             | "W" -> "WORD"
                             | "L" -> "DWORD"
                             | _ -> failwith "ERROR"
-                        let comment, kind = "FAKECOMMENT", Variable.Kind.VAR
+                        let comment = "FAKECOMMENT"
 
                         //<kwak>
                         //let name, comment = t.FullName, t.Tag
@@ -478,18 +485,21 @@ module internal XgiFile =
                         //    | Some tt when tt.Equals TagType.Instance -> Variable.Kind.VAR
                         //    | _-> Variable.Kind.VAR_EXTERNAL
 
-                        XGITag.createSymbol name comment device ((int)kind) addr plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
+                        XGITag.createSymbol name comment device kindVar addr plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
                     | DuTimer timer ->
                         let device, addr = "", ""
-                        let kind = Variable.Kind.VAR
                         let plcType =
                             match timer.Type with
                             | TON | TOF | RTO -> timer.Type.ToString()
 
-                        XGITag.createSymbol timer.Name $"TIMER {timer.Name}" device ((int)kind) addr plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
+                        XGITag.createSymbol timer.Name $"TIMER {timer.Name}" device kindVar addr plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
                     | DuCounter counter ->
-                        failwith "Not Yet"
-                        ()
+                        let device, addr = "", ""
+                        let plcType =
+                            match counter.Type with
+                            | CTU | CTD | CTUD | CTR -> $"{counter.Type}_INT"       // todo: CTU_{INT, UINT, .... } 등의 종류가 있음...
+
+                        XGITag.createSymbol counter.Name $"COUNTER {counter.Name}" device kindVar addr plcType
             ]
 
         /// Symbol table 정의 XML 문자열

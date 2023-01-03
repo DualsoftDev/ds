@@ -66,10 +66,10 @@ module XGITag = //IEC61131Tag =
 
 
             match memType with
-            | "I"  | "O"  | "M"  -> startBit   <- startBit  + 1
-            | "IB" | "OB" | "MB" ->  startByte <- startByte + 1
-            | "IW" | "OW" | "MW" -> startWord  <- startWord + 1
-            | "ID" | "OD" | "MD" -> startWord  <- startWord + 2
+            | "I"  | "O"  | "M"  -> startBit  <- startBit  + 1
+            | "IB" | "OB" | "MB" -> startByte <- startByte + 1
+            | "IW" | "OW" | "MW" -> startWord <- startWord + 1
+            | "ID" | "OD" | "MD" -> startWord <- startWord + 2
             | _ ->  failwithlog "Unknown  %s memType:" memType
 
             if (alreadyAllocatedAddresses.Contains(address)) then

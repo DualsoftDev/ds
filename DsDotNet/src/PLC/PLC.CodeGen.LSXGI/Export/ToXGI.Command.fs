@@ -10,6 +10,8 @@ module internal Command =
     /// Rung 의 Command 정의를 위한 type.
     //Command = CoilCmd or FunctionCmd or FunctionBlockCmd
     type XgiCommand(cmdType:CommandTypes) =
+        do
+            noop()
         member x.CommandType with get() = cmdType
         member x.CoilTerminalTag with get() =
             /// Terminal End Tag
@@ -30,21 +32,35 @@ module internal Command =
             match cmdType with
             | FunctionBlockCmd (fbc) ->
                 match fbc with
-                | TimerMode(_) -> fbc.GetInstanceText(), VarType.TON
-                | CounterMode(tag, resetTag, count) -> fbc.GetInstanceText(), VarType.CTU_INT
+                | TimerMode ts ->
+                    let varType =
+                        match ts.Timer.Type with
+                        | TON -> VarType.TON
+                        | TOF -> VarType.TOFF
+                        | RTO -> VarType.TMR
+                    fbc.GetInstanceText(), varType
+
+                | CounterMode cs ->
+                    let varType =
+                        match cs.Counter.Type with
+                        | CTU -> VarType.CTU_INT
+                        | CTD -> VarType.CTD_INT
+                        | CTUD -> VarType.CTUD_INT
+                        | CTR ->  VarType.CTR_INT
+                    fbc.GetInstanceText(), varType
             |_-> failwithlog "do not make instanceTag"
 
         member x.LDEnum with get() =
             match cmdType with
                 | CoilCmd (cc) ->
                     match cc with
-                    | CoilMode(_)       -> ElementType.CoilMode
-                    | ClosedCoilMode(_) -> ElementType.ClosedCoilMode
-                    | SetCoilMode(_)    -> ElementType.SetCoilMode
-                    | ResetCoilMode(_)  -> ElementType.ResetCoilMode
-                    | PulseCoilMode(_)  -> ElementType.PulseCoilMode
-                    | NPulseCoilMode(_) -> ElementType.NPulseCoilMode
-                | (FunctionCmd (_) | FunctionBlockCmd (_))
+                    | CoilMode _       -> ElementType.CoilMode
+                    | ClosedCoilMode _ -> ElementType.ClosedCoilMode
+                    | SetCoilMode _    -> ElementType.SetCoilMode
+                    | ResetCoilMode _  -> ElementType.ResetCoilMode
+                    | PulseCoilMode _  -> ElementType.PulseCoilMode
+                    | NPulseCoilMode _ -> ElementType.NPulseCoilMode
+                | (FunctionCmd  _ | FunctionBlockCmd  _)
                     -> ElementType.VertFBMode
 
             /// Coil의 부정 Command를 반환한다.
@@ -67,7 +83,7 @@ module internal Command =
     let createOutputNPulse(tag)  = XgiCommand(CoilCmd(CoilOutput.NPulseCoilMode(tag)))
 
     //let createOutputTime(tag, time)                 = XgiCommand(FunctionBlockCmd(FunctionBlock.TimerMode(tag, time)))
-    let createOutputCount(tag, resetTag, cnt)         = XgiCommand(FunctionBlockCmd(FunctionBlock.CounterMode(tag, resetTag, cnt)))
+    //let createOutputCount(tag, resetTag, cnt)         = XgiCommand(FunctionBlockCmd(FunctionBlock.CounterMode(tag, resetTag, cnt)))
     let createOutputCopy(tag, tagA, tagB)             = XgiCommand(FunctionCmd(FunctionPure.CopyMode(tag, (tagA, tagB))))
     let createOutputAdd(tag, targetTag, addValue:int) = XgiCommand(FunctionCmd(FunctionPure.Add(tag, targetTag, addValue)))
 
@@ -81,17 +97,54 @@ module internal Command =
         | NE -> XgiCommand(FunctionCmd(FunctionPure.CompareNE(tag, (tagA, tagB))))
 
     // <timer>
-    let drawCmdTimer(timerStatement:TimerStatement, x, y) : CoordinatedRungXmlsWithNewY =
+    let drawCmdTimer(timerStatement:XgiTimerStatement, x, y) : CoordinatedRungXmlsWithNewY =
         let time:int = int timerStatement.Timer.PRE.Value
         let fbSpanY = 2
         { SpanY = fbSpanY; PositionedRungXmls = [createFBParameterXml $"T#{time}MS" (x-1) (y+1)]}
 
-    let drawCmdCounter(coil:IExpressionTerminal, reset:IExpressionTerminal, count:int, x, y) : CoordinatedRungXmlsWithNewY =
-        let fbSpanY = 3
+    let drawCmdCounter(counterStatement:XgiCounterStatement, x, y) : CoordinatedRungXmlsWithNewY =
+        let count = int counterStatement.Counter.PRE.Value
+        let typ = counterStatement.Counter.Type
+
+        // 임시 :
+        // todo : 산전 xgi 의 경우, cu 를 제외한 나머지는 expression 으로 받을 수 없다.
+        // ResetTag 등으로 개정된 statement 구조를 만들어야 함
+
+        //let reset = counterStatement.Counter.RES.Name
+
+        let createParam (t:Terminal<bool> option) x y =
+            match t with
+            | Some t ->
+                let name =
+                    match t with
+                    | DuTag t -> t.Name
+                    | _ -> failwith "ERROR: need check"
+                [ createFBParameterXml name x y ]
+            | None -> []
+
+        let reset =
+            match counterStatement.Reset with
+            | Some(DuTag t) -> t.Name
+            | _ -> failwith "ERROR: need check"
+            //| DuLiteral of 'T
+            //| DuVariable of VariableBase<'T>
+
+        let fbSpanY =
+            match typ with
+            | CTUD -> 5
+            | (CTU | CTD | CTR) -> 3
+
         //Command 속성입력
         let results = [
-            createFBParameterXml reset.PLCTagName (x-1) (y+1)
-            createFBParameterXml $"{count}" (x-1) (y+2)
+            match typ with
+            | (CTU | CTD | CTR) ->
+                createFBParameterXml reset      (x-1) (y+1)
+                createFBParameterXml $"{count}" (x-1) (y+2)
+            | CTUD ->
+                yield! (createParam counterStatement.CountDown (x-1) (y+1))
+                yield! (createParam counterStatement.Reset     (x-1) (y+2))
+                yield! (createParam counterStatement.Load      (x-1) (y+3))
+                createFBParameterXml $"{count}" (x-1) (y+4)
         ]
 
         { SpanY = fbSpanY; PositionedRungXmls = results}
@@ -218,7 +271,7 @@ module internal Command =
                 results.AddRange(drawFunctionBlockInstance(cmd, newX, y)) //Command 객체생성
                 match fbc with
                 | TimerMode(timerStatement) -> drawCmdTimer(timerStatement, newX, y)     // <timer>
-                | CounterMode(cmdCoil, resetTag, count) -> drawCmdCounter(cmdCoil, resetTag, count, newX, y)
+                | CounterMode(counterStatement) -> drawCmdCounter(counterStatement, newX, y)
             | _ ->
                 failwithlog "Unknown CommandType"
 

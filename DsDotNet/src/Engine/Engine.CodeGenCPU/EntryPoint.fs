@@ -16,10 +16,12 @@ module ModuleInitializer =
 
 
         fwdCreateBoolTag <-
-            let createBoolTag name value = PlcTag<bool>(name, "FILL_ME_ADDRESS!!!!!!!!!!!!!!!!!!", value) :> TagBase<bool>
+            let createBoolTag name value =
+                PlcTag<bool>(name, "FILL_ME_ADDRESS!!!!!!!!!!!!!!!!!!", value) :> TagBase<bool>
             createBoolTag
 
 
         fwdCreateUShortTag <-
-            let createUShortTag name value = PlcTag<uint16>(name, "FILL_ME_ADDRESS!!!!!!!!!!!!!!!!!!", value) :> TagBase<uint16>
+            let createUShortTag name value =
+                PlcTag<uint16>(name, "FILL_ME_ADDRESS!!!!!!!!!!!!!!!!!!", value) :> TagBase<uint16>
             createUShortTag

@@ -23,6 +23,7 @@
 		<Compile Include="Import\XGConfigReader.fs" />
 		<Compile Include="Import\XGLDRoutineReader.fs" />
 		<Compile Include="Import\XGFileRead.fs" />
+		<Compile Include="Export\ToXGI.StatementAdaptor.fs" />
 		<Compile Include="Export\ToXGI.Common.fs" />
 		<Compile Include="Export\ToXGI.Command.fs" />
 		<Compile Include="Export\ToXGI.Basic.fs" />
@@ -44,6 +45,10 @@
 	  <ProjectReference Include="..\..\Engine\Engine.Common.FS\Engine.Common.FS.fsproj" />
 	  <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
 	  <ProjectReference Include="..\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Documents\" />
 	</ItemGroup>
 
 </Project>

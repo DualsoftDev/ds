@@ -1,2 +1,4 @@
 *.xml text eol=crlf
+*.fs text eol=crlf
+*.cs text eol=crlf
 .gitattributes text eol=lf

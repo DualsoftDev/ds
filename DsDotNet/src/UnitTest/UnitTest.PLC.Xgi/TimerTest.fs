@@ -1,16 +1,12 @@
 namespace T
 
-open System.IO
 
 open NUnit.Framework
 
 open Engine.Parser.FS
 open Engine.Core
 open Engine.Common.FS
-open PLC.CodeGen.Common.QGraph
 open PLC.CodeGen.LSXGI
-open PLC.CodeGen.Common.FlatExpressionModule
-open System.Globalization
 
 
 

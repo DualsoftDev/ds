@@ -78,13 +78,21 @@ module ExpressionModule =
 
         member _.Type = typ
         member _.Name = counterStruct.Name
+        /// Count up
         member _.CU = counterStruct.CU
+        /// Count down
         member _.CD = counterStruct.CD
+        /// Underflow
         member _.UN = counterStruct.UN
+        /// Overflow
         member _.OV = counterStruct.OV
+        /// Done bit
         member _.DN = counterStruct.DN
+        /// Preset
         member _.PRE = counterStruct.PRE
+        /// Accumuated
         member _.ACC = counterStruct.ACC
+        /// Reset
         member _.RES = counterStruct.RES
 
         member val InputEvaluateStatements:Statement list = [] with get, set
@@ -104,6 +112,8 @@ module ExpressionModule =
         UpCondition: IExpression<bool> option
         DownCondition: IExpression<bool> option
         ResetCondition:  IExpression<bool> option
+        // XGI only
+        //LoadCondition: IExpression<bool> option
     }
 
     type Statement =

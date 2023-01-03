@@ -189,7 +189,7 @@ module OriginModule =
     /// Get incoming resets
     let getIncomingResets (resets:'V seq seq) (node:'V) =
         resets
-        |> Seq.filter(fun e -> e.Last() = node)
+        |> Seq.filter(fun e -> node = e.Last())
         |> Seq.map(fun e -> e.First())
 
     /// Get outgoing resets
@@ -273,10 +273,11 @@ module OriginModule =
             (offByMutualResetChains:string list)
             (structedChains:seq<Map<string, seq<string>>>) =
         let allNodes = new Dictionary<string, InitialType>()
-        let oneWay = offByOneWayBackwardResets
-        let mutual = offByMutualResetChains
+        let oneWay   = offByOneWayBackwardResets
+        let mutual   = offByMutualResetChains
         let toBeZero = oneWay.Concat(mutual) |> Seq.distinct
-        let allJobs = allRoutes |> removeDuplicates
+        let allJobs  = allRoutes |> removeDuplicates
+        let allJobNames = allJobs |> Seq.map(fun j -> j.ApiName)
         for job in allJobs do
             let jobName = job.ApiName
             if toBeZero.Contains(jobName) &&
@@ -284,12 +285,17 @@ module OriginModule =
                 allNodes.Add(jobName, Off)
             else
                 for resets in structedChains do
-                    let nowName = jobName
-                    if resets.ContainsKey(nowName) &&
+                    let isAllResetsInNode =
+                        Enumerable.Intersect(
+                            resets.Values |> removeDuplicates, 
+                            allJobNames
+                        ) |> List.ofSeq
+                    if resets.ContainsKey(jobName) &&
+                            resets.Count = isAllResetsInNode.Length &&
                             not (allNodes.ContainsKey(jobName)) then
                         if resets.Count = 2 then
                             let interlocks =
-                                resets.Remove(nowName)
+                                resets.Remove(jobName)
                                 |> Seq.map(fun v -> v.Value)
                                 |> Seq.head
                             let isIn =
@@ -304,7 +310,7 @@ module OriginModule =
                             allNodes.Add(jobName, NeedCheck)
             if not (allNodes.ContainsKey(jobName)) then
                 allNodes.Add(jobName, NotCare)
-        allNodes, allJobs
+        allNodes, allJobs//, structedChains
 
     /// Get aliases in front of graph
     let getAliasHeads
@@ -403,10 +409,10 @@ module OriginModule =
     type OriginHelper =
         /// Get origin status of child nodes
         [<Extension>] 
-        static member GetOrigins(graph:DsGraph) = 
+        static member GetOrigins (graph:DsGraph) = 
             getOrigins graph |> fun (allNodes, allJobs) -> allNodes
         [<Extension>] 
-        static member GetOriginsWithJobDefs(graph:DsGraph) = 
+        static member GetOriginsWithJobDefs (graph:DsGraph) = 
             let allNodes, allJobs = getOrigins graph 
             allNodes 
             |> Seq.map(fun node -> 
@@ -415,15 +421,21 @@ module OriginModule =
             )
             |> Tuple.toDictionary
 
+        //[<Extension>]
+        //static member GetResetChains (graph:DsGraph) =
+        //    let rawResets = graph |> getAllResets
+        //    let mutualResets = rawResets |> getMutualResets
+        //    let resetChains = mutualResets |> getMutualResetChains true
+
         /// Get node index map(key:name, value:idx)
         [<Extension>] 
-        static member GetIndexedMap(graph:DsGraph) = getIndexedMap graph
+        static member GetIndexedMap (graph:DsGraph) = getIndexedMap graph
 
         /// Get reset informations from graph
         [<Extension>] 
-        static member GetAllResets(graph:DsGraph) = getAllResets graph
+        static member GetAllResets (graph:DsGraph) = getAllResets graph
 
         /// Get pre-calculated targets that
         /// child segments to be 'ON' in progress(Theta)
         [<Extension>] 
-        static member GetThetaTargets(graph:DsGraph) = getThetaTargets graph
+        static member GetThetaTargets (graph:DsGraph) = getThetaTargets graph

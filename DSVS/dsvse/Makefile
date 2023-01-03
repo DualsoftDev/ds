@@ -31,3 +31,10 @@ pre:
 
 publish:
 	vsce publish
+
+tmlanguage:
+	pushd ds.syntax/syntaxes
+	npm run build:grammar
+
+
+	

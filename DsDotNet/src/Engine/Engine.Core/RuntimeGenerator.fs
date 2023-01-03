@@ -30,7 +30,10 @@ module RuntimeGeneratorModule =
         | (WINDOWS | AB) -> "TT"
         | _ -> "_TT"
 
-    let nameRES() = "RES"
+    let nameRES() =
+        match RuntimeTarget with
+        | XGI -> "RST"
+        | _ -> "RES"
 
     let nameCU() =
         match RuntimeTarget with

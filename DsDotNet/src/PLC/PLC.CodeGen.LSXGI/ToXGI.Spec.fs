@@ -136,7 +136,7 @@ module Config =
         | TOFF          = 1010
         | CTD_INT       = 1011
         | CTUD_INT      = 1012
-        | CTR_INT       = 1013
+        | CTR           = 1013
 
     /// PLC에 특정 기능이 있는지에 대한 속성값으로, 다음의 값의 OR된 값이 저장된다.
     // Bitmask OR'ing --> |||

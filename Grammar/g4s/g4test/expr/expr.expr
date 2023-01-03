@@ -1,5 +1,7 @@
 /* grun expr toplevels -gui < g4test/expr/expr.expr */
 
+$myCTR.RST := $cd;
+
 rising($a) := $b;
 
 $myBit17 :=

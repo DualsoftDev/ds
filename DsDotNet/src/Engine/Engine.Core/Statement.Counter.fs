@@ -55,57 +55,66 @@ module CounterStatementModule =
         DuCounter { Counter=counter; UpCondition=countUpCondition; DownCondition=countDownCondition; ResetCondition=resetCondition }
 
     type CounterStatement =
-        static member CreateCTU(storages:Storages, name, preset, rungConditionIn) =
+        static member CreateCTU(tcParams:TCConstructionParams) =
+            let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition} = tcParams
+
             {   Type=CTU; Name=name; Preset=preset;
-                CountUpCondition=Some rungConditionIn;
+                CountUpCondition=Some rungInCondition;
                 CountDownCondition=None; ResetCondition=None; Accumulator=None }
             |> createCounterStatement storages
 
-        static member CreateCTD(storages:Storages, name, preset, rungConditionIn, accum) =
+        static member CreateCTD(tcParams:TCConstructionParams, accum) =
+            let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition} = tcParams
             {   Type=CTD; Name=name; Preset=preset;
                 CountUpCondition=None;
-                CountDownCondition=Some rungConditionIn;
+                CountDownCondition=Some rungInCondition;
                 ResetCondition=None; Accumulator=Some accum }
             |> createCounterStatement storages
 
-        static member CreateCTUD(storages:Storages, name, preset, countUpCondition, countDownCondition, accum) =
+        static member CreateCTUD(tcParams:TCConstructionParams, countDownCondition, accum) =
+            let {Storages=storages; Name=name; Preset=preset; RungInCondition=countUpCondition} = tcParams
             {   Type=CTUD; Name=name; Preset=preset;
                 CountUpCondition=Some countUpCondition;
                 CountDownCondition=Some countDownCondition;
                 ResetCondition=None; Accumulator=Some accum }
             |> createCounterStatement storages
 
-        static member CreateCTR(storages:Storages, name, preset, rungConditionIn) =
+        static member CreateCTR(tcParams:TCConstructionParams) =
+            let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition} = tcParams
             {   Type=CTR; Name=name; Preset=preset;
-                CountUpCondition=Some rungConditionIn;
+                CountUpCondition=Some rungInCondition;
                 CountDownCondition=None; ResetCondition=None; Accumulator=None }
             |> createCounterStatement storages
 
 
-        static member CreateCTU(storages:Storages, name, preset, rungConditionIn, reset) =
+        static member CreateCTU(tcParams:TCConstructionParams, reset) =
+            let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition} = tcParams
             {   Type=CTU; Name=name; Preset=preset;
-                CountUpCondition=Some rungConditionIn;
+                CountUpCondition=Some rungInCondition;
                 CountDownCondition=None;
                 ResetCondition=Some reset; Accumulator=None }
             |> createCounterStatement storages
 
-        static member CreateCTD(storages:Storages, name, preset, rungConditionIn, reset, accum) =
+        static member CreateCTD(tcParams:TCConstructionParams, reset, accum) =
+            let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition} = tcParams
             {   Type=CTD; Name=name; Preset=preset;
                 CountUpCondition=None;
-                CountDownCondition=Some rungConditionIn;
+                CountDownCondition=Some rungInCondition;
                 ResetCondition=Some reset; Accumulator=Some accum }
             |> createCounterStatement storages
 
-        static member CreateCTUD(storages:Storages, name, preset, countUpCondition, countDownCondition, reset, accum) =
+        static member CreateCTUD(tcParams:TCConstructionParams, countDownCondition, reset, accum) =
+            let {Storages=storages; Name=name; Preset=preset; RungInCondition=countUpCondition} = tcParams
             {   Type=CTUD; Name=name; Preset=preset;
                 CountUpCondition=Some countUpCondition;
                 CountDownCondition=Some countDownCondition;
                 ResetCondition=Some reset; Accumulator=Some accum }
             |> createCounterStatement storages
 
-        static member CreateCTR(storages:Storages, name, preset, rungConditionIn, reset) =
+        static member CreateCTR(tcParams:TCConstructionParams, reset) =
+            let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition} = tcParams
             {   Type=CTR; Name=name; Preset=preset;
-                CountUpCondition=Some rungConditionIn;
+                CountUpCondition=Some rungInCondition;
                 CountDownCondition=None;
                 ResetCondition=Some reset; Accumulator=None }
             |> createCounterStatement storages

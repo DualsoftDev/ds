@@ -22,7 +22,8 @@ open Engine.Common.FS
             let storages = Storages()
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", false)
             let condition = tag2expr t1
-            let timer = TimerStatement.CreateTON(storages, "myTon", 2000us, condition) |> toTimer       // 2000ms = 2sec
+            let tcParam = {Storages=storages; Name="myTon"; Preset=2000us; RungInCondition=condition}
+            let timer = TimerStatement.CreateTON(tcParam) |> toTimer       // 2000ms = 2sec
             timer.TT.Value === false
             timer.EN.Value === false
             timer.DN.Value === false
@@ -119,7 +120,8 @@ open Engine.Common.FS
             let storages = Storages()
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", true)
             let condition = tag2expr t1
-            let timer = TimerStatement.CreateTOF(storages, "myTof", 2000us, condition) |> toTimer        // 2000ms = 2sec
+            let tcParam = {Storages=storages; Name="myTof"; Preset=2000us; RungInCondition=condition}
+            let timer = TimerStatement.CreateTOF(tcParam) |> toTimer       // 2000ms = 2sec
             timer.EN.Value === true
             timer.TT.Value === false
             timer.DN.Value === true
@@ -131,7 +133,8 @@ open Engine.Common.FS
             let storages = Storages()
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", false)
             let condition = tag2expr t1
-            let timer = TimerStatement.CreateTOF(storages, "myTof", 2000us, condition) |> toTimer        // 2000ms = 2sec
+            let tcParam = {Storages=storages; Name="myTof"; Preset=2000us; RungInCondition=condition}
+            let timer = TimerStatement.CreateTON(tcParam) |> toTimer       // 2000ms = 2sec
             timer.TT.Value === false
             timer.EN.Value === false
             timer.DN.Value === false
@@ -143,7 +146,8 @@ open Engine.Common.FS
             let storages = Storages()
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", true)
             let condition = tag2expr t1
-            let timer = TimerStatement.CreateTOF(storages, "myTof", 2000us, condition) |> toTimer        // 2000ms = 2sec
+            let tcParam = {Storages=storages; Name="myTof"; Preset=2000us; RungInCondition=condition}
+            let timer = TimerStatement.CreateTOF(tcParam) |> toTimer       // 2000ms = 2sec
             // rung 입력 조건이 false
             t1.Value <- false
             evaluateRungInputs timer
@@ -190,7 +194,8 @@ open Engine.Common.FS
             let resetTag = PlcTag("my_timer_reset_tag", "%M1.1", false)
             let condition = tag2expr rungConditionInTag
             let reset = tag2expr resetTag
-            let timer = TimerStatement.CreateRTO(storages, "myRto", 2000us, condition, reset) |> toTimer        // 2000ms = 2sec
+            let tcParam = {Storages=storages; Name="myRto"; Preset=2000us; RungInCondition=condition}
+            let timer = TimerStatement.CreateRTO(tcParam, reset) |> toTimer       // 2000ms = 2sec
 
             timer.EN.Value === true
             timer.TT.Value === true

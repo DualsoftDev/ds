@@ -25,7 +25,8 @@ open Engine.Parser.FS
             let storages = Storages()
             let t1 = PlcTag("my_counter_control_tag", "%M1.1", false)
             let condition = tag2expr t1
-            let ctu = CounterStatement.CreateCTU(storages, "myCTU", 100us, condition) |> toCounter
+            let tcParam = {Storages=storages; Name="myCTU"; Preset=100us; RungInCondition=condition}
+            let ctu = CounterStatement.CreateCTU(tcParam) |> toCounter
             ctu.OV.Value === false
             ctu.UN.Value === false
             ctu.DN.Value === false
@@ -81,7 +82,8 @@ open Engine.Parser.FS
             let resetCondition = tag2expr t3
             let accum = 50us
 
-            let ctu = CounterStatement.CreateCTUD(storages, "myCTU", 100us, upCondition, downCondition, resetCondition, accum) |> toCounter
+            let tcParam = {Storages=storages; Name="myCTU"; Preset=100us; RungInCondition=upCondition}
+            let ctu = CounterStatement.CreateCTUD(tcParam, downCondition, resetCondition, accum) |> toCounter
             ctu.OV.Value === false
             ctu.UN.Value === false
             ctu.DN.Value === false
@@ -114,7 +116,8 @@ open Engine.Parser.FS
             let resetTag = PlcTag("my_counter_reset_tag", "%M1.1", false)
             let condition = tag2expr t1
             let reset = tag2expr resetTag
-            let ctu = CounterStatement.CreateCTU(storages, "myCTU", 100us, condition, reset) |> toCounter
+            let tcParam = {Storages=storages; Name="myCTU"; Preset=100us; RungInCondition=condition}
+            let ctu = CounterStatement.CreateCTU(tcParam, reset) |> toCounter
             ctu.OV.Value === false
             ctu.UN.Value === false
             ctu.DN.Value === false
@@ -153,7 +156,8 @@ open Engine.Parser.FS
             let resetTag = PlcTag("my_counter_reset_tag", "%M1.1", false)
             let condition = tag2expr t1
             let reset = tag2expr resetTag
-            let ctr = CounterStatement.CreateCTR(storages, "myCTR", 100us, condition, reset) |> toCounter
+            let tcParam = {Storages=storages; Name="myCTR"; Preset=100us; RungInCondition=condition}
+            let ctr = CounterStatement.CreateCTR(tcParam, reset) |> toCounter
             ctr.OV.Value === false
             ctr.UN.Value === false
             ctr.DN.Value === false
@@ -214,7 +218,7 @@ open Engine.Parser.FS
 
 
         [<Test>]
-        member x.``COUNTER structure WINDOWS platform test`` () =
+        member x.``CTU on WINDOWS platform test`` () =
             use _ = setRuntimeTarget WINDOWS
             let storages = Storages()
             let code = """
@@ -227,7 +231,7 @@ open Engine.Parser.FS
             [ "CD"; "Q"; "PT"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === false)
 
         [<Test>]
-        member x.``COUNTER structure XGI platform test`` () =
+        member x.``CTU on XGI platform test`` () =
             use _ = setRuntimeTarget XGI
             let storages = Storages()
             let code = """
@@ -238,3 +242,85 @@ open Engine.Parser.FS
             let statement = parseCode storages code
             [ "CU"; "Q"; "PV"; "CV"; "R"; ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === true)
             [ "DN"; "PRE"; "ACC"; ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === false)
+
+        [<Test>]
+        member x.``X CTD on WINDOWS platform test`` () =
+            use _ = setRuntimeTarget WINDOWS
+            let storages = Storages()
+            let code = """
+                bool x0 = createTag("%MX0.0.0", false);
+                ctd myCTD = createCTD(2000us, $x0);
+"""
+
+            let statement = parseCode storages code
+            [ "CU"; "DN"; "OV"; "UN"; "PRE"; "ACC"; "RES" ] |> iter (fun n -> storages.ContainsKey($"myCTD.{n}") === true)
+            [ "CD"; "Q"; "PT"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myCTD.{n}") === false)
+
+        [<Test>]
+        member x.``CTD on XGI platform test`` () =
+            use _ = setRuntimeTarget XGI
+            let storages = Storages()
+            let code = """
+                bool x0 = createTag("%MX0.0.0", false);
+                ctd myCTD = createCTD(2000us, $x0);
+"""
+
+            let statement = parseCode storages code
+            [ "CD"; "LD"; "PV"; "Q"; "CV"; ] |> iter (fun n -> storages.ContainsKey($"myCTD.{n}") === true)
+            [ "DN"; "PRE"; "ACC"; ] |> iter (fun n -> storages.ContainsKey($"myCTD.{n}") === false)
+
+
+        [<Test>]
+        member x.``X CTUD on WINDOWS platform test`` () =
+            use _ = setRuntimeTarget WINDOWS
+            let storages = Storages()
+            let code = """
+                bool x0 = createTag("%MX0.0.0", false);
+                ctud myCTUD = createCTUD(2000us, $x0);
+"""
+
+            let statement = parseCode storages code
+            [ "CU"; "DN"; "OV"; "UN"; "PRE"; "ACC"; "RES" ] |> iter (fun n -> storages.ContainsKey($"myCTUD.{n}") === true)
+            [ "CD"; "Q"; "PT"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myCTUD.{n}") === false)
+
+        [<Test>]
+        member x.``X CTUD on XGI platform test`` () =
+            use _ = setRuntimeTarget XGI
+            let storages = Storages()
+            let code = """
+                bool x0 = createTag("%MX0.0.0", false);
+                ctud myCTUD = createCTUD(2000us, $x0);
+"""
+
+            let statement = parseCode storages code
+            [ "CU"; "CD"; "R"; "LD"; "PV"; "QU"; "QD"; "CV"; ] |> iter (fun n -> storages.ContainsKey($"myCTUD.{n}") === true)
+            [ "DN"; "PRE"; "ACC"; ] |> iter (fun n -> storages.ContainsKey($"myCTUD.{n}") === false)
+
+
+
+
+        [<Test>]
+        member x.``X CTR on WINDOWS platform test`` () =
+            use _ = setRuntimeTarget WINDOWS
+            let storages = Storages()
+            let code = """
+                bool x0 = createTag("%MX0.0.0", false);
+                ctr myCTR = createCTR(2000us, $x0);
+"""
+
+            let statement = parseCode storages code
+            [ "CU"; "DN"; "OV"; "UN"; "PRE"; "ACC"; "RES" ] |> iter (fun n -> storages.ContainsKey($"myCTR.{n}") === true)
+            [ "CD"; "Q"; "PT"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myCTR.{n}") === false)
+
+        [<Test>]
+        member x.``CTR on XGI platform test`` () =
+            use _ = setRuntimeTarget XGI
+            let storages = Storages()
+            let code = """
+                bool x0 = createTag("%MX0.0.0", false);
+                ctr myCTR = createCTR(2000us, $x0);
+"""
+
+            let statement = parseCode storages code
+            [ "CD"; "PV"; "RST"; "Q"; "CV"; ] |> iter (fun n -> storages.ContainsKey($"myCTR.{n}") === true)
+            [ "CU"; "DN"; "PRE"; "ACC"; ] |> iter (fun n -> storages.ContainsKey($"myCTR.{n}") === false)

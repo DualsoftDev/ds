@@ -169,32 +169,35 @@ module rec ExpressionParser =
             let name = ctx.Descendants<StorageNameContext>().First().GetText()
             match exp  with
             | DuFunction { Name=functionName; Arguments=args } ->     // functionName = "createCTU"
+                let ((UnitValue preset)::(BoolExp rungInCondtion)::_) = args
+                let tcParams={Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondtion}
+
                 match typ, functionName, args with
-                | CTU, "createCTU", (UnitValue preset)::(BoolExp rungInCondtion)::[] ->
-                    CounterStatement.CreateCTU(storages, name, preset, rungInCondtion)
-                | CTU, "createCTU", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::[] ->
-                    CounterStatement.CreateCTU(storages, name, preset, rungInCondtion, resetCondition)
+                | CTU, "createCTU", _::_::[] ->
+                    CounterStatement.CreateCTU(tcParams)
+                | CTU, "createCTU", _::_::(BoolExp resetCondition)::[] ->
+                    CounterStatement.CreateCTU(tcParams, resetCondition)
 
-                | CTD, "createCTD", (UnitValue preset)::(BoolExp rungInCondtion)::[] ->
-                    CounterStatement.CreateCTD(storages, name, preset, rungInCondtion, 0us)
-                | CTD, "createCTD", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::[] ->
-                    CounterStatement.CreateCTD(storages, name, preset, rungInCondtion, resetCondition, 0us)
+                | CTD, "createCTD", _::_::[] ->
+                    CounterStatement.CreateCTD(tcParams, 0us)
+                | CTD, "createCTD", _::_::(BoolExp resetCondition)::[] ->
+                    CounterStatement.CreateCTD(tcParams, resetCondition, 0us)
 
-                | CTUD, "createCTUD", (UnitValue preset)::(BoolExp countUpCondition)::(BoolExp countDownCondition)::[] ->
-                    CounterStatement.CreateCTUD(storages, name, preset, countUpCondition, countDownCondition, 0us)
-                | CTUD, "createCTUD", (UnitValue preset)::(BoolExp countUpCondition)::(BoolExp countDownCondition)::(BoolExp resetCondition)::[] ->
-                    CounterStatement.CreateCTUD(storages, name, preset, countUpCondition, countDownCondition, resetCondition, 0us)
+                | CTUD, "createCTUD", _::_::(BoolExp countDownCondition)::[] ->
+                    CounterStatement.CreateCTUD(tcParams, countDownCondition, 0us)
+                | CTUD, "createCTUD", _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::[] ->
+                    CounterStatement.CreateCTUD(tcParams, countDownCondition, resetCondition, 0us)
 
-                | CTUD, "createCTUD", (UnitValue preset)::(BoolExp countUpCondition)::(BoolExp countDownCondition)::(UnitValue accum)::[] ->
-                    CounterStatement.CreateCTUD(storages, name, preset, countUpCondition, countDownCondition, accum)
-                | CTUD, "createCTUD", (UnitValue preset)::(BoolExp countUpCondition)::(BoolExp countDownCondition)::(BoolExp resetCondition)::(UnitValue accum)::[] ->
-                    CounterStatement.CreateCTUD(storages, name, preset, countUpCondition, countDownCondition, resetCondition, accum)
+                | CTUD, "createCTUD", _::_::(BoolExp countDownCondition)::(UnitValue accum)::[] ->
+                    CounterStatement.CreateCTUD(tcParams, countDownCondition, accum)
+                | CTUD, "createCTUD", _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::(UnitValue accum)::[] ->
+                    CounterStatement.CreateCTUD(tcParams, countDownCondition, resetCondition, accum)
 
 
-                | CTR, "createCTR", (UnitValue preset)::(BoolExp rungInCondtion)::[] ->
-                    CounterStatement.CreateCTR(storages, name, preset, rungInCondtion)
-                | CTR, "createCTR", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::[] ->
-                    CounterStatement.CreateCTR(storages, name, preset, rungInCondtion, resetCondition)
+                | CTR, "createCTR", _::_::[] ->
+                    CounterStatement.CreateCTR(tcParams)
+                | CTR, "createCTR", _::_::(BoolExp resetCondition)::[] ->
+                    CounterStatement.CreateCTR(tcParams, resetCondition)
 
                 | _ -> fail()
 
@@ -211,20 +214,22 @@ module rec ExpressionParser =
             let name = ctx.Descendants<StorageNameContext>().First().GetText()
             match exp  with
             | DuFunction { Name=functionName; Arguments=args } ->     // functionName = "createTON"
+                let ((UnitValue preset)::(BoolExp rungInCondtion)::_) = args
+                let tcParams={Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondtion}
                 match typ, functionName, args with
-                | TON, "createTON", (UnitValue preset)::(BoolExp rungInCondtion)::[] ->
-                    TimerStatement.CreateTON(storages, name, preset, rungInCondtion)
-                | TON, "createTON", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::[] ->
-                    TimerStatement.CreateTON(storages, name, preset, rungInCondtion, resetCondition)
-                | TOF, "createTOF", (UnitValue preset)::(BoolExp rungInCondtion)::[] ->
-                    TimerStatement.CreateTOF(storages, name, preset, rungInCondtion)
-                | TOF, "createTOF", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::[] ->
-                    TimerStatement.CreateTOF(storages, name, preset, rungInCondtion, resetCondition)
+                | TON, "createTON", _::_::[] ->
+                    TimerStatement.CreateTON(tcParams)
+                | TON, "createTON", _::_::(BoolExp resetCondition)::[] ->
+                    TimerStatement.CreateTON(tcParams, resetCondition)
+                | TOF, "createTOF", _::_::[] ->
+                    TimerStatement.CreateTOF(tcParams)
+                | TOF, "createTOF", _::_::(BoolExp resetCondition)::[] ->
+                    TimerStatement.CreateTOF(tcParams, resetCondition)
 
-                | RTO, "createRTO", (UnitValue preset)::(BoolExp rungInCondtion)::[] ->
-                    TimerStatement.CreateRTO(storages, name, preset, rungInCondtion)
-                | RTO, "createRTO", (UnitValue preset)::(BoolExp rungInCondtion)::(BoolExp resetCondition)::[] ->
-                    TimerStatement.CreateRTO(storages, name, preset, rungInCondtion, resetCondition)
+                | RTO, "createRTO", _::_::[] ->
+                    TimerStatement.CreateRTO(tcParams)
+                | RTO, "createRTO", _::_::(BoolExp resetCondition)::[] ->
+                    TimerStatement.CreateRTO(tcParams, resetCondition)
                 | _ -> fail()
             | _ -> fail()
         | None -> fail()

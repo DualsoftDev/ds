@@ -14,7 +14,7 @@ module TimerStatementModule =
 
     let private createTimerStatement (storages:Storages) {
         Type=typ; Name=name; Preset=preset;
-        RungConditionIn=rungConditionIn; ResetCondition=resetCondition;
+        RungConditionIn=rungInCondition; ResetCondition=resetCondition;
     } : Statement =
         if preset < MinTickInterval then
             failwith <| sprintf "Timer Resolution Error: Preset value should be larger than %A" MinTickInterval
@@ -23,7 +23,7 @@ module TimerStatementModule =
         let timer = new Timer(typ, ts)
 
         let statements = ResizeArray<Statement>()
-        match rungConditionIn with
+        match rungInCondition with
         | Some cond ->
             let rungInStatement = DuAssign (cond, ts.EN)
             rungInStatement.Do()
@@ -45,41 +45,56 @@ module TimerStatementModule =
         | None -> ()
 
         timer.InputEvaluateStatements <- statements.ToFSharpList()
-        DuTimer { Timer=timer; RungInCondition = rungConditionIn; ResetCondition = resetCondition}
+        DuTimer { Timer=timer; RungInCondition = rungInCondition; ResetCondition = resetCondition}
+
+
+    /// Timer & Counter construction parameters
+    type TCConstructionParams = {
+        Storages:Storages
+        Name: string
+        Preset: CountUnitType
+        RungInCondition:IExpression<bool>
+    }
 
     type TimerStatement =
-        static member CreateTON(storages:Storages, name, preset, rungConditionIn) =
+        static member CreateTON(tcParams:TCConstructionParams) =
+            let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition} = tcParams
             {   Type=TON; Name=name; Preset=preset;
-                RungConditionIn=Some rungConditionIn;
+                RungConditionIn=Some rungInCondition;
                 ResetCondition=None; }
             |> createTimerStatement storages
 
-        static member CreateTOF(storages:Storages, name, preset, rungConditionIn) =
+        static member CreateTOF(tcParams:TCConstructionParams) =
+            let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition} = tcParams
             {   Type=TOF; Name=name; Preset=preset;
-                RungConditionIn=Some rungConditionIn;
+                RungConditionIn=Some rungInCondition;
                 ResetCondition=None; }
             |> createTimerStatement storages
 
-        static member CreateRTO(storages:Storages, name, preset, rungConditionIn) =
+        static member CreateRTO(tcParams:TCConstructionParams) =
+            let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition} = tcParams
             {   Type=RTO; Name=name; Preset=preset;
-                RungConditionIn=Some rungConditionIn;
+                RungConditionIn=Some rungInCondition;
                 ResetCondition=None; }
             |> createTimerStatement storages
 
-        static member CreateTON(storages:Storages, name, preset, rungConditionIn, resetCondition) =
+        static member CreateTON(tcParams:TCConstructionParams, resetCondition) =
+            let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition} = tcParams
             {   Type=TON; Name=name; Preset=preset;
-                RungConditionIn=Some rungConditionIn;
+                RungConditionIn=Some rungInCondition;
                 ResetCondition=Some resetCondition; }
             |> createTimerStatement storages
 
-        static member CreateTOF(storages:Storages, name, preset, rungConditionIn, resetCondition) =
+        static member CreateTOF(tcParams:TCConstructionParams, resetCondition) =
+            let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition} = tcParams
             {   Type=TOF; Name=name; Preset=preset;
-                RungConditionIn=Some rungConditionIn;
+                RungConditionIn=Some rungInCondition;
                 ResetCondition=Some resetCondition; }
             |> createTimerStatement storages
-        static member CreateRTO(storages:Storages, name, preset, rungConditionIn, resetCondition) =
+        static member CreateRTO(tcParams:TCConstructionParams, resetCondition) =
+            let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition} = tcParams
             {   Type=RTO; Name=name; Preset=preset;
-                RungConditionIn=Some rungConditionIn;
+                RungConditionIn=Some rungInCondition;
                 ResetCondition=Some resetCondition; }
             |> createTimerStatement storages
 

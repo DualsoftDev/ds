@@ -12,5 +12,5 @@ open Engine.Cpu
 type ButtonLampStatement() =
     do Fixtures.SetUpTest()
 
-    [<Test>] member __.``B1 All Buttons`` () = Eq 1 1
-    [<Test>] member __.``B2 All Lamps`` () = Eq 1 1
+    [<Test>] member __.``B1 Button Output`` () = Eq 1 1
+    [<Test>] member __.``B2 Mode Lamp`` () = Eq 1 1

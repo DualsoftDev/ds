@@ -26,7 +26,8 @@
     <Compile Include="10.Counter.fs" />
     <Compile Include="11.Link.fs" />
     <Compile Include="12.System.fs" />
-    <Compile Include="13.Extension.fs" />
+    <Compile Include="13.ButtonLamp.fs" />
+    <Compile Include="14.Extension.fs" />
     <Compile Include="Convert.fsx" />
     <Compile Include="Loader.fs" />
 	<Compile Include="EntryPoint.fs" />

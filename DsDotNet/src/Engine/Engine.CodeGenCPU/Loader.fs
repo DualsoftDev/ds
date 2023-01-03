@@ -32,10 +32,9 @@ module CpuLoader =
 
             if IsSpec v (CallInReal ||| AliasCallInReal)
             then
-                yield vm.C2_CallHeadComplete()
-                yield vm.C3_CallTailComplete()
-                yield! vm.C4_CallTx()
-                yield vm.C5_CallRx()
+                yield! vm.C1_CallActionOut()
+                yield! vm.C2_CallTx()
+                yield vm.C3_CallRx()
 
                 yield vm.M3_CallErrorTXMonitor()
                 yield vm.M4_CallErrorRXMonitor()
@@ -58,11 +57,17 @@ module CpuLoader =
                 yield vm.R1_RealInitialStart()
                 yield vm.R2_RealJobComplete()
 
-                for coin in (v :?> Real).Graph.Vertices.Select(getVM) do
-                    yield coin.D1_DAGInitialStart()
-                    yield coin.D2_DAGTailStart()
+                yield! vm.D1_DAGHeadStart()
+                yield! vm.D2_DAGHeadComplete()
+                yield! vm.D3_DAGTailStart()
+                yield! vm.D4_DAGTailComplete()
         ]
-    let private applyBtnLampSpec(s:DsSystem) = []
+    let private applyBtnLampSpec(s:DsSystem) =
+        [
+            yield! s.B1_ButtonOutput()
+            yield! s.B2_ModeLamp()
+        ]   
+        
     ///flow 별 운영모드 적용
     let private applyOperationModeSpec(f:Flow) = 
         [

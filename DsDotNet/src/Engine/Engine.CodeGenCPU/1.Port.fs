@@ -17,9 +17,9 @@ let private getSetBits(v:VertexManager) (rse:SREType) (convert:ConvertType) =
 
     let setBits =  
         match rse with
-        |Start -> (shareds |> startTags ) @ [v.ST;v.SF]
-        |Reset -> (shareds |> resetTags ) @ [v.ET;v.RF]
-        |End   -> (shareds |> endTags   ) @ [v.ET;v.EF]    
+        |Start -> (shareds.STs()) @ [v.ST;v.SF]
+        |Reset -> (shareds.RTs()) @ [v.RT;v.RF]
+        |End   -> (shareds.ETs()) @ [v.ET;v.EF]    
 
     setBits.Cast<Tag<bool>>() |> toAnd
 //Port 처리 Rst 공용 함수

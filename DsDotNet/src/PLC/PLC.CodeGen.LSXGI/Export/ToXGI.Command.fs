@@ -46,7 +46,7 @@ module internal Command =
                         | CTU -> VarType.CTU_INT
                         | CTD -> VarType.CTD_INT
                         | CTUD -> VarType.CTUD_INT
-                        | CTR ->  VarType.CTR_INT
+                        | CTR ->  VarType.CTR
                     fbc.GetInstanceText(), varType
             |_-> failwithlog "do not make instanceTag"
 
@@ -137,9 +137,12 @@ module internal Command =
         //Command 속성입력
         let results = [
             match typ with
-            | (CTU | CTD | CTR) ->
+            | (CTU | CTD ) ->
                 createFBParameterXml reset      (x-1) (y+1)
                 createFBParameterXml $"{count}" (x-1) (y+2)
+            | CTR ->
+                createFBParameterXml $"{count}" (x-1) (y+1)
+                createFBParameterXml reset      (x-1) (y+2)
             | CTUD ->
                 yield! (createParam counterStatement.CountDown (x-1) (y+1))
                 yield! (createParam counterStatement.Reset     (x-1) (y+2))

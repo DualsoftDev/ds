@@ -28,6 +28,7 @@ type XgiCounterTest() =
 
     [<Test>]
     member __.``Counter CTD simple test`` () =
+        use _ = setRuntimeTarget XGI
         let storages = Storages()
         let code = """
             bool cd = createTag("%IX0.0.0", false);
@@ -50,6 +51,22 @@ type XgiCounterTest() =
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
+
+    [<Test>]
+    member __.``Counter CTR simple test`` () =
+        let storages = Storages()
+        let code = """
+            bool cd = createTag("%IX0.0.0", false);
+            bool res = createTag("%IX0.0.1", false);
+            ctr myCTR = createCTR(2000us, $cd, $res);
+            //int x7 = createTag("%QX0.1", 0);
+            //$x7 := $myCTR.CV;
+            $myCTR.RST := $cd;
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
+
 
     [<Test>]
     member __.``Counter CTU with conditional test`` () =

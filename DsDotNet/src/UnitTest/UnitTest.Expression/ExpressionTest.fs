@@ -167,6 +167,12 @@ module Exp =
             fAdd [v 1; v 2]                        |> evaluate === 3
 
         [<Test>]
+        member __.``31 Rising, Falling test`` () =
+            let t = PlcTag("t2", "%M1.1", 2)
+            fFalling [tag2expr t] |> evaluate |> ignore     // todo : rising/falling evaluation
+            fRising [tag2expr t] |> evaluate |> ignore     // todo : rising/falling evaluation
+
+        [<Test>]
         member __.``4 Composition test`` () =
             fMul [
                     tag2expr <| PlcTag("t2", "%M1.1", 2)

@@ -4,6 +4,7 @@ open System.IO
 open log4net
 open log4net.Config
 open Engine.Common.FS
+open Engine.Core
 
 // FsUnit/XUnit 사용법:
 // https://github.com/fsprojects/FsUnit/tree/master/tests/FsUnit.Xunit.Test
@@ -32,3 +33,9 @@ module Fixtures =
             ()
 
             Engine.CodeGenCPU.ModuleInitializer.Initialize()
+
+    let setRuntimeTarget(runtimeTarget:RuntimeTarget) =
+        let runtimeTargetBackup = RuntimeTarget
+        RuntimeTarget <- runtimeTarget
+        disposable { RuntimeTarget <- runtimeTargetBackup }
+

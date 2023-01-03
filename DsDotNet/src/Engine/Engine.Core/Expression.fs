@@ -10,6 +10,23 @@ open System.Net.NetworkInformation
     * matching 해서 수행해야 할 필요한 기능들은 non generic interface 인 IExpression 에 담아 두고, 이를 matching 한다.
 *)
 
+(*
+    type TagMode =
+        /// '-| |-' or '-( )-'
+        | Normal
+        /// '-|/|-' or '-(/)-'
+        | Neg
+        /// '-|P|-' or '-(P)-'
+        | Pulse
+        /// '-|N|-' or '-(N)-'
+        | NPulse
+        /// '-(S)-'
+        | Set
+        /// '-(R)-'
+        | Reset
+*)
+
+
 [<AutoOpen>]
 module ExpressionModule =
 

@@ -66,6 +66,16 @@ module FlatExpressionModule =
         | DuTerminal (DuTag t) -> FlatTerminal(t, false, false)
         | DuTerminal (DuLiteral b) -> FlatTerminal( literalBool2Terminal b, false, false)
         | DuTerminal  _ -> failwith "ERROR"
+        (* rising/falling/negation 은 function 으로 구현되어 있으며,
+           해당 function type 에 따라서 risng/falling/negation 의 contact/coil 을 생성한다.
+           (Terminal<'T> 이 generic 이어서 DuTag 에 bool type 으로 제한 할 수 없음.
+            Terminal<'T>.Evaluate() 가 bool type 으로 제한됨 )
+         *)
+        | DuFunction {FunctionBody = f; Name = n; Arguments = (:? Expression<bool> as arg)::[]}
+            when n = FunctionNameRising || n = FunctionNameFalling ->
+                match arg with
+                | DuTerminal (DuTag t) -> FlatTerminal(t, true, n = FunctionNameFalling)
+                | _ -> failwith "ERROR"
         | DuFunction fs ->
             let op =
                 match fs.Name with

@@ -55,10 +55,11 @@ module rec ExpressionSerializeModule =
             let needParenthesys (seaName:string) (island:Arg) =
                 option {
                     let! islandName = island.FunctionName
-                    let nSea = operatorPrecedenceMap.[seaName]
-                    let nIsland = operatorPrecedenceMap.[islandName]
-                    let needParen = nIsland > nSea        // precedence 값이 큰 것이 우선 순위가 낮다.
-                    return needParen
+                    if operatorPrecedenceMap.ContainsKey(seaName) && operatorPrecedenceMap.ContainsKey(islandName) then
+                        let nSea = operatorPrecedenceMap.[seaName]
+                        let nIsland = operatorPrecedenceMap.[islandName]
+                        let needParen = nIsland > nSea        // precedence 값이 큰 것이 우선 순위가 낮다.
+                        return needParen
                 } |> Option.defaultValue false
 
             let lWithParnethesys = needParenthesys name args[0]

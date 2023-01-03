@@ -21,6 +21,7 @@ open Engine.Parser.FS
 
         [<Test>]
         member __.``CTU creation test`` () =
+            use _ = setRuntimeTarget AB
             let storages = Storages()
             let t1 = PlcTag("my_counter_control_tag", "%M1.1", false)
             let condition = tag2expr t1
@@ -70,6 +71,7 @@ open Engine.Parser.FS
 
         [<Test>]
         member __.``CTUD creation test`` () =
+            use _ = setRuntimeTarget AB
             let storages = Storages()
             let t1 = PlcTag("my_counter_up_tag", "%M1.1", false)
             let t2 = PlcTag("my_counter_down_tag", "%M1.1", false)
@@ -106,6 +108,7 @@ open Engine.Parser.FS
 
         [<Test>]
         member __.``CTU with reset creation test`` () =
+            use _ = setRuntimeTarget AB
             let storages = Storages()
             let t1 = PlcTag("my_counter_control_tag", "%M1.1", false)
             let resetTag = PlcTag("my_counter_reset_tag", "%M1.1", false)
@@ -144,6 +147,7 @@ open Engine.Parser.FS
 
         [<Test>]
         member __.``CTR with reset creation test`` () =
+            use _ = setRuntimeTarget AB
             let storages = Storages()
             let t1 = PlcTag("my_counter_control_tag", "%M1.1", false)
             let resetTag = PlcTag("my_counter_reset_tag", "%M1.1", false)
@@ -208,36 +212,29 @@ open Engine.Parser.FS
 
 
 
-        member __.CommonPinNames = [ "RES"; "CU"; "CD"; "OV"; "UN" ]
 
         [<Test>]
         member x.``COUNTER structure WINDOWS platform test`` () =
+            use _ = setRuntimeTarget WINDOWS
             let storages = Storages()
             let code = """
                 bool x0 = createTag("%MX0.0.0", false);
                 ctu myCTU = createCTU(2000us, $x0);
 """
 
-            let runtimeTargetBackup = RuntimeTarget
-            RuntimeTarget <- WINDOWS
-            disposable { RuntimeTarget <- runtimeTargetBackup } |> ignore
-
             let statement = parseCode storages code
-            [ "DN"; "PRE"; "ACC"; yield! x.CommonPinNames ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === true)
-            [ "Q"; "PT"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === false)
+            [ "CU"; "DN"; "OV"; "UN"; "PRE"; "ACC"; "RES" ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === true)
+            [ "CD"; "Q"; "PT"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === false)
 
         [<Test>]
         member x.``COUNTER structure XGI platform test`` () =
+            use _ = setRuntimeTarget XGI
             let storages = Storages()
             let code = """
                 bool x0 = createTag("%MX0.0.0", false);
                 ctu myCTU = createCTU(2000us, $x0);
 """
 
-            let runtimeTargetBackup = RuntimeTarget
-            RuntimeTarget <- XGI
-            disposable { RuntimeTarget <- runtimeTargetBackup } |> ignore
-
             let statement = parseCode storages code
-            [ "Q"; "PT"; "ET"; yield! x.CommonPinNames ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === true)
+            [ "CU"; "Q"; "PV"; "CV"; "R"; ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === true)
             [ "DN"; "PRE"; "ACC"; ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === false)

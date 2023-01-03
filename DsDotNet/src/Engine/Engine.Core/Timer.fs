@@ -128,26 +128,15 @@ module rec TimerModule =
 
 
     [<AbstractClass>]
-    type TimerCounterBaseStruct (storages:Storages, name, preset, accum:CountUnitType) as this =
-        let dn  = fwdCreateBoolTag   $"{name}.{nameDN() }" false  // Done
-        let pre = fwdCreateUShortTag $"{name}.{namePRE()}" preset
-        let acc = fwdCreateUShortTag $"{name}.{nameACC()}" accum
-        let res = fwdCreateBoolTag   $"{name}.{nameRES()}" false
-        do
-            storages.Add(name, this)
-            storages.Add(dn.Name, dn)
-            storages.Add(pre.Name, pre)
-            storages.Add(acc.Name, acc)
-            storages.Add(res.Name, res)
-
-
+    type TimerCounterBaseStruct (storages:Storages, name, preset, accum:CountUnitType, dn, pre, acc, res) =
         interface IStorage with
             member x.Name with get() = x.Name and set(v) = failwith "ERROR: not supported"
             member x.DataType = typedefof<TimerCounterBaseStruct>
-            member x.Value with get() = this and set(v) = failwith "ERROR: not supported"
+            member x.Value with get() = x.This and set(v) = failwith "ERROR: not supported"
             member x.ToText() = failwith "ERROR: not supported"
             member _.ToBoxedExpression() = failwith "ERROR: not supported"
 
+        member private x.This = x
         member _.Name:string = name
         /// Done bit
         member _.DN:TagBase<bool> = dn
@@ -156,21 +145,39 @@ module rec TimerModule =
         /// Reset bit.
         member _.RES:TagBase<bool> = res
 
+    let addTagsToStorages (storages:Storages) (ts:IStorage seq) =
+        for t in ts do
+            if not (isItNull t) then
+                storages.Add(t.Name, t)
 
-    type TimerStruct internal(typ:TimerType, storages:Storages, name, preset:CountUnitType, accum:CountUnitType) =
-        inherit TimerCounterBaseStruct(storages, name, preset, accum)
-
-        let en = fwdCreateBoolTag $"{name}.{nameEN()}" false
-        let tt = fwdCreateBoolTag $"{name}.{nameTT()}" false
-        do
-            storages.Add(en.Name, en)
-            storages.Add(tt.Name, tt)
+    type TimerStruct private(typ:TimerType, storages:Storages, name, preset:CountUnitType, accum:CountUnitType, en, tt, dn, pre, acc, res) =
+        inherit TimerCounterBaseStruct(storages, name, preset, accum, dn, pre, acc, res)
 
         /// Enable
         member _.EN:TagBase<bool> = en
         /// Timing
         member _.TT:TagBase<bool> = tt
         member _.Type = typ
+
+        static member Create(typ:TimerType, storages:Storages, name, preset:CountUnitType, accum:CountUnitType) =
+
+            let en = fwdCreateBoolTag $"{name}.{nameEN()}" false
+            let tt = fwdCreateBoolTag $"{name}.{nameTT()}" false
+            let dn  = fwdCreateBoolTag   $"{name}.{nameDN() }" false  // Done
+            let pre = fwdCreateUShortTag $"{name}.{namePRE()}" preset
+            let acc = fwdCreateUShortTag $"{name}.{nameACC()}" accum
+            let res = fwdCreateBoolTag   $"{name}.{nameRES()}" false
+
+            storages.Add(en.Name, en)
+            storages.Add(tt.Name, tt)
+            storages.Add(dn.Name, dn)
+            storages.Add(pre.Name, pre)
+            storages.Add(acc.Name, acc)
+            storages.Add(res.Name, res)
+
+            let ts = new TimerStruct(typ, storages, name, preset, accum, en, tt, dn, pre, acc, res)
+            storages.Add(name, ts)
+            ts
 
 
     type TimerStruct with

@@ -49,7 +49,7 @@ toplevels: toplevel (';' toplevel)* ';';
 statement: assign | varDecl | timerDecl | counterDecl | copyStatement;
     assign: '$' storageName ':=' expr;
     varDecl:   type storageName ('=' expr)? ;//';';
-        storageName: IDENTIFIER;
+        storageName: IDENTIFIER ('.' IDENTIFIER )*;
     type:
         'int8' | 'sbyte'
         | 'uint8' | 'byte'

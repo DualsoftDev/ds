@@ -497,7 +497,8 @@ module internal XgiFile =
                         let device, addr = "", ""
                         let plcType =
                             match counter.Type with
-                            | CTU | CTD | CTUD | CTR -> $"{counter.Type}_INT"       // todo: CTU_{INT, UINT, .... } 등의 종류가 있음...
+                            | CTU | CTD | CTUD -> $"{counter.Type}_INT"       // todo: CTU_{INT, UINT, .... } 등의 종류가 있음...
+                            | CTR -> $"{counter.Type}"
 
                         XGITag.createSymbol counter.Name $"COUNTER {counter.Name}" device kindVar addr plcType
             ]

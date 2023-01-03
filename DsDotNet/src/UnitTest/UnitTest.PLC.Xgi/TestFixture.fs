@@ -64,7 +64,6 @@ module PLCGenerationTestModule =
         RuntimeTarget <- runtimeTarget
         disposable { RuntimeTarget <- runtimeTargetBackup }
 
-
 [<AutoOpen>]
 module XgiGenerationTestModule =
     let projectDir =
@@ -75,8 +74,9 @@ module XgiGenerationTestModule =
     let xmlDir = Path.Combine(projectDir, "XgiXmls")
     let xmlAnswerDir = Path.Combine(xmlDir, "Answers")
 
-    let saveTestResult testFunctionName xml =
-        File.WriteAllText($@"{xmlDir}\{testFunctionName}.xml", xml)
+    let saveTestResult testFunctionName (xml:string) =
+        let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
+        File.WriteAllText($@"{xmlDir}\{testFunctionName}.xml", crlfXml)
         let answerXml = File.ReadAllText($@"{xmlAnswerDir}\{testFunctionName}.xml")
         System.String.Compare(answerXml, xml, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols) === 0
 

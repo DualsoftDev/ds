@@ -18,7 +18,7 @@ module ExpressionExtension =
     /// Assign statement
     let (<==)  (storage: IStorage) (exp: IExpression) = DuAssign(exp, storage)
     /// Assign Puls statement  : Pulse Coil 타입 필요
-    let (<=!)  (storage: IStorage) (exp: IExpression) = DuAssign(exp, storage)
+    let (<=^)  (storage: IStorage) (exp: IExpression) = DuAssign(exp, storage)
 
 
     /// Create None Relay Coil Statement
@@ -29,7 +29,7 @@ module ExpressionExtension =
         coil <== (sets <||> tag2expr coil <&&> (!! rsts)) |> withExpressionComment comment
      /// Create None Relay Pulse Coil Statement
     let (--^) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool>, comment:string) = 
-        coil <=! (sets <&&> (!! rsts)) |> withExpressionComment comment
+        coil <=^ (sets <&&> (!! rsts)) |> withExpressionComment comment
 
     
     let private tags2LogicalAndOrExpr (fLogical: IExpression list -> Expression<bool>) (FList(ts:Tag<bool> list)) : Expression<bool> =

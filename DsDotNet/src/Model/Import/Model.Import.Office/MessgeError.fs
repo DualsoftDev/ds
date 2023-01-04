@@ -14,6 +14,7 @@ module WarnID =
     let _2 = 1, "Warnning message2"
 
 module ErrID =
+    // PPT Error (1 ~ 999)
     let _1 = "사용불가 도형입니다."
     let _2 = "Spare"
     let _3 = "사용불가 연결 방식 입니다."
@@ -68,8 +69,10 @@ module ErrID =
     let _48 = "외부 시스템이 없습니다."
     let _49 = "해당 인터페이스가 없습니다."
 
+    // Excel Error (1001 ~ )
+    let _1001 = "시스템에 버튼 이름이 없습니다."
+    let _1002 = "시스템에 램프 이름이 없습니다."
     
-
     //todo
        // "리얼 행위의 자식은 한곳에만 정의가능합니다.(alias, exFlow 정의불가)"
     //
@@ -100,4 +103,9 @@ module MessgeError =
                             else $"[Page{page}:{objName}" 
             failwithf  $"[{case.ToText()}] {msg} \t\t{itemName}]"
 
-        
+        [<Extension>]
+        static member ErrorXLS(case:ErrorCase, msg:string,  objName:string, tabName:string, ?userMsg:string) = 
+            let itemName =  if(userMsg.IsSome && (userMsg.Value = ""|>not))
+                            then $"[Sheet {tabName}:{objName}({userMsg.Value})" 
+                            else $"[Sheet {tabName}:{objName}" 
+            failwithf  $"[{case.ToText()}] {msg} \t\t{itemName}]"

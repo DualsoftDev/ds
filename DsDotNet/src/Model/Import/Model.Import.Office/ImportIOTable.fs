@@ -2,6 +2,7 @@
 namespace Model.Import.Office
 
 open System
+open System.Linq
 open Microsoft.Office.Interop.Excel
 open Engine.Common.FS
 open Engine.Core
@@ -12,12 +13,11 @@ module ImportIOTable =
     type IOColumn =
     | Case      = 0
     | Name      = 1
-    | Type      = 2
-    | Size      = 3
+    | DataType  = 2
+    | Input     = 3
     | Output    = 4
-    | Input     = 5
-    | Command   = 6
-    | Observe   = 7
+    | Command   = 5
+    | Observe   = 6
 
     let ApplyExcel(path:string, systems:DsSystem seq) =
         let sys = systems.Head()
@@ -57,6 +57,25 @@ module ImportIOTable =
 
         let dataset = FromExcel(path)
         try
+            let updateBtn(row:Data.DataRow, btntype:BtnType, tableIO:Data.DataTable) = 
+                let name  = $"{row.[(int)IOColumn.Name]}"
+                let input = $"{row.[(int)IOColumn.Input]}"
+                let output= $"{row.[(int)IOColumn.Output]}"
+                let btns = sys.SystemButtons.Where(fun w->w.ButtonType = btntype)
+                match btns.TryFind(fun f -> f.Name = name) with
+                | Some btn -> btn.InAddress <- input
+                              btn.OutAddress <- output
+                | None -> Office.ErrorXLS(ErrorCase.Name, ErrID._1001, $"{name}", tableIO.TableName, path)
+
+            let updateLamp(row:Data.DataRow, lampType:LampType, tableIO:Data.DataTable) = 
+                let name  = $"{row.[(int)IOColumn.Name]}"
+                let input = $"{row.[(int)IOColumn.Input]}"
+                let output= $"{row.[(int)IOColumn.Output]}"
+                let btns = sys.SystemLamps.Where(fun w->w.LampType = lampType)
+                match btns.TryFind(fun f -> f.Name = name) with
+                | Some btn -> btn.OutAddress <- output
+                | None -> Office.ErrorXLS(ErrorCase.Name, ErrID._1002, $"{name}", tableIO.TableName, path)
+
             systems
             |> Seq.iter(fun sys -> 
                 let tableIOs = dataset.Tables
@@ -71,31 +90,40 @@ module ImportIOTable =
                 for row in tableIO.Rows do
                     if($"{row.[(int)IOColumn.Name]}" = ""|>not && $"{row.[(int)IOColumn.Name]}" = "-"|>not) //name 존재시만
                     then 
-                        match ExcelCaseToType($"{row.[(int)IOColumn.Case]}") with
-                        |ExcelCase.ExcelAddress  -> 
+                        match TextToXlsType($"{row.[(int)IOColumn.Case]}") with
+                        | XlsAddress  -> 
                             let jobDef = dicJob.[$"{row.[(int)IOColumn.Name]}"]
                             jobDef.InAddress  <- $"{row.[(int)IOColumn.Input]}"
                             jobDef.OutAddress <- $"{row.[(int)IOColumn.Output]}"
 
-                        |ExcelCase.ExcelVariable -> 
-                            let name      = $"{row.[(int)IOColumn.Name]}"
-                            let datatype  = $"{row.[(int)IOColumn.Type]}"
+                        | XlsVariable -> 
+                            let name      = $"{row.[(int)IOColumn.Name]}" 
+                            let dataType  = $"{row.[(int)IOColumn.DataType]}" |> DataToType
                             let initValue = $"{row.[(int)IOColumn.Output]}"
-                            let variableData =  $"{datatype} {name} = {initValue}"
-                            sys.OriginalCodeBlocks.Add(variableData)
+                            let variableData = VariableData(name, dataType, initValue)
+                            sys.Variables.Add(variableData)
 
-                        |ExcelCase.ExcelCommand ->  
+                        | XlsCommand ->  
                             let jobDef = dicJob.[$"{row.[(int)IOColumn.Name]}"]
                             jobDef.CommandOutTimming  <- $"{row.[(int)IOColumn.Command]}"
 
-                        |ExcelCase.ExcelObserve ->  
+                        | XlsObserve ->  
                             let jobDef = dicJob.[$"{row.[(int)IOColumn.Name]}"]
                             jobDef.ObserveInTimming   <- $"{row.[(int)IOColumn.Observe]}"
 
-                        |ExcelCase.ExcelStartBTN        
-                        |ExcelCase.ExcelResetBTN        
-                        |ExcelCase.ExcelAutoBTN         
-                        |ExcelCase.ExcelEmergencyBTN   ->  ()// 버튼 TAG 구현 필요  //test ahn todo
+                        | XlsAutoBTN          -> updateBtn  (row, BtnType.DuAutoBTN, tableIO)
+                        | XlsManualBTN        -> updateBtn  (row, BtnType.DuManualBTN      , tableIO)
+                        | XlsEmergencyBTN     -> updateBtn  (row, BtnType.DuEmergencyBTN   , tableIO)
+                        | XlsStopBTN          -> updateBtn  (row, BtnType.DuStopBTN        , tableIO)
+                        | XlsRunBTN           -> updateBtn  (row, BtnType.DuRunBTN         , tableIO)
+                        | XlsDryRunBTN        -> updateBtn  (row, BtnType.DuDryRunBTN      , tableIO)
+                        | XlsClearBTN         -> updateBtn  (row, BtnType.DuClearBTN       , tableIO)
+                        | XlsHomeBTN          -> updateBtn  (row, BtnType.DuHomeBTN        , tableIO)
+                        | XlsEmergencyLamp    -> updateLamp (row, LampType.DuEmergencyLamp , tableIO)
+                        | XlsRunModeLamp      -> updateLamp (row, LampType.DuRunModeLamp   , tableIO)
+                        | XlsDryRunModeLamp   -> updateLamp (row, LampType.DuDryRunModeLamp, tableIO)
+                        | XlsManualModeLamp   -> updateLamp (row, LampType.DuManualModeLamp, tableIO)
+                        | XlsStopModeLamp     -> updateLamp (row, LampType.DuStopModeLamp  , tableIO)
             )
         with ex ->  failwithf  $"{ex.Message}"
         DoWork(0);

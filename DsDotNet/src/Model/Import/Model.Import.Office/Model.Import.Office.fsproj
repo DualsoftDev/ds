@@ -16,7 +16,7 @@
 
 
   <ItemGroup>
-    <Compile Include="InterfaceClass.fs" />
+    <Compile Include="Types.fs" />
     <Compile Include="Util.fs" />
     <Compile Include="MessgeError.fs" />
     <Compile Include="PPTUtil.fs" />

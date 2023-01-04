@@ -82,7 +82,8 @@ module CoreModule =
         /// 사용자 입력 code block(s).  "<@{" 와 "}@>" 사이의 text(s) : todo 복수개의 block 이 허용되면, serialize 할 때 해당 위치에 맞춰서 serialize 해야 하는데...
         member val OriginalCodeBlocks = ResizeArray<string>()
         member val Statements = ResizeArray<Statement>()
-
+        member val Variables = ResizeArray<VariableData>()
+        
         member val ApiItems = createNamedHashSet<ApiItem>()
         member val ApiResetInfos = HashSet<ApiResetInfo>()
         ///시스템 전체시작 버튼누름시 수행되야하는 Real목록

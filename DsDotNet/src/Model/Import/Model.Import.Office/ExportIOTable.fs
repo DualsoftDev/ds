@@ -16,15 +16,14 @@ module ExportIOTable =
         let dt = new System.Data.DataTable($"{sys.Name}")
         dt.Columns.Add($"{IOColumn.Case}"       , typeof<string>) |>ignore
         dt.Columns.Add($"{IOColumn.Name}"       , typeof<string>) |>ignore
-        dt.Columns.Add($"{IOColumn.Type}"       , typeof<string>) |>ignore
-        dt.Columns.Add($"{IOColumn.Size}"       , typeof<string>) |>ignore
-        dt.Columns.Add($"{IOColumn.Output}"     , typeof<string>) |>ignore
+        dt.Columns.Add($"{IOColumn.DataType}"   , typeof<string>) |>ignore
         dt.Columns.Add($"{IOColumn.Input}"      , typeof<string>) |>ignore
+        dt.Columns.Add($"{IOColumn.Output}"     , typeof<string>) |>ignore
         dt.Columns.Add($"{IOColumn.Command}"    , typeof<string>) |>ignore
         dt.Columns.Add($"{IOColumn.Observe}"    , typeof<string>) |>ignore
 
         let rowItems(jobDef:JobDef) =
-            ["주소";  jobDef.ApiName; "IO"; "bit"; jobDef.OutAddress  ; jobDef.InAddress; jobDef.CommandOutTimming; jobDef.ObserveInTimming]
+            ["주소";  jobDef.ApiName; "bool"; jobDef.InAddress  ; jobDef.OutAddress; jobDef.CommandOutTimming; jobDef.ObserveInTimming]
 
         let rows =
             seq {
@@ -39,26 +38,31 @@ module ExportIOTable =
                     rowTemp.ItemArray <- (row|> Seq.cast<obj>|> Seq.toArray)
                     dt.Rows.Add(rowTemp) |> ignore)
        
-        for btn in  sys.EmergencyButtons do
-            dt.Rows.Add(TextEmgBtn,  btn.Name  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
-        for btn in  sys.AutoButtons do
-            dt.Rows.Add(TextAutoBtn,  btn.Name  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
-        for btn in  sys.RunButtons do
-            dt.Rows.Add(TextStartBtn,  btn.Name  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
-        for btn in  sys.ClearButtons do
-            dt.Rows.Add(TextResetBtn,  btn.Name  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
-        for btn in  sys.ManualButtons do
-            dt.Rows.Add(TextResetBtn,  btn.Name  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
-        for btn in  sys.StopButtons    do
-            dt.Rows.Add(TextResetBtn,  btn.Name  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
-        for btn in  sys.DryRunButtons do
-            dt.Rows.Add(TextResetBtn,  btn.Name  , "'-", "'-", "'-",  "" , "'-", "'-" ) |> ignore
+        let toBtnText(btns:ButtonDef seq, xlsCase:ExcelCase) = 
+            for btn in  btns do
+                dt.Rows.Add(xlsCase.ToText(),  btn.Name  , "bool",  "",  "" , "'-", "'-" ) |> ignore
+        let toLampText(lamps:LampDef seq, xlsCase:ExcelCase) = 
+            for lamp in  lamps do
+                dt.Rows.Add(xlsCase.ToText(),  lamp.Name  , "bool",  "'-",  "" , "'-", "'-" ) |> ignore
 
-        dt.Rows.Add("'-", "'-","'-", "'-", "'-","'-", "'-","'-") |> ignore
-        dt.Rows.Add("'-", "'-","'-", "'-", "'-","'-", "'-","'-") |> ignore
-        dt.Rows.Add("'-", "'-","'-", "'-", "'-","'-", "'-","'-") |> ignore
+        toBtnText (sys.EmergencyButtons, ExcelCase.XlsEmergencyBTN)
+        toBtnText (sys.AutoButtons, ExcelCase.XlsAutoBTN)
+        toBtnText (sys.RunButtons, ExcelCase.XlsRunBTN)
+        toBtnText (sys.ClearButtons, ExcelCase.XlsClearBTN)
+        toBtnText (sys.ManualButtons, ExcelCase.XlsManualBTN)
+        toBtnText (sys.StopButtons, ExcelCase.XlsStopBTN)
+        toBtnText (sys.DryRunButtons, ExcelCase.XlsDryRunBTN)
+        
+        toLampText (sys.EmergencyModeLamps, ExcelCase.XlsEmergencyLamp)
+        toLampText (sys.ManualModeLamps, ExcelCase.XlsManualModeLamp)
+        toLampText (sys.RunModeLamps, ExcelCase.XlsRunModeLamp)
+        toLampText (sys.DryRunModeLamps, ExcelCase.XlsDryRunModeLamp)
+        toLampText (sys.StopModeLamps, ExcelCase.XlsStopModeLamp)
 
-        dt.Rows.Add(TextVariable,  ""  , "'-", ""  , "'-", "'-", "'-", "'-") |> ignore
+        dt.Rows.Add("'-", "'-", "'-", "'-","'-", "'-","'-") |> ignore
+        dt.Rows.Add("'-", "'-", "'-", "'-","'-", "'-","'-") |> ignore
+
+        dt.Rows.Add(TextVariable,  ""  ,  ""  , "'-", "'-", "'-", "'-") |> ignore
         dt
 
     let ToFiie(systems:DsSystem seq, excelFilePath:string) = 

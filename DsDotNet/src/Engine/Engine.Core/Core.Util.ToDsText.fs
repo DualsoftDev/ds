@@ -100,34 +100,34 @@ module internal ToDsTextModule =
             yield $"{tab}{rb}"
         ] |> combineLines
 
-    //let codeBlockToDs (theSystem:DsSystem) =
-    //    let funApp (funApp:FunctionApplication) =
-    //        let pgs (argGroups:ParameterGroup seq) =
-    //            argGroups.Select(fun ag -> ag.JoinWith ", ")
-    //                .JoinWith " ~ "
-    //        $"{funApp.FunctionName} = {pgs funApp.ParameterGroups}"
-    //    let vars = theSystem.Variables
-    //    let cmds = theSystem.Commands
-    //    let obss = theSystem.Observes
-    //    let tab = getTab 1
-    //    let tab2 = getTab 2
-    //    [
-    //        if vars.Any() then
-    //            yield $"{tab}[variables] = {lb}"
-    //            for var in vars do
-    //                yield $"{tab2}{var.Name} = ({var.Type}, {var.InitValue})"
-    //            yield $"{tab}{rb}"
-    //        if cmds.Any() then
-    //            yield $"{tab}[commands] = {lb}"
-    //            for cmd in cmds do
-    //                yield $"{tab2}{cmd.Name} = (@{funApp cmd.FunctionApplication})"
-    //            yield $"{tab}{rb}"
-    //        if obss.Any() then
-    //            yield $"{tab}[observes] = {lb}"
-    //            for obs in obss do
-    //                yield $"{tab2}{obs.Name} = (@{funApp obs.FunctionApplication})"
-    //            yield $"{tab}{rb}"
-    //    ] |> combineLines
+    let codeBlockToDs (theSystem:DsSystem) =
+        //let funApp (funApp:FunctionApplication) =
+        //    let pgs (argGroups:ParameterGroup seq) =
+        //        argGroups.Select(fun ag -> ag.JoinWith ", ")
+        //            .JoinWith " ~ "
+        //    $"{funApp.FunctionName} = {pgs funApp.ParameterGroups}"
+        let vars = theSystem.Variables
+        //let cmds = theSystem.Commands
+        //let obss = theSystem.Observes
+        let tab = getTab 1
+        let tab2 = getTab 2
+        [
+            if vars.Any() then
+                yield $"{tab}[variables] = {lb}"
+                for var in vars do
+                    yield $"{tab2}{var.ToDsText()}"
+                yield $"{tab}{rb}"
+            //if cmds.Any() then
+            //    yield $"{tab}[commands] = {lb}"
+            //    for cmd in cmds do
+            //        yield $"{tab2}{cmd.Name} = (@{funApp cmd.FunctionApplication})"
+            //    yield $"{tab}{rb}"
+            //if obss.Any() then
+            //    yield $"{tab}[observes] = {lb}"
+            //    for obs in obss do
+            //        yield $"{tab2}{obs.Name} = (@{funApp obs.FunctionApplication})"
+            //    yield $"{tab}{rb}"
+        ] |> combineLines
 
     let rec systemToDs (system:DsSystem) (indent:int) =
         let tab = getTab indent
@@ -289,8 +289,8 @@ module internal ToDsTextModule =
                     | _ -> ""
                 yield $"{tab}[external file={quote es.UserSpecifiedFilePath}{ip}] {es.Name}; // {es.AbsoluteFilePath}"
 
-            //Commands/Observes는 JobDef에 저장 (Variables는 OriginalCodeBlocks으로)
-            //yield codeBlockToDs system
+            //Commands/Observes는 JobDef에 저장 (Variables는 OriginalCodeBlocks ?? System.Variables ??)
+            yield codeBlockToDs system
 
             // todo 복수개의 block 이 허용되면, serialize 할 때 해당 위치에 맞춰서 serialize 해야 하는데...
             for code in system.OriginalCodeBlocks do

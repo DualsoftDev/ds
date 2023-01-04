@@ -124,18 +124,69 @@ type ModelingEdgeExt =
 
 
 [<AutoOpen>]
-module DsTextDataType =
-    //data
-    let [<Literal>] TextBit    = "bit"
-    let [<Literal>] TextBool   = "bool"
-    let [<Literal>] TextByte   = "byte"
-    let [<Literal>] TextWord   = "word"
-    let [<Literal>] TextDword  = "dword"
-    let [<Literal>] TextLword  = "lword"
-    let [<Literal>] TextString = "string"
-    let [<Literal>] TextFloat  = "float"
-    let [<Literal>] TextSingle = "single"
-    let [<Literal>] TextDouble = "double"
+module DsDataType =
+    //data 타입 지원 항목
+    let [<Literal>] FLOAT32 = "float32"
+    let [<Literal>] FLOAT64 = "float64"
+    let [<Literal>] INT8    = "int8"
+    let [<Literal>] UINT8   = "uint8"
+    let [<Literal>] INT16   = "int16"
+    let [<Literal>] UINT16  = "uint16"
+    let [<Literal>] INT32   = "int32"
+    let [<Literal>] UINT32  = "uint32"
+    let [<Literal>] INT64   = "int64"
+    let [<Literal>] UINT64  = "uint64"
+    let [<Literal>] STRING  = "string"
+    let [<Literal>] CHAR    = "char"
+    let [<Literal>] BOOL    = "bool"
+
+    type DataType =
+        | DuFLOAT32
+        | DuFLOAT64
+        | DuINT8   
+        | DuUINT8  
+        | DuINT16  
+        | DuUINT16 
+        | DuINT32  
+        | DuUINT32 
+        | DuINT64  
+        | DuUINT64 
+        | DuSTRING 
+        | DuCHAR   
+        | DuBOOL
+        member x.ToText() =
+            match x with
+            | DuFLOAT32 -> FLOAT32   
+            | DuFLOAT64 -> FLOAT64   
+            | DuINT8    -> INT8      
+            | DuUINT8   -> UINT8     
+            | DuINT16   -> INT16     
+            | DuUINT16  -> UINT16    
+            | DuINT32   -> INT32     
+            | DuUINT32  -> UINT32    
+            | DuINT64   -> INT64     
+            | DuUINT64  -> UINT64    
+            | DuSTRING  -> STRING    
+            | DuCHAR    -> CHAR      
+            | DuBOOL    -> BOOL      
+    
+    let DataToType(txt:string) =
+        match txt.ToLower() with
+        //system1 | system2   | plc
+        | FLOAT32 | "single"           ->  DuFLOAT32
+        | FLOAT64 | "double"           ->  DuFLOAT64
+        | INT8    | "sbyte"            ->  DuINT8   
+        | UINT8   | "byte"    |"byte"  ->  DuUINT8  
+        | INT16   | "short"   |"byte"  ->  DuINT16  
+        | UINT16  | "ushort"  |"word"  ->  DuUINT16 
+        | INT32   | "int"              ->  DuINT32  
+        | UINT32  | "uint"    |"dword" ->  DuUINT32 
+        | INT64   | "long"             ->  DuINT64  
+        | UINT64  | "ulong"   |"lword" ->  DuUINT64 
+        | STRING                       ->  DuSTRING 
+        | CHAR                         ->  DuCHAR   
+        | BOOL    | "boolean" | "bit"  ->  DuBOOL       
+        | _ -> failwithf $"'{txt}' DataToType Error check type"
 
 
 [<AutoOpen>]
@@ -145,16 +196,24 @@ module DsTextExport =
     let [<Literal>] TextVariable    = "내부"
     let [<Literal>] TextCommand     = "지시"
     let [<Literal>] TextObserve     = "관찰"
-    let [<Literal>] TextButton      = "버튼"
-    let [<Literal>] TextEmgBtn      = "비상"
-    let [<Literal>] TextAutoBtn     = "자동"
-    let [<Literal>] TextResetBtn    = "리셋"
-    let [<Literal>] TextStartBtn    = "시작"
 
+    let [<Literal>] TextAutoBTN             = "자동선택"
+    let [<Literal>] TextManualBTN           = "수동선택"
+    let [<Literal>] TextEmergencyBTN        = "비상푸쉬"
+    let [<Literal>] TextStopBTN             = "정지푸쉬"
+    let [<Literal>] TextRunBTN              = "운전푸쉬"
+    let [<Literal>] TextDryRunBTN           = "시운전푸쉬"
+    let [<Literal>] TextClearBTN            = "해지푸쉬"
+    let [<Literal>] TextHomeBTN             = "복귀푸쉬"
+
+    let [<Literal>] TextEmergencyLamp   = "비상램프"
+    let [<Literal>] TextRunModeLamp     = "운전램프"
+    let [<Literal>] TextDryRunModeLamp  = "시운전램프"
+    let [<Literal>] TextManualModeLamp  = "수동램프"
+    let [<Literal>] TextStopModeLamp    = "정지램프"
 
 [<AutoOpen>]
 module DsTextProperty =
-    //button
  
     let [<Literal>] TextFlow    = "flow"
     let [<Literal>] TextSystem  = "sys"
@@ -162,10 +221,4 @@ module DsTextProperty =
     let [<Literal>] TextSafety  = "safety"
     let [<Literal>] TextAlias   = "alias"
     let [<Literal>] TextLayout  = "layouts"
-
-    let [<Literal>] TextVariable = "variable"
-    let [<Literal>] TextCommand  = "command"
-    let [<Literal>] TextObserve  = "observe"
-    let [<Literal>] TextCpus     = "cpus"
-    let [<Literal>] TextCpu      = "cpu"
 

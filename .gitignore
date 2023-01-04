@@ -10,4 +10,5 @@ DsDotNet/obj/
 Grammar/CsParser/obj/
 Grammar/CsParser/bin/
 *.xlsx
-/DsDotNet/src/UnitTest/UnitTest.Engine/XgiXmls
+/DsDotNet/src/UnitTest/UnitTest.Engine/XgiXmls/*.xml
+/DsDotNet/src/UnitTest/UnitTest.PLC.Xgi/XgiXmls/*.xml

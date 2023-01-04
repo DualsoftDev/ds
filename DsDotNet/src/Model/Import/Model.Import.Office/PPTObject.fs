@@ -175,7 +175,7 @@ module PPTObjectModule =
         match key with
         | "R"      -> LampType.DuRunModeLamp
         | "S"      -> LampType.DuStopModeLamp
-        | "M"      -> LampType.DuDryRunModeLamp
+        | "M"      -> LampType.DuManualModeLamp
         | "E"      -> LampType.DuEmergencyLamp
         | "D"      -> LampType.DuDryRunModeLamp
         | _     ->  failwith $"{key} is Error Type"

@@ -45,8 +45,9 @@ type XgiCounterTest() =
         let code = """
             bool cu = createTag("%IX0.0.0", false);
             bool cd = createTag("%IX0.0.1", false);
-            bool res = createTag("%IX0.0.2", false);
-            ctud myCTUD = createXgiCTUD(2000us, $cu, $cd, $res);
+            bool r  = createTag("%IX0.0.2", false);
+            bool ld = createTag("%IX0.0.3", false);
+            ctud myCTUD = createXgiCTUD(2000us, $cu, $cd, $r, $ld);
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)

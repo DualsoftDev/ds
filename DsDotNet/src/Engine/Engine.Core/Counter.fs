@@ -69,12 +69,11 @@ module rec CounterModule =
 
         | XGI, CTD ->
             cd  <- fwdCreateBoolTag     $"{name}.CD" false  // Count down enable bit
-            //ld  <- fwdCreateBoolTag     $"{name}.LD" false  // Load
-            res  <- fwdCreateBoolTag     $"{name}.LD" false  // Load
+            ld  <- fwdCreateBoolTag     $"{name}.LD" false  // Load
             pre <- fwdCreateUShortTag   $"{name}.PV" preset
             dn  <- fwdCreateBoolTag     $"{name}.Q" false  // Done
             acc <- fwdCreateUShortTag   $"{name}.CV" accum
-            add [cd; res; pre; dn; acc]
+            add [cd; res; ld; pre; dn; acc]
 
         | XGI, CTUD ->
             cu  <- fwdCreateBoolTag     $"{name}.CU" false  // Count up enable bit
@@ -116,7 +115,7 @@ module rec CounterModule =
             pre <- fwdCreateUShortTag   $"{name}.PRE" preset
             acc <- fwdCreateUShortTag   $"{name}.ACC" accum
             res <- fwdCreateBoolTag     $"{name}.RES" false
-            add [ov; un; ld; dn; pre; acc; res;]
+            add [ov; un; dn; pre; acc; res;]
 
         (* 내부 structure 가 AB 기반이므로, 메모리 자체는 생성하되, storage 에 등록하지는 않는다. *)
         if isItNull(ov) then
@@ -159,6 +158,7 @@ module rec CounterModule =
         member _.CD:TagBase<bool> = cp.CD  // Count down enable bit
         member _.OV:TagBase<bool> = cp.OV  // Overflow
         member _.UN:TagBase<bool> = cp.UN  // Underflow
+        member _.LD:TagBase<bool> = cp.LD  // Load (XGI)
         member _.Type = cp.Type
 
 
@@ -171,6 +171,7 @@ module rec CounterModule =
     type ICTD =
         inherit ICounter
         abstract CD:TagBase<bool>
+        abstract LD:TagBase<bool>
 
     type ICTUD =
         inherit ICTU
@@ -197,6 +198,7 @@ module rec CounterModule =
         member _.CD = base.CD
         interface ICTD with
             member x.CD = x.CD
+            member x.LD = x.LD
         static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType) =
             let counterParams = CreateCounterParameters(typ, storages, name, preset, accum)
             let cs = new CTDStruct(counterParams)
@@ -210,6 +212,7 @@ module rec CounterModule =
         interface ICTUD with
             member x.CU = x.CU
             member x.CD = x.CD
+            member x.LD = x.LD
         static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType) =
             let counterParams = CreateCounterParameters(typ, storages, name, preset, accum)
             let cs = new CTUDStruct(counterParams)
@@ -231,6 +234,14 @@ module rec CounterModule =
         let disposables = new CompositeDisposable()
 
         let cs = counterStruct
+        let registerLoad() =
+            let csd = box cs :?> ICTD       // CTD or CTUD 둘다 적용
+            ValueSubject
+                .Where(fun storage -> storage = csd.LD && csd.LD.Value)
+                .Subscribe(fun storage ->
+                    cs.ACC.Value <- cs.PRE.Value
+            ) |> disposables.Add
+
         let registerCTU() =
             let csu = box cs :?> ICTU
             ValueSubject
@@ -244,6 +255,7 @@ module rec CounterModule =
             ) |> disposables.Add
         let registerCTD() =
             let csd = box cs :?> ICTD
+            registerLoad()
             ValueSubject
                 .Where(fun storage -> storage = csd.CD && csd.CD.Value)
                 .Subscribe(fun storage ->

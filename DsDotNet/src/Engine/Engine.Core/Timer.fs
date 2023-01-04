@@ -144,6 +144,8 @@ module rec TimerModule =
         member _.ACC:TagBase<CountUnitType> = acc
         /// Reset bit.
         member _.RES:TagBase<bool> = res
+        /// XGI load
+        member _.LD:TagBase<bool> = res
 
     let addTagsToStorages (storages:Storages) (ts:IStorage seq) =
         for t in ts do

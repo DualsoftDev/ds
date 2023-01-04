@@ -244,7 +244,7 @@ open Engine.Parser.FS
             [ "DN"; "PRE"; "ACC"; ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === false)
 
         [<Test>]
-        member x.``X CTD on WINDOWS platform test`` () =
+        member x.``CTD on WINDOWS platform test`` () =
             use _ = setRuntimeTarget WINDOWS
             let storages = Storages()
             let code = """
@@ -272,20 +272,22 @@ open Engine.Parser.FS
 
 
         [<Test>]
-        member x.``X CTUD on WINDOWS platform test`` () =
+        member x.``CTUD on WINDOWS platform test`` () =
             use _ = setRuntimeTarget WINDOWS
             let storages = Storages()
             let code = """
-                bool x0 = createTag("%MX0.0.0", false);
-                ctud myCTUD = createWinCTUD(2000us, $x0);
+                bool cu = createTag("%MX0.0.0", false);
+                bool cd = createTag("%MX0.0.1", false);
+                bool r  = createTag("%MX0.0.2", false);
+                ctud myCTUD = createWinCTUD(2000us, $cu, $cd, $r);
 """
 
             let statement = parseCode storages code
-            [ "CU"; "DN"; "OV"; "UN"; "PRE"; "ACC"; "RES" ] |> iter (fun n -> storages.ContainsKey($"myCTUD.{n}") === true)
-            [ "CD"; "Q"; "PT"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myCTUD.{n}") === false)
+            [ "CU"; "CD"; "DN"; "OV"; "UN"; "PRE"; "ACC"; "RES" ] |> iter (fun n -> storages.ContainsKey($"myCTUD.{n}") === true)
+            [ "LD"; "Q"; "PT"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myCTUD.{n}") === false)
 
         [<Test>]
-        member x.``X CTUD on XGI platform test`` () =
+        member x.``CTUD on XGI platform test`` () =
             use _ = setRuntimeTarget XGI
             let storages = Storages()
             let code = """
@@ -304,7 +306,7 @@ open Engine.Parser.FS
 
 
         [<Test>]
-        member x.``X CTR on WINDOWS platform test`` () =
+        member x.``CTR on WINDOWS platform test`` () =
             use _ = setRuntimeTarget WINDOWS
             let storages = Storages()
             let code = """

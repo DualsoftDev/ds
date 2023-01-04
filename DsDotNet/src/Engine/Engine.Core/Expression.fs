@@ -132,7 +132,7 @@ module ExpressionModule =
         DownCondition: IExpression<bool> option
         ResetCondition:  IExpression<bool> option
         // XGI only
-        //LoadCondition: IExpression<bool> option
+        LoadCondition: IExpression<bool> option
         /// Counter 생성시의 function name
         FunctionName:string
     }

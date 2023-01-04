@@ -78,7 +78,7 @@ module rec TypeConvertorModule =
         let cu, cd, ld =
             match typ with
             | ( CTU | CTD | CTR ) -> None, None, None
-            | CTUD -> None, expand cs.DownCondition "CD", None//expand cs.LoadCondition
+            | CTUD -> None, expand cs.DownCondition "CD", expand cs.LoadCondition "LD"
 
         member _.Counter = cs.Counter
         member _.RungInCondition:IExpression<bool> =

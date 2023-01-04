@@ -250,7 +250,7 @@ module internal Command =
     // <timer>
     let drawCommand(cmd:XgiCommand, x, y) =
         let results = ResizeArray<CoordinatedRungXml>()
-        let c = coord x y
+        let c = coord(x, y)
         results.Add( {Coordinate = c; Xml = hlineEmpty c})
 
         //FunctionBlock, Function 까지 연장선 긋기

@@ -23,7 +23,7 @@ module internal Basic =
         /// - Xml : 좌표 * 결과 xml 문자열
         let rec rng x y (expr:FlatExpression) : RungInfosWithSpan =
             let baseRIWNP = { RungInfos = []; X=x; Y=y; SpanX=1; SpanY=1; }
-            let c = coord x y
+            let c = coord(x, y)
             /// 좌표 * 결과 xml 문자열 보관 장소
             let rungInfos = ResizeArray<CoordinatedRungXml>()
             if enableXmlComment then
@@ -75,13 +75,13 @@ module internal Basic =
                                 let span = (spanX - ri.SpanX - 1) * 3
                                 $"Param={dq}{span}{dq}"
                             let mode = int ElementType.MultiHorzLineMode
-                            let c = coord (ri.X+ri.SpanX) ri.Y
+                            let c = coord (ri.X+ri.SpanX, ri.Y)
                             { Coordinate = c; Xml = elementFull mode c param "" }
                 ] |> rungInfos.AddRange
 
                 // 좌측 vertical lines
                 if x >= 1 then
-                    vlineDownTo (x-1) y (spanY-1) |> rungInfos.AddRange
+                    vlineDownTo (x-1, y) (spanY-1) |> rungInfos.AddRange
 
                 // ```OR variable length 역삼각형 test```
                 let lowestY =
@@ -89,7 +89,7 @@ module internal Basic =
                         .Where(fun sri -> sri.SpanX <= spanX)
                         .Max(fun sri -> sri.Y)
                 // 우측 vertical lines
-                vlineDownTo (x+spanX-1) y (lowestY-y) |> rungInfos.AddRange
+                vlineDownTo (x+spanX-1, y) (lowestY-y) |> rungInfos.AddRange
 
 
                 { baseRIWNP with RungInfos=rungInfos.Distinct().ToFSharpList(); SpanX=spanX; SpanY=spanY; }
@@ -127,7 +127,7 @@ module internal Basic =
 
                 //if indent = 1 then
                 //    assert(false)   // indent 가 필요하면, 사용할 코드.  현재는 indent 0 으로 fix
-                //    let c = coord x y
+                //    let c = coord(x, y)
                 //    { Position = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c "Param=\"0\"" "" }
 
                 let drawCoil(x, y) =
@@ -135,9 +135,9 @@ module internal Basic =
                         let param = 3 * (coilCellX-x-2)
                         $"Param={dq}{param}{dq}"
                     let results = [
-                        let c = coord (x+1) y
+                        let c = coord(x+1, y)
                         { Coordinate = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam "" }
-                        let c = coord coilCellX y
+                        let c = coord(coilCellX, y)
                         { Coordinate = c; Xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.PLCTagName) }
                     ]
                     1, results
@@ -163,6 +163,6 @@ module internal Basic =
 
         let c =
             let spanY = max result.SpanY commandHeight
-            coord x (spanY + y)
+            coord(x, spanY + y)
         { Xml = xml; Coordinate = c }
 

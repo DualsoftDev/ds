@@ -151,7 +151,7 @@ module XgiGenerationTestModule =
         let xx = x*3 + 1
         let yy = y*1024
         let coordi = xx + yy
-        coordi === coord x y
+        coordi === coord(x, y)
 
         let nElementType = int elementType
         let str = elementBody nElementType coordi "BOOL"

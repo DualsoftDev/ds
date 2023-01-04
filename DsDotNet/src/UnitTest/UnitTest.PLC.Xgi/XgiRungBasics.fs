@@ -122,10 +122,10 @@ type XgiRungTest() =
                     x <- x + 1
 
                 (* 꽉 채운 경우에는 HorzLineMode 및 MultiHorzLineMode 가 들어갈 공간이 없으므로 사용하지 않는다. *)
-                //let xy = coord x y
+                //let xy = coord(x, y)
                 //$""" <Element ElementType="{HorzLineMode}" Coordinate="{xy}"></Element>"""
                 //x <- x + 1
-                //let xy = coord x y
+                //let xy = coord(x, y)
                 //$""" <Element ElementType="{MultiHorzLineMode}" Coordinate="{xy}" Param="84"></Element>"""
 
                 coilAt q 1
@@ -133,8 +133,8 @@ type XgiRungTest() =
                 $"""
 </Rung>
 <Rung BlockMask="0">
-    <Element ElementType="{MultiHorzLineMode}" Coordinate="{coord 0 2}" Param="90"></Element>
-    <Element ElementType="{FBMode}" Coordinate="{coord 31 2}" Param="END">END</Element>
+    <Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(0, 2)}" Param="90"></Element>
+    <Element ElementType="{FBMode}" Coordinate="{coord(31, 2)}" Param="END">END</Element>
 </Rung>"""
             ] |> String.concat "\r\n"
 
@@ -149,7 +149,7 @@ type XgiRungTest() =
         let rungs =
             [
                 $"""
-<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="{coord 0 0}">DS Logic for XGI</Element></Rung>
+<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="{coord(0, 0)}">DS Logic for XGI</Element></Rung>
 <Rung BlockMask="0">
 """
                 let y = 1
@@ -159,10 +159,10 @@ type XgiRungTest() =
                     x <- x + 1
 
                 (* 꽉 채우고, 한 칸 빌 경우에는 HorzLineMode 만 사용한다. *)
-                let xy = coord x y
+                let xy = coord(x, y)
                 $""" <Element ElementType="{HorzLineMode}" Coordinate="{xy}"></Element>"""
                 //x <- x + 1
-                //let xy = coord x y
+                //let xy = coord(x, y)
                 //$""" <Element ElementType="{MultiHorzLineMode}" Coordinate="{xy}" Param="84"></Element>"""
 
                 coilAt q 1
@@ -170,7 +170,7 @@ type XgiRungTest() =
                 $"""
 </Rung>
 <Rung BlockMask="0">
-    <Element ElementType="{MultiHorzLineMode}" Coordinate="{coord 0 2}" Param="90"></Element>
+    <Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(0, 2)}" Param="90"></Element>
     <Element ElementType="{FBMode}" Coordinate="2142" Param="END">END</Element>
 </Rung>"""
             ] |> String.concat "\r\n"
@@ -186,7 +186,7 @@ type XgiRungTest() =
         let rungs =
             [
                 $"""
-<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="{coord 0 0}">DS Logic for XGI</Element></Rung>
+<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="{coord(0, 0)}">DS Logic for XGI</Element></Rung>
 <Rung BlockMask="0">
 """
                 let y = 1
@@ -196,10 +196,10 @@ type XgiRungTest() =
                     x <- x + 1
 
                 (* 꽉 채우고, 두 칸 이상 빌 경우에는 HorzLineMode 및 MultiHorzLineMode 를 모두 사용한다. *)
-                let xy = coord x y
+                let xy = coord(x, y)
                 $""" <Element ElementType="{HorzLineMode}" Coordinate="{xy}"></Element>"""
                 x <- x + 1
-                let xy = coord x y
+                let xy = coord(x, y)
                 $""" <Element ElementType="{MultiHorzLineMode}" Coordinate="{xy}" Param="84"></Element>"""
 
                 coilAt q 1
@@ -207,8 +207,8 @@ type XgiRungTest() =
                 $"""
 </Rung>
 <Rung BlockMask="0">
-    <Element ElementType="{MultiHorzLineMode}" Coordinate="{coord 0 2}" Param="90"></Element>
-    <Element ElementType="{FBMode}" Coordinate="{coord 31 2}" Param="END">END</Element>
+    <Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(0, 2)}" Param="90"></Element>
+    <Element ElementType="{FBMode}" Coordinate="{coord(31, 2)}" Param="END">END</Element>
 </Rung>"""
             ] |> String.concat "\r\n"
 
@@ -224,7 +224,7 @@ type XgiRungTest() =
         let rungs =
             [
                 $"""
-<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="{coord 0 0}">DS Logic for XGI</Element></Rung>
+<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="{coord(0, 0)}">DS Logic for XGI</Element></Rung>
 <Rung BlockMask="0">
 """
                 let mutable y = 1
@@ -232,9 +232,9 @@ type XgiRungTest() =
                     contactAt t 0 y     // <Element ElementType="{ContactMode}" Coordinate="1025">myBit00</Element>
                     if y = 1 then
                         (* VertLineMode 로 시작하면 HorzLineMode 없이, 바로 MultiHorzLineMode 가 와야 한다. *)
-                        let xy = coord 1 1 - 1      // 1027
+                        let xy = coord(1, 1) - 1      // 1027
                         $"""<Element ElementType="{VertLineMode}" Coordinate="{xy}" />"""
-                        let xy = coord 1 1          // 1028
+                        let xy = coord(1, 1)          // 1028
                         let width = (maxNumHorizontalContact - 2) * 3    // 87
                         //$""" <Element ElementType="{HorzLineMode}" Coordinate="{xy} Param={width}"></Element>"""
                         //let xy = coord 31 1
@@ -246,7 +246,7 @@ type XgiRungTest() =
 
                 coilAt q 1
 
-                let xyEndS, xyEndE = coord 0 y, coord maxNumHorizontalContact y
+                let xyEndS, xyEndE = coord(0, y), coord(maxNumHorizontalContact, y)
                 $"""
 </Rung>
 <Rung BlockMask="0">
@@ -265,7 +265,7 @@ type XgiRungTest() =
         let rungs =
             [
                 $"""
-<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="{coord 0 0}">DS Logic for XGI</Element></Rung>
+<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="{coord(0, 0)}">DS Logic for XGI</Element></Rung>
 <Rung BlockMask="0">
 """
                 let mutable y = 1
@@ -273,10 +273,10 @@ type XgiRungTest() =
                     contactAt t 0 y     // <Element ElementType="{ContactMode}" Coordinate="1025">myBit00</Element>
                     if y < 31 then
                         (* VertLineMode 로 시작하면 HorzLineMode 없이, 바로 MultiHorzLineMode 가 와야 한다. *)
-                        let xy = coord 1 y - 1      // 1027
+                        let xy = coord(1, y) - 1      // 1027
                         $"""<Element ElementType="{VertLineMode}" Coordinate="{xy}" />"""
                     if y = 1 then
-                        let xy = coord 1 1          // 1028
+                        let xy = coord(1, 1)          // 1028
                         let width = (maxNumHorizontalContact - 2) * 3    // 87 = (31-2) * 3
                         $""" <Element ElementType="{MultiHorzLineMode}" Coordinate="{xy}" Param="{width}"></Element>"""
 
@@ -284,7 +284,7 @@ type XgiRungTest() =
 
                 coilAt q 1
 
-                let xyEndS, xyEndE = coord 0 y, coord coilCellX y
+                let xyEndS, xyEndE = coord(0, y), coord(coilCellX, y)
                 $"""
 </Rung>
 <Rung BlockMask="0">

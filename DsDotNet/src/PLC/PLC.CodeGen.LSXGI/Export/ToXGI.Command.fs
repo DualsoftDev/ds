@@ -54,12 +54,12 @@ module internal Command =
             match cmdType with
                 | CoilCmd (cc) ->
                     match cc with
-                    | CoilMode _       -> ElementType.CoilMode
-                    | ClosedCoilMode _ -> ElementType.ClosedCoilMode
-                    | SetCoilMode _    -> ElementType.SetCoilMode
-                    | ResetCoilMode _  -> ElementType.ResetCoilMode
-                    | PulseCoilMode _  -> ElementType.PulseCoilMode
-                    | NPulseCoilMode _ -> ElementType.NPulseCoilMode
+                    | COMCoil _       -> ElementType.CoilMode
+                    | COMClosedCoil _ -> ElementType.ClosedCoilMode
+                    | COMSetCoil _    -> ElementType.SetCoilMode
+                    | COMResetCoil _  -> ElementType.ResetCoilMode
+                    | COMPulseCoil _  -> ElementType.PulseCoilMode
+                    | COMNPulseCoil _ -> ElementType.NPulseCoilMode
                 | (FunctionCmd  _ | FunctionBlockCmd  _)
                     -> ElementType.VertFBMode
 
@@ -68,19 +68,19 @@ module internal Command =
             match cmdType with
             | CoilCmd (cc) ->
                 match cc with
-                | CoilMode(tag) -> XgiCommand(CoilCmd(CoilOutput.ClosedCoilMode(tag)))
-                | ClosedCoilMode(tag) -> XgiCommand(CoilCmd(CoilOutput.CoilMode(tag)))
+                | COMCoil(tag) -> XgiCommand(CoilCmd(CoilOutputMode.COMClosedCoil(tag)))
+                | COMClosedCoil(tag) -> XgiCommand(CoilCmd(CoilOutputMode.COMCoil(tag)))
                 | _ ->
                     failwithlogf "This ReverseCmd is not support"
             | _ ->
                 failwithlogf "This ReverseCmd is not support"
 
-    let createOutputCoil(tag)    = XgiCommand(CoilCmd(CoilOutput.CoilMode(tag)))
-    let createOutputCoilNot(tag) = XgiCommand(CoilCmd(CoilOutput.ClosedCoilMode(tag)))
-    let createOutputSet(tag)     = XgiCommand(CoilCmd(CoilOutput.SetCoilMode(tag)))
-    let createOutputRst(tag)     = XgiCommand(CoilCmd(CoilOutput.ResetCoilMode(tag)))
-    let createOutputPulse(tag)   = XgiCommand(CoilCmd(CoilOutput.PulseCoilMode(tag)))
-    let createOutputNPulse(tag)  = XgiCommand(CoilCmd(CoilOutput.NPulseCoilMode(tag)))
+    let createOutputCoil(tag)    = XgiCommand(CoilCmd(CoilOutputMode.COMCoil(tag)))
+    let createOutputCoilNot(tag) = XgiCommand(CoilCmd(CoilOutputMode.COMClosedCoil(tag)))
+    let createOutputSet(tag)     = XgiCommand(CoilCmd(CoilOutputMode.COMSetCoil(tag)))
+    let createOutputRst(tag)     = XgiCommand(CoilCmd(CoilOutputMode.COMResetCoil(tag)))
+    let createOutputPulse(tag)   = XgiCommand(CoilCmd(CoilOutputMode.COMPulseCoil(tag)))
+    let createOutputNPulse(tag)  = XgiCommand(CoilCmd(CoilOutputMode.COMNPulseCoil(tag)))
 
     //let createOutputTime(tag, time)                 = XgiCommand(FunctionBlockCmd(FunctionBlock.TimerMode(tag, time)))
     //let createOutputCount(tag, resetTag, cnt)         = XgiCommand(FunctionBlockCmd(FunctionBlock.CounterMode(tag, resetTag, cnt)))

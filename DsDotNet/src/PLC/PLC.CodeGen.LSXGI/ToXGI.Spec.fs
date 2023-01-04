@@ -260,87 +260,87 @@ module Config =
             // Program / Body / LDRoutine
             module LDRoutine =
                 /// LD 프로그램 상에서의 구성요소에 대한 식별자
-                type ElementType =
-                    | LDElementMode_Start    = 0
-                    | LineType_Start         = 0
-                    | VertLineMode           = 0 // LineType_Start '|'
-                    | HorzLineMode           = 1 // '-'
-                    | MultiHorzLineMode      = 2 // '-->>'
+                module ElementType =
+                    let [<Literal>] LDElementMode_Start    = 0
+                    let [<Literal>] LineType_Start         = 0
+                    let [<Literal>] VertLineMode           = 0 // LineType_Start '|'
+                    let [<Literal>] HorzLineMode           = 1 // '-'
+                    let [<Literal>] MultiHorzLineMode      = 2 // '-->>'
                     ///addonly hereadditional line type device.
-                    | LineType_End           = 5
+                    let [<Literal>] LineType_End           = 5
 
-                    | ContactType_Start      = 6
-                    | ContactMode            = 6 // ContactType_Start // '-| |-'
-                    | ClosedContactMode      = 7 // '-|/|-'
-                    | PulseContactMode       = 8 // '-|P|-'
-                    | NPulseContactMode      = 9// '-|N|-'
+                    let [<Literal>] ContactType_Start      = 6
+                    let [<Literal>] ContactMode            = 6 // ContactType_Start // '-| |-'
+                    let [<Literal>] ClosedContactMode      = 7 // '-|/|-'
+                    let [<Literal>] PulseContactMode       = 8 // '-|P|-'
+                    let [<Literal>] NPulseContactMode      = 9// '-|N|-'
                     ///addonly hereadditional contact type device.
-                    | ContactType_End        = 13
+                    let [<Literal>] ContactType_End        = 13
 
-                    | CoilType_Start         = 14
-                    | CoilMode               = 14 // CoilType_Start // '-( )-'
-                    | ClosedCoilMode         = 15 // '-(/)-'
-                    | SetCoilMode            = 16 // '-(S)-'
-                    | ResetCoilMode          = 17 // '-(R)-'
-                    | PulseCoilMode          = 18 // '-(P)-'
-                    | NPulseCoilMode         = 19 // '-(N)-'
+                    let [<Literal>] CoilType_Start         = 14
+                    let [<Literal>] CoilMode               = 14 // CoilType_Start // '-( )-'
+                    let [<Literal>] ClosedCoilMode         = 15 // '-(/)-'
+                    let [<Literal>] SetCoilMode            = 16 // '-(S)-'
+                    let [<Literal>] ResetCoilMode          = 17 // '-(R)-'
+                    let [<Literal>] PulseCoilMode          = 18 // '-(P)-'
+                    let [<Literal>] NPulseCoilMode         = 19 // '-(N)-'
                     ///addonly hereadditional coil type device.
-                    | CoilType_End           = 30
+                    let [<Literal>] CoilType_End           = 30
 
-                    | FunctionType_Start     = 31
-                    | FuncMode               = 32
-                    | FBMode                 = 33 // '-[F]-'
-                    | FBHeaderMode           = 34 // '-[F]-' : Header
-                    | FBBodyMode             = 35 // '-[F]-' : Body
-                    | FBTailMode             = 36 // '-[F]-' : Tail
-                    | FBInputMode            = 37
-                    | FBOutputMode           = 38
+                    let [<Literal>] FunctionType_Start     = 31
+                    let [<Literal>] FuncMode               = 32
+                    let [<Literal>] FBMode                 = 33 // '-[F]-'
+                    let [<Literal>] FBHeaderMode           = 34 // '-[F]-' : Header
+                    let [<Literal>] FBBodyMode             = 35 // '-[F]-' : Body
+                    let [<Literal>] FBTailMode             = 36 // '-[F]-' : Tail
+                    let [<Literal>] FBInputMode            = 37
+                    let [<Literal>] FBOutputMode           = 38
                     ///addonly hereadditional function type device.
-                    | FunctionType_End       = 45
+                    let [<Literal>] FunctionType_End       = 45
 
-                    | BranchType_Start       = 51
-                    | SCALLMode              = 52
-                    | JMPMode                = 53
-                    | RetMode                = 54
-                    | SubroutineMode         = 55
-                    | BreakMode              = 56
-                    | ForMode                = 57
-                    | NextMode               = 58
+                    let [<Literal>] BranchType_Start       = 51
+                    let [<Literal>] SCALLMode              = 52
+                    let [<Literal>] JMPMode                = 53
+                    let [<Literal>] RetMode                = 54
+                    let [<Literal>] SubroutineMode         = 55
+                    let [<Literal>] BreakMode              = 56
+                    let [<Literal>] ForMode                = 57
+                    let [<Literal>] NextMode               = 58
                     ///addonly hereadditional branch type device.
-                    | BranchType_End         = 60
+                    let [<Literal>] BranchType_End         = 60
 
-                    | CommentType_Start      = 61
-                    | InverterMode           = 62 // '-*-'
-                    | RungCommentMode        = 63 // 'rung comment'
-                    | OutputCommentMode      = 64 // 'output comment'
-                    | LabelMode              = 65
-                    | EndOfPrgMode           = 66
-                    | RowCompositeMode       = 67 // 'row'
-                    | ErrorComponentMode     = 68
-                    | NullType               = 69
-                    | VariableMode           = 70
-                    | CellActionMode         = 71
-                    | RisingContact          = 72 //add dual    xg5000 4.52
-                    | FallingContact         = 73 //add dual    xg5000 4.52
+                    let [<Literal>] CommentType_Start      = 61
+                    let [<Literal>] InverterMode           = 62 // '-*-'
+                    let [<Literal>] RungCommentMode        = 63 // 'rung comment'
+                    let [<Literal>] OutputCommentMode      = 64 // 'output comment'
+                    let [<Literal>] LabelMode              = 65
+                    let [<Literal>] EndOfPrgMode           = 66
+                    let [<Literal>] RowCompositeMode       = 67 // 'row'
+                    let [<Literal>] ErrorComponentMode     = 68
+                    let [<Literal>] NullType               = 69
+                    let [<Literal>] VariableMode           = 70
+                    let [<Literal>] CellActionMode         = 71
+                    let [<Literal>] RisingContact          = 72 //add dual    xg5000 4.52
+                    let [<Literal>] FallingContact         = 73 //add dual    xg5000 4.52
                     ///addonly hereadditional comment type device.
-                    | CommentType_End        = 90
+                    let [<Literal>] CommentType_End        = 90
 
                     /// vertical function(function & function block) related
-                    | VertFunctionType_Start = 100
-                    | VertFuncMode           = 101
-                    | VertFBMode             = 102
-                    | VertFBHeaderMode       = 103
-                    | VertFBBodyMode         = 104
-                    | VertFBTailMode         = 105
+                    let [<Literal>] VertFunctionType_Start = 100
+                    let [<Literal>] VertFuncMode           = 101
+                    let [<Literal>] VertFBMode             = 102
+                    let [<Literal>] VertFBHeaderMode       = 103
+                    let [<Literal>] VertFBBodyMode         = 104
+                    let [<Literal>] VertFBTailMode         = 105
                     /// add additional vertical function type device here
-                    | VertFunctionType_End   = 109
-                    | LDElementMode_End      = 110
+                    let [<Literal>] VertFunctionType_End   = 109
+                    let [<Literal>] LDElementMode_End      = 110
 
-                    | Misc_Start             = 120
-                    | ArrowMode              = 121
-                    | Misc_End               = 122
+                    let [<Literal>] Misc_Start             = 120
+                    let [<Literal>] ArrowMode              = 121
+                    let [<Literal>] Misc_End               = 122
 
-
+                type ElementType = int
 
 module FB =
       //산전 보안자료로 외부유출 금지 코드안에 구성

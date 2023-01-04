@@ -30,8 +30,8 @@
 		<Compile Include="TestFixture.fs" />
 		<Compile Include="XgiRungBasics.fs" />
 		<Compile Include="XgiGenTest.fs" />
-		<Compile Include="TimerTest.fs" />
-		<Compile Include="CounterTest.fs" />
+		<Compile Include="XgiTimerTest.fs" />
+		<Compile Include="XgiCounterTest.fs" />
 		<Compile Include="RisingFallingTest.fs" />
 		<None Include="App.config" />
 		<Compile Include="Main.fs" />

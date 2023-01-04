@@ -161,7 +161,7 @@ module rec TypeConvertorModule =
 
     /// 실행을 가지는 type
     type CommandTypes =
-        | CoilCmd          of CoilOutput
+        | CoilCmd          of CoilOutputMode
         | FunctionCmd      of FunctionPure
         /// Timer, Counter 등
         | FunctionBlockCmd of FunctionBlock

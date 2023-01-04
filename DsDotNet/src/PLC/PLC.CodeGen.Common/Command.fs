@@ -38,23 +38,23 @@ module Command =
         abstract member TerminalEndTag: IExpressionTerminal with get
 
     ///CoilOutput은 단일 출력을 내보내는 형식
-    and CoilOutput =
-        | CoilMode       of IExpressionTerminal
-        | PulseCoilMode  of IExpressionTerminal
-        | NPulseCoilMode of IExpressionTerminal
-        | ClosedCoilMode of IExpressionTerminal
-        | SetCoilMode    of IExpressionTerminal
-        | ResetCoilMode  of IExpressionTerminal
+    and CoilOutputMode =
+        | COMCoil       of IExpressionTerminal
+        | COMPulseCoil  of IExpressionTerminal
+        | COMNPulseCoil of IExpressionTerminal
+        | COMClosedCoil of IExpressionTerminal
+        | COMSetCoil    of IExpressionTerminal
+        | COMResetCoil  of IExpressionTerminal
     with
         interface IFunctionCommand with
             member this.TerminalEndTag: IExpressionTerminal =
                 match this with
-                | CoilMode      (endTag) -> endTag
-                | PulseCoilMode (endTag) -> endTag
-                | NPulseCoilMode(endTag) -> endTag
-                | ClosedCoilMode(endTag) -> endTag
-                | SetCoilMode   (endTag) -> endTag
-                | ResetCoilMode (endTag) -> endTag
+                | COMCoil      (endTag) -> endTag
+                | COMPulseCoil (endTag) -> endTag
+                | COMNPulseCoil(endTag) -> endTag
+                | COMClosedCoil(endTag) -> endTag
+                | COMSetCoil   (endTag) -> endTag
+                | COMResetCoil (endTag) -> endTag
 
     ///FunctionPures은 Copy와 같은 Instance가 필요없는 Function에 해당
     and FunctionPure =

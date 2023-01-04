@@ -51,6 +51,10 @@ module internal Common =
     /// 좌표 반환 : 1, 4, 7, 11, ...
     /// 논리 좌표 x y 를 LS 산전 XGI 수치 좌표계로 반환
     let coord x y : EncodedXYCoordinate = x*3 + y*1024 + 1
+    let xyFromCoord coord =
+        let y = (coord - 1) / 1024
+        let x = ((coord - 1) % 1024) / 3
+        x, y
 
     /// 산전 limit : contact 기준 가로로 최대 31개[0..30] + coil 1개[31]
     let coilCellX = 31

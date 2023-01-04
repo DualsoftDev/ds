@@ -121,6 +121,8 @@ module ExpressionModule =
         Timer:Timer
         RungInCondition: IExpression<bool> option
         ResetCondition:  IExpression<bool> option
+        /// Timer 생성시의 function name
+        FunctionName:string
     }
 
 
@@ -131,6 +133,8 @@ module ExpressionModule =
         ResetCondition:  IExpression<bool> option
         // XGI only
         //LoadCondition: IExpression<bool> option
+        /// Counter 생성시의 function name
+        FunctionName:string
     }
 
     type Statement =
@@ -179,7 +183,7 @@ module ExpressionModule =
             | DuTimer timerStatement ->
                 let ts, t = timerStatement, timerStatement.Timer
                 let typ = t.Type.ToString()
-                let functionName = $"create{typ}"       // e.g "createTON"
+                let functionName = ts.FunctionName  // e.g "createTON"
                 let args = [    // [preset; rung-in-condition; (reset-condition)]
                     sprintf "%A" t.PRE.Value
                     match ts.RungInCondition with | Some c -> c.ToText(false) | None -> ()
@@ -190,7 +194,7 @@ module ExpressionModule =
             | DuCounter counterStatement ->
                 let cs, c = counterStatement, counterStatement.Counter
                 let typ = c.Type.ToString()
-                let functionName = $"create{typ}"       // e.g "createCTU"
+                let functionName = cs.FunctionName  // e.g "createCTU"
                 let args = [    // [preset; up-condition; (down-condition;) (reset-condition;) (accum;)]
                     sprintf "%A" c.PRE.Value
                     match cs.UpCondition    with | Some c -> c.ToText(false) | None -> ()

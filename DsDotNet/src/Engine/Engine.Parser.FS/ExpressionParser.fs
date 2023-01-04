@@ -169,34 +169,39 @@ module rec ExpressionParser =
             let name = ctx.Descendants<StorageNameContext>().First().GetText()
             match exp  with
             | DuFunction { Name=functionName; Arguments=args } ->     // functionName = "createCTU"
-                let ((UnitValue preset)::(BoolExp rungInCondtion)::_) = args
-                let tcParams={Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondtion}
+                let preset, rungInCondtion =
+                    match args with
+                    | (UnitValue preset)::(BoolExp rungInCondtion)::_ -> preset, rungInCondtion
+                    | _ -> failwith "ERROR"
+
+                let tcParams={Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondtion; FunctionName=functionName}
 
                 match typ, functionName, args with
-                | CTU, "createCTU", _::_::[] ->
+                | CTU, "createWinCTU", _::_::[] ->
                     CounterStatement.CreateCTU(tcParams)
-                | CTU, "createCTU", _::_::(BoolExp resetCondition)::[] ->
+                | CTU, "createXgiCTU", _::_::(BoolExp resetCondition)::[] ->
                     CounterStatement.CreateCTU(tcParams, resetCondition)
 
-                | CTD, "createCTD", _::_::[] ->
+                | CTD, "createWinCTD", _::_::[] ->
                     CounterStatement.CreateCTD(tcParams, 0us)
-                | CTD, "createCTD", _::_::(BoolExp resetCondition)::[] ->
+                | CTD, "createXgiCTD", _::_::(BoolExp resetCondition)::[] ->
                     CounterStatement.CreateCTD(tcParams, resetCondition, 0us)
 
-                | CTUD, "createCTUD", _::_::(BoolExp countDownCondition)::[] ->
-                    CounterStatement.CreateCTUD(tcParams, countDownCondition, 0us)
-                | CTUD, "createCTUD", _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::[] ->
-                    CounterStatement.CreateCTUD(tcParams, countDownCondition, resetCondition, 0us)
+                | CTUD, "createWinCTUD", _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::[] ->
+                    CounterStatement.CreateCTUD(tcParams, countDownCondition, resetCondition)
+                | CTUD, "createXgiCTUD", _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::(BoolExp ldCondition)::[] ->
+                    failwith "TODO....."
+                    CounterStatement.CreateXgiCTUD(tcParams, countDownCondition, resetCondition, ldCondition)
 
-                | CTUD, "createCTUD", _::_::(BoolExp countDownCondition)::(UnitValue accum)::[] ->
-                    CounterStatement.CreateCTUD(tcParams, countDownCondition, accum)
-                | CTUD, "createCTUD", _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::(UnitValue accum)::[] ->
-                    CounterStatement.CreateCTUD(tcParams, countDownCondition, resetCondition, accum)
+                //| CTUD, "createCTUD", _::_::(BoolExp countDownCondition)::(UnitValue accum)::[] ->
+                //    CounterStatement.CreateCTUD(tcParams, countDownCondition, accum)
+                //| CTUD, "createCTUD", _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::(UnitValue accum)::[] ->
+                //    CounterStatement.CreateCTUD(tcParams, countDownCondition, resetCondition, accum)
 
 
-                | CTR, "createCTR", _::_::[] ->
+                | CTR, "createWinCTR", _::_::[] ->
                     CounterStatement.CreateCTR(tcParams)
-                | CTR, "createCTR", _::_::(BoolExp resetCondition)::[] ->
+                | CTR, "createXgiCTR", _::_::(BoolExp resetCondition)::[] ->
                     CounterStatement.CreateCTR(tcParams, resetCondition)
 
                 | _ -> fail()
@@ -214,21 +219,24 @@ module rec ExpressionParser =
             let name = ctx.Descendants<StorageNameContext>().First().GetText()
             match exp  with
             | DuFunction { Name=functionName; Arguments=args } ->     // functionName = "createTON"
-                let ((UnitValue preset)::(BoolExp rungInCondtion)::_) = args
-                let tcParams={Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondtion}
-                match typ, functionName, args with
-                | TON, "createTON", _::_::[] ->
-                    TimerStatement.CreateTON(tcParams)
-                | TON, "createTON", _::_::(BoolExp resetCondition)::[] ->
-                    TimerStatement.CreateTON(tcParams, resetCondition)
-                | TOF, "createTOF", _::_::[] ->
-                    TimerStatement.CreateTOF(tcParams)
-                | TOF, "createTOF", _::_::(BoolExp resetCondition)::[] ->
-                    TimerStatement.CreateTOF(tcParams, resetCondition)
+                let preset, rungInCondtion =
+                    match args with
+                    | (UnitValue preset)::(BoolExp rungInCondtion)::_ -> preset, rungInCondtion
+                    | _ -> failwith "ERROR"
 
-                | RTO, "createRTO", _::_::[] ->
+                let tcParams={Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondtion; FunctionName=functionName}
+                match typ, functionName, args with
+                | TON, ("createXgiTON" | "createWinTON"), _::_::[] ->
+                    TimerStatement.CreateTON(tcParams)
+                | TOF, ("createXgiTOF" | "createWinTOF"), _::_::[] ->
+                    TimerStatement.CreateTOF(tcParams)
+                | RTO, ("createXgiRTO" | "createWinRTO"), _::_::[] ->
                     TimerStatement.CreateRTO(tcParams)
-                | RTO, "createRTO", _::_::(BoolExp resetCondition)::[] ->
+                //| TON, "createTON", _::_::(BoolExp resetCondition)::[] ->
+                //    TimerStatement.CreateTON(tcParams, resetCondition)
+                //| TOF, "createTOF", _::_::(BoolExp resetCondition)::[] ->
+                //    TimerStatement.CreateTOF(tcParams, resetCondition)
+                | RTO, ("createXgiRTO" | "createWinRTO"), _::_::(BoolExp resetCondition)::[] ->
                     TimerStatement.CreateRTO(tcParams, resetCondition)
                 | _ -> fail()
             | _ -> fail()

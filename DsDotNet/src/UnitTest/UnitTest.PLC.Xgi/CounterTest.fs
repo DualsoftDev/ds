@@ -20,7 +20,7 @@ type XgiCounterTest() =
         let code = """
             bool cu = createTag("%IX0.0.0", false);
             bool res = createTag("%IX0.0.1", false);
-            ctu myCTU = createCTU(2000us, $cu, $res);
+            ctu myCTU = createXgiCTU(2000us, $cu, $res);
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
@@ -33,7 +33,7 @@ type XgiCounterTest() =
         let code = """
             bool cd = createTag("%IX0.0.0", false);
             bool res = createTag("%IX0.0.1", false);
-            ctd myCTD = createCTD(2000us, $cd, $res);
+            ctd myCTD = createXgiCTD(2000us, $cd, $res);
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
@@ -46,7 +46,7 @@ type XgiCounterTest() =
             bool cu = createTag("%IX0.0.0", false);
             bool cd = createTag("%IX0.0.1", false);
             bool res = createTag("%IX0.0.2", false);
-            ctud myCTUD = createCTUD(2000us, $cu, $cd, $res);
+            ctud myCTUD = createXgiCTUD(2000us, $cu, $cd, $res);
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
@@ -58,7 +58,7 @@ type XgiCounterTest() =
         let code = """
             bool cd = createTag("%IX0.0.0", false);
             bool res = createTag("%IX0.0.1", false);
-            ctr myCTR = createCTR(2000us, $cd, $res);
+            ctr myCTR = createXgiCTR(2000us, $cd, $res);
             //int x7 = createTag("%QX0.1", 0);
             //$x7 := $myCTR.CV;
             $myCTR.RST := $cd;
@@ -80,7 +80,7 @@ type XgiCounterTest() =
             bool res2 = createTag("%IX0.0.2", false);
 
             bool x7 = createTag("%IX0.0.7", false);
-            ctu myCTU = createCTU(2000us, ($cu1 && $cu2) || $cu3, ($res0 || $res1) && $res2 );
+            ctu myCTU = createXgiCTU(2000us, ($cu1 && $cu2) || $cu3, ($res0 || $res1) && $res2 );
             $x7 := (($cu1 && $cu2) || $cu3 || ($res0 || $res1) && $res2) && $cu1;
 """
         let statements = parseCode storages code
@@ -99,7 +99,7 @@ type XgiCounterTest() =
             bool res2 = createTag("%IX0.0.2", false);
 
             bool x7 = createTag("%IX0.0.7", false);
-            ctd myCTD = createCTD(2000us, ($cu1 && $cu2) || $cu3, ($res0 || $res1) && $res2 );
+            ctd myCTD = createXgiCTD(2000us, ($cu1 && $cu2) || $cu3, ($res0 || $res1) && $res2 );
             $x7 := (($cu1 && $cu2) || $cu3 || ($res0 || $res1) && $res2) && $cu1;
 """
         let statements = parseCode storages code

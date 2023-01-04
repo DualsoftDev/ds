@@ -22,7 +22,7 @@ open Engine.Common.FS
             let storages = Storages()
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", false)
             let condition = tag2expr t1
-            let tcParam = {Storages=storages; Name="myTon"; Preset=2000us; RungInCondition=condition}
+            let tcParam = {Storages=storages; Name="myTon"; Preset=2000us; RungInCondition=condition; FunctionName="createWinTON"}
             let timer = TimerStatement.CreateTON(tcParam) |> toTimer       // 2000ms = 2sec
             timer.TT.Value === false
             timer.EN.Value === false
@@ -76,11 +76,12 @@ open Engine.Common.FS
 
         [<Test>]
         member __.``TON creation with text test`` () =
+            use _ = setRuntimeTarget WINDOWS
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", false)
             let storages = Storages()
             storages.Add(t1.Name, t1)
 
-            let statement:Statement = "ton myTon = createTON(2000us, $my_timer_control_tag)" |> tryParseStatement storages |> Option.get
+            let statement:Statement = "ton myTon = createWinTON(2000us, $my_timer_control_tag)" |> tryParseStatement storages |> Option.get
             let timer = toTimer statement
 
             timer.TT.Value === false
@@ -120,7 +121,7 @@ open Engine.Common.FS
             let storages = Storages()
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", true)
             let condition = tag2expr t1
-            let tcParam = {Storages=storages; Name="myTof"; Preset=2000us; RungInCondition=condition}
+            let tcParam = {Storages=storages; Name="myTof"; Preset=2000us; RungInCondition=condition; FunctionName="createWinTOF"}
             let timer = TimerStatement.CreateTOF(tcParam) |> toTimer       // 2000ms = 2sec
             timer.EN.Value === true
             timer.TT.Value === false
@@ -133,7 +134,7 @@ open Engine.Common.FS
             let storages = Storages()
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", false)
             let condition = tag2expr t1
-            let tcParam = {Storages=storages; Name="myTof"; Preset=2000us; RungInCondition=condition}
+            let tcParam = {Storages=storages; Name="myTof"; Preset=2000us; RungInCondition=condition; FunctionName="createWinTON"}
             let timer = TimerStatement.CreateTON(tcParam) |> toTimer       // 2000ms = 2sec
             timer.TT.Value === false
             timer.EN.Value === false
@@ -146,7 +147,7 @@ open Engine.Common.FS
             let storages = Storages()
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", true)
             let condition = tag2expr t1
-            let tcParam = {Storages=storages; Name="myTof"; Preset=2000us; RungInCondition=condition}
+            let tcParam = {Storages=storages; Name="myTof"; Preset=2000us; RungInCondition=condition; FunctionName="createWinTOF"}
             let timer = TimerStatement.CreateTOF(tcParam) |> toTimer       // 2000ms = 2sec
             // rung 입력 조건이 false
             t1.Value <- false
@@ -194,7 +195,7 @@ open Engine.Common.FS
             let resetTag = PlcTag("my_timer_reset_tag", "%M1.1", false)
             let condition = tag2expr rungConditionInTag
             let reset = tag2expr resetTag
-            let tcParam = {Storages=storages; Name="myRto"; Preset=2000us; RungInCondition=condition}
+            let tcParam = {Storages=storages; Name="myRto"; Preset=2000us; RungInCondition=condition; FunctionName="createWinRTO"}
             let timer = TimerStatement.CreateRTO(tcParam, reset) |> toTimer       // 2000ms = 2sec
 
             timer.EN.Value === true
@@ -234,15 +235,12 @@ open Engine.Common.FS
 
         [<Test>]
         member __.``TIMER structure WINDOWS platform test`` () =
+            use _ = setRuntimeTarget WINDOWS
             let storages = Storages()
             let code = """
                 bool x0 = createTag("%MX0.0.0", false);
-                ton myTon = createTON(2000us, $x0);
+                ton myTon = createWinTON(2000us, $x0);
 """
-
-            let runtimeTargetBackup = RuntimeTarget
-            RuntimeTarget <- WINDOWS
-            disposable { RuntimeTarget <- runtimeTargetBackup } |> ignore
 
             let statement = parseCode storages code
             [ "EN"; "DN"; "PRE"; "ACC"; "TT" ] |> iter (fun n -> storages.ContainsKey($"myTon.{n}") === true)
@@ -250,15 +248,12 @@ open Engine.Common.FS
 
         [<Test>]
         member __.``TIMER structure XGI platform test`` () =
+            use _ = setRuntimeTarget XGI
             let storages = Storages()
             let code = """
                 bool x0 = createTag("%MX0.0.0", false);
-                ton myTon = createTON(2000us, $x0);
+                ton myTon = createXgiTON(2000us, $x0);
 """
-
-            let runtimeTargetBackup = RuntimeTarget
-            RuntimeTarget <- XGI
-            disposable { RuntimeTarget <- runtimeTargetBackup } |> ignore
 
             let statement = parseCode storages code
             [ "IN"; "Q"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myTon.{n}") === true)

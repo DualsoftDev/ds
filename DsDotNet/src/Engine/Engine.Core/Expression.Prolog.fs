@@ -53,7 +53,7 @@ module ExpressionForwardDeclModule =
         abstract CollectStorages: unit -> IStorage list
         abstract Flatten: unit -> IFlatExpression
 
-    type IExpression<'T> =
+    type IExpression<'T when 'T:equality> =
         inherit IExpression
         abstract EvaluatedValue : 'T
 

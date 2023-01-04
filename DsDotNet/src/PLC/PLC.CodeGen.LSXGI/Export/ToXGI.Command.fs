@@ -114,20 +114,10 @@ module internal Command =
 
         let createParam (x, y) (t:Terminal<bool> option) =
             match t with
-            | Some t ->
-                let name =
-                    match t with
-                    | DuTag t -> t.Name
-                    | _ -> failwith "ERROR: need check"
-                [ createFBParameterXml (x, y) name  ]
-            | None -> []
+            | Some t -> [ createFBParameterXml (x, y) t.Name  ]
+            | None   -> []
 
-        let reset =
-            match counterStatement.Reset with
-            | Some(DuTag t) -> t.Name
-            | _ -> failwith "ERROR: need check"
-            //| DuLiteral of 'T
-            //| DuVariable of VariableBase<'T>
+        let reset = counterStatement.Reset.Value.Name
 
         let fbSpanY =
             match typ with

@@ -334,6 +334,7 @@ module internal XgiFile =
 
     type XgiSymbol =
         | DuXsTag of ITagWithAddress
+        | DuXsXgiLocalVar of IXgiLocalVar
         | DuXsTimer of TimerStruct
         | DuXsCounter of CounterBaseStruct
 
@@ -490,6 +491,8 @@ module internal XgiFile =
                         //    | _-> Variable.Kind.VAR_EXTERNAL
 
                         XGITag.createSymbol name comment device kindVar addr plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
+                    | DuXsXgiLocalVar xgi ->
+                        xgi.SymbolInfo
                     | DuXsTimer timer ->
                         let device, addr = "", ""
                         let plcType =

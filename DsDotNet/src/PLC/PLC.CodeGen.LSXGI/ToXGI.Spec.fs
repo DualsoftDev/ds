@@ -104,18 +104,28 @@ module Config =
         | NONE          = 0
         | BOOL          = 1
         | BYTE          = 2
+        /// 2 bytes
         | WORD          = 3
+        /// 4 bytes
         | DWORD         = 4
+        /// 8 bytes
         | LWORD         = 5
+        /// Short Integer.  1 bytes
         | SINT          = 6
+        /// 2 bytes
         | INT           = 7
+        /// 4 bytes
         | DINT          = 8
+        /// 8 bytes
         | LINT          = 9
+        /// Unsigned Short Integer.  1 bytes
         | USINT         = 10
         | UINT          = 11
         | UDINT         = 12
         | ULINT         = 13
+        /// 4 bytes
         | REAL          = 14
+        /// 8 bytes
         | LREAL         = 15
         | TIME          = 16
         | DATE          = 17

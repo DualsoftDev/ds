@@ -1,7 +1,9 @@
 namespace PLC.CodeGen.LSXGI
 
 open Engine.Core
+open Engine.Common.FS
 open PLC.CodeGen.Common
+open System.Security
 
 (*
     - Timer 나 Counter 의 Rung In Condition 은 expression 을 받을 수 있으나,
@@ -19,11 +21,53 @@ open PLC.CodeGen.Common
 *)
 
 
+[<AutoOpen>]
+module ConvertorPrologModule =
+    let systemTypeNameToXgiTypeName = function
+        | "Boolean" -> "BOOL"
+        | "Single" -> "REAL"
+        | "Double" -> "LREAL"
+        | ("SByte" | "Char")   -> "BYTE"
+        | "Byte"   -> "BYTE"
+        | "Int16"  -> "SINT"
+        | "UInt16" -> "USINT"
+        | "Int32"  -> "DINT"
+        | "UInt32" -> "UDINT"
+        | "Int64"  -> "LINT"
+        | "UInt64" -> "ULINT"
+        | "String" -> "STRING"  // 32 byte
+        | _ -> failwith "ERROR"
+
+
+
+    let mutable internal autoVariableCounter = 0
+
+    type IXgiLocalVar =
+        inherit IVariable
+        abstract SymbolInfo:SymbolInfo
+    type IXgiLocalVar<'T> =
+        inherit IXgiLocalVar
+        inherit IVariable<'T>
+
+    type XgiLocalVar<'T when 'T:equality>(name, comment, initValue:'T) =
+        inherit VariableBase<'T>(name, initValue)
+
+        interface IXgiLocalVar<'T> with
+            member x.SymbolInfo = x.SymbolInfo
+        interface IExpressionTerminal with
+            member x.PLCTagName = name
+        member x.SymbolInfo =
+            let kindVar = int Variable.Kind.VAR
+            let plcType = systemTypeNameToXgiTypeName typedefof<'T>.Name
+            let comment = SecurityElement.Escape comment
+            fwdCreateSymbol name comment "" kindVar "" plcType
+
+        override x.ToBoxedExpression() = var2expr x
+
 
 [<AutoOpen>]
 module rec TypeConvertorModule =
     type IXgiStatement = interface end
-    type TempTagCreator = string -> PlcTag<bool>  // name -> address -> PlcTag<bool>
     type CommentedXgiStatement = CommentedXgiStatement of comment:string * statement:XgiStatement
     let (|CommentAndXgiStatement|) = function | CommentedXgiStatement(x, y) -> x, y
     let commentAndXgiStatement = (|CommentAndXgiStatement|)
@@ -31,30 +75,30 @@ module rec TypeConvertorModule =
     [<AbstractClass>]
     type XgiStatementExptender() =
         interface IXgiStatement
-        member val TemporaryTags = ResizeArray<PlcTag<bool>>()
+        member val TemporaryTags = ResizeArray<IXgiLocalVar>()
         member val ExtendedStatements = ResizeArray<XgiStatement>()
 
 
-    let private expandExpression (store:XgiStatementExptender) (exp:IExpression<bool> option) (nameHint:string) : Terminal<bool> option =
-        let helper (tempTagCreator:TempTagCreator) =
+    let tagCreator (nameHint:string) comment (initValue:'Q) =
+        autoVariableCounter <- autoVariableCounter + 1
+        XgiLocalVar($"_tmp{nameHint}{autoVariableCounter}", comment, initValue)
+
+
+    let private expandExpression (store:XgiStatementExptender) (exp:IExpression<'T>) (nameHint:string) : Terminal<'T> =
+        match exp with
+        | :? Expression<'T> as exp ->
             match exp with
-            | Some (:? Expression<bool> as exp) ->
-                match exp with
-                | DuTerminal t -> Some t
-                | DuFunction _ ->
-                    let temp = tempTagCreator nameHint // "temp" "%MX0.0.1"
-                    store.TemporaryTags.Add temp
-                    let assign = DuXgiAssign <| XgiAssignStatement(exp, temp)
-                    store.ExtendedStatements.Add assign
-                    Some (DuTag temp)
-            | _ ->
-                None
-        let tagCreator =
-            let mutable n = 0
-            fun nameHint ->
-                n <- n + 1
-                PlcTag<bool>($"temp{nameHint}{n}", "%MX0", false)
-        helper tagCreator
+            | DuTerminal t -> t
+            | DuFunction fs ->
+                let comment = exp.ToText(false) //fs.Name
+                let temp = tagCreator nameHint comment (exp.Evaluate())
+                store.TemporaryTags.Add temp
+                let assign = DuXgiAssign <| XgiAssignStatement(exp, temp)
+                store.ExtendedStatements.Add(assign)
+                DuVariable temp
+        | _ ->
+            failwith "ERROR"
+
 
 
     type XgiAssignStatement(exp:IExpression, target:IStorage) =
@@ -64,8 +108,7 @@ module rec TypeConvertorModule =
 
     type XgiTimerStatement(ts:TimerStatement) as this =
         inherit XgiStatementExptender()
-        //let reset = lazy ( expandExpression this ts.ResetCondition )
-        let reset = expandExpression this ts.ResetCondition "RES"
+        let reset = ts.ResetCondition |> map (fun res -> expandExpression this res "RES")
         member _.Timer = ts.Timer
         member _.RungInCondition:IExpression<bool> = ts.RungInCondition.Value
         member _.Reset:Terminal<bool> option = reset
@@ -74,11 +117,14 @@ module rec TypeConvertorModule =
         inherit XgiStatementExptender()
         let typ = cs.Counter.Type
         let expand = expandExpression this
-        let reset = expand cs.ResetCondition "RES"
+        let reset = cs.ResetCondition |> map (fun res -> expand res "RES")
         let cu, cd, ld =
             match typ with
             | ( CTU | CTD | CTR ) -> None, None, None
-            | CTUD -> None, expand cs.DownCondition "CD", expand cs.LoadCondition "LD"
+            | CTUD ->
+                None,
+                cs.DownCondition |> map (fun cd -> expand cd "CD"),
+                cs.LoadCondition |> map (fun ld -> expand ld "LD")
 
         member _.Counter = cs.Counter
         member _.RungInCondition:IExpression<bool> =

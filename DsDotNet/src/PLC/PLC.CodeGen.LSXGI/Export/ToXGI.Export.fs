@@ -1,13 +1,11 @@
 namespace PLC.CodeGen.LSXGI
 
-open System
 open System.Linq
 
 open Engine.Common.FS
 open PLC.CodeGen.Common.QGraph
 open System.Collections.Generic
 open Engine.Core
-open PLC.CodeGen.Common.K
 
 module LsXGI =
 
@@ -87,6 +85,8 @@ module LsXGI =
                             ()
                         else
                             XgiSymbol.DuXsTag t
+                    | :? IXgiLocalVar as xgi ->
+                        XgiSymbol.DuXsXgiLocalVar xgi
                     | :? TimerStruct as ts ->
                         XgiSymbol.DuXsTimer ts
                     | :? CounterBaseStruct as cs ->

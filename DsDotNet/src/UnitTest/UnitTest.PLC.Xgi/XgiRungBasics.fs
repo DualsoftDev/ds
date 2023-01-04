@@ -29,15 +29,15 @@ type XgiRungTest() =
     *)
     let simplestProgramXml =
         $"""
-        <Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="1">DS Logic for XGI</Element></Rung>
+        <Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="{coord 0 0}">DS Logic for XGI</Element></Rung>
         <Rung BlockMask="0">
-            <Element ElementType="{ContactMode}" Coordinate="1025">myBit00</Element>
-            <Element ElementType="{HorzLineMode}" Coordinate="1028"></Element>
-            <Element ElementType="{MultiHorzLineMode}" Coordinate="1031" Param="84"></Element>
-            <Element ElementType="{CoilMode}" Coordinate="1118">myBit01</Element>
+            <Element ElementType="{ContactMode}" Coordinate="{coord 0 1}">myBit00</Element>
+            <Element ElementType="{HorzLineMode}" Coordinate="{coord 1 1}"></Element>
+            <Element ElementType="{MultiHorzLineMode}" Coordinate="{coord 2 1}" Param="84"></Element>
+            <Element ElementType="{CoilMode}" Coordinate="{coord 31 1}">myBit01</Element>
         </Rung>
-        <Rung BlockMask="0"><Element ElementType="{MultiHorzLineMode}" Coordinate="2049" Param="90"></Element>
-            <Element ElementType="{FBMode}" Coordinate="2142" Param="END">END</Element>
+        <Rung BlockMask="0"><Element ElementType="{MultiHorzLineMode}" Coordinate="{coord 0 2}" Param="90"></Element>
+            <Element ElementType="{FBMode}" Coordinate="{coord 31 2}" Param="END">END</Element>
         </Rung>
 """
 
@@ -185,7 +185,7 @@ type XgiRungTest() =
                 $"""
 </Rung>
 <Rung BlockMask="0">
-    <Element ElementType="{MultiHorzLineMode}" Coordinate="2049" Param="90"></Element>
+    <Element ElementType="{MultiHorzLineMode}" Coordinate="{coord 0 2}" Param="90"></Element>
     <Element ElementType="{FBMode}" Coordinate="2142" Param="END">END</Element>
 </Rung>"""
             ] |> String.concat "\r\n"
@@ -201,7 +201,7 @@ type XgiRungTest() =
         let rungs =
             [
                 $"""
-<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="1">DS Logic for XGI</Element></Rung>
+<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="{coord 0 0}">DS Logic for XGI</Element></Rung>
 <Rung BlockMask="0">
 """
                 let y = 1
@@ -222,7 +222,7 @@ type XgiRungTest() =
                 $"""
 </Rung>
 <Rung BlockMask="0">
-    <Element ElementType="{MultiHorzLineMode}" Coordinate="2049" Param="90"></Element>
+    <Element ElementType="{MultiHorzLineMode}" Coordinate="{coord 0 2}" Param="90"></Element>
     <Element ElementType="{FBMode}" Coordinate="2142" Param="END">END</Element>
 </Rung>"""
             ] |> String.concat "\r\n"
@@ -238,7 +238,7 @@ type XgiRungTest() =
         let rungs =
             [
                 $"""
-<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="1">DS Logic for XGI</Element></Rung>
+<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="{coord 0 0}">DS Logic for XGI</Element></Rung>
 <Rung BlockMask="0">
 """
                 let y = 1
@@ -259,8 +259,8 @@ type XgiRungTest() =
                 $"""
 </Rung>
 <Rung BlockMask="0">
-    <Element ElementType="{MultiHorzLineMode}" Coordinate="2049" Param="90"></Element>
-    <Element ElementType="{FBMode}" Coordinate="2142" Param="END">END</Element>
+    <Element ElementType="{MultiHorzLineMode}" Coordinate="{coord 0 2}" Param="90"></Element>
+    <Element ElementType="{FBMode}" Coordinate="{coord 31 2}" Param="END">END</Element>
 </Rung>"""
             ] |> String.concat "\r\n"
 
@@ -276,7 +276,7 @@ type XgiRungTest() =
         let rungs =
             [
                 $"""
-<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="1">DS Logic for XGI</Element></Rung>
+<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="{coord 0 0}">DS Logic for XGI</Element></Rung>
 <Rung BlockMask="0">
 """
                 let mutable y = 1
@@ -317,7 +317,7 @@ type XgiRungTest() =
         let rungs =
             [
                 $"""
-<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="1">DS Logic for XGI</Element></Rung>
+<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="{coord 0 0}">DS Logic for XGI</Element></Rung>
 <Rung BlockMask="0">
 """
                 let mutable y = 1

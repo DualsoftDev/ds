@@ -22,8 +22,15 @@ module ExpressionExtension =
     let (<=^)  (rising: RisingCoil)   (exp: IExpression) = DuAssign(exp, rising)
     /// Assign falling statement 
     let (<=!^) (falling: FallingCoil) (exp: IExpression) = DuAssign(exp, falling)
-
-
+    /// Create Timer Coil Statement
+    let (<=@)  (name: string) (rungInCondition: Expression<bool>) = 
+        let tcParam = {Storages=Storages(); Name=name; Preset=2000us; RungInCondition=rungInCondition; FunctionName="createWinTON"}
+        TimerStatement.CreateTON(tcParam) 
+    /// Create Counter Coil Statement
+    let (<=%)   (name: string) (upCondition: Expression<bool>) = 
+        let tcParam = {Storages=Storages(); Name=name; Preset=100us; RungInCondition=upCondition; FunctionName="createWinCTUD"}
+        CounterStatement.CreateCTR(tcParam) 
+    
     // Extenstion Comment Statement
     /// Create None Relay Coil Statement
     let (--|) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool>, comment:string) = 
@@ -39,8 +46,13 @@ module ExpressionExtension =
     let (--!^) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool>, comment:string) = 
         let falling:FallingCoil = {Storage = coil; HistoryFlag = HistoryFlag()}
         falling <=!^ (sets <&&> (!! rsts)) |> withExpressionComment comment
+    /// Create Timer Coil Statement
+    let (--@) (rungInCondition: Expression<bool>) (coil: TagBase<bool>, comment:string) = 
+        coil.Name <=@ rungInCondition |> withExpressionComment comment
+    /// Create Counter Coil Statement
+    let (--%) (rungInCondition: Expression<bool>) (coil: TagBase<bool>, comment:string) = 
+        coil.Name <=% rungInCondition |> withExpressionComment comment
 
-    
     let private tags2LogicalAndOrExpr (fLogical: IExpression list -> Expression<bool>) (FList(ts:Tag<bool> list)) : Expression<bool> =
         match ts with
         | [] -> failwith "tags2AndExpr: Empty list"

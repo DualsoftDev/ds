@@ -10,10 +10,14 @@ open Engine.CodeGenCPU
 type VertexManager with
        //test ahn
     member v.T1_DelayInput(): CommentedStatement  = 
-        (v.PA.Expr, v.System._off.Expr) --| (v.PA, "T1" )
+        let call = v.Vertex :?> Call
+        let sets = if call.INs.Any() then call.INs.ToAnd() else v.System._on.Expr
+        (sets) --@ (v.TRX, "T1" )
 
           //test ahn
     member v.T2_SustainOutput(): CommentedStatement  = 
-        (v.PA.Expr, v.System._off.Expr) --| (v.PA, "T2" )
+        let call = v.Vertex :?> Call
+        let sets = if call.OUTs.Any() then call.OUTs.ToAnd() else v.System._on.Expr
+        (sets) --@ (v.TRX, "T2" )
 
         

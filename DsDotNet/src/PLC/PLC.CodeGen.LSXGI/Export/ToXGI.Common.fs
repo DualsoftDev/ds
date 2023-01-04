@@ -33,7 +33,8 @@ module internal Common =
     with
         member me.Add(xml) = { Xmls = xml::me.Xmls; Y = me.Y + 1 }
 
-
+    /// <!-- --> 구문의 xml comment 삽입 여부.  순수 debugging 용도
+    let enableXmlComment = false
     let dq = "\""
 
     /// rung 을 구성하는 element (접점)의 XML 표현 문자열 반환
@@ -101,15 +102,21 @@ module internal Common =
             { Coordinate = c; Xml = mutiEndLine x (cellX-1) y}
         ]
 
+    /// x y 위치에서 수직선 한개를 긋는다
+    let vLineAt x y =
+        verify(x >= 0)
+        let c = 2 + coord x y
+        { Coordinate = c; Xml = vline c }
+
     /// x y 위치에서 수직으로 n 개의 line 을 긋는다
     let vlineDownTo x y n =
         [
-            if x >= 0 then
+            if enableXmlComment then
                 let c = coord x y
                 yield { Coordinate = c; Xml = $"<!-- vlineDownTo {x} {y} {n} -->" }
-                for n in [0.. n-1] do
-                    let c = 2 + coord x (y + n)
-                    yield { Coordinate = c; Xml = vline c }
+
+            for i in [0.. n-1] do
+                yield vLineAt x (y+i)
         ]
 
     let drawPulseCoil (x, y, tagCoil:IExpressionTerminal, funSize:int) =

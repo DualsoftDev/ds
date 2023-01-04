@@ -26,8 +26,8 @@ module internal Basic =
             let c = coord x y
             /// 좌표 * 결과 xml 문자열 보관 장소
             let rungInfos = ResizeArray<CoordinatedRungXml>()
-            let xxx = expr.ToText()
-            { Coordinate = c; Xml = $"<!-- {x} {y} {expr.ToText()} -->" } |> rungInfos.Add
+            if enableXmlComment then
+                { Coordinate = c; Xml = $"<!-- {x} {y} {expr.ToText()} -->" } |> rungInfos.Add
 
             match expr with
             | FlatTerminal(id, pulse, neg) ->
@@ -53,7 +53,7 @@ module internal Basic =
                     ]
                 let spanX = subRungInfos.Sum(fun sri-> sri.SpanX)
                 let spanY = subRungInfos.Max(fun sri-> sri.SpanY)
-                { baseRIWNP with RungInfos=rungInfos.ToFSharpList(); SpanX=spanX; SpanY=spanY; }
+                { baseRIWNP with RungInfos=rungInfos.Distinct().ToFSharpList(); SpanX=spanX; SpanY=spanY; }
 
             | FlatNary(Or, exprs) ->
                 let mutable sy = y
@@ -80,7 +80,8 @@ module internal Basic =
                 ] |> rungInfos.AddRange
 
                 // 좌측 vertical lines
-                vlineDownTo (x-1) y (spanY-1) |> rungInfos.AddRange
+                if x >= 1 then
+                    vlineDownTo (x-1) y (spanY-1) |> rungInfos.AddRange
 
                 // ```OR variable length 역삼각형 test```
                 let lowestY =
@@ -91,7 +92,7 @@ module internal Basic =
                 vlineDownTo (x+spanX-1) y (lowestY-y) |> rungInfos.AddRange
 
 
-                { baseRIWNP with RungInfos=rungInfos.ToFSharpList(); SpanX=spanX; SpanY=spanY; }
+                { baseRIWNP with RungInfos=rungInfos.Distinct().ToFSharpList(); SpanX=spanX; SpanY=spanY; }
 
 
             // terminal case

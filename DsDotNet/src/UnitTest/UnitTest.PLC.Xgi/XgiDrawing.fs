@@ -65,9 +65,10 @@ module XgiTestCommonModule =
 type XgiDrawingTest() =
     inherit XgiTestClass()
 
+    let span width = width*3
+
     [<Test>]
     member __.``Box drawing test``() =
-        let span width = width*3
         let rungsXml = $"""
 <Rung BlockMask="0">
     <Element ElementType="{RungCommentMode}"   Coordinate="{coord 0 0}">Test boxes</Element>
@@ -112,6 +113,35 @@ type XgiDrawingTest() =
 </Rung>
 
 """
+        let xml = wrapWithXml rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
+        saveTestResult (get_current_function_name ()) xml
+
+
+    [<Test>]
+    member __.``Vertical line drawing test``() =
+        let rungsXml =
+            [
+                let x, y = 1, 1
+                $"""
+<Rung BlockMask="0">
+    <Element ElementType="{RungCommentMode}"   Coordinate="{coord 0 (y-1)}">({x}, {y}) 에서 시작하는 'ㄱ'</Element>
+	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord x y}" Param="0"></Element>
+	<Element ElementType="{VertLineMode}"      Coordinate="{(coord x y) + 2}"></Element>
+</Rung>
+"""
+
+                let x, y = 4, 4
+                $"""
+<Rung BlockMask="0">
+    <Element ElementType="{RungCommentMode}"   Coordinate="{coord 0 (y-1)}">({x}-, {y}) 에서 시작하는 'ㄴ'</Element>
+	<Element ElementType="{VertLineMode}"      Coordinate="{(coord x y) - 1}"></Element>
+	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord x (y+1)}" Param="0"></Element>
+</Rung>
+"""
+
+            ] |> String.concat "\r\n"
+
+
         let xml = wrapWithXml rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
         saveTestResult (get_current_function_name ()) xml
 

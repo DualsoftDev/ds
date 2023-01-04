@@ -31,10 +31,10 @@ module ModelBuildupTests1 =
             let apiP = apis.First(fun ai -> ai.Name = "+")
             let apiM = apis.First(fun ai -> ai.Name = "-")
             let callAp =
-                let apiItem = JobDef(apiP, "%I1", "%Q1", "", "", dev.Name)
+                let apiItem = JobDef(apiP, "%I1", "%Q1",  dev.Name)
                 Job("Ap", [apiItem])
             let callAm =
-                let apiItem = JobDef(apiM, "%I2", "%Q2", "", "", dev.Name)
+                let apiItem = JobDef(apiM, "%I2", "%Q2", dev.Name)
                 Job("Am", [apiItem])
             system.Jobs.AddRange([callAp; callAm])
             system, flow, real, callAp, callAm

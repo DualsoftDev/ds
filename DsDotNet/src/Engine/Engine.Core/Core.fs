@@ -192,11 +192,14 @@ module CoreModule =
     type Job (name:string, jobDefs:JobDef seq) =
         inherit Named(name)
         member val JobDefs = jobDefs.ToFSharpList()
-
+        //$ton 200      //ls xgk 명령어를 따른다.
+        member val ObserveInTimming   = getNull<Observe>() with get, set//todo ToDsText, parsing
+        //$mov 100 R200 //ls xgk 명령어를 따른다.
+        member val CommandOutTimming  = getNull<Command>() with get, set//todo ToDsText, parsing
 
     type TagAddress = string
     /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
-    type JobDef (api:ApiItem, inAddress:TagAddress, outAddress:TagAddress, observe:string, command:string, deviceName:string) =
+    type JobDef (api:ApiItem, inAddress:TagAddress, outAddress:TagAddress, deviceName:string) =
         member _.ApiItem = api
         member val InAddress   = inAddress  with get,set
         member val OutAddress  = outAddress with get,set
@@ -204,11 +207,6 @@ module CoreModule =
         member val InTag = getNull<ITagWithAddress>() with get, set
         //CPU 생성시 할당됨 OutTag
         member val OutTag = getNull<ITagWithAddress>() with get, set
-
-        //$ton 200      //ls xgk 명령어를 따른다.
-        member val ObserveInTimming   = observe with get,set //todo ToDsText, parsing
-        //$mov 100 R200 //ls xgk 명령어를 따른다.
-        member val CommandOutTimming  = command with get,set //todo ToDsText, parsing
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
         member val ApiName = getRawName [deviceName;api.Name] true
 

@@ -69,16 +69,16 @@ module ImportU =
             |> Seq.iter(fun jobSet ->
                 let jobBase = jobSet.Key
                 let JobTargetSystems = jobSet.Value
-                        //ppt에서는 동일한 디바이스만 동시 Job구성 가능하여  아무시스템이나 찾아도 API는 같음
+                //ppt에서는 동일한 디바이스만 동시 Job구성 가능하여  아무시스템이나 찾아도 API는 같음
                 let refSystem = mySys.TryFindLoadedSystem(JobTargetSystems.First()).Value.ReferenceSystem
 
                 refSystem.ApiItems.ForEach(fun api->
                     let jobDefs =
                         JobTargetSystems
                             .Select(fun tgt -> getApiItems(mySys, tgt, api.Name), tgt)
-                            .Select(fun (api, tgt)-> JobDef(api, "", "", "", "", tgt))
+                            .Select(fun (api, tgt)-> JobDef(api, "", "", tgt))
 
-                    let job = Job(jobBase+"_"+api.Name, jobDefs)
+                    let job = Job(jobBase+"_"+api.Name, jobDefs) //test ahn command observe 추가
                     mySys.Jobs.Add(job)
                     )
                 )

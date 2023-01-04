@@ -19,11 +19,9 @@ module ExportIOTable =
         dt.Columns.Add($"{IOColumn.DataType}"   , typeof<string>) |>ignore
         dt.Columns.Add($"{IOColumn.Input}"      , typeof<string>) |>ignore
         dt.Columns.Add($"{IOColumn.Output}"     , typeof<string>) |>ignore
-        dt.Columns.Add($"{IOColumn.Command}"    , typeof<string>) |>ignore
-        dt.Columns.Add($"{IOColumn.Observe}"    , typeof<string>) |>ignore
 
         let rowItems(jobDef:JobDef) =
-            ["주소";  jobDef.ApiName; "bool"; jobDef.InAddress  ; jobDef.OutAddress; jobDef.CommandOutTimming; jobDef.ObserveInTimming]
+            ["주소";  jobDef.ApiName; "bool"; jobDef.InAddress  ; jobDef.OutAddress]
 
         let rows =
             seq {
@@ -40,10 +38,10 @@ module ExportIOTable =
        
         let toBtnText(btns:ButtonDef seq, xlsCase:ExcelCase) = 
             for btn in  btns do
-                dt.Rows.Add(xlsCase.ToText(),  btn.Name  , "bool",  "",  "" , "'-", "'-" ) |> ignore
+                dt.Rows.Add(xlsCase.ToText(),  btn.Name  , "bool",  "",  "" ) |> ignore
         let toLampText(lamps:LampDef seq, xlsCase:ExcelCase) = 
             for lamp in  lamps do
-                dt.Rows.Add(xlsCase.ToText(),  lamp.Name  , "bool",  "'-",  "" , "'-", "'-" ) |> ignore
+                dt.Rows.Add(xlsCase.ToText(),  lamp.Name  , "bool",  "'-",  ""  ) |> ignore
 
         toBtnText (sys.EmergencyButtons, ExcelCase.XlsEmergencyBTN)
         toBtnText (sys.AutoButtons, ExcelCase.XlsAutoBTN)
@@ -59,10 +57,10 @@ module ExportIOTable =
         toLampText (sys.DryRunModeLamps, ExcelCase.XlsDryRunModeLamp)
         toLampText (sys.StopModeLamps, ExcelCase.XlsStopModeLamp)
 
-        dt.Rows.Add("'-", "'-", "'-", "'-","'-", "'-","'-") |> ignore
-        dt.Rows.Add("'-", "'-", "'-", "'-","'-", "'-","'-") |> ignore
+        dt.Rows.Add("'-", "'-", "'-", "'-","'-") |> ignore
+        dt.Rows.Add("'-", "'-", "'-", "'-","'-") |> ignore
 
-        dt.Rows.Add(TextVariable,  ""  ,  ""  , "'-", "'-", "'-", "'-") |> ignore
+        dt.Rows.Add(TextVariable,  ""  ,  ""  , "'-", "'-") |> ignore
         dt
 
     let ToFiie(systems:DsSystem seq, excelFilePath:string) = 

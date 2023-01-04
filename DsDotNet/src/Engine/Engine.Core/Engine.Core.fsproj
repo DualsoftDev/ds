@@ -20,7 +20,6 @@
 		<Compile Include="Prolog.fs" />
 		<Compile Include="Named.fs" />
 		<Compile Include="Graph.fs" />
-		<Compile Include="CodeElements.fs" />
 		<Compile Include="RuntimeGenerator.fs" />
 		<Compile Include="Expression.Prolog.fs" />
 		<Content Include="Timer.txt" />
@@ -32,6 +31,7 @@
 		<Compile Include="Expression.Function.fs" />
 		<Compile Include="Statement.Timer.fs" />
 		<Compile Include="Statement.Counter.fs" />
+		<Compile Include="CodeElements.fs" />
 		<Compile Include="Core.fs" />
 		<Compile Include="Core.Extension.fs" />
 		<Compile Include="Core.Util.Edge.fs" />

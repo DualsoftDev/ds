@@ -16,8 +16,6 @@ module ImportIOTable =
     | DataType  = 2
     | Input     = 3
     | Output    = 4
-    | Command   = 5
-    | Observe   = 6
 
     let ApplyExcel(path:string, systems:DsSystem seq) =
         let sys = systems.Head()
@@ -105,11 +103,13 @@ module ImportIOTable =
 
                         | XlsCommand ->  
                             let jobDef = dicJob.[$"{row.[(int)IOColumn.Name]}"]
-                            jobDef.CommandOutTimming  <- $"{row.[(int)IOColumn.Command]}"
+                            ()
+                           // jobDef.CommandOutTimming  <- $"{row.[(int)IOColumn.Command]}"
 
                         | XlsObserve ->  
                             let jobDef = dicJob.[$"{row.[(int)IOColumn.Name]}"]
-                            jobDef.ObserveInTimming   <- $"{row.[(int)IOColumn.Observe]}"
+                            ()
+                          //  jobDef.ObserveInTimming   <- $"{row.[(int)IOColumn.Observe]}"
 
                         | XlsAutoBTN          -> updateBtn  (row, BtnType.DuAutoBTN, tableIO)
                         | XlsManualBTN        -> updateBtn  (row, BtnType.DuManualBTN      , tableIO)

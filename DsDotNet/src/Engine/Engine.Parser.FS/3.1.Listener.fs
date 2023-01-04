@@ -389,7 +389,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                                 let rx = getAddress(rxAddressCtx)
 
                                 tracefn $"TX={tx} RX={rx}"
-                                return JobDef(apiPoint, rx, tx, "", "", device)
+                                return JobDef(apiPoint, rx, tx, device)
                             }
                         match apiItem with
                         | Some apiItem -> yield apiItem
@@ -398,7 +398,10 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                     | _ -> failwith "ERROR"
                 ]
             assert(apiItems.Any())
-            Job(jobName, apiItems) |> system.Jobs.Add
+            let job = Job(jobName, apiItems)
+            //job.ObserveInTimming <-   <shin>
+            //job.CommandOutTimming <-  <shin>
+            job |> system.Jobs.Add
 
         let fillTargetOfAliasDef (x:DsParserListener) (ctx:AliasListingContext) =
             let system = x.TheSystem

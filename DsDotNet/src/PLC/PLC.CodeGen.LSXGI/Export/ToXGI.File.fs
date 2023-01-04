@@ -157,9 +157,13 @@ module internal XgiFile =
             match stmt with
             | DuXgiAssign assign ->
                 let expr = assign.Expression
-                let target = assign.Target :?> IExpressionTerminal
+                let coil =
+                    match assign.Target with
+                    | :? RisingCoil as rc -> PulseCoilMode(rc.Storage :?> IExpressionTerminal)
+                    | :? FallingCoil as fc -> NPulseCoilMode(fc.Storage :?> IExpressionTerminal)
+                    | _ -> CoilMode(assign.Target :?> IExpressionTerminal)
                 let flatExpr = expr.Flatten() :?> FlatExpression
-                let command:XgiCommand = CoilCmd(CoilMode(target)) |> XgiCommand
+                let command:XgiCommand = CoilCmd(coil) |> XgiCommand
                 let rgiSub = xmlRung flatExpr command rgi.Y
                 //rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
                 rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgiSub.Y}

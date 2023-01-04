@@ -272,12 +272,19 @@ module rec ExpressionParser =
                     Some <| DuVarDecl (exp, variable)
 
             | :? AssignContext as assignCtx ->
-                let exp = createExpression storages (getFirstChildExpressionContext assignCtx)
                 if not <| storages.ContainsKey storageName then
                     failwith $"ERROR: Failed to assign into non existing storage {storageName}"
-
                 let storage = storages[storageName]
-                Some <| DuAssign (exp, storage)
+                let createExp ctx = createExpression storages (getFirstChildExpressionContext ctx)
+                match assignCtx.children.ToFSharpList() with
+                | (:? RisingAssignContext as ctx)::[] ->
+                    let risingCoil:RisingCoil = {Storage = storage}
+                    Some <| DuAssign (createExp ctx, risingCoil)
+                | (:? FallingAssignContext as ctx)::[] ->
+                    let fallingCoil:FallingCoil = {Storage = storage}
+                    Some <| DuAssign (createExp ctx, fallingCoil)
+                | (:? NormalAssignContext as ctx)::[] -> Some <| DuAssign (createExp ctx, storage)
+                | _ -> failwith "ERROR"
             | :? CounterDeclContext as counterDeclCtx -> Some <| parseCounterStatement storages counterDeclCtx
             | :? TimerDeclContext as timerDeclCtx -> Some <| parseTimerStatement storages timerDeclCtx
             | :? CopyStatementContext as copyStatementCtx ->

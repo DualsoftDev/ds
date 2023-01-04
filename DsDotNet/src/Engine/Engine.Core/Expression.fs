@@ -127,18 +127,54 @@ module ExpressionModule =
 
 
     type CounterStatement = {
-        Counter:Counter
-        UpCondition: IExpression<bool> option
-        DownCondition: IExpression<bool> option
-        ResetCondition:  IExpression<bool> option
+        Counter        : Counter
+        UpCondition    : IExpression<bool> option
+        DownCondition  : IExpression<bool> option
+        ResetCondition : IExpression<bool> option
         // XGI only
-        LoadCondition: IExpression<bool> option
+        LoadCondition  : IExpression<bool> option
         /// Counter 생성시의 function name
-        FunctionName:string
+        FunctionName   : string
     }
+
+
+    /// Pulse coil '-(P)-' 생성 및 평가를 위한 구조
+    type RisingCoil = {
+        Storage:IStorage
+        // <ahn> fill other properties
+    } with
+        interface IStorage with
+            member _.DataType = typedefof<RisingCoil>
+            member _.ToBoxedExpression(): obj =
+                raise (System.NotImplementedException())
+            member x.ToText() = $"ppulse(${x.Storage.Name})"    // positive pulse
+            member _.Value
+                with get (): obj =
+                    raise (System.NotImplementedException())
+                and set (v: obj): unit =
+                    raise (System.NotImplementedException())
+            member x.Name with get() = $"RisingCoil.{x.Storage.Name}" and set(v) = failwith "ERROR"
+
+    /// Negative Pulse Coil '-(N)-' 생성 및 평가를 위한 구조
+    type FallingCoil = {
+        Storage:IStorage
+        // <ahn> fill other properties
+    } with
+        interface IStorage with
+            member _.DataType = typedefof<FallingCoil>
+            member _.ToBoxedExpression(): obj =
+                raise (System.NotImplementedException())
+            member x.ToText() = $"npulse(${x.Storage.Name})"    // negative pulse
+            member _.Value
+                with get (): obj =
+                    raise (System.NotImplementedException())
+                and set (v: obj): unit =
+                    raise (System.NotImplementedException())
+            member x.Name with get() = $"FallingCoil.{x.Storage.Name}" and set(v) = failwith "ERROR"
 
     type Statement =
         | DuAssign of expression:IExpression * target:IStorage
+        /// 변수 선언.  PLC rung 생성시에는 관여되지 않는다.
         | DuVarDecl of expression:IExpression * variable:IStorage
         | DuTimer of TimerStatement
         | DuCounter of CounterStatement
@@ -156,6 +192,13 @@ module ExpressionModule =
     type Statement with
         member x.Do() =
             match x with
+            | DuAssign (expr, (:? RisingCoil as rc)) ->
+                // <ahn>
+                ()
+            | DuAssign (expr, (:? FallingCoil as fc)) ->
+                // <ahn>
+                ()
+
             | DuAssign (expr, target) ->
                 assert(target.DataType = expr.DataType)
                 target.Value <- expr.BoxedEvaluatedValue
@@ -281,6 +324,7 @@ module ExpressionModule =
             | "UInt64" -> "uint64"
             | "String" -> "string"
             | "Char"   -> "char"
+            | "Boolean"-> "bool"
             | _  -> failwith "ERROR"
 
 

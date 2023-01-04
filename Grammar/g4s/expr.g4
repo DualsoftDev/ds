@@ -47,7 +47,12 @@ toplevels: toplevel (';' toplevel)* ';';
     toplevel: expr|statement;
 
 statement: assign | varDecl | timerDecl | counterDecl | copyStatement;
-    assign: '$' storageName ':=' expr;
+    assign: normalAssign | risingAssign | fallingAssign;
+    normalAssign: '$' storageName ':=' expr;
+    // risingAssign: 'rising' '(' '$' storageName ')' ':=' expr;
+    // fallingAssign: 'falling' '(' '$' storageName ')' ':=' expr;
+    risingAssign: 'ppulse' '(' '$' storageName ')' ':=' expr;
+    fallingAssign: 'npulse' '(' '$' storageName ')' ':=' expr;
     varDecl:   type storageName ('=' expr)? ;//';';
         storageName: IDENTIFIER ('.' IDENTIFIER )*;
     type:

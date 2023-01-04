@@ -1,8 +1,13 @@
 /* grun expr toplevels -gui < g4test/expr/expr.expr */
 
+ppulse($a) := $b;
+
+$qx := $ix && ! $ix && rising($ix) && falling($ix);
+
 $myCTR.RST := $cd;
 
-rising($a) := $b;
+
+
 
 $myBit17 :=
     $myBit00 &&

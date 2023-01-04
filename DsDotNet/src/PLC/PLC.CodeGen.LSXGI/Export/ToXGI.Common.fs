@@ -90,7 +90,7 @@ module internal Common =
         { Coordinate = c; Xml = xml }
 
     /// 함수 파라메터 그리기
-    let createFBParameterXml tag x y=
+    let createFBParameterXml (x, y) tag =
         let c = coord(x, y)
         let xml = elementFull (int ElementType.VariableMode) c "" tag
         { Coordinate = c; Xml = xml }
@@ -119,7 +119,7 @@ module internal Common =
                 yield vLineAt (x, y+i)
         ]
 
-    let drawPulseCoil (x, y, tagCoil:IExpressionTerminal, funSize:int) =
+    let drawPulseCoil (x, y) (tagCoil:IExpressionTerminal) (funSize:int) =
         let newX = getFBCellX (x-1)
         let newY = y + funSize
         [

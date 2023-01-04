@@ -194,7 +194,7 @@ module ExpressionModule =
         then storage.Value <- true   
              storage.Value <- false   
              //single 스켄방식이면 펄스조건 사용된 모든 Rung 처리후 Off 
-             //이벤트 방식이면 Stack에 이벤트 활용하여 상관없을듯  //이벤트 테스트 중 ahn
+             //이벤트 방식이면 단일 쓰레드이면 이벤트 끝난후 pulseDo Off 해서 상관없을듯  //이벤트 테스트 중 ahn
 
     type Statement with
         member x.Do() =

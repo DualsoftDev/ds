@@ -116,8 +116,11 @@ namespace Dual.Model.Import
 
                     if (color == Color.Transparent)
                     {
-                        if (f.StartsWith($"[{TextSystem}") || (f.Contains($"[{TextFlow}]"))  //[flow] F = {} 한줄제외
-                        || f.Contains($"[{TextAddress}]") || f.Contains($"[{TextLayout}]"))
+                        if (f.StartsWith($"[{TextSystem}") || f.Contains($"[{TextFlow}]")  //[flow] F = {} 한줄제외
+                        || f.Contains($"[{TextAddress}]")
+                        || f.Contains($"[{TextLayout}]")
+                        || f.Contains($"[{TextJobs}]")
+                        )
                         {
                             rndColor = Color.FromArgb(r.Next(130, 230), r.Next(130, 230), r.Next(130, 230));
                             this.Do(() => richTextBox_ds.ScrollToCaret());

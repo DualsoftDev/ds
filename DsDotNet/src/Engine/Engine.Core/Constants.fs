@@ -221,4 +221,5 @@ module DsTextProperty =
     let [<Literal>] TextSafety  = "safety"
     let [<Literal>] TextAlias   = "alias"
     let [<Literal>] TextLayout  = "layouts"
+    let [<Literal>] TextJobs    = "jobs"
 

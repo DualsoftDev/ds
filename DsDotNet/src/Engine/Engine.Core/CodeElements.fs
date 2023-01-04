@@ -16,16 +16,15 @@ module CodeElements =
         member _.ToDsText() = $"{name} = ({varType.ToText()}, {initValue})"
 
     type ParameterGroup = string[]
-    // @add = 30, 50 ~ R103
+    // $ton 500   // &mov 0 R100 // &ctr 5
     type FunctionApplication(functionName:string, parameterGroups:ParameterGroup[]) =
         member _.FunctionName = functionName
         member _.ParameterGroups = parameterGroups
 
-    //// CMD3 = (@add = 30, 50 ~ R103)
-    //type Command(name:string, functionApplication:FunctionApplication) =
-    //    member _.Name = name
-    //    member _.FunctionApplication = functionApplication
+    type Command(name:string, functionApplication:FunctionApplication) =
+        member _.Name = name
+        member _.FunctionApplication = functionApplication
 
-    //type Observe(name:string, functionApplication:FunctionApplication) =
-    //    member _.Name = name
-    //    member _.FunctionApplication = functionApplication
+    type Observe(name:string, functionApplication:FunctionApplication) =
+        member _.Name = name
+        member _.FunctionApplication = functionApplication

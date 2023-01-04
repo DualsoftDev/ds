@@ -9,6 +9,7 @@ open Engine.Common.FS
 [<AutoOpen>]
 module ExpressionExtension =
 
+    //  Statement
     /// boolean AND operator
     let (<&&>) (left: Expression<bool>) (right: Expression<bool>) = fLogicalAnd [ left; right ]
     /// boolean OR operator
@@ -17,19 +18,27 @@ module ExpressionExtension =
     let (!!)   (exp: Expression<bool>) = fLogicalNot [exp]
     /// Assign statement
     let (<==)  (storage: IStorage) (exp: IExpression) = DuAssign(exp, storage)
-    /// Assign Puls statement  : Pulse Coil 타입 필요
-    let (<=^)  (storage: IStorage) (exp: IExpression) = DuAssign(exp, storage)
+    /// Assign rising statement 
+    let (<=^)  (rising: RisingCoil)   (exp: IExpression) = DuAssign(exp, rising)
+    /// Assign falling statement 
+    let (<=!^) (falling: FallingCoil) (exp: IExpression) = DuAssign(exp, falling)
 
 
+    // Extenstion Comment Statement
     /// Create None Relay Coil Statement
     let (--|) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool>, comment:string) = 
         coil <== (sets <&&> (!! rsts)) |> withExpressionComment comment
     /// Create Relay Coil Statement                                                      
     let (==|) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool> , comment:string) =
         coil <== (sets <||> tag2expr coil <&&> (!! rsts)) |> withExpressionComment comment
-     /// Create None Relay Pulse Coil Statement
+    /// Create None Relay rising Pulse Coil Statement
     let (--^) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool>, comment:string) = 
-        coil <=^ (sets <&&> (!! rsts)) |> withExpressionComment comment
+        let rising:RisingCoil = {Storage = coil; HistoryFlag = HistoryFlag()}
+        rising <=^ (sets <&&> (!! rsts)) |> withExpressionComment comment
+    /// Create None Relay falling Pulse Coil Statement
+    let (--!^) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool>, comment:string) = 
+        let falling:FallingCoil = {Storage = coil; HistoryFlag = HistoryFlag()}
+        falling <=!^ (sets <&&> (!! rsts)) |> withExpressionComment comment
 
     
     let private tags2LogicalAndOrExpr (fLogical: IExpression list -> Expression<bool>) (FList(ts:Tag<bool> list)) : Expression<bool> =

@@ -86,11 +86,11 @@ module LsXGI =
                             // skip timer/counter structure member : timer 나 counter 명 + "." + field name
                             ()
                         else
-                            XgiSymbol.DuTag t
+                            XgiSymbol.DuXsTag t
                     | :? TimerStruct as ts ->
-                        XgiSymbol.DuTimer ts
+                        XgiSymbol.DuXsTimer ts
                     | :? CounterBaseStruct as cs ->
-                        XgiSymbol.DuCounter cs
+                        XgiSymbol.DuXsCounter cs
                     | _ -> failwith "ERROR"
             ]
 

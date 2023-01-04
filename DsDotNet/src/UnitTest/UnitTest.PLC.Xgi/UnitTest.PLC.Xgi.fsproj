@@ -28,6 +28,8 @@
 
 	<ItemGroup>
 		<Compile Include="TestFixture.fs" />
+		<Compile Include="XgiLadderElementsTest.fs" />
+		<Compile Include="XgiTestCommon.fs" />
 		<Compile Include="XgiDrawing.fs" />
 		<Compile Include="XgiRungBasics.fs" />
 		<Compile Include="XgiGenTest.fs" />

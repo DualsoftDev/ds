@@ -333,9 +333,9 @@ module internal XgiFile =
 
 
     type XgiSymbol =
-        | DuTag of ITagWithAddress
-        | DuTimer of TimerStruct
-        | DuCounter of CounterBaseStruct
+        | DuXsTag of ITagWithAddress
+        | DuXsTimer of TimerStruct
+        | DuXsCounter of CounterBaseStruct
 
 
     let generateXGIXmlFromStatement (prologComments:string seq) (commentedStatements:CommentedXgiStatement seq) (xgiSymbols:XgiSymbol seq) (unusedTags:ITagWithAddress seq) (existingLSISprj:string option) =
@@ -399,7 +399,7 @@ module internal XgiFile =
                 let tags =
                     [ for s in xgiSymbols do
                         match s with
-                        | DuTag t -> yield t.Address
+                        | DuXsTag t -> yield t.Address
                         | _ -> ()
                     ]
 
@@ -430,7 +430,7 @@ module internal XgiFile =
             [
                 for s in xgiSymbols do
                     match s with
-                    | DuTag t ->
+                    | DuXsTag t ->
                         let name, addr = t.Name, t.Address
 
                         let device, memSize =
@@ -490,14 +490,14 @@ module internal XgiFile =
                         //    | _-> Variable.Kind.VAR_EXTERNAL
 
                         XGITag.createSymbol name comment device kindVar addr plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
-                    | DuTimer timer ->
+                    | DuXsTimer timer ->
                         let device, addr = "", ""
                         let plcType =
                             match timer.Type with
                             | TON | TOF | RTO -> timer.Type.ToString()
 
                         XGITag.createSymbol timer.Name $"TIMER {timer.Name}" device kindVar addr plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
-                    | DuCounter counter ->
+                    | DuXsCounter counter ->
                         let device, addr = "", ""
                         let plcType =
                             match counter.Type with

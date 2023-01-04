@@ -60,30 +60,34 @@ module FlatExpressionModule =
             | FlatZero -> FlatZero
 
     let rec flattenExpression (expression:IExpression) : IFlatExpression =
-        let expr = expression :?> Expression<bool>
-        let literalBool2Terminal (b:bool) : IExpressionTerminal = if b then TrueValue() else FalseValue()
-        match expr with
-        | DuTerminal (DuTag t) -> FlatTerminal(t, false, false)
-        | DuTerminal (DuLiteral b) -> FlatTerminal( literalBool2Terminal b, false, false)
-        | DuTerminal  _ -> failwith "ERROR"
-        (* rising/falling/negation 은 function 으로 구현되어 있으며,
-           해당 function type 에 따라서 risng/falling/negation 의 contact/coil 을 생성한다.
-           (Terminal<'T> 이 generic 이어서 DuTag 에 bool type 으로 제한 할 수 없음.
-            Terminal<'T>.Evaluate() 가 bool type 으로 제한됨 )
-         *)
-        | DuFunction {FunctionBody = f; Name = n; Arguments = (:? Expression<bool> as arg)::[]}
-            when n = FunctionNameRising || n = FunctionNameFalling ->
-                match arg with
-                | DuTerminal (DuTag t) -> FlatTerminal(t, true, n = FunctionNameFalling)
-                | _ -> failwith "ERROR"
-        | DuFunction fs ->
-            let op =
-                match fs.Name with
-                | "&&" -> Op.And
-                | "||" -> Op.Or
-                | "!" -> Op.Neg
-                | _ -> failwith "ERROR"
-            FlatNary(op, fs.Arguments |> map flattenExpression |> Seq.cast<FlatExpression> |> Seq.toList)
+        match expression with
+        | :? Expression<bool> as expr ->
+            //let expr = expression :?> Expression<bool>
+            let literalBool2Terminal (b:bool) : IExpressionTerminal = if b then TrueValue() else FalseValue()
+            match expr with
+            | DuTerminal (DuTag t) -> FlatTerminal(t, false, false)
+            | DuTerminal (DuLiteral b) -> FlatTerminal( literalBool2Terminal b, false, false)
+            | DuTerminal  _ -> failwith "ERROR"
+            (* rising/falling/negation 은 function 으로 구현되어 있으며,
+               해당 function type 에 따라서 risng/falling/negation 의 contact/coil 을 생성한다.
+               (Terminal<'T> 이 generic 이어서 DuTag 에 bool type 으로 제한 할 수 없음.
+                Terminal<'T>.Evaluate() 가 bool type 으로 제한됨 )
+             *)
+            | DuFunction {FunctionBody = f; Name = n; Arguments = (:? Expression<bool> as arg)::[]}
+                when n = FunctionNameRising || n = FunctionNameFalling ->
+                    match arg with
+                    | DuTerminal (DuTag t) -> FlatTerminal(t, true, n = FunctionNameFalling)
+                    | _ -> failwith "ERROR"
+            | DuFunction fs ->
+                let op =
+                    match fs.Name with
+                    | "&&" -> Op.And
+                    | "||" -> Op.Or
+                    | "!" -> Op.Neg
+                    | _ -> failwith "ERROR"
+                FlatNary(op, fs.Arguments |> map flattenExpression |> Seq.cast<FlatExpression> |> Seq.toList)
+        | _ ->
+            failwith "Not yet for non boolean expression"
 
     ///// expression 이 차지하는 가로, 세로 span 의 width 와 height 를 반환한다.
     //let precalculateSpan (expr:FlatExpression) =

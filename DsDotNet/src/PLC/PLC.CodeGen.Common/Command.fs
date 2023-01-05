@@ -20,8 +20,9 @@ module Command =
 
     /// Command 를 위한 Tag
     type CommandTag(tag:string, size:Size, kind:VarKind) =
-        interface IExpressionTerminal with
-            member x.PLCTagName = tag
+        interface INamedExpressionTerminal with
+            member x.StorageName = tag
+            member x.ToText() = tag
         member x.Size() = size
         member x.SizeString =
             match size with
@@ -35,19 +36,19 @@ module Command =
 
 
     type IFunctionCommand =
-        abstract member TerminalEndTag: IExpressionTerminal with get
+        abstract member TerminalEndTag: INamedExpressionTerminal with get
 
     ///CoilOutput은 단일 출력을 내보내는 형식
     and CoilOutputMode =
-        | COMCoil       of IExpressionTerminal
-        | COMPulseCoil  of IExpressionTerminal
-        | COMNPulseCoil of IExpressionTerminal
-        | COMClosedCoil of IExpressionTerminal
-        | COMSetCoil    of IExpressionTerminal
-        | COMResetCoil  of IExpressionTerminal
+        | COMCoil       of INamedExpressionTerminal
+        | COMPulseCoil  of INamedExpressionTerminal
+        | COMNPulseCoil of INamedExpressionTerminal
+        | COMClosedCoil of INamedExpressionTerminal
+        | COMSetCoil    of INamedExpressionTerminal
+        | COMResetCoil  of INamedExpressionTerminal
     with
         interface IFunctionCommand with
-            member this.TerminalEndTag: IExpressionTerminal =
+            member this.TerminalEndTag: INamedExpressionTerminal =
                 match this with
                 | COMCoil      (endTag) -> endTag
                 | COMPulseCoil (endTag) -> endTag
@@ -58,17 +59,17 @@ module Command =
 
     ///FunctionPures은 Copy와 같은 Instance가 필요없는 Function에 해당
     and FunctionPure =
-        | CopyMode  of IExpressionTerminal *  (CommandTag * CommandTag) //endTag * (fromA, toB)
-        | CompareGT of IExpressionTerminal *  (CommandTag * CommandTag) //endTag * (leftA, rightB)  "<"
-        | CompareLT of IExpressionTerminal *  (CommandTag * CommandTag) //endTag * (leftA, rightB)  ">"
-        | CompareGE of IExpressionTerminal *  (CommandTag * CommandTag) //endTag * (leftA, rightB)  "<="
-        | CompareLE of IExpressionTerminal *  (CommandTag * CommandTag) //endTag * (leftA, rightB)  ">="
-        | CompareEQ of IExpressionTerminal *  (CommandTag * CommandTag) //endTag * (leftA, rightB)  "=="
-        | CompareNE of IExpressionTerminal *  (CommandTag * CommandTag) //endTag * (leftA, rightB)  "!="
-        | Add of IExpressionTerminal *  CommandTag  * int //endTag * Tag + (-+int)
+        | CopyMode  of INamedExpressionTerminal *  (CommandTag * CommandTag) //endTag * (fromA, toB)
+        | CompareGT of INamedExpressionTerminal *  (CommandTag * CommandTag) //endTag * (leftA, rightB)  "<"
+        | CompareLT of INamedExpressionTerminal *  (CommandTag * CommandTag) //endTag * (leftA, rightB)  ">"
+        | CompareGE of INamedExpressionTerminal *  (CommandTag * CommandTag) //endTag * (leftA, rightB)  "<="
+        | CompareLE of INamedExpressionTerminal *  (CommandTag * CommandTag) //endTag * (leftA, rightB)  ">="
+        | CompareEQ of INamedExpressionTerminal *  (CommandTag * CommandTag) //endTag * (leftA, rightB)  "=="
+        | CompareNE of INamedExpressionTerminal *  (CommandTag * CommandTag) //endTag * (leftA, rightB)  "!="
+        | Add of INamedExpressionTerminal *  CommandTag  * int //endTag * Tag + (-+int)
     with
         interface IFunctionCommand with
-            member this.TerminalEndTag: IExpressionTerminal =
+            member this.TerminalEndTag: INamedExpressionTerminal =
                 match this with
                 | CopyMode  (endTag, _) -> endTag
                 | CompareGT (endTag, _) -> endTag
@@ -80,7 +81,7 @@ module Command =
                 | Add       (endTag, _, _) -> endTag
 
 
-        member private x.GetTerminal(tag:CommandTag) = if(tag.VarKind() =  VarKind.Variable) then [ tag :> IExpressionTerminal ] else List.empty
+        member private x.GetTerminal(tag:CommandTag) = if(tag.VarKind() =  VarKind.Variable) then [ tag :> INamedExpressionTerminal ] else List.empty
 
         member x.UsedCommandTags() =
             match x with

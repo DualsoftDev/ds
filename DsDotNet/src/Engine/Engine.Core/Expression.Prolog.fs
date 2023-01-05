@@ -32,9 +32,15 @@ module ExpressionForwardDeclModule =
 
     (* PLC generation module 용 *)
     type IFlatExpression = interface end
+
+    /// terminal expression 이 될 수 있는 객체.  Tag, Variable, Literal
     type IExpressionTerminal =
-        //inherit IText
-        abstract PLCTagName:string
+        inherit IText
+
+    /// 이름을 갖는 terminal expression 이 될 수 있는 객체.  Tag, Variable (Literal 은 제외)
+    type INamedExpressionTerminal =
+        inherit IExpressionTerminal
+        abstract StorageName:string
 
     /// Expression<'T> 을 boxed 에서 접근하기 위한 최소의 interface
     type IExpression =
@@ -299,8 +305,8 @@ module rec ExpressionPrologModule =
         inherit TypedValueStorage<'T>(name, initValue)
 
         interface ITag<'T>
-        interface IExpressionTerminal with
-            member x.PLCTagName = name
+        interface INamedExpressionTerminal with
+            member x.StorageName = name
         override x.ToText() = "$" + name
 
     [<AbstractClass>]
@@ -313,7 +319,7 @@ module rec ExpressionPrologModule =
     type LiteralHolder<'T when 'T:equality>(literalValue:'T) =
         member _.Value = literalValue
         interface IExpressionTerminal with
-            member x.PLCTagName = "NO PLC NAME for literal value"
+            member x.ToText() = sprintf "%A" x.Value
 
     type Arg       = IExpression
     type Arguments = IExpression list

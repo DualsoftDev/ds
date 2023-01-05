@@ -21,10 +21,10 @@ module FlatExpressionModule =
 
     type TrueValue() =
         interface IExpressionTerminal with
-            member x.PLCTagName = "TRUE"
+            member x.ToText() = "TRUE"
     type FalseValue() =
         interface IExpressionTerminal with
-            member x.PLCTagName = "FALSE"
+            member x.ToText() = "FALSE"
 
     [<DebuggerDisplay("{ToText()}")>]
     type FlatExpression =
@@ -38,7 +38,7 @@ module FlatExpressionModule =
         interface IFlatExpression
         member x.ToText() =
             match x with
-            | FlatTerminal(value, pulse, neg) -> sprintf "%s%s" (if neg then "!" else "") (value.PLCTagName)
+            | FlatTerminal(value, pulse, neg) -> sprintf "%s%s" (if neg then "!" else "") (value.ToText())
             | FlatNary(op, terms) ->
                 let termsStr =
                     terms

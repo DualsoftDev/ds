@@ -67,8 +67,10 @@ module ConvertorPrologModule =
 
         interface IXgiLocalVar<'T> with
             member x.SymbolInfo = x.SymbolInfo
-        interface IExpressionTerminal with
-            member x.PLCTagName = name
+        interface INamedExpressionTerminal with
+            member x.StorageName = name
+        interface IText with
+            member x.ToText() = name
         member x.SymbolInfo =
             let kindVar = int Variable.Kind.VAR
             let plcType = systemTypeNameToXgiTypeName typedefof<'T>.Name
@@ -195,7 +197,7 @@ module rec TypeConvertorModule =
             match x with
             | TimerMode timerStatement -> timerStatement.Timer.Name
             | CounterMode counterStatement ->  counterStatement.Counter.Name
-        member x.UsedCommandTags() : IExpressionTerminal list =
+        member x.UsedCommandTags() : INamedExpressionTerminal list =
             failwith "Need check"
 
 
@@ -211,7 +213,7 @@ module rec TypeConvertorModule =
             //    |> List.map (fun x -> x :?> IExpressionTerminal)
 
         interface IFunctionCommand with
-            member this.TerminalEndTag: IExpressionTerminal =
+            member this.TerminalEndTag: INamedExpressionTerminal =
                 match this with
                 //| TimerMode(tag, time) -> tag
                 | TimerMode timerStatement -> timerStatement.Timer.DN

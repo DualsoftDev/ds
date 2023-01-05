@@ -119,13 +119,13 @@ module internal Common =
                 yield vLineAt (x, y+i)
         ]
 
-    let drawPulseCoil (x, y) (tagCoil:IExpressionTerminal) (funSize:int) =
+    let drawPulseCoil (x, y) (tagCoil:INamedExpressionTerminal) (funSize:int) =
         let newX = getFBCellX (x-1)
         let newY = y + funSize
         [
             { Coordinate = coord(x, y); Xml = risingline (coord(x, y))}
             { Coordinate = coord(newX, newY); Xml = mutiEndLine (x) (newX - 1) newY}
-            { Coordinate = coord(coilCellX, newY); Xml = elementBody (int ElementType.CoilMode) (coord(coilCellX, newY)) (tagCoil.PLCTagName)}
+            { Coordinate = coord(coilCellX, newY); Xml = elementBody (int ElementType.CoilMode) (coord(coilCellX, newY)) (tagCoil.StorageName)}
             yield! vlineDownTo (x-1, y) funSize
         ]
 

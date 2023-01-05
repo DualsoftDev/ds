@@ -38,7 +38,7 @@ module internal Basic =
                     | false, true   -> ElementType.ClosedContactMode
                     | false, false  -> ElementType.ContactMode
                     |> int
-                let str = elementBody mode c (id.PLCTagName)
+                let str = elementBody mode c (id.ToText())
                 { baseRIWNP with RungInfos = [{ Coordinate = c; Xml = str}]; }
 
             | FlatNary(And, exprs) ->
@@ -141,7 +141,7 @@ module internal Basic =
                         let c = coord(x+1, y)
                         { Coordinate = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam "" }
                         let c = coord(coilCellX, y)
-                        { Coordinate = c; Xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.PLCTagName) }
+                        { Coordinate = c; Xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.StorageName) }
                     ]
                     1, results
 

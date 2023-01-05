@@ -142,7 +142,7 @@ module internal Command =
 
         { SpanY = fbSpanY; PositionedRungXmls = results}
 
-    let drawCmdCompare (x, y) (coil:IExpressionTerminal) (opComp:OpComp) (leftA:CommandTag) (leftB:CommandTag) : CoordinatedRungXmlsWithNewY =
+    let drawCmdCompare (x, y) (coil:INamedExpressionTerminal) (opComp:OpComp) (leftA:CommandTag) (leftB:CommandTag) : CoordinatedRungXmlsWithNewY =
         let fbSpanY = 3
 
         if(leftA.Size() <> leftB.Size())
@@ -159,12 +159,12 @@ module internal Command =
             createFB funcFind func "" (opComp.ToText()) x y
             createFBParameterXml (x-1, y+1) (leftA.ToText())
             createFBParameterXml (x-1, y+2) (leftB.ToText())
-            createFBParameterXml (x+1, y+1) (coil.PLCTagName)
+            createFBParameterXml (x+1, y+1) (coil.StorageName)
         ]
 
         { SpanY = fbSpanY; PositionedRungXmls = results}
 
-    let drawCmdAdd (x, y) (tagCoil:IExpressionTerminal) (targetTag:CommandTag) (addValue:int) (pulse:bool): CoordinatedRungXmlsWithNewY =
+    let drawCmdAdd (x, y) (tagCoil:INamedExpressionTerminal) (targetTag:CommandTag) (addValue:int) (pulse:bool): CoordinatedRungXmlsWithNewY =
         let mutable xx = x
         let fbSpanY = 4
 
@@ -180,7 +180,7 @@ module internal Command =
             else
                 xx <- x
                 //Command 결과출력
-                createFBParameterXml (xx+1, y) (tagCoil.PLCTagName)
+                createFBParameterXml (xx+1, y) (tagCoil.StorageName)
 
 
             //Pulse시 증감 처리
@@ -196,7 +196,7 @@ module internal Command =
         { SpanY = newY; PositionedRungXmls = results}
 
 
-    let drawCmdCopy (x, y) (tagCoil:IExpressionTerminal) (fromTag:CommandTag) (toTag:CommandTag) (pulse:bool) : CoordinatedRungXmlsWithNewY =
+    let drawCmdCopy (x, y) (tagCoil:INamedExpressionTerminal) (fromTag:CommandTag) (toTag:CommandTag) (pulse:bool) : CoordinatedRungXmlsWithNewY =
         if fromTag.Size() <> toTag.Size() then
             failwithlog $"Tag Compare size error {fromTag.ToText()}{fromTag.SizeString},  {toTag.ToText()}({toTag.SizeString})"
 
@@ -213,7 +213,7 @@ module internal Command =
             else
                 //Command 결과출력
                 xx <- x
-                createFBParameterXml (xx+1, y) (tagCoil.PLCTagName)
+                createFBParameterXml (xx+1, y) (tagCoil.StorageName)
 
 
             //함수 그리기

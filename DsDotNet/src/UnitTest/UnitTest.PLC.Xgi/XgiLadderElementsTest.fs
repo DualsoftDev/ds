@@ -4,6 +4,7 @@ open NUnit.Framework
 open Engine.Common.FS
 open PLC.CodeGen.LSXGI
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine.ElementType
+open System.Security
 
 type XgiLadderElementTest() =
     inherit XgiTestClass()
@@ -12,13 +13,34 @@ type XgiLadderElementTest() =
 
     [<Test>]
     member __.``Local var test``() =
-        let name = "MySINT"
-        let comment = name
-        let device = ""
         let kindVar = int Variable.Kind.VAR
-        let plcType = "SINT"
-        let symbolInfo = XGITag.createSymbol name comment device kindVar "" plcType
-        let symbolsLocalXml = XGITag.generateSymbolVars ([symbolInfo], false)
+        let device = ""
+
+        let testSymbolTypes = [
+            typedefof<bool>
+            typedefof<single>
+            typedefof<double>
+            typedefof<sbyte>
+            typedefof<char>
+            typedefof<byte>
+            typedefof<int16>
+            typedefof<uint16>
+            typedefof<int32>
+            typedefof<uint32>
+            typedefof<int64>
+            typedefof<uint64>
+            typedefof<string>
+        ]
+
+        let symbolInfos = [
+            for t in testSymbolTypes do
+                let plcType = systemTypeNameToXgiTypeName t.Name
+                let comment = $"{plcType} <- {t.Name}"
+                let name = $"my{t.Name}"
+                XGITag.createSymbol name comment device kindVar "" plcType
+        ]
+
+        let symbolsLocalXml = XGITag.generateSymbolVars (symbolInfos, false)
 
 
         //let xml = generateXGIXmlFromStatement [] [] xgiSymbols unusedTags existingLSISprj

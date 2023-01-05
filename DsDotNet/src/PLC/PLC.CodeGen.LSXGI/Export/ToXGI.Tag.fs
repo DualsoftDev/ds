@@ -3,6 +3,7 @@ namespace PLC.CodeGen.LSXGI
 open System.Diagnostics
 
 open Engine.Common.FS
+open System.Security
 
 // IEC-61131 Addressing
 // http://www.microshadow.com/ladderdip/html/basic_iec_addressing.htm
@@ -84,6 +85,7 @@ module XGITag = //IEC61131Tag =
 
     /// devicePos, addressIEC, name, comment, device, kind, address, plcType 를 받아서 SymbolInfo 를 생성한다.
     let createSymbolWithDetail devicePos addressIEC name comment device kind  address plcType : SymbolInfo =
+        let comment = SecurityElement.Escape comment
         {   Name=name; Comment=comment; Device=device; Kind = kind;
             Type=plcType; State=0; Address=address; DevicePos=devicePos; AddressIEC=addressIEC}
 

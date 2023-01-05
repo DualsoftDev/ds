@@ -6,10 +6,23 @@ open PLC.CodeGen.Common
 open System.Security
 
 (*
-    - Timer 나 Counter 의 Rung In Condition 은 expression 을 받을 수 있으나,
-      산전 XGI, AB 모두 부수적인 것들은 tag 만 받을 수 있다.
-      e.g CTUD 의 경우, 기본 조건인 CU 는 expression 을 받지만,
-          CD 는 조건식으로 주어진 경우, tag 에 저장한 후, 해당 tag 만 CD 에 지정할 수 있다.
+    - 사칙연산 함수(Add, ..) 의 입력은 XGI 에서 전원선으로부터 연결이 불가능한 반면,
+      ds 문법으로 작성시에는 expression 을 이용하기 때문에 직접 호환이 불가능하다.
+      * add(<expr1>, <expr2>) 를
+            tmp1 := <expr1> 및 tmp2 := <expr2> 와 같이
+            . 임시 변수를 생성해서 assign rung 을 만들고
+            . 임시 변수를 add 함수의 입력 argument 에 tag 로 작성하도록 한다.
+
+    - 임의의 rung 에 사칙연산 함수가 포함되면, 해당 부분만 잘라서 임시 변수에 저장하고 그 값을 이용해야 한다.
+      * e.g $result := ($t1 + $t2) > 3
+            . $tmp = $t1 + $t2
+            . $result := $tmp > 3
+
+    - Timer 나 Counter 의 Rung In Condition 은 복수개이더라도 전원선 연결이 가능하다.
+      * 임시 변수 없이 expression 을 그대로 전원선 연결해서 그리면 된다.
+
+    - XGI 임시 변수는 XgiLocalVar<'T> type 으로 생성된다.
+
     - XGI rung 생성시에 Engine.Core 에서 생성된 Statement 를 직접 사용할 수 없는 이유이다.
     - Statement 를 XgiStatement 로 변환한 후, 이를 XGI 생성 모듈에서 사용한다.
     - 변환 시, 추가적으로 생성되는 요소

@@ -159,9 +159,9 @@ module internal XgiFile =
                 let expr = assign.Expression
                 let coil =
                     match assign.Target with
-                    | :? RisingCoil as rc -> COMPulseCoil(rc.Storage :?> INamedExpressionTerminal)
-                    | :? FallingCoil as fc -> COMNPulseCoil(fc.Storage :?> INamedExpressionTerminal)
-                    | _ -> COMCoil(assign.Target :?> INamedExpressionTerminal)
+                    | :? RisingCoil as rc -> COMPulseCoil(rc.Storage :?> INamedExpressionizableTerminal)
+                    | :? FallingCoil as fc -> COMNPulseCoil(fc.Storage :?> INamedExpressionizableTerminal)
+                    | _ -> COMCoil(assign.Target :?> INamedExpressionizableTerminal)
                 let flatExpr = expr.Flatten() :?> FlatExpression
                 let command:XgiCommand = CoilCmd(coil) |> XgiCommand
                 let rgiSub = xmlRung flatExpr command rgi.Y

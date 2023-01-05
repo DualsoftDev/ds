@@ -119,7 +119,7 @@ module internal Common =
                 yield vLineAt (x, y+i)
         ]
 
-    let drawPulseCoil (x, y) (tagCoil:INamedExpressionTerminal) (funSize:int) =
+    let drawPulseCoil (x, y) (tagCoil:INamedExpressionizableTerminal) (funSize:int) =
         let newX = getFBCellX (x-1)
         let newY = y + funSize
         [

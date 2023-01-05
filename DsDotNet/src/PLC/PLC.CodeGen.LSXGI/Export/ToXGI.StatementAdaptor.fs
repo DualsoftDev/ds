@@ -67,7 +67,7 @@ module ConvertorPrologModule =
 
         interface IXgiLocalVar<'T> with
             member x.SymbolInfo = x.SymbolInfo
-        interface INamedExpressionTerminal with
+        interface INamedExpressionizableTerminal with
             member x.StorageName = name
         interface IText with
             member x.ToText() = name
@@ -197,7 +197,7 @@ module rec TypeConvertorModule =
             match x with
             | TimerMode timerStatement -> timerStatement.Timer.Name
             | CounterMode counterStatement ->  counterStatement.Counter.Name
-        member x.UsedCommandTags() : INamedExpressionTerminal list =
+        member x.UsedCommandTags() : INamedExpressionizableTerminal list =
             failwith "Need check"
 
 
@@ -213,7 +213,7 @@ module rec TypeConvertorModule =
             //    |> List.map (fun x -> x :?> IExpressionTerminal)
 
         interface IFunctionCommand with
-            member this.TerminalEndTag: INamedExpressionTerminal =
+            member this.TerminalEndTag: INamedExpressionizableTerminal =
                 match this with
                 //| TimerMode(tag, time) -> tag
                 | TimerMode timerStatement -> timerStatement.Timer.DN

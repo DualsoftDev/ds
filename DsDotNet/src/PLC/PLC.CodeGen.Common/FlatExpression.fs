@@ -20,16 +20,16 @@ module FlatExpressionModule =
             | OpUnit -> Neg
 
     type TrueValue() =
-        interface IExpressionTerminal with
+        interface IExpressionizableTerminal with
             member x.ToText() = "TRUE"
     type FalseValue() =
-        interface IExpressionTerminal with
+        interface IExpressionizableTerminal with
             member x.ToText() = "FALSE"
 
     [<DebuggerDisplay("{ToText()}")>]
     type FlatExpression =
         /// pulse identifier 및 negation 여부 (pulse coil 은 지원하지 않을 예정)
-        | FlatTerminal  of tag:IExpressionTerminal * pulse:bool * negated:bool
+        | FlatTerminal  of tag:IExpressionizableTerminal * pulse:bool * negated:bool
 
         /// N-ary Expressions : And / Or 및 terms
         | FlatNary    of Op * FlatExpression list
@@ -96,6 +96,7 @@ module FlatExpressionModule =
         | _ ->
             failwith "Not yet for non boolean expression"
 
+    // <kwak> IExpression<'T> vs IExpression : 강제 변환
     and flattenExpression (expression:IExpression) : IFlatExpression =
         match expression with
         | :? IExpression<bool> as exp -> flattenExpressionT exp

@@ -142,7 +142,7 @@ module internal Command =
 
         { SpanY = fbSpanY; PositionedRungXmls = results}
 
-    let drawCmdCompare (x, y) (coil:INamedExpressionTerminal) (opComp:OpComp) (leftA:CommandTag) (leftB:CommandTag) : CoordinatedRungXmlsWithNewY =
+    let drawCmdCompare (x, y) (coil:INamedExpressionizableTerminal) (opComp:OpComp) (leftA:CommandTag) (leftB:CommandTag) : CoordinatedRungXmlsWithNewY =
         let fbSpanY = 3
 
         if(leftA.Size() <> leftB.Size())
@@ -164,7 +164,7 @@ module internal Command =
 
         { SpanY = fbSpanY; PositionedRungXmls = results}
 
-    let drawCmdAdd (x, y) (tagCoil:INamedExpressionTerminal) (targetTag:CommandTag) (addValue:int) (pulse:bool): CoordinatedRungXmlsWithNewY =
+    let drawCmdAdd (x, y) (tagCoil:INamedExpressionizableTerminal) (targetTag:CommandTag) (addValue:int) (pulse:bool): CoordinatedRungXmlsWithNewY =
         let mutable xx = x
         let fbSpanY = 4
 
@@ -196,7 +196,7 @@ module internal Command =
         { SpanY = newY; PositionedRungXmls = results}
 
 
-    let drawCmdCopy (x, y) (tagCoil:INamedExpressionTerminal) (fromTag:CommandTag) (toTag:CommandTag) (pulse:bool) : CoordinatedRungXmlsWithNewY =
+    let drawCmdCopy (x, y) (tagCoil:INamedExpressionizableTerminal) (fromTag:CommandTag) (toTag:CommandTag) (pulse:bool) : CoordinatedRungXmlsWithNewY =
         if fromTag.Size() <> toTag.Size() then
             failwithlog $"Tag Compare size error {fromTag.ToText()}{fromTag.SizeString},  {toTag.ToText()}({toTag.SizeString})"
 

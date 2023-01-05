@@ -16,18 +16,18 @@ module internal Basic =
 
     /// Flat expression 을 논리 Cell 좌표계 x y 에서 시작하는 rung 를 작성한다.
     /// xml 및 다음 y 좌표 반환
-    let rung x y (expr:FlatExpression) (cmdExp:XgiCommand) : CoordinatedRungXml =
+    let rung (x, y) (expr:FlatExpression) (cmdExp:XgiCommand) : CoordinatedRungXml =
 
         /// x y 위치에서 expression 표현하기 위한 정보 반환
         /// {| Xml=[|c, str|]; NextX=sx; NextY=maxY; VLineUpRightMaxY=maxY |}
         /// - Xml : 좌표 * 결과 xml 문자열
-        let rec rng x y (expr:FlatExpression) : RungInfosWithSpan =
+        let rec rng (x, y) (expr:FlatExpression) : RungInfosWithSpan =
             let baseRIWNP = { RungInfos = []; X=x; Y=y; SpanX=1; SpanY=1; }
-            let c = coord x y
+            let c = coord(x, y)
             /// 좌표 * 결과 xml 문자열 보관 장소
             let rungInfos = ResizeArray<CoordinatedRungXml>()
-            let xxx = expr.ToText()
-            { Coordinate = c; Xml = $"<!-- {x} {y} {expr.ToText()} -->" } |> rungInfos.Add
+            if enableXmlComment then
+                { Coordinate = c; Xml = $"<!-- {x} {y} {expr.ToText()} -->" } |> rungInfos.Add
 
             match expr with
             | FlatTerminal(id, pulse, neg) ->
@@ -46,21 +46,21 @@ module internal Basic =
                 let subRungInfos:RungInfosWithSpan list =
                     [
                         for exp in exprs do
-                            let sub = rng sx y exp
+                            let sub = rng (sx, y) exp
                             sx <- sx + sub.SpanX
                             rungInfos.AddRange(sub.RungInfos)
                             yield sub
                     ]
                 let spanX = subRungInfos.Sum(fun sri-> sri.SpanX)
                 let spanY = subRungInfos.Max(fun sri-> sri.SpanY)
-                { baseRIWNP with RungInfos=rungInfos.ToFSharpList(); SpanX=spanX; SpanY=spanY; }
+                { baseRIWNP with RungInfos=rungInfos.Distinct().ToFSharpList(); SpanX=spanX; SpanY=spanY; }
 
             | FlatNary(Or, exprs) ->
                 let mutable sy = y
                 let subRungInfos:RungInfosWithSpan list =
                     [
                         for exp in exprs do
-                            let sub = rng x sy exp
+                            let sub = rng (x, sy) exp
                             sy <- sy + sub.SpanY
                             rungInfos.AddRange(sub.RungInfos)
                             yield sub
@@ -75,12 +75,13 @@ module internal Basic =
                                 let span = (spanX - ri.SpanX - 1) * 3
                                 $"Param={dq}{span}{dq}"
                             let mode = int ElementType.MultiHorzLineMode
-                            let c = coord (ri.X+ri.SpanX) ri.Y
+                            let c = coord (ri.X+ri.SpanX, ri.Y)
                             { Coordinate = c; Xml = elementFull mode c param "" }
                 ] |> rungInfos.AddRange
 
                 // 좌측 vertical lines
-                vlineDownTo (x-1) y (spanY-1) |> rungInfos.AddRange
+                if x >= 1 then
+                    vlineDownTo (x-1, y) (spanY-1) |> rungInfos.AddRange
 
                 // ```OR variable length 역삼각형 test```
                 let lowestY =
@@ -88,20 +89,20 @@ module internal Basic =
                         .Where(fun sri -> sri.SpanX <= spanX)
                         .Max(fun sri -> sri.Y)
                 // 우측 vertical lines
-                vlineDownTo (x+spanX-1) y (lowestY-y) |> rungInfos.AddRange
+                vlineDownTo (x+spanX-1, y) (lowestY-y) |> rungInfos.AddRange
 
 
-                { baseRIWNP with RungInfos=rungInfos.ToFSharpList(); SpanX=spanX; SpanY=spanY; }
+                { baseRIWNP with RungInfos=rungInfos.Distinct().ToFSharpList(); SpanX=spanX; SpanY=spanY; }
 
 
             // terminal case
             | FlatNary(OpUnit, inner::[]) ->
-                inner |> rng x y
+                inner |> rng (x, y)
 
             // negation 없애기
             | FlatNary(Neg, inner::[]) ->
                 let xxx = inner.Negate()
-                FlatNary(OpUnit, [inner.Negate()]) |> rng x y
+                FlatNary(OpUnit, [inner.Negate()]) |> rng (x, y)
 
             | FlatZero ->
                 let str = hlineEmpty c
@@ -114,7 +115,7 @@ module internal Basic =
         /// 최초 시작이 OR 로 시작하면 우측으로 1 column 들여쓰기 한다.
         let indent = 0  // if getDepthFirstLogical expr = Some(Op.Or) then 1 else 0
 
-        let result = rng (x+indent) y expr
+        let result = rng (x+indent, y) expr
 
         noop()
 
@@ -126,7 +127,7 @@ module internal Basic =
 
                 //if indent = 1 then
                 //    assert(false)   // indent 가 필요하면, 사용할 코드.  현재는 indent 0 으로 fix
-                //    let c = coord x y
+                //    let c = coord(x, y)
                 //    { Position = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c "Param=\"0\"" "" }
 
                 let drawCoil(x, y) =
@@ -134,9 +135,9 @@ module internal Basic =
                         let param = 3 * (coilCellX-x-2)
                         $"Param={dq}{param}{dq}"
                     let results = [
-                        let c = coord (x+1) y
+                        let c = coord(x+1, y)
                         { Coordinate = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam "" }
-                        let c = coord coilCellX y
+                        let c = coord(coilCellX, y)
                         { Coordinate = c; Xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.PLCTagName) }
                     ]
                     1, results
@@ -147,7 +148,7 @@ module internal Basic =
                     | CoilCmd (cc) ->
                         drawCoil(nx-1, y)
                     | ( FunctionCmd _ | FunctionBlockCmd _ ) ->
-                        drawCommand(cmdExp, nx, y)
+                        drawCommand (nx, y) cmdExp
 
                 commandHeight <- commandSpanY
                 yield! posiRungXmls
@@ -162,6 +163,6 @@ module internal Basic =
 
         let c =
             let spanY = max result.SpanY commandHeight
-            coord x (spanY + y)
+            coord(x, spanY + y)
         { Xml = xml; Coordinate = c }
 

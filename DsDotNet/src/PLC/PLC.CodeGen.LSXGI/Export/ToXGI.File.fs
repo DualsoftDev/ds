@@ -134,7 +134,7 @@ module internal XgiFile =
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
     let private generateRungs (prologComments:string seq) (commentedStatements:CommentedXgiStatement seq) : XmlOutput =
         let xmlRung (expr:FlatExpression) xgiCommand y : RungGenerationInfo =
-            let {Coordinate=posi; Xml=xml} = rung 0 y expr xgiCommand
+            let {Coordinate=posi; Xml=xml} = rung (0, y) expr xgiCommand
             let yy = (posi / 1024)// + 1
             { Xmls = [$"\t<Rung BlockMask={dq}0{dq}>\r\n{xml}\t</Rung>"]; Y = yy}
 
@@ -333,9 +333,10 @@ module internal XgiFile =
 
 
     type XgiSymbol =
-        | DuTag of ITagWithAddress
-        | DuTimer of TimerStruct
-        | DuCounter of CounterBaseStruct
+        | DuXsTag of ITagWithAddress
+        | DuXsXgiLocalVar of IXgiLocalVar
+        | DuXsTimer of TimerStruct
+        | DuXsCounter of CounterBaseStruct
 
 
     let generateXGIXmlFromStatement (prologComments:string seq) (commentedStatements:CommentedXgiStatement seq) (xgiSymbols:XgiSymbol seq) (unusedTags:ITagWithAddress seq) (existingLSISprj:string option) =
@@ -399,7 +400,7 @@ module internal XgiFile =
                 let tags =
                     [ for s in xgiSymbols do
                         match s with
-                        | DuTag t -> yield t.Address
+                        | DuXsTag t -> yield t.Address
                         | _ -> ()
                     ]
 
@@ -430,7 +431,7 @@ module internal XgiFile =
             [
                 for s in xgiSymbols do
                     match s with
-                    | DuTag t ->
+                    | DuXsTag t ->
                         let name, addr = t.Name, t.Address
 
                         let device, memSize =
@@ -490,14 +491,16 @@ module internal XgiFile =
                         //    | _-> Variable.Kind.VAR_EXTERNAL
 
                         XGITag.createSymbol name comment device kindVar addr plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
-                    | DuTimer timer ->
+                    | DuXsXgiLocalVar xgi ->
+                        xgi.SymbolInfo
+                    | DuXsTimer timer ->
                         let device, addr = "", ""
                         let plcType =
                             match timer.Type with
                             | TON | TOF | RTO -> timer.Type.ToString()
 
                         XGITag.createSymbol timer.Name $"TIMER {timer.Name}" device kindVar addr plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
-                    | DuCounter counter ->
+                    | DuXsCounter counter ->
                         let device, addr = "", ""
                         let plcType =
                             match counter.Type with

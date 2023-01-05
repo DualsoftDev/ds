@@ -1,13 +1,11 @@
 namespace PLC.CodeGen.LSXGI
 
-open System
 open System.Linq
 
 open Engine.Common.FS
 open PLC.CodeGen.Common.QGraph
 open System.Collections.Generic
 open Engine.Core
-open PLC.CodeGen.Common.K
 
 module LsXGI =
 
@@ -86,11 +84,13 @@ module LsXGI =
                             // skip timer/counter structure member : timer 나 counter 명 + "." + field name
                             ()
                         else
-                            XgiSymbol.DuTag t
+                            XgiSymbol.DuXsTag t
+                    | :? IXgiLocalVar as xgi ->
+                        XgiSymbol.DuXsXgiLocalVar xgi
                     | :? TimerStruct as ts ->
-                        XgiSymbol.DuTimer ts
+                        XgiSymbol.DuXsTimer ts
                     | :? CounterBaseStruct as cs ->
-                        XgiSymbol.DuCounter cs
+                        XgiSymbol.DuXsCounter cs
                     | _ -> failwith "ERROR"
             ]
 

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
@@ -29,6 +29,7 @@
 		<Compile Include="Import\XGConfigReader.fs" />
 		<Compile Include="Import\XGLDRoutineReader.fs" />
 		<Compile Include="Import\XGFileRead.fs" />
+		<Compile Include="ToXGI.Prolog.fs" />
 		<Compile Include="Export\ToXGI.StatementAdaptor.fs" />
 		<Compile Include="Export\ToXGI.Common.fs" />
 		<Compile Include="Export\ToXGI.Command.fs" />
@@ -38,6 +39,7 @@
 		<Compile Include="Export\ToXGI.Export.fs" />
 		<Compile Include="ToXGI.Validation.fs" />
 		<None Include="Scripts\Script1.fsx" />
+		<Compile Include="EntryPoint.fs" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -45,7 +47,16 @@
 		<!--<PackageReference Include="EntityFramework" Version="6.4.4" />		--><!--Version="6.4.4"--><!--
 		<PackageReference Include="SQLProvider" Version="1.3.5" />
 		<PackageReference Include="System.Data.SQLite" Version="1.0.117" />-->
-	</ItemGroup>
+
+        <PackageReference Include="Fody" Version="6.6.4">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="ModuleInit.Fody" Version="2.1.1">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+
+    </ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Engine\Engine.Common.FS\Engine.Common.FS.fsproj" />

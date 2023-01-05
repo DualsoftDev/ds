@@ -83,7 +83,7 @@ module CoreModule =
         member val OriginalCodeBlocks = ResizeArray<string>()
         member val Statements = ResizeArray<Statement>()
         member val Variables = ResizeArray<VariableData>()
-        
+
         member val ApiItems = createNamedHashSet<ApiItem>()
         member val ApiResetInfos = HashSet<ApiResetInfo>()
         ///시스템 전체시작 버튼누름시 수행되야하는 Real목록
@@ -92,7 +92,7 @@ module CoreModule =
         member val internal Buttons = HashSet<ButtonDef>()
         ///시스템 램프 소속 Flow 정보  setting은 AddLamp 사용
         member val internal Lamps   = HashSet<LampDef>()
-        
+
 
     type Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
@@ -247,7 +247,7 @@ module CoreModule =
             edge
 
         override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
-        
+
     and AliasTargetWrapper =
         | DuAliasTargetReal of Real
         | DuAliasTargetCall of Call
@@ -304,7 +304,7 @@ module CoreModule =
             | DuAliasTargetReal real -> real
             | DuAliasTargetCall call -> call
             | DuAliasTargetRealEx otherFlowReal -> otherFlowReal
-    
+
     type Real with
         static member Create(name: string, flow) =
             if (name.Contains ".") (*&& not <| (name.StartsWith("\"") && name.EndsWith("\""))*) then

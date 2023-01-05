@@ -139,17 +139,17 @@ module ExpressionModule =
 
 
     /// Pulse coil '-(P)-' 생성 및 평가를 위한 구조
-    type HistoryFlag() = 
+    type HistoryFlag() =
         member val LastValue = false with get, set
     type RisingCoil = {
         Storage:IStorage
-        HistoryFlag:HistoryFlag 
+        HistoryFlag:HistoryFlag
     } with
         interface IStorage with
-            
+
             member x.Name with get() = $"RisingCoil.{x.Storage.Name}" and set(v) = failwith "ERROR"
             member x.DataType = typedefof<RisingCoil>
-            member x.Value with get() = x.Storage.Value 
+            member x.Value with get() = x.Storage.Value
                             and set(v) = x.Storage.Value <- v
 
             member x.ToText() = $"ppulse(${x.Storage.Name})"    // positive pulse
@@ -158,13 +158,13 @@ module ExpressionModule =
     /// Negative Pulse Coil '-(N)-' 생성 및 평가를 위한 구조
     type FallingCoil = {
         Storage:IStorage
-        HistoryFlag:HistoryFlag 
+        HistoryFlag:HistoryFlag
     } with
         interface IStorage with
-            
+
             member x.Name with get() = $"FallingCoil.{x.Storage.Name}" and set(v) = failwith "ERROR"
             member x.DataType = typedefof<FallingCoil>
-            member x.Value with get() = x.Storage.Value 
+            member x.Value with get() = x.Storage.Value
                             and set(v) = x.Storage.Value <- v
 
             member x.ToText() = $"npulse(${x.Storage.Name})"    // negative pulse
@@ -188,7 +188,7 @@ module ExpressionModule =
         CommentedStatement($"{append}\t{statement.ToText()}", statement)
 
 
-    let pulseDo(expr:IExpression, storage:IStorage, historyFlag:HistoryFlag, isRising:bool) = 
+    let pulseDo(expr:IExpression, storage:IStorage, historyFlag:HistoryFlag, isRising:bool) =
         historyFlag.LastValue <- (expr.BoxedEvaluatedValue |> unbox)
         if historyFlag.LastValue |> unbox = isRising //rising 경우 TRUE 변경시점 처리
         then storage.Value <- true   
@@ -202,7 +202,7 @@ module ExpressionModule =
             | DuAssign (expr, (:? RisingCoil as rc)) ->
                 if expr.BoxedEvaluatedValue <> rc.HistoryFlag.LastValue //평가값 변경시
                 then pulseDo (expr, rc.Storage, rc.HistoryFlag, true)
-                   
+
             | DuAssign (expr, (:? FallingCoil as fc)) ->
                 if expr.BoxedEvaluatedValue <> fc.HistoryFlag.LastValue //평가값 변경시
                 then pulseDo (expr, fc.Storage, fc.HistoryFlag, false)
@@ -276,6 +276,12 @@ module ExpressionModule =
             | DuTag t -> t.Value
             | DuVariable v -> v.Value
             | DuLiteral v -> v
+
+        member x.Name =
+            match x with
+            | DuTag t -> t.Name
+            | DuVariable t -> t.Name
+            | DuLiteral _ -> failwith "ERROR"
 
         member x.ToText() =
             match x with

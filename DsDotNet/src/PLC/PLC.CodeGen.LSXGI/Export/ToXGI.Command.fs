@@ -97,12 +97,12 @@ module internal Command =
         | NE -> XgiCommand(FunctionCmd(FunctionPure.CompareNE(tag, (tagA, tagB))))
 
     // <timer>
-    let drawCmdTimer(timerStatement:XgiTimerStatement, x, y) : CoordinatedRungXmlsWithNewY =
+    let drawCmdTimer (x, y) (timerStatement:XgiTimerStatement)  : CoordinatedRungXmlsWithNewY =
         let time:int = int timerStatement.Timer.PRE.Value
         let fbSpanY = 2
-        { SpanY = fbSpanY; PositionedRungXmls = [createFBParameterXml $"T#{time}MS" (x-1) (y+1)]}
+        { SpanY = fbSpanY; PositionedRungXmls = [createFBParameterXml (x-1, y+1) $"T#{time}MS" ]}
 
-    let drawCmdCounter(counterStatement:XgiCounterStatement, x, y) : CoordinatedRungXmlsWithNewY =
+    let drawCmdCounter (x, y) (counterStatement:XgiCounterStatement) : CoordinatedRungXmlsWithNewY =
         let count = int counterStatement.Counter.PRE.Value
         let typ = counterStatement.Counter.Type
 
@@ -112,22 +112,12 @@ module internal Command =
 
         //let reset = counterStatement.Counter.RES.Name
 
-        let createParam (t:Terminal<bool> option) x y =
+        let createParam (x, y) (t:Terminal<bool> option) =
             match t with
-            | Some t ->
-                let name =
-                    match t with
-                    | DuTag t -> t.Name
-                    | _ -> failwith "ERROR: need check"
-                [ createFBParameterXml name x y ]
-            | None -> []
+            | Some t -> [ createFBParameterXml (x, y) t.Name  ]
+            | None   -> []
 
-        let reset =
-            match counterStatement.Reset with
-            | Some(DuTag t) -> t.Name
-            | _ -> failwith "ERROR: need check"
-            //| DuLiteral of 'T
-            //| DuVariable of VariableBase<'T>
+        let reset = counterStatement.Reset.Value.Name
 
         let fbSpanY =
             match typ with
@@ -138,21 +128,21 @@ module internal Command =
         let results = [
             match typ with
             | (CTU | CTD ) ->
-                createFBParameterXml reset      (x-1) (y+1)
-                createFBParameterXml $"{count}" (x-1) (y+2)
+                createFBParameterXml (x-1, y+1) reset
+                createFBParameterXml (x-1, y+2) $"{count}"
             | CTR ->
-                createFBParameterXml $"{count}" (x-1) (y+1)
-                createFBParameterXml reset      (x-1) (y+2)
+                createFBParameterXml (x-1, y+1) $"{count}"
+                createFBParameterXml (x-1, y+2) reset
             | CTUD ->
-                yield! (createParam counterStatement.CountDown (x-1) (y+1))
-                yield! (createParam counterStatement.Reset     (x-1) (y+2))
-                yield! (createParam counterStatement.Load      (x-1) (y+3))
-                createFBParameterXml $"{count}" (x-1) (y+4)
+                yield! (createParam (x-1, y+1) counterStatement.CountDown )
+                yield! (createParam (x-1, y+2) counterStatement.Reset     )
+                yield! (createParam (x-1, y+3) counterStatement.Load      )
+                createFBParameterXml (x-1, y+4) $"{count}"
         ]
 
         { SpanY = fbSpanY; PositionedRungXmls = results}
 
-    let drawCmdCompare(coil:IExpressionTerminal, opComp:OpComp, leftA:CommandTag, leftB:CommandTag, x, y) : CoordinatedRungXmlsWithNewY =
+    let drawCmdCompare (x, y) (coil:IExpressionTerminal) (opComp:OpComp) (leftA:CommandTag) (leftB:CommandTag) : CoordinatedRungXmlsWithNewY =
         let fbSpanY = 3
 
         if(leftA.Size() <> leftB.Size())
@@ -167,15 +157,15 @@ module internal Command =
 
         let results = [
             createFB funcFind func "" (opComp.ToText()) x y
-            createFBParameterXml (leftA.ToText()) (x-1) (y+1)
-            createFBParameterXml (leftB.ToText()) (x-1) (y+2)
-            createFBParameterXml (coil.PLCTagName)  (x+1) (y+1)
+            createFBParameterXml (x-1, y+1) (leftA.ToText())
+            createFBParameterXml (x-1, y+2) (leftB.ToText())
+            createFBParameterXml (x+1, y+1) (coil.PLCTagName)
         ]
 
         { SpanY = fbSpanY; PositionedRungXmls = results}
 
-    let drawCmdAdd(tagCoil:IExpressionTerminal, targetTag:CommandTag, addValue:int, xInit, y, (pulse:bool)): CoordinatedRungXmlsWithNewY =
-        let mutable x = xInit
+    let drawCmdAdd (x, y) (tagCoil:IExpressionTerminal) (targetTag:CommandTag) (addValue:int) (pulse:bool): CoordinatedRungXmlsWithNewY =
+        let mutable xx = x
         let fbSpanY = 4
 
         let func = "ADD"
@@ -185,32 +175,32 @@ module internal Command =
 
         let results = [
             if pulse then
-                x <- xInit + 1
-                yield! drawPulseCoil (xInit, y, tagCoil, fbSpanY)
+                xx <- x + 1
+                yield! drawPulseCoil (x, y) tagCoil fbSpanY
             else
-                x <- xInit
+                xx <- x
                 //Command 결과출력
-                createFBParameterXml (tagCoil.PLCTagName)  (x+1) (y)
+                createFBParameterXml (xx+1, y) (tagCoil.PLCTagName)
 
 
             //Pulse시 증감 처리
             //yield! drawRising(x, y)
             //함수 그리기
-            createFB funcFind func "" func x y
-            createFBParameterXml (targetTag.ToText())    (x-1) (y+1)
-            createFBParameterXml (targetTag.ToText())    (x+1) (y+1)
-            createFBParameterXml (addValue.ToString())   (x-1) (y+2)
+            createFB funcFind func "" func xx y
+            createFBParameterXml (xx-1, y+1) (targetTag.ToText())
+            createFBParameterXml (xx+1, y+1) (targetTag.ToText())
+            createFBParameterXml (xx-1, y+2) (addValue.ToString())
         ]
 
         let newY = if pulse then fbSpanY else fbSpanY-1
         { SpanY = newY; PositionedRungXmls = results}
 
 
-    let drawCmdCopy(tagCoil:IExpressionTerminal, fromTag:CommandTag, toTag:CommandTag, xInit, y, (pulse:bool)) : CoordinatedRungXmlsWithNewY =
+    let drawCmdCopy (x, y) (tagCoil:IExpressionTerminal) (fromTag:CommandTag) (toTag:CommandTag) (pulse:bool) : CoordinatedRungXmlsWithNewY =
         if fromTag.Size() <> toTag.Size() then
             failwithlog $"Tag Compare size error {fromTag.ToText()}{fromTag.SizeString},  {toTag.ToText()}({toTag.SizeString})"
 
-        let mutable x = xInit
+        let mutable xx = x
         let fbSpanY = 3
         let func = "MOVE"
         let funcFind = func + "_" + fromTag.SizeString
@@ -218,18 +208,18 @@ module internal Command =
         let results = [
             if pulse then
                 //Pulse Command 결과출력
-                x <- xInit + 1
-                yield! drawPulseCoil (xInit, y, tagCoil, fbSpanY)
+                xx <- x + 1
+                yield! drawPulseCoil (x, y) tagCoil fbSpanY
             else
                 //Command 결과출력
-                x <- xInit
-                createFBParameterXml (tagCoil.PLCTagName)  (x+1) (y)
+                xx <- x
+                createFBParameterXml (xx+1, y) (tagCoil.PLCTagName)
 
 
             //함수 그리기
-            createFB funcFind func "" func x y
-            createFBParameterXml (fromTag.ToText())  (x-1) (y+1)
-            createFBParameterXml (toTag.ToText())  (x+1) (y+1)
+            createFB funcFind func "" func xx y
+            createFBParameterXml (xx-1, y+1) (fromTag.ToText())
+            createFBParameterXml (xx+1, y+1) (toTag.ToText())
         ]
 
         let spanY = if pulse then fbSpanY else fbSpanY-1
@@ -237,7 +227,7 @@ module internal Command =
 
 
 
-    let drawFunctionBlockInstance(cmd:XgiCommand, x, y) =
+    let drawFunctionBlockInstance (x, y) (cmd:XgiCommand) =
         //Command instance 객체생성
         let inst, func = cmd.Instance |> fun (inst, varType) -> inst, varType.ToString()
         [
@@ -248,9 +238,9 @@ module internal Command =
         ]
 
     // <timer>
-    let drawCommand(cmd:XgiCommand, x, y) =
+    let drawCommand (x, y) (cmd:XgiCommand) =
         let results = ResizeArray<CoordinatedRungXml>()
-        let c = coord x y
+        let c = coord(x, y)
         results.Add( {Coordinate = c; Xml = hlineEmpty c})
 
         //FunctionBlock, Function 까지 연장선 긋기
@@ -262,19 +252,19 @@ module internal Command =
             match cmd.CommandType with
             | FunctionCmd (fc) ->
                 match fc with
-                | CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy(endTag, tagA, tagB, newX, y, true)
-                | CompareGT (endTag, (tagA, tagB)) ->  drawCmdCompare(endTag, OpComp.GT, tagA, tagB, newX, y)
-                | CompareLT (endTag, (tagA, tagB)) ->  drawCmdCompare(endTag, OpComp.LT, tagA, tagB, newX, y)
-                | CompareGE (endTag, (tagA, tagB)) ->  drawCmdCompare(endTag, OpComp.GE, tagA, tagB, newX, y)
-                | CompareLE (endTag, (tagA, tagB)) ->  drawCmdCompare(endTag, OpComp.LE, tagA, tagB, newX, y)
-                | CompareEQ (endTag, (tagA, tagB)) ->  drawCmdCompare(endTag, OpComp.EQ, tagA, tagB, newX, y)
-                | CompareNE (endTag, (tagA, tagB)) ->  drawCmdCompare(endTag, OpComp.NE, tagA, tagB, newX, y)
-                | Add       (endTag, tag, value)   ->  drawCmdAdd(endTag, tag, value, newX, y, true)
+                | CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy (newX, y) endTag tagA tagB true
+                | CompareGT (endTag, (tagA, tagB)) ->  drawCmdCompare (newX, y) endTag OpComp.GT tagA tagB
+                | CompareLT (endTag, (tagA, tagB)) ->  drawCmdCompare (newX, y) endTag OpComp.LT tagA tagB
+                | CompareGE (endTag, (tagA, tagB)) ->  drawCmdCompare (newX, y) endTag OpComp.GE tagA tagB
+                | CompareLE (endTag, (tagA, tagB)) ->  drawCmdCompare (newX, y) endTag OpComp.LE tagA tagB
+                | CompareEQ (endTag, (tagA, tagB)) ->  drawCmdCompare (newX, y) endTag OpComp.EQ tagA tagB
+                | CompareNE (endTag, (tagA, tagB)) ->  drawCmdCompare (newX, y) endTag OpComp.NE tagA tagB
+                | Add       (endTag, tag, value)   ->  drawCmdAdd (newX, y) endTag tag value true
             | FunctionBlockCmd (fbc) ->
-                results.AddRange(drawFunctionBlockInstance(cmd, newX, y)) //Command 객체생성
+                results.AddRange(drawFunctionBlockInstance (newX, y) cmd) //Command 객체생성
                 match fbc with
-                | TimerMode(timerStatement) -> drawCmdTimer(timerStatement, newX, y)     // <timer>
-                | CounterMode(counterStatement) -> drawCmdCounter(counterStatement, newX, y)
+                | TimerMode(timerStatement) -> drawCmdTimer(newX, y) timerStatement     // <timer>
+                | CounterMode(counterStatement) -> drawCmdCounter(newX, y) counterStatement
             | _ ->
                 failwithlog "Unknown CommandType"
 

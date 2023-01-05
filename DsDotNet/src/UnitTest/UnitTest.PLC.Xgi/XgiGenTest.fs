@@ -286,3 +286,17 @@ type XgiGenerationTest() =
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
+    [<Test>]
+    member __.``Add test`` () =
+        let storages = Storages()
+        let code = """
+            int n0 = createTag("%IX0.0.0", 0);
+            int n1 = createTag("%IX0.0.0", 1);
+            int n2 = createTag("%IX0.0.0", 2);
+
+            $n0 := add($n1, $n2);
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
+

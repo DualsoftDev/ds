@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
@@ -28,6 +28,9 @@
 
 	<ItemGroup>
 		<Compile Include="TestFixture.fs" />
+		<Compile Include="XgiLadderElementsTest.fs" />
+		<Compile Include="XgiTestCommon.fs" />
+		<Compile Include="XgiDrawing.fs" />
 		<Compile Include="XgiRungBasics.fs" />
 		<Compile Include="XgiGenTest.fs" />
 		<Compile Include="XgiTimerTest.fs" />

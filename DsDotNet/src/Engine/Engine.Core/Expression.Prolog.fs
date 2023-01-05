@@ -310,6 +310,11 @@ module rec ExpressionPrologModule =
         interface IVariable<'T>
         override x.ToText() = "$" + name
 
+    type LiteralHolder<'T when 'T:equality>(literalValue:'T) =
+        member _.Value = literalValue
+        interface IExpressionTerminal with
+            member x.PLCTagName = "NO PLC NAME for literal value"
+
     type Arg       = IExpression
     type Arguments = IExpression list
     type Args      = Arguments
@@ -321,7 +326,7 @@ module rec ExpressionPrologModule =
     let isThisOperatorRequireAllArgumentsSameType: (string -> bool)  =
         let hash =
             [   "+" ; "-" ; "*" ; "/" ; "%"
-                ">" ; ">=" ; "<" ; "<=" ; "=" ; "="
+                ">" ; ">=" ; "<" ; "<=" ; "=" ; "!="
                 "&&" ; "||"
                 "&" ; "|" ; "&&&" ; "|||"
                 "add"; "sub"; "mul"; "div"

@@ -95,6 +95,9 @@ module internal Basic =
                 { baseRIWNP with RungInfos=rungInfos.Distinct().ToFSharpList(); SpanX=spanX; SpanY=spanY; }
 
 
+            | FlatNary((OpCompare _ | OpArithematic _), exprs) ->
+                failwith "ERROR : Should have been processed in early stage."    // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
+
             // terminal case
             | FlatNary(OpUnit, inner::[]) ->
                 inner |> rng (x, y)

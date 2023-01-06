@@ -156,7 +156,7 @@ type XgiDrawingTest() =
 
     [<Test>]
     member __.``ADD function drawing test``() =
-        let { Coordinate = c; Xml = elementAddXml } = createFunctionAt "ADD2_INT" "ADD" "" "ADD" (3, 2)
+        let { Coordinate = c; Xml = elementAddXml } = createFunctionXmlAt ("ADD2_INT", "ADD") "" (3, 2)
         (* '&#xA' = '&#10' = '\n' 의 HTML encoding *)
         let originalElementAddXml = "FNAME: ADD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 71&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;PROP_COLOR: 16777215&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00207fe0, , 0&#xA;VAR_IN: IN2, 0x00207fe0, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00007fe0, &#xA;"
         noop()

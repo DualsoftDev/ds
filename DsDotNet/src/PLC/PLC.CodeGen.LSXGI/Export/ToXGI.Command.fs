@@ -150,13 +150,14 @@ module internal Command =
 
         let opCompType = leftA.SizeString
         let func = opComp.ToText()
-        let funcFind =
-            if(opComp = OpComp.NE)
-            then $"{opComp.ToText()}_{opCompType}"
-            else $"{opComp.ToText()}2_{opCompType}"
+        let detailedFunctionName =
+            if opComp = OpComp.NE then
+                $"{func}_{opCompType}"
+            else
+                $"{func}2_{opCompType}"
 
         let results = [
-            createFunctionAt funcFind func "" (opComp.ToText()) (x, y)
+            createFunctionXmlAt (detailedFunctionName, func) "" (x, y)
             createFBParameterXml (x-1, y+1) (leftA.ToText())
             createFBParameterXml (x-1, y+2) (leftB.ToText())
             createFBParameterXml (x+1, y+1) (coil.StorageName)
@@ -186,7 +187,7 @@ module internal Command =
             //Pulse시 증감 처리
             //yield! drawRising(x, y)
             //함수 그리기
-            createFunctionAt funcFind func "" func (xx, y)
+            createFunctionXmlAt (funcFind, func) "" (xx, y)
             createFBParameterXml (xx-1, y+1) (targetTag.ToText())
             createFBParameterXml (xx+1, y+1) (targetTag.ToText())
             createFBParameterXml (xx-1, y+2) (addValue.ToString())
@@ -217,7 +218,7 @@ module internal Command =
 
 
             //함수 그리기
-            createFunctionAt funcFind func "" func (xx, y)
+            createFunctionXmlAt (funcFind, func) "" (xx, y)
             createFBParameterXml (xx-1, y+1) (fromTag.ToText())
             createFBParameterXml (xx+1, y+1) (toTag.ToText())
         ]
@@ -227,18 +228,18 @@ module internal Command =
 
 
 
-    let drawFunctionBlockInstance (x, y) (cmd:XgiCommand) =
+    let createFunctionBlockInstanceXmls (x, y) (cmd:XgiCommand) : CoordinatedRungXml list =
         //Command instance 객체생성
         let inst, func = cmd.Instance |> fun (inst, varType) -> inst, varType.ToString()
         [
-            createFunctionAt func func inst func (x, y)
+            createFunctionXmlAt (func, func) inst (x, y)
 
             //Command 결과출력
             //createFBParameterXml (cmd.CoilTerminalTag.PLCTagName)  (x+1) (y)
         ]
 
-    // <timer>
-    let drawCommand (x, y) (cmd:XgiCommand) =
+    /// (x, y) 위치에 cmd 를 생성.  cmd 가 차지하는 height 와 xml 목록을 반환
+    let drawCommand (x, y) (cmd:XgiCommand) : int * (CoordinatedRungXml list) =
         let results = ResizeArray<CoordinatedRungXml>()
         let c = coord(x, y)
         results.Add( {Coordinate = c; Xml = hlineEmpty c})
@@ -261,7 +262,7 @@ module internal Command =
                 | CompareNE (endTag, (tagA, tagB)) ->  drawCmdCompare (newX, y) endTag OpComp.NE tagA tagB
                 | Add       (endTag, tag, value)   ->  drawCmdAdd (newX, y) endTag tag value true
             | FunctionBlockCmd (fbc) ->
-                results.AddRange(drawFunctionBlockInstance (newX, y) cmd) //Command 객체생성
+                results.AddRange(createFunctionBlockInstanceXmls (newX, y) cmd) //Command 객체생성
                 match fbc with
                 | TimerMode(timerStatement) -> drawCmdTimer(newX, y) timerStatement     // <timer>
                 | CounterMode(counterStatement) -> drawCmdCounter(newX, y) counterStatement
@@ -273,3 +274,15 @@ module internal Command =
         spanY, (results |> List.ofSeq)
 
 
+    /// (x, y) 위치에 coil 생성.  height(=1) 와 xml 목록을 반환
+    let drawCoil(x, y) (cmdExp:XgiCommand) : int * (CoordinatedRungXml list) =
+        let lengthParam =
+            let param = 3 * (coilCellX-x-2)
+            $"Param={dq}{param}{dq}"
+        let results = [
+            let c = coord(x+1, y)
+            { Coordinate = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam "" }
+            let c = coord(coilCellX, y)
+            { Coordinate = c; Xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.StorageName) }
+        ]
+        1, results

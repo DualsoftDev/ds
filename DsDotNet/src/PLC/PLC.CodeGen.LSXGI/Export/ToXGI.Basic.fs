@@ -132,24 +132,11 @@ module internal Basic =
                 //    assert(false)   // indent 가 필요하면, 사용할 코드.  현재는 indent 0 으로 fix
                 //    let c = coord(x, y)
                 //    { Position = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c "Param=\"0\"" "" }
-
-                let drawCoil(x, y) =
-                    let lengthParam =
-                        let param = 3 * (coilCellX-x-2)
-                        $"Param={dq}{param}{dq}"
-                    let results = [
-                        let c = coord(x+1, y)
-                        { Coordinate = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam "" }
-                        let c = coord(coilCellX, y)
-                        { Coordinate = c; Xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.StorageName) }
-                    ]
-                    1, results
-
                 let nx = x + result.SpanX
                 let commandSpanY, posiRungXmls =
                     match cmdExp.CommandType with
                     | CoilCmd (cc) ->
-                        drawCoil(nx-1, y)
+                        drawCoil (nx-1, y) cmdExp
                     | ( FunctionCmd _ | FunctionBlockCmd _ ) ->
                         drawCommand (nx, y) cmdExp
 

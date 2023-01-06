@@ -72,40 +72,22 @@ module internal Common =
     let fallingline c = elementFull (int ElementType.FallingContact) (c) "" ""
 
 
+
     /// 마지막 수평으로 연결 정보
-    let mutiEndLine startX endX y =
-        if endX > startX then
-            let lengthParam = sprintf "Param=\"%d\"" (3 * (endX-startX))
-            let c = coord(startX, y)
-            elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
-        else
-            failwithlogf "endX startX [%d > %d]" endX startX
+    let hLineTo (x, y) endX =
+        if endX <= x then
+            failwithlog $"endX startX [{endX} > {x}]"
 
-    /// 함수 그리기
-    let createFunctionAt funcFind func (inst:string) tag (x, y) : CoordinatedRungXml =
-        let instFB = if inst = "" then "," else (inst + ",VAR")
+        let lengthParam = $"Param={dq}{3 * (endX-x)}{dq}"
         let c = coord(x, y)
-        let fbBody = sprintf "Param=\"%s\"" (FB.getFBXmlParam( funcFind, func, instFB, FB.getFBIndex tag))
-        let xml = elementFull (int ElementType.VertFBMode) c fbBody inst
-        { Coordinate = c; Xml = xml }
+        elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
 
-    /// 함수 파라메터 그리기
-    let createFBParameterXml (x, y) tag =
-        let c = coord(x, y)
-        let xml = elementFull (int ElementType.VariableMode) c "" tag
-        { Coordinate = c; Xml = xml }
 
-    let drawRising (x, y) =
-        let cellX = getFBCellX x
-        let c = coord (cellX, y)
-        [   { Coordinate = c; Xml = risingline c}
-            { Coordinate = c; Xml = mutiEndLine x (cellX-1) y}
-        ]
 
     /// x y 위치에서 수직선 한개를 긋는다
     let vLineAt (x, y) =
         verify(x >= 0)
-        let c = 2 + coord(x, y)
+        let c = coord(x, y) + 2
         { Coordinate = c; Xml = vline c }
 
     /// x y 위치에서 수직으로 n 개의 line 을 긋는다
@@ -119,12 +101,36 @@ module internal Common =
                 yield vLineAt (x, y+i)
         ]
 
+
+    /// 함수 그리기 (detailedFunctionName = 'ADD2_INT', briefFunctionName = 'ADD')
+    let createFunctionXmlAt (detailedFunctionName, briefFunctionName) (inst:string) (x, y) : CoordinatedRungXml =
+        let tag = briefFunctionName
+        let instFB = if inst = "" then "," else (inst + ",VAR")
+        let c = coord(x, y)
+        let param = FB.getFBXmlParam (detailedFunctionName, briefFunctionName) instFB (FB.getFBIndex tag)
+        let fbBody = $"Param={dq}{param}{dq}"
+        let xml = elementFull (int ElementType.VertFBMode) c fbBody inst
+        { Coordinate = c; Xml = xml }
+
+    /// 함수 파라메터 그리기
+    let createFBParameterXml (x, y) tag =
+        let c = coord(x, y)
+        let xml = elementFull (int ElementType.VariableMode) c "" tag
+        { Coordinate = c; Xml = xml }
+
+    let drawRising (x, y) =
+        let cellX = getFBCellX x
+        let c = coord (cellX, y)
+        [   { Coordinate = c; Xml = risingline c}
+            { Coordinate = c; Xml = hLineTo (x, y) (cellX-1)}
+        ]
+
     let drawPulseCoil (x, y) (tagCoil:INamedExpressionizableTerminal) (funSize:int) =
         let newX = getFBCellX (x-1)
         let newY = y + funSize
         [
             { Coordinate = coord(x, y); Xml = risingline (coord(x, y))}
-            { Coordinate = coord(newX, newY); Xml = mutiEndLine (x) (newX - 1) newY}
+            { Coordinate = coord(newX, newY); Xml = hLineTo (x, newY) (newX - 1) }
             { Coordinate = coord(coilCellX, newY); Xml = elementBody (int ElementType.CoilMode) (coord(coilCellX, newY)) (tagCoil.StorageName)}
             yield! vlineDownTo (x-1, y) funSize
         ]

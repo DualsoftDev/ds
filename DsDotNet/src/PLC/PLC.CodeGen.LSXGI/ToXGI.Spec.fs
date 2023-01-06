@@ -384,7 +384,7 @@ module internal FB =
     ///
     /// return sample =
     /// "#BEGIN_FUNC: ADD2_INT&#xA;FNAME: ADD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 71&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200040, , 0&#xA;VAR_IN: IN2, 0x00200040, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000040,&#xA;#END_FUNC &#xA;"
-    let getFBXmlParam (functionName, functionNameTarget, instance, index) =
+    let getFBXmlParam (functionName, functionNameTarget) instance index =
         let xmlLineFeed = "&#xA"
         let fbXml =
             xgiFunctionInfoDic[functionName]

@@ -1,6 +1,7 @@
 namespace Engine.Common.FS
 open Microsoft.FSharp.Reflection
 open Microsoft.FSharp.Quotations.Patterns
+open System
 
 /// F# Discriminated Unions
 [<RequireQualifiedAccess>]
@@ -51,4 +52,12 @@ module DU =
         verify isANoneOrSingle
         verify (not isASingleOrAll)
 
-        ()
+        (* int 을 F# flag enum type 으로 변환 *)
+        type [<Flags>] Num =
+            | BOOL          = 0x00000001
+            | BYTE          = 0x00000002
+            | WORD          = 0x00000004
+            | DWORD         = 0x00000008
+        let boolByte = 3 |> enum<Num>
+        verify(boolByte = (Num.BOOL ||| Num.BYTE))
+        verify (boolByte.ToString() = "BOOL, BYTE")

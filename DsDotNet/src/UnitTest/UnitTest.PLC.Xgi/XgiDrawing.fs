@@ -88,6 +88,71 @@ type XgiDrawingTest() =
         let xml = wrapWithXml rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
         saveTestResult (get_current_function_name ()) xml
 
+    [<Test>]
+    member __.``ADD function details test``() =
+        (* Function/FunctionBlock 정보 :
+            - function 의 가로 너비 : COL_PROP
+            - function 의 세로 높이 : max(# VAR_IN, # VAR_OUT)
+            - TYPE: {function or function_block}
+            - I/O parameter : VAR_{IN, OUT} 을 참조
+        *)
+
+        let details = FB.getFunctionDeails "ADD"
+        [
+            "#BEGIN_FUNC: ADD"
+            "FNAME: ADD"
+            "TYPE: function"
+            "INSTANCE: INST,VAR"
+            "INDEX: 71"
+            "COL_PROP: 1"
+            "SAFETY: 0"
+            "VAR_IN: EN, 0x00200001, , 0"
+            "VAR_OUT: ENO, 0x00000001,"
+            "VAR_OUT: OUT, 0x00007fe0,"
+            "#END_FUNC"
+        ] |> SeqEq details
+
+        FB.decodeVarType "0x00200001" |> toString === "BOOL, CONSTANT"    // EN
+
+        let details = FB.getFunctionDeails "ADD2_INT"
+        [
+            "#BEGIN_FUNC: ADD2_INT"
+            "FNAME: ADD2_INT"
+            "TYPE: function"
+            "INSTANCE: INST,VAR"
+            "INDEX: 1686"
+            "COL_PROP: 1"
+            "SAFETY: 0"
+            "VAR_IN: EN, 0x00200001, , 0"
+            "VAR_IN: IN1, 0x00200040, , 0"
+            "VAR_IN: IN2, 0x00200040, , 0"
+            "VAR_OUT: ENO, 0x00000001,"
+            "VAR_OUT: OUT, 0x00000040,"
+            "#END_FUNC"
+        ] |> SeqEq details
+        FB.decodeVarType "0x00200040" |> toString === "INT, CONSTANT"   // IN1, IN2, OUT
+
+
+
+
+        let details = FB.getFunctionDeails "GT"
+        [
+            "#BEGIN_FUNC: GT"
+            "FNAME: GT"
+            "TYPE: function"
+            "INSTANCE: INST,VAR"
+            "INDEX: 68"
+            "COL_PROP: 1"
+            "SAFETY: 0"
+            "VAR_IN: EN, 0x00200001, , 0"
+            "VAR_OUT: ENO, 0x00000001,"
+            "VAR_OUT: OUT, 0x00000001,"
+            "#END_FUNC"
+        ] |> SeqEq details
+
+
+        ()
+
 
     [<Test>]
     member __.``ADD function drawing test``() =

@@ -189,23 +189,23 @@ module ExpressionModule =
 
 
     let pulseDo(expr:IExpression, storage:IStorage, historyFlag:HistoryFlag, isRising:bool) =
-        historyFlag.LastValue <- (expr.BoxedEvaluatedValue |> unbox)
-        if historyFlag.LastValue |> unbox = isRising //rising 경우 TRUE 변경시점 처리
-        then storage.Value <- true   
-             storage.Value <- false   
-             //single 스켄방식이면 펄스조건 사용된 모든 Rung 처리후 Off 
-             //이벤트 방식이면 단일 쓰레드이면 이벤트 끝난후 pulseDo Off 해서 상관없을듯  //이벤트 테스트 중 ahn
+        if expr.BoxedEvaluatedValue <> historyFlag.LastValue //평가값 변경시
+        then 
+            historyFlag.LastValue <- (expr.BoxedEvaluatedValue |> unbox)
+            if historyFlag.LastValue |> unbox = isRising //rising 경우 TRUE 변경시점 처리
+            then storage.Value <- true   
+                 storage.Value <- false   
+                 //single 스켄방식이면 펄스조건 사용된 모든 Rung 처리후 Off 
+                 //이벤트 방식이면 단일 쓰레드이면 이벤트 끝난후 pulseDo Off 해서 상관없을듯  //이벤트 테스트 중 ahn
 
     type Statement with
         member x.Do() =
             match x with
             | DuAssign (expr, (:? RisingCoil as rc)) ->
-                if expr.BoxedEvaluatedValue <> rc.HistoryFlag.LastValue //평가값 변경시
-                then pulseDo (expr, rc.Storage, rc.HistoryFlag, true)
+                pulseDo (expr, rc.Storage, rc.HistoryFlag, true)
 
             | DuAssign (expr, (:? FallingCoil as fc)) ->
-                if expr.BoxedEvaluatedValue <> fc.HistoryFlag.LastValue //평가값 변경시
-                then pulseDo (expr, fc.Storage, fc.HistoryFlag, false)
+                pulseDo (expr, fc.Storage, fc.HistoryFlag, false)
 
             | DuAssign (expr, target) ->
                 assert(target.DataType = expr.DataType)

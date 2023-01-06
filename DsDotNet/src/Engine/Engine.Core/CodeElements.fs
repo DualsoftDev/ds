@@ -1,5 +1,7 @@
 namespace Engine.Core
 
+open System
+
 [<AutoOpen>]
 module CodeElements =
     (*
@@ -15,16 +17,44 @@ module CodeElements =
 
         member _.ToDsText() = $"{name} = ({varType.ToText()}, {initValue})"
 
+    let getFunctions (text:string) = 
+        if not <| text.StartsWith "$" 
+        then failwith "command & observe text start keyword is '$' ex)$mov 100 R100"
+        text.Split('$')
+        |> Seq.tail
+        |> Seq.map(fun line -> 
+            let line = line.Split(';')[0]  //줄바꿈 제거
+            //function Name
+            line.Split(' ')    |> Seq.head  
+            //function Parameters
+            , (line.Split(' ') |> Seq.tail |> Seq.toArray )
+            ) 
+        
     type ParameterGroup = string[]
-    // $ton 500   // &mov 0 R100 // &ctr 5
-    type FunctionApplication(functionName:string, parameterGroups:ParameterGroup[]) =
-        member _.FunctionName = functionName
+    [<AbstractClass>]
+    type Func(name:string, parameterGroups:ParameterGroup) =
+        member _.Name = name
         member _.ParameterGroups = parameterGroups
+        member _.ToDsText() =  $"""${name} {String.Join(" ", parameterGroups)}"""   
+    
+    //Job, ButtonDef, LampDef 에서 사용중  //todo ToDsText, parsing  
+    //  [jobs] = {
+    //    Ap = { A1."+"(%I1, %Q1); A2."+"(%I22, %Q22); A3."+"(%I33, %Q33); }
+    //    Am = { A."-"(%I2, %Q2); } (Observes?, Commands? 삽입 규칙 필요) 
+    //    Bp = { B."+"(%I3, %Q3); }
+    //    Bm = { B."-"(%I4, %Q4); }
+    //}
+    //  [emg] = {
+    //    STOP(%I1, %Q1) = { F; } (Observes?, Commands? 삽입 규칙 필요) 
+    //    STOP2(%I1, %Q1) = { F2; }
+    //}
+    //  [emglamp] = {
+    //    EmgMode(%Q1) = { F3 } ( Commands? 삽입 규칙 필요) ) 
+    //}
+    type Command(name:string, parameterGroups:ParameterGroup) =
+        inherit Func(name, parameterGroups)
 
-    type Command(name:string, functionApplication:FunctionApplication) =
-        member _.Name = name
-        member _.FunctionApplication = functionApplication
-
-    type Observe(name:string, functionApplication:FunctionApplication) =
-        member _.Name = name
-        member _.FunctionApplication = functionApplication
+    //Job, ButtonDef, LampDef 에서 사용중  //todo ToDsText, parsing  
+    type Observe(name:string, parameterGroups:ParameterGroup) =
+        inherit Func(name, parameterGroups)
+            

@@ -6,6 +6,7 @@ open System.Linq
 open Microsoft.Office.Interop.Excel
 open Engine.Common.FS
 open Engine.Core
+open System.Collections.Generic
 
 [<AutoOpen>]
 module ImportIOTable =
@@ -16,6 +17,9 @@ module ImportIOTable =
     | DataType  = 2
     | Input     = 3
     | Output    = 4
+    | Job       = 5
+    | Command   = 6
+    | Observe   = 7
 
     let ApplyExcel(path:string, systems:DsSystem seq) =
         let sys = systems.Head()
@@ -55,23 +59,41 @@ module ImportIOTable =
 
         let dataset = FromExcel(path)
         try
+            let functionUpdate(cmdText, commands:HashSet<Command>, obsText, observes:HashSet<Observe>) = 
+                commands.Clear()
+                if cmdText <> "" && cmdText <> "-"
+                then getFunctions(cmdText) 
+                        |> Seq.iter(fun (name, parms) -> commands.Add(Command(name, parms)) |>ignore )
+
+                observes.Clear()
+                if obsText <> "" && obsText <> "-"
+                then getFunctions(obsText) 
+                        |> Seq.iter(fun (name, parms) -> observes.Add(Observe(name, parms)) |>ignore )
+
             let updateBtn(row:Data.DataRow, btntype:BtnType, tableIO:Data.DataTable) = 
                 let name  = $"{row.[(int)IOColumn.Name]}"
                 let input = $"{row.[(int)IOColumn.Input]}"
                 let output= $"{row.[(int)IOColumn.Output]}"
+                let cmd  = $"{row.[(int)IOColumn.Command]}"
+                let obs  = $"{row.[(int)IOColumn.Observe]}"
+
                 let btns = sys.SystemButtons.Where(fun w->w.ButtonType = btntype)
                 match btns.TryFind(fun f -> f.Name = name) with
                 | Some btn -> btn.InAddress <- input
                               btn.OutAddress <- output
+                              functionUpdate (cmd, btn.Commands, obs, btn.Observes)
                 | None -> Office.ErrorXLS(ErrorCase.Name, ErrID._1001, $"{name}", tableIO.TableName, path)
 
             let updateLamp(row:Data.DataRow, lampType:LampType, tableIO:Data.DataTable) = 
                 let name  = $"{row.[(int)IOColumn.Name]}"
-                let input = $"{row.[(int)IOColumn.Input]}"
                 let output= $"{row.[(int)IOColumn.Output]}"
-                let btns = sys.SystemLamps.Where(fun w->w.LampType = lampType)
-                match btns.TryFind(fun f -> f.Name = name) with
-                | Some btn -> btn.OutAddress <- output
+                let cmd  = $"{row.[(int)IOColumn.Command]}"
+                let obs  = $"{row.[(int)IOColumn.Observe]}"
+
+                let lamps = sys.SystemLamps.Where(fun w->w.LampType = lampType)
+                match lamps.TryFind(fun f -> f.Name = name) with
+                | Some lamp -> lamp.OutAddress <- output
+                               functionUpdate (cmd, lamp.Commands, obs, lamp.Observes)
                 | None -> Office.ErrorXLS(ErrorCase.Name, ErrID._1002, $"{name}", tableIO.TableName, path)
 
             systems
@@ -81,7 +103,7 @@ module ImportIOTable =
                                 |> Seq.filter(fun tb -> tb.TableName = sys.Name)
                 
                 if tableIOs.length()  = 0
-                then Office.ErrorPPT(ErrorCase.Path, $"{sys.Name}에 해당하는 엑셀 Sheet 가 없습니다.", "", 0, "")
+                then Office.ErrorXLS(ErrorCase.Name, ErrID._1003, "",  $"오류 이름 {sys.Name}.")
 
                 let tableIO = tableIOs |> Seq.head
                 let dicJob = sys.Jobs |> Seq.collect(fun f-> f.JobDefs) |> Seq.map(fun j->j.ApiName, j) |> dict
@@ -93,6 +115,15 @@ module ImportIOTable =
                             let jobDef = dicJob.[$"{row.[(int)IOColumn.Name]}"]
                             jobDef.InAddress  <- $"{row.[(int)IOColumn.Input]}"
                             jobDef.OutAddress <- $"{row.[(int)IOColumn.Output]}"
+                            
+                            let jobName  = $"{row.[(int)IOColumn.Job]}"
+                            let cmd  = $"{row.[(int)IOColumn.Command]}"
+                            let obs  = $"{row.[(int)IOColumn.Observe]}"
+
+                            match sys.Jobs.TryFind(fun f-> f.Name = jobName) with
+                            | Some job ->  functionUpdate (cmd, job.Commands, obs, job.Observes)
+                            | None -> if "↑" <> jobName //이름이 위와 같지 않은 경우
+                                      then Office.ErrorXLS(ErrorCase.Name, ErrID._1004, tableIO.TableName,  $"오류 이름 {jobName}.")
 
                         | XlsVariable -> 
                             let name      = $"{row.[(int)IOColumn.Name]}" 
@@ -100,16 +131,6 @@ module ImportIOTable =
                             let initValue = $"{row.[(int)IOColumn.Output]}"
                             let variableData = VariableData(name, dataType, initValue)
                             sys.Variables.Add(variableData)
-
-                        | XlsCommand ->  
-                            let jobDef = dicJob.[$"{row.[(int)IOColumn.Name]}"]
-                            ()
-                           // jobDef.CommandOutTimming  <- $"{row.[(int)IOColumn.Command]}"
-
-                        | XlsObserve ->  
-                            let jobDef = dicJob.[$"{row.[(int)IOColumn.Name]}"]
-                            ()
-                          //  jobDef.ObserveInTimming   <- $"{row.[(int)IOColumn.Observe]}"
 
                         | XlsAutoBTN          -> updateBtn  (row, BtnType.DuAutoBTN, tableIO)
                         | XlsManualBTN        -> updateBtn  (row, BtnType.DuManualBTN      , tableIO)

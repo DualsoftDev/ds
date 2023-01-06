@@ -82,7 +82,7 @@ module ImportViewModule =
         system.EmergencyModeLamps.Where(fun w->w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuEmergencyLamp)) |>ignore)
         system.DryRunModeLamps.Where(fun w->   w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuDryRunModeLamp)) |>ignore)
         system.ManualModeLamps.Where(fun w->   w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuManualModeLamp)) |>ignore)
-        system.RunModeLamps.Where(fun w->      w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuDryRunModeLamp)) |>ignore)
+        system.RunModeLamps.Where(fun w->      w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuRunModeLamp)) |>ignore)
         system.StopModeLamps.Where(fun w->     w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuStopModeLamp)) |>ignore)
         
         if newNode.Singles.Count > 0

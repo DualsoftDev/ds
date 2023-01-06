@@ -209,17 +209,7 @@ C4 > C5;
         PI = (float, 3.1415)
     }
 
-    [commands] = {
-        CMD1 = (@Delay = 0)
-        CMD2 = (@Delay = 30)
-        CMD3 = (@add = 30, 50 ~ R103)  //30+R101 = R103
-    }
-
-    [observes] = {
-        CON1 = (@GT = R102, 5)
-        CON2 = (@Delay = 30)
-        CON3 = (@Not = Tag1)
-    }
+    
 }
 
 """

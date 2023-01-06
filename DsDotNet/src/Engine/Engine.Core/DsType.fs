@@ -16,14 +16,14 @@ module DsType =
 
     ///BtnType  종류
     type BtnType =
-        | DuAutoBTN             //자동 버튼
-        | DuManualBTN           //수동 버튼
-        | DuEmergencyBTN        //비상 버튼
-        | DuStopBTN             //정지 버튼
-        | DuRunBTN              //운전 버튼
-        | DuDryRunBTN           //시운전 시작 버튼
-        | DuClearBTN            //해지 버튼
-        | DuHomeBTN             //홈(원위치) 버튼
+        | DuAutoBTN             //자동 Select 버튼
+        | DuManualBTN           //수동 Select 버튼
+        | DuEmergencyBTN        //비상 Push 버튼
+        | DuStopBTN             //정지 Push 버튼
+        | DuRunBTN              //운전 Push 버튼
+        | DuDryRunBTN           //시운전 시작 Push 버튼
+        | DuClearBTN            //해지 Push 버튼
+        | DuHomeBTN             //홈(원위치) Push 버튼
 
     ///LampType  종류
     type LampType =

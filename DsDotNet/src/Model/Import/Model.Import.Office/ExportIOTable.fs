@@ -2,6 +2,7 @@
 namespace Model.Import.Office
 
 open System
+open System.Linq
 open Microsoft.Office.Interop.Excel
 open System.Drawing
 open System.Reflection
@@ -19,15 +20,33 @@ module ExportIOTable =
         dt.Columns.Add($"{IOColumn.DataType}"   , typeof<string>) |>ignore
         dt.Columns.Add($"{IOColumn.Input}"      , typeof<string>) |>ignore
         dt.Columns.Add($"{IOColumn.Output}"     , typeof<string>) |>ignore
+        dt.Columns.Add($"{IOColumn.Job}"        , typeof<string>) |>ignore
+        dt.Columns.Add($"{IOColumn.Command}"    , typeof<string>) |>ignore
+        dt.Columns.Add($"{IOColumn.Observe}"    , typeof<string>) |>ignore
+        
+        let funcToText(xs:Func seq) = xs.Select(fun f->f.ToDsText()).JoinWith(";")
 
-        let rowItems(jobDef:JobDef) =
-            ["주소";  jobDef.ApiName; "bool"; jobDef.InAddress  ; jobDef.OutAddress]
+        let rowItems(jobDef:JobDef, job:Job option) =
+            let jobName, commands, observes = 
+                if job.IsSome
+                then job.Value.Name
+                     , job.Value.Commands.Cast<Func>() |> funcToText
+                     , job.Value.Observes.Cast<Func>() |> funcToText
+                else "↑", "↑", "↑"
+
+            [TextXlsAddress;  jobDef.ApiName; "bool"; jobDef.InAddress  ; jobDef.OutAddress; jobName; commands; observes; ]
 
         let rows =
             seq {
-                for job in sys.Jobs do
-                    for jobDef in job.JobDefs do
-                        yield rowItems(jobDef)
+                for job in sys.Jobs |> Seq.sortBy(fun f->f.Name) do
+                    let sortedJobDefs = job.JobDefs |> Seq.sortBy(fun f->f.ApiName)
+
+                    for jobDef in  sortedJobDefs do
+                        if sortedJobDefs.Head() = jobDef
+                        then 
+                            yield rowItems(jobDef, Some job) //첫 JobDef만 만듬
+                        else 
+                            yield rowItems(jobDef, None)
             }
 
         rows
@@ -36,12 +55,24 @@ module ExportIOTable =
                     rowTemp.ItemArray <- (row|> Seq.cast<obj>|> Seq.toArray)
                     dt.Rows.Add(rowTemp) |> ignore)
        
+        let emptyLine() =  
+            let row = dt.NewRow()
+            row.ItemArray <- Enum.GetNames(typedefof<IOColumn>).Select(fun f-> "'-" |> box).ToArray()
+            row |> dt.Rows.Add |>ignore
+
         let toBtnText(btns:ButtonDef seq, xlsCase:ExcelCase) = 
             for btn in  btns do
-                dt.Rows.Add(xlsCase.ToText(),  btn.Name  , "bool",  "",  "" ) |> ignore
+                let cmds = btn.Commands.Cast<Func>() |> funcToText
+                let obss = btn.Observes.Cast<Func>() |> funcToText
+                dt.Rows.Add(xlsCase.ToText(),  btn.Name   , "bool",  btn.InAddress,    btn.OutAddress,  "'-",  cmds,  obss) |> ignore
         let toLampText(lamps:LampDef seq, xlsCase:ExcelCase) = 
             for lamp in  lamps do
-                dt.Rows.Add(xlsCase.ToText(),  lamp.Name  , "bool",  "'-",  ""  ) |> ignore
+                let cmds = lamp.Commands.Cast<Func>() |> funcToText
+                let obss = lamp.Observes.Cast<Func>() |> funcToText
+                dt.Rows.Add(xlsCase.ToText(),  lamp.Name  , "bool",  "'-",  lamp.OutAddress,  "'-",  cmds,  obss ) |> ignore
+        
+        emptyLine() 
+        emptyLine() 
 
         toBtnText (sys.EmergencyButtons, ExcelCase.XlsEmergencyBTN)
         toBtnText (sys.AutoButtons, ExcelCase.XlsAutoBTN)
@@ -50,6 +81,9 @@ module ExportIOTable =
         toBtnText (sys.ManualButtons, ExcelCase.XlsManualBTN)
         toBtnText (sys.StopButtons, ExcelCase.XlsStopBTN)
         toBtnText (sys.DryRunButtons, ExcelCase.XlsDryRunBTN)
+       
+        emptyLine() 
+        emptyLine() 
         
         toLampText (sys.EmergencyModeLamps, ExcelCase.XlsEmergencyLamp)
         toLampText (sys.ManualModeLamps, ExcelCase.XlsManualModeLamp)
@@ -57,10 +91,11 @@ module ExportIOTable =
         toLampText (sys.DryRunModeLamps, ExcelCase.XlsDryRunModeLamp)
         toLampText (sys.StopModeLamps, ExcelCase.XlsStopModeLamp)
 
-        dt.Rows.Add("'-", "'-", "'-", "'-","'-") |> ignore
-        dt.Rows.Add("'-", "'-", "'-", "'-","'-") |> ignore
+        emptyLine() 
+        emptyLine() 
 
-        dt.Rows.Add(TextVariable,  ""  ,  ""  , "'-", "'-") |> ignore
+        dt.Rows.Add(TextXlsVariable,  ""  ,  ""  , "'-", "'-","'-","'-","'-") |> ignore
+        emptyLine() 
         dt
 
     let ToFiie(systems:DsSystem seq, excelFilePath:string) = 
@@ -107,8 +142,8 @@ module ExportIOTable =
                         let excelCellrange = workSheet.Range(workSheet.Cells.[rowsIndex + 2, colIndex + 1], workSheet.Cells.[rowsIndex + 2, colIndex + 1])
                         enableCellStyle(excelCellrange)
 
-                    if(colIndex = 0 && (cellText = TextCommand||cellText = TextObserve))
-                    then cellMerge(workSheet.Range(workSheet.Cells.[rowsIndex + 2, colIndex + 6], workSheet.Cells.[rowsIndex + 2, colIndex + 9]))
+                    //if(colIndex = 0)
+                    //then cellMerge(workSheet.Range(workSheet.Cells.[rowsIndex + 2, colIndex + 6], workSheet.Cells.[rowsIndex + 2, colIndex + 9]))
 
             workSheet.Range(workSheet.Cells.[1, 1], workSheet.Cells.[rowsCnt + 1, colsCnt]) |> autoFitNFilterColumn
 

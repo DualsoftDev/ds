@@ -29,8 +29,6 @@ module InterfaceClass =
     type ExcelCase =
         | XlsAddress             //주소
         | XlsVariable            //변수
-        | XlsCommand             //지시
-        | XlsObserve             //관찰
         | XlsAutoBTN             //자동 버튼
         | XlsManualBTN           //수동 버튼
         | XlsEmergencyBTN        //비상 버튼
@@ -48,41 +46,37 @@ module InterfaceClass =
     with
         member x.ToText() =
             match x with
-            | XlsAddress        -> TextAddressDev 
-            | XlsVariable       -> TextVariable   
-            | XlsCommand        -> TextCommand    
-            | XlsObserve        -> TextObserve    
-            | XlsAutoBTN        -> TextAutoBTN        
-            | XlsManualBTN      -> TextManualBTN      
-            | XlsEmergencyBTN   -> TextEmergencyBTN   
-            | XlsStopBTN        -> TextStopBTN        
-            | XlsRunBTN         -> TextRunBTN         
-            | XlsDryRunBTN      -> TextDryRunBTN      
-            | XlsClearBTN       -> TextClearBTN       
-            | XlsHomeBTN        -> TextHomeBTN        
-            | XlsEmergencyLamp  -> TextEmergencyLamp  
-            | XlsRunModeLamp    -> TextRunModeLamp    
-            | XlsDryRunModeLamp -> TextDryRunModeLamp 
-            | XlsManualModeLamp -> TextManualModeLamp 
-            | XlsStopModeLamp   -> TextStopModeLamp   
+            | XlsAddress        -> TextXlsAddress
+            | XlsVariable       -> TextXlsVariable   
+            | XlsAutoBTN        -> TextXlsAutoBTN        
+            | XlsManualBTN      -> TextXlsManualBTN      
+            | XlsEmergencyBTN   -> TextXlsEmergencyBTN   
+            | XlsStopBTN        -> TextXlsStopBTN        
+            | XlsRunBTN         -> TextXlsRunBTN         
+            | XlsDryRunBTN      -> TextXlsDryRunBTN      
+            | XlsClearBTN       -> TextXlsClearBTN       
+            | XlsHomeBTN        -> TextXlsHomeBTN        
+            | XlsEmergencyLamp  -> TextXlsEmergencyLamp  
+            | XlsRunModeLamp    -> TextXlsRunModeLamp    
+            | XlsDryRunModeLamp -> TextXlsDryRunModeLamp 
+            | XlsManualModeLamp -> TextXlsManualModeLamp 
+            | XlsStopModeLamp   -> TextXlsStopModeLamp   
 
     let TextToXlsType(txt:string) =
         match txt.ToLower() with
-        | TextAddressDev     ->  XlsAddress     
-        | TextVariable       ->  XlsVariable    
-        | TextCommand        ->  XlsCommand     
-        | TextObserve        ->  XlsObserve     
-        | TextAutoBTN        ->  XlsAutoBTN       
-        | TextManualBTN      ->  XlsManualBTN     
-        | TextEmergencyBTN   ->  XlsEmergencyBTN  
-        | TextStopBTN        ->  XlsStopBTN       
-        | TextRunBTN         ->  XlsRunBTN        
-        | TextDryRunBTN      ->  XlsDryRunBTN     
-        | TextClearBTN       ->  XlsClearBTN      
-        | TextHomeBTN        ->  XlsHomeBTN       
-        | TextEmergencyLamp  ->  XlsEmergencyLamp 
-        | TextRunModeLamp    ->  XlsRunModeLamp   
-        | TextDryRunModeLamp ->  XlsDryRunModeLamp
-        | TextManualModeLamp ->  XlsManualModeLamp
-        | TextStopModeLamp   ->  XlsStopModeLamp  
+        | TextXlsAddress        ->  XlsAddress     
+        | TextXlsVariable       ->  XlsVariable    
+        | TextXlsAutoBTN        ->  XlsAutoBTN       
+        | TextXlsManualBTN      ->  XlsManualBTN     
+        | TextXlsEmergencyBTN   ->  XlsEmergencyBTN  
+        | TextXlsStopBTN        ->  XlsStopBTN       
+        | TextXlsRunBTN         ->  XlsRunBTN        
+        | TextXlsDryRunBTN      ->  XlsDryRunBTN     
+        | TextXlsClearBTN       ->  XlsClearBTN      
+        | TextXlsHomeBTN        ->  XlsHomeBTN       
+        | TextXlsEmergencyLamp  ->  XlsEmergencyLamp 
+        | TextXlsRunModeLamp    ->  XlsRunModeLamp   
+        | TextXlsDryRunModeLamp ->  XlsDryRunModeLamp
+        | TextXlsManualModeLamp ->  XlsManualModeLamp
+        | TextXlsStopModeLamp   ->  XlsStopModeLamp  
         | _ -> failwithf $"'{txt}' TextXlsType Error check type"

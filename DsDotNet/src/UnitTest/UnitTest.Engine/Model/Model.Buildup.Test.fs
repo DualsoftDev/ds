@@ -260,7 +260,7 @@ module ModelBuildupTests1 =
 //            Main; // island
 //    }
 //    [jobs] = {
-//        Ap = { A."+"(%I1, %Q1); }
+//        Ap = { A1."+"(%I1, %Q1); A2."+"(%I1, %Q1); A3."+"(%I1, %Q1); }
 //        Am = { A."-"(%I2, %Q2); }
 //    }
 //    [device file="cylinder.ds"] A;
@@ -269,6 +269,9 @@ module ModelBuildupTests1 =
 //        R101 = (word, 1)
 //        R102 = (int, 1)
 //    }
+
+
+
 //    [commands] = {
 //        CMD1 = (@Delay = 0)
 //        CMD2 = (@Delay = 30)

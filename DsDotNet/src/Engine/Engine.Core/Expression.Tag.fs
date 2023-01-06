@@ -34,8 +34,8 @@ module  TagModule =
     [<AbstractClass>]
     type Tag<'T when 'T:equality> (name, initValue:'T) =
         inherit TagBase<'T>(name, initValue)
-        override x.ToBoxedExpression() = tag2expr x
-        member x.Expr = tag2expr x
+        override x.ToBoxedExpression() = var2expr x
+        member x.Expr = var2expr x
 
     type Variable<'T when 'T:equality> (name, initValue:'T) =
         inherit VariableBase<'T>(name, initValue)

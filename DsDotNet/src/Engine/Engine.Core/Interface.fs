@@ -38,7 +38,6 @@ module Interface =
         inherit IText
 
     type ITerminal =
-        abstract Tag:IStorage option
         abstract Variable:IStorage option
         abstract Literal:IExpressionizableTerminal option
 

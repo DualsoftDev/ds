@@ -34,11 +34,9 @@ module ExpressionModule =
 
     [<DebuggerDisplay("{ToText()}")>]
     type Terminal<'T when 'T:equality> =
-        | DuTag of TagBase<'T>
-        | DuVariable of VariableBase<'T>
+        | DuVariable of TypedValueStorage<'T>
         | DuLiteral of LiteralHolder<'T>        // Literal 도 IExpressionizableTerminal 구현해야 하므로, 'T 대신 LiteralHolder<'T> 사용
         interface ITerminal with
-            member x.Tag      = match x with | DuTag tag           -> Some tag      | _ -> None
             member x.Variable = match x with | DuVariable variable -> Some variable | _ -> None
             member x.Literal  = match x with | DuLiteral literal   -> Some literal  | _ -> None
 
@@ -84,11 +82,8 @@ module ExpressionModule =
         else
             failwith "ERROR: Value Type Error.  only allowed for primitive type"
 
-    /// Tag<'T> 로부터 Expression<'T> 생성
-    let tag2expr (t: TagBase<'T>) = DuTerminal (DuTag t)
-
-    /// Variable<'T> 로부터 Expression<'T> 생성
-    let var2expr (t: VariableBase<'T>) = DuTerminal (DuVariable t)
+    /// Tag<'T> or Variable<'T> 로부터 Expression<'T> 생성
+    let var2expr (t: TypedValueStorage<'T>) = DuTerminal (DuVariable t)
 
     type Timer internal(typ:TimerType, timerStruct:TimerStruct) =
 
@@ -208,12 +203,12 @@ module ExpressionModule =
 
     let pulseDo(expr:IExpression, storage:IStorage, historyFlag:HistoryFlag, isRising:bool) =
         if expr.BoxedEvaluatedValue <> historyFlag.LastValue //평가값 변경시
-        then 
+        then
             historyFlag.LastValue <- (expr.BoxedEvaluatedValue |> unbox)
             if historyFlag.LastValue |> unbox = isRising //rising 경우 TRUE 변경시점 처리
-            then storage.Value <- true   
-                 storage.Value <- false   
-                 //single 스켄방식이면 펄스조건 사용된 모든 Rung 처리후 Off 
+            then storage.Value <- true
+                 storage.Value <- false
+                 //single 스켄방식이면 펄스조건 사용된 모든 Rung 처리후 Off
                  //이벤트 방식이면 단일 쓰레드이면 이벤트 끝난후 pulseDo Off 해서 상관없을듯  //이벤트 테스트 중 ahn
 
     type Statement with
@@ -279,31 +274,26 @@ module ExpressionModule =
     type Terminal<'T when 'T:equality> with
         member x.TryGetStorage(): IStorage option =
             match x with
-            | DuTag t -> Some t
             | DuVariable v -> Some v
             | DuLiteral l -> None
 
         member x.GetBoxedRawObject(): obj =
             match x with
-            | DuTag t -> t |> box
             | DuVariable v -> v
             | DuLiteral v -> v |> box
 
         member x.Evaluate(): 'T =
             match x with
-            | DuTag t -> t.Value
             | DuVariable v -> v.Value
             | DuLiteral v -> v.Value
 
         member x.Name =
             match x with
-            | DuTag t -> t.Name
             | DuVariable t -> t.Name
             | DuLiteral _ -> failwith "ERROR"
 
         member x.ToText() =
             match x with
-            | DuTag t -> "$" + t.Name
             | DuVariable t -> "$" + t.Name
             | DuLiteral v -> sprintf "%A" v.Value
 

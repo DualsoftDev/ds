@@ -24,7 +24,7 @@ open Engine.Parser.FS
             use _ = setRuntimeTarget AB
             let storages = Storages()
             let t1 = PlcTag("my_counter_control_tag", "%M1.1", false)
-            let condition = tag2expr t1
+            let condition = var2expr t1
             let tcParam = {Storages=storages; Name="myCTU"; Preset=100us; RungInCondition=condition; FunctionName="createWinCTU"}
             let ctu = CounterStatement.CreateCTU(tcParam) |> toCounter
             ctu.OV.Value === false
@@ -77,9 +77,9 @@ open Engine.Parser.FS
             let t1 = PlcTag("my_counter_up_tag", "%M1.1", false)
             let t2 = PlcTag("my_counter_down_tag", "%M1.1", false)
             let t3 = PlcTag("my_counter_reset_tag", "%M1.1", false)
-            let upCondition = tag2expr t1
-            let downCondition = tag2expr t2
-            let resetCondition = tag2expr t3
+            let upCondition = var2expr t1
+            let downCondition = var2expr t2
+            let resetCondition = var2expr t3
 
             let tcParam = {Storages=storages; Name="myCTU"; Preset=100us; RungInCondition=upCondition; FunctionName="createWinCTUD"}
             let ctu = CounterStatement.CreateCTUD(tcParam, downCondition, resetCondition) |> toCounter
@@ -113,8 +113,8 @@ open Engine.Parser.FS
             let storages = Storages()
             let t1 = PlcTag("my_counter_control_tag", "%M1.1", false)
             let resetTag = PlcTag("my_counter_reset_tag", "%M1.1", false)
-            let condition = tag2expr t1
-            let reset = tag2expr resetTag
+            let condition = var2expr t1
+            let reset = var2expr resetTag
             let tcParam = {Storages=storages; Name="myCTU"; Preset=100us; RungInCondition=condition; FunctionName="createWinCTU"}
             let ctu = CounterStatement.CreateCTU(tcParam, reset) |> toCounter
             ctu.OV.Value === false
@@ -153,8 +153,8 @@ open Engine.Parser.FS
             let storages = Storages()
             let t1 = PlcTag("my_counter_control_tag", "%M1.1", false)
             let resetTag = PlcTag("my_counter_reset_tag", "%M1.1", false)
-            let condition = tag2expr t1
-            let reset = tag2expr resetTag
+            let condition = var2expr t1
+            let reset = var2expr resetTag
             let tcParam = {Storages=storages; Name="myCTR"; Preset=100us; RungInCondition=condition; FunctionName="createWinCTR"}
             let ctr = CounterStatement.CreateCTR(tcParam, reset) |> toCounter
             ctr.OV.Value === false

@@ -290,7 +290,6 @@ module rec ExpressionPrologModule =
         interface IStorage with
             member x.DataType = typedefof<'T>
             member x.Value with get() = x.Value and set(v) = x.Value <- (v :?> 'T)
-            member x.ToText() = x.ToText()
             member x.ToBoxedExpression() = x.ToBoxedExpression()
 
         interface IStorage<'T> with
@@ -298,6 +297,11 @@ module rec ExpressionPrologModule =
 
         interface INamed with
             member x.Name with get() = x.Name and set(v) = failwith "ERROR: not supported"
+
+        interface IText with
+            member x.ToText() = x.ToText()
+
+        interface IExpressionizableTerminal
 
         abstract ToText: unit -> string
         abstract ToBoxedExpression : unit -> obj    /// IExpression<'T> 의 boxed 형태의 expression 생성

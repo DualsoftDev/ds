@@ -65,9 +65,9 @@ module FlatExpressionModule =
         match expression with
         | :? Expression<'T> as express ->
             match express with
-            | DuTerminal (DuTag t) -> FlatTerminal(t, false, false)
+            | DuTerminal (DuVariable t) -> FlatTerminal(t, false, false)
             | DuTerminal (DuLiteral b) -> FlatTerminal(b, false, false)
-            | DuTerminal  _ -> failwith "ERROR"
+
             (* rising/falling/negation 은 function 으로 구현되어 있으며,
                해당 function type 에 따라서 risng/falling/negation 의 contact/coil 을 생성한다.
                (Terminal<'T> 이 generic 이어서 DuTag 에 bool type 으로 제한 할 수 없음.
@@ -76,7 +76,7 @@ module FlatExpressionModule =
             | DuFunction {FunctionBody = f; Name = n; Arguments = (:? Expression<bool> as arg)::[]}
                 when n = FunctionNameRising || n = FunctionNameFalling ->
                     match arg with
-                    | DuTerminal (DuTag t) -> FlatTerminal(t, true, n = FunctionNameFalling)
+                    | DuTerminal (DuVariable t) -> FlatTerminal(t, true, n = FunctionNameFalling)
                     | _ -> failwith "ERROR"
             | DuFunction fs ->
                 let op =

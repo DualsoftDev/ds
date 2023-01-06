@@ -7,17 +7,20 @@ open Engine.CodeGenCPU
 
 
 
-type VertexManager with
-       //test ahn
-    member v.T1_DelayInput(): CommentedStatement  = 
-        let call = v.Vertex :?> Call
-        let sets = if call.INs.Any() then call.INs.ToAnd() else v.System._on.Expr
-        (sets) --@ (v.TRX, "T1" )
+type DsSystem with
 
-          //test ahn
-    member v.T2_SustainOutput(): CommentedStatement  = 
-        let call = v.Vertex :?> Call
-        let sets = if call.OUTs.Any() then call.OUTs.ToAnd() else v.System._on.Expr
-        (sets) --@ (v.TRX, "T2" )
+    member s.T1_DelayCall(): CommentedStatement list  = 
+        let allVertices = s.GetVertices()
+        let calls = allVertices.OfType<Call>()
+                          .Where(fun f->f.UsingTon)
+        let aliasCalls = allVertices.GetAliasTypeCalls()
+                          .Where(fun f -> f.TargetWrapper.CallTarget().Value.UsingTon)
+        [
+            for call in calls do
+                let sets = call.V.ST.Expr <&&>  call.INs.EmptyOnElseToAnd s
+                yield (sets) --@ (call.V.TON,  "T1")
 
-        
+            for alias in aliasCalls do
+                let sets = alias.V.ST.Expr <&&> alias.TargetWrapper.CallTarget().Value.INs.EmptyOnElseToAnd s
+                yield (sets) --@ (alias.V.TON, "T1")
+        ]

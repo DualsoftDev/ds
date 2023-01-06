@@ -18,17 +18,19 @@ module CodeSpecUtil =
     [<Flags>]
     [<AutoOpen>]
     type ConvertType = 
-    |RealInFlow          = 0b000000001  
-    |RealExFlow          = 0b000000010  
-    |CallInFlow          = 0b000000100  
-    |CallInReal          = 0b000000100  
-    |AliasCallInReal     = 0b000001000  
-    |AliasRealInReal     = 0b000010000  
-    |AliasRealExInReal   = 0b000100000 
-    |AliasCallInFlow     = 0b001000000  
-    |AliasRealInFlow     = 0b010000000  
-    |AliasRealExInFlow   = 0b100000000  
-    |VertexAll           = 0b111111111  
+    |RealInFlow          = 0b0000000001  
+    |RealExFlow          = 0b0000000010  
+    |CallInFlow          = 0b0000000100  
+    |CallInReal          = 0b0000001000  
+    |AliasCallInReal     = 0b0000010000  
+    |AliasRealInReal     = 0b0000100000  
+    |AliasRealExInReal   = 0b0001000000 
+    |AliasCallInFlow     = 0b0010000000  
+    |AliasRealInFlow     = 0b0100000000  
+    |AliasRealExInFlow   = 0b1000000000  
+    |CoinTypeAll         = 0b0010011100 
+    |RealTypeAll         = 0b0000000011 
+    |VertexAll           = 0b1111111111 
    
     let IsSpec (v:Vertex) (vaild:ConvertType) = 
         let isVaildVertex =
@@ -55,5 +57,3 @@ module CodeSpecUtil =
             |_ -> failwith "Error"
 
         isVaildVertex
-        //if not <| isVaildVertex 
-        //then failwith $"{v.Name} can't applies to [{vaild}] case"

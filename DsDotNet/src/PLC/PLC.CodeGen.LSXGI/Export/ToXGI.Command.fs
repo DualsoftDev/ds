@@ -142,7 +142,7 @@ module internal Command =
 
         { SpanY = fbSpanY; PositionedRungXmls = results}
 
-    let drawCmdCompare (x, y) (coil:IExpressionTerminal) (opComp:OpComp) (leftA:CommandTag) (leftB:CommandTag) : CoordinatedRungXmlsWithNewY =
+    let drawCmdCompare (x, y) (coil:INamedExpressionizableTerminal) (opComp:OpComp) (leftA:CommandTag) (leftB:CommandTag) : CoordinatedRungXmlsWithNewY =
         let fbSpanY = 3
 
         if(leftA.Size() <> leftB.Size())
@@ -156,15 +156,15 @@ module internal Command =
             else $"{opComp.ToText()}2_{opCompType}"
 
         let results = [
-            createFB funcFind func "" (opComp.ToText()) x y
+            createFunctionAt funcFind func "" (opComp.ToText()) (x, y)
             createFBParameterXml (x-1, y+1) (leftA.ToText())
             createFBParameterXml (x-1, y+2) (leftB.ToText())
-            createFBParameterXml (x+1, y+1) (coil.PLCTagName)
+            createFBParameterXml (x+1, y+1) (coil.StorageName)
         ]
 
         { SpanY = fbSpanY; PositionedRungXmls = results}
 
-    let drawCmdAdd (x, y) (tagCoil:IExpressionTerminal) (targetTag:CommandTag) (addValue:int) (pulse:bool): CoordinatedRungXmlsWithNewY =
+    let drawCmdAdd (x, y) (tagCoil:INamedExpressionizableTerminal) (targetTag:CommandTag) (addValue:int) (pulse:bool): CoordinatedRungXmlsWithNewY =
         let mutable xx = x
         let fbSpanY = 4
 
@@ -180,13 +180,13 @@ module internal Command =
             else
                 xx <- x
                 //Command 결과출력
-                createFBParameterXml (xx+1, y) (tagCoil.PLCTagName)
+                createFBParameterXml (xx+1, y) (tagCoil.StorageName)
 
 
             //Pulse시 증감 처리
             //yield! drawRising(x, y)
             //함수 그리기
-            createFB funcFind func "" func xx y
+            createFunctionAt funcFind func "" func (xx, y)
             createFBParameterXml (xx-1, y+1) (targetTag.ToText())
             createFBParameterXml (xx+1, y+1) (targetTag.ToText())
             createFBParameterXml (xx-1, y+2) (addValue.ToString())
@@ -196,7 +196,7 @@ module internal Command =
         { SpanY = newY; PositionedRungXmls = results}
 
 
-    let drawCmdCopy (x, y) (tagCoil:IExpressionTerminal) (fromTag:CommandTag) (toTag:CommandTag) (pulse:bool) : CoordinatedRungXmlsWithNewY =
+    let drawCmdCopy (x, y) (tagCoil:INamedExpressionizableTerminal) (fromTag:CommandTag) (toTag:CommandTag) (pulse:bool) : CoordinatedRungXmlsWithNewY =
         if fromTag.Size() <> toTag.Size() then
             failwithlog $"Tag Compare size error {fromTag.ToText()}{fromTag.SizeString},  {toTag.ToText()}({toTag.SizeString})"
 
@@ -213,11 +213,11 @@ module internal Command =
             else
                 //Command 결과출력
                 xx <- x
-                createFBParameterXml (xx+1, y) (tagCoil.PLCTagName)
+                createFBParameterXml (xx+1, y) (tagCoil.StorageName)
 
 
             //함수 그리기
-            createFB funcFind func "" func xx y
+            createFunctionAt funcFind func "" func (xx, y)
             createFBParameterXml (xx-1, y+1) (fromTag.ToText())
             createFBParameterXml (xx+1, y+1) (toTag.ToText())
         ]
@@ -231,7 +231,7 @@ module internal Command =
         //Command instance 객체생성
         let inst, func = cmd.Instance |> fun (inst, varType) -> inst, varType.ToString()
         [
-            createFB func func inst func x y
+            createFunctionAt func func inst func (x, y)
 
             //Command 결과출력
             //createFBParameterXml (cmd.CoilTerminalTag.PLCTagName)  (x+1) (y)

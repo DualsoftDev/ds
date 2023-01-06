@@ -82,10 +82,10 @@ module internal Common =
             failwithlogf "endX startX [%d > %d]" endX startX
 
     /// 함수 그리기
-    let createFB funcFind func (inst:string) tag x y : CoordinatedRungXml =
-        let instFB = if(inst <> "") then (inst + ",VAR") else ","
+    let createFunctionAt funcFind func (inst:string) tag (x, y) : CoordinatedRungXml =
+        let instFB = if inst = "" then "," else (inst + ",VAR")
         let c = coord(x, y)
-        let fbBody = sprintf "Param=\"%s\"" (FB.getFBXML( funcFind, func, instFB, FB.getFBIndex tag))
+        let fbBody = sprintf "Param=\"%s\"" (FB.getFBXmlParam( funcFind, func, instFB, FB.getFBIndex tag))
         let xml = elementFull (int ElementType.VertFBMode) c fbBody inst
         { Coordinate = c; Xml = xml }
 
@@ -119,13 +119,13 @@ module internal Common =
                 yield vLineAt (x, y+i)
         ]
 
-    let drawPulseCoil (x, y) (tagCoil:IExpressionTerminal) (funSize:int) =
+    let drawPulseCoil (x, y) (tagCoil:INamedExpressionizableTerminal) (funSize:int) =
         let newX = getFBCellX (x-1)
         let newY = y + funSize
         [
             { Coordinate = coord(x, y); Xml = risingline (coord(x, y))}
             { Coordinate = coord(newX, newY); Xml = mutiEndLine (x) (newX - 1) newY}
-            { Coordinate = coord(coilCellX, newY); Xml = elementBody (int ElementType.CoilMode) (coord(coilCellX, newY)) (tagCoil.PLCTagName)}
+            { Coordinate = coord(coilCellX, newY); Xml = elementBody (int ElementType.CoilMode) (coord(coilCellX, newY)) (tagCoil.StorageName)}
             yield! vlineDownTo (x-1, y) funSize
         ]
 

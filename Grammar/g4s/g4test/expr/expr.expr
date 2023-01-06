@@ -1,4 +1,6 @@
 /* grun expr toplevels -gui < g4test/expr/expr.expr */
+$n0 := add($n1, $n2) > 3;
+
 
 ppulse($a) := $b;
 

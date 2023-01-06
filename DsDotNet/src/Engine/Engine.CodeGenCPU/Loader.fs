@@ -7,8 +7,6 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module CpuLoader =
-    let callTypeAll = CallInReal||| CallInFlow ||| AliasCallInFlow ||| AliasCallInReal
-    let realTypeAll = RealInFlow||| RealExFlow
     ///Vertex 타입이 Spec에 해당하면 적용
     let private applyVertexSpec(v:Vertex) = 
         let vm = v.VertexManager :?> VertexManager
@@ -20,7 +18,7 @@ module CpuLoader =
                 yield vm.P5_CallResetPort()
                 yield vm.P6_CallEndPort()
 
-            if IsSpec v (RealInFlow ||| callTypeAll)
+            if IsSpec v (RealInFlow ||| CoinTypeAll)
             then
                 yield! vm.S1_Ready_Going_Finish_Homing()
                 yield vm.M2_PauseMonitor()

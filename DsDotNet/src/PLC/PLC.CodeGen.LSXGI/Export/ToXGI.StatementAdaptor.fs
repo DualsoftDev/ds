@@ -175,22 +175,37 @@ module rec TypeConvertorModule =
 
     [<DebuggerDisplay("{ToText()}")>]
     type XgiConvertorExpression =
-        | FunctionInstance of op:string * args:XgiConvertorExpression list * outSymbol:SymbolInfo
+        /// Ladder 에 직접 그릴 수 있음.  And/Or/Not
+        | LogicalOperator of op:string * args:XgiConvertorExpression list
+        /// True/False 판정하는 Function.  대소 비교 등
+        | PredicateInstance of op:string * args:XgiConvertorExpression list * outSymbol:IXgiLocalVar
+        /// Non boolean 값을 반환하는 Function.  사칙연산 등
+        | FunctionInstance of op:string * args:XgiConvertorExpression list * outSymbol:IXgiLocalVar
         | Terminal of IExpression
         member x.ToText() =
+            let getArgs (args:XgiConvertorExpression list) = args |> map toText |> String.concat ", "
             match x with
-            | FunctionInstance (op, args, outSymbol) ->
-                let args = args |> map toText |> String.concat ", "
-                $"{op}({args})"
+            | LogicalOperator   (op, args)            -> $"{op}({getArgs args})"
+            | PredicateInstance (op, args, outSymbol) -> $"{op}({getArgs args})"
+            | FunctionInstance  (op, args, outSymbol) -> $"{op}({getArgs args})"
             | Terminal t -> t.ToText(false)
     // todo
     let collectExpandedExpression (exp:IExpression) : XgiConvertorExpression list =
         [
             match exp.FunctionName with
-            | Some ("+"|"-"|"*"|"/"|">"|">="|"<"|"<="|"="|"!=" as op) ->
+            | Some funcName ->
                 let newArgs = exp.FunctionArguments |> bind collectExpandedExpression
-                let out = fwdCreateSymbol "xxx-name" "xxx-comment" "BOOL"        // todo
-                FunctionInstance (op, newArgs, out)
+                match funcName with
+                | ("&&" | "||" | "!") as op ->
+                    LogicalOperator(op, newArgs)
+                | (">"|">="|"<"|"<="|"="|"!=") as op ->
+                    let out = tagCreator "out" $"{op} output" false
+                    PredicateInstance (op, newArgs, out)
+                | ("+"|"-"|"*"|"/") as op ->
+                    let out = tagCreator "out" $"{op} output" false
+                    FunctionInstance (op, newArgs, out)
+                | _ ->
+                    failwith "ERROR"
             | _ ->
                 Terminal exp
         ]
@@ -198,7 +213,7 @@ module rec TypeConvertorModule =
     let private statement2XgiStatement (statement:Statement) : XgiStatement =
         match statement with
         | DuAssign (exp, target) ->
-            let xxx = collectExpandedExpression exp;
+            let xgiExpression = collectExpandedExpression exp |> List.exactlyOne;
             DuXgiAssign (XgiAssignStatement(exp, target))
         | DuTimer ts             -> DuXgiTimer  (XgiTimerStatement(ts))
         | DuCounter cs           -> DuXgiCounter(XgiCounterStatement(cs))

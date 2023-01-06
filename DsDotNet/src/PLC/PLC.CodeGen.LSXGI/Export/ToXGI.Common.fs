@@ -14,7 +14,7 @@ module internal Common =
         Xml: XmlOutput                  // string
     }
 
-    type CoordinatedRungXmlsWithNewY = {
+    type CoordinatedRungXmlsForCommand = {
         SpanY: int
         PositionedRungXmls: CoordinatedRungXml list
     }

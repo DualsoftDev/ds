@@ -107,6 +107,25 @@ type XgiCounterTest() =
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
+
+type XgiFunctionTest() =
+    inherit XgiTestClass()
+
+    [<Test>]
+    member __.``ADD simple test`` () =
+        let storages = Storages()
+        let code = """
+            int n1 = createTag("%IX0.0.0", 1);
+            int n2 = createTag("%IX0.0.0", 2);
+            int sum = createTag("%IX0.0.0", 0);
+            $sum := $n1 + $n2;
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
+
+
+
 //    [<Test>]
 //    member __.``TIMER= Many1 AND RungIn Condition test`` () =
 //        let storages = Storages()

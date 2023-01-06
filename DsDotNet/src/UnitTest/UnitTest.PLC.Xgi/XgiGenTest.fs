@@ -299,7 +299,8 @@ type XgiGenerationTest() =
             bool q = createTag("%QX0.1.0", false);
 
             //$q := add($n1, $n2) > 3;
-            $q := ($n1 + $n2) * 9 + $n3 > 3;
+            //$q := ($n1 + $n2) * 9 + $n3 > 3;
+            $q := true && (($n1 + $n2) * 9 + $n3 > 3);
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)

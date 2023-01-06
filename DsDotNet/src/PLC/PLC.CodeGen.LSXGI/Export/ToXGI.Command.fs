@@ -97,12 +97,12 @@ module internal Command =
         | NE -> XgiCommand(FunctionCmd(FunctionPure.CompareNE(tag, (tagA, tagB))))
 
     // <timer>
-    let drawCmdTimer (x, y) (timerStatement:XgiTimerStatement)  : CoordinatedRungXmlsWithNewY =
+    let drawCmdTimer (x, y) (timerStatement:XgiTimerStatement)  : CoordinatedRungXmlsForCommand =
         let time:int = int timerStatement.Timer.PRE.Value
         let fbSpanY = 2
         { SpanY = fbSpanY; PositionedRungXmls = [createFBParameterXml (x-1, y+1) $"T#{time}MS" ]}
 
-    let drawCmdCounter (x, y) (counterStatement:XgiCounterStatement) : CoordinatedRungXmlsWithNewY =
+    let drawCmdCounter (x, y) (counterStatement:XgiCounterStatement) : CoordinatedRungXmlsForCommand =
         let count = int counterStatement.Counter.PRE.Value
         let typ = counterStatement.Counter.Type
 
@@ -142,7 +142,7 @@ module internal Command =
 
         { SpanY = fbSpanY; PositionedRungXmls = results}
 
-    let drawCmdCompare (x, y) (coil:INamedExpressionizableTerminal) (opComp:OpComp) (leftA:CommandTag) (leftB:CommandTag) : CoordinatedRungXmlsWithNewY =
+    let drawCmdCompare (x, y) (coil:INamedExpressionizableTerminal) (opComp:OpComp) (leftA:CommandTag) (leftB:CommandTag) : CoordinatedRungXmlsForCommand =
         let fbSpanY = 3
 
         if(leftA.Size() <> leftB.Size())
@@ -165,7 +165,7 @@ module internal Command =
 
         { SpanY = fbSpanY; PositionedRungXmls = results}
 
-    let drawCmdAdd (x, y) (tagCoil:INamedExpressionizableTerminal) (targetTag:CommandTag) (addValue:int) (pulse:bool): CoordinatedRungXmlsWithNewY =
+    let drawCmdAdd (x, y) (tagCoil:INamedExpressionizableTerminal) (targetTag:CommandTag) (addValue:int) (pulse:bool): CoordinatedRungXmlsForCommand =
         let mutable xx = x
         let fbSpanY = 4
 
@@ -197,7 +197,7 @@ module internal Command =
         { SpanY = newY; PositionedRungXmls = results}
 
 
-    let drawCmdCopy (x, y) (tagCoil:INamedExpressionizableTerminal) (fromTag:CommandTag) (toTag:CommandTag) (pulse:bool) : CoordinatedRungXmlsWithNewY =
+    let drawCmdCopy (x, y) (tagCoil:INamedExpressionizableTerminal) (fromTag:CommandTag) (toTag:CommandTag) (pulse:bool) : CoordinatedRungXmlsForCommand =
         if fromTag.Size() <> toTag.Size() then
             failwithlog $"Tag Compare size error {fromTag.ToText()}{fromTag.SizeString},  {toTag.ToText()}({toTag.SizeString})"
 

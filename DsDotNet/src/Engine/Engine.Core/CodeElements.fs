@@ -33,9 +33,9 @@ module CodeElements =
     type ParameterGroup = string[]
     [<AbstractClass>]
     type Func(name:string, parameterGroups:ParameterGroup) =
-        member _.Name = name
-        member _.ParameterGroups = parameterGroups
-        member _.ToDsText() =  $"""${name} {String.Join(" ", parameterGroups)}"""   
+        member x.Name = name.ToLower() //명령어 이름은 소문자로만 허용
+        member x.ParameterGroups = parameterGroups
+        member x.ToDsText() =  $"""${x.Name} {String.Join(" ", parameterGroups)}"""   
     
     //Job, ButtonDef, LampDef 에서 사용중  //todo ToDsText, parsing  
     //  [jobs] = {

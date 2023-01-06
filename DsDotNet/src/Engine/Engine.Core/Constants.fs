@@ -221,3 +221,16 @@ module DsTextProperty =
     let [<Literal>] TextLayout  = "layouts"
     let [<Literal>] TextJobs    = "jobs"
 
+
+[<AutoOpen>]
+module DsTextFunction =
+ 
+    let [<Literal>] TextMove    = "mov"
+    let [<Literal>] TextOnDelayTimer = "ton"
+    let [<Literal>] TextRingCounter = "tmr"
+    let [<Literal>] TextEQ = "="
+    let [<Literal>] TextNotEQ = "!="
+    let [<Literal>] TextGT = ">"
+    let [<Literal>] TextGTE = ">="
+    let [<Literal>] TextLT = "<"
+    let [<Literal>] TextLTE = "<="

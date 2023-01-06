@@ -7,8 +7,6 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module CpuLoader =
-    let callTypeAll = CallInReal||| CallInFlow ||| AliasCallInFlow ||| AliasCallInReal
-    let realTypeAll = RealInFlow||| RealExFlow
     ///Vertex 타입이 Spec에 해당하면 적용
     let private applyVertexSpec(v:Vertex) = 
         let vm = v.VertexManager :?> VertexManager
@@ -20,7 +18,7 @@ module CpuLoader =
                 yield vm.P5_CallResetPort()
                 yield vm.P6_CallEndPort()
 
-            if IsSpec v (RealInFlow ||| callTypeAll)
+            if IsSpec v (RealInFlow ||| CoinTypeAll)
             then
                 yield! vm.S1_Ready_Going_Finish_Homing()
                 yield vm.M2_PauseMonitor()
@@ -36,13 +34,18 @@ module CpuLoader =
                 yield! vm.C2_CallTx()
                 yield vm.C3_CallRx()
 
-                yield vm.M3_CallErrorTXMonitor()
+                yield! vm.M3_CallErrorTXMonitor()
                 yield vm.M4_CallErrorRXMonitor()
 
-            if IsSpec v VertexAll
+            if IsSpec v RealInFlow
             then
-                yield! vm.F1_RootStart() |> Option.toList
-                yield! vm.F2_RootReset()
+                yield! vm.F1_RootStartReal()
+                yield! vm.F2_RootResetReal()
+
+            if IsSpec v CallInFlow
+            then
+                yield! vm.F3_RootStartCall()
+                yield vm.F4_RootCallRelay()
 
             if IsSpec v RealInFlow
             then 
@@ -58,9 +61,8 @@ module CpuLoader =
                 yield vm.R2_RealJobComplete()
 
                 yield! vm.D1_DAGHeadStart()
-                yield! vm.D2_DAGHeadComplete()
-                yield! vm.D3_DAGTailStart()
-                yield! vm.D4_DAGTailComplete()
+                yield! vm.D2_DAGTailStart()
+                yield! vm.D3_DAGComplete()
         ]
     let private applyBtnLampSpec(s:DsSystem) =
         [
@@ -78,7 +80,11 @@ module CpuLoader =
             yield f.O5_DryRunOperationMode()
         ]
 
-    let private applyTimerCounterSpec(s:DsSystem) = []
+    let private applyTimerCounterSpec(s:DsSystem) = 
+        [
+            yield! s.T1_DelayCall()
+        ]
+        
         
 
     let private convertSystem(sys:DsSystem) =
@@ -95,6 +101,7 @@ module CpuLoader =
             //Flow 적용
             for f in sys.Flows
              do yield! applyOperationModeSpec f
+
 
             //Vertex 적용
             for v in sys.GetVertices()

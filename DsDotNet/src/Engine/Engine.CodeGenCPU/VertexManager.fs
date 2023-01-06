@@ -53,8 +53,7 @@ module VertexManagerModule =
 
         let pulseBit      = bit "PUL" TagFlag.Pulse
         let counterBit    = counterBit "CTR" TagFlag.Counter
-        let timerTxBit    = timerBit "TTX" TagFlag.TimerTx
-        let timerRxBit    = timerBit "TRX" TagFlag.TimerRx
+        let timerDelayBit = timerBit "TON" TagFlag.TimerTx
 
         interface IVertexManager with
             member x.Vertex = v
@@ -122,13 +121,11 @@ module VertexManagerModule =
 
         //DummyBit
         ///PulseStart  
-        member x.PUL        = pulseBit  
-        ///Ring Counter // counter TAG로 수정필요
-        member x.CTR        = counterBit 
-        ///TimerTx  // timer TAG로 수정필요
-        member x.TTX        = timerTxBit 
-        ///TimerRx   // timer TAG로 수정필요
-        member x.TRX        = timerRxBit 
+        member x.PUL    = pulseBit  
+        ///Ring Counter 
+        member x.CTR    = counterBit 
+        ///Timer TON   
+        member x.TON    = timerDelayBit 
            
           
         

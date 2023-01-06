@@ -8,7 +8,20 @@ open Engine.CodeGenCPU
 
 
 
-type VertexManager with
-       //test ahn
-    member v.C1_FinishRingCounter(): CommentedStatement  = 
-        (v.F.Expr) --% (v.CTR, "C1" )
+type DsSystem with
+
+    member s.C1_FinishRingCounter(): CommentedStatement list  = 
+        let allVertices = s.GetVertices()
+        let calls = allVertices.OfType<Call>()
+                          .Where(fun f->f.UsingCtr)
+        let aliasCalls = allVertices.GetAliasTypeCalls()
+                          .Where(fun f -> f.TargetWrapper.CallTarget().Value.UsingCtr)
+        [
+            for call in calls do
+                let sets = call.V.F.Expr
+                yield (sets) --@ (call.V.CTR,  "C1")
+
+            for alias in aliasCalls do
+                let sets = alias.V.F.Expr 
+                yield (sets) --@ (alias.V.CTR, "C1")
+        ]

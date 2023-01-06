@@ -12,5 +12,4 @@ open Engine.Cpu
 type TimmerStatement() =
     do Fixtures.SetUpTest()
 
-    [<Test>] member __.``T1 Delay Input`` () = Eq 1 1
-    [<Test>] member __.``T2 Sustain Output`` () = Eq 1 1
+    [<Test>] member __.``T1 Delay Call`` () = Eq 1 1

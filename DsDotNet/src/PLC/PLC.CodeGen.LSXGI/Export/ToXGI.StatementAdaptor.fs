@@ -1,10 +1,12 @@
 namespace PLC.CodeGen.LSXGI
 
+open System.Linq
+open System.Security
+open System.Diagnostics
+
 open Engine.Core
 open Engine.Common.FS
 open PLC.CodeGen.Common
-open System.Security
-open System.Diagnostics
 
 (*
     - 사칙연산 함수(Add, ..) 의 입력은 XGI 에서 전원선으로부터 연결이 불가능한 반면,
@@ -171,61 +173,6 @@ module rec TypeConvertorModule =
             | DuXgiCounter s -> s
             | DuXgiCopy    s -> s
 
-
-
-    [<DebuggerDisplay("{ToText()}")>]
-    type XgiConvertorExpression =
-        /// Ladder 에 직접 그릴 수 있음.  And/Or/Not
-        | LogicalOperator of op:string * args:XgiConvertorExpression list
-        /// True/False 판정하는 Function.  대소 비교 등
-        | PredicateInstance of op:string * args:XgiConvertorExpression list * outSymbol:IXgiLocalVar
-        /// Non boolean 값을 반환하는 Function.  사칙연산 등
-        | FunctionInstance of op:string * args:XgiConvertorExpression list * outSymbol:IXgiLocalVar
-        | Terminal of IExpression
-        member x.ToText() =
-            let getArgs (args:XgiConvertorExpression list) = args |> map toText |> String.concat ", "
-            match x with
-            | LogicalOperator   (op, args)            -> $"{op}({getArgs args})"
-            | PredicateInstance (op, args, outSymbol) -> $"{op}({getArgs args})"
-            | FunctionInstance  (op, args, outSymbol) -> $"{op}({getArgs args})"
-            | Terminal t -> t.ToText(false)
-    // todo
-    let collectExpandedExpression (exp:IExpression) : XgiConvertorExpression list =
-        [
-            match exp.FunctionName with
-            | Some funcName ->
-                let newArgs = exp.FunctionArguments |> bind collectExpandedExpression
-                match funcName with
-                | ("&&" | "||" | "!") as op ->
-                    LogicalOperator(op, newArgs)
-                | (">"|">="|"<"|"<="|"="|"!=") as op ->
-                    let out = tagCreator "out" $"{op} output" false
-                    PredicateInstance (op, newArgs, out)
-                | ("+"|"-"|"*"|"/") as op ->
-                    let out = tagCreator "out" $"{op} output" false
-                    FunctionInstance (op, newArgs, out)
-                | _ ->
-                    failwith "ERROR"
-            | _ ->
-                Terminal exp
-        ]
-
-    let private statement2XgiStatement (statement:Statement) : XgiStatement =
-        match statement with
-        | DuAssign (exp, target) ->
-            let xgiExpression = collectExpandedExpression exp |> List.exactlyOne;
-            DuXgiAssign (XgiAssignStatement(exp, target))
-        | DuTimer ts             -> DuXgiTimer  (XgiTimerStatement(ts))
-        | DuCounter cs           -> DuXgiCounter(XgiCounterStatement(cs))
-        | DuCopy (exp, src, tgt) -> DuXgiCopy   (XgiCopyStatement(exp, src, tgt))
-        | DuVarDecl _            -> failwith "ERROR"
-
-    let internal commentedStatement2CommentedXgiStatement (CommentedStatement(comment, statement)) : CommentedXgiStatement =
-        let xgiStatement = statement2XgiStatement statement
-        CommentedXgiStatement(comment, xgiStatement)
-
-
-
     (* Moved from Command.fs *)
 
     ///FunctionBlocks은 Timer와 같은 현재 측정 시간을 저장하는 Instance가 필요있는 Command 해당
@@ -280,3 +227,68 @@ module rec TypeConvertorModule =
     let createPLCCommandAdd(endTag, tag, value)          = FunctionPure.Add(endTag, tag, value)
     //let createPLCCommandTimer(endTag, time)              = FunctionBlock.TimerMode(endTag, time)
     //let createPLCCommandCounter(endTag, resetTag, count) = FunctionBlock.CounterMode(endTag, resetTag , count)
+
+
+[<AutoOpen>]
+module XgiExpressionConvertorModule =
+    type XgiStorage = ResizeArray<IStorage>
+
+    [<DebuggerDisplay("{ToText()}")>]
+    type XgiConvertorExpression =
+        /// Ladder 에 직접 그릴 수 있음.  And/Or/Not
+        | LogicalOperator of op:string * args:XgiConvertorExpression list
+        /// True/False 판정하는 Function.  대소 비교 등
+        | PredicateInstance of op:string * args:XgiConvertorExpression list * outSymbol:IXgiLocalVar
+        /// Non boolean 값을 반환하는 Function.  사칙연산 등
+        | FunctionInstance of op:string * args:XgiConvertorExpression list * outSymbol:IXgiLocalVar
+        | Terminal of IExpression
+        member x.ToText() =
+            let getArgs (args:XgiConvertorExpression list) = args |> map toText |> String.concat ", "
+            match x with
+            | LogicalOperator   (op, args)            -> $"{op}({getArgs args})"
+            | PredicateInstance (op, args, outSymbol) -> $"{op}({getArgs args})"
+            | FunctionInstance  (op, args, outSymbol) -> $"{op}({getArgs args})"
+            | Terminal t -> t.ToText(false)
+    // todo
+    let collectExpandedExpression (storage:XgiStorage) (exp:IExpression) : XgiConvertorExpression =
+        let xgiLocalVars = ResizeArray<IXgiLocalVar>()
+        let rec helper (exp:IExpression) =
+            [
+                match exp.FunctionName with
+                | Some funcName ->
+                    let newArgs = exp.FunctionArguments |> bind helper
+                    match funcName with
+                    | ("&&" | "||" | "!") as op ->
+                        LogicalOperator(op, newArgs)
+                    | (">"|">="|"<"|"<="|"="|"!=") as op ->
+                        let out = tagCreator "out" $"{op} output" false
+                        xgiLocalVars.Add out
+                        PredicateInstance (op, newArgs, out)
+                    | ("+"|"-"|"*"|"/") as op ->
+                        let out = tagCreator "out" $"{op} output" false
+                        xgiLocalVars.Add out
+                        FunctionInstance (op, newArgs, out)
+                    | _ ->
+                        failwith "ERROR"
+                | _ ->
+                    Terminal exp
+            ]
+
+        let newExp = helper exp |> List.exactlyOne
+        xgiLocalVars.Cast<IStorage>() |> storage.AddRange
+        newExp
+
+    let private statement2XgiStatement (storage:XgiStorage) (statement:Statement) : XgiStatement =
+        match statement with
+        | DuAssign (exp, target) ->
+            let xgiExpression = collectExpandedExpression storage exp
+            DuXgiAssign (XgiAssignStatement(exp, target))
+        | DuTimer ts             -> DuXgiTimer  (XgiTimerStatement(ts))
+        | DuCounter cs           -> DuXgiCounter(XgiCounterStatement(cs))
+        | DuCopy (exp, src, tgt) -> DuXgiCopy   (XgiCopyStatement(exp, src, tgt))
+        | DuVarDecl _            -> failwith "ERROR"
+
+    let internal commentedStatement2CommentedXgiStatement (storage:XgiStorage) (CommentedStatement(comment, statement)) : CommentedXgiStatement =
+        let xgiStatement = statement2XgiStatement storage statement
+        CommentedXgiStatement(comment, xgiStatement)
+

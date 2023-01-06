@@ -62,7 +62,7 @@ module LsXGI =
         let newCommentedStatements = ResizeArray<CommentedXgiStatement>()
         let newStorages = ResizeArray<IStorage>(storages.Values)
         for cmtSt in commentedStatements do
-            let xgiCmtStmt = commentedStatement2CommentedXgiStatement cmtSt
+            let xgiCmtStmt = commentedStatement2CommentedXgiStatement newStorages cmtSt
             let (CommentedXgiStatement(cmt, xgiStmts)) = xgiCmtStmt
             match xgiStmts.GetStatement() with
             | :? XgiStatementExptender as extended ->

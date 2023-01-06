@@ -15,6 +15,8 @@ open System.Security
 % M [B|W|D] [file] . [element]
 *)
 
+
+[<AutoOpen>]
 module XGITag = //IEC61131Tag =
     type FE(f, e) =
         member x.File = f
@@ -81,16 +83,41 @@ module XGITag = //IEC61131Tag =
 
         generate
 
+    type internal XgiSymbolCreateParams = {
+        Name          : string
+        Comment       : string
+        PLCType       : string
+        Address       : string
+        DevicePosition: int
+        AddressIEC    : string
+        Device        : string
+        Kind          : int
+    }
 
+    let internal defaultSymbolCreateParam = {
+        Name          = ""
+        Comment       = "Fake Comment"
+        PLCType       = ""
+        Address       = ""
+        DevicePosition= -1
+        AddressIEC    = ""
+        Device        = ""
+        Kind          = int Variable.Kind.VAR
+    }
 
     /// devicePos, addressIEC, device, kind, address, name, comment, plcType 를 받아서 SymbolInfo 를 생성한다.
-    let createSymbolWithDetail (devicePos:int) addressIEC device (kind:int) address name comment plcType : SymbolInfo =
+    let internal createSymbolWithDetail (symbolCreateParam) : SymbolInfo =
+        let { Name=name; Comment=comment; PLCType=plcType; Address=address;
+              DevicePosition=devicePos; AddressIEC=addressIEC; Device=device; Kind=kind; } = symbolCreateParam
+
         let comment = SecurityElement.Escape comment
         {   Name=name; Comment=comment; Device=device; Kind = kind;
             Type=plcType; State=0; Address=address; DevicePos=devicePos; AddressIEC=addressIEC}
 
     /// name, comment, plcType 를 받아서 SymbolInfo 를 생성한다.
-    let createSymbol = createSymbolWithDetail -1 "" "" (int Variable.Kind.VAR) ""
+    let createSymbol name comment plcType =
+        { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType}
+        |> createSymbolWithDetail
 
     let copyLocal2GlobalSymbol (s:SymbolInfo) =
         { s with Kind = int Variable.Kind.VAR_GLOBAL; State=0; }

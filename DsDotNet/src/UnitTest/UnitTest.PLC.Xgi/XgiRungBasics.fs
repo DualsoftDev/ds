@@ -62,8 +62,8 @@ type XgiRungTest() =
         let t = PlcTag("myBit00", "%IX0.0.0", false)
         // name, comment, device, kind, address, plcType 를 받아서 SymbolInfo 를 생성한다.
         let symbolInfo: SymbolInfo =
-            let plcType = "BOOL"
-            XGITag.createSymbolWithDetail -1 "" "I" (int Variable.Kind.VAR) t.Address  t.Name "Fake Comment" plcType
+            { defaultSymbolCreateParam with Name=t.Name; PLCType="BOOL"; Address=t.Address; Device="I"; }
+            |> XGITag.createSymbolWithDetail
 
         let symbolInfoXml = symbolInfo.GenerateXml()
         symbolInfoXml =~= """<Symbol Name="myBit00" Kind="1" Type="BOOL" Comment="Fake Comment" Device="I" Address="%IX0.0.0" State="0">
@@ -96,9 +96,11 @@ type XgiRungTest() =
             let kindVar = int Variable.Kind.VAR
             let plcType = "BOOL"
             [   for t in iTags do
-                    XGITag.createSymbolWithDetail -1 "" "I" kindVar t.Address t.Name "Fake Comment" plcType
+                    { defaultSymbolCreateParam with Name=t.Name; PLCType=plcType; Address=t.Address; Device="I"; Kind=kindVar; }
+                    |> XGITag.createSymbolWithDetail
 
-                XGITag.createSymbolWithDetail -1 "" "Q" kindVar q.Address q.Name "Fake Comment" plcType
+                { defaultSymbolCreateParam with Name=q.Name; PLCType=plcType; Address=q.Address; Device="Q"; Kind=kindVar; }
+                |> XGITag.createSymbolWithDetail
             ]
         let localSymbolsXml = XGITag.generateSymbolVars(symbolInfos, false)
         iTags, q, localSymbolsXml

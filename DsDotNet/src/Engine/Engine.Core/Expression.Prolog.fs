@@ -33,9 +33,6 @@ module ExpressionForwardDeclModule =
     (* PLC generation module 용 *)
     type IFlatExpression = interface end
 
-    /// terminal expression 이 될 수 있는 객체.  Tag, Variable, Literal.  IExpression 은 아님
-    type IExpressionizableTerminal =
-        inherit IText
 
     /// 이름을 갖는 terminal expression 이 될 수 있는 객체.  Tag, Variable (Literal 은 제외)
     type INamedExpressionizableTerminal =
@@ -58,6 +55,9 @@ module ExpressionForwardDeclModule =
         /// Function expression 인 경우 function args 반환.  terminal 이거나 argument 없으면 empty list 반환
         abstract FunctionArguments: IExpression list
         /// Function expression 에 사용된 IStorage 항목들을 반환
+
+        abstract Terminal: ITerminal option
+
         abstract CollectStorages: unit -> IStorage list
         abstract Flatten: unit -> IFlatExpression
 

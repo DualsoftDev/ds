@@ -1,6 +1,8 @@
 namespace rec Engine.Core
 open System
 open System.Net.NetworkInformation
+open System.Runtime.InteropServices.ComTypes
+open System.Diagnostics
 
 (*  expression: generic type <'T> 나 <_> 으로는 <obj> match 으로 간주됨
     Expression<'T> 객체에 대한 matching
@@ -30,16 +32,29 @@ open System.Net.NetworkInformation
 [<AutoOpen>]
 module ExpressionModule =
 
+    [<DebuggerDisplay("{ToText()}")>]
     type Terminal<'T when 'T:equality> =
         | DuTag of TagBase<'T>
         | DuVariable of VariableBase<'T>
-        | DuLiteral of LiteralHolder<'T>        // Literal 도 IExpressionTerminal 구현해야 하므로, 'T 대신 LiteralHolder<'T> 사용
+        | DuLiteral of LiteralHolder<'T>        // Literal 도 IExpressionizableTerminal 구현해야 하므로, 'T 대신 LiteralHolder<'T> 사용
+        interface ITerminal with
+            member x.Tag      = match x with | DuTag tag           -> Some tag      | _ -> None
+            member x.Variable = match x with | DuVariable variable -> Some variable | _ -> None
+            member x.Literal  = match x with | DuLiteral literal   -> Some literal  | _ -> None
+
+    type IFunctionSpec =
+        abstract Name: string
+        abstract Arguments: Arguments
 
     type FunctionSpec<'T> = {
         FunctionBody: Arguments -> 'T
         Name        : string
         Arguments   : Arguments
     }
+    with
+        interface IFunctionSpec with
+            member x.Name      = x.Name
+            member x.Arguments = x.Arguments
 
 
     type Expression<'T when 'T:equality> =
@@ -51,10 +66,13 @@ module ExpressionModule =
             member x.BoxedEvaluatedValue = x.Evaluate() |> box
             member x.GetBoxedRawObject() = x.GetBoxedRawObject()
             member x.ToText(withParenthesys) = x.ToText(withParenthesys)
-            member x.FunctionName = x.FunctionName
-            member x.FunctionArguments = x.FunctionArguments
             member x.CollectStorages() = x.CollectStorages()
             member x.Flatten() = fwdFlattenExpression x
+
+            (* 'T type DU 를 접근하기 위한 members *)
+            member x.FunctionName = x.FunctionName
+            member x.FunctionArguments = x.FunctionArguments
+            member x.Terminal = match x with | DuTerminal t -> Some t | _ -> None
 
         member x.DataType = typedefof<'T>
 

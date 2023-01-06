@@ -4,6 +4,7 @@ open Engine.Core
 open Engine.Common.FS
 open PLC.CodeGen.Common
 open System.Security
+open System.Diagnostics
 
 (*
     - 사칙연산 함수(Add, ..) 의 입력은 XGI 에서 전원선으로부터 연결이 불가능한 반면,
@@ -159,22 +160,47 @@ module rec TypeConvertorModule =
         member _.Target = target
 
     type XgiStatement =
-        | DuXgiAssign of XgiAssignStatement
-        | DuXgiTimer of XgiTimerStatement
+        | DuXgiAssign  of XgiAssignStatement
+        | DuXgiTimer   of XgiTimerStatement
         | DuXgiCounter of XgiCounterStatement
-        | DuXgiCopy of XgiCopyStatement
+        | DuXgiCopy    of XgiCopyStatement
     with
         member x.GetStatement():IXgiStatement =
             match x with
-            | DuXgiAssign s -> s
-            | DuXgiTimer  s -> s
-            | DuXgiCounter  s -> s
-            | DuXgiCopy  s -> s
+            | DuXgiAssign  s -> s
+            | DuXgiTimer   s -> s
+            | DuXgiCounter s -> s
+            | DuXgiCopy    s -> s
 
+
+
+    [<DebuggerDisplay("{ToText()}")>]
+    type XgiConvertorExpression =
+        | FunctionInstance of op:string * args:XgiConvertorExpression list * outSymbol:SymbolInfo
+        | Terminal of IExpression
+        member x.ToText() =
+            match x with
+            | FunctionInstance (op, args, outSymbol) ->
+                let args = args |> map toText |> String.concat ", "
+                $"{op}({args})"
+            | Terminal t -> t.ToText(false)
+    // todo
+    let collectExpandedExpression (exp:IExpression) : XgiConvertorExpression list =
+        [
+            match exp.FunctionName with
+            | Some ("+"|"-"|"*"|"/"|">"|">="|"<"|"<="|"="|"!=" as op) ->
+                let newArgs = exp.FunctionArguments |> bind collectExpandedExpression
+                let out = fwdCreateSymbol "xxx" "xxx" "" 1 "" "BOOL"        // todo
+                FunctionInstance (op, newArgs, out)
+            | _ ->
+                Terminal exp
+        ]
 
     let private statement2XgiStatement (statement:Statement) : XgiStatement =
         match statement with
-        | DuAssign (exp, target) -> DuXgiAssign (XgiAssignStatement(exp, target))
+        | DuAssign (exp, target) ->
+            let xxx = collectExpandedExpression exp;
+            DuXgiAssign (XgiAssignStatement(exp, target))
         | DuTimer ts             -> DuXgiTimer  (XgiTimerStatement(ts))
         | DuCounter cs           -> DuXgiCounter(XgiCounterStatement(cs))
         | DuCopy (exp, src, tgt) -> DuXgiCopy   (XgiCopyStatement(exp, src, tgt))
@@ -191,7 +217,7 @@ module rec TypeConvertorModule =
     ///FunctionBlocks은 Timer와 같은 현재 측정 시간을 저장하는 Instance가 필요있는 Command 해당
     type FunctionBlock =
         | TimerMode of XgiTimerStatement //endTag, time
-        | CounterMode of XgiCounterStatement   // IExpressionTerminal *  CommandTag  * int  //endTag, countResetTag, count
+        | CounterMode of XgiCounterStatement   // IExpressionizableTerminal *  CommandTag  * int  //endTag, countResetTag, count
     with
         member x.GetInstanceText() =
             match x with
@@ -206,11 +232,11 @@ module rec TypeConvertorModule =
             //| TimerMode timerStatement ->
             //    timerStatement.RungInCondition
             //    |> Option.toList
-            //    |> List.cast<IExpressionTerminal>
+            //    |> List.cast<IExpressionizableTerminal>
             //| CounterMode counterStatement ->
             //    [ counterStatement.UpCondition; counterStatement.ResetCondition ]
             //    |> List.choose id
-            //    |> List.map (fun x -> x :?> IExpressionTerminal)
+            //    |> List.map (fun x -> x :?> IExpressionizableTerminal)
 
         interface IFunctionCommand with
             member this.TerminalEndTag: INamedExpressionizableTerminal =

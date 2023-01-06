@@ -64,7 +64,6 @@ module FlatExpressionModule =
     let rec flattenExpressionT (expression:IExpression<'T>) : IFlatExpression =
         match expression with
         | :? Expression<'T> as express ->
-            //let literalBool2Terminal (b:bool) : IExpressionTerminal = if b then TrueValue() else FalseValue()
             match express with
             | DuTerminal (DuTag t) -> FlatTerminal(t, false, false)
             | DuTerminal (DuLiteral b) -> FlatTerminal(b, false, false)

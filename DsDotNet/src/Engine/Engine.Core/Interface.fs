@@ -33,6 +33,15 @@ module Interface =
         abstract DataType : System.Type
         abstract ToBoxedExpression : unit -> obj    /// IExpression<'T> 의 boxed 형태의 expression 생성
 
+    /// terminal expression 이 될 수 있는 객체.  Tag, Variable, Literal.  IExpression 은 아님
+    type IExpressionizableTerminal =
+        inherit IText
+
+    type ITerminal =
+        abstract Tag:IStorage option
+        abstract Variable:IStorage option
+        abstract Literal:IExpressionizableTerminal option
+
     type IVertexManager =
         abstract Vertex: IVertex
     let mutable fwdCreateVertexManager = let dummy (vertex:IVertex) : IVertexManager = failwith "Should be reimplemented." in dummy

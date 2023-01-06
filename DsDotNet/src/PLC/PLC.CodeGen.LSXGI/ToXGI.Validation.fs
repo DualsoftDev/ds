@@ -50,7 +50,7 @@ open PLC.CodeGen.LSXGI
 //        /// PulseTag 로 사용되면, scan counter 값을 이용해서 rising/falling 을 평가한다.
 //        let terminalEvaluator (sc:int) =
 //            let f =
-//                fun (terminal:IExpressionTerminal) ->
+//                fun (terminal:IExpressionizableTerminal) ->
 //                    let v = (terminal :?> BitTag).Value
 //                    match terminal with
 //                    | :? PulseTag as pt ->

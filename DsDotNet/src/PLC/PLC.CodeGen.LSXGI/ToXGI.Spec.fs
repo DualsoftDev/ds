@@ -378,38 +378,39 @@ module internal FB =
         dic
 
     let isValidFunctionName = xgiFunctionInfoDic.ContainsKey
-    let getFunctionDeails functionName = xgiFunctionInfoDic.[functionName]
+    let getFunctionDeails functionName = xgiFunctionInfoDic[functionName]
 
     /// getFBXML FB 이름 기준으로 XML 저장 파라메터를 읽음
-    let getFBXML (functionName, fnameTarget, instance, index) =
+    ///
+    /// return sample =
+    /// "#BEGIN_FUNC: ADD2_INT&#xA;FNAME: ADD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 71&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200040, , 0&#xA;VAR_IN: IN2, 0x00200040, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000040,&#xA;#END_FUNC &#xA;"
+    let getFBXmlParam (functionName, functionNameTarget, instance, index) =
+        let xmlLineFeed = "&#xA"
         let fbXml =
-            xgiFunctionInfoDic.[functionName]
+            xgiFunctionInfoDic[functionName]
             |> Array.map (function
-                | StartsWith "FNAME: " -> sprintf "FNAME: %s" fnameTarget
-                | StartsWith "INSTANCE: " -> sprintf "INSTANCE: %s" instance
-                | StartsWith "INDEX: " -> sprintf "INDEX: %d" index
+                | StartsWith "FNAME: "    -> $"FNAME: {functionNameTarget}"
+                | StartsWith "INSTANCE: " -> $"INSTANCE: {instance}"
+                | StartsWith "INDEX: "    -> $"INDEX: {index}"
                 | str -> str)
-            |> String.concat "&#xA;"
-        fbXml + " &#xA;"
+            |> String.concat $"{xmlLineFeed};"
+        fbXml + $" {xmlLineFeed};"
 
     /// getFBXML FB 이름 기준으로 Input para 갯수를 읽어옴
     let getFBInCount (functionName:string) =
         let lstIn =
-            xgiFunctionInfoDic.[functionName]
-            |> Array.filter (function f -> not (f.StartsWith("VAR_IN: EN")))
-            |> Array.filter (function f -> f.StartsWith("VAR_IN: ") || f.StartsWith("VAR_IN_OUT: "))
+            xgiFunctionInfoDic[functionName]
+            |> Array.filter (fun f -> not (f.StartsWith("VAR_IN: EN")))
+            |> Array.filter (fun f -> f.StartsWith("VAR_IN: ") || f.StartsWith("VAR_IN_OUT: "))
         let onlyIn =
             lstIn
-            |> Seq.filter (function f -> f.StartsWith("VAR_IN: "))
+            |> Array.filter (fun f -> f.StartsWith("VAR_IN: "))
 
         onlyIn.length(), lstIn.length()
 
     /// getFBXML FB 이름 기준으로 index 가져옴
     let getFBIndex (functionName:string) =
-        let lstIndex =
-            xgiFunctionInfoDic.[functionName]
-            |> Array.filter (function f -> f.StartsWith("INDEX: "))
-            |> Array.toSeq
-
-        lstIndex |> Seq.head |> fun f -> f.Replace("INDEX: ", "") |> int
+        xgiFunctionInfoDic[functionName]
+        |> Array.find(fun f -> f.StartsWith("INDEX: "))
+        |> fun f -> f.Replace("INDEX: ", "") |> int
 

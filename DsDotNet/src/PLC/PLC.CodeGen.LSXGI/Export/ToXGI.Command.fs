@@ -156,7 +156,7 @@ module internal Command =
             else $"{opComp.ToText()}2_{opCompType}"
 
         let results = [
-            createFB funcFind func "" (opComp.ToText()) x y
+            createFunctionAt funcFind func "" (opComp.ToText()) (x, y)
             createFBParameterXml (x-1, y+1) (leftA.ToText())
             createFBParameterXml (x-1, y+2) (leftB.ToText())
             createFBParameterXml (x+1, y+1) (coil.StorageName)
@@ -186,7 +186,7 @@ module internal Command =
             //Pulse시 증감 처리
             //yield! drawRising(x, y)
             //함수 그리기
-            createFB funcFind func "" func xx y
+            createFunctionAt funcFind func "" func (xx, y)
             createFBParameterXml (xx-1, y+1) (targetTag.ToText())
             createFBParameterXml (xx+1, y+1) (targetTag.ToText())
             createFBParameterXml (xx-1, y+2) (addValue.ToString())
@@ -217,7 +217,7 @@ module internal Command =
 
 
             //함수 그리기
-            createFB funcFind func "" func xx y
+            createFunctionAt funcFind func "" func (xx, y)
             createFBParameterXml (xx-1, y+1) (fromTag.ToText())
             createFBParameterXml (xx+1, y+1) (toTag.ToText())
         ]
@@ -231,7 +231,7 @@ module internal Command =
         //Command instance 객체생성
         let inst, func = cmd.Instance |> fun (inst, varType) -> inst, varType.ToString()
         [
-            createFB func func inst func x y
+            createFunctionAt func func inst func (x, y)
 
             //Command 결과출력
             //createFBParameterXml (cmd.CoilTerminalTag.PLCTagName)  (x+1) (y)

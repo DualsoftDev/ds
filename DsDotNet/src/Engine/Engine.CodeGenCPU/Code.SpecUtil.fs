@@ -55,5 +55,3 @@ module CodeSpecUtil =
             |_ -> failwith "Error"
 
         isVaildVertex
-        //if not <| isVaildVertex 
-        //then failwith $"{v.Name} can't applies to [{vaild}] case"

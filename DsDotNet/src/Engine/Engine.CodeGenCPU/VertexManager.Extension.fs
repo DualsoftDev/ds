@@ -25,6 +25,13 @@ module VertexManagerExtension =
                     .Cast<VertexManager>()
 
 
+    
+    let getPureCall(v:Vertex) =
+            match v with
+            | :? Call as c  ->  v :?> Call
+            | :? Alias as a  -> a.TargetWrapper.GetTarget() :?> Call
+            |_ -> failwith "Error"
+
 
     [<Extension>]
     type CodeConvertUtilExt =
@@ -33,4 +40,10 @@ module VertexManagerExtension =
         [<Extension>] static member RTs(xs:VertexManager seq): DsBit list = xs.Select(fun s->s.RT) |> Seq.toList 
         [<Extension>] static member ETs(xs:VertexManager seq): DsBit list = xs.Select(fun s->s.ET) |> Seq.toList 
         [<Extension>] static member CRs(xs:VertexManager seq): DsBit list = xs.Select(fun s->s.CR) |> Seq.toList 
+        [<Extension>] static member EmptyOnElseToAnd(xs:PlcTag<bool> seq, sys:DsSystem) = if xs.Any() then xs.ToAnd() else sys._on.Expr
+        [<Extension>] static member EmptyOffElseToOr(xs:PlcTag<bool> seq, sys:DsSystem) = if xs.Any() then xs.ToOr() else sys._off.Expr
+        [<Extension>] static member EmptyOnElseToAnd(xs:DsBit seq, sys:DsSystem) = if xs.Any() then xs.ToAnd() else sys._on.Expr
+        [<Extension>] static member EmptyOffElseToOr(xs:DsBit seq, sys:DsSystem) = if xs.Any() then xs.ToOr() else sys._off.Expr
+
+
             

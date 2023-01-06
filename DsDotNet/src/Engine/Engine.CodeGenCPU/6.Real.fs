@@ -15,7 +15,7 @@ type VertexManager with
 
     member v.R2_RealJobComplete(): CommentedStatement  = 
         let real = v.Vertex :?> Real
-        let sets = if real.CoinRelays.Any() then real.CoinRelays.ToAnd() else v.System._on.Expr
+        let sets = real.CoinRelays.EmptyOnElseToAnd v.System
         let rsts = v.System._off.Expr
 
         (sets, rsts) --| (v.ET, "R2")

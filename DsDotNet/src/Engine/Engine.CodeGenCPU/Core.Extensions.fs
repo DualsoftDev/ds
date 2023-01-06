@@ -163,6 +163,9 @@ module ConvertCoreExt =
 
 
     type Call with
+        member c.V = c.VertexManager :?> VertexManager
+        member c.UsingTon = c.CallTarget.Observes.Where(fun f->f.Name = TextOnDelayTimer).any()
+        member c.UsingCtr = c.CallTarget.Observes.Where(fun f->f.Name = TextRingCounter).any()
         member c.INs  = c.CallTarget.JobDefs.Select(fun j -> j.InTag).Cast<PlcTag<bool>>()
         member c.OUTs = c.CallTarget.JobDefs.Select(fun j -> j.OutTag).Cast<PlcTag<bool>>()
         member c.TXs  = c.CallTarget.JobDefs |> Seq.collect(fun (j: JobDef) -> j.ApiItem.TXs)
@@ -177,8 +180,10 @@ module ConvertCoreExt =
                 .Cast<PlcTag<bool>>()
         
     type Real with
+        member r.V = r.VertexManager :?> VertexManager
         member r.CoinRelays = r.Graph.Vertices.Select(getVM).Select(fun f->f.CR)
         member r.ErrorTXs = r.Graph.Vertices.Select(getVM).Select(fun f->f.E1)
         member r.ErrorRXs = r.Graph.Vertices.Select(getVM).Select(fun f->f.E2)
 
-                             
+    type Alias with
+        member a.V = a.VertexManager :?> VertexManager                    

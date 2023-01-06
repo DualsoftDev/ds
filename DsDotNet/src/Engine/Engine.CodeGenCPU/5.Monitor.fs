@@ -31,9 +31,9 @@ type VertexManager with
         let locks  = getNeedCheckExpr (checks)
         //test ahn 인터락 원위치 필요
         
-        let onExpr   = if ons.Any() then ons.ToAnd() else v.System._on.Expr
-        let lockExpr = if locks.Any() then locks.ToOr() else v.System._on.Expr
-        let rsts     = if offs.Any() then offs.ToAnd() else v.System._off.Expr
+        let onExpr   = ons.EmptyOnElseToAnd v.System
+        let lockExpr = if locks.Any() then locks.ToAnd() else v.System._on.Expr
+        let rsts     = offs.EmptyOffElseToOr v.System
 
         (onExpr <&&> lockExpr, rsts) --| (v.OG, "M1" )
 
@@ -43,19 +43,28 @@ type VertexManager with
 
         (sets, rsts) --| (v.PA, "M2" )
 
-        //test ahn
-    member v.M3_CallErrorTXMonitor(): CommentedStatement  = 
+    member v.M3_CallErrorTXMonitor(): CommentedStatement list = 
         let call = v.Vertex :?> Call
-        let sets = v.Flow.eop.Expr <||> v.Flow.sop.Expr   //test ahn timmer 적용
+        let sets = v.G.Expr <&&> v.TON.Expr
         let rsts = v.Flow.clear.Expr <||> v.System._clear.Expr
-
-        (sets, rsts) ==| (v.E1, "M3" )
-
+        [
+            //test ahn 타임아웃 시간 받기
+            (v.G.Expr) --@ (v.TON, "M3")
+            (sets, rsts) ==| (v.E1, "M3")
+        ]
 
     member v.M4_CallErrorRXMonitor(): CommentedStatement  = 
         let call = v.Vertex :?> Call
-        let sets = (v.G.Expr <&&> call.INs.ToOr())
-                   <||> (v.H.Expr <&&> !!call.INs.ToOr())
+        let In_Rxs  = call.CallTarget.JobDefs
+                        .Select(fun j -> j.InTag:?>PlcTag<bool>, j.ApiItem.RXs.Select(getVM))
+
+        let onEventErr  = In_Rxs.Select(fun (input, rxs) -> 
+                        input.Expr <&&> !!rxs.Select(fun f -> f.G).EmptyOnElseToAnd(v.System))
+
+        let offEventErr = In_Rxs.Select(fun (input, rxs) -> 
+                        input.Expr <&&> rxs.Select(fun f -> f.H).EmptyOffElseToOr(v.System))
+
+        let sets = (onEventErr.ToOr() <||> offEventErr.ToOr())
         let rsts = v.Flow.clear.Expr <||> v.System._clear.Expr
 
         (sets, rsts) ==| (v.E2, "M4" )
@@ -63,7 +72,7 @@ type VertexManager with
 
     member v.M5_RealErrorTXMonitor(): CommentedStatement  = 
         let real = v.Vertex :?> Real
-        let sets = if real.ErrorTXs.Any() then real.ErrorTXs.ToOr() else v.System._off.Expr 
+        let sets = real.ErrorTXs.EmptyOffElseToOr v.System
         let rsts = v.System._off.Expr
 
         (sets, rsts) ==| (v.E1, "M5" )
@@ -71,7 +80,7 @@ type VertexManager with
 
     member v.M6_RealErrorRXMonitor(): CommentedStatement  = 
         let real = v.Vertex :?> Real
-        let sets = if real.ErrorRXs.Any() then real.ErrorRXs.ToOr() else v.System._off.Expr 
+        let sets = real.ErrorRXs.EmptyOffElseToOr v.System
         let rsts = v.System._off.Expr
 
         (sets, rsts) ==| (v.E2, "M6" )

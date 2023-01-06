@@ -5,9 +5,9 @@ open Engine.Common.FS
 
 [<AutoOpen>]
 module XgiPrologModule =
-    /// name -> comment -> device -> kind -> address -> plcType -> SymbolInfo
+    /// name -> comment -> plcType -> SymbolInfo
     let mutable fwdCreateSymbol =
-        let dummy (name:string) (comment:string) (device:string) (kind:int) (address:string) (plcType:string) : SymbolInfo =
+        let dummy (name:string) (comment:string) (plcType:string) : SymbolInfo =
             failwith "Should be reimplemented."
         dummy
 

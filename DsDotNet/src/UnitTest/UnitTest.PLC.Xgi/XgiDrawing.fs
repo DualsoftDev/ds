@@ -92,7 +92,6 @@ type XgiDrawingTest() =
     [<Test>]
     member __.``ADD function drawing test``() =
         let { Coordinate = c; Xml = elementAddXml } = createFB "ADD2_INT" "ADD" "" "ADD" 3 2
-        // addXml = <Element ElementType="{VertFBMode}" Coordinate="{coord(3,  2)}" Param="{addXml}"></Element>
         let originalElementAddXml = "FNAME: ADD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 71&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;PROP_COLOR: 16777215&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00207fe0, , 0&#xA;VAR_IN: IN2, 0x00207fe0, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00007fe0, &#xA;"
         noop()
         let rungsXml =
@@ -103,9 +102,8 @@ type XgiDrawingTest() =
 	<Element ElementType="{ContactMode}"       Coordinate="{coord(0,  2)}">EN</Element>
 	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(1,  2)}" Param="3"></Element>
 	{elementAddXml}
-	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(4,  2)}" Param="78"></Element>
-	<Element ElementType="{FBMode}"            Coordinate="{coord(31, 2)}" Param="END">END</Element>
 	<Element ElementType="{VariableMode}"      Coordinate="{coord(2,  3)}">IN1</Element>
+	<Element ElementType="{VariableMode}"      Coordinate="{coord(4,  3)}">Q</Element>
 	<Element ElementType="{VariableMode}"      Coordinate="{coord(2,  4)}">IN2</Element>
 </Rung>
 """
@@ -115,16 +113,15 @@ type XgiDrawingTest() =
 
         // Symbol 정의
         let symbolInfos = [
-            for t in testSymbolTypes do
-                let plcType = systemTypeNameToXgiTypeName t.Name
-                let comment = $"{plcType} <- {t.Name}"
-                let name = $"my{t.Name}"
-                XGITag.createSymbol name comment device kindVar "" plcType
+            XGITag.createSymbol "EN" "EN" "BOOL"
+            XGITag.createSymbol "IN1" "IN1" "INT"
+            XGITag.createSymbol "IN2" "IN2" "INT"
+            XGITag.createSymbol "Q" "Q" "INT"
         ]
 
         let symbolsLocalXml = XGITag.generateSymbolVars (symbolInfos, false)
 
 
-        let xml = wrapWithXml rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml rungsXml symbolsLocalXml emptySymbolsGlobalXml None
         saveTestResult (get_current_function_name ()) xml
 

@@ -490,7 +490,7 @@ module internal XgiFile =
                         //    | Some tt when tt.Equals TagType.Instance -> Variable.Kind.VAR
                         //    | _-> Variable.Kind.VAR_EXTERNAL
 
-                        XGITag.createSymbol name comment device kindVar addr plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
+                        XGITag.createSymbolWithDetail -1 "" device kindVar addr name comment plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
                     | DuXsXgiLocalVar xgi ->
                         xgi.SymbolInfo
                     | DuXsTimer timer ->
@@ -499,7 +499,7 @@ module internal XgiFile =
                             match timer.Type with
                             | TON | TOF | RTO -> timer.Type.ToString()
 
-                        XGITag.createSymbol timer.Name $"TIMER {timer.Name}" device kindVar addr plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
+                        XGITag.createSymbolWithDetail -1 "" device kindVar addr timer.Name $"TIMER {timer.Name}" plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
                     | DuXsCounter counter ->
                         let device, addr = "", ""
                         let plcType =
@@ -507,7 +507,7 @@ module internal XgiFile =
                             | CTU | CTD | CTUD -> $"{counter.Type}_INT"       // todo: CTU_{INT, UINT, .... } 등의 종류가 있음...
                             | CTR -> $"{counter.Type}"
 
-                        XGITag.createSymbol counter.Name $"COUNTER {counter.Name}" device kindVar addr plcType
+                        XGITag.createSymbolWithDetail -1 "" device kindVar addr counter.Name $"COUNTER {counter.Name}" plcType
             ]
 
         /// Symbol table 정의 XML 문자열

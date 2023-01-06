@@ -13,9 +13,6 @@ type XgiLadderElementTest() =
 
     [<Test>]
     member __.``Local var test``() =
-        let kindVar = int Variable.Kind.VAR
-        let device = ""
-
         let testSymbolTypes = [
             typedefof<bool>
             typedefof<single>
@@ -37,7 +34,7 @@ type XgiLadderElementTest() =
                 let plcType = systemTypeNameToXgiTypeName t.Name
                 let comment = $"{plcType} <- {t.Name}"
                 let name = $"my{t.Name}"
-                XGITag.createSymbol name comment device kindVar "" plcType
+                XGITag.createSymbol name comment plcType
         ]
 
         let symbolsLocalXml = XGITag.generateSymbolVars (symbolInfos, false)

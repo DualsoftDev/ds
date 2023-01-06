@@ -73,10 +73,9 @@ module ConvertorPrologModule =
         interface IText with
             member x.ToText() = name
         member x.SymbolInfo =
-            let kindVar = int Variable.Kind.VAR
             let plcType = systemTypeNameToXgiTypeName typedefof<'T>.Name
             let comment = SecurityElement.Escape comment
-            fwdCreateSymbol name comment "" kindVar "" plcType
+            fwdCreateSymbol name comment plcType
 
         override x.ToBoxedExpression() = var2expr x
 
@@ -190,7 +189,7 @@ module rec TypeConvertorModule =
             match exp.FunctionName with
             | Some ("+"|"-"|"*"|"/"|">"|">="|"<"|"<="|"="|"!=" as op) ->
                 let newArgs = exp.FunctionArguments |> bind collectExpandedExpression
-                let out = fwdCreateSymbol "xxx" "xxx" "" 1 "" "BOOL"        // todo
+                let out = fwdCreateSymbol "xxx-name" "xxx-comment" "BOOL"        // todo
                 FunctionInstance (op, newArgs, out)
             | _ ->
                 Terminal exp

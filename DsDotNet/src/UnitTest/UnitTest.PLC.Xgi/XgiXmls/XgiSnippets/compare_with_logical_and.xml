@@ -134,9 +134,11 @@
 				<Programs>
 					<Program Task="스캔 프로그램" Version="259" LocalVariable="1" Kind="0" InstanceName="" Comment="" ObjectId="5122d1cb-7f69-4b7f-bc43-59857fbf0f66" FindProgram="1" FindVar="1" Encrytption="">DsLogic<Body>
 							<LDRoutine>
-								<Rung BlockMask="0"><Element ElementType="63" Coordinate="1">DS Logic for XGI</Element>
+								<Rung BlockMask="0">
+									<Element ElementType="63" Coordinate="1">DS Logic for XGI</Element>
 								</Rung>
-								<Rung BlockMask="0"><Element ElementType="6" Coordinate="2049">EN</Element>
+								<Rung BlockMask="0">
+									<Element ElementType="6" Coordinate="2049">EN</Element>
 									<Element ElementType="2" Coordinate="2052" Param="3"></Element>
 									<Element ElementType="102" Coordinate="2058" Param="FNAME: GT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 68&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;PROP_COLOR: 16777215&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x002fffff, , 0&#xA;VAR_IN: IN2, 0x002fffff, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00000001, &#xA;"></Element>
 									<Element ElementType="0" Coordinate="2063"></Element>
@@ -148,9 +150,11 @@
 									<Element ElementType="2" Coordinate="3085" Param="0"></Element>
 									<Element ElementType="70" Coordinate="4103">IN2</Element>
 								</Rung>
-								<Rung BlockMask="0"><Element ElementType="63" Coordinate="6145">T2 := (IN1 &gt; IN2) &amp;&amp; T1</Element>
+								<Rung BlockMask="0">
+									<Element ElementType="63" Coordinate="6145">T2 := (IN1 &gt; IN2) &amp;&amp; T1</Element>
 								</Rung>
-								<Rung BlockMask="0"><Element ElementType="6" Coordinate="7169">EN</Element>
+								<Rung BlockMask="0">
+									<Element ElementType="6" Coordinate="7169">EN</Element>
 									<Element ElementType="2" Coordinate="7172" Param="3"></Element>
 									<Element ElementType="102" Coordinate="7178" Param="FNAME: GT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 68&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;PROP_COLOR: 16777215&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x002fffff, , 0&#xA;VAR_IN: IN2, 0x002fffff, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00000001, &#xA;"></Element>
 									<Element ElementType="70" Coordinate="8199">IN1</Element>
@@ -161,9 +165,11 @@
 									<Element ElementType="14" Coordinate="8286">T2</Element>
 									<Element ElementType="70" Coordinate="9223">IN2</Element>
 								</Rung>
-								<Rung BlockMask="0"><Element ElementType="63" Coordinate="12289">T2 := (IN1 &gt; IN2) &amp;&amp; (IN1 &gt; IN2) &amp;&amp; T1</Element>
+								<Rung BlockMask="0">
+									<Element ElementType="63" Coordinate="12289">T2 := (IN1 &gt; IN2) &amp;&amp; (IN1 &gt; IN2) &amp;&amp; T1</Element>
 								</Rung>
-								<Rung BlockMask="0"><Element ElementType="6" Coordinate="13313">EN</Element>
+								<Rung BlockMask="0">
+									<Element ElementType="6" Coordinate="13313">EN</Element>
 									<Element ElementType="2" Coordinate="13316" Param="0"></Element>
 									<Element ElementType="102" Coordinate="13319" Param="FNAME: GT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 68&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;PROP_COLOR: 16777215&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x002fffff, , 0&#xA;VAR_IN: IN2, 0x002fffff, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00000001, &#xA;"></Element>
 									<Element ElementType="0" Coordinate="13324"></Element>
@@ -179,9 +185,11 @@
 									<Element ElementType="70" Coordinate="15364">IN2</Element>
 									<Element ElementType="70" Coordinate="15373">IN2</Element>
 								</Rung>
-								<Rung BlockMask="0"><Element ElementType="63" Coordinate="18433">이중 연결선 : 불가!!!</Element>
+								<Rung BlockMask="0">
+									<Element ElementType="63" Coordinate="18433">이중 연결선 : 불가!!!</Element>
 								</Rung>
-								<Rung BlockMask="0"><Element ElementType="6" Coordinate="19457">EN</Element>
+								<Rung BlockMask="0">
+									<Element ElementType="6" Coordinate="19457">EN</Element>
 									<Element ElementType="2" Coordinate="19460" Param="0"></Element>
 									<Element ElementType="102" Coordinate="19463" Param="FNAME: GT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 68&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;PROP_COLOR: 16777215&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x002fffff, , 0&#xA;VAR_IN: IN2, 0x002fffff, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00000001, &#xA;"></Element>
 									<Element ElementType="2" Coordinate="19466" Param="3"></Element>
@@ -196,7 +204,8 @@
 									<Element ElementType="70" Coordinate="21508">IN2</Element>
 									<Element ElementType="70" Coordinate="21517">x00</Element>
 								</Rung>
-								<Rung BlockMask="0"><Element ElementType="2" Coordinate="24577" Param="0"></Element>
+								<Rung BlockMask="0">
+									<Element ElementType="2" Coordinate="24577" Param="0"></Element>
 									<Element ElementType="102" Coordinate="24580" Param="FNAME: EQ&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 76&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;PROP_COLOR: 16777215&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x002fffff, , 0&#xA;VAR_IN: IN2, 0x002fffff, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00000001, &#xA;"></Element>
 									<Element ElementType="2" Coordinate="24583" Param="3"></Element>
 									<Element ElementType="102" Coordinate="24589" Param="FNAME: EQ&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 76&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;PROP_COLOR: 16777215&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x002fffff, , 0&#xA;VAR_IN: IN2, 0x002fffff, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00000001, &#xA;"></Element>
@@ -205,125 +214,152 @@
 									<Element ElementType="70" Coordinate="26625">x00</Element>
 									<Element ElementType="70" Coordinate="26634">2</Element>
 								</Rung>
-								<Rung BlockMask="0"><Element ElementType="2" Coordinate="29697" Param="9"></Element>
+								<Rung BlockMask="0">
+									<Element ElementType="2" Coordinate="29697" Param="9"></Element>
 									<Element ElementType="102" Coordinate="29709" Param="FNAME: ADD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 71&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;PROP_COLOR: 16777215&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00207fe0, , 0&#xA;VAR_IN: IN2, 0x00207fe0, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00007fe0, &#xA;"></Element>
 								</Rung>
 								<OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
 XckU4UJCOYh5CA==</OnlineUploadData>
 							</LDRoutine>
 						</Body>
-						<LocalVar Version="Ver 1.0" Count="21"><Symbols><Symbol Name="EN" Kind="1" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="0" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+						<LocalVar Version="Ver 1.0" Count="21">
+							<Symbols>
+								<Symbol Name="EN" Kind="1" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="0" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="IN1" Kind="1" Type="SINT" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="8" TotalSize="8" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="IN1" Kind="1" Type="SINT" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="8" TotalSize="8" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="IN2" Kind="1" Type="SINT" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="16" TotalSize="8" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="IN2" Kind="1" Type="SINT" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="16" TotalSize="8" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="T1" Kind="1" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="1" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="T1" Kind="1" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="1" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="T2" Kind="1" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="2" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="T2" Kind="1" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="2" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="x00" Kind="1" Type="BOOL" State="0" Address="%IX0.0.0" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="0" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="x00" Kind="1" Type="BOOL" State="0" Address="%IX0.0.0" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="0" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="x01" Kind="1" Type="BOOL" State="0" Address="%IX0.0.1" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="1" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="x01" Kind="1" Type="BOOL" State="0" Address="%IX0.0.1" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="1" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="x02" Kind="1" Type="BOOL" State="0" Address="%IX0.0.2" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="2" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="x02" Kind="1" Type="BOOL" State="0" Address="%IX0.0.2" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="2" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="x03" Kind="1" Type="BOOL" State="0" Address="%IX0.0.3" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="3" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="x03" Kind="1" Type="BOOL" State="0" Address="%IX0.0.3" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="3" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="x04" Kind="1" Type="BOOL" State="0" Address="%IX0.0.4" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="4" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="x04" Kind="1" Type="BOOL" State="0" Address="%IX0.0.4" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="4" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="x05" Kind="1" Type="BOOL" State="0" Address="%IX0.0.5" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="5" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="x05" Kind="1" Type="BOOL" State="0" Address="%IX0.0.5" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="5" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="x06" Kind="1" Type="BOOL" State="0" Address="%IX0.0.6" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="6" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="x06" Kind="1" Type="BOOL" State="0" Address="%IX0.0.6" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="6" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="x07" Kind="1" Type="BOOL" State="0" Address="%IX0.0.7" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="7" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="x07" Kind="1" Type="BOOL" State="0" Address="%IX0.0.7" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="7" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="x08" Kind="1" Type="BOOL" State="0" Address="%IX0.0.8" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="8" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="x08" Kind="1" Type="BOOL" State="0" Address="%IX0.0.8" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="8" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="x09" Kind="1" Type="BOOL" State="0" Address="%IX0.0.9" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="9" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="x09" Kind="1" Type="BOOL" State="0" Address="%IX0.0.9" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="9" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="x10" Kind="1" Type="BOOL" State="0" Address="%IX0.0.10" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="10" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="x10" Kind="1" Type="BOOL" State="0" Address="%IX0.0.10" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="10" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="x11" Kind="1" Type="BOOL" State="0" Address="%IX0.0.11" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="11" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="x11" Kind="1" Type="BOOL" State="0" Address="%IX0.0.11" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="11" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="x12" Kind="1" Type="BOOL" State="0" Address="%IX0.0.12" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="12" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="x12" Kind="1" Type="BOOL" State="0" Address="%IX0.0.12" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="12" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="x13" Kind="1" Type="BOOL" State="0" Address="%IX0.0.13" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="13" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="x13" Kind="1" Type="BOOL" State="0" Address="%IX0.0.13" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="13" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="x14" Kind="1" Type="BOOL" State="0" Address="%IX0.0.14" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="14" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="x14" Kind="1" Type="BOOL" State="0" Address="%IX0.0.14" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="14" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="x15" Kind="1" Type="BOOL" State="0" Address="%IX0.0.15" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="15" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="x15" Kind="1" Type="BOOL" State="0" Address="%IX0.0.15" Trigger="" InitValue="" Comment="FAKECOMMENT" Device="I" DevicePos="15" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
 							</Symbols>
-							<TempVar Count="2"><Symbol Name="@LDTemp0" Kind="1" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="3" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+							<TempVar Count="2">
+								<Symbol Name="@LDTemp0" Kind="1" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="3" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="@LDTemp1" Kind="1" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="4" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="@LDTemp1" Kind="1" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="4" TotalSize="1" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+									<MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
@@ -334,7 +370,8 @@ XckU4UJCOYh5CA==</OnlineUploadData>
 					</Program>
 					<Program Task="스캔 프로그램" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" ObjectId="81b2f852-7f7e-4fdd-b3f0-f3b8a8a8b8e8" FindProgram="1" FindVar="1" Encrytption="">Units<Body>
 							<LDRoutine>
-								<Rung BlockMask="0"><Element ElementType="2" Coordinate="1025" Param="3"></Element>
+								<Rung BlockMask="0">
+									<Element ElementType="2" Coordinate="1025" Param="3"></Element>
 									<Element ElementType="102" Coordinate="1031" Param="FNAME: ADD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 71&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;PROP_COLOR: 16777215&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00207fe0, , 0&#xA;VAR_IN: IN2, 0x00207fe0, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00007fe0, &#xA;"></Element>
 									<Element ElementType="70" Coordinate="2052">0</Element>
 									<Element ElementType="70" Coordinate="3076">1</Element>
@@ -343,7 +380,8 @@ XckU4UJCOYh5CA==</OnlineUploadData>
 XckU4UJCOYh5CA==</OnlineUploadData>
 							</LDRoutine>
 						</Body>
-						<LocalVar Version="Ver 1.0" Count="0"><Symbols></Symbols>
+						<LocalVar Version="Ver 1.0" Count="0">
+							<Symbols></Symbols>
 							<TempVar Count="0"></TempVar>
 						</LocalVar>
 						<RungTable></RungTable>

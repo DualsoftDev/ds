@@ -146,14 +146,8 @@ module internal Command =
         //{ SpanY = fbSpanY; PositionedRungXmls = results}
 
     type System.Type with
-        member x.SizeString =
-            match x.Name with
-            | "Boolean"-> "BOOL"
-            | "Byte"  | "SByte"  -> "BYTE"
-            | "Int16" | "UInt16" -> "INT"
-            | "Int32" | "UInt32" -> "DINT"
-            | "Int64" | "UInt64" -> "LINT"
-            | _ -> failwith "ERROR"
+        member x.SizeString = systemTypeNameToXgiTypeName x.Name
+
 
     let private toTerminalText (exp:IExpression) =
         match exp.Terminal with
@@ -230,7 +224,7 @@ module internal Command =
             //Pulse시 증감 처리
             //yield! drawRising(x, y)
             //함수 그리기
-            createFunctionXmlAt ("ADD2_INT", "ADD") "" (x, y)
+            createFunctionXmlAt ("ADD2_INT", "ADD") "" (x, y)       // ADD2_XXX
             createFBParameterXml (x+1, y+1) (out.StorageName)
             createFBParameterXml (x-1, y+1) in1
             createFBParameterXml (x-1, y+2) in2

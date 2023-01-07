@@ -388,6 +388,7 @@ module internal FB =
         let xmlLineFeed = "&#xA"
         let fbXml =
             xgiFunctionInfoDic[functionName]
+            |> Array.filter(fun x -> not <| x.StartsWith("#"))
             |> Array.map (function
                 | StartsWith "FNAME: "    -> $"FNAME: {functionNameTarget}"
                 | StartsWith "INSTANCE: " -> $"INSTANCE: {instance}"

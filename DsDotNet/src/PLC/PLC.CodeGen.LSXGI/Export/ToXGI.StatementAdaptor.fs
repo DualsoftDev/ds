@@ -46,12 +46,15 @@ module ConvertorPrologModule =
         | "Double" -> "LREAL"
         | ("SByte" | "Char")   -> "BYTE"
         | "Byte"   -> "BYTE"
-        | "Int16"  -> "SINT"
-        | "UInt16" -> "USINT"
-        | "Int32"  -> "DINT"
-        | "UInt32" -> "UDINT"
-        | "Int64"  -> "LINT"
-        | "UInt64" -> "ULINT"
+        | "Int16" | "UInt16" -> "INT"
+        | "Int32" | "UInt32" -> "DINT"
+        | "Int64" | "UInt64" -> "LINT"
+        //| "Int16"  -> "SINT"
+        //| "UInt16" -> "USINT"
+        //| "Int32"  -> "DINT"
+        //| "UInt32" -> "UDINT"
+        //| "Int64"  -> "LINT"
+        //| "UInt64" -> "ULINT"
         | "String" -> "STRING"  // 32 byte
         | _ -> failwith "ERROR"
 
@@ -98,6 +101,9 @@ module rec TypeConvertorModule =
         interface IXgiStatement
         member val TemporaryTags = ResizeArray<IXgiLocalVar>()
         member val ExtendedStatements = ResizeArray<XgiStatement>()
+
+    let createXgiVariable name comment (initValue:'Q) =
+        XgiLocalVar(name, comment, initValue)
 
 
     let createXgiAutoVariable (nameHint:string) comment (initValue:'Q) =
@@ -340,18 +346,45 @@ module XgiExpressionConvertorModule =
     let private statement2XgiStatements (storage:XgiStorage) (statement:Statement) : Statement list =
         let expandFunctionStatements = ResizeArray<Statement>()  // DuAugmentedPLCFunction case
 
-        let newStatement =
+        let newStatements =
             match statement with
             | DuAssign (exp, target) ->
                 let newExp = collectExpandedExpression storage expandFunctionStatements exp
-                DuAssign (newExp, target)
-            | DuVarDecl _            -> failwith "ERROR"
+                [ DuAssign (newExp, target) ]
+
+            | DuVarDecl (exp, decl) ->
+                let newExp = collectExpandedExpression storage expandFunctionStatements exp
+
+                (* 일반 변수 선언 부분을 xgi local variable 로 치환한다. *)
+                storage.Remove decl |> ignore
+                let createVar (defaultValue:'T) =
+                    let var = createXgiVariable decl.Name "local var in code" defaultValue
+                    storage.Add var
+
+                match exp.DataType.Name with
+                | "Single" -> createVar 0.f
+                | "Double" -> createVar 0.0
+                | "SByte"  -> createVar 0y
+                | "Byte"   -> createVar 0uy
+                | "Int16"  -> createVar 0s
+                | "UInt16" -> createVar 0us
+                | "Int32"  -> createVar 0
+                | "UInt32" -> createVar 0u
+                | "Int64"  -> createVar 0L
+                | "UInt64" -> createVar 0UL
+                | "Boolean"-> createVar false
+                | "String" -> createVar ""
+                | "Char"   -> createVar ' '
+                | _ -> failwith "ERROR"
+
+                []
+
             //| DuTimer ts             -> DuXgiTimer  (XgiTimerStatement(ts))
             //| DuCounter cs           -> DuXgiCounter(XgiCounterStatement(cs))
             //| DuCopy (exp, src, tgt) -> DuXgiCopy   (XgiCopyStatement(exp, src, tgt))
-            | _ -> statement
+            | _ -> [ statement ]
 
-        expandFunctionStatements +++ newStatement |> List.ofSeq
+        expandFunctionStatements @ newStatements |> List.ofSeq
 
     let internal commentedStatement2CommentedXgiStatements (storage:XgiStorage) (CommentedStatement(comment, statement)) : CommentedXgiStatements =
         let xgiStatements = statement2XgiStatements storage statement

@@ -63,16 +63,9 @@ module LsXGI =
         let newStorages = ResizeArray<IStorage>(storages.Values)
         for cmtSt in commentedStatements do
             let xgiCmtStmts = commentedStatement2CommentedXgiStatements newStorages cmtSt
-            newCommentedStatements.Add xgiCmtStmts
-            //let (CommentedXgiStatements(cmt, xgiStmts)) = xgiCmtStmts
-            //match xgiStmts.GetStatement() with
-            //| :? XgiStatementExptender as extended ->
-            //    for ext in extended.ExtendedStatements do
-            //        CommentedXgiStatement(cmt, ext) |> newCommentedStatements.Add
-            //    extended.TemporaryTags |> Seq.cast<IStorage> |> newStorages.AddRange
-            //| _ -> ()
-
-        noop()
+            let (CommentAndXgiStatements(comment_, xgiStatements)) = xgiCmtStmts
+            if xgiStatements.Any() then
+                newCommentedStatements.Add xgiCmtStmts
 
         let xgiSymbols =
             [   for s in newStorages do

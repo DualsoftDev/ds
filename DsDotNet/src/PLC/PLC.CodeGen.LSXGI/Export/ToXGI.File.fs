@@ -188,13 +188,13 @@ module internal XgiFile =
                     let fn = operatorToXgiFunctionName op
                     let command:XgiCommand = FunctionCmd(FunctionCompare(fn, output, args)) |> XgiCommand
                     let rgiSub = xmlRung None command rgi.Y
-                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
+                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
 
                 | DuAugmentedPLCFunction ({FunctionName = ("+"|"-"|"*"|"/") as op; Arguments = args; Output=output }) ->
                     let fn = operatorToXgiFunctionName op
                     let command:XgiCommand = FunctionCmd(FunctionArithematic(fn, output, args)) |> XgiCommand
                     let rgiSub = xmlRung None command rgi.Y
-                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
+                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
                 | _ ->
                     failwith "Not yet"
 

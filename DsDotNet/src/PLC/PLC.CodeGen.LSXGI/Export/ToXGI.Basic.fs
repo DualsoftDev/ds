@@ -1,6 +1,7 @@
 namespace PLC.CodeGen.LSXGI
 
 open System.Linq
+open Engine.Core
 open Engine.Common.FS
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 open PLC.CodeGen.Common
@@ -12,6 +13,16 @@ module internal Basic =
         | FlatNary(op, FlatTerminal(_)::_) -> Some(op)
         | FlatNary(op, h::_) -> getDepthFirstLogical h
         | _ -> None
+
+    /// '_ON' 에 대한 flat expression
+    let alwaysOnFlatExpression =
+        let on = {
+            new System.Object() with
+                member x.Finalize() = ()
+            interface IExpressionizableTerminal with
+                member x.ToText() = "_ON"
+        }
+        FlatTerminal (on, false, false)
 
 
     /// Flat expression 을 논리 Cell 좌표계 x y 에서 시작하는 rung 를 작성한다.
@@ -117,13 +128,8 @@ module internal Basic =
         /// 최초 시작이 OR 로 시작하면 우측으로 1 column 들여쓰기 한다.
         let indent = 0  // if getDepthFirstLogical expr = Some(Op.Or) then 1 else 0
 
-        let result =
-            match expr with
-            | Some expr -> rng (x+indent, y) expr
-            | _ ->
-                let c = coord(x, y)
-                let xml = elementFull ElementType.MultiHorzLineMode c $"Param={dq}3{dq}" ""
-                { RungInfos = [{ Coordinate = c; Xml = xml}]; X=x; Y=y; SpanX=1; SpanY=1; }
+        // function (block) 의 경우, 조건이 없는 경우가 대부분인데, 이때는 always on (_ON) 으로 연결한다.
+        let result = (expr |? alwaysOnFlatExpression) |> rng (x+indent, y)
 
         noop()
 

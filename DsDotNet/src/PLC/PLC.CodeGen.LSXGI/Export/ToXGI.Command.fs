@@ -154,20 +154,15 @@ module internal Command =
         | Some t ->
             match t.Variable, t.Literal with
             | Some storage, None -> storage.Name
+            | None, Some (:? ILiteralHolder as literal) -> literal.ToTextWithoutTypeSuffix()
             | None, Some literal -> literal.ToText()
             | _ -> failwith "ERROR"
         | _ -> failwith "ERROR"
 
     let drawCmdCompare (x, y) (func:string) (out:INamedExpressionizableTerminal) (leftA:IExpression) (leftB:IExpression) : CoordinatedRungXmlsForCommand =
         let fbSpanY = 3
-
-        //let leftA:IExpressionizableTerminal =
-        //let leftB:IExpressionizableTerminal =
-
         let a, b = toTerminalText leftA, toTerminalText leftB
 
-        let xxx = leftA.DataType
-        let yyy = xxx
         if(leftA.DataType <> leftB.DataType) then
             failwithlog $"Type mismatch: {a}({leftA.DataType}) <> {b}({leftB.DataType})"
 

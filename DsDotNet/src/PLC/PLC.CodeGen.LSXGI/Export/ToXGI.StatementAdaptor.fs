@@ -8,6 +8,7 @@ open Engine.Core
 open Engine.Common.FS
 open PLC.CodeGen.Common
 open System
+open System.Globalization
 
 (*
     - 사칙연산 함수(Add, ..) 의 입력은 XGI 에서 전원선으로부터 연결이 불가능한 반면,
@@ -102,7 +103,19 @@ module rec TypeConvertorModule =
         member val TemporaryTags = ResizeArray<IXgiLocalVar>()
         member val ExtendedStatements = ResizeArray<XgiStatement>()
 
-    let createXgiVariable name comment (initValue:'Q) =
+    let createXgiVariable (name:string) comment (initValue:'Q) =
+        (*
+            "n0" is an incorrect variable.
+            The folling characters are allowed:
+            Only alphabet capital/small letters and '_' are allowed in the first letter.
+            Only alphabet capital/small letters and '_' are allowed in the second letter.
+            (e.g. variable1, _variable2, variableAB_3, SYMBOL, ...)
+        *)
+        match name |> Seq.toList with
+        | ch::_ when isHangul ch -> ()
+        | ch1::ch2::_ when isValidStart ch1 && isValidStart ch2 -> ()
+        | _ -> failwith $"Invalid XGI variable name {name}"
+
         XgiLocalVar(name, comment, initValue)
 
 

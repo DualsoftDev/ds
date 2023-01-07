@@ -13,9 +13,11 @@ open Engine.Common.FS
 
 [<AutoOpen>]
 module TextUtil =
+    let isHangul(ch:char) = Char.GetUnicodeCategory(ch) = UnicodeCategory.OtherLetter;
+    let isValidStart(ch:char) = ch = '_' || Char.IsLetter(ch) || isHangul(ch);
+    let (|IsHangul|) x = if isHangul x then Some x else None
+    let (|IsValidStart|) x = if isValidStart x then Some x else None
     let internal isValidIdentifier (identifier:string) =
-        let isHangul(ch:char) = Char.GetUnicodeCategory(ch) = UnicodeCategory.OtherLetter;
-        let isValidStart(ch:char) = ch = '_' || Char.IsLetter(ch) || isHangul(ch);
         let isValid(ch:char) = isValidStart(ch) || Char.IsDigit(ch);
         if (identifier = null || identifier = "") then
             ArgumentNullException() |> raise

@@ -7,6 +7,7 @@ open PLC.CodeGen.LSXGI
 open PLC.CodeGen.Common
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 open PLC.CodeGen.Common.NewIEC61131
+open System
 
 [<AutoOpen>]
 module internal XgiFile =
@@ -130,9 +131,9 @@ module internal XgiFile =
             failwithlog "Unknown FlatExpression case"
 
 
-
+    [<Obsolete("check generateRungs")>]
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
-    let private generateRungs (prologComments:string seq) (commentedStatements:CommentedXgiStatement seq) : XmlOutput =
+    let private generateRungs (prologComments:string seq) (commentedStatements:CommentedXgiStatements seq) : XmlOutput =
         let xmlRung (expr:FlatExpression) xgiCommand y : RungGenerationInfo =
             let {Coordinate=posi; Xml=xml} = rung (0, y) expr xgiCommand
             let yy = (posi / 1024)// + 1
@@ -147,45 +148,47 @@ module internal XgiFile =
             rgi <- rgi.Add(xml)
 
         // Rung 별로 생성
-        for CommentAndXgiStatement(cmt, stmt) in commentedStatements do
+        for CommentAndXgiStatements(cmt, stmts) in commentedStatements do
 
             // 다중 라인 설명문을 하나의 설명문 rung 에..
             if cmt.NonNullAny() then
                 let xml =getCommentRung rgi.Y cmt
                 rgi <- rgi.Add(xml)
+            for stmt in stmts do
+                match stmt with
+                | DuAssign (expr, target) ->
+                    let coil =
+                        match target with
+                        | :? RisingCoil as rc -> COMPulseCoil(rc.Storage :?> INamedExpressionizableTerminal)
+                        | :? FallingCoil as fc -> COMNPulseCoil(fc.Storage :?> INamedExpressionizableTerminal)
+                        | _ -> COMCoil(target :?> INamedExpressionizableTerminal)
+                    let flatExpr = expr.Flatten() :?> FlatExpression
+                    let command:XgiCommand = CoilCmd(coil) |> XgiCommand
+                    let rgiSub = xmlRung flatExpr command rgi.Y
+                    //rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
+                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgiSub.Y}
 
-            match stmt with
-            | DuXgiAssign assign ->
-                let expr = assign.Expression
-                let coil =
-                    match assign.Target with
-                    | :? RisingCoil as rc -> COMPulseCoil(rc.Storage :?> INamedExpressionizableTerminal)
-                    | :? FallingCoil as fc -> COMNPulseCoil(fc.Storage :?> INamedExpressionizableTerminal)
-                    | _ -> COMCoil(assign.Target :?> INamedExpressionizableTerminal)
-                let flatExpr = expr.Flatten() :?> FlatExpression
-                let command:XgiCommand = CoilCmd(coil) |> XgiCommand
-                let rgiSub = xmlRung flatExpr command rgi.Y
-                //rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
-                rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgiSub.Y}
+                // <kwak> <timer>
+                | DuTimer timerStatement ->
+                    let rungin = timerStatement.RungInCondition.Value :> IExpression
+                    let rungin = rungin.Flatten() :?> FlatExpression
 
-            // <kwak> <timer>
-            | DuXgiTimer timerStatement ->
-                let rungin = timerStatement.RungInCondition :> IExpression
-                let rungin = rungin.Flatten() :?> FlatExpression
+                    let command:XgiCommand = FunctionBlockCmd(TimerMode(timerStatement)) |> XgiCommand
+                    let rgiSub = xmlRung rungin command rgi.Y
+                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
-                let command:XgiCommand = FunctionBlockCmd(TimerMode(timerStatement)) |> XgiCommand
-                let rgiSub = xmlRung rungin command rgi.Y
-                rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
+                | DuCounter counterStatement ->
+                    let cs = counterStatement
+                    let rungIn = cs.RungInCondition.Flatten() :?> FlatExpression
+                    let command:XgiCommand = FunctionBlockCmd(CounterMode(counterStatement)) |> XgiCommand
+                    let rgiSub = xmlRung rungIn command rgi.Y
+                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
-            | DuXgiCounter counterStatement ->
-                let cs = counterStatement
-                let rungIn = cs.RungInCondition.Flatten() :?> FlatExpression
-                let command:XgiCommand = FunctionBlockCmd(CounterMode(counterStatement)) |> XgiCommand
-                let rgiSub = xmlRung rungIn command rgi.Y
-                rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
-
-            | _ ->
-                failwith "Not yet"
+                | DuAugmentedPLCFunction ({FunctionName = fn; Arguments = args; Output=output }) ->
+                    //let command:XgiCommand = FunctionCmd(CounterMode(counterStatement)) |> XgiCommand
+                    failwith "Not yet"
+                | _ ->
+                    failwith "Not yet"
 
         let rungEnd = generateEnd (rgi.Y + 1)
         rgi <- rgi.Add(rungEnd)
@@ -339,7 +342,7 @@ module internal XgiFile =
         | DuXsCounter of CounterBaseStruct
 
 
-    let generateXGIXmlFromStatement (prologComments:string seq) (commentedStatements:CommentedXgiStatement seq) (xgiSymbols:XgiSymbol seq) (unusedTags:ITagWithAddress seq) (existingLSISprj:string option) =
+    let generateXGIXmlFromStatement (prologComments:string seq) (commentedStatements:CommentedXgiStatements seq) (xgiSymbols:XgiSymbol seq) (unusedTags:ITagWithAddress seq) (existingLSISprj:string option) =
         // TODO : 하드 코딩...  PLC memory 설정을 어디선가 받아서 처리해야 함.
 
         /// PLC memory manager

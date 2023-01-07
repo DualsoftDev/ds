@@ -97,50 +97,52 @@ module internal Command =
         | NE -> XgiCommand(FunctionCmd(FunctionPure.CompareNE(tag, (tagA, tagB))))
 
     // <timer>
-    let drawCmdTimer (x, y) (timerStatement:XgiTimerStatement)  : CoordinatedRungXmlsForCommand =
+    let drawCmdTimer (x, y) (timerStatement:TimerStatement)  : CoordinatedRungXmlsForCommand =
         let time:int = int timerStatement.Timer.PRE.Value
         let fbSpanY = 2
         { SpanY = fbSpanY; PositionedRungXmls = [createFBParameterXml (x-1, y+1) $"T#{time}MS" ]}
 
-    let drawCmdCounter (x, y) (counterStatement:XgiCounterStatement) : CoordinatedRungXmlsForCommand =
-        let count = int counterStatement.Counter.PRE.Value
-        let typ = counterStatement.Counter.Type
+    let drawCmdCounter (x, y) (counterStatement:CounterStatement) : CoordinatedRungXmlsForCommand =
+        failwith "ERROR"
 
-        // 임시 :
-        // todo : 산전 xgi 의 경우, cu 를 제외한 나머지는 expression 으로 받을 수 없다.
-        // ResetTag 등으로 개정된 statement 구조를 만들어야 함
+        //let count = int counterStatement.Counter.PRE.Value
+        //let typ = counterStatement.Counter.Type
 
-        //let reset = counterStatement.Counter.RES.Name
+        //// 임시 :
+        //// todo : 산전 xgi 의 경우, cu 를 제외한 나머지는 expression 으로 받을 수 없다.
+        //// ResetTag 등으로 개정된 statement 구조를 만들어야 함
 
-        let createParam (x, y) (t:Terminal<bool> option) =
-            match t with
-            | Some t -> [ createFBParameterXml (x, y) t.Name  ]
-            | None   -> []
+        ////let reset = counterStatement.Counter.RES.Name
 
-        let reset = counterStatement.Reset.Value.Name
+        //let createParam (x, y) (t:Terminal<bool> option) =
+        //    match t with
+        //    | Some t -> [ createFBParameterXml (x, y) t.Name  ]
+        //    | None   -> []
 
-        let fbSpanY =
-            match typ with
-            | CTUD -> 5
-            | (CTU | CTD | CTR) -> 3
+        //let reset = counterStatement.Reset.Value.Name
 
-        //Command 속성입력
-        let results = [
-            match typ with
-            | (CTU | CTD ) ->
-                createFBParameterXml (x-1, y+1) reset
-                createFBParameterXml (x-1, y+2) $"{count}"
-            | CTR ->
-                createFBParameterXml (x-1, y+1) $"{count}"
-                createFBParameterXml (x-1, y+2) reset
-            | CTUD ->
-                yield! (createParam (x-1, y+1) counterStatement.CountDown )
-                yield! (createParam (x-1, y+2) counterStatement.Reset     )
-                yield! (createParam (x-1, y+3) counterStatement.Load      )
-                createFBParameterXml (x-1, y+4) $"{count}"
-        ]
+        //let fbSpanY =
+        //    match typ with
+        //    | CTUD -> 5
+        //    | (CTU | CTD | CTR) -> 3
 
-        { SpanY = fbSpanY; PositionedRungXmls = results}
+        ////Command 속성입력
+        //let results = [
+        //    match typ with
+        //    | (CTU | CTD ) ->
+        //        createFBParameterXml (x-1, y+1) reset
+        //        createFBParameterXml (x-1, y+2) $"{count}"
+        //    | CTR ->
+        //        createFBParameterXml (x-1, y+1) $"{count}"
+        //        createFBParameterXml (x-1, y+2) reset
+        //    | CTUD ->
+        //        yield! (createParam (x-1, y+1) counterStatement.CountDown )
+        //        yield! (createParam (x-1, y+2) counterStatement.Reset     )
+        //        yield! (createParam (x-1, y+3) counterStatement.Load      )
+        //        createFBParameterXml (x-1, y+4) $"{count}"
+        //]
+
+        //{ SpanY = fbSpanY; PositionedRungXmls = results}
 
     let drawCmdCompare (x, y) (coil:INamedExpressionizableTerminal) (opComp:OpComp) (leftA:CommandTag) (leftB:CommandTag) : CoordinatedRungXmlsForCommand =
         let fbSpanY = 3

@@ -7,6 +7,7 @@ open System.Diagnostics
 open Engine.Core
 open Engine.Common.FS
 open PLC.CodeGen.Common
+open System
 
 (*
     - 사칙연산 함수(Add, ..) 의 입력은 XGI 에서 전원선으로부터 연결이 불가능한 반면,
@@ -85,10 +86,11 @@ module ConvertorPrologModule =
 [<AutoOpen>]
 module rec TypeConvertorModule =
     type IXgiStatement = interface end
-    type CommentedXgiStatement = CommentedXgiStatement of comment:string * statement:XgiStatement
-    let (|CommentAndXgiStatement|) = function | CommentedXgiStatement(x, y) -> x, y
-    let commentAndXgiStatement = (|CommentAndXgiStatement|)
+    type CommentedXgiStatements = CommentedXgiStatements of comment:string * statements:Statement list
+    let (|CommentAndXgiStatements|) = function | CommentedXgiStatements(x, ys) -> x, ys
+    let commentAndXgiStatement = (|CommentAndXgiStatements|)
 
+    [<Obsolete("Check me: XgiStatementExptender")>]
     [<AbstractClass>]
     type XgiStatementExptender() =
         interface IXgiStatement
@@ -177,8 +179,8 @@ module rec TypeConvertorModule =
 
     ///FunctionBlocks은 Timer와 같은 현재 측정 시간을 저장하는 Instance가 필요있는 Command 해당
     type FunctionBlock =
-        | TimerMode of XgiTimerStatement //endTag, time
-        | CounterMode of XgiCounterStatement   // IExpressionizableTerminal *  CommandTag  * int  //endTag, countResetTag, count
+        | TimerMode of TimerStatement //endTag, time
+        | CounterMode of CounterStatement   // IExpressionizableTerminal *  CommandTag  * int  //endTag, countResetTag, count
     with
         member x.GetInstanceText() =
             match x with
@@ -233,24 +235,31 @@ module rec TypeConvertorModule =
 module XgiExpressionConvertorModule =
     type XgiStorage = ResizeArray<IStorage>
 
-    [<DebuggerDisplay("{ToText()}")>]
-    type XgiConvertorExpression =
-        /// Ladder 에 직접 그릴 수 있음.  And/Or/Not
-        | LogicalOperator of op:string * args:XgiConvertorExpression list
-        /// True/False 판정하는 Function.  대소 비교 등
-        | PredicateInstance of op:string * args:XgiConvertorExpression list * outSymbol:IXgiLocalVar
-        /// Non boolean 값을 반환하는 Function.  사칙연산 등
-        | FunctionInstance of op:string * args:XgiConvertorExpression list * outSymbol:IXgiLocalVar
-        | Terminal of IExpression
-        member x.ToText() =
-            let getArgs (args:XgiConvertorExpression list) = args |> map toText |> String.concat ", "
-            match x with
-            | LogicalOperator   (op, args)            -> $"{op}({getArgs args})"
-            | PredicateInstance (op, args, outSymbol) -> $"{op}({getArgs args})"
-            | FunctionInstance  (op, args, outSymbol) -> $"{op}({getArgs args})"
-            | Terminal t -> t.ToText(false)
-    // todo
-    let collectExpandedExpression (storage:XgiStorage) (exp:IExpression) : XgiConvertorExpression =
+    //[<DebuggerDisplay("{ToText()}")>]
+    //type XgiConvertorExpression =
+    //    /// Ladder 에 직접 그릴 수 있음.  And/Or/Not
+    //    | LogicalOperator of op:string * args:XgiConvertorExpression list
+    //    /// True/False 판정하는 Function.  대소 비교 등
+    //    | PredicateInstance of op:string * args:XgiConvertorExpression list * outSymbol:IXgiLocalVar
+    //    /// Non boolean 값을 반환하는 Function.  사칙연산 등
+    //    | FunctionInstance of op:string * args:XgiConvertorExpression list * outSymbol:IXgiLocalVar
+    //    | Terminal of IExpression
+    //    member x.ToText() =
+    //        let getArgs (args:XgiConvertorExpression list) = args |> map toText |> String.concat ", "
+    //        match x with
+    //        | LogicalOperator   (op, args)            -> $"{op}({getArgs args})"
+    //        | PredicateInstance (op, args, outSymbol) -> $"{op}({getArgs args})"
+    //        | FunctionInstance  (op, args, outSymbol) -> $"{op}({getArgs args})"
+    //        | Terminal t -> t.ToText(false)
+
+    //type XgiExtendedFunction = {
+    //    Name:string
+    //    Args:Arguments
+    //    OutSymbol:IXgiLocalVar
+    //    OriginalExpression:IExpression
+    //}
+
+    let collectExpandedExpression (storage:XgiStorage) (expandFunctionStatements:ResizeArray<Statement>) (exp:IExpression) : IExpression =
         let xgiLocalVars = ResizeArray<IXgiLocalVar>()
         let rec helper (exp:IExpression) =
             [
@@ -259,36 +268,47 @@ module XgiExpressionConvertorModule =
                     let newArgs = exp.FunctionArguments |> bind helper
                     match funcName with
                     | ("&&" | "||" | "!") as op ->
-                        LogicalOperator(op, newArgs)
-                    | (">"|">="|"<"|"<="|"="|"!=") as op ->
+                        exp.WithNewFunctionArguments newArgs
+                    | (">"|">="|"<"|"<="|"="|"!="  |  "+"|"-"|"*"|"/") as op ->
                         let out = tagCreator "out" $"{op} output" false
                         xgiLocalVars.Add out
-                        PredicateInstance (op, newArgs, out)
-                    | ("+"|"-"|"*"|"/") as op ->
-                        let out = tagCreator "out" $"{op} output" false
-                        xgiLocalVars.Add out
-                        FunctionInstance (op, newArgs, out)
+                        expandFunctionStatements.Add <| DuAugmentedPLCFunction { FunctionName = op; Arguments = newArgs; Output = out; }
+                        DuTerminal (DuVariable out)
                     | _ ->
                         failwith "ERROR"
                 | _ ->
-                    Terminal exp
+                    exp
             ]
 
         let newExp = helper exp |> List.exactlyOne
-        xgiLocalVars.Cast<IStorage>() |> storage.AddRange
+        xgiLocalVars.Cast<IStorage>() |> storage.AddRange   // 위의 helper 수행 이후가 아니면, xgiLocalVars 가 채워지지 않는다.
         newExp
 
-    let private statement2XgiStatement (storage:XgiStorage) (statement:Statement) : XgiStatement =
-        match statement with
-        | DuAssign (exp, target) ->
-            let xgiExpression = collectExpandedExpression storage exp
-            DuXgiAssign (XgiAssignStatement(exp, target))
-        | DuTimer ts             -> DuXgiTimer  (XgiTimerStatement(ts))
-        | DuCounter cs           -> DuXgiCounter(XgiCounterStatement(cs))
-        | DuCopy (exp, src, tgt) -> DuXgiCopy   (XgiCopyStatement(exp, src, tgt))
-        | DuVarDecl _            -> failwith "ERROR"
+    [<Obsolete("Check me")>]
+    let private statement2XgiStatements (storage:XgiStorage) (statement:Statement) : Statement list =
+        let expandFunctionStatements = ResizeArray<Statement>()  // DuAugmentedPLCFunction case
 
-    let internal commentedStatement2CommentedXgiStatement (storage:XgiStorage) (CommentedStatement(comment, statement)) : CommentedXgiStatement =
-        let xgiStatement = statement2XgiStatement storage statement
-        CommentedXgiStatement(comment, xgiStatement)
+        let newStatement =
+            match statement with
+            | DuAssign (exp, target) ->
+                let newExp = collectExpandedExpression storage expandFunctionStatements exp
+                DuAssign (newExp, target)
+            | DuVarDecl _            -> failwith "ERROR"
+            //| DuTimer ts             -> DuXgiTimer  (XgiTimerStatement(ts))
+            //| DuCounter cs           -> DuXgiCounter(XgiCounterStatement(cs))
+            //| DuCopy (exp, src, tgt) -> DuXgiCopy   (XgiCopyStatement(exp, src, tgt))
+            | _ -> statement
 
+        expandFunctionStatements +++ newStatement |> List.ofSeq
+
+    let internal commentedStatement2CommentedXgiStatements (storage:XgiStorage) (CommentedStatement(comment, statement)) : CommentedXgiStatements =
+        let xgiStatements = statement2XgiStatements storage statement
+        CommentedXgiStatements(comment, xgiStatements)
+
+
+
+    type CounterStatement with
+        member cs.RungInCondition:IExpression<bool> =
+            match cs.Counter.Type with
+            | ( CTU | CTUD | CTR ) -> cs.UpCondition.Value
+            | CTD -> cs.DownCondition.Value

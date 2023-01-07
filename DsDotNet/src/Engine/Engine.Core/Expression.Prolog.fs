@@ -54,10 +54,12 @@ module ExpressionForwardDeclModule =
         abstract FunctionName: string option
         /// Function expression 인 경우 function args 반환.  terminal 이거나 argument 없으면 empty list 반환
         abstract FunctionArguments: IExpression list
-        /// Function expression 에 사용된 IStorage 항목들을 반환
+        /// Function arguments 목록만 치환된 새로운 expression 반환
+        abstract WithNewFunctionArguments: IExpression list -> IExpression
 
         abstract Terminal: ITerminal option
 
+        /// Function expression 에 사용된 IStorage 항목들을 반환
         abstract CollectStorages: unit -> IStorage list
         abstract Flatten: unit -> IFlatExpression
 

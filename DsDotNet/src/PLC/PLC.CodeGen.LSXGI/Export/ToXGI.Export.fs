@@ -59,19 +59,18 @@ module LsXGI =
             => 새로운 임시 tag 와 새로운 임시 tag 에 저장하기 위한 rung 들이 추가된다.
         *)
 
-        let newCommentedStatements = ResizeArray<CommentedXgiStatement>()
+        let newCommentedStatements = ResizeArray<CommentedXgiStatements>()
         let newStorages = ResizeArray<IStorage>(storages.Values)
         for cmtSt in commentedStatements do
-            let xgiCmtStmt = commentedStatement2CommentedXgiStatement newStorages cmtSt
-            let (CommentedXgiStatement(cmt, xgiStmts)) = xgiCmtStmt
-            match xgiStmts.GetStatement() with
-            | :? XgiStatementExptender as extended ->
-                for ext in extended.ExtendedStatements do
-                    CommentedXgiStatement(cmt, ext) |> newCommentedStatements.Add
-                extended.TemporaryTags |> Seq.cast<IStorage> |> newStorages.AddRange
-            | _ -> ()
-
-            newCommentedStatements.Add xgiCmtStmt
+            let xgiCmtStmts = commentedStatement2CommentedXgiStatements newStorages cmtSt
+            newCommentedStatements.Add xgiCmtStmts
+            //let (CommentedXgiStatements(cmt, xgiStmts)) = xgiCmtStmts
+            //match xgiStmts.GetStatement() with
+            //| :? XgiStatementExptender as extended ->
+            //    for ext in extended.ExtendedStatements do
+            //        CommentedXgiStatement(cmt, ext) |> newCommentedStatements.Add
+            //    extended.TemporaryTags |> Seq.cast<IStorage> |> newStorages.AddRange
+            //| _ -> ()
 
         noop()
 

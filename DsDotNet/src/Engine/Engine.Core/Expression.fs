@@ -71,6 +71,10 @@ module ExpressionModule =
             member x.FunctionName = x.FunctionName
             member x.FunctionArguments = x.FunctionArguments
             member x.Terminal = match x with | DuTerminal t -> Some t | _ -> None
+            member x.WithNewFunctionArguments(args) =
+                match x with
+                | DuFunction fs -> DuFunction {fs with Arguments = args }
+                | _ -> failwith "ERROR"
 
         member x.DataType = typedefof<'T>
 
@@ -183,14 +187,25 @@ module ExpressionModule =
             member x.ToText() = $"npulse(${x.Storage.Name})"    // negative pulse
             member x.ToBoxedExpression() = failwith "ERROR: not supported"
 
+
+    type FunctionParameters = {
+        FunctionName:string
+        Arguments:Arguments
+        /// Function output store target
+        Output:IStorage
+    }
+
     type Statement =
         | DuAssign of expression:IExpression * target:IStorage
         /// 변수 선언.  PLC rung 생성시에는 관여되지 않는다.
         | DuVarDecl of expression:IExpression * variable:IStorage
+
         | DuTimer of TimerStatement
         | DuCounter of CounterStatement
         /// 주어진 condition 이 충족하면, source 를 target 으로 copy 수행하는 rung 생성
         | DuCopy of condition:IExpression<bool> * source:IExpression * target:IStorage
+
+        | DuAugmentedPLCFunction of FunctionParameters
 
 
     type CommentedStatement = CommentedStatement of comment:string * statement:Statement
@@ -239,6 +254,8 @@ module ExpressionModule =
             | DuCopy (condition, source, target) ->
                 if condition.EvaluatedValue then
                     target.Value <- source.BoxedEvaluatedValue
+            | DuAugmentedPLCFunction _ ->
+                failwith "ERROR"
 
         member x.ToText() =
             match x with
@@ -270,6 +287,8 @@ module ExpressionModule =
                 $"{typ.ToLower()} {c.Name} = {functionName}({args})"
             | DuCopy (condition, source, target) ->
                 $"copyIf({condition.ToText(false)}, {source.ToText(false)}, {target.ToText()})"
+            | DuAugmentedPLCFunction _ ->
+                failwith "ERROR"
 
     type Terminal<'T when 'T:equality> with
         member x.TryGetStorage(): IStorage option =

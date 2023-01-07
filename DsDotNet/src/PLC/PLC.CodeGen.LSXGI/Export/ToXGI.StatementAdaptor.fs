@@ -61,6 +61,7 @@ module ConvertorPrologModule =
 
     type IXgiLocalVar =
         inherit IVariable
+        inherit INamedExpressionizableTerminal
         abstract SymbolInfo:SymbolInfo
     type IXgiLocalVar<'T> =
         inherit IXgiLocalVar
@@ -99,9 +100,28 @@ module rec TypeConvertorModule =
         member val ExtendedStatements = ResizeArray<XgiStatement>()
 
 
-    let tagCreator (nameHint:string) comment (initValue:'Q) =
+    let createXgiAutoVariable (nameHint:string) comment (initValue:'Q) =
         autoVariableCounter <- autoVariableCounter + 1
         XgiLocalVar($"_tmp{nameHint}{autoVariableCounter}", comment, initValue)
+
+    let createTypedXgiAutoVariable (typ:System.Type) (nameHint:string) comment : IXgiLocalVar =
+        autoVariableCounter <- autoVariableCounter + 1
+        let name = $"_tmp{nameHint}{autoVariableCounter}"
+        match typ.Name with
+        | "Single" -> XgiLocalVar(name, comment, 0.f)
+        | "Double" -> XgiLocalVar(name, comment, 0.0)
+        | "SByte"  -> XgiLocalVar(name, comment, 0y)
+        | "Byte"   -> XgiLocalVar(name, comment, 0uy)
+        | "Int16"  -> XgiLocalVar(name, comment, 0s)
+        | "UInt16" -> XgiLocalVar(name, comment, 0us)
+        | "Int32"  -> XgiLocalVar(name, comment, 0)
+        | "UInt32" -> XgiLocalVar(name, comment, 0u)
+        | "Int64"  -> XgiLocalVar(name, comment, 0L)
+        | "UInt64" -> XgiLocalVar(name, comment, 0UL)
+        | "Boolean"-> XgiLocalVar(name, comment, false)
+        | "String" -> XgiLocalVar(name, comment, "")
+        | "Char"   -> XgiLocalVar(name, comment, ' ')
+        | _  -> failwith "ERROR"
 
 
     let private expandExpression (store:XgiStatementExptender) (exp:IExpression<'T>) (nameHint:string) : Terminal<'T> =
@@ -111,7 +131,7 @@ module rec TypeConvertorModule =
             | DuTerminal t -> t
             | DuFunction fs ->
                 let comment = exp.ToText(false) //fs.Name
-                let temp = tagCreator nameHint comment (exp.Evaluate())
+                let temp = createXgiAutoVariable nameHint comment (exp.Evaluate())
                 store.TemporaryTags.Add temp
                 let assign = DuXgiAssign <| XgiAssignStatement(exp, temp)
                 store.ExtendedStatements.Add(assign)
@@ -260,6 +280,19 @@ module XgiExpressionConvertorModule =
     //    OriginalExpression:IExpression
     //}
 
+    let operatorToXgiFunctionName = function
+        | ">" -> "GT"
+        |">=" -> "GTE"
+        |"<"  -> "LT"
+        |"<=" -> "LTE"
+        |"="  -> "EQ"
+        |"!=" -> "NE"
+        |"+"  -> "ADD"
+        |"-"  -> "SUB"
+        |"*"  -> "MUL"
+        |"/"  -> "DIV"
+        | _ -> failwith "ERROR"
+
     let collectExpandedExpression (storage:XgiStorage) (expandFunctionStatements:ResizeArray<Statement>) (exp:IExpression) : IExpression =
         let xgiLocalVars = ResizeArray<IXgiLocalVar>()
         let rec helper (exp:IExpression) =
@@ -271,10 +304,28 @@ module XgiExpressionConvertorModule =
                     | ("&&" | "||" | "!") as op ->
                         exp.WithNewFunctionArguments newArgs
                     | (">"|">="|"<"|"<="|"="|"!="  |  "+"|"-"|"*"|"/") as op ->
-                        let out = tagCreator "out" $"{op} output" false
-                        xgiLocalVars.Add out
-                        expandFunctionStatements.Add <| DuAugmentedPLCFunction { FunctionName = op; Arguments = newArgs; Output = out; }
-                        DuTerminal (DuVariable out)
+                        let withDefaultValue (defaultValue:'T) =
+                            let out = createXgiAutoVariable "out" $"{op} output" defaultValue
+                            xgiLocalVars.Add out
+                            expandFunctionStatements.Add <| DuAugmentedPLCFunction { FunctionName = op; Arguments = newArgs; Output = out; }
+                            DuTerminal (DuVariable out) :> IExpression
+
+                        match exp.DataType.Name with
+                        | "Single" -> withDefaultValue 0.f
+                        | "Double" -> withDefaultValue 0.0
+                        | "SByte"  -> withDefaultValue 0y
+                        | "Byte"   -> withDefaultValue 0uy
+                        | "Int16"  -> withDefaultValue 0s
+                        | "UInt16" -> withDefaultValue 0us
+                        | "Int32"  -> withDefaultValue 0
+                        | "UInt32" -> withDefaultValue 0u
+                        | "Int64"  -> withDefaultValue 0L
+                        | "UInt64" -> withDefaultValue 0UL
+                        | "Boolean"-> withDefaultValue false
+                        | "String" -> withDefaultValue ""
+                        | "Char"   -> withDefaultValue ' '
+                        | _ -> failwith "ERROR"
+
                     | _ ->
                         failwith "ERROR"
                 | _ ->

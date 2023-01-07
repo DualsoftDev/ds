@@ -16,7 +16,7 @@ module internal Basic =
 
     /// Flat expression 을 논리 Cell 좌표계 x y 에서 시작하는 rung 를 작성한다.
     /// xml 및 다음 y 좌표 반환
-    let rung (x, y) (expr:FlatExpression) (cmdExp:XgiCommand) : CoordinatedRungXml =
+    let rung (x, y) (expr:FlatExpression option) (cmdExp:XgiCommand) : CoordinatedRungXml =
 
         /// x y 위치에서 expression 표현하기 위한 정보 반환
         /// {| Xml=[|c, str|]; NextX=sx; NextY=maxY; VLineUpRightMaxY=maxY |}
@@ -114,11 +114,16 @@ module internal Basic =
             | _ ->
                 failwithlog "Unknown FlatExpression case"
 
-
         /// 최초 시작이 OR 로 시작하면 우측으로 1 column 들여쓰기 한다.
         let indent = 0  // if getDepthFirstLogical expr = Some(Op.Or) then 1 else 0
 
-        let result = rng (x+indent, y) expr
+        let result =
+            match expr with
+            | Some expr -> rng (x+indent, y) expr
+            | _ ->
+                let c = coord(x, y)
+                let xml = elementFull ElementType.MultiHorzLineMode c $"Param={dq}3{dq}" ""
+                { RungInfos = [{ Coordinate = c; Xml = xml}]; X=x; Y=y; SpanX=1; SpanY=1; }
 
         noop()
 

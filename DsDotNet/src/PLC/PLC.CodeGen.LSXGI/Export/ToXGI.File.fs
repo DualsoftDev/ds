@@ -134,7 +134,7 @@ module internal XgiFile =
     [<Obsolete("check generateRungs")>]
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
     let private generateRungs (prologComments:string seq) (commentedStatements:CommentedXgiStatements seq) : XmlOutput =
-        let xmlRung (expr:FlatExpression) xgiCommand y : RungGenerationInfo =
+        let xmlRung (expr:FlatExpression option) xgiCommand y : RungGenerationInfo =
             let {Coordinate=posi; Xml=xml} = rung (0, y) expr xgiCommand
             let yy = (posi / 1024)// + 1
             { Xmls = [$"\t<Rung BlockMask={dq}0{dq}>\r\n{xml}\t</Rung>"]; Y = yy}
@@ -164,32 +164,36 @@ module internal XgiFile =
                         | _ -> COMCoil(target :?> INamedExpressionizableTerminal)
                     let flatExpr = expr.Flatten() :?> FlatExpression
                     let command:XgiCommand = CoilCmd(coil) |> XgiCommand
-                    let rgiSub = xmlRung flatExpr command rgi.Y
+                    let rgiSub = xmlRung (Some flatExpr) command rgi.Y
                     //rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgiSub.Y}
 
                 // <kwak> <timer>
                 | DuTimer timerStatement ->
-                    let rungin = timerStatement.RungInCondition.Value :> IExpression
-                    let rungin = rungin.Flatten() :?> FlatExpression
+                    let rungIn = timerStatement.RungInCondition.Value :> IExpression
+                    let rungIn = rungIn.Flatten() :?> FlatExpression
 
                     let command:XgiCommand = FunctionBlockCmd(TimerMode(timerStatement)) |> XgiCommand
-                    let rgiSub = xmlRung rungin command rgi.Y
+                    let rgiSub = xmlRung (Some rungIn) command rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
                 | DuCounter counterStatement ->
                     let cs = counterStatement
                     let rungIn = cs.RungInCondition.Flatten() :?> FlatExpression
                     let command:XgiCommand = FunctionBlockCmd(CounterMode(counterStatement)) |> XgiCommand
-                    let rgiSub = xmlRung rungIn command rgi.Y
+                    let rgiSub = xmlRung (Some rungIn) command rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
-                | DuAugmentedPLCFunction ({FunctionName = (">"|">="|"<"|"<="|"="|"!=") as fn; Arguments = args; Output=output }) ->
+                | DuAugmentedPLCFunction ({FunctionName = (">"|">="|"<"|"<="|"="|"!=") as op; Arguments = args; Output=output }) ->
+                    let fn = operatorToXgiFunctionName op
                     let command:XgiCommand = FunctionCmd(FunctionCompare(fn, output, args)) |> XgiCommand
-                    failwith "Not yet"
-                | DuAugmentedPLCFunction ({FunctionName = ("+"|"-"|"*"|"/") as fn; Arguments = args; Output=output }) ->
-                    let command:XgiCommand = FunctionCmd(FunctionCompare(fn, output, args)) |> XgiCommand
-                    let rgiSub = xmlRung rungIn command rgi.Y
+                    let rgiSub = xmlRung None command rgi.Y
+                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
+
+                | DuAugmentedPLCFunction ({FunctionName = ("+"|"-"|"*"|"/") as op; Arguments = args; Output=output }) ->
+                    let fn = operatorToXgiFunctionName op
+                    let command:XgiCommand = FunctionCmd(FunctionArithematic(fn, output, args)) |> XgiCommand
+                    let rgiSub = xmlRung None command rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
                 | _ ->
                     failwith "Not yet"

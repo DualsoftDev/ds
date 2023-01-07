@@ -150,10 +150,19 @@ module internal Command =
             match x.Name with
             | "Boolean"-> "BOOL"
             | "Byte"  | "SByte"  -> "BYTE"
-            | "Int16" | "UInt16" -> "WORD"
-            | "Int32" | "UInt32" -> "DWORD"
-            | "Int64" | "UInt64" -> "LWORD"
+            | "Int16" | "UInt16" -> "INT"
+            | "Int32" | "UInt32" -> "DINT"
+            | "Int64" | "UInt64" -> "LINT"
             | _ -> failwith "ERROR"
+
+    let private toTerminalText (exp:IExpression) =
+        match exp.Terminal with
+        | Some t ->
+            match t.Variable, t.Literal with
+            | Some storage, None -> storage.Name
+            | None, Some literal -> literal.ToText()
+            | _ -> failwith "ERROR"
+        | _ -> failwith "ERROR"
 
     let drawCmdCompare (x, y) (func:string) (out:INamedExpressionizableTerminal) (leftA:IExpression) (leftB:IExpression) : CoordinatedRungXmlsForCommand =
         let fbSpanY = 3
@@ -161,13 +170,14 @@ module internal Command =
         //let leftA:IExpressionizableTerminal =
         //let leftB:IExpressionizableTerminal =
 
-        let a = (leftA :?> IExpressionizableTerminal).ToText()
-        let b = (leftB :?> IExpressionizableTerminal).ToText()
+        let a, b = toTerminalText leftA, toTerminalText leftB
 
-        if(leftA.GetType() <> leftB.GetType()) then
-            failwithlog $"Type mismatch: {a}({leftA.GetType()}) <> {b}({leftB.GetType()})"
+        let xxx = leftA.DataType
+        let yyy = xxx
+        if(leftA.DataType <> leftB.DataType) then
+            failwithlog $"Type mismatch: {a}({leftA.DataType}) <> {b}({leftB.DataType})"
 
-        let opCompType = leftA.GetType().SizeString
+        let opCompType = leftA.DataType.SizeString
         let detailedFunctionName =
             //if opComp = OpComp.NE then
             //    $"{func}_{opCompType}"
@@ -214,8 +224,7 @@ module internal Command =
     let drawCmdAdd (x, y) (func:string) (out:INamedExpressionizableTerminal) (in1:IExpression) (in2:IExpression): CoordinatedRungXmlsForCommand =
         let fbSpanY = 3
 
-        let in1 = (in1 :?> IExpressionizableTerminal).ToText()
-        let in2 = (in2 :?> IExpressionizableTerminal).ToText()
+        let in1, in2 = toTerminalText in1, toTerminalText in2
 
         let results = [
             //Pulse시 증감 처리

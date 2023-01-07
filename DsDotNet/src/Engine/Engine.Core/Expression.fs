@@ -192,7 +192,7 @@ module ExpressionModule =
         FunctionName:string
         Arguments:Arguments
         /// Function output store target
-        Output:IStorage
+        Output:INamedExpressionizableTerminal
     }
 
     type Statement =

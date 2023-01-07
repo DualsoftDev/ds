@@ -90,6 +90,7 @@ module rec TypeConvertorModule =
     let (|CommentAndXgiStatements|) = function | CommentedXgiStatements(x, ys) -> x, ys
     let commentAndXgiStatement = (|CommentAndXgiStatements|)
 
+
     [<Obsolete("Check me: XgiStatementExptender")>]
     [<AbstractClass>]
     type XgiStatementExptender() =
@@ -217,16 +218,16 @@ module rec TypeConvertorModule =
         | FunctionBlockCmd of FunctionBlock
 
     let createPLCCommandCopy(endTag, from, toTag) = FunctionPure.CopyMode(endTag, (from, toTag))
-    let createPLCCommandCompare(endTag, op, left, right) =
-        match op with
-        | GT ->FunctionPure.CompareGT(endTag, (left, right))
-        | GE ->FunctionPure.CompareGE(endTag, (left, right))
-        | EQ ->FunctionPure.CompareEQ(endTag, (left, right))
-        | LE ->FunctionPure.CompareLE(endTag, (left, right))
-        | LT ->FunctionPure.CompareLT(endTag, (left, right))
-        | NE ->FunctionPure.CompareNE(endTag, (left, right))
+    //let createPLCCommandCompare(endTag, op, left, right) =
+    //    match op with
+    //    | GT ->FunctionPure.CompareGT(endTag, (left, right))
+    //    | GE ->FunctionPure.CompareGE(endTag, (left, right))
+    //    | EQ ->FunctionPure.CompareEQ(endTag, (left, right))
+    //    | LE ->FunctionPure.CompareLE(endTag, (left, right))
+    //    | LT ->FunctionPure.CompareLT(endTag, (left, right))
+    //    | NE ->FunctionPure.CompareNE(endTag, (left, right))
 
-    let createPLCCommandAdd(endTag, tag, value)          = FunctionPure.Add(endTag, tag, value)
+    //let createPLCCommandAdd(endTag, tag, value)          = FunctionPure.Add(endTag, tag, value)
     //let createPLCCommandTimer(endTag, time)              = FunctionBlock.TimerMode(endTag, time)
     //let createPLCCommandCounter(endTag, resetTag, count) = FunctionBlock.CounterMode(endTag, resetTag , count)
 

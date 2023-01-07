@@ -179,6 +179,35 @@
 									<Element ElementType="70" Coordinate="15364">IN2</Element>
 									<Element ElementType="70" Coordinate="15373">IN2</Element>
 								</Rung>
+								<Rung BlockMask="0"><Element ElementType="63" Coordinate="18433">이중 연결선 : 불가!!!</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="19457">EN</Element>
+									<Element ElementType="2" Coordinate="19460" Param="0"></Element>
+									<Element ElementType="102" Coordinate="19463" Param="FNAME: GT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 68&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;PROP_COLOR: 16777215&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x002fffff, , 0&#xA;VAR_IN: IN2, 0x002fffff, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00000001, &#xA;"></Element>
+									<Element ElementType="2" Coordinate="19466" Param="3"></Element>
+									<Element ElementType="102" Coordinate="19472" Param="FNAME: EQ&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 76&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;PROP_COLOR: 16777215&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x002fffff, , 0&#xA;VAR_IN: IN2, 0x002fffff, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00000001, &#xA;"></Element>
+									<Element ElementType="70" Coordinate="20484">IN1</Element>
+									<Element ElementType="1" Coordinate="20490"></Element>
+									<Element ElementType="1" Coordinate="20493"></Element>
+									<Element ElementType="1" Coordinate="20499"></Element>
+									<Element ElementType="6" Coordinate="20502">T1</Element>
+									<Element ElementType="2" Coordinate="20505" Param="66"></Element>
+									<Element ElementType="14" Coordinate="20574">T2</Element>
+									<Element ElementType="70" Coordinate="21508">IN2</Element>
+									<Element ElementType="70" Coordinate="21517">x00</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="2" Coordinate="24577" Param="0"></Element>
+									<Element ElementType="102" Coordinate="24580" Param="FNAME: EQ&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 76&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;PROP_COLOR: 16777215&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x002fffff, , 0&#xA;VAR_IN: IN2, 0x002fffff, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00000001, &#xA;"></Element>
+									<Element ElementType="2" Coordinate="24583" Param="3"></Element>
+									<Element ElementType="102" Coordinate="24589" Param="FNAME: EQ&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 76&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;PROP_COLOR: 16777215&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x002fffff, , 0&#xA;VAR_IN: IN2, 0x002fffff, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00000001, &#xA;"></Element>
+									<Element ElementType="70" Coordinate="25601">x00</Element>
+									<Element ElementType="70" Coordinate="25610">1</Element>
+									<Element ElementType="70" Coordinate="26625">x00</Element>
+									<Element ElementType="70" Coordinate="26634">2</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="2" Coordinate="29697" Param="9"></Element>
+									<Element ElementType="102" Coordinate="29709" Param="FNAME: ADD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 71&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;PROP_COLOR: 16777215&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00207fe0, , 0&#xA;VAR_IN: IN2, 0x00207fe0, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00007fe0, &#xA;"></Element>
+								</Rung>
 								<OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
 XckU4UJCOYh5CA==</OnlineUploadData>
 							</LDRoutine>
@@ -300,6 +329,22 @@ XckU4UJCOYh5CA==</OnlineUploadData>
 									<MemberComments></MemberComments>
 								</Symbol>
 							</TempVar>
+						</LocalVar>
+						<RungTable></RungTable>
+					</Program>
+					<Program Task="스캔 프로그램" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" ObjectId="81b2f852-7f7e-4fdd-b3f0-f3b8a8a8b8e8" FindProgram="1" FindVar="1" Encrytption="">Units<Body>
+							<LDRoutine>
+								<Rung BlockMask="0"><Element ElementType="2" Coordinate="1025" Param="3"></Element>
+									<Element ElementType="102" Coordinate="1031" Param="FNAME: ADD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 71&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;PROP_COLOR: 16777215&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00207fe0, , 0&#xA;VAR_IN: IN2, 0x00207fe0, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00007fe0, &#xA;"></Element>
+									<Element ElementType="70" Coordinate="2052">0</Element>
+									<Element ElementType="70" Coordinate="3076">1</Element>
+								</Rung>
+								<OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
+XckU4UJCOYh5CA==</OnlineUploadData>
+							</LDRoutine>
+						</Body>
+						<LocalVar Version="Ver 1.0" Count="0"><Symbols></Symbols>
+							<TempVar Count="0"></TempVar>
 						</LocalVar>
 						<RungTable></RungTable>
 					</Program>

@@ -184,9 +184,13 @@ module internal XgiFile =
                     let rgiSub = xmlRung rungIn command rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
-                | DuAugmentedPLCFunction ({FunctionName = fn; Arguments = args; Output=output }) ->
-                    //let command:XgiCommand = FunctionCmd(CounterMode(counterStatement)) |> XgiCommand
+                | DuAugmentedPLCFunction ({FunctionName = (">"|">="|"<"|"<="|"="|"!=") as fn; Arguments = args; Output=output }) ->
+                    let command:XgiCommand = FunctionCmd(FunctionCompare(fn, output, args)) |> XgiCommand
                     failwith "Not yet"
+                | DuAugmentedPLCFunction ({FunctionName = ("+"|"-"|"*"|"/") as fn; Arguments = args; Output=output }) ->
+                    let command:XgiCommand = FunctionCmd(FunctionCompare(fn, output, args)) |> XgiCommand
+                    let rgiSub = xmlRung rungIn command rgi.Y
+                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
                 | _ ->
                     failwith "Not yet"
 

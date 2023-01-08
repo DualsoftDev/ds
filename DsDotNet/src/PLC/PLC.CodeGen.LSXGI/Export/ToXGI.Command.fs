@@ -1,10 +1,12 @@
 namespace PLC.CodeGen.LSXGI
 
-open Engine.Common.FS
+open System.Collections.Generic
+open System.Linq
+
 open PLC.CodeGen.Common
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
+open Engine.Common.FS
 open Engine.Core
-open System
 
 [<AutoOpen>]
 module internal Command =
@@ -77,6 +79,28 @@ module internal Command =
 
     //let createOutputCopy(tag, tagA, tagB)             = XgiCommand(FunctionCmd(FunctionPure.CopyMode(tag, (tagA, tagB))))
 
+
+    /// '_ON' 에 대한 flat expression
+    let alwaysOnFlatExpression =
+        let on = {
+            new System.Object() with
+                member x.Finalize() = ()
+            interface IExpressionizableTerminal with
+                member x.ToText() = "_ON"
+        }
+        FlatTerminal (on, false, false)
+
+
+
+    type FuctionParameterShape =
+        /// Input parameter connection
+        | LineConnectFrom of x:int * y:int
+        /// Output parameter connection
+        | LineConnectTo of x:int * y:int
+        /// Input/Output 라인 연결없이 직접 write
+        | Value of value:IValue
+
+
     // <timer>
     let drawCmdTimer (x, y) (timerStatement:TimerStatement)  : CoordinatedRungXmlsForCommand =
         let time:int = int timerStatement.Timer.PRE.Value
@@ -84,47 +108,54 @@ module internal Command =
         { SpanY = fbSpanY; PositionedRungXmls = [createFBParameterXml (x-1, y+1) $"T#{time}MS" ]}
 
     let drawCmdCounter (x, y) (counterStatement:CounterStatement) : CoordinatedRungXmlsForCommand =
-        failwith "ERROR"
+
+        let paramDic = Dictionary<string, FuctionParameterShape>()
+        let cs = counterStatement
+        let pv = int cs.Counter.PRE.Value
+        let typ = cs.Counter.Type
+        let fbSpanY =
+            match typ with
+            | CTUD -> 5
+            | (CTU | CTD | CTR) -> 3
+
+        let createParam (x, y) (t:Terminal<bool> option) =
+            match t with
+            | Some t -> [ createFBParameterXml (x, y) t.Name  ]
+            | None   -> []
+
+        //match typ with
+        //| CTU ->    // cu, r, pv, q, cv
+        //    let cu = cs.UpCondition.Value.Flatten()
+        //    rung (x, y)
 
 
-        //let count = int counterStatement.Counter.PRE.Value
-        //let typ = counterStatement.Counter.Type
+        //| CTD ->
+        //| CTUD ->
+        //| CTR -> 3
 
-        //// 임시 :
-        //// todo : 산전 xgi 의 경우, cu 를 제외한 나머지는 expression 으로 받을 수 없다.
-        //// ResetTag 등으로 개정된 statement 구조를 만들어야 함
+        //let reset = cs.Reset.Value.Name
 
-        ////let reset = counterStatement.Counter.RES.Name
 
-        //let createParam (x, y) (t:Terminal<bool> option) =
-        //    match t with
-        //    | Some t -> [ createFBParameterXml (x, y) t.Name  ]
-        //    | None   -> []
-
-        //let reset = counterStatement.Reset.Value.Name
-
-        //let fbSpanY =
-        //    match typ with
-        //    | CTUD -> 5
-        //    | (CTU | CTD | CTR) -> 3
 
         ////Command 속성입력
         //let results = [
         //    match typ with
         //    | (CTU | CTD ) ->
         //        createFBParameterXml (x-1, y+1) reset
-        //        createFBParameterXml (x-1, y+2) $"{count}"
+        //        createFBParameterXml (x-1, y+2) $"{pv}"
         //    | CTR ->
-        //        createFBParameterXml (x-1, y+1) $"{count}"
+        //        createFBParameterXml (x-1, y+1) $"{pv}"
         //        createFBParameterXml (x-1, y+2) reset
         //    | CTUD ->
-        //        yield! (createParam (x-1, y+1) counterStatement.CountDown )
-        //        yield! (createParam (x-1, y+2) counterStatement.Reset     )
-        //        yield! (createParam (x-1, y+3) counterStatement.Load      )
-        //        createFBParameterXml (x-1, y+4) $"{count}"
+        //        yield! (createParam (x-1, y+1) cs.DownCondition )
+        //        yield! (createParam (x-1, y+2) cs.Reset     )
+        //        yield! (createParam (x-1, y+3) cs.Load      )
+        //        createFBParameterXml (x-1, y+4) $"{pv}"
         //]
 
         //{ SpanY = fbSpanY; PositionedRungXmls = results}
+
+        failwith "ERROR"
 
     type System.Type with
         member x.SizeString = systemTypeNameToXgiTypeName x.Name
@@ -222,6 +253,7 @@ module internal Command =
             //createFBParameterXml (cmd.CoilTerminalTag.PLCTagName)  (x+1) (y)
         ]
 
+
     /// (x, y) 위치에 cmd 를 생성.  cmd 가 차지하는 height 와 xml 목록을 반환
     let drawCommand (x, y) (cmd:XgiCommand) : int * (CoordinatedRungXml list) =
         let results = ResizeArray<CoordinatedRungXml>()
@@ -265,3 +297,146 @@ module internal Command =
             { Coordinate = c; Xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.StorageName) }
         ]
         1, results
+
+
+    /// Flat expression 을 논리 Cell 좌표계 x y 에서 시작하는 rung 를 작성한다.
+    /// xml 및 다음 y 좌표 반환
+    /// expr 이 None 이면 선두 모선에서의 연결선으로 대체
+    /// cmdExp 이 None 이면 command 를 그리지 않는다.
+    let rung (x, y) (expr:FlatExpression option) (cmdExp:XgiCommand option) : CoordinatedRungXml =
+
+        /// x y 위치에서 expression 표현하기 위한 정보 반환
+        /// {| Xml=[|c, str|]; NextX=sx; NextY=maxY; VLineUpRightMaxY=maxY |}
+        /// - Xml : 좌표 * 결과 xml 문자열
+        let rec rng (x, y) (expr:FlatExpression) : RungInfosWithSpan =
+            let baseRIWNP = { RungInfos = []; X=x; Y=y; SpanX=1; SpanY=1; }
+            let c = coord(x, y)
+            /// 좌표 * 결과 xml 문자열 보관 장소
+            let rungInfos = ResizeArray<CoordinatedRungXml>()
+            if enableXmlComment then
+                { Coordinate = c; Xml = $"<!-- {x} {y} {expr.ToText()} -->" } |> rungInfos.Add
+
+            match expr with
+            | FlatTerminal(id, pulse, neg) ->
+                let mode =
+                    match pulse, neg with
+                    | true, true    -> ElementType.NPulseContactMode
+                    | true, false   -> ElementType.PulseContactMode
+                    | false, true   -> ElementType.ClosedContactMode
+                    | false, false  -> ElementType.ContactMode
+                    |> int
+                let str = elementBody mode c (id.ToText())
+                { baseRIWNP with RungInfos = [{ Coordinate = c; Xml = str}]; }
+
+            | FlatNary(And, exprs) ->
+                let mutable sx = x
+                let subRungInfos:RungInfosWithSpan list =
+                    [
+                        for exp in exprs do
+                            let sub = rng (sx, y) exp
+                            sx <- sx + sub.SpanX
+                            rungInfos.AddRange(sub.RungInfos)
+                            yield sub
+                    ]
+                let spanX = subRungInfos.Sum(fun sri-> sri.SpanX)
+                let spanY = subRungInfos.Max(fun sri-> sri.SpanY)
+                { baseRIWNP with RungInfos=rungInfos.Distinct().ToFSharpList(); SpanX=spanX; SpanY=spanY; }
+
+            | FlatNary(Or, exprs) ->
+                let mutable sy = y
+                let subRungInfos:RungInfosWithSpan list =
+                    [
+                        for exp in exprs do
+                            let sub = rng (x, sy) exp
+                            sy <- sy + sub.SpanY
+                            rungInfos.AddRange(sub.RungInfos)
+                            yield sub
+                    ]
+                let spanX = subRungInfos.Max(fun sri-> sri.SpanX)
+                let spanY = subRungInfos.Sum(fun sri-> sri.SpanY)
+
+                [
+                    for ri in subRungInfos do
+                        if ri.SpanX < spanX then
+                            let param =
+                                let span = (spanX - ri.SpanX - 1) * 3
+                                $"Param={dq}{span}{dq}"
+                            let mode = int ElementType.MultiHorzLineMode
+                            let c = coord (ri.X+ri.SpanX, ri.Y)
+                            { Coordinate = c; Xml = elementFull mode c param "" }
+                ] |> rungInfos.AddRange
+
+                // 좌측 vertical lines
+                if x >= 1 then
+                    vlineDownTo (x-1, y) (spanY-1) |> rungInfos.AddRange
+
+                // ```OR variable length 역삼각형 test```
+                let lowestY =
+                    subRungInfos
+                        .Where(fun sri -> sri.SpanX <= spanX)
+                        .Max(fun sri -> sri.Y)
+                // 우측 vertical lines
+                vlineDownTo (x+spanX-1, y) (lowestY-y) |> rungInfos.AddRange
+
+
+                { baseRIWNP with RungInfos=rungInfos.Distinct().ToFSharpList(); SpanX=spanX; SpanY=spanY; }
+
+
+            | FlatNary((OpCompare _ | OpArithematic _), exprs) ->
+                failwith "ERROR : Should have been processed in early stage."    // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
+
+            // terminal case
+            | FlatNary(OpUnit, inner::[]) ->
+                inner |> rng (x, y)
+
+            // negation 없애기
+            | FlatNary(Neg, inner::[]) ->
+                FlatNary(OpUnit, [inner.Negate()]) |> rng (x, y)
+
+            | FlatZero ->
+                let str = hlineEmpty c
+                { baseRIWNP with RungInfos=[{ Coordinate = c; Xml = str}]; SpanX=0; SpanY=0; }
+
+            | _ ->
+                failwithlog "Unknown FlatExpression case"
+
+        // function (block) 의 경우, 조건이 없는 경우가 대부분인데, 이때는 always on (_ON) 으로 연결한다.
+        let result = (expr |? alwaysOnFlatExpression) |> rng (x, y)
+
+        let mutable commandHeight = 0
+        /// 좌표 * xml 결과 문자열
+        let positionedRungXmls =
+            [
+                yield! result.RungInfos
+
+                match cmdExp with
+                | Some cmdExp ->
+                    let nx = x + result.SpanX
+                    let commandSpanY, posiRungXmls =
+                        match cmdExp.CommandType with
+                        | CoilCmd (cc) ->
+                            drawCoil (nx-1, y) cmdExp
+                        | ( FunctionCmd _ | FunctionBlockCmd _ ) ->
+                            drawCommand (nx, y) cmdExp
+
+                    commandHeight <- commandSpanY
+                    yield! posiRungXmls
+                | None ->
+                    ()
+            ]
+
+
+        let xml =
+            positionedRungXmls
+                |> Seq.sortBy (fun ri -> ri.Coordinate)   // fst
+                |> Seq.map (fun ri -> ri.Xml)  //snd
+                |> String.concat "\r\n"
+
+        let c =
+            let spanY = max result.SpanY commandHeight
+            coord(x, spanY + y)
+        { Xml = xml; Coordinate = c }
+
+
+
+

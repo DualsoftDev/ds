@@ -35,7 +35,6 @@
 		<Compile Include="Export\ToXGI.StatementAdaptor.fs" />
 		<Compile Include="Export\ToXGI.Common.fs" />
 		<Compile Include="Export\ToXGI.Command.fs" />
-		<Compile Include="Export\ToXGI.Basic.fs" />
 		<Compile Include="Export\ToXGI.Tag.fs" />
 		<Compile Include="Export\ToXGI.File.fs" />
 		<Compile Include="Export\ToXGI.Export.fs" />

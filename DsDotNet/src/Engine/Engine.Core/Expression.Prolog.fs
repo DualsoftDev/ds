@@ -9,6 +9,7 @@ open Engine.Common.FS
 [<AutoOpen>]
 module ExpressionForwardDeclModule =
     type IValue<'T> =
+        inherit IValue
         abstract Value: 'T with get, set
 
     type IStorage<'T> =

@@ -98,10 +98,26 @@ module FlatExpressionModule =
     // <kwak> IExpression<'T> vs IExpression : 강제 변환
     and flattenExpression (expression:IExpression) : IFlatExpression =
         match expression with
-        | :? IExpression<bool> as exp -> flattenExpressionT exp
-        | :? IExpression<int> as exp -> flattenExpressionT exp
-        | :? IExpression<uint> as exp -> flattenExpressionT exp
+        | :? IExpression<bool  > as exp -> flattenExpressionT exp
+        | :? IExpression<int8  > as exp -> flattenExpressionT exp
+        | :? IExpression<uint8 > as exp -> flattenExpressionT exp
+        | :? IExpression<int16 > as exp -> flattenExpressionT exp
+        | :? IExpression<uint16> as exp -> flattenExpressionT exp
+        | :? IExpression<int32 > as exp -> flattenExpressionT exp
+        | :? IExpression<uint32> as exp -> flattenExpressionT exp
+        | :? IExpression<int64 > as exp -> flattenExpressionT exp
+        | :? IExpression<uint64> as exp -> flattenExpressionT exp
+        | :? IExpression<single> as exp -> flattenExpressionT exp
+        | :? IExpression<double> as exp -> flattenExpressionT exp
+        | :? IExpression<string> as exp -> flattenExpressionT exp
+        | :? IExpression<char  > as exp -> flattenExpressionT exp
+
         | _ -> failwith "NOT yet"
+
+
+
+
+
 
     ///// expression 이 차지하는 가로, 세로 span 의 width 와 height 를 반환한다.
     //let precalculateSpan (expr:FlatExpression) =

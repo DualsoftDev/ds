@@ -369,3 +369,5 @@ module ExpressionPrologModule2 =
     let mutable fwdCreateBoolTag   = let dummy (tagName:string) (initValue:bool) : TagBase<bool>     = failwith "Should be reimplemented." in dummy
     let mutable fwdCreateUShortTag = let dummy (tagName:string) (initValue:uint16) : TagBase<uint16> = failwith "Should be reimplemented." in dummy
     let mutable fwdFlattenExpression = let dummy (expr:IExpression) : IFlatExpression = failwith "Should be reimplemented." in dummy
+
+

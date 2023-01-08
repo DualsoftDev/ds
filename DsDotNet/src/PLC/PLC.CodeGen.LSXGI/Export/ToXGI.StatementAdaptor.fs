@@ -257,60 +257,23 @@ module rec TypeConvertorModule =
         | FunctionBlockCmd of FunctionBlock
 
     let createPLCCommandCopy(endTag, from, toTag) = FunctionPure.CopyMode(endTag, (from, toTag))
-    //let createPLCCommandCompare(endTag, op, left, right) =
-    //    match op with
-    //    | GT ->FunctionPure.CompareGT(endTag, (left, right))
-    //    | GE ->FunctionPure.CompareGE(endTag, (left, right))
-    //    | EQ ->FunctionPure.CompareEQ(endTag, (left, right))
-    //    | LE ->FunctionPure.CompareLE(endTag, (left, right))
-    //    | LT ->FunctionPure.CompareLT(endTag, (left, right))
-    //    | NE ->FunctionPure.CompareNE(endTag, (left, right))
-
-    //let createPLCCommandAdd(endTag, tag, value)          = FunctionPure.Add(endTag, tag, value)
-    //let createPLCCommandTimer(endTag, time)              = FunctionBlock.TimerMode(endTag, time)
-    //let createPLCCommandCounter(endTag, resetTag, count) = FunctionBlock.CounterMode(endTag, resetTag , count)
-
 
 [<AutoOpen>]
 module XgiExpressionConvertorModule =
     type XgiStorage = ResizeArray<IStorage>
 
-    //[<DebuggerDisplay("{ToText()}")>]
-    //type XgiConvertorExpression =
-    //    /// Ladder 에 직접 그릴 수 있음.  And/Or/Not
-    //    | LogicalOperator of op:string * args:XgiConvertorExpression list
-    //    /// True/False 판정하는 Function.  대소 비교 등
-    //    | PredicateInstance of op:string * args:XgiConvertorExpression list * outSymbol:IXgiLocalVar
-    //    /// Non boolean 값을 반환하는 Function.  사칙연산 등
-    //    | FunctionInstance of op:string * args:XgiConvertorExpression list * outSymbol:IXgiLocalVar
-    //    | Terminal of IExpression
-    //    member x.ToText() =
-    //        let getArgs (args:XgiConvertorExpression list) = args |> map toText |> String.concat ", "
-    //        match x with
-    //        | LogicalOperator   (op, args)            -> $"{op}({getArgs args})"
-    //        | PredicateInstance (op, args, outSymbol) -> $"{op}({getArgs args})"
-    //        | FunctionInstance  (op, args, outSymbol) -> $"{op}({getArgs args})"
-    //        | Terminal t -> t.ToText(false)
-
-    //type XgiExtendedFunction = {
-    //    Name:string
-    //    Args:Arguments
-    //    OutSymbol:IXgiLocalVar
-    //    OriginalExpression:IExpression
-    //}
-
     let operatorToXgiFunctionName = function
-        | ">" -> "GT"
-        |">=" -> "GTE"
-        |"<"  -> "LT"
-        |"<=" -> "LTE"
-        |"="  -> "EQ"
-        |"!=" -> "NE"
-        |"+"  -> "ADD"
-        |"-"  -> "SUB"
-        |"*"  -> "MUL"
-        |"/"  -> "DIV"
-        | _ -> failwith "ERROR"
+        | ">"  -> "GT"
+        | ">=" -> "GTE"
+        | "<"  -> "LT"
+        | "<=" -> "LTE"
+        | "="  -> "EQ"
+        | "!=" -> "NE"
+        | "+"  -> "ADD"
+        | "-"  -> "SUB"
+        | "*"  -> "MUL"
+        | "/"  -> "DIV"
+        |  _ -> failwith "ERROR"
 
     let collectExpandedExpression (storage:XgiStorage) (expandFunctionStatements:ResizeArray<Statement>) (exp:IExpression) : IExpression =
         let xgiLocalVars = ResizeArray<IXgiLocalVar>()
@@ -391,10 +354,6 @@ module XgiExpressionConvertorModule =
                 | _ -> failwith "ERROR"
 
                 []
-
-            //| DuTimer ts             -> DuXgiTimer  (XgiTimerStatement(ts))
-            //| DuCounter cs           -> DuXgiCounter(XgiCounterStatement(cs))
-            //| DuCopy (exp, src, tgt) -> DuXgiCopy   (XgiCopyStatement(exp, src, tgt))
             | _ -> [ statement ]
 
         expandFunctionStatements @ newStatements |> List.ofSeq

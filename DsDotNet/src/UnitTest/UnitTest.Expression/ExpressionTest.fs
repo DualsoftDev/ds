@@ -129,8 +129,6 @@ module Exp =
             fAdd ([1..10]                |> List.map(v >> iexpr))   |> evaluate === 55
             fMul( [1..5]                 |> List.map(v >> iexpr))   |> evaluate === 120
             fSub [v 10; v 1; v 2]        |> evaluate === 7
-            let xxx = fSub [fAdd [v 1.1; v 2.2]; v 3.3]
-
             fAbs [ fSub [fAdd [v 1.1; v 2.2]; v 3.3] ] |> evaluate :?> double <= 0.00001 |> ShouldBeTrue
             fAbs [ fSub [fMul [v 1.1; v 2.0]; v 2.2] ] |> evaluate :?> double <= 0.00001 |> ShouldBeTrue
             fConcat [v "Hello, "; v "world!"]|> evaluate === "Hello, world!"

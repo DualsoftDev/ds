@@ -115,7 +115,6 @@ module internal Basic =
 
             // negation 없애기
             | FlatNary(Neg, inner::[]) ->
-                let xxx = inner.Negate()
                 FlatNary(OpUnit, [inner.Negate()]) |> rng (x, y)
 
             | FlatZero ->
@@ -125,13 +124,8 @@ module internal Basic =
             | _ ->
                 failwithlog "Unknown FlatExpression case"
 
-        /// 최초 시작이 OR 로 시작하면 우측으로 1 column 들여쓰기 한다.
-        let indent = 0  // if getDepthFirstLogical expr = Some(Op.Or) then 1 else 0
-
         // function (block) 의 경우, 조건이 없는 경우가 대부분인데, 이때는 always on (_ON) 으로 연결한다.
-        let result = (expr |? alwaysOnFlatExpression) |> rng (x+indent, y)
-
-        noop()
+        let result = (expr |? alwaysOnFlatExpression) |> rng (x, y)
 
         let mutable commandHeight = 0
         /// 좌표 * xml 결과 문자열
@@ -139,10 +133,6 @@ module internal Basic =
             [
                 yield! result.RungInfos
 
-                //if indent = 1 then
-                //    assert(false)   // indent 가 필요하면, 사용할 코드.  현재는 indent 0 으로 fix
-                //    let c = coord(x, y)
-                //    { Position = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c "Param=\"0\"" "" }
                 let nx = x + result.SpanX
                 let commandSpanY, posiRungXmls =
                     match cmdExp.CommandType with

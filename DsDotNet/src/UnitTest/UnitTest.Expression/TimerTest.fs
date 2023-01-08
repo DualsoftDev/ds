@@ -45,9 +45,6 @@ open Engine.Common.FS
             for t in internalTags do
                 storages.ContainsKey(t.Name) === true
 
-
-            let xxx = storages
-
             // rung 입력 조건이 true
             t1.Value <- true
             evaluateRungInputs timer

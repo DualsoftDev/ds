@@ -11,8 +11,6 @@ module internal Command =
     /// Rung 의 Command 정의를 위한 type.
     //Command = CoilCmd or FunctionCmd or FunctionBlockCmd
     type XgiCommand(cmdType:CommandTypes) =
-        do
-            noop()
         member x.CommandType with get() = cmdType
         member x.CoilTerminalTag with get() =
             /// Terminal End Tag
@@ -83,19 +81,7 @@ module internal Command =
     let createOutputPulse(tag)   = XgiCommand(CoilCmd(CoilOutputMode.COMPulseCoil(tag)))
     let createOutputNPulse(tag)  = XgiCommand(CoilCmd(CoilOutputMode.COMNPulseCoil(tag)))
 
-    //let createOutputTime(tag, time)                 = XgiCommand(FunctionBlockCmd(FunctionBlock.TimerMode(tag, time)))
-    //let createOutputCount(tag, resetTag, cnt)         = XgiCommand(FunctionBlockCmd(FunctionBlock.CounterMode(tag, resetTag, cnt)))
     let createOutputCopy(tag, tagA, tagB)             = XgiCommand(FunctionCmd(FunctionPure.CopyMode(tag, (tagA, tagB))))
-    //let createOutputAdd(tag, targetTag, addValue:int) = XgiCommand(FunctionCmd(FunctionPure.Add(tag, targetTag, addValue)))
-
-    //let createOutputCompare(tag, opComp:OpComp, tagA, tagB) =
-    //    match opComp with
-    //    | GT -> XgiCommand(FunctionCmd(FunctionPure.CompareGT(tag, (tagA, tagB))))
-    //    | GE -> XgiCommand(FunctionCmd(FunctionPure.CompareGE(tag, (tagA, tagB))))
-    //    | EQ -> XgiCommand(FunctionCmd(FunctionPure.CompareEQ(tag, (tagA, tagB))))
-    //    | LE -> XgiCommand(FunctionCmd(FunctionPure.CompareLE(tag, (tagA, tagB))))
-    //    | LT -> XgiCommand(FunctionCmd(FunctionPure.CompareLT(tag, (tagA, tagB))))
-    //    | NE -> XgiCommand(FunctionCmd(FunctionPure.CompareNE(tag, (tagA, tagB))))
 
     // <timer>
     let drawCmdTimer (x, y) (timerStatement:TimerStatement)  : CoordinatedRungXmlsForCommand =
@@ -182,34 +168,6 @@ module internal Command =
 
         { SpanY = fbSpanY; PositionedRungXmls = results}
 
-
-    //let drawCmdAdd (x, y) (tagCoil:INamedExpressionizableTerminal) (targetTag:CommandTag) (addValue:int) (pulse:bool): CoordinatedRungXmlsForCommand =
-    //    let mutable xx = x
-    //    let fbSpanY = 4
-
-    //    let results = [
-    //        if pulse then
-    //            xx <- x + 1
-    //            yield! drawPulseCoil (x, y) tagCoil fbSpanY
-    //        else
-    //            xx <- x
-    //            //Command 결과출력
-    //            createFBParameterXml (xx+1, y) (tagCoil.StorageName)
-
-
-    //        //Pulse시 증감 처리
-    //        //yield! drawRising(x, y)
-    //        //함수 그리기
-    //        createFunctionXmlAt ("ADD2_INT", "ADD") "" (xx, y)
-    //        createFBParameterXml (xx-1, y+1) (targetTag.ToText())
-    //        createFBParameterXml (xx+1, y+1) (targetTag.ToText())
-    //        createFBParameterXml (xx-1, y+2) (addValue.ToString())
-    //    ]
-
-    //    let newY = if pulse then fbSpanY else fbSpanY-1
-    //    { SpanY = newY; PositionedRungXmls = results}
-
-    //let drawCmdCompare (x, y) (coil:INamedExpressionizableTerminal) (func:string) (leftA:IExpression) (leftB:IExpression) : CoordinatedRungXmlsForCommand =
     let drawCmdAdd (x, y) (func:string) (out:INamedExpressionizableTerminal) (in1:IExpression) (in2:IExpression): CoordinatedRungXmlsForCommand =
         let fbSpanY = 3
 
@@ -287,14 +245,6 @@ module internal Command =
                 | CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy (newX, y) endTag tagA tagB true
                 | FunctionCompare (name, output, args) -> drawCmdCompare (newX, y) name output args[0] args[1]
                 | FunctionArithematic (name, output, args) -> drawCmdAdd (newX, y) name output args[0] args[1]
-
-                //| CompareGT (endTag, (tagA, tagB)) ->  drawCmdCompare (newX, y) endTag OpComp.GT tagA tagB
-                //| CompareLT (endTag, (tagA, tagB)) ->  drawCmdCompare (newX, y) endTag OpComp.LT tagA tagB
-                //| CompareGE (endTag, (tagA, tagB)) ->  drawCmdCompare (newX, y) endTag OpComp.GE tagA tagB
-                //| CompareLE (endTag, (tagA, tagB)) ->  drawCmdCompare (newX, y) endTag OpComp.LE tagA tagB
-                //| CompareEQ (endTag, (tagA, tagB)) ->  drawCmdCompare (newX, y) endTag OpComp.EQ tagA tagB
-                //| CompareNE (endTag, (tagA, tagB)) ->  drawCmdCompare (newX, y) endTag OpComp.NE tagA tagB
-                //| Add       (endTag, tag, value)   ->  drawCmdAdd (newX, y) endTag tag value true
             | FunctionBlockCmd (fbc) ->
                 results.AddRange(createFunctionBlockInstanceXmls (newX, y) cmd) //Command 객체생성
                 match fbc with

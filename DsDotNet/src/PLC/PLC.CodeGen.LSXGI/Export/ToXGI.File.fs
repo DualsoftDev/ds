@@ -7,7 +7,6 @@ open PLC.CodeGen.LSXGI
 open PLC.CodeGen.Common
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 open PLC.CodeGen.Common.NewIEC61131
-open System
 
 [<AutoOpen>]
 module internal XgiFile =
@@ -50,7 +49,6 @@ module internal XgiFile =
             failwithlog "Unknown FlatExpression case"
 
 
-    [<Obsolete("check generateRungs")>]
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
     let private generateRungs (prologComments:string seq) (commentedStatements:CommentedXgiStatements seq) : XmlOutput =
         let xmlRung (expr:FlatExpression option) xgiCommand y : RungGenerationInfo =

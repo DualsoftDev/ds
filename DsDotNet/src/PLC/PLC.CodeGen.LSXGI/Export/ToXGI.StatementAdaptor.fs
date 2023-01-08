@@ -2,13 +2,10 @@ namespace PLC.CodeGen.LSXGI
 
 open System.Linq
 open System.Security
-open System.Diagnostics
 
 open Engine.Core
 open Engine.Common.FS
 open PLC.CodeGen.Common
-open System
-open System.Globalization
 
 (*
     - 사칙연산 함수(Add, ..) 의 입력은 XGI 에서 전원선으로부터 연결이 불가능한 반면,
@@ -96,13 +93,6 @@ module rec TypeConvertorModule =
     let commentAndXgiStatement = (|CommentAndXgiStatements|)
 
 
-    [<Obsolete("Check me: XgiStatementExptender")>]
-    [<AbstractClass>]
-    type XgiStatementExptender() =
-        interface IXgiStatement
-        member val TemporaryTags = ResizeArray<IXgiLocalVar>()
-        member val ExtendedStatements = ResizeArray<XgiStatement>()
-
     let createXgiVariable (name:string) comment (initValue:'Q) =
         (*
             "n0" is an incorrect variable.
@@ -142,78 +132,6 @@ module rec TypeConvertorModule =
         | "Char"   -> XgiLocalVar(name, comment, ' ')
         | _  -> failwith "ERROR"
 
-
-    let private expandExpression (store:XgiStatementExptender) (exp:IExpression<'T>) (nameHint:string) : Terminal<'T> =
-        match exp with
-        | :? Expression<'T> as exp ->
-            match exp with
-            | DuTerminal t -> t
-            | DuFunction fs ->
-                let comment = exp.ToText(false) //fs.Name
-                let temp = createXgiAutoVariable nameHint comment (exp.Evaluate())
-                store.TemporaryTags.Add temp
-                let assign = DuXgiAssign <| XgiAssignStatement(exp, temp)
-                store.ExtendedStatements.Add(assign)
-                DuVariable temp
-        | _ ->
-            failwith "ERROR"
-
-
-
-    type XgiAssignStatement(exp:IExpression, target:IStorage) =
-        interface IXgiStatement
-        member _.Expression = exp
-        member _.Target = target
-
-    type XgiTimerStatement(ts:TimerStatement) as this =
-        inherit XgiStatementExptender()
-        let reset = ts.ResetCondition |> map (fun res -> expandExpression this res "RES")
-        member _.Timer = ts.Timer
-        member _.RungInCondition:IExpression<bool> = ts.RungInCondition.Value
-        member _.Reset:Terminal<bool> option = reset
-
-    type XgiCounterStatement(cs:CounterStatement) as this =
-        inherit XgiStatementExptender()
-        let typ = cs.Counter.Type
-        let expand = expandExpression this
-        let reset = cs.ResetCondition |> map (fun res -> expand res "RES")
-        let cu, cd, ld =
-            match typ with
-            | ( CTU | CTD | CTR ) -> None, None, None
-            | CTUD ->
-                None,
-                cs.DownCondition |> map (fun cd -> expand cd "CD"),
-                cs.LoadCondition |> map (fun ld -> expand ld "LD")
-
-        member _.Counter = cs.Counter
-        member _.RungInCondition:IExpression<bool> =
-            match typ with
-            | ( CTU | CTUD | CTR ) -> cs.UpCondition.Value
-            | CTD -> cs.DownCondition.Value
-
-        member _.Reset:Terminal<bool> option = reset
-        member _.CountUp:Terminal<bool> option = cu
-        member _.CountDown:Terminal<bool> option = cd
-        member _.Load:Terminal<bool> option = ld
-
-    type XgiCopyStatement(condition:IExpression<bool>, source:IExpression, target:IStorage) =
-        interface IXgiStatement
-        member _.Condition = condition
-        member _.Source = source
-        member _.Target = target
-
-    type XgiStatement =
-        | DuXgiAssign  of XgiAssignStatement
-        | DuXgiTimer   of XgiTimerStatement
-        | DuXgiCounter of XgiCounterStatement
-        | DuXgiCopy    of XgiCopyStatement
-    with
-        member x.GetStatement():IXgiStatement =
-            match x with
-            | DuXgiAssign  s -> s
-            | DuXgiTimer   s -> s
-            | DuXgiCounter s -> s
-            | DuXgiCopy    s -> s
 
     (* Moved from Command.fs *)
 
@@ -303,7 +221,6 @@ module XgiExpressionConvertorModule =
         xgiLocalVars.Cast<IStorage>() |> storage.AddRange   // 위의 helper 수행 이후가 아니면, xgiLocalVars 가 채워지지 않는다.
         newExp
 
-    [<Obsolete("Check me")>]
     let private statement2XgiStatements (storage:XgiStorage) (statement:Statement) : Statement list =
         let expandFunctionStatements = ResizeArray<Statement>()  // DuAugmentedPLCFunction case
 
@@ -314,7 +231,7 @@ module XgiExpressionConvertorModule =
                 [ DuAssign (newExp, target) ]
 
             | DuVarDecl (exp, decl) ->
-                let newExp = collectExpandedExpression storage expandFunctionStatements exp
+                let newExp_ = collectExpandedExpression storage expandFunctionStatements exp
 
                 (* 일반 변수 선언 부분을 xgi local variable 로 치환한다. *)
                 storage.Remove decl |> ignore

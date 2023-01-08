@@ -241,7 +241,7 @@ module rec TypeConvertorModule =
         /// Timer, Counter 등
         | FunctionBlockCmd of FunctionBlock
 
-    let createPLCCommandCopy(endTag, from, toTag) = FunctionPure.CopyMode(endTag, (from, toTag))
+    //let createPLCCommandCopy(endTag, from, toTag) = FunctionPure.CopyMode(endTag, (from, toTag))
 
 [<AutoOpen>]
 module XgiExpressionConvertorModule =

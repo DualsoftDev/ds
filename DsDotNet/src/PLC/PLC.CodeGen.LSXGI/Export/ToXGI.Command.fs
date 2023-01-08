@@ -75,7 +75,7 @@ module internal Command =
     let createOutputPulse(tag)   = XgiCommand(CoilCmd(CoilOutputMode.COMPulseCoil(tag)))
     let createOutputNPulse(tag)  = XgiCommand(CoilCmd(CoilOutputMode.COMNPulseCoil(tag)))
 
-    let createOutputCopy(tag, tagA, tagB)             = XgiCommand(FunctionCmd(FunctionPure.CopyMode(tag, (tagA, tagB))))
+    //let createOutputCopy(tag, tagA, tagB)             = XgiCommand(FunctionCmd(FunctionPure.CopyMode(tag, (tagA, tagB))))
 
     // <timer>
     let drawCmdTimer (x, y) (timerStatement:TimerStatement)  : CoordinatedRungXmlsForCommand =
@@ -180,34 +180,34 @@ module internal Command =
         { SpanY = fbSpanY; PositionedRungXmls = results}
 
 
-    let drawCmdCopy (x, y) (tagCoil:INamedExpressionizableTerminal) (fromTag:CommandTag) (toTag:CommandTag) (pulse:bool) : CoordinatedRungXmlsForCommand =
-        if fromTag.Size() <> toTag.Size() then
-            failwithlog $"Tag Compare size error {fromTag.ToText()}{fromTag.SizeString},  {toTag.ToText()}({toTag.SizeString})"
+    //let drawCmdCopy (x, y) (tagCoil:INamedExpressionizableTerminal) (fromTag:CommandTag) (toTag:CommandTag) (pulse:bool) : CoordinatedRungXmlsForCommand =
+    //    if fromTag.Size() <> toTag.Size() then
+    //        failwithlog $"Tag Compare size error {fromTag.ToText()}{fromTag.SizeString},  {toTag.ToText()}({toTag.SizeString})"
 
-        let mutable xx = x
-        let fbSpanY = 3
-        let func = "MOVE"
-        let funcFind = func + "_" + fromTag.SizeString
+    //    let mutable xx = x
+    //    let fbSpanY = 3
+    //    let func = "MOVE"
+    //    let funcFind = func + "_" + fromTag.SizeString
 
-        let results = [
-            if pulse then
-                //Pulse Command 결과출력
-                xx <- x + 1
-                yield! drawPulseCoil (x, y) tagCoil fbSpanY
-            else
-                //Command 결과출력
-                xx <- x
-                createFBParameterXml (xx+1, y) (tagCoil.StorageName)
+    //    let results = [
+    //        if pulse then
+    //            //Pulse Command 결과출력
+    //            xx <- x + 1
+    //            yield! drawPulseCoil (x, y) tagCoil fbSpanY
+    //        else
+    //            //Command 결과출력
+    //            xx <- x
+    //            createFBParameterXml (xx+1, y) (tagCoil.StorageName)
 
 
-            //함수 그리기
-            createFunctionXmlAt (funcFind, func) "" (xx, y)
-            createFBParameterXml (xx-1, y+1) (fromTag.ToText())
-            createFBParameterXml (xx+1, y+1) (toTag.ToText())
-        ]
+    //        //함수 그리기
+    //        createFunctionXmlAt (funcFind, func) "" (xx, y)
+    //        createFBParameterXml (xx-1, y+1) (fromTag.ToText())
+    //        createFBParameterXml (xx+1, y+1) (toTag.ToText())
+    //    ]
 
-        let spanY = if pulse then fbSpanY else fbSpanY-1
-        { SpanY = spanY; PositionedRungXmls = results}
+    //    let spanY = if pulse then fbSpanY else fbSpanY-1
+    //    { SpanY = spanY; PositionedRungXmls = results}
 
 
 
@@ -236,7 +236,7 @@ module internal Command =
             match cmd.CommandType with
             | FunctionCmd (fc) ->
                 match fc with
-                | CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy (newX, y) endTag tagA tagB true
+                //| CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy (newX, y) endTag tagA tagB true
                 | FunctionCompare (name, output, args) -> drawCmdCompare (newX, y) name output args[0] args[1]
                 | FunctionArithematic (name, output, args) -> drawCmdAdd (newX, y) name output args[0] args[1]
             | FunctionBlockCmd (fbc) ->

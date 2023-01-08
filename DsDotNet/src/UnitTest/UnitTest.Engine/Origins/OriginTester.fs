@@ -48,13 +48,13 @@ module OriginTestModule =
         member __.``OriginTestCase0`` () =
             let answer:seq<KeyValuePair<string, InitialType>> =
                 seq {
+                    KeyValuePair("S101_Copy1.Func3", Off);
+                    KeyValuePair("S101_Copy1.Func4", NeedCheck);
+                    KeyValuePair("S101_Copy1.Func5", NeedCheck);
                     KeyValuePair("S101_Copy2.Func1", Off);
                     KeyValuePair("S101_Copy2.Func2", On);
                     KeyValuePair("S101_Copy1.Func1", Off);
                     KeyValuePair("S101_Copy1.Func2", On);
-                    KeyValuePair("S101_Copy1.Func3", Off);
-                    KeyValuePair("S101_Copy1.Func4", NeedCheck);
-                    KeyValuePair("S101_Copy1.Func5", NeedCheck);
                     KeyValuePair("S101_Copy1.Func6", Off);
                     KeyValuePair("S102_SystemA1.Func1", Off);
                     KeyValuePair("S102_SystemA1.Func2", On);

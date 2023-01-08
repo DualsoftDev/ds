@@ -4,7 +4,10 @@
     [flow] S101 = {
         R1 > R2;		// R1(Real)> R2(Real);
         R1 = {
-            S101_Copy2_Func1 > S101_Copy2_Func2;		// S101_Copy1_Func1(Call)> S101_Copy2_Func2(Call);
+			S101_Copy1_Func3 > S101_Copy1_Func4, S101_Copy1_Func5 > S101_Copy2_Func1 > S101_Copy2_Func2 > S101_Copy2_Func3;
+			//S101_Copy1_Func3 > S101_Copy1_Func4, S101_Copy1_Func5;
+            //S101_Copy2_Func1 > S101_Copy2_Func2 > S101_Copy2_Func3;		// S101_Copy1_Func1(Call)> S101_Copy2_Func2(Call);
+			//S101_Copy2_Func4 > S101_Copy2_Func3;
         }
 		R2 = {
 			S101_Copy1_Func1 > S101_Copy1_Func2 > S101_Copy1_Func3 > S101_Copy1_Func4, S101_Copy1_Func6 > S101_Copy1_Func5;
@@ -23,6 +26,8 @@
         S101_Copy1_Func3 = { S101_Copy1.Func3(_, _); }
         S101_Copy1_Func2 = { S101_Copy1.Func2(_, _); }
         S101_Copy1_Func1 = { S101_Copy1.Func1(_, _); }
+		S101_Copy2_Func4 = { S101_Copy2.Func2(_, _); }
+		S101_Copy2_Func3 = { S101_Copy2.Func1(_, _); }
         S101_Copy2_Func2 = { S101_Copy2.Func2(_, _); }
         S101_Copy2_Func1 = { S101_Copy2.Func1(_, _); }
         S102_SystemA_Func2 = { S102_SystemA1.Func2(_, _); S102_SystemA2.Func2(_, _); S102_SystemA3.Func2(_, _); S102_SystemA4.Func2(_, _); S102_SystemA5.Func2(_, _); }

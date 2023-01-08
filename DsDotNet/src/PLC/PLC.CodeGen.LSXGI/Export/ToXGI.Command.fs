@@ -20,12 +20,6 @@ module internal Command =
             | FunctionCmd (fc)       -> tet(fc)
             | FunctionBlockCmd (fbc) -> tet(fbc)
 
-        member x.UsedCommandTags with get() =
-            match cmdType with
-            | CoilCmd (cc) -> [ x.CoilTerminalTag ]
-            | FunctionCmd (fc) ->  fc.UsedCommandTags()
-            | FunctionBlockCmd (fbc) -> fbc.UsedCommandTags()
-
         member x.HasInstance with get() = match cmdType with | FunctionBlockCmd (fbc) ->  true |_-> false
         member x.Instance with get() =
             match cmdType with

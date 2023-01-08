@@ -217,7 +217,7 @@ module rec TypeConvertorModule =
 
     (* Moved from Command.fs *)
 
-    ///FunctionBlocks은 Timer와 같은 현재 측정 시간을 저장하는 Instance가 필요있는 Command 해당
+    /// FunctionBlocks은 Timer와 같은 현재 측정 시간을 저장하는 Instance가 필요있는 Command 해당
     type FunctionBlock =
         | TimerMode of TimerStatement //endTag, time
         | CounterMode of CounterStatement   // IExpressionizableTerminal *  CommandTag  * int  //endTag, countResetTag, count
@@ -226,25 +226,10 @@ module rec TypeConvertorModule =
             match x with
             | TimerMode timerStatement -> timerStatement.Timer.Name
             | CounterMode counterStatement ->  counterStatement.Counter.Name
-        member x.UsedCommandTags() : INamedExpressionizableTerminal list =
-            failwith "Need check"
-
-
-            //match x with
-            ////| TimerMode(tag, time) -> [ tag ]
-            //| TimerMode timerStatement ->
-            //    timerStatement.RungInCondition
-            //    |> Option.toList
-            //    |> List.cast<IExpressionizableTerminal>
-            //| CounterMode counterStatement ->
-            //    [ counterStatement.UpCondition; counterStatement.ResetCondition ]
-            //    |> List.choose id
-            //    |> List.map (fun x -> x :?> IExpressionizableTerminal)
 
         interface IFunctionCommand with
             member this.TerminalEndTag: INamedExpressionizableTerminal =
                 match this with
-                //| TimerMode(tag, time) -> tag
                 | TimerMode timerStatement -> timerStatement.Timer.DN
                 | CounterMode counterStatement -> counterStatement.Counter.DN
 

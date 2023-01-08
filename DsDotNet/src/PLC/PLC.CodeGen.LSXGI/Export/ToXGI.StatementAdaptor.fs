@@ -211,6 +211,8 @@ module XgiExpressionConvertorModule =
                         | "Char"   -> withDefaultValue ' '
                         | _ -> failwith "ERROR"
 
+                    | (FunctionNameRising | FunctionNameFalling) ->
+                        exp
                     | _ ->
                         failwith "ERROR"
                 | _ ->

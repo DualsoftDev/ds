@@ -86,6 +86,7 @@ module internal Command =
     let drawCmdCounter (x, y) (counterStatement:CounterStatement) : CoordinatedRungXmlsForCommand =
         failwith "ERROR"
 
+
         //let count = int counterStatement.Counter.PRE.Value
         //let typ = counterStatement.Counter.Type
 

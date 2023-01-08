@@ -70,7 +70,7 @@ type XgiCounterTest() =
 
 
     [<Test>]
-    member __.``Counter CTU with conditional test`` () =
+    member __.``X Counter CTU with conditional test`` () =
         let storages = Storages()
         let code = """
             bool cu1 = createTag("%IX0.0.0", false);
@@ -89,7 +89,7 @@ type XgiCounterTest() =
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
-    member __.``Counter CTD with conditional test`` () =
+    member __.``X Counter CTD with conditional test`` () =
         let storages = Storages()
         let code = """
             bool cu1 = createTag("%IX0.0.0", false);
@@ -112,13 +112,13 @@ type XgiFunctionTest() =
     inherit XgiTestClass()
 
     [<Test>]
-    member __.``ADD simple test`` () =
+    member __.``X ADD simple test`` () =
         let storages = Storages()
         let code = """
-            int n1 = createTag("%IX0.0.0", 1);
-            int n2 = createTag("%IX0.0.0", 2);
-            int sum = createTag("%IX0.0.0", 0);
-            $sum := $n1 + $n2;
+            int16 nn1 = 1s;
+            int16 nn2 = 2s;
+            int16 sum = 0s;
+            $sum := $nn1 + $nn2;
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)

@@ -287,7 +287,7 @@ type XgiGenerationTest() =
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
-    member __.``Add test`` () =
+    member __.``X Add test`` () =
         let storages = Storages()
 
         //let symbolInfos = [

@@ -87,18 +87,12 @@ module internal XgiFile =
 
                 // <kwak> <timer>
                 | DuTimer timerStatement ->
-                    let rungIn = timerStatement.RungInCondition.Value :> IExpression
-                    let rungIn = rungIn.Flatten() :?> FlatExpression
-
                     let command:XgiCommand = FunctionBlockCmd(TimerMode(timerStatement)) |> XgiCommand
-                    let rgiSub = xmlRung (Some rungIn) (Some command) rgi.Y
+                    let rgiSub = xmlRung None (Some command) rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
                 | DuCounter counterStatement ->
                     let command:XgiCommand = FunctionBlockCmd(CounterMode(counterStatement)) |> XgiCommand
-                    //let cs = counterStatement
-                    //let rungIn = cs.RungInCondition.Flatten() :?> FlatExpression
-                    //let rgiSub = xmlRung (Some rungIn) (Some command) rgi.Y
                     let rgiSub = xmlRung None (Some command) rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 

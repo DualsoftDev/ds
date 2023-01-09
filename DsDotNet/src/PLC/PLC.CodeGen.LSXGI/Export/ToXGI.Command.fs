@@ -101,11 +101,36 @@ module internal rec Command =
         /// Input/Output 라인 연결없이 직접 write
         | Value of value:IValue
 
+    let private flatten (exp:IExpression<bool> option) = exp.Value.Flatten() :?> FlatExpression
 
     // <timer>
     let drawCmdTimer (x, y) (timerStatement:TimerStatement)  : CoordinatedXmlElement list =
-        let time:int = int timerStatement.Timer.PRE.Value
-        [createFBParameterXml (x-1, y+1) $"T#{time}MS" ]
+        let ts = timerStatement
+        let typ = ts.Timer.Type
+        let time:int = int ts.Timer.PRE.Value
+        let paramXmls =
+            [
+                let rungIn = ts.RungInCondition |> flatten
+                rung (x, y+0) (Some rungIn) None
+                createFBParameterXml (x, y+1) $"T#{time}MS"
+                match typ with
+                | RTO ->
+                    let reset = ts.ResetCondition |> flatten
+                    rung (x, y+2) (Some reset) None
+                | _ ->
+                    ()
+            ]
+
+        let spanX = paramXmls.Max(fun x -> x.SpanX)
+
+        //Command 속성입력
+        let results = [
+            yield! paramXmls
+
+            let cmd = FunctionBlockCmd(TimerMode(ts)) |> XgiCommand
+            yield! createFunctionBlockInstanceXmls (x+spanX, y) cmd
+        ]
+        results
 
     let drawCmdCounter (x, y) (counterStatement:CounterStatement) : CoordinatedXmlElement list =
 
@@ -113,46 +138,37 @@ module internal rec Command =
         let cs = counterStatement
         let pv = int cs.Counter.PRE.Value
         let typ = cs.Counter.Type
-        let fbSpanY =
-            match typ with
-            | CTUD -> 5
-            | (CTU | CTD | CTR) -> 3
-
-        let createParam (x, y) (t:Terminal<bool> option) =
-            match t with
-            | Some t -> [ createFBParameterXml (x, y) t.Name  ]
-            | None   -> []
 
         let paramXmls =
             [
                 match typ with
                 | CTU ->    // cu, r, pv,       q, cv
-                    let cu = cs.UpCondition.Value.Flatten() :?> FlatExpression
+                    let cu = cs.UpCondition |> flatten
                     rung (x, y+0) (Some cu) None
-                    let r = cs.ResetCondition.Value.Flatten() :?> FlatExpression
+                    let r = cs.ResetCondition |> flatten
                     rung (x, y+1) (Some r) None
                     createFBParameterXml (x, y+2) $"{pv}"
                 | CTD ->    // cd, ld, pv,       q, cv
-                    let cd = cs.DownCondition.Value.Flatten() :?> FlatExpression
+                    let cd = cs.DownCondition |> flatten
                     rung (x, y+0) (Some cd) None
-                    let ld = cs.LoadCondition.Value.Flatten() :?> FlatExpression
+                    let ld = cs.LoadCondition |> flatten
                     rung (x, y+1) (Some ld) None
                     createFBParameterXml (x, y+2) $"{pv}"
                 | CTUD ->   // cu, cd, r, ld, pv,       qu, qd, cv
-                    let cu = cs.UpCondition.Value.Flatten() :?> FlatExpression
+                    let cu = cs.UpCondition |> flatten
                     rung (x, y+0) (Some cu) None
-                    let cd = cs.DownCondition.Value.Flatten() :?> FlatExpression
+                    let cd = cs.DownCondition |> flatten
                     rung (x, y+1) (Some cd) None
-                    let r = cs.ResetCondition.Value.Flatten() :?> FlatExpression
+                    let r = cs.ResetCondition |> flatten
                     rung (x, y+2) (Some r) None
-                    let ld = cs.LoadCondition.Value.Flatten() :?> FlatExpression
+                    let ld = cs.LoadCondition |> flatten
                     rung (x, y+3) (Some ld) None
                     createFBParameterXml (x, y+4) $"{pv}"
                 | CTR -> // cd, pv, rst,       q, cv
-                    let cd = cs.DownCondition.Value.Flatten() :?> FlatExpression
+                    let cd = cs.DownCondition |> flatten
                     rung (x, y+0) (Some cd) None
                     createFBParameterXml (x, y+1) $"{pv}"
-                    let rst = cs.ResetCondition.Value.Flatten() :?> FlatExpression
+                    let rst = cs.ResetCondition |> flatten
                     rung (x, y+2) (Some rst) None
             ]
 
@@ -160,7 +176,7 @@ module internal rec Command =
         let results = [
             yield! paramXmls
 
-            let cmd = FunctionBlockCmd(CounterMode(counterStatement)) |> XgiCommand
+            let cmd = FunctionBlockCmd(CounterMode(cs)) |> XgiCommand
             yield! createFunctionBlockInstanceXmls (x+1, y) cmd
         ]
 
@@ -273,6 +289,7 @@ module internal rec Command =
             [
                 match cmd.CommandType with
                 | FunctionCmd (fc) ->
+                    // todo: 내부로 이동... drawCmdXXX 내에서 그려야 한다..
                     drawHLine()
                     match fc with
                     //| CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy (newX, y) endTag tagA tagB true
@@ -281,11 +298,8 @@ module internal rec Command =
                 | FunctionBlockCmd (fbc) ->
                     match fbc with
                     | TimerMode(timerStatement) ->
-                        // todo: 내부로 이동... drawCmdTimer 내에서 그려야 한다..
-                        drawHLine()
-                        yield! drawCmdTimer(x+1, y) timerStatement     // <timer>
+                        yield! drawCmdTimer(x, y) timerStatement     // <timer>
                     | CounterMode(counterStatement) ->
-                        // todo: 내부로 이동 작업 중...
                         yield! drawCmdCounter(x, y) counterStatement
                 | _ ->
                     failwithlog "Unknown CommandType"

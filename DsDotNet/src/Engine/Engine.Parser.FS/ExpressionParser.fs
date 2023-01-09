@@ -185,7 +185,7 @@ module rec ExpressionParser =
                 | CTD, "createWinCTD", _::_::[] ->
                     CounterStatement.CreateCTD(tcParams)
                 | CTD, "createXgiCTD", _::_::(BoolExp resetCondition)::[] ->
-                    CounterStatement.CreateCTD(tcParams, resetCondition, 0us)
+                    CounterStatement.CreateXgiCTD(tcParams, resetCondition)
 
                 | CTUD, "createWinCTUD", _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::[] ->
                     CounterStatement.CreateCTUD(tcParams, countDownCondition, resetCondition)
@@ -201,7 +201,7 @@ module rec ExpressionParser =
                 | CTR, "createWinCTR", _::_::[] ->
                     CounterStatement.CreateCTR(tcParams)
                 | CTR, "createXgiCTR", _::_::(BoolExp resetCondition)::[] ->
-                    CounterStatement.CreateCTR(tcParams, resetCondition)
+                    CounterStatement.CreateXgiCTR(tcParams, resetCondition)
 
                 | _ -> fail()
 
@@ -342,40 +342,8 @@ module rec ExpressionParser =
 
 
     type System.Type with
-        member x.CreateVariable(name:string, boxedValue:obj) : IStorage =
-            let v = boxedValue
-            match x.Name with
-            | "Single" -> new Variable<single>(name, v :?> single)
-            | "Double" -> new Variable<double>(name, v :?> double)
-            | "SByte"  -> new Variable<int8>  (name, v :?> int8)
-            | "Byte"   -> new Variable<uint8> (name, v :?> uint8)
-            | "Int16"  -> new Variable<int16> (name, v :?> int16)
-            | "UInt16" -> new Variable<uint16>(name, v :?> uint16)
-            | "Int32"  -> new Variable<int32> (name, v :?> int32)
-            | "UInt32" -> new Variable<uint32>(name, v :?> uint32)
-            | "Int64"  -> new Variable<int64> (name, v :?> int64)
-            | "UInt64" -> new Variable<uint64>(name, v :?> uint64)
-            | "Boolean"-> new Variable<bool>  (name, v :?> bool)
-            | "String" -> new Variable<string>(name, v :?> string)
-            | "Char"   -> new Variable<char>  (name, v :?> char)
-            | _  -> failwith "ERROR"
-
-        member x.CreateVariable(name:string) : IStorage =
-            match x.Name with
-            | "Single" -> new Variable<single>(name, 0.0f)
-            | "Double" -> new Variable<double>(name, 0.0)
-            | "SByte"  -> new Variable<int8>  (name, 0y)
-            | "Byte"   -> new Variable<uint8> (name, 0uy)
-            | "Int16"  -> new Variable<int16> (name, 0s)
-            | "UInt16" -> new Variable<uint16>(name, 0us)
-            | "Int32"  -> new Variable<int32> (name, 0)
-            | "UInt32" -> new Variable<uint32>(name, 0u)
-            | "Int64"  -> new Variable<int64> (name, 0L)
-            | "UInt64" -> new Variable<uint64>(name, 0UL)
-            | "Boolean"-> new Variable<bool>  (name, false)
-            | "String" -> new Variable<string>(name, "")
-            | "Char"   -> new Variable<char>  (name, ' ')
-            | _  -> failwith "ERROR"
+        member x.CreateVariable(name:string, boxedValue:obj) = fwdCreateVariableWithTypeAndValue name x ({Object = boxedValue}:BoxedObjectHolder)
+        member x.CreateVariable(name:string) = fwdCreateVariableWithType name x
 
         member x.CreateTag(name:string, address:string, boxedValue:obj) : IStorage =
             let v = boxedValue

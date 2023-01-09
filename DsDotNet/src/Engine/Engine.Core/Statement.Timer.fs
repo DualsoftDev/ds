@@ -34,13 +34,6 @@ module TimerStatementModule =
             resetStatement.Do()
             statements.Add resetStatement
         | None -> ()
-        //RungConditionIn,  ResetCondition 동시 입력 대비 ?? <kwak>
-        match tParams.ResetCondition with
-        | Some reset ->
-            let statement = DuAssign (reset, ts.RES)
-            statement.Do()
-            statements.Add statement
-        | None -> ()
 
         timer.InputEvaluateStatements <- statements.ToFSharpList()
         DuTimer ({ Timer=timer; RungInCondition = tParams.RungConditionIn; ResetCondition = tParams.ResetCondition; FunctionName=tParams.FunctionName }:TimerStatement)

@@ -196,6 +196,22 @@ module internal FBText =
         VAR_OUT: OUT, 0x00007fe0,
         #END_FUNC
 
+        #BEGIN_FUNC: ADD2_XXX
+        FNAME: ADD2_XXX
+        TYPE: function
+        INSTANCE: INST,VAR
+        INDEX: 1686
+        COL_PROP: 1
+        SAFETY: 0
+        PROP_COLOR: 16777215
+        VAR_IN: EN, 0x00200001, , 0
+        VAR_IN: IN1, 0x00207fe0, , 0
+        VAR_IN: IN2, 0x00207fe0, , 0
+        VAR_OUT: ENO, 0x00000001,
+        VAR_OUT: OUT, 0x00007fe0,
+        #END_FUNC
+
+
         #BEGIN_FUNC: ADD2
         FNAME: ADD2
         TYPE: function

@@ -1,10 +1,11 @@
 namespace PLC.CodeGen.LSXGI
 
+open System.Linq
+open System.Security
+
 open Engine.Core
 open Engine.Common.FS
 open PLC.CodeGen.Common
-open System.Security
-open System.Diagnostics
 
 (*
     - 사칙연산 함수(Add, ..) 의 입력은 XGI 에서 전원선으로부터 연결이 불가능한 반면,
@@ -43,12 +44,15 @@ module ConvertorPrologModule =
         | "Double" -> "LREAL"
         | ("SByte" | "Char")   -> "BYTE"
         | "Byte"   -> "BYTE"
-        | "Int16"  -> "SINT"
-        | "UInt16" -> "USINT"
-        | "Int32"  -> "DINT"
-        | "UInt32" -> "UDINT"
-        | "Int64"  -> "LINT"
-        | "UInt64" -> "ULINT"
+        | "Int16" | "UInt16" -> "INT"
+        | "Int32" | "UInt32" -> "DINT"
+        | "Int64" | "UInt64" -> "LINT"
+        //| "Int16"  -> "SINT"
+        //| "UInt16" -> "USINT"
+        //| "Int32"  -> "DINT"
+        //| "UInt32" -> "UDINT"
+        //| "Int64"  -> "LINT"
+        //| "UInt64" -> "ULINT"
         | "String" -> "STRING"  // 32 byte
         | _ -> failwith "ERROR"
 
@@ -58,6 +62,7 @@ module ConvertorPrologModule =
 
     type IXgiLocalVar =
         inherit IVariable
+        inherit INamedExpressionizableTerminal
         abstract SymbolInfo:SymbolInfo
     type IXgiLocalVar<'T> =
         inherit IXgiLocalVar
@@ -83,164 +88,66 @@ module ConvertorPrologModule =
 [<AutoOpen>]
 module rec TypeConvertorModule =
     type IXgiStatement = interface end
-    type CommentedXgiStatement = CommentedXgiStatement of comment:string * statement:XgiStatement
-    let (|CommentAndXgiStatement|) = function | CommentedXgiStatement(x, y) -> x, y
-    let commentAndXgiStatement = (|CommentAndXgiStatement|)
-
-    [<AbstractClass>]
-    type XgiStatementExptender() =
-        interface IXgiStatement
-        member val TemporaryTags = ResizeArray<IXgiLocalVar>()
-        member val ExtendedStatements = ResizeArray<XgiStatement>()
+    type CommentedXgiStatements = CommentedXgiStatements of comment:string * statements:Statement list
+    let (|CommentAndXgiStatements|) = function | CommentedXgiStatements(x, ys) -> x, ys
+    let commentAndXgiStatement = (|CommentAndXgiStatements|)
 
 
-    let tagCreator (nameHint:string) comment (initValue:'Q) =
+    let createXgiVariable (name:string) comment (initValue:'Q) =
+        (*
+            "n0" is an incorrect variable.
+            The folling characters are allowed:
+            Only alphabet capital/small letters and '_' are allowed in the first letter.
+            Only alphabet capital/small letters and '_' are allowed in the second letter.
+            (e.g. variable1, _variable2, variableAB_3, SYMBOL, ...)
+        *)
+        match name |> Seq.toList with
+        | ch::_ when isHangul ch -> ()
+        | ch1::ch2::_ when isValidStart ch1 && isValidStart ch2 -> ()
+        | _ -> failwith $"Invalid XGI variable name {name}"
+
+        XgiLocalVar(name, comment, initValue)
+
+
+    let createXgiAutoVariable (nameHint:string) comment (initValue:'Q) =
         autoVariableCounter <- autoVariableCounter + 1
         XgiLocalVar($"_tmp{nameHint}{autoVariableCounter}", comment, initValue)
 
-
-    let private expandExpression (store:XgiStatementExptender) (exp:IExpression<'T>) (nameHint:string) : Terminal<'T> =
-        match exp with
-        | :? Expression<'T> as exp ->
-            match exp with
-            | DuTerminal t -> t
-            | DuFunction fs ->
-                let comment = exp.ToText(false) //fs.Name
-                let temp = tagCreator nameHint comment (exp.Evaluate())
-                store.TemporaryTags.Add temp
-                let assign = DuXgiAssign <| XgiAssignStatement(exp, temp)
-                store.ExtendedStatements.Add(assign)
-                DuVariable temp
-        | _ ->
-            failwith "ERROR"
-
-
-
-    type XgiAssignStatement(exp:IExpression, target:IStorage) =
-        interface IXgiStatement
-        member _.Expression = exp
-        member _.Target = target
-
-    type XgiTimerStatement(ts:TimerStatement) as this =
-        inherit XgiStatementExptender()
-        let reset = ts.ResetCondition |> map (fun res -> expandExpression this res "RES")
-        member _.Timer = ts.Timer
-        member _.RungInCondition:IExpression<bool> = ts.RungInCondition.Value
-        member _.Reset:Terminal<bool> option = reset
-
-    type XgiCounterStatement(cs:CounterStatement) as this =
-        inherit XgiStatementExptender()
-        let typ = cs.Counter.Type
-        let expand = expandExpression this
-        let reset = cs.ResetCondition |> map (fun res -> expand res "RES")
-        let cu, cd, ld =
-            match typ with
-            | ( CTU | CTD | CTR ) -> None, None, None
-            | CTUD ->
-                None,
-                cs.DownCondition |> map (fun cd -> expand cd "CD"),
-                cs.LoadCondition |> map (fun ld -> expand ld "LD")
-
-        member _.Counter = cs.Counter
-        member _.RungInCondition:IExpression<bool> =
-            match typ with
-            | ( CTU | CTUD | CTR ) -> cs.UpCondition.Value
-            | CTD -> cs.DownCondition.Value
-
-        member _.Reset:Terminal<bool> option = reset
-        member _.CountUp:Terminal<bool> option = cu
-        member _.CountDown:Terminal<bool> option = cd
-        member _.Load:Terminal<bool> option = ld
-
-    type XgiCopyStatement(condition:IExpression<bool>, source:IExpression, target:IStorage) =
-        interface IXgiStatement
-        member _.Condition = condition
-        member _.Source = source
-        member _.Target = target
-
-    type XgiStatement =
-        | DuXgiAssign  of XgiAssignStatement
-        | DuXgiTimer   of XgiTimerStatement
-        | DuXgiCounter of XgiCounterStatement
-        | DuXgiCopy    of XgiCopyStatement
-    with
-        member x.GetStatement():IXgiStatement =
-            match x with
-            | DuXgiAssign  s -> s
-            | DuXgiTimer   s -> s
-            | DuXgiCounter s -> s
-            | DuXgiCopy    s -> s
-
-
-
-    [<DebuggerDisplay("{ToText()}")>]
-    type XgiConvertorExpression =
-        | FunctionInstance of op:string * args:XgiConvertorExpression list * outSymbol:SymbolInfo
-        | Terminal of IExpression
-        member x.ToText() =
-            match x with
-            | FunctionInstance (op, args, outSymbol) ->
-                let args = args |> map toText |> String.concat ", "
-                $"{op}({args})"
-            | Terminal t -> t.ToText(false)
-    // todo
-    let collectExpandedExpression (exp:IExpression) : XgiConvertorExpression list =
-        [
-            match exp.FunctionName with
-            | Some ("+"|"-"|"*"|"/"|">"|">="|"<"|"<="|"="|"!=" as op) ->
-                let newArgs = exp.FunctionArguments |> bind collectExpandedExpression
-                let out = fwdCreateSymbol "xxx-name" "xxx-comment" "BOOL"        // todo
-                FunctionInstance (op, newArgs, out)
-            | _ ->
-                Terminal exp
-        ]
-
-    let private statement2XgiStatement (statement:Statement) : XgiStatement =
-        match statement with
-        | DuAssign (exp, target) ->
-            let xxx = collectExpandedExpression exp;
-            DuXgiAssign (XgiAssignStatement(exp, target))
-        | DuTimer ts             -> DuXgiTimer  (XgiTimerStatement(ts))
-        | DuCounter cs           -> DuXgiCounter(XgiCounterStatement(cs))
-        | DuCopy (exp, src, tgt) -> DuXgiCopy   (XgiCopyStatement(exp, src, tgt))
-        | DuVarDecl _            -> failwith "ERROR"
-
-    let internal commentedStatement2CommentedXgiStatement (CommentedStatement(comment, statement)) : CommentedXgiStatement =
-        let xgiStatement = statement2XgiStatement statement
-        CommentedXgiStatement(comment, xgiStatement)
-
+    let createTypedXgiAutoVariable (typ:System.Type) (nameHint:string) comment : IXgiLocalVar =
+        autoVariableCounter <- autoVariableCounter + 1
+        let name = $"_tmp{nameHint}{autoVariableCounter}"
+        match typ.Name with
+        | "Single" -> XgiLocalVar(name, comment, 0.f)
+        | "Double" -> XgiLocalVar(name, comment, 0.0)
+        | "SByte"  -> XgiLocalVar(name, comment, 0y)
+        | "Byte"   -> XgiLocalVar(name, comment, 0uy)
+        | "Int16"  -> XgiLocalVar(name, comment, 0s)
+        | "UInt16" -> XgiLocalVar(name, comment, 0us)
+        | "Int32"  -> XgiLocalVar(name, comment, 0)
+        | "UInt32" -> XgiLocalVar(name, comment, 0u)
+        | "Int64"  -> XgiLocalVar(name, comment, 0L)
+        | "UInt64" -> XgiLocalVar(name, comment, 0UL)
+        | "Boolean"-> XgiLocalVar(name, comment, false)
+        | "String" -> XgiLocalVar(name, comment, "")
+        | "Char"   -> XgiLocalVar(name, comment, ' ')
+        | _  -> failwith "ERROR"
 
 
     (* Moved from Command.fs *)
 
-    ///FunctionBlocks은 Timer와 같은 현재 측정 시간을 저장하는 Instance가 필요있는 Command 해당
+    /// FunctionBlocks은 Timer와 같은 현재 측정 시간을 저장하는 Instance가 필요있는 Command 해당
     type FunctionBlock =
-        | TimerMode of XgiTimerStatement //endTag, time
-        | CounterMode of XgiCounterStatement   // IExpressionizableTerminal *  CommandTag  * int  //endTag, countResetTag, count
+        | TimerMode of TimerStatement //endTag, time
+        | CounterMode of CounterStatement   // IExpressionizableTerminal *  CommandTag  * int  //endTag, countResetTag, count
     with
         member x.GetInstanceText() =
             match x with
             | TimerMode timerStatement -> timerStatement.Timer.Name
             | CounterMode counterStatement ->  counterStatement.Counter.Name
-        member x.UsedCommandTags() : INamedExpressionizableTerminal list =
-            failwith "Need check"
-
-
-            //match x with
-            ////| TimerMode(tag, time) -> [ tag ]
-            //| TimerMode timerStatement ->
-            //    timerStatement.RungInCondition
-            //    |> Option.toList
-            //    |> List.cast<IExpressionizableTerminal>
-            //| CounterMode counterStatement ->
-            //    [ counterStatement.UpCondition; counterStatement.ResetCondition ]
-            //    |> List.choose id
-            //    |> List.map (fun x -> x :?> IExpressionizableTerminal)
 
         interface IFunctionCommand with
             member this.TerminalEndTag: INamedExpressionizableTerminal =
                 match this with
-                //| TimerMode(tag, time) -> tag
                 | TimerMode timerStatement -> timerStatement.Timer.DN
                 | CounterMode counterStatement -> counterStatement.Counter.DN
 
@@ -252,16 +159,117 @@ module rec TypeConvertorModule =
         /// Timer, Counter 등
         | FunctionBlockCmd of FunctionBlock
 
-    let createPLCCommandCopy(endTag, from, toTag) = FunctionPure.CopyMode(endTag, (from, toTag))
-    let createPLCCommandCompare(endTag, op, left, right) =
-        match op with
-        | GT ->FunctionPure.CompareGT(endTag, (left, right))
-        | GE ->FunctionPure.CompareGE(endTag, (left, right))
-        | EQ ->FunctionPure.CompareEQ(endTag, (left, right))
-        | LE ->FunctionPure.CompareLE(endTag, (left, right))
-        | LT ->FunctionPure.CompareLT(endTag, (left, right))
-        | NE ->FunctionPure.CompareNE(endTag, (left, right))
+    //let createPLCCommandCopy(endTag, from, toTag) = FunctionPure.CopyMode(endTag, (from, toTag))
 
-    let createPLCCommandAdd(endTag, tag, value)          = FunctionPure.Add(endTag, tag, value)
-    //let createPLCCommandTimer(endTag, time)              = FunctionBlock.TimerMode(endTag, time)
-    //let createPLCCommandCounter(endTag, resetTag, count) = FunctionBlock.CounterMode(endTag, resetTag , count)
+[<AutoOpen>]
+module XgiExpressionConvertorModule =
+    type XgiStorage = ResizeArray<IStorage>
+
+    let operatorToXgiFunctionName = function
+        | ">"  -> "GT"
+        | ">=" -> "GTE"
+        | "<"  -> "LT"
+        | "<=" -> "LTE"
+        | "="  -> "EQ"
+        | "!=" -> "NE"
+        | "+"  -> "ADD"
+        | "-"  -> "SUB"
+        | "*"  -> "MUL"
+        | "/"  -> "DIV"
+        |  _ -> failwith "ERROR"
+
+    let collectExpandedExpression (storage:XgiStorage) (expandFunctionStatements:ResizeArray<Statement>) (exp:IExpression) : IExpression =
+        let xgiLocalVars = ResizeArray<IXgiLocalVar>()
+        let rec helper (exp:IExpression) =
+            [
+                match exp.FunctionName with
+                | Some funcName ->
+                    let newArgs = exp.FunctionArguments |> bind helper
+                    match funcName with
+                    | ("&&" | "||" | "!") as op ->
+                        exp.WithNewFunctionArguments newArgs
+                    | (">"|">="|"<"|"<="|"="|"!="  |  "+"|"-"|"*"|"/") as op ->
+                        let withDefaultValue (defaultValue:'T) =
+                            let out = createXgiAutoVariable "out" $"{op} output" defaultValue
+                            xgiLocalVars.Add out
+                            expandFunctionStatements.Add <| DuAugmentedPLCFunction { FunctionName = op; Arguments = newArgs; Output = out; }
+                            DuTerminal (DuVariable out) :> IExpression
+
+                        match exp.DataType.Name with
+                        | "Single" -> withDefaultValue 0.f
+                        | "Double" -> withDefaultValue 0.0
+                        | "SByte"  -> withDefaultValue 0y
+                        | "Byte"   -> withDefaultValue 0uy
+                        | "Int16"  -> withDefaultValue 0s
+                        | "UInt16" -> withDefaultValue 0us
+                        | "Int32"  -> withDefaultValue 0
+                        | "UInt32" -> withDefaultValue 0u
+                        | "Int64"  -> withDefaultValue 0L
+                        | "UInt64" -> withDefaultValue 0UL
+                        | "Boolean"-> withDefaultValue false
+                        | "String" -> withDefaultValue ""
+                        | "Char"   -> withDefaultValue ' '
+                        | _ -> failwith "ERROR"
+
+                    | (FunctionNameRising | FunctionNameFalling) ->
+                        exp
+                    | _ ->
+                        failwith "ERROR"
+                | _ ->
+                    exp
+            ]
+
+        let newExp = helper exp |> List.exactlyOne
+        xgiLocalVars.Cast<IStorage>() |> storage.AddRange   // 위의 helper 수행 이후가 아니면, xgiLocalVars 가 채워지지 않는다.
+        newExp
+
+    let private statement2XgiStatements (storage:XgiStorage) (statement:Statement) : Statement list =
+        let expandFunctionStatements = ResizeArray<Statement>()  // DuAugmentedPLCFunction case
+
+        let newStatements =
+            match statement with
+            | DuAssign (exp, target) ->
+                let newExp = collectExpandedExpression storage expandFunctionStatements exp
+                [ DuAssign (newExp, target) ]
+
+            | DuVarDecl (exp, decl) ->
+                let newExp_ = collectExpandedExpression storage expandFunctionStatements exp
+
+                (* 일반 변수 선언 부분을 xgi local variable 로 치환한다. *)
+                storage.Remove decl |> ignore
+                let createVar (defaultValue:'T) =
+                    let var = createXgiVariable decl.Name "local var in code" defaultValue
+                    storage.Add var
+
+                match exp.DataType.Name with
+                | "Single" -> createVar 0.f
+                | "Double" -> createVar 0.0
+                | "SByte"  -> createVar 0y
+                | "Byte"   -> createVar 0uy
+                | "Int16"  -> createVar 0s
+                | "UInt16" -> createVar 0us
+                | "Int32"  -> createVar 0
+                | "UInt32" -> createVar 0u
+                | "Int64"  -> createVar 0L
+                | "UInt64" -> createVar 0UL
+                | "Boolean"-> createVar false
+                | "String" -> createVar ""
+                | "Char"   -> createVar ' '
+                | _ -> failwith "ERROR"
+
+                []
+            | _ -> [ statement ]
+
+        expandFunctionStatements @ newStatements |> List.ofSeq
+
+    let internal commentedStatement2CommentedXgiStatements (storage:XgiStorage) (CommentedStatement(comment, statement)) : CommentedXgiStatements =
+        let xgiStatements = statement2XgiStatements storage statement
+        CommentedXgiStatements(comment, xgiStatements)
+
+
+
+    type CounterStatement with
+        member cs.RungInCondition:IExpression<bool> =
+            match cs.Counter.Type with
+            | ( CTU | CTUD | CTR ) -> cs.UpCondition.Value
+            | CTD -> cs.DownCondition.Value

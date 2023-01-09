@@ -9,6 +9,7 @@ open Engine.Common.FS
 [<AutoOpen>]
 module ExpressionForwardDeclModule =
     type IValue<'T> =
+        inherit IValue
         abstract Value: 'T with get, set
 
     type IStorage<'T> =
@@ -54,10 +55,12 @@ module ExpressionForwardDeclModule =
         abstract FunctionName: string option
         /// Function expression 인 경우 function args 반환.  terminal 이거나 argument 없으면 empty list 반환
         abstract FunctionArguments: IExpression list
-        /// Function expression 에 사용된 IStorage 항목들을 반환
+        /// Function arguments 목록만 치환된 새로운 expression 반환
+        abstract WithNewFunctionArguments: IExpression list -> IExpression
 
         abstract Terminal: ITerminal option
 
+        /// Function expression 에 사용된 IStorage 항목들을 반환
         abstract CollectStorages: unit -> IStorage list
         abstract Flatten: unit -> IFlatExpression
 
@@ -290,7 +293,6 @@ module rec ExpressionPrologModule =
         interface IStorage with
             member x.DataType = typedefof<'T>
             member x.Value with get() = x.Value and set(v) = x.Value <- (v :?> 'T)
-            member x.ToText() = x.ToText()
             member x.ToBoxedExpression() = x.ToBoxedExpression()
 
         interface IStorage<'T> with
@@ -298,6 +300,11 @@ module rec ExpressionPrologModule =
 
         interface INamed with
             member x.Name with get() = x.Name and set(v) = failwith "ERROR: not supported"
+
+        interface IText with
+            member x.ToText() = x.ToText()
+
+        interface IExpressionizableTerminal
 
         abstract ToText: unit -> string
         abstract ToBoxedExpression : unit -> obj    /// IExpression<'T> 의 boxed 형태의 expression 생성
@@ -318,10 +325,15 @@ module rec ExpressionPrologModule =
         interface IVariable<'T>
         override x.ToText() = "$" + name
 
+    type ILiteralHolder =
+        abstract ToTextWithoutTypeSuffix: unit -> string
+
     type LiteralHolder<'T when 'T:equality>(literalValue:'T) =
         member _.Value = literalValue
         interface IExpressionizableTerminal with
             member x.ToText() = sprintf "%A" x.Value
+        interface ILiteralHolder with
+            member x.ToTextWithoutTypeSuffix() = $"{x.Value}"
 
     type Arg       = IExpression
     type Arguments = IExpression list
@@ -358,3 +370,5 @@ module ExpressionPrologModule2 =
     let mutable fwdCreateBoolTag   = let dummy (tagName:string) (initValue:bool) : TagBase<bool>     = failwith "Should be reimplemented." in dummy
     let mutable fwdCreateUShortTag = let dummy (tagName:string) (initValue:uint16) : TagBase<uint16> = failwith "Should be reimplemented." in dummy
     let mutable fwdFlattenExpression = let dummy (expr:IExpression) : IFlatExpression = failwith "Should be reimplemented." in dummy
+
+

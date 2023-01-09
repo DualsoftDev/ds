@@ -29,7 +29,7 @@ module FlatExpressionModule =
     [<DebuggerDisplay("{ToText()}")>]
     type FlatExpression =
         /// pulse identifier 및 negation 여부 (pulse coil 은 지원하지 않을 예정)
-        | FlatTerminal  of tag:IExpressionizableTerminal * pulse:bool * negated:bool
+        | FlatTerminal  of terminal:IExpressionizableTerminal * pulse:bool * negated:bool
 
         /// N-ary Expressions : And / Or 및 terms
         | FlatNary    of Op * FlatExpression list
@@ -65,9 +65,9 @@ module FlatExpressionModule =
         match expression with
         | :? Expression<'T> as express ->
             match express with
-            | DuTerminal (DuTag t) -> FlatTerminal(t, false, false)
+            | DuTerminal (DuVariable t) -> FlatTerminal(t, false, false)
             | DuTerminal (DuLiteral b) -> FlatTerminal(b, false, false)
-            | DuTerminal  _ -> failwith "ERROR"
+
             (* rising/falling/negation 은 function 으로 구현되어 있으며,
                해당 function type 에 따라서 risng/falling/negation 의 contact/coil 을 생성한다.
                (Terminal<'T> 이 generic 이어서 DuTag 에 bool type 으로 제한 할 수 없음.
@@ -76,7 +76,7 @@ module FlatExpressionModule =
             | DuFunction {FunctionBody = f; Name = n; Arguments = (:? Expression<bool> as arg)::[]}
                 when n = FunctionNameRising || n = FunctionNameFalling ->
                     match arg with
-                    | DuTerminal (DuTag t) -> FlatTerminal(t, true, n = FunctionNameFalling)
+                    | DuTerminal (DuVariable t) -> FlatTerminal(t, true, n = FunctionNameFalling)
                     | _ -> failwith "ERROR"
             | DuFunction fs ->
                 let op =
@@ -98,27 +98,57 @@ module FlatExpressionModule =
     // <kwak> IExpression<'T> vs IExpression : 강제 변환
     and flattenExpression (expression:IExpression) : IFlatExpression =
         match expression with
-        | :? IExpression<bool> as exp -> flattenExpressionT exp
-        | :? IExpression<int> as exp -> flattenExpressionT exp
-        | :? IExpression<uint> as exp -> flattenExpressionT exp
+        | :? IExpression<bool  > as exp -> flattenExpressionT exp
+        | :? IExpression<int8  > as exp -> flattenExpressionT exp
+        | :? IExpression<uint8 > as exp -> flattenExpressionT exp
+        | :? IExpression<int16 > as exp -> flattenExpressionT exp
+        | :? IExpression<uint16> as exp -> flattenExpressionT exp
+        | :? IExpression<int32 > as exp -> flattenExpressionT exp
+        | :? IExpression<uint32> as exp -> flattenExpressionT exp
+        | :? IExpression<int64 > as exp -> flattenExpressionT exp
+        | :? IExpression<uint64> as exp -> flattenExpressionT exp
+        | :? IExpression<single> as exp -> flattenExpressionT exp
+        | :? IExpression<double> as exp -> flattenExpressionT exp
+        | :? IExpression<string> as exp -> flattenExpressionT exp
+        | :? IExpression<char  > as exp -> flattenExpressionT exp
+
         | _ -> failwith "NOT yet"
 
-    ///// expression 이 차지하는 가로, 세로 span 의 width 와 height 를 반환한다.
-    //let precalculateSpan (expr:FlatExpression) =
-    //    let rec helper (expr:FlatExpression): int*int =
-    //        match expr with
-    //        | FlatTerminal _ -> 1, 1
-    //        | FlatNary(And, ands) ->
-    //            let spanXYs = ands |> map helper
-    //            let spanX = spanXYs |> map fst |> List.sum
-    //            let spanY = spanXYs |> map snd |> List.max
-    //            spanX, spanY
-    //        | FlatNary(Or, ors) ->
-    //            let spanXYs = ors |> map helper
-    //            let spanX = spanXYs |> map fst |> List.max
-    //            let spanY = spanXYs |> map snd |> List.sum
-    //            spanX, spanY
-    //        | FlatNary(Neg, neg::[]) ->
-    //            helper neg
-    //        | _ -> failwith "ERROR"
-    //    helper expr
+
+
+
+
+
+    /// expression 이 차지하는 가로, 세로 span 의 width 와 height 를 반환한다.
+    let precalculateSpan (expr:FlatExpression) =
+        let rec helper (expr:FlatExpression): int*int =
+            match expr with
+            | FlatTerminal _ -> 1, 1
+            | FlatNary(And, ands) ->
+                let spanXYs = ands |> map helper
+                let spanX = spanXYs |> map fst |> List.sum
+                let spanY = spanXYs |> map snd |> List.max
+                spanX, spanY
+            | FlatNary(Or, ors) ->
+                let spanXYs = ors |> map helper
+                let spanX = spanXYs |> map fst |> List.max
+                let spanY = spanXYs |> map snd |> List.sum
+                spanX, spanY
+            | FlatNary(Neg, neg::[]) ->
+                helper neg
+            | _ -> failwith "ERROR"
+        helper expr
+
+    /// 우측으로 바로 function block 을 붙일 수 있는지 검사.
+    /// false 반환 시, hLine (hypen) 을 적어도 하나 추가해야 function blcok 을 붙일 수 있다.
+    (*
+        false 반환 case
+            - toplevel 이 OR function
+            - toplevel 이 AND 이고, AND 의 마지막이 OR function
+     *)
+    let rec isFunctionBlockConnectable (expr:FlatExpression) =
+        match expr with
+        | ( FlatTerminal _ | FlatNary(Neg, _) ) -> true
+        | FlatNary(And, ands) -> ands |> List.last |> isFunctionBlockConnectable
+        | FlatNary(Or, _) -> false
+        | _ -> failwith "ERROR"

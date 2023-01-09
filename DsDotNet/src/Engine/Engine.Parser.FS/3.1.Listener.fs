@@ -330,7 +330,6 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                         | _, ofn::ofrn::[] -> ()
                         | _ ->
                             failwith "ERROR"
-                        noop()
             loop
 
         let createRealVertex          = tokenCreator 0

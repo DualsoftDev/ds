@@ -157,19 +157,19 @@ module CounterStatementModule =
                 ResetCondition   = Some reset; }
             |> createCounterStatement storages
 
-        static member CreateCTD(tcParams:TCConstructionParams, reset, accum) =
+        static member CreateXgiCTD(tcParams:TCConstructionParams, load) =
             let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition; FunctionName=functionName} = tcParams
             { defaultCounterCreateParam with
                 Type=CTD; Name=name; Preset=preset; FunctionName=functionName
                 CountDownCondition = Some rungInCondition;
-                ResetCondition     = Some reset; }
+                LoadCondition     = Some load; }
             |> createCounterStatement storages
 
-        static member CreateCTR(tcParams:TCConstructionParams, reset) =
+        static member CreateXgiCTR(tcParams:TCConstructionParams, reset) =
             let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition; FunctionName=functionName} = tcParams
             { defaultCounterCreateParam with
                 Type=CTR; Name=name; Preset=preset; FunctionName=functionName
-                CountUpCondition = Some rungInCondition;
+                CountDownCondition = Some rungInCondition;
                 ResetCondition   = Some reset; }
             |> createCounterStatement storages
 

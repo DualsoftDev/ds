@@ -8,36 +8,6 @@ open System.Collections.Generic
 open Engine.Core
 
 module LsXGI =
-
-    //<kwak>
-    //let generateXGIXmlFromLadderInfo (opt:CodeGenerationOption) (ladderInfo:LadderInfo) (tags) (unusedTags) (existingLSISprj:string option) =
-    //    let existTagdict =
-    //        existingLSISprj
-    //        |> map (DsXml.load >> XGIXml.createUsedVariableMap)
-    //        |> Option.defaultValue (new Dictionary<string, string>())
-
-    //    let statements =
-    //        ladderInfo.Rungs
-    //        |> RungGenerator.replaceDuplicateTags tags existTagdict
-    //        |> Seq.groupBy(fun ri -> ri.GetCoilTerminal())
-    //        |> Seq.map (rungInfoToStatement opt)
-
-    //    let plctags = statementToTag statements |> Seq.append tags |> Seq.distinct
-
-    //    File.generateXGIXmlFromStatement ladderInfo.PrologComments statements plctags unusedTags existingLSISprj
-
-    //let generateXGIXmlFromLadderInfoAndStatus (opt:CodeGenerationOption) (ladderInfo:LadderInfo) status (tags) (unusedTags) (existingLSISprj:string option) =
-    //    let existTagdict =
-    //        existingLSISprj
-    //        |> map (DsXml.load >> XGIXml.createUsedVariableMap)
-    //        |> Option.defaultValue (new Dictionary<string, string>())
-
-    //    let statements = ladderInfo.Rungs @ status |> RungGenerator.replaceDuplicateTags tags existTagdict |> Seq.groupBy(fun ri -> ri.GetCoilTerminal()) |> Seq.map (rungInfoToStatement opt)
-
-    //    let plctags = statementToTag statements |> Seq.append tags |> Seq.distinct
-    //    File.generateXGIXmlFromStatement ladderInfo.PrologComments statements plctags unusedTags existingLSISprj
-
-
     let generateXml (opt:CodeGenerationOption) (storages:Storages) (commentedStatements:CommentedStatement list) : string =
         match RuntimeTarget with
         | XGI -> ()
@@ -59,21 +29,13 @@ module LsXGI =
             => 새로운 임시 tag 와 새로운 임시 tag 에 저장하기 위한 rung 들이 추가된다.
         *)
 
-        let newCommentedStatements = ResizeArray<CommentedXgiStatement>()
+        let newCommentedStatements = ResizeArray<CommentedXgiStatements>()
         let newStorages = ResizeArray<IStorage>(storages.Values)
         for cmtSt in commentedStatements do
-            let xgiCmtStmt = commentedStatement2CommentedXgiStatement cmtSt
-            let (CommentedXgiStatement(cmt, xgiStmts)) = xgiCmtStmt
-            match xgiStmts.GetStatement() with
-            | :? XgiStatementExptender as extended ->
-                for ext in extended.ExtendedStatements do
-                    CommentedXgiStatement(cmt, ext) |> newCommentedStatements.Add
-                extended.TemporaryTags |> Seq.cast<IStorage> |> newStorages.AddRange
-            | _ -> ()
-
-            newCommentedStatements.Add xgiCmtStmt
-
-        noop()
+            let xgiCmtStmts = commentedStatement2CommentedXgiStatements newStorages cmtSt
+            let (CommentAndXgiStatements(comment_, xgiStatements)) = xgiCmtStmts
+            if xgiStatements.Any() then
+                newCommentedStatements.Add xgiCmtStmts
 
         let xgiSymbols =
             [   for s in newStorages do

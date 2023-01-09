@@ -32,8 +32,8 @@ type XgiCounterTest() =
         let storages = Storages()
         let code = """
             bool cd = createTag("%IX0.0.0", false);
-            bool res = createTag("%IX0.0.1", false);
-            ctd myCTD = createXgiCTD(2000us, $cd, $res);
+            bool load = createTag("%IX0.0.1", false);
+            ctd myCTD = createXgiCTD(2000us, $cd, $load);
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
@@ -70,7 +70,7 @@ type XgiCounterTest() =
 
 
     [<Test>]
-    member __.``Counter CTU with conditional test`` () =
+    member __.``X Counter CTU with conditional test`` () =
         let storages = Storages()
         let code = """
             bool cu1 = createTag("%IX0.0.0", false);
@@ -89,7 +89,7 @@ type XgiCounterTest() =
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
-    member __.``Counter CTD with conditional test`` () =
+    member __.``X Counter CTD with conditional test`` () =
         let storages = Storages()
         let code = """
             bool cu1 = createTag("%IX0.0.0", false);
@@ -106,6 +106,25 @@ type XgiCounterTest() =
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
+
+
+type XgiFunctionTest() =
+    inherit XgiTestClass()
+
+    [<Test>]
+    member __.``X ADD simple test`` () =
+        let storages = Storages()
+        let code = """
+            int16 nn1 = 1s;
+            int16 nn2 = 2s;
+            int16 sum = 0s;
+            $sum := $nn1 + $nn2;
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
+
+
 
 //    [<Test>]
 //    member __.``TIMER= Many1 AND RungIn Condition test`` () =

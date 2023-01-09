@@ -3,24 +3,33 @@ namespace PLC.CodeGen.LSXGI
 open Engine.Common.FS
 open Engine.Core
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
+open FB
 
 [<AutoOpen>]
 module internal Common =
     /// XmlOutput = string
     type XmlOutput = string
     type EncodedXYCoordinate = int
-    type CoordinatedRungXml = {
+    type CoordinatedXmlElement = {  // old name : CoordinatedRungXml
+        /// Xgi 출력시 순서 결정하기 위한 coordinate.
         Coordinate: EncodedXYCoordinate   // int
+        /// Xml element 문자열
         Xml: XmlOutput                  // string
+        SpanX: int
+        SpanY: int
     }
 
-    type CoordinatedRungXmlsWithNewY = {
-        SpanY: int
-        PositionedRungXmls: CoordinatedRungXml list
+    type BlockSummarizedXmlElements = {
+        // Block 시작 좌상단 x, y 좌표
+        X: int
+        Y: int
+        TotalSpanX: int
+        TotalSpanY: int
+        XmlElements: CoordinatedXmlElement list
     }
 
     type RungInfosWithSpan = {
-        RungInfos:CoordinatedRungXml list
+        RungInfos:CoordinatedXmlElement list
         X: int
         Y: int
         SpanX: int
@@ -38,7 +47,7 @@ module internal Common =
     let dq = "\""
 
     /// rung 을 구성하는 element (접점)의 XML 표현 문자열 반환
-    let elementFull (elementType:int) coordi (param:string) (tag:string) : XmlOutput =
+    let elementFull (elementType:int) (coordi:int) (param:string) (tag:string) : XmlOutput =
         $"\t\t<Element ElementType={dq}{elementType}{dq} Coordinate={dq}{coordi}{dq} {param}>{tag}</Element>"
 
     /// rung 을 구성하는 element (접점)의 XML 표현 문자열 반환
@@ -72,61 +81,70 @@ module internal Common =
     let fallingline c = elementFull (int ElementType.FallingContact) (c) "" ""
 
 
+
     /// 마지막 수평으로 연결 정보
-    let mutiEndLine startX endX y =
-        if endX > startX then
-            let lengthParam = sprintf "Param=\"%d\"" (3 * (endX-startX))
-            let c = coord(startX, y)
-            elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
-        else
-            failwithlogf "endX startX [%d > %d]" endX startX
+    let hLineTo (x, y) endX =
+        if endX <= x then
+            failwithlog $"endX startX [{endX} > {x}]"
 
-    /// 함수 그리기
-    let createFunctionAt funcFind func (inst:string) tag (x, y) : CoordinatedRungXml =
-        let instFB = if inst = "" then "," else (inst + ",VAR")
+        let lengthParam = $"Param={dq}{3 * (endX-x)}{dq}"
         let c = coord(x, y)
-        let fbBody = sprintf "Param=\"%s\"" (FB.getFBXmlParam( funcFind, func, instFB, FB.getFBIndex tag))
-        let xml = elementFull (int ElementType.VertFBMode) c fbBody inst
-        { Coordinate = c; Xml = xml }
+        elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
 
-    /// 함수 파라메터 그리기
-    let createFBParameterXml (x, y) tag =
-        let c = coord(x, y)
-        let xml = elementFull (int ElementType.VariableMode) c "" tag
-        { Coordinate = c; Xml = xml }
 
-    let drawRising (x, y) =
-        let cellX = getFBCellX x
-        let c = coord (cellX, y)
-        [   { Coordinate = c; Xml = risingline c}
-            { Coordinate = c; Xml = mutiEndLine x (cellX-1) y}
-        ]
 
     /// x y 위치에서 수직선 한개를 긋는다
     let vLineAt (x, y) =
         verify(x >= 0)
-        let c = 2 + coord(x, y)
-        { Coordinate = c; Xml = vline c }
+        let c = coord(x, y) + 2
+        { Coordinate = c; Xml = vline c; SpanX = 0; SpanY = 1 }
 
     /// x y 위치에서 수직으로 n 개의 line 을 긋는다
     let vlineDownTo (x, y) n =
         [
             if enableXmlComment then
                 let c = coord(x, y)
-                yield { Coordinate = c; Xml = $"<!-- vlineDownTo {x} {y} {n} -->" }
+                yield { Coordinate = c; Xml = $"<!-- vlineDownTo {x} {y} {n} -->" ; SpanX = 0; SpanY = n }
 
             for i in [0.. n-1] do
                 yield vLineAt (x, y+i)
         ]
 
-    let drawPulseCoil (x, y) (tagCoil:INamedExpressionizableTerminal) (funSize:int) =
-        let newX = getFBCellX (x-1)
-        let newY = y + funSize
-        [
-            { Coordinate = coord(x, y); Xml = risingline (coord(x, y))}
-            { Coordinate = coord(newX, newY); Xml = mutiEndLine (x) (newX - 1) newY}
-            { Coordinate = coord(coilCellX, newY); Xml = elementBody (int ElementType.CoilMode) (coord(coilCellX, newY)) (tagCoil.StorageName)}
-            yield! vlineDownTo (x-1, y) funSize
+
+    /// 함수 그리기 (detailedFunctionName = 'ADD2_INT', briefFunctionName = 'ADD')
+    let createFunctionXmlAt (detailedFunctionName, briefFunctionName) (inst:string) (x, y) : CoordinatedXmlElement =
+        let tag = briefFunctionName
+        let instFB = if inst = "" then "," else (inst + ",VAR")
+        let c = coord(x, y)
+        let param = FB.getFBXmlParam (detailedFunctionName, briefFunctionName) instFB (FB.getFBIndex tag)
+        let fbBody = $"Param={dq}{param}{dq}"
+        let xml = elementFull (int ElementType.VertFBMode) c fbBody inst
+        { Coordinate = c; Xml = xml; SpanX = 3; SpanY = getFunctionHeight detailedFunctionName }
+
+    /// 함수 파라메터 그리기
+    let createFBParameterXml (x, y) tag =
+        let c = coord(x, y)
+        let xml = elementFull (int ElementType.VariableMode) c "" tag
+        { Coordinate = c; Xml = xml ; SpanX = 1; SpanY = 1 }
+
+    let drawRising (x, y) =
+        let cellX = getFBCellX x
+        let c = coord (cellX, y)
+        [   { Coordinate = c; Xml = risingline c; SpanX = 0; SpanY = 0 }
+            { Coordinate = c; Xml = hLineTo (x, y) (cellX-1); SpanX = (cellX-1); SpanY = 0 }
         ]
+
+    //let drawPulseCoil (x, y) (tagCoil:INamedExpressionizableTerminal) (funSize:int) =
+    //    let newX = getFBCellX (x-1)
+    //    let newY = y + funSize
+    //    [
+    //        { Coordinate = coord(x, y); Xml = risingline (coord(x, y)); SpanX = 0; SpanY = 1 }
+    //        let xml = hLineTo (x, newY) (newX - 1)
+    //        { Coordinate = coord(newX, newY); Xml = xml; SpanX = (newX - 1); SpanY = 1 }
+
+    //        let xml = elementBody (int ElementType.CoilMode) (coord(coilCellX, newY)) (tagCoil.StorageName)
+    //        { Coordinate = coord(coilCellX, newY); Xml = xml; SpanX = 0; SpanY = 0 }
+    //        yield! vlineDownTo (x-1, y) funSize
+    //    ]
 
 

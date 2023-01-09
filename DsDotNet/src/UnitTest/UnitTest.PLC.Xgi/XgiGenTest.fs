@@ -287,19 +287,31 @@ type XgiGenerationTest() =
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
-    member __.``Add test`` () =
+    member __.``X Add test`` () =
         let storages = Storages()
-        let code = """
-            int n0 = createTag("%IX0.0.0", 0);
-            int n1 = createTag("%IX0.0.0", 1);
-            int n2 = createTag("%IX0.0.0", 2);
-            int n3 = createTag("%IX0.0.0", 3);
-            int n4 = createTag("%IX0.0.0", 4);
-            int n5 = createTag("%IX0.0.0", 5);
-            bool q = createTag("%QX0.1.0", false);
 
-            //$q := add($n1, $n2) > 3;
-            $q := ($n1 + $n2) * 9 + $n3 > 3;
+        //let symbolInfos = [
+        //    XGITag.createSymbol "n0" "n0" "INT"
+        //    XGITag.createSymbol "n1" "n1" "INT"
+        //    XGITag.createSymbol "n2" "n2" "INT"
+        //    XGITag.createSymbol "n3" "n3" "INT"
+        //    XGITag.createSymbol "n4" "n4" "INT"
+        //    XGITag.createSymbol "n5" "n5" "INT"
+        //]
+        //let symbolsLocalXml = XGITag.generateSymbolVars (symbolInfos, false)
+
+        let code = """
+            int16 nn0 = 0s;
+            int16 nn1 = 1s;
+            int16 nn2 = 2s;
+            int16 nn3 = 3s;
+            int16 nn4 = 4s;
+            int16 nn5 = 5s;
+            bool qq = createTag("%QX0.1.0", false);
+
+            //$qq := add($nn1, $nn2) > 3s;
+            //$qq := ($nn1 + $nn2) * 9s + $nn3 > 3s;
+            $qq := true && (($nn1 + $nn2) * 9s + $nn3 > 3s);
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)

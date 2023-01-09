@@ -35,7 +35,7 @@ module ExpressionExtension =
         coil <== (sets <&&> (!! rsts)) |> withExpressionComment comment
     /// Create Relay Coil Statement                                                      
     let (==|) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool> , comment:string) =
-        coil <== (sets <||> tag2expr coil <&&> (!! rsts)) |> withExpressionComment comment
+        coil <== (sets <||> var2expr coil <&&> (!! rsts)) |> withExpressionComment comment
     /// Create None Relay rising Pulse Coil Statement
     let (--^) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool>, comment:string) = 
         let rising:RisingCoil = {Storage = coil; HistoryFlag = HistoryFlag()}
@@ -56,8 +56,8 @@ module ExpressionExtension =
     let private tags2LogicalAndOrExpr (fLogical: IExpression list -> Expression<bool>) (FList(ts:Tag<bool> list)) : Expression<bool> =
         match ts with
         | [] -> failwith "tags2AndExpr: Empty list"
-        | t :: [] -> tag2expr t
-        | _ -> ts.Select(tag2expr) 
+        | t :: [] -> var2expr t
+        | _ -> ts.Select(var2expr) 
                 |> List.ofSeq 
                 |> List.cast<IExpression>
                 |> fLogical

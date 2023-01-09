@@ -38,13 +38,6 @@ module TimerStatementModule =
             statements.Add resetStatement
         | None -> ()
 
-        match resetCondition with
-        | Some reset ->
-            let statement = DuAssign (reset, ts.RES)
-            statement.Do()
-            statements.Add statement
-        | None -> ()
-
         timer.InputEvaluateStatements <- statements.ToFSharpList()
         DuTimer ({ Timer=timer; RungInCondition = rungInCondition; ResetCondition = resetCondition; FunctionName=functionName }:TimerStatement)
 

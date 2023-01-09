@@ -346,21 +346,22 @@ module internal rec Command =
 
         | FlatNary(And, exprs) ->
             let mutable sx = x
-            let xmls = [
-                for exp in exprs do
-                    let sub = drawLadderBlock (sx, y) exp
-                    sx <- sx + sub.TotalSpanX
-                    yield! sub.XmlElements
-            ]
-            let spanX = xmls.Sum(fun x -> x.SpanX)
-            let spanY = xmls.Max(fun x -> x.SpanX)
-            { XmlElements = xmls; X=x; Y=y; TotalSpanX = spanX; TotalSpanY = spanY}
+            let blockedExprXmls:BlockSummarizedXmlElements list =
+                [
+                    for exp in exprs do
+                        let sub = drawLadderBlock (sx, y) exp
+                        sx <- sx + sub.TotalSpanX
+                        sub
+                ]
+            let exprXmls = blockedExprXmls |> List.collect(fun x -> x.XmlElements)
+
+            let spanX = blockedExprXmls.Sum(fun x -> x.TotalSpanX)
+            let spanY = blockedExprXmls.Max(fun x -> x.TotalSpanY)
+            { XmlElements = exprXmls; X=x; Y=y; TotalSpanX = spanX; TotalSpanY = spanY}
 
 
         | FlatNary(Or, exprs) ->
             let mutable sy = y
-            let mutable maxSpanX = 0
-
             let blockedExprXmls:BlockSummarizedXmlElements list =
                 [
                     for exp in exprs do

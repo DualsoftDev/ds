@@ -119,22 +119,36 @@ module FlatExpressionModule =
 
 
 
-    ///// expression 이 차지하는 가로, 세로 span 의 width 와 height 를 반환한다.
-    //let precalculateSpan (expr:FlatExpression) =
-    //    let rec helper (expr:FlatExpression): int*int =
-    //        match expr with
-    //        | FlatTerminal _ -> 1, 1
-    //        | FlatNary(And, ands) ->
-    //            let spanXYs = ands |> map helper
-    //            let spanX = spanXYs |> map fst |> List.sum
-    //            let spanY = spanXYs |> map snd |> List.max
-    //            spanX, spanY
-    //        | FlatNary(Or, ors) ->
-    //            let spanXYs = ors |> map helper
-    //            let spanX = spanXYs |> map fst |> List.max
-    //            let spanY = spanXYs |> map snd |> List.sum
-    //            spanX, spanY
-    //        | FlatNary(Neg, neg::[]) ->
-    //            helper neg
-    //        | _ -> failwith "ERROR"
-    //    helper expr
+    /// expression 이 차지하는 가로, 세로 span 의 width 와 height 를 반환한다.
+    let precalculateSpan (expr:FlatExpression) =
+        let rec helper (expr:FlatExpression): int*int =
+            match expr with
+            | FlatTerminal _ -> 1, 1
+            | FlatNary(And, ands) ->
+                let spanXYs = ands |> map helper
+                let spanX = spanXYs |> map fst |> List.sum
+                let spanY = spanXYs |> map snd |> List.max
+                spanX, spanY
+            | FlatNary(Or, ors) ->
+                let spanXYs = ors |> map helper
+                let spanX = spanXYs |> map fst |> List.max
+                let spanY = spanXYs |> map snd |> List.sum
+                spanX, spanY
+            | FlatNary(Neg, neg::[]) ->
+                helper neg
+            | _ -> failwith "ERROR"
+        helper expr
+
+    /// 우측으로 바로 function block 을 붙일 수 있는지 검사.
+    /// false 반환 시, hLine (hypen) 을 적어도 하나 추가해야 function blcok 을 붙일 수 있다.
+    (*
+        false 반환 case
+            - toplevel 이 OR function
+            - toplevel 이 AND 이고, AND 의 마지막이 OR function
+     *)
+    let rec isFunctionBlockConnectable (expr:FlatExpression) =
+        match expr with
+        | ( FlatTerminal _ | FlatNary(Neg, _) ) -> true
+        | FlatNary(And, ands) -> ands |> List.last |> isFunctionBlockConnectable
+        | FlatNary(Or, _) -> false
+        | _ -> failwith "ERROR"

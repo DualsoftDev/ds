@@ -23,7 +23,10 @@ module internal rec Command =
             | FunctionCmd (fc)       -> tet(fc)
             | FunctionBlockCmd (fbc) -> tet(fbc)
 
-        member x.HasInstance with get() = match cmdType with | FunctionBlockCmd (fbc) ->  true |_-> false
+        member x.HasInstance with get() =
+            match cmdType with
+            | FunctionBlockCmd (fbc) ->  true
+            | _-> false
         member x.Instance with get() =
             match cmdType with
             | FunctionBlockCmd (fbc) ->
@@ -111,6 +114,7 @@ module internal rec Command =
         let paramXmls =
             [
                 let rungIn = ts.RungInCondition |> flatten
+                //let fbConnectable = isFunctionBlockConnectable rungIn
                 rung (x, y+0) (Some rungIn) None
                 createFBParameterXml (x, y+1) $"T#{time}MS"
                 match typ with

@@ -19,10 +19,10 @@ module internal Common =
         SpanY: int
     }
 
-    type CoordinatedRungXmlsForCommand = {
-        SpanY: int
-        PositionedRungXmls: CoordinatedXmlElement list
-    }
+    //type CoordinatedRungXmlsForCommand = {
+    //    SpanY: int
+    //    PositionedRungXmls: CoordinatedXmlElement list
+    //}
 
     type RungInfosWithSpan = {
         RungInfos:CoordinatedXmlElement list

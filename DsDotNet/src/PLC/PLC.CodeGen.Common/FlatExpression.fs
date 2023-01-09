@@ -29,7 +29,7 @@ module FlatExpressionModule =
     [<DebuggerDisplay("{ToText()}")>]
     type FlatExpression =
         /// pulse identifier 및 negation 여부 (pulse coil 은 지원하지 않을 예정)
-        | FlatTerminal  of tag:IExpressionizableTerminal * pulse:bool * negated:bool
+        | FlatTerminal  of terminal:IExpressionizableTerminal * pulse:bool * negated:bool
 
         /// N-ary Expressions : And / Or 및 terms
         | FlatNary    of Op * FlatExpression list

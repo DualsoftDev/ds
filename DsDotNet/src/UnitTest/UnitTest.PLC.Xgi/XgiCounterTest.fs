@@ -32,8 +32,8 @@ type XgiCounterTest() =
         let storages = Storages()
         let code = """
             bool cd = createTag("%IX0.0.0", false);
-            bool res = createTag("%IX0.0.1", false);
-            ctd myCTD = createXgiCTD(2000us, $cd, $res);
+            bool load = createTag("%IX0.0.1", false);
+            ctd myCTD = createXgiCTD(2000us, $cd, $load);
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)

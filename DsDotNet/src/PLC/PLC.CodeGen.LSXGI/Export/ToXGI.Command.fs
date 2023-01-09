@@ -103,13 +103,12 @@ module internal rec Command =
 
 
     // <timer>
-    let drawCmdTimer (x, y) (timerStatement:TimerStatement)  : CoordinatedRungXmlsForCommand =
+    let drawCmdTimer (x, y) (timerStatement:TimerStatement)  : CoordinatedXmlElement list =
         let time:int = int timerStatement.Timer.PRE.Value
-        let fbSpanY = 2
-        { SpanY = fbSpanY; PositionedRungXmls = [createFBParameterXml (x-1, y+1) $"T#{time}MS" ]}
+        [createFBParameterXml (x-1, y+1) $"T#{time}MS" ]
 
     [<Obsolete("미완성")>]
-    let drawCmdCounter (x, y) (counterStatement:CounterStatement) : CoordinatedRungXmlsForCommand =
+    let drawCmdCounter (x, y) (counterStatement:CounterStatement) : CoordinatedXmlElement list =
 
         let paramDic = Dictionary<string, FuctionParameterShape>()
         let cs = counterStatement
@@ -128,17 +127,34 @@ module internal rec Command =
         let paramXmls =
             [
                 match typ with
-                | CTU ->    // cu, r, pv, q, cv
+                | CTU ->    // cu, r, pv,       q, cv
                     let cu = cs.UpCondition.Value.Flatten() :?> FlatExpression
-                    let xxx = rung (x, y) (Some cu) None
-                    rung (x, y) (Some cu) None
+                    rung (x, y+0) (Some cu) None
                     let r = cs.ResetCondition.Value.Flatten() :?> FlatExpression
-                    let xxxy = rung (x, y+1) (Some cu) None
                     rung (x, y+1) (Some r) None
-
-                //| CTD ->
-                //| CTUD ->
-                //| CTR -> 3
+                    createFBParameterXml (x, y+2) $"{pv}"
+                | CTD ->    // cd, ld, pv,       q, cv
+                    let cd = cs.DownCondition.Value.Flatten() :?> FlatExpression
+                    rung (x, y+0) (Some cd) None
+                    let ld = cs.LoadCondition.Value.Flatten() :?> FlatExpression
+                    rung (x, y+1) (Some ld) None
+                    createFBParameterXml (x, y+2) $"{pv}"
+                | CTUD ->   // cu, cd, r, ld, pv,       qu, qd, cv
+                    let cu = cs.UpCondition.Value.Flatten() :?> FlatExpression
+                    rung (x, y+0) (Some cu) None
+                    let cd = cs.DownCondition.Value.Flatten() :?> FlatExpression
+                    rung (x, y+1) (Some cd) None
+                    let r = cs.ResetCondition.Value.Flatten() :?> FlatExpression
+                    rung (x, y+2) (Some r) None
+                    let ld = cs.LoadCondition.Value.Flatten() :?> FlatExpression
+                    rung (x, y+3) (Some ld) None
+                    createFBParameterXml (x, y+4) $"{pv}"
+                | CTR -> // cd, pv, rst,       q, cv
+                    let cd = cs.DownCondition.Value.Flatten() :?> FlatExpression
+                    rung (x, y+0) (Some cd) None
+                    createFBParameterXml (x, y+1) $"{pv}"
+                    let rst = cs.ResetCondition.Value.Flatten() :?> FlatExpression
+                    rung (x, y+2) (Some rst) None
                 | _ -> ()
             ]
 
@@ -150,26 +166,11 @@ module internal rec Command =
         let results = [
             yield! paramXmls
 
-            match typ with
-            | (CTU | CTD ) ->
-                //createFBParameterXml (x-1, y+1) reset
-                createFBParameterXml (x, y+2) $"{pv}"
-            | CTR ->
-                createFBParameterXml (x-1, y+1) $"{pv}"
-                //createFBParameterXml (x-1, y+2) reset
-            | CTUD ->
-                //yield! (createParam (x-1, y+1) cs.DownCondition )
-                //yield! (createParam (x-1, y+2) cs.Reset     )
-                //yield! (createParam (x-1, y+3) cs.Load      )
-                createFBParameterXml (x-1, y+4) $"{pv}"
-
-
             let cmd = FunctionBlockCmd(CounterMode(counterStatement)) |> XgiCommand
             yield! createFunctionBlockInstanceXmls (x+1, y) cmd
         ]
-        let results = results |> List.sortBy(fun x -> x.Coordinate)
 
-        { SpanY = fbSpanY; PositionedRungXmls = results}
+        results
 
     type System.Type with
         member x.SizeString = systemTypeNameToXgiTypeName x.Name
@@ -185,8 +186,7 @@ module internal rec Command =
             | _ -> failwith "ERROR"
         | _ -> failwith "ERROR"
 
-    let drawCmdCompare (x, y) (func:string) (out:INamedExpressionizableTerminal) (leftA:IExpression) (leftB:IExpression) : CoordinatedRungXmlsForCommand =
-        let fbSpanY = 3
+    let drawCmdCompare (x, y) (func:string) (out:INamedExpressionizableTerminal) (leftA:IExpression) (leftB:IExpression) : CoordinatedXmlElement list =
         let a, b = toTerminalText leftA, toTerminalText leftB
 
         if(leftA.DataType <> leftB.DataType) then
@@ -206,14 +206,13 @@ module internal rec Command =
             createFBParameterXml (x+1, y+1) (out.StorageName)
         ]
 
-        { SpanY = fbSpanY; PositionedRungXmls = results}
+        results
 
-    let drawCmdAdd (x, y) (func:string) (out:INamedExpressionizableTerminal) (in1:IExpression) (in2:IExpression): CoordinatedRungXmlsForCommand =
-        let fbSpanY = 3
+    let drawCmdAdd (x, y) (func:string) (out:INamedExpressionizableTerminal) (in1:IExpression) (in2:IExpression): CoordinatedXmlElement list =
 
         let in1, in2 = toTerminalText in1, toTerminalText in2
 
-        let results = [
+        [
             //Pulse시 증감 처리
             //yield! drawRising(x, y)
             //함수 그리기
@@ -223,7 +222,6 @@ module internal rec Command =
             createFBParameterXml (x-1, y+2) in2
         ]
 
-        { SpanY = fbSpanY; PositionedRungXmls = results}
 
 
     //let drawCmdCopy (x, y) (tagCoil:INamedExpressionizableTerminal) (fromTag:CommandTag) (toTag:CommandTag) (pulse:bool) : CoordinatedRungXmlsForCommand =
@@ -269,42 +267,40 @@ module internal rec Command =
 
 
     /// (x, y) 위치에 cmd 를 생성.  cmd 가 차지하는 height 와 xml 목록을 반환
-    let drawCommand (x, y) (cmd:XgiCommand) : int * (CoordinatedXmlElement list) =
-        let results = ResizeArray<CoordinatedXmlElement>()
+    let drawCommand (x, y) (cmd:XgiCommand) : CoordinatedXmlElement list =
         let c = coord(x, y)
 
         let drawHLine() =
             //FunctionBlock, Function 까지 연장선 긋기
-            results.Add( {Coordinate = c; Xml = hlineEmpty c; SpanX = 1; SpanY = 1})
+            {Coordinate = c; Xml = hlineEmpty c; SpanX = 1; SpanY = 1}
 
         //FunctionBlock, Function 그리기
-        let { SpanY = spanY; PositionedRungXmls = result} =
-            match cmd.CommandType with
-            | FunctionCmd (fc) ->
-                drawHLine()
-                match fc with
-                //| CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy (newX, y) endTag tagA tagB true
-                | FunctionCompare (name, output, args) -> drawCmdCompare (x+1, y) name output args[0] args[1]
-                | FunctionArithematic (name, output, args) -> drawCmdAdd (x+1, y) name output args[0] args[1]
-            | FunctionBlockCmd (fbc) ->
-                match fbc with
-                | TimerMode(timerStatement) ->
-                    // todo: 내부로 이동... drawCmdTimer 내에서 그려야 한다..
+        let results =
+            [
+                match cmd.CommandType with
+                | FunctionCmd (fc) ->
                     drawHLine()
-                    drawCmdTimer(x+1, y) timerStatement     // <timer>
-                | CounterMode(counterStatement) ->
-                    // todo: 내부로 이동 작업 중...
-                    drawCmdCounter(x, y) counterStatement
-            | _ ->
-                failwithlog "Unknown CommandType"
+                    match fc with
+                    //| CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy (newX, y) endTag tagA tagB true
+                    | FunctionCompare (name, output, args) -> yield! drawCmdCompare (x+1, y) name output args[0] args[1]
+                    | FunctionArithematic (name, output, args) -> yield! drawCmdAdd (x+1, y) name output args[0] args[1]
+                | FunctionBlockCmd (fbc) ->
+                    match fbc with
+                    | TimerMode(timerStatement) ->
+                        // todo: 내부로 이동... drawCmdTimer 내에서 그려야 한다..
+                        drawHLine()
+                        yield! drawCmdTimer(x+1, y) timerStatement     // <timer>
+                    | CounterMode(counterStatement) ->
+                        // todo: 내부로 이동 작업 중...
+                        yield! drawCmdCounter(x, y) counterStatement
+                | _ ->
+                    failwithlog "Unknown CommandType"
+            ]
 
-        results.AddRange(result)
-
-        spanY, (results |> List.ofSeq)
-
+        results
 
     /// (x, y) 위치에 coil 생성.  height(=1) 와 xml 목록을 반환
-    let drawCoil(x, y) (cmdExp:XgiCommand) : int * (CoordinatedXmlElement list) =
+    let drawCoil(x, y) (cmdExp:XgiCommand) : CoordinatedXmlElement list =
         let spanX = (coilCellX-x-2)
         let lengthParam = $"Param={dq}{3 * spanX}{dq}"
         let results = [
@@ -315,7 +311,7 @@ module internal rec Command =
             let xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.StorageName)
             { Coordinate = c; Xml = xml; SpanX = 1; SpanY = 1 }
         ]
-        1, results
+        results
 
 
 
@@ -332,7 +328,7 @@ module internal rec Command =
             { Coordinate = c; Xml = xml; SpanX = 1; SpanY = 1 } |> rungInfos.Add
 
         match expr with
-        | FlatTerminal(id, pulse, neg) ->
+        | FlatTerminal(terminal, pulse, neg) ->
             let mode =
                 match pulse, neg with
                 | true, true    -> ElementType.NPulseContactMode
@@ -340,7 +336,11 @@ module internal rec Command =
                 | false, true   -> ElementType.ClosedContactMode
                 | false, false  -> ElementType.ContactMode
                 |> int
-            let str = elementBody mode c (id.ToText())
+            let terminalText =
+                match terminal with
+                | :? IStorage as storage -> storage.Name
+                | _ -> terminal.ToText()
+            let str = elementBody mode c terminalText
             { baseRIWNP with RungInfos = [{ Coordinate = c; Xml = str; SpanX = 1; SpanY = 1}]; }
 
         | FlatNary(And, exprs) ->
@@ -427,7 +427,6 @@ module internal rec Command =
             | Some expr -> rng (x, y) expr
             | _ -> { RungInfos = []; X = x; Y = y; SpanX = 0; SpanY = 1 }
 
-        let mutable commandHeight = 0
         /// 좌표 * xml 결과 문자열
         let positionedRungXmls =
             [
@@ -436,15 +435,11 @@ module internal rec Command =
                 match cmdExp with
                 | Some cmdExp ->
                     let nx = x + result.SpanX
-                    let commandSpanY, posiRungXmls =
-                        match cmdExp.CommandType with
-                        | CoilCmd (cc) ->
-                            drawCoil (nx-1, y) cmdExp
-                        | ( FunctionCmd _ | FunctionBlockCmd _ ) ->
-                            drawCommand (nx, y) cmdExp
-
-                    commandHeight <- commandSpanY
-                    yield! posiRungXmls
+                    match cmdExp.CommandType with
+                    | CoilCmd (cc) ->
+                        yield! drawCoil (nx-1, y) cmdExp
+                    | ( FunctionCmd _ | FunctionBlockCmd _ ) ->
+                        yield! drawCommand (nx, y) cmdExp
                 | None ->
                     ()
             ]
@@ -456,7 +451,7 @@ module internal rec Command =
                 |> Seq.map (fun ri -> ri.Xml)  //snd
                 |> String.concat "\r\n"
 
-        let spanY = max result.SpanY commandHeight
+        let spanY = result.SpanY
         let commandWidth = 3    // todo : check
         let spanX = max result.SpanX commandWidth
         let c =

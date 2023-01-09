@@ -185,7 +185,7 @@ module rec ExpressionParser =
                 | CTD, "createWinCTD", _::_::[] ->
                     CounterStatement.CreateCTD(tcParams)
                 | CTD, "createXgiCTD", _::_::(BoolExp resetCondition)::[] ->
-                    CounterStatement.CreateCTD(tcParams, resetCondition, 0us)
+                    CounterStatement.CreateXgiCTD(tcParams, resetCondition)
 
                 | CTUD, "createWinCTUD", _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::[] ->
                     CounterStatement.CreateCTUD(tcParams, countDownCondition, resetCondition)

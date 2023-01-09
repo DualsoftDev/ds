@@ -9,7 +9,7 @@ open Engine.Common.FS
 open Engine.Core
 
 [<AutoOpen>]
-module internal Command =
+module internal rec Command =
     /// Rung 의 Command 정의를 위한 type.
     //Command = CoilCmd or FunctionCmd or FunctionBlockCmd
     type XgiCommand(cmdType:CommandTypes) =
@@ -123,39 +123,51 @@ module internal Command =
             | Some t -> [ createFBParameterXml (x, y) t.Name  ]
             | None   -> []
 
-        //match typ with
-        //| CTU ->    // cu, r, pv, q, cv
-        //    let cu = cs.UpCondition.Value.Flatten()
-        //    rung (x, y)
+        let paramXmls =
+            [
+                match typ with
+                | CTU ->    // cu, r, pv, q, cv
+                    let cu = cs.UpCondition.Value.Flatten() :?> FlatExpression
+                    let xxx = rung (x, y) (Some cu) None
+                    rung (x, y) (Some cu) None
+                    let r = cs.ResetCondition.Value.Flatten() :?> FlatExpression
+                    let xxxy = rung (x, y+1) (Some cu) None
+                    rung (x, y+1) (Some r) None
 
-
-        //| CTD ->
-        //| CTUD ->
-        //| CTR -> 3
+                //| CTD ->
+                //| CTUD ->
+                //| CTR -> 3
+                | _ -> ()
+            ]
 
         //let reset = cs.Reset.Value.Name
 
 
 
-        ////Command 속성입력
-        //let results = [
-        //    match typ with
-        //    | (CTU | CTD ) ->
-        //        createFBParameterXml (x-1, y+1) reset
-        //        createFBParameterXml (x-1, y+2) $"{pv}"
-        //    | CTR ->
-        //        createFBParameterXml (x-1, y+1) $"{pv}"
-        //        createFBParameterXml (x-1, y+2) reset
-        //    | CTUD ->
-        //        yield! (createParam (x-1, y+1) cs.DownCondition )
-        //        yield! (createParam (x-1, y+2) cs.Reset     )
-        //        yield! (createParam (x-1, y+3) cs.Load      )
-        //        createFBParameterXml (x-1, y+4) $"{pv}"
-        //]
+        //Command 속성입력
+        let results = [
+            yield! paramXmls
 
-        //{ SpanY = fbSpanY; PositionedRungXmls = results}
+            match typ with
+            | (CTU | CTD ) ->
+                //createFBParameterXml (x-1, y+1) reset
+                createFBParameterXml (x, y+2) $"{pv}"
+            | CTR ->
+                createFBParameterXml (x-1, y+1) $"{pv}"
+                //createFBParameterXml (x-1, y+2) reset
+            | CTUD ->
+                //yield! (createParam (x-1, y+1) cs.DownCondition )
+                //yield! (createParam (x-1, y+2) cs.Reset     )
+                //yield! (createParam (x-1, y+3) cs.Load      )
+                createFBParameterXml (x-1, y+4) $"{pv}"
 
-        failwith "ERROR"
+
+            let cmd = FunctionBlockCmd(CounterMode(counterStatement)) |> XgiCommand
+            yield! createFunctionBlockInstanceXmls (x+1, y) cmd
+        ]
+        let results = results |> List.sortBy(fun x -> x.Coordinate)
+
+        { SpanY = fbSpanY; PositionedRungXmls = results}
 
     type System.Type with
         member x.SizeString = systemTypeNameToXgiTypeName x.Name
@@ -258,25 +270,29 @@ module internal Command =
     let drawCommand (x, y) (cmd:XgiCommand) : int * (CoordinatedRungXml list) =
         let results = ResizeArray<CoordinatedRungXml>()
         let c = coord(x, y)
-        results.Add( {Coordinate = c; Xml = hlineEmpty c})
 
-        //FunctionBlock, Function 까지 연장선 긋기
-
-        let newX = x + 1
+        let drawHLine() =
+            //FunctionBlock, Function 까지 연장선 긋기
+            results.Add( {Coordinate = c; Xml = hlineEmpty c})
 
         //FunctionBlock, Function 그리기
         let { SpanY = spanY; PositionedRungXmls = result} =
             match cmd.CommandType with
             | FunctionCmd (fc) ->
+                drawHLine()
                 match fc with
                 //| CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy (newX, y) endTag tagA tagB true
-                | FunctionCompare (name, output, args) -> drawCmdCompare (newX, y) name output args[0] args[1]
-                | FunctionArithematic (name, output, args) -> drawCmdAdd (newX, y) name output args[0] args[1]
+                | FunctionCompare (name, output, args) -> drawCmdCompare (x+1, y) name output args[0] args[1]
+                | FunctionArithematic (name, output, args) -> drawCmdAdd (x+1, y) name output args[0] args[1]
             | FunctionBlockCmd (fbc) ->
-                results.AddRange(createFunctionBlockInstanceXmls (newX, y) cmd) //Command 객체생성
                 match fbc with
-                | TimerMode(timerStatement) -> drawCmdTimer(newX, y) timerStatement     // <timer>
-                | CounterMode(counterStatement) -> drawCmdCounter(newX, y) counterStatement
+                | TimerMode(timerStatement) ->
+                    // todo: 내부로 이동... drawCmdTimer 내에서 그려야 한다..
+                    drawHLine()
+                    drawCmdTimer(x+1, y) timerStatement     // <timer>
+                | CounterMode(counterStatement) ->
+                    // todo: 내부로 이동 작업 중...
+                    drawCmdCounter(x, y) counterStatement
             | _ ->
                 failwithlog "Unknown CommandType"
 
@@ -301,7 +317,7 @@ module internal Command =
 
     /// Flat expression 을 논리 Cell 좌표계 x y 에서 시작하는 rung 를 작성한다.
     /// xml 및 다음 y 좌표 반환
-    /// expr 이 None 이면 선두 모선에서의 연결선으로 대체
+    /// expr 이 None 이면 그리지 않는다.
     /// cmdExp 이 None 이면 command 를 그리지 않는다.
     let rung (x, y) (expr:FlatExpression option) (cmdExp:XgiCommand option) : CoordinatedRungXml =
 
@@ -401,7 +417,10 @@ module internal Command =
                 failwithlog "Unknown FlatExpression case"
 
         // function (block) 의 경우, 조건이 없는 경우가 대부분인데, 이때는 always on (_ON) 으로 연결한다.
-        let result = (expr |? alwaysOnFlatExpression) |> rng (x, y)
+        let result =
+            match expr with
+            | Some expr -> rng (x, y) expr
+            | _ -> { RungInfos = []; X = x; Y = y; SpanX = 0; SpanY = 1 }
 
         let mutable commandHeight = 0
         /// 좌표 * xml 결과 문자열

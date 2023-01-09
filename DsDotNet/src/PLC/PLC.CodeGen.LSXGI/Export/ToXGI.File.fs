@@ -95,22 +95,23 @@ module internal XgiFile =
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
                 | DuCounter counterStatement ->
-                    let cs = counterStatement
-                    let rungIn = cs.RungInCondition.Flatten() :?> FlatExpression
                     let command:XgiCommand = FunctionBlockCmd(CounterMode(counterStatement)) |> XgiCommand
-                    let rgiSub = xmlRung (Some rungIn) (Some command) rgi.Y
+                    //let cs = counterStatement
+                    //let rungIn = cs.RungInCondition.Flatten() :?> FlatExpression
+                    //let rgiSub = xmlRung (Some rungIn) (Some command) rgi.Y
+                    let rgiSub = xmlRung None (Some command) rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
                 | DuAugmentedPLCFunction ({FunctionName = (">"|">="|"<"|"<="|"="|"!=") as op; Arguments = args; Output=output }) ->
                     let fn = operatorToXgiFunctionName op
                     let command:XgiCommand = FunctionCmd(FunctionCompare(fn, output, args)) |> XgiCommand
-                    let rgiSub = xmlRung None (Some command) rgi.Y
+                    let rgiSub = xmlRung (Some alwaysOnFlatExpression) (Some command) rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
 
                 | DuAugmentedPLCFunction ({FunctionName = ("+"|"-"|"*"|"/") as op; Arguments = args; Output=output }) ->
                     let fn = operatorToXgiFunctionName op
                     let command:XgiCommand = FunctionCmd(FunctionArithematic(fn, output, args)) |> XgiCommand
-                    let rgiSub = xmlRung None (Some command) rgi.Y
+                    let rgiSub = xmlRung (Some alwaysOnFlatExpression) (Some command) rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
                 | _ ->
                     failwith "Not yet"

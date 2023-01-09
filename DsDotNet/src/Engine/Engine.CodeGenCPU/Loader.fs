@@ -11,44 +11,16 @@ module CpuLoader =
     let private applyVertexSpec(v:Vertex) = 
         let vm = v.VertexManager :?> VertexManager
         [
-        
-            if IsSpec v (CallInReal ||| CallInFlow) 
-            then
-                yield vm.P4_CallStartPort()
-                yield vm.P5_CallResetPort()
-                yield vm.P6_CallEndPort()
-
-            if IsSpec v (RealInFlow ||| CoinTypeAll)
-            then
-                yield! vm.S1_Ready_Going_Finish_Homing()
-                yield vm.M2_PauseMonitor()
-   
-
-            if IsSpec v (CallInReal)
-            then
-                yield! vm.C1_CallActionOut()
-
-            if IsSpec v (CallInReal ||| AliasCallInReal)
-            then
-                yield! vm.C1_CallActionOut()
-                yield! vm.C2_CallTx()
-                yield vm.C3_CallRx()
-
-                yield! vm.M3_CallErrorTXMonitor()
-                yield vm.M4_CallErrorRXMonitor()
-
-            if IsSpec v RealInFlow
-            then
-                yield! vm.F1_RootStartReal()
-                yield! vm.F2_RootResetReal()
-
-            if IsSpec v CallInFlow
-            then
+           
+            if IsSpec v CallInFlow then
                 yield! vm.F3_RootStartCall()
                 yield vm.F4_RootCallRelay()
 
-            if IsSpec v RealInFlow
-            then 
+            if IsSpec v RealInFlow then
+                yield! vm.S1_RealRGFH()
+                yield! vm.F1_RootStartReal()
+                yield! vm.F2_RootResetReal()
+
                 yield vm.P1_RealStartPort()
                 yield vm.P2_RealResetPort()
                 yield vm.P3_RealEndPort()
@@ -63,7 +35,28 @@ module CpuLoader =
                 yield! vm.D1_DAGHeadStart()
                 yield! vm.D2_DAGTailStart()
                 yield! vm.D3_DAGComplete()
+
+            if IsSpec v (CallInReal ||| CallInFlow) then
+                yield vm.P4_CallStartPort()
+                yield vm.P5_CallResetPort()
+                yield vm.P6_CallEndPort()
+                yield! vm.C1_CallActionOut()
+            
+            if IsSpec v CoinTypeAll then
+                yield! vm.S2_CoinRGFH()
+
+            if IsSpec v (RealInFlow ||| CoinTypeAll)  then
+                yield vm.M2_PauseMonitor()
+
+            if IsSpec v (CallInReal ||| AliasCallInReal) then
+                yield! vm.C1_CallActionOut()
+                yield! vm.C2_CallTx()
+                yield vm.C3_CallRx()
+
+                yield! vm.M3_CallErrorTXMonitor()
+                yield vm.M4_CallErrorRXMonitor()
         ]
+
     let private applyBtnLampSpec(s:DsSystem) =
         [
             yield! s.B1_ButtonOutput()

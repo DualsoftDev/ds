@@ -18,9 +18,9 @@ module  TagModule =
     | RelayCall     // Call Done Relay
     | RelayGoing    // Going Relay
     | Pulse         // Start Pulse
-    | Counter       // Ring Counter
-    | TimerTx       // Timer Command Delay
-    | TimerRx       // Timer Observe Delay
+    | CountRing     // Ring Counter
+    | TimerOnDely   // Timer OnDely
+    | TimeOut       // Timer TimeOut
     | ET            // End Tag
     | RT            // Reset Tag
     | ST            // Start Tag

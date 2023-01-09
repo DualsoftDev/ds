@@ -23,8 +23,6 @@ module VertexManagerModule =
         let name = v.QualifiedName
         let goingRelays = HashSet<DsBit>()
         let bit mark flag = DsBit($"{name}({mark})", false, v, flag)
-        let timerBit   mark flag = DsBit($"{name}({mark})", false, v, flag)
-        let counterBit mark flag = DsBit($"{name}({mark})", false, v, flag)
         
         let readyBit      = bit "R"  TagFlag.R
         let goingBit      = bit "G"  TagFlag.G
@@ -52,8 +50,9 @@ module VertexManagerModule =
         let startForceBit = bit "SF" TagFlag.SF
 
         let pulseBit      = bit "PUL" TagFlag.Pulse
-        let counterBit    = counterBit "CTR" TagFlag.Counter
-        let timerDelayBit = timerBit "TON" TagFlag.TimerTx
+        let counterBit    = bit "CTR" TagFlag.CountRing
+        let timerOnDelayBit = bit "TON" TagFlag.TimerOnDely
+        let timerTimeOutBit = bit "TOUT" TagFlag.TimeOut
 
         interface IVertexManager with
             member x.Vertex = v
@@ -124,8 +123,10 @@ module VertexManagerModule =
         member x.PUL    = pulseBit  
         ///Ring Counter 
         member x.CTR    = counterBit 
-        ///Timer TON   
-        member x.TON    = timerDelayBit 
+        ///Timer on delay
+        member x.TON    = timerOnDelayBit 
+        ///Timer time out   
+        member x.TOUT    = timerTimeOutBit 
            
           
         

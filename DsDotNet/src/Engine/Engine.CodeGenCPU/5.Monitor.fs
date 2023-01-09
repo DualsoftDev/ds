@@ -49,7 +49,7 @@ type VertexManager with
         let rsts = v.Flow.clear.Expr <||> v.System._clear.Expr
         [
             //test ahn 타임아웃 시간 받기
-            (v.G.Expr) --@ (v.TON, "M3")
+            (v.G.Expr) --@ (v.TOUT, "M3")
             (sets, rsts) ==| (v.E1, "M3")
         ]
 

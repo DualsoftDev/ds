@@ -1,5 +1,6 @@
 namespace PLC.CodeGen.LSXGI
 open System
+open System.Linq
 open System.Collections.Generic
 open Engine.Common.FS
 /// 래더에서 타입 체크할때 사용하기 위한 타입
@@ -379,6 +380,15 @@ module internal FB =
 
     let isValidFunctionName = xgiFunctionInfoDic.ContainsKey
     let getFunctionDeails functionName = xgiFunctionInfoDic[functionName]
+
+    let getFunctionInputNames functionName =
+        (getFunctionDeails functionName).Where(fun l -> l.StartsWith("VAR_IN: ")).Select(fun l -> l.Replace("VAR_IN: ", "")).ToFSharpList()
+    let getFunctionOutputNames functionName =
+        (getFunctionDeails functionName).Where(fun l -> l.StartsWith("VAR_OUT: ")).Select(fun l -> l.Replace("VAR_OUT: ", "")).ToFSharpList()
+
+    let getFunctionInputArity functionName = (getFunctionInputNames functionName).Count()
+    let getFunctionOutputArity functionName = (getFunctionOutputNames functionName).Count()
+    let getFunctionHeight functionName = max (getFunctionInputArity functionName) (getFunctionOutputArity functionName)
 
     /// getFBXML FB 이름 기준으로 XML 저장 파라메터를 읽음
     ///

@@ -3,24 +3,29 @@ namespace PLC.CodeGen.LSXGI
 open Engine.Common.FS
 open Engine.Core
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
+open FB
 
 [<AutoOpen>]
 module internal Common =
     /// XmlOutput = string
     type XmlOutput = string
     type EncodedXYCoordinate = int
-    type CoordinatedRungXml = {
+    type CoordinatedXmlElement = {  // old name : CoordinatedRungXml
+        /// Xgi 출력시 순서 결정하기 위한 coordinate.
         Coordinate: EncodedXYCoordinate   // int
+        /// Xml element 문자열
         Xml: XmlOutput                  // string
+        SpanX: int
+        SpanY: int
     }
 
     type CoordinatedRungXmlsForCommand = {
         SpanY: int
-        PositionedRungXmls: CoordinatedRungXml list
+        PositionedRungXmls: CoordinatedXmlElement list
     }
 
     type RungInfosWithSpan = {
-        RungInfos:CoordinatedRungXml list
+        RungInfos:CoordinatedXmlElement list
         X: int
         Y: int
         SpanX: int
@@ -88,14 +93,14 @@ module internal Common =
     let vLineAt (x, y) =
         verify(x >= 0)
         let c = coord(x, y) + 2
-        { Coordinate = c; Xml = vline c }
+        { Coordinate = c; Xml = vline c; SpanX = 0; SpanY = 1 }
 
     /// x y 위치에서 수직으로 n 개의 line 을 긋는다
     let vlineDownTo (x, y) n =
         [
             if enableXmlComment then
                 let c = coord(x, y)
-                yield { Coordinate = c; Xml = $"<!-- vlineDownTo {x} {y} {n} -->" }
+                yield { Coordinate = c; Xml = $"<!-- vlineDownTo {x} {y} {n} -->" ; SpanX = 0; SpanY = n }
 
             for i in [0.. n-1] do
                 yield vLineAt (x, y+i)
@@ -103,36 +108,39 @@ module internal Common =
 
 
     /// 함수 그리기 (detailedFunctionName = 'ADD2_INT', briefFunctionName = 'ADD')
-    let createFunctionXmlAt (detailedFunctionName, briefFunctionName) (inst:string) (x, y) : CoordinatedRungXml =
+    let createFunctionXmlAt (detailedFunctionName, briefFunctionName) (inst:string) (x, y) : CoordinatedXmlElement =
         let tag = briefFunctionName
         let instFB = if inst = "" then "," else (inst + ",VAR")
         let c = coord(x, y)
         let param = FB.getFBXmlParam (detailedFunctionName, briefFunctionName) instFB (FB.getFBIndex tag)
         let fbBody = $"Param={dq}{param}{dq}"
         let xml = elementFull (int ElementType.VertFBMode) c fbBody inst
-        { Coordinate = c; Xml = xml }
+        { Coordinate = c; Xml = xml; SpanX = 3; SpanY = getFunctionHeight detailedFunctionName }
 
     /// 함수 파라메터 그리기
     let createFBParameterXml (x, y) tag =
         let c = coord(x, y)
         let xml = elementFull (int ElementType.VariableMode) c "" tag
-        { Coordinate = c; Xml = xml }
+        { Coordinate = c; Xml = xml ; SpanX = 1; SpanY = 1 }
 
     let drawRising (x, y) =
         let cellX = getFBCellX x
         let c = coord (cellX, y)
-        [   { Coordinate = c; Xml = risingline c}
-            { Coordinate = c; Xml = hLineTo (x, y) (cellX-1)}
+        [   { Coordinate = c; Xml = risingline c; SpanX = 0; SpanY = 0 }
+            { Coordinate = c; Xml = hLineTo (x, y) (cellX-1); SpanX = (cellX-1); SpanY = 0 }
         ]
 
-    let drawPulseCoil (x, y) (tagCoil:INamedExpressionizableTerminal) (funSize:int) =
-        let newX = getFBCellX (x-1)
-        let newY = y + funSize
-        [
-            { Coordinate = coord(x, y); Xml = risingline (coord(x, y))}
-            { Coordinate = coord(newX, newY); Xml = hLineTo (x, newY) (newX - 1) }
-            { Coordinate = coord(coilCellX, newY); Xml = elementBody (int ElementType.CoilMode) (coord(coilCellX, newY)) (tagCoil.StorageName)}
-            yield! vlineDownTo (x-1, y) funSize
-        ]
+    //let drawPulseCoil (x, y) (tagCoil:INamedExpressionizableTerminal) (funSize:int) =
+    //    let newX = getFBCellX (x-1)
+    //    let newY = y + funSize
+    //    [
+    //        { Coordinate = coord(x, y); Xml = risingline (coord(x, y)); SpanX = 0; SpanY = 1 }
+    //        let xml = hLineTo (x, newY) (newX - 1)
+    //        { Coordinate = coord(newX, newY); Xml = xml; SpanX = (newX - 1); SpanY = 1 }
+
+    //        let xml = elementBody (int ElementType.CoilMode) (coord(coilCellX, newY)) (tagCoil.StorageName)
+    //        { Coordinate = coord(coilCellX, newY); Xml = xml; SpanX = 0; SpanY = 0 }
+    //        yield! vlineDownTo (x-1, y) funSize
+    //    ]
 
 

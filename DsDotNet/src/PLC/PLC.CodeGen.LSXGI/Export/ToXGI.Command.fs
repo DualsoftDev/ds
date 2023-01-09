@@ -7,6 +7,7 @@ open PLC.CodeGen.Common
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 open Engine.Common.FS
 open Engine.Core
+open System
 
 [<AutoOpen>]
 module internal rec Command =
@@ -107,6 +108,7 @@ module internal rec Command =
         let fbSpanY = 2
         { SpanY = fbSpanY; PositionedRungXmls = [createFBParameterXml (x-1, y+1) $"T#{time}MS" ]}
 
+    [<Obsolete("미완성")>]
     let drawCmdCounter (x, y) (counterStatement:CounterStatement) : CoordinatedRungXmlsForCommand =
 
         let paramDic = Dictionary<string, FuctionParameterShape>()
@@ -255,7 +257,7 @@ module internal rec Command =
 
 
 
-    let createFunctionBlockInstanceXmls (x, y) (cmd:XgiCommand) : CoordinatedRungXml list =
+    let createFunctionBlockInstanceXmls (x, y) (cmd:XgiCommand) : CoordinatedXmlElement list =
         //Command instance 객체생성
         let inst, func = cmd.Instance |> fun (inst, varType) -> inst, varType.ToString()
         [
@@ -267,13 +269,13 @@ module internal rec Command =
 
 
     /// (x, y) 위치에 cmd 를 생성.  cmd 가 차지하는 height 와 xml 목록을 반환
-    let drawCommand (x, y) (cmd:XgiCommand) : int * (CoordinatedRungXml list) =
-        let results = ResizeArray<CoordinatedRungXml>()
+    let drawCommand (x, y) (cmd:XgiCommand) : int * (CoordinatedXmlElement list) =
+        let results = ResizeArray<CoordinatedXmlElement>()
         let c = coord(x, y)
 
         let drawHLine() =
             //FunctionBlock, Function 까지 연장선 긋기
-            results.Add( {Coordinate = c; Xml = hlineEmpty c})
+            results.Add( {Coordinate = c; Xml = hlineEmpty c; SpanX = 1; SpanY = 1})
 
         //FunctionBlock, Function 그리기
         let { SpanY = spanY; PositionedRungXmls = result} =
@@ -302,119 +304,122 @@ module internal rec Command =
 
 
     /// (x, y) 위치에 coil 생성.  height(=1) 와 xml 목록을 반환
-    let drawCoil(x, y) (cmdExp:XgiCommand) : int * (CoordinatedRungXml list) =
-        let lengthParam =
-            let param = 3 * (coilCellX-x-2)
-            $"Param={dq}{param}{dq}"
+    let drawCoil(x, y) (cmdExp:XgiCommand) : int * (CoordinatedXmlElement list) =
+        let spanX = (coilCellX-x-2)
+        let lengthParam = $"Param={dq}{3 * spanX}{dq}"
         let results = [
             let c = coord(x+1, y)
-            { Coordinate = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam "" }
+            let xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
+            { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 }
             let c = coord(coilCellX, y)
-            { Coordinate = c; Xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.StorageName) }
+            let xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.StorageName)
+            { Coordinate = c; Xml = xml; SpanX = 1; SpanY = 1 }
         ]
         1, results
+
+
+
+    /// x y 위치에서 expression 표현하기 위한 정보 반환
+    /// {| Xml=[|c, str|]; NextX=sx; NextY=maxY; VLineUpRightMaxY=maxY |}
+    /// - Xml : 좌표 * 결과 xml 문자열
+    let rec private rng (x, y) (expr:FlatExpression) : RungInfosWithSpan =
+        let baseRIWNP = { RungInfos = []; X=x; Y=y; SpanX=1; SpanY=1; }
+        let c = coord(x, y)
+        /// 좌표 * 결과 xml 문자열 보관 장소
+        let rungInfos = ResizeArray<CoordinatedXmlElement>()
+        if enableXmlComment then
+            let xml = $"<!-- {x} {y} {expr.ToText()} -->"
+            { Coordinate = c; Xml = xml; SpanX = 1; SpanY = 1 } |> rungInfos.Add
+
+        match expr with
+        | FlatTerminal(id, pulse, neg) ->
+            let mode =
+                match pulse, neg with
+                | true, true    -> ElementType.NPulseContactMode
+                | true, false   -> ElementType.PulseContactMode
+                | false, true   -> ElementType.ClosedContactMode
+                | false, false  -> ElementType.ContactMode
+                |> int
+            let str = elementBody mode c (id.ToText())
+            { baseRIWNP with RungInfos = [{ Coordinate = c; Xml = str; SpanX = 1; SpanY = 1}]; }
+
+        | FlatNary(And, exprs) ->
+            let mutable sx = x
+            let subRungInfos:RungInfosWithSpan list =
+                [
+                    for exp in exprs do
+                        let sub = rng (sx, y) exp
+                        sx <- sx + sub.SpanX
+                        rungInfos.AddRange(sub.RungInfos)
+                        yield sub
+                ]
+            let spanX = subRungInfos.Sum(fun sri-> sri.SpanX)
+            let spanY = subRungInfos.Max(fun sri-> sri.SpanY)
+            { baseRIWNP with RungInfos=rungInfos.Distinct().ToFSharpList(); SpanX=spanX; SpanY=spanY; }
+
+        | FlatNary(Or, exprs) ->
+            let mutable sy = y
+            let subRungInfos:RungInfosWithSpan list =
+                [
+                    for exp in exprs do
+                        let sub = rng (x, sy) exp
+                        sy <- sy + sub.SpanY
+                        rungInfos.AddRange(sub.RungInfos)
+                        yield sub
+                ]
+            let spanX = subRungInfos.Max(fun sri-> sri.SpanX)
+            let spanY = subRungInfos.Sum(fun sri-> sri.SpanY)
+
+            [
+                for ri in subRungInfos do
+                    if ri.SpanX < spanX then
+                        let span = (spanX - ri.SpanX - 1)
+                        let param = $"Param={dq}{span*3}{dq}"
+                        let mode = int ElementType.MultiHorzLineMode
+                        let c = coord (ri.X+ri.SpanX, ri.Y)
+                        { Coordinate = c; Xml = elementFull mode c param ""; SpanX = span; SpanY = 1 }
+            ] |> rungInfos.AddRange
+
+            // 좌측 vertical lines
+            if x >= 1 then
+                vlineDownTo (x-1, y) (spanY-1) |> rungInfos.AddRange
+
+            // ```OR variable length 역삼각형 test```
+            let lowestY =
+                subRungInfos
+                    .Where(fun sri -> sri.SpanX <= spanX)
+                    .Max(fun sri -> sri.Y)
+            // 우측 vertical lines
+            vlineDownTo (x+spanX-1, y) (lowestY-y) |> rungInfos.AddRange
+
+
+            { baseRIWNP with RungInfos=rungInfos.Distinct().ToFSharpList(); SpanX=spanX; SpanY=spanY; }
+
+
+        | FlatNary((OpCompare _ | OpArithematic _), exprs) ->
+            failwith "ERROR : Should have been processed in early stage."    // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
+
+        // terminal case
+        | FlatNary(OpUnit, inner::[]) ->
+            inner |> rng (x, y)
+
+        // negation 없애기
+        | FlatNary(Neg, inner::[]) ->
+            FlatNary(OpUnit, [inner.Negate()]) |> rng (x, y)
+
+        | FlatZero ->
+            let str = hlineEmpty c
+            { baseRIWNP with RungInfos=[{ Coordinate = c; Xml = str; SpanX=0; SpanY=0;}]; SpanX=0; SpanY=0; }
+
+        | _ ->
+            failwithlog "Unknown FlatExpression case"
 
 
     /// Flat expression 을 논리 Cell 좌표계 x y 에서 시작하는 rung 를 작성한다.
     /// xml 및 다음 y 좌표 반환
     /// expr 이 None 이면 그리지 않는다.
     /// cmdExp 이 None 이면 command 를 그리지 않는다.
-    let rung (x, y) (expr:FlatExpression option) (cmdExp:XgiCommand option) : CoordinatedRungXml =
-
-        /// x y 위치에서 expression 표현하기 위한 정보 반환
-        /// {| Xml=[|c, str|]; NextX=sx; NextY=maxY; VLineUpRightMaxY=maxY |}
-        /// - Xml : 좌표 * 결과 xml 문자열
-        let rec rng (x, y) (expr:FlatExpression) : RungInfosWithSpan =
-            let baseRIWNP = { RungInfos = []; X=x; Y=y; SpanX=1; SpanY=1; }
-            let c = coord(x, y)
-            /// 좌표 * 결과 xml 문자열 보관 장소
-            let rungInfos = ResizeArray<CoordinatedRungXml>()
-            if enableXmlComment then
-                { Coordinate = c; Xml = $"<!-- {x} {y} {expr.ToText()} -->" } |> rungInfos.Add
-
-            match expr with
-            | FlatTerminal(id, pulse, neg) ->
-                let mode =
-                    match pulse, neg with
-                    | true, true    -> ElementType.NPulseContactMode
-                    | true, false   -> ElementType.PulseContactMode
-                    | false, true   -> ElementType.ClosedContactMode
-                    | false, false  -> ElementType.ContactMode
-                    |> int
-                let str = elementBody mode c (id.ToText())
-                { baseRIWNP with RungInfos = [{ Coordinate = c; Xml = str}]; }
-
-            | FlatNary(And, exprs) ->
-                let mutable sx = x
-                let subRungInfos:RungInfosWithSpan list =
-                    [
-                        for exp in exprs do
-                            let sub = rng (sx, y) exp
-                            sx <- sx + sub.SpanX
-                            rungInfos.AddRange(sub.RungInfos)
-                            yield sub
-                    ]
-                let spanX = subRungInfos.Sum(fun sri-> sri.SpanX)
-                let spanY = subRungInfos.Max(fun sri-> sri.SpanY)
-                { baseRIWNP with RungInfos=rungInfos.Distinct().ToFSharpList(); SpanX=spanX; SpanY=spanY; }
-
-            | FlatNary(Or, exprs) ->
-                let mutable sy = y
-                let subRungInfos:RungInfosWithSpan list =
-                    [
-                        for exp in exprs do
-                            let sub = rng (x, sy) exp
-                            sy <- sy + sub.SpanY
-                            rungInfos.AddRange(sub.RungInfos)
-                            yield sub
-                    ]
-                let spanX = subRungInfos.Max(fun sri-> sri.SpanX)
-                let spanY = subRungInfos.Sum(fun sri-> sri.SpanY)
-
-                [
-                    for ri in subRungInfos do
-                        if ri.SpanX < spanX then
-                            let param =
-                                let span = (spanX - ri.SpanX - 1) * 3
-                                $"Param={dq}{span}{dq}"
-                            let mode = int ElementType.MultiHorzLineMode
-                            let c = coord (ri.X+ri.SpanX, ri.Y)
-                            { Coordinate = c; Xml = elementFull mode c param "" }
-                ] |> rungInfos.AddRange
-
-                // 좌측 vertical lines
-                if x >= 1 then
-                    vlineDownTo (x-1, y) (spanY-1) |> rungInfos.AddRange
-
-                // ```OR variable length 역삼각형 test```
-                let lowestY =
-                    subRungInfos
-                        .Where(fun sri -> sri.SpanX <= spanX)
-                        .Max(fun sri -> sri.Y)
-                // 우측 vertical lines
-                vlineDownTo (x+spanX-1, y) (lowestY-y) |> rungInfos.AddRange
-
-
-                { baseRIWNP with RungInfos=rungInfos.Distinct().ToFSharpList(); SpanX=spanX; SpanY=spanY; }
-
-
-            | FlatNary((OpCompare _ | OpArithematic _), exprs) ->
-                failwith "ERROR : Should have been processed in early stage."    // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
-
-            // terminal case
-            | FlatNary(OpUnit, inner::[]) ->
-                inner |> rng (x, y)
-
-            // negation 없애기
-            | FlatNary(Neg, inner::[]) ->
-                FlatNary(OpUnit, [inner.Negate()]) |> rng (x, y)
-
-            | FlatZero ->
-                let str = hlineEmpty c
-                { baseRIWNP with RungInfos=[{ Coordinate = c; Xml = str}]; SpanX=0; SpanY=0; }
-
-            | _ ->
-                failwithlog "Unknown FlatExpression case"
+    let rung (x, y) (expr:FlatExpression option) (cmdExp:XgiCommand option) : CoordinatedXmlElement =
 
         // function (block) 의 경우, 조건이 없는 경우가 대부분인데, 이때는 always on (_ON) 으로 연결한다.
         let result =
@@ -451,10 +456,12 @@ module internal rec Command =
                 |> Seq.map (fun ri -> ri.Xml)  //snd
                 |> String.concat "\r\n"
 
+        let spanY = max result.SpanY commandHeight
+        let commandWidth = 3    // todo : check
+        let spanX = max result.SpanX commandWidth
         let c =
-            let spanY = max result.SpanY commandHeight
             coord(x, spanY + y)
-        { Xml = xml; Coordinate = c }
+        { Xml = xml; Coordinate = c; SpanX = spanX; SpanY=spanY }
 
 
 

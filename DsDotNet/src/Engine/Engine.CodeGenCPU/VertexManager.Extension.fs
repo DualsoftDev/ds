@@ -12,19 +12,12 @@ module VertexManagerExtension =
     type VertexManager with
         ///Real 자신을 공용으로 사용하는 Vertex들  
         member v.GetSharedReal() : VertexManager seq =
-                (v.Vertex :?> Real)
-                    .GetVertexSharedReal()
-                    .Select(fun v-> v.VertexManager)
-                    .Cast<VertexManager>()
+                (v.Vertex :?> Real).GetVertexSharedReal().Select(getVM) 
+                   
 
         ///Call 자신을 공용으로 사용하는 Vertex들  
         member v.GetSharedCall() : VertexManager seq =
-                (v.Vertex :?> Call)
-                    .GetVertexSharedCall()
-                    .Select(fun v-> v.VertexManager)
-                    .Cast<VertexManager>()
-
-
+                (v.Vertex :?> Call).GetVertexSharedCall().Select(getVM) 
     
     let getPureCall(v:Vertex) =
             match v with

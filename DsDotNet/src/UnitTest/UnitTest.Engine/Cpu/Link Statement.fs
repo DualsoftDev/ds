@@ -2,14 +2,15 @@ namespace T.CPU
 
 open NUnit.Framework
 
-open Engine.Parser.FS
+open Engine.Common.FS
 open T
-open System
 open Engine.Core
 open Engine.Cpu
+open Engine.CodeGenCPU
+open Engine.Parser.FS
 
 
-type LinkStatement() =
+type Spec11_LinkStatement() =
     do Fixtures.SetUpTest()
 
     [<Test>] member __.``L1 Link Start`` () = Eq 1 1

@@ -195,8 +195,6 @@ module Exp =
                         ]
                     v 5] |> evaluate === 100   // 4 * (1+4) * 5
 
-
-
         [<Test>]
         member __.``5 Statement test`` () =
             let expr = fMul [v 2; v 3; v 4]

@@ -37,13 +37,13 @@ module CpuLoader =
                 yield! vm.D3_DAGComplete()
 
             if IsSpec v (CallInReal ||| CallInFlow) then
-                yield vm.P4_CallStartPort()
-                yield vm.P5_CallResetPort()
-                yield vm.P6_CallEndPort()
                 yield! vm.C1_CallActionOut()
             
             if IsSpec v CoinTypeAll then
                 yield! vm.S2_CoinRGFH()
+                yield vm.P4_CallStartPort()
+                yield vm.P5_CallResetPort()
+                yield vm.P6_CallEndPort()
 
             if IsSpec v (RealInFlow ||| CoinTypeAll)  then
                 yield vm.M2_PauseMonitor()

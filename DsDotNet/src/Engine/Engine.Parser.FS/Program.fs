@@ -117,6 +117,9 @@ C4 > C5;
         Seg1 = {
             Ap > Am;
         }
+        Seg2 = {
+            Am > Ap;
+        }
     }
     [flow] "Flow.Complex" = {
         "#Seg.Complex#" => Seg;

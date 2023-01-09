@@ -66,6 +66,7 @@
 		<None Include="Libraries\cylinder.ds" />
 		<None Include="Libraries\station.ds" />
 		<None Include="Libraries\strange.ds" />
+		<Compile Include="Cpu\CpuTestCommon.fs" />
 		<Compile Include="Cpu\Port Statement.fs" />
 		<Compile Include="Cpu\Flow Statement.fs" />
 		<Compile Include="Cpu\Status Statement.fs" />

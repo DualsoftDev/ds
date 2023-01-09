@@ -22,7 +22,7 @@ module ConvertCoreExt =
 
 
     type DsSystem with
-        member s._on     = DsTag<bool>("_on", false)
+        member s._on     = DsTag<bool>("_on", true)
         member s._off    = DsTag<bool>("_off", false)
         member s._auto   = DsTag<bool>("_auto", false)
         member s._manual = DsTag<bool>("_manual", false)
@@ -188,7 +188,7 @@ module ConvertCoreExt =
                 .SelectMany(fun a -> c.System.JobDefs.Where(fun w-> w.ApiItem = a))
                 .Select(fun j -> j.OutTag).Cast<PlcTag<bool>>()
                 .Cast<PlcTag<bool>>()
-        
+    
     type Real with
         member r.V = r.VertexManager :?> VertexManager
         member r.CoinRelays = r.Graph.Vertices.Select(getVM).Select(fun f->f.CR)

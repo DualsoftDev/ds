@@ -28,4 +28,4 @@ type VertexManager with
         let h = v.H <==        (                      v.RP.Expr  <&&>      v.CR.Expr) //    H      -   o   o                                                                               
                                                                                         
         [ r; g; f; h ]
-        |> List.map(fun statement -> statement |> withExpressionComment "S1")
+        |> List.map(fun statement -> statement |> withExpressionComment "S2")

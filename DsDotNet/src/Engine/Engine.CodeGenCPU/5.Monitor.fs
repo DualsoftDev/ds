@@ -14,12 +14,30 @@ let getOriginIOs(real:Real, initialType:InitialType) =
             .Cast<PlcTag<bool>>()
     ios
 
-let getNeedCheckExpr(interlocks:PlcTag<bool> seq) =
+let getNeedCheck(real:Real) =
+    let origins, resetChains = OriginHelper.GetOriginsWithJobDefs real.Graph
+    let needChecks = origins.Where(fun w-> w.Value = NeedCheck)
+    let needCheckSet = 
+        resetChains.Select(fun rs-> 
+                 rs.SelectMany(fun r-> 
+                    needChecks.Where(fun f->f.Key.ApiName = r)
+                             ).Select(fun s-> s.Key.InTag).Cast<PlcTag<bool>>()
+                    )
     let sets = 
-        interlocks
-         .Select(fun il -> il.Expr <&&> !!interlocks.Except([il]).ToOr())
-    sets
+        needCheckSet 
+        |> Seq.map(fun ils -> 
+                    ils.Select(fun il -> il.Expr 
+                                         <&&> !!(ils.Except([il]).ToOr()))
+                       .ToOr()
+                   ) //각 리셋체인 단위로 하나라도 켜있으면 됨
+                    //         resetChain1         resetChain2       ...
+                    //      --| |--|/|--|/|--------| |--|/|--|/|--   ...
+                    //      --|/|--| |--|/|--    --|/|--| |--|/|--
+                    //      --|/|--|/|--| |--    --|/|--|/|--| |--
 
+    if needChecks.Any() 
+    then sets.ToAnd()
+    else real.V.System._on.Expr
 
 type VertexManager with
    
@@ -27,15 +45,12 @@ type VertexManager with
         let real = v.Vertex :?> Real
         let ons    = getOriginIOs (real, InitialType.On)
         let offs   = getOriginIOs (real, InitialType.Off)
-        let checks = getOriginIOs (real, InitialType.NeedCheck)
-        let locks  = getNeedCheckExpr (checks)
-        //test ahn 인터락 원위치 필요
+        let locks  = getNeedCheck (real)
         
         let onExpr   = ons.EmptyOnElseToAnd v.System
-        let lockExpr = if locks.Any() then locks.ToAnd() else v.System._on.Expr
         let rsts     = offs.EmptyOffElseToOr v.System
 
-        (onExpr <&&> lockExpr, rsts) --| (v.OG, "M1" )
+        (onExpr <&&> locks, rsts) --| (v.OG, "M1" )
 
     member v.M2_PauseMonitor(): CommentedStatement  = 
         let sets = v.Flow.eop.Expr <||> v.Flow.sop.Expr 

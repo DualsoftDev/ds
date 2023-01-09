@@ -2,14 +2,14 @@ namespace T.CPU
 
 open NUnit.Framework
 
-open Engine.Parser.FS
+open Engine.Common.FS
 open T
-open System
 open Engine.Core
 open Engine.Cpu
+open Engine.CodeGenCPU
 
 
-type OperationModeStatement() =
+type Spec04_OperationModeStatement() =
     do Fixtures.SetUpTest()
 
     [<Test>] member __.``O1 Emergency Operation Mode`` () = Eq 1 1

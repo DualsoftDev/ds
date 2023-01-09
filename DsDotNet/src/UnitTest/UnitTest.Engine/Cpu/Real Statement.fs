@@ -9,7 +9,7 @@ open Engine.Core
 open Engine.Cpu
 
 
-type RealStatement() =
+type Spec06_RealStatement() =
     do Fixtures.SetUpTest()
 
     [<Test>] member __.``R1 Real Initial Start`` () = Eq 1 1

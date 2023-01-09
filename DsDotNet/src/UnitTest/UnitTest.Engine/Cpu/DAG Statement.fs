@@ -2,14 +2,15 @@ namespace T.CPU
 
 open NUnit.Framework
 
-open Engine.Parser.FS
+open Engine.Common.FS
 open T
-open System
 open Engine.Core
 open Engine.Cpu
+open Engine.CodeGenCPU
+open Engine.Parser.FS
 
 
-type DAGStatement() =
+type Spec08_DAGStatement() =
     do Fixtures.SetUpTest()
 
     [<Test>] member __.``D1 DAG Head Start`` () = Eq 1 1

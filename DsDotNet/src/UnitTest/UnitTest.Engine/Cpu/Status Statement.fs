@@ -2,29 +2,20 @@ namespace T.CPU
 
 open NUnit.Framework
 
-open Engine.Parser.FS
+open Engine.Common.FS
 open T
-open System
 open Engine.Core
 open Engine.Cpu
+open Engine.CodeGenCPU
 
-
-type StatusStatement() =
+type Spec03_StatusStatement() =
     do Fixtures.SetUpTest()
 
     [<Test>]
-    member __.``S1 Ready`` () =
+    member __.``S1 RealRGFH`` () =
         Eq 1 1
 
     [<Test>]
-    member __.``S2 Going`` () =
+    member __.``S2 CoinRGFH`` () =
         Eq 1 1
-          
-    [<Test>]
-    member __.``S3 Finish`` () =
-        Eq 1 1
-          
-    [<Test>]
-    member __.``S4 Homing`` () =
-        Eq 1 1
-          
+      

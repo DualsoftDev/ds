@@ -1,6 +1,8 @@
 namespace rec Engine.Core
 open System
 open System.Net.NetworkInformation
+open System.Runtime.InteropServices.ComTypes
+open System.Diagnostics
 
 (*  expression: generic type <'T> 나 <_> 으로는 <obj> match 으로 간주됨
     Expression<'T> 객체에 대한 matching
@@ -30,16 +32,29 @@ open System.Net.NetworkInformation
 [<AutoOpen>]
 module ExpressionModule =
 
+    [<DebuggerDisplay("{ToText()}")>]
     type Terminal<'T when 'T:equality> =
         | DuTag of TagBase<'T>
         | DuVariable of VariableBase<'T>
-        | DuLiteral of 'T
+        | DuLiteral of LiteralHolder<'T>        // Literal 도 IExpressionizableTerminal 구현해야 하므로, 'T 대신 LiteralHolder<'T> 사용
+        interface ITerminal with
+            member x.Tag      = match x with | DuTag tag           -> Some tag      | _ -> None
+            member x.Variable = match x with | DuVariable variable -> Some variable | _ -> None
+            member x.Literal  = match x with | DuLiteral literal   -> Some literal  | _ -> None
+
+    type IFunctionSpec =
+        abstract Name: string
+        abstract Arguments: Arguments
 
     type FunctionSpec<'T> = {
         FunctionBody: Arguments -> 'T
         Name        : string
         Arguments   : Arguments
     }
+    with
+        interface IFunctionSpec with
+            member x.Name      = x.Name
+            member x.Arguments = x.Arguments
 
 
     type Expression<'T when 'T:equality> =
@@ -51,10 +66,13 @@ module ExpressionModule =
             member x.BoxedEvaluatedValue = x.Evaluate() |> box
             member x.GetBoxedRawObject() = x.GetBoxedRawObject()
             member x.ToText(withParenthesys) = x.ToText(withParenthesys)
-            member x.FunctionName = x.FunctionName
-            member x.FunctionArguments = x.FunctionArguments
             member x.CollectStorages() = x.CollectStorages()
             member x.Flatten() = fwdFlattenExpression x
+
+            (* 'T type DU 를 접근하기 위한 members *)
+            member x.FunctionName = x.FunctionName
+            member x.FunctionArguments = x.FunctionArguments
+            member x.Terminal = match x with | DuTerminal t -> Some t | _ -> None
 
         member x.DataType = typedefof<'T>
 
@@ -62,7 +80,7 @@ module ExpressionModule =
     let literal2expr (x:'T) =
         let t = x.GetType()
         if t.IsValueType || t = typedefof<string> then
-            DuTerminal (DuLiteral x)
+            DuTerminal (DuLiteral (LiteralHolder x))
         else
             failwith "ERROR: Value Type Error.  only allowed for primitive type"
 
@@ -275,7 +293,7 @@ module ExpressionModule =
             match x with
             | DuTag t -> t.Value
             | DuVariable v -> v.Value
-            | DuLiteral v -> v
+            | DuLiteral v -> v.Value
 
         member x.Name =
             match x with
@@ -287,7 +305,7 @@ module ExpressionModule =
             match x with
             | DuTag t -> "$" + t.Name
             | DuVariable t -> "$" + t.Name
-            | DuLiteral v -> sprintf "%A" v
+            | DuLiteral v -> sprintf "%A" v.Value
 
     type Expression<'T when 'T:equality> with
         member x.GetBoxedRawObject() =  // return type:obj    return type 명시할 경우, 다음 compile error 발생:  error FS1198: 제네릭 멤버 'ToText'이(가) 이 프로그램 지점 전의 비균일 인스턴스화에 사용되었습니다. 이 멤버가 처음에 오도록 멤버들을 다시 정렬해 보세요. 또는, 인수 형식, 반환 형식 및 추가 제네릭 매개 변수와 제약 조건을 포함한 멤버의 전체 형식을 명시적으로 지정하세요.

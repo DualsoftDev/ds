@@ -6,7 +6,7 @@ open Engine.Core
 open Engine.CodeGenCPU
 
 let getOriginIOs(real:Real, initialType:InitialType) =
-    let origins = OriginHelper.GetOriginsWithJobDefs real.Graph
+    let origins, resetChains = OriginHelper.GetOriginsWithJobDefs real.Graph
     let ios = 
         origins
             .Where(fun w-> w.Value = initialType)

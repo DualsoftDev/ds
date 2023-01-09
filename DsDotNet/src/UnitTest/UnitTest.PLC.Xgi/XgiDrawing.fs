@@ -88,4 +88,106 @@ type XgiDrawingTest() =
         let xml = wrapWithXml rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
         saveTestResult (get_current_function_name ()) xml
 
+    [<Test>]
+    member __.``ADD function details test``() =
+        (* Function/FunctionBlock 정보 :
+            - function 의 가로 너비 : COL_PROP
+            - function 의 세로 높이 : max(# VAR_IN, # VAR_OUT)
+            - TYPE: {function or function_block}
+            - I/O parameter : VAR_{IN, OUT} 을 참조
+        *)
+
+        let details = FB.getFunctionDeails "ADD"
+        [
+            "#BEGIN_FUNC: ADD"
+            "FNAME: ADD"
+            "TYPE: function"
+            "INSTANCE: INST,VAR"
+            "INDEX: 71"
+            "COL_PROP: 1"
+            "SAFETY: 0"
+            "VAR_IN: EN, 0x00200001, , 0"
+            "VAR_OUT: ENO, 0x00000001,"
+            "VAR_OUT: OUT, 0x00007fe0,"
+            "#END_FUNC"
+        ] |> SeqEq details
+
+        FB.decodeVarType "0x00200001" |> toString === "BOOL, CONSTANT"    // EN
+
+        let details = FB.getFunctionDeails "ADD2_INT"
+        [
+            "#BEGIN_FUNC: ADD2_INT"
+            "FNAME: ADD2_INT"
+            "TYPE: function"
+            "INSTANCE: INST,VAR"
+            "INDEX: 1686"
+            "COL_PROP: 1"
+            "SAFETY: 0"
+            "VAR_IN: EN, 0x00200001, , 0"
+            "VAR_IN: IN1, 0x00200040, , 0"
+            "VAR_IN: IN2, 0x00200040, , 0"
+            "VAR_OUT: ENO, 0x00000001,"
+            "VAR_OUT: OUT, 0x00000040,"
+            "#END_FUNC"
+        ] |> SeqEq details
+        FB.decodeVarType "0x00200040" |> toString === "INT, CONSTANT"   // IN1, IN2, OUT
+
+
+
+
+        let details = FB.getFunctionDeails "GT"
+        [
+            "#BEGIN_FUNC: GT"
+            "FNAME: GT"
+            "TYPE: function"
+            "INSTANCE: INST,VAR"
+            "INDEX: 68"
+            "COL_PROP: 1"
+            "SAFETY: 0"
+            "VAR_IN: EN, 0x00200001, , 0"
+            "VAR_OUT: ENO, 0x00000001,"
+            "VAR_OUT: OUT, 0x00000001,"
+            "#END_FUNC"
+        ] |> SeqEq details
+
+
+        ()
+
+
+    [<Test>]
+    member __.``ADD function drawing test``() =
+        let { Coordinate = c; Xml = elementAddXml } = createFunctionAt "ADD2_INT" "ADD" "" "ADD" (3, 2)
+        (* '&#xA' = '&#10' = '\n' 의 HTML encoding *)
+        let originalElementAddXml = "FNAME: ADD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 71&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;PROP_COLOR: 16777215&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00207fe0, , 0&#xA;VAR_IN: IN2, 0x00207fe0, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00007fe0, &#xA;"
+        noop()
+        let rungsXml =
+            [
+                let x, y = 1, 1
+                $"""
+<Rung BlockMask="0">
+	<Element ElementType="{ContactMode}"       Coordinate="{coord(0,  2)}">EN</Element>
+	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(1,  2)}" Param="3"></Element>
+	{elementAddXml}
+	<Element ElementType="{VariableMode}"      Coordinate="{coord(2,  3)}">IN1</Element>
+	<Element ElementType="{VariableMode}"      Coordinate="{coord(4,  3)}">Q</Element>
+	<Element ElementType="{VariableMode}"      Coordinate="{coord(2,  4)}">IN2</Element>
+</Rung>
+"""
+            ] |> String.concat "\r\n"
+
+
+
+        // Symbol 정의
+        let symbolInfos = [
+            XGITag.createSymbol "EN" "EN" "BOOL"
+            XGITag.createSymbol "IN1" "IN1" "INT"
+            XGITag.createSymbol "IN2" "IN2" "INT"
+            XGITag.createSymbol "Q" "Q" "INT"
+        ]
+
+        let symbolsLocalXml = XGITag.generateSymbolVars (symbolInfos, false)
+
+
+        let xml = wrapWithXml rungsXml symbolsLocalXml emptySymbolsGlobalXml None
+        saveTestResult (get_current_function_name ()) xml
 

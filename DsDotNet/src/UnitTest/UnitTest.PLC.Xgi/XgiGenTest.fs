@@ -293,8 +293,13 @@ type XgiGenerationTest() =
             int n0 = createTag("%IX0.0.0", 0);
             int n1 = createTag("%IX0.0.0", 1);
             int n2 = createTag("%IX0.0.0", 2);
+            int n3 = createTag("%IX0.0.0", 3);
+            int n4 = createTag("%IX0.0.0", 4);
+            int n5 = createTag("%IX0.0.0", 5);
+            bool q = createTag("%QX0.1.0", false);
 
-            $n0 := add($n1, $n2);
+            //$q := add($n1, $n2) > 3;
+            $q := ($n1 + $n2) * 9 + $n3 > 3;
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)

@@ -4,12 +4,26 @@ open Engine.Core
 open Engine.Common.FS
 open PLC.CodeGen.Common
 open System.Security
+open System.Diagnostics
 
 (*
-    - Timer 나 Counter 의 Rung In Condition 은 expression 을 받을 수 있으나,
-      산전 XGI, AB 모두 부수적인 것들은 tag 만 받을 수 있다.
-      e.g CTUD 의 경우, 기본 조건인 CU 는 expression 을 받지만,
-          CD 는 조건식으로 주어진 경우, tag 에 저장한 후, 해당 tag 만 CD 에 지정할 수 있다.
+    - 사칙연산 함수(Add, ..) 의 입력은 XGI 에서 전원선으로부터 연결이 불가능한 반면,
+      ds 문법으로 작성시에는 expression 을 이용하기 때문에 직접 호환이 불가능하다.
+      * add(<expr1>, <expr2>) 를
+            tmp1 := <expr1> 및 tmp2 := <expr2> 와 같이
+            . 임시 변수를 생성해서 assign rung 을 만들고
+            . 임시 변수를 add 함수의 입력 argument 에 tag 로 작성하도록 한다.
+
+    - 임의의 rung 에 사칙연산 함수가 포함되면, 해당 부분만 잘라서 임시 변수에 저장하고 그 값을 이용해야 한다.
+      * e.g $result := ($t1 + $t2) > 3
+            . $tmp = $t1 + $t2
+            . $result := $tmp > 3
+
+    - Timer 나 Counter 의 Rung In Condition 은 복수개이더라도 전원선 연결이 가능하다.
+      * 임시 변수 없이 expression 을 그대로 전원선 연결해서 그리면 된다.
+
+    - XGI 임시 변수는 XgiLocalVar<'T> type 으로 생성된다.
+
     - XGI rung 생성시에 Engine.Core 에서 생성된 Statement 를 직접 사용할 수 없는 이유이다.
     - Statement 를 XgiStatement 로 변환한 후, 이를 XGI 생성 모듈에서 사용한다.
     - 변환 시, 추가적으로 생성되는 요소
@@ -54,13 +68,14 @@ module ConvertorPrologModule =
 
         interface IXgiLocalVar<'T> with
             member x.SymbolInfo = x.SymbolInfo
-        interface IExpressionTerminal with
-            member x.PLCTagName = name
+        interface INamedExpressionizableTerminal with
+            member x.StorageName = name
+        interface IText with
+            member x.ToText() = name
         member x.SymbolInfo =
-            let kindVar = int Variable.Kind.VAR
             let plcType = systemTypeNameToXgiTypeName typedefof<'T>.Name
             let comment = SecurityElement.Escape comment
-            fwdCreateSymbol name comment "" kindVar "" plcType
+            fwdCreateSymbol name comment plcType
 
         override x.ToBoxedExpression() = var2expr x
 
@@ -144,22 +159,47 @@ module rec TypeConvertorModule =
         member _.Target = target
 
     type XgiStatement =
-        | DuXgiAssign of XgiAssignStatement
-        | DuXgiTimer of XgiTimerStatement
+        | DuXgiAssign  of XgiAssignStatement
+        | DuXgiTimer   of XgiTimerStatement
         | DuXgiCounter of XgiCounterStatement
-        | DuXgiCopy of XgiCopyStatement
+        | DuXgiCopy    of XgiCopyStatement
     with
         member x.GetStatement():IXgiStatement =
             match x with
-            | DuXgiAssign s -> s
-            | DuXgiTimer  s -> s
-            | DuXgiCounter  s -> s
-            | DuXgiCopy  s -> s
+            | DuXgiAssign  s -> s
+            | DuXgiTimer   s -> s
+            | DuXgiCounter s -> s
+            | DuXgiCopy    s -> s
 
+
+
+    [<DebuggerDisplay("{ToText()}")>]
+    type XgiConvertorExpression =
+        | FunctionInstance of op:string * args:XgiConvertorExpression list * outSymbol:SymbolInfo
+        | Terminal of IExpression
+        member x.ToText() =
+            match x with
+            | FunctionInstance (op, args, outSymbol) ->
+                let args = args |> map toText |> String.concat ", "
+                $"{op}({args})"
+            | Terminal t -> t.ToText(false)
+    // todo
+    let collectExpandedExpression (exp:IExpression) : XgiConvertorExpression list =
+        [
+            match exp.FunctionName with
+            | Some ("+"|"-"|"*"|"/"|">"|">="|"<"|"<="|"="|"!=" as op) ->
+                let newArgs = exp.FunctionArguments |> bind collectExpandedExpression
+                let out = fwdCreateSymbol "xxx-name" "xxx-comment" "BOOL"        // todo
+                FunctionInstance (op, newArgs, out)
+            | _ ->
+                Terminal exp
+        ]
 
     let private statement2XgiStatement (statement:Statement) : XgiStatement =
         match statement with
-        | DuAssign (exp, target) -> DuXgiAssign (XgiAssignStatement(exp, target))
+        | DuAssign (exp, target) ->
+            let xxx = collectExpandedExpression exp;
+            DuXgiAssign (XgiAssignStatement(exp, target))
         | DuTimer ts             -> DuXgiTimer  (XgiTimerStatement(ts))
         | DuCounter cs           -> DuXgiCounter(XgiCounterStatement(cs))
         | DuCopy (exp, src, tgt) -> DuXgiCopy   (XgiCopyStatement(exp, src, tgt))
@@ -176,13 +216,13 @@ module rec TypeConvertorModule =
     ///FunctionBlocks은 Timer와 같은 현재 측정 시간을 저장하는 Instance가 필요있는 Command 해당
     type FunctionBlock =
         | TimerMode of XgiTimerStatement //endTag, time
-        | CounterMode of XgiCounterStatement   // IExpressionTerminal *  CommandTag  * int  //endTag, countResetTag, count
+        | CounterMode of XgiCounterStatement   // IExpressionizableTerminal *  CommandTag  * int  //endTag, countResetTag, count
     with
         member x.GetInstanceText() =
             match x with
             | TimerMode timerStatement -> timerStatement.Timer.Name
             | CounterMode counterStatement ->  counterStatement.Counter.Name
-        member x.UsedCommandTags() : IExpressionTerminal list =
+        member x.UsedCommandTags() : INamedExpressionizableTerminal list =
             failwith "Need check"
 
 
@@ -191,14 +231,14 @@ module rec TypeConvertorModule =
             //| TimerMode timerStatement ->
             //    timerStatement.RungInCondition
             //    |> Option.toList
-            //    |> List.cast<IExpressionTerminal>
+            //    |> List.cast<IExpressionizableTerminal>
             //| CounterMode counterStatement ->
             //    [ counterStatement.UpCondition; counterStatement.ResetCondition ]
             //    |> List.choose id
-            //    |> List.map (fun x -> x :?> IExpressionTerminal)
+            //    |> List.map (fun x -> x :?> IExpressionizableTerminal)
 
         interface IFunctionCommand with
-            member this.TerminalEndTag: IExpressionTerminal =
+            member this.TerminalEndTag: INamedExpressionizableTerminal =
                 match this with
                 //| TimerMode(tag, time) -> tag
                 | TimerMode timerStatement -> timerStatement.Timer.DN

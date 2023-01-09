@@ -159,9 +159,9 @@ module internal XgiFile =
                 let expr = assign.Expression
                 let coil =
                     match assign.Target with
-                    | :? RisingCoil as rc -> COMPulseCoil(rc.Storage :?> IExpressionTerminal)
-                    | :? FallingCoil as fc -> COMNPulseCoil(fc.Storage :?> IExpressionTerminal)
-                    | _ -> COMCoil(assign.Target :?> IExpressionTerminal)
+                    | :? RisingCoil as rc -> COMPulseCoil(rc.Storage :?> INamedExpressionizableTerminal)
+                    | :? FallingCoil as fc -> COMNPulseCoil(fc.Storage :?> INamedExpressionizableTerminal)
+                    | _ -> COMCoil(assign.Target :?> INamedExpressionizableTerminal)
                 let flatExpr = expr.Flatten() :?> FlatExpression
                 let command:XgiCommand = CoilCmd(coil) |> XgiCommand
                 let rgiSub = xmlRung flatExpr command rgi.Y
@@ -489,8 +489,8 @@ module internal XgiFile =
                         //    match t.IOType with
                         //    | Some tt when tt.Equals TagType.Instance -> Variable.Kind.VAR
                         //    | _-> Variable.Kind.VAR_EXTERNAL
-
-                        XGITag.createSymbol name comment device kindVar addr plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
+                        let param:XgiSymbolCreateParams = { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; Device=device; Kind=kindVar; }
+                        XGITag.createSymbolWithDetail param
                     | DuXsXgiLocalVar xgi ->
                         xgi.SymbolInfo
                     | DuXsTimer timer ->
@@ -499,7 +499,10 @@ module internal XgiFile =
                             match timer.Type with
                             | TON | TOF | RTO -> timer.Type.ToString()
 
-                        XGITag.createSymbol timer.Name $"TIMER {timer.Name}" device kindVar addr plcType //Todo : XGK 일경우 DevicePos, IEC Address 정보 필요
+                        let param:XgiSymbolCreateParams =
+                            let name, comment = timer.Name, $"TIMER {timer.Name}"
+                            { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; Device=device; Kind=kindVar; }
+                        XGITag.createSymbolWithDetail param
                     | DuXsCounter counter ->
                         let device, addr = "", ""
                         let plcType =
@@ -507,7 +510,10 @@ module internal XgiFile =
                             | CTU | CTD | CTUD -> $"{counter.Type}_INT"       // todo: CTU_{INT, UINT, .... } 등의 종류가 있음...
                             | CTR -> $"{counter.Type}"
 
-                        XGITag.createSymbol counter.Name $"COUNTER {counter.Name}" device kindVar addr plcType
+                        let param:XgiSymbolCreateParams =
+                            let name, comment = counter.Name, $"COUNTER {counter.Name}"
+                            { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; Device=device; Kind=kindVar; }
+                        XGITag.createSymbolWithDetail param
             ]
 
         /// Symbol table 정의 XML 문자열

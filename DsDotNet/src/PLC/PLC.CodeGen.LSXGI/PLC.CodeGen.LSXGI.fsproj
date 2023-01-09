@@ -18,6 +18,7 @@
 		<Compile Include="AssemblyInfo.fs" />
 		<Compile Include="Address.Convert.fs" />
 		<Compile Include="FromXGI.fs" />
+		<Compile Include="ToXGI.Spec.FBText.fs" />
 		<Compile Include="ToXGI.Spec.fs" />
 		<Compile Include="ConfigXML\ConfigXml.fs" />
 		<EmbeddedResource Include="ConfigXml\DEVICE_INFO.xml" />

@@ -32,10 +32,15 @@ module ExpressionForwardDeclModule =
 
     (* PLC generation module 용 *)
     type IFlatExpression = interface end
-    type IExpressionTerminal =
-        //inherit IText
-        abstract PLCTagName:string
 
+
+    /// 이름을 갖는 terminal expression 이 될 수 있는 객체.  Tag, Variable (Literal 은 제외)
+    type INamedExpressionizableTerminal =
+        inherit IExpressionizableTerminal
+        abstract StorageName:string
+
+
+    // <kwak> IExpression<'T> vs IExpression : 강제 변환
     /// Expression<'T> 을 boxed 에서 접근하기 위한 최소의 interface
     type IExpression =
         abstract DataType : System.Type
@@ -50,6 +55,9 @@ module ExpressionForwardDeclModule =
         /// Function expression 인 경우 function args 반환.  terminal 이거나 argument 없으면 empty list 반환
         abstract FunctionArguments: IExpression list
         /// Function expression 에 사용된 IStorage 항목들을 반환
+
+        abstract Terminal: ITerminal option
+
         abstract CollectStorages: unit -> IStorage list
         abstract Flatten: unit -> IFlatExpression
 
@@ -299,8 +307,8 @@ module rec ExpressionPrologModule =
         inherit TypedValueStorage<'T>(name, initValue)
 
         interface ITag<'T>
-        interface IExpressionTerminal with
-            member x.PLCTagName = name
+        interface INamedExpressionizableTerminal with
+            member x.StorageName = name
         override x.ToText() = "$" + name
 
     [<AbstractClass>]
@@ -309,6 +317,11 @@ module rec ExpressionPrologModule =
 
         interface IVariable<'T>
         override x.ToText() = "$" + name
+
+    type LiteralHolder<'T when 'T:equality>(literalValue:'T) =
+        member _.Value = literalValue
+        interface IExpressionizableTerminal with
+            member x.ToText() = sprintf "%A" x.Value
 
     type Arg       = IExpression
     type Arguments = IExpression list
@@ -321,7 +334,7 @@ module rec ExpressionPrologModule =
     let isThisOperatorRequireAllArgumentsSameType: (string -> bool)  =
         let hash =
             [   "+" ; "-" ; "*" ; "/" ; "%"
-                ">" ; ">=" ; "<" ; "<=" ; "=" ; "="
+                ">" ; ">=" ; "<" ; "<=" ; "=" ; "!="
                 "&&" ; "||"
                 "&" ; "|" ; "&&&" ; "|||"
                 "add"; "sub"; "mul"; "div"

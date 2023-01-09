@@ -38,7 +38,7 @@ module internal Basic =
                     | false, true   -> ElementType.ClosedContactMode
                     | false, false  -> ElementType.ContactMode
                     |> int
-                let str = elementBody mode c (id.PLCTagName)
+                let str = elementBody mode c (id.ToText())
                 { baseRIWNP with RungInfos = [{ Coordinate = c; Xml = str}]; }
 
             | FlatNary(And, exprs) ->
@@ -95,6 +95,9 @@ module internal Basic =
                 { baseRIWNP with RungInfos=rungInfos.Distinct().ToFSharpList(); SpanX=spanX; SpanY=spanY; }
 
 
+            | FlatNary((OpCompare _ | OpArithematic _), exprs) ->
+                failwith "ERROR : Should have been processed in early stage."    // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
+
             // terminal case
             | FlatNary(OpUnit, inner::[]) ->
                 inner |> rng (x, y)
@@ -138,7 +141,7 @@ module internal Basic =
                         let c = coord(x+1, y)
                         { Coordinate = c; Xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam "" }
                         let c = coord(coilCellX, y)
-                        { Coordinate = c; Xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.PLCTagName) }
+                        { Coordinate = c; Xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.StorageName) }
                     ]
                     1, results
 

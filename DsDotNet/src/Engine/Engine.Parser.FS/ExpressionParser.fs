@@ -201,7 +201,7 @@ module rec ExpressionParser =
                 | CTR, "createWinCTR", _::_::[] ->
                     CounterStatement.CreateCTR(tcParams)
                 | CTR, "createXgiCTR", _::_::(BoolExp resetCondition)::[] ->
-                    CounterStatement.CreateCTR(tcParams, resetCondition)
+                    CounterStatement.CreateXgiCTR(tcParams, resetCondition)
 
                 | _ -> fail()
 

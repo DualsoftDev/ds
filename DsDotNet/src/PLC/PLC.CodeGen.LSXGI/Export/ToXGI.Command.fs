@@ -107,7 +107,6 @@ module internal rec Command =
         let time:int = int timerStatement.Timer.PRE.Value
         [createFBParameterXml (x-1, y+1) $"T#{time}MS" ]
 
-    [<Obsolete("미완성")>]
     let drawCmdCounter (x, y) (counterStatement:CounterStatement) : CoordinatedXmlElement list =
 
         let paramDic = Dictionary<string, FuctionParameterShape>()
@@ -156,10 +155,6 @@ module internal rec Command =
                     let rst = cs.ResetCondition.Value.Flatten() :?> FlatExpression
                     rung (x, y+2) (Some rst) None
             ]
-
-        //let reset = cs.Reset.Value.Name
-
-
 
         //Command 속성입력
         let results = [
@@ -353,10 +348,10 @@ module internal rec Command =
                         sx <- sx + sub.TotalSpanX
                         sub
                 ]
-            let exprXmls = blockedExprXmls |> List.collect(fun x -> x.XmlElements)
 
             let spanX = blockedExprXmls.Sum(fun x -> x.TotalSpanX)
             let spanY = blockedExprXmls.Max(fun x -> x.TotalSpanY)
+            let exprXmls = blockedExprXmls |> List.collect(fun x -> x.XmlElements)
             { XmlElements = exprXmls; X=x; Y=y; TotalSpanX = spanX; TotalSpanY = spanY}
 
 
@@ -369,8 +364,8 @@ module internal rec Command =
                         sy <- sy + sub.TotalSpanY
                         sub
                 ]
-            let maxSpanX = blockedExprXmls.Max(fun x -> x.TotalSpanX)
-            let totalSpanY = blockedExprXmls.Sum(fun x -> x.TotalSpanY)
+            let spanX = blockedExprXmls.Max(fun x -> x.TotalSpanX)
+            let spanY = blockedExprXmls.Sum(fun x -> x.TotalSpanY)
             let exprXmls = blockedExprXmls |> List.collect(fun x -> x.XmlElements)
 
             let xmls = [
@@ -379,8 +374,8 @@ module internal rec Command =
                 let auxLineXmls =
                     [
                         for ri in blockedExprXmls do
-                            if ri.TotalSpanX < maxSpanX then
-                                let span = (maxSpanX - ri.TotalSpanX - 1)
+                            if ri.TotalSpanX < spanX then
+                                let span = (spanX - ri.TotalSpanX - 1)
                                 let param = $"Param={dq}{span*3}{dq}"
                                 let mode = int ElementType.MultiHorzLineMode
                                 let c = coord (x + ri.TotalSpanX, ri.Y)
@@ -392,17 +387,17 @@ module internal rec Command =
 
                 // 좌측 vertical lines
                 if x >= 1 then
-                    yield! vlineDownTo (x-1, y) (sy-1)
+                    yield! vlineDownTo (x-1, y) (spanY-1)
 
                 // ```OR variable length 역삼각형 test```
                 let lowestY =
                     blockedExprXmls
-                        .Where(fun sri -> sri.TotalSpanX <= maxSpanX)
-                        .Max(fun sri -> y + sri.Y)
+                        .Where(fun sri -> sri.TotalSpanX <= spanX)
+                        .Max(fun sri -> sri.Y)
                 // 우측 vertical lines
-                yield! vlineDownTo (x+maxSpanX-1, y) (lowestY-y-1)
+                yield! vlineDownTo (x+spanX-1, y) (lowestY-y)
             ]
-            { XmlElements = xmls; X=x; Y=y; TotalSpanX = maxSpanX; TotalSpanY = totalSpanY}
+            { XmlElements = xmls; X=x; Y=y; TotalSpanX = spanX; TotalSpanY = spanY}
 
         | FlatNary((OpCompare _ | OpArithematic _), exprs) ->
             failwith "ERROR : Should have been processed in early stage."    // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement

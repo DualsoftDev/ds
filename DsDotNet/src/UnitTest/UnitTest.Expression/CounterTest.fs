@@ -156,7 +156,7 @@ open Engine.Parser.FS
             let condition = var2expr t1
             let reset = var2expr resetTag
             let tcParam = {Storages=storages; Name="myCTR"; Preset=100us; RungInCondition=condition; FunctionName="createWinCTR"}
-            let ctr = CounterStatement.CreateCTR(tcParam, reset) |> toCounter
+            let ctr = CounterStatement.CreateXgiCTR(tcParam, reset) |> toCounter
             ctr.OV.Value === false
             ctr.UN.Value === false
             ctr.DN.Value === false

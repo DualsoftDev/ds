@@ -1,6 +1,8 @@
 namespace Engine.Core
 
 open System
+open System.Runtime.CompilerServices
+open System.Text.RegularExpressions
 
 [<AutoOpen>]
 module CodeElements =
@@ -30,13 +32,13 @@ module CodeElements =
             , (line.Split(' ') |> Seq.tail |> Seq.toArray )
             ) 
         
-    type ParameterGroup = string[]
+    type Parameters = string[]
     [<AbstractClass>]
-    type Func(name:string, parameterGroups:ParameterGroup) =
+    type Func(name:string, parameters:Parameters) =
         member x.Name = name.ToLower() //명령어 이름은 소문자로만 허용
-        member x.ParameterGroups = parameterGroups
-        member x.ToDsText() =  $"""${x.Name} {String.Join(" ", parameterGroups)}"""   
-    
+        member x.Parameters = parameters
+        member x.ToDsText() =  $"""${x.Name} {String.Join(" ", parameters)}"""   
+  
     //Job, ButtonDef, LampDef 에서 사용중  //todo ToDsText, parsing  
     //  [jobs] = {
     //    Ap = { A1."+"(%I1, %Q1); A2."+"(%I22, %Q22); A3."+"(%I33, %Q33); }
@@ -51,10 +53,27 @@ module CodeElements =
     //  [emglamp] = {
     //    EmgMode(%Q1) = { F3 } ( Commands? 삽입 규칙 필요) ) 
     //}
-    type Command(name:string, parameterGroups:ParameterGroup) =
-        inherit Func(name, parameterGroups)
+    type Command(name:string, parameters:Parameters) =
+        inherit Func(name, parameters)
 
     //Job, ButtonDef, LampDef 에서 사용중  //todo ToDsText, parsing  
-    type Observe(name:string, parameterGroups:ParameterGroup) =
-        inherit Func(name, parameterGroups)
-            
+    type Observe(name:string, parameters:Parameters) =
+        inherit Func(name, parameters)
+      
+    [<Extension>]
+    type SystemExt =
+        [<Extension>] static member GetDelayTime (x:Observe) = 
+                        let presetTime = (x.Parameters |> Seq.head ).ToLower()
+                        let timetype = Regex.Replace(presetTime, @"\d", "");//문자 추출
+                        let preset   = Regex.Replace(presetTime, @"\D", "");//숫자 추출
+                        
+                        match timetype with
+                        | "ms"| "msec"-> preset|> CountUnitType.Parse
+                        | "s" | "sec" -> let presetMsec = ((preset |> Convert.ToInt32) * 1000)
+                                         presetMsec.ToString() |> CountUnitType.Parse
+
+                        | _-> failwith "timer foramt Error"
+                        
+
+        [<Extension>] static member GetRingCount (x:Observe) = 
+                        x.Parameters |> Seq.head |> CountUnitType.Parse

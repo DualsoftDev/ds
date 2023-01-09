@@ -31,6 +31,7 @@ module ConvertCoreExt =
         member s._stop   = DsTag<bool>("_stop", false)
         member s._clear  = DsTag<bool>("_clear", false)
         member s._dryrun = DsTag<bool>("dryrun", false)
+        member s._tout   = DsTag<uint16> ("_tout", 10000us)
         member s._yy     = DsTag<int> ("_yy", 0)
         member s._mm     = DsTag<int> ("_mm", 0)
         member s._dd     = DsTag<int> ("_dd", 0)
@@ -166,6 +167,15 @@ module ConvertCoreExt =
         member c.V = c.VertexManager :?> VertexManager
         member c.UsingTon = c.CallTarget.Observes.Where(fun f->f.Name = TextOnDelayTimer).any()
         member c.UsingCtr = c.CallTarget.Observes.Where(fun f->f.Name = TextRingCounter).any()
+
+        member c.PresetTime =   if c.UsingTon 
+                                then c.CallTarget.Observes.First(fun f->f.Name = TextOnDelayTimer).GetDelayTime()
+                                else failwith $"{c.Name} not use timer"
+
+        member c.PresetCounter = if c.UsingCtr 
+                                 then c.CallTarget.Observes.First(fun f->f.Name = TextRingCounter).GetRingCount()
+                                 else failwith $"{c.Name} not use counter"
+                            
         member c.INs  = c.CallTarget.JobDefs.Select(fun j -> j.InTag).Cast<PlcTag<bool>>()
         member c.OUTs = c.CallTarget.JobDefs.Select(fun j -> j.OutTag).Cast<PlcTag<bool>>()
         member c.TXs  = c.CallTarget.JobDefs |> Seq.collect(fun (j: JobDef) -> j.ApiItem.TXs)

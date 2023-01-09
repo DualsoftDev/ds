@@ -59,11 +59,11 @@ type VertexManager with
     member v.F4_RootCallRelay() : CommentedStatement =
         let call = getPureCall  v.Vertex
 
-        let ends = 
+        let ands = 
             if call.UsingTon 
-            then call.V.TON.Expr 
+            then call.V.TON.DN.Expr
             else call.INs.EmptyOnElseToAnd(v.System) 
 
-        let sets = ends <&&> v.EP.Expr
+        let sets = ands <&&> v.EP.Expr
         let rsts = !!v.SP.Expr
         (sets, rsts) ==| (v.CR, "F4")

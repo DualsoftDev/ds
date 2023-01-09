@@ -480,8 +480,7 @@ module OriginModule =
             allJobs
             offByOneWayBackwardResets offByMutualResetChains
             structedChains
-        |> fun (originMap, allJobs) ->
-            originMap, allJobs, resetChains
+        |> fun (originMap, allJobs) -> originMap, allJobs, resetChains
         
 
     /// Get pre-calculated targets that
@@ -505,7 +504,7 @@ module OriginModule =
             originMap 
             |> Seq.map(fun node -> getjobDef node.Key, node.Value)
             |> Tuple.toDictionary,
-            resetChains |> Seq.map(List.map(getjobDef)) |> List.ofSeq
+            resetChains
 
         /// Get node index map(key:name, value:idx)
         [<Extension>] 

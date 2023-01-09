@@ -23,13 +23,11 @@ module ExpressionExtension =
     /// Assign falling statement 
     let (<=!^) (falling: FallingCoil) (exp: IExpression) = DuAssign(exp, falling)
     /// Create Timer Coil Statement
-    let (<=@)  (name: string) (rungInCondition: Expression<bool>) = 
-        let tcParam = {Storages=Storages(); Name=name; Preset=2000us; RungInCondition=rungInCondition; FunctionName="createWinTON"}
-        TimerStatement.CreateTON(tcParam) 
+    let (<=@)  (ts: TimerStruct) (sets: IExpression<bool> option, rsts:IExpression<bool> option) = 
+        TimerStatement.CreateTONUsingTag(ts, sets, rsts) 
     /// Create Counter Coil Statement
-    let (<=%)   (name: string) (upCondition: Expression<bool>) = 
-        let tcParam = {Storages=Storages(); Name=name; Preset=100us; RungInCondition=upCondition; FunctionName="createWinCTUD"}
-        CounterStatement.CreateCTR(tcParam) 
+    let (<=%)  (cs: CTRStruct) (sets: IExpression<bool> option) = 
+        CounterStatement.CreateCTRUsingTag(cs, sets) 
     
     // Extenstion Comment Statement
     /// Create None Relay Coil Statement
@@ -47,11 +45,13 @@ module ExpressionExtension =
         let falling:FallingCoil = {Storage = coil; HistoryFlag = HistoryFlag()}
         falling <=!^ (sets <&&> (!! rsts)) |> withExpressionComment comment
     /// Create Timer Coil Statement
-    let (--@) (rungInCondition: Expression<bool>) (coil: TagBase<bool>, comment:string) = 
-        coil.Name <=@ rungInCondition |> withExpressionComment comment
+    let (--@) (rungInCondition: IExpression<bool>) (timerCoil: DsTimer, preset:CountUnitType, comment:string) = 
+        timerCoil.TimerStruct.PRE.Value <- preset
+        timerCoil.TimerStruct <=@ (Some rungInCondition, None) |> withExpressionComment comment
     /// Create Counter Coil Statement
-    let (--%) (rungInCondition: Expression<bool>) (coil: TagBase<bool>, comment:string) = 
-        coil.Name <=% rungInCondition |> withExpressionComment comment
+    let (--%) (rungInCondition: IExpression<bool>) (counterCoil: DsCounter, preset:CountUnitType, comment:string) = 
+        counterCoil.CTRStruct.PRE.Value <- preset
+        counterCoil.CTRStruct <=% (Some rungInCondition) |> withExpressionComment comment
 
     let private tags2LogicalAndOrExpr (fLogical: IExpression list -> Expression<bool>) (FList(ts:Tag<bool> list)) : Expression<bool> =
         match ts with

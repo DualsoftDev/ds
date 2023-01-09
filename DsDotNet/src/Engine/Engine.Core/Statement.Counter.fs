@@ -16,28 +16,17 @@ module CounterStatementModule =
         FunctionName:string
     }
 
-    let (*private*) createCounterStatement (storages:Storages) {
-        Type=typ; Name=name; Preset=preset; FunctionName=functionName
-        CountUpCondition=countUpCondition; CountDownCondition=countDownCondition;
-        ResetCondition=resetCondition; LoadCondition=loadCondition
-    } : Statement =
-        let accum = 0us
-        let cs =    // counter structure
-            match typ with
-            | CTU  -> CTUStruct.Create(typ, storages, name, preset, accum) :> CounterBaseStruct
-            | CTD  -> CTDStruct.Create(typ, storages, name, preset, accum)
-            | CTUD -> CTUDStruct.Create(typ, storages, name, preset, accum)
-            | CTR  -> CTRStruct.Create(typ, storages, name, preset, accum)
-        let counter = new Counter   (typ, cs)
+    let generateCounterStatement (cs, cParams:CounterCreateParams) = 
+        let counter = new Counter   (cParams.Type, cs)
 
         let statements = ResizeArray<Statement>()
-        match countUpCondition with
+        match cParams.CountUpCondition with
         | Some up->
             let statement = DuAssign (up, cs.CU)
             statement.Do()
             statements.Add statement
         | None -> ()
-        match countDownCondition with
+        match cParams.CountDownCondition with
         | Some down ->
             let statement = DuAssign (down, cs.CD)
             statement.Do()
@@ -45,28 +34,54 @@ module CounterStatementModule =
         | None -> ()
 
         if not <| isItNull cs.RES then
-            match resetCondition  with
+            match cParams.ResetCondition  with
             | Some reset ->
                 let statement = DuAssign (reset, cs.RES)
                 statement.Do()
                 statements.Add statement
             | None -> ()
 
-        match loadCondition with
+        match cParams.LoadCondition with
         | Some load ->
             let statement = DuAssign (load, cs.LD)
             statement.Do()
             statements.Add statement
         | None -> ()
 
-
-
         counter.InputEvaluateStatements <- statements.ToFSharpList()
         let counterStatement:CounterStatement =
-            {   Counter=counter; FunctionName=functionName;
-                UpCondition=countUpCondition; DownCondition=countDownCondition;
-                ResetCondition=resetCondition; LoadCondition=loadCondition;  }
+            {   Counter=counter; FunctionName=cParams.FunctionName;
+                UpCondition=cParams.CountUpCondition; DownCondition=cParams.CountDownCondition;
+                ResetCondition=cParams.ResetCondition; LoadCondition=cParams.LoadCondition;  }
         DuCounter counterStatement
+
+    let (*private*) createCounterStatement (storages:Storages) (cParams:CounterCreateParams): Statement =
+        let accum = 0us
+        let cs =    // counter structure
+            let typ = cParams.Type
+            let name = cParams.Name
+            let preset = cParams.Preset
+            match typ with
+            | CTU  -> CTUStruct.Create(typ, storages, name, preset, accum) :> CounterBaseStruct
+            | CTD  -> CTDStruct.Create(typ, storages, name, preset, accum)
+            | CTUD -> CTUDStruct.Create(typ, storages, name, preset, accum)
+            | CTR  -> CTRStruct.Create(typ, storages, name, preset, accum)
+        
+        generateCounterStatement (cs, cParams)
+
+    let private createCTRStatement (cs :CTRStruct, rungInCondition)  : Statement =
+        let cParams =
+                    {
+                        Type = cs.Type
+                        Name = cs.Name
+                        Preset= cs.PRE.Value
+                        CountUpCondition =  rungInCondition
+                        CountDownCondition = None
+                        ResetCondition = None
+                        LoadCondition= None
+                        FunctionName = "createWinCTR"
+                    }
+        generateCounterStatement (cs, cParams)
 
     let defaultCounterCreateParam = {
         Type=CTU
@@ -129,6 +144,9 @@ module CounterStatementModule =
                 Type=CTR; Name=name; Preset=preset; FunctionName=functionName
                 CountUpCondition=Some rungInCondition; }
             |> createCounterStatement storages
+
+        static member CreateCTRUsingTag(cs: CTRStruct, rungInCondition) =
+            createCTRStatement (cs, rungInCondition)
 
 
         static member CreateCTU(tcParams:TCConstructionParams, reset) =

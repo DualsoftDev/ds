@@ -34,12 +34,12 @@ type VertexManager with
         [
             for coin in coins do
                 let call = getPureCall  coin.Vertex
-                let ends = 
+                let ands = 
                     if call.UsingTon 
-                    then call.V.TON.Expr
+                    then call.V.TON.DN.Expr   //On Delay
                     else call.INs.EmptyOnElseToAnd(v.System)
 
-                let sets = ends <&&> coin.SP.Expr <&&> coin.EP.Expr
+                let sets = ands <&&> coin.SP.Expr <&&> coin.EP.Expr
                 let rsts = realV.H.Expr
                 yield (sets, rsts) --| (coin.CR, "D3" )
         ]   

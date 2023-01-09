@@ -23,36 +23,42 @@ module VertexManagerModule =
         let name = v.QualifiedName
         let goingRelays = HashSet<DsBit>()
         let bit mark flag = DsBit($"{name}({mark})", false, v, flag)
+        let timer mark flag = 
+                let ts = TimerStruct.Create(TimerType.TON, Storages(), $"{name}({mark}:TON)", 0us, 0us) 
+                DsTimer($"{name}({mark})", false, v, flag, ts)
+        let counter mark flag = 
+                let cs = CTRStruct.Create(CounterType.CTR, Storages(), $"{name}({mark}:CTR)", 0us, 0us) 
+                DsCounter($"{name}({mark})", false, v, flag, cs)
         
-        let readyBit      = bit "R"  TagFlag.R
-        let goingBit      = bit "G"  TagFlag.G
-        let finishBit     = bit "F"  TagFlag.F
-        let homingBit     = bit "H"  TagFlag.H
-        let originBit     = bit "0G" TagFlag.Origin
-        let pauseBit      = bit "PA" TagFlag.Pause
-        let errorTxBit    = bit "E1" TagFlag.ErrorTx
-        let errorRxBit    = bit "E2" TagFlag.ErrorRx
+        let readyBit      = bit "R"  BitFlag.R
+        let goingBit      = bit "G"  BitFlag.G
+        let finishBit     = bit "F"  BitFlag.F
+        let homingBit     = bit "H"  BitFlag.H
+        let originBit     = bit "0G" BitFlag.Origin
+        let pauseBit      = bit "PA" BitFlag.Pause
+        let errorTxBit    = bit "E1" BitFlag.ErrorTx
+        let errorRxBit    = bit "E2" BitFlag.ErrorRx
 
-        let relayRealBit  = bit "RR" TagFlag.RelayReal
-        let relayCallBit  = bit "CR" TagFlag.RelayCall
+        let relayRealBit  = bit "RR" BitFlag.RelayReal
+        let relayCallBit  = bit "CR" BitFlag.RelayCall
      
 
-        let endTagBit     = bit "ET" TagFlag.ET
-        let resetTagBit   = bit "RT" TagFlag.RT
-        let startTagBit   = bit "ST" TagFlag.ST
+        let endTagBit     = bit "ET" BitFlag.ET
+        let resetTagBit   = bit "RT" BitFlag.RT
+        let startTagBit   = bit "ST" BitFlag.ST
 
-        let endPortBit    = bit "EP" TagFlag.EP
-        let resetPortBit  = bit "RP" TagFlag.RP
-        let startPortBit  = bit "SP" TagFlag.SP
+        let endPortBit    = bit "EP" BitFlag.EP
+        let resetPortBit  = bit "RP" BitFlag.RP
+        let startPortBit  = bit "SP" BitFlag.SP
 
-        let endForceBit   = bit "EF" TagFlag.EF
-        let resetForceBit = bit "RF" TagFlag.RF
-        let startForceBit = bit "SF" TagFlag.SF
+        let endForceBit   = bit "EF" BitFlag.EF
+        let resetForceBit = bit "RF" BitFlag.RF
+        let startForceBit = bit "SF" BitFlag.SF
 
-        let pulseBit      = bit "PUL" TagFlag.Pulse
-        let counterBit    = bit "CTR" TagFlag.CountRing
-        let timerOnDelayBit = bit "TON" TagFlag.TimerOnDely
-        let timerTimeOutBit = bit "TOUT" TagFlag.TimeOut
+        let pulseBit      = bit "PUL" BitFlag.Pulse
+        let counterBit    = counter "CTR" CounterFlag.CountRing
+        let timerOnDelayBit = timer "TON"  TimerFlag.TimerOnDely
+        let timerTimeOutBit = timer "TOUT" TimerFlag.TimeOut
 
         interface IVertexManager with
             member x.Vertex = v
@@ -70,7 +76,7 @@ module VertexManagerModule =
         member x.CR         = relayCallBit 
         ///Going Relay   //리셋 인과에 따라 필요
         member x.GR(tgt:Vertex) = 
-           let gr =   bit $"GR_{tgt.Name}" TagFlag.RelayGoing
+           let gr =   bit $"GR_{tgt.Name}" BitFlag.RelayGoing
            goingRelays.Add gr |> ignore; gr
 
         ///Segment Start Tag

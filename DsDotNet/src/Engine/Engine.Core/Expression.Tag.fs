@@ -1,11 +1,12 @@
 namespace Engine.Core
 
 open System
+open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module  TagModule =
 
-    type TagFlag =
+    type BitFlag =
     | R             // Ready Status
     | G             // Going  Status
     | F             // Finish Status
@@ -18,9 +19,6 @@ module  TagModule =
     | RelayCall     // Call Done Relay
     | RelayGoing    // Going Relay
     | Pulse         // Start Pulse
-    | CountRing     // Ring Counter
-    | TimerOnDely   // Timer OnDely
-    | TimeOut       // Timer TimeOut
     | ET            // End Tag
     | RT            // Reset Tag
     | ST            // Start Tag
@@ -30,6 +28,14 @@ module  TagModule =
     | EF            // End Force
     | RF            // Reset Force
     | SF            // Start Force
+
+    type TimerFlag =
+    | TimerOnDely   // Timer OnDely
+    | TimeOut       // Timer TimeOut
+    
+    type CounterFlag =
+    | CountRing     // Ring Counter
+
 
     [<AbstractClass>]
     type Tag<'T when 'T:equality> (name, initValue:'T) =
@@ -49,21 +55,44 @@ module  TagModule =
 
         member val Address = address with get, set
 
-      /// Ds 일반 plan tag : going relay에 사용중
+      /// Ds Plan tag : system bit, eop, mop 등등.. 사용중
     type DsTag<'T when 'T:equality> (name, initValue:'T) =
         inherit Tag<'T>(name, initValue)
 
-    /// DsBit tag (PlanTag) class
-    type DsBit (name, initValue:bool, v:Vertex, tagFlag:TagFlag) =
+    /// Ds Plan tag with Vertex class
+    type DsBit (name, initValue:bool, v:Vertex, tagFlag:BitFlag) =
         inherit Tag<bool>(name, initValue)
-        member x.NotifyStatus() =
-             if x.Value then
-                 match tagFlag with
-                 | R -> ChangeStatusEvent (v, Ready)
-                 | G -> ChangeStatusEvent (v, Going)
-                 | F -> ChangeStatusEvent (v, Finish)
-                 | H -> ChangeStatusEvent (v, Homing)
-                 | _->()
+        member x.TagFlag = tagFlag
+        member x.Vertex = v
+
+    /// DsTimer tag with Vertex class
+    type DsTimer (name, initValue:bool, v:Vertex, tagFlag:TimerFlag, ts:TimerStruct) =
+        inherit Tag<bool>(name, initValue)
+        member x.TagFlag = tagFlag
+        member x.Vertex = v
+        member x.TimerStruct = ts
+        member x.DN = ts.DN :?> Tag<bool>
+
+    /// DsCounter tag with Vertex class
+    type DsCounter (name, initValue:bool, v:Vertex, tagFlag:CounterFlag, cs:CTRStruct) =
+        inherit Tag<bool>(name, initValue)
+        member x.TagFlag = tagFlag
+        member x.Vertex = v
+        member x.CTRStruct = cs
+        member x.DN = cs.DN
+
+    
+    [<Extension>]
+    type ExpressionExt =
+        [<Extension>] 
+        static member NotifyStatus (x:DsBit) =
+            if x.Value then
+                match x.TagFlag with
+                | R -> ChangeStatusEvent (x.Vertex, Ready)
+                | G -> ChangeStatusEvent (x.Vertex, Going)
+                | F -> ChangeStatusEvent (x.Vertex, Finish)
+                | H -> ChangeStatusEvent (x.Vertex, Homing)
+                | _->()
 
     //bitFlag
     //[<Flags>]

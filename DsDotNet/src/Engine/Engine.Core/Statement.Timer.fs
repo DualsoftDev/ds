@@ -13,32 +13,29 @@ module TimerStatementModule =
         FunctionName:string
     }
 
-    let private createTimerStatement (storages:Storages) {
-        Type=typ; Name=name; Preset=preset;
-        RungConditionIn=rungInCondition; ResetCondition=resetCondition; FunctionName=functionName
-    } : Statement =
-        if preset < MinTickInterval then
+    
+    let private generateTimerStatement (ts :TimerStruct, tParams:TimerCreateParams) = 
+
+        if ts.PRE.Value < MinTickInterval then
             failwith <| sprintf "Timer Resolution Error: Preset value should be larger than %A" MinTickInterval
 
-        let ts = TimerStruct.Create(typ, storages, name, preset, 0us)
-        let timer = new Timer(typ, ts)
-
+        let timer = new Timer(ts.Type, ts)
         let statements = ResizeArray<Statement>()
-        match rungInCondition with
+        match tParams.RungConditionIn with
         | Some cond ->
             let rungInStatement = DuAssign (cond, ts.EN)
             rungInStatement.Do()
             statements.Add rungInStatement
         | None -> ()
 
-        match resetCondition with
+        match tParams.ResetCondition with
         | Some cond ->
             let resetStatement = DuAssign (cond, ts.RES)
             resetStatement.Do()
             statements.Add resetStatement
         | None -> ()
-
-        match resetCondition with
+        //RungConditionIn,  ResetCondition 동시 입력 대비 ?? <kwak>
+        match tParams.ResetCondition with
         | Some reset ->
             let statement = DuAssign (reset, ts.RES)
             statement.Do()
@@ -46,7 +43,19 @@ module TimerStatementModule =
         | None -> ()
 
         timer.InputEvaluateStatements <- statements.ToFSharpList()
-        DuTimer ({ Timer=timer; RungInCondition = rungInCondition; ResetCondition = resetCondition; FunctionName=functionName }:TimerStatement)
+        DuTimer ({ Timer=timer; RungInCondition = tParams.RungConditionIn; ResetCondition = tParams.ResetCondition; FunctionName=tParams.FunctionName }:TimerStatement)
+
+
+    let private createTONStatement (ts :TimerStruct, rungInCondition, resetCondition)  : Statement =
+      
+        let tParams ={ Type=ts.Type; Name=ts.Name; Preset=ts.PRE.Value;
+                       RungConditionIn=rungInCondition; ResetCondition=resetCondition; FunctionName="createWinTON"} 
+    
+        generateTimerStatement (ts, tParams)
+
+    let private createTimerStatement (storages:Storages) (tParams:TimerCreateParams)   : Statement =
+        let ts = TimerStruct.Create(tParams.Type, storages, tParams.Name, tParams.Preset, 0us)
+        generateTimerStatement (ts, tParams)
 
 
     /// Timer & Counter construction parameters
@@ -68,6 +77,9 @@ module TimerStatementModule =
                 ResetCondition=None; FunctionName=functionName}:TimerCreateParams)
             |> createTimerStatement storages
 
+        static member CreateTONUsingTag(ts: TimerStruct, rungInCondition, resetCondition) =
+            createTONStatement (ts, rungInCondition, resetCondition)
+
         static member CreateTOF(tcParams:TCConstructionParams) =
             let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition; FunctionName=functionName} = tcParams
             ({   Type=TOF; Name=name; Preset=preset;
@@ -81,7 +93,7 @@ module TimerStatementModule =
                 RungConditionIn=Some rungInCondition;
                 ResetCondition=None; FunctionName=functionName }:TimerCreateParams)
             |> createTimerStatement storages
-
+      
         //static member CreateTON(tcParams:TCConstructionParams, resetCondition) =
         //    let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition} = tcParams
         //    {   Type=TON; Name=name; Preset=preset;

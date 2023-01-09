@@ -19,10 +19,14 @@ module internal Common =
         SpanY: int
     }
 
-    //type CoordinatedRungXmlsForCommand = {
-    //    SpanY: int
-    //    PositionedRungXmls: CoordinatedXmlElement list
-    //}
+    type BlockSummarizedXmlElements = {
+        // Block 시작 좌상단 x, y 좌표
+        X: int
+        Y: int
+        TotalSpanX: int
+        TotalSpanY: int
+        XmlElements: CoordinatedXmlElement list
+    }
 
     type RungInfosWithSpan = {
         RungInfos:CoordinatedXmlElement list

@@ -16,7 +16,7 @@ clean:
 
 all:
 	npm install
-	make g4
+	make tmlanguage
 	make tsc
 
 g4:

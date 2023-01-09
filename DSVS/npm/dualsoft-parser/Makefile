@@ -16,6 +16,8 @@ intall:
 ant:
 	yarn antlr4ts
 
+path:
+	export CLASSPATH=".:/usr/local/lib/antlr-4.10.1-complete.jar:$CLASSPATH"
 clean:
 	rm -f *.js *.js.map
 	rm -f ds.interp ds.tokens

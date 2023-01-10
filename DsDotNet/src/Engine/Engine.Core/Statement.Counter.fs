@@ -16,7 +16,7 @@ module CounterStatementModule =
         FunctionName:string
     }
 
-    let generateCounterStatement (cs, cParams:CounterCreateParams) = 
+    let generateCounterStatement (cs, cParams:CounterCreateParams) =
         let counter = new Counter   (cParams.Type, cs)
 
         let statements = ResizeArray<Statement>()
@@ -66,7 +66,7 @@ module CounterStatementModule =
             | CTD  -> CTDStruct.Create(typ, storages, name, preset, accum)
             | CTUD -> CTUDStruct.Create(typ, storages, name, preset, accum)
             | CTR  -> CTRStruct.Create(typ, storages, name, preset, accum)
-        
+
         generateCounterStatement (cs, cParams)
 
     let private createCTRStatement (cs :CTRStruct, rungInCondition)  : Statement =
@@ -135,14 +135,6 @@ module CounterStatementModule =
                 CountDownCondition = Some countDownCondition
                 LoadCondition      = Some ldCondition
                 ResetCondition     = Some reset  }
-            |> createCounterStatement storages
-
-
-        static member CreateCTR(tcParams:TCConstructionParams) =
-            let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition; FunctionName=functionName} = tcParams
-            { defaultCounterCreateParam with
-                Type=CTR; Name=name; Preset=preset; FunctionName=functionName
-                CountUpCondition=Some rungInCondition; }
             |> createCounterStatement storages
 
         static member CreateCTRUsingTag(cs: CTRStruct, rungInCondition) =

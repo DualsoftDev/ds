@@ -208,7 +208,7 @@ module ExpressionModule =
         | DuAugmentedPLCFunction of FunctionParameters
 
 
-    type CommentedStatement = 
+    type CommentedStatement =
         | CommentedStatement of comment:string * statement:Statement
         member x.Statement = match x with | CommentedStatement (c, s) -> s
 

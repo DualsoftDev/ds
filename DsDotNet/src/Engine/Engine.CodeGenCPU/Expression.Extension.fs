@@ -18,38 +18,38 @@ module ExpressionExtension =
     let (!!)   (exp: Expression<bool>) = fLogicalNot [exp]
     /// Assign statement
     let (<==)  (storage: IStorage) (exp: IExpression) = DuAssign(exp, storage)
-    /// Assign rising statement 
+    /// Assign rising statement
     let (<=^)  (rising: RisingCoil)   (exp: IExpression) = DuAssign(exp, rising)
-    /// Assign falling statement 
+    /// Assign falling statement
     let (<=!^) (falling: FallingCoil) (exp: IExpression) = DuAssign(exp, falling)
     /// Create Timer Coil Statement
-    let (<=@)  (ts: TimerStruct) (sets: IExpression<bool> option, rsts:IExpression<bool> option) = 
-        TimerStatement.CreateTONUsingTag(ts, sets, rsts) 
+    let (<=@)  (ts: TimerStruct) (sets: IExpression<bool> option, rsts:IExpression<bool> option) =
+        TimerStatement.CreateTONUsingTag(ts, sets, rsts)
     /// Create Counter Coil Statement
-    let (<=%)  (cs: CTRStruct) (sets: IExpression<bool> option) = 
-        CounterStatement.CreateCTRUsingTag(cs, sets) 
-    
+    let (<=%)  (cs: CTRStruct) (sets: IExpression<bool> option) =
+        CounterStatement.CreateCTRUsingTag(cs, sets)
+
     // Extenstion Comment Statement
     /// Create None Relay Coil Statement
-    let (--|) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool>, comment:string) = 
+    let (--|) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool>, comment:string) =
         coil <== (sets <&&> (!! rsts)) |> withExpressionComment comment
-    /// Create Relay Coil Statement                                                      
+    /// Create Relay Coil Statement
     let (==|) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool> , comment:string) =
         coil <== (sets <||> var2expr coil <&&> (!! rsts)) |> withExpressionComment comment
     /// Create None Relay rising Pulse Coil Statement
-    let (--^) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool>, comment:string) = 
+    let (--^) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool>, comment:string) =
         let rising:RisingCoil = {Storage = coil; HistoryFlag = HistoryFlag()}
         rising <=^ (sets <&&> (!! rsts)) |> withExpressionComment comment
     /// Create None Relay falling Pulse Coil Statement
-    let (--!^) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool>, comment:string) = 
+    let (--!^) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool>, comment:string) =
         let falling:FallingCoil = {Storage = coil; HistoryFlag = HistoryFlag()}
         falling <=!^ (sets <&&> (!! rsts)) |> withExpressionComment comment
     /// Create Timer Coil Statement
-    let (--@) (rungInCondition: IExpression<bool>) (timerCoil: DsTimer, preset:CountUnitType, comment:string) = 
+    let (--@) (rungInCondition: IExpression<bool>) (timerCoil: DsTimer, preset:CountUnitType, comment:string) =
         timerCoil.TimerStruct.PRE.Value <- preset
         timerCoil.TimerStruct <=@ (Some rungInCondition, None) |> withExpressionComment comment
     /// Create Counter Coil Statement
-    let (--%) (rungInCondition: IExpression<bool>) (counterCoil: DsCounter, preset:CountUnitType, comment:string) = 
+    let (--%) (rungInCondition: IExpression<bool>) (counterCoil: DsCounter, preset:CountUnitType, comment:string) =
         counterCoil.CTRStruct.PRE.Value <- preset
         counterCoil.CTRStruct <=% (Some rungInCondition) |> withExpressionComment comment
 
@@ -57,12 +57,12 @@ module ExpressionExtension =
         match ts with
         | [] -> failwith "tags2AndExpr: Empty list"
         | t :: [] -> var2expr t
-        | _ -> ts.Select(var2expr) 
-                |> List.ofSeq 
+        | _ -> ts.Select(var2expr)
+                |> List.ofSeq
                 |> List.cast<IExpression>
                 |> fLogical
 
-    
+
     /// Tag<'T> (들)로부터 AND Expression<'T> 생성
     let toAnd = tags2LogicalAndOrExpr fLogicalAnd
     /// Tag<'T> (들)로부터 OR  Expression<'T> 생성
@@ -79,7 +79,7 @@ module ExpressionExtension =
         [<Extension>] static member ToOr  (xs:PlcTag<bool> seq)      = xs.Cast<Tag<bool>>() |> toOr
         [<Extension>] static member ToOr  (xs:Tag<bool> seq)         = xs |> toOr
         [<Extension>] static member ToOr  (xs:Expression<bool> seq)  = xs.Reduce(<||>)
-                                            
-                                               
-       
-    
+
+
+
+

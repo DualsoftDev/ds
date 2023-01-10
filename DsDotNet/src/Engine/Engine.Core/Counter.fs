@@ -179,7 +179,7 @@ module rec CounterModule =
 
     type ICTR =
         inherit ICounter
-        abstract CU:TagBase<bool>
+        abstract CD:TagBase<bool>
 
 
     type CTUStruct private(counterParams:CounterParams) =
@@ -223,7 +223,7 @@ module rec CounterModule =
         inherit CounterBaseStruct(counterParams)
         member _.CU = base.CU
         interface ICTR with
-            member x.CU = x.CU
+            member x.CD = x.CD
         static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType) =
             let counterParams = CreateCounterParameters(typ, storages, name, preset, accum)
             let cs = new CTRStruct(counterParams)
@@ -269,7 +269,7 @@ module rec CounterModule =
         let registerCTR() =
             let csr = box cs :?> ICTR
             ValueSubject
-                .Where(fun storage -> storage = csr.CU && csr.CU.Value)
+                .Where(fun storage -> storage = csr.CD && csr.CD.Value)
                 .Subscribe(fun storage ->
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwith "ERROR"
                     cs.ACC.Value <- cs.ACC.Value + 1us

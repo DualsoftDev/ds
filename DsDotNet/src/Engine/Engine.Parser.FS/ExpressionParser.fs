@@ -197,10 +197,7 @@ module rec ExpressionParser =
                 //| CTUD, "createCTUD", _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::(UnitValue accum)::[] ->
                 //    CounterStatement.CreateCTUD(tcParams, countDownCondition, resetCondition, accum)
 
-
-                | CTR, "createWinCTR", _::_::[] ->
-                    CounterStatement.CreateCTR(tcParams)
-                | CTR, "createXgiCTR", _::_::(BoolExp resetCondition)::[] ->
+                | CTR, ("createCTR" | "createWinCTR" | "createXgiCTR"), _::(BoolExp resetCondition)::[] ->
                     CounterStatement.CreateXgiCTR(tcParams, resetCondition)
 
                 | _ -> fail()

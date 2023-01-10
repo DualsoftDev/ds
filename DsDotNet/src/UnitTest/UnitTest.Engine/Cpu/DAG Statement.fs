@@ -13,6 +13,19 @@ open Engine.Parser.FS
 type Spec08_DAGStatement() =
     do Fixtures.SetUpTest()
 
-    [<Test>] member __.``D1 DAG Head Start`` () = Eq 1 1
-    [<Test>] member __.``D2 DAG Tail Start`` () = Eq 1 1
-    [<Test>] member __.``D3 DAG Complete`` () = Eq 1 1
+    let t = CpuTestSample()
+    [<Test>]
+    member __.``D1 DAG Head Start`` () = 
+        for real in t.Reals do
+            real.D1_DAGHeadStart() |> doChecks
+
+    [<Test>]
+    member __.``D2 DAG Tail Start`` () = 
+        for real in t.Reals do
+            real.D1_DAGHeadStart() |> doChecks
+
+    [<Test>]
+    member __.``D3 DAG Complete`` () = 
+        for real in t.Reals do
+            real.D1_DAGHeadStart() |> doChecks
+

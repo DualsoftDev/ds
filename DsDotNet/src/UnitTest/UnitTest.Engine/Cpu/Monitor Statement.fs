@@ -13,20 +13,36 @@ open System.Linq
 
 type Spec05_MonitorStatement() =
     do Fixtures.SetUpTest()
+    let t = CpuTestSample()
 
     [<Test>]
-    member __.``M1 Origin Monitor`` () = Eq 1 1 //test ahn
+    member __.``M1 Origin Monitor`` () =
+        for real in t.Reals do
+            real.M1_OriginMonitor() |> doCheck
 
     [<Test>]
-    member __.``M2 Pause Monitor`` () =  Eq 1 1 //test ahn
+    member __.``M2 Pause Monitor`` () =  
+        for v in t.ALL do
+            v.M2_PauseMonitor() |> doCheck
+
     [<Test>]
-    member __.``M3 Call Error TX Monitor`` () =  Eq 1 1 //test ahn
+    member __.``M3 Call Error TX Monitor`` () = 
+         for coin in t.Coins do
+            coin.M3_CallErrorTXMonitor() |> doChecks
+
     [<Test>]
-    member __.``M4 Call Error RX Monitor`` () =  Eq 1 1 //test ahn
+    member __.``M4 Call Error RX Monitor`` () =    Eq 1 1 
+        //for coin in t.Coins do  //test ahn coin만 ?
+        //    coin.M4_CallErrorRXMonitor() |> doCheck
+
     [<Test>]
-    member __.``M5 Real Error RX Monitor`` () =  Eq 1 1 //test ahn
+    member __.``M5 Real Error RX Monitor`` () =  
+         for real in t.Reals do
+            real.M5_RealErrorTXMonitor() |> doCheck
+
     [<Test>]
-    member __.``M6 Real Error RX Monitor`` () =  Eq 1 1 //test ahn
-    
+    member __.``M6 Real Error RX Monitor`` () = 
+        for real in t.Reals do
+            real.M6_RealErrorRXMonitor() |> doCheck
        
           

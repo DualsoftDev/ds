@@ -11,15 +11,8 @@ module CpuLoader =
     let private applyVertexSpec(v:Vertex) = 
         let vm = v.VertexManager :?> VertexManager
         [
-           
-            if IsSpec v CallInFlow then
-                yield! vm.F3_RootStartCoin()
-                yield vm.F4_RootCoinRelay()
-
             if IsSpec v RealInFlow then
                 yield! vm.S1_RealRGFH()
-                yield! vm.F1_RootStartReal()
-                yield! vm.F2_RootResetReal()
 
                 yield vm.P1_RealStartPort()
                 yield vm.P2_RealResetPort()
@@ -35,15 +28,21 @@ module CpuLoader =
                 yield! vm.D1_DAGHeadStart()
                 yield! vm.D2_DAGTailStart()
                 yield! vm.D3_DAGComplete()
+           
+            if IsSpec v InFlowAll then
+                yield! vm.F1_RootStart()
+            //RealInFlow ||| RealExFlow ||| AliasRealInFlow ||| AliasRealExInFlow
+            if IsSpec v RealContainAll then 
+                yield! vm.F2_RootReset()
+            if IsSpec v InFlowWithoutReal then
+                yield vm.F3_RootCoinRelay()
+
 
             if IsSpec v (CallInReal ||| CallInFlow) then
                 yield! vm.C1_CallActionOut()
             
             if IsSpec v CoinTypeAll then
                 yield! vm.S2_CoinRGFH()
-                yield vm.P4_CallStartPort()
-                yield vm.P5_CallResetPort()
-                yield vm.P6_CallEndPort()
 
             if IsSpec v (RealInFlow ||| CoinTypeAll)  then
                 yield vm.M2_PauseMonitor()

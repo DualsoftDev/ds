@@ -56,4 +56,19 @@ module CodeConvertUtil =
                     -> failwith $"Do not use {edgeType} Error"
 
             foundEdges.Select(fun e->e.Source)
+
+        [<Extension>]
+        static member GetCausalTags(xs:Vertex seq, s:DsSystem) =
+            let tags = 
+                xs.Select(fun f->
+                match f with
+                | :? Real as r -> r.V.EP
+                | :? RealEx as re -> re.Real.V.EP
+                | :? Call as c  -> c.V.CR
+                | :? Alias as a -> a.V.CR
+                | _ -> failwith "Error"
+                )
+
+            tags.EmptyOnElseToAnd(s)
+            
     

@@ -315,10 +315,10 @@ module CoreModule =
             if (name.Contains ".") (*&& not <| (name.StartsWith("\"") && name.EndsWith("\""))*) then
                 logWarn $"Suspicious segment name [{name}]. Check it."
 
-            let segment = Real(name, flow)
-            segment.VertexManager <- fwdCreateVertexManager(segment)
-            flow.Graph.AddVertex(segment) |> verifyM $"Duplicated segment name [{name}]"
-            segment
+            let real = Real(name, flow)
+            real.VertexManager <- fwdCreateVertexManager(real)
+            flow.Graph.AddVertex(real) |> verifyM $"Duplicated segment name [{name}]"
+            real
 
         member x.GetAliasTargetToDs(aliasFlow:Flow) =
                 if x.Flow <> aliasFlow
@@ -332,7 +332,7 @@ module CoreModule =
         static member Create(otherFlowReal:Real, parent:ParentWrapper) =
             let ofn, ofrn = otherFlowReal.Flow.Name, otherFlowReal.Name
             let ofr = RealOtherFlow( [| ofn; ofrn |], otherFlowReal, parent)
-            ofr.VertexManager <- otherFlowReal.VertexManager
+            ofr.VertexManager <- fwdCreateVertexManager(ofr)
             parent.GetGraph().AddVertex(ofr) |> verifyM $"Duplicated other flow real call [{ofn}.{ofrn}]"
             ofr
 
@@ -372,7 +372,12 @@ module CoreModule =
 
             createAliasDefOnDemand()
             let alias = Alias(name, target, parent)
-            alias.VertexManager <- target.GetTarget().VertexManager
+            if parent.GetCore() :? Real 
+            then 
+                (target.RealTarget().IsNone && target.RealExTarget().IsNone) 
+                |> verifyM $"Vertex {name} children type error"
+
+            alias.VertexManager <- fwdCreateVertexManager(alias)
             parent.GetGraph().AddVertex(alias) |> verifyM $"Duplicated alias name [{name}]"
             alias
 

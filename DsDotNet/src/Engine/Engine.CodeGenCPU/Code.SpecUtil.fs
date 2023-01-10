@@ -26,8 +26,12 @@ module CodeSpecUtil =
     |AliasCallInFlow     = 0b00100000  
     |AliasRealInFlow     = 0b01000000  
     |AliasRealExInFlow   = 0b10000000  
-    |CoinTypeAll         = 0b11111100 
-    |RealTypeAll         = 0b00000011 
+
+    |InFlowWithoutReal   = 0b11100110 
+    |InFlowAll           = 0b11100111 
+    |CoinTypeAll         = 0b11111110 
+    |CallTypeAll         = 0b00001100 
+    |RealContainAll      = 0b11000011 
     |VertexAll           = 0b11111111 
    
     let IsSpec (v:Vertex) (vaild:ConvertType) = 

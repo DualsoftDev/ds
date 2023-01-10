@@ -19,7 +19,7 @@ type VertexManager with
 
                  
     member v.C2_CallTx(): CommentedStatement list = 
-        let call = getPureCall  v.Vertex
+        let call = v.GetPureCall().Value
         let sets = ([v.ST] @ v.GetSharedCall().STs()).ToOr()
         let rsts = v.System._off.Expr
         [
@@ -28,7 +28,7 @@ type VertexManager with
         ]
 
     member v.C3_CallRx(): CommentedStatement  = 
-        let call = getPureCall  v.Vertex
+        let call = v.GetPureCall().Value
         let sets = call.RXs.EmptyOnElseToAnd v.System
         let rsts = v.System._off.Expr
 

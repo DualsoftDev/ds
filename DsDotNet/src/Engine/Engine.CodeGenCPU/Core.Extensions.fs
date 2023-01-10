@@ -20,6 +20,9 @@ module ConvertCoreExt =
 
     let getVM(v:Vertex) = v.VertexManager :?> VertexManager
 
+    type ApiItem with
+        member s.tx = DsTag<bool>("tx", false)
+        member s.rx = DsTag<bool>("rx", false)
 
     type DsSystem with
         member s._on     = DsTag<bool>("_on", true)
@@ -59,9 +62,10 @@ module ConvertCoreExt =
 
         //[auto, manual] system HMI 두개다 선택이 안됨
         member s.ModeNoExpr = !!s._auto.Expr <&&> !!s._manual.Expr
-    
-
-
+        //자신이 사용된 API Txs
+        member s.GetTXs(r:Real)= s.ApiItems.Where(fun api->api.TXs.Contains(r)).Select(fun f->f.tx)
+        member s.GetRXs(r:Real)= s.ApiItems.Where(fun api->api.RXs.Contains(r)).Select(fun f->f.rx)
+            
     let private getButtonInputs(flow:Flow, btns:ButtonDef seq) : PlcTag<bool> seq = 
             btns.Where(fun b -> b.SettingFlows.Contains(flow))
                 .Select(fun b -> b.InTag)
@@ -200,3 +204,5 @@ module ConvertCoreExt =
 
     type RealOtherFlow with
         member a.V = a.VertexManager :?> VertexManager                    
+
+  

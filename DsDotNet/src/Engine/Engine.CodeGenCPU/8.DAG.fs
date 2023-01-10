@@ -30,16 +30,17 @@ type VertexManager with
     member v.D3_DAGComplete(): CommentedStatement list = 
         let real = v.Vertex :?> Real
         let realV = v
-        let coins = real.Graph.Vertices.Select(getVM)
+        let children = real.Graph.Vertices.Select(getVM)
         [
-            for coin in coins do
-                let call = getPureCall  coin.Vertex
+            for child in children do
                 let ands = 
-                    if call.UsingTon 
-                    then call.V.TON.DN.Expr   //On Delay
-                    else call.INs.EmptyOnElseToAnd(v.System)
+                    match child.GetPureCall() with
+                    |Some call ->  if call.UsingTon 
+                                        then call.V.TON.DN.Expr   //On Delay
+                                        else call.INs.EmptyOnElseToAnd(v.System)
+                    |None -> failwith "Error D3_DAGComplete"
 
-                let sets = ands <&&> coin.SP.Expr <&&> coin.EP.Expr
+                let sets = ands <&&> child.SP.Expr <&&> child.EP.Expr
                 let rsts = realV.H.Expr
-                yield (sets, rsts) --| (coin.CR, "D3" )
+                yield (sets, rsts) --| (child.CR, "D3" )
         ]   

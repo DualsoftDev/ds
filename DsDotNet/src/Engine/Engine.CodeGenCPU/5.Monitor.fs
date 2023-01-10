@@ -25,6 +25,7 @@ let getNeedCheck(real:Real) =
                     )
     let sets = 
         needCheckSet 
+        |> Seq.filter(fun ils -> ils.Any())
         |> Seq.map(fun ils -> 
                     ils.Select(fun il -> il.Expr 
                                          <&&> !!(ils.Except([il]).ToOr()))
@@ -59,7 +60,6 @@ type VertexManager with
         (sets, rsts) --| (v.PA, "M2" )
 
     member v.M3_CallErrorTXMonitor(): CommentedStatement list = 
-        let call = v.Vertex :?> Call
         let sets = v.G.Expr <&&> v.TON.Expr
         let rsts = v.Flow.clear.Expr <||> v.System._clear.Expr
         [

@@ -12,5 +12,11 @@ open Engine.Parser.FS
 type Spec12_ButtonLampStatement() =
     do Fixtures.SetUpTest()
 
-    [<Test>] member __.``B1 Button Output`` () = Eq 1 1
-    [<Test>] member __.``B2 Mode Lamp`` () = Eq 1 1
+    let t = CpuTestSample()
+    [<Test>] 
+    member __.``B1 Button Output`` () =    
+        t.Sys.B1_ButtonOutput() |> doChecks
+
+    [<Test>]
+    member __.``B2 Mode Lamp`` () =
+        t.Sys.B2_ModeLamp() |> doChecks

@@ -13,6 +13,7 @@ open Engine.Parser.FS
 type Spec11_LinkStatement() =
     do Fixtures.SetUpTest()
 
+    let t = CpuTestSample()
     [<Test>] member __.``L1 Link Start`` () = Eq 1 1
     [<Test>] member __.``L2 Link Reset`` () = Eq 1 1
     [<Test>] member __.``L2 Link StartReset`` () = Eq 1 1

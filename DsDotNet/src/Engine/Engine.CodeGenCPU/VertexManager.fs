@@ -19,6 +19,7 @@ module VertexManagerModule =
     // ACTION | OUT	    | API. O| -	   | API. O    |
     
     /// Vertex Manager : 소속되어 있는 DsBit 를 관리하는 컨테이어
+    [<DebuggerDisplay("{name}")>]
     type VertexManager (v:Vertex)  =
         let name = v.QualifiedName
         let goingRelays = HashSet<DsBit>()
@@ -75,8 +76,8 @@ module VertexManagerModule =
         ///Call Done Relay 
         member x.CR         = relayCallBit 
         ///Going Relay   //리셋 인과에 따라 필요
-        member x.GR(tgt:Vertex) = 
-           let gr =   bit $"GR_{tgt.Name}" BitFlag.RelayGoing
+        member x.GR(src:Vertex) = 
+           let gr =   bit $"GR_{src.Name}" BitFlag.RelayGoing
            goingRelays.Add gr |> ignore; gr
 
         ///Segment Start Tag

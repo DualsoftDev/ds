@@ -52,8 +52,8 @@ module internal XgiFile =
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
     let private generateRungs (prologComments:string seq) (commentedStatements:CommentedXgiStatements seq) : XmlOutput =
         let xmlRung (expr:FlatExpression option) xgiCommand y : RungGenerationInfo =
-            let {Coordinate=posi; Xml=xml} = rung (0, y) expr xgiCommand
-            let yy = (posi / 1024)// + 1
+            let {Coordinate=c; Xml=xml} = rung (0, y) expr xgiCommand
+            let yy = c / 1024
             { Xmls = [$"\t<Rung BlockMask={dq}0{dq}>\r\n{xml}\t</Rung>"]; Y = yy}
 
         let mutable rgi:RungGenerationInfo = {Xmls = []; Y = 0}
@@ -80,31 +80,31 @@ module internal XgiFile =
                         | :? FallingCoil as fc -> COMNPulseCoil(fc.Storage :?> INamedExpressionizableTerminal)
                         | _ -> COMCoil(target :?> INamedExpressionizableTerminal)
                     let flatExpr = expr.Flatten() :?> FlatExpression
-                    let command:XgiCommand = CoilCmd(coil) |> XgiCommand
+                    let command = CoilCmd(coil)
                     let rgiSub = xmlRung (Some flatExpr) (Some command) rgi.Y
                     //rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgiSub.Y}
 
                 // <kwak> <timer>
                 | DuTimer timerStatement ->
-                    let command:XgiCommand = FunctionBlockCmd(TimerMode(timerStatement)) |> XgiCommand
+                    let command = FunctionBlockCmd(TimerMode(timerStatement))
                     let rgiSub = xmlRung None (Some command) rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
                 | DuCounter counterStatement ->
-                    let command:XgiCommand = FunctionBlockCmd(CounterMode(counterStatement)) |> XgiCommand
+                    let command = FunctionBlockCmd(CounterMode(counterStatement))
                     let rgiSub = xmlRung None (Some command) rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
 
                 | DuAugmentedPLCFunction ({FunctionName = (">"|">="|"<"|"<="|"="|"!=") as op; Arguments = args; Output=output }) ->
                     let fn = operatorToXgiFunctionName op
-                    let command:XgiCommand = FunctionCmd(FunctionCompare(fn, output, args)) |> XgiCommand
+                    let command = FunctionCmd(FunctionCompare(fn, output, args))
                     let rgiSub = xmlRung (Some alwaysOnFlatExpression) (Some command) rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
 
                 | DuAugmentedPLCFunction ({FunctionName = ("+"|"-"|"*"|"/") as op; Arguments = args; Output=output }) ->
                     let fn = operatorToXgiFunctionName op
-                    let command:XgiCommand = FunctionCmd(FunctionArithematic(fn, output, args)) |> XgiCommand
+                    let command = FunctionCmd(FunctionArithematic(fn, output, args))
                     let rgiSub = xmlRung (Some alwaysOnFlatExpression) (Some command) rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
                 | _ ->

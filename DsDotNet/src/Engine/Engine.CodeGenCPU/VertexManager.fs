@@ -5,6 +5,7 @@ open System
 open System.Text.RegularExpressions
 open Engine.Core
 open System.Collections.Generic
+open System
 
 [<AutoOpen>]
 module VertexManagerModule =
@@ -17,19 +18,21 @@ module VertexManagerModule =
     //______________________________________________
     // ACTION | IN	    | API. I| -	   | API. I    |
     // ACTION | OUT	    | API. O| -	   | API. O    |
-    
+
     /// Vertex Manager : 소속되어 있는 DsBit 를 관리하는 컨테이어
     type VertexManager (v:Vertex)  =
         let name = v.QualifiedName
         let goingRelays = HashSet<DsBit>()
         let bit mark flag = DsBit($"{name}({mark})", false, v, flag)
-        let timer mark flag = 
-                let ts = TimerStruct.Create(TimerType.TON, Storages(), $"{name}({mark}:TON)", 0us, 0us) 
+        [<Obsolete("<ahn> Storages() 는 singleton instance 로 관리되어야 함.")>]
+        let timer mark flag =
+                let ts = TimerStruct.Create(TimerType.TON, Storages(), $"{name}({mark}:TON)", 0us, 0us)
                 DsTimer($"{name}({mark})", false, v, flag, ts)
-        let counter mark flag = 
-                let cs = CTRStruct.Create(CounterType.CTR, Storages(), $"{name}({mark}:CTR)", 0us, 0us) 
+        [<Obsolete("<ahn> Storages() 는 singleton instance 로 관리되어야 함.")>]
+        let counter mark flag =
+                let cs = CTRStruct.Create(CounterType.CTR, Storages(), $"{name}({mark}:CTR)", 0us, 0us)
                 DsCounter($"{name}({mark})", false, v, flag, cs)
-        
+
         let readyBit      = bit "R"  BitFlag.R
         let goingBit      = bit "G"  BitFlag.G
         let finishBit     = bit "F"  BitFlag.F
@@ -41,7 +44,7 @@ module VertexManagerModule =
 
         let relayRealBit  = bit "RR" BitFlag.RelayReal
         let relayCallBit  = bit "CR" BitFlag.RelayCall
-     
+
 
         let endTagBit     = bit "ET" BitFlag.ET
         let resetTagBit   = bit "RT" BitFlag.RT
@@ -67,15 +70,15 @@ module VertexManagerModule =
         member x.Vertex  = v
         member x.Flow    = v.Parent.GetFlow()
         member x.System  = v.Parent.GetFlow().System
-       
-        
+
+
         //Relay
-        ///Real Init Relay  
-        member x.RR         = relayRealBit  
-        ///Call Done Relay 
-        member x.CR         = relayCallBit 
+        ///Real Init Relay
+        member x.RR         = relayRealBit
+        ///Call Done Relay
+        member x.CR         = relayCallBit
         ///Going Relay   //리셋 인과에 따라 필요
-        member x.GR(tgt:Vertex) = 
+        member x.GR(tgt:Vertex) =
            let gr =   bit $"GR_{tgt.Name}" BitFlag.RelayGoing
            goingRelays.Add gr |> ignore; gr
 
@@ -83,57 +86,57 @@ module VertexManagerModule =
         member x.ST         = startTagBit
         ///Segment Reset Tag
         member x.ResetTag   = resetTagBit
-        member x.RT         = resetTagBit 
+        member x.RT         = resetTagBit
         ///Segment End Tag
-        member x.ET         = endTagBit   
+        member x.ET         = endTagBit
 
         //Port
         ///Segment Start Port
-        member x.SP         = startPortBit  
+        member x.SP         = startPortBit
         ///Segment Reset Port
-        member x.RP         = resetPortBit  
+        member x.RP         = resetPortBit
         ///Segment End Port
-        member x.EP         = endPortBit    
+        member x.EP         = endPortBit
 
         //Force
         ///StartForce HMI
-        member x.SF         = startForceBit 
+        member x.SF         = startForceBit
         ///ResetForce HMI
-        member x.RF         = resetForceBit 
+        member x.RF         = resetForceBit
         ///EndForce HMI
-        member x.EF         = endForceBit   
+        member x.EF         = endForceBit
 
-           
-        //Status 
+
+        //Status
         ///Ready Status
-        member x.R      = readyBit  
+        member x.R      = readyBit
         ///Going Status
-        member x.G      = goingBit  
+        member x.G      = goingBit
         ///Finish Status
-        member x.F      = finishBit 
+        member x.F      = finishBit
         ///Homing Status
-        member x.H      = homingBit 
+        member x.H      = homingBit
 
-        //Monitor 
+        //Monitor
         ///Origin Monitor
-        member x.OG      =  originBit 
+        member x.OG      =  originBit
         ///Pause Monitor
-        member x.PA      =  pauseBit  
+        member x.PA      =  pauseBit
         ///Error Tx Monitor
         member x.E1      =  errorTxBit
         ///Error Rx Monitor
         member x.E2      =  errorRxBit
 
         //DummyBit
-        ///PulseStart  
-        member x.PUL    = pulseBit  
-        ///Ring Counter 
-        member x.CTR    = counterBit 
+        ///PulseStart
+        member x.PUL    = pulseBit
+        ///Ring Counter
+        member x.CTR    = counterBit
         ///Timer on delay
-        member x.TON    = timerOnDelayBit 
-        ///Timer time out   
-        member x.TOUT    = timerTimeOutBit 
-           
-          
-        
-         
+        member x.TON    = timerOnDelayBit
+        ///Timer time out
+        member x.TOUT    = timerTimeOutBit
+
+
+
+

@@ -221,7 +221,7 @@ module rec CounterModule =
 
     type CTRStruct(counterParams:CounterParams ) =
         inherit CounterBaseStruct(counterParams)
-        member _.CU = base.CU
+        member _.RES = base.RES
         interface ICTR with
             member x.CD = x.CD
         static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType) =

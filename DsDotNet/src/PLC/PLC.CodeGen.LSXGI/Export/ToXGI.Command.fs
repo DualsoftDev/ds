@@ -320,7 +320,25 @@ module internal rec Command =
                         sy <- sy + 1
             ]
 
-        let sx = blockXmls.Max(fun x -> x.TotalSpanX)
+        (* 입력 parameter 를 그렸을 때, 1 줄을 넘는 것들의 갯수 만큼 horizontal line spacing 필요 *)
+        let plusHorizontalPadding = blockXmls.Count(fun x -> x.TotalSpanY > 1)
+        let plusHorizontalPadding = max 0 (plusHorizontalPadding - 1)
+
+        /// function start X
+        let fsx = blockXmls.Max(fun x -> x.TotalSpanX) + plusHorizontalPadding
+        let multiHLineXmls =
+            [
+                for (i, b) in blockXmls.Indexed() do
+                    let bex = b.X + b.TotalSpanX    // block end X
+                    let bey = b.Y
+                    let c = coord(bex, bey)
+                    let spanX = (fsx - bex)
+                    match tryHLineTo (bex, bey) (fsx - 1 - i) with
+                    | Some xml ->
+                        { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 }
+                    | None ->
+                        ()
+            ]
 
         let cxmls =
             [
@@ -336,13 +354,14 @@ module internal rec Command =
                             | _ -> failwith "ERROR"
                         | _ ->
                             failwith "ERROR"
-                    createFBParameterXml (x + sx - 1, ry) literal
+                    createFBParameterXml (x + fsx - 1, ry) literal
 
                 yield! blockXmls |> bind(fun bx -> bx.XmlElements)
+                yield! multiHLineXmls
                 let x, y = rungStartX, rungStartY // tmp
 
                 //Command 결과출력
-                createFunctionXmlAt (func, func) inst (x+sx, y)
+                createFunctionXmlAt (func, func) inst (x+fsx, y)
             ]
         cxmls |> List.sortBy(fun cxml -> cxml.Coordinate)
 
@@ -399,10 +418,10 @@ module internal rec Command =
             blockXml
         else
             let b = blockXml
-            let x = b.X + b.TotalSpanX + 1
-            let c = coord(x, b.Y)
+            let x = b.X + b.TotalSpanX //+ 1
             let lineXml =
-                let xml = elementFull (int ElementType.HorzLineMode) c "" ""
+                let c = coord(x, b.Y)
+                let xml = hLineStartMarkAt(x, b.Y)
                 { Coordinate = c; Xml = xml; SpanX = 1; SpanY = 1 }
             { blockXml with TotalSpanX = b.TotalSpanX + 1; XmlElements = b.XmlElements +++ lineXml }
 

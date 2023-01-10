@@ -80,16 +80,21 @@ module internal Common =
     let fallingline c = elementFull (int ElementType.FallingContact) (c) "" ""
 
 
+    let hLineStartMarkAt (x, y) = elementFull (int ElementType.HorzLineMode) (coord(x, y)) "" ""
 
     /// 마지막 수평으로 연결 정보
+    let tryHLineTo (x, y) endX =
+        if endX < x then
+            None
+        else
+            let lengthParam = $"Param={dq}{3 * (endX-x)}{dq}"
+            let c = coord(x, y)
+            Some <| elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
+
     let hLineTo (x, y) endX =
-        if endX <= x then
+        if endX < x then
             failwithlog $"endX startX [{endX} > {x}]"
-
-        let lengthParam = $"Param={dq}{3 * (endX-x)}{dq}"
-        let c = coord(x, y)
-        elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
-
+        tryHLineTo (x, y) endX |> Option.get
 
 
     /// x y 위치에서 수직선 한개를 긋는다

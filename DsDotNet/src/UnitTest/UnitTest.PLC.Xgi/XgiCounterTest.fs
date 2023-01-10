@@ -92,16 +92,16 @@ type XgiCounterTest() =
     member __.``X Counter CTD with conditional test`` () =
         let storages = Storages()
         let code = """
-            bool cu1 = createTag("%IX0.0.0", false);
-            bool cu2 = createTag("%IX0.0.1", false);
-            bool cu3 = createTag("%IX0.0.2", false);
-            bool res0 = createTag("%IX0.0.2", false);
-            bool res1 = createTag("%IX0.0.2", false);
-            bool res2 = createTag("%IX0.0.2", false);
+            bool cu1  = false;
+            bool cu2  = false;
+            bool cu3  = false;
+            bool res0 = false;
+            bool res1 = false;
+            bool res2 = false;
 
-            bool x7 = createTag("%IX0.0.7", false);
+            bool xx7 = false;
             ctd myCTD = createXgiCTD(2000us, ($cu1 && $cu2) || $cu3, ($res0 || $res1) && $res2 );
-            $x7 := (($cu1 && $cu2) || $cu3 || ($res0 || $res1) && $res2) && $cu1;
+            $xx7 := (($cu1 && $cu2) || $cu3 || ($res0 || $res1) && $res2) && $cu1;
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)

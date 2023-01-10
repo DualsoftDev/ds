@@ -104,7 +104,7 @@ module rec TypeConvertorModule =
         match name |> Seq.toList with
         | ch::_ when isHangul ch -> ()
         | ch1::ch2::_ when isValidStart ch1 && isValidStart ch2 -> ()
-        | _ -> failwith $"Invalid XGI variable name {name}"
+        | _ -> failwith $"Invalid XGI variable name {name}.  Use longer name"
 
         XgiLocalVar(name, comment, initValue)
 

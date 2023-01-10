@@ -104,15 +104,22 @@ module internal Common =
         { Coordinate = c; Xml = vline c; SpanX = 0; SpanY = 1 }
 
     /// x y 위치에서 수직으로 n 개의 line 을 긋는다
-    let vlineDownTo (x, y) n =
+    let vlineDownN (x, y) n =
         [
             if enableXmlComment then
                 let c = coord(x, y)
                 yield { Coordinate = c; Xml = $"<!-- vlineDownTo {x} {y} {n} -->" ; SpanX = 0; SpanY = n }
 
-            for i in [0.. n-1] do
-                yield vLineAt (x, y+i)
+            if n > 0 then
+                for i in [0.. n-1] do
+                    yield vLineAt (x, y+i)
         ]
+
+    let vlineUpN (x, y) n = vlineDownN (x, y-n) n
+
+    /// x y 위치에서 수직으로 endY 까지 line 을 긋는다
+    let vlineDownTo (x, y) endY = vlineDownN (x, y) (endY - y)
+    let vlineUpTo (x, y) endY = vlineUpN (x, y) (y-endY)
 
 
     /// 함수 그리기 (detailedFunctionName = 'ADD2_INT', briefFunctionName = 'ADD')

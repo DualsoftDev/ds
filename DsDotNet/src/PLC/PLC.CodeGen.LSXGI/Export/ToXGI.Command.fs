@@ -327,18 +327,33 @@ module internal rec Command =
 
         /// function start X
         let fsx = blockXmls.Max(fun x -> x.TotalSpanX) + plusHorizontalPadding
+
+        /// input parameter end 와 function input adaptor 와의 'S' shape 연결
         let multiHLineXmls =
             [
+                let mutable sy = 0
                 for (i, b) in blockXmls.Indexed() do
                     let bex = b.X + b.TotalSpanX    // block end X
                     let bey = b.Y
                     let c = coord(bex, bey)
                     let spanX = (fsx - bex)
-                    match tryHLineTo (bex, bey) (fsx - 1 - i) with
+                    tracefn $"H: ({bex}, {bey}) -> ({bex+i-1}, {bey})"
+                    match tryHLineTo (bex, bey) (bex + max 0 (i - 1)) with
                     | Some xml ->
                         { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 }
                     | None ->
                         ()
+
+                    if i > 0 then
+                        sy <- sy + b.TotalSpanY
+                        tracefn $"V: ({bex+i-1}, {bey}) -> ({bex+i-1}, {y + i})"
+                        yield! vlineUpTo (bex+i-1, bey) (y + i)
+
+                        match tryHLineTo (bex+i, y+i) (fsx - 1) with
+                        | Some xml ->
+                            { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 }
+                        | None ->
+                            ()
             ]
 
         let cxmls =
@@ -507,7 +522,7 @@ module internal rec Command =
 
                 // 좌측 vertical lines
                 if x >= 1 then
-                    yield! vlineDownTo (x-1, y) (spanY-1)
+                    yield! vlineDownN (x-1, y) (spanY-1)
 
                 // ```OR variable length 역삼각형 test```
                 let lowestY =
@@ -515,7 +530,7 @@ module internal rec Command =
                         .Where(fun sri -> sri.TotalSpanX <= spanX)
                         .Max(fun sri -> sri.Y)
                 // 우측 vertical lines
-                yield! vlineDownTo (x+spanX-1, y) (lowestY-y)
+                yield! vlineDownN (x+spanX-1, y) (lowestY-y)
             ]
 
             let xmls = xmls |> List.distinct    // dirty hacking!

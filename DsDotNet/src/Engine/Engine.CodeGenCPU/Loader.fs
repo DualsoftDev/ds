@@ -13,8 +13,8 @@ module CpuLoader =
         [
            
             if IsSpec v CallInFlow then
-                yield! vm.F3_RootStartCall()
-                yield vm.F4_RootCallRelay()
+                yield! vm.F3_RootStartCoin()
+                yield vm.F4_RootCoinRelay()
 
             if IsSpec v RealInFlow then
                 yield! vm.S1_RealRGFH()

@@ -23,7 +23,7 @@ module VertexManagerExtension =
             match v with
             | :? Call as c  ->  v :?> Call
             | :? Alias as a  -> a.TargetWrapper.GetTarget() :?> Call
-            |_ -> failwith "Error"
+            |_ -> failwith "Error getPureCall"
 
 
     [<Extension>]

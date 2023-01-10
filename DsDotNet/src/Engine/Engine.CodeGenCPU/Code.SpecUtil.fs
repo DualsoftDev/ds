@@ -18,19 +18,17 @@ module CodeSpecUtil =
     [<Flags>]
     [<AutoOpen>]
     type ConvertType = 
-    |RealInFlow          = 0b0000000001  
-    |RealExFlow          = 0b0000000010  
-    |CallInFlow          = 0b0000000100  
-    |CallInReal          = 0b0000001000  
-    |AliasCallInReal     = 0b0000010000  
-    |AliasRealInReal     = 0b0000100000  
-    |AliasRealExInReal   = 0b0001000000 
-    |AliasCallInFlow     = 0b0010000000  
-    |AliasRealInFlow     = 0b0100000000  
-    |AliasRealExInFlow   = 0b1000000000  
-    |CoinTypeAll         = 0b0010011100 
-    |RealTypeAll         = 0b0000000011 
-    |VertexAll           = 0b1111111111 
+    |RealInFlow          = 0b00000001  
+    |RealExFlow          = 0b00000010  
+    |CallInFlow          = 0b00000100  
+    |CallInReal          = 0b00001000  
+    |AliasCallInReal     = 0b00010000  
+    |AliasCallInFlow     = 0b00100000  
+    |AliasRealInFlow     = 0b01000000  
+    |AliasRealExInFlow   = 0b10000000  
+    |CoinTypeAll         = 0b11111100 
+    |RealTypeAll         = 0b00000011 
+    |VertexAll           = 0b11111111 
    
     let IsSpec (v:Vertex) (vaild:ConvertType) = 
         let isVaildVertex =
@@ -51,8 +49,8 @@ module CodeSpecUtil =
                      | DuAliasTargetCall ac   -> vaild.HasFlag(AliasCallInFlow)
                  |DuParentReal r-> 
                      match a.TargetWrapper with
-                     | DuAliasTargetReal ar   -> vaild.HasFlag(AliasRealInReal)
-                     | DuAliasTargetRealEx ao -> vaild.HasFlag(AliasRealExInReal)
+                     | DuAliasTargetReal ar   -> failwith "Error IsSpec"
+                     | DuAliasTargetRealEx ao -> failwith "Error IsSpec"
                      | DuAliasTargetCall ac   -> vaild.HasFlag(AliasCallInReal)
             |_ -> failwith "Error"
 

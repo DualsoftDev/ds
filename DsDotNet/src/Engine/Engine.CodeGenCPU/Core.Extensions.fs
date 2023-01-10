@@ -197,3 +197,6 @@ module ConvertCoreExt =
 
     type Alias with
         member a.V = a.VertexManager :?> VertexManager                    
+
+    type RealOtherFlow with
+        member a.V = a.VertexManager :?> VertexManager                    

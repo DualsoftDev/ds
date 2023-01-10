@@ -47,7 +47,7 @@ type VertexManager with
             |> Seq.toList
         else []
 
-    member v.F3_RootStartCall(): CommentedStatement list =
+    member v.F3_RootStartCoin(): CommentedStatement list =
         let srcs = v.Flow.Graph.FindEdgeSources(v.Vertex, StartEdge).Select(getVM)
         if srcs.Any() then
             let sets  = srcs.Select(fun f->f.EP).ToAnd()
@@ -56,13 +56,17 @@ type VertexManager with
             [(sets, rsts) ==| (v.ST, "F3")]
         else []
 
-    member v.F4_RootCallRelay() : CommentedStatement =
-        let call = getPureCall  v.Vertex
-
+    member v.F4_RootCoinRelay() : CommentedStatement =
         let ands = 
-            if call.UsingTon 
-            then call.V.TON.DN.Expr
-            else call.INs.EmptyOnElseToAnd(v.System) 
+            match v.Vertex  with
+            | :? Real as r ->r.V.CR.Expr
+            | :? Call | :? Alias as ca -> 
+                let call = getPureCall ca
+                if call.UsingTon 
+                    then call.V.TON.DN.Expr
+                    else call.INs.EmptyOnElseToAnd(v.System) 
+            | _ -> 
+                failwith "Error F4_RootCoinRelay"
 
         let sets = ands <&&> v.EP.Expr
         let rsts = !!v.SP.Expr

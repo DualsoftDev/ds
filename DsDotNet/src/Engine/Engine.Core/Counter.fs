@@ -89,7 +89,7 @@ module rec CounterModule =
         | XGI, CTR ->
             cd  <- fwdCreateBoolTag     $"{name}.CD" false  // Count down enable bit
             pre <- fwdCreateUShortTag   $"{name}.PV" preset
-            res <- fwdCreateBoolTag     $"{name}.RST" false
+            res <- fwdCreateBoolTag     $"{name}.LD" false
             dn  <- fwdCreateBoolTag     $"{name}.Q" false  // Done
             acc <- fwdCreateUShortTag   $"{name}.CV" accum
             add [cd; pre; res; dn; acc]

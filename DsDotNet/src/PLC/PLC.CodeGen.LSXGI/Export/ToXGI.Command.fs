@@ -1,7 +1,5 @@
 namespace PLC.CodeGen.LSXGI
 
-open System
-open System.Collections.Generic
 open System.Linq
 
 open PLC.CodeGen.Common
@@ -13,22 +11,17 @@ open Engine.Core
 module internal rec Command =
     /// Rung 의 Command 정의를 위한 type.
     //Command = CoilCmd or FunctionCmd or FunctionBlockCmd
-    type XgiCommand(cmdType:CommandTypes) =
-        member x.CommandType with get() = cmdType
+    type CommandTypes with
         member x.CoilTerminalTag with get() =
             /// Terminal End Tag
             let tet (fc:#IFunctionCommand) = fc.TerminalEndTag
-            match cmdType with
+            match x with
             | CoilCmd (cc)           -> tet(cc)
             | FunctionCmd (fc)       -> tet(fc)
             | FunctionBlockCmd (fbc) -> tet(fbc)
 
-        member x.HasInstance with get() =
-            match cmdType with
-            | FunctionBlockCmd (fbc) ->  true
-            | _-> false
         member x.Instance with get() =
-            match cmdType with
+            match x with
             | FunctionBlockCmd (fbc) ->
                 match fbc with
                 | TimerMode ts ->
@@ -50,7 +43,7 @@ module internal rec Command =
             |_-> failwithlog "do not make instanceTag"
 
         member x.LDEnum with get() =
-            match cmdType with
+            match x with
                 | CoilCmd (cc) ->
                     match cc with
                     | COMCoil _       -> ElementType.CoilMode
@@ -62,26 +55,26 @@ module internal rec Command =
                 | (FunctionCmd  _ | FunctionBlockCmd  _)
                     -> ElementType.VertFBMode
 
-            /// Coil의 부정 Command를 반환한다.
-         member x.ReverseCmd () =
-            match cmdType with
-            | CoilCmd (cc) ->
-                match cc with
-                | COMCoil(tag) -> XgiCommand(CoilCmd(CoilOutputMode.COMClosedCoil(tag)))
-                | COMClosedCoil(tag) -> XgiCommand(CoilCmd(CoilOutputMode.COMCoil(tag)))
-                | _ ->
-                    failwithlogf "This ReverseCmd is not support"
-            | _ ->
-                failwithlogf "This ReverseCmd is not support"
+         //   /// Coil의 부정 Command를 반환한다.
+         //member x.``ReverseCmd 사용안함`` () =
+         //   match cmdType with
+         //   | CoilCmd (cc) ->
+         //       match cc with
+         //       | COMCoil(tag) -> CoilCmd(CoilOutputMode.COMClosedCoil(tag))
+         //       | COMClosedCoil(tag) -> CoilCmd(CoilOutputMode.COMCoil(tag))
+         //       | _ ->
+         //           failwithlogf "This ReverseCmd is not support"
+         //   | _ ->
+         //       failwithlogf "This ReverseCmd is not support"
 
-    let createOutputCoil(tag)    = XgiCommand(CoilCmd(CoilOutputMode.COMCoil(tag)))
-    let createOutputCoilNot(tag) = XgiCommand(CoilCmd(CoilOutputMode.COMClosedCoil(tag)))
-    let createOutputSet(tag)     = XgiCommand(CoilCmd(CoilOutputMode.COMSetCoil(tag)))
-    let createOutputRst(tag)     = XgiCommand(CoilCmd(CoilOutputMode.COMResetCoil(tag)))
-    let createOutputPulse(tag)   = XgiCommand(CoilCmd(CoilOutputMode.COMPulseCoil(tag)))
-    let createOutputNPulse(tag)  = XgiCommand(CoilCmd(CoilOutputMode.COMNPulseCoil(tag)))
+    //let createOutputCoil(tag)    = CoilCmd(CoilOutputMode.COMCoil(tag))
+    //let createOutputCoilNot(tag) = CoilCmd(CoilOutputMode.COMClosedCoil(tag))
+    //let createOutputSet(tag)     = CoilCmd(CoilOutputMode.COMSetCoil(tag))
+    //let createOutputRst(tag)     = CoilCmd(CoilOutputMode.COMResetCoil(tag))
+    //let createOutputPulse(tag)   = CoilCmd(CoilOutputMode.COMPulseCoil(tag))
+    //let createOutputNPulse(tag)  = CoilCmd(CoilOutputMode.COMNPulseCoil(tag))
 
-    //let createOutputCopy(tag, tagA, tagB)             = XgiCommand(FunctionCmd(FunctionPure.CopyMode(tag, (tagA, tagB))))
+    //let createOutputCopy(tag, tagA, tagB)             = FunctionCmd(FunctionPure.CopyMode(tag, (tagA, tagB)))
 
 
     /// '_ON' 에 대한 flat expression
@@ -96,13 +89,13 @@ module internal rec Command =
 
 
 
-    type FuctionParameterShape =
-        /// Input parameter connection
-        | LineConnectFrom of x:int * y:int
-        /// Output parameter connection
-        | LineConnectTo of x:int * y:int
-        /// Input/Output 라인 연결없이 직접 write
-        | Value of value:IValue
+    //type FuctionParameterShape =
+    //    /// Input parameter connection
+    //    | LineConnectFrom of x:int * y:int
+    //    /// Output parameter connection
+    //    | LineConnectTo of x:int * y:int
+    //    /// Input/Output 라인 연결없이 직접 write
+    //    | Value of value:IValue
 
     let private flatten (exp:IExpression<bool> option) = exp.Value.Flatten() :?> FlatExpression
 
@@ -131,14 +124,14 @@ module internal rec Command =
         let results = [
             yield! paramXmls
 
-            let cmd = FunctionBlockCmd(TimerMode(ts)) |> XgiCommand
+            let cmd = FunctionBlockCmd(TimerMode(ts))
             yield! createFunctionBlockInstanceXmls (x+spanX, y) cmd
         ]
         results
 
     let drawCmdCounter (x, y) (counterStatement:CounterStatement) : CoordinatedXmlElement list =
 
-        let paramDic = Dictionary<string, FuctionParameterShape>()
+        //let paramDic = Dictionary<string, FuctionParameterShape>()
         let cs = counterStatement
         let pv = int cs.Counter.PRE.Value
         let typ = cs.Counter.Type
@@ -180,7 +173,7 @@ module internal rec Command =
         let results = [
             yield! paramXmls
 
-            let cmd = FunctionBlockCmd(CounterMode(cs)) |> XgiCommand
+            let cmd = FunctionBlockCmd(CounterMode(cs))
             yield! createFunctionBlockInstanceXmls (x+1, y) cmd
         ]
 
@@ -269,7 +262,7 @@ module internal rec Command =
 
 
 
-    let createFunctionBlockInstanceXmls (x, y) (cmd:XgiCommand) : CoordinatedXmlElement list =
+    let createFunctionBlockInstanceXmls (x, y) (cmd:CommandTypes) : CoordinatedXmlElement list =
         //Command instance 객체생성
         let inst, func = cmd.Instance |> fun (inst, varType) -> inst, varType.ToString()
         [
@@ -281,7 +274,7 @@ module internal rec Command =
 
 
     /// (x, y) 위치에 cmd 를 생성.  cmd 가 차지하는 height 와 xml 목록을 반환
-    let drawCommand (x, y) (cmd:XgiCommand) : CoordinatedXmlElement list =
+    let drawCommand (x, y) (cmd:CommandTypes) : CoordinatedXmlElement list =
         let c = coord(x, y)
 
         let drawHLine() =
@@ -291,7 +284,7 @@ module internal rec Command =
         //FunctionBlock, Function 그리기
         let results =
             [
-                match cmd.CommandType with
+                match cmd with
                 | FunctionCmd (fc) ->
                     // todo: 내부로 이동... drawCmdXXX 내에서 그려야 한다..
                     drawHLine()
@@ -312,7 +305,7 @@ module internal rec Command =
         results
 
     /// (x, y) 위치에 coil 생성.  height(=1) 와 xml 목록을 반환
-    let drawCoil(x, y) (cmdExp:XgiCommand) : CoordinatedXmlElement list =
+    let drawCoil(x, y) (cmdExp:CommandTypes) : CoordinatedXmlElement list =
         let spanX = (coilCellX-x-2)
         let lengthParam = $"Param={dq}{3 * spanX}{dq}"
         let results = [
@@ -440,7 +433,7 @@ module internal rec Command =
     /// xml 및 다음 y 좌표 반환
     /// expr 이 None 이면 그리지 않는다.
     /// cmdExp 이 None 이면 command 를 그리지 않는다.
-    let rung (x, y) (expr:FlatExpression option) (cmdExp:XgiCommand option) : CoordinatedXmlElement =
+    let rung (x, y) (expr:FlatExpression option) (cmdExp:CommandTypes option) : CoordinatedXmlElement =
 
         let exprSpanX, exprSpanY, exprXmls =
             match expr with
@@ -456,7 +449,7 @@ module internal rec Command =
             | Some cmdExp ->
                 let nx = x + exprSpanX
                 let cmdXmls =
-                    match cmdExp.CommandType with
+                    match cmdExp with
                     | CoilCmd (cc) ->
                         drawCoil (nx-1, y) cmdExp
                     | ( FunctionCmd _ | FunctionBlockCmd _ ) ->

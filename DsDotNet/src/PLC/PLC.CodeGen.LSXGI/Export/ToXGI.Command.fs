@@ -12,7 +12,7 @@ module internal rec Command =
     /// Rung 의 Command 정의를 위한 type.
     //Command = CoilCmd or FunctionCmd or FunctionBlockCmd
     type CommandTypes with
-        member x.CoilTerminalTag with get() =
+        member x.CoilTerminalTag =
             /// Terminal End Tag
             let tet (fc:#IFunctionCommand) = fc.TerminalEndTag
             match x with
@@ -20,40 +20,41 @@ module internal rec Command =
             | FunctionCmd (fc)       -> tet(fc)
             | FunctionBlockCmd (fbc) -> tet(fbc)
 
-        member x.Instance with get() =
+        member x.InstanceName =
+            match x with
+            | FunctionBlockCmd (fbc) -> fbc.GetInstanceText()
+            | _-> failwithlog "do not make instanceTag"
+
+        member x.VarType =
             match x with
             | FunctionBlockCmd (fbc) ->
                 match fbc with
                 | TimerMode ts ->
-                    let varType =
-                        match ts.Timer.Type with
-                        | TON -> VarType.TON
-                        | TOF -> VarType.TOFF
-                        | RTO -> VarType.TMR
-                    fbc.GetInstanceText(), varType
+                    match ts.Timer.Type with
+                    | TON -> VarType.TON
+                    | TOF -> VarType.TOFF
+                    | RTO -> VarType.TMR
 
                 | CounterMode cs ->
-                    let varType =
-                        match cs.Counter.Type with
-                        | CTU -> VarType.CTU_INT
-                        | CTD -> VarType.CTD_INT
-                        | CTUD -> VarType.CTUD_INT
-                        | CTR ->  VarType.CTR
-                    fbc.GetInstanceText(), varType
+                    match cs.Counter.Type with
+                    | CTU -> VarType.CTU_INT
+                    | CTD -> VarType.CTD_INT
+                    | CTUD -> VarType.CTUD_INT
+                    | CTR ->  VarType.CTR
             |_-> failwithlog "do not make instanceTag"
 
-        member x.LDEnum with get() =
+        member x.LDEnum =
             match x with
-                | CoilCmd (cc) ->
-                    match cc with
-                    | COMCoil _       -> ElementType.CoilMode
-                    | COMClosedCoil _ -> ElementType.ClosedCoilMode
-                    | COMSetCoil _    -> ElementType.SetCoilMode
-                    | COMResetCoil _  -> ElementType.ResetCoilMode
-                    | COMPulseCoil _  -> ElementType.PulseCoilMode
-                    | COMNPulseCoil _ -> ElementType.NPulseCoilMode
-                | (FunctionCmd  _ | FunctionBlockCmd  _)
-                    -> ElementType.VertFBMode
+            | CoilCmd (cc) ->
+                match cc with
+                | COMCoil _       -> ElementType.CoilMode
+                | COMClosedCoil _ -> ElementType.ClosedCoilMode
+                | COMSetCoil _    -> ElementType.SetCoilMode
+                | COMResetCoil _  -> ElementType.ResetCoilMode
+                | COMPulseCoil _  -> ElementType.PulseCoilMode
+                | COMNPulseCoil _ -> ElementType.NPulseCoilMode
+            | (FunctionCmd  _ | FunctionBlockCmd  _)
+                -> ElementType.VertFBMode
 
          //   /// Coil의 부정 Command를 반환한다.
          //member x.``ReverseCmd 사용안함`` () =
@@ -264,7 +265,8 @@ module internal rec Command =
 
     let createFunctionBlockInstanceXmls (x, y) (cmd:CommandTypes) : CoordinatedXmlElement list =
         //Command instance 객체생성
-        let inst, func = cmd.Instance |> fun (inst, varType) -> inst, varType.ToString()
+        let inst = cmd.InstanceName
+        let func = cmd.VarType.ToString()
         [
             createFunctionXmlAt (func, func) inst (x, y)
 
@@ -295,7 +297,7 @@ module internal rec Command =
                 | FunctionBlockCmd (fbc) ->
                     match fbc with
                     | TimerMode(timerStatement) ->
-                        yield! drawCmdTimer(x, y) timerStatement     // <timer>
+                        yield! drawCmdTimer(x, y) timerStatement
                     | CounterMode(counterStatement) ->
                         yield! drawCmdCounter(x, y) counterStatement
                 | _ ->

@@ -36,7 +36,7 @@ type XgiTimerTest() =
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
-    member __.``X TIMER= Many1 AND RungIn Condition test`` () =
+    member __.``TIMER= Many1 AND RungIn Condition test`` () =
         let storages = Storages()
         let code = codeForBits + """
             ton myTon = createXgiTON(2000us,
@@ -48,7 +48,7 @@ type XgiTimerTest() =
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
-    member __.``X TIMER= Many2 AND RungIn Condition test`` () =
+    member __.``TIMER= Many2 AND RungIn Condition test`` () =
         let storages = Storages()
         let code = codeForBits + """
             ton myTon = createXgiTON(2000us,

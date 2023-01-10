@@ -363,8 +363,8 @@ module internal FB =
     let xgiFunctionInfoDic =
         let dic =
             FBtext.Split('\n')
-            |> Seq.filter (fun s -> not <| s.StartsWith("#"))
             |> Seq.map (fun s -> s.Trim())
+            |> Seq.filter (fun s -> not <| s.StartsWith("#"))
             |> Seq.splitOn (fun s1 s2 -> s1.isEmpty() && not <| s2.isEmpty())
             |> Seq.map (Seq.filter (String.IsNullOrEmpty >> not) >> Array.ofSeq)
             |> Seq.map (fun fb ->
@@ -381,13 +381,29 @@ module internal FB =
     let isValidFunctionName = xgiFunctionInfoDic.ContainsKey
     let getFunctionDeails functionName = xgiFunctionInfoDic[functionName]
 
-    let getFunctionInputNames functionName =
-        (getFunctionDeails functionName).Where(fun l -> l.StartsWith("VAR_IN: ")).Select(fun l -> l.Replace("VAR_IN: ", "")).ToFSharpList()
-    let getFunctionOutputNames functionName =
-        (getFunctionDeails functionName).Where(fun l -> l.StartsWith("VAR_OUT: ")).Select(fun l -> l.Replace("VAR_OUT: ", "")).ToFSharpList()
+    type FunctionParameterSpec = {
+        Name:string
+        IsInput:bool
+        CheckType:CheckType
+    }
+    /// e.g ["CD, 0x00200001, , 0"; "LD, 0x00200001, , 0"; "PV, 0x00200040, , 0"]
+    let getFunctionParameterSpecs functionName =
+        [|
+            let details = getFunctionDeails functionName
+            for d in details do
+                match d with
+                | RegexPattern "VAR_IN: ([^,]+), ([^,]+)" [name; hex] ->
+                    { IsInput=true; Name=name; CheckType=decodeVarType hex }
+                | RegexPattern "VAR_OUT: ([^,]+), ([^,]+)" [name; hex] ->
+                    { IsInput=false; Name=name; CheckType=decodeVarType hex }
+                | _ -> ()
+        |]
 
-    let getFunctionInputArity functionName = (getFunctionInputNames functionName).Count()
-    let getFunctionOutputArity functionName = (getFunctionOutputNames functionName).Count()
+    let getFunctionInputSpecs  functionName = getFunctionParameterSpecs functionName |> filter (fun p -> p.IsInput)
+    let getFunctionOutputSpecs functionName = getFunctionParameterSpecs functionName |> filter (fun p -> not p.IsInput)
+
+    let getFunctionInputArity functionName = (getFunctionInputSpecs functionName).Count()
+    let getFunctionOutputArity functionName = (getFunctionOutputSpecs functionName).Count()
     let getFunctionHeight functionName = max (getFunctionInputArity functionName) (getFunctionOutputArity functionName)
 
     /// getFBXML FB 이름 기준으로 XML 저장 파라메터를 읽음

@@ -89,7 +89,7 @@ module rec CounterModule =
         | XGI, CTR ->
             cd  <- fwdCreateBoolTag     $"{name}.CD" false  // Count down enable bit
             pre <- fwdCreateUShortTag   $"{name}.PV" preset
-            res <- fwdCreateBoolTag     $"{name}.LD" false
+            res <- fwdCreateBoolTag     $"{name}.RST" false
             dn  <- fwdCreateBoolTag     $"{name}.Q" false  // Done
             acc <- fwdCreateUShortTag   $"{name}.CV" accum
             add [cd; pre; res; dn; acc]
@@ -221,7 +221,7 @@ module rec CounterModule =
 
     type CTRStruct(counterParams:CounterParams ) =
         inherit CounterBaseStruct(counterParams)
-        member _.CU = base.CU
+        member _.RES = base.RES
         interface ICTR with
             member x.CD = x.CD
         static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType) =

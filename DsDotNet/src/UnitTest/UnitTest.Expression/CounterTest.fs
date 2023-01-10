@@ -310,8 +310,9 @@ open Engine.Parser.FS
             use _ = setRuntimeTarget WINDOWS
             let storages = Storages()
             let code = """
-                bool x0 = createTag("%MX0.0.0", false);
-                ctr myCTR = createWinCTR(2000us, $x0);
+                bool cd = createTag("%MX0.0.0", false);
+                bool ld = createTag("%MX0.0.0", false);
+                ctr myCTR = createWinCTR(2000us, $cd, $ld);
 """
 
             let statement = parseCode storages code
@@ -329,5 +330,5 @@ open Engine.Parser.FS
 """
 
             let statement = parseCode storages code
-            [ "CD"; "PV"; "RST"; "Q"; "CV"; ] |> iter (fun n -> storages.ContainsKey($"myCTR.{n}") === true)
-            [ "CU"; "DN"; "PRE"; "ACC"; ] |> iter (fun n -> storages.ContainsKey($"myCTR.{n}") === false)
+            [ "CD"; "LD"; "PV"; "Q"; "CV"; ] |> iter (fun n -> storages.ContainsKey($"myCTR.{n}") === true)
+            [ "CU"; "DN"; "RST"; "PRE"; "ACC"; ] |> iter (fun n -> storages.ContainsKey($"myCTR.{n}") === false)

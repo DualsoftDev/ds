@@ -1,7 +1,6 @@
 namespace PLC.CodeGen.LSXGI
 
 open Engine.Common.FS
-open Engine.Core
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 open FB
 

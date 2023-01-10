@@ -431,6 +431,8 @@ module internal rec Command =
             let terminalText =
                 match terminal with
                 | :? IStorage as storage -> storage.Name
+                | :? LiteralHolder<bool> as onoff ->
+                    if onoff.Value then "_ON" else "_OFF"
                 | _ -> terminal.ToText()
             let str = elementBody mode c terminalText
             let xml = { Coordinate = c; Xml = str; SpanX = 1; SpanY = 1;}

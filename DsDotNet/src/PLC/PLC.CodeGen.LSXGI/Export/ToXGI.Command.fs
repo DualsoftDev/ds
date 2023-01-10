@@ -8,6 +8,7 @@ open Engine.Common.FS
 open Engine.Core
 open FB
 open FSharp.Data.Runtime.BaseTypes
+open System.Collections.Generic
 
 [<AutoOpen>]
 module internal rec Command =
@@ -317,7 +318,9 @@ module internal rec Command =
                         sy <- sy + blockXml.TotalSpanY
                     else
                         (y + portOffset, exp) |> reservedLiteralInputParam.Add
-                        // Function block input cell 에 직접 적을 것이므로 sy offset 을 증가시키지 않는다.  (sy <- sy + 1)
+
+                        // Function block input cell 에 직접 적을 것이므로 sy offset 을 증가시키지 않고 optimize 필요. ``Counter CTR with conditional test2``
+                        sy <- sy + 1
             ]
 
         (* 입력 parameter 를 그렸을 때, 1 줄을 넘는 것들의 갯수 만큼 horizontal line spacing 필요 *)
@@ -330,33 +333,30 @@ module internal rec Command =
         /// input parameter end 와 function input adaptor 와의 'S' shape 연결 문어발
         let tentacleXmls =
             [
-                let mutable sy = 0
                 for (inputBlockIndex, (portOffset, b)) in blockXmls.Indexed() do
                     let i = inputBlockIndex
                     let bex = b.X + b.TotalSpanX    // block end X
                     let bey = b.Y
                     let c = coord(bex, bey)
                     let spanX = (fsx - bex)
-                    tracefn $"H: ({bex}, {bey}) -> ({bex+i-1}, {bey})"
-                    match tryHLineTo (bex, bey) (bex + max 0 (i - 1)) with
-                    | Some xml ->
-                        { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 }
-                    | None ->
-                        ()
+                    if b.TotalSpanX > 1 then
+                        tracefn $"H: ({bex}, {bey}) -> ({bex+i-1}, {bey})"
+                        match tryHLineTo (bex, bey) (bex + max 0 (i - 1)) with
+                        | Some xml -> { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 }
+                        | None -> ()
 
-                    if i > 0 then
-                        sy <- sy + b.TotalSpanY
-                        tracefn $"V: ({bex+i-1}, {bey}) -> ({bex+i-1}, {y + i})"
-                        yield! vlineUpTo (bex+i-1, bey) (y + portOffset)
+                        if i > 0 then
+                            let bexi = bex+i
+                            let yi = y + portOffset
+                            tracefn $"V: ({bexi-1}, {bey}) -> ({bexi-1}, {yi})"
+                            yield! vlineUpTo (bexi-1, bey) yi
 
-                        match tryHLineTo (bex+i, y+portOffset) (fsx - 1) with
-                        | Some xml ->
-                            { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 }
-                        | None ->
-                            ()
+                            match tryHLineTo (bexi, yi) (fsx - 1) with
+                            | Some xml -> { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 }
+                            | None -> ()
             ]
 
-        let cxmls =
+        let allXmls =
             [
                 (* Timer 의 PT, Counter 의 PV 등의 상수 값을 입력 모선에서 연결하지 않고, function cell 에 바로 입력 하기 위함*)
                 for (ry, rexp) in reservedLiteralInputParam do
@@ -383,8 +383,8 @@ module internal rec Command =
 
         {   X=x; Y=y;
             TotalSpanX = fsx + 3;
-            TotalSpanY = max sy (cxmls.Max(fun x -> x.SpanY));
-            XmlElements = cxmls |> List.sortBy(fun cxml -> cxml.Coordinate)
+            TotalSpanY = max sy (allXmls.Max(fun x -> x.SpanY));
+            XmlElements = allXmls |> List.sortBy(fun cxml -> cxml.Coordinate)
         }
 
 

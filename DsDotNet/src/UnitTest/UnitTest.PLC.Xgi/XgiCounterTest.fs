@@ -70,7 +70,7 @@ type XgiCounterTest() =
 
 
     [<Test>]
-    member __.``X Counter CTU with conditional test`` () =
+    member __.``Counter CTU with conditional test`` () =
         let storages = Storages()
         let code = """
             bool cu1  = false;
@@ -89,7 +89,7 @@ type XgiCounterTest() =
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
-    member __.``X Counter CTD with conditional test`` () =
+    member __.``Counter CTD with conditional test`` () =
         let storages = Storages()
         let code = """
             bool cu1  = false;
@@ -108,7 +108,7 @@ type XgiCounterTest() =
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
-    member __.``X Counter CTR with conditional test`` () =
+    member __.``Counter CTR with conditional test`` () =
         let storages = Storages()
         let code = """
             bool cd1  = false;
@@ -121,6 +121,61 @@ type XgiCounterTest() =
             bool xx7 = false;
             ctr myCTR = createXgiCTR(2000us, ($cd1 && $cd2) || $cd3, ($res0 || $res1) && $res2 );
             $xx7 := (($cd1 && $cd2) || $cd3 || ($res0 || $res1) && $res2) && $cd1;
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
+
+    [<Test>]
+    member __.``Counter CTR with conditional test2`` () =
+        let storages = Storages()
+        let code = """
+            bool cd1  = false;
+            bool cd2  = false;
+            bool cd3  = false;
+            bool cd4  = false;
+            bool res0 = false;
+            bool res1 = false;
+            bool res2 = false;
+
+            bool xx7 = false;
+            ctr myCTR = createXgiCTR(2000us, ($cd1 && $cd2 || $cd3 || $cd4) && $cd3, ($res0 || $res1) && $res2 );
+            $xx7 := (($cd1 && $cd2) || $cd3 || ($res0 || $res1) && $res2) && $cd1;
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
+
+    [<Test>]
+    member __.``X Counter CTUD with conditional test`` () =
+        let storages = Storages()
+        let code = """
+            bool cu1  = false;
+            bool cu2  = false;
+            bool cu3  = false;
+            bool cu4  = false;
+            bool cd1  = false;
+            bool cd2  = false;
+            bool cd3  = false;
+            bool cd4  = false;
+            bool res0 = false;
+            bool res1 = false;
+            bool res2 = false;
+            bool load1  = false;
+            bool load2  = false;
+            bool load3  = false;
+            bool load4  = false;
+
+            bool xx7 = false;
+            ctud myCTUD =
+                createXgiCTUD(
+                    2000us
+                    , ($cu1 && $cu2) || $cu3 || $cu4
+                    , $cd1 || $cd2 || $cd3 && $cd4
+                    , $res0 || $res1 && $res2
+                    , $load1 && $load2 ||$load3 || $load4
+                    );
+            //$xx7 := (($cd1 && $cd2) || $cd3 || ($res0 || $res1) && $res2) && $cd1;
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)

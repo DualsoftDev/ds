@@ -1,4 +1,21 @@
 /* grun expr toplevels -gui < g4test/expr/expr.expr */
+
+ctud myCTUD =
+    createXgiCTUD(
+        2000us
+        , ($cu1 && $cu2) || $cu3 || cu4
+        , $cd1 || $cd2 || $cd3 && $cd4
+        , $res0 || $res1 && res2
+        , $ld1 && ! $ld2 ||$ld3 || ! $ld4
+        );
+
+ctud myCTUD =
+    createXgiCTUD(2000us
+        , ($cu1 && $cu2) || $cu3 || cu4
+        , $cd1 || $cd2 || $cd3 && $cd4
+        , $res0 || $res1 && res2
+        , $ld1 && ! $ld2 ||$ld3 || ! $ld4);
+
 $n0 := add($n1, $n2) > 3;
 
 

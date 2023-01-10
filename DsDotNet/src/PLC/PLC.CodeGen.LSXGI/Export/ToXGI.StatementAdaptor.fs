@@ -106,6 +106,10 @@ module rec TypeConvertorModule =
         | ch1::ch2::_ when isValidStart ch1 && isValidStart ch2 -> ()
         | _ -> failwith $"Invalid XGI variable name {name}.  Use longer name"
 
+        match name with
+        | RegexPattern "ld(\d)+" _ -> failwith $"Invalid XGI variable name {name}."
+        | _ -> ()
+
         XgiLocalVar(name, comment, initValue)
 
 

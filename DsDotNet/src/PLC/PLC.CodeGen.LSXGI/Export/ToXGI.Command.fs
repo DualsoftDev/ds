@@ -291,12 +291,11 @@ module internal rec Command =
         //Command instance 객체생성
         let inst = cmd.InstanceName
         let func = cmd.VarType.ToString()
-        let inputSpecs = getFunctionInputSpecs func |> Array.ofSeq      // e.g ["CD, 0x00200001, , 0"; "LD, 0x00200001, , 0"; "PV, 0x00200040, , 0"]
-
-        namedParameters.Length = inputSpecs.Length |> verifyM "ERROR: Function input parameter mismatch."
 
         let dic = namedParameters |> dict
         let alignedParameters =
+            let inputSpecs = getFunctionInputSpecs func |> Array.ofSeq      // e.g ["CD, 0x00200001, , 0"; "LD, 0x00200001, , 0"; "PV, 0x00200040, , 0"]
+            namedParameters.Length = inputSpecs.Length |> verifyM "ERROR: Function input parameter mismatch."
             [|
                 for s in inputSpecs do
                     let exp = dic[s.Name]
@@ -311,28 +310,29 @@ module internal rec Command =
         let mutable sy = 0
         let blockXmls =
             [
-                for (i, (name, exp, checkType)) in alignedParameters.Indexed() do
+                for (portOffset, (name, exp, checkType)) in alignedParameters.Indexed() do
                     if checkType.HasFlag CheckType.BOOL then
                         let blockXml = drawFunctionInputLadderBlock (x, y + sy) (flatten exp)
-                        blockXml
+                        portOffset, blockXml
                         sy <- sy + blockXml.TotalSpanY
                     else
-                        (y + i, exp) |> reservedLiteralInputParam.Add
-                        sy <- sy + 1
+                        (y + portOffset, exp) |> reservedLiteralInputParam.Add
+                        // Function block input cell 에 직접 적을 것이므로 sy offset 을 증가시키지 않는다.  (sy <- sy + 1)
             ]
 
         (* 입력 parameter 를 그렸을 때, 1 줄을 넘는 것들의 갯수 만큼 horizontal line spacing 필요 *)
-        let plusHorizontalPadding = blockXmls.Count(fun x -> x.TotalSpanY > 1)
+        let plusHorizontalPadding = blockXmls.Count(fun (_, x) -> x.TotalSpanY > 1)
         let plusHorizontalPadding = max 0 (plusHorizontalPadding - 1)
 
         /// function start X
-        let fsx = blockXmls.Max(fun x -> x.TotalSpanX) + plusHorizontalPadding
+        let fsx = blockXmls.Max(fun (_, x) -> x.TotalSpanX) + plusHorizontalPadding
 
-        /// input parameter end 와 function input adaptor 와의 'S' shape 연결
-        let multiHLineXmls =
+        /// input parameter end 와 function input adaptor 와의 'S' shape 연결 문어발
+        let tentacleXmls =
             [
                 let mutable sy = 0
-                for (i, b) in blockXmls.Indexed() do
+                for (inputBlockIndex, (portOffset, b)) in blockXmls.Indexed() do
+                    let i = inputBlockIndex
                     let bex = b.X + b.TotalSpanX    // block end X
                     let bey = b.Y
                     let c = coord(bex, bey)
@@ -347,9 +347,9 @@ module internal rec Command =
                     if i > 0 then
                         sy <- sy + b.TotalSpanY
                         tracefn $"V: ({bex+i-1}, {bey}) -> ({bex+i-1}, {y + i})"
-                        yield! vlineUpTo (bex+i-1, bey) (y + i)
+                        yield! vlineUpTo (bex+i-1, bey) (y + portOffset)
 
-                        match tryHLineTo (bex+i, y+i) (fsx - 1) with
+                        match tryHLineTo (bex+i, y+portOffset) (fsx - 1) with
                         | Some xml ->
                             { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 }
                         | None ->
@@ -372,8 +372,8 @@ module internal rec Command =
                             failwith "ERROR"
                     createFBParameterXml (x + fsx - 1, ry) literal
 
-                yield! blockXmls |> bind(fun bx -> bx.XmlElements)
-                yield! multiHLineXmls
+                yield! blockXmls |> bind(fun (_, bx) -> bx.XmlElements)
+                yield! tentacleXmls
                 let x, y = rungStartX, rungStartY // tmp
 
                 //Command 결과출력
@@ -448,12 +448,6 @@ module internal rec Command =
     let rec private drawLadderBlock (x, y) (expr:FlatExpression) : BlockSummarizedXmlElements =
         let baseRIWNP = { RungInfos = []; X=x; Y=y; SpanX=1; SpanY=1; }
         let c = coord(x, y)
-
-        // todo : uncomment
-
-        //if enableXmlComment then
-        //    let xml = $"<!-- {x} {y} {expr.ToText()} -->"
-        //    { Coordinate = c; Xml = xml; SpanX = 1; SpanY = 1 }
 
         match expr with
         | FlatTerminal(terminal, pulse, neg) ->

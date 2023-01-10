@@ -82,6 +82,13 @@ module internal Common =
 
     let hLineStartMarkAt (x, y) = elementFull (int ElementType.HorzLineMode) (coord(x, y)) "" ""
 
+    /// debugging 용 xml comment 생성
+    let xmlCommentAtCoordinate (c:EncodedXYCoordinate) (comment:string) =
+        { Coordinate = c; Xml = $"<!-- {comment} -->" ; SpanX = maxNumHorizontalContact; SpanY = 1 }
+    /// debugging 용 xml comment 생성
+    let xmlCommentAt (x, y) comment = xmlCommentAtCoordinate (coord(x, y)) comment
+
+
     /// 마지막 수평으로 연결 정보
     let tryHLineTo (x, y) endX =
         if endX < x then
@@ -107,12 +114,11 @@ module internal Common =
     let vlineDownN (x, y) n =
         [
             if enableXmlComment then
-                let c = coord(x, y)
-                yield { Coordinate = c; Xml = $"<!-- vlineDownTo {x} {y} {n} -->" ; SpanX = 0; SpanY = n }
+                xmlCommentAt (x, y) $"vlineDownN ({x}, {y}) {n}"
 
             if n > 0 then
                 for i in [0.. n-1] do
-                    yield vLineAt (x, y+i)
+                    vLineAt (x, y+i)
         ]
 
     let vlineUpN (x, y) n = vlineDownN (x, y-n) n

@@ -105,7 +105,7 @@ module internal XgiFile =
                 | DuAugmentedPLCFunction ({FunctionName = ("+"|"-"|"*"|"/") as op; Arguments = args; Output=output }) ->
                     let fn = operatorToXgiFunctionName op
                     let command = FunctionCmd(Arithematic(fn, output, args))
-                    let rgiSub = xmlRung (Some alwaysOnFlatExpression) (Some command) rgi.Y
+                    let rgiSub = xmlRung None (Some command) rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
                 | _ ->
                     failwith "Not yet"

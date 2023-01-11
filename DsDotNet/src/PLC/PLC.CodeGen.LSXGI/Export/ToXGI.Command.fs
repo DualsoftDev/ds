@@ -180,7 +180,7 @@ module internal rec Command =
     let drawPredicate (x, y) (predicate:Predicate) : BlockSummarizedXmlElements =
         match predicate with
         | Compare (name, output, args) ->
-            let namedParameters =
+            let namedInputParameters =
                 [ "EN", alwaysOnExpression :> IExpression]
                 @ (args |> List.indexed |> List.map1st (fun n -> $"IN{n+1}"))
             let func =
@@ -190,19 +190,19 @@ module internal rec Command =
                     $"{name}2_{opCompType}" // e.g "GT2_INT"
                 | _ ->
                     failwith "NOT YET"
-            createBoxXmls (x, y)  func namedParameters ""
+            createBoxXmls (x, y)  func namedInputParameters ""
 
     let drawFunction (x, y) (func:Function) : BlockSummarizedXmlElements =
         match func with
         | Arithematic (name, output, args) ->
-            let namedParameters =
+            let namedInputParameters =
                 [ "EN", alwaysOnExpression :> IExpression]
                 @ (args |> List.indexed |> List.map1st (fun n -> $"IN{n+1}"))
             let func =
                 match name with
                 | ("ADD" | "MUL" | "SUB" | "DIV") -> $"{name}2_INT"
                 | _ -> failwith "NOT YET"
-            createBoxXmls (x, y)  func namedParameters ""
+            createBoxXmls (x, y)  func namedInputParameters ""
 
     [<Obsolete("삭제 대상")>]
     let drawPredicateCompare (x, y) (func:string) (out:INamedExpressionizableTerminal) (leftA:IExpression) (leftB:IExpression) : BlockSummarizedXmlElements =
@@ -296,22 +296,28 @@ module internal rec Command =
                 failwith "ERROR"
 
 
-    let createFunctionBlockInstanceXmls (rungStartX, rungStartY) (cmd:CommandTypes) (namedParameters:(string*IExpression) list) : BlockSummarizedXmlElements =
+    let createFunctionBlockInstanceXmls (rungStartX, rungStartY) (cmd:CommandTypes) (namedInputParameters:(string*IExpression) list) : BlockSummarizedXmlElements =
         let func = cmd.VarType.ToString()
         let instanceName = cmd.InstanceName
-        createBoxXmls (rungStartX, rungStartY) func namedParameters instanceName
+        createBoxXmls (rungStartX, rungStartY) func namedInputParameters instanceName
 
     /// cmd 인자로 주어진 function block 의 type 과
-    /// namedParameters 로 주어진 function block 에 연결된 다릿발 정보를 이용해서
+    /// namedInputParameters 로 주어진 function block 에 연결된 다릿발 정보를 이용해서
     /// function block rung 을 그린다.
-    let createBoxXmls (rungStartX, rungStartY) (func:string) (namedParameters:(string*IExpression) list) (instanceName:string) : BlockSummarizedXmlElements =
-        let dic = namedParameters |> dict
+    let createBoxXmls
+        (rungStartX, rungStartY)
+        (func:string)
+        (namedInputParameters:(string*IExpression) list)
+        (instanceName:string)
+        : BlockSummarizedXmlElements
+      =
+        let dic = namedInputParameters |> dict
 
         /// 입력 인자들을 function 의 입력 순서 맞게 재배열
         let alignedParameters =
             /// e.g ["CD, 0x00200001, , 0"; "LD, 0x00200001, , 0"; "PV, 0x00200040, , 0"]
             let inputSpecs = getFunctionInputSpecs func |> Array.ofSeq
-            namedParameters.Length = inputSpecs.Length |> verifyM "ERROR: Function input parameter mismatch."
+            namedInputParameters.Length = inputSpecs.Length |> verifyM "ERROR: Function input parameter mismatch."
             [|
                 for s in inputSpecs do
                     let exp = dic[s.Name]

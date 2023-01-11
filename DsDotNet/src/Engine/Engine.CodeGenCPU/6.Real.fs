@@ -8,6 +8,7 @@ open Engine.CodeGenCPU
 type VertexManager with
 
     member v.R1_RealInitialStart(): CommentedStatement  = 
+        let v = v :?> VertexReal
         let sets = v.G.Expr <&&> v.OG.Expr  
         let rsts = v.H.Expr
 

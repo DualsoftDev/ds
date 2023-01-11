@@ -19,6 +19,11 @@ module ConvertCoreExt =
         (PlcTag(plcName, address, false) :> ITagWithAddress)
 
     let getVM(v:Vertex) = v.VertexManager :?> VertexManager
+    let getVMReal(v:Vertex) = v.VertexManager :?> VertexReal
+    let getVMCoin(v:Vertex) = v.VertexManager :?> VertexCoin
+        //match v with
+        //| :? Real ->  v.VertexManager :?> VertexReal
+        //| _       ->  v.VertexManager :?> VertexCoin
 
     type ApiItem with
         member s.tx = DsTag<bool>("tx", false)
@@ -168,7 +173,7 @@ module ConvertCoreExt =
 
 
     type Call with
-        member c.V = c.VertexManager :?> VertexManager
+        member c.V = c.VertexManager :?> VertexCoin
         member c.UsingTon = c.CallTarget.Observes.Where(fun f->f.Name = TextOnDelayTimer).any()
         member c.UsingCtr = c.CallTarget.Observes.Where(fun f->f.Name = TextRingCounter).any()
 
@@ -182,8 +187,7 @@ module ConvertCoreExt =
                             
         member c.INs  = c.CallTarget.JobDefs.Select(fun j -> j.InTag).Cast<PlcTag<bool>>()
         member c.OUTs = c.CallTarget.JobDefs.Select(fun j -> j.OutTag).Cast<PlcTag<bool>>()
-        member c.TXs  = c.CallTarget.JobDefs |> Seq.collect(fun (j: JobDef) -> j.ApiItem.TXs)
-                                             |> Seq.map getVM |> Seq.map(fun f->f.ST)
+        member c.TXs  = c.CallTarget.JobDefs |> Seq.map(fun (j: JobDef) -> j.ApiItem.tx)
         member c.RXs  = c.CallTarget.JobDefs |> Seq.collect(fun (j: JobDef) -> j.ApiItem.RXs) 
                                              |> Seq.map getVM |> Seq.map(fun f->f.ET)
         member c.MutualResetOuts = 
@@ -194,15 +198,15 @@ module ConvertCoreExt =
                 .Cast<PlcTag<bool>>()
     
     type Real with
-        member r.V = r.VertexManager :?> VertexManager
-        member r.CoinRelays = r.Graph.Vertices.Select(getVM).Select(fun f->f.CR)
+        member r.V = r.VertexManager :?> VertexReal
+        member r.CoinRelays = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.CR)
         member r.ErrorTXs = r.Graph.Vertices.Select(getVM).Select(fun f->f.E1)
         member r.ErrorRXs = r.Graph.Vertices.Select(getVM).Select(fun f->f.E2)
 
     type Alias with
-        member a.V = a.VertexManager :?> VertexManager                    
+        member a.V = a.VertexManager :?> VertexCoin                    
 
     type RealOtherFlow with
-        member a.V = a.VertexManager :?> VertexManager                    
+        member a.V = a.VertexManager :?> VertexCoin                    
 
   

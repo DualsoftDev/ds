@@ -7,7 +7,9 @@ open Engine.Core
 type VertexManager with
 
     /// vertex 의 Real RGFH status 를 update 하는 rungs/statements 만들기                  
-    member v.S1_RealRGFH(): CommentedStatement list =                                 //  Status   SP  RP  ET
+    member v.S1_RealRGFH(): CommentedStatement list =     
+        let v = v :?> VertexReal
+                                                                                      //  Status   SP  RP  ET
                                                                                       //----------------------
         let r = v.R  <== (( (!!) v.SP.Expr                       <&&> (!!) v.EP.Expr) //    R      x   -   x  
                           <||> ( v.SP.Expr <&&>       v.RP.Expr  <&&> (!!) v.EP.Expr))//           o   o   x                                                    
@@ -20,6 +22,7 @@ type VertexManager with
 
     /// vertex 의 Call RGFH status 를 update 하는 rungs/statements 만들기                  
     member v.S2_CoinRGFH(): CommentedStatement list =                                 //  Status   ST  RT  CR
+        let v = v :?> VertexCoin
                                                                                       //----------------------
         let r = v.R  <== (( (!!) v.ST.Expr                       <&&> (!!) v.CR.Expr) //    R      x   -   x  
                           <||> ( v.ST.Expr <&&>       v.RT.Expr  <&&> (!!) v.CR.Expr))//           o   o   x                                                    

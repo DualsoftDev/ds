@@ -8,7 +8,7 @@ open Engine.Core
 type VertexManager with
 
     member v.C1_CallActionOut(): CommentedStatement list = 
-        let call = v.Vertex :?> Call
+        let call = v.GetPureCall().Value
         
         let sets = ([v.ST] @ v.GetSharedCall().STs()).ToOr()
         let rsts = call.MutualResetOuts.EmptyOffElseToOr v.System

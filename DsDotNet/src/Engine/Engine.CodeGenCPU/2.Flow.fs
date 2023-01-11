@@ -26,7 +26,7 @@ type VertexManager with
             let sets  = srcs.Select(fun (src, gr) -> gr).ToAnd()
             let rsts  = (!!)real.V.EP.Expr
             //going relay rungs
-            srcs.Select(fun (src, gr) -> (src.G.Expr, real.V.H.Expr) ==| (gr, "F2"))
+            srcs.Select(fun (src, gr) -> (src.G.Expr, real.V.EP.Expr) ==| (gr, "F2"))
             |> Seq.append [(sets, rsts) ==| (v.RT, "F2")] //reset tag  
             |> Seq.toList
         else []
@@ -34,6 +34,7 @@ type VertexManager with
 
     
     member v.F3_RootCoinRelay() : CommentedStatement =
+        let v = v :?> VertexCoin
         let ands = 
             match v.Vertex  with
             | :? RealEx as rex -> rex.V.CR.Expr
@@ -46,15 +47,15 @@ type VertexManager with
             | _ -> 
                 failwith "Error F4_RootCoinRelay"
 
-        let sets = ands <&&> v.EP.Expr
-        let rsts = !!v.SP.Expr
+        let sets = ands <&&> v.ET.Expr
+        let rsts = !!v.ST.Expr
         (sets, rsts) ==| (v.CR, "F4")
 
     //option Spec 확정 필요  
      member v.F0_RootStartRealOptionPulse(): CommentedStatement list =
         let srcs = v.Flow.Graph.FindEdgeSources(v.Vertex, StartEdge).Select(getVM)
         if srcs.Any() then
-            let sets  = srcs.Select(fun f->f.EP).ToAnd()
+            let sets  = srcs.Select(fun f->f.F).ToAnd()
             let rsts  = v.System._off.Expr
             [ 
                 //root 시작조건 이벤트 Pulse 처리

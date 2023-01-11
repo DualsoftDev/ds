@@ -32,14 +32,18 @@ module CpuLoader =
             if IsSpec v InFlowAll then
                 yield! vm.F1_RootStart()
             //RealInFlow ||| RealExFlow ||| AliasRealInFlow ||| AliasRealExInFlow
-            if IsSpec v RealContainAll then 
+            if IsSpec v RealnIndirectReal then 
                 yield! vm.F2_RootReset()
+
             if IsSpec v InFlowWithoutReal then
                 yield vm.F3_RootCoinRelay()
 
-
             if IsSpec v (CallInReal ||| CallInFlow) then
                 yield! vm.C1_CallActionOut()
+                yield! vm.C2_CallTx()
+                yield vm.C3_CallRx()
+                yield! vm.M3_CallErrorTXMonitor()
+                yield vm.M4_CallErrorRXMonitor()
             
             if IsSpec v CoinTypeAll then
                 yield! vm.S2_CoinRGFH()
@@ -47,13 +51,8 @@ module CpuLoader =
             if IsSpec v (RealInFlow ||| CoinTypeAll)  then
                 yield vm.M2_PauseMonitor()
 
-            if IsSpec v (CallInReal ||| AliasCallInReal) then
-                yield! vm.C1_CallActionOut()
-                yield! vm.C2_CallTx()
-                yield vm.C3_CallRx()
-
-                yield! vm.M3_CallErrorTXMonitor()
-                yield vm.M4_CallErrorRXMonitor()
+           // if IsSpec v (CallInReal ||| AliasCallInReal) then
+             
         ]
 
     let private applyBtnLampSpec(s:DsSystem) =

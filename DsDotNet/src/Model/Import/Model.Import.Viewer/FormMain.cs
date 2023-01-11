@@ -239,9 +239,6 @@ namespace Dual.Model.Import
 
         private void UpdateCpuUI(IEnumerable<string> text)
         {
-
-            comboBox_Segment.Items.Clear();
-
             comboBox_Segment.DisplayMember = "Display";
 
             if (comboBox_Segment.Items.Count > 0)

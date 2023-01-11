@@ -9,6 +9,36 @@ open Engine.Common.FS
 [<AutoOpen>]
 module CodeConvertUtil =
 
+        ///Real 자신을 공용으로 사용하는 Vertex들  
+    let getSharedReal(v:VertexManager) : VertexManager seq =
+            (v.Vertex :?> Real).GetVertexSharedReal().Select(getVM) 
+
+        ///Call 자신을 공용으로 사용하는 Vertex들  
+    let getSharedCall(v:VertexManager) : VertexManager seq =
+            (v.Vertex :?> Call).GetVertexSharedCall().Select(getVM) 
+           
+        ///Call 자신이거나 Alias Target Call
+    let getPureCall(v:VertexManager) : Call option=
+            match v.Vertex with
+            | :? Call as c  ->  Some (c) 
+            | :? Alias as a  ->
+                    if a.TargetWrapper.GetTarget() :? Call then 
+                        Some (a.TargetWrapper.GetTarget() :?> Call)
+                    else None
+            |_ -> None
+           
+        ///Real 자신이거나 RealEx Target Real
+    let getPureReal(v:VertexManager)  : Real =
+            match v.Vertex with
+            | :? Real as r  ->  r
+            | :? RealEx as re  -> re.Real
+            | :? Alias as a  ->
+                    if a.TargetWrapper.GetTarget() :? Real then 
+                        a.TargetWrapper.GetTarget() :?> Real
+                    else failwith "Error GetPureReal"
+            |_ -> failwith "Error GetPureReal"
+
+
     let rec getCoinTags(v:Vertex, isInTag:bool) : Tag<bool> seq =
             match v with
             | :? Call as c ->
@@ -41,8 +71,23 @@ module CodeConvertUtil =
             | DuAliasTargetRealEx ao  -> getCoinTags(ao, isTx)
         | _ -> failwith "Error"
     
+    [<AutoOpen>]
     [<Extension>]
     type CodeConvertUtilExt =
+        [<Extension>] static member STs(xs:VertexManager seq): DsBit list = xs.Select(fun s->s.ST) |> Seq.toList 
+        [<Extension>] static member RTs(xs:VertexManager seq): DsBit list = xs.Select(fun s->s.RT) |> Seq.toList 
+        [<Extension>] static member ETs(xs:VertexManager seq): DsBit list = xs.Select(fun s->s.ET) |> Seq.toList 
+        [<Extension>] static member CRs(xs:VertexCoin seq): DsBit list    = xs.Select(fun s->s.CR) |> Seq.toList 
+        [<Extension>] static member EmptyOnElseToAnd(xs:PlcTag<bool> seq, sys:DsSystem) = if xs.Any() then xs.ToAnd() else sys._on.Expr
+        [<Extension>] static member EmptyOnElseToAnd(xs:DsBit seq, sys:DsSystem) = if xs.Any() then xs.ToAnd() else sys._on.Expr
+        [<Extension>] static member EmptyOnElseToAnd(xs:DsTag<bool> seq, sys:DsSystem) = if xs.Any() then xs.Cast<Tag<bool>>().ToAnd() else sys._on.Expr
+        [<Extension>] static member EmptyOffElseToOr(xs:PlcTag<bool> seq, sys:DsSystem) = if xs.Any() then xs.ToOr() else sys._off.Expr
+        [<Extension>] static member EmptyOffElseToOr(xs:DsBit seq, sys:DsSystem) = if xs.Any() then xs.ToOr() else sys._off.Expr
+        [<Extension>] static member EmptyOffElseToOr(xs:DsTag<bool> seq, sys:DsSystem) = if xs.Any() then xs.Cast<Tag<bool>>().ToOr() else sys._off.Expr
+        [<Extension>] static member GetSharedReal(v:VertexManager) = v |> getSharedReal
+        [<Extension>] static member GetSharedCall(v:VertexManager) = v |> getSharedCall
+        [<Extension>] static member GetPureReal(v:VertexManager) = v |> getPureReal
+        [<Extension>] static member GetPureCall(v:VertexManager) = v |> getPureCall
         [<Extension>]
         static member FindEdgeSources(graph:DsGraph, target:Vertex, edgeType:ModelingEdgeType): Vertex seq =
             let edges = graph.GetIncomingEdges(target)

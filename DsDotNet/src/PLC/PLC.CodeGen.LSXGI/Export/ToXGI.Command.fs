@@ -287,15 +287,18 @@ module internal rec Command =
 *)
 
 
-
+    /// cmd 인자로 주어진 function block 의 type 과
+    /// namedParameters 로 주어진 function block 에 연결된 다릿발 정보를 이용해서
+    /// function block rung 을 그린다.
     let createFunctionBlockInstanceXmls (rungStartX, rungStartY) (cmd:CommandTypes) (namedParameters:(string*IExpression) list) : BlockSummarizedXmlElements =
-        //Command instance 객체생성
-        let inst = cmd.InstanceName
         let func = cmd.VarType.ToString()
 
         let dic = namedParameters |> dict
+
+        /// 입력 인자들을 function 의 입력 순서 맞게 재배열
         let alignedParameters =
-            let inputSpecs = getFunctionInputSpecs func |> Array.ofSeq      // e.g ["CD, 0x00200001, , 0"; "LD, 0x00200001, , 0"; "PV, 0x00200040, , 0"]
+            /// e.g ["CD, 0x00200001, , 0"; "LD, 0x00200001, , 0"; "PV, 0x00200040, , 0"]
+            let inputSpecs = getFunctionInputSpecs func |> Array.ofSeq
             namedParameters.Length = inputSpecs.Length |> verifyM "ERROR: Function input parameter mismatch."
             [|
                 for s in inputSpecs do
@@ -306,80 +309,78 @@ module internal rec Command =
 
         let (x, y) = (rungStartX, rungStartY)
 
-        // y 위치에 literal parameter 쓸 공간 확보 (x 좌표는 아직 미정)
+        /// y 위치에 literal parameter 쓸 공간 확보 (x 좌표는 아직 미정)
         let reservedLiteralInputParam = ResizeArray<int*IExpression>()
         let mutable sy = 0
-        let blockXmls =
-            [
-                for (portOffset, (name, exp, checkType)) in alignedParameters.Indexed() do
-                    if checkType.HasFlag CheckType.BOOL then
-                        let blockXml = drawFunctionInputLadderBlock (x, y + sy) (flatten exp)
-                        portOffset, blockXml
-                        sy <- sy + blockXml.TotalSpanY
-                    else
-                        (y + portOffset, exp) |> reservedLiteralInputParam.Add
+        let blockXmls = [
+            for (portOffset, (name, exp, checkType)) in alignedParameters.Indexed() do
+                if checkType.HasFlag CheckType.BOOL then
+                    let blockXml = drawFunctionInputLadderBlock (x, y + sy) (flatten exp)
+                    portOffset, blockXml
+                    sy <- sy + blockXml.TotalSpanY
+                else
+                    (y + portOffset, exp) |> reservedLiteralInputParam.Add
+                    sy <- sy + 1
+        ]
 
-                        // Function block input cell 에 직접 적을 것이므로 sy offset 을 증가시키지 않고 optimize 필요. ``Counter CTR with conditional test2``
-                        sy <- sy + 1
-            ]
-
-        (* 입력 parameter 를 그렸을 때, 1 줄을 넘는 것들의 갯수 만큼 horizontal line spacing 필요 *)
+        /// 입력 parameter 를 그렸을 때, 1 줄을 넘는 것들의 갯수 만큼 horizontal line spacing 필요
         let plusHorizontalPadding = blockXmls.Count(fun (_, x) -> x.TotalSpanY > 1)
 
         /// function start X
         let fsx = blockXmls.Max(fun (_, x) -> x.TotalSpanX) + plusHorizontalPadding
 
         /// input parameter end 와 function input adaptor 와의 'S' shape 연결 문어발
-        let tentacleXmls =
-            [
-                for (inputBlockIndex, (portOffset, b)) in blockXmls.Indexed() do
-                    let i = inputBlockIndex
-                    let bex = b.X + b.TotalSpanX    // block end X
-                    let bey = b.Y
-                    let c = coord(bex, bey)
-                    let spanX = (fsx - bex)
-                    if b.TotalSpanX > 1 then
-                        yield! tryHLineTo (bex, bey) (if i = 0 then fsx - 1 else bex + i - 1)
-                            |> map (fun xml ->
-                                tracefn $"H: ({bex}, {bey}) -> ({bex + max 0 (i - 1)}, {bey})"
-                                { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 })
+        let tentacleXmls = [
+            for (inputBlockIndex, (portOffset, b)) in blockXmls.Indexed() do
+                let i = inputBlockIndex
+                let bex = b.X + b.TotalSpanX    // block end X
+                let bey = b.Y
+                let c = coord(bex, bey)
+                let spanX = (fsx - bex)
+                if b.TotalSpanX > 1 then
+                    /// 'S' shape 의 하단부 수평선 끝점 x 좌표
+                    let hEndX = if i = 0 then fsx - 1 else bex + i - 1
+                    yield! tryHLineTo (bex, bey) (hEndX)
+                        |> map (fun xml ->
+                            tracefn $"H: ({bex}, {bey}) -> ({hEndX}, {bey})"
+                            { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 })
 
-                        if i > 0 then
+                    if i > 0 then
+                        let bexi = bex+i
+                        let yi = y + portOffset
+                        tracefn $"V: ({bexi-1}, {bey}) -> [({bexi-1}, {yi})]"
+                        // 'S' shape 의 세로선 그리기
+                        yield! vlineUpTo (bexi-1, bey) yi
 
-                            let bexi = bex+i
-                            let yi = y + portOffset
-                            tracefn $"V: ({bexi-1}, {bey}) -> [({bexi-1}, {yi})]"
-                            yield! vlineUpTo (bexi-1, bey) yi
+                        // 'S' shape 의 상단부 수평선 그리기
+                        yield! tryHLineTo (bexi, yi) (fsx - 1)
+                        |> map (fun xml ->
+                            tracefn $"H: ({bexi}, {yi}) -> [({bexi}, {fsx - 1})]"
+                            { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 })
+        ]
 
-                            yield! tryHLineTo (bexi, yi) (fsx - 1)
-                            |> map (fun xml ->
-                                tracefn $"H: ({bexi}, {yi}) -> [({bexi}, {fsx - 1})]"
-                                { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 })
-            ]
+        let allXmls = [
+            (* Timer 의 PT, Counter 의 PV 등의 상수 값을 입력 모선에서 연결하지 않고, function cell 에 바로 입력 하기 위함*)
+            for (ry, rexp) in reservedLiteralInputParam do
+                let literal =
+                    match rexp.Terminal with
+                    | Some terminal ->
+                        match terminal.Literal, terminal.Variable with
+                        | Some (:? ILiteralHolder as literal), None -> literal.ToTextWithoutTypeSuffix()
+                        | Some literal, None -> literal.ToText()
+                        | None, Some variable -> variable.ToText()
+                        | _ -> failwith "ERROR"
+                    | _ ->
+                        failwith "ERROR"
+                createFBParameterXml (x + fsx - 1, ry) literal
 
-        let allXmls =
-            [
-                (* Timer 의 PT, Counter 의 PV 등의 상수 값을 입력 모선에서 연결하지 않고, function cell 에 바로 입력 하기 위함*)
-                for (ry, rexp) in reservedLiteralInputParam do
-                    let literal =
-                        match rexp.Terminal with
-                        | Some terminal ->
-                            match terminal.Literal, terminal.Variable with
-                            | Some (:? ILiteralHolder as literal), None -> literal.ToTextWithoutTypeSuffix()
-                            | Some literal, None -> literal.ToText()
-                            | None, Some variable -> variable.ToText()
-                            | _ -> failwith "ERROR"
-                        | _ ->
-                            failwith "ERROR"
-                    createFBParameterXml (x + fsx - 1, ry) literal
+            yield! blockXmls |> bind(fun (_, bx) -> bx.XmlElements)
+            yield! tentacleXmls
+            let x, y = rungStartX, rungStartY
 
-                yield! blockXmls |> bind(fun (_, bx) -> bx.XmlElements)
-                yield! tentacleXmls
-                let x, y = rungStartX, rungStartY // tmp
-
-                //Command 결과출력
-                createFunctionXmlAt (func, func) inst (x+fsx, y)
-            ]
+            //Command 결과출력
+            createFunctionXmlAt (func, func) cmd.InstanceName (x+fsx, y)
+        ]
 
 
         {   X=x; Y=y;

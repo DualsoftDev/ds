@@ -4,7 +4,7 @@ open Engine.Common.FS
 open Engine.Core
 
 [<AutoOpen>]
-module Command =
+module rec Command =
 
     //type VarKind =
     //    | None     = 0
@@ -33,7 +33,7 @@ module Command =
         abstract member TerminalEndTag: INamedExpressionizableTerminal with get
 
     ///CoilOutput은 단일 출력을 내보내는 형식
-    and CoilOutputMode =
+    type CoilOutputMode =
         | COMCoil       of INamedExpressionizableTerminal
         | COMPulseCoil  of INamedExpressionizableTerminal
         | COMNPulseCoil of INamedExpressionizableTerminal
@@ -51,17 +51,24 @@ module Command =
                 | COMSetCoil   (endTag) -> endTag
                 | COMResetCoil (endTag) -> endTag
 
-    ///FunctionPures은 Copy와 같은 Instance가 필요없는 Function에 해당
-    and FunctionPure =
+    /// bool type 을 반환하는 pure function.   (instance 불필요)
+    type Predicate =
+        | Compare of name:string * output:INamedExpressionizableTerminal * arguments:IExpression list //endTag * FunctionName * Tag list
+    with
+        interface IFunctionCommand with
+            member this.TerminalEndTag: INamedExpressionizableTerminal =
+                match this with
+                | Compare (_, endTag, _) -> endTag
+
+    /// non-boolean 값을 반환하는 pure function.  (instance 불필요)
+    type Function =
         //| CopyMode  of INamedExpressionizableTerminal *  (CommandTag * CommandTag) //endTag * (fromA, toB)
-        | FunctionCompare of name:string * output:INamedExpressionizableTerminal * arguments:IExpression list //endTag * FunctionName * Tag list
-        | FunctionArithematic of name:string * output:INamedExpressionizableTerminal * arguments:IExpression list //endTag * FunctionName * Tag list
+        | Arithematic of name:string * output:INamedExpressionizableTerminal * arguments:IExpression list //endTag * FunctionName * Tag list
     with
         interface IFunctionCommand with
             member this.TerminalEndTag: INamedExpressionizableTerminal =
                 match this with
                 //| CopyMode  (endTag, _) -> endTag
-                | FunctionCompare (_, endTag, _) -> endTag
-                | FunctionArithematic (_, endTag, _) -> endTag
+                | Arithematic (_, endTag, _) -> endTag
 
 

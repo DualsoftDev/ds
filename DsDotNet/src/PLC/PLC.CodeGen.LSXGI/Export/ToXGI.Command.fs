@@ -20,7 +20,8 @@ module internal rec Command =
             let tet (fc:#IFunctionCommand) = fc.TerminalEndTag
             match x with
             | CoilCmd (cc)           -> tet(cc)
-            | FunctionCmd (fc)       -> tet(fc)
+            | PredicateCmd(pc)       -> tet(pc)
+            | FunctionCmd (fc)     -> tet(fc)
             | FunctionBlockCmd (fbc) -> tet(fbc)
 
         member x.InstanceName =
@@ -56,7 +57,7 @@ module internal rec Command =
                 | COMResetCoil _  -> ElementType.ResetCoilMode
                 | COMPulseCoil _  -> ElementType.PulseCoilMode
                 | COMNPulseCoil _ -> ElementType.NPulseCoilMode
-            | (FunctionCmd  _ | FunctionBlockCmd  _)
+            | ( PredicateCmd _ | FunctionCmd  _ | FunctionBlockCmd  _ )
                 -> ElementType.VertFBMode
 
          //   /// Coil의 부정 Command를 반환한다.
@@ -400,13 +401,18 @@ module internal rec Command =
 
         //FunctionBlock, Function 그리기
         match cmd with
+        | PredicateCmd (pc) ->
+            // todo: 내부로 이동... drawCmdXXX 내에서 그려야 한다..
+            drawHLine()
+            match pc with
+            //| CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy (newX, y) endTag tagA tagB true
+            | Compare (name, output, args)     -> drawCmdCompare (x+1, y) name output args[0] args[1]
         | FunctionCmd (fc) ->
             // todo: 내부로 이동... drawCmdXXX 내에서 그려야 한다..
             drawHLine()
             match fc with
             //| CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy (newX, y) endTag tagA tagB true
-            | FunctionCompare (name, output, args)     -> drawCmdCompare (x+1, y) name output args[0] args[1]
-            | FunctionArithematic (name, output, args) -> drawCmdAdd (x+1, y) name output args[0] args[1]
+            | Arithematic (name, output, args) -> drawCmdAdd (x+1, y) name output args[0] args[1]
         | FunctionBlockCmd (fbc) ->
             match fbc with
             | TimerMode(timerStatement) ->
@@ -575,6 +581,8 @@ module internal rec Command =
                     match cmdExp with
                     | CoilCmd (cc) ->
                         drawCoil (nx-1, y) cmdExp
+                    | PredicateCmd (pc) ->
+                        drawCommand (nx, y) cmdExp  // todo : 수정 필요
                     | ( FunctionCmd _ | FunctionBlockCmd _ ) ->
                         drawCommand (nx, y) cmdExp
                 let cmdXmls = { cmdXmls with XmlElements = cmdXmls.XmlElements |> List.distinct }       // dirty hack!

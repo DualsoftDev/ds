@@ -98,13 +98,13 @@ module internal XgiFile =
 
                 | DuAugmentedPLCFunction ({FunctionName = (">"|">="|"<"|"<="|"="|"!=") as op; Arguments = args; Output=output }) ->
                     let fn = operatorToXgiFunctionName op
-                    let command = FunctionCmd(FunctionCompare(fn, output, args))
+                    let command = PredicateCmd(Compare(fn, output, args))
                     let rgiSub = xmlRung (Some alwaysOnFlatExpression) (Some command) rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
 
                 | DuAugmentedPLCFunction ({FunctionName = ("+"|"-"|"*"|"/") as op; Arguments = args; Output=output }) ->
                     let fn = operatorToXgiFunctionName op
-                    let command = FunctionCmd(FunctionArithematic(fn, output, args))
+                    let command = FunctionCmd(Arithematic(fn, output, args))
                     let rgiSub = xmlRung (Some alwaysOnFlatExpression) (Some command) rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
                 | _ ->

@@ -12,9 +12,9 @@ let private getPortSetBits(v:VertexManager) (rse:SREType) =
     | :? Real as r ->  
         let shareds = v.GetSharedReal()
         match rse with
-        |Reset -> (shareds.RTs() @ [v.RT;v.RF]).ToOr()
         |Start -> (shareds.STs() @ [v.ST;v.SF]).ToOr() <||> v.System.GetTXs(r).EmptyOffElseToOr(v.System)
-        |End   -> (shareds.ETs() @ [v.ST;v.SF]).ToOr() 
+        |Reset -> (shareds.RTs() @ [v.RT;v.RF]).ToOr()
+        |End   -> (shareds.ETs() @ [v.ET;v.EF]).ToOr() 
 
     | _ -> failwith "Error getPortSetBits : Real Only"
  

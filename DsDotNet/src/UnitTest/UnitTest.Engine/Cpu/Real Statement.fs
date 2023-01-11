@@ -24,3 +24,9 @@ type Spec06_RealStatement() =
             for real in t.Reals do
                 real.R2_RealJobComplete() |> doCheck
 
+    [<Test>]
+    member __.``R3 Real Job Homing`` () = 
+            for real in t.Reals do
+                real.R3_RealJobHoming() |> doCheck
+
+                

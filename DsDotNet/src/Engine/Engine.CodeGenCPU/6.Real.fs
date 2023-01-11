@@ -16,7 +16,16 @@ type VertexManager with
 
     member v.R2_RealJobComplete(): CommentedStatement  = 
         let real = v.Vertex :?> Real
-        let sets = real.CoinRelays.EmptyOnElseToAnd v.System
-        let rsts = v.System._off.Expr
+        let sets = v.G.Expr <&&> real.CoinRelays.EmptyOnElseToAnd v.System
+        let rsts = v.H.Expr
 
-        (sets, rsts) --| (v.ET, "R2")
+        (sets, rsts) ==| (v.ET, "R2")
+
+    
+    member v.R3_RealJobHoming(): CommentedStatement  =  //test ahn
+        let real = v.Vertex :?> Real
+        let sets = v.G.Expr <&&> real.CoinRelays.EmptyOnElseToAnd v.System
+        let rsts = v.H.Expr
+
+        (sets, rsts) ==| (v.ET, "R3")
+

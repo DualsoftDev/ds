@@ -37,7 +37,7 @@ module VertexManagerModule =
         let resetTagBit   = bit v  "RT" BitFlag.RT
         let startTagBit   = bit v  "ST" BitFlag.ST
 
-        let originBit     = bit v "0G" BitFlag.Origin
+        let originBit     = bit v "OG" BitFlag.Origin
         let pauseBit      = bit v "PA" BitFlag.Pause
         let errorTxBit    = bit v "E1" BitFlag.ErrorTx
         let errorRxBit    = bit v "E2" BitFlag.ErrorRx

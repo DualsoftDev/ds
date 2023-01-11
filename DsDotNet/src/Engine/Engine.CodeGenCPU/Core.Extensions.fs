@@ -94,6 +94,7 @@ module ConvertCoreExt =
           let manual  = if manualIns.Any() then  manualIns.ToAnd()   else sysOff.Expr
           auto, manual
 
+   
 //운영 모드 는 Flow 별로 제공된 모드 On/Off 상태 나타낸다.
     type Flow with
         member f.eop    = DsTag<bool> ($"{f.Name}(EO)", false)   // Emergency Operation Mode

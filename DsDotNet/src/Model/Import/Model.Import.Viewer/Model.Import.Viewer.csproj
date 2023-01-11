@@ -16,6 +16,7 @@
 			</assemblyBinding>
 		</runtime>
 	</configuration>
+	<UserSecretsId>28d2a3c9-1645-4f3d-af8d-6dae4366dc6b</UserSecretsId>
 
   </PropertyGroup>
   <ItemGroup>

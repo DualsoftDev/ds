@@ -1,7 +1,6 @@
 namespace PLC.CodeGen.LSXGI
-open System
-open System.Collections.Generic
-open Engine.Common.FS
+
+open System.Security
 
 [<AutoOpen>]
 module XgiPrologModule =
@@ -11,3 +10,16 @@ module XgiPrologModule =
             failwith "Should be reimplemented."
         dummy
 
+    /// XML 특수 문자 escape.  '&' 등
+    let escapeXml xml = SecurityElement.Escape xml
+
+    type XgiGenerationOptions = {
+        /// <!-- --> 구문의 xml comment 삽입 여부.  순수 xml 생성 과정 debugging 용도
+        EnableXmlComment:bool
+        IsAppendExpressionTextToRungComment:bool
+    }
+
+    let mutable xgiGenerationOptions = {
+        EnableXmlComment = false
+        IsAppendExpressionTextToRungComment = true
+    }

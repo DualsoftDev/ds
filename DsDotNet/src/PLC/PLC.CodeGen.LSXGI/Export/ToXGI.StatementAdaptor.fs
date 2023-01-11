@@ -292,4 +292,13 @@ module XgiExpressionConvertorModule =
 
     let internal commentedStatement2CommentedXgiStatements (storage:XgiStorage) (CommentedStatement(comment, statement)) : CommentedXgiStatements =
         let xgiStatements = statement2XgiStatements storage statement
-        CommentedXgiStatements(comment, xgiStatements)
+        let rungComment =
+            let statementComment = statement.ToText()
+            match comment.NonNullAny(), xgiGenerationOptions.IsAppendExpressionTextToRungComment with
+            | true, true -> $"{comment}\r\n{statementComment}"
+            | true, false -> comment
+            | false, true -> statementComment
+            | false, false -> ""
+            |> escapeXml
+
+        CommentedXgiStatements(rungComment, xgiStatements)

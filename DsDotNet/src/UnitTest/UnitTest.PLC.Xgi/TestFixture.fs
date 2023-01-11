@@ -49,13 +49,16 @@ module PLCGenerationTestModule =
     type PLCGenerationTestClass() =
         do Fixtures.SetUpTest()
         let mutable runtimeTarget = RuntimeTarget
+        let xgiGenerationOptionsBackup = xgiGenerationOptions
         [<SetUp>]
         member x.Setup () =
             RuntimeTarget <- x.GetCurrentRuntimeTarget()
+            xgiGenerationOptions <- {EnableXmlComment = false; IsAppendExpressionTextToRungComment = true}
 
         [<TearDown>]
         member __.TearDown () =
             RuntimeTarget <- runtimeTarget
+            xgiGenerationOptions <- xgiGenerationOptionsBackup
 
         abstract GetCurrentRuntimeTarget: unit -> RuntimeTarget
 

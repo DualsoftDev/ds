@@ -41,8 +41,6 @@ module internal Common =
     with
         member me.Add(xml) = { Xmls = xml::me.Xmls; Y = me.Y + 1 }
 
-    /// <!-- --> 구문의 xml comment 삽입 여부.  순수 debugging 용도
-    let enableXmlComment = false
     let dq = "\""
 
     /// rung 을 구성하는 element (접점)의 XML 표현 문자열 반환
@@ -113,7 +111,7 @@ module internal Common =
     /// x y 위치에서 수직으로 n 개의 line 을 긋는다
     let vlineDownN (x, y) n =
         [
-            if enableXmlComment then
+            if xgiGenerationOptions.EnableXmlComment then
                 xmlCommentAt (x, y) $"vlineDownN ({x}, {y}) {n}"
 
             if n > 0 then

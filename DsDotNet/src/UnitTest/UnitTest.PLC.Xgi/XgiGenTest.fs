@@ -290,16 +290,6 @@ type XgiGenerationTest() =
     member __.``Add test`` () =
         let storages = Storages()
 
-        //let symbolInfos = [
-        //    XGITag.createSymbol "n0" "n0" "INT"
-        //    XGITag.createSymbol "n1" "n1" "INT"
-        //    XGITag.createSymbol "n2" "n2" "INT"
-        //    XGITag.createSymbol "n3" "n3" "INT"
-        //    XGITag.createSymbol "n4" "n4" "INT"
-        //    XGITag.createSymbol "n5" "n5" "INT"
-        //]
-        //let symbolsLocalXml = XGITag.generateSymbolVars (symbolInfos, false)
-
         let code = """
             int16 nn0 = 0s;
             int16 nn1 = 1s;
@@ -312,6 +302,23 @@ type XgiGenerationTest() =
             //$qq := add($nn1, $nn2) > 3s;
             //$qq := ($nn1 + $nn2) * 9s + $nn3 > 3s;
             $qq := true && (($nn1 + $nn2) * 9s + $nn3 > 3s);
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
+
+
+
+    [<Test>]
+    member __.``MOVE test`` () =
+        let storages = Storages()
+
+        let code = """
+            bool cond = false;
+            int16 src = 1s;
+            int16 tgt = 2s;
+
+            copyIf($cond, $src, $tgt);
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)

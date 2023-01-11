@@ -15,7 +15,7 @@ module CoreExtensionsModule =
             | DuCounter counterStatement ->
                 [ for s in counterStatement.Counter.InputEvaluateStatements do
                     yield! s.GetTargetStorages() ]
-            | DuCopy (condition, source, target) -> [ target ]
+            | DuAction (DuCopy (condition, source, target)) -> [ target ]
             | DuAugmentedPLCFunction _ -> []
 
         member x.GetSourceStorages() =
@@ -28,5 +28,5 @@ module CoreExtensionsModule =
             | DuCounter counterStatement ->
                 [ for s in counterStatement.Counter.InputEvaluateStatements do
                     yield! s.GetSourceStorages() ]
-            | DuCopy (condition, source, target) -> condition.CollectStorages()
+            | DuAction (DuCopy (condition, source, target)) -> condition.CollectStorages()
             | DuAugmentedPLCFunction _ -> []

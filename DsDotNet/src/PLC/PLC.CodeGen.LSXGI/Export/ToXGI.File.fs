@@ -107,6 +107,13 @@ module internal XgiFile =
                     let command = FunctionCmd(Arithematic(fn, output, args))
                     let rgiSub = xmlRung None (Some command) rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
+                | DuAugmentedPLCFunction ({FunctionName = XgiConstants.FunctionNameMove as func; Arguments = args; Output=output }) ->
+                    let condition = args[0] :?> IExpression<bool>
+                    let source = args[1]
+                    let target = output :?> IStorage
+                    let command = ActionCmd(Move(condition, source, target))
+                    let rgiSub = xmlRung None (Some command) rgi.Y
+                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
                 | _ ->
                     failwith "Not yet"
 

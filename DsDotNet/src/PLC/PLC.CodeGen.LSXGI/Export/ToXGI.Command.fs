@@ -20,8 +20,9 @@ module internal rec Command =
             match x with
             | CoilCmd (cc)           -> tet(cc)
             | PredicateCmd(pc)       -> tet(pc)
-            | FunctionCmd (fc)     -> tet(fc)
+            | FunctionCmd (fc)       -> tet(fc)
             | FunctionBlockCmd (fbc) -> tet(fbc)
+            | ActionCmd (ac) -> failwith "ERROR: check"
 
         member x.InstanceName =
             match x with
@@ -56,7 +57,7 @@ module internal rec Command =
                 | COMResetCoil _  -> ElementType.ResetCoilMode
                 | COMPulseCoil _  -> ElementType.PulseCoilMode
                 | COMNPulseCoil _ -> ElementType.NPulseCoilMode
-            | ( PredicateCmd _ | FunctionCmd  _ | FunctionBlockCmd  _ )
+            | ( PredicateCmd _ | FunctionCmd  _ | FunctionBlockCmd  _ | ActionCmd _)
                 -> ElementType.VertFBMode
 
          //   /// Coil의 부정 Command를 반환한다.
@@ -207,6 +208,18 @@ module internal rec Command =
                 | ("ADD" | "MUL" | "SUB" | "DIV") -> $"{name}2_INT"
                 | _ -> failwith "NOT YET"
             createBoxXmls (x, y)  func namedInputParameters outputParameters ""
+
+    let drawAction (x, y) (func:PLCAction) : BlockSummarizedXmlElements =
+        match func with
+        | Move (condition, source, target) ->
+            let namedInputParameters =
+                [ "EN", condition :> IExpression
+                  "IN", source ]
+
+            let output = target :?> INamedExpressionizableTerminal
+            let outputParameters = [ "OUT", output ]
+            createBoxXmls (x, y)  XgiConstants.FunctionNameMove namedInputParameters outputParameters ""
+
 
     [<Obsolete("삭제 대상")>]
     let drawPredicateCompare (x, y) (func:string) (out:INamedExpressionizableTerminal) (leftA:IExpression) (leftB:IExpression) : BlockSummarizedXmlElements =
@@ -441,6 +454,7 @@ module internal rec Command =
         match cmd with
         | PredicateCmd (pc) -> drawPredicate (x, y) pc
         | FunctionCmd (fc) -> drawFunction (x, y) fc
+        | ActionCmd (ac) -> drawAction (x, y) ac
         | FunctionBlockCmd (fbc) ->
             match fbc with
             | TimerMode(timerStatement) ->
@@ -609,7 +623,7 @@ module internal rec Command =
                         drawCoil (nx-1, y) cmdExp
                     | PredicateCmd (pc) ->
                         drawCommand (nx, y) cmdExp  // todo : 수정 필요
-                    | ( FunctionCmd _ | FunctionBlockCmd _ ) ->
+                    | ( FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _) ->
                         drawCommand (nx, y) cmdExp
                 let cmdXmls = { cmdXmls with XmlElements = cmdXmls.XmlElements |> List.distinct }       // dirty hack!
                 let spanX = exprSpanX + cmdXmls.TotalSpanX

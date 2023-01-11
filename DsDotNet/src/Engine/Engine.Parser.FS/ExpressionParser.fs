@@ -291,7 +291,7 @@ module rec ExpressionParser =
                 let target = copyStatementCtx.Descendants<CopyTargetContext>().First().GetText()
                 assert(target.StartsWith("$"))
                 let target = storages[target.Replace("$", "")]
-                Some <| DuCopy(condition, source, target)
+                Some <| DuAction (DuCopy(condition, source, target))
             | _ ->
                 failwith "ERROR: Not yet statement"
 

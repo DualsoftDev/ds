@@ -165,6 +165,7 @@ module rec TypeConvertorModule =
         | PredicateCmd     of Predicate
         /// Non-boolean function
         | FunctionCmd      of Function
+        | ActionCmd        of PLCAction
         /// Timer, Counter 등
         | FunctionBlockCmd of FunctionBlock
 
@@ -276,8 +277,16 @@ module XgiExpressionConvertorModule =
                 | _ -> failwith "ERROR"
 
                 []
-            | _ ->
-                [ statement ]
+            | ( DuTimer _ | DuCounter _ ) ->
+                [statement]
+
+            | DuAction (DuCopy(condition, source, target)) ->
+                let funcName = XgiConstants.FunctionNameMove
+                let output = target:?>INamedExpressionizableTerminal
+                [ DuAugmentedPLCFunction {FunctionName=funcName; Arguments=[condition; source]; Output=output } ]
+
+            | DuAugmentedPLCFunction _ ->
+                failwith "ERROR"
 
         expandFunctionStatements @ newStatements |> List.ofSeq
 

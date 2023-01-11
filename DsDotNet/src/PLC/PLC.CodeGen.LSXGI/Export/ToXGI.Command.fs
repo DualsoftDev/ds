@@ -79,11 +79,9 @@ module internal rec Command =
     //let createOutputPulse(tag)   = CoilCmd(CoilOutputMode.COMPulseCoil(tag))
     //let createOutputNPulse(tag)  = CoilCmd(CoilOutputMode.COMNPulseCoil(tag))
 
-    //let createOutputCopy(tag, tagA, tagB)             = FunctionCmd(FunctionPure.CopyMode(tag, (tagA, tagB)))
-
 
     /// '_ON' 에 대한 flat expression
-    let alwaysOnFlatExpression =
+    let fakeAlwaysOnFlatExpression =
         let on = {
             new System.Object() with
                 member x.Finalize() = ()
@@ -93,7 +91,7 @@ module internal rec Command =
         FlatTerminal (on, false, false)
 
     /// '_ON' 에 대한 expression
-    let alwaysOnExpression:Expression<bool> =
+    let fakeAlwaysOnExpression:Expression<bool> =
         let on = createXgiVariable "_ON" "가짜 _ON" true
         DuTerminal (DuVariable on)
 
@@ -184,7 +182,7 @@ module internal rec Command =
         match predicate with
         | Compare (name, output, args) ->
             let namedInputParameters =
-                [ "EN", alwaysOnExpression :> IExpression]
+                [ "EN", fakeAlwaysOnExpression :> IExpression]
                 @ (args |> List.indexed |> List.map1st (fun n -> $"IN{n+1}"))
             let outputParameters = [ "OUT", output ]
             let func =
@@ -200,7 +198,7 @@ module internal rec Command =
         match func with
         | Arithematic (name, output, args) ->
             let namedInputParameters =
-                [ "EN", alwaysOnExpression :> IExpression]
+                [ "EN", fakeAlwaysOnExpression :> IExpression]
                 @ (args |> List.indexed |> List.map1st (fun n -> $"IN{n+1}"))
             let outputParameters = [ "OUT", output ]
             let func =
@@ -219,79 +217,6 @@ module internal rec Command =
             let output = target :?> INamedExpressionizableTerminal
             let outputParameters = [ "OUT", output ]
             createBoxXmls (x, y)  XgiConstants.FunctionNameMove namedInputParameters outputParameters ""
-
-
-    [<Obsolete("삭제 대상")>]
-    let drawPredicateCompare (x, y) (func:string) (out:INamedExpressionizableTerminal) (leftA:IExpression) (leftB:IExpression) : BlockSummarizedXmlElements =
-        let a, b = toTerminalText leftA, toTerminalText leftB
-
-        if(leftA.DataType <> leftB.DataType) then
-            failwithlog $"Type mismatch: {a}({leftA.DataType}) <> {b}({leftB.DataType})"
-
-        let opCompType = leftA.DataType.SizeString
-        let detailedFunctionName =
-            //if opComp = OpComp.NE then
-            //    $"{func}_{opCompType}"
-            //else
-                $"{func}2_{opCompType}"
-
-        let xmls = [
-            createFunctionXmlAt (detailedFunctionName, func) "" (x, y)
-            createFBParameterXml (x-1, y+1) a
-            createFBParameterXml (x-1, y+2) b
-            createFBParameterXml (x+1, y+1) (out.StorageName)
-        ]
-
-        failwith "ERROR: 수정 필요"
-        { X=x; Y=y; TotalSpanX=(-1); TotalSpanY=(-1); XmlElements=xmls }
-
-    [<Obsolete("삭제 대상")>]
-    let drawFunctionAdd (x, y) (func:string) (out:INamedExpressionizableTerminal) (in1:IExpression) (in2:IExpression): BlockSummarizedXmlElements =
-
-        let in1, in2 = toTerminalText in1, toTerminalText in2
-
-        let xmls = [
-            //Pulse시 증감 처리
-            //yield! drawRising(x, y)
-            //함수 그리기
-            createFunctionXmlAt ("ADD2_INT", "ADD") "" (x, y)       // ADD2_XXX
-            createFBParameterXml (x+1, y+1) (out.StorageName)
-            createFBParameterXml (x-1, y+1) in1
-            createFBParameterXml (x-1, y+2) in2
-        ]
-        //failwith "ERROR: 수정 필요"
-        { X=x; Y=y; TotalSpanX=(-1); TotalSpanY=(-1); XmlElements=xmls }
-
-
-
-    //let drawCmdCopy (x, y) (tagCoil:INamedExpressionizableTerminal) (fromTag:CommandTag) (toTag:CommandTag) (pulse:bool) : CoordinatedRungXmlsForCommand =
-    //    if fromTag.Size() <> toTag.Size() then
-    //        failwithlog $"Tag Compare size error {fromTag.ToText()}{fromTag.SizeString},  {toTag.ToText()}({toTag.SizeString})"
-
-    //    let mutable xx = x
-    //    let fbSpanY = 3
-    //    let func = "MOVE"
-    //    let funcFind = func + "_" + fromTag.SizeString
-
-    //    let results = [
-    //        if pulse then
-    //            //Pulse Command 결과출력
-    //            xx <- x + 1
-    //            yield! drawPulseCoil (x, y) tagCoil fbSpanY
-    //        else
-    //            //Command 결과출력
-    //            xx <- x
-    //            createFBParameterXml (xx+1, y) (tagCoil.StorageName)
-
-
-    //        //함수 그리기
-    //        createFunctionXmlAt (funcFind, func) "" (xx, y)
-    //        createFBParameterXml (xx-1, y+1) (fromTag.ToText())
-    //        createFBParameterXml (xx+1, y+1) (toTag.ToText())
-    //    ]
-
-    //    let spanY = if pulse then fbSpanY else fbSpanY-1
-    //    { SpanY = spanY; PositionedRungXmls = results}
 
     type CheckType with
         member t.IsRoughlyEqual(typ:System.Type) =
@@ -367,13 +292,14 @@ module internal rec Command =
         let mutable sy = 0
         let inputBlockXmls = [
             for (portOffset, (name, exp, checkType)) in alignedInputParameters.Indexed() do
-                if checkType.HasFlag CheckType.BOOL then
+                if portOffset > 0 && exp.Terminal.IsSome then
+                    (y + portOffset, exp) |> reservedLiteralInputParam.Add
+                    sy <- sy + 1
+                else
+                    checkType.HasFlag CheckType.BOOL |> verifyM "ERROR: Only BOOL type can be used as compound expression for input."
                     let blockXml = drawFunctionInputLadderBlock (x, y + sy) (flatten exp)
                     portOffset, blockXml
                     sy <- sy + blockXml.TotalSpanY
-                else
-                    (y + portOffset, exp) |> reservedLiteralInputParam.Add
-                    sy <- sy + 1
         ]
 
         /// 입력 parameter 를 그렸을 때, 1 줄을 넘는 것들의 갯수 만큼 horizontal line spacing 필요
@@ -426,7 +352,7 @@ module internal rec Command =
                         match terminal.Literal, terminal.Variable with
                         | Some (:? ILiteralHolder as literal), None -> literal.ToTextWithoutTypeSuffix()
                         | Some literal, None -> literal.ToText()
-                        | None, Some variable -> variable.ToText()
+                        | None, Some variable -> variable.Name
                         | _ -> failwith "ERROR"
                     | _ ->
                         failwith "ERROR"
@@ -496,7 +422,6 @@ module internal rec Command =
     /// {| Xml=[|c, str|]; NextX=sx; NextY=maxY; VLineUpRightMaxY=maxY |}
     /// - Xml : 좌표 * 결과 xml 문자열
     let rec private drawLadderBlock (x, y) (expr:FlatExpression) : BlockSummarizedXmlElements =
-        let baseRIWNP = { RungInfos = []; X=x; Y=y; SpanX=1; SpanY=1; }
         let c = coord(x, y)
 
         match expr with
@@ -548,17 +473,16 @@ module internal rec Command =
             let xmls = [
                 yield! exprXmls
 
-                let auxLineXmls =
-                    [
-                        for ri in blockedExprXmls do
-                            if ri.TotalSpanX < spanX then
-                                let span = (spanX - ri.TotalSpanX - 1)
-                                let param = $"Param={dq}{span*3}{dq}"
-                                let mode = int ElementType.MultiHorzLineMode
-                                let c = coord (x + ri.TotalSpanX, ri.Y)
-                                let xml = elementFull mode c param ""
-                                { Coordinate = c; Xml = xml; SpanX = span; SpanY = 1 }
-                    ]
+                let auxLineXmls = [
+                    for ri in blockedExprXmls do
+                        if ri.TotalSpanX < spanX then
+                            let span = (spanX - ri.TotalSpanX - 1)
+                            let param = $"Param={dq}{span*3}{dq}"
+                            let mode = int ElementType.MultiHorzLineMode
+                            let c = coord (x + ri.TotalSpanX, ri.Y)
+                            let xml = elementFull mode c param ""
+                            { Coordinate = c; Xml = xml; SpanX = span; SpanY = 1 }
+                ]
                 yield! auxLineXmls
 
 

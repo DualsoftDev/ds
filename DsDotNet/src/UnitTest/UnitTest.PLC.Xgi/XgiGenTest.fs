@@ -310,7 +310,7 @@ type XgiGenerationTest() =
 
 
     [<Test>]
-    member __.``MOVE test`` () =
+    member __.``COPY test`` () =
         let storages = Storages()
 
         let code = """

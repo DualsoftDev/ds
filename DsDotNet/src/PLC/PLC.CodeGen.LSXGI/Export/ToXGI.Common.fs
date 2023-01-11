@@ -89,19 +89,19 @@ module internal Common =
     let xmlCommentAt (x, y) comment = xmlCommentAtCoordinate (coord(x, y)) comment
 
 
-    /// 마지막 수평으로 연결 정보
+    /// 마지막 수평으로 연결 정보: 그릴 수 없으면 [], 그릴 수 있으면 [singleton]
     let tryHLineTo (x, y) endX =
         if endX < x then
-            None
+            []
         else
             let lengthParam = $"Param={dq}{3 * (endX-x)}{dq}"
             let c = coord(x, y)
-            Some <| elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
+            [ elementFull (int ElementType.MultiHorzLineMode) c lengthParam "" ]
 
     let hLineTo (x, y) endX =
         if endX < x then
             failwithlog $"endX startX [{endX} > {x}]"
-        tryHLineTo (x, y) endX |> Option.get
+        tryHLineTo (x, y) endX |> List.exactlyOne
 
 
     /// x y 위치에서 수직선 한개를 긋는다

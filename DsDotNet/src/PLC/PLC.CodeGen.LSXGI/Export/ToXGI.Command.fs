@@ -325,7 +325,6 @@ module internal rec Command =
 
         (* 입력 parameter 를 그렸을 때, 1 줄을 넘는 것들의 갯수 만큼 horizontal line spacing 필요 *)
         let plusHorizontalPadding = blockXmls.Count(fun (_, x) -> x.TotalSpanY > 1)
-        let plusHorizontalPadding = max 0 (plusHorizontalPadding - 1)
 
         /// function start X
         let fsx = blockXmls.Max(fun (_, x) -> x.TotalSpanX) + plusHorizontalPadding
@@ -340,20 +339,22 @@ module internal rec Command =
                     let c = coord(bex, bey)
                     let spanX = (fsx - bex)
                     if b.TotalSpanX > 1 then
-                        tracefn $"H: ({bex}, {bey}) -> ({bex+i-1}, {bey})"
-                        match tryHLineTo (bex, bey) (bex + max 0 (i - 1)) with
-                        | Some xml -> { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 }
-                        | None -> ()
+                        yield! tryHLineTo (bex, bey) (if i = 0 then fsx - 1 else bex + i - 1)
+                            |> map (fun xml ->
+                                tracefn $"H: ({bex}, {bey}) -> ({bex + max 0 (i - 1)}, {bey})"
+                                { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 })
 
                         if i > 0 then
+
                             let bexi = bex+i
                             let yi = y + portOffset
-                            tracefn $"V: ({bexi-1}, {bey}) -> ({bexi-1}, {yi})"
+                            tracefn $"V: ({bexi-1}, {bey}) -> [({bexi-1}, {yi})]"
                             yield! vlineUpTo (bexi-1, bey) yi
 
-                            match tryHLineTo (bexi, yi) (fsx - 1) with
-                            | Some xml -> { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 }
-                            | None -> ()
+                            yield! tryHLineTo (bexi, yi) (fsx - 1)
+                            |> map (fun xml ->
+                                tracefn $"H: ({bexi}, {yi}) -> [({bexi}, {fsx - 1})]"
+                                { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 })
             ]
 
         let allXmls =

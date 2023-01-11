@@ -147,7 +147,7 @@ type XgiCounterTest() =
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
-    member __.``X Counter CTUD with conditional test`` () =
+    member __.``Counter CTUD with conditional test`` () =
         let storages = Storages()
         let code = """
             bool cu1  = false;

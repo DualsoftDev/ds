@@ -7,8 +7,7 @@ open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 open Engine.Common.FS
 open Engine.Core
 open FB
-open FSharp.Data.Runtime.BaseTypes
-open System.Collections.Generic
+open System
 
 [<AutoOpen>]
 module internal rec Command =
@@ -92,7 +91,10 @@ module internal rec Command =
         }
         FlatTerminal (on, false, false)
 
-
+    /// '_ON' 에 대한 expression
+    let alwaysOnExpression:Expression<bool> =
+        let on = createXgiVariable "_ON" "가짜 _ON" true
+        DuTerminal (DuVariable on)
 
     //type FuctionParameterShape =
     //    /// Input parameter connection
@@ -107,7 +109,7 @@ module internal rec Command =
     let private flatten (exp:IExpression) = exp.Flatten() :?> FlatExpression
 
     // <timer>
-    let drawCmdTimer (x, y) (timerStatement:TimerStatement)  : BlockSummarizedXmlElements =
+    let drawFunctionBlockTimer (x, y) (timerStatement:TimerStatement)  : BlockSummarizedXmlElements =
         let ts = timerStatement
         let typ = ts.Timer.Type
         let time:int = int ts.Timer.PRE.Value
@@ -128,7 +130,7 @@ module internal rec Command =
 
         blockXml
 
-    let drawCmdCounter (x, y) (counterStatement:CounterStatement) : BlockSummarizedXmlElements =
+    let drawFunctionBlockCounter (x, y) (counterStatement:CounterStatement) : BlockSummarizedXmlElements =
 
         //let paramDic = Dictionary<string, FuctionParameterShape>()
         let cs = counterStatement
@@ -175,7 +177,35 @@ module internal rec Command =
             | _ -> failwith "ERROR"
         | _ -> failwith "ERROR"
 
-    let drawCmdCompare (x, y) (func:string) (out:INamedExpressionizableTerminal) (leftA:IExpression) (leftB:IExpression) : BlockSummarizedXmlElements =
+    let drawPredicate (x, y) (predicate:Predicate) : BlockSummarizedXmlElements =
+        match predicate with
+        | Compare (name, output, args) ->
+            let namedParameters =
+                [ "EN", alwaysOnExpression :> IExpression]
+                @ (args |> List.indexed |> List.map1st (fun n -> $"IN{n+1}"))
+            let func =
+                match name with
+                | ("GT" | "GE" | "EQ" | "LE" | "LT" | "NE") ->
+                    let opCompType = args[0].DataType.SizeString
+                    $"{name}2_{opCompType}" // e.g "GT2_INT"
+                | _ ->
+                    failwith "NOT YET"
+            createBoxXmls (x, y)  func namedParameters ""
+
+    let drawFunction (x, y) (func:Function) : BlockSummarizedXmlElements =
+        match func with
+        | Arithematic (name, output, args) ->
+            let namedParameters =
+                [ "EN", alwaysOnExpression :> IExpression]
+                @ (args |> List.indexed |> List.map1st (fun n -> $"IN{n+1}"))
+            let func =
+                match name with
+                | ("ADD" | "MUL" | "SUB" | "DIV") -> $"{name}2_INT"
+                | _ -> failwith "NOT YET"
+            createBoxXmls (x, y)  func namedParameters ""
+
+    [<Obsolete("삭제 대상")>]
+    let drawPredicateCompare (x, y) (func:string) (out:INamedExpressionizableTerminal) (leftA:IExpression) (leftB:IExpression) : BlockSummarizedXmlElements =
         let a, b = toTerminalText leftA, toTerminalText leftB
 
         if(leftA.DataType <> leftB.DataType) then
@@ -198,7 +228,8 @@ module internal rec Command =
         failwith "ERROR: 수정 필요"
         { X=x; Y=y; TotalSpanX=(-1); TotalSpanY=(-1); XmlElements=xmls }
 
-    let drawCmdAdd (x, y) (func:string) (out:INamedExpressionizableTerminal) (in1:IExpression) (in2:IExpression): BlockSummarizedXmlElements =
+    [<Obsolete("삭제 대상")>]
+    let drawFunctionAdd (x, y) (func:string) (out:INamedExpressionizableTerminal) (in1:IExpression) (in2:IExpression): BlockSummarizedXmlElements =
 
         let in1, in2 = toTerminalText in1, toTerminalText in2
 
@@ -211,7 +242,7 @@ module internal rec Command =
             createFBParameterXml (x-1, y+1) in1
             createFBParameterXml (x-1, y+2) in2
         ]
-        failwith "ERROR: 수정 필요"
+        //failwith "ERROR: 수정 필요"
         { X=x; Y=y; TotalSpanX=(-1); TotalSpanY=(-1); XmlElements=xmls }
 
 
@@ -264,36 +295,16 @@ module internal rec Command =
             | _ ->
                 failwith "ERROR"
 
-(*
-    | BOOL          = 0x00000001
-    | BYTE          = 0x00000002
-    | WORD          = 0x00000004
-    | DWORD         = 0x00000008
-    | LWORD         = 0x00000010
-    | SINT          = 0x00000020
-    | INT           = 0x00000040
-    | DINT          = 0x00000080
-    | LINT          = 0x00000100
-    | USINT         = 0x00000200
-    | UINT          = 0x00000400
-    | UDINT         = 0x00000800
-    | ULINT         = 0x00001000
-    | REAL          = 0x00002000
-    | LREAL         = 0x00004000
-    | TIME          = 0x00008000
-    | DATE          = 0x00010000
-    | TOD           = 0x00020000
-    | DT            = 0x00040000
-    | STRING        = 0x00080000
-*)
 
+    let createFunctionBlockInstanceXmls (rungStartX, rungStartY) (cmd:CommandTypes) (namedParameters:(string*IExpression) list) : BlockSummarizedXmlElements =
+        let func = cmd.VarType.ToString()
+        let instanceName = cmd.InstanceName
+        createBoxXmls (rungStartX, rungStartY) func namedParameters instanceName
 
     /// cmd 인자로 주어진 function block 의 type 과
     /// namedParameters 로 주어진 function block 에 연결된 다릿발 정보를 이용해서
     /// function block rung 을 그린다.
-    let createFunctionBlockInstanceXmls (rungStartX, rungStartY) (cmd:CommandTypes) (namedParameters:(string*IExpression) list) : BlockSummarizedXmlElements =
-        let func = cmd.VarType.ToString()
-
+    let createBoxXmls (rungStartX, rungStartY) (func:string) (namedParameters:(string*IExpression) list) (instanceName:string) : BlockSummarizedXmlElements =
         let dic = namedParameters |> dict
 
         /// 입력 인자들을 function 의 입력 순서 맞게 재배열
@@ -380,7 +391,7 @@ module internal rec Command =
             let x, y = rungStartX, rungStartY
 
             //Command 결과출력
-            createFunctionXmlAt (func, func) cmd.InstanceName (x+fsx, y)
+            createFunctionXmlAt (func, func) instanceName (x+fsx, y)
         ]
 
 
@@ -401,24 +412,24 @@ module internal rec Command =
 
         //FunctionBlock, Function 그리기
         match cmd with
-        | PredicateCmd (pc) ->
-            // todo: 내부로 이동... drawCmdXXX 내에서 그려야 한다..
-            drawHLine()
-            match pc with
-            //| CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy (newX, y) endTag tagA tagB true
-            | Compare (name, output, args)     -> drawCmdCompare (x+1, y) name output args[0] args[1]
-        | FunctionCmd (fc) ->
-            // todo: 내부로 이동... drawCmdXXX 내에서 그려야 한다..
-            drawHLine()
-            match fc with
-            //| CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy (newX, y) endTag tagA tagB true
-            | Arithematic (name, output, args) -> drawCmdAdd (x+1, y) name output args[0] args[1]
+        | PredicateCmd (pc) -> drawPredicate (x, y) pc
+            //// todo: 내부로 이동... drawCmdXXX 내에서 그려야 한다..
+            //drawHLine()
+            //match pc with
+            ////| CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy (newX, y) endTag tagA tagB true
+            //| Compare (name, output, args)     -> drawPredicateCompare (x+1, y) name output args[0] args[1]
+        | FunctionCmd (fc) -> drawFunction (x, y) fc
+            //// todo: 내부로 이동... drawCmdXXX 내에서 그려야 한다..
+            //drawHLine()
+            //match fc with
+            ////| CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy (newX, y) endTag tagA tagB true
+            //| Arithematic (name, output, args) -> drawFunctionAdd (x+1, y) name output args[0] args[1]
         | FunctionBlockCmd (fbc) ->
             match fbc with
             | TimerMode(timerStatement) ->
-                drawCmdTimer(x, y) timerStatement
+                drawFunctionBlockTimer(x, y) timerStatement
             | CounterMode(counterStatement) ->
-                drawCmdCounter(x, y) counterStatement
+                drawFunctionBlockCounter(x, y) counterStatement
         | _ ->
             failwithlog "Unknown CommandType"
 

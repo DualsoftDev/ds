@@ -8,7 +8,7 @@ open System.Collections.Generic
 open Engine.Core
 
 module LsXGI =
-    let generateXml (opt:CodeGenerationOption) (storages:Storages) (commentedStatements:CommentedStatement list) : string =
+    let generateXml (storages:Storages) (commentedStatements:CommentedStatement list) : string =
         match RuntimeTarget with
         | XGI -> ()
         | _ -> failwith $"ERROR: Require XGI Runtime target.  Current runtime target = {RuntimeTarget}"

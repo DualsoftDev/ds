@@ -23,7 +23,7 @@ type XgiCounterTest() =
             ctu myCTU = createXgiCTU(2000us, $cu, $res);
 """
         let statements = parseCode storages code
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
@@ -36,7 +36,7 @@ type XgiCounterTest() =
             ctd myCTD = createXgiCTD(2000us, $cd, $load);
 """
         let statements = parseCode storages code
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
@@ -50,7 +50,7 @@ type XgiCounterTest() =
             ctud myCTUD = createXgiCTUD(2000us, $cu, $cd, $r, $ld);
 """
         let statements = parseCode storages code
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
@@ -65,7 +65,7 @@ type XgiCounterTest() =
             $myCTR.RST := $cd;
 """
         let statements = parseCode storages code
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
 
@@ -85,7 +85,7 @@ type XgiCounterTest() =
             $xx7 := (($cu1 && $cu2) || $cu3 || ($res0 || $res1) && $res2) && $cu1;
 """
         let statements = parseCode storages code
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
@@ -104,7 +104,7 @@ type XgiCounterTest() =
             $xx7 := (($cu1 && $cu2) || $cu3 || ($res0 || $res1) && $res2) && $cu1;
 """
         let statements = parseCode storages code
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
@@ -123,7 +123,7 @@ type XgiCounterTest() =
             $xx7 := (($cd1 && $cd2) || $cd3 || ($res0 || $res1) && $res2) && $cd1;
 """
         let statements = parseCode storages code
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
@@ -143,7 +143,7 @@ type XgiCounterTest() =
             $xx7 := (($cd1 && $cd2) || $cd3 || ($res0 || $res1) && $res2) && $cd1;
 """
         let statements = parseCode storages code
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
@@ -178,7 +178,7 @@ type XgiCounterTest() =
             //$xx7 := (($cd1 && $cd2) || $cd3 || ($res0 || $res1) && $res2) && $cd1;
 """
         let statements = parseCode storages code
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
 type XgiFunctionTest() =
@@ -194,7 +194,7 @@ type XgiFunctionTest() =
             $sum := $nn1 + $nn2;
 """
         let statements = parseCode storages code
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
 
@@ -208,7 +208,7 @@ type XgiFunctionTest() =
 //                && $x08 && $x09 && $x10 && $x11 && $x12 && $x13 && $x14    );
 //"""
 //        let statements = parseCode storages code
-//        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+//        let xml = LsXGI.generateXml storages (map withNoComment statements)
 //        saveTestResult (get_current_function_name()) xml
 
 //    [<Test>]
@@ -232,7 +232,7 @@ type XgiFunctionTest() =
 //                $x14    );
 //"""
 //        let statements = parseCode storages code
-//        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+//        let xml = LsXGI.generateXml storages (map withNoComment statements)
 //        saveTestResult (get_current_function_name()) xml
 
 
@@ -245,7 +245,7 @@ type XgiFunctionTest() =
 //                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14    );
 //"""
 //        let statements = parseCode storages code
-//        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+//        let xml = LsXGI.generateXml storages (map withNoComment statements)
 //        saveTestResult (get_current_function_name()) xml
 
 
@@ -266,7 +266,7 @@ type XgiFunctionTest() =
 //                );
 //"""
 //        let statements = parseCode storages code
-//        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+//        let xml = LsXGI.generateXml storages (map withNoComment statements)
 //        saveTestResult (get_current_function_name()) xml
 
 
@@ -290,7 +290,7 @@ type XgiFunctionTest() =
 //                );
 //"""
 //        let statements = parseCode storages code
-//        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+//        let xml = LsXGI.generateXml storages (map withNoComment statements)
 //        saveTestResult (get_current_function_name()) xml
 
 //    [<Test>]
@@ -313,5 +313,5 @@ type XgiFunctionTest() =
 //                );
 //"""
 //        let statements = parseCode storages code
-//        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+//        let xml = LsXGI.generateXml storages (map withNoComment statements)
 //        saveTestResult (get_current_function_name()) xml

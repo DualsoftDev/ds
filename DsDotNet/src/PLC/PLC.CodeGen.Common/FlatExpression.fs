@@ -18,6 +18,17 @@ module FlatExpressionModule =
             | Or -> And
             | Neg -> OpUnit
             | OpUnit -> Neg
+            | OpCompare op ->
+                match op with
+                | ">" -> "<="
+                | ">=" -> "<"
+                | "<" -> ">="
+                | "<=" -> ">"
+                | "=" -> "!="
+                | "!=" -> "="
+                | _ -> failwith "ERROR"
+                |> OpCompare
+            | OpArithematic _ -> failwith "ERROR"
 
     type TrueValue() =
         interface IExpressionizableTerminal with

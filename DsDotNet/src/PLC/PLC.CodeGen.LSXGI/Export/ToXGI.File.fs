@@ -99,7 +99,7 @@ module internal XgiFile =
                 | DuAugmentedPLCFunction ({FunctionName = (">"|">="|"<"|"<="|"="|"!=") as op; Arguments = args; Output=output }) ->
                     let fn = operatorToXgiFunctionName op
                     let command = PredicateCmd(Compare(fn, output, args))
-                    let rgiSub = xmlRung (Some alwaysOnFlatExpression) (Some command) rgi.Y
+                    let rgiSub = xmlRung None (Some command) rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
 
                 | DuAugmentedPLCFunction ({FunctionName = ("+"|"-"|"*"|"/") as op; Arguments = args; Output=output }) ->

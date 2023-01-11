@@ -1,5 +1,6 @@
 namespace PLC.CodeGen.LSXGI
 
+open System
 open System.Linq
 
 open PLC.CodeGen.Common
@@ -7,7 +8,6 @@ open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 open Engine.Common.FS
 open Engine.Core
 open FB
-open System
 
 [<AutoOpen>]
 module internal rec Command =
@@ -113,7 +113,7 @@ module internal rec Command =
         let ts = timerStatement
         let typ = ts.Timer.Type
         let time:int = int ts.Timer.PRE.Value
-        let parameters =
+        let inputParameters =
             [
                 "PT", (literal2expr $"T#{time}MS") :> IExpression
                 "IN", obe2e ts.RungInCondition
@@ -123,10 +123,11 @@ module internal rec Command =
                 | _ ->
                     ()
             ]
+        let outputParameters = []
 
         let blockXml =
             let cmd = FunctionBlockCmd(TimerMode(ts))
-            createFunctionBlockInstanceXmls (x, y) cmd parameters
+            createFunctionBlockInstanceXmls (x, y) cmd inputParameters outputParameters
 
         blockXml
 
@@ -137,7 +138,7 @@ module internal rec Command =
         let pv = int16 cs.Counter.PRE.Value
         let typ = cs.Counter.Type
 
-        let parameters =
+        let inputParameters =
             [
                 "PV", (literal2expr pv) :> IExpression
                 match typ with
@@ -156,10 +157,11 @@ module internal rec Command =
                     "CD", obe2e cs.DownCondition
                     "RST", obe2e cs.ResetCondition
             ]
+        let outputParameters = []
 
         let blockXml =
             let cmd = FunctionBlockCmd(CounterMode(cs))
-            createFunctionBlockInstanceXmls (x, y) cmd parameters
+            createFunctionBlockInstanceXmls (x, y) cmd inputParameters outputParameters
 
         blockXml
 
@@ -183,6 +185,7 @@ module internal rec Command =
             let namedInputParameters =
                 [ "EN", alwaysOnExpression :> IExpression]
                 @ (args |> List.indexed |> List.map1st (fun n -> $"IN{n+1}"))
+            let outputParameters = [ "OUT", output ]
             let func =
                 match name with
                 | ("GT" | "GE" | "EQ" | "LE" | "LT" | "NE") ->
@@ -190,7 +193,7 @@ module internal rec Command =
                     $"{name}2_{opCompType}" // e.g "GT2_INT"
                 | _ ->
                     failwith "NOT YET"
-            createBoxXmls (x, y)  func namedInputParameters ""
+            createBoxXmls (x, y)  func namedInputParameters outputParameters ""
 
     let drawFunction (x, y) (func:Function) : BlockSummarizedXmlElements =
         match func with
@@ -198,11 +201,12 @@ module internal rec Command =
             let namedInputParameters =
                 [ "EN", alwaysOnExpression :> IExpression]
                 @ (args |> List.indexed |> List.map1st (fun n -> $"IN{n+1}"))
+            let outputParameters = [ "OUT", output ]
             let func =
                 match name with
                 | ("ADD" | "MUL" | "SUB" | "DIV") -> $"{name}2_INT"
                 | _ -> failwith "NOT YET"
-            createBoxXmls (x, y)  func namedInputParameters ""
+            createBoxXmls (x, y)  func namedInputParameters outputParameters ""
 
     [<Obsolete("삭제 대상")>]
     let drawPredicateCompare (x, y) (func:string) (out:INamedExpressionizableTerminal) (leftA:IExpression) (leftB:IExpression) : BlockSummarizedXmlElements =
@@ -296,42 +300,60 @@ module internal rec Command =
                 failwith "ERROR"
 
 
-    let createFunctionBlockInstanceXmls (rungStartX, rungStartY) (cmd:CommandTypes) (namedInputParameters:(string*IExpression) list) : BlockSummarizedXmlElements =
+    let createFunctionBlockInstanceXmls (rungStartX, rungStartY) (cmd:CommandTypes) (namedInputParameters:(string*IExpression) list) (namedOutputParameters:(string*INamedExpressionizableTerminal) list) : BlockSummarizedXmlElements =
         let func = cmd.VarType.ToString()
         let instanceName = cmd.InstanceName
-        createBoxXmls (rungStartX, rungStartY) func namedInputParameters instanceName
+        createBoxXmls (rungStartX, rungStartY) func namedInputParameters namedOutputParameters instanceName
 
     /// cmd 인자로 주어진 function block 의 type 과
     /// namedInputParameters 로 주어진 function block 에 연결된 다릿발 정보를 이용해서
     /// function block rung 을 그린다.
     let createBoxXmls
         (rungStartX, rungStartY)
-        (func:string)
+        (functionName:string)
         (namedInputParameters:(string*IExpression) list)
+        (namedOutputParameters:(string*INamedExpressionizableTerminal) list)
         (instanceName:string)
         : BlockSummarizedXmlElements
       =
-        let dic = namedInputParameters |> dict
+        let iDic = namedInputParameters |> dict
+        let oDic = namedOutputParameters |> Tuple.toDictionary
 
         /// 입력 인자들을 function 의 입력 순서 맞게 재배열
-        let alignedParameters =
+        let alignedInputParameters =
             /// e.g ["CD, 0x00200001, , 0"; "LD, 0x00200001, , 0"; "PV, 0x00200040, , 0"]
-            let inputSpecs = getFunctionInputSpecs func |> Array.ofSeq
+            let inputSpecs = getFunctionInputSpecs functionName |> Array.ofSeq
             namedInputParameters.Length = inputSpecs.Length |> verifyM "ERROR: Function input parameter mismatch."
             [|
                 for s in inputSpecs do
-                    let exp = dic[s.Name]
+                    let exp = iDic[s.Name]
                     s.CheckType.IsRoughlyEqual exp.DataType |> verify
                     s.Name, exp, s.CheckType
             |]
+
+        /// 출력 인자들을 function 의 출력 순서 맞게 재배열
+        let alignedOutputParameters =
+            /// e.g ["ENO, 0x00200001, , 0"; "OUT, 0x00200001, , 0";]
+            let outputSpecs = getFunctionOutputSpecs functionName |> Array.ofSeq
+            [
+                for (i, s) in outputSpecs.Indexed() do
+                    option {
+                        let! terminal = oDic.TryFind(s.Name)
+                        match terminal with
+                        | :? IStorage as storage ->
+                            s.CheckType.IsRoughlyEqual storage.DataType |> verify
+                        | _ -> ()
+                        return s.Name, i, terminal, s.CheckType
+                    }
+            ] |> List.choose id
 
         let (x, y) = (rungStartX, rungStartY)
 
         /// y 위치에 literal parameter 쓸 공간 확보 (x 좌표는 아직 미정)
         let reservedLiteralInputParam = ResizeArray<int*IExpression>()
         let mutable sy = 0
-        let blockXmls = [
-            for (portOffset, (name, exp, checkType)) in alignedParameters.Indexed() do
+        let inputBlockXmls = [
+            for (portOffset, (name, exp, checkType)) in alignedInputParameters.Indexed() do
                 if checkType.HasFlag CheckType.BOOL then
                     let blockXml = drawFunctionInputLadderBlock (x, y + sy) (flatten exp)
                     portOffset, blockXml
@@ -342,14 +364,19 @@ module internal rec Command =
         ]
 
         /// 입력 parameter 를 그렸을 때, 1 줄을 넘는 것들의 갯수 만큼 horizontal line spacing 필요
-        let plusHorizontalPadding = blockXmls.Count(fun (_, x) -> x.TotalSpanY > 1)
+        let plusHorizontalPadding = inputBlockXmls.Count(fun (_, x) -> x.TotalSpanY > 1)
 
         /// function start X
-        let fsx = blockXmls.Max(fun (_, x) -> x.TotalSpanX) + plusHorizontalPadding
+        let fsx = inputBlockXmls.Max(fun (_, x) -> x.TotalSpanX) + plusHorizontalPadding
 
-        /// input parameter end 와 function input adaptor 와의 'S' shape 연결 문어발
+        let outputCellXmls = [
+            for (portOffset, (name, yoffset, terminal, checkType)) in alignedOutputParameters.Indexed() do
+                createFBParameterXml (fsx + 1, y + yoffset) terminal.StorageName
+        ]
+
+        /// 문어발: input parameter end 와 function input adaptor 와의 'S' shape 연결
         let tentacleXmls = [
-            for (inputBlockIndex, (portOffset, b)) in blockXmls.Indexed() do
+            for (inputBlockIndex, (portOffset, b)) in inputBlockXmls.Indexed() do
                 let i = inputBlockIndex
                 let bex = b.X + b.TotalSpanX    // block end X
                 let bey = b.Y
@@ -392,44 +419,28 @@ module internal rec Command =
                         failwith "ERROR"
                 createFBParameterXml (x + fsx - 1, ry) literal
 
-            yield! blockXmls |> bind(fun (_, bx) -> bx.XmlElements)
+            yield! inputBlockXmls |> bind(fun (_, bx) -> bx.XmlElements)
+            yield! outputCellXmls
             yield! tentacleXmls
             let x, y = rungStartX, rungStartY
 
             //Command 결과출력
-            createFunctionXmlAt (func, func) instanceName (x+fsx, y)
+            createFunctionXmlAt (functionName, functionName) instanceName (x+fsx, y)
         ]
 
 
         {   X=x; Y=y;
             TotalSpanX = fsx + 3;
             TotalSpanY = max sy (allXmls.Max(fun x -> x.SpanY));
-            XmlElements = allXmls |> List.sortBy(fun cxml -> cxml.Coordinate)
+            XmlElements = allXmls |> List.sortBy(fun x -> x.Coordinate)
         }
 
 
     /// (x, y) 위치에 cmd 를 생성.  cmd 가 차지하는 height 와 xml 목록을 반환
     let drawCommand (x, y) (cmd:CommandTypes) : BlockSummarizedXmlElements =
-        let c = coord(x, y)
-
-        let drawHLine() =
-            //FunctionBlock, Function 까지 연장선 긋기
-            {Coordinate = c; Xml = hlineEmpty c; SpanX = 1; SpanY = 1}
-
-        //FunctionBlock, Function 그리기
         match cmd with
         | PredicateCmd (pc) -> drawPredicate (x, y) pc
-            //// todo: 내부로 이동... drawCmdXXX 내에서 그려야 한다..
-            //drawHLine()
-            //match pc with
-            ////| CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy (newX, y) endTag tagA tagB true
-            //| Compare (name, output, args)     -> drawPredicateCompare (x+1, y) name output args[0] args[1]
         | FunctionCmd (fc) -> drawFunction (x, y) fc
-            //// todo: 내부로 이동... drawCmdXXX 내에서 그려야 한다..
-            //drawHLine()
-            //match fc with
-            ////| CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy (newX, y) endTag tagA tagB true
-            //| Arithematic (name, output, args) -> drawFunctionAdd (x+1, y) name output args[0] args[1]
         | FunctionBlockCmd (fbc) ->
             match fbc with
             | TimerMode(timerStatement) ->
@@ -495,13 +506,12 @@ module internal rec Command =
 
         | FlatNary(And, exprs) ->
             let mutable sx = x
-            let blockedExprXmls:BlockSummarizedXmlElements list =
-                [
-                    for exp in exprs do
-                        let sub = drawLadderBlock (sx, y) exp
-                        sx <- sx + sub.TotalSpanX
-                        sub
-                ]
+            let blockedExprXmls:BlockSummarizedXmlElements list = [
+                for exp in exprs do
+                    let sub = drawLadderBlock (sx, y) exp
+                    sx <- sx + sub.TotalSpanX
+                    sub
+            ]
 
             let spanX = blockedExprXmls.Sum(fun x -> x.TotalSpanX)
             let spanY = blockedExprXmls.Max(fun x -> x.TotalSpanY)
@@ -511,13 +521,12 @@ module internal rec Command =
 
         | FlatNary(Or, exprs) ->
             let mutable sy = y
-            let blockedExprXmls:BlockSummarizedXmlElements list =
-                [
-                    for exp in exprs do
-                        let sub = drawLadderBlock (x, sy) exp
-                        sy <- sy + sub.TotalSpanY
-                        sub
-                ]
+            let blockedExprXmls:BlockSummarizedXmlElements list = [
+                for exp in exprs do
+                    let sub = drawLadderBlock (x, sy) exp
+                    sy <- sy + sub.TotalSpanY
+                    sub
+            ]
             let spanX = blockedExprXmls.Max(fun x -> x.TotalSpanX)
             let spanY = blockedExprXmls.Sum(fun x -> x.TotalSpanY)
             let exprXmls = blockedExprXmls |> List.collect(fun x -> x.XmlElements)

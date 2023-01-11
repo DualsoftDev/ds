@@ -6,6 +6,7 @@ open System.Security
 open Engine.Core
 open Engine.Common.FS
 open PLC.CodeGen.Common
+open System
 
 (*
     - 사칙연산 함수(Add, ..) 의 입력은 XGI 에서 전원선으로부터 연결이 불가능한 반면,
@@ -38,6 +39,7 @@ open PLC.CodeGen.Common
 
 [<AutoOpen>]
 module ConvertorPrologModule =
+    [<Obsolete("Need check")>]
     let systemTypeNameToXgiTypeName = function
         | "Boolean" -> "BOOL"
         | "Single" -> "REAL"
@@ -185,46 +187,49 @@ module XgiExpressionConvertorModule =
         | "/"  -> "DIV"
         |  _ -> failwith "ERROR"
 
-    let collectExpandedExpression (storage:XgiStorage) (expandFunctionStatements:ResizeArray<Statement>) (exp:IExpression) : IExpression =
+    let collectExpandedExpression
+        (storage:XgiStorage)
+        (expandFunctionStatements:ResizeArray<Statement>)
+        (exp:IExpression)
+      : IExpression =
         let xgiLocalVars = ResizeArray<IXgiLocalVar>()
-        let rec helper (exp:IExpression) =
-            [
-                match exp.FunctionName with
-                | Some funcName ->
-                    let newArgs = exp.FunctionArguments |> bind helper
-                    match funcName with
-                    | ("&&" | "||" | "!") as op ->
-                        exp.WithNewFunctionArguments newArgs
-                    | (">"|">="|"<"|"<="|"="|"!="  |  "+"|"-"|"*"|"/") as op ->
-                        let withDefaultValue (defaultValue:'T) =
-                            let out = createXgiAutoVariable "out" $"{op} output" defaultValue
-                            xgiLocalVars.Add out
-                            expandFunctionStatements.Add <| DuAugmentedPLCFunction { FunctionName = op; Arguments = newArgs; Output = out; }
-                            DuTerminal (DuVariable out) :> IExpression
+        let rec helper (exp:IExpression) = [
+            match exp.FunctionName with
+            | Some funcName ->
+                let newArgs = exp.FunctionArguments |> bind helper
+                match funcName with
+                | ("&&" | "||" | "!") as op ->
+                    exp.WithNewFunctionArguments newArgs
+                | (">"|">="|"<"|"<="|"="|"!="  |  "+"|"-"|"*"|"/") as op ->
+                    let withDefaultValue (defaultValue:'T) =
+                        let out = createXgiAutoVariable "out" $"{op} output" defaultValue
+                        xgiLocalVars.Add out
+                        expandFunctionStatements.Add <| DuAugmentedPLCFunction { FunctionName = op; Arguments = newArgs; Output = out; }
+                        DuTerminal (DuVariable out) :> IExpression
 
-                        match exp.DataType.Name with
-                        | "Single" -> withDefaultValue 0.f
-                        | "Double" -> withDefaultValue 0.0
-                        | "SByte"  -> withDefaultValue 0y
-                        | "Byte"   -> withDefaultValue 0uy
-                        | "Int16"  -> withDefaultValue 0s
-                        | "UInt16" -> withDefaultValue 0us
-                        | "Int32"  -> withDefaultValue 0
-                        | "UInt32" -> withDefaultValue 0u
-                        | "Int64"  -> withDefaultValue 0L
-                        | "UInt64" -> withDefaultValue 0UL
-                        | "Boolean"-> withDefaultValue false
-                        | "String" -> withDefaultValue ""
-                        | "Char"   -> withDefaultValue ' '
-                        | _ -> failwith "ERROR"
+                    match exp.DataType.Name with
+                    | "Single" -> withDefaultValue 0.f
+                    | "Double" -> withDefaultValue 0.0
+                    | "SByte"  -> withDefaultValue 0y
+                    | "Byte"   -> withDefaultValue 0uy
+                    | "Int16"  -> withDefaultValue 0s
+                    | "UInt16" -> withDefaultValue 0us
+                    | "Int32"  -> withDefaultValue 0
+                    | "UInt32" -> withDefaultValue 0u
+                    | "Int64"  -> withDefaultValue 0L
+                    | "UInt64" -> withDefaultValue 0UL
+                    | "Boolean"-> withDefaultValue false
+                    | "String" -> withDefaultValue ""
+                    | "Char"   -> withDefaultValue ' '
+                    | _ -> failwith "ERROR"
 
-                    | (FunctionNameRising | FunctionNameFalling) ->
-                        exp
-                    | _ ->
-                        failwith "ERROR"
-                | _ ->
+                | (FunctionNameRising | FunctionNameFalling) ->
                     exp
-            ]
+                | _ ->
+                    failwith "ERROR"
+            | _ ->
+                exp
+        ]
 
         let newExp = helper exp |> List.exactlyOne
         xgiLocalVars.Cast<IStorage>() |> storage.AddRange   // 위의 helper 수행 이후가 아니면, xgiLocalVars 가 채워지지 않는다.
@@ -236,8 +241,14 @@ module XgiExpressionConvertorModule =
         let newStatements =
             match statement with
             | DuAssign (exp, target) ->
-                let newExp = collectExpandedExpression storage expandFunctionStatements exp
-                [ DuAssign (newExp, target) ]
+                // todo : "sum := tag1 + tag2" 의 처리 : DuAugmentedPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
+                match exp.FunctionName with
+                | Some ("+"|"-"|"*"|"/" as op) ->
+                    let tgt = target :?> INamedExpressionizableTerminal
+                    [ DuAugmentedPLCFunction {FunctionName=op; Arguments=exp.FunctionArguments; Output=tgt } ]
+                | _ ->
+                    let newExp = collectExpandedExpression storage expandFunctionStatements exp
+                    [ DuAssign (newExp, target) ]
 
             | DuVarDecl (exp, decl) ->
                 let newExp_ = collectExpandedExpression storage expandFunctionStatements exp
@@ -265,18 +276,11 @@ module XgiExpressionConvertorModule =
                 | _ -> failwith "ERROR"
 
                 []
-            | _ -> [ statement ]
+            | _ ->
+                [ statement ]
 
         expandFunctionStatements @ newStatements |> List.ofSeq
 
     let internal commentedStatement2CommentedXgiStatements (storage:XgiStorage) (CommentedStatement(comment, statement)) : CommentedXgiStatements =
         let xgiStatements = statement2XgiStatements storage statement
         CommentedXgiStatements(comment, xgiStatements)
-
-
-
-    type CounterStatement with
-        member cs.RungInCondition:IExpression<bool> =
-            match cs.Counter.Type with
-            | ( CTU | CTUD | CTR ) -> cs.UpCondition.Value
-            | CTD -> cs.DownCondition.Value

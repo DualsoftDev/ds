@@ -185,7 +185,7 @@ type XgiFunctionTest() =
     inherit XgiTestClass()
 
     [<Test>]
-    member __.``X ADD simple test`` () =
+    member __.``ADD simple test`` () =
         let storages = Storages()
         let code = """
             int16 nn1 = 1s;

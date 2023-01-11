@@ -330,5 +330,5 @@ open Engine.Parser.FS
 """
 
             let statement = parseCode storages code
-            [ "CD"; "LD"; "PV"; "Q"; "CV"; ] |> iter (fun n -> storages.ContainsKey($"myCTR.{n}") === true)
-            [ "CU"; "DN"; "RST"; "PRE"; "ACC"; ] |> iter (fun n -> storages.ContainsKey($"myCTR.{n}") === false)
+            [ "CD"; "PV"; "RST"; "Q"; "CV"; ] |> iter (fun n -> storages.ContainsKey($"myCTR.{n}") === true)
+            [ "CU"; "DN"; "LD"; "PRE"; "ACC"; ] |> iter (fun n -> storages.ContainsKey($"myCTR.{n}") === false)

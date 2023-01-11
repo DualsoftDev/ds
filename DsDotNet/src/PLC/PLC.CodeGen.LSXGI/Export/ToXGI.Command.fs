@@ -7,6 +7,8 @@ open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 open Engine.Common.FS
 open Engine.Core
 open FB
+open FSharp.Data.Runtime.BaseTypes
+open System.Collections.Generic
 
 [<AutoOpen>]
 module internal rec Command =
@@ -104,7 +106,7 @@ module internal rec Command =
     let private flatten (exp:IExpression) = exp.Flatten() :?> FlatExpression
 
     // <timer>
-    let drawCmdTimer (x, y) (timerStatement:TimerStatement)  : CoordinatedXmlElement list =
+    let drawCmdTimer (x, y) (timerStatement:TimerStatement)  : BlockSummarizedXmlElements =
         let ts = timerStatement
         let typ = ts.Timer.Type
         let time:int = int ts.Timer.PRE.Value
@@ -119,14 +121,13 @@ module internal rec Command =
                     ()
             ]
 
-        //Command 속성입력
-        let results = [
+        let blockXml =
             let cmd = FunctionBlockCmd(TimerMode(ts))
-            yield! createFunctionBlockInstanceXmls (x, y) cmd parameters
-        ]
-        results
+            createFunctionBlockInstanceXmls (x, y) cmd parameters
 
-    let drawCmdCounter (x, y) (counterStatement:CounterStatement) : CoordinatedXmlElement list =
+        blockXml
+
+    let drawCmdCounter (x, y) (counterStatement:CounterStatement) : BlockSummarizedXmlElements =
 
         //let paramDic = Dictionary<string, FuctionParameterShape>()
         let cs = counterStatement
@@ -153,13 +154,11 @@ module internal rec Command =
                     "RST", obe2e cs.ResetCondition
             ]
 
-        //Command 속성입력
-        let results = [
+        let blockXml =
             let cmd = FunctionBlockCmd(CounterMode(cs))
-            yield! createFunctionBlockInstanceXmls (x, y) cmd parameters
-        ]
+            createFunctionBlockInstanceXmls (x, y) cmd parameters
 
-        results
+        blockXml
 
     type System.Type with
         member x.SizeString = systemTypeNameToXgiTypeName x.Name
@@ -175,7 +174,7 @@ module internal rec Command =
             | _ -> failwith "ERROR"
         | _ -> failwith "ERROR"
 
-    let drawCmdCompare (x, y) (func:string) (out:INamedExpressionizableTerminal) (leftA:IExpression) (leftB:IExpression) : CoordinatedXmlElement list =
+    let drawCmdCompare (x, y) (func:string) (out:INamedExpressionizableTerminal) (leftA:IExpression) (leftB:IExpression) : BlockSummarizedXmlElements =
         let a, b = toTerminalText leftA, toTerminalText leftB
 
         if(leftA.DataType <> leftB.DataType) then
@@ -188,20 +187,21 @@ module internal rec Command =
             //else
                 $"{func}2_{opCompType}"
 
-        let results = [
+        let xmls = [
             createFunctionXmlAt (detailedFunctionName, func) "" (x, y)
             createFBParameterXml (x-1, y+1) a
             createFBParameterXml (x-1, y+2) b
             createFBParameterXml (x+1, y+1) (out.StorageName)
         ]
 
-        results
+        failwith "ERROR: 수정 필요"
+        { X=x; Y=y; TotalSpanX=(-1); TotalSpanY=(-1); XmlElements=xmls }
 
-    let drawCmdAdd (x, y) (func:string) (out:INamedExpressionizableTerminal) (in1:IExpression) (in2:IExpression): CoordinatedXmlElement list =
+    let drawCmdAdd (x, y) (func:string) (out:INamedExpressionizableTerminal) (in1:IExpression) (in2:IExpression): BlockSummarizedXmlElements =
 
         let in1, in2 = toTerminalText in1, toTerminalText in2
 
-        [
+        let xmls = [
             //Pulse시 증감 처리
             //yield! drawRising(x, y)
             //함수 그리기
@@ -210,6 +210,8 @@ module internal rec Command =
             createFBParameterXml (x-1, y+1) in1
             createFBParameterXml (x-1, y+2) in2
         ]
+        failwith "ERROR: 수정 필요"
+        { X=x; Y=y; TotalSpanX=(-1); TotalSpanY=(-1); XmlElements=xmls }
 
 
 
@@ -285,17 +287,19 @@ module internal rec Command =
 *)
 
 
-
-    let createFunctionBlockInstanceXmls (rungStartX, rungStartY) (cmd:CommandTypes) (namedParameters:(string*IExpression) list) : CoordinatedXmlElement list =
-        //Command instance 객체생성
-        let inst = cmd.InstanceName
+    /// cmd 인자로 주어진 function block 의 type 과
+    /// namedParameters 로 주어진 function block 에 연결된 다릿발 정보를 이용해서
+    /// function block rung 을 그린다.
+    let createFunctionBlockInstanceXmls (rungStartX, rungStartY) (cmd:CommandTypes) (namedParameters:(string*IExpression) list) : BlockSummarizedXmlElements =
         let func = cmd.VarType.ToString()
-        let inputSpecs = getFunctionInputSpecs func |> Array.ofSeq      // e.g ["CD, 0x00200001, , 0"; "LD, 0x00200001, , 0"; "PV, 0x00200040, , 0"]
-
-        namedParameters.Length = inputSpecs.Length |> verifyM "ERROR: Function input parameter mismatch."
 
         let dic = namedParameters |> dict
+
+        /// 입력 인자들을 function 의 입력 순서 맞게 재배열
         let alignedParameters =
+            /// e.g ["CD, 0x00200001, , 0"; "LD, 0x00200001, , 0"; "PV, 0x00200040, , 0"]
+            let inputSpecs = getFunctionInputSpecs func |> Array.ofSeq
+            namedParameters.Length = inputSpecs.Length |> verifyM "ERROR: Function input parameter mismatch."
             [|
                 for s in inputSpecs do
                     let exp = dic[s.Name]
@@ -305,50 +309,89 @@ module internal rec Command =
 
         let (x, y) = (rungStartX, rungStartY)
 
-        // y 위치에 literal parameter 쓸 공간 확보 (x 좌표는 아직 미정)
+        /// y 위치에 literal parameter 쓸 공간 확보 (x 좌표는 아직 미정)
         let reservedLiteralInputParam = ResizeArray<int*IExpression>()
         let mutable sy = 0
-        let blockXmls =
-            [
-                for (i, (name, exp, checkType)) in alignedParameters.Indexed() do
-                    if checkType.HasFlag CheckType.BOOL then
-                        let blockXml = drawFunctionInputLadderBlock (x, y + sy) (flatten exp)
-                        blockXml
-                        sy <- sy + blockXml.TotalSpanY
-                    else
-                        (y + i, exp) |> reservedLiteralInputParam.Add
-                        sy <- sy + 1
-            ]
+        let blockXmls = [
+            for (portOffset, (name, exp, checkType)) in alignedParameters.Indexed() do
+                if checkType.HasFlag CheckType.BOOL then
+                    let blockXml = drawFunctionInputLadderBlock (x, y + sy) (flatten exp)
+                    portOffset, blockXml
+                    sy <- sy + blockXml.TotalSpanY
+                else
+                    (y + portOffset, exp) |> reservedLiteralInputParam.Add
+                    sy <- sy + 1
+        ]
 
-        let sx = blockXmls.Max(fun x -> x.TotalSpanX)
+        /// 입력 parameter 를 그렸을 때, 1 줄을 넘는 것들의 갯수 만큼 horizontal line spacing 필요
+        let plusHorizontalPadding = blockXmls.Count(fun (_, x) -> x.TotalSpanY > 1)
 
-        let cxmls =
-            [
-                (* Timer 의 PT, Counter 의 PV 등의 상수 값을 입력 모선에서 연결하지 않고, function cell 에 바로 입력 하기 위함*)
-                for (ry, rexp) in reservedLiteralInputParam do
-                    let literal =
-                        match rexp.Terminal with
-                        | Some terminal ->
-                            match terminal.Literal, terminal.Variable with
-                            | Some (:? ILiteralHolder as literal), None -> literal.ToTextWithoutTypeSuffix()
-                            | Some literal, None -> literal.ToText()
-                            | None, Some variable -> variable.ToText()
-                            | _ -> failwith "ERROR"
-                        | _ ->
-                            failwith "ERROR"
-                    createFBParameterXml (x + sx - 1, ry) literal
+        /// function start X
+        let fsx = blockXmls.Max(fun (_, x) -> x.TotalSpanX) + plusHorizontalPadding
 
-                yield! blockXmls |> bind(fun bx -> bx.XmlElements)
-                let x, y = rungStartX, rungStartY // tmp
+        /// input parameter end 와 function input adaptor 와의 'S' shape 연결 문어발
+        let tentacleXmls = [
+            for (inputBlockIndex, (portOffset, b)) in blockXmls.Indexed() do
+                let i = inputBlockIndex
+                let bex = b.X + b.TotalSpanX    // block end X
+                let bey = b.Y
+                let c = coord(bex, bey)
+                let spanX = (fsx - bex)
+                if b.TotalSpanX > 1 then
+                    /// 'S' shape 의 하단부 수평선 끝점 x 좌표
+                    let hEndX = if i = 0 then fsx - 1 else bex + i - 1
+                    yield! tryHLineTo (bex, bey) (hEndX)
+                        |> map (fun xml ->
+                            tracefn $"H: ({bex}, {bey}) -> ({hEndX}, {bey})"
+                            { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 })
 
-                //Command 결과출력
-                createFunctionXmlAt (func, func) inst (x+sx, y)
-            ]
-        cxmls |> List.sortBy(fun cxml -> cxml.Coordinate)
+                    if i > 0 then
+                        let bexi = bex+i
+                        let yi = y + portOffset
+                        tracefn $"V: ({bexi-1}, {bey}) -> [({bexi-1}, {yi})]"
+                        // 'S' shape 의 세로선 그리기
+                        yield! vlineUpTo (bexi-1, bey) yi
+
+                        // 'S' shape 의 상단부 수평선 그리기
+                        yield! tryHLineTo (bexi, yi) (fsx - 1)
+                        |> map (fun xml ->
+                            tracefn $"H: ({bexi}, {yi}) -> [({bexi}, {fsx - 1})]"
+                            { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 })
+        ]
+
+        let allXmls = [
+            (* Timer 의 PT, Counter 의 PV 등의 상수 값을 입력 모선에서 연결하지 않고, function cell 에 바로 입력 하기 위함*)
+            for (ry, rexp) in reservedLiteralInputParam do
+                let literal =
+                    match rexp.Terminal with
+                    | Some terminal ->
+                        match terminal.Literal, terminal.Variable with
+                        | Some (:? ILiteralHolder as literal), None -> literal.ToTextWithoutTypeSuffix()
+                        | Some literal, None -> literal.ToText()
+                        | None, Some variable -> variable.ToText()
+                        | _ -> failwith "ERROR"
+                    | _ ->
+                        failwith "ERROR"
+                createFBParameterXml (x + fsx - 1, ry) literal
+
+            yield! blockXmls |> bind(fun (_, bx) -> bx.XmlElements)
+            yield! tentacleXmls
+            let x, y = rungStartX, rungStartY
+
+            //Command 결과출력
+            createFunctionXmlAt (func, func) cmd.InstanceName (x+fsx, y)
+        ]
+
+
+        {   X=x; Y=y;
+            TotalSpanX = fsx + 3;
+            TotalSpanY = max sy (allXmls.Max(fun x -> x.SpanY));
+            XmlElements = allXmls |> List.sortBy(fun cxml -> cxml.Coordinate)
+        }
 
 
     /// (x, y) 위치에 cmd 를 생성.  cmd 가 차지하는 height 와 xml 목록을 반환
-    let drawCommand (x, y) (cmd:CommandTypes) : CoordinatedXmlElement list =
+    let drawCommand (x, y) (cmd:CommandTypes) : BlockSummarizedXmlElements =
         let c = coord(x, y)
 
         let drawHLine() =
@@ -356,33 +399,28 @@ module internal rec Command =
             {Coordinate = c; Xml = hlineEmpty c; SpanX = 1; SpanY = 1}
 
         //FunctionBlock, Function 그리기
-        let results =
-            [
-                match cmd with
-                | FunctionCmd (fc) ->
-                    // todo: 내부로 이동... drawCmdXXX 내에서 그려야 한다..
-                    drawHLine()
-                    match fc with
-                    //| CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy (newX, y) endTag tagA tagB true
-                    | FunctionCompare (name, output, args) -> yield! drawCmdCompare (x+1, y) name output args[0] args[1]
-                    | FunctionArithematic (name, output, args) -> yield! drawCmdAdd (x+1, y) name output args[0] args[1]
-                | FunctionBlockCmd (fbc) ->
-                    match fbc with
-                    | TimerMode(timerStatement) ->
-                        yield! drawCmdTimer(x, y) timerStatement
-                    | CounterMode(counterStatement) ->
-                        yield! drawCmdCounter(x, y) counterStatement
-                | _ ->
-                    failwithlog "Unknown CommandType"
-            ]
-
-        results
+        match cmd with
+        | FunctionCmd (fc) ->
+            // todo: 내부로 이동... drawCmdXXX 내에서 그려야 한다..
+            drawHLine()
+            match fc with
+            //| CopyMode  (endTag, (tagA, tagB)) ->  drawCmdCopy (newX, y) endTag tagA tagB true
+            | FunctionCompare (name, output, args)     -> drawCmdCompare (x+1, y) name output args[0] args[1]
+            | FunctionArithematic (name, output, args) -> drawCmdAdd (x+1, y) name output args[0] args[1]
+        | FunctionBlockCmd (fbc) ->
+            match fbc with
+            | TimerMode(timerStatement) ->
+                drawCmdTimer(x, y) timerStatement
+            | CounterMode(counterStatement) ->
+                drawCmdCounter(x, y) counterStatement
+        | _ ->
+            failwithlog "Unknown CommandType"
 
     /// (x, y) 위치에 coil 생성.  height(=1) 와 xml 목록을 반환
-    let drawCoil(x, y) (cmdExp:CommandTypes) : CoordinatedXmlElement list =
+    let drawCoil(x, y) (cmdExp:CommandTypes) : BlockSummarizedXmlElements =
         let spanX = (coilCellX-x-2)
         let lengthParam = $"Param={dq}{3 * spanX}{dq}"
-        let results = [
+        let xmls = [
             let c = coord(x+1, y)
             let xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
             { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 }
@@ -390,7 +428,7 @@ module internal rec Command =
             let xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.StorageName)
             { Coordinate = c; Xml = xml; SpanX = 1; SpanY = 1 }
         ]
-        results
+        { X=x; Y=y; TotalSpanX=31; TotalSpanY=1; XmlElements=xmls }
 
     /// function input 에 해당하는 expr 을 그리되, 맨 마지막을 multi horizontal line 연결 가능한 상태로 만든다.
     let drawFunctionInputLadderBlock (x, y) (expr:FlatExpression) : BlockSummarizedXmlElements =
@@ -399,10 +437,10 @@ module internal rec Command =
             blockXml
         else
             let b = blockXml
-            let x = b.X + b.TotalSpanX + 1
-            let c = coord(x, b.Y)
+            let x = b.X + b.TotalSpanX //+ 1
             let lineXml =
-                let xml = elementFull (int ElementType.HorzLineMode) c "" ""
+                let c = coord(x, b.Y)
+                let xml = hLineStartMarkAt(x, b.Y)
                 { Coordinate = c; Xml = xml; SpanX = 1; SpanY = 1 }
             { blockXml with TotalSpanX = b.TotalSpanX + 1; XmlElements = b.XmlElements +++ lineXml }
 
@@ -412,12 +450,6 @@ module internal rec Command =
     let rec private drawLadderBlock (x, y) (expr:FlatExpression) : BlockSummarizedXmlElements =
         let baseRIWNP = { RungInfos = []; X=x; Y=y; SpanX=1; SpanY=1; }
         let c = coord(x, y)
-
-        // todo : uncomment
-
-        //if enableXmlComment then
-        //    let xml = $"<!-- {x} {y} {expr.ToText()} -->"
-        //    { Coordinate = c; Xml = xml; SpanX = 1; SpanY = 1 }
 
         match expr with
         | FlatTerminal(terminal, pulse, neg) ->
@@ -486,7 +518,7 @@ module internal rec Command =
 
                 // 좌측 vertical lines
                 if x >= 1 then
-                    yield! vlineDownTo (x-1, y) (spanY-1)
+                    yield! vlineDownN (x-1, y) (spanY-1)
 
                 // ```OR variable length 역삼각형 test```
                 let lowestY =
@@ -494,8 +526,11 @@ module internal rec Command =
                         .Where(fun sri -> sri.TotalSpanX <= spanX)
                         .Max(fun sri -> sri.Y)
                 // 우측 vertical lines
-                yield! vlineDownTo (x+spanX-1, y) (lowestY-y)
+                yield! vlineDownN (x+spanX-1, y) (lowestY-y)
             ]
+
+            let xmls = xmls |> List.distinct    // dirty hacking!
+
             { XmlElements = xmls; X=x; Y=y; TotalSpanX = spanX; TotalSpanY = spanY}
 
         | FlatNary((OpCompare _ | OpArithematic _), exprs) ->
@@ -542,17 +577,18 @@ module internal rec Command =
                         drawCoil (nx-1, y) cmdExp
                     | ( FunctionCmd _ | FunctionBlockCmd _ ) ->
                         drawCommand (nx, y) cmdExp
-                let spanX = exprSpanX + cmdXmls.Max(fun x -> x.SpanX)
-                let spanY = max exprSpanY (cmdXmls.Max(fun x -> x.SpanY))
+                let cmdXmls = { cmdXmls with XmlElements = cmdXmls.XmlElements |> List.distinct }       // dirty hack!
+                let spanX = exprSpanX + cmdXmls.TotalSpanX
+                let spanY = max exprSpanY cmdXmls.TotalSpanY
                 spanX, spanY, cmdXmls
             | None ->
-                0, 0, []
+                0, 0, {X=x; Y=y; TotalSpanX=0; TotalSpanY=0; XmlElements=[]}
 
 
 
 
         let xml =
-            exprXmls @ cmdXmls
+            exprXmls @ cmdXmls.XmlElements
                 |> Seq.sortBy (fun ri -> ri.Coordinate)   // fst
                 |> Seq.map (fun ri -> ri.Xml)  //snd
                 |> String.concat "\r\n"

@@ -69,7 +69,7 @@ module internal XgiFile =
 
             // 다중 라인 설명문을 하나의 설명문 rung 에..
             if cmt.NonNullAny() then
-                let xml =getCommentRung rgi.Y cmt
+                let xml = getCommentRung rgi.Y cmt
                 rgi <- rgi.Add(xml)
             for stmt in stmts do
                 match stmt with

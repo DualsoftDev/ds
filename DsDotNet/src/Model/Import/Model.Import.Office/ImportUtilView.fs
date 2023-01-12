@@ -79,11 +79,13 @@ module ImportViewModule =
     let UpdateLampNodes(system:DsSystem, flow:Flow, node:ViewNode)  =
         let newNode = ViewNode("Lamps", LAMP)
 
-        system.AutoModeLamps.Where(fun w->   w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuAutoModeLamp)) |>ignore)
-        system.ManualModeLamps.Where(fun w-> w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuManualModeLamp)) |>ignore)
-        system.DriveModeLamps.Where(fun w->  w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuDriveModeLamp)) |>ignore)
-        system.StopModeLamps.Where(fun w->   w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuStopModeLamp)) |>ignore)
-        system.ReadyModeLamps.Where(fun w->  w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuReadyModeLamp)) |>ignore)
+        system.AutoModeLamps.Where(fun w->      w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuAutoModeLamp))      |>ignore)
+        system.ManualModeLamps.Where(fun w->    w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuManualModeLamp))    |>ignore)
+        system.DriveModeLamps.Where(fun w->     w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuDriveModeLamp))     |>ignore)
+        system.StopModeLamps.Where(fun w->      w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuStopModeLamp))      |>ignore)
+        system.EmergencyModeLamps.Where(fun w-> w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuEmergencyModeLamp)) |>ignore)
+        system.TestModeLamps.Where(fun w->      w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuTestModeLamp))      |>ignore)
+        system.ReadyModeLamps.Where(fun w->     w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuReadyModeLamp))     |>ignore)
         
         if newNode.Singles.Count > 0
         then node.Singles.Add(newNode) |> ignore

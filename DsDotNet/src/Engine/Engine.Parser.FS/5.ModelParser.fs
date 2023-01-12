@@ -21,11 +21,11 @@ module ModelParser =
         for ctx in sysctx.Descendants<CausalPhraseContext>() do
             listener.ProcessCausalPhrase(ctx)
 
-        for ctx in sysctx.Descendants<ButtonsBlocksContext>() do
-            listener.ProcessButtonsBlocks(ctx)
+        for ctx in sysctx.Descendants<ButtonBlockContext>() do
+            listener.ProcessButtonBlock(ctx)
 
-        for ctx in sysctx.Descendants<LampBlocksContext>() do
-            listener.ProcessLampBlocks(ctx)
+        for ctx in sysctx.Descendants<LampBlockContext>() do
+            listener.ProcessLampBlock(ctx)
 
         for ctx in sysctx.Descendants<SafetyBlockContext>() do
             listener.ProcessSafetyBlock(ctx)

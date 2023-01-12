@@ -41,23 +41,25 @@ module CoreExtensionModule =
             | Some lmp -> lmp.SettingFlow <- flow
             | None -> x.Lamps.Add(LampDef(lmpName, lmpType, addr, flow)) |> verifyM $"Duplicated LampDef [{lmpName}]"
 
-        member x.SystemButtons    = x.Buttons |> Seq.map(fun btn  -> btn) //read only
-        member x.SystemLamps      = x.Lamps   |> Seq.map(fun lamp -> lamp)//read only
-
-        member x.AutoButtons      = getButtons(x, DuAutoBTN)
-        member x.ManualButtons    = getButtons(x, DuManualBTN)
-        member x.DriveButtons     = getButtons(x, DuDriveBTN)
-        member x.StopButtons      = getButtons(x, DuStopBTN)
-        member x.ClearButtons     = getButtons(x, DuClearBTN)
-        member x.EmergencyButtons = getButtons(x, DuEmergencyBTN)
-        member x.TestButtons      = getButtons(x, DuTestBTN)
-        member x.HomeButtons      = getButtons(x, DuHomeBTN)
-
-        member x.DriveModeLamps   = getLamps(x, DuDriveModeLamp)
-        member x.AutoModeLamps    = getLamps(x, DuAutoModeLamp)
-        member x.ManualModeLamps  = getLamps(x, DuManualModeLamp)
-        member x.StopModeLamps    = getLamps(x, DuStopModeLamp)
-        member x.ReadyModeLamps   = getLamps(x, DuReadyModeLamp)
+        member x.SystemButtons      = x.Buttons |> Seq.map(fun btn  -> btn) //read only
+        member x.SystemLamps        = x.Lamps   |> Seq.map(fun lamp -> lamp)//read only
+                                    
+        member x.AutoButtons        = getButtons(x, DuAutoBTN)
+        member x.ManualButtons      = getButtons(x, DuManualBTN)
+        member x.DriveButtons       = getButtons(x, DuDriveBTN)
+        member x.StopButtons        = getButtons(x, DuStopBTN)
+        member x.ClearButtons       = getButtons(x, DuClearBTN)
+        member x.EmergencyButtons   = getButtons(x, DuEmergencyBTN)
+        member x.TestButtons        = getButtons(x, DuTestBTN)
+        member x.HomeButtons        = getButtons(x, DuHomeBTN)
+                                    
+        member x.DriveModeLamps     = getLamps(x, DuDriveModeLamp)
+        member x.AutoModeLamps      = getLamps(x, DuAutoModeLamp)
+        member x.ManualModeLamps    = getLamps(x, DuManualModeLamp)
+        member x.StopModeLamps      = getLamps(x, DuStopModeLamp)
+        member x.EmergencyModeLamps = getLamps(x, DuEmergencyModeLamp)
+        member x.TestModeLamps      = getLamps(x, DuTestModeLamp)
+        member x.ReadyModeLamps     = getLamps(x, DuReadyModeLamp)
 
 
         member x.GetMutualResetApis(src:ApiItem) =

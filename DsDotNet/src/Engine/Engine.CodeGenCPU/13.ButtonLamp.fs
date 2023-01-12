@@ -20,11 +20,13 @@ type DsSystem with
             for lamp in s.SystemLamps do
                 let set = 
                     match lamp.LampType with
-                    | DuEmergencyLamp   -> lamp.SettingFlow.eop
-                    | DuRunModeLamp     -> lamp.SettingFlow.rop
-                    | DuDryRunModeLamp  -> lamp.SettingFlow.dop
-                    | DuManualModeLamp  -> lamp.SettingFlow.mop
-                    | DuStopModeLamp    -> lamp.SettingFlow.sop
+                    | DuAutoModeLamp      -> lamp.SettingFlow.dop
+                    | DuManualModeLamp    -> lamp.SettingFlow.mop
+                    | DuDriveModeLamp     -> lamp.SettingFlow.rop
+                    | DuStopModeLamp      -> lamp.SettingFlow.sop
+                    | DuEmergencyModeLamp -> lamp.SettingFlow.eop
+                    | DuTestModeLamp      -> lamp.SettingFlow.dop
+                    | DuReadyModeLamp     -> lamp.SettingFlow.dop
 
                 let out = lamp.OutTag :?> PlcTag<bool>
                 yield (set.Expr, s._off.Expr) --| (out, "B2" )

@@ -29,6 +29,8 @@ module DsType =
     type LampType =
         | DuAutoModeLamp      //자동 Select 버튼
         | DuManualModeLamp    //수동 Select 버튼
-        | DuDriveModeLamp //운전모드 램프
-        | DuStopModeLamp  //정지 모드 램프
-        | DuReadyModeLamp     //대기모드 램프
+        | DuDriveModeLamp     //운전 모드 램프
+        | DuStopModeLamp      //정지 모드 램프
+        | DuEmergencyModeLamp //비상 모드 램프
+        | DuTestModeLamp      //시운전 모드 램프
+        | DuReadyModeLamp     //대기 모드 램프

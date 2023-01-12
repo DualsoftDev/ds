@@ -15,7 +15,7 @@ open System.Collections.Generic
 module EtcListenerModule =
     (* 모든 vertex 가 생성 된 이후, edge 연결 작업 수행 *)
     type DsParserListener with
-        member x.ProcessButtonsBlocks(ctx:ButtonsBlocksContext) =
+        member x.ProcessButtonBlock(ctx:ButtonBlockContext) =
             let first = ctx.TryFindFirstChild<ParserRuleContext>().Value // {Emergency, Auto, Start, Reset}ButtonsContext
             let system = x.TheSystem
             let targetBtnType =
@@ -72,16 +72,18 @@ module EtcListenerModule =
             |> List.map(system.Buttons.Add)
             |> ignore
 
-        member x.ProcessLampBlocks(ctx:LampBlocksContext) =
+        member x.ProcessLampBlock(ctx:LampBlockContext) =
             let first = ctx.TryFindFirstChild<ParserRuleContext>().Value
             let system = x.TheSystem
             let targetLmpType =
                 match first with
-                | :? AutoBlockContext   -> DuAutoModeLamp
-                | :? ManualBlockContext -> DuManualModeLamp
-                | :? DriveBlockContext  -> DuDriveModeLamp
-                | :? StopBlockContext   -> DuStopModeLamp
-                | :? ReadyBlockContext  -> DuReadyModeLamp
+                | :? AutoBlockContext      -> DuAutoModeLamp
+                | :? ManualBlockContext    -> DuManualModeLamp
+                | :? DriveBlockContext     -> DuDriveModeLamp
+                | :? StopBlockContext      -> DuStopModeLamp
+                | :? EmergencyBlockContext -> DuEmergencyModeLamp
+                | :? TestBlockContext      -> DuTestModeLamp
+                | :? ReadyBlockContext     -> DuReadyModeLamp
                 | _ -> failwith "lamp type error"
 
             let lampDefs = first.Descendants<LampDefContext>().ToArray()

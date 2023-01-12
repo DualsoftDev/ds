@@ -27,7 +27,7 @@ system: '[' sysHeader ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
     sysHeader: SYS ipSpec?;
     sysBlock
         : LBRACE (  flowBlock | jobBlock | loadDeviceBlock | loadExternalSystemBlock
-                    | interfaceBlock | buttonsBlocks | lampBlocks | propsBlock
+                    | interfaceBlock | buttonBlock | lampBlock | propsBlock
                     | codeBlock
                     | variableBlock | commandBlock | observeBlock )*
           RBRACE       // identifier1Listing|parenting|causal|call
@@ -138,10 +138,10 @@ interfaceBlock
 categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|stopBlock|emergencyBlock|testBlock|homeBlock|readyBlock;
     autoBlock      :'[' ('auto_in'|'auto') ']'     EQ categoryBlock;
     manualBlock    :'[' ('manual_in'|'manual') ']' EQ categoryBlock;
+    driveBlock     :'[' ('drive_in'|'drive') ']'   EQ categoryBlock;
+    stopBlock      :'[' ('stop_in'|'stop') ']'     EQ categoryBlock;
     clearBlock     :'[' ('clear_in'|'clear') ']'   EQ categoryBlock;
     emergencyBlock :'[' ('emg_in'|'emg') ']'       EQ categoryBlock;
-    stopBlock      :'[' ('stop_in'|'stop') ']'     EQ categoryBlock;
-    driveBlock     :'[' ('drive_in'|'drive') ']'   EQ categoryBlock;
     testBlock      :'[' ('test_in'|'test') ']'     EQ categoryBlock;
     homeBlock      :'[' ('home_in'|'home') ']'     EQ categoryBlock;
     readyBlock     :'[' ('ready') ']'              EQ categoryBlock;
@@ -157,8 +157,8 @@ categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|stopBlock|emergencyBl
     addrDef: LPARENTHESIS addressItem? RPARENTHESIS;
     lampName: identifier1;
 
-buttonsBlocks: '[' 'buttons' ']' '=' LBRACE (categoryBlocks)* RBRACE;
-lampBlocks: '[' 'lamps' ']' '=' LBRACE (categoryBlocks)* RBRACE;
+buttonBlock: '[' 'buttons' ']' '=' LBRACE (categoryBlocks)* RBRACE;
+lampBlock: '[' 'lamps' ']' '=' LBRACE (categoryBlocks)* RBRACE;
 
 // B.F1 > Set1F <| T.A21;
 causal: causalPhrase SEIMCOLON;

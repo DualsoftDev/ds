@@ -177,6 +177,8 @@ module PPTObjectModule =
         | "M"      -> LampType.DuManualModeLamp
         | "D"      -> LampType.DuDriveModeLamp
         | "S"      -> LampType.DuStopModeLamp
+        | "E"      -> LampType.DuEmergencyModeLamp
+        | "T"      -> LampType.DuTestModeLamp
         | "R"      -> LampType.DuReadyModeLamp
         | _     ->  failwith $"{key} is Error Type"
 

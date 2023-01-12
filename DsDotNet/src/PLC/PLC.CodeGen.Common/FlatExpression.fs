@@ -9,7 +9,7 @@ module FlatExpressionModule =
     type Op =
         | And | Or | Neg | OpUnit
         | OpCompare of operator:string
-        | OpArithematic of operator:string
+        | OpArithmatic of operator:string
     with
         member x.ToText() = sprintf "%A" x
         member x.Negate() =
@@ -28,7 +28,7 @@ module FlatExpressionModule =
                 | "!=" -> "="
                 | _ -> failwith "ERROR"
                 |> OpCompare
-            | OpArithematic _ -> failwith "ERROR: Negation not supported for arithematic operator."
+            | OpArithmatic _ -> failwith "ERROR: Negation not supported for Arithmatic operator."
 
     type TrueValue() =
         interface IExpressionizableTerminal with
@@ -93,7 +93,7 @@ module FlatExpressionModule =
                     | "||" -> Op.Or
                     | "!" -> Op.Neg
                     | (">" | "<" | ">=" | "<=" | "=" | "!=" ) -> Op.OpCompare fs.Name
-                    | ("+" | "-" | "*" | "/" ) -> Op.OpArithematic fs.Name
+                    | ("+" | "-" | "*" | "/" ) -> Op.OpArithmatic fs.Name
                     | _ -> failwith "ERROR"
                 let flatArgs =
                     fs.Arguments

@@ -164,7 +164,7 @@ module internal rec Command =
         blockXml
 
     type System.Type with
-        member x.SizeString = systemTypeNameToXgiTypeName x.Name
+        member x.SizeString = systemTypeToXgiTypeName x
 
 
     let private toTerminalText (exp:IExpression) =
@@ -195,17 +195,19 @@ module internal rec Command =
 
     let drawFunction (x, y) (func:Function) : BlockSummarizedXmlElements =
         match func with
-        | Arithematic (name, output, args) ->
+        | Arithmatic (name, output, args) ->
             let namedInputParameters =
                 [ "EN", fakeAlwaysOnExpression :> IExpression]
                 @ (args |> List.indexed |> List.map1st (fun n -> $"IN{n+1}"))
             let outputParameters = [ "OUT", output ]
             let plcFuncType =
                 let outputType = getType output
-                systemTypeNameToXgiTypeName outputType.Name
+                systemTypeToXgiTypeName outputType
             let func =
+                let arity = args.Length
                 match name with
-                | ("ADD" | "MUL" | "SUB" | "DIV") -> $"{name}2_{plcFuncType}"        // xxx
+                | ("ADD" | "MUL") -> $"{name}{arity}_{plcFuncType}"        // xxx: ADD2_INT
+                | ("SUB" | "DIV") -> name        // DIV 는 DIV, DIV2 만 존재함
                 | _ -> failwith "NOT YET"
             createBoxXmls (x, y)  func namedInputParameters outputParameters ""
 
@@ -261,7 +263,7 @@ module internal rec Command =
         let oDic = namedOutputParameters |> Tuple.toDictionary
 
         let systemTypeToXgiType (typ:System.Type) =
-            systemTypeNameToXgiTypeName typ.Name
+            systemTypeToXgiTypeName typ
             |> DU.tryParseEnum<CheckType>
             |> Option.get
 
@@ -518,7 +520,7 @@ module internal rec Command =
 
             { XmlElements = xmls; X=x; Y=y; TotalSpanX = spanX; TotalSpanY = spanY}
 
-        | FlatNary((OpCompare _ | OpArithematic _), exprs) ->
+        | FlatNary((OpCompare _ | OpArithmatic _), exprs) ->
             failwith "ERROR : Should have been processed in early stage."    // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
 
         // terminal case

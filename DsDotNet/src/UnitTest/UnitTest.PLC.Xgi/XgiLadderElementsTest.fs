@@ -33,7 +33,7 @@ type XgiLadderElementTest() =
 
         let symbolInfos = [
             for t in testSymbolTypes do
-                let plcType = systemTypeNameToXgiTypeName t.Name
+                let plcType = systemTypeToXgiTypeName t
                 let comment = $"{plcType} <- {t.Name}"
                 let name = $"my{t.Name}"
                 let initValueHolder:BoxedObjectHolder = {Object=null}

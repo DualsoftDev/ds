@@ -39,16 +39,13 @@ open System
 
 [<AutoOpen>]
 module ConvertorPrologModule =
-    [<Obsolete("Need check")>]
-    let systemTypeNameToXgiTypeName = function
+    let systemTypeToXgiTypeName (typ:System.Type) =
+        match typ.Name with
         | "Boolean" -> "BOOL"
         | "Single" -> "REAL"
         | "Double" -> "LREAL"
         | ("SByte" | "Char")   -> "BYTE"
         | "Byte"   -> "BYTE"
-        //| "Int16" | "UInt16" -> "INT"
-        //| "Int32" | "UInt32" -> "DINT"
-        //| "Int64" | "UInt64" -> "LINT"
         | "Int16"  -> "SINT"
         | "UInt16" -> "USINT"
         | "Int32"  -> "DINT"
@@ -73,7 +70,7 @@ module ConvertorPrologModule =
     type XgiLocalVar<'T when 'T:equality>(name, comment, initValue:'T) =
         inherit VariableBase<'T>(name, initValue)
         let symbolInfo =
-            let plcType = systemTypeNameToXgiTypeName typedefof<'T>.Name
+            let plcType = systemTypeToXgiTypeName typedefof<'T>
             let comment = SecurityElement.Escape comment
             let initValueHolder:BoxedObjectHolder = {Object=initValue}
             fwdCreateSymbolInfo name comment plcType initValueHolder
@@ -212,8 +209,8 @@ module XgiExpressionConvertorModule =
                 | ("&&" | "||" | "!") as op ->
                     exp.WithNewFunctionArguments newArgs
                 | (">"|">="|"<"|"<="|"="|"!="  |  "+"|"-"|"*"|"/") as op ->
-                    let withDefaultValue (defaultValue:'T) =
-                        let out = createXgiAutoVariable "out" $"{op} output" defaultValue
+                    let withDefaultValue (default_value:'T) =
+                        let out = createXgiAutoVariable "out" $"{op} output" default_value
                         xgiLocalVars.Add out
                         expandFunctionStatements.Add <| DuAugmentedPLCFunction { FunctionName = op; Arguments = newArgs; Output = out; }
                         DuTerminal (DuVariable out) :> IExpression
@@ -246,6 +243,60 @@ module XgiExpressionConvertorModule =
         xgiLocalVars.Cast<IStorage>() |> storage.AddRange   // 위의 helper 수행 이후가 아니면, xgiLocalVars 가 채워지지 않는다.
         newExp
 
+    (* see ``ADD 3 items test`` *)
+    /// 사칙 연산 처리
+    /// - a + b + c => + [a; b; c] 로 변환
+    /// - a + (b * c) + d => +[a; x; d], *[b; c] 두개의 expression 으로 변환.  부가적으로 생성된 *[b;c] 는 새로운 statement 를 생성해서 augmentedStatementsStorage 에 추가된다.
+    let private mergeArithmaticOperator
+        (storage:XgiStorage)
+        (augmentedStatementsStorage:ResizeArray<Statement>)
+        (exp:IExpression)
+        : IExpression
+      =
+        let rec helper (currentOp:string) (exp:IExpression) : IExpression list =
+            match exp.FunctionName with
+            | Some ("+"|"-"|"*"|"/" as op) ->
+                if op = currentOp then
+                    let args = [
+                        for arg in exp.FunctionArguments do
+                            match arg.Terminal, arg.FunctionName with
+                            | Some _, _ -> yield arg
+                            | None, Some fn ->
+                                yield! helper op arg
+                            | _ -> failwith "ERROR"
+                    ]
+                    args
+                else
+                    let go (v:'Q) =
+                        let out = createXgiAutoVariable "_temp_internal_" $"{op} output" v
+                        storage.Add out
+                        let args = exp.FunctionArguments |> List.bind (helper op)
+                        DuAugmentedPLCFunction {FunctionName=op; Arguments=args; Output=out } |> augmentedStatementsStorage.Add
+                        [ var2expr out :> IExpression ]
+
+                    let v = exp.BoxedEvaluatedValue
+                    match exp.DataType.Name with
+                    | "Single" -> go (v :?> float32)
+                    | "Double" -> go (v :?> double)
+                    | "SByte"  -> go (v :?> int8)
+                    | "Byte"   -> go (v :?> uint8)
+                    | "Int16"  -> go (v :?> int16)
+                    | "UInt16" -> go (v :?> uint16)
+                    | "Int32"  -> go (v :?> int32)
+                    | "UInt32" -> go (v :?> uint32)
+                    | "Int64"  -> go (v :?> int64)
+                    | "UInt64" -> go (v :?> uint64)
+                    | "Boolean"-> go (v :?> bool)
+                    | "String" -> go (v :?> string)
+                    | "Char"   -> go (v :?> char)
+                    | _ -> failwith "ERROR"
+            | _ ->
+                [ exp ]
+
+        let topOperator = exp.FunctionName.Value
+        let newArgs = helper topOperator exp
+        exp.WithNewFunctionArguments newArgs
+
     let private statement2XgiStatements (storage:XgiStorage) (statement:Statement) : Statement list =
         let expandFunctionStatements = ResizeArray<Statement>()  // DuAugmentedPLCFunction case
 
@@ -255,8 +306,12 @@ module XgiExpressionConvertorModule =
                 // todo : "sum := tag1 + tag2" 의 처리 : DuAugmentedPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
                 match exp.FunctionName with
                 | Some ("+"|"-"|"*"|"/" as op) ->
+
+                    let augmentedStatementsStorage = ResizeArray<Statement>()
+                    let exp = mergeArithmaticOperator storage augmentedStatementsStorage exp
+
                     let tgt = target :?> INamedExpressionizableTerminal
-                    [ DuAugmentedPLCFunction {FunctionName=op; Arguments=exp.FunctionArguments; Output=tgt } ]
+                    augmentedStatementsStorage @ [ DuAugmentedPLCFunction {FunctionName=op; Arguments=exp.FunctionArguments; Output=tgt } ]
                 | _ ->
                     let newExp = collectExpandedExpression storage expandFunctionStatements exp
                     [ DuAssign (newExp, target) ]

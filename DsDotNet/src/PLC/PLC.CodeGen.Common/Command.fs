@@ -63,13 +63,13 @@ module rec Command =
     /// non-boolean 값을 반환하는 pure function.  (instance 불필요)
     type Function =
         //| CopyMode  of INamedExpressionizableTerminal *  (CommandTag * CommandTag) //endTag * (fromA, toB)
-        | Arithematic of name:string * output:INamedExpressionizableTerminal * arguments:IExpression list //endTag * FunctionName * Tag list
+        | Arithmatic of name:string * output:INamedExpressionizableTerminal * arguments:IExpression list //endTag * FunctionName * Tag list
     with
         interface IFunctionCommand with
             member this.TerminalEndTag: INamedExpressionizableTerminal =
                 match this with
                 //| CopyMode  (endTag, _) -> endTag
-                | Arithematic (_, endTag, _) -> endTag
+                | Arithmatic (_, endTag, _) -> endTag
 
     type PLCAction =
         | Move of condition:IExpression<bool> * source:IExpression * target:IStorage

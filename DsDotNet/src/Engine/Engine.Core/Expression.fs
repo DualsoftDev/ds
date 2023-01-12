@@ -154,6 +154,8 @@ module ExpressionModule =
         FunctionName   : string
     }
 
+    type ActionStatement =
+        | DuCopy of condition:IExpression<bool> * source:IExpression * target:IStorage
 
     /// Pulse coil '-(P)-' 생성 및 평가를 위한 구조
     type HistoryFlag() =
@@ -202,8 +204,7 @@ module ExpressionModule =
 
         | DuTimer of TimerStatement
         | DuCounter of CounterStatement
-        /// 주어진 condition 이 충족하면, source 를 target 으로 copy 수행하는 rung 생성
-        | DuCopy of condition:IExpression<bool> * source:IExpression * target:IStorage
+        | DuAction of ActionStatement
 
         | DuAugmentedPLCFunction of FunctionParameters
 
@@ -254,7 +255,7 @@ module ExpressionModule =
                 for s in counterStatement.Counter.InputEvaluateStatements do
                     s.Do()
 
-            | DuCopy (condition, source, target) ->
+            | DuAction (DuCopy (condition, source, target)) ->
                 if condition.EvaluatedValue then
                     target.Value <- source.BoxedEvaluatedValue
             | DuAugmentedPLCFunction _ ->
@@ -288,7 +289,7 @@ module ExpressionModule =
                         sprintf "%A" c.ACC.Value ]
                 let args = String.Join(", ", args)
                 $"{typ.ToLower()} {c.Name} = {functionName}({args})"
-            | DuCopy (condition, source, target) ->
+            | DuAction (DuCopy (condition, source, target)) ->
                 $"copyIf({condition.ToText(false)}, {source.ToText(false)}, {target.ToText()})"
             | DuAugmentedPLCFunction _ ->
                 failwith "ERROR"

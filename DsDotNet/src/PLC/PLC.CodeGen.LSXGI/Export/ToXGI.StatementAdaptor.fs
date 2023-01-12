@@ -72,17 +72,19 @@ module ConvertorPrologModule =
 
     type XgiLocalVar<'T when 'T:equality>(name, comment, initValue:'T) =
         inherit VariableBase<'T>(name, initValue)
+        let symbolInfo =
+            let plcType = systemTypeNameToXgiTypeName typedefof<'T>.Name
+            let comment = SecurityElement.Escape comment
+            let initValueHolder:BoxedObjectHolder = {Object=initValue}
+            fwdCreateSymbolInfo name comment plcType initValueHolder
 
-        interface IXgiLocalVar<'T> with
+        interface IXgiLocalVar with
             member x.SymbolInfo = x.SymbolInfo
         interface INamedExpressionizableTerminal with
             member x.StorageName = name
         interface IText with
             member x.ToText() = name
-        member x.SymbolInfo =
-            let plcType = systemTypeNameToXgiTypeName typedefof<'T>.Name
-            let comment = SecurityElement.Escape comment
-            fwdCreateSymbol name comment plcType
+        member x.SymbolInfo = symbolInfo
 
         override x.ToBoxedExpression() = var2expr x
 
@@ -165,6 +167,7 @@ module rec TypeConvertorModule =
         | PredicateCmd     of Predicate
         /// Non-boolean function
         | FunctionCmd      of Function
+        | ActionCmd        of PLCAction
         /// Timer, Counter 등
         | FunctionBlockCmd of FunctionBlock
 
@@ -191,7 +194,8 @@ module XgiExpressionConvertorModule =
         (storage:XgiStorage)
         (expandFunctionStatements:ResizeArray<Statement>)
         (exp:IExpression)
-      : IExpression =
+        : IExpression
+      =
         let xgiLocalVars = ResizeArray<IXgiLocalVar>()
         let rec helper (exp:IExpression) = [
             match exp.FunctionName with
@@ -255,32 +259,58 @@ module XgiExpressionConvertorModule =
 
                 (* 일반 변수 선언 부분을 xgi local variable 로 치환한다. *)
                 storage.Remove decl |> ignore
-                let createVar (defaultValue:'T) =
-                    let var = createXgiVariable decl.Name "local var in code" defaultValue
-                    storage.Add var
 
-                match exp.DataType.Name with
-                | "Single" -> createVar 0.f
-                | "Double" -> createVar 0.0
-                | "SByte"  -> createVar 0y
-                | "Byte"   -> createVar 0uy
-                | "Int16"  -> createVar 0s
-                | "UInt16" -> createVar 0us
-                | "Int32"  -> createVar 0
-                | "UInt32" -> createVar 0u
-                | "Int64"  -> createVar 0L
-                | "UInt64" -> createVar 0UL
-                | "Boolean"-> createVar false
-                | "String" -> createVar ""
-                | "Char"   -> createVar ' '
-                | _ -> failwith "ERROR"
+                match decl with
+                | :? IXgiLocalVar as loc ->
+                    let si = loc.SymbolInfo
+                    let comment = $"[local var in code] {si.Comment}"
+                    let initValue = exp.BoxedEvaluatedValue
+
+                    let createLocalVar (defaultValue:'T) =
+                        let var = createXgiVariable decl.Name comment defaultValue
+                        storage.Add var
+
+                    match exp.DataType.Name with
+                    | "Single" -> createLocalVar (initValue :?> float32)
+                    | "Double" -> createLocalVar (initValue :?> double)
+                    | "SByte"  -> createLocalVar (initValue :?> int8)
+                    | "Byte"   -> createLocalVar (initValue :?> uint8)
+                    | "Int16"  -> createLocalVar (initValue :?> int16)
+                    | "UInt16" -> createLocalVar (initValue :?> uint16)
+                    | "Int32"  -> createLocalVar (initValue :?> int32)
+                    | "UInt32" -> createLocalVar (initValue :?> uint32)
+                    | "Int64"  -> createLocalVar (initValue :?> int64)
+                    | "UInt64" -> createLocalVar (initValue :?> uint64)
+                    | "Boolean"-> createLocalVar (initValue :?> bool)
+                    | "String" -> createLocalVar (initValue :?> string)
+                    | "Char"   -> createLocalVar (initValue :?> char)
+                    | _ -> failwith "ERROR"
+                | _ ->
+                    failwith "ERROR"
 
                 []
-            | _ ->
-                [ statement ]
+            | ( DuTimer _ | DuCounter _ ) ->
+                [statement]
+
+            | DuAction (DuCopy(condition, source, target)) ->
+                let funcName = XgiConstants.FunctionNameMove
+                let output = target:?>INamedExpressionizableTerminal
+                [ DuAugmentedPLCFunction {FunctionName=funcName; Arguments=[condition; source]; Output=output } ]
+
+            | DuAugmentedPLCFunction _ ->
+                failwith "ERROR"
 
         expandFunctionStatements @ newStatements |> List.ofSeq
 
     let internal commentedStatement2CommentedXgiStatements (storage:XgiStorage) (CommentedStatement(comment, statement)) : CommentedXgiStatements =
         let xgiStatements = statement2XgiStatements storage statement
-        CommentedXgiStatements(comment, xgiStatements)
+        let rungComment =
+            let statementComment = statement.ToText()
+            match comment.NonNullAny(), xgiGenerationOptions.IsAppendExpressionTextToRungComment with
+            | true, true -> $"{comment}\r\n{statementComment}"
+            | true, false -> comment
+            | false, true -> statementComment
+            | false, false -> ""
+            |> escapeXml
+
+        CommentedXgiStatements(rungComment, xgiStatements)

@@ -24,7 +24,7 @@ type XgiRisingFallingTest() =
         statements.Length === 1
         statements[0].ToText() === "$qx := $ix && !($ix) && rising($ix) && falling($ix)"
 
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
@@ -40,6 +40,6 @@ type XgiRisingFallingTest() =
         statements.Length === 1
         statements[0].ToText() === "ppulse($qx) := $ix"
 
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 

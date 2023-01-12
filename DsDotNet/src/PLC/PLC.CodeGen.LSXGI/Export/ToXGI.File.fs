@@ -28,27 +28,6 @@ module internal XgiFile =
 			</Rung>""" (int ElementType.MultiHorzLineMode) yy (int ElementType.FBMode) (yy+93)
 
 
-    /// X 항목으로 Max 32개 넘는지 여부 체크
-    ///32개 기준 FB x 3개 +  Coil x 1개 사용기준
-    let rec getXGIMaxX (x:int) (expr:FlatExpression) =
-        match expr with
-        | FlatTerminal(id, pulse, neg) -> x
-        | FlatZero -> x
-        | FlatNary(And, exprs) ->
-            let mutable sx = x
-            for exp in exprs do
-                sx <- getXGIMaxX sx exp + 1
-            sx-1// for loop 에서 마지막 +1 된 것 revert
-        | FlatNary(Or, exprs) ->
-            let mutable maxX = x
-            for (i, exp) in (exprs |> Seq.indexed) do
-                let sub = getXGIMaxX x exp
-                maxX <- max maxX sub
-            maxX
-        | _ ->
-            failwithlog "Unknown FlatExpression case"
-
-
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
     let private generateRungs (prologComments:string seq) (commentedStatements:CommentedXgiStatements seq) : XmlOutput =
         let xmlRung (expr:FlatExpression option) xgiCommand y : RungGenerationInfo =
@@ -105,6 +84,13 @@ module internal XgiFile =
                 | DuAugmentedPLCFunction ({FunctionName = ("+"|"-"|"*"|"/") as op; Arguments = args; Output=output }) ->
                     let fn = operatorToXgiFunctionName op
                     let command = FunctionCmd(Arithematic(fn, output, args))
+                    let rgiSub = xmlRung None (Some command) rgi.Y
+                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
+                | DuAugmentedPLCFunction ({FunctionName = XgiConstants.FunctionNameMove as func; Arguments = args; Output=output }) ->
+                    let condition = args[0] :?> IExpression<bool>
+                    let source = args[1]
+                    let target = output :?> IStorage
+                    let command = ActionCmd(Move(condition, source, target))
                     let rgiSub = xmlRung None (Some command) rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
                 | _ ->
@@ -218,16 +204,16 @@ module internal XgiFile =
 
 
     type XgiSymbol =
-        | DuXsTag of ITagWithAddress
-        | DuXsXgiLocalVar of IXgiLocalVar
-        | DuXsTimer of TimerStruct
-        | DuXsCounter of CounterBaseStruct
+        | DuTag         of ITagWithAddress
+        | DuXgiLocalVar of IXgiLocalVar
+        | DuTimer       of TimerStruct
+        | DuCounter     of CounterBaseStruct
 
 
     let generateXGIXmlFromStatement
-            (prologComments:string seq) (commentedStatements:CommentedXgiStatements seq)
-            (xgiSymbols:XgiSymbol seq) (unusedTags:ITagWithAddress seq) (existingLSISprj:string option)
-        =
+        (prologComments:string seq) (commentedStatements:CommentedXgiStatements seq)
+        (xgiSymbols:XgiSymbol seq) (unusedTags:ITagWithAddress seq) (existingLSISprj:string option)
+      =
         /// PLC memory manager
         let manager =
             /// PLC H/W memory configurations
@@ -246,27 +232,26 @@ module internal XgiFile =
             let alreadyAllocatedAddresses =
                 /// 이미 할당된 주소 앞뒤로 buffer word 만큼 회피하기 위한 word address 를 생성한다.
                 let toChunk bitAddress buffer =
-                    let rec loop bitAddress =
-                        [
-                            match bitAddress with
-                            | RegexPattern @"%M([BWDL])(\d+).(\d+)" [size; element; nth_] ->
-                                yield! loop (sprintf "%%M%s%s" size element)
-                            | RegexPattern @"%MX(\d+)" [Int32Pattern nth] ->
-                                yield nth / 16
-                            | RegexPattern @"%M([BWDL])(\d+)" [size; Int32Pattern element] ->
-                                let ele =
-                                    match size with
-                                    | "B" -> element / 2
-                                    | "W" -> element
-                                    | "D" -> element * 2
-                                    | "L" -> element * 4
-                                    | _ ->
-                                        failwith "ERROR"
-                                yield ele
-                            | _ ->
-                                logWarn "Warn: unknown address [%s]" bitAddress
-                                ()
-                        ]
+                    let rec loop bitAddress = [
+                        match bitAddress with
+                        | RegexPattern @"%M([BWDL])(\d+).(\d+)" [size; element; nth_] ->
+                            yield! loop (sprintf "%%M%s%s" size element)
+                        | RegexPattern @"%MX(\d+)" [Int32Pattern nth] ->
+                            yield nth / 16
+                        | RegexPattern @"%M([BWDL])(\d+)" [size; Int32Pattern element] ->
+                            let ele =
+                                match size with
+                                | "B" -> element / 2
+                                | "W" -> element
+                                | "D" -> element * 2
+                                | "L" -> element * 4
+                                | _ ->
+                                    failwith "ERROR"
+                            yield ele
+                        | _ ->
+                            logWarn "Warn: unknown address [%s]" bitAddress
+                            ()
+                    ]
 
                     loop bitAddress
                     |> sort |> distinct
@@ -283,12 +268,12 @@ module internal XgiFile =
                     |> Seq.filter (fun t -> t.StartsWith("%M"))
                     |> Seq.bind (fun t -> toChunk t 10)
 
-                let tags =
-                    [ for s in xgiSymbols do
+                let tags = [
+                    for s in xgiSymbols do
                         match s with
-                        | DuXsTag t -> yield t.Address
+                        | DuTag t -> yield t.Address
                         | _ -> ()
-                    ]
+                ]
 
                 let tagsUnusedInTags = [ for t in unusedTags -> t.Address] |> Set
                 tagsUsedInFiles @ tags @ tagsUnusedInTags |> distinct
@@ -301,7 +286,7 @@ module internal XgiFile =
             [
                 for s in xgiSymbols do
                     match s with
-                    | DuXsTag t ->
+                    | DuTag t ->
                         let name, addr = t.Name, t.Address
 
                         let device, memSize =
@@ -318,12 +303,13 @@ module internal XgiFile =
                             | _ -> failwith "ERROR"
                         let comment = "FAKECOMMENT"
 
-                        { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; Device=device; Kind=kindVar; }
-                        |> XGITag.createSymbolWithDetail
+                        let initValue = null // PLCTag 는 값을 초기화 할 수 없다.
+                        { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; InitValue=initValue; Device=device; Kind=kindVar; }
+                        |> XGITag.createSymbolInfoWithDetail
 
-                    | DuXsXgiLocalVar xgi ->
+                    | DuXgiLocalVar xgi ->
                         xgi.SymbolInfo
-                    | DuXsTimer timer ->
+                    | DuTimer timer ->
                         let device, addr = "", ""
                         let plcType =
                             match timer.Type with
@@ -331,9 +317,9 @@ module internal XgiFile =
 
                         let param:XgiSymbolCreateParams =
                             let name, comment = timer.Name, $"TIMER {timer.Name}"
-                            { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; Device=device; Kind=kindVar; }
-                        XGITag.createSymbolWithDetail param
-                    | DuXsCounter counter ->
+                            { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; InitValue=null; Device=device; Kind=kindVar; }
+                        XGITag.createSymbolInfoWithDetail param
+                    | DuCounter counter ->
                         let device, addr = "", ""
                         let plcType =
                             match counter.Type with
@@ -342,22 +328,20 @@ module internal XgiFile =
 
                         let param:XgiSymbolCreateParams =
                             let name, comment = counter.Name, $"COUNTER {counter.Name}"
-                            { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; Device=device; Kind=kindVar; }
-                        XGITag.createSymbolWithDetail param
+                            { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; InitValue=null; Device=device; Kind=kindVar; }
+                        XGITag.createSymbolInfoWithDetail param
             ]
 
         /// Symbol table 정의 XML 문자열
-        let symbolsLocalXml = XGITag.generateSymbolVars (symbolInfos, false)
+        let symbolsLocalXml = XGITag.generateLocalSymbolsXml symbolInfos
 
-        let globalSym =
-            [
-                for s in symbolInfos do
-                    if not (s.Device.IsNullOrEmpty()) then
-                        XGITag.copyLocal2GlobalSymbol s
-            ]
+        let globalSym = [
+            for s in symbolInfos do
+                if not (s.Device.IsNullOrEmpty()) then
+                    XGITag.copyLocal2GlobalSymbol s
+        ]
 
-        let symbolsGlobalXml = XGITag.generateSymbolVars (globalSym, true)
-
+        let symbolsGlobalXml = XGITag.generateGlobalSymbolsXml globalSym
 
         let rungsXml = generateRungs prologComments commentedStatements
 

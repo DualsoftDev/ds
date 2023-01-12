@@ -41,8 +41,6 @@ module internal Common =
     with
         member me.Add(xml) = { Xmls = xml::me.Xmls; Y = me.Y + 1 }
 
-    /// <!-- --> 구문의 xml comment 삽입 여부.  순수 debugging 용도
-    let enableXmlComment = false
     let dq = "\""
 
     /// rung 을 구성하는 element (접점)의 XML 표현 문자열 반환
@@ -111,15 +109,14 @@ module internal Common =
         { Coordinate = c; Xml = vline c; SpanX = 0; SpanY = 1 }
 
     /// x y 위치에서 수직으로 n 개의 line 을 긋는다
-    let vlineDownN (x, y) n =
-        [
-            if enableXmlComment then
-                xmlCommentAt (x, y) $"vlineDownN ({x}, {y}) {n}"
+    let vlineDownN (x, y) n = [
+        if xgiGenerationOptions.EnableXmlComment then
+            xmlCommentAt (x, y) $"vlineDownN ({x}, {y}) {n}"
 
-            if n > 0 then
-                for i in [0.. n-1] do
-                    vLineAt (x, y+i)
-        ]
+        if n > 0 then
+            for i in [0.. n-1] do
+                vLineAt (x, y+i)
+    ]
 
     let vlineUpN (x, y) n = vlineDownN (x, y-n) n
 

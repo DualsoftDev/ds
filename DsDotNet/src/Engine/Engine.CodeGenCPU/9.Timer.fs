@@ -21,7 +21,7 @@ type DsSystem with
                 yield (sets) --@ (call.V.TON, call.PresetTime, "T1")
 
             for alias in aliasCalls do
-                let call = getPureCall alias
+                let call = alias.V.GetPureCall().Value
                 let sets = alias.V.ST.Expr <&&> alias.TargetWrapper.CallTarget().Value.INs.EmptyOnElseToAnd s
                 yield (sets) --@ (alias.V.TON, call.PresetTime,"T1")
         ]

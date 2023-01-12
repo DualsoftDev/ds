@@ -1,7 +1,6 @@
 namespace PLC.CodeGen.LSXGI
 
 open Engine.Common.FS
-open Engine.Core
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 open FB
 
@@ -42,8 +41,6 @@ module internal Common =
     with
         member me.Add(xml) = { Xmls = xml::me.Xmls; Y = me.Y + 1 }
 
-    /// <!-- --> 구문의 xml comment 삽입 여부.  순수 debugging 용도
-    let enableXmlComment = false
     let dq = "\""
 
     /// rung 을 구성하는 element (접점)의 XML 표현 문자열 반환
@@ -81,16 +78,28 @@ module internal Common =
     let fallingline c = elementFull (int ElementType.FallingContact) (c) "" ""
 
 
+    let hLineStartMarkAt (x, y) = elementFull (int ElementType.HorzLineMode) (coord(x, y)) "" ""
 
-    /// 마지막 수평으로 연결 정보
+    /// debugging 용 xml comment 생성
+    let xmlCommentAtCoordinate (c:EncodedXYCoordinate) (comment:string) =
+        { Coordinate = c; Xml = $"<!-- {comment} -->" ; SpanX = maxNumHorizontalContact; SpanY = 1 }
+    /// debugging 용 xml comment 생성
+    let xmlCommentAt (x, y) comment = xmlCommentAtCoordinate (coord(x, y)) comment
+
+
+    /// 마지막 수평으로 연결 정보: 그릴 수 없으면 [], 그릴 수 있으면 [singleton]
+    let tryHLineTo (x, y) endX =
+        if endX < x then
+            []
+        else
+            let lengthParam = $"Param={dq}{3 * (endX-x)}{dq}"
+            let c = coord(x, y)
+            [ elementFull (int ElementType.MultiHorzLineMode) c lengthParam "" ]
+
     let hLineTo (x, y) endX =
-        if endX <= x then
+        if endX < x then
             failwithlog $"endX startX [{endX} > {x}]"
-
-        let lengthParam = $"Param={dq}{3 * (endX-x)}{dq}"
-        let c = coord(x, y)
-        elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
-
+        tryHLineTo (x, y) endX |> List.exactlyOne
 
 
     /// x y 위치에서 수직선 한개를 긋는다
@@ -100,15 +109,20 @@ module internal Common =
         { Coordinate = c; Xml = vline c; SpanX = 0; SpanY = 1 }
 
     /// x y 위치에서 수직으로 n 개의 line 을 긋는다
-    let vlineDownTo (x, y) n =
-        [
-            if enableXmlComment then
-                let c = coord(x, y)
-                yield { Coordinate = c; Xml = $"<!-- vlineDownTo {x} {y} {n} -->" ; SpanX = 0; SpanY = n }
+    let vlineDownN (x, y) n = [
+        if xgiGenerationOptions.EnableXmlComment then
+            xmlCommentAt (x, y) $"vlineDownN ({x}, {y}) {n}"
 
+        if n > 0 then
             for i in [0.. n-1] do
-                yield vLineAt (x, y+i)
-        ]
+                vLineAt (x, y+i)
+    ]
+
+    let vlineUpN (x, y) n = vlineDownN (x, y-n) n
+
+    /// x y 위치에서 수직으로 endY 까지 line 을 긋는다
+    let vlineDownTo (x, y) endY = vlineDownN (x, y) (endY - y)
+    let vlineUpTo (x, y) endY = vlineUpN (x, y) (y-endY)
 
 
     /// 함수 그리기 (detailedFunctionName = 'ADD2_INT', briefFunctionName = 'ADD')

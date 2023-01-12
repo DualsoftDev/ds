@@ -22,6 +22,14 @@ module EdgeModule =
         | Some v -> failwith $"Vertex {v.Name} is not child of flow {parent.Name}"
         | None -> ()
 
+
+    let private validateChildrenVertexType (mei:ModelingEdgeInfo<Vertex>) (parent:FqdnObject) =
+        let invalidEdge =  (mei.Sources @ mei.Targets).OfType<Alias>()
+                             .Where(fun a->a.TargetWrapper.RealTarget().IsSome 
+                                        || a.TargetWrapper.RealExTarget().IsSome)
+
+        if invalidEdge.any() then failwith $"Vertex {invalidEdge.First().Name} children type error"
+
     let createFlowEdge(flow:Flow) (modeingEdgeInfo:ModelingEdgeInfo<Vertex>) =
         let mei = modeingEdgeInfo
         validateParentOfEdgeVertices mei flow
@@ -32,6 +40,8 @@ module EdgeModule =
         let mei = modeingEdgeInfo
         validateParentOfEdgeVertices mei segment
         segment.ModelingEdges.Add(mei) |> verifyM $"Duplicated edge {mei.Sources[0].Name}{mei.EdgeSymbol}{mei.Targets[0].Name}"
+        validateChildrenVertexType mei segment
+
         createEdge segment.Graph modeingEdgeInfo
 
     let toText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (e:'E) = $"{e.Source.Name.QuoteOnDemand()} {e.EdgeType.ToText()} {e.Target.Name.QuoteOnDemand()}"

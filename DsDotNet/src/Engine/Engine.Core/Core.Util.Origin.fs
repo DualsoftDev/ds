@@ -53,7 +53,7 @@ module OriginModule =
             $"{system}.{src}", info.Operator.ToText(), $"{system}.{tgt}"
 
         let getJobDefs (call:Call) =
-            call.CallTarget.JobDefs
+            call.CallTargetJob.JobDefs
 
         let getResetInfo (jd:JobDef) =
             let apiOwnSystem = jd.ApiItem.System
@@ -119,7 +119,7 @@ module OriginModule =
                 route
                 |> Seq.map(fun v ->
                     let c = getVertexTarget v
-                    c.CallTarget.JobDefs
+                    c.CallTargetJob.JobDefs
                 )
                 |> List.ofSeq
             )
@@ -371,7 +371,7 @@ module OriginModule =
         graph.Vertices
         |> Seq.distinct
         |> Seq.iter(fun v ->
-            let call = (getVertexTarget v).CallTarget
+            let call = (getVertexTarget v).CallTargetJob
             call.JobDefs
             |> Seq.iter(fun jd ->
                 if not (jobIncludedMap.ContainsKey(jd.ApiName)) then
@@ -390,7 +390,7 @@ module OriginModule =
         let structedChains = getNameStructedChains resetChains
         let jobNameMap =
             graph.Vertices
-            |> Seq.map(fun v -> (getVertexTarget v).CallTarget.JobDefs)
+            |> Seq.map(fun v -> (getVertexTarget v).CallTargetJob.JobDefs)
             |> removeDuplicates
             |> Seq.map(fun jd -> jd.ApiName, jd)
             |> Map.ofSeq
@@ -473,7 +473,7 @@ module OriginModule =
         let allJobs =
             graph.Vertices
             |> Seq.map(getVertexTarget)
-            |> Seq.map(fun c -> c.CallTarget.JobDefs)
+            |> Seq.map(fun c -> c.CallTargetJob.JobDefs)
             |> removeDuplicates
 
         getOriginMaps

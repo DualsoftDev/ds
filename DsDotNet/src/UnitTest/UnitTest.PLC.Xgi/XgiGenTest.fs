@@ -30,7 +30,7 @@ type XgiGenerationTest() =
         storages.Count === 3
         statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
@@ -49,7 +49,7 @@ type XgiGenerationTest() =
         storages.Count === 4
         statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
 
@@ -76,7 +76,7 @@ type XgiGenerationTest() =
                 ;
 """
         let statements = parseCode storages code
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
@@ -102,7 +102,7 @@ type XgiGenerationTest() =
                 ;
 """
         let statements = parseCode storages code
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
@@ -115,7 +115,7 @@ type XgiGenerationTest() =
                 ;
 """
         let statements = parseCode storages code
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
@@ -171,7 +171,7 @@ type XgiGenerationTest() =
 
 """
         let statements = parseCode storages code
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
 
@@ -189,7 +189,7 @@ type XgiGenerationTest() =
                         ;
 """
         let statements = parseCode storages code
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
         ()
 
@@ -245,7 +245,7 @@ type XgiGenerationTest() =
             $x01 := ! $x00;
 """
         let statements = parseCode storages code
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
@@ -263,7 +263,7 @@ type XgiGenerationTest() =
             $x05 := ! ($x03 && $x04);
 """
         let statements = parseCode storages code
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
         ()
 
@@ -283,22 +283,12 @@ type XgiGenerationTest() =
             $x05 := ! ($x03 && ! $x04);
 """
         let statements = parseCode storages code
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
-    member __.``X Add test`` () =
+    member __.``Add test`` () =
         let storages = Storages()
-
-        //let symbolInfos = [
-        //    XGITag.createSymbol "n0" "n0" "INT"
-        //    XGITag.createSymbol "n1" "n1" "INT"
-        //    XGITag.createSymbol "n2" "n2" "INT"
-        //    XGITag.createSymbol "n3" "n3" "INT"
-        //    XGITag.createSymbol "n4" "n4" "INT"
-        //    XGITag.createSymbol "n5" "n5" "INT"
-        //]
-        //let symbolsLocalXml = XGITag.generateSymbolVars (symbolInfos, false)
 
         let code = """
             int16 nn0 = 0s;
@@ -314,6 +304,23 @@ type XgiGenerationTest() =
             $qq := true && (($nn1 + $nn2) * 9s + $nn3 > 3s);
 """
         let statements = parseCode storages code
-        let xml = LsXGI.generateXml plcCodeGenerationOption storages (map withNoComment statements)
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
+
+
+
+    [<Test>]
+    member __.``COPY test`` () =
+        let storages = Storages()
+
+        let code = """
+            bool cond = false;
+            int16 src = 1s;
+            int16 tgt = 2s;
+
+            copyIf($cond, $src, $tgt);
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 

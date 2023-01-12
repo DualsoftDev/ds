@@ -7,7 +7,7 @@ open Engine.Common.FS
 open System
 
 [<AutoOpen>]
-module ConvertCoreExt =
+module rec ConvertCoreExt =
     
     type InOut = | In | Out | Memory
     let private getIOs(name, address, inOut:InOut): ITagWithAddress   =  
@@ -19,6 +19,8 @@ module ConvertCoreExt =
         (PlcTag(plcName, address, false) :> ITagWithAddress)
 
     let getVM(v:Vertex) = v.VertexManager :?> VertexManager
+    let getVMReal(v:Vertex) = v.VertexManager :?> VertexMReal
+    let getVMCoin(v:Vertex) = v.VertexManager :?> VertexMCoin
 
 
     type DsSystem with
@@ -59,9 +61,11 @@ module ConvertCoreExt =
 
         //[auto, manual] system HMI 두개다 선택이 안됨
         member s.ModeNoExpr = !!s._auto.Expr <&&> !!s._manual.Expr
-    
-
-
+        //자신이 사용된 API Plan Send
+        member s.GetPSs(r:Real) = 
+            s.ApiItems.Where(fun api-> api.TXs.Contains(r))
+                      .Select(fun api -> api.PS)
+            
     let private getButtonInputs(flow:Flow, btns:ButtonDef seq) : PlcTag<bool> seq = 
             btns.Where(fun b -> b.SettingFlows.Contains(flow))
                 .Select(fun b -> b.InTag)
@@ -85,6 +89,7 @@ module ConvertCoreExt =
           let manual  = if manualIns.Any() then  manualIns.ToAnd()   else sysOff.Expr
           auto, manual
 
+   
 //운영 모드 는 Flow 별로 제공된 모드 On/Off 상태 나타낸다.
     type Flow with
         member f.eop    = DsTag<bool> ($"{f.Name}(EO)", false)   // Emergency Operation Mode
@@ -164,39 +169,53 @@ module ConvertCoreExt =
 
 
     type Call with
-        member c.V = c.VertexManager :?> VertexManager
-        member c.UsingTon = c.CallTarget.Observes.Where(fun f->f.Name = TextOnDelayTimer).any()
-        member c.UsingCtr = c.CallTarget.Observes.Where(fun f->f.Name = TextRingCounter).any()
+        member c.V = c.VertexManager :?> VertexMCoin
+        member c.UsingTon = c.CallTargetJob.Funcs.Where(fun f->f.Name = TextOnDelayTimer).any()
+        member c.UsingCtr = c.CallTargetJob.Funcs.Where(fun f->f.Name = TextRingCounter).any()
 
         member c.PresetTime =   if c.UsingTon 
-                                then c.CallTarget.Observes.First(fun f->f.Name = TextOnDelayTimer).GetDelayTime()
+                                then c.CallTargetJob.Funcs.First(fun f->f.Name = TextOnDelayTimer).GetDelayTime()
                                 else failwith $"{c.Name} not use timer"
 
         member c.PresetCounter = if c.UsingCtr 
-                                 then c.CallTarget.Observes.First(fun f->f.Name = TextRingCounter).GetRingCount()
+                                 then c.CallTargetJob.Funcs.First(fun f->f.Name = TextRingCounter).GetRingCount()
                                  else failwith $"{c.Name} not use counter"
                             
-        member c.INs  = c.CallTarget.JobDefs.Select(fun j -> j.InTag).Cast<PlcTag<bool>>()
-        member c.OUTs = c.CallTarget.JobDefs.Select(fun j -> j.OutTag).Cast<PlcTag<bool>>()
-        member c.TXs  = c.CallTarget.JobDefs |> Seq.collect(fun (j: JobDef) -> j.ApiItem.TXs)
-                                             |> Seq.map getVM |> Seq.map(fun f->f.ST)
-        member c.RXs  = c.CallTarget.JobDefs |> Seq.collect(fun (j: JobDef) -> j.ApiItem.RXs) 
-                                             |> Seq.map getVM |> Seq.map(fun f->f.ET)
-        member c.MutualResetOuts = 
-            c.CallTarget.JobDefs
+        member c.INs  = c.CallTargetJob.JobDefs.Select(fun j -> j.ActionIN)
+        member c.OUTs = c.CallTargetJob.JobDefs.Select(fun j -> j.ActionOut)
+        member c.PlanSends  = c.CallTargetJob.JobDefs.Select(fun j  -> j.ApiItem.PS)
+        member c.PlanReceives  = c.CallTargetJob.JobDefs.Select(fun j  -> j.ApiItem.PR)
+
+        
+        member c.MutualResets = 
+            c.CallTargetJob.JobDefs
                 .SelectMany(fun j -> j.ApiItem.System.GetMutualResetApis(j.ApiItem))
                 .SelectMany(fun a -> c.System.JobDefs.Where(fun w-> w.ApiItem = a))
-                .Select(fun j -> j.OutTag).Cast<PlcTag<bool>>()
-                .Cast<PlcTag<bool>>()
     
     type Real with
-        member r.V = r.VertexManager :?> VertexManager
-        member r.CoinRelays = r.Graph.Vertices.Select(getVM).Select(fun f->f.CR)
+        member r.V = r.VertexManager :?> VertexMReal
+        member r.CoinRelays = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.CR)
         member r.ErrorTXs = r.Graph.Vertices.Select(getVM).Select(fun f->f.E1)
         member r.ErrorRXs = r.Graph.Vertices.Select(getVM).Select(fun f->f.E2)
 
     type Alias with
-        member a.V = a.VertexManager :?> VertexManager                    
+        member a.V = a.VertexManager :?> VertexMCoin                    
 
     type RealOtherFlow with
-        member a.V = a.VertexManager :?> VertexManager                    
+        member r.V = r.VertexManager :?> VertexMCoin                    
+
+    type JobDef with
+        member jd.ActionIN  = jd.InTag :?> PlcTag<bool>
+        member jd.ActionOut  = jd.OutTag :?> PlcTag<bool>
+        member jd.RXs  = jd.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.EP)
+                                            
+        member jd.MutualResets(x:DsSystem) = 
+                jd.ApiItem.System.GetMutualResetApis(jd.ApiItem)
+                    .SelectMany(fun a -> x.JobDefs.Where(fun w-> w.ApiItem = a))
+    
+    type Vertex with 
+        member r.V = r.VertexManager :?> VertexManager                    
+        
+    type ApiItem with
+        member a.PS = DsTag<bool>($"{a.Name}(PS)", false)
+        member a.PR = DsTag<bool>($"{a.Name}(PR)", false)

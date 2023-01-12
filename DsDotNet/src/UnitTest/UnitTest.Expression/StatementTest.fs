@@ -37,7 +37,7 @@ open Engine.Common.FS
 
             let statements = [
                 "ctu myCounter1 = createWinCTU(100us, false)"
-                "ctr myCtr1 = createWinCTR(100us, $tag1)"
+                "ctr myCtr1 = createWinCTR(100us, $tag1, $tag2)"
                 "ton myTimer2 = createWinTON(100us, false)"
                 "ton mytimer3 = createWinTON(1000us, $tag1 || $tag2)"
                 //"ton mytimer4 = createWinTON(1000us, $tag1 || $tag2, $tag3)"
@@ -48,7 +48,7 @@ open Engine.Common.FS
             let fails = [
                 "Counter declaration error"      , "ctu myCtu1 = createWinCTU(100us, $tag1, $tag1, $tag1, $tag1)"    // 'Counter declaration error: ctu myCounter = createCTU(100us, $tag1, $tag1, $tag1, $tag1)'
                 "Unable to cast"                 , "ctu myCtu2 = createWinCTU(100us, $tagDouble)"                    // 'Unable to cast object of type 'DuTerminal[System.Double]' to type 'IExpression`1[System.Boolean]'.'
-        //<<help kwak>> 예외나는데 ShouldFailWithSubstringT 에서 처리가  안되네요  ( 한글 Visual studio 이라 처리안됨 ) 
+        //<<help kwak>> 예외나는데 ShouldFailWithSubstringT 에서 처리가  안되네요  ( 한글 Visual studio 이라 처리안됨 )
         //        "The index was outside the range", "ctu myTon1 = createWinTON()"                                     // 'The index was outside the range of elements in the list. (Parameter 'n')'
         //<<help kwak>>
                 "Unable to cast"                 , "ctu myTon2 = createWinTON(100us, $tag1)"                         // 'Unable to cast object of type 'DuFunction[Engine.Core.ExpressionModule+Timer]' to type 'Expression`1[Engine.Core.ExpressionModule+Counter]'.'

@@ -12,4 +12,5 @@ open Engine.Parser.FS
 type Spec14_ExtensionStatement() =
     do Fixtures.SetUpTest()
 
+    let t = CpuTestSample()
     [<Test>] member __.``E1`` () = Eq 1 1

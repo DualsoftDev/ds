@@ -113,7 +113,7 @@ module internal ModelFindModule =
                 .OfType<RealEx>()
                 .Where(fun w-> w.Real = real)
                 .Cast<Vertex>()
-    
+
         sheredAlias @ sheredRealEx
 
     let getVertexSharedCall(call:Call) = 

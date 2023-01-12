@@ -16,31 +16,31 @@ module CoreExtensionModule =
     type DsSystem with
         member x.AddButton(btnType:BtnType, btnName:string, inAddress:TagAddress, outAddress:TagAddress, flow:Flow) =
             let checkSystem() =
-                if x <> flow.System 
+                if x <> flow.System
                 then failwithf $"button [{btnName}] in flow ({flow.System.Name} != {x.Name}) is not same system"
 
             let checkUsedFlow() =
                 let flows = x.Buttons.Where(fun f->f.ButtonType = btnType)
                             |> Seq.collect(fun b -> b.SettingFlows)
-                flows.Contains(flow) |> not 
+                flows.Contains(flow) |> not
                 |> verifyM $"{btnType} {btnName} is assigned to a single flow : Duplicated flow [{flow.Name}]"
-                 
+
             checkSystem()
-            if btnType = DuAutoBTN || btnType = DuManualBTN 
+            if btnType = DuAutoBTN || btnType = DuManualBTN
             then checkUsedFlow()
 
             match x.Buttons.TryFind(fun f -> f.Name = btnName) with
             | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
-            | None -> x.Buttons.Add(ButtonDef(btnName, btnType, inAddress, outAddress, HashSet[|flow|])) 
+            | None -> x.Buttons.Add(ButtonDef(btnName, btnType, inAddress, outAddress, HashSet[|flow|]))
                       |> verifyM $"Duplicated ButtonDef [{btnName}]"
-            
+
         member x.AddLamp(lmpType:LampType, lmpName: string, addr:string, flow:Flow) =
             if x <> flow.System then failwithf $"lamp [{lmpName}] in flow ({flow.System.Name} != {x.Name}) is not same system"
 
             match x.Lamps.TryFind(fun f -> f.Name = lmpName) with
             | Some lmp -> lmp.SettingFlow <- flow
             | None -> x.Lamps.Add(LampDef(lmpName, lmpType, addr, flow)) |> verifyM $"Duplicated LampDef [{lmpName}]"
-        
+
         member x.SystemButtons    = x.Buttons |> Seq.map(fun btn  -> btn) //read only
         member x.SystemLamps      = x.Lamps   |> Seq.map(fun lamp -> lamp)//read only
 
@@ -50,18 +50,18 @@ module CoreExtensionModule =
         member x.StopButtons      = getButtons(x, DuStopBTN)
         member x.RunButtons       = getButtons(x, DuRunBTN)
         member x.DryRunButtons    = getButtons(x, DuDryRunBTN)
-        member x.ClearButtons     = getButtons(x, DuClearBTN)   
-        member x.HomeButtons      = getButtons(x, DuHomeBTN)   
+        member x.ClearButtons     = getButtons(x, DuClearBTN)
+        member x.HomeButtons      = getButtons(x, DuHomeBTN)
 
-        member x.RunModeLamps       = getLamps(x, DuRunModeLamp)   
-        member x.DryRunModeLamps    = getLamps(x, DuDryRunModeLamp)   
-        member x.StopModeLamps      = getLamps(x, DuStopModeLamp)   
-        member x.ManualModeLamps    = getLamps(x, DuManualModeLamp)   
+        member x.RunModeLamps       = getLamps(x, DuRunModeLamp)
+        member x.DryRunModeLamps    = getLamps(x, DuDryRunModeLamp)
+        member x.StopModeLamps      = getLamps(x, DuStopModeLamp)
+        member x.ManualModeLamps    = getLamps(x, DuManualModeLamp)
         member x.EmergencyModeLamps = getLamps(x, DuEmergencyLamp)
 
 
-        member x.GetMutualResetApis(src:ApiItem) = 
-            let getMutual(apiInfo:ApiResetInfo) = 
+        member x.GetMutualResetApis(src:ApiItem) =
+            let getMutual(apiInfo:ApiResetInfo) =
                 match src.Name = apiInfo.Operand1, src.Name = apiInfo.Operand2 with
                 |true, false -> Some apiInfo.Operand2
                 |false, true -> Some apiInfo.Operand1
@@ -74,4 +74,4 @@ module CoreExtensionModule =
 
     type Call with
         member x.System = x.Parent.GetSystem()
-       
+

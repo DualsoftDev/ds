@@ -38,3 +38,4 @@ type Spec04_OperationModeStatement() =
     member __.``O5 Dry Run Operation Mode `` () =
         for flow in t.Flows do
             flow.O5_DryRunOperationMode()  |> doCheck
+

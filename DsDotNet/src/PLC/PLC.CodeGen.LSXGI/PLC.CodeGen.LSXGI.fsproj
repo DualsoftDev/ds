@@ -28,10 +28,10 @@
 		<EmbeddedResource Include="ConfigXml\PLC_TYPE_LIST.xml" />
 		<EmbeddedResource Include="ConfigXml\tblIOModule.xml" />
 		<EmbeddedResource Include="XgI-4.5.2.template.xml" />
+		<Compile Include="ToXGI.Prolog.fs" />
 		<Compile Include="Import\XGConfigReader.fs" />
 		<Compile Include="Import\XGLDRoutineReader.fs" />
 		<Compile Include="Import\XGFileRead.fs" />
-		<Compile Include="ToXGI.Prolog.fs" />
 		<Compile Include="Export\ToXGI.StatementAdaptor.fs" />
 		<Compile Include="Export\ToXGI.Common.fs" />
 		<Compile Include="Export\ToXGI.Command.fs" />

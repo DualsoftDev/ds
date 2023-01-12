@@ -16,21 +16,16 @@ type Spec02_FlowStatement() =
     let t = CpuTestSample()
   
     [<Test>] 
-    member __.``F1 Root Start Real`` () = 
+    member __.``F1 Root Start`` () = 
         for real in t.Reals do
-            real.F1_RootStartReal() |> doChecks
+            real.F1_RootStart() |> doChecks
 
     [<Test>] 
-    member __.``F2 Root Reset Real`` () = 
+    member __.``F2 Root Reset`` () = 
         for real in t.Reals do
-            real.F2_RootResetReal() |> doChecks
+            real.F2_RootReset() |> doChecks
 
     [<Test>]
-    member __.``F3 Root Start Coin`` () = 
-        for real in t.Reals do
-            real.F3_RootStartCoin() |> doChecks
-
-    [<Test>]
-    member __.``F4 Root Reset Coin`` () = 
+    member __.``F3 Root Reset Coin`` () = 
         for coin in t.Coins do
-            coin.F4_RootCoinRelay()   |> doCheck
+            coin.F3_RootCoinRelay()   |> doCheck

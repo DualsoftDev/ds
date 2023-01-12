@@ -13,4 +13,5 @@ open Engine.Parser.FS
 type Spec13_SystemStatement() =
     do Fixtures.SetUpTest()
 
+    let t = CpuTestSample()
     [<Test>] member __.``System Bit`` () = Eq 1 1

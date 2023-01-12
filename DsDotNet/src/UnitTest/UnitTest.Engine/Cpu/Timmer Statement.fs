@@ -12,4 +12,7 @@ open Engine.Parser.FS
 type Spec09_TimmerStatement() =
     do Fixtures.SetUpTest()
 
-    [<Test>] member __.``T1 Delay Call`` () = Eq 1 1
+    let t = CpuTestSample()
+    [<Test>] 
+    member __.``T1 Delay Call`` () =
+        t.Sys.T1_DelayCall() |> doChecks

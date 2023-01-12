@@ -49,13 +49,16 @@ module PLCGenerationTestModule =
     type PLCGenerationTestClass() =
         do Fixtures.SetUpTest()
         let mutable runtimeTarget = RuntimeTarget
+        let xgiGenerationOptionsBackup = xgiGenerationOptions
         [<SetUp>]
         member x.Setup () =
             RuntimeTarget <- x.GetCurrentRuntimeTarget()
+            xgiGenerationOptions <- {EnableXmlComment = false; IsAppendExpressionTextToRungComment = true}
 
         [<TearDown>]
         member __.TearDown () =
             RuntimeTarget <- runtimeTarget
+            xgiGenerationOptions <- xgiGenerationOptionsBackup
 
         abstract GetCurrentRuntimeTarget: unit -> RuntimeTarget
 
@@ -79,32 +82,6 @@ module XgiGenerationTestModule =
         File.WriteAllText($@"{xmlDir}\{testFunctionName}.xml", crlfXml)
         let answerXml = File.ReadAllText($@"{xmlAnswerDir}\{testFunctionName}.xml")
         System.String.Compare(answerXml, xml, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols) === 0
-
-    let plcCodeGenerationOption =
-        let n (v:IVertex) = v :?> INamed |> name
-        /// 테스트 용으로 출력 신호를 따로 생성함.  e.g "Ap" --> "QAp"
-        let coilGenerator          = fun (v:IVertex) -> $"O_{n v}"
-        let SensorGenerator        = fun (v:IVertex) -> $"I_{n v}"
-        let runningGenerator       = fun (v:IVertex) -> $"{n v}_G"
-        let finishGenerator        = fun (v:IVertex) -> $"{n v}_F"
-        let resetGenerator         = fun (v:IVertex) -> $"{n v}_RST"
-        let readyStateGenerator    = fun (v:IVertex) -> $"{n v}_R"
-        let HomingStateGenerator   = fun (v:IVertex) -> $"{n v}_H"
-        let OriginStateGenerator   = fun (v:IVertex) -> $"{n v}_O"
-        let goinglockNameGenerator = fun (v:IVertex) (i:int) -> $"{n v}_GL{id}"
-
-        { createDefaultCodeGenerationOption() with
-            CoilTagGenerator            = Some coilGenerator
-            SensorTagGenerator          = Some SensorGenerator
-            GoingStateNameGenerator     = Some runningGenerator
-            StandbyStateNameGenerator   = Some readyStateGenerator
-            HomingStateNameGenerator    = Some HomingStateGenerator
-            OriginStateNameGenerator    = Some OriginStateGenerator
-            ResetLockRelayNameGenerator = Some goinglockNameGenerator
-            ResetNameGenerator          = Some resetGenerator
-            RelayGenerator              = relayGenerator "RR" 1// XGI 고려한 모델 : Relay 이름 R 대신 RR
-            //FinishStateNameGenerator  = Some finishGenerator
-        }
 
     let codeForBits = """
         bool x00 = createTag("%IX0.0.0", false);

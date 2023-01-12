@@ -11,8 +11,26 @@ open Engine.Parser.FS
 
 type Spec07_CallStatement() =
     do Fixtures.SetUpTest()
+    let t = CpuTestSample()
 
-    [<Test>] member __.``C1 Call Action Out`` () = Eq 1 1
+    [<Test>]
+    member __.``C1 Call Plan Send`` () = 
+        for call in t.Calls do
+            call.C1_CallPlanSend() |> doChecks
 
-    [<Test>] member __.``C2 Call Tx`` () = Eq 1 1
-    [<Test>] member __.``C3 Call Rx`` () = Eq 1 1
+    [<Test>]
+    member __.``C2 Call Action Out`` () = 
+        for call in t.Calls do
+            call.C2_CallActionOut() |> doChecks
+
+    [<Test>]
+    member __.``C3 Call Plan Receive`` () =
+        for call in t.Calls do
+            call.C3_CallPlanReceive() |> doChecks
+
+
+    [<Test>]
+    member __.``C4 Call Action In`` () =
+        for call in t.Calls do
+            call.C4_CallActionIn() |> doChecks
+

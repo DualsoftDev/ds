@@ -295,8 +295,7 @@ module internal ToDsTextModule =
             // todo 복수개의 block 이 허용되면, serialize 할 때 해당 위치에 맞춰서 serialize 해야 하는데...
             for code in system.OriginalCodeBlocks do
                 yield code
-
-
+                
             yield rb
         ] |> combineLines
 

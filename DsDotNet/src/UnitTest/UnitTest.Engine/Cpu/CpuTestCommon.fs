@@ -22,21 +22,23 @@ module CpuTestUtil =
             parseText systemRepo referenceDir Program.CpuTestText
         
 
-        let sys                = LoadSampleSystem()
-        let flow               = sys.Flows.Find(fun f->f.Name = "MyFlow") 
-        let realInFlow         = flow.Graph.Vertices.First(fun f->f.Name = "Seg1") :?> Real
-        let realExFlow         = flow.Graph.Vertices.First(fun f->f.Name = "F.R3") :?> RealEx
-        let callInFlow         = flow.Graph.Vertices.First(fun f->f.Name = "Ap") :?> Call
-        let callInReal         = realInFlow.Graph.Vertices.First(fun f->f.Name = "Am") :?> Call
-        
-        let aliasCallInReal    = realInFlow.Graph.Vertices.First(fun f->f.Name = "Seg1Alias1") :?> Alias
-        let aliasCallInFlow    = flow.Graph.Vertices.First(fun f->f.Name = "AmAlias1") :?> Alias
-        let aliasRealInFlow    = flow.Graph.Vertices.First(fun f->f.Name = "Seg2AliasInFlow") :?> Alias
-        let aliasRealExInFlow  = flow.Graph.Vertices.First(fun f->f.Name = "exAlias") :?> Alias
-
-        let coinTypeAll        = sys.GetVertices().OfType<Call>().Cast<Vertex>() @ (sys.GetVertices().OfType<Alias>().Cast<Vertex>())
-        let realTypeAll        = sys.GetVertices().OfType<Real>() 
-        let vertexAll          = sys.GetVertices()
+        let sys               = LoadSampleSystem()
+        let vertices          = sys.GetVertices()
+        let flow              = sys.Flows.Find(fun f->f.Name = "MyFlow") 
+        let realInFlow        = flow.Graph.Vertices.First(fun f->f.Name = "Seg1") :?> Real
+        let realExFlow        = flow.Graph.Vertices.First(fun f->f.Name = "F.R3") :?> RealEx
+        let callInFlow        = flow.Graph.Vertices.First(fun f->f.Name = "Ap") :?> Call
+        let callInReal        = realInFlow.Graph.Vertices.First(fun f->f.Name = "Am") :?> Call
+                              
+        let aliasCallInReal   = realInFlow.Graph.Vertices.First(fun f->f.Name = "aliasCallInReal") :?> Alias
+        let aliasCallInFlow   = flow.Graph.Vertices.First(fun f->f.Name = "aliasCallInFlow") :?> Alias
+        let aliasRealInFlow   = flow.Graph.Vertices.First(fun f->f.Name = "aliasRealInFlow") :?> Alias
+        let aliasRealExInFlow = flow.Graph.Vertices.First(fun f->f.Name = "aliasRealExInFlow") :?> Alias
+                              
+        let callTypeAll       = vertices.OfType<Call>().Cast<Vertex>() 
+        let coinTypeAll       = vertices.Except(vertices.OfType<Real>().Cast<Vertex>())
+        let realTypeAll       = vertices.OfType<Real>()
+        let vertexAll         = vertices
         do
             sys.GenerationButtonIO()
             sys.GenerationLampIO()
@@ -54,9 +56,8 @@ module CpuTestUtil =
         member x.AREInF =  aliasRealExInFlow.V
         member x.Coins  =  coinTypeAll.Select(getVM) 
         member x.Reals  =  realTypeAll.Select(getVM)   
+        member x.Calls  =  callTypeAll.Select(getVM)   
         member x.ALL    =  vertexAll.Select(getVM)      
-
-
        
     let doCheck (commentedStatement:CommentedStatement) = 
         let st = commentedStatement.Statement

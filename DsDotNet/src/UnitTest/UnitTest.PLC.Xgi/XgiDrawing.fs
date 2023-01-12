@@ -4,6 +4,7 @@ open NUnit.Framework
 open Engine.Common.FS
 open PLC.CodeGen.LSXGI
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine.ElementType
+open Engine.Core
 
 type XgiDrawingTest() =
     inherit XgiTestClass()
@@ -99,7 +100,7 @@ type XgiDrawingTest() =
 
         let details = FB.getFunctionDeails "ADD"
         [
-            "#BEGIN_FUNC: ADD"
+            //"#BEGIN_FUNC: ADD"
             "FNAME: ADD"
             "TYPE: function"
             "INSTANCE: INST,VAR"
@@ -109,14 +110,14 @@ type XgiDrawingTest() =
             "VAR_IN: EN, 0x00200001, , 0"
             "VAR_OUT: ENO, 0x00000001,"
             "VAR_OUT: OUT, 0x00007fe0,"
-            "#END_FUNC"
+            //"#END_FUNC"
         ] |> SeqEq details
 
         FB.decodeVarType "0x00200001" |> toString === "BOOL, CONSTANT"    // EN
 
         let details = FB.getFunctionDeails "ADD2_INT"
         [
-            "#BEGIN_FUNC: ADD2_INT"
+            //"#BEGIN_FUNC: ADD2_INT"
             "FNAME: ADD2_INT"
             "TYPE: function"
             "INSTANCE: INST,VAR"
@@ -128,7 +129,7 @@ type XgiDrawingTest() =
             "VAR_IN: IN2, 0x00200040, , 0"
             "VAR_OUT: ENO, 0x00000001,"
             "VAR_OUT: OUT, 0x00000040,"
-            "#END_FUNC"
+            //"#END_FUNC"
         ] |> SeqEq details
         FB.decodeVarType "0x00200040" |> toString === "INT, CONSTANT"   // IN1, IN2, OUT
 
@@ -137,7 +138,7 @@ type XgiDrawingTest() =
 
         let details = FB.getFunctionDeails "GT"
         [
-            "#BEGIN_FUNC: GT"
+            //"#BEGIN_FUNC: GT"
             "FNAME: GT"
             "TYPE: function"
             "INSTANCE: INST,VAR"
@@ -147,7 +148,7 @@ type XgiDrawingTest() =
             "VAR_IN: EN, 0x00200001, , 0"
             "VAR_OUT: ENO, 0x00000001,"
             "VAR_OUT: OUT, 0x00000001,"
-            "#END_FUNC"
+            //"#END_FUNC"
         ] |> SeqEq details
 
 
@@ -179,13 +180,14 @@ type XgiDrawingTest() =
 
         // Symbol 정의
         let symbolInfos = [
-            XGITag.createSymbol "EN" "EN" "BOOL"
-            XGITag.createSymbol "IN1" "IN1" "INT"
-            XGITag.createSymbol "IN2" "IN2" "INT"
-            XGITag.createSymbol "Q" "Q" "INT"
+            let intInitValue:BoxedObjectHolder = {Object=0}
+            XGITag.createSymbolInfo "EN" "EN" "BOOL" {Object=false}
+            XGITag.createSymbolInfo "IN1" "IN1" "INT" intInitValue
+            XGITag.createSymbolInfo "IN2" "IN2" "INT" intInitValue
+            XGITag.createSymbolInfo "Q" "Q" "INT" intInitValue
         ]
 
-        let symbolsLocalXml = XGITag.generateSymbolVars (symbolInfos, false)
+        let symbolsLocalXml = XGITag.generateLocalSymbolsXml symbolInfos
 
 
         let xml = wrapWithXml rungsXml symbolsLocalXml emptySymbolsGlobalXml None

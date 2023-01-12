@@ -3,13 +3,12 @@ namespace Engine.Cpu
 open Engine.Core
 open System
 open System.Linq
-open Engine.Parser.FS
 open System.Collections.Generic
 open System.Collections.Concurrent
 
 [<AutoOpen>]
 module RunTime =
-    type DsCPU(storages:Storages, text:string, statements:Statement seq) =
+    type DsCPU(statements:Statement seq) =
         let mapRungs = ConcurrentDictionary<IStorage, HashSet<Statement>>()
         let statements = statements |> List.ofSeq
         let runSubscribe() =
@@ -25,6 +24,7 @@ module RunTime =
                     if mapRungs.ContainsKey evt
                     then
                         for statement in mapRungs[evt] do
+                       //     statement.Do()
                         async {statement.Do()}|> Async.StartImmediate
                     else
                         let mapRungs = mapRungs
@@ -32,13 +32,7 @@ module RunTime =
                     )
             subscribe
 
-        let mutable runningSubscription:IDisposable = null
-
-        let statements =
-            if String.IsNullOrEmpty text then
-                statements
-            else
-                (text |> parseCode storages) @ statements
+        let mutable runSubscription:IDisposable = null
 
         do
             let usedItems =
@@ -51,8 +45,6 @@ module RunTime =
                 statements
                     .Select(fun s -> s, s.GetSourceStorages())
                     |> dict |> Dictionary
-
-
 
             for item in usedItems do
             for s in statements do
@@ -69,14 +61,14 @@ module RunTime =
                 s.Do()
 
             ///running 이 Some 이면 Expression 처리 동작 중
-        member x.IsRunning = runningSubscription <> null
+        member x.IsRunning = runSubscription <> null
         member x.Run() =
-            assert(runningSubscription = null)
-            runningSubscription <- runSubscribe()
+            assert(runSubscription = null)
+            runSubscription <- runSubscribe()
         member x.Stop() =
-            assert(runningSubscription <> null)
-            runningSubscription.Dispose()
-            runningSubscription <- null
+            assert(runSubscription <> null)
+            runSubscription.Dispose()
+            runSubscription <- null
 
         member x.ToTextStatement() =
             let statementTexts = statements.Select(fun statement -> statement.ToText())

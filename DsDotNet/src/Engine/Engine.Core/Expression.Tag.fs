@@ -8,27 +8,28 @@ open Engine.Common.FS
 module  TagModule =
 
     type BitFlag =
-    | R             // Ready Status
-    | G             // Going  Status
-    | F             // Finish Status
-    | H             // Homing  Status
-    | Origin        // Origin Monitor
-    | Pause         // Pause Monitor
-    | ErrorTx       // Error Tx Monitor
-    | ErrorRx       // Error Rx Monitor
-    | RelayReal     // Real Init Relay
-    | RelayCall     // Call Done Relay
-    | RelayGoing    // Going Relay
-    | Pulse         // Start Pulse
-    | ET            // End Tag
-    | RT            // Reset Tag
-    | ST            // Start Tag
-    | EP            // End Port
-    | RP            // Reset Port
-    | SP            // Start Port
-    | EF            // End Force
-    | RF            // Reset Force
-    | SF            // Start Force
+    | R                 // Ready Status
+    | G                 // Going  Status
+    | F                 // Finish Status
+    | H                 // Homing  Status
+    | Origin            // Origin Monitor
+    | Pause             // Pause Monitor
+    | ErrorTx           // Error Tx Monitor
+    | ErrorRx           // Error Rx Monitor
+    | RealOriginAction  // Real Origin Action
+    | RelayReal         // Real Init Relay
+    | RelayCall         // Call Done Relay
+    | RelayGoing        // Going Relay
+    | Pulse             // Start Pulse
+    | ET                // End Tag
+    | RT                // Reset Tag
+    | ST                // Start Tag
+    | EP                // End Port
+    | RP                // Reset Port
+    | SP                // Start Port
+    | EF                // End Force
+    | RF                // Reset Force
+    | SF                // Start Force
 
     type TimerFlag =
     | TimerOnDely   // Timer OnDely

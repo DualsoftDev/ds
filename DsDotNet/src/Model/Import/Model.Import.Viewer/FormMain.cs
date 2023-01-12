@@ -146,7 +146,9 @@ namespace Dual.Model.Import
                 _cts.Cancel();
                 _cts = new CancellationTokenSource();
 
+                if (_myCPU != null && _myCPU.IsRunning)  _myCPU.Stop(); 
                 ImportPowerPoint(paths);
+
 
                 button_CreateExcel.Visible = true;
                 pictureBox_xls.Visible = true;
@@ -239,9 +241,6 @@ namespace Dual.Model.Import
 
         private void UpdateCpuUI(IEnumerable<string> text)
         {
-
-            comboBox_Segment.Items.Clear();
-
             comboBox_Segment.DisplayMember = "Display";
 
             if (comboBox_Segment.Items.Count > 0)
@@ -285,8 +284,7 @@ namespace Dual.Model.Import
             SystemView sysView = comboBox_System.SelectedItem as SystemView;
 
             var rungs = Cpu.LoadStatements(sysView.System);
-            var storages = new Dictionary<string, IStorage>();
-            _myCPU = new DsCPU(storages, "", rungs.Select(s => s.statement));
+            _myCPU = new DsCPU(rungs.Select(s => s.statement));
             _myCPU.Run();
 
             _DicVertex = new Dictionary<Vertex, ViewNode>();

@@ -9,7 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="Core.Extensions.fs" />
+		<Compile Include="Core.Extension.fs" />
 		<Compile Include="RunTime.fs" />
 	</ItemGroup>
 

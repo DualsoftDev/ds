@@ -18,17 +18,17 @@ type Spec03_StatusStatement() =
     member __.``S1 RealRGFH`` () =
         for real in t.Reals do
             let rgfh = real.S1_RealRGFH() 
-            rgfh.First() |> doCheck                 //Ready
-            rgfh.Skip(1).Take(1).First() |> doCheck //Going
-            rgfh.Skip(2).Take(1).First() |> doCheck //Finish
-            rgfh.Last() |> doCheck                  //Homing
+            rgfh[0] |> doCheck     //Ready
+            rgfh[1] |> doCheck     //Going
+            rgfh[2] |> doCheck     //Finish
+            rgfh[3] |> doCheck     //Homing
 
     [<Test>]
     member __.``S2 CoinRGFH`` () =
         for coin in t.Coins do
-            let rgfh = coin.S1_RealRGFH() 
-            rgfh.First() |> doCheck                 //Ready
-            rgfh.Skip(1).Take(1).First() |> doCheck //Going
-            rgfh.Skip(2).Take(1).First() |> doCheck //Finish
-            rgfh.Last() |> doCheck                  //Homing
+            let rgfh = coin.S2_CoinRGFH() 
+            rgfh[0] |> doCheck     //Ready
+            rgfh[1] |> doCheck     //Going
+            rgfh[2] |> doCheck     //Finish
+            rgfh[3] |> doCheck     //Homing
       

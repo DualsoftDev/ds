@@ -119,8 +119,7 @@ module CoreModule =
         //CPU 생성시 할당됨 OutTag
         member val OutTag = getNull<ITagWithAddress>() with get, set
         member val SettingFlows  = flows with get, set
-        member val Observes  = HashSet<Observe>() with get, set//todo ToDsText, parsing
-        member val Commands  = HashSet<Command>() with get, set//todo ToDsText, parsing
+        member val Funcs  = HashSet<Func>() with get, set//todo ToDsText, parsing
 
 
     and LampDef (name:string, lampType:LampType, outAddress:TagAddress, flow:Flow) =
@@ -133,8 +132,7 @@ module CoreModule =
         member val OutTag = getNull<ITagWithAddress>() with get, set
         ///단일 Flow 단위로 Lamp 상태 출력
         member val SettingFlow  = flow with get, set
-        member val Observes  = HashSet<Observe>() with get, set//todo ToDsText, parsing
-        member val Commands  = HashSet<Command>() with get, set//todo ToDsText, parsing
+        member val Funcs  = HashSet<Func>() with get, set//todo ToDsText, parsing
 
     and AliasDef(aliasKey:Fqdn, target:AliasTargetWrapper option, mnemonics:string []) =
         member _.AliasKey = aliasKey
@@ -184,7 +182,7 @@ module CoreModule =
 
     and Call private (target:Job, parent) =
         inherit Indirect(target.Name, parent)
-        member _.CallTarget = target
+        member _.CallTargetJob = target
         member val Xywh:Xywh = null with get, set
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
@@ -197,10 +195,7 @@ module CoreModule =
     type Job (name:string, jobDefs:JobDef seq) =
         inherit Named(name)
         member val JobDefs = jobDefs.ToFSharpList()
-        //$ton 200      //ls xgk 명령어를 따른다.
-        member val Observes  = HashSet<Observe>() with get, set//todo ToDsText, parsing
-        //$mov 100 R200 //ls xgk 명령어를 따른다.
-        member val Commands  = HashSet<Command>() with get, set//todo ToDsText, parsing
+        member val Funcs  = HashSet<Func>() with get, set//todo ToDsText, parsing
 
     type TagAddress = string
     /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
@@ -315,10 +310,10 @@ module CoreModule =
             if (name.Contains ".") (*&& not <| (name.StartsWith("\"") && name.EndsWith("\""))*) then
                 logWarn $"Suspicious segment name [{name}]. Check it."
 
-            let segment = Real(name, flow)
-            segment.VertexManager <- fwdCreateVertexManager(segment)
-            flow.Graph.AddVertex(segment) |> verifyM $"Duplicated segment name [{name}]"
-            segment
+            let real = Real(name, flow)
+            real.VertexManager <- fwdCreateVertexManager(real)
+            flow.Graph.AddVertex(real) |> verifyM $"Duplicated segment name [{name}]"
+            real
 
         member x.GetAliasTargetToDs(aliasFlow:Flow) =
                 if x.Flow <> aliasFlow
@@ -332,7 +327,7 @@ module CoreModule =
         static member Create(otherFlowReal:Real, parent:ParentWrapper) =
             let ofn, ofrn = otherFlowReal.Flow.Name, otherFlowReal.Name
             let ofr = RealOtherFlow( [| ofn; ofrn |], otherFlowReal, parent)
-            ofr.VertexManager <- otherFlowReal.VertexManager
+            ofr.VertexManager <- fwdCreateVertexManager(ofr)
             parent.GetGraph().AddVertex(ofr) |> verifyM $"Duplicated other flow real call [{ofn}.{ofrn}]"
             ofr
 
@@ -372,7 +367,12 @@ module CoreModule =
 
             createAliasDefOnDemand()
             let alias = Alias(name, target, parent)
-            alias.VertexManager <- target.GetTarget().VertexManager
+            if parent.GetCore() :? Real 
+            then 
+                (target.RealTarget().IsNone && target.RealExTarget().IsNone) 
+                |> verifyM $"Vertex {name} children type error"
+
+            alias.VertexManager <- fwdCreateVertexManager(alias)
             parent.GetGraph().AddVertex(alias) |> verifyM $"Duplicated alias name [{name}]"
             alias
 

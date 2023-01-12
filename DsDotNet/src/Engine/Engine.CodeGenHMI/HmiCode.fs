@@ -169,12 +169,12 @@ module HmiGenModule =
             let vertName =
                 match vertex with
                 | :? Real as r -> r.QualifiedName
-                | :? Call as c -> getJobName c.CallTarget.Name
+                | :? Call as c -> getJobName c.CallTargetJob.Name
                 | :? Alias as a ->
                     match a.TargetWrapper with
                     | DuAliasTargetReal r -> r.QualifiedName
                     | DuAliasTargetRealEx rex -> rex.QualifiedName
-                    | DuAliasTargetCall c -> getJobName c.CallTarget.Name
+                    | DuAliasTargetCall c -> getJobName c.CallTargetJob.Name
                 | _ -> null
             addToUsedIn vertName system.Name
             addToUsedIn vertName flow.QualifiedName

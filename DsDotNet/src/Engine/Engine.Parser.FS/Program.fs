@@ -113,20 +113,20 @@ C4 > C5;
     let CpuTestText = """
 [sys ip = 192.168.0.1] My = {
     [flow] MyFlow = {
-        Seg1 > Seg2 > Ap > F.R3, AmAlias1 > Seg2AliasInFlow > exAlias;
+        Seg1 > Seg2 > Ap > F.R3, aliasCallInFlow > aliasRealInFlow > aliasRealExInFlow ;
         Seg1 = {
-            Ap > Am > Seg1Alias1;
+            Ap > Am > aliasCallInReal;
         }
         Seg2 = {
-            Am > Ap;
+            Ap > Am ;
         }
 
         [aliases] = {
-            Seg1.Am = { AmAlias1; AmAlias2; }
-            Seg1 = { Seg1Alias1; }
-            F.R3 = { exAlias; }
-            Seg1.Ap = { ApAliasInReal; }
-            Seg2  = { Seg2AliasInFlow; }
+            Seg1.Am = { aliasCallInReal; }
+            Ap = {aliasCallInFlow;}
+
+            Seg1 = { aliasRealInFlow; }
+            F.R3 = { aliasRealExInFlow; }
         }
     }
     [flow] "Flow.Complex" = {

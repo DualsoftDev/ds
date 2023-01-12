@@ -113,6 +113,7 @@ module DotNetCollectionExt =
                 Some xs.[key]
             else
                 None
+        member xs.TryFindIt = xs.TryFind
         member xs.AddOrReplace(key:'k, value:'v) =
             if xs.ContainsKey key then
                 xs.[key] <- value

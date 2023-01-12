@@ -13,4 +13,9 @@ open Engine.Parser.FS
 type Spec10_CounterStatement() =
     do Fixtures.SetUpTest()
 
-    [<Test>] member __.``C1 Finish Ring Counter`` () = Eq 1 1
+    let t = CpuTestSample()
+    [<Test>] 
+    member __.``C1 Finish Ring Counter`` () = 
+        t.Sys.C1_FinishRingCounter() |> doChecks
+        
+        

@@ -184,7 +184,7 @@ module CoreModule =
 
     and Call private (target:Job, parent) =
         inherit Indirect(target.Name, parent)
-        member _.CallTarget = target
+        member _.CallTargetJob = target
         member val Xywh:Xywh = null with get, set
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()

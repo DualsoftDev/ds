@@ -7,7 +7,7 @@ open Engine.Common.FS
 open System
 
 [<AutoOpen>]
-module ConvertCoreExt =
+module rec ConvertCoreExt =
     
     type InOut = | In | Out | Memory
     let private getIOs(name, address, inOut:InOut): ITagWithAddress   =  
@@ -21,13 +21,7 @@ module ConvertCoreExt =
     let getVM(v:Vertex) = v.VertexManager :?> VertexManager
     let getVMReal(v:Vertex) = v.VertexManager :?> VertexMReal
     let getVMCoin(v:Vertex) = v.VertexManager :?> VertexMCoin
-        //match v with
-        //| :? Real ->  v.VertexManager :?> VertexMReal
-        //| _       ->  v.VertexManager :?> VertexMCoin
 
-    type ApiItem with
-        member s.tx = DsTag<bool>("tx", false)
-        member s.rx = DsTag<bool>("rx", false)
 
     type DsSystem with
         member s._on     = DsTag<bool>("_on", true)
@@ -68,8 +62,7 @@ module ConvertCoreExt =
         //[auto, manual] system HMI 두개다 선택이 안됨
         member s.ModeNoExpr = !!s._auto.Expr <&&> !!s._manual.Expr
         //자신이 사용된 API Txs
-        member s.GetTXs(r:Real)= s.ApiItems.Where(fun api->api.TXs.Contains(r)).Select(fun f->f.tx)
-        member s.GetRXs(r:Real)= s.ApiItems.Where(fun api->api.RXs.Contains(r)).Select(fun f->f.rx)
+        member s.GetTXs(r:Real)= s.ApiItems.Where(fun api->api.TXs.Contains(r)).Select(fun f->f.TX)
             
     let private getButtonInputs(flow:Flow, btns:ButtonDef seq) : PlcTag<bool> seq = 
             btns.Where(fun b -> b.SettingFlows.Contains(flow))
@@ -175,30 +168,26 @@ module ConvertCoreExt =
 
     type Call with
         member c.V = c.VertexManager :?> VertexMCoin
-        member c.UsingTon = c.CallTarget.Observes.Where(fun f->f.Name = TextOnDelayTimer).any()
-        member c.UsingCtr = c.CallTarget.Observes.Where(fun f->f.Name = TextRingCounter).any()
+        member c.UsingTon = c.CallTargetJob.Observes.Where(fun f->f.Name = TextOnDelayTimer).any()
+        member c.UsingCtr = c.CallTargetJob.Observes.Where(fun f->f.Name = TextRingCounter).any()
 
         member c.PresetTime =   if c.UsingTon 
-                                then c.CallTarget.Observes.First(fun f->f.Name = TextOnDelayTimer).GetDelayTime()
+                                then c.CallTargetJob.Observes.First(fun f->f.Name = TextOnDelayTimer).GetDelayTime()
                                 else failwith $"{c.Name} not use timer"
 
         member c.PresetCounter = if c.UsingCtr 
-                                 then c.CallTarget.Observes.First(fun f->f.Name = TextRingCounter).GetRingCount()
+                                 then c.CallTargetJob.Observes.First(fun f->f.Name = TextRingCounter).GetRingCount()
                                  else failwith $"{c.Name} not use counter"
                             
-        member c.INs  = c.CallTarget.JobDefs.Select(fun j -> j.InTag).Cast<PlcTag<bool>>()
-        member c.OUTs = c.CallTarget.JobDefs.Select(fun j -> j.OutTag).Cast<PlcTag<bool>>()
-        member c.TXs  = c.CallTarget.JobDefs |> Seq.map(fun (j: JobDef) -> j.ApiItem.tx)
-        member c.RXs  = c.CallTarget.JobDefs |> Seq.collect(fun (j: JobDef) -> j.ApiItem.RXs) 
+        member c.INs  = c.CallTargetJob.JobDefs.Select(fun j -> j.InTag).Cast<PlcTag<bool>>()
+        member c.OUTs = c.CallTargetJob.JobDefs.Select(fun j -> j.OutTag).Cast<PlcTag<bool>>()
+        member c.TXs  = c.CallTargetJob.JobDefs |> Seq.map(fun (j: JobDef) -> j.ApiItem.TX)
+        member c.RXs  = c.CallTargetJob.JobDefs |> Seq.collect(fun (j: JobDef) -> j.ApiItem.RXs) 
                                              |> Seq.map getVM |> Seq.map(fun f->f.ET)
-        member c.MutualResetOuts = 
-            c.CallTarget.JobDefs
+        member c.MutualResets = 
+            c.CallTargetJob.JobDefs
                 .SelectMany(fun j -> j.ApiItem.System.GetMutualResetApis(j.ApiItem))
                 .SelectMany(fun a -> c.System.JobDefs.Where(fun w-> w.ApiItem = a))
-                .Select(fun j -> j.OutTag).Cast<PlcTag<bool>>()
-                .Cast<PlcTag<bool>>()
-
-        
     
     type Real with
         member r.V = r.VertexManager :?> VertexMReal
@@ -212,4 +201,5 @@ module ConvertCoreExt =
     type RealOtherFlow with
         member a.V = a.VertexManager :?> VertexMCoin                    
 
-  
+    type ApiItem with
+        member a.TX = DsTag<bool>($"{a.Name}(TX)", false)

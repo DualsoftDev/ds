@@ -71,10 +71,13 @@ module ExpressionExtension =
 
     [<Extension>]
     type ExpressionExt =
+        [<Extension>] static member ToAnd (xs:DsTag<bool> seq)       = xs.Cast<Tag<bool>>() |> toAnd
         [<Extension>] static member ToAnd (xs:DsBit seq)             = xs.Cast<Tag<bool>>() |> toAnd
         [<Extension>] static member ToAnd (xs:PlcTag<bool> seq)      = xs.Cast<Tag<bool>>() |> toAnd
         [<Extension>] static member ToAnd (xs:Tag<bool> seq)         = xs |> toAnd
         [<Extension>] static member ToAnd (xs:Expression<bool> seq)  = xs.Reduce(<&&>)
+
+        [<Extension>] static member ToOr  (xs:DsTag<bool> seq)       = xs.Cast<Tag<bool>>() |> toOr
         [<Extension>] static member ToOr  (xs:DsBit seq)             = xs.Cast<Tag<bool>>() |> toOr
         [<Extension>] static member ToOr  (xs:PlcTag<bool> seq)      = xs.Cast<Tag<bool>>() |> toOr
         [<Extension>] static member ToOr  (xs:Tag<bool> seq)         = xs |> toOr

@@ -120,7 +120,7 @@ module internal ModelFindModule =
         let sheredAlias = 
             call.Parent.GetFlow().GetVerticesWithInReal()
               .GetAliasTypeCalls()
-              .Where(fun a -> a.TargetWrapper.CallTargetJob().Value = call)
+              .Where(fun a -> a.TargetWrapper.CallTarget().Value = call)
               .Cast<Vertex>()
        
         sheredAlias 

@@ -72,7 +72,7 @@ type VertexManager with
 
     member v.M4_CallErrorRXMonitor(): CommentedStatement  = 
         let call = v.Vertex :?> Call
-        let In_Rxs  = call.CallTarget.JobDefs
+        let In_Rxs  = call.CallTargetJob.JobDefs
                         .Select(fun j -> j.InTag:?>PlcTag<bool>, j.ApiItem.RXs.Select(getVM))
 
         let onEventErr  = In_Rxs.Select(fun (input, rxs) -> 

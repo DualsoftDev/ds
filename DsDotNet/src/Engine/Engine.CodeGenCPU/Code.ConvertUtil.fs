@@ -10,12 +10,12 @@ open Engine.Common.FS
 module CodeConvertUtil =
 
         ///Real 자신을 공용으로 사용하는 Vertex들  
-    let getSharedReal(v:VertexManager) : VertexManager seq =
-            (v.Vertex :?> Real).GetVertexSharedReal().Select(getVM) 
+    let getSharedReal(v:VertexManager) : Vertex seq =
+            (v.Vertex :?> Real).GetVertexSharedReal()
 
         ///Call 자신을 공용으로 사용하는 Vertex들  
-    let getSharedCall(v:VertexManager) : VertexManager seq =
-            (v.Vertex :?> Call).GetVertexSharedCall().Select(getVM) 
+    let getSharedCall(v:VertexManager) : Vertex seq =
+            (v.Vertex :?> Call).GetVertexSharedCall()
            
         ///Call 자신이거나 Alias Target Call
     let getPureCall(v:VertexManager) : Call option=
@@ -39,37 +39,21 @@ module CodeConvertUtil =
             |_ -> failwith "Error GetPureReal"
 
 
-    let rec getCoinTags(v:Vertex, isInTag:bool) : Tag<bool> seq =
-            match v with
-            | :? Call as c ->
-                [ for j in c.CallTarget.JobDefs do
-                    let typ = if isInTag then "I" else "O"
-                    PlcTag( $"{j.ApiName}_{typ}", "", false) :> Tag<bool>
-                ]
-            | :? Alias as a ->
-                match a.TargetWrapper with
-                | DuAliasTargetReal ar    -> getCoinTags( ar, isInTag)
-                | DuAliasTargetCall ac    -> getCoinTags( ac, isInTag)
-                | DuAliasTargetRealEx ao  -> getCoinTags( ao, isInTag)
-            | _ -> failwith "Error"
+    //let rec getCoinTags(v:Vertex, isInTag:bool) : Tag<bool> seq =
+    //        match v with
+    //        | :? Call as c ->
+    //            [ for j in c.CallTargetJob.JobDefs do
+    //                let typ = if isInTag then "I" else "O"
+    //                PlcTag( $"{j.ApiName}_{typ}", "", false) :> Tag<bool>
+    //            ]
+    //        | :? Alias as a ->
+    //            match a.TargetWrapper with
+    //            | DuAliasTargetReal ar    -> getCoinTags( ar, isInTag)
+    //            | DuAliasTargetCall ac    -> getCoinTags( ac, isInTag)
+    //            | DuAliasTargetRealEx ao  -> getCoinTags( ao, isInTag)
+    //        | _ -> failwith "Error"
 
-    let getTxRxTags(v:Vertex, isTx:bool) : Tag<bool> seq =
-        match v with
-        | :? Call as c ->
-            c.CallTarget.JobDefs
-                .SelectMany(fun j->
-                    if isTx then
-                        j.ApiItem.TXs.Select(getVM).Select(fun f->f.ST.Expr)
-                    else
-                        j.ApiItem.RXs.Select(getVM).Select(fun f->f.ET.Expr)
-                )
-                .Cast<Tag<bool>>()
-        | :? Alias as a ->
-            match a.TargetWrapper with
-            | DuAliasTargetReal ar    -> getCoinTags(ar, isTx)
-            | DuAliasTargetCall ac    -> getCoinTags(ac, isTx)
-            | DuAliasTargetRealEx ao  -> getCoinTags(ao, isTx)
-        | _ -> failwith "Error"
+    //let getTxTags(c:Call) : DsTag<bool> seq = c.CallTargetJob.JobDefs.Select(fun j-> j.ApiItem.TX)
     
     [<AutoOpen>]
     [<Extension>]

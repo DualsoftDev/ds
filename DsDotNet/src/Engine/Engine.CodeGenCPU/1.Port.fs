@@ -8,16 +8,12 @@ open System.Linq
 
 //Port 처리 Set 공용 함수
 let private getPortSetBits(v:VertexManager) (rse:SREType) =
-    match v.Vertex with
-    | :? Real as r ->  
-        let shareds = v.GetSharedReal()
-        match rse with
-        |Start -> (shareds.STs() @ [v.ST;v.SF]).ToOr() <||> v.System.GetTXs(r).EmptyOffElseToOr(v.System)
-        |Reset -> (shareds.RTs() @ [v.RT;v.RF]).ToOr()
-        |End   -> (shareds.ETs() @ [v.ET;v.EF]).ToOr() 
-
-    | _ -> failwith "Error getPortSetBits : Real Only"
- 
+    let real = v.Vertex :?> Real
+    let shareds = v.GetSharedReal().Select(getVM)
+    match rse with
+    |Start -> (shareds.STs() @ [v.ST;v.SF]).ToOr() <||> v.System.GetTXs(real).EmptyOffElseToOr(v.System)
+    |Reset -> (shareds.RTs() @ [v.RT;v.RF]).ToOr()
+    |End   -> (shareds.ETs() @ [v.ET;v.EF]).ToOr() 
 
 type VertexManager with
     

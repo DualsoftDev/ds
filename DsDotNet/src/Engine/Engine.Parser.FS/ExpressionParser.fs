@@ -106,7 +106,6 @@ module rec ExpressionParser =
                         | :? LiteralCharContext   ->
                             // text : "'a'" 의 형태
                             let dq, sq = "\"", "'"
-                            let xxx = text |> unwrapString dq dq |> unwrapString sq sq
                             text |> unwrapString dq dq |> unwrapString sq sq |> System.Char.Parse   |> literal2expr |> iexpr
                         | _ -> failwith "ERROR"
                     | :? TagContext as texp ->

@@ -8,6 +8,7 @@ open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 open Engine.Common.FS
 open Engine.Core
 open FB
+open ConvertorPrologModule
 
 [<AutoOpen>]
 module internal rec Command =
@@ -163,7 +164,7 @@ module internal rec Command =
         blockXml
 
     type System.Type with
-        member x.SizeString = systemTypeNameToXgiTypeName x.Name
+        member x.SizeString = systemTypeToXgiTypeName x
 
 
     let private toTerminalText (exp:IExpression) =
@@ -194,14 +195,19 @@ module internal rec Command =
 
     let drawFunction (x, y) (func:Function) : BlockSummarizedXmlElements =
         match func with
-        | Arithematic (name, output, args) ->
+        | Arithmatic (name, output, args) ->
             let namedInputParameters =
                 [ "EN", fakeAlwaysOnExpression :> IExpression]
                 @ (args |> List.indexed |> List.map1st (fun n -> $"IN{n+1}"))
             let outputParameters = [ "OUT", output ]
+            let plcFuncType =
+                let outputType = getType output
+                systemTypeToXgiTypeName outputType
             let func =
+                let arity = args.Length
                 match name with
-                | ("ADD" | "MUL" | "SUB" | "DIV") -> $"{name}2_INT"
+                | ("ADD" | "MUL") -> $"{name}{arity}_{plcFuncType}"        // xxx: ADD2_INT
+                | ("SUB" | "DIV") -> name        // DIV 는 DIV, DIV2 만 존재함
                 | _ -> failwith "NOT YET"
             createBoxXmls (x, y)  func namedInputParameters outputParameters ""
 
@@ -217,6 +223,7 @@ module internal rec Command =
             createBoxXmls (x, y)  XgiConstants.FunctionNameMove namedInputParameters outputParameters ""
 
     type CheckType with
+        [<Obsolete>]
         member t.IsRoughlyEqual(typ:System.Type) =
             match typ.Name with
             | "Single" -> t.HasFlag CheckType.REAL
@@ -255,6 +262,11 @@ module internal rec Command =
         let iDic = namedInputParameters |> dict
         let oDic = namedOutputParameters |> Tuple.toDictionary
 
+        let systemTypeToXgiType (typ:System.Type) =
+            systemTypeToXgiTypeName typ
+            |> DU.tryParseEnum<CheckType>
+            |> Option.get
+
         /// 입력 인자들을 function 의 입력 순서 맞게 재배열
         let alignedInputParameters =
             /// e.g ["CD, 0x00200001, , 0"; "LD, 0x00200001, , 0"; "PV, 0x00200040, , 0"]
@@ -263,7 +275,14 @@ module internal rec Command =
             [|
                 for s in inputSpecs do
                     let exp = iDic[s.Name]
-                    s.CheckType.IsRoughlyEqual exp.DataType |> verify
+                    let exprDataType = systemTypeToXgiType exp.DataType
+
+                    let typeCheckExcludes = [ "TON"; "TOF"; "RTO"; "CTU"; "CTD"; "CTUD"; "CTR" ]
+                    if (typeCheckExcludes.Any(fun ex -> functionName = ex || functionName.StartsWith($"{ex}_"))) then
+                        ()   // xxx: timer, counter 에 대해서는 일단, type check skip
+                    else
+                        s.CheckType.HasFlag(exprDataType) |> verify
+
                     s.Name, exp, s.CheckType
             |]
 
@@ -277,7 +296,7 @@ module internal rec Command =
                         let! terminal = oDic.TryFind(s.Name)
                         match terminal with
                         | :? IStorage as storage ->
-                            s.CheckType.IsRoughlyEqual storage.DataType |> verify
+                            s.CheckType.HasFlag(systemTypeToXgiType storage.DataType) |> verify
                         | _ -> ()
                         return s.Name, i, terminal, s.CheckType
                     }
@@ -501,7 +520,7 @@ module internal rec Command =
 
             { XmlElements = xmls; X=x; Y=y; TotalSpanX = spanX; TotalSpanY = spanY}
 
-        | FlatNary((OpCompare _ | OpArithematic _), exprs) ->
+        | FlatNary((OpCompare _ | OpArithmatic _), exprs) ->
             failwith "ERROR : Should have been processed in early stage."    // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
 
         // terminal case

@@ -26,7 +26,7 @@ namespace Dual.Model.Import
         {
             CpuEvent.ValueSubject.Subscribe(rx =>
             {
-                FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{rx.Name}:{rx.Value}");
+                FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{rx.Name}:{rx.BoxedValue}");
             });
 
             CpuEvent.StatusSubject.Subscribe(rx =>
@@ -45,7 +45,7 @@ namespace Dual.Model.Import
             });
         }
 
-      
+
 
 
         public static void MSGSubscribe()

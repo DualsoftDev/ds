@@ -71,34 +71,36 @@ namespace Engine
     [flow] F5 = {
         A > B;		// A(Real)> B(Real);
     }
-    [auto] = {
-        AutoBTN(%I1, %Q1) = { F2; }
-        AutoBTN2(%I2, %Q2) = { F1;F3;F5; }
-    }
-    [manual] = {
-        ManualBTN(_, _) = { F1;F5; }
-    }
-    [emg] = {
-        EmptyButton(_, _) = {}
-        EmptyButton2(_, _) = {}
-        EMGBTN3(_, _) = { F3;F5; }
-        EMGBTN(_, _) = { F1;F2;F3;F5; }
-    }
-    [stop] = {
-        StopBTN(_, _) = { F1;F2;F5; }
-    }
-    [run] = {
-        StartBTN_FF(_, _) = { F2; }
-        StartBTN1(_, _) = { F1; }
-    }
-    [dryrun] = {
-        StartDryBTN(_, _) = { F5; }
-    }
-    [clear] = {
-        ClearBTN(_, _) = { F1;F2;F3;F5; }
-    }
-    [home] = {
-        HomeBTN(_, _) = { F1;F2;F3;F5; }
+    [buttons] = {
+        [auto] = {
+            AutoBTN(%I1, %Q1) = { F2; }
+            AutoBTN2(%I2, %Q2) = { F1;F3;F5; }
+        }
+        [manual] = {
+            ManualBTN(_, _) = { F1;F5; }
+        }
+        [emg] = {
+            EmptyButton(_, _) = {}
+            EmptyButton2(_, _) = {}
+            EMGBTN3(_, _) = { F3;F5; }
+            EMGBTN(_, _) = { F1;F2;F3;F5; }
+        }
+        [stop] = {
+            StopBTN(_, _) = { F1;F2;F5; }
+        }
+        [drive] = {
+            StartBTN_FF(_, _) = { F2; }
+            StartBTN1(_, _) = { F1; }
+        }
+        [test] = {
+            StartTestBTN(_, _) = { F5; }
+        }
+        [clear] = {
+            ClearBTN(_, _) = { F1;F2;F3;F5; }
+        }
+        [home] = {
+            HomeBTN(_, _) = { F1;F2;F3;F5; }
+        }
     }
 }
 ";

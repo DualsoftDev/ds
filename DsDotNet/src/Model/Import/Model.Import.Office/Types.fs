@@ -31,17 +31,17 @@ module InterfaceClass =
         | XlsVariable            //변수
         | XlsAutoBTN             //자동 버튼
         | XlsManualBTN           //수동 버튼
-        | XlsEmergencyBTN        //비상 버튼
+        | XlsDriveBTN            //운전 버튼
         | XlsStopBTN             //정지 버튼
-        | XlsRunBTN              //운전 버튼
-        | XlsDryRunBTN           //시운전 시작 버튼
         | XlsClearBTN            //해지 버튼
+        | XlsEmergencyBTN        //비상 버튼
+        | XlsTestBTN             //시운전 시작 버튼
         | XlsHomeBTN             //홈(원위치) 버튼
-        | XlsEmergencyLamp       //비상모드 램프
-        | XlsRunModeLamp         //운전모드 램프
-        | XlsDryRunModeLamp      //시 운전모드  램프
+        | XlsAutoModeLamp        //자동 모드 램프
         | XlsManualModeLamp      //수동 모드 램프
+        | XlsDriveModeLamp       //운전 모드 램프
         | XlsStopModeLamp        //정지 모드 램프
+        | XlsReadyModeLamp       //댜가 모드  램프
 
     with
         member x.ToText() =
@@ -50,17 +50,17 @@ module InterfaceClass =
             | XlsVariable       -> TextXlsVariable   
             | XlsAutoBTN        -> TextXlsAutoBTN        
             | XlsManualBTN      -> TextXlsManualBTN      
-            | XlsEmergencyBTN   -> TextXlsEmergencyBTN   
+            | XlsDriveBTN       -> TextXlsDriveBTN       
             | XlsStopBTN        -> TextXlsStopBTN        
-            | XlsRunBTN         -> TextXlsRunBTN         
-            | XlsDryRunBTN      -> TextXlsDryRunBTN      
             | XlsClearBTN       -> TextXlsClearBTN       
+            | XlsEmergencyBTN   -> TextXlsEmergencyBTN     
+            | XlsTestBTN        -> TextXlsTestBTN      
             | XlsHomeBTN        -> TextXlsHomeBTN        
-            | XlsEmergencyLamp  -> TextXlsEmergencyLamp  
-            | XlsRunModeLamp    -> TextXlsRunModeLamp    
-            | XlsDryRunModeLamp -> TextXlsDryRunModeLamp 
+            | XlsAutoModeLamp   -> TextXlsAutoModeLamp  
             | XlsManualModeLamp -> TextXlsManualModeLamp 
+            | XlsDriveModeLamp  -> TextXlsDriveModeLamp    
             | XlsStopModeLamp   -> TextXlsStopModeLamp   
+            | XlsReadyModeLamp  -> TextXlsReadyModeLamp 
 
     let TextToXlsType(txt:string) =
         match txt.ToLower() with
@@ -70,13 +70,13 @@ module InterfaceClass =
         | TextXlsManualBTN      ->  XlsManualBTN     
         | TextXlsEmergencyBTN   ->  XlsEmergencyBTN  
         | TextXlsStopBTN        ->  XlsStopBTN       
-        | TextXlsRunBTN         ->  XlsRunBTN        
-        | TextXlsDryRunBTN      ->  XlsDryRunBTN     
+        | TextXlsDriveBTN       ->  XlsDriveBTN        
+        | TextXlsTestBTN        ->  XlsTestBTN     
         | TextXlsClearBTN       ->  XlsClearBTN      
         | TextXlsHomeBTN        ->  XlsHomeBTN       
-        | TextXlsEmergencyLamp  ->  XlsEmergencyLamp 
-        | TextXlsRunModeLamp    ->  XlsRunModeLamp   
-        | TextXlsDryRunModeLamp ->  XlsDryRunModeLamp
+        | TextXlsAutoModeLamp   ->  XlsAutoModeLamp 
         | TextXlsManualModeLamp ->  XlsManualModeLamp
-        | TextXlsStopModeLamp   ->  XlsStopModeLamp  
+        | TextXlsDriveModeLamp  ->  XlsDriveModeLamp 
+        | TextXlsStopModeLamp   ->  XlsStopModeLamp    
+        | TextXlsReadyModeLamp ->  XlsReadyModeLamp
         | _ -> failwithf $"'{txt}' TextXlsType Error check type"

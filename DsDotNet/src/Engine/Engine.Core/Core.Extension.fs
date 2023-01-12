@@ -46,18 +46,18 @@ module CoreExtensionModule =
 
         member x.AutoButtons      = getButtons(x, DuAutoBTN)
         member x.ManualButtons    = getButtons(x, DuManualBTN)
-        member x.EmergencyButtons = getButtons(x, DuEmergencyBTN)
+        member x.DriveButtons     = getButtons(x, DuDriveBTN)
         member x.StopButtons      = getButtons(x, DuStopBTN)
-        member x.RunButtons       = getButtons(x, DuRunBTN)
-        member x.DryRunButtons    = getButtons(x, DuDryRunBTN)
         member x.ClearButtons     = getButtons(x, DuClearBTN)
+        member x.EmergencyButtons = getButtons(x, DuEmergencyBTN)
+        member x.TestButtons      = getButtons(x, DuTestBTN)
         member x.HomeButtons      = getButtons(x, DuHomeBTN)
 
-        member x.RunModeLamps       = getLamps(x, DuRunModeLamp)
-        member x.DryRunModeLamps    = getLamps(x, DuDryRunModeLamp)
-        member x.StopModeLamps      = getLamps(x, DuStopModeLamp)
-        member x.ManualModeLamps    = getLamps(x, DuManualModeLamp)
-        member x.EmergencyModeLamps = getLamps(x, DuEmergencyLamp)
+        member x.DriveModeLamps   = getLamps(x, DuDriveModeLamp)
+        member x.AutoModeLamps    = getLamps(x, DuAutoModeLamp)
+        member x.ManualModeLamps  = getLamps(x, DuManualModeLamp)
+        member x.StopModeLamps    = getLamps(x, DuStopModeLamp)
+        member x.ReadyModeLamps   = getLamps(x, DuReadyModeLamp)
 
 
         member x.GetMutualResetApis(src:ApiItem) =

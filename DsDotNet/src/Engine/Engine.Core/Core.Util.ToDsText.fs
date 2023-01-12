@@ -185,11 +185,11 @@ module internal ToDsTextModule =
                 ] |> combineLines
             yield buttonsToDs("auto",   system.AutoButtons      )
             yield buttonsToDs("manual", system.ManualButtons    )
-            yield buttonsToDs("emg",    system.EmergencyButtons )
+            yield buttonsToDs("drive",  system.DriveButtons     )
             yield buttonsToDs("stop",   system.StopButtons      )
-            yield buttonsToDs("run",    system.RunButtons       )
-            yield buttonsToDs("dryrun", system.DryRunButtons    )
             yield buttonsToDs("clear",  system.ClearButtons     )
+            yield buttonsToDs("emg",    system.EmergencyButtons )
+            yield buttonsToDs("test",   system.TestButtons      )
             yield buttonsToDs("home",   system.HomeButtons      )
 
             let lampsToDs(category:string, lamps:LampDef seq) =
@@ -206,11 +206,11 @@ module internal ToDsTextModule =
                             yield $"{tab2}{lamp.Name}{addr} = {lb} {lamp.SettingFlow.Name} {rb}"
                         yield $"{tab}{rb}"
                 ] |> combineLines
-            yield lampsToDs("runlamp",    system.RunModeLamps       )
-            yield lampsToDs("dryrunlamp", system.DryRunModeLamps    )
-            yield lampsToDs("manuallamp", system.ManualModeLamps    )
-            yield lampsToDs("stoplamp",   system.StopModeLamps      )
-            yield lampsToDs("emglamp",    system.EmergencyModeLamps )
+            yield lampsToDs("auto",   system.AutoModeLamps       )
+            yield lampsToDs("manual", system.ManualModeLamps    )
+            yield lampsToDs("drive",  system.DriveModeLamps    )
+            yield lampsToDs("stop",   system.StopModeLamps      )
+            yield lampsToDs("ready",  system.ReadyModeLamps )
 
             (* prop
                     safety

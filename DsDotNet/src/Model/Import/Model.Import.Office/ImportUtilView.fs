@@ -79,11 +79,11 @@ module ImportViewModule =
     let UpdateLampNodes(system:DsSystem, flow:Flow, node:ViewNode)  =
         let newNode = ViewNode("Lamps", LAMP)
 
-        system.EmergencyModeLamps.Where(fun w->w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuEmergencyLamp)) |>ignore)
-        system.DryRunModeLamps.Where(fun w->   w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuDryRunModeLamp)) |>ignore)
-        system.ManualModeLamps.Where(fun w->   w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuManualModeLamp)) |>ignore)
-        system.RunModeLamps.Where(fun w->      w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuRunModeLamp)) |>ignore)
-        system.StopModeLamps.Where(fun w->     w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuStopModeLamp)) |>ignore)
+        system.AutoModeLamps.Where(fun w->   w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuAutoModeLamp)) |>ignore)
+        system.ManualModeLamps.Where(fun w-> w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuManualModeLamp)) |>ignore)
+        system.DriveModeLamps.Where(fun w->  w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuDriveModeLamp)) |>ignore)
+        system.StopModeLamps.Where(fun w->   w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuStopModeLamp)) |>ignore)
+        system.ReadyModeLamps.Where(fun w->  w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuReadyModeLamp)) |>ignore)
         
         if newNode.Singles.Count > 0
         then node.Singles.Add(newNode) |> ignore
@@ -93,12 +93,12 @@ module ImportViewModule =
         let newNode = ViewNode("Buttons", BUTTON)
 
         system.AutoButtons.Where(fun w->w.SettingFlows.Contains(flow))       |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuAutoBTN)) |>ignore)
-        system.ClearButtons.Where(fun w->w.SettingFlows.Contains(flow))      |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuClearBTN)) |>ignore)
-        system.RunButtons.Where(fun w->w.SettingFlows.Contains(flow))      |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuRunBTN)) |>ignore)
-        system.EmergencyButtons.Where(fun w->w.SettingFlows.Contains(flow))  |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuEmergencyBTN)) |>ignore)
         system.ManualButtons.Where(fun w->w.SettingFlows.Contains(flow))     |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuManualBTN)) |>ignore)
+        system.DriveButtons.Where(fun w->w.SettingFlows.Contains(flow))      |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuDriveBTN)) |>ignore)
         system.StopButtons.Where(fun w->w.SettingFlows.Contains(flow))       |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuStopBTN)) |>ignore)
-        system.DryRunButtons.Where(fun w->w.SettingFlows.Contains(flow))   |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuDryRunBTN)) |>ignore)
+        system.ClearButtons.Where(fun w->w.SettingFlows.Contains(flow))      |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuClearBTN)) |>ignore)
+        system.EmergencyButtons.Where(fun w->w.SettingFlows.Contains(flow))  |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuEmergencyBTN)) |>ignore)
+        system.TestButtons.Where(fun w->w.SettingFlows.Contains(flow))   |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuTestBTN)) |>ignore)
         system.HomeButtons.Where(fun w->w.SettingFlows.Contains(flow))   |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuHomeBTN)) |>ignore)
         
         if newNode.Singles.Count > 0

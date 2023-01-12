@@ -163,21 +163,21 @@ module PPTObjectModule =
         match key with
         | "A"      -> BtnType.DuAutoBTN
         | "M"      -> BtnType.DuManualBTN
-        | "E"      -> BtnType.DuEmergencyBTN
+        | "D"      -> BtnType.DuDriveBTN
         | "S"      -> BtnType.DuStopBTN
         | "C"      -> BtnType.DuClearBTN
-        | "R"      -> BtnType.DuRunBTN
-        | "D"      -> BtnType.DuDryRunBTN
+        | "E"      -> BtnType.DuEmergencyBTN
+        | "T"      -> BtnType.DuTestBTN
         | "H"      -> BtnType.DuHomeBTN
         | _     ->  failwith $"{key} is Error Type"
 
     let getLampType(key:string) =
         match key with
-        | "R"      -> LampType.DuRunModeLamp
-        | "S"      -> LampType.DuStopModeLamp
+        | "A"      -> LampType.DuAutoModeLamp
         | "M"      -> LampType.DuManualModeLamp
-        | "E"      -> LampType.DuEmergencyLamp
-        | "D"      -> LampType.DuDryRunModeLamp
+        | "D"      -> LampType.DuDriveModeLamp
+        | "S"      -> LampType.DuStopModeLamp
+        | "R"      -> LampType.DuReadyModeLamp
         | _     ->  failwith $"{key} is Error Type"
 
     let IsDummyShape(shape:Shape) = shape.IsDashShape() && (shape.CheckRectangle()||shape.CheckEllipse())

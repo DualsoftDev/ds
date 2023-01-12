@@ -195,20 +195,20 @@ module DsTextExport =
     let [<Literal>] TextXlsAddress  = "외부주소"
     let [<Literal>] TextXlsVariable    = "내부변수"
 
-    let [<Literal>] TextXlsAutoBTN             = "자동선택"
-    let [<Literal>] TextXlsManualBTN           = "수동선택"
-    let [<Literal>] TextXlsEmergencyBTN        = "비상푸쉬"
-    let [<Literal>] TextXlsStopBTN             = "정지푸쉬"
-    let [<Literal>] TextXlsRunBTN              = "운전푸쉬"
-    let [<Literal>] TextXlsDryRunBTN           = "시운전푸쉬"
-    let [<Literal>] TextXlsClearBTN            = "해지푸쉬"
-    let [<Literal>] TextXlsHomeBTN             = "복귀푸쉬"
+    let [<Literal>] TextXlsAutoBTN        = "자동선택"
+    let [<Literal>] TextXlsManualBTN      = "수동선택"
+    let [<Literal>] TextXlsDriveBTN       = "운전푸쉬"
+    let [<Literal>] TextXlsStopBTN        = "정지푸쉬"
+    let [<Literal>] TextXlsClearBTN       = "해지푸쉬"
+    let [<Literal>] TextXlsEmergencyBTN   = "비상푸쉬"
+    let [<Literal>] TextXlsTestBTN        = "시운전푸쉬"
+    let [<Literal>] TextXlsHomeBTN        = "복귀푸쉬"
 
-    let [<Literal>] TextXlsEmergencyLamp   = "비상램프"
-    let [<Literal>] TextXlsRunModeLamp     = "운전램프"
-    let [<Literal>] TextXlsDryRunModeLamp  = "시운전램프"
-    let [<Literal>] TextXlsManualModeLamp  = "수동램프"
-    let [<Literal>] TextXlsStopModeLamp    = "정지램프"
+    let [<Literal>] TextXlsAutoModeLamp   = "자동램프"
+    let [<Literal>] TextXlsManualModeLamp = "수동램프"
+    let [<Literal>] TextXlsDriveModeLamp  = "운전램프"
+    let [<Literal>] TextXlsStopModeLamp   = "정지램프"
+    let [<Literal>] TextXlsReadyModeLamp  = "대기램프"
 
 [<AutoOpen>]
 module DsTextProperty =

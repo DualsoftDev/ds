@@ -35,11 +35,11 @@ type Flow with
     member f.O4_RunOperationMode (): CommentedStatement =
         let sys = f.System
         let sets = 
-                sys._auto.Expr <&&> !!sys._manual.Expr <&&> f.RunExpr
+                sys._auto.Expr <&&> !!sys._manual.Expr <&&> f.DriveExpr
                 //시스템 A/M 셀렉트 없으면 Flow HW A or M 모드를 따라간다.
-                <||> sys.ModeNoExpr <&&> f.ModeAutoHwExpr <&&> f.RunExpr
+                <||> sys.ModeNoExpr <&&> f.ModeAutoHwExpr <&&> f.DriveExpr
                 //Flow HW A/M 셀렉트 없으면 HMI SW 모드를 따라간다.
-                <||> sys.ModeNoExpr <&&> f.ModeNoHWExpr <&&> f.ModeAutoSwHMIExpr <&&> f.RunExpr
+                <||> sys.ModeNoExpr <&&> f.ModeNoHWExpr <&&> f.ModeAutoSwHMIExpr <&&> f.DriveExpr
 
         let rsts = f.eop.Expr <||> f.rop.Expr <||> f.dop.Expr <||> f.sop.Expr
         (sets, rsts) ==| (f.mop, "O4")
@@ -47,11 +47,11 @@ type Flow with
     member f.O5_DryRunOperationMode(): CommentedStatement =
         let sys = f.System
         let sets = 
-                sys._auto.Expr <&&> !!sys._manual.Expr <&&> f.DryRunExpr
+                sys._auto.Expr <&&> !!sys._manual.Expr <&&> f.TestExpr
                 //시스템 A/M 셀렉트 없으면 Flow HW A or M 모드를 따라간다.
-                <||> sys.ModeNoExpr <&&> f.ModeAutoHwExpr <&&> f.DryRunExpr
+                <||> sys.ModeNoExpr <&&> f.ModeAutoHwExpr <&&> f.TestExpr
                 //Flow HW A/M 셀렉트 없으면 HMI SW 모드를 따라간다.
-                <||> sys.ModeNoExpr <&&> f.ModeNoHWExpr <&&> f.ModeAutoSwHMIExpr <&&> f.DryRunExpr
+                <||> sys.ModeNoExpr <&&> f.ModeNoHWExpr <&&> f.ModeAutoSwHMIExpr <&&> f.TestExpr
 
         let rsts = f.eop.Expr <||> f.rop.Expr <||> f.dop.Expr <||> f.sop.Expr
         (sets, rsts) ==| (f.mop, "O5")

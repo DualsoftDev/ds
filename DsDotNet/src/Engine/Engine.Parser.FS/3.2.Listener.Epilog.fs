@@ -20,14 +20,14 @@ module EtcListenerModule =
             let system = x.TheSystem
             let targetBtnType =
                 match first with
-                | :? AutoButtonBlockContext      -> DuAutoBTN
-                | :? ManualButtonBlockContext    -> DuManualBTN
-                | :? EmergencyButtonBlockContext -> DuEmergencyBTN
-                | :? StopButtonBlockContext      -> DuStopBTN
-                | :? RunButtonBlockContext       -> DuRunBTN
-                | :? DryrunButtonBlockContext    -> DuDryRunBTN
-                | :? ClearButtonBlockContext     -> DuClearBTN
-                | :? HomeButtonBlockContext      -> DuHomeBTN
+                | :? AutoBlockContext      -> DuAutoBTN
+                | :? ManualBlockContext    -> DuManualBTN
+                | :? DriveBlockContext     -> DuDriveBTN
+                | :? StopBlockContext      -> DuStopBTN
+                | :? ClearBlockContext     -> DuClearBTN
+                | :? EmergencyBlockContext -> DuEmergencyBTN
+                | :? TestBlockContext      -> DuTestBTN
+                | :? HomeBlockContext      -> DuHomeBTN
                 | _ -> failwith "button type error"
             let category = first.GetChild(1).GetText();       // [| '[', category, ']', buttonBlock |] 에서 category 만 추려냄 (e.g 'emg')
             let key = (system, category)
@@ -77,11 +77,11 @@ module EtcListenerModule =
             let system = x.TheSystem
             let targetLmpType =
                 match first with
-                | :? RunLampBlockContext    -> DuRunModeLamp
-                | :? DryrunLampBlockContext -> DuDryRunModeLamp
-                | :? ManualLampBlockContext -> DuManualModeLamp
-                | :? StopLampBlockContext   -> DuStopModeLamp
-                | :? EmgLampBlockContext    -> DuEmergencyLamp
+                | :? AutoBlockContext   -> DuAutoModeLamp
+                | :? ManualBlockContext -> DuManualModeLamp
+                | :? DriveBlockContext  -> DuDriveModeLamp
+                | :? StopBlockContext   -> DuStopModeLamp
+                | :? ReadyBlockContext  -> DuReadyModeLamp
                 | _ -> failwith "lamp type error"
 
             let lampDefs = first.Descendants<LampDefContext>().ToArray()

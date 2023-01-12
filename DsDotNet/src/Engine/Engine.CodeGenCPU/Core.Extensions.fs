@@ -28,11 +28,12 @@ module rec ConvertCoreExt =
         member s._off    = DsTag<bool>("_off", false)
         member s._auto   = DsTag<bool>("_auto", false)
         member s._manual = DsTag<bool>("_manual", false)
-        member s._emg    = DsTag<bool>("_emg", false)
-        member s._run    = DsTag<bool>("_run", false)
+        member s._drive  = DsTag<bool>("_drive", false)
         member s._stop   = DsTag<bool>("_stop", false)
         member s._clear  = DsTag<bool>("_clear", false)
-        member s._dryrun = DsTag<bool>("dryrun", false)
+        member s._emg    = DsTag<bool>("_emg", false)
+        member s._test    = DsTag<bool>("test", false)
+        member s._home    = DsTag<bool>("home", false)
         member s._tout   = DsTag<uint16> ("_tout", 10000us)
         member s._yy     = DsTag<int> ("_yy", 0)
         member s._mm     = DsTag<int> ("_mm", 0)
@@ -99,36 +100,37 @@ module rec ConvertCoreExt =
         member f.dop    = DsTag<bool> ($"{f.Name}(DO)", false)   // Dry Run Operation Mode (시운전) 
         member f.auto   = DsTag<bool>("auto", false)
         member f.manual = DsTag<bool>("manual", false)
-        member f.emg    = DsTag<bool>("emg", false)
-        member f.run    = DsTag<bool>("run", false)
+        member f.drive  = DsTag<bool>("drive", false)
         member f.stop   = DsTag<bool>("stop", false)
         member f.clear  = DsTag<bool>("clear", false)
-        member f.dryrun = DsTag<bool>("dryrun", false)  
+        member f.emg    = DsTag<bool>("emg", false)
+        member f.test   = DsTag<bool>("test", false)  
+        member f.home   = DsTag<bool>("home", false)  
 
         //버튼 IO PLC TAG
         member f.autoIns    = getButtonInputs  (f, f.System.AutoButtons) 
         member f.autoOuts   = getButtonOutputs (f, f.System.AutoButtons) 
         member f.manualIns  = getButtonInputs (f, f.System.ManualButtons) 
         member f.manualOuts = getButtonOutputs (f, f.System.ManualButtons) 
-        member f.emgIns     = getButtonInputs (f, f.System.EmergencyButtons) 
-        member f.emgOuts    = getButtonOutputs (f, f.System.EmergencyButtons) 
+        member f.driveIns   = getButtonInputs (f, f.System.DriveButtons) 
+        member f.driveOuts  = getButtonOutputs (f, f.System.DriveButtons) 
         member f.stopIns    = getButtonInputs (f, f.System.StopButtons) 
         member f.stopOuts   = getButtonOutputs (f, f.System.StopButtons) 
-        member f.runIns     = getButtonInputs (f, f.System.RunButtons) 
-        member f.runOuts    = getButtonOutputs (f, f.System.RunButtons) 
-        member f.dryIns     = getButtonInputs (f, f.System.DryRunButtons) 
-        member f.dryOuts    = getButtonOutputs (f, f.System.DryRunButtons) 
         member f.clearIns   = getButtonInputs (f, f.System.ClearButtons) 
         member f.clearOuts  = getButtonOutputs (f, f.System.ClearButtons) 
+        member f.emgIns     = getButtonInputs (f, f.System.EmergencyButtons) 
+        member f.emgOuts    = getButtonOutputs (f, f.System.EmergencyButtons) 
+        member f.testIns    = getButtonInputs (f, f.System.TestButtons) 
+        member f.testOuts   = getButtonOutputs (f, f.System.TestButtons) 
         member f.homeIns    = getButtonInputs (f, f.System.HomeButtons) 
         member f.homeOuts   = getButtonOutputs (f, f.System.HomeButtons) 
 
         //램프 IO PLC TAG
-        member f.runModelampOuts    = getLampOutputs (f, f.System.RunModeLamps) 
-        member f.dryrunModelampOuts = getLampOutputs (f, f.System.DryRunModeLamps) 
+        member f.autoModelampOuts   = getLampOutputs (f, f.System.AutoModeLamps) 
         member f.manualModelampOuts = getLampOutputs (f, f.System.ManualModeLamps) 
+        member f.driveModelampOuts  = getLampOutputs (f, f.System.DriveModeLamps) 
         member f.stopModelampOuts   = getLampOutputs (f, f.System.StopModeLamps) 
-        member f.emergencylampOuts  = getLampOutputs (f, f.System.EmergencyModeLamps) 
+        member f.readylampOuts      = getLampOutputs (f, f.System.ReadyModeLamps) 
         
         //[auto, manual] HW Input 두개다 선택이 안됨
         member f.ModeNoHWExpr = 
@@ -146,15 +148,15 @@ module rec ConvertCoreExt =
          member f.ModeAutoSwHMIExpr   =  f.auto.Expr <&&> !!f.manual.Expr
          member f.ModeManualSwHMIExpr =  !!f.auto.Expr <&&> f.manual.Expr
                 
-        member f.RunExpr = f.System._run.Expr 
-                           <||> f.run.Expr 
-                           <||> if f.runIns.any() 
-                                then f.runIns.ToOr() else f.System._off.Expr
+        member f.DriveExpr = f.System._drive.Expr 
+                           <||> f.drive.Expr 
+                           <||> if f.driveIns.any() 
+                                then f.driveIns.ToOr() else f.System._off.Expr
 
-        member f.DryRunExpr = f.System._dryrun.Expr 
-                           <||> f.dryrun.Expr 
-                           <||> if f.dryIns.any() 
-                                then f.dryIns.ToOr() else f.System._off.Expr
+        member f.TestExpr = f.System._test.Expr 
+                           <||> f.test.Expr 
+                           <||> if f.testIns.any() 
+                                then f.testIns.ToOr() else f.System._off.Expr
 
         member f.StopExpr = f.System._stop.Expr 
                            <||> f.stop.Expr 

@@ -135,37 +135,30 @@ interfaceBlock
     //callDefs: (callDef SEIMCOLON)+ ;
     interfaceResetDef: identifier1 (causalOperatorReset identifier1)+ (';')?;
 
-
-
-buttonsBlocks:emergencyButtonBlock|autoButtonBlock|runButtonBlock|clearButtonBlock|manualButtonBlock|stopButtonBlock|dryrunButtonBlock|homeButtonBlock;
-    emergencyButtonBlock :'[' ('emg_in'|'emg') ']'       EQ buttonBlock;
-    autoButtonBlock      :'[' ('auto_in'|'auto') ']'     EQ buttonBlock;
-    clearButtonBlock     :'[' ('clear_in'|'clear') ']'   EQ buttonBlock;
-    manualButtonBlock    :'[' ('manual_in'|'manual') ']' EQ buttonBlock;
-    stopButtonBlock      :'[' ('stop_in'|'stop') ']'     EQ buttonBlock;
-    runButtonBlock       :'[' ('run_in'|'run') ']'       EQ buttonBlock;
-    dryrunButtonBlock    :'[' ('dryrun_in'|'dryrun') ']' EQ buttonBlock;
-    homeButtonBlock      :'[' ('home_in'|'home') ']'     EQ buttonBlock;
+categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|stopBlock|emergencyBlock|testBlock|homeBlock|readyBlock;
+    autoBlock      :'[' ('auto_in'|'auto') ']'     EQ categoryBlock;
+    manualBlock    :'[' ('manual_in'|'manual') ']' EQ categoryBlock;
+    clearBlock     :'[' ('clear_in'|'clear') ']'   EQ categoryBlock;
+    emergencyBlock :'[' ('emg_in'|'emg') ']'       EQ categoryBlock;
+    stopBlock      :'[' ('stop_in'|'stop') ']'     EQ categoryBlock;
+    driveBlock     :'[' ('drive_in'|'drive') ']'   EQ categoryBlock;
+    testBlock      :'[' ('test_in'|'test') ']'     EQ categoryBlock;
+    homeBlock      :'[' ('home_in'|'home') ']'     EQ categoryBlock;
+    readyBlock     :'[' ('ready') ']'              EQ categoryBlock;
     
-    buttonBlock: LBRACE (() | ((SEIMCOLON)* buttonDef)* (SEIMCOLON)*) RBRACE;
+    categoryBlock: LBRACE (() | ((SEIMCOLON)* (buttonDef|lampDef))* (SEIMCOLON)*) RBRACE;
+    
     buttonDef: btnNameAddr EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
     btnNameAddr: buttonName addressInOut;
     buttonName: identifier1;
     flowName : identifier1;
 
-
-lampBlocks:runLampBlock|dryrunLampBlock|manualLampBlock|stopLampBlock|emgLampBlock;
-    runLampBlock    : '[' 'runlamp' ']'    EQ lampBlock;
-    dryrunLampBlock : '[' 'dryrunlamp' ']' EQ lampBlock;
-    manualLampBlock : '[' 'manuallamp' ']' EQ lampBlock;
-    stopLampBlock   : '[' 'stoplamp' ']'   EQ lampBlock;
-    emgLampBlock    : '[' 'emglamp' ']'    EQ lampBlock;
-    
-    lampBlock: LBRACE (() | ((SEIMCOLON)* lampDef)* (SEIMCOLON)*) RBRACE;
     lampDef: (lampName|lampName addrDef) EQ LBRACE (() | flowName) RBRACE;
     addrDef: LPARENTHESIS addressItem? RPARENTHESIS;
     lampName: identifier1;
-    
+
+buttonsBlocks: '[' 'buttons' ']' '=' LBRACE (categoryBlocks)* RBRACE;
+lampBlocks: '[' 'lamps' ']' '=' LBRACE (categoryBlocks)* RBRACE;
 
 // B.F1 > Set1F <| T.A21;
 causal: causalPhrase SEIMCOLON;

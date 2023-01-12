@@ -1,6 +1,7 @@
 namespace T
 
 
+open Xunit
 open NUnit.Framework
 
 open Engine.Parser.FS
@@ -17,6 +18,7 @@ module XgiEngineCoreExtensionModule =
             x.ToText(withParenthesys) = y.ToText(withParenthesys)
 
 
+[<Collection("SerialAutoVariable")>]
 type XgiExpEqualityTest() =
     inherit XgiTestClass()
 

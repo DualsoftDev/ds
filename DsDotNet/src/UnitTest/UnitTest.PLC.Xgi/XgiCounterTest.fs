@@ -1,6 +1,7 @@
 namespace T
 
 
+open Xunit
 open NUnit.Framework
 
 open Engine.Parser.FS
@@ -181,6 +182,7 @@ type XgiCounterTest() =
         let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
+[<Collection("SerialAutoVariable")>]
 type XgiFunctionTest() =
     inherit XgiTestClass()
 

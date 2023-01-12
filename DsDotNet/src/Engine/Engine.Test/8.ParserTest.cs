@@ -122,20 +122,29 @@ namespace Engine
     [flow] F5 = {
         A > B;		// A(Real)> B(Real);
     }
-    [runlamp] = {
-        RunMode(%Q1) = { F3  }
-    }
-    [dryrunlamp] = {
-        DryRunMode = { F5 }
-    }
-    [manuallamp] = {
-        ManualMode(%Q1) = { F2  }
-    }
-    [stoplamp] = {
-        StopMode(%Q1) = { F3  }
-    }
-    [emglamp] = {
-        EmgMode(%Q1) = { F3  }
+    [lamps] = 
+    {
+        [auto] = {
+            AutoMode(%Q1) = { F1 }
+        }
+        [manual] = {
+            ManualMode(%Q1) = { F2 }
+        }
+        [drive] = {
+            RunMode(%Q1) = { F3  }
+        }
+        [stop] = {
+            StopMode(%Q1) = { F3 }
+        }
+        [emg] = {
+            EmgMode(%Q1) = { F3 }
+        }
+        [test] = {
+            TestMode = { F5 }
+        }
+        [ready] = {
+            ReadyMode = { F4 }
+        }
     }
 }
 ";

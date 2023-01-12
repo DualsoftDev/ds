@@ -21,6 +21,7 @@ module EtcListenerModule =
                     let first = ctxChild.TryFindFirstChild<ParserRuleContext>().Value
                     let system = x.TheSystem
                     let targetBtnType =
+                        let fstType = first.GetType()
                         match first with
                         | :? AutoBlockContext      -> DuAutoBTN
                         | :? ManualBlockContext    -> DuManualBTN
@@ -30,7 +31,7 @@ module EtcListenerModule =
                         | :? EmergencyBlockContext -> DuEmergencyBTN
                         | :? TestBlockContext      -> DuTestBTN
                         | :? HomeBlockContext      -> DuHomeBTN
-                        | _ -> failwith $"button type error {first.GetType()}"
+                        | _ -> failwith $"button type error {fstType}"
                     let category = first.GetChild(1).GetText();       // [| '[', category, ']', buttonBlock |] 에서 category 만 추려냄 (e.g 'emg')
                     let key = (system, category)
                     if x.ButtonCategories.Contains(key) then
@@ -75,39 +76,42 @@ module EtcListenerModule =
                     |> ignore
 
         member x.ProcessLampBlock(ctx:LampBlockContext) =
-            let first = ctx.TryFindFirstChild<ParserRuleContext>().Value
-            let system = x.TheSystem
-            let targetLmpType =
-                match first with
-                | :? AutoBlockContext      -> DuAutoModeLamp
-                | :? ManualBlockContext    -> DuManualModeLamp
-                | :? DriveBlockContext     -> DuDriveModeLamp
-                | :? StopBlockContext      -> DuStopModeLamp
-                | :? EmergencyBlockContext -> DuEmergencyModeLamp
-                | :? TestBlockContext      -> DuTestModeLamp
-                | :? ReadyBlockContext     -> DuReadyModeLamp
-                | _ -> failwith "lamp type error"
+            for ctxChild in ctx.children do
+                if ctxChild :? ParserRuleContext then
+                    let first = ctxChild.TryFindFirstChild<ParserRuleContext>().Value
+                    let system = x.TheSystem
+                    let targetLmpType =
+                        let fstType = first.GetType()
+                        match first with
+                        | :? AutoBlockContext      -> DuAutoModeLamp
+                        | :? ManualBlockContext    -> DuManualModeLamp
+                        | :? DriveBlockContext     -> DuDriveModeLamp
+                        | :? StopBlockContext      -> DuStopModeLamp
+                        | :? EmergencyBlockContext -> DuEmergencyModeLamp
+                        | :? TestBlockContext      -> DuTestModeLamp
+                        | :? ReadyBlockContext     -> DuReadyModeLamp
+                        | _ -> failwith $"lamp type error {fstType}"
 
-            let lampDefs = first.Descendants<LampDefContext>().ToArray()
-            let flowLampInfo = [
-                for ld in lampDefs do
-                option {
-                    let! lampNameCtx = ld.TryFindFirstChild<LampNameContext>()
-                    let! flowNameCtx = ld.TryFindFirstChild<FlowNameContext>()
-                    let  addrCtx  = ld.TryFindFirstChild<AddressItemContext>()
-                    let! flow   = flowNameCtx.GetText() |> system.TryFindFlow
-                    let lmpName = lampNameCtx.GetText()
-                    let address = 
-                        match addrCtx with
-                        | Some addr -> addr.GetText()
-                        | None -> null
-                    return LampDef(lmpName, targetLmpType, address, flow)
-                }
-            ]
-            flowLampInfo
-            |> List.choose id
-            |> List.map(system.Lamps.Add)
-            |> ignore
+                    let lampDefs = first.Descendants<LampDefContext>().ToArray()
+                    let flowLampInfo = [
+                        for ld in lampDefs do
+                        option {
+                            let! lampNameCtx = ld.TryFindFirstChild<LampNameContext>()
+                            let! flowNameCtx = ld.TryFindFirstChild<FlowNameContext>()
+                            let  addrCtx  = ld.TryFindFirstChild<AddressItemContext>()
+                            let! flow   = flowNameCtx.GetText() |> system.TryFindFlow
+                            let lmpName = lampNameCtx.GetText()
+                            let address = 
+                                match addrCtx with
+                                | Some addr -> addr.GetText()
+                                | None -> null
+                            return LampDef(lmpName, targetLmpType, address, flow)
+                        }
+                    ]
+                    flowLampInfo
+                    |> List.choose id
+                    |> List.map(system.Lamps.Add)
+                    |> ignore
 
         member x.ProcessSafetyBlock(ctx:SafetyBlockContext) =
             let safetyDefs = ctx.Descendants<SafetyDefContext>()

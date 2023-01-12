@@ -200,20 +200,35 @@ module internal ToDsTextModule =
                                 yield $"{tab3}{btn.Name}({inAddr}, {outAddr}) = {lb} {flowTexts} {rb}"
                             yield $"{tab2}{rb}"
                     ] |> combineLines
-                yield buttonsToDs("auto",   system.AutoButtons      )
-                yield buttonsToDs("manual", system.ManualButtons    )
-                yield buttonsToDs("drive",  system.DriveButtons     )
-                yield buttonsToDs("stop",   system.StopButtons      )
-                yield buttonsToDs("clear",  system.ClearButtons     )
-                yield buttonsToDs("emg",    system.EmergencyButtons )
-                yield buttonsToDs("test",   system.TestButtons      )
-                yield buttonsToDs("home",   system.HomeButtons      )
+                yield buttonsToDs("auto",   system.AutoButtons     )
+                yield buttonsToDs("manual", system.ManualButtons   )
+                yield buttonsToDs("drive",  system.DriveButtons    )
+                yield buttonsToDs("stop",   system.StopButtons     )
+                yield buttonsToDs("clear",  system.ClearButtons    )
+                yield buttonsToDs("emg",    system.EmergencyButtons)
+                yield buttonsToDs("test",   system.TestButtons     )
+                yield buttonsToDs("home",   system.HomeButtons     )
                 yield $"{tab}{rb}"
-
+                
+            let lmps = 
+                let alllmps = [
+                    system.AutoModeLamps;
+                    system.ManualModeLamps;
+                    system.DriveModeLamps;
+                    system.StopModeLamps;
+                    system.EmergencyModeLamps;
+                    system.TestModeLamps;
+                    system.ReadyModeLamps;
+                ]
+                alllmps
+                |> List.map(fun b -> b |> List.ofSeq)
+                |> List.collect id
+            if lmps.Any() then
+                yield $"{tab}[lamps] = {lb}"
             let lampsToDs(category:string, lamps:LampDef seq) =
                 [
                     if lamps.length() > 0 then
-                        yield $"{tab}[{category}] = {lb}"
+                        yield $"{tab2}[{category}] = {lb}"
                         for lamp in lamps do
                             let addr = 
                                 if lamp.OutAddress <> null then
@@ -221,14 +236,17 @@ module internal ToDsTextModule =
                                 else
                                     ""
                                 
-                            yield $"{tab2}{lamp.Name}{addr} = {lb} {lamp.SettingFlow.Name} {rb}"
-                        yield $"{tab}{rb}"
+                            yield $"{tab3}{lamp.Name}{addr} = {lb} {lamp.SettingFlow.Name} {rb}"
+                        yield $"{tab2}{rb}"
                 ] |> combineLines
-            yield lampsToDs("auto",   system.AutoModeLamps       )
-            yield lampsToDs("manual", system.ManualModeLamps    )
+            yield lampsToDs("auto",   system.AutoModeLamps     )
+            yield lampsToDs("manual", system.ManualModeLamps   )
             yield lampsToDs("drive",  system.DriveModeLamps    )
-            yield lampsToDs("stop",   system.StopModeLamps      )
-            yield lampsToDs("ready",  system.ReadyModeLamps )
+            yield lampsToDs("stop",   system.StopModeLamps     )
+            yield lampsToDs("emg",    system.EmergencyModeLamps)
+            yield lampsToDs("test",   system.TestModeLamps     )
+            yield lampsToDs("ready",  system.ReadyModeLamps    )
+            yield $"{tab}{rb}"
 
             (* prop
                     safety

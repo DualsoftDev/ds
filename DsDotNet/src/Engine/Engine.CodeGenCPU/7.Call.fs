@@ -4,21 +4,30 @@ module Engine.CodeGenCPU.ConvertCall
 open System.Linq
 open Engine.CodeGenCPU
 open Engine.Core
+open Engine.Common.FS
 
 type VertexManager with
 
     member v.C1_CallPlanSend(): CommentedStatement list = 
         let v = v :?> VertexMCoin
         let call = v.Vertex :?> Call
-        let sets = ([v.ST] @ v.GetSharedCall().Select(getVM).STs()).ToOr()
+        let rop, mop = v.Flow.rop.Expr, v.Flow.mop.Expr
+        let startTags = ([v.ST] @ v.GetSharedCall().Select(getVM).STs()).ToOr()
+        let forceStarts = ([v.SF] @ v.GetSharedCall().Select(getVM).SFs()).ToOr()
         [
             for jd in call.CallTargetJob.JobDefs do
+                let startPointExpr = getStartPointExpr(call, jd)
+                let sets = (rop <&&> startTags) <||>
+                           (mop <&&> forceStarts)        <||>
+                           (rop <||> mop <&&> startPointExpr) 
+
                 let rsts = jd.MutualResets(v.System)
                              .Select(fun f -> f.ApiItem.PS)
                              .EmptyOffElseToOr(v.System)
                               
                 yield (sets, rsts) --| (jd.ApiItem.PS, "C1" )
         ]
+
 
     member v.C2_CallActionOut(): CommentedStatement list = 
         let v = v :?> VertexMCoin

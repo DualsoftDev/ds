@@ -80,6 +80,7 @@ module ImportCheck =
 
         let CheckSameCopy(doc:pptDoc) =
             let dicSame = Dictionary<string, pptNode>()
+
             doc.Nodes
             |> Seq.filter(fun node -> node.NodeType = COPY_VALUE || node.NodeType = COPY_REF)
             |> Seq.iter(fun node ->

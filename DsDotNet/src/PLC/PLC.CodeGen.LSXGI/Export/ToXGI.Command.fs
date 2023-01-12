@@ -112,16 +112,15 @@ module internal rec Command =
         let ts = timerStatement
         let typ = ts.Timer.Type
         let time:int = int ts.Timer.PRE.Value
-        let inputParameters =
-            [
-                "PT", (literal2expr $"T#{time}MS") :> IExpression
-                "IN", obe2e ts.RungInCondition
-                match typ with
-                | RTO ->
-                    "RST", obe2e ts.ResetCondition
-                | _ ->
-                    ()
-            ]
+        let inputParameters = [
+            "PT", (literal2expr $"T#{time}MS") :> IExpression
+            "IN", obe2e ts.RungInCondition
+            match typ with
+            | RTO ->
+                "RST", obe2e ts.ResetCondition
+            | _ ->
+                ()
+        ]
         let outputParameters = []
 
         let blockXml =
@@ -137,25 +136,24 @@ module internal rec Command =
         let pv = int16 cs.Counter.PRE.Value
         let typ = cs.Counter.Type
 
-        let inputParameters =
-            [
-                "PV", (literal2expr pv) :> IExpression
-                match typ with
-                | CTU ->    // cu, r, pv,       q, cv
-                    "CU", obe2e cs.UpCondition
-                    "R" , obe2e cs.ResetCondition
-                | CTD ->    // cd, ld, pv,       q, cv
-                    "CD", obe2e cs.DownCondition
-                    "LD", obe2e cs.LoadCondition
-                | CTUD ->   // cu, cd, r, ld, pv,       qu, qd, cv
-                    "CU", obe2e cs.UpCondition
-                    "CD", obe2e cs.DownCondition
-                    "R",  obe2e cs.ResetCondition
-                    "LD", obe2e cs.LoadCondition
-                | CTR -> // cd, pv, rst,       q, cv
-                    "CD", obe2e cs.DownCondition
-                    "RST", obe2e cs.ResetCondition
-            ]
+        let inputParameters = [
+            "PV", (literal2expr pv) :> IExpression
+            match typ with
+            | CTU ->    // cu, r, pv,       q, cv
+                "CU", obe2e cs.UpCondition
+                "R" , obe2e cs.ResetCondition
+            | CTD ->    // cd, ld, pv,       q, cv
+                "CD", obe2e cs.DownCondition
+                "LD", obe2e cs.LoadCondition
+            | CTUD ->   // cu, cd, r, ld, pv,       qu, qd, cv
+                "CU", obe2e cs.UpCondition
+                "CD", obe2e cs.DownCondition
+                "R",  obe2e cs.ResetCondition
+                "LD", obe2e cs.LoadCondition
+            | CTR -> // cd, pv, rst,       q, cv
+                "CD", obe2e cs.DownCondition
+                "RST", obe2e cs.ResetCondition
+        ]
         let outputParameters = []
 
         let blockXml =
@@ -513,10 +511,6 @@ module internal rec Command =
         // negation 없애기
         | FlatNary(Neg, inner::[]) ->
             FlatNary(OpUnit, [inner.Negate()]) |> drawLadderBlock (x, y)
-
-        //| FlatZero ->
-        //    let str = hlineEmpty c
-        //    { baseRIWNP with RungInfos=[{ Coordinate = c; Xml = str; SpanX=0; SpanY=0;}]; SpanX=0; SpanY=0; }
 
         | _ ->
             failwithlog "Unknown FlatExpression case"

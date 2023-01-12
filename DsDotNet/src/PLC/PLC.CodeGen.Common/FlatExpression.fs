@@ -28,7 +28,7 @@ module FlatExpressionModule =
                 | "!=" -> "="
                 | _ -> failwith "ERROR"
                 |> OpCompare
-            | OpArithematic _ -> failwith "ERROR"
+            | OpArithematic _ -> failwith "ERROR: Negation not supported for arithematic operator."
 
     type TrueValue() =
         interface IExpressionizableTerminal with
@@ -44,7 +44,6 @@ module FlatExpressionModule =
 
         /// N-ary Expressions : And / Or 및 terms
         | FlatNary    of Op * FlatExpression list
-        | FlatZero
     with
         interface IFlatExpression
         member x.ToText() =
@@ -56,7 +55,6 @@ module FlatExpressionModule =
                     |> Seq.map (fun t -> t.ToText())
                     |> String.concat ", "
                 sprintf "%s(%s)" (op.ToText()) termsStr
-            | FlatZero -> ""
         member x.Negate() =
             match x with
             | FlatTerminal(value, pulse, neg) -> FlatTerminal(value, pulse, not neg)
@@ -70,7 +68,6 @@ module FlatExpressionModule =
                 let opNeg = op.Negate()
                 let termsNeg = terms |> map (fun t -> t.Negate())
                 FlatNary(opNeg, termsNeg)
-            | FlatZero -> FlatZero
 
     let rec flattenExpressionT (expression:IExpression<'T>) : IFlatExpression =
         match expression with
@@ -124,10 +121,6 @@ module FlatExpressionModule =
         | :? IExpression<char  > as exp -> flattenExpressionT exp
 
         | _ -> failwith "NOT yet"
-
-
-
-
 
 
     /// expression 이 차지하는 가로, 세로 span 의 width 와 height 를 반환한다.

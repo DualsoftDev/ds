@@ -192,7 +192,8 @@ module XgiExpressionConvertorModule =
         (storage:XgiStorage)
         (expandFunctionStatements:ResizeArray<Statement>)
         (exp:IExpression)
-      : IExpression =
+        : IExpression
+      =
         let xgiLocalVars = ResizeArray<IXgiLocalVar>()
         let rec helper (exp:IExpression) = [
             match exp.FunctionName with

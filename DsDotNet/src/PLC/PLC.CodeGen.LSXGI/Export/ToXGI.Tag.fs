@@ -31,11 +31,11 @@ module XGITag = //IEC61131Tag =
 
     /// memory type(I/O/M) 에 따른 연속적인  device 를 생성하는 함수를 반환한다.
     let AddressGenerator
-            (memType:string)
-            (nBaseBit:int, nMaxBit:int)
-            (nBaseByte:int, nMaxByte:int)
-            (nBaseWord:int, nMaxWord:int) (alreadyAllocatedAddresses:Set<string>)
-        =
+        (memType:string)
+        (nBaseBit:int, nMaxBit:int)
+        (nBaseByte:int, nMaxByte:int)
+        (nBaseWord:int, nMaxWord:int) (alreadyAllocatedAddresses:Set<string>)
+      =
         let mutable startBit = nBaseBit
         let mutable startByte = nBaseByte
         let mutable startWord = nBaseWord

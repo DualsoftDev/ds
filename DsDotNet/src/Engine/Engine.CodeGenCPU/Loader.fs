@@ -112,7 +112,7 @@ module CpuLoader =
 
             //test debug
             system._auto.Value <- true
-            system._run.Value <- true
+            system._drive.Value <- true
             statements.Iter(fun f->f.Statement.Do())
             //test debug
 

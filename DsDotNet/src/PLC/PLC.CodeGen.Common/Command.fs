@@ -71,4 +71,5 @@ module rec Command =
                 //| CopyMode  (endTag, _) -> endTag
                 | Arithematic (_, endTag, _) -> endTag
 
-
+    type PLCAction =
+        | Move of condition:IExpression<bool> * source:IExpression * target:IStorage

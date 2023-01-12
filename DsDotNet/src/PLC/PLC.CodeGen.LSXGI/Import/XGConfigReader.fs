@@ -55,47 +55,6 @@ module XGConfigReader  =
         nCommentIndex : int
     }
 
-
-    /// Xml Symbol tag 가 가지는 속성
-    type SymbolInfo = {
-        Name:string
-        Comment:string
-        /// "M"
-        Device:string
-        /// "%MX1"
-        Address:string
-        DevicePos:int //XGK 일경우 DevicePos 정보 필요
-        Kind:int
-        /// "BOOL"
-        Type:string
-        State:int
-        AddressIEC : string //XGK 일경우 IEC 주소로 변환해서 가지고 있음
-    } with
-        /// Symbol 관련 XML tag attributes 생성
-        member private x.GetXmlArgs() =
-            [
-                $"Name=\"{x.Name}\""
-                $"Kind=\"{x.Kind}\""
-                $"Type=\"{x.Type}\""
-                $"Comment=\"{x.Comment}\""
-                $"Device=\"{x.Device}\""
-                $"Address=\"{x.Address}\""
-                $"State=\"{x.State}\""
-            ] |> String.concat " "
-
-        /// Symbol 관련 XML tag 생성
-        member x.ToText() = $"<Symbol {x.GetXmlArgs()}/>"
-                //Address="" Trigger="" InitValue="" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="0" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
-
-        member x.GenerateXml() =
-            [
-                yield $"\t<Symbol {x.GetXmlArgs()}>"
-                // 사용되지 않지만, 필요한 XML children element 생성
-                yield! ["Addresses"; "Retains"; "InitValues"; "Comments"]
-                    |> Seq.map (fun k -> sprintf "\t\t<Member%s/>" k)
-                yield "\t</Symbol>"
-            ] |> String.concat "\r\n"
-
     ///CPU ID에 해당하는 이름을 XG5000 설정 파일로 부터 가져온다
     ///원본 경로 C:\XG5000\l.kor\Symbol.mdb 에  PLC_TYPE_LIST table을 Xml으로 Export해서 사용
     let readConfigCPU () =

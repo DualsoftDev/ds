@@ -353,6 +353,11 @@ module Config =
 
                 type ElementType = int
 
+
+[<RequireQualifiedAccess>]
+module XgiConstants =
+    let [<Literal>] FunctionNameMove = "MOVE"
+
 module internal FB =
     open FBText
 

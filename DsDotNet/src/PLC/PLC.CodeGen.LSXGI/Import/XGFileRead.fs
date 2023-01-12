@@ -5,6 +5,7 @@ open System.Xml
 open System.Net
 open System.Collections.Generic
 open AddressConvert
+open Engine.Common.FS
 
 [<AutoOpen>]
 module FileRead =
@@ -85,15 +86,17 @@ module FileRead =
 
         globals.SelectNodes("//Symbols/Symbol")
         |> XmlExt.ToEnumerables
-        |> Seq.map (fun e -> e.Attributes.["Name"].InnerText
-                            , e.Attributes.["Kind"].InnerText |> int
-                            , e.Attributes.["Type"].InnerText
-                            , e.Attributes.["Address"].InnerText
-                            , e.Attributes.["Comment"].InnerText
-                            , e.Attributes.["Device"].InnerText
-                            )
-        |> Seq.map(fun (name, kind, plctype, address, comment, device) ->
-        {Name=name; Comment=comment; Device=device; Kind = kind; Type=plctype; State=0; Address=address; DevicePos=0; AddressIEC=address;})
+        |> Seq.map (fun e ->
+            e.Attributes.["Name"].InnerText
+            , e.Attributes.["Kind"].InnerText |> int
+            , e.Attributes.["Type"].InnerText
+            , e.Attributes.["InitValue"].InnerText
+            , e.Attributes.["Address"].InnerText
+            , e.Attributes.["Comment"].InnerText
+            , e.Attributes.["Device"].InnerText
+        ) |> Seq.map(fun (name, kind, plctype, initValue, address, comment, device) ->
+        { Name=name; Comment=comment; Device=device; Kind = kind; Type=plctype;
+          InitValue=initValue; State=0; Address=address; DevicePos=0; AddressIEC=address;})
 
 
     let getAddressXGK (devices, devicePos, devType, dicMaxDevice:IDictionary<string, int>)=
@@ -148,15 +151,17 @@ module FileRead =
 
         globals.SelectNodes("//Symbols/Symbol")
         |> XmlExt.ToEnumerables
-        |> Seq.map (fun e -> e.Attributes.["Name"].InnerText
-                            , e.Attributes.["Device"].InnerText
-                            , e.Attributes.["DevicePos"].InnerText |> int
-                            , e.Attributes.["Type"].InnerText
-                            , e.Attributes.["Comment"].InnerText
-                            )
-        |> Seq.map(fun (name, device, devicePos, devType, comment) ->
+        |> Seq.map (fun e ->
+            e.Attributes.["Name"].InnerText
+            , e.Attributes.["Device"].InnerText
+            , e.Attributes.["InitValue"].InnerText
+            , e.Attributes.["DevicePos"].InnerText |> int
+            , e.Attributes.["Type"].InnerText
+            , e.Attributes.["Comment"].InnerText
+        ) |> Seq.map(fun (name, device, initValue, devicePos, devType, comment) ->
         let address, addressIEC = getAddressXGK(device, devicePos, devType, dicMaxDevice)
-        {Name=name; Comment=comment; Device=device; Kind = 0; Type=devType; State=0; Address=address; DevicePos=devicePos; AddressIEC=addressIEC;}
+        {   Name=name; Comment=comment; Device=device; Kind = 0; InitValue=initValue;
+            Type=devType; State=0; Address=address; DevicePos=devicePos; AddressIEC=addressIEC; }
                             )
 
     let getDirectVarXGI  (xdoc:XmlDocument, cpuType) =

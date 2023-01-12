@@ -46,6 +46,11 @@ variables:
   parentHeader: '({{identifier1}})\s*=\s*'
   aliasHeader: '(\[\s*aliases\s*\])\s*=\s*'
 
+  #codeblock's dollor identifiers, etc
+  dollar: '(?<=\$){{identifiers}}'
+
+
+  
 # Before we dive into the meat, a bit of syntax to remember:
 #
 # (?<=): Positive lookbehind, non capturing unless it's within a group

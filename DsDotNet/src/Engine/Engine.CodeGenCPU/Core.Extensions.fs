@@ -19,11 +19,11 @@ module ConvertCoreExt =
         (PlcTag(plcName, address, false) :> ITagWithAddress)
 
     let getVM(v:Vertex) = v.VertexManager :?> VertexManager
-    let getVMReal(v:Vertex) = v.VertexManager :?> VertexReal
-    let getVMCoin(v:Vertex) = v.VertexManager :?> VertexCoin
+    let getVMReal(v:Vertex) = v.VertexManager :?> VertexMReal
+    let getVMCoin(v:Vertex) = v.VertexManager :?> VertexMCoin
         //match v with
-        //| :? Real ->  v.VertexManager :?> VertexReal
-        //| _       ->  v.VertexManager :?> VertexCoin
+        //| :? Real ->  v.VertexManager :?> VertexMReal
+        //| _       ->  v.VertexManager :?> VertexMCoin
 
     type ApiItem with
         member s.tx = DsTag<bool>("tx", false)
@@ -174,7 +174,7 @@ module ConvertCoreExt =
 
 
     type Call with
-        member c.V = c.VertexManager :?> VertexCoin
+        member c.V = c.VertexManager :?> VertexMCoin
         member c.UsingTon = c.CallTarget.Observes.Where(fun f->f.Name = TextOnDelayTimer).any()
         member c.UsingCtr = c.CallTarget.Observes.Where(fun f->f.Name = TextRingCounter).any()
 
@@ -197,17 +197,19 @@ module ConvertCoreExt =
                 .SelectMany(fun a -> c.System.JobDefs.Where(fun w-> w.ApiItem = a))
                 .Select(fun j -> j.OutTag).Cast<PlcTag<bool>>()
                 .Cast<PlcTag<bool>>()
+
+        
     
     type Real with
-        member r.V = r.VertexManager :?> VertexReal
+        member r.V = r.VertexManager :?> VertexMReal
         member r.CoinRelays = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.CR)
         member r.ErrorTXs = r.Graph.Vertices.Select(getVM).Select(fun f->f.E1)
         member r.ErrorRXs = r.Graph.Vertices.Select(getVM).Select(fun f->f.E2)
 
     type Alias with
-        member a.V = a.VertexManager :?> VertexCoin                    
+        member a.V = a.VertexManager :?> VertexMCoin                    
 
     type RealOtherFlow with
-        member a.V = a.VertexManager :?> VertexCoin                    
+        member a.V = a.VertexManager :?> VertexMCoin                    
 
   

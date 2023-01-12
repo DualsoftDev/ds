@@ -60,7 +60,7 @@ type VertexManager with
         (sets, rsts) --| (v.PA, "M2" )
 
     member v.M3_CallErrorTXMonitor(): CommentedStatement list = 
-        let v= v :?> VertexCoin
+        let v= v :?> VertexMCoin
         let sets = v.G.Expr <&&> v.TON.Expr
         let rsts = v.Flow.clear.Expr <||> v.System._clear.Expr
         [

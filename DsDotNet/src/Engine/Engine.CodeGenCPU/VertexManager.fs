@@ -33,9 +33,9 @@ module VertexManagerModule =
     [<AbstractClass>]
     type VertexManager (v:Vertex)  =
     
-        let endTagBit     = bit v  "ET" BitFlag.ET
-        let resetTagBit   = bit v  "RT" BitFlag.RT
-        let startTagBit   = bit v  "ST" BitFlag.ST
+        let endTagBit     = bit v "ET" BitFlag.ET
+        let resetTagBit   = bit v "RT" BitFlag.RT
+        let startTagBit   = bit v "ST" BitFlag.ST
 
         let originBit     = bit v "OG" BitFlag.Origin
         let pauseBit      = bit v "PA" BitFlag.Pause
@@ -47,11 +47,11 @@ module VertexManagerModule =
         let finishBit     = bit v "F"  BitFlag.F
         let homingBit     = bit v "H"  BitFlag.H
 
-        let endForceBit   = bit v  "EF" BitFlag.EF
-        let resetForceBit = bit v  "RF" BitFlag.RF
-        let startForceBit = bit v  "SF" BitFlag.SF
+        let endForceBit   = bit v "EF" BitFlag.EF
+        let resetForceBit = bit v "RF" BitFlag.RF
+        let startForceBit = bit v "SF" BitFlag.SF
 
-        let pulseBit      = bit v  "PUL" BitFlag.Pulse
+        let pulseBit      = bit v "PUL" BitFlag.Pulse
         let goingRelays = HashSet<DsBit>()
      
         interface IVertexManager with
@@ -108,14 +108,16 @@ module VertexManagerModule =
 
     
 
-    type VertexReal(v:Vertex) =
+    type VertexMReal(v:Vertex) =
         inherit VertexManager(v)
         let endPortBit    = bit v "EP" BitFlag.EP
         let resetPortBit  = bit v "RP" BitFlag.RP
         let startPortBit  = bit v "SP" BitFlag.SP
         
-        let relayRealBit  = bit v  "RR" BitFlag.RelayReal
-                
+        let relayRealBit  = bit v "RR" BitFlag.RelayReal
+        let realOriginAction  = bit v "RO" BitFlag.RealOriginAction
+        /// Real Origin Action 
+        member x.RO         = realOriginAction  
         ///Real Init Relay  
         member x.RR         = relayRealBit  
         //Port
@@ -127,7 +129,7 @@ module VertexManagerModule =
         member x.EP         = endPortBit    
 
        
-    type VertexCoin(v:Vertex) =
+    type VertexMCoin(v:Vertex) =
         inherit VertexManager(v)
         let relayCallBit  = bit v  "CR" BitFlag.RelayCall
 

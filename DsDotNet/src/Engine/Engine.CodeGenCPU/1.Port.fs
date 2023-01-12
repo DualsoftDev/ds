@@ -22,21 +22,21 @@ let private getPortSetBits(v:VertexManager) (rse:SREType) =
 type VertexManager with
     
     member v.P1_RealStartPort(): CommentedStatement =
-        let v = v :?> VertexReal
+        let v = v :?> VertexMReal
         let sets = getPortSetBits v SREType.Start 
         let rsts = v.System._off.Expr
          
         (sets, rsts) --| (v.SP, "P1")
 
     member v.P2_RealResetPort(): CommentedStatement =
-        let v = v :?> VertexReal
+        let v = v :?> VertexMReal
         let sets = getPortSetBits v SREType.Reset 
         let rsts = v.System._off.Expr
          
         (sets, rsts) --| (v.RP, "P2")
 
     member v.P3_RealEndPort(): CommentedStatement =
-        let v = v :?> VertexReal
+        let v = v :?> VertexMReal
         let sets = getPortSetBits v SREType.End 
         let rsts = v.System._off.Expr
          

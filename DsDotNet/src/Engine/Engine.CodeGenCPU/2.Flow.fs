@@ -34,7 +34,7 @@ type VertexManager with
 
     
     member v.F3_RootCoinRelay() : CommentedStatement =
-        let v = v :?> VertexCoin
+        let v = v :?> VertexMCoin
         let ands = 
             match v.Vertex  with
             | :? RealEx as rex -> rex.V.CR.Expr

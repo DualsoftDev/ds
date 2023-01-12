@@ -25,8 +25,8 @@ type Spec06_RealStatement() =
                 real.R2_RealJobComplete() |> doCheck
 
     [<Test>]
-    member __.``R3 Real Job Homing`` () = 
+    member __.``R3 Real Start Point`` () = 
             for real in t.Reals do
-                real.R3_RealJobHoming() |> doCheck
+                real.R3_RealStartPoint() |> doCheck
 
                 

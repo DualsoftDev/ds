@@ -9,12 +9,12 @@ open Engine.CodeGenCPU
 type VertexManager with
     member v.D1_DAGHeadStart(): CommentedStatement list =
         let real = v.Vertex :?> Real
-        let v = v :?> VertexReal
+        let v = v :?> VertexMReal
         let coins = real.Graph.Inits.Select(getVM)
         let sets = v.G.Expr<&&> v.RR.Expr
         [
             for coin in coins do
-                let coin = coin :?> VertexCoin
+                let coin = coin :?> VertexMCoin
                 yield (sets, coin.CR.Expr) --| (coin.ST, "D1" )
         ]
    
@@ -23,7 +23,7 @@ type VertexManager with
         let coins = real.Graph.Vertices.Except(real.Graph.Inits).Select(getVM)
         [
             for coin in coins do
-                let coin = coin :?> VertexCoin
+                let coin = coin :?> VertexMCoin
                 let srcs = real.Graph.FindEdgeSources(coin.Vertex, StartEdge).Select(getVMCoin).CRs()
                 let sets = ([v.G] @ srcs).ToAnd()
                 yield (sets, coin.CR.Expr) --| (coin.ST, "D2" )
@@ -36,7 +36,7 @@ type VertexManager with
         let children = real.Graph.Vertices.Select(getVM)
         [
             for child in children do
-                let child = child :?> VertexCoin
+                let child = child :?> VertexMCoin
                 let ands = 
                     match child.GetPureCall() with
                     |Some call ->  if call.UsingTon 

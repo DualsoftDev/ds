@@ -168,15 +168,15 @@ module rec ConvertCoreExt =
 
     type Call with
         member c.V = c.VertexManager :?> VertexMCoin
-        member c.UsingTon = c.CallTargetJob.Observes.Where(fun f->f.Name = TextOnDelayTimer).any()
-        member c.UsingCtr = c.CallTargetJob.Observes.Where(fun f->f.Name = TextRingCounter).any()
+        member c.UsingTon = c.CallTargetJob.Funcs.Where(fun f->f.Name = TextOnDelayTimer).any()
+        member c.UsingCtr = c.CallTargetJob.Funcs.Where(fun f->f.Name = TextRingCounter).any()
 
         member c.PresetTime =   if c.UsingTon 
-                                then c.CallTargetJob.Observes.First(fun f->f.Name = TextOnDelayTimer).GetDelayTime()
+                                then c.CallTargetJob.Funcs.First(fun f->f.Name = TextOnDelayTimer).GetDelayTime()
                                 else failwith $"{c.Name} not use timer"
 
         member c.PresetCounter = if c.UsingCtr 
-                                 then c.CallTargetJob.Observes.First(fun f->f.Name = TextRingCounter).GetRingCount()
+                                 then c.CallTargetJob.Funcs.First(fun f->f.Name = TextRingCounter).GetRingCount()
                                  else failwith $"{c.Name} not use counter"
                             
         member c.INs  = c.CallTargetJob.JobDefs.Select(fun j -> j.InTag).Cast<PlcTag<bool>>()

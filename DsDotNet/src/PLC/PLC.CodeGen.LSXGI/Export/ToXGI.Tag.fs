@@ -4,6 +4,7 @@ open System.Diagnostics
 
 open Engine.Common.FS
 open System.Security
+open Engine.Core
 
 // IEC-61131 Addressing
 // http://www.microshadow.com/ladderdip/html/basic_iec_addressing.htm
@@ -88,6 +89,7 @@ module XGITag = //IEC61131Tag =
         Comment       : string
         PLCType       : string
         Address       : string
+        InitValue     : obj
         DevicePosition: int
         AddressIEC    : string
         Device        : string
@@ -102,25 +104,63 @@ module XGITag = //IEC61131Tag =
         DevicePosition= -1
         AddressIEC    = ""
         Device        = ""
+        InitValue     = null
         Kind          = int Variable.Kind.VAR
     }
 
     /// devicePos, addressIEC, device, kind, address, name, comment, plcType 를 받아서 SymbolInfo 를 생성한다.
     let internal createSymbolInfoWithDetail (symbolCreateParam) : SymbolInfo =
         let { Name=name; Comment=comment; PLCType=plcType; Address=address;
-              DevicePosition=devicePos; AddressIEC=addressIEC; Device=device; Kind=kind; } = symbolCreateParam
+              DevicePosition=devicePos; AddressIEC=addressIEC; Device=device; Kind=kind; InitValue=initValue } = symbolCreateParam
 
         let comment = escapeXml comment
-        {   Name=name; Comment=comment; Device=device; Kind = kind;
+        {   Name=name; Comment=comment; Device=device; Kind = kind; InitValue=initValue
             Type=plcType; State=0; Address=address; DevicePos=devicePos; AddressIEC=addressIEC}
 
     /// name, comment, plcType 를 받아서 SymbolInfo 를 생성한다.
-    let createSymbolInfo name comment plcType =
-        { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType}
+    let createSymbolInfo name comment plcType (initValue:BoxedObjectHolder) =
+        { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; InitValue=initValue.Object}
         |> createSymbolInfoWithDetail
 
     let copyLocal2GlobalSymbol (s:SymbolInfo) =
         { s with Kind = int Variable.Kind.VAR_GLOBAL; State=0; }
+
+
+    type SymbolInfo with
+        member private x.ToXgiLiteral()  =
+            let xxx = x
+            match x.Type with
+            | "BOOL" ->
+                match x.InitValue :?> bool with
+                | true -> "true"
+                | false -> "false"
+            | _ -> $"{x.InitValue}"
+        /// Symbol 관련 XML tag attributes 생성
+        member private x.GetXmlArgs() =
+            [
+                $"Name=\"{x.Name}\""
+                $"Kind=\"{x.Kind}\""
+                $"Type=\"{x.Type}\""
+                if x.InitValue <> null then
+                    $"InitValue=\"{x.ToXgiLiteral()}\""
+                $"Comment=\"{x.Comment}\""
+                $"Device=\"{x.Device}\""
+                $"Address=\"{x.Address}\""
+                $"State=\"{x.State}\""
+            ] |> String.concat " "
+
+        /// Symbol 관련 XML tag 생성
+        member x.ToText() = $"<Symbol {x.GetXmlArgs()}/>"
+                //Address="" Trigger="" InitValue="" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="0" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+
+        member x.GenerateXml() =
+            [
+                yield $"\t<Symbol {x.GetXmlArgs()}>"
+                // 사용되지 않지만, 필요한 XML children element 생성
+                yield! ["Addresses"; "Retains"; "InitValues"; "Comments"]
+                    |> Seq.map (fun k -> sprintf "\t\t<Member%s/>" k)
+                yield "\t</Symbol>"
+            ] |> String.concat "\r\n"
 
     /// Symbol variable 정의 구역 xml 의 string 을 생성
     let private generateSymbolVarDefinitionXml (bGlobal:bool) (symbols:SymbolInfo seq) =
@@ -133,6 +173,7 @@ module XGITag = //IEC61131Tag =
             yield "<TempVar Count=\"0\"></TempVar>"
             yield $"</{varType}>"
         ] |> String.concat "\r\n"
+
     let generateLocalSymbolsXml symbols = generateSymbolVarDefinitionXml false symbols
     let generateGlobalSymbolsXml symbols = generateSymbolVarDefinitionXml true symbols
 

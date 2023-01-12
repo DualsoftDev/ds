@@ -5,6 +5,7 @@ open Engine.Common.FS
 open PLC.CodeGen.LSXGI
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine.ElementType
 open System.Security
+open Engine.Core
 
 type XgiLadderElementTest() =
     inherit XgiTestClass()
@@ -34,7 +35,8 @@ type XgiLadderElementTest() =
                 let plcType = systemTypeNameToXgiTypeName t.Name
                 let comment = $"{plcType} <- {t.Name}"
                 let name = $"my{t.Name}"
-                XGITag.createSymbolInfo name comment plcType
+                let initValueHolder:BoxedObjectHolder = {Object=null}
+                XGITag.createSymbolInfo name comment plcType initValueHolder
         ]
 
         let symbolsLocalXml = XGITag.generateLocalSymbolsXml symbolInfos

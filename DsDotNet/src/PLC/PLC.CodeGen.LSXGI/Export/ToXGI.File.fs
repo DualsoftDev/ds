@@ -303,7 +303,8 @@ module internal XgiFile =
                             | _ -> failwith "ERROR"
                         let comment = "FAKECOMMENT"
 
-                        { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; Device=device; Kind=kindVar; }
+                        let initValue = null // PLCTag 는 값을 초기화 할 수 없다.
+                        { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; InitValue=initValue; Device=device; Kind=kindVar; }
                         |> XGITag.createSymbolInfoWithDetail
 
                     | DuXgiLocalVar xgi ->
@@ -316,7 +317,7 @@ module internal XgiFile =
 
                         let param:XgiSymbolCreateParams =
                             let name, comment = timer.Name, $"TIMER {timer.Name}"
-                            { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; Device=device; Kind=kindVar; }
+                            { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; InitValue=null; Device=device; Kind=kindVar; }
                         XGITag.createSymbolInfoWithDetail param
                     | DuCounter counter ->
                         let device, addr = "", ""
@@ -327,7 +328,7 @@ module internal XgiFile =
 
                         let param:XgiSymbolCreateParams =
                             let name, comment = counter.Name, $"COUNTER {counter.Name}"
-                            { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; Device=device; Kind=kindVar; }
+                            { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; InitValue=null; Device=device; Kind=kindVar; }
                         XGITag.createSymbolInfoWithDetail param
             ]
 

@@ -75,7 +75,8 @@ module ConvertorPrologModule =
         let symbolInfo =
             let plcType = systemTypeNameToXgiTypeName typedefof<'T>.Name
             let comment = SecurityElement.Escape comment
-            fwdCreateSymbolInfo name comment plcType
+            let initValueHolder:BoxedObjectHolder = {Object=initValue}
+            fwdCreateSymbolInfo name comment plcType initValueHolder
 
         interface IXgiLocalVar<'T> with
             member x.SymbolInfo = x.SymbolInfo

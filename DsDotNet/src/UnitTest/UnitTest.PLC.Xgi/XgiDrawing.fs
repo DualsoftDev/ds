@@ -4,6 +4,7 @@ open NUnit.Framework
 open Engine.Common.FS
 open PLC.CodeGen.LSXGI
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine.ElementType
+open Engine.Core
 
 type XgiDrawingTest() =
     inherit XgiTestClass()
@@ -179,10 +180,11 @@ type XgiDrawingTest() =
 
         // Symbol 정의
         let symbolInfos = [
-            XGITag.createSymbolInfo "EN" "EN" "BOOL"
-            XGITag.createSymbolInfo "IN1" "IN1" "INT"
-            XGITag.createSymbolInfo "IN2" "IN2" "INT"
-            XGITag.createSymbolInfo "Q" "Q" "INT"
+            let intInitValue:BoxedObjectHolder = {Object=0}
+            XGITag.createSymbolInfo "EN" "EN" "BOOL" {Object=false}
+            XGITag.createSymbolInfo "IN1" "IN1" "INT" intInitValue
+            XGITag.createSymbolInfo "IN2" "IN2" "INT" intInitValue
+            XGITag.createSymbolInfo "Q" "Q" "INT" intInitValue
         ]
 
         let symbolsLocalXml = XGITag.generateLocalSymbolsXml symbolInfos

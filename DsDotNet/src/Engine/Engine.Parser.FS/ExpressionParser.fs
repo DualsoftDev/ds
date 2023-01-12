@@ -264,7 +264,7 @@ module rec ExpressionParser =
                 | _ ->
                     if exp.DataType <> declType then
                         failwith $"ERROR: Type mismatch in variable declaration {ctx.GetText()}"
-                    let variable = declType.CreateVariable(storageName)
+                    let variable = declType.CreateVariable(storageName, exp.BoxedEvaluatedValue)
                     storages.Add(storageName, variable)
                     Some <| DuVarDecl (exp, variable)
 

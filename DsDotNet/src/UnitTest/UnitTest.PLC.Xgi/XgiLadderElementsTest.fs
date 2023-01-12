@@ -34,10 +34,10 @@ type XgiLadderElementTest() =
                 let plcType = systemTypeNameToXgiTypeName t.Name
                 let comment = $"{plcType} <- {t.Name}"
                 let name = $"my{t.Name}"
-                XGITag.createSymbol name comment plcType
+                XGITag.createSymbolInfo name comment plcType
         ]
 
-        let symbolsLocalXml = XGITag.generateSymbolVars (symbolInfos, false)
+        let symbolsLocalXml = XGITag.generateLocalSymbolsXml symbolInfos
 
 
         //let xml = generateXGIXmlFromStatement [] [] xgiSymbols unusedTags existingLSISprj

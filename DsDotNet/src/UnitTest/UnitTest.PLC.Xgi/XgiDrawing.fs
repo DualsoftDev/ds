@@ -179,13 +179,13 @@ type XgiDrawingTest() =
 
         // Symbol 정의
         let symbolInfos = [
-            XGITag.createSymbol "EN" "EN" "BOOL"
-            XGITag.createSymbol "IN1" "IN1" "INT"
-            XGITag.createSymbol "IN2" "IN2" "INT"
-            XGITag.createSymbol "Q" "Q" "INT"
+            XGITag.createSymbolInfo "EN" "EN" "BOOL"
+            XGITag.createSymbolInfo "IN1" "IN1" "INT"
+            XGITag.createSymbolInfo "IN2" "IN2" "INT"
+            XGITag.createSymbolInfo "Q" "Q" "INT"
         ]
 
-        let symbolsLocalXml = XGITag.generateSymbolVars (symbolInfos, false)
+        let symbolsLocalXml = XGITag.generateLocalSymbolsXml symbolInfos
 
 
         let xml = wrapWithXml rungsXml symbolsLocalXml emptySymbolsGlobalXml None

@@ -5,7 +5,7 @@ open System.Security
 [<AutoOpen>]
 module XgiPrologModule =
     /// name -> comment -> plcType -> SymbolInfo
-    let mutable fwdCreateSymbol =
+    let mutable fwdCreateSymbolInfo =
         let dummy (name:string) (comment:string) (plcType:string) : SymbolInfo =
             failwith "Should be reimplemented."
         dummy

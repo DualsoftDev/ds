@@ -304,7 +304,7 @@ module internal XgiFile =
                         let comment = "FAKECOMMENT"
 
                         { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; Device=device; Kind=kindVar; }
-                        |> XGITag.createSymbolWithDetail
+                        |> XGITag.createSymbolInfoWithDetail
 
                     | DuXgiLocalVar xgi ->
                         xgi.SymbolInfo
@@ -317,7 +317,7 @@ module internal XgiFile =
                         let param:XgiSymbolCreateParams =
                             let name, comment = timer.Name, $"TIMER {timer.Name}"
                             { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; Device=device; Kind=kindVar; }
-                        XGITag.createSymbolWithDetail param
+                        XGITag.createSymbolInfoWithDetail param
                     | DuCounter counter ->
                         let device, addr = "", ""
                         let plcType =
@@ -328,11 +328,11 @@ module internal XgiFile =
                         let param:XgiSymbolCreateParams =
                             let name, comment = counter.Name, $"COUNTER {counter.Name}"
                             { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; Device=device; Kind=kindVar; }
-                        XGITag.createSymbolWithDetail param
+                        XGITag.createSymbolInfoWithDetail param
             ]
 
         /// Symbol table 정의 XML 문자열
-        let symbolsLocalXml = XGITag.generateSymbolVars (symbolInfos, false)
+        let symbolsLocalXml = XGITag.generateLocalSymbolsXml symbolInfos
 
         let globalSym = [
             for s in symbolInfos do
@@ -340,7 +340,7 @@ module internal XgiFile =
                     XGITag.copyLocal2GlobalSymbol s
         ]
 
-        let symbolsGlobalXml = XGITag.generateSymbolVars (globalSym, true)
+        let symbolsGlobalXml = XGITag.generateGlobalSymbolsXml globalSym
 
         let rungsXml = generateRungs prologComments commentedStatements
 

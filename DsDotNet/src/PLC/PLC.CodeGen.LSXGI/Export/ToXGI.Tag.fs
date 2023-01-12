@@ -106,24 +106,24 @@ module XGITag = //IEC61131Tag =
     }
 
     /// devicePos, addressIEC, device, kind, address, name, comment, plcType 를 받아서 SymbolInfo 를 생성한다.
-    let internal createSymbolWithDetail (symbolCreateParam) : SymbolInfo =
+    let internal createSymbolInfoWithDetail (symbolCreateParam) : SymbolInfo =
         let { Name=name; Comment=comment; PLCType=plcType; Address=address;
               DevicePosition=devicePos; AddressIEC=addressIEC; Device=device; Kind=kind; } = symbolCreateParam
 
-        let comment = SecurityElement.Escape comment
+        let comment = escapeXml comment
         {   Name=name; Comment=comment; Device=device; Kind = kind;
             Type=plcType; State=0; Address=address; DevicePos=devicePos; AddressIEC=addressIEC}
 
     /// name, comment, plcType 를 받아서 SymbolInfo 를 생성한다.
-    let createSymbol name comment plcType =
+    let createSymbolInfo name comment plcType =
         { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType}
-        |> createSymbolWithDetail
+        |> createSymbolInfoWithDetail
 
     let copyLocal2GlobalSymbol (s:SymbolInfo) =
         { s with Kind = int Variable.Kind.VAR_GLOBAL; State=0; }
 
     /// Symbol variable 정의 구역 xml 의 string 을 생성
-    let generateSymbolVars (symbols:SymbolInfo seq, bGlobal:bool) =
+    let private generateSymbolVarDefinitionXml (bGlobal:bool) (symbols:SymbolInfo seq) =
         [
             let varType = if bGlobal then "GlobalVariable" else "LocalVar"
             yield $"<{varType} Version=\"Ver 1.0\" Count={dq}{symbols.length()}{dq}>"
@@ -133,6 +133,7 @@ module XGITag = //IEC61131Tag =
             yield "<TempVar Count=\"0\"></TempVar>"
             yield $"</{varType}>"
         ] |> String.concat "\r\n"
-
+    let generateLocalSymbolsXml symbols = generateSymbolVarDefinitionXml false symbols
+    let generateGlobalSymbolsXml symbols = generateSymbolVarDefinitionXml true symbols
 
 

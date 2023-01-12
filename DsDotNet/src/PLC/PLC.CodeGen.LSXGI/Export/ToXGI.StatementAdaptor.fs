@@ -72,6 +72,10 @@ module ConvertorPrologModule =
 
     type XgiLocalVar<'T when 'T:equality>(name, comment, initValue:'T) =
         inherit VariableBase<'T>(name, initValue)
+        let symbolInfo =
+            let plcType = systemTypeNameToXgiTypeName typedefof<'T>.Name
+            let comment = SecurityElement.Escape comment
+            fwdCreateSymbolInfo name comment plcType
 
         interface IXgiLocalVar<'T> with
             member x.SymbolInfo = x.SymbolInfo
@@ -79,10 +83,7 @@ module ConvertorPrologModule =
             member x.StorageName = name
         interface IText with
             member x.ToText() = name
-        member x.SymbolInfo =
-            let plcType = systemTypeNameToXgiTypeName typedefof<'T>.Name
-            let comment = SecurityElement.Escape comment
-            fwdCreateSymbol name comment plcType
+        member x.SymbolInfo = symbolInfo
 
         override x.ToBoxedExpression() = var2expr x
 

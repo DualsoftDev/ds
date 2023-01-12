@@ -54,14 +54,13 @@ module CodeElements =
             ) 
         
     type Parameters = string[]
-    [<AbstractClass>]
     type Func(name:string, parameters:Parameters) =
         member x.Name = name.ToLower() //명령어 이름은 소문자로만 허용
         member x.Parameters = parameters
         member x.ToDsText() =  $"""${x.Name} {String.Join(" ", parameters)}"""   
         
-    type AdditionalFunc(name:string, parameters:Parameters) =
-        inherit Func(name, parameters)
+    //type AdditionalFunc(name:string, parameters:Parameters) =
+    //    inherit Func(name, parameters)
   
     //Job, ButtonDef, LampDef 에서 사용중  //todo ToDsText, parsing  
     //  [jobs] = {

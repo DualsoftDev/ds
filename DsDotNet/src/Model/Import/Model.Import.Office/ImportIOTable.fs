@@ -62,7 +62,7 @@ module ImportIOTable =
                 funcs.Clear()
                 if funcText <> "" && funcText <> "-"
                 then getFunctions(funcText) 
-                        |> Seq.iter(fun (name, parms) -> funcs.Add(AdditionalFunc(name, parms)) |>ignore )
+                        |> Seq.iter(fun (name, parms) -> funcs.Add(Func(name, parms)) |>ignore )
 
             let updateBtn(row:Data.DataRow, btntype:BtnType, tableIO:Data.DataTable) = 
                 let name  = $"{row.[(int)IOColumn.Name]}"

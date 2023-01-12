@@ -27,7 +27,7 @@ module CpuLoader =
 
                 yield! vm.D1_DAGHeadStart()
                 yield! vm.D2_DAGTailStart()
-                yield! vm.D3_DAGComplete()
+                yield! vm.D3_DAGCoinComplete()
            
             if IsSpec v InFlowAll then
                 yield! vm.F1_RootStart()
@@ -39,9 +39,10 @@ module CpuLoader =
                 yield vm.F3_RootCoinRelay()
 
             if IsSpec v (CallInReal ||| CallInFlow) then
-                yield! vm.C1_CallActionOut()
-                yield! vm.C2_CallTx()
-                yield vm.C3_CallRx()
+                yield! vm.C1_CallPlanSend()
+                yield! vm.C2_CallActionOut()
+                yield! vm.C3_CallPlanReceive()
+                yield! vm.C4_CallActionIn()
                 yield! vm.M3_CallErrorTXMonitor()
                 yield vm.M4_CallErrorRXMonitor()
             

@@ -22,10 +22,10 @@ type Spec08_DAGStatement() =
     [<Test>]
     member __.``D2 DAG Tail Start`` () = 
         for real in t.Reals do
-            real.D1_DAGHeadStart() |> doChecks
+            real.D2_DAGTailStart() |> doChecks
 
     [<Test>]
-    member __.``D3 DAG Complete`` () = 
+    member __.``D3 DAG Coin Complete`` () = 
         for real in t.Reals do
-            real.D1_DAGHeadStart() |> doChecks
+            real.D3_DAGCoinComplete() |> doChecks
 

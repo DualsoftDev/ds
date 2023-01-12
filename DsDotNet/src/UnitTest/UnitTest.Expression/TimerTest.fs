@@ -192,14 +192,14 @@ open Engine.Common.FS
             let resetTag = PlcTag("my_timer_reset_tag", "%M1.1", false)
             let condition = var2expr rungConditionInTag
             let reset = var2expr resetTag
-            let tcParam = {Storages=storages; Name="myRto"; Preset=2000us; RungInCondition=condition; FunctionName="createWinRTO"}
-            let timer = TimerStatement.CreateRTO(tcParam, reset) |> toTimer       // 2000ms = 2sec
+            let tcParam = {Storages=storages; Name="myRto"; Preset=1000us; RungInCondition=condition; FunctionName="createWinRTO"}
+            let timer = TimerStatement.CreateRTO(tcParam, reset) |> toTimer       // 1000ms = 1sec
 
             timer.EN.Value === true
             timer.TT.Value === true
             timer.DN.Value === false
-            timer.PRE.Value === 2000us
-            timer.ACC.Value <= 1000us === true
+            timer.PRE.Value === 1000us
+            timer.ACC.Value <= 500us === true
             timer.RES.Value === false
 
             // rung 입력 조건이 false : Pause
@@ -207,8 +207,8 @@ open Engine.Common.FS
             evaluateRungInputs timer
             timer.EN.Value === false
             timer.TT.Value === false
-            System.Threading.Thread.Sleep(2100)
-            timer.ACC.Value < 2000us === true
+            System.Threading.Thread.Sleep(1100)
+            timer.ACC.Value < 1000us === true
             timer.DN.Value === false
 
             // rung 입력 조건이 false
@@ -217,9 +217,9 @@ open Engine.Common.FS
             timer.EN.Value === true
             timer.TT.Value === true
             timer.DN.Value === false
-            System.Threading.Thread.Sleep(2100)
+            System.Threading.Thread.Sleep(1100)
             timer.DN.Value === true
-            timer.ACC.Value === 2000us
+            timer.ACC.Value === 1000us
 
 
             // reset 입력 조건이 true

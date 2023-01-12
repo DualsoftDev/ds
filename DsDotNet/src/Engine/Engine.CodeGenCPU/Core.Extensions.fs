@@ -61,8 +61,10 @@ module rec ConvertCoreExt =
 
         //[auto, manual] system HMI 두개다 선택이 안됨
         member s.ModeNoExpr = !!s._auto.Expr <&&> !!s._manual.Expr
-        //자신이 사용된 API Txs
-        member s.GetTXs(r:Real)= s.ApiItems.Where(fun api->api.TXs.Contains(r)).Select(fun f->f.TX)
+        //자신이 사용된 API Plan Send
+        member s.GetPSs(r:Real) = 
+            s.ApiItems.Where(fun api-> api.TXs.Contains(r))
+                      .Select(fun api -> api.PS)
             
     let private getButtonInputs(flow:Flow, btns:ButtonDef seq) : PlcTag<bool> seq = 
             btns.Where(fun b -> b.SettingFlows.Contains(flow))
@@ -179,11 +181,12 @@ module rec ConvertCoreExt =
                                  then c.CallTargetJob.Observes.First(fun f->f.Name = TextRingCounter).GetRingCount()
                                  else failwith $"{c.Name} not use counter"
                             
-        member c.INs  = c.CallTargetJob.JobDefs.Select(fun j -> j.InTag).Cast<PlcTag<bool>>()
-        member c.OUTs = c.CallTargetJob.JobDefs.Select(fun j -> j.OutTag).Cast<PlcTag<bool>>()
-        member c.TXs  = c.CallTargetJob.JobDefs |> Seq.map(fun (j: JobDef) -> j.ApiItem.TX)
-        member c.RXs  = c.CallTargetJob.JobDefs |> Seq.collect(fun (j: JobDef) -> j.ApiItem.RXs) 
-                                             |> Seq.map getVM |> Seq.map(fun f->f.ET)
+        member c.INs  = c.CallTargetJob.JobDefs.Select(fun j -> j.ActionIN)
+        member c.OUTs = c.CallTargetJob.JobDefs.Select(fun j -> j.ActionOut)
+        member c.PlanSends  = c.CallTargetJob.JobDefs.Select(fun j  -> j.ApiItem.PS)
+        member c.PlanReceives  = c.CallTargetJob.JobDefs.Select(fun j  -> j.ApiItem.PR)
+
+        
         member c.MutualResets = 
             c.CallTargetJob.JobDefs
                 .SelectMany(fun j -> j.ApiItem.System.GetMutualResetApis(j.ApiItem))
@@ -199,7 +202,20 @@ module rec ConvertCoreExt =
         member a.V = a.VertexManager :?> VertexMCoin                    
 
     type RealOtherFlow with
-        member a.V = a.VertexManager :?> VertexMCoin                    
+        member r.V = r.VertexManager :?> VertexMCoin                    
 
+    type JobDef with
+        member jd.ActionIN  = jd.InTag :?> PlcTag<bool>
+        member jd.ActionOut  = jd.OutTag :?> PlcTag<bool>
+        member jd.RXs  = jd.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.EP)
+                                            
+        member jd.MutualResets(x:DsSystem) = 
+                jd.ApiItem.System.GetMutualResetApis(jd.ApiItem)
+                    .SelectMany(fun a -> x.JobDefs.Where(fun w-> w.ApiItem = a))
+    
+    type Vertex with 
+        member r.V = r.VertexManager :?> VertexManager                    
+        
     type ApiItem with
-        member a.TX = DsTag<bool>($"{a.Name}(TX)", false)
+        member a.PS = DsTag<bool>($"{a.Name}(PS)", false)
+        member a.PR = DsTag<bool>($"{a.Name}(PR)", false)

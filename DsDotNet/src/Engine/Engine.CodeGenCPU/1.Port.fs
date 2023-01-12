@@ -10,8 +10,8 @@ open System.Linq
 let private getPortSetBits(v:VertexManager) (rse:SREType) =
     let real = v.Vertex :?> Real
     let shareds = v.GetSharedReal().Select(getVM)
-    match rse with
-    |Start -> (shareds.STs() @ [v.ST;v.SF]).ToOr() <||> v.System.GetTXs(real).EmptyOffElseToOr(v.System)
+    match rse with                                      //real 자신을 외부 시스템에서 Plan Send 경우
+    |Start -> (shareds.STs() @ [v.ST;v.SF]).ToOr() <||> v.System.GetPSs(real).EmptyOffElseToOr(v.System)
     |Reset -> (shareds.RTs() @ [v.RT;v.RF]).ToOr()
     |End   -> (shareds.ETs() @ [v.ET;v.EF]).ToOr() 
 

@@ -11,7 +11,7 @@ type VertexManager with
     member v.F1_RootStart(): CommentedStatement list =
         let srcs = v.Flow.Graph.FindEdgeSources(v.Vertex, StartEdge)
         if srcs.Any() then
-            let sets  = srcs.GetCausalTags(v.System)
+            let sets  = srcs.GetCausalTags(v.System, true)
             let rsts  = v.F.Expr
             [(sets, rsts) ==| (v.ST, "F1")]
         else []

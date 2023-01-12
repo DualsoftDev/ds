@@ -160,26 +160,26 @@ module PPTObjectModule =
         | ACTIVESYS       -> checkDotErr()
 
     let getBtnType(key:string) =
-        match key with
-        | "A"      -> BtnType.DuAutoBTN
-        | "M"      -> BtnType.DuManualBTN
-        | "D"      -> BtnType.DuDriveBTN
-        | "S"      -> BtnType.DuStopBTN
-        | "C"      -> BtnType.DuClearBTN
-        | "E"      -> BtnType.DuEmergencyBTN
-        | "T"      -> BtnType.DuTestBTN
-        | "H"      -> BtnType.DuHomeBTN
+        match TrimSpace key with
+        | "A"   -> BtnType.DuAutoBTN
+        | "M"   -> BtnType.DuManualBTN
+        | "D"   -> BtnType.DuDriveBTN
+        | "S"   -> BtnType.DuStopBTN
+        | "C"   -> BtnType.DuClearBTN
+        | "E"   -> BtnType.DuEmergencyBTN
+        | "T"   -> BtnType.DuTestBTN
+        | "H"   -> BtnType.DuHomeBTN
         | _     ->  failwith $"{key} is Error Type"
 
     let getLampType(key:string) =
-        match key with
-        | "A"      -> LampType.DuAutoModeLamp
-        | "M"      -> LampType.DuManualModeLamp
-        | "D"      -> LampType.DuDriveModeLamp
-        | "S"      -> LampType.DuStopModeLamp
-        | "E"      -> LampType.DuEmergencyModeLamp
-        | "T"      -> LampType.DuTestModeLamp
-        | "R"      -> LampType.DuReadyModeLamp
+        match TrimSpace key with
+        | "A"   -> LampType.DuAutoModeLamp
+        | "M"   -> LampType.DuManualModeLamp
+        | "D"   -> LampType.DuDriveModeLamp
+        | "S"   -> LampType.DuStopModeLamp
+        | "E"   -> LampType.DuEmergencyModeLamp
+        | "T"   -> LampType.DuTestModeLamp
+        | "R"   -> LampType.DuReadyModeLamp
         | _     ->  failwith $"{key} is Error Type"
 
     let IsDummyShape(shape:Shape) = shape.IsDashShape() && (shape.CheckRectangle()||shape.CheckEllipse())

@@ -78,7 +78,7 @@ module ConvertorPrologModule =
             let initValueHolder:BoxedObjectHolder = {Object=initValue}
             fwdCreateSymbolInfo name comment plcType initValueHolder
 
-        interface IXgiLocalVar<'T> with
+        interface IXgiLocalVar with
             member x.SymbolInfo = x.SymbolInfo
         interface INamedExpressionizableTerminal with
             member x.StorageName = name
@@ -259,25 +259,34 @@ module XgiExpressionConvertorModule =
 
                 (* 일반 변수 선언 부분을 xgi local variable 로 치환한다. *)
                 storage.Remove decl |> ignore
-                let createVar (defaultValue:'T) =
-                    let var = createXgiVariable decl.Name "local var in code" defaultValue
-                    storage.Add var
 
-                match exp.DataType.Name with
-                | "Single" -> createVar 0.f
-                | "Double" -> createVar 0.0
-                | "SByte"  -> createVar 0y
-                | "Byte"   -> createVar 0uy
-                | "Int16"  -> createVar 0s
-                | "UInt16" -> createVar 0us
-                | "Int32"  -> createVar 0
-                | "UInt32" -> createVar 0u
-                | "Int64"  -> createVar 0L
-                | "UInt64" -> createVar 0UL
-                | "Boolean"-> createVar false
-                | "String" -> createVar ""
-                | "Char"   -> createVar ' '
-                | _ -> failwith "ERROR"
+                match decl with
+                | :? IXgiLocalVar as loc ->
+                    let si = loc.SymbolInfo
+                    let comment = $"[local var in code] {si.Comment}"
+                    let initValue = exp.BoxedEvaluatedValue
+
+                    let createLocalVar (defaultValue:'T) =
+                        let var = createXgiVariable decl.Name comment defaultValue
+                        storage.Add var
+
+                    match exp.DataType.Name with
+                    | "Single" -> createLocalVar (initValue :?> float32)
+                    | "Double" -> createLocalVar (initValue :?> double)
+                    | "SByte"  -> createLocalVar (initValue :?> int8)
+                    | "Byte"   -> createLocalVar (initValue :?> uint8)
+                    | "Int16"  -> createLocalVar (initValue :?> int16)
+                    | "UInt16" -> createLocalVar (initValue :?> uint16)
+                    | "Int32"  -> createLocalVar (initValue :?> int32)
+                    | "UInt32" -> createLocalVar (initValue :?> uint32)
+                    | "Int64"  -> createLocalVar (initValue :?> int64)
+                    | "UInt64" -> createLocalVar (initValue :?> uint64)
+                    | "Boolean"-> createLocalVar (initValue :?> bool)
+                    | "String" -> createLocalVar (initValue :?> string)
+                    | "Char"   -> createLocalVar (initValue :?> char)
+                    | _ -> failwith "ERROR"
+                | _ ->
+                    failwith "ERROR"
 
                 []
             | ( DuTimer _ | DuCounter _ ) ->

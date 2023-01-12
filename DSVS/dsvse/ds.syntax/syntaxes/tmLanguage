@@ -22,9 +22,63 @@
         <key>include</key>
         <string>#systems</string>
       </dict>
+      <dict>
+        <key>include</key>
+        <string>#systmeType</string>
+      </dict>
+      <dict>
+        <key>include</key>
+        <string>#ip</string>
+      </dict>
     </array>
     <key>repository</key>
     <dict>
+      <key>systmeType</key>
+      <dict>
+        <key>patterns</key>
+        <array>
+          <dict>
+            <key>name</key>
+            <string>storge.modifier.system.text.withbrackets.ds</string>
+            <key>match</key>
+            <string>\[(system|sys)\]</string>
+          </dict>
+          <dict>
+            <key>name</key>
+            <string>storage.modifier.system.text.ds</string>
+            <key>match</key>
+            <string>^\s*(system|sys)</string>
+          </dict>
+        </array>
+      </dict>
+      <key>ip</key>
+      <dict>
+        <key>name</key>
+        <string>entity.name.tag.ip.ds</string>
+        <key>match</key>
+        <string>^\s*(?:ip|host)\s*=\s*(?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+\.(?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+*</string>
+      </dict>
+      <key>types</key>
+      <dict>
+        <key>name</key>
+        <string>storage.modifier.ds</string>
+        <key>match</key>
+        <string>(?&lt;![_$[:alnum:]])(?:(?&lt;=\.\.\.)|(?&lt;!\.))((device|flow|aliases|runlamp|dryrunlamp|manuallamp|stoplamp|emglamp|emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home))(?![_$[:alnum:]])(?:(?=\.\.\.)|(?!\.))</string>
+      </dict>
+      <key>property</key>
+      <dict>
+        <key>name</key>
+        <string>variable.object.property.ds</string>
+        <key>match</key>
+        <string>(?&lt;![_$[:alnum:]])(?:(?&lt;=\.\.\.)|(?&lt;!\.))((?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+|(?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+\.(?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+|(?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+\.(?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+\.(?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+|(?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+\.(?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+\.(?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+\.(?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+|(?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+\.(?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+*)(?![_$[:alnum:]])(?:(?=\.\.\.)|(?!\.))</string>
+      </dict>
+      <key>punctuation</key>
+      <dict>
+        <key>name</key>
+        <string>keyword.other.accessor.ds</string>
+        <key>match</key>
+        <string>(?&lt;![_$[:alnum:]])(?:(?&lt;=\.\.\.)|(?&lt;!\.))((&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|))(?![_$[:alnum:]])(?:(?=\.\.\.)|(?!\.))</string>
+      </dict>
       <key>comments</key>
       <dict>
         <key>patterns</key>
@@ -81,13 +135,13 @@
             <key>name</key>
             <string>system.multi.ds</string>
             <key>begin</key>
-            <string>(\[\s*sys\s*((?:ip|host)\s*=\s*(?:(?:[^\\\s][^\\\s]*))}*)*\s*\])\s*((?:[^\\\s][^\\\s]*))\s*=\s*(\{)(?=[^\}]*$)</string>
+            <string>\[\s*(system|sys)\s*((?:ip|host)\s*=\s*(?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+)?\]\s*((?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+)\s*=\s*(\{)(?=[^\}]*$)</string>
             <key>beginCaptures</key>
             <dict>
               <key>1</key>
               <dict>
                 <key>name</key>
-                <string>entity.name.type.system.header.ds</string>
+                <string>storage.modifier.system.header.ds</string>
               </dict>
               <key>2</key>
               <dict>
@@ -129,6 +183,38 @@
                 <key>include</key>
                 <string>#jobs</string>
               </dict>
+              <dict>
+                <key>include</key>
+                <string>#interfaces</string>
+              </dict>
+              <dict>
+                <key>include</key>
+                <string>#buttons</string>
+              </dict>
+              <dict>
+                <key>include</key>
+                <string>#lamps</string>
+              </dict>
+              <dict>
+                <key>include</key>
+                <string>#devices</string>
+              </dict>
+              <dict>
+                <key>include</key>
+                <string>#codeblocks</string>
+              </dict>
+              <dict>
+                <key>include</key>
+                <string>#types</string>
+              </dict>
+              <dict>
+                <key>include</key>
+                <string>#punctuation</string>
+              </dict>
+              <dict>
+                <key>include</key>
+                <string>#property</string>
+              </dict>
             </array>
           </dict>
           <dict>
@@ -137,13 +223,13 @@
             <key>name</key>
             <string>system.single.ds</string>
             <key>begin</key>
-            <string>(\[\s*sys\s*((?:ip|host)\s*=\s*(?:(?:[^\\\s][^\\\s]*))}*)*\s*\])\s*((?:[^\\\s][^\\\s]*))\s*=\s*(\{)</string>
+            <string>\[\s*(system|sys)\s*((?:ip|host)\s*=\s*(?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+)?\]\s*((?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+)\s*=\s*(\{)</string>
             <key>beginCaptures</key>
             <dict>
               <key>1</key>
               <dict>
                 <key>name</key>
-                <string>entity.name.type.system.header.ds</string>
+                <string>storage.modifier.system.header.ds</string>
               </dict>
               <key>2</key>
               <dict>
@@ -197,6 +283,38 @@
                 <key>include</key>
                 <string>#jobs</string>
               </dict>
+              <dict>
+                <key>include</key>
+                <string>#interfaces</string>
+              </dict>
+              <dict>
+                <key>include</key>
+                <string>#buttons</string>
+              </dict>
+              <dict>
+                <key>include</key>
+                <string>#lamps</string>
+              </dict>
+              <dict>
+                <key>include</key>
+                <string>#devices</string>
+              </dict>
+              <dict>
+                <key>include</key>
+                <string>#codeblocks</string>
+              </dict>
+              <dict>
+                <key>include</key>
+                <string>#types</string>
+              </dict>
+              <dict>
+                <key>include</key>
+                <string>#punctuation</string>
+              </dict>
+              <dict>
+                <key>include</key>
+                <string>#property</string>
+              </dict>
             </array>
           </dict>
         </array>
@@ -211,13 +329,13 @@
             <key>name</key>
             <string>flow.multi.ds</string>
             <key>begin</key>
-            <string>(\[\s*flow\s*\])\s*((?:[^\\\s][^\\\s]*))\s*(=)\s*(\{)(?=[^\}]*$)</string>
+            <string>(\[\s*flow\s*\])\s*((?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+)\s*(=)\s*(\{)(?=[^\}]*$)</string>
             <key>beginCaptures</key>
             <dict>
               <key>1</key>
               <dict>
                 <key>name</key>
-                <string>entity.name.type.flow.header.ds</string>
+                <string>storage.modifier.flow.header.ds</string>
               </dict>
               <key>2</key>
               <dict>
@@ -227,7 +345,7 @@
               <key>3</key>
               <dict>
                 <key>name</key>
-                <string>entity.name.type.flow.equal.ds</string>
+                <string>storage.modifier.flow.equal.ds</string>
               </dict>
               <key>4</key>
               <dict>
@@ -267,6 +385,14 @@
                 <key>include</key>
                 <string>#segment</string>
               </dict>
+              <dict>
+                <key>include</key>
+                <string>#punctuation</string>
+              </dict>
+              <dict>
+                <key>include</key>
+                <string>#property</string>
+              </dict>
             </array>
           </dict>
           <dict>
@@ -275,13 +401,13 @@
             <key>name</key>
             <string>flow.single.ds</string>
             <key>begin</key>
-            <string>(\[\s*flow\s*\])\s*((?:[^\\\s][^\\\s]*))\s*(=)\s*\{</string>
+            <string>(\[\s*flow\s*\])\s*((?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+)\s*(=)\s*\{</string>
             <key>beginCaptures</key>
             <dict>
               <key>1</key>
               <dict>
                 <key>name</key>
-                <string>entity.name.type.flow.header.ds</string>
+                <string>storage.modifier.flow.header.ds</string>
               </dict>
               <key>2</key>
               <dict>
@@ -333,7 +459,7 @@
               <key>1</key>
               <dict>
                 <key>name</key>
-                <string>entity.name.type.aliase.header.ds</string>
+                <string>storage.modifier.aliase.header.ds</string>
               </dict>
               <key>2</key>
               <dict>
@@ -379,7 +505,7 @@
               <key>1</key>
               <dict>
                 <key>name</key>
-                <string>entity.name.type.aliase.header.ds</string>
+                <string>storage.modifier.aliase.header.ds</string>
               </dict>
             </dict>
             <key>end</key>
@@ -420,7 +546,7 @@
             <key>name</key>
             <string>parent.multi.ds</string>
             <key>begin</key>
-            <string>((?:[^\\\s][^\\\s]*))\s*=\s*(\{)(?=[^\}]*$)</string>
+            <string>((?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+)\s*=\s*(\{)(?=[^\}]*$)</string>
             <key>beginCaptures</key>
             <dict>
               <key>1</key>
@@ -458,6 +584,18 @@
                 <key>include</key>
                 <string>#segment</string>
               </dict>
+              <dict>
+                <key>name</key>
+                <string>punctuation.separator.array.ds</string>
+                <key>match</key>
+                <string>;</string>
+              </dict>
+              <dict>
+                <key>name</key>
+                <string>invalid.illegal.expected-array-separator.json</string>
+                <key>match</key>
+                <string>[^\s\}]</string>
+              </dict>
             </array>
           </dict>
           <dict>
@@ -466,7 +604,7 @@
             <key>name</key>
             <string>parent.single.ds</string>
             <key>begin</key>
-            <string>((?:[^\\\s][^\\\s]*))\s*=\s*\{</string>
+            <string>((?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+)\s*=\s*\{</string>
             <key>beginCaptures</key>
             <dict>
               <key>1</key>
@@ -493,18 +631,6 @@
             <key>patterns</key>
             <array>
               <dict>
-                <key>name</key>
-                <string>punctuation.separator.array.ds</string>
-                <key>match</key>
-                <string>;</string>
-              </dict>
-              <dict>
-                <key>name</key>
-                <string>invalid.illegal.expected-array-separator.json</string>
-                <key>match</key>
-                <string>[^\s\}]</string>
-              </dict>
-              <dict>
                 <key>include</key>
                 <string>#comments</string>
               </dict>
@@ -515,6 +641,18 @@
               <dict>
                 <key>include</key>
                 <string>#segment</string>
+              </dict>
+              <dict>
+                <key>name</key>
+                <string>punctuation.separator.array.ds</string>
+                <key>match</key>
+                <string>;</string>
+              </dict>
+              <dict>
+                <key>name</key>
+                <string>invalid.illegal.expected-array-separator.json</string>
+                <key>match</key>
+                <string>[^\s\}]</string>
               </dict>
             </array>
           </dict>
@@ -536,7 +674,7 @@
               <key>1</key>
               <dict>
                 <key>name</key>
-                <string>entity.name.type.jobs.header.ds</string>
+                <string>storage.modifier.jobs.header.ds</string>
               </dict>
             </dict>
             <key>end</key>
@@ -573,7 +711,7 @@
               <key>1</key>
               <dict>
                 <key>name</key>
-                <string>entity.name.type.jobs.header.ds</string>
+                <string>storage.modifier.jobs.header.ds</string>
               </dict>
             </dict>
             <key>end</key>
@@ -603,6 +741,384 @@
             </array>
           </dict>
         </array>
+      </dict>
+      <key>buttons</key>
+      <dict>
+        <key>patterns</key>
+        <array>
+          <dict>
+            <key>comment</key>
+            <string>buttons-multi-line</string>
+            <key>name</key>
+            <string>buttons.multi.ds</string>
+            <key>begin</key>
+            <string>(\[\s*(?:emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home)\s*\])\s*(=)\s*(\{)(?=[^\}]*$)</string>
+            <key>beginCaptures</key>
+            <dict>
+              <key>1</key>
+              <dict>
+                <key>name</key>
+                <string>storage.modifier.buttons.header.ds</string>
+              </dict>
+            </dict>
+            <key>end</key>
+            <string>(^\s*\})</string>
+            <key>endCaptures</key>
+            <dict>
+              <key>1</key>
+              <dict>
+                <key>name</key>
+                <string>punctuation.brace.end.ds</string>
+              </dict>
+            </dict>
+            <key>patterns</key>
+            <array>
+              <dict>
+                <key>include</key>
+                <string>#comments</string>
+              </dict>
+            </array>
+          </dict>
+          <dict>
+            <key>comment</key>
+            <string>buttons-single-line</string>
+            <key>name</key>
+            <string>buttons.single.ds</string>
+            <key>begin</key>
+            <string>(\[\s*(?:emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home)\s*\])\s*(=)\s*\{</string>
+            <key>beginCaptures</key>
+            <dict>
+              <key>1</key>
+              <dict>
+                <key>name</key>
+                <string>storage.modifier.buttons.header.ds</string>
+              </dict>
+            </dict>
+            <key>end</key>
+            <string>\}</string>
+            <key>endCaptures</key>
+            <dict>
+              <key>1</key>
+              <dict>
+                <key>name</key>
+                <string>punctuation.brace.end.ds</string>
+              </dict>
+            </dict>
+            <key>patterns</key>
+            <array>
+              <dict>
+                <key>name</key>
+                <string>punctuation.separator.array.ds</string>
+                <key>match</key>
+                <string>;</string>
+              </dict>
+              <dict>
+                <key>name</key>
+                <string>invalid.illegal.expected-array-separator.json</string>
+                <key>match</key>
+                <string>[^\s\}]</string>
+              </dict>
+            </array>
+          </dict>
+        </array>
+      </dict>
+      <key>lamps</key>
+      <dict>
+        <key>patterns</key>
+        <array>
+          <dict>
+            <key>comment</key>
+            <string>lamps-multi-line</string>
+            <key>name</key>
+            <string>lamps.multi.ds</string>
+            <key>begin</key>
+            <string>(\[\s*(?:runlamp|dryrunlamp|manuallamp|stoplamp|emglamp)\s*\])\s*(=)\s*(\{)(?=[^\}]*$)</string>
+            <key>beginCaptures</key>
+            <dict>
+              <key>1</key>
+              <dict>
+                <key>name</key>
+                <string>storage.modifier.lamps.header.ds</string>
+              </dict>
+            </dict>
+            <key>end</key>
+            <string>(^\s*\})</string>
+            <key>endCaptures</key>
+            <dict>
+              <key>1</key>
+              <dict>
+                <key>name</key>
+                <string>punctuation.brace.end.ds</string>
+              </dict>
+            </dict>
+            <key>patterns</key>
+            <array>
+              <dict>
+                <key>include</key>
+                <string>#comments</string>
+              </dict>
+            </array>
+          </dict>
+          <dict>
+            <key>comment</key>
+            <string>lamps-single-line</string>
+            <key>name</key>
+            <string>lamps.single.ds</string>
+            <key>begin</key>
+            <string>(\[\s*(?:runlamp|dryrunlamp|manuallamp|stoplamp|emglamp)\s*\])\s*(=)\s*\{</string>
+            <key>beginCaptures</key>
+            <dict>
+              <key>1</key>
+              <dict>
+                <key>name</key>
+                <string>storage.modifier.lamps.header.ds</string>
+              </dict>
+            </dict>
+            <key>end</key>
+            <string>\}</string>
+            <key>endCaptures</key>
+            <dict>
+              <key>1</key>
+              <dict>
+                <key>name</key>
+                <string>punctuation.brace.end.ds</string>
+              </dict>
+            </dict>
+            <key>patterns</key>
+            <array>
+              <dict>
+                <key>name</key>
+                <string>punctuation.separator.array.ds</string>
+                <key>match</key>
+                <string>;</string>
+              </dict>
+              <dict>
+                <key>name</key>
+                <string>invalid.illegal.expected-array-separator.json</string>
+                <key>match</key>
+                <string>[^\s\}]</string>
+              </dict>
+            </array>
+          </dict>
+        </array>
+      </dict>
+      <key>interfaces</key>
+      <dict>
+        <key>patterns</key>
+        <array>
+          <dict>
+            <key>comment</key>
+            <string>interfaces-multi-line</string>
+            <key>name</key>
+            <string>interfaces.multi.ds</string>
+            <key>begin</key>
+            <string>(\[\s*interfaces\s*\])\s*(=)\s*(\{)(?=[^\}]*$)</string>
+            <key>beginCaptures</key>
+            <dict>
+              <key>1</key>
+              <dict>
+                <key>name</key>
+                <string>storage.modifier.interfaces.header.ds</string>
+              </dict>
+            </dict>
+            <key>end</key>
+            <string>(^\s*\})</string>
+            <key>endCaptures</key>
+            <dict>
+              <key>1</key>
+              <dict>
+                <key>name</key>
+                <string>punctuation.brace.end.ds</string>
+              </dict>
+            </dict>
+            <key>patterns</key>
+            <array>
+              <dict>
+                <key>include</key>
+                <string>#comments</string>
+              </dict>
+              <dict>
+                <key>include</key>
+                <string>#parents</string>
+              </dict>
+            </array>
+          </dict>
+          <dict>
+            <key>comment</key>
+            <string>interfaces-single-line</string>
+            <key>name</key>
+            <string>interfaces.single.ds</string>
+            <key>begin</key>
+            <string>(\[\s*interfaces\s*\])\s*(=)\s*\{</string>
+            <key>beginCaptures</key>
+            <dict>
+              <key>1</key>
+              <dict>
+                <key>name</key>
+                <string>storage.modifier.interfaces.header.ds</string>
+              </dict>
+            </dict>
+            <key>end</key>
+            <string>\}</string>
+            <key>endCaptures</key>
+            <dict>
+              <key>1</key>
+              <dict>
+                <key>name</key>
+                <string>punctuation.brace.end.ds</string>
+              </dict>
+            </dict>
+            <key>patterns</key>
+            <array>
+              <dict>
+                <key>name</key>
+                <string>punctuation.separator.array.ds</string>
+                <key>match</key>
+                <string>;</string>
+              </dict>
+              <dict>
+                <key>name</key>
+                <string>invalid.illegal.expected-array-separator.json</string>
+                <key>match</key>
+                <string>[^\s\}]</string>
+              </dict>
+            </array>
+          </dict>
+        </array>
+      </dict>
+      <key>codeblocks</key>
+      <dict>
+        <key>patterns</key>
+        <array>
+          <dict>
+            <key>comment</key>
+            <string>codeblocks-multi-line</string>
+            <key>name</key>
+            <string>codeblocks.multi.ds</string>
+            <key>begin</key>
+            <string>(&lt;@\{)(?=[^\}@&gt;]*)</string>
+            <key>beginCaptures</key>
+            <dict>
+              <key>1</key>
+              <dict>
+                <key>name</key>
+                <string>punctuation.codeblocks.brace.start.ds</string>
+              </dict>
+            </dict>
+            <key>end</key>
+            <string>(^\s*\}@&gt;)</string>
+            <key>endCaptures</key>
+            <dict>
+              <key>1</key>
+              <dict>
+                <key>name</key>
+                <string>punctuation.codeblocks.brace.end.ds</string>
+              </dict>
+            </dict>
+            <key>patterns</key>
+            <array>
+              <dict>
+                <key>include</key>
+                <string>#comments</string>
+              </dict>
+              <dict>
+                <key>include</key>
+                <string>#punctuation</string>
+              </dict>
+              <dict>
+                <key>include</key>
+                <string>#property</string>
+              </dict>
+            </array>
+          </dict>
+          <dict>
+            <key>comment</key>
+            <string>codeblocks-single-line</string>
+            <key>name</key>
+            <string>codeblocks.single.ds</string>
+            <key>begin</key>
+            <string>(&lt;@\{)</string>
+            <key>beginCaptures</key>
+            <dict>
+              <key>1</key>
+              <dict>
+                <key>name</key>
+                <string>punctuation.codeblocks.brace.start.ds</string>
+              </dict>
+            </dict>
+            <key>end</key>
+            <string>(\}@&gt;)</string>
+            <key>endCaptures</key>
+            <dict>
+              <key>1</key>
+              <dict>
+                <key>name</key>
+                <string>punctuation.brace.end.ds</string>
+              </dict>
+            </dict>
+            <key>patterns</key>
+            <array>
+              <dict>
+                <key>name</key>
+                <string>punctuation.separator.array.ds</string>
+                <key>match</key>
+                <string>;</string>
+              </dict>
+              <dict>
+                <key>name</key>
+                <string>invalid.illegal.expected-array-separator.json</string>
+                <key>match</key>
+                <string>[^\s*\}@&gt;]</string>
+              </dict>
+            </array>
+          </dict>
+        </array>
+      </dict>
+      <key>devices</key>
+      <dict>
+        <key>patterns</key>
+        <dict>
+          <key>name</key>
+          <string>device.ds</string>
+          <key>begin</key>
+          <string>(\[\s*(device)\s*(file\s*=\s*(?:(?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+))\]\s*)\s*((?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+)</string>
+          <key>beginCaptures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>storage.modifier.interfaces.header.ds</string>
+            </dict>
+            <key>2</key>
+            <dict>
+              <key>name</key>
+              <string>storage.modifier.interfaces.header.ds</string>
+            </dict>
+            <key>3</key>
+            <dict>
+              <key>name</key>
+              <string>storage.modifier.interfaces.header.ds</string>
+            </dict>
+          </dict>
+          <key>end</key>
+          <string>\;</string>
+          <key>endCaptures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>punctuation.separator.array.ds</string>
+            </dict>
+          </dict>
+        </dict>
+      </dict>
+      <key>exsystem</key>
+      <dict>
+        <key>patterns</key>
+        <dict>
+          <key>name</key>
+          <string>exsystem.ds</string>
+        </dict>
       </dict>
       <key>causals</key>
       <dict>
@@ -642,13 +1158,13 @@
             <key>name</key>
             <string>variable.other.segment.withdot.ds</string>
             <key>match</key>
-            <string>(?:[^\\\s][^\\\s]*)\.(?:[^\\\s][^\\\s]*)*</string>
+            <string>(?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+\.(?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+*</string>
           </dict>
           <dict>
             <key>name</key>
             <string>variable.other.segment.ds</string>
             <key>match</key>
-            <string>(?:[^\\\s][^\\\s]*)</string>
+            <string>(?:[^\\\s\.;|(&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|(=&gt;)|(&lt;=)|(,|;|:=|=)|(\|\|)])+</string>
           </dict>
           <dict>
             <key>include</key>

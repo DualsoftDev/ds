@@ -15,8 +15,8 @@ fileTypes: [ds]
 variables:
   startOfIdentifier: (?<![_$[:alnum:]])(?:(?<=\.\.\.)|(?<!\.))
   endOfIdentifier: (?![_$[:alnum:]])(?:(?=\.\.\.)|(?!\.))
-  startofBracket: (\[)
-  endofBracket: (\])
+  startofBracket: (\[\s*)
+  endofBracket: (\s*\])
 
   compo: '(?:[^\\\s\.;|{{punctuation}}])+'
   words: '[가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*'
@@ -27,20 +27,21 @@ variables:
   identifiers: '{{compo}}\.{{compo}}*'
 
   system: 'system|sys'
+  external: 'external'
   ipSpec: 'ip|host'
   ip: '(?:{{ipSpec}})\s*=\s*{{identifiers}}'
   button: 'emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home'
   lamp: 'runlamp|dryrunlamp|manuallamp|stoplamp|emglamp'
   types: '(device|flow|aliases|{{lamp}}|{{button}})'
   props: '{{identifier1}}|{{identifier2}}|{{identifier3}}|{{identifier4}}|{{identifiers}}'
-  punctuation: '(<\|\|>)|(<\|)|(\|>)|<|>|(=>)|(<=)|(,|;|:=|=)|(\|\|)'
+  punctuation: '[(<\|\|>)(<\|)(\|>)<>,;:=(=>)(<=)(\|\|)]'
   buttonHeader: '\[\s*(?:{{button}})\s*\]'
   lampHeader: '\[\s*(?:{{lamp}})\s*\]'
 
-  fliepath: 'file\s*=\s*(?:{{identifier1}})'
+  fliepath: 'file\s*=\s*(?:{{identifiers}})'
 
   systemHeader: '\[\s*({{system}})\s*((?:{{ipSpec}})\s*=\s*{{identifier1}})?\]\s*({{identifier1}})\s*=\s*'
-  deviceHeader: '(\[\s*(device)\s*({{fliepath}})\]\s*)\s*({{identifier1}})'
+  deviceHeader: '(?:\[\s*(device)\s*({{fliepath}})?\]\s*)\s*({{identifier1}})'
   flowHeader: '(\[\s*flow\s*\])\s*({{identifier1}})\s*(=)\s*'
   parentHeader: '({{identifier1}})\s*=\s*'
   aliasHeader: '(\[\s*aliases\s*\])\s*=\s*'
@@ -66,19 +67,21 @@ patterns:
 repository:
   systmeType:
     patterns:
-    - name: storge.modifier.system.text.withbrackets.ds
-      match: '\[({{system}})\]'
+    - name: storage.modifier.system.text.withbrackets.ds
+      match: '{{startofBracket}}({{system}}){{endofBracket}}'
     - name: storage.modifier.system.text.ds
       match: '^\s*({{system}})'
-
 
   ip:
     name: entity.name.tag.ip.ds
     match: '^\s*{{ip}}'
 
   types:
-    name: storage.modifier.ds
-    match: '{{startOfIdentifier}}({{types}}){{endOfIdentifier}}'
+    patterns:
+    - name: storage.modifier.withbrackets.ds
+      match: '{{startofBracket}}({{types}}){{endofBracket}}'
+    - name: storage.modifier.ds
+      match: '{{startOfIdentifier}}({{types}}){{endOfIdentifier}}'
 
   property:
    name: variable.object.property.ds
@@ -109,7 +112,7 @@ repository:
         begin: '{{systemHeader}}(\{)(?=[^\}]*$)'
         beginCaptures:
           '1': {name: storage.modifier.system.header.ds}
-          '2': {name: entity.name.tag.ip.spec.ds}
+          '2': {name: support.type.tag.ip.spec.ds}
           '3': {name: entity.name.variable.system.name.ds}
           '4': {name: punctuation.brace.system.start.ds}
         end: (^\s*\})
@@ -119,10 +122,10 @@ repository:
           - include: '#comments'
           - include: '#flows'
           - include: '#jobs'
+          - include: '#devices'
           - include: '#interfaces'
           - include: '#buttons'
           - include: '#lamps'
-          - include: '#devices'
           - include: '#codeblocks'
           # - include: '#segment'
           - include: '#types'
@@ -134,7 +137,7 @@ repository:
         begin: '{{systemHeader}}(\{)'
         beginCaptures:
           '1': {name: storage.modifier.system.header.ds}
-          '2': {name: entity.name.tag.ip.spec.ds}
+          '2': {name: support.type.tag.ip.spec.ds}
           '3': {name: entity.name.variable.system.name.ds}
           '4': {name: punctuation.brace.system.start.ds}
         end: (\})
@@ -148,10 +151,10 @@ repository:
           - include: '#comments'
           - include: '#flows'
           - include: '#jobs'
+          - include: '#devices'
           - include: '#interfaces'
           - include: '#buttons'
           - include: '#lamps'
-          - include: '#devices'
           - include: '#codeblocks'
           # - include: '#segment'
           - include: '#types'
@@ -403,14 +406,12 @@ repository:
   devices:
     patterns:
       name: device.ds
-      begin: '{{deviceHeader}}'
-      beginCaptures:
-        '1': {name: storage.modifier.interfaces.header.ds}
-        '2': {name: storage.modifier.interfaces.header.ds}
-        '3': {name: storage.modifier.interfaces.header.ds}
-      end: \;
-      endCaptures:
-        '1': {name: punctuation.separator.array.ds}
+      # match: '{{deviceHeader}}'
+      match: '\[(device)\s*(file\s*=\s*)?\]\s*(;)$'
+      captures:
+        '1': {name: storage.modifier.devices.header1.ds}
+        '2': {name: support.type.devices.header2.ds}
+        '3': {name: storage.modifier.devices.header3.ds}
 
   exsystem:
     patterns:

@@ -5,40 +5,6 @@ open System.Linq
 open Engine.Core
 open Engine.CodeGenCPU
 
-let getOriginIOs(real:Real, initialType:InitialType) =
-    let origins, resetChains = OriginHelper.GetOriginsWithJobDefs real.Graph
-    let ios = 
-        origins
-            .Where(fun w-> w.Value = initialType)
-            .Select(fun s-> s.Key.InTag)
-            .Cast<PlcTag<bool>>()
-    ios
-
-let getNeedCheck(real:Real) =
-    let origins, resetChains = OriginHelper.GetOriginsWithJobDefs real.Graph
-    let needChecks = origins.Where(fun w-> w.Value = NeedCheck)
-    let needCheckSet = 
-        resetChains.Select(fun rs-> 
-                 rs.SelectMany(fun r-> 
-                    needChecks.Where(fun f->f.Key.ApiName = r)
-                             ).Select(fun s-> s.Key.InTag).Cast<PlcTag<bool>>()
-                    )
-    let sets = 
-        needCheckSet 
-        |> Seq.filter(fun ils -> ils.Any())
-        |> Seq.map(fun ils -> 
-                    ils.Select(fun il -> il.Expr 
-                                         <&&> !!(ils.Except([il]).ToOr()))
-                       .ToOr()
-                   ) //각 리셋체인 단위로 하나라도 켜있으면 됨
-                    //         resetChain1         resetChain2       ...
-                    //      --| |--|/|--|/|--------| |--|/|--|/|--   ...
-                    //      --|/|--| |--|/|--    --|/|--| |--|/|--
-                    //      --|/|--|/|--| |--    --|/|--|/|--| |--
-
-    if needChecks.Any() 
-    then sets.ToAnd()
-    else real.V.System._on.Expr
 
 type VertexManager with
    

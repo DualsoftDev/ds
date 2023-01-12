@@ -106,5 +106,14 @@ module CpuLoader =
     type Cpu =
 
         [<Extension>]
-        static member LoadStatements (system:DsSystem) = convertSystem(system)
-        
+        static member LoadStatements (system:DsSystem) = 
+            
+            let statements = convertSystem(system)
+
+            //test debug
+            system._auto.Value <- true
+            system._run.Value <- true
+            statements.Iter(fun f->f.Statement.Do())
+            //test debug
+
+            statements

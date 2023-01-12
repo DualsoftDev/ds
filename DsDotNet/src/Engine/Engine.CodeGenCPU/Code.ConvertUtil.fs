@@ -37,7 +37,58 @@ module CodeConvertUtil =
                         a.TargetWrapper.GetTarget() :?> Real
                     else failwith "Error GetPureReal"
             |_ -> failwith "Error GetPureReal"
+    
+   
+        //let origins, resetChains = OriginHelper.GetOriginsWithJobDefs real.Graph
+        //origins
+        //    .Where(fun w-> w.Value = initialType)
+        //    .Select(fun s-> s.Key)
+    
 
+    let getOriginJobDefs(real:Real, initialType:InitialType) =
+        let origins, resetChains = OriginHelper.GetOriginsWithJobDefs real.Graph
+        origins
+            .Where(fun w-> w.Value = initialType)
+            .Select(fun s-> s.Key)
+    
+    let getOriginIOs(real:Real, initialType:InitialType) =
+        let origins = getOriginJobDefs(real, initialType)
+        origins.Select(fun jd -> jd.InTag).Cast<PlcTag<bool>>()
+
+    let getStartPointExpr(call:Call, jd:JobDef) =
+        match call.Parent.GetCore() with
+        | :? Real as r -> 
+                let ons = getOriginJobDefs (r, InitialType.On)
+                if ons.Contains(jd)
+                    then r.V.RO.Expr <||> call.System._on.Expr
+                    else call.System._off.Expr
+        | _ -> call.System._off.Expr
+
+    let getNeedCheck(real:Real) =
+        let origins, resetChains = OriginHelper.GetOriginsWithJobDefs real.Graph
+        let needChecks = origins.Where(fun w-> w.Value = NeedCheck)
+        let needCheckSet = 
+            resetChains.Select(fun rs-> 
+                     rs.SelectMany(fun r-> 
+                        needChecks.Where(fun f->f.Key.ApiName = r)
+                                 ).Select(fun s-> s.Key.InTag).Cast<PlcTag<bool>>()
+                        )
+        let sets = 
+            needCheckSet 
+            |> Seq.filter(fun ils -> ils.Any())
+            |> Seq.map(fun ils -> 
+                        ils.Select(fun il -> il.Expr 
+                                             <&&> !!(ils.Except([il]).ToOr()))
+                           .ToOr()
+                       ) //각 리셋체인 단위로 하나라도 켜있으면 됨
+                        //         resetChain1         resetChain2       ...
+                        //      --| |--|/|--|/|--------| |--|/|--|/|--   ...
+                        //      --|/|--| |--|/|--    --|/|--| |--|/|--
+                        //      --|/|--|/|--| |--    --|/|--|/|--| |--
+
+        if needChecks.Any() 
+        then sets.ToAnd()
+        else real.V.System._on.Expr
 
     //let rec getCoinTags(v:Vertex, isInTag:bool) : Tag<bool> seq =
     //        match v with
@@ -59,6 +110,7 @@ module CodeConvertUtil =
     [<Extension>]
     type CodeConvertUtilExt =
         [<Extension>] static member STs(xs:VertexManager seq): DsBit list = xs.Select(fun s->s.ST) |> Seq.toList 
+        [<Extension>] static member SFs(xs:VertexManager seq): DsBit list = xs.Select(fun s->s.SF) |> Seq.toList 
         [<Extension>] static member RTs(xs:VertexManager seq): DsBit list = xs.Select(fun s->s.RT) |> Seq.toList 
         [<Extension>] static member ETs(xs:VertexManager seq): DsBit list = xs.Select(fun s->s.ET) |> Seq.toList 
         [<Extension>] static member CRs(xs:VertexMCoin seq): DsBit list    = xs.Select(fun s->s.CR) |> Seq.toList 

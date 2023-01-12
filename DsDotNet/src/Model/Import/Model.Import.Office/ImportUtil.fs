@@ -63,23 +63,31 @@ module ImportU =
         //Job 만들기
         [<Extension>]
         static member MakeJobs  (doc:pptDoc, mySys:DsSystem) =
+            let dicJobName = Dictionary<string, Job>()
+
             doc.Nodes
             |> Seq.filter(fun node -> node.NodeType = COPY_VALUE ||  node.NodeType = COPY_REF)
-            |> Seq.collect(fun node -> node.JobInfos)
-            |> Seq.iter(fun jobSet ->
-                let jobBase = jobSet.Key
-                let JobTargetSystems = jobSet.Value
-                //ppt에서는 동일한 디바이스만 동시 Job구성 가능하여  아무시스템이나 찾아도 API는 같음
-                let refSystem = mySys.TryFindLoadedSystem(JobTargetSystems.First()).Value.ReferenceSystem
+            |> Seq.iter(fun node ->
+                node.JobInfos 
+                |> Seq.iter(fun jobSet -> 
+                    let jobBase = jobSet.Key
+                    let JobTargetSystems = jobSet.Value
+                    //ppt에서는 동일한 디바이스만 동시 Job구성 가능하여  아무시스템이나 찾아도 API는 같음
+                    let refSystem = mySys.TryFindLoadedSystem(JobTargetSystems.First()).Value.ReferenceSystem
 
-                refSystem.ApiItems.ForEach(fun api->
-                    let jobDefs =
-                        JobTargetSystems
-                            .Select(fun tgt -> getApiItems(mySys, tgt, api.Name), tgt)
-                            .Select(fun (api, tgt)-> JobDef(api, "", "", tgt))
+                    refSystem.ApiItems.ForEach(fun api->
+                        let jobDefs =
+                            JobTargetSystems
+                                .Select(fun tgt -> getApiItems(mySys, tgt, api.Name), tgt)
+                                .Select(fun (api, tgt)-> JobDef(api, "", "", tgt))
 
-                    let job = Job(jobBase+"_"+api.Name, jobDefs) //test ahn command observe 추가
-                    mySys.Jobs.Add(job)
+                        let job = Job(jobBase+"_"+api.Name, jobDefs) 
+                        if dicJobName.ContainsKey(job.Name)
+                        then Office.ErrorName(node.Shape, ErrID._33, node.PageNum)
+                        else dicJobName.Add(job.Name, job)
+
+                        mySys.Jobs.Add(job)
+                    )
                     )
                 )
 

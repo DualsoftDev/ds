@@ -226,15 +226,16 @@ module PPTDocModule =
     
 [<Extension>]
 type PPTDocExt =
-        [<Extension>] static member GetCopyPathNName(doc:pptDoc) =
-                         doc.Nodes 
-                         |> Seq.filter(fun node -> node.NodeType = COPY_VALUE || node.NodeType = COPY_REF)
-                         |> Seq.collect(fun node ->
-                            node.CopySys.Select(fun copy -> 
-                                let path = Path.GetFullPath(Path.Combine(doc.DirectoryName, copy.Value))+".pptx"
-                                if File.Exists(path) |> not
-                                then node.Shape.ErrorPath(ErrID._29, node.PageNum, path)
+        [<Extension>]
+        static member GetCopyPathNName(doc:pptDoc) =
+            doc.Nodes 
+            |> Seq.filter(fun node -> node.NodeType = COPY_VALUE || node.NodeType = COPY_REF)
+            |> Seq.collect(fun node ->
+            node.CopySys.Select(fun copy -> 
+                let path = Path.GetFullPath(Path.Combine(doc.DirectoryName, copy.Value))+".pptx"
+                if File.Exists(path) |> not
+                then node.Shape.ErrorPath(ErrID._29, node.PageNum, path)
                                 
-                                copy.Value , copy.Key, node)
-                        )
+                copy.Value , copy.Key, node)
+        )
      

@@ -139,6 +139,7 @@ module internal ToDsTextModule =
                 yield flowToDs f indent
 
             let tab2 = getTab (indent+1)
+            let tab3 = getTab 3
 
             if system.Jobs.Any() then
                 let addressPrint (addr:string) = if addr = "" then "_" else addr
@@ -167,30 +168,47 @@ module internal ToDsTextModule =
 
                 yield $"{tab}{rb}"
 
-            let buttonsToDs(category:string, btns:ButtonDef seq) =
-                [
-                    if btns.length() > 0 then
-                        yield $"{tab}[{category}] = {lb}"
-                        for btn in btns do
-                            let flows = (btn.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine()) |> String.concat ";")
-                            let flowTexts = 
-                                if flows.Count() > 0 then
-                                    flows + ";"
-                                else
-                                    ""
-                            let inAddr =  if isNullOrEmpty  btn.InAddress  then "_" else btn.InAddress 
-                            let outAddr = if isNullOrEmpty  btn.OutAddress then "_" else btn.OutAddress
-                            yield $"{tab2}{btn.Name}({inAddr}, {outAddr}) = {lb} {flowTexts} {rb}"
-                        yield $"{tab}{rb}"
-                ] |> combineLines
-            yield buttonsToDs("auto",   system.AutoButtons      )
-            yield buttonsToDs("manual", system.ManualButtons    )
-            yield buttonsToDs("drive",  system.DriveButtons     )
-            yield buttonsToDs("stop",   system.StopButtons      )
-            yield buttonsToDs("clear",  system.ClearButtons     )
-            yield buttonsToDs("emg",    system.EmergencyButtons )
-            yield buttonsToDs("test",   system.TestButtons      )
-            yield buttonsToDs("home",   system.HomeButtons      )
+            let btns = 
+                let allBtns = [
+                    system.AutoButtons;
+                    system.ManualButtons;
+                    system.DriveButtons;
+                    system.StopButtons;
+                    system.ClearButtons;
+                    system.EmergencyButtons;
+                    system.TestButtons;
+                    system.HomeButtons;
+                ]
+                allBtns
+                |> List.map(fun b -> b |> List.ofSeq)
+                |> List.collect id
+            if btns.Any() then
+                yield $"{tab}[buttons] = {lb}"
+                let buttonsToDs(category:string, btns:ButtonDef seq) =
+                    [
+                        if btns.length() > 0 then
+                            yield $"{tab2}[{category}] = {lb}"
+                            for btn in btns do
+                                let flows = (btn.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine()) |> String.concat ";")
+                                let flowTexts = 
+                                    if flows.Count() > 0 then
+                                        flows + ";"
+                                    else
+                                        ""
+                                let inAddr =  if isNullOrEmpty  btn.InAddress  then "_" else btn.InAddress 
+                                let outAddr = if isNullOrEmpty  btn.OutAddress then "_" else btn.OutAddress
+                                yield $"{tab3}{btn.Name}({inAddr}, {outAddr}) = {lb} {flowTexts} {rb}"
+                            yield $"{tab2}{rb}"
+                    ] |> combineLines
+                yield buttonsToDs("auto",   system.AutoButtons      )
+                yield buttonsToDs("manual", system.ManualButtons    )
+                yield buttonsToDs("drive",  system.DriveButtons     )
+                yield buttonsToDs("stop",   system.StopButtons      )
+                yield buttonsToDs("clear",  system.ClearButtons     )
+                yield buttonsToDs("emg",    system.EmergencyButtons )
+                yield buttonsToDs("test",   system.TestButtons      )
+                yield buttonsToDs("home",   system.HomeButtons      )
+                yield $"{tab}{rb}"
 
             let lampsToDs(category:string, lamps:LampDef seq) =
                 [

@@ -146,7 +146,7 @@ categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|stopBlock|emergencyBl
     homeBlock      :'[' ('home_in'|'home') ']'     EQ categoryBlock;
     readyBlock     :'[' ('ready') ']'              EQ categoryBlock;
     
-    categoryBlock: LBRACE (() | ((SEIMCOLON)* (buttonDef|lampDef))* (SEIMCOLON)*) RBRACE;
+    categoryBlock: LBRACE (() | (buttonDef|lampDef)*) RBRACE;
     
     buttonDef: btnNameAddr EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
     btnNameAddr: buttonName addressInOut;

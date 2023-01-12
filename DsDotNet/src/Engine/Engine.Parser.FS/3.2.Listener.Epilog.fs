@@ -16,61 +16,63 @@ module EtcListenerModule =
     (* 모든 vertex 가 생성 된 이후, edge 연결 작업 수행 *)
     type DsParserListener with
         member x.ProcessButtonBlock(ctx:ButtonBlockContext) =
-            let first = ctx.TryFindFirstChild<ParserRuleContext>().Value // {Emergency, Auto, Start, Reset}ButtonsContext
-            let system = x.TheSystem
-            let targetBtnType =
-                match first with
-                | :? AutoBlockContext      -> DuAutoBTN
-                | :? ManualBlockContext    -> DuManualBTN
-                | :? DriveBlockContext     -> DuDriveBTN
-                | :? StopBlockContext      -> DuStopBTN
-                | :? ClearBlockContext     -> DuClearBTN
-                | :? EmergencyBlockContext -> DuEmergencyBTN
-                | :? TestBlockContext      -> DuTestBTN
-                | :? HomeBlockContext      -> DuHomeBTN
-                | _ -> failwith "button type error"
-            let category = first.GetChild(1).GetText();       // [| '[', category, ']', buttonBlock |] 에서 category 만 추려냄 (e.g 'emg')
-            let key = (system, category)
-            if x.ButtonCategories.Contains(key) then
-                failwith $"Duplicated button category {category} near {ctx.GetText()}"
-            else
-                x.ButtonCategories.Add(key) |> ignore
-
-            let buttonDefs = first.Descendants<ButtonDefContext>().ToArray()
-            let flowBtnInfo = [
-                for bd in buttonDefs do
-                option {
-                    let! btnNameAddr    = bd.TryFindFirstChild<BtnNameAddrContext>()
-                    let! btnNameCtx     = btnNameAddr.TryFindFirstChild<ButtonNameContext>()
-                    let btnName         = btnNameCtx.GetText()
-                    let addrIn, addrOut = 
-                        match btnNameAddr.ChildCount with
-                        | 2 -> 
-                            option {
-                                let! inOutCtx = btnNameAddr.TryFindFirstChild<AddressInOutContext>()
-                                let! inCtx    = inOutCtx.TryFindFirstChild<InAddrContext>()
-                                let! outCtx   = inOutCtx.TryFindFirstChild<OutAddrContext>()
-                                return inCtx.GetText(), outCtx.GetText()
-                            } |> Option.get
-                        | _ -> 
-                            null, null
-                    let flows =
-                        bd.Descendants<FlowNameContext>()
-                            .Select(fun flowCtx -> flowCtx.GetText())
-                            .Tap(fun flowName -> verifyM $"Flow [{flowName}] not exists!" (system.Flows.Any(fun f -> f.Name = flowName)))
-                            .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName))
-                            .ToHashSet()
-                                
-                    if flows.Count > 0 then
-                        return ButtonDef(btnName, targetBtnType, addrIn, addrOut, flows)
+            for ctxChild in ctx.children do
+                if ctxChild :? ParserRuleContext then
+                    let first = ctxChild.TryFindFirstChild<ParserRuleContext>().Value
+                    let system = x.TheSystem
+                    let targetBtnType =
+                        match first with
+                        | :? AutoBlockContext      -> DuAutoBTN
+                        | :? ManualBlockContext    -> DuManualBTN
+                        | :? DriveBlockContext     -> DuDriveBTN
+                        | :? StopBlockContext      -> DuStopBTN
+                        | :? ClearBlockContext     -> DuClearBTN
+                        | :? EmergencyBlockContext -> DuEmergencyBTN
+                        | :? TestBlockContext      -> DuTestBTN
+                        | :? HomeBlockContext      -> DuHomeBTN
+                        | _ -> failwith $"button type error {first.GetType()}"
+                    let category = first.GetChild(1).GetText();       // [| '[', category, ']', buttonBlock |] 에서 category 만 추려냄 (e.g 'emg')
+                    let key = (system, category)
+                    if x.ButtonCategories.Contains(key) then
+                        failwith $"Duplicated button category {category} near {ctx.GetText()}"
                     else
-                        return ButtonDef(btnName, targetBtnType, null, null, new HashSet<Flow>())
-                }
-            ]
-            flowBtnInfo
-            |> List.choose id
-            |> List.map(system.Buttons.Add)
-            |> ignore
+                        x.ButtonCategories.Add(key) |> ignore
+
+                    let buttonDefs = first.Descendants<ButtonDefContext>().ToArray()
+                    let flowBtnInfo = [
+                        for bd in buttonDefs do
+                        option {
+                            let! btnNameAddr    = bd.TryFindFirstChild<BtnNameAddrContext>()
+                            let! btnNameCtx     = btnNameAddr.TryFindFirstChild<ButtonNameContext>()
+                            let btnName         = btnNameCtx.GetText()
+                            let addrIn, addrOut = 
+                                match btnNameAddr.ChildCount with
+                                | 2 -> 
+                                    option {
+                                        let! inOutCtx = btnNameAddr.TryFindFirstChild<AddressInOutContext>()
+                                        let! inCtx    = inOutCtx.TryFindFirstChild<InAddrContext>()
+                                        let! outCtx   = inOutCtx.TryFindFirstChild<OutAddrContext>()
+                                        return inCtx.GetText(), outCtx.GetText()
+                                    } |> Option.get
+                                | _ -> 
+                                    null, null
+                            let flows =
+                                bd.Descendants<FlowNameContext>()
+                                    .Select(fun flowCtx -> flowCtx.GetText())
+                                    .Tap(fun flowName -> verifyM $"Flow [{flowName}] not exists!" (system.Flows.Any(fun f -> f.Name = flowName)))
+                                    .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName))
+                                    .ToHashSet()
+                                
+                            if flows.Count > 0 then
+                                return ButtonDef(btnName, targetBtnType, addrIn, addrOut, flows)
+                            else
+                                return ButtonDef(btnName, targetBtnType, null, null, new HashSet<Flow>())
+                        }
+                    ]
+                    flowBtnInfo
+                    |> List.choose id
+                    |> List.map(system.Buttons.Add)
+                    |> ignore
 
         member x.ProcessLampBlock(ctx:LampBlockContext) =
             let first = ctx.TryFindFirstChild<ParserRuleContext>().Value

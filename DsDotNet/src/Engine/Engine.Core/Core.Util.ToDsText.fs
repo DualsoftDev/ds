@@ -168,7 +168,7 @@ module internal ToDsTextModule =
 
                 yield $"{tab}{rb}"
 
-            let btns = 
+            let btns =
                 let allBtns = [
                     system.AutoButtons;
                     system.ManualButtons;
@@ -190,12 +190,12 @@ module internal ToDsTextModule =
                             yield $"{tab2}[{category}] = {lb}"
                             for btn in btns do
                                 let flows = (btn.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine()) |> String.concat ";")
-                                let flowTexts = 
+                                let flowTexts =
                                     if flows.Count() > 0 then
                                         flows + ";"
                                     else
                                         ""
-                                let inAddr =  if isNullOrEmpty  btn.InAddress  then "_" else btn.InAddress 
+                                let inAddr =  if isNullOrEmpty  btn.InAddress  then "_" else btn.InAddress
                                 let outAddr = if isNullOrEmpty  btn.OutAddress then "_" else btn.OutAddress
                                 yield $"{tab3}{btn.Name}({inAddr}, {outAddr}) = {lb} {flowTexts} {rb}"
                             yield $"{tab2}{rb}"
@@ -209,8 +209,8 @@ module internal ToDsTextModule =
                 yield buttonsToDs("test",   system.TestButtons     )
                 yield buttonsToDs("home",   system.HomeButtons     )
                 yield $"{tab}{rb}"
-                
-            let lmps = 
+
+            let lmps =
                 let alllmps = [
                     system.AutoModeLamps;
                     system.ManualModeLamps;
@@ -230,12 +230,12 @@ module internal ToDsTextModule =
                     if lamps.length() > 0 then
                         yield $"{tab2}[{category}] = {lb}"
                         for lamp in lamps do
-                            let addr = 
+                            let addr =
                                 if lamp.OutAddress <> null then
                                     $"({lamp.OutAddress})"
                                 else
                                     ""
-                                
+
                             yield $"{tab3}{lamp.Name}{addr} = {lb} {lamp.SettingFlow.Name} {rb}"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
@@ -246,7 +246,8 @@ module internal ToDsTextModule =
             yield lampsToDs("emg",    system.EmergencyModeLamps)
             yield lampsToDs("test",   system.TestModeLamps     )
             yield lampsToDs("ready",  system.ReadyModeLamps    )
-            yield $"{tab}{rb}"
+            if lmps.Any() then
+                yield $"{tab}{rb}"
 
             (* prop
                     safety
@@ -331,7 +332,7 @@ module internal ToDsTextModule =
             // todo 복수개의 block 이 허용되면, serialize 할 때 해당 위치에 맞춰서 serialize 해야 하는데...
             for code in system.OriginalCodeBlocks do
                 yield code
-                
+
             yield rb
         ] |> combineLines
 

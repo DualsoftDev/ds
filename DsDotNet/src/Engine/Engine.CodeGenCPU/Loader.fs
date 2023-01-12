@@ -65,7 +65,7 @@ module CpuLoader =
     ///flow 별 운영모드 적용
     let private applyOperationModeSpec(f:Flow) = 
         [
-            yield f.O1_EmergencyOperationMode()
+            yield f.O1_ReadyOperationMode()
             yield f.O2_StopOperationMode()
             yield f.O3_ManualOperationMode()
             yield f.O4_RunOperationMode()

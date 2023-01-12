@@ -15,19 +15,20 @@ type DsSystem with
                 let out = btn.OutTag :?> PlcTag<bool>
                 yield (set.Expr, s._off.Expr) --| (out, "B1" )
         ]
+
     member s.B2_ModeLamp(): CommentedStatement list=
         [
             for lamp in s.SystemLamps do
-                let set = 
+                let sets = 
                     match lamp.LampType with
-                    | DuAutoModeLamp      -> lamp.SettingFlow.dop
-                    | DuManualModeLamp    -> lamp.SettingFlow.mop
-                    | DuDriveModeLamp     -> lamp.SettingFlow.rop
-                    | DuStopModeLamp      -> lamp.SettingFlow.sop
-                    | DuEmergencyModeLamp -> lamp.SettingFlow.eop
-                    | DuTestModeLamp      -> lamp.SettingFlow.dop
-                    | DuReadyModeLamp     -> lamp.SettingFlow.dop
+                    | DuAutoModeLamp      -> lamp.SettingFlow.aop.Expr
+                    | DuManualModeLamp    -> lamp.SettingFlow.mop.Expr
+                    | DuDriveModeLamp     -> lamp.SettingFlow.dop.Expr
+                    | DuStopModeLamp      -> lamp.SettingFlow.sop.Expr
+                    | DuEmergencyModeLamp -> lamp.SettingFlow.eop.Expr
+                    | DuTestModeLamp      -> lamp.SettingFlow.top.Expr
+                    | DuReadyModeLamp     -> lamp.SettingFlow.rop.Expr
 
                 let out = lamp.OutTag :?> PlcTag<bool>
-                yield (set.Expr, s._off.Expr) --| (out, "B2" )
+                yield (sets, s._off.Expr) --| (out, "B2" )
         ]

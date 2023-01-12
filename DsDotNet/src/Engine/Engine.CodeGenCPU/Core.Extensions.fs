@@ -93,11 +93,13 @@ module rec ConvertCoreExt =
    
 //운영 모드 는 Flow 별로 제공된 모드 On/Off 상태 나타낸다.
     type Flow with
-        member f.eop    = DsTag<bool> ($"{f.Name}(EO)", false)   // Emergency Operation Mode
-        member f.sop    = DsTag<bool> ($"{f.Name}(SO)", false)   // Stop Operation Mode
+        member f.rop    = DsTag<bool> ($"{f.Name}(RO)", false)   // Ready Operation Mode
+        member f.aop    = DsTag<bool> ($"{f.Name}(AO)", false)   // Auto Operation Mode
         member f.mop    = DsTag<bool> ($"{f.Name}(MO)", false)   // Manual Operation Mode 
-        member f.rop    = DsTag<bool> ($"{f.Name}(RO)", false)   // Auto Run Operation Mode 
-        member f.dop    = DsTag<bool> ($"{f.Name}(DO)", false)   // Dry Run Operation Mode (시운전) 
+        member f.dop    = DsTag<bool> ($"{f.Name}(DO)", false)   // Drive Operation Mode 
+        member f.top    = DsTag<bool> ($"{f.Name}(TO)", false)   // Test Run Operation Mode (시운전) 
+        member f.sop    = DsTag<bool> ($"{f.Name}(SO)", false)   // Stop State 
+        member f.eop    = DsTag<bool> ($"{f.Name}(EO)", false)   // Emergency State 
         member f.auto   = DsTag<bool>("auto", false)
         member f.manual = DsTag<bool>("manual", false)
         member f.drive  = DsTag<bool>("drive", false)

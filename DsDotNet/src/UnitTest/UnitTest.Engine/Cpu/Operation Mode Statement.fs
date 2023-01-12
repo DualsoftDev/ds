@@ -17,7 +17,7 @@ type Spec04_OperationModeStatement() =
     [<Test>] 
     member __.``O1 Emergency Operation Mode`` () = 
         for flow in t.Flows do
-            flow.O1_EmergencyOperationMode() |> doCheck
+            flow.O1_ReadyOperationMode() |> doCheck
 
     [<Test>]
     member __.``O2 Stop Operation Mode`` () = 

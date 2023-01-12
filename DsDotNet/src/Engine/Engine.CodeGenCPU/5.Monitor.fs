@@ -20,7 +20,7 @@ type VertexManager with
         (onExpr <&&> locks, rsts) --| (v.OG, "M1" )
 
     member v.M2_PauseMonitor(): CommentedStatement  = 
-        let sets = v.Flow.eop.Expr <||> v.Flow.sop.Expr 
+        let sets = v.Flow.rop.Expr <||> v.Flow.rop.Expr 
         let rsts = v.System._off.Expr
 
         (sets, rsts) --| (v.PA, "M2" )

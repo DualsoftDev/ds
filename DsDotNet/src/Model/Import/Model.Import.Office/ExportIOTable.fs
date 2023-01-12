@@ -21,20 +21,18 @@ module ExportIOTable =
         dt.Columns.Add($"{IOColumn.Input}"      , typeof<string>) |>ignore
         dt.Columns.Add($"{IOColumn.Output}"     , typeof<string>) |>ignore
         dt.Columns.Add($"{IOColumn.Job}"        , typeof<string>) |>ignore
-        dt.Columns.Add($"{IOColumn.Command}"    , typeof<string>) |>ignore
-        dt.Columns.Add($"{IOColumn.Observe}"    , typeof<string>) |>ignore
+        dt.Columns.Add($"{IOColumn.Func}"       , typeof<string>) |>ignore
         
         let funcToText(xs:Func seq) = xs.Select(fun f->f.ToDsText()).JoinWith(";")
 
         let rowItems(jobDef:JobDef, job:Job option) =
-            let jobName, commands, observes = 
+            let jobName, funcs = 
                 if job.IsSome
                 then job.Value.Name
-                     , job.Value.Commands.Cast<Func>() |> funcToText
-                     , job.Value.Observes.Cast<Func>() |> funcToText
-                else "↑", "↑", "↑"
+                     , job.Value.Funcs.Cast<Func>() |> funcToText
+                else "↑", "↑"
 
-            [TextXlsAddress;  jobDef.ApiName; "bool"; jobDef.InAddress  ; jobDef.OutAddress; jobName; commands; observes; ]
+            [TextXlsAddress;  jobDef.ApiName; "bool"; jobDef.InAddress  ; jobDef.OutAddress; jobName; funcs; ]
 
         let rows =
             seq {
@@ -62,14 +60,12 @@ module ExportIOTable =
 
         let toBtnText(btns:ButtonDef seq, xlsCase:ExcelCase) = 
             for btn in  btns do
-                let cmds = btn.Commands.Cast<Func>() |> funcToText
-                let obss = btn.Observes.Cast<Func>() |> funcToText
-                dt.Rows.Add(xlsCase.ToText(),  btn.Name   , "bool",  btn.InAddress,    btn.OutAddress,  "'-",  cmds,  obss) |> ignore
+                let func = btn.Funcs.Cast<Func>() |> funcToText
+                dt.Rows.Add(xlsCase.ToText(),  btn.Name   , "bool",  btn.InAddress,    btn.OutAddress,  "'-",  func) |> ignore
         let toLampText(lamps:LampDef seq, xlsCase:ExcelCase) = 
             for lamp in  lamps do
-                let cmds = lamp.Commands.Cast<Func>() |> funcToText
-                let obss = lamp.Observes.Cast<Func>() |> funcToText
-                dt.Rows.Add(xlsCase.ToText(),  lamp.Name  , "bool",  "'-",  lamp.OutAddress,  "'-",  cmds,  obss ) |> ignore
+                let func = lamp.Funcs.Cast<Func>() |> funcToText
+                dt.Rows.Add(xlsCase.ToText(),  lamp.Name  , "bool",  "'-",  lamp.OutAddress,  "'-",  func) |> ignore
         
         emptyLine() 
         emptyLine() 

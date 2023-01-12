@@ -119,8 +119,7 @@ module CoreModule =
         //CPU 생성시 할당됨 OutTag
         member val OutTag = getNull<ITagWithAddress>() with get, set
         member val SettingFlows  = flows with get, set
-        member val Observes  = HashSet<Observe>() with get, set//todo ToDsText, parsing
-        member val Commands  = HashSet<Command>() with get, set//todo ToDsText, parsing
+        member val Funcs  = HashSet<Func>() with get, set//todo ToDsText, parsing
 
 
     and LampDef (name:string, lampType:LampType, outAddress:TagAddress, flow:Flow) =
@@ -133,8 +132,7 @@ module CoreModule =
         member val OutTag = getNull<ITagWithAddress>() with get, set
         ///단일 Flow 단위로 Lamp 상태 출력
         member val SettingFlow  = flow with get, set
-        member val Observes  = HashSet<Observe>() with get, set//todo ToDsText, parsing
-        member val Commands  = HashSet<Command>() with get, set//todo ToDsText, parsing
+        member val Funcs  = HashSet<Func>() with get, set//todo ToDsText, parsing
 
     and AliasDef(aliasKey:Fqdn, target:AliasTargetWrapper option, mnemonics:string []) =
         member _.AliasKey = aliasKey
@@ -197,10 +195,7 @@ module CoreModule =
     type Job (name:string, jobDefs:JobDef seq) =
         inherit Named(name)
         member val JobDefs = jobDefs.ToFSharpList()
-        //$ton 200      //ls xgk 명령어를 따른다.
-        member val Observes  = HashSet<Observe>() with get, set//todo ToDsText, parsing
-        //$mov 100 R200 //ls xgk 명령어를 따른다.
-        member val Commands  = HashSet<Command>() with get, set//todo ToDsText, parsing
+        member val Funcs  = HashSet<Func>() with get, set//todo ToDsText, parsing
 
     type TagAddress = string
     /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }

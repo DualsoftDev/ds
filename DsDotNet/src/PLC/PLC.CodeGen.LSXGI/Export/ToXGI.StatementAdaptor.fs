@@ -46,15 +46,15 @@ module ConvertorPrologModule =
         | "Double" -> "LREAL"
         | ("SByte" | "Char")   -> "BYTE"
         | "Byte"   -> "BYTE"
-        | "Int16" | "UInt16" -> "INT"
-        | "Int32" | "UInt32" -> "DINT"
-        | "Int64" | "UInt64" -> "LINT"
-        //| "Int16"  -> "SINT"
-        //| "UInt16" -> "USINT"
-        //| "Int32"  -> "DINT"
-        //| "UInt32" -> "UDINT"
-        //| "Int64"  -> "LINT"
-        //| "UInt64" -> "ULINT"
+        //| "Int16" | "UInt16" -> "INT"
+        //| "Int32" | "UInt32" -> "DINT"
+        //| "Int64" | "UInt64" -> "LINT"
+        | "Int16"  -> "SINT"
+        | "UInt16" -> "USINT"
+        | "Int32"  -> "DINT"
+        | "UInt32" -> "UDINT"
+        | "Int64"  -> "LINT"
+        | "UInt64" -> "ULINT"
         | "String" -> "STRING"  // 32 byte
         | _ -> failwith "ERROR"
 
@@ -87,6 +87,13 @@ module ConvertorPrologModule =
         member x.SymbolInfo = symbolInfo
 
         override x.ToBoxedExpression() = var2expr x
+
+    let getType (x:obj) : System.Type =
+        match x with
+        | :? IExpression as exp -> exp.DataType
+        | :? IStorage as stg -> stg.DataType
+        | :? IValue as value -> value.ObjValue.GetType()
+        | _ -> failwith "ERROR"
 
 
 [<AutoOpen>]

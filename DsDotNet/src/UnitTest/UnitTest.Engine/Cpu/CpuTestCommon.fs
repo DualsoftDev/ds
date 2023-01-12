@@ -63,9 +63,9 @@ module CpuTestUtil =
         let st = commentedStatement.Statement
         st.GetSourceStorages() 
         |> Seq.filter(fun f-> not <| f.Name.StartsWith("_"))
-        |> Seq.iter(fun f->f.Value <- true)
+        |> Seq.iter(fun f->f.BoxedValue <- true)
 
         st.Do()     // test ahn 추후 정답지 작성
-        st.GetTargetStorages().Head.Value === st.GetTargetStorages().Head.Value
+        st.GetTargetStorages().Head.BoxedValue === st.GetTargetStorages().Head.BoxedValue
         
     let doChecks (commentedStatements:CommentedStatement seq) = commentedStatements.Iter(doCheck)

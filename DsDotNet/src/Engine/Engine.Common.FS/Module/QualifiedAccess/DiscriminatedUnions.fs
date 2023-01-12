@@ -2,6 +2,8 @@ namespace Engine.Common.FS
 open Microsoft.FSharp.Reflection
 open Microsoft.FSharp.Quotations.Patterns
 open System
+open Parse
+open Engine.Common.FS
 
 /// F# Discriminated Unions
 [<RequireQualifiedAccess>]
@@ -16,7 +18,7 @@ module DU =
         |[|case|] -> Some(FSharpValue.MakeUnion(case,[||]) :?> 'a)
         |_ -> None
 
-
+    let tryParseEnum<'T when 'T: (new: unit -> 'T) and 'T: struct and 'T :> ValueType> (s:string) = Enum.TryParse<'T>(s) |> tryToOption
 
     //https://stackoverflow.com/questions/3363184/f-how-to-elegantly-select-and-group-discriminated-unions/3365084#3365084
     /// UnionCase 판정

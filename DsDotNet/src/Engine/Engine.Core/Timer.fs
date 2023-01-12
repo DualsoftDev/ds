@@ -81,7 +81,7 @@ module rec TimerModule =
                 .Where(fun storage -> storage = timerStruct.EN)
                 .Subscribe(fun storage ->
                     if ts.ACC.Value < 0us || ts.PRE.Value < 0us then failwith "ERROR"
-                    let rungInCondition = storage.Value :?> bool
+                    let rungInCondition = storage.BoxedValue :?> bool
                     tracefn "%A rung-condition-in=%b with DN=%b" tt rungInCondition ts.DN.Value
                     match tt, rungInCondition with
                     | TON, true ->
@@ -114,7 +114,7 @@ module rec TimerModule =
             ValueSubject
                 .Where(fun storage -> storage = ts.RES)
                 .Subscribe(fun storage ->
-                    let resetCondition = storage.Value :?> bool
+                    let resetCondition = storage.BoxedValue :?> bool
                     if resetCondition then
                         ts.ACC.Value <- 0us
                         ts.DN.Value <- false
@@ -132,7 +132,8 @@ module rec TimerModule =
         interface IStorage with
             member x.Name with get() = x.Name and set(v) = failwith "ERROR: not supported"
             member x.DataType = typedefof<TimerCounterBaseStruct>
-            member x.Value with get() = x.This and set(v) = failwith "ERROR: not supported"
+            member x.BoxedValue with get() = x.This and set(v) = failwith "ERROR: not supported"
+            member x.ObjValue = x.This
             member x.ToText() = failwith "ERROR: not supported"
             member _.ToBoxedExpression() = failwith "ERROR: not supported"
 

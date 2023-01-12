@@ -6,6 +6,7 @@ open PLC.CodeGen.LSXGI
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine.ElementType
 open System.Security
 open Engine.Core
+open Engine.Parser.FS
 
 type XgiLadderElementTest() =
     inherit XgiTestClass()
@@ -52,3 +53,24 @@ type XgiLadderElementTest() =
 
 
 
+    [<Test>]
+    member __.``Local var with init test`` () =
+        let storages = Storages()
+        let code = """
+            bool    mybool   = false;
+            single  mysingle = 0.1f;
+            double  mydouble = 3.14;
+            sbyte   mysbyte  = 1y;
+            char    mychar   = 'a';
+            byte    mybyte   = 2uy;
+            int16   myint16  = 16s;
+            uint16  myuint16 = 16us;
+            int32   myint32  = 32;
+            uint32  myuint32 = 32u;
+            int64   myint64  = 64L;
+            uint64  myuint64 = 64UL;
+            string  mystring = "hello";     // not working for string
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml

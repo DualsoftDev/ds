@@ -168,8 +168,9 @@ module ExpressionModule =
 
             member x.Name with get() = $"RisingCoil.{x.Storage.Name}" and set(v) = failwith "ERROR"
             member x.DataType = typedefof<RisingCoil>
-            member x.Value with get() = x.Storage.Value
-                            and set(v) = x.Storage.Value <- v
+            member x.BoxedValue with get() = x.Storage.BoxedValue
+                                and set(v) = x.Storage.BoxedValue <- v
+            member x.ObjValue = x.Storage.BoxedValue
 
             member x.ToText() = $"ppulse(${x.Storage.Name})"    // positive pulse
             member x.ToBoxedExpression() = failwith "ERROR: not supported"
@@ -183,9 +184,10 @@ module ExpressionModule =
 
             member x.Name with get() = $"FallingCoil.{x.Storage.Name}" and set(v) = failwith "ERROR"
             member x.DataType = typedefof<FallingCoil>
-            member x.Value with get() = x.Storage.Value
-                            and set(v) = x.Storage.Value <- v
+            member x.BoxedValue with get() = x.Storage.BoxedValue
+                                and set(v) = x.Storage.BoxedValue <- v
 
+            member x.ObjValue = x.Storage.BoxedValue
             member x.ToText() = $"npulse(${x.Storage.Name})"    // negative pulse
             member x.ToBoxedExpression() = failwith "ERROR: not supported"
 
@@ -225,8 +227,8 @@ module ExpressionModule =
         then
             historyFlag.LastValue <- (expr.BoxedEvaluatedValue |> unbox)
             if historyFlag.LastValue |> unbox = isRising //rising 경우 TRUE 변경시점 처리
-            then storage.Value <- true
-                 storage.Value <- false
+            then storage.BoxedValue <- true
+                 storage.BoxedValue <- false
                  //single 스켄방식이면 펄스조건 사용된 모든 Rung 처리후 Off
                  //이벤트 방식이면 단일 쓰레드이면 이벤트 끝난후 pulseDo Off 해서 상관없을듯  //이벤트 테스트 중 ahn
 
@@ -241,11 +243,11 @@ module ExpressionModule =
 
             | DuAssign (expr, target) ->
                 assert(target.DataType = expr.DataType)
-                target.Value <- expr.BoxedEvaluatedValue
+                target.BoxedValue <- expr.BoxedEvaluatedValue
 
             | DuVarDecl (expr, target) ->
                 assert(target.DataType = expr.DataType)
-                target.Value <- expr.BoxedEvaluatedValue
+                target.BoxedValue <- expr.BoxedEvaluatedValue
 
             | DuTimer timerStatement ->
                 for s in timerStatement.Timer.InputEvaluateStatements do
@@ -257,7 +259,7 @@ module ExpressionModule =
 
             | DuAction (DuCopy (condition, source, target)) ->
                 if condition.EvaluatedValue then
-                    target.Value <- source.BoxedEvaluatedValue
+                    target.BoxedValue <- source.BoxedEvaluatedValue
             | DuAugmentedPLCFunction _ ->
                 failwith "ERROR"
 

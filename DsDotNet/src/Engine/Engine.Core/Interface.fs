@@ -24,14 +24,15 @@ module Interface =
         abstract QualifiedName:string with get
         abstract NameComponents:string[] with get
 
-    type IValue = interface end
+    type IValue =
+        abstract ObjValue: obj with get        // 'BoxedValue' 사용시 이름 충돌
 
     /// Expression 의 Terminal 이 될 수 있는 subclass: Tag<'T>, Variable<'T>
     type IStorage =
         inherit IValue
         inherit INamed
         inherit IText
-        abstract Value: obj with get, set
+        abstract BoxedValue: obj with get, set
         abstract DataType : System.Type
         abstract ToBoxedExpression : unit -> obj    /// IExpression<'T> 의 boxed 형태의 expression 생성
 

@@ -197,121 +197,56 @@ type XgiFunctionTest() =
         let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
+    [<Test>]
+    member __.``X ADD 3 items test`` () =
+        let storages = Storages()
+        let code = """
+            int16 nn1 = 1s;
+            int16 nn2 = 2s;
+            int16 nn3 = 3s;
+            int16 sum = 0s;
+            $sum := $nn1 + $nn2 + $nn3;
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
 
 
-//    [<Test>]
-//    member __.``TIMER= Many1 AND RungIn Condition test`` () =
-//        let storages = Storages()
-//        let code = codeForBits + """
-//            ton myTon = createTON(2000us,
-//                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07
-//                && $x08 && $x09 && $x10 && $x11 && $x12 && $x13 && $x14    );
-//"""
-//        let statements = parseCode storages code
-//        let xml = LsXGI.generateXml storages (map withNoComment statements)
-//        saveTestResult (get_current_function_name()) xml
+    [<Test>]
+    member __.``ADD int32 test`` () =
+        let storages = Storages()
+        let code = """
+            int nn1 = 1;
+            int nn2 = 2;
+            int sum = 0;
+            $sum := $nn1 + $nn2;
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
 
-//    [<Test>]
-//    member __.``TIMER= Many2 AND RungIn Condition test`` () =
-//        let storages = Storages()
-//        let code = codeForBits + """
-//            ton myTon = createTON(2000us,
-//                // 산전 limit : 가로로 31개
-//                //let coilCellX = 31
-//                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07
-//                && $x08 && $x09 && $x10 && $x11 && $x12 && $x13 &&
+    [<Test>]
+    member __.``ADD int64 test`` () =
+        let storages = Storages()
+        let code = """
+            int64 nn1 = 1L;
+            int64 nn2 = 2L;
+            int64 sum = 0L;
+            $sum := $nn1 + $nn2;
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
 
-//                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 &&
-//                $x08 &&
-//                $x09 &&
-//                $x10 &&
-//                $x11 &&
-//                //$x12 &&
-//                //$x13 &&
-
-//                $x14    );
-//"""
-//        let statements = parseCode storages code
-//        let xml = LsXGI.generateXml storages (map withNoComment statements)
-//        saveTestResult (get_current_function_name()) xml
-
-
-//    [<Test>]
-//    member __.``TIMER= Many1 OR RungIn Condition test`` () =
-//        let storages = Storages()
-//        let code = codeForBits + """
-//            ton myTon = createTON(2000us,
-//                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-//                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14    );
-//"""
-//        let statements = parseCode storages code
-//        let xml = LsXGI.generateXml storages (map withNoComment statements)
-//        saveTestResult (get_current_function_name()) xml
-
-
-//    [<Test>]
-//    member __.``TIMER= Many2 OR RungIn Condition test`` () =
-//        let storages = Storages()
-//        let code = codeForBits + """
-//            ton myTon = createTON(2000us,
-//                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-//                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14 ||
-
-//                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-//                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14 ||
-
-//                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-//                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14
-
-//                );
-//"""
-//        let statements = parseCode storages code
-//        let xml = LsXGI.generateXml storages (map withNoComment statements)
-//        saveTestResult (get_current_function_name()) xml
-
-
-//    [<Test>]
-//    member __.``TIMER= Many And, OR RungIn Condition test`` () =
-//        let storages = Storages()
-//        let code = codeForBits + """
-//            ton myTon = createTON(2000us,
-//                ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-//                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
-//                &&
-//                ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-//                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
-//                &&
-//                ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-//                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
-//                &&
-//                ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-//                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
-
-//                );
-//"""
-//        let statements = parseCode storages code
-//        let xml = LsXGI.generateXml storages (map withNoComment statements)
-//        saveTestResult (get_current_function_name()) xml
-
-//    [<Test>]
-//    member __.``TIMER= Many And, OR RungIn Condition test2`` () =
-//        let storages = Storages()
-//        let code = codeForBits + """
-//            ton myTon = createTON(2000us,
-//                ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-//                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
-//                && $x00 &&
-//                ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-//                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
-//                && $x00 &&
-//                ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-//                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
-//                && $x00 &&
-//                ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-//                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
-
-//                );
-//"""
-//        let statements = parseCode storages code
-//        let xml = LsXGI.generateXml storages (map withNoComment statements)
-//        saveTestResult (get_current_function_name()) xml
+    [<Test>]
+    member __.``ADD double test`` () =
+        let storages = Storages()
+        let code = """
+            double nn1 = 1.1;
+            double nn2 = 2.2;
+            double sum = 0.0;
+            $sum := $nn1 + $nn2;
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml

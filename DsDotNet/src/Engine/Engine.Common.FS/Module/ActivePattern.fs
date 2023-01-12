@@ -7,7 +7,7 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module Parse =
-    let inline private tryToOption (s, v) = if s then Some v else None
+    let inline tryToOption (s, v) = if s then Some v else None
 
     /// Attempts to parse a string into an int and returns Some upon success and None upon failure.
     let Int s = System.Int32.TryParse(s) |> tryToOption

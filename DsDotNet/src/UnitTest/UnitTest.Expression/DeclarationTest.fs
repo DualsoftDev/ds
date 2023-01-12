@@ -37,7 +37,7 @@ open Engine.Core
                 | None -> ()
 
             storages.ContainsKey("myByte") === true
-            storages["myByte"].Value === 123y
+            storages["myByte"].BoxedValue === 123y
             storages["myByte"].DataType === typedefof<int8>
             let myByte = storages["myByte"] :?> PlcTag<int8>
             myByte.Address === "%M9.9"

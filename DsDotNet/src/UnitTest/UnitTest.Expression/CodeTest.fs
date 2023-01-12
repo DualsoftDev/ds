@@ -48,7 +48,7 @@ double myDouble = 0.0;
             storages.Count === numAddedVariables
 
             for KeyValue(k, v) in storages do
-                ExpressionPrologSubModule.toFloat64 v.Value === 0.0
+                ExpressionPrologSubModule.toFloat64 v.BoxedValue === 0.0
 
             (fun () -> "int8 myInt8 = 0y;" |> parseCode storages |> ignore) |> ShouldFailWithSubstringT "Duplicated"
             storages.Count === numAddedVariables
@@ -89,7 +89,7 @@ uint64 myUInt64 = 32UL;
             storages.Count === numAddedVariables
 
             for KeyValue(k, v) in storages do
-                ExpressionPrologSubModule.toFloat64 v.Value === 32.0
+                ExpressionPrologSubModule.toFloat64 v.BoxedValue === 32.0
 
 
         [<Test>]
@@ -107,7 +107,7 @@ double myDouble = 3.14;
             storages.Count === numAddedVariables
 
             for KeyValue(k, v) in storages do
-                Math.Abs(ExpressionPrologSubModule.toFloat64 v.Value - 3.14) <= 0.0001 |> ShouldBeTrue
+                Math.Abs(ExpressionPrologSubModule.toFloat64 v.BoxedValue - 3.14) <= 0.0001 |> ShouldBeTrue
 
 
         [<Test>]
@@ -125,7 +125,7 @@ double myDouble = 3.14 + 3.14;
             storages.Count === numAddedVariables
 
             for KeyValue(k, v) in storages do
-                Math.Abs(ExpressionPrologSubModule.toFloat64 v.Value - 3.14 * 2.0) <= 0.0001 |> ShouldBeTrue
+                Math.Abs(ExpressionPrologSubModule.toFloat64 v.BoxedValue - 3.14 * 2.0) <= 0.0001 |> ShouldBeTrue
 
 
 
@@ -146,11 +146,11 @@ double myDouble = 3.14 + 3.14;
                 ]
 
             match statements[0] with
-            | DuVarDecl (expr, target) -> target.Value === "Hello, world"
+            | DuVarDecl (expr, target) -> target.BoxedValue === "Hello, world"
             | _ -> failwith "ERROR"
 
             match statements[1] with
-            | DuVarDecl (expr, target) -> target.Value === 'x'
+            | DuVarDecl (expr, target) -> target.BoxedValue === 'x'
             | _ -> failwith "ERROR"
 
             storages.Count === declarations.Length

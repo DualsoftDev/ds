@@ -31,7 +31,7 @@ module CoreExtensionModule =
 
             match x.Buttons.TryFind(fun f -> f.Name = btnName) with
             | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
-            | None -> x.Buttons.Add(ButtonDef(btnName, btnType, inAddress, outAddress, HashSet[|flow|]))
+            | None -> x.Buttons.Add(ButtonDef(btnName, btnType, inAddress, outAddress, HashSet[|flow|], HashSet[||])) // need button functions....
                       |> verifyM $"Duplicated ButtonDef [{btnName}]"
 
         member x.AddLamp(lmpType:LampType, lmpName: string, addr:string, flow:Flow) =
@@ -39,7 +39,7 @@ module CoreExtensionModule =
 
             match x.Lamps.TryFind(fun f -> f.Name = lmpName) with
             | Some lmp -> lmp.SettingFlow <- flow
-            | None -> x.Lamps.Add(LampDef(lmpName, lmpType, addr, flow)) |> verifyM $"Duplicated LampDef [{lmpName}]"
+            | None -> x.Lamps.Add(LampDef(lmpName, lmpType, addr, flow, HashSet[||])) |> verifyM $"Duplicated LampDef [{lmpName}]" // need lamp functions....
 
         member x.SystemButtons      = x.Buttons |> Seq.map(fun btn  -> btn) //read only
         member x.SystemLamps        = x.Lamps   |> Seq.map(fun lamp -> lamp)//read only

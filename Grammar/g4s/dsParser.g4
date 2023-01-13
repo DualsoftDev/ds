@@ -28,8 +28,7 @@ system: '[' sysHeader ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
     sysBlock
         : LBRACE (  flowBlock | jobBlock | loadDeviceBlock | loadExternalSystemBlock
                     | interfaceBlock | buttonBlock | lampBlock | propsBlock
-                    | codeBlock
-                    | variableBlock | commandBlock | observeBlock )*
+                    | codeBlock | variableBlock )*
           RBRACE       // identifier1Listing|parenting|causal|call
           ;
     systemName:identifier1;
@@ -172,7 +171,7 @@ categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|stopBlock|emergencyBl
     
     funcSet: buttonName | lampName '=' LBRACE (() | funcDef (SEIMCOLON funcDef)* (SEIMCOLON)?) RBRACE;
     funcDef:  '$' funcName (argument (argument)*);
-    funcName:IDENTIFIER1;
+    funcName: identifier1;
 
 buttonBlock: '[' 'buttons' ']' '=' LBRACE (categoryBlocks)* RBRACE;
 lampBlock: '[' 'lamps' ']' '=' LBRACE (categoryBlocks)* RBRACE;
@@ -218,15 +217,3 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
     identifier123CNF: identifier123 (COMMA identifier123)*;
 
     flowPath: identifier2;
-
-
-funApplication: funName '=' argumentGroups;
-
-commandBlock: '[' 'commands' ']' '=' '{' commandDef* '}';
-    commandDef: cmdName '=' '(' '@' funApplication ')';     // CMD1 = (@Delay= 0)
-    cmdName: IDENTIFIER1;
-    funName:IDENTIFIER1;
-observeBlock: '[' 'observes' ']' '=' '{' observeDef* '}';
-    observeDef: observeName '=' '(' '@' funApplication ')';     // CMD1 = (@Delay= 0)
-    observeName:IDENTIFIER1;
-    //funName:IDENTIFIER1;

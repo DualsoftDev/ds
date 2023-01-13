@@ -214,6 +214,10 @@ module ModelComponentAnswers =
         }
         [ready] = {
             ReadyMode = { F4 }
+            ReadyMode.funcs = {
+                $ton 2000;
+                $ctu 1 5;
+            }
         }
     }
 }
@@ -265,6 +269,10 @@ module ModelComponentAnswers =
         }
         [home] = {
             HomeBTN(_, _) = { F1;F2;F3;F5; }
+            HomeBTN.funcs = { 
+                $ton 2000; 
+                $ctu 1 5; 
+            }
         }
     }
 }

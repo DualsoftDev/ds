@@ -13,6 +13,33 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module EtcListenerModule =
+    let private commonFunctionExtractor (input:ParserRuleContext) = 
+        input.Descendants<FuncSetContext>().ToArray()
+        |> Seq.map(fun fs ->
+            option {
+                let! nameCtx = fs.TryFindFirstChild<Identifier2Context>()
+                let! funcs = fs.Descendants<FuncDefContext>()
+                return nameCtx.CollectNameComponents()[0], funcs
+            } |> Option.get
+        )
+        |> Map.ofSeq
+
+    let private commonFunctionSetter 
+            (targetName:string)  (functionMap:Map<string, ResizeArray<FuncDefContext>>) = 
+        if functionMap.ContainsKey(targetName) then
+            [
+                for func in functionMap[targetName] do
+                    option {
+                        let! funcName = func.TryFindFirstChild<FuncNameContext>()
+                        let! parameters = func.Descendants<ArgumentContext>().Select(fun argCtx -> argCtx.GetText()).ToArray()
+                        return new Func(funcName.GetText(), parameters)
+                    } |> Option.get
+            ]
+        else
+            List.empty 
+        |> Enumerable.ToHashSet
+
+
     (* 모든 vertex 가 생성 된 이후, edge 연결 작업 수행 *)
     type DsParserListener with
         member x.ProcessButtonBlock(ctx:ButtonBlockContext) =
@@ -41,6 +68,7 @@ module EtcListenerModule =
                         x.ButtonCategories.Add(key) |> ignore
 
                     let buttonDefs = first.Descendants<ButtonDefContext>().ToArray()
+                    let buttonFuncs = commonFunctionExtractor first
                     let flowBtnInfo = [
                         for bd in buttonDefs do
                         option {
@@ -64,11 +92,11 @@ module EtcListenerModule =
                                     .Tap(fun flowName -> verifyM $"Flow [{flowName}] not exists!" (system.Flows.Any(fun f -> f.Name = flowName)))
                                     .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName))
                                     .ToHashSet()
-                                
+                            let funcSet = commonFunctionSetter btnName buttonFuncs
                             if flows.Count > 0 then
-                                return ButtonDef(btnName, targetBtnType, addrIn, addrOut, flows)
+                                return ButtonDef(btnName, targetBtnType, addrIn, addrOut, flows, funcSet)
                             else
-                                return ButtonDef(btnName, targetBtnType, null, null, new HashSet<Flow>())
+                                return ButtonDef(btnName, targetBtnType, null, null, new HashSet<Flow>(), new HashSet<Func>())
                         }
                     ]
                     flowBtnInfo
@@ -94,6 +122,7 @@ module EtcListenerModule =
                         | _ -> failwith $"lamp type error {fstType}"
 
                     let lampDefs = first.Descendants<LampDefContext>().ToArray()
+                    let lampFuncs = commonFunctionExtractor first
                     let flowLampInfo = [
                         for ld in lampDefs do
                         option {
@@ -106,7 +135,8 @@ module EtcListenerModule =
                                 match addrCtx with
                                 | Some addr -> addr.GetText()
                                 | None -> null
-                            return LampDef(lmpName, targetLmpType, address, flow)
+                            let funcSet = commonFunctionSetter lmpName lampFuncs
+                            return LampDef(lmpName, targetLmpType, address, flow, funcSet)
                         }
                     ]
                     flowLampInfo

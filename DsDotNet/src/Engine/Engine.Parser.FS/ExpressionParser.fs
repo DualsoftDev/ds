@@ -190,14 +190,9 @@ module rec ExpressionParser =
                     CounterStatement.CreateAbCTD(tcParams)
 
                 | CTUD, ("createWinCTUD" | "createXgiCTUD"), _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::(BoolExp ldCondition)::[] ->
-                    CounterStatement.CreateXgiCTUD(tcParams, countDownCondition, resetCondition, ldCondition)
+                    CounterStatement.CreateCTUD(tcParams, countDownCondition, resetCondition, ldCondition)
                 | CTUD, "createAbCTUD", _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::[] ->
                     CounterStatement.CreateAbCTUD(tcParams, countDownCondition, resetCondition)
-
-                //| CTUD, "createCTUD", _::_::(BoolExp countDownCondition)::(UnitValue accum)::[] ->
-                //    CounterStatement.CreateCTUD(tcParams, countDownCondition, accum)
-                //| CTUD, "createCTUD", _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::(UnitValue accum)::[] ->
-                //    CounterStatement.CreateCTUD(tcParams, countDownCondition, resetCondition, accum)
 
                 | CTR, ("createWinCTR" | "createXgiCTR" ), _::_::(BoolExp resetCondition)::[] ->
                     CounterStatement.CreateXgiCTR(tcParams, resetCondition)
@@ -230,14 +225,10 @@ module rec ExpressionParser =
                     TimerStatement.CreateTON(tcParams)
                 | TOF, ("createWinTOF" | "createXgiTOF" | "createAbTOF"), _::_::[] ->
                     TimerStatement.CreateTOF(tcParams)
-                | RTO, ("createAbRTO" ), _::_::[] ->
+                | TMR, ("createAbRTO" ), _::_::[] ->
                     TimerStatement.CreateAbRTO(tcParams)
-                //| TON, "createTON", _::_::(BoolExp resetCondition)::[] ->
-                //    TimerStatement.CreateTON(tcParams, resetCondition)
-                //| TOF, "createTOF", _::_::(BoolExp resetCondition)::[] ->
-                //    TimerStatement.CreateTOF(tcParams, resetCondition)
-                | RTO, ("createXgiTMR" | "createWinTMR"), _::_::(BoolExp resetCondition)::[] ->
-                    TimerStatement.CreateRTO(tcParams, resetCondition)
+                | TMR, ("createXgiTMR" | "createWinTMR"), _::_::(BoolExp resetCondition)::[] ->
+                    TimerStatement.CreateTMR(tcParams, resetCondition)
                 | _ -> fail()
             | _ -> fail()
         | None -> fail()
@@ -343,44 +334,30 @@ module rec ExpressionParser =
 
 
     type System.Type with
-        member x.CreateVariable(name:string, boxedValue:obj) = fwdCreateVariableWithTypeAndValue name x ({Object = boxedValue}:BoxedObjectHolder)
-        member x.CreateVariable(name:string) = fwdCreateVariableWithType name x
+        member x.CreateVariable(name:string, boxedValue:obj) = fwdCreateVariableWithTypeAndValue x name ({Object = boxedValue}:BoxedObjectHolder)
+        member x.CreateVariable(name:string) = fwdCreateVariableWithType x name
 
         member x.CreateTag(name:string, address:string, boxedValue:obj) : IStorage =
             let v = boxedValue
             match x.Name with
-            | "Single" -> new PlcTag<single>(name, address, v :?> single)
-            | "Double" -> new PlcTag<double>(name, address, v :?> double)
-            | "SByte"  -> new PlcTag<int8>  (name, address, v :?> int8)
-            | "Byte"   -> new PlcTag<uint8> (name, address, v :?> uint8)
-            | "Int16"  -> new PlcTag<int16> (name, address, v :?> int16)
-            | "UInt16" -> new PlcTag<uint16>(name, address, v :?> uint16)
-            | "Int32"  -> new PlcTag<int32> (name, address, v :?> int32)
-            | "UInt32" -> new PlcTag<uint32>(name, address, v :?> uint32)
-            | "Int64"  -> new PlcTag<int64> (name, address, v :?> int64)
-            | "UInt64" -> new PlcTag<uint64>(name, address, v :?> uint64)
-            | "Boolean"-> new PlcTag<bool>  (name, address, v :?> bool)
-            | "String" -> new PlcTag<string>(name, address, v :?> string)
-            | "Char"   -> new PlcTag<char>  (name, address, v :?> char)
+            | "Boolean"-> new PlcTag<bool>  (name, address, unbox v)
+            | "Byte"   -> new PlcTag<uint8> (name, address, unbox v)
+            | "Char"   -> new PlcTag<char>  (name, address, unbox v)
+            | "Double" -> new PlcTag<double>(name, address, unbox v)
+            | "Int16"  -> new PlcTag<int16> (name, address, unbox v)
+            | "Int32"  -> new PlcTag<int32> (name, address, unbox v)
+            | "Int64"  -> new PlcTag<int64> (name, address, unbox v)
+            | "SByte"  -> new PlcTag<int8>  (name, address, unbox v)
+            | "Single" -> new PlcTag<single>(name, address, unbox v)
+            | "String" -> new PlcTag<string>(name, address, unbox v)
+            | "UInt16" -> new PlcTag<uint16>(name, address, unbox v)
+            | "UInt32" -> new PlcTag<uint32>(name, address, unbox v)
+            | "UInt64" -> new PlcTag<uint64>(name, address, unbox v)
             | _  -> failwith "ERROR"
 
         member x.CreateTag(name:string, address:string) : IStorage =
-            match x.Name with
-            | "Single" -> new PlcTag<single>(name, address, 0.0f)
-            | "Double" -> new PlcTag<double>(name, address, 0.0)
-            | "SByte"  -> new PlcTag<int8>  (name, address, 0y)
-            | "Byte"   -> new PlcTag<uint8> (name, address, 0uy)
-            | "Int16"  -> new PlcTag<int16> (name, address, 0s)
-            | "UInt16" -> new PlcTag<uint16>(name, address, 0us)
-            | "Int32"  -> new PlcTag<int32> (name, address, 0)
-            | "UInt32" -> new PlcTag<uint32>(name, address, 0u)
-            | "Int64"  -> new PlcTag<int64> (name, address, 0L)
-            | "UInt64" -> new PlcTag<uint64>(name, address, 0UL)
-            | "Boolean"-> new PlcTag<bool>  (name, address, false)
-            | "String" -> new PlcTag<string>(name, address, "")
-            | "Char"   -> new PlcTag<char>  (name, address, ' ')
-            | _  -> failwith "ERROR"
-
+            let v = typeDefaultValue x
+            x.CreateTag(name, address, unbox v)
 
         static member FromString(typeName:string) : System.Type =
             match typeName.ToLower() with

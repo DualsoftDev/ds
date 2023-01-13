@@ -214,73 +214,6 @@ module internal XgiFile =
         (prologComments:string seq) (commentedStatements:CommentedXgiStatements seq)
         (xgiSymbols:XgiSymbol seq) (unusedTags:ITagWithAddress seq) (existingLSISprj:string option)
       =
-        /// PLC memory manager
-        let manager =
-            /// PLC H/W memory configurations
-            let hwconfs =
-                let m (x:#MemoryConfigBase) = x :> MemoryConfigBase
-                [
-                    IQMemoryConfig(Memory.I, 0, 0, 64) |> m
-                    IQMemoryConfig(Memory.Q, 0, 1, 64) |> m
-                    MMemoryConfig(Memory.M, 640*1024*8) |> m     // 640KB memory
-                    MMemoryConfig(Memory.R, 640*1024*8) |> m     // 640KB memory
-                ]
-            let manager = MemoryManager(hwconfs)
-
-            //<kwak>
-            /// 이미 할당된 주소 : 자동 할당시 이 주소를 피해야 한다.
-            let alreadyAllocatedAddresses =
-                /// 이미 할당된 주소 앞뒤로 buffer word 만큼 회피하기 위한 word address 를 생성한다.
-                let toChunk bitAddress buffer =
-                    let rec loop bitAddress = [
-                        match bitAddress with
-                        | RegexPattern @"%M([BWDL])(\d+).(\d+)" [size; element; nth_] ->
-                            yield! loop (sprintf "%%M%s%s" size element)
-                        | RegexPattern @"%MX(\d+)" [Int32Pattern nth] ->
-                            yield nth / 16
-                        | RegexPattern @"%M([BWDL])(\d+)" [size; Int32Pattern element] ->
-                            let ele =
-                                match size with
-                                | "B" -> element / 2
-                                | "W" -> element
-                                | "D" -> element * 2
-                                | "L" -> element * 4
-                                | _ ->
-                                    failwith "ERROR"
-                            yield ele
-                        | _ ->
-                            logWarn "Warn: unknown address [%s]" bitAddress
-                            ()
-                    ]
-
-                    loop bitAddress
-                    |> sort |> distinct
-                    |> bind (fun n -> [n-buffer..n+buffer])
-                    |> filter (fun n -> n >= 0)
-                    |> map (sprintf "%%MW%d")
-
-
-
-                let tagsUsedInFiles =
-                    existingLSISprj
-                    |> map (DsXml.load >> XGIXml.getGlobalAddresses)
-                    |? Seq.empty
-                    |> Seq.filter (fun t -> t.StartsWith("%M"))
-                    |> Seq.bind (fun t -> toChunk t 10)
-
-                let tags = [
-                    for s in xgiSymbols do
-                        match s with
-                        | DuTag t -> yield t.Address
-                        | _ -> ()
-                ]
-
-                let tagsUnusedInTags = [ for t in unusedTags -> t.Address] |> Set
-                tagsUsedInFiles @ tags @ tagsUnusedInTags |> distinct
-
-            alreadyAllocatedAddresses |> iter (fun t -> manager.MarkAllocated(t))
-            manager
-
         let symbolInfos =
             let kindVar = int Variable.Kind.VAR
             [
@@ -313,7 +246,7 @@ module internal XgiFile =
                         let device, addr = "", ""
                         let plcType =
                             match timer.Type with
-                            | TON | TOF | RTO -> timer.Type.ToString()
+                            | TON | TOF | TMR -> timer.Type.ToString()
 
                         let param:XgiSymbolCreateParams =
                             let name, comment = timer.Name, $"TIMER {timer.Name}"

@@ -42,7 +42,7 @@ module CodeElements =
 
     let getFunctions (text:string) = 
         if not <| text.StartsWith "$" 
-        then failwith "function text start keyword is '$' ex)$mov 100 R100"
+        then failwith "function text start keyword is '$' ex)$m 100 R100"
         text.Split('$')
         |> Seq.tail
         |> Seq.map(fun line -> 

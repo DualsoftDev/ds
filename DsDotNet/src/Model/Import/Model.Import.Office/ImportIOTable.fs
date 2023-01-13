@@ -58,11 +58,14 @@ module ImportIOTable =
 
         let dataset = FromExcel(path)
         try
-            let functionUpdate(funcText, funcs:HashSet<Func>) = 
+            let functionUpdate(funcText, funcs:HashSet<Func>, tableIO:Data.DataTable, isJob:bool) = 
                 funcs.Clear()
                 if funcText <> "" && funcText <> "-"
                 then getFunctions(funcText) 
-                        |> Seq.iter(fun (name, parms) -> funcs.Add(Func(name, parms)) |>ignore )
+                        |> Seq.iter(fun (name, parms) -> 
+                            if (not<|isJob) && name <> "n"
+                            then Office.ErrorXLS(ErrorCase.Name, ErrID._1005, $"{name}", tableIO.TableName, path)
+                            funcs.Add(Func(name, parms)) |>ignore )
 
             let updateBtn(row:Data.DataRow, btntype:BtnType, tableIO:Data.DataTable) = 
                 let name  = $"{row.[(int)IOColumn.Name]}"
@@ -74,7 +77,7 @@ module ImportIOTable =
                 match btns.TryFind(fun f -> f.Name = name) with
                 | Some btn -> btn.InAddress <- input
                               btn.OutAddress <- output
-                              functionUpdate (func, btn.Funcs)
+                              functionUpdate (func, btn.Funcs, tableIO, false)
                 | None -> Office.ErrorXLS(ErrorCase.Name, ErrID._1001, $"{name}", tableIO.TableName, path)
 
             let updateLamp(row:Data.DataRow, lampType:LampType, tableIO:Data.DataTable) = 
@@ -85,7 +88,7 @@ module ImportIOTable =
                 let lamps = sys.SystemLamps.Where(fun w->w.LampType = lampType)
                 match lamps.TryFind(fun f -> f.Name = name) with
                 | Some lamp -> lamp.OutAddress <- output
-                               functionUpdate (func, lamp.Funcs)
+                               functionUpdate (func, lamp.Funcs, tableIO, false)
                 | None -> Office.ErrorXLS(ErrorCase.Name, ErrID._1002, $"{name}", tableIO.TableName, path)
 
             systems
@@ -112,7 +115,7 @@ module ImportIOTable =
                             let func  = $"{row.[(int)IOColumn.Func]}"
 
                             match sys.Jobs.TryFind(fun f-> f.Name = jobName) with
-                            | Some job ->  functionUpdate (func, job.Funcs)
+                            | Some job ->  functionUpdate (func, job.Funcs, tableIO, true)
                             | None -> if "↑" <> jobName //이름이 위와 같지 않은 경우
                                       then Office.ErrorXLS(ErrorCase.Name, ErrID._1004, tableIO.TableName,  $"오류 이름 {jobName}.")
 
@@ -125,12 +128,14 @@ module ImportIOTable =
 
                         | XlsAutoBTN           -> updateBtn  (row, BtnType.DuAutoBTN             , tableIO)
                         | XlsManualBTN         -> updateBtn  (row, BtnType.DuManualBTN           , tableIO)
-                        | XlsEmergencyBTN      -> updateBtn  (row, BtnType.DuEmergencyBTN        , tableIO)
-                        | XlsStopBTN           -> updateBtn  (row, BtnType.DuStopBTN             , tableIO)
                         | XlsDriveBTN          -> updateBtn  (row, BtnType.DuDriveBTN            , tableIO)
+                        | XlsStopBTN           -> updateBtn  (row, BtnType.DuStopBTN             , tableIO)
+                        | XlsEmergencyBTN      -> updateBtn  (row, BtnType.DuEmergencyBTN        , tableIO)
                         | XlsTestBTN           -> updateBtn  (row, BtnType.DuTestBTN             , tableIO)
+                        | XlsReadyBTN          -> updateBtn  (row, BtnType.DuReadyBTN            , tableIO)
                         | XlsClearBTN          -> updateBtn  (row, BtnType.DuClearBTN            , tableIO)
                         | XlsHomeBTN           -> updateBtn  (row, BtnType.DuHomeBTN             , tableIO)
+
                         | XlsAutoModeLamp      -> updateLamp (row, LampType.DuAutoModeLamp       , tableIO)
                         | XlsManualModeLamp    -> updateLamp (row, LampType.DuManualModeLamp     , tableIO)
                         | XlsDriveModeLamp     -> updateLamp (row, LampType.DuDriveModeLamp      , tableIO)

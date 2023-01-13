@@ -59,7 +59,7 @@ module rec CounterModule =
         let mutable res = nullB
         let add = addTagsToStorages storages
         match RuntimeTarget, typ with
-        | XGI, CTU ->
+        | (WINDOWS | XGI), CTU ->
             cu  <- fwdCreateBoolTag     $"{name}.CU" false  // Count up enable bit
             res <- fwdCreateBoolTag     $"{name}.R" false
             pre <- fwdCreateUShortTag   $"{name}.PV" preset
@@ -67,7 +67,7 @@ module rec CounterModule =
             acc <- fwdCreateUShortTag   $"{name}.CV" accum
             add [cu; res; pre; dn; acc]
 
-        | XGI, CTD ->
+        | (WINDOWS | XGI), CTD ->
             cd  <- fwdCreateBoolTag     $"{name}.CD" false  // Count down enable bit
             ld  <- fwdCreateBoolTag     $"{name}.LD" false  // Load
             pre <- fwdCreateUShortTag   $"{name}.PV" preset
@@ -75,7 +75,7 @@ module rec CounterModule =
             acc <- fwdCreateUShortTag   $"{name}.CV" accum
             add [cd; res; ld; pre; dn; acc]
 
-        | XGI, CTUD ->
+        | (WINDOWS | XGI), CTUD ->
             cu  <- fwdCreateBoolTag     $"{name}.CU" false  // Count up enable bit
             cd  <- fwdCreateBoolTag     $"{name}.CD" false  // Count down enable bit
             res <- fwdCreateBoolTag     $"{name}.R" false
@@ -86,7 +86,7 @@ module rec CounterModule =
             acc <- fwdCreateUShortTag   $"{name}.CV" accum
             add [cu; cd; res; ld; pre; dn; dnDown; acc]
 
-        | XGI, CTR ->
+        | (WINDOWS | XGI), CTR ->
             cd  <- fwdCreateBoolTag     $"{name}.CD" false  // Count down enable bit
             pre <- fwdCreateUShortTag   $"{name}.PV" preset
             res <- fwdCreateBoolTag     $"{name}.RST" false

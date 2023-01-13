@@ -192,7 +192,7 @@ open Engine.Common.FS
             let resetTag = PlcTag("my_timer_reset_tag", "%M1.1", false)
             let condition = var2expr rungConditionInTag
             let reset = var2expr resetTag
-            let tcParam = {Storages=storages; Name="myRto"; Preset=1000us; RungInCondition=condition; FunctionName="createWinRTO"}
+            let tcParam = {Storages=storages; Name="myRto"; Preset=1000us; RungInCondition=condition; FunctionName="createWinTMR"}
             let timer = TimerStatement.CreateRTO(tcParam, reset) |> toTimer       // 1000ms = 1sec
 
             timer.EN.Value === true

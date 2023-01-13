@@ -131,12 +131,14 @@ module ExpressionFunctionModule =
           - 실제로 function/expression 은 아니지만, parsing 편의를 고려해 function 처럼 취급.
           - evaluate 등은 수행해서는 안된다.
         *)
-        | ("createXgiCTU" | "createXgiCTD" | "createXgiCTUD" | "createXgiCTR"
-            | "createWinCTU" | "createWinCTD" | "createWinCTUD" | "createWinCTR" ) ->
+        | (   "createXgiCTU" | "createXgiCTD" | "createXgiCTUD" | "createXgiCTR"
+            | "createWinCTU" | "createWinCTD" | "createWinCTUD" | "createWinCTR"
+            | "createAbCTU"  | "createAbCTD"  | "createAbCTUD"  | "createAbCTR" ) ->
                 let psedoFunction (args:Args):Counter = failwith "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
                 DuFunction { FunctionBody=psedoFunction; Name=funName; Arguments=args }
-        | ("createXgiTON" | "createXgiTOF" | "createXgiCRTO"
-            | "createWinTON" | "createWinTOF" | "createWinCRTO") ->
+        | (   "createXgiTON" | "createXgiTOF" | "createXgiCRTO"
+            | "createWinTON" | "createWinTOF" | "createWinCRTO"
+            | "createAbTON"  | "createAbTOF"  | "createAbCRTO") ->
                 let psedoFunction (args:Args):Timer = failwith "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
                 DuFunction { FunctionBody=psedoFunction; Name=funName; Arguments=args }
         | "createTag" ->

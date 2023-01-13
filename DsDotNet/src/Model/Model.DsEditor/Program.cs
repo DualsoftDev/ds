@@ -23,7 +23,4 @@ namespace Model.DsEditor
 
         }
     }
-
-
-
 }

@@ -313,7 +313,7 @@ module internal XgiFile =
                         let device, addr = "", ""
                         let plcType =
                             match timer.Type with
-                            | TON | TOF | RTO -> timer.Type.ToString()
+                            | TON | TOF | TMR -> timer.Type.ToString()
 
                         let param:XgiSymbolCreateParams =
                             let name, comment = timer.Name, $"TIMER {timer.Name}"

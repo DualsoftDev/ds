@@ -43,6 +43,7 @@ WORDTYPE: 'word';
 DWORDTYPE: 'dword';
 INTTYPE: 'int';
 FLOATTYPE: 'float';
+FUNC: 'func';
 
 
 WS: [ \t\r\n]+ -> skip;
@@ -104,6 +105,7 @@ AND: '&';
 EXCLAMATION: '!';
 OR: '|';
 AT: '@';
+FNC: '$';
 POUND: '#';
 PLUS: '+';
 MINUS: '-';

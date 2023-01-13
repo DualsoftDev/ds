@@ -121,7 +121,18 @@ jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing)* RBRACE;
     callApiDef: callKey addressInOut;
     callKey: identifier12;
 
+codeBlock: CODE_BLOCK;
 
+variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';
+    variableDef: varName '=' '(' varType ',' argumentGroups ')';     // R100   = (Word, 0)
+    varName: IDENTIFIER1;
+    argumentGroups: argumentGroup ('~' argumentGroup)*;
+    argumentGroup: argument (',' argument)*;
+    argument: intValue | floatValue | varIdentifier;
+    varIdentifier: IDENTIFIER1;
+    intValue: INTEGER;
+    floatValue:FLOAT;
+    varType: 'int' | 'word' | 'float' | 'dword';
 
 interfaceBlock
     : '[' 'interfaces' ']' '=' LBRACE (interfaceListing)* RBRACE;
@@ -146,16 +157,22 @@ categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|stopBlock|emergencyBl
     homeBlock      :'[' ('home_in'|'home') ']'     EQ categoryBlock;
     readyBlock     :'[' ('ready_in'|'ready') ']'   EQ categoryBlock;
     
-    categoryBlock: LBRACE (() | (buttonDef|lampDef)*) RBRACE;
+    categoryBlock: LBRACE (() | (buttonDef|lampDef|funcSet)*) RBRACE;
     
     buttonDef: btnNameAddr EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
     btnNameAddr: buttonName addressInOut;
-    buttonName: identifier1;
-    flowName : identifier1;
+    
+    buttonName: identifier1 | identifier2;
 
     lampDef: (lampName|lampName addrDef) EQ LBRACE (() | flowName) RBRACE;
     addrDef: LPARENTHESIS addressItem? RPARENTHESIS;
-    lampName: identifier1;
+    lampName: identifier1 | identifier2;
+    
+    flowName: identifier1;
+    
+    funcSet: buttonName | lampName '=' LBRACE (() | funcDef (SEIMCOLON funcDef)* (SEIMCOLON)?) RBRACE;
+    funcDef:  '$' funcName (argument (argument)*);
+    funcName:IDENTIFIER1;
 
 buttonBlock: '[' 'buttons' ']' '=' LBRACE (categoryBlocks)* RBRACE;
 lampBlock: '[' 'lamps' ']' '=' LBRACE (categoryBlocks)* RBRACE;
@@ -201,19 +218,6 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
     identifier123CNF: identifier123 (COMMA identifier123)*;
 
     flowPath: identifier2;
-
-codeBlock: CODE_BLOCK;
-
-variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';
-    variableDef: varName '=' '(' varType ',' argumentGroups ')';     // R100   = (Word, 0)
-    varName: IDENTIFIER1;
-    argumentGroups: argumentGroup ('~' argumentGroup)*;
-    argumentGroup: argument (',' argument)*;
-    argument: intValue | floatValue | varIdentifier;
-    varIdentifier: IDENTIFIER1;
-    intValue: INTEGER;
-    floatValue:FLOAT;
-    varType: 'int' | 'word' | 'float' | 'dword';
 
 
 funApplication: funName '=' argumentGroups;

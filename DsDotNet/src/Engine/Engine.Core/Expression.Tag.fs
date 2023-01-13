@@ -5,7 +5,7 @@ open System.Runtime.CompilerServices
 open Engine.Common.FS
 
 [<AutoOpen>]
-module  TagModule =
+module TagModule =
 
     type BitFlag =
     | R                 // Ready Status
@@ -112,47 +112,51 @@ module  TagModule =
     //let HiNibble  = 240   //0000xxxx
 
 
-
-    let createVariableWithTypeOnWindows (name:string) (typ:System.Type): IVariable =
-        verify (Runtime.Target = WINDOWS)
+    let typeDefaultValue (typ:System.Type) =
         match typ.Name with
-        | "Single" -> new Variable<single>(name, 0.0f)
-        | "Double" -> new Variable<double>(name, 0.0)
-        | "SByte"  -> new Variable<int8>  (name, 0y)
-        | "Byte"   -> new Variable<uint8> (name, 0uy)
-        | "Int16"  -> new Variable<int16> (name, 0s)
-        | "UInt16" -> new Variable<uint16>(name, 0us)
-        | "Int32"  -> new Variable<int32> (name, 0)
-        | "UInt32" -> new Variable<uint32>(name, 0u)
-        | "Int64"  -> new Variable<int64> (name, 0L)
-        | "UInt64" -> new Variable<uint64>(name, 0UL)
-        | "Boolean"-> new Variable<bool>  (name, false)
-        | "String" -> new Variable<string>(name, "")
-        | "Char"   -> new Variable<char>  (name, ' ')
+        | "Boolean"-> box false
+        | "Byte"   -> box 0uy
+        | "Char"   -> box ' '
+        | "Double" -> box 0.0
+        | "Int16"  -> box 0s
+        | "Int32"  -> box 0
+        | "Int64"  -> box 0L
+        | "SByte"  -> box 0y
+        | "Single" -> box 0.0f
+        | "String" -> box ""
+        | "UInt16" -> box 0us
+        | "UInt32" -> box 0u
+        | "UInt64" -> box 0UL
         | _  -> failwith "ERROR"
+
 
     // error FS0030: 값 제한이 있습니다. 값 'fwdCreateVariableWithValue'은(는) 제네릭 형식    val mutable fwdCreateVariableWithValue: (string -> '_a -> IVariable)을(를) 가지는 것으로 유추되었습니다.    'fwdCreateVariableWithValue'에 대한 인수를 명시적으로 만들거나, 제네릭 요소로 만들지 않으려는 경우 형식 주석을 추가하세요.
     type BoxedObjectHolder = { Object:obj }
 
-    let createVariableWithTypeAndValueOnWindows (name:string) (typ:System.Type) (boxedValue:BoxedObjectHolder): IVariable =
+    let createVariableWithTypeAndValueOnWindows (typ:System.Type) (name:string) (boxedValue:BoxedObjectHolder): IVariable =
         let xxx = Runtime.Target
         verify (Runtime.Target = WINDOWS)
         let v = boxedValue.Object
         match typ.Name with
-        | "Single" -> new Variable<single>(name, v :?> single)
-        | "Double" -> new Variable<double>(name, v :?> double)
-        | "SByte"  -> new Variable<int8>  (name, v :?> int8)
-        | "Byte"   -> new Variable<uint8> (name, v :?> uint8)
-        | "Int16"  -> new Variable<int16> (name, v :?> int16)
-        | "UInt16" -> new Variable<uint16>(name, v :?> uint16)
-        | "Int32"  -> new Variable<int32> (name, v :?> int32)
-        | "UInt32" -> new Variable<uint32>(name, v :?> uint32)
-        | "Int64"  -> new Variable<int64> (name, v :?> int64)
-        | "UInt64" -> new Variable<uint64>(name, v :?> uint64)
-        | "Boolean"-> new Variable<bool>  (name, v :?> bool)
-        | "String" -> new Variable<string>(name, v :?> string)
-        | "Char"   -> new Variable<char>  (name, v :?> char)
+        | "Boolean"-> new Variable<bool>  (name, unbox v)
+        | "Byte"   -> new Variable<uint8> (name, unbox v)
+        | "Char"   -> new Variable<char>  (name, unbox v)
+        | "Double" -> new Variable<double>(name, unbox v)
+        | "Int16"  -> new Variable<int16> (name, unbox v)
+        | "Int32"  -> new Variable<int32> (name, unbox v)
+        | "Int64"  -> new Variable<int64> (name, unbox v)
+        | "SByte"  -> new Variable<int8>  (name, unbox v)
+        | "Single" -> new Variable<single>(name, unbox v)
+        | "String" -> new Variable<string>(name, unbox v)
+        | "UInt16" -> new Variable<uint16>(name, unbox v)
+        | "UInt32" -> new Variable<uint32>(name, unbox v)
+        | "UInt64" -> new Variable<uint64>(name, unbox v)
         | _  -> failwith "ERROR"
+
+    let createVariableWithTypeOnWindows (typ:System.Type) (name:string) : IVariable =
+        verify (Runtime.Target = WINDOWS)
+        let value = { Object = typeDefaultValue typ }
+        createVariableWithTypeAndValueOnWindows typ name value
 
 
     let mutable fwdCreateVariableWithType = createVariableWithTypeOnWindows

@@ -157,6 +157,7 @@ module ImportM =
                             let param = dic.Value.Parameter
                             let relative  = param.UserSpecifiedFilePath
                             let absolute  = param.AbsoluteFilePath
-                            let rootDirectroy = absolute.Substring(0, absolute.length() - relative.length())
+                            let removeTarget = relative.Replace("ds", "")
+                            let rootDirectroy = absolute.Substring(0, absolute.length() - removeTarget.length())
                                
                             system.ToDsText(), rootDirectroy, relative)

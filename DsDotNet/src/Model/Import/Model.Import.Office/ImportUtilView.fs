@@ -102,6 +102,7 @@ module ImportViewModule =
         system.EmergencyButtons.Where(fun w->w.SettingFlows.Contains(flow))  |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuEmergencyBTN)) |>ignore)
         system.TestButtons.Where(fun w->w.SettingFlows.Contains(flow))   |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuTestBTN)) |>ignore)
         system.HomeButtons.Where(fun w->w.SettingFlows.Contains(flow))   |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuHomeBTN)) |>ignore)
+        system.ReadyButtons.Where(fun w->w.SettingFlows.Contains(flow))   |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuReadyBTN)) |>ignore)
         
         if newNode.Singles.Count > 0
         then node.Singles.Add(newNode) |> ignore

@@ -132,16 +132,32 @@ module internal ToDsTextModule =
 
     let rec systemToDs (system:DsSystem) (indent:int) =
         let tab = getTab indent
+        let tab2 = getTab 2
+        let tab3 = getTab 3
+        let tab4 = getTab 4
+        let printFuncions (targetName:string) (funcs:HashSet<Func>) =
+            [
+                $"{tab3}{targetName}.func = {lb}"
+                for func in funcs do
+                    let funcDefs = 
+                        [
+                            $"{tab4}${func.Name}";
+                            String.concat "" [
+                                for param in func.Parameters do
+                                    $" {param}";
+                                $";";
+                            ];
+                        ]
+                    String.concat "" funcDefs
+                $"{tab3}{rb}";
+            ]
+
         [
             let ip = if system.HostIp.IsNullOrEmpty() then "" else $" ip = {system.HostIp}"
             yield $"[sys{ip}] {system.Name.QuoteOnDemand()} = {lb}"
 
             for f in system.Flows do
                 yield flowToDs f indent
-
-            let tab2 = getTab 2
-            let tab3 = getTab 3
-            let tab4 = getTab 4
 
             if system.Jobs.Any() then
                 let addressPrint (addr:string) = if addr = "" then "_" else addr
@@ -150,6 +166,9 @@ module internal ToDsTextModule =
                 for c in system.Jobs do
                     let ais = c.JobDefs.Select(print).JoinWith("; ") + ";"
                     yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {ais} {rb}"
+                    if c.Funcs.any() then
+                        for funcString in printFuncions c.Name c.Funcs do
+                            yield funcString
                 yield $"{tab}{rb}"
 
 
@@ -184,23 +203,6 @@ module internal ToDsTextModule =
                 allBtns
                 |> List.map(fun b -> b |> List.ofSeq)
                 |> List.collect id
-
-            let printFuncions (targetName:string) (funcs:HashSet<Func>) =
-                [
-                    $"{tab3}{targetName}.funcs = {lb}"
-                    for func in funcs do
-                        let funcDefs = 
-                            [
-                                $"{tab4}${func.Name}";
-                                String.concat "" [
-                                    for param in func.Parameters do
-                                        $" {param}";
-                                    $";";
-                                ];
-                            ]
-                        String.concat "" funcDefs
-                    $"{tab3}{rb}";
-                ]
 
             if btns.Any() then
                 yield $"{tab}[buttons] = {lb}"

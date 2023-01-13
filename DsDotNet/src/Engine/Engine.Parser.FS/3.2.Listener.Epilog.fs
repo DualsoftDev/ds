@@ -13,33 +13,6 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module EtcListenerModule =
-    let private commonFunctionExtractor (input:ParserRuleContext) = 
-        input.Descendants<FuncSetContext>().ToArray()
-        |> Seq.map(fun fs ->
-            option {
-                let! nameCtx = fs.TryFindFirstChild<Identifier2Context>()
-                let! funcs = fs.Descendants<FuncDefContext>()
-                return nameCtx.CollectNameComponents()[0], funcs
-            } |> Option.get
-        )
-        |> Map.ofSeq
-
-    let private commonFunctionSetter 
-            (targetName:string)  (functionMap:Map<string, ResizeArray<FuncDefContext>>) = 
-        if functionMap.ContainsKey(targetName) then
-            [
-                for func in functionMap[targetName] do
-                    option {
-                        let! funcName = func.TryFindFirstChild<FuncNameContext>()
-                        let! parameters = func.Descendants<ArgumentContext>().Select(fun argCtx -> argCtx.GetText()).ToArray()
-                        return new Func(funcName.GetText(), parameters)
-                    } |> Option.get
-            ]
-        else
-            List.empty 
-        |> Enumerable.ToHashSet
-
-
     (* 모든 vertex 가 생성 된 이후, edge 연결 작업 수행 *)
     type DsParserListener with
         member x.ProcessButtonBlock(ctx:ButtonBlockContext) =

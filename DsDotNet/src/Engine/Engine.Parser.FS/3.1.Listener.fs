@@ -13,6 +13,33 @@ open type Engine.Parser.dsParser
 open type DsParser
 open System.Collections.Generic
 
+[<AutoOpen>]
+module ListnerCommonFunctionGenerator =
+    let commonFunctionExtractor (input:ParserRuleContext) = 
+        input.Descendants<FuncSetContext>().ToArray()
+        |> Seq.map(fun fs ->
+            option {
+                let! nameCtx = fs.TryFindFirstChild<Identifier2Context>()
+                let! funcs = fs.Descendants<FuncDefContext>()
+                return nameCtx.CollectNameComponents()[0], funcs
+            } |> Option.get
+        )
+        |> Map.ofSeq
+
+    let commonFunctionSetter 
+            (targetName:string)  (functionMap:Map<string, ResizeArray<FuncDefContext>>) = 
+        if functionMap.ContainsKey(targetName) then
+            [
+                for func in functionMap[targetName] do
+                    option {
+                        let! funcName = func.TryFindFirstChild<FuncNameContext>()
+                        let! parameters = func.Descendants<ArgumentContext>().Select(fun argCtx -> argCtx.GetText()).ToArray()
+                        return new Func(funcName.GetText(), parameters)
+                    } |> Option.get
+            ]
+        else
+            List.empty 
+        |> Enumerable.ToHashSet
 
 /// <summary>
 /// System, Flow, Parenting(껍데기만),
@@ -367,40 +394,43 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 api.AddRXs(findSegments(ser[1])) |> ignore
             } |> ignore
 
-        let createJobDef (system:DsSystem) (ctx:CallListingContext) =
-            let getRawJobName = ctx.TryFindFirstChild<EtcName1Context>().Value
-            let jobName =  getRawJobName.GetText().DeQuoteOnDemand()
-            let apiDefCtxs = ctx.Descendants<CallApiDefContext>().ToArray()
-            let getAddress (addressCtx:IParseTree) =
-                addressCtx.TryFindFirstChild<AddressItemContext>().Map(getText).Value
-            let apiItems =
-                [   for apiDefCtx in apiDefCtxs do
-                    let apiPath = apiDefCtx.CollectNameComponents() |> List.ofSeq // e.g ["A"; "+"]
-                    match apiPath with
-                    | device::api::[] ->
-                        let apiItem =
-                            option {
-                                let! apiPoint = tryFindCallingApiItem system device api
-                                let! addressCtx = ctx.TryFindFirstChild<AddressInOutContext>()
-                                let! txAddressCtx = addressCtx.TryFindFirstChild<OutAddrContext>()
-                                let! rxAddressCtx = addressCtx.TryFindFirstChild<InAddrContext>()
-                                let tx = getAddress(txAddressCtx)
-                                let rx = getAddress(rxAddressCtx)
+        let createJobDef (system:DsSystem) (ctx:JobBlockContext) =
+            let callListings = ctx.Descendants<CallListingContext>().ToArray()
+            let jobFuncs = commonFunctionExtractor ctx
+            for callList in callListings do
+                let getRawJobName = callList.TryFindFirstChild<EtcName1Context>().Value
+                let jobName =  getRawJobName.GetText().DeQuoteOnDemand()
+                let apiDefCtxs = callList.Descendants<CallApiDefContext>().ToArray()
+                let getAddress (addressCtx:IParseTree) =
+                    addressCtx.TryFindFirstChild<AddressItemContext>().Map(getText).Value
+                let apiItems =
+                    [   for apiDefCtx in apiDefCtxs do
+                        let apiPath = apiDefCtx.CollectNameComponents() |> List.ofSeq // e.g ["A"; "+"]
+                        match apiPath with
+                        | device::api::[] ->
+                            let apiItem =
+                                option {
+                                    let! apiPoint = tryFindCallingApiItem system device api
+                                    let! addressCtx = callList.TryFindFirstChild<AddressInOutContext>()
+                                    let! txAddressCtx = addressCtx.TryFindFirstChild<OutAddrContext>()
+                                    let! rxAddressCtx = addressCtx.TryFindFirstChild<InAddrContext>()
+                                    let tx = getAddress(txAddressCtx)
+                                    let rx = getAddress(rxAddressCtx)
 
-                                tracefn $"TX={tx} RX={rx}"
-                                return JobDef(apiPoint, rx, tx, device)
-                            }
-                        match apiItem with
-                        | Some apiItem -> yield apiItem
+                                    tracefn $"TX={tx} RX={rx}"
+                                    return JobDef(apiPoint, rx, tx, device)
+                                }
+                            match apiItem with
+                            | Some apiItem -> yield apiItem
+                            | _ -> failwith "ERROR"
+
                         | _ -> failwith "ERROR"
-
-                    | _ -> failwith "ERROR"
-                ]
-            assert(apiItems.Any())
-            let job = Job(jobName, apiItems)
-            //job.ObserveInTimming <-   <shin>
-            //job.CommandOutTimming <-  <shin>
-            job |> system.Jobs.Add
+                    ]
+                let funcSet = commonFunctionSetter jobName jobFuncs
+                assert(apiItems.Any())
+                let job = Job(jobName, apiItems)
+                job.Funcs <- funcSet
+                job |> system.Jobs.Add
 
         let fillTargetOfAliasDef (x:DsParserListener) (ctx:AliasListingContext) =
             let system = x.TheSystem
@@ -441,7 +471,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
             }
 
 
-        for ctx in sysctx.Descendants<CallListingContext>() do
+        for ctx in sysctx.Descendants<JobBlockContext>() do
             createJobDef x.TheSystem ctx
 
         for ctx in sysctx.Descendants<AliasListingContext>() do

@@ -165,10 +165,11 @@ module PPTObjectModule =
         | "M"   -> BtnType.DuManualBTN
         | "D"   -> BtnType.DuDriveBTN
         | "S"   -> BtnType.DuStopBTN
-        | "C"   -> BtnType.DuClearBTN
         | "E"   -> BtnType.DuEmergencyBTN
         | "T"   -> BtnType.DuTestBTN
+        | "R"   -> BtnType.DuReadyBTN
         | "H"   -> BtnType.DuHomeBTN
+        | "C"   -> BtnType.DuClearBTN
         | _     ->  failwith $"{key} is Error Type"
 
     let getLampType(key:string) =

@@ -24,7 +24,7 @@ variables:
   identifier2: '{{compo}}\.{{compo}}'
   identifier3: '{{compo}}\.{{compo}}\.{{compo}}'
   identifier4: '{{compo}}\.{{compo}}\.{{compo}}\.{{compo}}'
-  identifiers: '{{compo}}\.{{compo}}*'
+  identifiers: '{{compo}}(?:\.{{compo}})*'
 
   system: 'system|sys'
   external: 'external'
@@ -34,7 +34,7 @@ variables:
   lamp: 'runlamp|dryrunlamp|manuallamp|stoplamp|emglamp'
   types: '(device|flow|aliases|{{lamp}}|{{button}})'
   props: '{{identifier1}}|{{identifier2}}|{{identifier3}}|{{identifier4}}|{{identifiers}}'
-  punctuation: '[(<\|\|>)(<\|)(\|>)<>,;:=(=>)(<=)(\|\|)]'
+  punctuation: '[(<\|\|>)(<\|)(\|>)<>,;:=(=>)(<=)(\|\|)(\&\&)]'
   buttonHeader: '\[\s*(?:{{button}})\s*\]'
   lampHeader: '\[\s*(?:{{lamp}})\s*\]'
 
@@ -79,7 +79,7 @@ repository:
 
   ip:
     name: entity.name.tag.ip.ds
-    match: '^\s*{{ip}}'
+    match: '(?=>{{system}}){{ip}}'
 
   types:
     patterns:
@@ -308,7 +308,7 @@ repository:
           '1': {name: punctuation.brace.end.ds}
         patterns:
         - include: '#comments'
-
+        - include: '#segment'
       - comment: buttons-single-line
         name: buttons.single.ds
         begin:  '({{buttonHeader}})\s*(=)\s*\{'
@@ -391,9 +391,8 @@ repository:
           '1': {name: punctuation.codeblocks.brace.end.ds}
         patterns:
         - include: '#comments'
-        # - include: '#parents'
         - include: '#punctuation'
-        - include: '#property'
+        - include: '#code'
       - comment: codeblocks-single-line
         name: codeblocks.single.ds
         begin: (<@\{)
@@ -410,13 +409,13 @@ repository:
 
   devices:
     patterns:
-      name: device.ds
+      name: storage.modifier.devices.header.ds
       # match: '{{deviceHeader}}'
-      match: '\[(device)\s*(file\s*=\s*)?\]\s*(;)$'
-      captures:
-        '1': {name: storage.modifier.devices.header1.ds}
-        '2': {name: support.type.devices.header2.ds}
-        '3': {name: storage.modifier.devices.header3.ds}
+      match: '(?<=\[)(device)'
+      # captures:
+      #   '1': {name: storage.modifier.devices.header1.ds}
+      #   '2': {name: support.type.devices.header2.ds}
+      #   '3': {name: storage.modifier.devices.header3.ds}
 
   exsystem:
     patterns:
@@ -433,7 +432,6 @@ repository:
       - name: keyword.other.causal.ds
         match: '(<\|\|>)|(<\|)|(\|>)|<|>|(=>)|(<=)'
 
-
   segment:
     patterns:
     - name: 'variable.other.segment.withdot.ds'
@@ -443,5 +441,11 @@ repository:
     - include: '#comments'
     - name: punctuation.separator.array.ds
       match: ";"
-
+  
+  code: 
+    patterns:
+    - name: 'variable.other.code.ds'
+      match: '(?<=\$){{identifiers}}'
+    - name: 'punctuation.dollar.ds'
+      match: '(?={{identifiers}})\$'
 ...

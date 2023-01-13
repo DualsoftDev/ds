@@ -203,6 +203,7 @@ module DsTextExport =
     let [<Literal>] TextXlsEmergencyBTN      = "비상푸쉬"
     let [<Literal>] TextXlsTestBTN           = "시운전푸쉬"
     let [<Literal>] TextXlsHomeBTN           = "복귀푸쉬"
+    let [<Literal>] TextXlsReadyBTN          = "준비푸쉬"
                                              
     let [<Literal>] TextXlsAutoModeLamp      = "자동램프"
     let [<Literal>] TextXlsManualModeLamp    = "수동램프"

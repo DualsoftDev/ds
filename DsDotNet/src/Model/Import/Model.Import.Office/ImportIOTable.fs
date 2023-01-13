@@ -131,6 +131,7 @@ module ImportIOTable =
                         | XlsTestBTN           -> updateBtn  (row, BtnType.DuTestBTN             , tableIO)
                         | XlsClearBTN          -> updateBtn  (row, BtnType.DuClearBTN            , tableIO)
                         | XlsHomeBTN           -> updateBtn  (row, BtnType.DuHomeBTN             , tableIO)
+                        | XlsReadyBTN          -> updateBtn  (row, BtnType.DuReadyBTN            , tableIO)
                         | XlsAutoModeLamp      -> updateLamp (row, LampType.DuAutoModeLamp       , tableIO)
                         | XlsManualModeLamp    -> updateLamp (row, LampType.DuManualModeLamp     , tableIO)
                         | XlsDriveModeLamp     -> updateLamp (row, LampType.DuDriveModeLamp      , tableIO)

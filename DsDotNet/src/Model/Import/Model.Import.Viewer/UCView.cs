@@ -225,6 +225,7 @@ namespace Dual.Model.Import
                         if (viewNode.BtnType.Value == BtnType.DuManualBTN) nNode.Attr.FillColor = Color.Violet;
                         if (viewNode.BtnType.Value == BtnType.DuTestBTN) nNode.Attr.FillColor = Color.CadetBlue;
                         if (viewNode.BtnType.Value == BtnType.DuHomeBTN) nNode.Attr.FillColor = Color.Brown  ;
+                        if (viewNode.BtnType.Value == BtnType.DuReadyBTN) nNode.Attr.FillColor = Color.Green  ;
                         if (viewNode.BtnType.Value == BtnType.DuDriveBTN) nNode.Attr.FillColor = Color.DodgerBlue;
                         if (viewNode.BtnType.Value == BtnType.DuStopBTN) nNode.Attr.FillColor = Color.Firebrick;
                     }

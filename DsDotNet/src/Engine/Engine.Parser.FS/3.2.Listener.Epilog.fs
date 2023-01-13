@@ -31,6 +31,7 @@ module EtcListenerModule =
                         | :? EmergencyBlockContext -> DuEmergencyBTN
                         | :? TestBlockContext      -> DuTestBTN
                         | :? HomeBlockContext      -> DuHomeBTN
+                        | :? ReadyBlockContext     -> DuReadyBTN
                         | _ -> failwith $"button type error {fstType}"
                     let category = first.GetChild(1).GetText();       // [| '[', category, ']', buttonBlock |] 에서 category 만 추려냄 (e.g 'emg')
                     let key = (system, category)

@@ -52,6 +52,7 @@ module CoreExtensionModule =
         member x.EmergencyButtons   = getButtons(x, DuEmergencyBTN)
         member x.TestButtons        = getButtons(x, DuTestBTN)
         member x.HomeButtons        = getButtons(x, DuHomeBTN)
+        member x.ReadyButtons       = getButtons(x, DuReadyBTN)
                                     
         member x.DriveModeLamps     = getLamps(x, DuDriveModeLamp)
         member x.AutoModeLamps      = getLamps(x, DuAutoModeLamp)

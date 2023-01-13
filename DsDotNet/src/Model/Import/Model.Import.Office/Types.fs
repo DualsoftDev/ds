@@ -37,13 +37,14 @@ module InterfaceClass =
         | XlsEmergencyBTN        //비상 버튼
         | XlsTestBTN             //시운전 시작 버튼
         | XlsHomeBTN             //홈(원위치) 버튼
+        | XlsReadyBTN            //준비(원위치) 버튼
         | XlsAutoModeLamp        //자동 모드 램프
         | XlsManualModeLamp      //수동 모드 램프
         | XlsDriveModeLamp       //운전 모드 램프
         | XlsStopModeLamp        //정지 모드 램프
-        | XlsEmergencyModeLamp   //정지 모드 램프
-        | XlsTestModeLamp        //정지 모드 램프
-        | XlsReadyModeLamp       //댜가 모드  램프
+        | XlsEmergencyModeLamp   //비상 모드 램프
+        | XlsTestModeLamp        //시운전 모드 램프
+        | XlsReadyModeLamp       //준비 모드  램프
 
     with
         member x.ToText() =
@@ -57,6 +58,7 @@ module InterfaceClass =
             | XlsClearBTN          -> TextXlsClearBTN       
             | XlsEmergencyBTN      -> TextXlsEmergencyBTN     
             | XlsTestBTN           -> TextXlsTestBTN      
+            | XlsReadyBTN          -> TextXlsReadyBTN        
             | XlsHomeBTN           -> TextXlsHomeBTN        
             | XlsAutoModeLamp      -> TextXlsAutoModeLamp  
             | XlsManualModeLamp    -> TextXlsManualModeLamp 
@@ -82,5 +84,5 @@ module InterfaceClass =
         | TextXlsManualModeLamp ->  XlsManualModeLamp
         | TextXlsDriveModeLamp  ->  XlsDriveModeLamp 
         | TextXlsStopModeLamp   ->  XlsStopModeLamp    
-        | TextXlsReadyModeLamp ->  XlsReadyModeLamp
+        | TextXlsReadyModeLamp  ->  XlsReadyModeLamp
         | _ -> failwithf $"'{txt}' TextXlsType Error check type"

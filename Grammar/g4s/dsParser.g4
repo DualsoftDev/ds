@@ -144,7 +144,7 @@ categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|stopBlock|emergencyBl
     emergencyBlock :'[' ('emg_in'|'emg') ']'       EQ categoryBlock;
     testBlock      :'[' ('test_in'|'test') ']'     EQ categoryBlock;
     homeBlock      :'[' ('home_in'|'home') ']'     EQ categoryBlock;
-    readyBlock     :'[' ('ready') ']'              EQ categoryBlock;
+    readyBlock     :'[' ('ready_in'|'ready') ']'   EQ categoryBlock;
     
     categoryBlock: LBRACE (() | (buttonDef|lampDef)*) RBRACE;
     

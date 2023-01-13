@@ -34,6 +34,7 @@ TEST_IN: 'test_in';
 TEST: 'test';
 HOME_IN: 'home_in';
 HOME: 'home';
+READY_IN: 'ready_in';
 READY: 'ready';
 VARIABLES: 'variables';
 COMMANDS: 'commands';

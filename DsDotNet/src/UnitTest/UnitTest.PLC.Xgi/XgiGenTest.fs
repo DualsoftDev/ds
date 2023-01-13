@@ -9,7 +9,7 @@ open Engine.Common.FS
 open PLC.CodeGen.LSXGI
 open PLC.CodeGen.Common.FlatExpressionModule
 
-[<Collection("SerialAutoVariable")>]
+[<Collection("SerialXgiGenerationTest")>]
 type XgiGenerationTest() =
     inherit XgiTestClass()
 
@@ -56,21 +56,24 @@ type XgiGenerationTest() =
         let storages = Storages()
         let code = codeForBits + """
             $x15 :=
-                $x00 &&
-                $x01 &&
-                $x02 &&
-                $x03 &&
-                $x04 &&
-                $x05 &&
-                $x06 &&
-                $x07 &&
-                $x08 &&
-                $x09 &&
-                $x10 &&
-                $x11 &&
-                $x12 &&
-                $x13 &&
-                $x14
+                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 && $x10 &&
+                $x11 && $x12 && $x13 && $x14
+                ;
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
+
+    [<Test>]
+    member __.``X And Huge test`` () =
+        let storages = Storages()
+        let code = codeForBits31 + """
+            $x15 :=
+                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
+                $x10 && $x11 && $x12 && $x13 && $x14 && $x15 && $x16 && $x17 && $x18 && $x19 &&
+                $x20 && $x21 && $x22 && $x23 && $x24 && $x25 && $x26 && $x27 && $x28 && $x29 &&
+                $x30 && $x31 &&
+                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09
                 ;
 """
         let statements = parseCode storages code
@@ -82,21 +85,24 @@ type XgiGenerationTest() =
         let storages = Storages()
         let code = codeForBits + """
             $x15 :=
-                $x00 ||
-                $x01 ||
-                $x02 ||
-                $x03 ||
-                $x04 ||
-                $x05 ||
-                $x06 ||
-                $x07 ||
-                $x08 ||
-                $x09 ||
-                $x10 ||
-                $x11 ||
-                $x12 ||
-                $x13 ||
-                $x14
+                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07 || $x08 || $x09 ||
+                $x10 || $x11 || $x12 || $x13 || $x14
+                ;
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
+
+    [<Test>]
+    member __.``OR Huge test`` () =
+        let storages = Storages()
+        let code = codeForBits31 + """
+            $x15 :=
+                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07 || $x08 || $x09 ||
+                $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16 || $x17 || $x18 || $x19 ||
+                $x20 || $x21 || $x22 || $x23 || $x24 || $x25 || $x26 || $x27 || $x28 || $x29 ||
+                $x30 || $x31 ||
+                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07 || $x08 || $x09
                 ;
 """
         let statements = parseCode storages code

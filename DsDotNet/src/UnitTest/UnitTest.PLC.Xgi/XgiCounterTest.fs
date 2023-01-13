@@ -12,6 +12,7 @@ open PLC.CodeGen.LSXGI
 
 
 
+[<Collection("XgiCounterTest")>]
 type XgiCounterTest() =
     inherit XgiTestClass()
 
@@ -182,7 +183,7 @@ type XgiCounterTest() =
         let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
-[<Collection("SerialAutoVariable")>]
+[<Collection("SerialXgiFunctionTest")>]
 type XgiFunctionTest() =
     inherit XgiTestClass()
 
@@ -254,7 +255,7 @@ type XgiFunctionTest() =
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
-    member __.``ADD MUL 3 items test`` () =
+    member __.``ADD 8 items test`` () =
         let storages = Storages()
         let code = """
             int16 nn1 = 1s;
@@ -265,16 +266,16 @@ type XgiFunctionTest() =
             int16 nn6 = 6s;
             int16 nn7 = 7s;
             int16 nn8 = 8s;
+
             int16 sum = 0s;
-            $sum := $nn1 + $nn2 * $nn3 + $nn4 + $nn5 * $nn6 / $nn7 - $nn8;
+            $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8;
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
-
 
     [<Test>]
-    member __.``Comparision, Arithmatic, AND test`` () =
+    member __.``X ADD 10 items test`` () =
         let storages = Storages()
         let code = """
             int16 nn1 = 1s;
@@ -285,12 +286,73 @@ type XgiFunctionTest() =
             int16 nn6 = 6s;
             int16 nn7 = 7s;
             int16 nn8 = 8s;
-            int16 sum = 0s;
-            bool result = false;
+            int16 nn9 = 9s;
+            int16 nn10 = 10s;
 
-            $result := $nn1 + $nn2 * $nn3 > 2s && $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
+            int16 sum = 0s;
+            $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8 + $nn9 + $nn10;
 """
         let statements = parseCode storages code
         let xml = LsXGI.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
 
+    [<Test>]
+    member __.``X DIV 3 items test`` () =
+        let storages = Storages()
+        let code = """
+            int16 nn1 = 1s;
+            int16 nn2 = 2s;
+            int16 nn3 = 3s;
+
+            int16 quotient = 0s;
+            $quotient := $nn1 / $nn2 / $nn3;
+"""
+        let statements = parseCode storages code
+        let xml = LsXGI.generateXml storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml
+
+    [<Test>]
+    member x.``ADD MUL 3 items test`` () =
+        lock x.Locker (fun () ->
+            autoVariableCounter <- 0
+            let storages = Storages()
+            let code = """
+                int16 nn1 = 1s;
+                int16 nn2 = 2s;
+                int16 nn3 = 3s;
+                int16 nn4 = 4s;
+                int16 nn5 = 5s;
+                int16 nn6 = 6s;
+                int16 nn7 = 7s;
+                int16 nn8 = 8s;
+                int16 sum = 0s;
+                $sum := $nn1 + $nn2 * $nn3 + $nn4 + $nn5 * $nn6 / $nn7 - $nn8;
+    """
+            let statements = parseCode storages code
+            let xml = LsXGI.generateXml storages (map withNoComment statements)
+            saveTestResult (get_current_function_name()) xml
+        )
+
+    [<Test>]
+    member x.``Comparision, Arithmatic, AND test`` () =
+        lock x.Locker (fun () ->
+            autoVariableCounter <- 0
+            let storages = Storages()
+            let code = """
+                int16 nn1 = 1s;
+                int16 nn2 = 2s;
+                int16 nn3 = 3s;
+                int16 nn4 = 4s;
+                int16 nn5 = 5s;
+                int16 nn6 = 6s;
+                int16 nn7 = 7s;
+                int16 nn8 = 8s;
+                int16 sum = 0s;
+                bool result = false;
+
+                $result := $nn1 + $nn2 * $nn3 > 2s && $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
+    """
+            let statements = parseCode storages code
+            let xml = LsXGI.generateXml storages (map withNoComment statements)
+            saveTestResult (get_current_function_name()) xml
+        )

@@ -56,18 +56,22 @@ namespace Engine
 ";
         public static string DupButtonCategory = @"
 [sys] My = {
-    [emg] = {
-    }
-    [emg] = {
+    [buttons] = {
+        [emg] = {
+        }
+        [emg] = {
+        }
     }
 }
 ";
 
         public static string DupButtonName = @"
 [sys] My = {
-    [emg] = {
-        EmptyButton = {};
-        EmptyButton = {}
+    [buttons] = {
+        [emg] = {
+            EmptyButton = {}
+            EmptyButton = {}
+        }
     }
 }
 ";
@@ -75,8 +79,10 @@ namespace Engine
         public static string DupButtonFlowName = @"
 [sys] My = {
     [flow] F1 = { A > B; }
-    [emg] = {
-        EmptyButton = {F1; F1};
+    [buttons] = {
+        [emg] = {
+            EmptyButton = {F1; F1};
+        }
     }
 }
 ";

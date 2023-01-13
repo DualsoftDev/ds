@@ -243,18 +243,20 @@ namespace Engine
         CC2     = {EX.FF_CC2.TX    ~    EX.FF_CC2.RX}
         ResetBTN     = {EX.FF_ResetBTN.TX    ~    EX.FF_ResetBTN.RX}
     }
-    [emg] = {
-        EMGBTN3 = { F3; F5 };
-        EMGBTN = { F1; F2; F3; F5; FF };
-    }
-    [auto] = {
-        //AutoBTN2;     Empty not allowed
-        //AutoBTN = { F2 };
-        AutoBTN = { F1; F3; F5; FF };
-    }
-    [start] = {
-        StartBTN_FF = { FF };
-        StartBTN1 = { F1 };
+    [buttons] = {
+        [emg] = {
+            EMGBTN3 = { F3; F5 };
+            EMGBTN = { F1; F2; F3; F5; FF };
+        }
+        [auto] = {
+            //AutoBTN2;     Empty not allowed
+            //AutoBTN = { F2 };
+            AutoBTN = { F1; F3; F5; FF };
+        }
+        [start] = {
+            StartBTN_FF = { FF };
+            StartBTN1 = { F1 };
+        }
     }
     [reset] = {
         ResetBTN = { F1; F2; F3; F5; FF };
@@ -315,17 +317,19 @@ namespace Engine
         Work.작업공정 > Front.배출공정;
         Rear.제품공급 > Work.작업공정;
     }
-    [emg_in] = {
-        EMGBTN = { Work; Model_Auto };
-    }
-    [auto_in] = {
-        AutoBTN = { Work; Model_Auto };
-    }
-    [start_in] = {
-        StartBTN1 = { Work; Model_Auto };
-    }
-    [reset_in] = {
-        ResetBTN = { Work; Model_Auto };
+    [buttons] = {
+        [emg_in] = {
+            EMGBTN = { Work; Model_Auto };
+        }
+        [auto_in] = {
+            AutoBTN = { Work; Model_Auto };
+        }
+        [start_in] = {
+            StartBTN1 = { Work; Model_Auto };
+        }
+        [reset_in] = {
+            ResetBTN = { Work; Model_Auto };
+        }
     }
 }
 

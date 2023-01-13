@@ -97,8 +97,10 @@ module ModelAnswers =
         Bp = { B."+"(%I3, %Q3); }
         Bm = { B."-"(%I4, %Q4); }
     }
-    [emg] = {
-        EMGBTN(_, _) = { F; }
+    [buttons] = {
+        [emg] = {
+            EMGBTN(_, _) = { F; }
+        }
     }
     [prop] = {
         [safety] = {

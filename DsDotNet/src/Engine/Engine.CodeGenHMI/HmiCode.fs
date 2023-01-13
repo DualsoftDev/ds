@@ -101,7 +101,7 @@ module HmiGenModule =
                 "CLEARof",  ButtonType.Clear;
                 "EMSTOPof", ButtonType.Emergency;
                 "TESTof",   ButtonType.Test;
-                "HOME",   ButtonType.Home;
+                "HOME",     ButtonType.Home;
             ]
             for name, btnType in btnNames do
                 let btnName = $"{name}__{flowName}"
@@ -132,7 +132,8 @@ module HmiGenModule =
                         for sp in sys.StartPoints do
                             hmiInfos[button].targets.Add(sp.QualifiedName)
                 | ButtonType.Emergency | ButtonType.Auto | ButtonType.Manual
-                | ButtonType.Clear | ButtonType.Stop ->
+                | ButtonType.Clear | ButtonType.Home 
+                | ButtonType.Stop | ButtonType.Emergency ->
                     for flow in flowNames do hmiInfos[button].targets.Add(flow)
                 | _ ->
                     printfn "%A" btnType

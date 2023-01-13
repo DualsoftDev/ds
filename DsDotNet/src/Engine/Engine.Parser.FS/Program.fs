@@ -89,11 +89,14 @@ C4 > C5;
         Bm = { B."-"(%I4, %Q4); }
     }
 
-    [emg] = {
-        EMGBTN(_,_) = { F; };
-        //EmptyButton = {};
-        //NonExistingFlowButton = { F1; };
+    [buttons] = {
+        [emg] = {
+            EMGBTN(_,_) = { F; }
+            //EmptyButton = {}
+            //NonExistingFlowButton = { F1; }
+        }
     }
+
     [prop] = {
         // safety : Real|Call = { (Real|Call)* }
         [safety] = {

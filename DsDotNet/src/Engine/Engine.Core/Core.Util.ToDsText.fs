@@ -225,28 +225,28 @@ module internal ToDsTextModule =
                 |> List.collect id
             if lmps.Any() then
                 yield $"{tab}[lamps] = {lb}"
-            let lampsToDs(category:string, lamps:LampDef seq) =
-                [
-                    if lamps.length() > 0 then
-                        yield $"{tab2}[{category}] = {lb}"
-                        for lamp in lamps do
-                            let addr = 
-                                if lamp.OutAddress <> null then
-                                    $"({lamp.OutAddress})"
-                                else
-                                    ""
+                let lampsToDs(category:string, lamps:LampDef seq) =
+                    [
+                        if lamps.length() > 0 then
+                            yield $"{tab2}[{category}] = {lb}"
+                            for lamp in lamps do
+                                let addr = 
+                                    if lamp.OutAddress <> null then
+                                        $"({lamp.OutAddress})"
+                                    else
+                                        ""
                                 
-                            yield $"{tab3}{lamp.Name}{addr} = {lb} {lamp.SettingFlow.Name} {rb}"
-                        yield $"{tab2}{rb}"
-                ] |> combineLines
-            yield lampsToDs("auto",   system.AutoModeLamps     )
-            yield lampsToDs("manual", system.ManualModeLamps   )
-            yield lampsToDs("drive",  system.DriveModeLamps    )
-            yield lampsToDs("stop",   system.StopModeLamps     )
-            yield lampsToDs("emg",    system.EmergencyModeLamps)
-            yield lampsToDs("test",   system.TestModeLamps     )
-            yield lampsToDs("ready",  system.ReadyModeLamps    )
-            yield $"{tab}{rb}"
+                                yield $"{tab3}{lamp.Name}{addr} = {lb} {lamp.SettingFlow.Name} {rb}"
+                            yield $"{tab2}{rb}"
+                    ] |> combineLines
+                yield lampsToDs("auto",   system.AutoModeLamps     )
+                yield lampsToDs("manual", system.ManualModeLamps   )
+                yield lampsToDs("drive",  system.DriveModeLamps    )
+                yield lampsToDs("stop",   system.StopModeLamps     )
+                yield lampsToDs("emg",    system.EmergencyModeLamps)
+                yield lampsToDs("test",   system.TestModeLamps     )
+                yield lampsToDs("ready",  system.ReadyModeLamps    )
+                yield $"{tab}{rb}"
 
             (* prop
                     safety

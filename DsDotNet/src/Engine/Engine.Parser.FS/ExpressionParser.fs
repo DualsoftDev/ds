@@ -190,14 +190,9 @@ module rec ExpressionParser =
                     CounterStatement.CreateAbCTD(tcParams)
 
                 | CTUD, ("createWinCTUD" | "createXgiCTUD"), _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::(BoolExp ldCondition)::[] ->
-                    CounterStatement.CreateXgiCTUD(tcParams, countDownCondition, resetCondition, ldCondition)
+                    CounterStatement.CreateCTUD(tcParams, countDownCondition, resetCondition, ldCondition)
                 | CTUD, "createAbCTUD", _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::[] ->
                     CounterStatement.CreateAbCTUD(tcParams, countDownCondition, resetCondition)
-
-                //| CTUD, "createCTUD", _::_::(BoolExp countDownCondition)::(UnitValue accum)::[] ->
-                //    CounterStatement.CreateCTUD(tcParams, countDownCondition, accum)
-                //| CTUD, "createCTUD", _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::(UnitValue accum)::[] ->
-                //    CounterStatement.CreateCTUD(tcParams, countDownCondition, resetCondition, accum)
 
                 | CTR, ("createWinCTR" | "createXgiCTR" ), _::_::(BoolExp resetCondition)::[] ->
                     CounterStatement.CreateXgiCTR(tcParams, resetCondition)
@@ -230,14 +225,10 @@ module rec ExpressionParser =
                     TimerStatement.CreateTON(tcParams)
                 | TOF, ("createWinTOF" | "createXgiTOF" | "createAbTOF"), _::_::[] ->
                     TimerStatement.CreateTOF(tcParams)
-                | RTO, ("createAbRTO" ), _::_::[] ->
+                | TMR, ("createAbRTO" ), _::_::[] ->
                     TimerStatement.CreateAbRTO(tcParams)
-                //| TON, "createTON", _::_::(BoolExp resetCondition)::[] ->
-                //    TimerStatement.CreateTON(tcParams, resetCondition)
-                //| TOF, "createTOF", _::_::(BoolExp resetCondition)::[] ->
-                //    TimerStatement.CreateTOF(tcParams, resetCondition)
-                | RTO, ("createXgiTMR" | "createWinTMR"), _::_::(BoolExp resetCondition)::[] ->
-                    TimerStatement.CreateRTO(tcParams, resetCondition)
+                | TMR, ("createXgiTMR" | "createWinTMR"), _::_::(BoolExp resetCondition)::[] ->
+                    TimerStatement.CreateTMR(tcParams, resetCondition)
                 | _ -> fail()
             | _ -> fail()
         | None -> fail()
@@ -343,8 +334,8 @@ module rec ExpressionParser =
 
 
     type System.Type with
-        member x.CreateVariable(name:string, boxedValue:obj) = fwdCreateVariableWithTypeAndValue name x ({Object = boxedValue}:BoxedObjectHolder)
-        member x.CreateVariable(name:string) = fwdCreateVariableWithType name x
+        member x.CreateVariable(name:string, boxedValue:obj) = fwdCreateVariableWithTypeAndValue x name ({Object = boxedValue}:BoxedObjectHolder)
+        member x.CreateVariable(name:string) = fwdCreateVariableWithType x name
 
         member x.CreateTag(name:string, address:string, boxedValue:obj) : IStorage =
             let v = boxedValue

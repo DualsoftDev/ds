@@ -38,7 +38,7 @@ module internal rec Command =
                     match ts.Timer.Type with
                     | TON -> VarType.TON
                     | TOF -> VarType.TOFF
-                    | RTO -> VarType.TMR
+                    | TMR -> VarType.TMR
 
                 | CounterMode cs ->
                     match cs.Counter.Type with
@@ -93,7 +93,7 @@ module internal rec Command =
 
     /// '_ON' 에 대한 expression
     let fakeAlwaysOnExpression:Expression<bool> =
-        let on = createXgiVariable "_ON" "가짜 _ON" true
+        let on = createXgiVariable typedefof<bool> "_ON" true "가짜 _ON" :?> XgiLocalVar<bool>
         DuTerminal (DuVariable on)
 
     //type FuctionParameterShape =
@@ -117,7 +117,7 @@ module internal rec Command =
             "PT", (literal2expr $"T#{time}MS") :> IExpression
             "IN", obe2e ts.RungInCondition
             match typ with
-            | RTO ->
+            | TMR ->
                 "RST", obe2e ts.ResetCondition
             | _ ->
                 ()

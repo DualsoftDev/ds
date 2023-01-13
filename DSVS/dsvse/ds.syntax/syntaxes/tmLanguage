@@ -20,15 +20,11 @@
       </dict>
       <dict>
         <key>include</key>
-        <string>#systems</string>
-      </dict>
-      <dict>
-        <key>include</key>
         <string>#systmeType</string>
       </dict>
       <dict>
         <key>include</key>
-        <string>#ip</string>
+        <string>#systems</string>
       </dict>
     </array>
     <key>repository</key>
@@ -39,24 +35,17 @@
         <array>
           <dict>
             <key>name</key>
-            <string>storage.modifier.system.text.withbrackets.ds</string>
+            <string>storage.modifier.system.text.ds</string>
             <key>match</key>
-            <string>(\[\s*)(system|sys)(\s*\])</string>
+            <string>(?&lt;=\[)(system|sys)\b</string>
           </dict>
           <dict>
             <key>name</key>
-            <string>storage.modifier.system.text.ds</string>
+            <string>support.type.tag.ip.ds</string>
             <key>match</key>
-            <string>^\s*(system|sys)</string>
+            <string>(?&lt;=(system|sys)\b)(\s(ip|host))\b</string>
           </dict>
         </array>
-      </dict>
-      <key>ip</key>
-      <dict>
-        <key>name</key>
-        <string>entity.name.tag.ip.ds</string>
-        <key>match</key>
-        <string>(?=&gt;system|sys)(?:ip|host)\s*=\s*(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+(?:\.(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+)*</string>
       </dict>
       <key>types</key>
       <dict>
@@ -66,13 +55,13 @@
             <key>name</key>
             <string>storage.modifier.withbrackets.ds</string>
             <key>match</key>
-            <string>(\[\s*)((device|flow|aliases|runlamp|dryrunlamp|manuallamp|stoplamp|emglamp|emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home))(\s*\])</string>
+            <string>(\[\s*)((device|flow|aliases|runlamp|dryrunlamp|manuallamp|stoplamp|emglamp|emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home)\b)(\s*\])</string>
           </dict>
           <dict>
             <key>name</key>
             <string>storage.modifier.ds</string>
             <key>match</key>
-            <string>(?&lt;![_$[:alnum:]])(?:(?&lt;=\.\.\.)|(?&lt;!\.))((device|flow|aliases|runlamp|dryrunlamp|manuallamp|stoplamp|emglamp|emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home))(?![_$[:alnum:]])(?:(?=\.\.\.)|(?!\.))</string>
+            <string>(?&lt;![_$[:alnum:]])(?:(?&lt;=\.\.\.)|(?&lt;!\.))((device|flow|aliases|runlamp|dryrunlamp|manuallamp|stoplamp|emglamp|emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home)\b)(?![_$[:alnum:]])(?:(?=\.\.\.)|(?!\.))</string>
           </dict>
         </array>
       </dict>
@@ -188,15 +177,15 @@
               </dict>
               <dict>
                 <key>include</key>
+                <string>#devices</string>
+              </dict>
+              <dict>
+                <key>include</key>
                 <string>#flows</string>
               </dict>
               <dict>
                 <key>include</key>
                 <string>#jobs</string>
-              </dict>
-              <dict>
-                <key>include</key>
-                <string>#devices</string>
               </dict>
               <dict>
                 <key>include</key>
@@ -288,15 +277,15 @@
               </dict>
               <dict>
                 <key>include</key>
+                <string>#devices</string>
+              </dict>
+              <dict>
+                <key>include</key>
                 <string>#flows</string>
               </dict>
               <dict>
                 <key>include</key>
                 <string>#jobs</string>
-              </dict>
-              <dict>
-                <key>include</key>
-                <string>#devices</string>
               </dict>
               <dict>
                 <key>include</key>
@@ -1092,12 +1081,20 @@
       <key>devices</key>
       <dict>
         <key>patterns</key>
-        <dict>
-          <key>name</key>
-          <string>storage.modifier.devices.header.ds</string>
-          <key>match</key>
-          <string>(?&lt;=\[)(device)</string>
-        </dict>
+        <array>
+          <dict>
+            <key>name</key>
+            <string>storage.modifier.devices.header.ds</string>
+            <key>match</key>
+            <string>(?&lt;=\[\b)(device\b)</string>
+          </dict>
+          <dict>
+            <key>name</key>
+            <string>support.type.tag.file.ds</string>
+            <key>match</key>
+            <string>(?&lt;=(device\b))(\s*file)\b</string>
+          </dict>
+        </array>
       </dict>
       <key>exsystem</key>
       <dict>

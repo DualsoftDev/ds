@@ -100,6 +100,10 @@ namespace Engine
         }
         [home] = {
             HomeBTN(_, _) = { F1;F2;F3;F5; }
+            HomeBTN.func = {
+                $TON 2000;
+                $CTU 1 5;
+            }
         }
     }
 }
@@ -144,6 +148,10 @@ namespace Engine
         }
         [ready] = {
             ReadyMode = { F4 }
+            ReadyMode.func = {
+                $TON 2000;
+                $CTU 1 5;
+            }
         }
     }
 }

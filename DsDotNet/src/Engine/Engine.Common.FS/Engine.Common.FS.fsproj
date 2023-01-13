@@ -56,6 +56,7 @@
 		<Compile Include="Prelude.AdhocPolymorphism.fs" />
 		<Compile Include="TypeExtensions\Xml.fs" />
 		<Compile Include="TypeExtensions\Em.Collection.fs" />
+		<Compile Include="TypeExtensions\Em.FSharp.Collection.fs" />
 		<Compile Include="TypeExtensions\Em.Option.fs" />
 		<Compile Include="Graph\QuickGraph.fsx" />
 		<Compile Include="Library.fs" />

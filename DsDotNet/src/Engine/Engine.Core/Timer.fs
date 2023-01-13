@@ -163,13 +163,18 @@ module rec TimerModule =
         member _.Type = typ
 
         static member Create(typ:TimerType, storages:Storages, name, preset:CountUnitType, accum:CountUnitType) =
+            let en, tt, dn, pre, acc, res =
+                match Runtime.Target with
+                | ( XGI | WINDOWS ) -> "IN", "_TT", "Q", "PT", "ET", "RST"
+                | AB -> "EN", "TT", "DN", "PRE", "ACC", "RES"
+                | _ -> failwith "NOT yet supported"
 
-            let en = fwdCreateBoolTag $"{name}.{nameEN()}" false
-            let tt = fwdCreateBoolTag $"{name}.{nameTT()}" false
-            let dn  = fwdCreateBoolTag   $"{name}.{nameDN() }" false  // Done
-            let pre = fwdCreateUShortTag $"{name}.{namePRE()}" preset
-            let acc = fwdCreateUShortTag $"{name}.{nameACC()}" accum
-            let res = fwdCreateBoolTag   $"{name}.{nameRES()}" false
+            let en  = fwdCreateBoolTag   $"{name}.{en }" false
+            let tt  = fwdCreateBoolTag   $"{name}.{tt }" false
+            let dn  = fwdCreateBoolTag   $"{name}.{dn }" false  // Done
+            let pre = fwdCreateUShortTag $"{name}.{pre}" preset
+            let acc = fwdCreateUShortTag $"{name}.{acc}" accum
+            let res = fwdCreateBoolTag   $"{name}.{res}" false
 
             storages.Add(en.Name, en)
             storages.Add(tt.Name, tt)

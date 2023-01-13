@@ -34,8 +34,8 @@ module Fixtures =
 
             Engine.CodeGenCPU.ModuleInitializer.Initialize()
 
-    let setRuntimeTarget(runtimeTarget:RuntimeTarget) =
-        let runtimeTargetBackup = RuntimeTarget
-        RuntimeTarget <- runtimeTarget
-        disposable { RuntimeTarget <- runtimeTargetBackup }
+    let setRuntimeTarget(runtimeTarget:RuntimeTargetType) =
+        let runtimeTargetBackup = Runtime.Target
+        Runtime.Target <- runtimeTarget
+        disposable { Runtime.Target <- runtimeTargetBackup }
 

@@ -192,7 +192,7 @@ open Engine.Common.FS
             let resetTag = PlcTag("my_timer_reset_tag", "%M1.1", false)
             let condition = var2expr rungConditionInTag
             let reset = var2expr resetTag
-            let tcParam = {Storages=storages; Name="myRto"; Preset=1000us; RungInCondition=condition; FunctionName="createWinRTO"}
+            let tcParam = {Storages=storages; Name="myRto"; Preset=1000us; RungInCondition=condition; FunctionName="createWinTMR"}
             let timer = TimerStatement.CreateRTO(tcParam, reset) |> toTimer       // 1000ms = 1sec
 
             timer.EN.Value === true
@@ -231,8 +231,8 @@ open Engine.Common.FS
 
 
         [<Test>]
-        member __.``TIMER structure WINDOWS platform test`` () =
-            use _ = setRuntimeTarget WINDOWS
+        member __.``TIMER structure AB platform test`` () =
+            use _ = setRuntimeTarget AB
             let storages = Storages()
             let code = """
                 bool x0 = createTag("%MX0.0.0", false);
@@ -244,14 +244,15 @@ open Engine.Common.FS
             [ "IN"; "Q"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myTon.{n}") === false)
 
         [<Test>]
-        member __.``TIMER structure XGI platform test`` () =
-            use _ = setRuntimeTarget XGI
-            let storages = Storages()
-            let code = """
-                bool x0 = createTag("%MX0.0.0", false);
-                ton myTon = createXgiTON(2000us, $x0);
-"""
+        member __.``TIMER structure WINDOWS, XGI platform test`` () =
+            for platform in [WINDOWS; XGI] do
+                use _ = setRuntimeTarget platform
+                let storages = Storages()
+                let code = """
+                    bool x0 = createTag("%MX0.0.0", false);
+                    ton myTon = createXgiTON(2000us, $x0);
+    """
 
-            let statement = parseCode storages code
-            [ "IN"; "Q"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myTon.{n}") === true)
-            [ "EN"; "DN"; "PRE"; "ACC"; "TT" ] |> iter (fun n -> storages.ContainsKey($"myTon.{n}") === false)
+                let statement = parseCode storages code
+                [ "IN"; "Q"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myTon.{n}") === true)
+                [ "EN"; "DN"; "PRE"; "ACC"; "TT" ] |> iter (fun n -> storages.ContainsKey($"myTon.{n}") === false)

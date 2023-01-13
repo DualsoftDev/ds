@@ -6,7 +6,7 @@ open Engine.Common.FS
 
 module ModuleInitializer =
     let private createVariableWithTypeOnXgi (name:string) (typ:System.Type) : IVariable =
-        verify (RuntimeTarget = XGI)
+        verify (Runtime.Target = XGI)
         match typ.Name with
         | "Single" -> createXgiVariable name "no comment" 0.0f
         | "Double" -> createXgiVariable name "no comment" 0.0
@@ -24,7 +24,7 @@ module ModuleInitializer =
         | _  -> failwith "ERROR"
 
     let private createVariableWithTypeAndValueOnXgi (name:string) (typ:System.Type) (boxedValue:BoxedObjectHolder) : IVariable =
-        verify (RuntimeTarget = XGI)
+        verify (Runtime.Target = XGI)
         let v = boxedValue.Object
         match typ.Name with
         | "Single" -> createXgiVariable name "no comment" (v :?> single)
@@ -47,7 +47,17 @@ module ModuleInitializer =
 
         fwdCreateSymbolInfo <- XGITag.createSymbolInfo
 
+        Runtime.TargetChangedSubject.Subscribe(fun newRuntimeTarget ->
+            match newRuntimeTarget with
+            | XGI ->
+                fwdCreateVariableWithType <- createVariableWithTypeOnXgi
+                fwdCreateVariableWithTypeAndValue <- createVariableWithTypeAndValueOnXgi
+            | WINDOWS ->
+                fwdCreateVariableWithType <- createVariableWithTypeOnWindows
+                fwdCreateVariableWithTypeAndValue <- createVariableWithTypeAndValueOnWindows
+            | _ ->
+                ()
+        ) |> ignore
 
-
-        fwdCreateVariableWithType <- createVariableWithTypeOnXgi
-        fwdCreateVariableWithTypeAndValue <- createVariableWithTypeAndValueOnXgi
+        //fwdCreateVariableWithType <- createVariableWithTypeOnXgi
+        //fwdCreateVariableWithTypeAndValue <- createVariableWithTypeAndValueOnXgi

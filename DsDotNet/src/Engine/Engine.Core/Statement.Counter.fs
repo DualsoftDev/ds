@@ -95,7 +95,7 @@ module CounterStatementModule =
     }
 
     type CounterStatement =
-        static member CreateCTU(tcParams:TCConstructionParams) =
+        static member CreateAbCTU(tcParams:TCConstructionParams) =
             let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition; FunctionName=functionName} = tcParams
 
             ({ defaultCounterCreateParam with
@@ -103,7 +103,7 @@ module CounterStatementModule =
                 CountUpCondition=Some rungInCondition; } :CounterCreateParams)
             |> createCounterStatement storages
 
-        static member CreateCTD(tcParams:TCConstructionParams) =
+        static member CreateAbCTD(tcParams:TCConstructionParams) =
             let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition; FunctionName=functionName} = tcParams
             { defaultCounterCreateParam with
                 Type=CTD; Name=name; Preset=preset; FunctionName=functionName
@@ -118,7 +118,7 @@ module CounterStatementModule =
         //        ResetCondition=None; FunctionName=functionName }
         //    |> createCounterStatement storages
 
-        static member CreateCTUD(tcParams:TCConstructionParams, countDownCondition, reset) =
+        static member CreateAbCTUD(tcParams:TCConstructionParams, countDownCondition, reset) =
             let {Storages=storages; Name=name; Preset=preset; RungInCondition=countUpCondition; FunctionName=functionName} = tcParams
             { defaultCounterCreateParam with
                 Type=CTUD; Name=name; Preset=preset; FunctionName=functionName

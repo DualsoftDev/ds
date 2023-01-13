@@ -14,6 +14,7 @@ open Engine.Core
 
         [<Test>]
         member __.``Variable Declaration test`` () =
+            use _ = setRuntimeTarget AB
             let storages = Storages()
             let t1 = PlcTag("my_counter_control_tag", "%M1.1", false)
             let tag1 = PlcTag("tag1", "%M1.1", false)
@@ -25,9 +26,9 @@ open Engine.Core
 
             let percent = "%"
             let statementTexts = [
-                "ctu myCtu1 = createWinCTU(100us, false)"
+                "ctu myCtu1 = createAbCTU(100us, false)"
                 $"int8 myByte = createTag({dq}{percent}M9.9{dq}, 123y)"
-                "ton myton1 = createWinTON(1000us, $tag1 || $tag2)"
+                "ton myton1 = createAbTON(1000us, $tag1 || $tag2)"
                 //"ton myton2 = createWinTON(1000us, $tag1 || $tag2, $tag3)"
             ]
             for s in statementTexts do

@@ -34,7 +34,7 @@ module  TagModule =
     type TimerFlag =
     | TimerOnDely   // Timer OnDely
     | TimeOut       // Timer TimeOut
-    
+
     type CounterFlag =
     | CountRing     // Ring Counter
 
@@ -83,10 +83,10 @@ module  TagModule =
         member x.CTRStruct = cs
         member x.DN = cs.DN
 
-    
+
     [<Extension>]
     type ExpressionExt =
-        [<Extension>] 
+        [<Extension>]
         static member NotifyStatus (x:DsBit) =
             if x.Value then
                 match x.TagFlag with
@@ -113,8 +113,8 @@ module  TagModule =
 
 
 
-    let private createVariableWithTypeOnWindows (name:string) (typ:System.Type): IVariable =
-        verify (RuntimeTarget = WINDOWS)
+    let createVariableWithTypeOnWindows (name:string) (typ:System.Type): IVariable =
+        verify (Runtime.Target = WINDOWS)
         match typ.Name with
         | "Single" -> new Variable<single>(name, 0.0f)
         | "Double" -> new Variable<double>(name, 0.0)
@@ -134,8 +134,9 @@ module  TagModule =
     // error FS0030: 값 제한이 있습니다. 값 'fwdCreateVariableWithValue'은(는) 제네릭 형식    val mutable fwdCreateVariableWithValue: (string -> '_a -> IVariable)을(를) 가지는 것으로 유추되었습니다.    'fwdCreateVariableWithValue'에 대한 인수를 명시적으로 만들거나, 제네릭 요소로 만들지 않으려는 경우 형식 주석을 추가하세요.
     type BoxedObjectHolder = { Object:obj }
 
-    let private createVariableWithTypeAndValueOnWindows (name:string) (typ:System.Type) (boxedValue:BoxedObjectHolder): IVariable =
-        verify (RuntimeTarget = WINDOWS)
+    let createVariableWithTypeAndValueOnWindows (name:string) (typ:System.Type) (boxedValue:BoxedObjectHolder): IVariable =
+        let xxx = Runtime.Target
+        verify (Runtime.Target = WINDOWS)
         let v = boxedValue.Object
         match typ.Name with
         | "Single" -> new Variable<single>(name, v :?> single)

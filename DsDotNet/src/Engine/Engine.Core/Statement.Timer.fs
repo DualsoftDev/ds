@@ -80,7 +80,7 @@ module TimerStatementModule =
                 ResetCondition=None; FunctionName=functionName}:TimerCreateParams)
             |> createTimerStatement storages
 
-        static member CreateRTO(tcParams:TCConstructionParams) =
+        static member CreateAbRTO(tcParams:TCConstructionParams) =
             let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition; FunctionName=functionName} = tcParams
             ({   Type=RTO; Name=name; Preset=preset;
                 RungConditionIn=Some rungInCondition;

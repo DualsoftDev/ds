@@ -175,29 +175,34 @@ module rec ExpressionParser =
 
                 let tcParams={Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondtion; FunctionName=functionName}
 
+                (* args[0] 는 PV (Preset),
+                   args[1] 이후부터 XGI 명령 입력 순서대로...
+                *)
                 match typ, functionName, args with
-                | CTU, "createWinCTU", _::_::[] ->
-                    CounterStatement.CreateCTU(tcParams)
-                | CTU, "createXgiCTU", _::_::(BoolExp resetCondition)::[] ->
+                | CTU, ("createWinCTU" | "createXgiCTU"), _::_::(BoolExp resetCondition)::[] ->
                     CounterStatement.CreateCTU(tcParams, resetCondition)
+                | CTU, "createAbCTU", _::_::[] ->
+                    CounterStatement.CreateAbCTU(tcParams)
 
-                | CTD, "createWinCTD", _::_::[] ->
-                    CounterStatement.CreateCTD(tcParams)
-                | CTD, "createXgiCTD", _::_::(BoolExp resetCondition)::[] ->
+                | CTD, ("createWinCTD" | "createXgiCTD"), _::_::(BoolExp resetCondition)::[] ->
                     CounterStatement.CreateXgiCTD(tcParams, resetCondition)
+                | CTD, "createAbCTD", _::_::[] ->
+                    CounterStatement.CreateAbCTD(tcParams)
 
-                | CTUD, "createWinCTUD", _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::[] ->
-                    CounterStatement.CreateCTUD(tcParams, countDownCondition, resetCondition)
-                | CTUD, "createXgiCTUD", _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::(BoolExp ldCondition)::[] ->
+                | CTUD, ("createWinCTUD" | "createXgiCTUD"), _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::(BoolExp ldCondition)::[] ->
                     CounterStatement.CreateXgiCTUD(tcParams, countDownCondition, resetCondition, ldCondition)
+                | CTUD, "createAbCTUD", _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::[] ->
+                    CounterStatement.CreateAbCTUD(tcParams, countDownCondition, resetCondition)
 
                 //| CTUD, "createCTUD", _::_::(BoolExp countDownCondition)::(UnitValue accum)::[] ->
                 //    CounterStatement.CreateCTUD(tcParams, countDownCondition, accum)
                 //| CTUD, "createCTUD", _::_::(BoolExp countDownCondition)::(BoolExp resetCondition)::(UnitValue accum)::[] ->
                 //    CounterStatement.CreateCTUD(tcParams, countDownCondition, resetCondition, accum)
 
-                | CTR, ("createCTR" | "createWinCTR" | "createXgiCTR"), _::_::(BoolExp resetCondition)::[] ->
+                | CTR, ("createWinCTR" | "createXgiCTR" ), _::_::(BoolExp resetCondition)::[] ->
                     CounterStatement.CreateXgiCTR(tcParams, resetCondition)
+                | CTR, _, _ ->
+                    failwith "ERROR: CTR only supported for WINDOWS and XGI platform"
 
                 | _ -> fail()
 
@@ -221,17 +226,17 @@ module rec ExpressionParser =
 
                 let tcParams={Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondtion; FunctionName=functionName}
                 match typ, functionName, args with
-                | TON, ("createXgiTON" | "createWinTON"), _::_::[] ->
+                | TON, ("createWinTON" | "createXgiTON" | "createAbTON"), _::_::[] ->
                     TimerStatement.CreateTON(tcParams)
-                | TOF, ("createXgiTOF" | "createWinTOF"), _::_::[] ->
+                | TOF, ("createWinTOF" | "createXgiTOF" | "createAbTOF"), _::_::[] ->
                     TimerStatement.CreateTOF(tcParams)
-                | RTO, ("createXgiRTO" | "createWinRTO"), _::_::[] ->
-                    TimerStatement.CreateRTO(tcParams)
+                | RTO, ("createAbRTO" ), _::_::[] ->
+                    TimerStatement.CreateAbRTO(tcParams)
                 //| TON, "createTON", _::_::(BoolExp resetCondition)::[] ->
                 //    TimerStatement.CreateTON(tcParams, resetCondition)
                 //| TOF, "createTOF", _::_::(BoolExp resetCondition)::[] ->
                 //    TimerStatement.CreateTOF(tcParams, resetCondition)
-                | RTO, ("createXgiRTO" | "createWinRTO"), _::_::(BoolExp resetCondition)::[] ->
+                | RTO, ("createXgiTMR" | "createWinTMR"), _::_::(BoolExp resetCondition)::[] ->
                     TimerStatement.CreateRTO(tcParams, resetCondition)
                 | _ -> fail()
             | _ -> fail()

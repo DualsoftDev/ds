@@ -126,7 +126,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
     member private x.GetFilePath(fileSpecCtx:FileSpecContext) =
         let simpleFilePath = fileSpecCtx.TryFindFirstChild<FilePathContext>().Value.GetText().DeQuoteOnDemand()
         let envPaths = collectEnvironmentVariablePaths()
-        let targetPath(directory:string) = 
+        let targetPath(directory:string) =
             [ simpleFilePath; $"{directory}\\{simpleFilePath}"; for path in envPaths do $"{path}\\{simpleFilePath}" ] |> fileExistChecker
         let absoluteFilePath =
             let dir = x.ParserOptions.ReferencePath
@@ -330,7 +330,6 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                         | _, ofn::ofrn::[] -> ()
                         | _ ->
                             failwith "ERROR"
-                        noop()
             loop
 
         let createRealVertex          = tokenCreator 0

@@ -134,7 +134,6 @@ module TagModule =
     type BoxedObjectHolder = { Object:obj }
 
     let createVariableWithTypeAndValueOnWindows (typ:System.Type) (name:string) (boxedValue:BoxedObjectHolder): IVariable =
-        let xxx = Runtime.Target
         verify (Runtime.Target = WINDOWS)
         let v = boxedValue.Object
         match typ.Name with

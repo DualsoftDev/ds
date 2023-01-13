@@ -6,8 +6,6 @@ open System.Security
 open Engine.Core
 open Engine.Common.FS
 open PLC.CodeGen.Common
-open System
-open Engine.Common.FS
 
 (*
     - 사칙연산 함수(Add, ..) 의 입력은 XGI 에서 전원선으로부터 연결이 불가능한 반면,

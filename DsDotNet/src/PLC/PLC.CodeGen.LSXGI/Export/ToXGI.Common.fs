@@ -141,12 +141,12 @@ module internal Common =
         let xml = elementFull (int ElementType.VariableMode) c "" tag
         { Coordinate = c; Xml = xml ; SpanX = 1; SpanY = 1 }
 
-    let drawRising (x, y) =
-        let cellX = getFBCellX x
-        let c = coord (cellX, y)
-        [   { Coordinate = c; Xml = risingline c; SpanX = 0; SpanY = 0 }
-            { Coordinate = c; Xml = hLineTo (x, y) (cellX-1); SpanX = (cellX-1); SpanY = 0 }
-        ]
+    //let drawRising (x, y) =
+    //    let cellX = getFBCellX x
+    //    let c = coord (cellX, y)
+    //    [   { Coordinate = c; Xml = risingline c; SpanX = 0; SpanY = 0 }
+    //        { Coordinate = c; Xml = hLineTo (x, y) (cellX-1); SpanX = (cellX-1); SpanY = 0 }
+    //    ]
 
     //let drawPulseCoil (x, y) (tagCoil:INamedExpressionizableTerminal) (funSize:int) =
     //    let newX = getFBCellX (x-1)

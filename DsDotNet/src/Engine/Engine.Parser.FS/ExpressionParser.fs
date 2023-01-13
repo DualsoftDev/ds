@@ -343,8 +343,8 @@ module rec ExpressionParser =
 
 
     type System.Type with
-        member x.CreateVariable(name:string, boxedValue:obj) = fwdCreateVariableWithTypeAndValue name x ({Object = boxedValue}:BoxedObjectHolder)
-        member x.CreateVariable(name:string) = fwdCreateVariableWithType name x
+        member x.CreateVariable(name:string, boxedValue:obj) = fwdCreateVariableWithTypeAndValue x name ({Object = boxedValue}:BoxedObjectHolder)
+        member x.CreateVariable(name:string) = fwdCreateVariableWithType x name
 
         member x.CreateTag(name:string, address:string, boxedValue:obj) : IStorage =
             let v = boxedValue

@@ -414,6 +414,10 @@ namespace Engine
     }
     [jobs] = {
         C1 = { B.""+""(%I1, %Q1); A.""+""(_, %Q999.2343); }
+        C1.func = {
+            $TON 2000;
+            $CTU 1 5;
+        }
         C2 = { A.""-""(_, %Q3); B.""-""(%I1, _); }
     }
     [external file=""cylinder.ds"" ip=""192.168.0.1""] A;

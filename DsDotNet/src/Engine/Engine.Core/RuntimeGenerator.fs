@@ -13,8 +13,6 @@ module RuntimeGeneratorModule =
         static member Target
             with get() = runtimeTarget
             and set(v) =
-                if v = XGI then
-                    noop()
                 //if v <> runtimeTarget then
                 runtimeTarget <- v
                 targetChangedSubject.OnNext(v)

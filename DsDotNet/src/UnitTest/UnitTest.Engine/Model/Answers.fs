@@ -214,6 +214,10 @@ module ModelComponentAnswers =
         }
         [ready] = {
             ReadyMode = { F4 }
+            ReadyMode.func = {
+                $ton 2000;
+                $ctu 1 5;
+            }
         }
     }
 }
@@ -265,6 +269,10 @@ module ModelComponentAnswers =
         }
         [home] = {
             HomeBTN(_, _) = { F1;F2;F3;F5; }
+            HomeBTN.func = { 
+                $ton 2000; 
+                $ctu 1 5; 
+            }
         }
     }
 }
@@ -307,6 +315,10 @@ module ModelComponentAnswers =
     }
     [jobs] = {
         C1 = { B."+"(%I1, %Q1); A."+"(%I1, %Q1); }
+        C1.func = {
+            $ton 2000; 
+            $ctu 1 5; 
+        }
         C2 = { A."-"(_, %Q3); B."-"(_, %Q3); }
     }
     [device file="cylinder.ds"] B;

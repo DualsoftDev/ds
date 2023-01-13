@@ -28,8 +28,7 @@ system: '[' sysHeader ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
     sysBlock
         : LBRACE (  flowBlock | jobBlock | loadDeviceBlock | loadExternalSystemBlock
                     | interfaceBlock | buttonBlock | lampBlock | propsBlock
-                    | codeBlock
-                    | variableBlock | commandBlock | observeBlock )*
+                    | codeBlock | variableBlock )*
           RBRACE       // identifier1Listing|parenting|causal|call
           ;
     systemName:identifier1;
@@ -114,12 +113,16 @@ flowBlock
         aliasDef: identifier12;     // {OtherFlow}.{real} or {MyFlowReal} or {Call}
         aliasMnemonic: identifier1;
 
-jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing)* RBRACE;
+jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|funcSet)* RBRACE;
     callListing:
         jobName '=' LBRACE (callApiDef)? ( ';' callApiDef)* (';')+ RBRACE;
     jobName: etcName1;
     callApiDef: callKey addressInOut;
     callKey: identifier12;
+    
+    funcSet: identifier12 '=' LBRACE (() | funcDef (SEIMCOLON funcDef)* (SEIMCOLON)?) RBRACE;
+    funcDef:  '$' funcName (argument (argument)*);
+    funcName: identifier1;
 
 codeBlock: CODE_BLOCK;
 
@@ -162,17 +165,13 @@ categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|stopBlock|emergencyBl
     buttonDef: btnNameAddr EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
     btnNameAddr: buttonName addressInOut;
     
-    buttonName: identifier1 | identifier2;
+    buttonName: identifier12;
 
     lampDef: (lampName|lampName addrDef) EQ LBRACE (() | flowName) RBRACE;
     addrDef: LPARENTHESIS addressItem? RPARENTHESIS;
-    lampName: identifier1 | identifier2;
+    lampName: identifier12;
     
     flowName: identifier1;
-    
-    funcSet: buttonName | lampName '=' LBRACE (() | funcDef (SEIMCOLON funcDef)* (SEIMCOLON)?) RBRACE;
-    funcDef:  '$' funcName (argument (argument)*);
-    funcName:IDENTIFIER1;
 
 buttonBlock: '[' 'buttons' ']' '=' LBRACE (categoryBlocks)* RBRACE;
 lampBlock: '[' 'lamps' ']' '=' LBRACE (categoryBlocks)* RBRACE;
@@ -218,15 +217,3 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
     identifier123CNF: identifier123 (COMMA identifier123)*;
 
     flowPath: identifier2;
-
-
-funApplication: funName '=' argumentGroups;
-
-commandBlock: '[' 'commands' ']' '=' '{' commandDef* '}';
-    commandDef: cmdName '=' '(' '@' funApplication ')';     // CMD1 = (@Delay= 0)
-    cmdName: IDENTIFIER1;
-    funName:IDENTIFIER1;
-observeBlock: '[' 'observes' ']' '=' '{' observeDef* '}';
-    observeDef: observeName '=' '(' '@' funApplication ')';     // CMD1 = (@Delay= 0)
-    observeName:IDENTIFIER1;
-    //funName:IDENTIFIER1;

@@ -54,18 +54,18 @@ module HmiGenModule =
         let addSystemFlowReal (systemFlowReal:obj) =
             let target, parent, category  =
                 match systemFlowReal with
-                | :? DsSystem -> 
+                | :? DsSystem ->
                     let sys = (systemFlowReal :?> DsSystem)
                     sys.QualifiedName, null, Category.System
-                | :? Flow -> 
+                | :? Flow ->
                     let flow = (systemFlowReal :?> Flow)
                     flow.QualifiedName, flow.System.Name, Category.Flow
-                | :? Real -> 
+                | :? Real ->
                     let real = (systemFlowReal :?> Real)
                     real.QualifiedName, real.Flow.QualifiedName, Category.Real
                 | _ ->
                     null, null, Category.None
-                    
+
             if target <> null && false = hmiInfos.ContainsKey(target) then
                 let info = genInfo target category ButtonType.None parent
                 hmiInfos.Add(target, info)
@@ -84,8 +84,8 @@ module HmiGenModule =
                 (buttonsInFlow:ButtonDef seq(*Dictionary<string, HashSet<Flow>>*))
                 buttonType =
             for btn in buttonsInFlow do
-                let flowNames = [ 
-                    for flow in btn.SettingFlows do flow.QualifiedName 
+                let flowNames = [
+                    for flow in btn.SettingFlows do flow.QualifiedName
                 ]
                 addFlowButton btn.Name system.Name flowNames buttonType
 
@@ -132,7 +132,7 @@ module HmiGenModule =
                         for sp in sys.StartPoints do
                             hmiInfos[button].targets.Add(sp.QualifiedName)
                 | ButtonType.Emergency | ButtonType.Auto | ButtonType.Manual
-                | ButtonType.Clear | ButtonType.Home 
+                | ButtonType.Clear | ButtonType.Home
                 | ButtonType.Stop | ButtonType.Emergency ->
                     for flow in flowNames do hmiInfos[button].targets.Add(flow)
                 | _ ->
@@ -141,31 +141,31 @@ module HmiGenModule =
 
         let addInterface (api:ApiItem) (usedIn:string) =
             if false = hmiInfos.ContainsKey(api.QualifiedName) then
-                let info = 
+                let info =
                     genInfo
                         api.QualifiedName Category.Interface
                         ButtonType.None api.System.QualifiedName
                 info.used_in.Add(usedIn)
                 hmiInfos.Add(api.QualifiedName, info)
 
-        let addApiGroup (system:DsSystem) (job:Job) = 
+        let addApiGroup (system:DsSystem) (job:Job) =
             let jobName = $"{system.Name}.{job.Name}"
             if hmiInfos.ContainsKey(jobName) = false then
-                let info = 
-                    genInfo 
+                let info =
+                    genInfo
                         jobName Category.Job ButtonType.None system.Name
                 hmiInfos.Add(jobName, info)
             for dvc in job.JobDefs do
                 let api = dvc.ApiItem
                 let device = dvc.ApiItem.System.Name
                 if false = hmiInfos.ContainsKey(device) then
-                    let info = 
-                        genInfo 
+                    let info =
+                        genInfo
                             device Category.Device ButtonType.None system.Name
                     hmiInfos.Add(device, info)
                 addInterface api jobName
 
-        let addUses (system:DsSystem) (flow:Flow) (vertex:Vertex) = 
+        let addUses (system:DsSystem) (flow:Flow) (vertex:Vertex) =
             let addToUsedIn nowVertex target =
                 if false = hmiInfos[nowVertex].used_in.Contains(target) then
                     hmiInfos[nowVertex].used_in.Add(target)
@@ -176,10 +176,10 @@ module HmiGenModule =
                 | :? Call as c -> getJobName c.CallTargetJob.Name
                 | :? Alias as a ->
                     match a.TargetWrapper with
-                    | DuAliasTargetReal r -> r.QualifiedName
+                    | DuAliasTargetReal r     -> r.QualifiedName
                     | DuAliasTargetRealEx rex -> rex.QualifiedName
-                    | DuAliasTargetCall c -> getJobName c.CallTargetJob.Name
-                | _ -> null
+                    | DuAliasTargetCall c     -> getJobName c.CallTargetJob.Name
+                | _  -> null
             addToUsedIn vertName system.Name
             addToUsedIn vertName flow.QualifiedName
             match vertex.Parent with
@@ -190,14 +190,14 @@ module HmiGenModule =
             for sys in model.Systems do
                 let groupBtnCombiner = addGroupButtons sys
                 addSystemFlowReal sys
-                groupBtnCombiner sys.AutoButtons ButtonType.Auto
-                groupBtnCombiner sys.ManualButtons ButtonType.Manual
-                groupBtnCombiner sys.DriveButtons ButtonType.Drive
-                groupBtnCombiner sys.StopButtons ButtonType.Stop
-                groupBtnCombiner sys.ClearButtons ButtonType.Clear
+                groupBtnCombiner sys.AutoButtons      ButtonType.Auto
+                groupBtnCombiner sys.ManualButtons    ButtonType.Manual
+                groupBtnCombiner sys.DriveButtons     ButtonType.Drive
+                groupBtnCombiner sys.StopButtons      ButtonType.Stop
+                groupBtnCombiner sys.ClearButtons     ButtonType.Clear
                 groupBtnCombiner sys.EmergencyButtons ButtonType.Emergency
-                groupBtnCombiner sys.TestButtons ButtonType.Test
-                groupBtnCombiner sys.HomeButtons ButtonType.Home
+                groupBtnCombiner sys.TestButtons      ButtonType.Test
+                groupBtnCombiner sys.HomeButtons      ButtonType.Home
                 let btnTgtMap =
                     new Dictionary<ButtonType, ResizeArray<string>>()
                 for flow in sys.Flows do
@@ -221,7 +221,7 @@ module HmiGenModule =
                                 addUses sys flow vertex
                         | _ -> addUses sys flow rootSeg
 
-        let success, message = 
+        let success, message =
             try
                 addBasicComponents()
                 addJobComponentAndUses()

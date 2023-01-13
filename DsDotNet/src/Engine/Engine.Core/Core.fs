@@ -107,7 +107,7 @@ module CoreModule =
             system.Flows.Add(flow) |> verifyM $"Duplicated flow name [{name}]"
             flow
 
-    and ButtonDef (name:string, btnType:BtnType, inAddress:TagAddress, outAddress:TagAddress, flows:HashSet<Flow>) =
+    and ButtonDef (name:string, btnType:BtnType, inAddress:TagAddress, outAddress:TagAddress, flows:HashSet<Flow>, funcs:HashSet<Func>) =
         member x.Name = name
         member x.ButtonType = btnType
         ///버튼 동작을 위한 외부 IO 입력 주소
@@ -120,10 +120,10 @@ module CoreModule =
         //CPU 생성시 할당됨 OutTag
         member val OutTag = getNull<ITagWithAddress>() with get, set
         member val SettingFlows  = flows with get, set
-        member val Funcs  = HashSet<Func>() with get, set//todo ToDsText, parsing
+        member val Funcs  = funcs with get, set//todo ToDsText, parsing
 
 
-    and LampDef (name:string, lampType:LampType, outAddress:TagAddress, flow:Flow) =
+    and LampDef (name:string, lampType:LampType, outAddress:TagAddress, flow:Flow, funcs:HashSet<Func>) =
         member x.Name = name
         member x.LampType = lampType
         ///램프 동작을 위한 외부 IO 출력 주소
@@ -133,7 +133,7 @@ module CoreModule =
         member val OutTag = getNull<ITagWithAddress>() with get, set
         ///단일 Flow 단위로 Lamp 상태 출력
         member val SettingFlow  = flow with get, set
-        member val Funcs  = HashSet<Func>() with get, set//todo ToDsText, parsing
+        member val Funcs  = funcs with get, set//todo ToDsText, parsing
 
     and AliasDef(aliasKey:Fqdn, target:AliasTargetWrapper option, mnemonics:string []) =
         member _.AliasKey = aliasKey

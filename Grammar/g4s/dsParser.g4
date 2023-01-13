@@ -113,12 +113,16 @@ flowBlock
         aliasDef: identifier12;     // {OtherFlow}.{real} or {MyFlowReal} or {Call}
         aliasMnemonic: identifier1;
 
-jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing)* RBRACE;
+jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|funcSet)* RBRACE;
     callListing:
         jobName '=' LBRACE (callApiDef)? ( ';' callApiDef)* (';')+ RBRACE;
     jobName: etcName1;
     callApiDef: callKey addressInOut;
     callKey: identifier12;
+    
+    funcSet: identifier12 '=' LBRACE (() | funcDef (SEIMCOLON funcDef)* (SEIMCOLON)?) RBRACE;
+    funcDef:  '$' funcName (argument (argument)*);
+    funcName: identifier1;
 
 codeBlock: CODE_BLOCK;
 
@@ -161,17 +165,13 @@ categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|stopBlock|emergencyBl
     buttonDef: btnNameAddr EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
     btnNameAddr: buttonName addressInOut;
     
-    buttonName: identifier1 | identifier2;
+    buttonName: identifier12;
 
     lampDef: (lampName|lampName addrDef) EQ LBRACE (() | flowName) RBRACE;
     addrDef: LPARENTHESIS addressItem? RPARENTHESIS;
-    lampName: identifier1 | identifier2;
+    lampName: identifier12;
     
     flowName: identifier1;
-    
-    funcSet: buttonName | lampName '=' LBRACE (() | funcDef (SEIMCOLON funcDef)* (SEIMCOLON)?) RBRACE;
-    funcDef:  '$' funcName (argument (argument)*);
-    funcName: identifier1;
 
 buttonBlock: '[' 'buttons' ']' '=' LBRACE (categoryBlocks)* RBRACE;
 lampBlock: '[' 'lamps' ']' '=' LBRACE (categoryBlocks)* RBRACE;

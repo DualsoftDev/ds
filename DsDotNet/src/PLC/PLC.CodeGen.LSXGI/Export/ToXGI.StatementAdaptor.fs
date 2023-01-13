@@ -42,17 +42,17 @@ module ConvertorPrologModule =
     let systemTypeToXgiTypeName (typ:System.Type) =
         match typ.Name with
         | "Boolean" -> "BOOL"
-        | "Single" -> "REAL"
-        | "Double" -> "LREAL"
+        | "Byte"    -> "BYTE"
+        | "Double"  -> "LREAL"
+        | "Int16"   -> "SINT"
+        | "Int32"   -> "DINT"
+        | "Int64"   -> "LINT"
+        | "Single"  -> "REAL"
+        | "String"  -> "STRING"  // 32 byte
+        | "UInt16"  -> "USINT"
+        | "UInt32"  -> "UDINT"
+        | "UInt64"  -> "ULINT"
         | ("SByte" | "Char")   -> "BYTE"
-        | "Byte"   -> "BYTE"
-        | "Int16"  -> "SINT"
-        | "UInt16" -> "USINT"
-        | "Int32"  -> "DINT"
-        | "UInt32" -> "UDINT"
-        | "Int64"  -> "LINT"
-        | "UInt64" -> "ULINT"
-        | "String" -> "STRING"  // 32 byte
         | _ -> failwith "ERROR"
 
 
@@ -128,20 +128,21 @@ module rec TypeConvertorModule =
     let createTypedXgiAutoVariable (typ:System.Type) (nameHint:string) comment : IXgiLocalVar =
         autoVariableCounter <- autoVariableCounter + 1
         let name = $"_tmp{nameHint}{autoVariableCounter}"
+        let value = typeDefaultValue typ
         match typ.Name with
-        | "Single" -> XgiLocalVar(name, comment, 0.f)
-        | "Double" -> XgiLocalVar(name, comment, 0.0)
-        | "SByte"  -> XgiLocalVar(name, comment, 0y)
-        | "Byte"   -> XgiLocalVar(name, comment, 0uy)
-        | "Int16"  -> XgiLocalVar(name, comment, 0s)
-        | "UInt16" -> XgiLocalVar(name, comment, 0us)
-        | "Int32"  -> XgiLocalVar(name, comment, 0)
-        | "UInt32" -> XgiLocalVar(name, comment, 0u)
-        | "Int64"  -> XgiLocalVar(name, comment, 0L)
-        | "UInt64" -> XgiLocalVar(name, comment, 0UL)
-        | "Boolean"-> XgiLocalVar(name, comment, false)
-        | "String" -> XgiLocalVar(name, comment, "")
-        | "Char"   -> XgiLocalVar(name, comment, ' ')
+        | "Boolean"-> XgiLocalVar<bool>  (name, comment, unbox value)
+        | "Byte"   -> XgiLocalVar<uint8> (name, comment, unbox value)
+        | "Char"   -> XgiLocalVar<char>  (name, comment, unbox value)
+        | "Double" -> XgiLocalVar<double>(name, comment, unbox value)
+        | "Int16"  -> XgiLocalVar<int16> (name, comment, unbox value)
+        | "Int32"  -> XgiLocalVar<int32> (name, comment, unbox value)
+        | "Int64"  -> XgiLocalVar<int64> (name, comment, unbox value)
+        | "SByte"  -> XgiLocalVar<int8>  (name, comment, unbox value)
+        | "Single" -> XgiLocalVar<single>(name, comment, unbox value)
+        | "String" -> XgiLocalVar<string>(name, comment, unbox value)
+        | "UInt16" -> XgiLocalVar<uint16>(name, comment, unbox value)
+        | "UInt32" -> XgiLocalVar<uint32>(name, comment, unbox value)
+        | "UInt64" -> XgiLocalVar<uint64>(name, comment, unbox value)
         | _  -> failwith "ERROR"
 
 
@@ -216,19 +217,19 @@ module XgiExpressionConvertorModule =
                         DuTerminal (DuVariable out) :> IExpression
 
                     match exp.DataType.Name with
-                    | "Single" -> withDefaultValue 0.f
-                    | "Double" -> withDefaultValue 0.0
-                    | "SByte"  -> withDefaultValue 0y
-                    | "Byte"   -> withDefaultValue 0uy
-                    | "Int16"  -> withDefaultValue 0s
-                    | "UInt16" -> withDefaultValue 0us
-                    | "Int32"  -> withDefaultValue 0
-                    | "UInt32" -> withDefaultValue 0u
-                    | "Int64"  -> withDefaultValue 0L
-                    | "UInt64" -> withDefaultValue 0UL
                     | "Boolean"-> withDefaultValue false
-                    | "String" -> withDefaultValue ""
+                    | "Byte"   -> withDefaultValue 0uy
                     | "Char"   -> withDefaultValue ' '
+                    | "Double" -> withDefaultValue 0.0
+                    | "Int16"  -> withDefaultValue 0s
+                    | "Int32"  -> withDefaultValue 0
+                    | "Int64"  -> withDefaultValue 0L
+                    | "SByte"  -> withDefaultValue 0y
+                    | "Single" -> withDefaultValue 0.f
+                    | "String" -> withDefaultValue ""
+                    | "UInt16" -> withDefaultValue 0us
+                    | "UInt32" -> withDefaultValue 0u
+                    | "UInt64" -> withDefaultValue 0UL
                     | _ -> failwith "ERROR"
 
                 | (FunctionNameRising | FunctionNameFalling) ->
@@ -276,19 +277,19 @@ module XgiExpressionConvertorModule =
 
                     let v = exp.BoxedEvaluatedValue
                     match exp.DataType.Name with
-                    | "Single" -> go (v :?> float32)
-                    | "Double" -> go (v :?> double)
-                    | "SByte"  -> go (v :?> int8)
-                    | "Byte"   -> go (v :?> uint8)
-                    | "Int16"  -> go (v :?> int16)
-                    | "UInt16" -> go (v :?> uint16)
-                    | "Int32"  -> go (v :?> int32)
-                    | "UInt32" -> go (v :?> uint32)
-                    | "Int64"  -> go (v :?> int64)
-                    | "UInt64" -> go (v :?> uint64)
                     | "Boolean"-> go (v :?> bool)
-                    | "String" -> go (v :?> string)
+                    | "Byte"   -> go (v :?> uint8)
                     | "Char"   -> go (v :?> char)
+                    | "Double" -> go (v :?> double)
+                    | "Int16"  -> go (v :?> int16)
+                    | "Int32"  -> go (v :?> int32)
+                    | "Int64"  -> go (v :?> int64)
+                    | "SByte"  -> go (v :?> int8)
+                    | "Single" -> go (v :?> float32)
+                    | "String" -> go (v :?> string)
+                    | "UInt16" -> go (v :?> uint16)
+                    | "UInt32" -> go (v :?> uint32)
+                    | "UInt64" -> go (v :?> uint64)
                     | _ -> failwith "ERROR"
             | _ ->
                 [ exp ]
@@ -333,19 +334,19 @@ module XgiExpressionConvertorModule =
                         storage.Add var
 
                     match exp.DataType.Name with
-                    | "Single" -> createLocalVar (initValue :?> float32)
-                    | "Double" -> createLocalVar (initValue :?> double)
-                    | "SByte"  -> createLocalVar (initValue :?> int8)
-                    | "Byte"   -> createLocalVar (initValue :?> uint8)
-                    | "Int16"  -> createLocalVar (initValue :?> int16)
-                    | "UInt16" -> createLocalVar (initValue :?> uint16)
-                    | "Int32"  -> createLocalVar (initValue :?> int32)
-                    | "UInt32" -> createLocalVar (initValue :?> uint32)
-                    | "Int64"  -> createLocalVar (initValue :?> int64)
-                    | "UInt64" -> createLocalVar (initValue :?> uint64)
                     | "Boolean"-> createLocalVar (initValue :?> bool)
-                    | "String" -> createLocalVar (initValue :?> string)
+                    | "Byte"   -> createLocalVar (initValue :?> uint8)
                     | "Char"   -> createLocalVar (initValue :?> char)
+                    | "Double" -> createLocalVar (initValue :?> double)
+                    | "Int16"  -> createLocalVar (initValue :?> int16)
+                    | "Int32"  -> createLocalVar (initValue :?> int32)
+                    | "Int64"  -> createLocalVar (initValue :?> int64)
+                    | "SByte"  -> createLocalVar (initValue :?> int8)
+                    | "Single" -> createLocalVar (initValue :?> float32)
+                    | "String" -> createLocalVar (initValue :?> string)
+                    | "UInt16" -> createLocalVar (initValue :?> uint16)
+                    | "UInt32" -> createLocalVar (initValue :?> uint32)
+                    | "UInt64" -> createLocalVar (initValue :?> uint64)
                     | _ -> failwith "ERROR"
                 | _ ->
                     failwith "ERROR"

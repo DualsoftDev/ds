@@ -226,18 +226,18 @@ module internal rec Command =
         [<Obsolete>]
         member t.IsRoughlyEqual(typ:System.Type) =
             match typ.Name with
-            | "Single" -> t.HasFlag CheckType.REAL
-            | "Double" -> t.HasFlag CheckType.LREAL
-            | "SByte"  -> t.HasFlag CheckType.BYTE
-            | "Byte"   -> t.HasFlag CheckType.BYTE
-            | "Int16"  -> t.HasFlag CheckType.INT
-            | "UInt16" -> t.HasFlag CheckType.UINT
-            | "Int32"  -> t.HasFlag CheckType.DINT
-            | "UInt32" -> t.HasFlag CheckType.UDINT
-            | "Int64"  -> t.HasFlag CheckType.LINT
-            | "UInt64" -> t.HasFlag CheckType.ULINT
             | "Boolean"-> t.HasFlag CheckType.BOOL
+            | "Byte"   -> t.HasFlag CheckType.BYTE
+            | "Double" -> t.HasFlag CheckType.LREAL
+            | "Int16"  -> t.HasFlag CheckType.INT
+            | "Int32"  -> t.HasFlag CheckType.DINT
+            | "Int64"  -> t.HasFlag CheckType.LINT
+            | "SByte"  -> t.HasFlag CheckType.BYTE
+            | "Single" -> t.HasFlag CheckType.REAL
             | "String" -> t.HasFlag CheckType.STRING || t.HasFlag CheckType.TIME
+            | "UInt16" -> t.HasFlag CheckType.UINT
+            | "UInt32" -> t.HasFlag CheckType.UDINT
+            | "UInt64" -> t.HasFlag CheckType.ULINT
             //| "Char"   , CheckType.
             | _ ->
                 failwith "ERROR"

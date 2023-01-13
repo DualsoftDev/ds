@@ -27,27 +27,50 @@ module rec ConvertCoreExt =
     let hasMove (xs:Func seq) = xs.Where(fun f->f.Name = TextMove).any()
     let hasNot  (xs:Func seq) = xs.Where(fun f->f.Name = TextNot ).any()
     
+    let dsBit (system:DsSystem) name init = 
+        if system.Storages.ContainsKey(name) 
+        then system.Storages[name] :?> DsTag<bool>
+        else 
+            let t = DsTag<bool>($"{name}", init)
+            system.Storages.Add(t.Name, t) |> ignore
+            t
+
+    let dsInt (system:DsSystem) name init = 
+        if system.Storages.ContainsKey(name) 
+        then system.Storages[name] :?> DsTag<int>
+        else 
+            let t = DsTag<int>($"{name}", init)
+            system.Storages.Add(t.Name, t) |> ignore
+            t
+
+    let dsUint16 (system:DsSystem) name init = 
+        if system.Storages.ContainsKey(name) 
+        then system.Storages[name] :?> DsTag<uint16>
+        else 
+            let t = DsTag<uint16>($"{name}", init)
+            system.Storages.Add(t.Name, t) |> ignore
+            t
 
     type DsSystem with
-        member s._on     = DsTag<bool>("_on", true)
-        member s._off    = DsTag<bool>("_off", false)
-        member s._auto   = DsTag<bool>("_auto", false)
-        member s._manual = DsTag<bool>("_manual", false)
-        member s._drive  = DsTag<bool>("_drive", false)
-        member s._stop   = DsTag<bool>("_stop", false)
-        member s._emg    = DsTag<bool>("_emg", false)
-        member s._test   = DsTag<bool>("_test", false)
-        member s._ready  = DsTag<bool>("_ready", false)
-        member s._clear  = DsTag<bool>("_clear", false)
-        member s._home    = DsTag<bool>("home", false)
-        member s._tout   = DsTag<uint16> ("_tout", 10000us)
-        member s._dtimeyy     = DsTag<int> ("_yy", 0)
-        member s._dtimemm     = DsTag<int> ("_mm", 0)
-        member s._dtimedd     = DsTag<int> ("_dd", 0)
-        member s._dtimeh      = DsTag<int> ("_h", 0)
-        member s._dtimem      = DsTag<int> ("_m", 0)
-        member s._dtimes      = DsTag<int> ("_s", 0)
-        member s._dtimems     = DsTag<int> ("_ms", 0)
+        member s._on     = dsBit s "_on"  true
+        member s._off    = dsBit s "_off" false
+        member s._auto   = dsBit s "_auto" false
+        member s._manual = dsBit s "_manual" false
+        member s._drive  = dsBit s "_drive" false
+        member s._stop   = dsBit s "_stop" false
+        member s._emg    = dsBit s "_emg" false
+        member s._test   = dsBit s "_test" false
+        member s._ready  = dsBit s "_ready" false
+        member s._clear  = dsBit s "_clear" false
+        member s._home   = dsBit s "home" false
+        member s._dtimeyy  = dsInt s "_yy" 0
+        member s._dtimemm  = dsInt s "_mm" 0
+        member s._dtimedd  = dsInt s "_dd" 0
+        member s._dtimeh   = dsInt s "_h" 0
+        member s._dtimem   = dsInt s "_m" 0
+        member s._dtimes   = dsInt s "_s" 0
+        member s._dtimems  = dsInt s "_ms" 0
+        member s._tout   = dsUint16 s "_tout" 10000us
 
         member s.GenerationLampIO() =
             s.SystemLamps
@@ -98,63 +121,26 @@ module rec ConvertCoreExt =
                 .Select(fun b -> b.OutTag)
                 .Cast<PlcTag<bool>>()   
     
-    //let private getAutoManualIOs(autoIns:PlcTag<bool> seq, manualIns:PlcTag<bool> seq, sysOff:DsTag<bool>) =
-    //      if autoIns.Count() > 1 || manualIns.Count() > 1
-    //      then failwith "Error : One button(auto or manual) must be assigned to one flow"
-
-    //      let auto    = if autoIns.Any()   then  autoIns.Head().Expr else sysOff.Expr
-    //      let manual  = if manualIns.Any() then  manualIns.ToAnd()   else sysOff.Expr
-    //      auto, manual
-    
-    //let getBtnAutoExpr  (f:Flow) = getButtonExpr(f, f.System.AutoButtons)
-    //let getBtnManualExpr(f:Flow) = getButtonExpr(f, f.System.ManualButtons) 
-    //let getBtnDriveExpr (f:Flow) = getButtonExpr(f, f.System.DriveButtons) 
-    //let getBtnStopExpr  (f:Flow) = getButtonExpr(f, f.System.StopButtons) 
-    //let getBtnEmgExpr   (f:Flow) = getButtonExpr(f, f.System.EmergencyButtons)  
-    //let getBtnTestExpr  (f:Flow) = getButtonExpr(f, f.System.TestButtons) 
-    //let getBtnReadyExpr (f:Flow) = getButtonExpr(f, f.System.ReadyButtons)
-    //let getBtnClearExpr (f:Flow) = getButtonExpr(f, f.System.ClearButtons)
-    //let getBtnHomeExpr  (f:Flow) = getButtonExpr(f, f.System.HomeButtons)
-   
 //운영 모드 는 Flow 별로 제공된 모드 On/Off 상태 나타낸다.
     type Flow with
-        member f.rop    = DsTag<bool> ($"{f.Name}(RO)", false)   // Ready Operation Mode
-        member f.aop    = DsTag<bool> ($"{f.Name}(AO)", false)   // Auto Operation Mode
-        member f.mop    = DsTag<bool> ($"{f.Name}(MO)", false)   // Manual Operation Mode 
-        member f.dop    = DsTag<bool> ($"{f.Name}(DO)", false)   // Drive Operation Mode 
-        member f.top    = DsTag<bool> ($"{f.Name}(TO)", false)   //  Test  Operation Mode (시운전) 
-        member f.sop    = DsTag<bool> ($"{f.Name}(SO)", false)   // Stop State 
-        member f.eop    = DsTag<bool> ($"{f.Name}(EO)", false)   // Emergency State 
-        member f.auto   = DsTag<bool>("auto", false)
-        member f.manual = DsTag<bool>("manual", false)
-        member f.drive  = DsTag<bool>("drive", false)
-        member f.stop   = DsTag<bool>("stop", false)
-        member f.ready  = DsTag<bool>("ready", false)
-        member f.clear  = DsTag<bool>("clear", false)
-        member f.emg    = DsTag<bool>("emg", false)
-        member f.test   = DsTag<bool>("test", false)  
-        member f.home   = DsTag<bool>("home", false)  
+        member f.rop    = dsBit f.System $"{f.Name}(RO)" false   // Ready Operation Mode
+        member f.aop    = dsBit f.System $"{f.Name}(AO)" false   // Auto Operation Mode
+        member f.mop    = dsBit f.System $"{f.Name}(MO)" false   // Manual Operation Mode 
+        member f.dop    = dsBit f.System $"{f.Name}(DO)" false   // Drive Operation Mode 
+        member f.top    = dsBit f.System $"{f.Name}(TO)" false   //  Test  Operation Mode (시운전) 
+        member f.sop    = dsBit f.System $"{f.Name}(SO)" false   // Stop State 
+        member f.eop    = dsBit f.System $"{f.Name}(EO)" false   // Emergency State 
+        member f.auto   = dsBit f.System $"{f.Name}_auto" false
+        member f.manual = dsBit f.System $"{f.Name}_manual" false
+        member f.drive  = dsBit f.System $"{f.Name}_drive" false
+        member f.stop   = dsBit f.System $"{f.Name}_stop" false
+        member f.ready  = dsBit f.System $"{f.Name}_ready" false
+        member f.clear  = dsBit f.System $"{f.Name}_clear" false
+        member f.emg    = dsBit f.System $"{f.Name}_emg"  false
+        member f.test   = dsBit f.System $"{f.Name}_test" false  
+        member f.home   = dsBit f.System $"{f.Name}_home" false  
 
 
-        //버튼 IO PLC TAG
-        member f.autoOuts   = getButtonOutputs (f, f.System.AutoButtons) 
-        member f.manualOuts = getButtonOutputs (f, f.System.ManualButtons) 
-        member f.driveOuts  = getButtonOutputs (f, f.System.DriveButtons) 
-        member f.stopOuts   = getButtonOutputs (f, f.System.StopButtons) 
-        member f.clearOuts  = getButtonOutputs (f, f.System.ClearButtons) 
-        member f.emgOuts    = getButtonOutputs (f, f.System.EmergencyButtons) 
-        member f.testOuts   = getButtonOutputs (f, f.System.TestButtons) 
-        member f.homeOuts   = getButtonOutputs (f, f.System.HomeButtons) 
-        member f.readyOuts  = getButtonOutputs (f, f.System.ReadyButtons) 
-
-
-        //램프 IO PLC TAG
-        member f.autoModelampOuts   = getLampOutputs (f, f.System.AutoModeLamps) 
-        member f.manualModelampOuts = getLampOutputs (f, f.System.ManualModeLamps) 
-        member f.driveModelampOuts  = getLampOutputs (f, f.System.DriveModeLamps) 
-        member f.stopModelampOuts   = getLampOutputs (f, f.System.StopModeLamps) 
-        member f.readylampOuts      = getLampOutputs (f, f.System.ReadyModeLamps) 
-        
         //select 버튼은 없을경우 항상 _on
          member f.SelectAutoExpr =   getSelectBtnExpr(f, f.System.AutoButtons  )
          member f.SelectManualExpr = getSelectBtnExpr(f, f.System.ManualButtons)

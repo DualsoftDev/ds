@@ -9,27 +9,33 @@ open System.Collections.Generic
 [<AutoOpen>]
 module VertexManagerModule =
 
-    //   타입 | 구분    | Tag   | Port | Force HMI |
-    //                          (Real Only) 
-    //______________________________________________
-    //   PLAN | Start	| ST    | SP   | SF        |
-    //   PLAN | Reset	| RT	| RP   | RF        |
-    //   PLAN | End	    | ET	| EP   | EF        |
-    //______________________________________________
-    // ACTION | IN	    | API. I| -	   | API. I    |
-    // ACTION | OUT	    | API. O| -	   | API. O    |
+       //    타입 | 구분       | Tag    | Port  (Real Only) | Force HMI |
+    //__________________________________________________________________
+    //   PLAN | Start	| ST    | SP              | SF        |
+    //   PLAN | Reset	| RT	| RP              | RF        |
+    //   PLAN | End	    | ET	| EP              | EF        |
+    //__________________________________________________________________
+    // ACTION | IN	    | API. I| -	              | API. I    |
+    // ACTION | OUT	    | API. O| -	              | API. O    |
+                                            
+    let bit (v:Vertex)  mark flag  = 
+        let t = DsBit($"{v.QualifiedName}({mark})", false, v, flag)
+        v.Parent.GetSystem().Storages.Add(t.Name, t) |> ignore
+        t
 
-    let bit (v:Vertex)  mark flag = DsBit($"{v.QualifiedName}({mark})", false, v, flag)
-    let timer (v:Vertex)  mark flag storages= 
-            let ts = TimerStruct.Create(TimerType.TON, storages, $"{v.QualifiedName}({mark}:TON)", 0us, 0us) 
-            DsTimer($"{v.QualifiedName}({mark})", false, v, flag, ts)
-    let counter (v:Vertex)  mark flag storages= 
-            let cs = CTRStruct.Create(CounterType.CTR, storages, $"{v.QualifiedName}({mark}:CTR)", 0us, 0us) 
-            DsCounter($"{v.QualifiedName}({mark})", false, v, flag, cs)
+    let timer (v:Vertex)  mark flag = 
+        let storages = v.Parent.GetSystem().Storages
+        let ts = TimerStruct.Create(TimerType.TON, storages, $"{v.QualifiedName}({mark}:TON)", 0us, 0us) 
+        DsTimer($"{v.QualifiedName}({mark})", false, v, flag, ts)
+    
+    let counter (v:Vertex)  mark flag = 
+        let storages = v.Parent.GetSystem().Storages
+        let cs = CTRStruct.Create(CounterType.CTR, storages, $"{v.QualifiedName}({mark}:CTR)", 0us, 0us) 
+        DsCounter($"{v.QualifiedName}({mark})", false, v, flag, cs)
         
     
     /// Vertex Manager : 소속되어 있는 DsBit 를 관리하는 컨테이어
-    [<DebuggerDisplay("{name}")>]
+    [<DebuggerDisplay("{Name}")>]
     [<AbstractClass>]
     type VertexManager (v:Vertex)  =
     
@@ -133,13 +139,12 @@ module VertexManagerModule =
        
     type VertexMCoin(v:Vertex) =
         inherit VertexManager(v)
-        let storages = v.Parent.GetSystem().Storages
         let relayCallBit  = bit v  "CR" BitFlag.RelayCall
 
 
-        let counterBit    = counter v  "CTR" CounterFlag.CountRing storages
-        let timerOnDelayBit = timer v  "TON"  TimerFlag.TimerOnDely storages
-        let timerTimeOutBit = timer v  "TOUT" TimerFlag.TimeOut storages
+        let counterBit    = counter v  "CTR" CounterFlag.CountRing 
+        let timerOnDelayBit = timer v  "TON"  TimerFlag.TimerOnDely 
+        let timerTimeOutBit = timer v  "TOUT" TimerFlag.TimeOut 
 
         ///Call Done Relay 
         member x.CR         = relayCallBit 

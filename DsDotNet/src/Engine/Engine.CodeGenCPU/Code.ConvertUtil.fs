@@ -64,6 +64,23 @@ module CodeConvertUtil =
                     else call.System._off.Expr
         | _ -> call.System._off.Expr
 
+    let getEdgeSources(graph:DsGraph, target:Vertex, bStartEdge:bool) =
+        let edges = graph.GetIncomingEdges(target)
+        let srcsWeek   = 
+            if bStartEdge 
+            then edges.Where(fun e -> e.EdgeType = EdgeType.Start )
+            else edges.Where(fun e -> e.EdgeType = EdgeType.Reset )
+
+        let srcsStrong = 
+            if bStartEdge 
+            then edges.Where(fun e -> e.EdgeType = (EdgeType.Start &&& EdgeType.Strong))
+            else edges.Where(fun e -> e.EdgeType = (EdgeType.Reset &&& EdgeType.Strong))
+
+        if srcsWeek.Any() && srcsStrong.Any()  
+            then failwith "Error Week and Strong can't connenct same node target"
+        
+        srcsWeek.Select(fun e->e.Source), srcsStrong.Select(fun e->e.Source)
+
     let getNeedCheck(real:Real) =
         let origins, resetChains = OriginHelper.GetOriginsWithJobDefs real.Graph
         let needChecks = origins.Where(fun w-> w.Value = NeedCheck)
@@ -125,20 +142,6 @@ module CodeConvertUtil =
         [<Extension>] static member GetSharedCall(v:VertexManager) = v |> getSharedCall
         [<Extension>] static member GetPureReal  (v:VertexManager) = v |> getPureReal
         [<Extension>] static member GetPureCall  (v:VertexManager) = v |> getPureCall
-        [<Extension>]
-        static member FindEdgeSources(graph:DsGraph, target:Vertex, edgeType:ModelingEdgeType): Vertex seq =
-            let edges = graph.GetIncomingEdges(target)
-            let foundEdges =
-                match edgeType with
-                | StartPush -> edges.OfNotResetEdge().Where(fun e -> e.EdgeType.HasFlag(EdgeType.Strong))
-                | StartEdge -> edges.OfNotResetEdge().Where(fun e -> not <| e.EdgeType.HasFlag(EdgeType.Strong))
-                | ResetEdge -> edges.OfWeakResetEdge()
-                | ResetPush -> edges.OfStrongResetEdge()
-                | ( StartReset | InterlockWeak | Interlock )
-                    -> failwith $"Do not use {edgeType} Error"
-
-            foundEdges.Select(fun e->e.Source)
-
         [<Extension>]
         static member GetCausalTags(xs:Vertex seq, s:DsSystem, usingRoot:bool) =
             let tags =

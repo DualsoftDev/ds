@@ -16,7 +16,7 @@ type VertexManager with
         [
             for coin in coins do
                 let coin = coin :?> VertexMCoin
-                yield (sets, coin.CR.Expr) --| (coin.ST, "D1" )
+                yield (sets, coin.CR.Expr) ==| (coin.ST, "D1" )
         ]
    
     member v.D2_DAGTailStart(): CommentedStatement list = 
@@ -24,10 +24,17 @@ type VertexManager with
         let coins = real.Graph.Vertices.Except(real.Graph.Inits).Select(getVM)
         [
             for coin in coins do
-                let coin = coin :?> VertexMCoin
-                let sets = real.Graph.FindEdgeSources(coin.Vertex, StartEdge)
-                                     .GetCausalTags(v.System, false)
-                yield (sets, coin.CR.Expr) --| (coin.ST, "D2" )
+                let coin = coin :?> VertexMCoin 
+                let srcsWeek, srcsStrong  = getEdgeSources(real.Graph, coin.Vertex, true)
+
+                if srcsWeek.Any() then
+                    let sets = srcsWeek.GetCausalTags(v.System, false)
+                    yield (sets, coin.CR.Expr) ==| (coin.ST, "D2" )
+
+                if srcsStrong.Any() then
+                    let sets = srcsStrong.GetCausalTags(v.System, false)
+                    yield (sets, coin.CR.Expr) --| (coin.ST, "D2" )
+
         ]
    
 
@@ -47,5 +54,5 @@ type VertexManager with
 
                 let sets = ands <&&> child.ST.Expr <&&> child.ET.Expr
                 let rsts = realV.H.Expr
-                yield (sets, rsts) --| (child.CR, "D3" )
+                yield (sets, rsts) ==| (child.CR, "D3" )
         ]   

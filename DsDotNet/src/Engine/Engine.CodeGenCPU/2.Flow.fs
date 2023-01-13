@@ -9,17 +9,23 @@ open Engine.Common.FS
 type VertexManager with
 
     member v.F1_RootStart(): CommentedStatement list =
-        let srcs = v.Flow.Graph.FindEdgeSources(v.Vertex, StartEdge)
-        if srcs.Any() then
-            let sets  = srcs.GetCausalTags(v.System, true)
-            let rsts  = v.F.Expr
-            [(sets, rsts) ==| (v.ST, "F1")]
-        else []
+        let srcsWeek, srcsStrong  = getEdgeSources(v.Flow.Graph, v.Vertex, true)
+        let rsts  = v.F.Expr
+        [
+            if srcsWeek.Any() then
+                let sets = srcsWeek.GetCausalTags(v.System, true)
+                yield (sets, rsts) ==| (v.ST, "F1" )
+
+            if srcsStrong.Any() then
+                let sets = srcsStrong.GetCausalTags(v.System, true)
+                yield (sets, rsts) --| (v.ST, "F1" )
+        ]
 
     member v.F2_RootReset() : CommentedStatement list =
-        let srcs = v.Flow.Graph.FindEdgeSources(v.Vertex, ResetEdge)
+        let srcsWeek, srcsStrong  = getEdgeSources(v.Flow.Graph, v.Vertex, false)  //test ahn  srcsStrong 리셋처리
+        let srcs = srcsWeek
                     .Select(getVM)
-                    .Select(fun s -> s, v.GR(s.Vertex))
+                    .Select(fun s -> s, v.GR(s.Vertex)).ToList()
 
         let real = v.GetPureReal()
         if srcs.Any() then
@@ -53,32 +59,18 @@ type VertexManager with
 
     //option Spec 확정 필요  
      member v.F0_RootStartRealOptionPulse(): CommentedStatement list =
-        let srcs = v.Flow.Graph.FindEdgeSources(v.Vertex, StartEdge).Select(getVM)
-        if srcs.Any() then
-            let sets  = srcs.Select(fun f->f.F).ToAnd()
-            let rsts  = v.System._off.Expr
-            [ 
-                //root 시작조건 이벤트 Pulse 처리
-                (sets, rsts) --^ (v.PUL, "F1") 
-                //Pulse start Tag relay
-                (v.PUL.Expr, v.H.Expr) ==| (v.ST, "F1") 
-            ]
-        else []
-        
-    //member v.F1_RootStartReal(): CommentedStatement list =
-    //    let srcs = v.Flow.Graph.FindEdgeSources(v.Vertex, StartEdge).Select(getVM)
-    //    if srcs.Any() then
-    //        let sets  = srcs.Select(fun f->f.EP).ToAnd()
-    //        let rsts  = v.F.Expr
-    //        //root 시작조건 처리
-    //        [(sets, rsts) ==| (v.ST, "F1")]
-    //    else []
+        let srcsWeek, srcsStrong  = getEdgeSources(v.Flow.Graph, v.Vertex, true)
+        let rsts  = v.F.Expr
+        [
+            if srcsWeek.Any() then
+                let sets = srcsWeek.GetCausalTags(v.System, true)
+                        //root 시작조건 이벤트 Pulse 처리
+                yield (sets, rsts) ==| (v.PUL, "F1" )
+                yield (v.PUL.Expr, v.H.Expr) ==| (v.ST, "F1") 
 
-    //member v.F3_RootStartCoin(): CommentedStatement list =
-    //    let srcs = v.Flow.Graph.FindEdgeSources(v.Vertex, StartEdge).Select(getVM)
-    //    if srcs.Any() then
-    //        let sets  = srcs.Select(fun f->f.EP).ToAnd()
-    //        let rsts  = v.CR.Expr
-    //        //root 시작조건 처리
-    //        [(sets, rsts) ==| (v.ST, "F3")]
-    //    else []
+            if srcsStrong.Any() then
+                let sets = srcsStrong.GetCausalTags(v.System, true)
+                        //root 시작조건 이벤트 Pulse 처리
+                yield (sets, rsts) --| (v.PUL, "F1" )
+                yield (v.PUL.Expr, v.H.Expr) --| (v.ST, "F1") 
+        ]

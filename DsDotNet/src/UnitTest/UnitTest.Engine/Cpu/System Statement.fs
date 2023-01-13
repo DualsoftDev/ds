@@ -15,6 +15,6 @@ type Spec13_SystemStatement() =
 
     let t = CpuTestSample()
     [<Test>]
-    member __.``System Bit`` () = 
-        t.Sys.S1_SystemBitSetFlow() |> doChecks
+    member __.``Y1 System Bit Set Flow`` () = 
+        t.Sys.Y1_SystemBitSetFlow() |> doChecks
         

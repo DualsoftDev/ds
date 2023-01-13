@@ -38,7 +38,7 @@ module internal rec Command =
                     match ts.Timer.Type with
                     | TON -> VarType.TON
                     | TOF -> VarType.TOFF
-                    | RTO -> VarType.TMR
+                    | TMR -> VarType.TMR
 
                 | CounterMode cs ->
                     match cs.Counter.Type with
@@ -117,7 +117,7 @@ module internal rec Command =
             "PT", (literal2expr $"T#{time}MS") :> IExpression
             "IN", obe2e ts.RungInCondition
             match typ with
-            | RTO ->
+            | TMR ->
                 "RST", obe2e ts.ResetCondition
             | _ ->
                 ()

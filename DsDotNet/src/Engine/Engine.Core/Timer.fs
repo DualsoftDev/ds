@@ -30,7 +30,7 @@ module rec TimerModule =
     let the100msTimer = the20msTimer.Where(fun x -> x % 5L = 0)
     let the1secTimer = the20msTimer.Where(fun x -> x % 50L = 0)
 
-    type TimerType = TON | TOF | RTO
+    type TimerType = TON | TOF | TMR        // AB 에서 TMR 은 RTO 에 해당
 
     type internal TickAccumulator(timerType:TimerType, timerStruct:TimerStruct) =
         let ts = timerStruct
@@ -67,7 +67,7 @@ module rec TimerModule =
             match tt with
             | TON -> accumulateTON()
             | TOF -> accumulateTOF()
-            | RTO -> accumulateRTO()
+            | TMR -> accumulateRTO()
 
         let disposables = new CompositeDisposable()
 
@@ -100,13 +100,13 @@ module rec TimerModule =
                         ts.DN.Value <- true
                         ts.ACC.Value <- 0us
 
-                    | RTO, true ->
+                    | TMR, true ->
                         if ts.DN.Value then
                             ts.TT.Value <- false
                         else
                             ts.EN.Value <- true
                             ts.TT.Value <- true
-                    | RTO, false ->
+                    | TMR, false ->
                         ts.EN.Value <- false
                         ts.TT.Value <- false
                 ) |> disposables.Add

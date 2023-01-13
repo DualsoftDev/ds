@@ -5,24 +5,6 @@ open Engine.Common.FS
 
 
 module ModuleInitializer =
-    let private createVariableWithTypeOnXgi (name:string) (typ:System.Type) : IVariable =
-        verify (Runtime.Target = XGI)
-        match typ.Name with
-        | "Boolean"-> createXgiVariable name "no comment" false
-        | "Byte"   -> createXgiVariable name "no comment" 0uy
-        | "Char"   -> createXgiVariable name "no comment" ' '
-        | "Double" -> createXgiVariable name "no comment" 0.0
-        | "Int16"  -> createXgiVariable name "no comment" 0s
-        | "Int32"  -> createXgiVariable name "no comment" 0
-        | "Int64"  -> createXgiVariable name "no comment" 0L
-        | "SByte"  -> createXgiVariable name "no comment" 0y
-        | "Single" -> createXgiVariable name "no comment" 0.0f
-        | "String" -> createXgiVariable name "no comment" ""
-        | "UInt16" -> createXgiVariable name "no comment" 0us
-        | "UInt32" -> createXgiVariable name "no comment" 0u
-        | "UInt64" -> createXgiVariable name "no comment" 0UL
-        | _  -> failwith "ERROR"
-
     let private createVariableWithTypeAndValueOnXgi (name:string) (typ:System.Type) (boxedValue:BoxedObjectHolder) : IVariable =
         verify (Runtime.Target = XGI)
         let v = boxedValue.Object
@@ -41,6 +23,11 @@ module ModuleInitializer =
         | "UInt32" -> createXgiVariable name "no comment" (v :?> uint32)
         | "UInt64" -> createXgiVariable name "no comment" (v :?> uint64)
         | _  -> failwith "ERROR"
+
+    let private createVariableWithTypeOnXgi (name:string) (typ:System.Type) : IVariable =
+        verify (Runtime.Target = XGI)
+        let v = typeDefaultValue typ
+        createVariableWithTypeAndValueOnXgi name typ (unbox v)
 
     let Initialize() =
         printfn "Module is being initialized..."

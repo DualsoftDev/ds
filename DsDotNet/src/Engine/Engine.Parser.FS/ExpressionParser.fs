@@ -349,38 +349,24 @@ module rec ExpressionParser =
         member x.CreateTag(name:string, address:string, boxedValue:obj) : IStorage =
             let v = boxedValue
             match x.Name with
-            | "Boolean"-> new PlcTag<bool>  (name, address, v :?> bool)
-            | "Byte"   -> new PlcTag<uint8> (name, address, v :?> uint8)
-            | "Char"   -> new PlcTag<char>  (name, address, v :?> char)
-            | "Double" -> new PlcTag<double>(name, address, v :?> double)
-            | "Int16"  -> new PlcTag<int16> (name, address, v :?> int16)
-            | "Int32"  -> new PlcTag<int32> (name, address, v :?> int32)
-            | "Int64"  -> new PlcTag<int64> (name, address, v :?> int64)
-            | "SByte"  -> new PlcTag<int8>  (name, address, v :?> int8)
-            | "Single" -> new PlcTag<single>(name, address, v :?> single)
-            | "String" -> new PlcTag<string>(name, address, v :?> string)
-            | "UInt16" -> new PlcTag<uint16>(name, address, v :?> uint16)
-            | "UInt32" -> new PlcTag<uint32>(name, address, v :?> uint32)
-            | "UInt64" -> new PlcTag<uint64>(name, address, v :?> uint64)
+            | "Boolean"-> new PlcTag<bool>  (name, address, unbox v)
+            | "Byte"   -> new PlcTag<uint8> (name, address, unbox v)
+            | "Char"   -> new PlcTag<char>  (name, address, unbox v)
+            | "Double" -> new PlcTag<double>(name, address, unbox v)
+            | "Int16"  -> new PlcTag<int16> (name, address, unbox v)
+            | "Int32"  -> new PlcTag<int32> (name, address, unbox v)
+            | "Int64"  -> new PlcTag<int64> (name, address, unbox v)
+            | "SByte"  -> new PlcTag<int8>  (name, address, unbox v)
+            | "Single" -> new PlcTag<single>(name, address, unbox v)
+            | "String" -> new PlcTag<string>(name, address, unbox v)
+            | "UInt16" -> new PlcTag<uint16>(name, address, unbox v)
+            | "UInt32" -> new PlcTag<uint32>(name, address, unbox v)
+            | "UInt64" -> new PlcTag<uint64>(name, address, unbox v)
             | _  -> failwith "ERROR"
 
         member x.CreateTag(name:string, address:string) : IStorage =
-            match x.Name with
-            | "Boolean"-> new PlcTag<bool>  (name, address, false)
-            | "Byte"   -> new PlcTag<uint8> (name, address, 0uy)
-            | "Char"   -> new PlcTag<char>  (name, address, ' ')
-            | "Double" -> new PlcTag<double>(name, address, 0.0)
-            | "Int16"  -> new PlcTag<int16> (name, address, 0s)
-            | "Int32"  -> new PlcTag<int32> (name, address, 0)
-            | "Int64"  -> new PlcTag<int64> (name, address, 0L)
-            | "SByte"  -> new PlcTag<int8>  (name, address, 0y)
-            | "Single" -> new PlcTag<single>(name, address, 0.0f)
-            | "String" -> new PlcTag<string>(name, address, "")
-            | "UInt16" -> new PlcTag<uint16>(name, address, 0us)
-            | "UInt32" -> new PlcTag<uint32>(name, address, 0u)
-            | "UInt64" -> new PlcTag<uint64>(name, address, 0UL)
-            | _  -> failwith "ERROR"
-
+            let v = typeDefaultValue x
+            x.CreateTag(name, address, unbox v)
 
         static member FromString(typeName:string) : System.Type =
             match typeName.ToLower() with

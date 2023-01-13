@@ -128,20 +128,21 @@ module rec TypeConvertorModule =
     let createTypedXgiAutoVariable (typ:System.Type) (nameHint:string) comment : IXgiLocalVar =
         autoVariableCounter <- autoVariableCounter + 1
         let name = $"_tmp{nameHint}{autoVariableCounter}"
+        let value = typeDefaultValue typ
         match typ.Name with
-        | "Boolean"-> XgiLocalVar(name, comment, false)
-        | "Byte"   -> XgiLocalVar(name, comment, 0uy)
-        | "Char"   -> XgiLocalVar(name, comment, ' ')
-        | "Double" -> XgiLocalVar(name, comment, 0.0)
-        | "Int16"  -> XgiLocalVar(name, comment, 0s)
-        | "Int32"  -> XgiLocalVar(name, comment, 0)
-        | "Int64"  -> XgiLocalVar(name, comment, 0L)
-        | "SByte"  -> XgiLocalVar(name, comment, 0y)
-        | "Single" -> XgiLocalVar(name, comment, 0.f)
-        | "String" -> XgiLocalVar(name, comment, "")
-        | "UInt16" -> XgiLocalVar(name, comment, 0us)
-        | "UInt32" -> XgiLocalVar(name, comment, 0u)
-        | "UInt64" -> XgiLocalVar(name, comment, 0UL)
+        | "Boolean"-> XgiLocalVar<bool>  (name, comment, unbox value)
+        | "Byte"   -> XgiLocalVar<uint8> (name, comment, unbox value)
+        | "Char"   -> XgiLocalVar<char>  (name, comment, unbox value)
+        | "Double" -> XgiLocalVar<double>(name, comment, unbox value)
+        | "Int16"  -> XgiLocalVar<int16> (name, comment, unbox value)
+        | "Int32"  -> XgiLocalVar<int32> (name, comment, unbox value)
+        | "Int64"  -> XgiLocalVar<int64> (name, comment, unbox value)
+        | "SByte"  -> XgiLocalVar<int8>  (name, comment, unbox value)
+        | "Single" -> XgiLocalVar<single>(name, comment, unbox value)
+        | "String" -> XgiLocalVar<string>(name, comment, unbox value)
+        | "UInt16" -> XgiLocalVar<uint16>(name, comment, unbox value)
+        | "UInt32" -> XgiLocalVar<uint32>(name, comment, unbox value)
+        | "UInt64" -> XgiLocalVar<uint64>(name, comment, unbox value)
         | _  -> failwith "ERROR"
 
 

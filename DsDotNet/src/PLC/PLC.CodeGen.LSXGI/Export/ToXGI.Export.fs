@@ -8,9 +8,9 @@ open Engine.Core
 
 module LsXGI =
     let generateXml (storages:Storages) (commentedStatements:CommentedStatement list) : string =
-        match RuntimeTarget with
+        match Runtime.Target with
         | XGI -> ()
-        | _ -> failwith $"ERROR: Require XGI Runtime target.  Current runtime target = {RuntimeTarget}"
+        | _ -> failwith $"ERROR: Require XGI Runtime target.  Current runtime target = {Runtime.Target}"
 
         let prologComments = ["DS Logic for XGI"]
 

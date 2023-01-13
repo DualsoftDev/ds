@@ -58,7 +58,7 @@ module rec CounterModule =
         let mutable acc = getNull<TagBase<CountUnitType>>()
         let mutable res = nullB
         let add = addTagsToStorages storages
-        match RuntimeTarget, typ with
+        match Runtime.Target, typ with
         | (WINDOWS | XGI), CTU ->
             cu  <- fwdCreateBoolTag     $"{name}.CU" false  // Count up enable bit
             res <- fwdCreateBoolTag     $"{name}.R" false

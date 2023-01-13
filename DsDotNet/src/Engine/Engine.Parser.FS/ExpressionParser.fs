@@ -175,6 +175,9 @@ module rec ExpressionParser =
 
                 let tcParams={Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondtion; FunctionName=functionName}
 
+                (* args[0] 는 PV (Preset),
+                   args[1] 이후부터 XGI 명령 입력 순서대로...
+                *)
                 match typ, functionName, args with
                 | CTU, ("createWinCTU" | "createXgiCTU"), _::_::(BoolExp resetCondition)::[] ->
                     CounterStatement.CreateCTU(tcParams, resetCondition)

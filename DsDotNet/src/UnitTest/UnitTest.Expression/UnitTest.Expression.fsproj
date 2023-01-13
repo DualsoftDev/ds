@@ -45,6 +45,7 @@
 
 		<ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
+		<ProjectReference Include="..\..\PLC\PLC.CodeGen.LSXGI\PLC.CodeGen.LSXGI.fsproj" />
 
 		<ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
 	</ItemGroup>

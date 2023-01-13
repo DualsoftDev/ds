@@ -7,13 +7,17 @@ open Engine.Core
 open T.Expression
 open Engine.Common.FS
 open Engine.Parser.FS
+open PLC.CodeGen.LSXGI
 
 
 //[<AutoOpen>]
 //module CounterTestModule =
 
     type CounterTest() =
-        do Fixtures.SetUpTest()
+        do
+            let ``강제 reference 추가용`` = XGITag.createSymbolInfo
+            Fixtures.SetUpTest()
+
 
         let evaluateRungInputs (counter:Counter) =
             for s in counter.InputEvaluateStatements do
@@ -258,7 +262,7 @@ open Engine.Parser.FS
             [ "DN"; "OV"; "UN"; "PRE"; "ACC"; ] |> iter (fun n -> storages.ContainsKey($"myCTD.{n}") === false)
 
         [<Test>]
-        member x.``CTD on XGI platform test`` () =
+        member x.``CTD on WINDOWS, XGI platform test`` () =
             use _ = setRuntimeTarget XGI
             let storages = Storages()
             let code = """
@@ -280,9 +284,9 @@ open Engine.Parser.FS
                 let code = """
                     bool cu = false;
                     bool cd = false;
-                    bool r  = false;
+                    bool r__ = false; // 'r'
                     bool ld = false;
-                    ctud myCTUD = createWinCTUD(2000us, $cu, $cd, $r, $ld);
+                    ctud myCTUD = createWinCTUD(2000us, $cu, $cd, $r__, $ld);
     """
 
                 let statement = parseCode storages code

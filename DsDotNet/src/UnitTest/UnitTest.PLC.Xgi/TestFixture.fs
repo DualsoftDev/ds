@@ -48,24 +48,24 @@ module PLCGenerationTestModule =
     [<AbstractClass>]
     type PLCGenerationTestClass() =
         do Fixtures.SetUpTest()
-        let mutable runtimeTarget = RuntimeTarget
+        let mutable runtimeTarget = Runtime.Target
         let xgiGenerationOptionsBackup = xgiGenerationOptions
         [<SetUp>]
         member x.Setup () =
-            RuntimeTarget <- x.GetCurrentRuntimeTarget()
+            Runtime.Target <- x.GetCurrentRuntimeTarget()
             xgiGenerationOptions <- {EnableXmlComment = false; IsAppendExpressionTextToRungComment = true}
 
         [<TearDown>]
         member __.TearDown () =
-            RuntimeTarget <- runtimeTarget
+            Runtime.Target <- runtimeTarget
             xgiGenerationOptions <- xgiGenerationOptionsBackup
 
-        abstract GetCurrentRuntimeTarget: unit -> RuntimeTarget
+        abstract GetCurrentRuntimeTarget: unit -> RuntimeTargetType
 
-    let setRuntimeTarget(runtimeTarget:RuntimeTarget) =
-        let runtimeTargetBackup = RuntimeTarget
-        RuntimeTarget <- runtimeTarget
-        disposable { RuntimeTarget <- runtimeTargetBackup }
+    let setRuntimeTarget(runtimeTarget:RuntimeTargetType) =
+        let runtimeTargetBackup = Runtime.Target
+        Runtime.Target <- runtimeTarget
+        disposable { Runtime.Target <- runtimeTargetBackup }
 
 [<AutoOpen>]
 module XgiGenerationTestModule =

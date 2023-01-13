@@ -164,7 +164,7 @@ module rec TimerModule =
 
         static member Create(typ:TimerType, storages:Storages, name, preset:CountUnitType, accum:CountUnitType) =
             let en, tt, dn, pre, acc, res =
-                match RuntimeTarget with
+                match Runtime.Target with
                 | ( XGI | WINDOWS ) -> "IN", "_TT", "Q", "PT", "ET", "RST"
                 | AB -> "EN", "TT", "DN", "PRE", "ACC", "RES"
                 | _ -> failwith "NOT yet supported"

@@ -116,19 +116,19 @@ module  TagModule =
     let createVariableWithTypeOnWindows (name:string) (typ:System.Type): IVariable =
         verify (Runtime.Target = WINDOWS)
         match typ.Name with
-        | "Single" -> new Variable<single>(name, 0.0f)
-        | "Double" -> new Variable<double>(name, 0.0)
-        | "SByte"  -> new Variable<int8>  (name, 0y)
-        | "Byte"   -> new Variable<uint8> (name, 0uy)
-        | "Int16"  -> new Variable<int16> (name, 0s)
-        | "UInt16" -> new Variable<uint16>(name, 0us)
-        | "Int32"  -> new Variable<int32> (name, 0)
-        | "UInt32" -> new Variable<uint32>(name, 0u)
-        | "Int64"  -> new Variable<int64> (name, 0L)
-        | "UInt64" -> new Variable<uint64>(name, 0UL)
         | "Boolean"-> new Variable<bool>  (name, false)
-        | "String" -> new Variable<string>(name, "")
+        | "Byte"   -> new Variable<uint8> (name, 0uy)
         | "Char"   -> new Variable<char>  (name, ' ')
+        | "Double" -> new Variable<double>(name, 0.0)
+        | "Int16"  -> new Variable<int16> (name, 0s)
+        | "Int32"  -> new Variable<int32> (name, 0)
+        | "Int64"  -> new Variable<int64> (name, 0L)
+        | "SByte"  -> new Variable<int8>  (name, 0y)
+        | "Single" -> new Variable<single>(name, 0.0f)
+        | "String" -> new Variable<string>(name, "")
+        | "UInt16" -> new Variable<uint16>(name, 0us)
+        | "UInt32" -> new Variable<uint32>(name, 0u)
+        | "UInt64" -> new Variable<uint64>(name, 0UL)
         | _  -> failwith "ERROR"
 
     // error FS0030: 값 제한이 있습니다. 값 'fwdCreateVariableWithValue'은(는) 제네릭 형식    val mutable fwdCreateVariableWithValue: (string -> '_a -> IVariable)을(를) 가지는 것으로 유추되었습니다.    'fwdCreateVariableWithValue'에 대한 인수를 명시적으로 만들거나, 제네릭 요소로 만들지 않으려는 경우 형식 주석을 추가하세요.
@@ -139,19 +139,19 @@ module  TagModule =
         verify (Runtime.Target = WINDOWS)
         let v = boxedValue.Object
         match typ.Name with
-        | "Single" -> new Variable<single>(name, v :?> single)
-        | "Double" -> new Variable<double>(name, v :?> double)
-        | "SByte"  -> new Variable<int8>  (name, v :?> int8)
-        | "Byte"   -> new Variable<uint8> (name, v :?> uint8)
-        | "Int16"  -> new Variable<int16> (name, v :?> int16)
-        | "UInt16" -> new Variable<uint16>(name, v :?> uint16)
-        | "Int32"  -> new Variable<int32> (name, v :?> int32)
-        | "UInt32" -> new Variable<uint32>(name, v :?> uint32)
-        | "Int64"  -> new Variable<int64> (name, v :?> int64)
-        | "UInt64" -> new Variable<uint64>(name, v :?> uint64)
         | "Boolean"-> new Variable<bool>  (name, v :?> bool)
-        | "String" -> new Variable<string>(name, v :?> string)
+        | "Byte"   -> new Variable<uint8> (name, v :?> uint8)
         | "Char"   -> new Variable<char>  (name, v :?> char)
+        | "Double" -> new Variable<double>(name, v :?> double)
+        | "Int16"  -> new Variable<int16> (name, v :?> int16)
+        | "Int32"  -> new Variable<int32> (name, v :?> int32)
+        | "Int64"  -> new Variable<int64> (name, v :?> int64)
+        | "SByte"  -> new Variable<int8>  (name, v :?> int8)
+        | "Single" -> new Variable<single>(name, v :?> single)
+        | "String" -> new Variable<string>(name, v :?> string)
+        | "UInt16" -> new Variable<uint16>(name, v :?> uint16)
+        | "UInt32" -> new Variable<uint32>(name, v :?> uint32)
+        | "UInt64" -> new Variable<uint64>(name, v :?> uint64)
         | _  -> failwith "ERROR"
 
 

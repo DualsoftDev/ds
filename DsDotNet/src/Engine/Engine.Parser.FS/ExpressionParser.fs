@@ -349,36 +349,36 @@ module rec ExpressionParser =
         member x.CreateTag(name:string, address:string, boxedValue:obj) : IStorage =
             let v = boxedValue
             match x.Name with
-            | "Single" -> new PlcTag<single>(name, address, v :?> single)
-            | "Double" -> new PlcTag<double>(name, address, v :?> double)
-            | "SByte"  -> new PlcTag<int8>  (name, address, v :?> int8)
-            | "Byte"   -> new PlcTag<uint8> (name, address, v :?> uint8)
-            | "Int16"  -> new PlcTag<int16> (name, address, v :?> int16)
-            | "UInt16" -> new PlcTag<uint16>(name, address, v :?> uint16)
-            | "Int32"  -> new PlcTag<int32> (name, address, v :?> int32)
-            | "UInt32" -> new PlcTag<uint32>(name, address, v :?> uint32)
-            | "Int64"  -> new PlcTag<int64> (name, address, v :?> int64)
-            | "UInt64" -> new PlcTag<uint64>(name, address, v :?> uint64)
             | "Boolean"-> new PlcTag<bool>  (name, address, v :?> bool)
-            | "String" -> new PlcTag<string>(name, address, v :?> string)
+            | "Byte"   -> new PlcTag<uint8> (name, address, v :?> uint8)
             | "Char"   -> new PlcTag<char>  (name, address, v :?> char)
+            | "Double" -> new PlcTag<double>(name, address, v :?> double)
+            | "Int16"  -> new PlcTag<int16> (name, address, v :?> int16)
+            | "Int32"  -> new PlcTag<int32> (name, address, v :?> int32)
+            | "Int64"  -> new PlcTag<int64> (name, address, v :?> int64)
+            | "SByte"  -> new PlcTag<int8>  (name, address, v :?> int8)
+            | "Single" -> new PlcTag<single>(name, address, v :?> single)
+            | "String" -> new PlcTag<string>(name, address, v :?> string)
+            | "UInt16" -> new PlcTag<uint16>(name, address, v :?> uint16)
+            | "UInt32" -> new PlcTag<uint32>(name, address, v :?> uint32)
+            | "UInt64" -> new PlcTag<uint64>(name, address, v :?> uint64)
             | _  -> failwith "ERROR"
 
         member x.CreateTag(name:string, address:string) : IStorage =
             match x.Name with
-            | "Single" -> new PlcTag<single>(name, address, 0.0f)
-            | "Double" -> new PlcTag<double>(name, address, 0.0)
-            | "SByte"  -> new PlcTag<int8>  (name, address, 0y)
-            | "Byte"   -> new PlcTag<uint8> (name, address, 0uy)
-            | "Int16"  -> new PlcTag<int16> (name, address, 0s)
-            | "UInt16" -> new PlcTag<uint16>(name, address, 0us)
-            | "Int32"  -> new PlcTag<int32> (name, address, 0)
-            | "UInt32" -> new PlcTag<uint32>(name, address, 0u)
-            | "Int64"  -> new PlcTag<int64> (name, address, 0L)
-            | "UInt64" -> new PlcTag<uint64>(name, address, 0UL)
             | "Boolean"-> new PlcTag<bool>  (name, address, false)
-            | "String" -> new PlcTag<string>(name, address, "")
+            | "Byte"   -> new PlcTag<uint8> (name, address, 0uy)
             | "Char"   -> new PlcTag<char>  (name, address, ' ')
+            | "Double" -> new PlcTag<double>(name, address, 0.0)
+            | "Int16"  -> new PlcTag<int16> (name, address, 0s)
+            | "Int32"  -> new PlcTag<int32> (name, address, 0)
+            | "Int64"  -> new PlcTag<int64> (name, address, 0L)
+            | "SByte"  -> new PlcTag<int8>  (name, address, 0y)
+            | "Single" -> new PlcTag<single>(name, address, 0.0f)
+            | "String" -> new PlcTag<string>(name, address, "")
+            | "UInt16" -> new PlcTag<uint16>(name, address, 0us)
+            | "UInt32" -> new PlcTag<uint32>(name, address, 0u)
+            | "UInt64" -> new PlcTag<uint64>(name, address, 0UL)
             | _  -> failwith "ERROR"
 
 

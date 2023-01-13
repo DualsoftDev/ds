@@ -210,26 +210,26 @@ module XgiExpressionConvertorModule =
                 | ("&&" | "||" | "!") as op ->
                     exp.WithNewFunctionArguments newArgs
                 | (">"|">="|"<"|"<="|"="|"!="  |  "+"|"-"|"*"|"/") as op ->
-                    let withDefaultValue (default_value:'T) =
+                    let withDefaultValueT (default_value:'T) =
                         let out = createXgiAutoVariableT "out" $"{op} output" default_value
                         xgiLocalVars.Add out
                         expandFunctionStatements.Add <| DuAugmentedPLCFunction { FunctionName = op; Arguments = newArgs; Output = out; }
                         DuTerminal (DuVariable out) :> IExpression
 
                     match exp.DataType.Name with
-                    | "Boolean"-> withDefaultValue false
-                    | "Byte"   -> withDefaultValue 0uy
-                    | "Char"   -> withDefaultValue ' '
-                    | "Double" -> withDefaultValue 0.0
-                    | "Int16"  -> withDefaultValue 0s
-                    | "Int32"  -> withDefaultValue 0
-                    | "Int64"  -> withDefaultValue 0L
-                    | "SByte"  -> withDefaultValue 0y
-                    | "Single" -> withDefaultValue 0.f
-                    | "String" -> withDefaultValue ""
-                    | "UInt16" -> withDefaultValue 0us
-                    | "UInt32" -> withDefaultValue 0u
-                    | "UInt64" -> withDefaultValue 0UL
+                    | "Boolean"-> withDefaultValueT false
+                    | "Byte"   -> withDefaultValueT 0uy
+                    | "Char"   -> withDefaultValueT ' '
+                    | "Double" -> withDefaultValueT 0.0
+                    | "Int16"  -> withDefaultValueT 0s
+                    | "Int32"  -> withDefaultValueT 0
+                    | "Int64"  -> withDefaultValueT 0L
+                    | "SByte"  -> withDefaultValueT 0y
+                    | "Single" -> withDefaultValueT 0.f
+                    | "String" -> withDefaultValueT ""
+                    | "UInt16" -> withDefaultValueT 0us
+                    | "UInt32" -> withDefaultValueT 0u
+                    | "UInt64" -> withDefaultValueT 0UL
                     | _ -> failwith "ERROR"
 
                 | (FunctionNameRising | FunctionNameFalling) ->

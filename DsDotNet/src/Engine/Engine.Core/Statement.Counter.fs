@@ -127,7 +127,7 @@ module CounterStatementModule =
                 ResetCondition     = Some reset;  }
             |> createCounterStatement storages
 
-        static member CreateXgiCTUD(tcParams:TCConstructionParams, countDownCondition, reset, ldCondition) =
+        static member CreateCTUD(tcParams:TCConstructionParams, countDownCondition, reset, ldCondition) =
             let {Storages=storages; Name=name; Preset=preset; RungInCondition=countUpCondition; FunctionName=functionName} = tcParams
             { defaultCounterCreateParam with
                 Type=CTUD; Name=name; Preset=preset; FunctionName=functionName

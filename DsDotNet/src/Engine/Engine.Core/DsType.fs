@@ -24,6 +24,7 @@ module DsType =
         | DuEmergencyBTN //비상 Push 버튼
         | DuClearBTN     //해지 Push 버튼
         | DuHomeBTN      //홈(원위치) Push 버튼
+        | DuReadyBTN     //운전 준비 Push 버튼
 
     ///LampType  종류
     type LampType =

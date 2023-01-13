@@ -7,6 +7,7 @@ open Engine.Core
 open Engine.Common.FS
 open PLC.CodeGen.Common
 open System
+open Engine.Common.FS
 
 (*
     - 사칙연산 함수(Add, ..) 의 입력은 XGI 에서 전원선으로부터 연결이 불가능한 반면,
@@ -42,17 +43,17 @@ module ConvertorPrologModule =
     let systemTypeToXgiTypeName (typ:System.Type) =
         match typ.Name with
         | "Boolean" -> "BOOL"
-        | "Single" -> "REAL"
-        | "Double" -> "LREAL"
+        | "Byte"    -> "BYTE"
+        | "Double"  -> "LREAL"
+        | "Int16"   -> "SINT"
+        | "Int32"   -> "DINT"
+        | "Int64"   -> "LINT"
+        | "Single"  -> "REAL"
+        | "String"  -> "STRING"  // 32 byte
+        | "UInt16"  -> "USINT"
+        | "UInt32"  -> "UDINT"
+        | "UInt64"  -> "ULINT"
         | ("SByte" | "Char")   -> "BYTE"
-        | "Byte"   -> "BYTE"
-        | "Int16"  -> "SINT"
-        | "UInt16" -> "USINT"
-        | "Int32"  -> "DINT"
-        | "UInt32" -> "UDINT"
-        | "Int64"  -> "LINT"
-        | "UInt64" -> "ULINT"
-        | "String" -> "STRING"  // 32 byte
         | _ -> failwith "ERROR"
 
 
@@ -100,8 +101,7 @@ module rec TypeConvertorModule =
     let (|CommentAndXgiStatements|) = function | CommentedXgiStatements(x, ys) -> x, ys
     let commentAndXgiStatement = (|CommentAndXgiStatements|)
 
-
-    let createXgiVariable (name:string) comment (initValue:'Q) =
+    let createXgiVariable (typ:System.Type) (name:string) (initValue:obj) comment : IXgiLocalVar =
         (*
             "n0" is an incorrect variable.
             The folling characters are allowed:
@@ -118,31 +118,32 @@ module rec TypeConvertorModule =
         | RegexPattern "ld(\d)+" _ -> failwith $"Invalid XGI variable name {name}."
         | _ -> ()
 
-        XgiLocalVar(name, comment, initValue)
+        match typ.Name with
+        | "Boolean"-> XgiLocalVar<bool>  (name, comment, unbox initValue)
+        | "Byte"   -> XgiLocalVar<uint8> (name, comment, unbox initValue)
+        | "Char"   -> XgiLocalVar<char>  (name, comment, unbox initValue)
+        | "Double" -> XgiLocalVar<double>(name, comment, unbox initValue)
+        | "Int16"  -> XgiLocalVar<int16> (name, comment, unbox initValue)
+        | "Int32"  -> XgiLocalVar<int32> (name, comment, unbox initValue)
+        | "Int64"  -> XgiLocalVar<int64> (name, comment, unbox initValue)
+        | "SByte"  -> XgiLocalVar<int8>  (name, comment, unbox initValue)
+        | "Single" -> XgiLocalVar<single>(name, comment, unbox initValue)
+        | "String" -> XgiLocalVar<string>(name, comment, unbox initValue)
+        | "UInt16" -> XgiLocalVar<uint16>(name, comment, unbox initValue)
+        | "UInt32" -> XgiLocalVar<uint32>(name, comment, unbox initValue)
+        | "UInt64" -> XgiLocalVar<uint64>(name, comment, unbox initValue)
+        | _  -> failwith "ERROR"
 
-
-    let createXgiAutoVariable (nameHint:string) comment (initValue:'Q) =
-        autoVariableCounter <- autoVariableCounter + 1
-        XgiLocalVar($"_tmp{nameHint}{autoVariableCounter}", comment, initValue)
-
-    let createTypedXgiAutoVariable (typ:System.Type) (nameHint:string) comment : IXgiLocalVar =
+    let createTypedXgiAutoVariable (typ:System.Type) (nameHint:string) (initValue:obj) comment : IXgiLocalVar =
         autoVariableCounter <- autoVariableCounter + 1
         let name = $"_tmp{nameHint}{autoVariableCounter}"
-        match typ.Name with
-        | "Single" -> XgiLocalVar(name, comment, 0.f)
-        | "Double" -> XgiLocalVar(name, comment, 0.0)
-        | "SByte"  -> XgiLocalVar(name, comment, 0y)
-        | "Byte"   -> XgiLocalVar(name, comment, 0uy)
-        | "Int16"  -> XgiLocalVar(name, comment, 0s)
-        | "UInt16" -> XgiLocalVar(name, comment, 0us)
-        | "Int32"  -> XgiLocalVar(name, comment, 0)
-        | "UInt32" -> XgiLocalVar(name, comment, 0u)
-        | "Int64"  -> XgiLocalVar(name, comment, 0L)
-        | "UInt64" -> XgiLocalVar(name, comment, 0UL)
-        | "Boolean"-> XgiLocalVar(name, comment, false)
-        | "String" -> XgiLocalVar(name, comment, "")
-        | "Char"   -> XgiLocalVar(name, comment, ' ')
-        | _  -> failwith "ERROR"
+        let typ = initValue.GetType()
+        createXgiVariable typ name initValue comment
+
+
+    let internal createXgiAutoVariableT (nameHint:string) comment (initValue:'T) =
+        autoVariableCounter <- autoVariableCounter + 1
+        XgiLocalVar($"_tmp{nameHint}{autoVariableCounter}", comment, initValue)
 
 
     (* Moved from Command.fs *)
@@ -210,25 +211,25 @@ module XgiExpressionConvertorModule =
                     exp.WithNewFunctionArguments newArgs
                 | (">"|">="|"<"|"<="|"="|"!="  |  "+"|"-"|"*"|"/") as op ->
                     let withDefaultValue (default_value:'T) =
-                        let out = createXgiAutoVariable "out" $"{op} output" default_value
+                        let out = createXgiAutoVariableT "out" $"{op} output" default_value
                         xgiLocalVars.Add out
                         expandFunctionStatements.Add <| DuAugmentedPLCFunction { FunctionName = op; Arguments = newArgs; Output = out; }
                         DuTerminal (DuVariable out) :> IExpression
 
                     match exp.DataType.Name with
-                    | "Single" -> withDefaultValue 0.f
-                    | "Double" -> withDefaultValue 0.0
-                    | "SByte"  -> withDefaultValue 0y
-                    | "Byte"   -> withDefaultValue 0uy
-                    | "Int16"  -> withDefaultValue 0s
-                    | "UInt16" -> withDefaultValue 0us
-                    | "Int32"  -> withDefaultValue 0
-                    | "UInt32" -> withDefaultValue 0u
-                    | "Int64"  -> withDefaultValue 0L
-                    | "UInt64" -> withDefaultValue 0UL
                     | "Boolean"-> withDefaultValue false
-                    | "String" -> withDefaultValue ""
+                    | "Byte"   -> withDefaultValue 0uy
                     | "Char"   -> withDefaultValue ' '
+                    | "Double" -> withDefaultValue 0.0
+                    | "Int16"  -> withDefaultValue 0s
+                    | "Int32"  -> withDefaultValue 0
+                    | "Int64"  -> withDefaultValue 0L
+                    | "SByte"  -> withDefaultValue 0y
+                    | "Single" -> withDefaultValue 0.f
+                    | "String" -> withDefaultValue ""
+                    | "UInt16" -> withDefaultValue 0us
+                    | "UInt32" -> withDefaultValue 0u
+                    | "UInt64" -> withDefaultValue 0UL
                     | _ -> failwith "ERROR"
 
                 | (FunctionNameRising | FunctionNameFalling) ->
@@ -268,7 +269,7 @@ module XgiExpressionConvertorModule =
                     args
                 else
                     let go (v:'Q) =
-                        let out = createXgiAutoVariable "_temp_internal_" $"{op} output" v
+                        let out = createXgiAutoVariableT "_temp_internal_" $"{op} output" v
                         storage.Add out
                         let args = exp.FunctionArguments |> List.bind (helper op)
                         DuAugmentedPLCFunction {FunctionName=op; Arguments=args; Output=out } |> augmentedStatementsStorage.Add
@@ -276,19 +277,19 @@ module XgiExpressionConvertorModule =
 
                     let v = exp.BoxedEvaluatedValue
                     match exp.DataType.Name with
-                    | "Single" -> go (v :?> float32)
-                    | "Double" -> go (v :?> double)
-                    | "SByte"  -> go (v :?> int8)
-                    | "Byte"   -> go (v :?> uint8)
-                    | "Int16"  -> go (v :?> int16)
-                    | "UInt16" -> go (v :?> uint16)
-                    | "Int32"  -> go (v :?> int32)
-                    | "UInt32" -> go (v :?> uint32)
-                    | "Int64"  -> go (v :?> int64)
-                    | "UInt64" -> go (v :?> uint64)
                     | "Boolean"-> go (v :?> bool)
-                    | "String" -> go (v :?> string)
+                    | "Byte"   -> go (v :?> uint8)
                     | "Char"   -> go (v :?> char)
+                    | "Double" -> go (v :?> double)
+                    | "Int16"  -> go (v :?> int16)
+                    | "Int32"  -> go (v :?> int32)
+                    | "Int64"  -> go (v :?> int64)
+                    | "SByte"  -> go (v :?> int8)
+                    | "Single" -> go (v :?> float32)
+                    | "String" -> go (v :?> string)
+                    | "UInt16" -> go (v :?> uint16)
+                    | "UInt32" -> go (v :?> uint32)
+                    | "UInt64" -> go (v :?> uint64)
                     | _ -> failwith "ERROR"
             | _ ->
                 [ exp ]
@@ -328,25 +329,10 @@ module XgiExpressionConvertorModule =
                     let comment = $"[local var in code] {si.Comment}"
                     let initValue = exp.BoxedEvaluatedValue
 
-                    let createLocalVar (defaultValue:'T) =
-                        let var = createXgiVariable decl.Name comment defaultValue
-                        storage.Add var
+                    let typ = initValue.GetType()
+                    let var = createXgiVariable typ decl.Name initValue comment
+                    storage.Add var
 
-                    match exp.DataType.Name with
-                    | "Single" -> createLocalVar (initValue :?> float32)
-                    | "Double" -> createLocalVar (initValue :?> double)
-                    | "SByte"  -> createLocalVar (initValue :?> int8)
-                    | "Byte"   -> createLocalVar (initValue :?> uint8)
-                    | "Int16"  -> createLocalVar (initValue :?> int16)
-                    | "UInt16" -> createLocalVar (initValue :?> uint16)
-                    | "Int32"  -> createLocalVar (initValue :?> int32)
-                    | "UInt32" -> createLocalVar (initValue :?> uint32)
-                    | "Int64"  -> createLocalVar (initValue :?> int64)
-                    | "UInt64" -> createLocalVar (initValue :?> uint64)
-                    | "Boolean"-> createLocalVar (initValue :?> bool)
-                    | "String" -> createLocalVar (initValue :?> string)
-                    | "Char"   -> createLocalVar (initValue :?> char)
-                    | _ -> failwith "ERROR"
                 | _ ->
                     failwith "ERROR"
 

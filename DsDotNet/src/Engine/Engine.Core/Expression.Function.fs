@@ -167,158 +167,158 @@ module ExpressionFunctionModule =
         *)
         let fAdd (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "SByte"  -> cf _addInt8   "+"  args
-            | "Byte"   -> cf _addUInt8  "+"  args
-            | "Int16"  -> cf _addInt16  "+"  args
-            | "UInt16" -> cf _addUInt16 "+"  args
-            | "Int32"  -> cf _addInt32  "+"  args
-            | "UInt32" -> cf _addUInt32 "+"  args
-            | "Int64"  -> cf _addInt64  "+"  args
-            | "UInt64" -> cf _addUInt64 "+"  args
-            | "Single" -> cf _addFloat32 "+" args
+            | "Byte"   -> cf _addUInt8   "+"  args
             | "Double" -> cf _addFloat64 "+" args
+            | "Int16"  -> cf _addInt16   "+"  args
+            | "Int32"  -> cf _addInt32   "+"  args
+            | "Int64"  -> cf _addInt64   "+"  args
+            | "SByte"  -> cf _addInt8    "+"  args
+            | "Single" -> cf _addFloat32 "+" args
+            | "UInt16" -> cf _addUInt16  "+"  args
+            | "UInt32" -> cf _addUInt32  "+"  args
+            | "UInt64" -> cf _addUInt64  "+"  args
             | _        -> failwith "ERROR"
 
         let fSub (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "SByte"  -> cf _subInt8    "-" args
             | "Byte"   -> cf _subUInt8   "-" args
-            | "Int16"  -> cf _subInt16   "-" args
-            | "UInt16" -> cf _subUInt16  "-" args
-            | "Int32"  -> cf _subInt32   "-" args
-            | "UInt32" -> cf _subUInt32  "-" args
-            | "Int64"  -> cf _subInt64   "-" args
-            | "UInt64" -> cf _subUInt64  "-" args
-            | "Single" -> cf _subFloat32 "-" args
             | "Double" -> cf _subFloat64 "-" args
+            | "Int16"  -> cf _subInt16   "-" args
+            | "Int32"  -> cf _subInt32   "-" args
+            | "Int64"  -> cf _subInt64   "-" args
+            | "SByte"  -> cf _subInt8    "-" args
+            | "Single" -> cf _subFloat32 "-" args
+            | "UInt16" -> cf _subUInt16  "-" args
+            | "UInt32" -> cf _subUInt32  "-" args
+            | "UInt64" -> cf _subUInt64  "-" args
             | _        -> failwith "ERROR"
 
         let fMul (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "SByte"  -> cf _mulInt8    "*" args
             | "Byte"   -> cf _mulUInt8   "*" args
-            | "Int16"  -> cf _mulInt16   "*" args
-            | "UInt16" -> cf _mulUInt16  "*" args
-            | "Int32"  -> cf _mulInt32   "*" args
-            | "UInt32" -> cf _mulUInt32  "*" args
-            | "Int64"  -> cf _mulInt64   "*" args
-            | "UInt64" -> cf _mulUInt64  "*" args
-            | "Single" -> cf _mulFloat32 "*" args
             | "Double" -> cf _mulFloat64 "*" args
+            | "Int16"  -> cf _mulInt16   "*" args
+            | "Int32"  -> cf _mulInt32   "*" args
+            | "Int64"  -> cf _mulInt64   "*" args
+            | "SByte"  -> cf _mulInt8    "*" args
+            | "Single" -> cf _mulFloat32 "*" args
+            | "UInt16" -> cf _mulUInt16  "*" args
+            | "UInt32" -> cf _mulUInt32  "*" args
+            | "UInt64" -> cf _mulUInt64  "*" args
             | _        -> failwith "ERROR"
 
         let fDiv (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "SByte"  -> cf _divInt8    "/" args
             | "Byte"   -> cf _divUInt8   "/" args
-            | "Int16"  -> cf _divInt16   "/" args
-            | "UInt16" -> cf _divUInt16  "/" args
-            | "Int32"  -> cf _divInt32   "/" args
-            | "UInt32" -> cf _divUInt32  "/" args
-            | "Int64"  -> cf _divInt64   "/" args
-            | "UInt64" -> cf _divUInt64  "/" args
-            | "Single" -> cf _divFloat32 "/" args
             | "Double" -> cf _divFloat64 "/" args
+            | "Int16"  -> cf _divInt16   "/" args
+            | "Int32"  -> cf _divInt32   "/" args
+            | "Int64"  -> cf _divInt64   "/" args
+            | "SByte"  -> cf _divInt8    "/" args
+            | "Single" -> cf _divFloat32 "/" args
+            | "UInt16" -> cf _divUInt16  "/" args
+            | "UInt32" -> cf _divUInt32  "/" args
+            | "UInt64" -> cf _divUInt64  "/" args
             | _        -> failwith "ERROR"
 
         let fAbs (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "SByte"  -> cf _absInt8    "abs" args
             | "Byte"   -> cf _absUInt8   "abs" args
-            | "Int16"  -> cf _absInt16   "abs" args
-            | "UInt16" -> cf _absUInt16  "abs" args
-            | "Int32"  -> cf _absInt32   "abs" args
-            | "UInt32" -> cf _absUInt32  "abs" args
-            | "Int64"  -> cf _absInt64   "abs" args
-            | "UInt64" -> cf _absUInt64  "abs" args
-            | "Single" -> cf _absFloat32 "abs" args
             | "Double" -> cf _absFloat64 "abs" args
+            | "Int16"  -> cf _absInt16   "abs" args
+            | "Int32"  -> cf _absInt32   "abs" args
+            | "Int64"  -> cf _absInt64   "abs" args
+            | "SByte"  -> cf _absInt8    "abs" args
+            | "Single" -> cf _absFloat32 "abs" args
+            | "UInt16" -> cf _absUInt16  "abs" args
+            | "UInt32" -> cf _absUInt32  "abs" args
+            | "UInt64" -> cf _absUInt64  "abs" args
             | _        -> failwith "ERROR"
 
         let fMod (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "SByte"  -> cf _modInt8    "%" args
             | "Byte"   -> cf _modUInt8   "%" args
-            | "Int16"  -> cf _modInt16   "%" args
-            | "UInt16" -> cf _modUInt16  "%" args
-            | "Int32"  -> cf _modInt32   "%" args
-            | "UInt32" -> cf _modUInt32  "%" args
-            | "Int64"  -> cf _modInt64   "%" args
-            | "UInt64" -> cf _modUInt64  "%" args
-            | "Single" -> cf _modFloat32 "%" args
             | "Double" -> cf _modFloat64 "%" args
+            | "Int16"  -> cf _modInt16   "%" args
+            | "Int32"  -> cf _modInt32   "%" args
+            | "Int64"  -> cf _modInt64   "%" args
+            | "SByte"  -> cf _modInt8    "%" args
+            | "Single" -> cf _modFloat32 "%" args
+            | "UInt16" -> cf _modUInt16  "%" args
+            | "UInt32" -> cf _modUInt32  "%" args
+            | "UInt64" -> cf _modUInt64  "%" args
             | _        -> failwith "ERROR"
 
 
         let fShiftLeft (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "SByte"  -> cf _shiftLeftInt8    "<<<" args
             | "Byte"   -> cf _shiftLeftUInt8   "<<<" args
             | "Int16"  -> cf _shiftLeftInt16   "<<<" args
-            | "UInt16" -> cf _shiftLeftUInt16  "<<<" args
             | "Int32"  -> cf _shiftLeftInt32   "<<<" args
-            | "UInt32" -> cf _shiftLeftUInt32  "<<<" args
             | "Int64"  -> cf _shiftLeftInt64   "<<<" args
+            | "SByte"  -> cf _shiftLeftInt8    "<<<" args
+            | "UInt16" -> cf _shiftLeftUInt16  "<<<" args
+            | "UInt32" -> cf _shiftLeftUInt32  "<<<" args
             | "UInt64" -> cf _shiftLeftUInt64  "<<<" args
             | _        -> failwith "ERROR"
 
         let fShiftRight (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "SByte"  -> cf _shiftRightInt8    ">>>" args
             | "Byte"   -> cf _shiftRightUInt8   ">>>" args
             | "Int16"  -> cf _shiftRightInt16   ">>>" args
-            | "UInt16" -> cf _shiftRightUInt16  ">>>" args
             | "Int32"  -> cf _shiftRightInt32   ">>>" args
-            | "UInt32" -> cf _shiftRightUInt32  ">>>" args
             | "Int64"  -> cf _shiftRightInt64   ">>>" args
+            | "SByte"  -> cf _shiftRightInt8    ">>>" args
+            | "UInt16" -> cf _shiftRightUInt16  ">>>" args
+            | "UInt32" -> cf _shiftRightUInt32  ">>>" args
             | "UInt64" -> cf _shiftRightUInt64  ">>>" args
             | _        -> failwith "ERROR"
 
         let fBitwiseAnd (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "SByte"  -> cf _bitwiseAndInt8    "&&&" args
             | "Byte"   -> cf _bitwiseAndUInt8   "&&&" args
             | "Int16"  -> cf _bitwiseAndInt16   "&&&" args
-            | "UInt16" -> cf _bitwiseAndUInt16  "&&&" args
             | "Int32"  -> cf _bitwiseAndInt32   "&&&" args
-            | "UInt32" -> cf _bitwiseAndUInt32  "&&&" args
             | "Int64"  -> cf _bitwiseAndInt64   "&&&" args
+            | "SByte"  -> cf _bitwiseAndInt8    "&&&" args
+            | "UInt16" -> cf _bitwiseAndUInt16  "&&&" args
+            | "UInt32" -> cf _bitwiseAndUInt32  "&&&" args
             | "UInt64" -> cf _bitwiseAndUInt64  "&&&" args
             | _        -> failwith "ERROR"
 
         let fBitwiseOr (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "SByte"  -> cf _bitwiseOrInt8    "|||" args
             | "Byte"   -> cf _bitwiseOrUInt8   "|||" args
             | "Int16"  -> cf _bitwiseOrInt16   "|||" args
-            | "UInt16" -> cf _bitwiseOrUInt16  "|||" args
             | "Int32"  -> cf _bitwiseOrInt32   "|||" args
-            | "UInt32" -> cf _bitwiseOrUInt32  "|||" args
             | "Int64"  -> cf _bitwiseOrInt64   "|||" args
+            | "SByte"  -> cf _bitwiseOrInt8    "|||" args
+            | "UInt16" -> cf _bitwiseOrUInt16  "|||" args
+            | "UInt32" -> cf _bitwiseOrUInt32  "|||" args
             | "UInt64" -> cf _bitwiseOrUInt64  "|||" args
             | _        -> failwith "ERROR"
 
         let fBitwiseNot (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "SByte"  -> cf _bitwiseNotInt8    "~~~" args
             | "Byte"   -> cf _bitwiseNotUInt8   "~~~" args
             | "Int16"  -> cf _bitwiseNotInt16   "~~~" args
-            | "UInt16" -> cf _bitwiseNotUInt16  "~~~" args
             | "Int32"  -> cf _bitwiseNotInt32   "~~~" args
-            | "UInt32" -> cf _bitwiseNotUInt32  "~~~" args
             | "Int64"  -> cf _bitwiseNotInt64   "~~~" args
+            | "SByte"  -> cf _bitwiseNotInt8    "~~~" args
+            | "UInt16" -> cf _bitwiseNotUInt16  "~~~" args
+            | "UInt32" -> cf _bitwiseNotUInt32  "~~~" args
             | "UInt64" -> cf _bitwiseNotUInt64  "~~~" args
             | _        -> failwith "ERROR"
 
         let fBitwiseXor (args:Args) : IExpression =
             match args[0].DataType.Name with
-            | "SByte"  -> cf _bitwiseXorInt8    "^^^" args
             | "Byte"   -> cf _bitwiseXorUInt8   "^^^" args
             | "Int16"  -> cf _bitwiseXorInt16   "^^^" args
-            | "UInt16" -> cf _bitwiseXorUInt16  "^^^" args
             | "Int32"  -> cf _bitwiseXorInt32   "^^^" args
-            | "UInt32" -> cf _bitwiseXorUInt32  "^^^" args
             | "Int64"  -> cf _bitwiseXorInt64   "^^^" args
+            | "SByte"  -> cf _bitwiseXorInt8    "^^^" args
+            | "UInt16" -> cf _bitwiseXorUInt16  "^^^" args
+            | "UInt32" -> cf _bitwiseXorUInt32  "^^^" args
             | "UInt64" -> cf _bitwiseXorUInt64  "^^^" args
             | _        -> failwith "ERROR"
 

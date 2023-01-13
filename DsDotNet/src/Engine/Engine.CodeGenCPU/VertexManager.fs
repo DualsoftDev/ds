@@ -20,11 +20,11 @@ module VertexManagerModule =
     // ACTION | OUT	    | API. O| -	   | API. O    |
 
     let bit (v:Vertex)  mark flag = DsBit($"{v.QualifiedName}({mark})", false, v, flag)
-    let timer (v:Vertex)  mark flag = 
-            let ts = TimerStruct.Create(TimerType.TON, Storages(), $"{v.QualifiedName}({mark}:TON)", 0us, 0us) 
+    let timer (v:Vertex)  mark flag storages= 
+            let ts = TimerStruct.Create(TimerType.TON, storages, $"{v.QualifiedName}({mark}:TON)", 0us, 0us) 
             DsTimer($"{v.QualifiedName}({mark})", false, v, flag, ts)
-    let counter (v:Vertex)  mark flag = 
-            let cs = CTRStruct.Create(CounterType.CTR, Storages(), $"{v.QualifiedName}({mark}:CTR)", 0us, 0us) 
+    let counter (v:Vertex)  mark flag storages= 
+            let cs = CTRStruct.Create(CounterType.CTR, storages, $"{v.QualifiedName}({mark}:CTR)", 0us, 0us) 
             DsCounter($"{v.QualifiedName}({mark})", false, v, flag, cs)
         
     
@@ -61,6 +61,8 @@ module VertexManagerModule =
         member x.Vertex  = v
         member x.Flow    = v.Parent.GetFlow()
         member x.System  = v.Parent.GetFlow().System
+
+
 
         ///Segment Start Tag
         member x.ST         = startTagBit
@@ -131,11 +133,13 @@ module VertexManagerModule =
        
     type VertexMCoin(v:Vertex) =
         inherit VertexManager(v)
+        let storages = v.Parent.GetSystem().Storages
         let relayCallBit  = bit v  "CR" BitFlag.RelayCall
 
-        let counterBit    = counter v  "CTR" CounterFlag.CountRing
-        let timerOnDelayBit = timer v  "TON"  TimerFlag.TimerOnDely
-        let timerTimeOutBit = timer v  "TOUT" TimerFlag.TimeOut
+
+        let counterBit    = counter v  "CTR" CounterFlag.CountRing storages
+        let timerOnDelayBit = timer v  "TON"  TimerFlag.TimerOnDely storages
+        let timerTimeOutBit = timer v  "TOUT" TimerFlag.TimeOut storages
 
         ///Call Done Relay 
         member x.CR         = relayCallBit 

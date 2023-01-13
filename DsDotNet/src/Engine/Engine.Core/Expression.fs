@@ -214,6 +214,18 @@ module ExpressionModule =
     type CommentedStatement =
         | CommentedStatement of comment:string * statement:Statement
         member x.Statement = match x with | CommentedStatement (c, s) -> s
+        member x.TargetValue    =
+            match x.Statement with
+            | DuAssign (expression, target) -> target.BoxedValue
+            | DuVarDecl (expression,variable) -> variable.BoxedValue
+            | DuTimer (t:TimerStatement) -> t.Timer.DN.Value
+            | DuCounter (c:CounterStatement) -> c.Counter.DN.Value
+            | DuAction (a:ActionStatement) -> 
+                match a with 
+                | DuCopy (condition:IExpression<bool>, source:IExpression,target:IStorage)-> target.BoxedValue
+            | DuAugmentedPLCFunction (f:FunctionParameters) ->  false
+
+
 
     let (|CommentAndStatement|) = function | CommentedStatement(x, y) -> x, y
     let commentAndStatement = (|CommentAndStatement|)

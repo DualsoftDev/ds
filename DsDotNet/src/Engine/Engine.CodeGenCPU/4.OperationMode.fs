@@ -47,6 +47,6 @@ type Flow with
 
     member f.O7_ReadyMode(): CommentedStatement =
         let sets = f.ready.Expr <||> f.BtnReadyExpr
-        let rsts = !!f.rop.Expr
+        let rsts = !!f.eop.Expr
 
         (sets, rsts) ==| (f.rop, "O7")

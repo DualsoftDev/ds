@@ -22,9 +22,9 @@ module rec ConvertCoreExt =
     let getVMReal(v:Vertex) = v.VertexManager :?> VertexMReal
     let getVMCoin(v:Vertex) = v.VertexManager :?> VertexMCoin
 
-    let hasTime (xs:Func seq) = xs.Where(fun f->f.Name = TextMove  ).any()
-    let hasCount(xs:Func seq) = xs.Where(fun f->f.Name = TextOnDelayTimer).any()
-    let hasMove (xs:Func seq) = xs.Where(fun f->f.Name = TextRingCounter).any()
+    let hasTime (xs:Func seq) = xs.Where(fun f->f.Name = TextOnDelayTimer).any()
+    let hasCount(xs:Func seq) = xs.Where(fun f->f.Name = TextRingCounter).any()
+    let hasMove (xs:Func seq) = xs.Where(fun f->f.Name = TextMove).any()
     let hasNot  (xs:Func seq) = xs.Where(fun f->f.Name = TextNot ).any()
     
 
@@ -35,9 +35,10 @@ module rec ConvertCoreExt =
         member s._manual = DsTag<bool>("_manual", false)
         member s._drive  = DsTag<bool>("_drive", false)
         member s._stop   = DsTag<bool>("_stop", false)
-        member s._clear  = DsTag<bool>("_clear", false)
         member s._emg    = DsTag<bool>("_emg", false)
-        member s._test = DsTag<bool>("_test", false)
+        member s._test   = DsTag<bool>("_test", false)
+        member s._ready  = DsTag<bool>("_ready", false)
+        member s._clear  = DsTag<bool>("_clear", false)
         member s._home    = DsTag<bool>("home", false)
         member s._tout   = DsTag<uint16> ("_tout", 10000us)
         member s._dtimeyy     = DsTag<int> ("_yy", 0)
@@ -71,18 +72,22 @@ module rec ConvertCoreExt =
         member s.GetPSs(r:Real) = 
             s.ApiItems.Where(fun api-> api.TXs.Contains(r))
                       .Select(fun api -> api.PS)
-            
-    let private getButtonExpr(flow:Flow, btns:ButtonDef seq, sysBit:DsTag<bool>) : Expression<bool>  = 
-        let exprs =
+
+    let private getButtonExpr(flow:Flow, btns:ButtonDef seq) : Expression<bool> seq = 
             btns.Where(fun b -> b.SettingFlows.Contains(flow))
                 .Select(fun b -> 
                     let inTag = (b.InTag :?> PlcTag<bool>).Expr
-                    if hasNot(b.Funcs)then !!inTag else inTag
-                    )
+                    if hasNot(b.Funcs)then !!inTag else inTag    )
+                
+    let private getBtnExpr(f:Flow, btns:ButtonDef seq) : Expression<bool>  = 
+        let exprs = getButtonExpr(f, btns)
         if exprs.any()
         then exprs.ToOr()
-        else sysBit.Expr
+        else f.System._off.Expr
 
+    let private getSelectBtnExpr(f:Flow, btns:ButtonDef seq) : Expression<bool> seq = 
+        getButtonExpr(f, btns)
+        
     let private getButtonOutputs(flow:Flow, btns:ButtonDef seq) : PlcTag<bool> seq = 
             btns.Where(fun b -> b.SettingFlows.Contains(flow))
                 .Select(fun b -> b.OutTag)
@@ -151,20 +156,27 @@ module rec ConvertCoreExt =
         member f.readylampOuts      = getLampOutputs (f, f.System.ReadyModeLamps) 
         
         //select 버튼은 없을경우 항상 _on
-         member f.BtnAutoExpr =   getButtonExpr(f, f.System.AutoButtons     , f.System._on)
-         member f.BtnManualExpr = getButtonExpr(f, f.System.ManualButtons   , f.System._on) 
+         member f.SelectAutoExpr =   getSelectBtnExpr(f, f.System.AutoButtons  )
+         member f.SelectManualExpr = getSelectBtnExpr(f, f.System.ManualButtons)
 
         //push 버튼은 없을경우 항상 _off
-         member f.BtnDriveExpr =  getButtonExpr(f, f.System.DriveButtons    , f.System._off) 
-         member f.BtnStopExpr =   getButtonExpr(f, f.System.StopButtons     , f.System._off) 
-         member f.BtnEmgExpr =    getButtonExpr(f, f.System.EmergencyButtons, f.System._off)  
-         member f.BtnTestExpr =   getButtonExpr(f, f.System.TestButtons     , f.System._off) 
-         member f.BtnReadyExpr =  getButtonExpr(f, f.System.ReadyButtons    , f.System._off)
-         member f.BtnClearExpr =  getButtonExpr(f, f.System.ClearButtons    , f.System._off)
-         member f.BtnHomeExpr =   getButtonExpr(f, f.System.HomeButtons     , f.System._off)
+         member f.BtnDriveExpr =  getBtnExpr(f, f.System.DriveButtons    )
+         member f.BtnStopExpr =   getBtnExpr(f, f.System.StopButtons     )
+         member f.BtnEmgExpr =    getBtnExpr(f, f.System.EmergencyButtons)
+         member f.BtnTestExpr =   getBtnExpr(f, f.System.TestButtons     )
+         member f.BtnReadyExpr =  getBtnExpr(f, f.System.ReadyButtons    )
+         member f.BtnClearExpr =  getBtnExpr(f, f.System.ClearButtons    )
+         member f.BtnHomeExpr =   getBtnExpr(f, f.System.HomeButtons     )
 
-         member f.ModeAutoHwExpr =    f.BtnAutoExpr <&&> !!f.BtnManualExpr
-         member f.ModeManualHwExpr =  !!f.BtnAutoExpr <&&> f.BtnManualExpr
+         member f.ModeAutoHwExpr =   
+            let auto    = if f.SelectAutoExpr.any()   then f.SelectAutoExpr.ToAnd()   else f.System._on.Expr 
+            let ableAuto = if f.SelectManualExpr.any() then !!f.SelectManualExpr.ToOr() else f.System._on.Expr 
+            auto <&&> ableAuto
+            
+         member f.ModeManualHwExpr = 
+            let manual    = if f.SelectManualExpr.any()   then f.SelectManualExpr.ToAnd()   else f.System._off.Expr 
+            let ableManual = if f.SelectAutoExpr.any() then !!f.SelectAutoExpr.ToOr() else f.System._on.Expr 
+            manual <&&> ableManual
 
          member f.ModeAutoSwHMIExpr   =  f.auto.Expr <&&> !!f.manual.Expr
          member f.ModeManualSwHMIExpr =  !!f.auto.Expr <&&> f.manual.Expr

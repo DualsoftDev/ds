@@ -69,6 +69,8 @@ module CoreModule =
         member val Flows   = createNamedHashSet<Flow>()
         //시스템에서 호출가능한 작업리스트 (Call => Job => ApiItems => Addresses)
         member val Jobs    = ResizeArray<Job>()
+        //시스템에 사용된 모든 메모리를 관리함
+        member val Storages =  Storages()
 
         member _.AddLoadedSystem(dev) = loadedSystems.Add(dev) |> ignore; addApiItemsForDevice dev
         member _.ReferenceSystems     = loadedSystems.Select(fun s->s.ReferenceSystem)
@@ -77,7 +79,6 @@ module CoreModule =
         member _.ExternalSystems      = loadedSystems.OfType<ExternalSystem>()
         member _.ApiUsages = apiUsages |> seq
         member _.HostIp = hostIp
-
 
         /// 사용자 입력 code block(s).  "<@{" 와 "}@>" 사이의 text(s) : todo 복수개의 block 이 허용되면, serialize 할 때 해당 위치에 맞춰서 serialize 해야 하는데...
         member val OriginalCodeBlocks = ResizeArray<string>()
@@ -339,7 +340,7 @@ module CoreModule =
             call.VertexManager <- fwdCreateVertexManager(call)
             parent.GetGraph().AddVertex(call) |> verifyM $"Duplicated call name [{target.Name}]"
             call
-
+        
         member x.GetAliasTargetToDs() =
             match x.Parent.GetCore() with
                 | :? Flow as f -> [x.Name].ToArray()

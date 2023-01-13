@@ -211,7 +211,7 @@ module DsTextExport =
     let [<Literal>] TextXlsStopModeLamp      = "정지램프"
     let [<Literal>] TextXlsEmergencyModeLamp = "비상램프"
     let [<Literal>] TextXlsTestModeLamp      = "시운전램프"
-    let [<Literal>] TextXlsReadyModeLamp     = "대기램프"
+    let [<Literal>] TextXlsReadyModeLamp     = "준비램프"
 
 [<AutoOpen>]
 module DsTextProperty =
@@ -228,9 +228,10 @@ module DsTextProperty =
 [<AutoOpen>]
 module DsTextFunction =
  
-    let [<Literal>] TextMove    = "mov"
-    let [<Literal>] TextOnDelayTimer = "ton"
-    let [<Literal>] TextRingCounter = "tmr"
+    let [<Literal>] TextMove    = "m"
+    let [<Literal>] TextOnDelayTimer = "t"
+    let [<Literal>] TextRingCounter = "c"
+    let [<Literal>] TextNot = "n"
     let [<Literal>] TextEQ = "="
     let [<Literal>] TextNotEQ = "!="
     let [<Literal>] TextGT = ">"

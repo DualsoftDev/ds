@@ -22,6 +22,11 @@ module rec ConvertCoreExt =
     let getVMReal(v:Vertex) = v.VertexManager :?> VertexMReal
     let getVMCoin(v:Vertex) = v.VertexManager :?> VertexMCoin
 
+    let hasTime (xs:Func seq) = xs.Where(fun f->f.Name = TextMove  ).any()
+    let hasCount(xs:Func seq) = xs.Where(fun f->f.Name = TextOnDelayTimer).any()
+    let hasMove (xs:Func seq) = xs.Where(fun f->f.Name = TextRingCounter).any()
+    let hasNot  (xs:Func seq) = xs.Where(fun f->f.Name = TextNot ).any()
+    
 
     type DsSystem with
         member s._on     = DsTag<bool>("_on", true)
@@ -67,10 +72,16 @@ module rec ConvertCoreExt =
             s.ApiItems.Where(fun api-> api.TXs.Contains(r))
                       .Select(fun api -> api.PS)
             
-    let private getButtonInputs(flow:Flow, btns:ButtonDef seq) : PlcTag<bool> seq = 
+    let private getButtonExpr(flow:Flow, btns:ButtonDef seq, sysBit:DsTag<bool>) : Expression<bool>  = 
+        let exprs =
             btns.Where(fun b -> b.SettingFlows.Contains(flow))
-                .Select(fun b -> b.InTag)
-                .Cast<PlcTag<bool>>()   
+                .Select(fun b -> 
+                    let inTag = (b.InTag :?> PlcTag<bool>).Expr
+                    if hasNot(b.Funcs)then !!inTag else inTag
+                    )
+        if exprs.any()
+        then exprs.ToOr()
+        else sysBit.Expr
 
     let private getButtonOutputs(flow:Flow, btns:ButtonDef seq) : PlcTag<bool> seq = 
             btns.Where(fun b -> b.SettingFlows.Contains(flow))
@@ -82,14 +93,23 @@ module rec ConvertCoreExt =
                 .Select(fun b -> b.OutTag)
                 .Cast<PlcTag<bool>>()   
     
-    let private getAutoManualIOs(autoIns:PlcTag<bool> seq, manualIns:PlcTag<bool> seq, sysOff:DsTag<bool>) =
-          if autoIns.Count() > 1 || manualIns.Count() > 1
-          then failwith "Error : One button(auto or manual) must be assigned to one flow"
+    //let private getAutoManualIOs(autoIns:PlcTag<bool> seq, manualIns:PlcTag<bool> seq, sysOff:DsTag<bool>) =
+    //      if autoIns.Count() > 1 || manualIns.Count() > 1
+    //      then failwith "Error : One button(auto or manual) must be assigned to one flow"
 
-          let auto    = if autoIns.Any()   then  autoIns.Head().Expr else sysOff.Expr
-          let manual  = if manualIns.Any() then  manualIns.ToAnd()   else sysOff.Expr
-          auto, manual
-
+    //      let auto    = if autoIns.Any()   then  autoIns.Head().Expr else sysOff.Expr
+    //      let manual  = if manualIns.Any() then  manualIns.ToAnd()   else sysOff.Expr
+    //      auto, manual
+    
+    //let getBtnAutoExpr  (f:Flow) = getButtonExpr(f, f.System.AutoButtons)
+    //let getBtnManualExpr(f:Flow) = getButtonExpr(f, f.System.ManualButtons) 
+    //let getBtnDriveExpr (f:Flow) = getButtonExpr(f, f.System.DriveButtons) 
+    //let getBtnStopExpr  (f:Flow) = getButtonExpr(f, f.System.StopButtons) 
+    //let getBtnEmgExpr   (f:Flow) = getButtonExpr(f, f.System.EmergencyButtons)  
+    //let getBtnTestExpr  (f:Flow) = getButtonExpr(f, f.System.TestButtons) 
+    //let getBtnReadyExpr (f:Flow) = getButtonExpr(f, f.System.ReadyButtons)
+    //let getBtnClearExpr (f:Flow) = getButtonExpr(f, f.System.ClearButtons)
+    //let getBtnHomeExpr  (f:Flow) = getButtonExpr(f, f.System.HomeButtons)
    
 //운영 모드 는 Flow 별로 제공된 모드 On/Off 상태 나타낸다.
     type Flow with
@@ -110,23 +130,18 @@ module rec ConvertCoreExt =
         member f.test   = DsTag<bool>("test", false)  
         member f.home   = DsTag<bool>("home", false)  
 
+
         //버튼 IO PLC TAG
-        member f.autoIns    = getButtonInputs  (f, f.System.AutoButtons) 
         member f.autoOuts   = getButtonOutputs (f, f.System.AutoButtons) 
-        member f.manualIns  = getButtonInputs (f, f.System.ManualButtons) 
         member f.manualOuts = getButtonOutputs (f, f.System.ManualButtons) 
-        member f.driveIns   = getButtonInputs (f, f.System.DriveButtons) 
         member f.driveOuts  = getButtonOutputs (f, f.System.DriveButtons) 
-        member f.stopIns    = getButtonInputs (f, f.System.StopButtons) 
         member f.stopOuts   = getButtonOutputs (f, f.System.StopButtons) 
-        member f.clearIns   = getButtonInputs (f, f.System.ClearButtons) 
         member f.clearOuts  = getButtonOutputs (f, f.System.ClearButtons) 
-        member f.emgIns     = getButtonInputs (f, f.System.EmergencyButtons) 
         member f.emgOuts    = getButtonOutputs (f, f.System.EmergencyButtons) 
-        member f.testIns    = getButtonInputs (f, f.System.TestButtons) 
         member f.testOuts   = getButtonOutputs (f, f.System.TestButtons) 
-        member f.homeIns    = getButtonInputs (f, f.System.HomeButtons) 
         member f.homeOuts   = getButtonOutputs (f, f.System.HomeButtons) 
+        member f.readyOuts  = getButtonOutputs (f, f.System.ReadyButtons) 
+
 
         //램프 IO PLC TAG
         member f.autoModelampOuts   = getLampOutputs (f, f.System.AutoModeLamps) 
@@ -135,49 +150,33 @@ module rec ConvertCoreExt =
         member f.stopModelampOuts   = getLampOutputs (f, f.System.StopModeLamps) 
         member f.readylampOuts      = getLampOutputs (f, f.System.ReadyModeLamps) 
         
-        //[auto, manual] HW Input 두개다 선택이 안됨
-        member f.ModeNoHWExpr = 
-                let auto, manual = getAutoManualIOs (f.autoIns, f.manualIns, f.System._off)
-                !!auto <&&> !!manual
+        //select 버튼은 없을경우 항상 _on
+         member f.BtnAutoExpr =   getButtonExpr(f, f.System.AutoButtons     , f.System._on)
+         member f.BtnManualExpr = getButtonExpr(f, f.System.ManualButtons   , f.System._on) 
 
-        member f.ModeManualHwExpr = 
-                let auto, manual = getAutoManualIOs (f.autoIns, f.manualIns, f.System._off)
-                !!auto <&&> manual
+        //push 버튼은 없을경우 항상 _off
+         member f.BtnDriveExpr =  getButtonExpr(f, f.System.DriveButtons    , f.System._off) 
+         member f.BtnStopExpr =   getButtonExpr(f, f.System.StopButtons     , f.System._off) 
+         member f.BtnEmgExpr =    getButtonExpr(f, f.System.EmergencyButtons, f.System._off)  
+         member f.BtnTestExpr =   getButtonExpr(f, f.System.TestButtons     , f.System._off) 
+         member f.BtnReadyExpr =  getButtonExpr(f, f.System.ReadyButtons    , f.System._off)
+         member f.BtnClearExpr =  getButtonExpr(f, f.System.ClearButtons    , f.System._off)
+         member f.BtnHomeExpr =   getButtonExpr(f, f.System.HomeButtons     , f.System._off)
 
-        member f.ModeAutoHwExpr = 
-                let auto, manual = getAutoManualIOs (f.autoIns, f.manualIns, f.System._off)
-                auto <&&> !!manual
+         member f.ModeAutoHwExpr =    f.BtnAutoExpr <&&> !!f.BtnManualExpr
+         member f.ModeManualHwExpr =  !!f.BtnAutoExpr <&&> f.BtnManualExpr
 
          member f.ModeAutoSwHMIExpr   =  f.auto.Expr <&&> !!f.manual.Expr
          member f.ModeManualSwHMIExpr =  !!f.auto.Expr <&&> f.manual.Expr
-                
-        member f.DriveExpr = f.System._drive.Expr 
-                           <||> f.drive.Expr 
-                           <||> if f.driveIns.any() 
-                                then f.driveIns.ToOr() else f.System._off.Expr
 
-        member f.TestExpr = f.System._test.Expr 
-                           <||> f.test.Expr 
-                           <||> if f.testIns.any() 
-                                then f.testIns.ToOr() else f.System._off.Expr
-
-        member f.StopExpr = f.System._stop.Expr 
-                           <||> f.stop.Expr 
-                           <||> if f.stopIns.any() 
-                                then f.stopIns.ToOr() else f.System._off.Expr
-        
-        //test ahn : plctag b접점 옵션 반영필요
-        member f.EmgExpr = f.System._emg.Expr 
-                           <||> f.emg.Expr 
-                           <||> if f.emgIns.any() 
-                                then f.emgIns.ToOr() else f.System._off.Expr
-
-
+    
     type Call with
         member c.V = c.VertexManager :?> VertexMCoin
-        member c.UsingTon = c.CallTargetJob.Funcs.Where(fun f->f.Name = TextOnDelayTimer).any()
-        member c.UsingCtr = c.CallTargetJob.Funcs.Where(fun f->f.Name = TextRingCounter).any()
-
+        member c.UsingTon  = c.CallTargetJob.Funcs |> hasTime
+        member c.UsingCtr  = c.CallTargetJob.Funcs |> hasCount
+        member c.UsingNot  = c.CallTargetJob.Funcs |> hasNot
+        member c.UsingMove = c.CallTargetJob.Funcs |> hasMove
+        
         member c.PresetTime =   if c.UsingTon 
                                 then c.CallTargetJob.Funcs.First(fun f->f.Name = TextOnDelayTimer).GetDelayTime()
                                 else failwith $"{c.Name} not use timer"
@@ -208,7 +207,10 @@ module rec ConvertCoreExt =
 
     type RealOtherFlow with
         member r.V = r.VertexManager :?> VertexMCoin                    
-
+            
+    type Vertex with 
+        member r.V = r.VertexManager :?> VertexManager                    
+        
     type JobDef with
         member jd.ActionIN  = jd.InTag :?> PlcTag<bool>
         member jd.ActionOut  = jd.OutTag :?> PlcTag<bool>
@@ -217,10 +219,8 @@ module rec ConvertCoreExt =
         member jd.MutualResets(x:DsSystem) = 
                 jd.ApiItem.System.GetMutualResetApis(jd.ApiItem)
                     .SelectMany(fun a -> x.JobDefs.Where(fun w-> w.ApiItem = a))
-    
-    type Vertex with 
-        member r.V = r.VertexManager :?> VertexManager                    
-        
+
+
     type ApiItem with
         member a.PS = DsTag<bool>($"{a.Name}(PS)", false)
         member a.PR = DsTag<bool>($"{a.Name}(PR)", false)

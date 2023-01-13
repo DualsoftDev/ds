@@ -60,11 +60,11 @@ module ExportIOTable =
 
         let toBtnText(btns:ButtonDef seq, xlsCase:ExcelCase) = 
             for btn in  btns do
-                let func = btn.Funcs.Cast<Func>() |> funcToText
+                let func = btn.Funcs |> funcToText
                 dt.Rows.Add(xlsCase.ToText(),  btn.Name   , "bool",  btn.InAddress,    btn.OutAddress,  "'-",  func) |> ignore
         let toLampText(lamps:LampDef seq, xlsCase:ExcelCase) = 
             for lamp in  lamps do
-                let func = lamp.Funcs.Cast<Func>() |> funcToText
+                let func = lamp.Funcs |> funcToText
                 dt.Rows.Add(xlsCase.ToText(),  lamp.Name  , "bool",  "'-",  lamp.OutAddress,  "'-",  func) |> ignore
         
         emptyLine() 
@@ -91,7 +91,7 @@ module ExportIOTable =
         emptyLine() 
         emptyLine() 
 
-        dt.Rows.Add(TextXlsVariable,  ""  ,  ""  , "'-", "'-","'-","'-","'-") |> ignore
+        dt.Rows.Add(TextXlsVariable,  ""  ,  ""  , "'-", "'-","'-","'-") |> ignore
         emptyLine() 
         dt
 

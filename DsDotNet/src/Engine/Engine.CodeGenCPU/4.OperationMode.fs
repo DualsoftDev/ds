@@ -21,27 +21,32 @@ type Flow with
         (sets, rsts) ==| (f.mop, "O2")
   
     member f.O3_DriveOperationMode (): CommentedStatement =
-        let sets = f.aop.Expr <&&>  (f.drive.Expr <||> f.driveIns.EmptyOffElseToOr(f.System))
+        let sets = f.aop.Expr <&&> (f.drive.Expr <||> f.BtnDriveExpr)
         let rsts = !!f.rop.Expr
-        (sets, rsts) ==| (f.mop, "O3")
+
+        (sets, rsts) ==| (f.dop, "O3")
     
     member f.O4_TestRunOperationMode (): CommentedStatement =
-        let sets = f.aop.Expr <&&>  (f.test.Expr <||> f.testIns.EmptyOffElseToOr(f.System))
+        let sets = f.aop.Expr <&&>  (f.test.Expr <||> f.BtnTestExpr)
         let rsts = !!f.rop.Expr
-        (sets, rsts) ==| (f.mop, "O4")
+
+        (sets, rsts) ==| (f.top, "O4")
     
     member f.O5_EmergencyMode(): CommentedStatement =
-        let sets = f.emg.Expr <||> f.emgIns.EmptyOffElseToOr(f.System)
+        let sets = f.emg.Expr <||> f.BtnEmgExpr
         let rsts = f.System._off.Expr
-        (sets, rsts) --| (f.mop, "O5")
+
+        (sets, rsts) --| (f.eop, "O5")
 
     member f.O6_StopMode(): CommentedStatement =
-        let sets = f.stop.Expr <||> f.stopIns.EmptyOffElseToOr(f.System)
+        let sets = f.stop.Expr <||> f.BtnStopExpr
+        let setErrs = f.GetVerticesWithInReal().Select(getVM).ERRs().EmptyOffElseToOr(f.System)
         let rsts = f.clear.Expr
-        (sets, rsts) --| (f.mop, "O6")
 
+        (sets <||> setErrs, rsts) --| (f.sop, "O6")
 
     member f.O7_ReadyMode(): CommentedStatement =
-        let sets = f.stop.Expr <||> f.stopIns.EmptyOffElseToOr(f.System)
-        let rsts = f.clear.Expr
-        (sets, rsts) ==| (f.mop, "O7")
+        let sets = f.ready.Expr <||> f.BtnReadyExpr
+        let rsts = !!f.rop.Expr
+
+        (sets, rsts) ==| (f.rop, "O7")

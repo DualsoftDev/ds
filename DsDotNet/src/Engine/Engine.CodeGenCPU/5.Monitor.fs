@@ -14,8 +14,8 @@ type VertexManager with
         let offs   = getOriginIOs (real, InitialType.Off)
         let locks  = getNeedCheck (real)
         
-        let onExpr   = ons.EmptyOnElseToAnd v.System
-        let rsts     = offs.EmptyOffElseToOr v.System
+        let onExpr   = ons.ToAndElseOn v.System
+        let rsts     = offs.ToOrElseOff v.System
 
         (onExpr <&&> locks, rsts) --| (v.OG, "M1" )
 
@@ -42,10 +42,10 @@ type VertexManager with
                         .Select(fun j -> j.InTag:?>PlcTag<bool>, j.ApiItem.RXs.Select(getVM))
 
         let onEventErr  = In_Rxs.Select(fun (input, rxs) -> 
-                        input.Expr <&&> !!rxs.Select(fun f -> f.G).EmptyOnElseToAnd(v.System))
+                        input.Expr <&&> !!rxs.Select(fun f -> f.G).ToAndElseOn(v.System))
 
         let offEventErr = In_Rxs.Select(fun (input, rxs) -> 
-                        input.Expr <&&> rxs.Select(fun f -> f.H).EmptyOffElseToOr(v.System))
+                        input.Expr <&&> rxs.Select(fun f -> f.H).ToOrElseOff(v.System))
 
         let sets = (onEventErr.ToOr() <||> offEventErr.ToOr())
         let rsts = v.Flow.clear.Expr <||> v.System._clear.Expr
@@ -55,7 +55,7 @@ type VertexManager with
 
     member v.M5_RealErrorTXMonitor(): CommentedStatement  = 
         let real = v.Vertex :?> Real
-        let sets = real.ErrorTXs.EmptyOffElseToOr v.System
+        let sets = real.ErrorTXs.ToOrElseOff v.System
         let rsts = v.System._off.Expr
 
         (sets, rsts) ==| (v.E1, "M5" )
@@ -63,7 +63,7 @@ type VertexManager with
 
     member v.M6_RealErrorRXMonitor(): CommentedStatement  = 
         let real = v.Vertex :?> Real
-        let sets = real.ErrorRXs.EmptyOffElseToOr v.System
+        let sets = real.ErrorRXs.ToOrElseOff v.System
         let rsts = v.System._off.Expr
 
         (sets, rsts) ==| (v.E2, "M6" )

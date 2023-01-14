@@ -42,7 +42,7 @@ type VertexManager with
                     match child.GetPureCall() with
                     |Some call ->  if call.UsingTon 
                                         then call.V.TON.DN.Expr   //On Delay
-                                        else call.INs.EmptyOnElseToAnd(v.System)
+                                        else call.INs.ToAndElseOn(v.System)
                     |None -> failwith "Error D3_DAGCoinComplete"
 
                 let sets = ands <&&> child.ST.Expr <&&> child.ET.Expr

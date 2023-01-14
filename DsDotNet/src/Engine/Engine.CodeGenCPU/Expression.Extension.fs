@@ -53,21 +53,26 @@ module ExpressionExtension =
         counterCoil.CTRStruct.PRE.Value <- preset
         counterCoil.CTRStruct <=% (Some rungInCondition) |> withExpressionComment comment
 
-    let private tags2LogicalAndOrExpr (fLogical: IExpression list -> Expression<bool>) (FList(ts:Tag<bool> list)) : Expression<bool> =
+    let private tryTags2LogicalAndOrExpr (fLogical: IExpression list -> Expression<bool>) (FList(ts:Tag<bool> list)) : Expression<bool> option =
         match ts with
-        | [] -> failwith "tags2AndExpr: Empty list"
-        | t :: [] -> var2expr t
+        | [] -> None    //failwith "tags2AndExpr: Empty list"
+        | t :: [] -> Some (var2expr t)
         | _ -> ts.Select(var2expr)
                 |> List.ofSeq
                 |> List.cast<IExpression>
                 |> fLogical
+                |> Some
 
 
     /// Tag<'T> (들)로부터 AND Expression<'T> 생성
-    let toAnd = tags2LogicalAndOrExpr fLogicalAnd
+    let tryToAnd xs = tryTags2LogicalAndOrExpr fLogicalAnd xs
     /// Tag<'T> (들)로부터 OR  Expression<'T> 생성
-    let toOr  = tags2LogicalAndOrExpr fLogicalOr
+    let tryToOr xs  = tryTags2LogicalAndOrExpr fLogicalOr xs
 
+    /// Tag<'T> (들)로부터 AND Expression<'T> 생성
+    let toAnd = tryToAnd >> Option.get
+    /// Tag<'T> (들)로부터 OR  Expression<'T> 생성
+    let toOr  = tryToOr >> Option.get
 
     [<Extension>]
     type ExpressionExt =

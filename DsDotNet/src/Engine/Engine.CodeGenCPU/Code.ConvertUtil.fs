@@ -20,22 +20,22 @@ module CodeConvertUtil =
         ///Call 자신이거나 Alias Target Call
     let getPureCall(v:VertexManager) : Call option=
             match v.Vertex with
-            | :? Call as c  ->  Some (c)
+            | :? Call  as c  ->  Some (c)
             | :? Alias as a  ->
-                    if a.TargetWrapper.GetTarget() :? Call then
-                        Some (a.TargetWrapper.GetTarget() :?> Call)
-                    else None
+                match a.TargetWrapper.GetTarget() with
+                | :? Call as call -> Some call
+                | _ -> None
             |_ -> None
 
         ///Real 자신이거나 RealEx Target Real
     let getPureReal(v:VertexManager)  : Real =
             match v.Vertex with
-            | :? Real as r  ->  r
-            | :? RealEx as re  -> re.Real
-            | :? Alias as a  ->
-                    if a.TargetWrapper.GetTarget() :? Real then
-                        a.TargetWrapper.GetTarget() :?> Real
-                    else failwith "Error GetPureReal"
+            | :? Real   as r  -> r
+            | :? RealEx as re -> re.Real
+            | :? Alias  as a  ->
+                match a.TargetWrapper.GetTarget() with
+                | :? Real as real -> real
+                | _ -> failwith "Error GetPureReal"
             |_ -> failwith "Error GetPureReal"
 
 
@@ -47,9 +47,9 @@ module CodeConvertUtil =
 
     let getOriginJobDefs(real:Real, initialType:InitialType) =
         let origins, resetChains = OriginHelper.GetOriginsWithJobDefs real.Graph
-        origins
-            .Where(fun w-> w.Value = initialType)
-            .Select(fun s-> s.Key)
+        [ for w in origins do
+            if w.Value = initialType then
+                yield w.Key ]
 
     let getOriginIOs(real:Real, initialType:InitialType) =
         let origins = getOriginJobDefs(real, initialType)
@@ -67,24 +67,37 @@ module CodeConvertUtil =
     let getNeedCheck(real:Real) =
         let origins, resetChains = OriginHelper.GetOriginsWithJobDefs real.Graph
         let needChecks = origins.Where(fun w-> w.Value = NeedCheck)
-        let needCheckSet =
-            resetChains.Select(fun rs->
-                     rs.SelectMany(fun r->
-                        needChecks.Where(fun f->f.Key.ApiName = r)
-                                 ).Select(fun s-> s.Key.InTag).Cast<PlcTag<bool>>()
-                        )
-        let sets =
-            needCheckSet
-            |> Seq.filter(fun ils -> ils.Any())
-            |> Seq.map(fun ils ->
-                        ils.Select(fun il -> il.Expr
-                                             <&&> !!(ils.Except([il]).ToOr()))
-                           .ToOr()
-                       ) //각 리셋체인 단위로 하나라도 켜있으면 됨
-                        //         resetChain1         resetChain2       ...
-                        //      --| |--|/|--|/|--------| |--|/|--|/|--   ...
-                        //      --|/|--| |--|/|--    --|/|--| |--|/|--
-                        //      --|/|--|/|--| |--    --|/|--|/|--| |--
+
+        let needCheckSet:PlcTag<bool> list list =
+            let apiNameToInTagMap =
+                needChecks.Map(fun (KeyValue(k, v)) -> k.ApiName, k.InTag)
+                |> Tuple.toDictionary
+            [
+                if apiNameToInTagMap.Any() then
+                    (*
+                        apiNameToInTagMap: [ "A.+" => "A.+.I"; ... ]
+                        r: "A.+"
+                        rs ["A.+"; "A.-"]
+                        resetChains = [ ["A.+"; "A.-"]; ]
+                     *)
+                    for rs in resetChains do
+                        [
+                            for r in rs do
+                                apiNameToInTagMap.TryFind(r).Map(fun intag -> intag :?> PlcTag<bool>)
+                        ] |> List.choose id
+            ] |> List.filter List.any
+
+
+        let sets:Expression<bool> list = [
+            for is in needCheckSet do
+                [   for i in is do
+                        i.Expr <&&> !!(is.Except([i]).ToOr())   // --| |--|/|--|/|--
+                ].ToOr()
+        ]   //각 리셋체인 단위로 하나라도 켜있으면 됨
+            //         resetChain1         resetChain2       ...
+            //      --| |--|/|--|/|--------| |--|/|--|/|--   ...
+            //      --|/|--| |--|/|--    --|/|--| |--|/|--
+            //      --|/|--|/|--| |--    --|/|--|/|--| |--
 
         if needChecks.Any()
         then sets.ToAnd()
@@ -109,18 +122,19 @@ module CodeConvertUtil =
     [<AutoOpen>]
     [<Extension>]
     type CodeConvertUtilExt =
-        [<Extension>] static member STs(xs:VertexManager seq): DsBit list = xs.Select(fun s->s.ST) |> Seq.toList 
-        [<Extension>] static member SFs(xs:VertexManager seq): DsBit list = xs.Select(fun s->s.SF) |> Seq.toList 
-        [<Extension>] static member RTs(xs:VertexManager seq): DsBit list = xs.Select(fun s->s.RT) |> Seq.toList 
-        [<Extension>] static member ETs(xs:VertexManager seq): DsBit list = xs.Select(fun s->s.ET) |> Seq.toList 
-        [<Extension>] static member ERRs(xs:VertexManager seq):DsBit list = xs |>Seq.collect(fun s-> [s.E1;s.E2]) |> Seq.toList 
-        [<Extension>] static member CRs(xs:VertexMCoin seq):   DsBit list = xs.Select(fun s->s.CR) |> Seq.toList 
-        [<Extension>] static member EmptyOnElseToAnd(xs:PlcTag<bool> seq, sys:DsSystem) = if xs.Any() then xs.ToAnd() else sys._on.Expr
-        [<Extension>] static member EmptyOnElseToAnd(xs:DsBit seq,        sys:DsSystem) = if xs.Any() then xs.ToAnd() else sys._on.Expr
-        [<Extension>] static member EmptyOnElseToAnd(xs:DsTag<bool> seq,  sys:DsSystem) = if xs.Any() then xs.ToAnd() else sys._on.Expr
-        [<Extension>] static member EmptyOffElseToOr(xs:PlcTag<bool> seq, sys:DsSystem) = if xs.Any() then xs.ToOr() else sys._off.Expr
-        [<Extension>] static member EmptyOffElseToOr(xs:DsBit seq,        sys:DsSystem) = if xs.Any() then xs.ToOr() else sys._off.Expr
-        [<Extension>] static member EmptyOffElseToOr(xs:DsTag<bool> seq,  sys:DsSystem) = if xs.Any() then xs.ToOr() else sys._off.Expr
+        [<Extension>] static member STs (FList(xs:VertexManager list)): DsBit list = xs |> map(fun s->s.ST)
+        [<Extension>] static member SFs (FList(xs:VertexManager list)): DsBit list = xs |> map(fun s->s.SF)
+        [<Extension>] static member RTs (FList(xs:VertexManager list)): DsBit list = xs |> map(fun s->s.RT)
+        [<Extension>] static member ETs (FList(xs:VertexManager list)): DsBit list = xs |> map(fun s->s.ET)
+        [<Extension>] static member ERRs(FList(xs:VertexManager list)): DsBit list = xs |> bind(fun s-> [s.E1;s.E2])
+        [<Extension>] static member CRs (FList(xs:VertexMCoin list))  : DsBit list = xs |> map(fun s->s.CR)
+
+        [<Extension>] static member ToAndElseOn(xs:PlcTag<bool> seq, sys:DsSystem) = if xs.Any() then xs.ToAnd() else sys._on.Expr
+        [<Extension>] static member ToAndElseOn(xs:DsBit seq,        sys:DsSystem) = if xs.Any() then xs.ToAnd() else sys._on.Expr
+        [<Extension>] static member ToAndElseOn(xs:DsTag<bool> seq,  sys:DsSystem) = if xs.Any() then xs.ToAnd() else sys._on.Expr
+        [<Extension>] static member ToOrElseOff(xs:PlcTag<bool> seq, sys:DsSystem) = if xs.Any() then xs.ToOr() else sys._off.Expr
+        [<Extension>] static member ToOrElseOff(xs:DsBit seq,        sys:DsSystem) = if xs.Any() then xs.ToOr() else sys._off.Expr
+        [<Extension>] static member ToOrElseOff(xs:DsTag<bool> seq,  sys:DsSystem) = if xs.Any() then xs.ToOr() else sys._off.Expr
         [<Extension>] static member GetSharedReal(v:VertexManager) = v |> getSharedReal
         [<Extension>] static member GetSharedCall(v:VertexManager) = v |> getSharedCall
         [<Extension>] static member GetPureReal  (v:VertexManager) = v |> getPureReal
@@ -151,4 +165,4 @@ module CodeConvertUtil =
                 | _ -> failwith "Error"
                 )
 
-            tags.EmptyOnElseToAnd(s)
+            tags.ToAndElseOn(s)

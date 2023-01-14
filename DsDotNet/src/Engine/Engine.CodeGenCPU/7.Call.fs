@@ -23,7 +23,7 @@ type VertexManager with
 
                 let rsts = jd.MutualResets(v.System)
                              .Select(fun f -> f.ApiItem.PS)
-                             .EmptyOffElseToOr(v.System)
+                             .ToOrElseOff(v.System)
 
                 yield (sets, rsts) --| (jd.ApiItem.PS, "C1" )
         ]
@@ -44,7 +44,7 @@ type VertexManager with
         let rsts = v.System._off.Expr
         [
             for jd in call.CallTargetJob.JobDefs do
-                let sets = jd.RXs.EmptyOnElseToAnd(v.System)
+                let sets = jd.RXs.ToAndElseOn(v.System)
                 yield (sets, rsts) --| (jd.ApiItem.PR, "C3" )
         ]
 
@@ -58,6 +58,6 @@ type VertexManager with
                 let sets =
                     if call.UsingTon
                         then call.V.TON.DN.Expr   //On Delay
-                        else call.INs.EmptyOnElseToAnd(v.System)
+                        else call.INs.ToAndElseOn(v.System)
                 yield (sets, rsts) --| (coin.V.ET, "C4" )
         ]

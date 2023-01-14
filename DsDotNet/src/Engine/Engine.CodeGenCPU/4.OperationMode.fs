@@ -40,7 +40,7 @@ type Flow with
 
     member f.O6_StopMode(): CommentedStatement =
         let sets = f.stop.Expr <||> f.BtnStopExpr
-        let setErrs = f.GetVerticesWithInReal().Select(getVM).ERRs().EmptyOffElseToOr(f.System)
+        let setErrs = f.GetVerticesWithInReal().Select(getVM).ERRs().ToOrElseOff(f.System)
         let rsts = f.clear.Expr
 
         (sets <||> setErrs, rsts) --| (f.sop, "O6")

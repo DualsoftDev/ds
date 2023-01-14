@@ -17,7 +17,7 @@ type VertexManager with
     member v.R2_RealJobComplete(): CommentedStatement  = 
         let v = v :?> VertexMReal
         let real = v.Vertex :?> Real
-        let sets = v.G.Expr <&&> real.CoinRelays.EmptyOnElseToAnd v.System
+        let sets = v.G.Expr <&&> real.CoinRelays.ToAndElseOn v.System
         let rsts = v.H.Expr
 
         (sets, rsts) ==| (v.ET, "R2")

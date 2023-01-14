@@ -193,7 +193,8 @@ module XgiExpressionConvertorModule =
         | "/"  -> "DIV"
         |  _ -> failwith "ERROR"
 
-    let collectExpandedExpression
+    /// expression 내부의 비교 및 사칙 연산을 xgi function 으로 대체
+    let replaceInnerArithmaticOrComparisionToXgiFunctionStatements
         (storage:XgiStorage)
         (expandFunctionStatements:ResizeArray<Statement>)
         (exp:IExpression)
@@ -242,6 +243,54 @@ module XgiExpressionConvertorModule =
         xgiLocalVars.Cast<IStorage>() |> storage.AddRange   // 위의 helper 수행 이후가 아니면, xgiLocalVars 가 채워지지 않는다.
         newExp
 
+    let rec binaryToNary
+        (storage:XgiStorage)
+        (augmentedStatementsStorage:ResizeArray<Statement>)
+        (operatorToChange:string list)
+        (currentOp:string)
+        (exp:IExpression)
+        : IExpression list
+      =
+        let b2n = binaryToNary storage augmentedStatementsStorage operatorToChange
+        match exp.FunctionName with
+        | Some op when operatorToChange.Contains(op) -> // ("+"|"-"|"*"|"/"   (*|"&&"|"||"*) as op) ->
+            if op = currentOp then
+                let args = [
+                    for arg in exp.FunctionArguments do
+                        match arg.Terminal, arg.FunctionName with
+                        | Some _, _ -> yield arg
+                        | None, Some fn ->
+                            yield! b2n op arg
+                        | _ -> failwith "ERROR"
+                ]
+                args
+            else
+                let go (v:'Q) =
+                    let out = createXgiAutoVariableT "_temp_internal_" $"{op} output" v
+                    storage.Add out
+                    let args = exp.FunctionArguments |> List.bind (b2n op)
+                    DuAugmentedPLCFunction {FunctionName=op; Arguments=args; Output=out } |> augmentedStatementsStorage.Add
+                    [ var2expr out :> IExpression ]
+
+                let v = exp.BoxedEvaluatedValue
+                match exp.DataType.Name with
+                | "Boolean"-> go (v :?> bool)
+                | "Byte"   -> go (v :?> uint8)
+                | "Char"   -> go (v :?> char)
+                | "Double" -> go (v :?> double)
+                | "Int16"  -> go (v :?> int16)
+                | "Int32"  -> go (v :?> int32)
+                | "Int64"  -> go (v :?> int64)
+                | "SByte"  -> go (v :?> int8)
+                | "Single" -> go (v :?> float32)
+                | "String" -> go (v :?> string)
+                | "UInt16" -> go (v :?> uint16)
+                | "UInt32" -> go (v :?> uint32)
+                | "UInt64" -> go (v :?> uint64)
+                | _ -> failwith "ERROR"
+        | _ ->
+            [ exp ]
+
     (* see ``ADD 3 items test`` *)
     /// 사칙 연산 처리
     /// - a + b + c => + [a; b; c] 로 변환
@@ -252,52 +301,62 @@ module XgiExpressionConvertorModule =
         (exp:IExpression)
         : IExpression
       =
-        let rec helper (currentOp:string) (exp:IExpression) : IExpression list =
-            match exp.FunctionName with
-            | Some ("+"|"-"|"*"|"/" as op) ->
-                if op = currentOp then
-                    let args = [
-                        for arg in exp.FunctionArguments do
-                            match arg.Terminal, arg.FunctionName with
-                            | Some _, _ -> yield arg
-                            | None, Some fn ->
-                                yield! helper op arg
-                            | _ -> failwith "ERROR"
-                    ]
-                    args
-                else
-                    let go (v:'Q) =
-                        let out = createXgiAutoVariableT "_temp_internal_" $"{op} output" v
-                        storage.Add out
-                        let args = exp.FunctionArguments |> List.bind (helper op)
-                        DuAugmentedPLCFunction {FunctionName=op; Arguments=args; Output=out } |> augmentedStatementsStorage.Add
-                        [ var2expr out :> IExpression ]
+        match exp.FunctionName with
+        | Some ("+"|"-"|"*"|"/" as topOperator) ->
+            let newArgs = binaryToNary (storage:XgiStorage) augmentedStatementsStorage ["+"; "-"; "*"; "/"] topOperator exp
+            exp.WithNewFunctionArguments newArgs
+        | Some "&&" ->
+            let newArgs = binaryToNary (storage:XgiStorage) augmentedStatementsStorage ["&&"; ] "&&" exp
+            exp.WithNewFunctionArguments newArgs
+        | Some "||" ->
+            let newArgs = binaryToNary (storage:XgiStorage) augmentedStatementsStorage ["||"] "||" exp
+            exp.WithNewFunctionArguments newArgs
+        | _ -> exp
 
-                    let v = exp.BoxedEvaluatedValue
-                    match exp.DataType.Name with
-                    | "Boolean"-> go (v :?> bool)
-                    | "Byte"   -> go (v :?> uint8)
-                    | "Char"   -> go (v :?> char)
-                    | "Double" -> go (v :?> double)
-                    | "Int16"  -> go (v :?> int16)
-                    | "Int32"  -> go (v :?> int32)
-                    | "Int64"  -> go (v :?> int64)
-                    | "SByte"  -> go (v :?> int8)
-                    | "Single" -> go (v :?> float32)
-                    | "String" -> go (v :?> string)
-                    | "UInt16" -> go (v :?> uint16)
-                    | "UInt32" -> go (v :?> uint32)
-                    | "UInt64" -> go (v :?> uint64)
-                    | _ -> failwith "ERROR"
-            | _ ->
-                [ exp ]
 
-        let topOperator = exp.FunctionName.Value
-        let newArgs = helper topOperator exp
-        exp.WithNewFunctionArguments newArgs
+    let collectExpandedExpression
+        (storage:XgiStorage)
+        (expandFunctionStatements:ResizeArray<Statement>)
+        (exp:IExpression)
+        : IExpression
+      =
+        let newExp = replaceInnerArithmaticOrComparisionToXgiFunctionStatements storage expandFunctionStatements exp
+
+        let xxxStorages = XgiStorage()
+        let xxxExpandFunctionStatements = ResizeArray<Statement>()
+        let xxx = mergeArithmaticOperator xxxStorages xxxExpandFunctionStatements exp
+        let w, h = xxx.Flatten() :?> FlatExpression |> precalculateSpan
+        if w > maxNumHorizontalContact then
+            match xxx.FunctionName with
+            | Some "&&" ->
+                let mutable partSpanX = 0
+                let maxNumHorizontalContact = 8
+                let maxExp = ResizeArray<IExpression>()
+                let folder (z:IExpression list list) (e:IExpression) =
+                    let spanX = e.Flatten() :?> FlatExpression |> precalculateSpan |> fst
+                    if partSpanX + spanX > maxNumHorizontalContact then
+                        let z = z +++ (maxExp.ToFSharpList())
+                        maxExp.Clear()
+                        partSpanX <- spanX
+                        maxExp.Add e
+                        z
+                    else
+                        partSpanX <- partSpanX + spanX
+                        maxExp.Add e
+                        z
+                let yyy =
+                    (xxx.FunctionArguments |> List.fold folder [] ) //|> List.rev
+                    +++ (maxExp.ToFSharpList())
+                ()
+            | None -> ()
+            noop()
+
+        newExp
+
+
 
     let private statement2XgiStatements (storage:XgiStorage) (statement:Statement) : Statement list =
-        let expandFunctionStatements = ResizeArray<Statement>()  // DuAugmentedPLCFunction case
+        let augmentedStatements = ResizeArray<Statement>()  // DuAugmentedPLCFunction case
 
         let newStatements =
             match statement with
@@ -306,17 +365,17 @@ module XgiExpressionConvertorModule =
                 match exp.FunctionName with
                 | Some ("+"|"-"|"*"|"/" as op) ->
 
-                    let augmentedStatementsStorage = ResizeArray<Statement>()
-                    let exp = mergeArithmaticOperator storage augmentedStatementsStorage exp
+                    let augStmtsStorage = ResizeArray<Statement>()
+                    let exp = mergeArithmaticOperator storage augStmtsStorage exp
 
                     let tgt = target :?> INamedExpressionizableTerminal
-                    augmentedStatementsStorage @ [ DuAugmentedPLCFunction {FunctionName=op; Arguments=exp.FunctionArguments; Output=tgt } ]
+                    augStmtsStorage @ [ DuAugmentedPLCFunction {FunctionName=op; Arguments=exp.FunctionArguments; Output=tgt } ]
                 | _ ->
-                    let newExp = collectExpandedExpression storage expandFunctionStatements exp
+                    let newExp = collectExpandedExpression storage augmentedStatements exp
                     [ DuAssign (newExp, target) ]
 
             | DuVarDecl (exp, decl) ->
-                let newExp_ = collectExpandedExpression storage expandFunctionStatements exp
+                let newExp_ = collectExpandedExpression storage augmentedStatements exp
 
                 (* 일반 변수 선언 부분을 xgi local variable 로 치환한다. *)
                 storage.Remove decl |> ignore
@@ -346,7 +405,7 @@ module XgiExpressionConvertorModule =
             | DuAugmentedPLCFunction _ ->
                 failwith "ERROR"
 
-        expandFunctionStatements @ newStatements |> List.ofSeq
+        augmentedStatements @ newStatements |> List.ofSeq
 
     let internal commentedStatement2CommentedXgiStatements (storage:XgiStorage) (CommentedStatement(comment, statement)) : CommentedXgiStatements =
         let xgiStatements = statement2XgiStatements storage statement

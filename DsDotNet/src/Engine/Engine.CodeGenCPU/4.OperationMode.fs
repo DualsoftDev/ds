@@ -7,46 +7,46 @@ open Engine.CodeGenCPU
 
 
 type Flow with
-    
+
     member f.O1_AutoOperationMode(): CommentedStatement =
-        let sets = f.ModeAutoHwExpr <&&> f.ModeAutoSwHMIExpr
-        let rsts = f.rop.Expr
-         
-        (sets, rsts) ==| (f.aop, "O1")
-    
+        let set = f.ModeAutoHwExpr <&&> f.ModeAutoSwHMIExpr
+        let rst = f.rop.Expr
+
+        (set, rst) ==| (f.aop, "O1")
+
     member f.O2_ManualOperationMode (): CommentedStatement =
-        let sets = f.ModeManualHwExpr <||> f.ModeManualSwHMIExpr
-        let rsts = f.rop.Expr
-         
-        (sets, rsts) ==| (f.mop, "O2")
-  
+        let set = f.ModeManualHwExpr <||> f.ModeManualSwHMIExpr
+        let rst = f.rop.Expr
+
+        (set, rst) ==| (f.mop, "O2")
+
     member f.O3_DriveOperationMode (): CommentedStatement =
-        let sets = f.aop.Expr <&&> (f.drive.Expr <||> f.BtnDriveExpr)
-        let rsts = !!f.rop.Expr
+        let set = f.aop.Expr <&&> (f.drive.Expr <||> f.BtnDriveExpr)
+        let rst = !!f.rop.Expr
 
-        (sets, rsts) ==| (f.dop, "O3")
-    
+        (set, rst) ==| (f.dop, "O3")
+
     member f.O4_TestRunOperationMode (): CommentedStatement =
-        let sets = f.aop.Expr <&&>  (f.test.Expr <||> f.BtnTestExpr)
-        let rsts = !!f.rop.Expr
+        let set = f.aop.Expr <&&>  (f.test.Expr <||> f.BtnTestExpr)
+        let rst = !!f.rop.Expr
 
-        (sets, rsts) ==| (f.top, "O4")
-    
+        (set, rst) ==| (f.top, "O4")
+
     member f.O5_EmergencyMode(): CommentedStatement =
-        let sets = f.emg.Expr <||> f.BtnEmgExpr
-        let rsts = f.System._off.Expr
+        let set = f.emg.Expr <||> f.BtnEmgExpr
+        let rst = f.System._off.Expr
 
-        (sets, rsts) --| (f.eop, "O5")
+        (set, rst) --| (f.eop, "O5")
 
     member f.O6_StopMode(): CommentedStatement =
-        let sets = f.stop.Expr <||> f.BtnStopExpr
+        let set = f.stop.Expr <||> f.BtnStopExpr
         let setErrs = f.GetVerticesWithInReal().Select(getVM).ERRs().ToOrElseOff(f.System)
-        let rsts = f.clear.Expr
+        let rst = f.clear.Expr
 
-        (sets <||> setErrs, rsts) --| (f.sop, "O6")
+        (set <||> setErrs, rst) --| (f.sop, "O6")
 
     member f.O7_ReadyMode(): CommentedStatement =
-        let sets = f.ready.Expr <||> f.BtnReadyExpr
-        let rsts = !!f.rop.Expr
+        let set = f.ready.Expr <||> f.BtnReadyExpr
+        let rst = !!f.rop.Expr
 
-        (sets, rsts) ==| (f.rop, "O7")
+        (set, rst) ==| (f.rop, "O7")

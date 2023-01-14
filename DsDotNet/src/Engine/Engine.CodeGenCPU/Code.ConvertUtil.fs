@@ -137,6 +137,7 @@ module CodeConvertUtil =
         [<Extension>] static member ToOrElseOff(xs:DsTag<bool> seq,  sys:DsSystem) = if xs.Any() then xs.ToOr() else sys._off.Expr
         [<Extension>] static member GetSharedReal(v:VertexManager) = v |> getSharedReal
         [<Extension>] static member GetSharedCall(v:VertexManager) = v |> getSharedCall
+        ///Real 자신이거나 RealEx Target Real
         [<Extension>] static member GetPureReal  (v:VertexManager) = v |> getPureReal
         [<Extension>] static member GetPureCall  (v:VertexManager) = v |> getPureCall
         [<Extension>]
@@ -154,15 +155,15 @@ module CodeConvertUtil =
             foundEdges.Select(fun e->e.Source)
 
         [<Extension>]
-        static member GetCausalTags(xs:Vertex seq, s:DsSystem, usingRoot:bool) =
-            let tags =
-                xs.Select(fun f->
-                match f with
-                | :? Real   as r  -> r.V.EP
-                | :? RealEx as re -> re.Real.V.EP
-                | :? Call   as c  -> if usingRoot then  c.V.ET else  c.V.CR
-                | :? Alias  as a  -> if usingRoot then  a.V.ET else  a.V.CR
-                | _ -> failwith "Error"
-                )
+        static member GetCausalTagsExpression(xs:Vertex seq, s:DsSystem, usingRoot:bool) =
+            let tags = [
+                for f in xs do
+                    match f with
+                    | :? Real   as r  -> r.V.EP
+                    | :? RealEx as re -> re.Real.V.EP
+                    | :? Call   as c  -> if usingRoot then  c.V.ET else  c.V.CR
+                    | :? Alias  as a  -> if usingRoot then  a.V.ET else  a.V.CR
+                    | _ -> failwith "Error"
+            ]
 
             tags.ToAndElseOn(s)

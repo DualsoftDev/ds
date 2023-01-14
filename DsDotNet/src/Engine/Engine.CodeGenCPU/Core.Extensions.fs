@@ -113,13 +113,13 @@ module rec ConvertCoreExt =
 
 //운영 모드 는 Flow 별로 제공된 모드 On/Off 상태 나타낸다.
     type Flow with
-        member f.rop    = DsTag<bool> ($"{f.Name}(RO)", false)   // Ready Operation Mode
-        member f.aop    = DsTag<bool> ($"{f.Name}(AO)", false)   // Auto Operation Mode
-        member f.mop    = DsTag<bool> ($"{f.Name}(MO)", false)   // Manual Operation Mode
-        member f.dop    = DsTag<bool> ($"{f.Name}(DO)", false)   // Drive Operation Mode
-        member f.top    = DsTag<bool> ($"{f.Name}(TO)", false)   //  Test  Operation Mode (시운전)
-        member f.sop    = DsTag<bool> ($"{f.Name}(SO)", false)   // Stop State
-        member f.eop    = DsTag<bool> ($"{f.Name}(EO)", false)   // Emergency State
+        member f.rop    = DsTag<bool>($"{f.Name}(RO)", false)   // Ready Operation Mode
+        member f.aop    = DsTag<bool>($"{f.Name}(AO)", false)   // Auto Operation Mode
+        member f.mop    = DsTag<bool>($"{f.Name}(MO)", false)   // Manual Operation Mode
+        member f.dop    = DsTag<bool>($"{f.Name}(DO)", false)   // Drive Operation Mode
+        member f.top    = DsTag<bool>($"{f.Name}(TO)", false)   //  Test  Operation Mode (시운전)
+        member f.sop    = DsTag<bool>($"{f.Name}(SO)", false)   // Stop State
+        member f.eop    = DsTag<bool>($"{f.Name}(EO)", false)   // Emergency State
         member f.auto   = DsTag<bool>("auto",   false)
         member f.manual = DsTag<bool>("manual", false)
         member f.drive  = DsTag<bool>("drive",  false)
@@ -151,31 +151,32 @@ module rec ConvertCoreExt =
         member f.readylampOuts      = getLampOutputs (f, f.System.ReadyModeLamps)
 
         //select 버튼은 없을경우 항상 _on
-         member f.BtnAutoExpr =   getButtonExpr(f, f.System.AutoButtons     , f.System._on)
+         member f.BtnAutoExpr   = getButtonExpr(f, f.System.AutoButtons     , f.System._on)
          member f.BtnManualExpr = getButtonExpr(f, f.System.ManualButtons   , f.System._on)
 
         //push 버튼은 없을경우 항상 _off
-         member f.BtnDriveExpr =  getButtonExpr(f, f.System.DriveButtons    , f.System._off)
-         member f.BtnStopExpr =   getButtonExpr(f, f.System.StopButtons     , f.System._off)
-         member f.BtnEmgExpr =    getButtonExpr(f, f.System.EmergencyButtons, f.System._off)
-         member f.BtnTestExpr =   getButtonExpr(f, f.System.TestButtons     , f.System._off)
-         member f.BtnReadyExpr =  getButtonExpr(f, f.System.ReadyButtons    , f.System._off)
-         member f.BtnClearExpr =  getButtonExpr(f, f.System.ClearButtons    , f.System._off)
-         member f.BtnHomeExpr =   getButtonExpr(f, f.System.HomeButtons     , f.System._off)
+         member f.BtnDriveExpr  = getButtonExpr(f, f.System.DriveButtons    , f.System._off)
+         member f.BtnStopExpr   = getButtonExpr(f, f.System.StopButtons     , f.System._off)
+         member f.BtnEmgExpr    = getButtonExpr(f, f.System.EmergencyButtons, f.System._off)
+         member f.BtnTestExpr   = getButtonExpr(f, f.System.TestButtons     , f.System._off)
+         member f.BtnReadyExpr  = getButtonExpr(f, f.System.ReadyButtons    , f.System._off)
+         member f.BtnClearExpr  = getButtonExpr(f, f.System.ClearButtons    , f.System._off)
+         member f.BtnHomeExpr   = getButtonExpr(f, f.System.HomeButtons     , f.System._off)
 
-         member f.ModeAutoHwExpr =    f.BtnAutoExpr <&&> !!f.BtnManualExpr
-         member f.ModeManualHwExpr =  !!f.BtnAutoExpr <&&> f.BtnManualExpr
+         member f.ModeAutoHwExpr      =    f.BtnAutoExpr <&&> !!f.BtnManualExpr
+         member f.ModeManualHwExpr    =  !!f.BtnAutoExpr <&&>   f.BtnManualExpr
 
-         member f.ModeAutoSwHMIExpr   =  f.auto.Expr <&&> !!f.manual.Expr
-         member f.ModeManualSwHMIExpr =  !!f.auto.Expr <&&> f.manual.Expr
+         member f.ModeAutoSwHMIExpr   =    f.auto.Expr <&&> !!f.manual.Expr
+         member f.ModeManualSwHMIExpr =  !!f.auto.Expr <&&>   f.manual.Expr
 
 
     type Call with
         member c.V = c.VertexManager :?> VertexMCoin
-        member c.UsingTon  = c.CallTargetJob.Funcs |> hasTime
-        member c.UsingCtr  = c.CallTargetJob.Funcs |> hasCount
-        member c.UsingNot  = c.CallTargetJob.Funcs |> hasNot
-        member c.UsingMove = c.CallTargetJob.Funcs |> hasMove
+        member private c.fs = c.CallTargetJob.Funcs
+        member c.UsingTon  = c.fs |> hasTime
+        member c.UsingCtr  = c.fs |> hasCount
+        member c.UsingNot  = c.fs |> hasNot
+        member c.UsingMove = c.fs |> hasMove
 
         member c.PresetTime =   if c.UsingTon
                                 then c.CallTargetJob.Funcs.First(fun f->f.Name = TextOnDelayTimer).GetDelayTime()
@@ -185,16 +186,18 @@ module rec ConvertCoreExt =
                                  then c.CallTargetJob.Funcs.First(fun f->f.Name = TextRingCounter).GetRingCount()
                                  else failwith $"{c.Name} not use counter"
 
-        member c.INs          = c.CallTargetJob.JobDefs.Select(fun j -> j.ActionIN)
-        member c.OUTs         = c.CallTargetJob.JobDefs.Select(fun j -> j.ActionOut)
-        member c.PlanSends    = c.CallTargetJob.JobDefs.Select(fun j -> j.ApiItem.PS)
-        member c.PlanReceives = c.CallTargetJob.JobDefs.Select(fun j -> j.ApiItem.PR)
+        member private c.jdfs = c.CallTargetJob.JobDefs
+        member c.INs          = c.jdfs.Select(fun j -> j.ActionIN)
+        member c.OUTs         = c.jdfs.Select(fun j -> j.ActionOut)
+        member c.PlanSends    = c.jdfs.Select(fun j -> j.ApiItem.PS)
+        member c.PlanReceives = c.jdfs.Select(fun j -> j.ApiItem.PR)
 
 
-        member c.MutualResets =
-            c.CallTargetJob.JobDefs
-                .SelectMany(fun j -> j.ApiItem.System.GetMutualResetApis(j.ApiItem))
-                .SelectMany(fun a -> c.System.JobDefs.Where(fun w-> w.ApiItem = a))
+        member c.MutualResets = [
+            for j in c.jdfs do
+            for a in j.ApiItem.System.GetMutualResetApis(j.ApiItem) do
+                yield! c.System.JobDefs.Where(fun w-> w.ApiItem = a)
+        ]
 
     type Real with
         member r.V = r.VertexManager :?> VertexMReal
@@ -216,10 +219,10 @@ module rec ConvertCoreExt =
         member jd.ActionOut = jd.OutTag :?> PlcTag<bool>
         member jd.RXs       = jd.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.EP)
 
-        member jd.MutualResets(x:DsSystem) =
-                jd.ApiItem.System.GetMutualResetApis(jd.ApiItem)
-                    .SelectMany(fun a -> x.JobDefs.Where(fun w-> w.ApiItem = a))
-
+        member jd.MutualResets(sys:DsSystem) = [
+            for a in jd.ApiItem.System.GetMutualResetApis(jd.ApiItem) do
+                yield! sys.JobDefs.Where(fun w-> w.ApiItem = a)
+        ]
 
     type ApiItem with
         member a.PS = DsTag<bool>($"{a.Name}(PS)", false)

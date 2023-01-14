@@ -5,29 +5,30 @@ open System.Linq
 open Engine.Core
 open Engine.CodeGenCPU
 
-type VertexManager with
+type VertexMReal with
 
-    member v.R1_RealInitialStart(): CommentedStatement  = 
-        let v = v :?> VertexMReal
-        let sets = v.G.Expr <&&> v.OG.Expr  
-        let rsts = v.H.Expr
+    member v.R1_RealInitialStart(): CommentedStatement  =
+        let set = v.G.Expr <&&> v.OG.Expr
+        let rst = v.H.Expr
 
-        (sets, rsts) ==| (v.RR, "R1")
+        (set, rst) ==| (v.RR, "R1")
 
-    member v.R2_RealJobComplete(): CommentedStatement  = 
-        let v = v :?> VertexMReal
+    member v.R2_RealJobComplete(): CommentedStatement  =
         let real = v.Vertex :?> Real
-        let sets = v.G.Expr <&&> real.CoinRelays.ToAndElseOn v.System
-        let rsts = v.H.Expr
+        let set = v.G.Expr <&&> real.CoinRelays.ToAndElseOn v.System
+        let rst = v.H.Expr
 
-        (sets, rsts) ==| (v.ET, "R2")
+        (set, rst) ==| (v.ET, "R2")
 
-    
-    member v.R3_RealStartPoint(): CommentedStatement  =  
-        let v = v :?> VertexMReal
-        let sets = (v.G.Expr <&&> v.RR.Expr) <||> 
+
+    member v.R3_RealStartPoint(): CommentedStatement  =
+        let set = (v.G.Expr <&&> v.RR.Expr) <||>
                    (v.H.Expr <&&> v.OG.Expr)
-        let rsts = v.System._off.Expr
+        let rst = v.System._off.Expr
 
-        (sets, rsts) ==| (v.RO, "R3")
+        (set, rst) ==| (v.RO, "R3")
 
+type VertexManager with
+    member v.R1_RealInitialStart(): CommentedStatement  = (v :?> VertexMReal).R1_RealInitialStart()
+    member v.R2_RealJobComplete() : CommentedStatement  = (v :?> VertexMReal).R2_RealJobComplete()
+    member v.R3_RealStartPoint()  : CommentedStatement  = (v :?> VertexMReal).R3_RealStartPoint()

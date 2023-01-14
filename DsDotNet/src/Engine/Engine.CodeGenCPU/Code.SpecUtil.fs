@@ -10,52 +10,53 @@ open Engine.Common.FS
 module CodeSpecUtil =
 
     [<AutoOpen>]
-    type SREType = 
-    |Start
-    |Reset
-    |End
-    
+    type SREType =
+        | Start
+        | Reset
+        | End
+
     [<Flags>]
     [<AutoOpen>]
-    type ConvertType = 
-    |RealInFlow          = 0b00000001  
-    |RealExFlow          = 0b00000010  
-    |CallInFlow          = 0b00000100  
-    |CallInReal          = 0b00001000  
-    |AliasCallInReal     = 0b00010000  
-    |AliasCallInFlow     = 0b00100000  
-    |AliasRealInFlow     = 0b01000000  
-    |AliasRealExInFlow   = 0b10000000  
+    type ConvertType =
+        | RealInFlow          = 0b00000001
+        | RealExFlow          = 0b00000010
+        | CallInFlow          = 0b00000100
+        | CallInReal          = 0b00001000
+        | AliasCallInReal     = 0b00010000
+        | AliasCallInFlow     = 0b00100000
+        | AliasRealInFlow     = 0b01000000
+        | AliasRealExInFlow   = 0b10000000
 
-    |InFlowWithoutReal   = 0b11100110 
-    |InFlowAll           = 0b11100111 
-    |CoinTypeAll         = 0b11111110 
-    |CallTypeAll         = 0b00001100 
-    |RealnIndirectReal   = 0b11000011 
-    |VertexAll           = 0b11111111 
-   
-    let IsSpec (v:Vertex) (vaild:ConvertType) = 
+    let InFlowWithoutReal = AliasRealExInFlow ||| AliasRealInFlow ||| AliasCallInFlow                                    ||| CallInFlow ||| RealExFlow                    // 0b11100110
+    let InFlowAll         = AliasRealExInFlow ||| AliasRealInFlow ||| AliasCallInFlow                                    ||| CallInFlow ||| RealExFlow ||| RealInFlow     // 0b11100111
+    let CoinTypeAll       = AliasRealExInFlow ||| AliasRealInFlow ||| AliasCallInFlow ||| AliasCallInReal ||| CallInReal ||| CallInFlow ||| RealExFlow                    // 0b11111110
+    let CallTypeAll       =                                                                                   CallInReal ||| CallInFlow                                   // 0b00001100
+    let RealnIndirectReal = AliasRealExInFlow ||| AliasRealInFlow                                                                       ||| RealExFlow ||| RealInFlow     // 0b11000011
+    let VertexAll         = AliasRealExInFlow ||| AliasRealInFlow ||| AliasCallInFlow ||| AliasCallInReal ||| CallInReal ||| CallInFlow ||| RealExFlow ||| RealInFlow     // 0b11111111
+
+
+    let IsSpec (v:Vertex) (vaild:ConvertType) =
         let isVaildVertex =
             match v with
             | :? Real   -> vaild.HasFlag(RealInFlow)
-            | :? RealEx -> vaild.HasFlag(RealExFlow) 
-            | :? Call as c  -> 
+            | :? RealEx -> vaild.HasFlag(RealExFlow)
+            | :? Call as c  ->
                 match c.Parent with
-                |DuParentFlow f-> vaild.HasFlag(CallInFlow)
-                |DuParentReal r-> vaild.HasFlag(CallInReal)
+                | DuParentFlow f-> vaild.HasFlag(CallInFlow)
+                | DuParentReal r-> vaild.HasFlag(CallInReal)
 
-            | :? Alias as a  -> 
+            | :? Alias as a  ->
                  match a.Parent with
-                 |DuParentFlow f-> 
+                 | DuParentFlow f->
                      match a.TargetWrapper with
-                     | DuAliasTargetReal ar   -> vaild.HasFlag(AliasRealInFlow)
-                     | DuAliasTargetRealEx ao -> vaild.HasFlag(AliasRealExInFlow)
-                     | DuAliasTargetCall ac   -> vaild.HasFlag(AliasCallInFlow)
-                 |DuParentReal r-> 
+                     |  DuAliasTargetReal   ar -> vaild.HasFlag(AliasRealInFlow)
+                     |  DuAliasTargetRealEx ao -> vaild.HasFlag(AliasRealExInFlow)
+                     |  DuAliasTargetCall   ac -> vaild.HasFlag(AliasCallInFlow)
+                 | DuParentReal r->
                      match a.TargetWrapper with
-                     | DuAliasTargetReal ar   -> failwith "Error IsSpec"
+                     | DuAliasTargetReal   ar -> failwith "Error IsSpec"
                      | DuAliasTargetRealEx ao -> failwith "Error IsSpec"
-                     | DuAliasTargetCall ac   -> vaild.HasFlag(AliasCallInReal)
+                     | DuAliasTargetCall   ac -> vaild.HasFlag(AliasCallInReal)
             |_ -> failwith "Error"
 
         isVaildVertex

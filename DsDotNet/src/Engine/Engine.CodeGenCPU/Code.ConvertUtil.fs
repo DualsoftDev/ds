@@ -122,19 +122,15 @@ module CodeConvertUtil =
     [<AutoOpen>]
     [<Extension>]
     type CodeConvertUtilExt =
-        [<Extension>] static member STs (FList(xs:VertexManager list)): DsBit list = xs |> map(fun s->s.ST)
-        [<Extension>] static member SFs (FList(xs:VertexManager list)): DsBit list = xs |> map(fun s->s.SF)
-        [<Extension>] static member RTs (FList(xs:VertexManager list)): DsBit list = xs |> map(fun s->s.RT)
-        [<Extension>] static member ETs (FList(xs:VertexManager list)): DsBit list = xs |> map(fun s->s.ET)
-        [<Extension>] static member ERRs(FList(xs:VertexManager list)): DsBit list = xs |> bind(fun s-> [s.E1;s.E2])
-        [<Extension>] static member CRs (FList(xs:VertexMCoin list))  : DsBit list = xs |> map(fun s->s.CR)
+        [<Extension>] static member STs (FList(vms:VertexManager list)): DsBit list = vms |> map (fun vm -> vm.RT)
+        [<Extension>] static member SFs (FList(vms:VertexManager list)): DsBit list = vms |> map (fun vm -> vm.SF)
+        [<Extension>] static member RTs (FList(vms:VertexManager list)): DsBit list = vms |> map (fun vm -> vm.RT)
+        [<Extension>] static member ETs (FList(vms:VertexManager list)): DsBit list = vms |> map (fun vm -> vm.ET)
+        [<Extension>] static member ERRs(FList(vms:VertexManager list)): DsBit list = vms |> bind(fun vm -> [vm.E1; vm.E2])
+        [<Extension>] static member CRs (FList(vms:VertexMCoin list))  : DsBit list = vms |> map (fun vm -> vm.CR)
 
-        [<Extension>] static member ToAndElseOn(xs:PlcTag<bool> seq, sys:DsSystem) = if xs.Any() then xs.ToAnd() else sys._on.Expr
-        [<Extension>] static member ToAndElseOn(xs:DsBit seq,        sys:DsSystem) = if xs.Any() then xs.ToAnd() else sys._on.Expr
-        [<Extension>] static member ToAndElseOn(xs:DsTag<bool> seq,  sys:DsSystem) = if xs.Any() then xs.ToAnd() else sys._on.Expr
-        [<Extension>] static member ToOrElseOff(xs:PlcTag<bool> seq, sys:DsSystem) = if xs.Any() then xs.ToOr() else sys._off.Expr
-        [<Extension>] static member ToOrElseOff(xs:DsBit seq,        sys:DsSystem) = if xs.Any() then xs.ToOr() else sys._off.Expr
-        [<Extension>] static member ToOrElseOff(xs:DsTag<bool> seq,  sys:DsSystem) = if xs.Any() then xs.ToOr() else sys._off.Expr
+        [<Extension>] static member ToAndElseOn(ts:#Tag<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToAnd() else sys._on.Expr
+        [<Extension>] static member ToOrElseOff(ts:#Tag<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToOr()  else sys._off.Expr
         [<Extension>] static member GetSharedReal(v:VertexManager) = v |> getSharedReal
         [<Extension>] static member GetSharedCall(v:VertexManager) = v |> getSharedCall
         ///Real 자신이거나 RealEx Target Real

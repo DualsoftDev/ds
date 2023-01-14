@@ -1,10 +1,7 @@
 namespace Engine.CodeGenCPU
 
-open System.Linq
-open System.Runtime.CompilerServices
 open Engine.Core
 open System
-open Engine.Common.FS
 
 [<AutoOpen>]
 module CodeSpecUtil =

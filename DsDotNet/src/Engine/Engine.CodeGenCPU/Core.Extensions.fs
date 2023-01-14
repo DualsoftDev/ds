@@ -11,10 +11,11 @@ module rec ConvertCoreExt =
 
     type InOut = | In | Out | Memory
     let private getIOs(name, address, inOut:InOut): ITagWithAddress   =
-        let plcName = match inOut with
-                        | In  -> $"{name}_I"
-                        | Out -> $"{name}_O"
-                        | Memory -> failwith "error: Memory not supported "
+        let plcName =
+            match inOut with
+            | In  -> $"{name}_I"
+            | Out -> $"{name}_O"
+            | Memory -> failwith "error: Memory not supported "
 
         (PlcTag(plcName, address, false) :> ITagWithAddress)
 
@@ -22,11 +23,10 @@ module rec ConvertCoreExt =
     let getVMReal(v:Vertex) = v.VertexManager :?> VertexMReal
     let getVMCoin(v:Vertex) = v.VertexManager :?> VertexMCoin
 
-    let hasTime (xs:Func seq) = xs.Where(fun f->f.Name = TextMove  ).any()
-    let hasCount(xs:Func seq) = xs.Where(fun f->f.Name = TextOnDelayTimer).any()
-    let hasMove (xs:Func seq) = xs.Where(fun f->f.Name = TextRingCounter).any()
-    let hasNot  (xs:Func seq) = xs.Where(fun f->f.Name = TextNot ).any()
-
+    let hasTime (xs:Func seq) = xs.Any(fun f -> f.Name = TextOnDelayTimer  )
+    let hasCount(xs:Func seq) = xs.Any(fun f -> f.Name = TextRingCounter)
+    let hasMove (xs:Func seq) = xs.Any(fun f -> f.Name = TextMove)
+    let hasNot  (xs:Func seq) = xs.Any(fun f -> f.Name = TextNot )
 
     type DsSystem with
         member s._on      = DsTag<bool>("_on"     , true)
@@ -49,21 +49,18 @@ module rec ConvertCoreExt =
         member s._dtimems = DsTag<int> ("_ms", 0)
 
         member s.GenerationLampIO() =
-            s.SystemLamps
-                   .ForEach(fun b->b.OutTag  <- getIOs(b.Name, b.OutAddress, In))
+            for b in s.SystemLamps do
+                b.OutTag  <- getIOs(b.Name, b.OutAddress, In)
 
         member s.GenerationButtonIO() =
-            s.SystemButtons
-                     .ForEach(fun b-> b.InTag  <- getIOs(b.Name, b.OutAddress, In))
-            s.SystemButtons
-                     .ForEach(fun b->b.OutTag <- getIOs(b.Name, b.OutAddress, Out))
+            for b in s.SystemButtons do
+                b.InTag  <- getIOs(b.Name, b.OutAddress, In)
+                b.OutTag <- getIOs(b.Name, b.OutAddress, Out)
 
         member s.GenerationJobIO() =
-            let jobDefs = s.Jobs |> Seq.collect(fun j -> j.JobDefs)
-            jobDefs
-                   .ForEach(fun jdef->jdef.InTag <- getIOs(jdef.ApiName, jdef.InAddress, In))
-            jobDefs
-                   .ForEach(fun jdef->jdef.OutTag <- getIOs(jdef.ApiName, jdef.OutAddress, Out))
+            for jdef in s.Jobs |> Seq.collect(fun j -> j.JobDefs) do
+                jdef.InTag <- getIOs(jdef.ApiName, jdef.InAddress, In)
+                jdef.OutTag <- getIOs(jdef.ApiName, jdef.OutAddress, Out)
 
         //[auto, manual] system HMI 두개다 선택이 안됨
         member s.ModeNoExpr = !!s._auto.Expr <&&> !!s._manual.Expr
@@ -85,13 +82,11 @@ module rec ConvertCoreExt =
 
     let private getButtonOutputs(flow:Flow, btns:ButtonDef seq) : PlcTag<bool> seq =
             btns.Where(fun b -> b.SettingFlows.Contains(flow))
-                .Select(fun b -> b.OutTag)
-                .Cast<PlcTag<bool>>()
+                .Select(fun b -> b.OutTag :?> PlcTag<bool>)
 
     let private getLampOutputs(flow:Flow, btns:LampDef seq) : PlcTag<bool> seq =
             btns.Where(fun b -> b.SettingFlow = flow)
-                .Select(fun b -> b.OutTag)
-                .Cast<PlcTag<bool>>()
+                .Select(fun b -> b.OutTag :?> PlcTag<bool>)
 
     //let private getAutoManualIOs(autoIns:PlcTag<bool> seq, manualIns:PlcTag<bool> seq, sysOff:DsTag<bool>) =
     //      if autoIns.Count() > 1 || manualIns.Count() > 1

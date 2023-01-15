@@ -330,8 +330,18 @@ module XgiExpressionConvertorModule =
                         partSpanX <- partSpanX + spanX
                         built, building @ [e]
                 let maxs, remaining = (exp.FunctionArguments |> List.fold folder ([], []) )
-                // todo:
-                getNull<IExpression>()
+                let subSums = [
+                    for max in maxs do
+                        let out = createXgiAutoVariableT "_temp_internal_" "&& split output" false
+                        storage.Add out
+                        DuAugmentedPLCFunction {FunctionName="&&"; Arguments=max; Output=out } |> expandFunctionStatements.Add
+                        var2expr out :> IExpression
+                ]
+
+                let grandTotal = createXgiAutoVariableT "_temp_internal_" "&& split output" false
+                storage.Add grandTotal
+                DuAugmentedPLCFunction {FunctionName="&&"; Arguments=subSums @ remaining; Output=grandTotal } |> expandFunctionStatements.Add
+                var2expr grandTotal :> IExpression
             | _ ->
                 exp
         else
@@ -339,7 +349,7 @@ module XgiExpressionConvertorModule =
 
     let private collectExpandedExpression (augmentParams:AugmentedConvertorParams) : IExpression =
         let newExp = replaceInnerArithmaticOrComparisionToXgiFunctionStatements augmentParams
-        //let newExp = splitWideExpression {augmentParams with Exp = newExp}
+        let newExp = splitWideExpression {augmentParams with Exp = newExp}
         newExp
 
 

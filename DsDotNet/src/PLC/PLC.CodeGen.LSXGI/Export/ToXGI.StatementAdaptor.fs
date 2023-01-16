@@ -254,6 +254,32 @@ module XgiExpressionConvertorModule =
         : IExpression list
       =
         let { Storage=storage; ExpandFunctionStatements=augmentedStatementsStorage; Exp=exp } = augmentParams
+        let withAugmentedPLCFunction (exp:IExpression) =
+            let op = exp.FunctionName.Value
+            let go (v:'Q) =
+                let out = createXgiAutoVariableT "_temp_internal_" $"{op} output" v
+                storage.Add out
+                let args = exp.FunctionArguments |> List.bind (fun arg -> binaryToNary { augmentParams with Exp = arg } operatorsToChange op)
+                DuAugmentedPLCFunction {FunctionName=op; Arguments=args; Output=out } |> augmentedStatementsStorage.Add
+                var2expr out :> IExpression
+
+            let v = exp.BoxedEvaluatedValue
+            match exp.DataType.Name with
+            | "Boolean"-> go (v :?> bool)
+            | "Byte"   -> go (v :?> uint8)
+            | "Char"   -> go (v :?> char)
+            | "Double" -> go (v :?> double)
+            | "Int16"  -> go (v :?> int16)
+            | "Int32"  -> go (v :?> int32)
+            | "Int64"  -> go (v :?> int64)
+            | "SByte"  -> go (v :?> int8)
+            | "Single" -> go (v :?> float32)
+            | "String" -> go (v :?> string)
+            | "UInt16" -> go (v :?> uint16)
+            | "UInt32" -> go (v :?> uint32)
+            | "UInt64" -> go (v :?> uint64)
+            | _ -> failwith "ERROR"
+
         match exp.FunctionName with
         | Some op when operatorsToChange.Contains(op) -> // ("+"|"-"|"*"|"/"   (*|"&&"|"||"*) as op) ->
             if op = currentOp then
@@ -261,35 +287,15 @@ module XgiExpressionConvertorModule =
                     for arg in exp.FunctionArguments do
                         match arg.Terminal, arg.FunctionName with
                         | Some _, _ -> yield arg
+                        | None, Some ("-"|"/") ->
+                            yield withAugmentedPLCFunction arg
                         | None, Some fn_ ->
                             yield! binaryToNary { augmentParams with Exp = arg } operatorsToChange op
                         | _ -> failwith "ERROR"
                 ]
                 args
             else
-                let go (v:'Q) =
-                    let out = createXgiAutoVariableT "_temp_internal_" $"{op} output" v
-                    storage.Add out
-                    let args = exp.FunctionArguments |> List.bind (fun arg -> binaryToNary { augmentParams with Exp = arg } operatorsToChange op)
-                    DuAugmentedPLCFunction {FunctionName=op; Arguments=args; Output=out } |> augmentedStatementsStorage.Add
-                    [ var2expr out :> IExpression ]
-
-                let v = exp.BoxedEvaluatedValue
-                match exp.DataType.Name with
-                | "Boolean"-> go (v :?> bool)
-                | "Byte"   -> go (v :?> uint8)
-                | "Char"   -> go (v :?> char)
-                | "Double" -> go (v :?> double)
-                | "Int16"  -> go (v :?> int16)
-                | "Int32"  -> go (v :?> int32)
-                | "Int64"  -> go (v :?> int64)
-                | "SByte"  -> go (v :?> int8)
-                | "Single" -> go (v :?> float32)
-                | "String" -> go (v :?> string)
-                | "UInt16" -> go (v :?> uint16)
-                | "UInt32" -> go (v :?> uint32)
-                | "UInt64" -> go (v :?> uint64)
-                | _ -> failwith "ERROR"
+                [withAugmentedPLCFunction exp]
         | _ ->
             [ exp ]
 

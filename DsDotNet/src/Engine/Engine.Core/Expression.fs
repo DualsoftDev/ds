@@ -87,7 +87,7 @@ module ExpressionModule =
             failwith "ERROR: Value Type Error.  only allowed for primitive type"
 
     /// Tag<'T> or Variable<'T> 로부터 Expression<'T> 생성
-    let var2expr (t: TypedValueStorage<'T>) = DuTerminal (DuVariable t)
+    let var2expr (t: TypedValueStorage<'T>):Expression<'T> = DuTerminal (DuVariable t)
 
     type Timer internal(typ:TimerType, timerStruct:TimerStruct) =
 
@@ -220,8 +220,8 @@ module ExpressionModule =
             | DuVarDecl (expression,variable) -> variable.BoxedValue
             | DuTimer (t:TimerStatement) -> t.Timer.DN.Value
             | DuCounter (c:CounterStatement) -> c.Counter.DN.Value
-            | DuAction (a:ActionStatement) -> 
-                match a with 
+            | DuAction (a:ActionStatement) ->
+                match a with
                 | DuCopy (condition:IExpression<bool>, source:IExpression,target:IStorage)-> target.BoxedValue
             | DuAugmentedPLCFunction (f:FunctionParameters) ->  false
 
@@ -387,6 +387,21 @@ module ExpressionModule =
             | _  -> failwith "ERROR"
 
 
-
-
+    type IStorage with
+        member x.ToExpression():IExpression =
+            match x.DataType.Name with
+            | "Boolean"-> DuTerminal (DuVariable (x :?> TypedValueStorage<bool>  )) :> IExpression
+            | "Byte"   -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint8> )) :> IExpression
+            | "Char"   -> DuTerminal (DuVariable (x :?> TypedValueStorage<char>  )) :> IExpression
+            | "Double" -> DuTerminal (DuVariable (x :?> TypedValueStorage<double>)) :> IExpression
+            | "Int16"  -> DuTerminal (DuVariable (x :?> TypedValueStorage<int16> )) :> IExpression
+            | "Int32"  -> DuTerminal (DuVariable (x :?> TypedValueStorage<int32> )) :> IExpression
+            | "Int64"  -> DuTerminal (DuVariable (x :?> TypedValueStorage<int64> )) :> IExpression
+            | "SByte"  -> DuTerminal (DuVariable (x :?> TypedValueStorage<int8>  )) :> IExpression
+            | "Single" -> DuTerminal (DuVariable (x :?> TypedValueStorage<single>)) :> IExpression
+            | "String" -> DuTerminal (DuVariable (x :?> TypedValueStorage<string>)) :> IExpression
+            | "UInt16" -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint16>)) :> IExpression
+            | "UInt32" -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint32>)) :> IExpression
+            | "UInt64" -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint64>)) :> IExpression
+            | _  -> failwith "ERROR"
 

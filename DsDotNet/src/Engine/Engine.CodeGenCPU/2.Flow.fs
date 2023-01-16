@@ -32,7 +32,7 @@ type VertexManager with
             let sets  = srcs.Select(fun (src, gr) -> gr).ToAnd()
             let rsts  = (!!)real.V.EP.Expr
             //going relay rungs
-            srcs.Select(fun (src, gr) -> (src.G.Expr, real.V.EP.Expr) ==| (gr, "F2"))
+            srcs.Select(fun (src, gr) -> (src.G.Expr, real.V.H.Expr) ==| (gr, "F2"))
             |> Seq.append [(sets, rsts) ==| (v.RT, "F2")] //reset tag  
             |> Seq.toList
         else []

@@ -12,7 +12,7 @@ let private getPortSetBits(v:VertexManager) (rse:SREType) =
     let shareds = v.GetSharedReal().Select(getVM)
     match rse with                                      //real 자신을 외부 시스템에서 Plan Send 경우
     |Start -> (shareds.STs() @ [v.ST;v.SF]).ToOr() <||> v.System.GetPSs(real).EmptyOffElseToOr(v.System)
-    |Reset -> (shareds.RTs() @ [v.RT;v.RF]).ToOr()
+    |Reset -> (shareds.RTs() @ [v.RT;v.RF]).ToOr() <||> v.System.GetPRs(real).EmptyOffElseToOr(v.System)
     |End   -> (shareds.ETs() @ [v.ET;v.EF]).ToOr() 
 
 type VertexManager with

@@ -133,7 +133,7 @@ module HmiGenModule =
                         for sp in sys.StartPoints do
                             hmiInfos[button].targets.Add(sp.QualifiedName)
                 | ButtonType.Emergency | ButtonType.Auto | ButtonType.Manual
-                | ButtonType.Clear | ButtonType.Home
+                | ButtonType.Clear | ButtonType.Home | ButtonType.Ready
                 | ButtonType.Stop | ButtonType.Emergency ->
                     for flow in flowNames do hmiInfos[button].targets.Add(flow)
                 | _ ->

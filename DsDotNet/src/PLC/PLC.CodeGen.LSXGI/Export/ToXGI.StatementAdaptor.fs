@@ -301,13 +301,15 @@ module XgiExpressionConvertorModule =
         | _ ->
             [ exp ]
 
-    type internal MergeArithmaticResult =
+    type private MergeArithmaticResult =
+        /// arithmatic operator 를 적용해서, 결과 값을 이미 tag / variable 에 write 한 경우.  추후의 expression 과 혼합할 필요가 없다.
         | AlreadyApplied of IExpression
         | NotApplied of IExpression
 
     (* see ``ADD 3 items test`` *)
     /// 사칙 연산 처리
     /// - a + b + c => + [a; b; c] 로 변환
+    ///     * '+' or '*' 연산에서 argument 갯수가 8 개 이상이면 분할해서 PLC function 생성
     /// - a + (b * c) + d => +[a; x; d], *[b; c] 두개의 expression 으로 변환.  부가적으로 생성된 *[b;c] 는 새로운 statement 를 생성해서 augmentedStatementsStorage 에 추가된다.
     let private mergeArithmaticOperator (augmentParams:AugmentedConvertorParams) (outputStore:IStorage option) : MergeArithmaticResult =
         let { Storage = storage; ExpandFunctionStatements=augmentedStatementsStorage; Exp=exp } = augmentParams
@@ -328,22 +330,9 @@ module XgiExpressionConvertorModule =
                             createTypedXgiAutoVariable exp.DataType "_temp_internal_" exp.BoxedEvaluatedValue "comment"
                     let outexp = out.ToExpression()
 
-                    let augmentedFunctionStatement =
-                        match exp.DataType.Name with
-                        | "Byte"   -> DuAugmentedPLCFunction { FunctionName = op; Arguments = args; Output = out :?> INamedExpressionizableTerminal }
-                        | "Double" -> DuAugmentedPLCFunction { FunctionName = op; Arguments = args; Output = out :?> INamedExpressionizableTerminal }
-                        | "Int16"  -> DuAugmentedPLCFunction { FunctionName = op; Arguments = args; Output = out :?> INamedExpressionizableTerminal }
-                        | "Int32"  -> DuAugmentedPLCFunction { FunctionName = op; Arguments = args; Output = out :?> INamedExpressionizableTerminal }
-                        | "Int64"  -> DuAugmentedPLCFunction { FunctionName = op; Arguments = args; Output = out :?> INamedExpressionizableTerminal }
-                        | "SByte"  -> DuAugmentedPLCFunction { FunctionName = op; Arguments = args; Output = out :?> INamedExpressionizableTerminal }
-                        | "Single" -> DuAugmentedPLCFunction { FunctionName = op; Arguments = args; Output = out :?> INamedExpressionizableTerminal }
-                        | "UInt16" -> DuAugmentedPLCFunction { FunctionName = op; Arguments = args; Output = out :?> INamedExpressionizableTerminal }
-                        | "UInt32" -> DuAugmentedPLCFunction { FunctionName = op; Arguments = args; Output = out :?> INamedExpressionizableTerminal }
-                        | "UInt64" -> DuAugmentedPLCFunction { FunctionName = op; Arguments = args; Output = out :?> INamedExpressionizableTerminal }
-                        | _ ->
-                            failwith "ERROR"
+                    DuAugmentedPLCFunction { FunctionName = op; Arguments = args; Output = out :?> INamedExpressionizableTerminal }
+                    |> augmentedStatementsStorage.Add
 
-                    augmentedFunctionStatement |> augmentedStatementsStorage.Add
                     out |> storage.Add
                     if allArgs.Length <= 8 then
                         outexp
@@ -356,7 +345,8 @@ module XgiExpressionConvertorModule =
         | Some (">"|">="|"<"|"<="|"="|"!="  |"&&"|"||" as op) ->
             let newArgs = binaryToNary { augmentParams with Exp = exp } [op ] op
             NotApplied(exp.WithNewFunctionArguments newArgs)
-        | _ -> NotApplied(exp)
+        | _ ->
+            NotApplied(exp)
 
     let private splitWideExpression (augmentParams:AugmentedConvertorParams) : IExpression =
         let { Storage = storage; ExpandFunctionStatements=expandFunctionStatements; Exp=exp } = augmentParams

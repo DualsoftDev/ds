@@ -1,20 +1,17 @@
 namespace Engine.CodeGenCPU
 
-open System.Linq
-open System.Runtime.CompilerServices
 open Engine.Core
 open System
-open Engine.Common.FS
 
 [<AutoOpen>]
 module CodeSpecUtil =
 
     [<AutoOpen>]
-    type SREType = 
-    |Start
-    |Reset
-    |End
-    
+    type SREType =
+        | Start
+        | Reset
+        | End
+
     [<Flags>]
     [<AutoOpen>]
     type ConvertType = 
@@ -38,24 +35,24 @@ module CodeSpecUtil =
         let isVaildVertex =
             match v with
             | :? Real   -> vaild.HasFlag(RealInFlow)
-            | :? RealEx -> vaild.HasFlag(RealExFlow) 
-            | :? Call as c  -> 
+            | :? RealEx -> vaild.HasFlag(RealExFlow)
+            | :? Call as c  ->
                 match c.Parent with
-                |DuParentFlow f-> vaild.HasFlag(CallInFlow)
-                |DuParentReal r-> vaild.HasFlag(CallInReal)
+                | DuParentFlow f-> vaild.HasFlag(CallInFlow)
+                | DuParentReal r-> vaild.HasFlag(CallInReal)
 
-            | :? Alias as a  -> 
+            | :? Alias as a  ->
                  match a.Parent with
-                 |DuParentFlow f-> 
+                 | DuParentFlow f->
                      match a.TargetWrapper with
-                     | DuAliasTargetReal ar   -> vaild.HasFlag(AliasRealInFlow)
-                     | DuAliasTargetRealEx ao -> vaild.HasFlag(AliasRealExInFlow)
-                     | DuAliasTargetCall ac   -> vaild.HasFlag(AliasCallInFlow)
-                 |DuParentReal r-> 
+                     |  DuAliasTargetReal   ar -> vaild.HasFlag(AliasRealInFlow)
+                     |  DuAliasTargetRealEx ao -> vaild.HasFlag(AliasRealExInFlow)
+                     |  DuAliasTargetCall   ac -> vaild.HasFlag(AliasCallInFlow)
+                 | DuParentReal r->
                      match a.TargetWrapper with
-                     | DuAliasTargetReal ar   -> failwith "Error IsSpec"
+                     | DuAliasTargetReal   ar -> failwith "Error IsSpec"
                      | DuAliasTargetRealEx ao -> failwith "Error IsSpec"
-                     | DuAliasTargetCall ac   -> vaild.HasFlag(AliasCallInReal)
+                     | DuAliasTargetCall   ac -> vaild.HasFlag(AliasCallInReal)
             |_ -> failwith "Error"
 
         isVaildVertex

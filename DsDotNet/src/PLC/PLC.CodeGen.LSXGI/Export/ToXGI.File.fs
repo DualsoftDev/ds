@@ -43,6 +43,18 @@ module internal XgiFile =
             let xml = getCommentRung rgi.Y cmt
             rgi <- rgi.Add(xml)
 
+        let simpleRung (expr:IExpression) (target:IStorage) =
+            let coil =
+                match target with
+                | :? RisingCoil as rc -> COMPulseCoil(rc.Storage :?> INamedExpressionizableTerminal)
+                | :? FallingCoil as fc -> COMNPulseCoil(fc.Storage :?> INamedExpressionizableTerminal)
+                | _ -> COMCoil(target :?> INamedExpressionizableTerminal)
+            let flatExpr = expr.Flatten() :?> FlatExpression
+            let command = CoilCmd(coil)
+            let rgiSub = xmlRung (Some flatExpr) (Some command) rgi.Y
+            //rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
+            rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgiSub.Y}
+
         // Rung 별로 생성
         for CommentAndXgiStatements(cmt, stmts) in commentedStatements do
 
@@ -52,17 +64,12 @@ module internal XgiFile =
                 rgi <- rgi.Add(xml)
             for stmt in stmts do
                 match stmt with
-                | DuAssign (expr, target) ->
-                    let coil =
-                        match target with
-                        | :? RisingCoil as rc -> COMPulseCoil(rc.Storage :?> INamedExpressionizableTerminal)
-                        | :? FallingCoil as fc -> COMNPulseCoil(fc.Storage :?> INamedExpressionizableTerminal)
-                        | _ -> COMCoil(target :?> INamedExpressionizableTerminal)
-                    let flatExpr = expr.Flatten() :?> FlatExpression
-                    let command = CoilCmd(coil)
-                    let rgiSub = xmlRung (Some flatExpr) (Some command) rgi.Y
-                    //rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
-                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgiSub.Y}
+                | DuAssign (expr, target) -> simpleRung expr target
+                | DuAugmentedPLCFunction ({FunctionName = ("&&"|"||") as op; Arguments = args; Output=output }) ->
+                    let psedoFunction (args:Args):bool = failwith "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
+                    let expr = DuFunction { FunctionBody=psedoFunction; Name=op; Arguments=args }
+                    simpleRung expr (output :?> IStorage)
+
 
                 // <kwak> <timer>
                 | DuTimer timerStatement ->

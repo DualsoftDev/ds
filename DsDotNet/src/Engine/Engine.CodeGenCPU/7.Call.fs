@@ -6,14 +6,13 @@ open Engine.CodeGenCPU
 open Engine.Core
 open Engine.Common.FS
 
-type VertexManager with
-
-    member v.C1_CallPlanSend(): CommentedStatement list =
-        let v = v :?> VertexMCoin
-        let call = v.Vertex :?> Call
-        let rop, mop = v.Flow.rop.Expr, v.Flow.mop.Expr
-        let startTags   = ([v.ST] @ v.GetSharedCall().Select(getVM).STs()).ToOr()
-        let forceStarts = ([v.SF] @ v.GetSharedCall().Select(getVM).SFs()).ToOr()
+type VertexMCoin with
+    member coin.C1_CallPlanSend(): CommentedStatement list =
+        let call = coin.Vertex :?> Call
+        let rop, mop = coin.Flow.rop.Expr, coin.Flow.mop.Expr
+        let sharedCalls = coin.GetSharedCall().Select(getVM)
+        let startTags   = ([coin.ST] @ sharedCalls.STs()).ToOr()
+        let forceStarts = ([coin.SF] @ sharedCalls.SFs()).ToOr()
         [
             for jd in call.CallTargetJob.JobDefs do
                 let startPointExpr = getStartPointExpr(call, jd)
@@ -21,43 +20,47 @@ type VertexManager with
                            (mop <&&> forceStarts) <||>
                            (rop <||> mop <&&> startPointExpr)
 
-                let rsts = jd.MutualResets(v.System)
+                let rsts = jd.MutualResets(coin.System)
                              .Select(fun f -> f.ApiItem.PS)
-                             .EmptyOffElseToOr(v.System)
+                             .ToOrElseOff(coin.System)
 
                 yield (sets, rsts) --| (jd.ApiItem.PS, "C1" )
         ]
 
 
-    member v.C2_CallActionOut(): CommentedStatement list =
-        let v = v :?> VertexMCoin
-        let call = v.Vertex :?> Call
-        let rsts = v.System._off.Expr
+    member coin.C2_CallActionOut(): CommentedStatement list =
+        let call = coin.Vertex :?> Call
+        let rsts = coin.System._off.Expr
         [
             for jd in call.CallTargetJob.JobDefs do
                 yield (jd.ApiItem.PS.Expr, rsts) --| (jd.ActionOut, "C2" )
         ]
 
-    member v.C3_CallPlanReceive(): CommentedStatement list =
-        let v = v :?> VertexMCoin
-        let call = v.Vertex :?> Call
-        let rsts = v.System._off.Expr
+    member coin.C3_CallPlanReceive(): CommentedStatement list =
+        let call = coin.Vertex :?> Call
+        let rsts = coin.System._off.Expr
         [
             for jd in call.CallTargetJob.JobDefs do
-                let sets = jd.RXs.EmptyOnElseToAnd(v.System)
+                let sets = jd.RXs.ToAndElseOn(coin.System)
                 yield (sets, rsts) --| (jd.ApiItem.PR, "C3" )
         ]
 
-    member v.C4_CallActionIn(): CommentedStatement list =
-        let v = v :?> VertexMCoin
-        let coins = v.GetSharedCall()
-        let call = v.Vertex :?> Call
-        let rsts = v.System._off.Expr
+    member coin.C4_CallActionIn(): CommentedStatement list =
+        let sharedCalls = coin.GetSharedCall()
+        let call = coin.Vertex :?> Call
+        let rsts = coin.System._off.Expr
         [
-            for coin in coins do
+            for sharedCall in sharedCalls do
                 let sets =
                     if call.UsingTon
                         then call.V.TON.DN.Expr   //On Delay
-                        else call.INs.EmptyOnElseToAnd(v.System)
-                yield (sets, rsts) --| (coin.V.ET, "C4" )
+                        else call.INs.ToAndElseOn(coin.System)
+                yield (sets, rsts) --| (sharedCall.V.ET, "C4" )
         ]
+
+
+type VertexManager with
+    member v.C1_CallPlanSend()   : CommentedStatement list = (v :?> VertexMCoin).C1_CallPlanSend()
+    member v.C2_CallActionOut()  : CommentedStatement list = (v :?> VertexMCoin).C2_CallActionOut()
+    member v.C3_CallPlanReceive(): CommentedStatement list = (v :?> VertexMCoin).C3_CallPlanReceive()
+    member v.C4_CallActionIn()   : CommentedStatement list = (v :?> VertexMCoin).C4_CallActionIn()

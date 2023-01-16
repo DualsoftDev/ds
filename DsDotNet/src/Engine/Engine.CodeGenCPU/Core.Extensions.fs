@@ -73,8 +73,8 @@ module rec ConvertCoreExt =
         member s._tout   = dsUint16 s "_tout" 10000us
 
         member s.GenerationLampIO() =
-            s.SystemLamps
-                   .ForEach(fun b->b.OutTag  <- getIOs(b.Name, b.OutAddress, In))
+            for b in s.SystemLamps do
+                b.OutTag  <- getIOs(b.Name, b.OutAddress, In)
 
         member s.GenerationButtonIO() = 
             s.SystemButtons
@@ -167,8 +167,8 @@ module rec ConvertCoreExt =
             let ableManual = if f.SelectAutoExpr.any() then !!f.SelectAutoExpr.ToOr() else f.System._on.Expr 
             manual <&&> ableManual
 
-         member f.ModeAutoSwHMIExpr   =  f.auto.Expr <&&> !!f.manual.Expr
-         member f.ModeManualSwHMIExpr =  !!f.auto.Expr <&&> f.manual.Expr
+         member f.ModeAutoSwHMIExpr   =    f.auto.Expr <&&> !!f.manual.Expr
+         member f.ModeManualSwHMIExpr =  !!f.auto.Expr <&&>   f.manual.Expr
 
     
     type Call with

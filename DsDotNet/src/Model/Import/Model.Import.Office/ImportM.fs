@@ -139,8 +139,7 @@ module ImportM =
 
         let systems =  results.Select(fun (sys, view) -> sys) |> Seq.toList
         let views   =  results |> dict
-        let storages = systems |> Seq.map(fun s -> s, new Storages()) |> dict
-        { Config = cfg; Systems = systems; Storages = storages}, views, pptRepo
+        { Config = cfg; Systems = systems}, views, pptRepo
     
     type PptResult = {
         System: DsSystem 

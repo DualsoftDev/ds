@@ -15,8 +15,6 @@ module ModelLoaderModule =
     type Model = {
         Config: ModelConfig
         Systems : DsSystem list
-        ///active DsSystem 기준 Storages 관리 (reference systems은 상위 active Storages 사용)
-        Storages: IDictionary<DsSystem, Storages>
     }
 
 [<RequireQualifiedAccess>]
@@ -57,8 +55,7 @@ module ModelLoader =
                     |> fileExistChecker
                     |> loadSystemFromDsFile systemRepo
             ]
-        let storages = systems |> Seq.map(fun s -> s, new Storages()) |> dict
-        { Config = cfg; Systems = systems; Storages =  storages}
+        { Config = cfg; Systems = systems}
 
 module private TestLoadConfig =
     let testme() =

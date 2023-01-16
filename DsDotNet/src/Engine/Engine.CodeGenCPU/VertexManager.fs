@@ -16,21 +16,6 @@ module VertexManagerModule =
     // ACTION | IN	    | API. I| -	              | API. I    |
     // ACTION | OUT	    | API. O| -	              | API. O    |
                                             
-    let bit (v:Vertex)  mark flag  = 
-        let t = DsBit($"{v.QualifiedName}({mark})", false, v, flag)
-        v.Parent.GetSystem().Storages.Add(t.Name, t) |> ignore
-        t
-
-    let timer (v:Vertex)  mark flag = 
-        let storages = v.Parent.GetSystem().Storages
-        let ts = TimerStruct.Create(TimerType.TON, storages, $"{v.QualifiedName}({mark}:TON)", 0us, 0us) 
-        DsTimer($"{v.QualifiedName}({mark})", false, v, flag, ts)
-    
-    let counter (v:Vertex)  mark flag = 
-        let storages = v.Parent.GetSystem().Storages
-        let cs = CTRStruct.Create(CounterType.CTR, storages, $"{v.QualifiedName}({mark}:CTR)", 0us, 0us) 
-        DsCounter($"{v.QualifiedName}({mark})", false, v, flag, cs)
-        
     
     /// Vertex Manager : 소속되어 있는 DsBit 를 관리하는 컨테이어
     [<DebuggerDisplay("{Name}")>]
@@ -58,6 +43,7 @@ module VertexManagerModule =
         let pulseBit      = bit v "PUL" BitFlag.Pulse
         let goingRelays = HashSet<DsBit>()
 
+
         interface IVertexManager with
             member x.Vertex = v
 
@@ -65,6 +51,7 @@ module VertexManagerModule =
         member x.Vertex = v
         member x.Flow   = v.Parent.GetFlow()
         member x.System = v.Parent.GetFlow().System
+        member val SysManager = SystemManager(v.Parent.GetSystem())
 
 
 

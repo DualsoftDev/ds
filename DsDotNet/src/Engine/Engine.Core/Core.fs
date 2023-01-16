@@ -69,10 +69,19 @@ module CoreModule =
         member val Flows   = createNamedHashSet<Flow>()
         //시스템에서 호출가능한 작업리스트 (Call => Job => ApiItems => Addresses)
         member val Jobs    = ResizeArray<Job>()
-        //시스템에 사용된 모든 메모리를 관리함 (Model Config로 부터 초기 할당받음)
-        member val Storages = getNull<Storages>()  with get, set
+        //시스템에 사용된 모든 메모리를 관리함 
+        member val Storages = Storages() with get, set
 
-        member _.AddLoadedSystem(dev) = loadedSystems.Add(dev) |> ignore; addApiItemsForDevice dev
+        member _.AddLoadedSystem(childSys) =
+            loadedSystems.Add(childSys) |> ignore
+                  //Active 자식 시스템은 전부 최상위 부모 Storages 를 받음
+            let passive = childSys.ReferenceSystem.Storages
+            let active  = childSys.ContainerSystem.Storages
+            //test ahn
+            //passive.ForEach(fun f -> active.Add(f.Key, f.Value))
+            childSys.ReferenceSystem.Storages <- active
+            addApiItemsForDevice childSys
+
         member _.ReferenceSystems     = loadedSystems.Select(fun s->s.ReferenceSystem)
         member _.LoadedSystems        = loadedSystems |> seq
         member _.Devices              = loadedSystems.OfType<Device>()

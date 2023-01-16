@@ -1,4 +1,4 @@
-namespace Engine.CodeGenCPU
+namespace rec Engine.CodeGenCPU
 
 open System.Linq
 open System.Runtime.CompilerServices
@@ -7,7 +7,7 @@ open Engine.Common.FS
 open System
 
 [<AutoOpen>]
-module rec ConvertCoreExt =
+module ConvertCoreExt =
     
     type InOut = | In | Out | Memory
     let private getIOs(name, address, inOut:InOut): ITagWithAddress   =  
@@ -27,33 +27,13 @@ module rec ConvertCoreExt =
     let hasMove (xs:Func seq) = xs.Where(fun f->f.Name = TextMove).any()
     let hasNot  (xs:Func seq) = xs.Where(fun f->f.Name = TextNot ).any()
     
-    let dsBit (system:DsSystem) name init = 
-        if system.Storages.ContainsKey(name) 
-        then system.Storages[name] :?> DsTag<bool>
-        else 
-            
-            system.Storages <- new Storages()
-            let t = DsTag<bool>($"{name}", init)
-            system.Storages.Add(t.Name, t) |> ignore
-            t
-
-    let dsInt (system:DsSystem) name init = 
-        if system.Storages.ContainsKey(name) 
-        then system.Storages[name] :?> DsTag<int>
-        else 
-            let t = DsTag<int>($"{name}", init)
-            system.Storages.Add(t.Name, t) |> ignore
-            t
-
-    let dsUint16 (system:DsSystem) name init = 
-        if system.Storages.ContainsKey(name) 
-        then system.Storages[name] :?> DsTag<uint16>
-        else 
-            let t = DsTag<uint16>($"{name}", init)
-            system.Storages.Add(t.Name, t) |> ignore
-            t
+    type ApiItem with
+        member a.PS = DsTag<bool>($"{a.Name}(PS)", false)
+        member a.PR = DsTag<bool>($"{a.Name}(PR)", false)
 
     type DsSystem with
+        member s.SystemManager  = SystemManager(s)
+        //test ahn
         member s._on     = dsBit s "_on"  true
         member s._off    = dsBit s "_off" false
         member s._auto   = dsBit s "_auto" false
@@ -73,6 +53,7 @@ module rec ConvertCoreExt =
         member s._dtimes   = dsInt s "_s" 0
         member s._dtimems  = dsInt s "_ms" 0
         member s._tout   = dsUint16 s "_tout" 10000us
+        //test ahn
 
         member s.GenerationLampIO() =
             for b in s.SystemLamps do
@@ -129,13 +110,14 @@ module rec ConvertCoreExt =
     
 //운영 모드 는 Flow 별로 제공된 모드 On/Off 상태 나타낸다.
     type Flow with
-        member f.rop    = dsBit f.System $"{f.Name}(RO)" false   // Ready Operation Mode
-        member f.aop    = dsBit f.System $"{f.Name}(AO)" false   // Auto Operation Mode
-        member f.mop    = dsBit f.System $"{f.Name}(MO)" false   // Manual Operation Mode 
-        member f.dop    = dsBit f.System $"{f.Name}(DO)" false   // Drive Operation Mode 
-        member f.top    = dsBit f.System $"{f.Name}(TO)" false   //  Test  Operation Mode (시운전) 
-        member f.sop    = dsBit f.System $"{f.Name}(SO)" false   // Stop State 
-        member f.eop    = dsBit f.System $"{f.Name}(EO)" false   // Emergency State 
+        //test ahn
+        member f.rop    = dsBit f.System $"{f.Name}(ROM)" false   // Ready Operation Mode
+        member f.aop    = dsBit f.System $"{f.Name}(AOM)" false   // Auto Operation Mode
+        member f.mop    = dsBit f.System $"{f.Name}(MOM)" false   // Manual Operation Mode 
+        member f.dop    = dsBit f.System $"{f.Name}(DOM)" false   // Drive Operation Mode 
+        member f.top    = dsBit f.System $"{f.Name}(TOM)" false   //  Test  Operation Mode (시운전) 
+        member f.sop    = dsBit f.System $"{f.Name}(SOM)" false   // Stop State 
+        member f.eop    = dsBit f.System $"{f.Name}(EOM)" false   // Emergency State 
         member f.auto   = dsBit f.System $"{f.Name}_auto" false
         member f.manual = dsBit f.System $"{f.Name}_manual" false
         member f.drive  = dsBit f.System $"{f.Name}_drive" false
@@ -145,6 +127,7 @@ module rec ConvertCoreExt =
         member f.emg    = dsBit f.System $"{f.Name}_emg"  false
         member f.test   = dsBit f.System $"{f.Name}_test" false  
         member f.home   = dsBit f.System $"{f.Name}_home" false  
+        //test ahn
 
 
         //select 버튼은 없을경우 항상 _on
@@ -225,6 +208,3 @@ module rec ConvertCoreExt =
                     .SelectMany(fun a -> x.JobDefs.Where(fun w-> w.ApiItem = a))
 
 
-    type ApiItem with
-        member a.PS = DsTag<bool>($"{a.Name}(PS)", false)
-        member a.PR = DsTag<bool>($"{a.Name}(PR)", false)

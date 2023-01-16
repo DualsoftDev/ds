@@ -222,27 +222,6 @@ module internal rec Command =
             let outputParameters = [ "OUT", output ]
             createBoxXmls (x, y)  XgiConstants.FunctionNameMove namedInputParameters outputParameters ""
 
-    type CheckType with
-        [<Obsolete>]
-        member t.IsRoughlyEqual(typ:System.Type) =
-            match typ.Name with
-            | "Boolean"-> t.HasFlag CheckType.BOOL
-            | "Byte"   -> t.HasFlag CheckType.BYTE
-            | "Double" -> t.HasFlag CheckType.LREAL
-            | "Int16"  -> t.HasFlag CheckType.INT
-            | "Int32"  -> t.HasFlag CheckType.DINT
-            | "Int64"  -> t.HasFlag CheckType.LINT
-            | "SByte"  -> t.HasFlag CheckType.BYTE
-            | "Single" -> t.HasFlag CheckType.REAL
-            | "String" -> t.HasFlag CheckType.STRING || t.HasFlag CheckType.TIME
-            | "UInt16" -> t.HasFlag CheckType.UINT
-            | "UInt32" -> t.HasFlag CheckType.UDINT
-            | "UInt64" -> t.HasFlag CheckType.ULINT
-            //| "Char"   , CheckType.
-            | _ ->
-                failwith "ERROR"
-
-
     let createFunctionBlockInstanceXmls (rungStartX, rungStartY) (cmd:CommandTypes) (namedInputParameters:(string*IExpression) list) (namedOutputParameters:(string*INamedExpressionizableTerminal) list) : BlockSummarizedXmlElements =
         let func = cmd.VarType.ToString()
         let instanceName = cmd.InstanceName

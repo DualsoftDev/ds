@@ -213,27 +213,10 @@ module XgiExpressionConvertorModule =
                 | ("&&" | "||" | "!") as op ->
                     exp.WithNewFunctionArguments newArgs
                 | (">"|">="|"<"|"<="|"="|"!="  |  "+"|"-"|"*"|"/") as op ->
-                    let withDefaultValueT (default_value:'T) =
-                        let out = createXgiAutoVariableT "out" $"{op} output" default_value
-                        xgiLocalVars.Add out
-                        expandFunctionStatements.Add <| DuAugmentedPLCFunction { FunctionName = op; Arguments = newArgs; Output = out; }
-                        DuTerminal (DuVariable out) :> IExpression
-
-                    match exp.DataType.Name with
-                    | "Boolean"-> withDefaultValueT false
-                    | "Byte"   -> withDefaultValueT 0uy
-                    | "Char"   -> withDefaultValueT ' '
-                    | "Double" -> withDefaultValueT 0.0
-                    | "Int16"  -> withDefaultValueT 0s
-                    | "Int32"  -> withDefaultValueT 0
-                    | "Int64"  -> withDefaultValueT 0L
-                    | "SByte"  -> withDefaultValueT 0y
-                    | "Single" -> withDefaultValueT 0.f
-                    | "String" -> withDefaultValueT ""
-                    | "UInt16" -> withDefaultValueT 0us
-                    | "UInt32" -> withDefaultValueT 0u
-                    | "UInt64" -> withDefaultValueT 0UL
-                    | _ -> failwith "ERROR"
+                    let out = createTypedXgiAutoVariable exp.DataType "out" exp.BoxedEvaluatedValue $"{op} output"
+                    xgiLocalVars.Add out
+                    expandFunctionStatements.Add <| DuAugmentedPLCFunction { FunctionName = op; Arguments = newArgs; Output = out; }
+                    out.ToExpression()
 
                 | (FunctionNameRising | FunctionNameFalling) ->
                     exp
@@ -256,29 +239,11 @@ module XgiExpressionConvertorModule =
         let { Storage=storage; ExpandFunctionStatements=augmentedStatementsStorage; Exp=exp } = augmentParams
         let withAugmentedPLCFunction (exp:IExpression) =
             let op = exp.FunctionName.Value
-            let go (v:'Q) =
-                let out = createXgiAutoVariableT "_temp_internal_" $"{op} output" v
-                storage.Add out
-                let args = exp.FunctionArguments |> List.bind (fun arg -> binaryToNary { augmentParams with Exp = arg } operatorsToChange op)
-                DuAugmentedPLCFunction {FunctionName=op; Arguments=args; Output=out } |> augmentedStatementsStorage.Add
-                var2expr out :> IExpression
-
-            let v = exp.BoxedEvaluatedValue
-            match exp.DataType.Name with
-            | "Boolean"-> go (v :?> bool)
-            | "Byte"   -> go (v :?> uint8)
-            | "Char"   -> go (v :?> char)
-            | "Double" -> go (v :?> double)
-            | "Int16"  -> go (v :?> int16)
-            | "Int32"  -> go (v :?> int32)
-            | "Int64"  -> go (v :?> int64)
-            | "SByte"  -> go (v :?> int8)
-            | "Single" -> go (v :?> float32)
-            | "String" -> go (v :?> string)
-            | "UInt16" -> go (v :?> uint16)
-            | "UInt32" -> go (v :?> uint32)
-            | "UInt64" -> go (v :?> uint64)
-            | _ -> failwith "ERROR"
+            let out = createTypedXgiAutoVariable exp.DataType "_temp_internal_" exp.BoxedEvaluatedValue $"{op} output"
+            storage.Add out
+            let args = exp.FunctionArguments |> List.bind (fun arg -> binaryToNary { augmentParams with Exp = arg } operatorsToChange op)
+            DuAugmentedPLCFunction {FunctionName=op; Arguments=args; Output=out } |> augmentedStatementsStorage.Add
+            out.ToExpression()
 
         match exp.FunctionName with
         | Some op when operatorsToChange.Contains(op) -> // ("+"|"-"|"*"|"/"   (*|"&&"|"||"*) as op) ->

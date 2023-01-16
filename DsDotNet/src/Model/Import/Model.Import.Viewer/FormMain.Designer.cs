@@ -46,6 +46,7 @@ namespace Dual.Model.Import
             this.button_TestStart = new System.Windows.Forms.Button();
             this.button_TestORG = new System.Windows.Forms.Button();
             this.splitContainer4 = new System.Windows.Forms.SplitContainer();
+            this.comboBox_TestExpr = new System.Windows.Forms.ComboBox();
             this.button_Stop = new System.Windows.Forms.Button();
             this.button_Reset = new System.Windows.Forms.Button();
             this.button_Start = new System.Windows.Forms.Button();
@@ -54,6 +55,8 @@ namespace Dual.Model.Import
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.label2 = new System.Windows.Forms.Label();
+            this.comboBox_Device = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -122,7 +125,9 @@ namespace Dual.Model.Import
             // splitContainer2.Panel1
             // 
             this.splitContainer2.Panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(33)))), ((int)(((byte)(33)))));
+            this.splitContainer2.Panel1.Controls.Add(this.label2);
             this.splitContainer2.Panel1.Controls.Add(this.label1);
+            this.splitContainer2.Panel1.Controls.Add(this.comboBox_Device);
             this.splitContainer2.Panel1.Controls.Add(this.comboBox_System);
             this.splitContainer2.Panel1.Controls.Add(this.button_OpenFolder);
             this.splitContainer2.Panel1.Controls.Add(this.button_CreateExcel);
@@ -152,7 +157,7 @@ namespace Dual.Model.Import
             this.comboBox_System.FormattingEnabled = true;
             this.comboBox_System.Location = new System.Drawing.Point(82, 112);
             this.comboBox_System.Name = "comboBox_System";
-            this.comboBox_System.Size = new System.Drawing.Size(362, 20);
+            this.comboBox_System.Size = new System.Drawing.Size(125, 20);
             this.comboBox_System.TabIndex = 10;
             this.comboBox_System.SelectedIndexChanged += new System.EventHandler(this.comboBox_System_SelectedIndexChanged);
             // 
@@ -290,6 +295,7 @@ namespace Dual.Model.Import
             // 
             // splitContainer4.Panel2
             // 
+            this.splitContainer4.Panel2.Controls.Add(this.comboBox_TestExpr);
             this.splitContainer4.Panel2.Controls.Add(this.button_Stop);
             this.splitContainer4.Panel2.Controls.Add(this.button_Reset);
             this.splitContainer4.Panel2.Controls.Add(this.button_Start);
@@ -301,6 +307,17 @@ namespace Dual.Model.Import
             this.splitContainer4.Size = new System.Drawing.Size(1373, 746);
             this.splitContainer4.SplitterDistance = 346;
             this.splitContainer4.TabIndex = 20;
+            // 
+            // comboBox_TestExpr
+            // 
+            this.comboBox_TestExpr.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBox_TestExpr.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_TestExpr.FormattingEnabled = true;
+            this.comboBox_TestExpr.Location = new System.Drawing.Point(1171, 201);
+            this.comboBox_TestExpr.Name = "comboBox_TestExpr";
+            this.comboBox_TestExpr.Size = new System.Drawing.Size(173, 20);
+            this.comboBox_TestExpr.TabIndex = 10;
+            this.comboBox_TestExpr.SelectedIndexChanged += new System.EventHandler(this.comboBox_TestExpr_SelectedIndexChanged);
             // 
             // button_Stop
             // 
@@ -385,6 +402,25 @@ namespace Dual.Model.Import
             this.splitter1.TabIndex = 22;
             this.splitter1.TabStop = false;
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(242, 116);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(57, 12);
+            this.label2.TabIndex = 12;
+            this.label2.Text = "디바이스:";
+            // 
+            // comboBox_Device
+            // 
+            this.comboBox_Device.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_Device.FormattingEnabled = true;
+            this.comboBox_Device.Location = new System.Drawing.Point(306, 111);
+            this.comboBox_Device.Name = "comboBox_Device";
+            this.comboBox_Device.Size = new System.Drawing.Size(125, 20);
+            this.comboBox_Device.TabIndex = 10;
+            this.comboBox_Device.SelectedIndexChanged += new System.EventHandler(this.comboBox_Device_SelectedIndexChanged);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
@@ -451,6 +487,9 @@ namespace Dual.Model.Import
         private System.Windows.Forms.Button button_Stop;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox comboBox_System;
+        private System.Windows.Forms.ComboBox comboBox_TestExpr;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox comboBox_Device;
     }
 }
 

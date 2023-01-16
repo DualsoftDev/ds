@@ -156,8 +156,7 @@ module PPTObjectModule =
         | REAL        
         | DUMMY       
         | BUTTON       
-        | LAMP       
-        | ACTIVESYS       -> checkDotErr()
+        | LAMP        -> checkDotErr()
 
     let getBtnType(key:string) =
         match TrimSpace key with
@@ -265,7 +264,6 @@ module PPTObjectModule =
                 elif(shape.CheckEllipse())      then CALL
                 elif(shape.CheckBevelShapePlate())  then  LAMP
                 elif(shape.CheckBevelShapeRound())  then  BUTTON
-                elif(shape.CheckCube())  then  ACTIVESYS
                 else  shape.ErrorName(ErrID._1, iPage)
 
             nameCheck (shape, nodeType, iPage)

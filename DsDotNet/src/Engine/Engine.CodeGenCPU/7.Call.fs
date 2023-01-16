@@ -9,16 +9,16 @@ open Engine.Common.FS
 type VertexMCoin with
     member coin.C1_CallPlanSend(): CommentedStatement list =
         let call = coin.Vertex :?> Call
-        let rop, mop = coin.Flow.rop.Expr, coin.Flow.mop.Expr
+        let dop, mop, rop = coin.Flow.dop.Expr, coin.Flow.mop.Expr, coin.Flow.rop.Expr
         let sharedCalls = coin.GetSharedCall().Select(getVM)
         let startTags   = ([coin.ST] @ sharedCalls.STs()).ToOr()
         let forceStarts = ([coin.SF] @ sharedCalls.SFs()).ToOr()
         [
             for jd in call.CallTargetJob.JobDefs do
                 let startPointExpr = getStartPointExpr(call, jd)
-                let sets = (rop <&&> startTags) <||>
+                let sets = (dop <&&> startTags) <||>
                            (mop <&&> forceStarts) <||>
-                           (rop <||> mop <&&> startPointExpr)
+                           (rop <&&> startPointExpr)
 
                 let rsts = jd.MutualResets(coin.System)
                              .Select(fun f -> f.ApiItem.PS)

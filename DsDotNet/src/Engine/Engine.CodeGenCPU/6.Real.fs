@@ -22,8 +22,8 @@ type VertexMReal with
 
 
     member v.R3_RealStartPoint(): CommentedStatement  =
-        let set = (v.G.Expr <&&> v.RR.Expr) <||>
-                  (v.H.Expr <&&> v.OG.Expr)
+        let set = (v.G.Expr <&&> !!v.RR.Expr) <||>
+                  (v.H.Expr <&&> !!v.OG.Expr)
         let rst = v.System._off.Expr
 
         (set, rst) ==| (v.RO, "R3")

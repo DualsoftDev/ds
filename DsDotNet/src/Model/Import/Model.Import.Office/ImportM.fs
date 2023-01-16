@@ -139,15 +139,36 @@ module ImportM =
 
         let systems =  results.Select(fun (sys, view) -> sys) |> Seq.toList
         let views   =  results |> dict
-        { Config = cfg; Systems = systems}, views, pptRepo
+        let storages = systems |> Seq.map(fun s -> s, new Storages()) |> dict
+        { Config = cfg; Systems = systems; Storages = storages}, views, pptRepo
+    
+    type PptResult = {
+        System: DsSystem 
+        Views : ViewNode seq 
+        IsActive : bool
+    }
 
     [<Extension>]
     type ImportPPT =
 
         [<Extension>]
-        static member GetModel      (paths:string seq) = fromPPTs paths |> fun (model, views, pptRepo) -> model
-        static member GetModelNView (paths:string seq) = fromPPTs paths |> fun (model, views, pptRepo) -> model, views
-                                    
+        static member GetModel      (paths:string seq) = 
+            fromPPTs paths |> fun (model, views, pptRepo) -> model
+
+        [<Extension>]
+        static member GetModelNView (paths:string seq) = 
+            fromPPTs paths |> fun (model, views, pptRepo) -> model, views
+
+        [<Extension>]
+        static member GetLoadingAllSystem (paths:string seq) =
+             fromPPTs paths 
+             |> fun (model, views, pptRepo)
+                    -> pptRepo 
+                        |> Seq.map(fun f-> 
+                            {   System= f.Key
+                                Views = f.Value.MakeGraphView(f.Key)
+                                IsActive = model.Systems.Contains(f.Key)}  )
+        [<Extension>]
         static member GetDsFilesWithLib (paths:string seq) = 
                 fromPPTs paths 
                 |> fun (model, views, pptRepo) 

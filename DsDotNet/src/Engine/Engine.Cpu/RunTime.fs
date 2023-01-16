@@ -8,9 +8,9 @@ open System.Collections.Concurrent
 
 [<AutoOpen>]
 module RunTime =
-    type DsCPU(statements:Statement seq) =
+    type DsCPU(css:CommentedStatement seq) =
         let mapRungs = ConcurrentDictionary<IStorage, HashSet<Statement>>()
-        let statements = statements |> List.ofSeq
+        let statements = css |> Seq.map(fun f -> f.Statement)
         let runSubscribe() =
             let subscribe =
                 ValueSubject
@@ -56,12 +56,13 @@ module RunTime =
 
 
         //강제 전체 연산 임시 test용
-        member x.Scan() =
+        member x.ScanOnce() =
             for s in statements do
                 s.Do()
 
             ///running 이 Some 이면 Expression 처리 동작 중
         member x.IsRunning = runSubscription <> null
+        member x.CommentedStatements = css
         member x.Run() =
             assert(runSubscription = null)
             runSubscription <- runSubscribe()

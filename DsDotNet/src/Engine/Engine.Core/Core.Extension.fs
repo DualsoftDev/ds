@@ -6,13 +6,18 @@ open System.Linq
 open System.Diagnostics
 open Engine.Common.FS
 open System
+open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module CoreExtensionModule =
 
     let getButtons (sys:DsSystem, btnType:BtnType) = sys.Buttons.Where(fun f->f.ButtonType = btnType)
     let getLamps (sys:DsSystem, lampType:LampType) = sys.Lamps.Where(fun f->f.LampType = lampType)
-
+    let getRecursiveSystems (sys:DsSystem) =
+            [
+                yield! sys.ReferenceSystems
+                yield! sys.ReferenceSystems |> Seq.collect(fun f->f |> getRecursiveSystems)
+            ] |> List.toSeq
     type DsSystem with
         member x.AddButton(btnType:BtnType, btnName:string, inAddress:TagAddress, outAddress:TagAddress, flow:Flow) =
             let checkSystem() =
@@ -74,7 +79,15 @@ module CoreExtensionModule =
                 .Select(fun s->x.ApiItems.Find(fun f->f.Name = s.Value))
 
         member x.JobDefs = x.Jobs |> Seq.collect(fun s->s.JobDefs)
+        member x.GetRecursiveSystems() =  x |> getRecursiveSystems
 
     type Call with
         member x.System = x.Parent.GetSystem()
     
+
+
+[<Extension>]
+type SystemExt =
+    [<Extension>] 
+    static member GetRecursiveSystems (x:DsSystem) : DsSystem seq = x |> getRecursiveSystems 
+        

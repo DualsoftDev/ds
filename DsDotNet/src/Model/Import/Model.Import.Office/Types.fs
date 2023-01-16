@@ -18,12 +18,23 @@ module InterfaceClass =
         | DUMMY         //그룹더미
         | BUTTON        //버튼 emg,start, ...
         | LAMP          //램프 runmode,stopmode, ...
-        | ACTIVESYS        //model ppt active  system
+        //| ACTIVESYS        //model ppt active  system
         with
             member x.IsReal = x = REAL || x = REALEx
             member x.IsCall = x = CALL
             member x.IsRealorCall =  x.IsReal || x.IsCall
 
+    type ViewType =
+        | VFLOW          
+        | VREAL          
+        | VREALEx        
+        | VCALL          
+        | VIF            
+        | VCOPY_VALUE    
+        | VCOPY_REF      
+        | VDUMMY         
+        | VBUTTON        
+        | VLAMP          
     
     ///인터페이스 Tag 기본 형식
     type ExcelCase =

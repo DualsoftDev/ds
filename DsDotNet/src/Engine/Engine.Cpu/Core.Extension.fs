@@ -1,6 +1,7 @@
 namespace Engine.Cpu
 
 open Engine.Core
+open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module CoreExtensionsModule =
@@ -31,3 +32,15 @@ module CoreExtensionsModule =
                     yield! s.GetSourceStorages() ]
             | DuAction (DuCopy (condition, source_, target_)) -> condition.CollectStorages()
             | DuAugmentedPLCFunction _ -> []
+
+
+
+    let getTargetStorages (x:Statement) = x.GetTargetStorages()
+    let getSourceStorages (x:Statement) = x.GetSourceStorages()
+    let getAutoButtons (x:DsSystem) = x.AutoButtons
+
+
+//[<Extension>]
+//type StatementExt =
+//    [<Extension>] static member GetTargetStorages (x:Statement) = x.GetTargetStorages()
+//    [<Extension>] static member GetSourceStorages (x:Statement) = x.GetSourceStorages()

@@ -31,6 +31,8 @@ module rec ConvertCoreExt =
         if system.Storages.ContainsKey(name) 
         then system.Storages[name] :?> DsTag<bool>
         else 
+            
+            system.Storages <- new Storages()
             let t = DsTag<bool>($"{name}", init)
             system.Storages.Add(t.Name, t) |> ignore
             t
@@ -91,10 +93,11 @@ module rec ConvertCoreExt =
 
         //[auto, manual] system HMI 두개다 선택이 안됨
         member s.ModeNoExpr = !!s._auto.Expr <&&> !!s._manual.Expr
-        //자신이 사용된 API Plan Send
+        //자신이 사용된 API Plan Set Send 
         member s.GetPSs(r:Real) = 
             s.ApiItems.Where(fun api-> api.TXs.Contains(r))
                       .Select(fun api -> api.PS)
+        //자신이 사용된 API Plan Rst Send 
         member s.GetPRs(r:Real) = 
             s.ApiItems.Where(fun api-> api.TXs.Contains(r))
                       .Select(fun api -> api.PR)

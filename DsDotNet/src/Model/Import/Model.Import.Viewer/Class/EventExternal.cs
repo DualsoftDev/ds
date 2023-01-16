@@ -34,14 +34,18 @@ namespace Dual.Model.Import
                 var v = rx.vertex as Vertex;
                 FormMain.TheMain.Do(() =>
                 {
-                    var ucView = FormMain.TheMain.SelectedView;
-                    var viewNode = FormMain.TheMain._DicVertex[v];
-                    viewNode.Status4 = rx.status;
+                    if (FormMain.TheMain._DicVertex.ContainsKey(v))
+                    {
+                        var ucView = FormMain.TheMain.SelectedView;
+                        var viewNode = FormMain.TheMain._DicVertex[v];
+                        viewNode.Status4 = rx.status;
 
-                    ucView.UpdateStatus(viewNode);
+                        ucView.UpdateStatus(viewNode);
+                        FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{v.Name}:{rx.status}");
+                    }
                 });
 
-                FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{v.Name}:{rx.status}");
+                
             });
         }
 

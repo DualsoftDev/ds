@@ -209,7 +209,7 @@ namespace Dual.Model.Import
             {
                 //nNode.Attr.Color = Color.DarkGoldenrod;
 
-                if (viewNode.NodeType == NodeType.BUTTON)
+                if (viewNode.ViewType == ViewType.VBUTTON)
                 {
                     if (viewNode.IsChildExist)
                     {
@@ -230,7 +230,7 @@ namespace Dual.Model.Import
                         if (viewNode.BtnType.Value == BtnType.DuClearBTN) nNode.Attr.FillColor = Color.DarkOliveGreen;
                     }
                 }
-                if (viewNode.NodeType == NodeType.LAMP)
+                if (viewNode.ViewType == ViewType.VLAMP)
                 {
                     if (viewNode.IsChildExist)
                     {
@@ -250,16 +250,16 @@ namespace Dual.Model.Import
                         if (viewNode.LampType.Value == LampType.DuReadyModeLamp) nNode.Attr.FillColor = Color.Green;
                     }
                 }
-                if (viewNode.NodeType == NodeType.REAL)
+                if (viewNode.ViewType == ViewType.VREAL)
                     nNode.Attr.Shape = Shape.Box;
-                if (viewNode.NodeType == NodeType.DUMMY)
+                if (viewNode.ViewType == ViewType.VDUMMY)
                 {
                     nNode.Attr.Shape = Shape.Box;
                     nNode.Attr.FillColor = Color.Black;
                 }
-                if (viewNode.NodeType == NodeType.CALL)
+                if (viewNode.ViewType == ViewType.VCALL)
                     nNode.Attr.Shape = Shape.Ellipse;
-                if (viewNode.NodeType == NodeType.IF)
+                if (viewNode.ViewType == ViewType.VIF)
                 {
                     if (viewNode.IsChildExist)
                     {
@@ -273,7 +273,7 @@ namespace Dual.Model.Import
                     }
 
                 }
-                //if (viewNode.NodeType == NodeType.COPY_VALUE)
+                //if (viewNode.NodeType == ViewType.VCOPY_VALUE)
                 //    nNode.Attr.Shape = Shape.Octagon;
             }
         }
@@ -302,7 +302,7 @@ namespace Dual.Model.Import
             //node.Label.FontColor = Color.White;
             if (viewNode != null)
             {
-                if (viewNode.NodeType == NodeType.REAL)
+                if (viewNode.ViewType == ViewType.VREAL)
                     UpdateLineColor(viewNode.Status4, node);
                 else
                     UpdateFillColor(viewNode.Status4, node);

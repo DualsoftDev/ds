@@ -78,7 +78,7 @@ module CodeElements =
     //}
       
     [<Extension>]
-    type SystemExt =
+    type SystemFuncExt =
         [<Extension>] static member GetDelayTime (x:Func) = 
                         let presetTime = (x.Parameters |> Seq.head ).ToLower()
                         let timetype = Regex.Replace(presetTime, @"\d", "");//문자 추출

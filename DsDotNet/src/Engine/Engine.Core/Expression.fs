@@ -223,9 +223,7 @@ module ExpressionModule =
             | DuAction (a:ActionStatement) -> 
                 match a with 
                 | DuCopy (condition:IExpression<bool>, source:IExpression,target:IStorage)-> target.BoxedValue
-            | DuAugmentedPLCFunction (f:FunctionParameters) ->  false
-
-
+            | DuAugmentedPLCFunction (f:FunctionParameters) ->  false  // Function은 항상 false 함수에 따른다.
 
     let (|CommentAndStatement|) = function | CommentedStatement(x, y) -> x, y
     let commentAndStatement = (|CommentAndStatement|)

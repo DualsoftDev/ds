@@ -69,8 +69,8 @@ module CoreModule =
         member val Flows   = createNamedHashSet<Flow>()
         //시스템에서 호출가능한 작업리스트 (Call => Job => ApiItems => Addresses)
         member val Jobs    = ResizeArray<Job>()
-        //시스템에 사용된 모든 메모리를 관리함
-        member val Storages =  Storages()
+        //시스템에 사용된 모든 메모리를 관리함 (Model Config로 부터 초기 할당받음)
+        member val Storages = getNull<Storages>()  with get, set
 
         member _.AddLoadedSystem(dev) = loadedSystems.Add(dev) |> ignore; addApiItemsForDevice dev
         member _.ReferenceSystems     = loadedSystems.Select(fun s->s.ReferenceSystem)

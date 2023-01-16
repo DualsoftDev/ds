@@ -368,5 +368,5 @@ module internal ToDsTextModule =
 
 
 [<Extension>]
-type SystemExt =
+type SystemToDsExt =
     [<Extension>] static member ToDsText (system:DsSystem) = systemToDs system 1

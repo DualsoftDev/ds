@@ -4,6 +4,7 @@ open System.IO
 open Newtonsoft.Json
 open Engine.Common.FS
 open Engine.Parser.FS
+open System.Collections.Generic
 
 [<AutoOpen>]
 module ModelLoaderModule =
@@ -13,9 +14,10 @@ module ModelLoaderModule =
     }
     type Model = {
         Config: ModelConfig
-        Systems: DsSystem list
+        Systems : DsSystem list
+        ///active DsSystem 기준 Storages 관리 (reference systems은 상위 active Storages 사용)
+        Storages: IDictionary<DsSystem, Storages>
     }
-
 
 [<RequireQualifiedAccess>]
 module ModelLoader =
@@ -55,7 +57,8 @@ module ModelLoader =
                     |> fileExistChecker
                     |> loadSystemFromDsFile systemRepo
             ]
-        { Config = cfg; Systems = systems }
+        let storages = systems |> Seq.map(fun s -> s, new Storages()) |> dict
+        { Config = cfg; Systems = systems; Storages =  storages}
 
 module private TestLoadConfig =
     let testme() =

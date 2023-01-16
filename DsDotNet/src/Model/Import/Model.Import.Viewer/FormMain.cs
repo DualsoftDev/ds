@@ -17,10 +17,19 @@ using static Engine.Core.CoreModule;
 using static Engine.Core.EdgeExt;
 using static Engine.Core.SystemExt;
 using static Engine.Core.Interface;
-
+using static Engine.Cpu.CoreExtensionsModule;
 using static Engine.Cpu.RunTime;
 using static Model.Import.Office.ViewModule;
 using static Engine.CodeGenCPU.CpuLoader;
+using System.Data;
+using static Engine.Core.ExpressionModule;
+using Engine.Core;
+using static Engine.CodeGenCPU.ConvertSystem;
+using log4net.Appender;
+using DocumentFormat.OpenXml.Wordprocessing;
+using Model.Import.Office;
+using Color = System.Drawing.Color;
+using System.Security.Cryptography;
 
 namespace Dual.Model.Import
 {
@@ -28,9 +37,12 @@ namespace Dual.Model.Import
     {
         public static FormMain TheMain;
 
-        private DsCPU _myCPU;
+        private DsCPU _SelectedCPU;
+        public Dictionary<DsSystem, DsCPU>          _DicCpu;
+        public Dictionary<DsSystem, IEnumerable<ViewNode>> _DicViews;
 
         public Dictionary<Vertex, ViewNode> _DicVertex;
+        public Dictionary<int, CommentedStatement> _DicStatement;
         public List<string> _PathPPTs = new List<string>();
         public string _PathXLS;
         public bool Busy = false;
@@ -146,7 +158,7 @@ namespace Dual.Model.Import
                 _cts.Cancel();
                 _cts = new CancellationTokenSource();
 
-                if (_myCPU != null && _myCPU.IsRunning)  _myCPU.Stop(); 
+                if (_SelectedCPU != null && _SelectedCPU.IsRunning)  _SelectedCPU.Stop(); 
                 ImportPowerPoint(paths);
 
 
@@ -193,16 +205,16 @@ namespace Dual.Model.Import
 
         private async void button_TestStart_Click(object sender, EventArgs e)
         {
-            if (_myCPU == null) return;
+            if (_SelectedCPU == null) return;
             StartResetBtnUpdate(true);
             await Task.Delay(0);
-            _myCPU.Run();
+            _SelectedCPU.Run();
         }
         private void button_Stop_Click(object sender, EventArgs e)
         {
-            if (_myCPU == null) return;
+            if (_SelectedCPU == null) return;
             StartResetBtnUpdate(false);
-            _myCPU.Stop();
+            _SelectedCPU.Stop();
         }
 
         private async void button_TestORG_Click(object sender, EventArgs e)
@@ -278,17 +290,44 @@ namespace Dual.Model.Import
                 sysViews.Add(systemView);
             return sysViews.Select(s => s.System);
         }
+        private void UpdateDevice(SystemView sysView)
+        {
+            var devices = sysView.System.GetRecursiveSystems();
+            comboBox_Device.Items.Clear();
+            foreach (var dev in devices)
+            {
+                var vi = new SystemView() { Display = dev.Name, System = dev, ViewNodes = _DicViews[dev].ToList() };
+                comboBox_Device.Items.Add(vi);
+            }
 
+
+            comboBox_Device.DisplayMember = "Display";
+            //if (comboBox_Device.Items.Count > 0)
+            //    comboBox_Device.SelectedIndex = 0;
+        }
+
+        private void comboBox_Device_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            SystemView sysView = comboBox_Device.SelectedItem as SystemView;
+            UpdateSelectedCpu(sysView);
+        }
         private void comboBox_System_SelectedIndexChanged(object sender, EventArgs e)
         {
             SystemView sysView = comboBox_System.SelectedItem as SystemView;
+            UpdateSelectedCpu(sysView);
+            UpdateDevice(sysView);
+        }
 
-            var rungs = Cpu.LoadStatements(sysView.System);
-            _myCPU = new DsCPU(rungs.Select(s => s.statement));
-            _myCPU.Run();
+        private void UpdateSelectedCpu(SystemView sysView)
+        {
+
+            _SelectedCPU = _DicCpu[sysView.System];
 
             _DicVertex = new Dictionary<Vertex, ViewNode>();
             comboBox_Segment.Items.Clear();
+
+            _DicStatement = new Dictionary<int, CommentedStatement>();
+            comboBox_TestExpr.Items.Clear();
 
             sysView.System.GetVertices()
                 .ForEach(v =>
@@ -305,21 +344,39 @@ namespace Dual.Model.Import
                     }
                 });
             int cnt = 0;
-            var text = rungs.Select(rung =>
+            var text = _SelectedCPU.CommentedStatements.Select(rung =>
             {
                 var description = rung.comment;
                 var statement = rung.statement;
                 var targetValue = rung.TargetValue;
+                _DicStatement.Add(cnt, rung);
+                comboBox_TestExpr.Items.Add(cnt);
                 return $"{cnt++}\t[{targetValue}] Spec:{description.Replace("%", " ").Replace("$", " ")}";
             });
-            
+
             StartResetBtnUpdate(true);
 
             UpdateCpuUI(text);
             UpdateGraphUI(sysView.ViewNodes);
 
-            DisplayTextModel(Color.Transparent, sysView.System.ToDsText());
-            //DisplayTextExpr(_myCPU.ToTextStatement(), Color.WhiteSmoke);
+            DisplayTextModel(System.Drawing.Color.Transparent, sysView.System.ToDsText());
+        }
+
+
+        private void comboBox_TestExpr_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int index = comboBox_TestExpr.SelectedIndex;
+            var cs = _DicStatement[index];
+           // cs.statement.Do();
+
+            var tgts = getTargetStorages(cs.statement);
+            var srcs = getSourceStorages(cs.statement);
+            string tgtsTexs = string.Join(", ", tgts.Select(s => $"{s.Name}({s.BoxedValue})"));
+            string srcsTexs = string.Join(", ", srcs.Select(s => $"{s.Name}({s.BoxedValue})"));
+
+            richTextBox_ds.AppendTextColor($"{cs.comment}".Replace("$", ""), Color.White);
+            richTextBox_ds.AppendTextColor($"\r\n\t{tgtsTexs} = {srcsTexs}\r\n", Color.White);
+            richTextBox_ds.ScrollToCaret();
         }
     }
 }

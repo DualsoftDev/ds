@@ -60,7 +60,7 @@ module CodeConvertUtil =
         | :? Real as r ->
                 let ons = getOriginJobDefs (r, InitialType.On)
                 if ons.Contains(jd)
-                    then r.V.RO.Expr <||> call.System._on.Expr
+                    then r.V.RO.Expr <&&> call.System._on.Expr
                     else call.System._off.Expr
         | _ -> call.System._off.Expr
 

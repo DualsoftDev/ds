@@ -40,7 +40,7 @@ module ImportViewModule =
             )
 
     let ConvertFlow(flow:Flow, dummys:pptDummy seq)  =
-        let newNode = ViewNode()
+        let newNode = ViewNode(VFLOW)
         newNode.Flow <- Some flow
         let edgeInfos = flow.ModelingEdges
         let lands = flow.Graph.Islands
@@ -77,7 +77,7 @@ module ImportViewModule =
         newNode
         
     let UpdateLampNodes(system:DsSystem, flow:Flow, node:ViewNode)  =
-        let newNode = ViewNode("Lamps", LAMP)
+        let newNode = ViewNode("Lamps", VLAMP)
 
         system.AutoModeLamps.Where(fun w->      w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuAutoModeLamp))      |>ignore)
         system.ManualModeLamps.Where(fun w->    w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuManualModeLamp))    |>ignore)
@@ -92,7 +92,7 @@ module ImportViewModule =
     
     let UpdateBtnNodes(system:DsSystem, flow:Flow, node:ViewNode)  =
 
-        let newNode = ViewNode("Buttons", BUTTON)
+        let newNode = ViewNode("Buttons", VBUTTON)
 
         system.AutoButtons.Where(fun w->w.SettingFlows.Contains(flow))       |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuAutoBTN)) |>ignore)
         system.ManualButtons.Where(fun w->w.SettingFlows.Contains(flow))     |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuManualBTN)) |>ignore)
@@ -110,38 +110,38 @@ module ImportViewModule =
 
     let UpdateApiItems(system:DsSystem, page:int, pptNodes: pptNode seq, node:ViewNode)  =
 
-        let newNode = ViewNode("Interface", IF)
+        let newNode = ViewNode("Interface", VIF)
 
         system.ApiItems 
         |> Seq.iter(fun api ->
             
             let findApiNode = pptNodes.Where(fun f->f.Name = api.Name && f.PageNum = page)
             if findApiNode.Count() > 0
-            then newNode.Singles.Add(ViewNode(api.Name, IF)) |>ignore
+            then newNode.Singles.Add(ViewNode(api.Name, VIF)) |>ignore
             
             )
 
         if newNode.Singles.Count > 0
         then node.Singles.Add(newNode) |> ignore
 
-    let rec ConvertRuntimeEdge(graph:Graph<Vertex, Edge>)  =
-        let newNode = ViewNode()
-        let dicV = graph.Vertices.Select(fun v-> v, ViewNode(v)) |> dict
-        let convertReal(vertex:Vertex) = 
-            match vertex  with
-                | :? Real as r ->  newNode.Singles.Add(ConvertRuntimeEdge(r.Graph)) |>ignore
-                | :? Call | :? Alias-> newNode.Singles.Add(dicV.[vertex]) |>ignore
-                | _ -> failwithf "vertex type ERROR" 
+    //let rec ConvertRuntimeEdge(graph:Graph<Vertex, Edge>)  =
+    //    let newNode = ViewNode()
+    //    let dicV = graph.Vertices.Select(fun v-> v, ViewNode(v)) |> dict
+    //    let convertReal(vertex:Vertex) = 
+    //        match vertex  with
+    //            | :? Real as r ->  newNode.Singles.Add(ConvertRuntimeEdge(r.Graph)) |>ignore
+    //            | :? Call | :? Alias-> newNode.Singles.Add(dicV.[vertex]) |>ignore
+    //            | _ -> failwithf "vertex type ERROR" 
 
-        graph.Islands |>Seq.iter(fun vertex -> convertReal(vertex))
-        graph.Edges
-        |>Seq.iter(fun edge -> 
-            convertReal(edge.Source)
-            convertReal(edge.Target)
-            let viewEdge = ModelingEdgeInfo(dicV.[edge.Source], edge.EdgeType.ToText(), dicV.[edge.Target])
-            newNode.Edges.Add(viewEdge) |>ignore)
+    //    graph.Islands |>Seq.iter(fun vertex -> convertReal(vertex))
+    //    graph.Edges
+    //    |>Seq.iter(fun edge -> 
+    //        convertReal(edge.Source)
+    //        convertReal(edge.Target)
+    //        let viewEdge = ModelingEdgeInfo(dicV.[edge.Source], edge.EdgeType.ToText(), dicV.[edge.Target])
+    //        newNode.Edges.Add(viewEdge) |>ignore)
 
-        newNode
+    //    newNode
 
     [<Extension>]
     type ImportViewUtil =

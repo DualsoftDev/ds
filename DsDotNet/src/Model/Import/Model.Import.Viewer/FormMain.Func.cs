@@ -9,9 +9,11 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using static Engine.CodeGenCPU.CpuLoader;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
+using static Engine.Cpu.RunTime;
 using static Model.Import.Office.ImportM;
 using static Model.Import.Office.ImportViewModule;
 using Color = System.Drawing.Color;
@@ -27,19 +29,47 @@ namespace Dual.Model.Import
         {
             try
             {
-                var results = ImportPPT.GetModelNView(paths);
-                var model = results.Item1;
-                var views = results.Item2;
+                var results = ImportPPT.GetLoadingAllSystem(paths);
+                _DicCpu = new Dictionary<DsSystem, DsCPU>();
+                _DicViews = new Dictionary<DsSystem, IEnumerable<ViewModule.ViewNode>>();
+                foreach (var view in results)
+                {
+                    var sys = view.System;
+                    var sysView = view.Views.ToList();
+                    var isActive = view.IsActive;
+                    _DicViews.Add(sys, sysView);
 
-                views.ForEach(dic =>
-                    comboBox_System.Items
-                    .Add(new SystemView() { Display = dic.Key.Name, System = dic.Key, ViewNodes = dic.Value.ToList() }));
+                    if (isActive)
+                    {
+                        var rungs = Cpu.LoadStatements(sys);
+                        _DicCpu.Add(sys, new DsCPU(rungs));
+
+                        var systemView = new SystemView() { Display = sys.Name, System = sys, ViewNodes = sysView };
+                        comboBox_System.Items.Add(systemView);
+
+                        var devices = sys.GetRecursiveSystems();
+                        foreach (var device in devices)
+                        {
+                            var devRungs = Cpu.LoadStatements(device);
+                            if (!_DicCpu.ContainsKey(device))  //external system 은 공유
+                                _DicCpu.Add(device, new DsCPU(devRungs));
+                        }
+                    }
+                }
+
                 comboBox_System.DisplayMember = "Display";
                 if (comboBox_System.Items.Count > 0)
                     comboBox_System.SelectedIndex = 0;
 
-                model.Config.DsFilePaths.ForEach(f =>
+                paths.ForEach(f =>
                     WriteDebugMsg(DateTime.Now, MSGLevel.MsgWarn, $"{f} 불러오기 성공!!"));
+
+
+                _DicCpu.ForEach(f =>
+                {
+                    f.Value.Run();
+                    f.Value.ScanOnce();
+                });
 
                 ProcessEvent.DoWork(0);
             }
@@ -187,7 +217,7 @@ namespace Dual.Model.Import
                     richTextBox_Debug.AppendTextColor($"\r\n{time} : {msg}", color);
                 }
 
-                richTextBox_Debug.ScrollToCaret();
+               // richTextBox_Debug.ScrollToCaret();
             });
         }
        // CoreModule.Model _Demo = new CoreModule.Model();

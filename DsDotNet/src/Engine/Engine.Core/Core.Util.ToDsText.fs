@@ -93,7 +93,7 @@ module internal ToDsTextModule =
                         | Some(DuAliasTargetReal real) -> real.GetAliasTargetToDs(flow).Combine()
                         | Some(DuAliasTargetCall call) -> call.GetAliasTargetToDs().Combine()
                         | Some(DuAliasTargetRealEx o) -> o.Real.GetAliasTargetToDs(flow).Combine()
-                        | None -> failwith "ERROR"
+                        | None -> failwithlog "ERROR"
 
                     yield $"{tab}{aliasKey} = {lb} {mnemonics} {rb}"
                 yield $"{tab}{rb}"
@@ -304,7 +304,7 @@ module internal ToDsTextModule =
                     | :? Real as real -> real.ParentNPureNames.Combine()
                     | :? Call as call -> getCallName call
                     | :? RealOtherFlow as realEx -> realEx.ParentNPureNames.Combine()
-                    | _ -> failwith "ERROR"
+                    | _ -> failwithlog "ERROR"
 
                 [
                     if withSafeties.Any() then

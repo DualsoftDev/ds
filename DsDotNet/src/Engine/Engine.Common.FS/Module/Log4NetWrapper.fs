@@ -8,7 +8,7 @@
 // App.config 샘플
 // https://gist.github.com/dpan/9229147
 // https://jakubwajs.wordpress.com/2019/11/28/logging-with-log4net-in-net-core-3-0-console-app/
-// 
+//
 
 namespace Engine.Common.FS
 
@@ -77,6 +77,8 @@ module Log4NetWrapper =
     let failwithlog msg =
         logError "%s" msg
         failwith msg
+
+    let verify x = if not x then failwithlog "ERROR"
 
     // see Prelude.failwithf
 

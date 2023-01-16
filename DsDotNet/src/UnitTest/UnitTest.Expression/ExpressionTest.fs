@@ -29,12 +29,12 @@ module Exp =
     let toTimer (timerStatement:Statement) :Timer =
         match timerStatement with
         | DuTimer t -> t.Timer
-        | _ -> failwith "not a timer statement"
+        | _ -> failwithlog "not a timer statement"
 
     let toCounter (counterStatement:Statement) :Counter =
         match counterStatement with
         | DuCounter t -> t.Counter
-        | _ -> failwith "not a counter statement"
+        | _ -> failwithlog "not a counter statement"
 
     type ExpressionTest() =
         do Fixtures.SetUpTest()

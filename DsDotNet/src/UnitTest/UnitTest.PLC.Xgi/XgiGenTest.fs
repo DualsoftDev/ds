@@ -247,7 +247,7 @@ type XgiGenerationTest() =
         let negatedFlatTerminal = flatTerminal.Negate()
         match negatedFlatTerminal with
         | FlatTerminal(t, p, n) -> n === true
-        | _ -> failwith "ERROR"
+        | _ -> failwithlog "ERROR"
 
         (* ! (A & B) === ! A || ! B) test *)
         let expAnd = FlatNary(And, [FlatTerminal(myTagA, pulse, negated); FlatTerminal(myTagB, pulse, negated)])
@@ -256,7 +256,7 @@ type XgiGenerationTest() =
         | FlatNary(Or, [FlatTerminal(_, _, negated1); FlatTerminal(_, _, negated2)]) ->
             negated1 === true
             negated2 === true
-        | _ -> failwith "ERROR"
+        | _ -> failwithlog "ERROR"
 
 
         (* ! (! A & B) === A || ! B) test *)
@@ -266,7 +266,7 @@ type XgiGenerationTest() =
         | FlatNary(Or, [FlatTerminal(_, _, negated1); FlatTerminal(_, _, negated2)]) ->
             negated1 === false
             negated2 === true
-        | _ -> failwith "ERROR"
+        | _ -> failwithlog "ERROR"
 
 
         (* ! (! A & B) === A || ! B) test *)
@@ -276,7 +276,7 @@ type XgiGenerationTest() =
         | FlatNary(Or, [FlatTerminal(_, _, negated1); FlatTerminal(_, _, negated2)]) ->
             negated1 === false
             negated2 === true
-        | _ -> failwith "ERROR"
+        | _ -> failwithlog "ERROR"
 
         ()
 

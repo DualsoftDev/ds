@@ -80,7 +80,7 @@ module rec TimerModule =
             ValueSubject
                 .Where(fun storage -> storage = timerStruct.EN)
                 .Subscribe(fun storage ->
-                    if ts.ACC.Value < 0us || ts.PRE.Value < 0us then failwith "ERROR"
+                    if ts.ACC.Value < 0us || ts.PRE.Value < 0us then failwithlog "ERROR"
                     let rungInCondition = storage.BoxedValue :?> bool
                     tracefn "%A rung-condition-in=%b with DN=%b" tt rungInCondition ts.DN.Value
                     match tt, rungInCondition with
@@ -130,12 +130,12 @@ module rec TimerModule =
     [<AbstractClass>]
     type TimerCounterBaseStruct (storages:Storages, name, preset, accum:CountUnitType, dn, pre, acc, res) =
         interface IStorage with
-            member x.Name with get() = x.Name and set(v) = failwith "ERROR: not supported"
+            member x.Name with get() = x.Name and set(v) = failwithlog "ERROR: not supported"
             member x.DataType = typedefof<TimerCounterBaseStruct>
-            member x.BoxedValue with get() = x.This and set(v) = failwith "ERROR: not supported"
+            member x.BoxedValue with get() = x.This and set(v) = failwithlog "ERROR: not supported"
             member x.ObjValue = x.This
-            member x.ToText() = failwith "ERROR: not supported"
-            member _.ToBoxedExpression() = failwith "ERROR: not supported"
+            member x.ToText() = failwithlog "ERROR: not supported"
+            member _.ToBoxedExpression() = failwithlog "ERROR: not supported"
 
         member private x.This = x
         member _.Name:string = name
@@ -167,7 +167,7 @@ module rec TimerModule =
                 match Runtime.Target with
                 | ( XGI | WINDOWS ) -> "IN", "_TT", "Q", "PT", "ET", "RST"
                 | AB -> "EN", "TT", "DN", "PRE", "ACC", "RES"
-                | _ -> failwith "NOT yet supported"
+                | _ -> failwithlog "NOT yet supported"
 
             let en  = fwdCreateBoolTag   $"{name}.{en }" false
             let tt  = fwdCreateBoolTag   $"{name}.{tt }" false

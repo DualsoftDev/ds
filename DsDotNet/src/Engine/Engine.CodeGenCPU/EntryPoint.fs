@@ -1,6 +1,7 @@
 namespace Engine.CodeGenCPU
 
 open Engine.Core
+open Engine.Common.FS
 
 module ModuleInitializer =
     let Initialize() =
@@ -10,7 +11,7 @@ module ModuleInitializer =
             match v with
             | :? Real  -> new VertexMReal(v)
             | (:? RealEx | :? Call | :? Alias) -> new VertexMCoin(v)
-            | _ -> failwith "ERROR"
+            | _ -> failwithlog "ERROR"
 
         fwdCreateVertexManager <- createVertexManager
 

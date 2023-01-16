@@ -202,7 +202,7 @@ module Functions =
 
     let verifyValue value =
         if not value then
-            failwith "Failed to verify"
+            failwithlog "Failed to verify"
     let verifyWith f = f() |> verifyValue
 
     /// Type name 을 반환

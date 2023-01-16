@@ -6,6 +6,7 @@ open Engine.Parser.FS
 open T
 open System
 open Engine.Core
+open Engine.Common.FS
 
 [<AutoOpen>]
 module CodeTestModule =
@@ -147,11 +148,11 @@ double myDouble = 3.14 + 3.14;
 
             match statements[0] with
             | DuVarDecl (expr, target) -> target.BoxedValue === "Hello, world"
-            | _ -> failwith "ERROR"
+            | _ -> failwithlog "ERROR"
 
             match statements[1] with
             | DuVarDecl (expr, target) -> target.BoxedValue === 'x'
-            | _ -> failwith "ERROR"
+            | _ -> failwithlog "ERROR"
 
             storages.Count === declarations.Length
 

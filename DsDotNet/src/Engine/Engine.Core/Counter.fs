@@ -247,7 +247,7 @@ module rec CounterModule =
             ValueSubject
                 .Where(fun storage -> storage = csu.CU && csu.CU.Value)
                 .Subscribe(fun storage ->
-                    if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwith "ERROR"
+                    if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
                     cs.ACC.Value <- cs.ACC.Value + 1us
                     if cs.ACC.Value >= cs.PRE.Value then
                         tracefn "Counter accumulator value reached"
@@ -259,7 +259,7 @@ module rec CounterModule =
             ValueSubject
                 .Where(fun storage -> storage = csd.CD && csd.CD.Value)
                 .Subscribe(fun storage ->
-                    if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwith "ERROR"
+                    if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
                     cs.ACC.Value <- cs.ACC.Value - 1us
                     if cs.ACC.Value <= cs.PRE.Value then
                         tracefn "Counter accumulator value reached"
@@ -271,7 +271,7 @@ module rec CounterModule =
             ValueSubject
                 .Where(fun storage -> storage = csr.CD && csr.CD.Value)
                 .Subscribe(fun storage ->
-                    if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwith "ERROR"
+                    if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
                     cs.ACC.Value <- cs.ACC.Value + 1us
                     if cs.ACC.Value = cs.PRE.Value then
                         tracefn "Counter accumulator value reached"
@@ -286,7 +286,7 @@ module rec CounterModule =
                 .Where(fun storage -> storage = cs.RES && cs.RES.Value)
                 .Subscribe(fun storage ->
                     tracefn "Counter reset requested"
-                    if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwith "ERROR"
+                    if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
                     cs.ACC.Value <- 0us
                     cs.DN.Value <- false
                     cs.CU.Value <- false
@@ -312,7 +312,7 @@ module rec CounterModule =
             | :? CTRStruct, CTR -> registerCTR()
             | :? CTDStruct, CTD -> registerCTD()
             | :? CTUDStruct, CTUD -> registerCTU(); registerCTD();
-            | _ -> failwith "ERROR"
+            | _ -> failwithlog "ERROR"
 
         interface IDisposable with
             member this.Dispose() =

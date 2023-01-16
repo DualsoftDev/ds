@@ -34,7 +34,7 @@ module ImportM =
         let getLoadingType(nodeType:NodeType) = 
             if   nodeType = COPY_REF   then DuExternal 
             elif nodeType = COPY_VALUE then DuDevice
-            else  failwith "error"
+            else  failwithlog "error"
 
 
         let rec loadSystem(repo:ShareableSystemRepository, pptReop:Dictionary<DsSystem, pptDoc>, theSys:DsSystem, paras:DeviceLoadParameters) =
@@ -76,7 +76,7 @@ module ImportM =
                     let sys = reloading(newDevSys, paras)
                     theSys.AddLoadedSystem(Device(sys, paras))
 
-                |_ ->   failwith "error"
+                |_ ->   failwithlog "error"
             )
 
             //ExternalSystem 위하여 인터페이스는 공통으로 시스템 생성시 만들어 줌

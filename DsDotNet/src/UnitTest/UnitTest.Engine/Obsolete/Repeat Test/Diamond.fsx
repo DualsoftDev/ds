@@ -95,7 +95,7 @@ type Diamond(output1:ITestOutputHelper) =
                         | "EndPlan_B_F_Sp" -> opc.Write("EndActual_B_F_Sp", value)
                         | "EndPlan_B_F_Sm" -> opc.Write("EndActual_B_F_Sm", value)
                         | _ ->
-                            failwith "ERROR"
+                            failwithlog "ERROR"
                     ) |> ignore
 
 

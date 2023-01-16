@@ -2,6 +2,7 @@ namespace Engine.CodeGenHMI
 
 open System.Collections.Generic
 open Engine.Core
+open Engine.Common.FS
 
 [<AutoOpen>]
 module HmiGenModule =
@@ -138,7 +139,7 @@ module HmiGenModule =
                     for flow in flowNames do hmiInfos[button].targets.Add(flow)
                 | _ ->
                     printfn "%A" btnType
-                    failwith "type error"
+                    failwithlog "type error"
 
         let addInterface (api:ApiItem) (usedIn:string) =
             if false = hmiInfos.ContainsKey(api.QualifiedName) then

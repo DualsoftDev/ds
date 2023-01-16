@@ -127,7 +127,7 @@ module TagModule =
         | "UInt16" -> box 0us
         | "UInt32" -> box 0u
         | "UInt64" -> box 0UL
-        | _  -> failwith "ERROR"
+        | _  -> failwithlog "ERROR"
 
 
     // error FS0030: 값 제한이 있습니다. 값 'fwdCreateVariableWithValue'은(는) 제네릭 형식    val mutable fwdCreateVariableWithValue: (string -> '_a -> IVariable)을(를) 가지는 것으로 유추되었습니다.    'fwdCreateVariableWithValue'에 대한 인수를 명시적으로 만들거나, 제네릭 요소로 만들지 않으려는 경우 형식 주석을 추가하세요.
@@ -150,7 +150,7 @@ module TagModule =
         | "UInt16" -> new Variable<uint16>(name, unbox v)
         | "UInt32" -> new Variable<uint32>(name, unbox v)
         | "UInt64" -> new Variable<uint64>(name, unbox v)
-        | _  -> failwith "ERROR"
+        | _  -> failwithlog "ERROR"
 
     let createVariableWithTypeOnWindows (typ:System.Type) (name:string) : IVariable =
         verify (Runtime.Target = WINDOWS)

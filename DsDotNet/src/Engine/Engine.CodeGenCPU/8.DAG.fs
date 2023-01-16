@@ -4,6 +4,7 @@ module Engine.CodeGenCPU.ConvertDAG
 open System.Linq
 open Engine.Core
 open Engine.CodeGenCPU
+open Engine.Common.FS
 
 
 type VertexManager with
@@ -24,7 +25,7 @@ type VertexManager with
         let coins = real.Graph.Vertices.Except(real.Graph.Inits).Select(getVM)
         [
             for coin in coins do
-                let coin = coin :?> VertexMCoin 
+                let coin = coin :?> VertexMCoin
                 let srcsWeek, srcsStrong  = getEdgeSources(real.Graph, coin.Vertex, true)
 
                 if srcsWeek.Any() then
@@ -50,9 +51,9 @@ type VertexManager with
                     |Some call ->  if call.UsingTon
                                         then call.V.TON.DN.Expr   //On Delay
                                         else call.INs.ToAndElseOn(v.System)
-                    |None -> failwith "Error D3_DAGCoinComplete"
+                    |None -> failwithlog "Error D3_DAGCoinComplete"
 
                 let sets = ands <&&> child.ST.Expr <&&> child.ET.Expr
                 let rsts = realV.H.Expr
                 yield (sets, rsts) ==| (child.CR, "D3" )
-        ]   
+        ]

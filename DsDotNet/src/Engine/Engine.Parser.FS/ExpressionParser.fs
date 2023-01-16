@@ -70,7 +70,7 @@ module rec ExpressionParser =
                         let op = op.GetText()
                         createBinaryExpression expL op expR
                     | _ ->
-                        failwith "ERROR"
+                        failwithlog "ERROR"
 
 
                 | :? UnaryExprContext as exp ->
@@ -81,7 +81,7 @@ module rec ExpressionParser =
                         let op = op.GetText()
                         createUnaryExpression op exp
                     | _ ->
-                        failwith "ERROR"
+                        failwithlog "ERROR"
 
                 | :? TerminalExprContext as terminalExp ->
                     tracefn $"Terminal: {text}"
@@ -107,9 +107,9 @@ module rec ExpressionParser =
                             // text : "'a'" 의 형태
                             let dq, sq = "\"", "'"
                             text |> unwrapString dq dq |> unwrapString sq sq |> System.Char.Parse   |> literal2expr |> iexpr
-                        | _ -> failwith "ERROR"
+                        | _ -> failwithlog "ERROR"
                     | :? TagContext as texp ->
-                        failwith "Obsoleted.  Why not Storage???"   // todo : remove
+                        failwithlog "Obsoleted.  Why not Storage???"   // todo : remove
                         //iexpr <| tag (storages[text])
                     | :? StorageContext as sctx ->
                         let storage =
@@ -122,11 +122,11 @@ module rec ExpressionParser =
                         | Some strg -> strg.ToBoxedExpression() :?> IExpression
                         | None -> failwith $"Failed to find variable/tag name in {sctx.GetText()}"
                     | _ ->
-                        failwith "ERROR"
+                        failwithlog "ERROR"
 
                 | :? ArrayReferenceExprContext as exp ->
                     tracefn $"ArrayReference: {text}"
-                    failwith "Not yet"
+                    failwithlog "Not yet"
 
                 | :? ParenthesysExprContext as exp ->
                     tracefn $"Parenthesys: {text}"
@@ -134,7 +134,7 @@ module rec ExpressionParser =
                     helper exp
 
                 | _ ->
-                    failwith "Not yet"
+                    failwithlog "Not yet"
 
             expr
 
@@ -171,7 +171,7 @@ module rec ExpressionParser =
                 let preset, rungInCondtion =
                     match args with
                     | (UnitValue preset)::(BoolExp rungInCondtion)::_ -> preset, rungInCondtion
-                    | _ -> failwith "ERROR"
+                    | _ -> failwithlog "ERROR"
 
                 let tcParams={Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondtion; FunctionName=functionName}
 
@@ -197,7 +197,7 @@ module rec ExpressionParser =
                 | CTR, ("createWinCTR" | "createXgiCTR" ), _::_::(BoolExp resetCondition)::[] ->
                     CounterStatement.CreateXgiCTR(tcParams, resetCondition)
                 | CTR, _, _ ->
-                    failwith "ERROR: CTR only supported for WINDOWS and XGI platform"
+                    failwithlog "ERROR: CTR only supported for WINDOWS and XGI platform"
 
                 | _ -> fail()
 
@@ -217,7 +217,7 @@ module rec ExpressionParser =
                 let preset, rungInCondtion =
                     match args with
                     | (UnitValue preset)::(BoolExp rungInCondtion)::_ -> preset, rungInCondtion
-                    | _ -> failwith "ERROR"
+                    | _ -> failwithlog "ERROR"
 
                 let tcParams={Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondtion; FunctionName=functionName}
                 match typ, functionName, args with
@@ -276,7 +276,7 @@ module rec ExpressionParser =
                     let fallingCoil:FallingCoil = {Storage = storage; HistoryFlag = HistoryFlag()}
                     Some <| DuAssign (createExp ctx, fallingCoil)
                 | (:? NormalAssignContext as ctx)::[] -> Some <| DuAssign (createExp ctx, storage)
-                | _ -> failwith "ERROR"
+                | _ -> failwithlog "ERROR"
             | :? CounterDeclContext as counterDeclCtx -> Some <| parseCounterStatement storages counterDeclCtx
             | :? TimerDeclContext as timerDeclCtx -> Some <| parseTimerStatement storages timerDeclCtx
             | :? CopyStatementContext as copyStatementCtx ->
@@ -288,7 +288,7 @@ module rec ExpressionParser =
                 let target = storages[target.Replace("$", "")]
                 Some <| DuAction (DuCopy(condition, source, target))
             | _ ->
-                failwith "ERROR: Not yet statement"
+                failwithlog "ERROR: Not yet statement"
 
         optStatement.Iter(fun st -> st.Do())
         optStatement
@@ -314,7 +314,7 @@ module rec ExpressionParser =
                         match t with
                         | :? ToplevelContext as ctx -> ctx
                         | :? ITerminalNode as semicolon when semicolon.GetText() = ";" -> ()
-                        | _ -> failwith "ERROR"
+                        | _ -> failwithlog "ERROR"
                 ]
 
 
@@ -353,7 +353,7 @@ module rec ExpressionParser =
             | "UInt16" -> new PlcTag<uint16>(name, address, unbox v)
             | "UInt32" -> new PlcTag<uint32>(name, address, unbox v)
             | "UInt64" -> new PlcTag<uint64>(name, address, unbox v)
-            | _  -> failwith "ERROR"
+            | _  -> failwithlog "ERROR"
 
         member x.CreateTag(name:string, address:string) : IStorage =
             let v = typeDefaultValue x
@@ -374,4 +374,4 @@ module rec ExpressionParser =
             | ("bool"    | "boolean")-> typedefof<bool>
             | "string"               -> typedefof<string>
             | "char"                 -> typedefof<char>
-            | _  -> failwith "ERROR"
+            | _  -> failwithlog "ERROR"

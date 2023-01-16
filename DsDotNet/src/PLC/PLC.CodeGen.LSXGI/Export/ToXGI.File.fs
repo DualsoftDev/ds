@@ -66,7 +66,7 @@ module internal XgiFile =
                 match stmt with
                 | DuAssign (expr, target) -> simpleRung expr target
                 | DuAugmentedPLCFunction ({FunctionName = ("&&"|"||") as op; Arguments = args; Output=output }) ->
-                    let psedoFunction (args:Args):bool = failwith "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
+                    let psedoFunction (args:Args):bool = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
                     let expr = DuFunction { FunctionBody=psedoFunction; Name=op; Arguments=args }
                     simpleRung expr (output :?> IStorage)
 
@@ -101,7 +101,7 @@ module internal XgiFile =
                     let rgiSub = xmlRung None (Some command) rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
                 | _ ->
-                    failwith "Not yet"
+                    failwithlog "Not yet"
 
         let rungEnd = generateEnd (rgi.Y + 1)
         rgi <- rgi.Add(rungEnd)
@@ -240,7 +240,7 @@ module internal XgiFile =
                             | "B" -> "BYTE"
                             | "W" -> "WORD"
                             | "L" -> "DWORD"
-                            | _ -> failwith "ERROR"
+                            | _ -> failwithlog "ERROR"
                         let comment = "FAKECOMMENT"
 
                         let initValue = null // PLCTag 는 값을 초기화 할 수 없다.

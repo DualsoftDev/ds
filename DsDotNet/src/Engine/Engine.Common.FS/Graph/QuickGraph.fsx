@@ -56,7 +56,7 @@
 //                        let oes = g.OutEdges(s) |> Array.ofSeq
 //                        let hasBackEdge = oes |> Array.exists(fun e -> history |> List.contains(e.Target))
 //                        if hasBackEdge then
-//                            failwith "Failed to get all path with cycle edge" 
+//                            failwithlog "Failed to get all path with cycle edge" 
 
 //                        for oe in oes do
 //                            let n = oe.Target
@@ -91,7 +91,7 @@
 //    module UnusedRevertGraph =
 //        let revertGraphDirection2 (g:AdjacencyGraph<'V, 'E>) (edgeCreator:'V -> 'V -> 'E) =
 //            if g.EdgeCount = 0 then
-//                failwith "Failed to revert graph direction with no edge."
+//                failwithlog "Failed to revert graph direction with no edge."
 
 //            let revertedEdges =
 //                g.Edges
@@ -100,7 +100,7 @@
 
 //        let revertGraphDirection (g:AdjacencyGraph<'V, 'E>) =
 //            if g.EdgeCount = 0 then
-//                failwith "Failed to revert graph direction with no edge."
+//                failwithlog "Failed to revert graph direction with no edge."
 
 //            let revertedEdges =
 //                g.Edges
@@ -125,7 +125,7 @@
 //    let getEdgeExactlyOne (g:AdjacencyGraph<'V, 'E>) (src:'V) (dst:'V) =
 //        match g.TryGetEdges (src, dst) with
 //        | true, edges -> edges |> List.ofSeq |> List.exactlyOne
-//        | _ -> failwith "Edge not found"
+//        | _ -> failwithlog "Edge not found"
 
 //    let duplicateGraphByEdgeClone (g:AdjacencyGraph<'V, 'E>) (edgeCreator:'V->'V->'E) =
 //        let newEdges = 

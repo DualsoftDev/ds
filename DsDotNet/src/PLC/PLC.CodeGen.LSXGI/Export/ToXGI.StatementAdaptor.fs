@@ -52,7 +52,7 @@ module ConvertorPrologModule =
         | "UInt32"  -> "UDINT"
         | "UInt64"  -> "ULINT"
         | ("SByte" | "Char")   -> "BYTE"
-        | _ -> failwith "ERROR"
+        | _ -> failwithlog "ERROR"
 
 
 
@@ -89,7 +89,7 @@ module ConvertorPrologModule =
         | :? IExpression as exp -> exp.DataType
         | :? IStorage as stg -> stg.DataType
         | :? IValue as value -> value.ObjValue.GetType()
-        | _ -> failwith "ERROR"
+        | _ -> failwithlog "ERROR"
 
 
 [<AutoOpen>]
@@ -130,7 +130,7 @@ module rec TypeConvertorModule =
         | "UInt16" -> XgiLocalVar<uint16>(name, comment, unbox initValue)
         | "UInt32" -> XgiLocalVar<uint32>(name, comment, unbox initValue)
         | "UInt64" -> XgiLocalVar<uint64>(name, comment, unbox initValue)
-        | _  -> failwith "ERROR"
+        | _  -> failwithlog "ERROR"
 
     let createTypedXgiAutoVariable (typ:System.Type) (nameHint:string) (initValue:obj) comment : IXgiLocalVar =
         autoVariableCounter <- autoVariableCounter + 1
@@ -191,7 +191,7 @@ module XgiExpressionConvertorModule =
         | "-"  -> "SUB"
         | "*"  -> "MUL"
         | "/"  -> "DIV"
-        |  _ -> failwith "ERROR"
+        |  _ -> failwithlog "ERROR"
 
     type private AugmentedConvertorParams = {
         Storage:XgiStorage
@@ -221,7 +221,7 @@ module XgiExpressionConvertorModule =
                 | (FunctionNameRising | FunctionNameFalling) ->
                     exp
                 | _ ->
-                    failwith "ERROR"
+                    failwithlog "ERROR"
             | _ ->
                 exp
         ]
@@ -256,7 +256,7 @@ module XgiExpressionConvertorModule =
                             yield withAugmentedPLCFunction arg
                         | None, Some fn_ ->
                             yield! binaryToNary { augmentParams with Exp = arg } operatorsToChange op
-                        | _ -> failwith "ERROR"
+                        | _ -> failwithlog "ERROR"
                 ]
                 if args.Length = 8 then
                     noop()
@@ -398,7 +398,7 @@ module XgiExpressionConvertorModule =
                     storage.Add var
 
                 | _ ->
-                    failwith "ERROR"
+                    failwithlog "ERROR"
 
                 []
             | ( DuTimer _ | DuCounter _ ) ->
@@ -410,7 +410,7 @@ module XgiExpressionConvertorModule =
                 [ DuAugmentedPLCFunction {FunctionName=funcName; Arguments=[condition; source]; Output=output } ]
 
             | DuAugmentedPLCFunction _ ->
-                failwith "ERROR"
+                failwithlog "ERROR"
 
         augmentedStatements @ newStatements |> List.ofSeq
 

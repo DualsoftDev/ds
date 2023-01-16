@@ -26,9 +26,6 @@ let isSuperType<'T> (x: obj) = x.GetType().IsAssignableFrom(typeof<'T>)
 /// 강제 type 변환
 let forceCast<'T> (x: obj) = box x :?> 'T
 
-
-let verify x = if not x then failwith "ERROR"
-
 // https://github.com/fsharp/fsharp/blob/cb6cb5c410f537c81cf26825657ef3bb29a7e952/src/fsharp/FSharp.Core/printf.fs#L1645
 let failwithf format =
     Printf.ksprintf failwith format

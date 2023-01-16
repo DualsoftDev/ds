@@ -48,7 +48,7 @@ module ListnerCommonFunctionGenerator =
 ///   - Parenting, Child, alias, Api
 /// </summary>
 type DsParserListener(parser:dsParser, options:ParserOptions) =
-    inherit dsParserBaseListener()
+    inherit dsBaseListener()
     do
         parser.Reset()
 

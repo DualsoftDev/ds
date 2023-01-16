@@ -2,6 +2,7 @@ namespace Engine.CodeGenHMI
 
 open System.Collections.Generic
 open Engine.Core
+open Engine.Common.FS
 
 [<AutoOpen>]
 module HmiGenModule =
@@ -28,6 +29,7 @@ module HmiGenModule =
         | Clear     = 17
         | Stop      = 18
         | Home      = 19
+        | Ready     = 20
 
     type Info = {
         name:string;
@@ -80,9 +82,7 @@ module HmiGenModule =
                 for flow in flowNames do hmiInfos[btnName].targets.Add(flow)
 
         let addGroupButtons
-                (system:DsSystem)
-                (buttonsInFlow:ButtonDef seq(*Dictionary<string, HashSet<Flow>>*))
-                buttonType =
+                (system:DsSystem) (buttonsInFlow:ButtonDef seq) buttonType =
             for btn in buttonsInFlow do
                 let flowNames = [
                     for flow in btn.SettingFlows do flow.QualifiedName
@@ -101,7 +101,8 @@ module HmiGenModule =
                 "CLEARof",  ButtonType.Clear;
                 "EMSTOPof", ButtonType.Emergency;
                 "TESTof",   ButtonType.Test;
-                "HOME",     ButtonType.Home;
+                "HOMEof",   ButtonType.Home;
+                "READYof",  ButtonType.Ready;
             ]
             for name, btnType in btnNames do
                 let btnName = $"{name}__{flowName}"
@@ -123,6 +124,7 @@ module HmiGenModule =
                 "EMSTOP", ButtonType.Emergency;
                 "TEST",   ButtonType.Test;
                 "HOME",   ButtonType.Home;
+                "READY",  ButtonType.Ready;
             ]
             for button, btnType in buttons do
                 addButton button null btnType
@@ -132,12 +134,12 @@ module HmiGenModule =
                         for sp in sys.StartPoints do
                             hmiInfos[button].targets.Add(sp.QualifiedName)
                 | ButtonType.Emergency | ButtonType.Auto | ButtonType.Manual
-                | ButtonType.Clear | ButtonType.Home
+                | ButtonType.Clear | ButtonType.Home | ButtonType.Ready
                 | ButtonType.Stop | ButtonType.Emergency ->
                     for flow in flowNames do hmiInfos[button].targets.Add(flow)
                 | _ ->
                     printfn "%A" btnType
-                    failwith "type error"
+                    failwithlog "type error"
 
         let addInterface (api:ApiItem) (usedIn:string) =
             if false = hmiInfos.ContainsKey(api.QualifiedName) then
@@ -176,9 +178,9 @@ module HmiGenModule =
                 | :? Call as c -> getJobName c.CallTargetJob.Name
                 | :? Alias as a ->
                     match a.TargetWrapper with
-                    | DuAliasTargetReal r     -> r.QualifiedName
-                    | DuAliasTargetRealEx rex -> rex.QualifiedName
-                    | DuAliasTargetCall c     -> getJobName c.CallTargetJob.Name
+                    | DuAliasTargetReal r    -> r.QualifiedName
+                    | DuAliasTargetRealEx rx -> rx.QualifiedName
+                    | DuAliasTargetCall c    -> getJobName c.CallTargetJob.Name
                 | _  -> null
             addToUsedIn vertName system.Name
             addToUsedIn vertName flow.QualifiedName

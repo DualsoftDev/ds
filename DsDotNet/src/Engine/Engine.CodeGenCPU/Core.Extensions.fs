@@ -14,7 +14,7 @@ module rec ConvertCoreExt =
         let plcName = match inOut with 
                         | In  -> $"{name}_I" 
                         | Out -> $"{name}_O" 
-                        | Memory -> failwith "error: Memory not supported "
+                        | Memory -> failwithlog "error: Memory not supported "
 
         (PlcTag(plcName, address, false) :> ITagWithAddress)
 

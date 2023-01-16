@@ -50,7 +50,7 @@ module Base =
     let ShouldFailWithSubstringT<'ex when 'ex :> Exception> (substring:string) (func:unit->unit) =
         try
             func()
-            failwith "No exception matched!"
+            failwithlog "No exception matched!"
         with
         | :? 'ex as excpt when excpt.Message.Contains substring ->
             tracefn $"Got expected exception:\r\n{excpt}"

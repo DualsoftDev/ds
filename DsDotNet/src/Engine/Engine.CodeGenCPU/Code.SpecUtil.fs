@@ -2,6 +2,7 @@ namespace Engine.CodeGenCPU
 
 open Engine.Core
 open System
+open Engine.Common.FS
 
 [<AutoOpen>]
 module CodeSpecUtil =
@@ -50,9 +51,9 @@ module CodeSpecUtil =
                      |  DuAliasTargetCall   ac -> vaild.HasFlag(AliasCallInFlow)
                  | DuParentReal r->
                      match a.TargetWrapper with
-                     | DuAliasTargetReal   ar -> failwith "Error IsSpec"
-                     | DuAliasTargetRealEx ao -> failwith "Error IsSpec"
+                     | DuAliasTargetReal   ar -> failwithlog "Error IsSpec"
+                     | DuAliasTargetRealEx ao -> failwithlog "Error IsSpec"
                      | DuAliasTargetCall   ac -> vaild.HasFlag(AliasCallInReal)
-            |_ -> failwith "Error"
+            |_ -> failwithlog "Error"
 
         isVaildVertex

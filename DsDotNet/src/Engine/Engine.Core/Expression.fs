@@ -3,6 +3,7 @@ open System
 open System.Net.NetworkInformation
 open System.Runtime.InteropServices.ComTypes
 open System.Diagnostics
+open Engine.Common.FS
 
 (*  expression: generic type <'T> 나 <_> 으로는 <obj> match 으로 간주됨
     Expression<'T> 객체에 대한 matching
@@ -74,7 +75,7 @@ module ExpressionModule =
             member x.WithNewFunctionArguments(args) =
                 match x with
                 | DuFunction fs -> DuFunction {fs with Arguments = args }
-                | _ -> failwith "ERROR"
+                | _ -> failwithlog "ERROR"
 
         member x.DataType = typedefof<'T>
 
@@ -84,10 +85,10 @@ module ExpressionModule =
         if t.IsValueType || t = typedefof<string> then
             DuTerminal (DuLiteral (LiteralHolder x))
         else
-            failwith "ERROR: Value Type Error.  only allowed for primitive type"
+            failwithlog "ERROR: Value Type Error.  only allowed for primitive type"
 
     /// Tag<'T> or Variable<'T> 로부터 Expression<'T> 생성
-    let var2expr (t: TypedValueStorage<'T>) = DuTerminal (DuVariable t)
+    let var2expr (t: TypedValueStorage<'T>):Expression<'T> = DuTerminal (DuVariable t)
 
     type Timer internal(typ:TimerType, timerStruct:TimerStruct) =
 
@@ -166,14 +167,14 @@ module ExpressionModule =
     } with
         interface IStorage with
 
-            member x.Name with get() = $"RisingCoil.{x.Storage.Name}" and set(v) = failwith "ERROR"
+            member x.Name with get() = $"RisingCoil.{x.Storage.Name}" and set(v) = failwithlog "ERROR"
             member x.DataType = typedefof<RisingCoil>
             member x.BoxedValue with get() = x.Storage.BoxedValue
                                 and set(v) = x.Storage.BoxedValue <- v
             member x.ObjValue = x.Storage.BoxedValue
 
             member x.ToText() = $"ppulse(${x.Storage.Name})"    // positive pulse
-            member x.ToBoxedExpression() = failwith "ERROR: not supported"
+            member x.ToBoxedExpression() = failwithlog "ERROR: not supported"
 
     /// Negative Pulse Coil '-(N)-' 생성 및 평가를 위한 구조
     type FallingCoil = {
@@ -182,14 +183,14 @@ module ExpressionModule =
     } with
         interface IStorage with
 
-            member x.Name with get() = $"FallingCoil.{x.Storage.Name}" and set(v) = failwith "ERROR"
+            member x.Name with get() = $"FallingCoil.{x.Storage.Name}" and set(v) = failwithlog "ERROR"
             member x.DataType = typedefof<FallingCoil>
             member x.BoxedValue with get() = x.Storage.BoxedValue
                                 and set(v) = x.Storage.BoxedValue <- v
 
             member x.ObjValue = x.Storage.BoxedValue
             member x.ToText() = $"npulse(${x.Storage.Name})"    // negative pulse
-            member x.ToBoxedExpression() = failwith "ERROR: not supported"
+            member x.ToBoxedExpression() = failwithlog "ERROR: not supported"
 
 
     type FunctionParameters = {
@@ -220,8 +221,8 @@ module ExpressionModule =
             | DuVarDecl (expression,variable) -> variable.BoxedValue
             | DuTimer (t:TimerStatement) -> t.Timer.DN.Value
             | DuCounter (c:CounterStatement) -> c.Counter.DN.Value
-            | DuAction (a:ActionStatement) -> 
-                match a with 
+            | DuAction (a:ActionStatement) ->
+                match a with
                 | DuCopy (condition:IExpression<bool>, source:IExpression,target:IStorage)-> target.BoxedValue
             | DuAugmentedPLCFunction (f:FunctionParameters) ->  false  // Function은 항상 false 함수에 따른다.
 
@@ -271,7 +272,7 @@ module ExpressionModule =
                 if condition.EvaluatedValue then
                     target.BoxedValue <- source.BoxedEvaluatedValue
             | DuAugmentedPLCFunction _ ->
-                failwith "ERROR"
+                failwithlog "ERROR"
 
         member x.ToText() =
             match x with
@@ -304,7 +305,7 @@ module ExpressionModule =
             | DuAction (DuCopy (condition, source, target)) ->
                 $"copyIf({condition.ToText(false)}, {source.ToText(false)}, {target.ToText()})"
             | DuAugmentedPLCFunction _ ->
-                failwith "ERROR"
+                failwithlog "ERROR"
 
     type Terminal<'T when 'T:equality> with
         member x.TryGetStorage(): IStorage option =
@@ -325,7 +326,7 @@ module ExpressionModule =
         member x.Name =
             match x with
             | DuVariable t -> t.Name
-            | DuLiteral _ -> failwith "ERROR"
+            | DuLiteral _ -> failwithlog "ERROR"
 
         member x.ToText() =
             match x with
@@ -382,9 +383,24 @@ module ExpressionModule =
             | "String" -> "string"
             | "Char"   -> "char"
             | "Boolean"-> "bool"
-            | _  -> failwith "ERROR"
+            | _  -> failwithlog "ERROR"
 
 
-
-
+    type IStorage with
+        member x.ToExpression():IExpression =
+            match x.DataType.Name with
+            | "Boolean"-> DuTerminal (DuVariable (x :?> TypedValueStorage<bool>  )) :> IExpression
+            | "Byte"   -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint8> )) :> IExpression
+            | "Char"   -> DuTerminal (DuVariable (x :?> TypedValueStorage<char>  )) :> IExpression
+            | "Double" -> DuTerminal (DuVariable (x :?> TypedValueStorage<double>)) :> IExpression
+            | "Int16"  -> DuTerminal (DuVariable (x :?> TypedValueStorage<int16> )) :> IExpression
+            | "Int32"  -> DuTerminal (DuVariable (x :?> TypedValueStorage<int32> )) :> IExpression
+            | "Int64"  -> DuTerminal (DuVariable (x :?> TypedValueStorage<int64> )) :> IExpression
+            | "SByte"  -> DuTerminal (DuVariable (x :?> TypedValueStorage<int8>  )) :> IExpression
+            | "Single" -> DuTerminal (DuVariable (x :?> TypedValueStorage<single>)) :> IExpression
+            | "String" -> DuTerminal (DuVariable (x :?> TypedValueStorage<string>)) :> IExpression
+            | "UInt16" -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint16>)) :> IExpression
+            | "UInt32" -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint32>)) :> IExpression
+            | "UInt64" -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint64>)) :> IExpression
+            | _  -> failwithlog "ERROR"
 

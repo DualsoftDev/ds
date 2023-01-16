@@ -58,7 +58,7 @@ module TextUtil =
     let internal combine (separator:string) (nameComponents:string seq) =
         let nameComponents = nameComponents |> List.ofSeq
         match nameComponents with
-        | [] -> failwith "ERROR"
+        | [] -> failwithlog "ERROR"
         | n::[] -> n
         | ns -> ns |> Seq.map quoteOnDemand |> String.concat separator
 
@@ -109,7 +109,7 @@ module TextUtil =
         | n::[] when quoteOnSingle -> quoteOnDemand n
         | n::[] -> n
         | p::q::[] -> combine "." fqdn'
-        | _ -> failwith "ERROR"
+        | _ -> failwithlog "ERROR"
 
     let getRelativeNames(referencePath:Fqdn) (fqdn:Fqdn) =
         let rec countSameStartElements (FList(xs)) (FList(ys)) =

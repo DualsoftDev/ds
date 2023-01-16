@@ -7,7 +7,7 @@ namespace Engine.Parser;
 /// Segment Listing(root flow toplevel 만),
 /// CallPrototype, Aliasing 구조까지 생성
 /// </summary>
-class DsParserListener : dsParserBaseListener
+class DsParserListener : dsBaseListener
 {
     public ParserHelper ParserHelper;
     Model _model => ParserHelper.Model;

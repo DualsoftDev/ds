@@ -34,7 +34,7 @@ type OptionExt =
         match xo with
         | None -> None
         | Some o when isType<'TO> o -> Some (forceCast<'TO> o)
-        | _ -> failwith "Casting ERROR"
+        | _ -> failwithlog "Casting ERROR"
 
 [<Extension>] // type OptionExt =
 type ResultExt =

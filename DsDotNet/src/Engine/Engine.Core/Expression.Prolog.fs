@@ -275,7 +275,7 @@ module rec ExpressionPrologModule =
             | (:? string as a), (:? string as b) -> a = b
             | Float64 x, Float64 y -> x = y     // double 로 환산가능한 숫자만 비교하면 모든 type 의 숫자 비교는 OK
             | _ ->
-                failwith "ERROR"
+                failwithlog "ERROR"
                 false
 
     [<AbstractClass>]
@@ -300,7 +300,7 @@ module rec ExpressionPrologModule =
             member x.Value with get() = x.Value and set(v) = x.Value <- v
 
         interface INamed with
-            member x.Name with get() = x.Name and set(v) = failwith "ERROR: not supported"
+            member x.Name with get() = x.Name and set(v) = failwithlog "ERROR: not supported"
 
         interface IText with
             member x.ToText() = x.ToText()
@@ -364,11 +364,11 @@ module rec ExpressionPrologModule =
 module ExpressionPrologModule2 =
     let mutable internal fwdSerializeFunctionNameAndBoxedArguments =
         let dummy (functionName:string) (args:Args) (withParenthesys:bool): string =
-            failwith "Should be reimplemented."
+            failwithlog "Should be reimplemented."
         dummy
 
-    let mutable fwdCreateBoolTag     = let dummy (tagName:string) (initValue:bool)   : TagBase<bool>   = failwith "Should be reimplemented." in dummy
-    let mutable fwdCreateUShortTag   = let dummy (tagName:string) (initValue:uint16) : TagBase<uint16> = failwith "Should be reimplemented." in dummy
-    let mutable fwdFlattenExpression = let dummy (expr:IExpression)                  : IFlatExpression = failwith "Should be reimplemented." in dummy
+    let mutable fwdCreateBoolTag     = let dummy (tagName:string) (initValue:bool)   : TagBase<bool>   = failwithlog "Should be reimplemented." in dummy
+    let mutable fwdCreateUShortTag   = let dummy (tagName:string) (initValue:uint16) : TagBase<uint16> = failwithlog "Should be reimplemented." in dummy
+    let mutable fwdFlattenExpression = let dummy (expr:IExpression)                  : IFlatExpression = failwithlog "Should be reimplemented." in dummy
 
 

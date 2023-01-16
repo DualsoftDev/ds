@@ -11,7 +11,7 @@ type ParserResult() =
 
 
 type AllListener() =
-    inherit dsParserBaseListener()
+    inherit dsBaseListener()
 
     member val r = new ParserResult()
 

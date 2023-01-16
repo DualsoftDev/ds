@@ -20,30 +20,30 @@
       </dict>
       <dict>
         <key>include</key>
-        <string>#systmeType</string>
+        <string>#systems</string>
       </dict>
       <dict>
         <key>include</key>
-        <string>#systems</string>
+        <string>#systemType</string>
       </dict>
     </array>
     <key>repository</key>
     <dict>
-      <key>systmeType</key>
+      <key>systemType</key>
       <dict>
         <key>patterns</key>
         <array>
           <dict>
             <key>name</key>
-            <string>storage.modifier.system.text.ds</string>
+            <string>support.type.tag.ip.ds</string>
             <key>match</key>
-            <string>(?&lt;=\[)(system|sys)\b</string>
+            <string>(?&lt;=(system|sys)\b)\s*((ip|host))\b</string>
           </dict>
           <dict>
             <key>name</key>
-            <string>support.type.tag.ip.ds</string>
+            <string>storage.modifier.system.header.ds</string>
             <key>match</key>
-            <string>(?&lt;=(system|sys)\b)(\s(ip|host))\b</string>
+            <string>(system|sys)\b</string>
           </dict>
         </array>
       </dict>
@@ -53,15 +53,27 @@
         <array>
           <dict>
             <key>name</key>
+            <string>support.type.tag.ip.ds</string>
+            <key>match</key>
+            <string>(?&lt;=(external)\b)\s*((ip|host))\b</string>
+          </dict>
+          <dict>
+            <key>name</key>
+            <string>support.type.tag.file.ds</string>
+            <key>match</key>
+            <string>(?&lt;=({{device}})\b)\s*((file))\b</string>
+          </dict>
+          <dict>
+            <key>name</key>
             <string>storage.modifier.withbrackets.ds</string>
             <key>match</key>
-            <string>(\[\s*)((device|flow|aliases|runlamp|dryrunlamp|manuallamp|stoplamp|emglamp|emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home)\b)(\s*\])</string>
+            <string>(\[\s*)((device|external|flow|aliases|runlamp|dryrunlamp|manuallamp|stoplamp|emglamp|emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home)\b)(\s*\])</string>
           </dict>
           <dict>
             <key>name</key>
             <string>storage.modifier.ds</string>
             <key>match</key>
-            <string>(?&lt;![_$[:alnum:]])(?:(?&lt;=\.\.\.)|(?&lt;!\.))((device|flow|aliases|runlamp|dryrunlamp|manuallamp|stoplamp|emglamp|emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home)\b)(?![_$[:alnum:]])(?:(?=\.\.\.)|(?!\.))</string>
+            <string>(?&lt;![_$[:alnum:]])(?:(?&lt;=\.\.\.)|(?&lt;!\.))((device|external|flow|aliases|runlamp|dryrunlamp|manuallamp|stoplamp|emglamp|emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home)\b)(?![_$[:alnum:]])(?:(?=\.\.\.)|(?!\.))</string>
           </dict>
         </array>
       </dict>
@@ -70,7 +82,7 @@
         <key>name</key>
         <string>variable.object.property.ds</string>
         <key>match</key>
-        <string>(?&lt;![_$[:alnum:]])(?:(?&lt;=\.\.\.)|(?&lt;!\.))((?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+|(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+\.(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+|(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+\.(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+\.(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+|(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+\.(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+\.(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+\.(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+|(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+(?:\.(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+)*)(?![_$[:alnum:]])(?:(?=\.\.\.)|(?!\.))</string>
+        <string>(?&lt;![_$[:alnum:]])(?:(?&lt;=\.\.\.)|(?&lt;!\.))((?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+|(?:(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])++(?:\.(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+)+))(?![_$[:alnum:]])(?:(?=\.\.\.)|(?!\.))</string>
       </dict>
       <key>punctuation</key>
       <dict>
@@ -135,7 +147,7 @@
             <key>name</key>
             <string>system.multi.ds</string>
             <key>begin</key>
-            <string>\[\s*(system|sys)\s*((?:ip|host)\s*=\s*(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+)?\]\s*((?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+)\s*=\s*(\{)(?=[^\}]*$)</string>
+            <string>\[\s*(system|sys)\s*((?:ip|host)\s*=\s*((?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+|(?:(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])++(?:\.(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+)+)))?\]\s*((?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+)\s*=\s*(\{)(?=[^\}]*$)</string>
             <key>beginCaptures</key>
             <dict>
               <key>1</key>
@@ -151,9 +163,14 @@
               <key>3</key>
               <dict>
                 <key>name</key>
-                <string>entity.name.variable.system.name.ds</string>
+                <string>entity.name.variable.ip.name.ds</string>
               </dict>
               <key>4</key>
+              <dict>
+                <key>name</key>
+                <string>entity.name.variable.system.name.ds</string>
+              </dict>
+              <key>5</key>
               <dict>
                 <key>name</key>
                 <string>punctuation.brace.system.start.ds</string>
@@ -178,6 +195,10 @@
               <dict>
                 <key>include</key>
                 <string>#devices</string>
+              </dict>
+              <dict>
+                <key>include</key>
+                <string>#externals</string>
               </dict>
               <dict>
                 <key>include</key>
@@ -223,7 +244,7 @@
             <key>name</key>
             <string>system.single.ds</string>
             <key>begin</key>
-            <string>\[\s*(system|sys)\s*((?:ip|host)\s*=\s*(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+)?\]\s*((?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+)\s*=\s*(\{)</string>
+            <string>\[\s*(system|sys)\s*((?:ip|host)\s*=\s*((?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+|(?:(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])++(?:\.(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+)+)))?\]\s*((?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+)\s*=\s*(\{)</string>
             <key>beginCaptures</key>
             <dict>
               <key>1</key>
@@ -239,9 +260,14 @@
               <key>3</key>
               <dict>
                 <key>name</key>
-                <string>entity.name.variable.system.name.ds</string>
+                <string>entity.name.variable.ip.name.ds</string>
               </dict>
               <key>4</key>
+              <dict>
+                <key>name</key>
+                <string>entity.name.variable.system.name.ds</string>
+              </dict>
+              <key>5</key>
               <dict>
                 <key>name</key>
                 <string>punctuation.brace.system.start.ds</string>
@@ -278,6 +304,10 @@
               <dict>
                 <key>include</key>
                 <string>#devices</string>
+              </dict>
+              <dict>
+                <key>include</key>
+                <string>#externals</string>
               </dict>
               <dict>
                 <key>include</key>
@@ -329,7 +359,7 @@
             <key>name</key>
             <string>flow.multi.ds</string>
             <key>begin</key>
-            <string>(\[\s*flow\s*\])\s*((?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+)\s*(=)\s*(\{)(?=[^\}]*$)</string>
+            <string>(\[\s*flow\s*\])\s*((?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+)\s*(=)\s*(\{)(?=[^\}]*$)</string>
             <key>beginCaptures</key>
             <dict>
               <key>1</key>
@@ -401,7 +431,7 @@
             <key>name</key>
             <string>flow.single.ds</string>
             <key>begin</key>
-            <string>(\[\s*flow\s*\])\s*((?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+)\s*(=)\s*\{</string>
+            <string>(\[\s*flow\s*\])\s*((?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+)\s*(=)\s*\{</string>
             <key>beginCaptures</key>
             <dict>
               <key>1</key>
@@ -546,7 +576,7 @@
             <key>name</key>
             <string>parent.multi.ds</string>
             <key>begin</key>
-            <string>((?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+)\s*=\s*(\{)(?=[^\}]*$)</string>
+            <string>((?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+)\s*=\s*(\{)(?=[^\}]*$)</string>
             <key>beginCaptures</key>
             <dict>
               <key>1</key>
@@ -604,7 +634,7 @@
             <key>name</key>
             <string>parent.single.ds</string>
             <key>begin</key>
-            <string>((?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+)\s*=\s*\{</string>
+            <string>((?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+)\s*=\s*\{</string>
             <key>beginCaptures</key>
             <dict>
               <key>1</key>
@@ -1080,28 +1110,92 @@
       </dict>
       <key>devices</key>
       <dict>
-        <key>patterns</key>
-        <array>
+        <key>name</key>
+        <string>devices.ds</string>
+        <key>begin</key>
+        <string>(?:\[)\s*(device)\s*(?:(file\b)\s*=\s*((?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+|(?:(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])++(?:\.(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+)+))?)?\]\s*((?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+|(?:(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])++(?:\.(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+)+))</string>
+        <key>beginCaptures</key>
+        <dict>
+          <key>1</key>
           <dict>
             <key>name</key>
             <string>storage.modifier.devices.header.ds</string>
-            <key>match</key>
-            <string>(?&lt;=\[\b)(device\b)</string>
           </dict>
+          <key>2</key>
           <dict>
             <key>name</key>
             <string>support.type.tag.file.ds</string>
-            <key>match</key>
-            <string>(?&lt;=(device\b))(\s*file)\b</string>
           </dict>
-        </array>
-      </dict>
-      <key>exsystem</key>
-      <dict>
-        <key>patterns</key>
+          <key>3</key>
+          <dict>
+            <key>name</key>
+            <string>variable.other.devices.file.ds</string>
+          </dict>
+          <key>4</key>
+          <dict>
+            <key>name</key>
+            <string>variable.other.devices.segment.ds</string>
+          </dict>
+        </dict>
+        <key>end</key>
+        <string>;</string>
+        <key>endCaptures</key>
         <dict>
-          <key>name</key>
-          <string>exsystem.ds</string>
+          <key>1</key>
+          <dict>
+            <key>name</key>
+            <string>punctuation.devices.end.ds</string>
+          </dict>
+        </dict>
+      </dict>
+      <key>externals</key>
+      <dict>
+        <key>name</key>
+        <string>externals.ds</string>
+        <key>begin</key>
+        <string>(?:\[)\s*(external)\s*(?:(file\b)\s*=\s*((?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+|(?:(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])++(?:\.(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+)+))?)?\s*(?:(ip|host\b)\s*=\s*((?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+|(?:(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])++(?:\.(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+)+))?)?\]\s*((?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+|(?:(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])++(?:\.(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+)+))</string>
+        <key>beginCaptures</key>
+        <dict>
+          <key>1</key>
+          <dict>
+            <key>name</key>
+            <string>storage.modifier.externals.header.ds</string>
+          </dict>
+          <key>2</key>
+          <dict>
+            <key>name</key>
+            <string>support.type.tag.file.ds</string>
+          </dict>
+          <key>3</key>
+          <dict>
+            <key>name</key>
+            <string>variable.other.externals.file.ds</string>
+          </dict>
+          <key>4</key>
+          <dict>
+            <key>name</key>
+            <string>support.type.tag.ip.ds</string>
+          </dict>
+          <key>5</key>
+          <dict>
+            <key>name</key>
+            <string>variable.other.externals.ip.ds</string>
+          </dict>
+          <key>6</key>
+          <dict>
+            <key>name</key>
+            <string>variable.other.externals.segment.ds</string>
+          </dict>
+        </dict>
+        <key>end</key>
+        <string>;</string>
+        <key>endCaptures</key>
+        <dict>
+          <key>1</key>
+          <dict>
+            <key>name</key>
+            <string>punctuation.externals.end.ds</string>
+          </dict>
         </dict>
       </dict>
       <key>causals</key>
@@ -1142,13 +1236,13 @@
             <key>name</key>
             <string>variable.other.segment.withdot.ds</string>
             <key>match</key>
-            <string>(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+(?:\.(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+)*</string>
+            <string>(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+|(?:(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])++(?:\.(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+)+)</string>
           </dict>
           <dict>
             <key>name</key>
             <string>variable.other.segment.ds</string>
             <key>match</key>
-            <string>(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+</string>
+            <string>(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+</string>
           </dict>
           <dict>
             <key>include</key>
@@ -1168,15 +1262,15 @@
         <array>
           <dict>
             <key>name</key>
-            <string>variable.other.code.ds</string>
+            <string>support.function.dollar.ds</string>
             <key>match</key>
-            <string>(?&lt;=\$)(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+(?:\.(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+)*</string>
+            <string>(?=(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+|(?:(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])++(?:\.(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+)+))\$</string>
           </dict>
           <dict>
             <key>name</key>
-            <string>punctuation.dollar.ds</string>
+            <string>variable.other.code.ds</string>
             <key>match</key>
-            <string>(?=(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+(?:\.(?:[^\\\s\.;|[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)]])+)*)\$</string>
+            <string>(?&lt;=\$)(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+|(?:(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])++(?:\.(?:[^\\\s\.;[(&lt;\|\|&gt;)(&lt;\|)(\|&gt;)&lt;&gt;,;:=(=&gt;)(&lt;=)(\|\|)(\&amp;\&amp;)][^\S\n\r]])+)+)</string>
           </dict>
         </array>
       </dict>

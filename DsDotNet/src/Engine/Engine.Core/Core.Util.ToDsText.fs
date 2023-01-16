@@ -93,7 +93,7 @@ module internal ToDsTextModule =
                         | Some(DuAliasTargetReal real) -> real.GetAliasTargetToDs(flow).Combine()
                         | Some(DuAliasTargetCall call) -> call.GetAliasTargetToDs().Combine()
                         | Some(DuAliasTargetRealEx o) -> o.Real.GetAliasTargetToDs(flow).Combine()
-                        | None -> failwith "ERROR"
+                        | None -> failwithlog "ERROR"
 
                     yield $"{tab}{aliasKey} = {lb} {mnemonics} {rb}"
                 yield $"{tab}{rb}"
@@ -225,14 +225,14 @@ module internal ToDsTextModule =
                                         yield funcString
                             yield $"{tab2}{rb}"
                     ] |> combineLines
-                yield buttonsToDs("auto",   system.AutoButtons     )
-                yield buttonsToDs("manual", system.ManualButtons   )
-                yield buttonsToDs("drive",  system.DriveButtons    )
-                yield buttonsToDs("stop",   system.StopButtons     )
-                yield buttonsToDs("clear",  system.ClearButtons    )
-                yield buttonsToDs("emg",    system.EmergencyButtons)
-                yield buttonsToDs("test",   system.TestButtons     )
-                yield buttonsToDs("home",   system.HomeButtons     )
+                yield buttonsToDs("a", system.AutoButtons)
+                yield buttonsToDs("m", system.ManualButtons)
+                yield buttonsToDs("d", system.DriveButtons)
+                yield buttonsToDs("s", system.StopButtons)
+                yield buttonsToDs("c", system.ClearButtons)
+                yield buttonsToDs("e", system.EmergencyButtons)
+                yield buttonsToDs("t", system.TestButtons)
+                yield buttonsToDs("h", system.HomeButtons)
                 yield $"{tab}{rb}"
 
             let lmps =
@@ -267,13 +267,13 @@ module internal ToDsTextModule =
                                         yield funcString
                             yield $"{tab2}{rb}"
                     ] |> combineLines
-                yield lampsToDs("auto",   system.AutoModeLamps     )
-                yield lampsToDs("manual", system.ManualModeLamps   )
-                yield lampsToDs("drive",  system.DriveModeLamps    )
-                yield lampsToDs("stop",   system.StopModeLamps     )
-                yield lampsToDs("emg",    system.EmergencyModeLamps)
-                yield lampsToDs("test",   system.TestModeLamps     )
-                yield lampsToDs("ready",  system.ReadyModeLamps    )
+                yield lampsToDs("a", system.AutoModeLamps)
+                yield lampsToDs("m", system.ManualModeLamps)
+                yield lampsToDs("d", system.DriveModeLamps)
+                yield lampsToDs("s", system.StopModeLamps)
+                yield lampsToDs("e", system.EmergencyModeLamps)
+                yield lampsToDs("t", system.TestModeLamps)
+                yield lampsToDs("r", system.ReadyModeLamps)
                 yield $"{tab}{rb}"
 
             (* prop
@@ -304,7 +304,7 @@ module internal ToDsTextModule =
                     | :? Real as real -> real.ParentNPureNames.Combine()
                     | :? Call as call -> getCallName call
                     | :? RealOtherFlow as realEx -> realEx.ParentNPureNames.Combine()
-                    | _ -> failwith "ERROR"
+                    | _ -> failwithlog "ERROR"
 
                 [
                     if withSafeties.Any() then

@@ -150,7 +150,7 @@ let multiplesOfThreeUptoTwenty =
             if i % 3 = 0 then do! State.put (s + i)
         return! State.get
     } |> State.run 0 |> fst
-let verify c = if not c then failwith "ERROR"
+let verify c = if not c then failwithlog "ERROR"
 verify ([ 3..3..20 ] |> List.sum = multiplesOfThreeUptoTwenty)
 
 /// Cons the input to the state

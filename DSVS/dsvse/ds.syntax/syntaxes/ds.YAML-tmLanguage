@@ -19,31 +19,32 @@ variables:
   endofBracket: (\s*\])
   whitespace: '[^\S\n\r]'
 
-  compo: '(?:[^\\\s\.;|{{punctuation}}])+'
+  compo: '(?:[^\\\s\.;{{punctuation}}{{whitespace}}])+'
   words: '[가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*'
   # [가-힣\w\d]
   identifier1: '{{compo}}'
   identifier2: '{{compo}}\.{{compo}}'
   identifier3: '{{compo}}\.{{compo}}\.{{compo}}'
   identifier4: '{{compo}}\.{{compo}}\.{{compo}}\.{{compo}}'
-  identifiers: '{{compo}}(?:\.{{compo}})*'
+  identifiers: '{{compo}}|(?:{{compo}}+(?:\.{{compo}})+)'
 
   system: 'system|sys'
   external: 'external'
   ipSpec: 'ip|host'
+  address: '{{compo}}|\.'
   fileSpec: 'file'
-  ip: '(?:{{ipSpec}})\s*=\s*{{identifiers}}|d+'
+  ip: '{{ipSpec}}\s*='
   button: 'emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home'
   lamp: 'runlamp|dryrunlamp|manuallamp|stoplamp|emglamp'
-  types: '(device|flow|aliases|{{lamp}}|{{button}})\b'
-  props: '{{identifier1}}|{{identifier2}}|{{identifier3}}|{{identifier4}}|{{identifiers}}'
+  types: '(device|external|flow|aliases|{{lamp}}|{{button}})\b'
+  # props: '{{identifier1}}|{{identifier2}}|{{identifier3}}|{{identifier4}}|{{identifiers}}'
   punctuation: '[(<\|\|>)(<\|)(\|>)<>,;:=(=>)(<=)(\|\|)(\&\&)]'
   buttonHeader: '\[\s*(?:{{button}})\s*\]'
   lampHeader: '\[\s*(?:{{lamp}})\s*\]'
 
   fliepath: 'file\s*=\s*(?:{{identifiers}})'
 
-  systemHeader: '\[\s*({{system}})\s*((?:{{ipSpec}})\s*=\s*{{identifier1}})?\]\s*({{identifier1}})\s*=\s*'
+  systemHeader: '\[\s*({{system}})\s*((?:{{ipSpec}})\s*=\s*({{identifiers}}))?\]\s*({{identifier1}})\s*=\s*'
   deviceHeader: '(?:\[\s*(device)\s*({{fliepath}})?\]\s*)\s*({{identifier1}})'
   flowHeader: '(\[\s*flow\s*\])\s*({{identifier1}})\s*(=)\s*'
   parentHeader: '({{identifier1}})\s*=\s*'
@@ -67,23 +68,26 @@ variables:
 
 patterns:
 - include: '#comments'
-- include: '#systmeType'
 - include: '#systems'
+- include: '#systemType'
 # - include: '#segment'
 
 repository:
-  systmeType:
+  systemType:
     patterns:
     # - name: storage.modifier.system.text.withbrackets.ds
     #   match: '{{startofBracket}}({{system}}){{endofBracket}}'
-    - name: storage.modifier.system.text.ds
-      match: '(?<=\[)({{system}})\b'
     - name: support.type.tag.ip.ds
-      match: '(?<=({{system}})\b)(\s({{ipSpec}}))\b'
-
+      match: '(?<=({{system}})\b)\s*(({{ipSpec}}))\b'
+    - name: storage.modifier.system.header.ds
+      match: '({{system}})\b'
 
   types:
     patterns:
+    - name: support.type.tag.ip.ds
+      match: '(?<=({{external}})\b)\s*(({{ipSpec}}))\b'
+    - name: support.type.tag.file.ds
+      match: '(?<=({{device}})\b)\s*(({{fileSpec}}))\b'
     - name: storage.modifier.withbrackets.ds
       match: '{{startofBracket}}({{types}}){{endofBracket}}'
     - name: storage.modifier.ds
@@ -91,7 +95,7 @@ repository:
 
   property:
    name: variable.object.property.ds
-   match: '{{startOfIdentifier}}({{props}}){{endOfIdentifier}}' 
+   match: '{{startOfIdentifier}}({{identifiers}}){{endOfIdentifier}}' 
 
   punctuation:
     name: keyword.other.accessor.ds
@@ -119,14 +123,16 @@ repository:
         beginCaptures:
           '1': {name: storage.modifier.system.header.ds}
           '2': {name: support.type.tag.ip.spec.ds}
-          '3': {name: entity.name.variable.system.name.ds}
-          '4': {name: punctuation.brace.system.start.ds}
+          '3': {name: entity.name.variable.ip.name.ds}
+          '4': {name: entity.name.variable.system.name.ds}
+          '5': {name: punctuation.brace.system.start.ds}
         end: (^\s*\})
         endCaptures:
           '1': {name: punctuation.brace.system.end.ds}
         patterns:             
           - include: '#comments'
           - include: '#devices'
+          - include: '#externals'
           - include: '#flows'
           - include: '#jobs'
           - include: '#interfaces'
@@ -144,8 +150,9 @@ repository:
         beginCaptures:
           '1': {name: storage.modifier.system.header.ds}
           '2': {name: support.type.tag.ip.spec.ds}
-          '3': {name: entity.name.variable.system.name.ds}
-          '4': {name: punctuation.brace.system.start.ds}
+          '3': {name: entity.name.variable.ip.name.ds}
+          '4': {name: entity.name.variable.system.name.ds}
+          '5': {name: punctuation.brace.system.start.ds}
         end: (\})
         endCaptures:
           '1': {name: punctuation.brace.system.end.ds}
@@ -156,6 +163,7 @@ repository:
             match: '[^\s\}]'
           - include: '#comments'
           - include: '#devices'
+          - include: '#externals'
           - include: '#flows'
           - include: '#jobs'
           - include: '#interfaces'
@@ -409,20 +417,30 @@ repository:
           match: '[^\s*\}@>]'
 
   devices:      
-    patterns:
-      - name: storage.modifier.devices.header.ds
-      # match: '{{deviceHeader}}'
-        match: '(?<=\[\b)(device\b)'
-      - name: support.type.tag.file.ds
-        match: '(?<=(device\b))(\s*{{fileSpec}})\b'
-      # captures:
-      #   '1': {name: storage.modifier.devices.header1.ds}
-      #   '2': {name: support.type.devices.header2.ds}
-      #   '3': {name: storage.modifier.devices.header3.ds}
+    name: devices.ds
+    begin: (?:\[)\s*(device)\s*(?:({{fileSpec}}\b)\s*=\s*({{identifiers}})?)?\]\s*({{identifiers}})
+    beginCaptures:
+      '1': {name: storage.modifier.devices.header.ds}
+      '2': {name: support.type.tag.file.ds}
+      '3': {name: variable.other.devices.file.ds}
+      '4': {name: variable.other.devices.segment.ds}
+    end: ;
+    endCaptures:
+      '1': {name: punctuation.devices.end.ds}
 
-  exsystem:
-    patterns:
-      name: exsystem.ds
+  externals:      
+    name: externals.ds
+    begin: (?:\[)\s*(external)\s*(?:({{fileSpec}}\b)\s*=\s*({{identifiers}})?)?\s*(?:({{ipSpec}}\b)\s*=\s*({{identifiers}})?)?\]\s*({{identifiers}})
+    beginCaptures:
+      '1': {name: storage.modifier.externals.header.ds}
+      '2': {name: support.type.tag.file.ds}
+      '3': {name: variable.other.externals.file.ds}
+      '4': {name: support.type.tag.ip.ds}
+      '5': {name: variable.other.externals.ip.ds}
+      '6': {name: variable.other.externals.segment.ds}
+    end: ;
+    endCaptures:
+      '1': {name: punctuation.externals.end.ds}
 
   causals:
     patterns:
@@ -447,8 +465,9 @@ repository:
   
   code: 
     patterns:
+    - name: 'support.function.dollar.ds'
+      match: '(?={{identifiers}})\$'
     - name: 'variable.other.code.ds'
       match: '(?<=\$){{identifiers}}'
-    - name: 'punctuation.dollar.ds'
-      match: '(?={{identifiers}})\$'
+
 ...

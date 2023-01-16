@@ -63,6 +63,6 @@ module DsParserHelperModule =
                 | Some sys, Some flow, None, _ ->
                     let! f = tryFindFlow x flowName
                     return DuParentFlow f
-                | _ -> failwith "ERROR"
+                | _ -> failwithlog "ERROR"
             }
 

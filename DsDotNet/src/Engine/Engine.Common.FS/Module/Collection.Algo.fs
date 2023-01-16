@@ -195,7 +195,7 @@ module CollectionAlgorithm =
     let rec last = function
     | hd :: [] -> hd
     | hd :: tl -> last tl
-    | _ -> failwith "Empty list."
+    | _ -> failwithlog "Empty list."
 
     module private TestMe =
         let a = randomSequence None (Some 7) |> Seq.take 10 |> List.ofSeq   // e.g [5; 3; 1; 1; 1; 6; 3; 3; 6; 2]

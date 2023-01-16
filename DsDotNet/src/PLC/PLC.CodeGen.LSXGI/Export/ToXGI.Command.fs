@@ -23,7 +23,7 @@ module internal rec Command =
             | PredicateCmd(pc)       -> tet(pc)
             | FunctionCmd (fc)       -> tet(fc)
             | FunctionBlockCmd (fbc) -> tet(fbc)
-            | ActionCmd (ac) -> failwith "ERROR: check"
+            | ActionCmd (ac) -> failwithlog "ERROR: check"
 
         member x.InstanceName =
             match x with
@@ -174,8 +174,8 @@ module internal rec Command =
             | Some storage, None -> storage.Name
             | None, Some (:? ILiteralHolder as literal) -> literal.ToTextWithoutTypeSuffix()
             | None, Some literal -> literal.ToText()
-            | _ -> failwith "ERROR"
-        | _ -> failwith "ERROR"
+            | _ -> failwithlog "ERROR"
+        | _ -> failwithlog "ERROR"
 
     let drawPredicate (x, y) (predicate:Predicate) : BlockSummarizedXmlElements =
         match predicate with
@@ -190,7 +190,7 @@ module internal rec Command =
                     let opCompType = args[0].DataType.SizeString
                     $"{name}2_{opCompType}" // e.g "GT2_INT"
                 | _ ->
-                    failwith "NOT YET"
+                    failwithlog "NOT YET"
             createBoxXmls (x, y)  func namedInputParameters outputParameters ""
 
     let drawFunction (x, y) (func:Function) : BlockSummarizedXmlElements =
@@ -208,7 +208,7 @@ module internal rec Command =
                 match name with
                 | ("ADD" | "MUL") -> $"{name}{arity}_{plcFuncType}"        // xxx: ADD2_INT
                 | ("SUB" | "DIV") -> name        // DIV 는 DIV, DIV2 만 존재함
-                | _ -> failwith "NOT YET"
+                | _ -> failwithlog "NOT YET"
             createBoxXmls (x, y)  func namedInputParameters outputParameters ""
 
     let drawAction (x, y) (func:PLCAction) : BlockSummarizedXmlElements =
@@ -221,27 +221,6 @@ module internal rec Command =
             let output = target :?> INamedExpressionizableTerminal
             let outputParameters = [ "OUT", output ]
             createBoxXmls (x, y)  XgiConstants.FunctionNameMove namedInputParameters outputParameters ""
-
-    type CheckType with
-        [<Obsolete>]
-        member t.IsRoughlyEqual(typ:System.Type) =
-            match typ.Name with
-            | "Boolean"-> t.HasFlag CheckType.BOOL
-            | "Byte"   -> t.HasFlag CheckType.BYTE
-            | "Double" -> t.HasFlag CheckType.LREAL
-            | "Int16"  -> t.HasFlag CheckType.INT
-            | "Int32"  -> t.HasFlag CheckType.DINT
-            | "Int64"  -> t.HasFlag CheckType.LINT
-            | "SByte"  -> t.HasFlag CheckType.BYTE
-            | "Single" -> t.HasFlag CheckType.REAL
-            | "String" -> t.HasFlag CheckType.STRING || t.HasFlag CheckType.TIME
-            | "UInt16" -> t.HasFlag CheckType.UINT
-            | "UInt32" -> t.HasFlag CheckType.UDINT
-            | "UInt64" -> t.HasFlag CheckType.ULINT
-            //| "Char"   , CheckType.
-            | _ ->
-                failwith "ERROR"
-
 
     let createFunctionBlockInstanceXmls (rungStartX, rungStartY) (cmd:CommandTypes) (namedInputParameters:(string*IExpression) list) (namedOutputParameters:(string*INamedExpressionizableTerminal) list) : BlockSummarizedXmlElements =
         let func = cmd.VarType.ToString()
@@ -370,9 +349,9 @@ module internal rec Command =
                         | Some (:? ILiteralHolder as literal), None -> literal.ToTextWithoutTypeSuffix()
                         | Some literal, None -> literal.ToText()
                         | None, Some variable -> variable.Name
-                        | _ -> failwith "ERROR"
+                        | _ -> failwithlog "ERROR"
                     | _ ->
-                        failwith "ERROR"
+                        failwithlog "ERROR"
                 createFBParameterXml (x + fsx - 1, ry) literal
 
             yield! inputBlockXmls |> bind(fun (_, bx) -> bx.XmlElements)
@@ -521,7 +500,7 @@ module internal rec Command =
             { XmlElements = xmls; X=x; Y=y; TotalSpanX = spanX; TotalSpanY = spanY}
 
         | FlatNary((OpCompare _ | OpArithmatic _), exprs) ->
-            failwith "ERROR : Should have been processed in early stage."    // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
+            failwithlog "ERROR : Should have been processed in early stage."    // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
 
         // terminal case
         | FlatNary(OpUnit, inner::[]) ->

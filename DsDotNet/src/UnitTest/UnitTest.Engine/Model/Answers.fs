@@ -98,7 +98,7 @@ module ModelAnswers =
         Bm = { B."-"(%I4, %Q4); }
     }
     [buttons] = {
-        [emg] = {
+        [e] = {
             EMGBTN(_, _) = { F; }
         }
     }
@@ -194,25 +194,25 @@ module ModelComponentAnswers =
         A > B;		// A(Real)> B(Real);
     }
     [lamps] = {
-        [auto] = {
+        [a] = {
             AutoMode(%Q1) = { F1 }
         }
-        [manual] = {
+        [m] = {
             ManualMode(%Q1) = { F2 }
         }
-        [drive] = {
+        [d] = {
             RunMode(%Q1) = { F3 }
         }
-        [stop] = {
+        [s] = {
             StopMode(%Q1) = { F3 }
         }
-        [emg] = {
+        [e] = {
             EmgMode(%Q1) = { F3 }
         }
-        [test] = {
+        [t] = {
             TestMode = { F5 }
         }
-        [ready] = {
+        [r] = {
             ReadyMode = { F4 }
             ReadyMode.func = {
                 $ton 2000;
@@ -241,33 +241,33 @@ module ModelComponentAnswers =
         A > B;		// A(Real)> B(Real);
     }
     [buttons] = {
-        [auto] = {
+        [a] = {
             AutoBTN(%I1, %Q1) = { F2; }
             AutoBTN2(%I2, %Q2) = { F1;F3;F5; }
         }
-        [manual] = {
+        [m] = {
             ManualBTN(_, _) = { F1;F5; }
         }
-        [drive] = {
+        [d] = {
             StartBTN_FF(_, _) = { F2; }
             StartBTN1(_, _) = { F1; }
         }
-        [stop] = {
+        [s] = {
             StopBTN(_, _) = { F1;F2;F5; }
         }
-        [clear] = {
+        [c] = {
             ClearBTN(_, _) = { F1;F2;F3;F5; }
         }
-        [emg] = {
+        [e] = {
             EmptyButton(_, _) = {  }
             EmptyButton2(_, _) = {  }
             EMGBTN3(_, _) = { F3;F5; }
             EMGBTN(_, _) = { F1;F2;F3;F5; }
         }
-        [test] = {
+        [t] = {
             StartTestBTN(_, _) = { F5; }
         }
-        [home] = {
+        [h] = {
             HomeBTN(_, _) = { F1;F2;F3;F5; }
             HomeBTN.func = { 
                 $ton 2000; 

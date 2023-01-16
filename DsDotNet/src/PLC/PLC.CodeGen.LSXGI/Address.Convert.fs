@@ -24,7 +24,7 @@ open System.Collections.Generic
 //            | Xgr -> 0xA8uy
 //            | XgbMk -> 0xB0uy
 //            | XgbIEC -> 0xB4uy
-//            | _ -> failwith "ERROR"
+//            | _ -> failwithlog "ERROR"
 //        member x.ToText() =
 //            match x with
 //            | Xgk -> "XGK"
@@ -32,7 +32,7 @@ open System.Collections.Generic
 //            | Xgr -> "XGR"
 //            | XgbMk -> "XGBMK"
 //            | XgbIEC -> "XGBIEC"
-//            | _ -> failwith "ERROR"
+//            | _ -> failwithlog "ERROR"
 //        static member FromByte (by:byte) =
 //            match by with
 //            | 0xA0uy -> CpuType.Xgk
@@ -40,7 +40,7 @@ open System.Collections.Generic
 //            | 0xA8uy -> CpuType.Xgr
 //            | 0xB0uy -> CpuType.XgbMk
 //            | 0xB4uy -> CpuType.XgbIEC
-//            | _ -> failwith "ERROR"
+//            | _ -> failwithlog "ERROR"
 
 //        static member FromID(cpuId:int) =
 //            match cpuId with
@@ -80,7 +80,7 @@ open System.Collections.Generic
 //            //XGB-XEMHP 115
 //            | 103 | 108 | 109 | 112 | 113 | 114 | 115 | 116 -> XgbIEC
 //            | 2 | 6 | 7 | 9 | 10 | 15 | 18 | 19 | 21 | 22 -> XgbMk
-//            | _ -> failwith "ERROR"
+//            | _ -> failwithlog "ERROR"
 
 ///// 16.  개별 읽기 모드에서의 최대 접점 수
 //let maxRandomReadTagCount = 16
@@ -127,7 +127,7 @@ open System.Collections.Generic
 //            | Word  -> 16
 //            | DWord -> 32
 //            | LWord -> 64
-//            | Continuous -> failwith "ERROR"
+//            | Continuous -> failwithlog "ERROR"
 //        member x.GetByteLength() =
 //            match x with
 //            | Bit   -> 1
@@ -139,7 +139,7 @@ open System.Collections.Generic
 //            | Word  -> TagType.I2
 //            | DWord -> TagType.I4
 //            | LWord -> TagType.I8
-//            | Continuous -> failwith "ERROR"
+//            | Continuous -> failwithlog "ERROR"
 //        member x.ToDataLengthType() =
 //            match x with
 //            | Bit   -> DataLengthType.Bit
@@ -147,7 +147,7 @@ open System.Collections.Generic
 //            | Word  -> DataLengthType.Word
 //            | DWord -> DataLengthType.DWord
 //            | LWord -> DataLengthType.LWord
-//            | Continuous -> failwith "ERROR"
+//            | Continuous -> failwithlog "ERROR"
 //        member x.ToMnemonic() =
 //            match x with
 //            | Bit   -> "X"
@@ -155,7 +155,7 @@ open System.Collections.Generic
 //            | Word  -> "W"
 //            | DWord -> "D"
 //            | LWord -> "L"
-//            | Continuous -> failwith "ERROR"
+//            | Continuous -> failwithlog "ERROR"
 //        member x.Totext() =
 //            match x with
 //            | Bit   -> "BIT"
@@ -163,7 +163,7 @@ open System.Collections.Generic
 //            | Word  -> "WORD"
 //            | DWord -> "DWORD"
 //            | LWord -> "LWORD"
-//            | Continuous -> failwith "ERROR"
+//            | Continuous -> failwithlog "ERROR"
 
 //        /// uint64 를 data type 에 맞게 boxing 해서 반환
 //        member x.BoxUI8(v:uint64) =
@@ -173,7 +173,7 @@ open System.Collections.Generic
 //            | Word  -> uint16 v |> box
 //            | DWord -> uint32 v |> box
 //            | LWord -> uint64 v |> box
-//            | Continuous -> failwith "ERROR"
+//            | Continuous -> failwithlog "ERROR"
 
 //        /// Boxing 된 값 v 를 uint64 로 unboxing 해서 반환
 //        member x.Unbox2UI8(v:obj) =
@@ -186,7 +186,7 @@ open System.Collections.Generic
 //            | (:? uint64 as l, _) ->
 //                logWarn "Mismatched type: %A(%A)" x v
 //                l
-//            | _ -> failwith "ERROR"
+//            | _ -> failwithlog "ERROR"
 
 //        static member FromDeviceMnemonic = function
 //            | "X" -> Bit
@@ -194,7 +194,7 @@ open System.Collections.Generic
 //            | "W" -> Word
 //            | "D" -> DWord
 //            | "L" -> LWord
-//            | _ -> failwith "ERROR"
+//            | _ -> failwithlog "ERROR"
 
 ////let inline xToBytes (x:'a) = x |> uint16 |> fun x -> x.ToBytes()
 

@@ -43,12 +43,12 @@ module QueueTestModule =
 
             // Exception will be catched
             //async {
-            //    failwith "ERROR"
+            //    failwithlog "ERROR"
             //} |> Async.Start
 
             // Exception won't be catched
             //task {
-            //    failwith "ERROR"
+            //    failwithlog "ERROR"
             //}
 
             async {
@@ -112,7 +112,7 @@ module QueueTestModule =
             let y =
                 task {
                     do! Task.Delay(100)
-                    failwith "Uncaught Exception 1"
+                    failwithlog "Uncaught Exception 1"
                 //} |> Task.withLogging |> Async.AwaitTask |> Async.Start
                 //} |> Async.ofTask |> Async.RunSynchronously
                 //} |> Async.AwaitTask |> Async.RunSynchronously
@@ -121,14 +121,14 @@ module QueueTestModule =
 
             task {
                 do! Task.Delay(100)
-                failwith "Uncaught Exception 2"
+                failwithlog "Uncaught Exception 2"
             } |> Async.startTask
 
 
             let kkk =
                 task {
                     do! Task.Delay(200)
-                    failwith "Uncaught Exception 3"
+                    failwithlog "Uncaught Exception 3"
                     return 1
                 //} |> Async.ofTask |> Async.StartAsTask |> ignore
                 } |> Task.withLogging
@@ -137,7 +137,7 @@ module QueueTestModule =
 
             task {
                 do! Task.Delay(200)
-                failwith "Uncaught Exception 4"
+                failwithlog "Uncaught Exception 4"
                 return 1
             //} |> Async.ofTask |> Async.StartAsTask |> ignore
             //} |> Task.withLogging //|> Task.toAsync //|> Async.StartAsTask
@@ -146,7 +146,7 @@ module QueueTestModule =
             let n =
                 task {
                     do! Task.Delay(100)
-                    //failwith "Uncaught Exception 5"
+                    //failwithlog "Uncaught Exception 5"
                     return 1
                 //} |> Async.ofTask |> Async.RunSynchronously
                 } |> Task.withLogging |> Async.AwaitTask |> Async.RunSynchronously

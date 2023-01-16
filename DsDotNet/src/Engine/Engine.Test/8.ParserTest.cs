@@ -72,33 +72,33 @@ namespace Engine
         A > B;		// A(Real)> B(Real);
     }
     [buttons] = {
-        [auto] = {
+        [a] = {
             AutoBTN(%I1, %Q1) = { F2; }
             AutoBTN2(%I2, %Q2) = { F1;F3;F5; }
         }
-        [manual] = {
+        [m] = {
             ManualBTN(_, _) = { F1;F5; }
         }
-        [emg] = {
+        [e] = {
             EmptyButton(_, _) = {}
             EmptyButton2(_, _) = {}
             EMGBTN3(_, _) = { F3;F5; }
             EMGBTN(_, _) = { F1;F2;F3;F5; }
         }
-        [stop] = {
+        [s] = {
             StopBTN(_, _) = { F1;F2;F5; }
         }
-        [drive] = {
+        [d] = {
             StartBTN_FF(_, _) = { F2; }
             StartBTN1(_, _) = { F1; }
         }
-        [test] = {
+        [t] = {
             StartTestBTN(_, _) = { F5; }
         }
-        [clear] = {
+        [c] = {
             ClearBTN(_, _) = { F1;F2;F3;F5; }
         }
-        [home] = {
+        [h] = {
             HomeBTN(_, _) = { F1;F2;F3;F5; }
             HomeBTN.func = {
                 $TON 2000;
@@ -128,25 +128,25 @@ namespace Engine
     }
     [lamps] = 
     {
-        [auto] = {
+        [a] = {
             AutoMode(%Q1) = { F1 }
         }
-        [manual] = {
+        [m] = {
             ManualMode(%Q1) = { F2 }
         }
-        [drive] = {
+        [d] = {
             RunMode(%Q1) = { F3  }
         }
-        [stop] = {
+        [s] = {
             StopMode(%Q1) = { F3 }
         }
-        [emg] = {
+        [e] = {
             EmgMode(%Q1) = { F3 }
         }
-        [test] = {
+        [t] = {
             TestMode = { F5 }
         }
-        [ready] = {
+        [r] = {
             ReadyMode = { F4 }
             ReadyMode.func = {
                 $TON 2000;
@@ -252,16 +252,16 @@ namespace Engine
         ResetBTN     = {EX.FF_ResetBTN.TX    ~    EX.FF_ResetBTN.RX}
     }
     [buttons] = {
-        [emg] = {
+        [e] = {
             EMGBTN3 = { F3; F5 };
             EMGBTN = { F1; F2; F3; F5; FF };
         }
-        [auto] = {
+        [a] = {
             //AutoBTN2;     Empty not allowed
             //AutoBTN = { F2 };
             AutoBTN = { F1; F3; F5; FF };
         }
-        [start] = {
+        [d] = {
             StartBTN_FF = { FF };
             StartBTN1 = { F1 };
         }
@@ -326,16 +326,16 @@ namespace Engine
         Rear.제품공급 > Work.작업공정;
     }
     [buttons] = {
-        [emg_in] = {
+        [e_in] = {
             EMGBTN = { Work; Model_Auto };
         }
-        [auto_in] = {
+        [a_in] = {
             AutoBTN = { Work; Model_Auto };
         }
-        [start_in] = {
+        [d_in] = {
             StartBTN1 = { Work; Model_Auto };
         }
-        [reset_in] = {
+        [c_in] = {
             ResetBTN = { Work; Model_Auto };
         }
     }

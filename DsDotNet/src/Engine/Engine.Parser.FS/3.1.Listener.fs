@@ -48,7 +48,7 @@ module ListnerCommonFunctionGenerator =
 ///   - Parenting, Child, alias, Api
 /// </summary>
 type DsParserListener(parser:dsParser, options:ParserOptions) =
-    inherit dsParserBaseListener()
+    inherit dsBaseListener()
     do
         parser.Reset()
 
@@ -109,7 +109,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 x.TheSystem <- DsSystem(name, hostIp)
             tracefn($"System: {name}")
         | None ->
-            failwith "ERROR"
+            failwithlog "ERROR"
 
     override x.ExitSystem(ctx:SystemContext) = x.OptLoadedSystemName <- None
 
@@ -225,7 +225,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
             | callOrAlias::[] ->
                 return! graph.TryFindVertex(callOrAlias)
             | _ ->
-                failwith "ERROR"
+                failwithlog "ERROR"
         }
 
 
@@ -267,7 +267,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 match oci.Parenting, oci.Flow with
                 | Some parenting, _ -> parenting.CreateEdge(mei)
                 | None, Some flow -> flow.CreateEdge(mei)
-                | _ -> failwith "ERROR"
+                | _ -> failwithlog "ERROR"
                 |> ignore
 
     /// system context 아래에 기술된 모든 vertex 들을 생성한다.
@@ -314,7 +314,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                         return Alias.Create(name, aliasDef.AliasTarget.Value, parentWrapper) :> Indirect
                     | None, None -> return! None
                     | _ ->
-                        failwith "ERROR: duplicated"
+                        failwithlog "ERROR: duplicated"
                 }
 
             let createCall (parentWrapper:ParentWrapper) name =
@@ -356,7 +356,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                         | _, q::[] -> ()
                         | _, ofn::ofrn::[] -> ()
                         | _ ->
-                            failwith "ERROR"
+                            failwithlog "ERROR"
             loop
 
         let createRealVertex          = tokenCreator 0
@@ -422,9 +422,9 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                                 }
                             match apiItem with
                             | Some apiItem -> yield apiItem
-                            | _ -> failwith "ERROR"
+                            | _ -> failwithlog "ERROR"
 
-                        | _ -> failwith "ERROR"
+                        | _ -> failwithlog "ERROR"
                     ]
                 let funcSet = commonFunctionSetter jobName jobFuncs
                 assert(apiItems.Any())
@@ -452,7 +452,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                             | Some f -> f.Graph.TryFindVertex<Real>(rc)  |> Option.get |> DuAliasTargetReal
                             | None ->  tryFindCall system ([flow.Name]@ns) |> Option.get |> DuAliasTargetCall
                         | _ ->
-                            failwith "ERROR"
+                            failwithlog "ERROR"
 
 
                 flow.AliasDefs[aliasKeys].AliasTarget <- Some target

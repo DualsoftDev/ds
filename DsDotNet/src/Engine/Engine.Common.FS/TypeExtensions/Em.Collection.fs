@@ -102,6 +102,7 @@ type SeqExt =
 
 [<AutoOpen>]
 module DotNetCollectionExt =
+    (* C# list extension *)
     type System.Collections.Generic.List<'t> with
         member xs.AddIfNotContains(x:'t) =
             if not (xs.Contains x) then

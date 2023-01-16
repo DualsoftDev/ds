@@ -341,7 +341,7 @@ module internal rec Command =
                 if b.TotalSpanX > 1 then
                     /// 'S' shape 의 하단부 수평선 끝점 x 좌표
                     let hEndX = if i = 0 then fsx - 1 else bex + i - 1
-                    yield! tryHLineTo (bex, bey) (hEndX)
+                    yield! tryHlineTo (bex, bey) (hEndX)
                         |> map (fun xml ->
                             tracefn $"H: ({bex}, {bey}) -> ({hEndX}, {bey})"
                             { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 })
@@ -354,7 +354,7 @@ module internal rec Command =
                         yield! vlineUpTo (bexi-1, bey) yi
 
                         // 'S' shape 의 상단부 수평선 그리기
-                        yield! tryHLineTo (bexi, yi) (fsx - 1)
+                        yield! tryHlineTo (bexi, yi) (fsx - 1)
                         |> map (fun xml ->
                             tracefn $"H: ({bexi}, {yi}) -> [({bexi}, {fsx - 1})]"
                             { Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1 })
@@ -431,7 +431,7 @@ module internal rec Command =
             let x = b.X + b.TotalSpanX //+ 1
             let lineXml =
                 let c = coord(x, b.Y)
-                let xml = hLineStartMarkAt(x, b.Y)
+                let xml = hlineStartMarkAt(x, b.Y)
                 { Coordinate = c; Xml = xml; SpanX = 1; SpanY = 1 }
             { blockXml with TotalSpanX = b.TotalSpanX + 1; XmlElements = b.XmlElements +++ lineXml }
 

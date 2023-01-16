@@ -43,6 +43,14 @@ module internal Common =
 
     let dq = "\""
 
+
+
+    /// 산전 limit : contact 기준 가로로 최대 31개[0..30] + coil 1개[31]
+    let coilCellX = 31
+    let maxNumHorizontalContact = 31
+    /// 최소기본 FB 위치 : 가로로  9 포인트
+    let minFBCellX = 9
+
     /// rung 을 구성하는 element (접점)의 XML 표현 문자열 반환
     let elementFull (elementType:int) (coordi:int) (param:string) (tag:string) : XmlOutput =
         $"\t\t<Element ElementType={dq}{elementType}{dq} Coordinate={dq}{coordi}{dq} {param}>{tag}</Element>"
@@ -51,8 +59,6 @@ module internal Common =
     let elementBody elementType coordi tag = elementFull elementType coordi "" tag
     /// rung 을 구성하는 element (접점)의 XML 표현 문자열 반환
     let element elementType coordi = elementBody elementType coordi ""
-    let hlineEmpty c = element (int ElementType.HorzLineMode) c
-    let hline c = element (int ElementType.MultiHorzLineMode) c
     /// 좌표 c 에서 시작하는 수직 line
     let vline c = element (int ElementType.VertLineMode) c
     /// 좌표 반환 : 1, 4, 7, 11, ...
@@ -64,21 +70,41 @@ module internal Common =
         let x = xx / 3
         let r = xx % 3
         (x, y), r
+    let pointAt (elementType:ElementType) (tag:string) (x:int) (y:int) : XmlOutput =
+        let xx = x*3 + 1
+        let yy = y*1024
+        let coordi = xx + yy
+        assert(coordi = coord(x, y))
 
-    /// 산전 limit : contact 기준 가로로 최대 31개[0..30] + coil 1개[31]
-    let coilCellX = 31
-    let maxNumHorizontalContact = 31
-    /// 최소기본 FB 위치 : 가로로  9 포인트
-    let minFBCellX = 9
-    /// 조건이 9 이상이면 뒤로 증가
-    let getFBCellX x:int = if minFBCellX <= x+3 then (x+4) else minFBCellX
-    /// 좌표 c 에서 시작하는 양 방향 검출 line
-    let risingline c = elementFull (int ElementType.RisingContact) (c) "" ""
-    /// 좌표 c 에서 시작하는 음 방향 검출 line
-    let fallingline c = elementFull (int ElementType.FallingContact) (c) "" ""
+        let nElementType = int elementType
+        let str = elementBody nElementType coordi "BOOL"
+
+        (* see elementFull
+            /// rung 을 구성하는 element (접점)의 XML 표현 문자열 반환
+            let elementFull elementType coordi param tag : XmlOutput =
+                $"\t\t<Element ElementType={dq}{elementType}{dq} Coordinate={dq}{coordi}{dq} {param}>{tag}</Element>"
+        *)
+
+        elementFull nElementType coordi "" tag
+
+    /// x, y 위치에 contact 생성하기 위한 xml 문자열 반환
+    let contactAt (tag:string) (x:int) (y:int) = pointAt ElementType.ContactMode tag x y
+
+    /// y line 에 coil 생성하기 위한 xml 문자열 반환
+    let coilAt (tag:string) (y:int) = pointAt ElementType.CoilMode tag coilCellX y    // coilCellX = 31
+
+    module Unused =
+        /// 조건이 9 이상이면 뒤로 증가
+        let getFBCellX x:int = if minFBCellX <= x+3 then (x+4) else minFBCellX
+        /// 좌표 c 에서 시작하는 양 방향 검출 line
+        let risingline c = elementFull (int ElementType.RisingContact) (c) "" ""
+        /// 좌표 c 에서 시작하는 음 방향 검출 line
+        let fallingline c = elementFull (int ElementType.FallingContact) (c) "" ""
+        let hlineEmpty c = element (int ElementType.HorzLineMode) c
+        let hline c = element (int ElementType.MultiHorzLineMode) c
 
 
-    let hLineStartMarkAt (x, y) = elementFull (int ElementType.HorzLineMode) (coord(x, y)) "" ""
+    let hlineStartMarkAt (x, y) = elementFull (int ElementType.HorzLineMode) (coord(x, y)) "" ""
 
     /// debugging 용 xml comment 생성
     let xmlCommentAtCoordinate (c:EncodedXYCoordinate) (comment:string) =
@@ -88,7 +114,7 @@ module internal Common =
 
 
     /// 마지막 수평으로 연결 정보: 그릴 수 없으면 [], 그릴 수 있으면 [singleton]
-    let tryHLineTo (x, y) endX =
+    let tryHlineTo (x, y) endX =
         if endX < x then
             []
         else
@@ -96,14 +122,14 @@ module internal Common =
             let c = coord(x, y)
             [ elementFull (int ElementType.MultiHorzLineMode) c lengthParam "" ]
 
-    let hLineTo (x, y) endX =
+    let hlineTo (x, y) endX =
         if endX < x then
             failwithlog $"endX startX [{endX} > {x}]"
-        tryHLineTo (x, y) endX |> List.exactlyOne
+        tryHlineTo (x, y) endX |> List.exactlyOne
 
 
     /// x y 위치에서 수직선 한개를 긋는다
-    let vLineAt (x, y) =
+    let vlineAt (x, y) =
         verify(x >= 0)
         let c = coord(x, y) + 2
         { Coordinate = c; Xml = vline c; SpanX = 0; SpanY = 1 }
@@ -115,7 +141,7 @@ module internal Common =
 
         if n > 0 then
             for i in [0.. n-1] do
-                vLineAt (x, y+i)
+                vlineAt (x, y+i)
     ]
 
     let vlineUpN (x, y) n = vlineDownN (x, y-n) n

@@ -123,36 +123,32 @@ module XgiGenerationTestModule =
         bool x31 = createTag("%IX0.1.15", false);
 """
 
+    let codeForBitsHuge = codeForBits31 + """
+        bool x32 = createTag("%IX0.0.2", false);
+        bool x33 = createTag("%IX0.0.3", false);
+        bool x34 = createTag("%IX0.0.4", false);
+        bool x35 = createTag("%IX0.0.5", false);
+        bool x36 = createTag("%IX0.0.6", false);
+        bool x37 = createTag("%IX0.0.7", false);
+        bool x38 = createTag("%IX0.0.7", false);
+        bool x39 = createTag("%IX0.0.7", false);
 
-    let pointAt (elementType:ElementType) (tag:ITag) (x:int) (y:int) : XmlOutput =
-        let xx = x*3 + 1
-        let yy = y*1024
-        let coordi = xx + yy
-        coordi === coord(x, y)
-
-        let nElementType = int elementType
-        let str = elementBody nElementType coordi "BOOL"
-
-        (* see elementFull
-            /// rung 을 구성하는 element (접점)의 XML 표현 문자열 반환
-            let elementFull elementType coordi param tag : XmlOutput =
-                $"\t\t<Element ElementType={dq}{elementType}{dq} Coordinate={dq}{coordi}{dq} {param}>{tag}</Element>"
-        *)
-
-        elementFull nElementType coordi "" tag.Name
-
-    /// x, y 위치에 contact 생성하기 위한 xml 문자열 반환
-    let contactAt (tag:ITag) (x:int) (y:int) = pointAt ElementType.ContactMode tag x y
-
-    /// y line 에 coil 생성하기 위한 xml 문자열 반환
-    let coilAt (tag:ITag) (y:int) = pointAt ElementType.CoilMode tag coilCellX y    // coilCellX = 31
-
-
-
-
+        int nn1 = 1;
+        int nn2 = 2;
+        int nn3 = 3;
+        int nn4 = 4;
+        int nn5 = 5;
+        int nn6 = 6;
+        int nn7 = 7;
+        int nn8 = 8;
+        int nn9 = 9;
+"""
 
 type XgiTestClass() =
     inherit PLCGenerationTestClass()
-    override x.GetCurrentRuntimeTarget() = XGI
+    do
+        autoVariableCounter <- 0
 
+    override x.GetCurrentRuntimeTarget() = XGI
+    member val Locker = obj
 

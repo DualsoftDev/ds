@@ -1,8 +1,6 @@
 namespace Engine.CodeGenCPU
 
 open System.Diagnostics
-open System
-open System.Text.RegularExpressions
 open Engine.Core
 open System.Collections.Generic
 
@@ -38,7 +36,7 @@ module VertexManagerModule =
     [<DebuggerDisplay("{Name}")>]
     [<AbstractClass>]
     type VertexManager (v:Vertex)  =
-    
+
         let endTagBit     = bit v "ET" BitFlag.ET
         let resetTagBit   = bit v "RT" BitFlag.RT
         let startTagBit   = bit v "ST" BitFlag.ST
@@ -59,14 +57,14 @@ module VertexManagerModule =
 
         let pulseBit      = bit v "PUL" BitFlag.Pulse
         let goingRelays = HashSet<DsBit>()
-     
+
         interface IVertexManager with
             member x.Vertex = v
 
-        member x.Name  = v.QualifiedName
-        member x.Vertex  = v
-        member x.Flow    = v.Parent.GetFlow()
-        member x.System  = v.Parent.GetFlow().System
+        member x.Name   = v.QualifiedName
+        member x.Vertex = v
+        member x.Flow   = v.Parent.GetFlow()
+        member x.System = v.Parent.GetFlow().System
 
 
 
@@ -74,69 +72,69 @@ module VertexManagerModule =
         member x.ST         = startTagBit
         ///Segment Reset Tag
         member x.ResetTag   = resetTagBit
-        member x.RT         = resetTagBit 
+        member x.RT         = resetTagBit
         ///Segment End Tag
-        member x.ET         = endTagBit   
+        member x.ET         = endTagBit
 
         //Force
         ///StartForce HMI
-        member x.SF         = startForceBit 
+        member x.SF         = startForceBit
         ///ResetForce HMI
-        member x.RF         = resetForceBit 
+        member x.RF         = resetForceBit
         ///EndForce HMI
-        member x.EF         = endForceBit   
-           
-        //Status 
-        ///Ready Status
-        member x.R      = readyBit  
-        ///Going Status
-        member x.G      = goingBit  
-        ///Finish Status
-        member x.F      = finishBit 
-        ///Homing Status
-        member x.H      = homingBit 
+        member x.EF         = endForceBit
 
-        //Monitor 
+        //Status
+        ///Ready Status
+        member x.R          = readyBit
+        ///Going Status
+        member x.G          = goingBit
+        ///Finish Status
+        member x.F          = finishBit
+        ///Homing Status
+        member x.H          = homingBit
+
+        //Monitor
         ///Origin Monitor
-        member x.OG      =  originBit 
+        member x.OG         =  originBit
         ///Pause Monitor
-        member x.PA      =  pauseBit  
+        member x.PA         =  pauseBit
         ///Error Tx Monitor
-        member x.E1      =  errorTxBit
+        member x.E1         =  errorTxBit
         ///Error Rx Monitor
-        member x.E2      =  errorRxBit
+        member x.E2         =  errorRxBit
 
         //DummyBit
-        ///PulseStart  
-        member x.PUL    = pulseBit  
+        ///PulseStart
+        member x.PUL        = pulseBit
         ///Going Relay   //리셋 인과에 따라 필요
-        member x.GR(src:Vertex) = 
+        member x.GR(src:Vertex) =
            let gr =   bit v  $"GR_{src.Name}" BitFlag.RelayGoing
            goingRelays.Add gr |> ignore; gr
 
-    
+
 
     type VertexMReal(v:Vertex) =
         inherit VertexManager(v)
         let endPortBit    = bit v "EP" BitFlag.EP
         let resetPortBit  = bit v "RP" BitFlag.RP
         let startPortBit  = bit v "SP" BitFlag.SP
-        
+
         let relayRealBit  = bit v "RR" BitFlag.RelayReal
         let realOriginAction  = bit v "RO" BitFlag.RealOriginAction
-        /// Real Origin Action 
-        member x.RO         = realOriginAction  
-        ///Real Init Relay  
-        member x.RR         = relayRealBit  
+        /// Real Origin Action
+        member x.RO         = realOriginAction
+        ///Real Init Relay
+        member x.RR         = relayRealBit
         //Port
         ///Segment Start Port
-        member x.SP         = startPortBit  
+        member x.SP         = startPortBit
         ///Segment Reset Port
-        member x.RP         = resetPortBit  
+        member x.RP         = resetPortBit
         ///Segment End Port
-        member x.EP         = endPortBit    
+        member x.EP         = endPortBit
 
-       
+
     type VertexMCoin(v:Vertex) =
         inherit VertexManager(v)
         let relayCallBit  = bit v  "CR" BitFlag.RelayCall
@@ -146,16 +144,16 @@ module VertexManagerModule =
         let timerOnDelayBit = timer v  "TON"  TimerFlag.TimerOnDely 
         let timerTimeOutBit = timer v  "TOUT" TimerFlag.TimeOut 
 
-        ///Call Done Relay 
-        member x.CR         = relayCallBit 
+        ///Call Done Relay
+        member x.CR     = relayCallBit
 
-        ///Ring Counter 
-        member x.CTR    = counterBit 
+        ///Ring Counter
+        member x.CTR    = counterBit
         ///Timer on delay
-        member x.TON    = timerOnDelayBit 
-        ///Timer time out   
-        member x.TOUT    = timerTimeOutBit 
+        member x.TON    = timerOnDelayBit
+        ///Timer time out
+        member x.TOUT   = timerTimeOutBit
 
-           
-          
-           
+
+
+

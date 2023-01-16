@@ -65,31 +65,62 @@ type XgiGenerationTest() =
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]
-    member __.``X And Huge test`` () =
-        let storages = Storages()
-        let codeForBits39 = codeForBits31 + """
-            bool x32 = createTag("%IX0.0.2", false);
-            bool x33 = createTag("%IX0.0.3", false);
-            bool x34 = createTag("%IX0.0.4", false);
-            bool x35 = createTag("%IX0.0.5", false);
-            bool x36 = createTag("%IX0.0.6", false);
-            bool x37 = createTag("%IX0.0.7", false);
-            bool x38 = createTag("%IX0.0.7", false);
-            bool x39 = createTag("%IX0.0.7", false);
+    member x.``And Huge simple test`` () =
+        lock x.Locker (fun () ->
+            autoVariableCounter <- 0
+            let storages = Storages()
+            let code = codeForBitsHuge + """
+                $x15 :=
+                    $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
+                    $x10 && $x11 && $x12 && $x13 && $x14 && $x15 && $x16 && $x17 && $x18 && $x19 &&
+                    $x20 && $x21 && $x22 && $x23 && $x24 && $x25 && $x26 && $x27 && $x28 && $x29 &&
+                    $x30 && $x31 &&
+                    $x32 && $x33 && $x34 && $x35 && $x36 && $x37 //&& $x38 && $x39
+                    ;
 """
-        let code = codeForBits39 + """
-            $x15 :=
-                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
-                $x10 && $x11 && $x12 && $x13 && $x14 && $x15 && $x16 && $x17 && $x18 && $x19 &&
-                $x20 && $x21 && $x22 && $x23 && $x24 && $x25 && $x26 && $x27 && $x28 && $x29 &&
-                $x30 && $x31 &&
-                $x32 && $x33 && $x34 && $x35 && $x36 && $x37 //&& $x38 && $x39
-                ;
-"""
-        let statements = parseCode storages code
-        let xml = LsXGI.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+            let statements = parseCode storages code
+            let xml = LsXGI.generateXml storages (map withNoComment statements)
+            saveTestResult (get_current_function_name()) xml
+        )
+    [<Test>]
+    member x.``And Huge test`` () =
+        lock x.Locker (fun () ->
+            autoVariableCounter <- 0
+            let storages = Storages()
+            let code = codeForBitsHuge + """
+                $x16 :=
+                    ($nn1 > $nn2) &&
+                    $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
+                    $x10 && $x11 && $x12 && $x13 && $x14 && $x15 && $x16 && $x17 && $x18 && $x19 &&
+                    $x20 && $x21 && $x22 && $x23 && $x24 && $x25 && $x26 && $x27 && $x28 && $x29 &&
+                    $x30 && ($nn1 > $nn2) &&
+                    $x32 && $x33 && $x34 && $x35 && $x36 && $x37 //&& $x38 && $x39
+                    ;
+    """
+            let statements = parseCode storages code
+            let xml = LsXGI.generateXml storages (map withNoComment statements)
+            saveTestResult (get_current_function_name()) xml
+        )
 
+    [<Test>]
+    member x.``And Huge test2`` () =
+        lock x.Locker (fun () ->
+            autoVariableCounter <- 0
+            let storages = Storages()
+            let code = codeForBitsHuge + """
+                $x16 :=
+                    (($nn1 + $nn2) > $nn3) && (($nn4 - $nn5 + $nn6) > $nn7) &&
+                    $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
+                    $x10 && $x11 && $x12 && $x13 && $x14 && $x15 && $x16 && $x17 && $x18 && $x19 &&
+                    $x20 && $x21 && $x22 && $x23 && $x24 && $x25 && $x26 && $x27 && $x28 && $x29 &&
+                    $x30 && ($nn1 > $nn2) &&
+                    $x32 && $x33 && $x34 && $x35 && $x36 && $x37 //&& $x38 && $x39
+                    ;
+    """
+            let statements = parseCode storages code
+            let xml = LsXGI.generateXml storages (map withNoComment statements)
+            saveTestResult (get_current_function_name()) xml
+        )
     [<Test>]
     member __.``OR Many test`` () =
         let storages = Storages()

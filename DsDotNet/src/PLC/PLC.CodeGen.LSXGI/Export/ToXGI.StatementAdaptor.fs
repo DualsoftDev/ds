@@ -249,20 +249,20 @@ module XgiExpressionConvertorModule =
 
     let rec private binaryToNary
         (augmentParams:AugmentedConvertorParams)
-        (operatorToChange:string list)
+        (operatorsToChange:string list)
         (currentOp:string)
         : IExpression list
       =
         let { Storage=storage; ExpandFunctionStatements=augmentedStatementsStorage; Exp=exp } = augmentParams
         match exp.FunctionName with
-        | Some op when operatorToChange.Contains(op) -> // ("+"|"-"|"*"|"/"   (*|"&&"|"||"*) as op) ->
+        | Some op when operatorsToChange.Contains(op) -> // ("+"|"-"|"*"|"/"   (*|"&&"|"||"*) as op) ->
             if op = currentOp then
                 let args = [
                     for arg in exp.FunctionArguments do
                         match arg.Terminal, arg.FunctionName with
                         | Some _, _ -> yield arg
-                        | None, Some fn ->
-                            yield! binaryToNary { augmentParams with Exp = arg } operatorToChange op
+                        | None, Some fn_ ->
+                            yield! binaryToNary { augmentParams with Exp = arg } operatorsToChange op
                         | _ -> failwith "ERROR"
                 ]
                 args
@@ -270,7 +270,7 @@ module XgiExpressionConvertorModule =
                 let go (v:'Q) =
                     let out = createXgiAutoVariableT "_temp_internal_" $"{op} output" v
                     storage.Add out
-                    let args = exp.FunctionArguments |> List.bind (fun arg -> binaryToNary { augmentParams with Exp = arg } operatorToChange op)
+                    let args = exp.FunctionArguments |> List.bind (fun arg -> binaryToNary { augmentParams with Exp = arg } operatorsToChange op)
                     DuAugmentedPLCFunction {FunctionName=op; Arguments=args; Output=out } |> augmentedStatementsStorage.Add
                     [ var2expr out :> IExpression ]
 
@@ -303,11 +303,8 @@ module XgiExpressionConvertorModule =
         | Some ("+"|"-"|"*"|"/" as topOperator) ->
             let newArgs = binaryToNary { augmentParams with Exp = exp } ["+"; "-"; "*"; "/"] topOperator
             exp.WithNewFunctionArguments newArgs
-        | Some "&&" ->
-            let newArgs = binaryToNary { augmentParams with Exp = exp } ["&&"; ] "&&"
-            exp.WithNewFunctionArguments newArgs
-        | Some "||" ->
-            let newArgs = binaryToNary { augmentParams with Exp = exp } ["||"] "||"
+        | Some (">"|">="|"<"|"<="|"="|"!="  |"&&"|"||" as topOperator) ->
+            let newArgs = binaryToNary { augmentParams with Exp = exp } [topOperator ] topOperator
             exp.WithNewFunctionArguments newArgs
         | _ -> exp
 

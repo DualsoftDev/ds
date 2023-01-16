@@ -17,9 +17,11 @@ variables:
   endOfIdentifier: (?![_$[:alnum:]])(?:(?=\.\.\.)|(?!\.))
   startofBracket: (\[\s*)
   endofBracket: (\s*\])
+  whitespace: '[^\S\n\r]'
 
   compo: '(?:[^\\\s\.;|{{punctuation}}])+'
   words: '[가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*'
+  # [가-힣\w\d]
   identifier1: '{{compo}}'
   identifier2: '{{compo}}\.{{compo}}'
   identifier3: '{{compo}}\.{{compo}}\.{{compo}}'
@@ -29,10 +31,11 @@ variables:
   system: 'system|sys'
   external: 'external'
   ipSpec: 'ip|host'
-  ip: '(?:{{ipSpec}})\s*=\s*{{identifiers}}'
+  fileSpec: 'file'
+  ip: '(?:{{ipSpec}})\s*=\s*{{identifiers}}|d+'
   button: 'emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home'
   lamp: 'runlamp|dryrunlamp|manuallamp|stoplamp|emglamp'
-  types: '(device|flow|aliases|{{lamp}}|{{button}})'
+  types: '(device|flow|aliases|{{lamp}}|{{button}})\b'
   props: '{{identifier1}}|{{identifier2}}|{{identifier3}}|{{identifier4}}|{{identifiers}}'
   punctuation: '[(<\|\|>)(<\|)(\|>)<>,;:=(=>)(<=)(\|\|)(\&\&)]'
   buttonHeader: '\[\s*(?:{{button}})\s*\]'
@@ -64,22 +67,20 @@ variables:
 
 patterns:
 - include: '#comments'
-- include: '#systems'
 - include: '#systmeType'
-- include: '#ip'
+- include: '#systems'
 # - include: '#segment'
 
 repository:
   systmeType:
     patterns:
-    - name: storage.modifier.system.text.withbrackets.ds
-      match: '{{startofBracket}}({{system}}){{endofBracket}}'
+    # - name: storage.modifier.system.text.withbrackets.ds
+    #   match: '{{startofBracket}}({{system}}){{endofBracket}}'
     - name: storage.modifier.system.text.ds
-      match: '^\s*({{system}})'
+      match: '(?<=\[)({{system}})\b'
+    - name: support.type.tag.ip.ds
+      match: '(?<=({{system}})\b)(\s({{ipSpec}}))\b'
 
-  ip:
-    name: entity.name.tag.ip.ds
-    match: '(?=>{{system}}){{ip}}'
 
   types:
     patterns:
@@ -125,9 +126,9 @@ repository:
           '1': {name: punctuation.brace.system.end.ds}
         patterns:             
           - include: '#comments'
+          - include: '#devices'
           - include: '#flows'
           - include: '#jobs'
-          - include: '#devices'
           - include: '#interfaces'
           - include: '#buttons'
           - include: '#lamps'
@@ -154,9 +155,9 @@ repository:
           - name: invalid.illegal.expected-array-separator.json
             match: '[^\s\}]'
           - include: '#comments'
+          - include: '#devices'
           - include: '#flows'
           - include: '#jobs'
-          - include: '#devices'
           - include: '#interfaces'
           - include: '#buttons'
           - include: '#lamps'
@@ -407,11 +408,13 @@ repository:
         - name: invalid.illegal.expected-array-separator.json
           match: '[^\s*\}@>]'
 
-  devices:
+  devices:      
     patterns:
-      name: storage.modifier.devices.header.ds
+      - name: storage.modifier.devices.header.ds
       # match: '{{deviceHeader}}'
-      match: '(?<=\[)(device)'
+        match: '(?<=\[\b)(device\b)'
+      - name: support.type.tag.file.ds
+        match: '(?<=(device\b))(\s*{{fileSpec}})\b'
       # captures:
       #   '1': {name: storage.modifier.devices.header1.ds}
       #   '2': {name: support.type.devices.header2.ds}

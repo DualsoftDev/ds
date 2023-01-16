@@ -32,7 +32,7 @@ module CpuLoader =
             if IsSpec v InFlowAll then
                 yield! vm.F1_RootStart()
             //RealInFlow ||| RealExFlow ||| AliasRealInFlow ||| AliasRealExInFlow
-            if IsSpec v RealnIndirectReal then 
+            if IsSpec v RealNIndirectReal then 
                 yield! vm.F2_RootReset()
 
             if IsSpec v InFlowWithoutReal then
@@ -56,10 +56,11 @@ module CpuLoader =
              
         ]
 
-    let private applyBtnLampSpec(s:DsSystem) =
+    let private applySystemSpec(s:DsSystem) =
         [
             yield! s.B1_ButtonOutput()
             yield! s.B2_ModeLamp()
+            yield! s.Y1_SystemBitSetFlow()
         ]   
         
     ///flow 별 운영모드 적용
@@ -90,7 +91,7 @@ module CpuLoader =
 
         [
             //시스템 적용
-            yield! applyBtnLampSpec sys
+            yield! applySystemSpec sys
            
             //Flow 적용
             for f in sys.Flows
@@ -109,11 +110,11 @@ module CpuLoader =
 
         [<Extension>]
         static member LoadStatements (system:DsSystem) = 
-            
             let statements = convertSystem(system)
 
             //test debug
             system._auto.Value <- true
+            system._ready.Value <- true
             system._drive.Value <- true
             statements.Iter(fun f->f.Statement.Do())
             //test debug

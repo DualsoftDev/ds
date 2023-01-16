@@ -2,6 +2,7 @@ namespace Engine.Core
 
 open System.Linq
 open Engine.Common.FS
+open System.Collections.Generic
 open System.Runtime.CompilerServices
 
 [<AutoOpen>]
@@ -131,15 +132,32 @@ module internal ToDsTextModule =
 
     let rec systemToDs (system:DsSystem) (indent:int) =
         let tab = getTab indent
+        let tab2 = getTab 2
+        let tab3 = getTab 3
+        let tab4 = getTab 4
+        let printFuncions (targetName:string) (funcs:HashSet<Func>) =
+            [
+                $"{tab3}{targetName}.func = {lb}"
+                for func in funcs do
+                    let funcDefs = 
+                        [
+                            $"{tab4}${func.Name}";
+                            String.concat "" [
+                                for param in func.Parameters do
+                                    $" {param}";
+                                $";";
+                            ];
+                        ]
+                    String.concat "" funcDefs
+                $"{tab3}{rb}";
+            ]
+
         [
             let ip = if system.HostIp.IsNullOrEmpty() then "" else $" ip = {system.HostIp}"
             yield $"[sys{ip}] {system.Name.QuoteOnDemand()} = {lb}"
 
             for f in system.Flows do
                 yield flowToDs f indent
-
-            let tab2 = getTab (indent+1)
-            let tab3 = getTab 3
 
             if system.Jobs.Any() then
                 let addressPrint (addr:string) = if addr = "" then "_" else addr
@@ -148,6 +166,9 @@ module internal ToDsTextModule =
                 for c in system.Jobs do
                     let ais = c.JobDefs.Select(print).JoinWith("; ") + ";"
                     yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {ais} {rb}"
+                    if c.Funcs.any() then
+                        for funcString in printFuncions c.Name c.Funcs do
+                            yield funcString
                 yield $"{tab}{rb}"
 
 
@@ -182,6 +203,7 @@ module internal ToDsTextModule =
                 allBtns
                 |> List.map(fun b -> b |> List.ofSeq)
                 |> List.collect id
+
             if btns.Any() then
                 yield $"{tab}[buttons] = {lb}"
                 let buttonsToDs(category:string, btns:ButtonDef seq) =
@@ -198,6 +220,9 @@ module internal ToDsTextModule =
                                 let inAddr =  if isNullOrEmpty  btn.InAddress  then "_" else btn.InAddress
                                 let outAddr = if isNullOrEmpty  btn.OutAddress then "_" else btn.OutAddress
                                 yield $"{tab3}{btn.Name}({inAddr}, {outAddr}) = {lb} {flowTexts} {rb}"
+                                if btn.Funcs.any() then
+                                    for funcString in printFuncions btn.Name btn.Funcs do
+                                        yield funcString
                             yield $"{tab2}{rb}"
                     ] |> combineLines
                 yield buttonsToDs("auto",   system.AutoButtons     )
@@ -237,6 +262,9 @@ module internal ToDsTextModule =
                                         ""
                                 
                                 yield $"{tab3}{lamp.Name}{addr} = {lb} {lamp.SettingFlow.Name} {rb}"
+                                if lamp.Funcs.any() then
+                                    for funcString in printFuncions lamp.Name lamp.Funcs do
+                                        yield funcString
                             yield $"{tab2}{rb}"
                     ] |> combineLines
                 yield lampsToDs("auto",   system.AutoModeLamps     )

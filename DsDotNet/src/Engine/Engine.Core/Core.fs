@@ -69,6 +69,8 @@ module CoreModule =
         member val Flows   = createNamedHashSet<Flow>()
         //시스템에서 호출가능한 작업리스트 (Call => Job => ApiItems => Addresses)
         member val Jobs    = ResizeArray<Job>()
+        //시스템에 사용된 모든 메모리를 관리함
+        member val Storages =  Storages()
 
         member _.AddLoadedSystem(dev) = loadedSystems.Add(dev) |> ignore; addApiItemsForDevice dev
         member _.ReferenceSystems     = loadedSystems.Select(fun s->s.ReferenceSystem)
@@ -77,7 +79,6 @@ module CoreModule =
         member _.ExternalSystems      = loadedSystems.OfType<ExternalSystem>()
         member _.ApiUsages = apiUsages |> seq
         member _.HostIp = hostIp
-
 
         /// 사용자 입력 code block(s).  "<@{" 와 "}@>" 사이의 text(s) : todo 복수개의 block 이 허용되면, serialize 할 때 해당 위치에 맞춰서 serialize 해야 하는데...
         member val OriginalCodeBlocks = ResizeArray<string>()
@@ -106,7 +107,7 @@ module CoreModule =
             system.Flows.Add(flow) |> verifyM $"Duplicated flow name [{name}]"
             flow
 
-    and ButtonDef (name:string, btnType:BtnType, inAddress:TagAddress, outAddress:TagAddress, flows:HashSet<Flow>) =
+    and ButtonDef (name:string, btnType:BtnType, inAddress:TagAddress, outAddress:TagAddress, flows:HashSet<Flow>, funcs:HashSet<Func>) =
         member x.Name = name
         member x.ButtonType = btnType
         ///버튼 동작을 위한 외부 IO 입력 주소
@@ -119,10 +120,10 @@ module CoreModule =
         //CPU 생성시 할당됨 OutTag
         member val OutTag = getNull<ITagWithAddress>() with get, set
         member val SettingFlows  = flows with get, set
-        member val Funcs  = HashSet<Func>() with get, set//todo ToDsText, parsing
+        member val Funcs  = funcs with get, set//todo ToDsText, parsing
 
 
-    and LampDef (name:string, lampType:LampType, outAddress:TagAddress, flow:Flow) =
+    and LampDef (name:string, lampType:LampType, outAddress:TagAddress, flow:Flow, funcs:HashSet<Func>) =
         member x.Name = name
         member x.LampType = lampType
         ///램프 동작을 위한 외부 IO 출력 주소
@@ -132,7 +133,7 @@ module CoreModule =
         member val OutTag = getNull<ITagWithAddress>() with get, set
         ///단일 Flow 단위로 Lamp 상태 출력
         member val SettingFlow  = flow with get, set
-        member val Funcs  = HashSet<Func>() with get, set//todo ToDsText, parsing
+        member val Funcs  = funcs with get, set//todo ToDsText, parsing
 
     and AliasDef(aliasKey:Fqdn, target:AliasTargetWrapper option, mnemonics:string []) =
         member _.AliasKey = aliasKey
@@ -339,7 +340,7 @@ module CoreModule =
             call.VertexManager <- fwdCreateVertexManager(call)
             parent.GetGraph().AddVertex(call) |> verifyM $"Duplicated call name [{target.Name}]"
             call
-
+        
         member x.GetAliasTargetToDs() =
             match x.Parent.GetCore() with
                 | :? Flow as f -> [x.Name].ToArray()

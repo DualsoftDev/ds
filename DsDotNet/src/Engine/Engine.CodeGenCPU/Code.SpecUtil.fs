@@ -31,7 +31,7 @@ module CodeSpecUtil =
     |InFlowAll           = 0b11100111 
     |CoinTypeAll         = 0b11111110 
     |CallTypeAll         = 0b00001100 
-    |RealnIndirectReal   = 0b11000011 
+    |RealNIndirectReal   = 0b11000011 
     |VertexAll           = 0b11111111 
    
     let IsSpec (v:Vertex) (vaild:ConvertType) = 

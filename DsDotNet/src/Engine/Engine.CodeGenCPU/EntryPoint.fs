@@ -10,7 +10,6 @@ module ModuleInitializer =
             match v with
             | :? Real  -> new VertexMReal(v)
             | (:? RealEx | :? Call | :? Alias) -> new VertexMCoin(v)
-            //| :? Alias as a -> new VertexManager(a.TargetWrapper.GetTarget())
             | _ -> failwith "ERROR"
 
         fwdCreateVertexManager <- createVertexManager

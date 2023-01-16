@@ -309,7 +309,8 @@ namespace Dual.Model.Import
             {
                 var description = rung.comment;
                 var statement = rung.statement;
-                return $"{cnt++}\tSpec:{description.Replace("%", " ").Replace("$", " ")}";
+                var targetValue = rung.TargetValue;
+                return $"{cnt++}\t[{targetValue}] Spec:{description.Replace("%", " ").Replace("$", " ")}";
             });
             
             StartResetBtnUpdate(true);

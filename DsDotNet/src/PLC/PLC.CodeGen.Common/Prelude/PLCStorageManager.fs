@@ -159,7 +159,7 @@ module NewIEC61131 =    // from Dual.Core.FS/Prelude/PLCStorageManager2.fs
             TagIndicesMemBit(mem, size, e, b) :> TagIndices
 
         | _ ->
-            failwith "ERROR"
+            failwithlog "ERROR"
 
 
     /// PLC memory 설정 base class

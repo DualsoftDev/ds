@@ -26,9 +26,9 @@ module FlatExpressionModule =
                 | "<=" -> ">"
                 | "=" -> "!="
                 | "!=" -> "="
-                | _ -> failwith "ERROR"
+                | _ -> failwithlog "ERROR"
                 |> OpCompare
-            | OpArithmatic _ -> failwith "ERROR: Negation not supported for Arithmatic operator."
+            | OpArithmatic _ -> failwithlog "ERROR: Negation not supported for Arithmatic operator."
 
     type TrueValue() =
         interface IExpressionizableTerminal with
@@ -62,7 +62,7 @@ module FlatExpressionModule =
                 let negated = if op = Neg then n else not n
                 FlatTerminal(t, p, negated)
 
-            | FlatNary(op, FlatTerminal(t, p, n)::[]) -> failwith "ERROR"
+            | FlatNary(op, FlatTerminal(t, p, n)::[]) -> failwithlog "ERROR"
 
             | FlatNary(op, terms) ->
                 let opNeg = op.Negate()
@@ -85,7 +85,7 @@ module FlatExpressionModule =
                 when n = FunctionNameRising || n = FunctionNameFalling ->
                     match arg with
                     | DuTerminal (DuVariable t) -> FlatTerminal(t, true, n = FunctionNameFalling)
-                    | _ -> failwith "ERROR"
+                    | _ -> failwithlog "ERROR"
             | DuFunction fs ->
                 let op =
                     match fs.Name with
@@ -94,14 +94,14 @@ module FlatExpressionModule =
                     | "!" -> Op.Neg
                     | (">" | "<" | ">=" | "<=" | "=" | "!=" ) -> Op.OpCompare fs.Name
                     | ("+" | "-" | "*" | "/" ) -> Op.OpArithmatic fs.Name
-                    | _ -> failwith "ERROR"
+                    | _ -> failwithlog "ERROR"
                 let flatArgs =
                     fs.Arguments
                     |> map flattenExpression
                     |> List.cast<FlatExpression>
                 FlatNary(op, flatArgs)
         | _ ->
-            failwith "Not yet for non boolean expression"
+            failwithlog "Not yet for non boolean expression"
 
     // <kwak> IExpression<'T> vs IExpression : 강제 변환
     and flattenExpression (expression:IExpression) : IFlatExpression =
@@ -120,7 +120,7 @@ module FlatExpressionModule =
         | :? IExpression<string> as exp -> flattenExpressionT exp
         | :? IExpression<char  > as exp -> flattenExpressionT exp
 
-        | _ -> failwith "NOT yet"
+        | _ -> failwithlog "NOT yet"
 
 
     /// expression 이 차지하는 가로, 세로 span 의 width 와 height 를 반환한다.
@@ -140,7 +140,7 @@ module FlatExpressionModule =
                 spanX, spanY
             | FlatNary(Neg, neg::[]) ->
                 helper neg
-            | _ -> failwith "ERROR"
+            | _ -> failwithlog "ERROR"
         helper expr
 
     /// 우측으로 바로 function block 을 붙일 수 있는지 검사.
@@ -155,4 +155,4 @@ module FlatExpressionModule =
         | ( FlatTerminal _ | FlatNary(Neg, _) ) -> true
         | FlatNary(And, ands) -> ands |> List.last |> isFunctionBlockConnectable
         | FlatNary(Or, _) -> false
-        | _ -> failwith "ERROR"
+        | _ -> failwithlog "ERROR"

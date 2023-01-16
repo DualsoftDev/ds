@@ -35,8 +35,8 @@ module CodeConvertUtil =
             | :? Alias  as a  ->
                 match a.TargetWrapper.GetTarget() with
                 | :? Real as real -> real
-                | _ -> failwith "Error GetPureReal"
-            |_ -> failwith "Error GetPureReal"
+                | _ -> failwithlog "Error GetPureReal"
+            |_ -> failwithlog "Error GetPureReal"
 
 
         //let origins, resetChains = OriginHelper.GetOriginsWithJobDefs real.Graph
@@ -77,7 +77,7 @@ module CodeConvertUtil =
             else edges.Where(fun e -> e.EdgeType = (EdgeType.Reset &&& EdgeType.Strong))
 
         if srcsWeek.Any() && srcsStrong.Any()
-            then failwith "Error Week and Strong can't connenct same node target"
+            then failwithlog "Error Week and Strong can't connenct same node target"
 
         srcsWeek.Select(fun e->e.Source), srcsStrong.Select(fun e->e.Source)
 
@@ -132,7 +132,7 @@ module CodeConvertUtil =
     //            | DuAliasTargetReal ar    -> getCoinTags( ar, isInTag)
     //            | DuAliasTargetCall ac    -> getCoinTags( ac, isInTag)
     //            | DuAliasTargetRealEx ao  -> getCoinTags( ao, isInTag)
-    //        | _ -> failwith "Error"
+    //        | _ -> failwithlog "Error"
 
     //let getTxTags(c:Call) : DsTag<bool> seq = c.CallTargetJob.JobDefs.Select(fun j-> j.ApiItem.TX)
 
@@ -162,7 +162,7 @@ module CodeConvertUtil =
                 | :? RealEx as re -> re.Real.V.EP
                 | :? Call   as c  -> if usingRoot then  c.V.ET else  c.V.CR
                 | :? Alias  as a  -> if usingRoot then  a.V.ET else  a.V.CR
-                | _ -> failwith "Error"
+                | _ -> failwithlog "Error"
                 )
 
             tags.ToAndElseOn(s)

@@ -170,7 +170,7 @@ module PreludeAdhocPolymorphism =
         #r "Engine.Common.FS.dll"
         open Engine.Common.FS
         *)
-        let verify c = if not c then failwith "ERROR"
+        let verify c = if not c then failwithlog "ERROR"
         let some1, some2, some3 = Some 1, Some 2, Some 3
         verify ( [1..3] @ [4..5] = [1..5])
         verify ( [|1..3|] @ [|4..5|] = [|1..5|])

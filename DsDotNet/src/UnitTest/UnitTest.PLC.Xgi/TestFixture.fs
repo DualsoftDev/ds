@@ -36,7 +36,7 @@ module Fixtures =
             logInfo "Log4net logging enabled!!!"
 
             if not (File.Exists configFile) then
-                failwith "config 파일 위치를 강제로 수정해 주세요."
+                failwithlog "config 파일 위치를 강제로 수정해 주세요."
             ()
 
             Engine.CodeGenCPU.ModuleInitializer.Initialize()

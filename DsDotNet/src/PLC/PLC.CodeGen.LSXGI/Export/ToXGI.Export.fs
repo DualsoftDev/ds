@@ -52,7 +52,7 @@ module LsXGI =
                         XgiSymbol.DuTimer ts
                     | :? CounterBaseStruct as cs ->
                         XgiSymbol.DuCounter cs
-                    | _ -> failwith "ERROR"
+                    | _ -> failwithlog "ERROR"
             ]
 
         let xml = generateXGIXmlFromStatement prologComments newCommentedStatements xgiSymbols unusedTags existingLSISprj

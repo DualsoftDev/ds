@@ -151,7 +151,7 @@ module EtcListenerModule =
                             | :? Real as r -> return DuSafetyConditionReal (r)
                             | :? Call as c -> return DuSafetyConditionCall (c)
                             | :? RealOtherFlow as o -> return DuSafetyConditionRealEx (o)
-                            | _-> failwith "Error"
+                            | _-> failwithlog "Error"
 
                         |None ->        
                             let c = curSystem.TryFindCall(ns) |> Option.get
@@ -162,7 +162,7 @@ module EtcListenerModule =
                          return DuSafetyConditionCall c
                 
                     | _ ->
-                        failwith "ERROR"
+                        failwithlog "ERROR"
                 }
 
             for (key, values) in safetyKvs do
@@ -232,4 +232,4 @@ module EtcListenerModule =
                 | Int32Pattern x, Int32Pattern y, null, null ->
                     call.Xywh <- new Xywh(x, y, Nullable(), Nullable())
                 | _ ->
-                    failwith "ERROR"
+                    failwithlog "ERROR"

@@ -378,7 +378,7 @@ module internal FB =
                     match fnameLine with
                     | RegexPattern @"FNAME: (\w+)$" [fn] ->
                         fn
-                    | _ -> failwith "ERROR"
+                    | _ -> failwithlog "ERROR"
                 fName, fb )
             |> dict |> Dictionary
         dic

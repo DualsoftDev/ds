@@ -2,6 +2,7 @@ namespace PLC.CodeGen.LSXGI
 
 open System.Security
 open Engine.Core
+open Engine.Common.FS
 
 [<AutoOpen>]
 module XgiPrologModule =
@@ -40,6 +41,6 @@ module XgiPrologModule =
     /// name -> comment -> plcType -> SymbolInfo
     let mutable fwdCreateSymbolInfo =
         let dummy (name:string) (comment:string) (plcType:string) (initValue:BoxedObjectHolder) : SymbolInfo =
-            failwith "Should be reimplemented."
+            failwithlog "Should be reimplemented."
         dummy
 

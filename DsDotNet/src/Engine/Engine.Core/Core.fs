@@ -12,7 +12,7 @@ module CoreModule =
     /// Creates FQDN(Fully Qualified Domain Name) object
     let createFqdnObject (nameComponents:string array) = {
         new IQualifiedNamed with
-            member _.Name with get() = nameComponents.LastOrDefault() and set(v) = failwith "ERROR"
+            member _.Name with get() = nameComponents.LastOrDefault() and set(v) = failwithlog "ERROR"
             member _.NameComponents = nameComponents
             member x.QualifiedName = nameComponents.Combine() }
 
@@ -345,7 +345,7 @@ module CoreModule =
             match x.Parent.GetCore() with
                 | :? Flow as f -> [x.Name].ToArray()
                 | :? Real as r -> x.ParentNPureNames
-                | _->failwith "Error"
+                | _->failwithlog "Error"
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 
 

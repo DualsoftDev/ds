@@ -13,7 +13,7 @@ module internal ModelFindModule =
         //let inline nameComponentsEq xs ys = (^T: (member NameComponents: Fqdn) xs) = (^T: (member NameComponents: Fqdn) ys)
 
         let tryFindInLoadedSystem (device:LoadedSystem) (Fqdn(fqdn)) =
-            failwith "Not yet implemented"
+            failwithlog "Not yet implemented"
             None
 
         let rec tryFindSystemInner (system:DsSystem) (xs:string list) : obj option =
@@ -41,12 +41,12 @@ module internal ModelFindModule =
                 match xs with
                 | [] -> Some device
                 | _ -> tryFindInLoadedSystem device (xs.ToArray())
-            | _ -> failwith "ERROR"
+            | _ -> failwithlog "ERROR"
 
 
         let fqdn = fqdn.ToFSharpList()
         match fqdn with
-        | [] -> failwith "ERROR: name not given"
+        | [] -> failwithlog "ERROR: name not given"
         | s::xs when s = system.Name -> tryFindSystemInner system xs
         | _ -> tryFindSystemInner system fqdn
 
@@ -57,7 +57,7 @@ module internal ModelFindModule =
             if typedefof<'V>.IsAssignableFrom(v.GetType()) then
                 return v :?> 'V
             else
-                failwith "ERROR"
+                failwithlog "ERROR"
         }
         
     let tryFindFlow(system:DsSystem) (name:string)   = system.Flows.TryFind(nameEq name)

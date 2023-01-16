@@ -2,6 +2,7 @@
 namespace Engine.Core
 
 open System.Collections.Generic
+open Engine.Common.FS
 
 [<AutoOpen>]
 module Interface =
@@ -46,4 +47,4 @@ module Interface =
 
     type IVertexManager =
         abstract Vertex: IVertex
-    let mutable fwdCreateVertexManager = let dummy (vertex:IVertex) : IVertexManager = failwith "Should be reimplemented." in dummy
+    let mutable fwdCreateVertexManager = let dummy (vertex:IVertex) : IVertexManager = failwithlog "Should be reimplemented." in dummy

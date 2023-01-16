@@ -36,7 +36,7 @@ module ImportU =
                 |> Seq.filter(fun group -> group.Value.Contains(edge.StartNode) && group.Value.Contains(edge.EndNode))
                 |> Seq.map(fun group ->   dicSeg.[group.Key.Key])
 
-            if(newParents.Any() && newParents.length() > 1) then failwith "중복부모"
+            if(newParents.Any() && newParents.length() > 1) then failwithlog "중복부모"
             if(newParents.Any())
                 then Some( newParents |> Seq.head)
                 else None
@@ -360,8 +360,8 @@ module ImportU =
                                     | :? Real as r -> holder.SafetyConditions.Add( DuSafetyConditionReal (r)) |>ignore
                                     | :? RealEx as ex -> holder.SafetyConditions.Add(DuSafetyConditionRealEx (ex))  |>ignore
                                     | :? Call as c -> holder.SafetyConditions.Add(DuSafetyConditionCall (c)) |>ignore
-                                    | _ -> failwith "Error"
-                            | _ -> failwith "Error"
+                                    | _ -> failwithlog "Error"
+                            | _ -> failwithlog "Error"
                         )
                     )
 
@@ -389,7 +389,7 @@ module ImportU =
                                 then Office.ErrorPPT(Name, ErrID._41, $"원인이름{realName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
                                 match vertex.Value with
                                 | :? Real as r -> r
-                                | _ -> failwith "Error "
+                                | _ -> failwithlog "Error "
 
                             let txs = node.IfTXs |> Seq.map(fun f-> findReal(f))
                             let rxs = node.IfRXs |> Seq.map(fun f-> findReal(f))

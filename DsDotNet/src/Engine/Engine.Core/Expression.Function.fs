@@ -51,7 +51,7 @@ module ExpressionFunctionModule =
         | ("&&&" | "&") ->  fBitwiseAnd args
         | ("|||" | "|") ->  fBitwiseOr  args
         | ("^^^" | "^") ->  fBitwiseXor args
-        | ("~~~" | "~") ->  failwith "Not binary operation" //fBitwiseNot args
+        | ("~~~" | "~") ->  failwithlog "Not binary operation" //fBitwiseNot args
 
         | "&&"  -> fLogicalAnd  args
         | "||"  -> fLogicalOr  args
@@ -134,15 +134,15 @@ module ExpressionFunctionModule =
         | (   "createXgiCTU" | "createXgiCTD" | "createXgiCTUD" | "createXgiCTR"
             | "createWinCTU" | "createWinCTD" | "createWinCTUD" | "createWinCTR"
             | "createAbCTU"  | "createAbCTD"  | "createAbCTUD"  | "createAbCTR" ) ->
-                let psedoFunction (args:Args):Counter = failwith "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
+                let psedoFunction (args:Args):Counter = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
                 DuFunction { FunctionBody=psedoFunction; Name=funName; Arguments=args }
         | (   "createXgiTON" | "createXgiTOF" | "createXgiCRTO"
             | "createWinTON" | "createWinTOF" | "createWinCRTO"
             | "createAbTON"  | "createAbTOF"  | "createAbCRTO") ->
-                let psedoFunction (args:Args):Timer = failwith "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
+                let psedoFunction (args:Args):Timer = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
                 DuFunction { FunctionBody=psedoFunction; Name=funName; Arguments=args }
         | "createTag" ->
-                let psedoFunction (args:Args):ITag = failwith "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
+                let psedoFunction (args:Args):ITag = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
                 DuFunction { FunctionBody=psedoFunction; Name=funName; Arguments=args }
 
         | _ -> failwith $"NOT yet: {funName}"
@@ -177,7 +177,7 @@ module ExpressionFunctionModule =
             | "UInt16" -> cf _addUInt16  "+"  args
             | "UInt32" -> cf _addUInt32  "+"  args
             | "UInt64" -> cf _addUInt64  "+"  args
-            | _        -> failwith "ERROR"
+            | _        -> failwithlog "ERROR"
 
         let fSub (args:Args) : IExpression =
             match args[0].DataType.Name with
@@ -191,7 +191,7 @@ module ExpressionFunctionModule =
             | "UInt16" -> cf _subUInt16  "-" args
             | "UInt32" -> cf _subUInt32  "-" args
             | "UInt64" -> cf _subUInt64  "-" args
-            | _        -> failwith "ERROR"
+            | _        -> failwithlog "ERROR"
 
         let fMul (args:Args) : IExpression =
             match args[0].DataType.Name with
@@ -205,7 +205,7 @@ module ExpressionFunctionModule =
             | "UInt16" -> cf _mulUInt16  "*" args
             | "UInt32" -> cf _mulUInt32  "*" args
             | "UInt64" -> cf _mulUInt64  "*" args
-            | _        -> failwith "ERROR"
+            | _        -> failwithlog "ERROR"
 
         let fDiv (args:Args) : IExpression =
             match args[0].DataType.Name with
@@ -219,7 +219,7 @@ module ExpressionFunctionModule =
             | "UInt16" -> cf _divUInt16  "/" args
             | "UInt32" -> cf _divUInt32  "/" args
             | "UInt64" -> cf _divUInt64  "/" args
-            | _        -> failwith "ERROR"
+            | _        -> failwithlog "ERROR"
 
         let fAbs (args:Args) : IExpression =
             match args[0].DataType.Name with
@@ -233,7 +233,7 @@ module ExpressionFunctionModule =
             | "UInt16" -> cf _absUInt16  "abs" args
             | "UInt32" -> cf _absUInt32  "abs" args
             | "UInt64" -> cf _absUInt64  "abs" args
-            | _        -> failwith "ERROR"
+            | _        -> failwithlog "ERROR"
 
         let fMod (args:Args) : IExpression =
             match args[0].DataType.Name with
@@ -247,7 +247,7 @@ module ExpressionFunctionModule =
             | "UInt16" -> cf _modUInt16  "%" args
             | "UInt32" -> cf _modUInt32  "%" args
             | "UInt64" -> cf _modUInt64  "%" args
-            | _        -> failwith "ERROR"
+            | _        -> failwithlog "ERROR"
 
 
         let fShiftLeft (args:Args) : IExpression =
@@ -260,7 +260,7 @@ module ExpressionFunctionModule =
             | "UInt16" -> cf _shiftLeftUInt16  "<<<" args
             | "UInt32" -> cf _shiftLeftUInt32  "<<<" args
             | "UInt64" -> cf _shiftLeftUInt64  "<<<" args
-            | _        -> failwith "ERROR"
+            | _        -> failwithlog "ERROR"
 
         let fShiftRight (args:Args) : IExpression =
             match args[0].DataType.Name with
@@ -272,7 +272,7 @@ module ExpressionFunctionModule =
             | "UInt16" -> cf _shiftRightUInt16  ">>>" args
             | "UInt32" -> cf _shiftRightUInt32  ">>>" args
             | "UInt64" -> cf _shiftRightUInt64  ">>>" args
-            | _        -> failwith "ERROR"
+            | _        -> failwithlog "ERROR"
 
         let fBitwiseAnd (args:Args) : IExpression =
             match args[0].DataType.Name with
@@ -284,7 +284,7 @@ module ExpressionFunctionModule =
             | "UInt16" -> cf _bitwiseAndUInt16  "&&&" args
             | "UInt32" -> cf _bitwiseAndUInt32  "&&&" args
             | "UInt64" -> cf _bitwiseAndUInt64  "&&&" args
-            | _        -> failwith "ERROR"
+            | _        -> failwithlog "ERROR"
 
         let fBitwiseOr (args:Args) : IExpression =
             match args[0].DataType.Name with
@@ -296,7 +296,7 @@ module ExpressionFunctionModule =
             | "UInt16" -> cf _bitwiseOrUInt16  "|||" args
             | "UInt32" -> cf _bitwiseOrUInt32  "|||" args
             | "UInt64" -> cf _bitwiseOrUInt64  "|||" args
-            | _        -> failwith "ERROR"
+            | _        -> failwithlog "ERROR"
 
         let fBitwiseNot (args:Args) : IExpression =
             match args[0].DataType.Name with
@@ -308,7 +308,7 @@ module ExpressionFunctionModule =
             | "UInt16" -> cf _bitwiseNotUInt16  "~~~" args
             | "UInt32" -> cf _bitwiseNotUInt32  "~~~" args
             | "UInt64" -> cf _bitwiseNotUInt64  "~~~" args
-            | _        -> failwith "ERROR"
+            | _        -> failwithlog "ERROR"
 
         let fBitwiseXor (args:Args) : IExpression =
             match args[0].DataType.Name with
@@ -320,7 +320,7 @@ module ExpressionFunctionModule =
             | "UInt16" -> cf _bitwiseXorUInt16  "^^^" args
             | "UInt32" -> cf _bitwiseXorUInt32  "^^^" args
             | "UInt64" -> cf _bitwiseXorUInt64  "^^^" args
-            | _        -> failwith "ERROR"
+            | _        -> failwithlog "ERROR"
 
 
         let fConcat         args = cf _concat         "+"      args
@@ -501,8 +501,8 @@ module ExpressionFunctionModule =
         let _logicalOr  (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce( || )
         let _logicalNot (args:Args) = args.Select(evalArg).Cast<bool>().Expect1() |> not
 
-        let _rising (args:Args) : bool = false//failwith "ERROR"   //args.Select(evalArg).Cast<bool>().Expect1() |> not
-        let _falling (args:Args) : bool = false// failwith "ERROR"  //args.Select(evalArg).Cast<bool>().Expect1() |> not
+        let _rising (args:Args) : bool = false//failwithlog "ERROR"   //args.Select(evalArg).Cast<bool>().Expect1() |> not
+        let _falling (args:Args) : bool = false// failwithlog "ERROR"  //args.Select(evalArg).Cast<bool>().Expect1() |> not
 
 
         let _shiftLeftInt8    (args:Args) = let n, shift = args.ExpectTyped2<int8,   int>() in n <<< shift

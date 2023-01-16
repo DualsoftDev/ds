@@ -35,4 +35,4 @@ type ErrorListener<'Symbol>([<Optional; DefaultParameterValue(false)>]throwOnErr
             if throwOnError then
                 ParserException($"Lexical error : {msg}", line, col) |> raise
         | _ ->
-            failwith "ERROR"
+            failwithlog "ERROR"

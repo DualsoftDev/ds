@@ -225,14 +225,14 @@ module internal ToDsTextModule =
                                         yield funcString
                             yield $"{tab2}{rb}"
                     ] |> combineLines
-                yield buttonsToDs("a",   system.AutoButtons     )
-                yield buttonsToDs("m", system.ManualButtons   )
-                yield buttonsToDs("d",  system.DriveButtons    )
-                yield buttonsToDs("s",   system.StopButtons     )
-                yield buttonsToDs("c",  system.ClearButtons    )
-                yield buttonsToDs("e",    system.EmergencyButtons)
-                yield buttonsToDs("t",   system.TestButtons     )
-                yield buttonsToDs("h",   system.HomeButtons     )
+                yield buttonsToDs("a", system.AutoButtons)
+                yield buttonsToDs("m", system.ManualButtons)
+                yield buttonsToDs("d", system.DriveButtons)
+                yield buttonsToDs("s", system.StopButtons)
+                yield buttonsToDs("c", system.ClearButtons)
+                yield buttonsToDs("e", system.EmergencyButtons)
+                yield buttonsToDs("t", system.TestButtons)
+                yield buttonsToDs("h", system.HomeButtons)
                 yield $"{tab}{rb}"
 
             let lmps =
@@ -267,13 +267,13 @@ module internal ToDsTextModule =
                                         yield funcString
                             yield $"{tab2}{rb}"
                     ] |> combineLines
-                yield lampsToDs("a",   system.AutoModeLamps     )
-                yield lampsToDs("m", system.ManualModeLamps   )
-                yield lampsToDs("d",  system.DriveModeLamps    )
-                yield lampsToDs("s",   system.StopModeLamps     )
-                yield lampsToDs("e",    system.EmergencyModeLamps)
-                yield lampsToDs("t",   system.TestModeLamps     )
-                yield lampsToDs("r",  system.ReadyModeLamps    )
+                yield lampsToDs("a", system.AutoModeLamps)
+                yield lampsToDs("m", system.ManualModeLamps)
+                yield lampsToDs("d", system.DriveModeLamps)
+                yield lampsToDs("s", system.StopModeLamps)
+                yield lampsToDs("e", system.EmergencyModeLamps)
+                yield lampsToDs("t", system.TestModeLamps)
+                yield lampsToDs("r", system.ReadyModeLamps)
                 yield $"{tab}{rb}"
 
             (* prop

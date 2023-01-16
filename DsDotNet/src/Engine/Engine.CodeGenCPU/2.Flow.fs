@@ -48,7 +48,7 @@ type VertexManager with
                 match v.GetPureCall() with
                 |Some call ->  if call.UsingTon 
                                 then call.V.TON.DN.Expr
-                                else call.INs.EmptyOnElseToAnd(v.System) 
+                                else call.INs.ToAndElseOn(v.System) 
                 |None -> v.CR.Expr
             | _ -> 
                 failwith "Error F4_RootCoinRelay"

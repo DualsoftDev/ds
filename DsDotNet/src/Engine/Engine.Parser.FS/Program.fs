@@ -90,7 +90,7 @@ C4 > C5;
     }
 
     [buttons] = {
-        [emg] = {
+        [e] = {
             EMGBTN(_,_) = { F; }
             //EmptyButton = {}
             //NonExistingFlowButton = { F1; }
@@ -189,7 +189,7 @@ C4 > C5;
     }
 
     [buttons] = {
-        [emg] = {
+        [e] = {
             EMGBTN(_,_) = { F; }
             //EmptyButton = {}
             //NonExistingFlowButton = { F1; }

@@ -95,6 +95,9 @@ module rec ConvertCoreExt =
         member s.GetPSs(r:Real) = 
             s.ApiItems.Where(fun api-> api.TXs.Contains(r))
                       .Select(fun api -> api.PS)
+        member s.GetPRs(r:Real) = 
+            s.ApiItems.Where(fun api-> api.TXs.Contains(r))
+                      .Select(fun api -> api.PR)
 
     let private getButtonExpr(flow:Flow, btns:ButtonDef seq) : Expression<bool> seq = 
             btns.Where(fun b -> b.SettingFlows.Contains(flow))

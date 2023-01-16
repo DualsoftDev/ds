@@ -196,11 +196,11 @@ module ModelBuildupTests1 =
         Am = { A."-"(%I2, %Q2); }
     }
     [buttons] = {
-        [drive] = {
+        [d] = {
             START(%I1, %Q1) = { F; }
             START2(%I1, %Q1) = { F2; }
         }
-        [emg] = {
+        [e] = {
             STOP(%I1, %Q1) = { F; }
             STOP2(%I1, %Q1) = { F2; }
         }

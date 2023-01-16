@@ -29,35 +29,35 @@ type VertexManager with
 
         let real = v.GetPureReal()
         if srcs.Any() then
-            let set = srcs.Select(fun (src, goingRelay) -> goingRelay).ToAnd()      // 자신으로 들어오는 모든 reset edge 의 source vertex 들의 going relay 가 모두 ON 인지 여부
-            let rst = (!!)real.V.EP.Expr
+            let sets  = srcs.Select(fun (src, gr) -> gr).ToAnd()
+            let rsts  = (!!)real.V.EP.Expr
             //going relay rungs
-            srcs.Select(fun (src, gr) -> (src.G.Expr, real.V.EP.Expr) ==| (gr, "F2"))
-            |> Seq.append [(set, rst) ==| (v.RT, "F2")] //reset tag
+            srcs.Select(fun (src, gr) -> (src.G.Expr, real.V.H.Expr) ==| (gr, "F2"))
+            |> Seq.append [(sets, rsts) ==| (v.RT, "F2")] //reset tag  
             |> Seq.toList
         else []
 
 
-
+    
     member v.F3_RootCoinRelay() : CommentedStatement =
         let v = v :?> VertexMCoin
-        let ands =
+        let ands = 
             match v.Vertex  with
             | :? RealEx as rex -> rex.V.CR.Expr
-            | :? Call | :? Alias as ca ->
+            | :? Call | :? Alias as ca -> 
                 match v.GetPureCall() with
-                |Some call ->  if call.UsingTon
+                |Some call ->  if call.UsingTon 
                                 then call.V.TON.DN.Expr
-                                else call.INs.ToAndElseOn(v.System)
+                                else call.INs.ToAndElseOn(v.System) 
                 |None -> v.CR.Expr
-            | _ ->
+            | _ -> 
                 failwith "Error F4_RootCoinRelay"
 
         let sets = ands <&&> v.ET.Expr
         let rsts = !!v.ST.Expr
         (sets, rsts) ==| (v.CR, "F4")
 
-    //option Spec 확정 필요
+    //option Spec 확정 필요  
      member v.F0_RootStartRealOptionPulse(): CommentedStatement list =
         let srcsWeek, srcsStrong  = getEdgeSources(v.Flow.Graph, v.Vertex, true)
         let rsts  = v.F.Expr

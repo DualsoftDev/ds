@@ -22,8 +22,8 @@
 		<OutputPath>$(SolutionDir)\bin</OutputPath>
 	</PropertyGroup>
 	<ItemGroup>
-		<Antlr4 Include="..\..\..\..\Grammar\g4s\dsLexer.g4" Link="g4s\dsLexer.g4" />
-		<Antlr4 Include="..\..\..\..\Grammar\g4s\dsParser.g4" Link="g4s\dsParser.g4">
+		<!--<Antlr4 Include="..\..\..\..\Grammar\g4s\dsLexer.g4" Link="g4s\dsLexer.g4" />-->
+		<Antlr4 Include="..\..\..\..\Grammar\g4s\ds.g4" Link="g4s\ds.g4">
 			<Visitor>true</Visitor>
 			<Package>Engine.Parser</Package>
 		</Antlr4>

@@ -80,18 +80,21 @@ module CodeConvertUtil =
     /// returns [week] * [strong] reset incoming edges for target
     let getResetEdgeSources(graph:DsGraph, target:Vertex) = getEdgeSources (graph, target, false)
 
-    let getNeedCheck(real:Real) =
+    /// 원위치 고려했을 때, reset chain 중 하나라도 켜져 있는지 검사하는 expression 반환
+    let getNeedCheckExpression(real:Real) =
         let origins, resetChains = OriginHelper.GetOriginsWithJobDefs real.Graph
+
+        (* [ KeyValuePair(JogDef, InitialType) ] *)
         let needChecks = origins.Where(fun w-> w.Value = NeedCheck)
 
         let needCheckSet:PlcTag<bool> list list =
             let apiNameToInTagMap =
-                needChecks.Map(fun (KeyValue(k, v)) -> k.ApiName, k.InTag)
+                needChecks.Map(fun (KeyValue(jobDef, v)) -> jobDef.ApiName, jobDef.InTag)
                 |> Tuple.toDictionary
             [
                 if apiNameToInTagMap.Any() then
                     (*
-                        apiNameToInTagMap: [ "A.+" => "A.+.I"; ... ]
+                        apiNameToInTagMap: [ "A.+" => "A.+.I"; ... ]        // name => tag
                         r: "A.+"
                         rs ["A.+"; "A.-"]
                         resetChains = [ ["A.+"; "A.-"]; ]

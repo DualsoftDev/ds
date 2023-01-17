@@ -16,6 +16,7 @@ module CoreModule =
             member _.NameComponents = nameComponents
             member x.QualifiedName = nameComponents.Combine() }
 
+    let createTagManager(x:FqdnObject) = x.TagManager <- fwdCreateTagManager(x)
     type ParserLoadingType = DuNone | DuDevice | DuExternal
     /// External system loading 시, 공유하기 위한 정보를 담을 곳
     type ShareableSystemRepository = Dictionary<string, DsSystem>
@@ -36,8 +37,7 @@ module CoreModule =
     [<AbstractClass>]
     type LoadedSystem(loadedSystem:DsSystem, param:DeviceLoadParameters) as this =
         inherit FqdnObject(param.LoadedName, param.ContainerSystem)
-        do 
-            this.TagManager <- fwdCreateTagManager(this)
+        do createTagManager this
             
         /// 다른 device 을 Loading 하려는 system 입장에서 loading 된 system 참조 용
         member _.ReferenceSystem = loadedSystem
@@ -61,8 +61,7 @@ module CoreModule =
 
     type DsSystem (name:string, hostIp:string) as this (*, ?onCreation:DsSystem -> unit) as this*) =
         inherit FqdnObject(name, createFqdnObject([||]))
-        do
-            this.TagManager <- fwdCreateTagManager(this)
+        do createTagManager this
         //    // this system 객체가 생성되고 나서 수행해야 할 작업 수행.  external system loading 시, 공유하기 위한 정보를 marking
         //    onCreation.Iter(fun f -> f this)
 
@@ -73,8 +72,6 @@ module CoreModule =
         member val Flows   = createNamedHashSet<Flow>()
         //시스템에서 호출가능한 작업리스트 (Call => Job => ApiItems => Addresses)
         member val Jobs    = ResizeArray<Job>()
-        ////시스템에 사용된 모든 메모리를 관리함 
-        //member val Storages = Storages() with get, set
 
         member _.AddLoadedSystem(childSys) = loadedSystems.Add(childSys)  
                                              |> verifyM $"Duplicated LoadedSystem name [{childSys.Name}]"
@@ -112,7 +109,7 @@ module CoreModule =
         member x.System = system
         static member Create(name:string, system:DsSystem) =
             let flow = Flow(name, system)
-            flow.TagManager <- fwdCreateTagManager(flow)
+            createTagManager flow
             system.Flows.Add(flow) |> verifyM $"Duplicated flow name [{name}]"
             flow
 
@@ -152,8 +149,9 @@ module CoreModule =
     /// leaf or stem(parenting)
     /// Graph 상의 vertex 를 점유하는 named object : Real, Alias, Call
     [<AbstractClass>]
-    type Vertex (names:Fqdn, parent:ParentWrapper) =
+    type Vertex (names:Fqdn, parent:ParentWrapper) as this =
         inherit FqdnObject(names.Combine(), parent.GetCore())
+        do createTagManager this
 
         interface INamedVertex
         member _.Parent = parent
@@ -319,7 +317,6 @@ module CoreModule =
                 logWarn $"Suspicious segment name [{name}]. Check it."
 
             let real = Real(name, flow)
-            real.TagManager <- fwdCreateTagManager(real)
             flow.Graph.AddVertex(real) |> verifyM $"Duplicated segment name [{name}]"
             real
              
@@ -335,7 +332,6 @@ module CoreModule =
         static member Create(otherFlowReal:Real, parent:ParentWrapper) =
             let ofn, ofrn = otherFlowReal.Flow.Name, otherFlowReal.Name
             let ofr = RealOtherFlow( [| ofn; ofrn |], otherFlowReal, parent)
-            ofr.TagManager <- fwdCreateTagManager(ofr)
             parent.GetGraph().AddVertex(ofr) |> verifyM $"Duplicated other flow real call [{ofn}.{ofrn}]"
             ofr
 
@@ -344,7 +340,6 @@ module CoreModule =
     type Call with
         static member Create(target:Job, parent:ParentWrapper) =
             let call = Call(target, parent)
-            call.TagManager <- fwdCreateTagManager(call)
             parent.GetGraph().AddVertex(call) |> verifyM $"Duplicated call name [{target.Name}]"
             call
         
@@ -380,7 +375,6 @@ module CoreModule =
                 (target.RealTarget().IsNone && target.RealExTarget().IsNone) 
                 |> verifyM $"Vertex {name} children type error"
 
-            alias.TagManager <- fwdCreateTagManager(alias)
             parent.GetGraph().AddVertex(alias) |> verifyM $"Duplicated alias name [{name}]"
             alias
 
@@ -389,7 +383,7 @@ module CoreModule =
         member x.AddRXs(rxs:Real seq) = rxs |> Seq.forall(fun rx -> x.RXs.Add(rx))
         static member Create(name, system) =
             let cp = ApiItem(name, system)
-            cp.TagManager <- fwdCreateTagManager(cp)
+            createTagManager cp
             system.ApiItems.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
             cp
         static member Create(name, system, txs, rxs) =

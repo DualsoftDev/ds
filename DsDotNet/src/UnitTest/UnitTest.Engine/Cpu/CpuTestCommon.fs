@@ -26,7 +26,7 @@ module CpuTestUtil =
         let vertices          = sys.GetVertices()
         let flow              = sys.Flows.Find(fun f->f.Name = "MyFlow") 
         let realInFlow        = flow.Graph.Vertices.First(fun f->f.Name = "Seg1") :?> Real
-        let realExFlow        = flow.Graph.Vertices.First(fun f->f.Name = "F.R3") :?> RealExFlw
+        let realExFlow        = flow.Graph.Vertices.First(fun f->f.Name = "F.R3") :?> RealExF
         let callInFlow        = flow.Graph.Vertices.First(fun f->f.Name = "Ap") :?> Call
         let callInReal        = realInFlow.Graph.Vertices.First(fun f->f.Name = "Am") :?> Call
                               

@@ -10,8 +10,8 @@ module CpuLoader =
         let isVaildVertex =
             match v with
             | :? Real   -> vaild.HasFlag(RealInFlow)
-            | :? RealExFlw -> vaild.HasFlag(RealExFlow)
-            | :? RealExSys -> vaild.HasFlag(RealExSystem)
+            | :? RealExF -> vaild.HasFlag(RealExFlow)
+            | :? RealExS -> vaild.HasFlag(RealExSystem)
             | :? Call as c  ->
                 match c.Parent with
                 | DuParentFlow f-> vaild.HasFlag(CallInFlow)

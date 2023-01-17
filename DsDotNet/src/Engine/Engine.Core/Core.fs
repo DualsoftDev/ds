@@ -345,7 +345,7 @@ module CoreModule =
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 
 
-    type RealExFlw = RealOtherFlow
+    type RealExF = RealOtherFlow
     type RealOtherFlow with
         static member Create(otherFlowReal:Real, parent:ParentWrapper) =
             let ofn, ofrn = otherFlowReal.Flow.Name, otherFlowReal.Name
@@ -355,7 +355,7 @@ module CoreModule =
 
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
         
-    type RealExSys = RealOtherSystem
+    type RealExS = RealOtherSystem
     type RealOtherSystem with
         static member Create(target:Job, parent:ParentWrapper) =
             let exSysReal = RealOtherSystem(target, parent)

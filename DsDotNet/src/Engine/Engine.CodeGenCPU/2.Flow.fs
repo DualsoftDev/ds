@@ -43,8 +43,8 @@ type VertexManager with
         let v = v :?> VertexMCoin
         let ands =
             match v.Vertex  with
-            | :? RealExFlw as rf -> rf.V.CR.Expr
-            | :? RealExSys as rs -> rs.V.CR.Expr
+            | :? RealExF as rf -> rf.V.CR.Expr
+            | :? RealExS as rs -> rs.V.CR.Expr
             | :? Call | :? Alias as ca ->
                 match v.GetPureCall() with
                 | Some call ->  if call.UsingTon

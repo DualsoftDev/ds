@@ -57,7 +57,7 @@ module ImportU =
                     nodeEx.Shape.ErrorName(ErrID._26, nodeEx.PageNum)
 
     let private getOtherSystemReal(flows:Flow seq, nodeEx:pptNode) =
-                // 고쳐야 함
+                // 고쳐야 함  //test ahn
                 let flowName, nodeName = nodeEx.Name.Split('.')[0], nodeEx.Name.Split('.')[1]
                 match flows.TryFind(fun f -> f.Name = flowName) with
                 |Some flow ->
@@ -228,10 +228,10 @@ module ImportU =
                             match node.NodeType with
                             | REALExFlw ->
                                 let real = getOtherFlowReal(dicFlow.Values, node) :?> Real
-                                dicVertex.Add(node.Key, RealExFlw.Create(real, DuParentFlow dicFlow.[node.PageNum]))
+                                dicVertex.Add(node.Key, RealExF.Create(real, DuParentFlow dicFlow.[node.PageNum]))
                             | REALExSys ->
                                 let real = getOtherSystemReal(dicFlow.Values, node) :?> Real
-                                dicVertex.Add(node.Key, RealExFlw.Create(real, DuParentFlow dicFlow.[node.PageNum]))
+                                dicVertex.Add(node.Key, RealExF.Create(real, DuParentFlow dicFlow.[node.PageNum]))
                             | _ ->
                                 let real = Real.Create(node.Name, dicFlow.[node.PageNum])
                                 dicVertex.Add(node.Key, real)
@@ -268,8 +268,8 @@ module ImportU =
                                 else
                                     let flow = dicFlow.[node.PageNum]
                                     match segOrg with
-                                    | :? RealExFlw as ex -> Alias.Create($"{ex.Name}_{node.AliasNumber}", DuAliasTargetRealExFlow(ex), DuParentFlow(flow))
-                                    | :? RealExSys as ex -> Alias.Create($"{ex.Name}_{node.AliasNumber}", DuAliasTargetRealExSystem(ex), DuParentFlow(flow))
+                                    | :? RealExF as ex -> Alias.Create($"{ex.Name}_{node.AliasNumber}", DuAliasTargetRealExFlow(ex), DuParentFlow(flow))
+                                    | :? RealExS as ex -> Alias.Create($"{ex.Name}_{node.AliasNumber}", DuAliasTargetRealExSystem(ex), DuParentFlow(flow))
                                     | :? Real as rt -> Alias.Create($"{rt.Name}_{node.AliasNumber}", DuAliasTargetReal(rt), DuParentFlow(flow))
                                     | :? Call as ct -> Alias.Create($"{ct.Name}_{node.AliasNumber}", DuAliasTargetCall(ct), DuParentFlow(flow))
                                     |_ -> failwithf "Error type"
@@ -373,8 +373,8 @@ module ImportU =
                             | :? ISafetyConditoinHolder as holder ->
                                     match safeCondV with
                                     | :? Real as r -> holder.SafetyConditions.Add( DuSafetyConditionReal (r)) |>ignore
-                                    | :? RealExFlw as ex -> holder.SafetyConditions.Add(DuSafetyConditionRealExFlow (ex))  |>ignore
-                                    | :? RealExSys as ex -> holder.SafetyConditions.Add(DuSafetyConditionRealExSystem (ex))  |>ignore
+                                    | :? RealExF as ex -> holder.SafetyConditions.Add(DuSafetyConditionRealExFlow (ex))  |>ignore
+                                    | :? RealExS as ex -> holder.SafetyConditions.Add(DuSafetyConditionRealExSystem (ex))  |>ignore
                                     | :? Call as c -> holder.SafetyConditions.Add(DuSafetyConditionCall (c)) |>ignore
                                     | _ -> failwithlog "Error"
                             | _ -> failwithlog "Error"

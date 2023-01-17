@@ -110,7 +110,7 @@ module internal ModelFindModule =
 
         let sharedRealExFlow = 
             real.Flow.System.GetVertices()
-                .OfType<RealExFlw>()
+                .OfType<RealExF>()
                 .Where(fun w-> w.Real = real)
                 .Cast<Vertex>()
 

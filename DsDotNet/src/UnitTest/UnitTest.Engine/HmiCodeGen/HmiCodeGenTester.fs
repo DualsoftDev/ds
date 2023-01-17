@@ -45,7 +45,7 @@ module HmiCodeGenTestModule =
                 "answer_factoryIO.json"
 
         [<Test>]
-        member __.``HmiTestCase-test_sample`` () =
+        member __.``X HmiTestCase-test_sample`` () =
             answerChecker 
                 [
                     "test_sample\control.ds";

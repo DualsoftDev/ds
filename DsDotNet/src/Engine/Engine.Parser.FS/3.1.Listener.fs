@@ -339,9 +339,9 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                                 Real.Create(r, flow) |> ignore
 
                         | 1, c::[] when not <| (isAliasMnemonic (parent, ctxInfo.Names.Combine())) ->
-                            let flow = parent.GetFlow()
                             let job = tryFindJob system c |> Option.get
-                            Call.Create(job, parent) |> ignore
+                            if job.Link = null then Call.Create(job, parent) |> ignore
+                            else RealOtherSystem.Create(job, parent) |> ignore
 
                         | 1, realorFlow::cr::[] when not <| isAliasMnemonic (parent, ctxInfo.Names.Combine()) ->
                             let otherFlowReal = tryFindReal system realorFlow cr |> Option.get
@@ -386,12 +386,19 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                         .Tap(fun callComponents -> assert(callComponents.All(fun cc -> cc.Length = 2 || isWildcard(cc))))
                         .Select(fun callCompnents -> callCompnents.Select(fun cc -> if isWildcard(cc) then null else cc.Prepend(system.Name).ToArray()).ToArray())
                         .ToArray()
-
+                let lnk = 
+                    ctx.TryFindFirstChild<Identifier12Context>()
+                        .Map(collectNameComponents)
+                        .ToArray()
                 let n = ser.Length
 
-                assert(n = 2 || n = 3)
-                api.AddTXs(findSegments(ser[0])) |> ignore
-                api.AddRXs(findSegments(ser[1])) |> ignore
+                match n with
+                | 2 | 3 ->
+                    api.AddTXs(findSegments(ser[0])) |> ignore
+                    api.AddRXs(findSegments(ser[1])) |> ignore
+                | _ -> 
+                    api.AddTXs(findSegments(lnk)) |> ignore
+                    api.AddRXs(findSegments(lnk)) |> ignore
             } |> ignore
 
         let createJobDef (system:DsSystem) (ctx:JobBlockContext) =
@@ -430,6 +437,30 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 assert(apiItems.Any())
                 let job = Job(jobName, apiItems)
                 job.Funcs <- funcSet
+                job |> system.Jobs.Add
+
+        let createLink (system:DsSystem) (ctx:JobBlockContext) =
+            let linkListings = ctx.Descendants<LinkListingContext>().ToArray()
+            for linkDef in linkListings do
+                let getRawLinkName = linkDef.TryFindFirstChild<EtcName1Context>().Value
+                let linkName = getRawLinkName.GetText().DeQuoteOnDemand()
+                let apiLinkPath = 
+                    linkDef.TryFindFirstChild<Identifier12Context>()
+                        .Value.CollectNameComponents() |> List.ofSeq
+                apiLinkPath |> printfn "%A = %A" linkName
+                let linkInfo = 
+                    match apiLinkPath with
+                    | exSys::api::[] -> 
+                        let apiItem = tryFindCallingApiItem system exSys api
+                        match apiItem with
+                        | Some apiItem -> apiItem, exSys
+                        | _ -> failwithlog "ERROR"
+                    | _ -> failwithlog "ERROR"
+                let linkDef = LinkDef linkInfo
+                let orgName = ((linkDef.ApiItem.RXs |> List.ofSeq)[0]).QualifiedName
+                linkDef.orgRealName <- orgName
+                let job = Job(linkName, new HashSet<JobDef>())
+                job.Link <- linkDef
                 job |> system.Jobs.Add
 
         let fillTargetOfAliasDef (x:DsParserListener) (ctx:AliasListingContext) =
@@ -473,6 +504,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
 
         for ctx in sysctx.Descendants<JobBlockContext>() do
             createJobDef x.TheSystem ctx
+            createLink x.TheSystem ctx
 
         for ctx in sysctx.Descendants<AliasListingContext>() do
             createAliasDef x ctx |> ignore

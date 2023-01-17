@@ -9,6 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<None Include="Documents\Classes.pptx" />
 		<Content Include="Documents\Readme.txt" />
 		<None Include="Documents\XG5000 - 패키지 SW 설계.docx" />
 		<None Include="Documents\XgiLadder.pptx" />
@@ -34,8 +35,6 @@
 		<None Include="Scripts\Script1.fsx" />
 		<Compile Include="EntryPoint.fs" />
 	</ItemGroup>
-
-	<ItemGroup />
 
 	<ItemGroup>
         <PackageReference Include="System.Reactive" Version="5.0.0" />

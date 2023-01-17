@@ -8,6 +8,7 @@
 	</PropertyGroup>
 
   <ItemGroup>
+    <None Include="Documents\Classes.pptx" />
     <Compile Include="Expression.Extension.fs" />
     <Compile Include="VertexManager.fs" />
     <Compile Include="Core.Extensions.fs" />
@@ -51,4 +52,6 @@
 		  <PrivateAssets>all</PrivateAssets>
 	  </PackageReference>
   </ItemGroup>
+
+  <ItemGroup />
 </Project>

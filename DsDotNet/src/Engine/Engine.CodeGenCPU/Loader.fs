@@ -1,14 +1,39 @@
 namespace Engine.CodeGenCPU
 
-open System.Linq
 open Engine.Core
 open Engine.Common.FS
 open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module CpuLoader =
+    let private IsSpec (v:Vertex) (vaild:ConvertType) =
+        let isVaildVertex =
+            match v with
+            | :? Real   -> vaild.HasFlag(RealInFlow)
+            | :? RealEx -> vaild.HasFlag(RealExFlow)
+            | :? Call as c  ->
+                match c.Parent with
+                | DuParentFlow f-> vaild.HasFlag(CallInFlow)
+                | DuParentReal r-> vaild.HasFlag(CallInReal)
+
+            | :? Alias as a  ->
+                 match a.Parent with
+                 | DuParentFlow f->
+                     match a.TargetWrapper with
+                     |  DuAliasTargetReal   ar -> vaild.HasFlag(AliasRealInFlow)
+                     |  DuAliasTargetRealEx ao -> vaild.HasFlag(AliasRealExInFlow)
+                     |  DuAliasTargetCall   ac -> vaild.HasFlag(AliasCallInFlow)
+                 | DuParentReal r->
+                     match a.TargetWrapper with
+                     | DuAliasTargetReal   ar -> failwithlog "Error IsSpec"
+                     | DuAliasTargetRealEx ao -> failwithlog "Error IsSpec"
+                     | DuAliasTargetCall   ac -> vaild.HasFlag(AliasCallInReal)
+            |_ -> failwithlog "Error"
+
+        isVaildVertex
+
     ///Vertex 타입이 Spec에 해당하면 적용
-    let private applyVertexSpec(v:Vertex) = 
+    let private applyVertexSpec(v:Vertex) =
         let vm = v.VertexManager :?> VertexManager
         [
             if IsSpec v RealInFlow then
@@ -28,11 +53,11 @@ module CpuLoader =
                 yield! vm.D1_DAGHeadStart()
                 yield! vm.D2_DAGTailStart()
                 yield! vm.D3_DAGCoinComplete()
-           
+
             if IsSpec v InFlowAll then
                 yield! vm.F1_RootStart()
             //RealInFlow ||| RealExFlow ||| AliasRealInFlow ||| AliasRealExInFlow
-            if IsSpec v RealNIndirectReal then 
+            if IsSpec v RealNIndirectReal then
                 yield! vm.F2_RootReset()
 
             if IsSpec v InFlowWithoutReal then
@@ -45,7 +70,7 @@ module CpuLoader =
                 yield! vm.C4_CallActionIn()
                 yield! vm.M3_CallErrorTXMonitor()
                 yield vm.M4_CallErrorRXMonitor()
-            
+
             if IsSpec v CoinTypeAll then
                 yield! vm.S2_CoinRGFH()
 
@@ -53,7 +78,7 @@ module CpuLoader =
                 yield vm.M2_PauseMonitor()
 
            // if IsSpec v (CallInReal ||| AliasCallInReal) then
-             
+
         ]
 
     let private applySystemSpec(s:DsSystem) =
@@ -61,10 +86,10 @@ module CpuLoader =
             yield! s.B1_ButtonOutput()
             yield! s.B2_ModeLamp()
             yield! s.Y1_SystemBitSetFlow()
-        ]   
-        
+        ]
+
     ///flow 별 운영모드 적용
-    let private applyOperationModeSpec(f:Flow) = 
+    let private applyOperationModeSpec(f:Flow) =
         [
             yield f.O1_AutoOperationMode()
             yield f.O2_ManualOperationMode()
@@ -75,12 +100,12 @@ module CpuLoader =
             yield f.O7_ReadyMode()
         ]
 
-    let private applyTimerCounterSpec(s:DsSystem) = 
+    let private applyTimerCounterSpec(s:DsSystem) =
         [
             yield! s.T1_DelayCall()
         ]
-        
-        
+
+
 
     let private convertSystem(sys:DsSystem) =
 
@@ -92,16 +117,16 @@ module CpuLoader =
         [
             //시스템 적용
             yield! applySystemSpec sys
-           
+
             //Flow 적용
-            for f in sys.Flows
-             do yield! applyOperationModeSpec f
+            for f in sys.Flows do
+                yield! applyOperationModeSpec f
 
 
             //Vertex 적용
-            for v in sys.GetVertices()
-             do yield! applyVertexSpec v
-             
+            for v in sys.GetVertices() do
+                yield! applyVertexSpec v
+
             yield! applyTimerCounterSpec sys
         ]
 
@@ -109,7 +134,7 @@ module CpuLoader =
     type Cpu =
 
         [<Extension>]
-        static member LoadStatements (system:DsSystem) = 
+        static member LoadStatements (system:DsSystem) =
             let statements = convertSystem(system)
 
             //test debug

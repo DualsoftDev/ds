@@ -9,7 +9,7 @@ open Engine.Common.FS
 type VertexManager with
 
     member v.F1_RootStart(): CommentedStatement list =
-        let srcsWeek, srcsStrong  = getEdgeSources(v.Flow.Graph, v.Vertex, true)
+        let srcsWeek, srcsStrong  = getStartEdgeSources(v.Flow.Graph, v.Vertex)
         let rsts  = v.F.Expr
         [
             if srcsWeek.Any() then
@@ -22,7 +22,7 @@ type VertexManager with
         ]
 
     member v.F2_RootReset() : CommentedStatement list =
-        let srcsWeek, srcsStrong  = getEdgeSources(v.Flow.Graph, v.Vertex, false)  //test ahn  srcsStrong 리셋처리
+        let srcsWeek, srcsStrong  = getResetEdgeSources(v.Flow.Graph, v.Vertex)  //test ahn  srcsStrong 리셋처리
         let srcs = srcsWeek
                     .Select(getVM)
                     .Select(fun s -> s, v.GR(s.Vertex)).ToList()
@@ -59,7 +59,7 @@ type VertexManager with
 
     //option Spec 확정 필요
      member v.F0_RootStartRealOptionPulse(): CommentedStatement list =
-        let srcsWeek, srcsStrong  = getEdgeSources(v.Flow.Graph, v.Vertex, true)
+        let srcsWeek, srcsStrong  = getStartEdgeSources(v.Flow.Graph, v.Vertex)
         let rsts  = v.F.Expr
         [
             if srcsWeek.Any() then

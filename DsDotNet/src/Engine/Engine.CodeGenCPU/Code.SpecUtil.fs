@@ -1,8 +1,6 @@
 namespace Engine.CodeGenCPU
 
-open Engine.Core
 open System
-open Engine.Common.FS
 
 [<AutoOpen>]
 module CodeSpecUtil =
@@ -33,28 +31,3 @@ module CodeSpecUtil =
     let VertexAll         = AliasRealExInFlow ||| AliasRealInFlow ||| AliasCallInFlow ||| AliasCallInReal ||| CallInReal ||| CallInFlow ||| RealExFlow ||| RealInFlow     // 0b11111111
 
 
-    let IsSpec (v:Vertex) (vaild:ConvertType) =
-        let isVaildVertex =
-            match v with
-            | :? Real   -> vaild.HasFlag(RealInFlow)
-            | :? RealEx -> vaild.HasFlag(RealExFlow)
-            | :? Call as c  ->
-                match c.Parent with
-                | DuParentFlow f-> vaild.HasFlag(CallInFlow)
-                | DuParentReal r-> vaild.HasFlag(CallInReal)
-
-            | :? Alias as a  ->
-                 match a.Parent with
-                 | DuParentFlow f->
-                     match a.TargetWrapper with
-                     |  DuAliasTargetReal   ar -> vaild.HasFlag(AliasRealInFlow)
-                     |  DuAliasTargetRealEx ao -> vaild.HasFlag(AliasRealExInFlow)
-                     |  DuAliasTargetCall   ac -> vaild.HasFlag(AliasCallInFlow)
-                 | DuParentReal r->
-                     match a.TargetWrapper with
-                     | DuAliasTargetReal   ar -> failwithlog "Error IsSpec"
-                     | DuAliasTargetRealEx ao -> failwithlog "Error IsSpec"
-                     | DuAliasTargetCall   ac -> vaild.HasFlag(AliasCallInReal)
-            |_ -> failwithlog "Error"
-
-        isVaildVertex

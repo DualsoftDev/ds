@@ -10,7 +10,8 @@ module CpuLoader =
         let isVaildVertex =
             match v with
             | :? Real   -> vaild.HasFlag(RealInFlow)
-            | :? RealEx -> vaild.HasFlag(RealExFlow)
+            | :? RealExFlw -> vaild.HasFlag(RealExFlow)
+            | :? RealExSys -> vaild.HasFlag(RealExSystem)
             | :? Call as c  ->
                 match c.Parent with
                 | DuParentFlow f-> vaild.HasFlag(CallInFlow)
@@ -21,12 +22,14 @@ module CpuLoader =
                  | DuParentFlow f->
                      match a.TargetWrapper with
                      |  DuAliasTargetReal   ar -> vaild.HasFlag(AliasRealInFlow)
-                     |  DuAliasTargetRealEx ao -> vaild.HasFlag(AliasRealExInFlow)
+                     |  DuAliasTargetRealExFlow ao -> vaild.HasFlag(AliasRealExInFlow)
+                     |  DuAliasTargetRealExSystem ao -> vaild.HasFlag(AliasRealExInSystem)
                      |  DuAliasTargetCall   ac -> vaild.HasFlag(AliasCallInFlow)
                  | DuParentReal r->
                      match a.TargetWrapper with
                      | DuAliasTargetReal   ar -> failwithlog "Error IsSpec"
-                     | DuAliasTargetRealEx ao -> failwithlog "Error IsSpec"
+                     | DuAliasTargetRealExFlow ao -> failwithlog "Error IsSpec"
+                     | DuAliasTargetRealExSystem ao -> failwithlog "Error IsSpec"
                      | DuAliasTargetCall   ac -> vaild.HasFlag(AliasCallInReal)
             |_ -> failwithlog "Error"
 

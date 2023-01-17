@@ -30,7 +30,7 @@ module CodeConvertUtil =
     let getPureReal(v:VertexManager)  : Real =
             match v.Vertex with
             | :? Real   as r  -> r
-            | :? RealEx as re -> re.Real
+            | :? RealExFlw as rf -> rf.Real
             | :? Alias  as a  ->
                 match a.TargetWrapper.GetTarget() with
                 | :? Real as real -> real
@@ -161,7 +161,8 @@ module CodeConvertUtil =
                 xs.Select(fun f->
                 match f with
                 | :? Real   as r  -> r.V.EP
-                | :? RealEx as re -> re.Real.V.EP
+                | :? RealExFlw as rf -> rf.Real.V.EP
+                | :? RealExSys as rs -> rs.V.ET
                 | :? Call   as c  -> if usingRoot then  c.V.ET else  c.V.CR
                 | :? Alias  as a  -> if usingRoot then  a.V.ET else  a.V.CR
                 | _ -> failwithlog "Error"

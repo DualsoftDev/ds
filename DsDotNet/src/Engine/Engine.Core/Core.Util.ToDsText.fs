@@ -92,7 +92,8 @@ module internal ToDsTextModule =
                         match a.AliasTarget with
                         | Some(DuAliasTargetReal real) -> real.GetAliasTargetToDs(flow).Combine()
                         | Some(DuAliasTargetCall call) -> call.GetAliasTargetToDs().Combine()
-                        | Some(DuAliasTargetRealEx o) -> o.Real.GetAliasTargetToDs(flow).Combine()
+                        | Some(DuAliasTargetRealExFlow rf) -> rf.Real.GetAliasTargetToDs(flow).Combine()
+                        | Some(DuAliasTargetRealExSystem rs) -> rs.GetAliasTargetToDs().Combine()
                         | None -> failwithlog "ERROR"
 
                     yield $"{tab}{aliasKey} = {lb} {mnemonics} {rb}"
@@ -298,7 +299,8 @@ module internal ToDsTextModule =
                     match sc with
                     | DuSafetyConditionReal real -> real.ParentNPureNames.Combine()
                     | DuSafetyConditionCall call -> getCallName call
-                    | DuSafetyConditionRealEx  o -> o.ParentNPureNames.Combine()
+                    | DuSafetyConditionRealExFlow  rf -> rf.ParentNPureNames.Combine()
+                    | DuSafetyConditionRealExSystem  rs -> rs.Name
                 let safetyConditionHolderName(sch:ISafetyConditoinHolder) =
                     match sch with
                     | :? Real as real -> real.ParentNPureNames.Combine()

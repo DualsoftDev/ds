@@ -10,7 +10,8 @@ module InterfaceClass =
  ///인과의 노드 종류
     type NodeType =
         | REAL          //실제 나의 시스템 1 bit
-        | REALEx        //다른 Flow real
+        | REALExFlw        //다른 Flow real
+        | REALExSys        //다른 System real
         | CALL          //지시관찰 
         | IF            //인터페이스
         | COPY_VALUE          //시스템복사
@@ -20,7 +21,7 @@ module InterfaceClass =
         | LAMP          //램프 runmode,stopmode, ...
         //| ACTIVESYS        //model ppt active  system
         with
-            member x.IsReal = x = REAL || x = REALEx
+            member x.IsReal = x = REAL || x = REALExFlw || x = REALExSys
             member x.IsCall = x = CALL
             member x.IsRealorCall =  x.IsReal || x.IsCall
 

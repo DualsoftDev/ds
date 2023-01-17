@@ -150,7 +150,8 @@ module EtcListenerModule =
                             match vertex with
                             | :? Real as r -> return DuSafetyConditionReal (r)
                             | :? Call as c -> return DuSafetyConditionCall (c)
-                            | :? RealOtherFlow as o -> return DuSafetyConditionRealEx (o)
+                            | :? RealOtherFlow as o -> return DuSafetyConditionRealExFlow (o)
+                            | :? RealOtherSystem as o -> return DuSafetyConditionRealExSystem (o)
                             | _-> failwithlog "Error"
 
                         |None ->        

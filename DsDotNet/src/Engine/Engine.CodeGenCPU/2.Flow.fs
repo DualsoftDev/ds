@@ -43,13 +43,14 @@ type VertexManager with
         let v = v :?> VertexMCoin
         let ands =
             match v.Vertex  with
-            | :? RealEx as rex -> rex.V.CR.Expr
+            | :? RealExFlw as rf -> rf.V.CR.Expr
+            | :? RealExSys as rs -> rs.V.CR.Expr
             | :? Call | :? Alias as ca ->
                 match v.GetPureCall() with
-                |Some call ->  if call.UsingTon
+                | Some call ->  if call.UsingTon
                                 then call.V.TON.DN.Expr
                                 else call.INs.ToAndElseOn(v.System)
-                |None -> v.CR.Expr
+                | None -> v.CR.Expr
             | _ ->
                 failwithlog "Error F4_RootCoinRelay"
 

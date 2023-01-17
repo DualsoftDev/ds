@@ -140,11 +140,12 @@ module PPTObjectModule =
         
         //REAL other flow 아니면 이름에 '.' 불가
         let checkDotErr() = 
-            if nodeType <> REALEx && name.Contains(".") 
+            if nodeType <> REALExFlw && name.Contains(".") 
             then  shape.ErrorName(ErrID._19, iPage)
 
         match nodeType with
-        | REALEx      -> ()
+        | REALExFlw      -> ()
+        | REALExSys      -> ()
         | CALL        -> if  name.Contains("$")|>not 
                          then  shape.ErrorName(ErrID._12, iPage)
 
@@ -257,7 +258,7 @@ module PPTObjectModule =
             
             nodeType <-
                 if(shape.CheckRectangle())      
-                then if name.Contains(".") then REALEx else REAL
+                then if name.Contains(".") then REALExFlw else REAL
                 elif(shape.CheckHomePlate())    then IF
                 elif(shape.CheckFoldedCornerRound()) then COPY_VALUE
                 elif(shape.CheckFoldedCornerPlate()) then COPY_REF

@@ -179,7 +179,8 @@ module HmiGenModule =
                 | :? Alias as a ->
                     match a.TargetWrapper with
                     | DuAliasTargetReal r    -> r.QualifiedName
-                    | DuAliasTargetRealEx rx -> rx.QualifiedName
+                    | DuAliasTargetRealExFlow rx -> rx.QualifiedName
+                    | DuAliasTargetRealExSystem rx -> rx.QualifiedName
                     | DuAliasTargetCall c    -> getJobName c.CallTargetJob.Name
                 | _  -> null
             addToUsedIn vertName system.Name

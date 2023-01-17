@@ -26,7 +26,7 @@ type VertexManager with
         [
             for coin in coins do
                 let coin = coin :?> VertexMCoin
-                let srcsWeek, srcsStrong  = getEdgeSources(real.Graph, coin.Vertex, true)
+                let srcsWeek, srcsStrong  = getStartEdgeSources(real.Graph, coin.Vertex)
 
                 if srcsWeek.Any() then
                     let sets = srcsWeek.GetCausalTags(v.System, false)

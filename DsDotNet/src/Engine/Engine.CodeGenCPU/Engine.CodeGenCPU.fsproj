@@ -8,6 +8,7 @@
 	</PropertyGroup>
 
   <ItemGroup>
+    <None Include="Documents\Classes.pptx" />
     <Compile Include="Expression.Extension.fs" />
     <Compile Include="TagManagerUtil.fs" />
     <Compile Include="FlowManager.fs" />
@@ -54,4 +55,6 @@
 		  <PrivateAssets>all</PrivateAssets>
 	  </PackageReference>
   </ItemGroup>
+
+  <ItemGroup />
 </Project>

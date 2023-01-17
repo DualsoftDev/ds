@@ -3,7 +3,6 @@ namespace Engine.CodeGenCPU
 open System.Linq
 open System.Runtime.CompilerServices
 open Engine.Core
-open System
 open Engine.Common.FS
 
 [<AutoOpen>]
@@ -64,35 +63,38 @@ module CodeConvertUtil =
                     else call.System._off.Expr
         | _ -> call.System._off.Expr
 
-    let getEdgeSources(graph:DsGraph, target:Vertex, bStartEdge:bool) =
+    /// returns [week] * [strong] incoming edges
+    let private getEdgeSources(graph:DsGraph, target:Vertex, bStartEdge:bool) =
         let edges = graph.GetIncomingEdges(target)
-        let srcsWeek   =
-            if bStartEdge
-            then edges.Where(fun e -> e.EdgeType = EdgeType.Start )
-            else edges.Where(fun e -> e.EdgeType = EdgeType.Reset )
+        let mask  = if bStartEdge then EdgeType.Start else EdgeType.Reset
 
-        let srcsStrong =
-            if bStartEdge
-            then edges.Where(fun e -> e.EdgeType = (EdgeType.Start &&& EdgeType.Strong))
-            else edges.Where(fun e -> e.EdgeType = (EdgeType.Reset &&& EdgeType.Strong))
+        let srcsWeek   = edges.Where(fun e -> e.EdgeType = mask )
+        let srcsStrong = edges.Where(fun e -> e.EdgeType = (mask &&& EdgeType.Strong))
 
         if srcsWeek.Any() && srcsStrong.Any()
             then failwithlog "Error Week and Strong can't connenct same node target"
 
         srcsWeek.Select(fun e->e.Source), srcsStrong.Select(fun e->e.Source)
+    /// returns [week] * [strong] start incoming edges for target
+    let getStartEdgeSources(graph:DsGraph, target:Vertex) = getEdgeSources (graph, target, true)
+    /// returns [week] * [strong] reset incoming edges for target
+    let getResetEdgeSources(graph:DsGraph, target:Vertex) = getEdgeSources (graph, target, false)
 
-    let getNeedCheck(real:Real) =
+    /// 원위치 고려했을 때, reset chain 중 하나라도 켜져 있는지 검사하는 expression 반환
+    let getNeedCheckExpression(real:Real) =
         let origins, resetChains = OriginHelper.GetOriginsWithJobDefs real.Graph
+
+        (* [ KeyValuePair(JogDef, InitialType) ] *)
         let needChecks = origins.Where(fun w-> w.Value = NeedCheck)
 
         let needCheckSet:PlcTag<bool> list list =
             let apiNameToInTagMap =
-                needChecks.Map(fun (KeyValue(k, v)) -> k.ApiName, k.InTag)
+                needChecks.Map(fun (KeyValue(jobDef, v)) -> jobDef.ApiName, jobDef.InTag)
                 |> Tuple.toDictionary
             [
                 if apiNameToInTagMap.Any() then
                     (*
-                        apiNameToInTagMap: [ "A.+" => "A.+.I"; ... ]
+                        apiNameToInTagMap: [ "A.+" => "A.+.I"; ... ]        // name => tag
                         r: "A.+"
                         rs ["A.+"; "A.-"]
                         resetChains = [ ["A.+"; "A.-"]; ]

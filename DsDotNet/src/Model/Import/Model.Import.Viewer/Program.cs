@@ -1,4 +1,6 @@
 using Engine.Common;
+using Engine.Common.FS;
+
 using System;
 using System.Reflection;
 using System.Windows.Forms;
@@ -17,10 +19,12 @@ namespace Dual.Model.Import
             Application.SetCompatibleTextRenderingDefault(false);
             SimpleExceptionHandler.InstallExceptionHandler();
 
-          //  DllVersionChecker.IsValidExDLL(Assembly.GetExecutingAssembly());
-            //var logger = Log4NetHelper.PrepareLog4Net("ModelImport");
-            //Log4NetWrapper.SetLogger(logger);
-            //Global.Logger = logger;
+            // DllVersionChecker.IsValidExDLL(Assembly.GetExecutingAssembly());
+            var logger = Log4NetHelper.PrepareLog4Net("ViewerLogger");
+            Log4NetWrapper.SetLogger(logger);
+            Global.Logger = logger;
+            logger.Info("Model import viewer started.");
+
 
             //cpu 로딩 사용시 초기화 필요
             Engine.CodeGenCPU.ModuleInitializer.Initialize();

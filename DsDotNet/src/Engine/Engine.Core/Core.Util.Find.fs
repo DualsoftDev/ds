@@ -102,19 +102,19 @@ module internal ModelFindModule =
         flow.AliasDefs.Values.TryFind(fun ad -> ad.Mnemonincs.Contains(aliasMnemonic))
     
     let getVertexSharedReal(real:Real) = 
-        let sheredAlias = 
+        let sharedAlias = 
             real.Flow.Graph.Vertices
                 .GetAliasTypeReals()
                 .Where(fun a -> a.TargetWrapper.RealTarget().Value = real)
                 .Cast<Vertex>()
 
-        let sheredRealEx = 
+        let sharedRealExFlow = 
             real.Flow.System.GetVertices()
-                .OfType<RealEx>()
+                .OfType<RealExFlw>()
                 .Where(fun w-> w.Real = real)
                 .Cast<Vertex>()
 
-        sheredAlias @ sheredRealEx
+        sharedAlias @ sharedRealExFlow
 
     let getVertexSharedCall(call:Call) = 
         let sheredAlias = 

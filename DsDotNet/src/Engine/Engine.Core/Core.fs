@@ -269,18 +269,22 @@ module CoreModule =
     and AliasTargetWrapper =
         | DuAliasTargetReal of Real
         | DuAliasTargetCall of Call
-        | DuAliasTargetRealEx of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
+        | DuAliasTargetRealExFlow of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
+        | DuAliasTargetRealExSystem of RealOtherSystem
         member x.RealTarget() =
             match x with | DuAliasTargetReal   r -> Some r |_ -> None
         member x.CallTarget() =
             match x with | DuAliasTargetCall   c -> Some c |_ -> None
-        member x.RealExTarget() =
-            match x with | DuAliasTargetRealEx rx -> Some rx |_ -> None
+        member x.RealExFlowTarget() =
+            match x with | DuAliasTargetRealExFlow rx -> Some rx |_ -> None
+        member x.RealExSystemTarget() =
+            match x with | DuAliasTargetRealExSystem  rx -> Some rx |_ -> None
 
     and SafetyCondition =
         | DuSafetyConditionReal of Real
         | DuSafetyConditionCall of Call
-        | DuSafetyConditionRealEx of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
+        | DuSafetyConditionRealExFlow of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
+        | DuSafetyConditionRealExSystem of RealOtherSystem    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
 
           ///Vertex의 부모의 타입을 구분한다.
     type ParentWrapper =
@@ -314,14 +318,16 @@ module CoreModule =
             match x with
             | DuSafetyConditionReal real -> real
             | DuSafetyConditionCall call -> call
-            | DuSafetyConditionRealEx  realOtherFlow -> realOtherFlow
+            | DuSafetyConditionRealExFlow  realOtherFlow -> realOtherFlow
+            | DuSafetyConditionRealExSystem  realOtherSystem -> realOtherSystem
 
     type AliasTargetWrapper with
         member x.GetTarget() : Vertex =
             match x with
             | DuAliasTargetReal real -> real
             | DuAliasTargetCall call -> call
-            | DuAliasTargetRealEx otherFlowReal -> otherFlowReal
+            | DuAliasTargetRealExFlow otherFlowReal -> otherFlowReal
+            | DuAliasTargetRealExSystem otherSystemReal -> otherSystemReal
 
     type Real with
         static member Create(name: string, flow) =
@@ -339,7 +345,7 @@ module CoreModule =
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 
 
-    type RealEx = RealOtherFlow
+    type RealExFlw = RealOtherFlow
     type RealOtherFlow with
         static member Create(otherFlowReal:Real, parent:ParentWrapper) =
             let ofn, ofrn = otherFlowReal.Flow.Name, otherFlowReal.Name
@@ -349,13 +355,19 @@ module CoreModule =
 
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
         
+    type RealExSys = RealOtherSystem
     type RealOtherSystem with
         static member Create(target:Job, parent:ParentWrapper) =
             let exSysReal = RealOtherSystem(target, parent)
             exSysReal.TagManager <- fwdCreateTagManager(exSysReal)
             parent.GetGraph().AddVertex(exSysReal) |> verifyM $"Duplicated other flow real call [{exSysReal}]"
             exSysReal
-
+            
+        member x.GetAliasTargetToDs() =
+            match x.Parent.GetCore() with
+                | :? Flow as f -> [x.Name].ToArray()
+                | :? Real as r -> x.ParentNPureNames
+                | _->failwithlog "Error"
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 
     type Call with
@@ -383,7 +395,8 @@ module CoreModule =
                     match target with
                     | DuAliasTargetReal r -> r.GetAliasTargetToDs(flow)
                     | DuAliasTargetCall c -> c.GetAliasTargetToDs()
-                    | DuAliasTargetRealEx o -> o.Real.GetAliasTargetToDs(flow)
+                    | DuAliasTargetRealExFlow rf -> rf.Real.GetAliasTargetToDs(flow)
+                    | DuAliasTargetRealExSystem rs -> rs.GetAliasTargetToDs() // 고쳐야 함
                 let ads = flow.AliasDefs
                 match ads.TryFind(aliasKey) with
                 | Some ad -> ad.Mnemonincs.AddIfNotContains(name) |> ignore
@@ -393,7 +406,7 @@ module CoreModule =
             let alias = Alias(name, target, parent)
             if parent.GetCore() :? Real 
             then 
-                (target.RealTarget().IsNone && target.RealExTarget().IsNone) 
+                (target.RealTarget().IsNone && target.RealExFlowTarget().IsNone) 
                 |> verifyM $"Vertex {name} children type error"
 
             parent.GetGraph().AddVertex(alias) |> verifyM $"Duplicated alias name [{name}]"

@@ -22,7 +22,8 @@ module rec ViewModule =
                     | :? Alias as a -> match a.TargetWrapper with
                                        | DuAliasTargetReal r -> r.Name
                                        | DuAliasTargetCall c -> c.Name
-                                       | DuAliasTargetRealEx o -> o.Name
+                                       | DuAliasTargetRealExFlow rf -> rf.Name
+                                       | DuAliasTargetRealExSystem rs -> rs.Name
                     | _ -> coreVertex.Name
                 
               ViewNode(name, VREAL, Some(coreVertex),  None, None)

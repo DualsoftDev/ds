@@ -14,7 +14,7 @@ module ModuleInitializer =
             | :? Vertex as v->
                 match v with
                 | :? Real  -> new VertexMReal(v)
-                | (:? RealEx | :? Call | :? Alias) -> new VertexMCoin(v)
+                | (:? RealExSys | :? RealExFlw | :? Call | :? Alias) -> new VertexMCoin(v)
                 | _ -> failwithlog "ERROR createTagManager"
 
                   //LoadedSystem은 추후 부모인 ContainerSystem Storages로 다시생성

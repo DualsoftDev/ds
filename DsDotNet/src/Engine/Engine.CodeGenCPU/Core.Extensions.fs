@@ -1,16 +1,14 @@
 namespace rec Engine.CodeGenCPU
 
 open System.Linq
-open System.Runtime.CompilerServices
 open Engine.Core
 open Engine.Common.FS
-open System
 
 [<AutoOpen>]
 module ConvertCoreExt =
 
     type InOut = | In | Out | Memory
-    let private createIOPLCTag(name, address, inOut:InOut): ITagWithAddress   =
+    let private createIOPLCTag(name, address, inOut:InOut): ITagWithAddress =
         let plcName = match inOut with
                         | In  -> $"{name}_I"
                         | Out -> $"{name}_O"
@@ -18,9 +16,9 @@ module ConvertCoreExt =
 
         (PlcTag(plcName, address, false) :> ITagWithAddress)
 
-    let getVM(v:Vertex) = v.VertexManager :?> VertexManager
-    let getVMReal(v:Vertex) = v.VertexManager :?> VertexMReal
-    let getVMCoin(v:Vertex) = v.VertexManager :?> VertexMCoin
+    let getVM(v:Vertex) = v.TagManager :?> VertexManager
+    let getVMReal(v:Vertex) = v.TagManager :?> VertexMReal
+    let getVMCoin(v:Vertex) = v.TagManager :?> VertexMCoin
 
     let hasTime (xs:Func seq) = xs.Any(fun f->f.Name = TextOnDelayTimer)
     let hasCount(xs:Func seq) = xs.Any(fun f->f.Name = TextRingCounter)
@@ -31,54 +29,54 @@ module ConvertCoreExt =
         member a.PS = DsTag<bool>($"{a.Name}(PS)", false)
         member a.PR = DsTag<bool>($"{a.Name}(PR)", false)
 
-    type DsSystem with
-        member s.SystemManager  = SystemManager(s)
-        //test ahn
-        member s._on     = dsBit s "_on"  true
-        member s._off    = dsBit s "_off" false
-        member s._auto   = dsBit s "_auto" false
-        member s._manual = dsBit s "_manual" false
-        member s._drive  = dsBit s "_drive" false
-        member s._stop   = dsBit s "_stop" false
-        member s._emg    = dsBit s "_emg" false
-        member s._test   = dsBit s "_test" false
-        member s._ready  = dsBit s "_ready" false
-        member s._clear  = dsBit s "_clear" false
-        member s._home   = dsBit s "home" false
-        member s._dtimeyy  = dsInt s "_yy" 0
-        member s._dtimemm  = dsInt s "_mm" 0
-        member s._dtimedd  = dsInt s "_dd" 0
-        member s._dtimeh   = dsInt s "_h" 0
-        member s._dtimem   = dsInt s "_m" 0
-        member s._dtimes   = dsInt s "_s" 0
-        member s._dtimems  = dsInt s "_ms" 0
-        member s._tout   = dsUint16 s "_tout" 10000us
-        //test ahn
+    let getSM (x:DsSystem) = x.TagManager :?> SystemManager
 
-        member s.GenerationLampIO() =
-            for b in s.SystemLamps do
+    type DsSystem with
+        member s._on     = getSM(s).GetSysBitTag(SysBitTag.ON)
+        member s._off    = getSM(s).GetSysBitTag(SysBitTag.OFF)
+        member s._auto   = getSM(s).GetSysBitTag(SysBitTag.AUTO)
+        member s._manual = getSM(s).GetSysBitTag(SysBitTag.MANUAL)
+        member s._drive  = getSM(s).GetSysBitTag(SysBitTag.DRIVE)
+        member s._stop   = getSM(s).GetSysBitTag(SysBitTag.STOP)
+        member s._emg    = getSM(s).GetSysBitTag(SysBitTag.EMG)
+        member s._test   = getSM(s).GetSysBitTag(SysBitTag.TEST )
+        member s._ready  = getSM(s).GetSysBitTag(SysBitTag.READY)
+        member s._clear  = getSM(s).GetSysBitTag(SysBitTag.CLEAR)
+        member s._home   = getSM(s).GetSysBitTag(SysBitTag.HOME)
+        member s._dtimeyy  = getSM(s).GetSysDateTag(SysDataTimeTag.DATET_YY)
+        member s._dtimemm  = getSM(s).GetSysDateTag(SysDataTimeTag.DATET_MM)
+        member s._dtimedd  = getSM(s).GetSysDateTag(SysDataTimeTag.DATET_DD)
+        member s._dtimeh   = getSM(s).GetSysDateTag(SysDataTimeTag.DATET_H )
+        member s._dtimem   = getSM(s).GetSysDateTag(SysDataTimeTag.DATET_M )
+        member s._dtimes   = getSM(s).GetSysDateTag(SysDataTimeTag.DATET_S )
+        member s._dtimems  = getSM(s).GetSysDateTag(SysDataTimeTag.DATET_MS)
+        member s._tout     = getSM(s).GetSysErrTag(SysErrorTag.TIMEOUT)
+        member x.S = x |> getSM
+
+        member x.GenerationLampIO() =
+            for b in x.SystemLamps do
                 b.OutTag  <- createIOPLCTag(b.Name, b.OutAddress, In)
 
-        member s.GenerationButtonIO() =
-            for b in s.SystemButtons do
-                b.InTag  <- createIOPLCTag(b.Name, b.OutAddress, In)
-                b.OutTag <- createIOPLCTag(b.Name, b.OutAddress, Out)
+        member x.GenerationButtonIO() =
+            for b in x.SystemButtons do
+                     b.InTag  <- createIOPLCTag(b.Name, b.OutAddress, In)
+                     b.OutTag <- createIOPLCTag(b.Name, b.OutAddress, Out)
 
-        member s.GenerationJobIO() =
-            let jobDefs = s.Jobs |> Seq.collect(fun j -> j.JobDefs)
+        member x.GenerationJobIO() =
+            let jobDefs = x.Jobs |> Seq.collect(fun j -> j.JobDefs)
             for jdef in jobDefs do
-                jdef.InTag  <- createIOPLCTag(jdef.ApiName, jdef.InAddress, In)
+                jdef.InTag <- createIOPLCTag(jdef.ApiName, jdef.InAddress, In)
                 jdef.OutTag <- createIOPLCTag(jdef.ApiName, jdef.OutAddress, Out)
 
         //[auto, manual] system HMI 두개다 선택이 안됨
-        member s.ModeNoExpr = !!s._auto.Expr <&&> !!s._manual.Expr
+     //   member x.ModeNoExpr = !!s._auto.Expr <&&> !!s._manual.Expr
         //자신이 사용된 API Plan Set Send
-        member s.GetPSs(r:Real) =
-            s.ApiItems.Where(fun api-> api.TXs.Contains(r))
+        member x.GetPSs(r:Real) =
+            x.ApiItems.Where(fun api-> api.TXs.Contains(r))
                       .Select(fun api -> api.PS)
         //자신이 사용된 API Plan Rst Send
-        member s.GetPRs(r:Real) =
-            s.ApiItems.Where(fun api-> api.TXs.Contains(r))
+        member x.GetPRs(r:Real) =
+            x.ApiItems.Where(fun api-> api.TXs.Contains(r))
                       .Select(fun api -> api.PR)
 
     let private getButtonExpr(flow:Flow, btns:ButtonDef seq) : Expression<bool> seq =
@@ -106,27 +104,28 @@ module ConvertCoreExt =
                 .Select(fun b -> b.OutTag)
                 .Cast<PlcTag<bool>>()
 
+    let getFM (x:Flow) = x.TagManager :?> FlowManager
+
 //운영 모드 는 Flow 별로 제공된 모드 On/Off 상태 나타낸다.
     type Flow with
-        //test ahn
-        member f.rop    = dsBit f.System $"{f.Name}(ROM)" false   // Ready Operation Mode
-        member f.aop    = dsBit f.System $"{f.Name}(AOM)" false   // Auto Operation Mode
-        member f.mop    = dsBit f.System $"{f.Name}(MOM)" false   // Manual Operation Mode
-        member f.dop    = dsBit f.System $"{f.Name}(DOM)" false   // Drive Operation Mode
-        member f.top    = dsBit f.System $"{f.Name}(TOM)" false   //  Test  Operation Mode (시운전)
-        member f.sop    = dsBit f.System $"{f.Name}(SOM)" false   // Stop State
-        member f.eop    = dsBit f.System $"{f.Name}(EOM)" false   // Emergency State
-        member f.auto   = dsBit f.System $"{f.Name}_auto" false
-        member f.manual = dsBit f.System $"{f.Name}_manual" false
-        member f.drive  = dsBit f.System $"{f.Name}_drive" false
-        member f.stop   = dsBit f.System $"{f.Name}_stop" false
-        member f.ready  = dsBit f.System $"{f.Name}_ready" false
-        member f.clear  = dsBit f.System $"{f.Name}_clear" false
-        member f.emg    = dsBit f.System $"{f.Name}_emg"  false
-        member f.test   = dsBit f.System $"{f.Name}_test" false
-        member f.home   = dsBit f.System $"{f.Name}_home" false
-        //test ahn
 
+        member f.rop    = getFM(f).GetFlowTag(FlowTag.READY_OP    ) // Ready Operation Mode
+        member f.aop    = getFM(f).GetFlowTag(FlowTag.AUTO_OP     ) // Auto Operation Mode
+        member f.mop    = getFM(f).GetFlowTag(FlowTag.MANUAL_OP   ) // Manual Operation Mode
+        member f.dop    = getFM(f).GetFlowTag(FlowTag.DRIVE_OP    ) // Drive Operation Mode
+        member f.top    = getFM(f).GetFlowTag(FlowTag.TEST_OP     ) //  Test  Operation Mode (시운전)
+        member f.sop    = getFM(f).GetFlowTag(FlowTag.STOP_OP     ) // Stop State
+        member f.eop    = getFM(f).GetFlowTag(FlowTag.EMERGENCY_OP) // Emergency State
+        member f.auto   = getFM(f).GetFlowTag(FlowTag.AUTO_BIT    )
+        member f.manual = getFM(f).GetFlowTag(FlowTag.MANUAL_BIT  )
+        member f.drive  = getFM(f).GetFlowTag(FlowTag.DRIVE_BIT   )
+        member f.stop   = getFM(f).GetFlowTag(FlowTag.STOP_BIT    )
+        member f.ready  = getFM(f).GetFlowTag(FlowTag.READY_BIT   )
+        member f.clear  = getFM(f).GetFlowTag(FlowTag.CLEAR_BIT   )
+        member f.emg    = getFM(f).GetFlowTag(FlowTag.EMG_BIT     )
+        member f.test   = getFM(f).GetFlowTag(FlowTag.TEST_BIT    )
+        member f.home   = getFM(f).GetFlowTag(FlowTag.HOME_BIT    )
+        member x.F = x |> getFM
 
         //select 버튼은 없을경우 항상 _on
          member f.SelectAutoExpr   = getSelectBtnExpr(f, f.System.AutoButtons  )
@@ -156,7 +155,7 @@ module ConvertCoreExt =
 
 
     type Call with
-        member c.V = c.VertexManager :?> VertexMCoin
+        member c.V = c.TagManager :?> VertexMCoin
         member c.UsingTon  = c.CallTargetJob.Funcs |> hasTime
         member c.UsingCtr  = c.CallTargetJob.Funcs |> hasCount
         member c.UsingNot  = c.CallTargetJob.Funcs |> hasNot
@@ -182,19 +181,21 @@ module ConvertCoreExt =
                 .SelectMany(fun a -> c.System.JobDefs.Where(fun w-> w.ApiItem = a))
 
     type Real with
-        member r.V = r.VertexManager :?> VertexMReal
+        member r.V = r.TagManager :?> VertexMReal
         member r.CoinRelays = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.CR)
         member r.ErrorTXs   = r.Graph.Vertices.Select(getVM    ).Select(fun f->f.E1)
         member r.ErrorRXs   = r.Graph.Vertices.Select(getVM    ).Select(fun f->f.E2)
 
     type Alias with
-        member a.V = a.VertexManager :?> VertexMCoin
+        member a.V = a.TagManager :?> VertexMCoin
 
     type RealOtherFlow with
-        member r.V = r.VertexManager :?> VertexMCoin
+        member r.V = r.TagManager :?> VertexMCoin
 
     type Vertex with
-        member r.V = r.VertexManager :?> VertexManager
+        member r.V = r.TagManager :?> VertexManager
+        member r._on  = r.Parent.GetSystem()._on
+        member r._off  = r.Parent.GetSystem()._off
 
     type JobDef with
         member jd.ActionIN  = jd.InTag  :?> PlcTag<bool>

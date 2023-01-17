@@ -6,15 +6,19 @@ open Engine.Common.FS
 module ModuleInitializer =
     let Initialize() =
         printfn "Module is being initialized..."
-        let createVertexManager (vertex:IVertex) : IVertexManager =
-            let v = vertex :?> Vertex
-            match v with
-            | :? Real  -> new VertexMReal(v)
-            | (:? RealEx | :? Call | :? Alias) -> new VertexMCoin(v)
-            | _ -> failwithlog "ERROR"
+        let createTagManager (x:IQualifiedNamed) : ITagManager =
+            match x with
+            | :? Vertex as v->
+                match v with
+                | :? Real  -> new VertexMReal(v)
+                | (:? RealEx | :? Call | :? Alias) -> new VertexMCoin(v)
+                | _ -> failwithlog "ERROR createTagManager"
 
-        fwdCreateVertexManager <- createVertexManager
+            | :? DsSystem as s-> SystemManager(s)
+            | :? Flow     as f-> FlowManager(f)
+            | _ -> failwithlog $"{x.Name} is not TagManager target"
 
+        fwdCreateTagManager <- createTagManager
 
         fwdCreateBoolTag <-
             let createBoolTag name value =

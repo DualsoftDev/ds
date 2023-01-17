@@ -56,9 +56,10 @@ module CoreModule =
         inherit LoadedSystem(loadedSystem, param)
         member _.HostIp = param.HostIp
 
-    type DsSystem (name:string, hostIp:string)(*, ?onCreation:DsSystem -> unit) as this*) =
+    type DsSystem (name:string, hostIp:string) as this (*, ?onCreation:DsSystem -> unit) as this*) =
         inherit FqdnObject(name, createFqdnObject([||]))
-        //do
+        do
+            this.TagManager <- fwdCreateTagManager(this)
         //    // this system 객체가 생성되고 나서 수행해야 할 작업 수행.  external system loading 시, 공유하기 위한 정보를 marking
         //    onCreation.Iter(fun f -> f this)
 
@@ -69,17 +70,17 @@ module CoreModule =
         member val Flows   = createNamedHashSet<Flow>()
         //시스템에서 호출가능한 작업리스트 (Call => Job => ApiItems => Addresses)
         member val Jobs    = ResizeArray<Job>()
-        //시스템에 사용된 모든 메모리를 관리함 
-        member val Storages = Storages() with get, set
+        ////시스템에 사용된 모든 메모리를 관리함 
+        //member val Storages = Storages() with get, set
 
         member _.AddLoadedSystem(childSys) =
             loadedSystems.Add(childSys) |> ignore
                   //Active 자식 시스템은 전부 최상위 부모 Storages 를 받음
-            let passive = childSys.ReferenceSystem.Storages
-            let active  = childSys.ContainerSystem.Storages
-            //test ahn
-            //passive.ForEach(fun f -> active.Add(f.Key, f.Value))
-            childSys.ReferenceSystem.Storages <- active
+            //let passive = childSys.ReferenceSystem.Storages
+            //let active  = childSys.ContainerSystem.Storages
+            ////test ahn
+            ////passive.ForEach(fun f -> active.Add(f.Key, f.Value))
+            //childSys.ReferenceSystem.Storages <- active
             addApiItemsForDevice childSys
 
         member _.ReferenceSystems     = loadedSystems.Select(fun s->s.ReferenceSystem)
@@ -103,6 +104,7 @@ module CoreModule =
         ///시스템 램프 소속 Flow 정보  setting은 AddLamp 사용
         member val internal Lamps   = HashSet<LampDef>()
 
+        
 
     type Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
@@ -113,6 +115,7 @@ module CoreModule =
         member x.System = system
         static member Create(name:string, system:DsSystem) =
             let flow = Flow(name, system)
+            flow.TagManager <- fwdCreateTagManager(flow)
             system.Flows.Add(flow) |> verifyM $"Duplicated flow name [{name}]"
             flow
 
@@ -161,7 +164,7 @@ module CoreModule =
         member _.ParentNPureNames = ([parent.GetCore().Name] @ names).ToArray()
         override x.GetRelativeName(referencePath:Fqdn) = x.PureNames.Combine()
 
-        member val VertexManager = getNull<IVertexManager>() with get, set
+        //member val TagManager = getNull<ITagManager>() with get, set
 
     // Subclasses = {Call | Real | RealOtherFlow}
     type ISafetyConditoinHolder =
@@ -321,7 +324,7 @@ module CoreModule =
                 logWarn $"Suspicious segment name [{name}]. Check it."
 
             let real = Real(name, flow)
-            real.VertexManager <- fwdCreateVertexManager(real)
+            real.TagManager <- fwdCreateTagManager(real)
             flow.Graph.AddVertex(real) |> verifyM $"Duplicated segment name [{name}]"
             real
 
@@ -337,7 +340,7 @@ module CoreModule =
         static member Create(otherFlowReal:Real, parent:ParentWrapper) =
             let ofn, ofrn = otherFlowReal.Flow.Name, otherFlowReal.Name
             let ofr = RealOtherFlow( [| ofn; ofrn |], otherFlowReal, parent)
-            ofr.VertexManager <- fwdCreateVertexManager(ofr)
+            ofr.TagManager <- fwdCreateTagManager(ofr)
             parent.GetGraph().AddVertex(ofr) |> verifyM $"Duplicated other flow real call [{ofn}.{ofrn}]"
             ofr
 
@@ -346,7 +349,7 @@ module CoreModule =
     type Call with
         static member Create(target:Job, parent:ParentWrapper) =
             let call = Call(target, parent)
-            call.VertexManager <- fwdCreateVertexManager(call)
+            call.TagManager <- fwdCreateTagManager(call)
             parent.GetGraph().AddVertex(call) |> verifyM $"Duplicated call name [{target.Name}]"
             call
         
@@ -382,7 +385,7 @@ module CoreModule =
                 (target.RealTarget().IsNone && target.RealExTarget().IsNone) 
                 |> verifyM $"Vertex {name} children type error"
 
-            alias.VertexManager <- fwdCreateVertexManager(alias)
+            alias.TagManager <- fwdCreateTagManager(alias)
             parent.GetGraph().AddVertex(alias) |> verifyM $"Duplicated alias name [{name}]"
             alias
 

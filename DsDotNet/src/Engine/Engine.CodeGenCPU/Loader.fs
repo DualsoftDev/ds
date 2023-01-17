@@ -34,7 +34,7 @@ module CpuLoader =
 
     ///Vertex 타입이 Spec에 해당하면 적용
     let private applyVertexSpec(v:Vertex) =
-        let vm = v.VertexManager :?> VertexManager
+        let vm = v.TagManager :?> VertexManager
         [
             if IsSpec v RealInFlow then
                 yield! vm.S1_RealRGFH()
@@ -49,7 +49,6 @@ module CpuLoader =
 
                 yield vm.R1_RealInitialStart()
                 yield vm.R2_RealJobComplete()
-                yield vm.R3_RealStartPoint()
 
                 yield! vm.D1_DAGHeadStart()
                 yield! vm.D2_DAGTailStart()
@@ -137,11 +136,12 @@ module CpuLoader =
         [<Extension>]
         static member LoadStatements (system:DsSystem) =
             let statements = convertSystem(system)
+
             //test debug
             system._auto.Value <- true
             system._ready.Value <- true
             system._drive.Value <- true
-            //statements.Iter(fun f->f.Statement.Do())
+            statements.Iter(fun f->f.Statement.Do())
             //test debug
 
             statements

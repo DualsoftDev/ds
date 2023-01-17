@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 
-using static Engine.CodeGenCPU.VertexManagerModule;
+using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.EdgeExt;
@@ -340,7 +340,7 @@ namespace Dual.Model.Import
                     if (v is Real)
                     {
                         comboBox_Segment.Items
-                        .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = v.VertexManager as VertexManager });
+                        .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = v.TagManager as VertexManager });
                     }
                 });
             int cnt = 0;

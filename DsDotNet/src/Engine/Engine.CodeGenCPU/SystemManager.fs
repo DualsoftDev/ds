@@ -7,11 +7,38 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module SystemManagerModule =
-                                            
+                         
+    [<AutoOpen>]
+    type SysBitTag = 
+    |ON
+    |OFF
+    |AUTO
+    |MANUAL
+    |DRIVE
+    |STOP
+    |EMG
+    |TEST 
+    |READY
+    |CLEAR
+    |HOME
+
+    [<AutoOpen>]
+    type SysDataTimeTag = 
+    |DATET_YY 
+    |DATET_MM 
+    |DATET_DD 
+    |DATET_H 
+    |DATET_M 
+    |DATET_S 
+    |DATET_MS
+
+    [<AutoOpen>]
+    type SysErrorTag = 
+    |TIMEOUT
   
     /// DsSystem Manager : System Tag  를 관리하는 컨테이어
-    type SystemManager (s:DsSystem)  =
-    
+    type SystemManager (sys:DsSystem)  =
+        let s = Storages()
         let on     = dsBit s "_on"  true
         let off    = dsBit s "_off" false
         let auto   = dsBit s "_auto" false
@@ -22,7 +49,7 @@ module SystemManagerModule =
         let test   = dsBit s "_test" false
         let ready  = dsBit s "_ready" false
         let clear  = dsBit s "_clear" false
-        let home   = dsBit s "home" false
+        let home   = dsBit s "_home" false
         let dtimeyy  = dsInt s "_yy" 0
         let dtimemm  = dsInt s "_mm" 0
         let dtimedd  = dsInt s "_dd" 0
@@ -31,29 +58,36 @@ module SystemManagerModule =
         let dtimes   = dsInt s "_s" 0
         let dtimems  = dsInt s "_ms" 0
         let tout   = dsUint16 s "_tout" 10000us
-        let flowManager  = HashSet<FlowManager>()
-        do 
-            s.Flows 
-            |> Seq.iter(fun f -> flowManager.Add(FlowManager(f)) |>ignore)
+        
+        interface ITagManager with
+            member x.Target = sys
+        
+        member val Storages = s
 
-        member s.FlowManager  = flowManager   
+        member f.GetSysBitTag(st:SysBitTag)     = 
+            match st with
+            |ON         ->    on       
+            |OFF        ->    off      
+            |AUTO       ->    auto     
+            |MANUAL     ->    manual   
+            |DRIVE      ->    drive    
+            |STOP       ->    stop     
+            |EMG        ->    emg      
+            |TEST       ->    test     
+            |READY      ->    ready    
+            |CLEAR      ->    clear    
+            |HOME       ->    home     
 
-        member s._on       = on     
-        member s._off      = off    
-        member s._auto     = auto   
-        member s._manual   = manual 
-        member s._drive    = drive  
-        member s._stop     = stop   
-        member s._emg      = emg    
-        member s._test     = test   
-        member s._ready    = ready  
-        member s._clear    = clear  
-        member s._home     = home   
-        member s._dtimeyy  = dtimeyy
-        member s._dtimemm  = dtimemm
-        member s._dtimedd  = dtimedd
-        member s._dtimeh   = dtimeh 
-        member s._dtimem   = dtimem 
-        member s._dtimes   = dtimes 
-        member s._dtimems  = dtimems
-        member s._tout     = tout   
+        member f.GetSysDateTag(st:SysDataTimeTag)     = 
+            match st with
+            |DATET_YY   ->    dtimeyy  
+            |DATET_MM   ->    dtimemm  
+            |DATET_DD   ->    dtimedd  
+            |DATET_H    ->    dtimeh   
+            |DATET_M    ->    dtimem   
+            |DATET_S    ->    dtimes   
+            |DATET_MS   ->    dtimems  
+
+        member f.GetSysErrTag(st:SysErrorTag)     = 
+            match st with
+            |TIMEOUT    ->    tout  

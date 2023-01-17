@@ -11,8 +11,8 @@
     <None Include="Documents\Classes.pptx" />
     <Compile Include="Expression.Extension.fs" />
     <Compile Include="TagManagerUtil.fs" />
-    <Compile Include="FlowManager.fs" />
     <Compile Include="SystemManager.fs" />
+    <Compile Include="FlowManager.fs" />
     <Compile Include="VertexManager.fs" />
     <Compile Include="Core.Extensions.fs" />
     <Compile Include="Code.SpecUtil.fs" />

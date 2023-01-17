@@ -19,8 +19,9 @@ module CpuTestUtil =
         let LoadSampleSystem()  = 
             let systemRepo   = ShareableSystemRepository ()
             let referenceDir = @$"{__SOURCE_DIRECTORY__}\..\Libraries"
-            parseText systemRepo referenceDir Program.CpuTestText
-        
+            let sys = parseText systemRepo referenceDir Program.CpuTestText
+            applyTagManager (sys, Storages())
+            sys
 
         let sys               = LoadSampleSystem()
         let vertices          = sys.GetVertices()

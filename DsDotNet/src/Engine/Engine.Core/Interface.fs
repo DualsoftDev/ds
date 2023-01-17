@@ -48,4 +48,3 @@ module Interface =
     type ITagManager =
         abstract Target: IQualifiedNamed
         abstract Storages: Dictionary<string,IStorage> 
-    let mutable fwdCreateTagManager = let dummy (item:IQualifiedNamed) : ITagManager = failwithlog "Should be reimplemented." in dummy

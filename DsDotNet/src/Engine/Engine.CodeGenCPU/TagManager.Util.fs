@@ -16,7 +16,7 @@ module TagManagerUtil =
         let removePrefix x = Regex.Replace(x, "^_\d+_", "")
         let rec unique (name:string) (cnt:int) (storages:Storages) = 
             if storages.ContainsKey name 
-                then unique $"_{cnt}_{name |> removePrefix}" (cnt+1) storages
+                then unique $"_{cnt+1}_{name |> removePrefix}" (cnt+1) storages
                 else name
 
         unique name 0 storages

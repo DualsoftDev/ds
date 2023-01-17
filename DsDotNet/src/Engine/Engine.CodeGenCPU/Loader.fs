@@ -52,6 +52,7 @@ module CpuLoader =
 
                 yield vm.R1_RealInitialStart()
                 yield vm.R2_RealJobComplete()
+                yield vm.R3_RealStartPoint()
 
                 yield! vm.D1_DAGHeadStart()
                 yield! vm.D2_DAGTailStart()
@@ -133,12 +134,37 @@ module CpuLoader =
             yield! applyTimerCounterSpec sys
         ]
 
+    let applyTagManager(system:DsSystem, storages:Storages) = 
+        let createTagM (sys:DsSystem) = 
+            sys.TagManager <- SystemManager(sys, storages)
+            sys.Flows.Iter(fun f->f.TagManager <- FlowManager(f))
+            sys.ApiItems.Iter(fun a->a.TagManager <- ApiItemManager(a))
+            sys.GetVertices().Iter(fun v->
+                match v with
+                | :? Real  
+                    ->  v.TagManager <- VertexMReal(v)
+                | (:? RealExS | :? RealExF | :? Call | :? Alias) 
+                    -> v.TagManager <-  VertexMCoin(v)
+                | _ -> failwithlog "ERROR createTagManager")
+        
+        let rec tagManagerBuild(sys:DsSystem)  =
+            createTagM (sys)  
+            sys.LoadedSystems
+                  .Iter(fun s->  tagManagerBuild (s.ReferenceSystem))     
+
+        tagManagerBuild (system)  
+
     [<Extension>]
     type Cpu =
-
         [<Extension>]
-        static member LoadStatements (system:DsSystem) =
+        static member LoadStatements (system:DsSystem, storages:Storages) =
+            applyTagManager (system, storages)
             let statements = convertSystem(system)
+            let result = system.GetRecursiveSystems()
+                         |>Seq.map(fun s->s, convertSystem(s))
+                         |>Seq.append [system, statements]
+                         |> dict
+            
 
             //test debug
             system._auto.Value <- true
@@ -147,4 +173,4 @@ module CpuLoader =
             statements.Iter(fun f->f.Statement.Do())
             //test debug
 
-            statements
+            result

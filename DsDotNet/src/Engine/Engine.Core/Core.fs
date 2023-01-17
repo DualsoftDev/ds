@@ -16,7 +16,6 @@ module CoreModule =
             member _.NameComponents = nameComponents
             member x.QualifiedName = nameComponents.Combine() }
 
-    let createTagManager(x:FqdnObject) = x.TagManager <- fwdCreateTagManager(x)
     type ParserLoadingType = DuNone | DuDevice | DuExternal
     /// External system loading 시, 공유하기 위한 정보를 담을 곳
     type ShareableSystemRepository = Dictionary<string, DsSystem>
@@ -35,9 +34,8 @@ module CoreModule =
     }
 
     [<AbstractClass>]
-    type LoadedSystem(loadedSystem:DsSystem, param:DeviceLoadParameters) as this =
+    type LoadedSystem(loadedSystem:DsSystem, param:DeviceLoadParameters)  =
         inherit FqdnObject(param.LoadedName, param.ContainerSystem)
-        do createTagManager this
             
         /// 다른 device 을 Loading 하려는 system 입장에서 loading 된 system 참조 용
         member _.ReferenceSystem = loadedSystem
@@ -59,9 +57,8 @@ module CoreModule =
         inherit LoadedSystem(loadedSystem, param)
         member _.HostIp = param.HostIp
 
-    type DsSystem (name:string, hostIp:string) as this (*, ?onCreation:DsSystem -> unit) as this*) =
+    type DsSystem (name:string, hostIp:string) (*, ?onCreation:DsSystem -> unit) as this*) =
         inherit FqdnObject(name, createFqdnObject([||]))
-        do createTagManager this
         //    // this system 객체가 생성되고 나서 수행해야 할 작업 수행.  external system loading 시, 공유하기 위한 정보를 marking
         //    onCreation.Iter(fun f -> f this)
 
@@ -109,7 +106,6 @@ module CoreModule =
         member x.System = system
         static member Create(name:string, system:DsSystem) =
             let flow = Flow(name, system)
-            createTagManager flow
             system.Flows.Add(flow) |> verifyM $"Duplicated flow name [{name}]"
             flow
 
@@ -149,9 +145,8 @@ module CoreModule =
     /// leaf or stem(parenting)
     /// Graph 상의 vertex 를 점유하는 named object : Real, Alias, Call
     [<AbstractClass>]
-    type Vertex (names:Fqdn, parent:ParentWrapper) as this =
+    type Vertex (names:Fqdn, parent:ParentWrapper)  =
         inherit FqdnObject(names.Combine(), parent.GetCore())
-        do createTagManager this
 
         interface INamedVertex
         member _.Parent = parent
@@ -359,7 +354,6 @@ module CoreModule =
     type RealOtherSystem with
         static member Create(target:Job, parent:ParentWrapper) =
             let exSysReal = RealOtherSystem(target, parent)
-            exSysReal.TagManager <- fwdCreateTagManager(exSysReal)
             parent.GetGraph().AddVertex(exSysReal) |> verifyM $"Duplicated other flow real call [{exSysReal}]"
             exSysReal
             
@@ -417,7 +411,6 @@ module CoreModule =
         member x.AddRXs(rxs:Real seq) = rxs |> Seq.forall(fun rx -> x.RXs.Add(rx))
         static member Create(name, system) =
             let cp = ApiItem(name, system)
-            createTagManager cp
             system.ApiItems.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
             cp
         static member Create(name, system, txs, rxs) =

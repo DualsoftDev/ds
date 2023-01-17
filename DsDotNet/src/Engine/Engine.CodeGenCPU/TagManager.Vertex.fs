@@ -21,7 +21,7 @@ module TagManagerModule =
     [<DebuggerDisplay("{Name}")>]
     [<AbstractClass>]
     type VertexManager (v:Vertex)  =
-        let s =  (v.Parent.GetSystem().TagManager :?> SystemManager).Storages
+        let s =  v.Parent.GetSystem().TagManager.Storages
 
         let endTagBit     = bit v s "ET" BitFlag.ET
         let resetTagBit   = bit v s "RT" BitFlag.RT
@@ -47,6 +47,7 @@ module TagManagerModule =
 
         interface ITagManager with
             member x.Target = v
+            member x.Storages = s
 
         member x.Name   = v.QualifiedName
         member x.Vertex = v
@@ -54,7 +55,8 @@ module TagManagerModule =
         member x.System = v.Parent.GetFlow().System
         member x.Storages = s
 
-
+        member x._on  = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSysBitTag(ON)
+        member x._off  = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSysBitTag(OFF)
 
         ///Segment Start Tag
         member x.ST         = startTagBit

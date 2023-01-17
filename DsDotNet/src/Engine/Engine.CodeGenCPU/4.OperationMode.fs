@@ -34,7 +34,7 @@ type Flow with
 
     member f.O5_EmergencyMode(): CommentedStatement =
         let set = f.emg.Expr <||> f.BtnEmgExpr
-        let rst = f.System._off.Expr
+        let rst = f._off.Expr
 
         (set, rst) --| (f.eop, "O5")
 

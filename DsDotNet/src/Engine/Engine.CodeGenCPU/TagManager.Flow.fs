@@ -29,7 +29,7 @@ module FlowManagerModule =
 
     /// Flow Manager : Flow Tag  를 관리하는 컨테이어
     type FlowManager (f:Flow)  =    
-        let s =  (f.System.TagManager :?> SystemManager).Storages
+        let s =  f.System.TagManager.Storages
 
         let f_rop    = dsBit s $"{f.Name}(ROP)" false   // Ready Operation Mode
         let f_aop    = dsBit s $"{f.Name}(AOP)" false   // Auto Operation Mode
@@ -50,6 +50,7 @@ module FlowManagerModule =
                 
         interface ITagManager with
             member x.Target = f
+            member x.Storages = s
 
         member f.GetFlowTag(ft:FlowTag)     = 
             match ft with

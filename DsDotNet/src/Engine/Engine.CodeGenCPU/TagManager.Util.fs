@@ -15,11 +15,13 @@ module TagManagerUtil =
         t
 
     let timer (v:Vertex) (storages:Storages)  mark flag = 
-        let ts = TimerStruct.Create(TimerType.TON, storages, $"{v.QualifiedName}({mark}:TON)", 0us, 0us) 
+        let name =  $"{v.QualifiedName}({mark}:TON)"
+        let ts = TimerStruct.Create(TimerType.TON, storages,name, 0us, 0us) 
         DsTimer($"{v.QualifiedName}({mark})", false, v, flag, ts)
     
     let counter (v:Vertex) (storages:Storages) mark flag = 
-        let cs = CTRStruct.Create(CounterType.CTR, storages, $"{v.QualifiedName}({mark}:CTR)", 0us, 0us) 
+        let name = $"{v.QualifiedName}({mark}:CTR)"
+        let cs = CTRStruct.Create(CounterType.CTR, storages, name, 0us, 0us) 
         DsCounter($"{v.QualifiedName}({mark})", false, v, flag, cs)
         
     let dsBit (storages:Storages) name init = 

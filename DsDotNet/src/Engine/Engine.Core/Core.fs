@@ -34,8 +34,11 @@ module CoreModule =
     }
 
     [<AbstractClass>]
-    type LoadedSystem(loadedSystem:DsSystem, param:DeviceLoadParameters) =
+    type LoadedSystem(loadedSystem:DsSystem, param:DeviceLoadParameters) as this =
         inherit FqdnObject(param.LoadedName, param.ContainerSystem)
+        do 
+            this.TagManager <- fwdCreateTagManager(this)
+            
         /// 다른 device 을 Loading 하려는 system 입장에서 loading 된 system 참조 용
         member _.ReferenceSystem = loadedSystem
 
@@ -73,20 +76,14 @@ module CoreModule =
         ////시스템에 사용된 모든 메모리를 관리함 
         //member val Storages = Storages() with get, set
 
-        member _.AddLoadedSystem(childSys) =
-            loadedSystems.Add(childSys) |> ignore
-                  //Active 자식 시스템은 전부 최상위 부모 Storages 를 받음
-            //let passive = childSys.ReferenceSystem.Storages
-            //let active  = childSys.ContainerSystem.Storages
-            ////test ahn
-            ////passive.ForEach(fun f -> active.Add(f.Key, f.Value))
-            //childSys.ReferenceSystem.Storages <- active
-            addApiItemsForDevice childSys
+        member _.AddLoadedSystem(childSys) = loadedSystems.Add(childSys)  
+                                             |> verifyM $"Duplicated LoadedSystem name [{childSys.Name}]"
+                                             addApiItemsForDevice childSys
 
-        member _.ReferenceSystems     = loadedSystems.Select(fun s->s.ReferenceSystem)
-        member _.LoadedSystems        = loadedSystems |> seq
-        member _.Devices              = loadedSystems.OfType<Device>()
-        member _.ExternalSystems      = loadedSystems.OfType<ExternalSystem>()
+        member _.ReferenceSystems = loadedSystems.Select(fun s->s.ReferenceSystem)
+        member _.LoadedSystems    = loadedSystems |> seq
+        member _.Devices          = loadedSystems.OfType<Device>()
+        member _.ExternalSystems  = loadedSystems.OfType<ExternalSystem>()
         member _.ApiUsages = apiUsages |> seq
         member _.HostIp = hostIp
 
@@ -164,8 +161,6 @@ module CoreModule =
         member _.ParentNPureNames = ([parent.GetCore().Name] @ names).ToArray()
         override x.GetRelativeName(referencePath:Fqdn) = x.PureNames.Combine()
 
-        //member val TagManager = getNull<ITagManager>() with get, set
-
     // Subclasses = {Call | Real | RealOtherFlow}
     type ISafetyConditoinHolder =
         abstract member SafetyConditions: HashSet<SafetyCondition>
@@ -228,7 +223,7 @@ module CoreModule =
         (* createFqdnObject : system 이 다른 system 에 포함되더라도, name component 를 더 이상 확장하지 않도록 cut *)
         inherit FqdnObject(name, createFqdnObject([|system.Name|]))
         interface INamedVertex
-
+       
         member _.Name = name
         member _.System = system
         member val TXs = createQualifiedNamedHashSet<Real>()
@@ -327,7 +322,7 @@ module CoreModule =
             real.TagManager <- fwdCreateTagManager(real)
             flow.Graph.AddVertex(real) |> verifyM $"Duplicated segment name [{name}]"
             real
-
+             
         member x.GetAliasTargetToDs(aliasFlow:Flow) =
                 if x.Flow <> aliasFlow
                 then [|x.Flow.Name; x.Name|]  //other flow
@@ -394,6 +389,7 @@ module CoreModule =
         member x.AddRXs(rxs:Real seq) = rxs |> Seq.forall(fun rx -> x.RXs.Add(rx))
         static member Create(name, system) =
             let cp = ApiItem(name, system)
+            cp.TagManager <- fwdCreateTagManager(cp)
             system.ApiItems.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
             cp
         static member Create(name, system, txs, rxs) =

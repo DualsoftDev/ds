@@ -21,7 +21,7 @@ type VertexManager with
 
     member v.M2_PauseMonitor(): CommentedStatement  =
         let set = v.Flow.rop.Expr <||> v.Flow.rop.Expr
-        let rst = v.System._off.Expr
+        let rst = v._off.Expr
 
         (set, rst) --| (v.PA, "M2" )
 
@@ -59,7 +59,7 @@ type VertexManager with
     member v.M5_RealErrorTXMonitor(): CommentedStatement  =
         let real = v.Vertex :?> Real
         let set = real.ErrorTXs.ToOrElseOff v.System
-        let rst = v.System._off.Expr
+        let rst = v._off.Expr
 
         (set, rst) ==| (v.E1, "M5" )
 
@@ -67,7 +67,7 @@ type VertexManager with
     member v.M6_RealErrorRXMonitor(): CommentedStatement  =
         let real = v.Vertex :?> Real
         let set = real.ErrorRXs.ToOrElseOff v.System
-        let rst = v.System._off.Expr
+        let rst = v._off.Expr
 
         (set, rst) ==| (v.E2, "M6" )
 

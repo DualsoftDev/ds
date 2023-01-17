@@ -14,7 +14,14 @@ module ModuleInitializer =
                 | (:? RealEx | :? Call | :? Alias) -> new VertexMCoin(v)
                 | _ -> failwithlog "ERROR createTagManager"
 
-            | :? DsSystem as s-> SystemManager(s)
+                  //LoadedSystem은 추후 부모 Storages로 다시생성
+            | :? DsSystem as s   -> SystemManager(s, Storages())   
+            | :? LoadedSystem as s-> 
+                let child = s.ReferenceSystem
+                let parent = s.ContainerSystem
+                SystemManager(child, parent.TagManager.Storages)
+                
+            | :? ApiItem     as a-> ApiItemManager(a)
             | :? Flow     as f-> FlowManager(f)
             | _ -> failwithlog $"{x.Name} is not TagManager target"
 

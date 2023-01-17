@@ -3,12 +3,12 @@ namespace Engine.CodeGenHMI
 open Engine.Core
 
 module ModuleInitializer =
-    type VMM (v:IVertex) =
-        interface IVertexManager with
-            member x.Vertex = v
+    type VMM (v:IQualifiedNamed) =
+        interface ITagManager with
+            member x.Target = v
         
     let Initialize() =
-        let createVertexManager (vertex:IVertex) : IVertexManager =
+        let createTagManager (vertex:IQualifiedNamed) : ITagManager =
             new VMM(vertex)
 
-        fwdCreateVertexManager <- createVertexManager
+        fwdCreateTagManager <- createTagManager

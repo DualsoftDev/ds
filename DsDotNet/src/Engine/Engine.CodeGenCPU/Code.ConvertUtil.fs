@@ -60,9 +60,9 @@ module CodeConvertUtil =
         | :? Real as r ->
                 let ons = getOriginJobDefs (r, InitialType.On)
                 if ons.Contains(jd)
-                    then r.V.RO.Expr <&&> call.System._on.Expr
-                    else call.System._off.Expr
-        | _ -> call.System._off.Expr
+                    then r.V.RO.Expr <&&> call._on.Expr
+                    else call._off.Expr
+        | _ -> call._off.Expr
 
     let getEdgeSources(graph:DsGraph, target:Vertex, bStartEdge:bool) =
         let edges = graph.GetIncomingEdges(target)
@@ -118,7 +118,7 @@ module CodeConvertUtil =
 
         if needChecks.Any()
         then sets.ToAnd()
-        else real.V.System._on.Expr
+        else real._on.Expr
 
     //let rec getCoinTags(v:Vertex, isInTag:bool) : Tag<bool> seq =
     //        match v with

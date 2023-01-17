@@ -9,7 +9,7 @@ open System.Runtime.CompilerServices
 module CpuLoader =
     ///Vertex 타입이 Spec에 해당하면 적용
     let private applyVertexSpec(v:Vertex) = 
-        let vm = v.VertexManager :?> VertexManager
+        let vm = v.TagManager :?> VertexManager
         [
             if IsSpec v RealInFlow then
                 yield! vm.S1_RealRGFH()

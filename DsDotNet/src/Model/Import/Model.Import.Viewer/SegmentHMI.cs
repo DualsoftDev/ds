@@ -1,6 +1,6 @@
 using Engine.CodeGenCPU;
 using Microsoft.Msagl.GraphmapsWithMesh;
-using static Engine.CodeGenCPU.VertexManagerModule;
+using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.Core.CoreModule;
 using static Model.Import.Office.ViewModule;
 

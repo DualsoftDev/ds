@@ -137,6 +137,9 @@ module TextUtil =
         default x.GetRelativeName(referencePath:Fqdn) =
             getRelativeName referencePath x.NameComponents
 
+        member val TagManager = getNull<ITagManager>() with get, set
+
+
 
 
 [<Extension>]

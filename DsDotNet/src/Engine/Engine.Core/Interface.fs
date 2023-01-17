@@ -45,6 +45,6 @@ module Interface =
         abstract Variable:IStorage option
         abstract Literal:IExpressionizableTerminal option
 
-    type IVertexManager =
-        abstract Vertex: IVertex
-    let mutable fwdCreateVertexManager = let dummy (vertex:IVertex) : IVertexManager = failwithlog "Should be reimplemented." in dummy
+    type ITagManager =
+        abstract Target: IQualifiedNamed
+    let mutable fwdCreateTagManager = let dummy (vertex:IQualifiedNamed) : ITagManager = failwithlog "Should be reimplemented." in dummy

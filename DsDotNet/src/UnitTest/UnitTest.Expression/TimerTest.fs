@@ -22,12 +22,12 @@ open Engine.Common.FS
             let storages = Storages()
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", false)
             let condition = var2expr t1
-            let tcParam = {Storages=storages; Name="myTon"; Preset=2000us; RungInCondition=condition; FunctionName="createWinTON"}
+            let tcParam = {Storages=storages; Name="myTon"; Preset=200us; RungInCondition=condition; FunctionName="createWinTON"}
             let timer = TimerStatement.CreateTON(tcParam) |> toTimer       // 2000ms = 2sec
             timer.TT.Value === false
             timer.EN.Value === false
             timer.DN.Value === false
-            timer.PRE.Value === 2000us
+            timer.PRE.Value === 200us
             timer.ACC.Value === 0us
 
             (* Timer struct 의 내부 tag 들이 생성되고, 등록되었는지 확인 *)
@@ -54,12 +54,12 @@ open Engine.Common.FS
             timer.TT.Value === true
 
             // 설정된 timer 시간 경과를 기다림
-            System.Threading.Thread.Sleep(2100)
+            System.Threading.Thread.Sleep(210)
             timer.TT.Value === false
             timer.DN.Value === true
             timer.EN.Value === true
-            timer.PRE.Value === 2000us
-            timer.ACC.Value === 2000us
+            timer.PRE.Value === 200us
+            timer.ACC.Value === 200us
 
 
             // rung 입력 조건이 false
@@ -68,7 +68,7 @@ open Engine.Common.FS
             timer.TT.Value === false
             timer.DN.Value === false
             timer.EN.Value === false
-            timer.PRE.Value === 2000us
+            timer.PRE.Value === 200us
             timer.ACC.Value === 0us
 
         [<Test>]
@@ -78,13 +78,13 @@ open Engine.Common.FS
             let storages = Storages()
             storages.Add(t1.Name, t1)
 
-            let statement:Statement = "ton myTon = createWinTON(2000us, $my_timer_control_tag)" |> tryParseStatement storages |> Option.get
+            let statement:Statement = "ton myTon = createWinTON(200us, $my_timer_control_tag)" |> tryParseStatement storages |> Option.get
             let timer = toTimer statement
 
             timer.TT.Value === false
             timer.EN.Value === false
             timer.DN.Value === false
-            timer.PRE.Value === 2000us
+            timer.PRE.Value === 200us
             timer.ACC.Value === 0us
 
             // rung 입력 조건이 true
@@ -96,12 +96,12 @@ open Engine.Common.FS
             timer.TT.Value === true
 
             // 설정된 timer 시간 경과를 기다림
-            System.Threading.Thread.Sleep(2100)
+            System.Threading.Thread.Sleep(210)
             timer.TT.Value === false
             timer.DN.Value === true
             timer.EN.Value === true
-            timer.PRE.Value === 2000us
-            timer.ACC.Value === 2000us
+            timer.PRE.Value === 200us
+            timer.ACC.Value === 200us
 
 
             // rung 입력 조건이 false
@@ -110,7 +110,7 @@ open Engine.Common.FS
             timer.TT.Value === false
             timer.DN.Value === false
             timer.EN.Value === false
-            timer.PRE.Value === 2000us
+            timer.PRE.Value === 200us
             timer.ACC.Value === 0us
 
         [<Test>]
@@ -118,12 +118,12 @@ open Engine.Common.FS
             let storages = Storages()
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", true)
             let condition = var2expr t1
-            let tcParam = {Storages=storages; Name="myTof"; Preset=2000us; RungInCondition=condition; FunctionName="createWinTOF"}
+            let tcParam = {Storages=storages; Name="myTof"; Preset=200us; RungInCondition=condition; FunctionName="createWinTOF"}
             let timer = TimerStatement.CreateTOF(tcParam) |> toTimer       // 2000ms = 2sec
             timer.EN.Value === true
             timer.TT.Value === false
             timer.DN.Value === true
-            timer.PRE.Value === 2000us
+            timer.PRE.Value === 200us
             timer.ACC.Value === 0us
 
         [<Test>]
@@ -131,12 +131,12 @@ open Engine.Common.FS
             let storages = Storages()
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", false)
             let condition = var2expr t1
-            let tcParam = {Storages=storages; Name="myTof"; Preset=2000us; RungInCondition=condition; FunctionName="createWinTON"}
+            let tcParam = {Storages=storages; Name="myTof"; Preset=200us; RungInCondition=condition; FunctionName="createWinTON"}
             let timer = TimerStatement.CreateTON(tcParam) |> toTimer       // 2000ms = 2sec
             timer.TT.Value === false
             timer.EN.Value === false
             timer.DN.Value === false
-            timer.PRE.Value === 2000us
+            timer.PRE.Value === 200us
             timer.ACC.Value === 0us
 
         [<Test>]
@@ -144,7 +144,7 @@ open Engine.Common.FS
             let storages = Storages()
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", true)
             let condition = var2expr t1
-            let tcParam = {Storages=storages; Name="myTof"; Preset=2000us; RungInCondition=condition; FunctionName="createWinTOF"}
+            let tcParam = {Storages=storages; Name="myTof"; Preset=200us; RungInCondition=condition; FunctionName="createWinTOF"}
             let timer = TimerStatement.CreateTOF(tcParam) |> toTimer       // 2000ms = 2sec
             // rung 입력 조건이 false
             t1.Value <- false
@@ -153,28 +153,28 @@ open Engine.Common.FS
             timer.EN.Value === false
             timer.TT.Value === true
             timer.DN.Value === true
-            timer.PRE.Value === 2000us
-            (0us <= timer.ACC.Value && timer.ACC.Value <= 1000us) === true
+            timer.PRE.Value === 200us
+            (0us <= timer.ACC.Value && timer.ACC.Value <= 100us) === true
 
             t1.Value <- true
             evaluateRungInputs timer
-            System.Threading.Thread.Sleep(500)
+            System.Threading.Thread.Sleep(50)
             timer.EN.Value === true
             timer.TT.Value === false
             timer.DN.Value === true
 
             t1.Value <- false
             evaluateRungInputs timer
-            System.Threading.Thread.Sleep(500)
+            System.Threading.Thread.Sleep(50)
             timer.EN.Value === false
             timer.TT.Value === true
             timer.DN.Value === true
 
-            System.Threading.Thread.Sleep(2100)
+            System.Threading.Thread.Sleep(210)
             timer.EN.Value === false
             timer.TT.Value === false
             timer.DN.Value === false
-            timer.ACC.Value === 2000us
+            timer.ACC.Value === 200us
 
             t1.Value <- true
             evaluateRungInputs timer
@@ -182,7 +182,7 @@ open Engine.Common.FS
             timer.EN.Value === true
             timer.TT.Value === false
             timer.DN.Value === true
-            timer.ACC.Value <= 1000us === true
+            timer.ACC.Value <= 100us === true
 
 
         [<Test>]
@@ -192,14 +192,14 @@ open Engine.Common.FS
             let resetTag = PlcTag("my_timer_reset_tag", "%M1.1", false)
             let condition = var2expr rungConditionInTag
             let reset = var2expr resetTag
-            let tcParam = {Storages=storages; Name="myTmr"; Preset=1000us; RungInCondition=condition; FunctionName="createWinTMR"}
+            let tcParam = {Storages=storages; Name="myTmr"; Preset=100us; RungInCondition=condition; FunctionName="createWinTMR"}
             let timer = TimerStatement.CreateTMR(tcParam, reset) |> toTimer       // 1000ms = 1sec
 
             timer.EN.Value === true
             timer.TT.Value === true
             timer.DN.Value === false
-            timer.PRE.Value === 1000us
-            timer.ACC.Value <= 500us === true
+            timer.PRE.Value === 100us
+            timer.ACC.Value <= 50us === true
             timer.RES.Value === false
 
             // rung 입력 조건이 false : Pause
@@ -207,8 +207,8 @@ open Engine.Common.FS
             evaluateRungInputs timer
             timer.EN.Value === false
             timer.TT.Value === false
-            System.Threading.Thread.Sleep(1100)
-            timer.ACC.Value < 1000us === true
+            System.Threading.Thread.Sleep(110)
+            timer.ACC.Value < 100us === true
             timer.DN.Value === false
 
             // rung 입력 조건이 false
@@ -217,9 +217,9 @@ open Engine.Common.FS
             timer.EN.Value === true
             timer.TT.Value === true
             timer.DN.Value === false
-            System.Threading.Thread.Sleep(1100)
+            System.Threading.Thread.Sleep(110)
             timer.DN.Value === true
-            timer.ACC.Value === 1000us
+            timer.ACC.Value === 100us
 
 
             // reset 입력 조건이 true
@@ -236,7 +236,7 @@ open Engine.Common.FS
             let storages = Storages()
             let code = """
                 bool x0 = createTag("%MX0.0.0", false);
-                ton myTon = createWinTON(2000us, $x0);
+                ton myTon = createWinTON(200us, $x0);
 """
 
             let statement = parseCode storages code
@@ -250,7 +250,7 @@ open Engine.Common.FS
                 let storages = Storages()
                 let code = """
                     bool x0 = createTag("%MX0.0.0", false);
-                    ton myTon = createXgiTON(2000us, $x0);
+                    ton myTon = createXgiTON(200us, $x0);
     """
 
                 let statement = parseCode storages code

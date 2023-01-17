@@ -1,7 +1,5 @@
 namespace rec Engine.Core
 open System
-open System.Net.NetworkInformation
-open System.Runtime.InteropServices.ComTypes
 open System.Diagnostics
 open Engine.Common.FS
 

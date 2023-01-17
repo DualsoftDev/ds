@@ -12,7 +12,7 @@ type VertexManager with
         let real = v.Vertex :?> Real
         let ons    = getOriginIOs (real, InitialType.On)
         let offs   = getOriginIOs (real, InitialType.Off)
-        let locks  = getNeedCheck (real)
+        let locks  = getNeedCheckExpression (real)
 
         let onExpr   = ons.ToAndElseOn v.System
         let rst     = offs.ToOrElseOff v.System

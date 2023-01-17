@@ -28,7 +28,7 @@ module ConvertCoreExt =
     let getVMCoin(v:Vertex) = v.TagManager :?> VertexMCoin
 
     let getSM (x:DsSystem) = x.TagManager :?> SystemManager
-    let getFM (x:Flow) = x.TagManager :?> FlowManager
+    let getFM (x:Flow)     = x.TagManager :?> FlowManager
     let getAM (x:ApiItem)  = x.TagManager :?> ApiItemManager
 
     type ApiItem with 

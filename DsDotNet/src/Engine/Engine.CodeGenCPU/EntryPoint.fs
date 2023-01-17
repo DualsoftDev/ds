@@ -2,10 +2,13 @@ namespace Engine.CodeGenCPU
 
 open Engine.Core
 open Engine.Common.FS
+open System.Text.RegularExpressions
 
 module ModuleInitializer =
     let Initialize() =
         printfn "Module is being initialized..."
+
+
         let createTagManager (x:IQualifiedNamed) : ITagManager =
             match x with
             | :? Vertex as v->
@@ -14,15 +17,26 @@ module ModuleInitializer =
                 | (:? RealEx | :? Call | :? Alias) -> new VertexMCoin(v)
                 | _ -> failwithlog "ERROR createTagManager"
 
-                  //LoadedSystem은 추후 부모 Storages로 다시생성
+                  //LoadedSystem은 추후 부모인 ContainerSystem Storages로 다시생성
             | :? DsSystem as s   -> SystemManager(s, Storages())   
             | :? LoadedSystem as s-> 
-                let child = s.ReferenceSystem
-                let parent = s.ContainerSystem
-                SystemManager(child, parent.TagManager.Storages)
+                let cStg = s.ReferenceSystem.TagManager.Storages
+                let pStg = s.ContainerSystem.TagManager.Storages
+                //cStg
+                //|> Seq.filter(fun t-> not <| t.Key.StartsWith("_"))  //시스템 TAG제외
+                //|> Seq.iter(fun t-> 
+                //    if pStg.ContainsKey t.Key
+                //    then failwith "Err"
+
+                //    //let uniqueName = getUniqueName t.Key pStg
+                //    ////t.Value.Name <- uniqueName
+                //    //pStg.Add(uniqueName, t.Value)
+                //    )  //test ahn 하위 TAG 교체 필요
+
+                SystemManager(s.ReferenceSystem, pStg)
                 
-            | :? ApiItem     as a-> ApiItemManager(a)
-            | :? Flow     as f-> FlowManager(f)
+            | :? ApiItem as a -> ApiItemManager(a)
+            | :? Flow    as f -> FlowManager(f)
             | _ -> failwithlog $"{x.Name} is not TagManager target"
 
         fwdCreateTagManager <- createTagManager

@@ -15,8 +15,8 @@ module VertexManagerModule =
     //__________________________________________________________________
     // ACTION | IN	    | API. I| -	              | API. I    |
     // ACTION | OUT	    | API. O| -	              | API. O    |
-                                            
-    
+
+
     /// Vertex Manager : 소속되어 있는 DsBit 를 관리하는 컨테이어
     [<DebuggerDisplay("{Name}")>]
     [<AbstractClass>]
@@ -47,55 +47,55 @@ module VertexManagerModule =
         interface IVertexManager with
             member x.Vertex = v
 
-        member x.Name   = v.QualifiedName
-        member x.Vertex = v
-        member x.Flow   = v.Parent.GetFlow()
-        member x.System = v.Parent.GetFlow().System
+        member _.Name   = v.QualifiedName
+        member _.Vertex = v
+        member _.Flow   = v.Parent.GetFlow()
+        member _.System = v.Parent.GetFlow().System
         member val SysManager = SystemManager(v.Parent.GetSystem())
 
 
 
         ///Segment Start Tag
-        member x.ST         = startTagBit
+        member _.ST         = startTagBit
         ///Segment Reset Tag
-        member x.ResetTag   = resetTagBit
-        member x.RT         = resetTagBit
+        member _.ResetTag   = resetTagBit
+        member _.RT         = resetTagBit
         ///Segment End Tag
-        member x.ET         = endTagBit
+        member _.ET         = endTagBit
 
         //Force
         ///StartForce HMI
-        member x.SF         = startForceBit
+        member _.SF         = startForceBit
         ///ResetForce HMI
-        member x.RF         = resetForceBit
+        member _.RF         = resetForceBit
         ///EndForce HMI
-        member x.EF         = endForceBit
+        member _.EF         = endForceBit
 
         //Status
         ///Ready Status
-        member x.R          = readyBit
+        member _.R          = readyBit
         ///Going Status
-        member x.G          = goingBit
+        member _.G          = goingBit
         ///Finish Status
-        member x.F          = finishBit
+        member _.F          = finishBit
         ///Homing Status
-        member x.H          = homingBit
+        member _.H          = homingBit
 
         //Monitor
         ///Origin Monitor
-        member x.OG         =  originBit
+        member _.OG         =  originBit
         ///Pause Monitor
-        member x.PA         =  pauseBit
+        member _.PA         =  pauseBit
         ///Error Tx Monitor
-        member x.E1         =  errorTxBit
+        member _.E1         =  errorTxBit
         ///Error Rx Monitor
-        member x.E2         =  errorRxBit
+        member _.E2         =  errorRxBit
 
         //DummyBit
         ///PulseStart
-        member x.PUL        = pulseBit
+        member _.PUL        = pulseBit
         ///Going Relay   //리셋 인과에 따라 필요
-        member x.GR(src:Vertex) =
+        member _.GR(src:Vertex) =
            let gr =   bit v  $"GR_{src.Name}" BitFlag.RelayGoing
            goingRelays.Add gr |> ignore; gr
 
@@ -110,36 +110,35 @@ module VertexManagerModule =
         let relayRealBit  = bit v "RR" BitFlag.RelayReal
         let realOriginAction  = bit v "RO" BitFlag.RealOriginAction
         /// Real Origin Action
-        member x.RO         = realOriginAction
+        member _.RO         = realOriginAction
         ///Real Init Relay
-        member x.RR         = relayRealBit
+        member _.RR         = relayRealBit
         //Port
         ///Segment Start Port
-        member x.SP         = startPortBit
+        member _.SP         = startPortBit
         ///Segment Reset Port
-        member x.RP         = resetPortBit
+        member _.RP         = resetPortBit
         ///Segment End Port
-        member x.EP         = endPortBit
+        member _.EP         = endPortBit
 
 
     type VertexMCoin(v:Vertex) =
         inherit VertexManager(v)
         let relayCallBit  = bit v  "CR" BitFlag.RelayCall
 
-
-        let counterBit    = counter v  "CTR" CounterFlag.CountRing 
-        let timerOnDelayBit = timer v  "TON"  TimerFlag.TimerOnDely 
-        let timerTimeOutBit = timer v  "TOUT" TimerFlag.TimeOut 
+        let counterBit    = counter v  "CTR" CounterFlag.CountRing
+        let timerOnDelayBit = timer v  "TON"  TimerFlag.TimerOnDely
+        let timerTimeOutBit = timer v  "TOUT" TimerFlag.TimeOut
 
         ///Call Done Relay
-        member x.CR     = relayCallBit
+        member _.CR     = relayCallBit
 
         ///Ring Counter
-        member x.CTR    = counterBit
+        member _.CTR    = counterBit
         ///Timer on delay
-        member x.TON    = timerOnDelayBit
+        member _.TON    = timerOnDelayBit
         ///Timer time out
-        member x.TOUT   = timerTimeOutBit
+        member _.TOUT   = timerTimeOutBit
 
 
 

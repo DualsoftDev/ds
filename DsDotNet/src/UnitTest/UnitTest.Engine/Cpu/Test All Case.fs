@@ -27,7 +27,7 @@ type TestAllCase() =
 
 
     [<Test>]  //<kwak> help rung 만들때 안되네요 Tag는 임시로 넘겼는데
-    member __.``Test All Case`` () =
+    member __.``XXXXXXXXXXXXXXX Test All Case`` () =
         let stg = Storages()
         Runtime.Target <- XGI
         let result = Cpu.LoadStatements(t.Sys, stg).Head().Value //Active 기준으로 나머지 Tail도 출력필요 //test ahn

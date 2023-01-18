@@ -25,6 +25,8 @@ module FlowManagerModule =
     |EMG_BIT
     |TEST_BIT
     |HOME_BIT
+    |READYCONDI_BIT
+    |DRIVECONDI_BIT
 
 
     /// Flow Manager : Flow Tag  를 관리하는 컨테이어
@@ -38,6 +40,8 @@ module FlowManagerModule =
         let f_top    = dsBit s $"{f.Name}(TOP)" false   //  Test  Operation Mode (시운전) 
         let f_sop    = dsBit s $"{f.Name}(SOP)" false   // Stop State 
         let f_eop    = dsBit s $"{f.Name}(EOP)" false   // Emergency State 
+        let f_readycondi = dsBit s $"{f.Name}(SCR)" false  //system condition ready
+        let f_drivecondi = dsBit s $"{f.Name}(SCD)" false  //system condition drive
         let f_auto   = dsBit s $"{f.Name}_auto" false
         let f_manual = dsBit s $"{f.Name}_manual" false
         let f_drive  = dsBit s $"{f.Name}_drive" false
@@ -70,4 +74,6 @@ module FlowManagerModule =
             |EMG_BIT         -> f_emg   
             |TEST_BIT        -> f_test  
             |HOME_BIT        -> f_home  
+            |READYCONDI_BIT  -> f_readycondi  
+            |DRIVECONDI_BIT  -> f_drivecondi  
        

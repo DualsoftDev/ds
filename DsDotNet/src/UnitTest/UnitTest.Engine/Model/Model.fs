@@ -110,7 +110,7 @@ module ModelTests1 =
             compare ParserTest.Lamps answerLamps
 
         [<Test>] 
-        member __.``XXXXX Model component [Conditions] test`` () =
+        member __.``Model component [Conditions] test`` () =
             compare ParserTest.Conditions answerConditions
 
         [<Test>]

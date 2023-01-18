@@ -90,6 +90,8 @@ module CpuLoader =
             yield! s.B1_ButtonOutput()
             yield! s.B2_ModeLamp()
             yield! s.Y1_SystemBitSetFlow()
+            yield! s.Y2_SystemConditionReady()
+            yield! s.Y3_SystemConditionDrive()
         ]
 
     ///flow 별 운영모드 적용

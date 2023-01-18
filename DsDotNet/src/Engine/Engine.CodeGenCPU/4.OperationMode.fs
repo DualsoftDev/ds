@@ -21,7 +21,7 @@ type Flow with
         (set, rst) ==| (f.mop, "O2")
 
     member f.O3_DriveOperationMode (): CommentedStatement =
-        let set = f.aop.Expr <&&> (f.drive.Expr <||> f.BtnDriveExpr)
+        let set = f.aop.Expr <&&> f.scd.Expr <&&> (f.drive.Expr <||> f.BtnDriveExpr)
         let rst = !!f.rop.Expr
 
         (set, rst) ==| (f.dop, "O3")
@@ -46,7 +46,7 @@ type Flow with
         (set <||> setErrs, rst) --| (f.sop, "O6")
 
     member f.O7_ReadyMode(): CommentedStatement =
-        let set = f.ready.Expr <||> f.BtnReadyExpr
+        let set = f.scr.Expr <&&> (f.ready.Expr <||> f.BtnReadyExpr)
         let rst = f.eop.Expr
 
         (set, rst) ==| (f.rop, "O7")

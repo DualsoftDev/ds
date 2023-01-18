@@ -70,8 +70,6 @@ module ConvertCoreExt =
                 jdef.InTag <- createIOPLCTag(jdef.ApiName, jdef.InAddress, In)
                 jdef.OutTag <- createIOPLCTag(jdef.ApiName, jdef.OutAddress, Out)
 
-        //[auto, manual] system HMI 두개다 선택이 안됨
-     //   member x.ModeNoExpr = !!s._auto.Expr <&&> !!s._manual.Expr
         //자신이 사용된 API Plan Set Send
         member x.GetPSs(r:Real) =
             x.ApiItems.Where(fun api-> api.TXs.Contains(r))
@@ -96,15 +94,20 @@ module ConvertCoreExt =
     let private getSelectBtnExpr(f:Flow, btns:ButtonDef seq) : Expression<bool> seq =
         getButtonExpr(f, btns)
 
-    let private getButtonOutputs(flow:Flow, btns:ButtonDef seq) : PlcTag<bool> seq =
-            btns.Where(fun b -> b.SettingFlows.Contains(flow))
-                .Select(fun b -> b.OutTag)
-                .Cast<PlcTag<bool>>()
+    //let private getButtonOutputs(flow:Flow, btns:ButtonDef seq) : PlcTag<bool> seq =
+    //        btns.Where(fun b -> b.SettingFlows.Contains(flow))
+    //            .Select(fun b -> b.OutTag)
+    //            .Cast<PlcTag<bool>>()
 
-    let private getLampOutputs(flow:Flow, btns:LampDef seq) : PlcTag<bool> seq =
-            btns.Where(fun b -> b.SettingFlow = flow)
-                .Select(fun b -> b.OutTag)
-                .Cast<PlcTag<bool>>()
+    //let private getLampOutputs(flow:Flow, btns:LampDef seq) : PlcTag<bool> seq =
+    //        btns.Where(fun b -> b.SettingFlow = flow)
+    //            .Select(fun b -> b.OutTag)
+    //            .Cast<PlcTag<bool>>()
+
+    let getConditionInputs(flow:Flow, condis:ConditionDef seq) : PlcTag<bool> seq =
+            condis.Where(fun b -> b.SettingFlows.Contains(flow))
+                 .Select(fun b -> b.InTag)
+                 .Cast<PlcTag<bool>>()
 
 
 //운영 모드 는 Flow 별로 제공된 모드 On/Off 상태 나타낸다.
@@ -126,6 +129,8 @@ module ConvertCoreExt =
         member f.emg    = getFM(f).GetFlowTag(FlowTag.EMG_BIT     )
         member f.test   = getFM(f).GetFlowTag(FlowTag.TEST_BIT    )
         member f.home   = getFM(f).GetFlowTag(FlowTag.HOME_BIT    )
+        member f.scr    = getFM(f).GetFlowTag(FlowTag.READYCONDI_BIT    )
+        member f.scd    = getFM(f).GetFlowTag(FlowTag.DRIVECONDI_BIT    )
         member x.F = x |> getFM
         member f._on     = f.System._on
         member f._off    = f.System._off

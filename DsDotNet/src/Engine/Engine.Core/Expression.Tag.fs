@@ -60,11 +60,11 @@ module TagModule =
 
     /// Ds Plan tag : system bit, eop, mop 등등.. 사용중
     type DsTag<'T when 'T:equality> (name, initValue:'T) =
-        inherit Tag<'T>(name, initValue)
+        inherit PlcTag<'T>(name, "", initValue)
 
     /// Ds Plan tag with Vertex class
     type DsBit (name, initValue:bool, v:Vertex, tagFlag:BitFlag) =
-        inherit Tag<bool>(name, initValue)
+        inherit PlcTag<bool>(name, "", initValue)
         member x.TagFlag = tagFlag
         member x.Vertex = v
 

@@ -232,7 +232,7 @@ module internal XgiFile =
                         let device, memSize =
                             match t.Address with
                             | RegexPattern @"%([IQM])([XBWL]).*$" [iqm; mem] -> iqm, mem
-                            | _ -> "????", "????"
+                            | _ -> "M", "X" //test ahn 주소없는 오토변수 방법 타입 ??
 
                         let plcType =
                             match memSize with

@@ -34,6 +34,7 @@ module internal ModelFindModule =
                                 let! v = real.Graph.TryFindVertex(remaining.Combine())
                                 return box v
                             }
+                    | :? RealExS as real -> Some real
                     | _ -> None
 
             | dev::xs when system.LoadedSystems.Any(nameEq dev) ->
@@ -82,7 +83,18 @@ module internal ModelFindModule =
     let tryFindCall (system:DsSystem) (Fqdn(callPath))=
         if tryFindJob system (callPath.Last()) |> Option.isSome
         then match tryFindGraphVertex system callPath with
-             |Some(v) -> Some(v :?> Call)
+             |Some(v) -> 
+                match v with
+                | :? Call -> Some(v)
+                | :? RealOtherSystem -> Some(v)
+                | _ -> None
+             |None -> None
+        else None
+
+    let tryFindRealOtherSystem (system:DsSystem) (Fqdn(realExSPath)) =
+        if tryFindJob system (realExSPath.Last()) |> Option.isSome
+        then match tryFindGraphVertex system realExSPath with
+             |Some(v) -> Some(v :?> RealOtherSystem)
              |None -> None
         else None
 
@@ -131,6 +143,7 @@ module internal ModelFindModule =
 
         member x.TryFindExportApiItem(Fqdn(apiPath)) = tryFindExportApiItem x apiPath
         member x.TryFindCall(callPath:Fqdn) = tryFindCall x callPath
+        member x.TryFindRealOtherSystem(realExSPath:Fqdn) = tryFindRealOtherSystem x realExSPath
         member x.TryFindFlow(flowName:string) = tryFindFlow x flowName
         member x.TryFindJob (jobName:string) =  tryFindJob  x jobName
         member x.TryFindReal(system) flowName realName =  tryFindReal  system flowName realName 

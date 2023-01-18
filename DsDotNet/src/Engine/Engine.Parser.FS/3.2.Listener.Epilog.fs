@@ -187,19 +187,31 @@ module EtcListenerModule =
                         |Some (flow) ->
                             let! vertex = flow.Graph.TryFindVertex(realOrCall)
                             match vertex with
-                            | :? Real as r -> return DuSafetyConditionReal (r)
-                            | :? Call as c -> return DuSafetyConditionCall (c)
-                            | :? RealOtherFlow as o -> return DuSafetyConditionRealExFlow (o)
-                            | :? RealOtherSystem as o -> return DuSafetyConditionRealExSystem (o)
+                            | :? Real as r -> return DuSafetyConditionReal r
+                            | :? Call as c -> return DuSafetyConditionCall c
+                            | :? RealOtherFlow as o -> return DuSafetyConditionRealExFlow o
+                            | :? RealOtherSystem as o -> return DuSafetyConditionRealExSystem o
                             | _-> failwithlog "Error"
 
                         |None ->        
-                            let c = curSystem.TryFindCall(ns) |> Option.get
-                            return DuSafetyConditionCall (c)
+                            //let c = curSystem.TryFindCall(ns) |> Option.get
+                            //return DuSafetyConditionCall res
+                            
+                            let! vertex = curSystem.TryFindCall(ns)
+                            match vertex with
+                            | :? RealOtherSystem as rs -> return DuSafetyConditionRealExSystem rs
+                            | :? Call as c -> return DuSafetyConditionCall c
+                            | _ -> failwithlog "ERROR"
 
                     | f::r::c::[] ->
-                         let! c = curSystem.TryFindCall(ns)
-                         return DuSafetyConditionCall c
+                         //let! c = curSystem.TryFindCall(ns)
+                         //return DuSafetyConditionCall c
+                         
+                        let! vertex = curSystem.TryFindCall(ns)
+                        match vertex with
+                        | :? RealOtherSystem as rs -> return DuSafetyConditionRealExSystem rs
+                        | :? Call as c -> return DuSafetyConditionCall c
+                        | _ -> failwithlog "ERROR"
                 
                     | _ ->
                         failwithlog "ERROR"
@@ -268,8 +280,12 @@ module EtcListenerModule =
 
                 match xywh.x().GetText(), xywh.y().GetText(), xywh.w().GetText(), xywh.h().GetText() with
                 | Int32Pattern x, Int32Pattern y, Int32Pattern w, Int32Pattern h ->
-                    call.Xywh <- new Xywh(x, y, w, h)
+                    match call with
+                    | :? Call -> (call:?>Call).Xywh <- new Xywh(x, y, w, h)
+                    | _ -> ()
                 | Int32Pattern x, Int32Pattern y, null, null ->
-                    call.Xywh <- new Xywh(x, y, Nullable(), Nullable())
+                    match call with
+                    | :? Call -> (call:?>Call).Xywh <- new Xywh(x, y, Nullable(), Nullable())
+                    | _ -> ()
                 | _ ->
                     failwithlog "ERROR"

@@ -1,9 +1,14 @@
 [sys] Control = {
     [flow] F = {
 		Main = { mv1up, mv2dn > mv1dn, mv2up; }
-		FWD > BWD > Main;
+		FWD > BWD > Main |> FWD2 |> BWD2;
 		Main <||> Reset;
 		FWD <| Main |> BWD;
+		
+		[aliases] = {
+			FWD = { FWD2; }
+			BWD = { BWD2; }
+		}
     }
     [interfaces] = {
         "G"  = { F.Main ~ F.Main }

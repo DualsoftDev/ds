@@ -476,12 +476,29 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                         | rc::[] -> //Flow.R or Flow.C
                             match flow.System.TryFindReal flow.System flow.Name rc  with
                             | Some r -> r |> DuAliasTargetReal
-                            | None -> flow.System.TryFindCall ([flow.Name;rc].ToArray()) |> Option.get |>DuAliasTargetCall
+                            | None ->
+                                let vertex = flow.System.TryFindCall ([flow.Name;rc].ToArray()) |> Option.get
+                                match vertex with
+                                | :? RealOtherSystem as rs -> DuAliasTargetRealExSystem rs
+                                | :? Call as c -> DuAliasTargetCall c
+                                | _ -> failwithlog "ERROR"
+
+                                //if call.IsNone then
+                                //    let job = flow.System.TryFindRealOtherSystem ([flow.Name;rc].ToArray())
+                                //    job |> Option.get |> DuAliasTargetRealExSystem
+                                //else
+                                //    call |> Option.get |> DuAliasTargetCall
 
                         | flowOrReal::rc::[] -> //FlowEx.R or Real.C
                             match tryFindFlow system flowOrReal with
                             | Some f -> f.Graph.TryFindVertex<Real>(rc)  |> Option.get |> DuAliasTargetReal
-                            | None ->  tryFindCall system ([flow.Name]@ns) |> Option.get |> DuAliasTargetCall
+                            | None -> 
+                                //tryFindCall system ([flow.Name]@ns) |> Option.get |> DuAliasTargetCall
+                                let vertex = tryFindCall system ([flow.Name]@ns) |> Option.get
+                                match vertex with
+                                | :? RealOtherSystem as rs -> DuAliasTargetRealExSystem rs
+                                | :? Call as c -> DuAliasTargetCall c
+                                | _ -> failwithlog "ERROR"
                         | _ ->
                             failwithlog "ERROR"
 

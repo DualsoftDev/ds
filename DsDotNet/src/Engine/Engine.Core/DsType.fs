@@ -35,3 +35,7 @@ module DsType =
         | DuEmergencyModeLamp //비상 모드 램프
         | DuTestModeLamp      //시운전 모드 램프
         | DuReadyModeLamp     //대기 모드 램프
+
+    type ConditionType =
+        | ReadyState
+        | DriveState

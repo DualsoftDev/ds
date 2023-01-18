@@ -94,6 +94,8 @@ module CoreModule =
         member val internal Buttons = HashSet<ButtonDef>()
         ///시스템 램프 소속 Flow 정보  setting은 AddLamp 사용
         member val internal Lamps   = HashSet<LampDef>()
+        ///시스템 조건 (운전/준비) 정보  setting은 AddCondition 사용
+        member val internal Conditions   = HashSet<ConditionDef>()
 
         
 
@@ -122,7 +124,7 @@ module CoreModule =
         //CPU 생성시 할당됨 OutTag
         member val OutTag = getNull<ITagWithAddress>() with get, set
         member val SettingFlows  = flows with get, set
-        member val Funcs  = funcs with get, set//todo ToDsText, parsing
+        member val Funcs  = funcs with get, set
 
 
     and LampDef (name:string, lampType:LampType, outAddress:TagAddress, flow:Flow, funcs:HashSet<Func>) =
@@ -135,7 +137,19 @@ module CoreModule =
         member val OutTag = getNull<ITagWithAddress>() with get, set
         ///단일 Flow 단위로 Lamp 상태 출력
         member val SettingFlow  = flow with get, set
-        member val Funcs  = funcs with get, set//todo ToDsText, parsing
+        member val Funcs  = funcs with get, set
+
+    and ConditionDef (name:string, conditionType:ConditionType, inAddress:TagAddress, flows:HashSet<Flow>, funcs:HashSet<Func>) =
+        member x.Name = name
+        member x.ConditionType = conditionType
+        ///조건을 위한 외부 IO 출력 주소
+        member val InAddress = inAddress  with get,set
+
+        //CPU 생성시 할당됨 InTag
+        member val InTag = getNull<ITagWithAddress>() with get, set
+        ///단일 Flow 단위로 Condition 상태 출력
+        member val SettingFlows  = flows with get, set
+        member val Funcs  = funcs with get, set
 
     and AliasDef(aliasKey:Fqdn, target:AliasTargetWrapper option, mnemonics:string []) =
         member _.AliasKey = aliasKey

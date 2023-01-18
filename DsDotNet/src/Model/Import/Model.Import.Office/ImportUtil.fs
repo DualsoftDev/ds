@@ -203,6 +203,22 @@ module ImportU =
                     )
             )
 
+        //시스템 조건 만들기 준비/운전
+        [<Extension>]
+        static member MakeConditions (doc:pptDoc, mySys:DsSystem) =
+            let dicFlow = doc.DicFlow
+            
+            doc.Nodes
+            |> Seq.filter(fun node -> node.CondiDefs.any())
+            |> Seq.iter(fun node ->
+                    let flow = dicFlow.[node.PageNum]
+                    node.CondiDefs.ForEach(fun l -> 
+                        mySys.AddCondtion(l.Value, l.Key, "", flow)
+                    )
+            )
+
+
+            
 
         //real call alias  만들기
         [<Extension>]
@@ -223,13 +239,13 @@ module ImportU =
                     |> Seq.filter(fun node -> node.Alias.IsNone)
                     |> Seq.filter(fun node -> node.NodeType.IsReal)
                     |> Seq.filter(fun node -> dicChildParent.ContainsKey(node)|>not)
-                    |> Seq.sortBy(fun node -> node.NodeType = REALExFlw || node.NodeType = REALExSys)  //real 부터 생성 후 realEx 처리
+                    |> Seq.sortBy(fun node -> node.NodeType = REALExF || node.NodeType = REALExS)  //real 부터 생성 후 realEx 처리
                     |> Seq.iter(fun node   ->
                             match node.NodeType with
-                            | REALExFlw ->
+                            | REALExF ->
                                 let real = getOtherFlowReal(dicFlow.Values, node) :?> Real
                                 dicVertex.Add(node.Key, RealExF.Create(real, DuParentFlow dicFlow.[node.PageNum]))
-                            | REALExSys ->
+                            | REALExS ->
                                 let real = getOtherSystemReal(dicFlow.Values, node) :?> Real
                                 dicVertex.Add(node.Key, RealExF.Create(real, DuParentFlow dicFlow.[node.PageNum]))
                             | _ ->
@@ -421,6 +437,8 @@ module ImportU =
             doc.MakeButtons(sys)
             //run / stop mode  램프 리스트 만들기
             doc.MakeLamps(sys)
+            //시스템 조건 만들기 준비/운전
+            doc.MakeConditions(sys)
             //segment 리스트 만들기
             doc.MakeSegment(sys)
             //Edge  만들기

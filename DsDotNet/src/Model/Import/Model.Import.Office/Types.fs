@@ -10,18 +10,19 @@ module InterfaceClass =
  ///인과의 노드 종류
     type NodeType =
         | REAL          //실제 나의 시스템 1 bit
-        | REALExFlw        //다른 Flow real
-        | REALExSys        //다른 System real
+        | REALExF        //다른 Flow real
+        | REALExS        //다른 System real
         | CALL          //지시관찰 
         | IF            //인터페이스
         | COPY_VALUE          //시스템복사
         | COPY_REF           //시스템참조
         | DUMMY         //그룹더미
         | BUTTON        //버튼 emg,start, ...
+        | CONDITION        //system Condition ready/drive 정의 블록
         | LAMP          //램프 runmode,stopmode, ...
         //| ACTIVESYS        //model ppt active  system
         with
-            member x.IsReal = x = REAL || x = REALExFlw || x = REALExSys
+            member x.IsReal = x = REAL || x = REALExF || x = REALExS
             member x.IsCall = x = CALL
             member x.IsRealorCall =  x.IsReal || x.IsCall
 
@@ -55,9 +56,11 @@ module InterfaceClass =
         | XlsDriveModeLamp       //운전 모드 램프
         | XlsStopModeLamp        //정지 모드 램프
         | XlsEmergencyModeLamp   //비상 모드 램프
+        | XlsReadyModeLamp       //준비 모드 램프
         | XlsTestModeLamp        //시운전 모드 램프
-        | XlsReadyModeLamp       //준비 모드  램프
-
+        | XlsConditionReady      //준비 모드  램프
+        | XlsConditionDrive      //준비 모드  램프
+        
     with
         member x.ToText() =
             match x with
@@ -79,7 +82,9 @@ module InterfaceClass =
             | XlsEmergencyModeLamp -> TextXlsEmergencyModeLamp
             | XlsTestModeLamp      -> TextXlsTestModeLamp
             | XlsReadyModeLamp     -> TextXlsReadyModeLamp 
-
+            | XlsConditionReady    -> TextXlsConditionReady 
+            | XlsConditionDrive    -> TextXlsConditionDrive 
+            
     let TextToXlsType(txt:string) =
         match txt.ToLower() with
         | TextXlsAddress        ->  XlsAddress     
@@ -97,4 +102,8 @@ module InterfaceClass =
         | TextXlsDriveModeLamp  ->  XlsDriveModeLamp 
         | TextXlsStopModeLamp   ->  XlsStopModeLamp    
         | TextXlsReadyModeLamp  ->  XlsReadyModeLamp
+        | TextXlsConditionReady ->  XlsConditionReady
+        | TextXlsConditionDrive ->  XlsConditionDrive
+
+        
         | _ -> failwithf $"'{txt}' TextXlsType Error check type"

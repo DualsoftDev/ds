@@ -212,6 +212,8 @@ module DsTextExport =
     let [<Literal>] TextXlsEmergencyModeLamp = "비상램프"
     let [<Literal>] TextXlsTestModeLamp      = "시운전램프"
     let [<Literal>] TextXlsReadyModeLamp     = "준비램프"
+    let [<Literal>] TextXlsConditionReady     = "준비조건"
+    let [<Literal>] TextXlsConditionDrive     = "운전조건"
 
 [<AutoOpen>]
 module DsTextProperty =

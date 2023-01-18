@@ -13,24 +13,25 @@ module CoreExtensionModule =
 
     let getButtons (sys:DsSystem, btnType:BtnType) = sys.Buttons.Where(fun f->f.ButtonType = btnType)
     let getLamps (sys:DsSystem, lampType:LampType) = sys.Lamps.Where(fun f->f.LampType = lampType)
+    let getConditions (sys:DsSystem, cType:ConditionType) = sys.Conditions.Where(fun f->f.ConditionType = cType)
     let getRecursiveSystems (sys:DsSystem) =
             [
                 yield! sys.ReferenceSystems
                 yield! sys.ReferenceSystems |> Seq.collect(fun f->f |> getRecursiveSystems)
             ] |> List.toSeq
+    let checkSystem(system:DsSystem, targetFlow:Flow, itemName:string) =
+                if system <> targetFlow.System
+                then failwithf $"add item [{itemName}] in flow ({targetFlow.System.Name} != {system.Name}) is not same system"
+
     type DsSystem with
         member x.AddButton(btnType:BtnType, btnName:string, inAddress:TagAddress, outAddress:TagAddress, flow:Flow) =
-            let checkSystem() =
-                if x <> flow.System
-                then failwithf $"button [{btnName}] in flow ({flow.System.Name} != {x.Name}) is not same system"
-
             let checkUsedFlow() =
                 let flows = x.Buttons.Where(fun f->f.ButtonType = btnType)
                             |> Seq.collect(fun b -> b.SettingFlows)
                 flows.Contains(flow) |> not
                 |> verifyM $"{btnType} {btnName} is assigned to a single flow : Duplicated flow [{flow.Name}]"
 
-            checkSystem()
+            checkSystem(x, flow, btnName)
             if btnType = DuAutoBTN || btnType = DuManualBTN
             then checkUsedFlow()
 
@@ -40,12 +41,22 @@ module CoreExtensionModule =
                       |> verifyM $"Duplicated ButtonDef [{btnName}]"
 
         member x.AddLamp(lmpType:LampType, lmpName: string, addr:string, flow:Flow) =
-            if x <> flow.System then failwithf $"lamp [{lmpName}] in flow ({flow.System.Name} != {x.Name}) is not same system"
+            checkSystem(x, flow, lmpName)
 
             match x.Lamps.TryFind(fun f -> f.Name = lmpName) with
             | Some lmp -> lmp.SettingFlow <- flow
             | None -> x.Lamps.Add(LampDef(lmpName, lmpType, addr, flow, HashSet[||])) |> verifyM $"Duplicated LampDef [{lmpName}]" // need lamp functions....
+       
+        member x.AddCondtion(condiType:ConditionType, condiName: string, inAddr:string, flow:Flow) =
+            checkSystem(x, flow, condiName)
 
+            match x.Conditions.TryFind(fun f -> f.Name = condiName) with
+            | Some condi -> condi.SettingFlows.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
+            | None -> x.Conditions.Add(ConditionDef(condiName, condiType, inAddr, HashSet[|flow|], HashSet[||])) // need button functions....
+                      |> verifyM $"Duplicated ButtonDef [{condiName}]"
+
+
+        member x.SystemConditions   = x.Conditions |> Seq.map(fun con  -> con) //read only
         member x.SystemButtons      = x.Buttons |> Seq.map(fun btn  -> btn) //read only
         member x.SystemLamps        = x.Lamps   |> Seq.map(fun lamp -> lamp)//read only
                                     
@@ -67,6 +78,8 @@ module CoreExtensionModule =
         member x.TestModeLamps      = getLamps(x, DuTestModeLamp)
         member x.ReadyModeLamps     = getLamps(x, DuReadyModeLamp)
 
+        member x.ReadyConditions     = getConditions(x, ReadyState)
+        member x.DriveConditions     = getConditions(x, DriveState)
 
         member x.GetMutualResetApis(src:ApiItem) =
             let getMutual(apiInfo:ApiResetInfo) =

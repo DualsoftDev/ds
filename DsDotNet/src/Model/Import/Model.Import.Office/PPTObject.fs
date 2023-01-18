@@ -140,12 +140,12 @@ module PPTObjectModule =
         
         //REAL other flow 아니면 이름에 '.' 불가
         let checkDotErr() = 
-            if nodeType <> REALExFlw && name.Contains(".") 
+            if nodeType <> REALExF && name.Contains(".") 
             then  shape.ErrorName(ErrID._19, iPage)
 
         match nodeType with
-        | REALExFlw      -> ()
-        | REALExSys      -> ()
+        | REALExF      -> ()
+        | REALExS      -> ()
         | CALL        -> if  name.Contains("$")|>not 
                          then  shape.ErrorName(ErrID._12, iPage)
 
@@ -157,6 +157,7 @@ module PPTObjectModule =
         | REAL        
         | DUMMY       
         | BUTTON       
+        | CONDITION      
         | LAMP        -> checkDotErr()
 
     let getBtnType(key:string) =
@@ -183,6 +184,13 @@ module PPTObjectModule =
         | "R"   -> LampType.DuReadyModeLamp
         | _     ->  failwith $"{key} is Error Type"
 
+    let getConditionType(key:string) =
+        match TrimSpace key with
+        | "R"   -> ConditionType.ReadyState
+        | "D"   -> ConditionType.DriveState
+        | _     ->  failwith $"{key} is Error Type"
+
+
     let IsDummyShape(shape:Shape) = shape.IsDashShape() && (shape.CheckRectangle()||shape.CheckEllipse())
 
     type pptPage(slidePart:SlidePart, iPage:int , bShow:bool) =
@@ -195,8 +203,9 @@ module PPTObjectModule =
         let copySystems = Dictionary<string, string>() //copyName, orgiName
         let safeties    = HashSet<string>()
         let jobInfos = Dictionary<string, HashSet<string>>()  // jobBase, api SystemNames
-        let buttonDefs = Dictionary<string, BtnType>()
+        let btnDefs = Dictionary<string, BtnType>()
         let lampDefs   = Dictionary<string, LampType>()
+        let condiDefs   = Dictionary<string, ConditionType>()
 
         let mutable name = ""
         let mutable ifName    = ""
@@ -252,22 +261,28 @@ module PPTObjectModule =
                     ifRXs  <- rxs.Split(';').Where(fun f->f=""|>not) |> trimStartEndSeq |> Seq.filter(fun f->f="_"|>not) |> HashSet
                 else
                     shape.ErrorName(ErrID._43, iPage)
-                
+              
+        let getBracketItems (name:string) =
+            name.Split(']').Where(fun w->w <> "")
+            |> Seq.map(fun f->  GetSquareBrackets(f+"]", false), GetBracketsReplaceName(f+"]"))
+
         do
             name <-  GetBracketsReplaceName(shape.InnerText)  |> trimSpace
             
             nodeType <-
                 if(shape.CheckRectangle())      
-                then if name.Contains(".") then REALExFlw else REAL
+                then if name.Contains(".") then REALExF else REAL
                 elif(shape.CheckHomePlate())    then IF
                 elif(shape.CheckFoldedCornerRound()) then COPY_VALUE
                 elif(shape.CheckFoldedCornerPlate()) then COPY_REF
                 elif(shape.CheckEllipse())      then CALL
                 elif(shape.CheckBevelShapePlate())  then  LAMP
                 elif(shape.CheckBevelShapeRound())  then  BUTTON
+                elif(shape.CheckCondition())  then  CONDITION
                 else  shape.ErrorName(ErrID._1, iPage)
-
+                
             nameCheck (shape, nodeType, iPage)
+
 
             match nodeType with
             |CALL|REAL ->
@@ -280,14 +295,10 @@ module PPTObjectModule =
                      GetSquareBrackets(name, false)
                         |> fun text -> 
                             updateCopySys  (text ,(GetBracketsReplaceName(name) |> trimSpace), number)
-            |BUTTON -> 
-                      shape.InnerText.Split(']').Where(fun w->w <> "")
-                      |> Seq.map(fun f->  GetSquareBrackets(f+"]", false), GetBracketsReplaceName(f+"]")  |> getBtnType)
-                      |> Seq.iter(fun (name, typ) -> buttonDefs.Add(name, typ))
-
-            |LAMP ->  shape.InnerText.Split(']').Where(fun w->w <> "")
-                      |> Seq.map(fun f->  GetSquareBrackets(f+"]", false), GetBracketsReplaceName(f+"]") |> getLampType)
-                      |> Seq.iter(fun (name, typ) -> lampDefs.Add(name, typ))
+            
+            |BUTTON ->          getBracketItems(shape.InnerText).ForEach(fun (n, t) -> btnDefs.Add(n, t|> getBtnType))
+            |LAMP   ->          getBracketItems(shape.InnerText).ForEach(fun (n, t) -> lampDefs.Add(n, t|> getLampType))
+            |CONDITION -> getBracketItems(shape.InnerText).ForEach(fun (n, t) -> condiDefs.Add(n, t|> getConditionType))
             |_ -> ()
 
         member x.PageNum = iPage
@@ -309,8 +320,9 @@ module PPTObjectModule =
         member val Alias :pptNode  option = None with get, set
         member val AliasNumber :int = 0 with get, set
 
-        member val ButtonDefs = buttonDefs
+        member val ButtonDefs = btnDefs
         member val LampDefs   = lampDefs
+        member val CondiDefs   = condiDefs
 
         member x.GetRectangle (sildeSize:int*int) =  shape.GetPosition(sildeSize)
 

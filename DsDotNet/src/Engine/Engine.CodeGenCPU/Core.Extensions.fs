@@ -131,26 +131,26 @@ module ConvertCoreExt =
         member f._off    = f.System._off
 
         //select 버튼은 없을경우 항상 _on
-        member f.SelectAutoExpr =   getSelectBtnExpr(f, f.System.AutoButtons  )
+        member f.SelectAutoExpr   = getSelectBtnExpr(f, f.System.AutoButtons  )
         member f.SelectManualExpr = getSelectBtnExpr(f, f.System.ManualButtons)
 
         //push 버튼은 없을경우 항상 _off
-        member f.BtnDriveExpr =  getBtnExpr(f, f.System.DriveButtons    )
-        member f.BtnStopExpr =   getBtnExpr(f, f.System.StopButtons     )
-        member f.BtnEmgExpr =    getBtnExpr(f, f.System.EmergencyButtons)
-        member f.BtnTestExpr =   getBtnExpr(f, f.System.TestButtons     )
-        member f.BtnReadyExpr =  getBtnExpr(f, f.System.ReadyButtons    )
-        member f.BtnClearExpr =  getBtnExpr(f, f.System.ClearButtons    )
-        member f.BtnHomeExpr =   getBtnExpr(f, f.System.HomeButtons     )
+        member f.BtnDriveExpr = getBtnExpr(f, f.System.DriveButtons    )
+        member f.BtnStopExpr  = getBtnExpr(f, f.System.StopButtons     )
+        member f.BtnEmgExpr   = getBtnExpr(f, f.System.EmergencyButtons)
+        member f.BtnTestExpr  = getBtnExpr(f, f.System.TestButtons     )
+        member f.BtnReadyExpr = getBtnExpr(f, f.System.ReadyButtons    )
+        member f.BtnClearExpr = getBtnExpr(f, f.System.ClearButtons    )
+        member f.BtnHomeExpr  = getBtnExpr(f, f.System.HomeButtons     )
 
         member f.ModeAutoHwExpr =
-            let auto    = if f.SelectAutoExpr.any()   then f.SelectAutoExpr.ToAnd()   else f._on.Expr
+            let auto     = if f.SelectAutoExpr.any()   then f.SelectAutoExpr.ToAnd()    else f._on.Expr
             let ableAuto = if f.SelectManualExpr.any() then !!f.SelectManualExpr.ToOr() else f._on.Expr
             auto <&&> ableAuto
 
         member f.ModeManualHwExpr =
-            let manual    = if f.SelectManualExpr.any()   then f.SelectManualExpr.ToAnd()   else f._off.Expr
-            let ableManual = if f.SelectAutoExpr.any() then !!f.SelectAutoExpr.ToOr() else f._on.Expr
+            let manual     = if f.SelectManualExpr.any() then f.SelectManualExpr.ToAnd() else f._off.Expr
+            let ableManual = if f.SelectAutoExpr.any()   then !!f.SelectAutoExpr.ToOr()  else f._on.Expr
             manual <&&> ableManual
 
         member f.ModeAutoSwHMIExpr   =    f.auto.Expr <&&> !!f.manual.Expr

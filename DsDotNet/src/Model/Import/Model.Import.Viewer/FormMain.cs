@@ -38,7 +38,7 @@ namespace Dual.Model.Import
         public static FormMain TheMain;
 
         private DsCPU _SelectedCPU;
-        public Dictionary<DsSystem, DsCPU>          _DicCpu;
+        public Dictionary<DsSystem, DsCPU> _DicCpu;
         public Dictionary<DsSystem, IEnumerable<ViewNode>> _DicViews;
 
         public Dictionary<Vertex, ViewNode> _DicVertex;

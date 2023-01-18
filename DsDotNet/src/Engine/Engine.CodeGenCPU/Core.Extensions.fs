@@ -16,20 +16,22 @@ module ConvertCoreExt =
 
         (PlcTag(plcName, address, false) :> ITagWithAddress)
 
-    let getVM(v:Vertex) = v.TagManager :?> VertexManager
-    let getVMReal(v:Vertex) = v.TagManager :?> VertexMReal
-    let getVMCoin(v:Vertex) = v.TagManager :?> VertexMCoin
-
     let hasTime (xs:Func seq) = xs.Any(fun f->f.Name = TextOnDelayTimer)
     let hasCount(xs:Func seq) = xs.Any(fun f->f.Name = TextRingCounter)
     let hasMove (xs:Func seq) = xs.Any(fun f->f.Name = TextMove)
     let hasNot  (xs:Func seq) = xs.Any(fun f->f.Name = TextNot )
 
-    type ApiItem with
-        member a.PS = DsTag<bool>($"{a.Name}(PS)", false)
-        member a.PR = DsTag<bool>($"{a.Name}(PR)", false)
+    let getVM(v:Vertex) = v.TagManager :?> VertexManager
+    let getVMReal(v:Vertex) = v.TagManager :?> VertexMReal
+    let getVMCoin(v:Vertex) = v.TagManager :?> VertexMCoin
 
     let getSM (x:DsSystem) = x.TagManager :?> SystemManager
+    let getFM (x:Flow)     = x.TagManager :?> FlowManager
+    let getAM (x:ApiItem)  = x.TagManager :?> ApiItemManager
+
+    type ApiItem with
+        member a.PS     = getAM(a).GetApiTag(ApiTag.PLANSET)
+        member a.PR     = getAM(a).GetApiTag(ApiTag.PLANRST)
 
     type DsSystem with
         member s._on     = getSM(s).GetSysBitTag(SysBitTag.ON)
@@ -104,7 +106,6 @@ module ConvertCoreExt =
                 .Select(fun b -> b.OutTag)
                 .Cast<PlcTag<bool>>()
 
-    let getFM (x:Flow) = x.TagManager :?> FlowManager
 
 //운영 모드 는 Flow 별로 제공된 모드 On/Off 상태 나타낸다.
     type Flow with
@@ -126,36 +127,37 @@ module ConvertCoreExt =
         member f.test   = getFM(f).GetFlowTag(FlowTag.TEST_BIT    )
         member f.home   = getFM(f).GetFlowTag(FlowTag.HOME_BIT    )
         member x.F = x |> getFM
+        member f._on     = f.System._on
+        member f._off    = f.System._off
 
         //select 버튼은 없을경우 항상 _on
-         member f.SelectAutoExpr   = getSelectBtnExpr(f, f.System.AutoButtons  )
-         member f.SelectManualExpr = getSelectBtnExpr(f, f.System.ManualButtons)
+        member f.SelectAutoExpr =   getSelectBtnExpr(f, f.System.AutoButtons  )
+        member f.SelectManualExpr = getSelectBtnExpr(f, f.System.ManualButtons)
 
         //push 버튼은 없을경우 항상 _off
-         member f.BtnDriveExpr = getBtnExpr(f, f.System.DriveButtons    )
-         member f.BtnStopExpr  = getBtnExpr(f, f.System.StopButtons     )
-         member f.BtnEmgExpr   = getBtnExpr(f, f.System.EmergencyButtons)
-         member f.BtnTestExpr  = getBtnExpr(f, f.System.TestButtons     )
-         member f.BtnReadyExpr = getBtnExpr(f, f.System.ReadyButtons    )
-         member f.BtnClearExpr = getBtnExpr(f, f.System.ClearButtons    )
-         member f.BtnHomeExpr  = getBtnExpr(f, f.System.HomeButtons     )
+        member f.BtnDriveExpr =  getBtnExpr(f, f.System.DriveButtons    )
+        member f.BtnStopExpr =   getBtnExpr(f, f.System.StopButtons     )
+        member f.BtnEmgExpr =    getBtnExpr(f, f.System.EmergencyButtons)
+        member f.BtnTestExpr =   getBtnExpr(f, f.System.TestButtons     )
+        member f.BtnReadyExpr =  getBtnExpr(f, f.System.ReadyButtons    )
+        member f.BtnClearExpr =  getBtnExpr(f, f.System.ClearButtons    )
+        member f.BtnHomeExpr =   getBtnExpr(f, f.System.HomeButtons     )
 
-         member f.ModeAutoHwExpr =
-            let auto     = if f.SelectAutoExpr.any()   then   f.SelectAutoExpr.ToAnd()  else f.System._on.Expr
-            let ableAuto = if f.SelectManualExpr.any() then !!f.SelectManualExpr.ToOr() else f.System._on.Expr
+        member f.ModeAutoHwExpr =
+            let auto    = if f.SelectAutoExpr.any()   then f.SelectAutoExpr.ToAnd()   else f._on.Expr
+            let ableAuto = if f.SelectManualExpr.any() then !!f.SelectManualExpr.ToOr() else f._on.Expr
             auto <&&> ableAuto
 
-         member f.ModeManualHwExpr =
-            let manual     = if f.SelectManualExpr.any() then   f.SelectManualExpr.ToAnd() else f.System._off.Expr
-            let ableManual = if f.SelectAutoExpr.any()   then !!f.SelectAutoExpr.ToOr()    else f.System._on.Expr
+        member f.ModeManualHwExpr =
+            let manual    = if f.SelectManualExpr.any()   then f.SelectManualExpr.ToAnd()   else f._off.Expr
+            let ableManual = if f.SelectAutoExpr.any() then !!f.SelectAutoExpr.ToOr() else f._on.Expr
             manual <&&> ableManual
 
-         member f.ModeAutoSwHMIExpr   =    f.auto.Expr <&&> !!f.manual.Expr
-         member f.ModeManualSwHMIExpr =  !!f.auto.Expr <&&>   f.manual.Expr
+        member f.ModeAutoSwHMIExpr   =    f.auto.Expr <&&> !!f.manual.Expr
+        member f.ModeManualSwHMIExpr =  !!f.auto.Expr <&&>   f.manual.Expr
 
 
     type Call with
-        member c.V = c.TagManager :?> VertexMCoin
         member c.UsingTon  = c.CallTargetJob.Funcs |> hasTime
         member c.UsingCtr  = c.CallTargetJob.Funcs |> hasCount
         member c.UsingNot  = c.CallTargetJob.Funcs |> hasNot
@@ -186,11 +188,8 @@ module ConvertCoreExt =
         member r.ErrorTXs   = r.Graph.Vertices.Select(getVM    ).Select(fun f->f.E1)
         member r.ErrorRXs   = r.Graph.Vertices.Select(getVM    ).Select(fun f->f.E2)
 
-    type Alias with
+    type Indirect with
         member a.V = a.TagManager :?> VertexMCoin
-
-    type RealOtherFlow with
-        member r.V = r.TagManager :?> VertexMCoin
 
     type Vertex with
         member r.V = r.TagManager :?> VertexManager

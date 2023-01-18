@@ -30,7 +30,7 @@ type VertexMCoin with
 
     member coin.C2_CallActionOut(): CommentedStatement list =
         let call = coin.Vertex :?> Call
-        let rsts = coin.System._off.Expr
+        let rsts = coin._off.Expr
         [
             for jd in call.CallTargetJob.JobDefs do
                 yield (jd.ApiItem.PS.Expr, rsts) --| (jd.ActionOut, "C2" )
@@ -38,7 +38,7 @@ type VertexMCoin with
 
     member coin.C3_CallPlanReceive(): CommentedStatement list =
         let call = coin.Vertex :?> Call
-        let rsts = coin.System._off.Expr
+        let rsts = coin._off.Expr
         [
             for jd in call.CallTargetJob.JobDefs do
                 let sets = jd.RXs.ToAndElseOn(coin.System)
@@ -48,7 +48,7 @@ type VertexMCoin with
     member coin.C4_CallActionIn(): CommentedStatement list =
         let sharedCalls = coin.GetSharedCall()
         let call = coin.Vertex :?> Call
-        let rsts = coin.System._off.Expr
+        let rsts = coin._off.Expr
         [
             for sharedCall in sharedCalls do
                 let sets =

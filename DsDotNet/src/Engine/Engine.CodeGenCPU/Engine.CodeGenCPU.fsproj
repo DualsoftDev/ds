@@ -8,12 +8,12 @@
 	</PropertyGroup>
 
   <ItemGroup>
-    <None Include="Documents\Classes.pptx" />
     <Compile Include="Expression.Extension.fs" />
-    <Compile Include="TagManagerUtil.fs" />
-    <Compile Include="SystemManager.fs" />
-    <Compile Include="FlowManager.fs" />
-    <Compile Include="VertexManager.fs" />
+    <Compile Include="TagManager.Util.fs" />
+    <Compile Include="TagManager.System.fs" />
+    <Compile Include="TagManager.Flow.fs" />
+    <Compile Include="TagManager.Api.fs" />
+    <Compile Include="TagManager.Vertex.fs" />
     <Compile Include="Core.Extensions.fs" />
     <Compile Include="Code.SpecUtil.fs" />
     <Compile Include="Code.ConvertUtil.fs" />
@@ -55,6 +55,4 @@
 		  <PrivateAssets>all</PrivateAssets>
 	  </PackageReference>
   </ItemGroup>
-
-  <ItemGroup />
 </Project>

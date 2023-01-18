@@ -34,8 +34,9 @@ module CoreModule =
     }
 
     [<AbstractClass>]
-    type LoadedSystem(loadedSystem:DsSystem, param:DeviceLoadParameters) =
+    type LoadedSystem(loadedSystem:DsSystem, param:DeviceLoadParameters)  =
         inherit FqdnObject(param.LoadedName, param.ContainerSystem)
+            
         /// 다른 device 을 Loading 하려는 system 입장에서 loading 된 system 참조 용
         member _.ReferenceSystem = loadedSystem
 
@@ -56,10 +57,8 @@ module CoreModule =
         inherit LoadedSystem(loadedSystem, param)
         member _.HostIp = param.HostIp
 
-    type DsSystem (name:string, hostIp:string) as this (*, ?onCreation:DsSystem -> unit) as this*) =
+    type DsSystem (name:string, hostIp:string) (*, ?onCreation:DsSystem -> unit) as this*) =
         inherit FqdnObject(name, createFqdnObject([||]))
-        do
-            this.TagManager <- fwdCreateTagManager(this)
         //    // this system 객체가 생성되고 나서 수행해야 할 작업 수행.  external system loading 시, 공유하기 위한 정보를 marking
         //    onCreation.Iter(fun f -> f this)
 
@@ -70,23 +69,15 @@ module CoreModule =
         member val Flows   = createNamedHashSet<Flow>()
         //시스템에서 호출가능한 작업리스트 (Call => Job => ApiItems => Addresses)
         member val Jobs    = ResizeArray<Job>()
-        ////시스템에 사용된 모든 메모리를 관리함 
-        //member val Storages = Storages() with get, set
 
-        member _.AddLoadedSystem(childSys) =
-            loadedSystems.Add(childSys) |> ignore
-                  //Active 자식 시스템은 전부 최상위 부모 Storages 를 받음
-            //let passive = childSys.ReferenceSystem.Storages
-            //let active  = childSys.ContainerSystem.Storages
-            ////test ahn
-            ////passive.ForEach(fun f -> active.Add(f.Key, f.Value))
-            //childSys.ReferenceSystem.Storages <- active
-            addApiItemsForDevice childSys
+        member _.AddLoadedSystem(childSys) = loadedSystems.Add(childSys)  
+                                             |> verifyM $"Duplicated LoadedSystem name [{childSys.Name}]"
+                                             addApiItemsForDevice childSys
 
-        member _.ReferenceSystems     = loadedSystems.Select(fun s->s.ReferenceSystem)
-        member _.LoadedSystems        = loadedSystems |> seq
-        member _.Devices              = loadedSystems.OfType<Device>()
-        member _.ExternalSystems      = loadedSystems.OfType<ExternalSystem>()
+        member _.ReferenceSystems = loadedSystems.Select(fun s->s.ReferenceSystem)
+        member _.LoadedSystems    = loadedSystems |> seq
+        member _.Devices          = loadedSystems.OfType<Device>()
+        member _.ExternalSystems  = loadedSystems.OfType<ExternalSystem>()
         member _.ApiUsages = apiUsages |> seq
         member _.HostIp = hostIp
 
@@ -103,6 +94,8 @@ module CoreModule =
         member val internal Buttons = HashSet<ButtonDef>()
         ///시스템 램프 소속 Flow 정보  setting은 AddLamp 사용
         member val internal Lamps   = HashSet<LampDef>()
+        ///시스템 조건 (운전/준비) 정보  setting은 AddCondition 사용
+        member val internal Conditions   = HashSet<ConditionDef>()
 
         
 
@@ -115,7 +108,6 @@ module CoreModule =
         member x.System = system
         static member Create(name:string, system:DsSystem) =
             let flow = Flow(name, system)
-            flow.TagManager <- fwdCreateTagManager(flow)
             system.Flows.Add(flow) |> verifyM $"Duplicated flow name [{name}]"
             flow
 
@@ -132,7 +124,7 @@ module CoreModule =
         //CPU 생성시 할당됨 OutTag
         member val OutTag = getNull<ITagWithAddress>() with get, set
         member val SettingFlows  = flows with get, set
-        member val Funcs  = funcs with get, set//todo ToDsText, parsing
+        member val Funcs  = funcs with get, set
 
 
     and LampDef (name:string, lampType:LampType, outAddress:TagAddress, flow:Flow, funcs:HashSet<Func>) =
@@ -145,7 +137,19 @@ module CoreModule =
         member val OutTag = getNull<ITagWithAddress>() with get, set
         ///단일 Flow 단위로 Lamp 상태 출력
         member val SettingFlow  = flow with get, set
-        member val Funcs  = funcs with get, set//todo ToDsText, parsing
+        member val Funcs  = funcs with get, set
+
+    and ConditionDef (name:string, conditionType:ConditionType, inAddress:TagAddress, flows:HashSet<Flow>, funcs:HashSet<Func>) =
+        member x.Name = name
+        member x.ConditionType = conditionType
+        ///조건을 위한 외부 IO 출력 주소
+        member val InAddress = inAddress  with get,set
+
+        //CPU 생성시 할당됨 InTag
+        member val InTag = getNull<ITagWithAddress>() with get, set
+        ///단일 Flow 단위로 Condition 상태 출력
+        member val SettingFlows  = flows with get, set
+        member val Funcs  = funcs with get, set
 
     and AliasDef(aliasKey:Fqdn, target:AliasTargetWrapper option, mnemonics:string []) =
         member _.AliasKey = aliasKey
@@ -155,7 +159,7 @@ module CoreModule =
     /// leaf or stem(parenting)
     /// Graph 상의 vertex 를 점유하는 named object : Real, Alias, Call
     [<AbstractClass>]
-    type Vertex (names:Fqdn, parent:ParentWrapper) =
+    type Vertex (names:Fqdn, parent:ParentWrapper)  =
         inherit FqdnObject(names.Combine(), parent.GetCore())
 
         interface INamedVertex
@@ -163,8 +167,6 @@ module CoreModule =
         member _.PureNames = names
         member _.ParentNPureNames = ([parent.GetCore().Name] @ names).ToArray()
         override x.GetRelativeName(referencePath:Fqdn) = x.PureNames.Combine()
-
-        //member val TagManager = getNull<ITagManager>() with get, set
 
     // Subclasses = {Call | Real | RealOtherFlow}
     type ISafetyConditoinHolder =
@@ -193,6 +195,12 @@ module CoreModule =
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
+    and RealOtherSystem private (target:Job, parent) = 
+        inherit Indirect(target.Name, parent)
+        member _.Real = target
+        interface ISafetyConditoinHolder with
+            member val SafetyConditions = HashSet<SafetyCondition>()
+
     and Call private (target:Job, parent) =
         inherit Indirect(target.Name, parent)
         member _.CallTargetJob = target
@@ -208,14 +216,15 @@ module CoreModule =
     type Job (name:string, jobDefs:JobDef seq) =
         inherit Named(name)
         member val JobDefs = jobDefs.ToFSharpList()
+        member val Link = null with get, set
         member val Funcs  = HashSet<Func>() with get, set//todo ToDsText, parsing
 
     type TagAddress = string
     /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
     type JobDef (api:ApiItem, inAddress:TagAddress, outAddress:TagAddress, deviceName:string) =
         member _.ApiItem = api
-        member val InAddress   = inAddress  with get,set
-        member val OutAddress  = outAddress with get,set
+        member val InAddress   = inAddress  with get, set
+        member val OutAddress  = outAddress with get, set
         //CPU 생성시 할당됨 InTag
         member val InTag = getNull<ITagWithAddress>() with get, set
         //CPU 생성시 할당됨 OutTag
@@ -223,12 +232,17 @@ module CoreModule =
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
         member val ApiName = getRawName [deviceName;api.Name] true
 
+    type LinkDef (api:ApiItem, systemName:string) = 
+        member _.ApiItem = api
+        member val ApiName = getRawName [systemName;api.Name] true
+        member val orgRealName = null with get, set
+
     /// 자신을 export 하는 관점에서 본 api's.  Interface 정의.   [interfaces] = { "+" = { F.Vp ~ F.Sp } }
     and ApiItem private (name:string, system:DsSystem) =
         (* createFqdnObject : system 이 다른 system 에 포함되더라도, name component 를 더 이상 확장하지 않도록 cut *)
         inherit FqdnObject(name, createFqdnObject([|system.Name|]))
         interface INamedVertex
-
+       
         member _.Name = name
         member _.System = system
         member val TXs = createQualifiedNamedHashSet<Real>()
@@ -264,18 +278,22 @@ module CoreModule =
     and AliasTargetWrapper =
         | DuAliasTargetReal of Real
         | DuAliasTargetCall of Call
-        | DuAliasTargetRealEx of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
+        | DuAliasTargetRealExFlow of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
+        | DuAliasTargetRealExSystem of RealOtherSystem
         member x.RealTarget() =
             match x with | DuAliasTargetReal   r -> Some r |_ -> None
         member x.CallTarget() =
             match x with | DuAliasTargetCall   c -> Some c |_ -> None
-        member x.RealExTarget() =
-            match x with | DuAliasTargetRealEx rx -> Some rx |_ -> None
+        member x.RealExFlowTarget() =
+            match x with | DuAliasTargetRealExFlow rx -> Some rx |_ -> None
+        member x.RealExSystemTarget() =
+            match x with | DuAliasTargetRealExSystem  rx -> Some rx |_ -> None
 
     and SafetyCondition =
         | DuSafetyConditionReal of Real
         | DuSafetyConditionCall of Call
-        | DuSafetyConditionRealEx of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
+        | DuSafetyConditionRealExFlow of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
+        | DuSafetyConditionRealExSystem of RealOtherSystem    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
 
           ///Vertex의 부모의 타입을 구분한다.
     type ParentWrapper =
@@ -309,14 +327,16 @@ module CoreModule =
             match x with
             | DuSafetyConditionReal real -> real
             | DuSafetyConditionCall call -> call
-            | DuSafetyConditionRealEx  realOtherFlow -> realOtherFlow
+            | DuSafetyConditionRealExFlow  realOtherFlow -> realOtherFlow
+            | DuSafetyConditionRealExSystem  realOtherSystem -> realOtherSystem
 
     type AliasTargetWrapper with
         member x.GetTarget() : Vertex =
             match x with
             | DuAliasTargetReal real -> real
             | DuAliasTargetCall call -> call
-            | DuAliasTargetRealEx otherFlowReal -> otherFlowReal
+            | DuAliasTargetRealExFlow otherFlowReal -> otherFlowReal
+            | DuAliasTargetRealExSystem otherSystemReal -> otherSystemReal
 
     type Real with
         static member Create(name: string, flow) =
@@ -324,10 +344,9 @@ module CoreModule =
                 logWarn $"Suspicious segment name [{name}]. Check it."
 
             let real = Real(name, flow)
-            real.TagManager <- fwdCreateTagManager(real)
             flow.Graph.AddVertex(real) |> verifyM $"Duplicated segment name [{name}]"
             real
-
+             
         member x.GetAliasTargetToDs(aliasFlow:Flow) =
                 if x.Flow <> aliasFlow
                 then [|x.Flow.Name; x.Name|]  //other flow
@@ -335,21 +354,33 @@ module CoreModule =
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 
 
-    type RealEx = RealOtherFlow
+    type RealExF = RealOtherFlow
     type RealOtherFlow with
         static member Create(otherFlowReal:Real, parent:ParentWrapper) =
             let ofn, ofrn = otherFlowReal.Flow.Name, otherFlowReal.Name
             let ofr = RealOtherFlow( [| ofn; ofrn |], otherFlowReal, parent)
-            ofr.TagManager <- fwdCreateTagManager(ofr)
             parent.GetGraph().AddVertex(ofr) |> verifyM $"Duplicated other flow real call [{ofn}.{ofrn}]"
             ofr
 
+        member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
+        
+    type RealExS = RealOtherSystem
+    type RealOtherSystem with
+        static member Create(target:Job, parent:ParentWrapper) =
+            let exSysReal = RealOtherSystem(target, parent)
+            parent.GetGraph().AddVertex(exSysReal) |> verifyM $"Duplicated other flow real call [{exSysReal}]"
+            exSysReal
+            
+        member x.GetAliasTargetToDs() =
+            match x.Parent.GetCore() with
+                | :? Flow as f -> [x.Name].ToArray()
+                | :? Real as r -> x.ParentNPureNames
+                | _->failwithlog "Error"
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 
     type Call with
         static member Create(target:Job, parent:ParentWrapper) =
             let call = Call(target, parent)
-            call.TagManager <- fwdCreateTagManager(call)
             parent.GetGraph().AddVertex(call) |> verifyM $"Duplicated call name [{target.Name}]"
             call
         
@@ -372,7 +403,8 @@ module CoreModule =
                     match target with
                     | DuAliasTargetReal r -> r.GetAliasTargetToDs(flow)
                     | DuAliasTargetCall c -> c.GetAliasTargetToDs()
-                    | DuAliasTargetRealEx o -> o.Real.GetAliasTargetToDs(flow)
+                    | DuAliasTargetRealExFlow rf -> rf.Real.GetAliasTargetToDs(flow)
+                    | DuAliasTargetRealExSystem rs -> rs.GetAliasTargetToDs() // 고쳐야 함
                 let ads = flow.AliasDefs
                 match ads.TryFind(aliasKey) with
                 | Some ad -> ad.Mnemonincs.AddIfNotContains(name) |> ignore
@@ -382,10 +414,9 @@ module CoreModule =
             let alias = Alias(name, target, parent)
             if parent.GetCore() :? Real 
             then 
-                (target.RealTarget().IsNone && target.RealExTarget().IsNone) 
+                (target.RealTarget().IsNone && target.RealExFlowTarget().IsNone) 
                 |> verifyM $"Vertex {name} children type error"
 
-            alias.TagManager <- fwdCreateTagManager(alias)
             parent.GetGraph().AddVertex(alias) |> verifyM $"Duplicated alias name [{name}]"
             alias
 

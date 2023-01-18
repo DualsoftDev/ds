@@ -54,7 +54,7 @@ open Engine.Common.FS
             timer.TT.Value === true
 
             // 설정된 timer 시간 경과를 기다림
-            System.Threading.Thread.Sleep(210)
+            System.Threading.Thread.Sleep(220)
             timer.TT.Value === false
             timer.DN.Value === true
             timer.EN.Value === true
@@ -96,7 +96,7 @@ open Engine.Common.FS
             timer.TT.Value === true
 
             // 설정된 timer 시간 경과를 기다림
-            System.Threading.Thread.Sleep(210)
+            System.Threading.Thread.Sleep(220)
             timer.TT.Value === false
             timer.DN.Value === true
             timer.EN.Value === true
@@ -170,7 +170,7 @@ open Engine.Common.FS
             timer.TT.Value === true
             timer.DN.Value === true
 
-            System.Threading.Thread.Sleep(210)
+            System.Threading.Thread.Sleep(220)
             timer.EN.Value === false
             timer.TT.Value === false
             timer.DN.Value === false
@@ -207,7 +207,7 @@ open Engine.Common.FS
             evaluateRungInputs timer
             timer.EN.Value === false
             timer.TT.Value === false
-            System.Threading.Thread.Sleep(110)
+            System.Threading.Thread.Sleep(120)
             timer.ACC.Value < 100us === true
             timer.DN.Value === false
 
@@ -217,7 +217,7 @@ open Engine.Common.FS
             timer.EN.Value === true
             timer.TT.Value === true
             timer.DN.Value === false
-            System.Threading.Thread.Sleep(110)
+            System.Threading.Thread.Sleep(120)
             timer.DN.Value === true
             timer.ACC.Value === 100us
 

@@ -90,6 +90,17 @@ module ImportIOTable =
                 | Some lamp -> lamp.OutAddress <- output
                                functionUpdate (func, lamp.Funcs, tableIO, false)
                 | None -> Office.ErrorXLS(ErrorCase.Name, ErrID._1002, $"{name}", tableIO.TableName, path)
+            
+            let updateCondition (row:Data.DataRow, cType:ConditionType, tableIO:Data.DataTable) = 
+                let name  = $"{row.[(int)IOColumn.Name]}"
+                let output= $"{row.[(int)IOColumn.Output]}"
+                let func  = $"{row.[(int)IOColumn.Func]}"
+
+                let conds = sys.SystemConditions.Where(fun w->w.ConditionType = cType)
+                match conds.TryFind(fun f -> f.Name = name) with
+                | Some cond -> cond.InAddress <- output
+                               functionUpdate (func, cond.Funcs, tableIO, false)
+                | None -> Office.ErrorXLS(ErrorCase.Name, ErrID._1002, $"{name}", tableIO.TableName, path)
 
             systems
             |> Seq.iter(fun sys -> 
@@ -143,6 +154,8 @@ module ImportIOTable =
                         | XlsEmergencyModeLamp -> updateLamp (row, LampType.DuEmergencyModeLamp  , tableIO)
                         | XlsTestModeLamp      -> updateLamp (row, LampType.DuTestModeLamp       , tableIO)
                         | XlsReadyModeLamp     -> updateLamp (row, LampType.DuReadyModeLamp      , tableIO)
+                        | XlsConditionReady    -> updateCondition (row, ConditionType.ReadyState , tableIO)
+                        | XlsConditionDrive    -> updateCondition (row, ConditionType.DriveState , tableIO)
             )
         with ex ->  failwithf  $"{ex.Message}"
         DoWork(0);

@@ -56,6 +56,17 @@ module ImportU =
                 |None ->
                     nodeEx.Shape.ErrorName(ErrID._26, nodeEx.PageNum)
 
+    let private getOtherSystemReal(flows:Flow seq, nodeEx:pptNode) =
+                // 고쳐야 함  //test ahn
+                let flowName, nodeName = nodeEx.Name.Split('.')[0], nodeEx.Name.Split('.')[1]
+                match flows.TryFind(fun f -> f.Name = flowName) with
+                |Some flow ->
+                    match flow.Graph.Vertices.TryFind(fun f->f.Name = nodeName) with
+                    |Some real -> real
+                    |None ->  nodeEx.Shape.ErrorName(ErrID._27, nodeEx.PageNum)
+                |None ->
+                    nodeEx.Shape.ErrorName(ErrID._26, nodeEx.PageNum)
+
     [<Extension>]
     type ImportUtil =
 
@@ -192,6 +203,22 @@ module ImportU =
                     )
             )
 
+        //시스템 조건 만들기 준비/운전
+        [<Extension>]
+        static member MakeConditions (doc:pptDoc, mySys:DsSystem) =
+            let dicFlow = doc.DicFlow
+            
+            doc.Nodes
+            |> Seq.filter(fun node -> node.CondiDefs.any())
+            |> Seq.iter(fun node ->
+                    let flow = dicFlow.[node.PageNum]
+                    node.CondiDefs.ForEach(fun l -> 
+                        mySys.AddCondtion(l.Value, l.Key, "", flow)
+                    )
+            )
+
+
+            
 
         //real call alias  만들기
         [<Extension>]
@@ -212,13 +239,16 @@ module ImportU =
                     |> Seq.filter(fun node -> node.Alias.IsNone)
                     |> Seq.filter(fun node -> node.NodeType.IsReal)
                     |> Seq.filter(fun node -> dicChildParent.ContainsKey(node)|>not)
-                    |> Seq.sortBy(fun node -> node.NodeType = REALEx)  //real 부터 생성 후 realEx 처리
+                    |> Seq.sortBy(fun node -> node.NodeType = REALExF || node.NodeType = REALExS)  //real 부터 생성 후 realEx 처리
                     |> Seq.iter(fun node   ->
-                            if node.NodeType = REALEx
-                            then
+                            match node.NodeType with
+                            | REALExF ->
                                 let real = getOtherFlowReal(dicFlow.Values, node) :?> Real
-                                dicVertex.Add(node.Key, RealEx.Create(real, DuParentFlow dicFlow.[node.PageNum]))
-                            else
+                                dicVertex.Add(node.Key, RealExF.Create(real, DuParentFlow dicFlow.[node.PageNum]))
+                            | REALExS ->
+                                let real = getOtherSystemReal(dicFlow.Values, node) :?> Real
+                                dicVertex.Add(node.Key, RealExF.Create(real, DuParentFlow dicFlow.[node.PageNum]))
+                            | _ ->
                                 let real = Real.Create(node.Name, dicFlow.[node.PageNum])
                                 dicVertex.Add(node.Key, real)
                         )
@@ -254,7 +284,8 @@ module ImportU =
                                 else
                                     let flow = dicFlow.[node.PageNum]
                                     match segOrg with
-                                    | :? RealEx as ex -> Alias.Create($"{ex.Name}_{node.AliasNumber}", DuAliasTargetRealEx(ex), DuParentFlow(flow))
+                                    | :? RealExF as ex -> Alias.Create($"{ex.Name}_{node.AliasNumber}", DuAliasTargetRealExFlow(ex), DuParentFlow(flow))
+                                    | :? RealExS as ex -> Alias.Create($"{ex.Name}_{node.AliasNumber}", DuAliasTargetRealExSystem(ex), DuParentFlow(flow))
                                     | :? Real as rt -> Alias.Create($"{rt.Name}_{node.AliasNumber}", DuAliasTargetReal(rt), DuParentFlow(flow))
                                     | :? Call as ct -> Alias.Create($"{ct.Name}_{node.AliasNumber}", DuAliasTargetCall(ct), DuParentFlow(flow))
                                     |_ -> failwithf "Error type"
@@ -358,7 +389,8 @@ module ImportU =
                             | :? ISafetyConditoinHolder as holder ->
                                     match safeCondV with
                                     | :? Real as r -> holder.SafetyConditions.Add( DuSafetyConditionReal (r)) |>ignore
-                                    | :? RealEx as ex -> holder.SafetyConditions.Add(DuSafetyConditionRealEx (ex))  |>ignore
+                                    | :? RealExF as ex -> holder.SafetyConditions.Add(DuSafetyConditionRealExFlow (ex))  |>ignore
+                                    | :? RealExS as ex -> holder.SafetyConditions.Add(DuSafetyConditionRealExSystem (ex))  |>ignore
                                     | :? Call as c -> holder.SafetyConditions.Add(DuSafetyConditionCall (c)) |>ignore
                                     | _ -> failwithlog "Error"
                             | _ -> failwithlog "Error"
@@ -405,6 +437,8 @@ module ImportU =
             doc.MakeButtons(sys)
             //run / stop mode  램프 리스트 만들기
             doc.MakeLamps(sys)
+            //시스템 조건 만들기 준비/운전
+            doc.MakeConditions(sys)
             //segment 리스트 만들기
             doc.MakeSegment(sys)
             //Edge  만들기

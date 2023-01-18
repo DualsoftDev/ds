@@ -16,9 +16,9 @@ module Interface =
     type IText  =
          abstract ToText:unit -> string
 
-    type IRenameable =
-        inherit INamed
-        abstract Name:string with set
+    //type IRenameable =
+    //    inherit INamed
+    //    abstract Name:string with set
 
     type IQualifiedNamed =
         inherit INamed
@@ -47,4 +47,4 @@ module Interface =
 
     type ITagManager =
         abstract Target: IQualifiedNamed
-    let mutable fwdCreateTagManager = let dummy (vertex:IQualifiedNamed) : ITagManager = failwithlog "Should be reimplemented." in dummy
+        abstract Storages: Dictionary<string,IStorage> 

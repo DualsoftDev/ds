@@ -41,19 +41,26 @@ namespace Dual.Model.Import
 
                     if (isActive)
                     {
-                        var rungs = Cpu.LoadStatements(sys);
-                        _DicCpu.Add(sys, new DsCPU(rungs));
+                        var storages = new Dictionary<string, Interface.IStorage>();
+                        
+                        //var devices = sys.GetRecursiveSystems();
+                        //foreach (var device in devices)
+                        //{
+                        //    var devRungs = Cpu.LoadStatements(device, storages);
+                        //    if (!_DicCpu.ContainsKey(device))  //external system 은 공유
+                        //        _DicCpu.Add(device, new DsCPU(devRungs));
+                        //}
+
+                        var rungs = Cpu.LoadStatements(sys, storages);
+                        rungs.ForEach(s =>
+                        {
+                            _DicCpu.Add(s.Key, new DsCPU(s.Value));
+                        });
+                      
 
                         var systemView = new SystemView() { Display = sys.Name, System = sys, ViewNodes = sysView };
                         comboBox_System.Items.Add(systemView);
 
-                        var devices = sys.GetRecursiveSystems();
-                        foreach (var device in devices)
-                        {
-                            var devRungs = Cpu.LoadStatements(device);
-                            if (!_DicCpu.ContainsKey(device))  //external system 은 공유
-                                _DicCpu.Add(device, new DsCPU(devRungs));
-                        }
                     }
                 }
 

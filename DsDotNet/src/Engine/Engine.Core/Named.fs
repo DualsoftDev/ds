@@ -140,8 +140,6 @@ module TextUtil =
         member val TagManager = getNull<ITagManager>() with get, set
 
 
-
-
 [<Extension>]
 type NameUtil =
     /// DS 문법에서 사용하는 identifier (Segment, flow, call 등의 이름)가 적법한지 검사.

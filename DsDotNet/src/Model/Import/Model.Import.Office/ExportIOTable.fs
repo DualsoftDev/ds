@@ -66,6 +66,11 @@ module ExportIOTable =
             for lamp in  lamps do
                 let func = lamp.Funcs |> funcToText
                 dt.Rows.Add(xlsCase.ToText(),  lamp.Name  , "bool",  "'-",  lamp.OutAddress,  "'-",  func) |> ignore
+
+        let toCondiText(conds:ConditionDef seq, xlsCase:ExcelCase) = 
+            for cond in  conds do
+                let func = cond.Funcs |> funcToText
+                dt.Rows.Add(xlsCase.ToText(),  cond.Name  , "bool",  cond.InAddress, "'-",   "'-",  func) |> ignore
         
         emptyLine() 
         emptyLine() 
@@ -90,6 +95,9 @@ module ExportIOTable =
 
         emptyLine() 
         emptyLine() 
+
+        toCondiText (sys.ReadyConditions, ExcelCase.XlsConditionReady)
+        toCondiText (sys.DriveConditions, ExcelCase.XlsConditionDrive)
 
         dt.Rows.Add(TextXlsVariable,  ""  ,  ""  , "'-", "'-","'-","'-") |> ignore
         emptyLine() 

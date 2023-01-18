@@ -26,7 +26,7 @@ module EdgeModule =
     let private validateChildrenVertexType (mei:ModelingEdgeInfo<Vertex>) (parent:FqdnObject) =
         let invalidEdge =  (mei.Sources @ mei.Targets).OfType<Alias>()
                              .Where(fun a->a.TargetWrapper.RealTarget().IsSome 
-                                        || a.TargetWrapper.RealExTarget().IsSome)
+                                        || a.TargetWrapper.RealExFlowTarget().IsSome)
 
         if invalidEdge.any() then failwith $"Vertex {invalidEdge.First().Name} children type error"
 
@@ -72,7 +72,7 @@ module EdgeModule =
 
     let ofAliasForRealExVertex (xs:Vertex seq) =
         xs.OfType<Alias>()
-        |> Seq.filter(fun a -> a.TargetWrapper.RealExTarget().IsSome)
+        |> Seq.filter(fun a -> a.TargetWrapper.RealExFlowTarget().IsSome)
 
 
     /// 상호 reset 정보(Mutual Reset Info) 확장

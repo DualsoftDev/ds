@@ -102,13 +102,17 @@ module ModelTests1 =
         member __.``Model component [StrongCausal] test`` () =
             compare ParserTest.StrongCausal answerStrongCausal
 
-        [<Test>] //파서 IO 주소 규격 추가 필요
+        [<Test>] 
         member __.``Model component [Buttons] test`` () =
             compare ParserTest.Buttons answerButtons
 
-        [<Test>] //파서 추가 필요
+        [<Test>] 
         member __.``Model component [Lamps] test`` () =
             compare ParserTest.Lamps answerLamps
+
+        [<Test>] 
+        member __.``XXXXX Model component [Conditions] test`` () =
+            compare ParserTest.Conditions answerConditions
 
         [<Test>]
         member __.``Model component [Dup] test`` () =

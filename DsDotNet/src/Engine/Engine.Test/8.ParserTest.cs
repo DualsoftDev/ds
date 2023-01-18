@@ -156,6 +156,40 @@ namespace Engine
     }
 }
 ";
+
+        public static string Conditions = @"
+[sys] My = {
+    [flow] F1 = {
+        A > B;		// A(Real)> B(Real);
+    }
+    [flow] F2 = {
+        A > B;		// A(Real)> B(Real);
+    }
+    [flow] F3 = {
+        A > B;		// A(Real)> B(Real);
+    }
+    [flow] F4 = {
+        A > B;		// A(Real)> B(Real);
+    }
+    [flow] F5 = {
+        A > B;		// A(Real)> B(Real);
+    }
+    [conditions] = 
+    {
+        [d] = {
+            AirOn1(%I1) = { F1;F2};
+            AirOn2(%I2) = { F1 };
+        }
+        [r] = {
+            LeakErr(%I3) = { F2 }
+            LeakErr.func = {
+                $TON 2000;
+                $CTU 1 5;
+            }
+        }
+    }
+}
+";
         public static string Ppt = @"
 [sys] MY = {
     [flow] F1 = {

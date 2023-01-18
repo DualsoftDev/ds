@@ -234,15 +234,16 @@ module PPTUtil =
                     let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
                     geometry.Preset.Value = Drawing.ShapeTypeValues.BlockArc   
         
-        //Active system 정의 블록
+     
+        
+        //system Condition  정의 블록
         [<Extension>] 
-        static member CheckCube(shape:Shape) = 
+        static member CheckCondition(shape:Shape) = 
                 if(Office.CheckShape(shape) |> not) then false
                  else
                     let geometry = shape.Descendants<ShapeProperties>().First().Descendants<Drawing.PresetGeometry>().FirstOrDefault()
-                    geometry.Preset.Value = Drawing.ShapeTypeValues.Cube
-        
-                
+                    geometry.Preset.Value = Drawing.ShapeTypeValues.Frame
+
         [<Extension>] 
         static member IsDashShape(shape:Shape) = 
             if(shape.Descendants<ShapeProperties>().First().Descendants<Drawing.Outline>().Any()|>not) then false
@@ -323,7 +324,7 @@ module PPTUtil =
                     || shape.CheckFoldedCornerRound()    //copy_value
                     || shape.CheckFoldedCornerPlate()    //copy_ref
                     || shape.CheckHomePlate()      //interface
-                    || shape.CheckCube())      //active system
+                    || shape.CheckCondition())       // system condition  
                     then true
                     else false
                     

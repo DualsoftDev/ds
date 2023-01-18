@@ -5,7 +5,6 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module CoreExtensionsModule =
-    // <ahn> Engine.Cpu 에서만 사용하는 확장 모듈이므로 Engine.Core 로 옮길 필요는 없습니다.
     type Statement with
         member x.GetTargetStorages() =
             match x with

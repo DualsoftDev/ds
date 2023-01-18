@@ -39,3 +39,6 @@ module Fixtures =
         Runtime.Target <- runtimeTarget
         disposable { Runtime.Target <- runtimeTargetBackup }
 
+    [<AbstractClass>]
+    type TestBaseClass() =
+        do SetUpTest()

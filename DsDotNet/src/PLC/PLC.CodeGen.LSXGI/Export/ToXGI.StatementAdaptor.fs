@@ -258,8 +258,6 @@ module XgiExpressionConvertorModule =
                             yield! binaryToNary { augmentParams with Exp = arg } operatorsToChange op
                         | _ -> failwithlog "ERROR"
                 ]
-                if args.Length = 8 then
-                    noop()
                 args
             else
                 [withAugmentedPLCFunction exp]

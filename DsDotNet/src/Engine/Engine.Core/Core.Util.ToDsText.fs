@@ -277,6 +277,38 @@ module internal ToDsTextModule =
                 yield lampsToDs("r", system.ReadyModeLamps)
                 yield $"{tab}{rb}"
 
+            let cnds = system.Conditions
+            if cnds.Any() then
+                let getTargetCnds (target:ConditionType) = 
+                    cnds |> Seq.filter(fun c -> c.ConditionType = target)
+                let driveCnds = getTargetCnds DriveState
+                let readyCnds = getTargetCnds ReadyState
+                yield $"{tab}[conditions] = {lb}"
+                let conditionsToDs(category:string, conditions:ConditionDef seq) = 
+                    [
+                        yield $"{tab2}[{category}] = {lb}"
+                        for cnd in conditions do
+                            let addr = 
+                                if cnd.InAddress <> null then
+                                    $"({cnd.InAddress})"
+                                else
+                                    ""
+                            let flows = (cnd.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine()) |> String.concat ";")
+                            let flowTexts =
+                                if flows.Count() > 0 then
+                                    flows + ";"
+                                else
+                                    ""
+                            yield $"{tab3}{cnd.Name}{addr} = {lb} {flowTexts} {rb}"
+                            if cnd.Funcs.any() then
+                                for funcString in printFuncions cnd.Name cnd.Funcs do
+                                    yield funcString
+                        yield $"{tab2}{rb}"
+                    ] |> combineLines
+                yield conditionsToDs("d", driveCnds)
+                yield conditionsToDs("r", readyCnds)
+                yield $"{tab}{rb}"
+
             (* prop
                     safety
                     layouts *)

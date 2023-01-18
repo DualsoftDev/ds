@@ -117,6 +117,45 @@ module EtcListenerModule =
                     |> List.map(system.Lamps.Add)
                     |> ignore
 
+        member x.ProcessConditionBlock(ctx:ConditionBlockContext) =
+            for ctxChild in ctx.children do
+                if ctxChild :? ParserRuleContext then
+                    let first = ctxChild.TryFindFirstChild<ParserRuleContext>().Value
+                    let system = x.TheSystem
+                    let targetCndType =
+                        let fstType = first.GetType()
+                        match first with
+                        | :? DriveBlockContext     -> DriveState
+                        | :? ReadyBlockContext     -> ReadyState
+                        | _ -> failwith $"condition type error {fstType}"
+
+                    let conditionDefs = first.Descendants<LampDefContext>().ToArray()
+                    let conditionFuncs = commonFunctionExtractor first
+                    let flowConditionInfo = [
+                        for cd in conditionDefs do
+                        option {
+                            let! lampNameCtx = cd.TryFindFirstChild<LampNameContext>()
+                            let  addrCtx = cd.TryFindFirstChild<AddressItemContext>()
+                            let lmpName = lampNameCtx.GetText()
+                            let address = 
+                                match addrCtx with
+                                | Some addr -> addr.GetText()
+                                | None -> null
+                            let funcSet = commonFunctionSetter lmpName conditionFuncs
+                            let flows =
+                                cd.Descendants<FlowNameContext>()
+                                    .Select(fun flowCtx -> flowCtx.GetText())
+                                    .Tap(fun flowName -> verifyM $"Flow [{flowName}] not exists!" (system.Flows.Any(fun f -> f.Name = flowName)))
+                                    .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName))
+                                    .ToHashSet()
+                            return ConditionDef(lmpName, targetCndType, address, flows, funcSet)
+                        }
+                    ]
+                    flowConditionInfo
+                    |> List.choose id
+                    |> List.map(system.Conditions.Add)
+                    |> ignore
+
         member x.ProcessSafetyBlock(ctx:SafetyBlockContext) =
             let safetyDefs = ctx.Descendants<SafetyDefContext>()
             (*

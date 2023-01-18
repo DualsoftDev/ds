@@ -32,6 +32,7 @@ ALIASES: 'aliases';
 JOBS: 'jobs';
 BUTTONS: 'buttons';
 LAMPS: 'lamps';
+CONDITIONS: 'conditions';
 E_IN: 'e_in';
 E: 'e';
 A_IN: 'a_in';
@@ -190,7 +191,7 @@ system: '[' sysHeader ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
     sysHeader: SYS ipSpec?;
     sysBlock
         : LBRACE (  flowBlock | jobBlock | loadDeviceBlock | loadExternalSystemBlock
-                    | interfaceBlock | buttonBlock | lampBlock | propsBlock
+                    | interfaceBlock | buttonBlock | lampBlock | conditionBlock | propsBlock
                     | codeBlock | variableBlock )*
           RBRACE       // identifier1Listing|parenting|causal|call
           ;
@@ -318,7 +319,7 @@ categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|stopBlock|emergencyBl
     
     buttonName: identifier12;
 
-    lampDef: (lampName|lampName addrDef) EQ LBRACE (() | flowName) RBRACE;
+    lampDef: (lampName|lampName addrDef) EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
     addrDef: LPARENTHESIS addressItem? RPARENTHESIS;
     lampName: identifier12;
     
@@ -326,6 +327,7 @@ categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|stopBlock|emergencyBl
 
 buttonBlock: '[' 'buttons' ']' '=' LBRACE (categoryBlocks)* RBRACE;
 lampBlock: '[' 'lamps' ']' '=' LBRACE (categoryBlocks)* RBRACE;
+conditionBlock: '[' 'conditions' ']' '=' LBRACE (categoryBlocks)* RBRACE;
 
 // B.F1 > Set1F <| T.A21;
 causal: causalPhrase SEIMCOLON;
@@ -358,7 +360,7 @@ causal: causalPhrase SEIMCOLON;
         | FILE | DEVICE | COPY_SYSTEM
         | LAYOUTS | ADDRESSES | PROP | SAFETY | FLOW 
         | INTERFACES | ALIASES | VARIABLES
-        | JOBS | BUTTONS | LAMPS 
+        | JOBS | BUTTONS | LAMPS | CONDITIONS
         | E_IN | E | A_IN | A | D_IN | D 
         | C_IN | C | M_IN | M | S_IN | S 
         | T_IN | T | H_IN | H | R_IN | R 

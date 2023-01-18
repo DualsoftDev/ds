@@ -193,22 +193,20 @@ module ModelComponentAnswers =
     [flow] F5 = {
         A > B;		// A(Real)> B(Real);
     }
-    [conditions] = 
-    {
+    [conditions] = {
         [d] = {
-            AirOn1(%I1) = { F1;F2};
-            AirOn2(%I2) = { F1 };
+            AirOn1(%I1) = { F1;F2; }
+            AirOn2(%I2) = { F1; }
         }
         [r] = {
-            LeakErr(%I3) = { F2 }
+            LeakErr(%I3) = { F2; }
             LeakErr.func = {
-                $TON 2000;
-                $CTU 1 5;
+                $ton 2000;
+                $ctu 1 5;
             }
         }
     }
 }
-";
 """
     let answerLamps= """
 [sys] My = {

@@ -12,7 +12,7 @@ open System.Linq
 open Engine.CodeGenCPU.CpuLoader
 
 type TestAllCase() =
-    do Fixtures.SetUpTest()
+    inherit EngineTestBaseClass()
     
     let t = CpuTestSample()
     

@@ -11,7 +11,7 @@ open Engine.Core.ExpressionPrologModule.ExpressionPrologSubModule
 module ComparisionTestModule =
 
     type ComparisonTest() =
-        do Fixtures.SetUpTest()
+        inherit ExpressionTestBaseClass()
 
         [<Test>]
         member __.``1 ">" test`` () =
@@ -128,7 +128,7 @@ module ComparisionTestModule =
 
 
     type ShiftTest() =
-        do Fixtures.SetUpTest()
+        inherit ExpressionTestBaseClass()
 
         [<Test>]
         member __.``1 ">>>" test`` () =

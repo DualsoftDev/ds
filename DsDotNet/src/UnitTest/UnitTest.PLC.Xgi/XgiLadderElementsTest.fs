@@ -9,7 +9,7 @@ open Engine.Core
 open Engine.Parser.FS
 
 type XgiLadderElementTest() =
-    inherit XgiTestClass()
+    inherit XgiTestBaseClass()
 
     let span width = width*3
 

@@ -9,7 +9,7 @@ open Engine.Parser.FS
 open Engine.Common.FS
 
 type StatementTest() =
-    do Fixtures.SetUpTest()
+    inherit ExpressionTestBaseClass()
 
     let prepareStorage() =
         let storages = Storages()

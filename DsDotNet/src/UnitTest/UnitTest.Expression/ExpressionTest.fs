@@ -37,7 +37,7 @@ module Exp =
         | _ -> failwithlog "not a counter statement"
 
     type ExpressionTest() =
-        do Fixtures.SetUpTest()
+        inherit ExpressionTestBaseClass()
 
 
         [<Test>]
@@ -488,7 +488,7 @@ module Exp =
 
 
     type ExpressionObjectTest() =
-        do Fixtures.SetUpTest()
+        inherit ExpressionTestBaseClass()
 
 
         [<Test>]

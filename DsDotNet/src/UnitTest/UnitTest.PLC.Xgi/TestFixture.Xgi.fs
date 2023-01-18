@@ -4,50 +4,23 @@ open System.IO
 open System.Globalization
 
 open NUnit.Framework
-open log4net
-open log4net.Config
 
 open Engine.Common.FS
 open Engine.Core
-open PLC.CodeGen.Common.QGraph
 open PLC.CodeGen.LSXGI
-open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 
 // FsUnit/XUnit 사용법:
 // https://github.com/fsprojects/FsUnit/tree/master/tests/FsUnit.Xunit.Test
 // https://marnee.silvrback.com/fsharp-and-xunit-classfixture
 [<AutoOpen>]
-module Fixtures =
-    let configureLog4Net (loggerName:string) log4netConfigFile =
-        XmlConfigurator.Configure(new FileInfo(log4netConfigFile)) |> ignore
-        let logger = LogManager.GetLogger(loggerName)
-        Engine.Common.Global.Logger <- logger
-        gLogger <- logger
-        logger
-
-    let SetUpTest() =
-
-            let cwd = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\"))
-            sprintf "테스트 초기화 수행" |> ignore
-            let configFile = $@"{cwd}App.config"
-            let logger = configureLog4Net "EngineLogger" configFile
-
-            // 로깅 결과 파일 : UnitTest.Engine/bin/logEngine*.txt
-            logInfo "Log4net logging enabled!!!"
-
-            if not (File.Exists configFile) then
-                failwithlog "config 파일 위치를 강제로 수정해 주세요."
-            ()
-
-            Engine.CodeGenCPU.ModuleInitializer.Initialize()
-
-
-
-[<AutoOpen>]
-module PLCGenerationTestModule =
+module XgiFixtures =
     [<AbstractClass>]
-    type PLCGenerationTestClass() =
-        do Fixtures.SetUpTest()
+    type XgiTestBaseClass() =
+        inherit TestBaseClass("EngineLogger")
+        do
+            Engine.CodeGenCPU.ModuleInitializer.Initialize()
+            autoVariableCounter <- 0
+
         let mutable runtimeTarget = Runtime.Target
         let xgiGenerationOptionsBackup = xgiGenerationOptions
         [<SetUp>]
@@ -62,10 +35,14 @@ module PLCGenerationTestModule =
 
         abstract GetCurrentRuntimeTarget: unit -> RuntimeTargetType
 
+        override x.GetCurrentRuntimeTarget() = XGI
+        member val Locker = obj
+
     let setRuntimeTarget(runtimeTarget:RuntimeTargetType) =
         let runtimeTargetBackup = Runtime.Target
         Runtime.Target <- runtimeTarget
         disposable { Runtime.Target <- runtimeTargetBackup }
+
 
 [<AutoOpen>]
 module XgiGenerationTestModule =
@@ -143,12 +120,4 @@ module XgiGenerationTestModule =
         int nn8 = 8;
         int nn9 = 9;
 """
-
-type XgiTestClass() =
-    inherit PLCGenerationTestClass()
-    do
-        autoVariableCounter <- 0
-
-    override x.GetCurrentRuntimeTarget() = XGI
-    member val Locker = obj
 

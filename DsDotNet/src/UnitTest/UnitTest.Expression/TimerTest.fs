@@ -12,7 +12,7 @@ open Engine.Common.FS
 //module TimerTestModule =
 
     type TimerTest() =
-        do Fixtures.SetUpTest()
+        inherit ExpressionTestBaseClass()
 
         let evaluateRungInputs (timer:Timer) =
             for s in timer.InputEvaluateStatements do

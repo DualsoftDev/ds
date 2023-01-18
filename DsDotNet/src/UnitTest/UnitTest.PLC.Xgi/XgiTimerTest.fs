@@ -12,7 +12,7 @@ open PLC.CodeGen.LSXGI
 
 
 type XgiTimerTest() =
-    inherit XgiTestClass()
+    inherit XgiTestBaseClass()
 
 
     [<Test>]

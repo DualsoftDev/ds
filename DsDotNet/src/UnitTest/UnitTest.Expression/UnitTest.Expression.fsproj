@@ -27,7 +27,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Include="TestFixture.fs" />
+		<Compile Include="TestFixture.Expression.fs" />
 		<Compile Include="ExpressionTest.fs" />
 		<Compile Include="ComparisonTest.fs" />
 		<Compile Include="CustomFunctionTest.fs" />

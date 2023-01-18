@@ -12,7 +12,7 @@ open Engine.Common.FS
 module CodeTestModule =
 
     type CodeTest() =
-        do Fixtures.SetUpTest()
+        inherit ExpressionTestBaseClass()
 
         [<Test>]
         member __.``1 var declaration test`` () =

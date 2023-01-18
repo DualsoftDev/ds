@@ -20,7 +20,7 @@ module XgiEngineCoreExtensionModule =
 
 [<Collection("SerialXgiExpEqualityTest")>]
 type XgiExpEqualityTest() =
-    inherit XgiTestClass()
+    inherit XgiTestBaseClass()
 
     [<Test>]
     member x.``Comparision, Arithmatic, OR test`` () =

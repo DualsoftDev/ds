@@ -7,7 +7,7 @@ open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine.ElementType
 open Engine.Core
 
 type XgiDrawingTest() =
-    inherit XgiTestClass()
+    inherit XgiTestBaseClass()
 
     let span width = width*3
 

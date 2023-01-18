@@ -32,3 +32,8 @@ module Fixtures =
             ()
 
             Engine.CodeGenCPU.ModuleInitializer.Initialize()
+
+    [<AbstractClass>]
+    type TestBaseClass() =
+        do
+            SetUpTest()

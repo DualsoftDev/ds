@@ -14,7 +14,7 @@ open PLC.CodeGen.LSXGI
 
 [<Collection("XgiCounterTest")>]
 type XgiCounterTest() =
-    inherit XgiTestClass()
+    inherit XgiTestBaseClass()
 
     [<Test>]
     member __.``Counter CTU simple test`` () =
@@ -185,7 +185,7 @@ type XgiCounterTest() =
 
 [<Collection("SerialXgiFunctionTest")>]
 type XgiFunctionTest() =
-    inherit XgiTestClass()
+    inherit XgiTestBaseClass()
 
     [<Test>]
     member __.``ADD simple test`` () =

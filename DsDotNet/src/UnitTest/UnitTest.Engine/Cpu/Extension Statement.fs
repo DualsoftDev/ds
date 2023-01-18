@@ -10,7 +10,7 @@ open Engine.CodeGenCPU
 open Engine.Parser.FS
 
 type Spec14_ExtensionStatement() =
-    do Fixtures.SetUpTest()
+    inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
     [<Test>] member __.``E1`` () = Eq 1 1

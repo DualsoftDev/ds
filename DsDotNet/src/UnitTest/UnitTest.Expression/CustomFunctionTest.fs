@@ -9,7 +9,7 @@ open Engine.Core
 //module CustomFunctionTestModule =
 
     type ExpressionTest() =
-        do Fixtures.SetUpTest()
+        inherit ExpressionTestBaseClass()
 
         [<Test>]
         member __.``1 Trigonometry test`` () =

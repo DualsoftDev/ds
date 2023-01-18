@@ -8,8 +8,7 @@ open System.Collections.Generic
 [<AutoOpen>]
 module OriginTestModule =
     type OriginTester() =
-        do
-            Fixtures.SetUpTest()
+        inherit EngineTestBaseClass()
 
         let libdir = @$"{__SOURCE_DIRECTORY__}\..\Libraries"
         let configFile = @"test-origin-config.json"

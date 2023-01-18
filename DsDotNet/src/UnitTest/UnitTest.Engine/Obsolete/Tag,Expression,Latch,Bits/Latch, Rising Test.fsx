@@ -10,7 +10,7 @@ open NUnit.Framework
 [<AutoOpen>]
 module LatchTest =
     type LatchTests1() =
-        do Fixtures.SetUpTest()
+        inherit EngineTestBaseClass()
         let init() =
             Global.BitChangedSubject
                 .Subscribe(fun bc ->

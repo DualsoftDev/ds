@@ -5,15 +5,15 @@ open Engine.Common.FS
 
 
 module ModuleInitializer =
-    let private createVariableWithTypeAndValueOnXgi (typ:System.Type) (name:string) (boxedValue:BoxedObjectHolder) : IVariable =
+    let private createXgiVariableWithTypeAndValue (typ:System.Type) (name:string) (boxedValue:BoxedObjectHolder) : IVariable =
         verify (Runtime.Target = XGI)
         let v = boxedValue.Object
         createXgiVariable typ name (unbox v) "no comment"
 
-    let private createVariableWithTypeOnXgi (typ:System.Type) (name:string) : IVariable =
+    let private createXgiVariableWithType (typ:System.Type) (name:string) : IVariable =
         verify (Runtime.Target = XGI)
         let v = typeDefaultValue typ
-        createVariableWithTypeAndValueOnXgi typ name (unbox v)
+        createXgiVariableWithTypeAndValue typ name (unbox v)
 
     let Initialize() =
         printfn "Module is being initialized..."
@@ -23,11 +23,11 @@ module ModuleInitializer =
         Runtime.TargetChangedSubject.Subscribe(fun newRuntimeTarget ->
             match newRuntimeTarget with
             | XGI ->
-                fwdCreateVariableWithType <- createVariableWithTypeOnXgi
-                fwdCreateVariableWithTypeAndValue <- createVariableWithTypeAndValueOnXgi
+                fwdCreateVariableWithType <- createXgiVariableWithType
+                fwdCreateVariableWithTypeAndValue <- createXgiVariableWithTypeAndValue
             | WINDOWS ->
-                fwdCreateVariableWithType <- createVariableWithTypeOnWindows
-                fwdCreateVariableWithTypeAndValue <- createVariableWithTypeAndValueOnWindows
+                fwdCreateVariableWithType <- createWindowsVariableWithType
+                fwdCreateVariableWithTypeAndValue <- createWindowsVariableWithTypeAndValue
             | _ ->
                 ()
         ) |> ignore

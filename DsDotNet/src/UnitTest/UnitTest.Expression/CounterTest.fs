@@ -14,9 +14,10 @@ open PLC.CodeGen.LSXGI
 //module CounterTestModule =
 
     type CounterTest() =
+        inherit ExpressionTestBaseClass()
         do
             let ``강제 reference 추가용`` = XGITag.createSymbolInfo
-            Fixtures.SetUpTest()
+            ()
 
 
         let evaluateRungInputs (counter:Counter) =

@@ -27,7 +27,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Include="TestFixture.fs" />
+		<Compile Include="TestFixture.Xgi.fs" />
 		<Compile Include="XgiLadderElementsTest.fs" />
 		<Compile Include="XgiTestCommon.fs" />
 		<Compile Include="XgiDrawing.fs" />

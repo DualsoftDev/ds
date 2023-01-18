@@ -7,7 +7,7 @@ open NUnit.Framework
 [<AutoOpen>]
 module ParseOKTest =
     type OK() =
-        do Fixtures.SetUpTest()
+        inherit EngineTestBaseClass()
 
         let checkParseOK(text:string, activeCpu:string) =
             ParserTest.Test(text, activeCpu)

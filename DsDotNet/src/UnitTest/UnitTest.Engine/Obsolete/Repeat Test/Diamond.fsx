@@ -13,7 +13,7 @@ open Engine.Base
 open NUnit.Framework
 
 type Diamond(output1:ITestOutputHelper) =
-    do Fixtures.SetUpTest()
+    inherit EngineTestBaseClass()
     
     let createCylinder = Tester.CreateCylinder
     let address = """

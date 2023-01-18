@@ -23,7 +23,7 @@ module pptTestModule =
         )
 
     type PPTTest() =
-        do Fixtures.SetUpTest()
+        inherit EngineTestBaseClass()
 
         [<Test>] member __.``System  test``    () = check (ImportPPT.GetModel [ $"{__SOURCE_DIRECTORY__}\\ppt\\T1_System.pptx"])
         [<Test>] member __.``Flow  test``      () = check (ImportPPT.GetModel [ $"{__SOURCE_DIRECTORY__}\\ppt\\T2_Flow.pptx"])

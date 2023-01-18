@@ -10,7 +10,7 @@ open Engine.Core
 //module DeclarationTestModule =
 
     type DeclarationTest() =
-        do Fixtures.SetUpTest()
+        inherit ExpressionTestBaseClass()
 
         [<Test>]
         member __.``Variable Declaration test`` () =

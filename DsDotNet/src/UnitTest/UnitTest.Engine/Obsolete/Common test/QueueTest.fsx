@@ -29,7 +29,7 @@ module QueueTestModule =
 
 
     type QueueTest() =
-        do Fixtures.SetUpTest()
+        inherit EngineTestBaseClass()
 
 
         [<Test>]

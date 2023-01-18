@@ -11,7 +11,7 @@ open NUnit.Framework
 [<AutoOpen>]
 module ModelTests1 =
     type DemoTests1() = 
-        do Fixtures.SetUpTest()
+        inherit EngineTestBaseClass()
 
         [<Test>]
         member __.``Parse Cylinder`` () =

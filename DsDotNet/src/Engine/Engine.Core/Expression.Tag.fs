@@ -45,6 +45,7 @@ module TagModule =
         override x.ToBoxedExpression() = var2expr x
         member x.Expr = var2expr x
 
+    /// Variable for WINDOWS platform
     type Variable<'T when 'T:equality> (name, initValue:'T) =
         inherit VariableBase<'T>(name, initValue)
         override x.ToBoxedExpression() = var2expr x
@@ -57,7 +58,7 @@ module TagModule =
 
         member val Address = address with get, set
 
-      /// Ds Plan tag : system bit, eop, mop 등등.. 사용중
+    /// Ds Plan tag : system bit, eop, mop 등등.. 사용중
     type DsTag<'T when 'T:equality> (name, initValue:'T) =
         inherit Tag<'T>(name, initValue)
 
@@ -129,11 +130,11 @@ module TagModule =
         | "UInt64" -> box 0UL
         | _  -> failwithlog "ERROR"
 
-
+    // 다음 컴파일 에러 회피하기 위한 boxing
     // error FS0030: 값 제한이 있습니다. 값 'fwdCreateVariableWithValue'은(는) 제네릭 형식    val mutable fwdCreateVariableWithValue: (string -> '_a -> IVariable)을(를) 가지는 것으로 유추되었습니다.    'fwdCreateVariableWithValue'에 대한 인수를 명시적으로 만들거나, 제네릭 요소로 만들지 않으려는 경우 형식 주석을 추가하세요.
     type BoxedObjectHolder = { Object:obj }
 
-    let createVariableWithTypeAndValueOnWindows (typ:System.Type) (name:string) (boxedValue:BoxedObjectHolder): IVariable =
+    let createWindowsVariableWithTypeAndValue (typ:System.Type) (name:string) (boxedValue:BoxedObjectHolder): IVariable =
         verify (Runtime.Target = WINDOWS)
         let v = boxedValue.Object
         match typ.Name with
@@ -152,11 +153,11 @@ module TagModule =
         | "UInt64" -> new Variable<uint64>(name, unbox v)
         | _  -> failwithlog "ERROR"
 
-    let createVariableWithTypeOnWindows (typ:System.Type) (name:string) : IVariable =
+    let createWindowsVariableWithType (typ:System.Type) (name:string) : IVariable =
         verify (Runtime.Target = WINDOWS)
         let value = { Object = typeDefaultValue typ }
-        createVariableWithTypeAndValueOnWindows typ name value
+        createWindowsVariableWithTypeAndValue typ name value
 
 
-    let mutable fwdCreateVariableWithType = createVariableWithTypeOnWindows
-    let mutable fwdCreateVariableWithTypeAndValue = createVariableWithTypeAndValueOnWindows
+    let mutable fwdCreateVariableWithType = createWindowsVariableWithType
+    let mutable fwdCreateVariableWithTypeAndValue = createWindowsVariableWithTypeAndValue

@@ -204,9 +204,10 @@ module internal rec Command =
                 let outputType = getType output
                 systemTypeToXgiTypeName outputType
             let func =
+                // argument 갯수에 따라서 다른 함수를 불러야 할 때 사용.  e.g "ADD3_INT" : 3개의 인수를 더하는 함수
                 let arity = args.Length
                 match name with
-                | ("ADD" | "MUL") -> $"{name}{arity}_{plcFuncType}"        // xxx: ADD2_INT
+                | ("ADD" | "MUL") -> $"{name}{arity}_{plcFuncType}"
                 | ("SUB" | "DIV") -> name        // DIV 는 DIV, DIV2 만 존재함
                 | _ -> failwithlog "NOT YET"
             createBoxXmls (x, y)  func namedInputParameters outputParameters ""

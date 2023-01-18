@@ -10,7 +10,7 @@ open Engine.CodeGenCPU
 open Engine.Parser.FS
 
 type Spec09_TimmerStatement() =
-    do Fixtures.SetUpTest()
+    inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
     [<Test>] 

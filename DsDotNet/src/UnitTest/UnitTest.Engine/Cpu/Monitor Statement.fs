@@ -12,7 +12,7 @@ open Engine.CodeGenCPU
 open System.Linq
 
 type Spec05_MonitorStatement() =
-    do Fixtures.SetUpTest()
+    inherit EngineTestBaseClass()
     let t = CpuTestSample()
 
     [<Test>]

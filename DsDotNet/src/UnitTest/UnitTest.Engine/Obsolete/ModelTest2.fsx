@@ -11,7 +11,7 @@ open NUnit.Framework
 [<AutoOpen>]
 module ModelTest2 =
     type DemoTests2() =
-        do Fixtures.SetUpTest()
+        inherit EngineTestBaseClass()
 
         [<Test>]
         member __.``XParse Alias & Task`` () =

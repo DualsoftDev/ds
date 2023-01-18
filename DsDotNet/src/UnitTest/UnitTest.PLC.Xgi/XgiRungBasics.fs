@@ -9,7 +9,7 @@ open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine.ElementType
 open Engine.Parser.FS
 
 type XgiRungTest() =
-    inherit XgiTestClass()
+    inherit XgiTestBaseClass()
 
     [<Test>]
     member __.``Prolog comment test``() =

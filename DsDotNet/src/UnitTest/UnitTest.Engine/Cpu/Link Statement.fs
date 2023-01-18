@@ -11,7 +11,7 @@ open Engine.Parser.FS
 
 
 type Spec11_LinkStatement() =
-    do Fixtures.SetUpTest()
+    inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
     [<Test>] member __.``L1 Link Start`` () = Eq 1 1

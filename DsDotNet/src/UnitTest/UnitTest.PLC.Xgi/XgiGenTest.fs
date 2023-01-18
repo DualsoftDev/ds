@@ -11,7 +11,7 @@ open PLC.CodeGen.Common.FlatExpressionModule
 
 [<Collection("SerialXgiGenerationTest")>]
 type XgiGenerationTest() =
-    inherit XgiTestClass()
+    inherit XgiTestBaseClass()
 
     [<Test>]
     member __.``OR simple test`` () =

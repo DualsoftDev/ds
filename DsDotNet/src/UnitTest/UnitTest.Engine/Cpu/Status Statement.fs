@@ -10,7 +10,7 @@ open Engine.CodeGenCPU
 open System.Linq
 
 type Spec03_StatusStatement() =
-    do Fixtures.SetUpTest()
+    inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
 

@@ -13,7 +13,7 @@ module StateBuilderModule =
     type State<'s, 'a> = State of ('s -> ('a * 's))
 
     module State =
-        let inline run state (State(f)) = f state
+        let inline run state (State f) = f state
         let ret result = State(fun state -> (result, state))
         let bind binder stateful =
             State(fun state ->
@@ -54,43 +54,81 @@ module StateBuilderModule =
     let state = new StateBuilder()
 
 module private ShowSamples =
-    let multiplesOfThreeUptoTwenty =
+    let sumOfMultiplesOfThreeUptoTwenty =
         // Reads like imperative code, but it's actually chaining a series of transformations
         // on an invisible state value behind the scenes. No mutable state here.
         state {
             for i in 0..20 do
-                let! s = State.get
-                if i % 3 = 0 then do! State.put (s + i)
+                if i % 3 = 0 then
+                    let! s = State.get
+                    do! State.put (s + i)
             return! State.get
         } |> State.run 0 |> fst
     let verify c = if not c then failwith "ERROR"
-    verify ([ 3..3..20 ] |> List.sum = multiplesOfThreeUptoTwenty)
+    verify ([ 3..3..20 ] |> List.sum = sumOfMultiplesOfThreeUptoTwenty)
 
-    /// Cons the input to the state
-    let push x = State(fun (s: 's seq) -> (), Seq.append [x] s)
-    /// Update and remove the return value from the top of the stack
-    let pop = State(fun (s: 's seq) -> Seq.head s, Seq.tail s)
-    /// Update the return value to the top of the stack
-    let peek = State(fun (s: 's seq) -> Seq.head s, s)
+    module SeqBased =
+        /// Cons the input to the state
+        let push x = State(fun (s: 's seq) -> (), Seq.append [x] s)
+        /// Update and remove the return value from the top of the stack
+        let pop = State(fun (s: 's seq) -> Seq.head s, Seq.tail s)
+        /// Update the return value to the top of the stack
+        let peek = State(fun (s: 's seq) -> Seq.head s, s)
 
-    module Seq =
-        /// Create a safe lazy infinite sequence of random integers using a System.Random
-        let fromRandom (randGen: Random) = Seq.unfold (fun () -> Some(randGen.Next (), ())) () |> Seq.cache
+        module Seq =
+            /// Create a safe lazy infinite sequence of random integers using a System.Random
+            let fromRandom (randGen: Random) =
+                let generator = fun () -> Some(randGen.Next(), ())
+                Seq.unfold generator () |> Seq.cache
 
-    let someRandom =
-        state {
-            // Pull the first random number off the stack
-            let! rand1 = pop
-            // Pull another random number
-            let! rand2 = pop
-            // Do some math on them and return the result
-            return (rand1 % 4) + (rand2 % 4)
-        } |> State.run (Seq.fromRandom (new Random()))
+        let someRandom =
+            state {
+                // Pull the first random number off the stack
+                let! rand1 = pop
+                // Pull another random number
+                let! rand2 = pop
+                // Do some math on them and return the result
+                return (rand1 % 4) + (rand2 % 4)
+            } |> State.run (Seq.fromRandom (new Random()))
+
+    module ListBased =
+        /// Cons the input to the state
+        let push x = State(fun (s: 's list) -> (), x::s)
+        /// Update and remove the return value from the top of the stack
+        let pop = State(fun (s: 's list) ->
+            match s with
+            | [] -> failwith "Stack is empty"
+            | h::t -> h, t)
+        /// Update the return value to the top of the stack
+        let peek = State(fun (s: 's list) ->
+            match s with
+            | [] -> failwith "Stack is empty"
+            | h::t -> h, s)
+
+
+        let comp =
+            state {
+                let! a = pop
+                if a = 5 then
+                    do! push 7
+                else
+                    do! push 3
+                    do! push 8
+                return a
+            }
+        // Output: (9, Stack [8; 3; 0; 2; 1; 0])
+        let stack = [9; 0; 2; 1; 0]
+        printfn "%A" (State.run stack comp)
+
+        // Output: (5, Stack [7; 1])
+        let stack2 = [5; 1]
+        printfn "%A" (State.run stack2 comp)
+
+
 
     // Some utility types and functions for the next state monad example
 
-    module String =
-        let split chars (s: string) = s.Split chars
+    let splitString separatorChars (s: string) = s.Split separatorChars
 
     type FileType = File | Dir
     /// Lazily returns every file and directory that has the given root path as a parent. Directories paths
@@ -102,7 +140,7 @@ module private ShowSamples =
               yield! Directory.GetFiles path |> Seq.map (fun f -> File, f) }
     let relativePath root fullPath =
         let sep = [|Path.DirectorySeparatorChar|]
-        fullPath |> String.split sep |> Array.skip ((String.split sep root).Length) |> Path.Combine
+        fullPath |> splitString sep |> Array.skip ((splitString sep root).Length) |> Path.Combine
 
     // We can use the state monad to implement dependency injection very readably and cleanly. The state is a
     // record of functions that we thread through transparently, so that when we want to call a special function,
@@ -128,10 +166,10 @@ module private ShowSamples =
     let copyFiles srcRoot dstRoot files =
         state {
             // Get the absolute paths of each source and destination path
-            let fullSrcDstPaths =
-                files
-                |> Seq.map (fun (fileType, srcFullPath) ->
-                    fileType, srcFullPath, Path.Combine ([|dstRoot; relativePath srcRoot srcFullPath|]))
+            let fullSrcDstPaths = [
+                for (fileType, srcFullPath) in files do
+                    fileType, srcFullPath, Path.Combine ([|dstRoot; relativePath srcRoot srcFullPath|])
+            ]
             for (fileType, src, dst) in fullSrcDstPaths do
                 do! copyFile fileType src dst
         }
@@ -140,10 +178,14 @@ module private ShowSamples =
     let copyRecursive src dst = getSystemEntriesRec src |> copyFiles src dst
 
     /// A table of IO functions that actually perform the IO
-    let realIO = { copyFile = File.Copy; mkdir = ignore << Directory.CreateDirectory }
+    let realIO = {
+        copyFile = File.Copy
+        mkdir = ignore << Directory.CreateDirectory }
+
     /// A table of mock IO functions that only log their inputs.
-    let testIO = { copyFile = fun (src, dst) -> printfn "cp %s %s" src dst
-                   mkdir = fun dir -> printfn "mkdir %s" dir }
+    let testIO = {
+        copyFile = fun (src, dst) -> printfn "cp %s %s" src dst
+        mkdir = fun dir -> printfn "mkdir %s" dir }
 
     let realCopyRecursive src dst =
         copyRecursive src dst |> State.run realIO |> ignore

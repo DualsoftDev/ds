@@ -25,8 +25,7 @@ module private ModelComparisonHelper =
 [<AutoOpen>]
 module ModelTests1 =
     type DemoTests1() =
-        do
-            Fixtures.SetUpTest()
+        inherit EngineTestBaseClass()
 
         let systemRepo = ShareableSystemRepository()
         let compare = compare systemRepo @$"{__SOURCE_DIRECTORY__}\..\Libraries"
@@ -158,8 +157,7 @@ module ModelTests1 =
 
 
     type InvalidModelTests1() =
-        do
-            Fixtures.SetUpTest()
+        inherit EngineTestBaseClass()
 
         let systemRepo = ShareableSystemRepository()
         let compare = compare systemRepo @$"{__SOURCE_DIRECTORY__}\..\Libraries"

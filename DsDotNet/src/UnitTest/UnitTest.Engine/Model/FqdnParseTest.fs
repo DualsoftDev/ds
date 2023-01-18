@@ -8,7 +8,7 @@ open Engine.Parser.FS
 module FqdnParseTestModule =
     let toString x = x.ToString()
     type FqdnParseTest() =
-        do Fixtures.SetUpTest()
+        inherit EngineTestBaseClass()
         let parseFqdn = FqdnParser.parseFqdn
 
         [<Test>]

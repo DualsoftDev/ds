@@ -87,9 +87,13 @@ module XGITag = //IEC61131Tag =
     type internal XgiSymbolCreateParams = {
         Name          : string
         Comment       : string
+        /// XGI PLC 에서의 type.  "BOOL", "TON", "TOF", "CTU", .., "INT", "REAL", "LREAL", "LINT", "DINT", "INT", "SINT", "ULINT", "UDINT", "UINT", "USINT", ...
         PLCType       : string
+        /// PLC Tag 인 경우에 한해서 address 값을 가짐.  Auto 변수일 경우 address 가 없음
         Address       : string
+        /// Auto 변수일 경우의 초기값.  PLC Tag 인 경우, 초기값을 설정할 수 없으므로 null 값.
         InitValue     : obj
+        // 현재는 -1 값으로 고정.
         DevicePosition: int
         AddressIEC    : string
         Device        : string
@@ -101,10 +105,10 @@ module XGITag = //IEC61131Tag =
         Comment       = "Fake Comment"
         PLCType       = ""
         Address       = ""
+        InitValue     = null
         DevicePosition= -1
         AddressIEC    = ""
         Device        = ""
-        InitValue     = null
         Kind          = int Variable.Kind.VAR
     }
 

@@ -10,7 +10,7 @@ open Engine.CodeGenCPU
 
 
 type Spec04_OperationModeStatement() =
-    do Fixtures.SetUpTest()
+    inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
 

@@ -11,7 +11,7 @@ open Engine.Parser.FS
 open System.Linq
 
 type Spec01_PortStatement() =
-    do Fixtures.SetUpTest()
+    inherit EngineTestBaseClass()
     
     let t = CpuTestSample()
     

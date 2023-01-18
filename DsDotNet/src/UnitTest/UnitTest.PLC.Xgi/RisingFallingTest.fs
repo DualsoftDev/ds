@@ -9,7 +9,7 @@ open PLC.CodeGen.LSXGI
 
 
 type XgiRisingFallingTest() =
-    inherit XgiTestClass()
+    inherit XgiTestBaseClass()
 
     [<Test>]
     member __.``Normal, Negation, Rising, Falling contact test`` () =

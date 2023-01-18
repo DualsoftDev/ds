@@ -70,3 +70,4 @@ module CpuTestUtil =
         st.GetTargetStorages().Head.BoxedValue === st.GetTargetStorages().Head.BoxedValue
         
     let doChecks (commentedStatements:CommentedStatement seq) = commentedStatements.Iter(doCheck)
+

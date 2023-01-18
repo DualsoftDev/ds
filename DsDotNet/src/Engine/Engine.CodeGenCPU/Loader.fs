@@ -167,10 +167,10 @@ module CpuLoader =
             
 
             //test debug
-            system._auto.Value <- true
-            system._ready.Value <- true
-            system._drive.Value <- true
-            statements.Iter(fun f->f.Statement.Do())
-            //test debug
+            //system._auto.Value <- true
+            //system._ready.Value <- true
+            //system._drive.Value <- true
+            //statements.Iter(fun f->f.Statement.Do())
+            ////test debug
 
             result

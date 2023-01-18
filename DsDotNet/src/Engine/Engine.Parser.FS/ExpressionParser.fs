@@ -34,15 +34,14 @@ module rec ExpressionParser =
                 | :? FunctionCallExprContext as exp ->  // functionName '(' arguments? ')'
                     tracefn $"FunctionCall: {text}"
                     let funName = exp.TryFindFirstChild<FunctionNameContext>().Value.GetText()
-                    let args =
-                        [
-                            match exp.TryFindFirstChild<ExprListContext>() with
-                            | Some exprListCtx ->
-                                for exprCtx in exprListCtx.children.OfType<ExprContext>() do
-                                    helper exprCtx
-                            | None ->
-                                ()
-                        ]
+                    let args = [
+                        match exp.TryFindFirstChild<ExprListContext>() with
+                        | Some exprListCtx ->
+                            for exprCtx in exprListCtx.children.OfType<ExprContext>() do
+                                helper exprCtx
+                        | None ->
+                            ()
+                    ]
                     createCustomFunctionExpression funName args
 
                 | :? CastingExprContext as exp ->   // '(' type ')' expr
@@ -52,25 +51,25 @@ module rec ExpressionParser =
                     let expr = helper exprCtx
                     createCustomFunctionExpression castName [expr]
 
-                |(  :? BinaryExprMultiplicativeContext
-                  | :? BinaryExprAdditiveContext
-                  | :? BinaryExprBitwiseShiftContext
-                  | :? BinaryExprRelationalContext
-                  | :? BinaryExprEqualityContext
-                  | :? BinaryExprBitwiseAndContext
-                  | :? BinaryExprBitwiseXorContext
-                  | :? BinaryExprBitwiseOrContext
-                  | :? BinaryExprLogicalAndContext
-                  | :? BinaryExprLogicalOrContext) ->
-                    tracefn $"Binary: {text}"
-                    match ctx.children.ToFSharpList() with
-                    | left::op::right::[] ->
-                        let expL = helper(left :?> ExprContext)
-                        let expR = helper(right :?> ExprContext)
-                        let op = op.GetText()
-                        createBinaryExpression expL op expR
-                    | _ ->
-                        failwithlog "ERROR"
+                | (   :? BinaryExprMultiplicativeContext
+                    | :? BinaryExprAdditiveContext
+                    | :? BinaryExprBitwiseShiftContext
+                    | :? BinaryExprRelationalContext
+                    | :? BinaryExprEqualityContext
+                    | :? BinaryExprBitwiseAndContext
+                    | :? BinaryExprBitwiseXorContext
+                    | :? BinaryExprBitwiseOrContext
+                    | :? BinaryExprLogicalAndContext
+                    | :? BinaryExprLogicalOrContext ) ->
+                        tracefn $"Binary: {text}"
+                        match ctx.children.ToFSharpList() with
+                        | left::op::right::[] ->
+                            let expL = helper(left :?> ExprContext)
+                            let expR = helper(right :?> ExprContext)
+                            let op = op.GetText()
+                            createBinaryExpression expL op expR
+                        | _ ->
+                            failwithlog "ERROR"
 
 
                 | :? UnaryExprContext as exp ->
@@ -268,6 +267,7 @@ module rec ExpressionParser =
                     failwith $"ERROR: Failed to assign into non existing storage {storageName}"
                 let storage = storages[storageName]
                 let createExp ctx = createExpression storages (getFirstChildExpressionContext ctx)
+
                 match assignCtx.children.ToFSharpList() with
                 | (:? RisingAssignContext as ctx)::[] ->
                     let risingCoil:RisingCoil = {Storage = storage; HistoryFlag = HistoryFlag()}
@@ -277,8 +277,11 @@ module rec ExpressionParser =
                     Some <| DuAssign (createExp ctx, fallingCoil)
                 | (:? NormalAssignContext as ctx)::[] -> Some <| DuAssign (createExp ctx, storage)
                 | _ -> failwithlog "ERROR"
+
             | :? CounterDeclContext as counterDeclCtx -> Some <| parseCounterStatement storages counterDeclCtx
+
             | :? TimerDeclContext as timerDeclCtx -> Some <| parseTimerStatement storages timerDeclCtx
+
             | :? CopyStatementContext as copyStatementCtx ->
                 let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression storages
                 let condition = copyStatementCtx.Descendants<CopyConditionContext>().First() |> expr :?> IExpression<bool>
@@ -287,6 +290,7 @@ module rec ExpressionParser =
                 assert(target.StartsWith("$"))
                 let target = storages[target.Replace("$", "")]
                 Some <| DuAction (DuCopy(condition, source, target))
+
             | _ ->
                 failwithlog "ERROR: Not yet statement"
 

@@ -32,8 +32,8 @@ module ContextInformationModule =
         member x.GetRawName() = getRawName x.Names false
         member x.Tuples = x.System, x.Flow, x.Parenting, x.Names
         member x.NameComponents = [
-            if x.System.IsSome then yield x.System.Value
-            if x.Flow.IsSome then yield x.Flow.Value
+            if x.System.IsSome    then yield x.System.Value
+            if x.Flow.IsSome      then yield x.Flow.Value
             if x.Parenting.IsSome then yield x.Parenting.Value
             if x.ContextType.IsOneOf(
                   typedefof<SystemContext>
@@ -57,10 +57,10 @@ module DsParserHelperModule =
             option {
                 let! flowName = ci.Flow
                 match ci.Tuples with
-                | Some sys, Some flow, Some parenting, _ ->
+                | Some sys_, Some flow, Some parenting, _ ->
                     let! real = tryFindReal x flow parenting
                     return DuParentReal real
-                | Some sys, Some flow, None, _ ->
+                | Some sys_, Some flow_, None, _ ->
                     let! f = tryFindFlow x flowName
                     return DuParentFlow f
                 | _ -> failwithlog "ERROR"

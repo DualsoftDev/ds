@@ -15,7 +15,7 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module ListnerCommonFunctionGenerator =
-    let commonFunctionExtractor (input:ParserRuleContext) = 
+    let commonFunctionExtractor (input:ParserRuleContext) =
         input.Descendants<FuncSetContext>().ToArray()
         |> Seq.map(fun fs ->
             option {
@@ -26,8 +26,9 @@ module ListnerCommonFunctionGenerator =
         )
         |> Map.ofSeq
 
-    let commonFunctionSetter 
-            (targetName:string)  (functionMap:Map<string, ResizeArray<FuncDefContext>>) = 
+    let commonFunctionSetter
+        (targetName:string) (functionMap:Map<string, ResizeArray<FuncDefContext>>)
+      =
         if functionMap.ContainsKey(targetName) then
             [
                 for func in functionMap[targetName] do
@@ -38,7 +39,7 @@ module ListnerCommonFunctionGenerator =
                     } |> Option.get
             ]
         else
-            List.empty 
+            List.empty
         |> Enumerable.ToHashSet
 
 /// <summary>
@@ -139,22 +140,24 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
         // I1 <||> I2 <||> I3;  ==> [| I1; <||>; I2; <||>; I3; |]
         let terms =
             let pred = fun (tree:IParseTree) -> tree :? Identifier1Context || tree :? CausalOperatorResetContext
-            ctx.Descendants<RuleContext>(false, pred)
-                .Select(fun ctx -> ctx.GetText())
-                .ToArray()
+            [| for des in ctx.Descendants<RuleContext>(false, pred) do
+                des.GetText() |]
 
         // I1 <||> I2 와 I2 <||> I3 에 대해서 해석
         for triple in (terms |> Array.windowed2 3 2) do
             if triple.Length = 3 then
                 let opnd1, op, opnd2 = triple[0], triple[1], triple[2]
-                let ri_ = ApiResetInfo.Create(x.TheSystem, opnd1, op.ToModelEdge(), opnd2)
-                ()
+                ApiResetInfo.Create(x.TheSystem, opnd1, op.ToModelEdge(), opnd2) |> ignore
 
     member private x.GetFilePath(fileSpecCtx:FileSpecContext) =
         let simpleFilePath = fileSpecCtx.TryFindFirstChild<FilePathContext>().Value.GetText().DeQuoteOnDemand()
         let envPaths = collectEnvironmentVariablePaths()
-        let targetPath(directory:string) =
-            [ simpleFilePath; $"{directory}\\{simpleFilePath}"; for path in envPaths do $"{path}\\{simpleFilePath}" ] |> fileExistChecker
+        let targetPath(directory:string) = [
+            simpleFilePath
+            $"{directory}\\{simpleFilePath}"
+            for path in envPaths do
+                $"{path}\\{simpleFilePath}" ] |> fileExistChecker
+
         let absoluteFilePath =
             let dir = x.ParserOptions.ReferencePath
             targetPath dir
@@ -184,7 +187,6 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
         let pureCode = code.Substring(3, code.Length-6)       // 처음과 끝의 "<@{" 와 "}@>" 제외
         let statements = pureCode |> parseCode options.Storages
         x.TheSystem.Statements.AddRange statements
-        ()
 
     /// parser rule context 에 대한 이름 기준의 정보를 얻는다.  system 이름, flow 이름, parenting 이름 등
     member x.GetContextInformation(parserRuleContext:ParserRuleContext) =      // collectUpwardContextInformation
@@ -288,8 +290,8 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
             ]
 
             let isCallName (pw:ParentWrapper, Fqdn(vetexPath)) =
-                    let flow = pw.GetFlow()
-                    tryFindCall flow.System vetexPath |> Option.isSome
+                let flow = pw.GetFlow()
+                tryFindCall flow.System vetexPath |> Option.isSome
 
             let isAliasMnemonic (pw:ParentWrapper, mnemonic:string) =
                 let flow = pw.GetFlow()
@@ -386,7 +388,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                         .Tap(fun callComponents -> assert(callComponents.All(fun cc -> cc.Length = 2 || isWildcard(cc))))
                         .Select(fun callCompnents -> callCompnents.Select(fun cc -> if isWildcard(cc) then null else cc.Prepend(system.Name).ToArray()).ToArray())
                         .ToArray()
-                let lnk = 
+                let lnk =
                     ctx.TryFindFirstChild<Identifier12Context>()
                         .Map(collectNameComponents)
                         .ToArray()
@@ -396,7 +398,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 | 2 | 3 ->
                     api.AddTXs(findSegments(ser[0])) |> ignore
                     api.AddRXs(findSegments(ser[1])) |> ignore
-                | _ -> 
+                | _ ->
                     api.AddTXs(findSegments(lnk)) |> ignore
                     api.AddRXs(findSegments(lnk)) |> ignore
             } |> ignore
@@ -410,8 +412,8 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 let apiDefCtxs = callList.Descendants<CallApiDefContext>().ToArray()
                 let getAddress (addressCtx:IParseTree) =
                     addressCtx.TryFindFirstChild<AddressItemContext>().Map(getText).Value
-                let apiItems =
-                    [   for apiDefCtx in apiDefCtxs do
+                let apiItems = [
+                    for apiDefCtx in apiDefCtxs do
                         let apiPath = apiDefCtx.CollectNameComponents() |> List.ofSeq // e.g ["A"; "+"]
                         match apiPath with
                         | device::api::[] ->
@@ -432,7 +434,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                             | _ -> failwithlog "ERROR"
 
                         | _ -> failwithlog "ERROR"
-                    ]
+                ]
                 let funcSet = commonFunctionSetter jobName jobFuncs
                 assert(apiItems.Any())
                 let job = Job(jobName, apiItems)
@@ -444,13 +446,13 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
             for linkDef in linkListings do
                 let getRawLinkName = linkDef.TryFindFirstChild<EtcName1Context>().Value
                 let linkName = getRawLinkName.GetText().DeQuoteOnDemand()
-                let apiLinkPath = 
+                let apiLinkPath =
                     linkDef.TryFindFirstChild<Identifier12Context>()
                         .Value.CollectNameComponents() |> List.ofSeq
                 apiLinkPath |> printfn "%A = %A" linkName
-                let linkInfo = 
+                let linkInfo =
                     match apiLinkPath with
-                    | exSys::api::[] -> 
+                    | exSys::api::[] ->
                         let apiItem = tryFindCallingApiItem system exSys api
                         match apiItem with
                         | Some apiItem -> apiItem, exSys

@@ -32,7 +32,7 @@ type ParserException(message:string) =
         let ambient = getAmbient(ctx)
         $"{posi} near\r\n'{ambient}'"
 
-    new (message:string, ctx:RuleContext) = ParserException($"{message} on {CreatePositionInfo(ctx)}")
+    new (message:string, ctx:RuleContext)      = ParserException($"{message} on {CreatePositionInfo(ctx)}")
     new (message:string, errorNode:IErrorNode) = ParserException($"{message} on {CreatePositionInfo(errorNode)}")
     new (message:string, line:int, column:int) = ParserException($"{message} on {line}:{column}")
 

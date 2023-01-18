@@ -68,7 +68,7 @@ module ModelParser =
             let text = File.ReadAllText(dsFilePath)
             let dir = Path.GetDirectoryName(dsFilePath)
             let option = ParserOptions.Create4Runtime(param.ShareableSystemRepository, dir, "ActiveCpuName", Some param.AbsoluteFilePath, param.LoadingType)
-            option.LoadedSystemName <- Option.ofObj loadedName
+            let option = { option with LoadedSystemName = Option.ofObj loadedName }
             let system = ParseFromString(text, option)
             system
 

@@ -11,7 +11,7 @@ open Engine.Parser.FS
 
 
 type Spec13_SystemStatement() =
-    do Fixtures.SetUpTest()
+    inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
     [<Test>]

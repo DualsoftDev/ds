@@ -10,7 +10,7 @@ open NUnit.Framework
 [<AutoOpen>]
 module PortInfoTest =
     type PortInfoTests1() =
-        do Fixtures.SetUpTest()
+        inherit EngineTestBaseClass()
 
         let init() =
             Global.BitChangedSubject

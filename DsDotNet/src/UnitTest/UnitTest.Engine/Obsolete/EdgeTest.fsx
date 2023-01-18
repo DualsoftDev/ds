@@ -11,7 +11,7 @@ open NUnit.Framework
 [<AutoOpen>]
 module EdgeTest =
     type EdgeTests1() =
-        do Fixtures.SetUpTest()
+        inherit EngineTestBaseClass()
 
 
         [<Test>]

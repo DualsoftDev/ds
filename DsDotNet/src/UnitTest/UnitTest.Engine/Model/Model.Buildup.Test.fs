@@ -11,8 +11,7 @@ open Engine.Parser.FS
 module ModelBuildupTests1 =
 
     type Buildup() =
-        do
-            Fixtures.SetUpTest()
+        inherit EngineTestBaseClass()
 
         let systemRepo = ShareableSystemRepository()
         let libdir = @$"{__SOURCE_DIRECTORY__}\..\Libraries"

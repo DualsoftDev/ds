@@ -2,21 +2,18 @@ namespace T
 
 open System.IO
 open Engine.Core
-open Engine.Parser.FS
 open NUnit.Framework
-open System.Collections.Generic
 open Engine.CodeGenHMI
 
 [<AutoOpen>]
-module HmiCodeGenTestModule = 
-    type HmiCodeGenTester() = 
-        do
-            Fixtures.SetUpTest()
+module HmiCodeGenTestModule =
+    type HmiCodeGenTester() =
+        inherit EngineTestBaseClass()
 
         let libdir = @$"{__SOURCE_DIRECTORY__}\..\Libraries"
         let configFile = @"test-hmi-gen-config.json"
         let genConfig (filePaths:string list) =
-            let cfg = { 
+            let cfg = {
                     DsFilePaths = [
                         for path in filePaths do
                             $@"{libdir}\HmiCodeGenExample\{path}"
@@ -36,17 +33,17 @@ module HmiCodeGenTestModule =
 
         [<Test>]
         member __.``HmiTestCase-FactoryIO`` () =
-            answerChecker 
+            answerChecker
                 [
                     "FactoryIO\FactoryIO.ds";
-                    "FactoryIO\Main.ds"; 
+                    "FactoryIO\Main.ds";
                     "FactoryIO\Assy.ds";
                 ]
                 "answer_factoryIO.json"
 
         [<Test>]
         member __.``HmiTestCase-test_sample`` () =
-            answerChecker 
+            answerChecker
                 [
                     "test_sample\control.ds";
                     "test_sample\device\MovingLifter1.ds";

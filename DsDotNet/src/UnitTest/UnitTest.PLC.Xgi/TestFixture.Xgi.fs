@@ -9,9 +9,6 @@ open Engine.Common.FS
 open Engine.Core
 open PLC.CodeGen.LSXGI
 
-// FsUnit/XUnit 사용법:
-// https://github.com/fsprojects/FsUnit/tree/master/tests/FsUnit.Xunit.Test
-// https://marnee.silvrback.com/fsharp-and-xunit-classfixture
 [<AutoOpen>]
 module XgiFixtures =
     [<AbstractClass>]
@@ -36,7 +33,6 @@ module XgiFixtures =
         abstract GetCurrentRuntimeTarget: unit -> RuntimeTargetType
 
         override x.GetCurrentRuntimeTarget() = XGI
-        member val Locker = obj
 
     let setRuntimeTarget(runtimeTarget:RuntimeTargetType) =
         let runtimeTargetBackup = Runtime.Target

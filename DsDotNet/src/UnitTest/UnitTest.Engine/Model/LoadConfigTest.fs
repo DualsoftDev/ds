@@ -3,14 +3,12 @@ namespace T
 open System.Linq
 open Engine.Core
 open NUnit.Framework
-open Engine.Parser.FS
 
 
 [<AutoOpen>]
 module LoadConfigTestModule =
     type LoadConfigTest() =
-        do
-            Fixtures.SetUpTest()
+        inherit EngineTestBaseClass()
 
         let libdir = @$"{__SOURCE_DIRECTORY__}\..\Libraries"
         let configFile = @"test-model-config.json"

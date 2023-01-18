@@ -6,7 +6,7 @@ open NUnit.Framework
 [<AutoOpen>]
 module MiscTestModule =
     type MiscTests() =
-        do Fixtures.SetUpTest()
+        inherit EngineTestBaseClass()
 
         [<Test>]
         member __.``NewtonSoft version test`` () =

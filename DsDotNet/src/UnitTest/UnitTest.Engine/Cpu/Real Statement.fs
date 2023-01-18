@@ -11,7 +11,7 @@ open Engine.CodeGenCPU
 
 
 type Spec06_RealStatement() =
-    do Fixtures.SetUpTest()
+    inherit EngineTestBaseClass()
     let t = CpuTestSample()
 
     [<Test>]

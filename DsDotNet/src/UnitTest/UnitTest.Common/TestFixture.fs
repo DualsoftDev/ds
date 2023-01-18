@@ -34,3 +34,4 @@ module Fixtures =
     [<AbstractClass>]
     type TestBaseClass(loggerName:string) =
         do setUpTest(loggerName)
+        member val Locker = obj

@@ -10,7 +10,7 @@ open NUnit.Framework
 [<AutoOpen>]
 module ParserTestModule =
     type ParserTest() =
-        do Fixtures.SetUpTest()
+        inherit EngineTestBaseClass()
 
         [<Test>]
         member __.``Quotation test`` () =

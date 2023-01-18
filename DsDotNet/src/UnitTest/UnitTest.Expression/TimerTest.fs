@@ -3,22 +3,23 @@ namespace T.Statement
 open NUnit.Framework
 
 open T
-open Engine.Core
 open T.Expression
+open Engine.Core
 open Engine.Parser.FS
 open Engine.Common.FS
 
 //[<AutoOpen>]
-//module TimerTestModule =
+module TimerTestModule =
+    let evaluateRungInputs (timer:Timer) =
+        for s in timer.InputEvaluateStatements do
+            s.Do()
 
+    //[<Collection("SeparatedTestGroup")>]
     type TimerTest() =
         inherit ExpressionTestBaseClass()
 
-        let evaluateRungInputs (timer:Timer) =
-            for s in timer.InputEvaluateStatements do
-                s.Do()
         [<Test>]
-        member __.``TON creation test`` () =
+        member x.``TON creation test`` () =
             let storages = Storages()
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", false)
             let condition = var2expr t1
@@ -54,7 +55,7 @@ open Engine.Common.FS
             timer.TT.Value === true
 
             // 설정된 timer 시간 경과를 기다림
-            System.Threading.Thread.Sleep(210)
+            System.Threading.Thread.Sleep(250)
             timer.TT.Value === false
             timer.DN.Value === true
             timer.EN.Value === true
@@ -72,7 +73,7 @@ open Engine.Common.FS
             timer.ACC.Value === 0us
 
         [<Test>]
-        member __.``TON creation with text test`` () =
+        member x.``TON creation with text test`` () =
             use _ = setRuntimeTarget WINDOWS
             let t1 = PlcTag("my_timer_control_tag", "%M1.1", false)
             let storages = Storages()
@@ -96,7 +97,7 @@ open Engine.Common.FS
             timer.TT.Value === true
 
             // 설정된 timer 시간 경과를 기다림
-            System.Threading.Thread.Sleep(210)
+            System.Threading.Thread.Sleep(250)
             timer.TT.Value === false
             timer.DN.Value === true
             timer.EN.Value === true

@@ -21,7 +21,7 @@ module xlsTestModule =
         )
 
     type XLSTest() =
-        do Fixtures.SetUpTest()
+        inherit EngineTestBaseClass()
         let systemRepo = ShareableSystemRepository()
         let model = ImportPPT.GetModel [$"{__SOURCE_DIRECTORY__}\\ppt\\T5_Call.pptx"]
         //[<Test>] member __.``Command test``     () =  (ImportIOTable.ApplyExcel($"{__SOURCE_DIRECTORY__}\\xls\\Command.xlsx", system))

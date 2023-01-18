@@ -7,7 +7,7 @@ open NUnit.Framework
 [<AutoOpen>]
 module ParseDuplicatedTest =
     type DemoTests2() =
-        do Fixtures.SetUpTest()
+        inherit EngineTestBaseClass()
 
         let checkDuplicate(text:string) =
             (fun () -> InvalidDuplicationTest.Test(text)) |> ShouldFailWithSubstringT("Duplicated")

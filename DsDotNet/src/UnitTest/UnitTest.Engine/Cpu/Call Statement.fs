@@ -10,7 +10,7 @@ open Engine.CodeGenCPU
 open Engine.Parser.FS
 
 type Spec07_CallStatement() =
-    do Fixtures.SetUpTest()
+    inherit EngineTestBaseClass()
     let t = CpuTestSample()
 
     [<Test>]

@@ -11,7 +11,7 @@ open Engine.Parser.FS
 
 
 type Spec08_DAGStatement() =
-    do Fixtures.SetUpTest()
+    inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
     [<Test>]

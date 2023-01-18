@@ -11,7 +11,7 @@ open System.Linq
 
 
 type Spec02_FlowStatement() =
-    do Fixtures.SetUpTest()
+    inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
   

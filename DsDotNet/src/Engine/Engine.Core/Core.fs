@@ -36,7 +36,7 @@ module CoreModule =
     [<AbstractClass>]
     type LoadedSystem(loadedSystem:DsSystem, param:DeviceLoadParameters)  =
         inherit FqdnObject(param.LoadedName, param.ContainerSystem)
-            
+
         /// 다른 device 을 Loading 하려는 system 입장에서 loading 된 system 참조 용
         member _.ReferenceSystem = loadedSystem
 
@@ -70,7 +70,7 @@ module CoreModule =
         //시스템에서 호출가능한 작업리스트 (Call => Job => ApiItems => Addresses)
         member val Jobs    = ResizeArray<Job>()
 
-        member _.AddLoadedSystem(childSys) = loadedSystems.Add(childSys)  
+        member _.AddLoadedSystem(childSys) = loadedSystems.Add(childSys)
                                              |> verifyM $"Duplicated LoadedSystem name [{childSys.Name}]"
                                              addApiItemsForDevice childSys
 
@@ -97,7 +97,7 @@ module CoreModule =
         ///시스템 조건 (운전/준비) 정보  setting은 AddCondition 사용
         member val internal Conditions   = HashSet<ConditionDef>()
 
-        
+
 
     type Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
@@ -172,7 +172,7 @@ module CoreModule =
     type ISafetyConditoinHolder =
         abstract member SafetyConditions: HashSet<SafetyCondition>
 
-    /// Indirect to Call/Alias
+    /// Indirect to Call/Alias/RealOtherFlow/RealOtherSystem
     [<AbstractClass>]
     type Indirect (names:string seq, parent:ParentWrapper) =
         inherit Vertex(names |> Array.ofSeq, parent)
@@ -195,7 +195,7 @@ module CoreModule =
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
-    and RealOtherSystem private (target:Job, parent) = 
+    and RealOtherSystem private (target:Job, parent) =
         inherit Indirect(target.Name, parent)
         member _.Real = target
         interface ISafetyConditoinHolder with
@@ -232,7 +232,7 @@ module CoreModule =
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
         member val ApiName = getRawName [deviceName;api.Name] true
 
-    type LinkDef (api:ApiItem, systemName:string) = 
+    type LinkDef (api:ApiItem, systemName:string) =
         member _.ApiItem = api
         member val ApiName = getRawName [systemName;api.Name] true
         member val orgRealName = null with get, set
@@ -242,7 +242,7 @@ module CoreModule =
         (* createFqdnObject : system 이 다른 system 에 포함되더라도, name component 를 더 이상 확장하지 않도록 cut *)
         inherit FqdnObject(name, createFqdnObject([|system.Name|]))
         interface INamedVertex
-       
+
         member _.Name = name
         member _.System = system
         member val TXs = createQualifiedNamedHashSet<Real>()
@@ -346,7 +346,7 @@ module CoreModule =
             let real = Real(name, flow)
             flow.Graph.AddVertex(real) |> verifyM $"Duplicated segment name [{name}]"
             real
-             
+
         member x.GetAliasTargetToDs(aliasFlow:Flow) =
                 if x.Flow <> aliasFlow
                 then [|x.Flow.Name; x.Name|]  //other flow
@@ -363,14 +363,14 @@ module CoreModule =
             ofr
 
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
-        
+
     type RealExS = RealOtherSystem
     type RealOtherSystem with
         static member Create(target:Job, parent:ParentWrapper) =
             let exSysReal = RealOtherSystem(target, parent)
             parent.GetGraph().AddVertex(exSysReal) |> verifyM $"Duplicated other flow real call [{exSysReal}]"
             exSysReal
-            
+
         member x.GetAliasTargetToDs() =
             match x.Parent.GetCore() with
                 | :? Flow as f -> [x.Name].ToArray()
@@ -383,7 +383,7 @@ module CoreModule =
             let call = Call(target, parent)
             parent.GetGraph().AddVertex(call) |> verifyM $"Duplicated call name [{target.Name}]"
             call
-        
+
         member x.GetAliasTargetToDs() =
             match x.Parent.GetCore() with
                 | :? Flow as f -> [x.Name].ToArray()
@@ -412,9 +412,9 @@ module CoreModule =
 
             createAliasDefOnDemand()
             let alias = Alias(name, target, parent)
-            if parent.GetCore() :? Real 
-            then 
-                (target.RealTarget().IsNone && target.RealExFlowTarget().IsNone) 
+            if parent.GetCore() :? Real
+            then
+                (target.RealTarget().IsNone && target.RealExFlowTarget().IsNone)
                 |> verifyM $"Vertex {name} children type error"
 
             parent.GetGraph().AddVertex(alias) |> verifyM $"Duplicated alias name [{name}]"

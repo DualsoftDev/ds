@@ -56,7 +56,10 @@ module ConvertCoreExt =
 
         member x.GenerationLampIO() =
             for b in x.SystemLamps do
-                b.OutTag  <- createIOPLCTag(b.Name, b.OutAddress, In)
+                b.OutTag  <- createIOPLCTag(b.Name, b.OutAddress, Out)
+        member x.GenerationCondition() =
+            for b in x.SystemConditions do
+                b.InTag  <- createIOPLCTag(b.Name, b.InAddress, In)
 
         member x.GenerationButtonIO() =
             for b in x.SystemButtons do

@@ -10,7 +10,7 @@ open Engine.CodeGenCPU
 
 type DsSystem with
 
-    member s.C1_FinishRingCounter(): CommentedStatement list  = 
+    member s.C1_FinishRingCounter(): CommentedStatement list  =
         let allVertices = s.GetVertices()
         let calls = allVertices.OfType<Call>()
                           .Where(fun f->f.UsingCtr)
@@ -23,6 +23,6 @@ type DsSystem with
 
             for alias in aliasCalls do
                 let call = alias.V.GetPureCall().Value
-                let sets = alias.V.F.Expr 
+                let sets = alias.V.F.Expr
                 yield (sets) --% (alias.V.CTR, call.PresetCounter, "C1")
         ]

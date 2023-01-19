@@ -47,4 +47,4 @@ module Interface =
 
     type ITagManager =
         abstract Target: IQualifiedNamed
-        abstract Storages: Dictionary<string,IStorage> 
+        abstract Storages: Dictionary<string,IStorage>

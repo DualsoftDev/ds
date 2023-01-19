@@ -140,7 +140,7 @@ module DsDataType =
     let [<Literal>] CHAR    = "char"
     let [<Literal>] BOOL    = "bool"
 
-    
+
     let typeDefaultValue (typ:System.Type) =
         match typ.Name with
         | "Boolean"-> box false
@@ -161,34 +161,34 @@ module DsDataType =
     type DataType =
         | DuFLOAT32
         | DuFLOAT64
-        | DuINT8   
-        | DuUINT8  
-        | DuINT16  
-        | DuUINT16 
-        | DuINT32  
-        | DuUINT32 
-        | DuINT64  
-        | DuUINT64 
-        | DuSTRING 
-        | DuCHAR   
+        | DuINT8
+        | DuUINT8
+        | DuINT16
+        | DuUINT16
+        | DuINT32
+        | DuUINT32
+        | DuINT64
+        | DuUINT64
+        | DuSTRING
+        | DuCHAR
         | DuBOOL
         member x.ToText() =
             match x with
-            | DuFLOAT32 -> FLOAT32   
-            | DuFLOAT64 -> FLOAT64   
-            | DuINT8    -> INT8      
-            | DuUINT8   -> UINT8     
-            | DuINT16   -> INT16     
-            | DuUINT16  -> UINT16    
-            | DuINT32   -> INT32     
-            | DuUINT32  -> UINT32    
-            | DuINT64   -> INT64     
-            | DuUINT64  -> UINT64    
-            | DuSTRING  -> STRING    
-            | DuCHAR    -> CHAR      
-            | DuBOOL    -> BOOL   
+            | DuFLOAT32 -> FLOAT32
+            | DuFLOAT64 -> FLOAT64
+            | DuINT8    -> INT8
+            | DuUINT8   -> UINT8
+            | DuINT16   -> INT16
+            | DuUINT16  -> UINT16
+            | DuINT32   -> INT32
+            | DuUINT32  -> UINT32
+            | DuINT64   -> INT64
+            | DuUINT64  -> UINT64
+            | DuSTRING  -> STRING
+            | DuCHAR    -> CHAR
+            | DuBOOL    -> BOOL
 
-       
+
         member x.ToType() =
             match x with
             | DuFLOAT32 -> typedefof<single>
@@ -207,23 +207,23 @@ module DsDataType =
 
         member x.DefaultValue() = typeDefaultValue (x.ToType())
 
-    
+
     let DataToType(txt:string) =
         match txt.ToLower() with
         //system1 | system2   | plc
         | FLOAT32 | "single"           ->  DuFLOAT32
         | FLOAT64 | "double"           ->  DuFLOAT64
-        | INT8    | "sbyte"            ->  DuINT8   
-        | UINT8   | "byte"    |"byte"  ->  DuUINT8  
-        | INT16   | "short"   |"byte"  ->  DuINT16  
-        | UINT16  | "ushort"  |"word"  ->  DuUINT16 
-        | INT32   | "int"              ->  DuINT32  
-        | UINT32  | "uint"    |"dword" ->  DuUINT32 
-        | INT64   | "long"             ->  DuINT64  
-        | UINT64  | "ulong"   |"lword" ->  DuUINT64 
-        | STRING                       ->  DuSTRING 
-        | CHAR                         ->  DuCHAR   
-        | BOOL    | "boolean" | "bit"  ->  DuBOOL       
+        | INT8    | "sbyte"            ->  DuINT8
+        | UINT8   | "byte"    |"byte"  ->  DuUINT8
+        | INT16   | "short"   |"byte"  ->  DuINT16
+        | UINT16  | "ushort"  |"word"  ->  DuUINT16
+        | INT32   | "int"              ->  DuINT32
+        | UINT32  | "uint"    |"dword" ->  DuUINT32
+        | INT64   | "long"             ->  DuINT64
+        | UINT64  | "ulong"   |"lword" ->  DuUINT64
+        | STRING                       ->  DuSTRING
+        | CHAR                         ->  DuCHAR
+        | BOOL    | "boolean" | "bit"  ->  DuBOOL
         | _ -> failwithf $"'{txt}' DataToType Error check type"
 
 
@@ -232,7 +232,7 @@ module DsTextExport =
     //export Excel
     let [<Literal>] TextXlsAddress           = "외부주소"
     let [<Literal>] TextXlsVariable          = "내부변수"
-                                             
+
     let [<Literal>] TextXlsAutoBTN           = "자동선택"
     let [<Literal>] TextXlsManualBTN         = "수동선택"
     let [<Literal>] TextXlsDriveBTN          = "운전푸쉬"
@@ -242,7 +242,7 @@ module DsTextExport =
     let [<Literal>] TextXlsTestBTN           = "시운전푸쉬"
     let [<Literal>] TextXlsHomeBTN           = "복귀푸쉬"
     let [<Literal>] TextXlsReadyBTN          = "준비푸쉬"
-                                             
+
     let [<Literal>] TextXlsAutoModeLamp      = "자동램프"
     let [<Literal>] TextXlsManualModeLamp    = "수동램프"
     let [<Literal>] TextXlsDriveModeLamp     = "운전램프"
@@ -255,7 +255,7 @@ module DsTextExport =
 
 [<AutoOpen>]
 module DsTextProperty =
- 
+
     let [<Literal>] TextFlow    = "flow"
     let [<Literal>] TextSystem  = "sys"
     let [<Literal>] TextAddress = "addresses"
@@ -267,7 +267,7 @@ module DsTextProperty =
 
 [<AutoOpen>]
 module DsTextFunction =
- 
+
     let [<Literal>] TextMove    = "m"
     let [<Literal>] TextOnDelayTimer = "t"
     let [<Literal>] TextRingCounter = "c"

@@ -24,12 +24,11 @@ module CodeSpecUtil =
         | AliasRealInFlow     = 0b0010000000
         | AliasRealExInFlow   = 0b0100000000
         | AliasRealExInSystem = 0b1000000000
-    // 고쳐야 함
-    let InFlowWithoutReal = AliasRealExInFlow ||| AliasRealInFlow ||| AliasCallInFlow                                    ||| CallInFlow ||| RealExFlow                    // 0b11100110
-    let InFlowAll         = AliasRealExInFlow ||| AliasRealInFlow ||| AliasCallInFlow                                    ||| CallInFlow ||| RealExFlow ||| RealInFlow     // 0b11100111
-    let CoinTypeAll       = AliasRealExInFlow ||| AliasRealInFlow ||| AliasCallInFlow ||| AliasCallInReal ||| CallInReal ||| CallInFlow ||| RealExFlow                    // 0b11111110
-    let CallTypeAll       =                                                                                   CallInReal ||| CallInFlow                                   // 0b00001100
-    let RealNIndirectReal = AliasRealExInFlow ||| AliasRealInFlow                                                                       ||| RealExFlow ||| RealInFlow     // 0b11000011
-    let VertexAll         = AliasRealExInFlow ||| AliasRealInFlow ||| AliasCallInFlow ||| AliasCallInReal ||| CallInReal ||| CallInFlow ||| RealExFlow ||| RealInFlow     // 0b11111111
 
+    let InFlowWithoutReal = AliasRealExInSystem ||| AliasRealExInFlow ||| AliasRealInFlow ||| AliasCallInFlow                                    ||| CallInFlow ||| RealExFlow                    // 0b111100110
+    let InFlowAll         = AliasRealExInSystem ||| AliasRealExInFlow ||| AliasRealInFlow ||| AliasCallInFlow                                    ||| CallInFlow ||| RealExFlow ||| RealInFlow     // 0b111100111
+    let CoinTypeAll       = AliasRealExInSystem ||| AliasRealExInFlow ||| AliasRealInFlow ||| AliasCallInFlow ||| AliasCallInReal ||| CallInReal ||| CallInFlow ||| RealExFlow                    // 0b111111110
+    let CallTypeAll       =                                                                                                                          CallInReal ||| CallInFlow                    // 0b000001100
+    let RealNIndirectReal = AliasRealExInSystem ||| AliasRealExInFlow ||| AliasRealInFlow                                                                       ||| RealExFlow ||| RealInFlow     // 0b111000011
+    let VertexAll         = AliasRealExInSystem ||| AliasRealExInFlow ||| AliasRealInFlow ||| AliasCallInFlow ||| AliasCallInReal ||| CallInReal ||| CallInFlow ||| RealExFlow ||| RealInFlow     // 0b111111111
 

@@ -6,17 +6,17 @@ open System.Reactive.Subjects
 
 
 [<AutoOpen>]
-module CpuEvent = 
-    
-    type VertexStatusParam = 
+module CpuEvent =
+
+    type VertexStatusParam =
                 |Event of vertex:IVertex * status:Status4
 
     let StatusSubject = new Subject<VertexStatusParam>()
     let ValueSubject = new Subject<IStorage>()
-    
-    let ChangeValueEvent(x:IStorage) = 
+
+    let ChangeValueEvent(x:IStorage) =
         ValueSubject.OnNext(x)
-    
-    let ChangeStatusEvent(vertex:IVertex, status:Status4) =  
+
+    let ChangeStatusEvent(vertex:IVertex, status:Status4) =
         StatusSubject.OnNext(VertexStatusParam.Event (vertex, status))
-        
+

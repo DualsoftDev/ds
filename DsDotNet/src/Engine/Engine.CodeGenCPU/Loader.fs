@@ -81,7 +81,8 @@ module CpuLoader =
             if IsSpec v (RealInFlow ||| CoinTypeAll)  then
                 yield vm.M2_PauseMonitor()
 
-           // if IsSpec v (CallInReal ||| AliasCallInReal) then
+            if IsSpec v AliasRealExInSystem then
+                yield! vm.L1_LinkStart()
 
         ]
 
@@ -118,6 +119,7 @@ module CpuLoader =
         //DsSystem 물리 IO 생성
         sys.GenerationButtonIO()
         sys.GenerationLampIO()
+        sys.GenerationCondition()
         sys.GenerationJobIO()
 
         [
@@ -136,25 +138,25 @@ module CpuLoader =
             yield! applyTimerCounterSpec sys
         ]
 
-    let applyTagManager(system:DsSystem, storages:Storages) = 
-        let createTagM (sys:DsSystem) = 
+    let applyTagManager(system:DsSystem, storages:Storages) =
+        let createTagM (sys:DsSystem) =
             sys.TagManager <- SystemManager(sys, storages)
             sys.Flows.Iter(fun f->f.TagManager <- FlowManager(f))
             sys.ApiItems.Iter(fun a->a.TagManager <- ApiItemManager(a))
             sys.GetVertices().Iter(fun v->
                 match v with
-                | :? Real  
+                | :? Real
                     ->  v.TagManager <- VertexMReal(v)
-                | (:? RealExS | :? RealExF | :? Call | :? Alias) 
+                | (:? RealExS | :? RealExF | :? Call | :? Alias)
                     -> v.TagManager <-  VertexMCoin(v)
                 | _ -> failwithlog "ERROR createTagManager")
-        
-        let rec tagManagerBuild(sys:DsSystem)  =
-            createTagM (sys)  
-            sys.LoadedSystems
-                  .Iter(fun s->  tagManagerBuild (s.ReferenceSystem))     
 
-        tagManagerBuild (system)  
+        let rec tagManagerBuild(sys:DsSystem)  =
+            createTagM (sys)
+            sys.LoadedSystems
+                  .Iter(fun s->  tagManagerBuild (s.ReferenceSystem))
+
+        tagManagerBuild (system)
 
     [<Extension>]
     type Cpu =
@@ -166,7 +168,7 @@ module CpuLoader =
                          |>Seq.map(fun s->s, convertSystem(s))
                          |>Seq.append [system, statements]
                          |> dict
-            
+
 
             //test debug
             //system._auto.Value <- true

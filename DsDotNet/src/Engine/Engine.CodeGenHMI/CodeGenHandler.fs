@@ -16,7 +16,7 @@ module CodeGenHandler =
         let SelectGet target = 
             match target with
             | "ds-pilot" -> JsonWrapping(GenPilotCode(model))
-            | "ds-hmi"   -> JsonWrapping(GenHmiCode(model))
+            | "ds-hmi"   -> JsonWrapping(HmiCode(model).Generate())
             | _ -> JsonWrapping { 
                     from    = null; 
                     success = false; 

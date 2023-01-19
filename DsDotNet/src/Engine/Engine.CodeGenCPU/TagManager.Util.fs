@@ -20,7 +20,25 @@ module TagManagerUtil =
                 else name
 
         unique name 0 storages
+
+    let createDsTag(name:string, dataType:DataType) : IStorage =
+            let v = dataType.DefaultValue() 
+            match dataType with
+            | DuFLOAT32 -> new DsTag<single>(name, v |> unbox)
+            | DuFLOAT64 -> new DsTag<double>(name, v |> unbox)
+            | DuINT8    -> new DsTag<int8>  (name, v |> unbox)
+            | DuUINT8   -> new DsTag<uint8> (name, v |> unbox)
+            | DuINT16   -> new DsTag<int16> (name, v |> unbox)
+            | DuUINT16  -> new DsTag<uint16>(name, v |> unbox)
+            | DuINT32   -> new DsTag<int32> (name, v |> unbox)
+            | DuUINT32  -> new DsTag<uint32>(name, v |> unbox)
+            | DuINT64   -> new DsTag<int64> (name, v |> unbox)
+            | DuUINT64  -> new DsTag<uint64>(name, v |> unbox)
+            | DuSTRING  -> new DsTag<string>(name, v |> unbox)
+            | DuCHAR    -> new DsTag<char>  (name, v |> unbox)
+            | DuBOOL    -> new DsTag<bool>  (name, v |> unbox)
             
+
     let bit (v:Vertex) (storages:Storages) mark flag  = 
         let name = getUniqueName $"{v.QualifiedName}({mark})" storages
         let t = DsBit(name, false, v, flag)
@@ -29,28 +47,20 @@ module TagManagerUtil =
 
     let timer (v:Vertex) (storages:Storages)  mark flag = 
         let name = getUniqueName $"{v.QualifiedName}({mark}:TON)" storages
+
         let ts = TimerStruct.Create(TimerType.TON, storages,name, 0us, 0us) 
         DsTimer($"{v.QualifiedName}({mark})", false, v, flag, ts)
     
     let counter (v:Vertex) (storages:Storages) mark flag = 
         let name = getUniqueName $"{v.QualifiedName}({mark}:CTR)" storages
+
         let cs = CTRStruct.Create(CounterType.CTR, storages, name, 0us, 0us) 
         DsCounter($"{v.QualifiedName}({mark})", false, v, flag, cs)
-        
-    let dsBit (storages:Storages) name init = 
+
+    let dsTag (storages:Storages) name (dataType:DataType) = 
         let name = getUniqueName name storages
-        let t = DsTag<bool>($"{name}", init)
-        storages.Add(t.Name, t) |> ignore 
+        let t= createDsTag (name, dataType)
+        storages.Add(t.Name, t) 
         t
 
-    let dsInt (storages:Storages) name init = 
-        let name = getUniqueName name storages
-        let t = DsTag<int>($"{name}", init)
-        storages.Add(t.Name, t) |> ignore
-        t
-
-    let dsUint16 (storages:Storages) name init = 
-        let name = getUniqueName name storages
-        let t = DsTag<uint16>($"{name}", init)
-        storages.Add(t.Name, t) |> ignore
-        t
+       

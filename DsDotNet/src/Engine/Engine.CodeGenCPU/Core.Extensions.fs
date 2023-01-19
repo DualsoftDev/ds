@@ -51,7 +51,6 @@ module ConvertCoreExt =
         member s._dtimeh   = getSM(s).GetSysDateTag(SysDataTimeTag.DATET_H )
         member s._dtimem   = getSM(s).GetSysDateTag(SysDataTimeTag.DATET_M )
         member s._dtimes   = getSM(s).GetSysDateTag(SysDataTimeTag.DATET_S )
-        member s._dtimems  = getSM(s).GetSysDateTag(SysDataTimeTag.DATET_MS)
         member s._tout     = getSM(s).GetSysErrTag(SysErrorTag.TIMEOUT)
         member x.S = x |> getSM
 

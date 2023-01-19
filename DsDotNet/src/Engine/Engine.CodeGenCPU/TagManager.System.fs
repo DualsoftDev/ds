@@ -30,7 +30,6 @@ module SystemManagerModule =
     |DATET_H 
     |DATET_M 
     |DATET_S 
-    |DATET_MS
 
     [<AutoOpen>]
     type SysErrorTag = 
@@ -39,29 +38,34 @@ module SystemManagerModule =
     /// DsSystem Manager : System Tag  를 관리하는 컨테이어
     type SystemManager (sys:DsSystem, stg:Storages)  =
             //시스템 Tag는 하위 시스템과 공유
-        let dsSysBit  name init = if stg.ContainsKey(name) then stg[name] :?> DsTag<bool> else dsBit stg name init
-        let dsSysInt  name init = if stg.ContainsKey(name) then stg[name] :?> DsTag<int>  else dsInt stg name init
-        let dsSysUint name init = if stg.ContainsKey(name) then stg[name] :?> DsTag<uint16> else dsUint16 stg name init
+        let dsSysBit    name = (if stg.ContainsKey(name) then stg[name]   else dsTag stg  name  DuBOOL )   :?> DsTag<bool>
+        let dsSysUint8  name = (if stg.ContainsKey(name) then stg[name]   else dsTag stg  name  DuUINT8 )  :?> DsTag<uint8>
+        let dsSysUint16 name = (if stg.ContainsKey(name) then stg[name]   else dsTag stg  name  DuUINT16 ) :?> DsTag<uint16>
+       
+        let on     = let tmpOn = dsSysBit "_on" in tmpOn.Value <- true; tmpOn
+        let off    = dsSysBit "_off"   
+        let auto   = dsSysBit "_auto"  
+        let manual = dsSysBit "_manual"
+        let drive  = dsSysBit "_drive" 
+        let stop   = dsSysBit "_stop"  
+        let emg    = dsSysBit "_emg"   
+        let test   = dsSysBit "_test"  
+        let ready  = dsSysBit "_ready" 
+        let clear  = dsSysBit "_clear" 
+        let home   = dsSysBit "_home"  
+        let dtimeyy  = dsSysUint8 "_RTC_TIME[0]"          //ls xgi 현재시각[년도]
+        let dtimemm  = dsSysUint8 "_RTC_TIME[1]"          //ls xgi 현재시각[월]
+        let dtimedd  = dsSysUint8 "_RTC_TIME[2]"          //ls xgi 현재시각[일]
+        let dtimeh   = dsSysUint8 "_RTC_TIME[3]"          //ls xgi 현재시각[시]
+        let dtimem   = dsSysUint8 "_RTC_TIME[4]"          //ls xgi 현재시각[분]
+        let dtimes   = dsSysUint8 "_RTC_TIME[5]"          //ls xgi 현재시각[초]
+        //let dtimewk  = dsSysUint8 "_ms"                 //ls xgi 현재시각[요일]
+        //let dtimeyk  = dsSysUint8 "_ms"                 //ls xgi 현재시각[년대]
 
-        let on     = dsSysBit "_on"  true
-        let off    = dsSysBit "_off" false
-        let auto   = dsSysBit "_auto" false
-        let manual = dsSysBit "_manual" false
-        let drive  = dsSysBit "_drive" false
-        let stop   = dsSysBit "_stop" false
-        let emg    = dsSysBit "_emg" false
-        let test   = dsSysBit "_test" false
-        let ready  = dsSysBit "_ready" false
-        let clear  = dsSysBit "_clear" false
-        let home   = dsSysBit "_home" false
-        let dtimeyy  = dsSysInt "_yy" 0
-        let dtimemm  = dsSysInt "_mm" 0
-        let dtimedd  = dsSysInt "_dd" 0
-        let dtimeh   = dsSysInt "_h" 0
-        let dtimem   = dsSysInt "_m" 0
-        let dtimes   = dsSysInt "_s" 0
-        let dtimems  = dsSysInt "_ms" 0
-        let tout   = dsSysUint  "_tout" 10000us
+        let tout     = 
+            let tout = dsSysUint16  "_tout" 
+            tout.Value <- 10000us
+            tout
         
         interface ITagManager with
             member x.Target = sys
@@ -89,7 +93,6 @@ module SystemManagerModule =
             |DATET_H    ->    dtimeh   
             |DATET_M    ->    dtimem   
             |DATET_S    ->    dtimes   
-            |DATET_MS   ->    dtimems  
 
         member f.GetSysErrTag(st:SysErrorTag)     = 
             match st with

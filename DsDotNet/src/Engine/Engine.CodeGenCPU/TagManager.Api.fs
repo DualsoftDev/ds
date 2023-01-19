@@ -17,14 +17,18 @@ module ApiTagManagerModule =
     type ApiItemManager (a:ApiItem)  =    
         let s =  a.System.TagManager.Storages
 
-        let ps    = dsBit s $"{a.Name}(PS)" false  
-        let pr    = dsBit s $"{a.Name}(PR)" false  
+        let ps    = dsTag s $"{a.Name}(PS)" DuBOOL   
+        let pr    = dsTag s $"{a.Name}(PR)" DuBOOL   
                 
         interface ITagManager with
             member x.Target = a
             member x.Storages = s
 
         member f.GetApiTag(at:ApiTag)     = 
-            match at with
-            |PLANSET        -> ps   
-            |PLANRST         -> pr   
+            let t = 
+                match at with
+                |PLANSET        -> ps   
+                |PLANRST        -> pr   
+
+            t :?> DsTag<bool>
+

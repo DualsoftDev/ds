@@ -113,22 +113,6 @@ module TagModule =
     //let HiNibble  = 240   //0000xxxx
 
 
-    let typeDefaultValue (typ:System.Type) =
-        match typ.Name with
-        | "Boolean"-> box false
-        | "Byte"   -> box 0uy
-        | "Char"   -> box ' '
-        | "Double" -> box 0.0
-        | "Int16"  -> box 0s
-        | "Int32"  -> box 0
-        | "Int64"  -> box 0L
-        | "SByte"  -> box 0y
-        | "Single" -> box 0.0f
-        | "String" -> box ""
-        | "UInt16" -> box 0us
-        | "UInt32" -> box 0u
-        | "UInt64" -> box 0UL
-        | _  -> failwithlog "ERROR"
 
     // 다음 컴파일 에러 회피하기 위한 boxing
     // error FS0030: 값 제한이 있습니다. 값 'fwdCreateVariableWithValue'은(는) 제네릭 형식    val mutable fwdCreateVariableWithValue: (string -> '_a -> IVariable)을(를) 가지는 것으로 유추되었습니다.    'fwdCreateVariableWithValue'에 대한 인수를 명시적으로 만들거나, 제네릭 요소로 만들지 않으려는 경우 형식 주석을 추가하세요.

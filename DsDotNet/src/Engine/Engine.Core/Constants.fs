@@ -140,6 +140,24 @@ module DsDataType =
     let [<Literal>] CHAR    = "char"
     let [<Literal>] BOOL    = "bool"
 
+    
+    let typeDefaultValue (typ:System.Type) =
+        match typ.Name with
+        | "Boolean"-> box false
+        | "Byte"   -> box 0uy
+        | "Char"   -> box ' '
+        | "Double" -> box 0.0
+        | "Int16"  -> box 0s
+        | "Int32"  -> box 0
+        | "Int64"  -> box 0L
+        | "SByte"  -> box 0y
+        | "Single" -> box 0.0f
+        | "String" -> box ""
+        | "UInt16" -> box 0us
+        | "UInt32" -> box 0u
+        | "UInt64" -> box 0UL
+        | _  -> failwithlog "ERROR"
+
     type DataType =
         | DuFLOAT32
         | DuFLOAT64
@@ -168,7 +186,27 @@ module DsDataType =
             | DuUINT64  -> UINT64    
             | DuSTRING  -> STRING    
             | DuCHAR    -> CHAR      
-            | DuBOOL    -> BOOL      
+            | DuBOOL    -> BOOL   
+
+       
+        member x.ToType() =
+            match x with
+            | DuFLOAT32 -> typedefof<single>
+            | DuFLOAT64 -> typedefof<double>
+            | DuINT8    -> typedefof<int8>
+            | DuUINT8   -> typedefof<uint8>
+            | DuINT16   -> typedefof<int16>
+            | DuUINT16  -> typedefof<uint16>
+            | DuINT32   -> typedefof<int32>
+            | DuUINT32  -> typedefof<uint32>
+            | DuINT64   -> typedefof<int64>
+            | DuUINT64  -> typedefof<uint64>
+            | DuSTRING  -> typedefof<string>
+            | DuCHAR    -> typedefof<char>
+            | DuBOOL    -> typedefof<bool>
+
+        member x.DefaultValue() = typeDefaultValue (x.ToType())
+
     
     let DataToType(txt:string) =
         match txt.ToLower() with

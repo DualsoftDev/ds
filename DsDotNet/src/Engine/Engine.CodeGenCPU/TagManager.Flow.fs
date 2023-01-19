@@ -33,47 +33,49 @@ module FlowManagerModule =
     type FlowManager (f:Flow)  =    
         let s =  f.System.TagManager.Storages
 
-        let f_rop    = dsBit s $"{f.Name}(ROP)" false   // Ready Operation Mode
-        let f_aop    = dsBit s $"{f.Name}(AOP)" false   // Auto Operation Mode
-        let f_mop    = dsBit s $"{f.Name}(MOP)" false   // Manual Operation Mode 
-        let f_dop    = dsBit s $"{f.Name}(DOP)" false   // Drive Operation Mode 
-        let f_top    = dsBit s $"{f.Name}(TOP)" false   //  Test  Operation Mode (시운전) 
-        let f_sop    = dsBit s $"{f.Name}(SOP)" false   // Stop State 
-        let f_eop    = dsBit s $"{f.Name}(EOP)" false   // Emergency State 
-        let f_readycondi = dsBit s $"{f.Name}(SCR)" false  //system condition ready
-        let f_drivecondi = dsBit s $"{f.Name}(SCD)" false  //system condition drive
-        let f_auto   = dsBit s $"{f.Name}_auto" false
-        let f_manual = dsBit s $"{f.Name}_manual" false
-        let f_drive  = dsBit s $"{f.Name}_drive" false
-        let f_stop   = dsBit s $"{f.Name}_stop" false
-        let f_ready  = dsBit s $"{f.Name}_ready" false
-        let f_clear  = dsBit s $"{f.Name}_clear" false
-        let f_emg    = dsBit s $"{f.Name}_emg"  false
-        let f_test   = dsBit s $"{f.Name}_test" false  
-        let f_home   = dsBit s $"{f.Name}_home" false  
+        let f_rop    = dsTag s $"{f.Name}(ROP)" DuBOOL // Ready Operation Mode
+        let f_aop    = dsTag s $"{f.Name}(AOP)" DuBOOL // Auto Operation Mode
+        let f_mop    = dsTag s $"{f.Name}(MOP)" DuBOOL // Manual Operation Mode 
+        let f_dop    = dsTag s $"{f.Name}(DOP)" DuBOOL // Drive Operation Mode 
+        let f_top    = dsTag s $"{f.Name}(TOP)" DuBOOL //  Test  Operation Mode (시운전) 
+        let f_sop    = dsTag s $"{f.Name}(SOP)" DuBOOL // Stop State 
+        let f_eop    = dsTag s $"{f.Name}(EOP)" DuBOOL // Emergency State 
+        let f_readycondi = dsTag s $"{f.Name}(SCR)" DuBOOL  //system condition ready
+        let f_drivecondi = dsTag s $"{f.Name}(SCD)" DuBOOL  //system condition drive
+        let f_auto   = dsTag s $"{f.Name}_auto"     DuBOOL 
+        let f_manual = dsTag s $"{f.Name}_manual"   DuBOOL 
+        let f_drive  = dsTag s $"{f.Name}_drive"    DuBOOL 
+        let f_stop   = dsTag s $"{f.Name}_stop"     DuBOOL 
+        let f_ready  = dsTag s $"{f.Name}_ready"    DuBOOL 
+        let f_clear  = dsTag s $"{f.Name}_clear"    DuBOOL 
+        let f_emg    = dsTag s $"{f.Name}_emg"      DuBOOL 
+        let f_test   = dsTag s $"{f.Name}_test"     DuBOOL  
+        let f_home   = dsTag s $"{f.Name}_home"     DuBOOL   
                 
         interface ITagManager with
             member x.Target = f
             member x.Storages = s
 
         member f.GetFlowTag(ft:FlowTag)     = 
-            match ft with
-            |READY_OP        -> f_rop   
-            |AUTO_OP         -> f_aop   
-            |MANUAL_OP       -> f_mop   
-            |DRIVE_OP        -> f_dop   
-            |TEST_OP         -> f_top   
-            |STOP_OP         -> f_sop   
-            |EMERGENCY_OP    -> f_eop   
-            |AUTO_BIT        -> f_auto  
-            |MANUAL_BIT      -> f_manual
-            |DRIVE_BIT       -> f_drive 
-            |STOP_BIT        -> f_stop  
-            |READY_BIT       -> f_ready 
-            |CLEAR_BIT       -> f_clear 
-            |EMG_BIT         -> f_emg   
-            |TEST_BIT        -> f_test  
-            |HOME_BIT        -> f_home  
-            |READYCONDI_BIT  -> f_readycondi  
-            |DRIVECONDI_BIT  -> f_drivecondi  
-       
+            let t = 
+                match ft with
+                |READY_OP        -> f_rop   
+                |AUTO_OP         -> f_aop   
+                |MANUAL_OP       -> f_mop   
+                |DRIVE_OP        -> f_dop   
+                |TEST_OP         -> f_top   
+                |STOP_OP         -> f_sop   
+                |EMERGENCY_OP    -> f_eop   
+                |AUTO_BIT        -> f_auto  
+                |MANUAL_BIT      -> f_manual
+                |DRIVE_BIT       -> f_drive 
+                |STOP_BIT        -> f_stop  
+                |READY_BIT       -> f_ready 
+                |CLEAR_BIT       -> f_clear 
+                |EMG_BIT         -> f_emg   
+                |TEST_BIT        -> f_test  
+                |HOME_BIT        -> f_home  
+                |READYCONDI_BIT  -> f_readycondi  
+                |DRIVECONDI_BIT  -> f_drivecondi  
+            t :?> DsTag<bool>
+        

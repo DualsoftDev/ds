@@ -46,7 +46,7 @@ module CoreExtensionModule =
             match x.Lamps.TryFind(fun f -> f.Name = lmpName) with
             | Some lmp -> lmp.SettingFlow <- flow
             | None -> x.Lamps.Add(LampDef(lmpName, lmpType, addr, flow, HashSet[||])) |> verifyM $"Duplicated LampDef [{lmpName}]" // need lamp functions....
-       
+
         member x.AddCondtion(condiType:ConditionType, condiName: string, inAddr:string, flow:Flow) =
             checkSystem(x, flow, condiName)
 
@@ -59,7 +59,7 @@ module CoreExtensionModule =
         member x.SystemConditions   = x.Conditions |> Seq.map(fun con  -> con) //read only
         member x.SystemButtons      = x.Buttons |> Seq.map(fun btn  -> btn) //read only
         member x.SystemLamps        = x.Lamps   |> Seq.map(fun lamp -> lamp)//read only
-                                    
+
         member x.AutoButtons        = getButtons(x, DuAutoBTN)
         member x.ManualButtons      = getButtons(x, DuManualBTN)
         member x.DriveButtons       = getButtons(x, DuDriveBTN)
@@ -69,7 +69,7 @@ module CoreExtensionModule =
         member x.TestButtons        = getButtons(x, DuTestBTN)
         member x.HomeButtons        = getButtons(x, DuHomeBTN)
         member x.ReadyButtons       = getButtons(x, DuReadyBTN)
-                                    
+
         member x.DriveModeLamps     = getLamps(x, DuDriveModeLamp)
         member x.AutoModeLamps      = getLamps(x, DuAutoModeLamp)
         member x.ManualModeLamps    = getLamps(x, DuManualModeLamp)
@@ -78,8 +78,8 @@ module CoreExtensionModule =
         member x.TestModeLamps      = getLamps(x, DuTestModeLamp)
         member x.ReadyModeLamps     = getLamps(x, DuReadyModeLamp)
 
-        member x.ReadyConditions     = getConditions(x, ReadyState)
-        member x.DriveConditions     = getConditions(x, DriveState)
+        member x.ReadyConditions     = getConditions(x, DuReadyState)
+        member x.DriveConditions     = getConditions(x, DuDriveState)
 
         member x.GetMutualResetApis(src:ApiItem) =
             let getMutual(apiInfo:ApiResetInfo) =
@@ -96,11 +96,11 @@ module CoreExtensionModule =
 
     type Call with
         member x.System = x.Parent.GetSystem()
-    
+
 
 
 [<Extension>]
 type SystemExt =
-    [<Extension>] 
-    static member GetRecursiveSystems (x:DsSystem) : DsSystem seq = x |> getRecursiveSystems 
-        
+    [<Extension>]
+    static member GetRecursiveSystems (x:DsSystem) : DsSystem seq = x |> getRecursiveSystems
+

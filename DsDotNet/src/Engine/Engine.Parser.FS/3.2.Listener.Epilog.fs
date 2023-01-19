@@ -125,8 +125,8 @@ module EtcListenerModule =
                     let targetCndType =
                         let fstType = first.GetType()
                         match first with
-                        | :? DriveBlockContext     -> DriveState
-                        | :? ReadyBlockContext     -> ReadyState
+                        | :? DriveBlockContext     -> DuDriveState
+                        | :? ReadyBlockContext     -> DuReadyState
                         | _ -> failwith $"condition type error {fstType}"
 
                     let conditionDefs = first.Descendants<LampDefContext>().ToArray()

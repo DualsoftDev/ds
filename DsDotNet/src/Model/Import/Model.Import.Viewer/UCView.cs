@@ -250,6 +250,22 @@ namespace Dual.Model.Import
                         if (viewNode.LampType.Value == LampType.DuReadyModeLamp) nNode.Attr.FillColor = Color.Green;
                     }
                 }
+
+                if (viewNode.ViewType == ViewType.VCONDITION)
+                {
+                    if (viewNode.IsChildExist)
+                    {
+                        nNode.Attr.FillColor = Color.DarkGray;
+                        nNode.Attr.Shape = Shape.Box;
+                    }
+                    else
+                    {
+                        nNode.Attr.Shape = Shape.Box;
+                        if (viewNode.ConditionType.Value == ConditionType.DuReadyState) nNode.Attr.FillColor = Color.DodgerBlue;
+                        if (viewNode.ConditionType.Value == ConditionType.DuDriveState) nNode.Attr.FillColor = Color.DarkSlateBlue;
+                    }
+                }
+
                 if (viewNode.ViewType == ViewType.VREAL)
                     nNode.Attr.Shape = Shape.Box;
                 if (viewNode.ViewType == ViewType.VDUMMY)

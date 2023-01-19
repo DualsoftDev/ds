@@ -12,7 +12,7 @@ module InterfaceClass =
         | REAL          //실제 나의 시스템 1 bit
         | REALExF        //다른 Flow real
         | REALExS        //다른 System real
-        | CALL          //지시관찰 
+        | CALL          //지시관찰
         | IF            //인터페이스
         | COPY_VALUE          //시스템복사
         | COPY_REF           //시스템참조
@@ -27,17 +27,18 @@ module InterfaceClass =
             member x.IsRealorCall =  x.IsReal || x.IsCall
 
     type ViewType =
-        | VFLOW          
-        | VREAL          
-        | VREALEx        
-        | VCALL          
-        | VIF            
-        | VCOPY_VALUE    
-        | VCOPY_REF      
-        | VDUMMY         
-        | VBUTTON        
-        | VLAMP          
-    
+        | VFLOW
+        | VREAL
+        | VREALEx
+        | VCALL
+        | VIF
+        | VCOPY_VALUE
+        | VCOPY_REF
+        | VDUMMY
+        | VBUTTON
+        | VLAMP
+        | VCONDITION
+
     ///인터페이스 Tag 기본 형식
     type ExcelCase =
         | XlsAddress             //주소
@@ -60,50 +61,50 @@ module InterfaceClass =
         | XlsTestModeLamp        //시운전 모드 램프
         | XlsConditionReady      //준비 모드  램프
         | XlsConditionDrive      //준비 모드  램프
-        
+
     with
         member x.ToText() =
             match x with
             | XlsAddress           -> TextXlsAddress
-            | XlsVariable          -> TextXlsVariable   
-            | XlsAutoBTN           -> TextXlsAutoBTN        
-            | XlsManualBTN         -> TextXlsManualBTN      
-            | XlsDriveBTN          -> TextXlsDriveBTN       
-            | XlsStopBTN           -> TextXlsStopBTN        
-            | XlsClearBTN          -> TextXlsClearBTN       
-            | XlsEmergencyBTN      -> TextXlsEmergencyBTN     
-            | XlsTestBTN           -> TextXlsTestBTN      
-            | XlsReadyBTN          -> TextXlsReadyBTN        
-            | XlsHomeBTN           -> TextXlsHomeBTN        
-            | XlsAutoModeLamp      -> TextXlsAutoModeLamp  
-            | XlsManualModeLamp    -> TextXlsManualModeLamp 
-            | XlsDriveModeLamp     -> TextXlsDriveModeLamp    
-            | XlsStopModeLamp      -> TextXlsStopModeLamp   
+            | XlsVariable          -> TextXlsVariable
+            | XlsAutoBTN           -> TextXlsAutoBTN
+            | XlsManualBTN         -> TextXlsManualBTN
+            | XlsDriveBTN          -> TextXlsDriveBTN
+            | XlsStopBTN           -> TextXlsStopBTN
+            | XlsClearBTN          -> TextXlsClearBTN
+            | XlsEmergencyBTN      -> TextXlsEmergencyBTN
+            | XlsTestBTN           -> TextXlsTestBTN
+            | XlsReadyBTN          -> TextXlsReadyBTN
+            | XlsHomeBTN           -> TextXlsHomeBTN
+            | XlsAutoModeLamp      -> TextXlsAutoModeLamp
+            | XlsManualModeLamp    -> TextXlsManualModeLamp
+            | XlsDriveModeLamp     -> TextXlsDriveModeLamp
+            | XlsStopModeLamp      -> TextXlsStopModeLamp
             | XlsEmergencyModeLamp -> TextXlsEmergencyModeLamp
             | XlsTestModeLamp      -> TextXlsTestModeLamp
-            | XlsReadyModeLamp     -> TextXlsReadyModeLamp 
-            | XlsConditionReady    -> TextXlsConditionReady 
-            | XlsConditionDrive    -> TextXlsConditionDrive 
-            
+            | XlsReadyModeLamp     -> TextXlsReadyModeLamp
+            | XlsConditionReady    -> TextXlsConditionReady
+            | XlsConditionDrive    -> TextXlsConditionDrive
+
     let TextToXlsType(txt:string) =
         match txt.ToLower() with
-        | TextXlsAddress        ->  XlsAddress     
-        | TextXlsVariable       ->  XlsVariable    
-        | TextXlsAutoBTN        ->  XlsAutoBTN       
-        | TextXlsManualBTN      ->  XlsManualBTN     
-        | TextXlsEmergencyBTN   ->  XlsEmergencyBTN  
-        | TextXlsStopBTN        ->  XlsStopBTN       
-        | TextXlsDriveBTN       ->  XlsDriveBTN        
-        | TextXlsTestBTN        ->  XlsTestBTN     
-        | TextXlsClearBTN       ->  XlsClearBTN      
-        | TextXlsHomeBTN        ->  XlsHomeBTN       
-        | TextXlsAutoModeLamp   ->  XlsAutoModeLamp 
+        | TextXlsAddress        ->  XlsAddress
+        | TextXlsVariable       ->  XlsVariable
+        | TextXlsAutoBTN        ->  XlsAutoBTN
+        | TextXlsManualBTN      ->  XlsManualBTN
+        | TextXlsEmergencyBTN   ->  XlsEmergencyBTN
+        | TextXlsStopBTN        ->  XlsStopBTN
+        | TextXlsDriveBTN       ->  XlsDriveBTN
+        | TextXlsTestBTN        ->  XlsTestBTN
+        | TextXlsClearBTN       ->  XlsClearBTN
+        | TextXlsHomeBTN        ->  XlsHomeBTN
+        | TextXlsAutoModeLamp   ->  XlsAutoModeLamp
         | TextXlsManualModeLamp ->  XlsManualModeLamp
-        | TextXlsDriveModeLamp  ->  XlsDriveModeLamp 
-        | TextXlsStopModeLamp   ->  XlsStopModeLamp    
+        | TextXlsDriveModeLamp  ->  XlsDriveModeLamp
+        | TextXlsStopModeLamp   ->  XlsStopModeLamp
         | TextXlsReadyModeLamp  ->  XlsReadyModeLamp
         | TextXlsConditionReady ->  XlsConditionReady
         | TextXlsConditionDrive ->  XlsConditionDrive
 
-        
+
         | _ -> failwithf $"'{txt}' TextXlsType Error check type"

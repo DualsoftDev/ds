@@ -22,13 +22,13 @@ module PPTObjectModule =
 
     let Objkey(iPage, Id) = $"{iPage}page{Id}"
     let TrimSpace(name:string) = name.TrimStart(' ').TrimEnd(' ')
-    let CopyName(name:string, cnt) = sprintf "Copy%d_%s" cnt (name.Replace(".", "_")) 
+    let CopyName(name:string, cnt) = sprintf "Copy%d_%s" cnt (name.Replace(".", "_"))
 
-    let GetSysNApi(flowName:string, name:string) = 
+    let GetSysNApi(flowName:string, name:string) =
         $"{flowName}_{TrimSpace (name.Split('$').[0])}", TrimSpace(name.Split('$').[1])
-    let GetSysNFlow(fileName:string, name:string, pageNum:int) = 
+    let GetSysNFlow(fileName:string, name:string, pageNum:int) =
             if(name.StartsWith("$"))
-                then 
+                then
                     if name.Contains(".")
                     then (TrimSpace(name.Split('.').[0]).TrimStart('$')), TrimSpace(name.Split('.').[1])
                     else (TrimSpace(name.TrimStart('$'))), "_"
@@ -88,13 +88,13 @@ module PPTObjectModule =
                     if (connStart = null && connEnd = null) then  conn.ErrorConnect(ErrID._4, startName, endName, iPage)
                     if (connStart = null) then  conn.ErrorConnect(ErrID._5, startName, endName, iPage)
                     if (connEnd = null) then  conn.ErrorConnect(ErrID._6, startName, endName, iPage)
-                    if (existHead && existTail) 
+                    if (existHead && existTail)
                     then
                         if(not dashLine)
-                        then 
-                            if(headArrow && tailArrow) then  conn.ErrorConnect(ErrID._8, startName, endName, iPage)           
-                            if((headArrow || tailArrow)|>not)   then  conn.ErrorConnect(ErrID._9, startName, endName, iPage)  
-                            if(not headArrow && not tailArrow)  then  conn.ErrorConnect(ErrID._10, startName, endName, iPage) 
+                        then
+                            if(headArrow && tailArrow) then  conn.ErrorConnect(ErrID._8, startName, endName, iPage)
+                            if((headArrow || tailArrow)|>not)   then  conn.ErrorConnect(ErrID._9, startName, endName, iPage)
+                            if(not headArrow && not tailArrow)  then  conn.ErrorConnect(ErrID._10, startName, endName, iPage)
 
 
                     //인과 타입과 <START, END> 역전여부
@@ -135,29 +135,29 @@ module PPTObjectModule =
 
     let nameCheck(shape:Shape, nodeType:NodeType, iPage:int) =
         let name = GetBracketsReplaceName(shape.InnerText) |> trimSpace
-        if name.Contains(";") 
+        if name.Contains(";")
             then shape.ErrorName(ErrID._18, iPage)
-        
+
         //REAL other flow 아니면 이름에 '.' 불가
-        let checkDotErr() = 
-            if nodeType <> REALExF && name.Contains(".") 
+        let checkDotErr() =
+            if nodeType <> REALExF && name.Contains(".")
             then  shape.ErrorName(ErrID._19, iPage)
 
         match nodeType with
         | REALExF      -> ()
         | REALExS      -> ()
-        | CALL        -> if  name.Contains("$")|>not 
+        | CALL        -> if  name.Contains("$")|>not
                          then  shape.ErrorName(ErrID._12, iPage)
 
-        | COPY_REF    
+        | COPY_REF
         | COPY_VALUE  -> let name, number = GetTailNumber(shape.InnerText)
                          if GetSquareBrackets(name, false).length() = 0
                          then  shape.ErrorName(ErrID._7, iPage)
-        | IF          
-        | REAL        
-        | DUMMY       
-        | BUTTON       
-        | CONDITION      
+        | IF
+        | REAL
+        | DUMMY
+        | BUTTON
+        | CONDITION
         | LAMP        -> checkDotErr()
 
     let getBtnType(key:string) =
@@ -186,8 +186,8 @@ module PPTObjectModule =
 
     let getConditionType(key:string) =
         match TrimSpace key with
-        | "R"   -> ConditionType.ReadyState
-        | "D"   -> ConditionType.DriveState
+        | "R"   -> ConditionType.DuReadyState
+        | "D"   -> ConditionType.DuDriveState
         | _     ->  failwith $"{key} is Error Type"
 
 
@@ -212,8 +212,8 @@ module PPTObjectModule =
         let mutable ifTXs    = HashSet<string>()
         let mutable ifRXs    = HashSet<string>()
         let mutable nodeType:NodeType = NodeType.REAL
-        let mutable btnType:BtnType option = None 
-        let mutable lampType:LampType option = None 
+        let mutable btnType:BtnType option = None
+        let mutable lampType:LampType option = None
 
 
 
@@ -225,18 +225,18 @@ module PPTObjectModule =
             then
                 let jobBaseName = $"{pageTitle}_{barckets}" //jobBaseName + apiName = JobName
                 jobInfos.Add(jobBaseName , HashSet<string>())
-                let copys = 
-                    [for i in [1..groupJob] do 
+                let copys =
+                    [for i in [1..groupJob] do
                         yield sprintf "%s%d" jobBaseName i]
-                
+
                 copys
                 |> Seq.iter(fun copy ->
-                    copySystems.Add(copy, orgiSysName) 
+                    copySystems.Add(copy, orgiSysName)
                     jobInfos[jobBaseName].Add(copy)|>ignore)
 
             else
-                let copys = 
-                    barckets.Split(';') 
+                let copys =
+                    barckets.Split(';')
                     |> trimStartEndSeq
                     |> Seq.map(fun sys -> $"{pageTitle}_{sys}")
 
@@ -244,7 +244,7 @@ module PPTObjectModule =
                 then Office.ErrorName(shape, ErrID._33, iPage)
 
                 copys
-                |> Seq.iter(fun copy -> 
+                |> Seq.iter(fun copy ->
                     copySystems.Add(copy, orgiSysName)
                     jobInfos.Add(copy, [copy]|>HashSet))
 
@@ -252,7 +252,7 @@ module PPTObjectModule =
             ifName <- GetBracketsReplaceName(text) |> trimSpace
             let txrx = GetSquareBrackets(shape.InnerText, false)
             if(txrx.length() > 0)
-            then 
+            then
                 if(txrx.Contains('~'))
                 then
                     let txs = (txrx.Split('~')[0])
@@ -261,16 +261,16 @@ module PPTObjectModule =
                     ifRXs  <- rxs.Split(';').Where(fun f->f=""|>not) |> trimStartEndSeq |> Seq.filter(fun f->f="_"|>not) |> HashSet
                 else
                     shape.ErrorName(ErrID._43, iPage)
-              
+
         let getBracketItems (name:string) =
             name.Split(']').Where(fun w->w <> "")
             |> Seq.map(fun f->  GetSquareBrackets(f+"]", false), GetBracketsReplaceName(f+"]"))
 
         do
             name <-  GetBracketsReplaceName(shape.InnerText)  |> trimSpace
-            
+
             nodeType <-
-                if(shape.CheckRectangle())      
+                if(shape.CheckRectangle())
                 then if name.Contains(".") then REALExF else REAL
                 elif(shape.CheckHomePlate())    then IF
                 elif(shape.CheckFoldedCornerRound()) then COPY_VALUE
@@ -280,22 +280,22 @@ module PPTObjectModule =
                 elif(shape.CheckBevelShapeRound())  then  BUTTON
                 elif(shape.CheckCondition())  then  CONDITION
                 else  shape.ErrorName(ErrID._1, iPage)
-                
+
             nameCheck (shape, nodeType, iPage)
 
 
             match nodeType with
             |CALL|REAL ->
-                     GetSquareBrackets(shape.InnerText, true )  
+                     GetSquareBrackets(shape.InnerText, true )
                      |> fun text -> if text = ""|>not then updateSafety text
             |IF ->   updateIF shape.InnerText
             |COPY_REF
-            |COPY_VALUE -> 
+            |COPY_VALUE ->
                      let name, number = GetTailNumber(shape.InnerText)
                      GetSquareBrackets(name, false)
-                        |> fun text -> 
+                        |> fun text ->
                             updateCopySys  (text ,(GetBracketsReplaceName(name) |> trimSpace), number)
-            
+
             |BUTTON ->          getBracketItems(shape.InnerText).ForEach(fun (n, t) -> btnDefs.Add(n, t|> getBtnType))
             |LAMP   ->          getBracketItems(shape.InnerText).ForEach(fun (n, t) -> lampDefs.Add(n, t|> getLampType))
             |CONDITION -> getBracketItems(shape.InnerText).ForEach(fun (n, t) -> condiDefs.Add(n, t|> getConditionType))
@@ -331,14 +331,14 @@ module PPTObjectModule =
         let mutable reverse = false
         let mutable causal:ModelingEdgeType = ModelingEdgeType.StartEdge
         do
-            
-            GetCausal(conn, iPage, sNode.Name, eNode.Name) 
+
+            GetCausal(conn, iPage, sNode.Name, eNode.Name)
             |> fun(c, r) -> causal <- c;reverse <- r
 
         member x.PageNum = iPage
         member x.ConnectionShape = conn
         member x.Id = iEdge
-        member x.IsInterfaceEdge:bool = x.StartNode.NodeType = IF || x.EndNode.NodeType = IF 
+        member x.IsInterfaceEdge:bool = x.StartNode.NodeType = IF || x.EndNode.NodeType = IF
         member x.StartNode:pptNode = if(reverse) then eNode else sNode
         member x.EndNode:pptNode =   if(reverse) then sNode else eNode
         member x.ParentId = 0 //reserve
@@ -364,7 +364,7 @@ module PPTObjectModule =
             let reals  = nodes.Where(fun w -> w.NodeType.IsReal)
             let calls  = nodes.Where(fun w -> w.NodeType.IsCall)
 
-            if(reals.Count() > 1) 
+            if(reals.Count() > 1)
             then  Office.ErrorPPT(Group, ErrID._23, $"Reals:{reals|>nodeNames}", iPage)
 
             parent <-
@@ -380,5 +380,4 @@ module PPTObjectModule =
         member x.PageNum = iPage
 
         member x.Parent:pptNode option = parent
-        member x.Children =  childSet.Values 
-    
+        member x.Children =  childSet.Values

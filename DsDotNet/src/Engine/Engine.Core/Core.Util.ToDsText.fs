@@ -281,8 +281,8 @@ module internal ToDsTextModule =
             if cnds.Any() then
                 let getTargetCnds (target:ConditionType) = 
                     cnds |> Seq.filter(fun c -> c.ConditionType = target)
-                let driveCnds = getTargetCnds DriveState
-                let readyCnds = getTargetCnds ReadyState
+                let driveCnds = getTargetCnds DuDriveState
+                let readyCnds = getTargetCnds DuReadyState
                 yield $"{tab}[conditions] = {lb}"
                 let conditionsToDs(category:string, conditions:ConditionDef seq) = 
                     [

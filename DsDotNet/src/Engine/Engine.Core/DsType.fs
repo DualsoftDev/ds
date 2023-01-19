@@ -37,5 +37,5 @@ module DsType =
         | DuReadyModeLamp     //대기 모드 램프
 
     type ConditionType =
-        | ReadyState
-        | DriveState
+        | DuReadyState
+        | DuDriveState

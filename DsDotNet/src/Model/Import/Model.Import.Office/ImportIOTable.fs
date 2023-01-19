@@ -154,8 +154,8 @@ module ImportIOTable =
                         | XlsEmergencyModeLamp -> updateLamp (row, LampType.DuEmergencyModeLamp  , tableIO)
                         | XlsTestModeLamp      -> updateLamp (row, LampType.DuTestModeLamp       , tableIO)
                         | XlsReadyModeLamp     -> updateLamp (row, LampType.DuReadyModeLamp      , tableIO)
-                        | XlsConditionReady    -> updateCondition (row, ConditionType.ReadyState , tableIO)
-                        | XlsConditionDrive    -> updateCondition (row, ConditionType.DriveState , tableIO)
+                        | XlsConditionReady    -> updateCondition (row, ConditionType.DuReadyState , tableIO)
+                        | XlsConditionDrive    -> updateCondition (row, ConditionType.DuDriveState , tableIO)
             )
         with ex ->  failwithf  $"{ex.Message}"
         DoWork(0);

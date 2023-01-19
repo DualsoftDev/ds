@@ -9,15 +9,15 @@ open System.Runtime.CompilerServices
 open System.Linq
 
 [<AutoOpen>]
-module rec ViewModule = 
+module rec ViewModule =
 
-   
-    type ViewNode(name:string, viewType:ViewType, coreVertex:Vertex option, btnType:BtnType option, lampType:LampType option)  = 
 
-        new (viewType) = ViewNode("", viewType, None, None, None)
-        new (name, viewType) = ViewNode(name, viewType, None, None, None)
-        new (coreVertex:Vertex) = 
-              let name = 
+    type ViewNode(name:string, viewType:ViewType, coreVertex:Vertex option, btnType:BtnType option, lampType:LampType option, cType:ConditionType option)  =
+
+        new (viewType) = ViewNode("", viewType, None, None, None, None)
+        new (name, viewType) = ViewNode(name, viewType, None, None, None, None)
+        new (coreVertex:Vertex) =
+              let name =
                   match coreVertex  with
                     | :? Alias as a -> match a.TargetWrapper with
                                        | DuAliasTargetReal r -> r.Name
@@ -25,11 +25,12 @@ module rec ViewModule =
                                        | DuAliasTargetRealExFlow rf -> rf.Name
                                        | DuAliasTargetRealExSystem rs -> rs.Name
                     | _ -> coreVertex.Name
-                
-              ViewNode(name, VREAL, Some(coreVertex),  None, None)
-            
-        new (name, btnType:BtnType) = ViewNode(name, VBUTTON, None, Some(btnType), None)
-        new (name, lampType:LampType) = ViewNode(name, VLAMP, None, None, Some(lampType))
+
+              ViewNode(name, VREAL, Some(coreVertex),  None, None, None)
+
+        new (name, btnType:BtnType) = ViewNode(name, VBUTTON, None, Some(btnType), None, None)
+        new (name, lampType:LampType) = ViewNode(name, VLAMP, None, None, Some(lampType), None)
+        new (name, cType:ConditionType) = ViewNode(name, VCONDITION, None, None, None, Some(cType))
 
         member val Edges = HashSet<ModelingEdgeInfo<ViewNode>>()
         member val Singles = HashSet<ViewNode>()
@@ -45,24 +46,25 @@ module rec ViewModule =
         member x.CoreVertex = coreVertex
         member x.BtnType =  btnType
         member x.LampType =  lampType
+        member x.ConditionType =  cType
         member x.IsChildExist =  x.Edges.Count>0 || x.Singles.Count>0
         member x.Name =  name
         member x.UIKey = if coreVertex.IsSome
                          then $"{name};{coreVertex.Value.QualifiedName.GetHashCode()}"
                          else $"{name};{x.GetHashCode()}"
 
-        member x.UsedViewNodes = 
+        member x.UsedViewNodes =
                             let thisChildren  = x.Edges |> Seq.collect(fun e-> e.Sources @ e.Targets)
                                                         |> Seq.append x.Singles
                             [
-                                yield! thisChildren 
+                                yield! thisChildren
                                 yield! thisChildren |> Seq.collect(fun x->x.UsedViewNodes)
                             ]
-    
 
-    let getViewEdge(edge:ModelingEdgeInfo<string> ,dummy:pptDummy , dummys:pptDummy seq,  dicV:IDictionary<Vertex, ViewNode>, dicDummy:IDictionary<string, ViewNode>) =  
-        let getVertex(dummyKey:string) =  
-            let createDummy() =  
+
+    let getViewEdge(edge:ModelingEdgeInfo<string> ,dummy:pptDummy , dummys:pptDummy seq,  dicV:IDictionary<Vertex, ViewNode>, dicDummy:IDictionary<string, ViewNode>) =
+        let getVertex(dummyKey:string) =
+            let createDummy() =
                 if dicDummy.ContainsKey(dummyKey) then dicDummy.[dummyKey]
                 else
                      let viewNode = ViewNode(ViewType.VDUMMY)
@@ -74,27 +76,26 @@ module rec ViewModule =
             let findV = dummy.GetVertex(dummyKey);
             let vertex = if findV.IsNonNull() then dicV.[findV] else createDummy()
             vertex
-        
+
         let src = getVertex (edge.Sources[0]);
         let tgt = getVertex (edge.Targets[0]);
         ModelingEdgeInfo<ViewNode>(src, edge.EdgeSymbol, tgt)
 
 [<Extension>]
-type ViewModuleExt = 
-    [<Extension>] 
-    static member GetDummyFlow(flow:Flow, dummys:pptDummy seq, dicV:IDictionary<Vertex, ViewNode>, dicDummy:IDictionary<string, ViewNode>) =  
-            dummys 
+type ViewModuleExt =
+    [<Extension>]
+    static member GetDummyFlow(flow:Flow, dummys:pptDummy seq, dicV:IDictionary<Vertex, ViewNode>, dicDummy:IDictionary<string, ViewNode>) =
+            dummys
             |> Seq.filter(fun dummy  -> dummy.GetParent().GetCore() = flow)
-            |> Seq.collect(fun dummy -> dummy.Edges 
+            |> Seq.collect(fun dummy -> dummy.Edges
                                         |> Seq.map(fun edge -> getViewEdge(edge, dummy, dummys, dicV, dicDummy)))
 
-    [<Extension>] 
-    static member GetDummyReal(real:Real, dummys:pptDummy seq, dicV:IDictionary<Vertex, ViewNode>, dicDummy:IDictionary<string, ViewNode>) =  
-            dummys 
+    [<Extension>]
+    static member GetDummyReal(real:Real, dummys:pptDummy seq, dicV:IDictionary<Vertex, ViewNode>, dicDummy:IDictionary<string, ViewNode>) =
+            dummys
             |> Seq.filter(fun dummy  -> dummy.GetParent().GetCore() = real)
-            |> Seq.collect(fun dummy -> dummy.Edges 
+            |> Seq.collect(fun dummy -> dummy.Edges
                                         |> Seq.map(fun edge -> getViewEdge(edge, dummy, dummys, dicV, dicDummy)))
-           
-    [<Extension>] 
+
+    [<Extension>]
     static member GetDummyMembers(dummys:pptDummy seq) =   dummys  |> Seq.collect(fun f-> f.Members)
-     

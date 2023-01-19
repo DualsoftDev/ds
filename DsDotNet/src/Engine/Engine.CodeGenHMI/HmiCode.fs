@@ -176,12 +176,14 @@ module HmiGenModule =
                 match vertex with
                 | :? Real as r -> r.QualifiedName
                 | :? Call as c -> getJobName c.CallTargetJob.Name
+                | :? RealOtherFlow as rf -> rf.QualifiedName
+                | :? RealOtherSystem as rs -> $"{system.Name}.{rs.Name}"
                 | :? Alias as a ->
                     match a.TargetWrapper with
-                    | DuAliasTargetReal r    -> r.QualifiedName
-                    | DuAliasTargetRealExFlow rx -> rx.QualifiedName
-                    | DuAliasTargetRealExSystem rx -> rx.QualifiedName
-                    | DuAliasTargetCall c    -> getJobName c.CallTargetJob.Name
+                    | DuAliasTargetReal r -> r.QualifiedName
+                    | DuAliasTargetRealExFlow rf -> rf.QualifiedName
+                    | DuAliasTargetRealExSystem rs -> $"{system.Name}.{rs.Name}"
+                    | DuAliasTargetCall c -> getJobName c.CallTargetJob.Name
                 | _  -> null
             addToUsedIn vertName system.Name
             addToUsedIn vertName flow.QualifiedName

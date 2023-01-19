@@ -14,16 +14,33 @@ module StateBuilderModule =
 
     module State =
         let inline run z (State f) = f z
-        let ret a = State(fun state -> (a, state))
-        let bind binder state =
+        let ret a = State(fun z -> (a, z))
+        (*
+            ( a -> [b] ) -> [a] -> [b]
+            ( a -> State<z, b> ) -> State<z, a> -> State<z, b>
+         *)
+        //let bind binder stateA =
+        //    State(fun z ->
+        //        let a, za = run z stateA
+        //        let stateB = binder a
+        //        run za stateB)
+
+        let bind g (State f) =
             State(fun z ->
-                let a, z' = state |> run z
-                binder a |> run z')
+                let a, z' = f z
+                run z' (g a))
+
         let get = State(fun z -> z, z)
         let put z = State(fun _ -> (), z)
-        let map f s = State(fun z ->
-            let a, z' = run z s
-            f a, z')
+
+        (*
+            ( a -> b ) -> [a] -> [b]
+            ( a -> b ) -> State<z, a> -> State<z, b>
+         *)
+        let map f stateA =
+            State(fun z ->
+                let a, za = run z stateA
+                f a, za)
 
     /// The state monad passes around an explicit internal state that can be
     /// updated along the way. It enables the appearance of mutability in a purely
@@ -54,6 +71,11 @@ module StateBuilderModule =
     let state = new StateBuilder()
 
 module private ShowSamples =
+    let verify c = if not c then failwith "ERROR"
+    let verifyM (message:string) condition =
+        if not condition then
+            failwith message
+
     let sumOfMultiplesOfThreeUptoTwenty =
         // Reads like imperative code, but it's actually chaining a series of transformations
         // on an invisible state value behind the scenes. No mutable state here.
@@ -64,10 +86,6 @@ module private ShowSamples =
                     do! State.put (z + i)
             return! State.get
         } |> State.run 0 |> fst
-    let verify c = if not c then failwith "ERROR"
-    let verifyM (message:string) condition =
-        if not condition then
-            failwith message
     verify ( sumOfMultiplesOfThreeUptoTwenty = ([ 3..3..20 ] |> List.sum) )
 
     module SeqBased =
@@ -96,17 +114,17 @@ module private ShowSamples =
 
     module ListBased =
         /// Cons the input to the state.  'Z = 's list
-        let push x = State(fun (xs: 's list) -> (), x::xs)
+        let push x = State(fun z -> (), x::z)
         /// Update and remove the return value from the top of the stack
-        let pop = State(fun (xs: 's list) ->
-            match xs with
+        let pop = State(fun z ->
+            match z with
             | [] -> failwith "Stack is empty"
             | h::t -> h, t)
         /// Update the return value to the top of the stack
-        let peek = State(fun (xs: 's list) ->
-            match xs with
+        let peek = State(fun z ->
+            match z with
             | [] -> failwith "Stack is empty"
-            | h::t -> h, xs)
+            | h::t_ -> h, z)
 
 
         let comp =
@@ -190,14 +208,14 @@ module private ShowSamples =
 
         let withoutHistory =
             let up n : State<Coord, Coord> =
-                State(fun ((x, y): Coord) -> (x, y+n), (x, y+n))
+                State(fun ((x, y): Coord) -> let c=(x, y+n) in (c, c))
             let down n : State<Coord, Coord> =
-                State(fun ((x, y): Coord) -> (x, y-n), (x, y-n))
+                State(fun ((x, y): Coord) -> let c=(x, y-n) in (c, c))
             let right n : State<Coord, Coord> =
-                State(fun ((x, y): Coord) -> (x+n, y), (x+n, y))
+                State(fun ((x, y): Coord) -> let c=(x+n, y) in (c, c))
             let left n : State<Coord, Coord> =
-                State(fun ((x, y): Coord) -> (x-n, y), (x-n, y))
-            let get = State(fun ((x, y): Coord) -> (x, y), (x, y))
+                State(fun ((x, y): Coord) -> let c=(x-n, y) in (c, c))
+            let get = State(fun ((x, y): Coord) -> let c=(x, y) in (c, c))
             let put ((x, y): Coord) = State(fun z -> (), (x, y))
 
 

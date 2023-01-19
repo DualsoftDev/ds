@@ -127,7 +127,7 @@ module internal XgiFile =
     /// rung 및 local var 에 대한 문자열 xml 을 전체 xml project file 에 embedding 시켜 outputPath 파일에 저장한다.
     /// Template file (EmptyLSISProject.xml) 에서 marking 된 위치를 참고로 하여 rung 및 local var 위치 파악함.
     (*
-         symbolsLocal = "<LocalVar Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </LocalVar>
+         symbolsLocal =        "<LocalVar Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </LocalVar>
          symbolsGlobal = "<GlobalVariable Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </GlobalVariable>
     *)
     let wrapWithXml (rungs:XmlOutput) symbolsLocal symbolsGlobal (existingLSISprj:string option) =
@@ -217,9 +217,9 @@ module internal XgiFile =
         | DuCounter     of CounterBaseStruct
 
 
-    let generateXGIXmlFromStatement
+    let generateXgiXmlFromStatement
         (prologComments:string seq) (commentedStatements:CommentedXgiStatements seq)
-        (xgiSymbols:XgiSymbol seq) (unusedTags:ITagWithAddress seq) (existingLSISprj:string option)
+        (xgiSymbols:XgiSymbol seq) (existingLSISprj:string option)
       =
         let symbolInfos =
             let kindVar = int Variable.Kind.VAR

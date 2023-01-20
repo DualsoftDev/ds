@@ -48,7 +48,7 @@ type VertexManager with
             | :? Call | :? Alias as ca ->
                 match v.GetPureCall() with
                 | Some call ->  if call.UsingTon
-                                then call.V.TON.DN.Expr
+                                then call.V.TON.DN |> var2expr
                                 else call.INs.ToAndElseOn(v.System)
                 | None -> v.CR.Expr
             | _ ->

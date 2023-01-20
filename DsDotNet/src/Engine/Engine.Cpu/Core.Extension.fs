@@ -43,3 +43,16 @@ module CoreExtensionsModule =
 //type StatementExt =
 //    [<Extension>] static member GetTargetStorages (x:Statement) = x.GetTargetStorages()
 //    [<Extension>] static member GetSourceStorages (x:Statement) = x.GetSourceStorages()
+
+
+    //[<Extension>]
+    //type ExpressionExt =
+        //[<Extension>]
+        //static member NotifyStatus (x:PlanTag<bool>) = () //test ahn
+        //    //if x.Value then
+        //    //    match x.TagFlag with
+        //    //    | R -> ChangeStatusEvent (x.Vertex, Ready)
+        //    //    | G -> ChangeStatusEvent (x.Vertex, Going)
+        //    //    | F -> ChangeStatusEvent (x.Vertex, Finish)
+        //    //    | H -> ChangeStatusEvent (x.Vertex, Homing)
+        //    //    | _->()

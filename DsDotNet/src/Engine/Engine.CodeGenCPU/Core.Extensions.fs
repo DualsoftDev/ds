@@ -14,7 +14,7 @@ module ConvertCoreExt =
                         | Out -> $"{name}_O"
                         | Memory -> failwithlog "error: Memory not supported "
 
-        (PlcTag(plcName, address, false) :> ITagWithAddress)
+        (ActionTag(plcName, address, false) :> ITagWithAddress)
 
     let hasTime (xs:Func seq) = xs.Any(fun f->f.Name = TextOnDelayTimer)
     let hasCount(xs:Func seq) = xs.Any(fun f->f.Name = TextRingCounter)

@@ -60,15 +60,15 @@ module ExpressionExtension =
         |> withExpressionComment comment
 
     /// Create Timer Coil Statement
-    let (--@) (rungInCondition: IExpression<bool>) (timerCoil: DsTimer, preset:CountUnitType, comment:string) =
-        timerCoil.TimerStruct.PRE.Value <- preset
-        timerCoil.TimerStruct <=@ (Some rungInCondition, None)
+    let (--@) (rungInCondition: IExpression<bool>) (timerCoil: TimerStruct, preset:CountUnitType, comment:string) =
+        timerCoil.PRE.Value <- preset
+        timerCoil <=@ (Some rungInCondition, None)
         |> withExpressionComment comment
 
     /// Create Counter Coil Statement
-    let (--%) (rungInCondition: IExpression<bool>) (counterCoil: DsCounter, preset:CountUnitType, comment:string) =
-        counterCoil.CTRStruct.PRE.Value <- preset
-        counterCoil.CTRStruct <=% (Some rungInCondition)
+    let (--%) (rungInCondition: IExpression<bool>) (counterCoil: CTRStruct, preset:CountUnitType, comment:string) =
+        counterCoil.PRE.Value <- preset
+        counterCoil <=% (Some rungInCondition)
         |> withExpressionComment comment
 
     let private tryTags2LogicalAndOrExpr (fLogical: IExpression list -> Expression<bool>) (FList(ts:#Tag<bool> list)) : Expression<bool> option =

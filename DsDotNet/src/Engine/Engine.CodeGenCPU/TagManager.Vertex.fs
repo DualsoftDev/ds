@@ -23,26 +23,26 @@ module TagManagerModule =
     type VertexManager (v:Vertex)  =
         let s =  v.Parent.GetSystem().TagManager.Storages
 
-        let endTagBit     = bit v s "ET" BitFlag.ET
-        let resetTagBit   = bit v s "RT" BitFlag.RT
-        let startTagBit   = bit v s "ST" BitFlag.ST
+        let endTagBit     = planTag  s "ET"
+        let resetTagBit   = planTag  s "RT"
+        let startTagBit   = planTag  s "ST"
 
-        let originBit     = bit v s "OG" BitFlag.Origin
-        let pauseBit      = bit v s "PA" BitFlag.Pause
-        let errorTxBit    = bit v s "E1" BitFlag.ErrorTx
-        let errorRxBit    = bit v s "E2" BitFlag.ErrorRx
+        let originBit     = planTag  s "OG"
+        let pauseBit      = planTag  s "PA"
+        let errorTxBit    = planTag  s "E1"
+        let errorRxBit    = planTag  s "E2"
 
-        let readyBit      = bit v s "R"  BitFlag.R
-        let goingBit      = bit v s "G"  BitFlag.G
-        let finishBit     = bit v s "F"  BitFlag.F
-        let homingBit     = bit v s "H"  BitFlag.H
+        let readyBit      = planTag  s "R"
+        let goingBit      = planTag  s "G"
+        let finishBit     = planTag  s "F"
+        let homingBit     = planTag  s "H"
 
-        let endForceBit   = bit v s "EF" BitFlag.EF
-        let resetForceBit = bit v s "RF" BitFlag.RF
-        let startForceBit = bit v s "SF" BitFlag.SF
+        let endForceBit   = planTag  s "EF"
+        let resetForceBit = planTag  s "RF"
+        let startForceBit = planTag  s "SF"
 
-        let pulseBit      = bit v s "PUL" BitFlag.Pulse
-        let goingRelays = HashSet<DsBit>()
+        let pulseBit      = planTag  s "PUL"
+        let goingRelays = HashSet<PlanTag<bool>>()
 
 
         interface ITagManager with
@@ -99,7 +99,7 @@ module TagManagerModule =
         member _.PUL        = pulseBit
         ///Going Relay   //리셋 인과에 따라 필요
         member x.GR(src:Vertex) =
-           let gr =   bit v s $"GR_{src.Name}" BitFlag.RelayGoing
+           let gr =  planTag  s $"GR_{src.Name}"
            goingRelays.Add gr |> ignore; gr
 
 
@@ -107,12 +107,12 @@ module TagManagerModule =
     type VertexMReal(v:Vertex) as this =
         inherit VertexManager(v)
         let s    = this.Storages
-        let endPortBit    = bit v s "EP" BitFlag.EP
-        let resetPortBit  = bit v s "RP" BitFlag.RP
-        let startPortBit  = bit v s "SP" BitFlag.SP
+        let endPortBit    = planTag s "EP"
+        let resetPortBit  = planTag s "RP"
+        let startPortBit  = planTag s "SP"
 
-        let relayRealBit  = bit v s "RR" BitFlag.RelayReal
-        let realOriginAction  = bit v s "RO" BitFlag.RealOriginAction
+        let relayRealBit  = planTag  s "RR"
+        let realOriginAction  = planTag  s "RO"
         /// Real Origin Action
         member _.RO         = realOriginAction
         ///Real Init Relay
@@ -129,12 +129,12 @@ module TagManagerModule =
     type VertexMCoin(v:Vertex)as this =
         inherit VertexManager(v)
         let s    = this.Storages
-        let relayCallBit  = bit v s "CR" BitFlag.RelayCall
+        let relayCallBit  = planTag  s "CR"
 
 
-        let counterBit    = counter v s "CTR" CounterFlag.CountRing
-        let timerOnDelayBit = timer v s "TON"  TimerFlag.TimerOnDely
-        let timerTimeOutBit = timer v s "TOUT" TimerFlag.TimeOut
+        let counterBit    = counter  s "CTR"
+        let timerOnDelayBit = timer  s "TON"
+        let timerTimeOutBit = timer  s "TOUT"
 
         ///Call Done Relay
         member _.CR     = relayCallBit

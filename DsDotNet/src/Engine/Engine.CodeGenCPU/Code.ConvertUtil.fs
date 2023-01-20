@@ -141,12 +141,12 @@ module CodeConvertUtil =
     [<AutoOpen>]
     [<Extension>]
     type CodeConvertUtilExt =
-        [<Extension>] static member STs (FList(vms:VertexManager list)): DsBit list = vms |> map (fun vm -> vm.RT)
-        [<Extension>] static member SFs (FList(vms:VertexManager list)): DsBit list = vms |> map (fun vm -> vm.SF)
-        [<Extension>] static member RTs (FList(vms:VertexManager list)): DsBit list = vms |> map (fun vm -> vm.RT)
-        [<Extension>] static member ETs (FList(vms:VertexManager list)): DsBit list = vms |> map (fun vm -> vm.ET)
-        [<Extension>] static member ERRs(FList(vms:VertexManager list)): DsBit list = vms |> bind(fun vm -> [vm.E1; vm.E2])
-        [<Extension>] static member CRs (FList(vms:VertexMCoin list))  : DsBit list = vms |> map (fun vm -> vm.CR)
+        [<Extension>] static member STs (FList(vms:VertexManager list)): PlanTag<bool> list = vms |> map (fun vm -> vm.RT)
+        [<Extension>] static member SFs (FList(vms:VertexManager list)): PlanTag<bool> list = vms |> map (fun vm -> vm.SF)
+        [<Extension>] static member RTs (FList(vms:VertexManager list)): PlanTag<bool> list = vms |> map (fun vm -> vm.RT)
+        [<Extension>] static member ETs (FList(vms:VertexManager list)): PlanTag<bool> list = vms |> map (fun vm -> vm.ET)
+        [<Extension>] static member ERRs(FList(vms:VertexManager list)): PlanTag<bool> list = vms |> bind(fun vm -> [vm.E1; vm.E2])
+        [<Extension>] static member CRs (FList(vms:VertexMCoin list))  : PlanTag<bool> list = vms |> map (fun vm -> vm.CR)
 
         [<Extension>] static member ToAndElseOn(ts:#Tag<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToAnd() else sys._on.Expr
         [<Extension>] static member ToOrElseOff(ts:#Tag<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToOr()  else sys._off.Expr

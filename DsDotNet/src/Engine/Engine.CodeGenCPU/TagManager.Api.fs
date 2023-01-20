@@ -17,8 +17,8 @@ module ApiTagManagerModule =
     type ApiItemManager (a:ApiItem)  =
         let s =  a.System.TagManager.Storages
 
-        let ps    = dsTag s $"{a.Name}(PS)" DuBOOL
-        let pr    = dsTag s $"{a.Name}(PR)" DuBOOL
+        let ps    = planTag s $"{a.Name}(PS)"
+        let pr    = planTag s $"{a.Name}(PR)"
 
         interface ITagManager with
             member x.Target = a
@@ -30,5 +30,5 @@ module ApiTagManagerModule =
                 |PLANSET        -> ps
                 |PLANRST        -> pr
 
-            t :?> DsTag<bool>
+            t
 

@@ -24,43 +24,48 @@ module TagManagerUtil =
     let createDsTag(name:string, dataType:DataType) : IStorage =
             let v = dataType.DefaultValue()
             match dataType with
-            | DuFLOAT32 -> new DsTag<single>(name, v |> unbox)
-            | DuFLOAT64 -> new DsTag<double>(name, v |> unbox)
-            | DuINT8    -> new DsTag<int8>  (name, v |> unbox)
-            | DuUINT8   -> new DsTag<uint8> (name, v |> unbox)
-            | DuINT16   -> new DsTag<int16> (name, v |> unbox)
-            | DuUINT16  -> new DsTag<uint16>(name, v |> unbox)
-            | DuINT32   -> new DsTag<int32> (name, v |> unbox)
-            | DuUINT32  -> new DsTag<uint32>(name, v |> unbox)
-            | DuINT64   -> new DsTag<int64> (name, v |> unbox)
-            | DuUINT64  -> new DsTag<uint64>(name, v |> unbox)
-            | DuSTRING  -> new DsTag<string>(name, v |> unbox)
-            | DuCHAR    -> new DsTag<char>  (name, v |> unbox)
-            | DuBOOL    -> new DsTag<bool>  (name, v |> unbox)
+            | DuFLOAT32 -> new PlanTag<single>(name, v |> unbox)
+            | DuFLOAT64 -> new PlanTag<double>(name, v |> unbox)
+            | DuINT8    -> new PlanTag<int8>  (name, v |> unbox)
+            | DuUINT8   -> new PlanTag<uint8> (name, v |> unbox)
+            | DuINT16   -> new PlanTag<int16> (name, v |> unbox)
+            | DuUINT16  -> new PlanTag<uint16>(name, v |> unbox)
+            | DuINT32   -> new PlanTag<int32> (name, v |> unbox)
+            | DuUINT32  -> new PlanTag<uint32>(name, v |> unbox)
+            | DuINT64   -> new PlanTag<int64> (name, v |> unbox)
+            | DuUINT64  -> new PlanTag<uint64>(name, v |> unbox)
+            | DuSTRING  -> new PlanTag<string>(name, v |> unbox)
+            | DuCHAR    -> new PlanTag<char>  (name, v |> unbox)
+            | DuBOOL    -> new PlanTag<bool>  (name, v |> unbox)
 
 
-    let bit (v:Vertex) (storages:Storages) mark flag  =
-        let name = getUniqueName $"{v.QualifiedName}({mark})" storages
-        let t = DsBit(name, false, v, flag)
-        storages.Add(t.Name, t)
-        t
+    //let bit (v:Vertex) (storages:Storages) mark   =
+    //    let name = getUniqueName $"{v.QualifiedName}({mark})" storages
+    //    let t = PlanTag(name, false)
+    //    storages.Add(t.Name, t)
+    //    t
 
-    let timer (v:Vertex) (storages:Storages)  mark flag =
-        let name = getUniqueName $"{v.QualifiedName}({mark}:TON)" storages
-
+    let timer  (storages:Storages)  name  =
+       // let name = getUniqueName $"{v.QualifiedName}({mark}:TON)" storages
+        let name = getUniqueName name storages
         let ts = TimerStruct.Create(TimerType.TON, storages,name, 0us, 0us)
-        DsTimer($"{v.QualifiedName}({mark})", false, v, flag, ts)
+        ts
 
-    let counter (v:Vertex) (storages:Storages) mark flag =
-        let name = getUniqueName $"{v.QualifiedName}({mark}:CTR)" storages
-
+    let counter (storages:Storages) name =
+        let name = getUniqueName name storages
         let cs = CTRStruct.Create(CounterType.CTR, storages, name, 0us, 0us)
-        DsCounter($"{v.QualifiedName}({mark})", false, v, flag, cs)
+        cs
 
-    let dsTag (storages:Storages) name (dataType:DataType) =
+    let sysTag (storages:Storages) name (dataType:DataType) =
         let name = getUniqueName name storages
         let t= createDsTag (name, dataType)
         storages.Add(t.Name, t)
         t
+
+    let planTag (storages:Storages) name =
+        let name = getUniqueName name storages
+        let t= createDsTag (name, DuBOOL)
+        storages.Add(t.Name, t)
+        t :?> PlanTag<bool>
 
 

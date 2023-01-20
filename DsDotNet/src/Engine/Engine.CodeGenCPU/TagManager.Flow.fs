@@ -33,24 +33,24 @@ module FlowManagerModule =
     type FlowManager (f:Flow)  =
         let s =  f.System.TagManager.Storages
 
-        let f_rop    = dsTag s $"{f.Name}(ROP)" DuBOOL // Ready Operation Mode
-        let f_aop    = dsTag s $"{f.Name}(AOP)" DuBOOL // Auto Operation Mode
-        let f_mop    = dsTag s $"{f.Name}(MOP)" DuBOOL // Manual Operation Mode
-        let f_dop    = dsTag s $"{f.Name}(DOP)" DuBOOL // Drive Operation Mode
-        let f_top    = dsTag s $"{f.Name}(TOP)" DuBOOL //  Test  Operation Mode (시운전)
-        let f_sop    = dsTag s $"{f.Name}(SOP)" DuBOOL // Stop State
-        let f_eop    = dsTag s $"{f.Name}(EOP)" DuBOOL // Emergency State
-        let f_readycondi = dsTag s $"{f.Name}(SCR)" DuBOOL  //system condition ready
-        let f_drivecondi = dsTag s $"{f.Name}(SCD)" DuBOOL  //system condition drive
-        let f_auto   = dsTag s $"{f.Name}_auto"     DuBOOL
-        let f_manual = dsTag s $"{f.Name}_manual"   DuBOOL
-        let f_drive  = dsTag s $"{f.Name}_drive"    DuBOOL
-        let f_stop   = dsTag s $"{f.Name}_stop"     DuBOOL
-        let f_ready  = dsTag s $"{f.Name}_ready"    DuBOOL
-        let f_clear  = dsTag s $"{f.Name}_clear"    DuBOOL
-        let f_emg    = dsTag s $"{f.Name}_emg"      DuBOOL
-        let f_test   = dsTag s $"{f.Name}_test"     DuBOOL
-        let f_home   = dsTag s $"{f.Name}_home"     DuBOOL
+        let f_rop    = planTag s $"{f.Name}(ROP)"      // Ready Operation Mode
+        let f_aop    = planTag s $"{f.Name}(AOP)"      // Auto Operation Mode
+        let f_mop    = planTag s $"{f.Name}(MOP)"      // Manual Operation Mode
+        let f_dop    = planTag s $"{f.Name}(DOP)"      // Drive Operation Mode
+        let f_top    = planTag s $"{f.Name}(TOP)"      //  Test  Operation Mode (시운전)
+        let f_sop    = planTag s $"{f.Name}(SOP)"      // Stop State
+        let f_eop    = planTag s $"{f.Name}(EOP)"      // Emergency State
+        let f_readycondi = planTag s $"{f.Name}(SCR)"  //system condition ready
+        let f_drivecondi = planTag s $"{f.Name}(SCD)"  //system condition drive
+        let f_auto   = planTag s $"{f.Name}_auto"
+        let f_manual = planTag s $"{f.Name}_manual"
+        let f_drive  = planTag s $"{f.Name}_drive"
+        let f_stop   = planTag s $"{f.Name}_stop"
+        let f_ready  = planTag s $"{f.Name}_ready"
+        let f_clear  = planTag s $"{f.Name}_clear"
+        let f_emg    = planTag s $"{f.Name}_emg"
+        let f_test   = planTag s $"{f.Name}_test"
+        let f_home   = planTag s $"{f.Name}_home"
 
         interface ITagManager with
             member x.Target = f
@@ -77,4 +77,4 @@ module FlowManagerModule =
                 |HOME_BIT        -> f_home
                 |READYCONDI_BIT  -> f_readycondi
                 |DRIVECONDI_BIT  -> f_drivecondi
-            t :?> DsTag<bool>
+            t

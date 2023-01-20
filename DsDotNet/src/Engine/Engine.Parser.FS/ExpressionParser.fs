@@ -344,19 +344,19 @@ module rec ExpressionParser =
         member x.CreateTag(name:string, address:string, boxedValue:obj) : IStorage =
             let v = boxedValue
             match x.Name with
-            | "Boolean"-> new PlcTag<bool>  (name, address, unbox v)
-            | "Byte"   -> new PlcTag<uint8> (name, address, unbox v)
-            | "Char"   -> new PlcTag<char>  (name, address, unbox v)
-            | "Double" -> new PlcTag<double>(name, address, unbox v)
-            | "Int16"  -> new PlcTag<int16> (name, address, unbox v)
-            | "Int32"  -> new PlcTag<int32> (name, address, unbox v)
-            | "Int64"  -> new PlcTag<int64> (name, address, unbox v)
-            | "SByte"  -> new PlcTag<int8>  (name, address, unbox v)
-            | "Single" -> new PlcTag<single>(name, address, unbox v)
-            | "String" -> new PlcTag<string>(name, address, unbox v)
-            | "UInt16" -> new PlcTag<uint16>(name, address, unbox v)
-            | "UInt32" -> new PlcTag<uint32>(name, address, unbox v)
-            | "UInt64" -> new PlcTag<uint64>(name, address, unbox v)
+            | "Boolean"-> new ActionTag<bool>  (name, address, unbox v)
+            | "Byte"   -> new ActionTag<uint8> (name, address, unbox v)
+            | "Char"   -> new ActionTag<char>  (name, address, unbox v)
+            | "Double" -> new ActionTag<double>(name, address, unbox v)
+            | "Int16"  -> new ActionTag<int16> (name, address, unbox v)
+            | "Int32"  -> new ActionTag<int32> (name, address, unbox v)
+            | "Int64"  -> new ActionTag<int64> (name, address, unbox v)
+            | "SByte"  -> new ActionTag<int8>  (name, address, unbox v)
+            | "Single" -> new ActionTag<single>(name, address, unbox v)
+            | "String" -> new ActionTag<string>(name, address, unbox v)
+            | "UInt16" -> new ActionTag<uint16>(name, address, unbox v)
+            | "UInt32" -> new ActionTag<uint32>(name, address, unbox v)
+            | "UInt64" -> new ActionTag<uint64>(name, address, unbox v)
             | _  -> failwithlog "ERROR"
 
         member x.CreateTag(name:string, address:string) : IStorage =

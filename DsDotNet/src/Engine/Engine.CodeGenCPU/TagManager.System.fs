@@ -38,9 +38,9 @@ module SystemManagerModule =
     /// DsSystem Manager : System Tag  를 관리하는 컨테이어
     type SystemManager (sys:DsSystem, stg:Storages)  =
             //시스템 Tag는 하위 시스템과 공유
-        let dsSysBit    name = (if stg.ContainsKey(name) then stg[name]   else dsTag stg  name  DuBOOL )   :?> DsTag<bool>
-        let dsSysUint8  name = (if stg.ContainsKey(name) then stg[name]   else dsTag stg  name  DuUINT8 )  :?> DsTag<uint8>
-        let dsSysUint16 name = (if stg.ContainsKey(name) then stg[name]   else dsTag stg  name  DuUINT16 ) :?> DsTag<uint16>
+        let dsSysBit    name = (if stg.ContainsKey(name) then stg[name]   else sysTag stg  name  DuBOOL )   :?> PlanTag<bool>
+        let dsSysUint8  name = (if stg.ContainsKey(name) then stg[name]   else sysTag stg  name  DuUINT8 )  :?> PlanTag<uint8>
+        let dsSysUint16 name = (if stg.ContainsKey(name) then stg[name]   else sysTag stg  name  DuUINT16 ) :?> PlanTag<uint16>
 
         let on     = let tmpOn = dsSysBit "_on" in tmpOn.Value <- true; tmpOn
         let off    = dsSysBit "_off"

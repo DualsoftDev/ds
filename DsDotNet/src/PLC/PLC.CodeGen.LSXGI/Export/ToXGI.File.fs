@@ -1,12 +1,15 @@
 namespace PLC.CodeGen.LSXGI
 
+open System.Linq
 open System.Reflection
+open System.Collections.Generic
+
 open Engine.Common.FS
 open Engine.Core
 open PLC.CodeGen.LSXGI
 open PLC.CodeGen.Common
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
-open PLC.CodeGen.Common.NewIEC61131
+
 
 [<AutoOpen>]
 module internal XgiFile =
@@ -27,85 +30,6 @@ module internal XgiFile =
 			    <Element ElementType="%d" Coordinate="%d" Param="END">END</Element>
 			</Rung>""" (int ElementType.MultiHorzLineMode) yy (int ElementType.FBMode) (yy+93)
 
-
-    /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
-    let private generateRungs (prologComments:string seq) (commentedStatements:CommentedXgiStatements seq) : XmlOutput =
-        let xmlRung (expr:FlatExpression option) xgiCommand y : RungGenerationInfo =
-            let {Coordinate=c; Xml=xml} = rung (0, y) expr xgiCommand
-            let yy = c / 1024
-            { Xmls = [$"\t<Rung BlockMask={dq}0{dq}>\r\n{xml}\t</Rung>"]; Y = yy}
-
-        let mutable rgi:RungGenerationInfo = {Xmls = []; Y = 0}
-
-        // Prolog 설명문
-        if prologComments.any() then
-            let cmt = prologComments |> String.concat "\r\n"
-            let xml = getCommentRung rgi.Y cmt
-            rgi <- rgi.Add(xml)
-
-        let simpleRung (expr:IExpression) (target:IStorage) =
-            let coil =
-                match target with
-                | :? RisingCoil as rc -> COMPulseCoil(rc.Storage :?> INamedExpressionizableTerminal)
-                | :? FallingCoil as fc -> COMNPulseCoil(fc.Storage :?> INamedExpressionizableTerminal)
-                | _ -> COMCoil(target :?> INamedExpressionizableTerminal)
-            let flatExpr = expr.Flatten() :?> FlatExpression
-            let command = CoilCmd(coil)
-            let rgiSub = xmlRung (Some flatExpr) (Some command) rgi.Y
-            //rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
-            rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgiSub.Y}
-
-        // Rung 별로 생성
-        for CommentAndXgiStatements(cmt, stmts) in commentedStatements do
-
-            // 다중 라인 설명문을 하나의 설명문 rung 에..
-            if cmt.NonNullAny() then
-                let xml = getCommentRung rgi.Y cmt
-                rgi <- rgi.Add(xml)
-            for stmt in stmts do
-                match stmt with
-                | DuAssign (expr, target) -> simpleRung expr target
-                | DuAugmentedPLCFunction ({FunctionName = ("&&"|"||") as op; Arguments = args; Output=output }) ->
-                    let psedoFunction (args:Args):bool = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
-                    let expr = DuFunction { FunctionBody=psedoFunction; Name=op; Arguments=args }
-                    simpleRung expr (output :?> IStorage)
-
-
-                // <kwak> <timer>
-                | DuTimer timerStatement ->
-                    let command = FunctionBlockCmd(TimerMode(timerStatement))
-                    let rgiSub = xmlRung None (Some command) rgi.Y
-                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
-
-                | DuCounter counterStatement ->
-                    let command = FunctionBlockCmd(CounterMode(counterStatement))
-                    let rgiSub = xmlRung None (Some command) rgi.Y
-                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
-
-                | DuAugmentedPLCFunction ({FunctionName = (">"|">="|"<"|"<="|"="|"!=") as op; Arguments = args; Output=output }) ->
-                    let fn = operatorToXgiFunctionName op
-                    let command = PredicateCmd(Compare(fn, output, args))
-                    let rgiSub = xmlRung None (Some command) rgi.Y
-                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
-
-                | DuAugmentedPLCFunction ({FunctionName = ("+"|"-"|"*"|"/") as op; Arguments = args; Output=output }) ->
-                    let fn = operatorToXgiFunctionName op
-                    let command = FunctionCmd(Arithmatic(fn, output, args))
-                    let rgiSub = xmlRung None (Some command) rgi.Y
-                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
-                | DuAugmentedPLCFunction ({FunctionName = XgiConstants.FunctionNameMove as func; Arguments = args; Output=output }) ->
-                    let condition = args[0] :?> IExpression<bool>
-                    let source = args[1]
-                    let target = output :?> IStorage
-                    let command = ActionCmd(Move(condition, source, target))
-                    let rgiSub = xmlRung None (Some command) rgi.Y
-                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
-                | _ ->
-                    failwithlog "Not yet"
-
-        let rungEnd = generateEnd (rgi.Y + 1)
-        rgi <- rgi.Add(rungEnd)
-        rgi.Xmls |> List.rev |> String.concat "\r\n"
 
     /// Template XGI XML 문자열을 반환
     let getTemplateXgiXmlWithVersion version =
@@ -209,82 +133,4 @@ module internal XgiFile =
 
         xdoc.OuterXml
 
-
-    type XgiSymbol =
-        | DuTag         of ITagWithAddress
-        | DuXgiLocalVar of IXgiLocalVar
-        | DuTimer       of TimerStruct
-        | DuCounter     of CounterBaseStruct
-
-
-    let generateXgiXmlFromStatement
-        (prologComments:string seq) (commentedStatements:CommentedXgiStatements seq)
-        (xgiSymbols:XgiSymbol seq) (existingLSISprj:string option)
-      =
-        let symbolInfos =
-            let kindVar = int Variable.Kind.VAR
-            [
-                for s in xgiSymbols do
-                    match s with
-                    | DuTag t ->
-                        let name, addr = t.Name, t.Address
-
-                        let device, memSize =
-                            match t.Address with
-                            | RegexPattern @"%([IQM])([XBWL]).*$" [iqm; mem] -> iqm, mem
-                            | _ -> "M", "X" //test ahn 주소없는 오토변수 방법 타입 ??
-
-                        let plcType =
-                            match memSize with
-                            | "X" -> "BOOL"
-                            | "B" -> "BYTE"
-                            | "W" -> "WORD"
-                            | "L" -> "DWORD"
-                            | _ -> failwithlog "ERROR"
-                        let comment = "FAKECOMMENT"
-
-                        let initValue = null // PLCTag 는 값을 초기화 할 수 없다.
-                        { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; InitValue=initValue; Device=device; Kind=kindVar; }
-                        |> XGITag.createSymbolInfoWithDetail
-
-                    | DuXgiLocalVar xgi ->
-                        xgi.SymbolInfo
-                    | DuTimer timer ->
-                        let device, addr = "", ""
-                        let plcType =
-                            match timer.Type with
-                            | TON | TOF | TMR -> timer.Type.ToString()
-
-                        let param:XgiSymbolCreateParams =
-                            let name, comment = timer.Name, $"TIMER {timer.Name}"
-                            { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; InitValue=null; Device=device; Kind=kindVar; }
-                        XGITag.createSymbolInfoWithDetail param
-                    | DuCounter counter ->
-                        let device, addr = "", ""
-                        let plcType =
-                            match counter.Type with
-                            | CTU | CTD | CTUD -> $"{counter.Type}_INT"       // todo: CTU_{INT, UINT, .... } 등의 종류가 있음...
-                            | CTR -> $"{counter.Type}"
-
-                        let param:XgiSymbolCreateParams =
-                            let name, comment = counter.Name, $"COUNTER {counter.Name}"
-                            { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; InitValue=null; Device=device; Kind=kindVar; }
-                        XGITag.createSymbolInfoWithDetail param
-            ]
-
-        /// Symbol table 정의 XML 문자열
-        let symbolsLocalXml = XGITag.generateLocalSymbolsXml symbolInfos
-
-        let globalSym = [
-            for s in symbolInfos do
-                if not (s.Device.IsNullOrEmpty()) then
-                    XGITag.copyLocal2GlobalSymbol s
-        ]
-
-        let symbolsGlobalXml = XGITag.generateGlobalSymbolsXml globalSym
-
-        let rungsXml = generateRungs prologComments commentedStatements
-
-        logInfo "Finished generating PLC code."
-        wrapWithXml rungsXml symbolsLocalXml symbolsGlobalXml existingLSISprj
 

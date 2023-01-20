@@ -117,10 +117,7 @@ module CpuLoader =
     let private convertSystem(sys:DsSystem) =
 
         //DsSystem 물리 IO 생성
-        sys.GenerationButtonIO()
-        sys.GenerationLampIO()
-        sys.GenerationCondition()
-        sys.GenerationJobIO()
+        sys.GenerationIO()
 
         [
             //시스템 적용

@@ -41,9 +41,7 @@ module CpuTestUtil =
         let realTypeAll       = vertices.OfType<Real>()
         let vertexAll         = vertices
         do
-            sys.GenerationButtonIO()
-            sys.GenerationLampIO()
-            sys.GenerationJobIO()
+            sys.GenerationIO()
 
         member x.Sys    =  sys
         member x.Flows  =  sys.Flows

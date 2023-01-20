@@ -7,14 +7,7 @@ open Engine.Common.FS
 [<AutoOpen>]
 module ConvertCoreExt =
 
-    type InOut = | In | Out | Memory
-    let private createIOPLCTag(name, address, inOut:InOut): ITagWithAddress =
-        let plcName = match inOut with
-                        | In  -> $"{name}_I"
-                        | Out -> $"{name}_O"
-                        | Memory -> failwithlog "error: Memory not supported "
 
-        (ActionTag(plcName, address, false) :> ITagWithAddress)
 
     let hasTime (xs:Func seq) = xs.Any(fun f->f.Name = TextOnDelayTimer)
     let hasCount(xs:Func seq) = xs.Any(fun f->f.Name = TextRingCounter)
@@ -53,24 +46,31 @@ module ConvertCoreExt =
         member s._dtimes   = getSM(s).GetSysDateTag(SysDataTimeTag.DATET_S )
         member s._tout     = getSM(s).GetSysErrTag(SysErrorTag.TIMEOUT)
         member x.S = x |> getSM
+        member x.Storages = x.TagManager.Storages
 
-        member x.GenerationLampIO() =
+        member private x.GenerationLampIO() =
             for b in x.SystemLamps do
-                b.OutTag  <- createIOPLCTag(b.Name, b.OutAddress, Out)
-        member x.GenerationCondition() =
+                b.OutTag  <- createIOPLCTag(x.Storages, b.Name, b.OutAddress, Out)
+        member private x.GenerationCondition() =
             for b in x.SystemConditions do
-                b.InTag  <- createIOPLCTag(b.Name, b.InAddress, In)
+                b.InTag  <- createIOPLCTag(x.Storages, b.Name, b.InAddress, In)
 
-        member x.GenerationButtonIO() =
+        member private x.GenerationButtonIO() =
             for b in x.SystemButtons do
-                     b.InTag  <- createIOPLCTag(b.Name, b.OutAddress, In)
-                     b.OutTag <- createIOPLCTag(b.Name, b.OutAddress, Out)
+                     b.InTag  <- createIOPLCTag(x.Storages, b.Name, b.OutAddress, In)
+                     b.OutTag <- createIOPLCTag(x.Storages, b.Name, b.OutAddress, Out)
 
-        member x.GenerationJobIO() =
+        member private x.GenerationTaskDevIO() =
             let taskDevices = x.Jobs |> Seq.collect(fun j -> j.DeviceDefs)
             for dev in taskDevices do
-                dev.InTag <- createIOPLCTag(dev.ApiName, dev.InAddress, In)
-                dev.OutTag <- createIOPLCTag(dev.ApiName, dev.OutAddress, Out)
+                dev.InTag <- createIOPLCTag(x.Storages, dev.ApiName, dev.InAddress, In)
+                dev.OutTag <- createIOPLCTag(x.Storages, dev.ApiName, dev.OutAddress, Out)
+
+        member x.GenerationIO() =
+            x.GenerationTaskDevIO()
+            x.GenerationButtonIO()
+            x.GenerationLampIO()
+            x.GenerationCondition()
 
         //자신이 사용된 API Plan Set Send
         member x.GetPSs(r:Real) =
@@ -95,16 +95,6 @@ module ConvertCoreExt =
 
     let private getSelectBtnExpr(f:Flow, btns:ButtonDef seq) : Expression<bool> seq =
         getButtonExpr(f, btns)
-
-    //let private getButtonOutputs(flow:Flow, btns:ButtonDef seq) : PlcTag<bool> seq =
-    //        btns.Where(fun b -> b.SettingFlows.Contains(flow))
-    //            .Select(fun b -> b.OutTag)
-    //            .Cast<PlcTag<bool>>()
-
-    //let private getLampOutputs(flow:Flow, btns:LampDef seq) : PlcTag<bool> seq =
-    //        btns.Where(fun b -> b.SettingFlow = flow)
-    //            .Select(fun b -> b.OutTag)
-    //            .Cast<PlcTag<bool>>()
 
     let getConditionInputs(flow:Flow, condis:ConditionDef seq) : PlcTag<bool> seq =
             condis.Where(fun b -> b.SettingFlows.Contains(flow))
@@ -204,8 +194,8 @@ module ConvertCoreExt =
         member r._off  = r.Parent.GetSystem()._off
 
     type TaskDevice with
-        member jd.ActionIN  = jd.InTag  :?> PlcTag<bool>
-        member jd.ActionOut = jd.OutTag :?> PlcTag<bool>
+        member jd.ActionIN  = jd.InTag  :?> ActionTag<bool>
+        member jd.ActionOut = jd.OutTag :?> ActionTag<bool>
         member jd.RXs       = jd.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.EP)
 
         member jd.MutualResets(x:DsSystem) =

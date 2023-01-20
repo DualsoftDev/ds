@@ -91,7 +91,7 @@ module ImportU =
                             JobTargetSystems
                                 .Select(fun tgt -> getApiItems(mySys, tgt, api.Name), tgt)
                                 .Select(fun (api, tgt)-> TaskDevice(api, "", "", tgt))
-                                .Cast<DsTask>()
+                                .Cast<DsTask>() |> Seq.toList
                         let job = Job(jobBase+"_"+api.Name, devs)
                         if dicJobName.ContainsKey(job.Name)
                         then Office.ErrorName(node.Shape, ErrID._33, node.PageNum)

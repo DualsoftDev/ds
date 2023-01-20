@@ -215,7 +215,7 @@ module CoreModule =
         member _.TargetWrapper = target
 
     /// Job 정의: Call 이 호출하는 Job 항목
-    type Job (name:string, tasks:DsTask seq) =
+    type Job (name:string, tasks:DsTask list) =
         inherit Named(name)
         member x.DeviceDefs = tasks.OfType<TaskDevice>()
         member x.LinkDefs   = tasks.OfType<TaskLink>()

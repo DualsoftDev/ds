@@ -437,7 +437,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 ]
                 let funcSet = commonFunctionSetter jobName jobFuncs
                 assert(apiItems.Any())
-                let job = Job(jobName, apiItems.Cast<DsTask>())
+                let job = Job(jobName, apiItems.Cast<DsTask>() |> Seq.toList)
                 job.Funcs <- funcSet
                 job |> system.Jobs.Add
 
@@ -458,7 +458,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                         | _ -> failwithlog "ERROR"
                     | _ -> failwithlog "ERROR"
                 let linkDef = TaskLink linkInfo
-                let job = Job(linkName, [|linkDef|])
+                let job = Job(linkName, [linkDef])
                 job |> system.Jobs.Add
 
         let fillTargetOfAliasDef (x:DsParserListener) (ctx:AliasListingContext) =

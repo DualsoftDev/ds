@@ -34,6 +34,9 @@ module TagModule =
     type PlanTag<'T when 'T:equality> (name, initValue:'T) =
         inherit PlcTag<'T>(name, "", initValue)
 
+     //   member val Vertex = getNull<Vertex>() with get, set
+        member val Vertex:Vertex option = None with get, set
+
     /// ActionTag 다른 시스템 연결 TAG
     type ActionTag<'T when 'T:equality> (name, address, initValue:'T) =
         inherit PlcTag<'T>(name, address, initValue)

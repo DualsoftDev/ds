@@ -16,9 +16,11 @@ module RunTime =
                 ValueSubject
                  .Subscribe(fun evt ->
                     //Step 1 상태보고
-                    //match evt with  //test ahn
-                    //| :? DsBit as b -> b.NotifyStatus()
-                    //| _ -> ()
+                    match evt with
+                    | :? PlanTag<bool> as p -> p.NotifyStatus()
+                    | :? ActionTag<bool> as a -> ()//hmi ?
+                    | _ -> ()
+
 
                     //Step 2 관련수식 연산
                     if mapRungs.ContainsKey evt

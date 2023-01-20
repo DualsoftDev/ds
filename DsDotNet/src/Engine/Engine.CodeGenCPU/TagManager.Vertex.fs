@@ -22,26 +22,30 @@ module TagManagerModule =
     [<AbstractClass>]
     type VertexManager (v:Vertex)  =
         let s =  v.Parent.GetSystem().TagManager.Storages
+        let createTag(mark) =
+            let name = $"{v.QualifiedName}({mark})"
+            let t = planTag  s name
+            t.Vertex <- Some v;  t
 
-        let endTagBit     = planTag  s "ET"
-        let resetTagBit   = planTag  s "RT"
-        let startTagBit   = planTag  s "ST"
+        let endTagBit     = createTag "ET"
+        let resetTagBit   = createTag "RT"
+        let startTagBit   = createTag "ST"
 
-        let originBit     = planTag  s "OG"
-        let pauseBit      = planTag  s "PA"
-        let errorTxBit    = planTag  s "E1"
-        let errorRxBit    = planTag  s "E2"
+        let originBit     = createTag "OG"
+        let pauseBit      = createTag "PA"
+        let errorTxBit    = createTag "E1"
+        let errorRxBit    = createTag "E2"
 
-        let readyBit      = planTag  s "R"
-        let goingBit      = planTag  s "G"
-        let finishBit     = planTag  s "F"
-        let homingBit     = planTag  s "H"
+        let readyBit      = createTag  "R"
+        let goingBit      = createTag  "G"
+        let finishBit     = createTag  "F"
+        let homingBit     = createTag  "H"
 
-        let endForceBit   = planTag  s "EF"
-        let resetForceBit = planTag  s "RF"
-        let startForceBit = planTag  s "SF"
+        let endForceBit   = createTag "EF"
+        let resetForceBit = createTag "RF"
+        let startForceBit = createTag "SF"
 
-        let pulseBit      = planTag  s "PUL"
+        let pulseBit      = createTag "PUL"
         let goingRelays = HashSet<PlanTag<bool>>()
 
 
@@ -102,17 +106,19 @@ module TagManagerModule =
            let gr =  planTag  s $"GR_{src.Name}"
            goingRelays.Add gr |> ignore; gr
 
+        member x.CreateTag(name) = createTag name
 
 
     type VertexMReal(v:Vertex) as this =
         inherit VertexManager(v)
         let s    = this.Storages
-        let endPortBit    = planTag s "EP"
-        let resetPortBit  = planTag s "RP"
-        let startPortBit  = planTag s "SP"
+        let createTag name = this.CreateTag name
+        let endPortBit    = createTag  "EP"
+        let resetPortBit  = createTag  "RP"
+        let startPortBit  = createTag  "SP"
 
-        let relayRealBit  = planTag  s "RR"
-        let realOriginAction  = planTag  s "RO"
+        let relayRealBit      = createTag "RR"
+        let realOriginAction  = createTag "RO"
         /// Real Origin Action
         member _.RO         = realOriginAction
         ///Real Init Relay
@@ -129,7 +135,8 @@ module TagManagerModule =
     type VertexMCoin(v:Vertex)as this =
         inherit VertexManager(v)
         let s    = this.Storages
-        let relayCallBit  = planTag  s "CR"
+        let createTag name = this.CreateTag name
+        let relayCallBit  = createTag  "CR"
 
 
         let counterBit    = counter  s "CTR"

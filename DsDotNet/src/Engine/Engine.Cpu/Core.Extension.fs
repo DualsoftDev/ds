@@ -2,7 +2,7 @@ namespace Engine.Cpu
 
 open Engine.Core
 open System.Runtime.CompilerServices
-
+open System.Text.RegularExpressions
 [<AutoOpen>]
 module CoreExtensionsModule =
     type Statement with
@@ -38,21 +38,16 @@ module CoreExtensionsModule =
     let getSourceStorages (x:Statement) = x.GetSourceStorages()
     let getAutoButtons (x:DsSystem) = x.AutoButtons
 
-
-//[<Extension>]
-//type StatementExt =
-//    [<Extension>] static member GetTargetStorages (x:Statement) = x.GetTargetStorages()
-//    [<Extension>] static member GetSourceStorages (x:Statement) = x.GetSourceStorages()
-
-
-    //[<Extension>]
-    //type ExpressionExt =
-        //[<Extension>]
-        //static member NotifyStatus (x:PlanTag<bool>) = () //test ahn
-        //    //if x.Value then
-        //    //    match x.TagFlag with
-        //    //    | R -> ChangeStatusEvent (x.Vertex, Ready)
-        //    //    | G -> ChangeStatusEvent (x.Vertex, Going)
-        //    //    | F -> ChangeStatusEvent (x.Vertex, Finish)
-        //    //    | H -> ChangeStatusEvent (x.Vertex, Homing)
-        //    //    | _->()
+    [<Extension>]
+    type ExpressionExt =
+        [<Extension>]
+        static member NotifyStatus (x:PlanTag<bool>) =
+            if x.Vertex.IsSome
+            then            //마지막 괄호 문자만 추출 tagname(R)  -> R
+                let m = Regex.Match(x.Name, @"(?<=\()\D+(?=\)$)")
+                match m.Value with
+                | "R" -> ChangeStatusEvent (x.Vertex.Value, Ready)
+                | "G" -> ChangeStatusEvent (x.Vertex.Value, Going)
+                | "F" -> ChangeStatusEvent (x.Vertex.Value, Finish)
+                | "H" -> ChangeStatusEvent (x.Vertex.Value, Homing)
+                | _->()

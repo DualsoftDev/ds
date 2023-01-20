@@ -21,32 +21,40 @@ module TagManagerUtil =
 
         unique name 0 storages
 
-    let createDsTag(name:string, dataType:DataType) : IStorage =
-            let v = dataType.DefaultValue()
+    let createDsTag(stg:Storages, name:string, dataType:DataType) : IStorage =
+        let v = dataType.DefaultValue()
+        let t =
             match dataType with
-            | DuFLOAT32 -> new PlanTag<single>(name, v |> unbox)
-            | DuFLOAT64 -> new PlanTag<double>(name, v |> unbox)
-            | DuINT8    -> new PlanTag<int8>  (name, v |> unbox)
-            | DuUINT8   -> new PlanTag<uint8> (name, v |> unbox)
-            | DuINT16   -> new PlanTag<int16> (name, v |> unbox)
-            | DuUINT16  -> new PlanTag<uint16>(name, v |> unbox)
-            | DuINT32   -> new PlanTag<int32> (name, v |> unbox)
-            | DuUINT32  -> new PlanTag<uint32>(name, v |> unbox)
-            | DuINT64   -> new PlanTag<int64> (name, v |> unbox)
-            | DuUINT64  -> new PlanTag<uint64>(name, v |> unbox)
-            | DuSTRING  -> new PlanTag<string>(name, v |> unbox)
-            | DuCHAR    -> new PlanTag<char>  (name, v |> unbox)
-            | DuBOOL    -> new PlanTag<bool>  (name, v |> unbox)
+            | DuFLOAT32 -> PlanTag<single>(name, v |> unbox) :>IStorage
+            | DuFLOAT64 -> PlanTag<double>(name, v |> unbox) :>IStorage
+            | DuINT8    -> PlanTag<int8>  (name, v |> unbox) :>IStorage
+            | DuUINT8   -> PlanTag<uint8> (name, v |> unbox) :>IStorage
+            | DuINT16   -> PlanTag<int16> (name, v |> unbox) :>IStorage
+            | DuUINT16  -> PlanTag<uint16>(name, v |> unbox) :>IStorage
+            | DuINT32   -> PlanTag<int32> (name, v |> unbox) :>IStorage
+            | DuUINT32  -> PlanTag<uint32>(name, v |> unbox) :>IStorage
+            | DuINT64   -> PlanTag<int64> (name, v |> unbox) :>IStorage
+            | DuUINT64  -> PlanTag<uint64>(name, v |> unbox) :>IStorage
+            | DuSTRING  -> PlanTag<string>(name, v |> unbox) :>IStorage
+            | DuCHAR    -> PlanTag<char>  (name, v |> unbox) :>IStorage
+            | DuBOOL    -> PlanTag<bool>  (name, v |> unbox) :>IStorage
 
+        stg.Add(t.Name, t)
+        t
 
-    //let bit (v:Vertex) (storages:Storages) mark   =
-    //    let name = getUniqueName $"{v.QualifiedName}({mark})" storages
-    //    let t = PlanTag(name, false)
-    //    storages.Add(t.Name, t)
-    //    t
+    type InOut = | In | Out | Memory
+    let createIOPLCTag(stg:Storages, name, address, inOut:InOut): ITagWithAddress =
+        let plcName =
+            match inOut with
+            | In  -> $"{name}_I"
+            | Out -> $"{name}_O"
+            | Memory -> failwithlog "error: Memory not supported "
+
+        let t= (ActionTag(plcName, address, false) :> ITagWithAddress)
+        stg.Add(t.Name, t)
+        t
 
     let timer  (storages:Storages)  name  =
-       // let name = getUniqueName $"{v.QualifiedName}({mark}:TON)" storages
         let name = getUniqueName name storages
         let ts = TimerStruct.Create(TimerType.TON, storages,name, 0us, 0us)
         ts
@@ -58,14 +66,12 @@ module TagManagerUtil =
 
     let sysTag (storages:Storages) name (dataType:DataType) =
         let name = getUniqueName name storages
-        let t= createDsTag (name, dataType)
-        storages.Add(t.Name, t)
+        let t= createDsTag (storages, name, dataType)
         t
 
     let planTag (storages:Storages) name =
         let name = getUniqueName name storages
-        let t= createDsTag (name, DuBOOL)
-        storages.Add(t.Name, t)
+        let t= createDsTag (storages, name, DuBOOL)
         t :?> PlanTag<bool>
 
 

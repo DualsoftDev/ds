@@ -165,8 +165,12 @@ module internal ToDsTextModule =
                 let print (ai:JobDef) = $"{ai.ApiName}({addressPrint ai.InAddress}, {addressPrint ai.OutAddress})"
                 yield $"{tab}[jobs] = {lb}"
                 for c in system.Jobs do
-                    let ais = c.JobDefs.Select(print).JoinWith("; ") + ";"
-                    yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {ais} {rb}"
+                    if c.Link = null then
+                        let ais = c.JobDefs.Select(print).JoinWith("; ") + ";"
+                        yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {ais} {rb}"
+                    else
+                        let ais = (c.Link:?>LinkDef).ApiName + ";"
+                        yield $"{tab2}{c.Name.QuoteOnDemand()} = {ais}"
                     if c.Funcs.any() then
                         for funcString in printFuncions c.Name c.Funcs do
                             yield funcString

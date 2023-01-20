@@ -1,40 +1,37 @@
 namespace PLC.CodeGen.LSXGI
 
-open System.Collections.Generic
+open System.Linq
 open Engine.Core
 open Engine.Common.FS
+open System.Xml
 
 [<AutoOpen>]
 module ToXGIFileNew =
 
     type XgiPOUParams = {
         /// POU name.  "DsLogic"
-        Name: string
+        POUName: string
+        /// POU container task name
+        TaskName: string
         /// POU ladder 최상단의 comment
         Comment: string
         LocalStorages:Storages
         CommentedStatements: CommentedStatement list
     }
-    type XgiProgramParams = {
-        /// Program (=task) name.  "Main Program", "Devices", "ExSystems"
-        Name:string
-        POUs: XgiPOUParams list
-    }
     type XgiProjectParams = {
         GlobalStorages:Storages
         ExistingLSISprj: string option
-        Programs: XgiProgramParams list
+        POUs: XgiPOUParams list
     }
 
-    (* Storages -> [XgiSymbol] -> [SymbolInfo] -> Xml *)
-    let private storagesToXml(isLocal:bool) (storages:Storages) = ()
-    let storagesToLocalVarXml(storages:Storages) =
-        ()
-
-    (*
     type XgiPOUParams with
-        member x.GenerateXmlString(taskName:string) =
-            let {Name=pouName; Comment=comment; LocalStorages=localStorages; CommentedStatements=commentedStatements} = x
+        member x.GenerateXmlString() = x.GenerateXmlNode().OuterXml
+        member x.GenerateXmlNode() : XmlNode =
+            let {TaskName=taskName; POUName=pouName; Comment=comment; LocalStorages=localStorages; CommentedStatements=commentedStatements} = x
+            let newLocalStorages, commentedXgiStatements = commentedStatementsToCommentedXgiStatements localStorages.Values commentedStatements
+            let localStoragesXml = storagesToLocalXml newLocalStorages
+            let rungsXml = generateRungs comment commentedXgiStatements
+
             /// POU/Programs/Program
             let programTemplate =
                 sprintf """
@@ -61,100 +58,70 @@ module ToXGIFileNew =
             (*
              * Rung 삽입
              *)
-            let rungsXml = $"<Rungs>{rungs}</Rungs>" |> DsXml.xmlToXmlNode
-            for r in DsXml.getChildNodes rungsXml do
+            let rungsXml = $"<Rungs>{rungsXml}</Rungs>" |> DsXml.xmlToXmlNode
+            for r in DsXml.getChildrenNodes rungsXml do
                 DsXml.insertBeforeUnit r onlineUploadData
 
             (*
              * Local variables 삽입
              *)
             let programBody = posiLdRoutine.ParentNode
-            let localSymbols = symbolsLocal |> DsXml.xmlToXmlNode
+            let localSymbols = localStoragesXml |> DsXml.xmlToXmlNode
             DsXml.insertAfterUnit localSymbols programBody
-    *)
+
+            programTemplate
 
 
-    /// rung 및 local var 에 대한 문자열 xml 을 전체 xml project file 에 embedding 시켜 outputPath 파일에 저장한다.
-    /// Template file (EmptyLSISProject.xml) 에서 marking 된 위치를 참고로 하여 rung 및 local var 위치 파악함.
-    (*
-         symbolsLocal = "<LocalVar Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </LocalVar>
-         symbolsGlobal = "<GlobalVariable Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </GlobalVariable>
-    *)
-    let xxxwrapWithXml2 (rungs:XmlOutput) symbolsLocal symbolsGlobal (existingLSISprj:string option) =
-        let xdoc =
-            existingLSISprj
+    type XgiProjectParams with
+        member private x.GetTemplateXmlDoc() =
+            x.ExistingLSISprj
             |> Option.map DsXml.load
             |? getTemplateXgiXmlDoc()
 
-        let pouName = "DsLogic"
-        if null <> xdoc.SelectSingleNode(sprintf "//POU/Programs/Program/%s" pouName) then
-            failwithlogf "POU name %s already exists.  Can't overwrite." pouName
+        member x.GenerateXmlString() = x.GenerateXmlDocument().OuterXml
+        member x.GenerateXmlDocument() : XmlDocument =
+            let { GlobalStorages=globalStorages; ExistingLSISprj=existingLSISprj; POUs=pous } = x
+            let xdoc = x.GetTemplateXmlDoc()
 
-        let programs = xdoc.SelectSingleNode("//POU/Programs")
+            (* xn = Xml Node *)
 
-        // Dirty hack "스캔 프로그램" vs "?? ????"
-        let taskName =
-            xdoc.SelectNodes("//POU/Programs/Program").ToEnumerables()
-            |> map (fun xmlnode -> xmlnode.Attributes.["Task"].Value)
-            |> Seq.tryHead
-            |> Option.defaultValue "스캔 프로그램"
+            (* Tasks/Task 삽입 *)
+            do
+                let xnTasks = xdoc.SelectSingleNode("//Configurations/Configuration/Tasks")
+                DsXml.removeChildren xnTasks |> ignore
+                let pous = pous |> List.distinctBy(fun pou -> pou.TaskName)
+                for i, pou in pous.Indexed() do
+                    let index = if i <= 1 then 0 else i-1
+                    let kind = if i = 0 then 0 else 2
+                    let priority = kind
+                    $"""<Task Version="257" Type="0" Attribute="2" Kind="{kind}" Priority="{priority}" TaskIndex="{index}" """
+                    + $"""Device="" DeviceType="0" WordValue="0" WordCondition="0" BitCondition="0">{pou.TaskName}</Task>"""
+                    |> xmlToXmlNode
+                    |> DsXml.adoptChildUnit xnTasks
 
-        printfn "%A" taskName
+            (* Global variables 삽입 *)
+            do
+                let xnGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
+                let countExistingGlobal = xnGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
+                // symbolsGlobal = "<GlobalVariable Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol>
+                let globalStoragesXmlNode = storagesToGlobalXml globalStorages.Values |> DsXml.xmlToXmlNode
+                let numNewGlobals = globalStoragesXmlNode.Attributes.["Count"].Value |> System.Int32.Parse
+
+                xnGlobalVar.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
+                let xnGlobalVarSymbols = DsXml.getXmlNode "Symbols" xnGlobalVar
+
+                globalStoragesXmlNode.SelectNodes("//Symbols/Symbol")
+                |> XmlExt.ToEnumerables
+                |> iter (DsXml.adoptChildUnit xnGlobalVarSymbols)
 
 
-        /// POU/Programs/Program
-        let programTemplate =
-            sprintf """
-			    <Program Task="%s" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" FindProgram="1" FindVar="1" Encrytption="">%s
-                    <Body>
-					    <LDRoutine>
-                            <COMMENT> ========= Rung(s) 삽입 위치 </COMMENT>
-						    <OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
-    XckU4UJCOYh5CA==</OnlineUploadData>
-					    </LDRoutine>
-				    </Body>
-                    <COMMENT> ========= LocalVar 삽입 위치 </COMMENT>
-				    <RungTable></RungTable>
-			    </Program>""" taskName pouName
-            |> DsXml.xmlToXmlNode
+            (* POU program 삽입 *)
+            do
+                let xnPrograms = xdoc.SelectSingleNode("//POU/Programs")
+                for pou in pous do
+                    pou.GenerateXmlNode() |> DsXml.adoptChildUnit xnPrograms
 
+            xdoc
 
+    // todo : 위의 코드를 이용해서 wrapWithXml 수정
 
-        let programTemplate = DsXml.adoptChild programs programTemplate
-
-        /// LDRoutine 위치 : Rung 삽입 위치
-        let posiLdRoutine = programTemplate |> DsXml.getXmlNode "Body/LDRoutine"
-        let onlineUploadData = posiLdRoutine.FirstChild
-
-        (*
-         * Rung 삽입
-         *)
-        let rungsXml = $"<Rungs>{rungs}</Rungs>" |> DsXml.xmlToXmlNode
-        for r in DsXml.getChildNodes rungsXml do
-            DsXml.insertBeforeUnit r onlineUploadData
-
-        (*
-         * Local variables 삽입
-         *)
-        let programBody = posiLdRoutine.ParentNode
-        let localSymbols = symbolsLocal |> DsXml.xmlToXmlNode
-        DsXml.insertAfterUnit localSymbols programBody
-
-        (*
-         * Global variables 삽입
-         *)
-        let posiGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
-        let countExistingGlobal = posiGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
-        let globalSymbolXmls =
-            // symbolsGlobal = "<GlobalVariable Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol>
-            let neoGlobals = symbolsGlobal |> DsXml.xmlToXmlNode
-            let numNewGlobals = neoGlobals.Attributes.["Count"].Value |> System.Int32.Parse
-
-            posiGlobalVar.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
-            let posiGlobalVarSymbols = DsXml.getXmlNode "Symbols" posiGlobalVar
-
-            neoGlobals.SelectNodes("//Symbols/Symbol")
-            |> XmlExt.ToEnumerables
-            |> iter (DsXml.adoptChildUnit posiGlobalVarSymbols)
-
-        xdoc.OuterXml

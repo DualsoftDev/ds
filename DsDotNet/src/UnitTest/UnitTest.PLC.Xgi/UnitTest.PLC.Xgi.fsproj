@@ -36,6 +36,7 @@
 		<Compile Include="XgiTimerTest.fs" />
 		<Compile Include="XgiCounterTest.fs" />
 		<Compile Include="XgiExpressionEqualityTest.fs" />
+		<Compile Include="XgiPOU.Test.fs" />
 		<Compile Include="RisingFallingTest.fs" />
 		<None Include="App.config" />
 		<Compile Include="Main.fs" />

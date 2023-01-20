@@ -9,6 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Content Include="Documents\POU.xml" />
 		<None Include="Documents\Classes.pptx" />
 		<Content Include="Documents\Readme.txt" />
 		<None Include="Documents\XG5000 - 패키지 SW 설계.docx" />

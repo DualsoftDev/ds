@@ -1,26 +1,23 @@
 namespace PLC.CodeGen.LSXGI
 
 open System.Linq
-open System.Reflection
 open System.Collections.Generic
 
 open Engine.Common.FS
 open Engine.Core
 open PLC.CodeGen.LSXGI
-open PLC.CodeGen.Common
-open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 
 
 [<AutoOpen>]
 module internal XgiSymbolsModule =
-    type internal XgiSymbol =
+    type XgiSymbol =
         | DuTag         of ITagWithAddress
         | DuXgiLocalVar of IXgiLocalVar
         | DuTimer       of TimerStruct
         | DuCounter     of CounterBaseStruct
 
 
-    let internal storagesToXgiSymbol(storages:IStorage seq) : XgiSymbol list = [
+    let storagesToXgiSymbol(storages:IStorage seq) : XgiSymbol list = [
         let timerOrCountersNames =
             storages.Filter(fun s -> s :? TimerCounterBaseStruct)
                 .Select(fun struc -> struc.Name)
@@ -45,7 +42,7 @@ module internal XgiSymbolsModule =
             | _ -> failwithlog "ERROR"
     ]
 
-    let internal xgiSymbolsToSymbolInfos (xgiSymbols:XgiSymbol seq) : SymbolInfo list =
+    let xgiSymbolsToSymbolInfos (xgiSymbols:XgiSymbol seq) : SymbolInfo list =
         let kindVar = int Variable.Kind.VAR
         [
             for s in xgiSymbols do
@@ -96,5 +93,17 @@ module internal XgiSymbolsModule =
                     XGITag.createSymbolInfoWithDetail param
         ]
 
+    /// 내부 변환: Storages => [XgiSymbol] => [SymbolInfo] => Xml string
+    ///
+    /// <GlobalVariable .../> or <LocalVariable .../> 문자열 반환
+    let private storagesToXml (isLocal:bool) =
+        let toXml = if isLocal then XGITag.generateLocalSymbolsXml else XGITag.generateGlobalSymbolsXml
+        storagesToXgiSymbol
+        >> xgiSymbolsToSymbolInfos
+        >> toXml
 
+    /// <LocalVariable .../> 문자열 반환
+    let storagesToLocalXml  (storages:IStorage seq) = storagesToXml true storages
+    /// <GlobalVariable .../> 문자열 반환
+    let storagesToGlobalXml (storages:IStorage seq) = storagesToXml false storages
 

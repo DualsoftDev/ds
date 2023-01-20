@@ -55,7 +55,7 @@ module DsXml =
         seed.SelectSingleNode(path)
 
     /// parent.ChildNodes 을 반환
-    let getChildNodes (parent:XmlNode) =
+    let getChildrenNodes (parent:XmlNode) =
         parent.ChildNodes.Cast<XmlNode>()
 
     /// 새로운 child 를 추가.
@@ -76,10 +76,15 @@ module DsXml =
         let adopted = parent.OwnerDocument.ImportNode(newChild, true)
         parent.InsertBefore(adopted, refChild)
 
-    /// child 삭제
-    let removeChild (child:XmlNode) =
-        let parent = child.ParentNode
-        parent.RemoveChild(child)
+    /// node 삭제
+    let removeNode (victim:XmlNode) =
+        let parent = victim.ParentNode
+        parent.RemoveChild(victim)
+
+    /// node 삭제
+    let removeChildren (parent:XmlNode) =
+        [ for child in getChildrenNodes parent do
+            parent.RemoveChild(child) ]
 
     /// Child node 바꿔치기
     let replaceChild (oldChild:XmlNode) (newChild:XmlNode) =
@@ -88,8 +93,8 @@ module DsXml =
 
 
     let adoptChildUnit parent xn = adoptChild   parent xn |> ignore
-    let removeChildUnit xn       = removeChild  xn        |> ignore
-    let insertAfterUnit xn xr    = insertAfter  xn xr     |> ignore
+    let removeNodeUnit   xn      = removeNode   xn        |> ignore
+    let insertAfterUnit  xn xr   = insertAfter  xn xr     |> ignore
     let insertBeforeUnit xn xr   = insertBefore xn xr     |> ignore
 
 [<Extension>]

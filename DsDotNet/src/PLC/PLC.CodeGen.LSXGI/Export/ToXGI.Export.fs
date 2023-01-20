@@ -8,10 +8,11 @@ open PLC.CodeGen.LSXGI
 
 open PLC.CodeGen.Common
 
+[<AutoOpen>]
 module LsXGI =
 
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
-    let private generateRungs (prologComments:string seq) (commentedStatements:CommentedXgiStatements seq) : XmlOutput =
+    let internal generateRungs (prologComment:string) (commentedStatements:CommentedXgiStatements seq) : XmlOutput =
         let xmlRung (expr:FlatExpression option) xgiCommand y : RungGenerationInfo =
             let {Coordinate=c; Xml=xml} = rung (0, y) expr xgiCommand
             let yy = c / 1024
@@ -20,9 +21,8 @@ module LsXGI =
         let mutable rgi:RungGenerationInfo = {Xmls = []; Y = 0}
 
         // Prolog 설명문
-        if prologComments.any() then
-            let cmt = prologComments |> String.concat "\r\n"
-            let xml = getCommentRung rgi.Y cmt
+        if prologComment.NonNullAny() then
+            let xml = getCommentRung rgi.Y prologComment
             rgi <- rgi.Add(xml)
 
         let simpleRung (expr:IExpression) (target:IStorage) =
@@ -90,7 +90,7 @@ module LsXGI =
         rgi.Xmls |> List.rev |> String.concat "\r\n"
 
     let internal generateXgiXmlFromStatement
-        (prologComments:string seq) (commentedStatements:CommentedXgiStatements seq)
+        (prologComment:string) (commentedStatements:CommentedXgiStatements seq)
         (xgiSymbols:XgiSymbol seq) (existingLSISprj:string option)
       =
         let symbolInfos = xgiSymbolsToSymbolInfos xgiSymbols
@@ -106,35 +106,43 @@ module LsXGI =
 
         let symbolsGlobalXml = XGITag.generateGlobalSymbolsXml globalSym
 
-        let rungsXml = generateRungs prologComments commentedStatements
+        let rungsXml = generateRungs prologComment commentedStatements
 
         logInfo "Finished generating PLC code."
         wrapWithXml rungsXml symbolsLocalXml symbolsGlobalXml existingLSISprj
 
 
-    let generateXml (storages:Storages) (commentedStatements:CommentedStatement list) : string =
-        match Runtime.Target with
-        | XGI -> ()
-        | _ -> failwith $"ERROR: Require XGI Runtime target.  Current runtime target = {Runtime.Target}"
-
-        let prologComments = ["DS Logic for XGI"]
-
-        let existingLSISprj = None
-
+    let internal commentedStatementsToCommentedXgiStatements
+        (storages:IStorage seq)
+        (commentedStatements:CommentedStatement list)
+        : IStorage list * CommentedXgiStatements list
+      =
         (* Timer 및 Counter 의 Rung In Condition 을 제외한 부수의 조건들이 직접 tag 가 아닌 condition expression 으로
             존재하는 경우, condition 들을 임시 tag 에 assign 하는 rung 으로 분리해서 저장.
             => 새로운 임시 tag 와 새로운 임시 tag 에 저장하기 위한 rung 들이 추가된다.
         *)
 
         let newCommentedStatements = ResizeArray<CommentedXgiStatements>()
-        let newStorages = ResizeArray<IStorage>(storages.Values)
+        let newStorages = ResizeArray<IStorage>(storages)
         for cmtSt in commentedStatements do
             let xgiCmtStmts = commentedStatement2CommentedXgiStatements newStorages cmtSt
             let (CommentAndXgiStatements(comment_, xgiStatements)) = xgiCmtStmts
             if xgiStatements.Any() then
                 newCommentedStatements.Add xgiCmtStmts
+        newStorages.ToFSharpList(), newCommentedStatements.ToFSharpList()
+
+    let generateXml (storages:Storages) (commentedStatements:CommentedStatement list) : string =
+        match Runtime.Target with
+        | XGI -> ()
+        | _ -> failwith $"ERROR: Require XGI Runtime target.  Current runtime target = {Runtime.Target}"
+
+        let prologComment = "DS Logic for XGI"
+
+        let existingLSISprj = None
+
+        let newStorages, newCommentedStatements = commentedStatementsToCommentedXgiStatements storages.Values commentedStatements
 
         let xgiSymbols = storagesToXgiSymbol newStorages
 
-        let xml = generateXgiXmlFromStatement prologComments newCommentedStatements xgiSymbols existingLSISprj
+        let xml = generateXgiXmlFromStatement prologComment newCommentedStatements xgiSymbols existingLSISprj
         xml

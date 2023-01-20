@@ -104,7 +104,7 @@ module internal XgiFile =
          * Rung 삽입
          *)
         let rungsXml = $"<Rungs>{rungs}</Rungs>" |> DsXml.xmlToXmlNode
-        for r in DsXml.getChildNodes rungsXml do
+        for r in DsXml.getChildrenNodes rungsXml do
             DsXml.insertBeforeUnit r onlineUploadData
 
         (*

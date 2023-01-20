@@ -6,7 +6,7 @@ open Engine.Common.FS
 
 [<AutoOpen>]
 module HmiGenModule =
-    type Category =
+    type Type =
         | None      = 0
         | System    = 1
         | Flow      = 2
@@ -35,14 +35,13 @@ module HmiGenModule =
     type Info = {
         name:string;
         parent:string;
-        category:Category;
+        category:Type;
         botton_type:ButtonType;
         used_in:ResizeArray<string>;
         targets:ResizeArray<string>;
     }
 
     type HmiCode (model:Model) = 
-        let hmiInfos = new Dictionary<string, Info>()
         let buttons = [
             "AUTO",   ButtonType.Auto;
             "MANUAL", ButtonType.Manual;
@@ -65,84 +64,47 @@ module HmiGenModule =
                 targets = new ResizeArray<string>(0);
             }
 
-        let addSystemFlowReal (systemFlowReal:obj) =
-            let target, parent, category  =
-                match systemFlowReal with
-                | :? DsSystem ->
-                    let sys = (systemFlowReal :?> DsSystem)
-                    sys.QualifiedName, null, Category.System
-                | :? Flow ->
-                    let flow = (systemFlowReal :?> Flow)
-                    flow.QualifiedName, flow.System.Name, Category.Flow
-                | :? Real ->
-                    let real = (systemFlowReal :?> Real)
-                    real.QualifiedName, real.Flow.QualifiedName, Category.Real
-                | _ ->
-                    null, null, Category.None
-
-            if target <> null && false = hmiInfos.ContainsKey(target) then
+        let addButton 
+                btnName systemName buttonType
+                (hmiInfos:Dictionary<string, Info>) =
+            let info = genInfo btnName Type.Button buttonType systemName
+            hmiInfos.Add(btnName, info)
+            
+        let addBasicComponents (hmiInfos:Dictionary<string, Info>) =
+            let addSystemFlowReal (systemFlowReal:obj) =
+                let target, parent, category  =
+                    match systemFlowReal with
+                    | :? DsSystem ->
+                        let sys = (systemFlowReal :?> DsSystem)
+                        sys.QualifiedName, null, Type.System
+                    | :? Flow ->
+                        let flow = (systemFlowReal :?> Flow)
+                        flow.QualifiedName, flow.System.Name, Type.Flow
+                    | :? Real ->
+                        let real = (systemFlowReal :?> Real)
+                        real.QualifiedName, real.Flow.QualifiedName, Type.Real
+                    | _ ->
+                        null, null, Type.None
                 let info = genInfo target category ButtonType.None parent
                 hmiInfos.Add(target, info)
-
-        let addUses (system:DsSystem) (flow:Flow) (vertex:Vertex) =
-            let addToUsedIn nowVertex target =
-                if false = hmiInfos[nowVertex].used_in.Contains(target) then
-                    hmiInfos[nowVertex].used_in.Add(target)
-            let jobName (call:Call) = 
-                $"{system.Name}.{call.CallTargetJob.Name}"
-            let realExSysName (system:DsSystem) name = 
-                $"{system.Name}.{name}"
-            let aliasName (alias:Alias) =
-                match alias.TargetWrapper with
-                | DuAliasTargetCall c          -> jobName c
-                | DuAliasTargetReal r          -> r.QualifiedName
-                | DuAliasTargetRealExFlow rf   -> rf.QualifiedName
-                | DuAliasTargetRealExSystem rs -> realExSysName system rs.Name
-            let vertName =
-                match vertex with
-                | :? Call as c                 -> jobName c
-                | :? Alias as a                -> aliasName a
-                | :? Real as r                 -> r.QualifiedName
-                | :? RealOtherFlow as rf       -> rf.QualifiedName
-                | :? RealOtherSystem as rs     -> realExSysName system rs.Name
-                | _ -> null
-            addToUsedIn vertName system.Name
-            addToUsedIn vertName flow.QualifiedName
-            match vertex.Parent with
-            | DuParentReal pr -> addToUsedIn vertName pr.QualifiedName
-            | _ -> ()
-
-        let addButton btnName systemName buttonType =
-            let info = genInfo btnName Category.Button buttonType systemName
-            hmiInfos.Add(btnName, info)
-
-        let addFlowButton btnName systemName flowNames buttonType =
-            if false = hmiInfos.ContainsKey(btnName) then
-                addButton btnName systemName buttonType
+            let addFlowButton btnName systemName flowNames buttonType =
+                addButton btnName systemName buttonType hmiInfos
                 for flow in flowNames do hmiInfos[btnName].targets.Add(flow)
-
-        let addGroupButtons
-                (system:DsSystem) (buttonsInFlow:ButtonDef seq) buttonType =
-            for btn in buttonsInFlow do
-                let flowNames = [
-                    for flow in btn.SettingFlows do flow.QualifiedName
-                ]
-                addFlowButton btn.Name system.Name flowNames buttonType
-
-        let addUnionButtons
-                (system:DsSystem) (flow:Flow)
-                (btnTargetMap:Dictionary<ButtonType, ResizeArray<string>>) =
-            let flowName = $"{flow.QualifiedName}"
-            for name, btnType in buttons do
-                let btnName = $"{name}of__{flowName}"
-                if false = btnTargetMap.ContainsKey(btnType) ||
-                        false = btnTargetMap[btnType].Contains(flowName) then
+            let addGroupButtons
+                    (system:DsSystem) (buttonsInFlow:ButtonDef seq) btnType =
+                for btn in buttonsInFlow do
+                    let flowNames = [
+                        for flow in btn.SettingFlows do flow.QualifiedName
+                    ]
+                    addFlowButton btn.Name system.Name flowNames btnType
+            let addUnionButtons (system:DsSystem) (flow:Flow) =
+                let flowName = $"{flow.QualifiedName}"
+                for name, btnType in buttons do
+                    let btnName = $"{name}of__{flowName}"
                     addFlowButton btnName system.Name [flowName] btnType
-            
-        let addBasicComponents () =
             for sys in model.Systems do
-                let groupBtnCombiner = addGroupButtons sys
                 addSystemFlowReal sys
+                let groupBtnCombiner = addGroupButtons sys
                 groupBtnCombiner sys.AutoButtons      ButtonType.Auto
                 groupBtnCombiner sys.ManualButtons    ButtonType.Manual
                 groupBtnCombiner sys.DriveButtons     ButtonType.Drive
@@ -152,39 +114,87 @@ module HmiGenModule =
                 groupBtnCombiner sys.TestButtons      ButtonType.Test
                 groupBtnCombiner sys.HomeButtons      ButtonType.Home
                 groupBtnCombiner sys.ReadyButtons     ButtonType.Ready
-                let btnTgtMap =
-                    new Dictionary<ButtonType, ResizeArray<string>>()
                 for flow in sys.Flows do
                     addSystemFlowReal flow
-                    addUnionButtons sys flow btnTgtMap
+                    addUnionButtons sys flow
                     for rootSeg in flow.Graph.Vertices do
                         match rootSeg with
                         | :? Real -> addSystemFlowReal rootSeg
                         | _ -> ()
+            hmiInfos
 
-        let addJobComponentAndUses () =
+        let addGlobalButtons (hmiInfos:Dictionary<string, Info>) =
+            let flowNames =
+                hmiInfos
+                |> Seq.filter(fun info -> info.Value.category = Type.Flow)
+                |> Seq.map(fun info -> info.Value.name)
+            for button, btnType in buttons do
+                addButton button null btnType hmiInfos
+                match btnType with
+                | ButtonType.Test | ButtonType.Drive ->
+                    for sys in model.Systems do
+                        for sp in sys.StartPoints do
+                            hmiInfos[button].targets.Add(sp.QualifiedName)
+                | ButtonType.Auto | ButtonType.Manual | ButtonType.Emergency
+                | ButtonType.Stop | ButtonType.Clear  | ButtonType.Home 
+                | ButtonType.Ready ->
+                    for flow in flowNames do hmiInfos[button].targets.Add(flow)
+                | _ ->
+                    failwithlog "type error"
+            hmiInfos
+
+        let addJobComponentAndUses (hmiInfos:Dictionary<string, Info>) =
+            let addUses (system:DsSystem) (flow:Flow) (vertex:Vertex) =
+                let addToUsedIn nowVertex target =
+                    if not <| hmiInfos[nowVertex].used_in.Contains(target) then
+                        hmiInfos[nowVertex].used_in.Add(target)
+                let jobName (call:Call) = 
+                    $"{system.Name}.{call.CallTargetJob.Name}"
+                let nameRealExS (system:DsSystem) name = 
+                    $"{system.Name}.{name}"
+                let aliasName (alias:Alias) =
+                    match alias.TargetWrapper with
+                    | DuAliasTargetCall c         -> jobName c
+                    | DuAliasTargetReal r         -> r.QualifiedName
+                    | DuAliasTargetRealExFlow f   -> f.QualifiedName
+                    | DuAliasTargetRealExSystem s -> nameRealExS system s.Name
+                let vertName =
+                    match vertex with
+                    | :? Call as c                -> jobName c
+                    | :? Real as r                -> r.QualifiedName
+                    | :? RealOtherFlow as f       -> f.QualifiedName
+                    | :? RealOtherSystem as s     -> nameRealExS system s.Name
+                    | :? Alias as a               -> aliasName a
+                    | _ -> null
+                addToUsedIn vertName system.Name
+                addToUsedIn vertName flow.QualifiedName
+                match vertex.Parent with
+                | DuParentReal pr -> addToUsedIn vertName pr.QualifiedName
+                | _ -> ()
             let addInterface (api:ApiItem) (usedIn:string) =
-                if false = hmiInfos.ContainsKey(api.QualifiedName) then
+                if not <| hmiInfos.ContainsKey(api.QualifiedName) then
                     let info =
                         genInfo
-                            api.QualifiedName Category.Interface
+                            api.QualifiedName Type.Interface
                             ButtonType.None api.System.QualifiedName
                     info.used_in.Add(usedIn)
                     hmiInfos.Add(api.QualifiedName, info)
             let addApiGroup (system:DsSystem) (job:Job) =
                 let jobName = $"{system.Name}.{job.Name}"
-                if hmiInfos.ContainsKey(jobName) = false then
+                if not <| hmiInfos.ContainsKey(jobName) then
                     let info =
                         genInfo
-                            jobName Category.Job ButtonType.None system.Name
+                            jobName Type.Job 
+                            ButtonType.None system.Name
                     hmiInfos.Add(jobName, info)
                 for dvc in job.JobDefs do
                     let api = dvc.ApiItem
                     let device = dvc.ApiItem.System.Name
-                    if false = hmiInfos.ContainsKey(device) then
+                    if not <| hmiInfos.ContainsKey(device) then
                         let info =
                             genInfo
-                                device Category.Device ButtonType.None system.Name
+                                device Type.Device 
+                                ButtonType.None system.Name
                         hmiInfos.Add(device, info)
                     addInterface api jobName
             for sys in model.Systems do
@@ -197,38 +207,19 @@ module HmiGenModule =
                             for vertex in r.Graph.Vertices do
                                 addUses sys flow vertex
                         | _ -> addUses sys flow rootSeg
-
-        let addGlobalButtons () =
-            let flowNames =
-                hmiInfos
-                |> Seq.filter(fun info -> info.Value.category = Category.Flow)
-                |> Seq.map(fun info -> info.Value.name)
-            
-            for button, btnType in buttons do
-                addButton button null btnType
-                match btnType with
-                | ButtonType.Test | ButtonType.Drive ->
-                    for sys in model.Systems do
-                        for sp in sys.StartPoints do
-                            hmiInfos[button].targets.Add(sp.QualifiedName)
-                | ButtonType.Auto | ButtonType.Manual | ButtonType.Emergency
-                | ButtonType.Stop | ButtonType.Clear  | ButtonType.Home 
-                | ButtonType.Ready ->
-                    for flow in flowNames do hmiInfos[button].targets.Add(flow)
-                | _ ->
-                    failwithlog "type error"
+            hmiInfos
 
         let generate () = 
+            let hmiInfos = new Dictionary<string, Info>()
             let success, message =
                 try
-                    addBasicComponents()
-                    addJobComponentAndUses()
-                    if hmiInfos.Count <> 0 then addGlobalButtons()
+                    hmiInfos 
+                    |> addBasicComponents 
+                    |> addJobComponentAndUses
+                    |> addGlobalButtons |> ignore
                     true, null
-                with
-                    | ex -> false, ex.Message
+                with | ex -> false, ex.Message
             let body = hmiInfos.Values |> List.ofSeq
-
             { from = "hmi"; success = success; body = body; error = message; }
 
         member x.Generate() = generate()

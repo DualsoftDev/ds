@@ -82,12 +82,10 @@ module internal XgiFile =
 			    <Program Task="%s" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" FindProgram="1" FindVar="1" Encrytption="">%s
                     <Body>
 					    <LDRoutine>
-                            <COMMENT> ========= Rung(s) 삽입 위치 </COMMENT>
 						    <OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
     XckU4UJCOYh5CA==</OnlineUploadData>
 					    </LDRoutine>
 				    </Body>
-                    <COMMENT> ========= LocalVar 삽입 위치 </COMMENT>
 				    <RungTable></RungTable>
 			    </Program>""" taskName pouName
             |> DsXml.xmlToXmlNode

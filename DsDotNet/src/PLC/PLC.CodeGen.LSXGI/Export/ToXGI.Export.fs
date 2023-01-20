@@ -23,6 +23,12 @@ XckU4UJCOYh5CA==</OnlineUploadData>
 				<RungTable></RungTable>
 			</Program>""" taskName pouName
 
+    let createXmlStringTask taskName kind priority index =
+        sprintf """
+            <Task Version="257" Type="0" Attribute="2" Kind="%d" Priority="%d" TaskIndex="%d"
+                Device="" DeviceType="0" WordValue="0" WordCondition="0" BitCondition="0">%s</Task>""" kind priority index taskName
+
+
 
 [<AutoOpen>]
 module XgiExportModule =
@@ -198,8 +204,8 @@ module XgiExportModule =
                     let index = if i <= 1 then 0 else i-1
                     let kind = if i = 0 then 0 else 2
                     let priority = kind
-                    $"""<Task Version="257" Type="0" Attribute="2" Kind="{kind}" Priority="{priority}" TaskIndex="{index}" """
-                    + $"""Device="" DeviceType="0" WordValue="0" WordCondition="0" BitCondition="0">{pou.TaskName}</Task>"""
+
+                    createXmlStringTask pou.TaskName kind priority index
                     |> xmlToXmlNode
                     |> DsXml.adoptChildUnit xnTasks
 

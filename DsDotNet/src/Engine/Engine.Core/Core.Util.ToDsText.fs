@@ -337,7 +337,8 @@ module internal ToDsTextModule =
                     match sch with
                     | :? Real as real -> real.ParentNPureNames.Combine()
                     | :? Call as call -> getCallName call
-                    | :? RealOtherFlow as realEx -> realEx.ParentNPureNames.Combine()
+                    | :? RealOtherFlow as realExF -> realExF.ParentNPureNames.Combine()
+                    | :? RealOtherSystem as realExS -> realExS.ParentNPureNames.Combine()
                     | _ -> failwithlog "ERROR"
 
                 [

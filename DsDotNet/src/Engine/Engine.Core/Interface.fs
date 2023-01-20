@@ -9,6 +9,7 @@ module Interface =
 
 
     type IVertex = interface end
+    type ISystem = interface end
 
     type INamed  =
          abstract Name:string with get, set

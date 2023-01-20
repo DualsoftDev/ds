@@ -158,17 +158,42 @@ module CpuLoader =
 
         tagManagerBuild (system)
 
+    //프로그램 내려가는 그룹
+    type PouGen =
+    | ActivePou    of DsSystem * CommentedStatement list
+    | DevicePou    of Device * CommentedStatement list
+    | ExternalPou  of ExternalSystem * CommentedStatement list
+        member x.ToSystem() =
+            match x with
+            | ActivePou    (s, p) -> s
+            | DevicePou    (d, p) -> d.ReferenceSystem
+            | ExternalPou  (e, p) -> e.ReferenceSystem
+        member x.CommentedStatements() =
+            match x with
+            | ActivePou    (s, p) -> p
+            | DevicePou    (d, p) -> p
+            | ExternalPou  (e, p) -> p
+        member x.IsActive   = match x with | ActivePou (s, p) -> true |_ -> false
+        member x.IsDevice   = match x with | DevicePou (s, p) -> true |_ -> false
+        member x.IsExternal = match x with | ExternalPou (s, p) -> true |_ -> false
+
+
     [<Extension>]
     type Cpu =
         [<Extension>]
         static member LoadStatements (system:DsSystem, storages:Storages) =
             applyTagManager (system, storages)
-            let statements = convertSystem(system)
-            let result = system.GetRecursiveSystems()
-                         |>Seq.map(fun s->s, convertSystem(s))
-                         |>Seq.append [system, statements]
-                         |> dict
-
+            let result =
+                //자신(Acitve)이 Loading 한 system을 재귀적으로 한번에 가져와 CPU 변환
+                system.GetRecursiveLoadeds()
+                |>Seq.map(fun s->
+                    match s  with
+                    | :? Device as d ->   DevicePou (d, convertSystem(d.ReferenceSystem))
+                    | :? ExternalSystem as e ->  ExternalPou (e, convertSystem(e.ReferenceSystem))
+                    | _ -> failwithlog "Error LoadStatements"
+                    )
+                //자신(Acitve) system을  CPU 변환
+                |>Seq.append [ActivePou (system, convertSystem(system))]
 
             //test debug
             //system._auto.Value <- true

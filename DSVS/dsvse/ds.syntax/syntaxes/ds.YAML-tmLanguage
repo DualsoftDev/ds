@@ -30,8 +30,9 @@ variables:
   button: 'emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home'
   lamp: 'runlamp|dryrunlamp|manuallamp|stoplamp|emglamp'
   blocks: 'a_in|a|m_in|m|d_in|d|s_in|s|c_in|c|e_in|e|t_in|t|h_in|h|r_in|r'
+  varType: 'int|word|float|dword'
   types: '(system|sys|device|prop|external|safety|layouts|flow|aliases|variables|jobs|interfaces|buttons|lamps|conditions|{{lamp}}|{{button}}|{{blocks}})'
-  punctuation: '((<\|\|>)|(<\|)|(\|>)|<|>|!|,|;|(:=)|=|(=>)|(<=)|(\|\|)|(\&\&))'
+  punctuation: '((<\|\|>)|(<\|)|(\|>)|<|>|!|~|,|(:=)|=|(=>)|(<=)|(\|\|)|(\&\&))'
   configs: '(ip|host|file)'
   
   buttonHeader: '\[\s*(?:{{button}})\s*\]'
@@ -60,6 +61,7 @@ variables:
 patterns:
 - include: '#comments'
 - include: '#invalid'
+- include: '#variableDef'
 - include: '#header'
 - include: '#headerConfigs'
 - include: '#codeblocks'
@@ -82,11 +84,6 @@ repository:
       '0': {name: punctuation.brace.header.gate.end.ds}
     patterns:
     - include: '#headerConfigs'
-    # - include: '#value'
-    # - name: punctuation.separator.array.json
-    #   match: ','
-    # - name: invalid.illegal.expected-array-separator.json
-    #   match: '[^\s\]]'
 
   headerConfigs:
     patterns:
@@ -95,33 +92,26 @@ repository:
     - name: support.type.header.config.path.ds
       match: '\b(?<!\=\s*){{configs}}\b'
 
+  variableType:
+    name: storage.modifier.variable.type.ds
+    match: '{{varType}}'
+
+  variableDef:
+    name: entity.other.definition.ds
+    begin: \(
+    beginCaptures:
+      '0': {name: punctuation.brace.definition.begin.ds}
+    end: \)
+    endCaptures:
+      '0': {name: punctuation.brace.definition.end.ds}
+    patterns:
+    - include: '#variableType'
+    - include: '#punctuation'
+    - include: '#segment'
+
   punctuation:
     name: keyword.other.accessor.ds
-    match: '{{startOfIdentifier}}({{punctuation}}){{endOfIdentifier}}'
-
-        
-  types:
-    patterns:
-    - name: support.type.tag.ip.ds
-      match: '(?<=({{external}})\b)\s*(({{ipSpec}}))\b'
-    - name: support.type.tag.file.ds
-      match: '(?<=({{device}})\b)\s*(({{fileSpec}}))\b'
-    - name: storage.modifier.withbrackets.ds
-      match: '{{startofBracket}}({{types}}){{endofBracket}}'
-    - name: storage.modifier.ds
-      match: '{{startOfIdentifier}}({{types}}){{endOfIdentifier}}'
-
-  systemType:
-    patterns:
-    - name: support.type.tag.ip.ds
-      match: '(?<=({{system}})\b)\s*(({{ipSpec}}))\b'
-    - name: storage.modifier.system.header.ds
-      match: '({{system}})\b'
-
-  property:
-   name: variable.object.property.ds
-   match: '{{startOfIdentifier}}({{identifiers}}){{endOfIdentifier}}' 
-
+    match: '({{punctuation}})'
 
   comments: # Inline (//) and block (/* */) comments. Comments can happen anywhere.
     patterns:
@@ -142,11 +132,11 @@ repository:
     patterns:
     - name: 'keyword.control.header.bracket.codeblocks.ds'
       match: '{{codeblock}}'
-    - name: 'support.function.code.ds'
-      match: '\$'
 
   segment:
     patterns:
+    - name: 'support.function.code.ds'
+      match: '\$'
     - name: 'entity.name.segment.withdot.ds'
       match: '{{identifiers}}'
     - name: 'entity.name.segment.ds'

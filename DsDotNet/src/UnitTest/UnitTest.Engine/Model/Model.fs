@@ -122,6 +122,10 @@ module ModelTests1 =
             compareExact ParserTest.Aliases
 
         [<Test>]
+        member __.``Model component [Link and link aliases] test`` () =
+            compare ParserTest.LinkAndLinkAliases linkAndLinkAliases
+
+        [<Test>]
         member __.``Model component [QualifiedName] test`` () =
             compareExact ParserTest.QualifiedName
 

@@ -561,7 +561,37 @@ namespace Engine
     [device file=""cylinder.ds""] A;
 }
 ";
-
+        public static string LinkAndLinkAliases = @"
+[sys] Control = {
+    [flow] F = {
+		Main = { mv1up, mv2dn > mv1dn, mv2up; }
+		FWD > BWD > Main |> FWD2 |> BWD2;
+		Main <||> Reset;
+		FWD <| Main |> BWD;
+		
+		[aliases] = {
+			FWD = { FWD2; }
+			BWD = { BWD2; }
+		}
+    }
+    [interfaces] = {
+        G = { F.Main ~ F.Main }
+        R = { F.Reset ~ F.Reset }
+        G <||> R;
+    }
+	[jobs] = {
+		mv1up = { M1.Up(%I300, %Q300); }
+		mv1dn = { M1.Dn(%I301, %Q301); }
+		mv2up = { M2.Up(%I302, %Q302); }
+		mv2dn = { M2.Dn(%I303, %Q303); }
+		FWD = Mt.fwd;
+		BWD = Mt.bwd;
+	}
+    [external file=""HmiCodeGenExample/test_sample/device/MovingLifter1.ds"" ip=""localhost""] M1;
+    [external file=""HmiCodeGenExample/test_sample/device/MovingLifter2.ds"" ip=""localhost""] M2;
+	[external file=""HmiCodeGenExample/test_sample/device/motor.ds"" ip=""localhost""] Mt;
+}
+";
 
         public static string Diamond = @"
 [sys] L = {

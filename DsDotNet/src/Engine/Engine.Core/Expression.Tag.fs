@@ -20,26 +20,21 @@ module TagModule =
         inherit VariableBase<'T>(name, initValue)
         override x.ToBoxedExpression() = var2expr x
 
-
-
     /// plc / pc / 다른 runtime platform 지원가능한 물리 TAG
     type PlcTag<'T when 'T:equality> (name, address:string, initValue:'T) =
         inherit Tag<'T>(name, initValue)
         interface ITagWithAddress with
             member x.Address = x.Address
-
         member val Address = address with get, set
 
     /// PlanTag 나의 시스템 내부 TAG
     type PlanTag<'T when 'T:equality> (name, initValue:'T) =
         inherit PlcTag<'T>(name, "", initValue)
-
         member val Vertex:Vertex option = None with get, set
 
     /// ActionTag 다른 시스템 연결 TAG
     type ActionTag<'T when 'T:equality> (name, address, initValue:'T) =
         inherit PlcTag<'T>(name, address, initValue)
-
 
 
 

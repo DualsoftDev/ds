@@ -9,6 +9,22 @@ open PLC.CodeGen.LSXGI
 open PLC.CodeGen.Common
 
 [<AutoOpen>]
+module XgiXmlGeneratorModule =
+    /// Program 부분 Xml string 반환: <Program Task="taskName" ..>pouName
+    let createXmlStringProgram taskName pouName =
+        sprintf """
+			<Program Task="%s" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" FindProgram="1" FindVar="1" Encrytption="">%s
+                <Body>
+					<LDRoutine>
+						<OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
+XckU4UJCOYh5CA==</OnlineUploadData>
+					</LDRoutine>
+				</Body>
+				<RungTable></RungTable>
+			</Program>""" taskName pouName
+
+
+[<AutoOpen>]
 module XgiExportModule =
 
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
@@ -136,22 +152,7 @@ module XgiExportModule =
             let rungsXml = generateRungs comment commentedXgiStatements
 
             /// POU/Programs/Program
-            let programTemplate =
-                sprintf """
-			        <Program Task="%s" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" FindProgram="1" FindVar="1" Encrytption="">%s
-                        <Body>
-					        <LDRoutine>
-                                <COMMENT> ========= Rung(s) 삽입 위치 </COMMENT>
-						        <OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
-        XckU4UJCOYh5CA==</OnlineUploadData>
-					        </LDRoutine>
-				        </Body>
-                        <COMMENT> ========= LocalVar 삽입 위치 </COMMENT>
-				        <RungTable></RungTable>
-			        </Program>""" taskName pouName
-                |> DsXml.xmlToXmlNode
-
-
+            let programTemplate = createXmlStringProgram taskName pouName |> DsXml.xmlToXmlNode
 
             //let programTemplate = DsXml.adoptChild programs programTemplate
 

@@ -24,6 +24,10 @@
       </dict>
       <dict>
         <key>include</key>
+        <string>#variableDef</string>
+      </dict>
+      <dict>
+        <key>include</key>
         <string>#header</string>
       </dict>
       <dict>
@@ -102,67 +106,59 @@
           </dict>
         </array>
       </dict>
+      <key>variableType</key>
+      <dict>
+        <key>name</key>
+        <string>storage.modifier.variable.type.ds</string>
+        <key>match</key>
+        <string>int|word|float|dword</string>
+      </dict>
+      <key>variableDef</key>
+      <dict>
+        <key>name</key>
+        <string>entity.other.definition.ds</string>
+        <key>begin</key>
+        <string>\(</string>
+        <key>beginCaptures</key>
+        <dict>
+          <key>0</key>
+          <dict>
+            <key>name</key>
+            <string>punctuation.brace.definition.begin.ds</string>
+          </dict>
+        </dict>
+        <key>end</key>
+        <string>\)</string>
+        <key>endCaptures</key>
+        <dict>
+          <key>0</key>
+          <dict>
+            <key>name</key>
+            <string>punctuation.brace.definition.end.ds</string>
+          </dict>
+        </dict>
+        <key>patterns</key>
+        <array>
+          <dict>
+            <key>include</key>
+            <string>#variableType</string>
+          </dict>
+          <dict>
+            <key>include</key>
+            <string>#punctuation</string>
+          </dict>
+          <dict>
+            <key>include</key>
+            <string>#segment</string>
+          </dict>
+        </array>
+      </dict>
       <key>punctuation</key>
       <dict>
         <key>name</key>
         <string>keyword.other.accessor.ds</string>
         <key>match</key>
-        <string>(?&lt;![_$[:alnum:]])(?:(?&lt;=\.\.\.)|(?&lt;!\.))(((&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|!|,|;|(:=)|=|(=&gt;)|(&lt;=)|(\|\|)|(\&amp;\&amp;)))(?![_$[:alnum:]])(?:(?=\.\.\.)|(?!\.))</string>
-      </dict>
-      <key>types</key>
-      <dict>
-        <key>patterns</key>
-        <array>
-          <dict>
-            <key>name</key>
-            <string>support.type.tag.ip.ds</string>
-            <key>match</key>
-            <string>(?&lt;=({{external}})\b)\s*(({{ipSpec}}))\b</string>
-          </dict>
-          <dict>
-            <key>name</key>
-            <string>support.type.tag.file.ds</string>
-            <key>match</key>
-            <string>(?&lt;=({{device}})\b)\s*(({{fileSpec}}))\b</string>
-          </dict>
-          <dict>
-            <key>name</key>
-            <string>storage.modifier.withbrackets.ds</string>
-            <key>match</key>
-            <string>(\[\s*)((system|sys|device|prop|external|safety|layouts|flow|aliases|variables|jobs|interfaces|buttons|lamps|conditions|runlamp|dryrunlamp|manuallamp|stoplamp|emglamp|emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home|a_in|a|m_in|m|d_in|d|s_in|s|c_in|c|e_in|e|t_in|t|h_in|h|r_in|r))(\s*\])</string>
-          </dict>
-          <dict>
-            <key>name</key>
-            <string>storage.modifier.ds</string>
-            <key>match</key>
-            <string>(?&lt;![_$[:alnum:]])(?:(?&lt;=\.\.\.)|(?&lt;!\.))((system|sys|device|prop|external|safety|layouts|flow|aliases|variables|jobs|interfaces|buttons|lamps|conditions|runlamp|dryrunlamp|manuallamp|stoplamp|emglamp|emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home|a_in|a|m_in|m|d_in|d|s_in|s|c_in|c|e_in|e|t_in|t|h_in|h|r_in|r))(?![_$[:alnum:]])(?:(?=\.\.\.)|(?!\.))</string>
-          </dict>
-        </array>
-      </dict>
-      <key>systemType</key>
-      <dict>
-        <key>patterns</key>
-        <array>
-          <dict>
-            <key>name</key>
-            <string>support.type.tag.ip.ds</string>
-            <key>match</key>
-            <string>(?&lt;=({{system}})\b)\s*(({{ipSpec}}))\b</string>
-          </dict>
-          <dict>
-            <key>name</key>
-            <string>storage.modifier.system.header.ds</string>
-            <key>match</key>
-            <string>({{system}})\b</string>
-          </dict>
-        </array>
-      </dict>
-      <key>property</key>
-      <dict>
-        <key>name</key>
-        <string>variable.object.property.ds</string>
-        <key>match</key>
-        <string>(?&lt;![_$[:alnum:]])(?:(?&lt;=\.\.\.)|(?&lt;!\.))((?:[^\\\s\.;((&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|!|,|;|(:=)|=|(=&gt;)|(&lt;=)|(\|\|)|(\&amp;\&amp;))[^\S\n\r]])+|(?:(?:[^\\\s\.;((&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|!|,|;|(:=)|=|(=&gt;)|(&lt;=)|(\|\|)|(\&amp;\&amp;))[^\S\n\r]])++(?:\.(?:[^\\\s\.;((&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|!|,|;|(:=)|=|(=&gt;)|(&lt;=)|(\|\|)|(\&amp;\&amp;))[^\S\n\r]])+)+))(?![_$[:alnum:]])(?:(?=\.\.\.)|(?!\.))</string>
+        <string>(((&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|!|~|,|(:=)|=|(=&gt;)|(&lt;=)|(\|\|)|(\&amp;\&amp;)))</string>
       </dict>
       <key>comments</key>
       <dict>
@@ -220,12 +216,6 @@
             <key>match</key>
             <string>(&lt;@\{|\}@&gt;)</string>
           </dict>
-          <dict>
-            <key>name</key>
-            <string>support.function.code.ds</string>
-            <key>match</key>
-            <string>\$</string>
-          </dict>
         </array>
       </dict>
       <key>segment</key>
@@ -234,15 +224,21 @@
         <array>
           <dict>
             <key>name</key>
+            <string>support.function.code.ds</string>
+            <key>match</key>
+            <string>\$</string>
+          </dict>
+          <dict>
+            <key>name</key>
             <string>entity.name.segment.withdot.ds</string>
             <key>match</key>
-            <string>(?:[^\\\s\.;((&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|!|,|;|(:=)|=|(=&gt;)|(&lt;=)|(\|\|)|(\&amp;\&amp;))[^\S\n\r]])+|(?:(?:[^\\\s\.;((&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|!|,|;|(:=)|=|(=&gt;)|(&lt;=)|(\|\|)|(\&amp;\&amp;))[^\S\n\r]])++(?:\.(?:[^\\\s\.;((&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|!|,|;|(:=)|=|(=&gt;)|(&lt;=)|(\|\|)|(\&amp;\&amp;))[^\S\n\r]])+)+)</string>
+            <string>(?:[^\\\s\.;((&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|!|~|,|(:=)|=|(=&gt;)|(&lt;=)|(\|\|)|(\&amp;\&amp;))[^\S\n\r]])+|(?:(?:[^\\\s\.;((&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|!|~|,|(:=)|=|(=&gt;)|(&lt;=)|(\|\|)|(\&amp;\&amp;))[^\S\n\r]])++(?:\.(?:[^\\\s\.;((&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|!|~|,|(:=)|=|(=&gt;)|(&lt;=)|(\|\|)|(\&amp;\&amp;))[^\S\n\r]])+)+)</string>
           </dict>
           <dict>
             <key>name</key>
             <string>entity.name.segment.ds</string>
             <key>match</key>
-            <string>(?:[^\\\s\.;((&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|!|,|;|(:=)|=|(=&gt;)|(&lt;=)|(\|\|)|(\&amp;\&amp;))[^\S\n\r]])+</string>
+            <string>(?:[^\\\s\.;((&lt;\|\|&gt;)|(&lt;\|)|(\|&gt;)|&lt;|&gt;|!|~|,|(:=)|=|(=&gt;)|(&lt;=)|(\|\|)|(\&amp;\&amp;))[^\S\n\r]])+</string>
           </dict>
           <dict>
             <key>include</key>

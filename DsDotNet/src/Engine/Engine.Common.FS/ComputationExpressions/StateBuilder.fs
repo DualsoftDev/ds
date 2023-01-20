@@ -15,20 +15,30 @@ module StateBuilderModule =
     module State =
         let inline run z (State f) = f z
         let ret a = State(fun z -> (a, z))
-        (*
-            ( a -> [b] ) -> [a] -> [b]
-            ( a -> State<z, b> ) -> State<z, a> -> State<z, b>
-         *)
-        //let bind binder stateA =
+
+        //let bind1 binder stateA =
         //    State(fun z ->
         //        let a, za = run z stateA
         //        let stateB = binder a
         //        run za stateB)
 
-        let bind g (State f) =
-            State(fun z ->
-                let a, z' = f z
-                run z' (g a))
+        //let bind2 g (State f) =
+        //    State(fun z ->
+        //        let a, z' = f z
+        //        run z' (g a))
+
+        //let bind3 g (State f) =
+        //    State(fun z ->
+        //        let a, z' = f z
+        //        let (State g) = g a
+        //        g z')
+
+        (*
+            ( a -> [b] ) -> [a] -> [b]
+            ( a -> State<z, b> ) -> State<z, a> -> State<z, b>
+         *)
+        let bind g (State f) = State(fun z -> let a, z' = f z in run z' (g a))
+
 
         let get = State(fun z -> z, z)
         let put z = State(fun _ -> (), z)
@@ -37,10 +47,11 @@ module StateBuilderModule =
             ( a -> b ) -> [a] -> [b]
             ( a -> b ) -> State<z, a> -> State<z, b>
          *)
-        let map f stateA =
-            State(fun z ->
-                let a, za = run z stateA
-                f a, za)
+        let map g (State f) = State(fun z -> let a, z' = f z in  g a, z')
+        //let map f stateA =
+        //    State(fun z ->
+        //        let a, za = run z stateA
+        //        f a, za)
 
     /// The state monad passes around an explicit internal state that can be
     /// updated along the way. It enables the appearance of mutability in a purely

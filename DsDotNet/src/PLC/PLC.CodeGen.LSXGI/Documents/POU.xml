@@ -2,8 +2,15 @@
 
 <!--
 Project
+    NetworkConfiguration
+        NetworkList
+            Network
+                NetworkModule
     Configurations
         Configuration
+            Parameters
+                Parameter
+                    Module
             GlobalVariables
                 GlobalVariable
                     Symbols

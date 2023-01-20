@@ -30,15 +30,18 @@ variables:
 
   system: 'system|sys'
   external: 'external'
-  ipSpec: 'ip|host'
-  address: '{{compo}}|\.'
-  fileSpec: 'file'
-  ip: '{{ipSpec}}\s*='
   button: 'emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home'
   lamp: 'runlamp|dryrunlamp|manuallamp|stoplamp|emglamp'
-  types: '(device|external|flow|aliases|{{lamp}}|{{button}})\b'
+  types: '({{system}}|device|external|jobs|flow|aliases|interfaces|{{lamp}}|{{button}})'
+
+  ipSpec: 'ip|host'
+  fileSpec: 'file'
+  configs: '({{ipSpec}}|{{fileSpec}})'
+  
+  address: '{{compo}}|\.'
+  ip: '{{ipSpec}}\s*='
   # props: '{{identifier1}}|{{identifier2}}|{{identifier3}}|{{identifier4}}|{{identifiers}}'
-  punctuation: '[(<\|\|>)(<\|)(\|>)<>,;:=(=>)(<=)(\|\|)(\&\&)]'
+  punctuation: '((<\|\|>)|(<\|)|(\|>)|<|>|!|,|;|(:=)|=|(=>)|(<=)|(\|\|)|(\&\&))'
   buttonHeader: '\[\s*(?:{{button}})\s*\]'
   lampHeader: '\[\s*(?:{{lamp}})\s*\]'
 
@@ -51,6 +54,7 @@ variables:
   aliasHeader: '(\[\s*aliases\s*\])\s*=\s*'
 
   #codeblock's dollor identifiers, etc
+  codeblock: '(<@\{|\}@>)'
   dollar: '(?<=\$){{identifiers}}'
 
 
@@ -68,20 +72,42 @@ variables:
 
 patterns:
 - include: '#comments'
-- include: '#systems'
-- include: '#systemType'
-# - include: '#segment'
+- include: '#header'
+- include: '#headerConfigs'
+- include: '#codeblocks'
+- include: '#punctuation'
+- include: '#segment'
 
 repository:
-  systemType:
-    patterns:
-    # - name: storage.modifier.system.text.withbrackets.ds
-    #   match: '{{startofBracket}}({{system}}){{endofBracket}}'
-    - name: support.type.tag.ip.ds
-      match: '(?<=({{system}})\b)\s*(({{ipSpec}}))\b'
-    - name: storage.modifier.system.header.ds
-      match: '({{system}})\b'
 
+  header:
+    name: variable.other.squarebracket.gate.ds
+    begin: \[
+    beginCaptures:
+      '0': {name: punctuation.brace.header.gate.begin.ds}
+    end: \]
+    endCaptures:
+      '0': {name: punctuation.brace.header.gate.end.ds}
+    patterns:
+    - include: '#headerConfigs'
+    # - include: '#value'
+    # - name: punctuation.separator.array.json
+    #   match: ','
+    # - name: invalid.illegal.expected-array-separator.json
+    #   match: '[^\s\]]'
+
+  headerConfigs:
+    patterns:
+    - name: storage.modifier.header.config.type.ds
+      match: '(?<=\[){{types}}'
+    - name: support.type.header.config.path.ds
+      match: '\b(?<!\=\s*){{configs}}\b'
+
+  punctuation:
+    name: keyword.other.accessor.ds
+    match: '{{startOfIdentifier}}({{punctuation}}){{endOfIdentifier}}'
+
+        
   types:
     patterns:
     - name: support.type.tag.ip.ds
@@ -93,13 +119,18 @@ repository:
     - name: storage.modifier.ds
       match: '{{startOfIdentifier}}({{types}}){{endOfIdentifier}}'
 
+  systemType:
+    patterns:
+    - name: support.type.tag.ip.ds
+      match: '(?<=({{system}})\b)\s*(({{ipSpec}}))\b'
+    - name: storage.modifier.system.header.ds
+      match: '({{system}})\b'
+
   property:
    name: variable.object.property.ds
    match: '{{startOfIdentifier}}({{identifiers}}){{endOfIdentifier}}' 
 
-  punctuation:
-    name: keyword.other.accessor.ds
-    match: '{{startOfIdentifier}}({{punctuation}}){{endOfIdentifier}}'
+
   comments: # Inline (//) and block (/* */) comments. Comments can happen anywhere.
     patterns:
     - name: comment.block.ds
@@ -114,360 +145,22 @@ repository:
       beginCaptures:
         '1': { name: 'punctuation.definition.comment.ds' }
       end: (?=$)
-
-  systems:
-    patterns:
-      - comment: system-multi-line
-        name: system.multi.ds
-        begin: '{{systemHeader}}(\{)(?=[^\}]*$)'
-        beginCaptures:
-          '1': {name: storage.modifier.system.header.ds}
-          '2': {name: support.type.tag.ip.spec.ds}
-          '3': {name: entity.name.variable.ip.name.ds}
-          '4': {name: entity.name.variable.system.name.ds}
-          '5': {name: punctuation.brace.system.start.ds}
-        end: (^\s*\})
-        endCaptures:
-          '1': {name: punctuation.brace.system.end.ds}
-        patterns:             
-          - include: '#comments'
-          - include: '#devices'
-          - include: '#externals'
-          - include: '#flows'
-          - include: '#jobs'
-          - include: '#interfaces'
-          - include: '#buttons'
-          - include: '#lamps'
-          - include: '#codeblocks'
-          # - include: '#segment'
-          - include: '#types'
-          - include: '#punctuation'
-          - include: '#property'
-
-      - comment: system-single-line
-        name: system.single.ds
-        begin: '{{systemHeader}}(\{)'
-        beginCaptures:
-          '1': {name: storage.modifier.system.header.ds}
-          '2': {name: support.type.tag.ip.spec.ds}
-          '3': {name: entity.name.variable.ip.name.ds}
-          '4': {name: entity.name.variable.system.name.ds}
-          '5': {name: punctuation.brace.system.start.ds}
-        end: (\})
-        endCaptures:
-          '1': {name: punctuation.brace.system.end.ds}
-        patterns:          
-          - name: punctuation.separator.array.ds
-            match: ";"
-          - name: invalid.illegal.expected-array-separator.json
-            match: '[^\s\}]'
-          - include: '#comments'
-          - include: '#devices'
-          - include: '#externals'
-          - include: '#flows'
-          - include: '#jobs'
-          - include: '#interfaces'
-          - include: '#buttons'
-          - include: '#lamps'
-          - include: '#codeblocks'
-          # - include: '#segment'
-          - include: '#types'
-          - include: '#punctuation'
-          - include: '#property'
-
-  flows:
-    patterns:
-      - comment: flow-multi-line
-        name: flow.multi.ds
-        begin: '{{flowHeader}}(\{)(?=[^\}]*$)'
-        beginCaptures:
-          '1': {name: storage.modifier.flow.header.ds}
-          '2': {name: entity.name.variable.flow.name.ds}
-          '3': {name: storage.modifier.flow.equal.ds}
-          '4': {name: punctuation.brace.flow.start.ds}
-        end: (^\s*\})
-        endCaptures:
-          '1': {name: punctuation.brace.flow.end.ds}
-        patterns:
-        - include: '#comments'
-        - include: '#aliases'
-        - include: '#parents'
-        - include: '#causals'
-        - include: '#segment'
-        - include: '#punctuation'
-        - include: '#property'
-      - comment: flow-single-line
-        name: flow.single.ds
-        begin: '{{flowHeader}}\{'
-        beginCaptures:
-          '1': {name: storage.modifier.flow.header.ds}
-          '2': {name: entity.name.variable.flow.name.ds}
-        end: \}
-        endCaptures:
-          '1': {name: punctuation.brace.end.ds}
-        patterns:          
-        - name: punctuation.separator.array.ds
-          match: ";"
-        - name: invalid.illegal.expected-array-separator.json
-          match: '[^\s\}]' 
-
-  aliases:
-    patterns:
-      - comment: aliases-multi-line
-        name: aliase.multi.ds
-        begin: '{{aliasHeader}}(\{)(?=[^\}]*$)'
-        beginCaptures:
-          '1': {name: storage.modifier.aliase.header.ds}
-          '2': {name: punctuation.brace.aliase.start.ds}
-        end: (^\s*\})
-        endCaptures:
-          '1': {name: punctuation.brace.flow.end.ds}
-        patterns:
-        - include: '#comments'
-        - include: '#causals'
-        - include: '#segment'
-      - comment: aliases-single-line
-        name: aliase.single.ds
-        begin: '{{aliasHeader}}\{'
-        beginCaptures:
-          '1': {name: storage.modifier.aliase.header.ds}
-        end: \}
-        endCaptures:
-          '1': {name: punctuation.brace.end.ds}
-        patterns:          
-        - name: punctuation.separator.array.ds
-          match: ";"
-        - name: invalid.illegal.expected-array-separator.json
-          match: '[^\s\}]'
-
-  parents:
-    patterns:
-      - comment: parents-multi-line
-        name: parent.multi.ds
-        begin: '{{parentHeader}}(\{)(?=[^\}]*$)'
-        beginCaptures:
-          '1': {name: entity.name.variable.parent.name.ds}
-          '2': {name: punctuation.brace.parent.start.ds}
-        end: (^\s*\})
-        endCaptures:
-          '1': {name: punctuation.brace.flow.end.ds}
-        patterns:
-        - include: '#comments'
-        - include: '#causals'
-        - include: '#segment'
-        - name: punctuation.separator.array.ds
-          match: ";"
-        - name: invalid.illegal.expected-array-separator.json
-          match: '[^\s\}]'
-      - comment: parents-single-line
-        name: parent.single.ds
-        begin: '{{parentHeader}}\{'
-        beginCaptures:
-          '1': {name: entity.name.variable.parent.name.ds}
-          '2': {name: entity.name.variable.parent.name.ds}
-        end: \}
-        endCaptures:
-          '1': {name: punctuation.brace.end.ds}
-        patterns:          
-        - include: '#comments'
-        - include: '#causals'
-        - include: '#segment'
-        - name: punctuation.separator.array.ds
-          match: ";"
-        - name: invalid.illegal.expected-array-separator.json
-          match: '[^\s\}]'
-
-  jobs:
-    patterns:
-      - comment: jobs-multi-line
-        name: jobs.multi.ds
-        begin: (\[\s*jobs\s*\])\s*(=)\s*(\{)(?=[^\}]*$)
-        beginCaptures:
-          '1': {name: storage.modifier.jobs.header.ds}
-        end: (^\s*\})
-        endCaptures:
-          '1': {name: punctuation.brace.end.ds}
-        patterns:
-        - include: '#comments'
-        - include: '#parents'
-
-      - comment: jobs-single-line
-        name: jobs.single.ds
-        begin: (\[\s*jobs\s*\])\s*(=)\s*\{
-        beginCaptures:
-          '1': {name: storage.modifier.jobs.header.ds}
-        end: \}
-        endCaptures:
-          '1': {name: punctuation.brace.end.ds}
-        patterns:          
-        - name: punctuation.separator.array.ds
-          match: ";"
-        - name: invalid.illegal.expected-array-separator.json
-          match: '[^\s\}]'
-
-  buttons:
-    patterns:
-      - comment: buttons-multi-line
-        name: buttons.multi.ds
-        begin: '({{buttonHeader}})\s*(=)\s*(\{)(?=[^\}]*$)'
-        beginCaptures:
-          '1': {name: storage.modifier.buttons.header.ds}
-        end: (^\s*\})
-        endCaptures:
-          '1': {name: punctuation.brace.end.ds}
-        patterns:
-        - include: '#comments'
-        - include: '#segment'
-      - comment: buttons-single-line
-        name: buttons.single.ds
-        begin:  '({{buttonHeader}})\s*(=)\s*\{'
-        beginCaptures:
-          '1': {name: storage.modifier.buttons.header.ds}
-        end: \}
-        endCaptures:
-          '1': {name: punctuation.brace.end.ds}
-        patterns:          
-        - name: punctuation.separator.array.ds
-          match: ";"
-        - name: invalid.illegal.expected-array-separator.json
-          match: '[^\s\}]'
-
-  lamps:
-    patterns:
-      - comment: lamps-multi-line
-        name: lamps.multi.ds
-        begin: '({{lampHeader}})\s*(=)\s*(\{)(?=[^\}]*$)'
-        beginCaptures:
-          '1': {name: storage.modifier.lamps.header.ds}
-        end: (^\s*\})
-        endCaptures:
-          '1': {name: punctuation.brace.end.ds}
-        patterns:
-        - include: '#comments'
-
-      - comment: lamps-single-line
-        name: lamps.single.ds
-        begin:  '({{lampHeader}})\s*(=)\s*\{'
-        beginCaptures:
-          '1': {name: storage.modifier.lamps.header.ds}
-        end: \}
-        endCaptures:
-          '1': {name: punctuation.brace.end.ds}
-        patterns:          
-        - name: punctuation.separator.array.ds
-          match: ";"
-        - name: invalid.illegal.expected-array-separator.json
-          match: '[^\s\}]'
-
-  interfaces:
-    patterns:
-      - comment: interfaces-multi-line
-        name: interfaces.multi.ds
-        begin: (\[\s*interfaces\s*\])\s*(=)\s*(\{)(?=[^\}]*$)
-        beginCaptures:
-          '1': {name: storage.modifier.interfaces.header.ds}
-        end: (^\s*\})
-        endCaptures:
-          '1': {name: punctuation.brace.end.ds}
-        patterns:
-        - include: '#comments'
-        - include: '#parents'
-
-      - comment: interfaces-single-line
-        name: interfaces.single.ds
-        begin: (\[\s*interfaces\s*\])\s*(=)\s*\{
-        beginCaptures:
-          '1': {name: storage.modifier.interfaces.header.ds}
-        end: \}
-        endCaptures:
-          '1': {name: punctuation.brace.end.ds}
-        patterns:          
-        - name: punctuation.separator.array.ds
-          match: ";"
-        - name: invalid.illegal.expected-array-separator.json
-          match: '[^\s\}]'
-
   
-  codeblocks:
+  codeblocks: 
     patterns:
-      - comment: codeblocks-multi-line
-        name: codeblocks.multi.ds
-        begin: (<@\{)(?=[^\}@>]*)
-        beginCaptures:
-          '1': {name: punctuation.codeblocks.brace.start.ds}
-        end: (^\s*\}@>)
-        endCaptures:
-          '1': {name: punctuation.codeblocks.brace.end.ds}
-        patterns:
-        - include: '#comments'
-        - include: '#punctuation'
-        - include: '#code'
-      - comment: codeblocks-single-line
-        name: codeblocks.single.ds
-        begin: (<@\{)
-        beginCaptures:
-          '1': {name: punctuation.codeblocks.brace.start.ds}
-        end: (\}@>)
-        endCaptures:
-          '1': {name: punctuation.brace.end.ds} 
-        patterns:          
-        - name: punctuation.separator.array.ds
-          match: ";"
-        - name: invalid.illegal.expected-array-separator.json
-          match: '[^\s*\}@>]'
-
-  devices:      
-    name: devices.ds
-    begin: (?:\[)\s*(device)\s*(?:({{fileSpec}}\b)\s*=\s*({{identifiers}})?)?\]\s*({{identifiers}})
-    beginCaptures:
-      '1': {name: storage.modifier.devices.header.ds}
-      '2': {name: support.type.tag.file.ds}
-      '3': {name: variable.other.devices.file.ds}
-      '4': {name: variable.other.devices.segment.ds}
-    end: ;
-    endCaptures:
-      '1': {name: punctuation.devices.end.ds}
-
-  externals:      
-    name: externals.ds
-    begin: (?:\[)\s*(external)\s*(?:({{fileSpec}}\b)\s*=\s*({{identifiers}})?)?\s*(?:({{ipSpec}}\b)\s*=\s*({{identifiers}})?)?\]\s*({{identifiers}})
-    beginCaptures:
-      '1': {name: storage.modifier.externals.header.ds}
-      '2': {name: support.type.tag.file.ds}
-      '3': {name: variable.other.externals.file.ds}
-      '4': {name: support.type.tag.ip.ds}
-      '5': {name: variable.other.externals.ip.ds}
-      '6': {name: variable.other.externals.segment.ds}
-    end: ;
-    endCaptures:
-      '1': {name: punctuation.externals.end.ds}
-
-  causals:
-    patterns:
-      - name: punctuation.andmark.ds
-        match: ','
-      - name: punctuation.ormark.ds
-        match: '\?'
-      - name: invalid.illegal.expected-array-separator.json
-        match: '(<\|>)'   
-      - name: keyword.other.causal.ds
-        match: '(<\|\|>)|(<\|)|(\|>)|<|>|(=>)|(<=)'
+    - name: 'keyword.control.header.bracket.codeblocks.ds'
+      match: '{{codeblock}}'
+    - name: 'support.function.code.ds'
+      match: '\$'
 
   segment:
     patterns:
-    - name: 'variable.other.segment.withdot.ds'
+    - name: 'entity.name.segment.withdot.ds'
       match: '{{identifiers}}'
-    - name: 'variable.other.segment.ds'
+    - name: 'entity.name.segment.ds'
       match: '{{identifier1}}'
     - include: '#comments'
     - name: punctuation.separator.array.ds
       match: ";"
-  
-  code: 
-    patterns:
-    - name: 'support.function.dollar.ds'
-      match: '(?={{identifiers}})\$'
-    - name: 'variable.other.code.ds'
-      match: '(?<=\$){{identifiers}}'
 
 ...

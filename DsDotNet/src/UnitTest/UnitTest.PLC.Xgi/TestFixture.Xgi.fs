@@ -39,6 +39,40 @@ module XgiFixtures =
         Runtime.Target <- runtimeTarget
         disposable { Runtime.Target <- runtimeTargetBackup }
 
+    let tempGenerateXml (storages:Storages) (commentedStatements:CommentedStatement list) : string =
+        verify (Runtime.Target = XGI)
+
+        (* Just for fitting global storage, legacy test code 와의 호환성 확보 *)
+        let globalStorages =
+            let allStorages = storages.Values.ToArray()
+            let kindVar = int Variable.Kind.VAR_GLOBAL
+            [
+                for (stg, symbolInfo) in allStorages |> storagesToXgiSymbol do
+                    let xgiSymbolInfo = xgiSymbolToSymbolInfo kindVar symbolInfo
+                    if xgiSymbolInfo.Device.NonNullAny() then
+                        stg
+            ]
+            |> map (fun stg -> stg.Name, stg)
+            |> Tuple.toDictionary
+
+        let pouParams:XgiPOUParams = {
+            /// POU name.  "DsLogic"
+            POUName = "DsLogic"
+            /// POU container task name
+            TaskName = "스캔 프로그램"
+            /// POU ladder 최상단의 comment
+            Comment = "DS Logic for XGI"
+            LocalStorages = storages
+            CommentedStatements = commentedStatements
+        }
+        let projParams:XgiProjectParams = {
+            GlobalStorages = globalStorages
+            ExistingLSISprj = None
+            POUs = [pouParams]
+        }
+
+        projParams.GenerateXmlString()
+
 
 [<AutoOpen>]
 module XgiGenerationTestModule =

@@ -7,6 +7,7 @@ open Engine.Core
 open PLC.CodeGen.LSXGI
 
 open PLC.CodeGen.Common
+open System
 
 [<AutoOpen>]
 module LsXGI =
@@ -89,27 +90,28 @@ module LsXGI =
         rgi <- rgi.Add(rungEnd)
         rgi.Xmls |> List.rev |> String.concat "\r\n"
 
-    let internal generateXgiXmlFromStatement
-        (prologComment:string) (commentedStatements:CommentedXgiStatements seq)
-        (xgiSymbols:XgiSymbol seq) (existingLSISprj:string option)
-      =
-        let symbolInfos = xgiSymbolsToSymbolInfos xgiSymbols
+    //[<Obsolete("RemoveMe")>]
+    //let internal generateXgiXmlFromStatement
+    //    (prologComment:string) (commentedStatements:CommentedXgiStatements seq)
+    //    (xgiSymbols:XgiSymbol seq) (existingLSISprj:string option)
+    //  =
+    //    let symbolInfos = xgiSymbolsToSymbolInfos xgiSymbols
 
-        /// Symbol table 정의 XML 문자열
-        let symbolsLocalXml = XGITag.generateLocalSymbolsXml symbolInfos
+    //    /// Symbol table 정의 XML 문자열
+    //    let symbolsLocalXml = XGITag.generateLocalSymbolsXml symbolInfos
 
-        let globalSym = [
-            for s in symbolInfos do
-                if not (s.Device.IsNullOrEmpty()) then
-                    XGITag.copyLocal2GlobalSymbol s
-        ]
+    //    let globalSym = [
+    //        for s in symbolInfos do
+    //            if not (s.Device.IsNullOrEmpty()) then
+    //                XGITag.copyLocal2GlobalSymbol s
+    //    ]
 
-        let symbolsGlobalXml = XGITag.generateGlobalSymbolsXml globalSym
+    //    let symbolsGlobalXml = XGITag.generateGlobalSymbolsXml globalSym
 
-        let rungsXml = generateRungs prologComment commentedStatements
+    //    let rungsXml = generateRungs prologComment commentedStatements
 
-        logInfo "Finished generating PLC code."
-        wrapWithXml rungsXml symbolsLocalXml symbolsGlobalXml existingLSISprj
+    //    logInfo "Finished generating PLC code."
+    //    wrapWithXml rungsXml symbolsLocalXml symbolsGlobalXml existingLSISprj
 
 
     let internal commentedStatementsToCommentedXgiStatements
@@ -131,18 +133,19 @@ module LsXGI =
                 newCommentedStatements.Add xgiCmtStmts
         newStorages.ToFSharpList(), newCommentedStatements.ToFSharpList()
 
-    let generateXml (storages:Storages) (commentedStatements:CommentedStatement list) : string =
-        match Runtime.Target with
-        | XGI -> ()
-        | _ -> failwith $"ERROR: Require XGI Runtime target.  Current runtime target = {Runtime.Target}"
+    //[<Obsolete("RemoveMe")>]
+    //let generateXml (storages:Storages) (commentedStatements:CommentedStatement list) : string =
+    //    match Runtime.Target with
+    //    | XGI -> ()
+    //    | _ -> failwith $"ERROR: Require XGI Runtime target.  Current runtime target = {Runtime.Target}"
 
-        let prologComment = "DS Logic for XGI"
+    //    let prologComment = "DS Logic for XGI"
 
-        let existingLSISprj = None
+    //    let existingLSISprj = None
 
-        let newStorages, newCommentedStatements = commentedStatementsToCommentedXgiStatements storages.Values commentedStatements
+    //    let newStorages, newCommentedStatements = commentedStatementsToCommentedXgiStatements storages.Values commentedStatements
 
-        let xgiSymbols = storagesToXgiSymbol newStorages
+    //    let xgiSymbols = storagesToXgiSymbol newStorages
 
-        let xml = generateXgiXmlFromStatement prologComment newCommentedStatements xgiSymbols existingLSISprj
-        xml
+    //    let xml = generateXgiXmlFromStatement prologComment newCommentedStatements xgiSymbols existingLSISprj
+    //    xml

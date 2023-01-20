@@ -24,7 +24,7 @@ namespace Dual.Model.Import
     public partial class FormMain : Form
     {
 
-        //복수 Active system ppt 불러오기 
+        //복수 Active system ppt 불러오기
         internal void ImportPowerPoint(List<string> paths)
         {
             try
@@ -42,7 +42,7 @@ namespace Dual.Model.Import
                     if (isActive)
                     {
                         var storages = new Dictionary<string, Interface.IStorage>();
-                        
+
                         //var devices = sys.GetRecursiveSystems();
                         //foreach (var device in devices)
                         //{
@@ -54,9 +54,9 @@ namespace Dual.Model.Import
                         var rungs = Cpu.LoadStatements(sys, storages);
                         rungs.ForEach(s =>
                         {
-                            _DicCpu.Add(s.Key, new DsCPU(s.Value));
+                            _DicCpu.Add(s.ToSystem(), new DsCPU(s.CommentedStatements()));
                         });
-                      
+
 
                         var systemView = new SystemView() { Display = sys.Name, System = sys, ViewNodes = sysView };
                         comboBox_System.Items.Add(systemView);

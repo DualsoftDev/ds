@@ -8,11 +8,11 @@ open Engine.Common.FS
 open Engine.CodeGenCPU
 open PLC.CodeGen.LSXGI
 open System.IO
-open System.Globalization
+open System.Linq
 
 type TestAllCase() =
     inherit EngineTestBaseClass()
-    
+
     let t = CpuTestSample()
     let projectDir =
         let src = __SOURCE_DIRECTORY__
@@ -30,7 +30,12 @@ type TestAllCase() =
     member __.``XXXXXXXXXXXXXXX Test All Case`` () =
         let stg = Storages()
         Runtime.Target <- XGI
-        let result = Cpu.LoadStatements(t.Sys, stg).Head().Value //Active 기준으로 나머지 Tail도 출력필요 //test ahn
-        let xml = LsXGI.generateXml stg  result
+        let result = Cpu.LoadStatements(t.Sys, stg)
+
+        let activePou = result.Filter(fun p -> p.IsActive).Head() //active는 항상 1개
+        let devicePous = result.Filter(fun p -> p.IsDevice)
+        let exSystemPous = result.Filter(fun p -> p.IsExternal)
+
+        let xml = LsXGI.generateXml stg  (activePou.CommentedStatements())
         saveTestResult (get_current_function_name()) xml
         result === result

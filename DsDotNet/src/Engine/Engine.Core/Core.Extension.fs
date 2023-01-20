@@ -19,6 +19,18 @@ module CoreExtensionModule =
                 yield! sys.ReferenceSystems
                 yield! sys.ReferenceSystems |> Seq.collect(fun f->f |> getRecursiveSystems)
             ] |> List.toSeq
+    let getRecursiveLoadeds (sys:ISystem) =
+            let dsSys =
+                match sys  with
+                | :? DsSystem as d -> d
+                | :? Device as d -> d.ReferenceSystem
+                | :? ExternalSystem as d -> d.ReferenceSystem
+                | _ -> failwithlog "Error getRecursiveLoadeds"
+            [
+                yield! dsSys.LoadedSystems |> Seq.cast<ISystem>
+                yield! dsSys.LoadedSystems |> Seq.collect(fun f-> f |> getRecursiveLoadeds)
+            ] |> List.toSeq
+
     let checkSystem(system:DsSystem, targetFlow:Flow, itemName:string) =
                 if system <> targetFlow.System
                 then failwithf $"add item [{itemName}] in flow ({targetFlow.System.Name} != {system.Name}) is not same system"
@@ -103,4 +115,6 @@ module CoreExtensionModule =
 type SystemExt =
     [<Extension>]
     static member GetRecursiveSystems (x:DsSystem) : DsSystem seq = x |> getRecursiveSystems
+    [<Extension>]
+    static member GetRecursiveLoadeds (x:DsSystem) : ISystem seq  = x |> getRecursiveLoadeds
 

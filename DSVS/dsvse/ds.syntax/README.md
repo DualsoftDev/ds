@@ -8,16 +8,26 @@
 
 ## Release Notes
 
-# v 0.0.1 
-- Initial release
-# v 0.0.2 
-- Bug fix
-# v 0.0.3 
-- Fix Support Korean
+# v 0.0.7
+- Fix minor bugs
+
+# v 0.0.6
+- Fix bugs
+
+# v 0.0.5
+ - Update new tmlanguage
 
 # v 0.0.4
 - Add #,@ macros
 
+# v 0.0.3 
+- Fix Support Korean
+
+# v 0.0.2 
+- Bug fix
+
+# v 0.0.1 
+- Initial release
 -----------------------------------------------------------------------------------------------------------
 
 ## Working with Markdown

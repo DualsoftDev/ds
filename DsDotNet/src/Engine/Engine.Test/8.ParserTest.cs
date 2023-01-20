@@ -460,6 +460,37 @@ namespace Engine
 }
 ";
 
+
+        public static string TaskLinkorDevice = @"
+    [sys] Control = {
+    [flow] F = {
+        Main <||> Reset;		
+        FWD <| Main |> BWD;		
+        FWD > BWD > Main |> FWD2 |> BWD2;		
+        Main = {
+            mv1up > mv1dn;		
+        }
+        [aliases] = {
+            FWD = { FWD2; }
+            BWD = { BWD2; }
+        }
+    }
+    [jobs] = {
+        mv1up = { A.""+""(%I300, %Q300); }
+        mv1dn = { A.""-""(%I301, %Q301); }
+        FWD = sysR.RUN;
+        BWD = sysR.RUN;
+    }
+    [interfaces] = {
+        G = { F.Main ~ F.Main }
+        R = { F.Reset ~ F.Reset }
+        G <||> R;
+    }
+    [device file=""cylinder.ds""] A;
+    [external file=""systemRH.ds"" ip=""localhost""] sysR;
+    [external file=""systemLH.ds"" ip=""localhost""] sysL;
+}";
+
         public static string ExternalSegmentCall = @"
 [sys] MY = {
     [flow] FFF = {

@@ -342,8 +342,8 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
 
                         | 1, c::[] when not <| (isAliasMnemonic (parent, ctxInfo.Names.Combine())) ->
                             let job = tryFindJob system c |> Option.get
-                            if job.Link = null then Call.Create(job, parent) |> ignore
-                            else RealOtherSystem.Create(job, parent) |> ignore
+                            if job.DeviceDefs.any() then Call.Create(job, parent) |> ignore
+                            if job.LinkDefs.any()   then RealOtherSystem.Create(job, parent) |> ignore
 
                         | 1, realorFlow::cr::[] when not <| isAliasMnemonic (parent, ctxInfo.Names.Combine()) ->
                             let otherFlowReal = tryFindReal system realorFlow cr |> Option.get
@@ -458,10 +458,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                         | _ -> failwithlog "ERROR"
                     | _ -> failwithlog "ERROR"
                 let linkDef = TaskLink linkInfo
-                let orgName = ((linkDef.ApiItem.RXs |> List.ofSeq)[0]).QualifiedName
-                linkDef.orgRealName <- orgName
-                let job = Job(linkName, new HashSet<DsTask>())
-                job.Link <- linkDef
+                let job = Job(linkName, [|linkDef|])
                 job |> system.Jobs.Add
 
         let fillTargetOfAliasDef (x:DsParserListener) (ctx:AliasListingContext) =

@@ -101,15 +101,15 @@ module ModelTests1 =
         member __.``Model component [StrongCausal] test`` () =
             compare ParserTest.StrongCausal answerStrongCausal
 
-        [<Test>] 
+        [<Test>]
         member __.``Model component [Buttons] test`` () =
             compare ParserTest.Buttons answerButtons
 
-        [<Test>] 
+        [<Test>]
         member __.``Model component [Lamps] test`` () =
             compare ParserTest.Lamps answerLamps
 
-        [<Test>] 
+        [<Test>]
         member __.``Model component [Conditions] test`` () =
             compare ParserTest.Conditions answerConditions
 
@@ -132,6 +132,10 @@ module ModelTests1 =
         [<Test>]
         member __.``Model component [external circular dependency] test`` () =
             compare ParserTest.CircularDependency answerCircularDependency
+
+        [<Test>]
+        member __.``Model component [Task Device/Link (old:JobDef)] test`` () =
+            compare ParserTest.TaskLinkorDevice answerTaskLinkorDevice
 
         //[<Test>]
         //member __.``X Ppt20221213Text test`` () =

@@ -217,9 +217,8 @@ module CoreModule =
     /// Job 정의: Call 이 호출하는 Job 항목
     type Job (name:string, tasks:DsTask seq) =
         inherit Named(name)
-        member x.DeviceDefs = tasks.Cast<TaskDevice>()
-        member x.LinkDefs   = tasks.Cast<TaskLink>()
-        member val Link = null with get, set
+        member x.DeviceDefs = tasks.OfType<TaskDevice>()
+        member x.LinkDefs   = tasks.OfType<TaskLink>()
         member val Funcs  = HashSet<Func>() with get, set//todo ToDsText, parsing
 
     type TagAddress = string
@@ -241,8 +240,6 @@ module CoreModule =
 
     type TaskLink (api:ApiItem, systemName:string) =
         inherit DsTask(api, systemName)
-        member val ApiName = getRawName [systemName;api.Name] true
-        member val orgRealName = null with get, set
 
     /// 자신을 export 하는 관점에서 본 api's.  Interface 정의.   [interfaces] = { "+" = { F.Vp ~ F.Sp } }
     and ApiItem private (name:string, system:DsSystem) =

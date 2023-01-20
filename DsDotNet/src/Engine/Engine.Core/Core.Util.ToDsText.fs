@@ -140,7 +140,7 @@ module internal ToDsTextModule =
             [
                 $"{tab3}{targetName}.func = {lb}"
                 for func in funcs do
-                    let funcDefs = 
+                    let funcDefs =
                         [
                             $"{tab4}${func.Name}";
                             String.concat "" [
@@ -162,14 +162,15 @@ module internal ToDsTextModule =
 
             if system.Jobs.Any() then
                 let addressPrint (addr:string) = if addr = "" then "_" else addr
-                let print (ai:JobDef) = $"{ai.ApiName}({addressPrint ai.InAddress}, {addressPrint ai.OutAddress})"
+                let printDev (ai:TaskDevice) = $"{ai.ApiName}({addressPrint ai.InAddress}, {addressPrint ai.OutAddress})"
+                let printLink (ai:TaskLink) = $"{ai.ApiName}"
                 yield $"{tab}[jobs] = {lb}"
                 for c in system.Jobs do
-                    if c.Link = null then
-                        let ais = c.JobDefs.Select(print).JoinWith("; ") + ";"
+                    if c.DeviceDefs.any() then
+                        let ais = c.DeviceDefs.Select(printDev).JoinWith("; ") + ";"
                         yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {ais} {rb}"
-                    else
-                        let ais = (c.Link:?>LinkDef).ApiName + ";"
+                    if c.LinkDefs.any() then
+                        let ais = c.LinkDefs.Select(printLink).JoinWith("; ") + ";"
                         yield $"{tab2}{c.Name.QuoteOnDemand()} = {ais}"
                     if c.Funcs.any() then
                         for funcString in printFuncions c.Name c.Funcs do
@@ -260,12 +261,12 @@ module internal ToDsTextModule =
                         if lamps.length() > 0 then
                             yield $"{tab2}[{category}] = {lb}"
                             for lamp in lamps do
-                                let addr = 
+                                let addr =
                                     if lamp.OutAddress <> null then
                                         $"({lamp.OutAddress})"
                                     else
                                         ""
-                                
+
                                 yield $"{tab3}{lamp.Name}{addr} = {lb} {lamp.SettingFlow.Name} {rb}"
                                 if lamp.Funcs.any() then
                                     for funcString in printFuncions lamp.Name lamp.Funcs do
@@ -283,16 +284,16 @@ module internal ToDsTextModule =
 
             let cnds = system.Conditions
             if cnds.Any() then
-                let getTargetCnds (target:ConditionType) = 
+                let getTargetCnds (target:ConditionType) =
                     cnds |> Seq.filter(fun c -> c.ConditionType = target)
                 let driveCnds = getTargetCnds DuDriveState
                 let readyCnds = getTargetCnds DuReadyState
                 yield $"{tab}[conditions] = {lb}"
-                let conditionsToDs(category:string, conditions:ConditionDef seq) = 
+                let conditionsToDs(category:string, conditions:ConditionDef seq) =
                     [
                         yield $"{tab2}[{category}] = {lb}"
                         for cnd in conditions do
-                            let addr = 
+                            let addr =
                                 if cnd.InAddress <> null then
                                     $"({cnd.InAddress})"
                                 else

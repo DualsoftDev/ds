@@ -301,14 +301,47 @@ module ModelComponentAnswers =
         }
         [h] = {
             HomeBTN(_, _) = { F1;F2;F3;F5; }
-            HomeBTN.func = { 
-                $ton 2000; 
-                $ctu 1 5; 
+            HomeBTN.func = {
+                $ton 2000;
+                $ctu 1 5;
             }
         }
     }
 }
 """
+
+    let answerTaskLinkorDevice = """
+    [sys] Control = {
+    [flow] F = {
+        Main <||> Reset;
+        FWD <| Main |> BWD;
+        FWD > BWD > Main |> FWD2 |> BWD2;
+        Main = {
+            mv1up > mv1dn;
+        }
+        [aliases] = {
+            FWD = { FWD2; }
+            BWD = { BWD2; }
+        }
+    }
+    [jobs] = {
+        mv1up = { A."+"(%I300, %Q300); }
+        mv1dn = { A."-"(%I301, %Q301); }
+        FWD = sysR.RUN;
+        BWD = sysR.RUN;
+    }
+    [interfaces] = {
+        G = { F.Main ~ F.Main }
+        R = { F.Reset ~ F.Reset }
+        G <||> R;
+    }
+    [device file="cylinder.ds"] A;
+    [external file="systemRH.ds" ip="localhost"] sysR;
+    [external file="systemLH.ds" ip="localhost"] sysL;
+}
+"""
+
+
     let answerCircularDependency = """
 [sys] My = {
     [flow] F = {
@@ -348,8 +381,8 @@ module ModelComponentAnswers =
     [jobs] = {
         C1 = { B."+"(%I1, %Q1); A."+"(%I1, %Q1); }
         C1.func = {
-            $ton 2000; 
-            $ctu 1 5; 
+            $ton 2000;
+            $ctu 1 5;
         }
         C2 = { A."-"(_, %Q3); B."-"(_, %Q3); }
     }

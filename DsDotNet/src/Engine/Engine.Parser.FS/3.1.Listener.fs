@@ -449,7 +449,6 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 let apiLinkPath =
                     linkDef.TryFindFirstChild<Identifier12Context>()
                         .Value.CollectNameComponents() |> List.ofSeq
-                apiLinkPath |> printfn "%A = %A" linkName
                 let linkInfo =
                     match apiLinkPath with
                     | exSys::api::[] ->

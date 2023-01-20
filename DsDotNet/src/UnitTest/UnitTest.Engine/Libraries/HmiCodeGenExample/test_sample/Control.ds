@@ -11,9 +11,9 @@
 		}
     }
     [interfaces] = {
-        "G"  = { F.Main ~ F.Main }
-        "R" = { F.Reset ~ F.Reset }
-        "G" <||> "R";
+        G = { F.Main ~ F.Main }
+        R = { F.Reset ~ F.Reset }
+        G <||> R;
     }
 	[jobs] = {
 		mv1up = { M1.Up(%I300, %Q300); }

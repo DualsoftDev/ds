@@ -1,5 +1,6 @@
 namespace T.CPU
 
+open System.IO
 open NUnit.Framework
 
 open T
@@ -7,9 +8,6 @@ open Engine.Core
 open Engine.Common.FS
 open Engine.CodeGenCPU
 open PLC.CodeGen.LSXGI
-open System.IO
-open System.Globalization
-open Microsoft.Office.Interop.Excel
 
 type TestAllCase() =
     inherit EngineTestBaseClass()
@@ -22,7 +20,7 @@ type TestAllCase() =
         src.Substring(0, tail)
     let xmlDir = Path.Combine(projectDir, "XgiXmls")
 
-    let generateXml globalStorages localStorages (statements:CommentedStatement list) : string =
+    let generateXmlForTest globalStorages localStorages (statements:CommentedStatement list) : string =
         let pouParams:XgiPOUParams = {
             /// POU name.  "DsLogic"
             POUName = "DsLogic"
@@ -40,6 +38,7 @@ type TestAllCase() =
         }
 
         projParams.GenerateXmlString()
+
     let saveTestResult testFunctionName (xml:string) =
         let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
         File.WriteAllText($@"{xmlDir}\{testFunctionName}.xml", crlfXml)
@@ -51,6 +50,6 @@ type TestAllCase() =
         let localStorage = Storages()
         Runtime.Target <- XGI
         let result = Cpu.LoadStatements(t.Sys, globalStorage).Head().Value //Active 기준으로 나머지 Tail도 출력필요 //test ahn
-        let xml = generateXml globalStorage localStorage  result
+        let xml = generateXmlForTest globalStorage localStorage  result
         saveTestResult (get_current_function_name()) xml
         result === result

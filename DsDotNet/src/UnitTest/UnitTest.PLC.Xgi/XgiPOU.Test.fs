@@ -79,3 +79,16 @@ type XgiPOUTest() =
     member __.``Project test`` () =
         let xml = projectParams.GenerateXmlString()
         saveTestResult (get_current_function_name()) xml
+
+
+    [<Test>]
+    member __.``Project with global test`` () =
+        let globalStorages = Storages()
+        let code = """
+            bool gg0 = createTag("%IX0.0.1", false);
+            bool gg1 = false;
+"""
+        parseCode globalStorages code |> ignore
+        let projectParams = { projectParams with GlobalStorages = globalStorages }
+        let xml = projectParams.GenerateXmlString()
+        saveTestResult (get_current_function_name()) xml

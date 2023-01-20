@@ -39,7 +39,7 @@ module XgiFixtures =
         Runtime.Target <- runtimeTarget
         disposable { Runtime.Target <- runtimeTargetBackup }
 
-    let tempGenerateXml (storages:Storages) (commentedStatements:CommentedStatement list) : string =
+    let generateXml (storages:Storages) (commentedStatements:CommentedStatement list) : string =
         verify (Runtime.Target = XGI)
 
         (* Just for fitting global storage, legacy test code 와의 호환성 확보 *)

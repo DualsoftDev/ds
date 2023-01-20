@@ -67,7 +67,11 @@ module internal XgiSymbolsModule =
             |> XGITag.createSymbolInfoWithDetail
 
         | DuXgiLocalVar xgi ->
-            xgi.SymbolInfo
+            if kindVar = int Variable.Kind.VAR_GLOBAL then
+                // Global 변수도 일단, XgiLocalVar type 으로 생성되므로, PLC 생성 시에만 global 로 override 해서 생성한다.
+                { xgi.SymbolInfo with Kind = kindVar }
+            else
+                xgi.SymbolInfo
         | DuTimer timer ->
             let device, addr = "", ""
             let plcType =

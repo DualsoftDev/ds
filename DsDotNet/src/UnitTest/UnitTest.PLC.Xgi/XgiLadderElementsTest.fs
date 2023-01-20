@@ -68,5 +68,5 @@ type XgiLadderElementTest() =
             string  mystring = "hello";     // not working for string
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.tempGenerateXml storages (map withNoComment statements)
+        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml

@@ -403,7 +403,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                     api.AddRXs(findSegments(lnk)) |> ignore
             } |> ignore
 
-        let createJobDef (system:DsSystem) (ctx:JobBlockContext) =
+        let createTaskDevice (system:DsSystem) (ctx:JobBlockContext) =
             let callListings = ctx.Descendants<CallListingContext>().ToArray()
             let jobFuncs = commonFunctionExtractor ctx
             for callList in callListings do
@@ -427,7 +427,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                                     let rx = getAddress(rxAddressCtx)
 
                                     tracefn $"TX={tx} RX={rx}"
-                                    return JobDef(apiPoint, rx, tx, device)
+                                    return TaskDevice(apiPoint, rx, tx, device)
                                 }
                             match apiItem with
                             | Some apiItem -> yield apiItem
@@ -437,11 +437,11 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 ]
                 let funcSet = commonFunctionSetter jobName jobFuncs
                 assert(apiItems.Any())
-                let job = Job(jobName, apiItems)
+                let job = Job(jobName, apiItems.Cast<DsTask>())
                 job.Funcs <- funcSet
                 job |> system.Jobs.Add
 
-        let createLink (system:DsSystem) (ctx:JobBlockContext) =
+        let createTaskLink (system:DsSystem) (ctx:JobBlockContext) =
             let linkListings = ctx.Descendants<LinkListingContext>().ToArray()
             for linkDef in linkListings do
                 let getRawLinkName = linkDef.TryFindFirstChild<EtcName1Context>().Value
@@ -458,10 +458,10 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                         | Some apiItem -> apiItem, exSys
                         | _ -> failwithlog "ERROR"
                     | _ -> failwithlog "ERROR"
-                let linkDef = LinkDef linkInfo
+                let linkDef = TaskLink linkInfo
                 let orgName = ((linkDef.ApiItem.RXs |> List.ofSeq)[0]).QualifiedName
                 linkDef.orgRealName <- orgName
-                let job = Job(linkName, new HashSet<JobDef>())
+                let job = Job(linkName, new HashSet<DsTask>())
                 job.Link <- linkDef
                 job |> system.Jobs.Add
 
@@ -494,7 +494,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                         | flowOrReal::rc::[] -> //FlowEx.R or Real.C
                             match tryFindFlow system flowOrReal with
                             | Some f -> f.Graph.TryFindVertex<Real>(rc)  |> Option.get |> DuAliasTargetReal
-                            | None -> 
+                            | None ->
                                 //tryFindCall system ([flow.Name]@ns) |> Option.get |> DuAliasTargetCall
                                 let vertex = tryFindCall system ([flow.Name]@ns) |> Option.get
                                 match vertex with
@@ -522,8 +522,8 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
 
 
         for ctx in sysctx.Descendants<JobBlockContext>() do
-            createJobDef x.TheSystem ctx
-            createLink x.TheSystem ctx
+            createTaskDevice  x.TheSystem ctx
+            createTaskLink x.TheSystem ctx
 
         for ctx in sysctx.Descendants<AliasListingContext>() do
             createAliasDef x ctx |> ignore

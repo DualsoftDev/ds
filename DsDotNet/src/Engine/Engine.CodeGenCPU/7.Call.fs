@@ -14,7 +14,7 @@ type VertexMCoin with
         let startTags   = ([coin.ST] @ sharedCalls.STs()).ToOr()
         let forceStarts = ([coin.SF] @ sharedCalls.SFs()).ToOr()
         [
-            for jd in call.CallTargetJob.JobDefs do
+            for jd in call.CallTargetJob.DeviceDefs do
                 let startPointExpr = getStartPointExpr(call, jd)
                 let sets = (dop <&&> startTags) <||>
                            (mop <&&> forceStarts) <||>
@@ -32,7 +32,7 @@ type VertexMCoin with
         let call = coin.Vertex :?> Call
         let rsts = coin._off.Expr
         [
-            for jd in call.CallTargetJob.JobDefs do
+            for jd in call.CallTargetJob.DeviceDefs do
                 yield (jd.ApiItem.PS.Expr, rsts) --| (jd.ActionOut, "C2" )
         ]
 
@@ -40,7 +40,7 @@ type VertexMCoin with
         let call = coin.Vertex :?> Call
         let rsts = coin._off.Expr
         [
-            for jd in call.CallTargetJob.JobDefs do
+            for jd in call.CallTargetJob.DeviceDefs do
                 let sets = jd.RXs.ToAndElseOn(coin.System)
                 yield (sets, rsts) --| (jd.ApiItem.PR, "C3" )
         ]

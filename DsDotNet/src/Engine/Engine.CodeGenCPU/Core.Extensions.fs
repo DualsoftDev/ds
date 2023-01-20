@@ -67,10 +67,10 @@ module ConvertCoreExt =
                      b.OutTag <- createIOPLCTag(b.Name, b.OutAddress, Out)
 
         member x.GenerationJobIO() =
-            let jobDefs = x.Jobs |> Seq.collect(fun j -> j.JobDefs)
-            for jdef in jobDefs do
-                jdef.InTag <- createIOPLCTag(jdef.ApiName, jdef.InAddress, In)
-                jdef.OutTag <- createIOPLCTag(jdef.ApiName, jdef.OutAddress, Out)
+            let taskDevices = x.Jobs |> Seq.collect(fun j -> j.DeviceDefs)
+            for dev in taskDevices do
+                dev.InTag <- createIOPLCTag(dev.ApiName, dev.InAddress, In)
+                dev.OutTag <- createIOPLCTag(dev.ApiName, dev.OutAddress, Out)
 
         //자신이 사용된 API Plan Set Send
         member x.GetPSs(r:Real) =
@@ -178,16 +178,16 @@ module ConvertCoreExt =
                                  then c.CallTargetJob.Funcs.First(fun f->f.Name = TextRingCounter).GetRingCount()
                                  else failwith $"{c.Name} not use counter"
 
-        member c.INs           = c.CallTargetJob.JobDefs.Select(fun j -> j.ActionIN)
-        member c.OUTs          = c.CallTargetJob.JobDefs.Select(fun j -> j.ActionOut)
-        member c.PlanSends     = c.CallTargetJob.JobDefs.Select(fun j -> j.ApiItem.PS)
-        member c.PlanReceives  = c.CallTargetJob.JobDefs.Select(fun j -> j.ApiItem.PR)
+        member c.INs           = c.CallTargetJob.DeviceDefs.Select(fun j -> j.ActionIN)
+        member c.OUTs          = c.CallTargetJob.DeviceDefs.Select(fun j -> j.ActionOut)
+        member c.PlanSends     = c.CallTargetJob.DeviceDefs.Select(fun j -> j.ApiItem.PS)
+        member c.PlanReceives  = c.CallTargetJob.DeviceDefs.Select(fun j -> j.ApiItem.PR)
 
 
         member c.MutualResets =
-            c.CallTargetJob.JobDefs
+            c.CallTargetJob.DeviceDefs
                 .SelectMany(fun j -> j.ApiItem.System.GetMutualResetApis(j.ApiItem))
-                .SelectMany(fun a -> c.System.JobDefs.Where(fun w-> w.ApiItem = a))
+                .SelectMany(fun a -> c.System.DeviceDefs.Where(fun w-> w.ApiItem = a))
 
     type Real with
         member r.V = r.TagManager :?> VertexMReal
@@ -203,13 +203,13 @@ module ConvertCoreExt =
         member r._on  = r.Parent.GetSystem()._on
         member r._off  = r.Parent.GetSystem()._off
 
-    type JobDef with
+    type TaskDevice with
         member jd.ActionIN  = jd.InTag  :?> PlcTag<bool>
         member jd.ActionOut = jd.OutTag :?> PlcTag<bool>
         member jd.RXs       = jd.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.EP)
 
         member jd.MutualResets(x:DsSystem) =
                 jd.ApiItem.System.GetMutualResetApis(jd.ApiItem)
-                    .SelectMany(fun a -> x.JobDefs.Where(fun w-> w.ApiItem = a))
+                    .SelectMany(fun a -> x.DeviceDefs.Where(fun w-> w.ApiItem = a))
 
 

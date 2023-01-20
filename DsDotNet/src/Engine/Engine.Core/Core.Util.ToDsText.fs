@@ -140,7 +140,7 @@ module internal ToDsTextModule =
             [
                 $"{tab3}{targetName}.func = {lb}"
                 for func in funcs do
-                    let funcDefs = 
+                    let funcDefs =
                         [
                             $"{tab4}${func.Name}";
                             String.concat "" [
@@ -162,10 +162,10 @@ module internal ToDsTextModule =
 
             if system.Jobs.Any() then
                 let addressPrint (addr:string) = if addr = "" then "_" else addr
-                let print (ai:JobDef) = $"{ai.ApiName}({addressPrint ai.InAddress}, {addressPrint ai.OutAddress})"
+                let print (ai:TaskDevice) = $"{ai.ApiName}({addressPrint ai.InAddress}, {addressPrint ai.OutAddress})"
                 yield $"{tab}[jobs] = {lb}"
                 for c in system.Jobs do
-                    let ais = c.JobDefs.Select(print).JoinWith("; ") + ";"
+                    let ais = c.DeviceDefs.Cast<TaskDevice>().Select(print).JoinWith("; ") + ";"
                     yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {ais} {rb}"
                     if c.Funcs.any() then
                         for funcString in printFuncions c.Name c.Funcs do
@@ -256,12 +256,12 @@ module internal ToDsTextModule =
                         if lamps.length() > 0 then
                             yield $"{tab2}[{category}] = {lb}"
                             for lamp in lamps do
-                                let addr = 
+                                let addr =
                                     if lamp.OutAddress <> null then
                                         $"({lamp.OutAddress})"
                                     else
                                         ""
-                                
+
                                 yield $"{tab3}{lamp.Name}{addr} = {lb} {lamp.SettingFlow.Name} {rb}"
                                 if lamp.Funcs.any() then
                                     for funcString in printFuncions lamp.Name lamp.Funcs do
@@ -279,16 +279,16 @@ module internal ToDsTextModule =
 
             let cnds = system.Conditions
             if cnds.Any() then
-                let getTargetCnds (target:ConditionType) = 
+                let getTargetCnds (target:ConditionType) =
                     cnds |> Seq.filter(fun c -> c.ConditionType = target)
                 let driveCnds = getTargetCnds DuDriveState
                 let readyCnds = getTargetCnds DuReadyState
                 yield $"{tab}[conditions] = {lb}"
-                let conditionsToDs(category:string, conditions:ConditionDef seq) = 
+                let conditionsToDs(category:string, conditions:ConditionDef seq) =
                     [
                         yield $"{tab2}[{category}] = {lb}"
                         for cnd in conditions do
-                            let addr = 
+                            let addr =
                                 if cnd.InAddress <> null then
                                     $"({cnd.InAddress})"
                                 else
@@ -387,7 +387,7 @@ module internal ToDsTextModule =
                     | _ -> ""
                 yield $"{tab}[external file={quote es.UserSpecifiedFilePath}{ip}] {es.Name}; // {es.AbsoluteFilePath}"
 
-            //Commands/Observes는 JobDef에 저장 (Variables는 OriginalCodeBlocks ?? System.Variables ??)
+            //Commands/Observes는 TaskDevice에 저장 (Variables는 OriginalCodeBlocks ?? System.Variables ??)
             yield codeBlockToDs system
 
             // todo 복수개의 block 이 허용되면, serialize 할 때 해당 위치에 맞춰서 serialize 해야 하는데...

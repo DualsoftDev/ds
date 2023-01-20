@@ -214,28 +214,33 @@ module CoreModule =
         inherit Indirect(name, parent)
         member _.TargetWrapper = target
 
-    /// JobDefs 정의: Call 이 호출하는 Job 항목
-    type Job (name:string, jobDefs:JobDef seq) =
+    /// Job 정의: Call 이 호출하는 Job 항목
+    type Job (name:string, tasks:DsTask seq) =
         inherit Named(name)
-        member val JobDefs = jobDefs.ToFSharpList()
+        member x.DeviceDefs = tasks.Cast<TaskDevice>()
+        member x.LinkDefs   = tasks.Cast<TaskLink>()
         member val Link = null with get, set
         member val Funcs  = HashSet<Func>() with get, set//todo ToDsText, parsing
 
     type TagAddress = string
-    /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
-    type JobDef (api:ApiItem, inAddress:TagAddress, outAddress:TagAddress, deviceName:string) =
+    [<AbstractClass>]
+    type DsTask (api:ApiItem, loadedName:string) =
         member _.ApiItem = api
+        ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
+        member val ApiName = getRawName [loadedName;api.Name] true
+
+    /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
+    type TaskDevice (api:ApiItem, inAddress:TagAddress, outAddress:TagAddress, deviceName:string) =
+        inherit DsTask(api, deviceName)
         member val InAddress   = inAddress  with get, set
         member val OutAddress  = outAddress with get, set
         //CPU 생성시 할당됨 InTag
         member val InTag = getNull<ITagWithAddress>() with get, set
         //CPU 생성시 할당됨 OutTag
         member val OutTag = getNull<ITagWithAddress>() with get, set
-        ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
-        member val ApiName = getRawName [deviceName;api.Name] true
 
-    type LinkDef (api:ApiItem, systemName:string) =
-        member _.ApiItem = api
+    type TaskLink (api:ApiItem, systemName:string) =
+        inherit DsTask(api, systemName)
         member val ApiName = getRawName [systemName;api.Name] true
         member val orgRealName = null with get, set
 

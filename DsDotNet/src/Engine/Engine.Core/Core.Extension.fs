@@ -103,7 +103,7 @@ module CoreExtensionModule =
             x.ApiResetInfos.Select(getMutual).Where(fun w-> w.IsSome)
                 .Select(fun s->x.ApiItems.Find(fun f->f.Name = s.Value))
 
-        member x.JobDefs = x.Jobs |> Seq.collect(fun s->s.JobDefs)
+        member x.DeviceDefs = x.Jobs |> Seq.collect(fun s->s.DeviceDefs)
         member x.GetRecursiveSystems() =  x |> getRecursiveSystems
 
     type Call with

@@ -187,7 +187,7 @@ module HmiGenModule =
                             jobName Type.Job 
                             ButtonType.None system.Name
                     hmiInfos.Add(jobName, info)
-                for dvc in job.JobDefs do
+                for dvc in job.DeviceDefs do
                     let api = dvc.ApiItem
                     let device = dvc.ApiItem.System.Name
                     if not <| hmiInfos.ContainsKey(device) then

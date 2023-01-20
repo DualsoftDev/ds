@@ -17,7 +17,7 @@ module ImportU =
     let private createCallVertex(mySys:DsSystem, node:pptNode, parentReal:Real Option, parentFlow:Flow Option, dicSeg:Dictionary<string, Vertex>) =
         let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
         if mySys.TryFindLoadedSystem(sysName).IsNone && mySys.Jobs.TryFind(fun job -> job.Name = sysName+"_"+apiName).IsNone
-        then node.Shape.ErrorName(ErrID._48, node.PageNum) 
+        then node.Shape.ErrorName(ErrID._48, node.PageNum)
 
         let call =
             match mySys.Jobs.TryFind(fun job -> job.Name = sysName+"_"+apiName) with
@@ -79,20 +79,20 @@ module ImportU =
             doc.Nodes
             |> Seq.filter(fun node -> node.NodeType = COPY_VALUE ||  node.NodeType = COPY_REF)
             |> Seq.iter(fun node ->
-                node.JobInfos 
-                |> Seq.iter(fun jobSet -> 
+                node.JobInfos
+                |> Seq.iter(fun jobSet ->
                     let jobBase = jobSet.Key
                     let JobTargetSystems = jobSet.Value
                     //ppt에서는 동일한 디바이스만 동시 Job구성 가능하여  아무시스템이나 찾아도 API는 같음
                     let refSystem = mySys.TryFindLoadedSystem(JobTargetSystems.First()).Value.ReferenceSystem
 
                     refSystem.ApiItems.ForEach(fun api->
-                        let jobDefs =
+                        let devs =
                             JobTargetSystems
                                 .Select(fun tgt -> getApiItems(mySys, tgt, api.Name), tgt)
-                                .Select(fun (api, tgt)-> JobDef(api, "", "", tgt))
-
-                        let job = Job(jobBase+"_"+api.Name, jobDefs) 
+                                .Select(fun (api, tgt)-> TaskDevice(api, "", "", tgt))
+                                .Cast<DsTask>()
+                        let job = Job(jobBase+"_"+api.Name, devs)
                         if dicJobName.ContainsKey(job.Name)
                         then Office.ErrorName(node.Shape, ErrID._33, node.PageNum)
                         else dicJobName.Add(job.Name, job)
@@ -129,7 +129,7 @@ module ImportU =
                     //인터페이스는 인터페이스끼리 인과가능
                     if(src.NodeType = IF && src.NodeType = tgt.NodeType|>not)
                     then Office.ErrorConnect(edge.ConnectionShape, ErrID._37, src.Name, tgt.Name, edge.PageNum)
-                    //인터페이스 인과는 약 리셋 불가 
+                    //인터페이스 인과는 약 리셋 불가
                     if (edge.Causal = InterlockWeak || edge.Causal = ResetEdge)
                     then Office.ErrorConnect(edge.ConnectionShape, ErrID._11, src.Name, tgt.Name, edge.PageNum)
 
@@ -141,21 +141,21 @@ module ImportU =
             let dicIL = Dictionary<int, HashSet<string>>()
 
             let updateILInfo(src, tgt) =
-                match dicIL.TryFind(fun dic -> dic.Value.Contains(src) 
+                match dicIL.TryFind(fun dic -> dic.Value.Contains(src)
                                             || dic.Value.Contains(tgt)) with
                 |Some dic -> dic.Value.Add(src) |> ignore;dic.Value.Add(tgt) |> ignore
                 |None -> dicIL.Add(dicIL.length(), [src;tgt] |> HashSet)
-            
+
             let createInterlockInfos(src, tgt) =
                 let mei = ApiResetInfo.Create(sys, src, Interlock ,tgt )
                 sys.ApiResetInfos.Add(mei)|>ignore
 
             resets.ForEach(fun rst ->  updateILInfo rst)
-            dicIL.ForEach(fun dic-> 
-                dic.Value 
+            dicIL.ForEach(fun dic->
+                dic.Value
                 |> Seq.pairwiseWindingFull  //2개식 조합
                 |> Seq.iter(fun (src, tgt) -> createInterlockInfos (src, tgt)))
-              
+
 
         //MFlow 리스트 만들기
         [<Extension>]
@@ -179,12 +179,12 @@ module ImportU =
         [<Extension>]
         static member MakeButtons (doc:pptDoc, mySys:DsSystem) =
             let dicFlow = doc.DicFlow
-            
+
             doc.Nodes
             |> Seq.filter(fun node -> node.ButtonDefs.any())
             |> Seq.iter(fun node ->
                     let flow = dicFlow.[node.PageNum]
-                    node.ButtonDefs.ForEach(fun b -> 
+                    node.ButtonDefs.ForEach(fun b ->
                         mySys.AddButton(b.Value, b.Key, "","", flow)
                     )
             )
@@ -193,12 +193,12 @@ module ImportU =
         [<Extension>]
         static member MakeLamps (doc:pptDoc, mySys:DsSystem) =
             let dicFlow = doc.DicFlow
-            
+
             doc.Nodes
             |> Seq.filter(fun node -> node.LampDefs.any())
             |> Seq.iter(fun node ->
                     let flow = dicFlow.[node.PageNum]
-                    node.LampDefs.ForEach(fun l -> 
+                    node.LampDefs.ForEach(fun l ->
                         mySys.AddLamp(l.Value, l.Key, "", flow)
                     )
             )
@@ -207,18 +207,18 @@ module ImportU =
         [<Extension>]
         static member MakeConditions (doc:pptDoc, mySys:DsSystem) =
             let dicFlow = doc.DicFlow
-            
+
             doc.Nodes
             |> Seq.filter(fun node -> node.CondiDefs.any())
             |> Seq.iter(fun node ->
                     let flow = dicFlow.[node.PageNum]
-                    node.CondiDefs.ForEach(fun l -> 
+                    node.CondiDefs.ForEach(fun l ->
                         mySys.AddCondtion(l.Value, l.Key, "", flow)
                     )
             )
 
 
-            
+
 
         //real call alias  만들기
         [<Extension>]
@@ -321,7 +321,7 @@ module ImportU =
                     |> Seq.filter(fun edge -> not <| edge.IsInterfaceEdge)
                     |> Seq.iter(fun edge ->
                         let flow = dicFlow.[edge.PageNum]
-                        
+
                         let srcDummy = dummys.TryFindDummy(edge.StartNode)
                         let tgtDummy = dummys.TryFindDummy(edge.EndNode)
 

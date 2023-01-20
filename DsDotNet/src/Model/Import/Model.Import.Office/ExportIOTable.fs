@@ -22,58 +22,58 @@ module ExportIOTable =
         dt.Columns.Add($"{IOColumn.Output}"     , typeof<string>) |>ignore
         dt.Columns.Add($"{IOColumn.Job}"        , typeof<string>) |>ignore
         dt.Columns.Add($"{IOColumn.Func}"       , typeof<string>) |>ignore
-        
+
         let funcToText(xs:Func seq) = xs.Select(fun f->f.ToDsText()).JoinWith(";")
 
-        let rowItems(jobDef:JobDef, job:Job option) =
-            let jobName, funcs = 
+        let rowItems(dev:TaskDevice, job:Job option) =
+            let jobName, funcs =
                 if job.IsSome
                 then job.Value.Name
                      , job.Value.Funcs.Cast<Func>() |> funcToText
                 else "↑", "↑"
 
-            [TextXlsAddress;  jobDef.ApiName; "bool"; jobDef.InAddress  ; jobDef.OutAddress; jobName; funcs; ]
+            [TextXlsAddress;  dev.ApiName; "bool"; dev.InAddress  ; dev.OutAddress; jobName; funcs; ]
 
         let rows =
             seq {
                 for job in sys.Jobs |> Seq.sortBy(fun f->f.Name) do
-                    let sortedJobDefs = job.JobDefs |> Seq.sortBy(fun f->f.ApiName)
+                    let sortedDeviceDefs = job.DeviceDefs |> Seq.sortBy(fun f->f.ApiName)
 
-                    for jobDef in  sortedJobDefs do
-                        if sortedJobDefs.Head() = jobDef
-                        then 
-                            yield rowItems(jobDef, Some job) //첫 JobDef만 만듬
-                        else 
-                            yield rowItems(jobDef, None)
+                    for dev in  sortedDeviceDefs do
+                        if sortedDeviceDefs.Head() = dev
+                        then
+                            yield rowItems(dev, Some job) //첫 TaskDevice만 만듬
+                        else
+                            yield rowItems(dev, None)
             }
 
         rows
-        |> Seq.iter(fun row -> 
+        |> Seq.iter(fun row ->
                     let rowTemp = dt.NewRow()
                     rowTemp.ItemArray <- (row|> Seq.cast<obj>|> Seq.toArray)
                     dt.Rows.Add(rowTemp) |> ignore)
-       
-        let emptyLine() =  
+
+        let emptyLine() =
             let row = dt.NewRow()
             row.ItemArray <- Enum.GetNames(typedefof<IOColumn>).Select(fun f-> "'-" |> box).ToArray()
             row |> dt.Rows.Add |>ignore
 
-        let toBtnText(btns:ButtonDef seq, xlsCase:ExcelCase) = 
+        let toBtnText(btns:ButtonDef seq, xlsCase:ExcelCase) =
             for btn in  btns do
                 let func = btn.Funcs |> funcToText
                 dt.Rows.Add(xlsCase.ToText(),  btn.Name   , "bool",  btn.InAddress,    btn.OutAddress,  "'-",  func) |> ignore
-        let toLampText(lamps:LampDef seq, xlsCase:ExcelCase) = 
+        let toLampText(lamps:LampDef seq, xlsCase:ExcelCase) =
             for lamp in  lamps do
                 let func = lamp.Funcs |> funcToText
                 dt.Rows.Add(xlsCase.ToText(),  lamp.Name  , "bool",  "'-",  lamp.OutAddress,  "'-",  func) |> ignore
 
-        let toCondiText(conds:ConditionDef seq, xlsCase:ExcelCase) = 
+        let toCondiText(conds:ConditionDef seq, xlsCase:ExcelCase) =
             for cond in  conds do
                 let func = cond.Funcs |> funcToText
                 dt.Rows.Add(xlsCase.ToText(),  cond.Name  , "bool",  cond.InAddress, "'-",   "'-",  func) |> ignore
-        
-        emptyLine() 
-        emptyLine() 
+
+        emptyLine()
+        emptyLine()
 
         toBtnText (sys.AutoButtons, ExcelCase.XlsAutoBTN)
         toBtnText (sys.ManualButtons, ExcelCase.XlsManualBTN)
@@ -83,27 +83,27 @@ module ExportIOTable =
         toBtnText (sys.EmergencyButtons, ExcelCase.XlsEmergencyBTN)
         toBtnText (sys.TestButtons, ExcelCase.XlsTestBTN)
         toBtnText (sys.HomeButtons, ExcelCase.XlsHomeBTN)
-       
-        emptyLine() 
-        emptyLine() 
-        
+
+        emptyLine()
+        emptyLine()
+
         toLampText (sys.AutoModeLamps, ExcelCase.XlsAutoModeLamp)
         toLampText (sys.ManualModeLamps, ExcelCase.XlsManualModeLamp)
         toLampText (sys.DriveModeLamps, ExcelCase.XlsDriveModeLamp)
         toLampText (sys.StopModeLamps, ExcelCase.XlsStopModeLamp)
         toLampText (sys.ReadyModeLamps, ExcelCase.XlsReadyModeLamp)
 
-        emptyLine() 
-        emptyLine() 
+        emptyLine()
+        emptyLine()
 
         toCondiText (sys.ReadyConditions, ExcelCase.XlsConditionReady)
         toCondiText (sys.DriveConditions, ExcelCase.XlsConditionDrive)
 
         dt.Rows.Add(TextXlsVariable,  ""  ,  ""  , "'-", "'-","'-","'-") |> ignore
-        emptyLine() 
+        emptyLine()
         dt
 
-    let ToFiie(systems:DsSystem seq, excelFilePath:string) = 
+    let ToFiie(systems:DsSystem seq, excelFilePath:string) =
         let disableCellStyle(range:Microsoft.Office.Interop.Excel.Range ) =
             range.Interior.Color <- Color.LightGray;
             range.Font.Bold <- true;
@@ -120,19 +120,19 @@ module ExportIOTable =
         let autoFitNFilterColumn(range:Microsoft.Office.Interop.Excel.Range ) =
                    range.AutoFilter(1, Type.Missing, XlAutoFilterOperator.xlAnd, Type.Missing, true) |> ignore
                    range.EntireColumn.AutoFit() |> ignore
-        
+
         let mutable curRow = 0
-        let createWorkSheet(tbl:Data.DataTable, wb:Workbook, totalRows:int) = 
+        let createWorkSheet(tbl:Data.DataTable, wb:Workbook, totalRows:int) =
             let rowsCnt = tbl.Rows.Count
             let colsCnt = tbl.Columns.Count
             //  create worksheet
             let workSheet = wb.Worksheets.Add Missing.Value :?> Worksheet
             workSheet.Name <- tbl.TableName
-            
-            //// now we resize the columns  
+
+            //// now we resize the columns
             let excelCellrange = workSheet.Range(workSheet.Cells.[1, 1], workSheet.Cells.[rowsCnt+ 1, colsCnt]);
-            disableCellStyle(excelCellrange) 
-        
+            disableCellStyle(excelCellrange)
+
             for colIndex in [|0..colsCnt-1|] do
                 workSheet.Cells.[1,colIndex+1] <- tbl.Columns.[colIndex].ColumnName
             //// rows
@@ -143,7 +143,7 @@ module ExportIOTable =
                     workSheet.Cells.[rowsIndex + 2, colIndex + 1] <- tbl.Rows.[rowsIndex].[colIndex]
                     let cellText =tbl.Rows.[rowsIndex].[colIndex].ToString()
                     if(cellText = "" || (cellText.StartsWith("'") && cellText.StartsWith("'-")|>not))
-                    then 
+                    then
                         let excelCellrange = workSheet.Range(workSheet.Cells.[rowsIndex + 2, colIndex + 1], workSheet.Cells.[rowsIndex + 2, colIndex + 1])
                         enableCellStyle(excelCellrange)
 
@@ -156,18 +156,18 @@ module ExportIOTable =
         // load excel, and create a new workbook
         let excelApp = new ApplicationClass(Visible = false)
         let wb = excelApp.Workbooks.Add Missing.Value
-        let firstSheet = wb.ActiveSheet :?> Worksheet 
-        excelApp.ScreenUpdating <- false 
+        let firstSheet = wb.ActiveSheet :?> Worksheet
+        excelApp.ScreenUpdating <- false
 
-        let tables =  systems 
-                        |> Seq.map(fun s ->  ToTable s) 
+        let tables =  systems
+                        |> Seq.map(fun s ->  ToTable s)
                         |> Seq.sortBy(fun f->f.TableName)
 
-        let totalRows = tables 
+        let totalRows = tables
                         |> Seq.map(fun t -> t.Rows.Count)
                         |> Seq.sum
 
-        tables 
+        tables
         |> Seq.iter(fun d -> createWorkSheet (d, wb, totalRows))
 
             //처음 자동으로 생성된 빈 Sheet 삭제
@@ -176,6 +176,6 @@ module ExportIOTable =
         excelApp.Quit()
 
 
-    
+
 
 

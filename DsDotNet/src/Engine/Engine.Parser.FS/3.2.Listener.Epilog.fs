@@ -245,7 +245,7 @@ module EtcListenerModule =
         //    let init    = context.TryFindFirstChild<ArgumentContext>().Value.GetText()
         //    x.TheSystem.Variables.Add(new VariableData(varName, varType, init))
 
-        //JobDef 여기에 저장 및 불러오기로 이동
+        //TaskDevice 여기에 저장 및 불러오기로 이동
         //member x.ProcessCommandDef(context:CommandDefContext) =
         //    let cmdName    = context.TryFindFirstChild<CmdNameContext>().Value.GetText()
         //    let funApplCtx = context.TryFindFirstChild<FunApplicationContext>().Value
@@ -253,7 +253,7 @@ module EtcListenerModule =
         //    let command    = new Command(cmdName, funAppl)
         //    x.TheSystem.Commands.Add(command)
 
-        //JobDef 여기에 저장 및 불러오기로 이동
+        //TaskDevice 여기에 저장 및 불러오기로 이동
         //member x.ProcessObserveDef(context:ObserveDefContext) =
         //    let obsName    = context.TryFindFirstChild<ObserveNameContext>().Value.GetText()
         //    let funApplCtx = context.TryFindFirstChild<FunApplicationContext>().Value

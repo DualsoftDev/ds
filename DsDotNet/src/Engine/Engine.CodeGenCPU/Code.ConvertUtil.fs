@@ -38,26 +38,26 @@ module CodeConvertUtil =
             |_ -> failwithlog "Error GetPureReal"
 
 
-        //let origins, resetChains = OriginHelper.GetOriginsWithJobDefs real.Graph
+        //let origins, resetChains = OriginHelper.GetOriginsWithDeviceDefs real.Graph
         //origins
         //    .Where(fun w-> w.Value = initialType)
         //    .Select(fun s-> s.Key)
 
 
-    let getOriginJobDefs(real:Real, initialType:InitialType) =
-        let origins, resetChains = OriginHelper.GetOriginsWithJobDefs real.Graph
+    let getOriginDeviceDefs(real:Real, initialType:InitialType) =
+        let origins, resetChains = OriginHelper.GetOriginsWithDeviceDefs real.Graph
         [ for w in origins do
             if w.Value = initialType then
                 yield w.Key ]
 
     let getOriginIOs(real:Real, initialType:InitialType) =
-        let origins = getOriginJobDefs(real, initialType)
+        let origins = getOriginDeviceDefs(real, initialType)
         origins.Select(fun jd -> jd.InTag).Cast<PlcTag<bool>>()
 
-    let getStartPointExpr(call:Call, jd:JobDef) =
+    let getStartPointExpr(call:Call, jd:TaskDevice) =
         match call.Parent.GetCore() with
         | :? Real as r ->
-                let ons = getOriginJobDefs (r, InitialType.On)
+                let ons = getOriginDeviceDefs (r, InitialType.On)
                 if ons.Contains(jd)
                     then r.V.RO.Expr <&&> call._on.Expr
                     else call._off.Expr
@@ -82,14 +82,14 @@ module CodeConvertUtil =
 
     /// 원위치 고려했을 때, reset chain 중 하나라도 켜져 있는지 검사하는 expression 반환
     let getNeedCheckExpression(real:Real) =
-        let origins, resetChains = OriginHelper.GetOriginsWithJobDefs real.Graph
+        let origins, resetChains = OriginHelper.GetOriginsWithDeviceDefs real.Graph
 
         (* [ KeyValuePair(JogDef, InitialType) ] *)
         let needChecks = origins.Where(fun w-> w.Value = NeedCheck)
 
         let needCheckSet:PlcTag<bool> list list =
             let apiNameToInTagMap =
-                needChecks.Map(fun (KeyValue(jobDef, v)) -> jobDef.ApiName, jobDef.InTag)
+                needChecks.Map(fun (KeyValue(taskDevice, v)) -> taskDevice.ApiName, taskDevice.InTag)
                 |> Tuple.toDictionary
             [
                 if apiNameToInTagMap.Any() then
@@ -125,7 +125,7 @@ module CodeConvertUtil =
     //let rec getCoinTags(v:Vertex, isInTag:bool) : Tag<bool> seq =
     //        match v with
     //        | :? Call as c ->
-    //            [ for j in c.CallTargetJob.JobDefs do
+    //            [ for j in c.CallTargetJob.DeviceDefs do
     //                let typ = if isInTag then "I" else "O"
     //                PlcTag( $"{j.ApiName}_{typ}", "", false) :> Tag<bool>
     //            ]
@@ -136,7 +136,7 @@ module CodeConvertUtil =
     //            | DuAliasTargetRealEx ao  -> getCoinTags( ao, isInTag)
     //        | _ -> failwithlog "Error"
 
-    //let getTxTags(c:Call) : DsTag<bool> seq = c.CallTargetJob.JobDefs.Select(fun j-> j.ApiItem.TX)
+    //let getTxTags(c:Call) : DsTag<bool> seq = c.CallTargetJob.DeviceDefs.Select(fun j-> j.ApiItem.TX)
 
     [<AutoOpen>]
     [<Extension>]

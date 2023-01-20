@@ -10,7 +10,7 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module ImportIOTable =
-       
+
     type IOColumn =
     | Case      = 0
     | Name      = 1
@@ -26,17 +26,17 @@ module ImportIOTable =
             let dataset = new System.Data.DataSet()
             let excelApp = new ApplicationClass(Visible = false)
                     // 워크북 열기
-            let workBook = excelApp.Workbooks.Open(path);       
-            
-            workBook.Worksheets 
+            let workBook = excelApp.Workbooks.Open(path);
+
+            workBook.Worksheets
             |> Seq.cast<Worksheet>
-            |> Seq.iter(fun workSheet -> 
+            |> Seq.iter(fun workSheet ->
                 let rowCnt = workSheet.UsedRange.Rows.Count
                 let colCnt = workSheet.UsedRange.Columns.Count
-            
+
                 let dtResult = dataset.Tables.Add()
                 dtResult.TableName <- workSheet.Name
-            
+
                 for column in [|1..colCnt|] do
                     dtResult.Columns.Add($"{column}") |> ignore
 
@@ -53,21 +53,21 @@ module ImportIOTable =
             // 사용중인 셀 범위를 가져오기
             workBook.Close();   // 워크북 닫기
             excelApp.Quit();        // 엑셀 어플리케이션 종료
-            
+
             dataset
 
         let dataset = FromExcel(path)
         try
-            let functionUpdate(funcText, funcs:HashSet<Func>, tableIO:Data.DataTable, isJob:bool) = 
+            let functionUpdate(funcText, funcs:HashSet<Func>, tableIO:Data.DataTable, isJob:bool) =
                 funcs.Clear()
                 if funcText <> "" && funcText <> "-"
-                then getFunctions(funcText) 
-                        |> Seq.iter(fun (name, parms) -> 
+                then getFunctions(funcText)
+                        |> Seq.iter(fun (name, parms) ->
                             if (not<|isJob) && name <> "n"
                             then Office.ErrorXLS(ErrorCase.Name, ErrID._1005, $"{name}", tableIO.TableName, path)
                             funcs.Add(Func(name, parms)) |>ignore )
 
-            let updateBtn(row:Data.DataRow, btntype:BtnType, tableIO:Data.DataTable) = 
+            let updateBtn(row:Data.DataRow, btntype:BtnType, tableIO:Data.DataTable) =
                 let name  = $"{row.[(int)IOColumn.Name]}"
                 let input = $"{row.[(int)IOColumn.Input]}"
                 let output= $"{row.[(int)IOColumn.Output]}"
@@ -80,7 +80,7 @@ module ImportIOTable =
                               functionUpdate (func, btn.Funcs, tableIO, false)
                 | None -> Office.ErrorXLS(ErrorCase.Name, ErrID._1001, $"{name}", tableIO.TableName, path)
 
-            let updateLamp(row:Data.DataRow, lampType:LampType, tableIO:Data.DataTable) = 
+            let updateLamp(row:Data.DataRow, lampType:LampType, tableIO:Data.DataTable) =
                 let name  = $"{row.[(int)IOColumn.Name]}"
                 let output= $"{row.[(int)IOColumn.Output]}"
                 let func  = $"{row.[(int)IOColumn.Func]}"
@@ -90,8 +90,8 @@ module ImportIOTable =
                 | Some lamp -> lamp.OutAddress <- output
                                functionUpdate (func, lamp.Funcs, tableIO, false)
                 | None -> Office.ErrorXLS(ErrorCase.Name, ErrID._1002, $"{name}", tableIO.TableName, path)
-            
-            let updateCondition (row:Data.DataRow, cType:ConditionType, tableIO:Data.DataTable) = 
+
+            let updateCondition (row:Data.DataRow, cType:ConditionType, tableIO:Data.DataTable) =
                 let name  = $"{row.[(int)IOColumn.Name]}"
                 let output= $"{row.[(int)IOColumn.Output]}"
                 let func  = $"{row.[(int)IOColumn.Func]}"
@@ -103,25 +103,25 @@ module ImportIOTable =
                 | None -> Office.ErrorXLS(ErrorCase.Name, ErrID._1002, $"{name}", tableIO.TableName, path)
 
             systems
-            |> Seq.iter(fun sys -> 
+            |> Seq.iter(fun sys ->
                 let tableIOs = dataset.Tables
                                 |> Seq.cast<System.Data.DataTable>
                                 |> Seq.filter(fun tb -> tb.TableName = sys.Name)
-                
+
                 if tableIOs.length()  = 0
                 then Office.ErrorXLS(ErrorCase.Name, ErrID._1003, "",  $"오류 이름 {sys.Name}.")
 
                 let tableIO = tableIOs |> Seq.head
-                let dicJob = sys.Jobs |> Seq.collect(fun f-> f.JobDefs) |> Seq.map(fun j->j.ApiName, j) |> dict
+                let dicJob = sys.Jobs |> Seq.collect(fun f-> f.DeviceDefs) |> Seq.map(fun j->j.ApiName, j) |> dict
                 for row in tableIO.Rows do
                     if($"{row.[(int)IOColumn.Name]}" = ""|>not && $"{row.[(int)IOColumn.Name]}" = "-"|>not) //name 존재시만
-                    then 
+                    then
                         match TextToXlsType($"{row.[(int)IOColumn.Case]}") with
-                        | XlsAddress  -> 
-                            let jobDef = dicJob.[$"{row.[(int)IOColumn.Name]}"]
-                            jobDef.InAddress  <- $"{row.[(int)IOColumn.Input]}"
-                            jobDef.OutAddress <- $"{row.[(int)IOColumn.Output]}"
-                            
+                        | XlsAddress  ->
+                            let dev = dicJob.[$"{row.[(int)IOColumn.Name]}"]
+                            dev.InAddress  <- $"{row.[(int)IOColumn.Input]}"
+                            dev.OutAddress <- $"{row.[(int)IOColumn.Output]}"
+
                             let jobName  = $"{row.[(int)IOColumn.Job]}"
                             let func  = $"{row.[(int)IOColumn.Func]}"
 
@@ -130,8 +130,8 @@ module ImportIOTable =
                             | None -> if "↑" <> jobName //이름이 위와 같지 않은 경우
                                       then Office.ErrorXLS(ErrorCase.Name, ErrID._1004, tableIO.TableName,  $"오류 이름 {jobName}.")
 
-                        | XlsVariable -> 
-                            let name      = $"{row.[(int)IOColumn.Name]}" 
+                        | XlsVariable ->
+                            let name      = $"{row.[(int)IOColumn.Name]}"
                             let dataType  = $"{row.[(int)IOColumn.DataType]}" |> DataToType
                             let initValue = $"{row.[(int)IOColumn.Output]}"
                             let variableData = VariableData(name, dataType, initValue)
@@ -161,7 +161,7 @@ module ImportIOTable =
         DoWork(0);
 
 
-            
+
 
 
 

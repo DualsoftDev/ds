@@ -65,16 +65,16 @@ module OriginModule =
             let tgt = $"{system}.{info.Operand2}"
             { Source=src; Operator=info.Operator.ToText(); Target=tgt}
 
-        let getJobDefs (call:Call) =
-            call.CallTargetJob.JobDefs
+        let getDeviceDefs (call:Call) =
+            call.CallTargetJob.DeviceDefs
 
-        let getResetInfo (jd:JobDef) =
+        let getResetInfo (jd:TaskDevice) =
             let apiOwnSystem = jd.ApiItem.System
             apiOwnSystem.ApiResetInfos
             |> Seq.map(makeName (apiOwnSystem.QualifiedName))
 
         graph.Vertices
-        |> Seq.map(getVertexTarget >> getJobDefs)
+        |> Seq.map(getVertexTarget >> getDeviceDefs)
         |> removeDuplicates
         |> Seq.collect(getResetInfo) |> Seq.distinct
 
@@ -106,13 +106,13 @@ module OriginModule =
             ]
         searchNodes now target graph []
 
-    /// Get ordered jobdef routes
+    /// Get ordered taskDevice routes
     let visitFromSourceToTargetInList
-        (now:int * int) (target:int * int) (route:JobDef list list)
+        (now:int * int) (target:int * int) (route:TaskDevice list list)
       =
         let rec searchList
                 (now:int * int) (target:int * int)
-                (route:JobDef list list) (path:JobDef list) =
+                (route:TaskDevice list list) (path:TaskDevice list) =
             [
                 let nv, nj = now
                 let nowPath = path.Append(route.[nv].[nj]) |> List.ofSeq
@@ -130,7 +130,7 @@ module OriginModule =
             for route in allRoutes do
                 [ for v in route do
                     let c = getVertexTarget v
-                    c.CallTargetJob.JobDefs
+                    c.CallTargetJob.DeviceDefs |> Seq.toList
                 ]
         ]
 
@@ -264,7 +264,7 @@ module OriginModule =
 
     /// get detected reset chains in all routes
     let getDetectedResetChains
-        (resetChains:seq<string list>) (allRoutes:seq<JobDef list>)
+        (resetChains:seq<string list>) (allRoutes:seq<TaskDevice list>)
       =
         allRoutes
         |> Seq.collect(fun route ->
@@ -294,7 +294,7 @@ module OriginModule =
 
     /// Get origin map
     let getOriginMaps
-        (allJobs:seq<JobDef>)
+        (allJobs:seq<TaskDevice>)
         (offByOneWayBackwardResets:string list)
         (offByMutualResetChains:string list)
         (structedChains:seq<Map<string, seq<string>>>)
@@ -374,7 +374,7 @@ module OriginModule =
         let jobIncludedMap = new Dictionary<string, List<Vertex>>()
         for v in graph.Vertices.Distinct() do
             let call = (getVertexTarget v).CallTargetJob
-            for jd in call.JobDefs do
+            for jd in call.DeviceDefs do
                 if not (jobIncludedMap.ContainsKey(jd.ApiName)) then
                     jobIncludedMap.Add(jd.ApiName, new List<Vertex>())
                 jobIncludedMap[jd.ApiName].Add(v)
@@ -390,7 +390,7 @@ module OriginModule =
         let structedChains = getNameStructedChains resetChains
         let jobNameMap =
             graph.Vertices
-            |> Seq.map(fun v -> (getVertexTarget v).CallTargetJob.JobDefs)
+            |> Seq.map(fun v -> (getVertexTarget v).CallTargetJob.DeviceDefs)
             |> removeDuplicates
             |> Seq.map(fun jd -> jd.ApiName, jd)
             |> Map.ofSeq
@@ -401,9 +401,9 @@ module OriginModule =
                 [
                     for name in jobNameMap do
                         if chain.ContainsKey(name.Key) then
-                            for jobdef in chain[name.Key] do
-                                if jobIncludedMap.ContainsKey(jobdef) then
-                                    jobIncludedMap[jobdef]
+                            for taskDevice in chain[name.Key] do
+                                if jobIncludedMap.ContainsKey(taskDevice) then
+                                    jobIncludedMap[taskDevice]
                 ]
                 |> List.distinct
             )
@@ -416,9 +416,9 @@ module OriginModule =
                 [
                     for name in jobNameMap do
                         if resets.Contains(name.Key) then
-                            for jobdef in resets do
-                                if jobIncludedMap.ContainsKey(jobdef) then
-                                    jobIncludedMap[jobdef]
+                            for taskDevice in resets do
+                                if jobIncludedMap.ContainsKey(taskDevice) then
+                                    jobIncludedMap[taskDevice]
                 ]
                 |> List.distinct
             )
@@ -473,7 +473,7 @@ module OriginModule =
         let allJobs =
             graph.Vertices
             |> Seq.map(getVertexTarget)
-            |> Seq.map(fun c -> c.CallTargetJob.JobDefs)
+            |> Seq.map(fun c -> c.CallTargetJob.DeviceDefs)
             |> removeDuplicates
 
         getOriginMaps
@@ -497,7 +497,7 @@ module OriginModule =
             getOrigins graph |> Tuple.tuple1st
 
         [<Extension>]
-        static member GetOriginsWithJobDefs (graph:DsGraph) =
+        static member GetOriginsWithDeviceDefs (graph:DsGraph) =
             let originMap, allJobs, resetChains = getOrigins graph
             let getjobDef name =
                 allJobs.First(fun j -> j.ApiName = name)

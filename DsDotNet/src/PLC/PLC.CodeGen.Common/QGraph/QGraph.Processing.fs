@@ -1,4 +1,4 @@
-﻿namespace Dual.Core.QGraph
+namespace Dual.Core.QGraph
 
 open System.Collections.Generic
 open System.Diagnostics
@@ -65,7 +65,7 @@ module TrustProcessing =
         let drsEdgeEffectFull = getEDurations g (QgVertexObj effect)
         /// 인'
         let cause2 = drsCauseFull |> List.map List.last |> List.distinct |> List.tryExactlyOne
-        
+
         /// [인 -> 인') 경로에 과 포함여부.  유지 check
         let cContainsE = drsCause.Contains(effect)
 
@@ -82,7 +82,7 @@ module TrustProcessing =
             |> Option.map(fun c -> c <> effect && drsEffect2.Contains(c))
             |> Option.defaultValue false
 
-        /// `인이 외부에서 들어와 인 -> `인이 존재하지 않지만 
+        /// `인이 외부에서 들어와 인 -> `인이 존재하지 않지만
         /// `인의 위치가 확실하여 인의 초기상태가 정해진경우
         let isTrustOutSideReset = IVertexExt.ContainOutsideReset cause g(* && cause.InitialStatus <> VertexStatus.Undefined*)
 
@@ -93,21 +93,21 @@ module TrustProcessing =
                 if eContainsC2 && drsEdgeEffectFull.any() then
                     getResetExntendableNodes g drsEdgeEffectFull
                 else
-                    let edgesNext = g.GetOutgoingEdges(effect) 
+                    let edgesNext = g.GetOutgoingEdges(effect)
                     [
                         yield! edgesNext |> Seq.map(fun en -> TrustedEdgeCondition(en))
                         yield! edgesNext |> Seq.map(fun en -> NodeIncomingCondition(en.Target))
                     ]
         let createURMs markables =
             let id = idGenerator()
-            markables |> List.map (fun v -> 
+            markables |> List.map (fun v ->
                 URM(id, v, edge, TrustedNodeStartCondition(v), resetExtendables) :> RelayMarker)
 
         //! 유지 check, 유일 check
         match cUniqGlobal, cContainsE, eContainsC2, isTrustOutSideReset with
         //| true, _, _, true
         | true, true, true, false ->         // happy case
-            []        
+            []
         | false, _, _, _ ->              // 인이 graph 전체에서 복수
             createURMs [cause]
         | true, true, false, false ->        // 유일 flag.  (인prev ... 인 -> 과) 에서 (인prev.. 인] 의 구간에 유일 flag 설정
@@ -123,24 +123,24 @@ module TrustProcessing =
         let getPath (vertex:IVertex) =
             let resets = vertex.getResetVertices()
             /// [V --> V'] 버텍스 -> 리셋 경로
-            let drsCause = 
-                resets 
+            let drsCause =
+                resets
                 /// V -> V` or V <- V` path
-                |> Seq.collect(fun reset -> 
-                    let fpath = g.GetAllPaths (vertex, reset) 
+                |> Seq.collect(fun reset ->
+                    let fpath = g.GetAllPaths (vertex, reset)
                     /// self Reset
-                    if vertex.isSelfReset() then [vertex; reset] 
+                    if vertex.isSelfReset() then [vertex; reset]
                     /// outside reset
                     else if g.ContainsVertex(reset) |> not then [vertex; vertex]
                     else
-                        if fpath.IsEmpty then g.GetAllPaths (reset, vertex) else fpath 
+                        if fpath.IsEmpty then g.GetAllPaths (reset, vertex) else fpath
                         |> List.flatten
-                    ) 
+                    )
 
             /// 분기를 가지고 있으면 분기까지 포함시킨다.
             let outvertices = g.GetOutgoingVertices(vertex)
-            let paths = 
-                if outvertices |> Seq.length > 1 then 
+            let paths =
+                if outvertices |> Seq.length > 1 then
                     drsCause |> Seq.append (outvertices |> Seq.where(fun v -> v.isSelfReset() |> not)) else drsCause
                 |> List.ofSeq
 
@@ -150,20 +150,20 @@ module TrustProcessing =
         let vpath = vertices |> Seq.map(getPath) |> List.ofSeq
 
         /// path에 속하는 Vertex의 Path를 Merge한다.
-        let rec vPathGroup (vnpath:(IVertex * IVertex list)list) = 
+        let rec vPathGroup (vnpath:(IVertex * IVertex list)list) =
             let result =
-                vnpath 
-                |> List.map(fun (v, spath) -> 
+                vnpath
+                |> List.map(fun (v, spath) ->
                     /// v경로의 모든 버텍스가 포함된 path들 취합 및 중복 버텍스제거
                     /// path에 동일 버텍스가 2번 나오는 경우가 없어야함
                     let mpath =
-                        spath 
+                        spath
                         |> List.collect(fun v ->
                             vnpath
-                            |> List.where(fun (_, tpath) -> tpath.Contains(v) ) 
+                            |> List.where(fun (_, tpath) -> tpath.Contains(v) )
                             |> List.collect snd)
                         |> List.distinct
-                    v, mpath) 
+                    v, mpath)
                 |> List.distinctBy snd
 
             /// 경로가 더이상 머지안될때까지
@@ -174,17 +174,17 @@ module TrustProcessing =
         /// vertex path를 edge로 변환
         let ePathGroup =
             mergePath
-            |> List.map(fun (v,path) -> 
+            |> List.map(fun (v,path) ->
                 if path.Length = 1 then
                     [QgEdge(v, v) :> IEdge]
                 else if path |> Seq.isEmpty && IVertexExt.ContainOutsideReset v g then [QgEdge(v, v) :> IEdge]
                 else
-                    path 
-                    |> List.collect(fun s -> 
-                        path 
-                        |> List.where(fun t -> 
-                            g.Edges 
-                            |> Seq.exists(fun e -> e.Source = s && e.Target = t) ) 
+                    path
+                    |> List.collect(fun s ->
+                        path
+                        |> List.where(fun t ->
+                            g.Edges
+                            |> Seq.exists(fun e -> e.Source = s && e.Target = t) )
                         |> List.map(fun t -> g.GetEdgeExactlyOne(s, t))
                     )
             )
@@ -212,7 +212,7 @@ module TrustProcessing =
             )
 
         /// Reset Block 별로 생성한 markers
-        let ``rb&ms`` = 
+        let ``rb&ms`` =
             /// v -> v`의 path를 구하여 해당 path에 존재하는 vertex들의 path를 취합하여 graph로 변형
             /// pairwisewinding하여 앞 뒤 block끼리 묶어줌
             /// 앞 last vertex -> 뒤 first vertex Edge를 만들어 marker의 대상 edge로 사용
@@ -221,32 +221,32 @@ module TrustProcessing =
 
             let result =
                 blocks
-                |> List.collect(fun block -> 
+                |> List.collect(fun block ->
                     let g = model.DCG
-                    let fstTerminals = 
-                        if block.VertexCount = 1 then 
-                            seq{block.Vertices |> Seq.head} 
+                    let fstTerminals =
+                        if block.VertexCount = 1 then
+                            seq{block.Vertices |> Seq.head}
                         else block.GetTerminalVertices()
-                    
-                    let cause = 
-                        if block.VertexCount = 1 then 
+
+                    let cause =
+                        if block.VertexCount = 1 then
                             block.Vertices
-                        else block.GetInitialVertices() 
+                        else block.GetInitialVertices()
                         |> Seq.head
 
-                    let edges = 
-                        fstTerminals 
-                        |> Seq.collect(fun s -> 
-                            blocks 
-                            |> Seq.collect(fun b -> 
-                                let sndInitials = 
-                                    if b.VertexCount = 1 then 
-                                        seq{b.Vertices |> Seq.head} 
+                    let edges =
+                        fstTerminals
+                        |> Seq.collect(fun s ->
+                            blocks
+                            |> Seq.collect(fun b ->
+                                let sndInitials =
+                                    if b.VertexCount = 1 then
+                                        seq{b.Vertices |> Seq.head}
                                     else b.GetInitialVertices()
                                 sndInitials
                             )
-                            |> Seq.where(fun t -> g.Edges |> Seq.exists(fun e -> e.Source = s && e.Target = t)) 
-                            |> Seq.map(fun t -> g.GetEdgeExactlyOne(s, t))) 
+                            |> Seq.where(fun t -> g.Edges |> Seq.exists(fun e -> e.Source = s && e.Target = t))
+                            |> Seq.map(fun t -> g.GetEdgeExactlyOne(s, t)))
                         |> List.ofSeq
 
                     edges |> List.map(fun edge -> MRM(idGenerator(), cause, edge, ResetBlockCondition(cause), [NodeResetCondition(Expression.Zero)])) |> List.cast<RelayMarker>
@@ -256,19 +256,19 @@ module TrustProcessing =
         /// edge 별로 생성한 marker 의 id 를 갖는 multimap : edge -> [id]
         ///
         /// Multimap<QgEdge, RMType<int>>
-        let ``e->id multimaps`` = 
+        let ``e->id multimaps`` =
             let erbms =
                 ``rb&ms``
                 |> List.map(fun rm -> rm.Edge, [rm])
-            
-            ``e&ms`` 
-            |> List.append  erbms 
-            |> List.groupBy fst 
+
+            ``e&ms``
+            |> List.append  erbms
+            |> List.groupBy fst
             |> List.map (fun (key, values) -> (key, values |> List.collect snd))
             |> List.map2nd (Seq.map (fun (rm:RelayMarker) -> rm.DuId))
             |> MultiMap.CreateDeep
 
-        /// marker 의 location (vertex) 별로 marker 를 갖는 multimap : v -> [markers] 
+        /// marker 의 location (vertex) 별로 marker 를 갖는 multimap : v -> [markers]
         ///
         /// Multimap<QgVertex, RelayMarker>
         let ``v->m multimap`` =
@@ -338,7 +338,7 @@ module TrustProcessing =
             tracefn "%s = %s" (ri.GetCoilName()) (x.ToText())
         )
 
-        
+
         /// Result
         let result = {
             LadderInfo = ladderInfos

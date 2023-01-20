@@ -43,7 +43,7 @@ module HmiCodeGenTestModule =
 
         [<Test>]
         member __.``HmiTestCase-test_sample`` () =
-            answerChecker 
+            answerChecker
                 [
                     "test_sample\control.ds";
                     "test_sample\device\MovingLifter1.ds";

@@ -14,18 +14,18 @@ type Spec02_FlowStatement() =
     inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
-  
-    [<Test>] 
-    member __.``F1 Root Start`` () = 
+
+    [<Test>]
+    member __.``F1 Root Start`` () =
         for real in t.Reals do
             real.F1_RootStart() |> doChecks
 
-    [<Test>] 
-    member __.``F2 Root Reset`` () = 
+    [<Test>]
+    member __.``F2 Root Reset`` () =
         for real in t.Reals do
             real.F2_RootReset() |> doChecks
 
     [<Test>]
-    member __.``F3 Root Reset Coin`` () = 
+    member __.``F3 Root Reset Coin`` () =
         for coin in t.Coins do
             coin.F3_RootCoinRelay()   |> doCheck

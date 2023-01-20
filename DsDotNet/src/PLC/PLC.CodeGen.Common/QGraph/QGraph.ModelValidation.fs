@@ -1,4 +1,4 @@
-﻿namespace Dual.Core.QGraph
+namespace Dual.Core.QGraph
 
 
 open System.Collections.Generic
@@ -8,7 +8,7 @@ open Dual.Common
 open Dual.Common.Graph.QuickGraph
 
 //[<AutoOpen>]
-module ModelVaidation = 
+module ModelVaidation =
     type ModelValidationError<'V, 'E> =
         /// 동떨어진 vertex 하나만 존재하는 것들
         | IsolatedNodes of 'V list
@@ -50,7 +50,7 @@ module ModelVaidation =
                     let devId = fst outputDeviceMap.[n.ToString()]
                     n, devId))
 
-        /// graph 상에 존재하는 모든 node 들이 속하는 device 의 id 
+        /// graph 상에 존재하는 모든 node 들이 속하는 device 의 id
         let allDevicesIds =
             let names = g.Vertices |> Seq.map (fun n -> n.ToString()) |> HashSet
             outputDeviceMap
@@ -81,7 +81,7 @@ module ModelVaidation =
                 /// major path 상에 존재하는 major device 의 node 들만 선택
                 let nodesOnMajorPath = mpath |> List.filter (snd >> ((=) devId)) |> List.map fst |> HashSet
 
-                yield! 
+                yield!
                     otherPaths
                     |> List.map (fun oPath ->
                         /// non major path 상에 존재하는 major device 의 state 중에 major path 에 존재하지 않는 node 들

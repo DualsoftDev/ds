@@ -13,8 +13,8 @@ module TimerStatementModule =
         FunctionName:string
     }
 
-    
-    let private generateTimerStatement (ts :TimerStruct, tParams:TimerCreateParams) = 
+
+    let private generateTimerStatement (ts :TimerStruct, tParams:TimerCreateParams) =
 
         if ts.PRE.Value < MinTickInterval then
             failwith <| sprintf "Timer Resolution Error: Preset value should be larger than %A" MinTickInterval
@@ -40,10 +40,10 @@ module TimerStatementModule =
 
 
     let private createTONStatement (ts :TimerStruct, rungInCondition, resetCondition)  : Statement =
-      
+
         let tParams ={ Type=ts.Type; Name=ts.Name; Preset=ts.PRE.Value;
-                       RungConditionIn=rungInCondition; ResetCondition=resetCondition; FunctionName="createWinTON"} 
-    
+                       RungConditionIn=rungInCondition; ResetCondition=resetCondition; FunctionName="createWinTON"}
+
         generateTimerStatement (ts, tParams)
 
     let private createTimerStatement (storages:Storages) (tParams:TimerCreateParams)   : Statement =
@@ -86,7 +86,7 @@ module TimerStatementModule =
                 RungConditionIn=Some rungInCondition;
                 ResetCondition=None; FunctionName=functionName }:TimerCreateParams)
             |> createTimerStatement storages
-      
+
         //static member CreateTON(tcParams:TCConstructionParams, resetCondition) =
         //    let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition} = tcParams
         //    {   Type=TON; Name=name; Preset=preset;

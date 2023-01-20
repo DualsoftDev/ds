@@ -9,7 +9,7 @@ open Microsoft.FSharp.Reflection
 module CollectionAlgorithm =
     // https://stackoverflow.com/questions/4495597/combinations-and-permutations-in-f
     /// 주어진 seq 에서 size 갯수크기의 combination 을 생성한다.
-    /// combinations 2 [1..5] |> Array.ofSeq 
+    /// combinations 2 [1..5] |> Array.ofSeq
     ///  [| [2; 1]; [3; 1]; [4; 1]; [5; 1];
     ///     [3; 2]; [4; 2]; [5; 2];
     ///     [4; 3]; [5; 3];
@@ -17,10 +17,10 @@ module CollectionAlgorithm =
     let combinations size xs =
         let rec combinationsHelper acc size xs =
             seq {
-                match size, xs with 
-                | n, y::ys -> 
+                match size, xs with
+                | n, y::ys ->
                     if n > 0 then yield! combinationsHelper (y::acc) (n - 1) ys
-                    if n >= 0 then yield! combinationsHelper acc n ys 
+                    if n >= 0 then yield! combinationsHelper acc n ys
                 | 0, [] -> yield acc
                 | _, [] -> () }
         combinationsHelper [] size (xs |> List.ofSeq)
@@ -36,7 +36,7 @@ module CollectionAlgorithm =
                     yield []
                 else
                     for l in xs do
-                        if not (Set.contains l taken) then 
+                        if not (Set.contains l taken) then
                             for perm in permu xs (Set.add l taken) do
                                 yield l::perm }
         permu (xs |> List.ofSeq) Set.empty
@@ -174,8 +174,8 @@ module CollectionAlgorithm =
     // C# : EmConsecutive.ToConsecutiveGroups
     // http://vaskir.blogspot.com/2013/09/grouping-consecutive-integers-in-f-and.html
     /// [1; 2; 4; 5; 6; 9] |> groupConsecutive ==> [[1;2]; [4;5;6]; [9]]
-    let groupConsecutive xs = 
-        List.foldBack (fun x acc -> 
+    let groupConsecutive xs =
+        List.foldBack (fun x acc ->
             match acc, x with
             | [], _ -> [[x]]
             | (h :: t) :: rest, x when h - x <= 1 -> (x :: h :: t) :: rest
@@ -186,7 +186,7 @@ module CollectionAlgorithm =
     let randomSequence m n =
         let m = defaultArg m 1
         let n = defaultArg n 100
-        seq { 
+        seq {
             let rng = new Random()
             while true do
                 yield rng.Next(m,n)

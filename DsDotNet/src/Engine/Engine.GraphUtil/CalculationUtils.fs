@@ -7,7 +7,7 @@ open Engine.Core
 [<AutoOpen>]
 module private GraphCalculationUtils =
     /// Remove duplicates in seq seq
-    let removeDuplicates (source:'T seq) = 
+    let removeDuplicates (source:'T seq) =
         source |> Seq.collect id |> Seq.distinct
 
     /// Remove inclusive relationship duplicates in list list
@@ -26,10 +26,10 @@ module private GraphCalculationUtils =
         result
 
     /// Get vertex target
-    let getVertexTarget (vertex:Vertex) = 
+    let getVertexTarget (vertex:Vertex) =
         match vertex with
         | :? Call as c -> c
-        | :? Alias as a -> 
+        | :? Alias as a ->
             match a.Target with
             | CallTarget ct -> ct
             | _ -> failwith $"type error of {vertex}"
@@ -39,8 +39,8 @@ module private GraphCalculationUtils =
     let getCallMap (graph:Graph<Vertex, Edge>) =
         let callMap = new Dictionary<string, ResizeArray<Vertex>>()
         graph.Vertices
-        |> Seq.iter(fun v -> 
-            let apiName = 
+        |> Seq.iter(fun v ->
+            let apiName =
                 (getVertexTarget v).ApiItem.QualifiedName
             if not (callMap.ContainsKey(apiName)) then
                 callMap.Add(apiName, new ResizeArray<Vertex>(0))
@@ -50,17 +50,17 @@ module private GraphCalculationUtils =
 
     /// Get reset informations from graph
     let getAllResets (graph:Graph<Vertex, Edge>) =
-        let makeName (system:string) (info:ApiResetInfo) = 
+        let makeName (system:string) (info:ApiResetInfo) =
             let src = info.Operand1
             let tgt = info.Operand2
             $"{system}.{src}", info.Operator, $"{system}.{tgt}"
 
-        let getResetInfo (node:Vertex) = 
+        let getResetInfo (node:Vertex) =
             let vertexSystem = (getVertexTarget node).ApiItem.System
-            vertexSystem.ApiResetInfos 
+            vertexSystem.ApiResetInfos
             |> Seq.map(makeName (vertexSystem.QualifiedName))
 
-        let generateResetRelationShips 
+        let generateResetRelationShips
                 (callMap:Dictionary<string, ResizeArray<Vertex>>)
                 (resets:string * string * string) =
             let (source, operator, target) = resets
@@ -79,7 +79,7 @@ module private GraphCalculationUtils =
             ]
 
         let callMap = getCallMap graph
-        graph.Vertices 
+        graph.Vertices
         |> Seq.collect(getResetInfo) |> Seq.distinct
         |> Seq.collect(generateResetRelationShips callMap)
 
@@ -95,14 +95,14 @@ module private GraphCalculationUtils =
                 yield v
         |]
         |> Array.distinct
-    
+
     /// Get ordered routes from start to end
     let visitFromSourceToTarget
-            (now:Vertex) (target:Vertex) 
+            (now:Vertex) (target:Vertex)
             (graph:Graph<Vertex, Edge>) =
         let rec searchNodes
                 (now:Vertex) (target:Vertex)
-                (graph:Graph<Vertex, Edge>) 
+                (graph:Graph<Vertex, Edge>)
                 (path:Vertex list) =
             [
                 let nowPath = path.Append(now) |> List.ofSeq
@@ -115,16 +115,16 @@ module private GraphCalculationUtils =
         searchNodes now target graph []
 
     /// Get all resets
-    let getOneWayResets 
-            (mutualResets:Vertex seq seq) 
+    let getOneWayResets
+            (mutualResets:Vertex seq seq)
             (resets:seq<Vertex option * string * Vertex option>) =
         resets
-        |> Seq.filter(fun e -> 
+        |> Seq.filter(fun e ->
             let (head, r, tail) = e
             r <> TextInterlock &&
             head.IsSome && tail.IsSome
         )
-        |> Seq.map(fun e -> 
+        |> Seq.map(fun e ->
             let (head, r, tail) = e
             if r = TextResetPush then
                 seq { head.Value; tail.Value; }
@@ -137,8 +137,8 @@ module private GraphCalculationUtils =
 
     /// Get mutual resets
     let getMutualResets (resets:seq<Vertex option * string * Vertex option>) =
-        resets 
-        |> Seq.filter(fun e -> 
+        resets
+        |> Seq.filter(fun e ->
             let (source, r, target) = e
             r = TextInterlock &&
             source.IsSome && target.IsSome
@@ -149,9 +149,9 @@ module private GraphCalculationUtils =
             seq { edge; edge.Reverse(); }
         )
         |> removeDuplicates
-    
+
     /// Check intersect between two sequences
-    let checkIntersect 
+    let checkIntersect
             (sourceSeq:Vertex seq) (shatteredSeqs:Vertex seq seq) =
         shatteredSeqs
         |> Seq.filter(fun sr ->
@@ -167,48 +167,48 @@ module private GraphCalculationUtils =
         |> Seq.map(fun e -> e.First())
 
     /// Get outgoing resets
-    let getOutgoingResets (resets:'V seq seq) (node:'V) = 
-        resets 
+    let getOutgoingResets (resets:'V seq seq) (node:'V) =
+        resets
         |> Seq.filter(fun e -> node = e.First())
         |> Seq.map(fun e -> e.Last())
-        
+
     /// Get mutual reset chains : All nodes are mutually resets themselves
     let getMutualResetChains (sort:bool) (resets:Vertex seq seq) =
         let nodes = resets |> Seq.map(fun e -> e.First()) |> Seq.distinct
         let globalChains = new ResizeArray<Vertex ResizeArray>(0)
         let candidates = new ResizeArray<Vertex list>(0)
-        
-        let addToChain 
-                (chain:ResizeArray<Vertex>) (addHead:bool) (target:Vertex) = 
-            let targets = 
-                match addHead with 
+
+        let addToChain
+                (chain:ResizeArray<Vertex>) (addHead:bool) (target:Vertex) =
+            let targets =
+                match addHead with
                 | true -> getIncomingResets resets target
                 | _ -> getOutgoingResets resets target
-            
+
             let mutable added = false
             for compare in targets do
                 if not (chain.Contains(compare)) then
                     match addHead with
-                    | true -> 
+                    | true ->
                         chain.Reverse()
                         chain.Add(compare)
                         chain.Reverse()
-                    | _ -> 
+                    | _ ->
                         chain.Add(compare)
                     added <- true
             added
-            
-        let addToResult 
-                (result: ResizeArray<Vertex list>) 
+
+        let addToResult
+                (result: ResizeArray<Vertex list>)
                 (sort:bool) (target:Vertex seq) =
-            let candidate = 
+            let candidate =
                 let tgt = target |> Seq.distinct
                 match sort with
                 | true -> tgt |> Seq.sortBy(fun r -> r.Name) |> List.ofSeq
                 | _ -> tgt |> List.ofSeq
             if not (result.Contains(candidate)) then
                 result.Add(candidate)
-                
+
         // Generate chain candidates
         for node in nodes do
             let mutable continued = true
@@ -217,13 +217,13 @@ module private GraphCalculationUtils =
             if not (checkInList.Contains(node)) then
                 localChains.Add(node)
                 while continued do
-                    let haedIn = 
+                    let haedIn =
                         localChains.First() |> addToChain localChains true
-                    let tailIn = 
+                    let tailIn =
                         localChains.Last() |> addToChain localChains false
                     continued <- haedIn || tailIn
                 globalChains.Add(localChains)
-    
+
         // Combine chain candidates
         match globalChains.Count with
         | 0 -> ()
@@ -236,14 +236,14 @@ module private GraphCalculationUtils =
                         now.Concat(chain) |> addToResult candidates sort
                     else
                         now |> addToResult candidates sort
-                        
+
         // Remove duplicates
         removeDuplicatesInList candidates
-        
+
     /// Get origin map
-    let getOriginMaps 
-            (graphNode:Vertex seq) (offByOneWayBackwardResets:Vertex seq) 
-            (offByMutualResetChains:Vertex seq) 
+    let getOriginMaps
+            (graphNode:Vertex seq) (offByOneWayBackwardResets:Vertex seq)
+            (offByMutualResetChains:Vertex seq)
             (structedChains:seq<Map<string, seq<Vertex>>>) =
         let allNodes = new Dictionary<Vertex, int>()
         let oneWay = offByOneWayBackwardResets |> Seq.map(getVertexTarget)
@@ -257,14 +257,14 @@ module private GraphCalculationUtils =
             else
                 for resets in structedChains do
                     let nowName = (getVertexTarget node).QualifiedName
-                    if resets.ContainsKey(nowName) && 
+                    if resets.ContainsKey(nowName) &&
                             not (allNodes.ContainsKey(node)) then
                         if resets.Count = 2 then
-                            let interlocks = 
+                            let interlocks =
                                 resets.Remove(nowName)
                                 |> Seq.map(fun v -> v.Value)
                                 |> Seq.head
-                            let isIn = 
+                            let isIn =
                                 Enumerable.Intersect(
                                     interlocks, offByMutualResetChains
                                 )
@@ -279,7 +279,7 @@ module private GraphCalculationUtils =
         allNodes
 
     // Get aliases in front of graph
-    let getAliasHeads 
+    let getAliasHeads
             (graph:Graph<Vertex, Edge>)
             (callMap:Dictionary<string, ResizeArray<Vertex>>) =
         [
@@ -288,10 +288,10 @@ module private GraphCalculationUtils =
                 for now in calls.Value do
                 for call in calls.Value do
                     if now <> call then
-                        let fromTo = 
-                            visitFromSourceToTarget now call graph 
+                        let fromTo =
+                            visitFromSourceToTarget now call graph
                             |> removeDuplicates
-                        let intersected = 
+                        let intersected =
                             Enumerable.Intersect(fromTo, calls.Value)
                         if intersected.Count() = calls.Value.Count then
                             yield intersected.First()

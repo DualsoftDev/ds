@@ -13,6 +13,6 @@ type Spec09_TimmerStatement() =
     inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
-    [<Test>] 
+    [<Test>]
     member __.``T1 Delay Call`` () =
         t.Sys.T1_DelayCall() |> doChecks

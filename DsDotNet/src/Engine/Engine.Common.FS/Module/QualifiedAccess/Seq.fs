@@ -179,14 +179,14 @@ module Seq =
     /// https://stackoverflow.com/questions/1222185/most-elegant-combinations-of-elements-in-f
     let pairwiseWindingFull xs =
         let xs = xs |> List.ofSeq
-        let rec comb n l = 
+        let rec comb n l =
             match n, l with
             | 0, _ -> [[]]
             | _, [] -> []
             | k, (x::xs) -> List.map ((@) [x]) (comb (k-1) xs) @ comb k xs
         comb 2 xs
-        |> Seq.map(fun f -> f |> Seq.head, f |> Seq.last) 
-      
+        |> Seq.map(fun f -> f |> Seq.head, f |> Seq.last)
+
     // http://www.fssnip.net/50/title/Seqtriplewise
     /// triplewise [1..4] // -> seq [(1, 2, 3); (2, 3, 4)]
     let triplewise (xs: seq<_>) =

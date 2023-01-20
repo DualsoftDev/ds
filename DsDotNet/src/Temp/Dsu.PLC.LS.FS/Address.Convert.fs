@@ -48,7 +48,7 @@ type CpuType =
             | 0xB0uy -> CpuType.XgbMk
             | 0xB4uy -> CpuType.XgbIEC
             | _ -> failwith "ERROR"
-     
+
 
         static member FromID(cpuId:int) =
             match cpuId with
@@ -58,7 +58,7 @@ type CpuType =
             //XGI-CPUU 100
             //XGI-CPUU/D 107
             //XGI-CPUUN 111
-            | 100 | 102 | 104 | 106 | 107 | 111  -> Xgi  
+            | 100 | 102 | 104 | 106 | 107 | 111  -> Xgi
             //XGK-CPUA 3
             //XGK-CPUE 4
             //XGK-CPUH 0
@@ -214,7 +214,7 @@ type DataType =
 
 //let inline xToBytes (x:'a) = x |> uint16 |> fun x -> x.ToBytes()
 
-type DeviceType = P | M | L | K | F |  D | U | N | Z | T | C | R | I | Q | W | ZR   //S Step제어용 디바이스 수집 불가 
+type DeviceType = P | M | L | K | F |  D | U | N | Z | T | C | R | I | Q | W | ZR   //S Step제어용 디바이스 수집 불가
 
 let (|DevicePattern|_|) (str:string) = DU.fromString<DeviceType> str
 
@@ -245,7 +245,7 @@ let (|LsTagPatternXgi|_|) tag =
             Device    = device
             DataType  = DataType.Bit
             BitOffset = bitOffset }
-             
+
     | RegexPattern @"%([IQ])X(\d+).(\d+).(\d+)$"
         [DevicePattern device; Int32Pattern file; Int32Pattern element; Int32Pattern bit] ->
         Some {
@@ -257,7 +257,7 @@ let (|LsTagPatternXgi|_|) tag =
     | RegexPattern @"%(U)([XBWDL])(\d+).(\d+).(\d+)$"
         [DevicePattern device; DataTypePattern dataType; Int32Pattern file; Int32Pattern element; Int32Pattern bit] ->
         let byteOffset = element * dataType.GetByteLength()
-        let fileOffset = file * 16 * 512  //max %U file.element(16).bit(512) 
+        let fileOffset = file * 16 * 512  //max %U file.element(16).bit(512)
         Some {
             Tag       = tag
             Device    = device
@@ -268,7 +268,7 @@ let (|LsTagPatternXgi|_|) tag =
         [DevicePattern device; DataTypePattern dataType; Int32Pattern offset;] ->
         let byteOffset = offset * dataType.GetByteLength()
         Some {
-            Tag       = tag 
+            Tag       = tag
             Device    = device
             DataType  = dataType
             BitOffset = byteOffset * 8}
@@ -276,7 +276,7 @@ let (|LsTagPatternXgi|_|) tag =
         [DevicePattern device; DataTypePattern dataType; Int32Pattern offset; Int32Pattern bit;] ->
             let byteOffset = offset * dataType.GetByteLength()
             Some {
-                Tag       = tag 
+                Tag       = tag
                 Device    = device
                 DataType  = DataType.Bit
                 BitOffset = byteOffset * 8 + bit}
@@ -312,27 +312,27 @@ let (|LsTagPatternXgk|_|) tag =
         Some (getWordTag device wordOffset)
 
     //ZR 타입은 word  타입
-    | RegexPattern "(ZR)(\d+)$"  
+    | RegexPattern "(ZR)(\d+)$"
         [DevicePattern device;   Int32Pattern wordOffset;] ->
         Some (getWordTag DeviceType.R wordOffset)
     //R or D 타입은 word 타입
-    | RegexPattern "([RDTCZN])(\d+)$"  
+    | RegexPattern "([RDTCZN])(\d+)$"
         [DevicePattern device;  Int32Pattern wordOffset;] ->
         Some (getWordTag device wordOffset)
-    // word.bit 타입 
+    // word.bit 타입
     | RegexPattern "([RD])(\d+).([\da-fA-F])"
         [DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
         Some (getBitTag device wordOffset bitOffset)
 
-    //S타입 word.bit 
+    //S타입 word.bit
     | RegexPattern "(S)(\d+).(\d+)$"  //마지막 비트 단위가 100인 특수 디바이스
         [DevicePattern device;  Int32Pattern wordOffset; Int32Pattern bitOffset] ->
         Some (getBitTag device 0 (wordOffset*100+bitOffset))
     //U타입 word
-    | RegexPattern "(U)(\d+).(\d+)$"  
+    | RegexPattern "(U)(\d+).(\d+)$"
         [DevicePattern device;  Int32Pattern wordOffsetA; Int32Pattern wordOffsetB;] ->
         Some (getWordTag device (wordOffsetA*32+wordOffsetB))
-    //U타입 word.bit 타입 
+    //U타입 word.bit 타입
     | RegexPattern "(U)(\d+).(\d+).([\da-fA-F])$"
         [DevicePattern device; Int32Pattern wordOffsetA;Int32Pattern wordOffsetB; HexPattern bitOffset] ->
         Some (getBitTag device 0 (wordOffsetA*16*32 + wordOffsetB*16 + bitOffset))
@@ -342,7 +342,7 @@ let (|LsTagPatternXgk|_|) tag =
         [DevicePattern device; DataTypePattern dataType; Int32Pattern offset;] ->
             let byteOffset = offset * dataType.GetByteLength()
             Some {
-                Tag       = tag 
+                Tag       = tag
                 Device    = device
                 DataType  = dataType
                 BitOffset = byteOffset * 8}
@@ -351,7 +351,7 @@ let (|LsTagPatternXgk|_|) tag =
         [DevicePattern device; DataTypePattern dataType; Int32Pattern offset;] ->
             let byteOffset = offset * dataType.GetByteLength()
             Some {
-                Tag       = tag 
+                Tag       = tag
                 Device    = DeviceType.R
                 DataType  = dataType
                 BitOffset = byteOffset * 8}
@@ -375,11 +375,11 @@ let tryParseTag (cpu:CpuType) tag =
 //        Some (sprintf "%%%sX%d" (device.ToString()) (offset*16 + bitOffset)), Some(DataType.Bit)
 //    | RegexPattern "([PMLKF])(\d+)$"
 //        [DevicePattern device; Int32Pattern offset;] ->
-//        if(offset > 9999) 
+//        if(offset > 9999)
 //        then  Some (sprintf "%%%sX%d" (device.ToString()) ((offset/10*16)+(offset%16))), Some(DataType.Bit)
 //        else  Some (sprintf "%%%sW%d" (device.ToString()) offset), Some(DataType.Word)
 
-//    | RegexPattern "([RD])(\d+)$"  
+//    | RegexPattern "([RD])(\d+)$"
 //        [DevicePattern device;  Int32Pattern offset] ->
 //        Some (sprintf "%%%sW%d" (device.ToString()) offset), Some(DataType.Word)
 //    | RegexPattern "([RD])(\d+).([\da-fA-F])"
@@ -396,20 +396,20 @@ let getBitSize cpu tag =
     match tryParseTag cpu tag with
     |Some v -> v.BitLength
     |None -> failwithlogf "Cannot getBitSize '%s'" tag
-    
+
 let getBitOffset cpu tag =
     match tryParseTag cpu tag with
     |Some v -> v.BitOffset
     |None -> failwithlogf "Cannot getBitOffset '%s'" tag
-    
+
 let getByteSize cpu tag =
     match tryParseTag cpu tag with
     |Some v -> v.ByteLength
     |None -> failwithlogf "Cannot getByteSize '%s'" tag
-    
+
 let getDataType cpu tag =
     match tryParseTag cpu tag with
     |Some v -> v.DataType
     |None -> failwithlogf "Cannot getDataType '%s'" tag
-    
-    
+
+

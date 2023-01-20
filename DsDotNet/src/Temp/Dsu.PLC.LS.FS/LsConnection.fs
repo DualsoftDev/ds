@@ -40,7 +40,7 @@ type LsTag internal(conn:ConnectionBase, name:string, cpu:CpuType) as this =
         this.Name <- name
         base.Type <- parsed.DataType.ToTagType()
 
-        
+
         let tName = conn.GetType().Name
         assert(tName = "LsConnection" || tName = "LsSwConnection" || tName = "LsXg5000Connection" || tName = "LsXg5000COMConnection")
 
@@ -73,18 +73,18 @@ and LsConnection(parameters:LsConnectionParameters) as this =
     let mutable connSuccess = false;
 
 
-    /// 초기 연결 타임아웃 체크 
+    /// 초기 연결 타임아웃 체크
     let timeoutCheck (asyncresult:System.IAsyncResult) =
         connSuccess <- false;
         let tcpclient = asyncresult.AsyncState :?> TcpClient;
 
         if ((tcpclient.Client <> null) && (tcpclient.Client.Connected))
-        then 
+        then
             tcpclient.EndConnect(asyncresult);
             connSuccess <- true;
         else
             connSuccess <- false;
-        
+
     /// connection 생성
     let createConnection() =
         dispose conn
@@ -92,16 +92,16 @@ and LsConnection(parameters:LsConnectionParameters) as this =
         let beginConnect = conn.BeginConnect(parameters.Ip, (parameters.Port|> int), System.AsyncCallback(timeoutCheck), conn)
         beginConnect.AsyncWaitHandle.WaitOne(parameters.Timeout, false) |> ignore
         System.Threading.Thread.Sleep 200
-        if(connSuccess) 
+        if(connSuccess)
             then
                 conn <- new TcpClient(parameters.Ip, parameters.Port |> int)
-            else 
+            else
                 failwithlogf "Ip[%s] Port[%d] 연결 확인이 필요 합니다."  parameters.Ip (parameters.Port |>int)
 
     /// server 에 의해 connection 이 끊긴 경우, 확인 후 재접속
     let reconnectOnDemand() =
         if (conn = null || not <| conn.Client.IsConnected()) then
-            logDebug "Reconnecting to %s:%d" parameters.Ip parameters.Port 
+            logDebug "Reconnecting to %s:%d" parameters.Ip parameters.Port
             System.Threading.Thread.Sleep 1000
             createConnection()
 
@@ -202,7 +202,7 @@ and LsConnection(parameters:LsConnectionParameters) as this =
     let channelize (lsTags:LsTag []) =
         let tags = lsTags |> map name
         let tagsDic = lsTags |> Array.map(fun t -> (t.Name, t)) |> Tuple.toDictionary
-            
+
         [
             for (channelTags, reader) in planReadTags  readRandomTagsWithNames readBlock cpu tags do
                 let channelLsTags =
@@ -302,7 +302,7 @@ and LsConnection(parameters:LsConnectionParameters) as this =
         |> Array.ofSeq
         |> channelize
         |> Seq.cast<ChannelRequestExecutor>
-        
+
 
 and LsChannelRequestExecutor(conn, tags, reader:CachedTagsReader) =
     inherit ChannelRequestExecutor(conn :> ConnectionBase, tags |> Seq.cast<TagBase>)
@@ -314,5 +314,5 @@ and LsChannelRequestExecutor(conn, tags, reader:CachedTagsReader) =
             let lsTag = tagsDic.[tag]
             let v = lsTag.Anal.DataType.BoxUI8(value)
             lsTag.Value <- v   /// uint64 를 type 에 맞게 casting 해서 넣어 주어야 함
-            
+
         true

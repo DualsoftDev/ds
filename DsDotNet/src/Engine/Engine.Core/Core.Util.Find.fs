@@ -26,7 +26,7 @@ module internal ModelFindModule =
                 | r::xs2 ->
                     match flow.Graph.FindVertex(r) |> box with
                     | :? Call as call-> Some call
-                    | :? Real as real-> 
+                    | :? Real as real->
                         match xs2 with
                         | [] -> Some real
                         | remaining ->
@@ -60,30 +60,30 @@ module internal ModelFindModule =
             else
                 failwithlog "ERROR"
         }
-        
+
     let tryFindFlow(system:DsSystem) (name:string)   = system.Flows.TryFind(nameEq name)
     let tryFindJob (system:DsSystem) name            = system.Jobs.TryFind(nameEq name)
 
     let tryFindLoadedSystem (system:DsSystem) name   = system.LoadedSystems.TryFind(nameEq name)
     let tryFindReferenceSystem (system:DsSystem) name   =
                      system.LoadedSystems.Select(fun s->s.ReferenceSystem).TryFind(nameEq name)
-    
-   
+
+
     let rec tryFindExportApiItem(system:DsSystem) (Fqdn(apiPath)) =
         let sysName, apiKey = apiPath[0], apiPath[1]
         system.ApiItems.TryFindWithName(apiKey)
 
     and tryFindCallingApiItem (system:DsSystem) targetSystemName targetApiName =
-        let findedLoadedSystem = tryFindLoadedSystem system targetSystemName 
+        let findedLoadedSystem = tryFindLoadedSystem system targetSystemName
         let targetSystem = findedLoadedSystem.Value.ReferenceSystem
         system.ApiUsages.TryFind(nameComponentsEq [targetSystem.Name; targetApiName])
 
-    
+
     //jobs 에 등록 안되있으면 Real로 처리 한다.
     let tryFindCall (system:DsSystem) (Fqdn(callPath))=
         if tryFindJob system (callPath.Last()) |> Option.isSome
         then match tryFindGraphVertex system callPath with
-             |Some(v) -> 
+             |Some(v) ->
                 match v with
                 | :? Call -> Some(v)
                 | :? RealOtherSystem -> Some(v)
@@ -103,7 +103,7 @@ module internal ModelFindModule =
         match flow.Graph.TryFindVertex(name) with
         |Some(v) -> if v:? Real then Some(v :?> Real) else None
         |None -> None
-     
+
     let tryFindAliasTarget (flow:Flow) aliasMnemonic =
         flow.AliasDefs.Values
             .Where(fun ad -> ad.Mnemonincs.Contains(aliasMnemonic))
@@ -112,15 +112,15 @@ module internal ModelFindModule =
 
     let tryFindAliasDefWithMnemonic (flow:Flow) aliasMnemonic =
         flow.AliasDefs.Values.TryFind(fun ad -> ad.Mnemonincs.Contains(aliasMnemonic))
-    
-    let getVertexSharedReal(real:Real) = 
-        let sharedAlias = 
+
+    let getVertexSharedReal(real:Real) =
+        let sharedAlias =
             real.Flow.Graph.Vertices
                 .GetAliasTypeReals()
                 .Where(fun a -> a.TargetWrapper.RealTarget().Value = real)
                 .Cast<Vertex>()
 
-        let sharedRealExFlow = 
+        let sharedRealExFlow =
             real.Flow.System.GetVertices()
                 .OfType<RealExF>()
                 .Where(fun w-> w.Real = real)
@@ -128,14 +128,14 @@ module internal ModelFindModule =
 
         sharedAlias @ sharedRealExFlow
 
-    let getVertexSharedCall(call:Call) = 
-        let sheredAlias = 
+    let getVertexSharedCall(call:Call) =
+        let sheredAlias =
             call.Parent.GetFlow().GetVerticesWithInReal()
               .GetAliasTypeCalls()
               .Where(fun a -> a.TargetWrapper.CallTarget().Value = call)
               .Cast<Vertex>()
-       
-        sheredAlias 
+
+        sheredAlias
 
     type DsSystem with
         member x.TryFindGraphVertex(Fqdn(fqdn)) = tryFindGraphVertex x fqdn
@@ -146,21 +146,21 @@ module internal ModelFindModule =
         member x.TryFindRealOtherSystem(realExSPath:Fqdn) = tryFindRealOtherSystem x realExSPath
         member x.TryFindFlow(flowName:string) = tryFindFlow x flowName
         member x.TryFindJob (jobName:string) =  tryFindJob  x jobName
-        member x.TryFindReal(system) flowName realName =  tryFindReal  system flowName realName 
-        member x.TryFindLoadedSystem     (system:DsSystem)  name = tryFindLoadedSystem system name  
-        member x.TryFindReferenceSystem  (system:DsSystem)  name = tryFindReferenceSystem system name  
-      
+        member x.TryFindReal(system) flowName realName =  tryFindReal  system flowName realName
+        member x.TryFindLoadedSystem     (system:DsSystem)  name = tryFindLoadedSystem system name
+        member x.TryFindReferenceSystem  (system:DsSystem)  name = tryFindReferenceSystem system name
+
 [<Extension>]
-type FindExtension =  
+type FindExtension =
     // 전체 사용된 시스템을 이름으로 찾기
-    [<Extension>] static member TryFindLoadedSystem (system:DsSystem, name) = tryFindLoadedSystem system name  
-    // 전체 사용된 시스템에서의 찾는 이름 대상 DsSystem  
-    [<Extension>] static member TryFindReferenceSystem (system:DsSystem, name) = tryFindReferenceSystem system name  
+    [<Extension>] static member TryFindLoadedSystem (system:DsSystem, name) = tryFindLoadedSystem system name
+    // 전체 사용된 시스템에서의 찾는 이름 대상 DsSystem
+    [<Extension>] static member TryFindReferenceSystem (system:DsSystem, name) = tryFindReferenceSystem system name
 
     [<Extension>] static member TryFindExportApiItem(x:DsSystem, Fqdn(apiPath)) = tryFindExportApiItem x apiPath
     [<Extension>] static member TryFindGraphVertex  (x:DsSystem, Fqdn(fqdn)) = tryFindGraphVertex x fqdn
     [<Extension>] static member TryFindGraphVertex<'V when 'V :> IVertex>(x:DsSystem, Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn
-    
+
     [<Extension>] static member GetVertexSharedReal (x:Real) = getVertexSharedReal x
     [<Extension>] static member GetVertexSharedCall (x:Call) = getVertexSharedCall x
 

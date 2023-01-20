@@ -37,7 +37,7 @@ module MapModule =
                 dictionary.Add(k, hash)
 
         let add k v = addValues k [v]
-    
+
         //new (tpls: ('k*'v) seq) =
         //    let kvsTpls =
         //        tpls
@@ -60,7 +60,7 @@ module MapModule =
         static member CreateDeep(tpls: seq<'k*(seq<'v>)> ) = MultiMap(tpls)
 
         /// Key - value 리스트로부터 multimap 생성 : key 중복 시, 하나의 키를 만들고 value list 연결
-        static member CreateFlat(tpls: ('k*'v) seq) = 
+        static member CreateFlat(tpls: ('k*'v) seq) =
             let kvsTpls =
                 tpls
                 |> Seq.groupBy fst // seq<'k * seq<'k * 'v>>

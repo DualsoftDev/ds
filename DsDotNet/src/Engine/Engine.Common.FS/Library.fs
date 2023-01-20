@@ -1,4 +1,4 @@
-﻿namespace Engine.Common.FS
+namespace Engine.Common.FS
 
 module Say =
     let hello name =

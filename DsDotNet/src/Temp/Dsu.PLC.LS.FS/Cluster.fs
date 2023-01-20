@@ -220,7 +220,7 @@ let readFromLWord ulValue (anal:LsTagAnalysis) =
 
 
 
-    
+
 /// byteOffsets 의 list 를 long word(8 byte) offset 으로 변경.
 /// 이때 각 byteOffset 값 마다, 해당 메모리를 참조하는 tag 들이 존재할 수 있다.
 /// 가령 M[0] 메모리 영역은 %MX0, %MB0, %MW0 등이 참조할 수 있다.
@@ -240,7 +240,7 @@ let private spitLongWordOffsets (bts:BackTrackings) (deviceType:DeviceType) (byt
         bb
         |> List.map2nd (List.mapProject2nd id >> List.flatten >> sort >> distinct)
     cc
-    
+
 /// memory scan 결과를 Fragment 와 Block type 에 따라서 분류한다.
 let private splitScans2FragmentsAndBlocks scans =
     let fragments = ResizeArray<FragmentType>()
@@ -317,7 +317,7 @@ let planReadTags (randomReader:TagsReader) (blockReader:ByteReader) cpu tags' =
                 yield (referringTags, reader)
         |]
 
-        
+
     // fragment type 처리
     // memory stream 을 Long type 8 바이트의 최대 16 접점씩 읽어 낼 수 있도록 처리
     // e.g fragments = [(M, [0; 3; 6;]); (P, [8;]);] (M, [1500;]); 이면

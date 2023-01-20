@@ -1,4 +1,4 @@
-﻿namespace Engine.Common.FS
+namespace Engine.Common.FS
 
 open System.Linq
 open System.Collections.Generic

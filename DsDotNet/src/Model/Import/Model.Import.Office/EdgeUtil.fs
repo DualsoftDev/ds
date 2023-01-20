@@ -21,5 +21,5 @@ module UtilEdge =
     //let [<Literal>] ResetPushRev      = ModelingEdgeType.Reset ||| ModelingEdgeType.Strong        ||| ModelingEdgeType.Reversed
     //let [<Literal>] StartResetRev     = ModelingEdgeType.Reset ||| ModelingEdgeType.Bidirectional ||| ModelingEdgeType.Reversed
 
-  
+
 

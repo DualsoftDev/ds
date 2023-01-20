@@ -4,7 +4,7 @@ open System.Linq
 open Engine.Core
 
 [<AutoOpen>]
-module internal GraphAlgorithms = 
+module internal GraphAlgorithms =
     /// Get node index map(key:name, value:idx)
     let getIndexedMap (graph:Graph<Vertex, Edge>) =
         let traverseOrder = getTraverseOrder graph
@@ -15,29 +15,29 @@ module internal GraphAlgorithms =
                 i <- i + 1
         ]
         |> Map.ofList
-    
+
     /// Get origin status of child nodes
     let getOrigins (graph:Graph<Vertex, Edge>) =
         let rawResets = graph |> getAllResets
         let mutualResets = rawResets |> getMutualResets
         let oneWayResets = rawResets |> getOneWayResets mutualResets
         let resetChains = mutualResets |> getMutualResetChains true
-        let structedChains = 
-            resetChains 
-            |> Seq.map(fun resets -> 
+        let structedChains =
+            resetChains
+            |> Seq.map(fun resets ->
                 resets
                 |> Seq.map(getVertexTarget)
                 |> Seq.distinct
                 |> Seq.map(fun seg ->
                     seg.QualifiedName,
-                    resetChains 
+                    resetChains
                     |> Seq.collect(Seq.filter(fun s -> getVertexTarget s = seg))
                 )
                 |> Map.ofSeq
             )
         let callMap = getCallMap graph
         let aliasHeads = getAliasHeads graph callMap
-        let offByOneWayBackwardResets = 
+        let offByOneWayBackwardResets =
             [
             for reset in oneWayResets do
                 let src = reset.First()
@@ -47,8 +47,8 @@ module internal GraphAlgorithms =
                     yield tgt
             ]
         let offByMutualResetChains =
-            let detectedChain = 
-                resetChains.Where(fun chain -> 
+            let detectedChain =
+                resetChains.Where(fun chain ->
                     Enumerable.Intersect(chain, aliasHeads).Count() > 0
                 )
             [
@@ -56,22 +56,22 @@ module internal GraphAlgorithms =
                 for now in chain do
                 for node in chain do
                     if now <> node then
-                        let fromTo = 
-                            visitFromSourceToTarget now node graph 
+                        let fromTo =
+                            visitFromSourceToTarget now node graph
                             |> removeDuplicates
-                        let intersected = 
+                        let intersected =
                             Enumerable.Intersect(fromTo, chain)
                         if intersected.Count() = chain.Count() then
                             yield now
             ]
 
-        getOriginMaps 
+        getOriginMaps
             graph.Vertices
-            offByOneWayBackwardResets offByMutualResetChains 
+            offByOneWayBackwardResets offByMutualResetChains
             structedChains
 
-    /// Get pre-calculated targets that 
+    /// Get pre-calculated targets that
     /// child segments to be 'ON' in progress(Theta)
-    let getThetaTargets (graph:Graph<Vertex, Edge>) = 
+    let getThetaTargets (graph:Graph<Vertex, Edge>) =
         // To do...
         ()

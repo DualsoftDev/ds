@@ -1,4 +1,4 @@
-﻿namespace FSharp.ProjectTemplate
+namespace FSharp.ProjectTemplate
 
 open CommandLine
 open System
@@ -6,15 +6,15 @@ open System
 module console1 =
 
     [<EntryPoint>]
-    let main argv = 
+    let main argv =
         printfn "%A" argv
 
         let parsedCommand = parse (System.Reflection.Assembly.GetExecutingAssembly().GetName().Name) argv
 
         match parsedCommand.Error with
-            | Some e -> 
+            | Some e ->
                 printfn "%s" parsedCommand.Usage
-            | None -> 
+            | None ->
                 printfn "%A" parsedCommand
 
         printfn "Hit any key to exit."

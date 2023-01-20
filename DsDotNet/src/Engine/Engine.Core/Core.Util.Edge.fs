@@ -25,7 +25,7 @@ module EdgeModule =
 
     let private validateChildrenVertexType (mei:ModelingEdgeInfo<Vertex>) (parent:FqdnObject) =
         let invalidEdge =  (mei.Sources @ mei.Targets).OfType<Alias>()
-                             .Where(fun a->a.TargetWrapper.RealTarget().IsSome 
+                             .Where(fun a->a.TargetWrapper.RealTarget().IsSome
                                         || a.TargetWrapper.RealExFlowTarget().IsSome)
 
         if invalidEdge.any() then failwith $"Vertex {invalidEdge.First().Name} children type error"
@@ -62,11 +62,11 @@ module EdgeModule =
             edges.Except(ofResetEdge edges)
 
 
-    let ofAliasForCallVertex (xs:Vertex seq) =  
+    let ofAliasForCallVertex (xs:Vertex seq) =
         xs.OfType<Alias>()
         |> Seq.filter(fun a -> a.TargetWrapper.CallTarget().IsSome)
-        
-    let ofAliasForRealVertex (xs:Vertex seq) = 
+
+    let ofAliasForRealVertex (xs:Vertex seq) =
         xs.OfType<Alias>()
         |> Seq.filter(fun a -> a.TargetWrapper.RealTarget().IsSome)
 
@@ -139,7 +139,7 @@ module EdgeModule =
                 logWarn "%A" exn
 
     let getVerticesOfSystem(system:DsSystem) =
-        let realVertices = system.Flows.SelectMany(fun f -> 
+        let realVertices = system.Flows.SelectMany(fun f ->
                                     f.Graph.Vertices.OfType<Real>()
                                         .SelectMany(fun r -> r.Graph.Vertices.Cast<Vertex>()))
 
@@ -147,13 +147,13 @@ module EdgeModule =
         realVertices @ flowVertices
 
     let getVerticesOfFlow(flow:Flow) =
-        let realVertices = 
+        let realVertices =
             flow.Graph.Vertices.OfType<Real>()
                 .SelectMany(fun r -> r.Graph.Vertices.Cast<Vertex>())
 
         let flowVertices =  flow.Graph.Vertices.Cast<Vertex>()
         realVertices @ flowVertices
-        
+
     type DsSystem with
         member x.CreateMRIEdgesTransitiveClosure() = createMRIEdgesTransitiveClosure4System x
         member x.ValidateGraph() = validateGraphOfSystem x
@@ -174,7 +174,7 @@ type EdgeExt =
     [<Extension>] static member GetAliasTypeReals(xs:Vertex seq)   = ofAliasForRealVertex xs
     [<Extension>] static member GetAliasTypeRealExs(xs:Vertex seq) = ofAliasForRealExVertex xs
     [<Extension>] static member GetAliasTypeCalls(xs:Vertex seq)   = ofAliasForCallVertex xs
-                                          
+
     [<Extension>] static member OfStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofStrongResetEdge edges
     [<Extension>] static member OfWeakResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofWeakResetEdge edges
     [<Extension>] static member OfNotResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofNotResetEdge edges

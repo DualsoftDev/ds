@@ -6,7 +6,7 @@ open System.Runtime.CompilerServices
 [<RequireQualifiedAccess>]
 module TaskHelper =
     // https://theburningmonk.com/2012/10/f-helper-functions-to-convert-between-asyncunit-and-task/
-    let withLogging<'T> (task: Task<'T>) : Task<'T> = 
+    let withLogging<'T> (task: Task<'T>) : Task<'T> =
         // rethrow exception from preceding task if it fauled
         let continuation (t : Task<'T>) : 'T =
             match t.IsFaulted with
@@ -16,7 +16,7 @@ module TaskHelper =
             | _ -> t.Result
         task.ContinueWith continuation
 
-    let internal withLoggingInternal (task: Task) : Task = 
+    let internal withLoggingInternal (task: Task) : Task =
         // rethrow exception from preceding task if it fauled
         let continuation (t : Task) =
             match t.IsFaulted with

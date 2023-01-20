@@ -15,18 +15,17 @@ type Spec06_RealStatement() =
     let t = CpuTestSample()
 
     [<Test>]
-    member __.``R1 Real Initial Start`` () = 
+    member __.``R1 Real Initial Start`` () =
             for real in t.Reals do
                 real.R1_RealInitialStart() |> doCheck
 
     [<Test>]
-    member __.``R2 Real Job Complete`` () = 
+    member __.``R2 Real Job Complete`` () =
             for real in t.Reals do
                 real.R2_RealJobComplete() |> doCheck
 
     [<Test>]
-    member __.``R3 Real Start Point`` () = 
+    member __.``R3 Real Start Point`` () =
             for real in t.Reals do
                 real.R3_RealStartPoint() |> doCheck
 
-                

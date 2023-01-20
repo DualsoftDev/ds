@@ -3,8 +3,8 @@ namespace FSharp.ProjectTemplate
 open Argu
 open System
 
-module CommandLine = 
-    let private bind f = 
+module CommandLine =
+    let private bind f =
         function
         | Ok x -> f x
         | Error x -> Error x
@@ -42,7 +42,7 @@ module CommandLine =
                 match operator with
                 | EQ
                 | GT
-                | LT -> 
+                | LT ->
                     sprintf "operator is %O and end date is requested" operator
                     |> invalidArg "Log Predicate Create"
                 | Between ->
@@ -52,11 +52,11 @@ module CommandLine =
                     EndDate = endDate
                     }
 
-            | None -> 
+            | None ->
                 match operator with
                 | EQ
                 | GT
-                | LT -> 
+                | LT ->
                     {
                     Operator = operator
                     StartDate = startDate
@@ -74,7 +74,7 @@ module CommandLine =
     type Target =
         | File of string
         | Console
-        
+
     type ParsedCommand =
         {
         Usage : string
@@ -95,9 +95,9 @@ module CommandLine =
         | [<AltCommandLine("-f")>] InputFolder of string list
 
         | [<AltCommandLine("-o")>] Output of string
-        | [<AltCommandLine("-c")>] ConsoleInput of string 
+        | [<AltCommandLine("-c")>] ConsoleInput of string
         | [<AltCommandLine("-p")>] Print
-  
+
          with
             interface IArgParserTemplate with
                 member s.Usage =
@@ -112,16 +112,16 @@ module CommandLine =
                     | ConsoleInput _ -> "input from console"
                     | Print -> "print target"
 
-    let parseCommandLine programName (argv : string []) = 
+    let parseCommandLine programName (argv : string []) =
 
         try
             match argv, argv.Length with
-            | _, 0 -> 
+            | _, 0 ->
                 Error (invalidArg "no arguments" "")
             | help, 1  when help.[0].ToLower() = "--help" ->
                 Error (invalidArg "" "")
             | _, _ ->
-                let parser = 
+                let parser =
                     ArgumentParser.Create<CLIArguments>(programName = programName)
 
                 let commandLine = parser.Parse argv
@@ -129,16 +129,16 @@ module CommandLine =
 
                 Ok (commandLine, usage)
         with e ->
-            Error e       
+            Error e
 
     let parseDate msg (date : string) =
         let d = date.Replace("\'", "").Replace("\"", "")
         match DateTime.TryParse d with
-        | true, dt -> dt 
-        | _ -> 
+        | true, dt -> dt
+        | _ ->
             match DateTime.TryParse (sprintf "%s 0:0:0" d) with
-            | true, dt -> dt 
-            | _ -> 
+            | true, dt -> dt
+            | _ ->
                 invalidArg msg date
 
     let getEq (commandLine : ParseResults<CLIArguments>) =
@@ -151,7 +151,7 @@ module CommandLine =
                 EndDate = None
                 } |> Some |> Ok
             | None -> Ok None
-            
+
         with e ->
             Error e
 
@@ -165,7 +165,7 @@ module CommandLine =
                 EndDate = None
                 } |> Some |> Ok
             | None -> Ok None
-            
+
         with e ->
             Error e
 
@@ -179,7 +179,7 @@ module CommandLine =
                 EndDate = None
                 } |> Some |> Ok
             | None -> Ok None
-            
+
         with e ->
             Error e
 
@@ -198,7 +198,7 @@ module CommandLine =
                     } |> Some |> Ok
                 else invalidArg "start date not less than end date" ""
             | None -> Ok None
-            
+
         with e ->
             Error e
 
@@ -210,17 +210,17 @@ module CommandLine =
                 |> Ok
             | hd::tl ->
                 sprintf "%s, %s" (hd.Operator.ToString()) (tl.Head.Operator.ToString())
-                |> invalidArg "multiple predicates selected" 
+                |> invalidArg "multiple predicates selected"
             | _ -> invalidArg "no predicate selected" "EQ, GT, LT, Between"
         with e ->
             Error e
 
-    let parseTarget (commandLine : ParseResults<CLIArguments>) = 
+    let parseTarget (commandLine : ParseResults<CLIArguments>) =
 
-        let targetList = 
+        let targetList =
             []
-            |> (fun x -> 
-                    if commandLine.Contains <@ Output @> then 
+            |> (fun x ->
+                    if commandLine.Contains <@ Output @> then
                         match commandLine.TryGetResult <@ Output @> with
                         | Some path -> (Target.File path)::x
                         | None -> x
@@ -229,23 +229,23 @@ module CommandLine =
         match targetList with
         | [] -> Ok Target.Console
         | [x] -> Ok x
-        | hd::tl -> 
+        | hd::tl ->
             ArgumentException(sprintf "more than one output target specified: %s, %s" (hd.ToString()) (tl.Head.ToString())) :> Exception
-            |> Error 
+            |> Error
 
-    let parseSource (commandLine : ParseResults<CLIArguments>) = 
+    let parseSource (commandLine : ParseResults<CLIArguments>) =
 
-        let sourceList = 
+        let sourceList =
             []
-            |> (fun x -> 
-                    if commandLine.Contains <@ InputFiles @> then 
+            |> (fun x ->
+                    if commandLine.Contains <@ InputFiles @> then
                         match commandLine.TryGetResult <@ InputFiles @> with
                         | Some path -> (Source.File path)::x
                         | None -> x
-                        
+
                     else x)
-            |> (fun x -> 
-                    if commandLine.Contains <@ ConsoleInput @> then 
+            |> (fun x ->
+                    if commandLine.Contains <@ ConsoleInput @> then
                         match commandLine.TryGetResult <@ ConsoleInput @> with
                         | Some consoleInput -> (Source.Console consoleInput)::x
                         | None -> x
@@ -258,9 +258,9 @@ module CommandLine =
             ArgumentException(sprintf "more than one input source specified: %s, %s" (hd.ToString()) (tl.Head.ToString())) :> Exception
             |> Error
 
-    let parse programName argv = 
+    let parse programName argv =
 
-        match choose { 
+        match choose {
                         let! commandLine, usage = parseCommandLine programName argv
 
                         let! eq = getEq commandLine
@@ -271,24 +271,24 @@ module CommandLine =
 
                         let! target = parseTarget commandLine
                         let! source = parseSource commandLine
-                        
-                        return 
+
+                        return
                             {
                             Usage = usage
                             Predicate = Some mergedPredicate
                             Source = source
                             Target = target
                             Error = None
-                            } 
+                            }
                         } with
         | Ok x -> x
-        | Error (e : Exception) -> 
+        | Error (e : Exception) ->
             let usage = ArgumentParser.Create<CLIArguments>(programName = programName).PrintUsage()
             {
             Usage = usage
             Predicate = None
             Source = Source.NoSource
-            Target = Target.Console 
+            Target = Target.Console
             ParsedCommand.Error = Some e
-            } 
+            }
 

@@ -1,4 +1,4 @@
-﻿namespace PLC.CodeGen.Common
+namespace PLC.CodeGen.Common
 
 module Say =
     let hello name =

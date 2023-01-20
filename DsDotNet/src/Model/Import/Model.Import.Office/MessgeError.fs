@@ -75,15 +75,15 @@ module ErrID =
     let _1003 = "해당 시스템 이름이 엑셀 Sheet에 없습니다."
     let _1004 = "Job 이 해당 시스템에 없습니다."
     let _1005 = "시스템 램프 or 버튼 or 조건은 Not($n) 함수만 사용가능합니다."
-    
+
     //todo
        // "리얼 행위의 자식은 한곳에만 정의가능합니다.(alias, exFlow 정의불가)"
     //
-        
-[<AutoOpen>]
-module MessgeError = 
 
-    type ErrorCase  = Shape | Conn | Page | Group | Name | Path 
+[<AutoOpen>]
+module MessgeError =
+
+    type ErrorCase  = Shape | Conn | Page | Group | Name | Path
         with
         member x.ToText() =
             match x with
@@ -98,17 +98,17 @@ module MessgeError =
 
     [<Extension>]
     type Office =
-            
+
         [<Extension>]
-        static member ErrorPPT(case:ErrorCase, msg:string,  objName:string, page:int, ?userMsg:string) = 
+        static member ErrorPPT(case:ErrorCase, msg:string,  objName:string, page:int, ?userMsg:string) =
             let itemName =  if(userMsg.IsSome && (userMsg.Value = ""|>not))
-                            then $"[Page{page}:{objName}({userMsg.Value})" 
-                            else $"[Page{page}:{objName}" 
+                            then $"[Page{page}:{objName}({userMsg.Value})"
+                            else $"[Page{page}:{objName}"
             failwithf  $"[{case.ToText()}] {msg} \t\t{itemName}]"
 
         [<Extension>]
-        static member ErrorXLS(case:ErrorCase, msg:string,  objName:string, tabName:string, ?userMsg:string) = 
+        static member ErrorXLS(case:ErrorCase, msg:string,  objName:string, tabName:string, ?userMsg:string) =
             let itemName =  if(userMsg.IsSome && (userMsg.Value = ""|>not))
-                            then $"[Sheet {tabName}:{objName}({userMsg.Value})" 
-                            else $"[Sheet {tabName}:{objName}" 
+                            then $"[Sheet {tabName}:{objName}({userMsg.Value})"
+                            else $"[Sheet {tabName}:{objName}"
             failwithf  $"[{case.ToText()}] {msg} \t\t{itemName}]"

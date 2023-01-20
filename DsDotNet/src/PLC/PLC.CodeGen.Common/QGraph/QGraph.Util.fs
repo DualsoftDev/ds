@@ -1,4 +1,4 @@
-﻿namespace Dual.Core.QGraph
+namespace Dual.Core.QGraph
 
 open QuickGraph
 open FSharpPlus
@@ -14,19 +14,19 @@ open Dual.Core.Types.Command
 
 [<AutoOpen>]
 module DcgModule =
-    let private createFakeEdge (s:IVertex) (e:IVertex) = 
+    let private createFakeEdge (s:IVertex) (e:IVertex) =
         e.StartPort.ConnectedPorts.Add(s.SensorPort) |> ignore
         FakeEdge(s, e) :> IEdge
 
     /// DAG g 로부터 terminal vertices 와 initial vertices 간의 fake edge 로 연결한 DCG 생성
     ///
-    /// initial vertices 가 sensors 로 주어진 이름 목록에 포함된 경우(e.g START), 
+    /// initial vertices 가 sensors 로 주어진 이름 목록에 포함된 경우(e.g START),
     /// sensor vertex 대신 이것이 가리키는 다음 vertex 들을 intial vertices 로 간주한다.
     let makeDCG2 (g:DAG) (sensors:string seq) (fakeEdgeCreator:IVertex -> IVertex -> IEdge) =
         let sensors = sensors |> HashSet
 
         /// DAG 의 initial vertices
-        let initials = 
+        let initials =
             /// g 에서 모든 (sensor --> v) edge 를 제외하고 만든 임시 graph
             let tmpg =
                 let validEdges =
@@ -34,7 +34,7 @@ module DcgModule =
                     |> Seq.filter(fun e -> not (sensors.Contains(e.Source.Name)))
                 validEdges.ToAdjacencyGraph()
             getInitialNodes tmpg
-            
+
         let terminals = getTerminalNodes g
         let fakeEdges =
             [
@@ -42,12 +42,12 @@ module DcgModule =
                     for t in terminals do
                         fakeEdgeCreator t i
             ]
-        g.Edges @@ fakeEdges 
+        g.Edges @@ fakeEdges
         |> GraphExtensions.ToAdjacencyGraph
 
     /// DAG g 로부터 terminal vertices 와 initial vertices 간의 fake edge 로 연결한 DCG 생성
     ///
-    /// initial vertices 가 sensors 로 주어진 이름 목록에 포함된 경우(e.g START), 
+    /// initial vertices 가 sensors 로 주어진 이름 목록에 포함된 경우(e.g START),
     /// sensor vertex 대신 이것이 가리키는 다음 vertex 들을 intial vertices 로 간주한다.
     let makeDCG (g:DAG) sensors =
         makeDCG2 g sensors createFakeEdge
@@ -55,7 +55,7 @@ module DcgModule =
 
     /// graph g 로부터 model 생성
     ///
-    /// initial vertices 가 sensors 로 주어진 이름 목록에 포함된 경우(e.g START), 
+    /// initial vertices 가 sensors 로 주어진 이름 목록에 포함된 경우(e.g START),
     /// sensor vertex 대신 이것이 가리키는 다음 vertex 들을 intial vertices 로 간주한다.
     let makeModel g sensors _heads _tails =
         let fdcg = makeDCG g sensors
@@ -68,29 +68,29 @@ module DcgModule =
     let rec getAllVertices2 (v:IVertex) : seq<IVertex> =
         let child =
             v.DAGs
-            |> Seq.collect(fun dag -> 
+            |> Seq.collect(fun dag ->
                 dag.Vertices |> Seq.collect getAllVertices2
             )
         [v] @@ child
 
     /// graph vertex들과 vertex child들까지 모두 가져온다.
-    let getAllVertices (g:AdjacencyGraph<IVertex, IEdge>) = 
-        //let rec getchild (v:IVertex) = 
+    let getAllVertices (g:AdjacencyGraph<IVertex, IEdge>) =
+        //let rec getchild (v:IVertex) =
         //    monad{
-        //        let! child = 
-        //        v.Vertices 
-        //        |> Option.bind(fun vs -> vs |> Seq.map(fun v -> getchild v) 
+        //        let! child =
+        //        v.Vertices
+        //        |> Option.bind(fun vs -> vs |> Seq.map(fun v -> getchild v)
         //        |> Seq.choose id |> Seq.flatten |> Some)
         //        let! vertices = v.Vertices
 
         //        child |> Seq.append vertices
         //    }
 
-        g.Vertices |> Seq.collect(fun v -> getAllVertices2 v) 
+        g.Vertices |> Seq.collect(fun v -> getAllVertices2 v)
 
-    
-        
-        
+
+
+
     /// model에 해당하는 vertex를 가져온다.
     let getParentVertexOfModel (model:QgModel) =
         monad{
@@ -99,7 +99,7 @@ module DcgModule =
             parent
         }
 
-    
+
 
 
 
@@ -167,30 +167,30 @@ module QgUtilModule =
     /// vertex v 의 NodeIncomingCondition expression
     let ns(v) = Expression.Terminal(NodeIncomingCondition(v))
 
-    let sp(v:IVertex) = 
+    let sp(v:IVertex) =
         if v.Ports.ContainsKey(PortCategory.Start) then v.StartPort
-        else 
+        else
             let p = QgPort(v, PortCategory.Start)
             v.StartPort <- p
             p :> IPort
 
-    let rstp(v:IVertex) = 
+    let rstp(v:IVertex) =
         if v.Ports.ContainsKey(PortCategory.Reset) then v.ResetPort
-        else 
+        else
             let p = QgPort(v, PortCategory.Reset)
             v.ResetPort <- p
             p :> IPort
 
-    let fp(v:IVertex) = 
+    let fp(v:IVertex) =
         if v.Ports.ContainsKey(PortCategory.Sensor) then v.SensorPort
-        else 
+        else
             let p = QgPort(v, PortCategory.Sensor)
             v.SensorPort <- p
             p :> IPort
 
-    let gp(v:IVertex) = 
+    let gp(v:IVertex) =
         if v.Ports.ContainsKey(PortCategory.Going) then v.GoingPort
-        else 
+        else
             let p = QgPort(v, PortCategory.Going)
             v.SensorPort <- p
             p :> IPort
@@ -241,23 +241,23 @@ module QgUtilModule =
         select.AddConditionDAG(func, dag)
         dag.Vertices |> Seq.iter(fun v -> v.Parent <- select :> IVertex |> Some)
 
-    
+
 [<Extension>]
 type IVertexExt =
     [<Extension>]
-    static member getResetVertices (v:IVertex) = 
-        getTerminals v.Reset 
+    static member getResetVertices (v:IVertex) =
+        getTerminals v.Reset
         |> Seq.where(fun r -> r :? MemoryOnOffCondition)
         |> Seq.cast<MemoryOnOffCondition>
-        |> Seq.map(fun r -> 
+        |> Seq.map(fun r ->
             match r with
             | NodeIncomingCondition(v) -> Some v
             | _ -> None
         )
         |> Seq.choose id
-        
+
     [<Extension>]
-    static member isSelfReset (v:IVertex) = 
+    static member isSelfReset (v:IVertex) =
         let reset = v.getResetVertices()
         reset.Contains(v)
 
@@ -267,25 +267,25 @@ type IVertexExt =
         v.DAGs
         |> Seq.where(fun d -> d.Edges.isEmpty() |> not)
         |> Seq.map(fun dag ->
-            { makeSimpleModel (dag.Edges.ToAdjacencyGraph()) with 
-                Start = v.StartPort.GetTag().ToText() |> Some; 
-                Reset = v.ResetPort.GetTag().ToText() |> Some; 
-                Title = v.Name |> Some 
-            } 
+            { makeSimpleModel (dag.Edges.ToAdjacencyGraph()) with
+                Start = v.StartPort.GetTag().ToText() |> Some;
+                Reset = v.ResetPort.GetTag().ToText() |> Some;
+                Title = v.Name |> Some
+            }
         )
 
-        
+
     [<Extension>]
     static member GetAllDepthAddress (v:IVertex) :int list  =
-        let parentAddress = 
-            v.Parent 
-            |> Option.bind(fun (p:IVertex)  -> 
+        let parentAddress =
+            v.Parent
+            |> Option.bind(fun (p:IVertex)  ->
                 Some (p.GetAllDepthAddress())
             )
-        
+
         match parentAddress with
         | Some(pa) -> (pa @@ [v.Address]) |> List.ofSeq
-        | None -> [v.Address] 
+        | None -> [v.Address]
 
     static member ContainOutsideReset (v:IVertex) (g:DAG) :bool =
         let resets = v.getResetVertices()
@@ -296,9 +296,9 @@ type IVertexExt =
 
     [<Extension>]
     static member GetSegmentType (segments:seq<ISegment>) (v:IVertex)  =
-        segments 
-        |> Seq.tryFind(fun seg -> seg.Vertices.Contains(v)) 
-        |> Option.bind(fun seg -> seg.SegmentType |> Some) 
+        segments
+        |> Seq.tryFind(fun seg -> seg.Vertices.Contains(v))
+        |> Option.bind(fun seg -> seg.SegmentType |> Some)
         |> Option.defaultValue SegmentType.Internal
 
     /// 초기 상태 값 추출
@@ -315,7 +315,7 @@ type IVertexExt =
 [<AutoOpen>]
 module IVertexM =
     let applyVertexCondition (v:IVertex) =
-        v.Conditions 
+        v.Conditions
         |> Seq.iter(fun cond ->
             v.StartPort.PLCFunctions.Add(cond)
             //|> Seq.iter(fun p -> p.PLCFunctions.Add(cond))
@@ -326,7 +326,7 @@ module IVertexM =
 [<AutoOpen>]
 module ISelectM =
     let applySelectCondition (v:ISelect) =
-        v.ConditionDAG 
+        v.ConditionDAG
         |> Seq.collect(fun kv ->
             let dag = kv.Value
             let cond = kv.Key

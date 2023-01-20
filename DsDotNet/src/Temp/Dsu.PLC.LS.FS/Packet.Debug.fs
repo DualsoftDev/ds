@@ -136,4 +136,3 @@ let printStatusData (pk:byte []) =
 
     printStatusDataImpl pk.[32..] p
 
-    

@@ -6,8 +6,8 @@ open System.Collections.Generic
 [<RequireQualifiedAccess>]
 module Tuple =
     // https://stackoverflow.com/questions/2920094/how-can-i-convert-between-f-list-and-f-tuple
-    let toSeq t = 
-        if FSharpType.IsTuple(t.GetType()) 
+    let toSeq t =
+        if FSharpType.IsTuple(t.GetType())
         then FSharpValue.GetTupleFields t |> seq
         else Seq.empty
 
@@ -63,10 +63,10 @@ module Tuple =
     type Tuple5th = Tuple5th with
         static member ($) (Tuple5th, (_,_,_,_,x1)) = x1
         static member ($) (Tuple5th, (_,_,_,_,x1,_)) = x1
-        static member ($) (Tuple5th, (_,_,_,_,x1,_,_)) = x1        
+        static member ($) (Tuple5th, (_,_,_,_,x1,_,_)) = x1
     type Tuple6th = Tuple6th with
         static member ($) (Tuple6th, (_,_,_,_,_,x1)) = x1
-        static member ($) (Tuple6th, (_,_,_,_,_,x1,_)) = x1        
+        static member ($) (Tuple6th, (_,_,_,_,_,x1,_)) = x1
     type Tuple7th = Tuple7th with
         static member ($) (Tuple7th, (_,_,_,_,_,_,x1)) = x1
 

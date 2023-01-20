@@ -1,4 +1,4 @@
-﻿namespace Dual.Core.QGraph
+namespace Dual.Core.QGraph
 
 open System.Collections.Generic
 open FSharpPlus
@@ -65,7 +65,7 @@ module RelayOptimzier =
             ]
 
         /// [ (set, reset, [markers]) ]
-        let ``s&r&ms`` = 
+        let ``s&r&ms`` =
             ``m&s&r's``
             // set * reset 조건으로 grouping : [ (set * reset) -> ([markers] * set * reset) ]
             |> List.groupBy (fun (m,s,r) -> s, r)     // [ (RelayOnOffCondition * RelayOnOffCondition) * [RelayMarker * RelayOnOffCondition * RelayOnOffCondition] ]
@@ -74,7 +74,7 @@ module RelayOptimzier =
             |> List.map (fun ((s,r), ms) -> s, r, ms) // [ RelayOnOffCondition * RelayOnOffCondition * * [RelayMarker] ]
             // set * reset 이 동일하면서, marker 갯수가 가장 많은 순으로 정렬
             |> List.sortByDescending(fun (s, r, ms) -> ms.Length)
-            
+
         for (s, r, ms') in ``s&r&ms`` do
             /// Set/Reset 이 동일한 marker 중에서 처리 안된 것들
             let ms = ms' |> getUnprocessedMarkers wb
@@ -83,7 +83,7 @@ module RelayOptimzier =
         ``s&r&ms``
 
     /// 주어진 markers [ms] 의 개별 marker 에 대해서 relay 를 생성하고
-    /// marker 의 모든 id (원래 id + merged ids) 에 대해서 해당 relay 를 key - value 로 갖는 
+    /// marker 의 모든 id (원래 id + merged ids) 에 대해서 해당 relay 를 key - value 로 갖는
     /// Dictionary<int,Relay> 반환
     let generateRelays opt (wb:RelayMarkerWorkbook) (ms:RelayMarker seq) =
         let relgen = opt.RelayGenerator
@@ -110,7 +110,7 @@ module RelayOptimzier =
         |> traceMarkers "------------------------\nBefore optimize\n\t" "\n\t"
 
         /// [ vertex -> [marker] ] 에서 marker 의 갯수가 많은 순으로 정렬
-        let ```v&ms`` = 
+        let ```v&ms`` =
             wb.Vertex2MarkersMap.EnumerateKeyAndGroupValue()
             |> Seq.sortByDescending (snd >> (fun hash -> hash.Count))
             |> List.ofSeq
@@ -122,7 +122,7 @@ module RelayOptimzier =
         if opt.OptimizeNodeStartAndNodeFinish then
             // NodeIncomingCondition 과 NodeRawFinishCondition 합성 조건 check
             mergeMarkers wb allMarkers |> ignore
-            
+
 
         let remainings = getAllUnprocessedMarkers wb
         remainings |> traceMarkers "------------------------\nRemaining relays\n\t" "\n\t"
@@ -139,7 +139,7 @@ module ExpressionGenerator =
 
     /// Synonym for getVertexRawExpression
     /// graph 상에 vertex v 에 대한 expression 을 생성.
-    let getVertexSensorExpression (opt:CodeGenerationOption) (v:IVertex) = 
+    let getVertexSensorExpression (opt:CodeGenerationOption) (v:IVertex) =
         match v.SensorPort.GetTag(), opt.SensorTagGenerator with
         | Expression.Zero, Some(f) -> f v |> toCoil
         | Expression.Zero, None -> v.ToText() |> toCoil
@@ -155,7 +155,7 @@ module ExpressionGenerator =
     let getVertexGoingExpression (opt:CodeGenerationOption) (v:IVertex) =
         match opt.GoingStateNameGenerator with
         | Some(f) -> f v
-        | _ -> v.ToText() 
+        | _ -> v.ToText()
         |> toCoil
 
     //let getSourcePortExpression (source:IVertex) (v:IVertex) =
@@ -165,54 +165,54 @@ module ExpressionGenerator =
 
     //        plctag |> mkTerminal
     //    }
-    //    //// source target 관계에 port연결을 못찾은경우 
+    //    //// source target 관계에 port연결을 못찾은경우
     //    |> Option.defaultValue Expression.Zero
 
     /// edge에 해당하는 Moved Relay 추출
     let getMovedRelayExpression opt (wb:RelayMarkerWorkbook) (id2RelayDic:Dictionary<int, Relay>) e =
         /// e로 moved relay 추출 id
-        let ids = 
-            wb.Edge2IdsMap.[e] 
-            |> List.ofSeq 
+        let ids =
+            wb.Edge2IdsMap.[e]
+            |> List.ofSeq
             |> List.where(fun id -> isMoved id)
-            |> List.map(fun id -> getIdOfTag id) 
+            |> List.map(fun id -> getIdOfTag id)
 
         /// id로 Relay 추출
-        let result = 
+        let result =
             ids
             |> List.map(fun id -> relayCoil opt wb id2RelayDic.[id] e)
             |> List.tryReduce mkAnd
             |> Option.defaultValue Expression.Zero
-        
+
         result
     /// Relay Area First Vertex에 해당하는 Moved Relay를 가져오기위함
     /// First Vertex에 의해서 Set되는 Moved Relay를 가져옴
-    /// Moved Relay는 Block First Vertex를 조건 Vertex로 가지고 있기 때문에 
+    /// Moved Relay는 Block First Vertex를 조건 Vertex로 가지고 있기 때문에
     /// First Vertex로 Relay Markder를 찾을수있다.
     let getMovedRelayExpressionForVertex opt (wb:RelayMarkerWorkbook) (id2RelayDic:Dictionary<int, Relay>) v =
         monad{
-            let! marker = 
+            let! marker =
                 match wb.Vertex2MarkersMap.ContainsKey(v) with
-                | true -> 
-                    wb.Vertex2MarkersMap.[v] 
-                    |> List.ofSeq 
-                    |> List.where(fun rm -> isMoved rm.DuId) 
+                | true ->
+                    wb.Vertex2MarkersMap.[v]
+                    |> List.ofSeq
+                    |> List.where(fun rm -> isMoved rm.DuId)
                     |> List.tryHead
                 | false -> None
-                
+
             getMovedRelayExpression opt wb id2RelayDic marker.Edge |> mkNeg
         }
         |> Option.defaultValue Expression.Zero
-        
+
 
     /// Relay Area Last Relay에 해당하는 Moved Relay를 가져오기위함
-    /// Moved Relay는 블럭의 마지막과 다음 블럭사이의 Edge를 가지고 있기 때문에 
+    /// Moved Relay는 블럭의 마지막과 다음 블럭사이의 Edge를 가지고 있기 때문에
     /// [A; B; C;] [D;] 블럭이있을경우 C->D 엣지로 Moved 릴레이를 찾을수있다.
     let getMovedRelayExpressionForRelay opt (wb:RelayMarkerWorkbook) (id2RelayDic:Dictionary<int, Relay>) v =
-        let marker = 
-            wb.Vertex2MarkersMap.[v] 
-            |> List.ofSeq 
-            |> List.where(fun rm -> isMoved rm.DuId |> not) 
+        let marker =
+            wb.Vertex2MarkersMap.[v]
+            |> List.ofSeq
+            |> List.where(fun rm -> isMoved rm.DuId |> not)
             |> List.tryHead
 
         match marker with
@@ -224,7 +224,7 @@ module ExpressionGenerator =
         let incomingEdges = wb.Model.DAG.GetIncomingEdges v
 
         match incomingEdges.any() with
-        | true -> 
+        | true ->
             let incoming = incomingEdges |> Seq.map(getMovedRelayExpression opt wb id2RelayDic) |> List.ofSeq
 
             incoming |> List.reduce mkAnd
@@ -237,17 +237,17 @@ module ExpressionGenerator =
 
     let getBlockFirstFromLast (wb:RelayMarkerWorkbook) v =
         monad{
-            let! emarker = 
-                wb.Vertex2MarkersMap.[v] 
-                |> List.ofSeq 
-                |> List.where(fun rm -> isMoved rm.DuId |> not) 
+            let! emarker =
+                wb.Vertex2MarkersMap.[v]
+                |> List.ofSeq
+                |> List.where(fun rm -> isMoved rm.DuId |> not)
                 |> List.tryHead
 
-            let! ids = 
-                wb.Edge2IdsMap.[emarker.Edge] 
-                |> List.ofSeq 
+            let! ids =
+                wb.Edge2IdsMap.[emarker.Edge]
+                |> List.ofSeq
                 |> List.where(fun id -> isMoved id)
-                |> List.map(fun id -> getIdOfTag id) 
+                |> List.map(fun id -> getIdOfTag id)
                 |> List.tryHead
 
             let! first = wb.Vertex2MarkersMap.EnumerateKeyAndValue() |> Seq.where(fun (_, v) -> v.Id = ids) |> Seq.map(fun (_, v) -> v.Set) |> Seq.tryHead
@@ -262,10 +262,10 @@ module ExpressionGenerator =
 
     let getRelayCauseExpression (wb:RelayMarkerWorkbook) (source:IVertex)=
         monad{
-            let! marker = 
-                wb.Vertex2MarkersMap.[source] 
-                |> List.ofSeq 
-                |> List.where(fun rm -> isMoved rm.DuId |> not) 
+            let! marker =
+                wb.Vertex2MarkersMap.[source]
+                |> List.ofSeq
+                |> List.where(fun rm -> isMoved rm.DuId |> not)
                 |> List.tryHead
             let target = marker.Edge.Target
 
@@ -274,7 +274,7 @@ module ExpressionGenerator =
             port.GetTag()
         }
         |> Option.defaultValue Expression.Zero
-        
+
 
     /// incoming edge 에 대한 expression 반환
     let generateEdgeExpression (opt:CodeGenerationOption) wb (id2RelayDic:Dictionary<int, Relay>) (isCondExpr:bool) e  =
@@ -282,15 +282,15 @@ module ExpressionGenerator =
         let ids = wb.Edge2IdsMap.[e] |> List.ofSeq
         let isFirstVertex = wb.Model.DAG.GetInitialVertices().Contains(e.Target)
         let sourcePort = e.Target.StartPort.ConnectedPorts |> Seq.find(fun p -> p.Parent = e.Source)
-        let srcCoil = 
-            if isFirstVertex then Expression.Zero 
+        let srcCoil =
+            if isFirstVertex then Expression.Zero
             else sourcePort.GetTag()
-        let relayCoil (rel:Relay) = 
+        let relayCoil (rel:Relay) =
             let re = relayCoil opt wb rel e
             if isFirstVertex && isCondExpr then mkNeg re else re
 
         match ids with
-        | Moved(id)::[] -> srcCoil 
+        | Moved(id)::[] -> srcCoil
         | [] -> srcCoil
         | Unique(id)::[] ->
             relayCoil id2RelayDic.[id] //? |> mkAnd srcCoil
@@ -327,10 +327,10 @@ module ExpressionGenerator =
         //    incoming |> List.tryReduce mkOr
         //// v 가 sensor 인 경우, incoming edge 가 존재하지 않는다.
         //|> Option.defaultValue Expression.Zero
-        
+
 
     /// vertex 출력에 대한 reset interlock 생성
-    /// 
+    ///
     let generateOutputInterlocks opt (v:IVertex) =
         if v.isSelfReset() then v.SensorPort.GetTag()
         else
@@ -346,34 +346,34 @@ module ExpressionGenerator =
         getVertexSensorExpression opt v |> mkNeg
 
 
-    
+
     /// 리셋 대상이 현재 task보다 선행된 경우,현재 task를 실행시키기 위한 릴레이의 set 조건으로 활용될 수 있다.
-    let generatePrecedeResetTargetExpression (wb:RelayMarkerWorkbook) source = 
+    let generatePrecedeResetTargetExpression (wb:RelayMarkerWorkbook) source =
         monad{
-            let! marker = 
+            let! marker =
                 match wb.Vertex2MarkersMap.ContainsKey(source) with
-                | true -> 
-                    wb.Vertex2MarkersMap.[source] 
-                    |> List.ofSeq 
-                    |> List.where(fun rm -> isMoved rm.DuId |> not) 
+                | true ->
+                    wb.Vertex2MarkersMap.[source]
+                    |> List.ofSeq
+                    |> List.where(fun rm -> isMoved rm.DuId |> not)
                     |> List.tryHead
                 | false -> None
-                
+
             let resetSource = marker.Edge.Target
             let vs = wb.Model.DAG.Vertices
             let resetTargets = vs |> Seq.where(fun v -> v.getResetVertices() |> Seq.contains(resetSource))
             let precede = resetTargets |> Seq.where(fun v -> v.Address < resetSource.Address)
 
             let! result =
-                precede 
-                |> Seq.map(fun v -> v.SensorPort.GetTag()) 
-                |> Seq.tryReduce mkAnd 
+                precede
+                |> Seq.map(fun v -> v.SensorPort.GetTag())
+                |> Seq.tryReduce mkAnd
 
             result
         }
         |> Option.defaultValue Expression.Zero
 
-        
+
 
 
     let isTerminalRelay (model:QgModel) (relay:Relay) =
@@ -403,32 +403,32 @@ module ExpressionGenerator =
                 let comments = ResizeArray<string>()
                 let v = Seq.head vs
                 let parent = v.Parent
-                let start = 
+                let start =
                     match parent, wb.Model.Start, heads.Contains(v) with
                     | None, Some(s), _ -> toCoil s
                     | Some(p), _, _ -> getVertexGoingExpression opt p
                     | _ -> Expression.Zero
 
-                let manual = 
+                let manual =
                     let 원점 =
                         match v.InitialStatus with
                         | VertexStatus.Finish -> "원점" |> toCoil
                         | _ -> Expression.Zero
                     let manualTag = v.ManualTag |> Option.bind(fun tag -> tag |> mkTerminal |> Some) |> Option.defaultValue Expression.Zero
-                    (*원점 <||>*) 
+                    (*원점 <||>*)
                     manualTag
                 /// 자신의 Start(출력)
                 let selfHold =
                     if v.UseSelfHold then
                         v.StartPort.GetTag()
-                    else                        
+                    else
                         Expression.Zero
-                
+
                 let condition =
                     vs
                     |> Seq.map (fun v ->
                         /// 블럭 첫 job이 다시 돌아가지 못하게 하기 위함
-                        let forBlockFirst = getMovedRelayExpressionForVertex opt wb id2RelayDic v 
+                        let forBlockFirst = getMovedRelayExpressionForVertex opt wb id2RelayDic v
                         generateVertexIncomingEdgesExpression opt wb id2RelayDic v <&&> forBlockFirst <&&> v.StartPort.ConnectedExpression
                         )
                     |> Seq.reduce mkOr
@@ -466,49 +466,49 @@ module ExpressionGenerator =
                 match onOffCond with
                 | NodeIncomingCondition(v)     -> generateVertexIncomingEdgesExpression opt wb id2RelayDic v
                 | NodeRawFinishCondition(v)    -> getVertexSensorExpression opt v
-                | TrustedNodeStartCondition(v) -> 
+                | TrustedNodeStartCondition(v) ->
                     /// for block to block
                     let forLastMoved = getMovedRelayExpressionForRelay opt wb id2RelayDic v
                     /// 블럭 첫번쨰에 대한 릴레이가 다시 살지 못하게하는 moved릴레이 조건
-                    let forFirstMoved = 
+                    let forFirstMoved =
                         if forLastMoved = Expression.Zero then getMovedRelayExpressionForVertex opt wb id2RelayDic v
                         else Expression.Zero
-                     
+
                     let incoming = generateVertexIncomingEdgesExpression opt wb id2RelayDic v |> remove (mkNeg forLastMoved)
                     let cause = getRelayCauseExpression wb v
                     /// cause : A+ B+ C+ A- B- C- D+ D- MODEL
                     let blockFirst =
-                        getBlockFirstFromLast wb v 
-                        //|> Option.bind(fun v -> Some (v.getResetVertices() |> Seq.map(getVertexSensorExpression opt) |> Seq.reduce mkAnd)) 
-                        |> Option.bind(fun v -> 
+                        getBlockFirstFromLast wb v
+                        //|> Option.bind(fun v -> Some (v.getResetVertices() |> Seq.map(getVertexSensorExpression opt) |> Seq.reduce mkAnd))
+                        |> Option.bind(fun v ->
                             if v.SensorPort.GetTag() = cause then
                                 Expression.Zero
                             else
-                                v.SensorPort.GetTag() |> mkNeg 
+                                v.SensorPort.GetTag() |> mkNeg
                             |> Some)
                         |> Option.defaultValue Expression.Zero
-                    
+
                     let precedeResetTerget = generatePrecedeResetTargetExpression wb v
                     blockFirst <&&> incoming <&&> cause <&&> forLastMoved <&&> forFirstMoved <&&> precedeResetTerget
-                | TrustedEdgeCondition(e)      -> 
+                | TrustedEdgeCondition(e)      ->
                     let incoming = generateVertexIncomingEdgesExpression opt wb id2RelayDic e.Target
                     let edge = generateEdgeExpression opt wb id2RelayDic false e
-                    let sensor = 
+                    let sensor =
                         let s = getVertexSensorExpression opt (e.Source)
                         if e.Source.isSelfReset() then Expression.Zero
                         else if incoming = s then Expression.Zero
                         else s
                     edge <&&> sensor
                 | NodeResetCondition(expr)     -> expr
-                | ResetBlockCondition(v)       -> 
+                | ResetBlockCondition(v)       ->
                     match v.isSelfReset() with
-                    | true -> 
-                        let output = getVertexOutputExpression opt v 
-                        let incoming = generateVertexIncomingEdgesExpression opt wb id2RelayDic v 
+                    | true ->
+                        let output = getVertexOutputExpression opt v
+                        let incoming = generateVertexIncomingEdgesExpression opt wb id2RelayDic v
                         let moved = getPrevMovedRelayExpressionForRelay opt wb id2RelayDic v
                         output <&&> incoming <&&> moved
-                    | false -> 
-                        let sensor = getVertexSensorExpression opt v 
+                    | false ->
+                        let sensor = getVertexSensorExpression opt v
                         let moved = getPrevMovedRelayExpressionForRelay opt wb id2RelayDic v
                         sensor <&&> moved
 
@@ -517,8 +517,8 @@ module ExpressionGenerator =
             let nonTerminalRelays = allRelays |> List.except wb.TerminalRelays
 
             /// 모델 전체의 reset 명령
-            let modelResetExpression = 
-                let v = wb.Model.DAG.Vertices |> Seq.head 
+            let modelResetExpression =
+                let v = wb.Model.DAG.Vertices |> Seq.head
                 //let resets = v.Parent |> Option.bind(fun parent -> generateOutputInterlocks opt parent |> Some) |> Option.defaultValue Expression.Zero
                 let resets = v.Parent |> Option.bind(fun parent -> parent.HomingPort.GetTag() |> Some) |> Option.defaultValue Expression.Zero
 
@@ -562,7 +562,7 @@ module ExpressionGenerator =
             let relayNames = relayRungInfos |> Seq.map (fun rungInfo -> rungInfo.GetCoilName())
             let relayNamesUsed =
                 let relaysUsedInVertex =
-                    vertexRungInfos 
+                    vertexRungInfos
                     |> Seq.map(fun info -> info.Set)
                     |> getTerminals
                     |> Seq.intersect relayNames

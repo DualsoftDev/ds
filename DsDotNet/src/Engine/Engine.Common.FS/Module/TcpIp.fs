@@ -1,4 +1,4 @@
-﻿namespace Engine.Common.FS
+namespace Engine.Common.FS
 
 open System
 open System.Net
@@ -32,7 +32,7 @@ module IPAddressModule =
                             if (ip.Address.AddressFamily = AddressFamily.InterNetwork) then
                                 yield ip.Address.ToString()
         ]
-        
+
 
     /// local system 의 IP address를 반환한다.
     ///
@@ -121,4 +121,4 @@ type SocketExt =
             not (socket.Poll(1, SelectMode.SelectRead) && socket.Available = 0);
         with exn ->
             false
-            
+

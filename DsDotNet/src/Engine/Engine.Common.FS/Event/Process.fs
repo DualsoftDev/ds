@@ -5,11 +5,11 @@ open System.Reactive.Subjects
 
 
 [<AutoOpen>]
-module ProcessEvent = 
-    
+module ProcessEvent =
+
     type ProParam = |PRO of Time:DateTime * pro:int
 
     let ProcessSubject = new Subject<ProParam>()
 
     let DoWork  (pro:int) = ProcessSubject.OnNext(ProParam.PRO (DateTime.Now, pro))
-   
+

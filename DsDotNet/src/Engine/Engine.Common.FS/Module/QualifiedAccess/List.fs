@@ -1,4 +1,4 @@
-﻿namespace Engine.Common.FS
+namespace Engine.Common.FS
 
 open System.Linq
 open System.Collections.Generic
@@ -68,7 +68,7 @@ module List =
     let symetricDifference xs1 xs2 = Seq.symetricDifference xs1 xs2 |> List.ofSeq
 
     /// list 목록 중에 처음과 마지막을 제외한 것
-    let mid source = 
+    let mid source =
         match source with
         | [] -> []
         | _ -> source |> List.tail |> initv
@@ -86,11 +86,11 @@ module List =
     let mapTuple (mapper1:'a->'c) (mapper2:'b->'d) (xs:('a*'b) list) =
         xs |> List.map (fun (a, b) -> mapper1 a, mapper2 b)
 
-    /// tuple 의 list 에 대해서 tuple 의 fst 만 mapping 
+    /// tuple 의 list 에 대해서 tuple 의 fst 만 mapping
     let map1st mapper = mapTuple mapper id
 
     // [ ("a", 1); ("b", 2) ] |> map2nd ((+) 1) ==> [("a", 2); ("b", 3)]
-    /// tuple 의 list 에 대해서 tuple 의 snd 만 mapping 
+    /// tuple 의 list 에 대해서 tuple 의 snd 만 mapping
     let map2nd mapper = mapTuple id mapper
 
     /// tuple 의 fst projection 후, mapper 적용
@@ -98,7 +98,7 @@ module List =
     /// tuple 의 snd projection 후, mapper 적용
     let mapProject2nd mapper (xs:(_*'a) list) = xs |> List.map (snd >> mapper)
 
-    /// list 의 list 에 대해서 내부의 list 를 mapping 
+    /// list 의 list 에 대해서 내부의 list 를 mapping
     ///
     /// [[1..3]; [5..9]] |> List.mapInner ((+) 1) ==> [[2; 3; 4]; [6; 7; 8; 9; 10]]
     let mapInner (mapper:'x->'b) (xss:'x list list) =
@@ -138,7 +138,7 @@ module List =
 
 
     /// List.reduce 의 option type safe version : empty sequence 인 경우 None 반환
-    let tryReduce f (xs: list<_>) = 
+    let tryReduce f (xs: list<_>) =
         if List.isEmpty xs then
             None
         else

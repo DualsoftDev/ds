@@ -30,9 +30,9 @@ module Util =
         let pattern   = "\d+$"  //글자 마지막 숫자를 찾음
         let matches   = System.Text.RegularExpressions.Regex.Matches(name, pattern)
         if matches.Count > 0
-        then 
+        then
              let name = System.Text.RegularExpressions.Regex.Replace(name, pattern, "")
-             let number = matches.[matches.Count-1].Value |> trimSpace |> Convert.ToInt32 
+             let number = matches.[matches.Count-1].Value |> trimSpace |> Convert.ToInt32
              name, number
         else name, 0
 

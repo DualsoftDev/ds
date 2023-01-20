@@ -41,7 +41,7 @@ module HmiGenModule =
         targets:ResizeArray<string>;
     }
 
-    type HmiCode (model:Model) = 
+    type HmiCode (model:Model) =
         let buttons = [
             "AUTO",   ButtonType.Auto;
             "MANUAL", ButtonType.Manual;
@@ -64,12 +64,12 @@ module HmiGenModule =
                 targets = new ResizeArray<string>(0);
             }
 
-        let addButton 
+        let addButton
                 btnName systemName buttonType
                 (hmiInfos:Dictionary<string, Info>) =
             let info = genInfo btnName Type.Button buttonType systemName
             hmiInfos.Add(btnName, info)
-            
+
         let addBasicComponents (hmiInfos:Dictionary<string, Info>) =
             let addSystemFlowReal (systemFlowReal:obj) =
                 let target, parent, category  =
@@ -136,7 +136,7 @@ module HmiGenModule =
                         for sp in sys.StartPoints do
                             hmiInfos[button].targets.Add(sp.QualifiedName)
                 | ButtonType.Auto | ButtonType.Manual | ButtonType.Emergency
-                | ButtonType.Stop | ButtonType.Clear  | ButtonType.Home 
+                | ButtonType.Stop | ButtonType.Clear  | ButtonType.Home
                 | ButtonType.Ready ->
                     for flow in flowNames do hmiInfos[button].targets.Add(flow)
                 | _ ->
@@ -148,9 +148,9 @@ module HmiGenModule =
                 let addToUsedIn nowVertex target =
                     if not <| hmiInfos[nowVertex].used_in.Contains(target) then
                         hmiInfos[nowVertex].used_in.Add(target)
-                let jobName (call:Call) = 
+                let jobName (call:Call) =
                     $"{system.Name}.{call.CallTargetJob.Name}"
-                let nameRealExS (system:DsSystem) name = 
+                let nameRealExS (system:DsSystem) name =
                     $"{system.Name}.{name}"
                 let aliasName (alias:Alias) =
                     match alias.TargetWrapper with
@@ -184,7 +184,7 @@ module HmiGenModule =
                 if not <| hmiInfos.ContainsKey(jobName) then
                     let info =
                         genInfo
-                            jobName Type.Job 
+                            jobName Type.Job
                             ButtonType.None system.Name
                     hmiInfos.Add(jobName, info)
                 for dvc in job.DeviceDefs do
@@ -193,7 +193,7 @@ module HmiGenModule =
                     if not <| hmiInfos.ContainsKey(device) then
                         let info =
                             genInfo
-                                device Type.Device 
+                                device Type.Device
                                 ButtonType.None system.Name
                         hmiInfos.Add(device, info)
                     addInterface api jobName
@@ -209,12 +209,12 @@ module HmiGenModule =
                         | _ -> addUses sys flow rootSeg
             hmiInfos
 
-        let generate () = 
+        let generate () =
             let hmiInfos = new Dictionary<string, Info>()
             let success, message =
                 try
-                    hmiInfos 
-                    |> addBasicComponents 
+                    hmiInfos
+                    |> addBasicComponents
                     |> addJobComponentAndUses
                     |> addGlobalButtons |> ignore
                     true, null

@@ -84,7 +84,7 @@ module ImportCheck =
             doc.Nodes
             |> Seq.filter(fun node -> node.NodeType = COPY_VALUE || node.NodeType = COPY_REF)
             |> Seq.iter(fun node ->
-                    node.CopySys.ForEach(fun loadsys -> 
+                    node.CopySys.ForEach(fun loadsys ->
                         let key = $"{node.PageNum}_{loadsys.Key}"
                         if dicSame.ContainsKey(key)
                         then Office.ErrorName(node.Shape, ErrID._33, node.PageNum)

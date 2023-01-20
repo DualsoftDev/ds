@@ -7,8 +7,8 @@ open Engine.Common.FS.Graph.QuickGraph.GraphAlgorithm
 open Engine.Core
 
 [<AutoOpen>]
-module private GraphCalculatingUtil = 
-    let removeDuplicates (source:'T seq) = 
+module private GraphCalculatingUtil =
+    let removeDuplicates (source:'T seq) =
         source
         |> Seq.collect id
         |> Seq.distinct
@@ -35,7 +35,7 @@ module private GraphCalculatingUtil =
         |> Seq.filter(checkIsAlias)
 
     let getAliasTarget (v:IVertex) =
-        let child = 
+        let child =
             match v with
             | :? Child -> v:?>Child
             | _ -> null
@@ -61,7 +61,7 @@ module private GraphCalculatingUtil =
             )
             |> Seq.distinct
         }
-        |> Seq.filter(fun e -> 
+        |> Seq.filter(fun e ->
             e.Count() <> 0)
         |> removeDuplicates
 
@@ -244,7 +244,7 @@ module private GraphCalculatingUtil =
                 |> Seq.collect id
             )
             |> Seq.collect id
-            
+
         let mutualResetsInMyRoutes =
             seq {
             for v in mutualResetNodesInMyRoutes do
@@ -256,7 +256,7 @@ module private GraphCalculatingUtil =
             |> removeDuplicates
 
         mutualResets |> Seq.except(mutualResetsInMyRoutes)
-        
+
     let filterResetsInMyRoute
             (myRoute:IVertex list)
             (resets:QgEdge seq) (isBidirectional:bool) =
@@ -373,7 +373,7 @@ module GraphProgressSupportUtil =
 
         // without alias reset edges
         let dummyResets = resetEdges |> Seq.except(aliasResets)
-        
+
         // causal edges + alias reset edges = order edges
         let orderEdges =
             gri.SolidGraph.Edges

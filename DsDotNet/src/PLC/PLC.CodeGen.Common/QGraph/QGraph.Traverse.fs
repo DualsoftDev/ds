@@ -1,4 +1,4 @@
-﻿namespace Dual.Core.QGraph
+namespace Dual.Core.QGraph
 
 open System.Collections.Generic
 open System.Diagnostics
@@ -9,7 +9,7 @@ open Dual.Core
 open System.Runtime.CompilerServices
 
 [<AutoOpen>]
-module GraphTraverse = 
+module GraphTraverse =
     /// vertex 에 대한 선택 여부를 결정하는 함수
     type VertexSelector = IVertex -> bool
     /// vertex 에 대해 predicate 을 수행하는 함수를 생성하기 위한 type
@@ -19,11 +19,11 @@ module GraphTraverse =
     let makeSelectorCreator (selector:VertexSelector) = fun() -> selector
 
     /// DCG Graph dcg 에서 시작 edge estart 로부터 selelctorCreator 에 의해서 생성된 selector 의 조건을 만족할 때까지 경로를 찾는다.
-    /// * dcg 의 원본 그래프 g : 
+    /// * dcg 의 원본 그래프 g :
     ///     - valid 한 model graph 이어야 한다. (cycle 이 없어야 하고, major path 규칙을 준수, isolated nodes 가 없음)
     /// * dcg : 원본 그래프 g 에 terminal nodes --> initial nodes 로 edges(FakeEdge type) 들을 연결한 graph
     /// * return type : [['E]]
-    // --- 구현 아이디어 : 
+    // --- 구현 아이디어 :
     // FakeEdge 를 두번 만나기 전에 원하는 결과를 못찾으면 검색 실패이다.
     //
     // see getAllPathsWindable2
@@ -40,7 +40,7 @@ module GraphTraverse =
                     let oesBackEdge, oesNormal =
                         oes
                         |> Seq.partition (fun e ->
-                            history 
+                            history
                             |> List.map (fun eg -> eg.Source)
                             |> List.contains(e.Source))
 
@@ -72,7 +72,7 @@ module GraphTraverse =
                         let oesBackEdge, oesNormal =
                             oes
                             |> Seq.partition (fun e ->
-                                history 
+                                history
                                 |> List.map (fun eg -> eg.Target)
                                 |> List.contains(e.Target))
 
@@ -130,7 +130,7 @@ module GraphTraverse =
     let getVDurations (dcg:DCG) (ostart:QgObject) =
         let startv = ostart.GetSource()
         //let reset = startv.Reset |> enumerateNodes dcg.Vertices
-        let reset = startv.getResetVertices() 
+        let reset = startv.getResetVertices()
         let slReset = dcg.Vertices |> Seq.where(fun v -> getAllVertices2 v |> Seq.exists(fun v -> reset |> Seq.contains(v))) |> List.ofSeq
         if startv.isSelfReset() then [[startv]]
         else

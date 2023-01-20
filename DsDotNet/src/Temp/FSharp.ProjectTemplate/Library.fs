@@ -1,4 +1,4 @@
-﻿namespace FSharp.ProjectTemplate
+namespace FSharp.ProjectTemplate
 
 /// Documentation for my library
 ///
@@ -7,8 +7,8 @@
 ///     let h = Library.hello 1
 ///     printfn "%d" h
 ///
-module Library = 
-  
+module Library =
+
   /// Returns 42
   ///
   /// ## Parameters

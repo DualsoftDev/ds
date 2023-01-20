@@ -166,7 +166,7 @@ module PPTDocModule =
                         if groupAllNodes.any()
                         then
                             let pptGroup = pptRealGroup(page, groupAllNodes)
-                                
+
                             let parent = pptGroup.Parent.Value;
                             if(dicParentCheck.TryAdd(pptGroup.RealKey, pptGroup.PageNum))
                             then parents.TryAdd(parent, pptGroup.Children)|>ignore
@@ -181,7 +181,7 @@ module PPTDocModule =
                           |> Seq.iter (fun (conn, Id, startId, endId) ->
                             let iPage = pages.[slide].PageNum
 
-                            
+
                             if(startId = 0u && endId = 0u) then  conn.ErrorConnect(ErrID._4, "","", iPage)
                             if(startId = 0u) then  conn.ErrorConnect(ErrID._15, "", $"{nodes.[Objkey(iPage, endId)].Name}", iPage)
                             if(endId = 0u)   then  conn.ErrorConnect(ErrID._16, $"{nodes.[Objkey(iPage, startId)].Name}", "", iPage)
@@ -193,7 +193,7 @@ module PPTDocModule =
 
                             if(nodes.ContainsKey(sNode.Key)|>not) then  conn.ErrorConnect(ErrID._14, $"{sName}", "", iPage)
                             if(nodes.ContainsKey(eNode.Key)|>not) then  conn.ErrorConnect(ErrID._14, $"{eName}", "", iPage)
-                           
+
                             if conn.IsNonDirectional()
                             then dummys.AddDummys([|sNode; eNode|])
                             else edges.Add(pptEdge(conn, Id, iPage ,sNode, eNode)) |>ignore
@@ -220,22 +220,21 @@ module PPTDocModule =
         member val DirectoryName =  getSystemDirectoryName path
 
         member val DicFlow = Dictionary<int, Flow>() // page , flow
-        member val DicVertex = Dictionary<string, Vertex>() 
+        member val DicVertex = Dictionary<string, Vertex>()
         member val IsBuilded = false with get, set
         member val Parameter:DeviceLoadParameters = parameter
-    
+
 [<Extension>]
 type PPTDocExt =
         [<Extension>]
         static member GetCopyPathNName(doc:pptDoc) =
-            doc.Nodes 
+            doc.Nodes
             |> Seq.filter(fun node -> node.NodeType = COPY_VALUE || node.NodeType = COPY_REF)
             |> Seq.collect(fun node ->
-            node.CopySys.Select(fun copy -> 
+            node.CopySys.Select(fun copy ->
                 let path = Path.GetFullPath(Path.Combine(doc.DirectoryName, copy.Value))+".pptx"
                 if File.Exists(path) |> not
                 then node.Shape.ErrorPath(ErrID._29, node.PageNum, path)
-                                
+
                 copy.Value , copy.Key, node)
         )
-     

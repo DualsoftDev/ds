@@ -31,8 +31,8 @@ module ImportM =
                 LoadingType = loadingType
             }
 
-        let getLoadingType(nodeType:NodeType) = 
-            if   nodeType = COPY_REF   then DuExternal 
+        let getLoadingType(nodeType:NodeType) =
+            if   nodeType = COPY_REF   then DuExternal
             elif nodeType = COPY_VALUE then DuDevice
             else  failwithlog "error"
 
@@ -47,10 +47,10 @@ module ImportM =
             let reloading(newSys:DsSystem, paras) =
                 let (sys, newDoc:pptDoc) = loadSystem(repo, pptReop, newSys, paras)
                 sys
-        
+
             doc.GetCopyPathNName()
             |> Seq.iter(fun (userPath, loadedName, node) ->
-                
+
                 let paras = getParams(repo, doc.DirectoryName, userPath
                             , loadedName, theSys, None, getLoadingType node.NodeType)
                 let hostIp = if paras.HostIp.IsSome then paras.HostIp.Value else ""
@@ -59,9 +59,9 @@ module ImportM =
                 |COPY_REF ->
                     let exLoaded =
                         if repo.ContainsKey paras.AbsoluteFilePath
-                        then 
+                        then
                             ExternalSystem(repo[paras.AbsoluteFilePath], paras)
-                        else 
+                        else
                             let newExSys = DsSystem(paras.LoadedName, hostIp)
                             repo.Add (paras.AbsoluteFilePath, newExSys)
 
@@ -83,7 +83,7 @@ module ImportM =
             doc.MakeInterfaces(theSys)
             doc.MakeInterfaceResets(theSys)
 
-            if paras.LoadingType <> DuExternal   
+            if paras.LoadingType <> DuExternal
             then //External system 은 Interfaces만 만들고 나중에 buildSystem 수행
                 doc.BuildSystem(theSys)
 
@@ -115,7 +115,7 @@ module ImportM =
                 mySys, viewNodes
 
             with ex ->  failwithf  $"{ex.Message}\t [ErrPath:{pathStack.First()}]"
-            
+
     let private fromPPTs(paths:string seq) =
         let systemRepo = ShareableSystemRepository()
         let pptRepo    = Dictionary<DsSystem, pptDoc>()
@@ -123,7 +123,7 @@ module ImportM =
         let cfg = {DsFilePaths = paths |> Seq.toList}
 
         let results =
-            [  
+            [
                 for dsFile in cfg.DsFilePaths do
                       let ppt = ImportPowerPoint()
                       ppt.GetImportModel(systemRepo, pptRepo, dsFile, ParserLoadingType.DuNone)
@@ -132,7 +132,7 @@ module ImportM =
         //ExternalSystem 순환참조때문에 완성못한 시스템 BuildSystem 마무리하기
         pptRepo
             .Where(fun dic -> not <| dic.Value.IsBuilded)
-            .ForEach(fun dic -> 
+            .ForEach(fun dic ->
                 let dsSystem = dic.Key
                 let pptDoc = dic.Value
                 pptDoc.BuildSystem(dsSystem))
@@ -140,10 +140,10 @@ module ImportM =
         let systems =  results.Select(fun (sys, view) -> sys) |> Seq.toList
         let views   =  results |> dict
         { Config = cfg; Systems = systems}, views, pptRepo
-    
+
     type PptResult = {
-        System: DsSystem 
-        Views : ViewNode seq 
+        System: DsSystem
+        Views : ViewNode seq
         IsActive : bool
     }
 
@@ -151,33 +151,33 @@ module ImportM =
     type ImportPPT =
 
         [<Extension>]
-        static member GetModel      (paths:string seq) = 
+        static member GetModel      (paths:string seq) =
             fromPPTs paths |> fun (model, views, pptRepo) -> model
 
         [<Extension>]
-        static member GetModelNView (paths:string seq) = 
+        static member GetModelNView (paths:string seq) =
             fromPPTs paths |> fun (model, views, pptRepo) -> model, views
 
         [<Extension>]
         static member GetLoadingAllSystem (paths:string seq) =
-             fromPPTs paths 
+             fromPPTs paths
              |> fun (model, views, pptRepo)
-                    -> pptRepo 
-                        |> Seq.map(fun f-> 
+                    -> pptRepo
+                        |> Seq.map(fun f->
                             {   System= f.Key
                                 Views = f.Value.MakeGraphView(f.Key)
                                 IsActive = model.Systems.Contains(f.Key)}  )
         [<Extension>]
-        static member GetDsFilesWithLib (paths:string seq) = 
-                fromPPTs paths 
-                |> fun (model, views, pptRepo) 
+        static member GetDsFilesWithLib (paths:string seq) =
+                fromPPTs paths
+                |> fun (model, views, pptRepo)
                     -> pptRepo
-                         .Select(fun dic -> 
+                         .Select(fun dic ->
                             let system = dic.Key
                             let param = dic.Value.Parameter
                             let relative  = param.UserSpecifiedFilePath
                             let absolute  = param.AbsoluteFilePath
                             let removeTarget = relative.Replace("ds", "")
                             let rootDirectroy = absolute.Substring(0, absolute.length() - removeTarget.length())
-                               
+
                             system.ToDsText(), rootDirectroy, relative)

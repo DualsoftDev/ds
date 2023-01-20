@@ -92,7 +92,7 @@ let internal defaultInvokeId = [|0xFFuy; 0xFFuy|]
 let toBinary (n:int) = Convert.ToString (n, 2)
 
 /// buffer 의 모든 byte sum % 256 의 check sum 을 구한다.
-let getChecksum (buffer:byte []) = 
+let getChecksum (buffer:byte []) =
     buffer
     |> Array.map int
     |> Array.fold (fun acc item -> (acc + item) % 256) 0
@@ -220,7 +220,7 @@ module StatusRequest =
         XGR-CPUH/F, CPUH/T, CPUH/S              V2.72
         XG5000                                  V4.21
      *)
-    let parseStatusResponsePacket (packet:byte []) = 
+    let parseStatusResponsePacket (packet:byte []) =
         /// status data buffer. 32 byte 부터 시작
         let bf = packet.[32..]
         let slotInfo  = bf.[0..3].ToUInt32()
@@ -235,7 +235,7 @@ module StatusRequest =
         let toBool = function
             | 0u -> false
             | _ -> true
-        
+
 
         {
             PLCInfo = packet.[10..11].ToUInt16()
@@ -243,8 +243,8 @@ module StatusRequest =
             ErrorState = packet.[26..27].ToUInt16()
             IsRunning = (sysState >>> 0) |> rightmostOne |> toBool
         }
-        
-    
+
+
 
 [<AutoOpen>]
 module RandomReadWrite =
@@ -395,7 +395,7 @@ module RandomReadWrite =
         //logDebug "Num Tags=%d" numTags
         (numTags, dataBlock)
 
-                
+
 
 
 
@@ -476,7 +476,7 @@ module RandomReadWrite =
                     errorCode |> getErrorMessage |> logError "%s"
                 buffer)
         with exn ->
-            logError "Exception on sendPacketAndGetResponse:\n%O" exn 
+            logError "Exception on sendPacketAndGetResponse:\n%O" exn
             match exn.InnerException with
             | :? SocketException as sckEx ->
                 rawSendPacketAndGetResponse streamer packet length
@@ -632,7 +632,7 @@ module BlockReadWrite =
     let rawReadBlock stream cpu startTag count =
         //logDebug "=== Block read: start=%s, count=%d" startTag count
         assert(count <= getMaxBlockReadByteCount cpu)
-        let bytes = 
+        let bytes =
             createBlockReadRequestPacket cpu startTag count  // 보낼 packet 및 response packet 의 length 를 구함
             ||> rawSendPacketAndGetResponse stream           // packet  전송하고, (해당 길이에 맞는지 check 해서) response packet 구함
             |> analyzeBlockReadResponse cpu                  // 응답 packet 분석해서 length * values[] 를 반환

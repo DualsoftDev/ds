@@ -11,7 +11,7 @@ open Engine.Core
 [<AutoOpen>]
 module Check =
 
-        let GetDemoModel(sysName:string) = 
+        let GetDemoModel(sysName:string) =
             let model = ImportModel("testModel");
             let sys = MSys(sysName, true, model)
             let mFlow = MFlow("P0", sys, Int32.MaxValue)
@@ -29,7 +29,7 @@ module Check =
             model
 
         let SameParent(doc:pptDoc, edge:pptEdge) =
-            let failError (parents:pptNode seq, node:pptNode)=  
+            let failError (parents:pptNode seq, node:pptNode)=
                 let error=
                     seq {
                            yield "그룹오류 : 자식은 한부모에만 존재 가능합니다."
@@ -38,20 +38,20 @@ module Check =
                                 }  |> String.concat "\r\n"
                 failwithf  $"{error}"
 
-            let srcParents = doc.Parents  
-                            |> Seq.filter(fun group ->group.Value.Contains(edge.StartNode)) 
-                            |> Seq.filter(fun group ->group.Key.IsDummy |>not) 
+            let srcParents = doc.Parents
+                            |> Seq.filter(fun group ->group.Value.Contains(edge.StartNode))
+                            |> Seq.filter(fun group ->group.Key.IsDummy |>not)
                             |> Seq.map (fun group -> group.Key)
             let tgtParents = doc.Parents
-                            |> Seq.filter(fun group ->group.Value.Contains(edge.EndNode)) 
-                            |> Seq.filter(fun group ->group.Key.IsDummy |>not) 
+                            |> Seq.filter(fun group ->group.Value.Contains(edge.EndNode))
+                            |> Seq.filter(fun group ->group.Key.IsDummy |>not)
                             |> Seq.map (fun group -> group.Key)
-            if(srcParents.Count() > 1) then failError (srcParents, edge.StartNode)  
-            if(tgtParents.Count() > 1) then failError (tgtParents, edge.EndNode)  
+            if(srcParents.Count() > 1) then failError (srcParents, edge.StartNode)
+            if(tgtParents.Count() > 1) then failError (tgtParents, edge.EndNode)
 
         let ValidMFlowPath(node:pptNode, dicMFlowName:ConcurrentDictionary<int, string>) =
             if(node.Name.Contains('.'))
-            then 
+            then
                 let paths = node.Name.Split('.')
                 if(dicMFlowName.Values.Contains(paths.[0])|> not)
                 then Office.ErrorName(node.Shape, 27, node.PageNum)
@@ -66,19 +66,19 @@ module Check =
             then dicSegCheckSame.TryAdd(nodekey, node)|> ignore
 
             let oldNode = dicSegCheckSame.[nodekey]
-            if((node.NodeType = oldNode.NodeType)|>not) 
-            then 
+            if((node.NodeType = oldNode.NodeType)|>not)
+            then
                 MSGError($"도형오류 :타입이 다른 같은이름이 존재합니다 \t[Page{node.PageNum}: {nodekey}({node.NodeType}) != ({oldNode.NodeType}) ({node.Shape.ShapeName()})]")
 
-        let SameEdgeErr(parentNode:pptNode option, pptEdge:pptEdge, mEdge:MEdge, dicSameCheck:ConcurrentDictionary<string, MEdge>) = 
-            let parentName = if(parentNode.IsSome) 
-                             then sprintf "%s.%s"  (mEdge.Source.OwnerMFlow) (parentNode.Value.Name) 
+        let SameEdgeErr(parentNode:pptNode option, pptEdge:pptEdge, mEdge:MEdge, dicSameCheck:ConcurrentDictionary<string, MEdge>) =
+            let parentName = if(parentNode.IsSome)
+                             then sprintf "%s.%s"  (mEdge.Source.OwnerMFlow) (parentNode.Value.Name)
                              else ""
             if(dicSameCheck.TryAdd(mEdge.ToCheckText(parentName), mEdge)|>not)
                 then
                     let mEdge = dicSameCheck.[mEdge.ToCheckText(parentName)]
                     Office.ErrorConnect(pptEdge.ConnectionShape, 20, $"{mEdge.Source.Name}", $"{mEdge.Target.Name}", pptEdge.PageNum)
-            
+
         let SamePage(page:pptPage, dicPage:ConcurrentDictionary<string, pptPage>) =
                     if(page.Title = ""|>not && page.IsUsing)
                     then if(dicPage.TryAdd(page.Title, page)|>not)

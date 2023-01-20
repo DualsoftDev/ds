@@ -8,7 +8,7 @@ open NUnit.Framework
 
 [<AutoOpen>]
 module ModelTests1 =
-    type DemoTests1() = 
+    type DemoTests1() =
         do Fixtures.SetUpTest()
 
         [<Test>]

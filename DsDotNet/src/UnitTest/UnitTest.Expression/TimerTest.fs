@@ -55,7 +55,7 @@ module TimerTestModule =
             timer.TT.Value === true
 
             // 설정된 timer 시간 경과를 기다림
-            System.Threading.Thread.Sleep(220)
+            System.Threading.Thread.Sleep(250)
             timer.TT.Value === false
             timer.DN.Value === true
             timer.EN.Value === true
@@ -97,7 +97,7 @@ module TimerTestModule =
             timer.TT.Value === true
 
             // 설정된 timer 시간 경과를 기다림
-            System.Threading.Thread.Sleep(220)
+            System.Threading.Thread.Sleep(250)
             timer.TT.Value === false
             timer.DN.Value === true
             timer.EN.Value === true

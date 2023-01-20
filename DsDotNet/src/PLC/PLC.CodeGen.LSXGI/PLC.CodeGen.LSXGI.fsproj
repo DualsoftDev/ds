@@ -9,6 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Content Include="Documents\POU.xml" />
 		<None Include="Documents\Classes.pptx" />
 		<Content Include="Documents\Readme.txt" />
 		<None Include="Documents\XG5000 - 패키지 SW 설계.docx" />
@@ -31,7 +32,9 @@
 		<Compile Include="Export\ToXGI.Command.fs" />
 		<Compile Include="Export\ToXGI.Tag.fs" />
 		<Compile Include="Export\ToXGI.File.fs" />
+		<Compile Include="Export\ToXGI.Symbols.fs" />
 		<Compile Include="Export\ToXGI.Export.fs" />
+		<Compile Include="Export\ToXGI.Exports.New.fs" />
 		<None Include="Scripts\Script1.fsx" />
 		<Compile Include="EntryPoint.fs" />
 	</ItemGroup>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Project
+    Configurations
+        Configuration
+            GlobalVariables
+                GlobalVariable
+                    Symbols
+            Tasks
+                Task
+            POU
+                Programs
+                    Program
+                        Body
+                            LDRoutine
+                                Rung
+                        LocalVar
+                            Symbols
+                                Symbol
+-->
+
+<Project>
+    <Configurations>
+        <Configuration>
+            <Parameters>
+                <Parameter></Parameter>
+            </Parameters>
+            <GlobalVariables>
+                <GlobalVariable Version="Ver 1.0" EIPGUID="f7000e44-35e9-4451-87be-bdcc9199ef8a" EIPChangedID="0" Count="0">
+                    <Symbols></Symbols>
+                    <TempVar Count="0"></TempVar>
+                    <HMIFlags></HMIFlags>
+                    <DirectVarComment Count="0"></DirectVarComment>
+                </GlobalVariable>
+            </GlobalVariables>
+            <Tasks>
+                <Task Version="257" Type="0" Attribute="2" Kind="0" Priority="0" TaskIndex="0" Device="" DeviceType="0" WordValue="0" WordCondition="0" BitCondition="0">스캔 프로그램</Task>
+                <Task Version="257" Type="0" Attribute="2" Kind="2" Priority="2" TaskIndex="0" Device="01" DeviceType="0" WordValue="0" WordCondition="0" BitCondition="0">Devices</Task>
+                <Task Version="257" Type="0" Attribute="2" Kind="2" Priority="2" TaskIndex="1" Device="1" DeviceType="0" WordValue="0" WordCondition="0" BitCondition="0">ExSystems</Task>
+            </Tasks>
+            <POU>
+                <Programs>
+                    <Program Task="스캔 프로그램" Version="259" LocalVariable="1" Kind="0" InstanceName="" Comment="" ObjectId="e62cc3a6-ac2d-427d-8cb1-bb9997f6e1c7" FindProgram="1" FindVar="1" Encrytption="">
+                        DsLogic
+                        <Body>
+                            <LDRoutine>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="1">DS Logic for XGI</Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="1025">sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8 + $nn9 + $nn10</Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="2049">_ON</Element>
+                                    <Element ElementType="102" Coordinate="2052" Param="FNAME: ADD8_SINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1750&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;PROP_COLOR: 16777215&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200020, , 0&#xA;VAR_IN: IN2, 0x00200020, , 0&#xA;VAR_IN: IN3, 0x00200020, , 0&#xA;VAR_IN: IN4, 0x00200020, , 0&#xA;VAR_IN: IN5, 0x00200020, , 0&#xA;VAR_IN: IN6, 0x00200020, , 0&#xA;VAR_IN: IN7, 0x00200020, , 0&#xA;VAR_IN: IN8, 0x00200020, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00000020, &#xA;"></Element>
+                                    <Element ElementType="70" Coordinate="3073">nn1</Element>
+                                    <Element ElementType="70" Coordinate="3079">_tmp_temp_internal_1</Element>
+                                    <Element ElementType="70" Coordinate="4097">nn2</Element>
+                                    <Element ElementType="70" Coordinate="5121">nn3</Element>
+                                    <Element ElementType="70" Coordinate="6145">nn4</Element>
+                                    <Element ElementType="70" Coordinate="7169">nn5</Element>
+                                    <Element ElementType="70" Coordinate="8193">nn6</Element>
+                                    <Element ElementType="70" Coordinate="9217">nn7</Element>
+                                    <Element ElementType="70" Coordinate="10241">nn8</Element>
+                                </Rung>
+                                <OnlineUploadData Compressed="1" dt:dt="bin.base64"
+                                    xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38 XckU4UJCOYh5CA==</OnlineUploadData>
+                            </LDRoutine>
+                        </Body>
+                        <LocalVar Version="Ver 1.0" Count="13">
+                            <Symbols>
+                                <Symbol Name="nn1" Kind="1" Type="SINT" State="0" Address="" Trigger="" InitValue="1" Comment="[local var in code] no comment" Device="A" DevicePos="0" TotalSize="8" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0">
+                                    <MemberAddresses></MemberAddresses>
+                                    <MemberRetains></MemberRetains>
+                                    <MemberInitValues></MemberInitValues>
+                                    <MemberComments></MemberComments>
+                                </Symbol>
+                            </Symbols>
+                            <TempVar Count="0"></TempVar>
+                        </LocalVar>
+                        <RungTable></RungTable>
+                    </Program>
+                    <Program Task="Devices" Version="259" LocalVariable="1" Kind="0" InstanceName="" Comment="" ObjectId="c7a4f0ed-35e5-460d-82a1-1e969af4017d" FindProgram="1" FindVar="1" Encrytption="">
+                        Pin1
+                        <Body>
+                            <LDRoutine>
+                                <OnlineUploadData Compressed="1" dt:dt="bin.base64"
+                                    xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38 XckU4UJCOYh5CA==</OnlineUploadData>
+                            </LDRoutine>
+                        </Body>
+                        <LocalVar Version="Ver 1.0" Count="0">
+                            <Symbols></Symbols>
+                            <TempVar Count="0"></TempVar>
+                        </LocalVar>
+                        <RungTable></RungTable>
+                    </Program>
+
+                </Programs>
+            </POU>
+
+        </Configuration>
+
+    </Configurations>
+</Project>

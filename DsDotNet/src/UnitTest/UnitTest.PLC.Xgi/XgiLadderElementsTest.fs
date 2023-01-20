@@ -42,10 +42,6 @@ type XgiLadderElementTest() =
 
         let symbolsLocalXml = XGITag.generateLocalSymbolsXml symbolInfos
 
-
-        //let xml = generateXGIXmlFromStatement [] [] xgiSymbols unusedTags existingLSISprj
-        //xml
-
         let rungsXml = ""   //generateRungs prologComments commentedStatements
         let symbolsGlobalXml = """<GlobalVariable Version="Ver 1.0" Count="0"/>"""
         let xml = wrapWithXml rungsXml symbolsLocalXml symbolsGlobalXml None
@@ -72,5 +68,5 @@ type XgiLadderElementTest() =
             string  mystring = "hello";     // not working for string
 """
         let statements = parseCode storages code
-        let xml = LsXGI.generateXml storages (map withNoComment statements)
+        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml

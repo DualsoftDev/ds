@@ -20,6 +20,10 @@
       </dict>
       <dict>
         <key>include</key>
+        <string>#invalid</string>
+      </dict>
+      <dict>
+        <key>include</key>
         <string>#header</string>
       </dict>
       <dict>
@@ -41,6 +45,13 @@
     </array>
     <key>repository</key>
     <dict>
+      <key>invalid</key>
+      <dict>
+        <key>name</key>
+        <string>invalid.illegal.expected-array-separator.ds</string>
+        <key>match</key>
+        <string>(\|\|\|+)|(&lt;&lt;&lt;+)|(&gt;&gt;&gt;+)</string>
+      </dict>
       <key>header</key>
       <dict>
         <key>name</key>
@@ -81,7 +92,7 @@
             <key>name</key>
             <string>storage.modifier.header.config.type.ds</string>
             <key>match</key>
-            <string>(?&lt;=\[)(system|sys|device|external|jobs|flow|aliases|interfaces|runlamp|dryrunlamp|manuallamp|stoplamp|emglamp|emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home)</string>
+            <string>(?&lt;=\[)\b(system|sys|device|prop|external|safety|layouts|flow|aliases|variables|jobs|interfaces|buttons|lamps|conditions|runlamp|dryrunlamp|manuallamp|stoplamp|emglamp|emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home|a_in|a|m_in|m|d_in|d|s_in|s|c_in|c|e_in|e|t_in|t|h_in|h|r_in|r)\b</string>
           </dict>
           <dict>
             <key>name</key>
@@ -106,25 +117,25 @@
             <key>name</key>
             <string>support.type.tag.ip.ds</string>
             <key>match</key>
-            <string>(?&lt;=(external)\b)\s*((ip|host))\b</string>
+            <string>(?&lt;=({{external}})\b)\s*(({{ipSpec}}))\b</string>
           </dict>
           <dict>
             <key>name</key>
             <string>support.type.tag.file.ds</string>
             <key>match</key>
-            <string>(?&lt;=({{device}})\b)\s*((file))\b</string>
+            <string>(?&lt;=({{device}})\b)\s*(({{fileSpec}}))\b</string>
           </dict>
           <dict>
             <key>name</key>
             <string>storage.modifier.withbrackets.ds</string>
             <key>match</key>
-            <string>(\[\s*)((system|sys|device|external|jobs|flow|aliases|interfaces|runlamp|dryrunlamp|manuallamp|stoplamp|emglamp|emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home))(\s*\])</string>
+            <string>(\[\s*)((system|sys|device|prop|external|safety|layouts|flow|aliases|variables|jobs|interfaces|buttons|lamps|conditions|runlamp|dryrunlamp|manuallamp|stoplamp|emglamp|emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home|a_in|a|m_in|m|d_in|d|s_in|s|c_in|c|e_in|e|t_in|t|h_in|h|r_in|r))(\s*\])</string>
           </dict>
           <dict>
             <key>name</key>
             <string>storage.modifier.ds</string>
             <key>match</key>
-            <string>(?&lt;![_$[:alnum:]])(?:(?&lt;=\.\.\.)|(?&lt;!\.))((system|sys|device|external|jobs|flow|aliases|interfaces|runlamp|dryrunlamp|manuallamp|stoplamp|emglamp|emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home))(?![_$[:alnum:]])(?:(?=\.\.\.)|(?!\.))</string>
+            <string>(?&lt;![_$[:alnum:]])(?:(?&lt;=\.\.\.)|(?&lt;!\.))((system|sys|device|prop|external|safety|layouts|flow|aliases|variables|jobs|interfaces|buttons|lamps|conditions|runlamp|dryrunlamp|manuallamp|stoplamp|emglamp|emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home|a_in|a|m_in|m|d_in|d|s_in|s|c_in|c|e_in|e|t_in|t|h_in|h|r_in|r))(?![_$[:alnum:]])(?:(?=\.\.\.)|(?!\.))</string>
           </dict>
         </array>
       </dict>
@@ -136,13 +147,13 @@
             <key>name</key>
             <string>support.type.tag.ip.ds</string>
             <key>match</key>
-            <string>(?&lt;=(system|sys)\b)\s*((ip|host))\b</string>
+            <string>(?&lt;=({{system}})\b)\s*(({{ipSpec}}))\b</string>
           </dict>
           <dict>
             <key>name</key>
             <string>storage.modifier.system.header.ds</string>
             <key>match</key>
-            <string>(system|sys)\b</string>
+            <string>({{system}})\b</string>
           </dict>
         </array>
       </dict>

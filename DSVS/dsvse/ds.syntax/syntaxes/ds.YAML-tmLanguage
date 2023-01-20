@@ -20,7 +20,6 @@ variables:
   whitespace: '[^\S\n\r]'
 
   compo: '(?:[^\\\s\.;{{punctuation}}{{whitespace}}])+'
-  words: '[가-힣a-zA-Z_][가-힣a-zA-Z_0-9]*'
   # [가-힣\w\d]
   identifier1: '{{compo}}'
   identifier2: '{{compo}}\.{{compo}}'
@@ -28,30 +27,18 @@ variables:
   identifier4: '{{compo}}\.{{compo}}\.{{compo}}\.{{compo}}'
   identifiers: '{{compo}}|(?:{{compo}}+(?:\.{{compo}})+)'
 
-  system: 'system|sys'
-  external: 'external'
   button: 'emg_in|emg|auto_in|auto|clear_in|clear|manual_in|manual|stop_in|stop|run_in|run|dryrun_in|dryrun|home_in|home'
   lamp: 'runlamp|dryrunlamp|manuallamp|stoplamp|emglamp'
-  types: '({{system}}|device|external|jobs|flow|aliases|interfaces|{{lamp}}|{{button}})'
-
-  ipSpec: 'ip|host'
-  fileSpec: 'file'
-  configs: '({{ipSpec}}|{{fileSpec}})'
-  
-  address: '{{compo}}|\.'
-  ip: '{{ipSpec}}\s*='
-  # props: '{{identifier1}}|{{identifier2}}|{{identifier3}}|{{identifier4}}|{{identifiers}}'
+  blocks: 'a_in|a|m_in|m|d_in|d|s_in|s|c_in|c|e_in|e|t_in|t|h_in|h|r_in|r'
+  types: '(system|sys|device|prop|external|safety|layouts|flow|aliases|variables|jobs|interfaces|buttons|lamps|conditions|{{lamp}}|{{button}}|{{blocks}})'
   punctuation: '((<\|\|>)|(<\|)|(\|>)|<|>|!|,|;|(:=)|=|(=>)|(<=)|(\|\|)|(\&\&))'
+  configs: '(ip|host|file)'
+  
   buttonHeader: '\[\s*(?:{{button}})\s*\]'
   lampHeader: '\[\s*(?:{{lamp}})\s*\]'
 
   fliepath: 'file\s*=\s*(?:{{identifiers}})'
 
-  systemHeader: '\[\s*({{system}})\s*((?:{{ipSpec}})\s*=\s*({{identifiers}}))?\]\s*({{identifier1}})\s*=\s*'
-  deviceHeader: '(?:\[\s*(device)\s*({{fliepath}})?\]\s*)\s*({{identifier1}})'
-  flowHeader: '(\[\s*flow\s*\])\s*({{identifier1}})\s*(=)\s*'
-  parentHeader: '({{identifier1}})\s*=\s*'
-  aliasHeader: '(\[\s*aliases\s*\])\s*=\s*'
 
   #codeblock's dollor identifiers, etc
   codeblock: '(<@\{|\}@>)'
@@ -72,6 +59,7 @@ variables:
 
 patterns:
 - include: '#comments'
+- include: '#invalid'
 - include: '#header'
 - include: '#headerConfigs'
 - include: '#codeblocks'
@@ -79,6 +67,10 @@ patterns:
 - include: '#segment'
 
 repository:
+  
+  invalid:
+    name: invalid.illegal.expected-array-separator.ds
+    match: (\|\|\|+)|(<<<+)|(>>>+)
 
   header:
     name: variable.other.squarebracket.gate.ds
@@ -99,7 +91,7 @@ repository:
   headerConfigs:
     patterns:
     - name: storage.modifier.header.config.type.ds
-      match: '(?<=\[){{types}}'
+      match: '(?<=\[)\b{{types}}\b'
     - name: support.type.header.config.path.ds
       match: '\b(?<!\=\s*){{configs}}\b'
 

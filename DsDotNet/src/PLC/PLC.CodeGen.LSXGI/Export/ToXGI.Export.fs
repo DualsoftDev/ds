@@ -233,3 +233,57 @@ module XgiExportModule =
 
             xdoc
 
+
+    let XXX_NEW_wrapWithXml (rungs:XmlOutput) symbolsLocal symbolsGlobal (existingLSISprj:string option) =
+        let emptyStorage = Storages()
+        let pouParams:XgiPOUParams = {
+            /// POU name.  "DsLogic"
+            POUName = "DsLogic"
+            /// POU container task name
+            TaskName = "스캔 프로그램"
+            /// POU ladder 최상단의 comment
+            Comment = "DS Logic for XGI"
+            LocalStorages = emptyStorage
+            CommentedStatements = []
+        }
+        let projParams:XgiProjectParams = {
+            GlobalStorages = emptyStorage
+            ExistingLSISprj = None
+            POUs = [pouParams]
+        }
+
+        let xdoc = projParams.GenerateXmlDocument()
+        (*
+            POU
+                Programs
+                    Program
+                        Body
+                            LDRoutine
+                                Rung
+                        LocalVar
+                            Symbols
+                                Symbol
+        *)
+        let xnProgram = xdoc.SelectSingleNode("//Configurations/Configuration/POU/Programs/Program")
+        //do
+        //    let xnGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
+        //    let newGlobalVar = symbolsGlobal|> DsXml.xmlToXmlNode
+        //    DsXml.replaceChild xnGlobalVar newGlobalVar |> ignore
+        do
+            let xnProgram = xdoc.SelectSingleNode("//Configurations/Configuration/POU/Programs/Program")
+            let xnLocalVar = xdoc.SelectSingleNode("//Configurations/Configuration/POU/Programs/Program/LocalVar")
+            let newLocalVar = symbolsLocal |> DsXml.xmlToXmlNode
+
+
+            //let newLocalVar = xnProgram.OwnerDocument.ImportNode(newLocalVar, true)
+            //DsXml.replaceChild xnLocalVar newLocalVar |> ignore
+
+            ////xnProgram.ReplaceChild(xnLocalVar, newLocalVar) |> ignore
+            xnProgram.RemoveChild(xnLocalVar) |> ignore
+            DsXml.adoptChild xnProgram newLocalVar |> ignore
+
+        //let xxx = rungs |> DsXml.xmlToXmlNode
+        //let xnLDRoutine = xdoc.SelectSingleNode("//Configurations/Configuration/POU/Programs/Program/Body/LDRoutine")
+
+        xdoc.OuterXml
+

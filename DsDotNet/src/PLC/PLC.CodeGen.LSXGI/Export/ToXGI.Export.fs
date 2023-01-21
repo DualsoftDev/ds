@@ -158,7 +158,7 @@ module XgiExportModule =
             let rungsXml = generateRungs comment commentedXgiStatements
 
             /// POU/Programs/Program
-            let programTemplate = createXmlStringProgram taskName pouName |> DsXml.xmlToXmlNode
+            let programTemplate = createXmlStringProgram taskName pouName |> XmlNode.fromString
 
             //let programTemplate = DsXml.adoptChild programs programTemplate
 
@@ -168,7 +168,7 @@ module XgiExportModule =
             (*
              * Rung 삽입
              *)
-            let rungsXml = $"<Rungs>{rungsXml}</Rungs>" |> DsXml.xmlToXmlNode
+            let rungsXml = $"<Rungs>{rungsXml}</Rungs>" |> XmlNode.fromString
             for r in DsXml.getChildrenNodes rungsXml do
                 DsXml.insertBeforeUnit r onlineUploadData
 
@@ -176,7 +176,7 @@ module XgiExportModule =
              * Local variables 삽입
              *)
             let programBody = posiLdRoutine.ParentNode
-            let localSymbols = localStoragesXml |> DsXml.xmlToXmlNode
+            let localSymbols = localStoragesXml |> XmlNode.fromString
             DsXml.insertAfterUnit localSymbols programBody
 
             programTemplate
@@ -185,7 +185,7 @@ module XgiExportModule =
     type XgiProjectParams with
         member private x.GetTemplateXmlDoc() =
             x.ExistingLSISprj
-            |> Option.map DsXml.load
+            |> Option.map XmlDocument.loadFromFile
             |? getTemplateXgiXmlDoc()
 
         member x.GenerateXmlString() = x.GenerateXmlDocument().Beautify()
@@ -206,7 +206,7 @@ module XgiExportModule =
                     let priority = kind
 
                     createXmlStringTask pou.TaskName kind priority index
-                    |> xmlToXmlNode
+                    |> XmlNode.fromString
                     |> DsXml.adoptChildUnit xnTasks
 
             (* Global variables 삽입 *)
@@ -214,7 +214,7 @@ module XgiExportModule =
                 let xnGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
                 let countExistingGlobal = xnGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
                 // symbolsGlobal = "<GlobalVariable Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol>
-                let globalStoragesXmlNode = storagesToGlobalXml globalStorages.Values |> DsXml.xmlToXmlNode
+                let globalStoragesXmlNode = storagesToGlobalXml globalStorages.Values |> XmlNode.fromString
                 let numNewGlobals = globalStoragesXmlNode.Attributes.["Count"].Value |> System.Int32.Parse
 
                 xnGlobalVar.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
@@ -268,7 +268,7 @@ module XgiExportModule =
         do
             if (symbolsGlobal.NonNullAny()) then
                 let xnGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
-                let newGlobalVar = symbolsGlobal |> DsXml.xmlToXmlNode
+                let newGlobalVar = symbolsGlobal |> XmlNode.fromString
                 let parent = newGlobalVar.ParentNode
                 parent.RemoveChild(xnGlobalVar) |> ignore
                 DsXml.adoptChild parent newGlobalVar |> ignore
@@ -276,7 +276,7 @@ module XgiExportModule =
         do
             if (symbolsLocal.NonNullAny()) then
                 let xnLocalVar = xdoc.SelectSingleNode("//Configurations/Configuration/POU/Programs/Program/LocalVar")
-                let newLocalVar = symbolsLocal |> DsXml.xmlToXmlNode
+                let newLocalVar = symbolsLocal |> XmlNode.fromString
                 let parent = xnLocalVar.ParentNode
                 parent.RemoveChild(xnLocalVar) |> ignore
                 DsXml.adoptChild parent newLocalVar |> ignore
@@ -284,7 +284,7 @@ module XgiExportModule =
         let xnProgram = xdoc.SelectSingleNode("//Configurations/Configuration/POU/Programs/Program")
         //do
         //    let xnGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
-        //    let newGlobalVar = symbolsGlobal|> DsXml.xmlToXmlNode
+        //    let newGlobalVar = symbolsGlobal|> XmlNode.fromString
         //    DsXml.replaceChild xnGlobalVar newGlobalVar |> ignore
 
         xdoc.OuterXml

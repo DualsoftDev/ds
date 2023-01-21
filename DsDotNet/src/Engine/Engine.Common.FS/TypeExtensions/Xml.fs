@@ -6,7 +6,37 @@ open System.Xml.Linq
 open System.Runtime.CompilerServices
 open System.Text
 
-//open FSharpPlus
+[<AutoOpen>]
+module XmlNodeExtension =
+    type XElement with
+        /// XElement -> XmlNode
+        member x.ToXmlNode() =
+            let reader = x.CreateReader()
+            let doc = new XmlDocument()
+            doc.ReadNode(reader)
+    type XmlNode with
+        member x.ToText() = x.OuterXml
+
+    [<RequireQualifiedAccess>]
+    module XElement =
+        let fromString(str:string) = XDocument.Parse(str).Root
+
+    [<RequireQualifiedAccess>]
+    module XmlNode =
+        let fromString(str:string) = (XElement.fromString str).ToXmlNode()
+
+    [<RequireQualifiedAccess>]
+    module XmlDocument =
+        /// Load from XML string
+        let fromString(xml:string) =
+            let xdoc = System.Xml.XmlDocument()
+            xdoc.LoadXml xml
+            xdoc
+        /// Load from XML file
+        let loadFromFile (xmlFile:string) =
+            let xdoc = System.Xml.XmlDocument()
+            xdoc.Load xmlFile
+            xdoc
 
 [<AutoOpen>]
 module DsXml =
@@ -20,15 +50,6 @@ module DsXml =
     let inline childNodes x =
         ( ^T: (member ChildNodes:System.Xml.XmlNodeList) x )
         |> fun xs -> xs.Cast<XmlNode>()
-
-    /// XElement -> XmlNode
-    let xElementToXmlNode (xElement:XElement) =
-        let reader = xElement.CreateReader()
-        let doc = new XmlDocument()
-        doc.ReadNode(reader)
-
-    /// XmlNode -> string
-    let xmlNodeToXml (xmlNode:XmlNode) = xmlNode.OuterXml
 
     type XmlDocument with
         member x.Beautify() =
@@ -50,23 +71,8 @@ module DsXml =
             //sb.ToString()
 
     /// XmlNode -> XElement
-    let xmlNodeToXElement (xmlNode:XmlNode) = xmlNodeToXml xmlNode |> XElement.Parse
-    /// string -> XElement
-    let xmlToXElement xmlContent = XDocument.Parse(xmlContent).Root
-    /// string -> XmlNode
-    let xmlToXmlNode = xmlToXElement >> xElementToXmlNode
+    let unused_xmlNodeToXElement (xmlNode:XmlNode) = xmlNode.ToText() |> XElement.Parse
 
-    /// Load from XML string
-    let loadXml (xml:string) =
-        let xdoc = System.Xml.XmlDocument()
-        xdoc.LoadXml xml
-        xdoc
-
-    /// Load from XML file
-    let load (xmlFile:string) =
-        let xdoc = System.Xml.XmlDocument()
-        xdoc.Load xmlFile
-        xdoc
 
     /// seed xml node 에서 path 를 만족하는 [xml node] 반환
     let getXmlNodes path (seed:XmlNode) =

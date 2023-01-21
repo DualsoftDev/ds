@@ -16,18 +16,41 @@ module ImportU =
 
     let private createCallVertex(mySys:DsSystem, node:pptNode, parentReal:Real Option, parentFlow:Flow Option, dicSeg:Dictionary<string, Vertex>) =
         let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
-        if mySys.TryFindLoadedSystem(sysName).IsNone && mySys.Jobs.TryFind(fun job -> job.Name = sysName+"_"+apiName).IsNone
+        if mySys.TryFindLoadedSystem(sysName).IsNone
         then node.Shape.ErrorName(ErrID._48, node.PageNum)
 
         let call =
             match mySys.Jobs.TryFind(fun job -> job.Name = sysName+"_"+apiName) with
             |Some job ->
-                if(parentReal.IsSome)
-                then  Call.Create(job, DuParentReal (parentReal.Value))
-                else  Call.Create(job, DuParentFlow (parentFlow.Value))
+                if job.DeviceDefs.any()
+                then
+                    if(parentReal.IsSome)
+                    then  Call.Create(job, DuParentReal (parentReal.Value))
+                    else  Call.Create(job, DuParentFlow (parentFlow.Value))
+                else
+                    node.Shape.ErrorName(ErrID._52, node.PageNum)
+
             |None -> node.Shape.ErrorName(ErrID._49, node.PageNum)
 
         dicSeg.Add(node.Key, call)
+
+    let private createExSystemReal(mySys:DsSystem, node:pptNode, parentFlow:Flow) =
+        let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
+
+        if mySys.TryFindLoadedSystem(sysName).IsNone
+        then node.Shape.ErrorName(ErrID._48, node.PageNum)
+        elif mySys.TryFindExternalSystem(sysName).IsNone
+        then node.Shape.ErrorName(ErrID._50, node.PageNum)
+
+        let realExS =
+            match mySys.Jobs.TryFind(fun job -> job.Name = sysName+"_"+apiName) with
+            |Some job ->
+                if job.LinkDefs.any()
+                then RealExS.Create(job, DuParentFlow (parentFlow))
+                else node.Shape.ErrorName(ErrID._51, node.PageNum)
+            |None -> node.Shape.ErrorName(ErrID._49, node.PageNum)
+
+        realExS
 
     let private getParent(edge:pptEdge, parents:ConcurrentDictionary<pptNode, seq<pptNode>>, dicSeg:Dictionary<string, Vertex>) =
             ImportCheck.SameParent(parents, edge)
@@ -56,16 +79,6 @@ module ImportU =
                 |None ->
                     nodeEx.Shape.ErrorName(ErrID._26, nodeEx.PageNum)
 
-    let private getOtherSystemReal(flows:Flow seq, nodeEx:pptNode) =
-                // 고쳐야 함  //test ahn
-                let flowName, nodeName = nodeEx.Name.Split('.')[0], nodeEx.Name.Split('.')[1]
-                match flows.TryFind(fun f -> f.Name = flowName) with
-                |Some flow ->
-                    match flow.Graph.Vertices.TryFind(fun f->f.Name = nodeName) with
-                    |Some real -> real
-                    |None ->  nodeEx.Shape.ErrorName(ErrID._27, nodeEx.PageNum)
-                |None ->
-                    nodeEx.Shape.ErrorName(ErrID._26, nodeEx.PageNum)
 
     [<Extension>]
     type ImportUtil =
@@ -77,7 +90,7 @@ module ImportU =
             let dicJobName = Dictionary<string, Job>()
 
             doc.Nodes
-            |> Seq.filter(fun node -> node.NodeType = COPY_VALUE ||  node.NodeType = COPY_REF)
+            |> Seq.filter(fun node -> node.NodeType.IsLoadSys)
             |> Seq.iter(fun node ->
                 node.JobInfos
                 |> Seq.iter(fun jobSet ->
@@ -89,25 +102,31 @@ module ImportU =
                     refSystem.ApiItems.ForEach(fun api->
                         let devs =
                             JobTargetSystems
-                                .Select(fun tgt -> getApiItems(mySys, tgt, api.Name), tgt)
-                                .Select(fun (api, tgt)-> TaskDevice(api, "", "", tgt))
-                                .Cast<DsTask>() |> Seq.toList
-                        let job = Job(jobBase+"_"+api.Name, devs)
+                             .Select(fun tgt -> getApiItems(mySys, tgt, api.Name), tgt)
+                             .Select(fun (api, tgt)->
+                                match node.NodeType with
+                                | OPEN_CPU            -> TaskLink(api, tgt)           :> DsTask
+                                | OPEN_SYS | COPY_SYS -> TaskDevice(api, "", "", tgt) :> DsTask
+                                | _-> failwithlog "Error MakeJobs"
+                                )
+
+
+                        let job = Job(jobBase+"_"+api.Name, devs |> Seq.toList)
                         if dicJobName.ContainsKey(job.Name)
                         then Office.ErrorName(node.Shape, ErrID._33, node.PageNum)
                         else dicJobName.Add(job.Name, job)
 
                         mySys.Jobs.Add(job)
                     )
-                    )
                 )
+            )
 
         //Interface 만들기
         [<Extension>]
         static member MakeInterfaces (doc :pptDoc, sys:DsSystem) =
             let checkName = HashSet<string>()
             doc.Nodes
-            |> Seq.filter(fun node -> node.NodeType = IF)
+            |> Seq.filter(fun node -> node.NodeType.IsIF)
             |> Seq.iter(fun node ->
 
                     if checkName.Add(node.IfName) |> not
@@ -127,11 +146,14 @@ module ImportU =
                     let src = edge.StartNode
                     let tgt = edge.EndNode
                     //인터페이스는 인터페이스끼리 인과가능
-                    if(src.NodeType = IF && src.NodeType = tgt.NodeType|>not)
+                    if(src.NodeType.IsIF && src.NodeType = tgt.NodeType|>not)
                     then Office.ErrorConnect(edge.ConnectionShape, ErrID._37, src.Name, tgt.Name, edge.PageNum)
                     //인터페이스 인과는 약 리셋 불가
                     if (edge.Causal = InterlockWeak || edge.Causal = ResetEdge)
                     then Office.ErrorConnect(edge.ConnectionShape, ErrID._11, src.Name, tgt.Name, edge.PageNum)
+                    //인터페이스 Link는 인과정보 정의 불가
+                    if (src.NodeType = IF_LINK || tgt.NodeType = IF_LINK)
+                    then Office.ErrorConnect(edge.ConnectionShape, ErrID._32, src.Name, tgt.Name, edge.PageNum)
 
                     if (edge.Causal = Interlock) //인터락 AugmentedTransitiveClosure 타입 만들기 재료
                     then resets.Add(src.Name, tgt.Name) |> ignore
@@ -239,18 +261,18 @@ module ImportU =
                     |> Seq.filter(fun node -> node.Alias.IsNone)
                     |> Seq.filter(fun node -> node.NodeType.IsReal)
                     |> Seq.filter(fun node -> dicChildParent.ContainsKey(node)|>not)
-                    |> Seq.sortBy(fun node -> node.NodeType = REALExF || node.NodeType = REALExS)  //real 부터 생성 후 realEx 처리
+                    |> Seq.sortBy(fun node -> node.NodeType = REALExF)  //real 부터 생성 후 realExF 처리
                     |> Seq.iter(fun node   ->
-                            match node.NodeType with
-                            | REALExF ->
-                                let real = getOtherFlowReal(dicFlow.Values, node) :?> Real
-                                dicVertex.Add(node.Key, RealExF.Create(real, DuParentFlow dicFlow.[node.PageNum]))
-                            | REALExS ->
-                                let real = getOtherSystemReal(dicFlow.Values, node) :?> Real
-                                dicVertex.Add(node.Key, RealExF.Create(real, DuParentFlow dicFlow.[node.PageNum]))
-                            | _ ->
-                                let real = Real.Create(node.Name, dicFlow.[node.PageNum])
-                                dicVertex.Add(node.Key, real)
+                        match node.NodeType with
+                        | REALExF ->
+                            let real = getOtherFlowReal(dicFlow.Values, node) :?> Real
+                            dicVertex.Add(node.Key, RealExF.Create(real, DuParentFlow dicFlow.[node.PageNum]))
+                        | REALExS ->
+                            let realExS = createExSystemReal(mySys, node, dicFlow.[node.PageNum])
+                            dicVertex.Add(node.Key, realExS)
+                        | _ ->
+                            let real = Real.Create(node.Name, dicFlow.[node.PageNum])
+                            dicVertex.Add(node.Key, real)
                         )
 
                 let createCall() =
@@ -402,7 +424,7 @@ module ImportU =
                 let dicFlow = doc.DicFlow
                             //1. 원본처리
                 doc.Nodes
-                    |> Seq.filter(fun node -> node.NodeType = IF)
+                    |> Seq.filter(fun node -> node.NodeType.IsIF)
                     |> Seq.iter(fun node ->
                             let flow = dicFlow.[node.PageNum]
                             let sys =  dicFlow.[node.PageNum].System

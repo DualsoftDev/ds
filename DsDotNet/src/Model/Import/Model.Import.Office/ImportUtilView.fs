@@ -173,7 +173,7 @@ module ImportViewModule =
                         UpdateBtnNodes(flow.System, flow, flowNode)
                         UpdateConditionNodes(flow.System, flow, flowNode)
 
-                        UpdateApiItems(flow.System, page, doc.DicNodes.Values.Where(fun f->f.NodeType = IF), flowNode)
+                        UpdateApiItems(flow.System, page, doc.DicNodes.Values.Where(fun f->f.NodeType.IsIF), flowNode)
 
                         flowNode.Page <- page; //flowNode.Flow <- Some(flow)
                         flowNode)

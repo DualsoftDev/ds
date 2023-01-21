@@ -82,7 +82,7 @@ module ImportCheck =
             let dicSame = Dictionary<string, pptNode>()
 
             doc.Nodes
-            |> Seq.filter(fun node -> node.NodeType = COPY_VALUE || node.NodeType = COPY_REF)
+            |> Seq.filter(fun node -> node.NodeType.IsLoadSys)
             |> Seq.iter(fun node ->
                     node.CopySys.ForEach(fun loadsys ->
                         let key = $"{node.PageNum}_{loadsys.Key}"

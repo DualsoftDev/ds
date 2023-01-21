@@ -145,15 +145,17 @@ module PPTObjectModule =
 
         match nodeType with
         | REALExF      -> ()
-        | REALExS      -> ()
+        | REALExS
         | CALL        -> if  name.Contains("$")|>not
                          then  shape.ErrorName(ErrID._12, iPage)
 
-        | COPY_REF
-        | COPY_VALUE  -> let name, number = GetTailNumber(shape.InnerText)
+        | OPEN_CPU
+        | OPEN_SYS
+        | COPY_SYS  ->   let name, number = GetTailNumber(shape.InnerText)
                          if GetSquareBrackets(name, false).length() = 0
                          then  shape.ErrorName(ErrID._7, iPage)
-        | IF
+        | IF_DEVICE
+        | IF_LINK
         | REAL
         | DUMMY
         | BUTTON
@@ -212,10 +214,6 @@ module PPTObjectModule =
         let mutable ifTXs    = HashSet<string>()
         let mutable ifRXs    = HashSet<string>()
         let mutable nodeType:NodeType = NodeType.REAL
-        let mutable btnType:BtnType option = None
-        let mutable lampType:LampType option = None
-
-
 
         let trimSpace(text:string) =   text.TrimStart(' ').TrimEnd(' ')
         let trimStartEndSeq(texts:string seq) =  texts  |> Seq.map(fun name -> trimSpace name)
@@ -248,7 +246,7 @@ module PPTObjectModule =
                     copySystems.Add(copy, orgiSysName)
                     jobInfos.Add(copy, [copy]|>HashSet))
 
-        let updateIF(text:string)      =
+        let updateDeviceIF(text:string)      =
             ifName <- GetBracketsReplaceName(text) |> trimSpace
             let txrx = GetSquareBrackets(shape.InnerText, false)
             if(txrx.length() > 0)
@@ -262,6 +260,13 @@ module PPTObjectModule =
                 else
                     shape.ErrorName(ErrID._43, iPage)
 
+        let updateLinkIF(text:string)      =
+            ifName <- GetBracketsReplaceName(text) |> trimSpace
+            let txrx = GetSquareBrackets(shape.InnerText, false)
+            if(txrx.length() > 0)
+            then
+                ifTXs  <- txrx.Split(';').Where(fun f->f=""|>not) |> trimStartEndSeq |> Seq.filter(fun f->f="_"|>not) |> HashSet
+
         let getBracketItems (name:string) =
             name.Split(']').Where(fun w->w <> "")
             |> Seq.map(fun f->  GetSquareBrackets(f+"]", false), GetBracketsReplaceName(f+"]"))
@@ -271,14 +276,25 @@ module PPTObjectModule =
 
             nodeType <-
                 if(shape.CheckRectangle())
-                then if name.Contains(".") then REALExF else REAL
-                elif(shape.CheckHomePlate())    then IF
-                elif(shape.CheckFoldedCornerRound()) then COPY_VALUE
-                elif(shape.CheckFoldedCornerPlate()) then COPY_REF
-                elif(shape.CheckEllipse())      then CALL
-                elif(shape.CheckBevelShapePlate())  then  LAMP
-                elif(shape.CheckBevelShapeRound())  then  BUTTON
-                elif(shape.CheckCondition())  then  CONDITION
+                then
+                    if   name.Contains(".") then REALExF
+                    elif name.Contains("$") then REALExS
+                    else REAL
+                elif(shape.CheckHomePlate())
+                then
+                    if GetSquareBrackets(shape.InnerText, false).Contains("~")
+                    then IF_DEVICE else IF_LINK
+
+                elif(shape.CheckFoldedCornerPlate())
+                then
+                    if name.Contains("/")
+                    then OPEN_SYS
+                    else OPEN_CPU
+                elif(shape.CheckFoldedCornerRound()) then COPY_SYS
+                elif(shape.CheckEllipse())           then CALL
+                elif(shape.CheckBevelShapePlate())   then LAMP
+                elif(shape.CheckBevelShapeRound())   then BUTTON
+                elif(shape.CheckCondition())         then CONDITION
                 else  shape.ErrorName(ErrID._1, iPage)
 
             nameCheck (shape, nodeType, iPage)
@@ -288,9 +304,11 @@ module PPTObjectModule =
             |CALL|REAL ->
                      GetSquareBrackets(shape.InnerText, true )
                      |> fun text -> if text = ""|>not then updateSafety text
-            |IF ->   updateIF shape.InnerText
-            |COPY_REF
-            |COPY_VALUE ->
+            |IF_DEVICE ->   updateDeviceIF  shape.InnerText
+            |IF_LINK   ->   updateLinkIF    shape.InnerText
+            |OPEN_CPU
+            |OPEN_SYS
+            |COPY_SYS ->
                      let name, number = GetTailNumber(shape.InnerText)
                      GetSquareBrackets(name, false)
                         |> fun text ->
@@ -299,7 +317,9 @@ module PPTObjectModule =
             |BUTTON ->          getBracketItems(shape.InnerText).ForEach(fun (n, t) -> btnDefs.Add(n, t|> getBtnType))
             |LAMP   ->          getBracketItems(shape.InnerText).ForEach(fun (n, t) -> lampDefs.Add(n, t|> getLampType))
             |CONDITION -> getBracketItems(shape.InnerText).ForEach(fun (n, t) -> condiDefs.Add(n, t|> getConditionType))
-            |_ -> ()
+            |REALExF
+            |REALExS
+            |DUMMY -> ()
 
         member x.PageNum = iPage
         member x.Shape = shape
@@ -338,7 +358,7 @@ module PPTObjectModule =
         member x.PageNum = iPage
         member x.ConnectionShape = conn
         member x.Id = iEdge
-        member x.IsInterfaceEdge:bool = x.StartNode.NodeType = IF || x.EndNode.NodeType = IF
+        member x.IsInterfaceEdge:bool = x.StartNode.NodeType.IsIF || x.EndNode.NodeType.IsIF
         member x.StartNode:pptNode = if(reverse) then eNode else sNode
         member x.EndNode:pptNode =   if(reverse) then sNode else eNode
         member x.ParentId = 0 //reserve

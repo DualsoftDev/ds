@@ -321,8 +321,8 @@ module PPTUtil =
                     || shape.CheckEllipse()         //call
                     || shape.CheckBevelShapeRound()      //btn
                     || shape.CheckBevelShapePlate()      //lamp
-                    || shape.CheckFoldedCornerRound()    //copy_value
-                    || shape.CheckFoldedCornerPlate()    //copy_ref
+                    || shape.CheckFoldedCornerRound()    //COPY_SYS
+                    || shape.CheckFoldedCornerPlate()    //OPEN_SYS
                     || shape.CheckHomePlate()      //interface
                     || shape.CheckCondition())       // system condition
                     then true

@@ -10,21 +10,24 @@ module InterfaceClass =
  ///인과의 노드 종류
     type NodeType =
         | REAL          //실제 나의 시스템 1 bit
-        | REALExF        //다른 Flow real
-        | REALExS        //다른 System real
+        | REALExF       //다른 Flow real
+        | REALExS       //다른 System real
         | CALL          //지시관찰
-        | IF            //인터페이스
-        | COPY_VALUE          //시스템복사
-        | COPY_REF           //시스템참조
+        | IF_DEVICE     //인터페이스
+        | IF_LINK       //인터페이스
+        | COPY_SYS      //시스템복사 deivce
+        | OPEN_SYS      //시스템참조 Passive sytem(초기 로딩과 같은 경로 ExSystem 이면 Acive)
+        | OPEN_CPU      //시스템참조 Active sytem (초기 로딩과 다른 경로 ExSystem 이면 Passive)
         | DUMMY         //그룹더미
         | BUTTON        //버튼 emg,start, ...
-        | CONDITION        //system Condition ready/drive 정의 블록
+        | CONDITION     //system Condition ready/drive 정의 블록
         | LAMP          //램프 runmode,stopmode, ...
-        //| ACTIVESYS        //model ppt active  system
         with
             member x.IsReal = x = REAL || x = REALExF || x = REALExS
             member x.IsCall = x = CALL
+            member x.IsLoadSys = x = COPY_SYS || x = OPEN_SYS || x = OPEN_CPU
             member x.IsRealorCall =  x.IsReal || x.IsCall
+            member x.IsIF =  x = IF_DEVICE || x = IF_LINK
 
     type ViewType =
         | VFLOW
@@ -32,8 +35,8 @@ module InterfaceClass =
         | VREALEx
         | VCALL
         | VIF
-        | VCOPY_VALUE
-        | VCOPY_REF
+        | VCOPY_SYS
+        | VOPEN_SYS
         | VDUMMY
         | VBUTTON
         | VLAMP

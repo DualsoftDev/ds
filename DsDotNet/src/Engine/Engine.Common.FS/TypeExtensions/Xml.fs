@@ -4,6 +4,8 @@ open System.Linq
 open System.Xml
 open System.Xml.Linq
 open System.Runtime.CompilerServices
+open System.Text
+
 //open FSharpPlus
 
 [<AutoOpen>]
@@ -27,6 +29,26 @@ module DsXml =
 
     /// XmlNode -> string
     let xmlNodeToXml (xmlNode:XmlNode) = xmlNode.OuterXml
+
+    type XmlDocument with
+        member x.Beautify() =
+            x.OuterXml
+            //// https://stackoverflow.com/questions/203528/what-is-the-simplest-way-to-get-indented-xml-with-line-breaks-from-xmldocument
+            //let sb = new StringBuilder()
+
+            //let settings = new XmlWriterSettings (
+            //    Indent = true
+            //    , IndentChars = "\t"
+            //    , NewLineChars = "\r\n"
+            //    , NewLineHandling = NewLineHandling.Replace
+            //    , Encoding = Encoding.UTF8
+            //    //, NewLineOnAttributes = true
+            //)
+
+            //use writer = XmlWriter.Create(sb, settings)
+            //x.Save(writer)
+            //sb.ToString()
+
     /// XmlNode -> XElement
     let xmlNodeToXElement (xmlNode:XmlNode) = xmlNodeToXml xmlNode |> XElement.Parse
     /// string -> XElement

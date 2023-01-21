@@ -66,12 +66,12 @@ module internal XgiFile =
 
         let programs = xdoc.SelectSingleNode("//POU/Programs")
 
-        // Dirty hack "스캔 프로그램" vs "?? ????"
+        // Dirty hack "Scan Program" vs "?? ????"
         let taskName =
             xdoc.SelectNodes("//POU/Programs/Program").ToEnumerables()
             |> map (fun xmlnode -> xmlnode.Attributes.["Task"].Value)
             |> Seq.tryHead
-            |> Option.defaultValue "스캔 프로그램"
+            |> Option.defaultValue "Scan Program"
 
         printfn "%A" taskName
 
@@ -129,6 +129,7 @@ module internal XgiFile =
             |> XmlExt.ToEnumerables
             |> iter (DsXml.adoptChildUnit posiGlobalVarSymbols)
 
-        xdoc.OuterXml
+        //xdoc.OuterXml
+        xmlNodeToXml xdoc
 
 

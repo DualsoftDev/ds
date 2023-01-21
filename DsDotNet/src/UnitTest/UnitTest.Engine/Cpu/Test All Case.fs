@@ -26,7 +26,7 @@ type TestAllCase() =
             /// POU name.  "DsLogic"
             POUName = "DsLogic"
             /// POU container task name
-            TaskName = "스캔 프로그램"
+            TaskName = "Scan Program"
             /// POU ladder 최상단의 comment
             Comment = "DS Logic for XGI"
             LocalStorages = localStorages

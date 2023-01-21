@@ -92,3 +92,19 @@ type XgiPOUTest() =
         let projectParams = { projectParams with GlobalStorages = globalStorages }
         let xml = projectParams.GenerateXmlString()
         saveTestResult (get_current_function_name()) xml
+
+
+    [<Test>]
+    member __.``Project with existing project test`` () =
+        let myTemplate = $"{__SOURCE_DIRECTORY__}/XgiXmls/Templates/myTemplate.xml"
+
+
+        let globalStorages = Storages()
+        let code = """
+            bool gg0 = createTag("%IX0.0.1", false);
+            bool gg1 = false;
+"""
+        parseCode globalStorages code |> ignore
+        let projectParams = { projectParams with GlobalStorages = globalStorages; ExistingLSISprj = Some myTemplate }
+        let xml = projectParams.GenerateXmlString()
+        saveTestResult (get_current_function_name()) xml

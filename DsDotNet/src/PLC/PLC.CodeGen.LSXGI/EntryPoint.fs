@@ -8,7 +8,8 @@ module ModuleInitializer =
     let private createXgiVariableWithTypeAndValue (typ:System.Type) (name:string) (boxedValue:BoxedObjectHolder) : IVariable =
         verify (Runtime.Target = XGI)
         let v = boxedValue.Object
-        createXgiVariable typ name (unbox v) "no comment"
+        let noComment = ""
+        createXgiVariable typ name (unbox v) noComment
 
     let private createXgiVariableWithType (typ:System.Type) (name:string) : IVariable =
         verify (Runtime.Target = XGI)

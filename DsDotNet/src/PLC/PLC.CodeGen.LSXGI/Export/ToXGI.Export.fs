@@ -23,6 +23,7 @@ XckU4UJCOYh5CA==</OnlineUploadData>
 				<RungTable></RungTable>
 			</Program>""" taskName pouName
 
+    /// Task 부분 Xml string 반환: <Task Version=..>taskNameName
     let createXmlStringTask taskName kind priority index =
         sprintf """
             <Task Version="257" Type="0" Attribute="2" Kind="%d" Priority="%d" TaskIndex="%d"

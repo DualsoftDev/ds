@@ -163,21 +163,21 @@ module XgiExportModule =
             //let programTemplate = DsXml.adoptChild programs programTemplate
 
             /// LDRoutine 위치 : Rung 삽입 위치
-            let posiLdRoutine = programTemplate |> DsXml.getXmlNode "Body/LDRoutine"
+            let posiLdRoutine = programTemplate.GetXmlNode "Body/LDRoutine"
             let onlineUploadData = posiLdRoutine.FirstChild
             (*
              * Rung 삽입
              *)
             let rungsXml = $"<Rungs>{rungsXml}</Rungs>" |> XmlNode.fromString
-            for r in DsXml.getChildrenNodes rungsXml do
-                DsXml.insertBeforeUnit r onlineUploadData
+            for r in rungsXml.GetChildrenNodes()  do
+                onlineUploadData.InsertBefore r |> ignore
 
             (*
              * Local variables 삽입
              *)
             let programBody = posiLdRoutine.ParentNode
             let localSymbols = localStoragesXml |> XmlNode.fromString
-            DsXml.insertAfterUnit localSymbols programBody
+            programBody.InsertAfter localSymbols |> ignore
 
             programTemplate
 
@@ -198,7 +198,7 @@ module XgiExportModule =
             (* Tasks/Task 삽입 *)
             do
                 let xnTasks = xdoc.SelectSingleNode("//Configurations/Configuration/Tasks")
-                DsXml.removeChildren xnTasks |> ignore
+                xnTasks.RemoveChildren()  |> ignore
                 let pous = pous |> List.distinctBy(fun pou -> pou.TaskName)
                 for i, pou in pous.Indexed() do
                     let index = if i <= 1 then 0 else i-1
@@ -207,7 +207,8 @@ module XgiExportModule =
 
                     createXmlStringTask pou.TaskName kind priority index
                     |> XmlNode.fromString
-                    |> DsXml.adoptChildUnit xnTasks
+                    |> xnTasks.AdoptChild
+                    |> ignore
 
             (* Global variables 삽입 *)
             do
@@ -218,19 +219,18 @@ module XgiExportModule =
                 let numNewGlobals = globalStoragesXmlNode.Attributes.["Count"].Value |> System.Int32.Parse
 
                 xnGlobalVar.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
-                let xnGlobalVarSymbols = DsXml.getXmlNode "Symbols" xnGlobalVar
+                let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
 
-                globalStoragesXmlNode.SelectNodes("//Symbols/Symbol")
-                |> XmlExt.ToEnumerables
-                |> iter (DsXml.adoptChildUnit xnGlobalVarSymbols)
+                globalStoragesXmlNode.SelectNodes("//Symbols/Symbol").ToEnumerables()
+                |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)
 
 
             (* POU program 삽입 *)
             do
                 let xnPrograms = xdoc.SelectSingleNode("//POU/Programs")
-                DsXml.removeChildren xnPrograms |> ignore
+                xnPrograms.RemoveChildren() |> ignore
                 for pou in pous do
-                    pou.GenerateXmlNode() |> DsXml.adoptChildUnit xnPrograms
+                    pou.GenerateXmlNode() |> xnPrograms.AdoptChild |> ignore
 
             xdoc
 
@@ -271,7 +271,7 @@ module XgiExportModule =
                 let newGlobalVar = symbolsGlobal |> XmlNode.fromString
                 let parent = newGlobalVar.ParentNode
                 parent.RemoveChild(xnGlobalVar) |> ignore
-                DsXml.adoptChild parent newGlobalVar |> ignore
+                parent.AdoptChild newGlobalVar |> ignore
 
         do
             if (symbolsLocal.NonNullAny()) then
@@ -279,7 +279,7 @@ module XgiExportModule =
                 let newLocalVar = symbolsLocal |> XmlNode.fromString
                 let parent = xnLocalVar.ParentNode
                 parent.RemoveChild(xnLocalVar) |> ignore
-                DsXml.adoptChild parent newLocalVar |> ignore
+                parent.AdoptChild newLocalVar |> ignore
 
         let xnProgram = xdoc.SelectSingleNode("//Configurations/Configuration/POU/Programs/Program")
         //do

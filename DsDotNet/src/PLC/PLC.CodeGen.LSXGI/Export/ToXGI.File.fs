@@ -1,15 +1,10 @@
 namespace PLC.CodeGen.LSXGI
 
-open System.Linq
 open System.Reflection
-open System.Collections.Generic
 
 open Engine.Common.FS
-open Engine.Core
 open PLC.CodeGen.LSXGI
-open PLC.CodeGen.Common
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
-open XmlNodeExtension
 
 [<AutoOpen>]
 module internal XgiFile =
@@ -92,25 +87,25 @@ module internal XgiFile =
 
 
 
-        let programTemplate = DsXml.adoptChild programs programTemplate
+        let programTemplate = programs.AdoptChild  programTemplate
 
         /// LDRoutine 위치 : Rung 삽입 위치
-        let posiLdRoutine = programTemplate |> DsXml.getXmlNode "Body/LDRoutine"
+        let posiLdRoutine = programTemplate.GetXmlNode "Body/LDRoutine"
         let onlineUploadData = posiLdRoutine.FirstChild
 
         (*
          * Rung 삽입
          *)
         let rungsXml = $"<Rungs>{rungs}</Rungs>" |> XmlNode.fromString
-        for r in DsXml.getChildrenNodes rungsXml do
-            DsXml.insertBeforeUnit r onlineUploadData
+        for r in rungsXml.GetChildrenNodes() do
+            onlineUploadData.InsertBefore r |> ignore
 
         (*
          * Local variables 삽입
          *)
         let programBody = posiLdRoutine.ParentNode
         let localSymbols = symbolsLocal |> XmlNode.fromString
-        DsXml.insertAfterUnit localSymbols programBody
+        programBody.InsertAfter localSymbols |> ignore
 
         (*
          * Global variables 삽입
@@ -123,11 +118,10 @@ module internal XgiFile =
             let numNewGlobals = neoGlobals.Attributes.["Count"].Value |> System.Int32.Parse
 
             posiGlobalVar.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
-            let posiGlobalVarSymbols = DsXml.getXmlNode "Symbols" posiGlobalVar
+            let posiGlobalVarSymbols = posiGlobalVar.GetXmlNode "Symbols"
 
-            neoGlobals.SelectNodes("//Symbols/Symbol")
-            |> XmlExt.ToEnumerables
-            |> iter (DsXml.adoptChildUnit posiGlobalVarSymbols)
+            neoGlobals.SelectNodes("//Symbols/Symbol").ToEnumerables()
+            |> iter (posiGlobalVarSymbols.AdoptChild >> ignore)
 
         xdoc.ToText()
 

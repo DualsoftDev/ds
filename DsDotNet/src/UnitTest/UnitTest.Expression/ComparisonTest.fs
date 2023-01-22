@@ -5,7 +5,6 @@ open NUnit.Framework
 open Engine.Parser.FS
 open T
 open Engine.Core
-open Engine.Core.ExpressionPrologModule.ExpressionPrologSubModule
 
 [<AutoOpen>]
 module ComparisionTestModule =

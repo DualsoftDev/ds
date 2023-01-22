@@ -72,12 +72,6 @@ module ExpressionForwardDeclModule =
 module rec ExpressionPrologModule =
 
     module ExpressionPrologSubModule =
-        let expectN (n:int) (xs:'a seq) = if xs.Count() <> n then failwith $"Wrong number of arguments: expect {n}"
-        let expect1 xs = expectN 1 xs; xs.First()
-        let expect2 xs = expectN 2 xs; Array.ofSeq xs
-        let expectGteN (n:int) (xs:'a seq) =
-            if xs.Count() < n then failwith $"Wrong number of arguments: expect at least {n} arguments"
-
         let (|Float64|_|) (x:obj) =
             match x with
             | :? bool as b -> Some (if b then 1.0 else 0.0)     // toInt(false) 등에서의 casting 허용 위해 필요

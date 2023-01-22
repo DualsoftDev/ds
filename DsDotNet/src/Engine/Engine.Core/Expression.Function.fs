@@ -4,10 +4,14 @@ open System.Linq
 open System.Runtime.CompilerServices
 open Engine.Common.FS
 open ExpressionPrologModule.ExpressionPrologSubModule
-open System.Collections.Generic
 
 [<AutoOpen>]
 module ExpressionFunctionModule =
+    let private expectN (n:int) (xs:'a seq) = if xs.Count() <> n then failwith $"Wrong number of arguments: expect {n}"
+    let private expect1 xs = expectN 1 xs; xs.First()
+    let private expect2 xs = expectN 2 xs; Array.ofSeq xs
+    let private expectGteN (n:int) (xs:'a seq) =
+        if xs.Count() < n then failwith $"Wrong number of arguments: expect at least {n} arguments"
 
     /// Expression<'T> 를 IExpression 으로 casting
     let internal iexpr any = (box any) :?> IExpression
@@ -360,7 +364,6 @@ module ExpressionFunctionModule =
 
     [<AutoOpen>]
     module internal FunctionImpl =
-        open ExpressionPrologSubModule
         [<Extension>] // type SeqExt =
         type SeqExt =
             [<Extension>] static member ExpectGteN(xs:'a seq, n) = expectGteN n xs; xs

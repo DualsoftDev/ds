@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
-using static Model.Import.Office.ImportM;
+using static Model.Import.Office.ImportPPTModule;
 
 namespace Model.DsEditor
 {

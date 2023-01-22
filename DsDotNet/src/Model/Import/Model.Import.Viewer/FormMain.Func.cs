@@ -14,7 +14,7 @@ using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
 using static Engine.Cpu.RunTime;
-using static Model.Import.Office.ImportM;
+using static Model.Import.Office.ImportPPTModule;
 using static Model.Import.Office.ImportViewModule;
 using Color = System.Drawing.Color;
 

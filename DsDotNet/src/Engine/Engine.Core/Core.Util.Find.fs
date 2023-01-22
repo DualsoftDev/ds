@@ -64,6 +64,7 @@ module internal ModelFindModule =
     let tryFindFlow(system:DsSystem) (name:string)   = system.Flows.TryFind(nameEq name)
     let tryFindJob (system:DsSystem) name            = system.Jobs.TryFind(nameEq name)
 
+    let tryFindExternalSystem (system:DsSystem) name   = system.ExternalSystems.TryFind(nameEq name)
     let tryFindLoadedSystem (system:DsSystem) name   = system.LoadedSystems.TryFind(nameEq name)
     let tryFindReferenceSystem (system:DsSystem) name   =
                      system.LoadedSystems.Select(fun s->s.ReferenceSystem).TryFind(nameEq name)
@@ -154,6 +155,7 @@ module internal ModelFindModule =
 type FindExtension =
     // 전체 사용된 시스템을 이름으로 찾기
     [<Extension>] static member TryFindLoadedSystem (system:DsSystem, name) = tryFindLoadedSystem system name
+    [<Extension>] static member TryFindExternalSystem (system:DsSystem, name) = tryFindExternalSystem system name
     // 전체 사용된 시스템에서의 찾는 이름 대상 DsSystem
     [<Extension>] static member TryFindReferenceSystem (system:DsSystem, name) = tryFindReferenceSystem system name
 

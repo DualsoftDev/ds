@@ -12,7 +12,7 @@ open Engine.Core.ModelLoaderModule
 open System.Runtime.CompilerServices
 
 [<AutoOpen>]
-module ImportM =
+module ImportPPTModule =
 
     type internal ImportPowerPoint() =
         let pathStack = Stack<string>()
@@ -32,9 +32,11 @@ module ImportM =
             }
 
         let getLoadingType(nodeType:NodeType) =
-            if   nodeType = COPY_REF   then DuExternal
-            elif nodeType = COPY_VALUE then DuDevice
-            else  failwithlog "error"
+            match nodeType with
+            | OPEN_SYS
+            | OPEN_CPU -> DuExternal
+            | COPY_SYS -> DuExternal
+            | _ -> failwithlog "error"
 
 
         let rec loadSystem(repo:ShareableSystemRepository, pptReop:Dictionary<DsSystem, pptDoc>, theSys:DsSystem, paras:DeviceLoadParameters) =
@@ -56,7 +58,8 @@ module ImportM =
                 let hostIp = if paras.HostIp.IsSome then paras.HostIp.Value else ""
 
                 match node.NodeType with
-                |COPY_REF ->
+                |OPEN_CPU
+                |OPEN_SYS ->
                     let exLoaded =
                         if repo.ContainsKey paras.AbsoluteFilePath
                         then
@@ -71,7 +74,7 @@ module ImportM =
 
                     theSys.AddLoadedSystem(exLoaded)
 
-                |COPY_VALUE ->
+                |COPY_SYS ->
                     let newDevSys = DsSystem(paras.LoadedName, hostIp)
                     let sys = reloading(newDevSys, paras)
                     theSys.AddLoadedSystem(Device(sys, paras))

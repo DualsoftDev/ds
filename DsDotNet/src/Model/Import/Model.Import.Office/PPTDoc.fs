@@ -229,7 +229,7 @@ type PPTDocExt =
         [<Extension>]
         static member GetCopyPathNName(doc:pptDoc) =
             doc.Nodes
-            |> Seq.filter(fun node -> node.NodeType = COPY_VALUE || node.NodeType = COPY_REF)
+            |> Seq.filter(fun node -> node.NodeType.IsLoadSys)
             |> Seq.collect(fun node ->
             node.CopySys.Select(fun copy ->
                 let path = Path.GetFullPath(Path.Combine(doc.DirectoryName, copy.Value))+".pptx"

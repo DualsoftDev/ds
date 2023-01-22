@@ -289,7 +289,7 @@ namespace Dual.Model.Import
                     }
 
                 }
-                //if (viewNode.NodeType == ViewType.VCOPY_VALUE)
+                //if (viewNode.NodeType == ViewType.VCOPY_SYS)
                 //    nNode.Attr.Shape = Shape.Octagon;
             }
         }

@@ -22,11 +22,11 @@ type DsSystem with
     member s.Y2_SystemConditionReady(): CommentedStatement list = [
         for f in s.Flows do
             let readys = getConditionInputs(f, s.ReadyConditions)
-            yield (readys.ToOrElseOff(s), s._off.Expr) --| (f.scr, "Y2" )
+            yield (readys.ToAndElseOn(s), s._off.Expr) --| (f.scr, "Y2" )
         ]
 
     member s.Y3_SystemConditionDrive(): CommentedStatement list = [
         for f in s.Flows do
             let drives = getConditionInputs(f, s.DriveConditions)
-            yield (drives.ToOrElseOff(s), s._off.Expr) --| (f.scr, "Y3" )
+            yield (drives.ToAndElseOn(s), s._off.Expr) --| (f.scd, "Y3" )
         ]

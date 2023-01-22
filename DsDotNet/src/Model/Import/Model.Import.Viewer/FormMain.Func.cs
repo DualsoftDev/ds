@@ -32,36 +32,32 @@ namespace Dual.Model.Import
                 var results = ImportPPT.GetLoadingAllSystem(paths);
                 _DicCpu = new Dictionary<DsSystem, DsCPU>();
                 _DicViews = new Dictionary<DsSystem, IEnumerable<ViewModule.ViewNode>>();
+                var storages = new Dictionary<string, Interface.IStorage>();
                 foreach (var view in results)
                 {
-                    var sys = view.System;
-                    var sysView = view.Views.ToList();
-                    var isActive = view.IsActive;
-                    _DicViews.Add(sys, sysView);
+                    _DicViews.Add(view.System, view.Views.ToList());
+                    if (!view.IsActive) continue;
 
-                    if (isActive)
+                    var rungs = Cpu.LoadStatements(view.System, storages);
+                    rungs.ForEach(s =>
                     {
-                        var storages = new Dictionary<string, Interface.IStorage>();
+                        _DicCpu.Add(s.ToSystem(), new DsCPU(s.CommentedStatements()));
 
-                        //var devices = sys.GetRecursiveSystems();
-                        //foreach (var device in devices)
-                        //{
-                        //    var devRungs = Cpu.LoadStatements(device, storages);
-                        //    if (!_DicCpu.ContainsKey(device))  //external system 은 공유
-                        //        _DicCpu.Add(device, new DsCPU(devRungs));
-                        //}
-
-                        var rungs = Cpu.LoadStatements(sys, storages);
-                        rungs.ForEach(s =>
+                        if(s.IsActive)
                         {
-                            _DicCpu.Add(s.ToSystem(), new DsCPU(s.CommentedStatements()));
-                        });
+
+                            var systemView = new SystemView()
+                                        { Display = s.ToSystem().Name
+                                        , System = s.ToSystem()
+                                        , ViewNodes = view.Views.ToList() };
+                            comboBox_System.Items.Add(systemView);
 
 
-                        var systemView = new SystemView() { Display = sys.Name, System = sys, ViewNodes = sysView };
-                        comboBox_System.Items.Add(systemView);
+                            testReadyAutoDrive(s.ToSystem());
+                            _DicCpu[s.ToSystem()].ScanOnce();
 
-                    }
+                        }
+                    });
                 }
 
                 comboBox_System.DisplayMember = "Display";
@@ -208,7 +204,7 @@ namespace Dual.Model.Import
         }
 
 
-        internal void WriteDebugMsg(DateTime time, MSGLevel level, string msg)
+        internal void WriteDebugMsg(DateTime time, MSGLevel level, string msg, bool bScrollToCaret = false)
         {
             this.Do(() =>
             {
@@ -223,8 +219,8 @@ namespace Dual.Model.Import
                     if (level.IsMsgWarn) color = Color.Purple;
                     richTextBox_Debug.AppendTextColor($"\r\n{time} : {msg}", color);
                 }
-
-               // richTextBox_Debug.ScrollToCaret();
+                if (bScrollToCaret)
+                    richTextBox_Debug.ScrollToCaret();
             });
         }
        // CoreModule.Model _Demo = new CoreModule.Model();

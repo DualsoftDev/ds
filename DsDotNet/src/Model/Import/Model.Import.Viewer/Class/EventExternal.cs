@@ -26,7 +26,7 @@ namespace Dual.Model.Import
         {
             CpuEvent.ValueSubject.Subscribe(rx =>
             {
-                FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{rx.Name}:{rx.BoxedValue}");
+                FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{rx.Name}:{rx.BoxedValue}", true);
             });
 
             CpuEvent.StatusSubject.Subscribe(rx =>
@@ -41,11 +41,11 @@ namespace Dual.Model.Import
                         viewNode.Status4 = rx.status;
 
                         ucView.UpdateStatus(viewNode);
-                        FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{v.Name}:{rx.status}");
+                        FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{v.Name}:{rx.status}", true);
                     }
                 });
 
-                
+
             });
         }
 

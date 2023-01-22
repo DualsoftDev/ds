@@ -42,7 +42,7 @@ type VertexMCoin with
         [
             for jd in call.CallTargetJob.DeviceDefs do
                 let sets = jd.RXs.ToAndElseOn(coin.System)
-                yield (sets, rsts) --| (jd.ApiItem.PR, "C3" )
+                yield (sets, rsts) --| (jd.ApiItem.PE, "C3" )
         ]
 
     member coin.C4_CallActionIn(): CommentedStatement list =

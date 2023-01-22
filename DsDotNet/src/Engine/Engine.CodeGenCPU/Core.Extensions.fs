@@ -25,6 +25,7 @@ module ConvertCoreExt =
     type ApiItem with
         member a.PS     = getAM(a).GetApiTag(ApiTag.PLANSET)
         member a.PR     = getAM(a).GetApiTag(ApiTag.PLANRST)
+        member a.PE     = getAM(a).GetApiTag(ApiTag.PLANEND)
 
     type DsSystem with
         member s._on     = getSM(s).GetSysBitTag(SysBitTag.ON)
@@ -170,8 +171,6 @@ module ConvertCoreExt =
 
         member c.INs           = c.CallTargetJob.DeviceDefs.Select(fun j -> j.ActionIN)
         member c.OUTs          = c.CallTargetJob.DeviceDefs.Select(fun j -> j.ActionOut)
-        member c.PlanSends     = c.CallTargetJob.DeviceDefs.Select(fun j -> j.ApiItem.PS)
-        member c.PlanReceives  = c.CallTargetJob.DeviceDefs.Select(fun j -> j.ApiItem.PR)
 
 
         member c.MutualResets =

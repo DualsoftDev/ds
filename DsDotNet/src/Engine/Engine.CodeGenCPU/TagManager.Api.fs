@@ -11,6 +11,7 @@ module ApiTagManagerModule =
     type ApiTag =
     |PLANSET
     |PLANRST
+    |PLANEND
 
 
     /// ApiItem Manager Manager : ApiItem Tag  를 관리하는 컨테이어
@@ -19,6 +20,7 @@ module ApiTagManagerModule =
 
         let ps    = planTag s $"{a.Name}(PS)"
         let pr    = planTag s $"{a.Name}(PR)"
+        let pe    = planTag s $"{a.Name}(PE)"
 
         interface ITagManager with
             member x.Target = a
@@ -29,6 +31,7 @@ module ApiTagManagerModule =
                 match at with
                 |PLANSET        -> ps
                 |PLANRST        -> pr
+                |PLANEND        -> pe
 
             t
 

@@ -158,7 +158,7 @@ namespace Dual.Model.Import
                 _cts.Cancel();
                 _cts = new CancellationTokenSource();
 
-                if (_SelectedCPU != null && _SelectedCPU.IsRunning)  _SelectedCPU.Stop(); 
+                if (_SelectedCPU != null && _SelectedCPU.IsRunning)  _SelectedCPU.Stop();
                 ImportPowerPoint(paths);
 
 
@@ -300,10 +300,7 @@ namespace Dual.Model.Import
                 comboBox_Device.Items.Add(vi);
             }
 
-
             comboBox_Device.DisplayMember = "Display";
-            //if (comboBox_Device.Items.Count > 0)
-            //    comboBox_Device.SelectedIndex = 0;
         }
 
         private void comboBox_Device_SelectedIndexChanged(object sender, EventArgs e)
@@ -332,9 +329,9 @@ namespace Dual.Model.Import
             sysView.System.GetVertices()
                 .ForEach(v =>
                 {
-                    var viewNode = sysView.ViewNodes.SelectMany(s => s.UsedViewNodes)
-                                                .Where(w => w.CoreVertex != null)
-                                                .First(w => w.CoreVertex.Value == v);
+                    var nodes = sysView.ViewNodes.SelectMany(s => s.UsedViewNodes);
+                    var viewNode = nodes.Where(w => w.CoreVertex != null)
+                                        .First(w => w.CoreVertex.Value == v);
 
                     _DicVertex.Add(v, viewNode);
                     if (v is Real)

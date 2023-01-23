@@ -1,15 +1,10 @@
 namespace PLC.CodeGen.LSXGI
 
-open System.Linq
 open System.Reflection
-open System.Collections.Generic
 
 open Engine.Common.FS
-open Engine.Core
 open PLC.CodeGen.LSXGI
-open PLC.CodeGen.Common
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
-
 
 [<AutoOpen>]
 module internal XgiFile =
@@ -45,7 +40,7 @@ module internal XgiFile =
             failwithlogf "INTERNAL ERROR: failed to read resource template"
 
     /// Template XGI XML 문서 (XDocument) 반환
-    let getTemplateXgiXmlDoc = getTemplateXgiXml >> DsXml.loadXml
+    let getTemplateXgiXmlDoc = getTemplateXgiXml >> XmlDocument.fromString
 
 
     /// rung 및 local var 에 대한 문자열 xml 을 전체 xml project file 에 embedding 시켜 outputPath 파일에 저장한다.
@@ -57,7 +52,7 @@ module internal XgiFile =
     let wrapWithXml (rungs:XmlOutput) symbolsLocal symbolsGlobal (existingLSISprj:string option) =
         let xdoc =
             existingLSISprj
-            |> Option.map DsXml.load
+            |> Option.map XmlDocument.loadFromFile
             |? getTemplateXgiXmlDoc()
 
         let pouName = "DsLogic"
@@ -66,12 +61,12 @@ module internal XgiFile =
 
         let programs = xdoc.SelectSingleNode("//POU/Programs")
 
-        // Dirty hack "스캔 프로그램" vs "?? ????"
+        // Dirty hack "Scan Program" vs "?? ????"
         let taskName =
             xdoc.SelectNodes("//POU/Programs/Program").ToEnumerables()
             |> map (fun xmlnode -> xmlnode.Attributes.["Task"].Value)
             |> Seq.tryHead
-            |> Option.defaultValue "스캔 프로그램"
+            |> Option.defaultValue "Scan Program"
 
         printfn "%A" taskName
 
@@ -82,37 +77,35 @@ module internal XgiFile =
 			    <Program Task="%s" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" FindProgram="1" FindVar="1" Encrytption="">%s
                     <Body>
 					    <LDRoutine>
-                            <COMMENT> ========= Rung(s) 삽입 위치 </COMMENT>
 						    <OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
     XckU4UJCOYh5CA==</OnlineUploadData>
 					    </LDRoutine>
 				    </Body>
-                    <COMMENT> ========= LocalVar 삽입 위치 </COMMENT>
 				    <RungTable></RungTable>
 			    </Program>""" taskName pouName
-            |> DsXml.xmlToXmlNode
+            |> XmlNode.fromString
 
 
 
-        let programTemplate = DsXml.adoptChild programs programTemplate
+        let programTemplate = programs.AdoptChild  programTemplate
 
         /// LDRoutine 위치 : Rung 삽입 위치
-        let posiLdRoutine = programTemplate |> DsXml.getXmlNode "Body/LDRoutine"
+        let posiLdRoutine = programTemplate.GetXmlNode "Body/LDRoutine"
         let onlineUploadData = posiLdRoutine.FirstChild
 
         (*
          * Rung 삽입
          *)
-        let rungsXml = $"<Rungs>{rungs}</Rungs>" |> DsXml.xmlToXmlNode
-        for r in DsXml.getChildrenNodes rungsXml do
-            DsXml.insertBeforeUnit r onlineUploadData
+        let rungsXml = $"<Rungs>{rungs}</Rungs>" |> XmlNode.fromString
+        for r in rungsXml.GetChildrenNodes() do
+            onlineUploadData.InsertBefore r |> ignore
 
         (*
          * Local variables 삽입
          *)
         let programBody = posiLdRoutine.ParentNode
-        let localSymbols = symbolsLocal |> DsXml.xmlToXmlNode
-        DsXml.insertAfterUnit localSymbols programBody
+        let localSymbols = symbolsLocal |> XmlNode.fromString
+        programBody.InsertAfter localSymbols |> ignore
 
         (*
          * Global variables 삽입
@@ -121,16 +114,15 @@ module internal XgiFile =
         let countExistingGlobal = posiGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
         let globalSymbolXmls =
             // symbolsGlobal = "<GlobalVariable Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol>
-            let neoGlobals = symbolsGlobal |> DsXml.xmlToXmlNode
+            let neoGlobals = symbolsGlobal |> XmlNode.fromString
             let numNewGlobals = neoGlobals.Attributes.["Count"].Value |> System.Int32.Parse
 
             posiGlobalVar.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
-            let posiGlobalVarSymbols = DsXml.getXmlNode "Symbols" posiGlobalVar
+            let posiGlobalVarSymbols = posiGlobalVar.GetXmlNode "Symbols"
 
-            neoGlobals.SelectNodes("//Symbols/Symbol")
-            |> XmlExt.ToEnumerables
-            |> iter (DsXml.adoptChildUnit posiGlobalVarSymbols)
+            neoGlobals.SelectNodes("//Symbols/Symbol").ToEnumerables()
+            |> iter (posiGlobalVarSymbols.AdoptChild >> ignore)
 
-        xdoc.OuterXml
+        xdoc.ToText()
 
 

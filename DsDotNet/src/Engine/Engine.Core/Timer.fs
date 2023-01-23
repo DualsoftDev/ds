@@ -132,6 +132,7 @@ module rec TimerModule =
         interface IStorage with
             member x.Name with get() = x.Name and set(v) = failwithlog "ERROR: not supported"
             member x.DataType = typedefof<TimerCounterBaseStruct>
+            member val Comment = "" with get, set
             member x.BoxedValue with get() = x.This and set(v) = failwithlog "ERROR: not supported"
             member x.ObjValue = x.This
             member x.ToText() = failwithlog "ERROR: not supported"

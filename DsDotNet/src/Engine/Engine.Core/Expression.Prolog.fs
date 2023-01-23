@@ -280,8 +280,9 @@ module rec ExpressionPrologModule =
 
     [<AbstractClass>]
     [<DebuggerDisplay("{Name}")>]
-    type TypedValueStorage<'T when 'T:equality>(name, initValue:'T) =
+    type TypedValueStorage<'T when 'T:equality>(name, initValue:'T, ?comment) =
         let mutable value = initValue
+        let comment = comment |? ""
         member _.Name: string = name
         member x.Value
             with get() = value
@@ -290,8 +291,11 @@ module rec ExpressionPrologModule =
                     value <- v
                     ChangeValueEvent(x :> IStorage)
 
+        member val Comment: string = comment with get, set
+
         interface IStorage with
             member x.DataType = typedefof<'T>
+            member x.Comment with get() = x.Comment and set(v) = x.Comment <- v
             member x.BoxedValue with get() = x.Value and set(v) = x.Value <- (v :?> 'T)
             member x.ObjValue = x.Value :> obj
             member x.ToBoxedExpression() = x.ToBoxedExpression()
@@ -311,8 +315,8 @@ module rec ExpressionPrologModule =
         abstract ToBoxedExpression : unit -> obj    /// IExpression<'T> 의 boxed 형태의 expression 생성
 
     [<AbstractClass>]
-    type TagBase<'T when 'T:equality>(name, initValue:'T) =
-        inherit TypedValueStorage<'T>(name, initValue)
+    type TagBase<'T when 'T:equality>(name, initValue:'T, ?comment) =
+        inherit TypedValueStorage<'T>(name, initValue, comment |? "")
 
         interface ITag<'T>
         interface INamedExpressionizableTerminal with
@@ -320,8 +324,8 @@ module rec ExpressionPrologModule =
         override x.ToText() = "$" + name
 
     [<AbstractClass>]
-    type VariableBase<'T when 'T:equality>(name, initValue:'T) =
-        inherit TypedValueStorage<'T>(name, initValue)
+    type VariableBase<'T when 'T:equality>(name, initValue:'T, ?comment) =
+        inherit TypedValueStorage<'T>(name, initValue, comment |? "")
 
         interface IVariable<'T>
         override x.ToText() = "$" + name

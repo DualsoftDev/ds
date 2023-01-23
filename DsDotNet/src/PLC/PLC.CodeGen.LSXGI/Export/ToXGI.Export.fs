@@ -1,6 +1,7 @@
 namespace PLC.CodeGen.LSXGI
 
 open System.Linq
+open System.Xml
 
 open Engine.Common.FS
 open Engine.Core
@@ -8,7 +9,30 @@ open PLC.CodeGen.LSXGI
 open PLC.CodeGen.Common
 
 [<AutoOpen>]
-module LsXGI =
+module XgiXmlGeneratorModule =
+    /// Program 부분 Xml string 반환: <Program Task="taskName" ..>pouName
+    let createXmlStringProgram taskName pouName =
+        sprintf """
+			<Program Task="%s" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" FindProgram="1" FindVar="1" Encrytption="">%s
+                <Body>
+					<LDRoutine>
+						<OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
+XckU4UJCOYh5CA==</OnlineUploadData>
+					</LDRoutine>
+				</Body>
+				<RungTable></RungTable>
+			</Program>""" taskName pouName
+
+    /// Task 부분 Xml string 반환: <Task Version=..>taskNameName
+    let createXmlStringTask taskName kind priority index =
+        sprintf """
+            <Task Version="257" Type="0" Attribute="2" Kind="%d" Priority="%d" TaskIndex="%d"
+                Device="" DeviceType="0" WordValue="0" WordCondition="0" BitCondition="0">%s</Task>""" kind priority index taskName
+
+
+
+[<AutoOpen>]
+module XgiExportModule =
 
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
     let internal generateRungs (prologComment:string) (commentedStatements:CommentedXgiStatements seq) : XmlOutput =
@@ -107,3 +131,162 @@ module LsXGI =
             if xgiStatements.Any() then
                 newCommentedStatements.Add xgiCmtStmts
         newStorages.ToFSharpList(), newCommentedStatements.ToFSharpList()
+
+
+
+    type XgiPOUParams = {
+        /// POU name.  "DsLogic"
+        POUName: string
+        /// POU container task name
+        TaskName: string
+        /// POU ladder 최상단의 comment
+        Comment: string
+        LocalStorages:Storages
+        CommentedStatements: CommentedStatement list
+    }
+    type XgiProjectParams = {
+        GlobalStorages:Storages
+        ExistingLSISprj: string option
+        POUs: XgiPOUParams list
+    }
+
+    type XgiPOUParams with
+        member x.GenerateXmlString() = x.GenerateXmlNode().OuterXml
+        member x.GenerateXmlNode() : XmlNode =
+            let {TaskName=taskName; POUName=pouName; Comment=comment; LocalStorages=localStorages; CommentedStatements=commentedStatements} = x
+            let newLocalStorages, commentedXgiStatements = commentedStatementsToCommentedXgiStatements localStorages.Values commentedStatements
+            let localStoragesXml = storagesToLocalXml newLocalStorages
+            let rungsXml = generateRungs comment commentedXgiStatements
+
+            /// POU/Programs/Program
+            let programTemplate = createXmlStringProgram taskName pouName |> XmlNode.fromString
+
+            //let programTemplate = DsXml.adoptChild programs programTemplate
+
+            /// LDRoutine 위치 : Rung 삽입 위치
+            let posiLdRoutine = programTemplate.GetXmlNode "Body/LDRoutine"
+            let onlineUploadData = posiLdRoutine.FirstChild
+            (*
+             * Rung 삽입
+             *)
+            let rungsXml = $"<Rungs>{rungsXml}</Rungs>" |> XmlNode.fromString
+            for r in rungsXml.GetChildrenNodes()  do
+                onlineUploadData.InsertBefore r |> ignore
+
+            (*
+             * Local variables 삽입
+             *)
+            let programBody = posiLdRoutine.ParentNode
+            let localSymbols = localStoragesXml |> XmlNode.fromString
+            programBody.InsertAfter localSymbols |> ignore
+
+            programTemplate
+
+
+    type XgiProjectParams with
+        member private x.GetTemplateXmlDoc() =
+            x.ExistingLSISprj
+            |> Option.map XmlDocument.loadFromFile
+            |? getTemplateXgiXmlDoc()
+
+        member x.GenerateXmlString() = x.GenerateXmlDocument().Beautify()
+        member x.GenerateXmlDocument() : XmlDocument =
+            let { GlobalStorages=globalStorages; ExistingLSISprj=existingLSISprj; POUs=pous } = x
+            let xdoc = x.GetTemplateXmlDoc()
+
+            (* xn = Xml Node *)
+
+            (* Tasks/Task 삽입 *)
+            do
+                let xnTasks = xdoc.SelectSingleNode("//Configurations/Configuration/Tasks")
+                xnTasks.RemoveChildren()  |> ignore
+                let pous = pous |> List.distinctBy(fun pou -> pou.TaskName)
+                for i, pou in pous.Indexed() do
+                    let index = if i <= 1 then 0 else i-1
+                    let kind = if i = 0 then 0 else 2
+                    let priority = kind
+
+                    createXmlStringTask pou.TaskName kind priority index
+                    |> XmlNode.fromString
+                    |> xnTasks.AdoptChild
+                    |> ignore
+
+            (* Global variables 삽입 *)
+            do
+                let xnGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
+                let countExistingGlobal = xnGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
+                // symbolsGlobal = "<GlobalVariable Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol>
+                let globalStoragesXmlNode = storagesToGlobalXml globalStorages.Values |> XmlNode.fromString
+                let numNewGlobals = globalStoragesXmlNode.Attributes.["Count"].Value |> System.Int32.Parse
+
+                xnGlobalVar.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
+                let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
+
+                globalStoragesXmlNode.SelectNodes("//Symbols/Symbol").ToEnumerables()
+                |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)
+
+
+            (* POU program 삽입 *)
+            do
+                let xnPrograms = xdoc.SelectSingleNode("//POU/Programs")
+                xnPrograms.RemoveChildren() |> ignore
+                for pou in pous do
+                    pou.GenerateXmlNode() |> xnPrograms.AdoptChild |> ignore
+
+            xdoc
+
+
+    let XXX_NEW_wrapWithXml (rungs:XmlOutput) (symbolsLocal:string) (symbolsGlobal:string) (existingLSISprj:string option) =
+        let emptyStorage = Storages()
+        let pouParams:XgiPOUParams = {
+            /// POU name.  "DsLogic"
+            POUName = "DsLogic"
+            /// POU container task name
+            TaskName = "Scan Program"
+            /// POU ladder 최상단의 comment
+            Comment = "DS Logic for XGI"
+            LocalStorages = emptyStorage
+            CommentedStatements = []
+        }
+        let projParams:XgiProjectParams = {
+            GlobalStorages = emptyStorage
+            ExistingLSISprj = None
+            POUs = [pouParams]
+        }
+
+        let xdoc = projParams.GenerateXmlDocument()
+        (*
+            POU
+                Programs
+                    Program
+                        Body
+                            LDRoutine
+                                Rung
+                        LocalVar
+                            Symbols
+                                Symbol
+        *)
+        do
+            if (symbolsGlobal.NonNullAny()) then
+                let xnGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
+                let newGlobalVar = symbolsGlobal |> XmlNode.fromString
+                let parent = newGlobalVar.ParentNode
+                parent.RemoveChild(xnGlobalVar) |> ignore
+                parent.AdoptChild newGlobalVar |> ignore
+
+        do
+            if (symbolsLocal.NonNullAny()) then
+                let xnLocalVar = xdoc.SelectSingleNode("//Configurations/Configuration/POU/Programs/Program/LocalVar")
+                let newLocalVar = symbolsLocal |> XmlNode.fromString
+                let parent = xnLocalVar.ParentNode
+                parent.RemoveChild(xnLocalVar) |> ignore
+                parent.AdoptChild newLocalVar |> ignore
+
+        let xnProgram = xdoc.SelectSingleNode("//Configurations/Configuration/POU/Programs/Program")
+        //do
+        //    let xnGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
+        //    let newGlobalVar = symbolsGlobal|> XmlNode.fromString
+        //    DsXml.replaceChild xnGlobalVar newGlobalVar |> ignore
+
+        xdoc.OuterXml
+

@@ -167,6 +167,7 @@ module ExpressionModule =
 
             member x.Name with get() = $"RisingCoil.{x.Storage.Name}" and set(v) = failwithlog "ERROR"
             member x.DataType = typedefof<RisingCoil>
+            member x.Comment with get() = "" and set(v) = failwithlog "ERROR"
             member x.BoxedValue with get() = x.Storage.BoxedValue
                                 and set(v) = x.Storage.BoxedValue <- v
             member x.ObjValue = x.Storage.BoxedValue
@@ -183,6 +184,7 @@ module ExpressionModule =
 
             member x.Name with get() = $"FallingCoil.{x.Storage.Name}" and set(v) = failwithlog "ERROR"
             member x.DataType = typedefof<FallingCoil>
+            member x.Comment with get() = "" and set(v) = failwithlog "ERROR"
             member x.BoxedValue with get() = x.Storage.BoxedValue
                                 and set(v) = x.Storage.BoxedValue <- v
 

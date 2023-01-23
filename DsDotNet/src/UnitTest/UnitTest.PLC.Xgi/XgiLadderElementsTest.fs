@@ -70,3 +70,18 @@ type XgiLadderElementTest() =
         let statements = parseCode storages code
         let xml = XgiFixtures.generateXml storages (map withNoComment statements)
         saveTestResult (get_current_function_name()) xml
+
+    [<Test>]
+    member __.``Local var with comment and init test`` () =
+        let storages = Storages()
+        let code = """
+            bool    mybool   = false;
+            int16   myint16  = 16s;
+            int32   myint32  = 32;
+            int64   myint64  = 64L;
+"""
+        let statements = parseCode storages code
+        storages["mybool"].Comment <- "mybool comment"
+        storages["myint16"].Comment <- "myint16 comment <> ! +-*/"
+        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
+        saveTestResult (get_current_function_name()) xml

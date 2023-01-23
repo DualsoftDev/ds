@@ -67,7 +67,7 @@ module ConvertorPrologModule =
         inherit IVariable<'T>
 
     type XgiLocalVar<'T when 'T:equality>(name, comment, initValue:'T) =
-        inherit VariableBase<'T>(name, initValue)
+        inherit VariableBase<'T>(name, initValue, comment)
         let symbolInfo =
             let plcType = systemTypeToXgiTypeName typedefof<'T>
             let comment = SecurityElement.Escape comment
@@ -388,7 +388,7 @@ module XgiExpressionConvertorModule =
                 match decl with
                 | :? IXgiLocalVar as loc ->
                     let si = loc.SymbolInfo
-                    let comment = $"[local var in code] {si.Comment}"
+                    let comment = loc.Comment.DefaultValue $"[local var in code] {si.Comment}"
                     let initValue = exp.BoxedEvaluatedValue
 
                     let typ = initValue.GetType()

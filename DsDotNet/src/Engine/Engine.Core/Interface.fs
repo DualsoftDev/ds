@@ -36,6 +36,7 @@ module Interface =
         inherit IText
         abstract BoxedValue: obj with get, set
         abstract DataType : System.Type
+        abstract Comment: string with get, set
         abstract ToBoxedExpression : unit -> obj    /// IExpression<'T> 의 boxed 형태의 expression 생성
 
     /// terminal expression 이 될 수 있는 객체.  Tag, Variable, Literal.  IExpression 은 아님

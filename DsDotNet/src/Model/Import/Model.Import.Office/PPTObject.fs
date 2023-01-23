@@ -259,6 +259,8 @@ module PPTObjectModule =
                     ifRXs  <- rxs.Split(';').Where(fun f->f=""|>not) |> trimStartEndSeq |> Seq.filter(fun f->f="_"|>not) |> HashSet
                 else
                     shape.ErrorName(ErrID._43, iPage)
+            else
+                shape.ErrorName(ErrID._53, iPage)
 
         let updateLinkIF(text:string)      =
             ifName <- GetBracketsReplaceName(text) |> trimSpace
@@ -266,6 +268,8 @@ module PPTObjectModule =
             if(txrx.length() > 0)
             then
                 ifTXs  <- txrx.Split(';').Where(fun f->f=""|>not) |> trimStartEndSeq |> Seq.filter(fun f->f="_"|>not) |> HashSet
+            else
+                shape.ErrorName(ErrID._53, iPage)
 
         let getBracketItems (name:string) =
             name.Split(']').Where(fun w->w <> "")

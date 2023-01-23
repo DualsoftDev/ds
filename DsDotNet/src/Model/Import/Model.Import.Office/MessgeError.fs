@@ -66,11 +66,12 @@ module ErrID =
     let _45 = "System 인터페이스 순환관계가 존재합니다."
     let _46 = "Call 이름은 '.' 으로 구분되어야 합니다.(ex: systemA.Inferface3)"
     let _47 = "호출 Interface에 해당하는 대상 시스템이 없습니다."
-    let _48 = "외부 시스템이 없습니다."
+    let _48 = "Spare"
     let _49 = "해당 인터페이스가 없습니다."
     let _50 = "다른 CPU는 Copy아닌 Open으로 로딩해야합니다."
     let _51 = "외부 시스템(CPU)은 Link Task만 호출가능 합니다."
     let _52 = "외부 시스템(Device) 호출은 Device Task만 호출가능 합니다."
+    let _53 = "Api TXs~Rxs 이름을 정의 해야합니다. ex) ApiName[tx1;tx2~rx1]"
 
     // Excel Error (1001 ~ )
     let _1001 = "시스템에 버튼 이름이 없습니다."

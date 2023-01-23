@@ -16,8 +16,6 @@ module ImportU =
 
     let private createCallVertex(mySys:DsSystem, node:pptNode, parentReal:Real Option, parentFlow:Flow Option, dicSeg:Dictionary<string, Vertex>) =
         let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
-        if mySys.TryFindLoadedSystem(sysName).IsNone
-        then node.Shape.ErrorName(ErrID._48, node.PageNum)
 
         let call =
             match mySys.Jobs.TryFind(fun job -> job.Name = sysName+"_"+apiName) with
@@ -37,9 +35,7 @@ module ImportU =
     let private createExSystemReal(mySys:DsSystem, node:pptNode, parentFlow:Flow) =
         let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
 
-        if mySys.TryFindLoadedSystem(sysName).IsNone
-        then node.Shape.ErrorName(ErrID._48, node.PageNum)
-        elif mySys.TryFindExternalSystem(sysName).IsNone
+        if mySys.TryFindExternalSystem(sysName).IsNone
         then node.Shape.ErrorName(ErrID._50, node.PageNum)
 
         let realExS =
@@ -82,8 +78,6 @@ module ImportU =
 
     [<Extension>]
     type ImportUtil =
-
-
         //Job 만들기
         [<Extension>]
         static member MakeJobs  (doc:pptDoc, mySys:DsSystem) =
@@ -95,13 +89,13 @@ module ImportU =
                 node.JobInfos
                 |> Seq.iter(fun jobSet ->
                     let jobBase = jobSet.Key
-                    let JobTargetSystems = jobSet.Value
+                    let JobTargetSystem = jobSet.Value.First()
                     //ppt에서는 동일한 디바이스만 동시 Job구성 가능하여  아무시스템이나 찾아도 API는 같음
-                    let refSystem = mySys.TryFindLoadedSystem(JobTargetSystems.First()).Value.ReferenceSystem
+                    let refSystem = mySys.TryFindLoadedSystem(JobTargetSystem).Value.ReferenceSystem
 
                     refSystem.ApiItems.ForEach(fun api->
                         let devs =
-                            JobTargetSystems
+                            jobSet.Value
                              .Select(fun tgt -> getApiItems(mySys, tgt, api.Name), tgt)
                              .Select(fun (api, tgt)->
                                 match node.NodeType with

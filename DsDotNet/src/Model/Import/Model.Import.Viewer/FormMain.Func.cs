@@ -53,8 +53,6 @@ namespace Dual.Model.Import
                             comboBox_System.Items.Add(systemView);
 
 
-                            testReadyAutoDrive(s.ToSystem());
-                            _DicCpu[s.ToSystem()].ScanOnce();
 
                         }
                     });

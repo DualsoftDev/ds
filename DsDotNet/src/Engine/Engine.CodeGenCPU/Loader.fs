@@ -198,11 +198,4 @@ module CpuLoader =
                 //자신(Acitve) system을  CPU 변환
                 |>Seq.append [ActivePou (system, convertSystem(system))]
 
-            //test debug
-            //system._auto.Value <- true
-            //system._ready.Value <- true
-            //system._drive.Value <- true
-            //statements.Iter(fun f->f.Statement.Do())
-            ////test debug
-
             result

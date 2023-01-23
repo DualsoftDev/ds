@@ -43,6 +43,7 @@ namespace Dual.Model.Import
                         ucView.UpdateStatus(viewNode);
                         FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{v.Name}:{rx.status}", true);
                     }
+                    else { }
                 });
 
 

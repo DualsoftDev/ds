@@ -38,7 +38,7 @@ namespace Dual.Model.Import
         public static FormMain TheMain;
 
         private DsCPU _SelectedCPU;
-        public Dictionary<DsSystem, DsCPU> _DicCpu;
+        public Dictionary<DsSystem, DsCPU> _DicCpu = new Dictionary<DsSystem, DsCPU>();
         public Dictionary<DsSystem, IEnumerable<ViewNode>> _DicViews;
 
         public Dictionary<Vertex, ViewNode> _DicVertex;
@@ -158,7 +158,12 @@ namespace Dual.Model.Import
                 _cts.Cancel();
                 _cts = new CancellationTokenSource();
 
-                if (_SelectedCPU != null && _SelectedCPU.IsRunning)  _SelectedCPU.Stop();
+
+                _DicCpu.ForEach(cpu => {
+                    if (cpu.Value != null && cpu.Value.IsRunning)
+                        cpu.Value.Stop();
+                });
+
                 ImportPowerPoint(paths);
 
 
@@ -357,6 +362,9 @@ namespace Dual.Model.Import
             UpdateGraphUI(sysView.ViewNodes);
 
             DisplayTextModel(System.Drawing.Color.Transparent, sysView.System.ToDsText());
+
+            testReadyAutoDrive(sysView.System);
+
         }
 
 

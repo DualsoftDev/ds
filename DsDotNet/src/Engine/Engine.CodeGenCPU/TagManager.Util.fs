@@ -42,17 +42,7 @@ module TagManagerUtil =
         stg.Add(t.Name, t)
         t
 
-    type InOut = | In | Out | Memory
-    let createIOPLCTag(stg:Storages, name, address, inOut:InOut): ITagWithAddress =
-        let plcName =
-            match inOut with
-            | In  -> $"{name}_I"
-            | Out -> $"{name}_O"
-            | Memory -> failwithlog "error: Memory not supported "
 
-        let t= (ActionTag(plcName, address, false) :> ITagWithAddress)
-        stg.Add(t.Name, t)
-        t
 
     let timer  (storages:Storages)  name  =
         let name = getUniqueName name storages
@@ -74,4 +64,16 @@ module TagManagerUtil =
         let t= createDsTag (storages, name, DuBOOL)
         t :?> PlanTag<bool>
 
+    type InOut = | In | Out | Memory
+    let actionTag(stg:Storages, name, address, inOut:InOut): ITagWithAddress =
+        let name = getUniqueName name stg
+        let plcName =
+            match inOut with
+            | In  -> $"{name}_I"
+            | Out -> $"{name}_O"
+            | Memory -> failwithlog "error: Memory not supported "
+
+        let t= (ActionTag(plcName, address, false) :> ITagWithAddress)
+        stg.Add(t.Name, t)
+        t
 

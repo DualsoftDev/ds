@@ -8,9 +8,25 @@ open Engine.Common.FS
 [<AutoOpen>]
 
 module TagVariableModule =
+    type TagCreationParams<'T when 'T:equality> = {
+        Name: string
+        Value: 'T
+        Address: string option
+        Comment: string option
+    }
+
+    let defaultTagCreationParam = {
+        Name = ""
+        Value = false
+        Address = None
+        Comment = None
+    }
+
+
     [<AbstractClass>]
     [<DebuggerDisplay("{Name}")>]
-    type TypedValueStorage<'T when 'T:equality>(name, initValue:'T, ?comment) =
+    type TypedValueStorage<'T when 'T:equality>(param:TagCreationParams<'T>) =
+        let {Name=name; Value=initValue; Comment=comment; } = param
         let mutable value = initValue
         let comment = comment |? ""
         member _.Name: string = name
@@ -45,8 +61,9 @@ module TagVariableModule =
         abstract ToBoxedExpression : unit -> obj    /// IExpression<'T> 의 boxed 형태의 expression 생성
 
     [<AbstractClass>]
-    type TagBase<'T when 'T:equality>(name, initValue:'T, ?comment) =
-        inherit TypedValueStorage<'T>(name, initValue, comment |? "")
+    type TagBase<'T when 'T:equality>(param:TagCreationParams<'T>) =
+        inherit TypedValueStorage<'T>(param)
+        let {Name=name; } = param
 
         interface ITag<'T>
         interface INamedExpressionizableTerminal with
@@ -54,8 +71,9 @@ module TagVariableModule =
         override x.ToText() = "$" + name
 
     [<AbstractClass>]
-    type VariableBase<'T when 'T:equality>(name, initValue:'T, ?comment) =
-        inherit TypedValueStorage<'T>(name, initValue, comment |? "")
+    type VariableBase<'T when 'T:equality>(param:TagCreationParams<'T>) =
+        inherit TypedValueStorage<'T>(param)
+        let {Name=name; Value=initValue; Comment=comment; } = param
 
         interface IVariable<'T>
         override x.ToText() = "$" + name

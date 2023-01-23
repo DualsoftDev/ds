@@ -11,30 +11,36 @@ module TagModule =
         member x.Expr = var2expr x
 
     [<AbstractClass>]
-    type Tag<'T when 'T:equality> (name, initValue:'T) =
-        inherit TagBase<'T>(name, initValue)
+    type Tag<'T when 'T:equality> (param:TagCreationParams<'T>) =
+        inherit TagBase<'T>(param)
         override x.ToBoxedExpression() = var2expr x
 
     /// Variable for WINDOWS platform
-    type Variable<'T when 'T:equality> (name, initValue:'T) =
-        inherit VariableBase<'T>(name, initValue)
+    type Variable<'T when 'T:equality> (param:TagCreationParams<'T>) =
+        inherit VariableBase<'T>(param)
         override x.ToBoxedExpression() = var2expr x
 
+    [<Obsolete("<ahn> PLCTag 에서 address 가 None or empty string 인 경우가 존재할 수 있는지 체크")>]
     /// plc / pc / 다른 runtime platform 지원가능한 물리 TAG
-    type PlcTag<'T when 'T:equality> (name, address:string, initValue:'T) =
-        inherit Tag<'T>(name, initValue)
+    type PlcTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
+        inherit Tag<'T>(param)
+        let address = param.Address |? ""   // todo: <ahn> address None 과 "" 구분 처리.  `|? ""` 없이 동작해야..
+        new(name, address:string, initValue:'T) =
+            let param = {Name = name; Address = Some address; Comment = None; Value = initValue}
+            PlcTag<'T>(param)
+
         interface ITagWithAddress with
             member x.Address = x.Address
         member val Address = address with get, set
 
     /// PlanTag 나의 시스템 내부 TAG
-    type PlanTag<'T when 'T:equality> (name, initValue:'T) =
-        inherit PlcTag<'T>(name, "", initValue)
+    type PlanTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
+        inherit PlcTag<'T>(param)
         member val Vertex:Vertex option = None with get, set
 
     /// ActionTag 다른 시스템 연결 TAG
-    type ActionTag<'T when 'T:equality> (name, address, initValue:'T) =
-        inherit PlcTag<'T>(name, address, initValue)
+    type ActionTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
+        inherit PlcTag<'T>(param)
 
 
 
@@ -45,20 +51,21 @@ module TagModule =
     let createWindowsVariableWithTypeAndValue (typ:System.Type) (name:string) (boxedValue:BoxedObjectHolder): IVariable =
         verify (Runtime.Target = WINDOWS)
         let v = boxedValue.Object
+        let createParam () = {Name=name; Value=unbox v; Comment=None; Address=None;}
         match typ.Name with
-        | "Boolean"-> new Variable<bool>  (name, unbox v)
-        | "Byte"   -> new Variable<uint8> (name, unbox v)
-        | "Char"   -> new Variable<char>  (name, unbox v)
-        | "Double" -> new Variable<double>(name, unbox v)
-        | "Int16"  -> new Variable<int16> (name, unbox v)
-        | "Int32"  -> new Variable<int32> (name, unbox v)
-        | "Int64"  -> new Variable<int64> (name, unbox v)
-        | "SByte"  -> new Variable<int8>  (name, unbox v)
-        | "Single" -> new Variable<single>(name, unbox v)
-        | "String" -> new Variable<string>(name, unbox v)
-        | "UInt16" -> new Variable<uint16>(name, unbox v)
-        | "UInt32" -> new Variable<uint32>(name, unbox v)
-        | "UInt64" -> new Variable<uint64>(name, unbox v)
+        | "Boolean"-> new Variable<bool>   (createParam())
+        | "Byte"   -> new Variable<uint8>  (createParam())
+        | "Char"   -> new Variable<char>   (createParam())
+        | "Double" -> new Variable<double> (createParam())
+        | "Int16"  -> new Variable<int16>  (createParam())
+        | "Int32"  -> new Variable<int32>  (createParam())
+        | "Int64"  -> new Variable<int64>  (createParam())
+        | "SByte"  -> new Variable<int8>   (createParam())
+        | "Single" -> new Variable<single> (createParam())
+        | "String" -> new Variable<string> (createParam())
+        | "UInt16" -> new Variable<uint16> (createParam())
+        | "UInt32" -> new Variable<uint32> (createParam())
+        | "UInt64" -> new Variable<uint64> (createParam())
         | _  -> failwithlog "ERROR"
 
     let createWindowsVariableWithType (typ:System.Type) (name:string) : IVariable =

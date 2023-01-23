@@ -66,11 +66,14 @@ module ConvertorPrologModule =
         inherit IXgiLocalVar
         inherit IVariable<'T>
 
-    type XgiLocalVar<'T when 'T:equality>(name, comment, initValue:'T) =
-        inherit VariableBase<'T>(name, initValue, comment)
+    type XgiLocalVar<'T when 'T:equality>(param:TagCreationParams<'T>) =
+        inherit VariableBase<'T>(param)
+
+        let {Name=name; Value=initValue; Comment=comment; } = param
+
         let symbolInfo =
             let plcType = systemTypeToXgiTypeName typedefof<'T>
-            let comment = SecurityElement.Escape comment
+            let comment = comment |> map (fun cmt -> SecurityElement.Escape cmt) |? ""
             let initValueHolder:BoxedObjectHolder = {Object=initValue}
             fwdCreateSymbolInfo name comment plcType initValueHolder
 
@@ -116,20 +119,22 @@ module rec TypeConvertorModule =
         | RegexPattern "ld(\d)+" _ -> failwith $"Invalid XGI variable name {name}."
         | _ -> ()
 
+        let createParam () = {Name=name; Value=unbox initValue; Comment=Some comment; Address=None;}
+
         match typ.Name with
-        | "Boolean"-> XgiLocalVar<bool>  (name, comment, unbox initValue)
-        | "Byte"   -> XgiLocalVar<uint8> (name, comment, unbox initValue)
-        | "Char"   -> XgiLocalVar<char>  (name, comment, unbox initValue)
-        | "Double" -> XgiLocalVar<double>(name, comment, unbox initValue)
-        | "Int16"  -> XgiLocalVar<int16> (name, comment, unbox initValue)
-        | "Int32"  -> XgiLocalVar<int32> (name, comment, unbox initValue)
-        | "Int64"  -> XgiLocalVar<int64> (name, comment, unbox initValue)
-        | "SByte"  -> XgiLocalVar<int8>  (name, comment, unbox initValue)
-        | "Single" -> XgiLocalVar<single>(name, comment, unbox initValue)
-        | "String" -> XgiLocalVar<string>(name, comment, unbox initValue)
-        | "UInt16" -> XgiLocalVar<uint16>(name, comment, unbox initValue)
-        | "UInt32" -> XgiLocalVar<uint32>(name, comment, unbox initValue)
-        | "UInt64" -> XgiLocalVar<uint64>(name, comment, unbox initValue)
+        | "Boolean"-> XgiLocalVar<bool>  (createParam())
+        | "Byte"   -> XgiLocalVar<uint8> (createParam())
+        | "Char"   -> XgiLocalVar<char>  (createParam())
+        | "Double" -> XgiLocalVar<double>(createParam())
+        | "Int16"  -> XgiLocalVar<int16> (createParam())
+        | "Int32"  -> XgiLocalVar<int32> (createParam())
+        | "Int64"  -> XgiLocalVar<int64> (createParam())
+        | "SByte"  -> XgiLocalVar<int8>  (createParam())
+        | "Single" -> XgiLocalVar<single>(createParam())
+        | "String" -> XgiLocalVar<string>(createParam())
+        | "UInt16" -> XgiLocalVar<uint16>(createParam())
+        | "UInt32" -> XgiLocalVar<uint32>(createParam())
+        | "UInt64" -> XgiLocalVar<uint64>(createParam())
         | _  -> failwithlog "ERROR"
 
     let createTypedXgiAutoVariable (typ:System.Type) (nameHint:string) (initValue:obj) comment : IXgiLocalVar =
@@ -141,7 +146,10 @@ module rec TypeConvertorModule =
 
     let internal createXgiAutoVariableT (nameHint:string) comment (initValue:'T) =
         autoVariableCounter <- autoVariableCounter + 1
-        XgiLocalVar($"_tmp{nameHint}{autoVariableCounter}", comment, initValue)
+        let name = $"_tmp{nameHint}{autoVariableCounter}"
+        let param = {Name=name; Value=initValue; Comment=Some comment; Address=None}
+
+        XgiLocalVar(param)
 
 
     (* Moved from Command.fs *)

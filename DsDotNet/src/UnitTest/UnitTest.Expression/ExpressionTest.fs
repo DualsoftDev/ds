@@ -410,19 +410,20 @@ module Exp =
             sbyte.DataType === typedefof<sbyte>
             sbyte.BoxedEvaluatedValue === 1y
 
+            let createParam (name, v) = {Name=name; Value=unbox v; Comment=None; Address=None;}
             let variables = [
-                Variable("sbyte", 1y)    |> var2expr |> iexpr
-                Variable("byte", 1uy)    |> var2expr |> iexpr
-                Variable("int16", 1s)    |> var2expr |> iexpr
-                Variable("uint16", 1us)  |> var2expr |> iexpr
-                Variable("int32", 1)     |> var2expr |> iexpr
-                Variable("uint32", 1u)   |> var2expr |> iexpr
-                Variable("int64", 1L)    |> var2expr |> iexpr
-                Variable("uint64", 1UL)  |> var2expr |> iexpr
-                Variable("single", 1.0f) |> var2expr |> iexpr
-                Variable("double", 1.0)  |> var2expr |> iexpr
-                Variable("char", '1')    |> var2expr |> iexpr
-                Variable("string", "1")  |> var2expr |> iexpr
+                Variable<byte>   (createParam("byte",   box 1uy))  |> var2expr |> iexpr
+                Variable<char>   (createParam("char",   box '1'))  |> var2expr |> iexpr
+                Variable<double> (createParam("double", box 0.1))  |> var2expr |> iexpr
+                Variable<int16>  (createParam("int16",  box 1s))   |> var2expr |> iexpr
+                Variable<int32>  (createParam("int32",  box 1))    |> var2expr |> iexpr
+                Variable<int64>  (createParam("int64",  box 1L))   |> var2expr |> iexpr
+                Variable<int8>   (createParam("sbyte",  box 1y))   |> var2expr |> iexpr
+                Variable<single> (createParam("single", box 1.0f)) |> var2expr |> iexpr
+                Variable<string> (createParam("string", box "1"))  |> var2expr |> iexpr
+                Variable<uint16> (createParam("uint16", box 1us))  |> var2expr |> iexpr
+                Variable<uint32> (createParam("uint32", box 1u))   |> var2expr |> iexpr
+                Variable<uint64> (createParam("uint64", box 1UL))  |> var2expr |> iexpr
             ]
             let varDic =
                 [   for v in variables do

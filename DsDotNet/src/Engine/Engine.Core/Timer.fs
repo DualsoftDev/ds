@@ -78,10 +78,10 @@ module rec TimerModule =
             the20msTimer.Subscribe(fun _ -> accumulate()) |> disposables.Add
 
             ValueSubject
-                .Where(fun storage -> storage = timerStruct.EN)
-                .Subscribe(fun storage ->
+                .Where(fun (storage, newValue_) -> storage = timerStruct.EN)
+                .Subscribe(fun (storage, newValue) ->
                     if ts.ACC.Value < 0us || ts.PRE.Value < 0us then failwithlog "ERROR"
-                    let rungInCondition = storage.BoxedValue :?> bool
+                    let rungInCondition = newValue :?> bool
                     tracefn "%A rung-condition-in=%b with DN=%b" tt rungInCondition ts.DN.Value
                     match tt, rungInCondition with
                     | TON, true ->
@@ -112,9 +112,9 @@ module rec TimerModule =
                 ) |> disposables.Add
 
             ValueSubject
-                .Where(fun storage -> storage = ts.RES)
-                .Subscribe(fun storage ->
-                    let resetCondition = storage.BoxedValue :?> bool
+                .Where(fun (storage, newValue) -> storage = ts.RES)
+                .Subscribe(fun (storage, newValue) ->
+                    let resetCondition = newValue :?> bool
                     if resetCondition then
                         ts.ACC.Value <- 0us
                         ts.DN.Value <- false

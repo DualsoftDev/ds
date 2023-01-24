@@ -46,8 +46,8 @@ module CoreExtensionsModule =
             then            //마지막 괄호 문자만 추출 tagname(R)  -> R
                 let m = Regex.Match(x.Name, @"(?<=\()\D+(?=\)$)")
                 match m.Value with
-                | "R" -> ChangeStatusEvent (x.Vertex.Value, Ready)
-                | "G" -> ChangeStatusEvent (x.Vertex.Value, Going)
-                | "F" -> ChangeStatusEvent (x.Vertex.Value, Finish)
-                | "H" -> ChangeStatusEvent (x.Vertex.Value, Homing)
+                | "R" -> onStatusChanged (x.Vertex.Value, Ready)
+                | "G" -> onStatusChanged (x.Vertex.Value, Going)
+                | "F" -> onStatusChanged (x.Vertex.Value, Finish)
+                | "H" -> onStatusChanged (x.Vertex.Value, Homing)
                 | _->()

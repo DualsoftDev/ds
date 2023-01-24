@@ -35,7 +35,7 @@ module TagVariableModule =
             and set(v) =
                 if value <> v then
                     value <- v
-                    ChangeValueEvent(x :> IStorage)
+                    onValueChanged(x :> IStorage, v)
 
         member val Comment: string = comment with get, set
 

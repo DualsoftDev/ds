@@ -46,19 +46,19 @@ module TagModule =
         verify (Runtime.Target = WINDOWS)
         let v = boxedValue.Object
         match typ.Name with
-        | "Boolean"-> new Variable<bool>  (name, unbox v)
-        | "Byte"   -> new Variable<uint8> (name, unbox v)
-        | "Char"   -> new Variable<char>  (name, unbox v)
-        | "Double" -> new Variable<double>(name, unbox v)
-        | "Int16"  -> new Variable<int16> (name, unbox v)
-        | "Int32"  -> new Variable<int32> (name, unbox v)
-        | "Int64"  -> new Variable<int64> (name, unbox v)
-        | "SByte"  -> new Variable<int8>  (name, unbox v)
-        | "Single" -> new Variable<single>(name, unbox v)
-        | "String" -> new Variable<string>(name, unbox v)
-        | "UInt16" -> new Variable<uint16>(name, unbox v)
-        | "UInt32" -> new Variable<uint32>(name, unbox v)
-        | "UInt64" -> new Variable<uint64>(name, unbox v)
+        | BOOL-> new Variable<bool>  (name, unbox v)
+        | UINT8   -> new Variable<uint8> (name, unbox v)
+        | CHAR   -> new Variable<char>  (name, unbox v)
+        | FLOAT64 -> new Variable<double>(name, unbox v)
+        | INT16  -> new Variable<int16> (name, unbox v)
+        | INT32  -> new Variable<int32> (name, unbox v)
+        | INT64  -> new Variable<int64> (name, unbox v)
+        | INT8  -> new Variable<int8>  (name, unbox v)
+        | FLOAT32 -> new Variable<single>(name, unbox v)
+        | STRING -> new Variable<string>(name, unbox v)
+        | UINT16 -> new Variable<uint16>(name, unbox v)
+        | UINT32 -> new Variable<uint32>(name, unbox v)
+        | UINT64 -> new Variable<uint64>(name, unbox v)
         | _  -> failwithlog "ERROR"
 
     let createWindowsVariableWithType (typ:System.Type) (name:string) : IVariable =

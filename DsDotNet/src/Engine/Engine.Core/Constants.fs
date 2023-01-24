@@ -126,81 +126,82 @@ type ModelingEdgeExt =
 [<AutoOpen>]
 module DsDataType =
     //data 타입 지원 항목
-    let [<Literal>] FLOAT32 = "float32"
-    let [<Literal>] FLOAT64 = "float64"
-    let [<Literal>] INT8    = "int8"
-    let [<Literal>] UINT8   = "uint8"
-    let [<Literal>] INT16   = "int16"
-    let [<Literal>] UINT16  = "uint16"
-    let [<Literal>] INT32   = "int32"
-    let [<Literal>] UINT32  = "uint32"
-    let [<Literal>] INT64   = "int64"
-    let [<Literal>] UINT64  = "uint64"
-    let [<Literal>] STRING  = "string"
-    let [<Literal>] CHAR    = "char"
-    let [<Literal>] BOOL    = "bool"
-
+    let [<Literal>] INT8    = "SByte"
+    let [<Literal>] INT16   = "Int16"
+    let [<Literal>] INT32   = "Int32"
+    let [<Literal>] INT64   = "Int64"
+    let [<Literal>] UINT8   = "Byte"
+    let [<Literal>] UINT16  = "UInt16"
+    let [<Literal>] UINT32  = "UInt32"
+    let [<Literal>] UINT64  = "UInt64"
+    let [<Literal>] FLOAT32 = "Single"
+    let [<Literal>] FLOAT64 = "Double"
+    let [<Literal>] STRING  = "String"
+    let [<Literal>] CHAR    = "Char"
+    let [<Literal>] BOOL    = "Boolean"
 
     let typeDefaultValue (typ:System.Type) =
         match typ.Name with
-        | "Boolean"-> box false
-        | "Byte"   -> box 0uy
-        | "Char"   -> box ' '
-        | "Double" -> box 0.0
-        | "Int16"  -> box 0s
-        | "Int32"  -> box 0
-        | "Int64"  -> box 0L
-        | "SByte"  -> box 0y
-        | "Single" -> box 0.0f
-        | "String" -> box ""
-        | "UInt16" -> box 0us
-        | "UInt32" -> box 0u
-        | "UInt64" -> box 0UL
+        | INT8      -> box 0y
+        | INT16     -> box 0s
+        | INT32     -> box 0
+        | INT64     -> box 0L
+        | UINT8     -> box 0uy
+        | UINT16    -> box 0us
+        | UINT32    -> box 0u
+        | UINT64    -> box 0UL
+        | FLOAT32   -> box 0.0f
+        | FLOAT64   -> box 0.0
+        | STRING    -> box ""
+        | CHAR      -> box ' '
+        | BOOL      -> box false
         | _  -> failwithlog "ERROR"
 
     type DataType =
+        | DuINT8
+        | DuINT16
+        | DuINT32
+        | DuINT64
+        | DuUINT8
+        | DuUINT16
+        | DuUINT32
+        | DuUINT64
         | DuFLOAT32
         | DuFLOAT64
-        | DuINT8
-        | DuUINT8
-        | DuINT16
-        | DuUINT16
-        | DuINT32
-        | DuUINT32
-        | DuINT64
-        | DuUINT64
         | DuSTRING
         | DuCHAR
         | DuBOOL
+
         member x.ToText() =
             match x with
+            | DuINT8    -> INT8
+            | DuINT16   -> INT16
+            | DuINT32   -> INT32
+            | DuINT64   -> INT64
+            | DuUINT8   -> UINT8
+            | DuUINT16  -> UINT16
+            | DuUINT32  -> UINT32
+            | DuUINT64  -> UINT64
             | DuFLOAT32 -> FLOAT32
             | DuFLOAT64 -> FLOAT64
-            | DuINT8    -> INT8
-            | DuUINT8   -> UINT8
-            | DuINT16   -> INT16
-            | DuUINT16  -> UINT16
-            | DuINT32   -> INT32
-            | DuUINT32  -> UINT32
-            | DuINT64   -> INT64
-            | DuUINT64  -> UINT64
             | DuSTRING  -> STRING
             | DuCHAR    -> CHAR
             | DuBOOL    -> BOOL
 
 
+        member x.ToTextLower() = x.ToText().ToLower()
         member x.ToType() =
             match x with
+            | DuINT8    -> typedefof<int8>
+            | DuINT16   -> typedefof<int16>
+            | DuINT32   -> typedefof<int32>
+            | DuINT64   -> typedefof<int64>
+            | DuUINT8   -> typedefof<uint8>
+            | DuUINT16  -> typedefof<uint16>
+            | DuUINT32  -> typedefof<uint32>
+            | DuUINT64  -> typedefof<uint64>
             | DuFLOAT32 -> typedefof<single>
             | DuFLOAT64 -> typedefof<double>
-            | DuINT8    -> typedefof<int8>
-            | DuUINT8   -> typedefof<uint8>
-            | DuINT16   -> typedefof<int16>
-            | DuUINT16  -> typedefof<uint16>
-            | DuINT32   -> typedefof<int32>
-            | DuUINT32  -> typedefof<uint32>
-            | DuINT64   -> typedefof<int64>
-            | DuUINT64  -> typedefof<uint64>
             | DuSTRING  -> typedefof<string>
             | DuCHAR    -> typedefof<char>
             | DuBOOL    -> typedefof<bool>
@@ -210,20 +211,20 @@ module DsDataType =
 
     let DataToType(txt:string) =
         match txt.ToLower() with
-        //system1 | system2   | plc
-        | FLOAT32 | "single"           ->  DuFLOAT32
-        | FLOAT64 | "double"           ->  DuFLOAT64
-        | INT8    | "sbyte"            ->  DuINT8
-        | UINT8   | "byte"    |"byte"  ->  DuUINT8
-        | INT16   | "short"   |"byte"  ->  DuINT16
-        | UINT16  | "ushort"  |"word"  ->  DuUINT16
-        | INT32   | "int"              ->  DuINT32
-        | UINT32  | "uint"    |"dword" ->  DuUINT32
-        | INT64   | "long"             ->  DuINT64
-        | UINT64  | "ulong"   |"lword" ->  DuUINT64
-        | STRING                       ->  DuSTRING
-        | CHAR                         ->  DuCHAR
-        | BOOL    | "boolean" | "bit"  ->  DuBOOL
+        //system1   | system2   | plc
+        | "sbyte"   | "int8"             ->  DuINT8
+        | "int16"   | "short"   |"byte"  ->  DuINT16
+        | "int32"   | "int"              ->  DuINT32
+        | "int64"   | "long"             ->  DuINT64
+        | "byte"    | "uint8"   |"byte"  ->  DuUINT8
+        | "uint16"  | "ushort"  |"word"  ->  DuUINT16
+        | "uint32"  | "uint"    |"dword" ->  DuUINT32
+        | "uint64"  | "ulong"   |"lword" ->  DuUINT64
+        | "single"  | "float32"          ->  DuFLOAT32
+        | "double"  | "float64"          ->  DuFLOAT64
+        | "string"                       ->  DuSTRING
+        | "char"                         ->  DuCHAR
+        | "boolean" | "bool"    | "bit"  ->  DuBOOL
         | _ -> failwithf $"'{txt}' DataToType Error check type"
 
 
@@ -250,8 +251,8 @@ module DsTextExport =
     let [<Literal>] TextXlsEmergencyModeLamp = "비상램프"
     let [<Literal>] TextXlsTestModeLamp      = "시운전램프"
     let [<Literal>] TextXlsReadyModeLamp     = "준비램프"
-    let [<Literal>] TextXlsConditionReady     = "준비조건"
-    let [<Literal>] TextXlsConditionDrive     = "운전조건"
+    let [<Literal>] TextXlsConditionReady    = "준비조건"
+    let [<Literal>] TextXlsConditionDrive    = "운전조건"
 
 [<AutoOpen>]
 module DsTextProperty =

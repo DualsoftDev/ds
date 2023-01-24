@@ -40,18 +40,18 @@ open PLC.CodeGen.Common
 module ConvertorPrologModule =
     let systemTypeToXgiTypeName (typ:System.Type) =
         match typ.Name with
-        | "Boolean" -> "BOOL"
-        | "Byte"    -> "BYTE"
-        | "Double"  -> "LREAL"
-        | "Int16"   -> "SINT"
-        | "Int32"   -> "DINT"
-        | "Int64"   -> "LINT"
-        | "Single"  -> "REAL"
-        | "String"  -> "STRING"  // 32 byte
-        | "UInt16"  -> "USINT"
-        | "UInt32"  -> "UDINT"
-        | "UInt64"  -> "ULINT"
-        | ("SByte" | "Char")   -> "BYTE"
+        | BOOL -> "BOOL"
+        | UINT8    -> "BYTE"
+        | FLOAT64  -> "LREAL"
+        | INT16   -> "SINT"
+        | INT32   -> "DINT"
+        | INT64   -> "LINT"
+        | FLOAT32  -> "REAL"
+        | STRING  -> "STRING"  // 32 byte
+        | UINT16  -> "USINT"
+        | UINT32  -> "UDINT"
+        | UINT64  -> "ULINT"
+        | (INT8 | CHAR)   -> "BYTE"
         | _ -> failwithlog "ERROR"
 
 
@@ -117,19 +117,19 @@ module rec TypeConvertorModule =
         | _ -> ()
 
         match typ.Name with
-        | "Boolean"-> XgiLocalVar<bool>  (name, comment, unbox initValue)
-        | "Byte"   -> XgiLocalVar<uint8> (name, comment, unbox initValue)
-        | "Char"   -> XgiLocalVar<char>  (name, comment, unbox initValue)
-        | "Double" -> XgiLocalVar<double>(name, comment, unbox initValue)
-        | "Int16"  -> XgiLocalVar<int16> (name, comment, unbox initValue)
-        | "Int32"  -> XgiLocalVar<int32> (name, comment, unbox initValue)
-        | "Int64"  -> XgiLocalVar<int64> (name, comment, unbox initValue)
-        | "SByte"  -> XgiLocalVar<int8>  (name, comment, unbox initValue)
-        | "Single" -> XgiLocalVar<single>(name, comment, unbox initValue)
-        | "String" -> XgiLocalVar<string>(name, comment, unbox initValue)
-        | "UInt16" -> XgiLocalVar<uint16>(name, comment, unbox initValue)
-        | "UInt32" -> XgiLocalVar<uint32>(name, comment, unbox initValue)
-        | "UInt64" -> XgiLocalVar<uint64>(name, comment, unbox initValue)
+        | BOOL-> XgiLocalVar<bool>  (name, comment, unbox initValue)
+        | UINT8   -> XgiLocalVar<uint8> (name, comment, unbox initValue)
+        | CHAR   -> XgiLocalVar<char>  (name, comment, unbox initValue)
+        | FLOAT64 -> XgiLocalVar<double>(name, comment, unbox initValue)
+        | INT16  -> XgiLocalVar<int16> (name, comment, unbox initValue)
+        | INT32  -> XgiLocalVar<int32> (name, comment, unbox initValue)
+        | INT64  -> XgiLocalVar<int64> (name, comment, unbox initValue)
+        | INT8  -> XgiLocalVar<int8>  (name, comment, unbox initValue)
+        | FLOAT32 -> XgiLocalVar<single>(name, comment, unbox initValue)
+        | STRING -> XgiLocalVar<string>(name, comment, unbox initValue)
+        | UINT16 -> XgiLocalVar<uint16>(name, comment, unbox initValue)
+        | UINT32 -> XgiLocalVar<uint32>(name, comment, unbox initValue)
+        | UINT64 -> XgiLocalVar<uint64>(name, comment, unbox initValue)
         | _  -> failwithlog "ERROR"
 
     let createTypedXgiAutoVariable (typ:System.Type) (nameHint:string) (initValue:obj) comment : IXgiLocalVar =

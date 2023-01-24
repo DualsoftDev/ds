@@ -370,37 +370,37 @@ module ExpressionModule =
     type System.Type with
         member x.ToDsDataTypeString() =
             match x.Name with
-            | "Single" -> "float32"
-            | "Double" -> "float64"
-            | "SByte"  -> "int8"
-            | "Byte"   -> "uint8"
-            | "Int16"  -> "int16"
-            | "UInt16" -> "uint16"
-            | "Int32"  -> "int32"
-            | "UInt32" -> "uint32"
-            | "Int64"  -> "int64"
-            | "UInt64" -> "uint64"
-            | "String" -> "string"
-            | "Char"   -> "char"
-            | "Boolean"-> "bool"
+            | FLOAT32 -> "float32"
+            | FLOAT64 -> "float64"
+            | INT8  -> "int8"
+            | UINT8   -> "uint8"
+            | UINT16  -> "int16"
+            | INT16 -> "uint16"
+            | INT32  -> "int32"
+            | UINT32 -> "uint32"
+            | INT64  -> "int64"
+            | UINT64 -> "uint64"
+            | STRING -> "string"
+            | CHAR   -> "char"
+            | BOOL-> "bool"
             | _  -> failwithlog "ERROR"
 
 
     type IStorage with
         member x.ToExpression():IExpression =
             match x.DataType.Name with
-            | "Boolean"-> DuTerminal (DuVariable (x :?> TypedValueStorage<bool>  )) :> IExpression
-            | "Byte"   -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint8> )) :> IExpression
-            | "Char"   -> DuTerminal (DuVariable (x :?> TypedValueStorage<char>  )) :> IExpression
-            | "Double" -> DuTerminal (DuVariable (x :?> TypedValueStorage<double>)) :> IExpression
-            | "Int16"  -> DuTerminal (DuVariable (x :?> TypedValueStorage<int16> )) :> IExpression
-            | "Int32"  -> DuTerminal (DuVariable (x :?> TypedValueStorage<int32> )) :> IExpression
-            | "Int64"  -> DuTerminal (DuVariable (x :?> TypedValueStorage<int64> )) :> IExpression
-            | "SByte"  -> DuTerminal (DuVariable (x :?> TypedValueStorage<int8>  )) :> IExpression
-            | "Single" -> DuTerminal (DuVariable (x :?> TypedValueStorage<single>)) :> IExpression
-            | "String" -> DuTerminal (DuVariable (x :?> TypedValueStorage<string>)) :> IExpression
-            | "UInt16" -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint16>)) :> IExpression
-            | "UInt32" -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint32>)) :> IExpression
-            | "UInt64" -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint64>)) :> IExpression
+            | BOOL-> DuTerminal (DuVariable (x :?> TypedValueStorage<bool>  )) :> IExpression
+            | UINT8   -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint8> )) :> IExpression
+            | CHAR   -> DuTerminal (DuVariable (x :?> TypedValueStorage<char>  )) :> IExpression
+            | FLOAT64 -> DuTerminal (DuVariable (x :?> TypedValueStorage<double>)) :> IExpression
+            | INT16  -> DuTerminal (DuVariable (x :?> TypedValueStorage<int16> )) :> IExpression
+            | INT32  -> DuTerminal (DuVariable (x :?> TypedValueStorage<int32> )) :> IExpression
+            | INT64  -> DuTerminal (DuVariable (x :?> TypedValueStorage<int64> )) :> IExpression
+            | INT8  -> DuTerminal (DuVariable (x :?> TypedValueStorage<int8>  )) :> IExpression
+            | FLOAT32 -> DuTerminal (DuVariable (x :?> TypedValueStorage<single>)) :> IExpression
+            | STRING -> DuTerminal (DuVariable (x :?> TypedValueStorage<string>)) :> IExpression
+            | UINT16 -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint16>)) :> IExpression
+            | UINT32 -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint32>)) :> IExpression
+            | UINT64 -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint64>)) :> IExpression
             | _  -> failwithlog "ERROR"
 

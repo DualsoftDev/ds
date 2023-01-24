@@ -213,7 +213,6 @@ namespace Dual.Model.Import
             if (_SelectedCPU == null) return;
             StartResetBtnUpdate(true);
             await Task.Delay(0);
-            _SelectedCPU.Run();
         }
         private void button_Stop_Click(object sender, EventArgs e)
         {
@@ -363,7 +362,6 @@ namespace Dual.Model.Import
 
             DisplayTextModel(System.Drawing.Color.Transparent, sysView.System.ToDsText());
 
-            testReadyAutoDrive(sysView.System);
 
         }
 

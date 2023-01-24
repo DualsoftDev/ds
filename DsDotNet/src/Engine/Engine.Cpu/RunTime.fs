@@ -1,6 +1,7 @@
 namespace Engine.Cpu
 
 open Engine.Core
+open Engine.Common.FS
 open System
 open System.Linq
 open System.Collections.Generic
@@ -8,12 +9,12 @@ open System.Collections.Concurrent
 
 [<AutoOpen>]
 module RunTime =
-    type DsCPU(css:CommentedStatement seq) =
+    type DsCPU(css:CommentedStatement seq, sys:DsSystem) =
         let mapRungs = ConcurrentDictionary<IStorage, HashSet<Statement>>()
         let statements = css |> Seq.map(fun f -> f.Statement)
         let runSubscribe() =
             let subscribe =
-                ValueSubject
+                sys.ValueChangeSubject      //cpu 단위로 이벤트 필요 ahn
                  .Subscribe(fun evt ->
                     //Step 1 상태보고
                     match evt with
@@ -26,35 +27,33 @@ module RunTime =
                     if mapRungs.ContainsKey evt
                     then
                         for statement in mapRungs[evt] do
-                       //     statement.Do()
-                        async {statement.Do()}|> Async.StartImmediate
+                            statement.Do()
+                    //    async {statement.Do()}|> Async.StartImmediate
                     else
                         let mapRungs = mapRungs
-                        ()//failwithlog "Error"  //디버깅후 예외 처리
+                        failwithlog "Error"  //디버깅후 예외 처리
                     )
             subscribe
 
         let mutable runSubscription:IDisposable = null
 
         do
-            let usedItems =
+            let total =
                 [ for s in statements do
                     yield! s.GetSourceStorages()
                     yield! s.GetTargetStorages()
-                ] |> Seq.distinct
-
+                ].Distinct()
+            for item in total do
+                mapRungs.TryAdd (item, HashSet<Statement>())|> verifyM $"Duplicated [{item.ToText()}]"
             let dicSource =
                 statements
                     .Select(fun s -> s, s.GetSourceStorages())
                     |> dict |> Dictionary
 
-            for item in usedItems do
-            for s in statements do
-                if dicSource[s].Contains item then
-                    if mapRungs.ContainsKey item then
-                        mapRungs[item].Add s |> verifyM $"Duplicated [{s.ToText()}]"
-                    else
-                        mapRungs.TryAdd(item, [s]|>HashSet) |> verifyM $"Duplicated [{item.ToText()}]"
+            for rung in mapRungs do
+                let sts = dicSource.Filter(fun f->f.Value.Contains(rung.Key))
+                for st in sts do
+                    rung.Value.Add(st.Key) |> verifyM $"Duplicated [{ st.Key.ToText()}]"
 
 
         //강제 전체 연산 임시 test용

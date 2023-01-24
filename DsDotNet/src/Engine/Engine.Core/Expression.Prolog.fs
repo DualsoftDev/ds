@@ -288,8 +288,8 @@ module rec ExpressionPrologModule =
             with get() = value
             and set(v) =
                 if value <> v then
-                    value <- v
-                    ChangeValueEvent(x :> IStorage)
+                    value <- v //cpu 단위로 이벤트 필요 ahn
+                    ValueSubject.OnNext(x :> IStorage)
 
         member val Comment: string = comment with get, set
 

@@ -20,14 +20,17 @@ module XgiFixtures =
 
         let mutable runtimeTarget = Runtime.Target
         let xgiGenerationOptionsBackup = xgiGenerationOptions
+        let sys = DsSystem("testSys", "localhost")
         [<SetUp>]
         member x.Setup () =
             Runtime.Target <- x.GetCurrentRuntimeTarget()
+            Runtime.System <- sys
             xgiGenerationOptions <- {EnableXmlComment = false; IsAppendExpressionTextToRungComment = true}
 
         [<TearDown>]
         member __.TearDown () =
             Runtime.Target <- runtimeTarget
+            Runtime.System <- sys
             xgiGenerationOptions <- xgiGenerationOptionsBackup
 
         abstract GetCurrentRuntimeTarget: unit -> RuntimeTargetType
@@ -72,6 +75,7 @@ module XgiFixtures =
         }
 
         projParams.GenerateXmlString()
+
 
 
 [<AutoOpen>]

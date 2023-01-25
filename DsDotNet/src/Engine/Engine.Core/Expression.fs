@@ -162,9 +162,11 @@ module ExpressionModule =
     type RisingCoil = {
         Storage:IStorage
         HistoryFlag:HistoryFlag
+        System:ISystem
     } with
         interface IStorage with
 
+            member x.DsSystem = x.System
             member x.Name with get() = $"RisingCoil.{x.Storage.Name}" and set(v) = failwithlog "ERROR"
             member x.DataType = typedefof<RisingCoil>
             member x.Comment with get() = "" and set(v) = failwithlog "ERROR"
@@ -179,9 +181,11 @@ module ExpressionModule =
     type FallingCoil = {
         Storage:IStorage
         HistoryFlag:HistoryFlag
+        System:ISystem
     } with
         interface IStorage with
 
+            member x.DsSystem = x.System
             member x.Name with get() = $"FallingCoil.{x.Storage.Name}" and set(v) = failwithlog "ERROR"
             member x.DataType = typedefof<FallingCoil>
             member x.Comment with get() = "" and set(v) = failwithlog "ERROR"

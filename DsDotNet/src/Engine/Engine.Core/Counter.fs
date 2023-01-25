@@ -44,7 +44,7 @@ module rec CounterModule =
         ACC: TagBase<CountUnitType>
     }
 
-    let private CreateCounterParameters(typ:CounterType, storages:Storages, name, preset, accum:CountUnitType) =
+    let private CreateCounterParameters(typ:CounterType, storages:Storages, name, preset, accum:CountUnitType, sys) =
         let nullB = getNull<TagBase<bool>>()
         let mutable cu  = nullB  // Count up enable bit
         let mutable cd  = nullB  // Count down enable bit
@@ -63,15 +63,15 @@ module rec CounterModule =
             cu  <- fwdCreateBoolTag     $"{name}.CU" false  // Count up enable bit
             res <- fwdCreateBoolTag     $"{name}.R" false
             pre <- fwdCreateUShortTag   $"{name}.PV" preset
-            dn  <- fwdCreateBoolTag     $"{name}.Q" false  // Done
+            dn  <- fwdCreateBoolTag     $"{name}.Q" false   // Done
             acc <- fwdCreateUShortTag   $"{name}.CV" accum
             add [cu; res; pre; dn; acc]
 
         | (WINDOWS | XGI), CTD ->
-            cd  <- fwdCreateBoolTag     $"{name}.CD" false  // Count down enable bit
-            ld  <- fwdCreateBoolTag     $"{name}.LD" false  // Load
+            cd  <- fwdCreateBoolTag     $"{name}.CD" false   // Count down enable bit
+            ld  <- fwdCreateBoolTag     $"{name}.LD" false   // Load
             pre <- fwdCreateUShortTag   $"{name}.PV" preset
-            dn  <- fwdCreateBoolTag     $"{name}.Q" false  // Done
+            dn  <- fwdCreateBoolTag     $"{name}.Q" false   // Done
             acc <- fwdCreateUShortTag   $"{name}.CV" accum
             add [cd; res; ld; pre; dn; acc]
 
@@ -87,10 +87,10 @@ module rec CounterModule =
             add [cu; cd; res; ld; pre; dn; dnDown; acc]
 
         | (WINDOWS | XGI), CTR ->
-            cd  <- fwdCreateBoolTag     $"{name}.CD" false  // Count down enable bit
+            cd  <- fwdCreateBoolTag     $"{name}.CD" false   // Count down enable bit
             pre <- fwdCreateUShortTag   $"{name}.PV" preset
             res <- fwdCreateBoolTag     $"{name}.RST" false
-            dn  <- fwdCreateBoolTag     $"{name}.Q" false  // Done
+            dn  <- fwdCreateBoolTag     $"{name}.Q" false   // Done
             acc <- fwdCreateUShortTag   $"{name}.CV" accum
             add [cd; pre; res; dn; acc]
 
@@ -103,15 +103,15 @@ module rec CounterModule =
                 cd  <- fwdCreateBoolTag     $"{name}.CD" false  // Count down enable bit
                 add [cd]
             | CTUD ->
-                cu  <- fwdCreateBoolTag     $"{name}.CU" false  // Count up enable bit
-                cd  <- fwdCreateBoolTag     $"{name}.CD" false  // Count down enable bit
+                cu  <- fwdCreateBoolTag     $"{name}.CU" false // Count up enable bit
+                cd  <- fwdCreateBoolTag     $"{name}.CD" false // Count down enable bit
                 add [cu; cd]
 
 
-            ov  <- fwdCreateBoolTag     $"{name}.OV" false  // Overflow
-            un  <- fwdCreateBoolTag     $"{name}.UN" false  // Underflow
-            ld  <- fwdCreateBoolTag     $"{name}.LD" false  // XGI: Load
-            dn  <- fwdCreateBoolTag     $"{name}.DN" false  // Done
+            ov  <- fwdCreateBoolTag     $"{name}.OV" false   // Overflow
+            un  <- fwdCreateBoolTag     $"{name}.UN" false   // Underflow
+            ld  <- fwdCreateBoolTag     $"{name}.LD" false   // XGI: Load
+            dn  <- fwdCreateBoolTag     $"{name}.DN" false   // Done
             pre <- fwdCreateUShortTag   $"{name}.PRE" preset
             acc <- fwdCreateUShortTag   $"{name}.ACC" accum
             res <- fwdCreateBoolTag     $"{name}.RES" false
@@ -151,8 +151,8 @@ module rec CounterModule =
 
 
     [<AbstractClass>]
-    type CounterBaseStruct(cp:CounterParams) =
-        inherit TimerCounterBaseStruct(cp.Storages, cp.Name, cp.Preset, cp.Accumulator, cp.DN, cp.PRE, cp.ACC, cp.RES)
+    type CounterBaseStruct(cp:CounterParams, sys) =
+        inherit TimerCounterBaseStruct(cp.Storages, cp.Name, cp.Preset, cp.Accumulator, cp.DN, cp.PRE, cp.ACC, cp.RES, sys)
 
         member _.CU:TagBase<bool> = cp.CU  // Count up enable bit
         member _.CD:TagBase<bool> = cp.CD  // Count down enable bit
@@ -182,61 +182,61 @@ module rec CounterModule =
         abstract CD:TagBase<bool>
 
 
-    type CTUStruct private(counterParams:CounterParams) =
-        inherit CounterBaseStruct(counterParams)
+    type CTUStruct private(counterParams:CounterParams, sys) =
+        inherit CounterBaseStruct(counterParams, sys)
         member _.CU = base.CU
         interface ICTU with
             member x.CU = x.CU
-        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType) =
-            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum)
-            let cs = new CTUStruct(counterParams)
+        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys) =
+            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum, sys)
+            let cs = new CTUStruct(counterParams, sys)
             storages.Add(name, cs)
             cs
 
-    type CTDStruct private(counterParams:CounterParams) =
-        inherit CounterBaseStruct(counterParams)
+    type CTDStruct private(counterParams:CounterParams, sys) =
+        inherit CounterBaseStruct(counterParams, sys)
         member _.CD = base.CD
         interface ICTD with
             member x.CD = x.CD
             member x.LD = x.LD
-        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType) =
-            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum)
-            let cs = new CTDStruct(counterParams)
+        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys) =
+            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum, sys)
+            let cs = new CTDStruct(counterParams, sys)
             storages.Add(name, cs)
             cs
 
-    type CTUDStruct private(counterParams:CounterParams) =
-        inherit CounterBaseStruct(counterParams)
+    type CTUDStruct private(counterParams:CounterParams, sys) =
+        inherit CounterBaseStruct(counterParams, sys)
         member _.CU = base.CU
         member _.CD = base.CD
         interface ICTUD with
             member x.CU = x.CU
             member x.CD = x.CD
             member x.LD = x.LD
-        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType) =
-            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum)
-            let cs = new CTUDStruct(counterParams)
+        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys) =
+            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum, sys)
+            let cs = new CTUDStruct(counterParams, sys)
             storages.Add(name, cs)
             cs
 
-    type CTRStruct(counterParams:CounterParams ) =
-        inherit CounterBaseStruct(counterParams)
+    type CTRStruct(counterParams:CounterParams , sys) =
+        inherit CounterBaseStruct(counterParams, sys)
         member _.RES = base.RES
         interface ICTR with
             member x.CD = x.CD
-        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType) =
-            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum)
-            let cs = new CTRStruct(counterParams)
+        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys) =
+            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum, sys)
+            let cs = new CTRStruct(counterParams, sys)
             storages.Add(name, cs)
             cs
 
-    type internal CountAccumulator(counterType:CounterType, counterStruct:CounterBaseStruct) =
+    type internal CountAccumulator(counterType:CounterType, counterStruct:CounterBaseStruct)=
         let disposables = new CompositeDisposable()
 
         let cs = counterStruct
         let registerLoad() =
             let csd = box cs :?> ICTD       // CTD or CTUD 둘다 적용
-            ValueSubject
+            (counterStruct:>  IStorage).DsSystem.ValueChangeSubject
                 .Where(fun (storage, newValue_) -> storage = csd.LD && csd.LD.Value)
                 .Subscribe(fun (storage, newValue_) ->
                     cs.ACC.Value <- cs.PRE.Value
@@ -244,7 +244,7 @@ module rec CounterModule =
 
         let registerCTU() =
             let csu = box cs :?> ICTU
-            ValueSubject
+            (counterStruct:>  IStorage).DsSystem.ValueChangeSubject
                 .Where(fun (storage, newValue_) -> storage = csu.CU && csu.CU.Value)
                 .Subscribe(fun (storage, newValue_) ->
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
@@ -256,7 +256,7 @@ module rec CounterModule =
         let registerCTD() =
             let csd = box cs :?> ICTD
             registerLoad()
-            ValueSubject
+            (counterStruct:>  IStorage).DsSystem.ValueChangeSubject
                 .Where(fun (storage, newValue_) -> storage = csd.CD && csd.CD.Value)
                 .Subscribe(fun (storage, newValue_) ->
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
@@ -268,7 +268,7 @@ module rec CounterModule =
 
         let registerCTR() =
             let csr = box cs :?> ICTR
-            ValueSubject
+            (counterStruct:>  IStorage).DsSystem.ValueChangeSubject
                 .Where(fun (storage, newValue_) -> storage = csr.CD && csr.CD.Value)
                 .Subscribe(fun (storage, newValue_) ->
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
@@ -282,7 +282,7 @@ module rec CounterModule =
             ) |> disposables.Add
 
         let registerReset() =
-            ValueSubject
+            (counterStruct:>  IStorage).DsSystem.ValueChangeSubject
                 .Where(fun (storage, newValue_) -> storage = cs.RES && cs.RES.Value)
                 .Subscribe(fun (storage, newValue_) ->
                     tracefn "Counter reset requested"

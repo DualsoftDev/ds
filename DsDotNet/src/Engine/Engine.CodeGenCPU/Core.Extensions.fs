@@ -51,21 +51,21 @@ module ConvertCoreExt =
 
         member private x.GenerationLampIO() =
             for b in x.SystemLamps do
-                b.OutTag  <- actionTag(x.Storages, b.Name, b.OutAddress, Out)
+                b.OutTag  <- actionTag(x.Storages, b.Name, b.OutAddress, Out , x)
         member private x.GenerationCondition() =
             for b in x.SystemConditions do
-                b.InTag  <- actionTag(x.Storages, b.Name, b.InAddress, In)
+                b.InTag  <- actionTag(x.Storages, b.Name, b.InAddress, In, x)
 
         member private x.GenerationButtonIO() =
             for b in x.SystemButtons do
-                     b.InTag  <- actionTag(x.Storages, b.Name, b.OutAddress, In)
-                     b.OutTag <- actionTag(x.Storages, b.Name, b.OutAddress, Out)
+                     b.InTag  <- actionTag(x.Storages, b.Name, b.OutAddress, In, x)
+                     b.OutTag <- actionTag(x.Storages, b.Name, b.OutAddress, Out, x)
 
         member private x.GenerationTaskDevIO() =
             let taskDevices = x.Jobs |> Seq.collect(fun j -> j.DeviceDefs)
             for dev in taskDevices do
-                dev.InTag <- actionTag(x.Storages, dev.ApiName, dev.InAddress, In)
-                dev.OutTag <- actionTag(x.Storages, dev.ApiName, dev.OutAddress, Out)
+                dev.InTag <- actionTag(x.Storages, dev.ApiName, dev.InAddress, In, x)
+                dev.OutTag <- actionTag(x.Storages, dev.ApiName, dev.OutAddress, Out, x)
 
         member x.GenerationIO() =
             x.GenerationTaskDevIO()

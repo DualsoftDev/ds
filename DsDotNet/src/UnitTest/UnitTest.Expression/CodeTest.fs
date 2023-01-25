@@ -16,6 +16,7 @@ module CodeTestModule =
 
         [<Test>]
         member __.``1 var declaration test`` () =
+            use _ = setRuntimeTarget WINDOWS
             let storages = Storages()
             let numericDeclarations = """
 int8 myInt8 = 0y;
@@ -70,6 +71,7 @@ double myDouble = 0.0;
 
         [<Test>]
         member __.``1 var initialization test`` () =
+            use _ = setRuntimeTarget WINDOWS
             let storages = Storages()
             let integers = """
 int8 myInt8 = 32y;
@@ -95,6 +97,7 @@ uint64 myUInt64 = 32UL;
 
         [<Test>]
         member __.``2 var initialization test`` () =
+            use _ = setRuntimeTarget WINDOWS
             let storages = Storages()
             let floats = """
 float32 myFloat32 = 3.14f;
@@ -113,6 +116,7 @@ double myDouble = 3.14;
 
         [<Test>]
         member __.``3 var initialization test`` () =
+            use _ = setRuntimeTarget WINDOWS
             let storages = Storages()
             let floats = """
 float32 myFloat32 = 3.14f + 3.14f;
@@ -132,6 +136,7 @@ double myDouble = 3.14 + 3.14;
 
         [<Test>]
         member __.``3 string/char initialization test`` () =
+            use _ = setRuntimeTarget WINDOWS
             let storages = Storages()
             let declarations = [
                 $"string myString = {dq}Hello, world{dq}"
@@ -141,7 +146,7 @@ double myDouble = 3.14 + 3.14;
             let statements =
                 [
                     for s in declarations do
-                        let statement = tryParseStatement storages s |> Option.get
+                        let statement = tryParseStatement storages s  |> Option.get
                         statement.ToText() === s
                         yield statement
                 ]
@@ -159,6 +164,7 @@ double myDouble = 3.14 + 3.14;
 
         [<Test>]
         member __.``4 coode block test`` () =
+            use _ = setRuntimeTarget WINDOWS
             let systemRepo = ShareableSystemRepository()
             let parseText text =
                 let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, ".", "ActiveCpuName", None, DuNone))

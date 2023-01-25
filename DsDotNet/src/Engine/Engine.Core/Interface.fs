@@ -3,13 +3,13 @@ namespace Engine.Core
 
 open System.Collections.Generic
 open Engine.Common.FS
+open System.Reactive.Subjects
 
 [<AutoOpen>]
 module Interface =
 
 
     type IVertex = interface end
-    type ISystem = interface end
 
     type INamed  =
          abstract Name:string with get, set
@@ -34,10 +34,14 @@ module Interface =
         inherit IValue
         inherit INamed
         inherit IText
+        abstract DsSystem: ISystem
         abstract BoxedValue: obj with get, set
         abstract DataType : System.Type
         abstract Comment: string with get, set
         abstract ToBoxedExpression : unit -> obj    /// IExpression<'T> 의 boxed 형태의 expression 생성
+
+    and ISystem =
+        abstract ValueChangeSubject : Subject<IStorage*obj>
 
     /// terminal expression 이 될 수 있는 객체.  Tag, Variable, Literal.  IExpression 은 아님
     type IExpressionizableTerminal =
@@ -50,3 +54,5 @@ module Interface =
     type ITagManager =
         abstract Target: IQualifiedNamed
         abstract Storages: Dictionary<string,IStorage>
+
+

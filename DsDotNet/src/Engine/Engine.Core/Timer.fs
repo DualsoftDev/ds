@@ -77,7 +77,7 @@ module rec TimerModule =
             tracefn "Timer subscribing to tick event"
             the20msTimer.Subscribe(fun _ -> accumulate()) |> disposables.Add
 
-            ValueSubject
+            (timerStruct:>  IStorage).DsSystem.ValueChangeSubject
                 .Where(fun (storage, newValue_) -> storage = timerStruct.EN)
                 .Subscribe(fun (storage, newValue) ->
                     if ts.ACC.Value < 0us || ts.PRE.Value < 0us then failwithlog "ERROR"
@@ -111,7 +111,7 @@ module rec TimerModule =
                         ts.TT.Value <- false
                 ) |> disposables.Add
 
-            ValueSubject
+            (timerStruct:>  IStorage).DsSystem.ValueChangeSubject
                 .Where(fun (storage, newValue) -> storage = ts.RES)
                 .Subscribe(fun (storage, newValue) ->
                     let resetCondition = newValue :?> bool
@@ -128,8 +128,9 @@ module rec TimerModule =
 
 
     [<AbstractClass>]
-    type TimerCounterBaseStruct (storages:Storages, name, preset, accum:CountUnitType, dn, pre, acc, res) =
+    type TimerCounterBaseStruct (storages:Storages, name, preset, accum:CountUnitType, dn, pre, acc, res, sys) =
         interface IStorage with
+            member x.DsSystem = sys
             member x.Name with get() = x.Name and set(v) = failwithlog "ERROR: not supported"
             member x.DataType = typedefof<TimerCounterBaseStruct>
             member val Comment = "" with get, set
@@ -154,8 +155,8 @@ module rec TimerModule =
             if not (isItNull t) then
                 storages.Add(t.Name, t)
 
-    type TimerStruct private(typ:TimerType, storages:Storages, name, preset:CountUnitType, accum:CountUnitType, en, tt, dn, pre, acc, res) =
-        inherit TimerCounterBaseStruct(storages, name, preset, accum, dn, pre, acc, res)
+    type TimerStruct private(typ:TimerType, storages:Storages, name, preset:CountUnitType, accum:CountUnitType, en, tt, dn, pre, acc, res, sys) =
+        inherit TimerCounterBaseStruct(storages, name, preset, accum, dn, pre, acc, res, sys)
 
         /// Enable
         member _.EN:TagBase<bool> = en
@@ -163,7 +164,7 @@ module rec TimerModule =
         member _.TT:TagBase<bool> = tt
         member _.Type = typ
 
-        static member Create(typ:TimerType, storages:Storages, name, preset:CountUnitType, accum:CountUnitType) =
+        static member Create(typ:TimerType, storages:Storages, name, preset:CountUnitType, accum:CountUnitType, sys) =
             let en, tt, dn, pre, acc, res =
                 match Runtime.Target with
                 | ( XGI | WINDOWS ) -> "IN", "_TT", "Q", "PT", "ET", "RST"
@@ -184,7 +185,7 @@ module rec TimerModule =
             storages.Add(acc.Name, acc)
             storages.Add(res.Name, res)
 
-            let ts = new TimerStruct(typ, storages, name, preset, accum, en, tt, dn, pre, acc, res)
+            let ts = new TimerStruct(typ, storages, name, preset, accum, en, tt, dn, pre, acc, res, sys)
             storages.Add(name, ts)
             ts
 

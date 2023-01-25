@@ -10,6 +10,7 @@ module RuntimeGeneratorModule =
     type Runtime() =
         static let mutable runtimeTarget = WINDOWS
         static let targetChangedSubject = new Subject<RuntimeTargetType>()
+        static let mutable dsSystem:ISystem option = None
         static member Target
             with get() = runtimeTarget
             and set(v) =
@@ -17,4 +18,8 @@ module RuntimeGeneratorModule =
                 runtimeTarget <- v
                 targetChangedSubject.OnNext(v)
         static member TargetChangedSubject = targetChangedSubject
+        static member System
+            with get() = dsSystem.Value
+            and set(v) = dsSystem <- Some v
+
 

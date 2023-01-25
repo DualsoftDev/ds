@@ -23,10 +23,13 @@ namespace Dual.Model.Import
 
         public static void CPUSubscribe()
         {
-            CpuEvent.ValueSubject.Subscribe(tuple =>
+            FormMain.TheMain._DicCpu.ForEach(x =>
             {
-                var (storage, newValue) = tuple;
-                FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{storage.Name}:{newValue}", true);
+                x.Key.ValueChangeSubject.Subscribe(tuple =>
+                {
+                    var (storage, newValue) = tuple;
+                    FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{storage.Name}:{newValue}", true);
+                });
             });
 
             CpuEvent.StatusSubject.Subscribe(rx =>

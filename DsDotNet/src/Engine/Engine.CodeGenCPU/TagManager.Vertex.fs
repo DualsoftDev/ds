@@ -21,10 +21,11 @@ module TagManagerModule =
     [<DebuggerDisplay("{Name}")>]
     [<AbstractClass>]
     type VertexManager (v:Vertex)  =
-        let s =  v.Parent.GetSystem().TagManager.Storages
+        let sys =  v.Parent.GetSystem()
+        let s =  sys.TagManager.Storages
         let createTag(mark) =
             let name = $"{v.QualifiedName}({mark})"
-            let t = planTag  s name
+            let t = planTag  s name sys
             t.Vertex <- Some v;  t
 
         let endTagBit     = createTag "ET"
@@ -103,7 +104,7 @@ module TagManagerModule =
         member _.PUL        = pulseBit
         ///Going Relay   //리셋 인과에 따라 필요
         member x.GR(src:Vertex) =
-           let gr =  planTag  s $"GR_{src.Name}"
+           let gr =  planTag  s $"GR_{src.Name}" sys
            goingRelays.Add gr |> ignore; gr
 
         member x.CreateTag(name) = createTag name
@@ -137,11 +138,11 @@ module TagManagerModule =
         let s    = this.Storages
         let createTag name = this.CreateTag name
         let relayCallBit  = createTag  "CR"
+        let sys = this.System
 
-
-        let counterBit    = counter  s "CTR"
-        let timerOnDelayBit = timer  s "TON"
-        let timerTimeOutBit = timer  s "TOUT"
+        let counterBit    = counter  s "CTR"  sys
+        let timerOnDelayBit = timer  s "TON"  sys
+        let timerTimeOutBit = timer  s "TOUT" sys
 
         ///Call Done Relay
         member _.CR     = relayCallBit

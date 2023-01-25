@@ -209,8 +209,8 @@ module DsDataType =
         member x.DefaultValue() = typeDefaultValue (x.ToType())
 
 
-    let DataToType(txt:string) =
-        match txt.ToLower() with
+    let textToDataType(typeName:string) =
+        match typeName.ToLower() with
         //system1   | system2   | plc
         | "int8"    | "sbyte"            ->  DuINT8
         | "int16"   | "short"            ->  DuINT16
@@ -225,7 +225,7 @@ module DsDataType =
         | "string"                       ->  DuSTRING
         | "char"                         ->  DuCHAR
         | "boolean" | "bool"    | "bit"  ->  DuBOOL
-        | _ -> failwithf $"'{txt}' DataToType Error check type"
+        | _ -> failwithf $"'{typeName}' DataToType Error check type"
 
 
 [<AutoOpen>]

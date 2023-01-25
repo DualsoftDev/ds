@@ -31,26 +31,27 @@ module FlowManagerModule =
 
     /// Flow Manager : Flow Tag  를 관리하는 컨테이어
     type FlowManager (f:Flow)  =
-        let s =  f.System.TagManager.Storages
+        let sys =  f.System
+        let s =  sys.TagManager.Storages
 
-        let f_rop    = planTag s $"{f.Name}(ROP)"      // Ready Operation Mode
-        let f_aop    = planTag s $"{f.Name}(AOP)"      // Auto Operation Mode
-        let f_mop    = planTag s $"{f.Name}(MOP)"      // Manual Operation Mode
-        let f_dop    = planTag s $"{f.Name}(DOP)"      // Drive Operation Mode
-        let f_top    = planTag s $"{f.Name}(TOP)"      //  Test  Operation Mode (시운전)
-        let f_sop    = planTag s $"{f.Name}(SOP)"      // Stop State
-        let f_eop    = planTag s $"{f.Name}(EOP)"      // Emergency State
-        let f_readycondi = planTag s $"{f.Name}(SCR)"  //system condition ready
-        let f_drivecondi = planTag s $"{f.Name}(SCD)"  //system condition drive
-        let f_auto   = planTag s $"{f.Name}_auto"
-        let f_manual = planTag s $"{f.Name}_manual"
-        let f_drive  = planTag s $"{f.Name}_drive"
-        let f_stop   = planTag s $"{f.Name}_stop"
-        let f_ready  = planTag s $"{f.Name}_ready"
-        let f_clear  = planTag s $"{f.Name}_clear"
-        let f_emg    = planTag s $"{f.Name}_emg"
-        let f_test   = planTag s $"{f.Name}_test"
-        let f_home   = planTag s $"{f.Name}_home"
+        let f_rop    = planTag s $"{f.Name}(ROP)"     sys     // Ready Operation Mode
+        let f_aop    = planTag s $"{f.Name}(AOP)"     sys     // Auto Operation Mode
+        let f_mop    = planTag s $"{f.Name}(MOP)"     sys     // Manual Operation Mode
+        let f_dop    = planTag s $"{f.Name}(DOP)"     sys     // Drive Operation Mode
+        let f_top    = planTag s $"{f.Name}(TOP)"     sys     //  Test  Operation Mode (시운전)
+        let f_sop    = planTag s $"{f.Name}(SOP)"     sys     // Stop State
+        let f_eop    = planTag s $"{f.Name}(EOP)"     sys     // Emergency State
+        let f_readycondi = planTag s $"{f.Name}(SCR)" sys //system condition ready
+        let f_drivecondi = planTag s $"{f.Name}(SCD)" sys //system condition drive
+        let f_auto   = planTag s $"{f.Name}_auto"     sys
+        let f_manual = planTag s $"{f.Name}_manual"   sys
+        let f_drive  = planTag s $"{f.Name}_drive"    sys
+        let f_stop   = planTag s $"{f.Name}_stop"     sys
+        let f_ready  = planTag s $"{f.Name}_ready"    sys
+        let f_clear  = planTag s $"{f.Name}_clear"    sys
+        let f_emg    = planTag s $"{f.Name}_emg"      sys
+        let f_test   = planTag s $"{f.Name}_test"     sys
+        let f_home   = planTag s $"{f.Name}_home"     sys
 
         interface ITagManager with
             member x.Target = f

@@ -13,14 +13,16 @@ module TagVariableModule =
         Value: 'T
         Address: string option
         Comment: string option
+        System: ISystem
     }
+    //let defaultTagCreationParam = {
+    //    Name = ""
+    //    Value = false
+    //    Address = None
+    //    Comment = None
+    //    System = None
+    //}
 
-    let defaultTagCreationParam = {
-        Name = ""
-        Value = false
-        Address = None
-        Comment = None
-    }
 
 
     [<AbstractClass>]
@@ -34,12 +36,12 @@ module TagVariableModule =
             with get() = value
             and set(v) =
                 if value <> v then
-                    value <- v //cpu 단위로 이벤트 필요 ahn
-                    ValueSubject.OnNext(x :> IStorage, v)
-
+                    value <- v
+                    (x:>  IStorage).DsSystem.ValueChangeSubject.OnNext(x :> IStorage, v)
         member val Comment: string = comment with get, set
 
         interface IStorage with
+            member x.DsSystem = param.System
             member x.DataType = typedefof<'T>
             member x.Comment with get() = x.Comment and set(v) = x.Comment <- v
             member x.BoxedValue with get() = x.Value and set(v) = x.Value <- (v :?> 'T)

@@ -102,7 +102,7 @@ module rec TypeConvertorModule =
     let (|CommentAndXgiStatements|) = function | CommentedXgiStatements(x, ys) -> x, ys
     let commentAndXgiStatement = (|CommentAndXgiStatements|)
 
-    let createXgiVariable (typ:System.Type) (name:string) (initValue:obj) comment : IXgiLocalVar =
+    let createXgiVariable (typ:System.Type) (name:string) (initValue:obj) comment: IXgiLocalVar =
         (*
             "n0" is an incorrect variable.
             The folling characters are allowed:
@@ -119,7 +119,7 @@ module rec TypeConvertorModule =
         | RegexPattern "ld(\d)+" _ -> failwith $"Invalid XGI variable name {name}."
         | _ -> ()
 
-        let createParam () = {Name=name; Value=unbox initValue; Comment=Some comment; Address=None;}
+        let createParam () = {Name=name; Value=unbox initValue; Comment=Some comment; Address=None; System = Runtime.System}
 
         match typ.Name with
         | BOOL   -> XgiLocalVar<bool>  (createParam())
@@ -136,8 +136,8 @@ module rec TypeConvertorModule =
         | UINT32 -> XgiLocalVar<uint32>(createParam())
         | UINT64 -> XgiLocalVar<uint64>(createParam())
         | _  -> failwithlog "ERROR"
-
-    let createTypedXgiAutoVariable (typ:System.Type) (nameHint:string) (initValue:obj) comment : IXgiLocalVar =
+    let sys = DsSystem("","")
+    let createTypedXgiAutoVariable (typ:System.Type) (nameHint:string) (initValue:obj) comment: IXgiLocalVar =
         autoVariableCounter <- autoVariableCounter + 1
         let name = $"_tmp{nameHint}{autoVariableCounter}"
         let typ = initValue.GetType()
@@ -147,7 +147,7 @@ module rec TypeConvertorModule =
     let internal createXgiAutoVariableT (nameHint:string) comment (initValue:'T) =
         autoVariableCounter <- autoVariableCounter + 1
         let name = $"_tmp{nameHint}{autoVariableCounter}"
-        let param = {Name=name; Value=initValue; Comment=Some comment; Address=None}
+        let param = {Name=name; Value=initValue; Comment=Some comment; Address=None; System = Runtime.System}
 
         XgiLocalVar(param)
 
@@ -282,7 +282,7 @@ module XgiExpressionConvertorModule =
     /// - a + b + c => + [a; b; c] 로 변환
     ///     * '+' or '*' 연산에서 argument 갯수가 8 개 이상이면 분할해서 PLC function 생성
     /// - a + (b * c) + d => +[a; x; d], *[b; c] 두개의 expression 으로 변환.  부가적으로 생성된 *[b;c] 는 새로운 statement 를 생성해서 augmentedStatementsStorage 에 추가된다.
-    let private mergeArithmaticOperator (augmentParams:AugmentedConvertorParams) (outputStore:IStorage option) : MergeArithmaticResult =
+    let private mergeArithmaticOperator (augmentParams:AugmentedConvertorParams) (outputStore:IStorage option): MergeArithmaticResult =
         let { Storage = storage; ExpandFunctionStatements=augmentedStatementsStorage; Exp=exp } = augmentParams
         match exp.FunctionName with
         | Some ("+"|"-"|"*"|"/" as op) ->

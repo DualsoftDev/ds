@@ -20,6 +20,7 @@ module CpuTestUtil =
             let systemRepo   = ShareableSystemRepository ()
             let referenceDir = @$"{__SOURCE_DIRECTORY__}\..\Libraries"
             let sys = parseText systemRepo referenceDir Program.CpuTestText
+            Runtime.System <- sys
             applyTagManager (sys, Storages())
             sys
 

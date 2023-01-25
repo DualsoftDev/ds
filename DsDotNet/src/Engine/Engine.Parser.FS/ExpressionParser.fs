@@ -157,7 +157,7 @@ module rec ExpressionParser =
         | _ -> None
     let private (|BoolExp|) (x:IExpression) = x :?> IExpression<bool>
 
-    let private parseCounterStatement (storages:Storages) (ctx:CounterDeclContext) : Statement =
+    let private parseCounterStatement (storages:Storages) (ctx:CounterDeclContext)  : Statement =
         let typ = ctx.Descendants<CounterTypeContext>().First().GetText().ToUpper() |> DU.fromString<CounterType>
         let fail() = failwith $"Counter declaration error: {ctx.GetOriginalText()}"
         match typ with
@@ -203,7 +203,7 @@ module rec ExpressionParser =
             | _ -> fail()
         | None -> fail()
 
-    let private parseTimerStatement (storages:Storages) (ctx:TimerDeclContext) : Statement =
+    let private parseTimerStatement (storages:Storages) (ctx:TimerDeclContext): Statement =
         let typ = ctx.Descendants<TimerTypeContext>().First().GetText().ToUpper() |> DU.fromString<TimerType>
         let fail() = failwith $"Timer declaration error: {ctx.GetText()}"
         match typ with
@@ -233,7 +233,7 @@ module rec ExpressionParser =
         | None -> fail()
 
 
-    let tryCreateStatement (storages:Storages) (ctx:StatementContext) : Statement option =
+    let tryCreateStatement (storages:Storages) (ctx:StatementContext): Statement option =
         assert(ctx.ChildCount = 1)
         let storageName = ctx.Descendants<StorageNameContext>().First().GetText()
 
@@ -270,10 +270,10 @@ module rec ExpressionParser =
 
                 match assignCtx.children.ToFSharpList() with
                 | (:? RisingAssignContext as ctx)::[] ->
-                    let risingCoil:RisingCoil = {Storage = storage; HistoryFlag = HistoryFlag()}
+                    let risingCoil:RisingCoil = {Storage = storage; HistoryFlag = HistoryFlag(); System = Runtime.System}
                     Some <| DuAssign (createExp ctx, risingCoil)
                 | (:? FallingAssignContext as ctx)::[] ->
-                    let fallingCoil:FallingCoil = {Storage = storage; HistoryFlag = HistoryFlag()}
+                    let fallingCoil:FallingCoil = {Storage = storage; HistoryFlag = HistoryFlag(); System = Runtime.System}
                     Some <| DuAssign (createExp ctx, fallingCoil)
                 | (:? NormalAssignContext as ctx)::[] -> Some <| DuAssign (createExp ctx, storage)
                 | _ -> failwithlog "ERROR"
@@ -339,10 +339,9 @@ module rec ExpressionParser =
 
     type System.Type with
         member x.CreateVariable(name:string, boxedValue:obj) = fwdCreateVariableWithTypeAndValue x name ({Object = boxedValue}:BoxedObjectHolder)
-        member x.CreateVariable(name:string) = fwdCreateVariableWithType x name
-
+        member x.CreateVariable(name:string)                 = fwdCreateVariableWithType x name
         member x.CreateTag(name:string, address:string, boxedValue:obj) : IStorage =
-            let createParam () = {Name=name; Value=unbox boxedValue; Address=Some address; Comment=None; }
+            let createParam () = {Name=name; Value=unbox boxedValue; Address=Some address; Comment=None;  System = Runtime.System}
 
             match x.Name with
             | BOOL    -> new ActionTag<bool>  (createParam())
@@ -365,18 +364,4 @@ module rec ExpressionParser =
             x.CreateTag(name, address, unbox v)
 
         static member FromString(typeName:string) : System.Type =
-            match typeName.ToLower() with
-            | ("float32" | "single") -> typedefof<single>
-            | ("float64" | "double") -> typedefof<double>
-            | ("int8"    | "sbyte")  -> typedefof<int8>
-            | ("uint8"   | "byte")   -> typedefof<uint8>
-            | ("int16"   | "short")  -> typedefof<int16>
-            | ("uint16"  | "ushort") -> typedefof<uint16>
-            | ("int32"   | "int" )   -> typedefof<int32>
-            | ("uint32"  | "uint")   -> typedefof<uint32>
-            | ("int64"   | "long")   -> typedefof<int64>
-            | ("uint64"  | "ulong")  -> typedefof<uint64>
-            | ("bool"    | "boolean")-> typedefof<bool>
-            | "string"               -> typedefof<string>
-            | "char"                 -> typedefof<char>
-            | _  -> failwithlog "ERROR"
+            (textToDataType typeName).ToType()

@@ -132,7 +132,7 @@ module ImportIOTable =
 
                         | XlsVariable ->
                             let name      = $"{row.[(int)IOColumn.Name]}"
-                            let dataType  = $"{row.[(int)IOColumn.DataType]}" |> DataToType
+                            let dataType  = $"{row.[(int)IOColumn.DataType]}" |> textToDataType
                             let initValue = $"{row.[(int)IOColumn.Output]}"
                             let variableData = VariableData(name, dataType, initValue)
                             sys.Variables.Add(variableData)

@@ -11,7 +11,7 @@ module ModuleInitializer =
         let noComment = ""
         createXgiVariable typ name (unbox v) noComment
 
-    let private createXgiVariableWithType (typ:System.Type) (name:string) : IVariable =
+    let private createXgiVariableWithType (typ:System.Type) (name:string): IVariable =
         verify (Runtime.Target = XGI)
         let v = typeDefaultValue typ
         createXgiVariableWithTypeAndValue typ name (unbox v)

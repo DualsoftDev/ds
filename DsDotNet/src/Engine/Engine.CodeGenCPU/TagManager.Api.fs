@@ -16,11 +16,12 @@ module ApiTagManagerModule =
 
     /// ApiItem Manager Manager : ApiItem Tag  를 관리하는 컨테이어
     type ApiItemManager (a:ApiItem)  =
-        let s =  a.System.TagManager.Storages
+        let sys = a.System
+        let s =  sys.TagManager.Storages
 
-        let ps    = planTag s $"{a.Name}(PS)"
-        let pr    = planTag s $"{a.Name}(PR)"
-        let pe    = planTag s $"{a.Name}(PE)"
+        let ps    = planTag s $"{a.Name}(PS)" sys
+        let pr    = planTag s $"{a.Name}(PR)" sys
+        let pe    = planTag s $"{a.Name}(PE)" sys
 
         interface ITagManager with
             member x.Target = a

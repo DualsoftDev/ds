@@ -37,7 +37,10 @@ module CoreModule =
     [<AbstractClass>]
     type LoadedSystem(loadedSystem:DsSystem, param:DeviceLoadParameters)  =
         inherit FqdnObject(param.LoadedName, param.ContainerSystem)
-        interface ISystem
+        interface ISystem with
+            member val ValueChangeSubject: Subject<IStorage * obj> = new Subject<IStorage*obj>()
+        //시스템단위로 이벤트 변화 처리
+        member x.ValueChangeSubject = (x :> ISystem).ValueChangeSubject
 
         /// 다른 device 을 Loading 하려는 system 입장에서 loading 된 system 참조 용
         member _.ReferenceSystem = loadedSystem
@@ -67,13 +70,14 @@ module CoreModule =
         let loadedSystems = createNamedHashSet<LoadedSystem>()
         let apiUsages = ResizeArray<ApiItem>()
         let addApiItemsForDevice (device: LoadedSystem) = device.ReferenceSystem.ApiItems |> apiUsages.AddRange
-        interface ISystem
+        interface ISystem with
+            member val ValueChangeSubject: Subject<IStorage * obj> =  new Subject<IStorage*obj>()
+        //시스템단위로 이벤트 변화 처리
+        member x.ValueChangeSubject = (x :> ISystem).ValueChangeSubject
 
         member val Flows   = createNamedHashSet<Flow>()
         //시스템에서 호출가능한 작업리스트 (Call => Job => ApiItems => Addresses)
         member val Jobs    = ResizeArray<Job>()
-        //시스템단위로 이벤트 변화 처리
-        member val ValueChangeSubject = new Subject<IStorage*obj>()
 
 
         member _.AddLoadedSystem(childSys) = loadedSystems.Add(childSys)

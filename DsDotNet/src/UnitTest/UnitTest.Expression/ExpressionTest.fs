@@ -387,18 +387,18 @@ module Exp =
         [<Test>]
         member __.``9 Tag type test`` () =
             let tags = [
-                PlcTag("sbyte" , "%M1.1", 1y)   |> var2expr |> iexpr
-                PlcTag("byte"  , "%M1.1", 1uy)  |> var2expr |> iexpr
-                PlcTag("int16" , "%M1.1", 1s)   |> var2expr |> iexpr
-                PlcTag("uint16", "%M1.1", 1us)  |> var2expr |> iexpr
-                PlcTag("int32" , "%M1.1", 1)    |> var2expr |> iexpr
-                PlcTag("uint32", "%M1.1", 1u)   |> var2expr |> iexpr
-                PlcTag("int64" , "%M1.1", 1L)   |> var2expr |> iexpr
-                PlcTag("uint64", "%M1.1", 1UL)  |> var2expr |> iexpr
-                PlcTag("single", "%M1.1", 1.0f) |> var2expr |> iexpr
-                PlcTag("double", "%M1.1", 1.0)  |> var2expr |> iexpr
-                PlcTag("char"  , "%M1.1", '1')  |> var2expr |> iexpr
-                PlcTag("string", "%M1.1", "1")  |> var2expr |> iexpr
+                PlcTag("sbyte" , "%M1.1", 1y  )    |> var2expr |> iexpr
+                PlcTag("byte"  , "%M1.1", 1uy )    |> var2expr |> iexpr
+                PlcTag("int16" , "%M1.1", 1s  )    |> var2expr |> iexpr
+                PlcTag("uint16", "%M1.1", 1us )    |> var2expr |> iexpr
+                PlcTag("int32" , "%M1.1", 1   )    |> var2expr |> iexpr
+                PlcTag("uint32", "%M1.1", 1u  )    |> var2expr |> iexpr
+                PlcTag("int64" , "%M1.1", 1L  )    |> var2expr |> iexpr
+                PlcTag("uint64", "%M1.1", 1UL )    |> var2expr |> iexpr
+                PlcTag("single", "%M1.1", 1.0f)    |> var2expr |> iexpr
+                PlcTag("double", "%M1.1", 1.0 )    |> var2expr |> iexpr
+                PlcTag("char"  , "%M1.1", '1' )    |> var2expr |> iexpr
+                PlcTag("string", "%M1.1", "1" )    |> var2expr |> iexpr
             ]
             let tagDic =
                 [   for t in tags do
@@ -410,7 +410,7 @@ module Exp =
             sbyte.DataType === typedefof<sbyte>
             sbyte.BoxedEvaluatedValue === 1y
 
-            let createParam (name, v) = {Name=name; Value=unbox v; Comment=None; Address=None;}
+            let createParam (name, v) = {Name=name; Value=unbox v; Comment=None; Address=None; System = sys}
             let variables = [
                 Variable<byte>   (createParam("byte",   box 1uy))  |> var2expr |> iexpr
                 Variable<char>   (createParam("char",   box '1'))  |> var2expr |> iexpr

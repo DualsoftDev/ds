@@ -49,13 +49,13 @@ module ExpressionExtension =
 
     /// Create None Relay rising Pulse Coil Statement
     let (--^) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool>, comment:string) =
-        let rising:RisingCoil = {Storage = coil; HistoryFlag = HistoryFlag()}
+        let rising:RisingCoil = {Storage = coil; HistoryFlag = HistoryFlag(); System = (coil :> IStorage).DsSystem}
         rising <=^ (sets <&&> (!! rsts))
         |> withExpressionComment comment
 
     /// Create None Relay falling Pulse Coil Statement
     let (--!^) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TagBase<bool>, comment:string) =
-        let falling:FallingCoil = {Storage = coil; HistoryFlag = HistoryFlag()}
+        let falling:FallingCoil = {Storage = coil; HistoryFlag = HistoryFlag(); System = (coil :> IStorage).DsSystem}
         falling <=!^ (sets <&&> (!! rsts))
         |> withExpressionComment comment
 

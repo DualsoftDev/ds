@@ -67,9 +67,9 @@ type StatementTest() =
 
         //let storages = storages.ToArray() |> map Tuple.ofKeyValuePair |> Tuple.toDictionary
         use _ = setRuntimeTarget WINDOWS
-        let coutnerStatement:Statement = "ctu myCounter = createWinCTU(100us, false, false)" |> tryParseStatement storages |> Option.get
+        let coutnerStatement:Statement = "ctu myCounter = createWinCTU(100us, false, false)" |> tryParseStatement storages|> Option.get
         let counter = toCounter coutnerStatement
-        let timerStatement2:Statement = "ton myTimer = createWinTON(100us, false)" |> tryParseStatement storages |> Option.get
+        let timerStatement2:Statement = "ton myTimer = createWinTON(100us, false)" |> tryParseStatement storages|> Option.get
 
         let cs2:Statement = "ton mytimer = createWinTON(1000us, $tag1 || $tag2)" |> tryParseStatement storages |> Option.get
         let timer = toTimer cs2

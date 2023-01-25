@@ -20,7 +20,7 @@ module TagManagerUtil =
 
     let createDsTag(stg:Storages, name:string, dataType:DataType) : IStorage =
         let v = dataType.DefaultValue()
-        let createParam () = {Name=name; Value=unbox v; Comment=None; Address=None;}
+        let createParam () = {Name=name; Value=unbox v; Comment=None; Address=None; System = Runtime.System}
         let t =
             match dataType with
             | DuINT8    -> PlanTag<int8>  (createParam()) :>IStorage
@@ -41,28 +41,28 @@ module TagManagerUtil =
         t
 
 
-    let timer  (storages:Storages)  name  =
+    let timer  (storages:Storages)  name sys =
         let name = getUniqueName name storages
-        let ts = TimerStruct.Create(TimerType.TON, storages,name, 0us, 0us)
+        let ts = TimerStruct.Create(TimerType.TON, storages,name, 0us, 0us, sys)
         ts
 
-    let counter (storages:Storages) name =
+    let counter (storages:Storages) name sys =
         let name = getUniqueName name storages
-        let cs = CTRStruct.Create(CounterType.CTR, storages, name, 0us, 0us)
+        let cs = CTRStruct.Create(CounterType.CTR, storages, name, 0us, 0us, sys)
         cs
 
-    let sysTag (storages:Storages) name (dataType:DataType) =
+    let sysTag (storages:Storages) name (dataType:DataType)  =
         let name = getUniqueName name storages
         let t= createDsTag (storages, name, dataType)
         t
 
-    let planTag (storages:Storages) name =
+    let planTag (storages:Storages) name sys =
         let name = getUniqueName name storages
         let t= createDsTag (storages, name, DuBOOL)
         t :?> PlanTag<bool>
 
     type InOut = | In | Out | Memory
-    let actionTag(stg:Storages, name, address, inOut:InOut): ITagWithAddress =
+    let actionTag(stg:Storages, name, address, inOut:InOut, sys): ITagWithAddress =
         let name = getUniqueName name stg
         let plcName =
             match inOut with
@@ -71,7 +71,7 @@ module TagManagerUtil =
             | Memory -> failwithlog "error: Memory not supported "
 
         let t =
-            let param = {Name=plcName; Address=Some address; Value=false; Comment=None; }
+            let param = {Name=plcName; Address=Some address; Value=false; Comment=None;  System = sys}
             (ActionTag(param) :> ITagWithAddress)
         stg.Add(t.Name, t)
         t

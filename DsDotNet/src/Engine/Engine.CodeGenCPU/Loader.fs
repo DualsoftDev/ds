@@ -115,6 +115,7 @@ module CpuLoader =
 
 
     let private convertSystem(sys:DsSystem) =
+        Runtime.System <- sys
 
         //DsSystem 물리 IO 생성
         sys.GenerationIO()
@@ -137,6 +138,8 @@ module CpuLoader =
 
     let applyTagManager(system:DsSystem, storages:Storages) =
         let createTagM (sys:DsSystem) =
+            Runtime.System <- sys
+
             sys.TagManager <- SystemManager(sys, storages)
             sys.Flows.Iter(fun f->f.TagManager <- FlowManager(f))
             sys.ApiItems.Iter(fun a->a.TagManager <- ApiItemManager(a))

@@ -31,7 +31,7 @@ module RunTime =
                     //    async {statement.Do()}|> Async.StartImmediate
                     else
                         let mapRungs = mapRungs
-                        failwithlog "Error"  //디버깅후 예외 처리
+                        failwithlog "Error runSubscribe"  //디버깅후 예외 처리
                     )
             subscribe
 
@@ -72,6 +72,7 @@ module RunTime =
             runSubscription.Dispose()
             runSubscription <- null
 
+        member x.System = sys
         member x.ToTextStatement() =
             let statementTexts = statements.Select(fun statement -> statement.ToText())
             String.Join("\r\n", statementTexts)

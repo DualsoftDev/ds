@@ -13,11 +13,11 @@ type StatementTest() =
 
     let prepareStorage() =
         let storages = Storages()
-        let t1 = PlcTag("my_counter_control_tag", "%M1.1", false)
-        let tag1 = PlcTag("tag1", "%M1.1", false)
-        let tag2 = PlcTag("tag2", "%M1.1", false)
-        let tag3 = PlcTag("tag3", "%M1.1", false)
-        let tagDouble = PlcTag("tagDouble", "%M1.1", 3.14)
+        let t1 = Tag("my_counter_control_tag", "%M1.1", false)
+        let tag1 = Tag("tag1", "%M1.1", false)
+        let tag2 = Tag("tag2", "%M1.1", false)
+        let tag3 = Tag("tag3", "%M1.1", false)
+        let tagDouble = Tag("tagDouble", "%M1.1", 3.14)
         for t in [t1 :> IStorage; tag1; tag2; tag3; tagDouble] do
             storages.Add(t.Name, t)
         storages
@@ -103,8 +103,8 @@ type StatementTest() =
     [<Test>]
     member __.``COPY statement parsing test`` () =
         let storages = Storages()
-        let tCond = PlcTag("tagCondition", "%M1.1", false)
-        let tTarget = PlcTag("tag1", "%M1.1", 99us)
+        let tCond = Tag("tagCondition", "%M1.1", false)
+        let tTarget = Tag("tag1", "%M1.1", 99us)
         storages.Add(tCond.Name, tCond)
         storages.Add(tTarget.Name, tTarget)
         let text = "copyIf($tagCondition, 100us, $tag1)"

@@ -1,7 +1,6 @@
 namespace Engine.Core
 
 open System
-open System.Runtime.CompilerServices
 open Engine.Common.FS
 
 [<AutoOpen>]
@@ -10,10 +9,6 @@ module TagModule =
     type TagBase<'T when 'T:equality> with
         member x.Expr = var2expr x
 
-    [<AbstractClass>]
-    type Tag<'T when 'T:equality> (param:TagCreationParams<'T>) =
-        inherit TagBase<'T>(param)
-        override x.ToBoxedExpression() = var2expr x
 
     /// Variable for WINDOWS platform
     type Variable<'T when 'T:equality> (param:TagCreationParams<'T>) =
@@ -22,25 +17,26 @@ module TagModule =
 
     [<Obsolete("<ahn> PLCTag 에서 address 가 None or empty string 인 경우가 존재할 수 있는지 체크")>]
     /// plc / pc / 다른 runtime platform 지원가능한 물리 TAG
-    type PlcTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
-        inherit Tag<'T>(param)
+    type Tag<'T when 'T:equality> (param:TagCreationParams<'T>) =
+        inherit TagBase<'T>(param)
         let address = param.Address |? ""   // todo: <ahn> address None 과 "" 구분 처리.  `|? ""` 없이 동작해야..
         new(name, address:string, initValue:'T) =
             let param = {Name = name; Address = Some address; Comment = None; Value = initValue}
-            PlcTag<'T>(param)
+            Tag<'T>(param)
 
         interface ITagWithAddress with
             member x.Address = x.Address
         member val Address = address with get, set
+        override x.ToBoxedExpression() = var2expr x
 
     /// PlanTag 나의 시스템 내부 TAG
     type PlanTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
-        inherit PlcTag<'T>(param)
+        inherit Tag<'T>(param)
         member val Vertex:Vertex option = None with get, set
 
     /// ActionTag 다른 시스템 연결 TAG
     type ActionTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
-        inherit PlcTag<'T>(param)
+        inherit Tag<'T>(param)
 
 
 

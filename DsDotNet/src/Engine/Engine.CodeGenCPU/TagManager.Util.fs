@@ -23,16 +23,16 @@ module TagManagerUtil =
         let createParam () = {Name=name; Value=unbox v; Comment=None; Address=None;}
         let t =
             match dataType with
+            | DuINT8    -> PlanTag<int8>  (createParam()) :>IStorage
+            | DuINT16   -> PlanTag<int16> (createParam()) :>IStorage
+            | DuINT32   -> PlanTag<int32> (createParam()) :>IStorage
+            | DuINT64   -> PlanTag<int64> (createParam()) :>IStorage
+            | DuUINT8   -> PlanTag<uint8> (createParam()) :>IStorage
+            | DuUINT16  -> PlanTag<uint16>(createParam()) :>IStorage
+            | DuUINT32  -> PlanTag<uint32>(createParam()) :>IStorage
+            | DuUINT64  -> PlanTag<uint64>(createParam()) :>IStorage
             | DuFLOAT32 -> PlanTag<single>(createParam()) :>IStorage
             | DuFLOAT64 -> PlanTag<double>(createParam()) :>IStorage
-            | DuINT8    -> PlanTag<int8>  (createParam()) :>IStorage
-            | DuUINT8   -> PlanTag<uint8> (createParam()) :>IStorage
-            | DuINT16   -> PlanTag<int16> (createParam()) :>IStorage
-            | DuUINT16  -> PlanTag<uint16>(createParam()) :>IStorage
-            | DuINT32   -> PlanTag<int32> (createParam()) :>IStorage
-            | DuUINT32  -> PlanTag<uint32>(createParam()) :>IStorage
-            | DuINT64   -> PlanTag<int64> (createParam()) :>IStorage
-            | DuUINT64  -> PlanTag<uint64>(createParam()) :>IStorage
             | DuSTRING  -> PlanTag<string>(createParam()) :>IStorage
             | DuCHAR    -> PlanTag<char>  (createParam()) :>IStorage
             | DuBOOL    -> PlanTag<bool>  (createParam()) :>IStorage

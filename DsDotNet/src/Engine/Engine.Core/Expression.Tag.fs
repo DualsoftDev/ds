@@ -20,18 +20,21 @@ module TagModule =
         inherit VariableBase<'T>(param)
         override x.ToBoxedExpression() = var2expr x
 
-    [<Obsolete("<ahn> PLCTag 에서 address 가 None or empty string 인 경우가 존재할 수 있는지 체크")>]
+    let createParam name add comm v = {Name=name; Comment=comm; Address=add; Value= v;}
     /// plc / pc / 다른 runtime platform 지원가능한 물리 TAG
     type PlcTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
         inherit Tag<'T>(param)
-        let address = param.Address |? ""   // todo: <ahn> address None 과 "" 구분 처리.  `|? ""` 없이 동작해야..
-        new(name, address:string, initValue:'T) =
-            let param = {Name = name; Address = Some address; Comment = None; Value = initValue}
-            PlcTag<'T>(param)
+        //address 없는 auto tag plcTag생성
+        new(name, initValue:'T)
+            = PlcTag<'T>(createParam name None           None initValue)
+        //address 있는 주소tag plcTag생성
+        new(name, address:string, initValue:'T)
+            = PlcTag<'T>(createParam name (Some address) None initValue)
 
         interface ITagWithAddress with
             member x.Address = x.Address
-        member val Address = address with get, set
+        ///xgi tag 생성시 주소가 _A_이면 자동주소 //auto tag 예약 문자 _A_
+        member val Address = ("_A_", param.Address) ||> Option.defaultValue
 
     /// PlanTag 나의 시스템 내부 TAG
     type PlanTag<'T when 'T:equality> (param:TagCreationParams<'T>) =

@@ -28,7 +28,7 @@ open PLC.CodeGen.LSXGI
         member __.``CTU creation test`` () =
             use _ = setRuntimeTarget AB
             let storages = Storages()
-            let t1 = PlcTag("my_counter_control_tag", "%M1.1", false)
+            let t1 = Tag("my_counter_control_tag", "%M1.1", false)
             let condition = var2expr t1
             let tcParam = {Storages=storages; Name="myCTU"; Preset=100us; RungInCondition=condition; FunctionName="createWinCTU"}
             let ctu = CounterStatement.CreateAbCTU(tcParam) |> toCounter
@@ -79,9 +79,9 @@ open PLC.CodeGen.LSXGI
         member __.``CTUD creation test`` () =
             use _ = setRuntimeTarget AB
             let storages = Storages()
-            let t1 = PlcTag("my_counter_up_tag", "%M1.1", false)
-            let t2 = PlcTag("my_counter_down_tag", "%M1.1", false)
-            let t3 = PlcTag("my_counter_reset_tag", "%M1.1", false)
+            let t1 = Tag("my_counter_up_tag", "%M1.1", false)
+            let t2 = Tag("my_counter_down_tag", "%M1.1", false)
+            let t3 = Tag("my_counter_reset_tag", "%M1.1", false)
             let upCondition = var2expr t1
             let downCondition = var2expr t2
             let resetCondition = var2expr t3
@@ -116,8 +116,8 @@ open PLC.CodeGen.LSXGI
         member __.``CTU with reset creation test`` () =
             use _ = setRuntimeTarget WINDOWS
             let storages = Storages()
-            let t1 = PlcTag("my_counter_control_tag", "%M1.1", false)
-            let resetTag = PlcTag("my_counter_reset_tag", "%M1.1", false)
+            let t1 = Tag("my_counter_control_tag", "%M1.1", false)
+            let resetTag = Tag("my_counter_reset_tag", "%M1.1", false)
             let condition = var2expr t1
             let reset = var2expr resetTag
             let tcParam = {Storages=storages; Name="myCTU"; Preset=100us; RungInCondition=condition; FunctionName="createWinCTU"}
@@ -156,8 +156,8 @@ open PLC.CodeGen.LSXGI
         member __.``CTR with reset creation test`` () =
             use _ = setRuntimeTarget WINDOWS
             let storages = Storages()
-            let t1 = PlcTag("my_counter_control_tag", "%M1.1", false)
-            let resetTag = PlcTag("my_counter_reset_tag", "%M1.1", false)
+            let t1 = Tag("my_counter_control_tag", "%M1.1", false)
+            let resetTag = Tag("my_counter_reset_tag", "%M1.1", false)
             let condition = var2expr t1
             let reset = var2expr resetTag
             let tcParam = {Storages=storages; Name="myCTR"; Preset=100us; RungInCondition=condition; FunctionName="createWinCTR"}

@@ -85,7 +85,7 @@ module ConvertCoreExt =
     let private getButtonExpr(flow:Flow, btns:ButtonDef seq) : Expression<bool> seq =
             btns.Where(fun b -> b.SettingFlows.Contains(flow))
                 .Select(fun b ->
-                    let inTag = (b.InTag :?> PlcTag<bool>).Expr
+                    let inTag = (b.InTag :?> Tag<bool>).Expr
                     if hasNot(b.Funcs)then !!inTag else inTag    )
 
     let private getBtnExpr(f:Flow, btns:ButtonDef seq) : Expression<bool>  =
@@ -97,10 +97,10 @@ module ConvertCoreExt =
     let private getSelectBtnExpr(f:Flow, btns:ButtonDef seq) : Expression<bool> seq =
         getButtonExpr(f, btns)
 
-    let getConditionInputs(flow:Flow, condis:ConditionDef seq) : PlcTag<bool> seq =
+    let getConditionInputs(flow:Flow, condis:ConditionDef seq) : Tag<bool> seq =
             condis.Where(fun b -> b.SettingFlows.Contains(flow))
                  .Select(fun b -> b.InTag)
-                 .Cast<PlcTag<bool>>()
+                 .Cast<Tag<bool>>()
 
 
 //운영 모드 는 Flow 별로 제공된 모드 On/Off 상태 나타낸다.

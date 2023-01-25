@@ -16,10 +16,10 @@ open Engine.Core
         member __.``Variable Declaration test`` () =
             use _ = setRuntimeTarget AB
             let storages = Storages()
-            let t1 = PlcTag("my_counter_control_tag", "%M1.1", false)
-            let tag1 = PlcTag("tag1", "%M1.1", false)
-            let tag2 = PlcTag("tag2", "%M1.1", false)
-            let tag3 = PlcTag("tag3", "%M1.1", false)
+            let t1 = Tag("my_counter_control_tag", "%M1.1", false)
+            let tag1 = Tag("tag1", "%M1.1", false)
+            let tag2 = Tag("tag2", "%M1.1", false)
+            let tag3 = Tag("tag3", "%M1.1", false)
             do
                 for t in [ t1 :> IStorage; tag1; tag2; tag3 ] do
                     storages.Add(t.Name, t)
@@ -40,7 +40,7 @@ open Engine.Core
             storages.ContainsKey("myByte") === true
             storages["myByte"].BoxedValue === 123y
             storages["myByte"].DataType === typedefof<int8>
-            let myByte = storages["myByte"] :?> PlcTag<int8>
+            let myByte = storages["myByte"] :?> Tag<int8>
             myByte.Address === "%M9.9"
             ()
 

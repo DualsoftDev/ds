@@ -71,7 +71,7 @@ module ExpressionExtension =
         counterCoil <=% (Some rungInCondition)
         |> withExpressionComment comment
 
-    let private tryTags2LogicalAndOrExpr (fLogical: IExpression list -> Expression<bool>) (FList(ts:#Tag<bool> list)) : Expression<bool> option =
+    let private tryTags2LogicalAndOrExpr (fLogical: IExpression list -> Expression<bool>) (FList(ts:#TagBase<bool> list)) : Expression<bool> option =
         match ts with
         | [] -> None    //failwithlog "tags2AndExpr: Empty list"
         | t :: [] -> Some (var2expr t)
@@ -94,10 +94,10 @@ module ExpressionExtension =
 
     [<Extension>]
     type ExpressionExt =
-        [<Extension>] static member ToAnd (xs:#Tag<bool> seq)       = xs |> toAnd
+        [<Extension>] static member ToAnd (xs:#TagBase<bool> seq)       = xs |> toAnd
         [<Extension>] static member ToAnd (xs:Expression<bool> seq) = xs.Reduce(<&&>)
 
-        [<Extension>] static member ToOr  (xs:#Tag<bool> seq)       = xs |> toOr
+        [<Extension>] static member ToOr  (xs:#TagBase<bool> seq)       = xs |> toOr
         [<Extension>] static member ToOr  (xs:Expression<bool> seq) = xs.Reduce(<||>)
 
 

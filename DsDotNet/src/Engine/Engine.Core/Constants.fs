@@ -212,16 +212,16 @@ module DsDataType =
     let DataToType(txt:string) =
         match txt.ToLower() with
         //system1   | system2   | plc
-        | "sbyte"   | "int8"             ->  DuINT8
-        | "int16"   | "short"   |"byte"  ->  DuINT16
+        | "int8"    | "sbyte"            ->  DuINT8
+        | "int16"   | "short"            ->  DuINT16
         | "int32"   | "int"              ->  DuINT32
         | "int64"   | "long"             ->  DuINT64
-        | "byte"    | "uint8"   |"byte"  ->  DuUINT8
+        | "uint8"   | "byte"    |"byte"  ->  DuUINT8
         | "uint16"  | "ushort"  |"word"  ->  DuUINT16
         | "uint32"  | "uint"    |"dword" ->  DuUINT32
         | "uint64"  | "ulong"   |"lword" ->  DuUINT64
-        | "single"  | "float32"          ->  DuFLOAT32
-        | "double"  | "float64"          ->  DuFLOAT64
+        | "float32" | "single"           ->  DuFLOAT32
+        | "float64" | "double"           ->  DuFLOAT64
         | "string"                       ->  DuSTRING
         | "char"                         ->  DuCHAR
         | "boolean" | "bool"    | "bit"  ->  DuBOOL

@@ -342,21 +342,22 @@ module rec ExpressionParser =
         member x.CreateVariable(name:string) = fwdCreateVariableWithType x name
 
         member x.CreateTag(name:string, address:string, boxedValue:obj) : IStorage =
-            let v = boxedValue
+            let createParam () = {Name=name; Value=unbox boxedValue; Address=Some address; Comment=None; }
+
             match x.Name with
-            | BOOL-> new ActionTag<bool>  (name, address, unbox v)
-            | UINT8   -> new ActionTag<uint8> (name, address, unbox v)
-            | CHAR   -> new ActionTag<char>  (name, address, unbox v)
-            | FLOAT64 -> new ActionTag<double>(name, address, unbox v)
-            | INT16  -> new ActionTag<int16> (name, address, unbox v)
-            | INT32  -> new ActionTag<int32> (name, address, unbox v)
-            | INT64  -> new ActionTag<int64> (name, address, unbox v)
-            | INT8  -> new ActionTag<int8>  (name, address, unbox v)
-            | FLOAT32 -> new ActionTag<single>(name, address, unbox v)
-            | STRING -> new ActionTag<string>(name, address, unbox v)
-            | UINT16 -> new ActionTag<uint16>(name, address, unbox v)
-            | UINT32 -> new ActionTag<uint32>(name, address, unbox v)
-            | UINT64 -> new ActionTag<uint64>(name, address, unbox v)
+            | BOOL    -> new ActionTag<bool>  (createParam())
+            | UINT8   -> new ActionTag<uint8> (createParam())
+            | CHAR    -> new ActionTag<char>  (createParam())
+            | FLOAT64 -> new ActionTag<double>(createParam())
+            | INT16   -> new ActionTag<int16> (createParam())
+            | INT32   -> new ActionTag<int32> (createParam())
+            | INT64   -> new ActionTag<int64> (createParam())
+            | INT8    -> new ActionTag<int8>  (createParam())
+            | FLOAT32 -> new ActionTag<single>(createParam())
+            | STRING  -> new ActionTag<string>(createParam())
+            | UINT16  -> new ActionTag<uint16>(createParam())
+            | UINT32  -> new ActionTag<uint32>(createParam())
+            | UINT64  -> new ActionTag<uint64>(createParam())
             | _  -> failwithlog "ERROR"
 
         member x.CreateTag(name:string, address:string) : IStorage =

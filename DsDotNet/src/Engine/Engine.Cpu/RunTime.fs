@@ -15,18 +15,18 @@ module RunTime =
         let runSubscribe() =
             let subscribe =
                 sys.ValueChangeSubject      //cpu 단위로 이벤트 필요 ahn
-                 .Subscribe(fun evt ->
+                 .Subscribe(fun (storage, newValue_) ->
                     //Step 1 상태보고
-                    match evt with
+                    match storage with
                     | :? PlanTag<bool> as p -> p.NotifyStatus()
                     | :? ActionTag<bool> as a -> ()//hmi ?
                     | _ -> ()
 
 
                     //Step 2 관련수식 연산
-                    if mapRungs.ContainsKey evt
+                    if mapRungs.ContainsKey storage
                     then
-                        for statement in mapRungs[evt] do
+                        for statement in mapRungs[storage] do
                             statement.Do()
                     //    async {statement.Do()}|> Async.StartImmediate
                     else

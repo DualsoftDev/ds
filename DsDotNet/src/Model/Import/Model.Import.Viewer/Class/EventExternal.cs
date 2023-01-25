@@ -1,11 +1,10 @@
+using System;
+using System.Reactive.Linq;
+
 using Engine.Common;
 using Engine.Common.FS;
 using Engine.Core;
-using Microsoft.Msagl.Core.DataStructures;
-using System;
-using System.Data.SqlTypes;
-using System.Reactive.Linq;
-using System.Text.RegularExpressions;
+
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 
@@ -24,9 +23,10 @@ namespace Dual.Model.Import
 
         public static void CPUSubscribe()
         {
-            CpuEvent.ValueSubject.Subscribe(rx =>
+            CpuEvent.ValueSubject.Subscribe(tuple =>
             {
-                FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{rx.Name}:{rx.BoxedValue}", true);
+                var (storage, newValue) = tuple;
+                FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{storage.Name}:{newValue}", true);
             });
 
             CpuEvent.StatusSubject.Subscribe(rx =>

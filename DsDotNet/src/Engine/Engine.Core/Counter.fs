@@ -237,16 +237,16 @@ module rec CounterModule =
         let registerLoad() =
             let csd = box cs :?> ICTD       // CTD or CTUD 둘다 적용
             ValueSubject
-                .Where(fun storage -> storage = csd.LD && csd.LD.Value)
-                .Subscribe(fun storage ->
+                .Where(fun (storage, newValue_) -> storage = csd.LD && csd.LD.Value)
+                .Subscribe(fun (storage, newValue_) ->
                     cs.ACC.Value <- cs.PRE.Value
             ) |> disposables.Add
 
         let registerCTU() =
             let csu = box cs :?> ICTU
             ValueSubject
-                .Where(fun storage -> storage = csu.CU && csu.CU.Value)
-                .Subscribe(fun storage ->
+                .Where(fun (storage, newValue_) -> storage = csu.CU && csu.CU.Value)
+                .Subscribe(fun (storage, newValue_) ->
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
                     cs.ACC.Value <- cs.ACC.Value + 1us
                     if cs.ACC.Value >= cs.PRE.Value then
@@ -257,8 +257,8 @@ module rec CounterModule =
             let csd = box cs :?> ICTD
             registerLoad()
             ValueSubject
-                .Where(fun storage -> storage = csd.CD && csd.CD.Value)
-                .Subscribe(fun storage ->
+                .Where(fun (storage, newValue_) -> storage = csd.CD && csd.CD.Value)
+                .Subscribe(fun (storage, newValue_) ->
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
                     cs.ACC.Value <- cs.ACC.Value - 1us
                     if cs.ACC.Value <= cs.PRE.Value then
@@ -269,8 +269,8 @@ module rec CounterModule =
         let registerCTR() =
             let csr = box cs :?> ICTR
             ValueSubject
-                .Where(fun storage -> storage = csr.CD && csr.CD.Value)
-                .Subscribe(fun storage ->
+                .Where(fun (storage, newValue_) -> storage = csr.CD && csr.CD.Value)
+                .Subscribe(fun (storage, newValue_) ->
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
                     cs.ACC.Value <- cs.ACC.Value + 1us
                     if cs.ACC.Value = cs.PRE.Value then
@@ -283,8 +283,8 @@ module rec CounterModule =
 
         let registerReset() =
             ValueSubject
-                .Where(fun storage -> storage = cs.RES && cs.RES.Value)
-                .Subscribe(fun storage ->
+                .Where(fun (storage, newValue_) -> storage = cs.RES && cs.RES.Value)
+                .Subscribe(fun (storage, newValue_) ->
                     tracefn "Counter reset requested"
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
                     cs.ACC.Value <- 0us

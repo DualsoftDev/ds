@@ -73,7 +73,7 @@ module CoreModule =
         //시스템에서 호출가능한 작업리스트 (Call => Job => ApiItems => Addresses)
         member val Jobs    = ResizeArray<Job>()
         //시스템단위로 이벤트 변화 처리
-        member val ValueChangeSubject = new Subject<IStorage>()
+        member val ValueChangeSubject = new Subject<IStorage*obj>()
 
 
         member _.AddLoadedSystem(childSys) = loadedSystems.Add(childSys)

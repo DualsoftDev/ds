@@ -3,17 +3,43 @@ open System
 open System.Linq
 open System.Runtime.CompilerServices
 open Engine.Common.FS
-open ExpressionPrologModule.ExpressionPrologSubModule
 open System.Collections.Generic
 
+module private ExpressionHelperModule =
+    let expectN (n:int) (xs:'a seq) = if xs.Count() <> n then failwith $"Wrong number of arguments: expect {n}"
+    let expect1 xs = expectN 1 xs; xs.First()
+    let expect2 xs = expectN 2 xs; Array.ofSeq xs
+    let expectGteN (n:int) (xs:'a seq) =
+        if xs.Count() < n then failwith $"Wrong number of arguments: expect at least {n} arguments"
+
+    let evalArg (x:IExpression) = x.BoxedEvaluatedValue
+    let castTo<'T> (x:obj) = x :?> 'T
+    let evalTo<'T> (x:IExpression) = x |> evalArg |> castTo<'T>
+
+    /// 모든 args 의 data type 이 동일한지 여부 반환
+    let isAllExpressionSameType(args:Args) =
+        args |> Seq.distinctBy(fun a -> a.DataType) |> Seq.length = 1
+    let verifyAllExpressionSameType = isAllExpressionSameType >> verifyM "Type mismatch"
+    let isThisOperatorRequireAllArgumentsSameType: (string -> bool)  =
+        let hash =
+            [   "+" ; "-" ; "*" ; "/" ; "%"
+                ">" ; ">=" ; "<" ; "<=" ; "=" ; "!="
+                "&&" ; "||"
+                "&" ; "|" ; "&&&" ; "|||"
+                "add"; "sub"; "mul"; "div"
+                "gt"; "gte"; "lt"; "lte"
+                "equal"; "notEqual"; "and"; "or"
+            ] |> HashSet<string>
+        fun (name:string) -> hash.Contains (name)
+    let verifyArgumentsTypes operator args =
+        if isThisOperatorRequireAllArgumentsSameType operator && not <| isAllExpressionSameType args then
+            failwith $"Type mismatch for operator={operator}"
 [<AutoOpen>]
 module ExpressionFunctionModule =
+    open ExpressionHelperModule
 
     /// Expression<'T> 를 IExpression 으로 casting
     let internal iexpr any = (box any) :?> IExpression
-    let private evalArg (x:IExpression) = x.BoxedEvaluatedValue
-    let private castTo<'T> (x:obj) = x :?> 'T
-    let private evalTo<'T> (x:IExpression) = x |> evalArg |> castTo<'T>
 
     let [<Literal>] FunctionNameRising  = "rising"
     let [<Literal>] FunctionNameFalling = "falling"
@@ -360,7 +386,6 @@ module ExpressionFunctionModule =
 
     [<AutoOpen>]
     module internal FunctionImpl =
-        open ExpressionPrologSubModule
         [<Extension>] // type SeqExt =
         type SeqExt =
             [<Extension>] static member ExpectGteN(xs:'a seq, n) = expectGteN n xs; xs

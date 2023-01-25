@@ -5,7 +5,7 @@ open NUnit.Framework
 open Engine.Parser.FS
 open T
 open Engine.Core
-open Engine.Core.ExpressionPrologModule.ExpressionPrologSubModule
+open System
 
 [<AutoOpen>]
 module ComparisionTestModule =
@@ -130,6 +130,7 @@ module ComparisionTestModule =
     type ShiftTest() =
         inherit ExpressionTestBaseClass()
 
+        [<Obsolete("1s <<< 2 = 4s 에 대해서 동작하지 않습니다.  수정 필요")>]
         [<Test>]
         member __.``1 ">>>" test`` () =
             let storages = Storages()

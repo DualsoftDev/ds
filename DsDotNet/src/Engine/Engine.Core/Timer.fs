@@ -130,9 +130,10 @@ module rec TimerModule =
     [<AbstractClass>]
     type TimerCounterBaseStruct (storages:Storages, name, preset, accum:CountUnitType, dn, pre, acc, res, sys) =
         interface IStorage with
-            member x.DsSystem = sys
+            member _.DsSystem = sys
             member x.Name with get() = x.Name and set(v) = failwithlog "ERROR: not supported"
-            member x.DataType = typedefof<TimerCounterBaseStruct>
+            member _.DataType = typedefof<TimerCounterBaseStruct>
+            member _.IsGlobal = true
             member val Comment = "" with get, set
             member x.BoxedValue with get() = x.This and set(v) = failwithlog "ERROR: not supported"
             member x.ObjValue = x.This
@@ -142,13 +143,13 @@ module rec TimerModule =
         member private x.This = x
         member _.Name:string = name
         /// Done bit
-        member _.DN:TagBase<bool> = dn
-        member _.PRE:TagBase<CountUnitType> = pre
-        member _.ACC:TagBase<CountUnitType> = acc
+        member _.DN:VariableBase<bool> = dn
+        member _.PRE:VariableBase<CountUnitType> = pre
+        member _.ACC:VariableBase<CountUnitType> = acc
         /// Reset bit.
-        member _.RES:TagBase<bool> = res
+        member _.RES:VariableBase<bool> = res
         /// XGI load
-        member _.LD:TagBase<bool> = res
+        member _.LD:VariableBase<bool> = res
 
     let addTagsToStorages (storages:Storages) (ts:IStorage seq) =
         for t in ts do
@@ -159,9 +160,9 @@ module rec TimerModule =
         inherit TimerCounterBaseStruct(storages, name, preset, accum, dn, pre, acc, res, sys)
 
         /// Enable
-        member _.EN:TagBase<bool> = en
+        member _.EN:VariableBase<bool> = en
         /// Timing
-        member _.TT:TagBase<bool> = tt
+        member _.TT:VariableBase<bool> = tt
         member _.Type = typ
 
         static member Create(typ:TimerType, storages:Storages, name, preset:CountUnitType, accum:CountUnitType, sys) =
@@ -171,12 +172,12 @@ module rec TimerModule =
                 | AB -> "EN", "TT", "DN", "PRE", "ACC", "RES"
                 | _ -> failwithlog "NOT yet supported"
 
-            let en  = fwdCreateBoolEndoTag   $"{name}.{en }" false
-            let tt  = fwdCreateBoolEndoTag   $"{name}.{tt }" false
-            let dn  = fwdCreateBoolEndoTag   $"{name}.{dn }" false  // Done
-            let pre = fwdCreateUShortEndoTag $"{name}.{pre}" preset
-            let acc = fwdCreateUShortEndoTag $"{name}.{acc}" accum
-            let res = fwdCreateBoolEndoTag   $"{name}.{res}" false
+            let en  = fwdCreateBoolMemberVariable   $"{name}.{en }" false
+            let tt  = fwdCreateBoolMemberVariable   $"{name}.{tt }" false
+            let dn  = fwdCreateBoolMemberVariable   $"{name}.{dn }" false  // Done
+            let pre = fwdCreateUShortMemberVariable $"{name}.{pre}" preset
+            let acc = fwdCreateUShortMemberVariable $"{name}.{acc}" accum
+            let res = fwdCreateBoolMemberVariable   $"{name}.{res}" false
 
             storages.Add(en.Name, en)
             storages.Add(tt.Name, tt)

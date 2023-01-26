@@ -52,7 +52,7 @@ module CodeConvertUtil =
 
     let getOriginIOs(real:Real, initialType:InitialType) =
         let origins = getOriginDeviceDefs(real, initialType)
-        origins.Select(fun jd -> jd.InTag).Cast<BridgeTag<bool>>()
+        origins.Select(fun jd -> jd.InTag).Cast<Tag<bool>>()
 
     let getStartPointExpr(call:Call, jd:TaskDevice) =
         match call.Parent.GetCore() with
@@ -87,7 +87,7 @@ module CodeConvertUtil =
         (* [ KeyValuePair(JogDef, InitialType) ] *)
         let needChecks = origins.Where(fun w-> w.Value = NeedCheck)
 
-        let needCheckSet:BridgeTag<bool> list list =
+        let needCheckSet:Tag<bool> list list =
             let apiNameToInTagMap =
                 needChecks.Map(fun (KeyValue(taskDevice, v)) -> taskDevice.ApiName, taskDevice.InTag)
                 |> Tuple.toDictionary
@@ -102,7 +102,7 @@ module CodeConvertUtil =
                     for rs in resetChains do
                         [
                             for r in rs do
-                                apiNameToInTagMap.TryFind(r).Map(fun intag -> intag :?> BridgeTag<bool>)
+                                apiNameToInTagMap.TryFind(r).Map(fun intag -> intag :?> Tag<bool>)
                         ] |> List.choose id
             ] |> List.filter List.any
 
@@ -141,15 +141,15 @@ module CodeConvertUtil =
     [<AutoOpen>]
     [<Extension>]
     type CodeConvertUtilExt =
-        [<Extension>] static member STs (FList(vms:VertexManager list)): PlanTag<bool> list = vms |> map (fun vm -> vm.RT)
-        [<Extension>] static member SFs (FList(vms:VertexManager list)): PlanTag<bool> list = vms |> map (fun vm -> vm.SF)
-        [<Extension>] static member RTs (FList(vms:VertexManager list)): PlanTag<bool> list = vms |> map (fun vm -> vm.RT)
-        [<Extension>] static member ETs (FList(vms:VertexManager list)): PlanTag<bool> list = vms |> map (fun vm -> vm.ET)
-        [<Extension>] static member ERRs(FList(vms:VertexManager list)): PlanTag<bool> list = vms |> bind(fun vm -> [vm.E1; vm.E2])
-        [<Extension>] static member CRs (FList(vms:VertexMCoin list))  : PlanTag<bool> list = vms |> map (fun vm -> vm.CR)
+        [<Extension>] static member STs (FList(vms:VertexManager list)): PlanVar<bool> list = vms |> map (fun vm -> vm.RT)
+        [<Extension>] static member SFs (FList(vms:VertexManager list)): PlanVar<bool> list = vms |> map (fun vm -> vm.SF)
+        [<Extension>] static member RTs (FList(vms:VertexManager list)): PlanVar<bool> list = vms |> map (fun vm -> vm.RT)
+        [<Extension>] static member ETs (FList(vms:VertexManager list)): PlanVar<bool> list = vms |> map (fun vm -> vm.ET)
+        [<Extension>] static member ERRs(FList(vms:VertexManager list)): PlanVar<bool> list = vms |> bind(fun vm -> [vm.E1; vm.E2])
+        [<Extension>] static member CRs (FList(vms:VertexMCoin list))  : PlanVar<bool> list = vms |> map (fun vm -> vm.CR)
 
-        [<Extension>] static member ToAndElseOn(ts:#TagBase<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToAnd() else sys._on.Expr
-        [<Extension>] static member ToOrElseOff(ts:#TagBase<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToOr()  else sys._off.Expr
+        [<Extension>] static member ToAndElseOn(ts:#TypedValueStorage<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToAnd() else sys._on.Expr
+        [<Extension>] static member ToOrElseOff(ts:#TypedValueStorage<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToOr()  else sys._off.Expr
         [<Extension>] static member GetSharedReal(v:VertexManager) = v |> getSharedReal
         [<Extension>] static member GetSharedCall(v:VertexManager) = v |> getSharedCall
         ///Real 자신이거나 RealEx Target Real

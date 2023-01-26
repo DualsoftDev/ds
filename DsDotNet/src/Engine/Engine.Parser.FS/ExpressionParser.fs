@@ -251,7 +251,7 @@ module rec ExpressionParser =
                     | tagAddress::tagValue::[] ->
                         if tagValue.DataType <> declType then failwith $"ERROR: Type mismatch in {varDeclCtx.GetOriginalText()}"
                         let addr = tagAddress.BoxedEvaluatedValue :?> string
-                        let tag = declType.CreateTag(storageName, addr, tagValue.BoxedEvaluatedValue)
+                        let tag = declType.CreateBridgeTag(storageName, addr, tagValue.BoxedEvaluatedValue)
                         storages.Add(storageName, tag)
                     | _ -> failwith $"ERROR: Tag declaration error in {varDeclCtx.GetOriginalText()}"
                     None
@@ -338,30 +338,30 @@ module rec ExpressionParser =
 
 
     type System.Type with
-        member x.CreateVariable(name:string, boxedValue:obj) = fwdCreateVariableWithTypeAndValue x name ({Object = boxedValue}:BoxedObjectHolder)
-        member x.CreateVariable(name:string)                 = fwdCreateVariableWithType x name
-        member x.CreateTag(name:string, address:string, boxedValue:obj) : IStorage =
-            let createParam () = {Name=name; Value=unbox boxedValue; Address=Some address; Comment=None;  System = Runtime.System}
+        member x.CreateVariable(name:string, boxedValue:obj) =
+            createVariable name ({Object = boxedValue}:BoxedObjectHolder)
+        member x.CreateBridgeTag(name:string, address:string, boxedValue:obj) : ITag =
+            let createParam () = {defaultStorageCreationParams(unbox boxedValue) with Name=name;  Address=Some address; }
 
             match x.Name with
-            | BOOL    -> new ActionTag<bool>  (createParam())
-            | UINT8   -> new ActionTag<uint8> (createParam())
-            | CHAR    -> new ActionTag<char>  (createParam())
-            | FLOAT64 -> new ActionTag<double>(createParam())
-            | INT16   -> new ActionTag<int16> (createParam())
-            | INT32   -> new ActionTag<int32> (createParam())
-            | INT64   -> new ActionTag<int64> (createParam())
-            | INT8    -> new ActionTag<int8>  (createParam())
-            | FLOAT32 -> new ActionTag<single>(createParam())
-            | STRING  -> new ActionTag<string>(createParam())
-            | UINT16  -> new ActionTag<uint16>(createParam())
-            | UINT32  -> new ActionTag<uint32>(createParam())
-            | UINT64  -> new ActionTag<uint64>(createParam())
+            | BOOL    -> new Tag<bool>  (createParam())
+            | CHAR    -> new Tag<char>  (createParam())
+            | FLOAT32 -> new Tag<single>(createParam())
+            | FLOAT64 -> new Tag<double>(createParam())
+            | INT16   -> new Tag<int16> (createParam())
+            | INT32   -> new Tag<int32> (createParam())
+            | INT64   -> new Tag<int64> (createParam())
+            | INT8    -> new Tag<int8>  (createParam())
+            | STRING  -> new Tag<string>(createParam())
+            | UINT16  -> new Tag<uint16>(createParam())
+            | UINT32  -> new Tag<uint32>(createParam())
+            | UINT64  -> new Tag<uint64>(createParam())
+            | UINT8   -> new Tag<uint8> (createParam())
             | _  -> failwithlog "ERROR"
 
-        member x.CreateTag(name:string, address:string) : IStorage =
+        member x.CreateBridgeTag(name:string, address:string) : ITag =
             let v = typeDefaultValue x
-            x.CreateTag(name, address, unbox v)
+            x.CreateBridgeTag(name, address, unbox v)
 
         static member FromString(typeName:string) : System.Type =
             (textToDataType typeName).ToType()

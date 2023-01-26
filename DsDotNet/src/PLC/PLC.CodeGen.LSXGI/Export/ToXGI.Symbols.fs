@@ -12,10 +12,10 @@ open System.Security
 [<AutoOpen>]
 module internal XgiSymbolsModule =
     type XgiSymbol =
-        | DuTag         of ITag
         | DuXgiLocalVar of IXgiLocalVar
         | DuTimer       of TimerStruct
         | DuCounter     of CounterBaseStruct
+        | DuStorage     of IStorage
 
 
     let storagesToXgiSymbol(storages:IStorage seq) : (IStorage*XgiSymbol) list =
@@ -28,25 +28,24 @@ module internal XgiSymbolsModule =
         [
             for s in storages do
                 match s with
-                | :? ITag as t ->
-                    let name = (t :> INamed).Name
-                    if timerOrCountersNames.Contains(name.Split(".")[0]) then
-                        // skip timer/counter structure member : timer 나 counter 명 + "." + field name
-                        None
-                    else
-                        Some (s, XgiSymbol.DuTag t)
                 | :? IXgiLocalVar as xgi ->
                     Some (s, XgiSymbol.DuXgiLocalVar xgi)
                 | :? TimerStruct as ts ->
                     Some (s, XgiSymbol.DuTimer ts)
                 | :? CounterBaseStruct as cs ->
                     Some (s, XgiSymbol.DuCounter cs)
-                | _ -> failwithlog "ERROR"
+                | _ ->
+                    let name = (s :> INamed).Name
+                    if timerOrCountersNames.Contains(name.Split(".")[0]) then
+                        // skip timer/counter structure member : timer 나 counter 명 + "." + field name
+                        None
+                    else
+                        Some (s, XgiSymbol.DuStorage s)
         ] |> List.choose id
 
     let xgiSymbolToSymbolInfo (kindVar:int) (xgiSymbol:XgiSymbol) : SymbolInfo =
         match xgiSymbol with
-        | DuTag (:? ITagWithAddress as t) ->
+        | DuStorage (:? ITag as t) ->
             let name, addr = t.Name, t.Address
 
             let device, memSize =
@@ -68,7 +67,7 @@ module internal XgiSymbolsModule =
             |> XGITag.createSymbolInfoWithDetail
 
         // address 가 지정되지 않은 tag : e.g Timer, Counter 의 내부 멤버 변수들 EN, DN, CU, CD, ...
-        | DuTag t ->
+        | DuStorage t ->
             let symbolInfo =
                 let plcType = systemTypeToXgiTypeName t.DataType
                 let comment = SecurityElement.Escape t.Comment

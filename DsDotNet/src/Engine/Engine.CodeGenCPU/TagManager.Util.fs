@@ -18,24 +18,24 @@ module TagManagerUtil =
 
         unique name 0 storages
 
-    let createDsTag(stg:Storages, name:string, dataType:DataType) : IStorage =
+    let private createPlanVarHelper(stg:Storages, name:string, dataType:DataType) : IStorage =
         let v = dataType.DefaultValue()
-        let createParam () = {Name=name; Value=unbox v; Comment=None; Address=None; System = Runtime.System}
+        let createParam () = {defaultStorageCreationParams(unbox v) with Name=name; IsGlobal=true;}
         let t =
             match dataType with
-            | DuINT8    -> PlanTag<int8>  (createParam()) :>IStorage
-            | DuINT16   -> PlanTag<int16> (createParam()) :>IStorage
-            | DuINT32   -> PlanTag<int32> (createParam()) :>IStorage
-            | DuINT64   -> PlanTag<int64> (createParam()) :>IStorage
-            | DuUINT8   -> PlanTag<uint8> (createParam()) :>IStorage
-            | DuUINT16  -> PlanTag<uint16>(createParam()) :>IStorage
-            | DuUINT32  -> PlanTag<uint32>(createParam()) :>IStorage
-            | DuUINT64  -> PlanTag<uint64>(createParam()) :>IStorage
-            | DuFLOAT32 -> PlanTag<single>(createParam()) :>IStorage
-            | DuFLOAT64 -> PlanTag<double>(createParam()) :>IStorage
-            | DuSTRING  -> PlanTag<string>(createParam()) :>IStorage
-            | DuCHAR    -> PlanTag<char>  (createParam()) :>IStorage
-            | DuBOOL    -> PlanTag<bool>  (createParam()) :>IStorage
+            | DuINT8    -> PlanVar<int8>  (createParam()) :>IStorage
+            | DuINT16   -> PlanVar<int16> (createParam()) :>IStorage
+            | DuINT32   -> PlanVar<int32> (createParam()) :>IStorage
+            | DuINT64   -> PlanVar<int64> (createParam()) :>IStorage
+            | DuUINT8   -> PlanVar<uint8> (createParam()) :>IStorage
+            | DuUINT16  -> PlanVar<uint16>(createParam()) :>IStorage
+            | DuUINT32  -> PlanVar<uint32>(createParam()) :>IStorage
+            | DuUINT64  -> PlanVar<uint64>(createParam()) :>IStorage
+            | DuFLOAT32 -> PlanVar<single>(createParam()) :>IStorage
+            | DuFLOAT64 -> PlanVar<double>(createParam()) :>IStorage
+            | DuSTRING  -> PlanVar<string>(createParam()) :>IStorage
+            | DuCHAR    -> PlanVar<char>  (createParam()) :>IStorage
+            | DuBOOL    -> PlanVar<bool>  (createParam()) :>IStorage
 
         stg.Add(t.Name, t)
         t
@@ -51,18 +51,16 @@ module TagManagerUtil =
         let cs = CTRStruct.Create(CounterType.CTR, storages, name, 0us, 0us, sys)
         cs
 
-    let sysTag (storages:Storages) name (dataType:DataType)  =
+    let createPlanVar (storages:Storages) name (dataType:DataType)  =
         let name = getUniqueName name storages
-        let t= createDsTag (storages, name, dataType)
+        let t= createPlanVarHelper (storages, name, dataType)
         t
 
-    let planTag (storages:Storages) name sys =
-        let name = getUniqueName name storages
-        let t= createDsTag (storages, name, DuBOOL)
-        t :?> PlanTag<bool>
+    let createPlanVarBool (storages:Storages) name sys =
+        createPlanVar storages name DuBOOL :?> PlanVar<bool>
 
     type InOut = | In | Out | Memory
-    let actionTag(stg:Storages, name, address, inOut:InOut, sys): ITagWithAddress =
+    let createBridgeTag(stg:Storages, name, address, inOut:InOut, sys): ITag =
         let name = getUniqueName name stg
         let plcName =
             match inOut with
@@ -71,8 +69,8 @@ module TagManagerUtil =
             | Memory -> failwithlog "error: Memory not supported "
 
         let t =
-            let param = {Name=plcName; Address=Some address; Value=false; Comment=None;  System = sys}
-            (ActionTag(param) :> ITagWithAddress)
+            let param = {defaultStorageCreationParams(false) with Name=plcName; Address=Some address; System=sys}
+            (Tag(param) :> ITag)
         stg.Add(t.Name, t)
         t
 

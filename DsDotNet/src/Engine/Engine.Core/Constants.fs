@@ -125,86 +125,86 @@ type ModelingEdgeExt =
 
 [<AutoOpen>]
 module DsDataType =
-    //data 타입 지원 항목
-    let [<Literal>] INT8    = "SByte"
+    //data 타입 지원 항목 : 알파벳 순 정렬 (Alt+Shift+L, Alt+Shift+S)
+    let [<Literal>] BOOL    = "Boolean"
+    let [<Literal>] CHAR    = "Char"
+    let [<Literal>] FLOAT32 = "Single"
+    let [<Literal>] FLOAT64 = "Double"
     let [<Literal>] INT16   = "Int16"
     let [<Literal>] INT32   = "Int32"
     let [<Literal>] INT64   = "Int64"
-    let [<Literal>] UINT8   = "Byte"
+    let [<Literal>] INT8    = "SByte"
+    let [<Literal>] STRING  = "String"
     let [<Literal>] UINT16  = "UInt16"
     let [<Literal>] UINT32  = "UInt32"
     let [<Literal>] UINT64  = "UInt64"
-    let [<Literal>] FLOAT32 = "Single"
-    let [<Literal>] FLOAT64 = "Double"
-    let [<Literal>] STRING  = "String"
-    let [<Literal>] CHAR    = "Char"
-    let [<Literal>] BOOL    = "Boolean"
+    let [<Literal>] UINT8   = "Byte"
 
     let typeDefaultValue (typ:System.Type) =
         match typ.Name with
-        | INT8      -> box 0y
+        | BOOL      -> box false
+        | CHAR      -> box ' '
+        | FLOAT32   -> box 0.0f
+        | FLOAT64   -> box 0.0
         | INT16     -> box 0s
         | INT32     -> box 0
         | INT64     -> box 0L
-        | UINT8     -> box 0uy
+        | INT8      -> box 0y
+        | STRING    -> box ""
         | UINT16    -> box 0us
         | UINT32    -> box 0u
         | UINT64    -> box 0UL
-        | FLOAT32   -> box 0.0f
-        | FLOAT64   -> box 0.0
-        | STRING    -> box ""
-        | CHAR      -> box ' '
-        | BOOL      -> box false
+        | UINT8     -> box 0uy
         | _  -> failwithlog "ERROR"
 
     type DataType =
-        | DuINT8
+        | DuBOOL
+        | DuCHAR
+        | DuFLOAT32
+        | DuFLOAT64
         | DuINT16
         | DuINT32
         | DuINT64
-        | DuUINT8
+        | DuINT8
+        | DuSTRING
         | DuUINT16
         | DuUINT32
         | DuUINT64
-        | DuFLOAT32
-        | DuFLOAT64
-        | DuSTRING
-        | DuCHAR
-        | DuBOOL
+        | DuUINT8
 
         member x.ToText() =
             match x with
-            | DuINT8    -> INT8
+            | DuBOOL    -> BOOL
+            | DuCHAR    -> CHAR
+            | DuFLOAT32 -> FLOAT32
+            | DuFLOAT64 -> FLOAT64
             | DuINT16   -> INT16
             | DuINT32   -> INT32
             | DuINT64   -> INT64
-            | DuUINT8   -> UINT8
+            | DuINT8    -> INT8
+            | DuSTRING  -> STRING
             | DuUINT16  -> UINT16
             | DuUINT32  -> UINT32
             | DuUINT64  -> UINT64
-            | DuFLOAT32 -> FLOAT32
-            | DuFLOAT64 -> FLOAT64
-            | DuSTRING  -> STRING
-            | DuCHAR    -> CHAR
-            | DuBOOL    -> BOOL
+            | DuUINT8   -> UINT8
 
 
         member x.ToTextLower() = x.ToText().ToLower()
         member x.ToType() =
             match x with
-            | DuINT8    -> typedefof<int8>
+            | DuBOOL    -> typedefof<bool>
+            | DuCHAR    -> typedefof<char>
+            | DuFLOAT32 -> typedefof<single>
+            | DuFLOAT64 -> typedefof<double>
             | DuINT16   -> typedefof<int16>
             | DuINT32   -> typedefof<int32>
             | DuINT64   -> typedefof<int64>
-            | DuUINT8   -> typedefof<uint8>
+            | DuINT8    -> typedefof<int8>
+            | DuSTRING  -> typedefof<string>
             | DuUINT16  -> typedefof<uint16>
             | DuUINT32  -> typedefof<uint32>
             | DuUINT64  -> typedefof<uint64>
-            | DuFLOAT32 -> typedefof<single>
-            | DuFLOAT64 -> typedefof<double>
-            | DuSTRING  -> typedefof<string>
-            | DuCHAR    -> typedefof<char>
-            | DuBOOL    -> typedefof<bool>
+            | DuUINT8   -> typedefof<uint8>
 
         member x.DefaultValue() = typeDefaultValue (x.ToType())
 
@@ -212,19 +212,19 @@ module DsDataType =
     let textToDataType(typeName:string) =
         match typeName.ToLower() with
         //system1   | system2   | plc
-        | "int8"    | "sbyte"            ->  DuINT8
+        | "boolean" | "bool"    | "bit"  ->  DuBOOL
+        | "char"                         ->  DuCHAR
+        | "float32" | "single"           ->  DuFLOAT32
+        | "float64" | "double"           ->  DuFLOAT64
         | "int16"   | "short"            ->  DuINT16
         | "int32"   | "int"              ->  DuINT32
         | "int64"   | "long"             ->  DuINT64
-        | "uint8"   | "byte"    |"byte"  ->  DuUINT8
+        | "int8"    | "sbyte"            ->  DuINT8
+        | "string"                       ->  DuSTRING
         | "uint16"  | "ushort"  |"word"  ->  DuUINT16
         | "uint32"  | "uint"    |"dword" ->  DuUINT32
         | "uint64"  | "ulong"   |"lword" ->  DuUINT64
-        | "float32" | "single"           ->  DuFLOAT32
-        | "float64" | "double"           ->  DuFLOAT64
-        | "string"                       ->  DuSTRING
-        | "char"                         ->  DuCHAR
-        | "boolean" | "bool"    | "bit"  ->  DuBOOL
+        | "uint8"   | "byte"    |"byte"  ->  DuUINT8
         | _ -> failwithf $"'{typeName}' DataToType Error check type"
 
 

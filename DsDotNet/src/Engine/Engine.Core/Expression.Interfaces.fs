@@ -14,14 +14,13 @@ module ExpressionForwardDeclModule =
         inherit IValue<'T>
     type Storages = Dictionary<string, IStorage>
 
-    type ITag = inherit IStorage
+    /// 시스템 간 연결에 사용되는 물리 주소를 갖는 tag 의 interface
+    type ITag =
+        inherit IStorage
+        abstract Address:string
     type ITag<'T> =
         inherit ITag
         inherit IStorage<'T>
-
-    type ITagWithAddress =
-        inherit ITag
-        abstract Address:string
 
     type IVariable = inherit IStorage
     type IVariable<'T> =

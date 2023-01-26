@@ -41,7 +41,7 @@ module CoreExtensionsModule =
     [<Extension>]
     type ExpressionExt =
         [<Extension>]
-        static member NotifyStatus (x:PlanTag<bool>) =
+        static member NotifyStatus (x:PlanVar<bool>) =
             if x.Vertex.IsSome
             then            //마지막 괄호 문자만 추출 tagname(R)  -> R
                 let m = Regex.Match(x.Name, @"(?<=\()\D+(?=\)$)")

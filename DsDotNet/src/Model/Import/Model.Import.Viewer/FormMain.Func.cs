@@ -66,12 +66,15 @@ namespace Dual.Model.Import
                     WriteDebugMsg(DateTime.Now, MSGLevel.MsgWarn, $"{f} 불러오기 성공!!"));
 
 
+                EventExternal.CPUSubscribe();
                 _DicCpu.ForEach(f =>
                 {
                     f.Value.Run();
                     testReadyAutoDrive(f.Key);
                     f.Value.ScanOnce();
                 });
+
+
 
                 //_DicCpu.First().Value.Run();
                 //_DicCpu.First().Value.ScanOnce();

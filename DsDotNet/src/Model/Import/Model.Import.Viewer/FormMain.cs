@@ -76,7 +76,6 @@ namespace Dual.Model.Import
         {
             EventExternal.ProcessSubscribe();
             EventExternal.MSGSubscribe();
-            EventExternal.CPUSubscribe();
 
 
             //_Demo = ImportCheck.GetDemoModel("test");

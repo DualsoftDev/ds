@@ -43,31 +43,24 @@ module TagModule =
     // error FS0030: 값 제한이 있습니다. 값 'fwdCreateVariableWithValue'은(는) 제네릭 형식    val mutable fwdCreateVariableWithValue: (string -> '_a -> IVariable)을(를) 가지는 것으로 유추되었습니다.    'fwdCreateVariableWithValue'에 대한 인수를 명시적으로 만들거나, 제네릭 요소로 만들지 않으려는 경우 형식 주석을 추가하세요.
     type BoxedObjectHolder = { Object:obj }
 
-    let createWindowsVariableWithTypeAndValue (typ:System.Type) (name:string) (boxedValue:BoxedObjectHolder) : IVariable =
+    let createWindowsVariableWithTypeAndValue (name:string) (boxedValue:BoxedObjectHolder) : IVariable =
         verify (Runtime.Target = WINDOWS)
         let v = boxedValue.Object
-        let createParam () = {Name=name; Value=unbox v; Comment=None; Address=None; System = Runtime.System}
-        match typ.Name with
-        | BOOL   -> new Variable<bool>   (createParam())
-        | CHAR   -> new Variable<char>   (createParam())
-        | FLOAT32-> new Variable<single> (createParam())
-        | FLOAT64-> new Variable<double> (createParam())
-        | INT16  -> new Variable<int16>  (createParam())
-        | INT32  -> new Variable<int32>  (createParam())
-        | INT64  -> new Variable<int64>  (createParam())
-        | INT8   -> new Variable<int8>   (createParam())
-        | STRING -> new Variable<string> (createParam())
-        | UINT16 -> new Variable<uint16> (createParam())
-        | UINT32 -> new Variable<uint32> (createParam())
-        | UINT64 -> new Variable<uint64> (createParam())
-        | UINT8  -> new Variable<uint8>  (createParam())
+        let createParam (v) = {Name=name; Value=v; Comment=None; Address=None; System = Runtime.System}
+        match v.GetType().Name with
+        | BOOL   -> new Variable<bool>   (createParam(unbox v))
+        | CHAR   -> new Variable<char>   (createParam(unbox v))
+        | FLOAT32-> new Variable<single> (createParam(unbox v))
+        | FLOAT64-> new Variable<double> (createParam(unbox v))
+        | INT16  -> new Variable<int16>  (createParam(unbox v))
+        | INT32  -> new Variable<int32>  (createParam(unbox v))
+        | INT64  -> new Variable<int64>  (createParam(unbox v))
+        | INT8   -> new Variable<int8>   (createParam(unbox v))
+        | STRING -> new Variable<string> (createParam(unbox v))
+        | UINT16 -> new Variable<uint16> (createParam(unbox v))
+        | UINT32 -> new Variable<uint32> (createParam(unbox v))
+        | UINT64 -> new Variable<uint64> (createParam(unbox v))
+        | UINT8  -> new Variable<uint8>  (createParam(unbox v))
         | _  -> failwithlog "ERROR"
 
-    let createWindowsVariableWithType (typ:System.Type) (name:string) : IVariable =
-        verify (Runtime.Target = WINDOWS)
-        let value = { Object = typeDefaultValue typ }
-        createWindowsVariableWithTypeAndValue typ name value
-
-
-    let mutable fwdCreateVariableWithType = createWindowsVariableWithType
     let mutable fwdCreateVariableWithTypeAndValue = createWindowsVariableWithTypeAndValue

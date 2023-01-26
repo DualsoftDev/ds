@@ -5,16 +5,16 @@ open Engine.Common.FS
 
 
 module ModuleInitializer =
-    let private createXgiVariableWithTypeAndValue (typ:System.Type) (name:string) (boxedValue:BoxedObjectHolder) : IVariable =
+    let private createXgiVariableWithTypeAndValue (name:string) (boxedValue:BoxedObjectHolder) : IVariable =
         verify (Runtime.Target = XGI)
         let v = boxedValue.Object
         let noComment = ""
-        createXgiVariable typ name (unbox v) noComment
+        createXgiVariable name v noComment
 
     let private createXgiVariableWithType (typ:System.Type) (name:string): IVariable =
         verify (Runtime.Target = XGI)
-        let v = typeDefaultValue typ
-        createXgiVariableWithTypeAndValue typ name (unbox v)
+        let boxed:BoxedObjectHolder = { Object = typeDefaultValue typ }
+        createXgiVariableWithTypeAndValue name boxed
 
     let Initialize() =
         printfn "Module is being initialized..."
@@ -24,10 +24,8 @@ module ModuleInitializer =
         Runtime.TargetChangedSubject.Subscribe(fun newRuntimeTarget ->
             match newRuntimeTarget with
             | XGI ->
-                fwdCreateVariableWithType <- createXgiVariableWithType
                 fwdCreateVariableWithTypeAndValue <- createXgiVariableWithTypeAndValue
             | WINDOWS ->
-                fwdCreateVariableWithType <- createWindowsVariableWithType
                 fwdCreateVariableWithTypeAndValue <- createWindowsVariableWithTypeAndValue
             | _ ->
                 ()

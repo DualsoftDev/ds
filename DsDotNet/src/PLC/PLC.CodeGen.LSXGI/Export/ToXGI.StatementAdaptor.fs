@@ -102,7 +102,7 @@ module rec TypeConvertorModule =
     let (|CommentAndXgiStatements|) = function | CommentedXgiStatements(x, ys) -> x, ys
     let commentAndXgiStatement = (|CommentAndXgiStatements|)
 
-    let createXgiVariable (typ:System.Type) (name:string) (initValue:obj) comment: IXgiLocalVar =
+    let createXgiVariable (name:string) (initValue:obj) comment: IXgiLocalVar =
         (*
             "n0" is an incorrect variable.
             The folling characters are allowed:
@@ -120,8 +120,8 @@ module rec TypeConvertorModule =
         | _ -> ()
 
         let createParam () = {Name=name; Value=unbox initValue; Comment=Some comment; Address=None; System = Runtime.System}
-
-        match typ.Name with
+        let typeName = (unbox initValue).GetType().Name
+        match typeName with
         | BOOL   -> XgiLocalVar<bool>  (createParam())
         | CHAR   -> XgiLocalVar<char>  (createParam())
         | FLOAT32-> XgiLocalVar<single>(createParam())
@@ -137,11 +137,10 @@ module rec TypeConvertorModule =
         | UINT8  -> XgiLocalVar<uint8> (createParam())
         | _  -> failwithlog "ERROR"
     let sys = DsSystem("","")
-    let createTypedXgiAutoVariable (typ:System.Type) (nameHint:string) (initValue:obj) comment: IXgiLocalVar =
+    let createTypedXgiAutoVariable (nameHint:string) (initValue:obj) comment: IXgiLocalVar =
         autoVariableCounter <- autoVariableCounter + 1
         let name = $"_tmp{nameHint}{autoVariableCounter}"
-        let typ = initValue.GetType()
-        createXgiVariable typ name initValue comment
+        createXgiVariable name initValue comment
 
 
     let internal createXgiAutoVariableT (nameHint:string) comment (initValue:'T) =
@@ -221,7 +220,7 @@ module XgiExpressionConvertorModule =
                 | ("&&" | "||" | "!") as op ->
                     exp.WithNewFunctionArguments newArgs
                 | (">"|">="|"<"|"<="|"="|"!="  |  "+"|"-"|"*"|"/") as op ->
-                    let out = createTypedXgiAutoVariable exp.DataType "out" exp.BoxedEvaluatedValue $"{op} output"
+                    let out = createTypedXgiAutoVariable "out" exp.BoxedEvaluatedValue $"{op} output"
                     xgiLocalVars.Add out
                     expandFunctionStatements.Add <| DuAugmentedPLCFunction { FunctionName = op; Arguments = newArgs; Output = out; }
                     out.ToExpression()
@@ -247,7 +246,7 @@ module XgiExpressionConvertorModule =
         let { Storage=storage; ExpandFunctionStatements=augmentedStatementsStorage; Exp=exp } = augmentParams
         let withAugmentedPLCFunction (exp:IExpression) =
             let op = exp.FunctionName.Value
-            let out = createTypedXgiAutoVariable exp.DataType "_temp_internal_" exp.BoxedEvaluatedValue $"{op} output"
+            let out = createTypedXgiAutoVariable "_temp_internal_" exp.BoxedEvaluatedValue $"{op} output"
             storage.Add out
             let args = exp.FunctionArguments |> List.bind (fun arg -> binaryToNary { augmentParams with Exp = arg } operatorsToChange op)
             DuAugmentedPLCFunction {FunctionName=op; Arguments=args; Output=out } |> augmentedStatementsStorage.Add
@@ -298,7 +297,7 @@ module XgiExpressionConvertorModule =
                         if argsRemaining.IsEmpty then
                             outputStore.Value
                         else
-                            createTypedXgiAutoVariable exp.DataType "_temp_internal_" exp.BoxedEvaluatedValue "comment"
+                            createTypedXgiAutoVariable "_temp_internal_" exp.BoxedEvaluatedValue "comment"
                     let outexp = out.ToExpression()
 
                     DuAugmentedPLCFunction { FunctionName = op; Arguments = args; Output = out :?> INamedExpressionizableTerminal }
@@ -400,7 +399,7 @@ module XgiExpressionConvertorModule =
                     let initValue = exp.BoxedEvaluatedValue
 
                     let typ = initValue.GetType()
-                    let var = createXgiVariable typ decl.Name initValue comment
+                    let var = createXgiVariable decl.Name initValue comment
                     storage.Add var
 
                 | _ ->

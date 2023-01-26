@@ -16,15 +16,16 @@ module TagModule =
         override x.ToBoxedExpression() = var2expr x
 
     let createParam name add comm v  = {Name=name; Comment=comm; Address=add; Value= v; System = Runtime.System}
-    /// plc / pc / 다른 runtime platform 지원가능한 물리 TAG
-    type Tag<'T when 'T:equality> (param:TagCreationParams<'T>) =
+
+    /// 시스템 간 연결용 tag.  Address 필수
+    type BridgeTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
         inherit TagBase<'T>(param)
         //address 없는 auto tag plcTag생성
         new(name, initValue:'T)
-            = Tag<'T>(createParam name None           None initValue)
+            = BridgeTag<'T>(createParam name None           None initValue)
         //address 있는 주소tag plcTag생성
         new(name, address:string, initValue:'T)
-            = Tag<'T>(createParam name (Some address) None initValue)
+            = BridgeTag<'T>(createParam name (Some address) None initValue)
 
         interface ITagWithAddress with
             member x.Address = x.Address
@@ -32,14 +33,13 @@ module TagModule =
         member val Address = ("_A_", param.Address) ||> Option.defaultValue
         override x.ToBoxedExpression() = var2expr x
 
+    type Tag<'T when 'T:equality> = BridgeTag<'T>
+    type ActionTag<'T when 'T:equality> = BridgeTag<'T>
+
     /// PlanTag 나의 시스템 내부 TAG
     type PlanTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
-        inherit Tag<'T>(param)
+        inherit BridgeTag<'T>(param)
         member val Vertex:Vertex option = None with get, set
-
-    /// ActionTag 다른 시스템 연결 TAG
-    type ActionTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
-        inherit Tag<'T>(param)
 
 
 

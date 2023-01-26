@@ -52,18 +52,18 @@ module TagModule =
         let createParam () = {Name=name; Value=unbox v; Comment=None; Address=None; System = Runtime.System}
         match typ.Name with
         | BOOL   -> new Variable<bool>   (createParam())
-        | UINT8  -> new Variable<uint8>  (createParam())
         | CHAR   -> new Variable<char>   (createParam())
+        | FLOAT32-> new Variable<single> (createParam())
         | FLOAT64-> new Variable<double> (createParam())
         | INT16  -> new Variable<int16>  (createParam())
         | INT32  -> new Variable<int32>  (createParam())
         | INT64  -> new Variable<int64>  (createParam())
         | INT8   -> new Variable<int8>   (createParam())
-        | FLOAT32-> new Variable<single> (createParam())
         | STRING -> new Variable<string> (createParam())
         | UINT16 -> new Variable<uint16> (createParam())
         | UINT32 -> new Variable<uint32> (createParam())
         | UINT64 -> new Variable<uint64> (createParam())
+        | UINT8  -> new Variable<uint8>  (createParam())
         | _  -> failwithlog "ERROR"
 
     let createWindowsVariableWithType (typ:System.Type) (name:string) : IVariable =

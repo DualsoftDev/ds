@@ -345,18 +345,18 @@ module rec ExpressionParser =
 
             match x.Name with
             | BOOL    -> new ActionTag<bool>  (createParam())
-            | UINT8   -> new ActionTag<uint8> (createParam())
             | CHAR    -> new ActionTag<char>  (createParam())
+            | FLOAT32 -> new ActionTag<single>(createParam())
             | FLOAT64 -> new ActionTag<double>(createParam())
             | INT16   -> new ActionTag<int16> (createParam())
             | INT32   -> new ActionTag<int32> (createParam())
             | INT64   -> new ActionTag<int64> (createParam())
             | INT8    -> new ActionTag<int8>  (createParam())
-            | FLOAT32 -> new ActionTag<single>(createParam())
             | STRING  -> new ActionTag<string>(createParam())
             | UINT16  -> new ActionTag<uint16>(createParam())
             | UINT32  -> new ActionTag<uint32>(createParam())
             | UINT64  -> new ActionTag<uint64>(createParam())
+            | UINT8   -> new ActionTag<uint8> (createParam())
             | _  -> failwithlog "ERROR"
 
         member x.CreateTag(name:string, address:string) : IStorage =

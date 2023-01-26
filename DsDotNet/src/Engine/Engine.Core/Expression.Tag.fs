@@ -13,6 +13,8 @@ module TagModule =
     /// Variable for WINDOWS platform
     type Variable<'T when 'T:equality> (param:TagCreationParams<'T>) =
         inherit VariableBase<'T>(param)
+        interface INamedExpressionizableTerminal with
+            member x.StorageName = param.Name
         override x.ToBoxedExpression() = var2expr x
 
     let createParam name add comm v  = {Name=name; Comment=comm; Address=add; Value= v; System = Runtime.System}
@@ -44,7 +46,6 @@ module TagModule =
     type BoxedObjectHolder = { Object:obj }
 
     let createVariable (name:string) (boxedValue:BoxedObjectHolder) : IVariable =
-        verify (Runtime.Target = WINDOWS)
         let v = boxedValue.Object
         let createParam (v) = {Name=name; Value=v; Comment=None; Address=None; System = Runtime.System}
         match v.GetType().Name with
@@ -63,4 +64,4 @@ module TagModule =
         | UINT8  -> new Variable<uint8>  (createParam(unbox v))
         | _  -> failwithlog "ERROR"
 
-    let mutable fwdCreateVariableWithTypeAndValue = createVariable
+    let mutable fwdCreateVariable = createVariable

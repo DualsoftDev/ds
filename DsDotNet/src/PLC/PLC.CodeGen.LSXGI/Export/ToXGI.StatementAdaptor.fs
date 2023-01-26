@@ -402,6 +402,12 @@ module XgiExpressionConvertorModule =
                     let var = createXgiVariable decl.Name initValue comment
                     storage.Add var
 
+                | :? IBridgeTag -> failwith "ERROR"
+
+                | ( :? IVariable | :? ITag ) ->
+                    let var = createXgiVariable decl.Name decl.BoxedValue decl.Comment
+                    storage.Add var
+
                 | _ ->
                     failwithlog "ERROR"
 

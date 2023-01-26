@@ -338,8 +338,9 @@ module rec ExpressionParser =
 
 
     type System.Type with
-        member x.CreateVariable(name:string, boxedValue:obj) = fwdCreateVariableWithTypeAndValue name ({Object = boxedValue}:BoxedObjectHolder)
-        member x.CreateBridgeTag(name:string, address:string, boxedValue:obj) : IStorage =
+        member x.CreateVariable(name:string, boxedValue:obj) =
+            createVariable name ({Object = boxedValue}:BoxedObjectHolder)
+        member x.CreateBridgeTag(name:string, address:string, boxedValue:obj) : IBridgeTag =
             let createParam () = {Name=name; Value=unbox boxedValue; Address=Some address; Comment=None;  System = Runtime.System}
 
             match x.Name with
@@ -358,7 +359,7 @@ module rec ExpressionParser =
             | UINT8   -> new BridgeTag<uint8> (createParam())
             | _  -> failwithlog "ERROR"
 
-        member x.CreateBridgeTag(name:string, address:string) : IStorage =
+        member x.CreateBridgeTag(name:string, address:string) : IBridgeTag =
             let v = typeDefaultValue x
             x.CreateBridgeTag(name, address, unbox v)
 

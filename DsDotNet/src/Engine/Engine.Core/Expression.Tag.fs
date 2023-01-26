@@ -6,7 +6,7 @@ open Engine.Common.FS
 [<AutoOpen>]
 module TagModule =
 
-    type TagBase<'T when 'T:equality> with
+    type TypedValueStorage<'T when 'T:equality> with
         member x.Expr = var2expr x
 
 
@@ -26,10 +26,7 @@ module TagModule =
         member val Address = param.Address.Value
         override x.ToBoxedExpression() = var2expr x
 
-    type Tag<'T when 'T:equality> = BridgeTag<'T>
-    type ActionTag<'T when 'T:equality> = BridgeTag<'T>
-
-    /// 시스템 내의 tag.  Address 불필요
+    /// 시스템 내(endo-)의 tag.  Address 불필요
     type EndoTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
         inherit TagBase<'T>(param)
         override x.ToBoxedExpression() = var2expr x

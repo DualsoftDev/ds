@@ -51,21 +51,21 @@ module ConvertCoreExt =
 
         member private x.GenerationLampIO() =
             for b in x.SystemLamps do
-                b.OutTag  <- actionTag(x.Storages, b.Name, b.OutAddress, Out , x)
+                b.OutTag  <- createBridgeTag(x.Storages, b.Name, b.OutAddress, Out , x)
         member private x.GenerationCondition() =
             for b in x.SystemConditions do
-                b.InTag  <- actionTag(x.Storages, b.Name, b.InAddress, In, x)
+                b.InTag  <- createBridgeTag(x.Storages, b.Name, b.InAddress, In, x)
 
         member private x.GenerationButtonIO() =
             for b in x.SystemButtons do
-                     b.InTag  <- actionTag(x.Storages, b.Name, b.OutAddress, In, x)
-                     b.OutTag <- actionTag(x.Storages, b.Name, b.OutAddress, Out, x)
+                     b.InTag  <- createBridgeTag(x.Storages, b.Name, b.OutAddress, In, x)
+                     b.OutTag <- createBridgeTag(x.Storages, b.Name, b.OutAddress, Out, x)
 
         member private x.GenerationTaskDevIO() =
             let taskDevices = x.Jobs |> Seq.collect(fun j -> j.DeviceDefs)
             for dev in taskDevices do
-                dev.InTag <- actionTag(x.Storages, dev.ApiName, dev.InAddress, In, x)
-                dev.OutTag <- actionTag(x.Storages, dev.ApiName, dev.OutAddress, Out, x)
+                dev.InTag <- createBridgeTag(x.Storages, dev.ApiName, dev.InAddress, In, x)
+                dev.OutTag <- createBridgeTag(x.Storages, dev.ApiName, dev.OutAddress, Out, x)
 
         member x.GenerationIO() =
             x.GenerationTaskDevIO()
@@ -193,8 +193,8 @@ module ConvertCoreExt =
         member r._off  = r.Parent.GetSystem()._off
 
     type TaskDevice with
-        member jd.ActionIN  = jd.InTag  :?> ActionTag<bool>
-        member jd.ActionOut = jd.OutTag :?> ActionTag<bool>
+        member jd.ActionIN  = jd.InTag  :?> BridgeTag<bool>
+        member jd.ActionOut = jd.OutTag :?> BridgeTag<bool>
         member jd.RXs       = jd.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.EP)
 
         member jd.MutualResets(x:DsSystem) =

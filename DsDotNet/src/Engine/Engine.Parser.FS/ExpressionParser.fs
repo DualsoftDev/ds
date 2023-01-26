@@ -344,19 +344,19 @@ module rec ExpressionParser =
             let createParam () = {Name=name; Value=unbox boxedValue; Address=Some address; Comment=None;  System = Runtime.System}
 
             match x.Name with
-            | BOOL    -> new ActionTag<bool>  (createParam())
-            | CHAR    -> new ActionTag<char>  (createParam())
-            | FLOAT32 -> new ActionTag<single>(createParam())
-            | FLOAT64 -> new ActionTag<double>(createParam())
-            | INT16   -> new ActionTag<int16> (createParam())
-            | INT32   -> new ActionTag<int32> (createParam())
-            | INT64   -> new ActionTag<int64> (createParam())
-            | INT8    -> new ActionTag<int8>  (createParam())
-            | STRING  -> new ActionTag<string>(createParam())
-            | UINT16  -> new ActionTag<uint16>(createParam())
-            | UINT32  -> new ActionTag<uint32>(createParam())
-            | UINT64  -> new ActionTag<uint64>(createParam())
-            | UINT8   -> new ActionTag<uint8> (createParam())
+            | BOOL    -> new BridgeTag<bool>  (createParam())
+            | CHAR    -> new BridgeTag<char>  (createParam())
+            | FLOAT32 -> new BridgeTag<single>(createParam())
+            | FLOAT64 -> new BridgeTag<double>(createParam())
+            | INT16   -> new BridgeTag<int16> (createParam())
+            | INT32   -> new BridgeTag<int32> (createParam())
+            | INT64   -> new BridgeTag<int64> (createParam())
+            | INT8    -> new BridgeTag<int8>  (createParam())
+            | STRING  -> new BridgeTag<string>(createParam())
+            | UINT16  -> new BridgeTag<uint16>(createParam())
+            | UINT32  -> new BridgeTag<uint32>(createParam())
+            | UINT64  -> new BridgeTag<uint64>(createParam())
+            | UINT8   -> new BridgeTag<uint8> (createParam())
             | _  -> failwithlog "ERROR"
 
         member x.CreateTag(name:string, address:string) : IStorage =

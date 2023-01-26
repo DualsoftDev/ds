@@ -34,8 +34,8 @@ module CoreExtensionsModule =
 
 
 
-    let getTargetStorages (x:Statement) = x.GetTargetStorages()
-    let getSourceStorages (x:Statement) = x.GetSourceStorages()
+    let getTargetStorages (x:Statement) = x.GetTargetStorages() |> List.toSeq
+    let getSourceStorages (x:Statement) = x.GetSourceStorages() |> List.toSeq
     let getAutoButtons (x:DsSystem) = x.AutoButtons
 
     [<Extension>]

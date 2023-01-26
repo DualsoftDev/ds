@@ -48,17 +48,18 @@ namespace Dual.Model.Import
             this.button_TestStart = new System.Windows.Forms.Button();
             this.button_TestORG = new System.Windows.Forms.Button();
             this.splitContainer4 = new System.Windows.Forms.SplitContainer();
+            this.checkedListBox_My = new System.Windows.Forms.CheckedListBox();
+            this.checkedListBox_Ex = new System.Windows.Forms.CheckedListBox();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.button_ClearLog = new System.Windows.Forms.Button();
             this.comboBox_TestExpr = new System.Windows.Forms.ComboBox();
             this.button_Stop = new System.Windows.Forms.Button();
+            this.comboBox_Segment = new System.Windows.Forms.ComboBox();
             this.button_Reset = new System.Windows.Forms.Button();
             this.button_Start = new System.Windows.Forms.Button();
-            this.comboBox_Segment = new System.Windows.Forms.ComboBox();
-            this.button_ClearLog = new System.Windows.Forms.Button();
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
-            this.panel1 = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -95,7 +96,7 @@ namespace Dual.Model.Import
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
             this.splitContainer1.Size = new System.Drawing.Size(1373, 346);
-            this.splitContainer1.SplitterDistance = 672;
+            this.splitContainer1.SplitterDistance = 531;
             this.splitContainer1.TabIndex = 18;
             // 
             // xtraTabControl_My
@@ -106,7 +107,7 @@ namespace Dual.Model.Import
             this.xtraTabControl_My.Location = new System.Drawing.Point(3, 0);
             this.xtraTabControl_My.Name = "xtraTabControl_My";
             this.xtraTabControl_My.SelectedIndex = 0;
-            this.xtraTabControl_My.Size = new System.Drawing.Size(669, 346);
+            this.xtraTabControl_My.Size = new System.Drawing.Size(528, 346);
             this.xtraTabControl_My.TabIndex = 8;
             // 
             // splitter2
@@ -141,7 +142,7 @@ namespace Dual.Model.Import
             // 
             this.splitContainer2.Panel2.Controls.Add(this.splitContainer5);
             this.splitContainer2.Panel2.Controls.Add(this.button_copy);
-            this.splitContainer2.Size = new System.Drawing.Size(697, 346);
+            this.splitContainer2.Size = new System.Drawing.Size(838, 346);
             this.splitContainer2.SplitterDistance = 253;
             this.splitContainer2.TabIndex = 4;
             // 
@@ -243,7 +244,7 @@ namespace Dual.Model.Import
             // 
             this.splitContainer5.Panel2.Controls.Add(this.xtraTabControl_Ex);
             this.splitContainer5.Panel2Collapsed = true;
-            this.splitContainer5.Size = new System.Drawing.Size(697, 89);
+            this.splitContainer5.Size = new System.Drawing.Size(838, 89);
             this.splitContainer5.SplitterDistance = 64;
             this.splitContainer5.TabIndex = 3;
             // 
@@ -254,7 +255,7 @@ namespace Dual.Model.Import
             this.richTextBox_ds.Location = new System.Drawing.Point(0, 0);
             this.richTextBox_ds.Name = "richTextBox_ds";
             this.richTextBox_ds.ReadOnly = true;
-            this.richTextBox_ds.Size = new System.Drawing.Size(697, 89);
+            this.richTextBox_ds.Size = new System.Drawing.Size(838, 89);
             this.richTextBox_ds.TabIndex = 2;
             this.richTextBox_ds.Text = "";
             // 
@@ -273,7 +274,7 @@ namespace Dual.Model.Import
             // button_copy
             // 
             this.button_copy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_copy.Location = new System.Drawing.Point(583, 13);
+            this.button_copy.Location = new System.Drawing.Point(724, 13);
             this.button_copy.Name = "button_copy";
             this.button_copy.Size = new System.Drawing.Size(85, 34);
             this.button_copy.TabIndex = 1;
@@ -284,7 +285,7 @@ namespace Dual.Model.Import
             // button_TestStart
             // 
             this.button_TestStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_TestStart.Location = new System.Drawing.Point(17, 79);
+            this.button_TestStart.Location = new System.Drawing.Point(14, 79);
             this.button_TestStart.Name = "button_TestStart";
             this.button_TestStart.Size = new System.Drawing.Size(85, 20);
             this.button_TestStart.TabIndex = 1;
@@ -295,7 +296,7 @@ namespace Dual.Model.Import
             // button_TestORG
             // 
             this.button_TestORG.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_TestORG.Location = new System.Drawing.Point(17, 51);
+            this.button_TestORG.Location = new System.Drawing.Point(14, 51);
             this.button_TestORG.Name = "button_TestORG";
             this.button_TestORG.Size = new System.Drawing.Size(85, 20);
             this.button_TestORG.TabIndex = 1;
@@ -317,19 +318,71 @@ namespace Dual.Model.Import
             // 
             // splitContainer4.Panel2
             // 
+            this.splitContainer4.Panel2.Controls.Add(this.checkedListBox_My);
+            this.splitContainer4.Panel2.Controls.Add(this.checkedListBox_Ex);
             this.splitContainer4.Panel2.Controls.Add(this.panel1);
-            this.splitContainer4.Panel2.Controls.Add(this.checkedListBox1);
             this.splitContainer4.Panel2.Controls.Add(this.richTextBox_Debug);
             this.splitContainer4.Size = new System.Drawing.Size(1373, 746);
             this.splitContainer4.SplitterDistance = 346;
             this.splitContainer4.TabIndex = 20;
+            // 
+            // checkedListBox_My
+            // 
+            this.checkedListBox_My.Dock = System.Windows.Forms.DockStyle.Right;
+            this.checkedListBox_My.FormattingEnabled = true;
+            this.checkedListBox_My.Items.AddRange(new object[] {
+            "Select System"});
+            this.checkedListBox_My.Location = new System.Drawing.Point(676, 0);
+            this.checkedListBox_My.Name = "checkedListBox_My";
+            this.checkedListBox_My.Size = new System.Drawing.Size(306, 396);
+            this.checkedListBox_My.TabIndex = 19;
+            this.checkedListBox_My.DoubleClick += new System.EventHandler(this.checkedListBox_My_DoubleClick);
+            // 
+            // checkedListBox_Ex
+            // 
+            this.checkedListBox_Ex.Dock = System.Windows.Forms.DockStyle.Right;
+            this.checkedListBox_Ex.FormattingEnabled = true;
+            this.checkedListBox_Ex.Items.AddRange(new object[] {
+            "Select Device"});
+            this.checkedListBox_Ex.Location = new System.Drawing.Point(982, 0);
+            this.checkedListBox_Ex.Name = "checkedListBox_Ex";
+            this.checkedListBox_Ex.Size = new System.Drawing.Size(277, 396);
+            this.checkedListBox_Ex.TabIndex = 18;
+            this.checkedListBox_Ex.DoubleClick += new System.EventHandler(this.checkedListBox_Ex_DoubleClick);
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.button_ClearLog);
+            this.panel1.Controls.Add(this.button_TestORG);
+            this.panel1.Controls.Add(this.comboBox_TestExpr);
+            this.panel1.Controls.Add(this.button_TestStart);
+            this.panel1.Controls.Add(this.button_Stop);
+            this.panel1.Controls.Add(this.comboBox_Segment);
+            this.panel1.Controls.Add(this.button_Reset);
+            this.panel1.Controls.Add(this.button_Start);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
+            this.panel1.Location = new System.Drawing.Point(1259, 0);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(114, 396);
+            this.panel1.TabIndex = 12;
+            // 
+            // button_ClearLog
+            // 
+            this.button_ClearLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_ClearLog.Location = new System.Drawing.Point(14, 23);
+            this.button_ClearLog.Name = "button_ClearLog";
+            this.button_ClearLog.Size = new System.Drawing.Size(85, 20);
+            this.button_ClearLog.TabIndex = 1;
+            this.button_ClearLog.Text = "Clear Log";
+            this.button_ClearLog.UseVisualStyleBackColor = true;
+            this.button_ClearLog.Click += new System.EventHandler(this.button_ClearLog_Click);
             // 
             // comboBox_TestExpr
             // 
             this.comboBox_TestExpr.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox_TestExpr.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_TestExpr.FormattingEnabled = true;
-            this.comboBox_TestExpr.Location = new System.Drawing.Point(17, 219);
+            this.comboBox_TestExpr.Location = new System.Drawing.Point(14, 219);
             this.comboBox_TestExpr.Name = "comboBox_TestExpr";
             this.comboBox_TestExpr.Size = new System.Drawing.Size(85, 20);
             this.comboBox_TestExpr.TabIndex = 10;
@@ -338,7 +391,7 @@ namespace Dual.Model.Import
             // button_Stop
             // 
             this.button_Stop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Stop.Location = new System.Drawing.Point(17, 107);
+            this.button_Stop.Location = new System.Drawing.Point(14, 107);
             this.button_Stop.Name = "button_Stop";
             this.button_Stop.Size = new System.Drawing.Size(85, 20);
             this.button_Stop.TabIndex = 9;
@@ -346,10 +399,20 @@ namespace Dual.Model.Import
             this.button_Stop.UseVisualStyleBackColor = true;
             this.button_Stop.Click += new System.EventHandler(this.button_Stop_Click);
             // 
+            // comboBox_Segment
+            // 
+            this.comboBox_Segment.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBox_Segment.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_Segment.FormattingEnabled = true;
+            this.comboBox_Segment.Location = new System.Drawing.Point(14, 135);
+            this.comboBox_Segment.Name = "comboBox_Segment";
+            this.comboBox_Segment.Size = new System.Drawing.Size(85, 20);
+            this.comboBox_Segment.TabIndex = 6;
+            // 
             // button_Reset
             // 
             this.button_Reset.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Reset.Location = new System.Drawing.Point(17, 191);
+            this.button_Reset.Location = new System.Drawing.Point(14, 191);
             this.button_Reset.Name = "button_Reset";
             this.button_Reset.Size = new System.Drawing.Size(85, 20);
             this.button_Reset.TabIndex = 8;
@@ -360,34 +423,13 @@ namespace Dual.Model.Import
             // button_Start
             // 
             this.button_Start.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Start.Location = new System.Drawing.Point(17, 163);
+            this.button_Start.Location = new System.Drawing.Point(14, 163);
             this.button_Start.Name = "button_Start";
             this.button_Start.Size = new System.Drawing.Size(85, 20);
             this.button_Start.TabIndex = 7;
             this.button_Start.Text = "Start";
             this.button_Start.UseVisualStyleBackColor = true;
             this.button_Start.Click += new System.EventHandler(this.button_start_Click);
-            // 
-            // comboBox_Segment
-            // 
-            this.comboBox_Segment.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_Segment.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox_Segment.FormattingEnabled = true;
-            this.comboBox_Segment.Location = new System.Drawing.Point(17, 135);
-            this.comboBox_Segment.Name = "comboBox_Segment";
-            this.comboBox_Segment.Size = new System.Drawing.Size(85, 20);
-            this.comboBox_Segment.TabIndex = 6;
-            // 
-            // button_ClearLog
-            // 
-            this.button_ClearLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_ClearLog.Location = new System.Drawing.Point(17, 23);
-            this.button_ClearLog.Name = "button_ClearLog";
-            this.button_ClearLog.Size = new System.Drawing.Size(85, 20);
-            this.button_ClearLog.TabIndex = 1;
-            this.button_ClearLog.Text = "Clear Log";
-            this.button_ClearLog.UseVisualStyleBackColor = true;
-            this.button_ClearLog.Click += new System.EventHandler(this.button_ClearLog_Click);
             // 
             // richTextBox_Debug
             // 
@@ -417,31 +459,6 @@ namespace Dual.Model.Import
             this.splitter1.Size = new System.Drawing.Size(1373, 3);
             this.splitter1.TabIndex = 22;
             this.splitter1.TabStop = false;
-            // 
-            // checkedListBox1
-            // 
-            this.checkedListBox1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.checkedListBox1.FormattingEnabled = true;
-            this.checkedListBox1.Location = new System.Drawing.Point(1200, 0);
-            this.checkedListBox1.Name = "checkedListBox1";
-            this.checkedListBox1.Size = new System.Drawing.Size(173, 396);
-            this.checkedListBox1.TabIndex = 11;
-            // 
-            // panel1
-            // 
-            this.panel1.Controls.Add(this.button_ClearLog);
-            this.panel1.Controls.Add(this.button_TestORG);
-            this.panel1.Controls.Add(this.comboBox_TestExpr);
-            this.panel1.Controls.Add(this.button_TestStart);
-            this.panel1.Controls.Add(this.button_Stop);
-            this.panel1.Controls.Add(this.comboBox_Segment);
-            this.panel1.Controls.Add(this.button_Reset);
-            this.panel1.Controls.Add(this.button_Start);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel1.Location = new System.Drawing.Point(1086, 0);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(114, 396);
-            this.panel1.TabIndex = 12;
             // 
             // FormMain
             // 
@@ -514,7 +531,8 @@ namespace Dual.Model.Import
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox comboBox_Device;
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.CheckedListBox checkedListBox1;
+        private System.Windows.Forms.CheckedListBox checkedListBox_My;
+        private System.Windows.Forms.CheckedListBox checkedListBox_Ex;
     }
 }
 

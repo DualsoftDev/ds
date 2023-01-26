@@ -21,7 +21,7 @@ module TagModule =
     type BridgeTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
         inherit TagBase<'T>(param)
 
-        interface ITagWithAddress with
+        interface IBridgeTag with
             member x.Address = x.Address
         member val Address = param.Address.Value
         override x.ToBoxedExpression() = var2expr x

@@ -22,7 +22,7 @@ module ExpressionForwardDeclModule =
         inherit ITag
         inherit IStorage<'T>
 
-    type ITagWithAddress =
+    type IBridgeTag =
         inherit ITag
         abstract Address:string
 

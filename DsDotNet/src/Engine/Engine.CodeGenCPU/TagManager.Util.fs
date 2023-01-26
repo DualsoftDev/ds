@@ -62,7 +62,7 @@ module TagManagerUtil =
         t :?> PlanTag<bool>
 
     type InOut = | In | Out | Memory
-    let actionTag(stg:Storages, name, address, inOut:InOut, sys): ITagWithAddress =
+    let actionTag(stg:Storages, name, address, inOut:InOut, sys): IBridgeTag =
         let name = getUniqueName name stg
         let plcName =
             match inOut with
@@ -72,7 +72,7 @@ module TagManagerUtil =
 
         let t =
             let param = {Name=plcName; Address=Some address; Value=false; Comment=None;  System = sys}
-            (ActionTag(param) :> ITagWithAddress)
+            (ActionTag(param) :> IBridgeTag)
         stg.Add(t.Name, t)
         t
 

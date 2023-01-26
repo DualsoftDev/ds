@@ -18,7 +18,7 @@ module RunTime =
                  .Subscribe(fun (storage, newValue_) ->
                     //Step 1 상태보고
                     match storage with
-                    | :? PlanTag<bool> as p -> p.NotifyStatus()
+                    | :? PlanVar<bool> as p -> p.NotifyStatus()
                     | :? BridgeTag<bool> as a -> ()//hmi ?
                     | _ -> ()
 

@@ -32,9 +32,9 @@ module TagModule =
         override x.ToBoxedExpression() = var2expr x
 
 
-    /// PlanTag 나의 시스템 내부 TAG
-    type PlanTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
-        inherit EndoTag<'T>(param)
+    /// PlanVar 나의 시스템 내부 variable
+    type PlanVar<'T when 'T:equality> (param:TagCreationParams<'T>) =
+        inherit Variable<'T>(param)
         member val Vertex:Vertex option = None with get, set
 
 

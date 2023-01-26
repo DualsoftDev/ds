@@ -7,8 +7,8 @@ open Engine.CodeGenCPU
 type DsSystem with
     member s.B1_ButtonOutput(): CommentedStatement list = [
         for btn in s.SystemButtons do
-            let set = btn.InTag :?> BridgeTag<bool>
-            let out = btn.OutTag :?> BridgeTag<bool>
+            let set = btn.InTag :?> Tag<bool>
+            let out = btn.OutTag :?> Tag<bool>
             yield (set.Expr, s._off.Expr) --| (out, "B1" )
     ]
 
@@ -25,6 +25,6 @@ type DsSystem with
                 | DuTestModeLamp      -> f.top.Expr
                 | DuReadyModeLamp     -> f.rop.Expr
 
-            let out = lamp.OutTag :?> BridgeTag<bool>
+            let out = lamp.OutTag :?> Tag<bool>
             yield (sets, s._off.Expr) --| (out, "B2" )
     ]

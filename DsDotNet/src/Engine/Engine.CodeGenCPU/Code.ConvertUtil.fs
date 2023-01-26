@@ -52,7 +52,7 @@ module CodeConvertUtil =
 
     let getOriginIOs(real:Real, initialType:InitialType) =
         let origins = getOriginDeviceDefs(real, initialType)
-        origins.Select(fun jd -> jd.InTag).Cast<BridgeTag<bool>>()
+        origins.Select(fun jd -> jd.InTag).Cast<Tag<bool>>()
 
     let getStartPointExpr(call:Call, jd:TaskDevice) =
         match call.Parent.GetCore() with
@@ -87,7 +87,7 @@ module CodeConvertUtil =
         (* [ KeyValuePair(JogDef, InitialType) ] *)
         let needChecks = origins.Where(fun w-> w.Value = NeedCheck)
 
-        let needCheckSet:BridgeTag<bool> list list =
+        let needCheckSet:Tag<bool> list list =
             let apiNameToInTagMap =
                 needChecks.Map(fun (KeyValue(taskDevice, v)) -> taskDevice.ApiName, taskDevice.InTag)
                 |> Tuple.toDictionary
@@ -102,7 +102,7 @@ module CodeConvertUtil =
                     for rs in resetChains do
                         [
                             for r in rs do
-                                apiNameToInTagMap.TryFind(r).Map(fun intag -> intag :?> BridgeTag<bool>)
+                                apiNameToInTagMap.TryFind(r).Map(fun intag -> intag :?> Tag<bool>)
                         ] |> List.choose id
             ] |> List.filter List.any
 

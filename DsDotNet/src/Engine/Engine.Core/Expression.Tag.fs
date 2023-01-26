@@ -1,6 +1,5 @@
 namespace Engine.Core
 
-open System
 open Engine.Common.FS
 
 [<AutoOpen>]
@@ -18,18 +17,13 @@ module TagModule =
         override x.ToBoxedExpression() = var2expr x
 
     /// 시스템 간 연결용 tag.  Address 필수
-    type BridgeTag<'T when 'T:equality> (param:StorageCreationParams<'T>) =
+    type Tag<'T when 'T:equality> (param:StorageCreationParams<'T>) =
         inherit TagBase<'T>(param)
-
-        interface IBridgeTag with
-            member x.Address = x.Address
-        member val Address = param.Address.Value
         override x.ToBoxedExpression() = var2expr x
 
     /// Timer, Counter 등의 structure 내의 변수.  PLC 로 내릴 때, 실제 변수를 생성하지는 않지만, 참조는 가능해야 한다.  e.g myTimer1.EN
     type MemberVariable<'T when 'T:equality> (param:StorageCreationParams<'T>) =
         inherit Variable<'T>(param)
-        override x.ToBoxedExpression() = var2expr x
 
 
     /// PlanVar 나의 시스템 내부의 global variable
@@ -45,20 +39,20 @@ module TagModule =
 
     let createVariable (name:string) (boxedValue:BoxedObjectHolder) : IVariable =
         let v = boxedValue.Object
-        let createParam (v) = {defaultStorageCreationParams(v) with Name=name; }
+        let createParam () = {defaultStorageCreationParams(unbox v) with Name=name; }
         match v.GetType().Name with
-        | BOOL   -> new Variable<bool>   (createParam(unbox v))
-        | CHAR   -> new Variable<char>   (createParam(unbox v))
-        | FLOAT32-> new Variable<single> (createParam(unbox v))
-        | FLOAT64-> new Variable<double> (createParam(unbox v))
-        | INT16  -> new Variable<int16>  (createParam(unbox v))
-        | INT32  -> new Variable<int32>  (createParam(unbox v))
-        | INT64  -> new Variable<int64>  (createParam(unbox v))
-        | INT8   -> new Variable<int8>   (createParam(unbox v))
-        | STRING -> new Variable<string> (createParam(unbox v))
-        | UINT16 -> new Variable<uint16> (createParam(unbox v))
-        | UINT32 -> new Variable<uint32> (createParam(unbox v))
-        | UINT64 -> new Variable<uint64> (createParam(unbox v))
-        | UINT8  -> new Variable<uint8>  (createParam(unbox v))
+        | BOOL   -> new Variable<bool>   (createParam())
+        | CHAR   -> new Variable<char>   (createParam())
+        | FLOAT32-> new Variable<single> (createParam())
+        | FLOAT64-> new Variable<double> (createParam())
+        | INT16  -> new Variable<int16>  (createParam())
+        | INT32  -> new Variable<int32>  (createParam())
+        | INT64  -> new Variable<int64>  (createParam())
+        | INT8   -> new Variable<int8>   (createParam())
+        | STRING -> new Variable<string> (createParam())
+        | UINT16 -> new Variable<uint16> (createParam())
+        | UINT32 -> new Variable<uint32> (createParam())
+        | UINT64 -> new Variable<uint64> (createParam())
+        | UINT8  -> new Variable<uint8>  (createParam())
         | _  -> failwithlog "ERROR"
 

@@ -340,26 +340,26 @@ module rec ExpressionParser =
     type System.Type with
         member x.CreateVariable(name:string, boxedValue:obj) =
             createVariable name ({Object = boxedValue}:BoxedObjectHolder)
-        member x.CreateBridgeTag(name:string, address:string, boxedValue:obj) : IBridgeTag =
+        member x.CreateBridgeTag(name:string, address:string, boxedValue:obj) : ITag =
             let createParam () = {defaultStorageCreationParams(unbox boxedValue) with Name=name;  Address=Some address; }
 
             match x.Name with
-            | BOOL    -> new BridgeTag<bool>  (createParam())
-            | CHAR    -> new BridgeTag<char>  (createParam())
-            | FLOAT32 -> new BridgeTag<single>(createParam())
-            | FLOAT64 -> new BridgeTag<double>(createParam())
-            | INT16   -> new BridgeTag<int16> (createParam())
-            | INT32   -> new BridgeTag<int32> (createParam())
-            | INT64   -> new BridgeTag<int64> (createParam())
-            | INT8    -> new BridgeTag<int8>  (createParam())
-            | STRING  -> new BridgeTag<string>(createParam())
-            | UINT16  -> new BridgeTag<uint16>(createParam())
-            | UINT32  -> new BridgeTag<uint32>(createParam())
-            | UINT64  -> new BridgeTag<uint64>(createParam())
-            | UINT8   -> new BridgeTag<uint8> (createParam())
+            | BOOL    -> new Tag<bool>  (createParam())
+            | CHAR    -> new Tag<char>  (createParam())
+            | FLOAT32 -> new Tag<single>(createParam())
+            | FLOAT64 -> new Tag<double>(createParam())
+            | INT16   -> new Tag<int16> (createParam())
+            | INT32   -> new Tag<int32> (createParam())
+            | INT64   -> new Tag<int64> (createParam())
+            | INT8    -> new Tag<int8>  (createParam())
+            | STRING  -> new Tag<string>(createParam())
+            | UINT16  -> new Tag<uint16>(createParam())
+            | UINT32  -> new Tag<uint32>(createParam())
+            | UINT64  -> new Tag<uint64>(createParam())
+            | UINT8   -> new Tag<uint8> (createParam())
             | _  -> failwithlog "ERROR"
 
-        member x.CreateBridgeTag(name:string, address:string) : IBridgeTag =
+        member x.CreateBridgeTag(name:string, address:string) : ITag =
             let v = typeDefaultValue x
             x.CreateBridgeTag(name, address, unbox v)
 

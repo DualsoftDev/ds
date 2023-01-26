@@ -60,7 +60,7 @@ module TagManagerUtil =
         createPlanVar storages name DuBOOL :?> PlanVar<bool>
 
     type InOut = | In | Out | Memory
-    let createBridgeTag(stg:Storages, name, address, inOut:InOut, sys): IBridgeTag =
+    let createBridgeTag(stg:Storages, name, address, inOut:InOut, sys): ITag =
         let name = getUniqueName name stg
         let plcName =
             match inOut with
@@ -70,7 +70,7 @@ module TagManagerUtil =
 
         let t =
             let param = {defaultStorageCreationParams(false) with Name=plcName; Address=Some address; System=sys}
-            (BridgeTag(param) :> IBridgeTag)
+            (Tag(param) :> ITag)
         stg.Add(t.Name, t)
         t
 

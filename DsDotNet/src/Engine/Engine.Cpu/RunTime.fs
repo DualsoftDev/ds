@@ -19,7 +19,7 @@ module RunTime =
                     //Step 1 상태보고
                     match storage with
                     | :? PlanVar<bool> as p -> if p.Value then p.NotifyStatus()
-                    | :? BridgeTag<bool> as a -> ()//hmi ?
+                    | :? Tag<bool> as a -> ()//hmi ?
                     | _ -> ()
 
 

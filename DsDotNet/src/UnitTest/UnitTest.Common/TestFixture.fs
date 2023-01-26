@@ -40,7 +40,7 @@ module Fixtures =
             System = Runtime.System
             IsGlobal = false
         }
-        BridgeTag(param)
+        Tag(param)
 
     [<AbstractClass>]
     type TestBaseClass(loggerName:string) =

@@ -40,7 +40,7 @@ open Engine.Core
             storages.ContainsKey("myByte") === true
             storages["myByte"].BoxedValue === 123y
             storages["myByte"].DataType === typedefof<int8>
-            let myByte = storages["myByte"] :?> BridgeTag<int8>
+            let myByte = storages["myByte"] :?> Tag<int8>
             myByte.Address === "%M9.9"
             ()
 

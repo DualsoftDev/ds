@@ -74,7 +74,9 @@ module TagVariableModule =
         inherit TypedValueStorage<'T>(param)
         let {Name=name; } = param
 
-        interface ITag<'T>
+        interface ITag<'T> with
+            member x.Address = x.Address
+        member val Address = param.Address.Value
         override x.ToText() = "$" + name
 
     [<AbstractClass>]

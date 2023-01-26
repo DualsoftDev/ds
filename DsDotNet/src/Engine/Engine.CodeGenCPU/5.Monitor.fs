@@ -40,7 +40,7 @@ type VertexManager with
         let call = v.Vertex :?> Call
         let In_Rxs =
             [ for j in call.CallTargetJob.DeviceDefs do
-                j.InTag:?>BridgeTag<bool>, j.ApiItem.RXs.Select(getVM)]
+                j.InTag:?>Tag<bool>, j.ApiItem.RXs.Select(getVM)]
 
         let onEventErr =
             [ for (input, rxs) in In_Rxs do

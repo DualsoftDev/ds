@@ -21,7 +21,7 @@ module TimerTestModule =
         [<Test>]
         member x.``TON creation test`` () =
             let storages = Storages()
-            let t1 = Tag("my_timer_control_tag", "%M1.1", false)
+            let t1 = createTag("my_timer_control_tag", "%M1.1", false)
             let condition = var2expr t1
             let tcParam = {Storages=storages; Name="myTon"; Preset=200us; RungInCondition=condition; FunctionName="createWinTON"}
             let timer = TimerStatement.CreateTON(tcParam) |> toTimer       // 2000ms = 2sec
@@ -75,7 +75,7 @@ module TimerTestModule =
         [<Test>]
         member x.``TON creation with text test`` () =
             use _ = setRuntimeTarget WINDOWS
-            let t1 = Tag("my_timer_control_tag", "%M1.1", false)
+            let t1 = createTag("my_timer_control_tag", "%M1.1", false)
             let storages = Storages()
             storages.Add(t1.Name, t1)
 
@@ -117,7 +117,7 @@ module TimerTestModule =
         [<Test>]
         member __.``TOF creation with initial TRUE test`` () =
             let storages = Storages()
-            let t1 = Tag("my_timer_control_tag", "%M1.1", true)
+            let t1 = createTag("my_timer_control_tag", "%M1.1", true)
             let condition = var2expr t1
             let tcParam = {Storages=storages; Name="myTof"; Preset=200us; RungInCondition=condition; FunctionName="createWinTOF"}
             let timer = TimerStatement.CreateTOF(tcParam) |> toTimer       // 2000ms = 2sec
@@ -130,7 +130,7 @@ module TimerTestModule =
         [<Test>]
         member __.``TOF creation with initial FALSE test`` () =
             let storages = Storages()
-            let t1 = Tag("my_timer_control_tag", "%M1.1", false)
+            let t1 = createTag("my_timer_control_tag", "%M1.1", false)
             let condition = var2expr t1
             let tcParam = {Storages=storages; Name="myTof"; Preset=200us; RungInCondition=condition; FunctionName="createWinTON"}
             let timer = TimerStatement.CreateTON(tcParam) |> toTimer       // 2000ms = 2sec
@@ -143,7 +143,7 @@ module TimerTestModule =
         [<Test>]
         member __.``TOF creation with t -> f -> t -> F -> t test`` () =
             let storages = Storages()
-            let t1 = Tag("my_timer_control_tag", "%M1.1", true)
+            let t1 = createTag("my_timer_control_tag", "%M1.1", true)
             let condition = var2expr t1
             let tcParam = {Storages=storages; Name="myTof"; Preset=200us; RungInCondition=condition; FunctionName="createWinTOF"}
             let timer = TimerStatement.CreateTOF(tcParam) |> toTimer       // 2000ms = 2sec
@@ -189,8 +189,8 @@ module TimerTestModule =
         [<Test>]
         member __.``RTO creation test`` () =
             let storages = Storages()
-            let rungConditionInTag = Tag("my_timer_control_tag", "%M1.1", true)
-            let resetTag = Tag("my_timer_reset_tag", "%M1.1", false)
+            let rungConditionInTag = createTag("my_timer_control_tag", "%M1.1", true)
+            let resetTag = createTag("my_timer_reset_tag", "%M1.1", false)
             let condition = var2expr rungConditionInTag
             let reset = var2expr resetTag
             let tcParam = {Storages=storages; Name="myTmr"; Preset=100us; RungInCondition=condition; FunctionName="createWinTMR"}

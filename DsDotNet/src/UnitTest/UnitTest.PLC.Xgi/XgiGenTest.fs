@@ -240,8 +240,8 @@ type XgiGenerationTest() =
 
     [<Test>]
     member __.``Atomic Negation test`` () =
-        let myTagA = Tag("tag0", "%IX0.0.0", false)
-        let myTagB = Tag("tag1", "%IX0.0.1", false)
+        let myTagA = createTag("tag0", "%IX0.0.0", false)
+        let myTagB = createTag("tag1", "%IX0.0.1", false)
         let pulse, negated = false, false
         let flatTerminal = FlatTerminal(myTagA, pulse, negated)
         let negatedFlatTerminal = flatTerminal.Negate()

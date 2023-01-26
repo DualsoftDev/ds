@@ -71,7 +71,7 @@ module Exp =
         [<Test>]
         member __.``2 Tag test`` () =
             let storages = Storages()
-            let t1 = Tag("1", "%M1.1", 1)
+            let t1 = createTag("1", "%M1.1", 1)
             var2expr t1 |> evaluate === 1
             t1.Value <- 2
 
@@ -88,25 +88,25 @@ module Exp =
             let exp = $"{dq}hello{dq} + {dq}world{dq}" |> parseExpression storages :?> Expression<string>
             // Invalid assignment: won't compile.  OK!
             // (t1 <== exp)
-            let tString = Tag("1", "%M1.1", "1")
+            let tString = createTag("1", "%M1.1", "1")
             (tString <== exp).Do()
             tString.Value === "helloworld"
 
-            let t2 = Tag("2", "%M1.1", 2)
+            let t2 = createTag("2", "%M1.1", 2)
             fAdd [var2expr t2; var2expr t2] |> evaluate === 4
             //함수 없는 Tag 배열 평가는 불가능
             (fun () -> v [t2;t2]   |> evaluate  === 1) |> ShouldFail
 
-            var2expr (Tag("Two", "%M1.1", "Two")) |> evaluate === "Two"
+            var2expr (createTag("Two", "%M1.1", "Two")) |> evaluate === "Two"
 
             fConcat([
-                    var2expr <| Tag("Hello", "%M1.1", "Hello, ")
-                    var2expr <| Tag("World", "%M1.1", "world!" )
+                    var2expr <| createTag("Hello", "%M1.1", "Hello, ")
+                    var2expr <| createTag("World", "%M1.1", "world!" )
                 ]) |> evaluate === "Hello, world!"
 
             let tt1 = var2expr t1
             t1.Value <- 1
-            let tt2 = Tag("t2", "%M1.1", 2)
+            let tt2 = createTag("t2", "%M1.1", 2)
 
             let addTwoExpr = fAdd [ tt1; var2expr tt2 ]
             addTwoExpr |> evaluate  === 3
@@ -166,14 +166,14 @@ module Exp =
 
         [<Test>]
         member __.``31 Rising, Falling test`` () =
-            let t = Tag("t2", "%M1.1", 2)
+            let t = createTag("t2", "%M1.1", 2)
             fFalling [var2expr t] |> evaluate |> ignore     // todo : rising/falling evaluation
             fRising [var2expr t] |> evaluate |> ignore     // todo : rising/falling evaluation
 
         [<Test>]
         member __.``4 Composition test`` () =
             fMul [
-                    var2expr <| Tag("t2", "%M1.1", 2)
+                    var2expr <| createTag("t2", "%M1.1", 2)
                     fAdd [v 1; v 2]
                     fAdd [v 4; v 5]
             ] |> evaluate === 54
@@ -196,7 +196,7 @@ module Exp =
         [<Test>]
         member __.``5 Statement test`` () =
             let expr = fMul [v 2; v 3; v 4]
-            let target = Tag("target", "%M1.1", 1)
+            let target = createTag("target", "%M1.1", 1)
             let targetExpr = var2expr target
 
             let stmt = DuAssign (expr, target)
@@ -206,7 +206,7 @@ module Exp =
             (DuAssign (v 9, target)).Do()
             targetExpr |> evaluate === 9
 
-            let source = Tag("source", "%M1.1", 33)
+            let source = createTag("source", "%M1.1", 33)
             DuAssign(var2expr source, target).Do()
             targetExpr |> evaluate === 33
             source.Value <- 44
@@ -261,21 +261,21 @@ module Exp =
             fMul [v 2; v 3; v 4]|> toText  === "*(2, 3, 4)"
             fMul [v 2; v 3; v 4]|> toText  === "*(2, 3, 4)"
 
-            let t1 = Tag("t1", "%M1.1", 1)
-            let t2 = Tag("t2", "%M1.1", 2)
+            let t1 = createTag("t1", "%M1.1", 1)
+            let t2 = createTag("t2", "%M1.1", 2)
             let tt1 = t1 |> var2expr
             let tt2 = t2 |> var2expr
             let addTwoExpr = fAdd [ tt1; tt2 ]
             addTwoExpr.ToText(false) === "$t1 + $t2"
 
-            let sTag = Tag("address", "%M1.1", "value")
+            let sTag = createTag("address", "%M1.1", "value")
             sTag.ToText() === "$address"
             let exprTag = var2expr sTag
             exprTag.ToText(false) === "$address"
 
 
             let expr = fMul [v 2; v 3; v 4]
-            let target = Tag("target", "%M1.1", 1)
+            let target = createTag("target", "%M1.1", 1)
             target.ToText() === "$target"
 
             let stmt = DuAssign (expr, target)
@@ -371,7 +371,7 @@ module Exp =
 
             (t <||> f) <&&> t |> evaluate === true
 
-            let target = Tag("bool", "%M1.1", false)
+            let target = createTag("bool", "%M1.1", false)
             let targetExpr = var2expr target
             targetExpr |> evaluate === false
 
@@ -387,18 +387,18 @@ module Exp =
         [<Test>]
         member __.``9 Tag type test`` () =
             let tags = [
-                Tag("sbyte" , "%M1.1", 1y  )    |> var2expr |> iexpr
-                Tag("byte"  , "%M1.1", 1uy )    |> var2expr |> iexpr
-                Tag("int16" , "%M1.1", 1s  )    |> var2expr |> iexpr
-                Tag("uint16", "%M1.1", 1us )    |> var2expr |> iexpr
-                Tag("int32" , "%M1.1", 1   )    |> var2expr |> iexpr
-                Tag("uint32", "%M1.1", 1u  )    |> var2expr |> iexpr
-                Tag("int64" , "%M1.1", 1L  )    |> var2expr |> iexpr
-                Tag("uint64", "%M1.1", 1UL )    |> var2expr |> iexpr
-                Tag("single", "%M1.1", 1.0f)    |> var2expr |> iexpr
-                Tag("double", "%M1.1", 1.0 )    |> var2expr |> iexpr
-                Tag("char"  , "%M1.1", '1' )    |> var2expr |> iexpr
-                Tag("string", "%M1.1", "1" )    |> var2expr |> iexpr
+                createTag("sbyte" , "%M1.1", 1y  )    |> var2expr |> iexpr
+                createTag("byte"  , "%M1.1", 1uy )    |> var2expr |> iexpr
+                createTag("int16" , "%M1.1", 1s  )    |> var2expr |> iexpr
+                createTag("uint16", "%M1.1", 1us )    |> var2expr |> iexpr
+                createTag("int32" , "%M1.1", 1   )    |> var2expr |> iexpr
+                createTag("uint32", "%M1.1", 1u  )    |> var2expr |> iexpr
+                createTag("int64" , "%M1.1", 1L  )    |> var2expr |> iexpr
+                createTag("uint64", "%M1.1", 1UL )    |> var2expr |> iexpr
+                createTag("single", "%M1.1", 1.0f)    |> var2expr |> iexpr
+                createTag("double", "%M1.1", 1.0 )    |> var2expr |> iexpr
+                createTag("char"  , "%M1.1", '1' )    |> var2expr |> iexpr
+                createTag("string", "%M1.1", "1" )    |> var2expr |> iexpr
             ]
             let tagDic =
                 [   for t in tags do
@@ -471,7 +471,7 @@ module Exp =
         [<Test>]
         member __.``11 Uncompilable test`` () =
             let storages = Storages()
-            let t1 = Tag("1", "%M1.1", 1)
+            let t1 = createTag("1", "%M1.1", 1)
             var2expr t1 |> evaluate === 1
             t1.Value <- 2
 
@@ -494,7 +494,7 @@ module Exp =
 
         [<Test>]
         member __.``1 ExpressionReference test`` () =
-            let t1 = Tag("1", "%M1.1", 1)
+            let t1 = createTag("1", "%M1.1", 1)
 
             (*
             let e1 = tag t1

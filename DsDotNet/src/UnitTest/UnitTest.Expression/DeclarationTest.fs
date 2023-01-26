@@ -16,10 +16,10 @@ open Engine.Core
         member __.``Variable Declaration test`` () =
             use _ = setRuntimeTarget AB
             let storages = Storages()
-            let t1 = Tag("my_counter_control_tag", "%M1.1", false)
-            let tag1 = Tag("tag1", "%M1.1", false)
-            let tag2 = Tag("tag2", "%M1.1", false)
-            let tag3 = Tag("tag3", "%M1.1", false)
+            let t1 = createTag("my_counter_control_tag", "%M1.1", false)
+            let tag1 = createTag("tag1", "%M1.1", false)
+            let tag2 = createTag("tag2", "%M1.1", false)
+            let tag3 = createTag("tag3", "%M1.1", false)
             do
                 for t in [ t1 :> IStorage; tag1; tag2; tag3 ] do
                     storages.Add(t.Name, t)

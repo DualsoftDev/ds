@@ -25,6 +25,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Engine\Engine.Common.FS\Engine.Common.FS.fsproj" />
+	  <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
 	</ItemGroup>
 
 	<ItemGroup>

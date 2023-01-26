@@ -68,8 +68,9 @@ type XgiLadderElementTest() =
             string  mystring = "hello";     // not working for string
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member __.``Local var with comment and init test`` () =
@@ -83,5 +84,6 @@ type XgiLadderElementTest() =
         let statements = parseCode storages code
         storages["mybool"].Comment <- "mybool comment"
         storages["myint16"].Comment <- "myint16 comment <> ! +-*/"
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml

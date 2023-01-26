@@ -28,8 +28,9 @@ type XgiGenerationTest() =
         storages.Count === 3
         statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member __.``AndOr simple test`` () =
@@ -47,8 +48,9 @@ type XgiGenerationTest() =
         storages.Count === 4
         statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
 
     [<Test>]
@@ -61,8 +63,9 @@ type XgiGenerationTest() =
                 ;
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member x.``And Huge simple test`` () =
@@ -79,8 +82,9 @@ type XgiGenerationTest() =
                     ;
 """
             let statements = parseCode storages code
-            let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-            saveTestResult (get_current_function_name()) xml
+            let f = get_current_function_name()
+            let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+            saveTestResult f xml
         )
     [<Test>]
     member x.``And Huge test`` () =
@@ -98,8 +102,9 @@ type XgiGenerationTest() =
                     ;
     """
             let statements = parseCode storages code
-            let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-            saveTestResult (get_current_function_name()) xml
+            let f = get_current_function_name()
+            let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+            saveTestResult f xml
         )
 
     [<Test>]
@@ -118,8 +123,9 @@ type XgiGenerationTest() =
                     ;
     """
             let statements = parseCode storages code
-            let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-            saveTestResult (get_current_function_name()) xml
+            let f = get_current_function_name()
+            let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+            saveTestResult f xml
         )
     [<Test>]
     member __.``OR Many test`` () =
@@ -131,8 +137,9 @@ type XgiGenerationTest() =
                 ;
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member __.``OR Huge test`` () =
@@ -147,8 +154,9 @@ type XgiGenerationTest() =
                 ;
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member __.``OR variable length 역삼각형 test`` () =
@@ -160,8 +168,9 @@ type XgiGenerationTest() =
                 ;
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member __.``OR variable length test`` () =
@@ -216,8 +225,9 @@ type XgiGenerationTest() =
 
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
 
     [<Test>]
@@ -234,8 +244,9 @@ type XgiGenerationTest() =
                         ;
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
         ()
 
     [<Test>]
@@ -290,8 +301,9 @@ type XgiGenerationTest() =
             $x01 := ! $x00;
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member __.``Negation2 test`` () =
@@ -308,8 +320,9 @@ type XgiGenerationTest() =
             $x05 := ! ($x03 && $x04);
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
         ()
 
 
@@ -328,8 +341,9 @@ type XgiGenerationTest() =
             $x05 := ! ($x03 && ! $x04);
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member __.``Add test`` () =
@@ -349,8 +363,9 @@ type XgiGenerationTest() =
             $qq := true && (($nn1 + $nn2) * 9s + $nn3 > 3s);
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
 
 
@@ -366,6 +381,7 @@ type XgiGenerationTest() =
             copyIf($cond, $src, $tgt);
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 

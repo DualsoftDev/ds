@@ -145,6 +145,7 @@ module XgiExportModule =
         CommentedStatements: CommentedStatement list
     }
     type XgiProjectParams = {
+        ProjectName: string
         GlobalStorages:Storages
         ExistingLSISprj: string option
         POUs: XgiPOUParams list
@@ -191,8 +192,12 @@ module XgiExportModule =
 
         member x.GenerateXmlString() = x.GenerateXmlDocument().Beautify()
         member x.GenerateXmlDocument() : XmlDocument =
-            let { GlobalStorages=globalStorages; ExistingLSISprj=existingLSISprj; POUs=pous } = x
+            let { ProjectName=projName; GlobalStorages=globalStorages; ExistingLSISprj=existingLSISprj; POUs=pous } = x
             let xdoc = x.GetTemplateXmlDoc()
+            (* project name 변경 *)
+            do
+                let xnProj = xdoc.SelectSingleNode("//Project")
+                xnProj.FirstChild.InnerText <- projName
 
             (* xn = Xml Node *)
 
@@ -234,59 +239,4 @@ module XgiExportModule =
                     pou.GenerateXmlNode() |> xnPrograms.AdoptChild |> ignore
 
             xdoc
-
-
-    let XXX_NEW_wrapWithXml (rungs:XmlOutput) (symbolsLocal:string) (symbolsGlobal:string) (existingLSISprj:string option) =
-        let emptyStorage = Storages()
-        let pouParams:XgiPOUParams = {
-            /// POU name.  "DsLogic"
-            POUName = "DsLogic"
-            /// POU container task name
-            TaskName = "Scan Program"
-            /// POU ladder 최상단의 comment
-            Comment = "DS Logic for XGI"
-            LocalStorages = emptyStorage
-            CommentedStatements = []
-        }
-        let projParams:XgiProjectParams = {
-            GlobalStorages = emptyStorage
-            ExistingLSISprj = None
-            POUs = [pouParams]
-        }
-
-        let xdoc = projParams.GenerateXmlDocument()
-        (*
-            POU
-                Programs
-                    Program
-                        Body
-                            LDRoutine
-                                Rung
-                        LocalVar
-                            Symbols
-                                Symbol
-        *)
-        do
-            if (symbolsGlobal.NonNullAny()) then
-                let xnGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
-                let newGlobalVar = symbolsGlobal |> XmlNode.fromString
-                let parent = newGlobalVar.ParentNode
-                parent.RemoveChild(xnGlobalVar) |> ignore
-                parent.AdoptChild newGlobalVar |> ignore
-
-        do
-            if (symbolsLocal.NonNullAny()) then
-                let xnLocalVar = xdoc.SelectSingleNode("//Configurations/Configuration/POU/Programs/Program/LocalVar")
-                let newLocalVar = symbolsLocal |> XmlNode.fromString
-                let parent = xnLocalVar.ParentNode
-                parent.RemoveChild(xnLocalVar) |> ignore
-                parent.AdoptChild newLocalVar |> ignore
-
-        let xnProgram = xdoc.SelectSingleNode("//Configurations/Configuration/POU/Programs/Program")
-        //do
-        //    let xnGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
-        //    let newGlobalVar = symbolsGlobal|> XmlNode.fromString
-        //    DsXml.replaceChild xnGlobalVar newGlobalVar |> ignore
-
-        xdoc.OuterXml
 

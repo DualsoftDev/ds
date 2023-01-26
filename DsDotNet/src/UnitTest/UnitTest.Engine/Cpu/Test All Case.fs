@@ -21,7 +21,7 @@ type TestAllCase() =
         src.Substring(0, tail)
     let xmlDir = Path.Combine(projectDir, "XgiXmls")
 
-    let generateXmlForTest globalStorages localStorages (statements:CommentedStatement list) : string =
+    let generateXmlForTest projName globalStorages localStorages (statements:CommentedStatement list) : string =
         let pouParams:XgiPOUParams = {
             /// POU name.  "DsLogic"
             POUName = "DsLogic"
@@ -33,6 +33,7 @@ type TestAllCase() =
             CommentedStatements = statements
         }
         let projParams:XgiProjectParams = {
+            ProjectName = projName
             GlobalStorages = globalStorages
             ExistingLSISprj = None
             POUs = [pouParams]
@@ -56,6 +57,7 @@ type TestAllCase() =
         let devicePous = result.Filter(fun p -> p.IsDevice)
         let exSystemPous = result.Filter(fun p -> p.IsExternal)
 
-        let xml = generateXmlForTest globalStorage localStorage (activePou.CommentedStatements())
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = generateXmlForTest f globalStorage localStorage (activePou.CommentedStatements())
+        saveTestResult f xml
         result === result

@@ -25,8 +25,9 @@ type XgiCounterTest() =
             ctu myCTU = createXgiCTU(2000us, $cu, $res);
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member __.``Counter CTD simple test`` () =
@@ -38,8 +39,9 @@ type XgiCounterTest() =
             ctd myCTD = createXgiCTD(2000us, $cd, $load);
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member __.``Counter CTUD simple test`` () =
@@ -52,8 +54,9 @@ type XgiCounterTest() =
             ctud myCTUD = createXgiCTUD(2000us, $cu, $cd, $r, $ld);
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member __.``Counter CTR simple test`` () =
@@ -67,8 +70,9 @@ type XgiCounterTest() =
             $myCTR.RST := $cd;
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
 
     [<Test>]
@@ -87,8 +91,9 @@ type XgiCounterTest() =
             $xx7 := (($cu1 && $cu2) || $cu3 || ($res0 || $res1) && $res2) && $cu1;
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member __.``Counter CTD with conditional test`` () =
@@ -106,8 +111,9 @@ type XgiCounterTest() =
             $xx7 := (($cu1 && $cu2) || $cu3 || ($res0 || $res1) && $res2) && $cu1;
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member __.``Counter CTR with conditional test`` () =
@@ -125,8 +131,9 @@ type XgiCounterTest() =
             $xx7 := (($cd1 && $cd2) || $cd3 || ($res0 || $res1) && $res2) && $cd1;
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member __.``Counter CTR with conditional test2`` () =
@@ -145,8 +152,9 @@ type XgiCounterTest() =
             $xx7 := (($cd1 && $cd2) || $cd3 || ($res0 || $res1) && $res2) && $cd1;
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member __.``Counter CTUD with conditional test`` () =
@@ -180,8 +188,9 @@ type XgiCounterTest() =
             //$xx7 := (($cd1 && $cd2) || $cd3 || ($res0 || $res1) && $res2) && $cd1;
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
 [<Collection("SerialXgiFunctionTest")>]
 type XgiFunctionTest() =
@@ -197,8 +206,9 @@ type XgiFunctionTest() =
             $sum := $nn1 + $nn2;
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member __.``ADD int32 test`` () =
@@ -210,8 +220,9 @@ type XgiFunctionTest() =
             $sum := $nn1 + $nn2;
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member __.``ADD int64 test`` () =
@@ -223,8 +234,9 @@ type XgiFunctionTest() =
             $sum := $nn1 + $nn2;
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member __.``ADD double test`` () =
@@ -236,8 +248,9 @@ type XgiFunctionTest() =
             $sum := $nn1 + $nn2;
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
 
     [<Test>]
@@ -251,8 +264,9 @@ type XgiFunctionTest() =
             $sum := $nn1 + $nn2 + $nn3;
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member __.``ADD 7 items test`` () =
@@ -271,8 +285,9 @@ type XgiFunctionTest() =
             $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7;
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member __.``ADD 8 items test`` () =
@@ -291,8 +306,9 @@ type XgiFunctionTest() =
             $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8;
 """
         let statements = parseCode storages code
-        let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        saveTestResult f xml
 
     [<Test>]
     member x.``ADD 10 items test`` () =
@@ -315,8 +331,9 @@ type XgiFunctionTest() =
                 $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8 + $nn9 + $nn10;
     """
             let statements = parseCode storages code
-            let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-            saveTestResult (get_current_function_name()) xml )
+            let f = get_current_function_name()
+            let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+            saveTestResult f xml )
 
     [<Test>]
     member x.``DIV 3 items test`` () =
@@ -332,8 +349,9 @@ type XgiFunctionTest() =
                 $quotient := $nn1 / $nn2 / $nn3;
     """
             let statements = parseCode storages code
-            let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-            saveTestResult (get_current_function_name()) xml )
+            let f = get_current_function_name()
+            let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+            saveTestResult f xml )
     [<Test>]
     member x.``ADD MUL 3 items test`` () =
         lock x.Locker (fun () ->
@@ -352,8 +370,9 @@ type XgiFunctionTest() =
                 $sum := $nn1 + $nn2 * $nn3 + $nn4 + $nn5 * $nn6 / $nn7 - $nn8;
     """
             let statements = parseCode storages code
-            let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-            saveTestResult (get_current_function_name()) xml
+            let f = get_current_function_name()
+            let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+            saveTestResult f xml
         )
 
     [<Test>]
@@ -376,6 +395,7 @@ type XgiFunctionTest() =
                 $result := $nn1 + $nn2 * $nn3 > 2s && $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
     """
             let statements = parseCode storages code
-            let xml = XgiFixtures.generateXml storages (map withNoComment statements)
-            saveTestResult (get_current_function_name()) xml
+            let f = get_current_function_name()
+            let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+            saveTestResult f xml
         )

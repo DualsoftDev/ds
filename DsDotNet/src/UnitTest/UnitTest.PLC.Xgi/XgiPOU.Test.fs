@@ -65,7 +65,8 @@ type XgiPOUTest() =
             CommentedStatements = statements
         }
 
-    let projectParams:XgiProjectParams = {
+    let createProjectParams(projName):XgiProjectParams = {
+        ProjectName = projName
         GlobalStorages = Storages()
         ExistingLSISprj = None
         POUs = [pou11; pou12; pou21]
@@ -77,8 +78,9 @@ type XgiPOUTest() =
 
     [<Test>]
     member __.``Project test`` () =
-        let xml = projectParams.GenerateXmlString()
-        saveTestResult (get_current_function_name()) xml
+        let f = get_current_function_name()
+        let xml = createProjectParams(f).GenerateXmlString()
+        saveTestResult f xml
 
 
     [<Test>]
@@ -88,10 +90,11 @@ type XgiPOUTest() =
             bool gg0 = createTag("%IX0.0.1", false);
             bool gg1 = false;
 """
+        let f = get_current_function_name()
         parseCode globalStorages code |> ignore
-        let projectParams = { projectParams with GlobalStorages = globalStorages }
+        let projectParams = { createProjectParams(f) with GlobalStorages = globalStorages }
         let xml = projectParams.GenerateXmlString()
-        saveTestResult (get_current_function_name()) xml
+        saveTestResult f xml
 
 
     [<Test>]
@@ -104,7 +107,8 @@ type XgiPOUTest() =
             bool gg0 = createTag("%IX0.0.1", false);
             bool gg1 = false;
 """
+        let f = get_current_function_name()
         parseCode globalStorages code |> ignore
-        let projectParams = { projectParams with GlobalStorages = globalStorages; ExistingLSISprj = Some myTemplate }
+        let projectParams = { createProjectParams(f) with GlobalStorages = globalStorages; ExistingLSISprj = Some myTemplate }
         let xml = projectParams.GenerateXmlString()
-        saveTestResult (get_current_function_name()) xml
+        saveTestResult f xml

@@ -30,6 +30,9 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using Model.Import.Office;
 using Color = System.Drawing.Color;
 using System.Security.Cryptography;
+using System.Net.Security;
+using static Engine.Core.ExpressionForwardDeclModule;
+using Microsoft.Msagl.Routing.ConstrainedDelaunayTriangulation;
 
 namespace Dual.Model.Import
 {
@@ -38,6 +41,7 @@ namespace Dual.Model.Import
         public static FormMain TheMain;
 
         private DsCPU _SelectedCPU;
+        private DsCPU _SelectedDev;
         public Dictionary<DsSystem, DsCPU> _DicCpu = new Dictionary<DsSystem, DsCPU>();
         public Dictionary<DsSystem, IEnumerable<ViewNode>> _DicViews;
 
@@ -82,6 +86,11 @@ namespace Dual.Model.Import
 
             // this.Text = UtilFile.GetVersion();
             this.Size = new Size(500, 500);
+
+            checkedListBox_My.ItemCheck += (ss, ee) => { if (checkedListBox_My.Enabled) ee.NewValue = ee.CurrentValue; };
+            checkedListBox_Ex.ItemCheck += (ss, ee) => { if (checkedListBox_Ex.Enabled) ee.NewValue = ee.CurrentValue; };
+            checkedListBox_My.DisplayMember = "Display";
+            checkedListBox_Ex.DisplayMember = "Display";
         }
 
         void Form1_DragEnter(object sender, DragEventArgs e)
@@ -207,17 +216,14 @@ namespace Dual.Model.Import
             richTextBox_Debug.AppendText($"{DateTime.Now} : Log Clear");
         }
 
-        private async void button_TestStart_Click(object sender, EventArgs e)
+        private  void button_TestStart_Click(object sender, EventArgs e)
         {
-            if (_SelectedCPU == null) return;
             StartResetBtnUpdate(true);
-            await Task.Delay(0);
         }
         private void button_Stop_Click(object sender, EventArgs e)
         {
-            if (_SelectedCPU == null) return;
             StartResetBtnUpdate(false);
-            _SelectedCPU.Stop();
+            _DicCpu.Values.ForEach(f=>f.Stop());
         }
 
         private async void button_TestORG_Click(object sender, EventArgs e)
@@ -304,25 +310,66 @@ namespace Dual.Model.Import
             }
 
             comboBox_Device.DisplayMember = "Display";
+            comboBox_Device.SelectedIndex = 0;
         }
 
         private void comboBox_Device_SelectedIndexChanged(object sender, EventArgs e)
         {
             SystemView sysView = comboBox_Device.SelectedItem as SystemView;
+            _SelectedDev = _DicCpu[sysView.System];
             UpdateSelectedCpu(sysView);
+
         }
         private void comboBox_System_SelectedIndexChanged(object sender, EventArgs e)
         {
             SystemView sysView = comboBox_System.SelectedItem as SystemView;
-            UpdateSelectedCpu(sysView);
+            _SelectedCPU = _DicCpu[sysView.System];
             UpdateDevice(sysView);
+            UpdateSelectedCpu(sysView);
         }
+
+        public void UpdateLogComboBox(IStorage storage, object value,  DsCPU cpu)
+        {
+            var name = value is bool ? storage.Name : $"{storage.Name}({value})";
+            var onOff = value is bool ? Convert.ToBoolean(value) : false;
+            var sd = new StorageDisplay() { Display = name, Storage = storage, Value = value, OnOff = onOff };
+            if (_SelectedCPU == cpu)
+            {
+                checkedListBox_My.Enabled= false;
+                checkedListBox_My.Items.Add(sd, sd.OnOff);
+                checkedListBox_My.SelectedIndex = checkedListBox_My.Items.Count - 1;
+                checkedListBox_My.Enabled= true;
+            }
+            if (_SelectedDev == cpu)
+            {
+                checkedListBox_Ex.Enabled= false;
+                checkedListBox_Ex.Items.Add(sd, sd.OnOff);
+                checkedListBox_Ex.SelectedIndex = checkedListBox_Ex.Items.Count - 1;
+                checkedListBox_Ex.Enabled= true;
+            }
+        }
+        private void checkedListBox_My_DoubleClick(object sender, EventArgs e)
+        {
+            StorageDisplay sd = checkedListBox_My.SelectedItem as StorageDisplay;
+            if (sd == null) return;
+            _SelectedCPU.CommentedStatements
+                .Where(cs => getTargetStorages(cs.Statement).ToList().Contains(sd.Storage))
+                .ForEach(cs => ShowExpr(cs, false));
+        }
+
+        private void checkedListBox_Ex_DoubleClick(object sender, EventArgs e)
+        {
+            StorageDisplay sd = checkedListBox_Ex.SelectedItem as StorageDisplay;
+            if (sd == null) return;
+            _SelectedDev.CommentedStatements
+                .Where(cs => getTargetStorages(cs.Statement).ToList().Contains(sd.Storage))
+                .ForEach(cs => ShowExpr(cs, true));
+        }
+
+
 
         private void UpdateSelectedCpu(SystemView sysView)
         {
-
-            _SelectedCPU = _DicCpu[sysView.System];
-
             _DicVertex = new Dictionary<Vertex, ViewNode>();
             comboBox_Segment.Items.Clear();
 
@@ -344,7 +391,7 @@ namespace Dual.Model.Import
                     }
                 });
             int cnt = 0;
-            var text = _SelectedCPU.CommentedStatements.Select(rung =>
+            var text = _DicCpu[sysView.System].CommentedStatements.Select(rung =>
             {
                 var description = rung.comment;
                 var statement = rung.statement;
@@ -361,7 +408,6 @@ namespace Dual.Model.Import
 
             DisplayTextModel(System.Drawing.Color.Transparent, sysView.System.ToDsText());
 
-
         }
 
 
@@ -369,15 +415,20 @@ namespace Dual.Model.Import
         {
             int index = comboBox_TestExpr.SelectedIndex;
             var cs = _DicStatement[index];
-           // cs.statement.Do();
+            // cs.statement.Do();
+            ShowExpr(cs, false);
+        }
 
+        private void ShowExpr(CommentedStatement cs, bool bDev)
+        {
             var tgts = getTargetStorages(cs.statement);
             var srcs = getSourceStorages(cs.statement);
             string tgtsTexs = string.Join(", ", tgts.Select(s => $"{s.Name}({s.BoxedValue})"));
             string srcsTexs = string.Join(", ", srcs.Select(s => $"{s.Name}({s.BoxedValue})"));
-
-            richTextBox_ds.AppendTextColor($"{cs.comment}".Replace("$", ""), Color.White);
-            richTextBox_ds.AppendTextColor($"\r\n\t{tgtsTexs} = {srcsTexs}\r\n", Color.White);
+            var color = bDev ? Color.White : Color.Gold;
+            richTextBox_ds.AppendTextColor($"{cs.comment}".Replace("$", ""), color);
+            richTextBox_ds.AppendTextColor($"\r\n\t{tgtsTexs} = {srcsTexs}\r\n", color);
+            richTextBox_ds.AppendTextColor("\r\n", color);
             richTextBox_ds.ScrollToCaret();
         }
     }

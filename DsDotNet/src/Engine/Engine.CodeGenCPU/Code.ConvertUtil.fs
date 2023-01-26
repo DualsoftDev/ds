@@ -34,8 +34,8 @@ module CodeConvertUtil =
             | :? Alias  as a  ->
                 match a.TargetWrapper.GetTarget() with
                 | :? Real as real -> real
-                | _ -> failwithlog "Error GetPureReal"
-            |_ -> failwithlog "Error GetPureReal"
+                | _ -> failwithlog $"Error"
+            |_ -> failwithlog $"Error"
 
 
         //let origins, resetChains = OriginHelper.GetOriginsWithDeviceDefs real.Graph
@@ -165,7 +165,7 @@ module CodeConvertUtil =
                 | :? RealExS as rs -> rs.V.ET
                 | :? Call   as c  -> if usingRoot then  c.V.ET else  c.V.CR
                 | :? Alias  as a  -> if usingRoot then  a.V.ET else  a.V.CR
-                | _ -> failwithlog "Error"
+                | _ -> failwithlog $"Error {get_current_function_name()}"
                 )
 
             tags.ToAndElseOn(s)

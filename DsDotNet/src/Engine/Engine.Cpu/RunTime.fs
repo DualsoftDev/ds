@@ -31,7 +31,7 @@ module RunTime =
                     //    async {statement.Do()}|> Async.StartImmediate
                     else
                         let mapRungs = mapRungs
-                        failwithlog "Error runSubscribe"  //디버깅후 예외 처리
+                        failwithlog $"Error {get_current_function_name()}"  //디버깅후 예외 처리
                     )
             subscribe
 

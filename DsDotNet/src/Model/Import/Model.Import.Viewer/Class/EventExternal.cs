@@ -25,10 +25,15 @@ namespace Dual.Model.Import
         {
             FormMain.TheMain._DicCpu.ForEach(x =>
             {
+                var sys = x.Key;
+                var cpu = x.Value;
                 x.Key.ValueChangeSubject.Subscribe(tuple =>
                 {
                     var (storage, newValue) = tuple;
-                    FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{storage.Name}:{newValue}", true);
+
+                    //FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{storage.Name}:{newValue}", true);
+                    FormMain.TheMain.UpdateLogComboBox(storage, newValue, cpu);
+
                 });
             });
 

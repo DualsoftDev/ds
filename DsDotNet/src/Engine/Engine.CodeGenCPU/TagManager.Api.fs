@@ -19,9 +19,9 @@ module ApiTagManagerModule =
         let sys = a.System
         let s =  sys.TagManager.Storages
 
-        let ps    = createPlanVarBool s $"{a.Name}(PS)" sys
-        let pr    = createPlanVarBool s $"{a.Name}(PR)" sys
-        let pe    = createPlanVarBool s $"{a.Name}(PE)" sys
+        let ps    = createPlanVarBool s $"{a.Name}_PS_"
+        let pr    = createPlanVarBool s $"{a.Name}_PR_"
+        let pe    = createPlanVarBool s $"{a.Name}_PE_"
 
         interface ITagManager with
             member x.Target = a

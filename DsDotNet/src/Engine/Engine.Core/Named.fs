@@ -146,6 +146,7 @@ type NameUtil =
     /// 적법하지 않으면 double quote 로 감싸주어야 한다.
     [<Extension>] static member IsValidIdentifier (identifier:string) = isValidIdentifier identifier
     [<Extension>] static member IsQuotationRequired (identifier:string) = isValidIdentifier(identifier) |> not
+    [<Extension>] static member IsQuotationRequired (identifier:char) = isValidIdentifier(identifier.ToString()) |> not
     [<Extension>] static member QuoteOnDemand (identifier:string) = quoteOnDemand identifier
     [<Extension>] static member DeQuoteOnDemand (identifier:string) = deQuoteOnDemand identifier
     [<Extension>] static member Combine (nameComponents:string seq, [<Optional; DefaultParameterValue(".")>]separator) = combine separator nameComponents

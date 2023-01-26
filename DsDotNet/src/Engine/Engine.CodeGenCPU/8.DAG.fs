@@ -51,7 +51,7 @@ type VertexManager with
                     |Some call ->  if call.UsingTon
                                         then call.V.TON.DN.Expr    //On Delay
                                         else call.INs.ToAndElseOn(v.System)
-                    |None -> failwithlog "Error D3_DAGCoinComplete"
+                    |None -> failwithlog $"Error"
 
                 let sets = ands <&&> child.ST.Expr <&&> child.ET.Expr
                 let rsts = realV.H.Expr

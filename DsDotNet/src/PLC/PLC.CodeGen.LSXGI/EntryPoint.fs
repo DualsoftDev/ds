@@ -26,7 +26,7 @@ module ModuleInitializer =
             | XGI ->
                 fwdCreateVariableWithTypeAndValue <- createXgiVariableWithTypeAndValue
             | WINDOWS ->
-                fwdCreateVariableWithTypeAndValue <- createWindowsVariableWithTypeAndValue
+                fwdCreateVariableWithTypeAndValue <- createVariable
             | _ ->
                 ()
         ) |> ignore

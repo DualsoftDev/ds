@@ -251,7 +251,7 @@ module rec ExpressionParser =
                     | tagAddress::tagValue::[] ->
                         if tagValue.DataType <> declType then failwith $"ERROR: Type mismatch in {varDeclCtx.GetOriginalText()}"
                         let addr = tagAddress.BoxedEvaluatedValue :?> string
-                        let tag = declType.CreateTag(storageName, addr, tagValue.BoxedEvaluatedValue)
+                        let tag = declType.CreateBridgeTag(storageName, addr, tagValue.BoxedEvaluatedValue)
                         storages.Add(storageName, tag)
                     | _ -> failwith $"ERROR: Tag declaration error in {varDeclCtx.GetOriginalText()}"
                     None
@@ -339,7 +339,7 @@ module rec ExpressionParser =
 
     type System.Type with
         member x.CreateVariable(name:string, boxedValue:obj) = fwdCreateVariableWithTypeAndValue name ({Object = boxedValue}:BoxedObjectHolder)
-        member x.CreateTag(name:string, address:string, boxedValue:obj) : IStorage =
+        member x.CreateBridgeTag(name:string, address:string, boxedValue:obj) : IStorage =
             let createParam () = {Name=name; Value=unbox boxedValue; Address=Some address; Comment=None;  System = Runtime.System}
 
             match x.Name with
@@ -358,9 +358,9 @@ module rec ExpressionParser =
             | UINT8   -> new BridgeTag<uint8> (createParam())
             | _  -> failwithlog "ERROR"
 
-        member x.CreateTag(name:string, address:string) : IStorage =
+        member x.CreateBridgeTag(name:string, address:string) : IStorage =
             let v = typeDefaultValue x
-            x.CreateTag(name, address, unbox v)
+            x.CreateBridgeTag(name, address, unbox v)
 
         static member FromString(typeName:string) : System.Type =
             (textToDataType typeName).ToType()

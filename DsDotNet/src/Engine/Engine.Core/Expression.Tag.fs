@@ -43,7 +43,7 @@ module TagModule =
     // error FS0030: 값 제한이 있습니다. 값 'fwdCreateVariableWithValue'은(는) 제네릭 형식    val mutable fwdCreateVariableWithValue: (string -> '_a -> IVariable)을(를) 가지는 것으로 유추되었습니다.    'fwdCreateVariableWithValue'에 대한 인수를 명시적으로 만들거나, 제네릭 요소로 만들지 않으려는 경우 형식 주석을 추가하세요.
     type BoxedObjectHolder = { Object:obj }
 
-    let createWindowsVariableWithTypeAndValue (name:string) (boxedValue:BoxedObjectHolder) : IVariable =
+    let createVariable (name:string) (boxedValue:BoxedObjectHolder) : IVariable =
         verify (Runtime.Target = WINDOWS)
         let v = boxedValue.Object
         let createParam (v) = {Name=name; Value=v; Comment=None; Address=None; System = Runtime.System}
@@ -63,4 +63,4 @@ module TagModule =
         | UINT8  -> new Variable<uint8>  (createParam(unbox v))
         | _  -> failwithlog "ERROR"
 
-    let mutable fwdCreateVariableWithTypeAndValue = createWindowsVariableWithTypeAndValue
+    let mutable fwdCreateVariableWithTypeAndValue = createVariable

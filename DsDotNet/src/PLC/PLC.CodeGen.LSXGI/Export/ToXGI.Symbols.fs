@@ -6,12 +6,13 @@ open System.Collections.Generic
 open Engine.Common.FS
 open Engine.Core
 open PLC.CodeGen.LSXGI
+open System.Security
 
 
 [<AutoOpen>]
 module internal XgiSymbolsModule =
     type XgiSymbol =
-        | DuTag         of ITagWithAddress
+        | DuTag         of ITag
         | DuXgiLocalVar of IXgiLocalVar
         | DuTimer       of TimerStruct
         | DuCounter     of CounterBaseStruct
@@ -27,7 +28,7 @@ module internal XgiSymbolsModule =
         [
             for s in storages do
                 match s with
-                | :? ITagWithAddress as t ->
+                | :? ITag as t ->
                     let name = (t :> INamed).Name
                     if timerOrCountersNames.Contains(name.Split(".")[0]) then
                         // skip timer/counter structure member : timer 나 counter 명 + "." + field name
@@ -45,7 +46,7 @@ module internal XgiSymbolsModule =
 
     let xgiSymbolToSymbolInfo (kindVar:int) (xgiSymbol:XgiSymbol) : SymbolInfo =
         match xgiSymbol with
-        | DuTag t ->
+        | DuTag (:? ITagWithAddress as t) ->
             let name, addr = t.Name, t.Address
 
             let device, memSize =
@@ -65,6 +66,15 @@ module internal XgiSymbolsModule =
             let initValue = null // PLCTag 는 값을 초기화 할 수 없다.
             { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; InitValue=initValue; Device=device; Kind=kindVar; }
             |> XGITag.createSymbolInfoWithDetail
+
+        // address 가 지정되지 않은 tag : e.g Timer, Counter 의 내부 멤버 변수들 EN, DN, CU, CD, ...
+        | DuTag t ->
+            let symbolInfo =
+                let plcType = systemTypeToXgiTypeName t.DataType
+                let comment = SecurityElement.Escape t.Comment
+                let initValueHolder:BoxedObjectHolder = {Object=t.BoxedValue}
+                XGITag.createSymbolInfo t.Name comment plcType initValueHolder
+            symbolInfo
 
         | DuXgiLocalVar xgi ->
             if kindVar = int Variable.Kind.VAR_GLOBAL then

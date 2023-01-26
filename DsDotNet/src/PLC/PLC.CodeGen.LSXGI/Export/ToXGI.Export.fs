@@ -146,6 +146,7 @@ module XgiExportModule =
     }
     type XgiProjectParams = {
         ProjectName: string
+        ProjectComment: string
         GlobalStorages:Storages
         ExistingLSISprj: string option
         POUs: XgiPOUParams list
@@ -192,12 +193,15 @@ module XgiExportModule =
 
         member x.GenerateXmlString() = x.GenerateXmlDocument().Beautify()
         member x.GenerateXmlDocument() : XmlDocument =
-            let { ProjectName=projName; GlobalStorages=globalStorages; ExistingLSISprj=existingLSISprj; POUs=pous } = x
+            let { ProjectName=projName; ProjectComment=projComment; GlobalStorages=globalStorages; ExistingLSISprj=existingLSISprj; POUs=pous } = x
             let xdoc = x.GetTemplateXmlDoc()
-            (* project name 변경 *)
+            (* project name/comment 변경 *)
             do
                 let xnProj = xdoc.SelectSingleNode("//Project")
                 xnProj.FirstChild.InnerText <- projName
+                if projComment.NonNullAny() then
+                    let xe = (xnProj :?> XmlElement)
+                    xe.SetAttribute("Comment", projComment)
 
             (* xn = Xml Node *)
 

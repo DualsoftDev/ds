@@ -70,6 +70,7 @@ module XgiFixtures =
         }
         let projParams:XgiProjectParams = {
             ProjectName = projName
+            ProjectComment = ""
             GlobalStorages = globalStorages
             ExistingLSISprj = None
             POUs = [pouParams]

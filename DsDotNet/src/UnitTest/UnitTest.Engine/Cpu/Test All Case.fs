@@ -30,6 +30,7 @@ type TestAllCase() =
 
         let projParams:XgiProjectParams = {
             ProjectName = projName
+            ProjectComment = ""
             GlobalStorages = globalStorages
             ExistingLSISprj = None
             POUs = pous.Select(getXgiPOUParams) |> Seq.toList

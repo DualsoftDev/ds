@@ -67,6 +67,7 @@ type XgiPOUTest() =
 
     let createProjectParams(projName):XgiProjectParams = {
         ProjectName = projName
+        ProjectComment = ""
         GlobalStorages = Storages()
         ExistingLSISprj = None
         POUs = [pou11; pou12; pou21]
@@ -79,7 +80,8 @@ type XgiPOUTest() =
     [<Test>]
     member __.``Project test`` () =
         let f = get_current_function_name()
-        let xml = createProjectParams(f).GenerateXmlString()
+        let projComment = "This is project comment."
+        let xml = { createProjectParams(f) with ProjectComment=projComment}.GenerateXmlString()
         saveTestResult f xml
 
 

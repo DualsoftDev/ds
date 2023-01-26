@@ -27,11 +27,11 @@ module CpuLoader =
                      |  DuAliasTargetCall   ac -> vaild.HasFlag(AliasCallInFlow)
                  | DuParentReal r->
                      match a.TargetWrapper with
-                     | DuAliasTargetReal   ar -> failwithlog "Error IsSpec"
-                     | DuAliasTargetRealExFlow ao -> failwithlog "Error IsSpec"
-                     | DuAliasTargetRealExSystem ao -> failwithlog "Error IsSpec"
+                     | DuAliasTargetReal   ar       -> failwithlog $"Error {get_current_function_name()}"
+                     | DuAliasTargetRealExFlow ao   -> failwithlog $"Error {get_current_function_name()}"
+                     | DuAliasTargetRealExSystem ao -> failwithlog $"Error {get_current_function_name()}"
                      | DuAliasTargetCall   ac -> vaild.HasFlag(AliasCallInReal)
-            |_ -> failwithlog "Error"
+            |_ -> failwithlog $"Error {get_current_function_name()}"
 
         isVaildVertex
 
@@ -149,7 +149,7 @@ module CpuLoader =
                     ->  v.TagManager <- VertexMReal(v)
                 | (:? RealExS | :? RealExF | :? Call | :? Alias)
                     -> v.TagManager <-  VertexMCoin(v)
-                | _ -> failwithlog "ERROR createTagManager")
+                | _ -> failwithlog (get_current_function_name()))
 
         let rec tagManagerBuild(sys:DsSystem)  =
             createTagM (sys)
@@ -173,6 +173,11 @@ module CpuLoader =
             | ActivePou    (s, p) -> p
             | DevicePou    (d, p) -> p
             | ExternalPou  (e, p) -> p
+        member x.TaskName() =
+            match x with
+            | ActivePou    (s, p) -> "Active"
+            | DevicePou    (d, p) -> "Device"
+            | ExternalPou  (e, p) -> "ExternalCpu"
         member x.IsActive   = match x with | ActivePou (s, p) -> true |_ -> false
         member x.IsDevice   = match x with | DevicePou (s, p) -> true |_ -> false
         member x.IsExternal = match x with | ExternalPou (s, p) -> true |_ -> false
@@ -196,7 +201,7 @@ module CpuLoader =
                     match s  with
                     | :? Device as d ->   DevicePou (d, convertSystem(d.ReferenceSystem))
                     | :? ExternalSystem as e ->  ExternalPou (e, convertSystem(e.ReferenceSystem))
-                    | _ -> failwithlog "Error LoadStatements"
+                    | _ -> failwithlog (get_current_function_name())
                     )
                 //자신(Acitve) system을  CPU 변환
                 |>Seq.append [ActivePou (system, convertSystem(system))]

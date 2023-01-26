@@ -52,7 +52,7 @@ type VertexManager with
                                 else call.INs.ToAndElseOn(v.System)
                 | None -> v.CR.Expr
             | _ ->
-                failwithlog "Error F4_RootCoinRelay"
+                failwithlog $"Error"
 
         let sets = ands <&&> v.ET.Expr
         let rsts = !!v.ST.Expr

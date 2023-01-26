@@ -43,8 +43,8 @@ module CoreExtensionsModule =
         [<Extension>]
         static member NotifyStatus (x:PlanVar<bool>) =
             if x.Vertex.IsSome
-            then            //마지막 괄호 문자만 추출 tagname(R)  -> R
-                let m = Regex.Match(x.Name, @"(?<=\()\D+(?=\)$)")
+            then            //마지막 문자 한글자만 추출 tagname_R_  -> R
+                let m = Regex.Match(x.Name, "(?<=_)\D(?=_$)")
                 match m.Value with
                 | "R" -> onStatusChanged (x.Vertex.Value, Ready)
                 | "G" -> onStatusChanged (x.Vertex.Value, Going)

@@ -86,6 +86,11 @@ namespace Dual.Model.Import
 
             // this.Text = UtilFile.GetVersion();
             this.Size = new Size(500, 500);
+
+            checkedListBox_My.ItemCheck += (ss, ee) => { if (checkedListBox_My.Enabled) ee.NewValue = ee.CurrentValue; };
+            checkedListBox_Ex.ItemCheck += (ss, ee) => { if (checkedListBox_Ex.Enabled) ee.NewValue = ee.CurrentValue; };
+            checkedListBox_My.DisplayMember = "Display";
+            checkedListBox_Ex.DisplayMember = "Display";
         }
 
         void Form1_DragEnter(object sender, DragEventArgs e)
@@ -313,9 +318,6 @@ namespace Dual.Model.Import
             SystemView sysView = comboBox_Device.SelectedItem as SystemView;
             _SelectedDev = _DicCpu[sysView.System];
             UpdateSelectedCpu(sysView);
-            checkedListBox_Ex.Items.Clear();
-            checkedListBox_Ex.DisplayMember = "Display";
-            checkedListBox_Ex.ItemCheck += (ss, ee) => { if (checkedListBox_Ex.Enabled) ee.NewValue = ee.CurrentValue; };
 
         }
         private void comboBox_System_SelectedIndexChanged(object sender, EventArgs e)
@@ -324,10 +326,6 @@ namespace Dual.Model.Import
             _SelectedCPU = _DicCpu[sysView.System];
             UpdateDevice(sysView);
             UpdateSelectedCpu(sysView);
-            checkedListBox_My.Items.Clear();
-            checkedListBox_My.DisplayMember = "Display";
-            checkedListBox_My.ItemCheck += (ss, ee) => { if (checkedListBox_My.Enabled) ee.NewValue = ee.CurrentValue; };
-
         }
 
         public void UpdateLogComboBox(IStorage storage, object value,  DsCPU cpu)
@@ -353,16 +351,22 @@ namespace Dual.Model.Import
         private void checkedListBox_My_DoubleClick(object sender, EventArgs e)
         {
             StorageDisplay sd = checkedListBox_My.SelectedItem as StorageDisplay;
+            if (sd == null) return;
             _SelectedCPU.CommentedStatements
                 .Where(cs => getTargetStorages(cs.Statement).ToList().Contains(sd.Storage))
-                .ForEach(cs => ShowExpr(cs));
-
+                .ForEach(cs => ShowExpr(cs, false));
         }
 
-    private void checkedListBox_Ex_DoubleClick(object sender, EventArgs e)
+        private void checkedListBox_Ex_DoubleClick(object sender, EventArgs e)
         {
-
+            StorageDisplay sd = checkedListBox_Ex.SelectedItem as StorageDisplay;
+            if (sd == null) return;
+            _SelectedDev.CommentedStatements
+                .Where(cs => getTargetStorages(cs.Statement).ToList().Contains(sd.Storage))
+                .ForEach(cs => ShowExpr(cs, true));
         }
+
+
 
         private void UpdateSelectedCpu(SystemView sysView)
         {
@@ -412,19 +416,19 @@ namespace Dual.Model.Import
             int index = comboBox_TestExpr.SelectedIndex;
             var cs = _DicStatement[index];
             // cs.statement.Do();
-            ShowExpr(cs);
+            ShowExpr(cs, false);
         }
 
-        private void ShowExpr(CommentedStatement cs)
+        private void ShowExpr(CommentedStatement cs, bool bDev)
         {
             var tgts = getTargetStorages(cs.statement);
             var srcs = getSourceStorages(cs.statement);
             string tgtsTexs = string.Join(", ", tgts.Select(s => $"{s.Name}({s.BoxedValue})"));
             string srcsTexs = string.Join(", ", srcs.Select(s => $"{s.Name}({s.BoxedValue})"));
-
-            richTextBox_ds.AppendTextColor($"{cs.comment}".Replace("$", ""), Color.White);
-            richTextBox_ds.AppendTextColor($"\r\n\t{tgtsTexs} = {srcsTexs}\r\n", Color.White);
-            richTextBox_ds.AppendTextColor("\r\n", Color.White);
+            var color = bDev ? Color.White : Color.Gold;
+            richTextBox_ds.AppendTextColor($"{cs.comment}".Replace("$", ""), color);
+            richTextBox_ds.AppendTextColor($"\r\n\t{tgtsTexs} = {srcsTexs}\r\n", color);
+            richTextBox_ds.AppendTextColor("\r\n", color);
             richTextBox_ds.ScrollToCaret();
         }
     }

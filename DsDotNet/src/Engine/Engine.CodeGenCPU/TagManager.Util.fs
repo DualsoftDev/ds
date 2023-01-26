@@ -9,7 +9,7 @@ module TagManagerUtil =
 
         //'_' 시작 TAG 이름은 사용자 정의 불가 하여 앞쪽에 중복처리 문자
         // _(n)_ 하나씩 증가 ex)  _1_tagName, _2_tagName, _3_tagName
-    let getUniqueName (name:string) (storages:Storages) =
+    let getUniqueName (storages:Storages) (name:string) =
         let removePrefix x = Regex.Replace(x, "^_\d+_", "")
         let rec unique (name:string) (cnt:int) (storages:Storages) =
             if storages.ContainsKey name
@@ -17,6 +17,17 @@ module TagManagerUtil =
                 else name
 
         unique name 0 storages
+
+    let getValidName (name:string) =
+        [
+            for c in name do
+                if c.IsQuotationRequired()
+                then yield "_"
+                else yield c.ToString()
+        ] |> String.concat ""
+
+    let getPlcTagAbleName (name:string) (storages:Storages) =
+        name |> getValidName |> getUniqueName  storages
 
     let private createPlanVarHelper(stg:Storages, name:string, dataType:DataType) : IStorage =
         let v = dataType.DefaultValue()
@@ -42,32 +53,32 @@ module TagManagerUtil =
 
 
     let timer  (storages:Storages)  name sys =
-        let name = getUniqueName name storages
+        let name = getPlcTagAbleName name storages
         let ts = TimerStruct.Create(TimerType.TON, storages,name, 0us, 0us, sys)
         ts
 
     let counter (storages:Storages) name sys =
-        let name = getUniqueName name storages
+        let name = getPlcTagAbleName name storages
         let cs = CTRStruct.Create(CounterType.CTR, storages, name, 0us, 0us, sys)
         cs
 
-    let createPlanVar (storages:Storages) name (dataType:DataType)  =
-        let name = getUniqueName name storages
+    let createPlanVar (storages:Storages) (name:string) (dataType:DataType)  =
+        let name = getPlcTagAbleName name storages
         let t= createPlanVarHelper (storages, name, dataType)
         t
 
-    let createPlanVarBool (storages:Storages) name sys =
+    let createPlanVarBool (storages:Storages) name  =
         createPlanVar storages name DuBOOL :?> PlanVar<bool>
 
     type InOut = | In | Out | Memory
     let createBridgeTag(stg:Storages, name, address, inOut:InOut, sys): ITag =
-        let name = getUniqueName name stg
-        let plcName =
+        let name =
             match inOut with
             | In  -> $"{name}_I"
             | Out -> $"{name}_O"
             | Memory -> failwithlog "error: Memory not supported "
 
+        let plcName = getPlcTagAbleName name stg
         let t =
             let param = {defaultStorageCreationParams(false) with Name=plcName; Address=Some address; System=sys}
             (Tag(param) :> ITag)

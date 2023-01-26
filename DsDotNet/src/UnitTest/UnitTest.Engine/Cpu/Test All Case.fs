@@ -14,48 +14,42 @@ type TestAllCase() =
     inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
-    let projectDir =
-        let src = __SOURCE_DIRECTORY__
-        let key = @"UnitTest\UnitTest.PLC.Xgi"
-        let tail = src.IndexOf(key) + key.Length
-        src.Substring(0, tail)
-    let xmlDir = Path.Combine(projectDir, "XgiXmls")
+    let generateXmlForTest globalStorages localStorages (pous:PouGen seq): string =
 
-    let generateXmlForTest globalStorages localStorages (statements:CommentedStatement list) : string =
-        let pouParams:XgiPOUParams = {
-            /// POU name.  "DsLogic"
-            POUName = "DsLogic"
-            /// POU container task name
-            TaskName = "Scan Program"
-            /// POU ladder 최상단의 comment
-            Comment = "DS Logic for XGI"
-            LocalStorages = localStorages
-            CommentedStatements = statements
-        }
+        let getXgiPOUParams (pouGen:PouGen) =
+            let pouParams:XgiPOUParams = {
+                /// POU name.  "DsLogic"
+                POUName = pouGen.ToSystem().Name
+                /// POU container task name
+                TaskName = pouGen.TaskName()
+                        /// POU ladder 최상단의 comment
+                Comment = "DS Logic for XGI"
+                LocalStorages = localStorages
+                CommentedStatements = pouGen.CommentedStatements()
+            }
+            pouParams
+
         let projParams:XgiProjectParams = {
             GlobalStorages = globalStorages
             ExistingLSISprj = None
-            POUs = [pouParams]
+            POUs = pous.Select(getXgiPOUParams) |> Seq.toList
         }
 
         projParams.GenerateXmlString()
 
     let saveTestResult testFunctionName (xml:string) =
         let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
-        File.WriteAllText($@"{xmlDir}\{testFunctionName}.xml", crlfXml)
+        let myTemplate = Path.Combine($"{__SOURCE_DIRECTORY__}", "../../UnitTest.PLC.Xgi/XgiXmls")
+        File.WriteAllText($@"{myTemplate}\{testFunctionName}.xml", crlfXml)
 
 
-    [<Test>]  //<kwak> help rung 만들때 안되네요 Tag는 임시로 넘겼는데
-    member __.``XXXXXXXXXXXXXXX Test All Case`` () =
+    [<Test>]
+    member __.``XXXXXXXXXXXXXX Test All Case`` () =
         let globalStorage = Storages()
         let localStorage = Storages()
         Runtime.Target <- XGI
         let result = Cpu.LoadStatements(t.Sys, globalStorage)
 
-        let activePou = result.Filter(fun p -> p.IsActive).Head() //active는 항상 1개
-        let devicePous = result.Filter(fun p -> p.IsDevice)
-        let exSystemPous = result.Filter(fun p -> p.IsExternal)
-
-        let xml = generateXmlForTest globalStorage localStorage (activePou.CommentedStatements())
+        let xml = generateXmlForTest globalStorage localStorage result
         saveTestResult (get_current_function_name()) xml
         result === result

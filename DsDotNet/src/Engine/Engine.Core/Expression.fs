@@ -168,14 +168,15 @@ module ExpressionModule =
 
             member x.DsSystem = x.System
             member x.Name with get() = $"RisingCoil.{x.Storage.Name}" and set(v) = failwithlog "ERROR"
-            member x.DataType = typedefof<RisingCoil>
-            member x.Comment with get() = "" and set(v) = failwithlog "ERROR"
+            member _.DataType = typedefof<RisingCoil>
+            member x.IsGlobal = x.Storage.IsGlobal
+            member _.Comment with get() = "" and set(v) = failwithlog "ERROR"
             member x.BoxedValue with get() = x.Storage.BoxedValue
                                 and set(v) = x.Storage.BoxedValue <- v
             member x.ObjValue = x.Storage.BoxedValue
 
             member x.ToText() = $"ppulse(${x.Storage.Name})"    // positive pulse
-            member x.ToBoxedExpression() = failwithlog "ERROR: not supported"
+            member _.ToBoxedExpression() = failwithlog "ERROR: not supported"
 
     /// Negative Pulse Coil '-(N)-' 생성 및 평가를 위한 구조
     type FallingCoil = {
@@ -187,14 +188,15 @@ module ExpressionModule =
 
             member x.DsSystem = x.System
             member x.Name with get() = $"FallingCoil.{x.Storage.Name}" and set(v) = failwithlog "ERROR"
-            member x.DataType = typedefof<FallingCoil>
-            member x.Comment with get() = "" and set(v) = failwithlog "ERROR"
+            member _.DataType = typedefof<FallingCoil>
+            member x.IsGlobal = x.Storage.IsGlobal
+            member _.Comment with get() = "" and set(v) = failwithlog "ERROR"
             member x.BoxedValue with get() = x.Storage.BoxedValue
                                 and set(v) = x.Storage.BoxedValue <- v
 
             member x.ObjValue = x.Storage.BoxedValue
             member x.ToText() = $"npulse(${x.Storage.Name})"    // negative pulse
-            member x.ToBoxedExpression() = failwithlog "ERROR: not supported"
+            member _.ToBoxedExpression() = failwithlog "ERROR: not supported"
 
 
     type FunctionParameters = {

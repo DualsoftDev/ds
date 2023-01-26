@@ -66,7 +66,7 @@ module ConvertorPrologModule =
         inherit IXgiLocalVar
         inherit IVariable<'T>
 
-    type XgiLocalVar<'T when 'T:equality>(param:TagCreationParams<'T>) =
+    type XgiLocalVar<'T when 'T:equality>(param:StorageCreationParams<'T>) =
         inherit VariableBase<'T>(param)
 
         let {Name=name; Value=initValue; Comment=comment; } = param
@@ -119,7 +119,7 @@ module rec TypeConvertorModule =
         | RegexPattern "ld(\d)+" _ -> failwith $"Invalid XGI variable name {name}."
         | _ -> ()
 
-        let createParam () = {Name=name; Value=unbox initValue; Comment=Some comment; Address=None; System = Runtime.System}
+        let createParam () = {defaultStorageCreationParams(unbox initValue) with Name=name; Comment=Some comment; }
         let typeName = (unbox initValue).GetType().Name
         match typeName with
         | BOOL   -> XgiLocalVar<bool>  (createParam())
@@ -146,7 +146,7 @@ module rec TypeConvertorModule =
     let internal createXgiAutoVariableT (nameHint:string) comment (initValue:'T) =
         autoVariableCounter <- autoVariableCounter + 1
         let name = $"_tmp{nameHint}{autoVariableCounter}"
-        let param = {Name=name; Value=initValue; Comment=Some comment; Address=None; System = Runtime.System}
+        let param = {defaultStorageCreationParams(initValue) with Name=name; Comment=Some comment; }
 
         XgiLocalVar(param)
 

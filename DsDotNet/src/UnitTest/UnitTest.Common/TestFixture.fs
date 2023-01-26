@@ -38,6 +38,7 @@ module Fixtures =
             Address = Some address
             Comment = None
             System = Runtime.System
+            IsGlobal = false
         }
         BridgeTag(param)
 

@@ -130,9 +130,10 @@ module rec TimerModule =
     [<AbstractClass>]
     type TimerCounterBaseStruct (storages:Storages, name, preset, accum:CountUnitType, dn, pre, acc, res, sys) =
         interface IStorage with
-            member x.DsSystem = sys
+            member _.DsSystem = sys
             member x.Name with get() = x.Name and set(v) = failwithlog "ERROR: not supported"
-            member x.DataType = typedefof<TimerCounterBaseStruct>
+            member _.DataType = typedefof<TimerCounterBaseStruct>
+            member _.IsGlobal = true
             member val Comment = "" with get, set
             member x.BoxedValue with get() = x.This and set(v) = failwithlog "ERROR: not supported"
             member x.ObjValue = x.This

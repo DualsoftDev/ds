@@ -20,7 +20,7 @@ module TagManagerUtil =
 
     let createDsVar(stg:Storages, name:string, dataType:DataType) : IStorage =
         let v = dataType.DefaultValue()
-        let createParam () = {Name=name; Value=unbox v; Comment=None; Address=None; System = Runtime.System}
+        let createParam () = {defaultStorageCreationParams(unbox v) with Name=name; }
         let t =
             match dataType with
             | DuINT8    -> PlanVar<int8>  (createParam()) :>IStorage
@@ -71,7 +71,7 @@ module TagManagerUtil =
             | Memory -> failwithlog "error: Memory not supported "
 
         let t =
-            let param = {Name=plcName; Address=Some address; Value=false; Comment=None;  System = sys}
+            let param = {defaultStorageCreationParams(false) with Name=plcName; Address=Some address; System=sys}
             (BridgeTag(param) :> IBridgeTag)
         stg.Add(t.Name, t)
         t

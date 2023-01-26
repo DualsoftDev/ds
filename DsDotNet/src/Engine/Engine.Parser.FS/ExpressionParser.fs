@@ -341,7 +341,7 @@ module rec ExpressionParser =
         member x.CreateVariable(name:string, boxedValue:obj) =
             createVariable name ({Object = boxedValue}:BoxedObjectHolder)
         member x.CreateBridgeTag(name:string, address:string, boxedValue:obj) : IBridgeTag =
-            let createParam () = {Name=name; Value=unbox boxedValue; Address=Some address; Comment=None;  System = Runtime.System}
+            let createParam () = {defaultStorageCreationParams(unbox boxedValue) with Name=name;  Address=Some address; }
 
             match x.Name with
             | BOOL    -> new BridgeTag<bool>  (createParam())

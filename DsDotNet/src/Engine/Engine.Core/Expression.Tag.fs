@@ -11,16 +11,14 @@ module TagModule =
 
 
     /// Variable for WINDOWS platform
-    type Variable<'T when 'T:equality> (param:TagCreationParams<'T>) =
+    type Variable<'T when 'T:equality> (param:StorageCreationParams<'T>) =
         inherit VariableBase<'T>(param)
         interface INamedExpressionizableTerminal with
             member x.StorageName = param.Name
         override x.ToBoxedExpression() = var2expr x
 
-    let createParam name add comm v  = {Name=name; Comment=comm; Address=add; Value= v; System = Runtime.System}
-
     /// 시스템 간 연결용 tag.  Address 필수
-    type BridgeTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
+    type BridgeTag<'T when 'T:equality> (param:StorageCreationParams<'T>) =
         inherit TagBase<'T>(param)
 
         interface IBridgeTag with
@@ -29,13 +27,13 @@ module TagModule =
         override x.ToBoxedExpression() = var2expr x
 
     /// 시스템 내(endo-)의 tag.  Address 불필요
-    type EndoTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
+    type EndoTag<'T when 'T:equality> (param:StorageCreationParams<'T>) =
         inherit TagBase<'T>(param)
         override x.ToBoxedExpression() = var2expr x
 
 
     /// PlanVar 나의 시스템 내부 variable
-    type PlanVar<'T when 'T:equality> (param:TagCreationParams<'T>) =
+    type PlanVar<'T when 'T:equality> (param:StorageCreationParams<'T>) =
         inherit Variable<'T>(param)
         member val Vertex:Vertex option = None with get, set
 
@@ -47,7 +45,7 @@ module TagModule =
 
     let createVariable (name:string) (boxedValue:BoxedObjectHolder) : IVariable =
         let v = boxedValue.Object
-        let createParam (v) = {Name=name; Value=v; Comment=None; Address=None; System = Runtime.System}
+        let createParam (v) = {defaultStorageCreationParams(v) with Name=name; }
         match v.GetType().Name with
         | BOOL   -> new Variable<bool>   (createParam(unbox v))
         | CHAR   -> new Variable<char>   (createParam(unbox v))
@@ -64,4 +62,3 @@ module TagModule =
         | UINT8  -> new Variable<uint8>  (createParam(unbox v))
         | _  -> failwithlog "ERROR"
 
-    let mutable fwdCreateVariable = createVariable

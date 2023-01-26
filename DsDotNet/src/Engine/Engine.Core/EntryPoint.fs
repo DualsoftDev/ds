@@ -7,13 +7,13 @@ module ModuleInitializer =
 
         fwdCreateBoolEndoTag <-
             let createBoolTag name value =
-                let param = {Name=name; Value=value; Comment=None; Address=None; System = Runtime.System}
+                let param = {defaultStorageCreationParams(value) with Name=name; }
                 EndoTag<bool>(param) :> TagBase<bool>
             createBoolTag
 
 
         fwdCreateUShortEndoTag <-
             let createUShortTag name value =
-                let param = {Name=name; Value=value; Comment=None; Address=None; System = Runtime.System}
+                let param = {defaultStorageCreationParams(value) with Name=name; }
                 EndoTag<uint16>(param) :> TagBase<uint16>
             createUShortTag

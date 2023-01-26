@@ -123,18 +123,18 @@ module rec TypeConvertorModule =
 
         match typ.Name with
         | BOOL   -> XgiLocalVar<bool>  (createParam())
-        | UINT8  -> XgiLocalVar<uint8> (createParam())
         | CHAR   -> XgiLocalVar<char>  (createParam())
+        | FLOAT32-> XgiLocalVar<single>(createParam())
         | FLOAT64-> XgiLocalVar<double>(createParam())
         | INT16  -> XgiLocalVar<int16> (createParam())
         | INT32  -> XgiLocalVar<int32> (createParam())
         | INT64  -> XgiLocalVar<int64> (createParam())
         | INT8   -> XgiLocalVar<int8>  (createParam())
-        | FLOAT32-> XgiLocalVar<single>(createParam())
         | STRING -> XgiLocalVar<string>(createParam())
         | UINT16 -> XgiLocalVar<uint16>(createParam())
         | UINT32 -> XgiLocalVar<uint32>(createParam())
         | UINT64 -> XgiLocalVar<uint64>(createParam())
+        | UINT8  -> XgiLocalVar<uint8> (createParam())
         | _  -> failwithlog "ERROR"
     let sys = DsSystem("","")
     let createTypedXgiAutoVariable (typ:System.Type) (nameHint:string) (initValue:obj) comment: IXgiLocalVar =

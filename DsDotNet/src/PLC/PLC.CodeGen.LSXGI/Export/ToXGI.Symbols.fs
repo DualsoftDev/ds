@@ -46,7 +46,7 @@ module internal XgiSymbolsModule =
 
     let xgiSymbolToSymbolInfo (kindVar:int) (xgiSymbol:XgiSymbol) : SymbolInfo =
         match xgiSymbol with
-        | DuTag (:? ITagWithAddress as t) ->
+        | DuTag (:? IBridgeTag as t) ->
             let name, addr = t.Name, t.Address
 
             let device, memSize =

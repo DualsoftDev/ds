@@ -6,7 +6,7 @@ open Engine.Common.FS
 [<AutoOpen>]
 module TagModule =
 
-    type TagBase<'T when 'T:equality> with
+    type TypedValueStorage<'T when 'T:equality> with
         member x.Expr = var2expr x
 
 
@@ -21,23 +21,20 @@ module TagModule =
     type BridgeTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
         inherit TagBase<'T>(param)
 
-        interface ITagWithAddress with
+        interface IBridgeTag with
             member x.Address = x.Address
         member val Address = param.Address.Value
         override x.ToBoxedExpression() = var2expr x
 
-    type Tag<'T when 'T:equality> = BridgeTag<'T>
-    type ActionTag<'T when 'T:equality> = BridgeTag<'T>
-
-    /// 시스템 내의 tag.  Address 불필요
+    /// 시스템 내(endo-)의 tag.  Address 불필요
     type EndoTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
         inherit TagBase<'T>(param)
         override x.ToBoxedExpression() = var2expr x
 
 
-    /// PlanTag 나의 시스템 내부 TAG
-    type PlanTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
-        inherit EndoTag<'T>(param)
+    /// PlanVar 나의 시스템 내부 variable
+    type PlanVar<'T when 'T:equality> (param:TagCreationParams<'T>) =
+        inherit Variable<'T>(param)
         member val Vertex:Vertex option = None with get, set
 
 
@@ -52,18 +49,18 @@ module TagModule =
         let createParam () = {Name=name; Value=unbox v; Comment=None; Address=None; System = Runtime.System}
         match typ.Name with
         | BOOL   -> new Variable<bool>   (createParam())
-        | UINT8  -> new Variable<uint8>  (createParam())
         | CHAR   -> new Variable<char>   (createParam())
+        | FLOAT32-> new Variable<single> (createParam())
         | FLOAT64-> new Variable<double> (createParam())
         | INT16  -> new Variable<int16>  (createParam())
         | INT32  -> new Variable<int32>  (createParam())
         | INT64  -> new Variable<int64>  (createParam())
         | INT8   -> new Variable<int8>   (createParam())
-        | FLOAT32-> new Variable<single> (createParam())
         | STRING -> new Variable<string> (createParam())
         | UINT16 -> new Variable<uint16> (createParam())
         | UINT32 -> new Variable<uint32> (createParam())
         | UINT64 -> new Variable<uint64> (createParam())
+        | UINT8  -> new Variable<uint8>  (createParam())
         | _  -> failwithlog "ERROR"
 
     let createWindowsVariableWithType (typ:System.Type) (name:string) : IVariable =

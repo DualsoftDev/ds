@@ -130,9 +130,9 @@ module CoreModule =
         member val OutAddress = outAddress  with get,set
 
         //CPU 생성시 할당됨 InTag
-        member val InTag = getNull<ITagWithAddress>() with get, set
+        member val InTag = getNull<IBridgeTag>() with get, set
         //CPU 생성시 할당됨 OutTag
-        member val OutTag = getNull<ITagWithAddress>() with get, set
+        member val OutTag = getNull<IBridgeTag>() with get, set
         member val SettingFlows  = flows with get, set
         member val Funcs  = funcs with get, set
 
@@ -144,7 +144,7 @@ module CoreModule =
         member val OutAddress = outAddress  with get,set
 
         //CPU 생성시 할당됨 OutTag
-        member val OutTag = getNull<ITagWithAddress>() with get, set
+        member val OutTag = getNull<IBridgeTag>() with get, set
         ///단일 Flow 단위로 Lamp 상태 출력
         member val SettingFlow  = flow with get, set
         member val Funcs  = funcs with get, set
@@ -156,7 +156,7 @@ module CoreModule =
         member val InAddress = inAddress  with get,set
 
         //CPU 생성시 할당됨 InTag
-        member val InTag = getNull<ITagWithAddress>() with get, set
+        member val InTag = getNull<IBridgeTag>() with get, set
         ///단일 Flow 단위로 Condition 상태 출력
         member val SettingFlows  = flows with get, set
         member val Funcs  = funcs with get, set
@@ -242,9 +242,9 @@ module CoreModule =
         member val InAddress   = inAddress  with get, set
         member val OutAddress  = outAddress with get, set
         //CPU 생성시 할당됨 InTag
-        member val InTag = getNull<ITagWithAddress>() with get, set
+        member val InTag = getNull<IBridgeTag>() with get, set
         //CPU 생성시 할당됨 OutTag
-        member val OutTag = getNull<ITagWithAddress>() with get, set
+        member val OutTag = getNull<IBridgeTag>() with get, set
 
     type TaskLink (api:ApiItem, systemName:string) =
         inherit DsTask(api, systemName)

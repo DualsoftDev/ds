@@ -30,22 +30,22 @@ module rec CounterModule =
         Name:string
         Preset: CountUnitType
         Accumulator: CountUnitType
-        CU: TagBase<bool>
-        CD: TagBase<bool>
-        OV: TagBase<bool>
-        UN: TagBase<bool>
-        DN: TagBase<bool>
+        CU: VariableBase<bool>
+        CD: VariableBase<bool>
+        OV: VariableBase<bool>
+        UN: VariableBase<bool>
+        DN: VariableBase<bool>
         /// XGI load
-        LD: TagBase<bool>
-        DNDown: TagBase<bool>
+        LD: VariableBase<bool>
+        DNDown: VariableBase<bool>
 
-        RES: TagBase<bool>
-        PRE: TagBase<CountUnitType>
-        ACC: TagBase<CountUnitType>
+        RES: VariableBase<bool>
+        PRE: VariableBase<CountUnitType>
+        ACC: VariableBase<CountUnitType>
     }
 
     let private CreateCounterParameters(typ:CounterType, storages:Storages, name, preset, accum:CountUnitType, sys) =
-        let nullB = getNull<TagBase<bool>>()
+        let nullB = getNull<VariableBase<bool>>()
         let mutable cu  = nullB  // Count up enable bit
         let mutable cd  = nullB  // Count down enable bit
         let mutable ov  = nullB  // Overflow
@@ -54,80 +54,80 @@ module rec CounterModule =
 
         let mutable dn  = nullB
         let mutable dnDown  = nullB
-        let mutable pre = getNull<TagBase<CountUnitType>>()
-        let mutable acc = getNull<TagBase<CountUnitType>>()
+        let mutable pre = getNull<VariableBase<CountUnitType>>()
+        let mutable acc = getNull<VariableBase<CountUnitType>>()
         let mutable res = nullB
         let add = addTagsToStorages storages
         match Runtime.Target, typ with
         | (WINDOWS | XGI), CTU ->
-            cu  <- fwdCreateBoolEndoTag     $"{name}.CU" false  // Count up enable bit
-            res <- fwdCreateBoolEndoTag     $"{name}.R" false
-            pre <- fwdCreateUShortEndoTag   $"{name}.PV" preset
-            dn  <- fwdCreateBoolEndoTag     $"{name}.Q" false   // Done
-            acc <- fwdCreateUShortEndoTag   $"{name}.CV" accum
+            cu  <- fwdCreateBoolMemberVariable     $"{name}.CU" false  // Count up enable bit
+            res <- fwdCreateBoolMemberVariable     $"{name}.R" false
+            pre <- fwdCreateUShortMemberVariable   $"{name}.PV" preset
+            dn  <- fwdCreateBoolMemberVariable     $"{name}.Q" false   // Done
+            acc <- fwdCreateUShortMemberVariable   $"{name}.CV" accum
             add [cu; res; pre; dn; acc]
 
         | (WINDOWS | XGI), CTD ->
-            cd  <- fwdCreateBoolEndoTag     $"{name}.CD" false   // Count down enable bit
-            ld  <- fwdCreateBoolEndoTag     $"{name}.LD" false   // Load
-            pre <- fwdCreateUShortEndoTag   $"{name}.PV" preset
-            dn  <- fwdCreateBoolEndoTag     $"{name}.Q" false   // Done
-            acc <- fwdCreateUShortEndoTag   $"{name}.CV" accum
+            cd  <- fwdCreateBoolMemberVariable     $"{name}.CD" false   // Count down enable bit
+            ld  <- fwdCreateBoolMemberVariable     $"{name}.LD" false   // Load
+            pre <- fwdCreateUShortMemberVariable   $"{name}.PV" preset
+            dn  <- fwdCreateBoolMemberVariable     $"{name}.Q" false   // Done
+            acc <- fwdCreateUShortMemberVariable   $"{name}.CV" accum
             add [cd; res; ld; pre; dn; acc]
 
         | (WINDOWS | XGI), CTUD ->
-            cu  <- fwdCreateBoolEndoTag     $"{name}.CU" false  // Count up enable bit
-            cd  <- fwdCreateBoolEndoTag     $"{name}.CD" false  // Count down enable bit
-            res <- fwdCreateBoolEndoTag     $"{name}.R" false
-            ld  <- fwdCreateBoolEndoTag     $"{name}.LD" false  // Load
-            pre <- fwdCreateUShortEndoTag   $"{name}.PV" preset
-            dn  <- fwdCreateBoolEndoTag     $"{name}.QU" false  // Done
-            dnDown  <- fwdCreateBoolEndoTag $"{name}.QD" false  // Done
-            acc <- fwdCreateUShortEndoTag   $"{name}.CV" accum
+            cu  <- fwdCreateBoolMemberVariable     $"{name}.CU" false  // Count up enable bit
+            cd  <- fwdCreateBoolMemberVariable     $"{name}.CD" false  // Count down enable bit
+            res <- fwdCreateBoolMemberVariable     $"{name}.R" false
+            ld  <- fwdCreateBoolMemberVariable     $"{name}.LD" false  // Load
+            pre <- fwdCreateUShortMemberVariable   $"{name}.PV" preset
+            dn  <- fwdCreateBoolMemberVariable     $"{name}.QU" false  // Done
+            dnDown  <- fwdCreateBoolMemberVariable $"{name}.QD" false  // Done
+            acc <- fwdCreateUShortMemberVariable   $"{name}.CV" accum
             add [cu; cd; res; ld; pre; dn; dnDown; acc]
 
         | (WINDOWS | XGI), CTR ->
-            cd  <- fwdCreateBoolEndoTag     $"{name}.CD" false   // Count down enable bit
-            pre <- fwdCreateUShortEndoTag   $"{name}.PV" preset
-            res <- fwdCreateBoolEndoTag     $"{name}.RST" false
-            dn  <- fwdCreateBoolEndoTag     $"{name}.Q" false   // Done
-            acc <- fwdCreateUShortEndoTag   $"{name}.CV" accum
+            cd  <- fwdCreateBoolMemberVariable     $"{name}.CD" false   // Count down enable bit
+            pre <- fwdCreateUShortMemberVariable   $"{name}.PV" preset
+            res <- fwdCreateBoolMemberVariable     $"{name}.RST" false
+            dn  <- fwdCreateBoolMemberVariable     $"{name}.Q" false   // Done
+            acc <- fwdCreateUShortMemberVariable   $"{name}.CV" accum
             add [cd; pre; res; dn; acc]
 
         | _ ->
             match typ with
             | CTU ->
-                cu  <- fwdCreateBoolEndoTag     $"{name}.CU" false  // Count up enable bit
+                cu  <- fwdCreateBoolMemberVariable     $"{name}.CU" false  // Count up enable bit
                 add [cu]
             | CTR | CTD ->
-                cd  <- fwdCreateBoolEndoTag     $"{name}.CD" false  // Count down enable bit
+                cd  <- fwdCreateBoolMemberVariable     $"{name}.CD" false  // Count down enable bit
                 add [cd]
             | CTUD ->
-                cu  <- fwdCreateBoolEndoTag     $"{name}.CU" false // Count up enable bit
-                cd  <- fwdCreateBoolEndoTag     $"{name}.CD" false // Count down enable bit
+                cu  <- fwdCreateBoolMemberVariable     $"{name}.CU" false // Count up enable bit
+                cd  <- fwdCreateBoolMemberVariable     $"{name}.CD" false // Count down enable bit
                 add [cu; cd]
 
 
-            ov  <- fwdCreateBoolEndoTag     $"{name}.OV" false   // Overflow
-            un  <- fwdCreateBoolEndoTag     $"{name}.UN" false   // Underflow
-            ld  <- fwdCreateBoolEndoTag     $"{name}.LD" false   // XGI: Load
-            dn  <- fwdCreateBoolEndoTag     $"{name}.DN" false   // Done
-            pre <- fwdCreateUShortEndoTag   $"{name}.PRE" preset
-            acc <- fwdCreateUShortEndoTag   $"{name}.ACC" accum
-            res <- fwdCreateBoolEndoTag     $"{name}.RES" false
+            ov  <- fwdCreateBoolMemberVariable     $"{name}.OV" false   // Overflow
+            un  <- fwdCreateBoolMemberVariable     $"{name}.UN" false   // Underflow
+            ld  <- fwdCreateBoolMemberVariable     $"{name}.LD" false   // XGI: Load
+            dn  <- fwdCreateBoolMemberVariable     $"{name}.DN" false   // Done
+            pre <- fwdCreateUShortMemberVariable   $"{name}.PRE" preset
+            acc <- fwdCreateUShortMemberVariable   $"{name}.ACC" accum
+            res <- fwdCreateBoolMemberVariable     $"{name}.RES" false
             add [ov; un; dn; pre; acc; res;]
 
         (* 내부 structure 가 AB 기반이므로, 메모리 자체는 생성하되, storage 에 등록하지는 않는다. *)
         if isItNull(ov) then
-            ov  <- fwdCreateBoolEndoTag     $"{name}.OV" false
+            ov  <- fwdCreateBoolMemberVariable     $"{name}.OV" false
         if isItNull(un) then
-            un  <- fwdCreateBoolEndoTag     $"{name}.UN" false
+            un  <- fwdCreateBoolMemberVariable     $"{name}.UN" false
         if isItNull(cu) then
-            cu  <- fwdCreateBoolEndoTag     $"{name}.CU" false
+            cu  <- fwdCreateBoolMemberVariable     $"{name}.CU" false
         if isItNull(cd) then
-            cd  <- fwdCreateBoolEndoTag     $"{name}.CD" false
+            cd  <- fwdCreateBoolMemberVariable     $"{name}.CD" false
         if isItNull(cd) then
-            res  <- fwdCreateBoolEndoTag     $"{name}.RES" false
+            res  <- fwdCreateBoolMemberVariable     $"{name}.RES" false
 
         {
             Type        = typ
@@ -154,11 +154,11 @@ module rec CounterModule =
     type CounterBaseStruct(cp:CounterParams, sys) =
         inherit TimerCounterBaseStruct(cp.Storages, cp.Name, cp.Preset, cp.Accumulator, cp.DN, cp.PRE, cp.ACC, cp.RES, sys)
 
-        member _.CU:TagBase<bool> = cp.CU  // Count up enable bit
-        member _.CD:TagBase<bool> = cp.CD  // Count down enable bit
-        member _.OV:TagBase<bool> = cp.OV  // Overflow
-        member _.UN:TagBase<bool> = cp.UN  // Underflow
-        member _.LD:TagBase<bool> = cp.LD  // Load (XGI)
+        member _.CU:VariableBase<bool> = cp.CU  // Count up enable bit
+        member _.CD:VariableBase<bool> = cp.CD  // Count down enable bit
+        member _.OV:VariableBase<bool> = cp.OV  // Overflow
+        member _.UN:VariableBase<bool> = cp.UN  // Underflow
+        member _.LD:VariableBase<bool> = cp.LD  // Load (XGI)
         member _.Type = cp.Type
 
 
@@ -166,12 +166,12 @@ module rec CounterModule =
 
     type ICTU =
         inherit ICounter
-        abstract CU:TagBase<bool>
+        abstract CU:VariableBase<bool>
 
     type ICTD =
         inherit ICounter
-        abstract CD:TagBase<bool>
-        abstract LD:TagBase<bool>
+        abstract CD:VariableBase<bool>
+        abstract LD:VariableBase<bool>
 
     type ICTUD =
         inherit ICTU
@@ -179,7 +179,7 @@ module rec CounterModule =
 
     type ICTR =
         inherit ICounter
-        abstract CD:TagBase<bool>
+        abstract CD:VariableBase<bool>
 
 
     type CTUStruct private(counterParams:CounterParams, sys) =

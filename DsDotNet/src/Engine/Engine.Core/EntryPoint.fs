@@ -5,15 +5,15 @@ module ModuleInitializer =
         printfn "Module is being initialized..."
         fwdSerializeFunctionNameAndBoxedArguments <- serializeFunctionNameAndBoxedArguments
 
-        fwdCreateBoolEndoTag <-
+        fwdCreateBoolMemberVariable <-
             let createBoolTag name value =
                 let param = {defaultStorageCreationParams(value) with Name=name; }
-                EndoTag<bool>(param) :> TagBase<bool>
+                MemberVariable<bool>(param) :> VariableBase<bool>
             createBoolTag
 
 
-        fwdCreateUShortEndoTag <-
+        fwdCreateUShortMemberVariable <-
             let createUShortTag name value =
                 let param = {defaultStorageCreationParams(value) with Name=name; }
-                EndoTag<uint16>(param) :> TagBase<uint16>
+                MemberVariable<uint16>(param) :> VariableBase<uint16>
             createUShortTag

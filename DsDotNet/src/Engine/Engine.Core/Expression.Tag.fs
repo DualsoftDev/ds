@@ -26,13 +26,13 @@ module TagModule =
         member val Address = param.Address.Value
         override x.ToBoxedExpression() = var2expr x
 
-    /// 시스템 내(endo-)의 tag.  Address 불필요
-    type EndoTag<'T when 'T:equality> (param:StorageCreationParams<'T>) =
-        inherit TagBase<'T>(param)
+    /// Timer, Counter 등의 structure 내의 변수.  PLC 로 내릴 때, 실제 변수를 생성하지는 않지만, 참조는 가능해야 한다.  e.g myTimer1.EN
+    type MemberVariable<'T when 'T:equality> (param:StorageCreationParams<'T>) =
+        inherit Variable<'T>(param)
         override x.ToBoxedExpression() = var2expr x
 
 
-    /// PlanVar 나의 시스템 내부 variable
+    /// PlanVar 나의 시스템 내부의 global variable
     type PlanVar<'T when 'T:equality> (param:StorageCreationParams<'T>) =
         inherit Variable<'T>(param)
         member val Vertex:Vertex option = None with get, set

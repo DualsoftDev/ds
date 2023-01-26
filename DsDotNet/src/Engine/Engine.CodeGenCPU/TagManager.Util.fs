@@ -18,9 +18,9 @@ module TagManagerUtil =
 
         unique name 0 storages
 
-    let createDsVar(stg:Storages, name:string, dataType:DataType) : IStorage =
+    let private createPlanVarHelper(stg:Storages, name:string, dataType:DataType) : IStorage =
         let v = dataType.DefaultValue()
-        let createParam () = {defaultStorageCreationParams(unbox v) with Name=name; }
+        let createParam () = {defaultStorageCreationParams(unbox v) with Name=name; IsGlobal=true;}
         let t =
             match dataType with
             | DuINT8    -> PlanVar<int8>  (createParam()) :>IStorage
@@ -51,15 +51,13 @@ module TagManagerUtil =
         let cs = CTRStruct.Create(CounterType.CTR, storages, name, 0us, 0us, sys)
         cs
 
-    let sysTag (storages:Storages) name (dataType:DataType)  =
+    let createPlanVar (storages:Storages) name (dataType:DataType)  =
         let name = getUniqueName name storages
-        let t= createDsVar (storages, name, dataType)
+        let t= createPlanVarHelper (storages, name, dataType)
         t
 
-    let createPlanVar (storages:Storages) name sys =
-        let name = getUniqueName name storages
-        let t= createDsVar (storages, name, DuBOOL)
-        t :?> PlanVar<bool>
+    let createPlanVarBool (storages:Storages) name sys =
+        createPlanVar storages name DuBOOL :?> PlanVar<bool>
 
     type InOut = | In | Out | Memory
     let createBridgeTag(stg:Storages, name, address, inOut:InOut, sys): IBridgeTag =

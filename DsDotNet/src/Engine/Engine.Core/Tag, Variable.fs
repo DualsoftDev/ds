@@ -61,7 +61,8 @@ module TagVariableModule =
         interface IText with
             member x.ToText() = x.ToText()
 
-        interface IExpressionizableTerminal
+        interface INamedExpressionizableTerminal with
+            member x.StorageName = name
 
         abstract ToText: unit -> string
         abstract ToBoxedExpression : unit -> obj    /// IExpression<'T> 의 boxed 형태의 expression 생성
@@ -74,8 +75,6 @@ module TagVariableModule =
         let {Name=name; } = param
 
         interface ITag<'T>
-        interface INamedExpressionizableTerminal with
-            member x.StorageName = name
         override x.ToText() = "$" + name
 
     [<AbstractClass>]
@@ -109,8 +108,8 @@ module ExpressionPrologModule =
             failwithlog "Should be reimplemented."
         dummy
 
-    let mutable fwdCreateBoolEndoTag   = let dummy (tagName:string) (initValue:bool)   : TagBase<bool>   = failwithlog "Should be reimplemented." in dummy
-    let mutable fwdCreateUShortEndoTag = let dummy (tagName:string) (initValue:uint16) : TagBase<uint16> = failwithlog "Should be reimplemented." in dummy
+    let mutable fwdCreateBoolMemberVariable   = let dummy (tagName:string) (initValue:bool)   : VariableBase<bool>   = failwithlog "Should be reimplemented." in dummy
+    let mutable fwdCreateUShortMemberVariable = let dummy (tagName:string) (initValue:uint16) : VariableBase<uint16> = failwithlog "Should be reimplemented." in dummy
     let mutable fwdFlattenExpression   = let dummy (expr:IExpression)                  : IFlatExpression = failwithlog "Should be reimplemented." in dummy
 
 

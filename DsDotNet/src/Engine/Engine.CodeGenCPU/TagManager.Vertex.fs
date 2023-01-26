@@ -25,7 +25,7 @@ module TagManagerModule =
         let s =  sys.TagManager.Storages
         let createTag(mark) =
             let name = $"{v.QualifiedName}({mark})"
-            let t = createPlanVar  s name sys
+            let t = createPlanVarBool  s name sys
             t.Vertex <- Some v;  t
 
         let endTagBit     = createTag "ET"
@@ -104,7 +104,7 @@ module TagManagerModule =
         member _.PUL        = pulseBit
         ///Going Relay   //리셋 인과에 따라 필요
         member x.GR(src:Vertex) =
-           let gr =  createPlanVar  s $"GR_{src.Name}" sys
+           let gr =  createPlanVarBool  s $"GR_{src.Name}" sys
            goingRelays.Add gr |> ignore; gr
 
         member x.CreateTag(name) = createTag name

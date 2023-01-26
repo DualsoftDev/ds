@@ -4,6 +4,7 @@ open System.IO
 open log4net
 open log4net.Config
 open Engine.Common.FS
+open Engine.Core
 
 // FsUnit/XUnit 사용법:
 // https://github.com/fsprojects/FsUnit/tree/master/tests/FsUnit.Xunit.Test
@@ -30,6 +31,15 @@ module Fixtures =
                 failwithlog "config 파일 위치를 강제로 수정해 주세요."
             ()
 
+    let createTag(name, address, value) =
+        let param = {
+            Name = name
+            Value = value
+            Address = Some address
+            Comment = None
+            System = Runtime.System
+        }
+        BridgeTag(param)
 
     [<AbstractClass>]
     type TestBaseClass(loggerName:string) =

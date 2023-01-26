@@ -59,7 +59,7 @@ type XgiRungTest() =
 
     [<Test>]
     member __.``Generate local variables test``() =
-        let t = PlcTag("myBit00", "%IX0.0.0", false)
+        let t = createTag("myBit00", "%IX0.0.0", false)
         // name, comment, device, kind, address, plcType 를 받아서 SymbolInfo 를 생성한다.
         let symbolInfo: SymbolInfo =
             { defaultSymbolCreateParam with Name=t.Name; PLCType="BOOL"; Address=t.Address; Device="I"; }
@@ -89,9 +89,9 @@ type XgiRungTest() =
 
     member __.PrepareWithSymbols(numTags:int) =
         let storages = Storages()
-        let q = PlcTag("myQ0", "%QX0.1.0", false)
+        let q = createTag("myQ0", "%QX0.1.0", false)
         let statements_ = parseCode storages codeForBits31
-        let iTags = storages.Values.ToEnumerable<PlcTag<bool>>().Take(numTags).ToArray()
+        let iTags = storages.Values.ToEnumerable<BridgeTag<bool>>().Take(numTags).ToArray()
         let symbolInfos =
             let kindVar = int Variable.Kind.VAR
             let plcType = "BOOL"

@@ -171,12 +171,12 @@ module rec TimerModule =
                 | AB -> "EN", "TT", "DN", "PRE", "ACC", "RES"
                 | _ -> failwithlog "NOT yet supported"
 
-            let en  = fwdCreateBoolTag   $"{name}.{en }" false
-            let tt  = fwdCreateBoolTag   $"{name}.{tt }" false
-            let dn  = fwdCreateBoolTag   $"{name}.{dn }" false  // Done
-            let pre = fwdCreateUShortTag $"{name}.{pre}" preset
-            let acc = fwdCreateUShortTag $"{name}.{acc}" accum
-            let res = fwdCreateBoolTag   $"{name}.{res}" false
+            let en  = fwdCreateBoolEndoTag   $"{name}.{en }" false
+            let tt  = fwdCreateBoolEndoTag   $"{name}.{tt }" false
+            let dn  = fwdCreateBoolEndoTag   $"{name}.{dn }" false  // Done
+            let pre = fwdCreateUShortEndoTag $"{name}.{pre}" preset
+            let acc = fwdCreateUShortEndoTag $"{name}.{acc}" accum
+            let res = fwdCreateBoolEndoTag   $"{name}.{res}" false
 
             storages.Add(en.Name, en)
             storages.Add(tt.Name, tt)

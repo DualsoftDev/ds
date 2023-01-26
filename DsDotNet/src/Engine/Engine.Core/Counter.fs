@@ -60,74 +60,74 @@ module rec CounterModule =
         let add = addTagsToStorages storages
         match Runtime.Target, typ with
         | (WINDOWS | XGI), CTU ->
-            cu  <- fwdCreateBoolTag     $"{name}.CU" false  // Count up enable bit
-            res <- fwdCreateBoolTag     $"{name}.R" false
-            pre <- fwdCreateUShortTag   $"{name}.PV" preset
-            dn  <- fwdCreateBoolTag     $"{name}.Q" false   // Done
-            acc <- fwdCreateUShortTag   $"{name}.CV" accum
+            cu  <- fwdCreateBoolEndoTag     $"{name}.CU" false  // Count up enable bit
+            res <- fwdCreateBoolEndoTag     $"{name}.R" false
+            pre <- fwdCreateUShortEndoTag   $"{name}.PV" preset
+            dn  <- fwdCreateBoolEndoTag     $"{name}.Q" false   // Done
+            acc <- fwdCreateUShortEndoTag   $"{name}.CV" accum
             add [cu; res; pre; dn; acc]
 
         | (WINDOWS | XGI), CTD ->
-            cd  <- fwdCreateBoolTag     $"{name}.CD" false   // Count down enable bit
-            ld  <- fwdCreateBoolTag     $"{name}.LD" false   // Load
-            pre <- fwdCreateUShortTag   $"{name}.PV" preset
-            dn  <- fwdCreateBoolTag     $"{name}.Q" false   // Done
-            acc <- fwdCreateUShortTag   $"{name}.CV" accum
+            cd  <- fwdCreateBoolEndoTag     $"{name}.CD" false   // Count down enable bit
+            ld  <- fwdCreateBoolEndoTag     $"{name}.LD" false   // Load
+            pre <- fwdCreateUShortEndoTag   $"{name}.PV" preset
+            dn  <- fwdCreateBoolEndoTag     $"{name}.Q" false   // Done
+            acc <- fwdCreateUShortEndoTag   $"{name}.CV" accum
             add [cd; res; ld; pre; dn; acc]
 
         | (WINDOWS | XGI), CTUD ->
-            cu  <- fwdCreateBoolTag     $"{name}.CU" false  // Count up enable bit
-            cd  <- fwdCreateBoolTag     $"{name}.CD" false  // Count down enable bit
-            res <- fwdCreateBoolTag     $"{name}.R" false
-            ld  <- fwdCreateBoolTag     $"{name}.LD" false  // Load
-            pre <- fwdCreateUShortTag   $"{name}.PV" preset
-            dn  <- fwdCreateBoolTag     $"{name}.QU" false  // Done
-            dnDown  <- fwdCreateBoolTag $"{name}.QD" false  // Done
-            acc <- fwdCreateUShortTag   $"{name}.CV" accum
+            cu  <- fwdCreateBoolEndoTag     $"{name}.CU" false  // Count up enable bit
+            cd  <- fwdCreateBoolEndoTag     $"{name}.CD" false  // Count down enable bit
+            res <- fwdCreateBoolEndoTag     $"{name}.R" false
+            ld  <- fwdCreateBoolEndoTag     $"{name}.LD" false  // Load
+            pre <- fwdCreateUShortEndoTag   $"{name}.PV" preset
+            dn  <- fwdCreateBoolEndoTag     $"{name}.QU" false  // Done
+            dnDown  <- fwdCreateBoolEndoTag $"{name}.QD" false  // Done
+            acc <- fwdCreateUShortEndoTag   $"{name}.CV" accum
             add [cu; cd; res; ld; pre; dn; dnDown; acc]
 
         | (WINDOWS | XGI), CTR ->
-            cd  <- fwdCreateBoolTag     $"{name}.CD" false   // Count down enable bit
-            pre <- fwdCreateUShortTag   $"{name}.PV" preset
-            res <- fwdCreateBoolTag     $"{name}.RST" false
-            dn  <- fwdCreateBoolTag     $"{name}.Q" false   // Done
-            acc <- fwdCreateUShortTag   $"{name}.CV" accum
+            cd  <- fwdCreateBoolEndoTag     $"{name}.CD" false   // Count down enable bit
+            pre <- fwdCreateUShortEndoTag   $"{name}.PV" preset
+            res <- fwdCreateBoolEndoTag     $"{name}.RST" false
+            dn  <- fwdCreateBoolEndoTag     $"{name}.Q" false   // Done
+            acc <- fwdCreateUShortEndoTag   $"{name}.CV" accum
             add [cd; pre; res; dn; acc]
 
         | _ ->
             match typ with
             | CTU ->
-                cu  <- fwdCreateBoolTag     $"{name}.CU" false  // Count up enable bit
+                cu  <- fwdCreateBoolEndoTag     $"{name}.CU" false  // Count up enable bit
                 add [cu]
             | CTR | CTD ->
-                cd  <- fwdCreateBoolTag     $"{name}.CD" false  // Count down enable bit
+                cd  <- fwdCreateBoolEndoTag     $"{name}.CD" false  // Count down enable bit
                 add [cd]
             | CTUD ->
-                cu  <- fwdCreateBoolTag     $"{name}.CU" false // Count up enable bit
-                cd  <- fwdCreateBoolTag     $"{name}.CD" false // Count down enable bit
+                cu  <- fwdCreateBoolEndoTag     $"{name}.CU" false // Count up enable bit
+                cd  <- fwdCreateBoolEndoTag     $"{name}.CD" false // Count down enable bit
                 add [cu; cd]
 
 
-            ov  <- fwdCreateBoolTag     $"{name}.OV" false   // Overflow
-            un  <- fwdCreateBoolTag     $"{name}.UN" false   // Underflow
-            ld  <- fwdCreateBoolTag     $"{name}.LD" false   // XGI: Load
-            dn  <- fwdCreateBoolTag     $"{name}.DN" false   // Done
-            pre <- fwdCreateUShortTag   $"{name}.PRE" preset
-            acc <- fwdCreateUShortTag   $"{name}.ACC" accum
-            res <- fwdCreateBoolTag     $"{name}.RES" false
+            ov  <- fwdCreateBoolEndoTag     $"{name}.OV" false   // Overflow
+            un  <- fwdCreateBoolEndoTag     $"{name}.UN" false   // Underflow
+            ld  <- fwdCreateBoolEndoTag     $"{name}.LD" false   // XGI: Load
+            dn  <- fwdCreateBoolEndoTag     $"{name}.DN" false   // Done
+            pre <- fwdCreateUShortEndoTag   $"{name}.PRE" preset
+            acc <- fwdCreateUShortEndoTag   $"{name}.ACC" accum
+            res <- fwdCreateBoolEndoTag     $"{name}.RES" false
             add [ov; un; dn; pre; acc; res;]
 
         (* 내부 structure 가 AB 기반이므로, 메모리 자체는 생성하되, storage 에 등록하지는 않는다. *)
         if isItNull(ov) then
-            ov  <- fwdCreateBoolTag     $"{name}.OV" false
+            ov  <- fwdCreateBoolEndoTag     $"{name}.OV" false
         if isItNull(un) then
-            un  <- fwdCreateBoolTag     $"{name}.UN" false
+            un  <- fwdCreateBoolEndoTag     $"{name}.UN" false
         if isItNull(cu) then
-            cu  <- fwdCreateBoolTag     $"{name}.CU" false
+            cu  <- fwdCreateBoolEndoTag     $"{name}.CU" false
         if isItNull(cd) then
-            cd  <- fwdCreateBoolTag     $"{name}.CD" false
+            cd  <- fwdCreateBoolEndoTag     $"{name}.CD" false
         if isItNull(cd) then
-            res  <- fwdCreateBoolTag     $"{name}.RES" false
+            res  <- fwdCreateBoolEndoTag     $"{name}.RES" false
 
         {
             Type        = typ

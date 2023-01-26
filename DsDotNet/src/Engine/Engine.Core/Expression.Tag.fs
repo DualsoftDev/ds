@@ -1,7 +1,6 @@
 namespace Engine.Core
 
 open System
-open System.Runtime.CompilerServices
 open Engine.Common.FS
 
 [<AutoOpen>]
@@ -10,10 +9,6 @@ module TagModule =
     type TagBase<'T when 'T:equality> with
         member x.Expr = var2expr x
 
-    [<AbstractClass>]
-    type Tag<'T when 'T:equality> (param:TagCreationParams<'T>) =
-        inherit TagBase<'T>(param)
-        override x.ToBoxedExpression() = var2expr x
 
     /// Variable for WINDOWS platform
     type Variable<'T when 'T:equality> (param:TagCreationParams<'T>) =
@@ -21,29 +16,29 @@ module TagModule =
         override x.ToBoxedExpression() = var2expr x
 
     let createParam name add comm v  = {Name=name; Comment=comm; Address=add; Value= v; System = Runtime.System}
-    /// plc / pc / 다른 runtime platform 지원가능한 물리 TAG
-    type PlcTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
-        inherit Tag<'T>(param)
-        //address 없는 auto tag plcTag생성
-        new(name, initValue:'T)
-            = PlcTag<'T>(createParam name None           None initValue)
-        //address 있는 주소tag plcTag생성
-        new(name, address:string, initValue:'T)
-            = PlcTag<'T>(createParam name (Some address) None initValue)
+
+    /// 시스템 간 연결용 tag.  Address 필수
+    type BridgeTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
+        inherit TagBase<'T>(param)
 
         interface ITagWithAddress with
             member x.Address = x.Address
-        ///xgi tag 생성시 주소가 _A_이면 자동주소 //auto tag 예약 문자 _A_
-        member val Address = ("_A_", param.Address) ||> Option.defaultValue
+        member val Address = param.Address.Value
+        override x.ToBoxedExpression() = var2expr x
+
+    type Tag<'T when 'T:equality> = BridgeTag<'T>
+    type ActionTag<'T when 'T:equality> = BridgeTag<'T>
+
+    /// 시스템 내의 tag.  Address 불필요
+    type EndoTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
+        inherit TagBase<'T>(param)
+        override x.ToBoxedExpression() = var2expr x
+
 
     /// PlanTag 나의 시스템 내부 TAG
     type PlanTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
-        inherit PlcTag<'T>(param)
+        inherit EndoTag<'T>(param)
         member val Vertex:Vertex option = None with get, set
-
-    /// ActionTag 다른 시스템 연결 TAG
-    type ActionTag<'T when 'T:equality> (param:TagCreationParams<'T>) =
-        inherit PlcTag<'T>(param)
 
 
 

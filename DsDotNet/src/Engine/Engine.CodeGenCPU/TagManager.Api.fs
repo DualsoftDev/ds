@@ -3,11 +3,12 @@ namespace Engine.CodeGenCPU
 open System.Diagnostics
 open Engine.Core
 open System.Collections.Generic
+open System
 
 [<AutoOpen>]
 module ApiTagManagerModule =
 
-    [<AutoOpen>]
+    [<Flags>]
     type ApiTag =
     |PLANSET
     |PLANRST

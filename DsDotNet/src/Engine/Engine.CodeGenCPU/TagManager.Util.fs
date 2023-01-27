@@ -28,6 +28,8 @@ module TagManagerUtil =
 
     let getPlcTagAbleName (name:string) (storages:Storages) =
         name |> getValidName |> getUniqueName  storages
+        // UniqueName.generate <kwak> Storages 에서 중복 피하는걸 를 어떻게 쓸지 잘모르겠어요 ㅜ
+
 
     let private createPlanVarHelper(stg:Storages, name:string, dataType:DataType) : IStorage =
         let v = dataType.DefaultValue()

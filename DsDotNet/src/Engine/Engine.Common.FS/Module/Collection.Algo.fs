@@ -4,6 +4,7 @@ open System
 open System.Linq
 open System.Collections.Generic
 open Microsoft.FSharp.Reflection
+open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module CollectionAlgorithm =
@@ -200,4 +201,11 @@ module CollectionAlgorithm =
     module private TestMe =
         let a = randomSequence None (Some 7) |> Seq.take 10 |> List.ofSeq   // e.g [5; 3; 1; 1; 1; 6; 3; 3; 6; 2]
 
-
+    //https://stackoverflow.com/questions/62195995/enumerate-names-and-values-of-an-f-discriminated-union-type-like-enum-getvalues?noredirect=1&lq=1
+    module EnumFS =
+        /// Return all values for an enumeration type
+        let EnumValues (t:'T)  =
+            [
+                for x in FSharpType.GetUnionCases t do
+                yield FSharpValue.MakeUnion(x, [||])
+            ]

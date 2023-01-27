@@ -163,7 +163,7 @@ module PPTObjectModule =
         | LAMP        -> checkDotErr()
 
     let getBtnType(key:string) =
-        match TrimSpace key with
+        match (TrimSpace key).ToUpper() with
         | "A"   -> BtnType.DuAutoBTN
         | "M"   -> BtnType.DuManualBTN
         | "D"   -> BtnType.DuDriveBTN
@@ -176,7 +176,7 @@ module PPTObjectModule =
         | _     ->  failwith $"{key} is Error Type"
 
     let getLampType(key:string) =
-        match TrimSpace key with
+        match (TrimSpace key).ToUpper() with
         | "A"   -> LampType.DuAutoModeLamp
         | "M"   -> LampType.DuManualModeLamp
         | "D"   -> LampType.DuDriveModeLamp
@@ -187,7 +187,7 @@ module PPTObjectModule =
         | _     ->  failwith $"{key} is Error Type"
 
     let getConditionType(key:string) =
-        match TrimSpace key with
+        match (TrimSpace key).ToUpper() with
         | "R"   -> ConditionType.DuReadyState
         | "D"   -> ConditionType.DuDriveState
         | _     ->  failwith $"{key} is Error Type"
@@ -272,8 +272,8 @@ module PPTObjectModule =
                 shape.ErrorName(ErrID._53, iPage)
 
         let getBracketItems (name:string) =
-            name.Split(']').Where(fun w->w <> "")
-            |> Seq.map(fun f->  GetSquareBrackets(f+"]", false), GetBracketsReplaceName(f+"]"))
+            name.Split('[').Where(fun w->w <> "")
+            |> Seq.map(fun f->  GetBracketsReplaceName("["+f), GetSquareBrackets("["+f, true))
 
         do
             name <-  GetBracketsReplaceName(shape.InnerText)  |> trimSpace
@@ -318,8 +318,8 @@ module PPTObjectModule =
                         |> fun text ->
                             updateCopySys  (text ,(GetBracketsReplaceName(name) |> trimSpace), number)
 
-            |BUTTON ->          getBracketItems(shape.InnerText).ForEach(fun (n, t) -> btnDefs.Add(n, t|> getBtnType))
-            |LAMP   ->          getBracketItems(shape.InnerText).ForEach(fun (n, t) -> lampDefs.Add(n, t|> getLampType))
+            |BUTTON ->    getBracketItems(shape.InnerText).ForEach(fun (n, t) -> btnDefs.Add(n, t|> getBtnType))
+            |LAMP   ->    getBracketItems(shape.InnerText).ForEach(fun (n, t) -> lampDefs.Add(n, t|> getLampType))
             |CONDITION -> getBracketItems(shape.InnerText).ForEach(fun (n, t) -> condiDefs.Add(n, t|> getConditionType))
             |REALExF
             |REALExS

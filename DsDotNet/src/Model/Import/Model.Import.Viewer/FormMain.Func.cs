@@ -1,6 +1,7 @@
 using Engine.Common;
 using Engine.Common.FS;
 using Engine.Core;
+using Engine.Cpu;
 using Model.Import.Office;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using static Engine.CodeGenCPU.CpuLoader;
+using static Engine.CodeGenCPU.ExportModule;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
@@ -70,10 +72,8 @@ namespace Dual.Model.Import
                 _DicCpu.ForEach(f =>
                 {
                     f.Value.Run();
-                    testReadyAutoDrive(f.Key);
                     f.Value.ScanOnce();
                 });
-
 
 
                 //_DicCpu.First().Value.Run();
@@ -89,6 +89,7 @@ namespace Dual.Model.Import
             }
             finally { Busy = false; }
         }
+
         internal void ImportExcel(string path)
         {
             try
@@ -106,6 +107,11 @@ namespace Dual.Model.Import
 
                     MSGInfo($"{_PathXLS} 적용완료!!");
                     MSGWarn($"파워포인트와 엑셀을 동시에 가져오면 IO 매칭된 설정값을 가져올수 있습니다.!!");
+                });
+
+                var xmlPath = Path.ChangeExtension(path, null);
+                this.Do(() => {
+                    ExportModuleExt.ExportXMLforXGI(SelectedSystem, $@"{xmlPath}.xml");
                 });
             }
 

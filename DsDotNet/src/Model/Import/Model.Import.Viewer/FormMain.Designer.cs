@@ -60,6 +60,7 @@ namespace Dual.Model.Import
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.checkedListBox_sysHMI = new System.Windows.Forms.CheckedListBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -318,6 +319,7 @@ namespace Dual.Model.Import
             // 
             // splitContainer4.Panel2
             // 
+            this.splitContainer4.Panel2.Controls.Add(this.checkedListBox_sysHMI);
             this.splitContainer4.Panel2.Controls.Add(this.checkedListBox_My);
             this.splitContainer4.Panel2.Controls.Add(this.checkedListBox_Ex);
             this.splitContainer4.Panel2.Controls.Add(this.panel1);
@@ -460,6 +462,18 @@ namespace Dual.Model.Import
             this.splitter1.TabIndex = 22;
             this.splitter1.TabStop = false;
             // 
+            // checkedListBox_sysHMI
+            // 
+            this.checkedListBox_sysHMI.Dock = System.Windows.Forms.DockStyle.Right;
+            this.checkedListBox_sysHMI.FormattingEnabled = true;
+            this.checkedListBox_sysHMI.Items.AddRange(new object[] {
+            "Select System"});
+            this.checkedListBox_sysHMI.Location = new System.Drawing.Point(535, 0);
+            this.checkedListBox_sysHMI.Name = "checkedListBox_sysHMI";
+            this.checkedListBox_sysHMI.Size = new System.Drawing.Size(141, 396);
+            this.checkedListBox_sysHMI.TabIndex = 20;
+            this.checkedListBox_sysHMI.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.checkedListBox_sysHMI_ItemCheck);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
@@ -533,6 +547,7 @@ namespace Dual.Model.Import
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.CheckedListBox checkedListBox_My;
         private System.Windows.Forms.CheckedListBox checkedListBox_Ex;
+        private System.Windows.Forms.CheckedListBox checkedListBox_sysHMI;
     }
 }
 

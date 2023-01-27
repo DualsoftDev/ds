@@ -3,6 +3,7 @@ namespace rec Engine.CodeGenCPU
 open System.Linq
 open Engine.Core
 open Engine.Common.FS
+open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module ConvertCoreExt =
@@ -192,6 +193,15 @@ module ConvertCoreExt =
         member r._on  = r.Parent.GetSystem()._on
         member r._off  = r.Parent.GetSystem()._off
 
+
+
+
+
+
+
+
+
+
     type TaskDevice with
         member jd.ActionIN  = jd.InTag  :?> Tag<bool>
         member jd.ActionOut = jd.OutTag :?> Tag<bool>
@@ -202,3 +212,11 @@ module ConvertCoreExt =
                     .SelectMany(fun a -> x.DeviceDefs.Where(fun w-> w.ApiItem = a))
 
 
+    [<AutoOpen>]
+    [<Extension>]
+    type TagTest =
+        [<Extension>] static member TagS (x:DsSystem, typ:SysDataTimeTag) = getSM(x).GetSysDateTag(typ)
+        [<Extension>] static member TagS (x:DsSystem, typ:SysBitTag)      = getSM(x).GetSysBitTag(typ)
+        [<Extension>] static member TagS (x:DsSystem, typ:SysErrorTag)    = getSM(x).GetSysErrTag(typ)
+        [<Extension>] static member TagF (x:Flow    , typ:FlowTag)        = getFM(x).GetFlowTag(typ )
+        [<Extension>] static member TagA (x:ApiItem , typ:ApiTag)         = getAM(x).GetApiTag(typ)

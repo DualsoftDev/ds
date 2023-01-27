@@ -6,7 +6,7 @@ using static Model.Import.Office.ViewModule;
 
 namespace Dual.Model.Import
 {
-    public class SegmentHMI
+    public class SegmentView
     {
         public string Display { get; set; }
         public Engine.Core.CoreModule.Vertex Vertex { get; set; }

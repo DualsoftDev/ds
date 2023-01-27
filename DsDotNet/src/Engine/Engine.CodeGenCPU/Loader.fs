@@ -184,11 +184,6 @@ module CpuLoader =
         member x.IsExternal = match x with | ExternalPou (s, p) -> true |_ -> false
 
 
-    let testReadyAutoDrive(system:DsSystem) =
-        system._auto.Value <- true
-        system._ready.Value <- true
-        system._drive.Value <- true
-
 
     [<Extension>]
     type Cpu =
@@ -208,3 +203,5 @@ module CpuLoader =
                 |>Seq.append [ActivePou (system, convertSystem(system))]
 
             result
+
+

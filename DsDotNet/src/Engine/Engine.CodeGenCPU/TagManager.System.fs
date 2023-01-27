@@ -4,36 +4,35 @@ open System.Diagnostics
 open Engine.Core
 open System.Collections.Generic
 open System.Runtime.CompilerServices
+open System
+open Engine.Common.FS
 
 [<AutoOpen>]
 module SystemManagerModule =
-
-    [<AutoOpen>]
+    [<Flags>]
     type SysBitTag =
-    |ON
-    |OFF
-    |AUTO
-    |MANUAL
-    |DRIVE
-    |STOP
-    |EMG
-    |TEST
-    |READY
-    |CLEAR
-    |HOME
+    | ON
+    | OFF
+    | AUTO
+    | MANUAL
+    | DRIVE
+    | STOP
+    | EMG
+    | TEST
+    | READY
+    | CLEAR
+    | HOME
 
-    [<AutoOpen>]
     type SysDataTimeTag =
-    |DATET_YY
-    |DATET_MM
-    |DATET_DD
-    |DATET_H
-    |DATET_M
-    |DATET_S
+    | DATET_YY
+    | DATET_MM
+    | DATET_DD
+    | DATET_H
+    | DATET_M
+    | DATET_S
 
-    [<AutoOpen>]
     type SysErrorTag =
-    |TIMEOUT
+    | TIMEOUT
 
     /// DsSystem Manager : System Tag  를 관리하는 컨테이어
     type SystemManager (sys:DsSystem, stg:Storages)  =
@@ -42,7 +41,8 @@ module SystemManagerModule =
         let dsSysUint8  name = (if stg.ContainsKey(name) then stg[name] else createPlanVar stg  name  DuUINT8  ) :?> PlanVar<uint8>
         let dsSysUint16 name = (if stg.ContainsKey(name) then stg[name] else createPlanVar stg  name  DuUINT16 ) :?> PlanVar<uint16>
 
-        let on     = let tmpOn = dsSysBit "_on" in tmpOn.Value <- true; tmpOn
+       // let on     = let tmpOn = dsSysBit "_on" in tmpOn.Value <- true; tmpOn
+        let on     = dsSysBit "_on"
         let off    = dsSysBit "_off"
         let auto   = dsSysBit "_auto"
         let manual = dsSysBit "_manual"

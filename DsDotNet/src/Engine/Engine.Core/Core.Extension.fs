@@ -37,35 +37,37 @@ module CoreExtensionModule =
 
     type DsSystem with
         member x.AddButton(btnType:BtnType, btnName:string, inAddress:TagAddress, outAddress:TagAddress, flow:Flow) =
-            let checkUsedFlow() =
+            checkSystem(x, flow, btnName)
+            if btnType = DuAutoBTN || btnType = DuManualBTN
+            then
                 let flows = x.Buttons.Where(fun f->f.ButtonType = btnType)
                             |> Seq.collect(fun b -> b.SettingFlows)
                 flows.Contains(flow) |> not
-                |> verifyM $"{btnType} {btnName} is assigned to a single flow : Duplicated flow [{flow.Name}]"
-
-            checkSystem(x, flow, btnName)
-            if btnType = DuAutoBTN || btnType = DuManualBTN
-            then checkUsedFlow()
+                |> verifyM $"{btnType} {btnName} is assigned to a single flow :  flow name [{flow.Name}]"
 
             match x.Buttons.TryFind(fun f -> f.Name = btnName) with
             | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
-            | None -> x.Buttons.Add(ButtonDef(btnName, btnType, inAddress, outAddress, HashSet[|flow|], HashSet[||])) // need button functions....
+            | None -> x.Buttons.Add(ButtonDef(btnName, btnType, inAddress, outAddress, HashSet[|flow|], HashSet[||]))
                       |> verifyM $"Duplicated ButtonDef [{btnName}]"
 
         member x.AddLamp(lmpType:LampType, lmpName: string, addr:string, flow:Flow) =
             checkSystem(x, flow, lmpName)
 
+            x.Lamps.Select(fun f->f.Name).Contains(lmpName) |> not
+            |> verifyM $"{lmpType} {lmpName} is assigned to a single flow :  flow name [{flow.Name}]"
+
             match x.Lamps.TryFind(fun f -> f.Name = lmpName) with
             | Some lmp -> lmp.SettingFlow <- flow
-            | None -> x.Lamps.Add(LampDef(lmpName, lmpType, addr, flow, HashSet[||])) |> verifyM $"Duplicated LampDef [{lmpName}]" // need lamp functions....
+            | None -> x.Lamps.Add(LampDef(lmpName, lmpType, addr, flow, HashSet[||]))
+                      |> verifyM $"Duplicated LampDef [{lmpName}]"
 
         member x.AddCondtion(condiType:ConditionType, condiName: string, inAddr:string, flow:Flow) =
             checkSystem(x, flow, condiName)
 
             match x.Conditions.TryFind(fun f -> f.Name = condiName) with
             | Some condi -> condi.SettingFlows.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
-            | None -> x.Conditions.Add(ConditionDef(condiName, condiType, inAddr, HashSet[|flow|], HashSet[||])) // need button functions....
-                      |> verifyM $"Duplicated ButtonDef [{condiName}]"
+            | None -> x.Conditions.Add(ConditionDef(condiName, condiType, inAddr, HashSet[|flow|], HashSet[||]))
+                      |> verifyM $"Duplicated ConditionDef [{condiName}]"
 
 
         member x.SystemConditions   = x.Conditions |> Seq.map(fun con  -> con) //read only

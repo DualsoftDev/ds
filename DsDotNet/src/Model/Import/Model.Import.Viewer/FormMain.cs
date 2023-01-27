@@ -33,6 +33,10 @@ using System.Security.Cryptography;
 using System.Net.Security;
 using static Engine.Core.ExpressionForwardDeclModule;
 using Microsoft.Msagl.Routing.ConstrainedDelaunayTriangulation;
+using static Engine.CodeGenCPU.SystemManagerModule;
+using System.Configuration;
+using static Engine.CodeGenCPU.ConvertCoreExt;
+using static Engine.Common.FS.CollectionAlgorithm;
 
 namespace Dual.Model.Import
 {
@@ -91,6 +95,23 @@ namespace Dual.Model.Import
             checkedListBox_Ex.ItemCheck += (ss, ee) => { if (checkedListBox_Ex.Enabled) ee.NewValue = ee.CurrentValue; };
             checkedListBox_My.DisplayMember = "Display";
             checkedListBox_Ex.DisplayMember = "Display";
+            checkedListBox_sysHMI.DisplayMember = "Display";
+
+        }
+
+        public void createSysHMI(DsSystem sys)
+        {
+            checkedListBox_sysHMI.Items.Clear();
+            var sysBits = EnumFS.EnumValues(typeof(SysBitTag)).Cast<SysBitTag>();
+            sysBits
+                .Where(w => !w.IsON && !w.IsOFF)        //시스템 비트  제외
+                .ForEach(f =>
+            {
+                var tag = TagTest.TagS(sys, f);
+                var sd = new StorageDisplay() { Display = tag.Name, Storage = tag, Value = tag.Value, OnOff = Convert.ToBoolean(tag.Value) };
+                checkedListBox_sysHMI.Items.Add(sd);
+                checkedListBox_sysHMI.SetItemChecked(checkedListBox_sysHMI.Items.Count - 1, sd.OnOff);
+            });
         }
 
         void Form1_DragEnter(object sender, DragEventArgs e)
@@ -241,7 +262,7 @@ namespace Dual.Model.Import
 
         private void button_start_Click(object sender, EventArgs e)
         {
-            var segHMI = comboBox_Segment.SelectedItem as SegmentHMI;
+            var segHMI = comboBox_Segment.SelectedItem as SegmentView;
             if (segHMI == null) return;
 
             var ucView = SelectedView;
@@ -251,7 +272,7 @@ namespace Dual.Model.Import
 
         private void button_reset_Click(object sender, EventArgs e)
         {
-            var segHMI = comboBox_Segment.SelectedItem as SegmentHMI;
+            var segHMI = comboBox_Segment.SelectedItem as SegmentView;
             if (segHMI == null) return;
 
             var ucView = SelectedView;
@@ -310,7 +331,7 @@ namespace Dual.Model.Import
             }
 
             comboBox_Device.DisplayMember = "Display";
-            comboBox_Device.SelectedIndex = 0;
+            if (devices.Any()) comboBox_Device.SelectedIndex = 0;
         }
 
         private void comboBox_Device_SelectedIndexChanged(object sender, EventArgs e)
@@ -326,6 +347,8 @@ namespace Dual.Model.Import
             _SelectedCPU = _DicCpu[sysView.System];
             UpdateDevice(sysView);
             UpdateSelectedCpu(sysView);
+
+            createSysHMI(sysView.System);
         }
 
         public void UpdateLogComboBox(IStorage storage, object value,  DsCPU cpu)
@@ -366,6 +389,13 @@ namespace Dual.Model.Import
                 .ForEach(cs => ShowExpr(cs, true));
         }
 
+        private void checkedListBox_sysHMI_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            StorageDisplay sd = checkedListBox_sysHMI.Items[e.Index] as StorageDisplay;
+            if (sd == null) return;
+            sd.Storage.BoxedValue = e.NewValue == CheckState.Checked ? true : false;
+        }
+
 
 
         private void UpdateSelectedCpu(SystemView sysView)
@@ -387,7 +417,7 @@ namespace Dual.Model.Import
                     if (v is Real)
                     {
                         comboBox_Segment.Items
-                        .Add(new SegmentHMI { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = v.TagManager as VertexManager });
+                        .Add(new SegmentView { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = v.TagManager as VertexManager });
                     }
                 });
             int cnt = 0;
@@ -431,5 +461,7 @@ namespace Dual.Model.Import
             richTextBox_ds.AppendTextColor("\r\n", color);
             richTextBox_ds.ScrollToCaret();
         }
+
+
     }
 }

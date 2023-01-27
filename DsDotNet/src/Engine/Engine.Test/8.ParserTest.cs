@@ -101,8 +101,8 @@ namespace Engine
         [h] = {
             HomeBTN(_, _) = { F1;F2;F3;F5; }
             HomeBTN.func = {
-                $TON 2000;
-                $CTU 1 5;
+                $t 2000;
+                $c 5;
             }
         }
     }
@@ -149,9 +149,12 @@ namespace Engine
         [r] = {
             ReadyMode = { F4 }
             ReadyMode.func = {
-                $TON 2000;
-                $CTU 1 5;
+                $t 2000;
+                $c 5;
             }
+        }
+        [i] = {
+            IdleLamp = { F5 }
         }
     }
 }
@@ -183,8 +186,8 @@ namespace Engine
         [r] = {
             LeakErr(%I3) = { F2; }
             LeakErr.func = {
-                $TON 2000;
-                $CTU 1 5;
+                $t 2000;
+                $c 5;
             }
         }
     }
@@ -449,8 +452,8 @@ namespace Engine
     [jobs] = {
         C1 = { B.""+""(%I1, %Q1); A.""+""(_, %Q999.2343); }
         C1.func = {
-            $TON 2000;
-            $CTU 1 5;
+            $t 2000;
+            $c 5;
         }
         C2 = { A.""-""(_, %Q3); B.""-""(%I1, _); }
     }

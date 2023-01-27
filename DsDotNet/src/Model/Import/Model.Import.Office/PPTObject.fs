@@ -184,6 +184,7 @@ module PPTObjectModule =
         | "E"   -> LampType.DuEmergencyLamp
         | "T"   -> LampType.DuTestDriveLamp
         | "R"   -> LampType.DuReadyLamp
+        | "I"   -> LampType.DuIdleLamp
         | _     ->  failwith $"{key} is Error Type"
 
     let getConditionType(key:string) =

@@ -51,6 +51,8 @@ H_IN: 'h_in';
 H: 'h';
 R_IN: 'r_in';
 R: 'r';
+I_IN: 'i_in';
+I: 'i';
 VARIABLES: 'variables';
 COMMANDS: 'commands';
 OBSERVES: 'observes';
@@ -281,7 +283,7 @@ jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|linkListing|funcSet)* RBRACE;
     callApiDef: interfaceCall addressInOut;
     interfaceCall: identifier12;
     interfaceLink: identifier12;
-    
+
     funcSet: identifier12 '=' LBRACE (() | funcDef (SEIMCOLON funcDef)* (SEIMCOLON)?) RBRACE;
     funcDef:  '$' funcName (argument (argument)*);
     funcName: identifier1;
@@ -301,7 +303,7 @@ interfaceBlock
     linkPhrase: identifier12;
     interfaceResetDef: identifier1 (causalOperatorReset identifier1)+ (';')?;
 
-categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|stopBlock|emergencyBlock|testBlock|homeBlock|readyBlock;
+categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|stopBlock|emergencyBlock|testBlock|homeBlock|readyBlock|idleBlock;
     autoBlock      :'[' ('a_in'|'a') ']' EQ categoryBlock;
     manualBlock    :'[' ('m_in'|'m') ']' EQ categoryBlock;
     driveBlock     :'[' ('d_in'|'d') ']' EQ categoryBlock;
@@ -311,18 +313,19 @@ categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|stopBlock|emergencyBl
     testBlock      :'[' ('t_in'|'t') ']' EQ categoryBlock;
     homeBlock      :'[' ('h_in'|'h') ']' EQ categoryBlock;
     readyBlock     :'[' ('r_in'|'r') ']' EQ categoryBlock;
-    
+    idleBlock      :'[' ('i_in'|'i') ']' EQ categoryBlock;
+
     categoryBlock: LBRACE (() | (buttonDef|lampDef|funcSet)*) RBRACE;
-    
+
     buttonDef: btnNameAddr EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
     btnNameAddr: buttonName addressInOut;
-    
+
     buttonName: identifier12;
 
     lampDef: (lampName|lampName addrDef) EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
     addrDef: LPARENTHESIS addressItem? RPARENTHESIS;
     lampName: identifier12;
-    
+
     flowName: identifier1;
 
 buttonBlock: '[' 'buttons' ']' '=' LBRACE (categoryBlocks)* RBRACE;
@@ -356,14 +359,14 @@ causal: causalPhrase SEIMCOLON;
         ;
 
     lexerTokenIdentifierCandidate:
-        SYS | EXTERNAL_SYSTEM | IP | HOST 
+        SYS | EXTERNAL_SYSTEM | IP | HOST
         | FILE | DEVICE | COPY_SYSTEM
-        | LAYOUTS | ADDRESSES | PROP | SAFETY | FLOW 
+        | LAYOUTS | ADDRESSES | PROP | SAFETY | FLOW
         | INTERFACES | ALIASES | VARIABLES
         | JOBS | BUTTONS | LAMPS | CONDITIONS
-        | E_IN | E | A_IN | A | D_IN | D 
-        | C_IN | C | M_IN | M | S_IN | S 
-        | T_IN | T | H_IN | H | R_IN | R 
+        | E_IN | E | A_IN | A | D_IN | D
+        | C_IN | C | M_IN | M | S_IN | S
+        | T_IN | T | H_IN | H | R_IN | R
         | WORDTYPE | DWORDTYPE | INTTYPE | FLOATTYPE
         | FUNC
         ;

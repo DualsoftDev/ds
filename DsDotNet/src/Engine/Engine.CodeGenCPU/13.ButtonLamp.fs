@@ -22,9 +22,9 @@ type DsSystem with
                 | DuDriveLamp     -> f.dop.Expr
                 | DuStopLamp      -> f.sop.Expr
                 | DuEmergencyLamp -> f.eop.Expr
-                | DuTestDriveLamp      -> f.top.Expr
+                | DuTestDriveLamp -> f.top.Expr
                 | DuReadyLamp     -> f.rop.Expr
-                | DuIdleLamp     -> f.rop.Expr
+                | DuIdleLamp      -> f.rop.Expr
                 
             let out = lamp.OutTag :?> Tag<bool>
             yield (sets, s._off.Expr) --| (out, "B2" )

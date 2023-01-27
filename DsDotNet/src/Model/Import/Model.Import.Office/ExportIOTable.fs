@@ -87,11 +87,11 @@ module ExportIOTable =
         emptyLine()
         emptyLine()
 
-        toLampText (sys.AutoModeLamps, ExcelCase.XlsAutoModeLamp)
-        toLampText (sys.ManualModeLamps, ExcelCase.XlsManualModeLamp)
-        toLampText (sys.DriveModeLamps, ExcelCase.XlsDriveModeLamp)
-        toLampText (sys.StopModeLamps, ExcelCase.XlsStopModeLamp)
-        toLampText (sys.ReadyModeLamps, ExcelCase.XlsReadyModeLamp)
+        toLampText (sys.AutoLamps, ExcelCase.XlsAutoLamp)
+        toLampText (sys.ManualLamps, ExcelCase.XlsManualLamp)
+        toLampText (sys.DriveLamps, ExcelCase.XlsDriveLamp)
+        toLampText (sys.StopLamps, ExcelCase.XlsStopLamp)
+        toLampText (sys.ReadyLamps, ExcelCase.XlsReadyLamp)
 
         emptyLine()
         emptyLine()

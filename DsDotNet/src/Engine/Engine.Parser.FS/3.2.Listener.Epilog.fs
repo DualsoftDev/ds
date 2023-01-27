@@ -48,16 +48,16 @@ module EtcListenerModule =
                             let! btnNameAddr    = bd.TryFindFirstChild<BtnNameAddrContext>()
                             let! btnNameCtx     = btnNameAddr.TryFindFirstChild<ButtonNameContext>()
                             let btnName         = btnNameCtx.GetText()
-                            let addrIn, addrOut = 
+                            let addrIn, addrOut =
                                 match btnNameAddr.ChildCount with
-                                | 2 -> 
+                                | 2 ->
                                     option {
                                         let! inOutCtx = btnNameAddr.TryFindFirstChild<AddressInOutContext>()
                                         let! inCtx    = inOutCtx.TryFindFirstChild<InAddrContext>()
                                         let! outCtx   = inOutCtx.TryFindFirstChild<OutAddrContext>()
                                         return inCtx.GetText(), outCtx.GetText()
                                     } |> Option.get
-                                | _ -> 
+                                | _ ->
                                     null, null
                             let flows =
                                 bd.Descendants<FlowNameContext>()
@@ -92,6 +92,7 @@ module EtcListenerModule =
                         | :? EmergencyBlockContext -> DuEmergencyLamp
                         | :? TestBlockContext      -> DuTestDriveLamp
                         | :? ReadyBlockContext     -> DuReadyLamp
+                        | :? IdleBlockContext      -> DuIdleLamp
                         | _ -> failwith $"lamp type error {fstType}"
 
                     let lampDefs = first.Descendants<LampDefContext>().ToArray()
@@ -104,7 +105,7 @@ module EtcListenerModule =
                             let  addrCtx  = ld.TryFindFirstChild<AddressItemContext>()
                             let! flow   = flowNameCtx.GetText() |> system.TryFindFlow
                             let lmpName = lampNameCtx.GetText()
-                            let address = 
+                            let address =
                                 match addrCtx with
                                 | Some addr -> addr.GetText()
                                 | None -> null
@@ -137,7 +138,7 @@ module EtcListenerModule =
                             let! lampNameCtx = cd.TryFindFirstChild<LampNameContext>()
                             let  addrCtx = cd.TryFindFirstChild<AddressItemContext>()
                             let lmpName = lampNameCtx.GetText()
-                            let address = 
+                            let address =
                                 match addrCtx with
                                 | Some addr -> addr.GetText()
                                 | None -> null
@@ -193,10 +194,10 @@ module EtcListenerModule =
                             | :? RealOtherSystem as o -> return DuSafetyConditionRealExSystem o
                             | _-> failwithlog "Error"
 
-                        |None ->        
+                        |None ->
                             //let c = curSystem.TryFindCall(ns) |> Option.get
                             //return DuSafetyConditionCall res
-                            
+
                             let! vertex = curSystem.TryFindCall(ns)
                             match vertex with
                             | :? RealOtherSystem as rs -> return DuSafetyConditionRealExSystem rs
@@ -206,13 +207,13 @@ module EtcListenerModule =
                     | f::r::c::[] ->
                          //let! c = curSystem.TryFindCall(ns)
                          //return DuSafetyConditionCall c
-                         
+
                         let! vertex = curSystem.TryFindCall(ns)
                         match vertex with
                         | :? RealOtherSystem as rs -> return DuSafetyConditionRealExSystem rs
                         | :? Call as c -> return DuSafetyConditionCall c
                         | _ -> failwithlog "ERROR"
-                
+
                     | _ ->
                         failwithlog "ERROR"
                 }

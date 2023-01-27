@@ -248,6 +248,7 @@ namespace Dual.Model.Import
                         if (viewNode.LampType.Value == LampType.DuEmergencyLamp) nNode.Attr.FillColor = Color.MediumVioletRed;
                         if (viewNode.LampType.Value == LampType.DuTestDriveLamp) nNode.Attr.FillColor = Color.CadetBlue;
                         if (viewNode.LampType.Value == LampType.DuReadyLamp) nNode.Attr.FillColor = Color.Green;
+                        if (viewNode.LampType.Value == LampType.DuIdleLamp) nNode.Attr.FillColor = Color.DarkGray;
                     }
                 }
 

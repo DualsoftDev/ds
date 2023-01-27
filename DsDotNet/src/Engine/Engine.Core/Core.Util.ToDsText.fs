@@ -103,14 +103,7 @@ module internal ToDsTextModule =
         ] |> combineLines
 
     let codeBlockToDs (theSystem:DsSystem) =
-        //let funApp (funApp:FunctionApplication) =
-        //    let pgs (argGroups:ParameterGroup seq) =
-        //        argGroups.Select(fun ag -> ag.JoinWith ", ")
-        //            .JoinWith " ~ "
-        //    $"{funApp.FunctionName} = {pgs funApp.ParameterGroups}"
         let vars = theSystem.Variables
-        //let cmds = theSystem.Commands
-        //let obss = theSystem.Observes
         let tab = getTab 1
         let tab2 = getTab 2
         [
@@ -119,16 +112,6 @@ module internal ToDsTextModule =
                 for var in vars do
                     yield $"{tab2}{var.ToDsText()}"
                 yield $"{tab}{rb}"
-            //if cmds.Any() then
-            //    yield $"{tab}[commands] = {lb}"
-            //    for cmd in cmds do
-            //        yield $"{tab2}{cmd.Name} = (@{funApp cmd.FunctionApplication})"
-            //    yield $"{tab}{rb}"
-            //if obss.Any() then
-            //    yield $"{tab}[observes] = {lb}"
-            //    for obs in obss do
-            //        yield $"{tab2}{obs.Name} = (@{funApp obs.FunctionApplication})"
-            //    yield $"{tab}{rb}"
         ] |> combineLines
 
     let rec systemToDs (system:DsSystem) (indent:int) =
@@ -241,20 +224,21 @@ module internal ToDsTextModule =
                 yield buttonsToDs("h", system.HomeButtons)
                 yield $"{tab}{rb}"
 
-            let lmps =
-                let alllmps = [
-                    system.AutoModeLamps;
-                    system.ManualModeLamps;
-                    system.DriveModeLamps;
-                    system.StopModeLamps;
-                    system.EmergencyModeLamps;
-                    system.TestModeLamps;
-                    system.ReadyModeLamps;
-                ]
-                alllmps
-                |> List.map(fun b -> b |> List.ofSeq)
-                |> List.collect id
-            if lmps.Any() then
+            //let lmps =
+            //    let alllmps = [
+            //        system.AutoModeLamps;
+            //        system.ManualLamps;
+            //        system.DriveLamps;
+            //        system.StopLamps;
+            //        system.EmergencyLamps;
+            //        system.TestLamps;
+            //        system.ReadyLamps;
+            //        system.IdleLamps;
+            //    ]
+            //    alllmps
+            //    |> List.map(fun b -> b |> List.ofSeq)
+            //    |> List.collect id
+            if system.Lamps.Any() then
                 yield $"{tab}[lamps] = {lb}"
                 let lampsToDs(category:string, lamps:LampDef seq) =
                     [
@@ -273,13 +257,14 @@ module internal ToDsTextModule =
                                         yield funcString
                             yield $"{tab2}{rb}"
                     ] |> combineLines
-                yield lampsToDs("a", system.AutoModeLamps)
-                yield lampsToDs("m", system.ManualModeLamps)
-                yield lampsToDs("d", system.DriveModeLamps)
-                yield lampsToDs("s", system.StopModeLamps)
-                yield lampsToDs("e", system.EmergencyModeLamps)
-                yield lampsToDs("t", system.TestModeLamps)
-                yield lampsToDs("r", system.ReadyModeLamps)
+                yield lampsToDs("a", system.AutoLamps)
+                yield lampsToDs("m", system.ManualLamps)
+                yield lampsToDs("d", system.DriveLamps)
+                yield lampsToDs("s", system.StopLamps)
+                yield lampsToDs("e", system.EmergencyLamps)
+                yield lampsToDs("t", system.TestLamps)
+                yield lampsToDs("r", system.ReadyLamps)
+                yield lampsToDs("i", system.IdleLamps)
                 yield $"{tab}{rb}"
 
             let cnds = system.Conditions

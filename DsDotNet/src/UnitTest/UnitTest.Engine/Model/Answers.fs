@@ -201,8 +201,8 @@ module ModelComponentAnswers =
         [r] = {
             LeakErr(%I3) = { F2; }
             LeakErr.func = {
-                $ton 2000;
-                $ctu 1 5;
+                $t 2000;
+                $c 5;
             }
         }
     }
@@ -247,9 +247,12 @@ module ModelComponentAnswers =
         [r] = {
             ReadyMode = { F4 }
             ReadyMode.func = {
-                $ton 2000;
-                $ctu 1 5;
+                $t 2000;
+                $c 5;
             }
+        }
+        [i] = {
+            IdleLamp = { F5 }
         }
     }
 }
@@ -302,8 +305,8 @@ module ModelComponentAnswers =
         [h] = {
             HomeBTN(_, _) = { F1;F2;F3;F5; }
             HomeBTN.func = {
-                $ton 2000;
-                $ctu 1 5;
+                $t 2000;
+                $c 5;
             }
         }
     }
@@ -414,8 +417,8 @@ module ModelComponentAnswers =
     [jobs] = {
         C1 = { B."+"(%I1, %Q1); A."+"(%I1, %Q1); }
         C1.func = {
-            $ton 2000;
-            $ctu 1 5;
+            $t 2000;
+            $c 5;
         }
         C2 = { A."-"(_, %Q3); B."-"(_, %Q3); }
     }

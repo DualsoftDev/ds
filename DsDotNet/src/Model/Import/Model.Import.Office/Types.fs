@@ -55,15 +55,16 @@ module InterfaceClass =
         | XlsTestBTN             //시운전 시작 버튼
         | XlsHomeBTN             //홈(원위치) 버튼
         | XlsReadyBTN            //준비(원위치) 버튼
-        | XlsAutoModeLamp        //자동 모드 램프
-        | XlsManualModeLamp      //수동 모드 램프
-        | XlsDriveModeLamp       //운전 모드 램프
-        | XlsStopModeLamp        //정지 모드 램프
-        | XlsEmergencyModeLamp   //비상 모드 램프
-        | XlsReadyModeLamp       //준비 모드 램프
-        | XlsTestModeLamp        //시운전 모드 램프
-        | XlsConditionReady      //준비 모드  램프
-        | XlsConditionDrive      //준비 모드  램프
+        | XlsAutoLamp        //자동 램프
+        | XlsManualLamp      //수동 램프
+        | XlsDriveLamp       //운전 램프
+        | XlsStopLamp        //정지 램프
+        | XlsEmergencyLamp   //비상 램프
+        | XlsReadyLamp       //준비 램프
+        | XlsIdleLamp        //대기 램프
+        | XlsTestLamp        //시운전 램프
+        | XlsConditionReady      //준비 램프
+        | XlsConditionDrive      //운전 램프
 
     with
         member x.ToText() =
@@ -79,13 +80,14 @@ module InterfaceClass =
             | XlsTestBTN           -> TextXlsTestBTN
             | XlsReadyBTN          -> TextXlsReadyBTN
             | XlsHomeBTN           -> TextXlsHomeBTN
-            | XlsAutoModeLamp      -> TextXlsAutoModeLamp
-            | XlsManualModeLamp    -> TextXlsManualModeLamp
-            | XlsDriveModeLamp     -> TextXlsDriveModeLamp
-            | XlsStopModeLamp      -> TextXlsStopModeLamp
-            | XlsEmergencyModeLamp -> TextXlsEmergencyModeLamp
-            | XlsTestModeLamp      -> TextXlsTestModeLamp
-            | XlsReadyModeLamp     -> TextXlsReadyModeLamp
+            | XlsAutoLamp      -> TextXlsAutoLamp
+            | XlsManualLamp    -> TextXlsManualLamp
+            | XlsDriveLamp     -> TextXlsDriveLamp
+            | XlsStopLamp      -> TextXlsStopLamp
+            | XlsEmergencyLamp -> TextXlsEmergencyLamp
+            | XlsTestLamp      -> TextXlsTestLamp
+            | XlsReadyLamp     -> TextXlsReadyLamp
+            | XlsIdleLamp      -> TextXlsIdleLamp
             | XlsConditionReady    -> TextXlsConditionReady
             | XlsConditionDrive    -> TextXlsConditionDrive
 
@@ -101,11 +103,11 @@ module InterfaceClass =
         | TextXlsTestBTN        ->  XlsTestBTN
         | TextXlsClearBTN       ->  XlsClearBTN
         | TextXlsHomeBTN        ->  XlsHomeBTN
-        | TextXlsAutoModeLamp   ->  XlsAutoModeLamp
-        | TextXlsManualModeLamp ->  XlsManualModeLamp
-        | TextXlsDriveModeLamp  ->  XlsDriveModeLamp
-        | TextXlsStopModeLamp   ->  XlsStopModeLamp
-        | TextXlsReadyModeLamp  ->  XlsReadyModeLamp
+        | TextXlsAutoLamp   ->  XlsAutoLamp
+        | TextXlsManualLamp ->  XlsManualLamp
+        | TextXlsDriveLamp  ->  XlsDriveLamp
+        | TextXlsStopLamp   ->  XlsStopLamp
+        | TextXlsReadyLamp  ->  XlsReadyLamp
         | TextXlsConditionReady ->  XlsConditionReady
         | TextXlsConditionDrive ->  XlsConditionDrive
 

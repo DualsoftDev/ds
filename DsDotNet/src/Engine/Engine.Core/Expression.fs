@@ -100,6 +100,7 @@ module ExpressionModule =
         member _.PRE = timerStruct.PRE
         member _.ACC = timerStruct.ACC
         member _.RES = timerStruct.RES
+        member _.TimerStruct = timerStruct
 
         member val InputEvaluateStatements:Statement list = [] with get, set
         interface IDisposable with
@@ -110,6 +111,7 @@ module ExpressionModule =
         let accumulator = new CountAccumulator(typ, counterStruct)
 
         member _.Type = typ
+        member _.CounterStruct = counterStruct
         member _.Name = counterStruct.Name
         /// Count up
         member _.CU = counterStruct.CU
@@ -211,9 +213,9 @@ module ExpressionModule =
         /// 변수 선언.  PLC rung 생성시에는 관여되지 않는다.
         | DuVarDecl of expression:IExpression * variable:IStorage
 
-        | DuTimer of TimerStatement
+        | DuTimer   of TimerStatement
         | DuCounter of CounterStatement
-        | DuAction of ActionStatement
+        | DuAction  of ActionStatement
 
         | DuAugmentedPLCFunction of FunctionParameters
 
@@ -312,6 +314,7 @@ module ExpressionModule =
                 $"copyIf({condition.ToText(false)}, {source.ToText(false)}, {target.ToText()})"
             | DuAugmentedPLCFunction _ ->
                 failwithlog "ERROR"
+
 
     type Terminal<'T when 'T:equality> with
         member x.TryGetStorage(): IStorage option =

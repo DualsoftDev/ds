@@ -199,6 +199,9 @@ module Config =
             | VAR_IN_OUT            = 5
             | VAR_GLOBAL            = 6
             | VAR_GLOBAL_CONSTANT   = 7
+            /// Global 에 선언된 변수를 local 에서 사용하고자 할 때 추가되는 type
+            /// 특정 변수(g)를 global 화 하면 Global block 에 VAR_GLOBAL 로 g 가 추가되고,
+            /// 해당 변수 g 를 사용하는 local block 에 VAR_EXTERNAL 로 g 가 추가된다.
             | VAR_EXTERNAL          = 8
             | VAR_EXTERNAL_CONSTANT = 9
             | VAR_RETURN            = 10

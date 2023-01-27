@@ -75,7 +75,8 @@ module ConvertorPrologModule =
             let plcType = systemTypeToXgiTypeName typedefof<'T>
             let comment = comment |> map (fun cmt -> SecurityElement.Escape cmt) |? ""
             let initValueHolder:BoxedObjectHolder = {Object=initValue}
-            fwdCreateSymbolInfo name comment plcType initValueHolder
+            let kind = int Variable.Kind.VAR
+            fwdCreateSymbolInfo name comment plcType kind initValueHolder
 
         interface IXgiLocalVar with
             member x.SymbolInfo = x.SymbolInfo
@@ -423,8 +424,13 @@ module XgiExpressionConvertorModule =
 
         augmentedStatements @ newStatements |> List.ofSeq
 
-    let internal commentedStatement2CommentedXgiStatements (storage:XgiStorage) (CommentedStatement(comment, statement)) : CommentedXgiStatements =
-        let xgiStatements = statement2XgiStatements storage statement
+    /// S -> [XS]
+    let internal commentedStatement2CommentedXgiStatements
+        (localStorages:XgiStorage)
+        (CommentedStatement(comment, statement))
+        : CommentedXgiStatements
+      =
+        let xgiStatements = statement2XgiStatements localStorages statement
         let rungComment =
             let statementComment = statement.ToText()
             match comment.NonNullAny(), xgiGenerationOptions.IsAppendExpressionTextToRungComment with
@@ -435,3 +441,4 @@ module XgiExpressionConvertorModule =
             |> escapeXml
 
         CommentedXgiStatements(rungComment, xgiStatements)
+

@@ -15,6 +15,7 @@
 		<Compile Include="Prelude\PLCStorageManager.fs" />
 		<Compile Include="TagType.fs" />
 		<Compile Include="FlatExpression.fs" />
+		<Compile Include="CollectStorages.fs" />
 		<Compile Include="Command.fs" />
 		<!--
 		<Compile Include="QGraph\QGraph.Prelude.fs" />

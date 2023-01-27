@@ -181,10 +181,11 @@ type XgiDrawingTest() =
         // Symbol 정의
         let symbolInfos = [
             let intInitValue:BoxedObjectHolder = {Object=0}
-            XGITag.createSymbolInfo "EN" "EN" "BOOL" {Object=false}
-            XGITag.createSymbolInfo "IN1" "IN1" "INT" intInitValue
-            XGITag.createSymbolInfo "IN2" "IN2" "INT" intInitValue
-            XGITag.createSymbolInfo "Q" "Q" "INT" intInitValue
+            let kind = (int Variable.Kind.VAR)
+            XGITag.createSymbolInfo "EN"  "EN"  "BOOL" kind {Object=false}
+            XGITag.createSymbolInfo "IN1" "IN1" "INT"  kind intInitValue
+            XGITag.createSymbolInfo "IN2" "IN2" "INT"  kind intInitValue
+            XGITag.createSymbolInfo "Q"   "Q"   "INT"  kind intInitValue
         ]
 
         let symbolsLocalXml = XGITag.generateLocalSymbolsXml symbolInfos

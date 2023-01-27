@@ -42,7 +42,7 @@ module XgiFixtures =
         Runtime.Target <- runtimeTarget
         disposable { Runtime.Target <- runtimeTargetBackup }
 
-    let generateXml projName (storages:Storages) (commentedStatements:CommentedStatement list) : string =
+    let generateXmlForTest projName (storages:Storages) (commentedStatements:CommentedStatement list) : string =
         verify (Runtime.Target = XGI)
 
         (* Just for fitting global storage, legacy test code 와의 호환성 확보 *)
@@ -66,6 +66,7 @@ module XgiFixtures =
             /// POU ladder 최상단의 comment
             Comment = "DS Logic for XGI"
             LocalStorages = storages
+            GlobalStorages = globalStorages
             CommentedStatements = commentedStatements
         }
         let projParams:XgiProjectParams = {

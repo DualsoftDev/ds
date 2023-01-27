@@ -25,7 +25,7 @@ type XgiRisingFallingTest() =
         statements[0].ToText() === "$qx := $ix && !($ix) && rising($ix) && falling($ix)"
 
         let f = get_current_function_name()
-        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
     [<Test>]
@@ -42,6 +42,6 @@ type XgiRisingFallingTest() =
         statements[0].ToText() === "ppulse($qx) := $ix"
 
         let f = get_current_function_name()
-        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 

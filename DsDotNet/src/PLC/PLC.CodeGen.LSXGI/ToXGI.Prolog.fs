@@ -38,9 +38,9 @@ module XgiPrologModule =
     }
 
 
-    /// name -> comment -> plcType -> SymbolInfo
+    /// name -> comment -> plcType -> kind -> SymbolInfo
     let mutable fwdCreateSymbolInfo =
-        let dummy (name:string) (comment:string) (plcType:string) (initValue:BoxedObjectHolder) : SymbolInfo =
+        let dummy (name:string) (comment:string) (plcType:string) (kind:int) (initValue:BoxedObjectHolder) : SymbolInfo =
             failwithlog "Should be reimplemented."
         dummy
 

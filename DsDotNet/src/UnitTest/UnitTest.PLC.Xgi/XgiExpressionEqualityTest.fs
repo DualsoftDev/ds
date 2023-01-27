@@ -43,7 +43,7 @@ type XgiExpEqualityTest() =
     """
             let statements = parseCode storages code
             let f = get_current_function_name()
-            let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+            let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
             saveTestResult f xml
         )
 
@@ -69,7 +69,7 @@ type XgiExpEqualityTest() =
     """
             let statements = parseCode storages code
             let f = get_current_function_name()
-            let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+            let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
             saveTestResult f xml
         )
 
@@ -145,7 +145,7 @@ type XgiExpEqualityTest() =
 """
         let statements = parseCode storages code
         let f = get_current_function_name()
-        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
 

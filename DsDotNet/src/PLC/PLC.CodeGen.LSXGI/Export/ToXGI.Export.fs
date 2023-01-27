@@ -112,9 +112,11 @@ module XgiExportModule =
         rgi <- rgi.Add(rungEnd)
         rgi.Xmls |> List.rev |> String.concat "\r\n"
 
+
+
     /// [S] -> [XS]
     let internal commentedStatementsToCommentedXgiStatements
-        (storages:IStorage seq)
+        (localStorages:IStorage seq)
         (commentedStatements:CommentedStatement list)
         : IStorage list * CommentedXgiStatements list
       =
@@ -124,13 +126,13 @@ module XgiExportModule =
         *)
 
         let newCommentedStatements = ResizeArray<CommentedXgiStatements>()
-        let newStorages = ResizeArray<IStorage>(storages)
+        let newLocalStorages = ResizeArray<IStorage>(localStorages)
         for cmtSt in commentedStatements do
-            let xgiCmtStmts = commentedStatement2CommentedXgiStatements newStorages cmtSt
+            let xgiCmtStmts = commentedStatement2CommentedXgiStatements newLocalStorages cmtSt
             let (CommentAndXgiStatements(comment_, xgiStatements)) = xgiCmtStmts
             if xgiStatements.Any() then
                 newCommentedStatements.Add xgiCmtStmts
-        newStorages.ToFSharpList(), newCommentedStatements.ToFSharpList()
+        newLocalStorages.ToFSharpList(), newCommentedStatements.ToFSharpList()
 
 
 
@@ -142,6 +144,8 @@ module XgiExportModule =
         /// POU ladder 최상단의 comment
         Comment: string
         LocalStorages:Storages
+        /// 참조용 global storages
+        GlobalStorages:Storages
         CommentedStatements: CommentedStatement list
     }
     type XgiProjectParams = {
@@ -155,8 +159,14 @@ module XgiExportModule =
     type XgiPOUParams with
         member x.GenerateXmlString() = x.GenerateXmlNode().OuterXml
         member x.GenerateXmlNode() : XmlNode =
-            let {TaskName=taskName; POUName=pouName; Comment=comment; LocalStorages=localStorages; CommentedStatements=commentedStatements} = x
+            let {TaskName=taskName; POUName=pouName; Comment=comment; GlobalStorages=globalStorages; LocalStorages=localStorages; CommentedStatements=commentedStatements} = x
             let newLocalStorages, commentedXgiStatements = commentedStatementsToCommentedXgiStatements localStorages.Values commentedStatements
+            let globalStoragesRefereces =
+                commentedStatements
+                    .Collect(fun cstmt -> cstmt.CollectStorages())
+                    .Except(newLocalStorages)
+                    .ToFSharpList()
+
             let localStoragesXml = storagesToLocalXml newLocalStorages
             let rungsXml = generateRungs comment commentedXgiStatements
 

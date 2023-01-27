@@ -239,6 +239,7 @@ module ExpressionModule =
                 match a with
                 | DuCopy (condition:IExpression<bool>, source:IExpression,target:IStorage)-> target.BoxedValue
             | DuAugmentedPLCFunction (f:FunctionParameters) ->  false  // Function은 항상 false 함수에 따른다.
+        member x.CollectStorages() : IStorage list = x.Statement.CollectStorages()
 
     let (|CommentAndStatement|) = function | CommentedStatement(x, y) -> x, y
     let commentAndStatement = (|CommentAndStatement|)

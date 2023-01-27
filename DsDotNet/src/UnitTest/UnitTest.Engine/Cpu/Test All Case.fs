@@ -24,6 +24,7 @@ type TestAllCase() =
                                 /// POU ladder 최상단의 comment
                         Comment = "DS Logic for XGI"
                         LocalStorages = localStorages
+                        GlobalStorages = globalStorages
                         CommentedStatements = pouGen.CommentedStatements()
                     }
                     pouParams

@@ -424,8 +424,12 @@ module XgiExpressionConvertorModule =
         augmentedStatements @ newStatements |> List.ofSeq
 
     /// S -> [XS]
-    let internal commentedStatement2CommentedXgiStatements (storage:XgiStorage) (CommentedStatement(comment, statement)) : CommentedXgiStatements =
-        let xgiStatements = statement2XgiStatements storage statement
+    let internal commentedStatement2CommentedXgiStatements
+        (localStorages:XgiStorage)
+        (CommentedStatement(comment, statement))
+        : CommentedXgiStatements
+      =
+        let xgiStatements = statement2XgiStatements localStorages statement
         let rungComment =
             let statementComment = statement.ToText()
             match comment.NonNullAny(), xgiGenerationOptions.IsAppendExpressionTextToRungComment with
@@ -436,3 +440,4 @@ module XgiExpressionConvertorModule =
             |> escapeXml
 
         CommentedXgiStatements(rungComment, xgiStatements)
+

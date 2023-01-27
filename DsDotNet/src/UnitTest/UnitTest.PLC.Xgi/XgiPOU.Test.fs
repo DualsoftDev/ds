@@ -18,19 +18,21 @@ type XgiPOUTest() =
         PLC.CodeGen.LSXGI.ModuleInitializer.Initialize()
         setRuntimeTarget XGI |> ignore
 
+    let globalStorages = Storages()
     let pou11 =
-        let storages = Storages()
+        let localStorages = Storages()
         let code = """
             bool xx0 = false;
             bool xx1 = false;
             $xx1 := $xx0;
 """
-        let statements = parseCode storages code |> map withNoComment
+        let statements = parseCode localStorages code |> map withNoComment
         {
             TaskName = "Scan Program"
             POUName = "POU1"
             Comment = "POU1"
-            LocalStorages = storages
+            LocalStorages = localStorages
+            GlobalStorages = globalStorages
             CommentedStatements = statements
         }
     let pou12 =
@@ -46,6 +48,7 @@ type XgiPOUTest() =
             POUName = "POU2"
             Comment = "POU2"
             LocalStorages = storages
+            GlobalStorages = globalStorages
             CommentedStatements = statements
         }
 
@@ -62,6 +65,7 @@ type XgiPOUTest() =
             POUName = "POU1"
             Comment = "POU1"
             LocalStorages = storages
+            GlobalStorages = globalStorages
             CommentedStatements = statements
         }
 

@@ -181,7 +181,10 @@ module XgiExportModule =
                         (* 'Timer1.Q' 등의 symbol 이 사용되었으면, Timer1 을 global storage 의 reference 로 간주하고, 이를 local var 에 external 로 등록한다. *)
                         match stg.Name with
                         | RegexPattern @"(^[^\.]+)\.(.*)$" [structName; tail] ->
-                            yield globalStorages[structName]
+                            if globalStorages.ContainsKey structName then
+                                yield globalStorages[structName]
+                            else
+                                logWarn $"Unknown struct name {structName}"
                         | _ ->
                             yield stg
                 ] |> distinct

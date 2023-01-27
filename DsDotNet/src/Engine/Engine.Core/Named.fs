@@ -158,6 +158,7 @@ type NameUtil =
     /// DS 문법에서 사용하는 identifier (Segment, flow, call 등의 이름)가 적법한지 검사.
     /// 적법하지 않으면 double quote 로 감싸주어야 한다.
     [<Extension>] static member IsValidIdentifier (identifier:string) = isValidIdentifier identifier
+    [<Extension>] static member IsValidIdentifier (identifier:char) = isValidIdentifier (identifier.ToString())
     [<Extension>] static member IsQuotationRequired (identifier:string) = isValidIdentifier(identifier) |> not
     [<Extension>] static member IsQuotationRequired (identifier:char) = isValidIdentifier(identifier.ToString()) |> not
     [<Extension>] static member QuoteOnDemand (identifier:string) = quoteOnDemand identifier

@@ -122,22 +122,6 @@ module CodeConvertUtil =
         then sets.ToAnd()
         else real._on.Expr
 
-    //let rec getCoinTags(v:Vertex, isInTag:bool) : Tag<bool> seq =
-    //        match v with
-    //        | :? Call as c ->
-    //            [ for j in c.CallTargetJob.DeviceDefs do
-    //                let typ = if isInTag then "I" else "O"
-    //                Tag( $"{j.ApiName}_{typ}", "", false) :> Tag<bool>
-    //            ]
-    //        | :? Alias as a ->
-    //            match a.TargetWrapper with
-    //            | DuAliasTargetReal ar    -> getCoinTags( ar, isInTag)
-    //            | DuAliasTargetCall ac    -> getCoinTags( ac, isInTag)
-    //            | DuAliasTargetRealEx ao  -> getCoinTags( ao, isInTag)
-    //        | _ -> failwithlog "Error"
-
-    //let getTxTags(c:Call) : DsTag<bool> seq = c.CallTargetJob.DeviceDefs.Select(fun j-> j.ApiItem.TX)
-
     [<AutoOpen>]
     [<Extension>]
     type CodeConvertUtilExt =

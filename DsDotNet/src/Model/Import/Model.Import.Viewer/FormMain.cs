@@ -235,6 +235,10 @@ namespace Dual.Model.Import
         {
             richTextBox_Debug.Clear();
             richTextBox_Debug.AppendText($"{DateTime.Now} : Log Clear");
+            checkedListBox_My.Items.Clear();
+            checkedListBox_My.Enabled= false;
+            checkedListBox_Ex.Items.Clear();
+            checkedListBox_Ex.Enabled= false;
         }
 
         private  void button_TestStart_Click(object sender, EventArgs e)

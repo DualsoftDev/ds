@@ -3,6 +3,7 @@ namespace Engine.CodeGenCPU
 open Engine.Core
 open Engine.Common.FS
 open System.Text.RegularExpressions
+open System
 
 [<AutoOpen>]
 module TagManagerUtil =
@@ -19,15 +20,21 @@ module TagManagerUtil =
         unique name 0 storages
 
     let getValidName (name:string) =
+        let ableChar(c:char) =
+            Char.IsNumber(c) ||
+            ['[';']'].ToResizeArray().Contains(c)
         [
             for c in name do
-                if c.IsQuotationRequired()
-                then yield "_"
-                else yield c.ToString()
+                if ableChar(c) || c.IsValidIdentifier()
+                then yield c.ToString()
+                else yield "_"
+
         ] |> String.concat ""
 
     let getPlcTagAbleName (name:string) (storages:Storages) =
-        name |> getValidName |> getUniqueName  storages
+        if name.StartsWith("_")
+        then name |> getValidName
+        else name |> getValidName |> getUniqueName  storages
         // UniqueName.generate <kwak> Storages 에서 중복 피하는걸 를 어떻게 쓸지 잘모르겠어요 ㅜ
 
 

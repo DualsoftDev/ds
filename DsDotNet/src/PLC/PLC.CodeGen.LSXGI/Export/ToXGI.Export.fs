@@ -116,6 +116,7 @@ module XgiExportModule =
 
     /// [S] -> [XS]
     let internal commentedStatementsToCommentedXgiStatements
+        (prjParam:XgiProjectParams)
         (localStorages:IStorage seq)
         (commentedStatements:CommentedStatement list)
         : IStorage list * CommentedXgiStatements list
@@ -135,35 +136,14 @@ module XgiExportModule =
         newLocalStorages.ToFSharpList(), newCommentedStatements.ToFSharpList()
 
 
-
-    type XgiPOUParams = {
-        /// POU name.  "DsLogic"
-        POUName : string
-        /// POU container task name
-        TaskName: string
-        /// POU ladder 최상단의 comment
-        Comment : string
-        LocalStorages : Storages
-        /// 참조용 global storages
-        GlobalStorages: Storages
-        CommentedStatements : CommentedStatement list
-    }
-    type XgiProjectParams = {
-        ProjectName    : string
-        ProjectComment : string
-        GlobalStorages : Storages
-        ExistingLSISprj: string option
-        POUs           : XgiPOUParams list
-    }
-
     type XgiPOUParams with
-        member x.GenerateXmlString() = x.GenerateXmlNode().OuterXml
-        member x.GenerateXmlNode() : XmlNode =
+        member x.GenerateXmlString(prjParam:XgiProjectParams) = x.GenerateXmlNode(prjParam).OuterXml
+        member x.GenerateXmlNode(prjParam:XgiProjectParams) : XmlNode =
             let { TaskName=taskName; POUName=pouName; Comment=comment;
                   GlobalStorages=globalStorages; LocalStorages=localStorages;
                   CommentedStatements=commentedStatements} = x
             let newLocalStorages, commentedXgiStatements =
-                commentedStatementsToCommentedXgiStatements localStorages.Values commentedStatements
+                commentedStatementsToCommentedXgiStatements prjParam localStorages.Values commentedStatements
 
 
             let globalStoragesRefereces =
@@ -225,7 +205,7 @@ module XgiExportModule =
             programTemplate
 
 
-    type XgiProjectParams with
+    and XgiProjectParams with
         member private x.GetTemplateXmlDoc() =
             x.ExistingLSISprj
             |> Option.map XmlDocument.loadFromFile
@@ -281,7 +261,7 @@ module XgiExportModule =
                 let xnPrograms = xdoc.SelectSingleNode("//POU/Programs")
                 xnPrograms.RemoveChildren() |> ignore
                 for pou in pous do
-                    pou.GenerateXmlNode() |> xnPrograms.AdoptChild |> ignore
+                    pou.GenerateXmlNode(x) |> xnPrograms.AdoptChild |> ignore
 
             xdoc
 

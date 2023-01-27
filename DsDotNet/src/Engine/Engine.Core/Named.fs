@@ -140,6 +140,19 @@ module TextUtil =
         member val TagManager = getNull<ITagManager>() with get, set
 
 
+[<RequireQualifiedAccess>]
+module UniqueName =
+    type NameGenerator = (unit -> string)
+    let private genDict = Dictionary<string, NameGenerator>()
+    let generate prefix =
+        if genDict.ContainsKey prefix then
+            genDict.[prefix]()
+        else
+            let f = incrementalKeywordGenerator prefix 0
+            genDict.Add(prefix, f)
+            f()
+    let resetAll() = genDict.Clear()
+
 [<Extension>]
 type NameUtil =
     /// DS 문법에서 사용하는 identifier (Segment, flow, call 등의 이름)가 적법한지 검사.

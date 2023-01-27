@@ -1,6 +1,7 @@
 namespace T
 
 open NUnit.Framework
+open Engine.Core
 
 
 [<AutoOpen>]
@@ -18,3 +19,24 @@ module MiscTestModule =
             let ver = get_newtonsoft_json_version()
             let major, minor = ver.Major, ver.Minor
             major >= 13 === true
+
+
+        [<Test>]
+        member __.``Unique name generator test`` () =
+            [ for i in 1..5 -> UniqueName.generate "MyTON" ]
+            |> SeqEq ["MyTON0"; "MyTON1"; "MyTON2"; "MyTON3"; "MyTON4"; ]
+
+            [ for i in 1..5 -> UniqueName.generate "MyCTU" ]
+            |> SeqEq ["MyCTU0"; "MyCTU1"; "MyCTU2"; "MyCTU3"; "MyCTU4"; ]
+
+            [ for i in 1..5 -> UniqueName.generate "MyTON" ]
+            |> SeqEq ["MyTON5"; "MyTON6"; "MyTON7"; "MyTON8"; "MyTON9"; ]
+
+            [ for i in 1..5 -> UniqueName.generate "MyCTU" ]
+            |> SeqEq ["MyCTU5"; "MyCTU6"; "MyCTU7"; "MyCTU8"; "MyCTU9"; ]
+
+            UniqueName.resetAll()
+
+            [ for i in 1..5 -> UniqueName.generate "MyTON" ]
+            |> SeqEq ["MyTON0"; "MyTON1"; "MyTON2"; "MyTON3"; "MyTON4"; ]
+

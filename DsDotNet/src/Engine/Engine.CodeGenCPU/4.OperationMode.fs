@@ -56,5 +56,5 @@ type Flow with
         let set = !!f.aop.Expr
         let rst = f._off.Expr
 
-        (set, rst) --| (f.sop, "O8")
+        (set, rst) --| (f.iop, "O8")
 

@@ -177,13 +177,13 @@ module PPTObjectModule =
 
     let getLampType(key:string) =
         match (TrimSpace key).ToUpper() with
-        | "A"   -> LampType.DuAutoModeLamp
-        | "M"   -> LampType.DuManualModeLamp
-        | "D"   -> LampType.DuDriveModeLamp
-        | "S"   -> LampType.DuStopModeLamp
-        | "E"   -> LampType.DuEmergencyModeLamp
-        | "T"   -> LampType.DuTestModeLamp
-        | "R"   -> LampType.DuReadyModeLamp
+        | "A"   -> LampType.DuAutoLamp
+        | "M"   -> LampType.DuManualLamp
+        | "D"   -> LampType.DuDriveLamp
+        | "S"   -> LampType.DuStopLamp
+        | "E"   -> LampType.DuEmergencyLamp
+        | "T"   -> LampType.DuTestDriveLamp
+        | "R"   -> LampType.DuReadyLamp
         | _     ->  failwith $"{key} is Error Type"
 
     let getConditionType(key:string) =

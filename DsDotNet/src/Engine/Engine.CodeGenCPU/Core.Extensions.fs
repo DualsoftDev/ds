@@ -114,6 +114,7 @@ module ConvertCoreExt =
         member f.top    = getFM(f).GetFlowTag(FlowTag.TEST_OP     ) //  Test  Operation Mode (시운전)
         member f.sop    = getFM(f).GetFlowTag(FlowTag.STOP_OP     ) // Stop State
         member f.eop    = getFM(f).GetFlowTag(FlowTag.EMERGENCY_OP) // Emergency State
+        member f.iop    = getFM(f).GetFlowTag(FlowTag.IDLE_OP) // Emergency State
         member f.auto   = getFM(f).GetFlowTag(FlowTag.AUTO_BIT    )
         member f.manual = getFM(f).GetFlowTag(FlowTag.MANUAL_BIT  )
         member f.drive  = getFM(f).GetFlowTag(FlowTag.DRIVE_BIT   )

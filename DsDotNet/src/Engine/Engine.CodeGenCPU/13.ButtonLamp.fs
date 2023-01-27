@@ -17,14 +17,15 @@ type DsSystem with
             let sets =
                 let f = lamp.SettingFlow
                 match lamp.LampType with
-                | DuAutoModeLamp      -> f.aop.Expr
-                | DuManualModeLamp    -> f.mop.Expr
-                | DuDriveModeLamp     -> f.dop.Expr
-                | DuStopModeLamp      -> f.sop.Expr
-                | DuEmergencyModeLamp -> f.eop.Expr
-                | DuTestModeLamp      -> f.top.Expr
-                | DuReadyModeLamp     -> f.rop.Expr
-
+                | DuAutoLamp      -> f.aop.Expr
+                | DuManualLamp    -> f.mop.Expr
+                | DuDriveLamp     -> f.dop.Expr
+                | DuStopLamp      -> f.sop.Expr
+                | DuEmergencyLamp -> f.eop.Expr
+                | DuTestDriveLamp      -> f.top.Expr
+                | DuReadyLamp     -> f.rop.Expr
+                | DuIdleLamp     -> f.rop.Expr
+                
             let out = lamp.OutTag :?> Tag<bool>
             yield (sets, s._off.Expr) --| (out, "B2" )
     ]

@@ -241,13 +241,13 @@ namespace Dual.Model.Import
                     {
 
                         nNode.Attr.Shape = Shape.Box;
-                        if (viewNode.LampType.Value == LampType.DuAutoModeLamp) nNode.Attr.FillColor = Color.DodgerBlue;
-                        if (viewNode.LampType.Value == LampType.DuManualModeLamp) nNode.Attr.FillColor = Color.DarkSlateBlue;
-                        if (viewNode.LampType.Value == LampType.DuDriveModeLamp) nNode.Attr.FillColor = Color.DarkGoldenrod;
-                        if (viewNode.LampType.Value == LampType.DuStopModeLamp) nNode.Attr.FillColor = Color.Firebrick;
-                        if (viewNode.LampType.Value == LampType.DuEmergencyModeLamp) nNode.Attr.FillColor = Color.MediumVioletRed;
-                        if (viewNode.LampType.Value == LampType.DuTestModeLamp) nNode.Attr.FillColor = Color.CadetBlue;
-                        if (viewNode.LampType.Value == LampType.DuReadyModeLamp) nNode.Attr.FillColor = Color.Green;
+                        if (viewNode.LampType.Value == LampType.DuAutoLamp) nNode.Attr.FillColor = Color.DodgerBlue;
+                        if (viewNode.LampType.Value == LampType.DuManualLamp) nNode.Attr.FillColor = Color.DarkSlateBlue;
+                        if (viewNode.LampType.Value == LampType.DuDriveLamp) nNode.Attr.FillColor = Color.DarkGoldenrod;
+                        if (viewNode.LampType.Value == LampType.DuStopLamp) nNode.Attr.FillColor = Color.Firebrick;
+                        if (viewNode.LampType.Value == LampType.DuEmergencyLamp) nNode.Attr.FillColor = Color.MediumVioletRed;
+                        if (viewNode.LampType.Value == LampType.DuTestDriveLamp) nNode.Attr.FillColor = Color.CadetBlue;
+                        if (viewNode.LampType.Value == LampType.DuReadyLamp) nNode.Attr.FillColor = Color.Green;
                     }
                 }
 

@@ -26,15 +26,26 @@ module DsType =
         | DuHomeBTN      //홈(원위치) Push 버튼
         | DuReadyBTN     //운전 준비 Push 버튼
 
-    ///LampType  종류
+    ///LampType  종류  old
+    //type LampType =
+    //    | DuAutoLamp      //자동 Select 버튼
+    //    | DuManualLamp    //수동 Select 버튼
+    //    | DuDriveLamp     //운전 모드 램프
+    //    | DuStopLamp      //정지 모드 램프
+    //    | DuEmergencyLamp //비상 모드 램프
+    //    | DuTestDriveLamp      //시운전 모드 램프
+    //    | DuReadyLamp     //대기 모드 램프
+
+        ///LampType  종류 new
     type LampType =
-        | DuAutoModeLamp      //자동 Select 버튼
-        | DuManualModeLamp    //수동 Select 버튼
-        | DuDriveModeLamp     //운전 모드 램프
-        | DuStopModeLamp      //정지 모드 램프
-        | DuEmergencyModeLamp //비상 모드 램프
-        | DuTestModeLamp      //시운전 모드 램프
-        | DuReadyModeLamp     //대기 모드 램프
+        | DuAutoLamp      //자동  버튼
+        | DuManualLamp    //수동  버튼
+        | DuDriveLamp     //운전  램프
+        | DuStopLamp      //정지  램프
+        | DuEmergencyLamp //비상  램프
+        | DuTestDriveLamp //시운전  램프
+        | DuReadyLamp     //준비  램프
+        | DuIdleLamp      //대기  램프
 
     type ConditionType =
         | DuReadyState

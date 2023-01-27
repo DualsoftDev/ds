@@ -85,13 +85,13 @@ module EtcListenerModule =
                     let targetLmpType =
                         let fstType = first.GetType()
                         match first with
-                        | :? AutoBlockContext      -> DuAutoModeLamp
-                        | :? ManualBlockContext    -> DuManualModeLamp
-                        | :? DriveBlockContext     -> DuDriveModeLamp
-                        | :? StopBlockContext      -> DuStopModeLamp
-                        | :? EmergencyBlockContext -> DuEmergencyModeLamp
-                        | :? TestBlockContext      -> DuTestModeLamp
-                        | :? ReadyBlockContext     -> DuReadyModeLamp
+                        | :? AutoBlockContext      -> DuAutoLamp
+                        | :? ManualBlockContext    -> DuManualLamp
+                        | :? DriveBlockContext     -> DuDriveLamp
+                        | :? StopBlockContext      -> DuStopLamp
+                        | :? EmergencyBlockContext -> DuEmergencyLamp
+                        | :? TestBlockContext      -> DuTestDriveLamp
+                        | :? ReadyBlockContext     -> DuReadyLamp
                         | _ -> failwith $"lamp type error {fstType}"
 
                     let lampDefs = first.Descendants<LampDefContext>().ToArray()

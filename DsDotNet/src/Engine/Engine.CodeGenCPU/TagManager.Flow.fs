@@ -17,6 +17,7 @@ module FlowManagerModule =
     |TEST_OP
     |STOP_OP
     |EMERGENCY_OP
+    |IDLE_OP
     |AUTO_BIT           //Flow bit
     |MANUAL_BIT
     |DRIVE_BIT
@@ -35,15 +36,16 @@ module FlowManagerModule =
         let sys =  f.System
         let s =  sys.TagManager.Storages
 
-        let f_rop    = createPlanVarBool s $"{f.Name}_ROP_"          // Ready Operation Mode
-        let f_aop    = createPlanVarBool s $"{f.Name}_AOP_"          // Auto Operation Mode
-        let f_mop    = createPlanVarBool s $"{f.Name}_MOP_"          // Manual Operation Mode
+        let f_rop    = createPlanVarBool s $"{f.Name}_ROP_"          // Ready Operation State
+        let f_aop    = createPlanVarBool s $"{f.Name}_AOP_"          // Auto Operation State
+        let f_mop    = createPlanVarBool s $"{f.Name}_MOP_"          // Manual Operation State
+        let f_sop    = createPlanVarBool s $"{f.Name}_SOP_"          // Stop Operation State
+        let f_eop    = createPlanVarBool s $"{f.Name}_EOP_"          // Emergency Operation State
         let f_dop    = createPlanVarBool s $"{f.Name}_DOP_"          // Drive Operation Mode
-        let f_top    = createPlanVarBool s $"{f.Name}_TOP_"          //  Test  Operation Mode (시운전)
-        let f_sop    = createPlanVarBool s $"{f.Name}_SOP_"          // Stop State
-        let f_eop    = createPlanVarBool s $"{f.Name}_EOP_"          // Emergency State
-        let f_readycondi = createPlanVarBool s $"{f.Name}_SCR_"  //system condition ready
-        let f_drivecondi = createPlanVarBool s $"{f.Name}_SCD_"  //system condition drive
+        let f_top    = createPlanVarBool s $"{f.Name}_TOP_"          // Test  Operation Mode (시운전)
+        let f_iop    = createPlanVarBool s $"{f.Name}_IOP_"          // Idle  Operation Mode
+        let f_readycondi = createPlanVarBool s $"{f.Name}_SCR_"      //system condition ready
+        let f_drivecondi = createPlanVarBool s $"{f.Name}_SCD_"      //system condition drive
         let f_auto   = createPlanVarBool s $"{f.Name}_auto"
         let f_manual = createPlanVarBool s $"{f.Name}_manual"
         let f_drive  = createPlanVarBool s $"{f.Name}_drive"
@@ -68,6 +70,7 @@ module FlowManagerModule =
                 |TEST_OP         -> f_top
                 |STOP_OP         -> f_sop
                 |EMERGENCY_OP    -> f_eop
+                |IDLE_OP         -> f_iop
                 |AUTO_BIT        -> f_auto
                 |MANUAL_BIT      -> f_manual
                 |DRIVE_BIT       -> f_drive

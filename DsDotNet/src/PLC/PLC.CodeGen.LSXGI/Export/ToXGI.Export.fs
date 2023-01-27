@@ -80,31 +80,31 @@ module XgiExportModule =
                 | Statement.DuTimer timerStatement ->
                     let command = FunctionBlockCmd(TimerMode(timerStatement))
                     let rgiSub = xmlRung None (Some command) rgi.Y
-                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
+                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = 1+rgiSub.Y}
 
                 | Statement.DuCounter counterStatement ->
                     let command = FunctionBlockCmd(CounterMode(counterStatement))
                     let rgiSub = xmlRung None (Some command) rgi.Y
-                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
+                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = 1+rgiSub.Y}
 
                 | DuAugmentedPLCFunction ({FunctionName = (">"|">="|"<"|"<="|"="|"!=") as op; Arguments = args; Output=output }) ->
                     let fn = operatorToXgiFunctionName op
                     let command = PredicateCmd(Compare(fn, output, args))
                     let rgiSub = xmlRung None (Some command) rgi.Y
-                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
+                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = 1+rgiSub.Y}
 
                 | DuAugmentedPLCFunction ({FunctionName = ("+"|"-"|"*"|"/") as op; Arguments = args; Output=output }) ->
                     let fn = operatorToXgiFunctionName op
                     let command = FunctionCmd(Arithmatic(fn, output, args))
                     let rgiSub = xmlRung None (Some command) rgi.Y
-                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
+                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = 1+rgiSub.Y}
                 | DuAugmentedPLCFunction ({FunctionName = XgiConstants.FunctionNameMove as func; Arguments = args; Output=output }) ->
                     let condition = args[0] :?> IExpression<bool>
                     let source = args[1]
                     let target = output :?> IStorage
                     let command = ActionCmd(Move(condition, source, target))
                     let rgiSub = xmlRung None (Some command) rgi.Y
-                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = (*rgi.Y +*) 1+rgiSub.Y}
+                    rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = 1+rgiSub.Y}
                 | _ ->
                     failwithlog "Not yet"
 
@@ -113,8 +113,10 @@ module XgiExportModule =
         rgi.Xmls |> List.rev |> String.concat "\r\n"
 
 
+
+    /// [S] -> [XS]
     let internal commentedStatementsToCommentedXgiStatements
-        (storages:IStorage seq)
+        (localStorages:IStorage seq)
         (commentedStatements:CommentedStatement list)
         : IStorage list * CommentedXgiStatements list
       =
@@ -124,13 +126,13 @@ module XgiExportModule =
         *)
 
         let newCommentedStatements = ResizeArray<CommentedXgiStatements>()
-        let newStorages = ResizeArray<IStorage>(storages)
+        let newLocalStorages = ResizeArray<IStorage>(localStorages)
         for cmtSt in commentedStatements do
-            let xgiCmtStmts = commentedStatement2CommentedXgiStatements newStorages cmtSt
+            let xgiCmtStmts = commentedStatement2CommentedXgiStatements newLocalStorages cmtSt
             let (CommentAndXgiStatements(comment_, xgiStatements)) = xgiCmtStmts
             if xgiStatements.Any() then
                 newCommentedStatements.Add xgiCmtStmts
-        newStorages.ToFSharpList(), newCommentedStatements.ToFSharpList()
+        newLocalStorages.ToFSharpList(), newCommentedStatements.ToFSharpList()
 
 
 
@@ -142,6 +144,8 @@ module XgiExportModule =
         /// POU ladder 최상단의 comment
         Comment: string
         LocalStorages:Storages
+        /// 참조용 global storages
+        GlobalStorages:Storages
         CommentedStatements: CommentedStatement list
     }
     type XgiProjectParams = {
@@ -155,9 +159,45 @@ module XgiExportModule =
     type XgiPOUParams with
         member x.GenerateXmlString() = x.GenerateXmlNode().OuterXml
         member x.GenerateXmlNode() : XmlNode =
-            let {TaskName=taskName; POUName=pouName; Comment=comment; LocalStorages=localStorages; CommentedStatements=commentedStatements} = x
+            let {TaskName=taskName; POUName=pouName; Comment=comment; GlobalStorages=globalStorages; LocalStorages=localStorages; CommentedStatements=commentedStatements} = x
             let newLocalStorages, commentedXgiStatements = commentedStatementsToCommentedXgiStatements localStorages.Values commentedStatements
-            let localStoragesXml = storagesToLocalXml newLocalStorages
+
+
+            let globalStoragesRefereces =
+                [
+                    // POU 에 사용된 모든 storages (global + local 모두 포함)
+                    let allUsedStorages = [
+                        for cstmt in commentedStatements do
+                            yield! cstmt.CollectStorages()
+                    ]
+
+                    if pouName = "My" then
+                        let xxx1 = allUsedStorages.Where(fun stg -> stg.Name = "TOUT").ToArray()
+                        let xxx2 = allUsedStorages.Where(fun stg -> stg.Name = "TON").ToArray()
+                        let xxx3 = globalStorages["TOUT"]
+                        let xxx4 = globalStorages["TON"]
+                        noop()
+                    for stg in allUsedStorages.Except(newLocalStorages) do
+                        (* 'Timer1.Q' 등의 symbol 이 사용되었으면, Timer1 을 global storage 의 reference 로 간주하고, 이를 local var 에 external 로 등록한다. *)
+                        match stg.Name with
+                        | RegexPattern @"(^[^\.]+)\.(.*)$" [structName; tail] ->
+                            yield globalStorages[structName]
+                        | _ ->
+                            yield stg
+                ] |> distinct
+                  |> List.sortBy(fun stg -> stg.Name)
+
+            (* storage 참조 무결성 체크 *)
+            do
+                for ref in globalStoragesRefereces do
+                    let name = ref.Name
+                    let inGlobal = globalStorages.ContainsKey name
+                    let inLocal  = localStorages.ContainsKey name
+
+                    if not (inGlobal || inLocal) then
+                        failwithf "Storage '%s' is not defined" name
+
+            let localStoragesXml = storagesToLocalXml newLocalStorages globalStoragesRefereces
             let rungsXml = generateRungs comment commentedXgiStatements
 
             /// POU/Programs/Program

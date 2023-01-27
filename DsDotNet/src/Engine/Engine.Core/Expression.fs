@@ -100,6 +100,7 @@ module ExpressionModule =
         member _.PRE = timerStruct.PRE
         member _.ACC = timerStruct.ACC
         member _.RES = timerStruct.RES
+        member _.TimerStruct = timerStruct
 
         member val InputEvaluateStatements:Statement list = [] with get, set
         interface IDisposable with
@@ -110,6 +111,7 @@ module ExpressionModule =
         let accumulator = new CountAccumulator(typ, counterStruct)
 
         member _.Type = typ
+        member _.CounterStruct = counterStruct
         member _.Name = counterStruct.Name
         /// Count up
         member _.CU = counterStruct.CU
@@ -139,7 +141,13 @@ module ExpressionModule =
         ResetCondition:  IExpression<bool> option
         /// Timer 생성시의 function name
         FunctionName:string
-    }
+    } with
+        member x.CollectStorages() : IStorage list = [
+            yield x.Timer.TimerStruct
+            let conditions = [x.RungInCondition; x.ResetCondition; ] |> List.choose id
+            for cond in conditions do
+                yield! cond.CollectStorages()
+        ]
 
 
     type CounterStatement = {
@@ -151,10 +159,24 @@ module ExpressionModule =
         LoadCondition  : IExpression<bool> option
         /// Counter 생성시의 function name
         FunctionName   : string
-    }
+    } with
+        member x.CollectStorages() : IStorage list = [
+            yield x.Counter.CounterStruct
+            let conditions = [x.UpCondition; x.DownCondition; x.ResetCondition; x.LoadCondition] |> List.choose id
+            for cond in conditions do
+                yield! cond.CollectStorages()
+        ]
 
     type ActionStatement =
         | DuCopy of condition:IExpression<bool> * source:IExpression * target:IStorage
+        with
+            member x.CollectStorages() : IStorage list = [
+                match x with
+                | DuCopy (cond, src, tgt) ->
+                    yield! cond.CollectStorages()
+                    yield! src.CollectStorages()
+                    yield tgt
+            ]
 
     /// Pulse coil '-(P)-' 생성 및 평가를 위한 구조
     type HistoryFlag() =
@@ -211,9 +233,9 @@ module ExpressionModule =
         /// 변수 선언.  PLC rung 생성시에는 관여되지 않는다.
         | DuVarDecl of expression:IExpression * variable:IStorage
 
-        | DuTimer of TimerStatement
+        | DuTimer   of TimerStatement
         | DuCounter of CounterStatement
-        | DuAction of ActionStatement
+        | DuAction  of ActionStatement
 
         | DuAugmentedPLCFunction of FunctionParameters
 
@@ -231,6 +253,7 @@ module ExpressionModule =
                 match a with
                 | DuCopy (condition:IExpression<bool>, source:IExpression,target:IStorage)-> target.BoxedValue
             | DuAugmentedPLCFunction (f:FunctionParameters) ->  false  // Function은 항상 false 함수에 따른다.
+        member x.CollectStorages() : IStorage list = x.Statement.CollectStorages()
 
     let (|CommentAndStatement|) = function | CommentedStatement(x, y) -> x, y
     let commentAndStatement = (|CommentAndStatement|)
@@ -312,6 +335,26 @@ module ExpressionModule =
                 $"copyIf({condition.ToText(false)}, {source.ToText(false)}, {target.ToText()})"
             | DuAugmentedPLCFunction _ ->
                 failwithlog "ERROR"
+
+
+        member x.CollectStorages() : IStorage list =
+            [
+                match x with
+                | DuAssign (exp, tgt) ->
+                    yield! exp.CollectStorages()
+                    yield tgt
+                /// 변수 선언.  PLC rung 생성시에는 관여되지 않는다.
+                | DuVarDecl (exp, var) ->
+                    yield! exp.CollectStorages()
+                    yield var
+
+                | DuTimer   stmt -> yield! stmt.CollectStorages()
+                | DuCounter stmt -> yield! stmt.CollectStorages()
+                | DuAction  stmt -> yield! stmt.CollectStorages()
+
+                | DuAugmentedPLCFunction functionParameters_ ->
+                    failwith "ERROR"
+            ]
 
     type Terminal<'T when 'T:equality> with
         member x.TryGetStorage(): IStorage option =

@@ -9,6 +9,7 @@ open Engine.Core
 open Engine.Common.FS
 open Engine.CodeGenCPU
 open PLC.CodeGen.LSXGI
+open System
 
 type TestAllCase() =
     inherit EngineTestBaseClass()
@@ -24,6 +25,7 @@ type TestAllCase() =
                                 /// POU ladder 최상단의 comment
                         Comment = "DS Logic for XGI"
                         LocalStorages = localStorages
+                        GlobalStorages = globalStorages
                         CommentedStatements = pouGen.CommentedStatements()
                     }
                     pouParams

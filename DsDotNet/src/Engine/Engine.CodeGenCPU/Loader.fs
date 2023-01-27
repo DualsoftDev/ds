@@ -98,13 +98,13 @@ module CpuLoader =
     ///flow 별 운영모드 적용
     let private applyOperationModeSpec(f:Flow) =
         [
-            yield f.O1_AutoOperationMode()
-            yield f.O2_ManualOperationMode()
-            yield f.O3_DriveOperationMode()
-            yield f.O4_TestRunOperationMode()
-            yield f.O5_EmergencyMode()
-            yield f.O6_StopMode()
-            yield f.O7_ReadyMode()
+            yield f.O1_ReadyMode()
+            yield f.O2_AutoOperationMode()
+            yield f.O3_ManualOperationMode()
+            yield f.O4_DriveOperationMode()
+            yield f.O5_TestRunOperationMode()
+            yield f.O6_EmergencyMode()
+            yield f.O7_StopMode()
         ]
 
     let private applyTimerCounterSpec(s:DsSystem) =

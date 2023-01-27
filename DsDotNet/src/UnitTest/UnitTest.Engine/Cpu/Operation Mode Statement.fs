@@ -15,37 +15,37 @@ type Spec04_OperationModeStatement() =
     let t = CpuTestSample()
 
     [<Test>]
-    member __.``O1 Auto Operation Mode`` () =
+    member __.``O1 Ready Operation Mode`` () =
         for flow in t.Flows do
-            flow.O1_AutoOperationMode() |> doCheck
+            flow.O1_ReadyMode() |> doCheck
 
     [<Test>]
-    member __.``O2 Manual Operation Mode`` () =
+    member __.``O2 Auto Operation Mode`` () =
         for flow in t.Flows do
-            flow.O2_ManualOperationMode() |> doCheck
+            flow.O2_AutoOperationMode() |> doCheck
 
     [<Test>]
-    member __.``O3 Drive Operation Mode`` () =
+    member __.``O3 Manual Operation Mode`` () =
         for flow in t.Flows do
-            flow.O3_DriveOperationMode() |> doCheck
+            flow.O3_ManualOperationMode() |> doCheck
 
     [<Test>]
-    member __.``O4 TestRun OperationM ode`` () =
+    member __.``O4 DriveOperation Operation Mode`` () =
         for flow in t.Flows do
-            flow.O4_TestRunOperationMode() |> doCheck
+            flow.O4_DriveOperationMode() |> doCheck
 
     [<Test>]
-    member __.``O5 Emergency Mode`` () =
+    member __.``O5 TestRunOperation Mode`` () =
         for flow in t.Flows do
-            flow.O5_EmergencyMode()  |> doCheck
+            flow.O5_TestRunOperationMode()  |> doCheck
 
     [<Test>]
-    member __.``O6 Stop Mode`` () =
+    member __.``O6 Emergency Mode`` () =
         for flow in t.Flows do
-            flow.O6_StopMode()  |> doCheck
+            flow.O6_EmergencyMode()  |> doCheck
 
     [<Test>]
-    member __.``O7 Ready Mode`` () =
+    member __.``O7 Stop Mode`` () =
         for flow in t.Flows do
-            flow.O7_ReadyMode()  |> doCheck
+            flow.O7_StopMode()  |> doCheck
 

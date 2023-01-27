@@ -117,7 +117,7 @@ module CpuLoader =
 
     let private convertSystem(sys:DsSystem) =
         Runtime.System <- sys
-
+        sys._on.Value <- true
         //DsSystem 물리 IO 생성
         sys.GenerationIO()
 

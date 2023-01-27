@@ -80,14 +80,14 @@ module InterfaceClass =
             | XlsTestBTN           -> TextXlsTestBTN
             | XlsReadyBTN          -> TextXlsReadyBTN
             | XlsHomeBTN           -> TextXlsHomeBTN
-            | XlsAutoLamp      -> TextXlsAutoLamp
-            | XlsManualLamp    -> TextXlsManualLamp
-            | XlsDriveLamp     -> TextXlsDriveLamp
-            | XlsStopLamp      -> TextXlsStopLamp
-            | XlsEmergencyLamp -> TextXlsEmergencyLamp
-            | XlsTestLamp      -> TextXlsTestLamp
-            | XlsReadyLamp     -> TextXlsReadyLamp
-            | XlsIdleLamp      -> TextXlsIdleLamp
+            | XlsAutoLamp          -> TextXlsAutoLamp
+            | XlsManualLamp        -> TextXlsManualLamp
+            | XlsDriveLamp         -> TextXlsDriveLamp
+            | XlsStopLamp          -> TextXlsStopLamp
+            | XlsEmergencyLamp     -> TextXlsEmergencyLamp
+            | XlsTestLamp          -> TextXlsTestLamp
+            | XlsReadyLamp         -> TextXlsReadyLamp
+            | XlsIdleLamp          -> TextXlsIdleLamp
             | XlsConditionReady    -> TextXlsConditionReady
             | XlsConditionDrive    -> TextXlsConditionDrive
 
@@ -103,11 +103,15 @@ module InterfaceClass =
         | TextXlsTestBTN        ->  XlsTestBTN
         | TextXlsClearBTN       ->  XlsClearBTN
         | TextXlsHomeBTN        ->  XlsHomeBTN
-        | TextXlsAutoLamp   ->  XlsAutoLamp
-        | TextXlsManualLamp ->  XlsManualLamp
-        | TextXlsDriveLamp  ->  XlsDriveLamp
-        | TextXlsStopLamp   ->  XlsStopLamp
-        | TextXlsReadyLamp  ->  XlsReadyLamp
+        | TextXlsReadyBTN       ->  XlsReadyBTN
+        | TextXlsAutoLamp       ->  XlsAutoLamp
+        | TextXlsManualLamp     ->  XlsManualLamp
+        | TextXlsDriveLamp      ->  XlsDriveLamp
+        | TextXlsTestLamp       ->  XlsTestLamp
+        | TextXlsStopLamp       ->  XlsStopLamp
+        | TextXlsEmergencyLamp  ->  XlsEmergencyLamp
+        | TextXlsReadyLamp      ->  XlsReadyLamp
+        | TextXlsIdleLamp       ->  XlsIdleLamp
         | TextXlsConditionReady ->  XlsConditionReady
         | TextXlsConditionDrive ->  XlsConditionDrive
 

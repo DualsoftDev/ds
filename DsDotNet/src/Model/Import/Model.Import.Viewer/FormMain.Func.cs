@@ -75,12 +75,6 @@ namespace Dual.Model.Import
                     f.Value.ScanOnce();
                 });
 
-
-                //_DicCpu.First().Value.Run();
-                //_DicCpu.First().Value.ScanOnce();
-
-
-
                 ProcessEvent.DoWork(0);
             }
             catch (Exception ex)
@@ -111,7 +105,7 @@ namespace Dual.Model.Import
 
                 var xmlPath = Path.ChangeExtension(path, null);
                 this.Do(() => {
-                    ExportModuleExt.ExportXMLforXGI(SelectedSystem, $@"{xmlPath}.xml");
+                    ExportModuleExt.ExportXMLforXGI(SelectedSystem, $@"{xmlPath}");
                 });
             }
 

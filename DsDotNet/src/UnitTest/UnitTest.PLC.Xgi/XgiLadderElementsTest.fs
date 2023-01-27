@@ -37,7 +37,7 @@ type XgiLadderElementTest() =
                 let comment = $"{plcType} <- {t.Name}"
                 let name = $"my{t.Name}"
                 let initValueHolder:BoxedObjectHolder = {Object=null}
-                XGITag.createSymbolInfo name comment plcType initValueHolder
+                XGITag.createSymbolInfo name comment plcType (int Variable.Kind.VAR)  initValueHolder
         ]
 
         let symbolsLocalXml = XGITag.generateLocalSymbolsXml symbolInfos

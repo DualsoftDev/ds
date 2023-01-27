@@ -9,6 +9,7 @@ open Engine.Core
 open Engine.Common.FS
 open Engine.CodeGenCPU
 open PLC.CodeGen.LSXGI
+open System
 
 type TestAllCase() =
     inherit EngineTestBaseClass()

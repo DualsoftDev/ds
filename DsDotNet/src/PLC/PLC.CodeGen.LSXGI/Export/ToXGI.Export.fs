@@ -171,12 +171,6 @@ module XgiExportModule =
                             yield! cstmt.CollectStorages()
                     ]
 
-                    if pouName = "My" then
-                        let xxx1 = allUsedStorages.Where(fun stg -> stg.Name = "TOUT").ToArray()
-                        let xxx2 = allUsedStorages.Where(fun stg -> stg.Name = "TON").ToArray()
-                        let xxx3 = globalStorages["TOUT"]
-                        let xxx4 = globalStorages["TON"]
-                        noop()
                     for stg in allUsedStorages.Except(newLocalStorages) do
                         (* 'Timer1.Q' 등의 symbol 이 사용되었으면, Timer1 을 global storage 의 reference 로 간주하고, 이를 local var 에 external 로 등록한다. *)
                         match stg.Name with

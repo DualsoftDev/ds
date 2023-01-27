@@ -104,36 +104,28 @@ module internal XgiSymbolsModule =
                 { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; InitValue=null; Device=device; Kind=kindVar; }
             XGITag.createSymbolInfoWithDetail param
 
-    let xgiSymbolsToSymbolInfos (kindVar:int) (xgiSymbols:XgiSymbol seq) : SymbolInfo list =
+    let private xgiSymbolsToSymbolInfos (kindVar:int) (xgiSymbols:XgiSymbol seq) : SymbolInfo list =
         xgiSymbols |> map (xgiSymbolToSymbolInfo kindVar) |> List.ofSeq
 
 
-    let storagesToSymbolInfos (kindVar:int) : (IStorage seq -> SymbolInfo list) =
+    let private storagesToSymbolInfos (kindVar:int) : (IStorage seq -> SymbolInfo list) =
         storagesToXgiSymbol
         >> map snd
         >> xgiSymbolsToSymbolInfos kindVar
 
-    /// 내부 변환: Storages => [XgiSymbol] => [SymbolInfo] => Xml string
-    ///
-    /// <GlobalVariable .../> or <LocalVariable .../> 문자열 반환
-    let private storagesToXml (isLocal:bool) =
-        let toXml, kindVar =
-            if isLocal then
-                XGITag.generateLocalSymbolsXml, int Variable.Kind.VAR
-            else
-                XGITag.generateGlobalSymbolsXml, int Variable.Kind.VAR_GLOBAL
-        storagesToSymbolInfos kindVar
-        >> toXml
-
-    [<Obsolete("Need to refine...")>]
     /// <LocalVariable .../> 문자열 반환
+    /// 내부 변환: Storages => [XgiSymbol] => [SymbolInfo] => Xml string
     let storagesToLocalXml  (localStorages:IStorage seq) (globalStoragesRefereces:IStorage seq) =
         let symbolInfos = [
             yield! storagesToSymbolInfos (int Variable.Kind.VAR) localStorages
             yield! storagesToSymbolInfos (int Variable.Kind.VAR_EXTERNAL) globalStoragesRefereces
         ]
         XGITag.generateLocalSymbolsXml symbolInfos
-        //storagesToXml true localStorages
+
     /// <GlobalVariable .../> 문자열 반환
-    let storagesToGlobalXml (storages:IStorage seq) = storagesToXml false storages
+    /// 내부 변환: Storages => [XgiSymbol] => [SymbolInfo] => Xml string
+    let storagesToGlobalXml (globalStorages:IStorage seq) =
+        //storagesToXml false globalStorages
+        let symbolInfos = storagesToSymbolInfos (int Variable.Kind.VAR_GLOBAL) globalStorages
+        XGITag.generateLocalSymbolsXml symbolInfos
 

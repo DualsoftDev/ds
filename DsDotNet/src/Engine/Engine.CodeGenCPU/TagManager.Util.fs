@@ -31,11 +31,21 @@ module TagManagerUtil =
 
         ] |> String.concat ""
 
+    [<Obsolete("<ahn> 체크 필요")>]
     let getPlcTagAbleName (name:string) (storages:Storages) =
-        if name.StartsWith("_")
-        then name |> getValidName
-        else name |> getValidName |> getUniqueName  storages
-        // UniqueName.generate <kwak> Storages 에서 중복 피하는걸 를 어떻게 쓸지 잘모르겠어요 ㅜ
+        // <ahn> 이렇게 하면 되지 않을까요?
+        let vName = name |> getValidName
+        if name.StartsWith("_") then
+            vName
+        else
+            let rec generateUntilValid() =
+                let candidate = UniqueName.generate vName
+                if storages.ContainsKey candidate then
+                    generateUntilValid()
+                else
+                    candidate
+            generateUntilValid()
+
 
 
     let private createPlanVarHelper(stg:Storages, name:string, dataType:DataType) : IStorage =

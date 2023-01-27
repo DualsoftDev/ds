@@ -11,13 +11,13 @@ module internal XgiFile =
     let [<Literal>] XGIMaxX = 28
 
     /// text comment 를 xml wrapping 해서 반환
-    let getCommentRung y cmt =
+    let getCommentRungXml y cmt =
         let yy = y * 1024 + 1
         $"\t<Rung BlockMask=\"0\"><Element ElementType=\"{int ElementType.RungCommentMode}\" Coordinate=\"{yy}\">{cmt}</Element></Rung>"
 
 
     /// Program 마지막 부분에 END 추가
-    let generateEnd y =
+    let generateEndXml y =
         let yy = y * 1024 + 1
         sprintf """
             <Rung BlockMask="0">

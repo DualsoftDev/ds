@@ -45,7 +45,7 @@ module XgiExportModule =
 
         // Prolog 설명문
         if prologComment.NonNullAny() then
-            let xml = getCommentRung rgi.Y prologComment
+            let xml = getCommentRungXml rgi.Y prologComment
             rgi <- rgi.Add(xml)
 
         let simpleRung (expr:IExpression) (target:IStorage) =
@@ -65,7 +65,7 @@ module XgiExportModule =
 
             // 다중 라인 설명문을 하나의 설명문 rung 에..
             if cmt.NonNullAny() then
-                let xml = getCommentRung rgi.Y cmt
+                let xml = getCommentRungXml rgi.Y cmt
                 rgi <- rgi.Add(xml)
             for stmt in stmts do
                 match stmt with
@@ -108,7 +108,7 @@ module XgiExportModule =
                 | _ ->
                     failwithlog "Not yet"
 
-        let rungEnd = generateEnd (rgi.Y + 1)
+        let rungEnd = generateEndXml (rgi.Y + 1)
         rgi <- rgi.Add(rungEnd)
         rgi.Xmls |> List.rev |> String.concat "\r\n"
 
@@ -138,29 +138,32 @@ module XgiExportModule =
 
     type XgiPOUParams = {
         /// POU name.  "DsLogic"
-        POUName: string
+        POUName : string
         /// POU container task name
         TaskName: string
         /// POU ladder 최상단의 comment
-        Comment: string
-        LocalStorages:Storages
+        Comment : string
+        LocalStorages : Storages
         /// 참조용 global storages
-        GlobalStorages:Storages
-        CommentedStatements: CommentedStatement list
+        GlobalStorages: Storages
+        CommentedStatements : CommentedStatement list
     }
     type XgiProjectParams = {
-        ProjectName: string
-        ProjectComment: string
-        GlobalStorages:Storages
+        ProjectName    : string
+        ProjectComment : string
+        GlobalStorages : Storages
         ExistingLSISprj: string option
-        POUs: XgiPOUParams list
+        POUs           : XgiPOUParams list
     }
 
     type XgiPOUParams with
         member x.GenerateXmlString() = x.GenerateXmlNode().OuterXml
         member x.GenerateXmlNode() : XmlNode =
-            let {TaskName=taskName; POUName=pouName; Comment=comment; GlobalStorages=globalStorages; LocalStorages=localStorages; CommentedStatements=commentedStatements} = x
-            let newLocalStorages, commentedXgiStatements = commentedStatementsToCommentedXgiStatements localStorages.Values commentedStatements
+            let { TaskName=taskName; POUName=pouName; Comment=comment;
+                  GlobalStorages=globalStorages; LocalStorages=localStorages;
+                  CommentedStatements=commentedStatements} = x
+            let newLocalStorages, commentedXgiStatements =
+                commentedStatementsToCommentedXgiStatements localStorages.Values commentedStatements
 
 
             let globalStoragesRefereces =
@@ -230,7 +233,8 @@ module XgiExportModule =
 
         member x.GenerateXmlString() = x.GenerateXmlDocument().Beautify()
         member x.GenerateXmlDocument() : XmlDocument =
-            let { ProjectName=projName; ProjectComment=projComment; GlobalStorages=globalStorages; ExistingLSISprj=existingLSISprj; POUs=pous } = x
+            let { ProjectName=projName; ProjectComment=projComment; GlobalStorages=globalStorages;
+                  ExistingLSISprj=existingLSISprj; POUs=pous } = x
             let xdoc = x.GetTemplateXmlDoc()
             (* project name/comment 변경 *)
             do

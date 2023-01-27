@@ -112,7 +112,7 @@ module XgiExportModule =
         rgi <- rgi.Add(rungEnd)
         rgi.Xmls |> List.rev |> String.concat "\r\n"
 
-
+    /// [S] -> [XS]
     let internal commentedStatementsToCommentedXgiStatements
         (storages:IStorage seq)
         (commentedStatements:CommentedStatement list)

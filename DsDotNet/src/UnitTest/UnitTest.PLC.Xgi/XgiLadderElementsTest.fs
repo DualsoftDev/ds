@@ -69,7 +69,7 @@ type XgiLadderElementTest() =
 """
         let statements = parseCode storages code
         let f = get_current_function_name()
-        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
     [<Test>]
@@ -85,5 +85,5 @@ type XgiLadderElementTest() =
         storages["mybool"].Comment <- "mybool comment"
         storages["myint16"].Comment <- "myint16 comment <> ! +-*/"
         let f = get_current_function_name()
-        let xml = XgiFixtures.generateXml f storages (map withNoComment statements)
+        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml

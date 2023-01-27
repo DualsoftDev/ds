@@ -423,6 +423,7 @@ module XgiExpressionConvertorModule =
 
         augmentedStatements @ newStatements |> List.ofSeq
 
+    /// S -> [XS]
     let internal commentedStatement2CommentedXgiStatements (storage:XgiStorage) (CommentedStatement(comment, statement)) : CommentedXgiStatements =
         let xgiStatements = statement2XgiStatements storage statement
         let rungComment =

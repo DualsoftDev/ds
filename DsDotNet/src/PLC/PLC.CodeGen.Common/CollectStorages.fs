@@ -51,7 +51,7 @@ module CollectStoragesModule =
                 | DuCounter stmt -> yield! stmt.CollectStorages()
                 | DuAction  stmt -> yield! stmt.CollectStorages()
 
-                | DuAugmentedPLCFunction functionParameters_ ->
+                | DuAugmentedPLCFunction _functionParameters ->
                     failwith "ERROR"
             ]
 

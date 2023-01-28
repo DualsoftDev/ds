@@ -7,7 +7,8 @@
 		<LangVersion>7.0</LangVersion>
 		<OutputPath>$(SolutionDir)\bin</OutputPath>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-	</PropertyGroup>
+        <OtherFlags>--warnon:1182</OtherFlags>
+    </PropertyGroup>
 
 	<ItemGroup>
 		<Compile Include="Prelude\FakeTypes.fs" />

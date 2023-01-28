@@ -15,7 +15,7 @@ module RunTime =
         let runSubscribe() =
             let subscribe =
                 sys.ValueChangeSubject      //cpu 단위로 이벤트 필요 ahn
-                 .Subscribe(fun (storage, newValue_) ->
+                 .Subscribe(fun (storage, _newValue) ->
                     //Step 1 상태보고
                     match storage with
                     | :? PlanVar<bool> as p -> if p.Value then p.NotifyStatus()

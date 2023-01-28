@@ -112,7 +112,6 @@ module TagManagerModule =
 
     type VertexMReal(v:Vertex) as this =
         inherit VertexManager(v)
-        let s    = this.Storages
         let createTag name = this.CreateTag name
         let endPortBit    = createTag  "EP"
         let resetPortBit  = createTag  "RP"

@@ -5,6 +5,7 @@
 		<RootNamespace>Engine.CodeGenCPU</RootNamespace>
 		<LangVersion>7.0</LangVersion>
 		<OutputType>Library</OutputType>
+        <OtherFlags>--warnon:1182</OtherFlags>
 	</PropertyGroup>
 
   <ItemGroup>

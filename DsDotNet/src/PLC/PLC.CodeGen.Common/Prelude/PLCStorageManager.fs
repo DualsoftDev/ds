@@ -147,15 +147,12 @@ module NewIEC61131 =    // from Dual.Core.FS/Prelude/PLCStorageManager2.fs
             TagIndicesIQ(mem, sz, f, e, nth) :> TagIndices
 
         | RegexPattern @"%([MRW])X(\d+)$" [MemTypePattern mem; Int32Pattern e; ] ->
-            let a = mem, Size.X, e
             TagIndicesMemBit(mem, e) :> TagIndices
 
         | RegexPattern @"%([MRW])([BWDL])(\d+)$" [MemTypePattern mem; DataSizePattern size; Int32Pattern e; ] ->
-            let a = mem, size, e        // 최종 = size
             TagIndicesMem(mem, size, e) :> TagIndices
 
         | RegexPattern @"%([MRW])([BWDL])(\d+).(\d+)$" [MemTypePattern mem; DataSizePattern size; Int32Pattern e; Int32Pattern b] ->
-            let a = mem, size, e, b     // 최종 = bit
             TagIndicesMemBit(mem, size, e, b) :> TagIndices
 
         | _ ->
@@ -178,7 +175,7 @@ module NewIEC61131 =    // from Dual.Core.FS/Prelude/PLCStorageManager2.fs
         member x.AllocateTag(dataSize) = x.AllocateTag(x.MemoryType, dataSize)
 
         /// 현재의 memory 구성에서 dataSize 를 고려해서 free 영역을 할당할 수 있으면, 해당 영역의 첫 bit 의 offset 을 반환
-        member x.FindEmptyBitSlot (memType:Memory, dataSize:Size) =
+        member x.FindEmptyBitSlot (dataSize:Size) =
             let sz = dataSize.ToInteger()
 
             let rec loop s e =
@@ -198,9 +195,9 @@ module NewIEC61131 =    // from Dual.Core.FS/Prelude/PLCStorageManager2.fs
     /// M 영역 memory 설정
     type MMemoryConfig(memType, bitLength) =
         inherit MemoryConfigBase(memType, bitLength)
-        override x.AllocateTag (memType:Memory, dataSize:Size) =
+        override x.AllocateTag (_memType:Memory, dataSize:Size) =
             option {
-                let! startBit = x.FindEmptyBitSlot(memType, dataSize)
+                let! startBit = x.FindEmptyBitSlot(dataSize)
                 // mark allocated
                 let e = startBit+dataSize.ToInteger()-1
                 [startBit..e]
@@ -224,10 +221,9 @@ module NewIEC61131 =    // from Dual.Core.FS/Prelude/PLCStorageManager2.fs
         member x.File   :int = file
         /// Element. Slot
         member x.Element:int = element
-        override x.AllocateTag (memType:Memory, dataSize:Size) =
-            let a = 1
+        override x.AllocateTag (_memType:Memory, dataSize:Size) =
             option {
-                let! startBit = x.FindEmptyBitSlot(memType, dataSize)
+                let! startBit = x.FindEmptyBitSlot(dataSize)
                 // mark allocated
                 let e = startBit+dataSize.ToInteger()-1
                 [startBit..e]
@@ -291,7 +287,7 @@ module NewIEC61131 =    // from Dual.Core.FS/Prelude/PLCStorageManager2.fs
                 // I/Q memory 의 경우, 해당 slot 을 넘어가는 범위를 지정하게 되면, 자동으로 다음 slot 으로 할당해야 한다.
                 let findConfig (cfgs:IQMemoryConfig list) f e offset  =
                     // 주어진 base,slot 에 해당하는 메모리 conf 를 먼저 찾음
-                    let (i, cfg) = cfgs |> indexed |> List.find(fun (i, c) -> c.File = f && c.Element = e)
+                    let (i, cfg) = cfgs |> indexed |> List.find(fun (_i, c) -> c.File = f && c.Element = e)
                     if cfg.BitLength > offset then
                         // 해당 conf 의 영역 내에 있으면 OK
                         Some (cfg, 0)
@@ -322,7 +318,7 @@ module NewIEC61131 =    // from Dual.Core.FS/Prelude/PLCStorageManager2.fs
                     | None ->
                         failwithlogf "Failed to mark tag %s" tag )
 
-            | :? TagIndicesMem as mem ->
+            | :? TagIndicesMem ->
                 let cfg = cfgs |> List.head
                 offsets |> Seq.iter (fun o -> cfg.BitUsage.[o] <- true)
             | _ ->
@@ -690,7 +686,6 @@ module IEC61131 =   // from Dual.Core.FS/Prelude/PLCStorageManager.fs
         let mdw =  PLCSubStorage1(this, m, SS.DWord, bitSize/32)
         let mlw =  PLCSubStorage1(this, m, SS.DWord, bitSize/64)
         let children = [| mx; mb; mw; mdw; mlw |]
-        let dic = children |> Seq.map (fun sp -> sp.Size, sp) |> dict
 
         member x.Children with get() = children |> Seq.cast<IPLCSizedStorageSection>
 

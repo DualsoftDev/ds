@@ -22,14 +22,14 @@ type VertexManager with
         ]
 
     member v.F2_RootReset() : CommentedStatement list =
-        let srcsWeek, srcsStrong  = getResetEdgeSources(v.Flow.Graph, v.Vertex)  //test ahn  srcsStrong 리셋처리
+        let srcsWeek, _srcsStrong  = getResetEdgeSources(v.Flow.Graph, v.Vertex)  //test ahn  srcsStrong 리셋처리
         let srcs = srcsWeek
                     .Select(getVM)
                     .Select(fun s -> s, v.GR(s.Vertex)).ToList()
 
         let real = v.GetPureReal()
         if srcs.Any() then
-            let sets  = srcs.Select(fun (src, gr) -> gr).ToAnd()
+            let sets  = srcs.Select(fun (_src, gr) -> gr).ToAnd()
             let rsts  = (!!)real.V.EP.Expr
             //going relay rungs
             srcs.Select(fun (src, gr) -> (src.G.Expr, real.V.H.Expr) ==| (gr, "F2"))
@@ -45,7 +45,7 @@ type VertexManager with
             match v.Vertex  with
             | :? RealExF as rf -> rf.V.CR.Expr
             | :? RealExS as rs -> rs.V.CR.Expr
-            | :? Call | :? Alias as ca ->
+            | :? Call | :? Alias ->
                 match v.GetPureCall() with
                 | Some call ->  if call.UsingTon
                                 then call.V.TON.DN |> var2expr

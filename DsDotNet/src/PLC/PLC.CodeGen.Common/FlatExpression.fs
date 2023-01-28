@@ -48,7 +48,7 @@ module FlatExpressionModule =
         interface IFlatExpression
         member x.ToText() =
             match x with
-            | FlatTerminal(value, pulse, neg) -> sprintf "%s%s" (if neg then "!" else "") (value.ToText())
+            | FlatTerminal(value, _pulse, neg) -> sprintf "%s%s" (if neg then "!" else "") (value.ToText())
             | FlatNary(op, terms) ->
                 let termsStr =
                     terms
@@ -62,7 +62,7 @@ module FlatExpressionModule =
                 let negated = if op = Neg then n else not n
                 FlatTerminal(t, p, negated)
 
-            | FlatNary(op, FlatTerminal(t, p, n)::[]) -> failwithlog "ERROR"
+            | FlatNary(_op, FlatTerminal(_t, _p, _n)::[]) -> failwithlog "ERROR"
 
             | FlatNary(op, terms) ->
                 let opNeg = op.Negate()
@@ -81,7 +81,7 @@ module FlatExpressionModule =
                (Terminal<'T> 이 generic 이어서 DuTag 에 bool type 으로 제한 할 수 없음.
                 Terminal<'T>.Evaluate() 가 bool type 으로 제한됨 )
              *)
-            | DuFunction {FunctionBody = f; Name = n; Arguments = (:? Expression<bool> as arg)::[]}
+            | DuFunction {Name = n; Arguments = (:? Expression<bool> as arg)::[]}
                 when n = FunctionNameRising || n = FunctionNameFalling ->
                     match arg with
                     | DuTerminal (DuVariable t) -> FlatTerminal(t, true, n = FunctionNameFalling)

@@ -6,6 +6,7 @@
 		<RootNamespace>Engine.Cpu</RootNamespace>
 		<LangVersion>7.0</LangVersion>
 		<OutputPath>$(SolutionDir)\bin</OutputPath>
+        <OtherFlags>--warnon:1182</OtherFlags>
 	</PropertyGroup>
 
 	<ItemGroup>

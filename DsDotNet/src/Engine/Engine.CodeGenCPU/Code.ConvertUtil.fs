@@ -45,7 +45,7 @@ module CodeConvertUtil =
 
 
     let getOriginDeviceDefs(real:Real, initialType:InitialType) =
-        let origins, resetChains = OriginHelper.GetOriginsWithDeviceDefs real.Graph
+        let origins, _resetChains = OriginHelper.GetOriginsWithDeviceDefs real.Graph
         [ for w in origins do
             if w.Value = initialType then
                 yield w.Key ]
@@ -89,7 +89,7 @@ module CodeConvertUtil =
 
         let needCheckSet:Tag<bool> list list =
             let apiNameToInTagMap =
-                needChecks.Map(fun (KeyValue(taskDevice, v)) -> taskDevice.ApiName, taskDevice.InTag)
+                needChecks.Map(fun (KeyValue(taskDevice, _v)) -> taskDevice.ApiName, taskDevice.InTag)
                 |> Tuple.toDictionary
             [
                 if apiNameToInTagMap.Any() then

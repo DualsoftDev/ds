@@ -14,23 +14,23 @@ module CpuLoader =
             | :? RealExS -> vaild.HasFlag(RealExSystem)
             | :? Call as c  ->
                 match c.Parent with
-                | DuParentFlow f-> vaild.HasFlag(CallInFlow)
-                | DuParentReal r-> vaild.HasFlag(CallInReal)
+                | DuParentFlow _ -> vaild.HasFlag(CallInFlow)
+                | DuParentReal _ -> vaild.HasFlag(CallInReal)
 
             | :? Alias as a  ->
                  match a.Parent with
-                 | DuParentFlow f->
+                 | DuParentFlow _ ->
                      match a.TargetWrapper with
-                     |  DuAliasTargetReal   ar -> vaild.HasFlag(AliasRealInFlow)
-                     |  DuAliasTargetRealExFlow ao -> vaild.HasFlag(AliasRealExInFlow)
-                     |  DuAliasTargetRealExSystem ao -> vaild.HasFlag(AliasRealExInSystem)
-                     |  DuAliasTargetCall   ac -> vaild.HasFlag(AliasCallInFlow)
-                 | DuParentReal r->
+                     |  DuAliasTargetReal _         -> vaild.HasFlag(AliasRealInFlow)
+                     |  DuAliasTargetRealExFlow _   -> vaild.HasFlag(AliasRealExInFlow)
+                     |  DuAliasTargetRealExSystem _ -> vaild.HasFlag(AliasRealExInSystem)
+                     |  DuAliasTargetCall _         -> vaild.HasFlag(AliasCallInFlow)
+                 | DuParentReal _ ->
                      match a.TargetWrapper with
-                     | DuAliasTargetReal   ar       -> failwithlog $"Error {get_current_function_name()}"
-                     | DuAliasTargetRealExFlow ao   -> failwithlog $"Error {get_current_function_name()}"
-                     | DuAliasTargetRealExSystem ao -> failwithlog $"Error {get_current_function_name()}"
-                     | DuAliasTargetCall   ac -> vaild.HasFlag(AliasCallInReal)
+                     | DuAliasTargetReal _         -> failwithlog $"Error {get_current_function_name()}"
+                     | DuAliasTargetRealExFlow _   -> failwithlog $"Error {get_current_function_name()}"
+                     | DuAliasTargetRealExSystem _ -> failwithlog $"Error {get_current_function_name()}"
+                     | DuAliasTargetCall _         -> vaild.HasFlag(AliasCallInReal)
             |_ -> failwithlog $"Error {get_current_function_name()}"
 
         isVaildVertex
@@ -166,22 +166,22 @@ module CpuLoader =
     | ExternalPou  of ExternalSystem * CommentedStatement list
         member x.ToSystem() =
             match x with
-            | ActivePou    (s, p) -> s
-            | DevicePou    (d, p) -> d.ReferenceSystem
-            | ExternalPou  (e, p) -> e.ReferenceSystem
+            | ActivePou    (s, _p) -> s
+            | DevicePou    (d, _p) -> d.ReferenceSystem
+            | ExternalPou  (e, _p) -> e.ReferenceSystem
         member x.CommentedStatements() =
             match x with
-            | ActivePou    (s, p) -> p
-            | DevicePou    (d, p) -> p
-            | ExternalPou  (e, p) -> p
+            | ActivePou    (_s, p) -> p
+            | DevicePou    (_d, p) -> p
+            | ExternalPou  (_e, p) -> p
         member x.TaskName() =
             match x with
-            | ActivePou    (s, p) -> "Active"
-            | DevicePou    (d, p) -> "Device"
-            | ExternalPou  (e, p) -> "ExternalCpu"
-        member x.IsActive   = match x with | ActivePou (s, p) -> true |_ -> false
-        member x.IsDevice   = match x with | DevicePou (s, p) -> true |_ -> false
-        member x.IsExternal = match x with | ExternalPou (s, p) -> true |_ -> false
+            | ActivePou   _ -> "Active"
+            | DevicePou   _ -> "Device"
+            | ExternalPou _ -> "ExternalCpu"
+        member x.IsActive   = match x with | ActivePou   _ -> true | _ -> false
+        member x.IsDevice   = match x with | DevicePou   _ -> true | _ -> false
+        member x.IsExternal = match x with | ExternalPou _ -> true | _ -> false
 
 
 

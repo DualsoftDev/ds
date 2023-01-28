@@ -19,7 +19,7 @@ type XgiPOUTest() =
         setRuntimeTarget XGI |> ignore
 
     let globalStorages = Storages()
-    let pou11 =
+    let pou11 = lazy (
         let localStorages = Storages()
         let code = """
             bool xx0 = false;
@@ -35,7 +35,8 @@ type XgiPOUTest() =
             GlobalStorages = globalStorages
             CommentedStatements = statements
         }
-    let pou12 =
+    )
+    let pou12 = lazy (
         let storages = Storages()
         let code = """
             bool yy0 = false;
@@ -51,8 +52,9 @@ type XgiPOUTest() =
             GlobalStorages = globalStorages
             CommentedStatements = statements
         }
+    )
 
-    let pou21 =
+    let pou21 = lazy (
         let storages = Storages()
         let code = """
             bool zz0 = false;
@@ -68,18 +70,17 @@ type XgiPOUTest() =
             GlobalStorages = globalStorages
             CommentedStatements = statements
         }
+    )
 
     let createProjectParams(projName):XgiProjectParams = {
-        ProjectName = projName
-        ProjectComment = ""
-        GlobalStorages = Storages()
-        ExistingLSISprj = None
-        POUs = [pou11; pou12; pou21]
+        defaultXgiProjectParams with
+            ProjectName = projName
+            POUs = [pou11.Value; pou12.Value; pou21.Value]
     }
     [<Test>]
     member __.``POU1 test`` () =
         let dummyPrjParams = createProjectParams "dummy"
-        let xml = pou11.GenerateXmlString(dummyPrjParams)
+        let xml = pou11.Value.GenerateXmlString(dummyPrjParams)
         saveTestResult (get_current_function_name()) xml
 
     [<Test>]

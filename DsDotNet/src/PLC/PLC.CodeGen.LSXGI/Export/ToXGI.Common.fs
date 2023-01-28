@@ -134,9 +134,11 @@ module internal Common =
         let c = coord(x, y) + 2
         { Coordinate = c; Xml = vline c; SpanX = 0; SpanY = 1 }
 
+    let mutable EnableXmlComment = false
+
     /// x y 위치에서 수직으로 n 개의 line 을 긋는다
     let vlineDownN (x, y) n = [
-        if xgiGenerationOptions.EnableXmlComment then
+        if EnableXmlComment then
             xmlCommentAt (x, y) $"vlineDownN ({x}, {y}) {n}"
 
         if n > 0 then

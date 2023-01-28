@@ -25,11 +25,10 @@ module ExportModule =
             pouParams
 
         let projParams:XgiProjectParams = {
-            ProjectName = projName
-            ProjectComment = ""
-            GlobalStorages = globalStorages
-            ExistingLSISprj = None
-            POUs = pous.Select(getXgiPOUParams) |> Seq.toList
+            defaultXgiProjectParams with
+                ProjectName = projName
+                GlobalStorages = globalStorages
+                POUs = pous.Select(getXgiPOUParams) |> Seq.toList
         }
 
         projParams.GenerateXmlString()

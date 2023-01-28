@@ -9,17 +9,6 @@ module XgiPrologModule =
     /// XML 특수 문자 escape.  '&' 등
     let escapeXml xml = SecurityElement.Escape xml
 
-    type XgiGenerationOptions = {
-        /// <!-- --> 구문의 xml comment 삽입 여부.  순수 xml 생성 과정 debugging 용도
-        EnableXmlComment:bool
-        IsAppendExpressionTextToRungComment:bool
-    }
-
-    let mutable xgiGenerationOptions = {
-        EnableXmlComment = false
-        IsAppendExpressionTextToRungComment = true
-    }
-
     /// Xml Symbol tag 가 가지는 속성
     type SymbolInfo = {
         Name:string

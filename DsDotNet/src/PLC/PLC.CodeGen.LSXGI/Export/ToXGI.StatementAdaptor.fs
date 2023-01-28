@@ -426,6 +426,7 @@ module XgiExpressionConvertorModule =
 
     /// S -> [XS]
     let internal commentedStatement2CommentedXgiStatements
+        (prjParam:XgiProjectParams)
         (localStorages:XgiStorage)
         (CommentedStatement(comment, statement))
         : CommentedXgiStatements
@@ -433,7 +434,7 @@ module XgiExpressionConvertorModule =
         let xgiStatements = statement2XgiStatements localStorages statement
         let rungComment =
             let statementComment = statement.ToText()
-            match comment.NonNullAny(), xgiGenerationOptions.IsAppendExpressionTextToRungComment with
+            match comment.NonNullAny(), prjParam.AppendExpressionTextToRungComment with
             | true, true -> $"{comment}\r\n{statementComment}"
             | true, false -> comment
             | false, true -> statementComment

@@ -129,7 +129,7 @@ module XgiExportModule =
         let newCommentedStatements = ResizeArray<CommentedXgiStatements>()
         let newLocalStorages = ResizeArray<IStorage>(localStorages)
         for cmtSt in commentedStatements do
-            let xgiCmtStmts = commentedStatement2CommentedXgiStatements newLocalStorages cmtSt
+            let xgiCmtStmts = commentedStatement2CommentedXgiStatements prjParam newLocalStorages cmtSt
             let (CommentAndXgiStatements(comment_, xgiStatements)) = xgiCmtStmts
             if xgiStatements.Any() then
                 newCommentedStatements.Add xgiCmtStmts
@@ -214,7 +214,9 @@ module XgiExportModule =
         member x.GenerateXmlString() = x.GenerateXmlDocument().Beautify()
         member x.GenerateXmlDocument() : XmlDocument =
             let { ProjectName=projName; ProjectComment=projComment; GlobalStorages=globalStorages;
-                  ExistingLSISprj=existingLSISprj; POUs=pous } = x
+                  ExistingLSISprj=existingLSISprj; EnableXmlComment = enableXmlComment;
+                  POUs=pous } = x
+            EnableXmlComment <- enableXmlComment
             let xdoc = x.GetTemplateXmlDoc()
             (* project name/comment 변경 *)
             do

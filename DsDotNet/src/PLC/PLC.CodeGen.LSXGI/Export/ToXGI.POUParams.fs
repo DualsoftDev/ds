@@ -16,10 +16,24 @@ module POUParametersModule =
         GlobalStorages: Storages
         CommentedStatements : CommentedStatement list
     }
+
     type XgiProjectParams = {
         ProjectName    : string
         ProjectComment : string
         GlobalStorages : Storages
         ExistingLSISprj: string option
         POUs           : XgiPOUParams list
+
+        EnableXmlComment : bool
+        AppendExpressionTextToRungComment : bool
+    }
+
+    let defaultXgiProjectParams = {
+        ProjectName = ""
+        ProjectComment = ""
+        GlobalStorages = Storages()
+        ExistingLSISprj = None
+        POUs = []
+        EnableXmlComment = false
+        AppendExpressionTextToRungComment = true
     }

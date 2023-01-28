@@ -23,7 +23,7 @@ module EdgeModule =
         | None -> ()
 
 
-    let private validateChildrenVertexType (mei:ModelingEdgeInfo<Vertex>) (parent:FqdnObject) =
+    let private validateChildrenVertexType (mei:ModelingEdgeInfo<Vertex>) =
         let invalidEdge =  (mei.Sources @ mei.Targets).OfType<Alias>()
                              .Where(fun a->a.TargetWrapper.RealTarget().IsSome
                                         || a.TargetWrapper.RealExFlowTarget().IsSome)
@@ -40,7 +40,7 @@ module EdgeModule =
         let mei = modeingEdgeInfo
         validateParentOfEdgeVertices mei segment
         segment.ModelingEdges.Add(mei) |> verifyM $"Duplicated edge {mei.Sources[0].Name}{mei.EdgeSymbol}{mei.Targets[0].Name}"
-        validateChildrenVertexType mei segment
+        validateChildrenVertexType mei
 
         createEdge segment.Graph modeingEdgeInfo
 

@@ -112,7 +112,7 @@ module internal XgiFile =
          *)
         let posiGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
         let countExistingGlobal = posiGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
-        let globalSymbolXmls =
+        let _globalSymbolXmls =
             // symbolsGlobal = "<GlobalVariable Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol>
             let neoGlobals = symbolsGlobal |> XmlNode.fromString
             let numNewGlobals = neoGlobals.Attributes.["Count"].Value |> System.Int32.Parse

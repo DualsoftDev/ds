@@ -60,7 +60,6 @@ module internal ToDsTextModule =
     let rec graphToDs (container:ParentWrapper) (indent:int) =
         let tab = getTab indent
         let graph = container.GetGraph()
-        let core = container.GetCore()
         [
             yield! modelingEdgeInfosToDs (container.GetModelingEdges()) tab
 
@@ -314,15 +313,15 @@ module internal ToDsTextModule =
             let safeties =
                 let getCallName (call:Call) =
                     match call.Parent with
-                    |DuParentReal r-> $"{r.Flow.Name}.{call.ParentNPureNames.Combine()}"
-                    |DuParentFlow f-> call.ParentNPureNames.Combine()
+                    | DuParentReal r-> $"{r.Flow.Name}.{call.ParentNPureNames.Combine()}"
+                    | DuParentFlow _ -> call.ParentNPureNames.Combine()
 
                 let safetyConditionName (sc:SafetyCondition) =
                     match sc with
-                    | DuSafetyConditionReal real -> real.ParentNPureNames.Combine()
-                    | DuSafetyConditionCall call -> getCallName call
-                    | DuSafetyConditionRealExFlow  rf -> rf.ParentNPureNames.Combine()
-                    | DuSafetyConditionRealExSystem  rs -> rs.Name
+                    | DuSafetyConditionReal real       -> real.ParentNPureNames.Combine()
+                    | DuSafetyConditionCall call       -> getCallName call
+                    | DuSafetyConditionRealExFlow rf   -> rf.ParentNPureNames.Combine()
+                    | DuSafetyConditionRealExSystem rs -> rs.Name
                 let safetyConditionHolderName(sch:ISafetyConditoinHolder) =
                     match sch with
                     | :? Real as real -> real.ParentNPureNames.Combine()

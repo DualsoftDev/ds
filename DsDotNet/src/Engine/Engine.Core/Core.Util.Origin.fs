@@ -485,7 +485,7 @@ module OriginModule =
 
     /// Get pre-calculated targets that
     /// child segments to be 'ON' in progress(Theta)
-    let getThetaTargets (graph:DsGraph) =
+    let getThetaTargets (_graph:DsGraph) =
         // To do...
         ()
 

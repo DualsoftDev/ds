@@ -77,7 +77,6 @@ module internal Common =
         assert(coordi = coord(x, y))
 
         let nElementType = int elementType
-        let str = elementBody nElementType coordi "BOOL"
 
         (* see elementFull
             /// rung 을 구성하는 element (접점)의 XML 표현 문자열 반환

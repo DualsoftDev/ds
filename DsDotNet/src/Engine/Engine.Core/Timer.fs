@@ -78,8 +78,8 @@ module rec TimerModule =
             the20msTimer.Subscribe(fun _ -> accumulate()) |> disposables.Add
 
             (timerStruct:>  IStorage).DsSystem.ValueChangeSubject
-                .Where(fun (storage, newValue_) -> storage = timerStruct.EN)
-                .Subscribe(fun (storage, newValue) ->
+                .Where(fun (storage, _newValue) -> storage = timerStruct.EN)
+                .Subscribe(fun (_storage, newValue) ->
                     if ts.ACC.Value < 0us || ts.PRE.Value < 0us then failwithlog "ERROR"
                     let rungInCondition = newValue :?> bool
                     tracefn "%A rung-condition-in=%b with DN=%b" tt rungInCondition ts.DN.Value
@@ -112,8 +112,8 @@ module rec TimerModule =
                 ) |> disposables.Add
 
             (timerStruct:>  IStorage).DsSystem.ValueChangeSubject
-                .Where(fun (storage, newValue) -> storage = ts.RES)
-                .Subscribe(fun (storage, newValue) ->
+                .Where(fun (storage, _newValue) -> storage = ts.RES)
+                .Subscribe(fun (_storage, newValue) ->
                     let resetCondition = newValue :?> bool
                     if resetCondition then
                         ts.ACC.Value <- 0us
@@ -128,14 +128,14 @@ module rec TimerModule =
 
 
     [<AbstractClass>]
-    type TimerCounterBaseStruct (storages:Storages, name, preset, accum:CountUnitType, dn, pre, acc, res, sys) =
+    type TimerCounterBaseStruct (name, dn, pre, acc, res, sys) =
         interface IStorage with
             member _.DsSystem = sys
-            member x.Name with get() = x.Name and set(v) = failwithlog "ERROR: not supported"
+            member x.Name with get() = x.Name and set(_v) = failwithlog "ERROR: not supported"
             member _.DataType = typedefof<TimerCounterBaseStruct>
             member _.IsGlobal = true
             member val Comment = "" with get, set
-            member x.BoxedValue with get() = x.This and set(v) = failwithlog "ERROR: not supported"
+            member x.BoxedValue with get() = x.This and set(_v) = failwithlog "ERROR: not supported"
             member x.ObjValue = x.This
             member x.ToText() = failwithlog "ERROR: not supported"
             member _.ToBoxedExpression() = failwithlog "ERROR: not supported"
@@ -156,8 +156,8 @@ module rec TimerModule =
             if not (isItNull t) then
                 storages.Add(t.Name, t)
 
-    type TimerStruct private(typ:TimerType, storages:Storages, name, preset:CountUnitType, accum:CountUnitType, en, tt, dn, pre, acc, res, sys) =
-        inherit TimerCounterBaseStruct(storages, name, preset, accum, dn, pre, acc, res, sys)
+    type TimerStruct private(typ:TimerType, name, en, tt, dn, pre, acc, res, sys) =
+        inherit TimerCounterBaseStruct(name, dn, pre, acc, res, sys)
 
         /// Enable
         member _.EN:VariableBase<bool> = en
@@ -186,7 +186,7 @@ module rec TimerModule =
             storages.Add(acc.Name, acc)
             storages.Add(res.Name, res)
 
-            let ts = new TimerStruct(typ, storages, name, preset, accum, en, tt, dn, pre, acc, res, sys)
+            let ts = new TimerStruct(typ, name, en, tt, dn, pre, acc, res, sys)
             storages.Add(name, ts)
             ts
 

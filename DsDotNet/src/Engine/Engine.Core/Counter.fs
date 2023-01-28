@@ -44,7 +44,7 @@ module rec CounterModule =
         ACC: VariableBase<CountUnitType>
     }
 
-    let private CreateCounterParameters(typ:CounterType, storages:Storages, name, preset, accum:CountUnitType, sys) =
+    let private CreateCounterParameters(typ:CounterType, storages:Storages, name, preset, accum:CountUnitType) =
         let nullB = getNull<VariableBase<bool>>()
         let mutable cu  = nullB  // Count up enable bit
         let mutable cd  = nullB  // Count down enable bit
@@ -152,7 +152,7 @@ module rec CounterModule =
 
     [<AbstractClass>]
     type CounterBaseStruct(cp:CounterParams, sys) =
-        inherit TimerCounterBaseStruct(cp.Storages, cp.Name, cp.Preset, cp.Accumulator, cp.DN, cp.PRE, cp.ACC, cp.RES, sys)
+        inherit TimerCounterBaseStruct(cp.Name, cp.DN, cp.PRE, cp.ACC, cp.RES, sys)
 
         member _.CU:VariableBase<bool> = cp.CU  // Count up enable bit
         member _.CD:VariableBase<bool> = cp.CD  // Count down enable bit
@@ -188,7 +188,7 @@ module rec CounterModule =
         interface ICTU with
             member x.CU = x.CU
         static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys) =
-            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum, sys)
+            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum)
             let cs = new CTUStruct(counterParams, sys)
             storages.Add(name, cs)
             cs
@@ -200,7 +200,7 @@ module rec CounterModule =
             member x.CD = x.CD
             member x.LD = x.LD
         static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys) =
-            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum, sys)
+            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum)
             let cs = new CTDStruct(counterParams, sys)
             storages.Add(name, cs)
             cs
@@ -214,7 +214,7 @@ module rec CounterModule =
             member x.CD = x.CD
             member x.LD = x.LD
         static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys) =
-            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum, sys)
+            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum)
             let cs = new CTUDStruct(counterParams, sys)
             storages.Add(name, cs)
             cs
@@ -225,7 +225,7 @@ module rec CounterModule =
         interface ICTR with
             member x.CD = x.CD
         static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys) =
-            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum, sys)
+            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum)
             let cs = new CTRStruct(counterParams, sys)
             storages.Add(name, cs)
             cs
@@ -237,16 +237,16 @@ module rec CounterModule =
         let registerLoad() =
             let csd = box cs :?> ICTD       // CTD or CTUD 둘다 적용
             (counterStruct:>  IStorage).DsSystem.ValueChangeSubject
-                .Where(fun (storage, newValue_) -> storage = csd.LD && csd.LD.Value)
-                .Subscribe(fun (storage, newValue_) ->
+                .Where(fun (storage, _newValue) -> storage = csd.LD && csd.LD.Value)
+                .Subscribe(fun (_storage, _newValue) ->
                     cs.ACC.Value <- cs.PRE.Value
             ) |> disposables.Add
 
         let registerCTU() =
             let csu = box cs :?> ICTU
             (counterStruct:>  IStorage).DsSystem.ValueChangeSubject
-                .Where(fun (storage, newValue_) -> storage = csu.CU && csu.CU.Value)
-                .Subscribe(fun (storage, newValue_) ->
+                .Where(fun (storage, _newValue) -> storage = csu.CU && csu.CU.Value)
+                .Subscribe(fun (_storage, _newValue) ->
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
                     cs.ACC.Value <- cs.ACC.Value + 1us
                     if cs.ACC.Value >= cs.PRE.Value then
@@ -257,8 +257,8 @@ module rec CounterModule =
             let csd = box cs :?> ICTD
             registerLoad()
             (counterStruct:>  IStorage).DsSystem.ValueChangeSubject
-                .Where(fun (storage, newValue_) -> storage = csd.CD && csd.CD.Value)
-                .Subscribe(fun (storage, newValue_) ->
+                .Where(fun (storage, _newValue) -> storage = csd.CD && csd.CD.Value)
+                .Subscribe(fun (_storage, _newValue) ->
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
                     cs.ACC.Value <- cs.ACC.Value - 1us
                     if cs.ACC.Value <= cs.PRE.Value then
@@ -269,8 +269,8 @@ module rec CounterModule =
         let registerCTR() =
             let csr = box cs :?> ICTR
             (counterStruct:>  IStorage).DsSystem.ValueChangeSubject
-                .Where(fun (storage, newValue_) -> storage = csr.CD && csr.CD.Value)
-                .Subscribe(fun (storage, newValue_) ->
+                .Where(fun (storage, _newValue) -> storage = csr.CD && csr.CD.Value)
+                .Subscribe(fun (_storage, _newValue) ->
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
                     cs.ACC.Value <- cs.ACC.Value + 1us
                     if cs.ACC.Value = cs.PRE.Value then
@@ -283,8 +283,8 @@ module rec CounterModule =
 
         let registerReset() =
             (counterStruct:>  IStorage).DsSystem.ValueChangeSubject
-                .Where(fun (storage, newValue_) -> storage = cs.RES && cs.RES.Value)
-                .Subscribe(fun (storage, newValue_) ->
+                .Where(fun (storage, _newValue) -> storage = cs.RES && cs.RES.Value)
+                .Subscribe(fun (_storage, _newValue) ->
                     tracefn "Counter reset requested"
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
                     cs.ACC.Value <- 0us

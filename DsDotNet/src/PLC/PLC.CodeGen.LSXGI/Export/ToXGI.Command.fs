@@ -19,11 +19,11 @@ module internal rec Command =
             /// Terminal End Tag
             let tet (fc:#IFunctionCommand) = fc.TerminalEndTag
             match x with
-            | CoilCmd (cc)           -> tet(cc)
-            | PredicateCmd(pc)       -> tet(pc)
-            | FunctionCmd (fc)       -> tet(fc)
-            | FunctionBlockCmd (fbc) -> tet(fbc)
-            | ActionCmd (ac) -> failwithlog "ERROR: check"
+            | CoilCmd cc           -> tet(cc)
+            | PredicateCmd pc      -> tet(pc)
+            | FunctionCmd fc       -> tet(fc)
+            | FunctionBlockCmd fbc -> tet(fbc)
+            | ActionCmd _ac -> failwithlog "ERROR: check"
 
         member x.InstanceName =
             match x with
@@ -288,7 +288,7 @@ module internal rec Command =
         let reservedLiteralInputParam = ResizeArray<int*IExpression>()
         let mutable sy = 0
         let inputBlockXmls = [
-            for (portOffset, (name, exp, checkType)) in alignedInputParameters.Indexed() do
+            for (portOffset, (_name, exp, checkType)) in alignedInputParameters.Indexed() do
                 if portOffset > 0 && exp.Terminal.IsSome then
                     (y + portOffset, exp) |> reservedLiteralInputParam.Add
                     sy <- sy + 1
@@ -306,7 +306,7 @@ module internal rec Command =
         let fsx = inputBlockXmls.Max(fun (_, x) -> x.TotalSpanX) + plusHorizontalPadding
 
         let outputCellXmls = [
-            for (portOffset, (name, yoffset, terminal, checkType)) in alignedOutputParameters.Indexed() do
+            for (_portOffset, (_name, yoffset, terminal, _checkType)) in alignedOutputParameters.Indexed() do
                 createFBParameterXml (fsx + 1, y + yoffset) terminal.StorageName
         ]
 
@@ -500,7 +500,7 @@ module internal rec Command =
 
             { XmlElements = xmls; X=x; Y=y; TotalSpanX = spanX; TotalSpanY = spanY}
 
-        | FlatNary((OpCompare _ | OpArithmatic _), exprs) ->
+        | FlatNary((OpCompare _ | OpArithmatic _), _exprs) ->
             failwithlog "ERROR : Should have been processed in early stage."    // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
 
         // terminal case
@@ -536,9 +536,9 @@ module internal rec Command =
                 let nx = x + exprSpanX
                 let cmdXmls =
                     match cmdExp with
-                    | CoilCmd (cc) ->
+                    | CoilCmd _cc ->
                         drawCoil (nx-1, y) cmdExp
-                    | PredicateCmd (pc) ->
+                    | PredicateCmd _pc ->
                         drawCommand (nx, y) cmdExp  // todo : 수정 필요
                     | ( FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _) ->
                         drawCommand (nx, y) cmdExp

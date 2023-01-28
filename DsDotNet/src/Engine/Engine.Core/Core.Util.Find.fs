@@ -12,7 +12,7 @@ module internal ModelFindModule =
     let tryFindGraphVertex(system:DsSystem) (Fqdn(fqdn)) : obj option =
         //let inline nameComponentsEq xs ys = (^T: (member NameComponents: Fqdn) xs) = (^T: (member NameComponents: Fqdn) ys)
 
-        let tryFindInLoadedSystem (device:LoadedSystem) (Fqdn(fqdn)) =
+        let tryFindInLoadedSystem (_device:LoadedSystem) (Fqdn(_fqdn)) =
             failwithlog "Not yet implemented"
             None
 
@@ -71,7 +71,7 @@ module internal ModelFindModule =
 
 
     let rec tryFindExportApiItem(system:DsSystem) (Fqdn(apiPath)) =
-        let sysName, apiKey = apiPath[0], apiPath[1]
+        let _sysName, apiKey = apiPath[0], apiPath[1]
         system.ApiItems.TryFindWithName(apiKey)
 
     and tryFindCallingApiItem (system:DsSystem) targetSystemName targetApiName =

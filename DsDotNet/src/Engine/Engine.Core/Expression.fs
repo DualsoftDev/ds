@@ -169,10 +169,10 @@ module ExpressionModule =
         interface IStorage with
 
             member x.DsSystem = x.System
-            member x.Name with get() = $"RisingCoil.{x.Storage.Name}" and set(v) = failwithlog "ERROR"
+            member x.Name with get() = $"RisingCoil.{x.Storage.Name}" and set(_v) = failwithlog "ERROR"
             member _.DataType = typedefof<RisingCoil>
             member x.IsGlobal = x.Storage.IsGlobal
-            member _.Comment with get() = "" and set(v) = failwithlog "ERROR"
+            member _.Comment with get() = "" and set(_v) = failwithlog "ERROR"
             member x.BoxedValue with get() = x.Storage.BoxedValue
                                 and set(v) = x.Storage.BoxedValue <- v
             member x.ObjValue = x.Storage.BoxedValue
@@ -189,10 +189,10 @@ module ExpressionModule =
         interface IStorage with
 
             member x.DsSystem = x.System
-            member x.Name with get() = $"FallingCoil.{x.Storage.Name}" and set(v) = failwithlog "ERROR"
+            member x.Name with get() = $"FallingCoil.{x.Storage.Name}" and set(_v) = failwithlog "ERROR"
             member _.DataType = typedefof<FallingCoil>
             member x.IsGlobal = x.Storage.IsGlobal
-            member _.Comment with get() = "" and set(v) = failwithlog "ERROR"
+            member _.Comment with get() = "" and set(_v) = failwithlog "ERROR"
             member x.BoxedValue with get() = x.Storage.BoxedValue
                                 and set(v) = x.Storage.BoxedValue <- v
 
@@ -222,17 +222,17 @@ module ExpressionModule =
 
     type CommentedStatement =
         | CommentedStatement of comment:string * statement:Statement
-        member x.Statement = match x with | CommentedStatement (c, s) -> s
+        member x.Statement = match x with | CommentedStatement (_c, s) -> s
         member x.TargetValue    =
             match x.Statement with
-            | DuAssign (expression, target) -> target.BoxedValue
-            | DuVarDecl (expression,variable) -> variable.BoxedValue
+            | DuAssign (_expression, target) -> target.BoxedValue
+            | DuVarDecl (_expression,variable) -> variable.BoxedValue
             | DuTimer (t:TimerStatement) -> t.Timer.DN.Value
             | DuCounter (c:CounterStatement) -> c.Counter.DN.Value
             | DuAction (a:ActionStatement) ->
                 match a with
-                | DuCopy (condition:IExpression<bool>, source:IExpression,target:IStorage)-> target.BoxedValue
-            | DuAugmentedPLCFunction (f:FunctionParameters) ->  false  // Function은 항상 false 함수에 따른다.
+                | DuCopy (_condition:IExpression<bool>, _source:IExpression,target:IStorage)-> target.BoxedValue
+            | DuAugmentedPLCFunction (_f:FunctionParameters) ->  false  // Function은 항상 false 함수에 따른다.
 
     let (|CommentAndStatement|) = function | CommentedStatement(x, y) -> x, y
     let commentAndStatement = (|CommentAndStatement|)
@@ -320,7 +320,7 @@ module ExpressionModule =
         member x.TryGetStorage(): IStorage option =
             match x with
             | DuVariable v -> Some v
-            | DuLiteral l -> None
+            | DuLiteral _ -> None
 
         member x.GetBoxedRawObject(): obj =
             match x with

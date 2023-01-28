@@ -46,7 +46,6 @@ module ExpressionFunctionModule =
 
     let createBinaryExpression (opnd1:IExpression) (op:string) (opnd2:IExpression) : IExpression =
         let t1 = opnd1.DataType
-        let t2 = opnd2.DataType
 
         verifyArgumentsTypes op [opnd1; opnd2]
         match op with
@@ -160,15 +159,15 @@ module ExpressionFunctionModule =
         | (   "createXgiCTU" | "createXgiCTD" | "createXgiCTUD" | "createXgiCTR"
             | "createWinCTU" | "createWinCTD" | "createWinCTUD" | "createWinCTR"
             | "createAbCTU"  | "createAbCTD"  | "createAbCTUD"  | "createAbCTR" ) ->
-                let psedoFunction (args:Args):Counter = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
+                let psedoFunction (_args:Args):Counter = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
                 DuFunction { FunctionBody=psedoFunction; Name=funName; Arguments=args }
         | (   "createXgiTON" | "createXgiTOF" | "createXgiCRTO"
             | "createWinTON" | "createWinTOF" | "createWinCRTO"
             | "createAbTON"  | "createAbTOF"  | "createAbCRTO") ->
-                let psedoFunction (args:Args):Timer = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
+                let psedoFunction (_args:Args):Timer = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
                 DuFunction { FunctionBody=psedoFunction; Name=funName; Arguments=args }
         | "createTag" ->
-                let psedoFunction (args:Args):ITag = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
+                let psedoFunction (_args:Args):ITag = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
                 DuFunction { FunctionBody=psedoFunction; Name=funName; Arguments=args }
 
         | _ -> failwith $"NOT yet: {funName}"
@@ -526,8 +525,8 @@ module ExpressionFunctionModule =
         let _logicalOr  (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce( || )
         let _logicalNot (args:Args) = args.Select(evalArg).Cast<bool>().Expect1() |> not
 
-        let _rising (args:Args) : bool = false//failwithlog "ERROR"   //args.Select(evalArg).Cast<bool>().Expect1() |> not
-        let _falling (args:Args) : bool = false// failwithlog "ERROR"  //args.Select(evalArg).Cast<bool>().Expect1() |> not
+        let _rising (_args:Args) : bool = false//failwithlog "ERROR"   //args.Select(evalArg).Cast<bool>().Expect1() |> not
+        let _falling (_args:Args) : bool = false// failwithlog "ERROR"  //args.Select(evalArg).Cast<bool>().Expect1() |> not
 
 
         let _shiftLeftInt8    (args:Args) = let n, shift = args.ExpectTyped2<int8,   int>() in n <<< shift

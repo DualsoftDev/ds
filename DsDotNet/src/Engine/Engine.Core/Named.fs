@@ -108,7 +108,7 @@ module TextUtil =
         match fqdn' with
         | n::[] when quoteOnSingle -> quoteOnDemand n
         | n::[] -> n
-        | p::q::[] -> combine "." fqdn'
+        | _p::_q::[] -> combine "." fqdn'
         | _ -> failwithlog "ERROR"
 
     let getRelativeNames(referencePath:Fqdn) (fqdn:Fqdn) =

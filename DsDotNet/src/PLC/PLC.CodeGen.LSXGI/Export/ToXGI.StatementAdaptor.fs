@@ -218,7 +218,7 @@ module XgiExpressionConvertorModule =
             | Some funcName ->
                 let newArgs = exp.FunctionArguments |> bind helper
                 match funcName with
-                | ("&&" | "||" | "!") as op ->
+                | ("&&" | "||" | "!") ->
                     exp.WithNewFunctionArguments newArgs
                 | (">"|">="|"<"|"<="|"="|"!="  |  "+"|"-"|"*"|"/") as op ->
                     let out = createTypedXgiAutoVariable "out" exp.BoxedEvaluatedValue $"{op} output"
@@ -262,7 +262,7 @@ module XgiExpressionConvertorModule =
                         | Some _, _ -> yield arg
                         | None, Some ("-"|"/") ->
                             yield withAugmentedPLCFunction arg
-                        | None, Some fn_ ->
+                        | None, Some _fn ->
                             yield! binaryToNary { augmentParams with Exp = arg } operatorsToChange op
                         | _ -> failwithlog "ERROR"
                 ]
@@ -320,13 +320,13 @@ module XgiExpressionConvertorModule =
             NotApplied(exp)
 
     let private splitWideExpression (augmentParams:AugmentedConvertorParams) : IExpression =
-        let { Storage = storage; ExpandFunctionStatements=expandFunctionStatements; Exp=exp } = augmentParams
+        let { Storage = storage; ExpandFunctionStatements=expandFunctionStatements; }:AugmentedConvertorParams = augmentParams
         let exp =
             match mergeArithmaticOperator augmentParams None with
             | AlreadyApplied exp -> exp
             | NotApplied exp -> exp
 
-        let w, h = exp.Flatten() :?> FlatExpression |> precalculateSpan
+        let w, _h = exp.Flatten() :?> FlatExpression |> precalculateSpan
         if w > maxNumHorizontalContact then
             match exp.FunctionName with
             | Some "&&" ->
@@ -378,7 +378,7 @@ module XgiExpressionConvertorModule =
 
                     let augStmtsStorage = ResizeArray<Statement>()
                     match mergeArithmaticOperator { Storage = storage; ExpandFunctionStatements=augStmtsStorage; Exp=exp } (Some target) with
-                    | AlreadyApplied exp ->
+                    | AlreadyApplied _exp ->
                         augStmtsStorage.ToFSharpList()
                     | NotApplied exp ->
                         let tgt = target :?> INamedExpressionizableTerminal
@@ -388,7 +388,7 @@ module XgiExpressionConvertorModule =
                     [ DuAssign (newExp, target) ]
 
             | DuVarDecl (exp, decl) ->
-                let newExp_ = collectExpandedExpression {Storage=storage; ExpandFunctionStatements=augmentedStatements; Exp=exp}
+                let _newExp = collectExpandedExpression {Storage=storage; ExpandFunctionStatements=augmentedStatements; Exp=exp}
 
                 (* 일반 변수 선언 부분을 xgi local variable 로 치환한다. *)
                 storage.Remove decl |> ignore
@@ -399,7 +399,7 @@ module XgiExpressionConvertorModule =
                     let comment = loc.Comment.DefaultValue $"[local var in code] {si.Comment}"
                     let initValue = exp.BoxedEvaluatedValue
 
-                    let typ = initValue.GetType()
+                    let _typ = initValue.GetType()
                     let var = createXgiVariable decl.Name initValue comment
                     storage.Add var
 

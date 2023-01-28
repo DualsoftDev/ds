@@ -71,7 +71,7 @@ module XgiExportModule =
                 match stmt with
                 | DuAssign (expr, target) -> simpleRung expr target
                 | DuAugmentedPLCFunction ({FunctionName = ("&&"|"||") as op; Arguments = args; Output=output }) ->
-                    let psedoFunction (args:Args):bool = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
+                    let psedoFunction (_args:Args):bool = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
                     let expr = DuFunction { FunctionBody=psedoFunction; Name=op; Arguments=args }
                     simpleRung expr (output :?> IStorage)
 
@@ -98,7 +98,7 @@ module XgiExportModule =
                     let command = FunctionCmd(Arithmatic(fn, output, args))
                     let rgiSub = xmlRung None (Some command) rgi.Y
                     rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = 1+rgiSub.Y}
-                | DuAugmentedPLCFunction ({FunctionName = XgiConstants.FunctionNameMove as func; Arguments = args; Output=output }) ->
+                | DuAugmentedPLCFunction ({FunctionName = XgiConstants.FunctionNameMove as _func; Arguments = args; Output=output }) ->
                     let condition = args[0] :?> IExpression<bool>
                     let source = args[1]
                     let target = output :?> IStorage
@@ -130,7 +130,7 @@ module XgiExportModule =
         let newLocalStorages = ResizeArray<IStorage>(localStorages)
         for cmtSt in commentedStatements do
             let xgiCmtStmts = commentedStatement2CommentedXgiStatements prjParam newLocalStorages cmtSt
-            let (CommentAndXgiStatements(comment_, xgiStatements)) = xgiCmtStmts
+            let (CommentAndXgiStatements(_comment, xgiStatements)) = xgiCmtStmts
             if xgiStatements.Any() then
                 newCommentedStatements.Add xgiCmtStmts
         newLocalStorages.ToFSharpList(), newCommentedStatements.ToFSharpList()
@@ -157,7 +157,7 @@ module XgiExportModule =
                     for stg in allUsedStorages.Except(newLocalStorages) do
                         (* 'Timer1.Q' 등의 symbol 이 사용되었으면, Timer1 을 global storage 의 reference 로 간주하고, 이를 local var 에 external 로 등록한다. *)
                         match stg.Name with
-                        | RegexPattern @"(^[^\.]+)\.(.*)$" [structName; tail] ->
+                        | RegexPattern @"(^[^\.]+)\.(.*)$" [structName; _tail] ->
                             if globalStorages.ContainsKey structName then
                                 yield globalStorages[structName]
                             else
@@ -214,8 +214,7 @@ module XgiExportModule =
         member x.GenerateXmlString() = x.GenerateXmlDocument().Beautify()
         member x.GenerateXmlDocument() : XmlDocument =
             let { ProjectName=projName; ProjectComment=projComment; GlobalStorages=globalStorages;
-                  ExistingLSISprj=existingLSISprj; EnableXmlComment = enableXmlComment;
-                  POUs=pous } = x
+                  EnableXmlComment = enableXmlComment; POUs=pous } = x
             EnableXmlComment <- enableXmlComment
             let xdoc = x.GetTemplateXmlDoc()
             (* project name/comment 변경 *)

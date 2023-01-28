@@ -56,7 +56,7 @@ module TagVariableModule =
             member x.Value with get() = x.Value and set(v) = x.Value <- v
 
         interface INamed with
-            member x.Name with get() = x.Name and set(v) = failwithlog "ERROR: not supported"
+            member x.Name with get() = x.Name and set(_v) = failwithlog "ERROR: not supported"
 
         interface IText with
             member x.ToText() = x.ToText()
@@ -82,10 +82,9 @@ module TagVariableModule =
     [<AbstractClass>]
     type VariableBase<'T when 'T:equality>(param:StorageCreationParams<'T>) =
         inherit TypedValueStorage<'T>(param)
-        let {Name=name; Value=initValue; Comment=comment; } = param
 
         interface IVariable<'T>
-        override x.ToText() = "$" + name
+        override x.ToText() = "$" + param.Name
 
     type ILiteralHolder =
         abstract ToTextWithoutTypeSuffix: unit -> string
@@ -106,13 +105,13 @@ module ExpressionPrologModule =
     type Args      = Arguments
 
     let mutable internal fwdSerializeFunctionNameAndBoxedArguments =
-        let dummy (functionName:string) (args:Args) (withParenthesys:bool): string =
+        let dummy (_functionName:string) (_args:Args) (_withParenthesys:bool): string =
             failwithlog "Should be reimplemented."
         dummy
 
-    let mutable fwdCreateBoolMemberVariable   = let dummy (tagName:string) (initValue:bool)   : VariableBase<bool>   = failwithlog "Should be reimplemented." in dummy
-    let mutable fwdCreateUShortMemberVariable = let dummy (tagName:string) (initValue:uint16) : VariableBase<uint16> = failwithlog "Should be reimplemented." in dummy
-    let mutable fwdFlattenExpression   = let dummy (expr:IExpression)                  : IFlatExpression = failwithlog "Should be reimplemented." in dummy
+    let mutable fwdCreateBoolMemberVariable   = let dummy (_tagName:string) (_initValue:bool)   : VariableBase<bool>   = failwithlog "Should be reimplemented." in dummy
+    let mutable fwdCreateUShortMemberVariable = let dummy (_tagName:string) (_initValue:uint16) : VariableBase<uint16> = failwithlog "Should be reimplemented." in dummy
+    let mutable fwdFlattenExpression          = let dummy (_expr:IExpression)                   : IFlatExpression      = failwithlog "Should be reimplemented." in dummy
 
 
 

@@ -10,34 +10,17 @@ open System.IO
 
 [<AutoOpen>]
 module StateBuilderModule =
-    type State<'Z, 'A> = State of ('Z -> ('A * 'Z))
+    type State<'Z, 'A> = State of ('Z -> 'A * 'Z)
 
     module State =
-        let inline run z (State f) = f z
-        let ret a = State(fun z -> (a, z))
-
-        //let bind1 binder stateA =
-        //    State(fun z ->
-        //        let a, za = run z stateA
-        //        let stateB = binder a
-        //        run za stateB)
-
-        //let bind2 g (State f) =
-        //    State(fun z ->
-        //        let a, z' = f z
-        //        run z' (g a))
-
-        //let bind3 g (State f) =
-        //    State(fun z ->
-        //        let a, z' = f z
-        //        let (State g) = g a
-        //        g z')
+        let inline run z (State sf) = sf z
+        let ret a = State(fun z -> a, z)
 
         (*
             ( a -> [b] ) -> [a] -> [b]
             ( a -> State<z, b> ) -> State<z, a> -> State<z, b>
          *)
-        let bind g (State f) = State(fun z -> let a, z' = f z in run z' (g a))
+        let bind f (State sf) = State(fun z -> let a, z' = sf z in run z' (f a))
 
 
         let get = State(fun z -> z, z)
@@ -47,11 +30,32 @@ module StateBuilderModule =
             ( a -> b ) -> [a] -> [b]
             ( a -> b ) -> State<z, a> -> State<z, b>
          *)
-        let map g (State f) = State(fun z -> let a, z' = f z in  g a, z')
-        //let map f stateA =
+        let map f (State sf) = State(fun z -> let a, z' = sf z in  f a, z')
+
+        //let map1 f stateA =
         //    State(fun z ->
         //        let a, za = run z stateA
         //        f a, za)
+
+        //let bind1 binder stateA =
+        //    State(fun z ->
+        //        let a, za = run z stateA
+        //        let stateB = binder a
+        //        run za stateB)
+
+        //let bind2 f (State sf) =
+        //    State(fun z ->
+        //        let a, z' = sf z
+        //        run z' (f a))
+
+        //let bind3 f (State sf) =
+        //    State(fun z ->
+        //        let a, z' = sf z
+        //        let (State g) = f a
+        //        g z')
+
+
+
 
     /// The state monad passes around an explicit internal state that can be
     /// updated along the way. It enables the appearance of mutability in a purely

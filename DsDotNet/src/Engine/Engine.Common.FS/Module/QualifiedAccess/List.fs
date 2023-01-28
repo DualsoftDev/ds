@@ -82,6 +82,8 @@ module List =
     let FoldBack folder state xs = List.foldBack folder xs state
     /// List.scanBack 과 동일하나, list(=xs) 의 pipe line 이 가능하도록 list 를 맨 마지막 인자로 수정
     let ScanBack folder state xs = List.scanBack folder xs state
+    /// Option list 에서 Some 인 항목에 대해서만 mapper 적용한 list 반환
+    let mapSome mapper (options:'a option list) = options |> List.choose (Option.map mapper)
 
     let mapTuple (mapper1:'a->'c) (mapper2:'b->'d) (xs:('a*'b) list) =
         xs |> List.map (fun (a, b) -> mapper1 a, mapper2 b)

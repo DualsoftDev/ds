@@ -13,7 +13,7 @@ module CoreModule =
     /// Creates FQDN(Fully Qualified Domain Name) object
     let createFqdnObject (nameComponents:string array) = {
         new IQualifiedNamed with
-            member _.Name with get() = nameComponents.LastOrDefault() and set(v) = failwithlog "ERROR"
+            member _.Name with get() = nameComponents.LastOrDefault() and set(_v) = failwithlog "ERROR"
             member _.NameComponents = nameComponents
             member x.QualifiedName = nameComponents.Combine() }
 
@@ -176,7 +176,7 @@ module CoreModule =
         member _.Parent = parent
         member _.PureNames = names
         member _.ParentNPureNames = ([parent.GetCore().Name] @ names).ToArray()
-        override x.GetRelativeName(referencePath:Fqdn) = x.PureNames.Combine()
+        override x.GetRelativeName(_referencePath:Fqdn) = x.PureNames.Combine()
 
     // Subclasses = {Call | Real | RealOtherFlow}
     type ISafetyConditoinHolder =
@@ -262,13 +262,13 @@ module CoreModule =
 
 
     /// API 의 reset 정보:  "+" <||> "-";
-    and ApiResetInfo private (system:DsSystem, operand1:string, operator:ModelingEdgeType, operand2:string) =
+    and ApiResetInfo private (operand1:string, operator:ModelingEdgeType, operand2:string) =
         member _.Operand1 = operand1  // "+"
         member _.Operand2 = operand2  // "-"
         member _.Operator = operator  // "<||>"
         member _.ToDsText() = sprintf "%s %s %s" operand1 (operator.ToText()) operand2  //"+" <||> "-"
-        static member Create(system, operand1, operator, operand2) =
-            let ri = ApiResetInfo(system, operand1, operator, operand2)
+        static member Create(system:DsSystem, operand1, operator, operand2) =
+            let ri = ApiResetInfo(operand1, operator, operand2)
             system.ApiResetInfos.Add(ri) |> verifyM $"Duplicated interface ResetInfo [{ri.ToDsText()}]"
             ri
 
@@ -385,8 +385,8 @@ module CoreModule =
 
         member x.GetAliasTargetToDs() =
             match x.Parent.GetCore() with
-                | :? Flow as f -> [x.Name].ToArray()
-                | :? Real as r -> x.ParentNPureNames
+                | :? Flow -> [x.Name].ToArray()
+                | :? Real -> x.ParentNPureNames
                 | _->failwithlog "Error"
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 
@@ -398,8 +398,8 @@ module CoreModule =
 
         member x.GetAliasTargetToDs() =
             match x.Parent.GetCore() with
-                | :? Flow as f -> [x.Name].ToArray()
-                | :? Real as r -> x.ParentNPureNames
+                | :? Flow -> [x.Name].ToArray()
+                | :? Real -> x.ParentNPureNames
                 | _->failwithlog "Error"
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 

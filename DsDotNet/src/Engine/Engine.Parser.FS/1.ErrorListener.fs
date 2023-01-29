@@ -29,7 +29,7 @@ type ErrorListener<'Symbol>([<Optional; DefaultParameterValue(false)>]throwOnErr
             x.Errors.Add(new ParserError(line, col, msg, ambient))
             if throwOnError then
                 ParserException($"{msg} near {ambient}", line, col) |> raise
-        | :? Lexer as lexer ->
+        | :? Lexer ->
             logError($"Lexer error on [{line}:{col}]@{dsFile}: {msg}")
             x.Errors.Add(new ParserError(line, col, msg, ""))
             if throwOnError then

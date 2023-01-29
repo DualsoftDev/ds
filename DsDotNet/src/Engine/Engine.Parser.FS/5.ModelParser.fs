@@ -48,7 +48,7 @@ module ModelParser =
         listener
 
     let ParseFromString2(text:string, options:ParserOptions):DsParserListener =
-        let (parser, errors) = DsParser.FromDocument(text)
+        let (parser, _errors) = DsParser.FromDocument(text)
         let listener = Walk(parser, options)
 
         let system = listener.TheSystem

@@ -19,7 +19,7 @@ module RunTime =
                     //Step 1 상태보고
                     match storage with
                     | :? PlanVar<bool> as p -> if p.Value then p.NotifyStatus()
-                    | :? Tag<bool> as a -> ()//hmi ?
+                    | :? Tag<bool> -> ()//hmi ?
                     | _ -> ()
 
 
@@ -30,7 +30,6 @@ module RunTime =
                             statement.Do()
                     //    async {statement.Do()}|> Async.StartImmediate
                     else
-                        let mapRungs = mapRungs
                         ()
                       //  failwithlog $"Error {get_current_function_name()}"  //디버깅후 예외 처리
                     )

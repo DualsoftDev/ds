@@ -177,7 +177,6 @@ module EtcListenerModule =
                         (key, values)
                 ]
 
-            let sysNames, flowName, parenting_, ns_ = (x.GetContextInformation ctx).Tuples
             let curSystem = x.TheSystem
 
             let tryFindRealOrCall (ns:Fqdn) =
@@ -195,19 +194,13 @@ module EtcListenerModule =
                             | _-> failwithlog "Error"
 
                         |None ->
-                            //let c = curSystem.TryFindCall(ns) |> Option.get
-                            //return DuSafetyConditionCall res
-
                             let! vertex = curSystem.TryFindCall(ns)
                             match vertex with
                             | :? RealOtherSystem as rs -> return DuSafetyConditionRealExSystem rs
                             | :? Call as c -> return DuSafetyConditionCall c
                             | _ -> failwithlog "ERROR"
 
-                    | f::r::c::[] ->
-                         //let! c = curSystem.TryFindCall(ns)
-                         //return DuSafetyConditionCall c
-
+                    | _f::_r::_c::[] ->
                         let! vertex = curSystem.TryFindCall(ns)
                         match vertex with
                         | :? RealOtherSystem as rs -> return DuSafetyConditionRealExSystem rs

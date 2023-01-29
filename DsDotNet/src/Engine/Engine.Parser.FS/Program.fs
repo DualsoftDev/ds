@@ -226,7 +226,7 @@ C4 > C5;
         PI = (float, 3.1415)
     }
 
-    
+
 }
 
 """
@@ -910,12 +910,12 @@ C4 > C5;
 
     let ParseNormal(text:string) =
         let systemRepo = ShareableSystemRepository()
-        let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, ".", "ActiveCpuName", None, DuNone))
-        let system = helper.TheSystem
+        ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, ".", "ActiveCpuName", None, DuNone))
+        |> ignore
         tracefn "Done"
 
 
-    let Main(args:string[]) =
+    let Main(_args:string[]) =
         //ParseNormal(SplittedMRIEdgesText)
         //ParseNormal(DuplicatedEdgesText)
         //ParseNormal(AdoptoedValidText)
@@ -923,23 +923,5 @@ C4 > C5;
         //ParseNormal(CodeElementsText)
         ParseNormal(EveryScenarioText)
         //ParseNormal(PptGeneratedText)
-
-    let Try(input:string) =
-        let str = new AntlrInputStream(input)
-        System.Console.WriteLine(input)
-        let lexer = new dsLexer(str)
-        let tokens = new CommonTokenStream(lexer)
-        let parser = new dsParser(tokens)
-        //let listener_lexer = new ErrorListener<int>()
-        //let listener_parser = new ErrorListener<IToken>()
-        //lexer.AddErrorListener(listener_lexer)
-        //parser.AddErrorListener(listener_parser)
-        //let tree = parser.file()
-        //if (listener_lexer.had_error || listener_parser.had_error)
-        //    System.Console.WriteLine("error in parse.")
-        //else
-        //    System.Console.WriteLine("parse completed.")
-        ()
-
 
     let ReadAllInput(fn:string) = System.IO.File.ReadAllText(fn)

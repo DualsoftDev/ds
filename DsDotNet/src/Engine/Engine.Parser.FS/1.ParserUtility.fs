@@ -40,7 +40,7 @@ module ParserUtilityModule =
 
             let includeMe = includeMe |? false
             let predicate = predicate |? (isType<'T>)
-            let exclude   = exclude |? (fun x -> false)
+            let exclude   = exclude |? (fun _ -> false)
             let rec helper(rslt:ResizeArray<'T>, frm:IParseTree, incMe:bool) =
                 if not (exclude(frm)) then
                     if (incMe && predicate(frm) && isType<'T> frm) then
@@ -169,7 +169,7 @@ type DsParser() =
     static member FromDocument(text:string, ?predExtract:RuleExtractor, ?throwOnError) =       // (dsParser, ParserError[])
         let throwOnError = throwOnError |? true
         let func = predExtract |? (fun (parser:dsParser) -> parser.system() :> RuleContext)
-        let (parser, tree, errors) = DsParser.ParseText(text, func, throwOnError)
+        let (parser, _tree, errors) = DsParser.ParseText(text, func, throwOnError)
         (parser, errors)
 
 

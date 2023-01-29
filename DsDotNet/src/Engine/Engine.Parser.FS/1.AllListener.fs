@@ -22,4 +22,4 @@ type AllListener() =
         ParserException("ERROR while parsing", node) |> raise
 
     override x.EnterEveryRule(ctx:ParserRuleContext) = x.r.rules.Add(ctx)
-    override x.ExitEveryRule(ctx:ParserRuleContext) = ()
+    override x.ExitEveryRule(_ctx:ParserRuleContext) = ()

@@ -107,7 +107,7 @@ module rec ExpressionParser =
                             let dq, sq = "\"", "'"
                             text |> unwrapString dq dq |> unwrapString sq sq |> System.Char.Parse   |> literal2expr |> iexpr
                         | _ -> failwithlog "ERROR"
-                    | :? TagContext as texp ->
+                    | :? TagContext ->
                         failwithlog "Obsoleted.  Why not Storage???"   // todo : remove
                         //iexpr <| tag (storages[text])
                     | :? StorageContext as sctx ->
@@ -123,7 +123,7 @@ module rec ExpressionParser =
                     | _ ->
                         failwithlog "ERROR"
 
-                | :? ArrayReferenceExprContext as exp ->
+                | :? ArrayReferenceExprContext ->
                     tracefn $"ArrayReference: {text}"
                     failwithlog "Not yet"
 

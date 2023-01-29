@@ -80,7 +80,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
         | _ -> ()
 
         match ctx.TryFindFirstChild<SysBlockContext>() with
-        | Some sysBlockCtx_ ->
+        | Some _sysBlockCtx ->
             let name = options.LoadedSystemName |? (ctx.systemName().GetText().DeQuoteOnDemand())
             let hostIp =
                 let hostSpec =
@@ -112,7 +112,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
         | None ->
             failwithlog "ERROR"
 
-    override x.ExitSystem(ctx:SystemContext) = x.OptLoadedSystemName <- None
+    override x.ExitSystem(_ctx:SystemContext) = x.OptLoadedSystemName <- None
 
     override x.EnterFlowBlock(ctx:FlowBlockContext) =
         let flowName = ctx.identifier1().GetText().DeQuoteOnDemand()
@@ -222,7 +222,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
             let! parentWrapper = x.TheSystem.TryFindParentWrapper(ci)
             let graph = parentWrapper.GetGraph()
             match ci.Names with
-            | ofn_::ofrn_::[] ->      // of(r)n: other flow (real) name
+            | _ofn::_ofrn::[] ->      // of(r)n: other flow (real) name
                 return! graph.TryFindVertex(ci.Names.Combine())
             | callOrAlias::[] ->
                 return! graph.TryFindVertex(callOrAlias)
@@ -233,7 +233,6 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
 
     member x.ProcessCausalPhrase(ctx:CausalPhraseContext) =
         let system = x.TheSystem
-        let ci = x.GetContextInformation ctx
         let oci = x.GetObjectContextInformation(system, ctx)
 
         let children = ctx.children.ToArray();      // (CausalTokensDNF CausalOperator)+ CausalTokensDNF
@@ -273,7 +272,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 |> ignore
 
     /// system context 아래에 기술된 모든 vertex 들을 생성한다.
-    member x.CreateVertices (ctx:SystemContext) =
+    member x.CreateVertices (_ctx:SystemContext) =
         let system = x.TheSystem
         let sysctx = x.AntlrParser.system()
 
@@ -303,26 +302,6 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
 
             let isJobOrAlias (pw:ParentWrapper, Fqdn(vetexPath)) =
                 isJobName (pw.GetFlow().System, vetexPath.Last()) || isAliasMnemonic (pw, vetexPath.JoinWith("."))
-
-            let tryCreateCallOrAlias (parentWrapper:ParentWrapper) name =
-                let flow = parentWrapper.GetFlow()
-                let tryJob = tryFindJob system name
-                let tryAliasDef = tryFindAliasDefWithMnemonic flow name
-                option {
-                    match tryJob, tryAliasDef with
-                    | Some job, None ->
-                        return Call.Create(job, parentWrapper) :> Indirect
-                    | None, Some aliasDef ->
-                        return Alias.Create(name, aliasDef.AliasTarget.Value, parentWrapper) :> Indirect
-                    | None, None -> return! None
-                    | _ ->
-                        failwithlog "ERROR: duplicated"
-                }
-
-            let createCall (parentWrapper:ParentWrapper) name =
-                let flow = parentWrapper.GetFlow()
-                let job = tryFindJob system name |> Option.get
-                Call.Create(job, parentWrapper) |> ignore
 
             let candidates = candidateCtxs.Select(getContainerChildPair)
 
@@ -355,8 +334,8 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                             let aliasDef = tryFindAliasDefWithMnemonic flow q |> Option.get
                             Alias.Create(q, aliasDef.AliasTarget.Value, parent) |> ignore
 
-                        | _, q::[] -> ()
-                        | _, ofn::ofrn::[] -> ()
+                        | _, _q::[] -> ()
+                        | _, _ofn::_ofrn::[] -> ()
                         | _ ->
                             failwithlog "ERROR"
             loop
@@ -466,7 +445,6 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
             let ci = x.GetContextInformation ctx
             option {
                 let! flow = tryFindFlow system ci.Flow.Value
-                let mnemonics = ctx.Descendants<AliasMnemonicContext>().Select(getText).ToArray()
                 let! aliasKeys = ctx.TryFindFirstChild<AliasDefContext>().Map(collectNameComponents)
                 let target =
                         let ns = aliasKeys.ToFSharpList()

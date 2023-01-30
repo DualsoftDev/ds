@@ -50,9 +50,10 @@ module internal XgiSymbolsModule =
             let name, addr = t.Name, t.Address
 
             let device, memSize =
-                match t.Address with
+                match addr with
                 | RegexPattern @"%([IQM])([XBWL]).*$" [iqm; mem] -> iqm, mem
-                | _ -> "M", "X" //test ahn 주소없는 오토변수 방법 타입 ??
+                | RegexPattern @"%([IQM]).*$" [iqm; ] -> iqm, "X"   // `%I1` 이런거 허용하나?
+                | _ -> failwith $"Invalid tag address {addr} for {name}"
 
             let plcType =
                 match memSize with

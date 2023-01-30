@@ -1,3 +1,6 @@
+using Dsu.PLC;
+using Dsu.PLC.LS;
+using Microsoft.FSharp.Core;
 using System;
 using System.Reflection;
 using System.Windows.Forms;
@@ -16,6 +19,10 @@ namespace Model.DsEditor
             Application.SetCompatibleTextRenderingDefault(false);
 
             Engine.CodeGenCPU.ModuleInitializer.Initialize();
+
+
+           var conn = new LsConnection(new LsConnectionParameters("192.168.0.100", new FSharpOption<ushort>(2004), TransportProtocol.Udp, 3000.0));
+
 
 
             var form = new FormMain();

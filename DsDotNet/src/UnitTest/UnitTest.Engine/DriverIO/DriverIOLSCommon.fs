@@ -20,9 +20,9 @@ module DriverIOLSCommonTest =
         inherit EngineTestBaseClass()
         let t = CpuTestSample()
 
-        let conn = new LsConnection(new LsConnectionParameters("192.168.0.100", 2004us, Dsu.PLC.TransportProtocol.Udp, 3000.0))
+        let conn = new LsConnection(LsConnectionParameters("192.168.0.100"))
 
-        member x.Connection    =  conn
+        member x.Connection = conn
 
         [<Test>]
         member __.``XXXXXXXXX LS Connection test`` () =

@@ -89,24 +89,28 @@ module TagManagerUtil =
 
     type InOut = | In | Out | Memory
     type BridgeType = | Device | Button | Lamp | Condition
-    let createBridgeTag(stg:Storages, name, address, inOut:InOut, bridge:BridgeType, sys): ITag =
+    let createBridgeTag(stg:Storages, name, addr:string, inOut:InOut, bridge:BridgeType, sys): ITag option=
         let address =
+            let addr = addr.ToUpper()
             match bridge with
-            | Device ->     if address <> "" then "" else address
-            | Button ->     if address <> "" then "" else address
-            | Lamp ->       if address <> "" then address else failwithlog $"Error Lamp {name} address is empty"
-            | Condition ->  if address <> "" then address else failwithlog $"Error Condition {name} address is empty"
+            | Device    -> if addr <> "" then Some addr else failwithlog $"Error Device {name} 주소가 없습니다."
+            | Button    -> if addr <> "" then Some addr else None
+            | Lamp      -> if addr <> "" then Some addr else failwithlog $"Error Lamp {name}  주소가 없습니다."
+            | Condition -> if addr <> "" then Some addr else failwithlog $"Error Condition {name} 주소가 없습니다."
 
-        let name =
-            match inOut with
-            | In  -> $"{name}_I"
-            | Out -> $"{name}_O"
-            | Memory -> failwithlog "error: Memory not supported "
+        if address.IsSome
+        then
+            let name =
+                match inOut with
+                | In  -> $"{name}_I"
+                | Out -> $"{name}_O"
+                | Memory -> failwithlog "error: Memory not supported "
 
-        let plcName = getPlcTagAbleName name stg
-        let t =
-            let param = {defaultStorageCreationParams(false) with Name=plcName; Address=Some address; System=sys}
-            (Tag(param) :> ITag)
-        stg.Add(t.Name, t)
-        t
+            let plcName = getPlcTagAbleName name stg
+            let t =
+                let param = {defaultStorageCreationParams(false) with Name=plcName; Address=address; System=sys}
+                (Tag(param) :> ITag)
+            stg.Add(t.Name, t)
+            Some t
+        else None
 

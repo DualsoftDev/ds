@@ -55,7 +55,7 @@ module EtcListenerModule =
                                         let! inOutCtx = btnNameAddr.TryFindFirstChild<AddressInOutContext>()
                                         let! inCtx    = inOutCtx.TryFindFirstChild<InAddrContext>()
                                         let! outCtx   = inOutCtx.TryFindFirstChild<OutAddrContext>()
-                                        return inCtx.GetText(), outCtx.GetText()
+                                        return inCtx.GetText() |> replaceSkipAddress, outCtx.GetText() |> replaceSkipAddress
                                     } |> Option.get
                                 | _ ->
                                     null, null
@@ -107,7 +107,7 @@ module EtcListenerModule =
                             let lmpName = lampNameCtx.GetText()
                             let address =
                                 match addrCtx with
-                                | Some addr -> addr.GetText()
+                                | Some addr -> addr.GetText() |> replaceSkipAddress
                                 | None -> null
                             let funcSet = commonFunctionSetter lmpName lampFuncs
                             return LampDef(lmpName, targetLmpType, address, flow, funcSet)
@@ -140,7 +140,7 @@ module EtcListenerModule =
                             let lmpName = lampNameCtx.GetText()
                             let address =
                                 match addrCtx with
-                                | Some addr -> addr.GetText()
+                                | Some addr -> addr.GetText() |> replaceSkipAddress
                                 | None -> null
                             let funcSet = commonFunctionSetter lmpName conditionFuncs
                             let flows =

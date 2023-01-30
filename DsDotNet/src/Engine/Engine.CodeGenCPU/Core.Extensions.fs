@@ -52,21 +52,34 @@ module ConvertCoreExt =
 
         member private x.GenerationLampIO() =
             for b in x.SystemLamps do
-                b.OutTag  <- createBridgeTag(x.Storages, b.Name, b.OutAddress, Out ,BridgeType.Lamp, x)
+                match createBridgeTag(x.Storages, b.Name, b.OutAddress, Out ,BridgeType.Lamp, x) with
+                |Some t ->  b.OutTag  <- t
+                |None -> ()
+
         member private x.GenerationCondition() =
             for b in x.SystemConditions do
-                b.InTag  <- createBridgeTag(x.Storages, b.Name, b.InAddress, In, BridgeType.Condition, x)
+                match createBridgeTag(x.Storages, b.Name, b.InAddress, In ,BridgeType.Condition, x) with
+                |Some t ->  b.InTag  <- t
+                |None -> ()
 
         member private x.GenerationButtonIO() =
             for b in x.SystemButtons do
-                     b.InTag  <- createBridgeTag(x.Storages, b.Name, b.OutAddress, In, BridgeType.Button, x)
-                     b.OutTag <- createBridgeTag(x.Storages, b.Name, b.OutAddress, Out,BridgeType.Button, x)
+                match createBridgeTag(x.Storages, b.Name, b.InAddress, In ,BridgeType.Button, x) with
+                |Some t ->  b.InTag   <- t  |None -> ()
+                match createBridgeTag(x.Storages, b.Name, b.OutAddress, Out ,BridgeType.Button, x) with
+                |Some t ->  b.OutTag  <- t  |None -> ()
 
         member private x.GenerationTaskDevIO() =
             let taskDevices = x.Jobs |> Seq.collect(fun j -> j.DeviceDefs)
-            for dev in taskDevices do
-                dev.InTag <- createBridgeTag(x.Storages, dev.ApiName, dev.InAddress, In, BridgeType.Device, x)
-                dev.OutTag <- createBridgeTag(x.Storages, dev.ApiName, dev.OutAddress, Out, BridgeType.Device, x)
+            for b in taskDevices do
+                if b.ApiItem.TXs.any()
+                then
+                    match createBridgeTag(x.Storages, b.ApiName, b.InAddress, In ,BridgeType.Device, x) with
+                    |Some t ->  b.InTag   <- t  |None -> ()
+                if b.ApiItem.RXs.any()
+                then
+                    match createBridgeTag(x.Storages, b.ApiName, b.OutAddress, Out ,BridgeType.Device, x) with
+                    |Some t ->  b.OutTag  <- t  |None -> ()
 
         member x.GenerationIO() =
             x.GenerationTaskDevIO()
@@ -85,6 +98,7 @@ module ConvertCoreExt =
 
     let private getButtonExpr(flow:Flow, btns:ButtonDef seq) : Expression<bool> seq =
             btns.Where(fun b -> b.SettingFlows.Contains(flow))
+                .Where(fun b -> b.InAddress <> "")
                 .Select(fun b ->
                     let inTag = (b.InTag :?> Tag<bool>).Expr
                     if hasNot(b.Funcs)then !!inTag else inTag    )

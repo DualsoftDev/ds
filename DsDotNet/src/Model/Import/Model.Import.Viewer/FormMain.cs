@@ -37,6 +37,7 @@ using static Engine.CodeGenCPU.SystemManagerModule;
 using System.Configuration;
 using static Engine.CodeGenCPU.ConvertCoreExt;
 using static Engine.Common.FS.CollectionAlgorithm;
+using static Model.Import.Office.ImportPPTModule;
 
 namespace Dual.Model.Import
 {
@@ -48,6 +49,7 @@ namespace Dual.Model.Import
         private DsCPU _SelectedDev;
         public Dictionary<DsSystem, DsCPU> _DicCpu = new Dictionary<DsSystem, DsCPU>();
         public Dictionary<DsSystem, IEnumerable<ViewNode>> _DicViews;
+        public IEnumerable<PptResult> _PPTResults;
 
         public Dictionary<Vertex, ViewNode> _DicVertex;
         public Dictionary<int, CommentedStatement> _DicStatement;
@@ -96,7 +98,7 @@ namespace Dual.Model.Import
             checkedListBox_My.DisplayMember = "Display";
             checkedListBox_Ex.DisplayMember = "Display";
             checkedListBox_sysHMI.DisplayMember = "Display";
-
+            comboBox_System.DisplayMember = "Display";
         }
 
         public void createSysHMI(DsSystem sys)
@@ -348,11 +350,18 @@ namespace Dual.Model.Import
         private void comboBox_System_SelectedIndexChanged(object sender, EventArgs e)
         {
             SystemView sysView = comboBox_System.SelectedItem as SystemView;
-            _SelectedCPU = _DicCpu[sysView.System];
-            UpdateDevice(sysView);
-            UpdateSelectedCpu(sysView);
+            if (_DicCpu.ContainsKey(sysView.System))
+            {
+                _SelectedCPU = _DicCpu[sysView.System];
+                UpdateDevice(sysView);
+                UpdateSelectedCpu(sysView);
 
-            createSysHMI(sysView.System);
+                createSysHMI(sysView.System);
+            }
+            else
+            {
+                UpdateSelectedView(sysView);
+            }
         }
 
         public void UpdateLogComboBox(IStorage storage, object value,  DsCPU cpu)
@@ -402,13 +411,10 @@ namespace Dual.Model.Import
 
 
 
-        private void UpdateSelectedCpu(SystemView sysView)
+        private void UpdateSelectedView(SystemView sysView)
         {
             _DicVertex = new Dictionary<Vertex, ViewNode>();
             comboBox_Segment.Items.Clear();
-
-            _DicStatement = new Dictionary<int, CommentedStatement>();
-            comboBox_TestExpr.Items.Clear();
 
             sysView.System.GetVertices()
                 .ForEach(v =>
@@ -424,6 +430,22 @@ namespace Dual.Model.Import
                         .Add(new SegmentView { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = v.TagManager as VertexManager });
                     }
                 });
+
+
+            StartResetBtnUpdate(true);
+
+            UpdateGraphUI(sysView.ViewNodes);
+
+            DisplayTextModel(System.Drawing.Color.Transparent, sysView.System.ToDsText());
+        }
+
+        private void UpdateSelectedCpu(SystemView sysView)
+        {
+
+            _DicStatement = new Dictionary<int, CommentedStatement>();
+            comboBox_TestExpr.Items.Clear();
+
+
             int cnt = 0;
             var text = _DicCpu[sysView.System].CommentedStatements.Select(rung =>
             {
@@ -436,14 +458,10 @@ namespace Dual.Model.Import
             });
 
             StartResetBtnUpdate(true);
-
             UpdateCpuUI(text);
-            UpdateGraphUI(sysView.ViewNodes);
 
             DisplayTextModel(System.Drawing.Color.Transparent, sysView.System.ToDsText());
-
         }
-
 
         private void comboBox_TestExpr_SelectedIndexChanged(object sender, EventArgs e)
         {

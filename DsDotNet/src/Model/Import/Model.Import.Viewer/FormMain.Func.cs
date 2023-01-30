@@ -31,54 +31,28 @@ namespace Dual.Model.Import
         {
             try
             {
-                var results = ImportPPT.GetLoadingAllSystem(paths);
-                _DicCpu = new Dictionary<DsSystem, DsCPU>();
+                _PPTResults = ImportPPT.GetLoadingAllSystem(paths);
                 _DicViews = new Dictionary<DsSystem, IEnumerable<ViewModule.ViewNode>>();
                 var storages = new Dictionary<string, Interface.IStorage>();
-                foreach (var view in results)
+                foreach (var view in _PPTResults)
                 {
                     _DicViews.Add(view.System, view.Views.ToList());
                     if (!view.IsActive) continue;
-
-                    var rungs = Cpu.LoadStatements(view.System, storages);
-                    rungs.ForEach(s =>
+                    var s = view.System;
+                    var systemView = new SystemView()
                     {
-                        _DicCpu.Add(s.ToSystem(), new DsCPU(s.CommentedStatements(), s.ToSystem()));
-
-                        if(s.IsActive)
-                        {
-
-                            var systemView = new SystemView()
-                                        { Display = s.ToSystem().Name
-                                        , System = s.ToSystem()
-                                        , ViewNodes = view.Views.ToList() };
-                            comboBox_System.Items.Add(systemView);
-
-
-
-                        }
-                    });
+                        Display = s.Name,
+                        System = s,
+                        ViewNodes = view.Views.ToList()
+                    };
+                    comboBox_System.Items.Add(systemView);
                 }
 
-                comboBox_System.DisplayMember = "Display";
                 if (comboBox_System.Items.Count > 0)
                     comboBox_System.SelectedIndex = 0;
 
                 paths.ForEach(f =>
                     WriteDebugMsg(DateTime.Now, MSGLevel.MsgWarn, $"{f} 불러오기 성공!!"));
-
-                var xmlPath = Path.ChangeExtension(_PathPPTs[0], null);
-                this.Do(() => {
-                    ExportModuleExt.ExportXMLforXGI(SelectedSystem, $@"{xmlPath}");
-                });
-
-
-                EventExternal.CPUSubscribe();
-                _DicCpu.ForEach(f =>
-                {
-                    f.Value.Run();
-                    f.Value.ScanOnce();
-                });
 
                 ProcessEvent.DoWork(0);
             }
@@ -106,6 +80,32 @@ namespace Dual.Model.Import
 
                     MSGInfo($"{_PathXLS} 적용완료!!");
                     MSGWarn($"파워포인트와 엑셀을 동시에 가져오면 IO 매칭된 설정값을 가져올수 있습니다.!!");
+                });
+
+                _DicCpu = new Dictionary<DsSystem, DsCPU>();
+                var storages = new Dictionary<string, Interface.IStorage>();
+                foreach (var view in _PPTResults)
+                {
+                    if (!view.IsActive) continue;
+                    var rungs = Cpu.LoadStatements(view.System, storages);
+                    rungs.ForEach(s =>
+                    {
+                        _DicCpu.Add(s.ToSystem(), new DsCPU(s.CommentedStatements(), s.ToSystem()));
+                    });
+                }
+
+
+
+                //var xmlPath = Path.ChangeExtension(_PathPPTs[0], null);
+                //this.Do(() => {
+                //    ExportModuleExt.ExportXMLforXGI(SelectedSystem, $@"{xmlPath}");
+                //});
+
+                EventExternal.CPUSubscribe();
+                _DicCpu.ForEach(f =>
+                {
+                    f.Value.Run();
+                    f.Value.ScanOnce();
                 });
 
                 var xmlPath = Path.ChangeExtension(path, null);
@@ -197,11 +197,11 @@ namespace Dual.Model.Import
 
             Directory.CreateDirectory(Path.GetDirectoryName(_PathXLS));
 
-            List<DsSystem> systems = new List<DsSystem>();
-            foreach (SystemView systemView in comboBox_System.Items)
-                systems.Add(systemView.System);
+            //List<DsSystem> systems = new List<DsSystem>();
+            //foreach (SystemView systemView in comboBox_System.Items)
+            //    systems.Add(systemView.System);
 
-            ExportIOTable.ToFiie(systems, _PathXLS);
+            ExportIOTable.ToFiie(GetSystems(), _PathXLS);
 
             WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{_PathXLS} 생성완료!!");
             this.Do(() =>

@@ -20,15 +20,13 @@ module DriverIOLSCommonTest =
         inherit EngineTestBaseClass()
         let t = CpuTestSample()
 
-        let conn = new LsConnection(LsConnectionParameters("192.168.0.100"))
+        let conn = new LsConnection(LsConnectionParameters("192.168.0.101"))
 
         member x.Connection = conn
 
         [<Test>]
-        member __.``XXXXXXXXX LS Connection test`` () =
+        member __.``LS Connection test`` () =
             let ls = DriverIOLSCommon()
             let conn = ls.Connection
             conn.PerRequestDelay <- 1000
-            if conn.Connect()
-            then true
-            else false
+            conn.Connect() === true

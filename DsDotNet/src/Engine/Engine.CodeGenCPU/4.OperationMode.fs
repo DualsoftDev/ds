@@ -16,13 +16,13 @@ type Flow with
 
     member f.O2_AutoOperationState(): CommentedStatement =
         let set = f.ModeAutoHwExpr <&&> f.ModeAutoSwHMIExpr
-        let rst = !!f.rop.Expr <||> f.mop.Expr
+        let rst = !!f.rop.Expr <||> f.manual.Expr
 
         (set, rst) ==| (f.aop, "O2")
 
     member f.O3_ManualOperationState (): CommentedStatement =
         let set = f.ModeManualHwExpr <||> f.ModeManualSwHMIExpr
-        let rst = !!f.rop.Expr <||> f.aop.Expr
+        let rst = !!f.rop.Expr <||> f.auto.Expr
 
         (set, rst) ==| (f.mop, "O3")
 

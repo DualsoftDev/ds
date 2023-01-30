@@ -4,13 +4,7 @@
     <OutputType>Library</OutputType>
     <Name>Old.Dual.Common.FS</Name>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <OutputPath>$(SolutionDir)\bin</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>$(SolutionDir)\bin</OutputPath>
-  </PropertyGroup>
+
   <ItemGroup>
     <EmbeddedResource Remove="FSharpFSIs\**" />
     <EmbeddedResource Remove="Test\**" />

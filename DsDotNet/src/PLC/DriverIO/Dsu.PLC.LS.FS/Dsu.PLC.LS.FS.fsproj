@@ -47,14 +47,8 @@
     </AssemblyAttribute>
   </ItemGroup>
 <ItemGroup>
-  <Reference Include="Dual.Common.FS">
-    <HintPath>..\..\..\..\exLib\Dual.Common.FS.dll</HintPath>
-  </Reference>
-  <Reference Include="Dual.ConvertPLC.FS">
-    <HintPath>..\..\..\..\exLib\Dual.ConvertPLC.FS.dll</HintPath>
-  </Reference>
-  <Reference Include="Dual.Core.FS">
-    <HintPath>..\..\..\..\exLib\Dual.Core.FS.dll</HintPath>
+  <Reference Include="log4net">
+    <HintPath>..\..\..\..\..\..\..\dsA\DsDotNet\exLib\log4net.dll</HintPath>
   </Reference>
 </ItemGroup>
 </Project>

@@ -38,6 +38,7 @@
 		<Compile Include="XgiExpressionEqualityTest.fs" />
 		<Compile Include="XgiPOU.Test.fs" />
 		<Compile Include="RisingFallingTest.fs" />
+		<Compile Include="AddressAllocatorTest.fs" />
 		<None Include="App.config" />
 		<Compile Include="Main.fs" />
 	</ItemGroup>

@@ -93,7 +93,7 @@ module internal rec Command =
 
     /// '_ON' 에 대한 expression
     let fakeAlwaysOnExpression:Expression<bool> =
-        let on = createXgiVariable "_ON" true "가짜 _ON" :?> XgiLocalVar<bool>
+        let on = createXgiVariable "_ON" true "가짜 _ON" :?> XgiVar<bool>
         DuTerminal (DuVariable on)
 
     //type FuctionParameterShape =

@@ -58,15 +58,16 @@ module ConvertorPrologModule =
 
     let mutable internal autoVariableCounter = 0
 
-    type IXgiLocalVar =
+    type IXgiVar =
         inherit IVariable
         inherit INamedExpressionizableTerminal
         abstract SymbolInfo:SymbolInfo
-    type IXgiLocalVar<'T> =
-        inherit IXgiLocalVar
+    type IXgiVar<'T> =
+        inherit IXgiVar
         inherit IVariable<'T>
 
-    type XgiLocalVar<'T when 'T:equality>(param:StorageCreationParams<'T>) =
+    /// XGI 에서 사용하는 tag 주소를 갖지 않는 variable
+    type XgiVar<'T when 'T:equality>(param:StorageCreationParams<'T>) =
         inherit VariableBase<'T>(param)
 
         let {Name=name; Value=initValue; Comment=comment; } = param
@@ -78,7 +79,7 @@ module ConvertorPrologModule =
             let kind = int Variable.Kind.VAR
             fwdCreateSymbolInfo name comment plcType kind initValueHolder
 
-        interface IXgiLocalVar with
+        interface IXgiVar with
             member x.SymbolInfo = x.SymbolInfo
         interface INamedExpressionizableTerminal with
             member x.StorageName = name
@@ -103,7 +104,7 @@ module rec TypeConvertorModule =
     let (|CommentAndXgiStatements|) = function | CommentedXgiStatements(x, ys) -> x, ys
     let commentAndXgiStatement = (|CommentAndXgiStatements|)
 
-    let createXgiVariable (name:string) (initValue:obj) comment: IXgiLocalVar =
+    let createXgiVariable (name:string) (initValue:obj) comment: IXgiVar =
         (*
             "n0" is an incorrect variable.
             The folling characters are allowed:
@@ -123,22 +124,22 @@ module rec TypeConvertorModule =
         let createParam () = {defaultStorageCreationParams(unbox initValue) with Name=name; Comment=Some comment; }
         let typeName = (unbox initValue).GetType().Name
         match typeName with
-        | BOOL   -> XgiLocalVar<bool>  (createParam())
-        | CHAR   -> XgiLocalVar<char>  (createParam())
-        | FLOAT32-> XgiLocalVar<single>(createParam())
-        | FLOAT64-> XgiLocalVar<double>(createParam())
-        | INT16  -> XgiLocalVar<int16> (createParam())
-        | INT32  -> XgiLocalVar<int32> (createParam())
-        | INT64  -> XgiLocalVar<int64> (createParam())
-        | INT8   -> XgiLocalVar<int8>  (createParam())
-        | STRING -> XgiLocalVar<string>(createParam())
-        | UINT16 -> XgiLocalVar<uint16>(createParam())
-        | UINT32 -> XgiLocalVar<uint32>(createParam())
-        | UINT64 -> XgiLocalVar<uint64>(createParam())
-        | UINT8  -> XgiLocalVar<uint8> (createParam())
+        | BOOL   -> XgiVar<bool>  (createParam())
+        | CHAR   -> XgiVar<char>  (createParam())
+        | FLOAT32-> XgiVar<single>(createParam())
+        | FLOAT64-> XgiVar<double>(createParam())
+        | INT16  -> XgiVar<int16> (createParam())
+        | INT32  -> XgiVar<int32> (createParam())
+        | INT64  -> XgiVar<int64> (createParam())
+        | INT8   -> XgiVar<int8>  (createParam())
+        | STRING -> XgiVar<string>(createParam())
+        | UINT16 -> XgiVar<uint16>(createParam())
+        | UINT32 -> XgiVar<uint32>(createParam())
+        | UINT64 -> XgiVar<uint64>(createParam())
+        | UINT8  -> XgiVar<uint8> (createParam())
         | _  -> failwithlog "ERROR"
     let sys = DsSystem("","")
-    let createTypedXgiAutoVariable (nameHint:string) (initValue:obj) comment: IXgiLocalVar =
+    let createTypedXgiAutoVariable (nameHint:string) (initValue:obj) comment: IXgiVar =
         autoVariableCounter <- autoVariableCounter + 1
         let name = $"_tmp{nameHint}{autoVariableCounter}"
         createXgiVariable name initValue comment
@@ -149,7 +150,7 @@ module rec TypeConvertorModule =
         let name = $"_tmp{nameHint}{autoVariableCounter}"
         let param = {defaultStorageCreationParams(initValue) with Name=name; Comment=Some comment; }
 
-        XgiLocalVar(param)
+        XgiVar(param)
 
 
     (* Moved from Command.fs *)
@@ -212,7 +213,7 @@ module XgiExpressionConvertorModule =
         { Storage = storage; ExpandFunctionStatements=expandFunctionStatements; Exp=exp }
         : IExpression
       =
-        let xgiLocalVars = ResizeArray<IXgiLocalVar>()
+        let xgiLocalVars = ResizeArray<IXgiVar>()
         let rec helper (exp:IExpression) = [
             match exp.FunctionName with
             | Some funcName ->
@@ -394,7 +395,7 @@ module XgiExpressionConvertorModule =
                 storage.Remove decl |> ignore
 
                 match decl with
-                | :? IXgiLocalVar as loc ->
+                | :? IXgiVar as loc ->
                     let si = loc.SymbolInfo
                     let comment = loc.Comment.DefaultValue $"[local var in code] {si.Comment}"
                     let initValue = exp.BoxedEvaluatedValue

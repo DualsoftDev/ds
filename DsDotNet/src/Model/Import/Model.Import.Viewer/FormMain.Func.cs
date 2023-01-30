@@ -10,6 +10,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using System.Xml;
 using static Engine.CodeGenCPU.CpuLoader;
 using static Engine.CodeGenCPU.ExportModule;
 using static Engine.Common.FS.MessageEvent;
@@ -108,9 +109,10 @@ namespace Dual.Model.Import
                     f.Value.ScanOnce();
                 });
 
-                var xmlPath = Path.ChangeExtension(path, null);
+                var xmlTargetPath   = Path.ChangeExtension(path, null);
+                var xmlTemplateFile = Path.ChangeExtension(_PathPPTs[0], "xml");
                 this.Do(() => {
-                    ExportModuleExt.ExportXMLforXGI(SelectedSystem, $@"{xmlPath}");
+                    ExportModuleExt.ExportXMLforXGI(SelectedSystem, $@"{xmlTargetPath}", xmlTemplateFile);
                 });
             }
 

@@ -115,8 +115,8 @@ module EtcListenerModule =
                                 | Some addr -> addr.GetText()
                                 | None -> null
                             let funcSet = commonFunctionSetter lmpName lampFuncs
-                            system.AddLamp(targetLmpType, lmpName, address, flow, funcSet)
-                        } |> ignore
+                            return targetLmpType, lmpName, address, flow, funcSet
+                        }
                     ]
                     flowLampInfo 
                     |> List.choose id

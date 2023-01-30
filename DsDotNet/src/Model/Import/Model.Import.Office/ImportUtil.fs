@@ -201,7 +201,7 @@ module ImportU =
             |> Seq.iter(fun node ->
                     let flow = dicFlow.[node.PageNum]
                     node.ButtonDefs.ForEach(fun b ->
-                        mySys.AddButton(b.Value, b.Key, "","", flow)
+                        mySys.AddButton(b.Value, b.Key, "","", flow , new HashSet<Func>())
                     )
             )
 
@@ -215,7 +215,7 @@ module ImportU =
             |> Seq.iter(fun node ->
                     let flow = dicFlow.[node.PageNum]
                     node.LampDefs.ForEach(fun l ->
-                        mySys.AddLamp(l.Value, l.Key, "", flow)
+                        mySys.AddLamp(l.Value, l.Key, "", flow, new HashSet<Func>())
                     )
             )
 
@@ -229,7 +229,7 @@ module ImportU =
             |> Seq.iter(fun node ->
                     let flow = dicFlow.[node.PageNum]
                     node.CondiDefs.ForEach(fun l ->
-                        mySys.AddCondtion(l.Value, l.Key, "", flow)
+                        mySys.AddCondtion(l.Value, l.Key, "", flow, new HashSet<Func>())
                     )
             )
 

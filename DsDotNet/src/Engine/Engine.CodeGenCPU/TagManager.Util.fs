@@ -8,16 +8,17 @@ open System
 [<AutoOpen>]
 module TagManagerUtil =
 
-        //'_' 시작 TAG 이름은 사용자 정의 불가 하여 앞쪽에 중복처리 문자
-        // _(n)_ 하나씩 증가 ex)  _1_tagName, _2_tagName, _3_tagName
-    let getUniqueName (storages:Storages) (name:string) =
-        let removePrefix x = Regex.Replace(x, "^_\d+_", "")
-        let rec unique (name:string) (cnt:int) (storages:Storages) =
-            if storages.ContainsKey name
-                then unique $"_{cnt+1}_{name |> removePrefix}" (cnt+1) storages
-                else name
+    //'_' 시작 TAG 이름은 사용자 정의 불가 하여 앞쪽에 중복처리 문자
+    // _(n)_ 하나씩 증가 ex)  _1_tagName, _2_tagName, _3_tagName
+    //UniqueName.generate 대신사용
+    //let getUniqueName (storages:Storages) (name:string) =
+    //    let removePrefix x = Regex.Replace(x, "^_\d+_", "")
+    //    let rec unique (name:string) (cnt:int) (storages:Storages) =
+    //        if storages.ContainsKey name
+    //            then unique $"_{cnt+1}_{name |> removePrefix}" (cnt+1) storages
+    //            else name
 
-        unique name 0 storages
+    //    unique name 0 storages
 
     let getValidName (name:string) =
         let ableChar(c:char) =
@@ -31,9 +32,7 @@ module TagManagerUtil =
 
         ] |> String.concat ""
 
-    [<Obsolete("<ahn> 체크 필요")>]
     let getPlcTagAbleName (name:string) (storages:Storages) =
-        // <ahn> 이렇게 하면 되지 않을까요?
         let vName = name |> getValidName
         if name.StartsWith("_") then
             vName
@@ -45,7 +44,6 @@ module TagManagerUtil =
                 else
                     candidate
             generateUntilValid()
-
 
 
     let private createPlanVarHelper(stg:Storages, name:string, dataType:DataType) : IStorage =
@@ -90,7 +88,15 @@ module TagManagerUtil =
         createPlanVar storages name DuBOOL :?> PlanVar<bool>
 
     type InOut = | In | Out | Memory
-    let createBridgeTag(stg:Storages, name, address, inOut:InOut, sys): ITag =
+    type BridgeType = | Device | Button | Lamp | Condition
+    let createBridgeTag(stg:Storages, name, address, inOut:InOut, bridge:BridgeType, sys): ITag =
+        let address =
+            match bridge with
+            | Device ->     if address <> "" then "" else address
+            | Button ->     if address <> "" then "" else address
+            | Lamp ->       if address <> "" then address else failwithlog $"Error Lamp {name} address is empty"
+            | Condition ->  if address <> "" then address else failwithlog $"Error Condition {name} address is empty"
+
         let name =
             match inOut with
             | In  -> $"{name}_I"

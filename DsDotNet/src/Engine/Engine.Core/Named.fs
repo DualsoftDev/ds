@@ -123,6 +123,8 @@ module TextUtil =
         assert(relativeNameComponents.NonNullAny())
         relativeNameComponents
 
+    // '_' 는 dsText에서 입력없음 의미 address 입력시 '_' 는 "" 입력없음으로 변환
+    let replaceSkipAddress(addr:string) = if addr = "_" then "" else addr
     let getRelativeName(referencePath:Fqdn) (fqdn:Fqdn) = getRelativeNames referencePath fqdn |> Seq.map(quoteOnDemand) |> (combine ".")
 
     type FqdnObject(name:string, parent:IQualifiedNamed) =

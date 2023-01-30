@@ -319,9 +319,9 @@ module PPTObjectModule =
                         |> fun text ->
                             updateCopySys  (text ,(GetBracketsReplaceName(name) |> trimSpace), number)
 
-            |BUTTON ->    getBracketItems(shape.InnerText).ForEach(fun (n, t) -> btnDefs.Add(n, t|> getBtnType))
-            |LAMP   ->    getBracketItems(shape.InnerText).ForEach(fun (n, t) -> lampDefs.Add(n, t|> getLampType))
-            |CONDITION -> getBracketItems(shape.InnerText).ForEach(fun (n, t) -> condiDefs.Add(n, t|> getConditionType))
+            |BUTTON ->    getBracketItems(shape.InnerText).ForEach(fun (n, t) -> btnDefs.Add(n|>TrimSpace, t|> getBtnType))
+            |LAMP   ->    getBracketItems(shape.InnerText).ForEach(fun (n, t) -> lampDefs.Add(n|>TrimSpace, t|> getLampType))
+            |CONDITION -> getBracketItems(shape.InnerText).ForEach(fun (n, t) -> condiDefs.Add(n|>TrimSpace, t|> getConditionType))
             |REALExF
             |REALExS
             |DUMMY -> ()

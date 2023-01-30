@@ -67,6 +67,11 @@ namespace Dual.Model.Import
                 paths.ForEach(f =>
                     WriteDebugMsg(DateTime.Now, MSGLevel.MsgWarn, $"{f} 불러오기 성공!!"));
 
+                var xmlPath = Path.ChangeExtension(_PathPPTs[0], null);
+                this.Do(() => {
+                    ExportModuleExt.ExportXMLforXGI(SelectedSystem, $@"{xmlPath}");
+                });
+
 
                 EventExternal.CPUSubscribe();
                 _DicCpu.ForEach(f =>

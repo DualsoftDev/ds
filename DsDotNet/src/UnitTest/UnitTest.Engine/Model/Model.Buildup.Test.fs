@@ -6,6 +6,7 @@ open Engine.Core
 open Engine.Common.FS
 open NUnit.Framework
 open Engine.Parser.FS
+open System.Collections.Generic
 
 [<AutoOpen>]
 module ModelBuildupTests1 =
@@ -175,12 +176,12 @@ module ModelBuildupTests1 =
         member __.``Model with buttons test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            system.AddButton(BtnType.DuEmergencyBTN, "STOP", "%I1","%Q1",flow)
-            system.AddButton(BtnType.DuDriveBTN, "START", "%I1","%Q1",flow)
+            system.AddButton(BtnType.DuEmergencyBTN, "STOP", "%I1","%Q1",flow, new HashSet<Func>())
+            system.AddButton(BtnType.DuDriveBTN, "START", "%I1","%Q1",flow, new HashSet<Func>())
 
             let flow2 = Flow.Create("F2", system)
-            system.AddButton(BtnType.DuEmergencyBTN, "STOP2", "%I1","%Q1",flow2)
-            system.AddButton(BtnType.DuDriveBTN, "START2", "%I1","%Q1",flow2)
+            system.AddButton(BtnType.DuEmergencyBTN, "STOP2", "%I1","%Q1",flow2, new HashSet<Func>())
+            system.AddButton(BtnType.DuDriveBTN, "START2", "%I1","%Q1",flow2, new HashSet<Func>())
 
             let generated = system.ToDsText()
             let answer = """

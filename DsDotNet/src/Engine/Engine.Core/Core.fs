@@ -227,7 +227,7 @@ module CoreModule =
         inherit Named(name)
         member x.DeviceDefs = tasks.OfType<TaskDevice>()
         member x.LinkDefs   = tasks.OfType<TaskLink>()
-        member val Funcs  = HashSet<Func>() with get, set//todo ToDsText, parsing
+        member val Funcs  = HashSet<Func>() with get, set
 
     type TagAddress = string
     [<AbstractClass>]

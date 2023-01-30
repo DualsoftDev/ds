@@ -402,8 +402,8 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                                     let! addressCtx = callList.TryFindFirstChild<AddressInOutContext>()
                                     let! txAddressCtx = addressCtx.TryFindFirstChild<OutAddrContext>()
                                     let! rxAddressCtx = addressCtx.TryFindFirstChild<InAddrContext>()
-                                    let tx = getAddress(txAddressCtx)
-                                    let rx = getAddress(rxAddressCtx)
+                                    let tx = getAddress(txAddressCtx) |>replaceSkipAddress
+                                    let rx = getAddress(rxAddressCtx) |>replaceSkipAddress
 
                                     tracefn $"TX={tx} RX={rx}"
                                     return TaskDevice(apiPoint, rx, tx, device)

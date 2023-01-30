@@ -36,7 +36,7 @@ module CoreExtensionModule =
                 then failwithf $"add item [{itemName}] in flow ({targetFlow.System.Name} != {system.Name}) is not same system"
 
     type DsSystem with
-        member x.AddButton(btnType:BtnType, btnName:string, inAddress:TagAddress, outAddress:TagAddress, flow:Flow) =
+        member x.AddButton(btnType:BtnType, btnName:string, inAddress:TagAddress, outAddress:TagAddress, flow:Flow, funcs:HashSet<Func>) =
             checkSystem(x, flow, btnName)
             if btnType = DuAutoBTN || btnType = DuManualBTN
             then
@@ -45,28 +45,33 @@ module CoreExtensionModule =
                 flows.Contains(flow) |> not
                 |> verifyM $"{btnType} {btnName} is assigned to a single flow :  flow name [{flow.Name}]"
 
+            // '_' dsText에서 입력없음 의미 "" 입력없음으로 변환
+            let inAddress  = replaceSkipAddress inAddress
+            let outAddress  = replaceSkipAddress outAddress
             match x.Buttons.TryFind(fun f -> f.Name = btnName) with
             | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
-            | None -> x.Buttons.Add(ButtonDef(btnName, btnType, inAddress, outAddress, HashSet[|flow|], HashSet[||]))
+            | None -> x.Buttons.Add(ButtonDef(btnName, btnType, inAddress, outAddress, HashSet[|flow|], funcs))
                       |> verifyM $"Duplicated ButtonDef [{btnName}]"
 
-        member x.AddLamp(lmpType:LampType, lmpName: string, addr:string, flow:Flow) =
+        member x.AddLamp(lmpType:LampType, lmpName: string, addr:string, flow:Flow, funcs:HashSet<Func>) =
             checkSystem(x, flow, lmpName)
 
             x.Lamps.Select(fun f->f.Name).Contains(lmpName) |> not
             |> verifyM $"{lmpType} {lmpName} is assigned to a single flow :  flow name [{flow.Name}]"
 
+            let addr = replaceSkipAddress addr
             match x.Lamps.TryFind(fun f -> f.Name = lmpName) with
             | Some lmp -> lmp.SettingFlow <- flow
-            | None -> x.Lamps.Add(LampDef(lmpName, lmpType, addr, flow, HashSet[||]))
+            | None -> x.Lamps.Add(LampDef(lmpName, lmpType, addr, flow, funcs))
                       |> verifyM $"Duplicated LampDef [{lmpName}]"
 
-        member x.AddCondtion(condiType:ConditionType, condiName: string, inAddr:string, flow:Flow) =
+        member x.AddCondtion(condiType:ConditionType, condiName: string, inAddr:string, flow:Flow, funcs:HashSet<Func>) =
             checkSystem(x, flow, condiName)
 
+            let inAddr = replaceSkipAddress inAddr
             match x.Conditions.TryFind(fun f -> f.Name = condiName) with
             | Some condi -> condi.SettingFlows.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
-            | None -> x.Conditions.Add(ConditionDef(condiName, condiType, inAddr, HashSet[|flow|], HashSet[||]))
+            | None -> x.Conditions.Add(ConditionDef(condiName, condiType, inAddr, HashSet[|flow|], funcs))
                       |> verifyM $"Duplicated ConditionDef [{condiName}]"
 
 

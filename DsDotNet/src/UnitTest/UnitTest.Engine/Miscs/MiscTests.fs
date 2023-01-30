@@ -2,6 +2,8 @@ namespace T
 
 open NUnit.Framework
 open Engine.Core
+open Engine.Common.FS.Log4NetWrapper
+open Engine.Common.FS
 
 
 [<AutoOpen>]
@@ -39,4 +41,12 @@ module MiscTestModule =
 
             [ for i in 1..5 -> UniqueName.generate "MyTON" ]
             |> SeqEq ["MyTON0"; "MyTON1"; "MyTON2"; "MyTON3"; "MyTON4"; ]
+
+        [<Test>]
+        member __.``Fail test`` () =
+            tracefn "FAIL testing..."
+            try
+                failwithstack "Dying with stack trace!"
+            with _ ->
+                ()
 

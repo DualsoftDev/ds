@@ -78,6 +78,13 @@ module Log4NetWrapper =
         logError "%s" msg
         failwith msg
 
+    /// failwith stack trace logging
+    let failwithstack msg =
+        let st = StackTrace().ToString()
+        logError $"{msg}{Environment.NewLine}{st}"
+        Trace.WriteLine $"{msg}{Environment.NewLine}{st}"
+        failwith msg
+
     let verify x = if not x then failwithlog "ERROR"
 
     // see Prelude.failwithf
@@ -85,6 +92,10 @@ module Log4NetWrapper =
     /// failwith formatted logging : %s 등을 사용할 수 있음
     let failwithlogf format =
         Printf.ksprintf failwithlog format
+
+    /// failwith stack trace with formatted logging : %s 등을 사용할 수 있음
+    let failwithstackf format =
+        Printf.ksprintf failwithstack format
 
     let raiseExceptionWithLog exn msg =
         logError "%s" msg

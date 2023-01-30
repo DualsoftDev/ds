@@ -17,19 +17,20 @@ module Fixtures =
         gLogger <- logger
         logger
 
+    let mutable private _setupDone = false
     let private setUpTest(loggerName:string) =
+            if not _setupDone then
+                let cwd = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\"))
+                sprintf "테스트 초기화 수행" |> ignore
+                let configFile = $@"{cwd}App.config"
+                let logger = configureLog4Net loggerName configFile
 
-            let cwd = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\"))
-            sprintf "테스트 초기화 수행" |> ignore
-            let configFile = $@"{cwd}App.config"
-            let logger = configureLog4Net loggerName configFile
+                // 로깅 결과 파일 : UnitTest.Engine/bin/logEngine*.txt
+                logInfo "Log4net logging enabled!!!"
 
-            // 로깅 결과 파일 : UnitTest.Engine/bin/logEngine*.txt
-            logInfo "Log4net logging enabled!!!"
-
-            if not (File.Exists configFile) then
-                failwithlog "config 파일 위치를 강제로 수정해 주세요."
-            ()
+                if not (File.Exists configFile) then
+                    failwithlog "config 파일 위치를 강제로 수정해 주세요."
+                _setupDone <- true
 
     let createTag(name, address, value) =
         let param = {

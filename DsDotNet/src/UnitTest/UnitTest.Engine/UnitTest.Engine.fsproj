@@ -97,6 +97,7 @@
 		<Compile Include="Cpu\System Statement.fs" />
 		<Compile Include="Cpu\ButtonLamp Statement.fs" />
 		<Compile Include="Cpu\Extension Statement.fs" />
+		<Compile Include="DriverIO\DriverIOModule.fs" />
 		<Compile Include="HmiCodeGen\HmiCodeGenTester.fs" />
 		<None Include="ScratchPad.fsx" />
 		<None Include="App.config" />

@@ -95,6 +95,27 @@ module ConvertCoreExt =
         member x.GetPRs(r:Real) =
             x.ApiItems.Where(fun api-> api.TXs.Contains(r))
                       .Select(fun api -> api.PR)
+        member x.GetReadAbleTags() =
+            EnumFS.EnumValues(typeof<SysBitTag>).Cast<SysBitTag>()
+                  .Select(getSM(x).GetSysBitTag)
+
+        member x.GetWriteAbleTags() =
+            let writeAble =
+                [
+                    SysBitTag.AUTO
+                    SysBitTag.MANUAL
+                    SysBitTag.DRIVE
+                    SysBitTag.STOP
+                    SysBitTag.EMG
+                    SysBitTag.TEST
+                    SysBitTag.READY
+                    SysBitTag.CLEAR
+                    SysBitTag.HOME
+                ]
+            let sm = getSM(x)
+            EnumFS.EnumValues(typeof<SysBitTag>).Cast<SysBitTag>()
+                  .Where(fun typ -> writeAble.Contains(typ))
+                  .Select(sm.GetSysBitTag)
 
     let private getButtonExpr(flow:Flow, btns:ButtonDef seq) : Expression<bool> seq =
             btns.Where(fun b -> b.SettingFlows.Contains(flow))
@@ -170,6 +191,26 @@ module ConvertCoreExt =
         member f.ModeAutoSwHMIExpr   =    f.auto.Expr <&&> !!f.manual.Expr
         member f.ModeManualSwHMIExpr =  !!f.auto.Expr <&&>   f.manual.Expr
 
+        member f.GetReadAbleTags() =
+            EnumFS.EnumValues(typeof<FlowTag>).Cast<FlowTag>()
+                  .Select(getFM(f).GetFlowTag)
+
+        member f.GetWriteAbleTags() =
+            let writeAble =
+                [   FlowTag.AUTO_BIT
+                    FlowTag.MANUAL_BIT
+                    FlowTag.DRIVE_BIT
+                    FlowTag.STOP_BIT
+                    FlowTag.READY_BIT
+                    FlowTag.CLEAR_BIT
+                    FlowTag.EMG_BIT
+                    FlowTag.TEST_BIT
+                    FlowTag.HOME_BIT
+                ]
+            let fm = getFM(f)
+            EnumFS.EnumValues(typeof<FlowTag>).Cast<FlowTag>()
+                  .Where(fun typ -> writeAble.Contains(typ))
+                  .Select(fm.GetFlowTag)
 
     type Call with
         member c.UsingTon  = c.CallTargetJob.Funcs |> hasTime

@@ -30,6 +30,7 @@ module TagModule =
     type PlanVar<'T when 'T:equality> (param:StorageCreationParams<'T>) =
         inherit Variable<'T>(param)
         member val Vertex:Vertex option = None with get, set
+        member x.Address:string option = param.Address
 
 
 

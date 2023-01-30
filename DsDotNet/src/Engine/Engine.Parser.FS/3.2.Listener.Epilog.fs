@@ -67,15 +67,20 @@ module EtcListenerModule =
                                     .ToHashSet()
                             let funcSet = commonFunctionSetter btnName buttonFuncs
                             if flows.Count > 0 then
-                                return ButtonDef(btnName, targetBtnType, addrIn, addrOut, flows, funcSet)
+                                return targetBtnType, btnName, addrIn, addrOut, flows, funcSet
                             else
-                                return ButtonDef(btnName, targetBtnType, null, null, new HashSet<Flow>(), new HashSet<Func>())
+                                failwith "There are no flows in button"
                         }
                     ]
                     flowBtnInfo
                     |> List.choose id
-                    |> List.map(system.Buttons.Add)
-                    |> ignore
+                    |> List.iter(fun ps ->
+                        let targetBtnType, btnName, addrIn, addrOut, flows, funcSet = ps
+                        flows
+                        |> Seq.iter(fun flow ->
+                            system.AddButton(targetBtnType, btnName, addrIn, addrOut, flow, funcSet)
+                        )
+                    )
 
         member x.ProcessLampBlock(ctx:LampBlockContext) =
             for ctxChild in ctx.children do
@@ -110,13 +115,12 @@ module EtcListenerModule =
                                 | Some addr -> addr.GetText() |> replaceSkipAddress
                                 | None -> null
                             let funcSet = commonFunctionSetter lmpName lampFuncs
-                            return LampDef(lmpName, targetLmpType, address, flow, funcSet)
+                            return targetLmpType, lmpName, address, flow, funcSet
                         }
                     ]
-                    flowLampInfo
+                    flowLampInfo 
                     |> List.choose id
-                    |> List.map(system.Lamps.Add)
-                    |> ignore
+                    |> List.iter(system.AddLamp)
 
         member x.ProcessConditionBlock(ctx:ConditionBlockContext) =
             for ctxChild in ctx.children do
@@ -135,27 +139,32 @@ module EtcListenerModule =
                     let flowConditionInfo = [
                         for cd in conditionDefs do
                         option {
-                            let! lampNameCtx = cd.TryFindFirstChild<LampNameContext>()
+                            let! cndNameCtx = cd.TryFindFirstChild<LampNameContext>()
                             let  addrCtx = cd.TryFindFirstChild<AddressItemContext>()
-                            let lmpName = lampNameCtx.GetText()
+                            let cndName = cndNameCtx.GetText()
                             let address =
                                 match addrCtx with
                                 | Some addr -> addr.GetText() |> replaceSkipAddress
                                 | None -> null
-                            let funcSet = commonFunctionSetter lmpName conditionFuncs
+                            let funcSet = commonFunctionSetter cndName conditionFuncs
                             let flows =
                                 cd.Descendants<FlowNameContext>()
                                     .Select(fun flowCtx -> flowCtx.GetText())
                                     .Tap(fun flowName -> verifyM $"Flow [{flowName}] not exists!" (system.Flows.Any(fun f -> f.Name = flowName)))
                                     .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName))
                                     .ToHashSet()
-                            return ConditionDef(lmpName, targetCndType, address, flows, funcSet)
+                            return targetCndType, cndName, address, flows, funcSet
                         }
                     ]
                     flowConditionInfo
                     |> List.choose id
-                    |> List.map(system.Conditions.Add)
-                    |> ignore
+                    |> List.iter(fun ps ->
+                        let targetCndType, cndName, address, flows, funcSet = ps
+                        flows
+                        |> Seq.iter(fun flow ->
+                            system.AddCondtion(targetCndType, cndName, address, flow, funcSet)
+                        )
+                    )
 
         member x.ProcessSafetyBlock(ctx:SafetyBlockContext) =
             let safetyDefs = ctx.Descendants<SafetyDefContext>()

@@ -2,30 +2,64 @@ namespace T
 
 open NUnit.Framework
 
-open Engine.Parser.FS
-open Engine.Core
-open Engine.Common.FS
-open PLC.CodeGen.LSXGI
-open PLC.CodeGen.Common.NewIEC61131
-
+open PLC.CodeGen.Common
 
 type AddressAllocatorTest() =
     inherit XgiTestBaseClass()
 
     [<Test>]
+    member __.``Allocate address beyond limit test`` () =
+        let {
+            BitAllocator  = x
+        } = MemoryAllocator.createMemoryAllocator "M" (0, 0)
+
+        for i = 0 to 7 do
+            x() === $"%%MX{i}"   // %MX0 ~ %MX10
+        (fun () -> x() |> ignore) |> ShouldFailWithSubstringT "Limit exceeded."
+
+
+        let {
+            WordAllocator = w
+        } = MemoryAllocator.createMemoryAllocator "M" (0, 0)
+
+        (fun () -> w() |> ignore) |> ShouldFailWithSubstringT "Limit exceeded."
+
+    [<Test>]
     member __.``Allocate address`` () =
-        let allocator = MemoryAllocator.createMemoryAllocator "M" (0, 100)
+        let {
+            BitAllocator  = x
+            ByteAllocator = b
+            WordAllocator = w
+            DWordAllocator= d
+            LWordAllocator= l
+        } = MemoryAllocator.createMemoryAllocator "M" (0, 100)
+
         for i = 0 to 10 do
-            allocator Size.X === $"%%MX{i}"   // %MX0 ~ %MX10
-        allocator Size.B === "%MB2"
-        allocator Size.X === "%MX11"
-        allocator Size.B === "%MB3"
-        allocator Size.W === "%MW2"
-        allocator Size.W === "%MW3"
-        allocator Size.X === "%MX12"
-        allocator Size.B === "%MB8"
-        allocator Size.W === "%MW5"
-        allocator Size.B === "%MB9"
-        ()
+            x() === $"%%MX{i}"   // %MX0 ~ %MX10
+        b() === "%MB2"
+        x() === "%MX11"
+        b() === "%MB3"
+        w() === "%MW2"
+        w() === "%MW3"
+        x() === "%MX12"
+        b() === "%MB8"
+        w() === "%MW5"
+        b() === "%MB9"
 
+    [<Test>]
+    member __.``Allocate address test2`` () =
+        let {
+            BitAllocator  = x
+            ByteAllocator = b
+            WordAllocator = w
+            DWordAllocator= d
+            LWordAllocator= l
+        } = MemoryAllocator.createMemoryAllocator "M" (20, 100)
 
+        b() === "%MB20"
+        b() === "%MB21"
+        b() === "%MB22"
+        w() === "%MW12"
+        b() === "%MB23"
+        x() === "%MX208" // 26 * 8
+        b() === "%MB27"

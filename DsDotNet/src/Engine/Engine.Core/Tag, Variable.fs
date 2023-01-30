@@ -65,7 +65,8 @@ module TagVariableModule =
             member x.StorageName = name
 
         abstract ToText: unit -> string
-        abstract ToBoxedExpression : unit -> obj    /// IExpression<'T> 의 boxed 형태의 expression 생성
+        /// IExpression<'T> 의 boxed 형태의 expression 생성
+        abstract ToBoxedExpression : unit -> obj
 
     /// PLC 기준 tag 로 생성되어야 하는 것들.  e.g Counter, Timer 구조의 멤버 변수 포함 (EN, CU, CD, ..)
     /// Tag<'T> 는 address 를 갖는 tag

@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace Dsu.PLC
+namespace Old.Dsu.PLC.Common
 {
     public interface IConnection : IDisposable
     {

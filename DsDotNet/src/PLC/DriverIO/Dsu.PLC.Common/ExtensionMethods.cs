@@ -1,6 +1,6 @@
-﻿using LanguageExt;
+using LanguageExt;
 
-namespace Dsu.PLC.Utilities
+namespace Old.Dsu.PLC.Common
 {
 	public static class ExtensionMethods
 	{

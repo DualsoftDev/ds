@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Dsu.PLC.Common
+namespace Old.Dsu.PLC.Common
 {
     public class PlcException : Exception
     {

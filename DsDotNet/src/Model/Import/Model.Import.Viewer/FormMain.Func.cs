@@ -16,6 +16,7 @@ using static Engine.CodeGenCPU.ExportModule;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
+using static Engine.Core.RuntimeGeneratorModule;
 using static Engine.Cpu.RunTime;
 using static Model.Import.Office.ImportPPTModule;
 using static Model.Import.Office.ImportViewModule;
@@ -71,6 +72,8 @@ namespace Dual.Model.Import
                 if (UtilFile.BusyCheck()) return;
                 Busy = true;
                 MSGInfo($"{_PathXLS} 불러오는 중!!");
+                Runtime.Target = RuntimeTargetType.XGI;
+
                 ImportIOTable.ApplyExcel(path, GetSystems());
 
                 this.Do(() =>

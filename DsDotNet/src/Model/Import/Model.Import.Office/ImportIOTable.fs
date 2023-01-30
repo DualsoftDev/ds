@@ -58,6 +58,13 @@ module ImportIOTable =
 
         let dataset = FromExcel(path)
         try
+            let autoFillAddress(x:string) =
+                if x = "" then x
+                else
+                    match Runtime.Target with
+                    |XGI -> if  not <| x.StartsWith("%")   then "%"+x else x
+                    |_ ->   x
+
             let functionUpdate(funcText, funcs:HashSet<Func>, tableIO:Data.DataTable, isJob:bool) =
                 funcs.Clear()
                 if funcText <> "" && funcText <> "-"
@@ -69,8 +76,8 @@ module ImportIOTable =
 
             let updateBtn(row:Data.DataRow, btntype:BtnType, tableIO:Data.DataTable) =
                 let name  = $"{row.[(int)IOColumn.Name]}"
-                let input = $"{row.[(int)IOColumn.Input]}"
-                let output= $"{row.[(int)IOColumn.Output]}"
+                let input = $"{row.[(int)IOColumn.Input]}"  |> autoFillAddress
+                let output= $"{row.[(int)IOColumn.Output]}" |> autoFillAddress
                 let func  = $"{row.[(int)IOColumn.Func]}"
 
                 let btns = sys.SystemButtons.Where(fun w->w.ButtonType = btntype)
@@ -82,7 +89,7 @@ module ImportIOTable =
 
             let updateLamp(row:Data.DataRow, lampType:LampType, tableIO:Data.DataTable) =
                 let name  = $"{row.[(int)IOColumn.Name]}"
-                let output= $"{row.[(int)IOColumn.Output]}"
+                let output= $"{row.[(int)IOColumn.Output]}" |> autoFillAddress
                 let func  = $"{row.[(int)IOColumn.Func]}"
 
                 let lamps = sys.SystemLamps.Where(fun w->w.LampType = lampType)
@@ -93,7 +100,7 @@ module ImportIOTable =
 
             let updateCondition (row:Data.DataRow, cType:ConditionType, tableIO:Data.DataTable) =
                 let name  = $"{row.[(int)IOColumn.Name]}"
-                let output= $"{row.[(int)IOColumn.Output]}"
+                let output= $"{row.[(int)IOColumn.Output]}" |> autoFillAddress
                 let func  = $"{row.[(int)IOColumn.Func]}"
 
                 let conds = sys.SystemConditions.Where(fun w->w.ConditionType = cType)
@@ -119,8 +126,8 @@ module ImportIOTable =
                         match TextToXlsType($"{row.[(int)IOColumn.Case]}") with
                         | XlsAddress  ->
                             let dev = dicJob.[$"{row.[(int)IOColumn.Name]}"]
-                            dev.InAddress  <- $"{row.[(int)IOColumn.Input]}"
-                            dev.OutAddress <- $"{row.[(int)IOColumn.Output]}"
+                            dev.InAddress  <- $"{row.[(int)IOColumn.Input]}" |> autoFillAddress
+                            dev.OutAddress <- $"{row.[(int)IOColumn.Output]}"|> autoFillAddress
 
                             let jobName  = $"{row.[(int)IOColumn.Job]}"
                             let func  = $"{row.[(int)IOColumn.Func]}"

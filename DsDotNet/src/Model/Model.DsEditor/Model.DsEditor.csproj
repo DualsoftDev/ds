@@ -12,7 +12,7 @@
 	</PropertyGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
-	  <ProjectReference Include="..\..\PLC\DriverIO\Dsu.PLC.Common\Dsu.PLC.Common.csproj" />
+	  <ProjectReference Include="..\..\PLC\DriverIO\Dsu.PLC.Common\Old.Dsu.PLC.Common.csproj" />
 	  <ProjectReference Include="..\..\PLC\DriverIO\Dsu.PLC.LS.FS\Dsu.PLC.LS.FS.fsproj" />
 	  <ProjectReference Include="..\Import\Model.Import.Office\Model.Import.Office.fsproj" />
 	</ItemGroup>

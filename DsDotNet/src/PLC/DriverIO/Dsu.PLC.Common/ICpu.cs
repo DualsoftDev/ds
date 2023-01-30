@@ -1,4 +1,4 @@
-﻿namespace Dsu.PLC
+namespace Old.Dsu.PLC.Common
 {
     public interface ICpu
     {

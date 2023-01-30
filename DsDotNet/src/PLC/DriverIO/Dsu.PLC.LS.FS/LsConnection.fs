@@ -1,10 +1,9 @@
-﻿namespace Dsu.PLC.LS
+namespace Dsu.PLC.LS
 
 open System.Net.Sockets
 open FSharpPlus
 open Engine.Common.FS
-open Dsu.PLC.Common
-open Dsu.PLC
+open Old.Dsu.PLC.Common
 open PacketImpl
 open AddressConvert
 open Cluster

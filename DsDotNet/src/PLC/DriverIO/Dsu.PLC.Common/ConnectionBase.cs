@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ using LanguageExt;
 using static LanguageExt.Prelude;
 using log4net;
 
-namespace Dsu.PLC.Common
+namespace Old.Dsu.PLC.Common
 {
     /// <summary>
     /// Common base class for PLC connection

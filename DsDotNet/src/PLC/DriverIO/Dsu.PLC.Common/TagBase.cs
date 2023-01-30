@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Linq;
 using LanguageExt;
 
-namespace Dsu.PLC.Common
+namespace Old.Dsu.PLC.Common
 {
     public enum DataLengthType
     {

@@ -1,10 +1,10 @@
-﻿using log4net;
+using log4net;
 
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Dsu.PLC.Common
+namespace Old.Dsu.PLC.Common
 {
     public static class Global
     {

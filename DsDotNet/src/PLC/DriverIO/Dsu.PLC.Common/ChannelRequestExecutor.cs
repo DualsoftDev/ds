@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using LanguageExt;
 
-namespace Dsu.PLC.Common
+namespace Old.Dsu.PLC.Common
 {
     public abstract class ChannelRequestExecutor
     {

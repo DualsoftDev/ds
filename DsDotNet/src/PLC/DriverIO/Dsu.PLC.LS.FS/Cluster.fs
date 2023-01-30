@@ -4,8 +4,7 @@ open System
 open System.Collections
 open System.Collections.Generic
 open Engine.Common.FS
-open Dsu.PLC
-open Dsu.PLC.Common
+open Old.Dsu.PLC.Common
 open FSharpPlus
 open AddressConvert
 open Engine.Common.FS

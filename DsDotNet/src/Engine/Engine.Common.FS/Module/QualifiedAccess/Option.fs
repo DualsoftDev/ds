@@ -12,6 +12,15 @@ module Option =
     let private defaultValue2 = Option.defaultValue
     let private defaultWith2  = Option.defaultWith
 
+    let ofString (str:string) =
+        match str with
+        | IsItNullOrEmpty str -> None
+        | _ -> Some str
+    let toString (optstr:string option) =
+        match optstr with
+        | Some str -> str
+        | _ -> null
+
     #if INTERACTIVE
     let ofTuple<'v> (b, v:'v) =
         if b then Some v

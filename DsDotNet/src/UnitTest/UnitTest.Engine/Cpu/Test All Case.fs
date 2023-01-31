@@ -17,6 +17,21 @@ type TestAllCase() =
 
     let t = CpuTestSample()
     let myTemplate testName = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../../UnitTest.PLC.Xgi/XgiXmls/{testName}")
+    let testAddressSetting (sys:DsSystem) =
+        for j in sys.Jobs do
+            for dev in j.DeviceDefs do
+            dev.InAddress <- "%MX777"
+            dev.OutAddress <- "%MX888"
+
+        for b in sys.Buttons do
+            b.InAddress <- "%MX777"
+            b.OutAddress <- "%MX888"
+
+        for l in sys.Lamps do
+            l.OutAddress <- "%MX888"
+
+        for c in sys.Conditions do
+            c.InAddress <- "%MX777"
 
     [<Test>]
     member __.``XXXXXXXXXXXXXX Test All Case`` () =
@@ -33,8 +48,7 @@ type TestAllCase() =
         let pptPath = sampleDirectory + "s.pptx"
         let xlsPath = sampleDirectory + "s.xlsx"
         let model = ImportPPT.GetModel [ pptPath ]
-
-        ApplyExcel(xlsPath, model.Systems)
+        model.Systems.ForEach(testAddressSetting)
 
         let result = exportXMLforXGI(model.Systems.First(), myTemplate f, None)
         //추후 정답과 비교 필요

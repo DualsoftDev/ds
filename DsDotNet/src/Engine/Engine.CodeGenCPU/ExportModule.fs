@@ -49,4 +49,5 @@ module ExportModule =
     [<Extension>]
     type ExportModuleExt =
         [<Extension>] static member ExportXMLforXGI (system:DsSystem, path:string, tempLSISxml) = exportXMLforXGI(system, path, tempLSISxml)
+        [<Extension>] static member ExportXMLforPC (system:DsSystem, path:string, tempLSISxml) = exportXMLforXGI(system, path, tempLSISxml)//test ahn
 

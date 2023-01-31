@@ -48,6 +48,7 @@ namespace Dual.Model.Import
             this.button_TestStart = new System.Windows.Forms.Button();
             this.button_TestORG = new System.Windows.Forms.Button();
             this.splitContainer4 = new System.Windows.Forms.SplitContainer();
+            this.checkedListBox_sysHMI = new System.Windows.Forms.CheckedListBox();
             this.checkedListBox_My = new System.Windows.Forms.CheckedListBox();
             this.checkedListBox_Ex = new System.Windows.Forms.CheckedListBox();
             this.panel1 = new System.Windows.Forms.Panel();
@@ -60,7 +61,8 @@ namespace Dual.Model.Import
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.checkedListBox_sysHMI = new System.Windows.Forms.CheckedListBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.comboBox_Package = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -130,6 +132,8 @@ namespace Dual.Model.Import
             // splitContainer2.Panel1
             // 
             this.splitContainer2.Panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(33)))), ((int)(((byte)(33)))));
+            this.splitContainer2.Panel1.Controls.Add(this.label3);
+            this.splitContainer2.Panel1.Controls.Add(this.comboBox_Package);
             this.splitContainer2.Panel1.Controls.Add(this.label2);
             this.splitContainer2.Panel1.Controls.Add(this.label1);
             this.splitContainer2.Panel1.Controls.Add(this.comboBox_Device);
@@ -150,7 +154,7 @@ namespace Dual.Model.Import
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(242, 116);
+            this.label2.Location = new System.Drawing.Point(311, 117);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(57, 12);
             this.label2.TabIndex = 12;
@@ -159,7 +163,7 @@ namespace Dual.Model.Import
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(28, 116);
+            this.label1.Location = new System.Drawing.Point(176, 117);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(45, 12);
             this.label1.TabIndex = 11;
@@ -169,9 +173,9 @@ namespace Dual.Model.Import
             // 
             this.comboBox_Device.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_Device.FormattingEnabled = true;
-            this.comboBox_Device.Location = new System.Drawing.Point(306, 111);
+            this.comboBox_Device.Location = new System.Drawing.Point(374, 113);
             this.comboBox_Device.Name = "comboBox_Device";
-            this.comboBox_Device.Size = new System.Drawing.Size(125, 20);
+            this.comboBox_Device.Size = new System.Drawing.Size(67, 20);
             this.comboBox_Device.TabIndex = 10;
             this.comboBox_Device.SelectedIndexChanged += new System.EventHandler(this.comboBox_Device_SelectedIndexChanged);
             // 
@@ -179,9 +183,9 @@ namespace Dual.Model.Import
             // 
             this.comboBox_System.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_System.FormattingEnabled = true;
-            this.comboBox_System.Location = new System.Drawing.Point(82, 112);
+            this.comboBox_System.Location = new System.Drawing.Point(230, 113);
             this.comboBox_System.Name = "comboBox_System";
-            this.comboBox_System.Size = new System.Drawing.Size(125, 20);
+            this.comboBox_System.Size = new System.Drawing.Size(59, 20);
             this.comboBox_System.TabIndex = 10;
             this.comboBox_System.SelectedIndexChanged += new System.EventHandler(this.comboBox_System_SelectedIndexChanged);
             // 
@@ -328,6 +332,18 @@ namespace Dual.Model.Import
             this.splitContainer4.SplitterDistance = 346;
             this.splitContainer4.TabIndex = 20;
             // 
+            // checkedListBox_sysHMI
+            // 
+            this.checkedListBox_sysHMI.Dock = System.Windows.Forms.DockStyle.Right;
+            this.checkedListBox_sysHMI.FormattingEnabled = true;
+            this.checkedListBox_sysHMI.Items.AddRange(new object[] {
+            "Select System"});
+            this.checkedListBox_sysHMI.Location = new System.Drawing.Point(535, 0);
+            this.checkedListBox_sysHMI.Name = "checkedListBox_sysHMI";
+            this.checkedListBox_sysHMI.Size = new System.Drawing.Size(141, 396);
+            this.checkedListBox_sysHMI.TabIndex = 20;
+            this.checkedListBox_sysHMI.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.checkedListBox_sysHMI_ItemCheck);
+            // 
             // checkedListBox_My
             // 
             this.checkedListBox_My.Dock = System.Windows.Forms.DockStyle.Right;
@@ -462,17 +478,23 @@ namespace Dual.Model.Import
             this.splitter1.TabIndex = 22;
             this.splitter1.TabStop = false;
             // 
-            // checkedListBox_sysHMI
+            // label3
             // 
-            this.checkedListBox_sysHMI.Dock = System.Windows.Forms.DockStyle.Right;
-            this.checkedListBox_sysHMI.FormattingEnabled = true;
-            this.checkedListBox_sysHMI.Items.AddRange(new object[] {
-            "Select System"});
-            this.checkedListBox_sysHMI.Location = new System.Drawing.Point(535, 0);
-            this.checkedListBox_sysHMI.Name = "checkedListBox_sysHMI";
-            this.checkedListBox_sysHMI.Size = new System.Drawing.Size(141, 396);
-            this.checkedListBox_sysHMI.TabIndex = 20;
-            this.checkedListBox_sysHMI.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.checkedListBox_sysHMI_ItemCheck);
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(24, 116);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(33, 12);
+            this.label3.TabIndex = 16;
+            this.label3.Text = "배포:";
+            // 
+            // comboBox_Package
+            // 
+            this.comboBox_Package.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_Package.FormattingEnabled = true;
+            this.comboBox_Package.Location = new System.Drawing.Point(63, 112);
+            this.comboBox_Package.Name = "comboBox_Package";
+            this.comboBox_Package.Size = new System.Drawing.Size(91, 20);
+            this.comboBox_Package.TabIndex = 15;
             // 
             // FormMain
             // 
@@ -548,6 +570,8 @@ namespace Dual.Model.Import
         private System.Windows.Forms.CheckedListBox checkedListBox_My;
         private System.Windows.Forms.CheckedListBox checkedListBox_Ex;
         private System.Windows.Forms.CheckedListBox checkedListBox_sysHMI;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ComboBox comboBox_Package;
     }
 }
 

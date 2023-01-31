@@ -38,6 +38,7 @@ using System.Configuration;
 using static Engine.CodeGenCPU.ConvertCoreExt;
 using static Engine.Common.FS.CollectionAlgorithm;
 using static Model.Import.Office.ImportPPTModule;
+using static Engine.Core.RuntimeGeneratorModule;
 
 namespace Dual.Model.Import
 {
@@ -99,6 +100,9 @@ namespace Dual.Model.Import
             checkedListBox_Ex.DisplayMember = "Display";
             checkedListBox_sysHMI.DisplayMember = "Display";
             comboBox_System.DisplayMember = "Display";
+            EnumFS.EnumValues(typeof(RuntimePackage)).Cast<RuntimePackage>()
+                .ForEach(f => comboBox_Package.Items.Add(f));
+            comboBox_Package.SelectedIndex = 0;
         }
 
         public void createSysHMI(DsSystem sys)

@@ -6,6 +6,7 @@ open Engine.Common.FS
 [<AutoOpen>]
 module RuntimeGeneratorModule =
     type RuntimeTargetType = WINDOWS | XGI | XGK | AB | MELSEC
+    type RuntimePackage    = StandardPC | StandardPLC | LightPC | LighxtPLC
 
     type Runtime() =
         static let mutable runtimeTarget = WINDOWS

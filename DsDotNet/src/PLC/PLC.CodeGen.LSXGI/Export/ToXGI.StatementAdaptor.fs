@@ -40,15 +40,15 @@ open PLC.CodeGen.Common
 module ConvertorPrologModule =
     let systemTypeToXgiTypeName (typ:System.Type) =
         match typ.Name with
-        | BOOL -> "BOOL"
-        | UINT8    -> "BYTE"
-        | FLOAT64  -> "LREAL"
+        | BOOL    -> "BOOL"
+        | UINT8   -> "BYTE"
+        | FLOAT64 -> "LREAL"
         | INT16   -> "SINT"
         | INT32   -> "DINT"
         | INT64   -> "LINT"
-        | FLOAT32  -> "REAL"
+        | FLOAT32 -> "REAL"
         | STRING  -> "STRING"  // 32 byte
-        | UINT16  -> "USINT"
+        | UINT16  -> "UINT"
         | UINT32  -> "UDINT"
         | UINT64  -> "ULINT"
         | (INT8 | CHAR)   -> "BYTE"

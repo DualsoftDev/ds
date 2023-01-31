@@ -73,10 +73,29 @@ module internal XgiSymbolsModule =
                 let plcType = systemTypeToXgiTypeName t.DataType
                 let comment = SecurityElement.Escape t.Comment
                 if t.Address = "" then
-                    let {BitAllocator = bitAllocator} = prjParams.MemoryAllocator
+
+                    if (t.BoxedValue.GetType() <> typedefof<bool>) then    // todo: 다른 type 처리 필요
+                        noop()
+
+                    let {
+                        BitAllocator   = x
+                        ByteAllocator  = b
+                        WordAllocator  = w
+                        DWordAllocator = d
+                        LWordAllocator = l
+                    } = prjParams.MemoryAllocator
+                    let allocator =
+                        match t.BoxedValue.GetType().GetByteSizePrefix() with
+                        | 'X' -> x
+                        | 'B' -> b
+                        | 'W' -> w
+                        | 'D' -> d
+                        | 'L' -> l
+                        | _ -> failwith "ERROR"
+
                     if t.Name.StartsWith("_") then
                         logWarn $"Something fish: trying to generate auto M address for {t.Name}"
-                    t.Address <- bitAllocator()
+                    t.Address <- allocator()
                 { defaultSymbolCreateParam with Name=t.Name; Comment=comment; PLCType=plcType; Address=t.Address; InitValue=t.BoxedValue; Kind=kindVar; }
                 |> XGITag.createSymbolInfoWithDetail
 

@@ -96,6 +96,8 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Old.Dual.Core.FS", "src\PLC
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Old.Dual.ConvertPLC.FS", "src\PLC\DriverIO\Dsu.Old\Dual.CovertPLC.FS\Old.Dual.ConvertPLC.FS.fsproj", "{E3A39BC8-6D8F-4E62-AE1E-29655F6E5E00}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server.DsTester", "Server.DsTester\Server.DsTester.csproj", "{2C82FDDC-69A8-4AC3-9024-DF373F4937FA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -213,6 +215,10 @@ Global
 		{E3A39BC8-6D8F-4E62-AE1E-29655F6E5E00}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E3A39BC8-6D8F-4E62-AE1E-29655F6E5E00}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E3A39BC8-6D8F-4E62-AE1E-29655F6E5E00}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C82FDDC-69A8-4AC3-9024-DF373F4937FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C82FDDC-69A8-4AC3-9024-DF373F4937FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C82FDDC-69A8-4AC3-9024-DF373F4937FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C82FDDC-69A8-4AC3-9024-DF373F4937FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -255,6 +261,7 @@ Global
 		{AD87630E-DC71-4CCE-B07B-93BD3E404573} = {F0D395BB-2C0D-4EE4-98D2-F683DC3F0E81}
 		{024AFE93-F577-43C5-84AD-B176C85781E9} = {F0D395BB-2C0D-4EE4-98D2-F683DC3F0E81}
 		{E3A39BC8-6D8F-4E62-AE1E-29655F6E5E00} = {F0D395BB-2C0D-4EE4-98D2-F683DC3F0E81}
+		{2C82FDDC-69A8-4AC3-9024-DF373F4937FA} = {04398A19-7AF6-4D97-A66D-7791167D65AB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B36D7B1-CD69-44C5-8E57-DE46AC18C1F7}

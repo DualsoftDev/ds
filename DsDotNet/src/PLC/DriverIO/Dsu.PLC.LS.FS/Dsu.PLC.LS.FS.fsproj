@@ -48,7 +48,7 @@
   </ItemGroup>
 <ItemGroup>
   <Reference Include="log4net">
-    <HintPath>..\..\..\..\..\..\..\dsA\DsDotNet\exLib\log4net.dll</HintPath>
+    <HintPath>..\..\..\..\exLib\log4net.dll</HintPath>
   </Reference>
 </ItemGroup>
 </Project>

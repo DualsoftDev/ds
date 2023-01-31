@@ -24,7 +24,9 @@
 	  <PackageReference Include="FSharpPlus" Version="1.3.2" />
 	  <PackageReference Include="FSharp.Control.Reactive" Version="4.5.0" />
   </ItemGroup>
-
+	<ItemGroup>
+		<PackageReference Update="FSharp.Core" Version="7.0.0" />
+	</ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Engine\Engine.Common.FS\Engine.Common.FS.fsproj" />
     <ProjectReference Include="..\Dsu.PLC.Common\Dsu.PLC.Common.csproj" />

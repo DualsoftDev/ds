@@ -129,16 +129,18 @@ module rec TimerModule =
 
     [<AbstractClass>]
     type TimerCounterBaseStruct (name, dn, pre, acc, res, sys) =
+        let unsupported() = failwithlog "ERROR: not supported"
         interface IStorage with
             member _.DsSystem = sys
-            member x.Name with get() = x.Name and set(_v) = failwithlog "ERROR: not supported"
+            member x.Name with get() = x.Name and set(_v) = unsupported()
+            member _.Address with get() = unsupported() and set(_v) = unsupported()
             member _.DataType = typedefof<TimerCounterBaseStruct>
             member _.IsGlobal = true
             member val Comment = "" with get, set
-            member x.BoxedValue with get() = x.This and set(_v) = failwithlog "ERROR: not supported"
+            member x.BoxedValue with get() = x.This and set(_v) = unsupported()
             member x.ObjValue = x.This
-            member x.ToText() = failwithlog "ERROR: not supported"
-            member _.ToBoxedExpression() = failwithlog "ERROR: not supported"
+            member x.ToText() = unsupported()
+            member _.ToBoxedExpression() = unsupported()
 
         member private x.This = x
         member _.Name:string = name

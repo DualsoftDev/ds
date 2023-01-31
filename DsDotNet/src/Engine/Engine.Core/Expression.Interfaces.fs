@@ -17,7 +17,6 @@ module ExpressionForwardDeclModule =
     /// 시스템 간 연결에 사용되는 물리 주소를 갖는 tag 의 interface
     type ITag =
         inherit IStorage
-        abstract Address:string
     type ITag<'T> =
         inherit ITag
         inherit IStorage<'T>

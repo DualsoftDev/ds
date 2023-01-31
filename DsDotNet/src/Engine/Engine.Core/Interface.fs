@@ -34,6 +34,7 @@ module Interface =
         inherit IValue
         inherit INamed
         inherit IText
+        abstract Address:string with get, set
         abstract DsSystem: ISystem
         abstract BoxedValue: obj with get, set
         abstract DataType : System.Type

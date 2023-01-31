@@ -48,12 +48,13 @@ module TagManagerUtil =
 
 
     /// address :
-    /// 1. null 이면 자동으로 주소를 할당하지 않음
+    /// 1. None 이면 자동으로 주소를 할당하지 않음
     /// 2. "" 이면 자동으로 주소를 할당
     /// 3. 그외의 문자열이면 그것 자체의 주소를 사용
-    let private createPlanVarHelper(stg:Storages, name:string, dataType:DataType, address:string) : IStorage =
+    let private createPlanVarHelper(stg:Storages, name:string, dataType:DataType, fillAutoAddress:bool) : IStorage =
         let v = dataType.DefaultValue()
-        let createParam () = {defaultStorageCreationParams(unbox v) with Name=name; IsGlobal=true; Address=address |> Option.ofObj}
+        let address = if fillAutoAddress then Some "" else None
+        let createParam () = {defaultStorageCreationParams(unbox v) with Name=name; IsGlobal=true; Address=address}
         let t =
             match dataType with
             | DuINT8    -> PlanVar<int8>  (createParam()) :> IStorage
@@ -84,15 +85,13 @@ module TagManagerUtil =
         let cs = CTRStruct.Create(CounterType.CTR, storages, name, 0us, 0us, sys)
         cs
 
-    let createPlanVar (storages:Storages) (name:string) (dataType:DataType) (address:string) =
-        assert(address = null || address = "")
+    let createPlanVar (storages:Storages) (name:string) (dataType:DataType) (fillAutoAddress:bool) =
         let name = getPlcTagAbleName name storages
-        let t= createPlanVarHelper (storages, name, dataType, address)
+        let t= createPlanVarHelper (storages, name, dataType, fillAutoAddress)
         t
 
-    let createPlanVarBool (storages:Storages) name (address:string) =
-        assert(address = null || address = "")
-        createPlanVar storages name DuBOOL address :?> PlanVar<bool>
+    let createPlanVarBool (storages:Storages) name (fillAutoAddress:bool) =
+        createPlanVar storages name DuBOOL fillAutoAddress :?> PlanVar<bool>
 
     type InOut = | In | Out | Memory
     type BridgeType = | Device | Button | Lamp | Condition

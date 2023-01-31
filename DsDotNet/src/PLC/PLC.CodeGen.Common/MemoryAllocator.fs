@@ -1,4 +1,5 @@
 namespace PLC.CodeGen.Common
+open Engine.Core
 
 [<AutoOpen>]
 module MemoryAllocator =
@@ -93,3 +94,33 @@ module MemoryAllocator =
             DWordAllocator= fun () -> getAddress 'D'
             LWordAllocator= fun () -> getAddress 'L'
         }
+
+
+    type System.Type with
+        member x.GetByteSize() =
+            match x.Name with
+            | BOOL    -> failwith "ERROR"
+            | CHAR    -> 1
+            | FLOAT32 -> 4
+            | FLOAT64 -> 8
+            | INT16   -> 2
+            | INT32   -> 4
+            | INT64   -> 8
+            | INT8    -> 1
+            | STRING  -> failwith "ERROR"
+            | UINT16  -> 2
+            | UINT32  -> 4
+            | UINT64  -> 8
+            | UINT8   -> 1
+            | _  -> failwith "ERROR"
+
+        member x.GetByteSizePrefix() =
+            if x = typedefof<bool> then
+                'X'
+            else
+                match x.GetByteSize() with
+                | 1 -> 'B'
+                | 2 -> 'W'
+                | 4 -> 'D'
+                | 8 -> 'L'
+                | _ -> failwith "ERROR"

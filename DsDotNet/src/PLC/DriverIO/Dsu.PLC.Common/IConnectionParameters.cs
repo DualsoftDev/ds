@@ -1,6 +1,6 @@
 using System;
 
-namespace Old.Dsu.PLC.Common
+namespace Dsu.PLC.Common
 {
     /// <summary>
     /// PLC connection base interface

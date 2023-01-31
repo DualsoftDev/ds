@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Old.Dsu.PLC.Common
+namespace Dsu.PLC.Common
 {
     public class PlcException : Exception
     {

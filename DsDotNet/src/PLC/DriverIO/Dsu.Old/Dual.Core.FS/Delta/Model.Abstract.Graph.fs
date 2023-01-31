@@ -15,11 +15,11 @@ type VertexPropertyType =
     | UseOutputInterlock
     | UseOutputResetByWorkFinish
     | ManualTag
-    
+
 
 [<AutoOpen>]
 module ModelAbstractGraph =
-    type INamed = 
+    type INamed =
         abstract member Name:string with get
 
     /// reset interface (read only)
@@ -67,13 +67,14 @@ module ModelAbstractGraph =
 
         new (t, iot, a)         = NegPLCTag(t, iot, a, [||])
 
-        override x.Equals t = 
+        override x.Equals t =
             match t with
-            | :? NegPLCTag as pt -> 
+            | :? NegPLCTag as pt ->
                 x.ToText() = pt.ToText()
                 && x.IOType = pt.IOType
                 && x.Address = pt.Address
             | _ -> false
+        override x.GetHashCode() = hash (x.Address, base.GetHashCode())
 
     /// Graph 상의 vertex 에 해당할 수 있는 객체의 interface.
     /// ISlot, Slot, ICircle, Circle, CircleSlot
@@ -112,7 +113,7 @@ module ModelAbstractGraph =
         abstract member DummyTag:PLCTag option with get, set
         /// sensor가 여러개 일 경우 하나의 단 메모리를 생성한다.
         abstract member EndTag:PLCTag option with get, set
-        
+
 
     and IUserPort =
         inherit IPort
@@ -120,7 +121,7 @@ module ModelAbstractGraph =
         abstract member InnerConnectedPorts:IPort ResizeArray with get
 
     /// Edge 의 interface
-    and IEdge = 
+    and IEdge =
         inherit QuickGraph.IEdge<IVertex>
         abstract member EdgeType: EdgeType with get
 
@@ -128,7 +129,7 @@ module ModelAbstractGraph =
     and IDAG =
         abstract member Vertices:IVertex seq with get
         abstract member Edges:IEdge seq with get
-            
+
 
     /// src, tgt 두개의 vertex 를 연결하는 edge 생성자
     type EdgeCreator = IVertex -> IVertex -> IEdge
@@ -147,18 +148,18 @@ module ModelAbstractGraph =
         abstract member ConditionDAG: Dictionary<IFunctionCommand list, IDAG> with get
         abstract member AddConditionDAG:IFunctionCommand list * IDAG -> unit
 
-    
+
 
 [<AutoOpen>]
 module IVertexExtension =
-    let getPort (v:IVertex) (portCate:PortCategory) = 
+    let getPort (v:IVertex) (portCate:PortCategory) =
         if v.Ports.ContainsKey(portCate) then v.Ports.[portCate] else failwithlogf "%A의 %s가 존재하지 않습니다." v (portCate.ToString())
-    let setPort (v:IVertex) (portCate:PortCategory) value = 
-        if v.Ports.ContainsKey(portCate) then v.Ports.[portCate] <- value else v.Ports.Add(portCate, value) 
+    let setPort (v:IVertex) (portCate:PortCategory) value =
+        if v.Ports.ContainsKey(portCate) then v.Ports.[portCate] <- value else v.Ports.Add(portCate, value)
     let getProperty<'T> (key:VertexPropertyType) (v:IVertex) =
         if v.Properties.ContainsKey(key) then
             v.Properties.[key] :?> 'T |> Some
-        else 
+        else
             None
     let setProperty (key:VertexPropertyType) (value:obj) (v:IVertex) =
         if v.Properties.ContainsKey(key) then
@@ -169,13 +170,13 @@ module IVertexExtension =
     type IVertex with
         /// Vertex의 초기 상태
         /// DefaultValue : VertexStatus.Undefined
-        member x.InitialStatus 
+        member x.InitialStatus
             with get() = getProperty<VertexStatus> VertexPropertyType.InitialStatus x |> Option.defaultValue VertexStatus.Undefined
             and set(v:VertexStatus) = setProperty VertexPropertyType.InitialStatus v x
 
         /// Vertex의 Dag 상 순서
         /// DefaultValue : 0
-        member x.Address 
+        member x.Address
             with get() = getProperty<int> VertexPropertyType.Address x |> Option.defaultValue 0
             and set(v:int) = setProperty VertexPropertyType.Address v x
 
@@ -197,10 +198,10 @@ module IVertexExtension =
             with get() = getProperty<bool> VertexPropertyType.UseOutputResetByWorkFinish x |> Option.defaultValue true
             and set(v:bool) = setProperty VertexPropertyType.UseOutputResetByWorkFinish v x
 
-        /// Vertex 메뉴얼 조건 태그 
+        /// Vertex 메뉴얼 조건 태그
         /// DefaultValue : None
         member x.ManualTag
-            with get() = getProperty<PLCTag> VertexPropertyType.ManualTag x 
+            with get() = getProperty<PLCTag> VertexPropertyType.ManualTag x
             and set(v:PLCTag) = setProperty VertexPropertyType.ManualTag v x
 
 
@@ -240,24 +241,24 @@ module IPortExtension =
             match x.PLCTags.length() > 1 with
             | true -> [x.EndTag] |> Seq.choose id |> List.ofSeq
             | false -> x.PLCTags |> List.ofSeq
-                
+
         /// 다른 port에서 조건으로써 사용되는 Tag
-        member x.GetTerminal() = 
-            let dan = 
+        member x.GetTerminal() =
+            let dan =
                 match x.PLCTags.length() > 1 with
                 | true -> x.EndTag
                 | false -> x.PLCTags |> Seq.tryHead
-            let tag = 
-                if x.PLCFunctions |> Seq.any then 
+            let tag =
+                if x.PLCFunctions |> Seq.any then
                     if x.PortType = PortCategory.Start || x.PortType = PortCategory.Reset then
                         dan
-                    else 
+                    else
                         x.DummyTag
-                else 
+                else
                     dan
 
             match tag with
-            | Some(t) -> 
+            | Some(t) ->
                 match t with
                 | :? NegPLCTag as nt -> nt |> mkTerminal |> mkNeg
                 | _ as t -> t |> mkTerminal
@@ -265,36 +266,36 @@ module IPortExtension =
 
         /// 다른 port에서 target으로써 사용되는 Tag Terminal
         member x.GetCoil() =
-            let coils = 
-                if x.PLCFunctions |> Seq.any then 
+            let coils =
+                if x.PLCFunctions |> Seq.any then
                     if  x.PortType = PortCategory.Start || x.PortType = PortCategory.Reset then
                         [x.DummyTag] |> List.choose id
-                    else 
+                    else
                         x.PLCTags |> List.ofSeq
-                else 
+                else
                     x.PLCTags |> List.ofSeq
-            
+
             match coils.isEmpty() with
             | false -> coils
             | true -> failwithlogf "%A의 태그가 존재하지않습니다." x.Parent.Name
 
 
 
-        
-        
 
-        
-        
-        
 
-        
-        
-        
 
-        
-        
-        
 
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
+
+
+
+

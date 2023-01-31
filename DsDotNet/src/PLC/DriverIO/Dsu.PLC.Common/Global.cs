@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Old.Dsu.PLC.Common
+namespace Dsu.PLC.Common
 {
     public static class Global
     {

@@ -58,6 +58,7 @@ type PLCTag private (tag, ioType, address, properties:(string*_) array, _unusedA
     new (t, iot, a)         = PLCTag(t, iot, s2a(a), [||], 0)
     new (t, iot)            = PLCTag(t, iot, None, [||], 0)
     new (t:PLCTag)          = PLCTag(t.Name, t.IOType, t.Address, t.Properties.ToArray(), 0)
+    override x.GetHashCode() = hash (x.Address, base.GetHashCode())
 
     interface INamed with
         member x.Name

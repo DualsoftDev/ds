@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using LanguageExt;
 
-namespace Old.Dsu.PLC.Common
+namespace Dsu.PLC.Common
 {
     public enum DataLengthType
     {

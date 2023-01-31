@@ -38,7 +38,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Dsu.PLC.Common\Old.Dsu.PLC.Common.csproj" />
-    <ProjectReference Include="..\Dual.Common.FS\Old.Dual.Common.FS.fsproj" />
     <ProjectReference Include="..\Dual.Core.FS\Old.Dual.Core.FS.fsproj" />
   </ItemGroup>
 

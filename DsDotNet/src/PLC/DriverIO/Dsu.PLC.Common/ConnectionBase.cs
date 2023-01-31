@@ -9,7 +9,7 @@ using LanguageExt;
 using static LanguageExt.Prelude;
 using log4net;
 
-namespace Old.Dsu.PLC.Common
+namespace Dsu.PLC.Common
 {
     /// <summary>
     /// Common base class for PLC connection

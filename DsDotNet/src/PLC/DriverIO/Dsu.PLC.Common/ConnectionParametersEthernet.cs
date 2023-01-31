@@ -1,6 +1,6 @@
 using System;
 
-namespace Old.Dsu.PLC.Common
+namespace Dsu.PLC.Common
 {
     public abstract class ConnectionParametersEthernet : IConnectionParametersEthernet
     {

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using LanguageExt;
 
-namespace Old.Dsu.PLC.Common
+namespace Dsu.PLC.Common
 {
     public abstract class ChannelRequestExecutor
     {

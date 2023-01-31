@@ -15,7 +15,7 @@ type Flow with
         (set, rst) ==| (f.rop, "O1")
 
     member f.O2_AutoOperationState(): CommentedStatement =
-        let set = f.ModeAutoHwExpr// <&&> f.ModeAutoSwHMIExpr  //test ahn lightPLC ¸ðµå ÁØºñÁß
+        let set = f.ModeAutoHwExpr// <&&> f.ModeAutoSwHMIExpr  //test ahn lightPLC ëª¨ë“œ ì¤€ë¹„ì¤‘
         let rst = !!f.rop.Expr <||> f.ModeManualHwExpr
 
         (set, rst) ==| (f.aop, "O2")
@@ -36,7 +36,7 @@ type Flow with
     member f.O5_StopOperationState(): CommentedStatement =
         let set = f.stop.Expr <||> f.BtnStopExpr
         let setErrs = f.GetVerticesWithInReal().Select(getVM).ERRs().ToOrElseOff(f.System)
-        let rst = f.clear.Expr
+        let rst = f.BtnClearExpr //test ahn lightPLC ëª¨ë“œ ì¤€ë¹„ì¤‘
 
         (set <||> setErrs, rst) ==| (f.sop, "O5")
 
@@ -53,7 +53,7 @@ type Flow with
         (set, rst) ==| (f.top, "O7")
 
     member f.O8_IdleOperationMode(): CommentedStatement =
-        let set = !!(f.drive.Expr <||> f.test.Expr)
+        let set = !!(f.dop.Expr <||> f.top.Expr)
         let rst = f._off.Expr
 
         (set, rst) --| (f.iop, "O8")

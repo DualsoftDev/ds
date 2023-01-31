@@ -124,7 +124,7 @@ public class KafkaConsume : KafkaCommonOption
                     $"{ServerAddress}({PartitionNumber})"
                 );
                 consumer.Assign(new TopicPartitionOffset(topicPartition, offset.High));
-                consumer.Seek(new TopicPartitionOffset(topicPartition, offset.High));
+                //consumer.Seek(new TopicPartitionOffset(topicPartition, offset.High));
             }
             catch (Exception e)
             {

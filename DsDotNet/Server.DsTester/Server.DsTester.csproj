@@ -3,7 +3,7 @@
 		<TargetFrameworks>net48</TargetFrameworks>
 		<LangVersion>7.0</LangVersion>
 		<RootNamespace>Server.DsTester</RootNamespace>
-		<OutputType>WinExe</OutputType>
+		<OutputType>Exe</OutputType>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>
 

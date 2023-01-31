@@ -180,13 +180,13 @@ module ConvertCoreExt =
 
         member f.ModeAutoHwExpr =
             let auto     = if f.SelectAutoExpr.any()   then f.SelectAutoExpr.ToAnd()    else f._on.Expr
-            let ableAuto = if f.SelectManualExpr.any() then !!f.SelectManualExpr.ToOr() else f._on.Expr
-            auto <&&> ableAuto
+          //  let ableAuto = if f.SelectManualExpr.any() then !!f.SelectManualExpr.ToOr() else f._on.Expr
+            auto// <&&> ableAuto  반대조건 봐야하나 ?
 
         member f.ModeManualHwExpr =
             let manual     = if f.SelectManualExpr.any() then f.SelectManualExpr.ToAnd() else f._off.Expr
-            let ableManual = if f.SelectAutoExpr.any()   then !!f.SelectAutoExpr.ToOr()  else f._on.Expr
-            manual <&&> ableManual
+          //  let ableManual = if f.SelectAutoExpr.any()   then !!f.SelectAutoExpr.ToOr()  else f._on.Expr
+            manual// <&&> ableManual 반대조건 봐야하나 ?
 
         member f.ModeAutoSwHMIExpr   =    f.auto.Expr <&&> !!f.manual.Expr
         member f.ModeManualSwHMIExpr =  !!f.auto.Expr <&&>   f.manual.Expr

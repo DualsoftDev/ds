@@ -15,14 +15,14 @@ type Flow with
         (set, rst) ==| (f.rop, "O1")
 
     member f.O2_AutoOperationState(): CommentedStatement =
-        let set = f.ModeAutoHwExpr <&&> f.ModeAutoSwHMIExpr
-        let rst = !!f.rop.Expr <||> f.manual.Expr
+        let set = f.ModeAutoHwExpr// <&&> f.ModeAutoSwHMIExpr  //test ahn lightPLC 모드 준비중
+        let rst = !!f.rop.Expr <||> f.ModeManualHwExpr
 
         (set, rst) ==| (f.aop, "O2")
 
     member f.O3_ManualOperationState (): CommentedStatement =
-        let set = f.ModeManualHwExpr <||> f.ModeManualSwHMIExpr
-        let rst = !!f.rop.Expr <||> f.auto.Expr
+        let set = f.ModeManualHwExpr// <||> f.ModeManualSwHMIExpr
+        let rst = !!f.rop.Expr <||> f.ModeAutoHwExpr
 
         (set, rst) ==| (f.mop, "O3")
 
@@ -53,7 +53,7 @@ type Flow with
         (set, rst) ==| (f.top, "O7")
 
     member f.O8_IdleOperationMode(): CommentedStatement =
-        let set = !!f.aop.Expr
+        let set = !!(f.drive.Expr <||> f.test.Expr)
         let rst = f._off.Expr
 
         (set, rst) --| (f.iop, "O8")

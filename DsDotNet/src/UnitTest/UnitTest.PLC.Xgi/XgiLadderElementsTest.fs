@@ -40,7 +40,7 @@ type XgiLadderElementTest() =
                 XGITag.createSymbolInfo name comment plcType (int Variable.Kind.VAR)  initValueHolder
         ]
 
-        let symbolsLocalXml = XGITag.generateLocalSymbolsXml defaultXgiProjectParams symbolInfos
+        let symbolsLocalXml = XGITag.generateLocalSymbolsXml symbolInfos
 
         let rungsXml = ""   //generateRungs prologComments commentedStatements
         let symbolsGlobalXml = """<GlobalVariable Version="Ver 1.0" Count="0"/>"""

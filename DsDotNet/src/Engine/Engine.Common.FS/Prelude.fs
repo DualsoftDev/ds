@@ -35,6 +35,8 @@ let noop() = ()
 // https://stackoverflow.com/questions/11696484/type-does-not-have-null-as-a-proper-value
 /// [<AllowNullLiteral>] 을 사용할 수 없는 or 정의하지 않은 객체에 대한 강제 null check.  use sparingly
 let inline isItNull (x:'T when 'T : not struct) = obj.ReferenceEquals (x, null)
+let (|IsItNull|_|) (x:'T when 'T : not struct) = if isItNull x then None else Some x
+let (|IsItNullOrEmpty|_|) (x:string) = if isNull x || x = "" then Some x else None
 
 /// [<AllowNullLiteral>] 을 사용할 수 없는 or 정의하지 않은 F# class 에 대한 null instance 강제 생성.  use sparingly
 let getNull<'T when 'T : not struct>():'T = Operators.Unchecked.defaultof<'T>

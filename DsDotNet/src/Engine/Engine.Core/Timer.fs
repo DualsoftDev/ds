@@ -135,7 +135,7 @@ module rec TimerModule =
             member x.Name with get() = x.Name and set(_v) = unsupported()
             member _.Address with get() = unsupported() and set(_v) = unsupported()
             member _.DataType = typedefof<TimerCounterBaseStruct>
-            member _.IsGlobal = true
+            member _.IsGlobal with get() = true and set(_v) = noop()
             member val Comment = "" with get, set
             member x.BoxedValue with get() = x.This and set(_v) = unsupported()
             member x.ObjValue = x.This

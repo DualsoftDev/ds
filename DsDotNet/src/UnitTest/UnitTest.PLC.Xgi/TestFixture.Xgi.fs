@@ -43,18 +43,8 @@ module XgiFixtures =
         verify (Runtime.Target = XGI)
 
         let prjParams = defaultXgiProjectParams
-        (* Just for fitting global storage, legacy test code 와의 호환성 확보 *)
-        let globalStorages =
-            let allStorages = storages.Values.ToArray()
-            let kindVar = int Variable.Kind.VAR_GLOBAL
-            [
-                for (stg, symbolInfo) in allStorages |> storagesToXgiSymbol do
-                    let xgiSymbolInfo = xgiSymbolToSymbolInfo prjParams kindVar symbolInfo
-                    if xgiSymbolInfo.Device.NonNullAny() then
-                        stg
-            ]
-            |> map (fun stg -> stg.Name, stg)
-            |> Tuple.toDictionary
+        let globalStorages = storages
+        let localStorages = Storages()
 
         let pouParams:XgiPOUParams = {
             /// POU name.  "DsLogic"
@@ -63,7 +53,7 @@ module XgiFixtures =
             TaskName = "Scan Program"
             /// POU ladder 최상단의 comment
             Comment = "DS Logic for XGI"
-            LocalStorages = storages
+            LocalStorages = localStorages
             GlobalStorages = globalStorages
             CommentedStatements = commentedStatements
         }

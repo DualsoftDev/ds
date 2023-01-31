@@ -66,18 +66,18 @@ type XgiRungTest() =
             |> XGITag.createSymbolInfoWithDetail
 
         let symbolInfoXml = symbolInfo.GenerateXml()
-        symbolInfoXml =~= """<Symbol Name="myBit00" Kind="1" Type="BOOL" Comment="Fake Comment" Device="I" Address="%IX0.0.0" State="0">
+        symbolInfoXml =~= """<Symbol Name="myBit00" Kind="1" Type="BOOL" Address="%IX0.0.0" Comment="Fake Comment" Device="I" State="0">
 		<MemberAddresses/>
 		<MemberRetains/>
 		<MemberInitValues/>
 		<MemberComments/>
 	</Symbol>"""
 
-        let symbolsLocalXml = XGITag.generateLocalSymbolsXml defaultXgiProjectParams [ symbolInfo ]
+        let symbolsLocalXml = XGITag.generateLocalSymbolsXml [ symbolInfo ]
 
         symbolsLocalXml =~= """<LocalVar Version="Ver 1.0" Count="1">
 <Symbols>
-	<Symbol Name="myBit00" Kind="1" Type="BOOL" Comment="Fake Comment" Device="I" Address="%IX0.0.0" State="0">
+	<Symbol Name="myBit00" Kind="1" Type="BOOL" Address="%IX0.0.0" Comment="Fake Comment" Device="I" State="0">
 		<MemberAddresses/>
 		<MemberRetains/>
 		<MemberInitValues/>
@@ -102,7 +102,7 @@ type XgiRungTest() =
                 { defaultSymbolCreateParam with Name=q.Name; PLCType=plcType; Address=q.Address; Device="Q"; Kind=kindVar; }
                 |> XGITag.createSymbolInfoWithDetail
             ]
-        let localSymbolsXml = XGITag.generateLocalSymbolsXml defaultXgiProjectParams symbolInfos
+        let localSymbolsXml = XGITag.generateLocalSymbolsXml symbolInfos
         iTags, q, localSymbolsXml
 
 

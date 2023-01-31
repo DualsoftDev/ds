@@ -50,3 +50,12 @@ module MiscTestModule =
             with _ ->
                 ()
 
+        [<Test>]
+        member __.``String option test`` () =
+            let nullstr:string = null
+            let emptystr = ""
+            let hello = "hello"
+            let optnullstr = nullstr |> Option.ofString
+            nullstr  |> Option.ofString |> Option.isNone === true
+            emptystr |> Option.ofString |> Option.isNone === true
+            hello    |> Option.ofString |> Option.isSome === true

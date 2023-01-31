@@ -177,7 +177,7 @@ module XgiExportModule =
                     if not (inGlobal || inLocal) then
                         failwithf "Storage '%s' is not defined" name
 
-            let localStoragesXml = storagesToLocalXml newLocalStorages globalStoragesRefereces
+            let localStoragesXml = storagesToLocalXml prjParam newLocalStorages globalStoragesRefereces
             let rungsXml = generateRungs comment commentedXgiStatements
 
             /// POU/Programs/Program
@@ -247,7 +247,7 @@ module XgiExportModule =
                 let xnGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
                 let countExistingGlobal = xnGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
                 // symbolsGlobal = "<GlobalVariable Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol>
-                let globalStoragesXmlNode = storagesToGlobalXml globalStorages.Values |> XmlNode.fromString
+                let globalStoragesXmlNode = storagesToGlobalXml x globalStorages.Values |> XmlNode.fromString
                 let numNewGlobals = globalStoragesXmlNode.Attributes.["Count"].Value |> System.Int32.Parse
 
                 xnGlobalVar.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)

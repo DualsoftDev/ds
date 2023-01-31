@@ -45,7 +45,7 @@ module TagVariableModule =
                     value <- v
                     (x:>  IStorage).DsSystem.ValueChangeSubject.OnNext(x :> IStorage, v)
         member val Comment: string = comment with get, set
-        member val Address = param.Address.Value with get, set
+        member val Address = param.Address.ToObj() with get, set
 
         interface IStorage with
             member x.DsSystem = param.System

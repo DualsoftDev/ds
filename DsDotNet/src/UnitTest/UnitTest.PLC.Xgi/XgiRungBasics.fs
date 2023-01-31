@@ -73,7 +73,7 @@ type XgiRungTest() =
 		<MemberComments/>
 	</Symbol>"""
 
-        let symbolsLocalXml = XGITag.generateLocalSymbolsXml [ symbolInfo ]
+        let symbolsLocalXml = XGITag.generateLocalSymbolsXml defaultXgiProjectParams [ symbolInfo ]
 
         symbolsLocalXml =~= """<LocalVar Version="Ver 1.0" Count="1">
 <Symbols>
@@ -102,7 +102,7 @@ type XgiRungTest() =
                 { defaultSymbolCreateParam with Name=q.Name; PLCType=plcType; Address=q.Address; Device="Q"; Kind=kindVar; }
                 |> XGITag.createSymbolInfoWithDetail
             ]
-        let localSymbolsXml = XGITag.generateLocalSymbolsXml symbolInfos
+        let localSymbolsXml = XGITag.generateLocalSymbolsXml defaultXgiProjectParams symbolInfos
         iTags, q, localSymbolsXml
 
 

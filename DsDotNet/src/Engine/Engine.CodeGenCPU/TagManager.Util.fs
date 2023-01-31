@@ -93,6 +93,15 @@ module TagManagerUtil =
     let createPlanVarBool (storages:Storages) name (fillAutoAddress:bool) =
         createPlanVar storages name DuBOOL fillAutoAddress :?> PlanVar<bool>
 
+    //[<Obsolete("Fix me: 임시")>]
+    //let createPlanVar (storages:Storages) (name:string) (dataType:DataType)  =
+    //    let name = getPlcTagAbleName name storages
+    //    let t= createPlanVarHelper (storages, name, dataType, true)
+    //    t
+
+    //let createPlanVarBool (storages:Storages) name  =
+    //    createPlanVar storages name DuBOOL :?> PlanVar<bool>
+
     type InOut = | In | Out | Memory
     type BridgeType = | Device | Button | Lamp | Condition
     let createBridgeTag(stg:Storages, name, addr:string, inOut:InOut, bridge:BridgeType, sys): ITag option=

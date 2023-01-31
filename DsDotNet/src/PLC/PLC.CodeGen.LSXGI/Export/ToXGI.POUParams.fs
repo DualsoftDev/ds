@@ -1,5 +1,6 @@
 namespace PLC.CodeGen.LSXGI
 open Engine.Core
+open PLC.CodeGen.Common
 
 [<AutoOpen>]
 module POUParametersModule =
@@ -23,6 +24,7 @@ module POUParametersModule =
         GlobalStorages : Storages
         ExistingLSISprj: string option
         POUs           : XgiPOUParams list
+        MemoryAllocator: PLCMemoryAllocator
 
         EnableXmlComment : bool
         AppendExpressionTextToRungComment : bool
@@ -34,6 +36,7 @@ module POUParametersModule =
         GlobalStorages = Storages()
         ExistingLSISprj = None
         POUs = []
+        MemoryAllocator = createMemoryAllocator "M" (0, 640*1024)    // 640K M memory 영역
         EnableXmlComment = false
         AppendExpressionTextToRungComment = true
     }

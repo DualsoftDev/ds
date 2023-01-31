@@ -2,12 +2,11 @@ namespace PLC.CodeGen.LSXGI
 
 open System.Linq
 open System.Collections.Generic
-
+open System.Security
 open Engine.Common.FS
 open Engine.Core
+open PLC.CodeGen.Common
 open PLC.CodeGen.LSXGI
-open System.Security
-open System
 
 
 [<AutoOpen>]
@@ -44,7 +43,7 @@ module internal XgiSymbolsModule =
                         Some (s, XgiSymbol.DuStorage s)
         ] |> List.choose id
 
-    let xgiSymbolToSymbolInfo (kindVar:int) (xgiSymbol:XgiSymbol) : SymbolInfo =
+    let xgiSymbolToSymbolInfo (prjParams:XgiProjectParams) (kindVar:int) (xgiSymbol:XgiSymbol) : SymbolInfo =
         match xgiSymbol with
         | DuStorage (:? ITag as t) ->
             let name, addr = t.Name, t.Address
@@ -73,14 +72,20 @@ module internal XgiSymbolsModule =
             let symbolInfo =
                 let plcType = systemTypeToXgiTypeName t.DataType
                 let comment = SecurityElement.Escape t.Comment
-                let initValueHolder:BoxedObjectHolder = {Object=t.BoxedValue}
-                XGITag.createSymbolInfo t.Name comment plcType kindVar initValueHolder
+                if t.Address = "" then
+                    let {BitAllocator = bitAllocator} = prjParams.MemoryAllocator
+                    if t.Name.StartsWith("_") then
+                        logWarn $"Something fish: trying to generate auto M address for {t.Name}"
+                    t.Address <- bitAllocator()
+                { defaultSymbolCreateParam with Name=t.Name; Comment=comment; PLCType=plcType; Address=t.Address; InitValue=t.BoxedValue; Kind=kindVar; }
+                |> XGITag.createSymbolInfoWithDetail
+
             symbolInfo
 
         | DuXgiVar xgi ->
             if kindVar = int Variable.Kind.VAR_GLOBAL then
                 // Global 변수도 일단, XgiLocalVar type 으로 생성되므로, PLC 생성 시에만 global 로 override 해서 생성한다.
-                { xgi.SymbolInfo with Kind = kindVar }
+                { xgi.SymbolInfo with Kind = kindVar; Address=xgi.Address }
             else
                 xgi.SymbolInfo
         | DuTimer timer ->
@@ -105,28 +110,28 @@ module internal XgiSymbolsModule =
                 { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; InitValue=null; Device=device; Kind=kindVar; }
             XGITag.createSymbolInfoWithDetail param
 
-    let private xgiSymbolsToSymbolInfos (kindVar:int) (xgiSymbols:XgiSymbol seq) : SymbolInfo list =
-        xgiSymbols |> map (xgiSymbolToSymbolInfo kindVar) |> List.ofSeq
+    let private xgiSymbolsToSymbolInfos (prjParams:XgiProjectParams) (kindVar:int) (xgiSymbols:XgiSymbol seq) : SymbolInfo list =
+        xgiSymbols |> map (xgiSymbolToSymbolInfo prjParams kindVar) |> List.ofSeq
 
 
-    let private storagesToSymbolInfos (kindVar:int) : (IStorage seq -> SymbolInfo list) =
+    let private storagesToSymbolInfos (prjParams:XgiProjectParams) (kindVar:int) : (IStorage seq -> SymbolInfo list) =
         storagesToXgiSymbol
         >> map snd
-        >> xgiSymbolsToSymbolInfos kindVar
+        >> xgiSymbolsToSymbolInfos prjParams kindVar
 
     /// <LocalVariable .../> 문자열 반환
     /// 내부 변환: Storages => [XgiSymbol] => [SymbolInfo] => Xml string
-    let storagesToLocalXml  (localStorages:IStorage seq) (globalStoragesRefereces:IStorage seq) =
+    let storagesToLocalXml (prjParams:XgiProjectParams) (localStorages:IStorage seq) (globalStoragesRefereces:IStorage seq) =
         let symbolInfos = [
-            yield! storagesToSymbolInfos (int Variable.Kind.VAR) localStorages
-            yield! storagesToSymbolInfos (int Variable.Kind.VAR_EXTERNAL) globalStoragesRefereces
+            yield! storagesToSymbolInfos prjParams (int Variable.Kind.VAR) localStorages
+            yield! storagesToSymbolInfos prjParams (int Variable.Kind.VAR_EXTERNAL) globalStoragesRefereces
         ]
-        XGITag.generateLocalSymbolsXml symbolInfos
+        XGITag.generateLocalSymbolsXml prjParams symbolInfos
 
     /// <GlobalVariable .../> 문자열 반환
     /// 내부 변환: Storages => [XgiSymbol] => [SymbolInfo] => Xml string
-    let storagesToGlobalXml (globalStorages:IStorage seq) =
+    let storagesToGlobalXml (prjParams:XgiProjectParams) (globalStorages:IStorage seq) =
         //storagesToXml false globalStorages
-        let symbolInfos = storagesToSymbolInfos (int Variable.Kind.VAR_GLOBAL) globalStorages
-        XGITag.generateLocalSymbolsXml symbolInfos
+        let symbolInfos = storagesToSymbolInfos prjParams (int Variable.Kind.VAR_GLOBAL) globalStorages
+        XGITag.generateLocalSymbolsXml prjParams symbolInfos
 

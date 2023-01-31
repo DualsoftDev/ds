@@ -42,13 +42,14 @@ module XgiFixtures =
     let generateXmlForTest projName (storages:Storages) (commentedStatements:CommentedStatement list) : string =
         verify (Runtime.Target = XGI)
 
+        let prjParams = defaultXgiProjectParams
         (* Just for fitting global storage, legacy test code 와의 호환성 확보 *)
         let globalStorages =
             let allStorages = storages.Values.ToArray()
             let kindVar = int Variable.Kind.VAR_GLOBAL
             [
                 for (stg, symbolInfo) in allStorages |> storagesToXgiSymbol do
-                    let xgiSymbolInfo = xgiSymbolToSymbolInfo kindVar symbolInfo
+                    let xgiSymbolInfo = xgiSymbolToSymbolInfo prjParams kindVar symbolInfo
                     if xgiSymbolInfo.Device.NonNullAny() then
                         stg
             ]

@@ -188,7 +188,7 @@ type XgiDrawingTest() =
             XGITag.createSymbolInfo "Q"   "Q"   "INT"  kind intInitValue
         ]
 
-        let symbolsLocalXml = XGITag.generateLocalSymbolsXml symbolInfos
+        let symbolsLocalXml = XGITag.generateLocalSymbolsXml defaultXgiProjectParams symbolInfos
 
 
         let xml = wrapWithXml rungsXml symbolsLocalXml emptySymbolsGlobalXml None

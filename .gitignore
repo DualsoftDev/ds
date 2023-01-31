@@ -15,3 +15,5 @@ Grammar/CsParser/bin/
 /DsDotNet/src/UnitTest/UnitTest.Engine/ImportOffice/Sample/*/*.xlsx
 /DsDotNet/src/UnitTest/UnitTest.Engine/ImportOffice/Sample/*/*.xgdb
 /DsDotNet/src/UnitTest/UnitTest.Engine/ImportOffice/Sample/*/*.state
+*.xgwx
+*.state

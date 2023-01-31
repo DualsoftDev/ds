@@ -63,3 +63,8 @@ type AddressAllocatorTest() =
         b() === "%MB23"
         x() === "%MX208" // 26 * 8
         b() === "%MB27"
+        for i = 1 to 7 do
+            x() === $"%%MX{208+i}"
+        d() === "%MD7"
+        b() === "%MB32"
+

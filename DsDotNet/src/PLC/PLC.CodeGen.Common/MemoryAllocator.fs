@@ -20,34 +20,23 @@ module MemoryAllocator =
         /// optional fragmented bit Position
         let mutable ofBit:int option = None  // Some (startByte * 8)
         /// optional framented byte Position
-        let mutable ofByte:int option = None
+        let mutable ofByte:(int*int) option = None
         let mutable byteIndex = startByte
         let getAddress (reqMemType:char) =
-            let adjustFragmentedByte() =
-                match ofByte with
-                | Some index ->
-                    if index = byteIndex - 1 then
-                        ofByte <- None
-                    elif index < byteIndex - 1 then
-                        ofByte <- Some (byteIndex - 1)
-                    else
-                        failwith "ERROR"
-                | None -> ()
-
             match reqMemType with
             | 'X' ->
                 let bit =
                     match ofBit, ofByte with
-                    | Some bit, _ when bit % 8 = 7 ->
+                    | Some bit, _ when bit % 8 = 7 ->   // 마지막 fragment bit 을 쓰는 상황
                         ofBit <- None
                         bit
-                    | Some bit, _ ->
+                    | Some bit, _ ->                    // 마지막이 아닌 여유 fragment bit 을 쓰는 상황
                         ofBit <- Some (bit + 1)
                         bit
-                    | None, Some byte ->
-                        let bit = byte * 8
+                    | None, Some (s, e) ->
+                        let bit = s * 8
                         ofBit <- Some (bit + 1)
-                        adjustFragmentedByte()
+                        ofByte <- if s = e then None else Some(s+1, e)
                         bit
                     | None, None ->
                         let bit = byteIndex * 8
@@ -70,21 +59,21 @@ module MemoryAllocator =
                     | _ -> failwith "ERROR"
                 let byte =
                     match ofByte with
-                    | Some fByte when (byteIndex - fByte) > byteSize ->     // fragmented bytes 로 해결하고도 남는 상황
-                        ofByte <- Some (fByte + byteSize)
-                        fByte
-                    | Some fByte when (byteIndex - fByte) = byteSize ->     // fragmented bytes 를 전부 써서 해결 가능한 상황
+                    | Some (fs, fe) when (fe - fs) > byteSize ->     // fragmented bytes 로 해결하고도 남는 상황
+                        ofByte <- Some (fs + byteSize, fe)
+                        fs
+                    | Some (fs, fe) when (fe - fs) = byteSize ->     // fragmented bytes 를 전부 써서 해결 가능한 상황
                         ofByte <- None
-                        fByte
-                    | _ ->                                                  // fragmented bytes 로 부족한 상황.  fragment 는 건드리지 않고 새로운 영역에서 할당
+                        fs
+                    | _ ->                                           // fragmented bytes 로 부족한 상황.  fragment 는 건드리지 않고 새로운 영역에서 할당
                         let byte =
                             if byteIndex % byteSize = 0 then
                                 let byte = byteIndex
                                 byteIndex <- byteIndex + byteSize
                                 byte
                             else
-                                ofByte <- Some byteIndex
                                 let newPosition = (byteIndex + byteSize) / byteSize * byteSize
+                                ofByte <- Some (byteIndex, newPosition)
                                 byteIndex <- newPosition + byteSize
                                 newPosition
                         //ofByte <- Some (byte + byteSize)

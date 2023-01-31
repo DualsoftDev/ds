@@ -15,7 +15,7 @@ module ConvertCoreExt =
     let hasMove (xs:Func seq) = xs.Any(fun f->f.Name = TextMove)
     let hasNot  (xs:Func seq) = xs.Any(fun f->f.Name = TextNot )
 
-    let getVM(v:Vertex) = v.TagManager :?> VertexManager
+    let getVM(v:Vertex)     = v.TagManager :?> VertexManager
     let getVMReal(v:Vertex) = v.TagManager :?> VertexMReal
     let getVMCoin(v:Vertex) = v.TagManager :?> VertexMCoin
 

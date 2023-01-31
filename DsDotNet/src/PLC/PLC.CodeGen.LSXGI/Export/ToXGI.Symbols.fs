@@ -74,9 +74,6 @@ module internal XgiSymbolsModule =
                 let comment = SecurityElement.Escape t.Comment
                 if t.Address = "" then
 
-                    if (t.BoxedValue.GetType() <> typedefof<bool>) then    // todo: 다른 type 처리 필요
-                        noop()
-
                     let {
                         BitAllocator   = x
                         ByteAllocator  = b
@@ -85,7 +82,7 @@ module internal XgiSymbolsModule =
                         LWordAllocator = l
                     } = prjParams.MemoryAllocator
                     let allocator =
-                        match t.BoxedValue.GetType().GetByteSizePrefix() with
+                        match t.BoxedValue.GetType().GetMemorySizePrefix() with
                         | 'X' -> x
                         | 'B' -> b
                         | 'W' -> w
@@ -115,7 +112,7 @@ module internal XgiSymbolsModule =
 
             let param:XgiSymbolCreateParams =
                 let name, comment = timer.Name, $"TIMER {timer.Name}"
-                { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; InitValue=null; Device=device; Kind=kindVar; }
+                { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; Device=device; Kind=kindVar; }
             XGITag.createSymbolInfoWithDetail param
         | DuCounter counter ->
             let device, addr = "", ""
@@ -126,7 +123,7 @@ module internal XgiSymbolsModule =
 
             let param:XgiSymbolCreateParams =
                 let name, comment = counter.Name, $"COUNTER {counter.Name}"
-                { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; InitValue=null; Device=device; Kind=kindVar; }
+                { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; Device=device; Kind=kindVar; }
             XGITag.createSymbolInfoWithDetail param
 
     let private xgiSymbolsToSymbolInfos (prjParams:XgiProjectParams) (kindVar:int) (xgiSymbols:XgiSymbol seq) : SymbolInfo list =

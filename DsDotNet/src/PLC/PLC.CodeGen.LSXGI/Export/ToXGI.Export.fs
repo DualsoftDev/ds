@@ -145,8 +145,6 @@ module XgiExportModule =
             let newLocalStorages, commentedXgiStatements =
                 commentedStatementsToCommentedXgiStatements prjParam localStorages.Values commentedStatements
 
-            noop()
-
             let globalStoragesRefereces =
                 [
                     // POU 에 사용된 모든 storages (global + local 모두 포함)
@@ -157,7 +155,6 @@ module XgiExportModule =
                         ] |> List.distinct
 
                     yield! newLocalStorages.Where(fun s -> s.IsGlobal)
-                    noop()
 
                     for stg in allUsedStorages.Except(newLocalStorages) do
                         (* 'Timer1.Q' 등의 symbol 이 사용되었으면, Timer1 을 global storage 의 reference 로 간주하고, 이를 local var 에 external 로 등록한다. *)
@@ -171,7 +168,6 @@ module XgiExportModule =
                             yield stg
                 ] |> distinct
                   |> List.sortBy(fun stg -> stg.Name)
-            noop()
 
             (* storage 참조 무결성 체크 *)
             do

@@ -114,7 +114,7 @@ module MemoryAllocator =
             | UINT8   -> 1
             | _  -> failwith "ERROR"
 
-        member x.GetByteSizePrefix() =
+        member x.GetMemorySizePrefix() =
             if x = typedefof<bool> then
                 'X'
             else

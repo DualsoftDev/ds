@@ -47,10 +47,7 @@ module TagManagerUtil =
             generateUntilValid()
 
 
-    /// address :
-    /// 1. None 이면 자동으로 주소를 할당하지 않음
-    /// 2. "" 이면 자동으로 주소를 할당
-    /// 3. 그외의 문자열이면 그것 자체의 주소를 사용
+    /// fillAutoAddress : PLC 에 내릴 때, 자동으로 주소를 할당할 지의 여부
     let private createPlanVarHelper(stg:Storages, name:string, dataType:DataType, fillAutoAddress:bool) : IStorage =
         let v = dataType.DefaultValue()
         let address = if fillAutoAddress then Some "" else None

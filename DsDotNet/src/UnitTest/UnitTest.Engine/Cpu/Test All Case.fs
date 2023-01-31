@@ -10,49 +10,32 @@ open Engine.Common.FS
 open Engine.CodeGenCPU
 open PLC.CodeGen.LSXGI
 open System
+open Model.Import.Office
 
 type TestAllCase() =
     inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
-    let generateXmlForTest projName globalStorages localStorages (pous:PouGen seq): string =
-        let getXgiPOUParams (pouGen:PouGen) =
-                    let pouParams:XgiPOUParams = {
-                        /// POU name.  "DsLogic"
-                        POUName = pouGen.ToSystem().Name
-                        /// POU container task name
-                        TaskName = pouGen.TaskName()
-                                /// POU ladder 최상단의 comment
-                        Comment = "DS Logic for XGI"
-                        LocalStorages = localStorages
-                        GlobalStorages = globalStorages
-                        CommentedStatements = pouGen.CommentedStatements()
-                    }
-                    pouParams
-
-        let projParams:XgiProjectParams = {
-            defaultXgiProjectParams with
-                ProjectName = projName
-                GlobalStorages = globalStorages
-                POUs = pous.Select(getXgiPOUParams) |> Seq.toList
-        }
-
-        projParams.GenerateXmlString()
-
-    let saveTestResult testFunctionName (xml:string) =
-        let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
-        let myTemplate = Path.Combine($"{__SOURCE_DIRECTORY__}", "../../UnitTest.PLC.Xgi/XgiXmls")
-        File.WriteAllText($@"{myTemplate}\{testFunctionName}.xml", crlfXml)
-
+    let myTemplate testName = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../../UnitTest.PLC.Xgi/XgiXmls/{testName}")
 
     [<Test>]
     member __.``XXXXXXXXXXXXXX Test All Case`` () =
-        let globalStorage = Storages()
-        let localStorage = Storages()
-        Runtime.Target <- XGI
-        let result = Cpu.LoadStatements(t.Sys, globalStorage)
-
         let f = get_current_function_name()
-        let xml = generateXmlForTest f globalStorage localStorage result
-        saveTestResult f xml
+        let result = exportXMLforXGI(t.Sys, myTemplate f, None)
+        //추후 정답과 비교 필요
+        result === result
+
+
+    [<Test>]
+    member __.``XX ppt Model Cpu test``    () =
+        let f = get_current_function_name()
+        let sampleDirectory = Path.Combine($"{__SOURCE_DIRECTORY__}", "../ImportOffice/sample/");
+        let pptPath = sampleDirectory + "s.pptx"
+        let xlsPath = sampleDirectory + "s.xlsx"
+        let model = ImportPPT.GetModel [ pptPath ]
+
+        ApplyExcel(xlsPath, model.Systems)
+
+        let result = exportXMLforXGI(model.Systems.First(), myTemplate f, None)
+        //추후 정답과 비교 필요
         result === result

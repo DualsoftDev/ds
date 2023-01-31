@@ -126,12 +126,12 @@ module internal XgiSymbolsModule =
             yield! storagesToSymbolInfos prjParams (int Variable.Kind.VAR) localStorages
             yield! storagesToSymbolInfos prjParams (int Variable.Kind.VAR_EXTERNAL) globalStoragesRefereces
         ]
-        XGITag.generateLocalSymbolsXml prjParams symbolInfos
+        XGITag.generateLocalSymbolsXml symbolInfos
 
     /// <GlobalVariable .../> 문자열 반환
     /// 내부 변환: Storages => [XgiSymbol] => [SymbolInfo] => Xml string
     let storagesToGlobalXml (prjParams:XgiProjectParams) (globalStorages:IStorage seq) =
         //storagesToXml false globalStorages
         let symbolInfos = storagesToSymbolInfos prjParams (int Variable.Kind.VAR_GLOBAL) globalStorages
-        XGITag.generateLocalSymbolsXml prjParams symbolInfos
+        XGITag.generateLocalSymbolsXml symbolInfos
 

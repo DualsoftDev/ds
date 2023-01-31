@@ -166,7 +166,7 @@ module XGITag = //IEC61131Tag =
             ] |> String.concat "\r\n"
 
     /// Symbol variable 정의 구역 xml 의 string 을 생성
-    let private generateSymbolVarDefinitionXml (prjParams:XgiProjectParams) (varType:string) (FList(symbols:SymbolInfo list)) =
+    let private generateSymbolVarDefinitionXml (varType:string) (FList(symbols:SymbolInfo list)) =
         let symbols = symbols |> List.sortBy (fun s -> s.Name)
         [
             yield $"<{varType} Version=\"Ver 1.0\" Count={dq}{symbols.length()}{dq}>"
@@ -177,7 +177,7 @@ module XGITag = //IEC61131Tag =
             yield $"</{varType}>"
         ] |> String.concat "\r\n"
 
-    let generateLocalSymbolsXml  (prjParams:XgiProjectParams) symbols = generateSymbolVarDefinitionXml prjParams "LocalVar" symbols
-    let generateGlobalSymbolsXml (prjParams:XgiProjectParams) symbols = generateSymbolVarDefinitionXml prjParams "GlobalVariable" symbols
+    let generateLocalSymbolsXml  symbols = generateSymbolVarDefinitionXml "LocalVar" symbols
+    let generateGlobalSymbolsXml symbols = generateSymbolVarDefinitionXml "GlobalVariable" symbols
 
 

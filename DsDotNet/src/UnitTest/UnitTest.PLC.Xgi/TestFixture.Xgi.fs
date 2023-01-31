@@ -48,12 +48,12 @@ module XgiFixtures =
             let allStorages = storages.Values.ToArray()
             let kindVar = int Variable.Kind.VAR_GLOBAL
             [
-                for (stg, symbolInfo) in allStorages |> storagesToXgiSymbol do
+                for (storage, symbolInfo) in allStorages |> storagesToXgiSymbol do
                     let xgiSymbolInfo = xgiSymbolToSymbolInfo prjParams kindVar symbolInfo
                     if xgiSymbolInfo.Device.NonNullAny() then
-                        stg
+                        storage
             ]
-            |> map (fun stg -> stg.Name, stg)
+            |> map (fun storage -> storage.Name, storage)
             |> Tuple.toDictionary
 
         let pouParams:XgiPOUParams = {

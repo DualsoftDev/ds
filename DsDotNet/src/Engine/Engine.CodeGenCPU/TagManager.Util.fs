@@ -85,13 +85,20 @@ module TagManagerUtil =
         let cs = CTRStruct.Create(CounterType.CTR, storages, name, 0us, 0us, sys)
         cs
 
-    let createPlanVar (storages:Storages) (name:string) (dataType:DataType) (fillAutoAddress:bool) =
+    let createPlanVar2 (storages:Storages) (name:string) (dataType:DataType) (fillAutoAddress:bool) =
         let name = getPlcTagAbleName name storages
         let t= createPlanVarHelper (storages, name, dataType, fillAutoAddress)
         t
+        //ahn 적용중
+    let createPlanVar (storages:Storages) (name:string) (dataType:DataType) =
+        createPlanVar2 storages name dataType false
 
-    let createPlanVarBool (storages:Storages) name (fillAutoAddress:bool) =
-        createPlanVar storages name DuBOOL fillAutoAddress :?> PlanVar<bool>
+
+    let createPlanVarBool2 (storages:Storages) name (fillAutoAddress:bool) =
+        createPlanVar2 storages name DuBOOL fillAutoAddress :?> PlanVar<bool>
+        //ahn 적용중
+    let createPlanVarBool (storages:Storages) name =
+        createPlanVarBool2 storages name false
 
     type InOut = | In | Out | Memory
     type BridgeType = | Device | Button | Lamp | Condition

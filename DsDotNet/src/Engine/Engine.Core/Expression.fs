@@ -161,6 +161,8 @@ module ExpressionModule =
     /// Pulse coil '-(P)-' 생성 및 평가를 위한 구조
     type HistoryFlag() =
         member val LastValue = false with get, set
+
+    let private unsupported() = failwithlog "ERROR: not supported"
     type RisingCoil = {
         Storage:IStorage
         HistoryFlag:HistoryFlag
@@ -170,6 +172,7 @@ module ExpressionModule =
 
             member x.DsSystem = x.System
             member x.Name with get() = $"RisingCoil.{x.Storage.Name}" and set(_v) = failwithlog "ERROR"
+            member _.Address with get() = unsupported() and set(_v) = unsupported()
             member _.DataType = typedefof<RisingCoil>
             member x.IsGlobal = x.Storage.IsGlobal
             member _.Comment with get() = "" and set(_v) = failwithlog "ERROR"
@@ -190,6 +193,7 @@ module ExpressionModule =
 
             member x.DsSystem = x.System
             member x.Name with get() = $"FallingCoil.{x.Storage.Name}" and set(_v) = failwithlog "ERROR"
+            member _.Address with get() = unsupported() and set(_v) = unsupported()
             member _.DataType = typedefof<FallingCoil>
             member x.IsGlobal = x.Storage.IsGlobal
             member _.Comment with get() = "" and set(_v) = failwithlog "ERROR"

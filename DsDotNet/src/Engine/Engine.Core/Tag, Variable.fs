@@ -11,6 +11,9 @@ module TagVariableModule =
     type StorageCreationParams<'T when 'T:equality> = {
         Name: string
         Value: 'T
+        /// 1. None 이면 자동으로 주소를 할당하지 않음
+        /// 2. "" 이면 자동으로 주소를 할당
+        /// 3. 그외의 문자열이면 그것 자체의 주소를 사용
         Address: string option
         Comment: string option
         System: ISystem
@@ -42,6 +45,7 @@ module TagVariableModule =
                     value <- v
                     (x:>  IStorage).DsSystem.ValueChangeSubject.OnNext(x :> IStorage, v)
         member val Comment: string = comment with get, set
+        member val Address = param.Address.Value with get, set
 
         interface IStorage with
             member x.DsSystem = param.System
@@ -50,6 +54,7 @@ module TagVariableModule =
             member x.Comment with get() = x.Comment and set(v) = x.Comment <- v
             member x.BoxedValue with get() = x.Value and set(v) = x.Value <- (v :?> 'T)
             member x.ObjValue = x.Value :> obj
+            member x.Address with get() = x.Address and set(v) = x.Address <- v
             member x.ToBoxedExpression() = x.ToBoxedExpression()
 
         interface IStorage<'T> with
@@ -75,9 +80,7 @@ module TagVariableModule =
         inherit TypedValueStorage<'T>(param)
         let {Name=name; } = param
 
-        interface ITag<'T> with
-            member x.Address = x.Address
-        member val Address = param.Address.Value
+        interface ITag<'T>
         override x.ToText() = "$" + name
 
     [<AbstractClass>]

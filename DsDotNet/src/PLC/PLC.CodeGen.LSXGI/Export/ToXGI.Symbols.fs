@@ -64,8 +64,7 @@ module internal XgiSymbolsModule =
             let comment = "FAKECOMMENT"
 
             let initValue = null // PLCTag 는 값을 초기화 할 수 없다.
-            { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; InitValue=initValue; Device=device; Kind=kindVar; }
-            |> XGITag.createSymbolInfoWithDetail
+            { defaultSymbolInfo with Name=name; Comment=comment; Type=plcType; Address=addr; InitValue=initValue; Device=device; Kind=kindVar; }
 
         // address 가 지정되지 않은 tag : e.g Timer, Counter 의 내부 멤버 변수들 EN, DN, CU, CD, ...
         | DuStorage t ->
@@ -93,8 +92,7 @@ module internal XgiSymbolsModule =
                     if t.Name.StartsWith("_") then
                         logWarn $"Something fish: trying to generate auto M address for {t.Name}"
                     t.Address <- allocator()
-                { defaultSymbolCreateParam with Name=t.Name; Comment=comment; PLCType=plcType; Address=t.Address; InitValue=t.BoxedValue; Kind=kindVar; }
-                |> XGITag.createSymbolInfoWithDetail
+                { defaultSymbolInfo with Name=t.Name; Comment=comment; Type=plcType; Address=t.Address; InitValue=t.BoxedValue; Kind=kindVar; }
 
             symbolInfo
 
@@ -110,10 +108,8 @@ module internal XgiSymbolsModule =
                 match timer.Type with
                 | TON | TOF | TMR -> timer.Type.ToString()
 
-            let param:XgiSymbolCreateParams =
-                let name, comment = timer.Name, $"TIMER {timer.Name}"
-                { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; Device=device; Kind=kindVar; }
-            XGITag.createSymbolInfoWithDetail param
+            let name, comment = timer.Name, $"TIMER {timer.Name}"
+            { defaultSymbolInfo with Name=name; Comment=comment; Type=plcType; Address=addr; Device=device; Kind=kindVar; }
         | DuCounter counter ->
             let device, addr = "", ""
             let plcType =
@@ -121,10 +117,8 @@ module internal XgiSymbolsModule =
                 | CTU | CTD | CTUD -> $"{counter.Type}_INT"       // todo: CTU_{INT, UINT, .... } 등의 종류가 있음...
                 | CTR -> $"{counter.Type}"
 
-            let param:XgiSymbolCreateParams =
-                let name, comment = counter.Name, $"COUNTER {counter.Name}"
-                { defaultSymbolCreateParam with Name=name; Comment=comment; PLCType=plcType; Address=addr; Device=device; Kind=kindVar; }
-            XGITag.createSymbolInfoWithDetail param
+            let name, comment = counter.Name, $"COUNTER {counter.Name}"
+            { defaultSymbolInfo with Name=name; Comment=comment; Type=plcType; Address=addr; Device=device; Kind=kindVar; }
 
     let private xgiSymbolsToSymbolInfos (prjParams:XgiProjectParams) (kindVar:int) (xgiSymbols:XgiSymbol seq) : SymbolInfo list =
         xgiSymbols |> map (xgiSymbolToSymbolInfo prjParams kindVar) |> List.ofSeq

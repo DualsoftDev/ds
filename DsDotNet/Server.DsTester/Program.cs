@@ -22,8 +22,8 @@ public class ServerTester
     {
         if (conn.Connect())
         {
-            conn.WriteRandomTags(writableTags);
             conn.AddMonitoringTags(readableTags);
+            conn.WriteRandomTags(writableTags);
             conn.Subject
                 .OfType<TagValueChangedEvent>()
                 .Subscribe(evt =>

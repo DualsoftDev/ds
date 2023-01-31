@@ -37,7 +37,7 @@ module TagVariableModule =
         let mutable value = initValue
         let comment = comment |? ""
         member _.Name: string = name
-        member _.IsGlobal = isGlobal
+        member val IsGlobal = isGlobal with get, set
         member x.Value
             with get() = value
             and set(v) =
@@ -50,7 +50,7 @@ module TagVariableModule =
         interface IStorage with
             member x.DsSystem = param.System
             member x.DataType = typedefof<'T>
-            member x.IsGlobal = isGlobal
+            member x.IsGlobal with get() = x.IsGlobal and set(v) = x.IsGlobal <- v
             member x.Comment with get() = x.Comment and set(v) = x.Comment <- v
             member x.BoxedValue with get() = x.Value and set(v) = x.Value <- (v :?> 'T)
             member x.ObjValue = x.Value :> obj

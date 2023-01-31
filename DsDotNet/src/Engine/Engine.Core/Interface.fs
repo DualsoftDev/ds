@@ -38,7 +38,7 @@ module Interface =
         abstract DsSystem: ISystem
         abstract BoxedValue: obj with get, set
         abstract DataType : System.Type
-        abstract IsGlobal : bool
+        abstract IsGlobal : bool with get, set
         abstract Comment: string with get, set
         abstract ToBoxedExpression : unit -> obj    /// IExpression<'T> 의 boxed 형태의 expression 생성
 

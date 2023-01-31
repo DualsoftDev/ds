@@ -143,12 +143,13 @@ module XGITag = //IEC61131Tag =
             [
                 $"Name=\"{x.Name}\""
                 $"Kind=\"{x.Kind}\""
-                $"Type=\"{x.Type}\""
-                if x.InitValue <> null then
-                    $"InitValue=\"{x.ToXgiLiteral()}\""
+                if x.Kind <> int Variable.Kind.VAR_EXTERNAL then
+                    $"Type=\"{x.Type}\""
+                    if x.InitValue <> null then
+                        $"InitValue=\"{x.ToXgiLiteral()}\""
+                    $"Address=\"{x.Address}\""
                 $"Comment=\"{x.Comment}\""
                 $"Device=\"{x.Device}\""
-                $"Address=\"{x.Address}\""
                 $"State=\"{x.State}\""
             ] |> String.concat " "
 

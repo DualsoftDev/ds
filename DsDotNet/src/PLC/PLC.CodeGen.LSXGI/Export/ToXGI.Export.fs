@@ -145,14 +145,19 @@ module XgiExportModule =
             let newLocalStorages, commentedXgiStatements =
                 commentedStatementsToCommentedXgiStatements prjParam localStorages.Values commentedStatements
 
+            noop()
 
             let globalStoragesRefereces =
                 [
                     // POU 에 사용된 모든 storages (global + local 모두 포함)
-                    let allUsedStorages = [
-                        for cstmt in commentedStatements do
-                            yield! cstmt.CollectStorages()
-                    ]
+                    let allUsedStorages =
+                        [
+                            for cstmt in commentedStatements do
+                                yield! cstmt.CollectStorages()
+                        ] |> List.distinct
+
+                    yield! newLocalStorages.Where(fun s -> s.IsGlobal)
+                    noop()
 
                     for stg in allUsedStorages.Except(newLocalStorages) do
                         (* 'Timer1.Q' 등의 symbol 이 사용되었으면, Timer1 을 global storage 의 reference 로 간주하고, 이를 local var 에 external 로 등록한다. *)
@@ -166,6 +171,7 @@ module XgiExportModule =
                             yield stg
                 ] |> distinct
                   |> List.sortBy(fun stg -> stg.Name)
+            noop()
 
             (* storage 참조 무결성 체크 *)
             do
@@ -177,6 +183,7 @@ module XgiExportModule =
                     if not (inGlobal || inLocal) then
                         failwithf "Storage '%s' is not defined" name
 
+            let newLocalStorages = newLocalStorages.Except(globalStoragesRefereces)
             let localStoragesXml = storagesToLocalXml prjParam newLocalStorages globalStoragesRefereces
             let rungsXml = generateRungs comment commentedXgiStatements
 
@@ -215,6 +222,11 @@ module XgiExportModule =
         member x.GenerateXmlDocument() : XmlDocument =
             let { ProjectName=projName; ProjectComment=projComment; GlobalStorages=globalStorages;
                   EnableXmlComment = enableXmlComment; POUs=pous } = x
+
+            // todo : 사전에 처리 되었어야...
+            for g in globalStorages.Values do
+                g.IsGlobal <- true
+
             EnableXmlComment <- enableXmlComment
             let xdoc = x.GetTemplateXmlDoc()
             (* project name/comment 변경 *)

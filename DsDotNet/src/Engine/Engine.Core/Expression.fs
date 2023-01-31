@@ -174,7 +174,7 @@ module ExpressionModule =
             member x.Name with get() = $"RisingCoil.{x.Storage.Name}" and set(_v) = failwithlog "ERROR"
             member _.Address with get() = unsupported() and set(_v) = unsupported()
             member _.DataType = typedefof<RisingCoil>
-            member x.IsGlobal = x.Storage.IsGlobal
+            member x.IsGlobal with get() = x.Storage.IsGlobal and set(v) = x.Storage.IsGlobal <- v
             member _.Comment with get() = "" and set(_v) = failwithlog "ERROR"
             member x.BoxedValue with get() = x.Storage.BoxedValue
                                 and set(v) = x.Storage.BoxedValue <- v
@@ -195,7 +195,7 @@ module ExpressionModule =
             member x.Name with get() = $"FallingCoil.{x.Storage.Name}" and set(_v) = failwithlog "ERROR"
             member _.Address with get() = unsupported() and set(_v) = unsupported()
             member _.DataType = typedefof<FallingCoil>
-            member x.IsGlobal = x.Storage.IsGlobal
+            member x.IsGlobal with get() = x.Storage.IsGlobal and set(v) = x.Storage.IsGlobal <- v
             member _.Comment with get() = "" and set(_v) = failwithlog "ERROR"
             member x.BoxedValue with get() = x.Storage.BoxedValue
                                 and set(v) = x.Storage.BoxedValue <- v

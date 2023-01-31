@@ -38,7 +38,7 @@ type Flow with
         let setErrs = f.GetVerticesWithInReal().Select(getVM).ERRs().ToOrElseOff(f.System)
         let rst = f.clear.Expr
 
-        (set <||> setErrs, rst) --| (f.sop, "O5")
+        (set <||> setErrs, rst) ==| (f.sop, "O5")
 
     member f.O6_DriveOperationMode (): CommentedStatement =
         let set = f.drive.Expr <||> f.BtnDriveExpr

@@ -16,19 +16,20 @@ module MemoryAllocator =
 
     /// 주어진 memory type 에서 주소를 할당하 하는 함수 제공
     /// typ: {"M", "I", "Q"} 등이 가능하나 주로 "M"
-    /// availableByteRange: 할당 가능한 [시작, 끝] byte 의 range
-    let createMemoryAllocator (typ:string) (availableByteRange:int*int) : PLCMemoryAllocator =
+    /// availableByteRange: 할당 가능한 [시작, 끝] byte 의 range (reservedBytes 에 포함된 부분은 제외됨)
+    /// reservedBytes: 회피 영역 - todo
+    let createMemoryAllocator (typ:string) (availableByteRange:int*int) (reservedBytes:int list) : PLCMemoryAllocator =
         let startByte, endByte = availableByteRange
         /// optional fragmented bit position
         let mutable ofBit:int option = None  // Some (startByte * 8)
         /// optional framented byte [start, end) position
         let mutable ofByteRange:(int*int) option = None
-        let mutable byteIndex = startByte
+        let mutable byteCursor = startByte
 
         let getAddress (reqMemType:char) =
             match reqMemType with
             | 'X' ->
-                let bit =
+                let bitIndex =
                     match ofBit, ofByteRange with
                     | Some bit, _ when bit % 8 = 7 ->   // 마지막 fragment bit 을 쓰는 상황
                         ofBit <- None
@@ -42,14 +43,14 @@ module MemoryAllocator =
                         ofByteRange <- if s = e then None else Some(s+1, e)
                         bit
                     | None, None ->
-                        let bit = byteIndex * 8
+                        let bit = byteCursor * 8
                         ofBit <- Some (bit + 1)
-                        byteIndex <- byteIndex + 1
+                        byteCursor <- byteCursor + 1
                         bit
-                if bit / 8 > endByte then
+                if bitIndex / 8 > endByte then
                     failwith "ERROR: Limit exceeded."
 
-                $"%%{typ}{reqMemType}{bit}"
+                $"%%{typ}{reqMemType}{bitIndex}"
 
 
             | ('B' | 'W' | 'D' | 'L') ->
@@ -60,7 +61,7 @@ module MemoryAllocator =
                     | 'D' -> 4
                     | 'L' -> 8
                     | _ -> failwith "ERROR"
-                let byte =
+                let byteIndex =
                     match ofByteRange with
                     | Some (fs, fe) when (fe - fs) > byteSize ->     // fragmented bytes 로 해결하고도 남는 상황
                         ofByteRange <- Some (fs + byteSize, fe)
@@ -70,21 +71,21 @@ module MemoryAllocator =
                         fs
                     | _ ->                                           // fragmented bytes 로 부족한 상황.  fragment 는 건드리지 않고 새로운 영역에서 할당
                         let byte =
-                            if byteIndex % byteSize = 0 then
-                                let byte = byteIndex
-                                byteIndex <- byteIndex + byteSize
+                            if byteCursor % byteSize = 0 then
+                                let byte = byteCursor
+                                byteCursor <- byteCursor + byteSize
                                 byte
                             else
-                                let newPosition = (byteIndex + byteSize) / byteSize * byteSize
-                                ofByteRange <- Some (byteIndex, newPosition)
-                                byteIndex <- newPosition + byteSize
+                                let newPosition = (byteCursor + byteSize) / byteSize * byteSize
+                                ofByteRange <- Some (byteCursor, newPosition)
+                                byteCursor <- newPosition + byteSize
                                 newPosition
                         //ofByte <- Some (byte + byteSize)
                         byte
-                if byte + byteSize > endByte then
+                if byteIndex + byteSize > endByte then
                     failwith "ERROR: Limit exceeded."
 
-                $"%%{typ}{reqMemType}{byte/byteSize}"
+                $"%%{typ}{reqMemType}{byteIndex/byteSize}"
             | _ ->
                 failwith "ERROR"
         {

@@ -36,7 +36,7 @@ module POUParametersModule =
         GlobalStorages = Storages()
         ExistingLSISprj = None
         POUs = []
-        MemoryAllocator = createMemoryAllocator "M" (0, 640*1024)    // 640K M memory 영역
+        MemoryAllocator = createMemoryAllocator "M" (0, 640*1024) []    // 640K M memory 영역
         EnableXmlComment = false
         AppendExpressionTextToRungComment = true
     }

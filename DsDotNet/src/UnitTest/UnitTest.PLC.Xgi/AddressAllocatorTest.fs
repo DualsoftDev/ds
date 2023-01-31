@@ -11,7 +11,7 @@ type AddressAllocatorTest() =
     member __.``Allocate address beyond limit test`` () =
         let {
             BitAllocator  = x
-        } = MemoryAllocator.createMemoryAllocator "M" (0, 0)
+        } = MemoryAllocator.createMemoryAllocator "M" (0, 0) []
 
         for i = 0 to 7 do
             x() === $"%%MX{i}"   // %MX0 ~ %MX10
@@ -20,7 +20,7 @@ type AddressAllocatorTest() =
 
         let {
             WordAllocator = w
-        } = MemoryAllocator.createMemoryAllocator "M" (0, 0)
+        } = MemoryAllocator.createMemoryAllocator "M" (0, 0) []
 
         (fun () -> w() |> ignore) |> ShouldFailWithSubstringT "Limit exceeded."
 
@@ -32,7 +32,7 @@ type AddressAllocatorTest() =
             WordAllocator = w
             DWordAllocator= d
             LWordAllocator= l
-        } = MemoryAllocator.createMemoryAllocator "M" (0, 100)
+        } = MemoryAllocator.createMemoryAllocator "M" (0, 100) []
 
         for i = 0 to 10 do
             x() === $"%%MX{i}"   // %MX0 ~ %MX10
@@ -54,7 +54,7 @@ type AddressAllocatorTest() =
             WordAllocator = w
             DWordAllocator= d
             LWordAllocator= l
-        } = MemoryAllocator.createMemoryAllocator "M" (20, 100)
+        } = MemoryAllocator.createMemoryAllocator "M" (20, 100) []
 
         b() === "%MB20"
         b() === "%MB21"

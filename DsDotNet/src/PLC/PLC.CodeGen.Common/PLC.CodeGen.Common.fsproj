@@ -26,6 +26,7 @@
 		<Compile Include="QGraph\QGraph.Relay.fs" />
 		-->
 		<Compile Include="QGraph\QGraph.CodeGenerationOption.fs" />
+		<Compile Include="MemoryAllocator.fs" />
 		<Compile Include="EntryPoint.fs" />
 		<!--
 		<Compile Include="QGraph\QGraph.Generator.fs" />

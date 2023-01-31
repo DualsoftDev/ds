@@ -37,6 +37,7 @@
 		<Compile Include="XgiCounterTest.fs" />
 		<Compile Include="XgiExpressionEqualityTest.fs" />
 		<Compile Include="XgiPOU.Test.fs" />
+		<Compile Include="XgiExistingXmlProjectAnalTest.fs" />
 		<Compile Include="RisingFallingTest.fs" />
 		<Compile Include="AddressAllocatorTest.fs" />
 		<None Include="App.config" />

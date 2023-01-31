@@ -3,6 +3,7 @@ namespace Engine.Common.FS
 open System.Linq
 open System.Xml
 open System.Xml.Linq
+open Engine.Common.FS
 
 [<AutoOpen>]
 module XmlNodeExtension =
@@ -22,6 +23,24 @@ module XmlNodeExtension =
         /// seed xml node 에서 path 를 만족하는 하나의 xml node 반환
         member x.GetXmlNode(xpath:string) =
             x.SelectSingleNode(xpath)
+
+        member x.TryGetAttribute(attributeName:string) =
+            if x.Attributes <> null && x.Attributes[attributeName] <> null then
+                Some x.Attributes[attributeName].Value
+            else
+                None
+        member x.GetAttribute(attributeName:string) = x.TryGetAttribute(attributeName).Value
+        member x.TryGetAttributes(attributeNames:string seq) =
+            attributeNames
+            |> Seq.map(fun n -> n, x.TryGetAttribute(n))
+            |> Seq.filter (fun (n, a) -> a.IsSome)
+            |> Seq.map (fun (n, a) -> n, a.Value)
+            |> Tuple.toDictionary
+        member x.GetAttributes() =
+            [ for a in x.Attributes do
+                a.Name, a.Value ]
+            |> Tuple.toDictionary
+
 
         /// parent.ChildNodes 을 반환
         member parent.GetChildrenNodes() =

@@ -23,9 +23,28 @@
 				</Parameter>
 			</Parameters>
 			<GlobalVariables>
-				<GlobalVariable Version="Ver 1.0" EIPGUID="f7000e44-35e9-4451-87be-bdcc9199ef8a" EIPChangedID="0" Count="0">
-					<Symbols></Symbols>
-					<TempVar Count="0"></TempVar>
+				<GlobalVariable Version="Ver 1.0" EIPGUID="f7000e44-35e9-4451-87be-bdcc9199ef8a" EIPChangedID="0" Count="3">
+                    <Symbols>
+                        <Symbol Name="cu" Kind="6" Type="BOOL" Address="%IX0.0.0" Comment="FAKECOMMENT" Device="I" State="0">
+                            <MemberAddresses />
+                            <MemberRetains />
+                            <MemberInitValues />
+                            <MemberComments />
+                        </Symbol>
+                        <Symbol Name="myCTU" Kind="6" Type="CTU_INT" Address="" Comment="COUNTER myCTU" Device="" State="0">
+                            <MemberAddresses />
+                            <MemberRetains />
+                            <MemberInitValues />
+                            <MemberComments />
+                        </Symbol>
+                        <Symbol Name="res" Kind="6" Type="BOOL" Address="%IX0.0.1" Comment="FAKECOMMENT" Device="I" State="0">
+                            <MemberAddresses />
+                            <MemberRetains />
+                            <MemberInitValues />
+                            <MemberComments />
+                        </Symbol>
+                    </Symbols>
+                    <TempVar Count="0"></TempVar>
 					<HMIFlags></HMIFlags>
 					<DirectVarComment Count="0"></DirectVarComment>
 				</GlobalVariable>
@@ -69,7 +88,27 @@
 XckU4UJCOYh5CA==</OnlineUploadData>
 							</LDRoutine>
 						</Body>
-						<LocalVar Version="Ver 1.0" Count="13"><Symbols><Symbol Name="nn1" Kind="1" Type="SINT" State="0" Address="" Trigger="" InitValue="1" Comment="[local var in code] no comment" Device="A" DevicePos="0" TotalSize="8" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+						<LocalVar Version="Ver 1.0" Count="16">
+                            <Symbols>
+                                <Symbol Name="cu" Kind="8" Comment="FAKECOMMENT" Device="I" State="0">
+                                    <MemberAddresses />
+                                    <MemberRetains />
+                                    <MemberInitValues />
+                                    <MemberComments />
+                                </Symbol>
+                                <Symbol Name="myCTU" Kind="8" Comment="COUNTER myCTU" Device="" State="0">
+                                    <MemberAddresses />
+                                    <MemberRetains />
+                                    <MemberInitValues />
+                                    <MemberComments />
+                                </Symbol>
+                                <Symbol Name="res" Kind="8" Comment="FAKECOMMENT" Device="I" State="0">
+                                    <MemberAddresses />
+                                    <MemberRetains />
+                                    <MemberInitValues />
+                                    <MemberComments />
+                                </Symbol>
+                                <Symbol Name="nn1" Kind="1" Type="SINT" State="0" Address="" Trigger="" InitValue="1" Comment="[local var in code] no comment" Device="A" DevicePos="0" TotalSize="8" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>

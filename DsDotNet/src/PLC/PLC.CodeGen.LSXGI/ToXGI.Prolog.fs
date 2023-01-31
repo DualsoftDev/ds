@@ -26,6 +26,19 @@ module XgiPrologModule =
         AddressIEC : string //XGK 일경우 IEC 주소로 변환해서 가지고 있음
     }
 
+    let defaultSymbolInfo = {
+        Name       = ""
+        Type       = ""
+        InitValue  = null
+        Comment    = ""
+        Device     = ""
+        Address    = ""
+        DevicePos  = -1
+        Kind       = int Variable.Kind.VAR
+        State      = 0
+        AddressIEC = ""
+    }
+
 
     /// name -> comment -> plcType -> kind -> SymbolInfo
     let mutable fwdCreateSymbolInfo =

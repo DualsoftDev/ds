@@ -5,6 +5,7 @@ open System.Diagnostics
 open Engine.Common.FS
 open System.Security
 open Engine.Core
+open System
 
 // IEC-61131 Addressing
 // http://www.microshadow.com/ladderdip/html/basic_iec_addressing.htm
@@ -84,6 +85,7 @@ module XGITag = //IEC61131Tag =
 
     //    generate
 
+    [<Obsolete("Use SymbolInfo instead.")>]
     type internal XgiSymbolCreateParams = {
         Name          : string
         Comment       : string

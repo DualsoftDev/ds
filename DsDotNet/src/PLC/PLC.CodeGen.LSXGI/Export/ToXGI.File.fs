@@ -89,9 +89,10 @@ module internal XgiFile =
 
         let programTemplate = programs.AdoptChild  programTemplate
 
+        (* xn = Xml Node *)
         /// LDRoutine 위치 : Rung 삽입 위치
-        let posiLdRoutine = programTemplate.GetXmlNode "Body/LDRoutine"
-        let onlineUploadData = posiLdRoutine.FirstChild
+        let xnLdRoutine = programTemplate.GetXmlNode "Body/LDRoutine"
+        let onlineUploadData = xnLdRoutine.FirstChild
 
         (*
          * Rung 삽입
@@ -103,25 +104,25 @@ module internal XgiFile =
         (*
          * Local variables 삽입
          *)
-        let programBody = posiLdRoutine.ParentNode
+        let programBody = xnLdRoutine.ParentNode
         let localSymbols = symbolsLocal |> XmlNode.fromString
         programBody.InsertAfter localSymbols |> ignore
 
         (*
          * Global variables 삽입
          *)
-        let posiGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
-        let countExistingGlobal = posiGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
+        let xnGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
+        let countExistingGlobal = xnGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
         let _globalSymbolXmls =
             // symbolsGlobal = "<GlobalVariable Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol>
             let neoGlobals = symbolsGlobal |> XmlNode.fromString
             let numNewGlobals = neoGlobals.Attributes.["Count"].Value |> System.Int32.Parse
 
-            posiGlobalVar.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
-            let posiGlobalVarSymbols = posiGlobalVar.GetXmlNode "Symbols"
+            xnGlobalVar.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
+            let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
 
             neoGlobals.SelectNodes("//Symbols/Symbol").ToEnumerables()
-            |> iter (posiGlobalVarSymbols.AdoptChild >> ignore)
+            |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)
 
         xdoc.ToText()
 

@@ -23,26 +23,40 @@
 				</Parameter>
 			</Parameters>
 			<GlobalVariables>
-				<GlobalVariable Version="Ver 1.0" EIPGUID="f7000e44-35e9-4451-87be-bdcc9199ef8a" EIPChangedID="0" Count="3">
+				<GlobalVariable Version="Ver 1.0" EIPGUID="f7000e44-35e9-4451-87be-bdcc9199ef8a" EIPChangedID="0" Count="9">
                     <Symbols>
                         <Symbol Name="cu" Kind="6" Type="BOOL" Address="%IX0.0.0" Comment="FAKECOMMENT" Device="I" State="0">
-                            <MemberAddresses />
-                            <MemberRetains />
-                            <MemberInitValues />
-                            <MemberComments />
+                            <MemberAddresses /> <MemberRetains /> <MemberInitValues /> <MemberComments />
                         </Symbol>
                         <Symbol Name="myCTU" Kind="6" Type="CTU_INT" Address="" Comment="COUNTER myCTU" Device="" State="0">
-                            <MemberAddresses />
-                            <MemberRetains />
-                            <MemberInitValues />
-                            <MemberComments />
+                            <MemberAddresses /> <MemberRetains /> <MemberInitValues /> <MemberComments />
                         </Symbol>
                         <Symbol Name="res" Kind="6" Type="BOOL" Address="%IX0.0.1" Comment="FAKECOMMENT" Device="I" State="0">
-                            <MemberAddresses />
-                            <MemberRetains />
-                            <MemberInitValues />
-                            <MemberComments />
+                            <MemberAddresses /> <MemberRetains /> <MemberInitValues /> <MemberComments />
                         </Symbol>
+
+                        <Symbol Name="MMX0" Kind="6" Type="BOOL" InitValue="false" Address="%MX0" Comment="" Device="" State="0">
+                            <MemberAddresses /> <MemberRetains /> <MemberInitValues /> <MemberComments />
+                        </Symbol>
+                        <Symbol Name="MMX1" Kind="6" Type="BOOL" InitValue="false" Address="%MX1" Comment="" Device="" State="0">
+                            <MemberAddresses /> <MemberRetains /> <MemberInitValues /> <MemberComments />
+                        </Symbol>
+                        <Symbol Name="MMX8" Kind="6" Type="BOOL" InitValue="false" Address="%MX8" Comment="" Device="" State="0">
+                            <MemberAddresses /> <MemberRetains /> <MemberInitValues /> <MemberComments />
+                        </Symbol>
+                        <Symbol Name="MMX33" Kind="6" Type="BOOL" InitValue="false" Address="%MX33" Comment="" Device="" State="0">
+                            <MemberAddresses /> <MemberRetains /> <MemberInitValues /> <MemberComments />
+                        </Symbol>
+                        <Symbol Name="MMB2" Kind="6" Type="USINT" InitValue="0" Address="%MB2" Comment="" Device="" State="0">
+                            <MemberAddresses /> <MemberRetains /> <MemberInitValues /> <MemberComments />
+                        </Symbol>
+                        <Symbol Name="MMB17" Kind="6" Type="USINT" InitValue="0" Address="%MB17" Comment="" Device="" State="0">
+                            <MemberAddresses /> <MemberRetains /> <MemberInitValues /> <MemberComments />
+                        </Symbol>
+                        <Symbol Name="MML1" Kind="6" Type="ULINT" InitValue="0" Address="%ML1" Comment="" Device="" State="0">
+                            <MemberAddresses /> <MemberRetains /> <MemberInitValues /> <MemberComments />
+                        </Symbol>
+
                     </Symbols>
                     <TempVar Count="0"></TempVar>
 					<HMIFlags></HMIFlags>
@@ -180,7 +194,11 @@ XckU4UJCOYh5CA==</OnlineUploadData>
 					</Program>
 					<Program Task="Devices" Version="259" LocalVariable="1" Kind="0" InstanceName="" Comment="" ObjectId="c7a4f0ed-35e5-460d-82a1-1e969af4017d" FindProgram="1" FindVar="1" Encrytption="">Pin1<Body>
 							<LDRoutine>
-								<OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="1" Param="90"></Element>
+                                    <Element ElementType="33" Coordinate="94" Param="END">END</Element>
+                                </Rung>
+                                <OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
 XckU4UJCOYh5CA==</OnlineUploadData>
 							</LDRoutine>
 						</Body>
@@ -191,7 +209,11 @@ XckU4UJCOYh5CA==</OnlineUploadData>
 					</Program>
 					<Program Task="Devices" Version="259" LocalVariable="1" Kind="0" InstanceName="" Comment="" ObjectId="2c31fce6-dc8c-4955-9ec8-471aef5f11d7" FindProgram="1" FindVar="1" Encrytption="">Pin2<Body>
 							<LDRoutine>
-								<OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="1" Param="90"></Element>
+                                    <Element ElementType="33" Coordinate="94" Param="END">END</Element>
+                                </Rung>
+                                <OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
 XckU4UJCOYh5CA==</OnlineUploadData>
 							</LDRoutine>
 						</Body>
@@ -202,7 +224,11 @@ XckU4UJCOYh5CA==</OnlineUploadData>
 					</Program>
 					<Program Task="Devices" Version="259" LocalVariable="1" Kind="0" InstanceName="" Comment="" ObjectId="465b8396-55e0-425d-8a87-75a725b74777" FindProgram="1" FindVar="1" Encrytption="">Robot1<Body>
 							<LDRoutine>
-								<OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="1" Param="90"></Element>
+                                    <Element ElementType="33" Coordinate="94" Param="END">END</Element>
+                                </Rung>
+                                <OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
 XckU4UJCOYh5CA==</OnlineUploadData>
 							</LDRoutine>
 						</Body>
@@ -213,7 +239,11 @@ XckU4UJCOYh5CA==</OnlineUploadData>
 					</Program>
 					<Program Task="ExSystems" Version="259" LocalVariable="1" Kind="0" InstanceName="" Comment="" ObjectId="e25de3df-9c2a-4626-beda-5fed80893d8b" FindProgram="1" FindVar="1" Encrytption="">CPU2<Body>
 							<LDRoutine>
-								<OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="1" Param="90"></Element>
+                                    <Element ElementType="33" Coordinate="94" Param="END">END</Element>
+                                </Rung>
+                                <OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
 XckU4UJCOYh5CA==</OnlineUploadData>
 							</LDRoutine>
 						</Body>

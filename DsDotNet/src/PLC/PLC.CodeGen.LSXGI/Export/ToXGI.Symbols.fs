@@ -82,11 +82,11 @@ module internal XgiSymbolsModule =
                     } = prjParams.MemoryAllocator
                     let allocator =
                         match t.BoxedValue.GetType().GetMemorySizePrefix() with
-                        | 'X' -> x
-                        | 'B' -> b
-                        | 'W' -> w
-                        | 'D' -> d
-                        | 'L' -> l
+                        | "X" -> x
+                        | "B" -> b
+                        | "W" -> w
+                        | "D" -> d
+                        | "L" -> l
                         | _ -> failwith "ERROR"
 
                     if t.Name.StartsWith("_") then

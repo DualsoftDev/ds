@@ -14,6 +14,15 @@ module MemoryAllocator =
         LWordAllocator: PLCMemoryAllocatorType
     }
 
+    let getByteSizeFromPrefix prefix =
+        match prefix with
+        | "B" -> 1
+        | "W" -> 2
+        | "D" -> 4
+        | "L" -> 8
+        | _ -> failwith "ERROR"
+
+
     /// 주어진 memory type 에서 주소를 할당하 하는 함수 제공
     /// typ: {"M", "I", "Q"} 등이 가능하나 주로 "M"
     /// availableByteRange: 할당 가능한 [시작, 끝] byte 의 range (reservedBytes 에 포함된 부분은 제외됨)
@@ -26,9 +35,9 @@ module MemoryAllocator =
         let mutable ofByteRange:(int*int) option = None
         let mutable byteCursor = startByte
 
-        let getAddress (reqMemType:char) =
+        let getAddress (reqMemType:string) =
             match reqMemType with
-            | 'X' ->
+            | "X" ->
                 let bitIndex =
                     match ofBit, ofByteRange with
                     | Some bit, _ when bit % 8 = 7 ->   // 마지막 fragment bit 을 쓰는 상황
@@ -53,14 +62,8 @@ module MemoryAllocator =
                 $"%%{typ}{reqMemType}{bitIndex}"
 
 
-            | ('B' | 'W' | 'D' | 'L') ->
-                let byteSize =
-                    match reqMemType with
-                    | 'B' -> 1
-                    | 'W' -> 2
-                    | 'D' -> 4
-                    | 'L' -> 8
-                    | _ -> failwith "ERROR"
+            | ("B" | "W" | "D" | "L") ->
+                let byteSize = getByteSizeFromPrefix reqMemType
                 let byteIndex =
                     match ofByteRange with
                     | Some (fs, fe) when (fe - fs) > byteSize ->     // fragmented bytes 로 해결하고도 남는 상황
@@ -89,11 +92,11 @@ module MemoryAllocator =
             | _ ->
                 failwith "ERROR"
         {
-            BitAllocator  = fun () -> getAddress 'X'
-            ByteAllocator = fun () -> getAddress 'B'
-            WordAllocator = fun () -> getAddress 'W'
-            DWordAllocator= fun () -> getAddress 'D'
-            LWordAllocator= fun () -> getAddress 'L'
+            BitAllocator  = fun () -> getAddress "X"
+            ByteAllocator = fun () -> getAddress "B"
+            WordAllocator = fun () -> getAddress "W"
+            DWordAllocator= fun () -> getAddress "D"
+            LWordAllocator= fun () -> getAddress "L"
         }
 
 
@@ -117,11 +120,11 @@ module MemoryAllocator =
 
         member x.GetMemorySizePrefix() =
             if x = typedefof<bool> then
-                'X'
+                "X"
             else
                 match x.GetByteSize() with
-                | 1 -> 'B'
-                | 2 -> 'W'
-                | 4 -> 'D'
-                | 8 -> 'L'
+                | 1 -> "B"
+                | 2 -> "W"
+                | 4 -> "D"
+                | 8 -> "L"
                 | _ -> failwith "ERROR"

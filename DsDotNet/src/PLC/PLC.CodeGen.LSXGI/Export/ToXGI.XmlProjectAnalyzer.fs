@@ -1,11 +1,11 @@
 namespace PLC.CodeGen.LSXGI
 
-open System.Linq
 open System.Xml
+open System.Linq
 
 open Engine.Common.FS
-open Engine.Core
 open PLC.CodeGen.LSXGI
+open System.Text.RegularExpressions
 open PLC.CodeGen.Common
 
 [<AutoOpen>]
@@ -25,12 +25,34 @@ module XgiXmlProjectAnalyzerModule =
                 }
         ]
 
-    let analyzeXmlProject existingLSISprj =
-        let xdoc = XmlDocument.loadFromFile existingLSISprj
-        let xnGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
-        let globalsWithAddress = collectSymbolInfos xnGlobalVar |> filter (fun symbolInfo -> symbolInfo.Address.NonNullAny())
+    let collectByteIndices (addresses: string seq) : int list =
+        [
+            for addr in addresses do
+                match addr with
+                | RegexPattern @"%M([XBWDL])(\d+)$" [m; Int32Pattern index] ->
+                    match m with
+                    | "X" -> index / 8
+                    | ("B" | "W" | "D" | "L") ->
+                        let byteSize = getByteSizeFromPrefix m
+                        let s = index * byteSize
+                        let e = s + byteSize - 1
+                        yield! [s..e]
+                    | _ -> failwith "ERROR"
+                | _ -> failwith "ERROR"
+        ] |> sort |> distinct
 
-        let countExistingGlobal = xnGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
-        let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
+    let analyzeXmlProject existingLSISprj =
+        //let xdoc = XmlDocument.loadFromFile existingLSISprj
+        //let xnGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
+        //let globalsWithAddress = collectSymbolInfos xnGlobalVar |> filter (fun symbolInfo -> symbolInfo.Address.NonNullAny())
+        //let globalsWithMAreaAddress = globalsWithAddress |> filter (fun symbolInfo -> symbolInfo.Address.StartsWith("%M"))
+        //let usedMAddresses = globalsWithMAreaAddress |> map (fun symbolInfo -> symbolInfo.Address)
+
+        //Enumerable.SequenceEqual(usedMAddresses, [ "%MX0"; "%MX1"; "%MX8"; "%MX33"; "%MB2"; "%MB17"; "%ML1" ]) |> verify
+
+        //let usedMIndices = usedMAddresses |> collectByteIndices
+
+        //let countExistingGlobal = xnGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
+        //let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
 
         noop()

@@ -9,7 +9,26 @@ module XgiPrologModule =
     /// XML 특수 문자 escape.  '&' 등
     let escapeXml xml = SecurityElement.Escape xml
 
-    //let validateVariableName name =
+    let validateVariableName (name:string) =
+        match name.ToUpper() with
+        | RegexPattern "^([NMR][XBWDL]?)(\d+)$" [_reserved; _num] ->
+            Error $"'{name}' is not valid symbol name.  (Can't use direct variable name)"
+        | RegexPattern "([\s]+)" [_ws] ->
+            Error $"'{name}' contains white space char"
+        | _ ->
+            Ok true
+
+    let validateAddress (address:string) =
+        if address.IsNullOrEmpty() then
+            Ok true
+        else
+            match address.ToUpper() with
+            (* matches %I3, %I3.2, %I3.2.1, %IX3, %IX3.2, %IX3.2.1, ... *)
+            | RegexPattern "^%([IQMR][XBWDL]?)(\d+)$"  _
+            |   RegexPattern "^%([IQ][XBWDL]?)(\d+).(\d+)$"  _
+            |   RegexPattern "^%([IQ][XBWDL]?)(\d+).(\d+).(\d+)$"  _ ->
+                  Ok true
+            | _ -> Error $"Invalid address: '{address}'"
 
     /// Xml Symbol tag 가 가지는 속성
     type SymbolInfo = {
@@ -33,20 +52,8 @@ module XgiPrologModule =
                 - Fail: n0, m0, mb0, mx0, mw0, r0, rx0, N0, M0,
              *)
             result {
-                match x.Name.ToUpper() with
-                | RegexPattern "^([NMR][XBWDL]?)(\d+)$" [reserved; _num] ->
-                    return! Error $"'{x.Name}' is not valid symbol name.  (Can't use direct variable name)"
-                | RegexPattern "([\s]+)" [ws] ->
-                    return! Error $"'{x.Name}' contains white space char"
-                | _ ->
-                    ()
-
-                match x.Address with
-                | IsItNullOrEmpty _ -> ()
-                (* matches %I3, %I3.2, %I3.2.1, %IX3, %IX3.2, %IX3.2.1, ... *)
-                | RegexPattern "^%([IQMR][XBWDL]?)(\d+)([.\d+]{0, 2})*$"  _ -> ()      // IQMLKFWUR
-                | _ -> return! Error $"Invalid address: '{x.Address}'"
-
+                let! _ = validateVariableName x.Name
+                let! _ = validateAddress x.Address
                 return! Ok()
             }
 

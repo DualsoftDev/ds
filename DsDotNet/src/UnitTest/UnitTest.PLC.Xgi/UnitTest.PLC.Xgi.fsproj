@@ -40,6 +40,7 @@
 		<Compile Include="XgiExistingXmlProjectAnalTest.fs" />
 		<Compile Include="RisingFallingTest.fs" />
 		<Compile Include="AddressAllocatorTest.fs" />
+		<Compile Include="NameAddressValidatorTest.fs" />
 		<None Include="App.config" />
 		<Compile Include="Main.fs" />
 	</ItemGroup>

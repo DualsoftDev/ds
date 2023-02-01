@@ -14,6 +14,12 @@ module MemoryAllocator =
         LWordAllocator: PLCMemoryAllocatorType
     }
 
+    type IntRange = int * int
+
+    type PLCMemoryAllocatorSpec =
+        | RangeSpec of IntRange
+        | AllocatorFunctions of PLCMemoryAllocator
+
     let getByteSizeFromPrefix prefix =
         match prefix with
         | "B" -> 1
@@ -27,12 +33,12 @@ module MemoryAllocator =
     /// typ: {"M", "I", "Q"} 등이 가능하나 주로 "M"
     /// availableByteRange: 할당 가능한 [시작, 끝] byte 의 range (reservedBytes 에 포함된 부분은 제외됨)
     /// reservedBytes: 회피 영역 - todo
-    let createMemoryAllocator (typ:string) (availableByteRange:int*int) (reservedBytes:int list) : PLCMemoryAllocator =
+    let createMemoryAllocator (typ:string) (availableByteRange:IntRange) (reservedBytes:int list) : PLCMemoryAllocator =
         let startByte, endByte = availableByteRange
         /// optional fragmented bit position
         let mutable ofBit:int option = None  // Some (startByte * 8)
         /// optional framented byte [start, end) position
-        let mutable ofByteRange:(int*int) option = None
+        let mutable ofByteRange:IntRange option = None
         let mutable byteCursor = startByte
 
         let getAddress (reqMemType:string) =

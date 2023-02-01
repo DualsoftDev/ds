@@ -72,6 +72,10 @@ module internal XgiSymbolsModule =
                 let plcType = systemTypeToXgiTypeName t.DataType
                 let comment = SecurityElement.Escape t.Comment
                 if t.Address = "" then
+                    let allocatorFunctions =
+                        match prjParams.MemoryAllocatorSpec with
+                        | RangeSpec _ -> failwith "ERROR.  Should have already been converted to allocator functions."
+                        | AllocatorFunctions functions -> functions
 
                     let {
                         BitAllocator   = x
@@ -79,7 +83,7 @@ module internal XgiSymbolsModule =
                         WordAllocator  = w
                         DWordAllocator = d
                         LWordAllocator = l
-                    } = prjParams.MemoryAllocator
+                    } = allocatorFunctions
                     let allocator =
                         match t.BoxedValue.GetType().GetMemorySizePrefix() with
                         | "X" -> x

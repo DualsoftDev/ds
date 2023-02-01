@@ -33,6 +33,9 @@ namespace Dual.Model.Import
             this.xtraTabControl_My = new System.Windows.Forms.TabControl();
             this.splitter2 = new System.Windows.Forms.Splitter();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.button_CreatePLC = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.comboBox_Package = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.comboBox_Device = new System.Windows.Forms.ComboBox();
@@ -61,8 +64,6 @@ namespace Dual.Model.Import
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.label3 = new System.Windows.Forms.Label();
-            this.comboBox_Package = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -132,6 +133,7 @@ namespace Dual.Model.Import
             // splitContainer2.Panel1
             // 
             this.splitContainer2.Panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(33)))), ((int)(((byte)(33)))));
+            this.splitContainer2.Panel1.Controls.Add(this.button_CreatePLC);
             this.splitContainer2.Panel1.Controls.Add(this.label3);
             this.splitContainer2.Panel1.Controls.Add(this.comboBox_Package);
             this.splitContainer2.Panel1.Controls.Add(this.label2);
@@ -150,6 +152,37 @@ namespace Dual.Model.Import
             this.splitContainer2.Size = new System.Drawing.Size(838, 346);
             this.splitContainer2.SplitterDistance = 253;
             this.splitContainer2.TabIndex = 4;
+            // 
+            // button_CreatePLC
+            // 
+            this.button_CreatePLC.BackColor = System.Drawing.Color.DarkSeaGreen;
+            this.button_CreatePLC.Location = new System.Drawing.Point(111, 192);
+            this.button_CreatePLC.Name = "button_CreatePLC";
+            this.button_CreatePLC.Size = new System.Drawing.Size(48, 33);
+            this.button_CreatePLC.TabIndex = 17;
+            this.button_CreatePLC.Text = "PLC생성";
+            this.button_CreatePLC.UseVisualStyleBackColor = false;
+            this.button_CreatePLC.Visible = false;
+            this.button_CreatePLC.Click += new System.EventHandler(this.button_CreatePLC_Click);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(24, 116);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(33, 12);
+            this.label3.TabIndex = 16;
+            this.label3.Text = "배포:";
+            // 
+            // comboBox_Package
+            // 
+            this.comboBox_Package.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_Package.FormattingEnabled = true;
+            this.comboBox_Package.Location = new System.Drawing.Point(63, 112);
+            this.comboBox_Package.Name = "comboBox_Package";
+            this.comboBox_Package.Size = new System.Drawing.Size(91, 20);
+            this.comboBox_Package.TabIndex = 15;
+            this.comboBox_Package.SelectedIndexChanged += new System.EventHandler(this.comboBox_Package_SelectedIndexChanged);
             // 
             // label2
             // 
@@ -204,9 +237,9 @@ namespace Dual.Model.Import
             // button_CreateExcel
             // 
             this.button_CreateExcel.BackColor = System.Drawing.Color.DarkSeaGreen;
-            this.button_CreateExcel.Location = new System.Drawing.Point(82, 194);
+            this.button_CreateExcel.Location = new System.Drawing.Point(59, 192);
             this.button_CreateExcel.Name = "button_CreateExcel";
-            this.button_CreateExcel.Size = new System.Drawing.Size(72, 33);
+            this.button_CreateExcel.Size = new System.Drawing.Size(47, 33);
             this.button_CreateExcel.TabIndex = 3;
             this.button_CreateExcel.Text = "엑셀생성";
             this.button_CreateExcel.UseVisualStyleBackColor = false;
@@ -478,24 +511,6 @@ namespace Dual.Model.Import
             this.splitter1.TabIndex = 22;
             this.splitter1.TabStop = false;
             // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(24, 116);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(33, 12);
-            this.label3.TabIndex = 16;
-            this.label3.Text = "배포:";
-            // 
-            // comboBox_Package
-            // 
-            this.comboBox_Package.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox_Package.FormattingEnabled = true;
-            this.comboBox_Package.Location = new System.Drawing.Point(63, 112);
-            this.comboBox_Package.Name = "comboBox_Package";
-            this.comboBox_Package.Size = new System.Drawing.Size(91, 20);
-            this.comboBox_Package.TabIndex = 15;
-            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
@@ -572,6 +587,7 @@ namespace Dual.Model.Import
         private System.Windows.Forms.CheckedListBox checkedListBox_sysHMI;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ComboBox comboBox_Package;
+        private System.Windows.Forms.Button button_CreatePLC;
     }
 }
 

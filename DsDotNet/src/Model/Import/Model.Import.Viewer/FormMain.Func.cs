@@ -1,24 +1,13 @@
 using Engine.Common;
 using Engine.Common.FS;
-using Engine.Core;
-using Engine.Cpu;
 using Model.Import.Office;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using System.Xml;
-using static Engine.CodeGenCPU.CpuLoader;
-using static Engine.CodeGenCPU.ExportModule;
 using static Engine.Common.FS.MessageEvent;
-using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
-using static Engine.Core.RuntimeGeneratorModule;
-using static Engine.Cpu.RunTime;
-using static Model.Import.Office.ImportPPTModule;
 using static Model.Import.Office.ImportViewModule;
 using Color = System.Drawing.Color;
 
@@ -27,109 +16,6 @@ namespace Dual.Model.Import
 
     public partial class FormMain : Form
     {
-
-        //복수 Active system ppt 불러오기
-        internal void ImportPowerPoint(List<string> paths)
-        {
-            try
-            {
-                _PPTResults = ImportPPT.GetLoadingAllSystem(paths);
-                _DicViews = new Dictionary<DsSystem, IEnumerable<ViewModule.ViewNode>>();
-                var storages = new Dictionary<string, Interface.IStorage>();
-                foreach (var view in _PPTResults)
-                {
-                    _DicViews.Add(view.System, view.Views.ToList());
-                    if (!view.IsActive) continue;
-                    var s = view.System;
-                    var systemView = new SystemView()
-                    {
-                        Display = s.Name,
-                        System = s,
-                        ViewNodes = view.Views.ToList()
-                    };
-                    comboBox_System.Items.Add(systemView);
-                }
-
-                if (comboBox_System.Items.Count > 0)
-                    comboBox_System.SelectedIndex = 0;
-
-                paths.ForEach(f =>
-                    WriteDebugMsg(DateTime.Now, MSGLevel.MsgWarn, $"{f} 불러오기 성공!!"));
-
-                ProcessEvent.DoWork(0);
-            }
-            catch (Exception ex)
-            {
-                WriteDebugMsg(DateTime.Now, MSGLevel.MsgError, ex.Message);
-            }
-            finally { Busy = false; }
-        }
-
-        internal void ImportExcel(string path)
-        {
-            try
-            {
-                if (UtilFile.BusyCheck()) return;
-                Busy = true;
-                MSGInfo($"{_PathXLS} 불러오는 중!!");
-                Runtime.Target = RuntimeTargetType.XGI;
-
-                ImportIOTable.ApplyExcel(path, GetSystems());
-
-                this.Do(() =>
-                {
-                    DisplayTextModel(Color.FromArgb(0, 150, 0), SelectedSystem.ToDsText());
-                    richTextBox_ds.ScrollToCaret();
-                    button_copy.Visible = true;
-
-                    MSGInfo($"{_PathXLS} 적용완료!!");
-                    MSGWarn($"파워포인트와 엑셀을 동시에 가져오면 IO 매칭된 설정값을 가져올수 있습니다.!!");
-                });
-
-                _DicCpu = new Dictionary<DsSystem, DsCPU>();
-                var storages = new Dictionary<string, Interface.IStorage>();
-                foreach (var view in _PPTResults)
-                {
-                    if (!view.IsActive) continue;
-                    var rungs = Cpu.LoadStatements(view.System, storages);
-                    rungs.ForEach(s =>
-                    {
-                        _DicCpu.Add(s.ToSystem(), new DsCPU(s.CommentedStatements(), s.ToSystem()));
-                    });
-                }
-
-
-
-                //var xmlPath = Path.ChangeExtension(_PathPPTs[0], null);
-                //this.Do(() => {
-                //    ExportModuleExt.ExportXMLforXGI(SelectedSystem, $@"{xmlPath}");
-                //});
-
-                EventExternal.CPUSubscribe();
-                _DicCpu.ForEach(f =>
-                {
-                    f.Value.Run();
-                    f.Value.ScanOnce();
-                });
-
-                var xmlTargetPath   = Path.ChangeExtension(path, null);
-                var xmlTemplateFile = Path.ChangeExtension(_PathPPTs[0], "xml");
-                this.Do(() => {
-                    ExportModuleExt.ExportXMLforXGI(SelectedSystem, $@"{xmlTargetPath}", xmlTemplateFile);
-                });
-            }
-
-            catch (Exception ex)
-            {
-                WriteDebugMsg(DateTime.Now, MSGLevel.MsgError, ex.Message);
-            }
-            finally
-            {
-                Busy = false;
-            }
-
-        }
-
         internal void DisplayTextExpr(string dsExpr, Color color)
         {
             richTextBox_ds.AppendText("\n\n\n");
@@ -188,39 +74,6 @@ namespace Dual.Model.Import
             ProcessEvent.DoWork(0);
         }
 
-
-        internal void ExportExcel()
-        {
-            if (UtilFile.BusyCheck()) return;
-            Busy = true;
-            ProcessEvent.DoWork(10);
-
-            button_copy.Visible = false;
-            button_CreateExcel.Enabled = false;
-            _PathXLS = UtilFile.GetNewPath(_PathPPTs);
-            WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{_PathXLS} 생성시작!!");
-
-            Directory.CreateDirectory(Path.GetDirectoryName(_PathXLS));
-
-            //List<DsSystem> systems = new List<DsSystem>();
-            //foreach (SystemView systemView in comboBox_System.Items)
-            //    systems.Add(systemView.System);
-
-            ExportIOTable.ToFiie(GetSystems(), _PathXLS);
-
-            WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{_PathXLS} 생성완료!!");
-            this.Do(() =>
-            {
-                button_CreateExcel.Enabled = true;
-                button_OpenFolder.Visible = true;
-            });
-            Process.Start($"{_PathXLS}");
-            FileWatcher.CreateFileWatcher();
-            Busy = false;
-            ProcessEvent.DoWork(0);
-        }
-
-
         internal void WriteDebugMsg(DateTime time, MSGLevel level, string msg, bool bScrollToCaret = false)
         {
             this.Do(() =>
@@ -260,7 +113,23 @@ namespace Dual.Model.Import
         internal void ReloadPPT()
         {
             if(_PathPPTs.Where(w=> !File.Exists(w)).IsEmpty())
-                InitModel(_PathPPTs);
+                ImportPPTs(_PathPPTs);
+        }
+        internal void ResultBtnAbleUI(bool bAble)
+        {
+            this.Do(() =>
+            {
+                if (bAble)
+                {
+                    button_CreateExcel.Enabled = true;
+                    button_OpenFolder.Visible = true;
+                }
+                else
+                {
+                    button_copy.Visible = false;
+                    button_CreateExcel.Enabled = false;
+                }
+            });
         }
         internal void TestDebug(bool bLoadExcel)
         {
@@ -282,13 +151,10 @@ namespace Dual.Model.Import
             {
                 _PathPPTs.Clear();
                 _PathPPTs.Add(path);
-                InitModel(_PathPPTs);
                 if (bLoadExcel)
-                {
-                    var xlsPath = Path.ChangeExtension(path, "xlsx");
-                    _PathXLS = xlsPath;
-                    ImportExcel(xlsPath);
-                }
+                    ImportPPTsXls(_PathPPTs, Path.ChangeExtension(path, "xlsx"));
+                else
+                    ImportPPTs(_PathPPTs);
             }
         }
 

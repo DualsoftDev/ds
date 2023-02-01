@@ -1,4 +1,3 @@
-using Engine.CodeGenCPU;
 using Engine.Common;
 using System;
 using System.Collections.Generic;
@@ -20,25 +19,15 @@ using static Engine.Core.Interface;
 using static Engine.Cpu.CoreExtensionsModule;
 using static Engine.Cpu.RunTime;
 using static Model.Import.Office.ViewModule;
-using static Engine.CodeGenCPU.CpuLoader;
-using System.Data;
 using static Engine.Core.ExpressionModule;
 using Engine.Core;
-using static Engine.CodeGenCPU.ConvertSystem;
-using log4net.Appender;
-using DocumentFormat.OpenXml.Wordprocessing;
-using Model.Import.Office;
 using Color = System.Drawing.Color;
-using System.Security.Cryptography;
-using System.Net.Security;
-using static Engine.Core.ExpressionForwardDeclModule;
-using Microsoft.Msagl.Routing.ConstrainedDelaunayTriangulation;
 using static Engine.CodeGenCPU.SystemManagerModule;
-using System.Configuration;
 using static Engine.CodeGenCPU.ConvertCoreExt;
 using static Engine.Common.FS.CollectionAlgorithm;
 using static Model.Import.Office.ImportPPTModule;
 using static Engine.Core.RuntimeGeneratorModule;
+using Engine.Common.FS;
 
 namespace Dual.Model.Import
 {
@@ -55,8 +44,7 @@ namespace Dual.Model.Import
         public Dictionary<Vertex, ViewNode> _DicVertex;
         public Dictionary<int, CommentedStatement> _DicStatement;
         public List<string> _PathPPTs = new List<string>();
-        public string _PathXLS;
-        public bool Busy = false;
+        public string _ResultDirectory = "";
         private CancellationTokenSource _cts = new CancellationTokenSource();
 
 
@@ -75,7 +63,6 @@ namespace Dual.Model.Import
 
             splitContainer1.Panel1Collapsed = true;
             splitContainer2.Panel2Collapsed = true;
-            button_copy.Visible = false;
 
             richTextBox_Debug.AppendText($"{DateTime.Now} : *.pptx 를 드랍하면 시작됩니다");
 
@@ -140,24 +127,15 @@ namespace Dual.Model.Import
             }
             //ppt xls 동시 로딩시
             if (_PathPPTs.Count > 0 && xlsx != "")
-            {
-                InitModel(_PathPPTs);
-                _PathXLS = xlsx;
-                ImportExcel(xlsx);
-            }
+                ImportPPTsXls(_PathPPTs, xlsx);
             else
             {
                 //ppt 만 로딩시
                 if (_PathPPTs.Count > 0 && xlsx == "")
-                    InitModel(_PathPPTs);
+                    ImportPPTs(_PathPPTs);
                 //xls 만 로딩시
                 if (_PathPPTs.Count == 0 && xlsx != "")
-                {
-                    if (_PathXLS == xlsx)
-                        ImportExcel(xlsx);
-                    else
-                        MSGError($"모델로 부터 자동생성된 {_PathXLS} 파일을 로드 해야 합니다.");
-                }
+                    ImportExcel(xlsx);
             }
         }
 
@@ -166,13 +144,21 @@ namespace Dual.Model.Import
             progressBar1.Do(() => progressBar1.Value = percent);
         }
 
-        private void InitModel(List<string> paths)
+        private void ImportPPTsXls(List<string> pptPaths, string xlsPath)
+        {
+            ImportPPTs(pptPaths);
+            ImportExcel(xlsPath);
+            var plcPath = Path.ChangeExtension(UtilFile.GetNewPathXls(pptPaths), "xml");
+            Directory.CreateDirectory(Path.GetDirectoryName(plcPath));
+            ExportPLC($"{Path.GetDirectoryName(plcPath)}\\DSLogic{DateTime.Now.ToString("(HH-mm-ss)")}.xml");
+        }
+
+        private void ImportPPTs(List<string> paths)
         {
 
             try
             {
                 if (UtilFile.BusyCheck()) return;
-                Busy = true;
 
                 progressBar1.Maximum = 100;
                 progressBar1.Step = 1;
@@ -206,10 +192,11 @@ namespace Dual.Model.Import
                 pictureBox_xls.Visible = true;
                 button_TestORG.Visible = true;
                 button_copy.Visible = false;
+                button_CreatePLC.Visible = false;
             }
             catch
             {
-                Busy = false;
+                ProcessEvent.DoWork(0);
             }
 
         }
@@ -235,7 +222,7 @@ namespace Dual.Model.Import
         }
         private void button_OpenFolder_Click(object sender, EventArgs e)
         {
-            Process.Start(Path.GetDirectoryName(_PathXLS));
+            Process.Start(_ResultDirectory);
         }
 
         private void button_ClearLog_Click(object sender, EventArgs e)
@@ -489,6 +476,14 @@ namespace Dual.Model.Import
             richTextBox_ds.ScrollToCaret();
         }
 
+        private void comboBox_Package_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Runtime.Package = comboBox_Package.SelectedItem as RuntimePackage;
+        }
 
+        private void button_CreatePLC_Click(object sender, EventArgs e)
+        {
+            ExportPLC($"{_ResultDirectory}\\DSLogic{DateTime.Now.ToString("(HH-mm-ss)")}.xml");
+        }
     }
 }

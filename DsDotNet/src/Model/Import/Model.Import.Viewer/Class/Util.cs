@@ -12,12 +12,12 @@ namespace Dual.Model.Import
 {
     public static class UtilFile
     {
-        public static string GetNewPath(List<string> pptPaths)
+        public static string GetNewPathXls(List<string> pptPaths)
         {
-            var newPath = Path.Combine(Path.GetDirectoryName(pptPaths.First()) 
-                        , string.Join("_", pptPaths.Select(s => Path.GetFileNameWithoutExtension(s))));   
+            var newPath = Path.Combine(Path.GetDirectoryName(pptPaths.First())
+                        , string.Join("_", pptPaths.Select(s => Path.GetFileNameWithoutExtension(s))));
 
-            var excelName = Path.GetFileNameWithoutExtension(newPath) + $"_{DateTime.Now.ToString("yy_MM_dd(HH-mm-ss)")}.xlsx";
+            var excelName = Path.GetFileNameWithoutExtension(newPath) + $"_{DateTime.Now.ToString("yyMMdd(HH-mm-ss)")}.xlsx";
             var excelDirectory = Path.Combine(Path.GetDirectoryName(newPath), Path.GetFileNameWithoutExtension(excelName));
             Directory.CreateDirectory(excelDirectory);
 
@@ -44,7 +44,7 @@ namespace Dual.Model.Import
 
         public static bool BusyCheck()
         {
-            if (FormMain.TheMain.Busy)
+            if (ProcessEvent.CurrProcess != 0)
             {
                 MessageEvent.MSGWarn("변환 작업중입니다.");
                 return true;

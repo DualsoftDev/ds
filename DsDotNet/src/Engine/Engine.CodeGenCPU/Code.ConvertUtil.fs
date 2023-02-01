@@ -38,13 +38,6 @@ module CodeConvertUtil =
                 | _ -> failwithlog $"Error"
             |_ -> failwithlog $"Error"
 
-
-        //let origins, resetChains = OriginHelper.GetOriginsWithDeviceDefs real.Graph
-        //origins
-        //    .Where(fun w-> w.Value = initialType)
-        //    .Select(fun s-> s.Key)
-
-
     let getOriginDeviceDefs(real:Real, initialType:InitialType) =
         let origins, _resetChains = OriginHelper.GetOriginsWithDeviceDefs real.Graph
         [ for w in origins do
@@ -147,7 +140,7 @@ module CodeConvertUtil =
                 xs.Select(fun f->
                 match f with
                 | :? Real   as r  -> r.V.EP
-                | :? RealExF as rf -> rf.Real.V.EP  //test ahn
+                | :? RealExF as rf -> rf.Real.V.EP
                 | :? RealExS as rs -> rs.V.ET
                 | :? Call   as c  -> if usingRoot then  c.V.ET else  c.V.CR
                 | :? Alias  as a  -> if usingRoot then  a.V.ET else  a.V.CR

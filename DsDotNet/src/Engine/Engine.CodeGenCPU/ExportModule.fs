@@ -41,7 +41,7 @@ module ExportModule =
         let result = Cpu.LoadStatements(system, globalStorage)
         let xml = generateXmlXGI system.Name globalStorage localStorage result tempLSISxml
         let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
-        File.WriteAllText($@"{path}.xml", crlfXml)
+        File.WriteAllText(path, crlfXml)
 
 
     let exportTextforDS() = ()

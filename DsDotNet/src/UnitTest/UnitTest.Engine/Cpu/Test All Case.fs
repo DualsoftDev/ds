@@ -16,7 +16,7 @@ type TestAllCase() =
     inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
-    let myTemplate testName = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../../UnitTest.PLC.Xgi/XgiXmls/{testName}")
+    let myTemplate testName = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../../UnitTest.PLC.Xgi/XgiXmls/{testName}.xml")
     let testAddressSetting (sys:DsSystem) =
         for j in sys.Jobs do
             for dev in j.DeviceDefs do
@@ -35,7 +35,7 @@ type TestAllCase() =
 
 
     [<Test>]
-    member __.``XXXXXXXXXXXXXX Test All Case`` () =
+    member __.``Test All Case`` () =
         let f = get_current_function_name()
         let result = exportXMLforXGI(t.Sys, myTemplate f, None)
         //추후 정답과 비교 필요
@@ -43,7 +43,7 @@ type TestAllCase() =
 
 
     [<Test>]
-    member __.``XX ppt Model Cpu test``    () =
+    member __.``PPT Model Cpu test``    () =
         let f = get_current_function_name()
         let sampleDirectory = Path.Combine($"{__SOURCE_DIRECTORY__}", "../ImportOffice/sample/");
         let pptPath = sampleDirectory + "s.pptx"

@@ -9,7 +9,11 @@ module ProcessEvent =
 
     type ProParam = |PRO of Time:DateTime * pro:int
 
+    let mutable currProcess:int = 0
     let ProcessSubject = new Subject<ProParam>()
+    let CurrProcess = currProcess
 
-    let DoWork  (pro:int) = ProcessSubject.OnNext(ProParam.PRO (DateTime.Now, pro))
+    let DoWork  (pro:int) =
+        currProcess <- pro
+        ProcessSubject.OnNext(ProParam.PRO (DateTime.Now, pro))
 

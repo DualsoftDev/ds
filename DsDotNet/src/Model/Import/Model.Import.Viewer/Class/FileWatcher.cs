@@ -9,10 +9,11 @@ namespace Dual.Model.Import
         //| NotifyFilters.DirectoryName                //| NotifyFilters.FileName
         //| NotifyFilters.LastAccess                //| NotifyFilters.LastWrite
         //| NotifyFilters.Security                //| NotifyFilters.Size
-
-        public static void CreateFileWatcher()
+        static private string watchPath = "";
+        public static void CreateFileWatcher(string path)
         {
-            var watcher = new FileSystemWatcher(Path.GetDirectoryName(FormMain.TheMain._PathXLS));
+            watchPath = path;
+            var watcher = new FileSystemWatcher(Path.GetDirectoryName(path));
             watcher.NotifyFilter = NotifyFilters.LastWrite;
             watcher.Changed += watcher_Changed;
             watcher.EnableRaisingEvents = true;
@@ -25,10 +26,11 @@ namespace Dual.Model.Import
             //D:\DS_22_08_28(16-19-34)\C2129000 <- 파일 변경시 파일명 날라감
             if (e.ChangeType == WatcherChangeTypes.Changed
                 && Path.GetExtension(e.FullPath) != ".xlsx"
-                && Path.GetFileNameWithoutExtension(e.FullPath) != Path.GetFileNameWithoutExtension(FormMain.TheMain._PathXLS))
+                && Path.GetExtension(e.FullPath) != ".xml"
+                && Path.GetFileNameWithoutExtension(e.FullPath) != Path.GetFileNameWithoutExtension(watchPath))
             {
                 ((FileSystemWatcher)sender).EnableRaisingEvents = false;
-                FormMain.TheMain.ImportExcel(FormMain.TheMain._PathXLS);
+                FormMain.TheMain.ImportExcel(watchPath);
                 ((FileSystemWatcher)sender).EnableRaisingEvents = true;
             }
         }

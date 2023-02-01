@@ -9,7 +9,7 @@ open System.IO
 
 [<AutoOpen>]
 module ExportModule =
-    let generateXmlXGI projName globalStorages localStorages (pous:PouGen seq) tempLSISxml: string =
+    let generateXmlXGI projName globalStorages localStorages (pous:PouGen seq) existingLSISprj: string =
         let getXgiPOUParams (pouGen:PouGen) =
             let pouParams:XgiPOUParams = {
                 /// POU name.  "DsLogic"
@@ -28,18 +28,18 @@ module ExportModule =
             defaultXgiProjectParams with
                 ProjectName = projName
                 GlobalStorages = globalStorages
-                ExistingLSISprj = tempLSISxml
+                ExistingLSISprj = existingLSISprj
                 POUs = pous.Select(getXgiPOUParams) |> Seq.toList
         }
 
         projParams.GenerateXmlString()
 
-    let exportXMLforXGI(system:DsSystem, path:string, tempLSISxml) =
+    let exportXMLforXGI(system:DsSystem, path:string, existingLSISprj) =
         Runtime.Target <- XGI
         let globalStorage = Storages()
         let localStorage = Storages()
         let result = Cpu.LoadStatements(system, globalStorage)
-        let xml = generateXmlXGI system.Name globalStorage localStorage result tempLSISxml
+        let xml = generateXmlXGI system.Name globalStorage localStorage result existingLSISprj
         let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
         File.WriteAllText($@"{path}.xml", crlfXml)
 

@@ -41,7 +41,7 @@ module MemoryAllocator =
         let mutable ofByteRange:IntRange option = None
         let mutable byteCursor = startByte
 
-        let getAddress (reqMemType:string) =
+        let rec getAddress (reqMemType:string) : string =
             match reqMemType with
             | "X" ->
                 let bitIndex =
@@ -62,10 +62,13 @@ module MemoryAllocator =
                         ofBit <- Some (bit + 1)
                         byteCursor <- byteCursor + 1
                         bit
-                if bitIndex / 8 > endByte then
+                let byteIndex = bitIndex / 8
+                if byteIndex > endByte then
                     failwith "ERROR: Limit exceeded."
-
-                $"%%{typ}{reqMemType}{bitIndex}"
+                if reservedBytes |> List.contains byteIndex then
+                    getAddress reqMemType
+                else
+                    $"%%{typ}{reqMemType}{bitIndex}"
 
 
             | ("B" | "W" | "D" | "L") ->
@@ -94,7 +97,10 @@ module MemoryAllocator =
                 if byteIndex + byteSize > endByte then
                     failwith "ERROR: Limit exceeded."
 
-                $"%%{typ}{reqMemType}{byteIndex/byteSize}"
+                if reservedBytes |> List.contains byteIndex then
+                    getAddress reqMemType
+                else
+                    $"%%{typ}{reqMemType}{byteIndex/byteSize}"
             | _ ->
                 failwith "ERROR"
         {

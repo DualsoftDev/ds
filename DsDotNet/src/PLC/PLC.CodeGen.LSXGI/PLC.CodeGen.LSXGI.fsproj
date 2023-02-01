@@ -39,8 +39,8 @@
 		<Compile Include="Export\ToXGI.Tag.fs" />
 		<Compile Include="Export\ToXGI.File.fs" />
 		<Compile Include="Export\ToXGI.Symbols.fs" />
-		<Compile Include="Export\ToXGI.Export.fs" />
 		<Compile Include="Export\ToXGI.XmlProjectAnalyzer.fs" />
+		<Compile Include="Export\ToXGI.Export.fs" />
 		<None Include="Scripts\Script1.fsx" />
 		<Compile Include="EntryPoint.fs" />
 	</ItemGroup>

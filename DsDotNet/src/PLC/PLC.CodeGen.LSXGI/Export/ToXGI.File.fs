@@ -121,7 +121,7 @@ module internal XgiFile =
             xnGlobalVar.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
             let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
 
-            neoGlobals.SelectNodes("//Symbols/Symbol").ToEnumerables()
+            neoGlobals.SelectNodes(".//Symbols/Symbol").ToEnumerables()
             |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)
 
         xdoc.ToText()

@@ -1,6 +1,6 @@
 namespace Engine.Common.FS
 
-// https://github.dev/Acadian-Ambulance/Acadian.FSharp
+// https://github.com/Acadian-Ambulance/Acadian.FSharp
 [<AutoOpen>]
 module ResultBuilderModule =
     open System

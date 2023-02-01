@@ -12,7 +12,7 @@ open PLC.CodeGen.Common
 module XgiXmlProjectAnalyzerModule =
     // symbolContainerXmlNode: e.g "//Configurations/Configuration/GlobalVariables/GlobalVariable"
     let internal collectSymbolInfos (symbolContainerXmlNode:XmlNode) : SymbolInfo list =
-        let symbols = symbolContainerXmlNode.SelectNodes("//Symbols/Symbol")
+        let symbols = symbolContainerXmlNode.SelectNodes(".//Symbols/Symbol")
         [
             for sym in symbols do
                 // [| "Name"; "Kind"; "Type"; "Address"; "Comment"; "Device"; "State" |]
@@ -29,7 +29,7 @@ module XgiXmlProjectAnalyzerModule =
         [
             for addr in addresses do
                 match addr with
-                | RegexPattern @"%M([XBWDL])(\d+)$" [m; Int32Pattern index] ->
+                | RegexPattern @"^%M([XBWDL])(\d+)$" [m; Int32Pattern index] ->
                     match m with
                     | "X" -> index / 8
                     | ("B" | "W" | "D" | "L") ->
@@ -56,3 +56,16 @@ module XgiXmlProjectAnalyzerModule =
         //let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
 
         noop()
+
+    let collectGlobalSymbols existingLSISprj =
+        XmlNode.ofDocumentAndXPath existingLSISprj "//Configurations/Configuration/GlobalVariables/GlobalVariable"
+        |> collectSymbolInfos
+
+    let collectGlobalSymbolNames existingLSISprj = collectGlobalSymbols existingLSISprj |> map name
+
+    let collectUsedMermoryIndicesInGlobalSymbols existingLSISprj =
+        let globalsWithAddress = collectGlobalSymbols existingLSISprj |> filter (fun symbolInfo -> symbolInfo.Address.NonNullAny())
+        let globalsWithMAreaAddress = globalsWithAddress |> filter (fun symbolInfo -> symbolInfo.Address.StartsWith("%M"))
+        let usedMAddresses = globalsWithMAreaAddress |> map (fun symbolInfo -> symbolInfo.Address)
+        let usedMIndices = usedMAddresses |> collectByteIndices
+        usedMIndices

@@ -26,8 +26,8 @@ type XgiExistingXmlProjectAnalTest() =
 
         usedMAddresses |> SeqEq [ "%MX0"; "%MX1"; "%MX8"; "%MX33"; "%MB2"; "%MB17"; "%ML1" ]
 
-        let usedMIndices = usedMAddresses |> collectByteIndices
-        usedMIndices |> SeqEq [ 0; 1; 2; 4; 8; 9; 10; 11; 12; 13; 14; 15; 17; ]
+        let usedMemoryIndices = usedMAddresses |> collectByteIndices
+        usedMemoryIndices |> SeqEq [ 0; 1; 2; 4; 8; 9; 10; 11; 12; 13; 14; 15; 17; ]
 
         let countExistingGlobal = xnGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
         let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"

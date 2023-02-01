@@ -58,6 +58,7 @@ module CpuTestUtil =
         member x.Reals  =  realTypeAll.Select(getVM)
         member x.Calls  =  callTypeAll.Select(getVM)
         member x.ALL    =  vertexAll.Select(getVM)
+        member x.GenerationIO() =  sys.GenerationIO()
 
     let doCheck (commentedStatement:CommentedStatement) =
         let st = commentedStatement.Statement

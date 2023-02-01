@@ -13,6 +13,8 @@ type Spec12_ButtonLampStatement() =
     inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
+    do
+            t.GenerationIO()
     [<Test>]
     member __.``B1 Button Output`` () =
         t.Sys.B1_ButtonOutput() |> doChecks

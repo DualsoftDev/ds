@@ -262,7 +262,7 @@ namespace Dual.Model.Import
             if(_PathPPTs.Where(w=> !File.Exists(w)).IsEmpty())
                 InitModel(_PathPPTs);
         }
-        internal void TestDebug()
+        internal void TestDebug(bool bLoadExcel)
         {
             //F7
             //T1_System
@@ -283,6 +283,12 @@ namespace Dual.Model.Import
                 _PathPPTs.Clear();
                 _PathPPTs.Add(path);
                 InitModel(_PathPPTs);
+                if (bLoadExcel)
+                {
+                    var xlsPath = Path.ChangeExtension(path, "xlsx");
+                    _PathXLS = xlsPath;
+                    ImportExcel(xlsPath);
+                }
             }
         }
 

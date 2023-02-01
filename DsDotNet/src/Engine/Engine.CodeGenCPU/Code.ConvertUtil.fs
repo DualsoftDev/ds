@@ -30,10 +30,11 @@ module CodeConvertUtil =
     let getPureReal(v:VertexManager)  : Real =
             match v.Vertex with
             | :? Real   as r  -> r
-            | :? RealExF as rf -> rf.Real   //test ahn
+            | :? RealExF as rf -> rf.Real
             | :? Alias  as a  ->
                 match a.TargetWrapper.GetTarget() with
                 | :? Real as real -> real
+                | :? RealExF as rf -> rf.Real
                 | _ -> failwithlog $"Error"
             |_ -> failwithlog $"Error"
 
@@ -89,7 +90,8 @@ module CodeConvertUtil =
 
         let needCheckSet:Tag<bool> list list =
             let apiNameToInTagMap =
-                needChecks.Map(fun (KeyValue(taskDevice, _v)) -> taskDevice.ApiName, taskDevice.InTag)
+                needChecks.Where(fun (KeyValue(taskDevice, _v)) -> taskDevice.ApiItem.RXs.any())
+                          .Map(fun (KeyValue(taskDevice, _v)) -> taskDevice.ApiName, taskDevice.InTag)
                 |> Tuple.toDictionary
             [
                 if apiNameToInTagMap.Any() then
@@ -118,7 +120,7 @@ module CodeConvertUtil =
             //      --|/|--| |--|/|--    --|/|--| |--|/|--
             //      --|/|--|/|--| |--    --|/|--|/|--| |--
 
-        if needChecks.Any()
+        if needChecks.Any() && sets.Any()
         then sets.ToAnd()
         else real._on.Expr
 

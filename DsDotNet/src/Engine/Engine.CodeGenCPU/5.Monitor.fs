@@ -40,18 +40,23 @@ type VertexManager with
         let call = v.Vertex :?> Call
         let In_Rxs =
             [ for j in call.CallTargetJob.DeviceDefs do
-                j.InTag:?>Tag<bool>, j.ApiItem.RXs.Select(getVM)]
+                if j.ApiItem.RXs.Any()
+                then yield j.InTag:?>Tag<bool>, j.ApiItem.RXs.Select(getVM) ]
 
-        let onEventErr =
-            [ for (input, rxs) in In_Rxs do
-                input.Expr <&&> !!rxs.Select(fun f -> f.G).ToAndElseOn(v.System) ]
+        let onErr =
+            let on =
+                [ for (input, rxs) in In_Rxs do
+                    input.Expr <&&> !!rxs.Select(fun f -> f.G).ToAndElseOn(v.System) ]
+            if on.Any() then on.ToOr() else v.System._off.Expr
 
-        let offEventErr =
-            [ for (input, rxs) in In_Rxs do
-                input.Expr <&&> rxs.Select(fun f -> f.H).ToOrElseOff(v.System)]
+        let offErr =
+            let off =
+                [ for (input, rxs) in In_Rxs do
+                    input.Expr <&&> rxs.Select(fun f -> f.H).ToOrElseOff(v.System)]
+            if off.Any() then off.ToOr() else v.System._off.Expr
 
-        let set = (onEventErr.ToOr() <||> offEventErr.ToOr())
-        let rst = v.Flow.clear.Expr <||> v.System._clear.Expr
+        let set = (onErr <||> offErr)
+        let rst = v.Flow.clear.Expr
 
         (set, rst) ==| (v.E2, "M4" )
 

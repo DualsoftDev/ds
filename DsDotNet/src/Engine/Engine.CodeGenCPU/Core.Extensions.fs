@@ -72,11 +72,11 @@ module ConvertCoreExt =
         member private x.GenerationTaskDevIO() =
             let taskDevices = x.Jobs |> Seq.collect(fun j -> j.DeviceDefs)
             for b in taskDevices do
-                if b.ApiItem.TXs.any()
+                if b.ApiItem.RXs.any()
                 then
                     match createBridgeTag(x.Storages, b.ApiName, b.InAddress, In ,BridgeType.Device, x) with
                     |Some t ->  b.InTag   <- t  |None -> ()
-                if b.ApiItem.RXs.any()
+                if b.ApiItem.TXs.any()
                 then
                     match createBridgeTag(x.Storages, b.ApiName, b.OutAddress, Out ,BridgeType.Device, x) with
                     |Some t ->  b.OutTag  <- t  |None -> ()
@@ -118,17 +118,20 @@ module ConvertCoreExt =
                   .Select(sm.GetSysBitTag)
 
     let private getButtonExpr(flow:Flow, btns:ButtonDef seq) : Expression<bool> seq =
-            btns.Where(fun b -> b.SettingFlows.Contains(flow))
-                .Where(fun b -> b.InAddress <> "")
-                .Select(fun b ->
-                    let inTag = (b.InTag :?> Tag<bool>).Expr
-                    if hasNot(b.Funcs)then !!inTag else inTag    )
+        btns.Where(fun b -> b.SettingFlows.Contains(flow))
+            .Where(fun b -> b.InAddress <> "")
+            .Select(fun b ->
+                let inTag = (b.InTag :?> Tag<bool>).Expr
+                if hasNot(b.Funcs)then !!inTag else inTag    )
 
     let private getBtnExpr(f:Flow, btns:ButtonDef seq) : Expression<bool>  =
-        let exprs = getButtonExpr(f, btns)
-        if exprs.any()
-        then exprs.ToOr()
-        else f.System._off.Expr
+
+        match Runtime.Package with
+        | StandardPC | StandardPLC -> let exprs = getButtonExpr(f, btns)
+                                      if exprs.any() then exprs.ToOr() else f.System._off.Expr
+
+        | LightPC    | LightPLC    -> f.System._off.Expr
+
 
     let private getSelectBtnExpr(f:Flow, btns:ButtonDef seq) : Expression<bool> seq =
         getButtonExpr(f, btns)
@@ -226,8 +229,8 @@ module ConvertCoreExt =
                                  then c.CallTargetJob.Funcs.First(fun f->f.Name = TextRingCounter).GetRingCount()
                                  else failwith $"{c.Name} not use counter"
 
-        member c.INs           = c.CallTargetJob.DeviceDefs.Select(fun j -> j.ActionIN)
-        member c.OUTs          = c.CallTargetJob.DeviceDefs.Select(fun j -> j.ActionOut)
+        member c.INs           = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionIN)
+        member c.OUTs          = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun j -> j.ActionOut)
 
 
         member c.MutualResets =

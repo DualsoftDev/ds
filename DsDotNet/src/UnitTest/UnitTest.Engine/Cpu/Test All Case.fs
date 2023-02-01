@@ -20,8 +20,8 @@ type TestAllCase() =
     let testAddressSetting (sys:DsSystem) =
         for j in sys.Jobs do
             for dev in j.DeviceDefs do
-            dev.InAddress <- "%MX777"
-            dev.OutAddress <- "%MX888"
+            if dev.ApiItem.RXs.any() then  dev.InAddress <- "%MX777"
+            if dev.ApiItem.TXs.any() then  dev.OutAddress <- "%MX888"
 
         for b in sys.Buttons do
             b.InAddress <- "%MX777"
@@ -32,6 +32,7 @@ type TestAllCase() =
 
         for c in sys.Conditions do
             c.InAddress <- "%MX777"
+
 
     [<Test>]
     member __.``XXXXXXXXXXXXXX Test All Case`` () =
@@ -49,6 +50,7 @@ type TestAllCase() =
         let xlsPath = sampleDirectory + "s.xlsx"
         let model = ImportPPT.GetModel [ pptPath ]
         model.Systems.ForEach(testAddressSetting)
+        t.GenerationIO()
 
         let result = exportXMLforXGI(model.Systems.First(), myTemplate f, None)
         //추후 정답과 비교 필요

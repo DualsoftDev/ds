@@ -13,4 +13,6 @@ type Spec14_ExtensionStatement() =
     inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
+    do
+            t.GenerationIO()
     [<Test>] member __.``E1`` () = Eq 1 1

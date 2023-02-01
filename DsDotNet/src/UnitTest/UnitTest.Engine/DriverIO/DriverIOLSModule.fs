@@ -18,6 +18,8 @@ module DriverIOLSModuleTest =
     type DriverIOLSModule() =
         inherit EngineTestBaseClass()
         let t = CpuTestSample()
+        do
+            t.GenerationIO()
 
         [<Test>]
         member __.``Read Tag Flows`` () =

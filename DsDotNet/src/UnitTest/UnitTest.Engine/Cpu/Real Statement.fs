@@ -13,6 +13,8 @@ open Engine.CodeGenCPU
 type Spec06_RealStatement() =
     inherit EngineTestBaseClass()
     let t = CpuTestSample()
+    do
+        t.GenerationIO()
 
     [<Test>]
     member __.``R1 Real Initial Start`` () =

@@ -14,6 +14,8 @@ open System.Linq
 type Spec05_MonitorStatement() =
     inherit EngineTestBaseClass()
     let t = CpuTestSample()
+    do
+        t.GenerationIO()
 
     [<Test>]
     member __.``M1 Origin Monitor`` () =

@@ -33,7 +33,8 @@ type VertexMCoin with
         let rsts = coin._off.Expr
         [
             for jd in call.CallTargetJob.DeviceDefs do
-                yield (jd.ApiItem.PS.Expr, rsts) --| (jd.ActionOut, "C2" )
+                if jd.ApiItem.TXs.any()
+                then yield (jd.ApiItem.PS.Expr, rsts) --| (jd.ActionOut, "C2" )
         ]
 
     member coin.C3_CallPlanReceive(): CommentedStatement list =

@@ -19,6 +19,8 @@ module DriverIOLSCommonTest =
     type DriverIOLSCommon() =
         inherit EngineTestBaseClass()
         let t = CpuTestSample()
+        do
+            t.GenerationIO()
 
         let conn = new LsConnection(LsConnectionParameters("192.168.0.101"))
 

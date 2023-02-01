@@ -14,6 +14,8 @@ type Spec10_CounterStatement() =
     inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
+    do
+            t.GenerationIO()
     [<Test>]
     member __.``C1 Finish Ring Counter`` () =
         t.Sys.C1_FinishRingCounter() |> doChecks

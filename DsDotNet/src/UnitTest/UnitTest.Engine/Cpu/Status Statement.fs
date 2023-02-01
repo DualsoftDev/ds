@@ -13,6 +13,8 @@ type Spec03_StatusStatement() =
     inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
+    do
+        t.GenerationIO()
 
     [<Test>]
     member __.``S1 RealRGFH`` () =

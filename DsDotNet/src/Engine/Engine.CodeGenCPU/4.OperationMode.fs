@@ -34,11 +34,11 @@ type Flow with
         (set, rst) --| (f.eop, "O4")
 
     member f.O5_StopOperationState(): CommentedStatement =
-        let set = f.stop.Expr <||> f.BtnStopExpr
+        let set = (f.stop.Expr <||> f.BtnStopExpr <||> f.sop.Expr) <&&> f.BtnClearExpr
         let setErrs = f.GetVerticesWithInReal().Select(getVM).ERRs().ToOrElseOff(f.System)
-        let rst = f.BtnClearExpr //test ahn lightPLC 모드 준비중
+        let rst = f._off.Expr //test ahn lightPLC 모드 준비중
 
-        (set <||> setErrs, rst) ==| (f.sop, "O5")
+        (set <||> setErrs, rst) --| (f.sop, "O5")
 
     member f.O6_DriveOperationMode (): CommentedStatement =
         let set = f.drive.Expr <||> f.BtnDriveExpr

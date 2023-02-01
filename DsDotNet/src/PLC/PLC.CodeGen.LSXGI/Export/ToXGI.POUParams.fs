@@ -24,7 +24,7 @@ module POUParametersModule =
         GlobalStorages : Storages
         ExistingLSISprj: string option
         POUs           : XgiPOUParams list
-        MemoryAllocator: PLCMemoryAllocator
+        MemoryAllocatorSpec: PLCMemoryAllocatorSpec
 
         EnableXmlComment : bool
         AppendExpressionTextToRungComment : bool
@@ -36,7 +36,8 @@ module POUParametersModule =
         GlobalStorages = Storages()
         ExistingLSISprj = None
         POUs = []
-        MemoryAllocator = createMemoryAllocator "M" (0, 640*1024) []    // 640K M memory 영역
+        MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) [])    // 640K M memory 영역
+        //MemoryAllocatorSpec = RangeSpec (0, 640*1024)   // 640K M memory 영역
         EnableXmlComment = false
         AppendExpressionTextToRungComment = true
     }

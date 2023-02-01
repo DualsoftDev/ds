@@ -24,7 +24,28 @@ module XgiPrologModule =
         Kind:int
         State:int
         AddressIEC : string //XGK 일경우 IEC 주소로 변환해서 가지고 있음
-    }
+    } with
+        member x.Validate() =
+            (* Symbol name validataion : 규칙을 찾을 수가 없네요~~
+                - OK: n, m, p, nn0, p1, mb, mw, rx, ix0, ib0
+                - Fail: n0, m0, mb0, mx0, mw0, r0, rx0, N0, M0,
+             *)
+            result {
+                match x.Name.ToUpper() with
+                | RegexPattern "^([NMR][XBWDL]?)(\d+)$" [reserved; _num] ->
+                    return! Error $"'{x.Name}' is not valid symbol name.  (Can't use direct variable name)"
+                | RegexPattern "([\s]+)" [ws] ->
+                    return! Error $"'{x.Name}' contains white space char"
+                | _ ->
+                    ()
+
+                match x.Address with
+                | IsItNullOrEmpty _ -> ()
+                | RegexPattern "%([IQMR])([XBWDL])(\d+)*"  _ -> ()      // IQMLKFWUR
+                | _ -> return! Error $"Invalid address: '{x.Address}'"
+
+                return! Ok()
+            }
 
     let defaultSymbolInfo = {
         Name       = ""

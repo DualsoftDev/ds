@@ -14,21 +14,36 @@ module MemoryAllocator =
         LWordAllocator: PLCMemoryAllocatorType
     }
 
+    type IntRange = int * int
+
+    type PLCMemoryAllocatorSpec =
+        | RangeSpec of IntRange
+        | AllocatorFunctions of PLCMemoryAllocator
+
+    let getByteSizeFromPrefix prefix =
+        match prefix with
+        | "B" -> 1
+        | "W" -> 2
+        | "D" -> 4
+        | "L" -> 8
+        | _ -> failwith "ERROR"
+
+
     /// 주어진 memory type 에서 주소를 할당하 하는 함수 제공
     /// typ: {"M", "I", "Q"} 등이 가능하나 주로 "M"
     /// availableByteRange: 할당 가능한 [시작, 끝] byte 의 range (reservedBytes 에 포함된 부분은 제외됨)
     /// reservedBytes: 회피 영역 - todo
-    let createMemoryAllocator (typ:string) (availableByteRange:int*int) (reservedBytes:int list) : PLCMemoryAllocator =
+    let createMemoryAllocator (typ:string) (availableByteRange:IntRange) (reservedBytes:int list) : PLCMemoryAllocator =
         let startByte, endByte = availableByteRange
         /// optional fragmented bit position
         let mutable ofBit:int option = None  // Some (startByte * 8)
         /// optional framented byte [start, end) position
-        let mutable ofByteRange:(int*int) option = None
+        let mutable ofByteRange:IntRange option = None
         let mutable byteCursor = startByte
 
-        let getAddress (reqMemType:char) =
+        let rec getAddress (reqMemType:string) : string =
             match reqMemType with
-            | 'X' ->
+            | "X" ->
                 let bitIndex =
                     match ofBit, ofByteRange with
                     | Some bit, _ when bit % 8 = 7 ->   // 마지막 fragment bit 을 쓰는 상황
@@ -47,20 +62,17 @@ module MemoryAllocator =
                         ofBit <- Some (bit + 1)
                         byteCursor <- byteCursor + 1
                         bit
-                if bitIndex / 8 > endByte then
+                let byteIndex = bitIndex / 8
+                if byteIndex > endByte then
                     failwith "ERROR: Limit exceeded."
+                if reservedBytes |> List.contains byteIndex then
+                    getAddress reqMemType
+                else
+                    $"%%{typ}{reqMemType}{bitIndex}"
 
-                $"%%{typ}{reqMemType}{bitIndex}"
 
-
-            | ('B' | 'W' | 'D' | 'L') ->
-                let byteSize =
-                    match reqMemType with
-                    | 'B' -> 1
-                    | 'W' -> 2
-                    | 'D' -> 4
-                    | 'L' -> 8
-                    | _ -> failwith "ERROR"
+            | ("B" | "W" | "D" | "L") ->
+                let byteSize = getByteSizeFromPrefix reqMemType
                 let byteIndex =
                     match ofByteRange with
                     | Some (fs, fe) when (fe - fs) > byteSize ->     // fragmented bytes 로 해결하고도 남는 상황
@@ -85,15 +97,18 @@ module MemoryAllocator =
                 if byteIndex + byteSize > endByte then
                     failwith "ERROR: Limit exceeded."
 
-                $"%%{typ}{reqMemType}{byteIndex/byteSize}"
+                if reservedBytes |> List.contains byteIndex then
+                    getAddress reqMemType
+                else
+                    $"%%{typ}{reqMemType}{byteIndex/byteSize}"
             | _ ->
                 failwith "ERROR"
         {
-            BitAllocator  = fun () -> getAddress 'X'
-            ByteAllocator = fun () -> getAddress 'B'
-            WordAllocator = fun () -> getAddress 'W'
-            DWordAllocator= fun () -> getAddress 'D'
-            LWordAllocator= fun () -> getAddress 'L'
+            BitAllocator  = fun () -> getAddress "X"
+            ByteAllocator = fun () -> getAddress "B"
+            WordAllocator = fun () -> getAddress "W"
+            DWordAllocator= fun () -> getAddress "D"
+            LWordAllocator= fun () -> getAddress "L"
         }
 
 
@@ -117,11 +132,11 @@ module MemoryAllocator =
 
         member x.GetMemorySizePrefix() =
             if x = typedefof<bool> then
-                'X'
+                "X"
             else
                 match x.GetByteSize() with
-                | 1 -> 'B'
-                | 2 -> 'W'
-                | 4 -> 'D'
-                | 8 -> 'L'
+                | 1 -> "B"
+                | 2 -> "W"
+                | 4 -> "D"
+                | 8 -> "L"
                 | _ -> failwith "ERROR"

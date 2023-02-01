@@ -50,8 +50,8 @@ module internal XgiSymbolsModule =
 
             let device, memSize =
                 match addr with
-                | RegexPattern @"%([IQM])([XBWL]).*$" [iqm; mem] -> iqm, mem
-                | RegexPattern @"%([IQM]).*$" [iqm; ] -> iqm, "X"   // `%I1` 이런거 허용하나?
+                | RegexPattern @"^%([IQM])([XBWL]).*$" [iqm; mem] -> iqm, mem
+                | RegexPattern @"^%([IQM]).*$" [iqm; ] -> iqm, "X"   // `%I1` 이런거 허용하나?
                 | _ -> failwith $"Invalid tag address {addr} for {name}"
 
             let plcType =
@@ -72,6 +72,10 @@ module internal XgiSymbolsModule =
                 let plcType = systemTypeToXgiTypeName t.DataType
                 let comment = SecurityElement.Escape t.Comment
                 if t.Address = "" then
+                    let allocatorFunctions =
+                        match prjParams.MemoryAllocatorSpec with
+                        | RangeSpec _ -> failwith "ERROR.  Should have already been converted to allocator functions."
+                        | AllocatorFunctions functions -> functions
 
                     let {
                         BitAllocator   = x
@@ -79,14 +83,14 @@ module internal XgiSymbolsModule =
                         WordAllocator  = w
                         DWordAllocator = d
                         LWordAllocator = l
-                    } = prjParams.MemoryAllocator
+                    } = allocatorFunctions
                     let allocator =
                         match t.BoxedValue.GetType().GetMemorySizePrefix() with
-                        | 'X' -> x
-                        | 'B' -> b
-                        | 'W' -> w
-                        | 'D' -> d
-                        | 'L' -> l
+                        | "X" -> x
+                        | "B" -> b
+                        | "W" -> w
+                        | "D" -> d
+                        | "L" -> l
                         | _ -> failwith "ERROR"
 
                     if t.Name.StartsWith("_") then
@@ -143,5 +147,17 @@ module internal XgiSymbolsModule =
     let storagesToGlobalXml (prjParams:XgiProjectParams) (globalStorages:IStorage seq) =
         //storagesToXml false globalStorages
         let symbolInfos = storagesToSymbolInfos prjParams (int Variable.Kind.VAR_GLOBAL) globalStorages
-        XGITag.generateLocalSymbolsXml symbolInfos
+
+        (* check any error *)
+        do
+            let optError =
+                symbolInfos
+                |> map (fun si -> si.Validate())
+                |> filter Result.isError
+                |> Seq.tryHead
+            match optError with
+            | Some (Error err) -> failwith err
+            | _ -> ()
+
+        XGITag.generateGlobalSymbolsXml symbolInfos
 

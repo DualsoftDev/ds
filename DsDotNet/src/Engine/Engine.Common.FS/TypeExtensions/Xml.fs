@@ -4,6 +4,7 @@ open System.Linq
 open System.Xml
 open System.Xml.Linq
 open Engine.Common.FS
+open System
 
 [<AutoOpen>]
 module XmlNodeExtension =
@@ -103,10 +104,6 @@ module XmlNodeExtension =
         let fromString(str:string) = XDocument.Parse(str).Root
 
     [<RequireQualifiedAccess>]
-    module XmlNode =
-        let fromString(str:string) = (XElement.fromString str).ToXmlNode()
-
-    [<RequireQualifiedAccess>]
     module XmlDocument =
         /// Load from XML string
         let fromString(xml:string) =
@@ -118,4 +115,12 @@ module XmlNodeExtension =
             let xdoc = System.Xml.XmlDocument()
             xdoc.Load xmlFile
             xdoc
+
+    [<RequireQualifiedAccess>]
+    module XmlNode =
+        [<Obsolete("Rename me: ofString()")>]
+        let fromString(str:string) = (XElement.fromString str).ToXmlNode()
+        let ofDocumentAndXPath (file:string) (xpath:string) : XmlNode =
+            let xdoc = XmlDocument.loadFromFile file
+            xdoc.SelectSingleNode xpath
 

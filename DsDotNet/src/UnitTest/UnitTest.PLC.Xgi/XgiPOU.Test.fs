@@ -8,6 +8,7 @@ open Engine.Parser.FS
 open Engine.Core
 open Engine.Common.FS
 open PLC.CodeGen.LSXGI
+open PLC.CodeGen.Common
 
 
 type XgiPOUTest() =
@@ -120,3 +121,88 @@ type XgiPOUTest() =
         let projectParams = { createProjectParams(f) with GlobalStorages = globalStorages; ExistingLSISprj = Some myTemplate }
         let xml = projectParams.GenerateXmlString()
         saveTestResult f xml
+
+
+    [<Test>]
+    member __.``Validation= Existing project global variable memory test`` () =
+        (* existing project 에 이미 global 변수들이 선언되어 있고,
+         * 새로 선언되는 자동 할당 변수들이 미리 선언된 메모리 영역을 피해서 생성되는지 검사한다.
+         *)
+
+        let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/multiProgramSample.xml"
+        let usedMemoryIndices = collectUsedMermoryIndicesInGlobalSymbols myTemplate
+        usedMemoryIndices |> SeqEq [ 0; 1; 2; 4; 8; 9; 10; 11; 12; 13; 14; 15; 17; ]
+
+
+        let globalStorages = Storages()
+        let code = """
+            bool gg0 = createTag("%IX0.0.1", false);
+            bool gg1 = false;
+            bool xm0 = false;
+            bool xm1 = false;
+            bool xm2 = false;
+            bool xm3 = false;
+
+            int8 bm0 = 0y;
+            int8 bm1 = 0y;
+            int8 bm2 = 0y;
+            int8 bm3 = 0y;
+
+            int nm0 = 0;
+            int nm1 = 0;
+            int nm2 = 0;
+            int nm3 = 0;
+"""
+        let f = get_current_function_name()
+        parseCode globalStorages code |> ignore
+        for n in ["xm0"; "xm1"; "xm2"; "xm3"; "bm0"; "bm1"; "bm2"; "bm3"; "nm0"; "nm1"; "nm2"; "nm3"] do
+            globalStorages[n].Address <- ""       // force to allocate Memory
+
+        let projectParams = {
+            createProjectParams(f) with
+                GlobalStorages = globalStorages
+                ExistingLSISprj = Some myTemplate
+                MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedMemoryIndices)    // 640K M memory 영역
+        }
+        let xml = projectParams.GenerateXmlString()
+
+        globalStorages["gg1"].Address === null
+        globalStorages["xm0"].Address === "%MX24"
+
+        saveTestResult f xml
+
+
+    [<Test>]
+    member __.``Validation= Existing project global variable name collide test`` () =
+        (* existing project 에 이미 global 변수들이 선언되어 있고,
+         * 새로 선언되는 자동 할당 변수 이름이 미리 선언된 gloal 변수와 동일할 때 fail 해야 한다..
+         *)
+
+        let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/multiProgramSample.xml"
+        let usedMemoryIndices = collectUsedMermoryIndicesInGlobalSymbols myTemplate
+        let existingGlobals = collectGlobalSymbols myTemplate |> map name
+
+        existingGlobals |> List.contains "MMX0" === true
+
+        let globalStorages = Storages()
+        let code = """
+            bool MMX0 = false;
+"""
+        let f = get_current_function_name()
+        parseCode globalStorages code |> ignore
+        globalStorages["MMX0"].Address <- ""       // force to allocate Memory
+
+        let projectParams = {
+            createProjectParams(f) with
+                GlobalStorages = globalStorages
+                ExistingLSISprj = Some myTemplate
+                MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedMemoryIndices)    // 640K M memory 영역
+        }
+        ( fun () ->
+            let xml = projectParams.GenerateXmlString()
+            saveTestResult f xml
+        ) |> ShouldFailWithSubstringT "ERROR: Duplicated global variable name : MMX0"
+
+    [<Test>]
+    member __.``Validation= Existing project POU name collide test`` () =
+        ()

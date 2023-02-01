@@ -254,6 +254,14 @@ module XgiExportModule =
             do
                 let xnGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
                 let countExistingGlobal = xnGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
+
+                (* existing global name 과 신규 global name 충돌 check *)
+                do
+                    let existingGlobalNames = xnGlobalVar |> collectSymbolInfos |> map name
+                    match existingGlobalNames.Intersect(globalStorages.Keys) |> Seq.tryHead with
+                    | Some duplicated -> failwith $"ERROR: Duplicated global variable name : {duplicated}"
+                    | _ -> ()
+
                 // symbolsGlobal = "<GlobalVariable Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol>
                 let globalStoragesXmlNode = storagesToGlobalXml x globalStorages.Values |> XmlNode.fromString
                 let numNewGlobals = globalStoragesXmlNode.Attributes.["Count"].Value |> System.Int32.Parse
@@ -261,7 +269,7 @@ module XgiExportModule =
                 xnGlobalVar.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
                 let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
 
-                globalStoragesXmlNode.SelectNodes("//Symbols/Symbol").ToEnumerables()
+                globalStoragesXmlNode.SelectNodes(".//Symbols/Symbol").ToEnumerables()
                 |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)
 
 

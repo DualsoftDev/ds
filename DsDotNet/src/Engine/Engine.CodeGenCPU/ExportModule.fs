@@ -36,8 +36,8 @@ module ExportModule =
 
     let exportXMLforXGI(system:DsSystem, path:string, tempLSISxml) =
         Runtime.Target <- XGI
-        let globalStorage = Storages()
-        let localStorage = Storages()
+        let globalStorage = new Storages()
+        let localStorage =  new Storages()
         let result = Cpu.LoadStatements(system, globalStorage)
         let xml = generateXmlXGI system.Name globalStorage localStorage result tempLSISxml
         let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")

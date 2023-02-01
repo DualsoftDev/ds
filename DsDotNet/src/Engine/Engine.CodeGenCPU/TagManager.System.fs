@@ -44,15 +44,15 @@ module SystemManagerModule =
        // let on     = let tmpOn = dsSysBit "_on" in tmpOn.Value <- true; tmpOn
         let on     = dsSysBit "_on"     false
         let off    = dsSysBit "_off"    false
-        let auto   = dsSysBit "_auto"   true
-        let manual = dsSysBit "_manual" true
-        let drive  = dsSysBit "_drive"  true
-        let stop   = dsSysBit "_stop"   true
-        let emg    = dsSysBit "_emg"    true
-        let test   = dsSysBit "_test"   true
-        let ready  = dsSysBit "_ready"  true
-        let clear  = dsSysBit "_clear"  true
-        let home   = dsSysBit "_home"   true
+        let auto   = dsSysBit "sysauto"   true
+        let manual = dsSysBit "sysmanual" true
+        let drive  = dsSysBit "sysdrive"  true
+        let stop   = dsSysBit "sysstop"   true
+        let emg    = dsSysBit "sysemg"    true
+        let test   = dsSysBit "systest"   true
+        let ready  = dsSysBit "sysready"  true
+        let clear  = dsSysBit "sysclear"  true
+        let home   = dsSysBit "syshome"   true
         let dtimeyy  = dsSysUint8 "_RTC_TIME[0]"  false   //ls xgi 현재시각[년도]
         let dtimemm  = dsSysUint8 "_RTC_TIME[1]"  false   //ls xgi 현재시각[월]
         let dtimedd  = dsSysUint8 "_RTC_TIME[2]"  false   //ls xgi 현재시각[일]
@@ -63,7 +63,7 @@ module SystemManagerModule =
         //let dtimeyk  = dsSysUint8 "_ms"                 //ls xgi 현재시각[년대]
 
         let tout     =
-            let tout = dsSysUint16  "_tout" true
+            let tout = dsSysUint16  "systout" true
             tout.Value <- 10000us
             tout
 

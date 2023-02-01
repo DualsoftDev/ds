@@ -34,7 +34,7 @@ type Flow with
         (set, rst) --| (f.eop, "O4")
 
     member f.O5_StopOperationState(): CommentedStatement =
-        let set = (f.stop.Expr <||> f.BtnStopExpr <||> f.sop.Expr) <&&> f.BtnClearExpr
+        let set = (f.stop.Expr <||> f.BtnStopExpr <||> f.sop.Expr) <&&> !!f.BtnClearExpr
         let setErrs = f.GetVerticesWithInReal().Select(getVM).ERRs().ToOrElseOff(f.System)
         let rst = f._off.Expr //test ahn lightPLC 모드 준비중
 

@@ -35,16 +35,13 @@ module TagManagerUtil =
 
     let getPlcTagAbleName (name:string) (storages:Storages) =
         let vName = name |> getValidName
-        if name.StartsWith("_") then
-            vName
-        else
-            let rec generateUntilValid() =
-                let candidate = UniqueName.generate vName
-                if storages.ContainsKey candidate then
-                    generateUntilValid()
-                else
-                    candidate
-            generateUntilValid()
+
+        let rec generateUntilValid(inputName:string) =
+            if storages.ContainsKey inputName then
+                generateUntilValid(UniqueName.generate inputName)
+            else
+                inputName
+        generateUntilValid(vName)
 
 
     /// fillAutoAddress : PLC 에 내릴 때, 자동으로 주소를 할당할 지의 여부

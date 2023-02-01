@@ -189,6 +189,7 @@ module CpuLoader =
     type Cpu =
         [<Extension>]
         static member LoadStatements (system:DsSystem, storages:Storages) =
+            UniqueName.resetAll()
             applyTagManager (system, storages)
             let result =
                 //자신(Acitve)이 Loading 한 system을 재귀적으로 한번에 가져와 CPU 변환

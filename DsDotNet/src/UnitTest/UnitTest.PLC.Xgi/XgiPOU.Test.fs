@@ -204,5 +204,20 @@ type XgiPOUTest() =
         ) |> ShouldFailWithSubstringT "ERROR: Duplicated global variable name : MMX0"
 
     [<Test>]
-    member __.``Validation= Existing project POU name collide test`` () =
-        ()
+    member __.``Validation= Existing project duplicated POU name test`` () =
+        let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/multiProgramSample.xml"
+        let collidingPou = {
+            pou11.Value with
+                TaskName = "스캔 프로그램"
+                POUName = "DsLogic"
+        }
+        let projectParams = {
+            createProjectParams("POU 이름 충돌 test 중..") with
+                GlobalStorages = globalStorages
+                ExistingLSISprj = Some myTemplate
+                POUs = [collidingPou]
+        }
+        ( fun () ->
+            let _xml = projectParams.GenerateXmlString()
+            ()
+        ) |> ShouldFailWithSubstringT "ERROR: Duplicated POU name"

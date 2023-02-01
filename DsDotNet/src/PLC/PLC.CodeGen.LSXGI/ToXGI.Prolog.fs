@@ -9,6 +9,8 @@ module XgiPrologModule =
     /// XML 특수 문자 escape.  '&' 등
     let escapeXml xml = SecurityElement.Escape xml
 
+    //let validateVariableName name =
+
     /// Xml Symbol tag 가 가지는 속성
     type SymbolInfo = {
         Name:string
@@ -41,7 +43,8 @@ module XgiPrologModule =
 
                 match x.Address with
                 | IsItNullOrEmpty _ -> ()
-                | RegexPattern "%([IQMR])([XBWDL])(\d+)*"  _ -> ()      // IQMLKFWUR
+                (* matches %I3, %I3.2, %I3.2.1, %IX3, %IX3.2, %IX3.2.1, ... *)
+                | RegexPattern "^%([IQMR][XBWDL]?)(\d+)([.\d+]{0, 2})*$"  _ -> ()      // IQMLKFWUR
                 | _ -> return! Error $"Invalid address: '{x.Address}'"
 
                 return! Ok()

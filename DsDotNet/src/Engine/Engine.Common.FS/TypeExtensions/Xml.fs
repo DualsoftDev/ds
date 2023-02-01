@@ -3,7 +3,6 @@ namespace Engine.Common.FS
 open System.Linq
 open System.Xml
 open System.Xml.Linq
-open Engine.Common.FS
 open System
 
 [<AutoOpen>]

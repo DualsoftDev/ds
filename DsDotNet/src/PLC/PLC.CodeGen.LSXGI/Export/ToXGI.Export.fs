@@ -225,6 +225,20 @@ module XgiExportModule =
 
             EnableXmlComment <- enableXmlComment
             let xdoc = x.GetTemplateXmlDoc()
+            (* validation : POU 중복 이름 체크 *)
+            do
+                let programs = xdoc.SelectNodes("//POU/Programs/Program")
+                let existingTaskPous = [
+                    for p in programs do
+                        let taskName = p.GetAttribute("Task");
+                        let pouName = p.FirstChild.OuterXml
+                        taskName, pouName
+                    ]
+                let newTaskPous = [ for p in pous -> p.TaskName, p.POUName ]
+                let duplicated = existingTaskPous @ newTaskPous |> List.groupBy id |> List.filter(fun (_, v) -> v.Length > 1)
+                if duplicated.Length > 0 then
+                    failwithf "ERROR: Duplicated POU name : %A" duplicated
+
             (* project name/comment 변경 *)
             do
                 let xnProj = xdoc.SelectSingleNode("//Project")

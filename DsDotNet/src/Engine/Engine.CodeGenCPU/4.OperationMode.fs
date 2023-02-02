@@ -4,6 +4,7 @@ module Engine.CodeGenCPU.ConvertOperationMode
 open System.Linq
 open Engine.Core
 open Engine.CodeGenCPU
+open Engine.Common.FS
 
 
 type Flow with
@@ -12,49 +13,49 @@ type Flow with
         let set = f.ready.Expr <||> f.BtnReadyExpr
         let rst = !!f.scr.Expr <||> f.eop.Expr <||> f.sop.Expr
 
-        (set, rst) ==| (f.rop, "O1")
+        (set, rst) ==| (f.rop, getFuncName())
 
     member f.O2_AutoOperationState(): CommentedStatement =
         let set = f.ModeAutoHwExpr// <&&> f.ModeAutoSwHMIExpr  //test ahn lightPLC 모드 준비중
         let rst = !!f.rop.Expr <||> f.ModeManualHwExpr
 
-        (set, rst) ==| (f.aop, "O2")
+        (set, rst) ==| (f.aop, getFuncName())
 
     member f.O3_ManualOperationState (): CommentedStatement =
         let set = f.ModeManualHwExpr// <||> f.ModeManualSwHMIExpr
         let rst = !!f.rop.Expr <||> f.ModeAutoHwExpr
 
-        (set, rst) ==| (f.mop, "O3")
+        (set, rst) ==| (f.mop, getFuncName())
 
 
     member f.O4_EmergencyOperationState(): CommentedStatement =
         let set = f.emg.Expr <||> f.BtnEmgExpr
         let rst = f._off.Expr
 
-        (set, rst) --| (f.eop, "O4")
+        (set, rst) --| (f.eop, getFuncName())
 
     member f.O5_StopOperationState(): CommentedStatement =
         let set = (f.stop.Expr <||> f.BtnStopExpr <||> f.sop.Expr) <&&> !!f.BtnClearExpr
         let setErrs = f.GetVerticesWithInReal().Select(getVM).ERRs().ToOrElseOff(f.System)
         let rst = f._off.Expr //test ahn lightPLC 모드 준비중
 
-        (set <||> setErrs, rst) --| (f.sop, "O5")
+        (set <||> setErrs, rst) --| (f.sop, getFuncName())
 
     member f.O6_DriveOperationMode (): CommentedStatement =
         let set = f.drive.Expr <||> f.BtnDriveExpr
         let rst = !!f.aop.Expr <||> !!f.scd.Expr  <||> f.top.Expr
 
-        (set, rst) ==| (f.dop, "O6")
+        (set, rst) ==| (f.dop, getFuncName())
 
     member f.O7_TestOperationMode (): CommentedStatement =
         let set = f.test.Expr <||> f.BtnTestExpr
         let rst = !!f.aop.Expr <||> !!f.scd.Expr  <||> f.dop.Expr
 
-        (set, rst) ==| (f.top, "O7")
+        (set, rst) ==| (f.top, getFuncName())
 
     member f.O8_IdleOperationMode(): CommentedStatement =
         let set = !!(f.dop.Expr <||> f.top.Expr)
         let rst = f._off.Expr
 
-        (set, rst) --| (f.iop, "O8")
+        (set, rst) --| (f.iop, getFuncName())
 

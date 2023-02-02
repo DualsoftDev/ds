@@ -17,15 +17,15 @@ type VertexManager with
         [
             if srcsWeek.Any() then
                 let sets = srcsWeek.GetCausalTags(v.System, true)
-                yield (sets, rsts) ==| (v.ST, "L1" )
+                yield (sets, rsts) ==| (v.ST, getFuncName() )
 
             if srcsStrong.Any() then
                 let sets = srcsStrong.GetCausalTags(v.System, true)
-                yield (sets, rsts) --| (v.ST, "L1" )
+                yield (sets, rsts) --| (v.ST, getFuncName() )
         ]
         //test ahn
     member v.L2_LinkReset(): CommentedStatement  =
-        (v.PA.Expr, v._off.Expr) --| (v.PA, "L2" )
+        (v.PA.Expr, v._off.Expr) --| (v.PA, getFuncName() )
         //test ahn
     member v.L3_LinkStartReset(): CommentedStatement  =
-        (v.PA.Expr, v._off.Expr) --| (v.PA, "L3" )
+        (v.PA.Expr, v._off.Expr) --| (v.PA, getFuncName())

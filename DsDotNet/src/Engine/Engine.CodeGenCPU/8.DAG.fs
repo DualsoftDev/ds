@@ -17,7 +17,7 @@ type VertexManager with
         [
             for coin in coins do
                 let coin = coin :?> VertexMCoin
-                yield (sets, coin.CR.Expr) ==| (coin.ST, "D1" )
+                yield (sets, coin.CR.Expr) ==| (coin.ST, getFuncName())
         ]
 
     member v.D2_DAGTailStart(): CommentedStatement list =
@@ -30,11 +30,11 @@ type VertexManager with
 
                 if srcsWeek.Any() then
                     let sets = srcsWeek.GetCausalTags(v.System, false)
-                    yield (sets, coin.CR.Expr) ==| (coin.ST, "D2" )
+                    yield (sets, coin.CR.Expr) ==| (coin.ST, getFuncName() )
 
                 if srcsStrong.Any() then
                     let sets = srcsStrong.GetCausalTags(v.System, false)
-                    yield (sets, coin.CR.Expr) --| (coin.ST, "D2" )
+                    yield (sets, coin.CR.Expr) --| (coin.ST, getFuncName() )
 
         ]
 
@@ -55,5 +55,5 @@ type VertexManager with
 
                 let sets = ands <&&> child.ST.Expr <&&> child.ET.Expr
                 let rsts = realV.H.Expr
-                yield (sets, rsts) ==| (child.CR, "D3" )
+                yield (sets, rsts) ==| (child.CR, getFuncName() )
         ]

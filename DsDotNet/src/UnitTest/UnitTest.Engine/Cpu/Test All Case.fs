@@ -36,7 +36,7 @@ type TestAllCase() =
 
     [<Test>]
     member __.``Test All Case`` () =
-        let f = get_current_function_name()
+        let f = getFuncName()
         let result = exportXMLforXGI(t.Sys, myTemplate f, None)
         //추후 정답과 비교 필요
         result === result
@@ -44,7 +44,7 @@ type TestAllCase() =
 
     [<Test>]
     member __.``PPT Model Cpu test``    () =
-        let f = get_current_function_name()
+        let f = getFuncName()
         let sampleDirectory = Path.Combine($"{__SOURCE_DIRECTORY__}", "../ImportOffice/sample/");
         let pptPath = sampleDirectory + "s.pptx"
         let xlsPath = sampleDirectory + "s.xlsx"

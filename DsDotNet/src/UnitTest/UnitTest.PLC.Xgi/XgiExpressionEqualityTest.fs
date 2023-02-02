@@ -42,7 +42,7 @@ type XgiExpEqualityTest() =
                 $result := $nn1 + $nn2 * $nn3 > 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
     """
             let statements = parseCode storages code
-            let f = get_current_function_name()
+            let f = getFuncName()
             let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
             saveTestResult f xml
         )
@@ -68,7 +68,7 @@ type XgiExpEqualityTest() =
                 $result := $cond1 && $nn1 + $nn2 * $nn3 > 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
     """
             let statements = parseCode storages code
-            let f = get_current_function_name()
+            let f = getFuncName()
             let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
             saveTestResult f xml
         )
@@ -144,7 +144,7 @@ type XgiExpEqualityTest() =
                 ;
 """
         let statements = parseCode storages code
-        let f = get_current_function_name()
+        let f = getFuncName()
         let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 

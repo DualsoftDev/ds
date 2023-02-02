@@ -82,11 +82,11 @@ type XgiPOUTest() =
     member __.``POU1 test`` () =
         let dummyPrjParams = createProjectParams "dummy"
         let xml = pou11.Value.GenerateXmlString(dummyPrjParams)
-        saveTestResult (get_current_function_name()) xml
+        saveTestResult (getFuncName()) xml
 
     [<Test>]
     member __.``Project test`` () =
-        let f = get_current_function_name()
+        let f = getFuncName()
         let projComment = "This is project comment."
         let xml = { createProjectParams(f) with ProjectComment=projComment}.GenerateXmlString()
         saveTestResult f xml
@@ -99,7 +99,7 @@ type XgiPOUTest() =
             bool gg0 = createTag("%IX0.0.1", false);
             bool gg1 = false;
 """
-        let f = get_current_function_name()
+        let f = getFuncName()
         parseCode globalStorages code |> ignore
         let projectParams = { createProjectParams(f) with GlobalStorages = globalStorages }
         let xml = projectParams.GenerateXmlString()
@@ -116,7 +116,7 @@ type XgiPOUTest() =
             bool gg0 = createTag("%IX0.0.1", false);
             bool gg1 = false;
 """
-        let f = get_current_function_name()
+        let f = getFuncName()
         parseCode globalStorages code |> ignore
         let projectParams = { createProjectParams(f) with GlobalStorages = globalStorages; ExistingLSISprj = Some myTemplate }
         let xml = projectParams.GenerateXmlString()
@@ -153,7 +153,7 @@ type XgiPOUTest() =
             int nm2 = 0;
             int nm3 = 0;
 """
-        let f = get_current_function_name()
+        let f = getFuncName()
         parseCode globalStorages code |> ignore
         for n in ["xm0"; "xm1"; "xm2"; "xm3"; "bm0"; "bm1"; "bm2"; "bm3"; "nm0"; "nm1"; "nm2"; "nm3"] do
             globalStorages[n].Address <- ""       // force to allocate Memory
@@ -188,7 +188,7 @@ type XgiPOUTest() =
         let code = """
             bool MMX0 = false;
 """
-        let f = get_current_function_name()
+        let f = getFuncName()
         parseCode globalStorages code |> ignore
         globalStorages["MMX0"].Address <- ""       // force to allocate Memory
 

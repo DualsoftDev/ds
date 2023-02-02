@@ -58,7 +58,7 @@ type XgiDrawingTest() =
 
 """
         let xml = wrapWithXml rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
-        saveTestResult (get_current_function_name ()) xml
+        saveTestResult (getFuncName ()) xml
 
 
     [<Test>]
@@ -87,7 +87,7 @@ type XgiDrawingTest() =
 
 
         let xml = wrapWithXml rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
-        saveTestResult (get_current_function_name ()) xml
+        saveTestResult (getFuncName ()) xml
 
     [<Test>]
     member __.``ADD function details test``() =
@@ -192,5 +192,5 @@ type XgiDrawingTest() =
 
 
         let xml = wrapWithXml rungsXml symbolsLocalXml emptySymbolsGlobalXml None
-        saveTestResult (get_current_function_name ()) xml
+        saveTestResult (getFuncName ()) xml
 

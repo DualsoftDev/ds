@@ -4,6 +4,7 @@ module Engine.CodeGenCPU.ConvertTimer
 open System.Linq
 open Engine.Core
 open Engine.CodeGenCPU
+open Engine.Common.FS
 
 
 
@@ -18,10 +19,10 @@ type DsSystem with
         [
             for call in calls do
                 let sets = call.V.ST.Expr <&&>  call.INs.ToAndElseOn s
-                yield (sets) --@ (call.V.TON, call.PresetTime, "T1")
+                yield (sets) --@ (call.V.TON, call.PresetTime, getFuncName())
 
             for alias in aliasCalls do
                 let call = alias.V.GetPureCall().Value
                 let sets = alias.V.ST.Expr <&&> alias.TargetWrapper.CallTarget().Value.INs.ToAndElseOn s
-                yield (sets) --@ (alias.V.TON, call.PresetTime,"T1")
+                yield (sets) --@ (alias.V.TON, call.PresetTime, getFuncName())
         ]

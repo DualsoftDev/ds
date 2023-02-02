@@ -18,7 +18,12 @@ type VertexManager with
         let f = v.F <==        (                 (!!) v.RP.Expr  <&&>      v.EP.Expr) //    F      -   x   o
         let h = v.H <==        (                      v.RP.Expr  <&&>      v.EP.Expr) //    H      -   o   o
 
-        [ r; g; f; h ] |> map(withExpressionComment "S1")
+        [
+           withExpressionComment (getFuncName()) r
+           withExpressionComment ""       g
+           withExpressionComment ""       f
+           withExpressionComment ""       h
+        ]
 
     /// vertex 의 Call RGFH status 를 update 하는 rungs/statements 만들기
     member v.S2_CoinRGFH(): CommentedStatement list =                                 //  Status   ST  RT  CR
@@ -30,4 +35,9 @@ type VertexManager with
         let f = v.F <==        (                 (!!) v.RT.Expr  <&&>      v.CR.Expr) //    F      -   x   o
         let h = v.H <==        (                      v.RT.Expr  <&&>      v.CR.Expr) //    H      -   o   o
 
-        [ r; g; f; h ] |> map(withExpressionComment "S2")
+        [
+           withExpressionComment (getFuncName()) r
+           withExpressionComment ""       g
+           withExpressionComment ""       f
+           withExpressionComment ""       h
+        ]

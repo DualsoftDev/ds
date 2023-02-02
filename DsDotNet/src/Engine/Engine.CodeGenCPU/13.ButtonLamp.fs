@@ -3,6 +3,7 @@ module Engine.CodeGenCPU.ConvertButtonLamp
 
 open Engine.Core
 open Engine.CodeGenCPU
+open Engine.Common.FS
 
 type DsSystem with
     member s.B1_ButtonOutput(): CommentedStatement list = [
@@ -11,7 +12,7 @@ type DsSystem with
             then
                 let set = btn.InTag :?> Tag<bool>
                 let out = btn.OutTag :?> Tag<bool>
-                yield (set.Expr, s._off.Expr) --| (out, "B1" )
+                yield (set.Expr, s._off.Expr) --| (out, getFuncName())
     ]
 
     member s.B2_ModeLamp(): CommentedStatement list = [
@@ -31,5 +32,5 @@ type DsSystem with
                     | DuIdleLamp      -> f.iop.Expr
 
                 let out = lamp.OutTag :?> Tag<bool>
-                yield (sets, s._off.Expr) --| (out, "B2" )
+                yield (sets, s._off.Expr) --| (out, getFuncName())
     ]

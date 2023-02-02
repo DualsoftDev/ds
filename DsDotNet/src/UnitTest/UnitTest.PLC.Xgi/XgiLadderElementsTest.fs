@@ -45,7 +45,7 @@ type XgiLadderElementTest() =
         let rungsXml = ""   //generateRungs prologComments commentedStatements
         let symbolsGlobalXml = """<GlobalVariable Version="Ver 1.0" Count="0"/>"""
         let xml = wrapWithXml rungsXml symbolsLocalXml symbolsGlobalXml None
-        saveTestResult (get_current_function_name()) xml
+        saveTestResult (getFuncName()) xml
 
 
 
@@ -68,7 +68,7 @@ type XgiLadderElementTest() =
             string  mystring = "hello";     // not working for string
 """
         let statements = parseCode storages code
-        let f = get_current_function_name()
+        let f = getFuncName()
         let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
@@ -84,6 +84,6 @@ type XgiLadderElementTest() =
         let statements = parseCode storages code
         storages["mybool"].Comment <- "mybool comment"
         storages["myint16"].Comment <- "myint16 comment <> ! +-*/"
-        let f = get_current_function_name()
+        let f = getFuncName()
         let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml

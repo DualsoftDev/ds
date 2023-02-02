@@ -144,7 +144,7 @@ module CodeConvertUtil =
                 | :? RealExS as rs -> rs.V.ET
                 | :? Call   as c  -> if usingRoot then  c.V.ET else  c.V.CR
                 | :? Alias  as a  -> if usingRoot then  a.V.ET else  a.V.CR
-                | _ -> failwithlog $"Error {get_current_function_name()}"
+                | _ -> failwithlog $"Error {getFuncName()}"
                 )
 
             tags.ToAndElseOn(s)

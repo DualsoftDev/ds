@@ -25,7 +25,7 @@ module CoreExtensionModule =
                 | :? DsSystem as d -> d
                 | :? Device as d -> d.ReferenceSystem
                 | :? ExternalSystem as d -> d.ReferenceSystem
-                | _ -> failwithlog $"Error {get_current_function_name()}"
+                | _ -> failwithlog $"Error {getFuncName()}"
             [
                 yield! dsSys.LoadedSystems |> Seq.cast<ISystem>
                 yield! dsSys.LoadedSystems |> Seq.collect(fun f-> f |> getRecursiveLoadeds)

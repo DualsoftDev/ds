@@ -4,6 +4,7 @@ module Engine.CodeGenCPU.ConvertReal
 open System.Linq
 open Engine.Core
 open Engine.CodeGenCPU
+open Engine.Common.FS
 
 type VertexMReal with
 
@@ -11,14 +12,14 @@ type VertexMReal with
         let set = v.G.Expr <&&> v.OG.Expr
         let rst = v.H.Expr
 
-        (set, rst) ==| (v.RR, "R1")
+        (set, rst) ==| (v.RR, getFuncName())
 
     member v.R2_RealJobComplete(): CommentedStatement  =
         let real = v.Vertex :?> Real
         let set  = v.G.Expr <&&> real.CoinRelays.ToAndElseOn v.System
         let rst  = v.H.Expr
 
-        (set, rst) ==| (v.ET, "R2")
+        (set, rst) ==| (v.ET, getFuncName())
 
 
     member v.R3_RealStartPoint(): CommentedStatement  =
@@ -26,7 +27,7 @@ type VertexMReal with
                   (v.H.Expr <&&> !!v.OG.Expr)
         let rst = v._off.Expr
 
-        (set, rst) ==| (v.RO, "R3")
+        (set, rst) ==| (v.RO, getFuncName())
 
 type VertexManager with
     member v.R1_RealInitialStart(): CommentedStatement  = (v :?> VertexMReal).R1_RealInitialStart()

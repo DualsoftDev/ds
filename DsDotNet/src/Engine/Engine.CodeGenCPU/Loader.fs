@@ -27,11 +27,11 @@ module CpuLoader =
                      |  DuAliasTargetCall _         -> vaild.HasFlag(AliasCallInFlow)
                  | DuParentReal _ ->
                      match a.TargetWrapper with
-                     | DuAliasTargetReal _         -> failwithlog $"Error {get_current_function_name()}"
-                     | DuAliasTargetRealExFlow _   -> failwithlog $"Error {get_current_function_name()}"
-                     | DuAliasTargetRealExSystem _ -> failwithlog $"Error {get_current_function_name()}"
+                     | DuAliasTargetReal _         -> failwithlog $"Error {getFuncName()}"
+                     | DuAliasTargetRealExFlow _   -> failwithlog $"Error {getFuncName()}"
+                     | DuAliasTargetRealExSystem _ -> failwithlog $"Error {getFuncName()}"
                      | DuAliasTargetCall _         -> vaild.HasFlag(AliasCallInReal)
-            |_ -> failwithlog $"Error {get_current_function_name()}"
+            |_ -> failwithlog $"Error {getFuncName()}"
 
         isVaildVertex
 
@@ -150,7 +150,7 @@ module CpuLoader =
                     ->  v.TagManager <- VertexMReal(v)
                 | (:? RealExS | :? RealExF | :? Call | :? Alias)
                     -> v.TagManager <-  VertexMCoin(v)
-                | _ -> failwithlog (get_current_function_name()))
+                | _ -> failwithlog (getFuncName()))
 
         let rec tagManagerBuild(sys:DsSystem)  =
             createTagM (sys)
@@ -198,7 +198,7 @@ module CpuLoader =
                     match s  with
                     | :? Device as d ->   DevicePou (d, convertSystem(d.ReferenceSystem))
                     | :? ExternalSystem as e ->  ExternalPou (e, convertSystem(e.ReferenceSystem))
-                    | _ -> failwithlog (get_current_function_name())
+                    | _ -> failwithlog (getFuncName())
                     )
                 //자신(Acitve) system을  CPU 변환
                 |>Seq.append [ActivePou (system, convertSystem(system))]

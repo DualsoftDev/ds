@@ -15,7 +15,6 @@ let private getPortSetBits(v:VertexManager) (rse:SREType) =
     |Start -> (shareds.STs() @ [v.ST;v.SF]).ToOr() <||> planSets//real 자신을 외부 시스템에서 Plan SET Send 경우
     |Reset -> (shareds.RTs() @ [v.RT;v.RF]).ToOr() //real 자신을 외부 시스템에서 Plan RST Send 경우  //test link real reset 구현 대기
     |End   -> (shareds.ETs() @ [v.ET;v.EF]).ToOr()
-
 type VertexManager with
 
     member v.P1_RealStartPort(): CommentedStatement =
@@ -23,18 +22,18 @@ type VertexManager with
         let sets = getPortSetBits v SREType.Start
         let rsts = v.Vertex._off.Expr
 
-        (sets, rsts) --| (v.SP, "P1")
+        (sets, rsts) --| (v.SP, getFuncName())
 
     member v.P2_RealResetPort(): CommentedStatement =
         let v = v :?> VertexMReal
         let sets = getPortSetBits v SREType.Reset
         let rsts = v.Vertex._off.Expr
 
-        (sets, rsts) --| (v.RP, "P2")
+        (sets, rsts) --| (v.RP, getFuncName())
 
     member v.P3_RealEndPort(): CommentedStatement =
         let v = v :?> VertexMReal
         let sets = getPortSetBits v SREType.End
         let rsts = v.Vertex._off.Expr
 
-        (sets, rsts) --| (v.EP, "P3")
+        (sets, rsts) --| (v.EP, getFuncName())

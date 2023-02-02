@@ -242,7 +242,7 @@ module ExpressionModule =
     let commentAndStatement = (|CommentAndStatement|)
     let withNoComment statement = CommentedStatement("", statement)
     let withExpressionComment (append:string) (statement: Statement) =
-        CommentedStatement($"{append}\t{statement.ToText()}", statement)
+        CommentedStatement(append, statement)
 
 
     let pulseDo(expr:IExpression, storage:IStorage, historyFlag:HistoryFlag, isRising:bool) =

@@ -32,7 +32,7 @@ type XgiTimerTest() =
         //storages.Count === 12
         //statements.Length === 2      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
-        let f = get_current_function_name()
+        let f = getFuncName()
         let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
@@ -45,7 +45,7 @@ type XgiTimerTest() =
                 && $x08 && $x09 && $x10 && $x11 && $x12 && $x13 && $x14    );
 """
         let statements = parseCode storages code
-        let f = get_current_function_name()
+        let f = getFuncName()
         let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
@@ -70,7 +70,7 @@ type XgiTimerTest() =
                 $x14    );
 """
         let statements = parseCode storages code
-        let f = get_current_function_name()
+        let f = getFuncName()
         let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
@@ -84,7 +84,7 @@ type XgiTimerTest() =
                 || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14    );
 """
         let statements = parseCode storages code
-        let f = get_current_function_name()
+        let f = getFuncName()
         let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
@@ -106,7 +106,7 @@ type XgiTimerTest() =
                 );
 """
         let statements = parseCode storages code
-        let f = get_current_function_name()
+        let f = getFuncName()
         let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
@@ -131,7 +131,7 @@ type XgiTimerTest() =
                 );
 """
         let statements = parseCode storages code
-        let f = get_current_function_name()
+        let f = getFuncName()
         let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
@@ -155,6 +155,6 @@ type XgiTimerTest() =
                 );
 """
         let statements = parseCode storages code
-        let f = get_current_function_name()
+        let f = getFuncName()
         let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml

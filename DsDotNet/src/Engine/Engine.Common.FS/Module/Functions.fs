@@ -213,8 +213,8 @@ module Functions =
             .Select(fun a -> a.FullName)
             .Any(fun n -> n.StartsWith("Microsoft.VisualStudio.TestPlatform."))
             ;
-
-    let get_current_function_name() =
+    ///get_current_function_name
+    let getFuncName() =
         let stackTrace = new System.Diagnostics.StackTrace()
         let stackFrame = stackTrace.GetFrame(1)
         let methodBase = stackFrame.GetMethod()

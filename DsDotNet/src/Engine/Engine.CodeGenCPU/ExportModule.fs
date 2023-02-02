@@ -29,6 +29,7 @@ module ExportModule =
                 ProjectName = projName
                 GlobalStorages = globalStorages
                 ExistingLSISprj = existingLSISprj
+                AppendExpressionTextToRungComment = false
                 POUs = pous.Select(getXgiPOUParams) |> Seq.toList
         }
 

@@ -4,6 +4,7 @@ module Engine.CodeGenCPU.ConvertMonitor
 open System.Linq
 open Engine.Core
 open Engine.CodeGenCPU
+open Engine.Common.FS
 
 
 type VertexManager with
@@ -17,13 +18,13 @@ type VertexManager with
         let onExpr   = ons.ToAndElseOn v.System
         let rst     = offs.ToOrElseOff v.System
 
-        (onExpr <&&> locks, rst) --| (v.OG, "M1" )
+        (onExpr <&&> locks, rst) --| (v.OG, getFuncName())
 
     member v.M2_PauseMonitor(): CommentedStatement  =
-        let set = v.Flow.rop.Expr <||> v.Flow.rop.Expr
+        let set = v.Flow.sop.Expr
         let rst = v._off.Expr
 
-        (set, rst) --| (v.PA, "M2" )
+        (set, rst) --| (v.PA, getFuncName())
 
     member v.M3_CallErrorTXMonitor(): CommentedStatement list =
         let v= v :?> VertexMCoin
@@ -32,8 +33,8 @@ type VertexManager with
         [
             //test ahn  going 직전시간 기준 타임아웃 시간 받기
             // 일단을 system 10초 타임아웃
-            (v.G.Expr) --@ (v.TOUT, v.System._tout.Value, "M3")
-            (set, rst) ==| (v.E1, "M3")
+            (v.G.Expr) --@ (v.TOUT, v.System._tout.Value, getFuncName())
+            (set, rst) ==| (v.E1, getFuncName())
         ]
 
     member v.M4_CallErrorRXMonitor(): CommentedStatement  =
@@ -58,7 +59,7 @@ type VertexManager with
         let set = (onErr <||> offErr)
         let rst = v.Flow.clear.Expr
 
-        (set, rst) ==| (v.E2, "M4" )
+        (set, rst) ==| (v.E2, getFuncName())
 
 
     member v.M5_RealErrorTXMonitor(): CommentedStatement  =
@@ -66,7 +67,7 @@ type VertexManager with
         let set = real.ErrorTXs.ToOrElseOff v.System
         let rst = v._off.Expr
 
-        (set, rst) ==| (v.E1, "M5" )
+        (set, rst) ==| (v.E1, getFuncName())
 
 
     member v.M6_RealErrorRXMonitor(): CommentedStatement  =
@@ -74,5 +75,5 @@ type VertexManager with
         let set = real.ErrorRXs.ToOrElseOff v.System
         let rst = v._off.Expr
 
-        (set, rst) ==| (v.E2, "M6" )
+        (set, rst) ==| (v.E2, getFuncName())
 

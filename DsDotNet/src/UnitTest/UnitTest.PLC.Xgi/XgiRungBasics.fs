@@ -15,18 +15,18 @@ type XgiRungTest() =
     member __.``Prolog comment test``() =
         let rungsXml = $"""<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="1">DS Logic for XGI</Element></Rung>"""
         let xml = wrapWithXml rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
-        saveTestResult (get_current_function_name ()) xml
+        saveTestResult (getFuncName ()) xml
 
     [<Test>]
     member __.``Generate simplest program test``() =
         let xml = wrapWithXml simplestProgramXml emptySymbolsLocalXml emptySymbolsGlobalXml None
-        saveTestResult (get_current_function_name ()) xml
+        saveTestResult (getFuncName ()) xml
 
 
     [<Test>]
     member __.``Generate simplest with local variables test``() =
         let xml = wrapWithXml simplestProgramXml simpleSymbolsLocalXml emptySymbolsGlobalXml None
-        saveTestResult (get_current_function_name ()) xml
+        saveTestResult (getFuncName ()) xml
 
 
     [<Test>]
@@ -53,7 +53,7 @@ type XgiRungTest() =
 """
 
         let xml = wrapWithXml simplestProgramXml simpleSymbolsLocalXml symbolsGlobalXml None
-        saveTestResult (get_current_function_name ()) xml
+        saveTestResult (getFuncName ()) xml
         ()
 
 
@@ -137,7 +137,7 @@ type XgiRungTest() =
             ] |> String.concat "\r\n"
 
         let xml = wrapWithXml rungs localSymbolsXml emptySymbolsGlobalXml None
-        saveTestResult (get_current_function_name ()) xml
+        saveTestResult (getFuncName ()) xml
 
 
     [<Test>]
@@ -174,7 +174,7 @@ type XgiRungTest() =
             ] |> String.concat "\r\n"
 
         let xml = wrapWithXml rungs localSymbolsXml emptySymbolsGlobalXml None
-        saveTestResult (get_current_function_name ()) xml
+        saveTestResult (getFuncName ()) xml
 
 
     [<Test>]
@@ -211,7 +211,7 @@ type XgiRungTest() =
             ] |> String.concat "\r\n"
 
         let xml = wrapWithXml rungs localSymbolsXml emptySymbolsGlobalXml None
-        saveTestResult (get_current_function_name ()) xml
+        saveTestResult (getFuncName ()) xml
 
 
 
@@ -254,7 +254,7 @@ type XgiRungTest() =
             ] |> String.concat "\r\n"
 
         let xml = wrapWithXml rungs localSymbolsXml emptySymbolsGlobalXml None
-        saveTestResult (get_current_function_name ()) xml
+        saveTestResult (getFuncName ()) xml
 
     [<Test>]
     member x.``Generate ORs variables test``() =
@@ -292,4 +292,4 @@ type XgiRungTest() =
             ] |> String.concat "\r\n"
 
         let xml = wrapWithXml rungs localSymbolsXml emptySymbolsGlobalXml None
-        saveTestResult (get_current_function_name ()) xml
+        saveTestResult (getFuncName ()) xml

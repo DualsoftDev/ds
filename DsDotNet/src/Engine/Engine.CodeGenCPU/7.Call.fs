@@ -24,7 +24,7 @@ type VertexMCoin with
                              .Select(fun f -> f.ApiItem.PS)
                              .ToOrElseOff(coin.System)
 
-                yield (sets, rsts) --| (jd.ApiItem.PS, "C1" )
+                yield (sets, rsts) --| (jd.ApiItem.PS, getFuncName())
         ]
 
 
@@ -34,7 +34,7 @@ type VertexMCoin with
         [
             for jd in call.CallTargetJob.DeviceDefs do
                 if jd.ApiItem.TXs.any()
-                then yield (jd.ApiItem.PS.Expr, rsts) --| (jd.ActionOut, "C2" )
+                then yield (jd.ApiItem.PS.Expr, rsts) --| (jd.ActionOut, getFuncName())
         ]
 
     member coin.C3_CallPlanReceive(): CommentedStatement list =
@@ -43,7 +43,7 @@ type VertexMCoin with
         [
             for jd in call.CallTargetJob.DeviceDefs do
                 let sets = jd.RXs.ToAndElseOn(coin.System)
-                yield (sets, rsts) --| (jd.ApiItem.PE, "C3" )
+                yield (sets, rsts) --| (jd.ApiItem.PE, getFuncName() )
         ]
 
     member coin.C4_CallActionIn(): CommentedStatement list =
@@ -56,7 +56,7 @@ type VertexMCoin with
                     if call.UsingTon
                         then call.V.TON.DN.Expr   //On Delay
                         else call.INs.ToAndElseOn(coin.System)
-                yield (sets, rsts) --| (sharedCall.V.ET, "C4" )
+                yield (sets, rsts) --| (sharedCall.V.ET, getFuncName() )
         ]
 
 

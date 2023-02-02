@@ -14,11 +14,11 @@ type VertexManager with
         [
             if srcsWeek.Any() then
                 let sets = srcsWeek.GetCausalTags(v.System, true)
-                yield (sets, rsts) ==| (v.ST, "F1" )
+                yield (sets, rsts) ==| (v.ST, getFuncName())
 
             if srcsStrong.Any() then
                 let sets = srcsStrong.GetCausalTags(v.System, true)
-                yield (sets, rsts) --| (v.ST, "F1" )
+                yield (sets, rsts) --| (v.ST, getFuncName())
         ]
 
     member v.F2_RootReset() : CommentedStatement list =
@@ -32,8 +32,8 @@ type VertexManager with
             let sets  = srcs.Select(fun (_src, gr) -> gr).ToAnd()
             let rsts  = (!!)real.V.EP.Expr
             //going relay rungs
-            srcs.Select(fun (src, gr) -> (src.G.Expr, real.V.H.Expr) ==| (gr, "F2"))
-            |> Seq.append [(sets, rsts) ==| (v.RT, "F2")] //reset tag
+            srcs.Select(fun (src, gr) -> (src.G.Expr, real.V.H.Expr) ==| (gr, getFuncName()))
+            |> Seq.append [(sets, rsts) ==| (v.RT, getFuncName())] //reset tag
             |> Seq.toList
         else []
 
@@ -56,7 +56,7 @@ type VertexManager with
 
         let sets = ands <&&> v.ET.Expr
         let rsts = !!v.ST.Expr
-        (sets, rsts) ==| (v.CR, "F4")
+        (sets, rsts) ==| (v.CR, getFuncName())
 
     //option Spec 확정 필요
      member v.F0_RootStartRealOptionPulse(): CommentedStatement list =
@@ -66,12 +66,12 @@ type VertexManager with
             if srcsWeek.Any() then
                 let sets = srcsWeek.GetCausalTags(v.System, true)
                         //root 시작조건 이벤트 Pulse 처리
-                yield (sets, rsts) ==| (v.PUL, "F1" )
-                yield (v.PUL.Expr, v.H.Expr) ==| (v.ST, "F1")
+                yield (sets, rsts) ==| (v.PUL, getFuncName() )
+                yield (v.PUL.Expr, v.H.Expr) ==| (v.ST, getFuncName())
 
             if srcsStrong.Any() then
                 let sets = srcsStrong.GetCausalTags(v.System, true)
                         //root 시작조건 이벤트 Pulse 처리
-                yield (sets, rsts) --| (v.PUL, "F1" )
-                yield (v.PUL.Expr, v.H.Expr) --| (v.ST, "F1")
+                yield (sets, rsts) --| (v.PUL, getFuncName())
+                yield (v.PUL.Expr, v.H.Expr) --| (v.ST, getFuncName())
         ]

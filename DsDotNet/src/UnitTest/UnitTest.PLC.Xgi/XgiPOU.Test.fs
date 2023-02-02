@@ -128,7 +128,8 @@ type XgiPOUTest() =
          *)
 
         let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/multiProgramSample.xml"
-        let usedMemoryIndices = collectUsedMermoryIndicesInGlobalSymbols myTemplate
+        let xdoc = XmlDocument.loadFromFile myTemplate
+        let usedMemoryIndices = collectUsedMermoryIndicesInGlobalSymbols xdoc
         usedMemoryIndices |> SeqEq [ 0; 1; 2; 4; 8; 9; 10; 11; 12; 13; 14; 15; 17; ]
 
 
@@ -177,8 +178,9 @@ type XgiPOUTest() =
          *)
 
         let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/multiProgramSample.xml"
-        let usedMemoryIndices = collectUsedMermoryIndicesInGlobalSymbols myTemplate
-        let existingGlobals = collectGlobalSymbols myTemplate |> map name
+        let xdoc = XmlDocument.loadFromFile myTemplate
+        let usedMemoryIndices = collectUsedMermoryIndicesInGlobalSymbols xdoc
+        let existingGlobals = collectGlobalSymbols xdoc |> map name
 
         existingGlobals |> List.contains "MMX0" === true
 
@@ -208,8 +210,9 @@ type XgiPOUTest() =
          *)
 
         let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/multiProgramSample.xml"
-        let usedMemoryIndices = collectUsedMermoryIndicesInGlobalSymbols myTemplate
-        let existingGlobals = collectGlobalSymbols myTemplate |> map name
+        let xdoc = XmlDocument.loadFromFile myTemplate
+        let usedMemoryIndices = collectUsedMermoryIndicesInGlobalSymbols xdoc
+        let existingGlobals = collectGlobalSymbols xdoc |> map name
 
         existingGlobals |> List.contains "MMX1" === true
 

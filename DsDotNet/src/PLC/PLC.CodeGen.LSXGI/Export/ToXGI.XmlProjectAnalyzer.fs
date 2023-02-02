@@ -8,20 +8,14 @@ open PLC.CodeGen.Common
 
 [<AutoOpen>]
 module XgiXmlProjectAnalyzerModule =
-    // symbolContainerXmlNode: e.g "//Configurations/Configuration/GlobalVariables/GlobalVariable"
-    let internal collectSymbolInfos (symbolContainerXmlNode:XmlNode) : SymbolInfo list =
-        let symbols = symbolContainerXmlNode.SelectNodes(".//Symbols/Symbol")
-        [
-            for sym in symbols do
-                (* [| "Name"; "Kind"; "Type"; "Address"; "Comment"; "Device"; "State" |] *)
-                let dic = sym.GetAttributes()
-                { defaultSymbolInfo with
-                    Name          = dic["Name"]
-                    Comment       = dic["Comment"]
-                    Address       = dic.TryFindIt("Address") |> Option.toString
-                    Kind          = dic["Kind"] |> System.Int32.Parse
-                }
-        ]
+    let xmlSymbolNodeToSymbolInfo (xnSymbol:XmlNode) : SymbolInfo =
+        let dic = xnSymbol.GetAttributes()
+        { defaultSymbolInfo with
+            Name          = dic["Name"]
+            Comment       = dic["Comment"]
+            Address       = dic.TryFindIt("Address") |> Option.toString
+            Kind          = dic["Kind"] |> System.Int32.Parse
+        }
 
     let collectByteIndices (addresses: string seq) : int list =
         [
@@ -39,15 +33,22 @@ module XgiXmlProjectAnalyzerModule =
                 | _ -> failwith "ERROR"
         ] |> sort |> distinct
 
-    let collectGlobalSymbols existingLSISprj =
-        XmlNode.ofDocumentAndXPath existingLSISprj "//Configurations/Configuration/GlobalVariables/GlobalVariable"
-        |> collectSymbolInfos
+    let collectGlobalSymbols (xdoc:XmlDocument) =
+        xdoc.SelectMultipleNodes "//Configurations/Configuration/GlobalVariables/GlobalVariable/Symbols/Symbol"
+        |> map xmlSymbolNodeToSymbolInfo
+        |> List.ofSeq
 
-    let collectGlobalSymbolNames existingLSISprj = collectGlobalSymbols existingLSISprj |> map name
+    let collectGlobalSymbolNames (xdoc:XmlDocument) = collectGlobalSymbols xdoc |> map name
 
-    let collectUsedMermoryIndicesInGlobalSymbols existingLSISprj =
-        let globalsWithAddress = collectGlobalSymbols existingLSISprj |> filter (fun symbolInfo -> symbolInfo.Address.NonNullAny())
-        let globalsWithMAreaAddress = globalsWithAddress |> filter (fun symbolInfo -> symbolInfo.Address.StartsWith("%M"))
-        let usedMAddresses = globalsWithMAreaAddress |> map (fun symbolInfo -> symbolInfo.Address)
-        let usedMIndices = usedMAddresses |> collectByteIndices
-        usedMIndices
+    let collectUsedMermoryIndicesInGlobalSymbols (xdoc:XmlDocument) =
+        //let globalsWithAddress      = collectGlobalSymbols xdoc |> filter (fun symbolInfo -> symbolInfo.Address.NonNullAny())
+        //let globalsWithMAreaAddress = globalsWithAddress |> filter (fun symbolInfo -> symbolInfo.Address.StartsWith("%M"))
+        //let usedMAddresses          = globalsWithMAreaAddress |> map (fun symbolInfo -> symbolInfo.Address)
+        //let usedMIndices            = usedMAddresses |> collectByteIndices
+        //usedMIndices
+        collectGlobalSymbols xdoc
+        |> filter (fun symbolInfo -> symbolInfo.Address.NonNullAny())
+        |> filter (fun symbolInfo -> symbolInfo.Address.StartsWith("%M"))
+        |> map (fun symbolInfo -> symbolInfo.Address)
+        |> collectByteIndices
+

@@ -74,6 +74,10 @@ module XmlNodeExtension =
             [ for child in parent.GetChildrenNodes()  do
                 parent.RemoveChild(child) ]
 
+        member xmlNode.SelectMultipleNodes xpath =
+            xmlNode.SelectNodes(xpath).Cast<XmlNode>()
+
+
     type XmlNodeList with
         member x.Do() = ()
         // https://stackoverflow.com/questions/21871908/converting-xmlnodelist-to-liststring

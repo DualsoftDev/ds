@@ -1,7 +1,5 @@
 namespace T
 
-
-open Xunit
 open NUnit.Framework
 
 open Engine.Parser.FS
@@ -136,7 +134,7 @@ type XgiPOUTest() =
 
         let globalStorages = Storages()
         let code = """
-            bool gg0 = createTag("%IX0.0.1", false);
+            bool gg0 = createTag("%IX1.0.1", false);
             bool gg1 = false;
             bool xm0 = false;
             bool xm1 = false;
@@ -173,7 +171,7 @@ type XgiPOUTest() =
 
 
     [<Test>]
-    member __.``Validation= Existing project global variable name collide test`` () =
+    member __.``Validation= Existing project global variable name collide exactly test`` () =
         (* existing project 에 이미 global 변수들이 선언되어 있고,
          * 새로 선언되는 자동 할당 변수 이름이 미리 선언된 gloal 변수와 동일할 때 fail 해야 한다..
          *)
@@ -202,6 +200,37 @@ type XgiPOUTest() =
             let xml = projectParams.GenerateXmlString()
             saveTestResult f xml
         ) |> ShouldFailWithSubstringT "ERROR: Duplicated global variable name : MMX0"
+
+    [<Test>]
+    member __.``Validation= Existing project global variable name collide ignoring case test`` () =
+        (* existing project 에 이미 global 변수들이 선언되어 있고,
+         * 새로 선언되는 자동 할당 변수 이름이 대소문자를 가리지 않고 미리 선언된 gloal 변수와 동일할 때 fail 해야 한다..
+         *)
+
+        let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/multiProgramSample.xml"
+        let usedMemoryIndices = collectUsedMermoryIndicesInGlobalSymbols myTemplate
+        let existingGlobals = collectGlobalSymbols myTemplate |> map name
+
+        existingGlobals |> List.contains "MMX1" === true
+
+        let globalStorages = Storages()
+        let code = """
+            bool mmx1 = false;      // MMX1 과 대소문자를 구분하지 않아야 한다.
+"""
+        let f = get_current_function_name()
+        parseCode globalStorages code |> ignore
+        globalStorages["MMX1"].Address <- ""       // force to allocate Memory
+
+        let projectParams = {
+            createProjectParams(f) with
+                GlobalStorages = globalStorages
+                ExistingLSISprj = Some myTemplate
+                MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedMemoryIndices)    // 640K M memory 영역
+        }
+        ( fun () ->
+            let xml = projectParams.GenerateXmlString()
+            saveTestResult f xml
+        ) |> ShouldFailWithSubstringT "ERROR: Duplicated global variable name : MMX1"
 
     [<Test>]
     member __.``Validation= Existing project duplicated POU name test`` () =

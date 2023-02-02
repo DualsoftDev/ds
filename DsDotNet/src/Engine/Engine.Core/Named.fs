@@ -9,6 +9,7 @@ open System.Globalization
 open System.Collections.Generic
 open System.Runtime.InteropServices
 open Engine.Common.FS
+open System.Text.RegularExpressions
 
 
 [<AutoOpen>]
@@ -145,14 +146,16 @@ module TextUtil =
 [<RequireQualifiedAccess>]
 module UniqueName =
     type NameGenerator = (unit -> string)
-    let private genDict = Dictionary<string, NameGenerator>()
+    let private genDict = Dictionary<string, NameGenerator>(StringComparer.OrdinalIgnoreCase)
     let generate prefix =
-        if genDict.ContainsKey prefix then
-            genDict.[prefix]()
-        else
-            let f = incrementalKeywordGenerator prefix 0
-            genDict.Add(prefix, f)
-            f()
+        let name =
+            if genDict.ContainsKey prefix then
+                genDict.[prefix]()
+            else
+                let f = incrementalKeywordGenerator prefix 0
+                genDict.Add(prefix, f)
+                f()
+        Regex.Replace(name, $"^{prefix}", prefix, RegexOptions.IgnoreCase)
     let resetAll() = genDict.Clear()
 
 [<Extension>]

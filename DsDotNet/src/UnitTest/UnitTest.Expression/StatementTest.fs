@@ -31,7 +31,7 @@ type StatementTest() =
         let counter = toCounter coutnerStatement
         let timerStatement2:Statement = "ton myTimer = createAbTON(100us, false)" |> tryParseStatement storages |> Option.get
 
-        let cs2:Statement = "ton mytimer = createAbTON(1000us, $tag1 || $tag2)" |> tryParseStatement storages |> Option.get
+        let cs2:Statement = "ton mytimerAB = createAbTON(1000us, $tag1 || $tag2)" |> tryParseStatement storages |> Option.get
         let timer = toTimer cs2
 
 
@@ -71,7 +71,7 @@ type StatementTest() =
         let counter = toCounter coutnerStatement
         let timerStatement2:Statement = "ton myTimer = createWinTON(100us, false)" |> tryParseStatement storages|> Option.get
 
-        let cs2:Statement = "ton mytimer = createWinTON(1000us, $tag1 || $tag2)" |> tryParseStatement storages |> Option.get
+        let cs2:Statement = "ton mytimerWin = createWinTON(1000us, $tag1 || $tag2)" |> tryParseStatement storages |> Option.get
         let timer = toTimer cs2
 
 

@@ -237,7 +237,11 @@ module CoreModule =
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
         member val ApiName = getRawName [loadedName;api.Name] true
 
-    /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
+    /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { FWD = Mt.fwd; }
+    type TaskSys (api:ApiItem, systemName:string) =
+        inherit DsTask(api, systemName)
+
+    /// Main system 에서 loading 된 다른 devcie 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
     type TaskDev (api:ApiItem, inAddress:TagAddress, outAddress:TagAddress, deviceName:string) =
         inherit DsTask(api, deviceName)
         member val InAddress   = inAddress  with get, set
@@ -247,8 +251,6 @@ module CoreModule =
         //CPU 생성시 할당됨 OutTag
         member val OutTag = getNull<ITag>() with get, set
 
-    type TaskSys (api:ApiItem, systemName:string) =
-        inherit DsTask(api, systemName)
 
     /// 자신을 export 하는 관점에서 본 api's.  Interface 정의.   [interfaces] = { "+" = { F.Vp ~ F.Sp } }
     and ApiItem private (name:string, system:DsSystem) =

@@ -18,3 +18,4 @@ module ExpressionFixtures =
         inherit TestBaseClass("EngineLogger")
         do
             Engine.CodeGenCPU.ModuleInitializer.Initialize()
+            setRuntimeTarget XGI |> ignore

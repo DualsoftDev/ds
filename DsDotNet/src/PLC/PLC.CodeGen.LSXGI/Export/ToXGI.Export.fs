@@ -271,8 +271,9 @@ module XgiExportModule =
 
                 (* existing global name 과 신규 global name 충돌 check *)
                 do
-                    let existingGlobalNames = xnGlobalVar |> collectSymbolInfos |> map name
-                    match existingGlobalNames.Intersect(globalStorages.Keys) |> Seq.tryHead with
+                    let existingGlobalNames = xnGlobalVar |> collectSymbolInfos |> map (name >> String.toUpper)
+                    let currentGlobalNames = globalStorages.Keys |> map String.toUpper
+                    match existingGlobalNames.Intersect(currentGlobalNames) |> Seq.tryHead with
                     | Some duplicated -> failwith $"ERROR: Duplicated global variable name : {duplicated}"
                     | _ -> ()
 

@@ -14,6 +14,7 @@ using static Engine.CodeGenCPU.CpuLoader;
 using static Engine.CodeGenCPU.ExportModule;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
+using static Engine.Core.Interface;
 using static Engine.Cpu.RunTime;
 
 namespace Dual.Model.Import
@@ -54,7 +55,7 @@ namespace Dual.Model.Import
                     WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{path} PLC 생성시작!!");
                     await Task.Delay(1);
                     _DicCpu = new Dictionary<DsSystem, DsCPU>();
-                    var storages = new Dictionary<string, Interface.IStorage>();
+                    var storages = new Storages();
                     int cnt = 0;
                     foreach (var view in _PPTResults)
                     {

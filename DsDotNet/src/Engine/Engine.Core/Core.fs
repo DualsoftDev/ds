@@ -207,7 +207,8 @@ module CoreModule =
 
     and RealOtherSystem private (target:Job, parent) =
         inherit Indirect(target.Name, parent)
-        member _.Real = target
+        member _.CallTargetJob = target
+        member val Xywh:Xywh = null with get, set
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 

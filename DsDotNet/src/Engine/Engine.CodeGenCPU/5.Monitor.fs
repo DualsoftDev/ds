@@ -29,7 +29,7 @@ type VertexManager with
     member v.M3_CallErrorTXMonitor(): CommentedStatement list =
         let v= v :?> VertexMCoin
         let set = v.G.Expr <&&> v.TON.DN.Expr
-        let rst = v.Flow.clear.Expr <||> v.System._clear.Expr
+        let rst = v.Flow.clear.Expr
         [
             //test ahn  going 직전시간 기준 타임아웃 시간 받기
             // 일단을 system 10초 타임아웃

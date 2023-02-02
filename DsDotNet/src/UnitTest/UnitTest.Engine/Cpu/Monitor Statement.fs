@@ -33,12 +33,12 @@ type Spec05_MonitorStatement() =
             coin.M3_CallErrorTXMonitor() |> doChecks
 
     [<Test>]
-    member __.``M4 Call Error RX Monitor`` () =    Eq 1 1
-        //for coin in t.Coins do  //test ahn coin만 ?
-        //    coin.M4_CallErrorRXMonitor() |> doCheck
+    member __.``M4 Call Error RX Monitor`` () =
+        for coin in t.Calls do
+            coin.M4_CallErrorRXMonitor() |> doCheck
 
     [<Test>]
-    member __.``M5 Real Error RX Monitor`` () =
+    member __.``M5 Real Error TX Monitor`` () =
          for real in t.Reals do
             real.M5_RealErrorTXMonitor() |> doCheck
 

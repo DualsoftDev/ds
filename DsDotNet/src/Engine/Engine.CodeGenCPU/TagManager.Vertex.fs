@@ -24,7 +24,7 @@ module TagManagerModule =
         let sys =  v.Parent.GetSystem()
         let s =  sys.TagManager.Storages
         let createTag(mark) =
-            let name = $"{v.QualifiedName}_{mark}_"
+            let name = $"{v.QualifiedName}_{mark}"
             let t = createPlanVarBool  s name true
             t.Vertex <- Some v;  t
 
@@ -37,10 +37,11 @@ module TagManagerModule =
         let errorTxBit    = createTag "E1"
         let errorRxBit    = createTag "E2"
 
-        let readyBit      = createTag  "R"
-        let goingBit      = createTag  "G"
-        let finishBit     = createTag  "F"
-        let homingBit     = createTag  "H"
+        //상태 비트만 NotifyStatus 때문에 아래 이름 규격 ex) tagname_R_
+        let readyBit      = createTag  "R_"
+        let goingBit      = createTag  "G_"
+        let finishBit     = createTag  "F_"
+        let homingBit     = createTag  "H_"
 
         let endForceBit   = createTag "EF"
         let resetForceBit = createTag "RF"

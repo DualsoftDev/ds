@@ -1,11 +1,9 @@
 namespace PLC.CodeGen.LSXGI
 
 open System.Xml
-open System.Linq
 
 open Engine.Common.FS
 open PLC.CodeGen.LSXGI
-open System.Text.RegularExpressions
 open PLC.CodeGen.Common
 
 [<AutoOpen>]
@@ -15,7 +13,7 @@ module XgiXmlProjectAnalyzerModule =
         let symbols = symbolContainerXmlNode.SelectNodes(".//Symbols/Symbol")
         [
             for sym in symbols do
-                // [| "Name"; "Kind"; "Type"; "Address"; "Comment"; "Device"; "State" |]
+                (* [| "Name"; "Kind"; "Type"; "Address"; "Comment"; "Device"; "State" |] *)
                 let dic = sym.GetAttributes()
                 { defaultSymbolInfo with
                     Name          = dic["Name"]
@@ -40,22 +38,6 @@ module XgiXmlProjectAnalyzerModule =
                     | _ -> failwith "ERROR"
                 | _ -> failwith "ERROR"
         ] |> sort |> distinct
-
-    let analyzeXmlProject existingLSISprj =
-        //let xdoc = XmlDocument.loadFromFile existingLSISprj
-        //let xnGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
-        //let globalsWithAddress = collectSymbolInfos xnGlobalVar |> filter (fun symbolInfo -> symbolInfo.Address.NonNullAny())
-        //let globalsWithMAreaAddress = globalsWithAddress |> filter (fun symbolInfo -> symbolInfo.Address.StartsWith("%M"))
-        //let usedMAddresses = globalsWithMAreaAddress |> map (fun symbolInfo -> symbolInfo.Address)
-
-        //Enumerable.SequenceEqual(usedMAddresses, [ "%MX0"; "%MX1"; "%MX8"; "%MX33"; "%MB2"; "%MB17"; "%ML1" ]) |> verify
-
-        //let usedMIndices = usedMAddresses |> collectByteIndices
-
-        //let countExistingGlobal = xnGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
-        //let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
-
-        noop()
 
     let collectGlobalSymbols existingLSISprj =
         XmlNode.ofDocumentAndXPath existingLSISprj "//Configurations/Configuration/GlobalVariables/GlobalVariable"

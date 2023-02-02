@@ -83,7 +83,7 @@ module internal XgiFile =
 				    </Body>
 				    <RungTable></RungTable>
 			    </Program>""" taskName pouName
-            |> XmlNode.fromString
+            |> XmlNode.ofString
 
 
 
@@ -97,7 +97,7 @@ module internal XgiFile =
         (*
          * Rung 삽입
          *)
-        let rungsXml = $"<Rungs>{rungs}</Rungs>" |> XmlNode.fromString
+        let rungsXml = $"<Rungs>{rungs}</Rungs>" |> XmlNode.ofString
         for r in rungsXml.GetChildrenNodes() do
             onlineUploadData.InsertBefore r |> ignore
 
@@ -105,7 +105,7 @@ module internal XgiFile =
          * Local variables 삽입
          *)
         let programBody = xnLdRoutine.ParentNode
-        let localSymbols = symbolsLocal |> XmlNode.fromString
+        let localSymbols = symbolsLocal |> XmlNode.ofString
         programBody.InsertAfter localSymbols |> ignore
 
         (*
@@ -115,7 +115,7 @@ module internal XgiFile =
         let countExistingGlobal = xnGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
         let _globalSymbolXmls =
             // symbolsGlobal = "<GlobalVariable Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol>
-            let neoGlobals = symbolsGlobal |> XmlNode.fromString
+            let neoGlobals = symbolsGlobal |> XmlNode.ofString
             let numNewGlobals = neoGlobals.Attributes.["Count"].Value |> System.Int32.Parse
 
             xnGlobalVar.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)

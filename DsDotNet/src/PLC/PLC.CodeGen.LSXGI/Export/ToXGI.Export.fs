@@ -184,7 +184,7 @@ module XgiExportModule =
             let rungsXml = generateRungs comment commentedXgiStatements
 
             /// POU/Programs/Program
-            let programTemplate = createXmlStringProgram taskName pouName |> XmlNode.fromString
+            let programTemplate = createXmlStringProgram taskName pouName |> XmlNode.ofString
 
             //let programTemplate = DsXml.adoptChild programs programTemplate
 
@@ -194,7 +194,7 @@ module XgiExportModule =
             (*
              * Rung 삽입
              *)
-            let rungsXml = $"<Rungs>{rungsXml}</Rungs>" |> XmlNode.fromString
+            let rungsXml = $"<Rungs>{rungsXml}</Rungs>" |> XmlNode.ofString
             for r in rungsXml.GetChildrenNodes()  do
                 onlineUploadData.InsertBefore r |> ignore
 
@@ -202,7 +202,7 @@ module XgiExportModule =
              * Local variables 삽입
              *)
             let programBody = posiLdRoutine.ParentNode
-            let localSymbols = localStoragesXml |> XmlNode.fromString
+            let localSymbols = localStoragesXml |> XmlNode.ofString
             programBody.InsertAfter localSymbols |> ignore
 
             programTemplate
@@ -260,7 +260,7 @@ module XgiExportModule =
                     let priority = kind
 
                     createXmlStringTask pou.TaskName kind priority index
-                    |> XmlNode.fromString
+                    |> XmlNode.ofString
                     |> xnTasks.AdoptChild
                     |> ignore
 
@@ -294,7 +294,7 @@ module XgiExportModule =
                     // todo : 실제로는 더 정밀한 충돌 check 필요.  %MX1 과 %MB0 은 서로 충돌하는 영역임.
 
                 // symbolsGlobal = "<GlobalVariable Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol>
-                let globalStoragesXmlNode = storagesToGlobalXml x globalStorages.Values |> XmlNode.fromString
+                let globalStoragesXmlNode = storagesToGlobalXml x globalStorages.Values |> XmlNode.ofString
                 let numNewGlobals = globalStoragesXmlNode.Attributes.["Count"].Value |> System.Int32.Parse
 
                 xnGlobalVar.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)

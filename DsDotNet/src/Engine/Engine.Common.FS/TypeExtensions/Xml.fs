@@ -100,7 +100,7 @@ module XmlNodeExtension =
 
     [<RequireQualifiedAccess>]
     module XElement =
-        let fromString(str:string) = XDocument.Parse(str).Root
+        let ofString(str:string) = XDocument.Parse(str).Root
 
     [<RequireQualifiedAccess>]
     module XmlDocument =
@@ -117,8 +117,7 @@ module XmlNodeExtension =
 
     [<RequireQualifiedAccess>]
     module XmlNode =
-        [<Obsolete("Rename me: ofString()")>]
-        let fromString(str:string) = (XElement.fromString str).ToXmlNode()
+        let ofString(str:string) = (XElement.ofString str).ToXmlNode()
         let ofDocumentAndXPath (file:string) (xpath:string) : XmlNode =
             let xdoc = XmlDocument.loadFromFile file
             xdoc.SelectSingleNode xpath

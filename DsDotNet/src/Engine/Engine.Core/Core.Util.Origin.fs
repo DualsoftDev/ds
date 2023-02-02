@@ -440,8 +440,7 @@ module OriginModule =
                 |> List.filter(fun l -> l.Length > 0)
                 |> List.collect id
             )
-            |> List.collect id
-            |> List.distinct
+            |> removeDuplicates
             |> removeDuplicatesInList
             |> getAllJobDefRoutes
             |> removeDuplicates

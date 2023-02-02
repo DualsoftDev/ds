@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>net48</TargetFrameworks>
+		<LangVersion>7.0</LangVersion>
+		<RootNamespace>Server.DsTester</RootNamespace>
+		<OutputType>Exe</OutputType>
+		<PlatformTarget>AnyCPU</PlatformTarget>
+	</PropertyGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Engine\Engine.Common\Engine.Common.csproj" />
+	  <ProjectReference Include="..\Server.Common.Kafka\Server.Common.Kafka.csproj" />
+	  <ProjectReference Include="..\Server.Common.NMC\Server.Common.NMC.csproj" />
+	</ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="log4net">
+      <HintPath>..\..\..\exLib\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\..\exLib\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy &quot;$(TargetDir)..\..\..\..\..\..\exlib\NMC2.dll&quot; &quot;$(TargetDir)NMC2.dll&quot;" />
+	<Exec Command="copy &quot;$(TargetDir)..\..\..\config.json&quot; &quot;$(TargetDir)config.json&quot;" />
+  </Target>
+
+</Project>

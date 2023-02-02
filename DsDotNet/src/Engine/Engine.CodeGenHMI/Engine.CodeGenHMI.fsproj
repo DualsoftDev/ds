@@ -10,6 +10,7 @@
 	</PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="CodeControlServer.fs" />
     <Compile Include="CodeGen.Common.fs" />
     <Compile Include="HmiCode.fs" />
     <Compile Include="PilotCode.fs" />

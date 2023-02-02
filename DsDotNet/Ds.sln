@@ -88,11 +88,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dsu.PLC.Common", "src\PLC\D
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Dsu.PLC.LS.FS", "src\PLC\DriverIO\Dsu.PLC.LS.FS\Dsu.PLC.LS.FS.fsproj", "{82B0C05A-D7F7-4B4C-A251-7B3CDD8B87F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server.Common.NMC", "src\Server\Server.Common.NMC\Server.Common.NMC.csproj", "{19FE5741-75EB-4C59-8B99-393990ED41FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server.Common.NMC", "src\Server\Server.Common.NMC\Server.Common.NMC.csproj", "{19FE5741-75EB-4C59-8B99-393990ED41FD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server.DsBridge", "src\Server\Server.DsBridge\Server.DsBridge.csproj", "{95932206-D2FD-407F-8F64-379D04C7981E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server.Common", "src\Server\Server.Common\Server.Common.csproj", "{92F1842C-3FDF-4F3F-BC24-670FF2248357}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server.Common", "src\Server\Server.Common\Server.Common.csproj", "{92F1842C-3FDF-4F3F-BC24-670FF2248357}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

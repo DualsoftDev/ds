@@ -38,24 +38,12 @@ module CodeConvertUtil =
                 | _ -> failwithlog $"Error"
             |_ -> failwithlog $"Error"
 
-    let getOriginDeviceDefs(real:Real, initialType:InitialType) =
-        let origins, _resetChains = OriginHelper.GetOriginsWithDeviceDefs real.Graph
-        [ for w in origins do
-            if w.Value = initialType then
-                yield w.Key ]
 
-    let getOriginIOs(real:Real, initialType:InitialType) =
-        let origins = getOriginDeviceDefs(real, initialType)
-        origins.Select(fun jd -> jd.InTag).Cast<Tag<bool>>()
-
-    let getStartPointExpr(call:CallDev, jd:TaskDev) =
-        match call.Parent.GetCore() with
-        | :? Real as r ->
-                let ons = getOriginDeviceDefs (r, InitialType.On)
-                if ons.Contains(jd)
-                    then r.V.RO.Expr <&&> call._on.Expr
-                    else call._off.Expr
-        | _ -> call._off.Expr
+    let getOriginIOs(vr:VertexMReal, initialType:InitialType) =
+        let origins = vr.OriginInfo.Tasks
+        origins
+            .Where(fun (_, init) -> init = initialType)
+            .Select(fun (task, _) -> task.InTag).Cast<Tag<bool>>()
 
     /// returns [week] * [strong] incoming edges
     let private getEdgeSources(graph:DsGraph, target:Vertex, bStartEdge:bool) =
@@ -76,15 +64,16 @@ module CodeConvertUtil =
 
     /// 원위치 고려했을 때, reset chain 중 하나라도 켜져 있는지 검사하는 expression 반환
     let getNeedCheckExpression(real:Real) =
-        let origins, resetChains = OriginHelper.GetOriginsWithDeviceDefs real.Graph
+        let origins      = real.V.OriginInfo.Tasks
+        let resetChains  = real.V.OriginInfo.ResetChains
 
         (* [ KeyValuePair(JogDef, InitialType) ] *)
-        let needChecks = origins.Where(fun w-> w.Value = NeedCheck)
+        let needChecks = origins.Where(fun (_, init)-> init = NeedCheck)
 
         let needCheckSet:Tag<bool> list list =
             let apiNameToInTagMap =
-                needChecks.Where(fun (KeyValue(taskDevice, _v)) -> taskDevice.ApiItem.RXs.any())
-                          .Map(fun (KeyValue(taskDevice, _v)) -> taskDevice.ApiName, taskDevice.InTag)
+                needChecks.Where(fun (task, _) -> task.ApiItem.RXs.any())
+                          .Map(fun   (task, _) -> task.ApiName, task.InTag)
                 |> Tuple.toDictionary
             [
                 if apiNameToInTagMap.Any() then

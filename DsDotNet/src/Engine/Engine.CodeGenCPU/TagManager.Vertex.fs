@@ -55,6 +55,7 @@ module TagManagerModule =
             member x.Target = v
             member x.Storages = s
 
+
         member x.Name   = v.QualifiedName
         member x.Vertex = v
         member x.Flow   = v.Parent.GetFlow()
@@ -113,6 +114,7 @@ module TagManagerModule =
 
     type VertexMReal(v:Vertex) as this =
         inherit VertexManager(v)
+        let mutable originInfo:OriginInfo = defaultOriginInfo (v:?> Real)
         let createTag name = this.CreateTag name
         let endPortBit    = createTag  "EP"
         let resetPortBit  = createTag  "RP"
@@ -120,6 +122,11 @@ module TagManagerModule =
 
         let relayRealBit      = createTag "RR"
         let realOriginAction  = createTag "RO"
+
+        member x.OriginInfo
+            with get() = originInfo
+            and set(v) = originInfo <- v
+
         /// Real Origin Action
         member _.RO         = realOriginAction
         ///Real Init Relay

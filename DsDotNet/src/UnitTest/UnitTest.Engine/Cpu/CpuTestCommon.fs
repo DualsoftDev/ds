@@ -43,6 +43,7 @@ module CpuTestUtil =
         let vertexAll         = vertices
         do
             sys.GenerationIO()
+            sys.GenerationOrigins()
 
         member x.Sys    =  sys
         member x.Flows  =  sys.Flows

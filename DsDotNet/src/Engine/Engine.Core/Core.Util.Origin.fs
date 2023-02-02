@@ -489,6 +489,17 @@ module OriginModule =
         // To do...
         ()
 
+    type OriginInfo = {
+        Real  : Real
+        Tasks : (TaskDev*InitialType) seq
+        ResetChains : string list seq
+    }
+    let defaultOriginInfo(real) = {
+        Real  = real
+        Tasks = [||]
+        ResetChains = [||]
+    }
+
     [<Extension>]
     type OriginHelper =
         /// Get origin status of child nodes
@@ -501,10 +512,9 @@ module OriginModule =
             let originMap, allJobs, resetChains = getOrigins graph
             let getjobDef name =
                 allJobs.First(fun j -> j.ApiName = name)
-            originMap
-            |> Seq.map(fun node -> getjobDef node.Key, node.Value)
-            |> Tuple.toDictionary,
-            resetChains
+            let orgs = originMap |> Seq.map(fun node -> getjobDef node.Key, node.Value)
+            orgs, resetChains
+
 
         /// Get node index map(key:name, value:idx)
         [<Extension>]

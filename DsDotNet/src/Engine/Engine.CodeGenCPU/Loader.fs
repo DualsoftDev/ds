@@ -3,6 +3,8 @@ namespace Engine.CodeGenCPU
 open Engine.Core
 open Engine.Common.FS
 open System.Runtime.CompilerServices
+open System.Linq
+open System.Collections.Generic
 
 [<AutoOpen>]
 module CpuLoader =
@@ -95,6 +97,8 @@ module CpuLoader =
             yield! s.Y3_SystemConditionDrive()
         ]
 
+
+
     ///flow 별 운영모드 적용
     let private applyOperationModeSpec(f:Flow) =
         [
@@ -115,11 +119,15 @@ module CpuLoader =
 
 
 
-    let private convertSystem(sys:DsSystem) =
+
+    let private convertSystem(sys:DsSystem, isActive:bool) =
         Runtime.System <- sys
         sys._on.Value <- true
         //DsSystem 물리 IO 생성
         sys.GenerationIO()
+
+        if isActive //직잡 제어하는 대상만 정렬(원위치) 정보 추출
+        then sys.GenerationOrigins()
 
         [
             //시스템 적용
@@ -177,7 +185,7 @@ module CpuLoader =
         member x.TaskName() =
             match x with
             | ActivePou   _ -> "Active"
-            | DevicePou   _ -> "DevicesScanGroup"
+            | DevicePou   _ -> "Devices"
             | ExternalPou _ -> "ExternalCpu"
         member x.IsActive   = match x with | ActivePou   _ -> true | _ -> false
         member x.IsDevice   = match x with | DevicePou   _ -> true | _ -> false
@@ -196,12 +204,12 @@ module CpuLoader =
                 system.GetRecursiveLoadeds()
                 |>Seq.map(fun s->
                     match s  with
-                    | :? Device as d ->   DevicePou (d, convertSystem(d.ReferenceSystem))
-                    | :? ExternalSystem as e ->  ExternalPou (e, convertSystem(e.ReferenceSystem))
+                    | :? Device as d ->   DevicePou (d, convertSystem(d.ReferenceSystem, false))
+                    | :? ExternalSystem as e ->  ExternalPou (e, convertSystem(e.ReferenceSystem, false))
                     | _ -> failwithlog (getFuncName())
                     )
                 //자신(Acitve) system을  CPU 변환
-                |>Seq.append [ActivePou (system, convertSystem(system))]
+                |>Seq.append [ActivePou (system, convertSystem(system, true))]
 
             result
 

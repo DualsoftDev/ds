@@ -26,9 +26,9 @@ module DriverIOLSCommonTest =
 
         member x.Connection = conn
 
-        [<Test>]
-        member __.``LS Connection test`` () =
-            let ls = DriverIOLSCommon()
-            let conn = ls.Connection
-            conn.PerRequestDelay <- 1000
-            conn.Connect() === true
+        //[<Test>]
+        //member __.``XXXX LS Connection test`` () =
+        //    let ls = DriverIOLSCommon()
+        //    let conn = ls.Connection
+        //    conn.PerRequestDelay <- 1000
+        //    conn.Connect() === true

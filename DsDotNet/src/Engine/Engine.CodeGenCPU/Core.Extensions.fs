@@ -23,6 +23,13 @@ module ConvertCoreExt =
     let getFM (x:Flow)     = x.TagManager :?> FlowManager
     let getAM (x:ApiItem)  = x.TagManager :?> ApiItemManager
 
+    let getOriginInfos(sys:DsSystem) =
+        let reals = sys.GetVertices().OfType<Real>()
+        reals.Select(fun r->
+               let t, rs = OriginHelper.GetOriginsWithDeviceDefs r.Graph
+               r, {Real = r; Tasks = t; ResetChains = rs})
+               |> Tuple.toDictionary
+
     type ApiItem with
         member a.PS     = getAM(a).GetApiTag(ApiTag.PLANSET)
         member a.PR     = getAM(a).GetApiTag(ApiTag.PLANRST)
@@ -86,6 +93,11 @@ module ConvertCoreExt =
             x.GenerationButtonIO()
             x.GenerationLampIO()
             x.GenerationCondition()
+
+        member x.GenerationOrigins() =
+            let origins = getOriginInfos x
+            for (rv: VertexMReal) in x.GetVertices().OfType<Real>().Select(fun f->f.V) do
+                rv.OriginInfo <- origins[rv.Vertex :?> Real]
 
         //자신이 사용된 API Plan Set Send
         member x.GetPSs(r:Real) =

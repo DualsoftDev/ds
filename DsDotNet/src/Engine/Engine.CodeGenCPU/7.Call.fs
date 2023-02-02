@@ -13,12 +13,19 @@ type VertexMCoin with
         let sharedCalls = coin.GetSharedCall().Select(getVM)
         let startTags   = ([coin.ST] @ sharedCalls.STs()).ToOr()
         let forceStarts = ([coin.SF] @ sharedCalls.SFs()).ToOr()
+        let getStartPointExpr(coin:CallDev, jd:TaskDev) =
+            match coin.Parent.GetCore() with
+            | :? Real as r ->
+                if r.V.OriginInfo.Tasks.Select(fun (t,_)->t).Contains(jd)
+                    then call._on.Expr <&&> r.V.RO.Expr
+                    else call._off.Expr
+            | _ ->       call._off.Expr
+
         [
             for jd in call.CallTargetJob.DeviceDefs do
-                let startPointExpr = getStartPointExpr(call, jd)
                 let sets = (dop <&&> startTags) <||>
                            (mop <&&> forceStarts) <||>
-                           (rop <&&> startPointExpr)
+                           (rop <&&> getStartPointExpr (call, jd))
 
                 let rsts = jd.MutualResets(coin.System)
                              .Select(fun f -> f.ApiItem.PS)

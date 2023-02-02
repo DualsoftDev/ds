@@ -10,9 +10,10 @@ open Engine.Common.FS
 type VertexManager with
 
     member v.M1_OriginMonitor(): CommentedStatement  =
+        let v = v :?> VertexMReal
         let real = v.Vertex :?> Real
-        let ons    = getOriginIOs (real, InitialType.On)
-        let offs   = getOriginIOs (real, InitialType.Off)
+        let ons    = getOriginIOs (v, InitialType.On)
+        let offs   = getOriginIOs (v, InitialType.Off)
         let locks  = getNeedCheckExpression (real)
 
         let onExpr   = ons.ToAndElseOn v.System

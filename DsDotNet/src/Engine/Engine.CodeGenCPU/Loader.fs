@@ -177,7 +177,7 @@ module CpuLoader =
         member x.TaskName() =
             match x with
             | ActivePou   _ -> "Active"
-            | DevicePou   _ -> "Device"
+            | DevicePou   _ -> "DevicesScanGroup"
             | ExternalPou _ -> "ExternalCpu"
         member x.IsActive   = match x with | ActivePou   _ -> true | _ -> false
         member x.IsDevice   = match x with | DevicePou   _ -> true | _ -> false

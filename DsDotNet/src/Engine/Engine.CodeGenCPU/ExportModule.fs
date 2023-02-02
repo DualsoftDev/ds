@@ -10,17 +10,17 @@ open System.IO
 [<AutoOpen>]
 module ExportModule =
     let generateXmlXGI projName globalStorages localStorages (pous:PouGen seq) existingLSISprj: string =
-        let getXgiPOUParams (pouGen:PouGen) =
+        let getXgiPOUParams (pouName:string) (taskName:string) (pouGens:PouGen seq) =
             let pouParams:XgiPOUParams = {
                 /// POU name.  "DsLogic"
-                POUName = pouGen.ToSystem().Name
+                POUName = pouName
                 /// POU container task name
-                TaskName = pouGen.TaskName()
+                TaskName = taskName
                         /// POU ladder 최상단의 comment
-                Comment = "DS Logic for XGI"
+                Comment = $"DsLogic Automatically generate"
                 LocalStorages = localStorages
                 GlobalStorages = globalStorages
-                CommentedStatements = pouGen.CommentedStatements()
+                CommentedStatements = pouGens.Collect(fun p->p.CommentedStatements()) |> Seq.toList
             }
             pouParams
 
@@ -30,7 +30,12 @@ module ExportModule =
                 GlobalStorages = globalStorages
                 ExistingLSISprj = existingLSISprj
                 AppendExpressionTextToRungComment = false
-                POUs = pous.Select(getXgiPOUParams) |> Seq.toList
+                POUs = [
+                          yield pous.Where(fun f->f.IsActive) |> getXgiPOUParams "Active" "Active"
+                          yield pous.Where(fun f->f.IsDevice) |> getXgiPOUParams "Devices" "Devices"
+                          for p in pous.Where(fun f->f.IsExternal) do
+                             yield getXgiPOUParams (p.ToSystem().Name) (p.TaskName()) [p]
+                ]
         }
 
         projParams.GenerateXmlString()
@@ -50,5 +55,5 @@ module ExportModule =
     [<Extension>]
     type ExportModuleExt =
         [<Extension>] static member ExportXMLforXGI (system:DsSystem, path:string, tempLSISxml) = exportXMLforXGI(system, path, tempLSISxml)
-        [<Extension>] static member ExportXMLforPC (system:DsSystem, path:string, tempLSISxml) = exportXMLforXGI(system, path, tempLSISxml)//test ahn
+        [<Extension>] static member ExportXMLforPC  (system:DsSystem, path:string) = if system.Name = path then ()//test ahn
 

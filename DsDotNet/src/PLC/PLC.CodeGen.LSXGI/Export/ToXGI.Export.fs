@@ -266,10 +266,10 @@ module XgiExportModule =
 
             (* Global variables 삽입 *)
             do
-                let xnGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
-                let countExistingGlobal = xnGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
+                let xnGlobalSymbols = xdoc.SelectMultipleNodes "//Configurations/Configuration/GlobalVariables/GlobalVariable/Symbols/Symbol" |> List.ofSeq
+                let countExistingGlobal = xnGlobalSymbols.Length
 
-                let existingGlobalSymbols = xnGlobalVar |> collectSymbolInfos
+                let existingGlobalSymbols = xnGlobalSymbols |> map xmlSymbolNodeToSymbolInfo
 
                 (* existing global name 과 신규 global name 충돌 check *)
                 do
@@ -297,6 +297,7 @@ module XgiExportModule =
                 let globalStoragesXmlNode = storagesToGlobalXml x globalStorages.Values |> XmlNode.ofString
                 let numNewGlobals = globalStoragesXmlNode.Attributes.["Count"].Value |> System.Int32.Parse
 
+                let xnGlobalVar = xdoc.SelectSingleNode "//Configurations/Configuration/GlobalVariables/GlobalVariable"
                 xnGlobalVar.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
                 let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
 

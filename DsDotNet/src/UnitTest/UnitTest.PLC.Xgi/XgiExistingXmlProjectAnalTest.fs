@@ -19,8 +19,8 @@ type XgiExistingXmlProjectAnalTest() =
         let xmlPrj = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/multiProgramSample.xml"
 
         let xdoc = XmlDocument.loadFromFile xmlPrj
-        let xnGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
-        let globalsWithAddress = collectSymbolInfos xnGlobalVar |> filter (fun symbolInfo -> symbolInfo.Address.NonNullAny())
+        let xnGlobalSymbols = xdoc.SelectMultipleNodes "//Configurations/Configuration/GlobalVariables/GlobalVariable/Symbols/Symbol" |> List.ofSeq
+        let globalsWithAddress = xnGlobalSymbols |> map xmlSymbolNodeToSymbolInfo |> filter (fun symbolInfo -> symbolInfo.Address.NonNullAny())
         let globalsWithMAreaAddress = globalsWithAddress |> filter (fun symbolInfo -> symbolInfo.Address.StartsWith("%M"))
         let usedMAddresses = globalsWithMAreaAddress |> map (fun symbolInfo -> symbolInfo.Address)
 
@@ -29,6 +29,4 @@ type XgiExistingXmlProjectAnalTest() =
         let usedMemoryIndices = usedMAddresses |> collectByteIndices
         usedMemoryIndices |> SeqEq [ 0; 1; 2; 4; 8; 9; 10; 11; 12; 13; 14; 15; 17; ]
 
-        let countExistingGlobal = xnGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
-        let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
         ()

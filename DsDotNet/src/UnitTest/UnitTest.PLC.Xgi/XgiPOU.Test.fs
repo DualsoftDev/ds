@@ -134,7 +134,7 @@ type XgiPOUTest() =
 
         let globalStorages = Storages()
         let code = """
-            bool gg0 = createTag("%IX0.0.1", false);
+            bool gg0 = createTag("%IX1.0.1", false);
             bool gg1 = false;
             bool xm0 = false;
             bool xm1 = false;

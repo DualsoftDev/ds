@@ -1,10 +1,7 @@
 namespace T
 
-
-open Xunit
 open NUnit.Framework
 
-open Engine.Parser.FS
 open Engine.Core
 open Engine.Common.FS
 open PLC.CodeGen.LSXGI
@@ -23,7 +20,7 @@ type XgiExistingXmlProjectAnalTest() =
             |> (fun xdoc -> xdoc.SelectMultipleNodes "//Configurations/Configuration/GlobalVariables/GlobalVariable/Symbols/Symbol") |> List.ofSeq
             |> map xmlSymbolNodeToSymbolInfo
             |> map address
-            |> filter (fun addr -> addr.NonNullAny())
+            |> filter notNullAny
             |> filter (fun addr -> addr.StartsWith("%M"))
 
         usedMAddresses |> SeqEq [ "%MX0"; "%MX1"; "%MX8"; "%MX33"; "%MB2"; "%MB17"; "%ML1" ]

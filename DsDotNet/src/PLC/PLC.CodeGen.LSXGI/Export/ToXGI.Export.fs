@@ -279,23 +279,30 @@ module XgiExportModule =
                     | Some duplicated -> failwith $"ERROR: Duplicated global variable name : {duplicated}"
                     | _ -> ()
 
-                (* existing global address 와 신규 global address 충돌 check *)
+                (* I, Q 영역의 existing global address 와 신규 global address 충돌 check *)
                 do
-                    let collectToUpper (addrs:string seq) = addrs |> filter (fun s -> s.NonNullAny()) |> map String.toUpper
+                    let standardize (addrs:string seq) =
+                        addrs
+                        |> filter notNullAny
+                        |> map standardizeAddress
+                        |> filter (function
+                            | RegexPattern "^%[IQ]" _ -> true
+                            | _ -> false)
                     let existingGlobalAddresses =
-                        existingGlobalSymbols |> map address |> collectToUpper
+                        existingGlobalSymbols |> map address |> standardize
                     let currentGlobalAddresses =
                         globalStorages.Values
                         |> filter(fun s -> s :? ITag || s :? IVariable)
-                        |> map address |> collectToUpper
+                        |> map address |> standardize
+
                     match existingGlobalAddresses.Intersect(currentGlobalAddresses) |> Seq.tryHead with
                     | Some duplicated -> failwith $"ERROR: Duplicated address usage : {duplicated}"
                     | _ -> ()
-                    // todo : 실제로는 더 정밀한 충돌 check 필요.  %MX1 과 %MB0 은 서로 충돌하는 영역임.
 
                 // symbolsGlobal = "<GlobalVariable Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol>
                 let globalStoragesXmlNode = storagesToGlobalXml x globalStorages.Values |> XmlNode.ofString
                 let numNewGlobals = globalStoragesXmlNode.Attributes.["Count"].Value |> System.Int32.Parse
+                // timer, counter 등을 고려했을 때는 numNewGlobals <> globalStorages.Count 일 수 있다.
 
                 let xnGlobalVar = xdoc.SelectSingleNode "//Configurations/Configuration/GlobalVariables/GlobalVariable"
                 xnGlobalVar.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)

@@ -49,7 +49,7 @@ module XgiXmlProjectAnalyzerModule =
     let collectUsedMermoryIndicesInGlobalSymbols (xdoc:XmlDocument) =
         collectGlobalSymbols xdoc
         |> map address
-        |> filter (fun addr -> addr.NonNullAny())
+        |> filter notNullAny
         |> filter (fun addr -> addr.StartsWith("%M"))
         |> collectByteIndices
 

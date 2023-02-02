@@ -11,8 +11,8 @@ module CpuLoader =
             match v with
             | :? Real   -> vaild.HasFlag(RealInFlow)
             | :? RealExF -> vaild.HasFlag(RealExFlow)
-            | :? RealExS -> vaild.HasFlag(RealExSystem)
-            | :? Call as c  ->
+            | :? CallSys -> vaild.HasFlag(RealExSystem)
+            | :? CallDev as c  ->
                 match c.Parent with
                 | DuParentFlow _ -> vaild.HasFlag(CallInFlow)
                 | DuParentReal _ -> vaild.HasFlag(CallInReal)
@@ -148,7 +148,7 @@ module CpuLoader =
                 match v with
                 | :? Real
                     ->  v.TagManager <- VertexMReal(v)
-                | (:? RealExS | :? RealExF | :? Call | :? Alias)
+                | (:? CallSys | :? RealExF | :? CallDev | :? Alias)
                     -> v.TagManager <-  VertexMCoin(v)
                 | _ -> failwithlog (getFuncName()))
 

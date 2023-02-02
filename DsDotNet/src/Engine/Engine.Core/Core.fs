@@ -76,7 +76,7 @@ module CoreModule =
         member x.ValueChangeSubject = (x :> ISystem).ValueChangeSubject
 
         member val Flows   = createNamedHashSet<Flow>()
-        //시스템에서 호출가능한 작업리스트 (Call => Job => ApiItems => Addresses)
+        //시스템에서 호출가능한 작업리스트 (CallDev => Job => ApiItems => Addresses)
         member val Jobs    = ResizeArray<Job>()
 
 
@@ -167,7 +167,7 @@ module CoreModule =
         member val Mnemonincs = mnemonics |> ResizeArray
 
     /// leaf or stem(parenting)
-    /// Graph 상의 vertex 를 점유하는 named object : Real, Alias, Call
+    /// Graph 상의 vertex 를 점유하는 named object : Real, Alias, CallDev
     [<AbstractClass>]
     type Vertex (names:Fqdn, parent:ParentWrapper)  =
         inherit FqdnObject(names.Combine(), parent.GetCore())
@@ -178,11 +178,11 @@ module CoreModule =
         member _.ParentNPureNames = ([parent.GetCore().Name] @ names).ToArray()
         override x.GetRelativeName(_referencePath:Fqdn) = x.PureNames.Combine()
 
-    // Subclasses = {Call | Real | RealOtherFlow}
+    // Subclasses = {CallDev | Real | RealOtherFlow}
     type ISafetyConditoinHolder =
         abstract member SafetyConditions: HashSet<SafetyCondition>
 
-    /// Indirect to Call/Alias/RealOtherFlow/RealOtherSystem
+    /// Indirect to CallDev/Alias/RealOtherFlow/CallSys
     [<AbstractClass>]
     type Indirect (names:string seq, parent:ParentWrapper) =
         inherit Vertex(names |> Array.ofSeq, parent)
@@ -205,29 +205,29 @@ module CoreModule =
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
-    and RealOtherSystem private (target:Job, parent) =
+    [<AbstractClass>]
+    type Call (target:Job, parent) =
         inherit Indirect(target.Name, parent)
         member _.CallTargetJob = target
         member val Xywh:Xywh = null with get, set
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
-    and Call private (target:Job, parent) =
-        inherit Indirect(target.Name, parent)
-        member _.CallTargetJob = target
-        member val Xywh:Xywh = null with get, set
-        interface ISafetyConditoinHolder with
-            member val SafetyConditions = HashSet<SafetyCondition>()
+    and CallSys private (target:Job, parent) =
+        inherit Call(target, parent)
 
-    and Alias private (name:string, target:AliasTargetWrapper, parent) = // target : Real or Call or OtherFlowReal
+    and CallDev private (target:Job, parent) =
+        inherit Call(target, parent)
+
+    and Alias private (name:string, target:AliasTargetWrapper, parent) = // target : Real or CallDev or OtherFlowReal
         inherit Indirect(name, parent)
         member _.TargetWrapper = target
 
-    /// Job 정의: Call 이 호출하는 Job 항목
+    /// Job 정의: CallDev 이 호출하는 Job 항목
     type Job (name:string, tasks:DsTask list) =
         inherit Named(name)
-        member x.DeviceDefs = tasks.OfType<TaskDevice>()
-        member x.LinkDefs   = tasks.OfType<TaskLink>()
+        member x.DeviceDefs = tasks.OfType<TaskDev>()
+        member x.LinkDefs   = tasks.OfType<TaskSys>()
         member val Funcs  = HashSet<Func>() with get, set
 
     type TagAddress = string
@@ -238,7 +238,7 @@ module CoreModule =
         member val ApiName = getRawName [loadedName;api.Name] true
 
     /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
-    type TaskDevice (api:ApiItem, inAddress:TagAddress, outAddress:TagAddress, deviceName:string) =
+    type TaskDev (api:ApiItem, inAddress:TagAddress, outAddress:TagAddress, deviceName:string) =
         inherit DsTask(api, deviceName)
         member val InAddress   = inAddress  with get, set
         member val OutAddress  = outAddress with get, set
@@ -247,7 +247,7 @@ module CoreModule =
         //CPU 생성시 할당됨 OutTag
         member val OutTag = getNull<ITag>() with get, set
 
-    type TaskLink (api:ApiItem, systemName:string) =
+    type TaskSys (api:ApiItem, systemName:string) =
         inherit DsTask(api, systemName)
 
     /// 자신을 export 하는 관점에서 본 api's.  Interface 정의.   [interfaces] = { "+" = { F.Vp ~ F.Sp } }
@@ -290,9 +290,9 @@ module CoreModule =
 
     and AliasTargetWrapper =
         | DuAliasTargetReal of Real
-        | DuAliasTargetCall of Call
+        | DuAliasTargetCall of CallDev
         | DuAliasTargetRealExFlow of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
-        | DuAliasTargetRealExSystem of RealOtherSystem
+        | DuAliasTargetRealExSystem of CallSys
         member x.RealTarget() =
             match x with | DuAliasTargetReal   r -> Some r |_ -> None
         member x.CallTarget() =
@@ -304,14 +304,14 @@ module CoreModule =
 
     and SafetyCondition =
         | DuSafetyConditionReal of Real
-        | DuSafetyConditionCall of Call
+        | DuSafetyConditionCall of CallDev
         | DuSafetyConditionRealExFlow of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
-        | DuSafetyConditionRealExSystem of RealOtherSystem    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
+        | DuSafetyConditionRealExSystem of CallSys    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
 
           ///Vertex의 부모의 타입을 구분한다.
     type ParentWrapper =
-        | DuParentFlow of Flow //Real/Call/Alias 의 부모
-        | DuParentReal of Real //Call/Alias      의 부모
+        | DuParentFlow of Flow //Real/CallDev/Alias 의 부모
+        | DuParentReal of Real //CallDev/Alias      의 부모
 
     type ParentWrapper with
         member x.GetCore() =
@@ -377,10 +377,9 @@ module CoreModule =
 
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 
-    type RealExS = RealOtherSystem
-    type RealOtherSystem with
+    type CallSys with
         static member Create(target:Job, parent:ParentWrapper) =
-            let exSysReal = RealOtherSystem(target, parent)
+            let exSysReal = CallSys(target, parent)
             parent.GetGraph().AddVertex(exSysReal) |> verifyM $"Duplicated other flow real call [{exSysReal}]"
             exSysReal
 
@@ -391,9 +390,9 @@ module CoreModule =
                 | _->failwithlog "Error"
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 
-    type Call with
+    type CallDev with
         static member Create(target:Job, parent:ParentWrapper) =
-            let call = Call(target, parent)
+            let call = CallDev(target, parent)
             parent.GetGraph().AddVertex(call) |> verifyM $"Duplicated call name [{target.Name}]"
             call
 

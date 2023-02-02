@@ -25,7 +25,7 @@ type VertexManager with
            withExpressionComment ""       h
         ]
 
-    /// vertex 의 Call RGFH status 를 update 하는 rungs/statements 만들기
+    /// vertex 의 CallDev RGFH status 를 update 하는 rungs/statements 만들기
     member v.S2_CoinRGFH(): CommentedStatement list =                                 //  Status   ST  RT  CR
         let v = v :?> VertexMCoin
                                                                                       //----------------------

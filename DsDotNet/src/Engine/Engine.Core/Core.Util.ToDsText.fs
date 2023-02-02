@@ -144,8 +144,8 @@ module internal ToDsTextModule =
 
             if system.Jobs.Any() then
                 let addressPrint (addr:string) = if addr = "" then "_" else addr
-                let printDev (ai:TaskDevice) = $"{ai.ApiName}({addressPrint ai.InAddress}, {addressPrint ai.OutAddress})"
-                let printLink (ai:TaskLink) = $"{ai.ApiName}"
+                let printDev (ai:TaskDev) = $"{ai.ApiName}({addressPrint ai.InAddress}, {addressPrint ai.OutAddress})"
+                let printLink (ai:TaskSys) = $"{ai.ApiName}"
                 yield $"{tab}[jobs] = {lb}"
                 for c in system.Jobs do
                     if c.DeviceDefs.any() then
@@ -311,7 +311,7 @@ module internal ToDsTextModule =
 
             let withSafeties = safetyHolders.Where(fun h -> h.SafetyConditions.Any())
             let safeties =
-                let getCallName (call:Call) =
+                let getCallName (call:CallDev) =
                     match call.Parent with
                     | DuParentReal r-> $"{r.Flow.Name}.{call.ParentNPureNames.Combine()}"
                     | DuParentFlow _ -> call.ParentNPureNames.Combine()
@@ -325,9 +325,9 @@ module internal ToDsTextModule =
                 let safetyConditionHolderName(sch:ISafetyConditoinHolder) =
                     match sch with
                     | :? Real as real -> real.ParentNPureNames.Combine()
-                    | :? Call as call -> getCallName call
+                    | :? CallDev as call -> getCallName call
                     | :? RealOtherFlow as realExF -> realExF.ParentNPureNames.Combine()
-                    | :? RealOtherSystem as realExS -> realExS.ParentNPureNames.Combine()
+                    | :? CallSys as realExS -> realExS.ParentNPureNames.Combine()
                     | _ -> failwithlog "ERROR"
 
                 [
@@ -341,7 +341,7 @@ module internal ToDsTextModule =
 
             let calls =
                 [   for f in system.Flows do
-                        yield! f.Graph.Vertices.OfType<Call>()
+                        yield! f.Graph.Vertices.OfType<CallDev>()
                 ] |> List.distinct
 
             let withLayouts = calls.Where(fun call -> call.Xywh <> null)

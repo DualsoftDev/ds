@@ -197,23 +197,23 @@ module EtcListenerModule =
                             let! vertex = flow.Graph.TryFindVertex(realOrCall)
                             match vertex with
                             | :? Real as r -> return DuSafetyConditionReal r
-                            | :? Call as c -> return DuSafetyConditionCall c
+                            | :? CallDev as c -> return DuSafetyConditionCall c
                             | :? RealOtherFlow as o -> return DuSafetyConditionRealExFlow o
-                            | :? RealOtherSystem as o -> return DuSafetyConditionRealExSystem o
+                            | :? CallSys as o -> return DuSafetyConditionRealExSystem o
                             | _-> failwithlog "Error"
 
                         |None ->
                             let! vertex = curSystem.TryFindCall(ns)
                             match vertex with
-                            | :? RealOtherSystem as rs -> return DuSafetyConditionRealExSystem rs
-                            | :? Call as c -> return DuSafetyConditionCall c
+                            | :? CallSys as rs -> return DuSafetyConditionRealExSystem rs
+                            | :? CallDev as c -> return DuSafetyConditionCall c
                             | _ -> failwithlog "ERROR"
 
                     | _f::_r::_c::[] ->
                         let! vertex = curSystem.TryFindCall(ns)
                         match vertex with
-                        | :? RealOtherSystem as rs -> return DuSafetyConditionRealExSystem rs
-                        | :? Call as c -> return DuSafetyConditionCall c
+                        | :? CallSys as rs -> return DuSafetyConditionRealExSystem rs
+                        | :? CallDev as c -> return DuSafetyConditionCall c
                         | _ -> failwithlog "ERROR"
 
                     | _ ->
@@ -248,7 +248,7 @@ module EtcListenerModule =
         //    let init    = context.TryFindFirstChild<ArgumentContext>().Value.GetText()
         //    x.TheSystem.Variables.Add(new VariableData(varName, varType, init))
 
-        //TaskDevice 여기에 저장 및 불러오기로 이동
+        //TaskDev 여기에 저장 및 불러오기로 이동
         //member x.ProcessCommandDef(context:CommandDefContext) =
         //    let cmdName    = context.TryFindFirstChild<CmdNameContext>().Value.GetText()
         //    let funApplCtx = context.TryFindFirstChild<FunApplicationContext>().Value
@@ -256,7 +256,7 @@ module EtcListenerModule =
         //    let command    = new Command(cmdName, funAppl)
         //    x.TheSystem.Commands.Add(command)
 
-        //TaskDevice 여기에 저장 및 불러오기로 이동
+        //TaskDev 여기에 저장 및 불러오기로 이동
         //member x.ProcessObserveDef(context:ObserveDefContext) =
         //    let obsName    = context.TryFindFirstChild<ObserveNameContext>().Value.GetText()
         //    let funApplCtx = context.TryFindFirstChild<FunApplicationContext>().Value
@@ -284,11 +284,11 @@ module EtcListenerModule =
                 match xywh.x().GetText(), xywh.y().GetText(), xywh.w().GetText(), xywh.h().GetText() with
                 | Int32Pattern x, Int32Pattern y, Int32Pattern w, Int32Pattern h ->
                     match call with
-                    | :? Call -> (call:?>Call).Xywh <- new Xywh(x, y, w, h)
+                    | :? CallDev -> (call:?>CallDev).Xywh <- new Xywh(x, y, w, h)
                     | _ -> ()
                 | Int32Pattern x, Int32Pattern y, null, null ->
                     match call with
-                    | :? Call -> (call:?>Call).Xywh <- new Xywh(x, y, Nullable(), Nullable())
+                    | :? CallDev -> (call:?>CallDev).Xywh <- new Xywh(x, y, Nullable(), Nullable())
                     | _ -> ()
                 | _ ->
                     failwithlog "ERROR"

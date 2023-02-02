@@ -16,5 +16,5 @@ type Spec09_TimmerStatement() =
     do
         t.GenerationIO()
     [<Test>]
-    member __.``T1 Delay Call`` () =
+    member __.``T1 Delay CallDev`` () =
         t.Sys.T1_DelayCall() |> doChecks

@@ -196,7 +196,7 @@ partial class ElementsListener : dsBaseListener
         call.TXs.AddRange(txs);
         call.RXs.AddRange(rxs);
         call.Resets.AddRange(resets);
-        //Trace.WriteLine($"Call: {name} = {txs.Select(tx => tx.Name)} ~ {rx?.Name}");
+        //Trace.WriteLine($"CallDev: {name} = {txs.Select(tx => tx.Name)} ~ {rx?.Name}");
     }
 
 

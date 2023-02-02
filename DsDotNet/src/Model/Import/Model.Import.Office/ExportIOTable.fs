@@ -25,7 +25,7 @@ module ExportIOTable =
 
         let funcToText(xs:Func seq) = xs.Select(fun f->f.ToDsText()).JoinWith(";")
 
-        let rowItems(dev:TaskDevice, job:Job option) =
+        let rowItems(dev:TaskDev, job:Job option) =
             let jobName, funcs =
                 if job.IsSome
                 then job.Value.Name
@@ -42,7 +42,7 @@ module ExportIOTable =
                     for dev in  sortedDeviceDefs do
                         if sortedDeviceDefs.Head() = dev
                         then
-                            yield rowItems(dev, Some job) //첫 TaskDevice만 만듬
+                            yield rowItems(dev, Some job) //첫 TaskDev만 만듬
                         else
                             yield rowItems(dev, None)
             }

@@ -38,7 +38,7 @@ type VertexManager with
         ]
 
     member v.M4_CallErrorRXMonitor(): CommentedStatement  =
-        let call = v.Vertex :?> Call
+        let call = v.Vertex :?> CallDev
         let In_Rxs =
             [ for j in call.CallTargetJob.DeviceDefs do
                 if j.ApiItem.RXs.Any()

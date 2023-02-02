@@ -59,15 +59,15 @@ module ModelAnswers =
     let answerEveryScenarioText = """
     [sys ip = 192.168.0.1] My = {
     [flow] MyFlow = {
-        Seg1 > Seg2 > Ap;		// Seg1(Real)> Seg2(Real) > Ap(Call);
+        Seg1 > Seg2 > Ap;		// Seg1(Real)> Seg2(Real) > Ap(CallDev);
         Seg1 = {
-            Ap > Am;		// Ap(Call)> Am(Call);
+            Ap > Am;		// Ap(CallDev)> Am(CallDev);
         }
     }
     [flow] "Flow.Complex" = {
         "#Seg.Complex#" => Seg;		// "#Seg.Complex#"(Real)=> Seg(Real);
         "#Seg.Complex#" = {
-            Ap > Am;		// Ap(Call)> Am(Call);
+            Ap > Am;		// Ap(CallDev)> Am(CallDev);
         }
     }
     [flow] F = {
@@ -77,7 +77,7 @@ module ModelAnswers =
         C3 > C5 > C6;		// C3(Real)> C5(Real) > C6(Real);
         C1, C2 > C3, C4 |> C5;		// C1(Real), C2(Real)> C3(Real), C4(Real) |> C5(Real);
         Main = {
-            Bm2 > Ap > Am > Bp > Bm;		// Bm2(Alias)> Ap(Call) > Am(Call) > Bp(Call) > Bm(Call);
+            Bm2 > Ap > Am > Bp > Bm;		// Bm2(Alias)> Ap(CallDev) > Am(CallDev) > Bp(CallDev) > Bm(CallDev);
             Ap2 > Bp2 > Bm2;		// Ap2(Alias)> Bp2(Alias) > Bm2(Alias);
             Ap1 > Bp1 > Bm1 > Ap2 > Am2 > Bm2;		// Ap1(Alias)> Bp1(Alias) > Bm1(Alias) > Ap2(Alias) > Am2(Alias) > Bm2(Alias);
             Ap1 > Am1 > Bm1;		// Ap1(Alias)> Am1(Alias) > Bm1(Alias);
@@ -365,10 +365,10 @@ module ModelComponentAnswers =
 [sys] Control = {
     [flow] F = {
         Main <||> Reset;		// Main(Real)<||> Reset(Real);
-        FWD <| Main |> BWD;		// FWD(RealOtherSystem)<| Main(Real) |> BWD(RealOtherSystem);
-        FWD > BWD > Main |> FWD2 |> BWD2;		// FWD(RealOtherSystem)> BWD(RealOtherSystem) > Main(Real) |> FWD2(Alias) |> BWD2(Alias);
+        FWD <| Main |> BWD;		// FWD(CallSys)<| Main(Real) |> BWD(CallSys);
+        FWD > BWD > Main |> FWD2 |> BWD2;		// FWD(CallSys)> BWD(CallSys) > Main(Real) |> FWD2(Alias) |> BWD2(Alias);
         Main = {
-            mv1up, mv2dn > mv1dn, mv2up;		// mv1up(Call), mv2dn(Call)> mv1dn(Call), mv2up(Call);
+            mv1up, mv2dn > mv1dn, mv2up;		// mv1up(CallDev), mv2dn(CallDev)> mv1dn(CallDev), mv2up(CallDev);
         }
         [aliases] = {
             FWD = { FWD2; }

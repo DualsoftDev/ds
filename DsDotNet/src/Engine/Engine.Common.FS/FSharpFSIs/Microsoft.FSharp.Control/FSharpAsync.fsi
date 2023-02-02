@@ -97,7 +97,7 @@ type Async =
     /// computation: The asynchronous computation to execute.
     /// cancellationToken: The CancellationToken to associate with the computation.  The default is used if this parameter is not provided.
     static member StartImmediate : computation:Async<unit> * ?cancellationToken:Threading.CancellationToken -> unit
-    /// Runs an asynchronous computation, starting immediately on the current operating system thread. Call one of the three continuations when the operation completes.
+    /// Runs an asynchronous computation, starting immediately on the current operating system thread. CallDev one of the three continuations when the operation completes.
     /// computation: The asynchronous computation to execute.
     /// continuation: The function called on success.
     /// exceptionContinuation: The function called on exception.

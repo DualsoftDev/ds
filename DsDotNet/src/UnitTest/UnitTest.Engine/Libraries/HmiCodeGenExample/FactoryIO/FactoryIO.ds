@@ -3,29 +3,29 @@
     }
     [flow] Line = {
         Clear |> Clear |> Copy1_Assy반출 |> Green공급및고정;		// Clear(Real)|> Clear(Real) |> Copy1_Assy반출(Alias) |> Green공급및고정(Real);
-        "Line_Robot_X+" > 로봇조립Sub;		// "Line_Robot_X+"(Call)> 로봇조립Sub(Real);
-        "Line_Robot_X-" > 로봇조립Main;		// "Line_Robot_X-"(Call)> 로봇조립Main(Real);
+        "Line_Robot_X+" > 로봇조립Sub;		// "Line_Robot_X+"(CallDev)> 로봇조립Sub(Real);
+        "Line_Robot_X-" > 로봇조립Main;		// "Line_Robot_X-"(CallDev)> 로봇조립Main(Real);
         Blue공급및고정 => 로봇조립Sub => Assy반출;		// Blue공급및고정(Real)=> 로봇조립Sub(Real) => Assy반출(Real);
         GoSub => Blue공급및고정 => Assy반출;		// GoSub(Real)=> Blue공급및고정(Real) => Assy반출(Real);
         GoMain => Green공급및고정 => 로봇조립Main => 로봇조립Sub;		// GoMain(Real)=> Green공급및고정(Real) => 로봇조립Main(Real) => 로봇조립Sub(Real);
         로봇조립Sub = {
-            "Line_Robot_Grab-" > "Line_Robot_Z-";		// "Line_Robot_Grab-"(Call)> "Line_Robot_Z-"(Call);
-            "Line_Robot_Z+" > "Line_Robot_Grab-" > "Line_Robot_X-";		// "Line_Robot_Z+"(Call)> "Line_Robot_Grab-"(Call) > "Line_Robot_X-"(Call);
+            "Line_Robot_Grab-" > "Line_Robot_Z-";		// "Line_Robot_Grab-"(CallDev)> "Line_Robot_Z-"(CallDev);
+            "Line_Robot_Z+" > "Line_Robot_Grab-" > "Line_Robot_X-";		// "Line_Robot_Z+"(CallDev)> "Line_Robot_Grab-"(CallDev) > "Line_Robot_X-"(CallDev);
         }
         로봇조립Main = {
-            "Line_Robot_Grab+" > Line_Main_PartOff;		// "Line_Robot_Grab+"(Call)> Line_Main_PartOff(Call);
-            "Line_Robot_Grab+" > "Line_Robot_X+";		// "Line_Robot_Grab+"(Call)> "Line_Robot_X+"(Call);
-            "Line_Robot_Z+" > "Line_Robot_Grab+" > "Line_Robot_Z-";		// "Line_Robot_Z+"(Call)> "Line_Robot_Grab+"(Call) > "Line_Robot_Z-"(Call);
+            "Line_Robot_Grab+" > Line_Main_PartOff;		// "Line_Robot_Grab+"(CallDev)> Line_Main_PartOff(CallDev);
+            "Line_Robot_Grab+" > "Line_Robot_X+";		// "Line_Robot_Grab+"(CallDev)> "Line_Robot_X+"(CallDev);
+            "Line_Robot_Z+" > "Line_Robot_Grab+" > "Line_Robot_Z-";		// "Line_Robot_Z+"(CallDev)> "Line_Robot_Grab+"(CallDev) > "Line_Robot_Z-"(CallDev);
         }
         Assy반출 = {
-            "Line_Assy_Upper+" > Line_Sub_PartOff;		// "Line_Assy_Upper+"(Call)> Line_Sub_PartOff(Call);
-            "Line_Assy_Upper+" > "Line_Assy_UpConv+" > "Line_Assy_Upper-" > "Line_Assy_DownConv+";		// "Line_Assy_Upper+"(Call)> "Line_Assy_UpConv+"(Call) > "Line_Assy_Upper-"(Call) > "Line_Assy_DownConv+"(Call);
+            "Line_Assy_Upper+" > Line_Sub_PartOff;		// "Line_Assy_Upper+"(CallDev)> Line_Sub_PartOff(CallDev);
+            "Line_Assy_Upper+" > "Line_Assy_UpConv+" > "Line_Assy_Upper-" > "Line_Assy_DownConv+";		// "Line_Assy_Upper+"(CallDev)> "Line_Assy_UpConv+"(CallDev) > "Line_Assy_Upper-"(CallDev) > "Line_Assy_DownConv+"(CallDev);
         }
         Blue공급및고정 = {
-            "Line_Sub_Conv+" > "Line_Sub_Clamp+" > "Line_Sub_Clamp-";		// "Line_Sub_Conv+"(Call)> "Line_Sub_Clamp+"(Call) > "Line_Sub_Clamp-"(Call);
+            "Line_Sub_Conv+" > "Line_Sub_Clamp+" > "Line_Sub_Clamp-";		// "Line_Sub_Conv+"(CallDev)> "Line_Sub_Clamp+"(CallDev) > "Line_Sub_Clamp-"(CallDev);
         }
         Green공급및고정 = {
-            "Line_Main_Conv+" > "Line_Main_Clamp+" > "Line_Main_Clamp-";		// "Line_Main_Conv+"(Call)> "Line_Main_Clamp+"(Call) > "Line_Main_Clamp-"(Call);
+            "Line_Main_Conv+" > "Line_Main_Clamp+" > "Line_Main_Clamp-";		// "Line_Main_Conv+"(CallDev)> "Line_Main_Clamp+"(CallDev) > "Line_Main_Clamp-"(CallDev);
         }
         [aliases] = {
             Assy반출 = { Copy1_Assy반출; }

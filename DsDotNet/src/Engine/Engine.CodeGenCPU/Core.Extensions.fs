@@ -215,7 +215,7 @@ module ConvertCoreExt =
                   .Where(fun typ -> writeAble.Contains(typ))
                   .Select(fm.GetFlowTag)
 
-    type Call with
+    type CallDev with
         member c.UsingTon  = c.CallTargetJob.Funcs |> hasTime
         member c.UsingCtr  = c.CallTargetJob.Funcs |> hasCount
         member c.UsingNot  = c.CallTargetJob.Funcs |> hasNot
@@ -261,7 +261,7 @@ module ConvertCoreExt =
 
 
 
-    type TaskDevice with
+    type TaskDev with
         member jd.ActionIN  = jd.InTag  :?> Tag<bool>
         member jd.ActionOut = jd.OutTag :?> Tag<bool>
         member jd.RXs       = jd.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.EP)

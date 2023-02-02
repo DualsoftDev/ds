@@ -23,8 +23,8 @@ module ImportU =
                 if job.DeviceDefs.any()
                 then
                     if(parentReal.IsSome)
-                    then  Call.Create(job, DuParentReal (parentReal.Value))
-                    else  Call.Create(job, DuParentFlow (parentFlow.Value))
+                    then  CallDev.Create(job, DuParentReal (parentReal.Value))
+                    else  CallDev.Create(job, DuParentFlow (parentFlow.Value))
                 else
                     node.Shape.ErrorName(ErrID._52, node.PageNum)
 
@@ -42,7 +42,7 @@ module ImportU =
             match mySys.Jobs.TryFind(fun job -> job.Name = sysName+"_"+apiName) with
             |Some job ->
                 if job.LinkDefs.any()
-                then RealExS.Create(job, DuParentFlow (parentFlow))
+                then CallSys.Create(job, DuParentFlow (parentFlow))
                 else node.Shape.ErrorName(ErrID._51, node.PageNum)
             |None -> node.Shape.ErrorName(ErrID._49, node.PageNum)
 
@@ -99,8 +99,8 @@ module ImportU =
                              .Select(fun tgt -> getApiItems(mySys, tgt, api.Name), tgt)
                              .Select(fun (api, tgt)->
                                 match node.NodeType with
-                                | OPEN_CPU            -> TaskLink(api, tgt)           :> DsTask
-                                | OPEN_SYS | COPY_SYS -> TaskDevice(api, "", "", tgt) :> DsTask
+                                | OPEN_CPU            -> TaskSys(api, tgt)           :> DsTask
+                                | OPEN_SYS | COPY_SYS -> TaskDev(api, "", "", tgt) :> DsTask
                                 | _-> failwithlog "Error MakeJobs"
                                 )
 
@@ -295,15 +295,15 @@ module ImportU =
                                 if dicChildParent.ContainsKey(node)
                                 then
                                     let real = dicVertex.[dicChildParent.[node].Key] :?> Real
-                                    let call = dicVertex.[node.Alias.Value.Key] :?> Call
-                                    Alias.Create($"{call.Name}_{node.AliasNumber}", DuAliasTargetCall(segOrg:?>Call), DuParentReal(real))
+                                    let call = dicVertex.[node.Alias.Value.Key] :?> CallDev
+                                    Alias.Create($"{call.Name}_{node.AliasNumber}", DuAliasTargetCall(segOrg:?>CallDev), DuParentReal(real))
                                 else
                                     let flow = dicFlow.[node.PageNum]
                                     match segOrg with
                                     | :? RealExF as ex -> Alias.Create($"{ex.Name}_{node.AliasNumber}", DuAliasTargetRealExFlow(ex), DuParentFlow(flow))
-                                    | :? RealExS as ex -> Alias.Create($"{ex.Name}_{node.AliasNumber}", DuAliasTargetRealExSystem(ex), DuParentFlow(flow))
+                                    | :? CallSys as ex -> Alias.Create($"{ex.Name}_{node.AliasNumber}", DuAliasTargetRealExSystem(ex), DuParentFlow(flow))
                                     | :? Real as rt -> Alias.Create($"{rt.Name}_{node.AliasNumber}", DuAliasTargetReal(rt), DuParentFlow(flow))
-                                    | :? Call as ct -> Alias.Create($"{ct.Name}_{node.AliasNumber}", DuAliasTargetCall(ct), DuParentFlow(flow))
+                                    | :? CallDev as ct -> Alias.Create($"{ct.Name}_{node.AliasNumber}", DuAliasTargetCall(ct), DuParentFlow(flow))
                                     |_ -> failwithf "Error type"
 
                             dicVertex.Add(node.Key, alias)
@@ -311,7 +311,7 @@ module ImportU =
 
                 //Real 부터
                 createReal()
-                //Call 처리
+                //CallDev 처리
                 createCall()
                 //Alias Node 처리 마감
                 createAlias()
@@ -406,8 +406,8 @@ module ImportU =
                                     match safeCondV with
                                     | :? Real as r -> holder.SafetyConditions.Add( DuSafetyConditionReal (r)) |>ignore
                                     | :? RealExF as ex -> holder.SafetyConditions.Add(DuSafetyConditionRealExFlow (ex))  |>ignore
-                                    | :? RealExS as ex -> holder.SafetyConditions.Add(DuSafetyConditionRealExSystem (ex))  |>ignore
-                                    | :? Call as c -> holder.SafetyConditions.Add(DuSafetyConditionCall (c)) |>ignore
+                                    | :? CallSys as ex -> holder.SafetyConditions.Add(DuSafetyConditionRealExSystem (ex))  |>ignore
+                                    | :? CallDev as c -> holder.SafetyConditions.Add(DuSafetyConditionCall (c)) |>ignore
                                     | _ -> failwithlog "Error"
                             | _ -> failwithlog "Error"
                         )

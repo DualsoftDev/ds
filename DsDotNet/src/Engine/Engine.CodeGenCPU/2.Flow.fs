@@ -44,8 +44,8 @@ type VertexManager with
         let ands =
             match v.Vertex  with
             | :? RealExF as rf -> rf.V.CR.Expr
-            | :? RealExS as rs -> rs.V.CR.Expr
-            | :? Call | :? Alias ->
+            | :? CallSys as rs -> rs.V.CR.Expr
+            | :? CallDev | :? Alias ->
                 match v.GetPureCall() with
                 | Some call ->  if call.UsingTon
                                 then call.V.TON.DN |> var2expr

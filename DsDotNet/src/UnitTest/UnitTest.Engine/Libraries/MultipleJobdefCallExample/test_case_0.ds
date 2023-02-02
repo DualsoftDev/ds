@@ -6,7 +6,7 @@
         R1 = {
 			S101_Copy1_Func3 > S101_Copy1_Func4, S101_Copy1_Func5 > S101_Copy2_Func1 > S101_Copy2_Func2 > S101_Copy2_Func3;
 			//S101_Copy1_Func3 > S101_Copy1_Func4, S101_Copy1_Func5;
-            //S101_Copy2_Func1 > S101_Copy2_Func2 > S101_Copy2_Func3;		// S101_Copy1_Func1(Call)> S101_Copy2_Func2(Call);
+            //S101_Copy2_Func1 > S101_Copy2_Func2 > S101_Copy2_Func3;		// S101_Copy1_Func1(CallDev)> S101_Copy2_Func2(CallDev);
 			//S101_Copy2_Func4 > S101_Copy2_Func3;
         }
 		R2 = {
@@ -16,7 +16,7 @@
     [flow] S102 = {
         R1 > R2;		// R1(Real)> R2(Real);
         R1 = {
-            S102_SystemA_Func1 > S102_SystemA_Func2;		// S102_SystemA_Func1(Call)> S102_SystemA_Func2(Call);
+            S102_SystemA_Func1 > S102_SystemA_Func2;		// S102_SystemA_Func1(CallDev)> S102_SystemA_Func2(CallDev);
         }
     }
     [jobs] = {

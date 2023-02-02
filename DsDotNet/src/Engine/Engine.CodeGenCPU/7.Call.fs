@@ -8,7 +8,7 @@ open Engine.Common.FS
 
 type VertexMCoin with
     member coin.C1_CallPlanSend(): CommentedStatement list =
-        let call = coin.Vertex :?> Call
+        let call = coin.Vertex :?> CallDev
         let dop, mop, rop = coin.Flow.dop.Expr, coin.Flow.mop.Expr, coin.Flow.rop.Expr
         let sharedCalls = coin.GetSharedCall().Select(getVM)
         let startTags   = ([coin.ST] @ sharedCalls.STs()).ToOr()
@@ -29,7 +29,7 @@ type VertexMCoin with
 
 
     member coin.C2_CallActionOut(): CommentedStatement list =
-        let call = coin.Vertex :?> Call
+        let call = coin.Vertex :?> CallDev
         let rsts = coin._off.Expr
         [
             for jd in call.CallTargetJob.DeviceDefs do
@@ -38,7 +38,7 @@ type VertexMCoin with
         ]
 
     member coin.C3_CallPlanReceive(): CommentedStatement list =
-        let call = coin.Vertex :?> Call
+        let call = coin.Vertex :?> CallDev
         let rsts = coin._off.Expr
         [
             for jd in call.CallTargetJob.DeviceDefs do
@@ -48,7 +48,7 @@ type VertexMCoin with
 
     member coin.C4_CallActionIn(): CommentedStatement list =
         let sharedCalls = coin.GetSharedCall()
-        let call = coin.Vertex :?> Call
+        let call = coin.Vertex :?> CallDev
         let rsts = coin._off.Expr
         [
             for sharedCall in sharedCalls do

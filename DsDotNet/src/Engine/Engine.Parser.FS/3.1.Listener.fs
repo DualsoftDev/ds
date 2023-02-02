@@ -321,8 +321,8 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
 
                         | 1, c::[] when not <| (isAliasMnemonic (parent, ctxInfo.Names.Combine())) ->
                             let job = tryFindJob system c |> Option.get
-                            if job.DeviceDefs.any() then Call.Create(job, parent) |> ignore
-                            if job.LinkDefs.any()   then RealOtherSystem.Create(job, parent) |> ignore
+                            if job.DeviceDefs.any() then CallDev.Create(job, parent) |> ignore
+                            if job.LinkDefs.any()   then CallSys.Create(job, parent) |> ignore
 
                         | 1, realorFlow::cr::[] when not <| isAliasMnemonic (parent, ctxInfo.Names.Combine()) ->
                             let otherFlowReal = tryFindReal system realorFlow cr |> Option.get
@@ -406,7 +406,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                                     let rx = getAddress(rxAddressCtx) |>replaceSkipAddress
 
                                     tracefn $"TX={tx} RX={rx}"
-                                    return TaskDevice(apiPoint, rx, tx, device)
+                                    return TaskDev(apiPoint, rx, tx, device)
                                 }
                             match apiItem with
                             | Some apiItem -> yield apiItem
@@ -436,7 +436,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                         | Some apiItem -> apiItem, exSys
                         | _ -> failwithlog "ERROR"
                     | _ -> failwithlog "ERROR"
-                let linkDef = TaskLink linkInfo
+                let linkDef = TaskSys linkInfo
                 let job = Job(linkName, [linkDef])
                 job |> system.Jobs.Add
 
@@ -455,8 +455,8 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                             | None ->
                                 let vertex = flow.System.TryFindCall ([flow.Name;rc].ToArray()) |> Option.get
                                 match vertex with
-                                | :? RealOtherSystem as rs -> DuAliasTargetRealExSystem rs
-                                | :? Call as c -> DuAliasTargetCall c
+                                | :? CallSys as rs -> DuAliasTargetRealExSystem rs
+                                | :? CallDev as c -> DuAliasTargetCall c
                                 | _ -> failwithlog "ERROR"
 
                                 //if call.IsNone then
@@ -472,8 +472,8 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                                 //tryFindCall system ([flow.Name]@ns) |> Option.get |> DuAliasTargetCall
                                 let vertex = tryFindCall system ([flow.Name]@ns) |> Option.get
                                 match vertex with
-                                | :? RealOtherSystem as rs -> DuAliasTargetRealExSystem rs
-                                | :? Call as c -> DuAliasTargetCall c
+                                | :? CallSys as rs -> DuAliasTargetRealExSystem rs
+                                | :? CallDev as c -> DuAliasTargetCall c
                                 | _ -> failwithlog "ERROR"
                         | _ ->
                             failwithlog "ERROR"

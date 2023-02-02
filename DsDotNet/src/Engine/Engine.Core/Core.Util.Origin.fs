@@ -45,7 +45,7 @@ module OriginModule =
     /// Get vertex target
     let getVertexTarget (vertex:Vertex) =
         match vertex with
-        | :? Call as c -> c
+        | :? CallDev as c -> c
         | :? Alias as a ->
             match a.TargetWrapper with
             | DuAliasTargetCall ct -> ct
@@ -65,10 +65,10 @@ module OriginModule =
             let tgt = $"{system}.{info.Operand2}"
             { Source=src; Operator=info.Operator.ToText(); Target=tgt}
 
-        let getDeviceDefs (call:Call) =
+        let getDeviceDefs (call:CallDev) =
             call.CallTargetJob.DeviceDefs
 
-        let getResetInfo (jd:TaskDevice) =
+        let getResetInfo (jd:TaskDev) =
             let apiOwnSystem = jd.ApiItem.System
             apiOwnSystem.ApiResetInfos
             |> Seq.map(makeName (apiOwnSystem.QualifiedName))
@@ -108,11 +108,11 @@ module OriginModule =
 
     /// Get ordered taskDevice routes
     let visitFromSourceToTargetInList
-        (now:int * int) (target:int * int) (route:TaskDevice list list)
+        (now:int * int) (target:int * int) (route:TaskDev list list)
       =
         let rec searchList
                 (now:int * int) (target:int * int)
-                (route:TaskDevice list list) (path:TaskDevice list) =
+                (route:TaskDev list list) (path:TaskDev list) =
             [
                 let nv, nj = now
                 let nowPath = path.Append(route.[nv].[nj]) |> List.ofSeq
@@ -264,7 +264,7 @@ module OriginModule =
 
     /// get detected reset chains in all routes
     let getDetectedResetChains
-        (resetChains:seq<string list>) (allRoutes:seq<TaskDevice list>)
+        (resetChains:seq<string list>) (allRoutes:seq<TaskDev list>)
       =
         allRoutes
         |> Seq.collect(fun route ->
@@ -294,7 +294,7 @@ module OriginModule =
 
     /// Get origin map
     let getOriginMaps
-        (allJobs:seq<TaskDevice>)
+        (allJobs:seq<TaskDev>)
         (offByOneWayBackwardResets:string list)
         (offByMutualResetChains:string list)
         (structedChains:seq<Map<string, seq<string>>>)

@@ -13,7 +13,7 @@
     [flow] S102 = {
         R1 > R2;		// R1(Real)> R2(Real);
         R1 = {
-            S102_SystemA_Func1 > S102_SystemA_Func2;		// S102_SystemA_Func1(Call)> S102_SystemA_Func2(Call);
+            S102_SystemA_Func1 > S102_SystemA_Func2;		// S102_SystemA_Func1(CallDev)> S102_SystemA_Func2(CallDev);
         }
     }
     [jobs] = {

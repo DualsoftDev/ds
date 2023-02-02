@@ -104,7 +104,7 @@ module ModelTests1 =
 [sys] L = {
     [flow] F = {
         Main = {
-            // 정보로서의 Call 상호 리셋
+            // 정보로서의 CallDev 상호 리셋
             Ap <||> Am;
             Bp <||> Bm;
             Ap > Am, Bp > Bm > Ap1 > Am1, Bp1 > Bm1;

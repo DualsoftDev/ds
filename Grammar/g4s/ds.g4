@@ -228,7 +228,7 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ipSpec ']' externalSystemN
 propsBlock: '[' 'prop' ']' EQ LBRACE (safetyBlock|layoutBlock)* RBRACE;
     safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
         safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
-            // Real|Call = { ((Real|Call);)* }
+            // Real|CallDev = { ((Real|CallDev);)* }
             safetyKey: identifier23;
             safetyValues: identifier23 (SEIMCOLON identifier23)* (SEIMCOLON)?;
 
@@ -254,13 +254,13 @@ flowBlock
         identifier1Listing: identifier1 SEIMCOLON;     // A;
         identifier2Listing: identifier2 SEIMCOLON;     // A;
 
-    // [aliases] = { X; Y; Z } = P          // {MyFlowReal} or {Call}
+    // [aliases] = { X; Y; Z } = P          // {MyFlowReal} or {CallDev}
     // [aliases] = { X; Y; Z } = P.Q        // {OtherFlow}.{real}
     aliasBlock: '[' 'aliases' ']' '=' LBRACE (aliasListing)* RBRACE;
         aliasListing:
             aliasDef '=' LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE (';')?
             ;
-        aliasDef: identifier12;     // {OtherFlow}.{real} or {MyFlowReal} or {Call}
+        aliasDef: identifier12;     // {OtherFlow}.{real} or {MyFlowReal} or {CallDev}
         aliasMnemonic: identifier1;
 
 variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';

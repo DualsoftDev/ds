@@ -141,7 +141,7 @@ module ModelTest2 =
                     main2Cp <- main1Children |> Seq.find(fun ch -> ch.Name = "Cp")
                     (main2Cp.Coin :?> SubCall).Prototype
 
-                // main1/T.Cp 와 main2/T.Cp 는 동일한 Call prototype 이어야 한다.
+                // main1/T.Cp 와 main2/T.Cp 는 동일한 CallDev prototype 이어야 한다.
                 main1CpProto === main2CpProto
 
 
@@ -153,7 +153,7 @@ module ModelTest2 =
                     main2Cm <- main1Children |> Seq.find(fun ch -> ch.Name = "Cm")
                     (main2Cm.Coin :?> SubCall).Prototype
 
-                // main1/T.Cm 와 main2/T.Cm 는 동일한 Call prototype 이어야 한다.
+                // main1/T.Cm 와 main2/T.Cm 는 동일한 CallDev prototype 이어야 한다.
                 main1CmProto === main2CmProto
 
 
@@ -205,7 +205,7 @@ module ModelTest2 =
 
 
                 let ``check main1`` =
-                    // Call 이 실제 사용하는 외부 시스템의 real segment 를 찾아서, 해당 segment 의 tag 가 존재하는 지 검사.
+                    // CallDev 이 실제 사용하는 외부 시스템의 real segment 를 찾아서, 해당 segment 의 tag 가 존재하는 지 검사.
                     let segMain1CpTx = (main1Cp.Coin :?> SubCall).Prototype.TXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
                     let segMain1CpRx = (main1Cp.Coin :?> SubCall).Prototype.RXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
 
@@ -237,7 +237,7 @@ module ModelTest2 =
 
 
                 let ``check main2`` =
-                    // Call 이 실제 사용하는 외부 시스템의 real segment 를 찾아서, 해당 segment 의 tag 가 존재하는 지 검사.
+                    // CallDev 이 실제 사용하는 외부 시스템의 real segment 를 찾아서, 해당 segment 의 tag 가 존재하는 지 검사.
                     let segMain2CpTx = (main2Cp.Coin :?> SubCall).Prototype.TXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
                     let segMain2CpRx = (main2Cp.Coin :?> SubCall).Prototype.RXs |> Enumerable.OfType<Segment> |> Seq.exactlyOne
 

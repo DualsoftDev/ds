@@ -175,7 +175,7 @@ public class Tester
     }
     [flow] F = {
         Main = {
-            // 정보로서의 Call 상호 리셋
+            // 정보로서의 CallDev 상호 리셋
             T.Ap <||> T.Am;
             T.Ap > T.Am;
         }
@@ -206,7 +206,7 @@ public class Tester
     }
     [flow] F = {
         Main = {
-            // 정보로서의 Call 상호 리셋
+            // 정보로서의 CallDev 상호 리셋
             T.Ap <||> T.Am;
             T.Bp <||> T.Bm;
             T.Ap > T.Bp > T.Bm > T.Am;
@@ -246,7 +246,7 @@ public class Tester
 [sys] L = {
     [flow] F = {
         Main = {
-            // 정보로서의 Call 상호 리셋
+            // 정보로서의 CallDev 상호 리셋
             Ap <||> Am;
             Bp <||> Bm;
             Ap > Am, Bp > Bm;
@@ -290,7 +290,7 @@ public class Tester
 [sys] L = {
     [flow] F = {
         Main = {
-            // 정보로서의 Call 상호 리셋
+            // 정보로서의 CallDev 상호 리셋
             Ap <||> Am;
             Bp <||> Bm;
             Ap > Am, Bp > Bm;
@@ -368,7 +368,7 @@ public class Tester
     }
     [flow] F = {
         Main = {
-            // 정보로서의 Call 상호 리셋
+            // 정보로서의 CallDev 상호 리셋
             T.Ap <||> T.Am;
             T.Ap > T.Am;
         }

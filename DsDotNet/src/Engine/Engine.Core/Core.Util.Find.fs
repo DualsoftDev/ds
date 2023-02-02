@@ -25,7 +25,8 @@ module internal ModelFindModule =
                 | [] -> Some flow
                 | r::xs2 ->
                     match flow.Graph.FindVertex(r) |> box with
-                    | :? Call as call-> Some call
+                    | :? CallDev as call-> Some call
+                    | :? CallSys as call-> Some call
                     | :? Real as real->
                         match xs2 with
                         | [] -> Some real
@@ -34,7 +35,6 @@ module internal ModelFindModule =
                                 let! v = real.Graph.TryFindVertex(remaining.Combine())
                                 return box v
                             }
-                    | :? RealExS as real -> Some real
                     | _ -> None
 
             | dev::xs when system.LoadedSystems.Any(nameEq dev) ->
@@ -86,8 +86,8 @@ module internal ModelFindModule =
         then match tryFindGraphVertex system callPath with
              |Some(v) ->
                 match v with
-                | :? Call -> Some(v)
-                | :? RealOtherSystem -> Some(v)
+                | :? CallDev -> Some(v)
+                | :? CallSys -> Some(v)
                 | _ -> None
              |None -> None
         else None
@@ -95,7 +95,7 @@ module internal ModelFindModule =
     let tryFindRealOtherSystem (system:DsSystem) (Fqdn(realExSPath)) =
         if tryFindJob system (realExSPath.Last()) |> Option.isSome
         then match tryFindGraphVertex system realExSPath with
-             |Some(v) -> Some(v :?> RealOtherSystem)
+             |Some(v) -> Some(v :?> CallSys)
              |None -> None
         else None
 
@@ -129,7 +129,7 @@ module internal ModelFindModule =
 
         sharedAlias @ sharedRealExFlow
 
-    let getVertexSharedCall(call:Call) =
+    let getVertexSharedCall(call:CallDev) =
         let sheredAlias =
             call.Parent.GetFlow().GetVerticesWithInReal()
               .GetAliasTypeCalls()
@@ -164,5 +164,5 @@ type FindExtension =
     [<Extension>] static member TryFindGraphVertex<'V when 'V :> IVertex>(x:DsSystem, Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn
 
     [<Extension>] static member GetVertexSharedReal (x:Real) = getVertexSharedReal x
-    [<Extension>] static member GetVertexSharedCall (x:Call) = getVertexSharedCall x
+    [<Extension>] static member GetVertexSharedCall (x:CallDev) = getVertexSharedCall x
 

@@ -31,10 +31,10 @@ module ModelBuildupTests1 =
             let apiP = apis.First(fun ai -> ai.Name = "+")
             let apiM = apis.First(fun ai -> ai.Name = "-")
             let callAp =
-                let apiItem = TaskDevice(apiP, "%I1", "%Q1",  dev.Name)
+                let apiItem = TaskDev(apiP, "%I1", "%Q1",  dev.Name)
                 Job("Ap", [apiItem])
             let callAm =
-                let apiItem = TaskDevice(apiM, "%I2", "%Q2", dev.Name)
+                let apiItem = TaskDev(apiM, "%I2", "%Q2", dev.Name)
                 Job("Am", [apiItem])
             system.Jobs.AddRange([callAp; callAm])
             system, flow, real, callAp, callAm
@@ -43,8 +43,8 @@ module ModelBuildupTests1 =
         member __.``Model creation test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            let vCallP = Call.Create( callAp, DuParentReal real)
-            let vCallM = Call.Create( callAm, DuParentReal real)
+            let vCallP = CallDev.Create( callAp, DuParentReal real)
+            let vCallM = CallDev.Create( callAm, DuParentReal real)
             real.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", vCallM)) |> ignore
 
             let generated = system.ToDsText()
@@ -70,8 +70,8 @@ module ModelBuildupTests1 =
         member __.``Invalid Model creation test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            let vCallP = Call.Create( callAp, DuParentReal real)
-            let vCallM = Call.Create( callAm, DuParentReal real)
+            let vCallP = CallDev.Create( callAp, DuParentReal real)
+            let vCallM = CallDev.Create( callAm, DuParentReal real)
             ( fun () ->
                 // real 의 child 간 edge 를 flow 에서 생성하려 함.. should fail
                 flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", vCallM)) |> ignore
@@ -82,14 +82,14 @@ module ModelBuildupTests1 =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
             let vCallP = Alias.Create("Main2", DuAliasTargetReal real, DuParentFlow flow)
-            let call2 = Call.Create(callAp, DuParentFlow flow)
+            let call2 = CallDev.Create(callAp, DuParentFlow flow)
 
             flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", call2)) |> ignore
             let generated = system.ToDsText()
             let answer = """
 [sys ip = localhost] My = {
     [flow] F = {
-        Main2 > Ap;		// Main2(Alias)> Ap(Call);
+        Main2 > Ap;		// Main2(Alias)> Ap(CallDev);
         Main; // island
         [aliases] = {
             Main = { Main2; }

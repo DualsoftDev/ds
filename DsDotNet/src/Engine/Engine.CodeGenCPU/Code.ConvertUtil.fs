@@ -12,17 +12,17 @@ module CodeConvertUtil =
     let getSharedReal(v:VertexManager) : Vertex seq =
             (v.Vertex :?> Real).GetVertexSharedReal()
 
-        ///Call 자신을 공용으로 사용하는 Vertex들
+        ///CallDev 자신을 공용으로 사용하는 Vertex들
     let getSharedCall(v:VertexManager) : Vertex seq =
-            (v.Vertex :?> Call).GetVertexSharedCall()
+            (v.Vertex :?> CallDev).GetVertexSharedCall()
 
-        ///Call 자신이거나 Alias Target Call
-    let getPureCall(v:VertexManager) : Call option=
+        ///CallDev 자신이거나 Alias Target CallDev
+    let getPureCall(v:VertexManager) : CallDev option=
             match v.Vertex with
-            | :? Call  as c  ->  Some (c)
+            | :? CallDev  as c  ->  Some (c)
             | :? Alias as a  ->
                 match a.TargetWrapper.GetTarget() with
-                | :? Call as call -> Some call
+                | :? CallDev as call -> Some call
                 | _ -> None
             |_ -> None
 
@@ -48,7 +48,7 @@ module CodeConvertUtil =
         let origins = getOriginDeviceDefs(real, initialType)
         origins.Select(fun jd -> jd.InTag).Cast<Tag<bool>>()
 
-    let getStartPointExpr(call:Call, jd:TaskDevice) =
+    let getStartPointExpr(call:CallDev, jd:TaskDev) =
         match call.Parent.GetCore() with
         | :? Real as r ->
                 let ons = getOriginDeviceDefs (r, InitialType.On)
@@ -141,8 +141,8 @@ module CodeConvertUtil =
                 match f with
                 | :? Real   as r  -> r.V.EP
                 | :? RealExF as rf -> rf.Real.V.EP
-                | :? RealExS as rs -> rs.V.ET
-                | :? Call   as c  -> if usingRoot then  c.V.ET else  c.V.CR
+                | :? CallSys as rs -> rs.V.ET
+                | :? CallDev   as c  -> if usingRoot then  c.V.ET else  c.V.CR
                 | :? Alias  as a  -> if usingRoot then  a.V.ET else  a.V.CR
                 | _ -> failwithlog $"Error {getFuncName()}"
                 )

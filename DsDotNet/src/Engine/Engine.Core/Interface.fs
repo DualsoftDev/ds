@@ -4,6 +4,7 @@ namespace Engine.Core
 open System.Collections.Generic
 open Engine.Common.FS
 open System.Reactive.Subjects
+open System
 
 [<AutoOpen>]
 module Interface =
@@ -53,8 +54,11 @@ module Interface =
         abstract Variable:IStorage option
         abstract Literal:IExpressionizableTerminal option
 
+    type Storages() =
+        inherit Dictionary<string, IStorage>(StringComparer.OrdinalIgnoreCase)
+
     type ITagManager =
         abstract Target: IQualifiedNamed
-        abstract Storages: Dictionary<string,IStorage>
+        abstract Storages: Storages
 
 

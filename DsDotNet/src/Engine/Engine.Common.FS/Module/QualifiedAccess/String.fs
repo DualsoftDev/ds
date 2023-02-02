@@ -37,3 +37,5 @@ module String =
     let any str = not <| String.IsNullOrEmpty(str)
 
     let toCharArray (s:string) = s.ToCharArray()
+    let toUpper (s:string) = s.ToUpper()
+    let toLower (s:string) = s.ToLower()

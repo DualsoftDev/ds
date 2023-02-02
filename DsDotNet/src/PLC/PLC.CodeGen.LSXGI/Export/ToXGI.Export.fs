@@ -269,12 +269,29 @@ module XgiExportModule =
                 let xnGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
                 let countExistingGlobal = xnGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
 
+                let existingGlobalSymbols = xnGlobalVar |> collectSymbolInfos
+
                 (* existing global name 과 신규 global name 충돌 check *)
                 do
-                    let existingGlobalNames = xnGlobalVar |> collectSymbolInfos |> map name
-                    match existingGlobalNames.Intersect(globalStorages.Keys) |> Seq.tryHead with
+                    let existingGlobalNames = existingGlobalSymbols |> map (name >> String.toUpper)
+                    let currentGlobalNames = globalStorages.Keys |> map String.toUpper
+                    match existingGlobalNames.Intersect(currentGlobalNames) |> Seq.tryHead with
                     | Some duplicated -> failwith $"ERROR: Duplicated global variable name : {duplicated}"
                     | _ -> ()
+
+                (* existing global address 와 신규 global address 충돌 check *)
+                do
+                    let collectToUpper (addrs:string seq) = addrs |> filter (fun s -> s.NonNullAny()) |> map String.toUpper
+                    let existingGlobalAddresses =
+                        existingGlobalSymbols |> map (fun s -> s.Address) |> collectToUpper
+                    let currentGlobalAddresses =
+                        globalStorages.Values
+                        |> filter(fun s -> s :? ITag || s :? IVariable)
+                        |> map (fun s -> s.Address) |> collectToUpper
+                    match existingGlobalAddresses.Intersect(currentGlobalAddresses) |> Seq.tryHead with
+                    | Some duplicated -> failwith $"ERROR: Duplicated address usage : {duplicated}"
+                    | _ -> ()
+                    // todo : 실제로는 더 정밀한 충돌 check 필요.  %MX1 과 %MB0 은 서로 충돌하는 영역임.
 
                 // symbolsGlobal = "<GlobalVariable Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol>
                 let globalStoragesXmlNode = storagesToGlobalXml x globalStorages.Values |> XmlNode.fromString

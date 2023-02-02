@@ -140,3 +140,19 @@ module MemoryAllocator =
                 | 4 -> "D"
                 | 8 -> "L"
                 | _ -> failwith "ERROR"
+
+
+[<AutoOpen>]
+module IECAddressModule =
+    open Engine.Common.FS
+    open System.Text.RegularExpressions
+
+    /// IEC address 를 표준화한다.  e.g "%i3" => "%IX3"
+    let standardizeAddress (address:string) =
+        let addr = address.ToUpper()
+        match addr with
+        | RegexPattern "^%([IQMLKFWUR])(\d+)$" [m; _]
+        | RegexPattern "^%([IQMLKFWUR])(\d+.\d+)$" [m; _]
+        | RegexPattern "^%([IQMLKFWUR])(\d+.\d+.\d+)$" [m; _] -> Regex.Replace(addr, m, m+"X")
+        | _ -> addr
+

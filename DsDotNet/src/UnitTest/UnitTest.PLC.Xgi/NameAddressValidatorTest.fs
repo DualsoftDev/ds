@@ -3,6 +3,7 @@ namespace T
 open NUnit.Framework
 
 open PLC.CodeGen.LSXGI.XgiPrologModule
+open PLC.CodeGen.Common.IECAddressModule
 
 type NameAddressValidatorTest() =
     inherit XgiTestBaseClass()
@@ -45,3 +46,12 @@ type NameAddressValidatorTest() =
         ]
         for xAddr in invalidAddresses do
             validateAddress xAddr |> Result.isError === true
+
+    [<Test>]
+    member __.``Variable address standardize test`` () =
+        "%I0"    |> standardizeAddress === "%IX0"
+        "%m0"    |> standardizeAddress === "%MX0"
+        "%iw10"  |> standardizeAddress === "%IW10"
+        "%iw1.2" |> standardizeAddress === "%IW1.2"
+        "%i1.2"  |> standardizeAddress === "%IX1.2"
+

@@ -217,7 +217,7 @@ type XgiPOUTest() =
         let code = """
             bool mmx1 = false;      // MMX1 과 대소문자를 구분하지 않아야 한다.
 """
-        let f = get_current_function_name()
+        let f = getFuncName()
         parseCode globalStorages code |> ignore
         globalStorages["MMX1"].Address <- ""       // force to allocate Memory
 

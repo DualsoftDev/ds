@@ -18,15 +18,19 @@ type XgiExistingXmlProjectAnalTest() =
     member __.``Xml project read global variable test`` () =
         let xmlPrj = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/multiProgramSample.xml"
 
-        let xdoc = XmlDocument.loadFromFile xmlPrj
-        let xnGlobalSymbols = xdoc.SelectMultipleNodes "//Configurations/Configuration/GlobalVariables/GlobalVariable/Symbols/Symbol" |> List.ofSeq
-        let globalsWithAddress = xnGlobalSymbols |> map xmlSymbolNodeToSymbolInfo |> filter (fun symbolInfo -> symbolInfo.Address.NonNullAny())
-        let globalsWithMAreaAddress = globalsWithAddress |> filter (fun symbolInfo -> symbolInfo.Address.StartsWith("%M"))
-        let usedMAddresses = globalsWithMAreaAddress |> map (fun symbolInfo -> symbolInfo.Address)
+        let usedMAddresses =
+            XmlDocument.loadFromFile xmlPrj
+            |> (fun xdoc -> xdoc.SelectMultipleNodes "//Configurations/Configuration/GlobalVariables/GlobalVariable/Symbols/Symbol") |> List.ofSeq
+            |> map xmlSymbolNodeToSymbolInfo
+            |> map address
+            |> filter (fun addr -> addr.NonNullAny())
+            |> filter (fun addr -> addr.StartsWith("%M"))
 
         usedMAddresses |> SeqEq [ "%MX0"; "%MX1"; "%MX8"; "%MX33"; "%MB2"; "%MB17"; "%ML1" ]
 
-        let usedMemoryIndices = usedMAddresses |> collectByteIndices
-        usedMemoryIndices |> SeqEq [ 0; 1; 2; 4; 8; 9; 10; 11; 12; 13; 14; 15; 17; ]
+        // used Memory Indices :
+        usedMAddresses
+        |> collectByteIndices
+        |> SeqEq [ 0; 1; 2; 4; 8; 9; 10; 11; 12; 13; 14; 15; 17; ]
 
         ()

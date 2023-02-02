@@ -283,11 +283,11 @@ module XgiExportModule =
                 do
                     let collectToUpper (addrs:string seq) = addrs |> filter (fun s -> s.NonNullAny()) |> map String.toUpper
                     let existingGlobalAddresses =
-                        existingGlobalSymbols |> map (fun s -> s.Address) |> collectToUpper
+                        existingGlobalSymbols |> map address |> collectToUpper
                     let currentGlobalAddresses =
                         globalStorages.Values
                         |> filter(fun s -> s :? ITag || s :? IVariable)
-                        |> map (fun s -> s.Address) |> collectToUpper
+                        |> map address |> collectToUpper
                     match existingGlobalAddresses.Intersect(currentGlobalAddresses) |> Seq.tryHead with
                     | Some duplicated -> failwith $"ERROR: Duplicated address usage : {duplicated}"
                     | _ -> ()

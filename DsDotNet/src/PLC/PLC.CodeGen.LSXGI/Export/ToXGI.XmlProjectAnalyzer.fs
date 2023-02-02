@@ -5,6 +5,7 @@ open System.Xml
 open Engine.Common.FS
 open PLC.CodeGen.LSXGI
 open PLC.CodeGen.Common
+open Engine.Core
 
 [<AutoOpen>]
 module XgiXmlProjectAnalyzerModule =
@@ -38,17 +39,17 @@ module XgiXmlProjectAnalyzerModule =
         |> map xmlSymbolNodeToSymbolInfo
         |> List.ofSeq
 
+    let collectAllSymbols (xdoc:XmlDocument) =
+        xdoc.SelectMultipleNodes "//Configurations/Configuration//Symbols/Symbol"
+        |> map xmlSymbolNodeToSymbolInfo
+        |> List.ofSeq
+
     let collectGlobalSymbolNames (xdoc:XmlDocument) = collectGlobalSymbols xdoc |> map name
 
     let collectUsedMermoryIndicesInGlobalSymbols (xdoc:XmlDocument) =
-        //let globalsWithAddress      = collectGlobalSymbols xdoc |> filter (fun symbolInfo -> symbolInfo.Address.NonNullAny())
-        //let globalsWithMAreaAddress = globalsWithAddress |> filter (fun symbolInfo -> symbolInfo.Address.StartsWith("%M"))
-        //let usedMAddresses          = globalsWithMAreaAddress |> map (fun symbolInfo -> symbolInfo.Address)
-        //let usedMIndices            = usedMAddresses |> collectByteIndices
-        //usedMIndices
         collectGlobalSymbols xdoc
-        |> filter (fun symbolInfo -> symbolInfo.Address.NonNullAny())
-        |> filter (fun symbolInfo -> symbolInfo.Address.StartsWith("%M"))
-        |> map (fun symbolInfo -> symbolInfo.Address)
+        |> map address
+        |> filter (fun addr -> addr.NonNullAny())
+        |> filter (fun addr -> addr.StartsWith("%M"))
         |> collectByteIndices
 

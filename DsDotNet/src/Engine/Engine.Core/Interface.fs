@@ -61,4 +61,6 @@ module Interface =
         abstract Target: IQualifiedNamed
         abstract Storages: Storages
 
+    /// x.Address 을 반환
+    let inline address x = ( ^T: (member Address:string) x )
 

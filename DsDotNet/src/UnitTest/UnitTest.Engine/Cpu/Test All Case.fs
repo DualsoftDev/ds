@@ -55,3 +55,18 @@ type TestAllCase() =
         let result = exportXMLforXGI(model.Systems.First(), myTemplate f, None)
         //추후 정답과 비교 필요
         result === result
+
+
+    [<Test>]
+    member __.``XXXXXXXPPT Model Cpu test``    () =
+        let f = getFuncName()
+        let sampleDirectory = Path.Combine($"{__SOURCE_DIRECTORY__}", "../ImportOffice/sample/");
+        let pptPath = sampleDirectory + "s_car.pptx"
+        let model = ImportPPT.GetModel [ pptPath ]
+        model.Systems.ForEach(testAddressSetting)
+        t.GenerationIO()
+
+        let result = exportXMLforXGI(model.Systems.First(), myTemplate f, None)
+        //추후 정답과 비교 필요
+        result === result
+

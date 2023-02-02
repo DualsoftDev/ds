@@ -62,11 +62,11 @@ namespace Dual.Model.Import
                         ProcessEvent.DoWork(Convert.ToInt32((cnt++ * 1.0) / (_PPTResults.Count() * 1.0) * 100));
                         await Task.Delay(10);
                         if (!view.IsActive) continue;
-                        var rungs = Cpu.LoadStatements(view.System, storages);
-                        rungs.ForEach(s =>
-                        {
-                            _DicCpu.Add(s.ToSystem(), new DsCPU(s.CommentedStatements(), s.ToSystem()));
-                        });
+                        //var rungs = Cpu.LoadStatements(view.System, storages);
+                        //rungs.ForEach(s =>
+                        //{
+                        //    _DicCpu.Add(s.ToSystem(), new DsCPU(s.CommentedStatements(), s.ToSystem()));
+                        //});
                     }
 
                     EventExternal.CPUSubscribe();

@@ -18,7 +18,8 @@ module ImportU =
         let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
 
         let call =
-            match mySys.Jobs.TryFind(fun job -> job.Name = sysName+"_"+apiName) with
+            let jobName = sysName+"_"+apiName
+            match mySys.Jobs.TryFind(fun job -> job.Name = jobName) with
             |Some job ->
                 if job.DeviceDefs.any()
                 then

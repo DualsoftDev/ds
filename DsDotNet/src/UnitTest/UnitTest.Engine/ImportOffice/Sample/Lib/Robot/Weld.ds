@@ -4,11 +4,11 @@
     [flow] Flow = {
     }
     [interfaces] = {
-        Reset = { _ ~ _ }
-        Home = { _ ~ _ }
-        Weld = { _ ~ _ }
-        Reset <||> Home;
-        Weld <||> Reset;
-        Weld <||> Home;
+        RESET = { _ ~ _ }
+        HOME = { _ ~ _ }
+        WELD = { _ ~ _ }
+        RESET <||> HOME;
+        WELD <||> RESET;
+        WELD <||> HOME;
     }
 }

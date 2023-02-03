@@ -24,7 +24,6 @@ module OriginModule =
         source |> Seq.collect id |> Seq.distinct
 
     let compareIsIncludedWithOrder (now:'T seq) (compare:'T seq) =
-        //Enumerable.SequenceEqual(Enumerable.Intersect(compare, now), now)
         let t = [|
             for a in now do
                 if (Seq.exists (fun n -> n = a) compare) then
@@ -43,22 +42,8 @@ module OriginModule =
                         yield n
             ]
             |> List.distinct
-        let res = candidates |> Seq.except(toRemove)
-        res //|> ignore
-        //let now = [
-        //    for now in candidates do
-        //        let mutable check = true
-        //        for compare in candidates do
-        //            if now <> compare then
-        //                if check
-        //                    && (compareIsIncludedWithOrder now compare)
-        //                    && now.Count() < compare.Count()
-        //                then
-        //                    check <- false
-        //        if check then
-        //            yield now
-        //]
-        //now
+        candidates |> Seq.except(toRemove)
+        
     /// Get vertex target
     let getVertexTarget (vertex:Vertex) =
         match vertex with

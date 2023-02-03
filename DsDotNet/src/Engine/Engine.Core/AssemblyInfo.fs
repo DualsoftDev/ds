@@ -7,5 +7,6 @@ open System.Runtime.InteropServices
 [<assembly: InternalsVisibleTo("UnitTest.Expression")>]
 [<assembly: InternalsVisibleTo("Engine.Parser.FS")>]
 [<assembly: InternalsVisibleTo("Model.Import.Viewer")>]
+[<assembly: InternalsVisibleTo("TestProfiler")>]
 
 do ()

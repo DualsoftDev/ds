@@ -14,6 +14,7 @@ open System.Runtime.CompilerServices
 [<AutoOpen>]
 module ImportPPTModule =
 
+    let dicPptDoc = Dictionary<string, pptDoc>()
     type internal ImportPowerPoint() =
         let pathStack = Stack<string>()
 
@@ -42,7 +43,15 @@ module ImportPPTModule =
         let rec loadSystem(repo:ShareableSystemRepository, pptReop:Dictionary<DsSystem, pptDoc>, theSys:DsSystem, paras:DeviceLoadParameters) =
             pathStack.Push(paras.AbsoluteFilePath)
 
-            let doc = pptDoc(paras.AbsoluteFilePath+".pptx" , paras)
+            let pathPPT = paras.AbsoluteFilePath+".pptx"
+
+            let doc =
+                    if dicPptDoc.ContainsKey pathPPT
+                    then dicPptDoc[pathPPT]
+                    else
+                       let pptDoc = pptDoc(pathPPT , paras)
+                       dicPptDoc.Add(pathPPT, pptDoc); pptDoc
+
             //시스템 로딩시 중복이름을 부를 수 없다.
             CheckSameCopy(doc)
 
@@ -120,6 +129,8 @@ module ImportPPTModule =
             with ex ->  failwithf  $"{ex.Message}\t [ErrPath:{pathStack.First()}]"
 
     let private fromPPTs(paths:string seq) =
+
+        dicPptDoc.Clear()
         let systemRepo = ShareableSystemRepository()
         let pptRepo    = Dictionary<DsSystem, pptDoc>()
 

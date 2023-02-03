@@ -3,10 +3,9 @@
 //using Dsu.PLC.LS;
 //using Dsu.PLC.Common;
 
-namespace Server.Control.OPC
-{
+namespace Server.Common.OPC;
 
-    public class LsTag
-    {
-    }
+
+public class LsTag
+{
 }

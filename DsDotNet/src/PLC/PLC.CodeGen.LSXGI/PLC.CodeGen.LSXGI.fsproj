@@ -11,12 +11,16 @@
 
 
 	<ItemGroup>
+        <Content Include="Documents\Function, FB.txt" />
         <None Include="Documents\empty.xml" />
         <None Include="Documents\minimal.xml" />
         <None Include="Documents\multiProgramSample.xml" />
         <None Include="Documents\POU.xml" />
-		<None Include="Documents\Classes.pptx" />
-		<None Include="Documents\Readme.txt" />
+
+        <None Include="Documents\POU.xml" />
+        <None Include="Documents\POU.xml" />
+        <None Include="Documents\FunctionBlockSample.xml" />
+		<None Include="Documents\FunctionBlockUsageSample.xml" />
 		<Content Include="Documents\IEC-61131-3.summary.txt" />
 		<None Include="Documents\XG5000 - 패키지 SW 설계.docx" />
 		<None Include="Documents\XgiLadder.pptx" />
@@ -45,9 +49,6 @@
 		<None Include="Scripts\Script1.fsx" />
 		<Compile Include="EntryPoint.fs" />
 	</ItemGroup>
-
-
-	<ItemGroup />
 
 	<ItemGroup>
         <PackageReference Include="System.Reactive" Version="5.0.0" />

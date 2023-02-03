@@ -115,8 +115,8 @@ module PPTDocModule =
 
             SubGroup(page, childGroup, dicUsedSub)
             )
-
     type pptDoc(path:string, parameter:DeviceLoadParameters)  =
+
         let doc = Office.Open(path)
         let name = getSystemName path
         let pages =  Dictionary<SlidePart, pptPage>()

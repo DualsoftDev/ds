@@ -14,8 +14,6 @@ type Spec08_DAGStatement() =
     inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
-    do
-            t.GenerationIO()
     [<Test>]
     member __.``D1 DAG Head Start`` () =
         for real in t.Reals do

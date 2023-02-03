@@ -14,8 +14,6 @@ type Spec02_FlowStatement() =
     inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
-    do
-            t.GenerationIO()
 
     [<Test>]
     member __.``F1 Root Start`` () =

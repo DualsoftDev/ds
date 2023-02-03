@@ -17,6 +17,13 @@ module TagVariableModule =
         Address: string option
         Comment: string option
         System: ISystem
+        Target: IQualifiedNamed option
+        /// TAG 종류  ex)going = 2007
+        /// SystemTag (0 ~ 999)
+        /// FlowTag   (1000 ~ 1999)
+        /// VertexTag (2000 ~ 2999)
+        /// ApiTag    (3000 ~ 3999)
+        TagKind : int
         IsGlobal: bool
     }
     let defaultStorageCreationParams(value) = {
@@ -25,6 +32,8 @@ module TagVariableModule =
         Address = None
         Comment = None
         System = Runtime.System
+        Target = None
+        TagKind = -1 //Target이 None일 경우 -1
         IsGlobal = false
     }
 
@@ -49,6 +58,8 @@ module TagVariableModule =
 
         interface IStorage with
             member x.DsSystem = param.System
+            member x.Target = param.Target
+            member x.TagKind = param.TagKind
             member x.DataType = typedefof<'T>
             member x.IsGlobal with get() = x.IsGlobal and set(v) = x.IsGlobal <- v
             member x.Comment with get() = x.Comment and set(v) = x.Comment <- v

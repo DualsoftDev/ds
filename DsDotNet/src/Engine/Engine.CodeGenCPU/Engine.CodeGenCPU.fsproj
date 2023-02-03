@@ -13,9 +13,9 @@
     <Compile Include="TagManager.Util.fs" />
     <Compile Include="TagManager.System.fs" />
     <Compile Include="TagManager.Flow.fs" />
+    <Compile Include="TagManager.Vertex.fs" />
     <Compile Include="TagManager.Api.fs" />
     <Compile Include="TagManager.Link.fs" />
-    <Compile Include="TagManager.Vertex.fs" />
     <Compile Include="Core.Extensions.fs" />
     <Compile Include="Code.SpecUtil.fs" />
     <Compile Include="Code.ConvertUtil.fs" />

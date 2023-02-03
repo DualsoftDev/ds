@@ -3,6 +3,7 @@ namespace Engine.CodeGenCPU
 open System.Diagnostics
 open Engine.Core
 open System.Collections.Generic
+open System
 
 [<AutoOpen>]
 module TagManagerModule =
@@ -15,39 +16,34 @@ module TagManagerModule =
     //__________________________________________________________________
     // ACTION | IN	    | API. I| -	              | API. I    |
     // ACTION | OUT	    | API. O| -	              | API. O    |
-
-
+    
     /// Vertex Manager : 소속되어 있는 DsBit 를 관리하는 컨테이어
     [<DebuggerDisplay("{Name}")>]
     [<AbstractClass>]
     type VertexManager (v:Vertex)  =
         let sys =  v.Parent.GetSystem()
         let s =  sys.TagManager.Storages
-        let createTag(mark) =
+        let createTag(mark) (vertexTag:VertexTag) =
+            let vertexTag = vertexTag |> int
             let name = $"{v.QualifiedName}_{mark}"
-            let t = createPlanVarBool  s name true
-            t.Vertex <- Some v;  t
+            let t = createPlanVar  s name DuBOOL true v vertexTag
+            t :?> PlanVar<bool>
 
-        let endTagBit     = createTag "ET"
-        let resetTagBit   = createTag "RT"
-        let startTagBit   = createTag "ST"
-
-        let originBit     = createTag "OG"
-        let pauseBit      = createTag "PA"
-        let errorTxBit    = createTag "E1"
-        let errorRxBit    = createTag "E2"
-
-        //상태 비트만 NotifyStatus 때문에 아래 이름 규격 ex) tagname_R_
-        let readyBit      = createTag  "R_"
-        let goingBit      = createTag  "G_"
-        let finishBit     = createTag  "F_"
-        let homingBit     = createTag  "H_"
-
-        let endForceBit   = createTag "EF"
-        let resetForceBit = createTag "RF"
-        let startForceBit = createTag "SF"
-
-        let pulseBit      = createTag "PUL"
+        let startTagBit   = createTag "ST"  VertexTag.startTag
+        let resetTagBit   = createTag "RT"  VertexTag.resetTag
+        let endTagBit     = createTag "ET"  VertexTag.endTag
+        let originBit     = createTag "OG"  VertexTag.origin
+        let pauseBit      = createTag "PA"  VertexTag.pause
+        let errorTxBit    = createTag "E1"  VertexTag.errorTx
+        let errorRxBit    = createTag "E2"  VertexTag.errorRx
+        let readyBit      = createTag "R"   VertexTag.ready
+        let goingBit      = createTag "G"   VertexTag.going
+        let finishBit     = createTag "F"   VertexTag.finish
+        let homingBit     = createTag "H"   VertexTag.homing
+        let startForceBit = createTag "SF"  VertexTag.startForce
+        let resetForceBit = createTag "RF"  VertexTag.resetForce
+        let endForceBit   = createTag "EF"  VertexTag.endForce
+        let pulseBit      = createTag "PUL" VertexTag.pulse
         let goingRelays = HashSet<PlanVar<bool>>()
 
 
@@ -62,13 +58,12 @@ module TagManagerModule =
         member x.System = v.Parent.GetFlow().System
         member x.Storages = s
 
-        member x._on  = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSysBitTag(ON)
-        member x._off  = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSysBitTag(OFF)
+        member x._on  = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.on)    :?> PlanVar<bool>
+        member x._off  = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.off)  :?> PlanVar<bool>
 
         ///Segment Start Tag
         member _.ST         = startTagBit
         ///Segment Reset Tag
-        member _.ResetTag   = resetTagBit
         member _.RT         = resetTagBit
         ///Segment End Tag
         member _.ET         = endTagBit
@@ -106,7 +101,7 @@ module TagManagerModule =
         member _.PUL        = pulseBit
         ///Going Relay   //리셋 인과에 따라 필요
         member x.GR(src:Vertex) =
-           let gr =  createPlanVarBool  s $"GR_{src.Name}" true
+           let gr = createPlanVar s $"GR_{src.Name}" DuBOOL true v (VertexTag.goingrelay|>int):?> PlanVar<bool>
            goingRelays.Add gr |> ignore; gr
 
         member x.CreateTag(name) = createTag name
@@ -116,12 +111,12 @@ module TagManagerModule =
         inherit VertexManager(v)
         let mutable originInfo:OriginInfo = defaultOriginInfo (v:?> Real)
         let createTag name = this.CreateTag name
-        let endPortBit    = createTag  "EP"
-        let resetPortBit  = createTag  "RP"
-        let startPortBit  = createTag  "SP"
+        let endPortBit    = createTag  "EP" VertexTag.endPort
+        let resetPortBit  = createTag  "RP" VertexTag.resetPort
+        let startPortBit  = createTag  "SP" VertexTag.startPort
 
-        let relayRealBit      = createTag "RR"
-        let realOriginAction  = createTag "RO"
+        let relayRealBit      = createTag "RR" VertexTag.relayReal
+        let realOriginAction  = createTag "RO" VertexTag.realOriginAction
 
         member x.OriginInfo
             with get() = originInfo
@@ -144,7 +139,7 @@ module TagManagerModule =
         inherit VertexManager(v)
         let s    = this.Storages
         let createTag name = this.CreateTag name
-        let relayCallBit  = createTag  "CR"
+        let relayCallBit  = createTag  "CR" VertexTag.relayCall
         let sys = this.System
 
         let counterBit    = counter  s "CTR"  sys
@@ -160,7 +155,6 @@ module TagManagerModule =
         member _.TON    = timerOnDelayBit
         ///Timer time out
         member _.TOUT   = timerTimeOutBit
-
 
 
 

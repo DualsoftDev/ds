@@ -136,7 +136,7 @@ namespace Dual.Model.Import
         }
         internal void TestDebug(bool bLoadExcel, bool bDummyTestAddress)
         {
-            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\")) + "src\\UnitTest\\UnitTest.Engine\\ImportOffice\\Sample\\s.pptx";
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\")) + "src\\UnitTest\\UnitTest.Model\\ImportOfficeExample\\Sample\\s.pptx";
             bool debug = File.Exists(path);
             if (debug)
             {

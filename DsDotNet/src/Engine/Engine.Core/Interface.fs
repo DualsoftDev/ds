@@ -37,6 +37,8 @@ module Interface =
         inherit IText
         abstract Address:string with get, set
         abstract DsSystem: ISystem
+        abstract Target: IQualifiedNamed option
+        abstract TagKind: int
         abstract BoxedValue: obj with get, set
         abstract DataType : System.Type
         abstract IsGlobal : bool with get, set

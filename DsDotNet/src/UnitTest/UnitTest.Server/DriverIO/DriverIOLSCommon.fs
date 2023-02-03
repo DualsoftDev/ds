@@ -4,7 +4,6 @@ open NUnit.Framework
 
 open Engine.Parser.FS
 open T
-open T.CPU
 open System
 open Engine.Core
 open Engine.Common.FS
@@ -18,9 +17,6 @@ module DriverIOLSCommonTest =
 
     type DriverIOLSCommon() =
         inherit EngineTestBaseClass()
-        let t = CpuTestSample()
-        do
-            t.GenerationIO()
 
         let conn = new LsConnection(LsConnectionParameters("192.168.0.101"))
 

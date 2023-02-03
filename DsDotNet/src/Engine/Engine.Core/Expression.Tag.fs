@@ -29,7 +29,6 @@ module TagModule =
     /// PlanVar 나의 시스템 내부의 global variable
     type PlanVar<'T when 'T:equality> (param:StorageCreationParams<'T>) =
         inherit Variable<'T>(param)
-        member val Vertex:Vertex option = None with get, set
 
 
 

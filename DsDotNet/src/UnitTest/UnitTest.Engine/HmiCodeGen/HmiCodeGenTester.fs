@@ -10,7 +10,7 @@ module HmiCodeGenTestModule =
     type HmiCodeGenTester() =
         inherit EngineTestBaseClass()
 
-        let libdir = @$"{__SOURCE_DIRECTORY__}\..\Libraries"
+        let libdir = @$"{__SOURCE_DIRECTORY__}\..\..\UnitTest.Model"
         let configFile = @"test-hmi-gen-config.json"
         let genConfig (filePaths:string list) =
             let cfg = {

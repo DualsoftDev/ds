@@ -132,6 +132,8 @@ module rec TimerModule =
         let unsupported() = failwithlog "ERROR: not supported"
         interface IStorage with
             member _.DsSystem = sys
+            member x.Target = None
+            member x.TagKind = -1
             member x.Name with get() = x.Name and set(_v) = unsupported()
             member _.Address with get() = unsupported() and set(_v) = unsupported()
             member _.DataType = typedefof<TimerCounterBaseStruct>

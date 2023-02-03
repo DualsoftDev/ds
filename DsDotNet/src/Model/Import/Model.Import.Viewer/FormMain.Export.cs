@@ -69,12 +69,7 @@ namespace Dual.Model.Import
                         //});
                     }
 
-                    EventExternal.CPUSubscribe();
-                    _DicCpu.ForEach(f =>
-                    {
-                        f.Value.Run();
-                        f.Value.ScanOnce();
-                    });
+
 
                     var xmlTemplateFile = Path.ChangeExtension(_PathPPTs[0], "xml");
                     this.Do(() =>
@@ -85,6 +80,13 @@ namespace Dual.Model.Import
                         else  //기본 템플릿 CPU-E 타입으로 생성
                             ExportModuleExt.ExportXMLforXGI(SelectedSystem, path, null);
 
+                    });
+
+                    EventExternal.CPUSubscribe();
+                    _DicCpu.ForEach(f =>
+                    {
+                        f.Value.Run();
+                        f.Value.ScanOnce();
                     });
 
                     ResultBtnAbleUI(true);

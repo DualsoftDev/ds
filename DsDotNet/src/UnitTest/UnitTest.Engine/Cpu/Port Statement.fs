@@ -9,8 +9,6 @@ type Spec01_PortStatement() =
     inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
-    do
-        t.GenerationIO()
 
 
     [<Test>]

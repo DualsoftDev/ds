@@ -8,8 +8,4 @@ open System
 [<AutoOpen>]
 module LinkTagManagerModule =
 
-    [<Flags>]
-    type LinkTag =
-    |LinkStart
-    |LintReset
-
+    ()

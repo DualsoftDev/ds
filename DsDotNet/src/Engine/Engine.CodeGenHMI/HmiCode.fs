@@ -36,7 +36,7 @@ module HmiGenModule =
         name:string;
         parent:string;
         category:Type;
-        botton_type:ButtonType;
+        button_type:ButtonType;
         used_in:ResizeArray<string>;
         targets:ResizeArray<string>;
     }
@@ -59,7 +59,7 @@ module HmiGenModule =
                 name = name;
                 parent = parent;
                 category = category;
-                botton_type = buttonType;
+                button_type = buttonType;
                 used_in = new ResizeArray<string>(0);
                 targets = new ResizeArray<string>(0);
             }

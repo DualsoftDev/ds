@@ -28,9 +28,9 @@ module PPTDocModule =
         fileName
 
     let updateAliasPPT (
-          nodes:ConcurrentDictionary<string, pptNode>
-        , pages:ConcurrentDictionary<SlidePart, pptPage>
-        , parents:ConcurrentDictionary<pptNode, seq<pptNode>>) =
+          nodes:Dictionary<string, pptNode>
+        , pages:Dictionary<SlidePart, pptPage>
+        , parents:Dictionary<pptNode, seq<pptNode>>) =
 
             let pptNodes = nodes.Values
             let dicFlowNodes = pages.Values
@@ -73,20 +73,20 @@ module PPTDocModule =
             callInRealSet |> Seq.iter settingAlias
 
 
-    let getGroupParentsChildren(page:int, subG:Presentation.GroupShape, nodes:ConcurrentDictionary<string, pptNode>) =
+    let getGroupParentsChildren(page:int, subG:Presentation.GroupShape, nodes:Dictionary<string, pptNode>) =
 
         //group 에 사용된 real, call ID를 재귀적으로 모든 하위그룹까지 가져옴
-        let rec getGroupMembers(subG:Presentation.GroupShape, shapeIds:ConcurrentHash<uint32>) =
+        let rec getGroupMembers(subG:Presentation.GroupShape, shapeIds:HashSet<uint32>) =
                 subG.Descendants<Presentation.Shape>()
                 |> Seq.filter(fun shape -> shape.CheckRectangle() || shape.CheckEllipse())
-                |> Seq.iter(fun shape -> shapeIds.TryAdd(shape.GetId().Value)|>ignore )
+                |> Seq.iter(fun shape -> shapeIds.Add(shape.GetId().Value)|>ignore )
 
                 subG.Descendants<Presentation.GroupShape>()
                 |> Seq.iter(fun childGroup -> getGroupMembers(childGroup, shapeIds) |> ignore)
 
-        let shapeIds = ConcurrentHash<uint32>()
+        let shapeIds = HashSet<uint32>()
         getGroupMembers(subG, shapeIds)
-        let groupNodes = shapeIds.Values |> Seq.map (fun id -> nodes.[ Objkey(page, id) ])
+        let groupNodes = shapeIds |> Seq.map (fun id -> nodes.[ Objkey(page, id) ])
         groupNodes
 
     let getValidGroup(groupShapes:GroupShape seq) =
@@ -107,11 +107,11 @@ module PPTDocModule =
 
 
     //하부의 재귀적 중복 그룹 항목을 dicUsedSub 저장한다
-    let rec SubGroup(page, subG:GroupShape, dicUsedSub:ConcurrentHash<GroupShape>) =
+    let rec SubGroup(page, subG:GroupShape, dicUsedSub:HashSet<GroupShape>) =
             subG.Descendants<Presentation.GroupShape>()
             |> Seq.iter(fun childGroup ->
 
-            dicUsedSub.TryAdd(childGroup) |>ignore
+            dicUsedSub.Add(childGroup) |>ignore
 
             SubGroup(page, childGroup, dicUsedSub)
             )
@@ -119,10 +119,10 @@ module PPTDocModule =
     type pptDoc(path:string, parameter:DeviceLoadParameters)  =
         let doc = Office.Open(path)
         let name = getSystemName path
-        let pages =  ConcurrentDictionary<SlidePart, pptPage>()
-        let masterPages =  ConcurrentDictionary<int, DocumentFormat.OpenXml.Presentation.SlideMaster>()
-        let nodes =  ConcurrentDictionary<string, pptNode>()
-        let parents = ConcurrentDictionary<pptNode, seq<pptNode>>()
+        let pages =  Dictionary<SlidePart, pptPage>()
+        let masterPages =  Dictionary<int, DocumentFormat.OpenXml.Presentation.SlideMaster>()
+        let nodes =  Dictionary<string, pptNode>()
+        let parents = Dictionary<pptNode, seq<pptNode>>()
         let dummys =  HashSet<pptDummy>()
         let edges =   HashSet<pptEdge>()
 
@@ -136,14 +136,14 @@ module PPTDocModule =
 
             try
 
-                sildeMasters |> Seq.iter (fun slideMaster -> masterPages.TryAdd(masterPages.Count+1, slideMaster) |>ignore )
-                sildesAll    |> Seq.iter (fun (slidePart, show, page) -> pages.TryAdd(slidePart, pptPage(slidePart, page, show)) |>ignore )
+                sildeMasters |> Seq.iter (fun slideMaster -> masterPages.Add(masterPages.Count+1, slideMaster) |>ignore )
+                sildesAll    |> Seq.iter (fun (slidePart, show, page) -> pages.Add(slidePart, pptPage(slidePart, page, show)) |>ignore )
 
-                let dicShape = ConcurrentDictionary<int, HashSet<Tuple<Shape,bool>>>()
+                let dicShape = Dictionary<int, HashSet<Tuple<Shape,bool>>>()
                 shapes
                 |> Seq.iter (fun (shape, page, geometry, isDash) ->
                             if(dicShape.ContainsKey(page)|>not)
-                            then dicShape.TryAdd(page, HashSet<Tuple<Shape,bool>>()) |> ignore
+                            then dicShape.Add(page, HashSet<Tuple<Shape,bool>>()) |> ignore
                             dicShape.[page].Add(shape, isDash) |> ignore
                 )
 
@@ -155,9 +155,9 @@ module PPTDocModule =
 
                             let node = pptNode(shape, page, flowName)
                             if(node.Name ="") then shape.ErrorName(ErrID._13, page)
-                            nodes.TryAdd(node.Key, node)  |>ignore )
+                            nodes.Add(node.Key, node)  |>ignore )
 
-                let dicParentCheck = ConcurrentDictionary<string, int>()
+                let dicParentCheck = Dictionary<string, int>()
                 allGroups
                 |> Seq.iter (fun (page, groups) ->
                     groups|> getValidGroup
@@ -168,9 +168,10 @@ module PPTDocModule =
                             let pptGroup = pptRealGroup(page, groupAllNodes)
 
                             let parent = pptGroup.Parent.Value;
-                            if(dicParentCheck.TryAdd(pptGroup.RealKey, pptGroup.PageNum))
-                            then parents.TryAdd(parent, pptGroup.Children)|>ignore
-                            else Office.ErrorPPT(Group, ErrID._17, $"{dicParentCheck.[pptGroup.RealKey]}-{parent.Name}", pptGroup.PageNum)
+                            if(dicParentCheck.TryAdd(pptGroup.RealKey, pptGroup.PageNum)) then
+                                parents.Add(parent, pptGroup.Children)
+                            else
+                                Office.ErrorPPT(Group, ErrID._17, $"{dicParentCheck.[pptGroup.RealKey]}-{parent.Name}", pptGroup.PageNum)
                     )
                 )
 

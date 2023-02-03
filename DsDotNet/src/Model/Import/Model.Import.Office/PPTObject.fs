@@ -382,7 +382,7 @@ module PPTObjectModule =
     and
         pptRealGroup(iPage:int,  nodes: pptNode seq) =
         let mutable parent:pptNode option = None
-        let childSet =  ConcurrentHash<pptNode>()
+        let childSet =  HashSet<pptNode>()
         let nodeNames(nodes :pptNode seq) = nodes.Select(fun s->s.Name).JoinWith(", ")
 
         do
@@ -399,10 +399,10 @@ module PPTObjectModule =
             let children = nodes
                             |> Seq.filter (fun node ->node.NodeType = REAL |> not)
 
-            children |> Seq.iter(fun child -> childSet.TryAdd(child)|>ignore)
+            children |> Seq.iter(fun child -> childSet.Add(child)|>ignore)
 
         member x.RealKey = sprintf "%d;%s"  iPage (parent.Value.Name)
         member x.PageNum = iPage
 
         member x.Parent:pptNode option = parent
-        member x.Children =  childSet.Values
+        member x.Children =  childSet

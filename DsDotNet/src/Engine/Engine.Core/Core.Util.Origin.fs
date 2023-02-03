@@ -33,16 +33,15 @@ module OriginModule =
         
     /// Remove inclusive relationship duplicates in list list
     let removeDuplicatesInList candidates:(seq<'T list>) =
-        let rec pairs (lst:'T list when 'T:equality) =
+        let rec pair (lst:'T list when 'T:equality) =
             match lst with
             | [] -> []
-            | h::t -> List.map (fun elem -> [(h, elem); (elem, h);]) t @ pairs t
-
+            | h::t -> List.map (fun e -> [(h, e); (e, h);]) t @ pair t
         let toRemove = 
             [
-                for p in Seq.allPairs candidates candidates do
+                for p in candidates |> List.ofSeq |> pair |> List.collect id do
                     let (n: 'T list), c = p
-                    if n <> c && n.Length < c.Length &&
+                    if n.Length < c.Length &&
                             (compareIsIncludedWithOrder n c) then
                         yield n
             ]
@@ -432,7 +431,7 @@ module OriginModule =
             )
             |> List.filter(fun s -> s.Length > 0)
             |> List.distinct
-
+            
         let allRoutes =
             routeCalculationTargets.Concat(oneWayResetTargets)
             |> List.ofSeq
@@ -461,11 +460,11 @@ module OriginModule =
                     let tgt = seq { reset.Last(); reset.First(); }
                     let backward =
                         allRoutes
-                        |> Seq.filter(fun route -> route.Any())
-                        |> Seq.map(fun route ->
+                        |> List.filter(fun route -> route.Any())
+                        |> List.map(fun route ->
                             route |> Seq.map(fun j -> j.ApiName)
                         )
-                        |> Seq.filter(compareIsIncludedWithOrder tgt)
+                        |> List.filter(compareIsIncludedWithOrder tgt)
                     if backward.Any() then yield tgt.First()
             ]
         let offByMutualResetChains =
@@ -483,9 +482,9 @@ module OriginModule =
             |> List.map(getVertexTarget)
             |> List.map(fun c -> c.CallTargetJob.DeviceDefs)
             |> removeDuplicates
+            
         stopWatch.Stop()
         printfn "\n%f" stopWatch.Elapsed.TotalMilliseconds
-            
         getOriginMaps
             allJobs
             offByOneWayBackwardResets offByMutualResetChains

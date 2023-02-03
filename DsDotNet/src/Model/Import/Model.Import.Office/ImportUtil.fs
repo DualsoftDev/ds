@@ -49,7 +49,7 @@ module ImportU =
 
         realExS
 
-    let private getParent(edge:pptEdge, parents:ConcurrentDictionary<pptNode, seq<pptNode>>, dicSeg:Dictionary<string, Vertex>) =
+    let private getParent(edge:pptEdge, parents:Dictionary<pptNode, seq<pptNode>>, dicSeg:Dictionary<string, Vertex>) =
             ImportCheck.SameParent(parents, edge)
             let newParents =
                 parents

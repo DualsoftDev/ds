@@ -115,11 +115,20 @@ module DotNetCollectionExt =
             else
                 None
         member xs.TryFindIt = xs.TryFind
+        /// 없어서 add 성공시 true, 있어서 update 시 false 반환
         member xs.AddOrReplace(key:'k, value:'v) =
             if xs.ContainsKey key then
                 xs.[key] <- value
+                false
             else
                 xs.Add(key, value)
+                true
+        member xs.TryAdd(key:'k, value:'v) =
+            if xs.ContainsKey key then
+                false
+            else
+                xs.[key] <- value
+                true
 
     type HashSet<'k> with
         member xs.AddRange(keys:'k seq) =

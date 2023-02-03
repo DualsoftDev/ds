@@ -37,7 +37,7 @@ module ImportCheck =
 
             sys
 
-        let SameParent(parents:ConcurrentDictionary<pptNode, seq<pptNode>>, edge:pptEdge) =
+        let SameParent(parents:Dictionary<pptNode, seq<pptNode>>, edge:pptEdge) =
             let failError (parents:pptNode seq, node:pptNode)=
                 let error=
                     seq {
@@ -71,11 +71,10 @@ module ImportCheck =
 
 
         let SameEdgeErr(pptEdges:pptEdge seq) =
-            let dicSameCheck = ConcurrentDictionary<string, string>()
+            let dicSameCheck = Dictionary<string, string>()
             pptEdges |> Seq.iter(fun edge ->
-                if(dicSameCheck.TryAdd(edge.Text,edge.Text)|>not)
-                    then
-                        edge.ConnectionShape.ErrorConnect(ErrID._22, edge.Text, edge.PageNum)
+                if(dicSameCheck.TryAdd(edge.Text,edge.Text)|>not) then
+                    edge.ConnectionShape.ErrorConnect(ErrID._22, edge.Text, edge.PageNum)
             )
 
         let CheckSameCopy(doc:pptDoc) =

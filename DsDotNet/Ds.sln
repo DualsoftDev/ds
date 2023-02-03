@@ -91,6 +91,7 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server.Common", "src\Server\Server.Common\Server.Common.csproj", "{92F1842C-3FDF-4F3F-BC24-670FF2248357}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server.Common.OPC", "src\Server\Server.Commonl.OPC\Server.Common.OPC.csproj", "{557ACC10-C7C8-445A-A55F-1674777BA8B3}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TestProfiler", "src\UnitTest\TestProfiler\TestProfiler.fsproj", "{8F715D73-E035-4C23-8FA8-E9EBC50163B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -205,6 +206,10 @@ Global
 		{557ACC10-C7C8-445A-A55F-1674777BA8B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{557ACC10-C7C8-445A-A55F-1674777BA8B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{557ACC10-C7C8-445A-A55F-1674777BA8B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F715D73-E035-4C23-8FA8-E9EBC50163B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F715D73-E035-4C23-8FA8-E9EBC50163B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F715D73-E035-4C23-8FA8-E9EBC50163B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F715D73-E035-4C23-8FA8-E9EBC50163B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -245,6 +250,7 @@ Global
 		{95932206-D2FD-407F-8F64-379D04C7981E} = {04398A19-7AF6-4D97-A66D-7791167D65AB}
 		{92F1842C-3FDF-4F3F-BC24-670FF2248357} = {04398A19-7AF6-4D97-A66D-7791167D65AB}
 		{557ACC10-C7C8-445A-A55F-1674777BA8B3} = {04398A19-7AF6-4D97-A66D-7791167D65AB}
+		{8F715D73-E035-4C23-8FA8-E9EBC50163B1} = {BCF8AC63-491C-4D8E-81EC-88032ED4CF05}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B36D7B1-CD69-44C5-8E57-DE46AC18C1F7}

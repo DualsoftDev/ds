@@ -21,7 +21,7 @@ module OriginModule =
 
      /// Remove duplicates in seq seq
     let removeDuplicates (source:'T seq) =
-        source |> Seq.collect id |> Seq.distinct
+        source |> Seq.collect id |> Seq.distinct |> List.ofSeq
 
     let compareIsIncludedWithOrder (now:'T seq) (compare:'T seq) =
         let t = [|
@@ -33,6 +33,11 @@ module OriginModule =
         
     /// Remove inclusive relationship duplicates in list list
     let removeDuplicatesInList candidates:(seq<'T list>) =
+        let rec pairs (lst:'T list when 'T:equality) =
+            match lst with
+            | [] -> []
+            | h::t -> List.map (fun elem -> [(h, elem); (elem, h);]) t @ pairs t
+
         let toRemove = 
             [
                 for p in Seq.allPairs candidates candidates do
@@ -384,6 +389,7 @@ module OriginModule =
 
     /// Get origin status of child nodes
     let getOrigins (graph:DsGraph) =
+        let stopWatch = System.Diagnostics.Stopwatch.StartNew()
         let rawResets      = getAllResets graph
         let mutualResets   = getMutualResets rawResets
         let oneWayResets   = getOneWayResets mutualResets rawResets
@@ -398,7 +404,8 @@ module OriginModule =
         let jobIncludedMap = getJobIncludedMap graph
         let routeCalculationTargets =
             structedChains
-            |> Seq.map(fun chain ->
+            |> List.ofSeq
+            |> List.map(fun chain ->
                 [
                     for name in jobNameMap do
                         if chain.ContainsKey(name.Key) then
@@ -408,12 +415,12 @@ module OriginModule =
                 ]
                 |> List.distinct
             )
-            |> Seq.filter(fun s -> s.Length > 0)
-            |> Seq.distinct
-            |> List.ofSeq
+            |> List.filter(fun s -> s.Length > 0)
+            |> List.distinct
         let oneWayResetTargets =
             oneWayResets
-            |> Seq.map(fun resets ->
+            |> List.ofSeq
+            |> List.map(fun resets ->
                 [
                     for name in jobNameMap do
                         if resets.Contains(name.Key) then
@@ -423,9 +430,8 @@ module OriginModule =
                 ]
                 |> List.distinct
             )
-            |> Seq.filter(fun s -> s.Length > 0)
-            |> Seq.distinct
-            |> List.ofSeq
+            |> List.filter(fun s -> s.Length > 0)
+            |> List.distinct
 
         let allRoutes =
             routeCalculationTargets.Concat(oneWayResetTargets)
@@ -445,9 +451,10 @@ module OriginModule =
             |> removeDuplicatesInList
             |> getAllJobDefRoutes
             |> removeDuplicates
-            |> Seq.map(fun r -> List.distinct r)
-
+            |> List.map(fun r -> List.distinct r)
+            
         let detectedChains = allRoutes |> getDetectedResetChains resetChains
+        //
         let offByOneWayBackwardResets =
             [
                 for reset in oneWayResets do
@@ -465,17 +472,20 @@ module OriginModule =
             let detectedChainHeads =
                 detectedChains |> Seq.map(fun chain -> chain.Head)
             resetChains
-            |> Seq.map(Seq.map(fun v -> v, detectedChainHeads.Contains(v)))
-            |> Seq.map(Seq.filter(fun v -> snd v = true))
-            |> Seq.filter(fun c -> c.Count() = 1)
-            |> Seq.collect(Seq.map(fun v -> fst v))
             |> List.ofSeq
+            |> List.map(List.map(fun v -> v, detectedChainHeads.Contains(v)))
+            |> List.map(List.filter(fun v -> snd v = true))
+            |> List.filter(fun c -> c.Count() = 1)
+            |> List.collect(List.map(fun v -> fst v))
         let allJobs =
             graph.Vertices
-            |> Seq.map(getVertexTarget)
-            |> Seq.map(fun c -> c.CallTargetJob.DeviceDefs)
+            |> List.ofSeq
+            |> List.map(getVertexTarget)
+            |> List.map(fun c -> c.CallTargetJob.DeviceDefs)
             |> removeDuplicates
-
+        stopWatch.Stop()
+        printfn "\n%f" stopWatch.Elapsed.TotalMilliseconds
+            
         getOriginMaps
             allJobs
             offByOneWayBackwardResets offByMutualResetChains

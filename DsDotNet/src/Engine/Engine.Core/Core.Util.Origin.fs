@@ -24,24 +24,26 @@ module OriginModule =
         source |> Seq.collect id |> Seq.distinct
 
     let compareIsIncludedWithOrder (now:'T seq) (compare:'T seq) =
-        Enumerable.SequenceEqual(Enumerable.Intersect(compare, now), now)
-
+        let t = [|
+            for a in now do
+                if (Seq.exists (fun n -> n = a) compare) then
+                    yield a
+        |]
+        t.Count() = now.Count()
+        
     /// Remove inclusive relationship duplicates in list list
     let removeDuplicatesInList candidates:(seq<'T list>) =
-        let result = new ResizeArray<'T list>(0)
-        for now in candidates do
-            let mutable check = true
-            for compare in candidates do
-                if now <> compare then
-                    if check
-                        && (compareIsIncludedWithOrder now compare)
-                        && now.Count() < compare.Count()
-                    then
-                        check <- false
-            if check then
-                result.Add(now)
-        result
-
+        let toRemove = 
+            [
+                for p in Seq.allPairs candidates candidates do
+                    let (n: 'T list), c = p
+                    if n <> c && n.Length < c.Length &&
+                            (compareIsIncludedWithOrder n c) then
+                        yield n
+            ]
+            |> List.distinct
+        candidates |> Seq.except(toRemove)
+        
     /// Get vertex target
     let getVertexTarget (vertex:Vertex) =
         match vertex with
@@ -55,7 +57,7 @@ module OriginModule =
     type EdgeDescription = {
         Source  :string
         Operator:string
-        Target  : string
+        Target  :string
     }
 
     /// Get reset informations from graph
@@ -83,7 +85,7 @@ module OriginModule =
         let q = Queue<Vertex>()
         graph.Inits |> Seq.iter q.Enqueue
         [|
-            while q.Count > 0 do
+            while q.Any() do
                 let v = q.Dequeue()
                 let oes = graph.GetOutgoingVertices(v)
                 oes |> Seq.iter q.Enqueue
@@ -254,11 +256,10 @@ module OriginModule =
             for now in globalChains do
                 for chain in globalChains do
                     if now <> chain then
-                        if Enumerable.Intersect(now, chain).Count() > 0 then
+                        if Enumerable.Intersect(now, chain).Any() then
                             now.Concat(chain) |> addToResult candidates sort
                         else
                             now |> addToResult candidates sort
-
         // Remove duplicates
         removeDuplicatesInList candidates
 
@@ -275,7 +276,7 @@ module OriginModule =
             )
         )
         |> Seq.distinct
-        |> Seq.filter(fun r -> r.Count() > 0)
+        |> Seq.filter(fun r -> r.Any())
         |> removeDuplicatesInList
 
     let getNameStructedChains (resetChains:seq<string list>) =
@@ -327,9 +328,9 @@ module OriginModule =
                                     interlocks, offByMutualResetChains
                                 )
                             if not (allNodes.ContainsKey(jobName)) then
-                                match isIn.Count() with
-                                | 0 -> allNodes.Add(jobName, NeedCheck)
-                                | _ -> allNodes.Add(jobName, On)
+                                match isIn.Any() with
+                                | false -> allNodes.Add(jobName, NeedCheck)
+                                | true  -> allNodes.Add(jobName, On)
                         else
                             allNodes.Add(jobName, NeedCheck)
             if not (allNodes.ContainsKey(jobName)) then
@@ -453,12 +454,12 @@ module OriginModule =
                     let tgt = seq { reset.Last(); reset.First(); }
                     let backward =
                         allRoutes
-                        |> Seq.filter(fun route -> route.Count() > 0)
+                        |> Seq.filter(fun route -> route.Any())
                         |> Seq.map(fun route ->
                             route |> Seq.map(fun j -> j.ApiName)
                         )
                         |> Seq.filter(compareIsIncludedWithOrder tgt)
-                    if backward.Count() > 0 then yield tgt.First()
+                    if backward.Any() then yield tgt.First()
             ]
         let offByMutualResetChains =
             let detectedChainHeads =

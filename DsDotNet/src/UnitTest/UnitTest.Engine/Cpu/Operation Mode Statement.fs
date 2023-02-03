@@ -13,8 +13,6 @@ type Spec04_OperationStatement() =
     inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
-    do
-        t.GenerationIO()
 
     [<Test>]
     member __.``O1 Ready Operation State`` () =

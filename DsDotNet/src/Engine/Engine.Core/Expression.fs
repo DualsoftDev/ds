@@ -171,6 +171,8 @@ module ExpressionModule =
         interface IStorage with
 
             member x.DsSystem = x.System
+            member x.Target = None
+            member x.TagKind = -1
             member x.Name with get() = $"RisingCoil.{x.Storage.Name}" and set(_v) = failwithlog "ERROR"
             member _.Address with get() = unsupported() and set(_v) = unsupported()
             member _.DataType = typedefof<RisingCoil>
@@ -192,6 +194,8 @@ module ExpressionModule =
         interface IStorage with
 
             member x.DsSystem = x.System
+            member x.Target = None
+            member x.TagKind = -1
             member x.Name with get() = $"FallingCoil.{x.Storage.Name}" and set(_v) = failwithlog "ERROR"
             member _.Address with get() = unsupported() and set(_v) = unsupported()
             member _.DataType = typedefof<FallingCoil>

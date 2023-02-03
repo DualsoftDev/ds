@@ -39,6 +39,8 @@ module Fixtures =
             Address = Some address
             Comment = None
             System = Runtime.System
+            Target = None
+            TagKind = -1
             IsGlobal = false
         }
         Tag(param)

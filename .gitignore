@@ -11,7 +11,6 @@ Grammar/CsParser/obj/
 Grammar/CsParser/bin/
 /DsDotNet/src/UnitTest/UnitTest.Engine/XgiXmls/*.xml
 /DsDotNet/src/UnitTest/UnitTest.PLC.Xgi/XgiXmls/*.xml
-/DsDotNet/src/UnitTest/UnitTest.Engine/ImportOffice/Sample/*/*.xml
-/DsDotNet/src/UnitTest/UnitTest.Engine/ImportOffice/Sample/*/*.xlsx
-/DsDotNet/src/UnitTest/UnitTest.Engine/ImportOffice/Sample/*/*.xgdb
-*.xml
+/DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/*/*.xml
+/DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/*/*.xlsx
+/DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/*/*.xgdb

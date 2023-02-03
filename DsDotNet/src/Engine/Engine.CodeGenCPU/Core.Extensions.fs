@@ -4,6 +4,7 @@ open System.Linq
 open Engine.Core
 open Engine.Common.FS
 open System.Runtime.CompilerServices
+open System
 
 [<AutoOpen>]
 module ConvertCoreExt =
@@ -31,29 +32,29 @@ module ConvertCoreExt =
                |> Tuple.toDictionary
 
     type ApiItem with
-        member a.PS     = getAM(a).GetApiTag(ApiTag.PLANSET)
-        member a.PR     = getAM(a).GetApiTag(ApiTag.PLANRST)
-        member a.PE     = getAM(a).GetApiTag(ApiTag.PLANEND)
+        member a.PS     = getAM(a).GetApiTag(ApiItemTag.planSet)
+        member a.PR     = getAM(a).GetApiTag(ApiItemTag.planRst)
+        member a.PE     = getAM(a).GetApiTag(ApiItemTag.planEnd)
 
     type DsSystem with
-        member s._on     = getSM(s).GetSysBitTag(SysBitTag.ON)
-        member s._off    = getSM(s).GetSysBitTag(SysBitTag.OFF)
-        member s._auto   = getSM(s).GetSysBitTag(SysBitTag.AUTO)
-        member s._manual = getSM(s).GetSysBitTag(SysBitTag.MANUAL)
-        member s._drive  = getSM(s).GetSysBitTag(SysBitTag.DRIVE)
-        member s._stop   = getSM(s).GetSysBitTag(SysBitTag.STOP)
-        member s._emg    = getSM(s).GetSysBitTag(SysBitTag.EMG)
-        member s._test   = getSM(s).GetSysBitTag(SysBitTag.TEST )
-        member s._ready  = getSM(s).GetSysBitTag(SysBitTag.READY)
-        member s._clear  = getSM(s).GetSysBitTag(SysBitTag.CLEAR)
-        member s._home   = getSM(s).GetSysBitTag(SysBitTag.HOME)
-        member s._dtimeyy  = getSM(s).GetSysDateTag(SysDataTimeTag.DATET_YY)
-        member s._dtimemm  = getSM(s).GetSysDateTag(SysDataTimeTag.DATET_MM)
-        member s._dtimedd  = getSM(s).GetSysDateTag(SysDataTimeTag.DATET_DD)
-        member s._dtimeh   = getSM(s).GetSysDateTag(SysDataTimeTag.DATET_H )
-        member s._dtimem   = getSM(s).GetSysDateTag(SysDataTimeTag.DATET_M )
-        member s._dtimes   = getSM(s).GetSysDateTag(SysDataTimeTag.DATET_S )
-        member s._tout     = getSM(s).GetSysErrTag(SysErrorTag.TIMEOUT)
+        member s._on     = getSM(s).GetSystemTag(SystemTag.on)         :?> PlanVar<bool>
+        member s._off    = getSM(s).GetSystemTag(SystemTag.off)        :?> PlanVar<bool>
+        member s._auto   = getSM(s).GetSystemTag(SystemTag.auto)       :?> PlanVar<bool>
+        member s._manual = getSM(s).GetSystemTag(SystemTag.manual)     :?> PlanVar<bool>
+        member s._drive  = getSM(s).GetSystemTag(SystemTag.drive)      :?> PlanVar<bool>
+        member s._stop   = getSM(s).GetSystemTag(SystemTag.stop)       :?> PlanVar<bool>
+        member s._emg    = getSM(s).GetSystemTag(SystemTag.emg)        :?> PlanVar<bool>
+        member s._test   = getSM(s).GetSystemTag(SystemTag.test )      :?> PlanVar<bool>
+        member s._ready  = getSM(s).GetSystemTag(SystemTag.ready)      :?> PlanVar<bool>
+        member s._clear  = getSM(s).GetSystemTag(SystemTag.clear)      :?> PlanVar<bool>
+        member s._home   = getSM(s).GetSystemTag(SystemTag.home)       :?> PlanVar<bool>
+        member s._dtimeyy  = getSM(s).GetSystemTag(SystemTag.datet_yy) :?> PlanVar<uint8>
+        member s._dtimemm  = getSM(s).GetSystemTag(SystemTag.datet_mm) :?> PlanVar<uint8>
+        member s._dtimedd  = getSM(s).GetSystemTag(SystemTag.datet_dd) :?> PlanVar<uint8>
+        member s._dtimeh   = getSM(s).GetSystemTag(SystemTag.datet_h ) :?> PlanVar<uint8>
+        member s._dtimem   = getSM(s).GetSystemTag(SystemTag.datet_m ) :?> PlanVar<uint8>
+        member s._dtimes   = getSM(s).GetSystemTag(SystemTag.datet_s ) :?> PlanVar<uint8>
+        member s._tout     = getSM(s).GetSystemTag(SystemTag.timeout)  :?> PlanVar<uint16>
         member x.S = x |> getSM
         member x.Storages = x.TagManager.Storages
 
@@ -107,27 +108,30 @@ module ConvertCoreExt =
         member x.GetPRs(r:Real) =
             x.ApiItems.Where(fun api-> api.TXs.Contains(r))
                       .Select(fun api -> api.PR)
+
         member x.GetReadAbleTags() =
-            EnumFS.EnumValues(typeof<SysBitTag>).Cast<SysBitTag>()
-                  .Select(getSM(x).GetSysBitTag)
+            SystemTag.GetValues(typeof<SystemTag>)
+                     .Cast<SystemTag>()
+                     .Select(getSM(x).GetSystemTag)
+
 
         member x.GetWriteAbleTags() =
             let writeAble =
                 [
-                    SysBitTag.AUTO
-                    SysBitTag.MANUAL
-                    SysBitTag.DRIVE
-                    SysBitTag.STOP
-                    SysBitTag.EMG
-                    SysBitTag.TEST
-                    SysBitTag.READY
-                    SysBitTag.CLEAR
-                    SysBitTag.HOME
+                    SystemTag.auto
+                    SystemTag.manual
+                    SystemTag.drive
+                    SystemTag.stop
+                    SystemTag.emg
+                    SystemTag.test
+                    SystemTag.ready
+                    SystemTag.clear
+                    SystemTag.home
                 ]
             let sm = getSM(x)
-            EnumFS.EnumValues(typeof<SysBitTag>).Cast<SysBitTag>()
-                  .Where(fun typ -> writeAble.Contains(typ))
-                  .Select(sm.GetSysBitTag)
+            SystemTag.GetValues(typeof<SystemTag>).Cast<SystemTag>()
+                     .Where(fun typ -> writeAble.Contains(typ))
+                     .Select(sm.GetSystemTag)
 
     let private getButtonExpr(flow:Flow, btns:ButtonDef seq) : Expression<bool> seq =
         btns.Where(fun b -> b.SettingFlows.Contains(flow))
@@ -157,26 +161,26 @@ module ConvertCoreExt =
 //운영 모드 는 Flow 별로 제공된 모드 On/Off 상태 나타낸다.
     type Flow with
 
-        member f.rop    = getFM(f).GetFlowTag(FlowTag.READY_OP    ) // Ready Operation Mode
-        member f.aop    = getFM(f).GetFlowTag(FlowTag.AUTO_OP     ) // Auto Operation Mode
-        member f.mop    = getFM(f).GetFlowTag(FlowTag.MANUAL_OP   ) // Manual Operation Mode
-        member f.dop    = getFM(f).GetFlowTag(FlowTag.DRIVE_OP    ) // Drive Operation Mode
-        member f.top    = getFM(f).GetFlowTag(FlowTag.TEST_OP     ) //  Test  Operation Mode (시운전)
-        member f.sop    = getFM(f).GetFlowTag(FlowTag.STOP_OP     ) // Stop State
-        member f.eop    = getFM(f).GetFlowTag(FlowTag.EMERGENCY_OP) // Emergency State
-        member f.iop    = getFM(f).GetFlowTag(FlowTag.IDLE_OP) // Emergency State
-        member f.auto   = getFM(f).GetFlowTag(FlowTag.AUTO_BIT    )
-        member f.manual = getFM(f).GetFlowTag(FlowTag.MANUAL_BIT  )
-        member f.drive  = getFM(f).GetFlowTag(FlowTag.DRIVE_BIT   )
-        member f.stop   = getFM(f).GetFlowTag(FlowTag.STOP_BIT    )
-        member f.ready  = getFM(f).GetFlowTag(FlowTag.READY_BIT   )
-        member f.clear  = getFM(f).GetFlowTag(FlowTag.CLEAR_BIT   )
-        member f.emg    = getFM(f).GetFlowTag(FlowTag.EMG_BIT     )
-        member f.test   = getFM(f).GetFlowTag(FlowTag.TEST_BIT    )
-        member f.home   = getFM(f).GetFlowTag(FlowTag.HOME_BIT    )
-        member f.scr    = getFM(f).GetFlowTag(FlowTag.READYCONDI_BIT    )
-        member f.scd    = getFM(f).GetFlowTag(FlowTag.DRIVECONDI_BIT    )
-        member x.F = x |> getFM
+        member f.rop    = getFM(f).GetFlowTag(FlowTag.ready_op    ) // ready Operation Mode
+        member f.aop    = getFM(f).GetFlowTag(FlowTag.auto_op     ) // auto operation Mode
+        member f.mop    = getFM(f).GetFlowTag(FlowTag.manual_op   ) // manual Operation Mode
+        member f.dop    = getFM(f).GetFlowTag(FlowTag.drive_op    ) // drive Operation Mode
+        member f.top    = getFM(f).GetFlowTag(FlowTag.test_op     ) //  test  Operation Mode (시운전)
+        member f.sop    = getFM(f).GetFlowTag(FlowTag.stop_op     ) // stop state
+        member f.eop    = getFM(f).GetFlowTag(FlowTag.emergency_op) // emergency State
+        member f.iop    = getFM(f).GetFlowTag(FlowTag.idle_op)      // emergency state
+        member f.auto   = getFM(f).GetFlowTag(FlowTag.auto_bit    )
+        member f.manual = getFM(f).GetFlowTag(FlowTag.manual_bit  )
+        member f.drive  = getFM(f).GetFlowTag(FlowTag.drive_bit   )
+        member f.stop   = getFM(f).GetFlowTag(FlowTag.stop_bit    )
+        member f.ready  = getFM(f).GetFlowTag(FlowTag.ready_bit   )
+        member f.clear  = getFM(f).GetFlowTag(FlowTag.clear_bit   )
+        member f.emg    = getFM(f).GetFlowTag(FlowTag.emg_bit     )
+        member f.test   = getFM(f).GetFlowTag(FlowTag.test_bit    )
+        member f.home   = getFM(f).GetFlowTag(FlowTag.home_bit    )
+        member f.scr    = getFM(f).GetFlowTag(FlowTag.readycondi_bit    )
+        member f.scd    = getFM(f).GetFlowTag(FlowTag.drivecondi_bit    )
+        member f.F = f |> getFM
         member f._on     = f.System._on
         member f._off    = f.System._off
 
@@ -207,23 +211,23 @@ module ConvertCoreExt =
         member f.ModeManualSwHMIExpr =  !!f.auto.Expr <&&>   f.manual.Expr
 
         member f.GetReadAbleTags() =
-            EnumFS.EnumValues(typeof<FlowTag>).Cast<FlowTag>()
+            FlowTag.GetValues(typeof<FlowTag>).Cast<FlowTag>()
                   .Select(getFM(f).GetFlowTag)
 
         member f.GetWriteAbleTags() =
             let writeAble =
-                [   FlowTag.AUTO_BIT
-                    FlowTag.MANUAL_BIT
-                    FlowTag.DRIVE_BIT
-                    FlowTag.STOP_BIT
-                    FlowTag.READY_BIT
-                    FlowTag.CLEAR_BIT
-                    FlowTag.EMG_BIT
-                    FlowTag.TEST_BIT
-                    FlowTag.HOME_BIT
+                [   FlowTag.auto_bit
+                    FlowTag.manual_bit
+                    FlowTag.drive_bit
+                    FlowTag.stop_bit
+                    FlowTag.ready_bit
+                    FlowTag.clear_bit
+                    FlowTag.emg_bit
+                    FlowTag.test_bit
+                    FlowTag.home_bit
                 ]
             let fm = getFM(f)
-            EnumFS.EnumValues(typeof<FlowTag>).Cast<FlowTag>()
+            FlowTag.GetValues(typeof<FlowTag>).Cast<FlowTag>()
                   .Where(fun typ -> writeAble.Contains(typ))
                   .Select(fm.GetFlowTag)
 
@@ -265,14 +269,6 @@ module ConvertCoreExt =
         member r._off  = r.Parent.GetSystem()._off
 
 
-
-
-
-
-
-
-
-
     type TaskDev with
         member jd.ActionIN  = jd.InTag  :?> Tag<bool>
         member jd.ActionOut = jd.OutTag :?> Tag<bool>
@@ -282,12 +278,9 @@ module ConvertCoreExt =
                 jd.ApiItem.System.GetMutualResetApis(jd.ApiItem)
                     .SelectMany(fun a -> x.DeviceDefs.Where(fun w-> w.ApiItem = a))
 
-
     [<AutoOpen>]
     [<Extension>]
-    type TagTest =
-        [<Extension>] static member TagS (x:DsSystem, typ:SysDataTimeTag) = getSM(x).GetSysDateTag(typ)
-        [<Extension>] static member TagS (x:DsSystem, typ:SysBitTag)      = getSM(x).GetSysBitTag(typ)
-        [<Extension>] static member TagS (x:DsSystem, typ:SysErrorTag)    = getSM(x).GetSysErrTag(typ)
-        [<Extension>] static member TagF (x:Flow    , typ:FlowTag)        = getFM(x).GetFlowTag(typ )
-        [<Extension>] static member TagA (x:ApiItem , typ:ApiTag)         = getAM(x).GetApiTag(typ)
+    type TagInfoType =
+        [<Extension>] static member GetTagSys  (x:DsSystem ,typ:SystemTag)   = getSM(x).GetSystemTag(typ)
+        [<Extension>] static member GetTagFlow (x:Flow     ,typ:FlowTag)     = getFM(x).GetFlowTag(typ )
+        [<Extension>] static member GetTagApi  (x:ApiItem  ,typ:ApiItemTag)  = getAM(x).GetApiTag(typ)

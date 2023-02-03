@@ -14,8 +14,6 @@ type Spec13_SystemStatement() =
     inherit EngineTestBaseClass()
 
     let t = CpuTestSample()
-    do
-        t.GenerationIO()
     [<Test>]
     member __.``Y1 System Bit Set Flow`` () =
         t.Sys.Y1_SystemBitSetFlow() |> doChecks

@@ -10,7 +10,7 @@ module OriginTestModule =
     type OriginTester() =
         inherit EngineTestBaseClass()
 
-        let libdir = @$"{__SOURCE_DIRECTORY__}\..\Libraries"
+        let libdir = @$"{__SOURCE_DIRECTORY__}\..\..\UnitTest.Model"
         let configFile = @"test-origin-config.json"
         let genConfig (filePath:string) =
             let cfg = {

@@ -3,6 +3,8 @@ namespace Engine.Cpu
 open Engine.Core
 open System.Runtime.CompilerServices
 open System.Text.RegularExpressions
+open System
+
 [<AutoOpen>]
 module CoreExtensionsModule =
     type Statement with
@@ -42,14 +44,16 @@ module CoreExtensionsModule =
     type ExpressionExt =
         [<Extension>]
         static member NotifyStatus (x:PlanVar<bool>) =
-            if x.Vertex.IsSome
-            then            //마지막 문자 한글자만 추출 tagname_R_  -> R
-                let m = Regex.Match(x.Name, "(?<=_)\D(?=_$)")
-                match m.Value with
-                | "R" -> onStatusChanged (x.Vertex.Value, Ready)
-                | "G" -> onStatusChanged (x.Vertex.Value, Going)
-                | "F" -> onStatusChanged (x.Vertex.Value, Finish)
-                | "H" -> onStatusChanged (x.Vertex.Value, Homing)
+            let stg = (x :> IStorage)
+            if stg.Target.IsSome && (stg.Target.Value :? Vertex)
+            then
+                let tagKind = Enum.ToObject(typeof<VertexTag>,  stg.TagKind) :?> VertexTag
+                let vertex  = stg.Target.Value :?> Vertex
+                match tagKind with
+                | VertexTag.ready  -> onStatusChanged (vertex, Ready)
+                | VertexTag.going  -> onStatusChanged (vertex, Going)
+                | VertexTag.finish -> onStatusChanged (vertex, Finish)
+                | VertexTag.homing -> onStatusChanged (vertex, Homing)
                 | _->()
 
 

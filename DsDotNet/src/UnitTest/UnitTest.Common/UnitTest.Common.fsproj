@@ -8,7 +8,13 @@
 		<!--<IsPackable>false</IsPackable>
 		<GenerateProgramFile>false</GenerateProgramFile>-->
 	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<NoWarn>NU1702</NoWarn>
+	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<NoWarn>NU1702</NoWarn>
+	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
@@ -21,11 +27,15 @@
 	<ItemGroup>
 		<Compile Include="OnlyOnce.fs" />
 		<Compile Include="TestFixture.fs" />
+		<Compile Include="CpuTestCommon.fs" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
 	  <ProjectReference Include="..\..\Engine\Engine.Common.FS\Engine.Common.FS.fsproj" />
 	  <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
+	  <ProjectReference Include="..\..\Engine\Engine.Cpu\Engine.Cpu.fsproj" />
+	  <ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
 	</ItemGroup>
 
 	<ItemGroup>

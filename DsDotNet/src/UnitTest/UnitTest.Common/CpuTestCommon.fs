@@ -15,10 +15,13 @@ open System.Linq
 module CpuTestUtil =
 
     type CpuTestSample() =
+        let parseText (systemRepo:ShareableSystemRepository) referenceDir text =
+            let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
+            helper.TheSystem
 
         let LoadSampleSystem()  =
             let systemRepo   = ShareableSystemRepository ()
-            let referenceDir = @$"{__SOURCE_DIRECTORY__}\..\..\UnitTest.Model"
+            let referenceDir = @$"{__SOURCE_DIRECTORY__}\..\UnitTest.Model"
             let sys = parseText systemRepo referenceDir Program.CpuTestText
             Runtime.System <- sys
             applyTagManager (sys, Storages())

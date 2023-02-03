@@ -108,9 +108,9 @@ module ModelAnswers =
             F.Main.Am = { F.Main; }
         }
     }
-    [device file="cylinder.ds"] A; // D:\Git\ds-Master\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\cylinder.ds
-    [device file="cylinder.ds"] B; // D:\Git\ds-Master\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\cylinder.ds
-    [external file="station.ds" ip="192.168.0.2"] C; // D:\Git\ds-Master\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\station.ds
+    [device file="cylinder.ds"] A; // D:\Git\ds-Master\DsDotNet\src\UnitTest\UnitTest.Model\cylinder.ds
+    [device file="cylinder.ds"] B; // D:\Git\ds-Master\DsDotNet\src\UnitTest\UnitTest.Model\cylinder.ds
+    [external file="station.ds" ip="192.168.0.2"] C; // D:\Git\ds-Master\DsDotNet\src\UnitTest\UnitTest.Model\station.ds
 }
 """
 

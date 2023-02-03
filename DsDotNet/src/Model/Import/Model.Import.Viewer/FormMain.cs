@@ -28,6 +28,8 @@ using static Engine.Common.FS.CollectionAlgorithm;
 using static Model.Import.Office.ImportPPTModule;
 using static Engine.Core.RuntimeGeneratorModule;
 using Engine.Common.FS;
+using static Engine.Core.TagModule;
+using static Engine.Core.TagKindModule;
 
 namespace Dual.Model.Import
 {
@@ -95,12 +97,13 @@ namespace Dual.Model.Import
         public void createSysHMI(DsSystem sys)
         {
             checkedListBox_sysHMI.Items.Clear();
-            var sysBits = EnumFS.EnumValues(typeof(SysBitTag)).Cast<SysBitTag>();
+            var sysBits = Enum.GetValues(typeof(SystemTag)).Cast<SystemTag>();
             sysBits
-                .Where(w => !w.IsON && !w.IsOFF)        //시스템 비트  제외
-                .ForEach(f =>
-            {
-                var tag = TagTest.TagS(sys, f);
+                .Where(w => !w.HasFlag(SystemTag.on) && !w.HasFlag(SystemTag.off))     //시스템 비트  제외
+                .Select(f=> TagInfoType.GetTagSys(sys, f))
+                .OfType<PlanVar<bool>>()
+                .ForEach(tag =>
+                {
                 var sd = new StorageDisplay() { Display = tag.Name, Storage = tag, Value = tag.Value, OnOff = Convert.ToBoolean(tag.Value) };
                 checkedListBox_sysHMI.Items.Add(sd);
                 checkedListBox_sysHMI.SetItemChecked(checkedListBox_sysHMI.Items.Count - 1, sd.OnOff);

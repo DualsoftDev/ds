@@ -14,11 +14,8 @@ open System.Linq
 [<AutoOpen>]
 module CpuTestUtil =
 
-    type CpuTestSample() =
-        let parseText (systemRepo:ShareableSystemRepository) referenceDir text =
-            let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
-            helper.TheSystem
 
+    type CpuTestSample() =
         let LoadSampleSystem()  =
             let systemRepo   = ShareableSystemRepository ()
             let referenceDir = @$"{__SOURCE_DIRECTORY__}\..\UnitTest.Model"

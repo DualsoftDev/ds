@@ -1,0 +1,162 @@
+[sys ip = localhost] s_car = {
+    [flow] Page1 = {
+    }
+    [flow] S101 = {
+        Work = {
+            S101_RbtHand_UNLOAD > S101_PART_OFF;		// S101_RbtHand_UNLOAD(CallDev)> S101_PART_OFF(CallDev);
+            S101_1stClamp_RET > S101_RbtHand_UNLOAD > S101_Pin_ADV;		// S101_1stClamp_RET(CallDev)> S101_RbtHand_UNLOAD(CallDev) > S101_Pin_ADV(CallDev);
+            S101_RbtHand_LOAD > S101_1stClamp_ADV;		// S101_RbtHand_LOAD(CallDev)> S101_1stClamp_ADV(CallDev);
+            S101_RbtHand_LOAD > S101_PART_ON > S101_RbtWeld_WELD;		// S101_RbtHand_LOAD(CallDev)> S101_PART_ON(CallDev) > S101_RbtWeld_WELD(CallDev);
+            S101_2ndClamp_ADV > S101_RbtWeld_WELD > S101_2ndClamp_RET > S101_1stClamp_RET > S101_Pin_RET > S101_Pin_ADV;		// S101_2ndClamp_ADV(CallDev)> S101_RbtWeld_WELD(CallDev) > S101_2ndClamp_RET(CallDev) > S101_1stClamp_RET(CallDev) > S101_Pin_RET(CallDev) > S101_Pin_ADV(CallDev);
+            S101_PART_ON > S101_1stClamp_ADV > S101_2ndClamp_ADV;		// S101_PART_ON(CallDev)> S101_1stClamp_ADV(CallDev) > S101_2ndClamp_ADV(CallDev);
+        }
+    }
+    [flow] S102 = {
+        Work = {
+            S102_RbtHand_UNLOAD > S102_PART_OFF;		// S102_RbtHand_UNLOAD(CallDev)> S102_PART_OFF(CallDev);
+            S102_1stClamp_RET > S102_RbtHand_UNLOAD > S102_Pin_ADV;		// S102_1stClamp_RET(CallDev)> S102_RbtHand_UNLOAD(CallDev) > S102_Pin_ADV(CallDev);
+            S102_RbtHand_LOAD > S102_1stClamp_ADV;		// S102_RbtHand_LOAD(CallDev)> S102_1stClamp_ADV(CallDev);
+            S102_RbtHand_LOAD > S102_PART_ON > S102_RbtWeld_WELD;		// S102_RbtHand_LOAD(CallDev)> S102_PART_ON(CallDev) > S102_RbtWeld_WELD(CallDev);
+            S102_2ndClamp_ADV > S102_RbtWeld_WELD > S102_2ndClamp_RET > S102_1stClamp_RET > S102_Pin_RET > S102_Pin_ADV;		// S102_2ndClamp_ADV(CallDev)> S102_RbtWeld_WELD(CallDev) > S102_2ndClamp_RET(CallDev) > S102_1stClamp_RET(CallDev) > S102_Pin_RET(CallDev) > S102_Pin_ADV(CallDev);
+            S102_PART_ON > S102_1stClamp_ADV > S102_2ndClamp_ADV;		// S102_PART_ON(CallDev)> S102_1stClamp_ADV(CallDev) > S102_2ndClamp_ADV(CallDev);
+        }
+    }
+    [flow] S103 = {
+        Work = {
+            S103_RbtHand_UNLOAD > S103_PART_OFF;		// S103_RbtHand_UNLOAD(CallDev)> S103_PART_OFF(CallDev);
+            S103_1stClamp_RET > S103_RbtHand_UNLOAD > S103_Pin_ADV;		// S103_1stClamp_RET(CallDev)> S103_RbtHand_UNLOAD(CallDev) > S103_Pin_ADV(CallDev);
+            S103_RbtHand_LOAD > S103_1stClamp_ADV;		// S103_RbtHand_LOAD(CallDev)> S103_1stClamp_ADV(CallDev);
+            S103_RbtHand_LOAD > S103_PART_ON > S103_RbtWeld_WELD;		// S103_RbtHand_LOAD(CallDev)> S103_PART_ON(CallDev) > S103_RbtWeld_WELD(CallDev);
+            S103_2ndClamp_ADV > S103_RbtWeld_WELD > S103_2ndClamp_RET > S103_1stClamp_RET > S103_Pin_RET > S103_Pin_ADV;		// S103_2ndClamp_ADV(CallDev)> S103_RbtWeld_WELD(CallDev) > S103_2ndClamp_RET(CallDev) > S103_1stClamp_RET(CallDev) > S103_Pin_RET(CallDev) > S103_Pin_ADV(CallDev);
+            S103_PART_ON > S103_1stClamp_ADV > S103_2ndClamp_ADV;		// S103_PART_ON(CallDev)> S103_1stClamp_ADV(CallDev) > S103_2ndClamp_ADV(CallDev);
+        }
+    }
+    [flow] S104 = {
+        Work = {
+            S104_RbtHand_UNLOAD > S104_PART_OFF;		// S104_RbtHand_UNLOAD(CallDev)> S104_PART_OFF(CallDev);
+            S104_1stClamp_RET > S104_RbtHand_UNLOAD > S104_Pin_ADV;		// S104_1stClamp_RET(CallDev)> S104_RbtHand_UNLOAD(CallDev) > S104_Pin_ADV(CallDev);
+            S104_RbtHand_LOAD > S104_1stClamp_ADV;		// S104_RbtHand_LOAD(CallDev)> S104_1stClamp_ADV(CallDev);
+            S104_RbtHand_LOAD > S104_PART_ON > S104_RbtWeld_WELD;		// S104_RbtHand_LOAD(CallDev)> S104_PART_ON(CallDev) > S104_RbtWeld_WELD(CallDev);
+            S104_2ndClamp_ADV > S104_RbtWeld_WELD > S104_2ndClamp_RET > S104_1stClamp_RET > S104_Pin_RET > S104_Pin_ADV;		// S104_2ndClamp_ADV(CallDev)> S104_RbtWeld_WELD(CallDev) > S104_2ndClamp_RET(CallDev) > S104_1stClamp_RET(CallDev) > S104_Pin_RET(CallDev) > S104_Pin_ADV(CallDev);
+            S104_PART_ON > S104_1stClamp_ADV > S104_2ndClamp_ADV;		// S104_PART_ON(CallDev)> S104_1stClamp_ADV(CallDev) > S104_2ndClamp_ADV(CallDev);
+        }
+    }
+    [jobs] = {
+        S101_RbtWeld_WELD = { S101_RbtWeld1.WELD(%mx31, %mx1031); S101_RbtWeld2.WELD(%mx32, %mx1032); S101_RbtWeld3.WELD(%mx33, %mx1033); S101_RbtWeld4.WELD(%mx34, %mx1034); }
+        S101_RbtWeld_RESET = { S101_RbtWeld1.RESET(%mx27, %mx1027); S101_RbtWeld2.RESET(%mx28, %mx1028); S101_RbtWeld3.RESET(%mx29, %mx1029); S101_RbtWeld4.RESET(%mx30, %mx1030); }
+        S101_RbtWeld_HOME = { S101_RbtWeld1.HOME(%mx23, %mx1023); S101_RbtWeld2.HOME(%mx24, %mx1024); S101_RbtWeld3.HOME(%mx25, %mx1025); S101_RbtWeld4.HOME(%mx26, %mx1026); }
+        S101_PART_OFF = { S101_PART.OFF(%mx16, %mx1016); }
+        S101_PART_ON = { S101_PART.ON(%mx17, %mx1017); }
+        S101_RbtHand_UNLOAD = { S101_RbtHand.UNLOAD(%mx22, %mx1022); }
+        S101_RbtHand_LOAD = { S101_RbtHand.LOAD(%mx21, %mx1021); }
+        S101_RbtHand_HOME = { S101_RbtHand.HOME(%mx20, %mx1020); }
+        S101_Pin_RET = { S101_Pin.RET(%mx19, %mx1019); }
+        S101_Pin_ADV = { S101_Pin.ADV(%mx18, %mx1018); }
+        S101_1stClamp_RET = { S101_1stClamp1.RET(%mx5, %mx1005); S101_1stClamp2.RET(%mx6, %mx1006); S101_1stClamp3.RET(%mx7, %mx1007); S101_1stClamp4.RET(%mx8, %mx1008); S101_1stClamp5.RET(%mx9, %mx1009); }
+        S101_1stClamp_ADV = { S101_1stClamp1.ADV(%mx0, %mx1000); S101_1stClamp2.ADV(%mx1, %mx1001); S101_1stClamp3.ADV(%mx2, %mx1002); S101_1stClamp4.ADV(%mx3, %mx1003); S101_1stClamp5.ADV(%mx4, %mx1004); }
+        S101_2ndClamp_RET = { S101_2ndClamp1.RET(%mx13, %mx1013); S101_2ndClamp2.RET(%mx14, %mx1014); S101_2ndClamp3.RET(%mx15, %mx1015); }
+        S101_2ndClamp_ADV = { S101_2ndClamp1.ADV(%mx10, %mx1010); S101_2ndClamp2.ADV(%mx11, %mx1011); S101_2ndClamp3.ADV(%mx12, %mx1012); }
+        S102_Pin_RET = { S102_Pin.RET(%mx54, %mx1054); }
+        S102_Pin_ADV = { S102_Pin.ADV(%mx53, %mx1053); }
+        S102_1stClamp_RET = { S102_1stClamp1.RET(%mx40, %mx1040); S102_1stClamp2.RET(%mx41, %mx1041); S102_1stClamp3.RET(%mx42, %mx1042); S102_1stClamp4.RET(%mx43, %mx1043); S102_1stClamp5.RET(%mx44, %mx1044); }
+        S102_1stClamp_ADV = { S102_1stClamp1.ADV(%mx35, %mx1035); S102_1stClamp2.ADV(%mx36, %mx1036); S102_1stClamp3.ADV(%mx37, %mx1037); S102_1stClamp4.ADV(%mx38, %mx1038); S102_1stClamp5.ADV(%mx39, %mx1039); }
+        S102_RbtWeld_WELD = { S102_RbtWeld1.WELD(%mx66, %mx1066); S102_RbtWeld2.WELD(%mx67, %mx1067); S102_RbtWeld3.WELD(%mx68, %mx1068); S102_RbtWeld4.WELD(%mx69, %mx1069); }
+        S102_RbtWeld_RESET = { S102_RbtWeld1.RESET(%mx62, %mx1062); S102_RbtWeld2.RESET(%mx63, %mx1063); S102_RbtWeld3.RESET(%mx64, %mx1064); S102_RbtWeld4.RESET(%mx65, %mx1065); }
+        S102_RbtWeld_HOME = { S102_RbtWeld1.HOME(%mx58, %mx1058); S102_RbtWeld2.HOME(%mx59, %mx1059); S102_RbtWeld3.HOME(%mx60, %mx1060); S102_RbtWeld4.HOME(%mx61, %mx1061); }
+        S102_PART_OFF = { S102_PART.OFF(%mx51, %mx1051); }
+        S102_PART_ON = { S102_PART.ON(%mx52, %mx1052); }
+        S102_RbtHand_UNLOAD = { S102_RbtHand.UNLOAD(%mx57, %mx1057); }
+        S102_RbtHand_LOAD = { S102_RbtHand.LOAD(%mx56, %mx1056); }
+        S102_RbtHand_HOME = { S102_RbtHand.HOME(%mx55, %mx1055); }
+        S102_2ndClamp_RET = { S102_2ndClamp1.RET(%mx48, %mx1048); S102_2ndClamp2.RET(%mx49, %mx1049); S102_2ndClamp3.RET(%mx50, %mx1050); }
+        S102_2ndClamp_ADV = { S102_2ndClamp1.ADV(%mx45, %mx1045); S102_2ndClamp2.ADV(%mx46, %mx1046); S102_2ndClamp3.ADV(%mx47, %mx1047); }
+        S103_2ndClamp_RET = { S103_2ndClamp1.RET(%mx83, %mx1083); S103_2ndClamp2.RET(%mx84, %mx1084); S103_2ndClamp3.RET(%mx85, %mx1085); }
+        S103_2ndClamp_ADV = { S103_2ndClamp1.ADV(%mx80, %mx1080); S103_2ndClamp2.ADV(%mx81, %mx1081); S103_2ndClamp3.ADV(%mx82, %mx1082); }
+        S103_Pin_RET = { S103_Pin.RET(%mx89, %mx1089); }
+        S103_Pin_ADV = { S103_Pin.ADV(%mx88, %mx1088); }
+        S103_1stClamp_RET = { S103_1stClamp1.RET(%mx75, %mx1075); S103_1stClamp2.RET(%mx76, %mx1076); S103_1stClamp3.RET(%mx77, %mx1077); S103_1stClamp4.RET(%mx78, %mx1078); S103_1stClamp5.RET(%mx79, %mx1079); }
+        S103_1stClamp_ADV = { S103_1stClamp1.ADV(%mx70, %mx1070); S103_1stClamp2.ADV(%mx71, %mx1071); S103_1stClamp3.ADV(%mx72, %mx1072); S103_1stClamp4.ADV(%mx73, %mx1073); S103_1stClamp5.ADV(%mx74, %mx1074); }
+        S103_RbtWeld_WELD = { S103_RbtWeld1.WELD(%mx101, %mx1101); S103_RbtWeld2.WELD(%mx102, %mx1102); S103_RbtWeld3.WELD(%mx103, %mx1103); S103_RbtWeld4.WELD(%mx104, %mx1104); }
+        S103_RbtWeld_RESET = { S103_RbtWeld1.RESET(%mx97, %mx1097); S103_RbtWeld2.RESET(%mx98, %mx1098); S103_RbtWeld3.RESET(%mx99, %mx1099); S103_RbtWeld4.RESET(%mx100, %mx1100); }
+        S103_RbtWeld_HOME = { S103_RbtWeld1.HOME(%mx93, %mx1093); S103_RbtWeld2.HOME(%mx94, %mx1094); S103_RbtWeld3.HOME(%mx95, %mx1095); S103_RbtWeld4.HOME(%mx96, %mx1096); }
+        S103_PART_OFF = { S103_PART.OFF(%mx86, %mx1086); }
+        S103_PART_ON = { S103_PART.ON(%mx87, %mx1087); }
+        S103_RbtHand_UNLOAD = { S103_RbtHand.UNLOAD(%mx92, %mx1092); }
+        S103_RbtHand_LOAD = { S103_RbtHand.LOAD(%mx91, %mx1091); }
+        S103_RbtHand_HOME = { S103_RbtHand.HOME(%mx90, %mx1090); }
+        S104_2ndClamp_RET = { S104_2ndClamp1.RET(%mx118, %mx1118); S104_2ndClamp2.RET(%mx119, %mx1119); S104_2ndClamp3.RET(%mx120, %mx1120); }
+        S104_2ndClamp_ADV = { S104_2ndClamp1.ADV(%mx115, %mx1115); S104_2ndClamp2.ADV(%mx116, %mx1116); S104_2ndClamp3.ADV(%mx117, %mx1117); }
+        S104_RbtWeld_WELD = { S104_RbtWeld1.WELD(%mx136, %mx1136); S104_RbtWeld2.WELD(%mx137, %mx1137); S104_RbtWeld3.WELD(%mx138, %mx1138); S104_RbtWeld4.WELD(%mx139, %mx1139); }
+        S104_RbtWeld_RESET = { S104_RbtWeld1.RESET(%mx132, %mx1132); S104_RbtWeld2.RESET(%mx133, %mx1133); S104_RbtWeld3.RESET(%mx134, %mx1134); S104_RbtWeld4.RESET(%mx135, %mx1135); }
+        S104_RbtWeld_HOME = { S104_RbtWeld1.HOME(%mx128, %mx1128); S104_RbtWeld2.HOME(%mx129, %mx1129); S104_RbtWeld3.HOME(%mx130, %mx1130); S104_RbtWeld4.HOME(%mx131, %mx1131); }
+        S104_PART_OFF = { S104_PART.OFF(%mx121, %mx1121); }
+        S104_PART_ON = { S104_PART.ON(%mx122, %mx1122); }
+        S104_Pin_RET = { S104_Pin.RET(%mx124, %mx1124); }
+        S104_Pin_ADV = { S104_Pin.ADV(%mx123, %mx1123); }
+        S104_1stClamp_RET = { S104_1stClamp1.RET(%mx110, %mx1110); S104_1stClamp2.RET(%mx111, %mx1111); S104_1stClamp3.RET(%mx112, %mx1112); S104_1stClamp4.RET(%mx113, %mx1113); S104_1stClamp5.RET(%mx114, %mx1114); }
+        S104_1stClamp_ADV = { S104_1stClamp1.ADV(%mx105, %mx1105); S104_1stClamp2.ADV(%mx106, %mx1106); S104_1stClamp3.ADV(%mx107, %mx1107); S104_1stClamp4.ADV(%mx108, %mx1108); S104_1stClamp5.ADV(%mx109, %mx1109); }
+        S104_RbtHand_UNLOAD = { S104_RbtHand.UNLOAD(%mx127, %mx1127); }
+        S104_RbtHand_LOAD = { S104_RbtHand.LOAD(%mx126, %mx1126); }
+        S104_RbtHand_HOME = { S104_RbtHand.HOME(%mx125, %mx1125); }
+    }
+    [device file="lib/Robot/Weld.ds"] S101_RbtWeld1; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Robot\Weld
+    [device file="lib/Robot/Weld.ds"] S101_RbtWeld2; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Robot\Weld
+    [device file="lib/Robot/Weld.ds"] S101_RbtWeld3; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Robot\Weld
+    [device file="lib/Robot/Weld.ds"] S101_RbtWeld4; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Robot\Weld
+    [device file="lib/Part/Sensor.ds"] S101_PART; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Part\Sensor
+    [device file="lib/Robot/Handling.ds"] S101_RbtHand; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Robot\Handling
+    [device file="lib/Cylinder/Single.ds"] S101_Pin; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Single
+    [device file="lib/Cylinder/Double.ds"] S101_1stClamp1; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S101_1stClamp2; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S101_1stClamp3; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S101_1stClamp4; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S101_1stClamp5; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S101_2ndClamp1; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S101_2ndClamp2; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S101_2ndClamp3; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Single.ds"] S102_Pin; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Single
+    [device file="lib/Cylinder/Double.ds"] S102_1stClamp1; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S102_1stClamp2; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S102_1stClamp3; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S102_1stClamp4; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S102_1stClamp5; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Robot/Weld.ds"] S102_RbtWeld1; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Robot\Weld
+    [device file="lib/Robot/Weld.ds"] S102_RbtWeld2; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Robot\Weld
+    [device file="lib/Robot/Weld.ds"] S102_RbtWeld3; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Robot\Weld
+    [device file="lib/Robot/Weld.ds"] S102_RbtWeld4; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Robot\Weld
+    [device file="lib/Part/Sensor.ds"] S102_PART; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Part\Sensor
+    [device file="lib/Robot/Handling.ds"] S102_RbtHand; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Robot\Handling
+    [device file="lib/Cylinder/Double.ds"] S102_2ndClamp1; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S102_2ndClamp2; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S102_2ndClamp3; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S103_2ndClamp1; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S103_2ndClamp2; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S103_2ndClamp3; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Single.ds"] S103_Pin; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Single
+    [device file="lib/Cylinder/Double.ds"] S103_1stClamp1; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S103_1stClamp2; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S103_1stClamp3; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S103_1stClamp4; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S103_1stClamp5; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Robot/Weld.ds"] S103_RbtWeld1; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Robot\Weld
+    [device file="lib/Robot/Weld.ds"] S103_RbtWeld2; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Robot\Weld
+    [device file="lib/Robot/Weld.ds"] S103_RbtWeld3; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Robot\Weld
+    [device file="lib/Robot/Weld.ds"] S103_RbtWeld4; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Robot\Weld
+    [device file="lib/Part/Sensor.ds"] S103_PART; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Part\Sensor
+    [device file="lib/Robot/Handling.ds"] S103_RbtHand; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Robot\Handling
+    [device file="lib/Cylinder/Double.ds"] S104_2ndClamp1; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S104_2ndClamp2; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S104_2ndClamp3; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Robot/Weld.ds"] S104_RbtWeld1; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Robot\Weld
+    [device file="lib/Robot/Weld.ds"] S104_RbtWeld2; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Robot\Weld
+    [device file="lib/Robot/Weld.ds"] S104_RbtWeld3; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Robot\Weld
+    [device file="lib/Robot/Weld.ds"] S104_RbtWeld4; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Robot\Weld
+    [device file="lib/Part/Sensor.ds"] S104_PART; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Part\Sensor
+    [device file="lib/Cylinder/Single.ds"] S104_Pin; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Single
+    [device file="lib/Cylinder/Double.ds"] S104_1stClamp1; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S104_1stClamp2; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S104_1stClamp3; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S104_1stClamp4; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Cylinder/Double.ds"] S104_1stClamp5; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Cylinder\Double
+    [device file="lib/Robot/Handling.ds"] S104_RbtHand; // D:\dsA\DsDotNet\src\UnitTest\UnitTest.Model\ImportOfficeExample\Sample\lib\Robot\Handling
+}

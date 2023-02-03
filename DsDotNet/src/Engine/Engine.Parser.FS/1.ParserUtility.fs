@@ -20,7 +20,7 @@ module ParserUtilityModule =
     let private environmentVariable = "DS_PROJECT"
     let collectNameComponents (parseTree:IParseTree) = parseTree.CollectNameComponents()
     let getEnvironmentVariableName():string = environmentVariable
-    let collectEnvironmentVariablePaths():string list = 
+    let collectEnvironmentVariablePaths():string list =
         let envVar = Environment.GetEnvironmentVariable(environmentVariable)
         if envVar <> null then
             Environment.GetEnvironmentVariable(environmentVariable).Split(';')

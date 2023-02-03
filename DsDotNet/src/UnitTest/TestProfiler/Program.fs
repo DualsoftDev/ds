@@ -14,32 +14,30 @@ open Engine.CodeGenCPU
 open PLC.CodeGen.LSXGI
 open System
 open Model.Import.Office
+open Engine.Parser.FS
 
 
 [<EntryPoint>]
 let main argv =
-    let testAddressSetting (sys:DsSystem) =
-        for j in sys.Jobs do
-            for dev in j.DeviceDefs do
-            if dev.ApiItem.RXs.any() then  dev.InAddress <- "%MX777"
-            if dev.ApiItem.TXs.any() then  dev.OutAddress <- "%MX888"
 
-        for b in sys.Buttons do
-            b.InAddress <- "%MX777"
-            b.OutAddress <- "%MX888"
+    let parseText (systemRepo:ShareableSystemRepository) referenceDir text =
+        let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
+        helper.TheSystem
 
-        for l in sys.Lamps do
-            l.OutAddress <- "%MX888"
+    let testDir = @$"{__SOURCE_DIRECTORY__}\..\UnitTest.Model\ImportOfficeExample\sample"
 
-        for c in sys.Conditions do
-            c.InAddress <- "%MX777"
+    let loadSampleSystem(textDs:string)  =
+        let systemRepo   = ShareableSystemRepository ()
+        let referenceDir = testDir
+        let sys = parseText systemRepo referenceDir textDs
+        Runtime.System <- sys
+        applyTagManager (sys, Storages())
+        sys
 
-    let sampleDirectory = Path.Combine($"{__SOURCE_DIRECTORY__}", "../UnitTest.Engine/ImportOffice/sample/");
-    let myTemplate testName = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../UnitTest.PLC.Xgi/XgiXmls/{testName}.xml")
-    let pptPath = sampleDirectory + "s_car.pptx"
-    let model = ImportPPT.GetModel [ pptPath ]
-    model.Systems.ForEach(testAddressSetting)
-
-    let result = exportXMLforXGI(model.Systems.First(), myTemplate "XXXXXXXXX", None)
+    let sampleDirectory = testDir
+    let dsPath = sampleDirectory + "\s_car.ds"
+    let txt= File.ReadAllText(dsPath);
+    let sys = loadSampleSystem(txt)
+    let result = exportXMLforXGI(sys, "XXXXXXXXX", None)
 
     0 // return an integer exit code

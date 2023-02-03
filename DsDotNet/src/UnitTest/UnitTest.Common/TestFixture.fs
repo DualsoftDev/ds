@@ -5,6 +5,7 @@ open log4net
 open log4net.Config
 open Engine.Common.FS
 open Engine.Core
+open Engine.Parser.FS
 
 // FsUnit/XUnit 사용법:
 // https://github.com/fsprojects/FsUnit/tree/master/tests/FsUnit.Xunit.Test
@@ -44,6 +45,10 @@ module Fixtures =
             IsGlobal = false
         }
         Tag(param)
+
+    let parseText (systemRepo:ShareableSystemRepository) referenceDir text =
+        let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
+        helper.TheSystem
 
     [<AbstractClass>]
     type TestBaseClass(loggerName:string) =

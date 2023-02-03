@@ -355,7 +355,7 @@ module OriginModule =
                     for node in chain do
                         if allNodes.ContainsKey(node) then
                             allNodes[node] <- NotCare
-
+                            
         allNodes, allJobs
 
     /// Get node index map(key:name, value:idx)
@@ -484,7 +484,7 @@ module OriginModule =
             |> removeDuplicates
             
         stopWatch.Stop()
-        printfn "\n%f" stopWatch.Elapsed.TotalMilliseconds
+        printfn "\nOuter %f" stopWatch.Elapsed.TotalMilliseconds
         getOriginMaps
             allJobs
             offByOneWayBackwardResets offByMutualResetChains

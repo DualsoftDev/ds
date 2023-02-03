@@ -1,3 +1,4 @@
+using Engine.CodeGenCPU;
 using Engine.Common;
 using Engine.Common.FS;
 using Model.Import.Office;
@@ -8,7 +9,9 @@ using System.Linq;
 using System.Windows.Forms;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.DsTextProperty;
+using static Model.Import.Office.ImportPPTModule;
 using static Model.Import.Office.ImportViewModule;
+using static Model.Import.Office.PPTObjectModule;
 using Color = System.Drawing.Color;
 
 namespace Dual.Model.Import
@@ -131,33 +134,30 @@ namespace Dual.Model.Import
                 }
             });
         }
-        internal void TestDebug(bool bLoadExcel)
+        internal void TestDebug(bool bLoadExcel, bool bDummyTestAddress)
         {
-            //F7
-            //T1_System
-            //T2_Flow
-            //T3_Real
-            //T4_Api
-            //T5_Call
-            //T6_Alias
-            //T7_CopySystem
-            //T8_Safety
-            //T9_Group
-            //T10_Button
-            //T11_SubLoading
-            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\")) + "src\\UnitTest\\UnitTest.Engine\\ImportOffice\\Sample\\s_car.pptx";
+            string path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\")) + "src\\UnitTest\\UnitTest.Engine\\ImportOffice\\Sample\\s.pptx";
             bool debug = File.Exists(path);
             if (debug)
             {
                 _PathPPTs.Clear();
                 _PathPPTs.Add(path);
-                if (bLoadExcel)
-                    ImportPPTsXls(_PathPPTs, Path.ChangeExtension(path, "xlsx"));
-                else
+                if (bDummyTestAddress)
+                {
                     ImportPPTs(_PathPPTs);
+                    CpuLoader.testAddressSetting(SelectedSystem);
+                    var plcPath = Path.ChangeExtension(UtilFile.GetNewPathXls(_PathPPTs), "xml");
+                    Directory.CreateDirectory(Path.GetDirectoryName(plcPath));
+                    ExportPLC($"{Path.GetDirectoryName(plcPath)}\\DSLogic{DateTime.Now.ToString("(HH-mm-ss)")}.xml");
+                }
+                else
+                {
+                    if (bLoadExcel)
+                        ImportPPTsXls(_PathPPTs, Path.ChangeExtension(path, "xlsx"));
+                    else
+                        ImportPPTs(_PathPPTs);
+                }
             }
         }
-
-
     }
 }

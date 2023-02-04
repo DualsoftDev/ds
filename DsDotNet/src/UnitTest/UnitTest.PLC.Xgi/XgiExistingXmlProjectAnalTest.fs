@@ -13,7 +13,7 @@ type XgiExistingXmlProjectAnalTest() =
 
     [<Test>]
     member __.``Xml project read global variable test`` () =
-        let xmlPrj = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/multiProgramSample.xml"
+        let xmlPrj = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/XmlSamples/multiProgramSample.xml"
 
         let usedMAddresses =
             XmlDocument.loadFromFile xmlPrj

@@ -387,18 +387,18 @@ module ExpressionModule =
     type System.Type with
         member x.ToDsDataTypeString() =
             match x.Name with
-            | BOOL-> "bool"
-            | CHAR   -> "char"
+            | BOOL    -> "bool"
+            | CHAR    -> "char"
             | FLOAT32 -> "float32"
             | FLOAT64 -> "float64"
-            | INT16 -> "uint16"
-            | INT32  -> "int32"
-            | INT64  -> "int64"
-            | INT8  -> "int8"
-            | STRING -> "string"
+            | INT16   -> "uint16"
+            | INT32   -> "int32"
+            | INT64   -> "int64"
+            | INT8    -> "int8"
+            | STRING  -> "string"
             | UINT16  -> "int16"
-            | UINT32 -> "uint32"
-            | UINT64 -> "uint64"
+            | UINT32  -> "uint32"
+            | UINT64  -> "uint64"
             | UINT8   -> "uint8"
             | _  -> failwithlog "ERROR"
 

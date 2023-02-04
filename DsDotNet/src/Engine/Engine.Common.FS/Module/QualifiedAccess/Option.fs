@@ -1,6 +1,6 @@
 namespace Engine.Common.FS
 
-open System.Runtime.CompilerServices
+open System
 
 [<RequireQualifiedAccess>]
 module Option =
@@ -65,6 +65,42 @@ module Option =
             None
         else
             tryCast<'a> a
+
+    // https://stackoverflow.com/questions/24841185/how-to-deal-with-option-values-generically-in-f
+    let isCompatible (x:obj) : isOption:bool * description:string =
+        let tOption = typeof<option<obj>>.GetGenericTypeDefinition()
+        match x with
+        | null -> true, "null"
+        | :? DBNull -> true, "dbnull"
+        | _ ->
+            let typ = x.GetType()
+            match x with
+            | _ when typ.IsGenericType && typ.GetGenericTypeDefinition() = tOption ->
+                match typ.GenericTypeArguments with
+                | [|t|] -> true, t.Name
+                | _     -> true, "'t"
+
+            | _ -> false, typ.Name
+
+module private TestMe =
+    (*
+    #I @"..\..\bin\Debug\net48"
+    #r "Engine.Common.FS.dll"
+    open Engine.Common.FS
+    open System
+    *)
+
+    let f = Option.isCompatible
+    f 4                    = (false, "Int32")    |> verify
+    f (Some 4)             = (true,  "Int32")    |> verify
+    f (Some 0.3)           = (true,  "Double")   |> verify
+    f None                 = (true,  "null")     |> verify
+    f null                 = (true,  "null")     |> verify
+    f (Some "a")           =  (true, "String")   |> verify
+    f (Some DateTime.Now)  = (true,  "DateTime") |> verify
+    f DateTime.Now         = (false, "DateTime") |> verify
+
+
 
 //[<AutoOpen>]
 module OptionModule =

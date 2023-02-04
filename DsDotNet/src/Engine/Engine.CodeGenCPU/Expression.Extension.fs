@@ -30,11 +30,11 @@ module ExpressionExtension =
 
     /// Create Timer Coil Statement
     let (<=@)  (ts: TimerStruct) (sets: IExpression<bool> option, rsts:IExpression<bool> option) =
-        TimerStatement.CreateTONUsingTag(ts, sets, rsts)
+        TimerStatement.CreateTONUsingStructure(ts, sets, rsts)
 
     /// Create Counter Coil Statement
     let (<=%)  (cs: CTRStruct) (sets: IExpression<bool> option) =
-        CounterStatement.CreateCTRUsingTag(cs, sets)
+        CounterStatement.CreateCTRUsingStructure(cs, sets)
 
     // Extenstion Comment Statement
     /// Create None Relay Coil Statement

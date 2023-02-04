@@ -15,15 +15,38 @@ module DU =
 
     let fromString<'a> (s:string) =
         match FSharpType.GetUnionCases typeof<'a> |> Array.filter (fun case -> case.Name = s) with
-        |[|case|] -> Some(FSharpValue.MakeUnion(case,[||]) :?> 'a)
-        |_ -> None
+        | [|case|] -> Some(FSharpValue.MakeUnion(case,[||]) :?> 'a)
+        | _ -> None
 
     let tryParseEnum<'T when 'T: (new: unit -> 'T) and 'T: struct and 'T :> ValueType> (s:string) = Enum.TryParse<'T>(s) |> tryToOption
 
+    //https://stackoverflow.com/questions/62195995/enumerate-names-and-values-of-an-f-discriminated-union-type-like-enum-getvalues?noredirect=1&lq=1
+    /// Return all values for an enumeration type
+    ///
+    /// e.g
+    ///
+    /// type Num = | One | Two | Three
+    ///
+    /// enumValues typeof<Num> => [One; Two; Three]
+    let enumValues (t:'T)  = [
+        for x in FSharpType.GetUnionCases t do
+           yield FSharpValue.MakeUnion(x, [||])
+    ]
+
     //https://stackoverflow.com/questions/3363184/f-how-to-elegantly-select-and-group-discriminated-unions/3365084#3365084
     /// UnionCase 판정
-    /// e.g isUnionCase<@ OnOffAction @> action => action  이 OnOffAction 인지 판정
-    /// e.g isUnionCase<@ OnOffAction, PLCAction @> action => action  이 OnOffAction 이거나 PLCAction 인지 판정
+    ///
+    /// e.g
+    ///
+    /// type Num = | One | Two | Three
+    ///
+    /// let n = One
+    ///
+    /// - isUnionCase<@ One @> n => n 이 One 인지 판정.  true
+    ///
+    /// - isUnionCase<@ Two @> : false
+    ///
+    /// - isUnionCase<@ One, Two @> n => n 이 One 이거나 Two 인지 판정
     let rec isUnionCase = function
         | Lambda (_, expr) | Let (_, _, expr) -> isUnionCase expr
         | NewTuple exprs ->

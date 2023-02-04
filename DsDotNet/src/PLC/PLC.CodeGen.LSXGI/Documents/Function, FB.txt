@@ -6,3 +6,25 @@
     - FUNCTION_BLOCK 키워드가 예약어로만 잡혀 있다.
     - IEC 표준 ST function block 정의
         https://www.fernhillsoftware.com/help/iec-61131/common-elements/program-unit/function-block.html
+
+
+- Function block 에서 사용가능한 변수 type
+    VAR
+    VAR_CONSTANT
+    VAR_EXTERNAL
+    VAR_INPUT
+    VAR_OUTPUT
+    VAR_IN_OUT
+
+- 일반 scan program 에서 사용가능한 변수 type
+    VAR
+    VAR_CONSTANT
+    VAR_EXTERNAL
+
+- Function 에서 사용가능한 변수 type
+    VAR_RETURN      - fixed (type 생성할 때 지정한 것으로 고정)
+    VAR
+    VAR_INPUT
+    VAR_OUTPUT
+    VAR_IN_OUT
+

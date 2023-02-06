@@ -127,7 +127,7 @@ type XgiPOUTest() =
          * 새로 선언되는 자동 할당 변수들이 미리 선언된 메모리 영역을 피해서 생성되는지 검사한다.
          *)
 
-        let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/multiProgramSample.xml"
+        let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/XmlSamples/multiProgramSample.xml"
         let xdoc = XmlDocument.loadFromFile myTemplate
         let usedMemoryIndices = collectUsedMermoryIndicesInGlobalSymbols xdoc
         usedMemoryIndices |> SeqEq [ 0; 1; 2; 4; 8; 9; 10; 11; 12; 13; 14; 15; 17; ]
@@ -177,7 +177,7 @@ type XgiPOUTest() =
          * 새로 선언되는 자동 할당 변수 이름이 미리 선언된 gloal 변수와 동일할 때 fail 해야 한다..
          *)
 
-        let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/multiProgramSample.xml"
+        let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/XmlSamples/multiProgramSample.xml"
         let xdoc = XmlDocument.loadFromFile myTemplate
         let usedMemoryIndices = collectUsedMermoryIndicesInGlobalSymbols xdoc
         let existingGlobals = collectGlobalSymbols xdoc |> map name
@@ -209,7 +209,7 @@ type XgiPOUTest() =
          * 새로 선언되는 자동 할당 변수 이름이 대소문자를 가리지 않고 미리 선언된 gloal 변수와 동일할 때 fail 해야 한다..
          *)
 
-        let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/multiProgramSample.xml"
+        let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/XmlSamples/multiProgramSample.xml"
         let xdoc = XmlDocument.loadFromFile myTemplate
         let usedMemoryIndices = collectUsedMermoryIndicesInGlobalSymbols xdoc
         let existingGlobals = collectGlobalSymbols xdoc |> map name
@@ -237,7 +237,7 @@ type XgiPOUTest() =
 
     [<Test>]
     member __.``Validation= Existing project duplicated POU name test`` () =
-        let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/multiProgramSample.xml"
+        let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/XmlSamples/multiProgramSample.xml"
         let collidingPou = {
             pou11.Value with
                 TaskName = "스캔 프로그램"

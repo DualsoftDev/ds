@@ -89,7 +89,7 @@ namespace Dual.Model.Import
             checkedListBox_Ex.DisplayMember = "Display";
             checkedListBox_sysHMI.DisplayMember = "Display";
             comboBox_System.DisplayMember = "Display";
-            EnumFS.EnumValues(typeof(RuntimePackage)).Cast<RuntimePackage>()
+            DU.enumValues(typeof(RuntimePackage)).Cast<RuntimePackage>()
                 .ForEach(f => comboBox_Package.Items.Add(f));
             comboBox_Package.SelectedIndex = 0;
         }

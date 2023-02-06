@@ -70,7 +70,7 @@ module TimerStatementModule =
                 ResetCondition=None; FunctionName=functionName}:TimerCreateParams)
             |> createTimerStatement storages
 
-        static member CreateTONUsingTag(ts: TimerStruct, rungInCondition, resetCondition) =
+        static member CreateTONUsingStructure(ts: TimerStruct, rungInCondition, resetCondition) =
             createTONStatement (ts, rungInCondition, resetCondition)
 
         static member CreateTOF(tcParams:TCConstructionParams) =

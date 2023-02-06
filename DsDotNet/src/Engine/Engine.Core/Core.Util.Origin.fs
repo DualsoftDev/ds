@@ -386,7 +386,6 @@ module OriginModule =
 
     /// Get origin status of child nodes
     let getOrigins (graph:DsGraph) =
-        let stopWatch      = System.Diagnostics.Stopwatch.StartNew()
         let rawResets      = getAllResets graph
         let mutualResets   = getMutualResets rawResets
         let oneWayResets   = getOneWayResets mutualResets rawResets
@@ -467,23 +466,14 @@ module OriginModule =
                     if backward.Any() then yield tgt.First()
             ]
         let offByMutualResetChains =
-            let stopWatch2 = System.Diagnostics.Stopwatch.StartNew()
             let detectedChainHeads =
                 detectedChains |> Seq.map(fun chain -> chain.Head)
-            let t =
-                resetChains
-                |> List.ofSeq
-                |> List.map(List.map(fun v -> v, detectedChainHeads.Contains(v)))
-            stopWatch2.Stop()
-            printfn "\nInner %f" stopWatch.Elapsed.TotalMilliseconds
-            let tt = 
-                t
-                |> List.map(List.filter(fun v -> snd v = true))
-                |> List.filter(fun c -> c.Count() = 1)
-            let ttt = 
-                tt
-                |> List.collect(List.map(fun v -> fst v))
-            ttt
+            resetChains
+            |> List.ofSeq
+            |> List.map(List.map(fun v -> v, detectedChainHeads.Contains(v)))
+            |> List.map(List.filter(fun v -> snd v = true))
+            |> List.filter(fun c -> c.Count() = 1)
+            |> List.collect(List.map(fun v -> fst v))
         let allJobs =
             graph.Vertices
             |> List.ofSeq
@@ -492,8 +482,6 @@ module OriginModule =
             |> List.collect id
             |> List.distinct
             
-        stopWatch.Stop()
-        printfn "\nOuter %f" stopWatch.Elapsed.TotalMilliseconds
         getOriginMaps
             allJobs
             offByOneWayBackwardResets offByMutualResetChains

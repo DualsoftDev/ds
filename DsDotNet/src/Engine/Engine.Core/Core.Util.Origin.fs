@@ -21,7 +21,7 @@ module OriginModule =
 
      /// Remove duplicates in seq seq
     let removeDuplicates (source:'T seq) =
-        source |> Seq.collect id |> Seq.distinct |> List.ofSeq
+        source |> Seq.collect id |> Seq.distinct
 
     let compareIsIncludedWithOrder (now:'T seq) (compare:'T seq) =
         let t = [|
@@ -82,7 +82,7 @@ module OriginModule =
         graph.Vertices
         |> Seq.map(getVertexTarget >> getDeviceDefs)
         |> removeDuplicates
-        |> Seq.collect(getResetInfo) |> Seq.distinct
+        |> Seq.collect(getResetInfo) |> Seq.distinct |> Array.ofSeq
 
     /// Get ordered graph nodes to calculate the node index
     let getTraverseOrder (graph:DsGraph) =
@@ -150,34 +150,34 @@ module OriginModule =
 
     /// Get all resets
     let private getOneWayResets
-            (mutualResets:string seq seq)
-            (resets:seq<EdgeDescription>) =
+            (mutualResets:string array array)
+            (resets:EdgeDescription array) =
         resets
-        |> Seq.filter(fun ({Operator=o}) ->
+        |> Array.filter(fun ({Operator=o}) ->
             o <> TextInterlock || o <> TextInterlockWeak
         )
-        |> Seq.map(fun {Source=head; Operator=r; Target=tail} ->
+        |> Array.map(fun {Source=head; Operator=r; Target=tail} ->
             if r = TextResetEdge || r = TextResetPush then
-                seq { head; tail; }
+                [| head; tail; |]
             elif r = TextResetEdgeRev || r = TextResetPushRev  then
-                seq { tail; head; }
+                [| tail; head; |]
             else
-                Seq.empty
+                Array.empty
         )
-        |> Seq.except(mutualResets)
-        |> Seq.filter(Seq.any)
+        |> Array.except(mutualResets)
+        |> Array.filter(Seq.any)
 
     /// Get mutual resets
-    let private getMutualResets (resets:seq<EdgeDescription>) =
+    let private getMutualResets (resets:EdgeDescription array) =
         resets
-        |> Seq.filter(fun ({Operator=o}) ->
+        |> Array.filter(fun ({Operator=o}) ->
             o = TextInterlock || o = TextInterlockWeak
         )
-        |> Seq.map(fun ({Source=source; Target=target}) ->
-            let edge = seq { source; target; }
-            seq { edge; edge.Reverse(); }
+        |> Array.map(fun ({Source=source; Target=target}) ->
+            [|[| source; target; |]; [|  target; source; |];|]
         )
         |> removeDuplicates
+        |> Array.ofSeq
 
     /// Check intersect between two sequences
     let checkIntersect (sourceSeq:Vertex seq) (shatteredSeqs:Vertex seq seq) =
@@ -189,20 +189,20 @@ module OriginModule =
         )
 
     /// Get incoming resets
-    let getIncomingResets (resets:'V seq seq) (node:'V) =
+    let getIncomingResets (resets:'V array array) (node:'V) =
         resets
-        |> Seq.filter(fun e -> node = e.Last())
-        |> Seq.map(fun e -> e.First())
+        |> Array.filter(fun e -> node = e.Last())
+        |> Array.map(fun e -> e.First())
 
     /// Get outgoing resets
-    let getOutgoingResets (resets:'V seq seq) (node:'V) =
+    let getOutgoingResets (resets:'V array array) (node:'V) =
         resets
-        |> Seq.filter(fun e -> node = e.First())
-        |> Seq.map(fun e -> e.Last())
+        |> Array.filter(fun e -> node = e.First())
+        |> Array.map(fun e -> e.Last())
 
     /// Get mutual reset chains : All nodes are mutually resets themselves
-    let getMutualResetChains (sort:bool) (resets:string seq seq) =
-        let nodes = resets |> Seq.map(fun e -> e.First()) |> Seq.distinct
+    let getMutualResetChains (sort:bool) (resets:string array array) =
+        let nodes = resets |> Array.map(fun e -> e.First()) |> Array.distinct
         let globalChains = new ResizeArray<string ResizeArray>(0)
         let candidates = new ResizeArray<string list>(0)
 
@@ -265,22 +265,21 @@ module OriginModule =
                         else
                             now |> addToResult candidates sort
         // Remove duplicates
-        removeDuplicatesInList candidates
+        candidates |> removeDuplicatesInList |> List.ofSeq
 
     /// get detected reset chains in all routes
     let getDetectedResetChains
-        (resetChains:seq<string list>) (allRoutes:seq<TaskDev list>)
-      =
+            (resetChains:string list list) (allRoutes:TaskDev list list) =
         allRoutes
-        |> Seq.collect(fun route ->
-            let nodes = route |> Seq.map(fun v -> v.ApiName)
+        |> List.collect(fun route ->
+            let nodes = route |> List.map(fun v -> v.ApiName)
             resetChains
-            |> Seq.map(fun chain ->
+            |> List.map(fun chain ->
                 Enumerable.Intersect(nodes, chain) |> List.ofSeq
             )
         )
-        |> Seq.distinct
-        |> Seq.filter(fun r -> r.Any())
+        |> List.distinct
+        |> List.filter(fun r -> r.Any())
         |> removeDuplicatesInList
 
     let getNameStructedChains (resetChains:seq<string list>) =
@@ -299,11 +298,10 @@ module OriginModule =
 
     /// Get origin map
     let getOriginMaps
-        (allJobs:seq<TaskDev>)
-        (offByOneWayBackwardResets:string list)
-        (offByMutualResetChains:string list)
-        (structedChains:seq<Map<string, seq<string>>>)
-      =
+            (allJobs:seq<TaskDev>)
+            (offByOneWayBackwardResets:string list)
+            (offByMutualResetChains:string list)
+            (structedChains:seq<Map<string, seq<string>>>) =
         let allNodes = new Dictionary<string, InitialType>()
         let oneWay   = offByOneWayBackwardResets
         let mutual   = offByMutualResetChains
@@ -388,7 +386,7 @@ module OriginModule =
 
     /// Get origin status of child nodes
     let getOrigins (graph:DsGraph) =
-        let stopWatch = System.Diagnostics.Stopwatch.StartNew()
+        let stopWatch      = System.Diagnostics.Stopwatch.StartNew()
         let rawResets      = getAllResets graph
         let mutualResets   = getMutualResets rawResets
         let oneWayResets   = getOneWayResets mutualResets rawResets
@@ -450,6 +448,7 @@ module OriginModule =
             |> removeDuplicatesInList
             |> getAllJobDefRoutes
             |> removeDuplicates
+            |> List.ofSeq
             |> List.map(fun r -> List.distinct r)
             
         let detectedChains = allRoutes |> getDetectedResetChains resetChains
@@ -468,20 +467,30 @@ module OriginModule =
                     if backward.Any() then yield tgt.First()
             ]
         let offByMutualResetChains =
+            let stopWatch2 = System.Diagnostics.Stopwatch.StartNew()
             let detectedChainHeads =
                 detectedChains |> Seq.map(fun chain -> chain.Head)
-            resetChains
-            |> List.ofSeq
-            |> List.map(List.map(fun v -> v, detectedChainHeads.Contains(v)))
-            |> List.map(List.filter(fun v -> snd v = true))
-            |> List.filter(fun c -> c.Count() = 1)
-            |> List.collect(List.map(fun v -> fst v))
+            let t =
+                resetChains
+                |> List.ofSeq
+                |> List.map(List.map(fun v -> v, detectedChainHeads.Contains(v)))
+            stopWatch2.Stop()
+            printfn "\nInner %f" stopWatch.Elapsed.TotalMilliseconds
+            let tt = 
+                t
+                |> List.map(List.filter(fun v -> snd v = true))
+                |> List.filter(fun c -> c.Count() = 1)
+            let ttt = 
+                tt
+                |> List.collect(List.map(fun v -> fst v))
+            ttt
         let allJobs =
             graph.Vertices
             |> List.ofSeq
             |> List.map(getVertexTarget)
-            |> List.map(fun c -> c.CallTargetJob.DeviceDefs)
-            |> removeDuplicates
+            |> List.map(fun c -> c.CallTargetJob.DeviceDefs |> List.ofSeq)
+            |> List.collect id
+            |> List.distinct
             
         stopWatch.Stop()
         printfn "\nOuter %f" stopWatch.Elapsed.TotalMilliseconds

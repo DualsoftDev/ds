@@ -86,3 +86,26 @@ module DU =
         let boolByte = 3 |> enum<Num>
         verify(boolByte = (Num.BOOL ||| Num.BYTE))
         verify (boolByte.ToString() = "BOOL, BYTE")
+
+
+    module private TestMe2 =
+
+        // 마이크로소프트 문서
+        // https://learn.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/how-to-examine-and-instantiate-generic-types-with-reflection
+
+
+        // https://stackoverflow.com/questions/37214017/f-generic-type-instanciation-from-object-and-not-type
+
+        type Foo<'a,'b> =
+            new () = {}
+
+        type First = class end
+
+        (* create Foo<int, int> programatically *)
+        let genericFooType = typedefof<Foo<_,_>>.GetGenericTypeDefinition()
+        let t = typedefof<int>
+        let fooType = genericFooType.MakeGenericType(t, t)
+        let foo = fooType.GetConstructor([||]).Invoke([||])
+        foo.GetType() = typeof<Foo<int,int>> |> verify
+
+

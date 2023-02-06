@@ -1,0 +1,711 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project Attribute="3145730" Version="513" Comment="" WksNodeCount="19" GUID="54190b7a-439b-4029-8b2e-2fa05d626fce">Real7 Function Block<NetworkConfiguration>
+		<NetworkList>
+			<Network Type="NETWORK ITEM:UNKNOWN" Name="Undefined Network" NetworkType=""></Network>
+		</NetworkList>
+	</NetworkConfiguration>
+	<SystemVariable HMIGUID=""></SystemVariable>
+	<Configurations>
+		<Configuration Version="259" Attribute="272119649" Comment="" Kind="1" Type="106" FindGlobal="1" FindSymbol="1" WriteSignature="773e53b3-4446-4204-b905-4558a1d0de61" Encrytption="" Encrytption_UDF="" UploadProhibit="75" GUID="975c4471-d3e3-4898-860c-95216a94fde3" SD_UploadProhibit="74" SD_Password="" SD_MacLimit="">NewPLC<Options Details="{&#xA;   &quot;m_nOptMultiUserRunEdit&quot; : 0,&#xA;   &quot;m_nOptNotUseExternalVar&quot; : 0,&#xA;   &quot;m_nOptOnlineEditAllocSize&quot; : 400,&#xA;   &quot;m_nOptPartitionMode&quot; : 0,&#xA;   &quot;m_nOptPulsePercent&quot; : 10,&#xA;   &quot;m_nOptReservedAllocSize&quot; : 400,&#xA;   &quot;m_nOptTextEncoding&quot; : 0,&#xA;   &quot;m_nOptUseFBOnlineEdit&quot; : 0,&#xA;   &quot;m_nOptVariableStorage&quot; : 0&#xA;}&#xA;"></Options>
+			<Parameters>
+				<Parameter Type="BASIC PARAMETER"><XGIBasicParam bp_ver="100" head="1145128264" size="400" pmt_reserved1_0="0" pmt_reserved1_1="0" pmt_reserved1_2="0" pmt_reserved1_3="0" pmt_reserved1_4="0" OsVersion="1" CPUType="43009" STATIC_PERIOD_MODE="0" STATIC_PERIOD_TIME="10" RESTART_METHOD="43521" REMOTE_ACCESS_PERMIT="43522" RESET_DISABLE="0" O_RESET_DISABLE="0" DCLEAR_DISABLE="0" O_DCLEAR_DISABLE="0" BASIC_MOD_RESERVED_0="0" BASIC_MOD_RESERVED_1="0" BASIC_MOD_RESERVED_2="0" BASIC_MOD_RESERVED_3="0" BASIC_MOD_RESERVED_4="0" BASIC_MOD_RESERVED_5="0" BASIC_MOD_RESERVED_6="0" BASIC_MOD_RESERVED_7="0" BASIC_MOD_RESERVED_8="0" BASIC_MOD_RESERVED_9="0" SCAN_WD_TIME_0="500" SCAN_WD_TIME_1="500" SCAN_WD_TIME_2="500" SCAN_WD_TIME_3="500" STANDARD_INPUT_FILTER_TIME="3" BASIC_TIME_RESERVED_0="0" BASIC_TIME_RESERVED_1="0" BASIC_TIME_RESERVED_2="0" BASIC_TIME_RESERVED_3="0" BASIC_TIME_RESERVED_4="0" BASIC_TIME_RESERVED_5="0" BASIC_TIME_RESERVED_6="0" BASIC_TIME_RESERVED_7="0" BASIC_TIME_RESERVED_8="0" BASIC_TIME_RESERVED_9="0" BASIC_TIME_RESERVED_10="0" DEBUG_OUTPUT_PARAMETER="0" ERROR_MODE_OUTPUT_PARAMETER="0" RUN2STOP_OUTPUT_PARAMETER="0" STOP2RUN_OUTPUT_PARAMETER="0" ERROR_MODE_LATCH_PARAMETER="0" OUTPUT_PARAMETER_RESERVED_0="0" OUTPUT_PARAMETER_RESERVED_1="0" OUTPUT_PARAMETER_RESERVED_2="0" OUTPUT_PARAMETER_RESERVED_3="0" OUTPUT_PARAMETER_RESERVED_4="0" SOE_RETAIN_HISTORY="43544" SOE_PARAMETER_RESERVED_0="0" SOE_PARAMETER_RESERVED_1="0" SOE_PARAMETER_RESERVED_2="0" SOE_PARAMETER_RESERVED_3="0" SOE_PARAMETER_RESERVED_4="0" RETAIN_SET_MODE="0" M_AREA_INIT="0" M_AREA_SIZE_0="32" M_AREA_SIZE_1="32" M_AREA_SIZE_2="32" M_AREA_SIZE_3="32" M_AREA_LATCH1_START="0" M_AREA_LATCH1_END="8191" RETAIN_SET_G1_MODE="0" RESERVE_G1="0" M_AREA_LATCH_G1_START="0" M_AREA_LATCH_G1_END="8191" RETAIN_SET_G2_MODE="0" RESERVE_G2="0" M_AREA_LATCH_G2_START="0" M_AREA_LATCH_G2_END="0" RETAIN_SET_G3_MODE="0" RESERVE_G3="0" M_AREA_LATCH_G3_START="0" M_AREA_LATCH_G3_END="0" RETAIN_SET_G4_MODE="0" RESERVE_G4="0" M_AREA_LATCH_G4_START="0" M_AREA_LATCH_G4_END="0" BASIC_RETAIN_RESERVED_0="0" BASIC_RETAIN_RESERVED_1="0" BASIC_RETAIN_RESERVED_2="0" BASIC_RETAIN_RESERVED_3="0" BASIC_RETAIN_RESERVED_4="0" BASIC_RETAIN_RESERVED_5="0" BASIC_RETAIN_RESERVED_6="0" BASIC_RETAIN_RESERVED_7="0" BASIC_RETAIN_RESERVED_8="0" BASIC_RETAIN_RESERVED_9="0" BASIC_RETAIN_RESERVED_10="0" BASIC_RETAIN_RESERVED_11="0" BASIC_RETAIN_RESERVED_12="0" BASIC_RETAIN_RESERVED_13="0" BASIC_RETAIN_RESERVED_14="0" BASIC_RETAIN_RESERVED_15="0" BASIC_RETAIN_RESERVED_16="0" BASIC_RETAIN_RESERVED_17="0" BASIC_RETAIN_RESERVED_18="0" BASIC_RETAIN_RESERVED_19="0" BASIC_RETAIN_RESERVED_20="0" BASIC_RETAIN_RESERVED_21="0" BASIC_RETAIN_RESERVED_22="0" BASIC_RETAIN_RESERVED_23="0" BASIC_RETAIN_RESERVED_24="0" BASIC_RETAIN_RESERVED_25="0" TIMER_RANGE_RESERVED_0="0" TIMER_RANGE_RESERVED_1="0" TIMER_RANGE_RESERVED_2="0" TIMER_RANGE_RESERVED_3="0" TIMER_RANGE_RESERVED_4="0" TIMER_RANGE_RESERVED_5="0" TIMER_RANGE_RESERVED_6="0" TIMER_RANGE_RESERVED_7="0" TIMER_RANGE_RESERVED_8="0" TIMER_RANGE_RESERVED_9="0" TIMER_RANGE_RESERVED_10="0" TIMER_RANGE_RESERVED_11="0" TIMER_RANGE_RESERVED_12="0" TIMER_RANGE_RESERVED_13="0" TIMER_RANGE_RESERVED_14="0" TIMER_RANGE_RESERVED_15="0" CHECK_FUSE_ERROR="43572" FUSE_ERROR_MODE="43573" CHECK_IO_ERROR="43574" IO_ERROR_MODE="43575" CHECK_EXT_BASE_ERROR="0" EXT_BASE_ERROR_MODE="0" ERROR_REACTION_RESERVED_0="0" ERROR_REACTION_RESERVED_1="0" ERROR_REACTION_RESERVED_2="0" ERROR_REACTION_RESERVED_3="0" ERROR_REACTION_RESERVED_4="0" ERROR_REACTION_RESERVED_5="0" ERROR_REACTION_RESERVED_6="0" ERROR_REACTION_RESERVED_7="0" ERROR_REACTION_RESERVED_8="0" ERROR_REACTION_RESERVED_9="0" ERROR_REACTION_RESERVED_10="0" ERROR_REACTION_RESERVED_11="0" ERROR_REACTION_RESERVED_12="0" ERROR_REACTION_RESERVED_13="0" ERROR_REACTION_RESERVED_14="0" ERROR_REACTION_RESERVED_15="0" ERROR_REACTION_RESERVED_16="0" ERROR_REACTION_RESERVED_17="0" ERROR_REACTION_RESERVED_18="0" ERROR_REACTION_RESERVED_19="0" ERROR_REACTION_RESERVED_20="0" ERROR_REACTION_RESERVED_21="0" CHECK_SP_ERROR="43576" SP_ERROR_MODE="43577" CHECK_CP_ERROR="43578" CP_ERROR_MODE="43579" MODBUS_STATION="63" MODBUS_BAUDRATE="4434" MODBUS_DATABIT="43592" MODBUS_PARITY="43602" MODBUS_STOPBIT="43617" MODBUS_TRX_MODE="43632" DI_START_DEVICE_TYPE="73" DO_START_DEVICE_TYPE="81" AI_START_DEVICE_TYPE="77" AO_START_DEVICE_TYPE="77" DI_DEVICE_OFFSET="0" DO_DEVICE_OFFSET="0" AI_DEVICE_OFFSET="2000" AO_DEVICE_OFFSET="4000" pmt_reserved2_0="0" pmt_reserved2_1="0" pmt_reserved2_2="0" pmt_reserved2_3="0" pmt_reserved2_4="0" pmt_reserved2_5="0" check_sum="0" tail="1414483782"></XGIBasicParam>
+				</Parameter>
+				<Parameter Type="IO PARAMETER"><BaseInfo>
+						<Base Base="0" SlotCount="12"></Base>
+						<Base Base="1" SlotCount="12"></Base>
+						<Base Base="2" SlotCount="12"></Base>
+						<Base Base="3" SlotCount="12"></Base>
+						<Base Base="4" SlotCount="12"></Base>
+						<Base Base="5" SlotCount="12"></Base>
+						<Base Base="6" SlotCount="12"></Base>
+						<Base Base="7" SlotCount="12"></Base>
+					</BaseInfo>
+				</Parameter>
+			</Parameters>
+			<GlobalVariables>
+				<GlobalVariable Version="Ver 1.0" EIPGUID="7852c968-08bb-4247-99f0-13ba9acf486f" EIPChangedID="0" HMIGUID="8ff4bb78-c013-4e15-889d-4b97a080f1ba" MultiUserRunEdit="0" Count="22"><Symbols><Symbol Name="E1" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="E2" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="EF" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="EP" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="ET" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="F" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="F0_Pin_Flow_Valve_EP" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="F0_Pin_Flow_Valve_PA" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="G" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="H" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="OG" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="PA" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="R" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="RF" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="RO" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="RP" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="RR" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="RT" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="SF" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="SOP_Flow" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="SP" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+						<Symbol Name="ST" Kind="6" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+							<MemberRetains></MemberRetains>
+							<MemberInitValues></MemberInitValues>
+							<MemberComments></MemberComments>
+						</Symbol>
+					</Symbols>
+					<TempVar Count="0"></TempVar>
+					<HMIFlags></HMIFlags>
+					<DirectVarComment Count="0"></DirectVarComment>
+				</GlobalVariable>
+			</GlobalVariables>
+			<Tasks>
+				<Task Version="257" Type="0" Attribute="2" Kind="0" Priority="0" TaskIndex="0" Device="" DeviceType="0" WordValue="0" WordCondition="0" BitCondition="0">Scan Program</Task>
+			</Tasks>
+			<POU>
+				<Programs>
+					<Program Task="Scan Program" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" ObjectId="33f2a042-f4e4-4d63-9cec-f02b0376b34f" FindProgram="1" FindVar="1" Encrytption="">NewProgram<Body>
+							<LDRoutine>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="1">_ON</Element>
+									<Element ElementType="2" Coordinate="4" Param="87"></Element>
+									<Element ElementType="14" Coordinate="94">aa</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="1025">_ON</Element>
+									<Element ElementType="2" Coordinate="1028" Param="3"></Element>
+									<Element ElementType="102" Coordinate="1034" Param="FNAME: FBREAL&#xA;TYPE: function_block, user&#xA;INSTANCE: Real1,VAR&#xA;INDEX: -2147483644&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: PREV_EP, 0x00200001, , 0&#xA;VAR_IN: SOP_Flow, 0x00200001, , 0&#xA;VAR_IN_OUT: ST, 0x00000001, , 0&#xA;VAR_IN: RT, 0x00200001, , 0&#xA;VAR_IN_OUT: ET, 0x00000001, , 0&#xA;VAR_IN: SF, 0x00200001, , 0&#xA;VAR_IN: RF, 0x00200001, , 0&#xA;VAR_IN: EF, 0x00200001, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: E1, 0x00000001, &#xA;VAR_OUT: E2, 0x00000001, &#xA;VAR_OUT: EP, 0x00000001, &#xA;VAR_OUT: F, 0x00000001, &#xA;VAR_OUT: G, 0x00000001, &#xA;VAR_OUT: H, 0x00000001, &#xA;VAR_OUT: OG, 0x00000001, &#xA;VAR_OUT: PA, 0x00000001, &#xA;VAR_OUT: R, 0x00000001, &#xA;VAR_OUT: RO, 0x00000001, &#xA;VAR_OUT: RP, 0x00000001, &#xA;VAR_OUT: RR, 0x00000001, &#xA;VAR_OUT: SP, 0x00000001, &#xA;">Real1</Element>
+									<Element ElementType="70" Coordinate="2055">_ON</Element>
+									<Element ElementType="70" Coordinate="3079">_ON</Element>
+									<Element ElementType="70" Coordinate="4103">aa</Element>
+									<Element ElementType="70" Coordinate="5127">_ON</Element>
+									<Element ElementType="70" Coordinate="6151">aa</Element>
+									<Element ElementType="70" Coordinate="7175">_ON</Element>
+									<Element ElementType="70" Coordinate="8199">_ON</Element>
+									<Element ElementType="70" Coordinate="9223">_ON</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="22529">Real1.E1</Element>
+									<Element ElementType="6" Coordinate="22532">Real2.E1</Element>
+									<Element ElementType="2" Coordinate="22535" Param="84"></Element>
+									<Element ElementType="14" Coordinate="22622">SomethingWrong</Element>
+								</Rung>
+								<OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
+XckU4UJCOYh5CA==</OnlineUploadData>
+							</LDRoutine>
+						</Body>
+						<LocalVar Version="Ver 1.0" Count="4"><Symbols><Symbol Name="aa" Kind="1" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="Real1" Kind="1" Type="FBREAL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="Real2" Kind="1" Type="FBREAL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="SomethingWrong" Kind="1" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+							</Symbols>
+							<TempVar Count="2"><Symbol Name="@LDTemp0" Kind="1" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="@LDTemp1" Kind="1" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+							</TempVar>
+						</LocalVar>
+						<RungTable></RungTable>
+					</Program>
+				</Programs>
+				<UserFunctions>
+					<UserFunction Comment="1x1" Type="2" En="1" Eno="1" ObjectId="3686af6b-923b-407e-91e3-e98f2dca969f" Completed="1" Editor="0" LibType="5" FuncType="1050" FBType="2050" MaxInput="0" Return="1" Size="64" Index="2147483648" Column="1" UploadProhibit="0" UDFBUseFBOnlineEdit="0" UDFBInstDefineType="-1" UDFBTotalAllocSize="64" UDFBTotalPulseSize="0" FindProgram="1" FindVar="1" Encrytption="">FB1X1<InputVariables><Variable Type="0" DataType="2097153" Trigger="0" UDTName="" Display="0" InstMemory="0">EN</Variable>
+							<Variable Type="0" DataType="2097153" Trigger="0" UDTName="" Display="0" InstMemory="0">IN1</Variable>
+						</InputVariables>
+						<OutputVariables><Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">ENO</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">OT1</Variable>
+						</OutputVariables>
+						<UserFunctionBlockVar Version="Ver 1.0" ProgramKind="1" PulseCount="0" EnState="1" EnoState="1" FBSize="64" IncludeLibrary="0" NotUseExternalVar="0" VARUseFBOnlineEdit="0" VARTotalAllocSize="64" VALTotalPulseSize="0" MultiUserRunEdit="0" FBInstRetain="0" Count="2"><Symbols><Symbol Name="IN1" Kind="3" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="8" TotalSize="1" OrderIndex="0" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="OT1" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="9" TotalSize="1" OrderIndex="1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+							</Symbols>
+							<TempVar Count="0"></TempVar>
+						</UserFunctionBlockVar>
+						<Body>
+							<LDRoutine>
+								<Rung BlockMask="0"><Element ElementType="2" Coordinate="1" Param="90"></Element>
+									<Element ElementType="33" Coordinate="94" Param="END">END</Element>
+								</Rung>
+								<OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
+XckU4UJCOYh5CA==</OnlineUploadData>
+							</LDRoutine>
+						</Body>
+					</UserFunction>
+					<UserFunction Comment="1X2" Type="2" En="1" Eno="1" ObjectId="ffaf2c36-a63c-4f50-8b0e-4ebb069ef156" Completed="1" Editor="0" LibType="5" FuncType="1050" FBType="2050" MaxInput="0" Return="1" Size="64" Index="2147483649" Column="1" UploadProhibit="0" UDFBUseFBOnlineEdit="0" UDFBInstDefineType="-1" UDFBTotalAllocSize="64" UDFBTotalPulseSize="0" FindProgram="1" FindVar="1" Encrytption="">FB1X2<InputVariables><Variable Type="0" DataType="2097153" Trigger="0" UDTName="" Display="0" InstMemory="0">EN</Variable>
+							<Variable Type="0" DataType="2097153" Trigger="0" UDTName="" Display="0" InstMemory="0">IN1</Variable>
+						</InputVariables>
+						<OutputVariables><Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">ENO</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">OT1</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">OT2</Variable>
+						</OutputVariables>
+						<UserFunctionBlockVar Version="Ver 1.0" ProgramKind="1" PulseCount="0" EnState="1" EnoState="1" FBSize="64" IncludeLibrary="0" NotUseExternalVar="0" VARUseFBOnlineEdit="0" VARTotalAllocSize="64" VALTotalPulseSize="0" MultiUserRunEdit="0" FBInstRetain="0" Count="3"><Symbols><Symbol Name="IN1" Kind="3" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="8" TotalSize="1" OrderIndex="0" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="OT1" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="9" TotalSize="1" OrderIndex="1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="OT2" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="10" TotalSize="1" OrderIndex="2" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+							</Symbols>
+							<TempVar Count="0"></TempVar>
+						</UserFunctionBlockVar>
+						<Body>
+							<LDRoutine>
+								<Rung BlockMask="0"><Element ElementType="2" Coordinate="1" Param="90"></Element>
+									<Element ElementType="33" Coordinate="94" Param="END">END</Element>
+								</Rung>
+								<OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
+XckU4UJCOYh5CA==</OnlineUploadData>
+							</LDRoutine>
+						</Body>
+					</UserFunction>
+					<UserFunction Comment="1X3" Type="2" En="1" Eno="1" ObjectId="ffaf2c36-a63c-4f50-8b0e-4ebb069ef157" Completed="1" Editor="0" LibType="5" FuncType="1050" FBType="2050" MaxInput="0" Return="1" Size="64" Index="2147483650" Column="1" UploadProhibit="0" UDFBUseFBOnlineEdit="0" UDFBInstDefineType="-1" UDFBTotalAllocSize="64" UDFBTotalPulseSize="0" FindProgram="1" FindVar="1" Encrytption="">FB1X3<InputVariables><Variable Type="0" DataType="2097153" Trigger="0" UDTName="" Display="0" InstMemory="0">EN</Variable>
+							<Variable Type="0" DataType="2097153" Trigger="0" UDTName="" Display="0" InstMemory="0">IN1</Variable>
+						</InputVariables>
+						<OutputVariables><Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">ENO</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">OT1</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">OT2</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">OT3</Variable>
+						</OutputVariables>
+						<UserFunctionBlockVar Version="Ver 1.0" ProgramKind="1" PulseCount="0" EnState="1" EnoState="1" FBSize="64" IncludeLibrary="0" NotUseExternalVar="0" VARUseFBOnlineEdit="0" VARTotalAllocSize="64" VALTotalPulseSize="0" MultiUserRunEdit="0" FBInstRetain="0" Count="4"><Symbols><Symbol Name="IN1" Kind="3" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="8" TotalSize="1" OrderIndex="0" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="OT1" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="9" TotalSize="1" OrderIndex="1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="OT2" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="10" TotalSize="1" OrderIndex="2" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="OT3" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="11" TotalSize="1" OrderIndex="3" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+							</Symbols>
+							<TempVar Count="0"></TempVar>
+						</UserFunctionBlockVar>
+						<Body>
+							<LDRoutine>
+								<Rung BlockMask="0"><Element ElementType="2" Coordinate="1" Param="90"></Element>
+									<Element ElementType="33" Coordinate="94" Param="END">END</Element>
+								</Rung>
+								<OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
+XckU4UJCOYh5CA==</OnlineUploadData>
+							</LDRoutine>
+						</Body>
+					</UserFunction>
+					<UserFunction Comment="1X9" Type="2" En="1" Eno="1" ObjectId="ffaf2c36-a63c-4f50-8b0e-4ebb069ef158" Completed="1" Editor="0" LibType="5" FuncType="1050" FBType="2050" MaxInput="0" Return="1" Size="64" Index="2147483651" Column="1" UploadProhibit="0" UDFBUseFBOnlineEdit="0" UDFBInstDefineType="-1" UDFBTotalAllocSize="64" UDFBTotalPulseSize="0" FindProgram="1" FindVar="1" Encrytption="">FB1X9<InputVariables><Variable Type="0" DataType="2097153" Trigger="0" UDTName="" Display="0" InstMemory="0">EN</Variable>
+							<Variable Type="0" DataType="2097153" Trigger="0" UDTName="" Display="0" InstMemory="0">IN1</Variable>
+						</InputVariables>
+						<OutputVariables><Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">ENO</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">OT1</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">OT2</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">OT3</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">OT4</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">OT5</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">OT6</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">OT7</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">OT8</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">OT9</Variable>
+						</OutputVariables>
+						<UserFunctionBlockVar Version="Ver 1.0" ProgramKind="1" PulseCount="0" EnState="1" EnoState="1" FBSize="64" IncludeLibrary="0" NotUseExternalVar="0" VARUseFBOnlineEdit="0" VARTotalAllocSize="64" VALTotalPulseSize="0" MultiUserRunEdit="0" FBInstRetain="0" Count="10"><Symbols><Symbol Name="IN1" Kind="3" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="8" TotalSize="1" OrderIndex="0" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="OT1" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="9" TotalSize="1" OrderIndex="1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="OT2" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="10" TotalSize="1" OrderIndex="2" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="OT3" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="11" TotalSize="1" OrderIndex="3" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="OT4" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="12" TotalSize="1" OrderIndex="4" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="OT5" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="13" TotalSize="1" OrderIndex="5" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="OT6" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="14" TotalSize="1" OrderIndex="6" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="OT7" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="15" TotalSize="1" OrderIndex="7" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="OT8" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="16" TotalSize="1" OrderIndex="8" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="OT9" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="17" TotalSize="1" OrderIndex="9" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+							</Symbols>
+							<TempVar Count="0"></TempVar>
+						</UserFunctionBlockVar>
+						<Body>
+							<LDRoutine>
+								<Rung BlockMask="0"><Element ElementType="2" Coordinate="1" Param="90"></Element>
+									<Element ElementType="33" Coordinate="94" Param="END">END</Element>
+								</Rung>
+								<OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
+XckU4UJCOYh5CA==</OnlineUploadData>
+							</LDRoutine>
+						</Body>
+					</UserFunction>
+					<UserFunction Comment="" Type="2" En="1" Eno="1" ObjectId="c252edf0-4219-4e44-8a6e-a7adf7d5ec59" Completed="1" Editor="0" LibType="5" FuncType="1050" FBType="2050" MaxInput="0" Return="1" Size="64" Index="2147483652" Column="1" UploadProhibit="0" UDFBUseFBOnlineEdit="0" UDFBInstDefineType="-1" UDFBTotalAllocSize="64" UDFBTotalPulseSize="0" FindProgram="1" FindVar="1" Encrytption="">FBREAL<InputVariables><Variable Type="0" DataType="2097153" Trigger="0" UDTName="" Display="0" InstMemory="0">EN</Variable>
+							<Variable Type="0" DataType="2097153" Trigger="0" UDTName="" Display="0" InstMemory="0">PREV_EP</Variable>
+							<Variable Type="0" DataType="2097153" Trigger="0" UDTName="" Display="0" InstMemory="0">SOP_Flow</Variable>
+							<Variable Type="1" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">ST</Variable>
+							<Variable Type="0" DataType="2097153" Trigger="0" UDTName="" Display="0" InstMemory="0">RT</Variable>
+							<Variable Type="1" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">ET</Variable>
+							<Variable Type="0" DataType="2097153" Trigger="0" UDTName="" Display="0" InstMemory="0">SF</Variable>
+							<Variable Type="0" DataType="2097153" Trigger="0" UDTName="" Display="0" InstMemory="0">RF</Variable>
+							<Variable Type="0" DataType="2097153" Trigger="0" UDTName="" Display="0" InstMemory="0">EF</Variable>
+						</InputVariables>
+						<OutputVariables><Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">ENO</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">E1</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">E2</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">EP</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">F</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">G</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">H</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">OG</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">PA</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">R</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">RO</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">RP</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">RR</Variable>
+							<Variable Type="2" DataType="1" Trigger="0" UDTName="" Display="0" InstMemory="0">SP</Variable>
+						</OutputVariables>
+						<UserFunctionBlockVar Version="Ver 1.0" ProgramKind="1" PulseCount="0" EnState="1" EnoState="1" FBSize="64" IncludeLibrary="0" NotUseExternalVar="0" VARUseFBOnlineEdit="0" VARTotalAllocSize="64" VALTotalPulseSize="0" MultiUserRunEdit="0" FBInstRetain="0" Count="21"><Symbols><Symbol Name="E1" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="16" TotalSize="1" OrderIndex="8" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="E2" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="17" TotalSize="1" OrderIndex="9" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="EF" Kind="3" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="15" TotalSize="1" OrderIndex="7" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="EP" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="B" DevicePos="18" TotalSize="1" OrderIndex="10" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="ET" Kind="5" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="12" TotalSize="1" OrderIndex="4" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="F" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="B" DevicePos="19" TotalSize="1" OrderIndex="11" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="G" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="B" DevicePos="20" TotalSize="1" OrderIndex="12" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="H" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="B" DevicePos="21" TotalSize="1" OrderIndex="13" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="OG" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="B" DevicePos="22" TotalSize="1" OrderIndex="14" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="PA" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="B" DevicePos="23" TotalSize="1" OrderIndex="15" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="PREV_EP" Kind="3" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="8" TotalSize="1" OrderIndex="0" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="R" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="B" DevicePos="24" TotalSize="1" OrderIndex="16" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="RF" Kind="3" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="14" TotalSize="1" OrderIndex="6" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="RO" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="B" DevicePos="25" TotalSize="1" OrderIndex="17" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="RP" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="B" DevicePos="26" TotalSize="1" OrderIndex="18" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="RR" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="B" DevicePos="27" TotalSize="1" OrderIndex="19" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="RT" Kind="3" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="11" TotalSize="1" OrderIndex="3" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="SF" Kind="3" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="13" TotalSize="1" OrderIndex="5" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="SOP_Flow" Kind="3" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="9" TotalSize="1" OrderIndex="1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="SP" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="B" DevicePos="28" TotalSize="1" OrderIndex="20" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+								<Symbol Name="ST" Kind="5" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="B" DevicePos="10" TotalSize="1" OrderIndex="2" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+									<MemberRetains></MemberRetains>
+									<MemberInitValues></MemberInitValues>
+									<MemberComments></MemberComments>
+								</Symbol>
+							</Symbols>
+							<TempVar Count="0"></TempVar>
+						</UserFunctionBlockVar>
+						<Body>
+							<LDRoutine>
+								<Rung BlockMask="0"><Element ElementType="63" Coordinate="1">VertexManager.S1_RealRGFH</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="7" Coordinate="1025">SP</Element>
+									<Element ElementType="7" Coordinate="1028">EP</Element>
+									<Element ElementType="2" Coordinate="1031" Param="0"></Element>
+									<Element ElementType="0" Coordinate="1033"></Element>
+									<Element ElementType="2" Coordinate="1034" Param="81"></Element>
+									<Element ElementType="14" Coordinate="1118">R</Element>
+									<Element ElementType="6" Coordinate="2049">SP</Element>
+									<Element ElementType="6" Coordinate="2052">RP</Element>
+									<Element ElementType="7" Coordinate="2055">EP</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="3073">SP</Element>
+									<Element ElementType="7" Coordinate="3076">RP</Element>
+									<Element ElementType="7" Coordinate="3079">EP</Element>
+									<Element ElementType="2" Coordinate="3082" Param="81"></Element>
+									<Element ElementType="14" Coordinate="3166">G</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="7" Coordinate="4097">RP</Element>
+									<Element ElementType="6" Coordinate="4100">EP</Element>
+									<Element ElementType="2" Coordinate="4103" Param="84"></Element>
+									<Element ElementType="14" Coordinate="4190">F</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="5121">RP</Element>
+									<Element ElementType="6" Coordinate="5124">EP</Element>
+									<Element ElementType="2" Coordinate="5127" Param="84"></Element>
+									<Element ElementType="14" Coordinate="5214">H</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="63" Coordinate="6145">VertexManager.P1_RealStartPort</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="7169">ST</Element>
+									<Element ElementType="0" Coordinate="7171"></Element>
+									<Element ElementType="7" Coordinate="7172">_off</Element>
+									<Element ElementType="2" Coordinate="7175" Param="84"></Element>
+									<Element ElementType="14" Coordinate="7262">SP</Element>
+									<Element ElementType="6" Coordinate="8193">SF</Element>
+									<Element ElementType="0" Coordinate="8195"></Element>
+									<Element ElementType="6" Coordinate="9217">_off</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="63" Coordinate="10241">VertexManager.P2_RealResetPort</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="11265">RT</Element>
+									<Element ElementType="0" Coordinate="11267"></Element>
+									<Element ElementType="7" Coordinate="11268">_off</Element>
+									<Element ElementType="2" Coordinate="11271" Param="84"></Element>
+									<Element ElementType="14" Coordinate="11358">RP</Element>
+									<Element ElementType="6" Coordinate="12289">RF</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="63" Coordinate="13313">VertexManager.P3_RealEndPort</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="14337">ET</Element>
+									<Element ElementType="0" Coordinate="14339"></Element>
+									<Element ElementType="7" Coordinate="14340">_off</Element>
+									<Element ElementType="2" Coordinate="14343" Param="84"></Element>
+									<Element ElementType="14" Coordinate="14430">EP</Element>
+									<Element ElementType="6" Coordinate="15361">EF</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="63" Coordinate="16385">VertexManager.M1_OriginMonitor</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="17409">_on</Element>
+									<Element ElementType="6" Coordinate="17412">_on</Element>
+									<Element ElementType="7" Coordinate="17415">_off</Element>
+									<Element ElementType="2" Coordinate="17418" Param="81"></Element>
+									<Element ElementType="14" Coordinate="17502">OG</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="63" Coordinate="18433">VertexManager.M5_RealErrorTXMonitor</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="19457">_off</Element>
+									<Element ElementType="0" Coordinate="19459"></Element>
+									<Element ElementType="7" Coordinate="19460">_off</Element>
+									<Element ElementType="2" Coordinate="19463" Param="84"></Element>
+									<Element ElementType="14" Coordinate="19550">E1</Element>
+									<Element ElementType="6" Coordinate="20481">E1</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="63" Coordinate="21505">VertexManager.M6_RealErrorRXMonitor</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="22529">_off</Element>
+									<Element ElementType="0" Coordinate="22531"></Element>
+									<Element ElementType="7" Coordinate="22532">_off</Element>
+									<Element ElementType="2" Coordinate="22535" Param="84"></Element>
+									<Element ElementType="14" Coordinate="22622">E2</Element>
+									<Element ElementType="6" Coordinate="23553">E2</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="63" Coordinate="24577">VertexMReal.R1_RealInitialStart</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="25601">G</Element>
+									<Element ElementType="6" Coordinate="25604">OG</Element>
+									<Element ElementType="0" Coordinate="25606"></Element>
+									<Element ElementType="7" Coordinate="25607">H</Element>
+									<Element ElementType="2" Coordinate="25610" Param="81"></Element>
+									<Element ElementType="14" Coordinate="25694">RR</Element>
+									<Element ElementType="6" Coordinate="26625">RR</Element>
+									<Element ElementType="2" Coordinate="26628" Param="0"></Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="63" Coordinate="27649">VertexMReal.R2_RealJobComplete</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="28673">G</Element>
+									<Element ElementType="6" Coordinate="28676">_on</Element>
+									<Element ElementType="0" Coordinate="28678"></Element>
+									<Element ElementType="7" Coordinate="28679">H</Element>
+									<Element ElementType="2" Coordinate="28682" Param="81"></Element>
+									<Element ElementType="14" Coordinate="28766">ET</Element>
+									<Element ElementType="6" Coordinate="29697">ET</Element>
+									<Element ElementType="2" Coordinate="29700" Param="0"></Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="63" Coordinate="30721">VertexMReal.R3_RealStartPoint</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="31745">G</Element>
+									<Element ElementType="7" Coordinate="31748">RR</Element>
+									<Element ElementType="0" Coordinate="31750"></Element>
+									<Element ElementType="7" Coordinate="31751">_off</Element>
+									<Element ElementType="2" Coordinate="31754" Param="81"></Element>
+									<Element ElementType="14" Coordinate="31838">RO</Element>
+									<Element ElementType="6" Coordinate="32769">H</Element>
+									<Element ElementType="7" Coordinate="32772">OG</Element>
+									<Element ElementType="0" Coordinate="32774"></Element>
+									<Element ElementType="6" Coordinate="33793">RO</Element>
+									<Element ElementType="2" Coordinate="33796" Param="0"></Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="63" Coordinate="34817">VertexManager.F1_RootStart</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="35841">PREV_EP</Element>
+									<Element ElementType="0" Coordinate="35843"></Element>
+									<Element ElementType="7" Coordinate="35844">F</Element>
+									<Element ElementType="2" Coordinate="35847" Param="84"></Element>
+									<Element ElementType="14" Coordinate="35934">ST</Element>
+									<Element ElementType="6" Coordinate="36865">ST</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="63" Coordinate="37889">VertexManager.M2_PauseMonitor</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="38913">SOP_Flow</Element>
+									<Element ElementType="7" Coordinate="38916">_off</Element>
+									<Element ElementType="2" Coordinate="38919" Param="84"></Element>
+									<Element ElementType="14" Coordinate="39006">PA</Element>
+								</Rung>
+								<OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
+XckU4UJCOYh5CA==</OnlineUploadData>
+							</LDRoutine>
+						</Body>
+					</UserFunction>
+				</UserFunctions>
+				<UserDataTypes></UserDataTypes>
+				<UserLibrary></UserLibrary>
+			</POU>
+			<OnlineElements>
+				<ProgramTable Type="2" Version="0"></ProgramTable>
+				<NCProgramTable></NCProgramTable>
+				<TaskTable></TaskTable>
+				<UploadTable></UploadTable>
+				<LabelCodeTable></LabelCodeTable>
+				<UsedFunctionCodeTable></UsedFunctionCodeTable>
+				<ForNextCodeTable></ForNextCodeTable>
+				<SubroutineAllocationTable></SubroutineAllocationTable>
+				<LabelAllocationTable></LabelAllocationTable>
+				<PulseAllocationTable></PulseAllocationTable>
+				<ForAllocationTable></ForAllocationTable>
+				<XGCommSettings Connnections="01000001010188130000010100C20100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000D20700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000">
+					<SafetySignature dt:dt="bin.base64" Compressed="1" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWesUlJwAAALIAMQAQAAAASAAISGgzTTWAg8XckU4UJDrFJScAAAA</SafetySignature>
+				</XGCommSettings>
+				<TrendMonitoring>
+					<TraceConfiguration MaxSample="1000" MaxDisplaySample="1000" SamplingFrequency="1000">
+						<BitDeviceList></BitDeviceList>
+						<TrendDeviceList></TrendDeviceList>
+						<XYDeviceList></XYDeviceList>
+					</TraceConfiguration>
+					<GraphConfiguration ShowGrid="1" AxisOption="65807" BitLegendPos="1" TrendLegendPos="1" XYLegendPos="1" MinValue="0.0000000000000000" MaxValue="100.0000000000000000">
+						<BitGraphGroup></BitGraphGroup>
+						<TrendGraphGroup></TrendGraphGroup>
+					</GraphConfiguration>
+					<WindowConfiguration ViewGraph="7" ViewBitValue="0" ViewTrendValue="0" VieXYValue="0"></WindowConfiguration>
+				</TrendMonitoring>
+				<DataRepository></DataRepository>
+				<UsedLibraryForPlatV2 Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWeOe3YsAAABAAEAQIAAhAIKDF3JFOFCQ457diw==</UsedLibraryForPlatV2>
+				<RetainValue Compressed="0" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">//7/CFIAZQBzAGUAcgB2AGUAZAAAAAAAAAAAAA==</RetainValue>
+			</OnlineElements>
+			<XGPD>
+				<XGPD_CONFIG_INFO_GROUP></XGPD_CONFIG_INFO_GROUP>
+				<XGPD_HS_LINK_GROUP></XGPD_HS_LINK_GROUP>
+				<XGPD_P2P_GROUP></XGPD_P2P_GROUP>
+			</XGPD>
+			<Properties Value=""></Properties>
+		</Configuration>
+	</Configurations>
+</Project>

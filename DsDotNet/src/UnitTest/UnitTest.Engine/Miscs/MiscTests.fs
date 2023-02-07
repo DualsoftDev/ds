@@ -68,3 +68,21 @@ module MiscTestModule =
             nullstr  |> Option.ofString |> Option.isNone === true
             emptystr |> Option.ofString |> Option.isNone === true
             hello    |> Option.ofString |> Option.isSome === true
+
+            nullstr  |> String.orElse "world" === "world"
+            emptystr |> String.orElse "world" === "world"
+            hello    |> String.orElse "world" === "hello"
+
+        [<Test>]
+        member __.``OrElse test`` () =
+            orElse [3] [1] === [1]
+            orElse [3] []  === [3]
+            orElse [] []   === []
+            orElse (Some 3) None === Some 3
+            orElse (Some 3) (Some 5) === Some 5
+            sprintf "%A" <| orElse (Ok 3) (Error "Error") === sprintf "%A" (Ok 3)
+            //orElse (Ok 3) (Error "Error") === (Ok 3)
+            orElse (Ok 3) (Ok 5) === Ok 5
+
+
+            [Some 1; None; Some 3] |> List.mapSome ((+) 1) === [2; 4]

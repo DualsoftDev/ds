@@ -109,3 +109,8 @@ module DU =
         foo.GetType() = typeof<Foo<int,int>> |> verify
 
 
+        (* Generic Discriminated Union Case 를 생성하는 방법은 ????
+            type MyUnion<'T> =
+                | MySome of 'T
+                | MyNone
+        *)

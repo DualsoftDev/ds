@@ -128,11 +128,11 @@ module CodeConvertUtil =
             let tags =
                 xs.Select(fun f->
                 match f with
-                | :? Real   as r  -> r.V.EP
+                | :? Real    as r  -> r.V.EP
                 | :? RealExF as rf -> rf.Real.V.EP
                 | :? CallSys as rs -> rs.V.ET
-                | :? CallDev   as c  -> if usingRoot then  c.V.ET else  c.V.CR
-                | :? Alias  as a  -> if usingRoot then  a.V.ET else  a.V.CR
+                | :? CallDev as c  -> if usingRoot then  c.V.ET else  c.V.CR
+                | :? Alias   as a  -> if usingRoot then  a.V.ET else  a.V.CR
                 | _ -> failwithlog $"Error {getFuncName()}"
                 )
 

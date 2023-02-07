@@ -1,15 +1,11 @@
 namespace Engine.CodeGenCPU
 
-open System.Diagnostics
 open Engine.Core
-open System.Collections.Generic
-open System.Runtime.CompilerServices
-open System
 open Engine.Common.FS
 
 [<AutoOpen>]
 module SystemManagerModule =
-    
+
 
     /// DsSystem Manager : System Tag  를 관리하는 컨테이어
     type SystemManager (sys:DsSystem, stg:Storages)  =
@@ -18,9 +14,8 @@ module SystemManagerModule =
             else
                 let systemTag = systemTag |> int
                 match dt with
-                | DuBOOL      -> createPlanVar stg  name  dt  autoAddr target systemTag
-                | DuUINT16    -> createPlanVar stg  name  dt  autoAddr target systemTag
-                | DuUINT8     -> createPlanVar stg  name  dt  autoAddr target systemTag
+                | (DuBOOL | DuUINT16 | DuUINT8) ->
+                    createPlanVar stg  name  dt  autoAddr target systemTag
                 | _ -> failwithlog $"not support system TagType {dt}"
 
 
@@ -58,24 +53,24 @@ module SystemManagerModule =
             member x.Target = sys
             member x.Storages = stg
 
-        member f.GetSystemTag(st:SystemTag)     =
+        member f.GetSystemTag(st:SystemTag) : IStorage=
             match st with
-            |SystemTag.on         ->    on       :> IStorage
-            |SystemTag.off        ->    off      :> IStorage
-            |SystemTag.auto       ->    auto     :> IStorage
-            |SystemTag.manual     ->    manual   :> IStorage
-            |SystemTag.drive      ->    drive    :> IStorage
-            |SystemTag.stop       ->    stop     :> IStorage
-            |SystemTag.emg        ->    emg      :> IStorage
-            |SystemTag.test       ->    test     :> IStorage
-            |SystemTag.ready      ->    ready    :> IStorage
-            |SystemTag.clear      ->    clear    :> IStorage
-            |SystemTag.home       ->    home     :> IStorage
-            |SystemTag.datet_yy   ->    dtimeyy  :> IStorage
-            |SystemTag.datet_mm   ->    dtimemm  :> IStorage
-            |SystemTag.datet_dd   ->    dtimedd  :> IStorage
-            |SystemTag.datet_h    ->    dtimeh   :> IStorage
-            |SystemTag.datet_m    ->    dtimem   :> IStorage
-            |SystemTag.datet_s    ->    dtimes   :> IStorage
-            |SystemTag.timeout    ->    tout     :> IStorage
-            |_ -> failwithlog $"Error : GetSystemTag {st} type not support!!"
+            | SystemTag.on         ->    on
+            | SystemTag.off        ->    off
+            | SystemTag.auto       ->    auto
+            | SystemTag.manual     ->    manual
+            | SystemTag.drive      ->    drive
+            | SystemTag.stop       ->    stop
+            | SystemTag.emg        ->    emg
+            | SystemTag.test       ->    test
+            | SystemTag.ready      ->    ready
+            | SystemTag.clear      ->    clear
+            | SystemTag.home       ->    home
+            | SystemTag.datet_yy   ->    dtimeyy
+            | SystemTag.datet_mm   ->    dtimemm
+            | SystemTag.datet_dd   ->    dtimedd
+            | SystemTag.datet_h    ->    dtimeh
+            | SystemTag.datet_m    ->    dtimem
+            | SystemTag.datet_s    ->    dtimes
+            | SystemTag.timeout    ->    tout
+            | _ -> failwithlog $"Error : GetSystemTag {st} type not support!!"

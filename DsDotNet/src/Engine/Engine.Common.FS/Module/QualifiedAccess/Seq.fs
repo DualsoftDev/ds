@@ -28,9 +28,11 @@ module Seq =
     /// Seq.collect 와 동일
     let bind = Seq.collect
 
+    let takeUntil f xs = Seq.takeWhile (f >> not) xs
     /// Seq.collect id 적용 : {{xs}} -> {xs}
     let flatten xss = xss |> Seq.collect id
 
+    let mapSome mapper (options:'a option seq) = options |> Seq.choose (Option.map mapper)
     let mapTuple (mapper1:'a->'c) (mapper2:'b->'d) (xs:('a*'b) seq) =
         xs |> Seq.map (fun (a, b) -> mapper1 a, mapper2 b)
 
@@ -71,6 +73,9 @@ module Seq =
 
     /// Creates a function from a sequence that, when called, returns the items in the sequence
     let enumerate (xs: seq<_>)  = tryEnumerate xs >> Option.get
+
+    let orElse ys xs = if Seq.isEmpty xs then ys else xs
+    let orElseWith f xs = if Seq.isEmpty xs then f() else xs
 
     // http://www.fssnip.net/18/title/Haskell-function-iterate
     /// seed 에 f 를 0번, 1번, ... 무한번 적용한 sequence 반환

@@ -76,7 +76,6 @@ module PreludeAdhocPolymorphism =
         static member ($) (FAdhoc_filter, x:seq<_>)    = fun f -> Seq.filter   f x
         static member ($) (FAdhoc_filter, x:array<_>)  = fun f -> Array.filter f x
 
-
     type FAdhoc_pairwise = FAdhoc_pairwise with
         static member ($) (FAdhoc_pairwise, x:list<_>)  = List.pairwise  x
         static member ($) (FAdhoc_pairwise, x:seq<_>)   = Seq.pairwise   x
@@ -109,9 +108,20 @@ module PreludeAdhocPolymorphism =
 
     type FAdhoc_orElse = FAdhoc_orElse with
         /// 주의: FAdhoc_orElse (Option.orElse) 사용 시 short circuit 기능이 없다.
-        static member (?<-) (FAdhoc_orElse, x:option<'a>, y:option<'a>)  = x |> Option.orElse y
-        static member (?<-) (FAdhoc_orElse, x:Nullable<'a>, y:Nullable<'a>)  = if x.HasValue then x else y
-        static member (?<-) (FAdhoc_orElse, x:'a when ^a : not struct, y:'a when ^a : not struct) = if isNull x then y else x
+        static member (?<-) (FAdhoc_orElse, y:option<'a>,   x:option<'a>)   = Option.orElse y x
+        static member (?<-) (FAdhoc_orElse, y:Result<'c, 'd>, x:Result<'c, 'd>) = Result.orElse y x
+        //static member (?<-) (FAdhoc_orElse, y:Nullable<'a>, x:Nullable<'a>) = if x.HasValue then x else y
+        //static member (?<-) (FAdhoc_orElse, y:'a when ^a : not struct, x:'a when ^a : not struct) = if isNull x then y else x
+        static member (?<-) (FAdhoc_orElse, ys:list<_> , xs:list<_> )       = List.orElse  ys xs
+        static member (?<-) (FAdhoc_orElse, ys:seq<_>  , xs:seq<_>  )       = Seq.orElse   ys xs
+        static member (?<-) (FAdhoc_orElse, ys:array<_>, xs:array<_>)       = Array.orElse ys xs
+
+    type FAdhoc_orElseWith = FAdhoc_orElseWith with
+        static member ($) (FAdhoc_orElseWith, x:option<_>) = fun f -> Option.orElseWith     f x
+        static member ($) (FAdhoc_orElseWith, x:list<_>)   = fun f -> List.orElseWith       f x
+        static member ($) (FAdhoc_orElseWith, x:seq<_>)    = fun f -> Seq.orElseWith        f x
+        static member ($) (FAdhoc_orElseWith, x:array<_>)  = fun f -> Array.orElseWith      f x
+        static member ($) (FAdhoc_orElseWith, x:Result<_, _>)  = fun f -> Result.orElseWith f x
 
     let inline bind        f x = FAdhoc_bind        $ x <| f
     let inline (>>=)       x f = FAdhoc_bind        $ x <| f
@@ -129,6 +139,10 @@ module PreludeAdhocPolymorphism =
     let inline map         f x = FAdhoc_map         $ x <| f
     let inline mapi        f x = FAdhoc_mapi        $ x <| f
     let inline picki       f x = FAdhoc_picki       $ x <| f
+    /// 대상 값이 None, [] 등이면 주어진 함수 수행 값을 선택한다.   Option, Result, Collection 등에 적용
+    let inline orElseWith  f x = FAdhoc_orElseWith  $ x <| f
+    /// 대상 값이 None, [] 등이면 주어진 후보 값을 선택한다.
+    let inline orElse      y x = (?<-) FAdhoc_orElse y x
 
 
     //type FAdhoc_scan = FAdhoc_scan with
@@ -143,7 +157,8 @@ module PreludeAdhocPolymorphism =
     /// map
     let inline ( ==> )     x f = FAdhoc_map         $ x <| f
     /// choice on option type
-    let inline ( <|> )     x y = (?<-) FAdhoc_orElse x y
+    //let inline ( <|> )     x y = orElse y x //(?<-) FAdhoc_orElse y x
+    let inline ( <|> )     x y = (?<-) FAdhoc_orElse y x
     /// append two lists / arrays / sequences
     let inline ( @ )       x y = (?<-) FAdhoc_append x y // Haskell 의 ++ 연산자와 동일
     let inline ( ++ )      x y = (?<-) FAdhoc_append x y // Haskell 의 ++ 연산자와 동일
@@ -166,11 +181,12 @@ module PreludeAdhocPolymorphism =
 
     let private testme() =
         (*
-        #I @"bin\Debug\net48"
-        #r "Engine.Common.FS.dll"
+        #r @"F:\Git\ds\DsDotNet\src\Engine\Engine.Common.FS\bin\Debug\net48\Engine.Common.FS.dll"
         open Engine.Common.FS
+        open System
+
         *)
-        let verify c = if not c then failwithlog "ERROR"
+        let verify c = if not c then failwith "ERROR"
         let some1, some2, some3 = Some 1, Some 2, Some 3
         verify ( [1..3] @ [4..5] = [1..5])
         verify ( [|1..3|] @ [|4..5|] = [|1..5|])
@@ -202,17 +218,47 @@ module PreludeAdhocPolymorphism =
         verify( map incr some2 = some3)
 
 
-        let s1:string = null
-        let s2 = "Hello"
-        verify( s1 <|> s2 = s2)
+        //let s1:string = null
+        //let s2 = "Hello"
+        //verify( String.orElse s2 s1 = s2)
 
-        let s3 = "World"
-        verify( s2 <|> s3 = s2 )
+        //let s3 = "World"
+        //verify( String.orElse s3 s2 = s2 )
 
-        verify( "nice" <|> null = "nice")
-        verify( null <|> "nice" = "nice")
-        verify( Nullable<int>() <|> Nullable<int>(333) = Nullable<int>(333))
-        verify( Nullable<int>() <|> Nullable<int>() = Nullable<int>())
+        //verify( "nice" <|> null = "nice")
+        //verify( null <|> "nice" = "nice")
+        //verify( Nullable<int>() <|> Nullable<int>(333) = Nullable<int>(333))
+        //verify( Nullable<int>() <|> Nullable<int>() = Nullable<int>())
+
+        verify( orElse [3] [1] = [1])
+        verify( orElse [3] [] = [3])
+        verify( orElse [] [] = [])
+        verify( [1] <|> [3] = [1])
+        verify( []  <|> [3] = [3])
+        verify( []  <|> []  = [])
+        verify( List.orElse [3] [1] = [1])
+
+        verify( orElse (Some 3) None  = Some 3)
+        verify( orElse (Some 3) (Some 5) = Some 5)
+        verify( orElse (Some 3) None     = Some 3)
+        verify( Some 3 <|> None   = Some 3)
+        verify( Some 5 <|> Some 3 = Some 5)
+        verify( None <|> Some 3   = Some 3)
+        verify( Option.orElse (Some 3) (Some 5) = Some 5)
+        verify( Option.orElse (Some 3) None = Some 3)
+
+        verify( orElse (Ok 3) (Ok 11) = Ok 11)
+        verify( orElse (Ok 3) (Error "X") = Ok 3)
+        verify( Ok 11 <|> (Ok 3) = Ok 11)
+        verify( Error "X" <|> Ok 3 = Ok 3)
+
+
+        verify( orElseWith (fun () -> [1]) [3] = [3])
+        verify( orElseWith (fun () -> [1]) [] = [1])
+
+        verify( Option.orElseWith (fun () -> Some 1) (Some 3) = (Some 3))
+        verify( Option.orElseWith (fun () -> Some 1) None = (Some 1))
+
         ()
 
 

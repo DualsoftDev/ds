@@ -49,21 +49,21 @@ module TagManagerUtil =
         let v = dataType.DefaultValue()
         let address = if fillAutoAddress then Some "" else None
         let createParam () = {defaultStorageCreationParams(unbox v) with Name=name; IsGlobal=true; Address=address; Target= Some target; TagKind = tagIndex}
-        let t =
+        let t:IStorage =
             match dataType with
-            | DuINT8    -> PlanVar<int8>  (createParam()) :> IStorage
-            | DuINT16   -> PlanVar<int16> (createParam()) :> IStorage
-            | DuINT32   -> PlanVar<int32> (createParam()) :> IStorage
-            | DuINT64   -> PlanVar<int64> (createParam()) :> IStorage
-            | DuUINT8   -> PlanVar<uint8> (createParam()) :> IStorage
-            | DuUINT16  -> PlanVar<uint16>(createParam()) :> IStorage
-            | DuUINT32  -> PlanVar<uint32>(createParam()) :> IStorage
-            | DuUINT64  -> PlanVar<uint64>(createParam()) :> IStorage
-            | DuFLOAT32 -> PlanVar<single>(createParam()) :> IStorage
-            | DuFLOAT64 -> PlanVar<double>(createParam()) :> IStorage
-            | DuSTRING  -> PlanVar<string>(createParam()) :> IStorage
-            | DuCHAR    -> PlanVar<char>  (createParam()) :> IStorage
-            | DuBOOL    -> PlanVar<bool>  (createParam()) :> IStorage
+            | DuINT8    -> PlanVar<int8>  (createParam())
+            | DuINT16   -> PlanVar<int16> (createParam())
+            | DuINT32   -> PlanVar<int32> (createParam())
+            | DuINT64   -> PlanVar<int64> (createParam())
+            | DuUINT8   -> PlanVar<uint8> (createParam())
+            | DuUINT16  -> PlanVar<uint16>(createParam())
+            | DuUINT32  -> PlanVar<uint32>(createParam())
+            | DuUINT64  -> PlanVar<uint64>(createParam())
+            | DuFLOAT32 -> PlanVar<single>(createParam())
+            | DuFLOAT64 -> PlanVar<double>(createParam())
+            | DuSTRING  -> PlanVar<string>(createParam())
+            | DuCHAR    -> PlanVar<char>  (createParam())
+            | DuBOOL    -> PlanVar<bool>  (createParam())
 
         stg.Add(t.Name, t)
         t
@@ -71,7 +71,7 @@ module TagManagerUtil =
 
     let timer  (storages:Storages)  name sys =
         let name = getPlcTagAbleName name storages
-        let ts = TimerStruct.Create(TimerType.TON, storages,name, 0us, 0us, sys)
+        let ts = TimerStruct.Create(TimerType.TON, storages, name, 0us, 0us, sys)
         ts
 
     let counter (storages:Storages) name sys =
@@ -79,7 +79,7 @@ module TagManagerUtil =
         let cs = CTRStruct.Create(CounterType.CTR, storages, name, 0us, 0us, sys)
         cs
 
-    let createPlanVar (storages:Storages) (name:string) (dataType:DataType) (fillAutoAddress:bool) (target:IQualifiedNamed) (tagIndex:int)=
+    let createPlanVar (storages:Storages) (name:string) (dataType:DataType) (fillAutoAddress:bool) (target:IQualifiedNamed) (tagIndex:int) =
         let name = getPlcTagAbleName name storages
         let t= createPlanVarHelper (storages, name, dataType, fillAutoAddress, target, tagIndex)
         t

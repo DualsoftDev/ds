@@ -64,7 +64,10 @@ module Array =
 
     /// Array.collect 와 동일
     let bind = Array.collect
+    let orElse ys xs = if Array.isEmpty xs then ys else xs
+    let orElseWith f xs = if Array.isEmpty xs then f() else xs
 
+    let takeUntil f xs = Array.takeWhile (f >> not) xs
     /// Array.collect id 적용 : {{xs}} -> {xs}
     let flatten xss = xss |> Array.collect id
 
@@ -89,6 +92,7 @@ module Array =
         |]
 
 
+    let mapSome mapper (options:'a option array) = options |> Array.choose (Option.map mapper)
     let mapTuple (mapper1:'a->'c) (mapper2:'b->'d) (xs:('a*'b) array) =
         xs |> Array.map (fun (a, b) -> mapper1 a, mapper2 b)
 

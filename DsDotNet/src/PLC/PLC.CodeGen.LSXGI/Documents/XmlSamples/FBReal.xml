@@ -455,7 +455,7 @@ XckU4UJCOYh5CA==</OnlineUploadData>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="OG" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="false" Comment="" Device="B" DevicePos="22" TotalSize="1" OrderIndex="14" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
+								<Symbol Name="OG" Kind="4" Type="BOOL" State="0" Address="" Trigger="" InitValue="true" Comment="" Device="B" DevicePos="22" TotalSize="1" OrderIndex="14" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType=""><MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>

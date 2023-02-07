@@ -47,6 +47,7 @@ module List =
         | [] -> []
         | _ -> source |> List.rev |> List.tail |> List.rev
 
+    let takeUntil f xs = List.takeWhile (f >> not) xs
     /// List.collect id 적용 : [[xs]] -> [xs]
     let flatten xss = xss |> List.collect id
 
@@ -138,13 +139,16 @@ module List =
             | [] -> Some(List.rev acc)
         loop [] lst
 
-
     /// List.reduce 의 option type safe version : empty sequence 인 경우 None 반환
     let tryReduce f (xs: list<_>) =
         if List.isEmpty xs then
             None
         else
             xs |> List.reduce f |> Some
+
+    let orElse ys xs = if List.isEmpty xs then ys else xs
+    let orElseWith f xs = if List.isEmpty xs then f() else xs
+
 
     /// System.Reactive 의 Observable.Window 를 참고해서 count 와 skip 을 구현
     /// Sliding / Hopping window 지원

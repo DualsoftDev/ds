@@ -3,7 +3,6 @@ namespace Engine.Common.FS
 open System
 
 
-[<AutoOpen>]
 [<RequireQualifiedAccess>]
 module String =
     let dos2unix (str:string) =
@@ -39,3 +38,7 @@ module String =
     let toCharArray (s:string) = s.ToCharArray()
     let toUpper (s:string) = s.ToUpper()
     let toLower (s:string) = s.ToLower()
+    let toOption(s:string) = if String.IsNullOrEmpty(s) then None else Some s
+
+    let orElse = defaultValue
+    let orElseWith f x = if String.IsNullOrEmpty x then f() else x

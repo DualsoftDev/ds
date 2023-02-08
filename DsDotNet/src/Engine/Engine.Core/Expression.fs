@@ -2,6 +2,7 @@ namespace rec Engine.Core
 open System
 open System.Diagnostics
 open Engine.Common.FS
+open ExpressionModule
 
 (*  expression: generic type <'T> 나 <_> 으로는 <obj> match 으로 간주됨
     Expression<'T> 객체에 대한 matching
@@ -65,6 +66,7 @@ module ExpressionModule =
             member x.ToText(withParenthesys) = x.ToText(withParenthesys)
             member x.CollectStorages() = x.CollectStorages()
             member x.Flatten() = fwdFlattenExpression x
+            member x.IsEqual y = x.IsEqual y
 
             (* 'T type DU 를 접근하기 위한 members *)
             member x.FunctionName = x.FunctionName
@@ -76,17 +78,30 @@ module ExpressionModule =
                 | _ -> failwithlog "ERROR"
 
         member x.DataType = typedefof<'T>
+        /// expression 의 type 이 동일한 경우 ToString() 결과가 같으면 동일한 것으로 간주
+        /// type 이 다르면 항상 false 반환
+        member x.IsEqual (y:IExpression) =
+            if x.GetType() = y.GetType() then
+                x.ToText(false) = y.ToText(false)
+            else
+                false
 
     /// literal 'T 로부터 terminal Expression<'T> 생성
     let literal2expr (x:'T) =
         let t = x.GetType()
         if t.IsValueType || t = typedefof<string> then
-            DuTerminal (DuLiteral (LiteralHolder x))
+            DuTerminal (DuLiteral ({Value=x}:LiteralHolder<_>))
         else
             failwithlog "ERROR: Value Type Error.  only allowed for primitive type"
 
     /// Tag<'T> or Variable<'T> 로부터 Expression<'T> 생성
     let var2expr (t: TypedValueStorage<'T>):Expression<'T> = DuTerminal (DuVariable t)
+
+    [<RequireQualifiedAccess>]
+    module Expression =
+        let True  = literal2expr true
+        let False = literal2expr false
+        let Zero  = literal2expr 0
 
     type Timer internal(typ:TimerType, timerStruct:TimerStruct) =
 
@@ -371,7 +386,8 @@ module ExpressionModule =
             | DuFunction fs -> fs.Arguments
             | DuTerminal _ -> []
 
-        member x.ToText(withParenthesys:bool) =
+        member x.ToText(?withParenthesys:bool) =
+            let withParenthesys = withParenthesys |? false
             match x with
             | DuTerminal b -> b.ToText()
             | DuFunction fs ->

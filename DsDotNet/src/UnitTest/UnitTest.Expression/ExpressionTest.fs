@@ -506,5 +506,27 @@ module Exp =
             let e2 = var2expr t1 :> IExpression
             let isEqual = e1 = e2
             isEqual === false       // IExpression 참조로 접근할 때, equality check 가 불가능한 상태
+            e1.IsEqual e2 === true
             ()
 
+        [<Test>]
+        member __.``2 Expression literal test`` () =
+            let h1:LiteralHolder<_> = {Value=true}
+            let h2:LiteralHolder<_> = {Value=true}
+            h1 === h2
+            let t1 = literal2expr true
+            let t2 = literal2expr true
+            let str1 = literal2expr "true"
+            str1.ToText() === "\"true\""
+
+            t1.ToText() === "true"
+            t1.IsEqual t2 === true
+
+            t1.IsEqual str1 === false
+
+            let theTrueExpression = literal2expr true
+            let theFalseExpression = literal2expr false
+
+            let xxx = (seq {1..3}).OrElse(seq {2..5})
+            let yyy = Seq.empty.OrElse(seq {2..5})
+            ()

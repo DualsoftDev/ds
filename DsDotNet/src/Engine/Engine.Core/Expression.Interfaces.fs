@@ -57,6 +57,7 @@ module ExpressionForwardDeclModule =
         /// Function expression 에 사용된 IStorage 항목들을 반환
         abstract CollectStorages: unit -> IStorage list
         abstract Flatten: unit -> IFlatExpression
+        abstract IsEqual: IExpression -> bool
 
     type IExpression<'T when 'T:equality> =
         inherit IExpression

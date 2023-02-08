@@ -10,14 +10,6 @@ open Engine.Common.FS
 open PLC.CodeGen.LSXGI
 
 
-[<AutoOpen>]
-module XgiEngineCoreExtensionModule =
-    type Expression<'T when 'T:equality> with
-        member x.IsEqual (y:Expression<'T>) =
-            let withParenthesys = false
-            x.ToText(withParenthesys) = y.ToText(withParenthesys)
-
-
 [<Collection("SerialXgiExpEqualityTest")>]
 type XgiExpEqualityTest() =
     inherit XgiTestBaseClass()

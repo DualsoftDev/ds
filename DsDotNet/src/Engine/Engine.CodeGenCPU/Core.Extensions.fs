@@ -37,57 +37,57 @@ module ConvertCoreExt =
         member a.PE     = getAM(a).GetApiTag(ApiItemTag.planEnd)
 
     type DsSystem with
-        member s._on     = getSM(s).GetSystemTag(SystemTag.on)         :?> PlanVar<bool>
-        member s._off    = getSM(s).GetSystemTag(SystemTag.off)        :?> PlanVar<bool>
-        member s._auto   = getSM(s).GetSystemTag(SystemTag.auto)       :?> PlanVar<bool>
-        member s._manual = getSM(s).GetSystemTag(SystemTag.manual)     :?> PlanVar<bool>
-        member s._drive  = getSM(s).GetSystemTag(SystemTag.drive)      :?> PlanVar<bool>
-        member s._stop   = getSM(s).GetSystemTag(SystemTag.stop)       :?> PlanVar<bool>
-        member s._emg    = getSM(s).GetSystemTag(SystemTag.emg)        :?> PlanVar<bool>
-        member s._test   = getSM(s).GetSystemTag(SystemTag.test )      :?> PlanVar<bool>
-        member s._ready  = getSM(s).GetSystemTag(SystemTag.ready)      :?> PlanVar<bool>
-        member s._clear  = getSM(s).GetSystemTag(SystemTag.clear)      :?> PlanVar<bool>
-        member s._home   = getSM(s).GetSystemTag(SystemTag.home)       :?> PlanVar<bool>
-        member s._dtimeyy  = getSM(s).GetSystemTag(SystemTag.datet_yy) :?> PlanVar<uint8>
-        member s._dtimemm  = getSM(s).GetSystemTag(SystemTag.datet_mm) :?> PlanVar<uint8>
-        member s._dtimedd  = getSM(s).GetSystemTag(SystemTag.datet_dd) :?> PlanVar<uint8>
-        member s._dtimeh   = getSM(s).GetSystemTag(SystemTag.datet_h ) :?> PlanVar<uint8>
-        member s._dtimem   = getSM(s).GetSystemTag(SystemTag.datet_m ) :?> PlanVar<uint8>
-        member s._dtimes   = getSM(s).GetSystemTag(SystemTag.datet_s ) :?> PlanVar<uint8>
-        member s._tout     = getSM(s).GetSystemTag(SystemTag.timeout)  :?> PlanVar<uint16>
+        member private s.GetPv<'T when 'T:equality >(st:SystemTag) =
+            getSM(s).GetSystemTag(st) :?> PlanVar<'T>
+        member s._on       = s.GetPv<bool>(SystemTag.on)
+        member s._off      = s.GetPv<bool>(SystemTag.off)
+        member s._auto     = s.GetPv<bool>(SystemTag.auto)
+        member s._manual   = s.GetPv<bool>(SystemTag.manual)
+        member s._drive    = s.GetPv<bool>(SystemTag.drive)
+        member s._stop     = s.GetPv<bool>(SystemTag.stop)
+        member s._emg      = s.GetPv<bool>(SystemTag.emg)
+        member s._test     = s.GetPv<bool>(SystemTag.test )
+        member s._ready    = s.GetPv<bool>(SystemTag.ready)
+        member s._clear    = s.GetPv<bool>(SystemTag.clear)
+        member s._home     = s.GetPv<bool>(SystemTag.home)
+        member s._dtimeyy  = s.GetPv<uint8>(SystemTag.datet_yy)
+        member s._dtimemm  = s.GetPv<uint8>(SystemTag.datet_mm)
+        member s._dtimedd  = s.GetPv<uint8>(SystemTag.datet_dd)
+        member s._dtimeh   = s.GetPv<uint8>(SystemTag.datet_h )
+        member s._dtimem   = s.GetPv<uint8>(SystemTag.datet_m )
+        member s._dtimes   = s.GetPv<uint8>(SystemTag.datet_s )
+        member s._tout     = s.GetPv<uint16>(SystemTag.timeout)
         member x.S = x |> getSM
         member x.Storages = x.TagManager.Storages
 
         member private x.GenerationLampIO() =
-            for b in x.SystemLamps do
-                match createBridgeTag(x.Storages, b.Name, b.OutAddress, Out ,BridgeType.Lamp, x) with
-                |Some t ->  b.OutTag  <- t
-                |None -> ()
+            for lamp in x.SystemLamps do
+                match createBridgeTag(x.Storages, lamp.Name, lamp.OutAddress, Out ,BridgeType.Lamp, x) with
+                | Some t ->  lamp.OutTag  <- t
+                | None -> ()
 
         member private x.GenerationCondition() =
-            for b in x.SystemConditions do
-                match createBridgeTag(x.Storages, b.Name, b.InAddress, In ,BridgeType.Condition, x) with
-                |Some t ->  b.InTag  <- t
-                |None -> ()
+            for sc in x.SystemConditions do
+                match createBridgeTag(x.Storages, sc.Name, sc.InAddress, In ,BridgeType.Condition, x) with
+                | Some t ->  sc.InTag  <- t
+                | None -> ()
 
         member private x.GenerationButtonIO() =
             for b in x.SystemButtons do
-                match createBridgeTag(x.Storages, b.Name, b.InAddress, In ,BridgeType.Button, x) with
-                |Some t ->  b.InTag   <- t  |None -> ()
-                match createBridgeTag(x.Storages, b.Name, b.OutAddress, Out ,BridgeType.Button, x) with
-                |Some t ->  b.OutTag  <- t  |None -> ()
+                createBridgeTag(x.Storages, b.Name, b.InAddress, In ,BridgeType.Button, x)
+                |> iter (fun t -> b.InTag   <- t)
+                createBridgeTag(x.Storages, b.Name, b.OutAddress, Out ,BridgeType.Button, x)
+                |> iter (fun t -> b.OutTag  <- t)
 
         member private x.GenerationTaskDevIO() =
             let taskDevices = x.Jobs |> Seq.collect(fun j -> j.DeviceDefs)
             for b in taskDevices do
-                if b.ApiItem.RXs.any()
-                then
-                    match createBridgeTag(x.Storages, b.ApiName, b.InAddress, In ,BridgeType.Device, x) with
-                    |Some t ->  b.InTag   <- t  |None -> ()
-                if b.ApiItem.TXs.any()
-                then
-                    match createBridgeTag(x.Storages, b.ApiName, b.OutAddress, Out ,BridgeType.Device, x) with
-                    |Some t ->  b.OutTag  <- t  |None -> ()
+                if b.ApiItem.RXs.any() then
+                    createBridgeTag(x.Storages, b.ApiName, b.InAddress, In ,BridgeType.Device, x)
+                    |> iter (fun t -> b.InTag <- t)
+                if b.ApiItem.TXs.any() then
+                    createBridgeTag(x.Storages, b.ApiName, b.OutAddress, Out ,BridgeType.Device, x)
+                    |> iter (fun t -> b.OutTag <- t)
 
         member x.GenerationIO() =
             x.GenerationTaskDevIO()
@@ -140,22 +140,24 @@ module ConvertCoreExt =
                 let inTag = (b.InTag :?> Tag<bool>).Expr
                 if hasNot(b.Funcs)then !!inTag else inTag    )
 
-    let private getBtnExpr(f:Flow, btns:ButtonDef seq) : Expression<bool>  =
-
+    let private getButtonExprWrtRuntimePackage(f:Flow, btns:ButtonDef seq) : Expression<bool> =
         match Runtime.Package with
-        | StandardPC | StandardPLC -> let exprs = getButtonExpr(f, btns)
-                                      if exprs.any() then exprs.ToOr() else f.System._off.Expr
+        | (StandardPC | StandardPLC) ->
+            let exprs = getButtonExpr(f, btns)
+            if exprs.any() then exprs.ToOr() else f.System._off.Expr
 
-        | LightPC    | LightPLC    -> f.System._off.Expr
+        | (LightPC | LightPLC) ->
+            f.System._off.Expr
 
 
     let private getSelectBtnExpr(f:Flow, btns:ButtonDef seq) : Expression<bool> seq =
         getButtonExpr(f, btns)
 
     let getConditionInputs(flow:Flow, condis:ConditionDef seq) : Tag<bool> seq =
-            condis.Where(fun b -> b.SettingFlows.Contains(flow))
-                 .Select(fun b -> b.InTag)
-                 .Cast<Tag<bool>>()
+        condis
+            .Where(fun b -> b.SettingFlows.Contains(flow))
+            .Select(fun b -> b.InTag)
+            .Cast<Tag<bool>>()
 
 
 //운영 모드 는 Flow 별로 제공된 모드 On/Off 상태 나타낸다.
@@ -197,21 +199,21 @@ module ConvertCoreExt =
         member f.SelectManualExpr = getSelectBtnExpr(f, f.System.ManualButtons)
 
         //push 버튼은 없을경우 항상 _off
-        member f.BtnDriveExpr = getBtnExpr(f, f.System.DriveButtons    )
-        member f.BtnStopExpr  = getBtnExpr(f, f.System.StopButtons     )
-        member f.BtnEmgExpr   = getBtnExpr(f, f.System.EmergencyButtons)
-        member f.BtnTestExpr  = getBtnExpr(f, f.System.TestButtons     )
-        member f.BtnReadyExpr = getBtnExpr(f, f.System.ReadyButtons    )
-        member f.BtnClearExpr = getBtnExpr(f, f.System.ClearButtons    )
-        member f.BtnHomeExpr  = getBtnExpr(f, f.System.HomeButtons     )
+        member f.BtnDriveExpr = getButtonExprWrtRuntimePackage(f, f.System.DriveButtons    )
+        member f.BtnStopExpr  = getButtonExprWrtRuntimePackage(f, f.System.StopButtons     )
+        member f.BtnEmgExpr   = getButtonExprWrtRuntimePackage(f, f.System.EmergencyButtons)
+        member f.BtnTestExpr  = getButtonExprWrtRuntimePackage(f, f.System.TestButtons     )
+        member f.BtnReadyExpr = getButtonExprWrtRuntimePackage(f, f.System.ReadyButtons    )
+        member f.BtnClearExpr = getButtonExprWrtRuntimePackage(f, f.System.ClearButtons    )
+        member f.BtnHomeExpr  = getButtonExprWrtRuntimePackage(f, f.System.HomeButtons     )
 
         member f.ModeAutoHwExpr =
-            let auto     = if f.SelectAutoExpr.any()   then f.SelectAutoExpr.ToAnd()    else f._on.Expr
+            let auto = if f.SelectAutoExpr.any()   then f.SelectAutoExpr.ToAnd()    else f._on.Expr
           //  let ableAuto = if f.SelectManualExpr.any() then !!f.SelectManualExpr.ToOr() else f._on.Expr
             auto// <&&> ableAuto  반대조건 봐야하나 ?
 
         member f.ModeManualHwExpr =
-            let manual     = if f.SelectManualExpr.any() then f.SelectManualExpr.ToAnd() else f._off.Expr
+            let manual = if f.SelectManualExpr.any() then f.SelectManualExpr.ToAnd() else f._off.Expr
           //  let ableManual = if f.SelectAutoExpr.any()   then !!f.SelectAutoExpr.ToOr()  else f._on.Expr
             manual// <&&> ableManual 반대조건 봐야하나 ?
 
@@ -234,10 +236,13 @@ module ConvertCoreExt =
                     FlowTag.test_bit
                     FlowTag.home_bit
                 ]
-            let fm = getFM(f)
-            FlowTag.GetValues(typeof<FlowTag>).Cast<FlowTag>()
-                  .Where(fun typ -> writeAble.Contains(typ))
-                  .Select(fm.GetFlowTag)
+            //let fm = getFM(f)
+            //FlowTag.GetValues(typeof<FlowTag>).Cast<FlowTag>()
+            //      .Where(fun typ -> writeAble.Contains(typ))
+            //      .Select(fm.GetFlowTag)
+            //
+            // <ahn> 아래랑 같은 의미 아닌가요?
+            writeAble |> map (getFM(f).GetFlowTag)
 
     type CallDev with
         member c.UsingTon  = c.CallTargetJob.Funcs |> hasTime
@@ -274,7 +279,7 @@ module ConvertCoreExt =
     type Vertex with
         member r.V = r.TagManager :?> VertexManager
         member r._on  = r.Parent.GetSystem()._on
-        member r._off  = r.Parent.GetSystem()._off
+        member r._off = r.Parent.GetSystem()._off
 
 
     type TaskDev with
@@ -283,12 +288,12 @@ module ConvertCoreExt =
         member jd.RXs       = jd.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.EP)
 
         member jd.MutualResets(x:DsSystem) =
-                jd.ApiItem.System.GetMutualResetApis(jd.ApiItem)
-                    .SelectMany(fun a -> x.DeviceDefs.Where(fun w-> w.ApiItem = a))
+            jd.ApiItem.System.GetMutualResetApis(jd.ApiItem)
+                .SelectMany(fun a -> x.DeviceDefs.Where(fun w-> w.ApiItem = a))
 
     [<AutoOpen>]
     [<Extension>]
     type TagInfoType =
-        [<Extension>] static member GetTagSys  (x:DsSystem ,typ:SystemTag)   = getSM(x).GetSystemTag(typ)
-        [<Extension>] static member GetTagFlow (x:Flow     ,typ:FlowTag)     = getFM(x).GetFlowTag(typ )
-        [<Extension>] static member GetTagApi  (x:ApiItem  ,typ:ApiItemTag)  = getAM(x).GetApiTag(typ)
+        [<Extension>] static member GetTagSys  (x:DsSystem ,typ:SystemTag)  = getSM(x).GetSystemTag(typ)
+        [<Extension>] static member GetTagFlow (x:Flow     ,typ:FlowTag)    = getFM(x).GetFlowTag(typ )
+        [<Extension>] static member GetTagApi  (x:ApiItem  ,typ:ApiItemTag) = getAM(x).GetApiTag(typ)

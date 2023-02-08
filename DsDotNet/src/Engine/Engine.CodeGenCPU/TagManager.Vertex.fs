@@ -52,14 +52,14 @@ module TagManagerModule =
             member x.Storages = s
 
 
-        member x.Name   = v.QualifiedName
-        member x.Vertex = v
-        member x.Flow   = v.Parent.GetFlow()
-        member x.System = v.Parent.GetFlow().System
-        member x.Storages = s
+        member _.Name   = v.QualifiedName
+        member _.Vertex = v
+        member _.Flow   = v.Parent.GetFlow()
+        member _.System = v.Parent.GetFlow().System
+        member _.Storages = s
 
-        member x._on  = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.on)    :?> PlanVar<bool>
-        member x._off  = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.off)  :?> PlanVar<bool>
+        member _._on  = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.on)    :?> PlanVar<bool>
+        member _._off  = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.off)  :?> PlanVar<bool>
 
         ///Segment Start Tag
         member _.ST         = startTagBit
@@ -100,11 +100,12 @@ module TagManagerModule =
         ///PulseStart
         member _.PUL        = pulseBit
         ///Going Relay   //리셋 인과에 따라 필요
-        member x.GR(src:Vertex) =
+        member _.GR(src:Vertex) =
            let gr = createPlanVar s $"GR_{src.Name}" DuBOOL true v (VertexTag.goingrelay|>int):?> PlanVar<bool>
-           goingRelays.Add gr |> ignore; gr
+           goingRelays.Add gr |> ignore
+           gr
 
-        member x.CreateTag(name) = createTag name
+        member _.CreateTag(name) = createTag name
 
 
     type VertexMReal(v:Vertex) as this =

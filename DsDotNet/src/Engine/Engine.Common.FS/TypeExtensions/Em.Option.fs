@@ -40,3 +40,14 @@ type OptionExt =
 type ResultExt =
     [<Extension>] static member Bind(xr, f) = Result.bind f xr
     [<Extension>] static member Map(xr, f)  = Result.map f xr
+
+
+[<RequireQualifiedAccess>]
+module Bool =
+    /// true 일 때에만 f() 를 수행한다.
+    let iter f b = if b then f()
+
+[<Extension>] // type OptionExt =
+type BooleanExt =
+    /// true 일 때에만 f() 를 수행한다.
+    [<Extension>] static member Iter(x, f) = Bool.iter f x

@@ -104,13 +104,12 @@ module TagVariableModule =
     type ILiteralHolder =
         abstract ToTextWithoutTypeSuffix: unit -> string
 
-    type LiteralHolder<'T when 'T:equality>(literalValue:'T) =
-        member _.Value = literalValue
-        interface IExpressionizableTerminal with
-            member x.ToText() = sprintf "%A" x.Value
-        interface ILiteralHolder with
-            member x.ToTextWithoutTypeSuffix() = $"{x.Value}"
-
+    type LiteralHolder<'T when 'T:equality> = { Value: 'T }
+        with
+            interface IExpressionizableTerminal with
+                member x.ToText() = sprintf "%A" x.Value
+            interface ILiteralHolder with
+                member x.ToTextWithoutTypeSuffix() = $"{x.Value}"
 
 
 [<AutoOpen>]

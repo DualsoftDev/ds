@@ -13,25 +13,26 @@ type VertexMCoin with
         let sharedCalls = coin.GetSharedCall().Select(getVM)
         let startTags   = ([coin.ST] @ sharedCalls.STs()).ToOr()
         let forceStarts = ([coin.SF] @ sharedCalls.SFs()).ToOr()
-        let getStartPointExpr(coin:CallDev, jd:TaskDev) =
+        let getStartPointExpr(coin:CallDev, td:TaskDev) =
             match coin.Parent.GetCore() with
             | :? Real as r ->
-                if r.V.OriginInfo.Tasks.Select(fun (t,_)->t).Contains(jd)
+                if r.V.OriginInfo.Tasks.Select(fun (t,_)->t).Contains(td)
                     then call._on.Expr <&&> r.V.RO.Expr
                     else call._off.Expr
-            | _ ->       call._off.Expr
+            | _ ->
+                call._off.Expr
 
         [
-            for jd in call.CallTargetJob.DeviceDefs do
+            for td in call.CallTargetJob.DeviceDefs do
                 let sets = (dop <&&> startTags) <||>
                            (mop <&&> forceStarts) <||>
-                           (rop <&&> getStartPointExpr (call, jd))
+                           (rop <&&> getStartPointExpr (call, td))
 
-                let rsts = jd.MutualResets(coin.System)
+                let rsts = td.MutualResets(coin.System)
                              .Select(fun f -> f.ApiItem.PS)
                              .ToOrElseOff(coin.System)
 
-                yield (sets, rsts) --| (jd.ApiItem.PS, getFuncName())
+                yield (sets, rsts) --| (td.ApiItem.PS, getFuncName())
         ]
 
 
@@ -39,18 +40,18 @@ type VertexMCoin with
         let call = coin.Vertex :?> CallDev
         let rsts = coin._off.Expr
         [
-            for jd in call.CallTargetJob.DeviceDefs do
-                if jd.ApiItem.TXs.any()
-                then yield (jd.ApiItem.PS.Expr, rsts) --| (jd.ActionOut, getFuncName())
+            for td in call.CallTargetJob.DeviceDefs do
+                if td.ApiItem.TXs.any()
+                then yield (td.ApiItem.PS.Expr, rsts) --| (td.ActionOut, getFuncName())
         ]
 
     member coin.C3_CallPlanReceive(): CommentedStatement list =
         let call = coin.Vertex :?> CallDev
         let rsts = coin._off.Expr
         [
-            for jd in call.CallTargetJob.DeviceDefs do
-                let sets = jd.RXs.ToAndElseOn(coin.System)
-                yield (sets, rsts) --| (jd.ApiItem.PE, getFuncName() )
+            for td in call.CallTargetJob.DeviceDefs do
+                let sets = td.RXs.ToAndElseOn(coin.System)
+                yield (sets, rsts) --| (td.ApiItem.PE, getFuncName() )
         ]
 
     member coin.C4_CallActionIn(): CommentedStatement list =

@@ -16,7 +16,7 @@ module TagManagerModule =
     //__________________________________________________________________
     // ACTION | IN	    | API. I| -	              | API. I    |
     // ACTION | OUT	    | API. O| -	              | API. O    |
-    
+
     /// Vertex Manager : 소속되어 있는 DsBit 를 관리하는 컨테이어
     [<DebuggerDisplay("{Name}")>]
     [<AbstractClass>]
@@ -87,9 +87,9 @@ module TagManagerModule =
         member _.H          = homingBit
 
         //Monitor
-        ///Origin Monitor
+        ///OriGin Monitor
         member _.OG         =  originBit
-        ///Pause Monitor
+        ///PAuse Monitor
         member _.PA         =  pauseBit
         ///Error Tx Monitor
         member _.E1         =  errorTxBit

@@ -161,14 +161,22 @@ module ConvertCoreExt =
 //운영 모드 는 Flow 별로 제공된 모드 On/Off 상태 나타낸다.
     type Flow with
 
-        member f.rop    = getFM(f).GetFlowTag(FlowTag.ready_op    ) // ready Operation Mode
-        member f.aop    = getFM(f).GetFlowTag(FlowTag.auto_op     ) // auto operation Mode
-        member f.mop    = getFM(f).GetFlowTag(FlowTag.manual_op   ) // manual Operation Mode
-        member f.dop    = getFM(f).GetFlowTag(FlowTag.drive_op    ) // drive Operation Mode
-        member f.top    = getFM(f).GetFlowTag(FlowTag.test_op     ) //  test  Operation Mode (시운전)
-        member f.sop    = getFM(f).GetFlowTag(FlowTag.stop_op     ) // stop state
-        member f.eop    = getFM(f).GetFlowTag(FlowTag.emergency_op) // emergency State
-        member f.iop    = getFM(f).GetFlowTag(FlowTag.idle_op)      // emergency state
+        /// READY operation mode
+        member f.rop    = getFM(f).GetFlowTag(FlowTag.ready_op    )
+        /// AUTO operation mode
+        member f.aop    = getFM(f).GetFlowTag(FlowTag.auto_op     )
+        /// MANUAL operation mode
+        member f.mop    = getFM(f).GetFlowTag(FlowTag.manual_op   )
+        /// DRIVE operation mode
+        member f.dop    = getFM(f).GetFlowTag(FlowTag.drive_op    )
+        /// TEST  operation mode (시운전)
+        member f.top    = getFM(f).GetFlowTag(FlowTag.test_op     )
+        /// STOP state
+        member f.sop    = getFM(f).GetFlowTag(FlowTag.stop_op     )
+        /// EMERGENCY State
+        member f.eop    = getFM(f).GetFlowTag(FlowTag.emergency_op)
+        /// IDLE state
+        member f.iop    = getFM(f).GetFlowTag(FlowTag.idle_op)
         member f.auto   = getFM(f).GetFlowTag(FlowTag.auto_bit    )
         member f.manual = getFM(f).GetFlowTag(FlowTag.manual_bit  )
         member f.drive  = getFM(f).GetFlowTag(FlowTag.drive_bit   )

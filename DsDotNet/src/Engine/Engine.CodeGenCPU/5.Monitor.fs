@@ -16,8 +16,8 @@ type VertexManager with
         let offs   = getOriginIOs (v, InitialType.Off)
         let locks  = getNeedCheckExpression (real)
 
-        let onExpr   = ons.ToAndElseOn v.System
-        let rst     = offs.ToOrElseOff v.System
+        let onExpr = ons.ToAndElseOn v.System
+        let rst    = offs.ToOrElseOff v.System
 
         (onExpr <&&> locks, rst) --| (v.OG, getFuncName())
 

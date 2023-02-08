@@ -95,22 +95,41 @@ module MiscTestModule =
             Runtime.System <- sys
 
             let anal(v:IValue<'T>) =
-                let t = typedefof<'T>
+                let innerType = typedefof<'T>
 
-                let varType = typedefof<Variable<_>>.GetGenericTypeDefinition().MakeGenericType(t)
-                let tagType = typedefof<Tag<_>>.GetGenericTypeDefinition().MakeGenericType(t)
-                if v.GetType() = varType then
-                    tracefn $"Variable<{t.Name}>"
-                elif v.GetType() = tagType then
-                    tracefn $"Tag<{t.Name}>"
+                let varType     = typedefof<Variable<_>>     .GetGenericTypeDefinition().MakeGenericType(innerType)
+                let tagType     = typedefof<Tag<_>>          .GetGenericTypeDefinition().MakeGenericType(innerType)
+                let literalType = typedefof<LiteralHolder<_>>.GetGenericTypeDefinition().MakeGenericType(innerType)
+                let vType = v.GetType()
+                if vType = varType then
+                    $"Variable<{innerType.Name}>"
+                elif vType = tagType then
+                    $"Tag<{innerType.Name}>"
+                elif vType = literalType then
+                    $"LiteralHolder<{innerType.Name}>"
                 else
-                    tracefn $"Something Else: {v.GetType().Name}"
-                ()
+                    $"Something Else: {vType.Name}"
 
             let param = defaultStorageCreationParams(false)
             let v = new Variable<bool> {param with Name="test var"; }
-            anal(v)
+            anal(v) === "Variable<Boolean>"
 
             let t = new Tag<bool> {param with Name="test var"; }
-            anal(t)
+            anal(t) === "Tag<Boolean>"
 
+            let l = {Value=1}:LiteralHolder<int>
+            anal(l) === "LiteralHolder<Int32>"
+
+            let tvs = t :> TypedValueStorage<bool>
+            let ivb = t :> IValue<bool>
+            anal(tvs) === "Tag<Boolean>"
+            anal(ivb) === "Tag<Boolean>"
+
+            match v.GetType() with
+            | GenericType <@ typedefof<Variable<_>> @> [|t|] -> $"Variable<{t.Name}>"//addChildListUntyped(t,o)
+            | _ -> failwith "ERROR"
+            === "Variable<Boolean>"
+
+            (* IValue<'T> 를 TypedValueStorage<obj> 가 아닌, TypedValueStorage<'T> 로 변환 할 수 있나? *)
+            //let terminal = DuVariable (ivb :?> TypedValueStorage<_>)
+            ()

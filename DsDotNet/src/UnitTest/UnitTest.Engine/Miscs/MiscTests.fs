@@ -86,3 +86,31 @@ module MiscTestModule =
 
 
             [Some 1; None; Some 3] |> List.mapSome ((+) 1) === [2; 4]
+
+
+        [<Test>]
+        member __.``Generic test`` () =
+            let sys = DsSystem("testSys", "localhost")
+            Runtime.Target <- XGI
+            Runtime.System <- sys
+
+            let anal(v:IValue<'T>) =
+                let t = typedefof<'T>
+
+                let varType = typedefof<Variable<_>>.GetGenericTypeDefinition().MakeGenericType(t)
+                let tagType = typedefof<Tag<_>>.GetGenericTypeDefinition().MakeGenericType(t)
+                if v.GetType() = varType then
+                    tracefn $"Variable<{t.Name}>"
+                elif v.GetType() = tagType then
+                    tracefn $"Tag<{t.Name}>"
+                else
+                    tracefn $"Something Else: {v.GetType().Name}"
+                ()
+
+            let param = defaultStorageCreationParams(false)
+            let v = new Variable<bool> {param with Name="test var"; }
+            anal(v)
+
+            let t = new Tag<bool> {param with Name="test var"; }
+            anal(t)
+

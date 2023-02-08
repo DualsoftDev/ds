@@ -26,16 +26,14 @@ type VertexManager with
         [
             for coin in coins do
                 let coin = coin :?> VertexMCoin
-                let srcsWeek, srcsStrong  = getStartEdgeSources(real.Graph, coin.Vertex)
-
-                if srcsWeek.Any() then
-                    let sets = srcsWeek.GetCausalTags(v.System, false)
+                match getStartEdgeSources(real.Graph, coin.Vertex) with
+                | DuEssWeak ws when ws.Any() ->
+                    let sets = ws.GetCausalTags(v.System, false)
                     yield (sets, coin.CR.Expr) ==| (coin.ST, getFuncName() )
-
-                if srcsStrong.Any() then
-                    let sets = srcsStrong.GetCausalTags(v.System, false)
+                | DuEssStrong ss when ss.Any() ->
+                    let sets = ss.GetCausalTags(v.System, false)
                     yield (sets, coin.CR.Expr) --| (coin.ST, getFuncName() )
-
+                | _ -> ()
         ]
 
 

@@ -45,18 +45,26 @@ module CodeConvertUtil =
             .Where(fun (_, init) -> init = initialType)
             .Select(fun (task, _) -> task.InTag).Cast<Tag<bool>>()
 
+    /// Edge source 검색 결과 정보 : target 으로 들어오는 source vertices list 와 그것들이 약연결로 들어오는지, 강연결로 들어오는지 정보
+    type EdgeSourcesWithStrength =
+        | DuEssWeak of Vertex list
+        | DuEssStrong of Vertex list
+        | DuEssNone
+
     /// returns [week] * [strong] incoming edges
     let private getEdgeSources(graph:DsGraph, target:Vertex, bStartEdge:bool) =
-        let edges = graph.GetIncomingEdges(target)
+        let edges = graph.GetIncomingEdges(target) |> List.ofSeq
         let mask  = if bStartEdge then EdgeType.Start else EdgeType.Reset
 
-        let srcsWeek   = edges.Where(fun e -> e.EdgeType = mask )
-        let srcsStrong = edges.Where(fun e -> e.EdgeType = (mask &&& EdgeType.Strong))
+        let srcsWeek   = edges |> filter(fun e -> e.EdgeType = mask )
+        let srcsStrong = edges |> filter(fun e -> e.EdgeType = (mask &&& EdgeType.Strong))
 
-        if srcsWeek.Any() && srcsStrong.Any()
-            then failwithlog "Error Week and Strong can't connenct same node target"
+        match srcsWeek.Any(), srcsStrong.Any() with
+        | true, true -> failwithlog "Error Week and Strong can't connenct same node target"
+        | true, false -> srcsWeek |> map (fun e->e.Source) |> DuEssWeak
+        | false, true -> srcsStrong |> map (fun e->e.Source) |> DuEssStrong
+        | false, false -> DuEssNone
 
-        srcsWeek.Select(fun e->e.Source), srcsStrong.Select(fun e->e.Source)
     /// returns [week] * [strong] start incoming edges for target
     let getStartEdgeSources(graph:DsGraph, target:Vertex) = getEdgeSources (graph, target, true)
     /// returns [week] * [strong] reset incoming edges for target
@@ -102,7 +110,7 @@ module CodeConvertUtil =
             //      --|/|--| |--|/|--    --|/|--| |--|/|--
             //      --|/|--|/|--| |--    --|/|--|/|--| |--
 
-        if needChecks.Any() && sets.Any()
+        if sets.Any()
         then sets.ToAnd()
         else real._on.Expr
 

@@ -109,6 +109,7 @@ module DotNetCollectionExt =
                 xs.Add x
 
     type Dictionary<'k, 'v> with
+        /// Dictionary 에 key 가 존재하면 Some(value) 반환, 없으면 None 반환
         member xs.TryFind(key:'k) =
             if xs.ContainsKey key then
                 Some xs.[key]

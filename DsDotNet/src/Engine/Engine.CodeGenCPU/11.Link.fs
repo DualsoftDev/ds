@@ -12,17 +12,19 @@ type VertexManager with
     member v.L1_LinkStart(): CommentedStatement list =
         let v = v :?> VertexMCoin
 
-        let srcsWeek, srcsStrong  = getStartEdgeSources(v.Flow.Graph, v.Vertex)
         let rsts  = v.F.Expr
         [
-            if srcsWeek.Any() then
-                let sets = srcsWeek.GetCausalTags(v.System, true)
+            match getStartEdgeSources(v.Flow.Graph, v.Vertex) with
+            | DuEssWeak ws when ws.Any() ->
+                let sets = ws.GetCausalTags(v.System, true)
                 yield (sets, rsts) ==| (v.ST, getFuncName() )
-
-            if srcsStrong.Any() then
-                let sets = srcsStrong.GetCausalTags(v.System, true)
+            | DuEssStrong ss when ss.Any() ->
+                let sets = ss.GetCausalTags(v.System, true)
                 yield (sets, rsts) --| (v.ST, getFuncName() )
+            | _ -> ()
         ]
+
+
         //test ahn
     member v.L2_LinkReset(): CommentedStatement  =
         (v.PA.Expr, v._off.Expr) --| (v.PA, getFuncName() )

@@ -9,33 +9,30 @@ open Engine.Common.FS
 type VertexManager with
 
     member v.F1_RootStart(): CommentedStatement list =
-        let srcsWeek, srcsStrong  = getStartEdgeSources(v.Flow.Graph, v.Vertex)
         let rsts  = v.F.Expr
-        [
-            if srcsWeek.Any() then
-                let sets = srcsWeek.GetCausalTags(v.System, true)
-                yield (sets, rsts) ==| (v.ST, getFuncName())
 
-            if srcsStrong.Any() then
-                let sets = srcsStrong.GetCausalTags(v.System, true)
-                yield (sets, rsts) --| (v.ST, getFuncName())
-        ]
+        match getStartEdgeSources(v.Flow.Graph, v.Vertex) with
+        | DuEssWeak ws when ws.Any() ->
+            let sets = ws.GetCausalTags(v.System, true)
+            [ (sets, rsts) ==| (v.ST, getFuncName()) ]
+        | DuEssStrong ss when ss.Any() ->
+            let sets = ss.GetCausalTags(v.System, true)
+            [ (sets, rsts) --| (v.ST, getFuncName()) ]
+        | _ -> []
+
 
     member v.F2_RootReset() : CommentedStatement list =
-        let srcsWeek, _srcsStrong  = getResetEdgeSources(v.Flow.Graph, v.Vertex)  //test ahn  srcsStrong 리셋처리
-        let srcs = srcsWeek
-                    .Select(getVM)
-                    .Select(fun s -> s, v.GR(s.Vertex)).ToList()
-
         let real = v.GetPureReal()
-        if srcs.Any() then
+        match getResetEdgeSources(v.Flow.Graph, v.Vertex) with  //test ahn  srcsStrong 리셋처리
+        | DuEssWeak ws when ws.Any() ->
+            let srcs = ws.Select(getVM).Select(fun s -> s, v.GR(s.Vertex))
             let sets  = srcs.Select(fun (_src, gr) -> gr).ToAnd()
             let rsts  = (!!)real.V.EP.Expr
             //going relay rungs
             srcs.Select(fun (src, gr) -> (src.G.Expr, real.V.H.Expr) ==| (gr, getFuncName()))
             |> Seq.append [(sets, rsts) ==| (v.RT, getFuncName())] //reset tag
             |> Seq.toList
-        else []
+        | _ -> []
 
 
 
@@ -60,18 +57,19 @@ type VertexManager with
 
     //option Spec 확정 필요
      member v.F0_RootStartRealOptionPulse(): CommentedStatement list =
-        let srcsWeek, srcsStrong  = getStartEdgeSources(v.Flow.Graph, v.Vertex)
         let rsts  = v.F.Expr
         [
-            if srcsWeek.Any() then
-                let sets = srcsWeek.GetCausalTags(v.System, true)
+            match getStartEdgeSources(v.Flow.Graph, v.Vertex) with
+            | DuEssWeak ws when ws.Any() ->
+                let sets = ws.GetCausalTags(v.System, true)
                         //root 시작조건 이벤트 Pulse 처리
                 yield (sets, rsts) ==| (v.PUL, getFuncName() )
                 yield (v.PUL.Expr, v.H.Expr) ==| (v.ST, getFuncName())
-
-            if srcsStrong.Any() then
-                let sets = srcsStrong.GetCausalTags(v.System, true)
+            | DuEssStrong ss when ss.Any() ->
+                let sets = ss.GetCausalTags(v.System, true)
                         //root 시작조건 이벤트 Pulse 처리
                 yield (sets, rsts) --| (v.PUL, getFuncName())
                 yield (v.PUL.Expr, v.H.Expr) --| (v.ST, getFuncName())
+            | _ ->
+                ()
         ]

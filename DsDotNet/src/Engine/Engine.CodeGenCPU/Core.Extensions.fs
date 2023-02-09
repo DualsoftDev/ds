@@ -236,12 +236,6 @@ module ConvertCoreExt =
                     FlowTag.test_bit
                     FlowTag.home_bit
                 ]
-            //let fm = getFM(f)
-            //FlowTag.GetValues(typeof<FlowTag>).Cast<FlowTag>()
-            //      .Where(fun typ -> writeAble.Contains(typ))
-            //      .Select(fm.GetFlowTag)
-            //
-            // <ahn> 아래랑 같은 의미 아닌가요?
             writeAble |> map (getFM(f).GetFlowTag)
 
     type CallDev with
@@ -283,12 +277,12 @@ module ConvertCoreExt =
 
 
     type TaskDev with
-        member jd.ActionIN  = jd.InTag  :?> Tag<bool>
-        member jd.ActionOut = jd.OutTag :?> Tag<bool>
-        member jd.RXs       = jd.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.EP)
+        member td.ActionIN  = td.InTag  :?> Tag<bool>
+        member td.ActionOut = td.OutTag :?> Tag<bool>
+        member td.RXs       = td.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.EP)
 
-        member jd.MutualResets(x:DsSystem) =
-            jd.ApiItem.System.GetMutualResetApis(jd.ApiItem)
+        member td.MutualResets(x:DsSystem) =
+            td.ApiItem.System.GetMutualResetApis(td.ApiItem)
                 .SelectMany(fun a -> x.DeviceDefs.Where(fun w-> w.ApiItem = a))
 
     [<AutoOpen>]

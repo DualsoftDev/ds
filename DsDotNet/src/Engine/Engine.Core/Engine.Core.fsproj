@@ -14,6 +14,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Include="Test.fsx" />
 		<Compile Include="Constants.fs" />
 		<Compile Include="Interface.fs" />
 		<Compile Include="DsType.fs" />
@@ -49,6 +50,8 @@
 		<Content Include="ProgramCodeSyntax.txt" />
 		<!--<Compile Include="Program.fs" />-->
 	</ItemGroup>
+
+	<ItemGroup />
 
 	<ItemGroup>
 		<ProjectReference Include="..\Engine.Common.FS\Engine.Common.FS.fsproj" />

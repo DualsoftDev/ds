@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+	<TargetFramework>net48</TargetFramework>
+	<LangVersion>7.0</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="BridgeCommon.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Server.Common.Kafka\Server.Common.Kafka.csproj" />
+    <ProjectReference Include="..\Server.Common.NMC\Server.Common.NMC.csproj" />
+    <ProjectReference Include="..\Server.Common.NMF\Server.Common.NMF.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="IOApi_CLRLib">
+      <HintPath>..\..\..\exLib\IOApi_CLRLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\..\exLib\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="WMX3Api_CLRLib">
+      <HintPath>..\..\..\exLib\WMX3Api_CLRLib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy $(TargetDir)..\..\..\..\..\..\exLib\NMC2.dll $(TargetDir)\NMC2.dll&#xD;&#xA;copy $(TargetDir)..\..\..\..\..\..\exLib\NMF.dll $(TargetDir)\NMF.dll&#xD;&#xA;copy $(TargetDir)..\..\..\..\..\..\exLib\IMDll.dll $(TargetDir)\IMDll.dll&#xD;&#xA;copy $(TargetDir)..\..\..\config.json $(TargetDir)\config.json" />
+  </Target>
+
+</Project>

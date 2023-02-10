@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="IOApi_CLRLib">
+      <HintPath>..\..\..\..\..\..\..\WMX3\Lib\IOApi_CLRLib.dll</HintPath>
+    </Reference>
+    <Reference Include="WMX3Api_CLRLib">
+      <HintPath>..\..\..\..\..\..\..\WMX3\Lib\WMX3Api_CLRLib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

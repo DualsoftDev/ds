@@ -292,7 +292,7 @@ module BridgeCommon =
                     ("OUTPUT.\"+\"", 21, 19);
                     ("OUTPUT.\"-\"", 20, 18);
                     
-                    ("CvForward",    -1, 23);
+                    ("CV.fwd",    -1, 20);
                 ]
 
             for data in ioList do

@@ -61,6 +61,7 @@
 		<Compile Include="Module\QualifiedAccess\Bytes.fs" />
 		<Compile Include="Module\QualifiedAccess\List.fs" />
 		<Compile Include="Module\QualifiedAccess\DiscriminatedUnions.fs" />
+		<Compile Include="Module\QualifiedAccess\Generic.fs" />
 		<Compile Include="Module\QualifiedAccess\ResizeArray.fs" />
 		<Compile Include="Module\QualifiedAccess\Map.fs" />
 		<Compile Include="Module\QualifiedAccess\Nullable.fs" />

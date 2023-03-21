@@ -122,8 +122,9 @@ module rec TypeConvertorModule =
         | _ -> ()
 
         let createParam () = {defaultStorageCreationParams(unbox initValue) with Name=name; Comment=Some comment; }
-        let typeName = (unbox initValue).GetType().Name
-        match typeName with
+        let typ = initValue.GetType()
+
+        match typ.Name with
         | BOOL   -> XgiVar<bool>  (createParam())
         | CHAR   -> XgiVar<char>  (createParam())
         | FLOAT32-> XgiVar<single>(createParam())

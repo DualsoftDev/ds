@@ -97,22 +97,22 @@ module Functions =
     // http://stackoverflow.com/questions/18928268/f-numeric-type-casting
     /// General type casting
     /// e.g
-    ///     cast<int> (box 1.1) -- converts object(->float) to int
-    ///     cast<int> 1.23 -- converts float to int
-    ///     cast<int> "123" -- converts string to int
-    ///     cast<int> "1.23" -- crash!!!
-    ///     cast<float> "1.23" |> cast<int> -- converts string -> float -> int
-    let cast<'a> input = System.Convert.ChangeType(input, typeof<'a>) :?> 'a
+    ///     convert<int> (box 1.1) -- converts object(->float) to int
+    ///     convert<int> 1.23 -- converts float to int
+    ///     convert<int> "123" -- converts string to int
+    ///     convert<int> "1.23" -- crash!!!
+    ///     convert<float> "1.23" |> cast<int> -- converts string -> float -> int
+    let convert<'a> input = System.Convert.ChangeType(input, typeof<'a>) :?> 'a
 
     // http://stackoverflow.com/questions/18928268/f-numeric-type-casting
     /// type casting
     /// e.g
-    ///     tryCast<int> (box 1.1) -- Some(1)
-    ///     tryCast<int> 1.23 -- Some(1)
-    ///     tryCast<int> "123" -- Some(123)
-    ///     tryCast<int> "1.23" -- None
-    let tryCast<'a> input =
-        try Some(cast<'a> input)
+    ///     tryConvert<int> (box 1.1) -- Some(1)
+    ///     tryConvert<int> 1.23 -- Some(1)
+    ///     tryConvert<int> "123" -- Some(123)
+    ///     tryConvert<int> "1.23" -- None
+    let tryConvert<'a> input =
+        try Some(convert<'a> input)
         with _ -> None
 
     /// Calls f and returns the result in Ok if it did not throw; otherwise catches the exception and returns it in an Error.

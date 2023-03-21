@@ -64,7 +64,7 @@ module Option =
         if a = null then
             None
         else
-            tryCast<'a> a
+            tryConvert<'a> a
 
     // https://stackoverflow.com/questions/24841185/how-to-deal-with-option-values-generically-in-f
     let isCompatible (x:obj) : isOption:bool * description:string =

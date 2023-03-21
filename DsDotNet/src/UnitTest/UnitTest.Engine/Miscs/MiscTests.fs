@@ -86,3 +86,50 @@ module MiscTestModule =
 
 
             [Some 1; None; Some 3] |> List.mapSome ((+) 1) === [2; 4]
+
+
+        [<Test>]
+        member __.``Generic test`` () =
+            let sys = DsSystem("testSys", "localhost")
+            Runtime.Target <- XGI
+            Runtime.System <- sys
+
+            let anal(v:IValue<'T>) =
+                let innerType = typedefof<'T>
+
+                let varType     = typedefof<Variable<_>>     .GetGenericTypeDefinition().MakeGenericType(innerType)
+                let tagType     = typedefof<Tag<_>>          .GetGenericTypeDefinition().MakeGenericType(innerType)
+                let literalType = typedefof<LiteralHolder<_>>.GetGenericTypeDefinition().MakeGenericType(innerType)
+                let vType = v.GetType()
+                if vType = varType then
+                    $"Variable<{innerType.Name}>"
+                elif vType = tagType then
+                    $"Tag<{innerType.Name}>"
+                elif vType = literalType then
+                    $"LiteralHolder<{innerType.Name}>"
+                else
+                    $"Something Else: {vType.Name}"
+
+            let param = defaultStorageCreationParams(false)
+            let v = new Variable<bool> {param with Name="test var"; }
+            anal(v) === "Variable<Boolean>"
+
+            let t = new Tag<bool> {param with Name="test var"; }
+            anal(t) === "Tag<Boolean>"
+
+            let l = {Value=1}:LiteralHolder<int>
+            anal(l) === "LiteralHolder<Int32>"
+
+            let tvs = t :> TypedValueStorage<bool>
+            let ivb = t :> IValue<bool>
+            anal(tvs) === "Tag<Boolean>"
+            anal(ivb) === "Tag<Boolean>"
+
+            match v.GetType() with
+            | GenericType <@ typedefof<Variable<_>> @> [|t|] -> $"Variable<{t.Name}>"//addChildListUntyped(t,o)
+            | _ -> failwith "ERROR"
+            === "Variable<Boolean>"
+
+            (* IValue<'T> 를 TypedValueStorage<obj> 가 아닌, TypedValueStorage<'T> 로 변환 할 수 있나? *)
+            //let terminal = DuVariable (ivb :?> TypedValueStorage<_>)
+            ()

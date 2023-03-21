@@ -167,16 +167,6 @@ module internal rec Command =
         member x.SizeString = systemTypeToXgiTypeName x
 
 
-    let private toTerminalText (exp:IExpression) =
-        match exp.Terminal with
-        | Some t ->
-            match t.Variable, t.Literal with
-            | Some storage, None -> storage.Name
-            | None, Some (:? ILiteralHolder as literal) -> literal.ToTextWithoutTypeSuffix()
-            | None, Some literal -> literal.ToText()
-            | _ -> failwithlog "ERROR"
-        | _ -> failwithlog "ERROR"
-
     let drawPredicate (x, y) (predicate:Predicate) : BlockSummarizedXmlElements =
         match predicate with
         | Compare (name, output, args) ->

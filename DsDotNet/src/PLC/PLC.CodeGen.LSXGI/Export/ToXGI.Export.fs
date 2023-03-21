@@ -286,7 +286,7 @@ module XgiExportModule =
                         |> filter notNullAny
                         |> map standardizeAddress
                         |> filter (function
-                            | RegexPattern "^%[IQ]" _ -> true
+                            | RegexPattern @"^%[IQ]" _ -> true
                             | _ -> false)
                     let existingGlobalAddresses =
                         existingGlobalSymbols |> map address |> standardize

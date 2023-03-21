@@ -118,7 +118,7 @@ module rec TypeConvertorModule =
         | _ -> failwith $"Invalid XGI variable name {name}.  Use longer name"
 
         match name with
-        | RegexPattern "ld(\d)+" _ -> failwith $"Invalid XGI variable name {name}."
+        | RegexPattern @"ld(\d)+" _ -> failwith $"Invalid XGI variable name {name}."
         | _ -> ()
 
         let createParam () = {defaultStorageCreationParams(unbox initValue) with Name=name; Comment=Some comment; }

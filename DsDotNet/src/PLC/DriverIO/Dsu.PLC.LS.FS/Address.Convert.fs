@@ -238,7 +238,7 @@ type LsTagAnalysis = {
 let (|LsTagPatternXgi|_|) tag =
     match tag with
     // XGI IEC 61131 : bit
-    | RegexPattern "%([MLKFWR])X(\d+)$"
+    | RegexPattern @"%([MLKFWR])X(\d+)$"
         [DevicePattern device; Int32Pattern bitOffset] ->
         Some {
             Tag       = tag
@@ -246,7 +246,7 @@ let (|LsTagPatternXgi|_|) tag =
             DataType  = DataType.Bit
             BitOffset = bitOffset }
 
-    | RegexPattern @"%([IQ])X(\d+).(\d+).(\d+)$"
+    | RegexPattern @"%([IQ])X(\d+)\.(\d+)\.(\d+)$"
         [DevicePattern device; Int32Pattern file; Int32Pattern element; Int32Pattern bit] ->
         Some {
             Tag       = tag
@@ -254,7 +254,7 @@ let (|LsTagPatternXgi|_|) tag =
             DataType  = DataType.Bit
             BitOffset = element * 64 + bit }
     // U 영역은 특수 처리 (서보 및 드라이버)
-    | RegexPattern @"%(U)([XBWDL])(\d+).(\d+).(\d+)$"
+    | RegexPattern @"%(U)([XBWDL])(\d+)\.(\d+)\.(\d+)$"
         [DevicePattern device; DataTypePattern dataType; Int32Pattern file; Int32Pattern element; Int32Pattern bit] ->
         let byteOffset = element * dataType.GetByteLength()
         let fileOffset = file * 16 * 512  //max %U file.element(16).bit(512)
@@ -264,7 +264,7 @@ let (|LsTagPatternXgi|_|) tag =
             DataType  = dataType
             BitOffset = fileOffset + byteOffset + bit }
     // XGI IEC 61131 : byte / word / dword / lword
-    | RegexPattern "%([IQMLKFWUR])([BWDL])(\d+)$"
+    | RegexPattern @"%([IQMLKFWUR])([BWDL])(\d+)$"
         [DevicePattern device; DataTypePattern dataType; Int32Pattern offset;] ->
         let byteOffset = offset * dataType.GetByteLength()
         Some {
@@ -272,7 +272,7 @@ let (|LsTagPatternXgi|_|) tag =
             Device    = device
             DataType  = dataType
             BitOffset = byteOffset * 8}
-    | RegexPattern "%([IQMLKFWUR])([BWDL])(\d+).(\d+)$"
+    | RegexPattern @"%([IQMLKFWUR])([BWDL])(\d+)\.(\d+)$"
         [DevicePattern device; DataTypePattern dataType; Int32Pattern offset; Int32Pattern bit;] ->
             let byteOffset = offset * dataType.GetByteLength()
             Some {
@@ -296,49 +296,49 @@ let (|LsTagPatternXgk|_|) tag =
         BitOffset = wordOffset * 16}
     match tag with
     //word + bit 타입은 word 가 4자리 고정
-    | RegexPattern "([PMKF])(\d\d\d\d)([\da-fA-F])"
+    | RegexPattern @"([PMKF])(\d\d\d\d)([\da-fA-F])"
         [DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
         Some (getBitTag device wordOffset bitOffset)
-    | RegexPattern "([PMKF])(\d\d\d\d)"
+    | RegexPattern @"([PMKF])(\d\d\d\d)"
         [DevicePattern device; Int32Pattern wordOffset;] ->
         Some (getWordTag device wordOffset)
 
     //L타입은 word + bit 타입은 word 가 4자리 고정
-    | RegexPattern "(L)(\d\d\d\d\d)([\da-fA-F])"
+    | RegexPattern @"(L)(\d\d\d\d\d)([\da-fA-F])"
         [DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
         Some (getBitTag device wordOffset bitOffset)
-    | RegexPattern "(L)(\d\d\d\d\d)"
+    | RegexPattern @"(L)(\d\d\d\d\d)"
         [DevicePattern device; Int32Pattern wordOffset;] ->
         Some (getWordTag device wordOffset)
 
     //ZR 타입은 word  타입
-    | RegexPattern "(ZR)(\d+)$"
+    | RegexPattern @"(ZR)(\d+)$"
         [DevicePattern device;   Int32Pattern wordOffset;] ->
         Some (getWordTag DeviceType.R wordOffset)
     //R or D 타입은 word 타입
-    | RegexPattern "([RDTCZN])(\d+)$"
+    | RegexPattern @"([RDTCZN])(\d+)$"
         [DevicePattern device;  Int32Pattern wordOffset;] ->
         Some (getWordTag device wordOffset)
     // word.bit 타입
-    | RegexPattern "([RD])(\d+).([\da-fA-F])"
+    | RegexPattern @"([RD])(\d+)\.([\da-fA-F])"
         [DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
         Some (getBitTag device wordOffset bitOffset)
 
     //S타입 word.bit
-    | RegexPattern "(S)(\d+).(\d+)$"  //마지막 비트 단위가 100인 특수 디바이스
+    | RegexPattern @"(S)(\d+)\.(\d+)$"  //마지막 비트 단위가 100인 특수 디바이스
         [DevicePattern device;  Int32Pattern wordOffset; Int32Pattern bitOffset] ->
         Some (getBitTag device 0 (wordOffset*100+bitOffset))
     //U타입 word
-    | RegexPattern "(U)(\d+).(\d+)$"
+    | RegexPattern @"(U)(\d+)\.(\d+)$"
         [DevicePattern device;  Int32Pattern wordOffsetA; Int32Pattern wordOffsetB;] ->
         Some (getWordTag device (wordOffsetA*32+wordOffsetB))
     //U타입 word.bit 타입
-    | RegexPattern "(U)(\d+).(\d+).([\da-fA-F])$"
+    | RegexPattern @"(U)(\d+)\.(\d+)\.([\da-fA-F])$"
         [DevicePattern device; Int32Pattern wordOffsetA;Int32Pattern wordOffsetB; HexPattern bitOffset] ->
         Some (getBitTag device 0 (wordOffsetA*16*32 + wordOffsetB*16 + bitOffset))
 
     // 수집 전용 타입
-    | RegexPattern "%([PMLKFWURDTCZN])([BWDL])(\d+)$"
+    | RegexPattern @"%([PMLKFWURDTCZN])([BWDL])(\d+)$"
         [DevicePattern device; DataTypePattern dataType; Int32Pattern offset;] ->
             let byteOffset = offset * dataType.GetByteLength()
             Some {
@@ -347,7 +347,7 @@ let (|LsTagPatternXgk|_|) tag =
                 DataType  = dataType
                 BitOffset = byteOffset * 8}
     //ZR은 R영역으로 수집한다.
-    | RegexPattern "%(ZR)([BWDL])(\d+)$"
+    | RegexPattern @"%(ZR)([BWDL])(\d+)$"
         [DevicePattern device; DataTypePattern dataType; Int32Pattern offset;] ->
             let byteOffset = offset * dataType.GetByteLength()
             Some {
@@ -370,19 +370,19 @@ let tryParseTag (cpu:CpuType) tag =
 
 //let tryParseIECTag (tag) =
 //    match tag with
-//    | RegexPattern "([PMLKF])(\d\d\d\d)([\da-fA-F])"
+//    | RegexPattern @"([PMLKF])(\d\d\d\d)([\da-fA-F])"
 //        [DevicePattern device; Int32Pattern offset; HexPattern bitOffset] ->
 //        Some (sprintf "%%%sX%d" (device.ToString()) (offset*16 + bitOffset)), Some(DataType.Bit)
-//    | RegexPattern "([PMLKF])(\d+)$"
+//    | RegexPattern @"([PMLKF])(\d+)$"
 //        [DevicePattern device; Int32Pattern offset;] ->
 //        if(offset > 9999)
 //        then  Some (sprintf "%%%sX%d" (device.ToString()) ((offset/10*16)+(offset%16))), Some(DataType.Bit)
 //        else  Some (sprintf "%%%sW%d" (device.ToString()) offset), Some(DataType.Word)
 
-//    | RegexPattern "([RD])(\d+)$"
+//    | RegexPattern @"([RD])(\d+)$"
 //        [DevicePattern device;  Int32Pattern offset] ->
 //        Some (sprintf "%%%sW%d" (device.ToString()) offset), Some(DataType.Word)
-//    | RegexPattern "([RD])(\d+).([\da-fA-F])"
+//    | RegexPattern @"([RD])(\d+)\.([\da-fA-F])"
 //        [DevicePattern device;  Int32Pattern offset; HexPattern bitOffset] ->
 //        Some (sprintf "%%%sW%d.%d" (device.ToString()) offset bitOffset), Some(DataType.Bit)
 //    | _ ->

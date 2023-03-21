@@ -11,9 +11,9 @@ module XgiPrologModule =
 
     let validateVariableName (name:string) =
         match name.ToUpper() with
-        | RegexPattern "^([NMR][XBWDL]?)(\d+)$" [_reserved; _num] ->
+        | RegexPattern @"^([NMR][XBWDL]?)(\d+)$" [_reserved; _num] ->
             Error $"'{name}' is not valid symbol name.  (Can't use direct variable name)"
-        | RegexPattern "([\s]+)" [_ws] ->
+        | RegexPattern @"([\s]+)" [_ws] ->
             Error $"'{name}' contains white space char"
         | _ ->
             Ok true
@@ -24,9 +24,14 @@ module XgiPrologModule =
         else
             match address.ToUpper() with
             (* matches %I3, %I3.2, %I3.2.1, %IX3, %IX3.2, %IX3.2.1, ... *)
-            | RegexPattern "^%([IQMR][XBWDL]?)(\d+)$"  _
-            |   RegexPattern "^%([IQ][XBWDL]?)(\d+).(\d+)$"  _
-            |   RegexPattern "^%([IQ][XBWDL]?)(\d+).(\d+).(\d+)$"  _ ->
+            | RegexPattern @"^%([IQMR][XBWDL]?)(\d+)$"  _
+            |   RegexPattern @"^%([IQ][XBWDL]?)(\d+)\.(\d+)$"  _
+            |   RegexPattern @"^%([IQ][XBWDL]?)(\d+)\.(\d+)\.(\d+)$" _ -> Ok true
+            |   RegexPattern @"^%M([BWDL])(\d+)\.(\d+)$" [size; Int32Pattern n1; Int32Pattern n2; ] when
+                    (size="B" && 0 <= n2 && n2 < 8 )
+                    || (size="W" && 0 <= n2 && n2 < 16 )
+                    || (size="D" && 0 <= n2 && n2 < 32 )
+                    || (size="L" && 0 <= n2 && n2 < 64 ) ->
                   Ok true
             | _ -> Error $"Invalid address: '{address}'"
 

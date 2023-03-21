@@ -151,8 +151,8 @@ module IECAddressModule =
     let standardizeAddress (address:string) =
         let addr = address.ToUpper()
         match addr with
-        | RegexPattern "^%([IQMLKFWUR])(\d+)$" [m; _]
-        | RegexPattern "^%([IQMLKFWUR])(\d+.\d+)$" [m; _]
-        | RegexPattern "^%([IQMLKFWUR])(\d+.\d+.\d+)$" [m; _] -> Regex.Replace(addr, m, m+"X")
+        | RegexPattern @"^%([IQMLKFWUR])(\d+)$" [m; _]
+        | RegexPattern @"^%([IQMLKFWUR])(\d+\.\d+)$" [m; _]
+        | RegexPattern @"^%([IQMLKFWUR])(\d+\.\d+\.\d+)$" [m; _] -> Regex.Replace(addr, m, m+"X")
         | _ -> addr
 

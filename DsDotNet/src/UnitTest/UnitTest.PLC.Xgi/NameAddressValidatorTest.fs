@@ -33,12 +33,14 @@ type NameAddressValidatorTest() =
             "%I0"; "%i0"; "%IX0"; "%ix0"
             "%IX0.1"; "%IX9.1"; "%IX1.1.1"; "%I0.1.2"
             "%M0"; "%m0"; "%MX0"; "%mx0"; "%MX1"
+            "%MW2.1"
         ]
         for addr in validAddresses do
             validateAddress addr |> Result.isOk === true
 
         let invalidAddresses = [
-            "%MX0.1"; "%MX9.1"; "%MX1.1.1"; "%M0.1.2"       // M 영역은 '.' 을 가지지 않는다.
+            "%IX0A1"; "%MX0.1"; "%MX9.1"; "%MX1.1.1"; "%M0.1.2"       // MX 영역은 '.' 을 가지지 않는다.
+            "%MB1.9"; "%MW1.17"                             // Byte, Word 등의 영역 침범
             "%Y0"; "%y0";                                   // 허용되지 않는 영역
             "M0"; "MX0"; "I0"; "IX0"; "Q0"; "QX0";          // % 누락
             "x%MX0"                                         // % 로 시작하지 않음

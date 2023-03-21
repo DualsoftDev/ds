@@ -400,9 +400,9 @@ module internal FB =
             let details = getFunctionDeails functionName
             for d in details do
                 match d with
-                | RegexPattern "VAR_IN: ([^,]+), ([^,]+)" [name; hex] ->
+                | RegexPattern @"VAR_IN: ([^,]+), ([^,]+)" [name; hex] ->
                     { IsInput=true; Name=name; CheckType=decodeVarType hex }
-                | RegexPattern "VAR_OUT: ([^,]+), ([^,]+)" [name; hex] ->
+                | RegexPattern @"VAR_OUT: ([^,]+), ([^,]+)" [name; hex] ->
                     { IsInput=false; Name=name; CheckType=decodeVarType hex }
                 | _ -> ()
         |]

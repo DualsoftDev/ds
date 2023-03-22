@@ -1,4 +1,4 @@
-﻿module PacketDebug
+module PacketDebug
 
 open PacketImpl
 open Engine.Common.FS
@@ -136,4 +136,3 @@ let printStatusData (pk:byte []) =
 
     printStatusDataImpl pk.[32..] p
 
-    

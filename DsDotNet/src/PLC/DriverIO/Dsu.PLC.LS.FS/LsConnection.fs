@@ -8,15 +8,12 @@ open PacketImpl
 open AddressConvert
 open Cluster
 open System.Diagnostics
-open System
 
 
 /// LS 산전 PLC connection parameters
 // Tcp port = 2004, Udp port = 2005
-type LsConnectionParameters(ip, ?port, ?protocol, ?timeout) =
+type LsConnectionParameters(ip, ?port, ?protocol) =
     inherit ConnectionParametersEthernet(ip, port |? 2004us, protocol |? TransportProtocol.Tcp)
-    do
-        base.Timeout <- TimeSpan.FromMilliseconds(timeout |? 2000.0)
 
 /// LS 산전 PLC CPU
 type LsCpu(cpu, running) =
@@ -38,7 +35,7 @@ type LsTag internal(conn:ConnectionBase, name:string, cpu:CpuType) as this =
         this.Name <- name
         base.Type <- parsed.DataType.ToTagType()
 
-        
+
         let tName = conn.GetType().Name
         assert(tName = "LsConnection" || tName = "LsSwConnection" || tName = "LsXg5000Connection" || tName = "LsXg5000COMConnection")
 
@@ -68,38 +65,16 @@ and LsConnection(parameters:LsConnectionParameters) as this =
 
     let mutable conn:TcpClient = null
     let mutable cpu = CpuType.Unknown
-    let mutable connSuccess = false;
 
-
-    /// 초기 연결 타임아웃 체크 
-    let timeoutCheck (asyncresult:System.IAsyncResult) =
-        connSuccess <- false;
-        let tcpclient = asyncresult.AsyncState :?> TcpClient;
-
-        if ((tcpclient.Client <> null) && (tcpclient.Client.Connected))
-        then 
-            tcpclient.EndConnect(asyncresult);
-            connSuccess <- true;
-        else
-            connSuccess <- false;
-        
     /// connection 생성
     let createConnection() =
         dispose conn
-        conn <- new TcpClient()
-        let beginConnect = conn.BeginConnect(parameters.Ip, (parameters.Port|> int), System.AsyncCallback(timeoutCheck), conn)
-        beginConnect.AsyncWaitHandle.WaitOne(parameters.Timeout, false) |> ignore
-        System.Threading.Thread.Sleep 200
-        if(connSuccess) 
-            then
-                conn <- new TcpClient(parameters.Ip, parameters.Port |> int)
-            else 
-                failwithlogf "Ip[%s] Port[%d] 연결 확인이 필요 합니다."  parameters.Ip (parameters.Port |>int)
+        conn <- new TcpClient(parameters.Ip, parameters.Port |> int)
 
     /// server 에 의해 connection 이 끊긴 경우, 확인 후 재접속
     let reconnectOnDemand() =
-        if (conn = null || conn.Client = null || not <| conn.Client.IsConnected()) then
-            logDebug "Reconnecting to %s:%d" parameters.Ip parameters.Port 
+        if (conn = null || not <| conn.Client.IsConnected()) then
+            logDebug "Reconnecting to %s:%d" parameters.Ip parameters.Port
             System.Threading.Thread.Sleep 1000
             createConnection()
 
@@ -113,7 +88,7 @@ and LsConnection(parameters:LsConnectionParameters) as this =
 
     /// CPU type 정보를 얻기 위해서 모든 PLC 기종에 존재하는 sample tag 를 전송하고 header 를 얻는다.
     let getPacketHeader() =
-        let dummyCpu = CpuType.Xgi
+        let dummyCpu = CpuType.Xgk
         createRandomReadRequestPacket dummyCpu [|"%MX00"|]    // 보낼 packet 및 response packet 의 length 를 구함
         ||> sendPacketAndGetResponse                    // packet  전송하고, (해당 길이에 맞는지 check 해서) response packet 구함
         |> verifyReponseHeader None
@@ -200,7 +175,7 @@ and LsConnection(parameters:LsConnectionParameters) as this =
     let channelize (lsTags:LsTag []) =
         let tags = lsTags |> map name
         let tagsDic = lsTags |> Array.map(fun t -> (t.Name, t)) |> Tuple.toDictionary
-            
+
         [
             for (channelTags, reader) in planReadTags  readRandomTagsWithNames readBlock cpu tags do
                 let channelLsTags =
@@ -300,7 +275,7 @@ and LsConnection(parameters:LsConnectionParameters) as this =
         |> Array.ofSeq
         |> channelize
         |> Seq.cast<ChannelRequestExecutor>
-        
+
 
 and LsChannelRequestExecutor(conn, tags, reader:CachedTagsReader) =
     inherit ChannelRequestExecutor(conn :> ConnectionBase, tags |> Seq.cast<TagBase>)
@@ -312,5 +287,5 @@ and LsChannelRequestExecutor(conn, tags, reader:CachedTagsReader) =
             let lsTag = tagsDic.[tag]
             let v = lsTag.Anal.DataType.BoxUI8(value)
             lsTag.Value <- v   /// uint64 를 type 에 맞게 casting 해서 넣어 주어야 함
-            
+
         true

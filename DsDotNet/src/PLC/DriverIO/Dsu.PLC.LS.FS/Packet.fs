@@ -170,8 +170,8 @@ let verifyReponseHeader (cpu:CpuType option) (buffer:byte []) =
 
     assert (buffer.[14..15] = defaultInvokeId) // Invoke id
 
-    //logDebug "BlockLength=%d, ModulePosition=%d" blockLength modulePosition
-    //logDebug "Bcc=%d, CheckSum=%d" bcc checkSum
+    logDebug "BlockLength=%d, ModulePosition=%d" blockLength modulePosition
+    logDebug "Bcc=%d, CheckSum=%d" bcc checkSum
     assert(bcc = checkSum)
 
     {
@@ -442,7 +442,7 @@ module RandomReadWrite =
                 |]
 
         let values = readTag numTags dataBlock
-        //logDebug "Values are %A (%s)" values (values |> Array.map (sprintf "0x%02x") |> String.concat(" "))
+        logDebug "Values are %A (%s)" values (values |> Array.map (sprintf "0x%02x") |> String.concat(" "))
 
         (tags, values) ||> Array.zip
 
@@ -483,12 +483,12 @@ module RandomReadWrite =
             | :? SocketException as sckEx ->
                 rawSendPacketAndGetResponse streamer packet length
             | _ ->
-                failwithlogf "%s" exn.Message
+                failwithlogf "Unknown exception: %s" exn.Message
 
     /// 복수개의 tags(최대 16개까지) 들을 읽는다.
     let internal rawReadRandomTagsWithNames stream cpu (tags:string []) =
         assert(tags.Length <= 16)
-        //logDebug "=== Random read: count=%d, tags=%A" tags.Length tags
+        logDebug "=== Random read: count=%d, tags=%A" tags.Length tags
 
         createRandomReadRequestPacket cpu tags   // 보낼 packet 및 response packet 의 length 를 구함
         ||> rawSendPacketAndGetResponse stream   // packet  전송하고, (해당 길이에 맞는지 check 해서) response packet 구함

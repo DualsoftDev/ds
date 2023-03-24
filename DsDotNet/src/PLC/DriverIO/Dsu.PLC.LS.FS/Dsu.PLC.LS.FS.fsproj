@@ -12,6 +12,7 @@
     <Content Include="Documents\LS protocol.txt" />
     <Content Include="Documents\ToDo.txt" />
     <Compile Include="Address.Convert.fs" />
+    <None Include="Address.Convert.fsx" />
     <Compile Include="Cluster.fs" />
     <Compile Include="Packet.fs" />
     <Compile Include="Packet.Debug.fs" />

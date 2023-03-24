@@ -25,15 +25,15 @@ module XgCOMFixtures =
         member val Factory:CommObjectFactory = null with get, set
         [<SetUp>]
         member x.Setup () =
-            //x.Factory <-
-            //    //let t = Type.GetTypeFromProgID("XGCommLib.CommObjectFactory")
-            //    let t = Type.GetTypeFromCLSID(Guid("338B2AC0-EE93-4C53-8AF9-F079F7075CB4")) // CommObjectFactory
-            //    Activator.CreateInstance(t) :?> CommObjectFactory
+            x.Factory <-
+                // DO NOT WORK : let t = Type.GetTypeFromProgID("XGCommLib.CommObjectFactory")
+                let t = Type.GetTypeFromCLSID(Guid("338B2AC0-EE93-4C53-8AF9-F079F7075CB4")) // CommObjectFactory
+                Activator.CreateInstance(t) :?> CommObjectFactory
 
-            //x.CommObject <- x.Factory.GetMLDPCommObject(connStr)
-            //if 0 = x.CommObject.Connect("") then
-            //    failwithlog "Failed to connect to XG."
-            //logInfo "Connection established."
+            x.CommObject <- x.Factory.GetMLDPCommObject(connStr)
+            if 0 = x.CommObject.Connect("") then
+                failwithlog "Failed to connect to XG."
+            logInfo "Connection established."
             ()
 
         [<TearDown>]

@@ -27,6 +27,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Include="PLCTestBase.fs" />
+		<Compile Include="XgkXgkTest.fs" />
 		<Compile Include="TestFixture.Xgi.fs" />
 		<Compile Include="XgiLadderElementsTest.fs" />
 		<Compile Include="XgiTestCommon.fs" />
@@ -51,6 +53,7 @@
 
 		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
+		<ProjectReference Include="..\..\PLC\DriverIO\Dsu.PLC.LS.FS\Dsu.PLC.LS.FS.fsproj" />
 
 		<ProjectReference Include="..\..\PLC\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
 		<ProjectReference Include="..\..\PLC\PLC.CodeGen.LSXGI\PLC.CodeGen.LSXGI.fsproj" />

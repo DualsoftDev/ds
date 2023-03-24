@@ -233,7 +233,9 @@ type LsTagAnalysis = {
     member x.BitLength  = x.DataType.GetBitLength()
     member x.ByteOffset = x.BitOffset / 8
     member x.WordOffset = x.BitOffset / 16
+    static member Create(tag, device, dataType, bitOffset) = {Tag = tag; Device=device; DataType=dataType; BitOffset=bitOffset}
 
+let createTagInfo = LsTagAnalysis.Create >> Some
 let (|LsTagPatternXgi|_|) tag =
     match tag with
     // XGI IEC 61131 : bit
@@ -319,85 +321,35 @@ let (|LsTagPatternXgi|_|) tag =
         None
 
 let (|LsTagPatternXgk|_|) tag =
-    let getBitTag device wordOffset bitOffset = {
-        Tag       = tag
-        Device    = device
-        DataType  = DataType.Bit
-        BitOffset = wordOffset * 16 + bitOffset}
-    let getWordTag device wordOffset = {
-        Tag       = tag
-        Device    = device
-        DataType  = DataType.Word
-        BitOffset = wordOffset * 16}
     match tag with
-    (* { Old code *)
-    //word + bit 타입은 word 가 4자리 고정
-    | RegexPattern @"([PMKF])(\d\d\d\d)([\da-fA-F])"
-        [DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
-        Some (getBitTag device wordOffset bitOffset)
-    | RegexPattern @"([PMKF])(\d\d\d\d)"
-        [DevicePattern device; Int32Pattern wordOffset;] ->
-        Some (getWordTag device wordOffset)
+    // bit devices : 'P1', 'PA'.  hex digit bit 만 존재
+    | RegexPattern @"^(%)?([PMLKFTCS])([\da-fA-F])$" [ _; DevicePattern device; HexPattern bitOffset] ->
+        createTagInfo(tag, device, DataType.Bit, bitOffset)
 
-    //L타입은 word + bit 타입은 word 가 4자리 고정
-    | RegexPattern @"(L)(\d\d\d\d\d)([\da-fA-F])"
-        [DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
-        Some (getBitTag device wordOffset bitOffset)
-    | RegexPattern @"(L)(\d\d\d\d\d)"
-        [DevicePattern device; Int32Pattern wordOffset;] ->
-        Some (getWordTag device wordOffset)
+    // bit devices : 'P0A', 'P01A', 'P001A', 'P1001A'.  마지막 hex digit 만 bit 로 인식
+    | RegexPattern @"^(%)?([PMLKFTCS])(\d{1, 4}?)([\da-fA-F])$" [ _; DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
+        let totalBitOffset = (wordOffset * 16) + bitOffset
+        createTagInfo(tag, device, DataType.Bit, totalBitOffset)
+    | RegexPattern @"^(%)?([PMLKFTCS])(\d{1, 4})([\da-fA-F])$" [ _; DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
+        let totalBitOffset = (wordOffset * 16) + bitOffset
+        createTagInfo(tag, device, DataType.Bit, totalBitOffset)
+    //| RegexPattern @"^(%)?([PMLKFTCS])(\d)([\da-fA-F])$" [ _; DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
+    //    let totalBitOffset = (wordOffset * 16) + bitOffset
+    //    createTagInfo(tag, device, DataType.Bit, totalBitOffset)
 
-    //ZR 타입은 word  타입
-    | RegexPattern @"(ZR)(\d+)$"
-        [DevicePattern device;   Int32Pattern wordOffset;] ->
-        Some (getWordTag DeviceType.R wordOffset)
-    //R or D 타입은 word 타입
-    | RegexPattern @"([RDTCZN])(\d+)$"
-        [DevicePattern device;  Int32Pattern wordOffset;] ->
-        Some (getWordTag device wordOffset)
-    // word.bit 타입
-    | RegexPattern @"([RD])(\d+)\.([\da-fA-F])"
-        [DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
-        Some (getBitTag device wordOffset bitOffset)
+    // bit devices : Full blown.  'P0000A'
+    | RegexPattern @"^(%)?([PMLKFTCS])(\d{4})([\da-fA-F])$" [ _; DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
+        let totalBitOffset = (wordOffset * 16) + bitOffset
+        createTagInfo(tag, device, DataType.Bit, totalBitOffset)
 
-    //S타입 word.bit
-    | RegexPattern @"(S)(\d+)\.(\d+)$"  //마지막 비트 단위가 100인 특수 디바이스
-        [DevicePattern device;  Int32Pattern wordOffset; Int32Pattern bitOffset] ->
-        Some (getBitTag device 0 (wordOffset*100+bitOffset))
-    //U타입 word
-    | RegexPattern @"(U)(\d+)\.(\d+)$"
-        [DevicePattern device;  Int32Pattern wordOffsetA; Int32Pattern wordOffsetB;] ->
-        Some (getWordTag device (wordOffsetA*32+wordOffsetB))
-    //U타입 word.bit 타입
-    | RegexPattern @"(U)(\d+)\.(\d+)\.([\da-fA-F])$"
-        [DevicePattern device; Int32Pattern wordOffsetA;Int32Pattern wordOffsetB; HexPattern bitOffset] ->
-        Some (getBitTag device 0 (wordOffsetA*16*32 + wordOffsetB*16 + bitOffset))
-
-    // 수집 전용 타입
-    | RegexPattern @"%([PMLKFWURDTCZN])([BWDL])(\d+)$"
-        [DevicePattern device; DataTypePattern dataType; Int32Pattern offset;] ->
-            let byteOffset = offset * dataType.GetByteLength()
-            Some {
-                Tag       = tag
-                Device    = device
-                DataType  = dataType
-                BitOffset = byteOffset * 8}
-    //ZR은 R영역으로 수집한다.
-    | RegexPattern @"%(ZR)([BWDL])(\d+)$"
-        [DevicePattern device; DataTypePattern dataType; Int32Pattern offset;] ->
-            let byteOffset = offset * dataType.GetByteLength()
-            Some {
-                Tag       = tag
-                Device    = DeviceType.R
-                DataType  = dataType
-                BitOffset = byteOffset * 8}
-    (* } Old code *)
+    // {word device} or {bit device 의 word 표현} : 'P0', 'P0000'
+    | RegexPattern @"^(%)?([DRUPMLKFTCS])(\d{1,4})$" [ _; DevicePattern device; Int32Pattern wordOffset; ] ->
+        let totalBitOffset = wordOffset * 16
+        createTagInfo(tag, device, DataType.Word, totalBitOffset)
 
 
-    (* { New code *)
-    // bit devices
-    | RegexPattern @"^%([PMLKFTCDUZSN])X(\d+)([\da-fA-F])$"     // CDFKLMNPSTUZ
-        [DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
+    | RegexPattern @"^(%)?([PMLKFTCDUZSN])X(\d+)([\da-fA-F])$"     // CDFKLMNPSTUZ
+        [ _; DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
         Some {
             Tag       = tag
             Device    = device
@@ -412,9 +364,11 @@ let (|LsTagPatternXgk|_|) tag =
             Device    = device
             DataType  = dataType
             BitOffset = byteOffset * 8}
-    (* } New code *)
     | _ ->
         None
+
+let getXgkTagInfo tag = (|LsTagPatternXgk|_|) tag
+let getXgiTagInfo tag = (|LsTagPatternXgi|_|) tag
 
 let tryParseTag (cpu:CpuType) tag =
     match (cpu, tag) with
@@ -444,7 +398,6 @@ let tryParseTag (cpu:CpuType) tag =
 //    | _ ->
 //        //logWarn "Failed to parse tag : %s" tag
 //        None, None
-
 
 
 /// LS PLC 의 tag 명을 기준으로 data 의 bit 수를 반환

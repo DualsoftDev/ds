@@ -1,4 +1,9 @@
-namespace T
+#if X64
+namespace Tx64
+#else
+namespace Tx86
+#endif
+open T
 
 open System.IO
 open System.Globalization
@@ -23,15 +28,19 @@ module XgCOMFixtures =
     let guidComObjectFactory = Guid("338B2AC0-EE93-4C53-8AF9-F079F7075CB4")
 #endif
 
+#if X64
+    let isX64Defined = true
+#else
+    let isX64Defined = false
+#endif
+
 
     [<AbstractClass>]
     type XgCOMBaseClass(?connStr) =
         inherit TestBaseClass("HWPLCLogger")
-#if !X64
         do
-            if (Environment.Is64BitProcess) then
-                failwithlog "Only support 32-bit."
-#endif
+            if (Environment.Is64BitProcess <> isX64Defined ) then
+                failwithlog "Platform and X64 compile flag mismatch"
 
         //let connStr = connStr |? "192.168.0.101:2004"
         let connStr = connStr |? "192.168.0.111:2004"

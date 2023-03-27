@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFramework>net6.0</TargetFramework>
+	  <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);X64</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>$(DefineConstants);X64</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="App.config" />
+    <Compile Include="LsXgCOM\XGK.Address.Test.fs" />
+    <Compile Include="LsXgCOM\TestFixture.PLC.HW.fs" />
+    <Compile Include="LsXgCOM\XgCOM.Read.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <COMReference Include="XGCommLib">
+      <WrapperTool>tlbimp</WrapperTool>
+      <VersionMinor>0</VersionMinor>
+      <VersionMajor>1</VersionMajor>
+      <Guid>2cff650c-6df0-48ae-9b06-c8dd467e0cd3</Guid>
+      <Lcid>0</Lcid>
+      <Isolated>false</Isolated>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
+		<PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
+		<PackageReference Include="FsUnit" Version="5.0.4" />
+		<PackageReference Include="FsUnit.xUnit" Version="5.0.4" />
+		<PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
+		<PackageReference Include="xunit" Version="2.4.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\PLC\DriverIO\Dsu.PLC.LS.FS\Dsu.PLC.LS.FS.fsproj" />
+		<ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<Reference Include="Interop.XGCommLib">
+		  <HintPath>LsXgCOM\Interop.XGCommLib.dll</HintPath>
+		</Reference>
+		<Reference Include="log4net">
+			<HintPath>..\..\..\exLib\log4net.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+</Project>

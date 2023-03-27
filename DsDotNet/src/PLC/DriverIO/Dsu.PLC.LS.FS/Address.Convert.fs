@@ -2,7 +2,6 @@ module AddressConvert
 
 open Engine.Common.FS
 open Dsu.PLC.Common
-open System.Collections.Generic
 
 // 산전 PLC 주소 체계 : https://tech-e.tistory.com/10
 
@@ -214,7 +213,7 @@ type DataType =
 
 //let inline xToBytes (x:'a) = x |> uint16 |> fun x -> x.ToBytes()
 
-type DeviceType = P | M | L | K | F |  D | U | N | Z | T | C | R | I | Q | W | ZR   //S Step제어용 디바이스 수집 불가
+type DeviceType = P | M | L | K | F | D | U | N | Z | T | C | R | I | Q | A | W | ZR    //S Step제어용 디바이스 수집 불가
 
 let (|DevicePattern|_|) (str:string) = DU.fromString<DeviceType> str
 
@@ -229,135 +228,99 @@ type LsTagAnalysis = {
     Device:DeviceType
     DataType:DataType
     BitOffset:int
+    IsIEC:bool
 } with
     member x.ByteLength = (max 8 x.BitLength) / 8
     member x.BitLength  = x.DataType.GetBitLength()
     member x.ByteOffset = x.BitOffset / 8
     member x.WordOffset = x.BitOffset / 16
+    static member Create(tag, device, dataType, bitOffset, isIEC) = {Tag = tag; Device=device; DataType=dataType; BitOffset=bitOffset; IsIEC=isIEC}
 
+let createTagInfo = LsTagAnalysis.Create >> Some
 let (|LsTagPatternXgi|_|) tag =
+    let isIEC = true
     match tag with
     // XGI IEC 61131 : bit
-    | RegexPattern @"%([MLKFWR])X(\d+)$"
-        [DevicePattern device; Int32Pattern bitOffset] ->
-        Some {
-            Tag       = tag
-            Device    = device
-            DataType  = DataType.Bit
-            BitOffset = bitOffset }
+    | RegexPattern @"^%([MLKFNRAWIQU])X([\da-fA-F]+)$" [ DevicePattern device; HexPattern bitOffset ] ->
+        createTagInfo(tag, device, DataType.Bit, bitOffset, isIEC)
 
-    | RegexPattern @"%([IQ])X(\d+)\.(\d+)\.(\d+)$"
+    | RegexPattern @"^%([IQU])X(\d+)\.(\d+)\.(\d+)$"
         [DevicePattern device; Int32Pattern file; Int32Pattern element; Int32Pattern bit] ->
-        Some {
-            Tag       = tag
-            Device    = device
-            DataType  = DataType.Bit
-            BitOffset = element * 64 + bit }
-    // U 영역은 특수 처리 (서보 및 드라이버)
-    | RegexPattern @"%(U)([XBWDL])(\d+)\.(\d+)\.(\d+)$"
-        [DevicePattern device; DataTypePattern dataType; Int32Pattern file; Int32Pattern element; Int32Pattern bit] ->
-        let byteOffset = element * dataType.GetByteLength()
-        let fileOffset = file * 16 * 512  //max %U file.element(16).bit(512)
-        Some {
-            Tag       = tag
-            Device    = device
-            DataType  = dataType
-            BitOffset = fileOffset + byteOffset + bit }
+        let baseStep : int =
+            match device with
+                | x when x.Equals(DeviceType.U) -> 512 * 16
+                | _ -> 64 * 16
+        let slotStep : int =
+            match device with
+                | x when x.Equals(DeviceType.U) -> 512
+                | _ -> 64
+
+        //logInfo "test : %O %d %d %d" device file element bit;
+        let totalBitOffset = file * baseStep + element * slotStep + bit
+        createTagInfo(tag, device, DataType.Bit, totalBitOffset, isIEC)
+
+    //// U 영역은 특수 처리 (서보 및 드라이버)
+    //| RegexPattern @"^%(U)([XBWDL])(\d+)\.(\d+)\.(\d+)$"
+    //    [DevicePattern device; DataTypePattern dataType; Int32Pattern file; Int32Pattern element; Int32Pattern bit] ->
+    //    let byteOffset = element * dataType.GetByteLength()
+    //    let fileOffset = file * 16 * 512  //max %U file.element(16).bit(512)
+    //    Some {
+    //        Tag       = tag
+    //        Device    = device
+    //        DataType  = dataType
+    //        BitOffset = fileOffset + byteOffset + bit }
+
+
+    | RegexPattern @"^%([MLKFNRAWIQU])([BWDL])([\da-fA-F]+)\.(\d+)$"
+       [DevicePattern device; DataTypePattern dataType;  Int32Pattern offset; Int32Pattern bit;] ->
+        let totalBitOffset = offset * dataType.GetBitLength() + bit
+        createTagInfo(tag, device, DataType.Bit, totalBitOffset, isIEC)
+
+
     // XGI IEC 61131 : byte / word / dword / lword
-    | RegexPattern @"%([IQMLKFWUR])([BWDL])(\d+)$"
+    | RegexPattern @"^%([MLKFNRAWIQU])([BWDL])(\d+)$"
         [DevicePattern device; DataTypePattern dataType; Int32Pattern offset;] ->
         let byteOffset = offset * dataType.GetByteLength()
-        Some {
-            Tag       = tag
-            Device    = device
-            DataType  = dataType
-            BitOffset = byteOffset * 8}
-    | RegexPattern @"%([IQMLKFWUR])([BWDL])(\d+)\.(\d+)$"
-        [DevicePattern device; DataTypePattern dataType; Int32Pattern offset; Int32Pattern bit;] ->
-            let byteOffset = offset * dataType.GetByteLength()
-            Some {
-                Tag       = tag
-                Device    = device
-                DataType  = DataType.Bit
-                BitOffset = byteOffset * 8 + bit}
+        let totalBitOffset = byteOffset * 8
+        createTagInfo(tag, device, dataType, totalBitOffset, isIEC)
+    | RegexPattern @"^%([IQU])([BWDL])(\d+)\.(\d+)\.(\d+)$"
+        [DevicePattern device; DataTypePattern dataType; Int32Pattern file; Int32Pattern element; Int32Pattern bit;]->
+        let uMemStep : int =
+            match device with
+                | x when x.Equals(DeviceType.U) -> 8
+                | _ -> 1
+
+        let bitStandard = 8 * uMemStep / dataType.GetByteLength();
+
+        let bitSet = (bit % bitStandard) * dataType.GetByteLength() * 8;
+        let elementSet = (element % 16 + bit / bitStandard) * 8 * 8 * uMemStep;
+        let fileSet = (file + element / 16) * 8 * 8 * 16 * uMemStep;
+
+        let offset = bitSet + elementSet + fileSet;
+
+        //logInfo "bitSet = %d  elementSet = %d fileSet = %d offset = %d" bitSet elementSet fileSet offset;
+        createTagInfo(tag, device, dataType, offset, isIEC)
     | _ ->
+        logWarn "Failed to parse tag : %s" tag
         None
 
 let (|LsTagPatternXgk|_|) tag =
-    let getBitTag device wordOffset bitOffset = {
-        Tag       = tag
-        Device    = device
-        DataType  = DataType.Bit
-        BitOffset = wordOffset * 16 + bitOffset}
-    let getWordTag device wordOffset = {
-        Tag       = tag
-        Device    = device
-        DataType  = DataType.Word
-        BitOffset = wordOffset * 16}
+    let isIEC = false
     match tag with
-    //word + bit 타입은 word 가 4자리 고정
-    | RegexPattern @"([PMKF])(\d\d\d\d)([\da-fA-F])"
-        [DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
-        Some (getBitTag device wordOffset bitOffset)
-    | RegexPattern @"([PMKF])(\d\d\d\d)"
-        [DevicePattern device; Int32Pattern wordOffset;] ->
-        Some (getWordTag device wordOffset)
+    // bit devices : Full blown 만 허용.  'P1001A'.  마지막 hex digit 만 bit 로 인식
+    | RegexPattern @"^%?([PMLKFTCS])(\d{4})([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
+        let totalBitOffset = (wordOffset * 16) + bitOffset
+        createTagInfo(tag, device, DataType.Bit, totalBitOffset, isIEC)
 
-    //L타입은 word + bit 타입은 word 가 4자리 고정
-    | RegexPattern @"(L)(\d\d\d\d\d)([\da-fA-F])"
-        [DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
-        Some (getBitTag device wordOffset bitOffset)
-    | RegexPattern @"(L)(\d\d\d\d\d)"
-        [DevicePattern device; Int32Pattern wordOffset;] ->
-        Some (getWordTag device wordOffset)
-
-    //ZR 타입은 word  타입
-    | RegexPattern @"(ZR)(\d+)$"
-        [DevicePattern device;   Int32Pattern wordOffset;] ->
-        Some (getWordTag DeviceType.R wordOffset)
-    //R or D 타입은 word 타입
-    | RegexPattern @"([RDTCZN])(\d+)$"
-        [DevicePattern device;  Int32Pattern wordOffset;] ->
-        Some (getWordTag device wordOffset)
-    // word.bit 타입
-    | RegexPattern @"([RD])(\d+)\.([\da-fA-F])"
-        [DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
-        Some (getBitTag device wordOffset bitOffset)
-
-    //S타입 word.bit
-    | RegexPattern @"(S)(\d+)\.(\d+)$"  //마지막 비트 단위가 100인 특수 디바이스
-        [DevicePattern device;  Int32Pattern wordOffset; Int32Pattern bitOffset] ->
-        Some (getBitTag device 0 (wordOffset*100+bitOffset))
-    //U타입 word
-    | RegexPattern @"(U)(\d+)\.(\d+)$"
-        [DevicePattern device;  Int32Pattern wordOffsetA; Int32Pattern wordOffsetB;] ->
-        Some (getWordTag device (wordOffsetA*32+wordOffsetB))
-    //U타입 word.bit 타입
-    | RegexPattern @"(U)(\d+)\.(\d+)\.([\da-fA-F])$"
-        [DevicePattern device; Int32Pattern wordOffsetA;Int32Pattern wordOffsetB; HexPattern bitOffset] ->
-        Some (getBitTag device 0 (wordOffsetA*16*32 + wordOffsetB*16 + bitOffset))
-
-    // 수집 전용 타입
-    | RegexPattern @"%([PMLKFWURDTCZN])([BWDL])(\d+)$"
-        [DevicePattern device; DataTypePattern dataType; Int32Pattern offset;] ->
-            let byteOffset = offset * dataType.GetByteLength()
-            Some {
-                Tag       = tag
-                Device    = device
-                DataType  = dataType
-                BitOffset = byteOffset * 8}
-    //ZR은 R영역으로 수집한다.
-    | RegexPattern @"%(ZR)([BWDL])(\d+)$"
-        [DevicePattern device; DataTypePattern dataType; Int32Pattern offset;] ->
-            let byteOffset = offset * dataType.GetByteLength()
-            Some {
-                Tag       = tag
-                Device    = DeviceType.R
-                DataType  = dataType
-                BitOffset = byteOffset * 8}
-
+    // {word device} or {bit device 의 word 표현} : 'P0000'
+    | RegexPattern @"^%?([DRUPMLKFTCS])(\d{4})$" [ DevicePattern device; Int32Pattern wordOffset; ] ->
+        let totalBitOffset = wordOffset * 16
+        createTagInfo(tag, device, DataType.Word, totalBitOffset, isIEC)
     | _ ->
         None
+
+let getXgkTagInfo tag = (|LsTagPatternXgk|_|) tag
+let getXgiTagInfo tag = (|LsTagPatternXgi|_|) tag
 
 let tryParseTag (cpu:CpuType) tag =
     match (cpu, tag) with
@@ -365,9 +328,8 @@ let tryParseTag (cpu:CpuType) tag =
     | CpuType.XgbMk, LsTagPatternXgk x -> Some x
     | CpuType.Xgi, LsTagPatternXgi x -> Some x
     | _ ->
-        //logWarn "Failed to parse tag : %s" tag
+        logWarn "Failed to parse tag : %s" tag
         None
-
 //let tryParseIECTag (tag) =
 //    match tag with
 //    | RegexPattern @"([PMLKF])(\d\d\d\d)([\da-fA-F])"
@@ -390,26 +352,16 @@ let tryParseTag (cpu:CpuType) tag =
 //        None, None
 
 
-
 /// LS PLC 의 tag 명을 기준으로 data 의 bit 수를 반환
 let getBitSize cpu tag =
-    match tryParseTag cpu tag with
-    |Some v -> v.BitLength
-    |None -> failwithlogf "Cannot getBitSize '%s'" tag
+    tryParseTag cpu tag |> Option.get |> fun x -> x.BitLength
 
 let getBitOffset cpu tag =
-    match tryParseTag cpu tag with
-    |Some v -> v.BitOffset
-    |None -> failwithlogf "Cannot getBitOffset '%s'" tag
+    tryParseTag cpu tag |> Option.get |> fun x -> x.BitOffset
 
 let getByteSize cpu tag =
-    match tryParseTag cpu tag with
-    |Some v -> v.ByteLength
-    |None -> failwithlogf "Cannot getByteSize '%s'" tag
+    tryParseTag cpu tag |> Option.get |> fun x -> x.ByteLength
 
 let getDataType cpu tag =
-    match tryParseTag cpu tag with
-    |Some v -> v.DataType
-    |None -> failwithlogf "Cannot getDataType '%s'" tag
-
+    tryParseTag cpu tag |> Option.get |> fun x -> x.DataType
 

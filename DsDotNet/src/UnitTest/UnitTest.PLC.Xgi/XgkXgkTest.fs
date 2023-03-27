@@ -12,7 +12,7 @@ module XGKTest =
         inherit PLCTestBase("192.168.0.101")                //xgk or xgbmk
         let conn = base.Conn
 
-        let bitDeviceTypes = [ P; M; L; K; F;]       //S Step제어용 디바이스 수집 불가    //T C 불가
+        let bitDeviceTypes = [ P; M; L; K; F;]       //S Step제어용 디바이스 수집 불가    //T, C : bit에서 읽기 불가
         let wordDeviceTypes = [D; R; U; T; C; T; Z]               // '사용설명서_XGK_XGB_명령어집_국문_v2.8.pdf', pp.2-12
         let wordDeviceTypesforWrite = [D; U; T; C; Z]
 
@@ -84,7 +84,7 @@ module XGKTest =
         
 
 
-        let testWordRW(typ:DeviceType, addresses:int[], value: int16, forceCurAddr: bool) = 
+        let testWordRW(typ:DeviceType, addresses:int[], value: uint16, forceCurAddr: bool) = 
             let strTyp = typ.ToString()
             let safeWordTags = 
                 if forceCurAddr then
@@ -116,7 +116,7 @@ module XGKTest =
         member __.``xgk(xgbmk) read bit test fail`` () =
             for dt in bitDeviceTypes do
                 for ba in bitAddresses do
-                    (fun () -> testBitRead(dt, shortAddresses, ba, false) ) |> ShouldFailWithSubstringT "Equals false"  
+                    (fun () -> testBitRead(dt, shortAddresses, ba, false) ) |> ShouldFailWithSubstringT "Equals false"  //Expected: Equals false
                     
         [<Test>]
         member __.``xgk(xgbmk) read bit test success`` () =
@@ -128,7 +128,7 @@ module XGKTest =
         [<Test>]
         member __.``xgk(xgbmk) read word test fail`` () =
             for dt in bitDeviceTypes do
-                (fun () -> testWordRead(dt, shortAddresses, false) ) |> ShouldFailWithSubstringT "Equals false"  
+                (fun () -> testWordRead(dt, shortAddresses, false) ) |> ShouldFailWithSubstringT "Equals false"  //Expected: Equals false
                     
         [<Test>]
         member __.``xgk(xgbmk) read word test success`` () =
@@ -142,7 +142,7 @@ module XGKTest =
             let mutable pass = false;
             
             try
-                conn.ReadATag("%M0033") |> ignore
+                conn.ReadATag("%UW0287") |> ignore
                 pass <- true
             with
                 | ex ->
@@ -163,3 +163,72 @@ module XGKTest =
                     ignore ex // 예외 처리 코드
                     pass <- false
             pass === true
+
+
+        [<Test>]
+        member __.``xgk(xgbmk) read-write bit test fail`` () =
+            for dt in bitDeviceTypes do
+                for ba in bitAddresses do
+                    (fun () -> testBitRW(dt, shortAddresses, ba, false) ) |> ShouldFailWithSubstringT "option"  
+                    //System.Exception : Exception messsage match failed on System.ArgumentException: 옵션 값이 None입니다. (Parameter 'option')
+                    
+        [<Test>]
+        member __.``xgk(xgbmk) read-write bit test success`` () =
+            for dt in bitDeviceTypes do
+                for ba in bitAddresses do
+                    //testBitRW(dt, fullAddresses, ba, true) 
+                    testBitRW(dt, shortAddresses, ba, true) 
+                    
+        [<Test>]
+        member __.``xgk(xgbmk) read-write word test fail`` () =
+            for dt in bitDeviceTypes do
+                for ba in bitAddresses do
+                    (fun () -> testWordRW(dt, shortAddresses, 13us , false) ) |> ShouldFailWithSubstringT "option"  
+                    //System.Exception : Exception messsage match failed on System.ArgumentException: 옵션 값이 None입니다. (Parameter 'option')
+                    
+        [<Test>]
+        member __.``xgk(xgbmk) read-write word test success`` () =
+            for dt in bitDeviceTypes do
+                for ba in bitAddresses do
+                    testWordRW(dt, fullAddresses, 13us, true) 
+                    testWordRW(dt, shortAddresses, 13us, true) 
+
+
+
+
+
+        [<Test>]
+        member __.``xgk(xgbmk) a word write`` () =
+            let mutable pass = false;
+            let safeWordTags = [|"%PW0011"|]
+            let lsTags = safeWordTags |> map (fun t -> LsTagXgk(conn, t) :> LsTag)
+            lsTags |> iter (fun t -> t.Value <- 141us)
+            conn.WriteRandomTags lsTags |> ignore
+            pass <- true
+            
+            pass === true
+
+        [<Test>]
+        member __.``xgk(xgbmk) a bit write`` () =
+            let mutable pass = false;
+            let safeWordTags = [|"%PX00011"|]
+            let lsTags = safeWordTags |> map (fun t -> LsTagXgk(conn, t) :> LsTag)
+            lsTags |> iter (fun t -> t.Value <- false)
+            conn.WriteRandomTags lsTags |> ignore
+            pass <- true
+            
+            pass === true
+
+
+        //[<Test>]
+        //member __.``xgk(xgbmk) a bit write`` () =
+        //    let mutable pass = false;
+            
+        //    try
+        //        conn.ReadATag("%M0033B") |> ignore
+        //        pass <- true
+        //    with
+        //        | ex ->
+        //            ignore ex // 예외 처리 코드
+        //            pass <- false
+        //    pass === true

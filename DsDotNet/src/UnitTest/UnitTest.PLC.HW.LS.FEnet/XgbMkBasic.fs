@@ -19,6 +19,21 @@ type XgbMkBasic() =
         let cpu = x.Conn.Cpu :?> LsCpu
         cpu.CpuType === CpuType.XgbMk
 
+    [<Test>]
+    member x.``Address convert test`` () =
+        let tags = [
+            "P0000", "%PW0"
+            "P0001", "%PW1"
+            "P0101", "%PW101"
+            "P00001", "%PX1"
+            "P00008", "%PX8"
+            "P0000F", "%PX15"
+            "P0001F", "%PX31"   // 1*16 + 15
+            "P0011F", "%PX191"  // 11*16 + 15
+        ]
+        for (tag, expected) in tags do
+            let fenet = tryToFEnetTag CpuType.XgbMk tag
+            fenet.Value === expected
 
     //[<Test>]
     //member x.``Readings`` () =
@@ -42,6 +57,9 @@ type XgbMkBasic() =
         x.Write("%ML1", ul0)
         x.Read("%ML1") === ul0
 
+        for i in [0..15] do
+            x.Write( sprintf "%%MX%X" (10*16+i), true)
+
         noop()
     [<Test>]
     member x.``P`` () =
@@ -54,7 +72,15 @@ type XgbMkBasic() =
 
 
         x.Write("%PW50", 0x1234us)
-        let xxx = x.Read("%PW1")
+        x.Read("%PW50") === 0x1234us
+
+        let offset = 50*16+0
+        let tag = sprintf "%%PX%X" offset
+        x.Write(tag, true)
+        x.Read(tag) === true
+        x.Write(tag, false)
+        x.Read(tag) === false
+
         noop()
 
 

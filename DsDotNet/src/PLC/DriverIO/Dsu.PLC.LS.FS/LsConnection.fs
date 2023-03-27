@@ -230,8 +230,9 @@ and LsConnection(parameters:LsConnectionParameters) as this =
 
     /// 하나의 tag 값을 즉시 읽어 낸다.  return type: obj.  ValueChanged event 등은 발생하지 않는다.
     member x.ReadATag(tag:string) =
+        // todo : tag 를 cpu type 에 맞게 FEnet format 으로 변환해서 호출 해야 함...
         let anal = tryParseTag tag |> Option.get
-        x.ReadATagUI8(anal.GetXgiTag())
+        x.ReadATagUI8(tag)
         |> anal.DataType.BoxUI8
     member x.WriteATag(tag:ITag) =
         x.WriteRandomTags([|tag :?> LsTag|])

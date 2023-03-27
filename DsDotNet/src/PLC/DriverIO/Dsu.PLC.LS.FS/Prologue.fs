@@ -202,26 +202,25 @@ type LsFEnetTagInfo = {
     Device:DeviceType
     DataType:DataType
     BitOffset:int
-    IsIEC:bool
 } with
     member x.ByteLength = (max 8 x.BitLength) / 8
     member x.BitLength  = x.DataType.GetBitLength()
     member x.ByteOffset = x.BitOffset / 8
     member x.WordOffset = x.BitOffset / 16
-    static member Create(tag, device, dataType, bitOffset, isIEC) = {Tag = tag; Device=device; DataType=dataType; BitOffset=bitOffset; IsIEC=isIEC}
-    member x.GetXgiTag():string =
-        if x.IsIEC then
-            x.Tag
-        else
-            let offset = x.BitOffset / 16
-                        |> toString
-                        |> (fun str -> str.PadLeft(5, '0'))
+    static member Create(tag, device, dataType, bitOffset, isIEC) = {Tag = tag; Device=device; DataType=dataType; BitOffset=bitOffset;}
+    //member x.GetXgiTag():string =
+    //    if x.IsIEC then
+    //        x.Tag
+    //    else
+    //        let offset = x.BitOffset / 16
+    //                    |> toString
+    //                    |> (fun str -> str.PadLeft(5, '0'))
 
-            match x.DataType with
-            | DataType.Bit ->
-                $"%%{x.Device}X{offset}"
-            | DataType.Word ->
-                assert(x.BitOffset%16 = 0)
-                $"%%{x.Device}W{offset}"
-            | _ ->
-                failwith "ERROR"
+    //        match x.DataType with
+    //        | DataType.Bit ->
+    //            $"%%{x.Device}X{offset}"
+    //        | DataType.Word ->
+    //            assert(x.BitOffset%16 = 0)
+    //            $"%%{x.Device}W{offset}"
+    //        | _ ->
+    //            failwith "ERROR"

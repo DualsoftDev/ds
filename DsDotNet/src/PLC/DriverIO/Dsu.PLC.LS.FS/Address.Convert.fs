@@ -37,7 +37,6 @@ let (|DataTypePattern|_|) str =
         Some <| DataType.FromDeviceMnemonic str
     with exn -> None
 
-
 let isXgiTag tag =
     Regex(@"^%([MLKFNRAWIQU])X([\da-fA-F]+)$").IsMatch(tag)
     || Regex(@"^%([IQU])X(\d+)\.(\d+)\.(\d+)$").IsMatch(tag)
@@ -48,6 +47,24 @@ let isXgiTag tag =
 let isXgkTag tag =
     Regex(@"^([PMLKFTCS])(\d{4})([\da-fA-F])$").IsMatch(tag)
     || Regex(@"^([DRUPMLKFTCS])(\d{4})$").IsMatch(tag)
+
+let (|ToFEnetTag|_|) (fromCpu:CpuType) tag =
+    match fromCpu with
+    | (CpuType.Xgk | CpuType.XgbMk) ->
+        match tag with
+        // bit devices : Full blown 만 허용.  'P1001A'.  마지막 hex digit 만 bit 로 인식
+        | RegexPattern @"^%?([PMLKFTCS])(\d{4})([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
+            let bitOffset = wordOffset * 16 + bitOffset
+            Some $"%%{device}X{bitOffset}"
+
+        // {word device} or {bit device 의 word 표현} : 'P0000'
+        | RegexPattern @"^%?([DRUPMLKFTCS])(\d{4})$" [ DevicePattern device; Int32Pattern wordOffset; ] ->
+            Some $"%%{device}W{wordOffset}"
+        | _ ->
+            None
+    | _ ->
+        None
+let tryToFEnetTag (fromCpu:CpuType) tag = (|ToFEnetTag|_|) fromCpu tag
 
 let createTagInfo = LsFEnetTagInfo.Create >> Some
 let (|LsTagPatternFEnet|_|) tag =

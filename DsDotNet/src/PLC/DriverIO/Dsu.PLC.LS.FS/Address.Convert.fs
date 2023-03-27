@@ -343,12 +343,12 @@ let (|LsTagPatternXgk|_|) tag =
         createTagInfo(tag, device, DataType.Bit, totalBitOffset)
 
     // {word device} or {bit device 의 word 표현} : 'P0', 'P0000'
-    | RegexPattern @"^(%)?([DRUPMLKFTCS])(\d{1,4})$" [ _; DevicePattern device; Int32Pattern wordOffset; ] ->
+    | RegexPattern @"^(%)?([DRUPMLKFTCSZ])(\d{1,4})$" [ _; DevicePattern device; Int32Pattern wordOffset; ] ->
         let totalBitOffset = wordOffset * 16
         createTagInfo(tag, device, DataType.Word, totalBitOffset)
 
 
-    | RegexPattern @"^(%)?([PMLKFTCDUZSN])X(\d+)([\da-fA-F])$"     // CDFKLMNPSTUZ
+    | RegexPattern @"^(%)?([PMLKFTCDUZSNR])X(\d+)([\da-fA-F])$"     // CDFKLMNPSTUZ
         [ _; DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
         Some {
             Tag       = tag
@@ -356,7 +356,7 @@ let (|LsTagPatternXgk|_|) tag =
             DataType  = DataType.Bit
             BitOffset = (wordOffset * 16) + bitOffset}
     // byte / word / dword / lword
-    | RegexPattern @"^%([PMLKFTCDUZSN])([BWDL])(\d+)$"
+    | RegexPattern @"^%([PMLKFTCDUZSNR])([BWDL])(\d+)$"
         [DevicePattern device; DataTypePattern dataType; Int32Pattern offset;] ->
         let byteOffset = offset * dataType.GetByteLength()
         Some {

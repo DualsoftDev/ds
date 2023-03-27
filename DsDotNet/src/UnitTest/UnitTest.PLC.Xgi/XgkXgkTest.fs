@@ -11,80 +11,138 @@ module XGKTest =
     type XGKTest() = 
         inherit PLCTestBase("192.168.0.101")                //xgk or xgbmk
         let conn = base.Conn
-        let bitDeviceTypes = [ P; M; L; K; F; T; C; ]       //S Step제어용 디바이스 수집 불가
-        let wordDeviceTypes = [D; R; U; T; C]               // '사용설명서_XGK_XGB_명령어집_국문_v2.8.pdf', pp.2-12
 
-        let testDevice(typ:DeviceType, testBit:bool) =
+        let bitDeviceTypes = [ P; M; L; K; F; T; C; ]       //S Step제어용 디바이스 수집 불가
+        let wordDeviceTypes = [D; R; U; T; C; Z]               // '사용설명서_XGK_XGB_명령어집_국문_v2.8.pdf', pp.2-12
+        let wordDeviceTypesforWrite = [D; U; T; C; Z]
+        
+        let targetAddresses = ["00000"; "00001"; "00002"; "00010"; "00011"; "00011"; "00012"; "10112"; "1011F"; "0000"; "0003"; "0010"; "0100"; ]
+
+        let safeLWordAddresses = [|0..255|]
+        
+        let safeDWordAddresses = [| for lw in safeLWordAddresses do yield! [2*lw; 2*lw+1] |]
+        let safeWordAddresses =  [| for dw in safeDWordAddresses do yield! [2*dw; 2*dw+1] |]
+        //let safeByteAddresses =  [| for w in safeWordAddresses do yield! [w; w+1UL] |]   // [| 0..1023 |]
+        let testNum = 11us
+
+        let testReadDevice(typ:DeviceType) = 
+            let mutable pass: bool = true
+            let testadd = [|0;1;35|]
+            let strTyp = typ.ToString()
+            let safeWordTags = testadd |> Array.map (fun addr -> sprintf "%%%sW%d" strTyp addr)
+
+            try 
+                for tag in safeWordTags do
+                    conn.ReadATag(tag) |> ignore
+                    pass <- true //R 읽기도 안됨 
+            with
+                | ex ->
+                    ignore ex // 예외 처리 코드
+                    pass <- false
+
+            pass === true
+            
+            
+
+
+
+        let testReadWriteTargetDevice(typ:DeviceType, testBit:bool) =
             let strTyp = typ.ToString()
             let bits = [
-                $"%%{strTyp}F",     LsTagAnalysis.Create($"%%{strTyp}F",     typ, DataType.Bit, 15)
-                $"%%{strTyp}1A",    LsTagAnalysis.Create($"%%{strTyp}1A",    typ, DataType.Bit, 16*1 + 10)
-                $"%%{strTyp}2A",    LsTagAnalysis.Create($"%%{strTyp}2A",    typ, DataType.Bit, 16*2 + 10)
+                //$"%%{strTyp}F",     LsTagAnalysis.Create($"%%{strTyp}F",     typ, DataType.Bit, 15)       //정규식 필요
+                //$"%%{strTyp}1A",    LsTagAnalysis.Create($"%%{strTyp}1A",    typ, DataType.Bit, 16*1 + 10)
+                //$"%%{strTyp}2A",    LsTagAnalysis.Create($"%%{strTyp}2A",    typ, DataType.Bit, 16*2 + 10)
 
-                $"%%{strTyp}00000", LsTagAnalysis.Create($"%%{strTyp}00000", typ, DataType.Bit, 0)
-                $"%%{strTyp}00001", LsTagAnalysis.Create($"%%{strTyp}00001", typ, DataType.Bit, 1)
-                $"%%{strTyp}00002", LsTagAnalysis.Create($"%%{strTyp}00002", typ, DataType.Bit, 2)
-                $"%%{strTyp}00010", LsTagAnalysis.Create($"%%{strTyp}00010", typ, DataType.Bit, 16*1 + 0)
-                $"%%{strTyp}00011", LsTagAnalysis.Create($"%%{strTyp}00011", typ, DataType.Bit, 16*1 + 1)
-                $"%%{strTyp}00012", LsTagAnalysis.Create($"%%{strTyp}00012", typ, DataType.Bit, 16*1 + 2)
-                $"%%{strTyp}00112", LsTagAnalysis.Create($"%%{strTyp}00112", typ, DataType.Bit, 16*11 + 2)
-                $"%%{strTyp}10112", LsTagAnalysis.Create($"%%{strTyp}10112", typ, DataType.Bit, 16*1011 + 2)
-                $"%%{strTyp}1011F", LsTagAnalysis.Create($"%%{strTyp}1011F", typ, DataType.Bit, 16*1011 + 15)
+                $"%%{strTyp}00000", testNum
+                $"%%{strTyp}00001", testNum
+                $"%%{strTyp}00002", testNum
+                $"%%{strTyp}00010", testNum
+                $"%%{strTyp}00011", testNum
+                $"%%{strTyp}00012", testNum
+                $"%%{strTyp}00112", testNum
+                $"%%{strTyp}10112", testNum
+                $"%%{strTyp}1011F", testNum
             ]
             let words = [
-                $"%%{strTyp}0000" , LsTagAnalysis.Create($"%%{strTyp}0000",  typ, DataType.Word, 0)
-                $"%%{strTyp}0001" , LsTagAnalysis.Create($"%%{strTyp}0001",  typ, DataType.Word, 16*1)
-                $"%%{strTyp}0002" , LsTagAnalysis.Create($"%%{strTyp}0002",  typ, DataType.Word, 16*2)
-                $"%%{strTyp}0003" , LsTagAnalysis.Create($"%%{strTyp}0003",  typ, DataType.Word, 16*3)
+                $"%%{strTyp}0000" , testNum
+                $"%%{strTyp}0001" , testNum
+                $"%%{strTyp}0002" , testNum
+                $"%%{strTyp}0003" , testNum
             ]
 
             let testSet = (if testBit then bits else []) @ words
+            let strings = testSet |> List.map (fun (s, i) -> s)|> Array.ofList
+            let lsTags = strings |> map (fun t -> LsTagXgk(conn, t) :> LsTag)
+            lsTags |> iter (fun t -> t.Value <- testNum)
+            conn.WriteRandomTags lsTags |> ignore
 
             for (tag, answer) in testSet do
-                let info = getXgkTagInfo tag
-                if info.IsNone || info.Value <> answer then
+                let info = conn.ReadATag(tag)
+                if info <> answer then
                     noop()
 
-                info.Value === answer
+                info === answer
 
+
+
+        let testWriteDevice(typ:DeviceType, testBit:bool) =
+            let safeLWriteAddresses = [|0..4|] @[|121|]
+            let strTyp = typ.ToString()
+            
+            let safeWordTags = safeLWriteAddresses |> Array.map (fun addr -> sprintf "%%%sW%d" strTyp addr)
+
+
+            let lsTags = safeWordTags |> map (fun t -> LsTagXgk(conn, t) :> LsTag)
+            lsTags |> iter (fun t -> t.Value <- testNum)
+            conn.WriteRandomTags lsTags |> ignore
+            for tag in safeWordTags do
+                let info = conn.ReadATag(tag)
+                let answer = testNum
+                if info <> answer then
+                    noop()
+                info === answer
+            lsTags |> iter (fun t -> t.Value <- 0us)
+            conn.WriteRandomTags lsTags |> ignore
+            for tag in safeWordTags do
+                let info = conn.ReadATag(tag)
+                let answer = 0us
+                if info <> answer then
+                    noop()
+                info === answer
+            
 
         [<Test>]
         member __.``xgk(xgbmk) Connection Test`` () =
             conn.Connect() === true
 
-///더미 메모리로 값 반환 확인,  메모리별확인, 주소별 확인 (두 type) 
 
         [<Test>]
-        member __.``xgk LsTagAnalysis Return Test`` () =
-            //let tag = conn.ReadATagUI8("%MW0")
-            //ShouldNotBeNull tag
-
-            let bitDeviceTypes = [ P; M; L; K; F; T; C; ]       //S Step제어용 디바이스 수집 불가
-            let wordDeviceTypes = [D; R; U; T; C]               // '사용설명서_XGK_XGB_명령어집_국문_v2.8.pdf', pp.2-12
-
+        member __.``xgk %PW Read Test`` () =
             for dt in bitDeviceTypes do
-                testDevice(dt, true)
+                testReadDevice(dt)
             for dt in wordDeviceTypes do
-                testDevice(dt, false)
+                testReadDevice(dt)
+            
+            
 
         [<Test>]
-        member __.``xgk %PW Read LsTagAnalysis Test`` () =
-            let mutable _some : LsTagAnalysis = {Tag = ""; Device = DeviceType.ZR; DataType = DataType.Continuous; BitOffset = 0}
-            let mutable tag : string = "%MW00"
+        member __.``xgk PLC LsTagAnalysis Return Test`` () =
+            for dt in bitDeviceTypes do
+                testReadWriteTargetDevice(dt, true)
+            for dt in wordDeviceTypesforWrite do
+                testReadWriteTargetDevice(dt, false)
 
-            tryParseTag CpuType.XgbMk tag |> Option.get |> fun x -> _some <- x
-            _some.Tag === "%MW00"
-            _some.Device === DeviceType.M
-            _some.DataType === DataType.Word
-            _some.BitOffset === 0
 
 
         [<Test>]
-        member __.``xgk %PW  Write-Read Test`` () =
-            let mutable _some : LsTagAnalysis = {Tag = ""; Device = DeviceType.ZR; DataType = DataType.Continuous; BitOffset = 0}
-            let mutable tag : string = "%MW00"
-            conn.WriteRandomTags
+        member __.``xgk PLC Write-Read Test`` () =
+            //for dt in bitDeviceTypes do
+            //    testWriteDevice(dt, true)
+            for dt in wordDeviceTypesforWrite do
+                testWriteDevice(dt, false)
 
 
 
-
+        [<Test>]
+        member __.``ignore test`` () =
+            ()

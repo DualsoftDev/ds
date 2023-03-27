@@ -80,4 +80,8 @@
 	  <ProjectReference Include="..\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <PackageReference Update="FSharp.Core" Version="7.0.0" />
+	</ItemGroup>
+
 </Project>

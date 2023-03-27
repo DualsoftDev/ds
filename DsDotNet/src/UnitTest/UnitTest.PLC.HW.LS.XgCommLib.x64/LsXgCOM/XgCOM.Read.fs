@@ -55,12 +55,11 @@ type XgCOM10ReadTest() =
         let wBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
         let rBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
         x.CommObject.RemoveAll()
-        for i = 0 to 1023 do
+        for i = 0 to MAX_RANDOM_READ_POINTS-1 do
             di.lSize <- 8
             di.lOffset <- i * 8
             wBuf[i] <- byte i
-            if i < 64 then
-                x.CommObject.AddDeviceInfo(di)
+            x.CommObject.AddDeviceInfo(di)
 
         // does *NOT* working
         //x.CommObject.Write((int)XgCOMCodes.W_M, wBuf, 1, 0) =!= 0
@@ -111,11 +110,10 @@ type XgCOM20ReadTest() =
         let wBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
         let rBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
         x.CommObject.RemoveAll()
-        for i = 0 to 1023 do
+        for i = 0 to MAX_RANDOM_READ_POINTS-1 do
             di.lOffset <- i * 8
             wBuf[i] <- byte i
-            if i < 64 then
-                x.CommObject.AddDeviceInfo(di)
+            x.CommObject.AddDeviceInfo(di)
 
         // does *NOT* working
         //x.CommObject.Write((int)XgCOMCodes.W_M, wBuf, 1, 0) =!= 0
@@ -167,7 +165,7 @@ type XgCOM20ReadTest() =
         let start = 16*5
         //for i = start to 1023 do
         //    x.CommObject.WriteDevice_Bit("M", i, 1) === 1
-        for i = 2049 to 4095 do
+        for i = 128 to 256 do
             x.CommObject.WriteDevice_Bit("M", i, 1) === 1
 
 
@@ -208,7 +206,7 @@ type XgCOM20ReadTest() =
 
         let rBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
         x.CommObject.RemoveAll()
-        for i = start to start+64-1 do
+        for i = start to start+MAX_RANDOM_READ_POINTS-1 do
             di.lOffset <- i * 8
             x.CommObject.AddDeviceInfo(di)
 
@@ -226,7 +224,7 @@ type XgCOM20ReadTest() =
 
         let di = x.CreateDevice('M', 'B')
 
-        let rBuf = Array.zeroCreate<byte>(512)
+        let rBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
         for i in start*8 .. 8 .. ((start+MAX_RANDOM_READ_POINTS)*8 - 1) do
             //di.lOffset <- i * 8
             di.lOffset <- i
@@ -240,7 +238,7 @@ type XgCOM20ReadTest() =
     member x.``Read random of Q test`` () =
         x.CommObject.RemoveAll()
 
-        let rBuf = Array.zeroCreate<byte>(512)
+        let rBuf = Array.zeroCreate<byte>(8)
         let di = x.CreateDevice('Q', 'B')
         x.CommObject.AddDeviceInfo(di)
         x.CommObject.ReadRandomDevice(rBuf) === 1
@@ -253,7 +251,7 @@ type XgCOM20ReadTest() =
 
         let di = x.CreateDevice('I', 'B')
 
-        let rBuf = Array.zeroCreate<byte>(512)
+        let rBuf = Array.zeroCreate<byte>(8)
         x.CommObject.AddDeviceInfo(di)
 
         x.CommObject.ReadRandomDevice(rBuf) === 1
@@ -265,7 +263,7 @@ type XgCOM20ReadTest() =
     member x.``Read random of Q 2nd slot test`` () =
         x.CommObject.RemoveAll()
 
-        let rBuf = Array.zeroCreate<byte>(512)
+        let rBuf = Array.zeroCreate<byte>(8)
         let di = x.CreateDevice('Q', 'B')
         x.CommObject.AddDeviceInfo(di)
 

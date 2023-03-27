@@ -45,12 +45,13 @@ module ImportPPTModule =
 
             let pathPPT = paras.AbsoluteFilePath+".pptx"
 
-            let doc =
-                    if dicPptDoc.ContainsKey pathPPT
-                    then dicPptDoc[pathPPT]
-                    else
-                       let pptDoc = pptDoc(pathPPT , paras)
-                       dicPptDoc.Add(pathPPT, pptDoc); pptDoc
+            //test ahn 중복 로딩 성능개선 중
+            let doc =  pptDoc(pathPPT , paras)
+                    //if dicPptDoc.ContainsKey pathPPT
+                    //then dicPptDoc[pathPPT]
+                    //else
+                    //   let pptDoc = pptDoc(pathPPT , paras)
+                    //   dicPptDoc.Add(pathPPT, pptDoc); pptDoc
 
             //시스템 로딩시 중복이름을 부를 수 없다.
             CheckSameCopy(doc)

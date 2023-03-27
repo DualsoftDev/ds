@@ -16,9 +16,9 @@
   <ItemGroup />
 
   <ItemGroup>
-    <Compile Include="..\UnitTest.PLC.HW\LsXgCOM\TestFixture.PLC.HW.fs" Link="LsXgCOM\TestFixture.PLC.HW.fs" />
-    <Compile Include="..\UnitTest.PLC.HW\LsXgCOM\XgCOM.Read.fs" Link="LsXgCOM\XgCOM.Read.fs" />
-    <Compile Include="..\UnitTest.PLC.HW\LsXgCOM\XGK.Address.Test.fs" Link="LsXgCOM\XGK.Address.Test.fs" />
+    <Compile Include="..\UnitTest.PLC.HW.LS.XgCommLib.x64\LsXgCOM\TestFixture.PLC.HW.fs" Link="LsXgCOM\TestFixture.PLC.HW.fs" />
+    <Compile Include="..\UnitTest.PLC.HW.LS.XgCommLib.x64\LsXgCOM\XgCOM.Read.fs" Link="LsXgCOM\XgCOM.Read.fs" />
+    <Compile Include="..\UnitTest.PLC.HW.LS.XgCommLib.x64\LsXgCOM\XGK.Address.Test.fs" Link="LsXgCOM\XGK.Address.Test.fs" />
     <None Include="App.config" />
   </ItemGroup>
 
@@ -37,7 +37,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="Interop.XGCommLib">
-		  <HintPath>..\UnitTest.PLC.HW\LsXgCOM\Interop.XGCommLib.dll</HintPath>
+		  <HintPath>..\UnitTest.PLC.HW.LS.XgCommLib.x64\LsXgCOM\Interop.XGCommLib.dll</HintPath>
 		</Reference>
 		<Reference Include="log4net">
 			<HintPath>..\..\..\exLib\log4net.dll</HintPath>

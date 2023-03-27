@@ -28,6 +28,7 @@
 
 	<ItemGroup>
 		<Compile Include="PLCTestBase.fs" />
+		<Compile Include="XgiTest.fs" />
 		<Compile Include="XgkXgkTest.fs" />
 		<Compile Include="TestFixture.Xgi.fs" />
 		<Compile Include="XgiLadderElementsTest.fs" />

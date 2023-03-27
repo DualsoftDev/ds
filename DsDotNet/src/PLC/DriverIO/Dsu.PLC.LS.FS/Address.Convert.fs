@@ -241,11 +241,15 @@ type LsTagAnalysis = {
         else
             let offset = x.BitOffset / 16
                         |> toString
-                        |> (fun str -> str.PadLeft(5, '0'))
+                        |> (fun str -> str.PadLeft(4, '0'))
 
+            let offsetBit = x.BitOffset % 16
+                            |> (fun str -> sprintf "%X" str)
+                            
             match x.DataType with
             | DataType.Bit ->
-                $"%%{x.Device}X{offset}"
+                
+                $"%%{x.Device}X{offset}{offsetBit}"
             | DataType.Word ->
                 assert(x.BitOffset%16 = 0)
                 $"%%{x.Device}W{offset}"
@@ -324,12 +328,12 @@ let (|LsTagPatternXgk|_|) tag =
     let isIEC = false
     match tag with
     // bit devices : Full blown 만 허용.  'P1001A'.  마지막 hex digit 만 bit 로 인식
-    | RegexPattern @"^%?([PMLKFTCS])(\d{4})([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
+    | RegexPattern @"^%?([PMLKFTCS])X?(\d{4})([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
         let totalBitOffset = (wordOffset * 16) + bitOffset
         createTagInfo(tag, device, DataType.Bit, totalBitOffset, isIEC)
 
     // {word device} or {bit device 의 word 표현} : 'P0000'
-    | RegexPattern @"^%?([DRUPMLKFTCS])(\d{4})$" [ DevicePattern device; Int32Pattern wordOffset; ] ->
+    | RegexPattern @"^%?([DRUPMLKFTCS])W?(\d{4})$" [ DevicePattern device; Int32Pattern wordOffset; ] ->
         let totalBitOffset = wordOffset * 16
         createTagInfo(tag, device, DataType.Word, totalBitOffset, isIEC)
     | _ ->

@@ -140,5 +140,26 @@ module XGKTest =
         [<Test>]
         member __.``xgk(xgbmk) a word read`` () =
             let mutable pass = false;
-            conn.ReadATag("%M0033") |> ignore
+            
+            try
+                conn.ReadATag("%M0033") |> ignore
+                pass <- true
+            with
+                | ex ->
+                    ignore ex // 예외 처리 코드
+                    pass <- false
+            pass === true
+
+
+        [<Test>]
+        member __.``xgk(xgbmk) a bit read`` () =
+            let mutable pass = false;
+            
+            try
+                conn.ReadATag("%M0033B") |> ignore
+                pass <- true
+            with
+                | ex ->
+                    ignore ex // 예외 처리 코드
+                    pass <- false
             pass === true

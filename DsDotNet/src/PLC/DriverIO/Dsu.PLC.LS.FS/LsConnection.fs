@@ -233,6 +233,8 @@ and LsConnection(parameters:LsConnectionParameters) as this =
         let anal = tryParseTag cpu tag |> Option.get
         x.ReadATagUI8(anal.GetXgiTag())
         |> anal.DataType.BoxUI8
+    member x.WriteATag(tag:ITag) =
+        x.WriteRandomTags([|tag :?> LsTag|])
 
 
     /// 복수개의 tag 값을 PLC 로부터 읽어 낸다.

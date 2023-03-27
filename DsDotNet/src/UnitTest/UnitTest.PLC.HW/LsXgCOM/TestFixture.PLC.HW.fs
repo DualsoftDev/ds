@@ -88,3 +88,14 @@ module XgCOMFixtures =
         member x.TearDown () =
             x.CommObject.Disconnect() |> ignore
             ()
+
+        member x.CreateDevice(deviceType:char, memType:char, ?size:int, ?offset:int) : DeviceInfo =
+            let size = size |? 8
+            let offset = offset |? 0
+            let di = x.Factory.CreateDevice()
+            di.ucDeviceType <- Convert.ToByte(deviceType)
+            di.ucDataType <- Convert.ToByte(memType)
+            di.lSize <- size
+            di.lOffset <- offset
+
+            di

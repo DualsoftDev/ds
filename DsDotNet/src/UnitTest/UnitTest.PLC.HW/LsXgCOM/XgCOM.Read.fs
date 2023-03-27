@@ -105,15 +105,12 @@ type XgCOM20ReadTest() =
         x.CommObject.IsConnected() === 1
         let plcId = x.CommObject.GetPLCID;
 
-        let di = x.Factory.CreateDevice()
-        di.ucDeviceType <- Convert.ToByte('M')
-        di.ucDataType <- Convert.ToByte('B')
+        let di = x.CreateDevice('M', 'B')
 
         let wBuf = Array.zeroCreate<byte>(1024)
         let rBuf = Array.zeroCreate<byte>(1024)
         x.CommObject.RemoveAll()
         for i = 0 to 1023 do
-            di.lSize <- 8
             di.lOffset <- i * 8
             wBuf[i] <- byte i
             if i < 64 then
@@ -191,14 +188,11 @@ type XgCOM20ReadTest() =
         //for i = start to 1023 do
         //    x.CommObject.WriteDevice_Bit("M", i, 1) === 1
 
-        let di = x.Factory.CreateDevice()
-        di.ucDeviceType <- Convert.ToByte('M')
-        di.ucDataType <- Convert.ToByte('B')
+        let di = x.CreateDevice('M', 'B')
 
         let rBuf = Array.zeroCreate<byte>(1024)
         x.CommObject.RemoveAll()
         for i = start to start+64-1 do
-            di.lSize <- 8
             di.lOffset <- i * 8
             x.CommObject.AddDeviceInfo(di)
 
@@ -214,15 +208,11 @@ type XgCOM20ReadTest() =
         //for i = start to 1023 do
         //    x.CommObject.WriteDevice_Bit("M", i, 1) === 1
 
-        let di = x.Factory.CreateDevice()
-        di.ucDeviceType <- Convert.ToByte('M')
-        di.ucDataType <- Convert.ToByte('B')
+        let di = x.CreateDevice('M', 'B')
 
         let rBuf = Array.zeroCreate<byte>(512)
         for i in start*8 .. 8 .. ((start+MAX_RANDOM_READ_POINTS)*8 - 1) do
-            //di.lSize <- 8
             //di.lOffset <- i * 8
-            di.lSize <- 8
             di.lOffset <- i
             x.CommObject.AddDeviceInfo(di)
 
@@ -234,16 +224,9 @@ type XgCOM20ReadTest() =
     member x.``Read random of Q test`` () =
         x.CommObject.RemoveAll()
 
-        let di = x.Factory.CreateDevice()
-        di.ucDeviceType <- Convert.ToByte('Q')
-        di.ucDataType <- Convert.ToByte('B')
-
         let rBuf = Array.zeroCreate<byte>(512)
-        di.lSize <- 8
-        di.lOffset <- 0
+        let di = x.CreateDevice('Q', 'B')
         x.CommObject.AddDeviceInfo(di)
-
-
         x.CommObject.ReadRandomDevice(rBuf) === 1
         noop();
 
@@ -252,15 +235,10 @@ type XgCOM20ReadTest() =
     member x.``Read random of I test`` () =
         x.CommObject.RemoveAll()
 
-        let di = x.Factory.CreateDevice()
-        di.ucDeviceType <- Convert.ToByte('I')
-        di.ucDataType <- Convert.ToByte('B')
+        let di = x.CreateDevice('I', 'B')
 
         let rBuf = Array.zeroCreate<byte>(512)
-        di.lSize <- 8
-        di.lOffset <- 0
         x.CommObject.AddDeviceInfo(di)
-
 
         x.CommObject.ReadRandomDevice(rBuf) === 1
         noop();
@@ -271,18 +249,13 @@ type XgCOM20ReadTest() =
     member x.``Read random of Q 2nd slot test`` () =
         x.CommObject.RemoveAll()
 
-        let di = x.Factory.CreateDevice()
-        di.ucDeviceType <- Convert.ToByte('Q')
-        di.ucDataType <- Convert.ToByte('B')
-
         let rBuf = Array.zeroCreate<byte>(512)
-        di.lSize <- 8
-        di.lOffset <- 0
+        let di = x.CreateDevice('Q', 'B')
         x.CommObject.AddDeviceInfo(di)
 
         (* SetBaseSlot 은 동작하지않고, 위의 di.lOffset 에 8 을 넣었을 때(8byte skip 해서 QX0.1.??) 에는 제대로 읽어 들임.  *)
-        x.CommObject.SetChNo(1uy)               // retuns unit ???
-        x.CommObject.SetBaseSlot(0uy, 0uy)      // retuns unit ???
+        x.CommObject.SetChNo(0uy)               // retuns unit ???
+        x.CommObject.SetBaseSlot(0uy, 1uy)      // retuns unit ???
 
         x.CommObject.ReadRandomDevice(rBuf) === 1
         noop();

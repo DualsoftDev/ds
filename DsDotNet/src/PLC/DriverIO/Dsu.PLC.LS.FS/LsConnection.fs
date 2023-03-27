@@ -231,7 +231,7 @@ and LsConnection(parameters:LsConnectionParameters) as this =
     /// 하나의 tag 값을 즉시 읽어 낸다.  return type: obj.  ValueChanged event 등은 발생하지 않는다.
     member x.ReadATag(tag:string) =
         let anal = tryParseTag cpu tag |> Option.get
-        x.ReadATagUI8(tag)
+        x.ReadATagUI8(anal.GetXgiTag())
         |> anal.DataType.BoxUI8
 
 

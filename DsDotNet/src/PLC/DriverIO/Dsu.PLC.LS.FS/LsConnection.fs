@@ -89,7 +89,7 @@ and LsConnection(parameters:LsConnectionParameters) as this =
     /// CPU type 정보를 얻기 위해서 모든 PLC 기종에 존재하는 sample tag 를 전송하고 header 를 얻는다.
     let getPacketHeader() =
         let dummyCpu = CpuType.Xgk
-        createRandomReadRequestPacket dummyCpu [|"%MX00"|]    // 보낼 packet 및 response packet 의 length 를 구함
+        createRandomReadRequestPacket dummyCpu [|"M00000"|]    // 보낼 packet 및 response packet 의 length 를 구함
         ||> sendPacketAndGetResponse                    // packet  전송하고, (해당 길이에 맞는지 check 해서) response packet 구함
         |> verifyReponseHeader None
 

@@ -29,6 +29,7 @@ module XgCommLibSpec =
         | W_A = 0xcd
 
     let [<Literal>] MAX_RANDOM_READ_POINTS = 64
+    let [<Literal>] MAX_ARRAY_BYTE_SIZE = 512   // 64*8
 
 (*
     XGComLib summary
@@ -51,8 +52,8 @@ type XgCOM10ReadTest() =
         di.ucDeviceType <- Convert.ToByte('M')
         di.ucDataType <- Convert.ToByte('B')
 
-        let wBuf = Array.zeroCreate<byte>(1024)
-        let rBuf = Array.zeroCreate<byte>(1024)
+        let wBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
+        let rBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
         x.CommObject.RemoveAll()
         for i = 0 to 1023 do
             di.lSize <- 8
@@ -107,8 +108,8 @@ type XgCOM20ReadTest() =
 
         let di = x.CreateDevice('M', 'B')
 
-        let wBuf = Array.zeroCreate<byte>(1024)
-        let rBuf = Array.zeroCreate<byte>(1024)
+        let wBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
+        let rBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
         x.CommObject.RemoveAll()
         for i = 0 to 1023 do
             di.lOffset <- i * 8
@@ -169,6 +170,21 @@ type XgCOM20ReadTest() =
         for i = 2049 to 4095 do
             x.CommObject.WriteDevice_Bit("M", i, 1) === 1
 
+
+    [<Test>]
+    member x.``Write Q0 bit test`` () =
+        x.CommObject.WriteDevice_Bit("Q", 0, 1) === 1
+    [<Test>]
+    member x.``Write Q0 and read it test`` () =
+        x.CommObject.WriteDevice_Bit("Q", 0, 1) === 1
+
+        x.CommObject.RemoveAll()
+        let di = x.CreateDevice('Q', 'B', 8, 0)
+        x.CommObject.AddDeviceInfo(di)
+        let rBuf = Array.zeroCreate<byte>(8)
+        x.CommObject.ReadRandomDevice(rBuf) === 1
+        (rBuf[0] &&& 1uy) === 1uy
+
     /// ReadDevice_Bit NOT working
     [<Test>]
     member x.``X Read bit test`` () =
@@ -190,7 +206,7 @@ type XgCOM20ReadTest() =
 
         let di = x.CreateDevice('M', 'B')
 
-        let rBuf = Array.zeroCreate<byte>(1024)
+        let rBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
         x.CommObject.RemoveAll()
         for i = start to start+64-1 do
             di.lOffset <- i * 8

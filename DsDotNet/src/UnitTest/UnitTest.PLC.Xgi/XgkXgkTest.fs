@@ -21,8 +21,6 @@ module XGKTest =
         let bitAddresses = [|3;7;0xA;0xF|]
 
 
-        
-
         let testBitRead(typ:DeviceType, addresses:int[], addBit:int) =
             let mutable pass: bool = false
             let strTyp = typ.ToString()
@@ -72,6 +70,7 @@ module XGKTest =
             pass === true
         
 
+
         let testWordRW(typ:DeviceType, addresses:int[], value: int16) = 
             let strTyp = typ.ToString()
             let safeWordTags = addresses |> Array.map (fun addr -> sprintf "%%%s%d" strTyp addr)
@@ -90,10 +89,9 @@ module XGKTest =
                 if info <> 0us then
                     noop()
                 info === 0us
-                
 
         [<Test>]
         member __.``xgk(xgbmk) Connection Test`` () =
             conn.Connect() === true
 
-        
+

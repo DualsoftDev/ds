@@ -310,7 +310,6 @@ let (|LsTagPatternXgk|_|) tag =
     // bit devices : Full blown 만 허용.  'P1001A'.  마지막 hex digit 만 bit 로 인식
     | RegexPattern @"^%?([PMLKFTCS])(\d{4})([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
         let totalBitOffset = (wordOffset * 16) + bitOffset
-
         createTagInfo(tag, device, DataType.Bit, totalBitOffset, isIEC)
     | RegexPattern @"^%?([PMLKFTCS])(\d{4})$" [ DevicePattern device; Int32Pattern wordOffset; ] ->
         let totalBitOffset = wordOffset * 16

@@ -14,7 +14,17 @@ module XGKTest =
 
         let bitDeviceTypes = [ P; M; L; K; F; T; C; ]       //S Step제어용 디바이스 수집 불가
         let wordDeviceTypes = [D; R; U; T; C; Z]               // '사용설명서_XGK_XGB_명령어집_국문_v2.8.pdf', pp.2-12
-        let wordDeviceTypesforWrite = [D; U; T; C; Z]
+        let wordDeviceTypesWithoutR = [D; U; T; C; Z]
+        let fullDeviceTypes = [D; R; U; P; M; L; K; F; T; C; Z;]
+        let fullDeviceTypesWithoutR = [D; U; P; M; L; K; F; T; C; Z;]
+        let fullDeviceTypesWithoutRUFTCZ = [D; P; M; L; K;] //U //F //T //C; // Z;
+
+        let word1Addresses = [|3;5;9|]  //P0 쓰기 불가
+        let word2Addresses = [|15;99|]
+        let word3Addresses = [|101;999|]
+        let word4Addresses = [|1001|]
+        let bitAddresses = [|0;0xF|]
+        let testNum = 11us
 
         let targetAddresses = ["00000"; "00001"; "00002"; "00010"; "00011"; "00011"; "00012"; "10112"; "1011F"; "0000"; "0003"; "0010"; "0100"; ]
 
@@ -23,11 +33,11 @@ module XGKTest =
         let safeDWordAddresses = [| for lw in safeLWordAddresses do yield! [2*lw; 2*lw+1] |]
         let safeWordAddresses =  [| for dw in safeDWordAddresses do yield! [2*dw; 2*dw+1] |]
         //let safeByteAddresses =  [| for w in safeWordAddresses do yield! [w; w+1UL] |]   // [| 0..1023 |]
-        let testNum = 11us
+
 
         let testReadDevice(typ:DeviceType) =
             let mutable pass: bool = true
-            let testadd = [|0;1;35|]
+            let testadd = [|0;1;11;35|]
             let strTyp = typ.ToString()
             let safeWordTags = testadd |> Array.map (fun addr -> sprintf "%%%sW%d" strTyp addr)
 
@@ -41,9 +51,6 @@ module XGKTest =
                     pass <- false
 
             pass === true
-
-
-
 
 
         let testReadWriteTargetDevice(typ:DeviceType, testBit:bool) =
@@ -80,8 +87,135 @@ module XGKTest =
                 let info = conn.ReadATag(tag)
                 if info <> answer then
                     noop()
-
                 info === answer
+
+
+        let testWord0BitDevice(typ:DeviceType) =
+            let strTyp = typ.ToString()
+            let safeWordTags = bitAddresses |> Array.map (fun addr -> sprintf "%%%s%X" strTyp addr)
+            let lsTags = safeWordTags |> map (fun t -> LsTagXgk(conn, t) :> LsTag)
+            lsTags |> iter (fun t -> t.Value <- true)
+            conn.WriteRandomTags lsTags |> ignore
+            for (tag) in safeWordTags do
+                let info = conn.ReadATag(tag)
+                if info <> true then
+                    noop()
+                info === true
+            lsTags |> iter (fun t -> t.Value <- false)
+            conn.WriteRandomTags lsTags |> ignore
+            for (tag) in safeWordTags do
+                let info = conn.ReadATag(tag)
+                if info <> false then
+                    noop()
+                info === false
+
+
+        let testWord1to4BitDevice(typ:DeviceType, bitAddress:int) =
+            let testWords = word1Addresses @ word2Addresses @ word3Addresses @ word4Addresses
+            let strTyp = typ.ToString()
+            let safeWordTags = testWords |> Array.map (fun addr -> sprintf "%%%s%d%X" strTyp addr bitAddress)
+            let lsTags = safeWordTags |> map (fun t -> LsTagXgk(conn, t) :> LsTag)
+            lsTags |> iter (fun t -> t.Value <- true)
+            conn.WriteRandomTags lsTags |> ignore
+            for (tag) in safeWordTags do
+                let info = conn.ReadATag(tag)
+                if info <> true then
+                    noop()
+                info === true
+            lsTags |> iter (fun t -> t.Value <- false)
+            conn.WriteRandomTags lsTags |> ignore
+            for (tag) in safeWordTags do
+                let info = conn.ReadATag(tag)
+                if info <> false then
+                    noop()
+                info === false
+
+        //let testType3Device(typ:DeviceType, bitAddress:string) =
+        //    let strTyp = typ.ToString()
+        //    let safeWordTags = word4Addresses |> Array.map (fun addr -> sprintf "%%%s%s%X" strTyp addr bitAddress)
+        //    let lsTags = safeWordTags |> map (fun t -> LsTagXgk(conn, t) :> LsTag)
+        //    lsTags |> iter (fun t -> t.Value <- 1us)
+        //    conn.WriteRandomTags lsTags |> ignore
+        //    for (tag) in safeWordTags do
+        //        let info = conn.ReadATag(tag)
+        //        if info <> 1us then
+        //            noop()
+        //        info === 1us
+        //    lsTags |> iter (fun t -> t.Value <- 0us)
+        //    conn.WriteRandomTags lsTags |> ignore
+        //    for (tag) in safeWordTags do
+        //        let info = conn.ReadATag(tag)
+        //        if info <> 0us then
+        //            noop()
+        //        info === 0us
+
+        let testOnlyWordDevice(typ:DeviceType) =
+            let testWords = word1Addresses @ word2Addresses @ word3Addresses @ word4Addresses
+            let strTyp = typ.ToString()
+            let safeWordTags = testWords |> Array.map (fun addr -> sprintf "%%%s%d" strTyp addr)
+            let lsTags = safeWordTags |> map (fun t -> LsTagXgk(conn, t) :> LsTag)
+            lsTags |> iter (fun t -> t.Value <- testNum)
+            conn.WriteRandomTags lsTags |> ignore
+            for (tag) in safeWordTags do
+                let info = conn.ReadATag(tag)
+                if info <> testNum then
+                    noop()
+                info === testNum
+            lsTags |> iter (fun t -> t.Value <- 0us)
+            conn.WriteRandomTags lsTags |> ignore
+            for (tag) in safeWordTags do
+                let info = conn.ReadATag(tag)
+                if info <> 0us then
+                    noop()
+                info === 0us
+
+        let testXWordBitDevice(typ: DeviceType, bitAddr: int) =
+            let testWords = word1Addresses @ word2Addresses @ word3Addresses @ word4Addresses
+            let strTyp = typ.ToString()
+            let safeWordTags = testWords |> Array.map (fun addr -> sprintf "%%%sX%04d%X" strTyp addr bitAddr)
+            let lsTags = safeWordTags |> map (fun t -> LsTagXgk(conn, t) :> LsTag)
+            lsTags |> iter (fun t -> t.Value <- true)
+            conn.WriteRandomTags lsTags |> ignore
+            for (tag) in safeWordTags do
+                let info = conn.ReadATag(tag)
+                if info <> true then
+                    noop()
+                info === true
+            lsTags |> iter (fun t -> t.Value <- false)
+            conn.WriteRandomTags lsTags |> ignore
+            for (tag) in safeWordTags do
+                let info = conn.ReadATag(tag)
+                if info <> false then
+                    noop()
+                info === false
+
+
+
+        let testBWDLWordDevice(typ:DeviceType, word: string) =
+            let testWords = word1Addresses @ word2Addresses @ word3Addresses @ word4Addresses
+            let strTyp = typ.ToString()
+
+            let safeWordTags = testWords |> Array.map (fun addr -> sprintf "%%%s%s%d" strTyp word addr)
+
+
+            let lsTags = safeWordTags |> map (fun t -> LsTagXgk(conn, t) :> LsTag)
+            lsTags |> iter (fun t -> t.Value <- testNum)
+            conn.WriteRandomTags lsTags |> ignore
+            for tag in safeWordTags do
+                let info = conn.ReadATag(tag)
+                let answer = testNum
+                if info <> answer then
+                    noop()
+
+            lsTags |> iter (fun t -> t.Value <- 0us)
+            conn.WriteRandomTags lsTags |> ignore
+            for tag in safeWordTags do
+                let info = conn.ReadATag(tag)
+                let answer = 0us
+                if info <> answer then
+                    noop()
+                info === answer
+
 
 
 
@@ -117,11 +251,114 @@ module XGKTest =
 
 
         [<Test>]
+        member __.``xgk(xgbmk) word0bit test`` () =
+            for dt in bitDeviceTypes do
+                testWord0BitDevice(dt)
+
+        [<Test>]
+        member __.``xgk(xgbmk) word1to4bit test`` () =
+            for dt in bitDeviceTypes do
+                for ba in bitAddresses do
+                    testWord1to4BitDevice(dt,ba)
+
+
+        [<Test>]
+        member __.``xgk(xgbmk) only word1to4 test`` () =
+            for dt in fullDeviceTypes do
+                testOnlyWordDevice(dt)
+
+        [<Test>]
+        member __.``xgk(xgbmk) only word1to4 test without R`` () =
+            for dt in fullDeviceTypesWithoutR do
+                testOnlyWordDevice(dt)
+
+        [<Test>]
+        member __.``xgk(xgbmk) X word bit test`` () =
+            for dt in fullDeviceTypes do
+                for ba in bitAddresses do
+                    testXWordBitDevice(dt,ba)
+
+        [<Test>]
+        member __.``xgk(xgbmk) X word bit test without R`` () =
+            for dt in fullDeviceTypesWithoutR do
+                for ba in bitAddresses do
+                    testXWordBitDevice(dt,ba)
+
+        [<Test>]
+        member __.``xgk(xgbmk) X word bit test without R and U`` () =
+            for dt in fullDeviceTypesWithoutRUFTCZ do
+                for ba in bitAddresses do
+                    testXWordBitDevice(dt,ba)
+
+
+        [<Test>]
+        member __.``xgk BWDL word Test`` () =
+            for dt in wordDeviceTypes do
+                //testBWDLWordDevice(dt, "B");
+                testBWDLWordDevice(dt, "W");
+                //testBWDLWordDevice(dt, "D");
+                //testBWDLWordDevice(dt, "L");
+
+        [<Test>]
+        member __.``xgk BWDL word Test withoutR`` () =
+            for dt in wordDeviceTypesWithoutR do
+                //testBWDLWordDevice(dt, "B");
+                testBWDLWordDevice(dt, "W");
+                //testBWDLWordDevice(dt, "D");
+                //testBWDLWordDevice(dt, "L");
+
+        //[<Test>]
+        //member __.``xgk BWDL word Test withoutR and U`` () =
+        //    for dt in fullDeviceTypesWithoutR do
+        //        testBWDLWordDevice(dt, "B");
+        //        testBWDLWordDevice(dt, "W");
+        //        testBWDLWordDevice(dt, "D");
+        //        testBWDLWordDevice(dt, "L");
+
+
+        //[<Test>]
+        //member __.``xgk(xgbmk) BWDL word bit test`` () =
+        //    for dt in bitDeviceTypes do
+        //            testBWDLWordBitDevice(dt)
+
+
+        //[<Test>]
+        //member __.``xgk(xgbmk) word3 test`` () =
+        //    for dt in bitDeviceTypes do
+        //        testType4Device(dt)
+
+        //[<Test>]
+        //member __.``xgk(xgbmk) word4 test`` () =
+        //    for dt in bitDeviceTypes do
+        //        testType4Device(dt)
+
+
+        //[<Test>]
+        //member __.``xgk(xgbmk) word2 test`` () =
+        //        for ba in bitAddresses do
+        //            testType3Device(dt,ba)
+
+
+        [<Test>]
         member __.``xgk %PW Read Test`` () =
             for dt in bitDeviceTypes do
                 testReadDevice(dt)
             for dt in wordDeviceTypes do
                 testReadDevice(dt)
+
+        [<Test>]
+        member __.``xgk PLC Write-Read Test`` () =
+            //for dt in bitDeviceTypes do
+            //    testWriteDevice(dt, true)
+            for dt in wordDeviceTypes do
+                testWriteDevice(dt, false)
+
+        [<Test>]
+        member __.``xgk PLC Write-Read without R Test`` () =
+            //for dt in bitDeviceTypes do
+            //    testWriteDevice(dt, true)
+            for dt in wordDeviceTypesWithoutR do
+                testWriteDevice(dt, false)
 
 
 
@@ -129,20 +366,5 @@ module XGKTest =
         member __.``xgk PLC LsTagAnalysis Return Test`` () =
             for dt in bitDeviceTypes do
                 testReadWriteTargetDevice(dt, true)
-            for dt in wordDeviceTypesforWrite do
+            for dt in wordDeviceTypesWithoutR do
                 testReadWriteTargetDevice(dt, false)
-
-
-
-        [<Test>]
-        member __.``xgk PLC Write-Read Test`` () =
-            //for dt in bitDeviceTypes do
-            //    testWriteDevice(dt, true)
-            for dt in wordDeviceTypesforWrite do
-                testWriteDevice(dt, false)
-
-
-
-        [<Test>]
-        member __.``ignore test`` () =
-            ()

@@ -1,4 +1,9 @@
-namespace T
+#if X64
+namespace Tx64
+#else
+namespace Tx86
+#endif
+open T
 
 open NUnit.Framework
 open AddressConvert

@@ -43,7 +43,7 @@ type XgkAddressTest() =
             let testSet = (if testBit then bits else []) @ words
 
             for (tag, answer) in testSet do
-                let info = getXgkTagInfo tag
+                let info = tryParseTag tag
                 if info.IsNone || info.Value <> answer then
                     noop()
 

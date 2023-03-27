@@ -2,6 +2,7 @@ module AddressConvert
 
 open Engine.Common.FS
 open Dsu.PLC.Common
+open System.Text.RegularExpressions
 
 // 산전 PLC 주소 체계 : https://tech-e.tistory.com/10
 
@@ -252,12 +253,24 @@ type LsTagAnalysis = {
             | _ ->
                 failwith "ERROR"
 
+
+let isXgiTag tag =
+    Regex(@"^%([MLKFNRAWIQU])X([\da-fA-F]+)$").IsMatch(tag)
+    || Regex(@"^%([IQU])X(\d+)\.(\d+)\.(\d+)$").IsMatch(tag)
+    || Regex(@"^%([MLKFNRAWIQU])([BWDL])([\da-fA-F]+)\.(\d+)$").IsMatch(tag)
+    || Regex(@"^%([MLKFNRAWIQU])([BWDL])(\d+)$").IsMatch(tag)
+    || Regex(@"^%([IQU])([BWDL])(\d+)\.(\d+)\.(\d+)$").IsMatch(tag)
+
+let isXgkTag tag =
+    Regex(@"^([PMLKFTCS])(\d{4})([\da-fA-F])$").IsMatch(tag)
+    || Regex(@"^([DRUPMLKFTCS])(\d{4})$").IsMatch(tag)
+
 let createTagInfo = LsTagAnalysis.Create >> Some
-let (|LsTagPatternXgi|_|) tag =
+let (|LsTagPatternFEnet|_|) tag =
     let isIEC = true
     match tag with
     // XGI IEC 61131 : bit
-    | RegexPattern @"^%([MLKFNRAWIQU])X([\da-fA-F]+)$" [ DevicePattern device; HexPattern bitOffset ] ->
+    | RegexPattern @"^%([PMLKFNRAWIQU])X([\da-fA-F]+)$" [ DevicePattern device; HexPattern bitOffset ] ->
         createTagInfo(tag, device, DataType.Bit, bitOffset, isIEC)
 
     | RegexPattern @"^%([IQU])X(\d+)\.(\d+)\.(\d+)$"
@@ -287,14 +300,14 @@ let (|LsTagPatternXgi|_|) tag =
     //        BitOffset = fileOffset + byteOffset + bit }
 
 
-    | RegexPattern @"^%([MLKFNRAWIQU])([BWDL])([\da-fA-F]+)\.(\d+)$"
+    | RegexPattern @"^%([PMLKFNRAWIQU])([BWDL])([\da-fA-F]+)\.(\d+)$"
        [DevicePattern device; DataTypePattern dataType;  Int32Pattern offset; Int32Pattern bit;] ->
         let totalBitOffset = offset * dataType.GetBitLength() + bit
         createTagInfo(tag, device, DataType.Bit, totalBitOffset, isIEC)
 
 
     // XGI IEC 61131 : byte / word / dword / lword
-    | RegexPattern @"^%([MLKFNRAWIQU])([BWDL])(\d+)$"
+    | RegexPattern @"^%([PMLKFNRAWIQU])([BWDL])(\d+)$"
         [DevicePattern device; DataTypePattern dataType; Int32Pattern offset;] ->
         let byteOffset = offset * dataType.GetByteLength()
         let totalBitOffset = byteOffset * 8
@@ -320,32 +333,9 @@ let (|LsTagPatternXgi|_|) tag =
         logWarn "Failed to parse tag : %s" tag
         None
 
-let (|LsTagPatternXgk|_|) tag =
-    let isIEC = false
-    match tag with
-    // bit devices : Full blown 만 허용.  'P1001A'.  마지막 hex digit 만 bit 로 인식
-    | RegexPattern @"^%?([PMLKFTCS])(\d{4})([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
-        let totalBitOffset = (wordOffset * 16) + bitOffset
-        createTagInfo(tag, device, DataType.Bit, totalBitOffset, isIEC)
 
-    // {word device} or {bit device 의 word 표현} : 'P0000'
-    | RegexPattern @"^%?([DRUPMLKFTCS])(\d{4})$" [ DevicePattern device; Int32Pattern wordOffset; ] ->
-        let totalBitOffset = wordOffset * 16
-        createTagInfo(tag, device, DataType.Word, totalBitOffset, isIEC)
-    | _ ->
-        None
+let tryParseTag tag =  (|LsTagPatternFEnet|_|) tag
 
-let getXgkTagInfo tag = (|LsTagPatternXgk|_|) tag
-let getXgiTagInfo tag = (|LsTagPatternXgi|_|) tag
-
-let tryParseTag (cpu:CpuType) tag =
-    match (cpu, tag) with
-    | CpuType.Xgk, LsTagPatternXgk x -> Some x
-    | CpuType.XgbMk, LsTagPatternXgk x -> Some x
-    | CpuType.Xgi, LsTagPatternXgi x -> Some x
-    | _ ->
-        logWarn "Failed to parse tag : %s" tag
-        None
 //let tryParseIECTag (tag) =
 //    match tag with
 //    | RegexPattern @"([PMLKF])(\d\d\d\d)([\da-fA-F])"
@@ -369,15 +359,15 @@ let tryParseTag (cpu:CpuType) tag =
 
 
 /// LS PLC 의 tag 명을 기준으로 data 의 bit 수를 반환
-let getBitSize cpu tag =
-    tryParseTag cpu tag |> Option.get |> fun x -> x.BitLength
+let getBitSize tag =
+    tryParseTag tag |> Option.get |> fun x -> x.BitLength
 
-let getBitOffset cpu tag =
-    tryParseTag cpu tag |> Option.get |> fun x -> x.BitOffset
+let getBitOffset tag =
+    tryParseTag tag |> Option.get |> fun x -> x.BitOffset
 
-let getByteSize cpu tag =
-    tryParseTag cpu tag |> Option.get |> fun x -> x.ByteLength
+let getByteSize tag =
+    tryParseTag tag |> Option.get |> fun x -> x.ByteLength
 
-let getDataType cpu tag =
-    tryParseTag cpu tag |> Option.get |> fun x -> x.DataType
+let getDataType tag =
+    tryParseTag tag |> Option.get |> fun x -> x.DataType
 

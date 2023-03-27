@@ -356,12 +356,12 @@ open System.Collections.Generic
 
 
 ///// LS PLC 의 tag 명을 기준으로 data 의 bit 수를 반환
-//let getBitSize cpu tag =
+//let getBitSize tag =
 //    match tryParseTag cpu tag with
 //    |Some v -> v.BitLength
 //    |None -> failwithlogf "Cannot getBitSize '%s'" tag
 
-//let getBitOffset cpu tag =
+//let getBitOffset tag =
 //    match tryParseTag cpu tag with
 //    |Some v -> v.BitOffset
 //    |None -> failwithlogf "Cannot getBitOffset '%s'" tag

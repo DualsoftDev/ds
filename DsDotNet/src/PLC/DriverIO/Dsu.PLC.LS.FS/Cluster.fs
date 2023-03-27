@@ -152,7 +152,7 @@ let clusterTags cpu (tags:string[]) =
         tags
         |> sort
         |> distinct
-        |> map (tryParseTag cpu >> Option.get)
+        |> map (tryParseTag >> Option.get)
         |> groupBy (fun anal -> anal.Device)
 
 
@@ -294,7 +294,7 @@ let planReadTags (randomReader:TagsReader) (blockReader:ByteReader) cpu tags' =
                 let referInfos =
                     [
                         for rtag in referringTags do
-                            let anal = tryParseTag cpu rtag |> Option.get
+                            let anal = tryParseTag rtag |> Option.get
                             //  anal.BitOffset 은 device type 의 global 한 offset 이므로, 해당 block 을 반영해서 조정해야 한다.
                             let bitOffset = anal.BitOffset - (s * 8)
                             yield (rtag, bitOffset, anal.BitLength)
@@ -347,7 +347,7 @@ let planReadTags (randomReader:TagsReader) (blockReader:ByteReader) cpu tags' =
                                     // referring tag 들의 value 값을 읽어서 결과 생성
                                     let referringTags = dic.[tag]
                                     for rtag in referringTags do
-                                        let anal = tryParseTag cpu rtag |> Option.get
+                                        let anal = tryParseTag rtag |> Option.get
                                         yield (rtag, readFromLWord ulValue anal)
                             |]
                         with exn ->

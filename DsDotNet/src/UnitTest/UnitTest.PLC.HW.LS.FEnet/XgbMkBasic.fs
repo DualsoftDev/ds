@@ -2,9 +2,7 @@ namespace T
 
 open NUnit.Framework
 open AddressConvert
-open Engine.Core.CoreModule
 open Engine.Common.FS
-open System.Text.RegularExpressions
 open Dsu.PLC.LS
 
 type XgbMkBasic() =
@@ -38,11 +36,26 @@ type XgbMkBasic() =
     //    x.Read("%ML0") === 0xFFFFFFFFFFFFFFFFUL
 
 
-    //[<Test>]
-    //member x.``WriteAndRead`` () =
-    //    let ul0 = 0xF1F2F3F4F5F6F7F8UL
-    //    x.Write("%ML1", ul0)
-    //    x.Read("%ML1") === ul0
-    //    noop()
+    [<Test>]
+    member x.``WriteAndRead`` () =
+        let ul0 = 0xF1F2F3F4F5F6F7F8UL
+        x.Write("%ML1", ul0)
+        x.Read("%ML1") === ul0
+
+        noop()
+    [<Test>]
+    member x.``P`` () =
+        (* P 영역은 write 가능한 영역과 불가능한 영역이 존재 하는 듯.. *)
+        x.Write("%PB64", 0x64uy)
+        x.Read("%PB64") === 0x64uy
+
+        x.Write("%PW33", 0x33us)
+        x.Read("%PW33") === 0x33us
+
+
+        x.Write("%PW50", 0x1234us)
+        let xxx = x.Read("%PW1")
+        noop()
+
 
 

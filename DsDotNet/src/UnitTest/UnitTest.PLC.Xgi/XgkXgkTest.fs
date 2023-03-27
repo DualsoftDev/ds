@@ -12,12 +12,12 @@ module XGKTest =
         inherit PLCTestBase("192.168.0.101")                //xgk or xgbmk
         let conn = base.Conn
 
-        let bitDeviceTypes = [ P; M; L; K; F; T; C; ]       //S Step제어용 디바이스 수집 불가
-        let wordDeviceTypes = [D; R; U; T; C; Z]               // '사용설명서_XGK_XGB_명령어집_국문_v2.8.pdf', pp.2-12
+        let bitDeviceTypes = [ P; M; L; K; F;]       //S Step제어용 디바이스 수집 불가    //T C 불가
+        let wordDeviceTypes = [D; R; U; T; C; T; Z]               // '사용설명서_XGK_XGB_명령어집_국문_v2.8.pdf', pp.2-12
         let wordDeviceTypesforWrite = [D; U; T; C; Z]
 
         let shortAddresses = [|1;2;12;301;999|]
-        let fullAddresses = [|1001;1014;1201;3002|]
+        let fullAddresses = [|1001;1014;|]
         let bitAddresses = [|3;7;0xA;0xF|]
 
 

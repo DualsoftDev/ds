@@ -248,7 +248,6 @@ type LsTagAnalysis = {
                             
             match x.DataType with
             | DataType.Bit ->
-                
                 $"%%{x.Device}X{offset}{offsetBit}"
             | DataType.Word ->
                 assert(x.BitOffset%16 = 0)

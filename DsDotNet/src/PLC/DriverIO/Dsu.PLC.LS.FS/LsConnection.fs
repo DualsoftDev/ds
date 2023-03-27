@@ -29,7 +29,7 @@ type LsCpu(cpu, running) =
 [<DebuggerDisplay("{Name}")>]
 type LsTag internal(conn:ConnectionBase, name:string, cpu:CpuType) as this =
     inherit TagBase(conn)
-    let parsed = tryParseTag cpu (name) |> Option.get
+    let parsed = tryParseTag (name) |> Option.get
     let dataLengthType = parsed.DataType.ToDataLengthType()
     do
         this.Name <- name
@@ -89,7 +89,7 @@ and LsConnection(parameters:LsConnectionParameters) as this =
     /// CPU type 정보를 얻기 위해서 모든 PLC 기종에 존재하는 sample tag 를 전송하고 header 를 얻는다.
     let getPacketHeader() =
         let dummyCpu = CpuType.Xgk
-        createRandomReadRequestPacket dummyCpu [|"M00000"|]    // 보낼 packet 및 response packet 의 length 를 구함
+        createRandomReadRequestPacket dummyCpu [|"%MX0"|]    // 보낼 packet 및 response packet 의 length 를 구함
         ||> sendPacketAndGetResponse                    // packet  전송하고, (해당 길이에 맞는지 check 해서) response packet 구함
         |> verifyReponseHeader None
 
@@ -149,7 +149,7 @@ and LsConnection(parameters:LsConnectionParameters) as this =
         let anals =
             tagsAndValues
             |> map fst
-            |> map(fun t -> (t, tryParseTag cpu t|> Option.get))
+            |> map(fun t -> (t, tryParseTag t|> Option.get))
             |> Tuple.toDictionary
         tagsAndValues
         |> groupBy (fun (t, _) -> anals.[t].DataType.ToDataLengthType())
@@ -158,11 +158,11 @@ and LsConnection(parameters:LsConnectionParameters) as this =
 
     /// Channel tag (LW 기준으로 사용된 tag) 별로 원래 tag 가 무엇이었는지를 map 으로 생성
     let mapChannelTags (channelTags:string[]) (originalTags:string[]) =
-        let ots = originalTags |> map (fun t -> (t, tryParseTag cpu t |> Option.get))
+        let ots = originalTags |> map (fun t -> (t, tryParseTag t |> Option.get))
         let mapping =    // channel tag --> [original tag]
             [
                 for ct in channelTags do
-                    let ctAnal = tryParseTag cpu ct |> Option.get
+                    let ctAnal = tryParseTag ct |> Option.get
                     let ctS, ctE = (ctAnal.BitOffset, ctAnal.BitOffset + ctAnal.BitLength)
                     for (ot, otAnal) in ots do
                         let ltS, ltE = (otAnal.BitOffset, otAnal.BitOffset + otAnal.BitLength)
@@ -230,9 +230,12 @@ and LsConnection(parameters:LsConnectionParameters) as this =
 
     /// 하나의 tag 값을 즉시 읽어 낸다.  return type: obj.  ValueChanged event 등은 발생하지 않는다.
     member x.ReadATag(tag:string) =
-        let anal = tryParseTag cpu tag |> Option.get
-        x.ReadATagUI8(anal.GetXgiTag())
+        // todo : tag 를 cpu type 에 맞게 FEnet format 으로 변환해서 호출 해야 함...
+        let anal = tryParseTag tag |> Option.get
+        x.ReadATagUI8(tag)
         |> anal.DataType.BoxUI8
+    member x.WriteATag(tag:ITag) =
+        x.WriteRandomTags([|tag :?> LsTag|])
 
 
     /// 복수개의 tag 값을 PLC 로부터 읽어 낸다.

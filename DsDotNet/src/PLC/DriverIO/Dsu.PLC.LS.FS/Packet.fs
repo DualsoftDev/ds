@@ -70,8 +70,8 @@ let getErrorMessage errorCode =
 
 
 /// tags 가 모두 동일 크기이면 해당 크기를 반환, 모두 동일하지 않으면 None
-let tryGetAllEqualByteSize cpu (tags:string[]) =
-    tags |> Array.map (getByteSize cpu) |> Array.distinct |> Array.tryExactlyOne
+let tryGetAllEqualByteSize (tags:string[]) =
+    tags |> Array.map getByteSize |> Array.distinct |> Array.tryExactlyOne
 
 
 let str2bytes (s:string) = ASCIIEncoding.ASCII.GetBytes(s)
@@ -255,9 +255,9 @@ module RandomReadWrite =
 
     /// Command(2B) + Data type(2B) + Reserved(2B) + Error State(2B) + Error Code or Num Tags(2B)
     /// + { Data Length(2B) + Actual Data(nB) } * m
-    let getReadResponsePacketLength cpu (tags:string []) =
+    let getReadResponsePacketLength (tags:string []) =
         // 통합 data size 방식
-        match tags |> tryGetAllEqualByteSize cpu with
+        match tags |> tryGetAllEqualByteSize with
         | Some dataSize -> commandPacketLength + tags.Length * (2 + dataSize)   // 2 : length 기록용
         | _ -> failwith "Mixing different size tags not allowed!"
 
@@ -273,7 +273,7 @@ module RandomReadWrite =
     /// e.g "%MX1F" --> "%MX31" (31 = 1 * 16 + 15)
     /// e.g "%MX0241A" --> "%MX3866" (3866 = 241 * 16 + 10)
     let bitHex2DecOnDemand cpu (tag:string) =
-        match (cpu, tryParseTag cpu tag) with
+        match (cpu, tryParseTag tag) with
         | CpuType.Xgk, Some anal when anal.DataType = DataType.Bit ->
             let bi = anal.BitOffset
             let dev = anal.Device.ToString()
@@ -306,9 +306,9 @@ module RandomReadWrite =
             if writeValue.any() then
                 // random write 인 경우
                 assert(tags.length() = writeValue.Length)
-                assert(tags |> Array.map (getBitSize cpu) |> Array.distinct |> Array.length = 1)
-                let dataLength = getByteSize cpu (tags.[0])
-                let dataType = getDataType cpu (tags.[0])
+                assert(tags |> Array.map (getBitSize) |> Array.distinct |> Array.length = 1)
+                let dataLength = getByteSize tags[0]
+                let dataType = getDataType tags[0]
                 for data in writeValue do
                     // data 크기(2B)
                     yield! dataLength |> uint16 |> fun x -> x.ToBytes()
@@ -334,10 +334,10 @@ module RandomReadWrite =
         //logDebug "Block length=%d" blockLength
         assert(tags |> Seq.forall(String.IsNullOrEmpty >> not))
         let header = createHeader cpu blockLength
-        let ackPacketLength = if isRead then (getReadResponsePacketLength cpu tags) else 10
+        let ackPacketLength = if isRead then (getReadResponsePacketLength tags) else 10
         let expectedResponsePacketLength = ackPacketLength + headerPacketLength
 
-        let dataType = getDataType cpu (tags.[0])
+        let dataType = getDataType tags[0]
         let cmd = if isRead then Command.ReadRequest else Command.WriteRequest
 
         (   [|
@@ -414,7 +414,7 @@ module RandomReadWrite =
     let analyzeRandomReadResponse cpu (tags:string[]) buffer =
 
         let numTags, dataBlock =
-            let dataType = getDataType cpu (tags.[0])
+            let dataType = getDataType tags[0]
             analyzeRandomResponse (Some cpu) true dataType buffer
 
         let rec readTag numRemaining (buf:byte[]) =
@@ -450,7 +450,7 @@ module RandomReadWrite =
 
     /// response buffer 확인해서 write 한 tag 의 갯수를 반환
     let analyzeRandomWriteResponse cpu (tags:string[]) buffer =
-        let dataType = getDataType cpu (tags.[0])
+        let dataType = getDataType tags[0]
         analyzeRandomResponse (Some cpu) false dataType buffer |> fst |> int
 
 

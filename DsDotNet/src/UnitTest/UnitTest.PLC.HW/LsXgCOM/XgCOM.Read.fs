@@ -11,20 +11,24 @@ open NUnit.Framework
 
 open Engine.Common.FS
 
-type XgCOMCodes =
-    | R_F = 0x24a
-    | R_U = 0x24e
-    | R_I = 0x24f
-    | R_Q = 0x250
-    | R_M = 0x251
-    | R_A = 0x253
+[<AutoOpen>]
+module XgCommLibSpec =
 
-    | W_U = 0xc8
-    | W_I = 0xc9
-    | W_Q = 0xca
-    | W_M = 0xcb
-    | W_A = 0xcd
+    type XgCOMCodes =
+        | R_F = 0x24a
+        | R_U = 0x24e
+        | R_I = 0x24f
+        | R_Q = 0x250
+        | R_M = 0x251
+        | R_A = 0x253
 
+        | W_U = 0xc8
+        | W_I = 0xc9
+        | W_Q = 0xca
+        | W_M = 0xcb
+        | W_A = 0xcd
+
+    let [<Literal>] MAX_RANDOM_READ_POINTS = 64
 
 (*
     XGComLib summary
@@ -35,8 +39,66 @@ type XgCOMCodes =
     32/64 bit 모두 동일 한 듯.
 *)
 [<Collection("SerialXgiGenerationTest")>]
-type XgCOMReadTest() =
+type XgCOM10ReadTest() =
     inherit XgCOMBaseClass()
+
+    [<Test>]
+    member x.``Basic read/write test`` () =
+        x.CommObject.IsConnected() === 1
+        let plcId = x.CommObject.GetPLCID;
+
+        let di = x.Factory.CreateDevice()
+        di.ucDeviceType <- Convert.ToByte('M')
+        di.ucDataType <- Convert.ToByte('B')
+
+        let wBuf = Array.zeroCreate<byte>(1024)
+        let rBuf = Array.zeroCreate<byte>(1024)
+        x.CommObject.RemoveAll()
+        for i = 0 to 1023 do
+            di.lSize <- 8
+            di.lOffset <- i * 8
+            wBuf[i] <- byte i
+            if i < 64 then
+                x.CommObject.AddDeviceInfo(di)
+
+        // does *NOT* working
+        //x.CommObject.Write((int)XgCOMCodes.W_M, wBuf, 1, 0) =!= 0
+        //x.CommObject.Read((int)XgCOMCodes.R_M, rBuf, 1, 0) =!= 0
+
+        //x.CommObject.Command((int)XgCOMCodes.W_M, wBuf, 1024, 0) =!= 0
+        //x.CommObject.Command((int)XgCOMCodes.R_M, rBuf, 1024, 0) =!= 0
+
+        //let offset = 16*10
+        //let a = x.CommObject.WriteDevice_Bit("M", offset, 1) //=== 1
+
+        //let mutable nRead = 0
+        ////x.CommObject.ReadDevice_Block("M", 0, &rBuf[0], 1024, &nRead)
+        //let mutable buf:byte = 0uy
+        //x.CommObject.ReadDevice_Block("M", 0, &buf, 1, &nRead)
+        // does *NOT* working
+
+
+
+        //// NOT working
+        //x.CommObject.WriteRandomDevice(wBuf) // === 1
+
+        // working : 단 random device 갯수가 64 이하 일 때...
+        x.CommObject.ReadRandomDevice(rBuf) === 1
+
+        noop()
+
+    (* Pre20 version 은 WriteDevice_Bit 지원 안함. *)
+    //[<Test>]
+    //member x.``Write bit test`` () =
+    //    for i = 0 to 1023 do
+    //        x.CommObject.WriteDevice_Bit("M", i, 0) === 1
+
+
+
+
+[<Collection("SerialXgiGenerationTest")>]
+type XgCOM20ReadTest() =
+    inherit XgCOMBaseClass20()
 
     [<Test>]
     member x.``Basic read/write test`` () =
@@ -102,5 +164,133 @@ type XgCOMReadTest() =
         noop()
 
 
+    [<Test>]
+    member x.``Write bit test`` () =
+        let start = 16*5
+        //for i = start to 1023 do
+        //    x.CommObject.WriteDevice_Bit("M", i, 1) === 1
+        for i = 2049 to 4095 do
+            x.CommObject.WriteDevice_Bit("M", i, 1) === 1
 
+    /// ReadDevice_Bit NOT working
+    [<Test>]
+    member x.``X Read bit test`` () =
+        let start = 16*5
+        for i = start to 1023 do
+            let nRead = 0
+            x.CommObject.ReadDevice_Bit("M", i, ref nRead) === 1
+            nRead = 1
+            noop()
+
+
+    [<Test>]
+    member x.``Write bit and read random test`` () =
+        //let start = 16*5
+        let start = 0
+
+        //for i = start to 1023 do
+        //    x.CommObject.WriteDevice_Bit("M", i, 1) === 1
+
+        let di = x.Factory.CreateDevice()
+        di.ucDeviceType <- Convert.ToByte('M')
+        di.ucDataType <- Convert.ToByte('B')
+
+        let rBuf = Array.zeroCreate<byte>(1024)
+        x.CommObject.RemoveAll()
+        for i = start to start+64-1 do
+            di.lSize <- 8
+            di.lOffset <- i * 8
+            x.CommObject.AddDeviceInfo(di)
+
+        x.CommObject.ReadRandomDevice(rBuf) === 1
+        noop()
+
+
+    [<Test>]
+    member x.``Write bit and read random with offset test`` () =
+        x.CommObject.RemoveAll()
+        let start = 1
+
+        //for i = start to 1023 do
+        //    x.CommObject.WriteDevice_Bit("M", i, 1) === 1
+
+        let di = x.Factory.CreateDevice()
+        di.ucDeviceType <- Convert.ToByte('M')
+        di.ucDataType <- Convert.ToByte('B')
+
+        let rBuf = Array.zeroCreate<byte>(512)
+        for i in start*8 .. 8 .. ((start+MAX_RANDOM_READ_POINTS)*8 - 1) do
+            //di.lSize <- 8
+            //di.lOffset <- i * 8
+            di.lSize <- 8
+            di.lOffset <- i
+            x.CommObject.AddDeviceInfo(di)
+
+
+        x.CommObject.ReadRandomDevice(rBuf) === 1
+        noop()
+
+    [<Test>]
+    member x.``Read random of Q test`` () =
+        x.CommObject.RemoveAll()
+
+        let di = x.Factory.CreateDevice()
+        di.ucDeviceType <- Convert.ToByte('Q')
+        di.ucDataType <- Convert.ToByte('B')
+
+        let rBuf = Array.zeroCreate<byte>(512)
+        di.lSize <- 8
+        di.lOffset <- 0
+        x.CommObject.AddDeviceInfo(di)
+
+
+        x.CommObject.ReadRandomDevice(rBuf) === 1
+        noop();
+
+
+    [<Test>]
+    member x.``Read random of I test`` () =
+        x.CommObject.RemoveAll()
+
+        let di = x.Factory.CreateDevice()
+        di.ucDeviceType <- Convert.ToByte('I')
+        di.ucDataType <- Convert.ToByte('B')
+
+        let rBuf = Array.zeroCreate<byte>(512)
+        di.lSize <- 8
+        di.lOffset <- 0
+        x.CommObject.AddDeviceInfo(di)
+
+
+        x.CommObject.ReadRandomDevice(rBuf) === 1
+        noop();
+
+
+    /// Slot change: Does NOT work
+    [<Test>]
+    member x.``Read random of Q 2nd slot test`` () =
+        x.CommObject.RemoveAll()
+
+        let di = x.Factory.CreateDevice()
+        di.ucDeviceType <- Convert.ToByte('Q')
+        di.ucDataType <- Convert.ToByte('B')
+
+        let rBuf = Array.zeroCreate<byte>(512)
+        di.lSize <- 8
+        di.lOffset <- 0
+        x.CommObject.AddDeviceInfo(di)
+
+        (* SetBaseSlot 은 동작하지않고, 위의 di.lOffset 에 8 을 넣었을 때(8byte skip 해서 QX0.1.??) 에는 제대로 읽어 들임.  *)
+        x.CommObject.SetChNo(1uy)               // retuns unit ???
+        x.CommObject.SetBaseSlot(0uy, 0uy)      // retuns unit ???
+
+        x.CommObject.ReadRandomDevice(rBuf) === 1
+        noop();
+
+
+
+    [<Test>]
+    member x.``Clear bit test`` () =
+        for i = 0 to 1023 do
+            x.CommObject.WriteDevice_Bit("M", i, 0) === 1
 

@@ -11,6 +11,7 @@
     <Content Include="Documents\Performance.txt" />
     <Content Include="Documents\LS protocol.txt" />
     <Content Include="Documents\ToDo.txt" />
+    <Compile Include="Prologue.fs" />
     <Compile Include="Address.Convert.fs" />
     <None Include="Address.Convert.fsx" />
     <Compile Include="Cluster.fs" />

@@ -213,7 +213,7 @@ let getBitsFromBytes (bytes:byte[]) bitOffset bitCount =
 
 
 /// ULong 8 byte 에서 주어진 bit 영역을 읽어서 ULong 으로 반환한다.
-let readFromLWord ulValue (anal:LsTagAnalysis) =
+let readFromLWord ulValue (anal:LsFEnetTagInfo) =
     let bitLength = anal.BitLength
     let bitOffset = anal.BitOffset % 64
     getBitsFromUInt64 ulValue bitOffset bitLength

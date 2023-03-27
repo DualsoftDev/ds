@@ -94,9 +94,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server.Common.OPC", "src\Se
 EndProject
 Project("{C6261335-32A8-4FD9-84F3-78654C251E00}") = "Server.DsBridge", "src\Server\Server.DsBridge\Server.DsBridge.fsproj", "{C17436C3-DF2D-4F74-A93A-CBF08E555182}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "UnitTest.PLC.HW", "src\UnitTest\UnitTest.PLC.HW\UnitTest.PLC.HW.fsproj", "{D3B38574-AA08-4701-BDBB-F9D7BECE970E}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "UnitTest.PLC.HW.LS.XgCommLib.x64", "src\UnitTest\UnitTest.PLC.HW.LS.XgCommLib.x64\UnitTest.PLC.HW.LS.XgCommLib.x64.fsproj", "{D3B38574-AA08-4701-BDBB-F9D7BECE970E}"
 EndProject
-Project("{AD1D883F-ADC3-412E-B66A-1BFF2707897E}") = "UnitTest.PLC.HW.x86", "src\UnitTest\UnitTest.PLC.HW.x86\UnitTest.PLC.HW.x86.fsproj", "{964D6002-A01A-46F2-9332-C3A8CA9B930F}"
+Project("{AD1D883F-ADC3-412E-B66A-1BFF2707897E}") = "UnitTest.PLC.HW.LS.XgCommLib.x86", "src\UnitTest\UnitTest.PLC.HW.LS.XgCommLib.x86\UnitTest.PLC.HW.LS.XgCommLib.x86.fsproj", "{964D6002-A01A-46F2-9332-C3A8CA9B930F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

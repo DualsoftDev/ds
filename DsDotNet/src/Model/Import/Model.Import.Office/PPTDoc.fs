@@ -115,9 +115,8 @@ module PPTDocModule =
 
             SubGroup(page, childGroup, dicUsedSub)
             )
-    type pptDoc(path:string, parameter:DeviceLoadParameters)  =
+    type pptDoc(path:string, parameter:DeviceLoadParameters, doc:PresentationDocument)  =
 
-        let doc = Office.Open(path)
         let name = getSystemName path
         let pages =  Dictionary<SlidePart, pptPage>()
         let masterPages =  Dictionary<int, DocumentFormat.OpenXml.Presentation.SlideMaster>()
@@ -202,7 +201,6 @@ module PPTDocModule =
 
 
                 updateAliasPPT(nodes, pages, parents)
-                doc.Close()
 
             with ex -> doc.Close()
                        failwithf  $"{ex.Message}"

@@ -67,4 +67,3 @@ type AddressAllocatorTest() =
             x() === $"%%MX{208+i}"
         d() === "%MD7"
         b() === "%MB32"
-

@@ -67,5 +67,12 @@ type TestAllCase() =
             if dev.ApiItem.RXs.any() then  dev.InAddress  <- "%MX0"
             if dev.ApiItem.TXs.any() then  dev.OutAddress <- "%MX1"
 
+        //Storages 테스트로 다시 만들기
+        applyTagManager (t.Sys, Storages())
+        t.Sys.GenerationIO()
+        //Storages 테스트로 다시 만들기
+
+        let samples = t.Sys.TagManager.Storages.Values |> Seq.map(fun f->f.Address <> null)
+
         let result = exportXMLforXGI(t.Sys, myTemplate "Allocate existing global address", None)
         result === result

@@ -30,8 +30,9 @@ type XgiBasic() =
             "%IX0.0.63", "%IX63"
             "%IX0.1.0", "%IX64"
             "%IX0.1.1", "%IX65"
-            "%IX1.1.1", "%IX4161"       // 1*64*64 + 1*64 + 1
-            "%IX2.3.1", "%IX8385"       // 2*64*64 + 3*64 + 1
+            "%IX1.1.1", "%IX1089"       // 1*16*64 + 1*64 + 1
+            "%IX2.3.1", "%IX2241"       // 2*16*64 + 3*64 + 1
+            "%IX32.0.0", "%IX32768"
 
             "%IB0.0", "%IX0"
             "%IB0.1", "%IX1"
@@ -48,10 +49,11 @@ type XgiBasic() =
             "%IL1.0", "%IX64"
             "%IL1.1", "%IX65"
 
-            "%IB1.0.1", "%IB65"
+            "%IB1.0.1", "%IB129"
             "%IW1.0.1", "%IW65"
-            "%ID1.0.1", "%ID65"
-            "%IL1.0.1", "%IL65"
+            "%ID1.0.1", "%ID33"
+            //"%IL1.0.1", "%IL65"     // 존재하지 않는 주소
+            "%IL1.1.0", "%IL17"
         ]
         for (tag, expected) in tags do
             let fenet = tryToFEnetTag CpuType.Xgi tag
@@ -81,22 +83,26 @@ type XgiBasic() =
 
     [<Test>]
     member x.``Readings All Memory bit type`` () =
+        logDebug "XXXXXXXXXXXXXXXXX"
         (* PLC 에서 %_X11 을 true 값으로 채우고 테스트. 단, A는 false으로 고정됨 *)
         let memoryType = "X"
         let address = bitAddress
                     |>toString
         let answer = true
-        x.Read("%M"+memoryType+address) === answer
-        x.Read("%L"+memoryType+address) === answer
-        x.Read("%N"+memoryType+address) === answer
-        x.Read("%K"+memoryType+address) === answer
-        x.Read("%R"+memoryType+address) === answer
-        x.Read("%W"+memoryType+address) === answer
-        x.Read("%A"+memoryType+address) =!= answer
-        x.Read("%F"+memoryType+address) === answer 
-        x.Read("%U"+memoryType+address) === answer          //4.0.0    
-        x.Read("%I"+memoryType+address) === answer          //32.0.0
-        x.Read("%Q"+memoryType+address) === answer          //32.0.0 
+        x.ReadFEnet("%M"+memoryType+address) === answer
+        x.ReadFEnet("%L"+memoryType+address) === answer
+        x.ReadFEnet("%N"+memoryType+address) === answer
+        x.ReadFEnet("%K"+memoryType+address) === answer
+        x.ReadFEnet("%R"+memoryType+address) === answer
+        x.ReadFEnet("%W"+memoryType+address) === answer
+        x.ReadFEnet("%A"+memoryType+address) =!= answer
+        x.ReadFEnet("%F"+memoryType+address) === answer 
+        //x.ReadFEnet("%U"+memoryType+address) === answer          //4.0.0    
+        x.ReadFEnet("%I"+memoryType+address) === answer          //32.0.0
+        x.ReadFEnet("%Q"+memoryType+address) === answer          //32.0.0 
+        x.Read($"%%U{memoryType}4.0.0") === answer          //4.0.0    
+        x.Read($"%%I{memoryType}32.0.0") === answer          //32.0.0
+        x.Read($"%%Q{memoryType}32.0.0") === answer          //32.0.0 
 
     [<Test>]
     member x.``Readings All Memory byte type`` () =
@@ -105,17 +111,20 @@ type XgiBasic() =
         let address = BAddress
                     |>toString
         let answer = 0xFFuy
-        x.Read("%M"+memoryType+address) === answer
-        x.Read("%L"+memoryType+address) === answer
-        x.Read("%N"+memoryType+address) === answer
-        x.Read("%K"+memoryType+address) === answer
-        x.Read("%R"+memoryType+address) === answer
-        x.Read("%W"+memoryType+address) === answer
-        x.Read("%A"+memoryType+address) === answer - answer
-        x.Read("%F"+memoryType+address) === answer 
-        x.Read("%U"+memoryType+address) === answer          //4.0.0    
-        x.Read("%I"+memoryType+address) === answer          //32.0.0
-        x.Read("%Q"+memoryType+address) === answer          //32.0.0           
+        x.ReadFEnet("%M"+memoryType+address) === answer
+        x.ReadFEnet("%L"+memoryType+address) === answer
+        x.ReadFEnet("%N"+memoryType+address) === answer
+        x.ReadFEnet("%K"+memoryType+address) === answer
+        x.ReadFEnet("%R"+memoryType+address) === answer
+        x.ReadFEnet("%W"+memoryType+address) === answer
+        x.ReadFEnet("%A"+memoryType+address) === answer - answer
+        x.ReadFEnet("%F"+memoryType+address) === answer 
+        //x.ReadFEnet("%U"+memoryType+address) === answer          //4.0.0    
+        x.ReadFEnet("%I"+memoryType+address) === answer          //32.0.0
+        x.ReadFEnet("%Q"+memoryType+address) === answer          //32.0.0    
+        x.Read($"%%U{memoryType}4.0.0") === answer          //4.0.0    
+        x.Read($"%%I{memoryType}32.0.0") === answer          //32.0.0
+        x.Read($"%%Q{memoryType}32.0.0") === answer          //32.0.0 
 
     [<Test>]
     member x.``Readings All Memory word type`` () =
@@ -125,17 +134,20 @@ type XgiBasic() =
                     |>toString
 
         let answer = 0xFFFFus
-        x.Read("%M"+memoryType+address) === answer
-        x.Read("%L"+memoryType+address) === answer
-        x.Read("%N"+memoryType+address) === answer
-        x.Read("%K"+memoryType+address) === answer
-        x.Read("%R"+memoryType+address) === answer
-        x.Read("%W"+memoryType+address) === answer
-        x.Read("%A"+memoryType+address) === answer - answer
-        x.Read("%F"+memoryType+address) === answer
-        x.Read("%U"+memoryType+address) === answer          //4.0.0    
-        x.Read("%I"+memoryType+address) === answer          //32.0.0
-        x.Read("%Q"+memoryType+address) === answer          //32.0.0     
+        x.ReadFEnet("%M"+memoryType+address) === answer
+        x.ReadFEnet("%L"+memoryType+address) === answer
+        x.ReadFEnet("%N"+memoryType+address) === answer
+        x.ReadFEnet("%K"+memoryType+address) === answer
+        x.ReadFEnet("%R"+memoryType+address) === answer
+        x.ReadFEnet("%W"+memoryType+address) === answer
+        x.ReadFEnet("%A"+memoryType+address) === answer - answer
+        x.ReadFEnet("%F"+memoryType+address) === answer 
+        //x.ReadFEnet("%U"+memoryType+address) === answer          //4.0.0    
+        x.ReadFEnet("%I"+memoryType+address) === answer          //32.0.0
+        x.ReadFEnet("%Q"+memoryType+address) === answer          //32.0.0    
+        x.Read($"%%U{memoryType}4.0.0") === answer          //4.0.0    
+        x.Read($"%%I{memoryType}32.0.0") === answer          //32.0.0
+        x.Read($"%%Q{memoryType}32.0.0") === answer          //32.0.0    
 
     [<Test>]
     member x.``Readings All Memory Double word type`` () =
@@ -144,17 +156,20 @@ type XgiBasic() =
         let address = DAddress
                     |>toString
         let answer = 0xFFFFFFFFu
-        x.Read("%M"+memoryType+address) === answer
-        x.Read("%L"+memoryType+address) === answer
-        x.Read("%N"+memoryType+address) === answer
-        x.Read("%K"+memoryType+address) === answer
-        x.Read("%R"+memoryType+address) === answer
-        x.Read("%W"+memoryType+address) === answer
-        x.Read("%A"+memoryType+address) === answer - answer
-        x.Read("%F"+memoryType+address) === answer
-        x.Read("%U"+memoryType+address) === answer          //4.0.0    
-        x.Read("%I"+memoryType+address) === answer          //32.0.0
-        x.Read("%Q"+memoryType+address) === answer          //32.0.0          
+        x.ReadFEnet("%M"+memoryType+address) === answer
+        x.ReadFEnet("%L"+memoryType+address) === answer
+        x.ReadFEnet("%N"+memoryType+address) === answer
+        x.ReadFEnet("%K"+memoryType+address) === answer
+        x.ReadFEnet("%R"+memoryType+address) === answer
+        x.ReadFEnet("%W"+memoryType+address) === answer
+        x.ReadFEnet("%A"+memoryType+address) === answer - answer
+        x.ReadFEnet("%F"+memoryType+address) === answer 
+        //x.ReadFEnet("%U"+memoryType+address) === answer          //4.0.0    
+        x.ReadFEnet("%I"+memoryType+address) === answer          //32.0.0
+        x.ReadFEnet("%Q"+memoryType+address) === answer          //32.0.0    
+        x.Read($"%%U{memoryType}4.0.0") === answer          //4.0.0    
+        x.Read($"%%I{memoryType}32.0.0") === answer          //32.0.0
+        x.Read($"%%Q{memoryType}32.0.0") === answer          //32.0.0          
 
 
     [<Test>]
@@ -164,17 +179,21 @@ type XgiBasic() =
         let address = LAddress
                     |>toString
         let answer = 0xFFFFFFFFFFFFFFFFUL
-        x.Read("%M"+memoryType+address) === answer
-        x.Read("%L"+memoryType+address) === answer
-        x.Read("%N"+memoryType+address) === answer
-        x.Read("%K"+memoryType+address) === answer
-        x.Read("%R"+memoryType+address) === answer
-        x.Read("%W"+memoryType+address) === answer
-        x.Read("%A"+memoryType+address) === answer - answer
-        x.Read("%F"+memoryType+address) === answer
-        x.Read("%U"+memoryType+address) === answer          //4.0.0    
-        x.Read("%I"+memoryType+address) === answer          //32.0.0
-        x.Read("%Q"+memoryType+address) === answer          //32.0.0
+        let testmemText = "%U"+memoryType+address
+        x.ReadFEnet("%M"+memoryType+address) === answer
+        x.ReadFEnet("%L"+memoryType+address) === answer
+        x.ReadFEnet("%N"+memoryType+address) === answer
+        x.ReadFEnet("%K"+memoryType+address) === answer
+        x.ReadFEnet("%R"+memoryType+address) === answer
+        x.ReadFEnet("%W"+memoryType+address) === answer
+        x.ReadFEnet("%A"+memoryType+address) === answer - answer
+        x.ReadFEnet("%F"+memoryType+address) === answer 
+        //x.ReadFEnet("%U"+memoryType+address) === answer          //4.0.0    
+        x.ReadFEnet("%I"+memoryType+address) === answer          //32.0.0
+        x.ReadFEnet("%Q"+memoryType+address) === answer          //32.0.0    
+        x.Read($"%%U{memoryType}4.0.0") === answer          //4.0.0    
+        x.Read($"%%I{memoryType}32.0.0") === answer          //32.0.0
+        x.Read($"%%Q{memoryType}32.0.0") === answer          //32.0.0 
 
 
     [<Test>]

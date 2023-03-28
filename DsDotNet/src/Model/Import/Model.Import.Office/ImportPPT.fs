@@ -10,11 +10,12 @@ open Engine.Core
 open System.IO
 open Engine.Core.ModelLoaderModule
 open System.Runtime.CompilerServices
+open DocumentFormat.OpenXml.Packaging
 
 [<AutoOpen>]
 module ImportPPTModule =
 
-    let dicPptDoc = Dictionary<string, pptDoc>()
+    let dicPptDoc = Dictionary<string, PresentationDocument>()
     type internal ImportPowerPoint() =
         let pathStack = Stack<string>()
 
@@ -45,13 +46,13 @@ module ImportPPTModule =
 
             let pathPPT = paras.AbsoluteFilePath+".pptx"
 
-            //test ahn 중복 로딩 성능개선 중
-            let doc =  pptDoc(pathPPT , paras)
-                    //if dicPptDoc.ContainsKey pathPPT
-                    //then dicPptDoc[pathPPT]
-                    //else
-                    //   let pptDoc = pptDoc(pathPPT , paras)
-                    //   dicPptDoc.Add(pathPPT, pptDoc); pptDoc
+            let doc =
+                if dicPptDoc.ContainsKey pathPPT
+                then pptDoc(pathPPT , paras, dicPptDoc[pathPPT])
+                else
+                    let doc = Office.Open(pathPPT)
+                    let pptDoc = pptDoc(pathPPT , paras, doc)
+                    dicPptDoc.Add(pathPPT, doc); pptDoc
 
             //시스템 로딩시 중복이름을 부를 수 없다.
             CheckSameCopy(doc)
@@ -151,6 +152,9 @@ module ImportPPTModule =
                 let dsSystem = dic.Key
                 let pptDoc = dic.Value
                 pptDoc.BuildSystem(dsSystem))
+
+        //사용한 ppt doc 일괄 닫기 (열린문서 재 사용이 있어서 사용후 전체 한번에 닫기)
+        dicPptDoc.Iter(fun f->f.Value.Close())
 
         let systems =  results.Select(fun (sys, view) -> sys) |> Seq.toList
         let views   =  results |> dict

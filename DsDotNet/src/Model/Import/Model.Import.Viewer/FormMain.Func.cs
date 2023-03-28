@@ -145,7 +145,6 @@ namespace Dual.Model.Import
                 if (bDummyTestAddress)
                 {
                     ImportPPTs(_PathPPTs);
-                    CpuLoader.testAddressSetting(SelectedSystem);
                     var plcPath = Path.ChangeExtension(UtilFile.GetNewPathXls(_PathPPTs), "xml");
                     Directory.CreateDirectory(Path.GetDirectoryName(plcPath));
                     ExportPLC($"{Path.GetDirectoryName(plcPath)}\\DSLogic{DateTime.Now.ToString("(HH-mm-ss)")}.xml");

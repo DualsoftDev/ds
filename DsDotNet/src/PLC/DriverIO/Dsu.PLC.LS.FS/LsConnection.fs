@@ -237,6 +237,7 @@ and LsConnection(parameters:LsConnectionParameters) as this =
     member x.ReadATagUI8(tag:string) = readRandomTagsWithNames [|tag|] |> Array.head |> snd
 
     /// 하나의 tag 값을 즉시 읽어 낸다.  return type: obj.  ValueChanged event 등은 발생하지 않는다.
+    /// tag 는 cpu type 에 맞는 문법으로 기술되어 있어야 한다.
     member x.ReadATag(tag:string) =
         option {
             let! fEnetTag = tryToFEnetTag cpu tag
@@ -246,6 +247,7 @@ and LsConnection(parameters:LsConnectionParameters) as this =
             |> anal.DataType.BoxUI8
         } |> Option.get
 
+    /// LS PLC FEnet 통신 규약에 정의된 tag format 으로 읽어 낸다.
     member x.ReadATagFEnet(fEnetTag:string) =
         let anal = tryParseTag fEnetTag |> Option.get
         x.ReadATagUI8(fEnetTag)

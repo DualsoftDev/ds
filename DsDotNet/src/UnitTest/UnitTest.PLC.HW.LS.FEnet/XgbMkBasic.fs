@@ -40,6 +40,17 @@ type XgbMkBasic() =
             let fenet = tryToFEnetTag CpuType.XgbMk tag
             fenet.Value === expected
 
+    [<Test>]
+    member x.``Invalid format test`` () =
+        (x.Conn.Cpu :?> LsCpu).CpuType === CpuType.XgbMk
+
+        (* XgbMk 에서 %MW 는 인식할 수 없어야 한다. *)
+        (fun () -> x.Read("%MW5")             |> ignore ) |> ShouldFail
+        (fun () -> x.ReadFEnet("M0005")       |> ignore ) |> ShouldFail
+
+        (fun () -> x.Write("%MW5", 0us)       |> ignore ) |> ShouldFail
+        (fun () -> x.WriteFEnet("M0005", 0us) |> ignore ) |> ShouldFail
+
     //[<Test>]
     //member x.``Readings`` () =
     //    (* PLC 에서 %ML0 를 FF 값으로 채우고 있다는 가정하에... *)
@@ -74,12 +85,7 @@ type XgbMkBasic() =
         x.ReadFEnet("%MW5") === w5
         x.Read("M0005") === w5
 
-        (* XgbMk 에서 %MW 는 인식할 수 없어야 한다. *)
-        (fun () -> x.Read("%MW5") |> ignore ) |> ShouldFail
-        (fun () -> x.ReadFEnet("M0005") |> ignore ) |> ShouldFail
 
-
-        noop()
     [<Test>]
     member x.``P`` () =
         (* P 영역은 write 가능한 영역과 불가능한 영역이 존재 하는 듯.. *)

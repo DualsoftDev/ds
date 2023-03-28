@@ -129,8 +129,8 @@ type XgiPOUTest() =
 
         let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/XmlSamples/multiProgramSample.xml"
         let xdoc = XmlDocument.loadFromFile myTemplate
-        let usedMemoryIndices = collectUsedMermoryIndicesInGlobalSymbols xdoc
-        usedMemoryIndices |> SeqEq [ 0; 1; 2; 4; 8; 9; 10; 11; 12; 13; 14; 15; 17; ]
+        let usedMemoryByteIndices = collectUsedMermoryByteIndicesInGlobalSymbols xdoc
+        usedMemoryByteIndices |> SeqEq [ 0; 1; 2; 4; 8; 9; 10; 11; 12; 13; 14; 15; 17; ]
 
 
         let globalStorages = Storages()
@@ -161,7 +161,7 @@ type XgiPOUTest() =
             createProjectParams(f) with
                 GlobalStorages = globalStorages
                 ExistingLSISprj = Some myTemplate
-                MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedMemoryIndices)    // 640K M memory 영역
+                MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedMemoryByteIndices)    // 640K M memory 영역
         }
         let xml = projectParams.GenerateXmlString()
 
@@ -179,7 +179,7 @@ type XgiPOUTest() =
 
         let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/XmlSamples/multiProgramSample.xml"
         let xdoc = XmlDocument.loadFromFile myTemplate
-        let usedMemoryIndices = collectUsedMermoryIndicesInGlobalSymbols xdoc
+        let usedMemoryByteIndices = collectUsedMermoryByteIndicesInGlobalSymbols xdoc
         let existingGlobals = collectGlobalSymbols xdoc |> map name
 
         existingGlobals |> List.contains "MMX0" === true
@@ -196,7 +196,7 @@ type XgiPOUTest() =
             createProjectParams(f) with
                 GlobalStorages = globalStorages
                 ExistingLSISprj = Some myTemplate
-                MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedMemoryIndices)    // 640K M memory 영역
+                MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedMemoryByteIndices)    // 640K M memory 영역
         }
         ( fun () ->
             let xml = projectParams.GenerateXmlString()
@@ -211,7 +211,7 @@ type XgiPOUTest() =
 
         let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/XmlSamples/multiProgramSample.xml"
         let xdoc = XmlDocument.loadFromFile myTemplate
-        let usedMemoryIndices = collectUsedMermoryIndicesInGlobalSymbols xdoc
+        let usedMemoryByteIndices = collectUsedMermoryByteIndicesInGlobalSymbols xdoc
         let existingGlobals = collectGlobalSymbols xdoc |> map name
 
         existingGlobals |> List.contains "MMX1" === true
@@ -228,7 +228,7 @@ type XgiPOUTest() =
             createProjectParams(f) with
                 GlobalStorages = globalStorages
                 ExistingLSISprj = Some myTemplate
-                MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedMemoryIndices)    // 640K M memory 영역
+                MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedMemoryByteIndices)    // 640K M memory 영역
         }
         ( fun () ->
             let xml = projectParams.GenerateXmlString()

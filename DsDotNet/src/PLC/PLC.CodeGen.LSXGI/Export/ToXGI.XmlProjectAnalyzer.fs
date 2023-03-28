@@ -46,7 +46,7 @@ module XgiXmlProjectAnalyzerModule =
 
     let collectGlobalSymbolNames (xdoc:XmlDocument) = collectGlobalSymbols xdoc |> map name
 
-    let collectUsedMermoryIndicesInGlobalSymbols (xdoc:XmlDocument) =
+    let collectUsedMermoryByteIndicesInGlobalSymbols (xdoc:XmlDocument) =
         collectGlobalSymbols xdoc
         |> map address
         |> filter notNullAny

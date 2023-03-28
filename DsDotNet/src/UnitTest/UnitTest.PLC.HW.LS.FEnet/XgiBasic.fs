@@ -47,6 +47,37 @@ type XgiBasic() =
             "%ID1.0.1", "%ID33"
             //"%IL1.0.1", "%IL65"     // 존재하지 않는 주소
             "%IL1.1.0", "%IL17"
+
+            "%QX0.0.0", "%QX0"
+            "%QX0.0.1", "%QX1"
+            "%QX0.0.8", "%QX8"
+            "%QX0.0.10", "%QX10"
+            "%QX0.0.63", "%QX63"
+            "%QX0.1.0", "%QX64"
+            "%QX0.1.1", "%QX65"
+            "%QX1.1.1", "%QX1089"       // 1*16*64 + 1*64 + 1
+            "%QX2.3.1", "%QX2241"       // 2*16*64 + 3*64 + 1
+            "%QX32.0.0", "%QX32768"
+
+            "%QB0.0", "%QX0"
+            "%QB0.1", "%QX1"
+            "%QB0.2", "%QX2"
+            "%QB1.0", "%QX8"
+            "%QB1.1", "%QX9"
+
+            "%QW1.0", "%QX16"
+            "%QW1.1", "%QX17"
+
+            "%QD1.0", "%QX32"
+            "%QD1.1", "%QX33"
+
+            "%QL1.0", "%QX64"
+            "%QL1.1", "%QX65"
+
+            "%QB1.0.1", "%QB129"
+            "%QW1.0.1", "%QW65"
+            "%QD1.0.1", "%QD33"
+            "%QL1.1.0", "%QL17"
         ]
         for (tag, expected) in tags do
             let fenet = tryToFEnetTag CpuType.Xgi tag
@@ -93,12 +124,14 @@ type XgiBasic() =
         x.ReadFEnet("%WX32768") === true
         x.ReadFEnet("%AX32768") === true                    //WARNING
         x.ReadFEnet("%FX32768") === true 
-        //x.ReadFEnet("%UX32768") === true                  //4.0.0  없는 주소  
         x.ReadFEnet("%IX32768") === true                    //32.0.0
         x.ReadFEnet("%QX32768") === true                    //32.0.0 
         x.Read("%UX4.0.0") === true                         //4.0.0    
         x.Read("%IX32.0.0") === true                        //32.0.0
         x.Read("%QX32.0.0") === true                        //32.0.0 
+        (*U메모리는 0.0.0 양식으로만 접근 가능*)
+        (fun () -> (x.ReadFEnet("%UX32768") === true )) |> ShouldFailWithSubstringT "option"  
+                         
 
     [<Test>]
     member x.``Readings All Memory byte type`` () =
@@ -121,12 +154,13 @@ type XgiBasic() =
         x.ReadFEnet("%WB4096") === 0xFFuy
         x.ReadFEnet("%AB4096") === 0xFFuy                   //WARNING
         x.ReadFEnet("%FB4096") === 0xFFuy 
-        //x.ReadFEnet("%U4096") === 0xFFuy                  //4.0.0    
         x.ReadFEnet("%IB4096") === 0xFFuy                    //32.0.0
         x.ReadFEnet("%QB4096") === 0xFFuy                    //32.0.0    
         x.Read("%UB4.0.0") === 0xFFuy                       //4.0.0    
         x.Read("%IB32.0.0") === 0xFFuy                      //32.0.0
         x.Read("%QB32.0.0") === 0xFFuy                      //32.0.0 
+        (*U메모리는 0.0.0 양식으로만 접근 가능*)
+        (fun () -> (x.ReadFEnet("%UB4096") === true )) |> ShouldFailWithSubstringT "option" 
 
     [<Test>]
     member x.``Readings All Memory word type`` () =
@@ -149,12 +183,13 @@ type XgiBasic() =
         x.ReadFEnet("%WW2048") === 0xFFFFus
         x.ReadFEnet("%AW2048") === 0xFFFFus                 //WARNING
         x.ReadFEnet("%FW2048") === 0xFFFFus 
-        //x.ReadFEnet("%UW2048") === 0xFFFFus               //4.0.0    
         x.ReadFEnet("%IW2048") === 0xFFFFus                 //32.0.0
         x.ReadFEnet("%QW2048") === 0xFFFFus                 //32.0.0    
         x.Read("%UW4.0.0") === 0xFFFFus                     //4.0.0    
         x.Read("%IW32.0.0") === 0xFFFFus                    //32.0.0
-        x.Read("%QW32.0.0") === 0xFFFFus                    //32.0.0   
+        x.Read("%QW32.0.0") === 0xFFFFus                    //32.0.0 
+        (*U메모리는 0.0.0 양식으로만 접근 가능*)
+        (fun () -> (x.ReadFEnet("%UW2048") === true )) |> ShouldFailWithSubstringT "option"
 
     [<Test>]
     member x.``Readings All Memory Double word type`` () =
@@ -177,12 +212,12 @@ type XgiBasic() =
         x.ReadFEnet("%WD1024") === 0xFFFFFFFFu
         x.ReadFEnet("%AD1024") === 0xFFFFFFFFu              //WARNING
         x.ReadFEnet("%FD1024") === 0xFFFFFFFFu 
-        //x.ReadFEnet("%UD1024") === 0xFFFFFFFFu            //4.0.0    
         x.ReadFEnet("%ID1024") === 0xFFFFFFFFu              //32.0.0
         x.ReadFEnet("%QD1024") === 0xFFFFFFFFu              //32.0.0            
-        x.Read("%UD4.0.0") === 0xFFFFFFFFu                  //4.0.0    
         x.Read("%ID32.0.0") === 0xFFFFFFFFu                 //32.0.0
         x.Read("%QD32.0.0") === 0xFFFFFFFFu                 //32.0.0 
+        (*U메모리는 0.0.0 양식으로만 접근 가능*)
+        (fun () -> (x.ReadFEnet("%UD1024") === true )) |> ShouldFailWithSubstringT "option"
 
     [<Test>]
     member x.``Readings All Memory Long word type`` () =
@@ -205,12 +240,14 @@ type XgiBasic() =
         x.ReadFEnet("%WL512") === 0xFFFFFFFFFFFFFFFFUL
         x.ReadFEnet("%AL512") === 0xFFFFFFFFFFFFFFFFUL              //WARNING
         x.ReadFEnet("%FL512") === 0xFFFFFFFFFFFFFFFFUL 
-        //x.ReadFEnet("%UL512") === 0xFFFFFFFFFFFFFFFFUL            //4.0.0    
         x.ReadFEnet("%IL512") === 0xFFFFFFFFFFFFFFFFUL              //32.0.0
         x.ReadFEnet("%QL512") === 0xFFFFFFFFFFFFFFFFUL              //32.0.0    
         x.Read("%UL4.0.0") === 0xFFFFFFFFFFFFFFFFUL                 //4.0.0    
         x.Read("%IL32.0.0") === 0xFFFFFFFFFFFFFFFFUL                //32.0.0
-        x.Read("%QL32.0.0") === 0xFFFFFFFFFFFFFFFFUL                //32.0.0 
+        x.Read("%QL32.0.0") === 0xFFFFFFFFFFFFFFFFUL                //32.0.0
+        (*U메모리는 0.0.0 양식으로만 접근 가능*)
+        (fun () -> x.ReadFEnet("%UL512") === true |> ignore) 
+        |> ShouldFailWithSubstringT "ArgumentException"
 
 
     [<Test>]

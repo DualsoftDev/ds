@@ -10,7 +10,7 @@ open Dsu.PLC.LS
 type XgiBasic() =
     inherit FEnetTestBase("192.168.0.100")
 
-    let LAddress = 512      // 모든 L주소 512에 최대값 넣기(A 제외)
+    let LAddress = 512      // 모든 메모리 - L - 주소512에 최대값(18446744073709551615) 넣기(A 제외)
     let DAddress = LAddress * 2
     let WAddress = DAddress * 2
     let BAddress = WAddress * 2
@@ -94,9 +94,9 @@ type XgiBasic() =
         x.Read("%W"+memoryType+address) === answer
         x.Read("%A"+memoryType+address) =!= answer
         x.Read("%F"+memoryType+address) === answer 
-        x.Read("%U"+memoryType+address) === answer          
-        //x.Read("%I"+memoryType+address) === answer   
-        //x.Read("%Q"+memoryType+address) === answer 
+        x.Read("%U"+memoryType+address) === answer          //4.0.0    
+        x.Read("%I"+memoryType+address) === answer          //32.0.0
+        x.Read("%Q"+memoryType+address) === answer          //32.0.0 
 
     [<Test>]
     member x.``Readings All Memory byte type`` () =
@@ -113,9 +113,9 @@ type XgiBasic() =
         x.Read("%W"+memoryType+address) === answer
         x.Read("%A"+memoryType+address) === answer - answer
         x.Read("%F"+memoryType+address) === answer 
-        x.Read("%U"+memoryType+address) === answer          
-        //x.Read("%I"+memoryType+address) === answer   
-        //x.Read("%Q"+memoryType+address) === answer           
+        x.Read("%U"+memoryType+address) === answer          //4.0.0    
+        x.Read("%I"+memoryType+address) === answer          //32.0.0
+        x.Read("%Q"+memoryType+address) === answer          //32.0.0           
 
     [<Test>]
     member x.``Readings All Memory word type`` () =
@@ -133,9 +133,9 @@ type XgiBasic() =
         x.Read("%W"+memoryType+address) === answer
         x.Read("%A"+memoryType+address) === answer - answer
         x.Read("%F"+memoryType+address) === answer
-        x.Read("%U"+memoryType+address) === answer          
-        //x.Read("%I"+memoryType+address) === answer   
-        //x.Read("%Q"+memoryType+address) === answer      
+        x.Read("%U"+memoryType+address) === answer          //4.0.0    
+        x.Read("%I"+memoryType+address) === answer          //32.0.0
+        x.Read("%Q"+memoryType+address) === answer          //32.0.0     
 
     [<Test>]
     member x.``Readings All Memory Double word type`` () =
@@ -152,9 +152,9 @@ type XgiBasic() =
         x.Read("%W"+memoryType+address) === answer
         x.Read("%A"+memoryType+address) === answer - answer
         x.Read("%F"+memoryType+address) === answer
-        x.Read("%U"+memoryType+address) === answer          
-        //x.Read("%I"+memoryType+address) === answer   
-        //x.Read("%Q"+memoryType+address) === answer          
+        x.Read("%U"+memoryType+address) === answer          //4.0.0    
+        x.Read("%I"+memoryType+address) === answer          //32.0.0
+        x.Read("%Q"+memoryType+address) === answer          //32.0.0          
 
 
     [<Test>]
@@ -173,8 +173,8 @@ type XgiBasic() =
         x.Read("%A"+memoryType+address) === answer - answer
         x.Read("%F"+memoryType+address) === answer
         x.Read("%U"+memoryType+address) === answer          //4.0.0    
-        //x.Read("%I"+memoryType+address) === answer   
-        //x.Read("%Q"+memoryType+address) === answer        
+        x.Read("%I"+memoryType+address) === answer          //32.0.0
+        x.Read("%Q"+memoryType+address) === answer          //32.0.0
 
 
     [<Test>]

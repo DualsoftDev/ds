@@ -15,14 +15,25 @@ module FEnetTestModule =
         let port = port |? 2004
         let conn = new LsConnection(LsConnectionParameters(ip, uint16 port))
 
+        abstract member CreateLsTag: string -> bool -> LsTag
+
+        member x.WriteTagValue(tag, value:obj, convertFEnet) =
+            let lsTag = x.CreateLsTag tag convertFEnet
+            lsTag.Value <- value
+            conn.WriteATag(lsTag) |> ignore
+        member x.Write(tag, value) = x.WriteTagValue(tag, value, true)
+        member x.WriteFEnet(tag, value) = x.WriteTagValue(tag, value, false)
+        member _.Read(tag:string) = conn.ReadATag(tag)
+        member _.ReadFEnet(tag:string) = conn.ReadATagFEnet(tag)
+
         [<SetUp>]
-        member X.Setup() =
+        member _.Setup() =
             conn.Connect() === true
 
 
         [<TearDown>]
-        member X.TearDown() =
+        member _.TearDown() =
             conn.Disconnect() === true
 
-        member X.Conn = conn
+        member _.Conn = conn
 

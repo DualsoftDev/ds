@@ -17,11 +17,45 @@ type XgiBasic() =
     let bitAddress = BAddress * 8
 
 
-    member private x.Write(tag, value) =
-        let lsTag = LsTagXgi(x.Conn, tag)
-        lsTag.Value <- value
-        x.Conn.WriteATag(lsTag) |> ignore
-    member private x.Read(tag:string) = x.Conn.ReadATag(tag)
+    override x.CreateLsTag (tag:string) (convertFEnet:bool) =
+        LsTagXgi(x.Conn, tag, convertFEnet)
+
+    [<Test>]
+    member x.``Address convert test`` () =
+        let tags = [
+            "%IX0.0.0", "%IX0"
+            "%IX0.0.1", "%IX1"
+            "%IX0.0.8", "%IX8"
+            "%IX0.0.10", "%IX10"
+            "%IX0.0.63", "%IX63"
+            "%IX0.1.0", "%IX64"
+            "%IX0.1.1", "%IX65"
+            "%IX1.1.1", "%IX4161"       // 1*64*64 + 1*64 + 1
+            "%IX2.3.1", "%IX8385"       // 2*64*64 + 3*64 + 1
+
+            "%IB0.0", "%IX0"
+            "%IB0.1", "%IX1"
+            "%IB0.2", "%IX2"
+            "%IB1.0", "%IX8"
+            "%IB1.1", "%IX9"
+
+            "%IW1.0", "%IX16"
+            "%IW1.1", "%IX17"
+
+            "%ID1.0", "%IX32"
+            "%ID1.1", "%IX33"
+
+            "%IL1.0", "%IX64"
+            "%IL1.1", "%IX65"
+
+            "%IB1.0.1", "%IB65"
+            "%IW1.0.1", "%IW65"
+            "%ID1.0.1", "%ID65"
+            "%IL1.0.1", "%IL65"
+        ]
+        for (tag, expected) in tags do
+            let fenet = tryToFEnetTag CpuType.Xgi tag
+            fenet.Value === expected
 
     [<Test>]
     member x.``Connection Check`` () =
@@ -146,8 +180,41 @@ type XgiBasic() =
     [<Test>]
     member x.``WriteAndRead`` () =
         let ul0 = 0xF1F2F3F4F5F6F7F8UL
+        x.WriteFEnet("%ML1", ul0)
+        x.Read("%ML1") === ul0
+
+
         x.Write("%ML1", ul0)
         x.Read("%ML1") === ul0
         noop()
 
 
+    [<Test>]
+    member x.``Q`` () =
+        let q0 = "%QX0.0.0"
+        x.Write(q0, true)
+        x.Read(q0) === true
+        x.Write(q0, false)
+        x.Read(q0) === false
+
+        let q1 = "%QX0.0.1"
+        x.Write(q1, true)
+        x.Read(q1) === true
+        x.Write(q1, false)
+        x.Read(q1) === false
+
+        let q11 = "%QX0.1.1"
+        x.Write(q11, true)
+        x.Read(q11) === true
+        x.ReadFEnet("%QX65") === true
+        x.Write(q11, false)
+        x.Read(q11) === false
+        x.ReadFEnet("%QX65") === false
+
+        let q111 = "%QX1.1.1"       // = 4161 : 1*64*64 + 1*64 + 1
+        x.Write(q111, true)
+        x.Read(q111) === true
+        x.ReadFEnet("%QX4161") === true
+        x.Write(q111, false)
+        x.Read(q111) === false
+        x.ReadFEnet("%QX4161") === false

@@ -8,11 +8,8 @@ open Dsu.PLC.LS
 type XgbMkBasic() =
     inherit FEnetTestBase("192.168.0.101")
 
-    member private x.Write(tag, value) =
-        let lsTag = LsTagXgbMk(x.Conn, tag)
-        lsTag.Value <- value
-        x.Conn.WriteATag(lsTag) |> ignore
-    member private x.Read(tag:string) = x.Conn.ReadATag(tag)
+    override x.CreateLsTag (tag:string) (convertFEnet:bool) =
+        LsTagXgbMk(x.Conn, tag, convertFEnet)
 
     [<Test>]
     member x.``Connection Check`` () =
@@ -35,53 +32,68 @@ type XgbMkBasic() =
             let fenet = tryToFEnetTag CpuType.XgbMk tag
             fenet.Value === expected
 
-    //[<Test>]
-    //member x.``Readings`` () =
-    //    (* PLC 에서 %ML0 를 FF 값으로 채우고 있다는 가정하에... *)
-    //    let mb0 = x.Conn.ReadATag("%MB0")
-    //    mb0 === 0xFFuy
-    //    x.Read("%MB1") === 0xFFuy
-    //    x.Read("%MB7") === 0xFFuy
+    [<Test>]
+    member x.``Invalid format test`` () =
+        (x.Conn.Cpu :?> LsCpu).CpuType === CpuType.XgbMk
 
-    //    x.Read("%MW0") === 0xFFFFus
-    //    x.Read("%MW1") === 0xFFFFus
-    //    x.Read("%MW2") === 0xFFFFus
-    //    x.Read("%MW3") === 0xFFFFus
+        (* XgbMk 에서 %MW 는 인식할 수 없어야 한다. *)
+        (fun () -> x.Read("%MW5")             |> ignore ) |> ShouldFail
+        (fun () -> x.ReadFEnet("M0005")       |> ignore ) |> ShouldFail
 
-    //    x.Read("%ML0") === 0xFFFFFFFFFFFFFFFFUL
+        (fun () -> x.Write("%MW5", 0us)       |> ignore ) |> ShouldFail
+        (fun () -> x.WriteFEnet("M0005", 0us) |> ignore ) |> ShouldFail
 
 
     [<Test>]
     member x.``WriteAndRead`` () =
         let ul0 = 0xF1F2F3F4F5F6F7F8UL
-        x.Write("%ML1", ul0)
-        x.Read("%ML1") === ul0
+        x.WriteFEnet("%ML1", ul0)
+        x.ReadFEnet("%ML1") === ul0
 
         for i in [0..15] do
-            x.Write( sprintf "%%MX%X" (10*16+i), true)
+            x.WriteFEnet( sprintf "%%MX%X" (10*16+i), true)
 
-        noop()
+        let mutable w5 = 0x1234us
+        x.WriteFEnet("%MW5", w5)
+        x.ReadFEnet("%MW5") === w5
+        x.Read("M0005") === w5
+        w5 <- 0x4321us
+        x.Write("M0005", w5)
+        x.ReadFEnet("%MW5") === w5
+        x.Read("M0005") === w5
+
+
     [<Test>]
     member x.``P`` () =
         (* P 영역은 write 가능한 영역과 불가능한 영역이 존재 하는 듯.. *)
-        x.Write("%PB64", 0x64uy)
-        x.Read("%PB64") === 0x64uy
+        x.WriteFEnet("%PB64", 0x64uy)
+        x.ReadFEnet("%PB64") === 0x64uy
 
-        x.Write("%PW33", 0x33us)
-        x.Read("%PW33") === 0x33us
+        x.WriteFEnet("%PW33", 0x33us)
+        x.ReadFEnet("%PW33") === 0x33us
 
 
-        x.Write("%PW50", 0x1234us)
-        x.Read("%PW50") === 0x1234us
+        x.WriteFEnet("%PW50", 0x1234us)
+        x.ReadFEnet("%PW50") === 0x1234us
 
         let offset = 50*16+0
         let tag = sprintf "%%PX%X" offset
-        x.Write(tag, true)
-        x.Read(tag) === true
-        x.Write(tag, false)
-        x.Read(tag) === false
+        x.WriteFEnet(tag, true)
+        x.ReadFEnet(tag) === true
+        x.WriteFEnet(tag, false)
+        x.ReadFEnet(tag) === false
 
         noop()
 
+    [<Test>]
+    member x.``M with native`` () =
+        let mutable w = 0x1234us
+        x.Write("M0032", w)
+        x.Read("M0032") === w
+        x.ReadFEnet("%MW32") === w
 
+        w <- 0x4321us
+        x.WriteFEnet("%MW32", w)
+        x.Read("M0032") === w
+        x.ReadFEnet("%MW32") === w
 

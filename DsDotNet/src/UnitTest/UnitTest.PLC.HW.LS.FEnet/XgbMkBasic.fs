@@ -83,5 +83,9 @@ type XgbMkBasic() =
 
         noop()
 
+    [<Test>]
+    member x.``M with native`` () =
+        x.Write("M0032", 0xFFFFus)
+        x.Read("M0032") === 0xFFFFus
 
 

@@ -137,8 +137,8 @@ type XgiBasic() =
         x.ReadFEnet("%AB4096") === 0xFFuy                   //WARNING
         x.ReadFEnet("%FB4096") === 0xFFuy 
         //x.ReadFEnet("%U4096") === 0xFFuy                  //4.0.0    
-        x.ReadFEnet("%I4096") === 0xFFuy                    //32.0.0
-        x.ReadFEnet("%Q4096") === 0xFFuy                    //32.0.0    
+        x.ReadFEnet("%IB4096") === 0xFFuy                    //32.0.0
+        x.ReadFEnet("%QB4096") === 0xFFuy                    //32.0.0    
         x.Read("%UB4.0.0") === 0xFFuy                       //4.0.0    
         x.Read("%IB32.0.0") === 0xFFuy                      //32.0.0
         x.Read("%QB32.0.0") === 0xFFuy                      //32.0.0 
@@ -173,9 +173,9 @@ type XgiBasic() =
         //x.ReadFEnet("%UW2048") === 0xFFFFus               //4.0.0    
         x.ReadFEnet("%IW2048") === 0xFFFFus                 //32.0.0
         x.ReadFEnet("%QW2048") === 0xFFFFus                 //32.0.0    
-        x.Read("%UB4.0.0") === 0xFFFFus                     //4.0.0    
-        x.Read("%IB32.0.0") === 0xFFFFus                    //32.0.0
-        x.Read("%QB32.0.0") === 0xFFFFus                    //32.0.0   
+        x.Read("%UW4.0.0") === 0xFFFFus                     //4.0.0    
+        x.Read("%IW32.0.0") === 0xFFFFus                    //32.0.0
+        x.Read("%QW32.0.0") === 0xFFFFus                    //32.0.0   
 
     [<Test>]
     member x.``Readings All Memory Double word type`` () =
@@ -206,9 +206,9 @@ type XgiBasic() =
         //x.ReadFEnet("%UD1024") === 0xFFFFFFFFu            //4.0.0    
         x.ReadFEnet("%ID1024") === 0xFFFFFFFFu              //32.0.0
         x.ReadFEnet("%QD1024") === 0xFFFFFFFFu              //32.0.0            
-        x.Read("%UB4.0.0") === 0xFFFFFFFFu                  //4.0.0    
-        x.Read("%IB32.0.0") === 0xFFFFFFFFu                 //32.0.0
-        x.Read("%QB32.0.0") === 0xFFFFFFFFu                 //32.0.0 
+        x.Read("%UD4.0.0") === 0xFFFFFFFFu                  //4.0.0    
+        x.Read("%ID32.0.0") === 0xFFFFFFFFu                 //32.0.0
+        x.Read("%QD32.0.0") === 0xFFFFFFFFu                 //32.0.0 
 
     [<Test>]
     member x.``Readings All Memory Long word type`` () =
@@ -239,9 +239,9 @@ type XgiBasic() =
         //x.ReadFEnet("%UL512") === 0xFFFFFFFFFFFFFFFFUL            //4.0.0    
         x.ReadFEnet("%IL512") === 0xFFFFFFFFFFFFFFFFUL              //32.0.0
         x.ReadFEnet("%QL512") === 0xFFFFFFFFFFFFFFFFUL              //32.0.0    
-        x.Read("%UB4.0.0") === 0xFFFFFFFFFFFFFFFFUL                 //4.0.0    
-        x.Read("%IB32.0.0") === 0xFFFFFFFFFFFFFFFFUL                //32.0.0
-        x.Read("%QB32.0.0") === 0xFFFFFFFFFFFFFFFFUL                //32.0.0 
+        x.Read("%UL4.0.0") === 0xFFFFFFFFFFFFFFFFUL                 //4.0.0    
+        x.Read("%IL32.0.0") === 0xFFFFFFFFFFFFFFFFUL                //32.0.0
+        x.Read("%QL32.0.0") === 0xFFFFFFFFFFFFFFFFUL                //32.0.0 
 
 
     [<Test>]
@@ -278,10 +278,10 @@ type XgiBasic() =
         x.Read(q11) === false
         x.ReadFEnet("%QX65") === false
 
-        let q111 = "%QX1.1.1"       // = 4161 : 1*64*64 + 1*64 + 1
+        let q111 = "%QX1.1.1"       // = 1089 : 1*16*64 + 1*64 + 1
         x.Write(q111, true)
         x.Read(q111) === true
-        x.ReadFEnet("%QX4161") === true
+        x.ReadFEnet("%QX1089") === true
         x.Write(q111, false)
         x.Read(q111) === false
-        x.ReadFEnet("%QX4161") === false
+        x.ReadFEnet("%QX1089") === false

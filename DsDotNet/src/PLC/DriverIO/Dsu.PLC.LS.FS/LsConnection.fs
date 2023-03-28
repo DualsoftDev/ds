@@ -27,8 +27,15 @@ type LsCpu(cpu, running) =
 
 /// LS 산전 PLC Tag
 [<DebuggerDisplay("{Name}")>]
-type LsTag internal(conn:ConnectionBase, name:string, cpu:CpuType) as this =
+type LsTag internal(conn:ConnectionBase, originalTagName:string, cpu:CpuType, ?convertFEnet) as this =
     inherit TagBase(conn)
+    let convertFEnet = convertFEnet |? true
+    let name =
+        if convertFEnet then
+            let cpu = (conn.Cpu :?> LsCpu).CpuType
+            tryToFEnetTag cpu originalTagName |> Option.get
+        else
+            originalTagName
     let parsed = tryParseTag (name) |> Option.get
     let dataLengthType = parsed.DataType.ToDataLengthType()
     do
@@ -40,24 +47,25 @@ type LsTag internal(conn:ConnectionBase, name:string, cpu:CpuType) as this =
         assert(tName = "LsConnection" || tName = "LsSwConnection" || tName = "LsXg5000Connection" || tName = "LsXg5000COMConnection")
 
     member x.Anal = parsed
+    member x.TagName = originalTagName
     override x.IsBitAddress = name.StartsWith("%MX")
     override x.DataLengthType = dataLengthType
 
 /// LS 산전 PLC Tag for XGK
-and LsTagXgk(conn:ConnectionBase, name) =
-    inherit LsTag(conn, name, CpuType.Xgk)
+and LsTagXgk(conn:ConnectionBase, name, ?convertFEnet) =
+    inherit LsTag(conn, name, CpuType.Xgk, convertFEnet |? true)
 
 /// LS 산전 PLC Tag for XGB MK
-and LsTagXgbMk(conn:ConnectionBase, name) =
-    inherit LsTag(conn, name, CpuType.XgbMk)
+and LsTagXgbMk(conn:ConnectionBase, name, ?convertFEnet) =
+    inherit LsTag(conn, name, CpuType.XgbMk, convertFEnet |? true)
 
 /// LS 산전 PLC Tag for XGI : 61131-3
-and LsTagXgi(conn:ConnectionBase, name) =
-    inherit LsTag(conn, name, CpuType.Xgi)
+and LsTagXgi(conn:ConnectionBase, name, ?convertFEnet) =
+    inherit LsTag(conn, name, CpuType.Xgi, convertFEnet |? true)
 
 /// XG-5000
 and LsTagXg5000(conn:ConnectionBase, name) =
-    inherit LsTag(conn, name, CpuType.Xgk)
+    inherit LsTag(conn, name, CpuType.Xgk, false)
 
 /// LS 산전 H/W PLC connection
 and LsConnection(parameters:LsConnectionParameters) as this =
@@ -230,10 +238,19 @@ and LsConnection(parameters:LsConnectionParameters) as this =
 
     /// 하나의 tag 값을 즉시 읽어 낸다.  return type: obj.  ValueChanged event 등은 발생하지 않는다.
     member x.ReadATag(tag:string) =
-        // todo : tag 를 cpu type 에 맞게 FEnet format 으로 변환해서 호출 해야 함...
-        let anal = tryParseTag tag |> Option.get
-        x.ReadATagUI8(tag)
+        option {
+            let! fEnetTag = tryToFEnetTag cpu tag
+            // todo : tag 를 cpu type 에 맞게 FEnet format 으로 변환해서 호출 해야 함...
+            let! anal = tryParseTag fEnetTag
+            return x.ReadATagUI8(fEnetTag)
+            |> anal.DataType.BoxUI8
+        } |> Option.get
+
+    member x.ReadATagFEnet(fEnetTag:string) =
+        let anal = tryParseTag fEnetTag |> Option.get
+        x.ReadATagUI8(fEnetTag)
         |> anal.DataType.BoxUI8
+
     member x.WriteATag(tag:ITag) =
         x.WriteRandomTags([|tag :?> LsTag|])
 

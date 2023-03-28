@@ -8,11 +8,16 @@ open Dsu.PLC.LS
 type XgbMkBasic() =
     inherit FEnetTestBase("192.168.0.101")
 
-    member private x.Write(tag, value) =
-        let lsTag = LsTagXgbMk(x.Conn, tag)
-        lsTag.Value <- value
-        x.Conn.WriteATag(lsTag) |> ignore
-    member private x.Read(tag:string) = x.Conn.ReadATag(tag)
+    override x.CreateLsTag (tag:string) (convertFEnet:bool) =
+        LsTagXgbMk(x.Conn, tag, convertFEnet)
+    //member private x.WriteTagValue(tag, value, convertFEnet) =
+    //    let lsTag = LsTagXgbMk(x.Conn, tag, convertFEnet)
+    //    lsTag.Value <- value
+    //    x.Conn.WriteATag(lsTag) |> ignore
+    //member private x.Write(tag, value) = x.WriteTagValue(tag, value, true)
+    //member private x.WriteFEnet(tag, value) = x.WriteTagValue(tag, value, false)
+    //member private x.Read(tag:string) = x.Conn.ReadATag(tag)
+    //member private x.ReadFEnet(tag:string) = x.Conn.ReadATagFEnet(tag)
 
     [<Test>]
     member x.``Connection Check`` () =
@@ -54,32 +59,46 @@ type XgbMkBasic() =
     [<Test>]
     member x.``WriteAndRead`` () =
         let ul0 = 0xF1F2F3F4F5F6F7F8UL
-        x.Write("%ML1", ul0)
-        x.Read("%ML1") === ul0
+        x.WriteFEnet("%ML1", ul0)
+        x.ReadFEnet("%ML1") === ul0
 
         for i in [0..15] do
-            x.Write( sprintf "%%MX%X" (10*16+i), true)
+            x.WriteFEnet( sprintf "%%MX%X" (10*16+i), true)
+
+        let mutable w5 = 0x1234us
+        x.WriteFEnet("%MW5", w5)
+        x.ReadFEnet("%MW5") === w5
+        x.Read("M0005") === w5
+        w5 <- 0x4321us
+        x.Write("M0005", w5)
+        x.ReadFEnet("%MW5") === w5
+        x.Read("M0005") === w5
+
+        (* XgbMk 에서 %MW 는 인식할 수 없어야 한다. *)
+        (fun () -> x.Read("%MW5") |> ignore ) |> ShouldFail
+        (fun () -> x.ReadFEnet("M0005") |> ignore ) |> ShouldFail
+
 
         noop()
     [<Test>]
     member x.``P`` () =
         (* P 영역은 write 가능한 영역과 불가능한 영역이 존재 하는 듯.. *)
-        x.Write("%PB64", 0x64uy)
-        x.Read("%PB64") === 0x64uy
+        x.WriteFEnet("%PB64", 0x64uy)
+        x.ReadFEnet("%PB64") === 0x64uy
 
-        x.Write("%PW33", 0x33us)
-        x.Read("%PW33") === 0x33us
+        x.WriteFEnet("%PW33", 0x33us)
+        x.ReadFEnet("%PW33") === 0x33us
 
 
-        x.Write("%PW50", 0x1234us)
-        x.Read("%PW50") === 0x1234us
+        x.WriteFEnet("%PW50", 0x1234us)
+        x.ReadFEnet("%PW50") === 0x1234us
 
         let offset = 50*16+0
         let tag = sprintf "%%PX%X" offset
-        x.Write(tag, true)
-        x.Read(tag) === true
-        x.Write(tag, false)
-        x.Read(tag) === false
+        x.WriteFEnet(tag, true)
+        x.ReadFEnet(tag) === true
+        x.WriteFEnet(tag, false)
+        x.ReadFEnet(tag) === false
 
         noop()
 
@@ -87,5 +106,6 @@ type XgbMkBasic() =
     member x.``M with native`` () =
         x.Write("M0032", 0xFFFFus)
         x.Read("M0032") === 0xFFFFus
+        x.ReadFEnet("%MW32") === 0xFFFFus
 
 

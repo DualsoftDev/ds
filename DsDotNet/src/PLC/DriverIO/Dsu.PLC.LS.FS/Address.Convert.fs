@@ -67,6 +67,7 @@ let (|ToFEnetTag|_|) (fromCpu:CpuType) tag =
             Some $"%%{device}W{wordOffset}"
         | _ ->
             None
+    | CpuType.Xgi -> Some tag       // todo : 추후 수정 필요
     | _ ->
         None
 

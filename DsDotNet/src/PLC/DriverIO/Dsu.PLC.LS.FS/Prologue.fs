@@ -207,7 +207,7 @@ type LsFEnetTagInfo = {
     member x.BitLength  = x.DataType.GetBitLength()
     member x.ByteOffset = x.BitOffset / 8
     member x.WordOffset = x.BitOffset / 16
-    static member Create(tag, device, dataType, bitOffset, isIEC) = {Tag = tag; Device=device; DataType=dataType; BitOffset=bitOffset;}
+    static member Create(tag, device, dataType, bitOffset) = {Tag = tag; Device=device; DataType=dataType; BitOffset=bitOffset;}
     //member x.GetXgiTag():string =
     //    if x.IsIEC then
     //        x.Tag

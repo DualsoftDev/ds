@@ -14,6 +14,41 @@ type XgiBasic() =
         LsTagXgi(x.Conn, tag, convertFEnet)
 
     [<Test>]
+    member x.``Address convert test`` () =
+        let tags = [
+            "%IX0.0.0", "%IX0"
+            "%IX0.0.1", "%IX1"
+            "%IX0.0.8", "%IX8"
+            "%IX0.0.10", "%IX10"
+            "%IX0.0.63", "%IX63"
+            "%IX0.1.0", "%IX64"
+            "%IX0.1.1", "%IX65"
+
+            "%IB0.0", "%IX0"
+            "%IB0.1", "%IX1"
+            "%IB0.2", "%IX2"
+            "%IB1.0", "%IX8"
+            "%IB1.1", "%IX9"
+
+            "%IW1.0", "%IX16"
+            "%IW1.1", "%IX17"
+
+            "%ID1.0", "%IX32"
+            "%ID1.1", "%IX33"
+
+            "%IL1.0", "%IX64"
+            "%IL1.1", "%IX65"
+
+            "%IB1.0.1", "%IB65"
+            "%IW1.0.1", "%IW65"
+            "%ID1.0.1", "%ID65"
+            "%IL1.0.1", "%IL65"
+        ]
+        for (tag, expected) in tags do
+            let fenet = tryToFEnetTag CpuType.Xgi tag
+            fenet.Value === expected
+
+    [<Test>]
     member x.``Connection Check`` () =
         let cpu = x.Conn.Cpu :?> LsCpu
         cpu.CpuType === CpuType.Xgi
@@ -46,3 +81,22 @@ type XgiBasic() =
         noop()
 
 
+    [<Test>]
+    member x.``Q`` () =
+        let q0 = "%QX0.0.0"
+        x.Write(q0, true)
+        x.Read(q0) === true
+        x.Write(q0, false)
+        x.Read(q0) === false
+
+        let q1 = "%QX0.0.1"
+        x.Write(q1, true)
+        x.Read(q1) === true
+        x.Write(q1, false)
+        x.Read(q1) === false
+
+        let q11 = "%QX0.1.1"
+        x.Write(q11, true)
+        x.Read(q11) === true
+        x.Write(q11, false)
+        x.Read(q11) === false

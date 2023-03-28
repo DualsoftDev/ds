@@ -10,13 +10,6 @@ open Dsu.PLC.LS
 type XgiBasic() =
     inherit FEnetTestBase("192.168.0.100")
 
-    let LAddress = 512      // 모든 메모리 - L - 주소512에 최대값(18446744073709551615) 넣기(A 제외)
-    let DAddress = LAddress * 2
-    let WAddress = DAddress * 2
-    let BAddress = WAddress * 2
-    let bitAddress = BAddress * 8
-
-
     override x.CreateLsTag (tag:string) (convertFEnet:bool) =
         LsTagXgi(x.Conn, tag, convertFEnet)
 
@@ -81,16 +74,13 @@ type XgiBasic() =
 
     [<Test>]
     member x.``Readings All Memory bit type`` () =
-        (* PLC 에서 %_X11 을 true 값으로 채우고 테스트. 단, A는 false으로 고정됨 *)
-        let address = bitAddress
-                    |>toString
         x.Write("%ML512", 18446744073709551615UL)
         x.Write("%LL512", 18446744073709551615UL)
         x.Write("%NL512", 18446744073709551615UL)
         x.Write("%KL512", 18446744073709551615UL)
         x.Write("%RL512", 18446744073709551615UL)
         x.Write("%WL512", 18446744073709551615UL)
-        x.Write("%AL512", 18446744073709551615UL)
+        x.Write("%AL512", 18446744073709551615UL)           //WARNING
         x.Write("%FL512", 18446744073709551615UL)
         x.Write("%IL512", 18446744073709551615UL)
         x.Write("%QL512", 18446744073709551615UL)
@@ -101,22 +91,17 @@ type XgiBasic() =
         x.ReadFEnet("%KX32768") === true
         x.ReadFEnet("%RX32768") === true
         x.ReadFEnet("%WX32768") === true
-        x.ReadFEnet("%AX32768") === true
+        x.ReadFEnet("%AX32768") === true                    //WARNING
         x.ReadFEnet("%FX32768") === true 
-        //x.ReadFEnet("%UX32768") === true          //4.0.0  없는 주소  
-        x.ReadFEnet("%IX32768") === true          //32.0.0
-        x.ReadFEnet("%QX32768") === true          //32.0.0 
-        x.Read("%UX4.0.0") === true          //4.0.0    
-        x.Read("%IX32.0.0") === true          //32.0.0
-        x.Read("%QX32.0.0") === true          //32.0.0 
+        //x.ReadFEnet("%UX32768") === true                  //4.0.0  없는 주소  
+        x.ReadFEnet("%IX32768") === true                    //32.0.0
+        x.ReadFEnet("%QX32768") === true                    //32.0.0 
+        x.Read("%UX4.0.0") === true                         //4.0.0    
+        x.Read("%IX32.0.0") === true                        //32.0.0
+        x.Read("%QX32.0.0") === true                        //32.0.0 
 
     [<Test>]
     member x.``Readings All Memory byte type`` () =
-        (* PLC 에서 %_B11 을 FF 값으로 채우고 테스트. 단, A는 0으로 고정됨 *)
-        let memoryType = "B"
-        let address = BAddress
-                    |>toString
-        let answer = 0xFFuy
         x.Write("%ML512", 18446744073709551615UL)
         x.Write("%LL512", 18446744073709551615UL)
         x.Write("%NL512", 18446744073709551615UL)
@@ -145,12 +130,6 @@ type XgiBasic() =
 
     [<Test>]
     member x.``Readings All Memory word type`` () =
-        (* PLC 에서 %_W11 을 FF 값으로 채우고 테스트. 단, A는 0으로 고정됨 *)
-        let memoryType = "W"
-        let address = WAddress
-                    |>toString
-
-        let answer = 0xFFFFus
         x.Write("%ML512", 18446744073709551615UL)
         x.Write("%LL512", 18446744073709551615UL)
         x.Write("%NL512", 18446744073709551615UL)
@@ -179,11 +158,6 @@ type XgiBasic() =
 
     [<Test>]
     member x.``Readings All Memory Double word type`` () =
-        (* PLC 에서 %_D11 을 FF 값으로 채우고 테스트. 단, A는 0으로 고정됨 *)
-        let memoryType = "D"
-        let address = DAddress
-                    |>toString
-        let answer = 0xFFFFFFFFu
         x.Write("%ML512", 18446744073709551615UL)
         x.Write("%LL512", 18446744073709551615UL)
         x.Write("%NL512", 18446744073709551615UL)
@@ -212,11 +186,6 @@ type XgiBasic() =
 
     [<Test>]
     member x.``Readings All Memory Long word type`` () =
-        (* PLC 에서 %_L11 을 FF 값으로 채우고 테스트. 단, A는 0으로 고정됨 *)
-        let memoryType = "L"
-        let address = LAddress
-                    |>toString
-        let answer = 0xFFFFFFFFFFFFFFFFUL
         x.Write("%ML512", 18446744073709551615UL)
         x.Write("%LL512", 18446744073709551615UL)
         x.Write("%NL512", 18446744073709551615UL)

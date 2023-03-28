@@ -38,9 +38,9 @@ let (|DataTypePattern|_|) str =
     with exn -> None
 
 let isXgiTag tag =
-    Regex(@"^%([MLKFNRAWIQU])X([\da-fA-F]+)$").IsMatch(tag)
+    Regex(@"^%([MLKFNRAWIQU])X([\d]+)$").IsMatch(tag)
     || Regex(@"^%([IQU])X(\d+)\.(\d+)\.(\d+)$").IsMatch(tag)
-    || Regex(@"^%([MLKFNRAWIQU])([BWDL])([\da-fA-F]+)\.(\d+)$").IsMatch(tag)
+    || Regex(@"^%([MLKFNRAWIQU])([BWDL])(\d+)\.(\d+)$").IsMatch(tag)
     || Regex(@"^%([MLKFNRAWIQU])([BWDL])(\d+)$").IsMatch(tag)
     || Regex(@"^%([IQU])([BWDL])(\d+)\.(\d+)\.(\d+)$").IsMatch(tag)
 
@@ -67,7 +67,27 @@ let (|ToFEnetTag|_|) (fromCpu:CpuType) tag =
             Some $"%%{device}W{wordOffset}"
         | _ ->
             None
-    | CpuType.Xgi -> Some tag       // todo : 추후 수정 필요
+    | CpuType.Xgi ->
+        match tag with
+        | RegexPattern @"^%([IQ])X(\d+)\.(\d+)\.(\d+)$" [DevicePattern device; Int32Pattern file; Int32Pattern element; Int32Pattern bit] ->
+            let totalBitOffset = file * 64*64 + element*64  + bit
+            Some $"%%{device}X{totalBitOffset}"
+        | RegexPattern @"^%([IQ])([BWDL])(\d+)\.(\d+)\.(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern d1; Int32Pattern d2; Int32Pattern d3] ->
+            let offset = d1 * 8*8 + d2 *8 + d3
+            Some $"%%{device}{dataType.ToMnemonic()}{offset}"
+        | RegexPattern @"^%([IQ])([BWDLX])(\d+)\.(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern element; Int32Pattern bit] ->
+            let totalBitOffset = element * dataType.GetBitLength() + bit
+            Some $"%%{device}X{totalBitOffset}"
+        | RegexPattern @"^%([IQ])([BWDLX])(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern bit] ->
+            Some $"%%{device}{dataType.ToMnemonic()}{bit}"
+
+
+        | RegexPattern @"^%([MLKFNRAWIQU])([BWDL])(\d+)\.(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern element; Int32Pattern bit;] ->
+            let totalBitOffset = element * dataType.GetBitLength() + bit
+            Some $"%%{device}X{totalBitOffset}"
+
+        | _ ->
+            None
     | _ ->
         None
 
@@ -76,11 +96,10 @@ let tryToFEnetTag (fromCpu:CpuType) tag = (|ToFEnetTag|_|) fromCpu tag
 
 let createTagInfo = LsFEnetTagInfo.Create >> Some
 let (|LsTagPatternFEnet|_|) tag =
-    let isIEC = true
     match tag with
     // XGI IEC 61131 : bit
     | RegexPattern @"^%([PMLKFNRAWIQU])X([\da-fA-F]+)$" [ DevicePattern device; HexPattern bitOffset ] ->
-        createTagInfo(tag, device, DataType.Bit, bitOffset, isIEC)
+        createTagInfo(tag, device, DataType.Bit, bitOffset)
 
     | RegexPattern @"^%([IQU])X(\d+)\.(\d+)\.(\d+)$"
         [DevicePattern device; Int32Pattern file; Int32Pattern element; Int32Pattern bit] ->
@@ -95,7 +114,7 @@ let (|LsTagPatternFEnet|_|) tag =
 
         //logInfo "test : %O %d %d %d" device file element bit;
         let totalBitOffset = file * baseStep + element * slotStep + bit
-        createTagInfo(tag, device, DataType.Bit, totalBitOffset, isIEC)
+        createTagInfo(tag, device, DataType.Bit, totalBitOffset)
 
     //// U 영역은 특수 처리 (서보 및 드라이버)
     //| RegexPattern @"^%(U)([XBWDL])(\d+)\.(\d+)\.(\d+)$"
@@ -112,7 +131,7 @@ let (|LsTagPatternFEnet|_|) tag =
     | RegexPattern @"^%([PMLKFNRAWIQU])([BWDL])([\da-fA-F]+)\.(\d+)$"
        [DevicePattern device; DataTypePattern dataType;  Int32Pattern offset; Int32Pattern bit;] ->
         let totalBitOffset = offset * dataType.GetBitLength() + bit
-        createTagInfo(tag, device, DataType.Bit, totalBitOffset, isIEC)
+        createTagInfo(tag, device, DataType.Bit, totalBitOffset)
 
 
     // XGI IEC 61131 : byte / word / dword / lword
@@ -120,7 +139,7 @@ let (|LsTagPatternFEnet|_|) tag =
         [DevicePattern device; DataTypePattern dataType; Int32Pattern offset;] ->
         let byteOffset = offset * dataType.GetByteLength()
         let totalBitOffset = byteOffset * 8
-        createTagInfo(tag, device, dataType, totalBitOffset, isIEC)
+        createTagInfo(tag, device, dataType, totalBitOffset)
     | RegexPattern @"^%([IQU])([BWDL])(\d+)\.(\d+)\.(\d+)$"
         [DevicePattern device; DataTypePattern dataType; Int32Pattern file; Int32Pattern element; Int32Pattern bit;]->
         let uMemStep : int =
@@ -137,7 +156,7 @@ let (|LsTagPatternFEnet|_|) tag =
         let offset = bitSet + elementSet + fileSet;
 
         //logInfo "bitSet = %d  elementSet = %d fileSet = %d offset = %d" bitSet elementSet fileSet offset;
-        createTagInfo(tag, device, dataType, offset, isIEC)
+        createTagInfo(tag, device, dataType, offset)
     | _ ->
         logWarn "Failed to parse tag : %s" tag
         None

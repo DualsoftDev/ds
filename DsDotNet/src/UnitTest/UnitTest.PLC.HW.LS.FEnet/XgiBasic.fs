@@ -81,7 +81,7 @@ type XgiBasic() =
 
     [<Test>]
     member x.``Readings All Memory bit type`` () =
-        (* PLC 에서 %_X11 을 FF 값으로 채우고 테스트. 단, A는 0으로 고정됨 *)
+        (* PLC 에서 %_X11 을 true 값으로 채우고 테스트. 단, A는 false으로 고정됨 *)
         let memoryType = "X"
         let address = bitAddress
                     |>toString

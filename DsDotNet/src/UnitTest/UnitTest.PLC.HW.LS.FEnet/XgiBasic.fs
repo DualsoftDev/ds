@@ -10,6 +10,15 @@ open Dsu.PLC.LS
 type XgiBasic() =
     inherit FEnetTestBase("192.168.0.100")
 
+    /// Unsigned Long with 0xFFFFFFFFFFFFFFFF
+    let ulFF = 0xFFFFFFFFFFFFFFFFUL
+    /// Unsigned Int with 0xFFFFFFFF
+    let unFF = 0xFFFFFFFFu
+    /// Unsigned Short with 0xFFFF
+    let usFF = 0xFFFFus
+    /// Unsigned Byte with 0xFF
+    let uyFF = 0xFFuy
+
     override x.CreateLsTag (tag:string) (convertFEnet:bool) =
         LsTagXgi(x.Conn, tag, convertFEnet)
 
@@ -92,30 +101,30 @@ type XgiBasic() =
     member x.``Readings`` () =
         (* PLC 에서 %ML0 를 FF 값으로 채우고 있다는 가정하에... *)
         let mb0 = x.Conn.ReadATag("%MB0")
-        mb0 === 0xFFuy
-        x.Read("%MB1") === 0xFFuy
-        x.Read("%MB7") === 0xFFuy
+        mb0 === uyFF
+        x.Read("%MB1") === uyFF
+        x.Read("%MB7") === uyFF
 
-        x.Read("%MW0") === 0xFFFFus
-        x.Read("%MW1") === 0xFFFFus
-        x.Read("%MW2") === 0xFFFFus
-        x.Read("%MW3") === 0xFFFFus
+        x.Read("%MW0") === usFF
+        x.Read("%MW1") === usFF
+        x.Read("%MW2") === usFF
+        x.Read("%MW3") === usFF
 
-        x.Read("%ML0") === 0xFFFFFFFFFFFFFFFFUL
+        x.Read("%ML0") === ulFF
 
     [<Test>]
     member x.``Readings All Memory bit type`` () =
-        x.Write("%ML512", 18446744073709551615UL)
-        x.Write("%LL512", 18446744073709551615UL)
-        x.Write("%NL512", 18446744073709551615UL)
-        x.Write("%KL512", 18446744073709551615UL)
-        x.Write("%RL512", 18446744073709551615UL)
-        x.Write("%WL512", 18446744073709551615UL)
-        x.Write("%AL512", 18446744073709551615UL)           //WARNING
-        x.Write("%FL512", 18446744073709551615UL)
-        x.Write("%IL512", 18446744073709551615UL)
-        x.Write("%QL512", 18446744073709551615UL)
-        x.Write("%UL4.0.0", 18446744073709551615UL)
+        x.Write("%ML512", ulFF)
+        x.Write("%LL512", ulFF)
+        x.Write("%NL512", ulFF)
+        x.Write("%KL512", ulFF)
+        x.Write("%RL512", ulFF)
+        x.Write("%WL512", ulFF)
+        x.Write("%AL512", ulFF)           //WARNING
+        x.Write("%FL512", ulFF)
+        x.Write("%IL512", ulFF)
+        x.Write("%QL512", ulFF)
+        x.Write("%UL4.0.0", ulFF)
         x.ReadFEnet("%MX32768") === true
         x.ReadFEnet("%LX32768") === true
         x.ReadFEnet("%NX32768") === true
@@ -123,131 +132,135 @@ type XgiBasic() =
         x.ReadFEnet("%RX32768") === true
         x.ReadFEnet("%WX32768") === true
         x.ReadFEnet("%AX32768") === true                    //WARNING
-        x.ReadFEnet("%FX32768") === true 
+        x.ReadFEnet("%FX32768") === true
         x.ReadFEnet("%IX32768") === true                    //32.0.0
-        x.ReadFEnet("%QX32768") === true                    //32.0.0 
-        x.Read("%UX4.0.0") === true                         //4.0.0    
+        x.ReadFEnet("%QX32768") === true                    //32.0.0
+        x.Read("%UX4.0.0") === true                         //4.0.0
         x.Read("%IX32.0.0") === true                        //32.0.0
-        x.Read("%QX32.0.0") === true                        //32.0.0 
+        x.Read("%QX32.0.0") === true                        //32.0.0
+
         (*U메모리는 0.0.0 양식으로만 접근 가능*)
-        (fun () -> (x.ReadFEnet("%UX32768") === true )) |> ShouldFailWithSubstringT "option"  
-                         
+        (tryParseTag "%UX32768").IsNone === true
+
 
     [<Test>]
     member x.``Readings All Memory byte type`` () =
-        x.Write("%ML512", 18446744073709551615UL)
-        x.Write("%LL512", 18446744073709551615UL)
-        x.Write("%NL512", 18446744073709551615UL)
-        x.Write("%KL512", 18446744073709551615UL)
-        x.Write("%RL512", 18446744073709551615UL)
-        x.Write("%WL512", 18446744073709551615UL)
-        x.Write("%AL512", 18446744073709551615UL)           //WARNING
-        x.Write("%FL512", 18446744073709551615UL)
-        x.Write("%IL512", 18446744073709551615UL)
-        x.Write("%QL512", 18446744073709551615UL)
-        x.Write("%UL4.0.0", 18446744073709551615UL)
-        x.ReadFEnet("%MB4096") === 0xFFuy
-        x.ReadFEnet("%LB4096") === 0xFFuy
-        x.ReadFEnet("%NB4096") === 0xFFuy
-        x.ReadFEnet("%KB4096") === 0xFFuy
-        x.ReadFEnet("%RB4096") === 0xFFuy
-        x.ReadFEnet("%WB4096") === 0xFFuy
-        x.ReadFEnet("%AB4096") === 0xFFuy                   //WARNING
-        x.ReadFEnet("%FB4096") === 0xFFuy 
-        x.ReadFEnet("%IB4096") === 0xFFuy                    //32.0.0
-        x.ReadFEnet("%QB4096") === 0xFFuy                    //32.0.0    
-        x.Read("%UB4.0.0") === 0xFFuy                       //4.0.0    
-        x.Read("%IB32.0.0") === 0xFFuy                      //32.0.0
-        x.Read("%QB32.0.0") === 0xFFuy                      //32.0.0 
+        x.Write("%ML512", ulFF)
+        x.Write("%LL512", ulFF)
+        x.Write("%NL512", ulFF)
+        x.Write("%KL512", ulFF)
+        x.Write("%RL512", ulFF)
+        x.Write("%WL512", ulFF)
+        x.Write("%AL512", ulFF)           //WARNING
+        x.Write("%FL512", ulFF)
+        x.Write("%IL512", ulFF)
+        x.Write("%QL512", ulFF)
+        x.Write("%UL4.0.0", ulFF)
+        x.ReadFEnet("%MB4096") === uyFF
+        x.ReadFEnet("%LB4096") === uyFF
+        x.ReadFEnet("%NB4096") === uyFF
+        x.ReadFEnet("%KB4096") === uyFF
+        x.ReadFEnet("%RB4096") === uyFF
+        x.ReadFEnet("%WB4096") === uyFF
+        x.ReadFEnet("%AB4096") === uyFF                   //WARNING
+        x.ReadFEnet("%FB4096") === uyFF
+        x.ReadFEnet("%IB4096") === uyFF                    //32.0.0
+        x.ReadFEnet("%QB4096") === uyFF                    //32.0.0
+        x.Read("%UB4.0.0") === uyFF                       //4.0.0
+        x.Read("%IB32.0.0") === uyFF                      //32.0.0
+        x.Read("%QB32.0.0") === uyFF                      //32.0.0
+
         (*U메모리는 0.0.0 양식으로만 접근 가능*)
-        (fun () -> (x.ReadFEnet("%UB4096") === true )) |> ShouldFailWithSubstringT "option" 
+        (tryParseTag "%UB4096").IsNone === true
 
     [<Test>]
     member x.``Readings All Memory word type`` () =
-        x.Write("%ML512", 18446744073709551615UL)
-        x.Write("%LL512", 18446744073709551615UL)
-        x.Write("%NL512", 18446744073709551615UL)
-        x.Write("%KL512", 18446744073709551615UL)
-        x.Write("%RL512", 18446744073709551615UL)
-        x.Write("%WL512", 18446744073709551615UL)
-        x.Write("%AL512", 18446744073709551615UL)           //WARNING
-        x.Write("%FL512", 18446744073709551615UL)
-        x.Write("%IL512", 18446744073709551615UL)
-        x.Write("%QL512", 18446744073709551615UL)
-        x.Write("%UL4.0.0", 18446744073709551615UL)
-        x.ReadFEnet("%MW2048") === 0xFFFFus
-        x.ReadFEnet("%LW2048") === 0xFFFFus
-        x.ReadFEnet("%NW2048") === 0xFFFFus
-        x.ReadFEnet("%KW2048") === 0xFFFFus
-        x.ReadFEnet("%RW2048") === 0xFFFFus
-        x.ReadFEnet("%WW2048") === 0xFFFFus
-        x.ReadFEnet("%AW2048") === 0xFFFFus                 //WARNING
-        x.ReadFEnet("%FW2048") === 0xFFFFus 
-        x.ReadFEnet("%IW2048") === 0xFFFFus                 //32.0.0
-        x.ReadFEnet("%QW2048") === 0xFFFFus                 //32.0.0    
-        x.Read("%UW4.0.0") === 0xFFFFus                     //4.0.0    
-        x.Read("%IW32.0.0") === 0xFFFFus                    //32.0.0
-        x.Read("%QW32.0.0") === 0xFFFFus                    //32.0.0 
+        x.Write("%ML512", ulFF)
+        x.Write("%LL512", ulFF)
+        x.Write("%NL512", ulFF)
+        x.Write("%KL512", ulFF)
+        x.Write("%RL512", ulFF)
+        x.Write("%WL512", ulFF)
+        x.Write("%AL512", ulFF)           //WARNING
+        x.Write("%FL512", ulFF)
+        x.Write("%IL512", ulFF)
+        x.Write("%QL512", ulFF)
+        x.Write("%UL4.0.0", ulFF)
+        x.ReadFEnet("%MW2048") === usFF
+        x.ReadFEnet("%LW2048") === usFF
+        x.ReadFEnet("%NW2048") === usFF
+        x.ReadFEnet("%KW2048") === usFF
+        x.ReadFEnet("%RW2048") === usFF
+        x.ReadFEnet("%WW2048") === usFF
+        x.ReadFEnet("%AW2048") === usFF                 //WARNING
+        x.ReadFEnet("%FW2048") === usFF
+        x.ReadFEnet("%IW2048") === usFF                 //32.0.0
+        x.ReadFEnet("%QW2048") === usFF                 //32.0.0
+        x.Read("%UW4.0.0") === usFF                     //4.0.0
+        x.Read("%IW32.0.0") === usFF                    //32.0.0
+        x.Read("%QW32.0.0") === usFF                    //32.0.0
+
         (*U메모리는 0.0.0 양식으로만 접근 가능*)
-        (fun () -> (x.ReadFEnet("%UW2048") === true )) |> ShouldFailWithSubstringT "option"
+        (tryParseTag "%UW2048").IsNone === true
 
     [<Test>]
     member x.``Readings All Memory Double word type`` () =
-        x.Write("%ML512", 18446744073709551615UL)
-        x.Write("%LL512", 18446744073709551615UL)
-        x.Write("%NL512", 18446744073709551615UL)
-        x.Write("%KL512", 18446744073709551615UL)
-        x.Write("%RL512", 18446744073709551615UL)
-        x.Write("%WL512", 18446744073709551615UL)
-        x.Write("%AL512", 18446744073709551615UL)           //WARNING
-        x.Write("%FL512", 18446744073709551615UL)
-        x.Write("%IL512", 18446744073709551615UL)
-        x.Write("%QL512", 18446744073709551615UL)
-        x.Write("%UL4.0.0", 18446744073709551615UL)
-        x.ReadFEnet("%MD1024") === 0xFFFFFFFFu
-        x.ReadFEnet("%LD1024") === 0xFFFFFFFFu
-        x.ReadFEnet("%ND1024") === 0xFFFFFFFFu
-        x.ReadFEnet("%KD1024") === 0xFFFFFFFFu
-        x.ReadFEnet("%RD1024") === 0xFFFFFFFFu
-        x.ReadFEnet("%WD1024") === 0xFFFFFFFFu
-        x.ReadFEnet("%AD1024") === 0xFFFFFFFFu              //WARNING
-        x.ReadFEnet("%FD1024") === 0xFFFFFFFFu 
-        x.ReadFEnet("%ID1024") === 0xFFFFFFFFu              //32.0.0
-        x.ReadFEnet("%QD1024") === 0xFFFFFFFFu              //32.0.0            
-        x.Read("%ID32.0.0") === 0xFFFFFFFFu                 //32.0.0
-        x.Read("%QD32.0.0") === 0xFFFFFFFFu                 //32.0.0 
-        (*U메모리는 0.0.0 양식으로만 접근 가능*)
-        (fun () -> (x.ReadFEnet("%UD1024") === true )) |> ShouldFailWithSubstringT "option"
+        x.Write("%ML512", ulFF)
+        x.Write("%LL512", ulFF)
+        x.Write("%NL512", ulFF)
+        x.Write("%KL512", ulFF)
+        x.Write("%RL512", ulFF)
+        x.Write("%WL512", ulFF)
+        x.Write("%AL512", ulFF)           //WARNING
+        x.Write("%FL512", ulFF)
+        x.Write("%IL512", ulFF)
+        x.Write("%QL512", ulFF)
+        x.Write("%UL4.0.0", ulFF)
+        x.ReadFEnet("%MD1024") === unFF
+        x.ReadFEnet("%LD1024") === unFF
+        x.ReadFEnet("%ND1024") === unFF
+        x.ReadFEnet("%KD1024") === unFF
+        x.ReadFEnet("%RD1024") === unFF
+        x.ReadFEnet("%WD1024") === unFF
+        x.ReadFEnet("%AD1024") === unFF              //WARNING
+        x.ReadFEnet("%FD1024") === unFF
+        x.ReadFEnet("%ID1024") === unFF              //32.0.0
+        x.ReadFEnet("%QD1024") === unFF              //32.0.0
+        x.Read("%ID32.0.0") === unFF                 //32.0.0
+        x.Read("%QD32.0.0") === unFF                 //32.0.0
+
+        (* U메모리는 0.0.0 양식으로만 접근 가능 *)
+        (tryParseTag "%UD1024").IsNone === true
 
     [<Test>]
     member x.``Readings All Memory Long word type`` () =
-        x.Write("%ML512", 18446744073709551615UL)
-        x.Write("%LL512", 18446744073709551615UL)
-        x.Write("%NL512", 18446744073709551615UL)
-        x.Write("%KL512", 18446744073709551615UL)
-        x.Write("%RL512", 18446744073709551615UL)
-        x.Write("%WL512", 18446744073709551615UL)
-        x.Write("%AL512", 18446744073709551615UL)           //WARNING
-        x.Write("%FL512", 18446744073709551615UL)
-        x.Write("%IL512", 18446744073709551615UL)
-        x.Write("%QL512", 18446744073709551615UL)
-        x.Write("%UL4.0.0", 18446744073709551615UL)
-        x.ReadFEnet("%ML512") === 0xFFFFFFFFFFFFFFFFUL
-        x.ReadFEnet("%LL512") === 0xFFFFFFFFFFFFFFFFUL
-        x.ReadFEnet("%NL512") === 0xFFFFFFFFFFFFFFFFUL
-        x.ReadFEnet("%KL512") === 0xFFFFFFFFFFFFFFFFUL
-        x.ReadFEnet("%RL512") === 0xFFFFFFFFFFFFFFFFUL
-        x.ReadFEnet("%WL512") === 0xFFFFFFFFFFFFFFFFUL
-        x.ReadFEnet("%AL512") === 0xFFFFFFFFFFFFFFFFUL              //WARNING
-        x.ReadFEnet("%FL512") === 0xFFFFFFFFFFFFFFFFUL 
-        x.ReadFEnet("%IL512") === 0xFFFFFFFFFFFFFFFFUL              //32.0.0
-        x.ReadFEnet("%QL512") === 0xFFFFFFFFFFFFFFFFUL              //32.0.0    
-        x.Read("%UL4.0.0") === 0xFFFFFFFFFFFFFFFFUL                 //4.0.0    
-        x.Read("%IL32.0.0") === 0xFFFFFFFFFFFFFFFFUL                //32.0.0
-        x.Read("%QL32.0.0") === 0xFFFFFFFFFFFFFFFFUL                //32.0.0
+        x.Write("%ML512", ulFF)
+        x.Write("%LL512", ulFF)
+        x.Write("%NL512", ulFF)
+        x.Write("%KL512", ulFF)
+        x.Write("%RL512", ulFF)
+        x.Write("%WL512", ulFF)
+        x.Write("%AL512", ulFF)           //WARNING
+        x.Write("%FL512", ulFF)
+        x.Write("%IL512", ulFF)
+        x.Write("%QL512", ulFF)
+        x.Write("%UL4.0.0", ulFF)
+        x.ReadFEnet("%ML512") === ulFF
+        x.ReadFEnet("%LL512") === ulFF
+        x.ReadFEnet("%NL512") === ulFF
+        x.ReadFEnet("%KL512") === ulFF
+        x.ReadFEnet("%RL512") === ulFF
+        x.ReadFEnet("%WL512") === ulFF
+        x.ReadFEnet("%AL512") === ulFF              //WARNING
+        x.ReadFEnet("%FL512") === ulFF
+        x.ReadFEnet("%IL512") === ulFF              //32.0.0
+        x.ReadFEnet("%QL512") === ulFF              //32.0.0
+        x.Read("%UL4.0.0") === ulFF                 //4.0.0
+        x.Read("%IL32.0.0") === ulFF                //32.0.0
+        x.Read("%QL32.0.0") === ulFF                //32.0.0
+
         (*U메모리는 0.0.0 양식으로만 접근 가능*)
-        (fun () -> x.ReadFEnet("%UL512") === true |> ignore) 
-        |> ShouldFailWithSubstringT "ArgumentException"
+        (tryParseTag "%UL512").IsNone === true
 
 
     [<Test>]

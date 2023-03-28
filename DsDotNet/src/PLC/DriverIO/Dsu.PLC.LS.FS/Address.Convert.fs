@@ -171,28 +171,8 @@ let (|LsTagPatternFEnet|_|) tag =
         logWarn "Failed to parse tag : %s" tag
         None
 
+/// LS PLC 통신 규약인 FEnet 규격을 따르는 tag 정보를 parsing.   규격 미충족 tag 는 Option.None 반환
 let tryParseTag tag =  (|LsTagPatternFEnet|_|) tag
-
-//let tryParseIECTag (tag) =
-//    match tag with
-//    | RegexPattern @"([PMLKF])(\d\d\d\d)([\da-fA-F])"
-//        [DevicePattern device; Int32Pattern offset; HexPattern bitOffset] ->
-//        Some (sprintf "%%%sX%d" (device.ToString()) (offset*16 + bitOffset)), Some(DataType.Bit)
-//    | RegexPattern @"([PMLKF])(\d+)$"
-//        [DevicePattern device; Int32Pattern offset;] ->
-//        if(offset > 9999)
-//        then  Some (sprintf "%%%sX%d" (device.ToString()) ((offset/10*16)+(offset%16))), Some(DataType.Bit)
-//        else  Some (sprintf "%%%sW%d" (device.ToString()) offset), Some(DataType.Word)
-
-//    | RegexPattern @"([RD])(\d+)$"
-//        [DevicePattern device;  Int32Pattern offset] ->
-//        Some (sprintf "%%%sW%d" (device.ToString()) offset), Some(DataType.Word)
-//    | RegexPattern @"([RD])(\d+)\.([\da-fA-F])"
-//        [DevicePattern device;  Int32Pattern offset; HexPattern bitOffset] ->
-//        Some (sprintf "%%%sW%d.%d" (device.ToString()) offset bitOffset), Some(DataType.Bit)
-//    | _ ->
-//        //logWarn "Failed to parse tag : %s" tag
-//        None, None
 
 
 /// LS PLC 의 tag 명을 기준으로 data 의 bit 수를 반환

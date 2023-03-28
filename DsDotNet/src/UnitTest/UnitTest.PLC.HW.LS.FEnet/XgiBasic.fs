@@ -83,19 +83,29 @@ type XgiBasic() =
 
     [<Test>]
     member x.``Readings All Memory bit type`` () =
-        logDebug "XXXXXXXXXXXXXXXXX"
         (* PLC 에서 %_X11 을 true 값으로 채우고 테스트. 단, A는 false으로 고정됨 *)
         let memoryType = "X"
         let address = bitAddress
                     |>toString
         let answer = true
+        x.Write("%ML512", 18446744073709551615UL)
+        x.Write("%LL512", 18446744073709551615UL)
+        x.Write("%NL512", 18446744073709551615UL)
+        x.Write("%KL512", 18446744073709551615UL)
+        x.Write("%RL512", 18446744073709551615UL)
+        x.Write("%WL512", 18446744073709551615UL)
+        x.Write("%AL512", 18446744073709551615UL)
+        x.Write("%FL512", 18446744073709551615UL)
+        x.Write("%IL512", 18446744073709551615UL)
+        x.Write("%QL512", 18446744073709551615UL)
+        x.Write("%UL4.0.0", 18446744073709551615UL)
         x.ReadFEnet("%M"+memoryType+address) === answer
         x.ReadFEnet("%L"+memoryType+address) === answer
         x.ReadFEnet("%N"+memoryType+address) === answer
         x.ReadFEnet("%K"+memoryType+address) === answer
         x.ReadFEnet("%R"+memoryType+address) === answer
         x.ReadFEnet("%W"+memoryType+address) === answer
-        x.ReadFEnet("%A"+memoryType+address) =!= answer
+        x.ReadFEnet("%A"+memoryType+address) === answer
         x.ReadFEnet("%F"+memoryType+address) === answer 
         //x.ReadFEnet("%U"+memoryType+address) === answer          //4.0.0    
         x.ReadFEnet("%I"+memoryType+address) === answer          //32.0.0

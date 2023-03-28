@@ -254,7 +254,12 @@ and LsConnection(parameters:LsConnectionParameters) as this =
         |> anal.DataType.BoxUI8
 
     member x.WriteATag(tag:ITag) =
+        let str:string = tag.Name
+        let containsChar = str.Contains("A")
+        if containsChar then 
+            logWarn "You are performing a write operation on memory A, which is not allowed on XG5000."
         x.WriteRandomTags([|tag :?> LsTag|])
+
 
 
     /// 복수개의 tag 값을 PLC 로부터 읽어 낸다.

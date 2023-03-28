@@ -78,7 +78,6 @@ let (|ToFEnetTag|_|) (fromCpu:CpuType) tag =
         | RegexPattern @"^%([IQ])([BWDL])(\d+)\.(\d+)\.(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern d1; Int32Pattern d2; Int32Pattern d3] ->
             let step = 64/dataType.GetBitLength()
             let offset = d1 * 16 * step + d2 * step + d3
-            logDebug $"{tag}'s offset = {offset}"
             Some $"%%{device}{dataType.ToMnemonic()}{offset}"
         | RegexPattern @"^%(U)([BWDL])(\d+)\.(\d+)\.(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern d1; Int32Pattern d2; Int32Pattern d3] ->
             let step = 64/dataType.GetBitLength() * 8

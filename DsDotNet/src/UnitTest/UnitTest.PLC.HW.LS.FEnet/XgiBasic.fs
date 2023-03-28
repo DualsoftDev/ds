@@ -10,13 +10,6 @@ open Dsu.PLC.LS
 type XgiBasic() =
     inherit FEnetTestBase("192.168.0.100")
 
-    let LAddress = 512      // 모든 메모리 - L - 주소512에 최대값(18446744073709551615) 넣기(A 제외)
-    let DAddress = LAddress * 2
-    let WAddress = DAddress * 2
-    let BAddress = WAddress * 2
-    let bitAddress = BAddress * 8
-
-
     override x.CreateLsTag (tag:string) (convertFEnet:bool) =
         LsTagXgi(x.Conn, tag, convertFEnet)
 
@@ -30,8 +23,9 @@ type XgiBasic() =
             "%IX0.0.63", "%IX63"
             "%IX0.1.0", "%IX64"
             "%IX0.1.1", "%IX65"
-            "%IX1.1.1", "%IX4161"       // 1*64*64 + 1*64 + 1
-            "%IX2.3.1", "%IX8385"       // 2*64*64 + 3*64 + 1
+            "%IX1.1.1", "%IX1089"       // 1*16*64 + 1*64 + 1
+            "%IX2.3.1", "%IX2241"       // 2*16*64 + 3*64 + 1
+            "%IX32.0.0", "%IX32768"
 
             "%IB0.0", "%IX0"
             "%IB0.1", "%IX1"
@@ -48,10 +42,42 @@ type XgiBasic() =
             "%IL1.0", "%IX64"
             "%IL1.1", "%IX65"
 
-            "%IB1.0.1", "%IB65"
+            "%IB1.0.1", "%IB129"
             "%IW1.0.1", "%IW65"
-            "%ID1.0.1", "%ID65"
-            "%IL1.0.1", "%IL65"
+            "%ID1.0.1", "%ID33"
+            //"%IL1.0.1", "%IL65"     // 존재하지 않는 주소
+            "%IL1.1.0", "%IL17"
+
+            "%QX0.0.0", "%QX0"
+            "%QX0.0.1", "%QX1"
+            "%QX0.0.8", "%QX8"
+            "%QX0.0.10", "%QX10"
+            "%QX0.0.63", "%QX63"
+            "%QX0.1.0", "%QX64"
+            "%QX0.1.1", "%QX65"
+            "%QX1.1.1", "%QX1089"       // 1*16*64 + 1*64 + 1
+            "%QX2.3.1", "%QX2241"       // 2*16*64 + 3*64 + 1
+            "%QX32.0.0", "%QX32768"
+
+            "%QB0.0", "%QX0"
+            "%QB0.1", "%QX1"
+            "%QB0.2", "%QX2"
+            "%QB1.0", "%QX8"
+            "%QB1.1", "%QX9"
+
+            "%QW1.0", "%QX16"
+            "%QW1.1", "%QX17"
+
+            "%QD1.0", "%QX32"
+            "%QD1.1", "%QX33"
+
+            "%QL1.0", "%QX64"
+            "%QL1.1", "%QX65"
+
+            "%QB1.0.1", "%QB129"
+            "%QW1.0.1", "%QW65"
+            "%QD1.0.1", "%QD33"
+            "%QL1.1.0", "%QL17"
         ]
         for (tag, expected) in tags do
             let fenet = tryToFEnetTag CpuType.Xgi tag
@@ -77,104 +103,151 @@ type XgiBasic() =
 
         x.Read("%ML0") === 0xFFFFFFFFFFFFFFFFUL
 
-
-
     [<Test>]
     member x.``Readings All Memory bit type`` () =
-        (* PLC 에서 %_X11 을 true 값으로 채우고 테스트. 단, A는 false으로 고정됨 *)
-        let memoryType = "X"
-        let address = bitAddress
-                    |>toString
-        let answer = true
-        x.Read("%M"+memoryType+address) === answer
-        x.Read("%L"+memoryType+address) === answer
-        x.Read("%N"+memoryType+address) === answer
-        x.Read("%K"+memoryType+address) === answer
-        x.Read("%R"+memoryType+address) === answer
-        x.Read("%W"+memoryType+address) === answer
-        x.Read("%A"+memoryType+address) =!= answer
-        x.Read("%F"+memoryType+address) === answer 
-        x.Read("%U"+memoryType+address) === answer          //4.0.0    
-        x.Read("%I"+memoryType+address) === answer          //32.0.0
-        x.Read("%Q"+memoryType+address) === answer          //32.0.0 
+        x.Write("%ML512", 18446744073709551615UL)
+        x.Write("%LL512", 18446744073709551615UL)
+        x.Write("%NL512", 18446744073709551615UL)
+        x.Write("%KL512", 18446744073709551615UL)
+        x.Write("%RL512", 18446744073709551615UL)
+        x.Write("%WL512", 18446744073709551615UL)
+        x.Write("%AL512", 18446744073709551615UL)           //WARNING
+        x.Write("%FL512", 18446744073709551615UL)
+        x.Write("%IL512", 18446744073709551615UL)
+        x.Write("%QL512", 18446744073709551615UL)
+        x.Write("%UL4.0.0", 18446744073709551615UL)
+        x.ReadFEnet("%MX32768") === true
+        x.ReadFEnet("%LX32768") === true
+        x.ReadFEnet("%NX32768") === true
+        x.ReadFEnet("%KX32768") === true
+        x.ReadFEnet("%RX32768") === true
+        x.ReadFEnet("%WX32768") === true
+        x.ReadFEnet("%AX32768") === true                    //WARNING
+        x.ReadFEnet("%FX32768") === true 
+        x.ReadFEnet("%IX32768") === true                    //32.0.0
+        x.ReadFEnet("%QX32768") === true                    //32.0.0 
+        x.Read("%UX4.0.0") === true                         //4.0.0    
+        x.Read("%IX32.0.0") === true                        //32.0.0
+        x.Read("%QX32.0.0") === true                        //32.0.0 
+        (*U메모리는 0.0.0 양식으로만 접근 가능*)
+        (fun () -> (x.ReadFEnet("%UX32768") === true )) |> ShouldFailWithSubstringT "option"  
+                         
 
     [<Test>]
     member x.``Readings All Memory byte type`` () =
-        (* PLC 에서 %_B11 을 FF 값으로 채우고 테스트. 단, A는 0으로 고정됨 *)
-        let memoryType = "B"
-        let address = BAddress
-                    |>toString
-        let answer = 0xFFuy
-        x.Read("%M"+memoryType+address) === answer
-        x.Read("%L"+memoryType+address) === answer
-        x.Read("%N"+memoryType+address) === answer
-        x.Read("%K"+memoryType+address) === answer
-        x.Read("%R"+memoryType+address) === answer
-        x.Read("%W"+memoryType+address) === answer
-        x.Read("%A"+memoryType+address) === answer - answer
-        x.Read("%F"+memoryType+address) === answer 
-        x.Read("%U"+memoryType+address) === answer          //4.0.0    
-        x.Read("%I"+memoryType+address) === answer          //32.0.0
-        x.Read("%Q"+memoryType+address) === answer          //32.0.0           
+        x.Write("%ML512", 18446744073709551615UL)
+        x.Write("%LL512", 18446744073709551615UL)
+        x.Write("%NL512", 18446744073709551615UL)
+        x.Write("%KL512", 18446744073709551615UL)
+        x.Write("%RL512", 18446744073709551615UL)
+        x.Write("%WL512", 18446744073709551615UL)
+        x.Write("%AL512", 18446744073709551615UL)           //WARNING
+        x.Write("%FL512", 18446744073709551615UL)
+        x.Write("%IL512", 18446744073709551615UL)
+        x.Write("%QL512", 18446744073709551615UL)
+        x.Write("%UL4.0.0", 18446744073709551615UL)
+        x.ReadFEnet("%MB4096") === 0xFFuy
+        x.ReadFEnet("%LB4096") === 0xFFuy
+        x.ReadFEnet("%NB4096") === 0xFFuy
+        x.ReadFEnet("%KB4096") === 0xFFuy
+        x.ReadFEnet("%RB4096") === 0xFFuy
+        x.ReadFEnet("%WB4096") === 0xFFuy
+        x.ReadFEnet("%AB4096") === 0xFFuy                   //WARNING
+        x.ReadFEnet("%FB4096") === 0xFFuy 
+        x.ReadFEnet("%IB4096") === 0xFFuy                    //32.0.0
+        x.ReadFEnet("%QB4096") === 0xFFuy                    //32.0.0    
+        x.Read("%UB4.0.0") === 0xFFuy                       //4.0.0    
+        x.Read("%IB32.0.0") === 0xFFuy                      //32.0.0
+        x.Read("%QB32.0.0") === 0xFFuy                      //32.0.0 
+        (*U메모리는 0.0.0 양식으로만 접근 가능*)
+        (fun () -> (x.ReadFEnet("%UB4096") === true )) |> ShouldFailWithSubstringT "option" 
 
     [<Test>]
     member x.``Readings All Memory word type`` () =
-        (* PLC 에서 %_W11 을 FF 값으로 채우고 테스트. 단, A는 0으로 고정됨 *)
-        let memoryType = "W"
-        let address = WAddress
-                    |>toString
-
-        let answer = 0xFFFFus
-        x.Read("%M"+memoryType+address) === answer
-        x.Read("%L"+memoryType+address) === answer
-        x.Read("%N"+memoryType+address) === answer
-        x.Read("%K"+memoryType+address) === answer
-        x.Read("%R"+memoryType+address) === answer
-        x.Read("%W"+memoryType+address) === answer
-        x.Read("%A"+memoryType+address) === answer - answer
-        x.Read("%F"+memoryType+address) === answer
-        x.Read("%U"+memoryType+address) === answer          //4.0.0    
-        x.Read("%I"+memoryType+address) === answer          //32.0.0
-        x.Read("%Q"+memoryType+address) === answer          //32.0.0     
+        x.Write("%ML512", 18446744073709551615UL)
+        x.Write("%LL512", 18446744073709551615UL)
+        x.Write("%NL512", 18446744073709551615UL)
+        x.Write("%KL512", 18446744073709551615UL)
+        x.Write("%RL512", 18446744073709551615UL)
+        x.Write("%WL512", 18446744073709551615UL)
+        x.Write("%AL512", 18446744073709551615UL)           //WARNING
+        x.Write("%FL512", 18446744073709551615UL)
+        x.Write("%IL512", 18446744073709551615UL)
+        x.Write("%QL512", 18446744073709551615UL)
+        x.Write("%UL4.0.0", 18446744073709551615UL)
+        x.ReadFEnet("%MW2048") === 0xFFFFus
+        x.ReadFEnet("%LW2048") === 0xFFFFus
+        x.ReadFEnet("%NW2048") === 0xFFFFus
+        x.ReadFEnet("%KW2048") === 0xFFFFus
+        x.ReadFEnet("%RW2048") === 0xFFFFus
+        x.ReadFEnet("%WW2048") === 0xFFFFus
+        x.ReadFEnet("%AW2048") === 0xFFFFus                 //WARNING
+        x.ReadFEnet("%FW2048") === 0xFFFFus 
+        x.ReadFEnet("%IW2048") === 0xFFFFus                 //32.0.0
+        x.ReadFEnet("%QW2048") === 0xFFFFus                 //32.0.0    
+        x.Read("%UW4.0.0") === 0xFFFFus                     //4.0.0    
+        x.Read("%IW32.0.0") === 0xFFFFus                    //32.0.0
+        x.Read("%QW32.0.0") === 0xFFFFus                    //32.0.0 
+        (*U메모리는 0.0.0 양식으로만 접근 가능*)
+        (fun () -> (x.ReadFEnet("%UW2048") === true )) |> ShouldFailWithSubstringT "option"
 
     [<Test>]
     member x.``Readings All Memory Double word type`` () =
-        (* PLC 에서 %_D11 을 FF 값으로 채우고 테스트. 단, A는 0으로 고정됨 *)
-        let memoryType = "D"
-        let address = DAddress
-                    |>toString
-        let answer = 0xFFFFFFFFu
-        x.Read("%M"+memoryType+address) === answer
-        x.Read("%L"+memoryType+address) === answer
-        x.Read("%N"+memoryType+address) === answer
-        x.Read("%K"+memoryType+address) === answer
-        x.Read("%R"+memoryType+address) === answer
-        x.Read("%W"+memoryType+address) === answer
-        x.Read("%A"+memoryType+address) === answer - answer
-        x.Read("%F"+memoryType+address) === answer
-        x.Read("%U"+memoryType+address) === answer          //4.0.0    
-        x.Read("%I"+memoryType+address) === answer          //32.0.0
-        x.Read("%Q"+memoryType+address) === answer          //32.0.0          
-
+        x.Write("%ML512", 18446744073709551615UL)
+        x.Write("%LL512", 18446744073709551615UL)
+        x.Write("%NL512", 18446744073709551615UL)
+        x.Write("%KL512", 18446744073709551615UL)
+        x.Write("%RL512", 18446744073709551615UL)
+        x.Write("%WL512", 18446744073709551615UL)
+        x.Write("%AL512", 18446744073709551615UL)           //WARNING
+        x.Write("%FL512", 18446744073709551615UL)
+        x.Write("%IL512", 18446744073709551615UL)
+        x.Write("%QL512", 18446744073709551615UL)
+        x.Write("%UL4.0.0", 18446744073709551615UL)
+        x.ReadFEnet("%MD1024") === 0xFFFFFFFFu
+        x.ReadFEnet("%LD1024") === 0xFFFFFFFFu
+        x.ReadFEnet("%ND1024") === 0xFFFFFFFFu
+        x.ReadFEnet("%KD1024") === 0xFFFFFFFFu
+        x.ReadFEnet("%RD1024") === 0xFFFFFFFFu
+        x.ReadFEnet("%WD1024") === 0xFFFFFFFFu
+        x.ReadFEnet("%AD1024") === 0xFFFFFFFFu              //WARNING
+        x.ReadFEnet("%FD1024") === 0xFFFFFFFFu 
+        x.ReadFEnet("%ID1024") === 0xFFFFFFFFu              //32.0.0
+        x.ReadFEnet("%QD1024") === 0xFFFFFFFFu              //32.0.0            
+        x.Read("%ID32.0.0") === 0xFFFFFFFFu                 //32.0.0
+        x.Read("%QD32.0.0") === 0xFFFFFFFFu                 //32.0.0 
+        (*U메모리는 0.0.0 양식으로만 접근 가능*)
+        (fun () -> (x.ReadFEnet("%UD1024") === true )) |> ShouldFailWithSubstringT "option"
 
     [<Test>]
     member x.``Readings All Memory Long word type`` () =
-        (* PLC 에서 %_L11 을 FF 값으로 채우고 테스트. 단, A는 0으로 고정됨 *)
-        let memoryType = "L"
-        let address = LAddress
-                    |>toString
-        let answer = 0xFFFFFFFFFFFFFFFFUL
-        x.Read("%M"+memoryType+address) === answer
-        x.Read("%L"+memoryType+address) === answer
-        x.Read("%N"+memoryType+address) === answer
-        x.Read("%K"+memoryType+address) === answer
-        x.Read("%R"+memoryType+address) === answer
-        x.Read("%W"+memoryType+address) === answer
-        x.Read("%A"+memoryType+address) === answer - answer
-        x.Read("%F"+memoryType+address) === answer
-        x.Read("%U"+memoryType+address) === answer          //4.0.0    
-        x.Read("%I"+memoryType+address) === answer          //32.0.0
-        x.Read("%Q"+memoryType+address) === answer          //32.0.0
+        x.Write("%ML512", 18446744073709551615UL)
+        x.Write("%LL512", 18446744073709551615UL)
+        x.Write("%NL512", 18446744073709551615UL)
+        x.Write("%KL512", 18446744073709551615UL)
+        x.Write("%RL512", 18446744073709551615UL)
+        x.Write("%WL512", 18446744073709551615UL)
+        x.Write("%AL512", 18446744073709551615UL)           //WARNING
+        x.Write("%FL512", 18446744073709551615UL)
+        x.Write("%IL512", 18446744073709551615UL)
+        x.Write("%QL512", 18446744073709551615UL)
+        x.Write("%UL4.0.0", 18446744073709551615UL)
+        x.ReadFEnet("%ML512") === 0xFFFFFFFFFFFFFFFFUL
+        x.ReadFEnet("%LL512") === 0xFFFFFFFFFFFFFFFFUL
+        x.ReadFEnet("%NL512") === 0xFFFFFFFFFFFFFFFFUL
+        x.ReadFEnet("%KL512") === 0xFFFFFFFFFFFFFFFFUL
+        x.ReadFEnet("%RL512") === 0xFFFFFFFFFFFFFFFFUL
+        x.ReadFEnet("%WL512") === 0xFFFFFFFFFFFFFFFFUL
+        x.ReadFEnet("%AL512") === 0xFFFFFFFFFFFFFFFFUL              //WARNING
+        x.ReadFEnet("%FL512") === 0xFFFFFFFFFFFFFFFFUL 
+        x.ReadFEnet("%IL512") === 0xFFFFFFFFFFFFFFFFUL              //32.0.0
+        x.ReadFEnet("%QL512") === 0xFFFFFFFFFFFFFFFFUL              //32.0.0    
+        x.Read("%UL4.0.0") === 0xFFFFFFFFFFFFFFFFUL                 //4.0.0    
+        x.Read("%IL32.0.0") === 0xFFFFFFFFFFFFFFFFUL                //32.0.0
+        x.Read("%QL32.0.0") === 0xFFFFFFFFFFFFFFFFUL                //32.0.0
+        (*U메모리는 0.0.0 양식으로만 접근 가능*)
+        (fun () -> x.ReadFEnet("%UL512") === true |> ignore) 
+        |> ShouldFailWithSubstringT "ArgumentException"
 
 
     [<Test>]
@@ -211,10 +284,10 @@ type XgiBasic() =
         x.Read(q11) === false
         x.ReadFEnet("%QX65") === false
 
-        let q111 = "%QX1.1.1"       // = 4161 : 1*64*64 + 1*64 + 1
+        let q111 = "%QX1.1.1"       // = 1089 : 1*16*64 + 1*64 + 1
         x.Write(q111, true)
         x.Read(q111) === true
-        x.ReadFEnet("%QX4161") === true
+        x.ReadFEnet("%QX1089") === true
         x.Write(q111, false)
         x.Read(q111) === false
-        x.ReadFEnet("%QX4161") === false
+        x.ReadFEnet("%QX1089") === false

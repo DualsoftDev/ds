@@ -1,4 +1,5 @@
 namespace PLC.CodeGen.LSXGI
+open System
 
 open System.Linq
 open System.Collections.Generic
@@ -71,7 +72,8 @@ module internal XgiSymbolsModule =
             let symbolInfo =
                 let plcType = systemTypeToXgiTypeName t.DataType
                 let comment = SecurityElement.Escape t.Comment
-                if t.Address = "" then
+                // address 가 지정되지 않은 symbol 에 한해서 자동으로 address 를 할당.
+                if String.IsNullOrEmpty(t.Address) then
                     let allocatorFunctions =
                         match prjParams.MemoryAllocatorSpec with
                         | RangeSpec _ -> failwith "ERROR.  Should have already been converted to allocator functions."
@@ -96,6 +98,7 @@ module internal XgiSymbolsModule =
                     if t.Name.StartsWith("_") then
                         logWarn $"Something fish: trying to generate auto M address for {t.Name}"
                     t.Address <- allocator()
+
                 { defaultSymbolInfo with Name=t.Name; Comment=comment; Type=plcType; Address=t.Address; InitValue=t.BoxedValue; Kind=kindVar; }
 
             symbolInfo

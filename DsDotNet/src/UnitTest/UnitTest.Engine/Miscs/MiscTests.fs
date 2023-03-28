@@ -50,6 +50,15 @@ module MiscTestModule =
             a0 === "A0"
             a1 === "a1"
             a2 === "A2"
+
+            UniqueName.resetAll()
+            let a0 = UniqueName.generate "A"
+            let a1 = UniqueName.generate "a"
+            let a2 = UniqueName.generate "A"
+            a0 === "A0"
+            a1 === "a1"
+            a2 === "A2"
+
             ()
         [<Test>]
         member __.``Fail test`` () =

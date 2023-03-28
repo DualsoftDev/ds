@@ -79,15 +79,11 @@ type XgiBasic() =
 
         x.Read("%ML0") === 0xFFFFFFFFFFFFFFFFUL
 
-
-
     [<Test>]
     member x.``Readings All Memory bit type`` () =
         (* PLC 에서 %_X11 을 true 값으로 채우고 테스트. 단, A는 false으로 고정됨 *)
-        let memoryType = "X"
         let address = bitAddress
                     |>toString
-        let answer = true
         x.Write("%ML512", 18446744073709551615UL)
         x.Write("%LL512", 18446744073709551615UL)
         x.Write("%NL512", 18446744073709551615UL)
@@ -99,20 +95,20 @@ type XgiBasic() =
         x.Write("%IL512", 18446744073709551615UL)
         x.Write("%QL512", 18446744073709551615UL)
         x.Write("%UL4.0.0", 18446744073709551615UL)
-        x.ReadFEnet("%M"+memoryType+address) === answer
-        x.ReadFEnet("%L"+memoryType+address) === answer
-        x.ReadFEnet("%N"+memoryType+address) === answer
-        x.ReadFEnet("%K"+memoryType+address) === answer
-        x.ReadFEnet("%R"+memoryType+address) === answer
-        x.ReadFEnet("%W"+memoryType+address) === answer
-        x.ReadFEnet("%A"+memoryType+address) === answer
-        x.ReadFEnet("%F"+memoryType+address) === answer 
-        //x.ReadFEnet("%U"+memoryType+address) === answer          //4.0.0    
-        x.ReadFEnet("%I"+memoryType+address) === answer          //32.0.0
-        x.ReadFEnet("%Q"+memoryType+address) === answer          //32.0.0 
-        x.Read($"%%U{memoryType}4.0.0") === answer          //4.0.0    
-        x.Read($"%%I{memoryType}32.0.0") === answer          //32.0.0
-        x.Read($"%%Q{memoryType}32.0.0") === answer          //32.0.0 
+        x.ReadFEnet("%MX32768") === true
+        x.ReadFEnet("%LX32768") === true
+        x.ReadFEnet("%NX32768") === true
+        x.ReadFEnet("%KX32768") === true
+        x.ReadFEnet("%RX32768") === true
+        x.ReadFEnet("%WX32768") === true
+        x.ReadFEnet("%AX32768") === true
+        x.ReadFEnet("%FX32768") === true 
+        //x.ReadFEnet("%UX32768") === true          //4.0.0  없는 주소  
+        x.ReadFEnet("%IX32768") === true          //32.0.0
+        x.ReadFEnet("%QX32768") === true          //32.0.0 
+        x.Read("%UX4.0.0") === true          //4.0.0    
+        x.Read("%IX32.0.0") === true          //32.0.0
+        x.Read("%QX32.0.0") === true          //32.0.0 
 
     [<Test>]
     member x.``Readings All Memory byte type`` () =
@@ -121,20 +117,31 @@ type XgiBasic() =
         let address = BAddress
                     |>toString
         let answer = 0xFFuy
-        x.ReadFEnet("%M"+memoryType+address) === answer
-        x.ReadFEnet("%L"+memoryType+address) === answer
-        x.ReadFEnet("%N"+memoryType+address) === answer
-        x.ReadFEnet("%K"+memoryType+address) === answer
-        x.ReadFEnet("%R"+memoryType+address) === answer
-        x.ReadFEnet("%W"+memoryType+address) === answer
-        x.ReadFEnet("%A"+memoryType+address) === answer - answer
-        x.ReadFEnet("%F"+memoryType+address) === answer 
-        //x.ReadFEnet("%U"+memoryType+address) === answer          //4.0.0    
-        x.ReadFEnet("%I"+memoryType+address) === answer          //32.0.0
-        x.ReadFEnet("%Q"+memoryType+address) === answer          //32.0.0    
-        x.Read($"%%U{memoryType}4.0.0") === answer          //4.0.0    
-        x.Read($"%%I{memoryType}32.0.0") === answer          //32.0.0
-        x.Read($"%%Q{memoryType}32.0.0") === answer          //32.0.0 
+        x.Write("%ML512", 18446744073709551615UL)
+        x.Write("%LL512", 18446744073709551615UL)
+        x.Write("%NL512", 18446744073709551615UL)
+        x.Write("%KL512", 18446744073709551615UL)
+        x.Write("%RL512", 18446744073709551615UL)
+        x.Write("%WL512", 18446744073709551615UL)
+        x.Write("%AL512", 18446744073709551615UL)           //WARNING
+        x.Write("%FL512", 18446744073709551615UL)
+        x.Write("%IL512", 18446744073709551615UL)
+        x.Write("%QL512", 18446744073709551615UL)
+        x.Write("%UL4.0.0", 18446744073709551615UL)
+        x.ReadFEnet("%MB4096") === 0xFFuy
+        x.ReadFEnet("%LB4096") === 0xFFuy
+        x.ReadFEnet("%NB4096") === 0xFFuy
+        x.ReadFEnet("%KB4096") === 0xFFuy
+        x.ReadFEnet("%RB4096") === 0xFFuy
+        x.ReadFEnet("%WB4096") === 0xFFuy
+        x.ReadFEnet("%AB4096") === 0xFFuy                   //WARNING
+        x.ReadFEnet("%FB4096") === 0xFFuy 
+        //x.ReadFEnet("%U4096") === 0xFFuy                  //4.0.0    
+        x.ReadFEnet("%I4096") === 0xFFuy                    //32.0.0
+        x.ReadFEnet("%Q4096") === 0xFFuy                    //32.0.0    
+        x.Read("%UB4.0.0") === 0xFFuy                       //4.0.0    
+        x.Read("%IB32.0.0") === 0xFFuy                      //32.0.0
+        x.Read("%QB32.0.0") === 0xFFuy                      //32.0.0 
 
     [<Test>]
     member x.``Readings All Memory word type`` () =
@@ -144,20 +151,31 @@ type XgiBasic() =
                     |>toString
 
         let answer = 0xFFFFus
-        x.ReadFEnet("%M"+memoryType+address) === answer
-        x.ReadFEnet("%L"+memoryType+address) === answer
-        x.ReadFEnet("%N"+memoryType+address) === answer
-        x.ReadFEnet("%K"+memoryType+address) === answer
-        x.ReadFEnet("%R"+memoryType+address) === answer
-        x.ReadFEnet("%W"+memoryType+address) === answer
-        x.ReadFEnet("%A"+memoryType+address) === answer - answer
-        x.ReadFEnet("%F"+memoryType+address) === answer 
-        //x.ReadFEnet("%U"+memoryType+address) === answer          //4.0.0    
-        x.ReadFEnet("%I"+memoryType+address) === answer          //32.0.0
-        x.ReadFEnet("%Q"+memoryType+address) === answer          //32.0.0    
-        x.Read($"%%U{memoryType}4.0.0") === answer          //4.0.0    
-        x.Read($"%%I{memoryType}32.0.0") === answer          //32.0.0
-        x.Read($"%%Q{memoryType}32.0.0") === answer          //32.0.0    
+        x.Write("%ML512", 18446744073709551615UL)
+        x.Write("%LL512", 18446744073709551615UL)
+        x.Write("%NL512", 18446744073709551615UL)
+        x.Write("%KL512", 18446744073709551615UL)
+        x.Write("%RL512", 18446744073709551615UL)
+        x.Write("%WL512", 18446744073709551615UL)
+        x.Write("%AL512", 18446744073709551615UL)           //WARNING
+        x.Write("%FL512", 18446744073709551615UL)
+        x.Write("%IL512", 18446744073709551615UL)
+        x.Write("%QL512", 18446744073709551615UL)
+        x.Write("%UL4.0.0", 18446744073709551615UL)
+        x.ReadFEnet("%MW2048") === 0xFFFFus
+        x.ReadFEnet("%LW2048") === 0xFFFFus
+        x.ReadFEnet("%NW2048") === 0xFFFFus
+        x.ReadFEnet("%KW2048") === 0xFFFFus
+        x.ReadFEnet("%RW2048") === 0xFFFFus
+        x.ReadFEnet("%WW2048") === 0xFFFFus
+        x.ReadFEnet("%AW2048") === 0xFFFFus                 //WARNING
+        x.ReadFEnet("%FW2048") === 0xFFFFus 
+        //x.ReadFEnet("%UW2048") === 0xFFFFus               //4.0.0    
+        x.ReadFEnet("%IW2048") === 0xFFFFus                 //32.0.0
+        x.ReadFEnet("%QW2048") === 0xFFFFus                 //32.0.0    
+        x.Read("%UB4.0.0") === 0xFFFFus                     //4.0.0    
+        x.Read("%IB32.0.0") === 0xFFFFus                    //32.0.0
+        x.Read("%QB32.0.0") === 0xFFFFus                    //32.0.0   
 
     [<Test>]
     member x.``Readings All Memory Double word type`` () =
@@ -166,21 +184,31 @@ type XgiBasic() =
         let address = DAddress
                     |>toString
         let answer = 0xFFFFFFFFu
-        x.ReadFEnet("%M"+memoryType+address) === answer
-        x.ReadFEnet("%L"+memoryType+address) === answer
-        x.ReadFEnet("%N"+memoryType+address) === answer
-        x.ReadFEnet("%K"+memoryType+address) === answer
-        x.ReadFEnet("%R"+memoryType+address) === answer
-        x.ReadFEnet("%W"+memoryType+address) === answer
-        x.ReadFEnet("%A"+memoryType+address) === answer - answer
-        x.ReadFEnet("%F"+memoryType+address) === answer 
-        //x.ReadFEnet("%U"+memoryType+address) === answer          //4.0.0    
-        x.ReadFEnet("%I"+memoryType+address) === answer          //32.0.0
-        x.ReadFEnet("%Q"+memoryType+address) === answer          //32.0.0    
-        x.Read($"%%U{memoryType}4.0.0") === answer          //4.0.0    
-        x.Read($"%%I{memoryType}32.0.0") === answer          //32.0.0
-        x.Read($"%%Q{memoryType}32.0.0") === answer          //32.0.0          
-
+        x.Write("%ML512", 18446744073709551615UL)
+        x.Write("%LL512", 18446744073709551615UL)
+        x.Write("%NL512", 18446744073709551615UL)
+        x.Write("%KL512", 18446744073709551615UL)
+        x.Write("%RL512", 18446744073709551615UL)
+        x.Write("%WL512", 18446744073709551615UL)
+        x.Write("%AL512", 18446744073709551615UL)           //WARNING
+        x.Write("%FL512", 18446744073709551615UL)
+        x.Write("%IL512", 18446744073709551615UL)
+        x.Write("%QL512", 18446744073709551615UL)
+        x.Write("%UL4.0.0", 18446744073709551615UL)
+        x.ReadFEnet("%MD1024") === 0xFFFFFFFFu
+        x.ReadFEnet("%LD1024") === 0xFFFFFFFFu
+        x.ReadFEnet("%ND1024") === 0xFFFFFFFFu
+        x.ReadFEnet("%KD1024") === 0xFFFFFFFFu
+        x.ReadFEnet("%RD1024") === 0xFFFFFFFFu
+        x.ReadFEnet("%WD1024") === 0xFFFFFFFFu
+        x.ReadFEnet("%AD1024") === 0xFFFFFFFFu              //WARNING
+        x.ReadFEnet("%FD1024") === 0xFFFFFFFFu 
+        //x.ReadFEnet("%UD1024") === 0xFFFFFFFFu            //4.0.0    
+        x.ReadFEnet("%ID1024") === 0xFFFFFFFFu              //32.0.0
+        x.ReadFEnet("%QD1024") === 0xFFFFFFFFu              //32.0.0            
+        x.Read("%UB4.0.0") === 0xFFFFFFFFu                  //4.0.0    
+        x.Read("%IB32.0.0") === 0xFFFFFFFFu                 //32.0.0
+        x.Read("%QB32.0.0") === 0xFFFFFFFFu                 //32.0.0 
 
     [<Test>]
     member x.``Readings All Memory Long word type`` () =
@@ -189,21 +217,31 @@ type XgiBasic() =
         let address = LAddress
                     |>toString
         let answer = 0xFFFFFFFFFFFFFFFFUL
-        let testmemText = "%U"+memoryType+address
-        x.ReadFEnet("%M"+memoryType+address) === answer
-        x.ReadFEnet("%L"+memoryType+address) === answer
-        x.ReadFEnet("%N"+memoryType+address) === answer
-        x.ReadFEnet("%K"+memoryType+address) === answer
-        x.ReadFEnet("%R"+memoryType+address) === answer
-        x.ReadFEnet("%W"+memoryType+address) === answer
-        x.ReadFEnet("%A"+memoryType+address) === answer - answer
-        x.ReadFEnet("%F"+memoryType+address) === answer 
-        //x.ReadFEnet("%U"+memoryType+address) === answer          //4.0.0    
-        x.ReadFEnet("%I"+memoryType+address) === answer          //32.0.0
-        x.ReadFEnet("%Q"+memoryType+address) === answer          //32.0.0    
-        x.Read($"%%U{memoryType}4.0.0") === answer          //4.0.0    
-        x.Read($"%%I{memoryType}32.0.0") === answer          //32.0.0
-        x.Read($"%%Q{memoryType}32.0.0") === answer          //32.0.0 
+        x.Write("%ML512", 18446744073709551615UL)
+        x.Write("%LL512", 18446744073709551615UL)
+        x.Write("%NL512", 18446744073709551615UL)
+        x.Write("%KL512", 18446744073709551615UL)
+        x.Write("%RL512", 18446744073709551615UL)
+        x.Write("%WL512", 18446744073709551615UL)
+        x.Write("%AL512", 18446744073709551615UL)           //WARNING
+        x.Write("%FL512", 18446744073709551615UL)
+        x.Write("%IL512", 18446744073709551615UL)
+        x.Write("%QL512", 18446744073709551615UL)
+        x.Write("%UL4.0.0", 18446744073709551615UL)
+        x.ReadFEnet("%ML512") === 0xFFFFFFFFFFFFFFFFUL
+        x.ReadFEnet("%LL512") === 0xFFFFFFFFFFFFFFFFUL
+        x.ReadFEnet("%NL512") === 0xFFFFFFFFFFFFFFFFUL
+        x.ReadFEnet("%KL512") === 0xFFFFFFFFFFFFFFFFUL
+        x.ReadFEnet("%RL512") === 0xFFFFFFFFFFFFFFFFUL
+        x.ReadFEnet("%WL512") === 0xFFFFFFFFFFFFFFFFUL
+        x.ReadFEnet("%AL512") === 0xFFFFFFFFFFFFFFFFUL              //WARNING
+        x.ReadFEnet("%FL512") === 0xFFFFFFFFFFFFFFFFUL 
+        //x.ReadFEnet("%UL512") === 0xFFFFFFFFFFFFFFFFUL            //4.0.0    
+        x.ReadFEnet("%IL512") === 0xFFFFFFFFFFFFFFFFUL              //32.0.0
+        x.ReadFEnet("%QL512") === 0xFFFFFFFFFFFFFFFFUL              //32.0.0    
+        x.Read("%UB4.0.0") === 0xFFFFFFFFFFFFFFFFUL                 //4.0.0    
+        x.Read("%IB32.0.0") === 0xFFFFFFFFFFFFFFFFUL                //32.0.0
+        x.Read("%QB32.0.0") === 0xFFFFFFFFFFFFFFFFUL                //32.0.0 
 
 
     [<Test>]

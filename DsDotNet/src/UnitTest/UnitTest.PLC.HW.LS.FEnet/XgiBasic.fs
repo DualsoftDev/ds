@@ -23,6 +23,8 @@ type XgiBasic() =
             "%IX0.0.63", "%IX63"
             "%IX0.1.0", "%IX64"
             "%IX0.1.1", "%IX65"
+            "%IX1.1.1", "%IX4161"       // 1*64*64 + 1*64 + 1
+            "%IX2.3.1", "%IX8385"       // 2*64*64 + 3*64 + 1
 
             "%IB0.0", "%IX0"
             "%IB0.1", "%IX1"
@@ -98,5 +100,15 @@ type XgiBasic() =
         let q11 = "%QX0.1.1"
         x.Write(q11, true)
         x.Read(q11) === true
+        x.ReadFEnet("%QX65") === true
         x.Write(q11, false)
         x.Read(q11) === false
+        x.ReadFEnet("%QX65") === false
+
+        let q111 = "%QX1.1.1"       // = 4161 : 1*64*64 + 1*64 + 1
+        x.Write(q111, true)
+        x.Read(q111) === true
+        x.ReadFEnet("%QX4161") === true
+        x.Write(q111, false)
+        x.Read(q111) === false
+        x.ReadFEnet("%QX4161") === false

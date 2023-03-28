@@ -81,7 +81,10 @@ let (|ToFEnetTag|_|) (fromCpu:CpuType) tag =
         | RegexPattern @"^%([IQ])([BWDLX])(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern bit] ->
             Some $"%%{device}{dataType.ToMnemonic()}{bit}"
 
-
+        | RegexPattern @"^%([MLKFNRAWIQU])(X)(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern bit;] ->
+            Some $"%%{device}{dataType.ToMnemonic()}{bit}"
+        | RegexPattern @"^%([MLKFNRAWIQU])([BWDL])(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern offset;] ->
+            Some $"%%{device}{dataType.ToMnemonic()}{offset}"
         | RegexPattern @"^%([MLKFNRAWIQU])([BWDL])(\d+)\.(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern element; Int32Pattern bit;] ->
             let totalBitOffset = element * dataType.GetBitLength() + bit
             Some $"%%{device}X{totalBitOffset}"

@@ -81,7 +81,7 @@ type XgiBasic() =
 
     [<Test>]
     member x.``Readings All Memory bit type`` () =
-        (* PLC 에서 %_B11 을 FF 값으로 채우고 테스트. 단, F와 A는 0으로 고정됨 *)
+        (* PLC 에서 %_X11 을 FF 값으로 채우고 테스트. 단, A는 0으로 고정됨 *)
         let memoryType = "X"
         let address = bitAddress
                     |>toString
@@ -100,7 +100,7 @@ type XgiBasic() =
 
     [<Test>]
     member x.``Readings All Memory byte type`` () =
-        (* PLC 에서 %_B11 을 FF 값으로 채우고 테스트. 단, F와 A는 0으로 고정됨 *)
+        (* PLC 에서 %_B11 을 FF 값으로 채우고 테스트. 단, A는 0으로 고정됨 *)
         let memoryType = "B"
         let address = BAddress
                     |>toString
@@ -119,7 +119,7 @@ type XgiBasic() =
 
     [<Test>]
     member x.``Readings All Memory word type`` () =
-        (* PLC 에서 %_W11 을 FF 값으로 채우고 테스트. 단, F와 A는 0으로 고정됨 *)
+        (* PLC 에서 %_W11 을 FF 값으로 채우고 테스트. 단, A는 0으로 고정됨 *)
         let memoryType = "W"
         let address = WAddress
                     |>toString
@@ -139,7 +139,7 @@ type XgiBasic() =
 
     [<Test>]
     member x.``Readings All Memory Double word type`` () =
-        (* PLC 에서 %_W11 을 FF 값으로 채우고 테스트. 단, F와 A는 0으로 고정됨 *)
+        (* PLC 에서 %_D11 을 FF 값으로 채우고 테스트. 단, A는 0으로 고정됨 *)
         let memoryType = "D"
         let address = DAddress
                     |>toString
@@ -159,7 +159,7 @@ type XgiBasic() =
 
     [<Test>]
     member x.``Readings All Memory Long word type`` () =
-        (* PLC 에서 %_W11 을 FF 값으로 채우고 테스트. 단, A는 0으로 고정됨 *)
+        (* PLC 에서 %_L11 을 FF 값으로 채우고 테스트. 단, A는 0으로 고정됨 *)
         let memoryType = "L"
         let address = LAddress
                     |>toString

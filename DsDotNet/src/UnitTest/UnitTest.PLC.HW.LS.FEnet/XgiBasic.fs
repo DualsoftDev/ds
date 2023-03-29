@@ -1,11 +1,9 @@
 namespace T
 
 open NUnit.Framework
-open AddressConvert
-open Engine.Core.CoreModule
 open Engine.Common.FS
-open System.Text.RegularExpressions
 open Dsu.PLC.LS
+open AddressConvert
 
 type XgiBasic() =
     inherit FEnetTestBase("192.168.0.100")
@@ -64,8 +62,8 @@ type XgiBasic() =
             "%QX0.0.63", "%QX63"
             "%QX0.1.0", "%QX64"         // 0 + 1 * 64 + 0
             "%QX0.1.1", "%QX65"         // 0 + 1 * 64 + 1
-            "%QX1.1.1", "%QX1089"       // 1 * 16 * 64 + 1 * 64 + 1
-            "%QX2.3.1", "%QX2241"       // 2 * 16 * 64 + 3 * 64 + 1
+            "%QX1.1.1", "%QX1089"       // 1  * 16 * 64 + 1 * 64 + 1
+            "%QX2.3.1", "%QX2241"       // 2  * 16 * 64 + 3 * 64 + 1
             "%QX32.0.0", "%QX32768"     // 32 * 16 * 64 + 0 + 0
 
             "%QB0.0", "%QX0"
@@ -87,6 +85,21 @@ type XgiBasic() =
             "%QW1.0.1", "%QW65"         // 1 * 4 * 16 + 0 * 4 + 1
             "%QD1.0.1", "%QD33"         // 1 * 2 * 16 + 0 * 2 + 1
             "%QL1.1.0", "%QL17"         // 1 * 1 * 16 + 1 * 1 + 0
+
+            "%ML32.4" , "%MX2052"       // 32 * 64 + 4
+            "%LD32.4" , "%LX1028"       // 32 * 32 + 4
+            "%NW32.4" , "%NX516"        // 32 * 16 + 4
+            "%KB32.4" , "%KX260"        // 32 * 8  + 4
+
+            "%RL32.15" , "%RX2063"       // 32 * 64 + 15
+            "%AD32.15" , "%AX1039"       // 32 * 32 + 15
+            "%WW32.15" , "%WX527"        // 32 * 16 + 15
+            "%FB32.15" , "%FX271"        // 32 * 8  + 15
+
+            //"%LL32.F" , "%LX2063"       // 32 * 64 + 15   //. 뒤에도 10진수 사용
+            //"%LD32.F" , "%LX1039"       // 32 * 32 + 15   //. 뒤에도 10진수 사용
+            //"%LW32.F" , "%LX527"        // 32 * 16 + 15   //. 뒤에도 10진수 사용
+            //"%LB32.F" , "%LX271"        // 32 * 8  + 15   //. 뒤에도 10진수 사용
         ]
         for (tag, expected) in tags do
             let fenet = tryToFEnetTag CpuType.Xgi tag

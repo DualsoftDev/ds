@@ -69,7 +69,7 @@ module ExportModule =
             // generate used memory byte indices
             system.TagManager.Storages.Values
             |> Seq.filter(fun f -> not <| (f :? TimerCounterBaseStruct))
-            |> Seq.filter(fun f-> f.Address <> null && f.Address <> "")
+            |> Seq.filter(fun f-> not <| String.IsNullOrEmpty(f.Address) && f.Address.StartsWith("%M"))
             |> Seq.collect(fun f -> f.Address |> getBytes)
             |> Seq.distinct
             |> Seq.sort

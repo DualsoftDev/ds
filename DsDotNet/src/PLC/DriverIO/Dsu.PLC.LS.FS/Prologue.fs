@@ -33,7 +33,7 @@ type CpuType =
             | XgbMk -> "XGBMK"
             | XgbIEC -> "XGBIEC"
             | _ -> failwith "ERROR"
-        member x.IsXGI() =
+        member x.IsIEC() =
             match x with
             | Xgk -> false
             | Xgi -> true
@@ -53,42 +53,43 @@ type CpuType =
 
         static member FromID(cpuId:int) =
             match cpuId with
-            //XGI-CPUE 106
+            //XGI-CPUU 100
             //XGI-CPUH 102
             //XGI-CPUS 104
-            //XGI-CPUU 100
+            //XGI-CPUE 106
             //XGI-CPUU/D 107
             //XGI-CPUUN 111
             | 100 | 102 | 104 | 106 | 107 | 111  -> Xgi
+            //XGK-CPUH 0
+            //XGK-CPUS 1
             //XGK-CPUA 3
             //XGK-CPUE 4
-            //XGK-CPUH 0
-            //XGK-CPUHN 16
-            //XGK-CPUS 1
-            //XGK-CPUSN 17
             //XGK-CPUU 5
             //XGK-CPUUN 14
-            | 0 | 1 | 3 | 4 | 14 | 16 | 17  -> Xgk
+            //XGK-CPUHN 16
+            //XGK-CPUSN 17
+            | 0 | 1 | 3 | 4 | 5 | 14 | 16 | 17  -> Xgk
+            //XGB-XBMS 2
             //XGB-DR16C3 6
-            //XGB-GIPAM 114
-            //XGB-KL 113
-            //XGB-XBCE 9
             //XGB-XBCH 7
+            //XGB-XBCE 9
             //XGB-XBCS 10
             //XGB-XBCU 15
-            //XGB-XBCXS 22
             //XGB-XBMH 18
-            //XGB-XBMH2 21
             //XGB-XBMHP 19
-            //XGB-XBMS 2
-            //XGB-XECE 109
+            //XGB-XBMH2 21
+            //XGB-XBCXS 22
+            | 2 | 6 | 7 | 9 | 10 | 15 | 18 | 19 | 21 | 22 -> XgbMk
+
             //XGB-XECH 103
             //XGB-XECS 108
+            //XGB-XECE 109
             //XGB-XECU 112
-            //XGB-XEMH2 116
+            //XGB-KL 113
+            //XGB-GIPAM 114
             //XGB-XEMHP 115
+            //XGB-XEMH2 116
             | 103 | 108 | 109 | 112 | 113 | 114 | 115 | 116 -> XgbIEC
-            | 2 | 6 | 7 | 9 | 10 | 15 | 18 | 19 | 21 | 22 -> XgbMk
             | _ -> failwith "ERROR"
 
 

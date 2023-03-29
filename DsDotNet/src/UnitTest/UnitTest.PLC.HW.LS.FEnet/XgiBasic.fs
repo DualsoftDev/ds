@@ -134,7 +134,8 @@ type XgiBasic() =
 
     [<Test>]
     member x.``Readings`` () =
-        (* PLC 에서 %ML0 를 FF 값으로 채우고 있다는 가정하에... *)
+        x.Write("%ML0", ulFF)
+
         let mb0 = x.Conn.ReadATag("%MB0")
         mb0 === uyFF
         x.Read("%MB1") === uyFF

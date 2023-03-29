@@ -5,9 +5,10 @@ open Engine.Common.FS
 open System.Text
 
 
+type Printer = string -> unit
 
 // pk : header 정보를 포함하는 packet.  이중 최초 20byte 가 header 정보임.
-let private printHeaderImpl (pk:byte []) p =
+let private printHeaderImpl (pk:byte []) (p:Printer) =
     let companyId = Encoding.Default.GetString(pk.[0..7])
     assert (companyId = lsis)
 
@@ -23,7 +24,7 @@ let private printHeaderImpl (pk:byte []) p =
 
 /// PLC status query 애 대한 response packet 을 print.  8.2.5
 /// bf : XGT Status Data buffer.  response packet 의 33번째 byte 부터
-let private printStatusDataImpl (bf:byte []) p =
+let private printStatusDataImpl (bf:byte []) (p:Printer) =
     let slotInfo  = bf.[ 0.. 3].ToUInt32()
     let cpuType   = bf.[ 4.. 5].ToUInt16()
     let connState = bf.[ 6.. 7].ToUInt16()
@@ -35,17 +36,17 @@ let private printStatusDataImpl (bf:byte []) p =
 
     /// Least-significant-bit : 가장 우측 bit
     let lsb x = x &&& 1u
-    slotInfo  |> sprintf "Slot[0..3] = 0x%x"               |> p
-    (slotInfo &&& 0x0000_000Fu) >>> 0 |> sprintf "\tLocal -> Remote : Slot = %d" |> p
-    (slotInfo &&& 0x0000_00F0u) >>> 4 |> sprintf "\tLocal -> Remote : Base = %d" |> p
+    slotInfo  |> sprintf "Slot[0..3] = 0x%x" |> p
+    (slotInfo &&& 0x0000_000Fu) >>> 0  |> sprintf "\tLocal -> Remote : Slot = %d" |> p
+    (slotInfo &&& 0x0000_00F0u) >>> 4  |> sprintf "\tLocal -> Remote : Base = %d" |> p
 
     // Remote -> Local 의 값은 XG5000 에서 PLC 연결 유무에 따라 값이 바뀌는 것 같음.
-    (slotInfo &&& 0x0000_0F00u) >>> 8 |> sprintf "\tRemote -> Local : Slot = %d" |> p
+    (slotInfo &&& 0x0000_0F00u) >>> 8  |> sprintf "\tRemote -> Local : Slot = %d" |> p
     (slotInfo &&& 0x0000_F000u) >>> 12 |> sprintf "\tRemote -> Local : Base = %d" |> p
 
-    (slotInfo &&& 0x000F_0000u) >>> 16 |> sprintf "\tSlot = %d" |> p
-    (slotInfo &&& 0x00F0_0000u) >>> 20 |> sprintf "\tBase = %d" |> p
-    (slotInfo &&& 0xFF00_0000u) >>> 24 |> sprintf "\tReserved = %d" |> p
+    (slotInfo &&& 0x000F_0000u) >>> 16 |> sprintf "\tSlot = %d"                   |> p
+    (slotInfo &&& 0x00F0_0000u) >>> 20 |> sprintf "\tBase = %d"                   |> p
+    (slotInfo &&& 0xFF00_0000u) >>> 24 |> sprintf "\tReserved = %d"               |> p
 
 
     (*

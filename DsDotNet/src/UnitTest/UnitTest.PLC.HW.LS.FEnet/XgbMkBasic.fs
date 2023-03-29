@@ -10,6 +10,7 @@ open Xunit
 type XgbMkBasic() =
     inherit FEnetTestBase("192.168.0.101")
 
+
     override x.CreateLsTag (tag:string) (convertFEnet:bool) =
         LsTagXgbMk(x.Conn, tag, convertFEnet)
 
@@ -21,14 +22,21 @@ type XgbMkBasic() =
     [<Test>]
     member x.``Address convert test`` () =
         let tags = [
-            "P0000", "%PW0"
-            "P0001", "%PW1"
-            "P0101", "%PW101"
-            "P00001", "%PX1"
-            "P00008", "%PX8"
-            "P0000F", "%PX15"
-            "P0001F", "%PX31"   // 1*16 + 15
-            "P0011F", "%PX191"  // 11*16 + 15
+            "P0000", "%PW0"     
+            "M0001", "%MW1"
+            "K0101", "%KW101"
+            "D0001", "%DW1"
+            "S0001", "%SW1"
+            "F00001", "%FX1"
+            "T00008", "%TX8"
+            "C0000F", "%CX15"   // 0 + 15
+            "L0011F", "%LX191"  // 11*16 + 15
+            "N0011F", "%NX191"  // 11*16 + 15
+            "D0011F", "%DX191"  // 11*16 + 15
+            "Z0011F", "%ZX191"  // 11*16 + 15
+
+            //CANNOT USE BIT
+            "S0001", "%SW1"   
         ]
         for (tag, expected) in tags do
             let fenet = tryToFEnetTag CpuType.XgbMk tag
@@ -65,11 +73,27 @@ type XgbMkBasic() =
         x.Read("M0005") === w5
 
 
+
+        x.Write("M0023F", true)
+        x.Read("M0023F") === true
+
+        x.WriteFEnet("%ML100", 123UL)
+        x.ReadFEnet("%ML100") === 123UL
+
+        x.WriteFEnet("%MW100", 123us)
+        x.ReadFEnet("%MW100") === 123us
+        x.Read("%M0100") === 123us
+
+
+        x.WriteFEnet("%SW3", 1us)
+        x.ReadFEnet("%SW3") === 1us
+        x.Read("%S0003") === 1us
+
     [<Test>]
     member x.``P`` () =
         (* P 영역은 write 가능한 영역과 불가능한 영역이 존재 하는 듯.. *)
-        x.WriteFEnet("%PB64", 0x64uy)
-        x.ReadFEnet("%PB64") === 0x64uy
+        x.WriteFEnet("%PB128", 0x63uy)
+        x.ReadFEnet("%PB128") === 0x63uy
 
         x.WriteFEnet("%PW33", 0x33us)
         x.ReadFEnet("%PW33") === 0x33us
@@ -98,4 +122,9 @@ type XgbMkBasic() =
         x.WriteFEnet("%MW32", w)
         x.Read("M0032") === w
         x.ReadFEnet("%MW32") === w
-
+    
+    (*보류*)
+    //[<Test>]
+    //member x.``Write D and L word test`` () =
+    //    x.WriteFEnet("%ML3", ulFF)
+    //    x.ReadFEnet("%ML3") === ulFF 

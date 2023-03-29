@@ -45,8 +45,8 @@ let isXgiTag tag =
     || Regex(@"^%([IQU])([BWDL])(\d+)\.(\d+)\.(\d+)$").IsMatch(tag)
 
 let isXgkTag tag =
-    Regex(@"^([PMLKFTCS])(\d{4})([\da-fA-F])$").IsMatch(tag)
-    || Regex(@"^([DRUPMLKFTCS])(\d{4})$").IsMatch(tag)
+    Regex(@"^([DPMNLKFTCSZ])(\d{4})([\da-fA-F])$").IsMatch(tag)
+    || Regex(@"^([DRUPMNLKFTCSZ])(\d{4})$").IsMatch(tag)
 
 
 /// e.g XGK cpu 의 tag "P0000A" 를 FEnet 통신을 위한 tag 인 "%PX10" 으로 변환해서 반환
@@ -58,12 +58,12 @@ let (|ToFEnetTag|_|) (fromCpu:CpuType) tag =
         /// Word 와 bit type 만 존재
         match tag with
         // bit devices : Full blown 만 허용.  'P1001A'.  마지막 hex digit 만 bit 로 인식
-        | RegexPattern @"^%?([PMLKFTCS])(\d{4})([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
+        | RegexPattern @"^%?([DPMNLKFTCSZ])(\d{4})([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
             let bitOffset = wordOffset * 16 + bitOffset
             Some $"%%{device}X{bitOffset}"
 
         // {word device} or {bit device 의 word 표현} : 'P0000'
-        | RegexPattern @"^%?([DRUPMLKFTCS])(\d{4})$" [ DevicePattern device; Int32Pattern wordOffset; ] ->
+        | RegexPattern @"^%?([DRUPMNLKFTCSZ])(\d{4})$" [ DevicePattern device; Int32Pattern wordOffset; ] ->
             Some $"%%{device}W{wordOffset}"
         | _ ->
             None
@@ -144,8 +144,8 @@ let (|LsTagPatternFEnet|_|) tag =
         createTagInfo(tag, device, DataType.Bit, totalBitOffset)
 
 
-    // XGI IEC 61131 : byte / word / dword / lword
-    | RegexPattern @"^%([PMLKFNRAWIQU])([BWDL])(\d+)$"
+    // XGI IEC 61131 : byte / word / dword / lword  //+ XGI "S" step memory
+    | RegexPattern @"^%([PMLKFNRAWIQUS])([BWDL])(\d+)$"
         [DevicePattern device; DataTypePattern dataType; Int32Pattern offset;] ->
         let byteOffset = offset * dataType.GetByteLength()
         let totalBitOffset = byteOffset * 8

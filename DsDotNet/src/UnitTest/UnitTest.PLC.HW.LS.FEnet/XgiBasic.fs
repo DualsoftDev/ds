@@ -305,3 +305,8 @@ type XgiBasic() =
         x.Write(q111, false)
         x.Read(q111) === false
         x.ReadFEnet("%QX1089") === false
+
+
+    [<Test>]
+    member x.``Add monitoring test`` () =
+        ()

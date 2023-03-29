@@ -379,7 +379,7 @@ type XgiBasic() =
         noop()
 
     [<Test>]
-    member x.``X Max memory test`` () =
+    member x.``Max memory test`` () =
         (*
             XG5000 접근 가능한 메모리 주소 범위(Long Word 기준)
             I,Q =   0.0.0   ~   127.15.0

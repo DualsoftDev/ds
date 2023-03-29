@@ -354,24 +354,27 @@ type XgiBasic() =
             | :? uint64 as ui64 -> ui64
             | _ -> failwith "Invalid type"
 
-
-        let testList : (string * obj) list = [
-                        ("IX1.0.1", true);
-                        ("MW33.1", true);
-                        ("LB104", 8uy);
-                        ("NW211", 16us);
-                        ("KD55", 32u);
-                        ("RL333", 64UL)
+            (*  data: name * value * value for init   *)
+        let testList : (string * obj * obj) list = [
+                        ("IX1.0.1", true, false);
+                        ("MW33.1", true, false);
+                        ("LB104", 8uy, 0uy);
+                        ("NW211", 16us, 0us);
+                        ("KD55", 32u, 0u);
+                        ("RL333", 64UL, 0UL)
         ]
         let subscription =
             x.Conn.Subject.ToIObservable()
             |> Observable.OfType<TagValueChangedEvent>
             |> fun x -> x.Subscribe(fun evt ->      //evt.Tag.Name evt.Tag.Value
-                            for (tag, value) in testList  do
+                            for (tag, value, dummy) in testList  do
                                 if tag.Equals evt.Tag.Name then
                                     castValue value === evt.Tag.Value
                             ignore())
         
+        for (tag, value) in testList do
+            x.Write(tag, castValue value)
+            x.Conn.AddMonitoringTag(LsTagXgi(x.Conn, tag)) |> ignore
 
 
         noop()

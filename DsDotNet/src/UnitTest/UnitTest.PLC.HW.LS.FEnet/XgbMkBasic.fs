@@ -25,18 +25,25 @@ type XgbMkBasic() =
             "P0000", "%PW0"     
             "M0001", "%MW1"
             "K0101", "%KW101"
-            "D0001", "%DW1"
-            "S0001", "%SW1"
+            "F0334", "%FW334"
+            "T0045", "%TW45"
+            "C0001", "%CW1"
+            "Z0018", "%ZW18"
+            "S0017", "%SW17"     //S CANNOT USE BIT ?
+            "L0024", "%LW24"   
+            "N0014", "%NW14"    
+            "D0033", "%DW33"
+
+            "P00008", "%PX8"
+            "M00001", "%MX1"
+            "K0000A", "%KX10"
             "F00001", "%FX1"
             "T00008", "%TX8"
             "C0000F", "%CX15"   // 0 + 15
+            "Z0010F", "%ZX175"  // 10*16 + 15
             "L0011F", "%LX191"  // 11*16 + 15
-            "N0011F", "%NX191"  // 11*16 + 15
-            "D0011F", "%DX191"  // 11*16 + 15
-            "Z0011F", "%ZX191"  // 11*16 + 15
-
-            //CANNOT USE BIT
-            "S0001", "%SW1"   
+            "N0012F", "%NX207"  // 12*16 + 15
+            "D0013F", "%DX223"  // 13*16 + 15
         ]
         for (tag, expected) in tags do
             let fenet = tryToFEnetTag CpuType.XgbMk tag
@@ -49,7 +56,6 @@ type XgbMkBasic() =
         (* XgbMk 에서 %MW 는 인식할 수 없어야 한다. *)
         (fun () -> x.Read("%MW5")             |> ignore ) |> ShouldFail
         (fun () -> x.ReadFEnet("M0005")       |> ignore ) |> ShouldFail
-
         (fun () -> x.Write("%MW5", 0us)       |> ignore ) |> ShouldFail
         (fun () -> x.WriteFEnet("M0005", 0us) |> ignore ) |> ShouldFail
 

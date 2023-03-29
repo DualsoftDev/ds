@@ -1,9 +1,34 @@
 namespace T
+open System
+open System.Runtime.CompilerServices
 
 open NUnit.Framework
 open Engine.Common.FS
 open Dsu.PLC.LS
 open AddressConvert
+open System.Reactive.Linq
+open Dsu.PLC.Common
+
+
+
+[<AutoOpen>]
+module ObservableModule =
+    [<Extension>]
+    type ObservableExt =
+        /// IObservable<'t> 의 subclass 를  IObservable<obj> 로 변환.  e.g Subject<XXX> -> IObservable<obj>
+        ///
+        /// Microsoft.FSharp.Control.Observable 의 대부분 기능이 IObservable<obj> 를 기반으로 동작한다.
+        /// Subject<XXX> 객체에 대해서, 대부분의  Microsoft.FSharp.Control.Observable 를직접적으로 사용할 수 없어서
+        /// IObservable<obj> 로 먼저 변환한다.
+        ///
+        /// e.g let subj:Subject<MyObservable> = ...; 
+        /// let obs:IObservable<obj> = subj.ToIObservable() 
+        [<Extension>]
+        static member ToIObservable(subj:#IObservable<'t>) =
+            subj
+            :> IObservable<'t>
+            |> Observable.map box
+
 
 type XgiBasic() =
     inherit FEnetTestBase("192.168.0.100")
@@ -319,7 +344,11 @@ type XgiBasic() =
 
     [<Test>]
     member x.``X Add monitoring test`` () =
-        
+        let subscription =
+            x.Conn.Subject.ToIObservable()
+            |> Observable.OfType<TagValueChangedEvent>
+            |> fun x -> x.Subscribe(fun evt ->      //evt.Tag.Name evt.Tag.Value
+                            ignore())
         ()
 
     [<Test>]
@@ -331,3 +360,5 @@ type XgiBasic() =
     member x.``X forbidden write to A and F0to511 test`` () =
         
         ()
+
+

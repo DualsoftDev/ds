@@ -98,7 +98,7 @@ type XgiBasic() =
         cpu.CpuType === CpuType.Xgi
 
     [<Test>]
-    member x.``X Readings`` () =
+    member x.``Readings`` () =
         (* PLC 에서 %ML0 를 FF 값으로 채우고 있다는 가정하에... *)
         let mb0 = x.Conn.ReadATag("%MB0")
         mb0 === uyFF

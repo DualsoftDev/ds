@@ -344,7 +344,7 @@ type XgiBasic() =
 
 
     [<Test>]
-    member x.``X Add monitoring test`` () =
+    member x.``Add monitoring test`` () =
         let castValue (o : obj) : obj =
             match o with
             | :? bool as b -> b
@@ -354,29 +354,28 @@ type XgiBasic() =
             | :? uint64 as ui64 -> ui64
             | _ -> failwith "Invalid type"
 
-            (*  data: name * value * value for init   *)
-        let testList : (string * obj * obj) list = [
-                        ("IX1.0.1", true, false);
-                        ("MW33.1", true, false);
-                        ("LB104", 8uy, 0uy);
-                        ("NW211", 16us, 0us);
-                        ("KD55", 32u, 0u);
-                        ("RL333", 64UL, 0UL)
+        let testList : (string * obj) list = [
+                        ("IX1.0.1", true);      //% 없어도 가능
+                        ("%MW33.1", true);
+                        ("%LB104", 8uy);
+                        ("%NW211", 16us);
+                        ("%KD55", 32u);
+                        ("%RL333", 64UL)
         ]
         let subscription =
             x.Conn.Subject.ToIObservable()
             |> Observable.OfType<TagValueChangedEvent>
             |> fun x -> x.Subscribe(fun evt ->      //evt.Tag.Name evt.Tag.Value
-                            for (tag, value, dummy) in testList  do
+                            for (tag, value) in testList  do
                                 if tag.Equals evt.Tag.Name then
                                     castValue value === evt.Tag.Value
+                            logDebug "%s value Changed %A -> %A" evt.Tag.Name evt.Tag.OldValue evt.Tag.Value
                             ignore())
         
         for (tag, value) in testList do
-            x.Write(tag, castValue value)
+            let input = castValue value
+            x.Write(tag, input)
             x.Conn.AddMonitoringTag(LsTagXgi(x.Conn, tag)) |> ignore
-
-
         noop()
 
     [<Test>]

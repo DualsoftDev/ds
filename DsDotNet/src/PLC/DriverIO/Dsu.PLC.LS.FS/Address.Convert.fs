@@ -69,30 +69,30 @@ let (|ToFEnetTag|_|) (fromCpu:CpuType) tag =
             None
     | CpuType.Xgi ->
         match tag with
-        | RegexPattern @"^%([IQ])X(\d+)\.(\d+)\.(\d+)$" [DevicePattern device; Int32Pattern file; Int32Pattern element; Int32Pattern bit] ->
+        | RegexPattern @"^%?([IQ])X(\d+)\.(\d+)\.(\d+)$" [DevicePattern device; Int32Pattern file; Int32Pattern element; Int32Pattern bit] ->
             let totalBitOffset = file * 16*64 + element*64  + bit
             Some $"%%{device}X{totalBitOffset}"
-        | RegexPattern @"^%(U)X(\d+)\.(\d+)\.(\d+)$" [DevicePattern device; Int32Pattern file; Int32Pattern element; Int32Pattern bit] ->
+        | RegexPattern @"^%?(U)X(\d+)\.(\d+)\.(\d+)$" [DevicePattern device; Int32Pattern file; Int32Pattern element; Int32Pattern bit] ->
             let totalBitOffset = file * 16*512 + element*512  + bit
             Some $"%%{device}X{totalBitOffset}"
-        | RegexPattern @"^%([IQ])([BWDL])(\d+)\.(\d+)\.(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern d1; Int32Pattern d2; Int32Pattern d3] ->
+        | RegexPattern @"^%?([IQ])([BWDL])(\d+)\.(\d+)\.(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern d1; Int32Pattern d2; Int32Pattern d3] ->
             let step = 64/dataType.GetBitLength()
             let offset = d1 * 16 * step + d2 * step + d3
             Some $"%%{device}{dataType.ToMnemonic()}{offset}"
-        | RegexPattern @"^%(U)([BWDL])(\d+)\.(\d+)\.(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern d1; Int32Pattern d2; Int32Pattern d3] ->
+        | RegexPattern @"^%?(U)([BWDL])(\d+)\.(\d+)\.(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern d1; Int32Pattern d2; Int32Pattern d3] ->
             let step = 64/dataType.GetBitLength() * 8
             let offset = d1 * 16 * step + d2 * step + d3
             Some $"%%{device}{dataType.ToMnemonic()}{offset}"
-        | RegexPattern @"^%([IQ])([BWDLX])(\d+)\.(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern element; Int32Pattern bit] ->
+        | RegexPattern @"^%?([IQ])([BWDLX])(\d+)\.(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern element; Int32Pattern bit] ->
             let totalBitOffset = element * dataType.GetBitLength() + bit
             Some $"%%{device}X{totalBitOffset}"
-        | RegexPattern @"^%([IQ])([BWDLX])(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern bit] ->
+        | RegexPattern @"^%?([IQ])([BWDLX])(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern bit] ->
             Some $"%%{device}{dataType.ToMnemonic()}{bit}"
-        | RegexPattern @"^%([MLKFNRAWIQ])(X)(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern bit;] ->
+        | RegexPattern @"^%?([MLKFNRAWIQ])(X)(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern bit;] ->
             Some $"%%{device}{dataType.ToMnemonic()}{bit}"
-        | RegexPattern @"^%([MLKFNRAWIQ])([BWDL])(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern offset;] ->
+        | RegexPattern @"^%?([MLKFNRAWIQ])([BWDL])(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern offset;] ->
             Some $"%%{device}{dataType.ToMnemonic()}{offset}"
-        | RegexPattern @"^%([MLKFNRAWIQ])([BWDL])(\d+)\.(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern element; Int32Pattern bit;] ->
+        | RegexPattern @"^%?([MLKFNRAWIQ])([BWDL])(\d+)\.(\d+)$" [DevicePattern device; DataTypePattern dataType;  Int32Pattern element; Int32Pattern bit;] ->
             let totalBitOffset = element * dataType.GetBitLength() + bit
             Some $"%%{device}X{totalBitOffset}"
 

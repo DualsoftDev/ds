@@ -473,7 +473,8 @@ module RandomReadWrite =
 
                     //[0.. (packet.Length-1)] |> List.map (sprintf "%3d") |> String.concat("") |> logDebug "Sent packet:%s"
                     //packet |> Array.map (sprintf "%02x") |> Array.map (sprintf "%3s") |> String.concat("") |> logDebug "Sent packet:%s"
-                    assert(buffer.[26..27].ToUInt16() = 0xFFFFus)
+                    let errorStatus = buffer.[26..27].ToUInt16()
+                    assert(errorStatus = 0xFFFFus || errorStatus = 0x00FFus)
                     let errorCode = buffer.[28..29].ToUInt16()
                     errorCode |> getErrorMessage |> logError "%s"
                 buffer)

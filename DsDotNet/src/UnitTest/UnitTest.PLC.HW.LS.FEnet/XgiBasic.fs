@@ -395,52 +395,26 @@ type XgiBasic() =
             F   =   0       ~   1023
         *)
 
-        (fun () ->
-            x.Write("%IL127.33.0",64UL)
-            x.Read("%IL127.33.0") === 64UL)
-            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+        let doInvalidRequest add =
+            //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+            (fun () -> x.Write(add, 64UL))    |> ShouldFailWithSubstringT "0x4"
+            (fun () -> x.Read(add) |> ignore) |> ShouldFailWithSubstringT "0x4"
 
-        (fun () ->
-            x.Write("%QL127.33.0",64UL)
-            x.Read("%QL127.33.0") === 64UL)
-            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+        let invalidAddresses = [
+            "%IL127.33.0"
+            "%QL127.33.0"
+            "%UL7.20.7"
+            "%ML999999"
+            "%LL999999"
+            "%NL999999"
+            "%KL999999"
+            "%RL999999"
+            "%AL999999"
+            "%WL999999"
+            "%FL999999"
+        ]
+        invalidAddresses |> iter doInvalidRequest
 
-        (fun () ->
-            x.Write("%UL7.20.7",64UL)
-            x.Read("%UL7.20.7") === 64UL)
-            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
-        (fun () ->
-            x.Write("%ML999999",64UL)
-            x.Read("%ML999999") === 64UL)
-            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
-        (fun () ->
-            x.Write("%LL999999",64UL)
-            x.Read("%LL999999") === 64UL)
-            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
-        (fun () ->
-            x.Write("%NL999999",64UL)
-            x.Read("%NL999999") === 64UL)
-            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
-        (fun () ->
-            x.Write("%KL999999",64UL)
-            x.Read("%KL999999") === 64UL)
-            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
-        (fun () ->
-            x.Write("%RL999999",64UL)
-            x.Read("%RL999999") === 64UL)
-            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
-        (fun () ->
-            x.Write("%AL999999",64UL)
-            x.Read("%AL999999") === 64UL)
-            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
-        (fun () ->
-            x.Write("%WL999999",64UL)
-            x.Read("%WL999999") === 64UL)
-            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
-        (fun () ->
-            x.Write("%FL999999",64UL)
-            x.Read("%FL999999") === 64UL)
-            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
         noop()
 
 

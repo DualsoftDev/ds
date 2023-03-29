@@ -118,7 +118,7 @@ type SocketExt =
     [<Extension>]
     static member IsConnected(socket:Socket) =
         try
-            not (socket.Poll(1, SelectMode.SelectRead) && socket.Available = 0);
+            not (isNull socket) && not (socket.Poll(1, SelectMode.SelectRead) && socket.Available = 0);
         with exn ->
             false
 

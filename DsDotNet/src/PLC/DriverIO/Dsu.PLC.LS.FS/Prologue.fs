@@ -1,8 +1,67 @@
 [<AutoOpen>]
-module PrologueModule
+module rec PrologueModule
 
 open Engine.Common.FS
 open Dsu.PLC.Common
+
+module PLCHwModel =
+    type ModelInfo = {
+        Name:string
+        Id: int
+        Type: CpuType
+        IsIEC: bool
+    }
+
+    let xgi    name id = { Name = name; Id = id; Type = CpuType.Xgi    ; IsIEC = true}
+    let xgk    name id = { Name = name; Id = id; Type = CpuType.Xgk    ; IsIEC = false}
+    let xgbmk  name id = { Name = name; Id = id; Type = CpuType.XgbMk  ; IsIEC = false}
+    let xgbiec name id = { Name = name; Id = id; Type = CpuType.XgbIEC ; IsIEC = true}
+
+    let Models = [|
+            xgi "XGI-CPUU"   100
+            xgi "XGI-CPUH"   102
+            xgi "XGI-CPUS"   104
+            xgi "XGI-CPUE"   106
+            xgi "XGI-CPUU/D" 107
+            xgi "XGI-CPUUN"  111
+
+
+            xgk "XGK-CPUH"   0
+            xgk "XGK-CPUS"   1
+            xgk "XGK-CPUA"   3
+            xgk "XGK-CPUE"   4
+            xgk "XGK-CPUU"   5
+            xgk "XGK-CPUUN"   14
+            xgk "XGK-CPUHN"   16
+            xgk "XGK-CPUSN"   17
+
+            xgbmk "XGB-XBMS"  2
+            xgbmk "XGB-DR16C3"  6
+            xgbmk "XGB-XBCH"  7
+            xgbmk "XGB-XBCE"  9
+            xgbmk "XGB-XBCS"  10
+            xgbmk "XGB-XBCU"  15
+            xgbmk "XGB-XBMH"  18
+            xgbmk "XGB-XBMHP"  19
+            xgbmk "XGB-XBMH2"  21
+            xgbmk "XGB-XBCXS"  22
+
+            xgbiec "XGB-XECH"  103
+            xgbiec "XGB-XECS"  108
+            xgbiec "XGB-XECE"  109
+            xgbiec "XGB-XECU"  112
+            xgbiec "XGB-KL"  113
+            xgbiec "XGB-GIPAM"  114
+            xgbiec "XGB-XEMHP"  115
+            xgbiec "XGB-XEMH2"  116
+    |]
+    let FindModel(cpuId:int) = PLCHwModel.Models |> Array.tryFind(fun (x:PLCHwModel.ModelInfo) -> x.Id = cpuId)
+    let GetModelName(cpuId:int) =
+        //match FindModel(cpuId) with
+        //| Some model -> model.Name
+        //| _ -> failwith "ERROR"
+        $"CpuID: {cpuId}"
+
 
 
 // 산전 PLC 주소 체계 : https://tech-e.tistory.com/10
@@ -50,46 +109,9 @@ type CpuType =
             | 0xB4uy -> CpuType.XgbIEC
             | _ -> failwith "ERROR"
 
-
         static member FromID(cpuId:int) =
-            match cpuId with
-            //XGI-CPUU 100
-            //XGI-CPUH 102
-            //XGI-CPUS 104
-            //XGI-CPUE 106
-            //XGI-CPUU/D 107
-            //XGI-CPUUN 111
-            | 100 | 102 | 104 | 106 | 107 | 111  -> Xgi
-            //XGK-CPUH 0
-            //XGK-CPUS 1
-            //XGK-CPUA 3
-            //XGK-CPUE 4
-            //XGK-CPUU 5
-            //XGK-CPUUN 14
-            //XGK-CPUHN 16
-            //XGK-CPUSN 17
-            | 0 | 1 | 3 | 4 | 5 | 14 | 16 | 17  -> Xgk
-            //XGB-XBMS 2
-            //XGB-DR16C3 6
-            //XGB-XBCH 7
-            //XGB-XBCE 9
-            //XGB-XBCS 10
-            //XGB-XBCU 15
-            //XGB-XBMH 18
-            //XGB-XBMHP 19
-            //XGB-XBMH2 21
-            //XGB-XBCXS 22
-            | 2 | 6 | 7 | 9 | 10 | 15 | 18 | 19 | 21 | 22 -> XgbMk
-
-            //XGB-XECH 103
-            //XGB-XECS 108
-            //XGB-XECE 109
-            //XGB-XECU 112
-            //XGB-KL 113
-            //XGB-GIPAM 114
-            //XGB-XEMHP 115
-            //XGB-XEMH2 116
-            | 103 | 108 | 109 | 112 | 113 | 114 | 115 | 116 -> XgbIEC
+            match PLCHwModel.FindModel(cpuId) with
+            | Some model -> model.Type
             | _ -> failwith "ERROR"
 
 

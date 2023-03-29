@@ -4,7 +4,9 @@ open NUnit.Framework
 open AddressConvert
 open Engine.Common.FS
 open Dsu.PLC.LS
+open Xunit
 
+[<Collection("XgbMkBasic")>]
 type XgbMkBasic() =
     inherit FEnetTestBase("192.168.0.101")
 

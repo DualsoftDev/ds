@@ -4,7 +4,9 @@ open NUnit.Framework
 open Engine.Common.FS
 open Dsu.PLC.LS
 open AddressConvert
+open Xunit
 
+[<Collection("XgiBasic")>]
 type XgiBasic() =
     inherit FEnetTestBase("192.168.0.100")
 
@@ -74,10 +76,10 @@ type XgiBasic() =
 
             "%QW1.0", "%QX16"
             "%QW1.1", "%QX17"           // 1 * 16 + 1
-                                               
+
             "%QD1.0", "%QX32"           // 1 * 32 + 0
             "%QD1.1", "%QX33"           // 1 * 32 + 1
-                                               
+
             "%QL1.0", "%QX64"           // 1 * 64 + 0
             "%QL1.1", "%QX65"           // 1 * 64 + 1
 
@@ -320,5 +322,5 @@ type XgiBasic() =
 
     [<Test>]
     member x.``X Add monitoring test`` () =
-        
+
         ()

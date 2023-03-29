@@ -105,6 +105,7 @@ and LsConnection(parameters:LsConnectionParameters) as this =
         let header = getPacketHeader()
         logDebug "Header : %A" header
         cpu <- header.CpuType
+        logInfo "CPU model: %s" (PLCHwModel.GetModelName (int header.PLCInfo))
 
     /// LS 산전 PLC CPU 정보.  XGB(mk) 의 경우, Status request 명령을 지원 안함
     let lsCpu =
@@ -256,7 +257,7 @@ and LsConnection(parameters:LsConnectionParameters) as this =
     member x.WriteATag(tag:ITag) =
         let str:string = tag.Name
         let containsChar = str.Contains("A")
-        if containsChar then 
+        if containsChar then
             logWarn "You are performing a write operation on memory A, which is not allowed on XG5000."
         x.WriteRandomTags([|tag :?> LsTag|])
 

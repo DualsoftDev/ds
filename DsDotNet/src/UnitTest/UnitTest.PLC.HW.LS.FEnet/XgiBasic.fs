@@ -10,7 +10,7 @@ open System.Reactive.Linq
 open Dsu.PLC.Common
 
 
-
+(*namespace Dual.Common / Observable.fs*)
 [<AutoOpen>]
 module ObservableModule =
     [<Extension>]
@@ -380,12 +380,65 @@ type XgiBasic() =
 
     [<Test>]
     member x.``X Max memory test`` () =
-        
+        (*
+            XG5000 접근 가능한 메모리 주소 범위(Long Word 기준)
+            I,Q =   0.0.0   ~   127.15.0
+            U   =   0.0.0   ~   7.15.7
+            M   =   0       ~   65535
+            L   =   0       ~   2815
+            N   =   0       ~   6271
+            K   =   0       ~   2099
+            R   =   0       ~   8191
+            A,W =   0       ~   131071
+            F   =   0       ~   1023
+        *)
+
+        (fun () ->
+            x.Write("%IL127.33.0",64UL)
+            x.Read("%IL127.33.0") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+
+        (fun () ->
+            x.Write("%QL127.33.0",64UL)
+            x.Read("%QL127.33.0") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+
+        (fun () ->
+            x.Write("%UL7.20.7",64UL)
+            x.Read("%UL7.20.7") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+        (fun () ->
+            x.Write("%ML999999",64UL)
+            x.Read("%ML999999") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+        (fun () ->
+            x.Write("%LL999999",64UL)
+            x.Read("%LL999999") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+        (fun () ->
+            x.Write("%NL999999",64UL)
+            x.Read("%NL999999") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+        (fun () ->
+            x.Write("%KL999999",64UL)
+            x.Read("%KL999999") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)            
+        (fun () ->
+            x.Write("%RL999999",64UL)
+            x.Read("%RL999999") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+        (fun () ->
+            x.Write("%AL999999",64UL)
+            x.Read("%AL999999") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+        (fun () ->
+            x.Write("%WL999999",64UL)
+            x.Read("%WL999999") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+        (fun () ->
+            x.Write("%FL999999",64UL)
+            x.Read("%FL999999") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
         noop()
     
-    [<Test>]
-    member x.``X forbidden write to A and F0to511 test`` () =
-        
-        noop()
-
 

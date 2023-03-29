@@ -1,10 +1,35 @@
 namespace T
+open System
+open System.Runtime.CompilerServices
 
 open NUnit.Framework
 open Engine.Common.FS
 open Dsu.PLC.LS
 open AddressConvert
+open System.Reactive.Linq
+open Dsu.PLC.Common
 open Xunit
+
+
+(*namespace Dual.Common / Observable.fs*)
+[<AutoOpen>]
+module ObservableModule =
+    [<Extension>]
+    type ObservableExt =
+        /// IObservable<'t> 의 subclass 를  IObservable<obj> 로 변환.  e.g Subject<XXX> -> IObservable<obj>
+        ///
+        /// Microsoft.FSharp.Control.Observable 의 대부분 기능이 IObservable<obj> 를 기반으로 동작한다.
+        /// Subject<XXX> 객체에 대해서, 대부분의  Microsoft.FSharp.Control.Observable 를직접적으로 사용할 수 없어서
+        /// IObservable<obj> 로 먼저 변환한다.
+        ///
+        /// e.g let subj:Subject<MyObservable> = ...;
+        /// let obs:IObservable<obj> = subj.ToIObservable()
+        [<Extension>]
+        static member ToIObservable(subj:#IObservable<'t>) =
+            subj
+            :> IObservable<'t>
+            |> Observable.map box
+
 
 [<Collection("XgiBasic")>]
 type XgiBasic() =
@@ -127,18 +152,18 @@ type XgiBasic() =
 
     [<Test>]
     member x.``Readings All Memory bit type`` () =
-        x.Write("%ML512", ulFF)
+        x.Write("ML512", ulFF)                          //Read, Write 함수의 tag는 %생략 가능
         x.Write("%LL512", ulFF)
         x.Write("%NL512", ulFF)
         x.Write("%KL512", ulFF)
         x.Write("%RL512", ulFF)
         x.Write("%WL512", ulFF)
-        x.Write("%AL512", ulFF)           //WARNING
+        x.Write("%AL512", ulFF)                         //WARNING
         x.Write("%FL512", ulFF)
         x.Write("%IL512", ulFF)
         x.Write("%QL512", ulFF)
         x.Write("%UL4.0.0", ulFF)
-        x.ReadFEnet("%MX32768") === true
+        x.ReadFEnet("%MX32768") === true                //ReadFEnet은 %가 반드시 표시되어야함(x11에러)
         x.ReadFEnet("%LX32768") === true
         x.ReadFEnet("%NX32768") === true
         x.ReadFEnet("%KX32768") === true
@@ -150,8 +175,8 @@ type XgiBasic() =
         x.ReadFEnet("%QX32768") === true                    //32.0.0
         x.ReadFEnet("%UX32768") === true                    //4.0.0    //XG5000에서는 주소 접근 불가
 
-        x.Read("%UX4.0.0") === true                         //32768
-        x.Read("%IX32.0.0") === true                        //32768
+        x.Read("UX4.0.0") === true                         //32768
+        x.Read("IX32.0.0") === true                        //32768
         x.Read("%QX32.0.0") === true                        //32768
 
 
@@ -164,7 +189,7 @@ type XgiBasic() =
         x.Write("%KL512", ulFF)
         x.Write("%RL512", ulFF)
         x.Write("%WL512", ulFF)
-        x.Write("%AL512", ulFF)           //WARNING
+        x.Write("%AL512", ulFF)                           //WARNING
         x.Write("%FL512", ulFF)
         x.Write("%IL512", ulFF)
         x.Write("%QL512", ulFF)
@@ -188,18 +213,18 @@ type XgiBasic() =
 
     [<Test>]
     member x.``Readings All Memory word type`` () =
-        x.Write("%ML512", ulFF)
-        x.Write("%LL512", ulFF)
-        x.Write("%NL512", ulFF)
-        x.Write("%KL512", ulFF)
-        x.Write("%RL512", ulFF)
-        x.Write("%WL512", ulFF)
-        x.Write("%AL512", ulFF)           //WARNING
-        x.Write("%FL512", ulFF)
-        x.Write("%IL512", ulFF)
-        x.Write("%QL512", ulFF)
-        x.Write("%UL4.0.0", ulFF)
-        x.ReadFEnet("%MW2048") === usFF
+        x.Write("ML512", ulFF)                          //Read, Write 함수의 tag는 %생략 가능
+        x.Write("LL512", ulFF)
+        x.Write("NL512", ulFF)
+        x.Write("KL512", ulFF)
+        x.Write("RL512", ulFF)
+        x.Write("WL512", ulFF)
+        x.Write("AL512", ulFF)                          //WARNING
+        x.Write("FL512", ulFF)
+        x.Write("IL512", ulFF)
+        x.Write("QL512", ulFF)
+        x.Write("UL4.0.0", ulFF)
+        x.ReadFEnet("%MW2048") === usFF                 //ReadFEnet은 %가 반드시 표시되어야함(x11에러)
         x.ReadFEnet("%LW2048") === usFF
         x.ReadFEnet("%NW2048") === usFF
         x.ReadFEnet("%KW2048") === usFF
@@ -211,9 +236,9 @@ type XgiBasic() =
         x.ReadFEnet("%QW2048") === usFF                 //32.0.0
         x.ReadFEnet("%UW2048") === usFF                 //4.0.0    //XG5000에서는 주소 접근 불가
 
-        x.Read("%UW4.0.0") === usFF                     //2048
-        x.Read("%IW32.0.0") === usFF                    //2048
-        x.Read("%QW32.0.0") === usFF                    //2048
+        x.Read("UW4.0.0") === usFF                     //2048
+        x.Read("IW32.0.0") === usFF                    //2048
+        x.Read("QW32.0.0") === usFF                    //2048
 
 
     [<Test>]
@@ -321,6 +346,101 @@ type XgiBasic() =
 
 
     [<Test>]
-    member x.``X Add monitoring test`` () =
+    member x.``Add monitoring test`` () =
+        let castValue (o : obj) : obj =
+            match o with
+            | :? bool as b -> b
+            | :? byte as by -> by
+            | :? uint16 as ui16 -> ui16
+            | :? uint32 as ui32 -> ui32
+            | :? uint64 as ui64 -> ui64
+            | _ -> failwith "Invalid type"
 
-        ()
+        let testList : (string * obj) list = [
+                        ("IX1.0.1", true);      //% 없어도 가능
+                        ("%MW33.1", true);
+                        ("%LB104", 8uy);
+                        ("%NW211", 16us);
+                        ("%KD55", 32u);
+                        ("%RL333", 64UL)
+        ]
+        let subscription =
+            x.Conn.Subject.ToIObservable()
+            |> Observable.OfType<TagValueChangedEvent>
+            |> fun x -> x.Subscribe(fun evt ->      //evt.Tag.Name evt.Tag.Value
+                            for (tag, value) in testList  do
+                                if tag.Equals evt.Tag.Name then
+                                    castValue value === evt.Tag.Value
+                            logDebug "%s value Changed %A -> %A" evt.Tag.Name evt.Tag.OldValue evt.Tag.Value
+                            ignore())
+
+        for (tag, value) in testList do
+            let input = castValue value
+            x.Write(tag, input)
+            x.Conn.AddMonitoringTag(LsTagXgi(x.Conn, tag)) |> ignore
+        noop()
+
+    [<Test>]
+    member x.``Max memory test`` () =
+        (*
+            XG5000 접근 가능한 메모리 주소 범위(Long Word 기준)
+            I,Q =   0.0.0   ~   127.15.0
+            U   =   0.0.0   ~   7.15.7
+            M   =   0       ~   65535
+            L   =   0       ~   2815
+            N   =   0       ~   6271
+            K   =   0       ~   2099
+            R   =   0       ~   8191
+            A,W =   0       ~   131071
+            F   =   0       ~   1023
+        *)
+
+        (fun () ->
+            x.Write("%IL127.33.0",64UL)
+            x.Read("%IL127.33.0") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+
+        (fun () ->
+            x.Write("%QL127.33.0",64UL)
+            x.Read("%QL127.33.0") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+
+        (fun () ->
+            x.Write("%UL7.20.7",64UL)
+            x.Read("%UL7.20.7") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+        (fun () ->
+            x.Write("%ML999999",64UL)
+            x.Read("%ML999999") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+        (fun () ->
+            x.Write("%LL999999",64UL)
+            x.Read("%LL999999") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+        (fun () ->
+            x.Write("%NL999999",64UL)
+            x.Read("%NL999999") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+        (fun () ->
+            x.Write("%KL999999",64UL)
+            x.Read("%KL999999") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+        (fun () ->
+            x.Write("%RL999999",64UL)
+            x.Read("%RL999999") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+        (fun () ->
+            x.Write("%AL999999",64UL)
+            x.Read("%AL999999") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+        (fun () ->
+            x.Write("%WL999999",64UL)
+            x.Read("%WL999999") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+        (fun () ->
+            x.Write("%FL999999",64UL)
+            x.Read("%FL999999") === 64UL)
+            |> ShouldFailWithSubstringT "0x4"     //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
+        noop()
+
+

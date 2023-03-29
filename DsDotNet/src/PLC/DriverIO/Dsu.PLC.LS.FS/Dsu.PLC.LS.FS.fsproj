@@ -8,6 +8,10 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	</PropertyGroup>
   <ItemGroup>
+    <None Include="Documents\사용설명서_XGT FEnet_국문_V2.1.pdf" />
+    <None Include="Documents\(PC)XGT_FEnet+Protocol.pdf" />
+    <None Include="Documents\PLC_XGT_상담기준서_Ethernet 전용 프로토콜 PC와 통신 방법 _KO_V1_공개.pdf" />
+    <None Include="Documents\User's Manual_XGT FEnet_V2.30.pdf" />
     <Content Include="Documents\Performance.txt" />
     <Content Include="Documents\LS protocol.txt" />
     <Content Include="Documents\ToDo.txt" />

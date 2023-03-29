@@ -321,3 +321,13 @@ type XgiBasic() =
     member x.``X Add monitoring test`` () =
         
         ()
+
+    [<Test>]
+    member x.``X Max memory test`` () =
+        
+        ()
+    
+    [<Test>]
+    member x.``X forbidden write to A and F0to511 test`` () =
+        
+        ()

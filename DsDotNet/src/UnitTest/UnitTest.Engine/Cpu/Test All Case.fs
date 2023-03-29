@@ -75,6 +75,5 @@ type TestAllCase() =
     [<Test>]
     member __.``Allocate existing global IO`` () =
         let t = CpuTestSample()
+        (fun () -> exportXMLforXGI(t.Sys, myTemplate "Allocate existing global IO", Some myExistIO))  |> ShouldFail
 
-        let result = exportXMLforXGI(t.Sys, myTemplate "Allocate existing global IO", Some myExistIO)
-        result === result

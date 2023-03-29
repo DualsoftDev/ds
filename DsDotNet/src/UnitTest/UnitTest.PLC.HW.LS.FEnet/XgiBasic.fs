@@ -211,18 +211,18 @@ type XgiBasic() =
 
     [<Test>]
     member x.``Readings All Memory word type`` () =
-        x.Write("%ML512", ulFF)
-        x.Write("%LL512", ulFF)
-        x.Write("%NL512", ulFF)
-        x.Write("%KL512", ulFF)
-        x.Write("%RL512", ulFF)
-        x.Write("%WL512", ulFF)
-        x.Write("%AL512", ulFF)           //WARNING
-        x.Write("%FL512", ulFF)
-        x.Write("%IL512", ulFF)
-        x.Write("%QL512", ulFF)
-        x.Write("%UL4.0.0", ulFF)
-        x.ReadFEnet("%MW2048") === usFF
+        x.Write("ML512", ulFF)                          //Read, Write 함수의 tag는 %생략 가능
+        x.Write("LL512", ulFF)
+        x.Write("NL512", ulFF)
+        x.Write("KL512", ulFF)
+        x.Write("RL512", ulFF)
+        x.Write("WL512", ulFF)
+        x.Write("AL512", ulFF)           //WARNING
+        x.Write("FL512", ulFF)
+        x.Write("IL512", ulFF)
+        x.Write("QL512", ulFF)
+        x.Write("UL4.0.0", ulFF)
+        x.ReadFEnet("%MW2048") === usFF                 //ReadFEnet은 %가 반드시 표시되어야함(x11에러)
         x.ReadFEnet("%LW2048") === usFF
         x.ReadFEnet("%NW2048") === usFF
         x.ReadFEnet("%KW2048") === usFF
@@ -234,9 +234,9 @@ type XgiBasic() =
         x.ReadFEnet("%QW2048") === usFF                 //32.0.0
         x.ReadFEnet("%UW2048") === usFF                 //4.0.0    //XG5000에서는 주소 접근 불가
 
-        x.Read("%UW4.0.0") === usFF                     //2048
-        x.Read("%IW32.0.0") === usFF                    //2048
-        x.Read("%QW32.0.0") === usFF                    //2048
+        x.Read("UW4.0.0") === usFF                     //2048
+        x.Read("IW32.0.0") === usFF                    //2048
+        x.Read("QW32.0.0") === usFF                    //2048
 
 
     [<Test>]

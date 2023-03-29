@@ -65,6 +65,7 @@ module TagVariableModule =
             member x.Comment with get() = x.Comment and set(v) = x.Comment <- v
             member x.BoxedValue with get() = x.Value and set(v) = x.Value <- (v :?> 'T)
             member x.ObjValue = x.Value :> obj
+            /// null 인 경우, memory 주소를 할당하지 않는다.   "" 인 경우, memory 주소를 할당한다.   다른 정상 문자열이 있으면 그대로 둔다.
             member x.Address with get() = x.Address and set(v) = x.Address <- v
             member x.ToBoxedExpression() = x.ToBoxedExpression()
 

@@ -35,6 +35,7 @@ module Interface =
         inherit IValue
         inherit INamed
         inherit IText
+        /// null 인 경우, memory 주소를 할당하지 않는다.   "" 인 경우, memory 주소를 할당한다.   다른 정상 문자열이 있으면 그대로 둔다.
         abstract Address:string with get, set
         abstract DsSystem: ISystem
         abstract Target: IQualifiedNamed option

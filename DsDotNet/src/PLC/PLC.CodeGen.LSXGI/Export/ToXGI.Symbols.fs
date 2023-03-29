@@ -72,8 +72,10 @@ module internal XgiSymbolsModule =
             let symbolInfo =
                 let plcType = systemTypeToXgiTypeName t.DataType
                 let comment = SecurityElement.Escape t.Comment
-                // address 가 지정되지 않은 symbol 에 한해서 자동으로 address 를 할당.
-                if String.IsNullOrEmpty(t.Address) then
+
+                // address 가 "" 인 symbol 에 한해서 자동으로 address 를 할당.
+                // null 또는 다른 값이 지정되어 있으면, 그대로 사용한다.
+                if t.Address = "" (*&& not (t :? IVariable)*) then
                     let allocatorFunctions =
                         match prjParams.MemoryAllocatorSpec with
                         | RangeSpec _ -> failwith "ERROR.  Should have already been converted to allocator functions."

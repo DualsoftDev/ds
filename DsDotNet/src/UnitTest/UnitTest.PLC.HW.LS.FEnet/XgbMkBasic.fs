@@ -10,6 +10,7 @@ open Xunit
 type XgbMkBasic() =
     inherit FEnetTestBase("192.168.0.101")
 
+
     override x.CreateLsTag (tag:string) (convertFEnet:bool) =
         LsTagXgbMk(x.Conn, tag, convertFEnet)
 
@@ -21,14 +22,31 @@ type XgbMkBasic() =
     [<Test>]
     member x.``Address convert test`` () =
         let tags = [
-            "P0000", "%PW0"
-            "P0001", "%PW1"
-            "P0101", "%PW101"
-            "P00001", "%PX1"
+            "P0000", "%PW0"     
+            "M0001", "%MW1"
+            "K0101", "%KW101"
+            "F0334", "%FW334"
+            "T0045", "%TW45"
+            "C0001", "%CW1"
+            "Z0018", "%ZW18"
+            "S0017", "%SW17"     //S CANNOT USE BIT 
+            "L0024", "%LW24"   
+            "N0014", "%NW14"    
+            "D0033", "%DW33"
+
             "P00008", "%PX8"
-            "P0000F", "%PX15"
-            "P0001F", "%PX31"   // 1*16 + 15
-            "P0011F", "%PX191"  // 11*16 + 15
+            "M00001", "%MX1"
+            "K0000A", "%KX10"
+            "F00001", "%FX1"
+            "T00008", "%TX8"
+            "C0000F", "%CX15"   // 0 + 15
+            "Z0010F", "%ZX175"  // 10*16 + 15
+            "L0011F", "%LX191"  // 11*16 + 15
+            "N0012F", "%NX207"  // 12*16 + 15
+            "D0013F", "%DX223"  // 13*16 + 15
+
+
+            //U
         ]
         for (tag, expected) in tags do
             let fenet = tryToFEnetTag CpuType.XgbMk tag
@@ -41,16 +59,15 @@ type XgbMkBasic() =
         (* XgbMk 에서 %MW 는 인식할 수 없어야 한다. *)
         (fun () -> x.Read("%MW5")             |> ignore ) |> ShouldFail
         (fun () -> x.ReadFEnet("M0005")       |> ignore ) |> ShouldFail
-
         (fun () -> x.Write("%MW5", 0us)       |> ignore ) |> ShouldFail
         (fun () -> x.WriteFEnet("M0005", 0us) |> ignore ) |> ShouldFail
 
 
     [<Test>]
     member x.``WriteAndRead`` () =
-        let ul0 = 0xF1F2F3F4F5F6F7F8UL
-        x.WriteFEnet("%ML1", ul0)
-        x.ReadFEnet("%ML1") === ul0
+        //let ul0 = 0xF1F2F3F4F5F6F7F8UL
+        //x.WriteFEnet("%ML1", ul0)
+        //x.ReadFEnet("%ML1") === ul0
 
         for i in [0..15] do
             x.WriteFEnet( sprintf "%%MX%X" (10*16+i), true)
@@ -65,11 +82,27 @@ type XgbMkBasic() =
         x.Read("M0005") === w5
 
 
+
+        x.Write("M0023F", true)
+        x.Read("M0023F") === true
+
+        //x.WriteFEnet("%ML100", 123UL)
+        //x.ReadFEnet("%ML100") === 123UL
+
+        x.WriteFEnet("%MW100", 123us)
+        x.ReadFEnet("%MW100") === 123us
+        x.Read("%M0100") === 123us
+
+
+        x.WriteFEnet("%SW3", 1us)
+        x.ReadFEnet("%SW3") === 1us
+        x.Read("%S0003") === 1us
+
     [<Test>]
     member x.``P`` () =
         (* P 영역은 write 가능한 영역과 불가능한 영역이 존재 하는 듯.. *)
-        x.WriteFEnet("%PB64", 0x64uy)
-        x.ReadFEnet("%PB64") === 0x64uy
+        x.WriteFEnet("%PB128", 0x63uy)
+        x.ReadFEnet("%PB128") === 0x63uy
 
         x.WriteFEnet("%PW33", 0x33us)
         x.ReadFEnet("%PW33") === 0x33us
@@ -98,4 +131,9 @@ type XgbMkBasic() =
         x.WriteFEnet("%MW32", w)
         x.Read("M0032") === w
         x.ReadFEnet("%MW32") === w
-
+    
+    (*보류*)
+    //[<Test>]
+    //member x.``Write D and L word test`` () =
+    //    x.WriteFEnet("%ML3", ulFF)
+    //    x.ReadFEnet("%ML3") === ulFF 

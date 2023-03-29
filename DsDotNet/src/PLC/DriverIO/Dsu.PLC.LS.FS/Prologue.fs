@@ -217,7 +217,7 @@ type DataType =
             | _ -> failwith "ERROR"
 
 
-type DeviceType = P | M | L | K | F | D | U | N | Z | T | C | R | I | Q | A | W | ZR    //S Step제어용 디바이스 수집 불가
+type DeviceType = P | M | L | K | F | D | U | N | Z | T | C | R | I | Q | A | W | S | ZR    //S Step제어용 디바이스 수집 불가
 
 type LsFEnetTagInfo = {
     /// Original Tag name

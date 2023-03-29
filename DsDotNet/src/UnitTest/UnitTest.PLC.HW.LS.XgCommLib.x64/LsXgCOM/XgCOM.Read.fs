@@ -32,12 +32,13 @@ module XgCommLibSpec =
     let [<Literal>] MAX_ARRAY_BYTE_SIZE = 512   // 64*8
 
 (*
-    XGComLib summary
+    XGComLib summary : working API (V20 API 기준)
     ----------------
-    모든 version 에서 ReadRandomDevice 는 동작함.
+    - ReadRandomDevice
+    - WriteRandomDevice
        - 단, 64점 이상인 경우, fail 함
-    V20 버젼 사용시, WriteDevice_Bit 동작함.
-    32/64 bit 모두 동일 한 듯.
+    - WriteDevice_Bit
+    - WriteDevice_Block
 *)
 [<Collection("SerialXgiGenerationTest")>]
 type XgCOM10ReadTest() =
@@ -61,39 +62,9 @@ type XgCOM10ReadTest() =
             wBuf[i] <- byte i
             x.CommObject.AddDeviceInfo(di)
 
-        // does *NOT* working
-        //x.CommObject.Write((int)XgCOMCodes.W_M, wBuf, 1, 0) =!= 0
-        //x.CommObject.Read((int)XgCOMCodes.R_M, rBuf, 1, 0) =!= 0
-
-        //x.CommObject.Command((int)XgCOMCodes.W_M, wBuf, 1024, 0) =!= 0
-        //x.CommObject.Command((int)XgCOMCodes.R_M, rBuf, 1024, 0) =!= 0
-
-        //let offset = 16*10
-        //let a = x.CommObject.WriteDevice_Bit("M", offset, 1) //=== 1
-
-        //let mutable nRead = 0
-        ////x.CommObject.ReadDevice_Block("M", 0, &rBuf[0], 1024, &nRead)
-        //let mutable buf:byte = 0uy
-        //x.CommObject.ReadDevice_Block("M", 0, &buf, 1, &nRead)
-        // does *NOT* working
-
-
-
-        //// NOT working
-        //x.CommObject.WriteRandomDevice(wBuf) // === 1
 
         // working : 단 random device 갯수가 64 이하 일 때...
         x.CommObject.ReadRandomDevice(rBuf) === 1
-
-        noop()
-
-    (* Pre20 version 은 WriteDevice_Bit 지원 안함. *)
-    //[<Test>]
-    //member x.``Write bit test`` () =
-    //    for i = 0 to 1023 do
-    //        x.CommObject.WriteDevice_Bit("M", i, 0) === 1
-
-
 
 
 [<Collection("SerialXgiGenerationTest")>]
@@ -101,7 +72,66 @@ type XgCOM20ReadTest() =
     inherit XgCOMBaseClass20()
 
     [<Test>]
-    member x.``Basic read/write test`` () =
+    member x.``Not working: Read/Write`` () =
+        let wBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
+        let rBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
+        rBuf[0] = 0xFFuy
+
+        let sWrite = x.CommObject.Write((int)XgCOMCodes.W_M, wBuf, 1, 0)
+        let sRead = x.CommObject.Read((int)XgCOMCodes.R_M, rBuf, 1, 0)
+
+        (*
+            1. COM 호출 return 값 모두 0 임.  sRead, sWrite
+            1. rBuf[0] 값이 0xFF 로 변경되지 않음.
+         *)
+        sWrite === 0     // 1 이 되어야 할 것 같은데...
+        sRead  === 0     // 1 이 되어야 할 것 같은데...
+        rBuf[0] === 0uy    // 1 이 되어야 함...
+
+        // does *NOT* working
+        //x.CommObject.Command((int)XgCOMCodes.W_M, wBuf, 1024, 0) =!= 0
+        //x.CommObject.Command((int)XgCOMCodes.R_M, rBuf, 1024, 0) =!= 0
+
+
+
+    [<Test>]
+    member x.``Not working: ReadDevice_Bit`` () =
+        let offset = 16*10
+        x.CommObject.WriteDevice_Bit("M", offset, 1) === 1      // WriteDevice_Bit 는 정상 동작
+        let mutable buf:int = 0
+        let sRead = x.CommObject.ReadDevice_Bit("M", offset, &buf)
+        // COM 호출 return 값 sRead 가 0 임
+        sRead === 0     // 1 이 되어야 할 것 같은데...
+        buf === 0       // 1 이 되어야 함...
+
+
+    [<Test>]
+    member x.``Not working: ReadDevice_Block`` () =
+        (*
+           ReadDevice_Block 호출 시, test process crash.
+           The active test run was aborted. Reason: Test host process crashed *)
+        //let mutable nRead = 0
+        //let rBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
+        //x.CommObject.ReadDevice_Block("M", offset, &rBuf[0], MAX_ARRAY_BYTE_SIZE-1, ref nRead)
+        ////x.CommObject.ReadDevice_Block("M", offset, &rBuf[0], MAX_ARRAY_BYTE_SIZE-1, &nRead)
+
+        noop()
+
+    [<Test>]
+    member x.``WriteRandomDevice`` () =
+        let di = x.CreateDevice('M', 'B')
+
+        let wBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
+        x.CommObject.RemoveAll()
+        for i = 0 to MAX_RANDOM_READ_POINTS-1 do
+            di.lOffset <- 180 + i * 8
+            wBuf[i] <- byte i
+            x.CommObject.AddDeviceInfo(di)
+        x.CommObject.WriteRandomDevice(wBuf) === 1
+
+
+    [<Test>]
+    member x.``read/write random device test`` () =
         x.CommObject.IsConnected() === 1
         let plcId = x.CommObject.GetPLCID;
 
@@ -111,62 +141,26 @@ type XgCOM20ReadTest() =
         let rBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
         x.CommObject.RemoveAll()
         for i = 0 to MAX_RANDOM_READ_POINTS-1 do
-            di.lOffset <- i * 8
+            di.lOffset <- 100 + i * 8
             wBuf[i] <- byte i
             x.CommObject.AddDeviceInfo(di)
 
-        // does *NOT* working
-        //x.CommObject.Write((int)XgCOMCodes.W_M, wBuf, 1, 0) =!= 0
-        //x.CommObject.Read((int)XgCOMCodes.R_M, rBuf, 1, 0) =!= 0
-
-        //x.CommObject.Command((int)XgCOMCodes.W_M, wBuf, 1024, 0) =!= 0
-        //x.CommObject.Command((int)XgCOMCodes.R_M, rBuf, 1024, 0) =!= 0
-
-        //let offset = 16*10
-        //let a = x.CommObject.WriteDevice_Bit("M", offset, 1) //=== 1
-
-        //let mutable nRead = 0
-        ////x.CommObject.ReadDevice_Block("M", 0, &rBuf[0], 1024, &nRead)
-        //let mutable buf:byte = 0uy
-        //x.CommObject.ReadDevice_Block("M", 0, &buf, 1, &nRead)
-        // does *NOT* working
-
-#if USEV20
-        // WORKING
-        //for i = 0 to 1023 do
-        //    x.CommObject20.WriteDevice_Bit("M", i, 0) === 1
-        //for i = 0 to 4096*2-1 do
-        //    x.CommObject.WriteDevice_Bit("M", i, 1) === 1
-        //for i = 0 to 1023 do
-        //    x.CommObject.WriteDevice_Bit("M", i, 0) === 1
-        // WORKING
-
-
-        // NOT working
-        //for i = 0 to 1023 do
-        //    let mutable nRead = 0
-        //    x.CommObject.ReadDevice_Bit("M", i, &nRead)
-        //    rBuf[i] <- byte nRead
-        // NOT working
-#endif
-
-
-        //// NOT working
-        //x.CommObject.WriteRandomDevice(wBuf) // === 1
-
-        // working : 단 random device 갯수가 너무 많지 않으면...
+        x.CommObject.WriteRandomDevice(wBuf) === 1
         x.CommObject.ReadRandomDevice(rBuf) === 1
+        for i = 0 to MAX_RANDOM_READ_POINTS-1 do
+            rBuf[i] === wBuf[i]
 
         noop()
-
+    [<Test>]
+    member x.``write device bit test`` () =
+        for i = 100 to 1024 do
+            x.CommObject.WriteDevice_Bit("M", i, 0) === 1
 
     [<Test>]
-    member x.``Write bit test`` () =
-        let start = 16*5
-        //for i = start to 1023 do
-        //    x.CommObject.WriteDevice_Bit("M", i, 1) === 1
-        for i = 128 to 256 do
-            x.CommObject.WriteDevice_Bit("M", i, 1) === 1
+    member x.``WriteDevice_Block`` () =
+        let offset = 512
+        let wBuf = [| 0uy .. byte (MAX_ARRAY_BYTE_SIZE-1) |]
+        x.CommObject.WriteDevice_Block("M", offset, &(wBuf[0]), MAX_ARRAY_BYTE_SIZE) === 1      // WriteDevice_Block 는 정상 동작
 
 
     [<Test>]
@@ -182,16 +176,6 @@ type XgCOM20ReadTest() =
         let rBuf = Array.zeroCreate<byte>(8)
         x.CommObject.ReadRandomDevice(rBuf) === 1
         (rBuf[0] &&& 1uy) === 1uy
-
-    /// ReadDevice_Bit NOT working
-    [<Test>]
-    member x.``X Read bit test`` () =
-        let start = 16*5
-        for i = start to 1023 do
-            let nRead = 0
-            x.CommObject.ReadDevice_Bit("M", i, ref nRead) === 1
-            nRead = 1
-            noop()
 
 
     [<Test>]

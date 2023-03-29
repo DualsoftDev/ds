@@ -16,22 +16,28 @@ type TestAllCase() =
     inherit EngineTestBaseClass()
 
     let myTemplate testName = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../../UnitTest.PLC.Xgi/XgiXmls/{testName}.xml")
+    let myExistIO  = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../../UnitTest.PLC.Xgi/XgiXmls/Templates/myTemplateExistIO.xml")
 
     let testAddressSetting (sys:DsSystem) =
+        let mutable index = 0
+        let addr() = index <- index+1
+                     sprintf "%%MX%d" index
         for j in sys.Jobs do
             for dev in j.DeviceDefs  do
-            if dev.ApiItem.RXs.any() then  dev.InAddress <- "%MX777"
-            if dev.ApiItem.TXs.any() then  dev.OutAddress <- "%MX888"
+                if dev.ApiItem.RXs.any() then
+                    dev.InAddress <- addr()
+                if dev.ApiItem.TXs.any() then
+                    dev.OutAddress <- addr()
 
         for b in sys.Buttons do
-            b.InAddress <- "%MX777"
-            b.OutAddress <- "%MX888"
+            b.InAddress <- addr()
+            b.OutAddress <- addr()
 
         for l in sys.Lamps do
-            l.OutAddress <- "%MX888"
+            l.OutAddress <-  addr()
 
         for c in sys.Conditions do
-            c.InAddress <- "%MX777"
+            c.InAddress <-  addr()
 
 
     [<Test>]
@@ -59,18 +65,16 @@ type TestAllCase() =
 
 
     [<Test>]
-    member __.``Allocate existing global address`` () =
+    member __.``Allocate existing global Memory`` () =
         let t = CpuTestSample()
 
-        //for j in t.Sys.Jobs do
-        //    for dev in j.DeviceDefs  do
-        //    if dev.ApiItem.RXs.any() then  dev.InAddress  <- "%MX0"
-        //    if dev.ApiItem.TXs.any() then  dev.OutAddress <- "%MX1"
+        let result = exportXMLforXGI(t.Sys, myTemplate "Allocate existing global Memory", None)
+        result === result
 
-        ////Storages 테스트로 다시 만들기
-        //applyTagManager (t.Sys, Storages())
-        //t.Sys.GenerationIO()
-        ////Storages 테스트로 다시 만들기
 
-        let result = exportXMLforXGI(t.Sys, myTemplate "Allocate existing global address", None)
+    [<Test>]
+    member __.``Allocate existing global IO`` () =
+        let t = CpuTestSample()
+
+        let result = exportXMLforXGI(t.Sys, myTemplate "Allocate existing global IO", Some myExistIO)
         result === result

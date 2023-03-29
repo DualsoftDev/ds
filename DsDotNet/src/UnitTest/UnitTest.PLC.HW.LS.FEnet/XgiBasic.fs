@@ -1,11 +1,9 @@
 namespace T
 
 open NUnit.Framework
-open AddressConvert
-open Engine.Core.CoreModule
 open Engine.Common.FS
-open System.Text.RegularExpressions
 open Dsu.PLC.LS
+open AddressConvert
 
 type XgiBasic() =
     inherit FEnetTestBase("192.168.0.100")
@@ -30,43 +28,43 @@ type XgiBasic() =
             "%IX0.0.8", "%IX8"
             "%IX0.0.10", "%IX10"
             "%IX0.0.63", "%IX63"
-            "%IX0.1.0", "%IX64"
-            "%IX0.1.1", "%IX65"
-            "%IX1.1.1", "%IX1089"       // 1*16*64 + 1*64 + 1
-            "%IX2.3.1", "%IX2241"       // 2*16*64 + 3*64 + 1
-            "%IX32.0.0", "%IX32768"
+            "%IX0.1.0", "%IX64"         // 0 + 1 * 64 + 0
+            "%IX0.1.1", "%IX65"         // 0 + 1 * 64 + 1
+            "%IX1.1.1", "%IX1089"       // 1  * 16 * 64 + 1 * 64 + 1
+            "%IX2.3.1", "%IX2241"       // 2  * 16 * 64 + 3 * 64 + 1
+            "%IX32.0.0", "%IX32768"     // 32 * 16 * 64 + 0 + 0
 
             "%IB0.0", "%IX0"
             "%IB0.1", "%IX1"
             "%IB0.2", "%IX2"
-            "%IB1.0", "%IX8"
-            "%IB1.1", "%IX9"
+            "%IB1.0", "%IX8"            // 1 * 8 + 0
+            "%IB1.1", "%IX9"            // 1 * 8 + 1
 
             "%IW1.0", "%IX16"
-            "%IW1.1", "%IX17"
+            "%IW1.1", "%IX17"           // 1 * 16 + 1
 
-            "%ID1.0", "%IX32"
-            "%ID1.1", "%IX33"
+            "%ID1.0", "%IX32"           // 1 * 32 + 0
+            "%ID1.1", "%IX33"           // 1 * 32 + 1
 
-            "%IL1.0", "%IX64"
-            "%IL1.1", "%IX65"
+            "%IL1.0", "%IX64"           // 1 * 64 + 0
+            "%IL1.1", "%IX65"           // 1 * 64 + 1
 
-            "%IB1.0.1", "%IB129"
-            "%IW1.0.1", "%IW65"
-            "%ID1.0.1", "%ID33"
-            //"%IL1.0.1", "%IL65"     // 존재하지 않는 주소
-            "%IL1.1.0", "%IL17"
+            "%IB1.0.1", "%IB129"        // 1 * 8 * 16 + 0 * 8 + 1   Byte
+            "%IW1.0.1", "%IW65"         // 1 * 4 * 16 + 0 * 4 + 1   Word
+            "%ID1.0.1", "%ID33"         // 1 * 2 * 16 + 0 * 2 + 1   DWord
+            "%IL1.1.0", "%IL17"         // 1 * 1 * 16 + 1 * 1 + 0   LWord
+            //"%IL1.0.1", "%IL65"       // 존재하지 않는 주소
 
             "%QX0.0.0", "%QX0"
             "%QX0.0.1", "%QX1"
             "%QX0.0.8", "%QX8"
             "%QX0.0.10", "%QX10"
             "%QX0.0.63", "%QX63"
-            "%QX0.1.0", "%QX64"
-            "%QX0.1.1", "%QX65"
-            "%QX1.1.1", "%QX1089"       // 1*16*64 + 1*64 + 1
-            "%QX2.3.1", "%QX2241"       // 2*16*64 + 3*64 + 1
-            "%QX32.0.0", "%QX32768"
+            "%QX0.1.0", "%QX64"         // 0 + 1 * 64 + 0
+            "%QX0.1.1", "%QX65"         // 0 + 1 * 64 + 1
+            "%QX1.1.1", "%QX1089"       // 1  * 16 * 64 + 1 * 64 + 1    bit
+            "%QX2.3.1", "%QX2241"       // 2  * 16 * 64 + 3 * 64 + 1    bit
+            "%QX32.0.0", "%QX32768"     // 32 * 16 * 64 + 0 + 0
 
             "%QB0.0", "%QX0"
             "%QB0.1", "%QX1"
@@ -75,18 +73,30 @@ type XgiBasic() =
             "%QB1.1", "%QX9"
 
             "%QW1.0", "%QX16"
-            "%QW1.1", "%QX17"
+            "%QW1.1", "%QX17"           // 1 * 16 + 1
+                                               
+            "%QD1.0", "%QX32"           // 1 * 32 + 0
+            "%QD1.1", "%QX33"           // 1 * 32 + 1
+                                               
+            "%QL1.0", "%QX64"           // 1 * 64 + 0
+            "%QL1.1", "%QX65"           // 1 * 64 + 1
 
-            "%QD1.0", "%QX32"
-            "%QD1.1", "%QX33"
+            "%QB1.0.1", "%QB129"        // 1 * 8 * 16 + 0 * 8 + 1   Byte
+            "%QW1.0.1", "%QW65"         // 1 * 4 * 16 + 0 * 4 + 1   Word
+            "%QD1.0.1", "%QD33"         // 1 * 2 * 16 + 0 * 2 + 1   DWord
+            "%QL1.1.0", "%QL17"         // 1 * 1 * 16 + 1 * 1 + 0   LWord
 
-            "%QL1.0", "%QX64"
-            "%QL1.1", "%QX65"
+            "%ML32.4" , "%MX2052"       // 32 * 64 + 4     LWord
+            "%LD32.4" , "%LX1028"       // 32 * 32 + 4     DWord
+            "%NW32.4" , "%NX516"        // 32 * 16 + 4     Word
+            "%KB32.4" , "%KX260"        // 32 * 8  + 4     Byte
 
-            "%QB1.0.1", "%QB129"
-            "%QW1.0.1", "%QW65"
-            "%QD1.0.1", "%QD33"
-            "%QL1.1.0", "%QL17"
+            "%RL32.15" , "%RX2063"      // 32 * 64 + 15   LWord
+            "%AD32.15" , "%AX1039"      // 32 * 32 + 15   DWord
+            "%WW32.15" , "%WX527"       // 32 * 16 + 15   Word
+            "%FB32.15" , "%FX271"       // 32 * 8  + 15   Byte
+
+            //"%LL32.F" , "%LX2063"     // 32 * 64 + 15   // '.' 뒤에도 10진수 사용
         ]
         for (tag, expected) in tags do
             let fenet = tryToFEnetTag CpuType.Xgi tag
@@ -136,12 +146,12 @@ type XgiBasic() =
         x.ReadFEnet("%FX32768") === true
         x.ReadFEnet("%IX32768") === true                    //32.0.0
         x.ReadFEnet("%QX32768") === true                    //32.0.0
-        x.Read("%UX4.0.0") === true                         //4.0.0
-        x.Read("%IX32.0.0") === true                        //32.0.0
-        x.Read("%QX32.0.0") === true                        //32.0.0
+        x.ReadFEnet("%UX32768") === true                    //4.0.0    //XG5000에서는 주소 접근 불가
 
-        (*U메모리는 0.0.0 양식으로만 접근 가능*)
-        (tryParseTag "%UX32768").IsNone === true
+        x.Read("%UX4.0.0") === true                         //32768
+        x.Read("%IX32.0.0") === true                        //32768
+        x.Read("%QX32.0.0") === true                        //32768
+
 
 
     [<Test>]
@@ -165,14 +175,14 @@ type XgiBasic() =
         x.ReadFEnet("%WB4096") === uyFF
         x.ReadFEnet("%AB4096") === uyFF                   //WARNING
         x.ReadFEnet("%FB4096") === uyFF
-        x.ReadFEnet("%IB4096") === uyFF                    //32.0.0
-        x.ReadFEnet("%QB4096") === uyFF                    //32.0.0
-        x.Read("%UB4.0.0") === uyFF                       //4.0.0
-        x.Read("%IB32.0.0") === uyFF                      //32.0.0
-        x.Read("%QB32.0.0") === uyFF                      //32.0.0
+        x.ReadFEnet("%IB4096") === uyFF                   //32.0.0
+        x.ReadFEnet("%QB4096") === uyFF                   //32.0.0
+        x.ReadFEnet("%UB4096") === uyFF                   //4.0.0    //XG5000에서는 주소 접근 불가
 
-        (*U메모리는 0.0.0 양식으로만 접근 가능*)
-        (tryParseTag "%UB4096").IsNone === true
+        x.Read("%UB4.0.0") === uyFF                       //4096
+        x.Read("%IB32.0.0") === uyFF                      //4096
+        x.Read("%QB32.0.0") === uyFF                      //4096
+
 
     [<Test>]
     member x.``Readings All Memory word type`` () =
@@ -197,12 +207,12 @@ type XgiBasic() =
         x.ReadFEnet("%FW2048") === usFF
         x.ReadFEnet("%IW2048") === usFF                 //32.0.0
         x.ReadFEnet("%QW2048") === usFF                 //32.0.0
-        x.Read("%UW4.0.0") === usFF                     //4.0.0
-        x.Read("%IW32.0.0") === usFF                    //32.0.0
-        x.Read("%QW32.0.0") === usFF                    //32.0.0
+        x.ReadFEnet("%UW2048") === usFF                 //4.0.0    //XG5000에서는 주소 접근 불가
 
-        (*U메모리는 0.0.0 양식으로만 접근 가능*)
-        (tryParseTag "%UW2048").IsNone === true
+        x.Read("%UW4.0.0") === usFF                     //2048
+        x.Read("%IW32.0.0") === usFF                    //2048
+        x.Read("%QW32.0.0") === usFF                    //2048
+
 
     [<Test>]
     member x.``Readings All Memory Double word type`` () =
@@ -227,11 +237,12 @@ type XgiBasic() =
         x.ReadFEnet("%FD1024") === unFF
         x.ReadFEnet("%ID1024") === unFF              //32.0.0
         x.ReadFEnet("%QD1024") === unFF              //32.0.0
-        x.Read("%ID32.0.0") === unFF                 //32.0.0
-        x.Read("%QD32.0.0") === unFF                 //32.0.0
+        x.ReadFEnet("%UD1024") === unFF              //4.0.0    //XG5000에서는 주소 접근 불가
 
-        (* U메모리는 0.0.0 양식으로만 접근 가능 *)
-        (tryParseTag "%UD1024").IsNone === true
+        x.Read("%UD4.0.0") === unFF                  //1024
+        x.Read("%ID32.0.0") === unFF                 //1024
+        x.Read("%QD32.0.0") === unFF                 //1024
+
 
     [<Test>]
     member x.``Readings All Memory Long word type`` () =
@@ -256,12 +267,12 @@ type XgiBasic() =
         x.ReadFEnet("%FL512") === ulFF
         x.ReadFEnet("%IL512") === ulFF              //32.0.0
         x.ReadFEnet("%QL512") === ulFF              //32.0.0
-        x.Read("%UL4.0.0") === ulFF                 //4.0.0
-        x.Read("%IL32.0.0") === ulFF                //32.0.0
-        x.Read("%QL32.0.0") === ulFF                //32.0.0
+        x.ReadFEnet("%UL512") === ulFF              //4.0.0    //XG5000에서는 주소 접근 불가
 
-        (*U메모리는 0.0.0 양식으로만 접근 가능*)
-        (tryParseTag "%UL512").IsNone === true
+        x.Read("%UL4.0.0") === ulFF                 //512
+        x.Read("%IL32.0.0") === ulFF                //512
+        x.Read("%QL32.0.0") === ulFF                //512
+
 
 
     [<Test>]
@@ -305,3 +316,9 @@ type XgiBasic() =
         x.Write(q111, false)
         x.Read(q111) === false
         x.ReadFEnet("%QX1089") === false
+
+
+    [<Test>]
+    member x.``X Add monitoring test`` () =
+        
+        ()

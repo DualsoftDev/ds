@@ -404,14 +404,7 @@ type XgiBasic() =
             "%IL127.33.0"
             "%QL127.33.0"
             "%UL7.20.7"
-            "%ML999999"
-            "%LL999999"
-            "%NL999999"
-            "%KL999999"
-            "%RL999999"
-            "%AL999999"
-            "%WL999999"
-            "%FL999999"
+            yield! ["M"; "L"; "N"; "K"; "R"; "A"; "W"; "F"] |> List.map (sprintf "%%%sL999999")
         ]
         invalidAddresses |> iter doInvalidRequest
 

@@ -73,6 +73,11 @@ module Log4NetWrapper =
     let logFatal fmt = logWithLogger Level.Error gLogger (fatal()) fmt
     //let logCritical fmt = logWithLogger Level.Critical gLogger gLogger.Error fmt
 
+
+    let logErrorWithStackTrace msg =
+        let st = StackTrace().ToString()
+        logError $"{msg}{Environment.NewLine}{st}"
+
     /// failwith logging
     let failwithlog msg =
         logError "%s" msg

@@ -476,7 +476,7 @@ module RandomReadWrite =
                     let errorStatus = buffer.[26..27].ToUInt16()
                     assert(errorStatus = 0xFFFFus || errorStatus = 0x00FFus)
                     let errorCode = buffer.[28..29].ToUInt16()
-                    errorCode |> getErrorMessage |> logError "%s"
+                    errorCode |> getErrorMessage |> logErrorWithStackTrace
                 buffer)
         with exn ->
             logError "Exception on sendPacketAndGetResponse:\n%O" exn

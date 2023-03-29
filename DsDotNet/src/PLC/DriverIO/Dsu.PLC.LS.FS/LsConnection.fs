@@ -101,6 +101,13 @@ and LsConnection(parameters:LsConnectionParameters) as this =
         ||> sendPacketAndGetResponse                    // packet  전송하고, (해당 길이에 맞는지 check 해서) response packet 구함
         |> verifyReponseHeader None
 
+
+    let printStatus() =
+        createStatusRequestPacket()
+        ||> sendPacketAndGetResponse
+        |> PacketDebug.printStatusData cpu
+
+
     do
         let header = getPacketHeader()
         logDebug "Header : %A" header
@@ -303,6 +310,8 @@ and LsConnection(parameters:LsConnectionParameters) as this =
         |> Array.ofSeq
         |> channelize
         |> Seq.cast<ChannelRequestExecutor>
+
+    member _.PrintStatus() = printStatus()
 
 
 and LsChannelRequestExecutor(conn, tags, reader:CachedTagsReader) =

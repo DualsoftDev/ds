@@ -95,7 +95,8 @@ OS 버젼= 0x16
     connState |> sprintf "XG5000연결상태 = 0x%x"            |> p
     // 관측 결과, XG5000 으로 PLC 접속한경우 0x102 의 값이 나왔고, 연결안하면 0x100 의 값이 나옴을 확인
     // XGI 인 경우, 0x21
-    assert(connState = 0x100us || connState = 0x102us || connState = 0x21us)
+    // 0 인 경우는 ??
+    assert(connState = 0x100us || connState = 0x102us || connState = 0x21us || connState = 0x0us)
 
     sysState  |> sprintf "PLC 모드와 운전상태[8..11] = 0x%x" |> p
     (sysState >>>  0) |> lsb |> sprintf "\tRUN = %d" |> p
@@ -118,21 +119,33 @@ let printHeader (buffer:byte []) =
 
 /// PLC status query 애 대한 response packet 을 print.  8.2.5
 /// pk : Response packet bytes
-let printStatusData (pk:byte []) =
+let printStatusData (cpu:CpuType) (pk:byte []) =
     let p = logInfo "%s"
     printHeaderImpl pk p
     let command = pk.[20..21].ToUInt16()
-    assert(command = (Command.StatusResponse.ToUInt16()))
+    let expectedCommand = Command.StatusResponse.ToUInt16()
+    // XGI 의 경우, 0xb1 대신 0x55 를 반환함.  문서 내용과 상충함
+    //assert(command = expectedCommand)
 
-    assert(pk.[22..23].ToUInt16() = 0us)  // don't care : Data type
-    assert(pk.[24..25].ToUInt16() = 0us)  // don't care : Reserved
+    let dataType = pk.[22..23].ToUInt16()
+    let reserved = pk.[24..25].ToUInt16()
+    assert(dataType = 0us)  // don't care : Data type
+    assert(reserved = 0us)  // don't care : Reserved
 
     let errorState = pk.[26..27].ToUInt16()
-    assert(errorState = 0us)
-    assert(pk.[28..29].ToUInt16() = 0us)  // don't care : Reserved
-
+    let dontcare = pk.[28..29].ToUInt16()     // don't care : Reserved
     let dataLength = pk.[30..31].ToUInt16()
-    assert(dataLength = 24us)
+
+    match cpu with
+    | CpuType.XgbMk ->
+        (* 문서 내용과 상충 함*)
+        assert(errorState = 0xFFFFus)
+        assert(dontcare = 0x78us)  // don't care : Reserved
+        assert(dataLength = 0us)
+    | _ ->
+        assert(errorState = 0us)
+        assert(dontcare = 0us)
+        assert(dataLength = 24us)
 
 
     printStatusDataImpl pk.[32..] p

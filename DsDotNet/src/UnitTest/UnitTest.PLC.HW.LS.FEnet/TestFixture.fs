@@ -29,6 +29,8 @@ module FEnetTestModule =
         [<SetUp>]
         member _.Setup() =
             conn.Connect() === true
+            conn.PrintStatus()
+
 
 
         [<TearDown>]

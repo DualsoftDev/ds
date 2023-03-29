@@ -150,18 +150,18 @@ type XgiBasic() =
 
     [<Test>]
     member x.``Readings All Memory bit type`` () =
-        x.Write("%ML512", ulFF)
+        x.Write("ML512", ulFF)                          //Read, Write 함수의 tag는 %생략 가능
         x.Write("%LL512", ulFF)
         x.Write("%NL512", ulFF)
         x.Write("%KL512", ulFF)
         x.Write("%RL512", ulFF)
         x.Write("%WL512", ulFF)
-        x.Write("%AL512", ulFF)           //WARNING
+        x.Write("%AL512", ulFF)                         //WARNING
         x.Write("%FL512", ulFF)
         x.Write("%IL512", ulFF)
         x.Write("%QL512", ulFF)
         x.Write("%UL4.0.0", ulFF)
-        x.ReadFEnet("%MX32768") === true
+        x.ReadFEnet("%MX32768") === true                //ReadFEnet은 %가 반드시 표시되어야함(x11에러)
         x.ReadFEnet("%LX32768") === true
         x.ReadFEnet("%NX32768") === true
         x.ReadFEnet("%KX32768") === true
@@ -173,8 +173,8 @@ type XgiBasic() =
         x.ReadFEnet("%QX32768") === true                    //32.0.0
         x.ReadFEnet("%UX32768") === true                    //4.0.0    //XG5000에서는 주소 접근 불가
 
-        x.Read("%UX4.0.0") === true                         //32768
-        x.Read("%IX32.0.0") === true                        //32768
+        x.Read("UX4.0.0") === true                         //32768
+        x.Read("IX32.0.0") === true                        //32768
         x.Read("%QX32.0.0") === true                        //32768
 
 
@@ -187,7 +187,7 @@ type XgiBasic() =
         x.Write("%KL512", ulFF)
         x.Write("%RL512", ulFF)
         x.Write("%WL512", ulFF)
-        x.Write("%AL512", ulFF)           //WARNING
+        x.Write("%AL512", ulFF)                           //WARNING
         x.Write("%FL512", ulFF)
         x.Write("%IL512", ulFF)
         x.Write("%QL512", ulFF)
@@ -217,7 +217,7 @@ type XgiBasic() =
         x.Write("KL512", ulFF)
         x.Write("RL512", ulFF)
         x.Write("WL512", ulFF)
-        x.Write("AL512", ulFF)           //WARNING
+        x.Write("AL512", ulFF)                          //WARNING
         x.Write("FL512", ulFF)
         x.Write("IL512", ulFF)
         x.Write("QL512", ulFF)

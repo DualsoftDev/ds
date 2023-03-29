@@ -344,21 +344,45 @@ type XgiBasic() =
 
     [<Test>]
     member x.``X Add monitoring test`` () =
+        let castValue (o : obj) : obj =
+            match o with
+            | :? bool as b -> b
+            | :? byte as by -> by
+            | :? uint16 as ui16 -> ui16
+            | :? uint32 as ui32 -> ui32
+            | :? uint64 as ui64 -> ui64
+            | _ -> failwith "Invalid type"
+
+
+        let testList : (string * obj) list = [
+                        ("IX1.0.1", true);
+                        ("MW33.1", true);
+                        ("LB104", 8uy);
+                        ("NW211", 16us);
+                        ("KD55", 32u);
+                        ("RL333", 64UL)
+        ]
         let subscription =
             x.Conn.Subject.ToIObservable()
             |> Observable.OfType<TagValueChangedEvent>
             |> fun x -> x.Subscribe(fun evt ->      //evt.Tag.Name evt.Tag.Value
+                            for (tag, value) in testList  do
+                                if tag.Equals evt.Tag.Name then
+                                    castValue value === evt.Tag.Value
                             ignore())
-        ()
+        
+
+
+        noop()
 
     [<Test>]
     member x.``X Max memory test`` () =
         
-        ()
+        noop()
     
     [<Test>]
     member x.``X forbidden write to A and F0to511 test`` () =
         
-        ()
+        noop()
 
 

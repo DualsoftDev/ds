@@ -308,5 +308,5 @@ type XgiBasic() =
 
 
     [<Test>]
-    member x.``Add monitoring test`` () =
+    member x.``X Add monitoring test`` () =
         ()

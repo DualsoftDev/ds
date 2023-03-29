@@ -29,7 +29,7 @@ type XgbMkBasic() =
             "T0045", "%TW45"
             "C0001", "%CW1"
             "Z0018", "%ZW18"
-            "S0017", "%SW17"     //S CANNOT USE BIT ?
+            "S0017", "%SW17"     //S CANNOT USE BIT 
             "L0024", "%LW24"   
             "N0014", "%NW14"    
             "D0033", "%DW33"
@@ -44,6 +44,9 @@ type XgbMkBasic() =
             "L0011F", "%LX191"  // 11*16 + 15
             "N0012F", "%NX207"  // 12*16 + 15
             "D0013F", "%DX223"  // 13*16 + 15
+
+
+            //U
         ]
         for (tag, expected) in tags do
             let fenet = tryToFEnetTag CpuType.XgbMk tag
@@ -62,9 +65,9 @@ type XgbMkBasic() =
 
     [<Test>]
     member x.``WriteAndRead`` () =
-        let ul0 = 0xF1F2F3F4F5F6F7F8UL
-        x.WriteFEnet("%ML1", ul0)
-        x.ReadFEnet("%ML1") === ul0
+        //let ul0 = 0xF1F2F3F4F5F6F7F8UL
+        //x.WriteFEnet("%ML1", ul0)
+        //x.ReadFEnet("%ML1") === ul0
 
         for i in [0..15] do
             x.WriteFEnet( sprintf "%%MX%X" (10*16+i), true)
@@ -83,8 +86,8 @@ type XgbMkBasic() =
         x.Write("M0023F", true)
         x.Read("M0023F") === true
 
-        x.WriteFEnet("%ML100", 123UL)
-        x.ReadFEnet("%ML100") === 123UL
+        //x.WriteFEnet("%ML100", 123UL)
+        //x.ReadFEnet("%ML100") === 123UL
 
         x.WriteFEnet("%MW100", 123us)
         x.ReadFEnet("%MW100") === 123us

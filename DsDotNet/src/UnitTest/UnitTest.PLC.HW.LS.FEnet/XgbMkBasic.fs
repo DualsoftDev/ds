@@ -45,6 +45,9 @@ type XgbMkBasic() =
             "N0012F", "%NX207"  // 12*16 + 15
             "D0013F", "%DX223"  // 13*16 + 15
 
+            //"D00003.F", "%DX63"   //  3*16 + 15
+
+
 
             //U
         ]
@@ -69,30 +72,45 @@ type XgbMkBasic() =
         //x.WriteFEnet("%ML1", ul0)
         //x.ReadFEnet("%ML1") === ul0
 
-        for i in [0..15] do
-            x.WriteFEnet( sprintf "%%MX%X" (10*16+i), true)
+        //for i in [0..15] do
+        //    x.WriteFEnet( sprintf "%%MX%X" (10*16+i), true)
 
-        let mutable w5 = 0x1234us
-        x.WriteFEnet("%MW5", w5)
-        x.ReadFEnet("%MW5") === w5
-        x.Read("M0005") === w5
-        w5 <- 0x4321us
-        x.Write("M0005", w5)
-        x.ReadFEnet("%MW5") === w5
-        x.Read("M0005") === w5
+        //let mutable w5 = 0x1234us
+        //x.WriteFEnet("%MW5", w5)
+        //x.ReadFEnet("%MW5") === w5
+        //x.Read("M0005") === w5
+        //w5 <- 0x4321us
+        //x.Write("M0005", w5)
+        //x.ReadFEnet("%MW5") === w5
+        //x.Read("M0005") === w5
 
 
 
-        x.Write("M0023F", true)
-        x.Read("M0023F") === true
+        //x.Write("M0023F", true)
+        //x.Read("M0023F") === true
 
-        //x.WriteFEnet("%ML100", 123UL)
-        //x.ReadFEnet("%ML100") === 123UL
+        ////x.WriteFEnet("%ML100", 123UL)
+        ////x.ReadFEnet("%ML100") === 123UL
 
-        x.WriteFEnet("%MW100", 123us)
-        x.ReadFEnet("%MW100") === 123us
-        x.Read("%M0100") === 123us
+        //x.WriteFEnet("%MW100", 123us)
+        //x.ReadFEnet("%MW100") === 123us
+        //x.Read("%M0100") === 123us
 
+        //x.WriteFEnet("%KW100", 123us)
+        //x.ReadFEnet("%KW100") === 123us
+        //x.Read("%K0100") === 123us
+
+        x.WriteFEnet("%FW200", 123us)       //FW는 200부터 쓰기 가능 
+        x.ReadFEnet("%FW200") === 123us
+        x.Read("%FW200") === 123us
+
+        x.WriteFEnet("%TW100", 123us)
+        x.ReadFEnet("%TW100") === 123us
+        x.Read("%T0100") === 123us
+
+        x.WriteFEnet("%CW100", 123us)
+        x.ReadFEnet("%CW100") === 123us
+        x.Read("%C0100") === 123us
 
         x.WriteFEnet("%SW3", 1us)
         x.ReadFEnet("%SW3") === 1us

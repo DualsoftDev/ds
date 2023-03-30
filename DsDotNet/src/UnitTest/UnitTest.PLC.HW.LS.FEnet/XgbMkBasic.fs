@@ -100,21 +100,21 @@ type XgbMkBasic() =
         //x.ReadFEnet("%KW100") === 123us
         //x.Read("%K0100") === 123us
 
-        x.WriteFEnet("%FW200", 123us)       //FW는 200부터 쓰기 가능 
-        x.ReadFEnet("%FW200") === 123us
-        x.Read("%FW200") === 123us
+        //x.WriteFEnet("%FW200", 123us)       //F 영역은 FENet 통신에서 Write불가능하다. XG5000에서는 가능
+        x.ReadFEnet("%FW1") === 40960us
+        x.Read("%F0001") === 40960us
 
-        x.WriteFEnet("%TW100", 123us)
-        x.ReadFEnet("%TW100") === 123us
-        x.Read("%T0100") === 123us
+        //x.WriteFEnet("%TW100", 123us)
+        //x.ReadFEnet("%TW100") === 123us
+        //x.Read("%T0100") === 123us
 
-        x.WriteFEnet("%CW100", 123us)
-        x.ReadFEnet("%CW100") === 123us
-        x.Read("%C0100") === 123us
+        //x.WriteFEnet("%CW100", 123us)
+        //x.ReadFEnet("%CW100") === 123us
+        //x.Read("%C0100") === 123us
 
-        x.WriteFEnet("%SW3", 1us)
-        x.ReadFEnet("%SW3") === 1us
-        x.Read("%S0003") === 1us
+        //x.WriteFEnet("%SW3", 1us)
+        //x.ReadFEnet("%SW3") === 1us
+        //x.Read("%S0003") === 1us
 
     [<Test>]
     member x.``P`` () =

@@ -5,6 +5,8 @@ open AddressConvert
 open Engine.Common.FS
 open Dsu.PLC.LS
 open Xunit
+open System.Reactive.Linq
+open Dsu.PLC.Common
 
 [<Collection("XgbMkBasic")>]
 type XgbMkBasic() =
@@ -22,7 +24,7 @@ type XgbMkBasic() =
     [<Test>]
     member x.``Address convert test`` () =
         let tags = [
-        //word
+        (* word *)
             "P0000", "%PW0"     
             "M0001", "%MW1"
             "K0101", "%KW101"
@@ -34,17 +36,19 @@ type XgbMkBasic() =
             "L0024", "%LW24"   
             "N0014", "%NW14"    
             "D0033", "%DW33"
-        //bit
-            "P00008", "%PX8"
-            "M00100", "%MX160"      // 10*16 + 0
-            "K0000A", "%KX10"
-            "F00001", "%FX1"
-            "T00008", "%TX8"
-            "C0000F", "%CX15"       // 0 + 15
-            "Z0010F", "%ZX175"      // 10*16 + 15
-            "L0011F", "%LX191"      // 11*16 + 15
-            "N0012F", "%NX207"      // 12*16 + 15
-            "D0013F", "%DX223"      // 13*16 + 15
+
+        (* bit : word 4자리 bit한자리로 변환 *)
+            "P00008", "%PX00008"   
+            "M01010", "%MX01010"     
+            "M00100", "%MX00100"    
+            "K0000A", "%KX0000A"
+            "F00001", "%FX00001"
+            "T00008", "%TX00008"
+            "C0000F", "%CX0000F"       
+            "Z0010F", "%ZX0010F"      
+            "L0011F", "%LX0011F"      
+            "N0012F", "%NX0012F"      
+            "D0013F", "%DX0013F"      
 
         //U word & bit
             "U00.01", "%UW1"
@@ -54,10 +58,10 @@ type XgbMkBasic() =
             "U2.17", "%UW81"        //  2*32 + 17
 
             (* 주소 개념은 있으나 XG5000에서 조회 불가 + 메모리 이상 접근 *)
-            //"U0.0.0", "%UX0"
-            //"U0.0.3", "%UX3"
-            //"U0.2.11", "%UX43"      //  2 * 16 + 11
-            //"U1.1.1", "%UX529"      //  1 * 32 * 16 + 1 * 16 + 1            
+            "U0.0.0", "%UX00"       //  {0*32+0}0
+            "U0.0.3", "%UX03"       //  {0*32+0}3
+            "U0.2.11","%UX2B"       //  {0*32+2}B
+            "U1.1.1", "%UX331"      //  {1 * 32 + 1 }1            
 
             (* 주소 개념은 있으나 XG5000에서 지원하지않음 *)
             //"D00003.F", "%DX63"   //  3*16 + 15 
@@ -84,42 +88,42 @@ type XgbMkBasic() =
     member x.``WriteAndRead`` () =
         (* Writing bit in M P K Z L D *)
         for i in [0..15] do
-            let mem = sprintf "%%MX%d" (10*16+i)    
+            let mem = sprintf "%%MX10%X" (i)    
             let memgb = sprintf "M0010%X" i         
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
 
         for i in [0..15] do
-            let mem = sprintf "%%PX%d" (10*16+i)    
+            let mem = sprintf "%%PX10%X" i   
             let memgb = sprintf "P0010%X" i         
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
 
         for i in [0..15] do
-            let mem = sprintf "%%KX%d" (10*16+i)    
+            let mem = sprintf "%%KX10%X" i     
             let memgb = sprintf "K0010%X" i         
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
 
         for i in [0..15] do
-            let mem = sprintf "%%ZX%d" (10*16+i)   
+            let mem = sprintf "%%ZX10%X" i  
             let memgb = sprintf "Z0010%X" i        
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
 
         for i in [0..15] do
-            let mem = sprintf "%%LX%d" (10*16+i)    
+            let mem = sprintf "%%LX10%X" i    
             let memgb = sprintf "L0010%X" i         
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
         
         for i in [0..15] do
-            let mem = sprintf "%%DX%d" (10*16+i)    
+            let mem = sprintf "%%DX10%X" i  
             let memgb = sprintf "D0010%X" i         
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
@@ -193,6 +197,13 @@ type XgbMkBasic() =
         x.Read("U01.01") === 65535us
 
 
+        for i in [0..15] do     //  U0.10.0 ~ U0.10.15
+            let mem = sprintf "%%UX10%X" i    
+            let memgb = sprintf "U0.10.%d" i         
+            x.WriteFEnet(mem, true)
+            x.ReadFEnet(mem) === true
+            x.Read(memgb) === true
+
     [<Test>]
     member x.``P`` () =
         (* P 영역은 write 가능한 영역과 불가능한 영역이 존재 하는 듯.. *)
@@ -230,8 +241,45 @@ type XgbMkBasic() =
 
     [<Test>]
     member x.``X Add monitoring test`` () =
-        
-        ()
+        let castValue (o : obj) : obj =
+            match o with
+            | :? bool as b -> b
+            | :? uint16 as ui16 -> ui16
+            | _ -> failwith "Invalid type"
+            
+        let testList : (string * obj) list = [
+                        ("M00231", true);
+                        ("L0102A", true);
+                        ("P0102A", true);
+                        ("K0100A", true);
+                        ("Z0010F", true);
+                        ("L0100A", true);
+                        ("D0100A", true);
+                        ("P0512", 32us);
+                        ("M0512", 32us);
+                        ("Z0012", 32us);
+                        ("K0512", 32us);
+                        ("T0512", 32us);
+                        ("C0512", 32us);
+                        ("S0012", 32us);
+                        ("L0512", 32us);
+                        ("D0512", 32us);
+        ]            
+        let subscription =
+            x.Conn.Subject.ToIObservable()
+            |> Observable.OfType<TagValueChangedEvent>
+            |> fun x -> x.Subscribe(fun evt ->      //evt.Tag.Name evt.Tag.Value
+                            for (tag, value) in testList  do
+                                if tag.Equals evt.Tag.Name then
+                                    castValue value === evt.Tag.Value
+                            logDebug "%s value Changed %A -> %A" evt.Tag.Name evt.Tag.OldValue evt.Tag.Value
+                            ignore())
+
+        for (tag, value) in testList do
+            let input = castValue value
+            x.Write(tag, input)
+            x.Conn.AddMonitoringTag(LsTagXgi(x.Conn, tag)) |> ignore
+        noop()
 
     [<Test>]
     member x.``X Max memory test`` () =

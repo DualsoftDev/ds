@@ -30,27 +30,40 @@ type XgbMkBasic() =
             "T0045", "%TW45"
             "C0001", "%CW1"
             "Z0018", "%ZW18"
-            "S0017", "%SW17"     //S CANNOT USE BIT 
+            "S0017", "%SW17"        //S CANNOT USE BIT 
             "L0024", "%LW24"   
             "N0014", "%NW14"    
             "D0033", "%DW33"
         //bit
             "P00008", "%PX8"
-            "M00100", "%MX160"   // 10*16 + 0
+            "M00100", "%MX160"      // 10*16 + 0
             "K0000A", "%KX10"
             "F00001", "%FX1"
             "T00008", "%TX8"
-            "C0000F", "%CX15"   // 0 + 15
-            "Z0010F", "%ZX175"  // 10*16 + 15
-            "L0011F", "%LX191"  // 11*16 + 15
-            "N0012F", "%NX207"  // 12*16 + 15
-            "D0013F", "%DX223"  // 13*16 + 15
+            "C0000F", "%CX15"       // 0 + 15
+            "Z0010F", "%ZX175"      // 10*16 + 15
+            "L0011F", "%LX191"      // 11*16 + 15
+            "N0012F", "%NX207"      // 12*16 + 15
+            "D0013F", "%DX223"      // 13*16 + 15
 
+        //U word & bit
+            "U00.01", "%UW1"
+            "U0.1", "%UW1"
+            "U00000.00001", "%UW1"
+            "U3.7", "%UW103"        //  3*32 + 7
+            "U2.17", "%UW81"        //  2*32 + 17
+
+            "U0.0.0", "%UX0"
+            "U0.0.3", "%UX3"
+            "U0.2.11", "%UX43"      //  2 * 16 + 11
+            "U1.1.1", "%UX529"      //  1 * 32 * 16 + 1 * 16 + 1            
+
+            (* 주소 개념은 있으나 XG5000에서 지원하지않음 *)
             //"D00003.F", "%DX63"   //  3*16 + 15
 
 
 
-            //U
+            
         ]
         for (tag, expected) in tags do
             let fenet = tryToFEnetTag CpuType.XgbMk tag
@@ -112,7 +125,7 @@ type XgbMkBasic() =
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
 
-        (* Writing word in M P K T C Z S L D *)
+        (* Writing word in M P K T C Z S L D U *)
         let mutable w5 = 0x1234us
         x.WriteFEnet("%MW5", w5)
         x.ReadFEnet("%MW5") === w5
@@ -124,57 +137,63 @@ type XgbMkBasic() =
 
         x.WriteFEnet("%MW100", 123us)
         x.ReadFEnet("%MW100") === 123us
-        x.Read("%M0100") === 123us
+        x.Read("M0100") === 123us
 
         x.WriteFEnet("%PW100", 123us)
         x.ReadFEnet("%PW100") === 123us
-        x.Read("%P0100") === 123us
+        x.Read("P0100") === 123us
 
         x.WriteFEnet("%KW100", 123us)
         x.ReadFEnet("%KW100") === 123us
-        x.Read("%K0100") === 123us
+        x.Read("K0100") === 123us
 
         x.WriteFEnet("%TW100", 123us)
         x.ReadFEnet("%TW100") === 123us
-        x.Read("%T0100") === 123us
+        x.Read("T0100") === 123us
 
         x.WriteFEnet("%CW100", 123us)
         x.ReadFEnet("%CW100") === 123us
-        x.Read("%C0100") === 123us
+        x.Read("C0100") === 123us
 
         x.WriteFEnet("%SW3", 1us)
         x.ReadFEnet("%SW3") === 1us
-        x.Read("%S0003") === 1us
+        x.Read("S0003") === 1us
 
 
         x.WriteFEnet("%ZW100", 123us)
         x.ReadFEnet("%ZW100") === 123us
-        x.Read("%Z0100") === 123us
+        x.Read("Z0100") === 123us
 
         x.WriteFEnet("%LW100", 123us)
         x.ReadFEnet("%LW100") === 123us
-        x.Read("%L0100") === 123us
+        x.Read("L0100") === 123us
 
         x.WriteFEnet("%DW100", 123us)
         x.ReadFEnet("%DW100") === 123us
-        x.Read("%D0100") === 123us
+        x.Read("D0100") === 123us
+
 
 
         (* F 영역은 FENet 통신에서 쓰기가 불가능하다. XG5000에서는 주소 200 이상에서 가능 *)
         (fun () -> x.WriteFEnet("%FW200", 123us) |> ignore) 
         |> ShouldFailWithSubstringT "LS Protocol Error with unknown code = 10x"
         x.ReadFEnet("%FW1") === 40960us
-        x.Read("%F0001") === 40960us
+        x.Read("F0001") === 40960us
 
         (* N 영역은 FENet 통신과 XG5000 모두 쓰기가 불가능하다 *)
         (fun () -> x.WriteFEnet("%NW200", 123us) |> ignore) 
         |> ShouldFailWithSubstringT "LS Protocol Error with unknown code = 10x"
         x.ReadFEnet("%NW1") === 0us
-        x.Read("%N0001") === 0us
+        x.Read("N0001") === 0us
 
         //U
+        x.WriteFEnet("%UW33", 123us)
+        x.ReadFEnet("%UW33") === 123us
+        x.Read("U01.01") === 123us
 
-
+        x.WriteFEnet("%UX1", true)
+        x.ReadFEnet("%UX1") === true
+        x.Read("U0.0.1") === true
 
     [<Test>]
     member x.``P`` () =
@@ -213,10 +232,10 @@ type XgbMkBasic() =
 
     [<Test>]
     member x.``X Add monitoring test`` () =
-
+        
         ()
 
     [<Test>]
     member x.``X Max memory test`` () =
-
+        
         ()

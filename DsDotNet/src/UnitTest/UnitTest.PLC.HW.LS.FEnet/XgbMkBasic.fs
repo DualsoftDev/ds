@@ -67,7 +67,7 @@ type XgbMkBasic() =
 
 
     [<Test>]
-    member x.``WriteAndRead`` () =
+    member x.``X WriteAndRead`` () =
         //let ul0 = 0xF1F2F3F4F5F6F7F8UL
         //x.WriteFEnet("%ML1", ul0)
         //x.ReadFEnet("%ML1") === ul0

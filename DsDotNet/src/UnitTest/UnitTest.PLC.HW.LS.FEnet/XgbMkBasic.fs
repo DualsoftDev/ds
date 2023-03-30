@@ -68,26 +68,51 @@ type XgbMkBasic() =
 
 
     [<Test>]
-    member x.``X WriteAndRead`` () =
-        //let ul0 = 0xF1F2F3F4F5F6F7F8UL
-        //x.WriteFEnet("%ML1", ul0)
-        //x.ReadFEnet("%ML1") === ul0
-
-        
+    member x.``WriteAndRead`` () =
+        (* Writing bit in M P K Z L D *)
         for i in [0..15] do
-            let mem = sprintf "%%MX%d" (10*16+i)    //MX160+i
-            let memgb = sprintf "M0010%X" i         //M0010(i)
+            let mem = sprintf "%%MX%d" (10*16+i)    
+            let memgb = sprintf "M0010%X" i         
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
 
         for i in [0..15] do
-            let mem = sprintf "%%PX%d" (10*16+i)    //MX160+i
-            let memgb = sprintf "P0010%X" i         //M0010(i)
+            let mem = sprintf "%%PX%d" (10*16+i)    
+            let memgb = sprintf "P0010%X" i         
+            x.WriteFEnet(mem, true)
+            x.ReadFEnet(mem) === true
+            x.Read(memgb) === true
+
+        for i in [0..15] do
+            let mem = sprintf "%%KX%d" (10*16+i)    
+            let memgb = sprintf "K0010%X" i         
+            x.WriteFEnet(mem, true)
+            x.ReadFEnet(mem) === true
+            x.Read(memgb) === true
+
+        for i in [0..15] do
+            let mem = sprintf "%%ZX%d" (10*16+i)   
+            let memgb = sprintf "Z0010%X" i        
+            x.WriteFEnet(mem, true)
+            x.ReadFEnet(mem) === true
+            x.Read(memgb) === true
+
+        for i in [0..15] do
+            let mem = sprintf "%%LX%d" (10*16+i)    
+            let memgb = sprintf "L0010%X" i         
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
         
+        for i in [0..15] do
+            let mem = sprintf "%%DX%d" (10*16+i)    
+            let memgb = sprintf "D0010%X" i         
+            x.WriteFEnet(mem, true)
+            x.ReadFEnet(mem) === true
+            x.Read(memgb) === true
+
+        (* Writing word in M P K T C Z S L D *)
         let mutable w5 = 0x1234us
         x.WriteFEnet("%MW5", w5)
         x.ReadFEnet("%MW5") === w5
@@ -97,28 +122,17 @@ type XgbMkBasic() =
         x.ReadFEnet("%MW5") === w5
         x.Read("M0005") === w5
 
-
-
-        x.Write("M0023F", true)
-        x.Read("M0023F") === true
-
-        //x.WriteFEnet("%ML100", 123UL)
-        //x.ReadFEnet("%ML100") === 123UL
-
         x.WriteFEnet("%MW100", 123us)
         x.ReadFEnet("%MW100") === 123us
         x.Read("%M0100") === 123us
 
+        x.WriteFEnet("%PW100", 123us)
+        x.ReadFEnet("%PW100") === 123us
+        x.Read("%P0100") === 123us
+
         x.WriteFEnet("%KW100", 123us)
         x.ReadFEnet("%KW100") === 123us
         x.Read("%K0100") === 123us
-
-        (*F 영역은 FENet 통신에서 쓰기가 불가능하다. XG5000에서는 주소 200 이상에서 가능*)
-        (fun () -> x.WriteFEnet("%FW200", 123us) |> ignore) 
-        |> ShouldFailWithSubstringT "LS Protocol Error with unknown code = 10x"
-
-        x.ReadFEnet("%FW1") === 40960us
-        x.Read("%F0001") === 40960us
 
         x.WriteFEnet("%TW100", 123us)
         x.ReadFEnet("%TW100") === 123us
@@ -131,6 +145,36 @@ type XgbMkBasic() =
         x.WriteFEnet("%SW3", 1us)
         x.ReadFEnet("%SW3") === 1us
         x.Read("%S0003") === 1us
+
+
+        x.WriteFEnet("%ZW100", 123us)
+        x.ReadFEnet("%ZW100") === 123us
+        x.Read("%Z0100") === 123us
+
+        x.WriteFEnet("%LW100", 123us)
+        x.ReadFEnet("%LW100") === 123us
+        x.Read("%L0100") === 123us
+
+        x.WriteFEnet("%DW100", 123us)
+        x.ReadFEnet("%DW100") === 123us
+        x.Read("%D0100") === 123us
+
+
+        (* F 영역은 FENet 통신에서 쓰기가 불가능하다. XG5000에서는 주소 200 이상에서 가능 *)
+        (fun () -> x.WriteFEnet("%FW200", 123us) |> ignore) 
+        |> ShouldFailWithSubstringT "LS Protocol Error with unknown code = 10x"
+        x.ReadFEnet("%FW1") === 40960us
+        x.Read("%F0001") === 40960us
+
+        (* N 영역은 FENet 통신과 XG5000 모두 쓰기가 불가능하다 *)
+        (fun () -> x.WriteFEnet("%NW200", 123us) |> ignore) 
+        |> ShouldFailWithSubstringT "LS Protocol Error with unknown code = 10x"
+        x.ReadFEnet("%NW1") === 0us
+        x.Read("%N0001") === 0us
+
+        //U
+
+
 
     [<Test>]
     member x.``P`` () =
@@ -165,9 +209,14 @@ type XgbMkBasic() =
         x.WriteFEnet("%MW32", w)
         x.Read("M0032") === w
         x.ReadFEnet("%MW32") === w
-    
-    (*보류*)
-    //[<Test>]
-    //member x.``Write D and L word test`` () =
-    //    x.WriteFEnet("%ML3", ulFF)
-    //    x.ReadFEnet("%ML3") === ulFF 
+
+
+    [<Test>]
+    member x.``X Add monitoring test`` () =
+
+        ()
+
+    [<Test>]
+    member x.``X Max memory test`` () =
+
+        ()

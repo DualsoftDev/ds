@@ -108,7 +108,8 @@ let createTagInfo = LsFEnetTagInfo.Create >> Some
 let (|LsTagPatternFEnet|_|) tag =
     match tag with
     // XGI IEC 61131 : bit
-    | RegexPattern @"^%([PMLKFNRAWIQU])X([\da-fA-F]+)$" [ DevicePattern device; HexPattern bitOffset ] ->
+    // XGK "Z" "D"
+    | RegexPattern @"^%([PMLKFNRAWIQUZD])X([\da-fA-F]+)$" [ DevicePattern device; HexPattern bitOffset ] ->
         createTagInfo(tag, device, DataType.Bit, bitOffset)
 
     | RegexPattern @"^%([IQU])X(\d+)\.(\d+)\.(\d+)$"
@@ -145,8 +146,8 @@ let (|LsTagPatternFEnet|_|) tag =
 
 
     //  XGI IEC 61131 : byte / word / dword / lword  
-    //  XGK "S" step memory
-    | RegexPattern @"^%([PMLKFNRAWIQUS])([BWDL])(\d+)$"
+    //  XGK "S" "T" "C" "Z" "D"
+    | RegexPattern @"^%([PMLKFNRAWIQUSTCZD])([BWDL])(\d+)$"
         [DevicePattern device; DataTypePattern dataType; Int32Pattern offset;] ->
         let byteOffset = offset * dataType.GetByteLength()
         let totalBitOffset = byteOffset * 8

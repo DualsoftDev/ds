@@ -53,16 +53,16 @@ type XgbMkBasic() =
             "U3.7", "%UW103"        //  3*32 + 7
             "U2.17", "%UW81"        //  2*32 + 17
 
-            "U0.0.0", "%UX0"
-            "U0.0.3", "%UX3"
-            "U0.2.11", "%UX43"      //  2 * 16 + 11
-            "U1.1.1", "%UX529"      //  1 * 32 * 16 + 1 * 16 + 1            
+            (* 주소 개념은 있으나 XG5000에서 조회 불가 + 메모리 이상 접근 *)
+            //"U0.0.0", "%UX0"
+            //"U0.0.3", "%UX3"
+            //"U0.2.11", "%UX43"      //  2 * 16 + 11
+            //"U1.1.1", "%UX529"      //  1 * 32 * 16 + 1 * 16 + 1            
 
             (* 주소 개념은 있으나 XG5000에서 지원하지않음 *)
-            //"D00003.F", "%DX63"   //  3*16 + 15
-
-
-
+            //"D00003.F", "%DX63"   //  3*16 + 15 
+            
+            (* S는XG5000에서 접근이 가능하지만 검색할 수 없다 *)
             
         ]
         for (tag, expected) in tags do
@@ -186,14 +186,12 @@ type XgbMkBasic() =
         x.ReadFEnet("%NW1") === 0us
         x.Read("N0001") === 0us
 
-        //U
-        x.WriteFEnet("%UW33", 123us)
-        x.ReadFEnet("%UW33") === 123us
-        x.Read("U01.01") === 123us
+        //U word only - bit는 값이 제대로 입력되지 않는다. 
+        //예상[FFFF][0000] -> 실제[03FF][003F]
+        x.WriteFEnet("%UW33", 65535us)
+        x.ReadFEnet("%UW33") === 65535us
+        x.Read("U01.01") === 65535us
 
-        x.WriteFEnet("%UX1", true)
-        x.ReadFEnet("%UX1") === true
-        x.Read("U0.0.1") === true
 
     [<Test>]
     member x.``P`` () =

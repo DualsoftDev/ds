@@ -67,8 +67,8 @@ let (|ToFEnetTag|_|) (fromCpu:CpuType) tag =
             Some $"%%{device}W{wordOffset}"
         | RegexPattern @"^U(\d+)\.(\d+)$" [Int32Pattern element; Int32Pattern bit] ->
             Some $"%%UW{element * 32 + bit}"
-        | RegexPattern @"^U(\d+)\.(\d+).(\d+)$" [Int32Pattern file; Int32Pattern element; Int32Pattern bit] ->
-            Some $"%%UX{file * 32 * 16 + element * 16 + bit}"
+        //| RegexPattern @"^U(\d+)\.(\d+).(\d+)$" [Int32Pattern file; Int32Pattern element; Int32Pattern bit] ->
+        //    Some $"%%UX{file * 32 * 16 + element * 16 + bit}"
         | _ ->
             None
     | CpuType.Xgi ->

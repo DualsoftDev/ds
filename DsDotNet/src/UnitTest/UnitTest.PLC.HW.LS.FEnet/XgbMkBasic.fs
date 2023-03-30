@@ -190,14 +190,13 @@ type XgbMkBasic() =
         x.ReadFEnet("%NW1") === 0us
         x.Read("N0001") === 0us
 
-        //U word only - bit는 값이 제대로 입력되지 않는다. 
-        //예상[FFFF][0000] -> 실제[03FF][003F]
+        //U
         x.WriteFEnet("%UW33", 65535us)
         x.ReadFEnet("%UW33") === 65535us
         x.Read("U01.01") === 65535us
 
-
-        for i in [0..15] do     //  U0.10.0 ~ U0.10.15
+        (* U0.10.0 ~ U0.10.15 -> %UX100 ~ %UX10F *)
+        for i in [0..15] do     
             let mem = sprintf "%%UX10%X" i    
             let memgb = sprintf "U0.10.%d" i         
             x.WriteFEnet(mem, true)

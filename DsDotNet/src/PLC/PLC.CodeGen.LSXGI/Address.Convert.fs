@@ -1,9 +1,8 @@
-module AddressConvert
+module AddressConvertUnused
 
-open Engine.Common.FS
-open PLC.CodeGen.Common
-//open FSharpPlus
-open System.Collections.Generic
+//open Engine.Common.FS
+//open PLC.CodeGen.Common
+//open System.Collections.Generic
 
 // 산전 PLC 주소 체계 : https://tech-e.tistory.com/10
 

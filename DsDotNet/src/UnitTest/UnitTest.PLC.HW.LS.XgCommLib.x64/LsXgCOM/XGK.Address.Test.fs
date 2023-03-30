@@ -22,27 +22,28 @@ type XgkAddressTest() =
 
             let strTyp = typ.ToString()
             let bits = [
-                $"%%{strTyp}00000", LsFEnetTagInfo.Create($"%%{strTyp}00000", typ, DataType.Bit, 0)
-                $"%%{strTyp}00001", LsFEnetTagInfo.Create($"%%{strTyp}00001", typ, DataType.Bit, 1)
-                $"%%{strTyp}00002", LsFEnetTagInfo.Create($"%%{strTyp}00002", typ, DataType.Bit, 2)
-                $"%%{strTyp}00010", LsFEnetTagInfo.Create($"%%{strTyp}00010", typ, DataType.Bit, 16*1 + 0)
-                $"%%{strTyp}00011", LsFEnetTagInfo.Create($"%%{strTyp}00011", typ, DataType.Bit, 16*1 + 1)
-                $"%%{strTyp}00012", LsFEnetTagInfo.Create($"%%{strTyp}00012", typ, DataType.Bit, 16*1 + 2)
-                $"%%{strTyp}00112", LsFEnetTagInfo.Create($"%%{strTyp}00112", typ, DataType.Bit, 16*11 + 2)
-                $"%%{strTyp}10112", LsFEnetTagInfo.Create($"%%{strTyp}10112", typ, DataType.Bit, 16*1011 + 2)
-                $"%%{strTyp}1011F", LsFEnetTagInfo.Create($"%%{strTyp}1011F", typ, DataType.Bit, 16*1011 + 15)
+                $"{strTyp}00000", LsFEnetTagInfo.Create($"%%{strTyp}X00000", typ, DataType.Bit, 0)
+                $"{strTyp}00001", LsFEnetTagInfo.Create($"%%{strTyp}X00001", typ, DataType.Bit, 1)
+                $"{strTyp}00002", LsFEnetTagInfo.Create($"%%{strTyp}X00002", typ, DataType.Bit, 2)
+                $"{strTyp}00010", LsFEnetTagInfo.Create($"%%{strTyp}X00010", typ, DataType.Bit, 16*1 + 0)
+                $"{strTyp}00011", LsFEnetTagInfo.Create($"%%{strTyp}X00011", typ, DataType.Bit, 16*1 + 1)
+                $"{strTyp}00012", LsFEnetTagInfo.Create($"%%{strTyp}X00012", typ, DataType.Bit, 16*1 + 2)
+                $"{strTyp}00112", LsFEnetTagInfo.Create($"%%{strTyp}X00112", typ, DataType.Bit, 16*11 + 2)
+                $"{strTyp}10112", LsFEnetTagInfo.Create($"%%{strTyp}X10112", typ, DataType.Bit, 16*1011 + 2)
+                $"{strTyp}1011F", LsFEnetTagInfo.Create($"%%{strTyp}X1011F", typ, DataType.Bit, 16*1011 + 15)
             ]
             let words = [
-                $"%%{strTyp}0000" , LsFEnetTagInfo.Create($"%%{strTyp}0000",  typ, DataType.Word, 0)
-                $"%%{strTyp}0001" , LsFEnetTagInfo.Create($"%%{strTyp}0001",  typ, DataType.Word, 16*1)
-                $"%%{strTyp}0002" , LsFEnetTagInfo.Create($"%%{strTyp}0002",  typ, DataType.Word, 16*2)
-                $"%%{strTyp}0003" , LsFEnetTagInfo.Create($"%%{strTyp}0003",  typ, DataType.Word, 16*3)
+                $"{strTyp}0000" , LsFEnetTagInfo.Create($"%%{strTyp}0000",  typ, DataType.Word, 0)
+                $"{strTyp}0001" , LsFEnetTagInfo.Create($"%%{strTyp}0001",  typ, DataType.Word, 16*1)
+                $"{strTyp}0002" , LsFEnetTagInfo.Create($"%%{strTyp}0002",  typ, DataType.Word, 16*2)
+                $"{strTyp}0003" , LsFEnetTagInfo.Create($"%%{strTyp}0003",  typ, DataType.Word, 16*3)
             ]
 
             let testSet = (if testBit then bits else []) @ words
 
             for (tag, answer) in testSet do
-                let info = tryParseTag tag
+                let fEnetTag = tryToFEnetTag CpuType.XgbMk tag
+                let info = tryParseTag fEnetTag.Value
                 if info.IsNone || info.Value <> answer then
                     noop()
 

@@ -135,6 +135,11 @@ type XgiBasic() =
         cpu.CpuType === CpuType.Xgi
 
     [<Test>]
+    member x.``Read singleton`` () =
+        let xxx = x.Read("%ML0")
+        noop()
+
+    [<Test>]
     member x.``Readings`` () =
         x.Write("%ML0", ulFF)
 

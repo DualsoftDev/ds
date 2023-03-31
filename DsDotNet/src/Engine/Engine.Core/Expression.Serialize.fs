@@ -23,6 +23,7 @@ module rec ExpressionSerializeModule =
                 (["^" ; "^^^";], i)               ; incr()   // bitwise xor
                 (["|" ; "|||";], i)               ; incr()   // bitwise or
                 (["&&";], i)                      ; incr()   // logical AND
+                (["^^";], i)                      ; incr()   // logical XOR -> "!=" 로 구현
                 (["||";], i)                      ; incr()   // logical OR
             ]
 

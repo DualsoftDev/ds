@@ -71,7 +71,7 @@ let (|ToFEnetTag|_|) (fromCpu:CpuType) tag =
             Some $"%%{device}W{wordOffset.ToString().PadLeft(4, '0')}"
         | RegexPattern @"^U(\d+)\.(\d+)\.(\d+)$" [Int32Pattern file; Int32Pattern element; Int32Pattern bit] ->
             Some $"%%UX{file * 32 + element}{bit:X}"
-        | RegexPattern @"^U(\d+)\.(\d+)$" [Int32Pattern element; Int32Pattern bit] ->
+        | RegexPattern @"^U(\d+)\.(\d+)$" [Int32Pattern element; Int32Pattern bit] when bit < 32 ->
             Some $"%%UW{element * 32 + bit}"
         | _ ->
             None
@@ -153,7 +153,7 @@ let (|LsTagPatternFEnet|_|) tag =
         createTagInfo(tag, device, DataType.Bit, totalBitOffset)
 
 
-    //  XGI IEC 61131 : byte / word / dword / lword  
+    //  XGI IEC 61131 : byte / word / dword / lword
     //  XGK "S" "T" "C" "Z" "D"
     | RegexPattern @"^%([PMLKFNRAWIQUSTCZD])([BWDL])(\d+)$"
         [DevicePattern device; DataTypePattern dataType; Int32Pattern offset;] ->

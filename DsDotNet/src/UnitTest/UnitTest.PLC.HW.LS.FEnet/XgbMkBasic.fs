@@ -40,9 +40,9 @@ type XgbMkBasic() =
             "N10033", "%NW10033"    //5자리
 
         (* bit : word 4자리 bit한자리로 변환 *)
-            "P00008", "%PX00008"   
-            "M01010", "%MX01010"     
-            "M00100", "%MX00100"    
+            "P00008", "%PX00008"
+            "M01010", "%MX01010"
+            "M00100", "%MX00100"
             "K0000A", "%KX0000A"
             "F00001", "%FX00001"
             "T00008", "%TX00008"
@@ -64,13 +64,13 @@ type XgbMkBasic() =
             "U0.0.0", "%UX00"       //  {0*32+0}0
             "U0.0.3", "%UX03"       //  {0*32+0}3
             "U0.2.11","%UX2B"       //  {0*32+2}B
-            "U1.1.1", "%UX331"      //  {1 * 32 + 1 }1            
+            "U1.1.1", "%UX331"      //  {1 * 32 + 1 }1
 
             (* 주소 개념은 있으나 XG5000에서 지원하지않음 *)
-            //"D00003.F", "%DX63"   //  3*16 + 15 
-            
+            //"D00003.F", "%DX63"   //  3*16 + 15
+
             (* S는XG5000에서 접근이 가능하지만 검색할 수 없다 *)
-            
+
         ]
         for (tag, expected) in tags do
             let fenet = tryToFEnetTag CpuType.XgbMk tag
@@ -91,43 +91,43 @@ type XgbMkBasic() =
     member x.``WriteAndRead`` () =
         (* Writing bit in M P K Z L D *)
         for i in [0..15] do
-            let mem = sprintf "%%MX10%X" (i)    
-            let memgb = sprintf "M0010%X" i         
+            let mem = sprintf "%%MX10%X" (i)
+            let memgb = sprintf "M0010%X" i
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
 
         for i in [0..15] do
-            let mem = sprintf "%%PX10%X" i   
-            let memgb = sprintf "P0010%X" i         
+            let mem = sprintf "%%PX10%X" i
+            let memgb = sprintf "P0010%X" i
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
 
         for i in [0..15] do
-            let mem = sprintf "%%KX10%X" i     
-            let memgb = sprintf "K0010%X" i         
+            let mem = sprintf "%%KX10%X" i
+            let memgb = sprintf "K0010%X" i
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
 
         for i in [0..15] do
-            let mem = sprintf "%%ZX10%X" i  
-            let memgb = sprintf "Z0010%X" i        
+            let mem = sprintf "%%ZX10%X" i
+            let memgb = sprintf "Z0010%X" i
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
 
         for i in [0..15] do
-            let mem = sprintf "%%LX10%X" i    
-            let memgb = sprintf "L0010%X" i         
+            let mem = sprintf "%%LX10%X" i
+            let memgb = sprintf "L0010%X" i
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
-        
+
         for i in [0..15] do
-            let mem = sprintf "%%DX10%X" i  
-            let memgb = sprintf "D0010%X" i         
+            let mem = sprintf "%%DX10%X" i
+            let memgb = sprintf "D0010%X" i
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
@@ -182,13 +182,13 @@ type XgbMkBasic() =
 
 
         (* F 영역은 FENet 통신에서 쓰기가 불가능하다. XG5000에서는 주소 200 이상에서 가능 *)
-        (fun () -> x.WriteFEnet("%FW200", 123us) |> ignore) 
+        (fun () -> x.WriteFEnet("%FW200", 123us) |> ignore)
         |> ShouldFailWithSubstringT "LS Protocol Error with unknown code = 10x"
         x.ReadFEnet("%FW1") === 40960us
         x.Read("F0001") === 40960us
 
         (* N 영역은 FENet 통신과 XG5000 모두 쓰기가 불가능하다 *)
-        (fun () -> x.WriteFEnet("%NW200", 123us) |> ignore) 
+        (fun () -> x.WriteFEnet("%NW200", 123us) |> ignore)
         |> ShouldFailWithSubstringT "LS Protocol Error with unknown code = 10x"
         x.ReadFEnet("%NW1") === 0us
         x.Read("N0001") === 0us
@@ -199,16 +199,24 @@ type XgbMkBasic() =
         x.Read("U01.01") === 65535us
 
         (* U0.10.0 ~ U0.10.15 -> %UX100 ~ %UX10F *)
-        for i in [0..15] do     
-            let mem = sprintf "%%UX10%X" i    
-            let memgb = sprintf "U0.10.%d" i         
+        for i in [0..15] do
+            let mem = sprintf "%%UX10%X" i
+            let memgb = sprintf "U0.10.%d" i
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
 
     [<Test>]
     member x.``P`` () =
-        (* P 영역은 write 가능한 영역과 불가능한 영역이 존재 하는 듯.. *)
+        (* P 영역은 I/Q 를 통합한 영역으로, I 영역에는 write 불가.  Q 영역은 write 가능 *)
+        let bitAddress = "P0002A"
+        x.Write(bitAddress, false)
+        x.Read(bitAddress) === false
+        x.Write(bitAddress, true)
+        x.Read(bitAddress) === true
+
+
+
         x.WriteFEnet("%PB128", 0x63uy)
         x.ReadFEnet("%PB128") === 0x63uy
 
@@ -248,7 +256,7 @@ type XgbMkBasic() =
             | :? bool as b -> b
             | :? uint16 as ui16 -> ui16
             | _ -> failwith "Invalid type"
-            
+
         let testList : (string * obj) list = [
                         ("M00231", true);
                         ("L0102A", true);
@@ -266,7 +274,7 @@ type XgbMkBasic() =
                         ("S0012", 32us);
                         ("L0512", 32us);
                         ("D0512", 32us);
-        ]            
+        ]
         let subscription =
             x.Conn.Subject.ToIObservable()
             |> Observable.OfType<TagValueChangedEvent>

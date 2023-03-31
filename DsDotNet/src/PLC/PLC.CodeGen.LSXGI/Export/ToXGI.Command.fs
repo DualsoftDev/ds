@@ -178,7 +178,10 @@ module internal rec Command =
                 match name with
                 | ("GT" | "GE" | "EQ" | "LE" | "LT" | "NE") ->
                     let opCompType = args[0].DataType.SizeString
-                    $"{name}2_{opCompType}" // e.g "GT2_INT"
+                    if name = "NE" then
+                        $"{name}_{opCompType}" // NE_BOOL
+                    else
+                        $"{name}2_{opCompType}" // e.g "GT2_INT"
                 | _ ->
                     failwithlog "NOT YET"
             createBoxXmls (x, y)  func namedInputParameters outputParameters ""

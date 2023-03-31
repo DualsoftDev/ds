@@ -7,7 +7,7 @@ open Engine.Core
 [<AutoOpen>]
 module FlatExpressionModule =
     type Op =
-        | And | Or | Neg | OpUnit
+        | And | Or | Neg | OpUnit           // Logical XOR 는 function 인 '<>' 로 구현됨
         | OpCompare of operator:string
         | OpArithmatic of operator:string
     with

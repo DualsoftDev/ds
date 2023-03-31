@@ -16,44 +16,60 @@ type XgkAddressTest() =
 
     [<Test>]
     member x.``XGK Address parsing test`` () =
-        let testDevice(typ:DeviceType, testBit:bool) =
+        let testDevice (testBitDevice:bool) (typ:DeviceType) =
             //let h = Regex(@"^%([PMLKFTCS])(\d{1,4})([\da-fA-F])$").Match("%P0A")
 
 
             let strTyp = typ.ToString()
-            let bits = [
-                $"{strTyp}00000", LsFEnetTagInfo.Create($"%%{strTyp}X00000", typ, DataType.Bit, 0)
-                $"{strTyp}00001", LsFEnetTagInfo.Create($"%%{strTyp}X00001", typ, DataType.Bit, 1)
-                $"{strTyp}00002", LsFEnetTagInfo.Create($"%%{strTyp}X00002", typ, DataType.Bit, 2)
-                $"{strTyp}00010", LsFEnetTagInfo.Create($"%%{strTyp}X00010", typ, DataType.Bit, 16*1 + 0)
-                $"{strTyp}00011", LsFEnetTagInfo.Create($"%%{strTyp}X00011", typ, DataType.Bit, 16*1 + 1)
-                $"{strTyp}00012", LsFEnetTagInfo.Create($"%%{strTyp}X00012", typ, DataType.Bit, 16*1 + 2)
-                $"{strTyp}00112", LsFEnetTagInfo.Create($"%%{strTyp}X00112", typ, DataType.Bit, 16*11 + 2)
-                $"{strTyp}10112", LsFEnetTagInfo.Create($"%%{strTyp}X10112", typ, DataType.Bit, 16*1011 + 2)
-                $"{strTyp}1011F", LsFEnetTagInfo.Create($"%%{strTyp}X1011F", typ, DataType.Bit, 16*1011 + 15)
-            ]
-            let words = [
-                $"{strTyp}0000" , LsFEnetTagInfo.Create($"%%{strTyp}0000",  typ, DataType.Word, 0)
-                $"{strTyp}0001" , LsFEnetTagInfo.Create($"%%{strTyp}0001",  typ, DataType.Word, 16*1)
-                $"{strTyp}0002" , LsFEnetTagInfo.Create($"%%{strTyp}0002",  typ, DataType.Word, 16*2)
-                $"{strTyp}0003" , LsFEnetTagInfo.Create($"%%{strTyp}0003",  typ, DataType.Word, 16*3)
+            let qnas = [
+                if testBitDevice then
+                    yield $"{strTyp}00000", $"%%{strTyp}X00000"
+                    yield $"{strTyp}00001", $"%%{strTyp}X00001"
+                    yield $"{strTyp}00002", $"%%{strTyp}X00002"
+                    yield $"{strTyp}00010", $"%%{strTyp}X00010"
+                    yield $"{strTyp}00011", $"%%{strTyp}X00011"
+                    yield $"{strTyp}00012", $"%%{strTyp}X00012"
+                    yield $"{strTyp}00112", $"%%{strTyp}X00112"
+                    yield $"{strTyp}10112", $"%%{strTyp}X10112"
+                    yield $"{strTyp}1011F", $"%%{strTyp}X1011F"
+
+                yield $"{strTyp}0001" , $"%%{strTyp}W1"
+                yield $"{strTyp}0002" , $"%%{strTyp}W2"
+                yield $"{strTyp}0003" , $"%%{strTyp}W3"
             ]
 
-            let testSet = (if testBit then bits else []) @ words
-
-            for (tag, answer) in testSet do
+            for (tag, answer) in qnas do
                 let fEnetTag = tryToFEnetTag CpuType.XgbMk tag
-                let info = tryParseTag fEnetTag.Value
-                if info.IsNone || info.Value <> answer then
-                    noop()
+                fEnetTag.Value === answer
 
-                info.Value === answer
+        let testUDeivce() =
+            let qnas = [
+                "U0.0", "%UW0"
+                "U0.1", "%UW1"
+                "U0.31", "%UW31"
+                "U1.0", "%UW32"
+            ]
+            for (tag, answer) in qnas do
+                let fEnetTag = tryToFEnetTag CpuType.XgbMk tag
+                fEnetTag.Value === answer
 
-        let bitDeviceTypes = [ P; M; L; K; F; T; C; ]       //S Step제어용 디바이스 수집 불가
-        let wordDeviceTypes = [D; R; U; T; C]               // '사용설명서_XGK_XGB_명령어집_국문_v2.8.pdf', pp.2-12
+            let invalids = [
+                //"U0.0.0"            // XG5000 UI 상에서는 지원되지 않고, FEnet 통신으로는 지원됨.
+                "U0.32"             // U0.31 에서 끝나고, U1.0 으로 시작해야 함
+            ]
+            for tag in invalids do
+                let fEnetTag = tryToFEnetTag CpuType.XgbMk tag
+                fEnetTag.IsNone === true
 
-        for dt in bitDeviceTypes do
-            testDevice(dt, true)
-        for dt in wordDeviceTypes do
-            testDevice(dt, false)
+        let testBitAndWordDevice = testDevice true
+        let testWordDevice = testDevice false
+
+        let bitAndWordDeviceTypes = [ P; M; L; K; F; T; C; ]    //S Step제어용 디바이스 수집 불가
+        let wordDeviceTypes = [D; R; T; C]                   // U    // '사용설명서_XGK_XGB_명령어집_국문_v2.8.pdf', pp.2-12
+
+        bitAndWordDeviceTypes |> iter testBitAndWordDevice
+        wordDeviceTypes |> iter testWordDevice
+
+        testUDeivce()
+
 

@@ -71,7 +71,7 @@ module ExpressionFunctionModule =
         | "<=" -> fLte args
         | "=" when t = STRING -> fEqualString args
         | "="  -> fEqual args
-        | ("!=" | "<>")  -> fNotEqual args
+        | ("!=" | "<>" | "^^")  -> fNotEqual args       // ^^ 는 logical XOR 로, not equal 과 동일해서, notEqual 로 처리한다.
 
         | ("<<<" | "<<") -> fShiftLeft  args
         | (">>>" | ">>") -> fShiftRight args
@@ -116,8 +116,8 @@ module ExpressionFunctionModule =
 
         | ("="  | "equal") when t = STRING -> fEqualString args
         | ("="  | "equal") -> fEqual args
-        | ("!=" | "notEqual") when t = STRING -> fNotEqualString args
-        | ("!=" | "notEqual") -> fNotEqual args
+        | ("!=" | "<>" | "notEqual") when t = STRING -> fNotEqualString args
+        | ("!=" | "<>" | "^^" | "notEqual") -> fNotEqual args
 
         | ("<<" | "<<<" | "shiftLeft") -> fShiftLeft args
         | (">>" | ">>>" | "shiftRight") -> fShiftLeft args

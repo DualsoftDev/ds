@@ -58,13 +58,18 @@ let (|ToFEnetTag|_|) (fromCpu:CpuType) tag =
         /// Word 와 bit type 만 존재
         match tag with
         // bit devices : Full blown 만 허용.  'P1001A'.  마지막 hex digit 만 bit 로 인식
-        | RegexPattern @"^([DPMNLKFTCSZ])(\d{4})([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] when bitOffset < 16 ->
-            Some $"%%{device}X{wordOffset.ToString().PadLeft(4, '0')}{bitOffset:X}"
-
-        // {word device} or {bit device 의 word 표현} : 'P0000'
-        | RegexPattern @"^([DRPMNLKFTCSZ])(\d{4})$" [ DevicePattern device; Int32Pattern wordOffset; ] ->
+        | RegexPattern @"^(D)(\d{5})\.([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
+            Some $"%%{device}X{wordOffset.ToString().PadLeft(5, '0')}{bitOffset:X}"
+        | RegexPattern @"^([DN])(\d{5})([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
+            Some $"%%{device}X{wordOffset.ToString().PadLeft(5, '0')}{bitOffset:X}"
+        | RegexPattern @"^([DN])(\d{5})$" [ DevicePattern device; Int32Pattern wordOffset; ] ->
             Some $"%%{device}W{wordOffset}"
-        | RegexPattern @"^U(\d+)\.(\d+)\.(\d+)$" [Int32Pattern file; Int32Pattern element; Int32Pattern bit] when bit < 32 ->
+        | RegexPattern @"^([PMLKFTCSZ])(\d{4})([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
+            Some $"%%{device}X{wordOffset.ToString().PadLeft(4, '0')}{bitOffset:X}"
+        // {word device} or {bit device 의 word 표현} : 'P0000'
+        | RegexPattern @"^([RPMLKFTCSZ])(\d{4})$" [ DevicePattern device; Int32Pattern wordOffset; ] ->
+            Some $"%%{device}W{wordOffset.ToString().PadLeft(4, '0')}"
+        | RegexPattern @"^U(\d+)\.(\d+)\.(\d+)$" [Int32Pattern file; Int32Pattern element; Int32Pattern bit] ->
             Some $"%%UX{file * 32 + element}{bit:X}"
         | RegexPattern @"^U(\d+)\.(\d+)$" [Int32Pattern element; Int32Pattern bit] when bit < 32 ->
             Some $"%%UW{element * 32 + bit}"

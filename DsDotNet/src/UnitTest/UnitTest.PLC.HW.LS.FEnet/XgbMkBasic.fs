@@ -25,17 +25,20 @@ type XgbMkBasic() =
     member x.``Address convert test`` () =
         let tags = [
         (* word *)
-            "P0000", "%PW0"
-            "M0001", "%MW1"
-            "K0101", "%KW101"
-            "F0334", "%FW334"
-            "T0045", "%TW45"
-            "C0001", "%CW1"
-            "Z0018", "%ZW18"
-            "S0017", "%SW17"        //S CANNOT USE BIT
-            "L0024", "%LW24"
-            "N0014", "%NW14"
-            "D0033", "%DW33"
+            "P0000", "%PW0000"     
+            "M0001", "%MW0001"
+            "K0101", "%KW0101"
+            "F0334", "%FW0334"
+            "T0045", "%TW0045"
+            "C0001", "%CW0001"
+            "Z0018", "%ZW0018"
+            "S0017", "%SW0017"        //S CANNOT USE BIT 
+            "L0024", "%LW0024"
+            
+            //"N0014", "%NW0014"    //bit, word 판단을 위해 4자리 허용 안함
+            //"D0033", "%DW0033"    //bit, word 판단을 위해 4자리 허용 안함
+            "D10033", "%DW10033"    //5자리  올바른 표현법
+            "N10033", "%NW10033"    //5자리  올바른 표현법
 
         (* bit : word 4자리 bit한자리로 변환 *)
             "P00008", "%PX00008"
@@ -44,11 +47,17 @@ type XgbMkBasic() =
             "K0000A", "%KX0000A"
             "F00001", "%FX00001"
             "T00008", "%TX00008"
-            "C0000F", "%CX0000F"
-            "Z0010F", "%ZX0010F"
-            "L0011F", "%LX0011F"
-            "N0012F", "%NX0012F"
-            "D0013F", "%DX0013F"
+            "C0000F", "%CX0000F"       
+            "Z0010F", "%ZX0010F"      
+            "L0011F", "%LX0011F"     
+            
+            //"N00012", "%NX000012"     //bit, word 판단을 위해 4자리word{bit} 허용 안함      
+            //"D00013", "%DX000013"     //bit, word 판단을 위해 4자리word{bit} 허용 안함
+            //"D0013F", "%DX0013F"      //bit, word 판단을 위해 4자리word{bit} 허용 안함
+            //"N0013F", "%NX0013F"      //bit, word 판단을 위해 4자리word{bit} 허용 안함
+            "D10013.F", "%DX10013F"     //D 5자리.bit  올바른 표현법
+            "D10013F", "%DX10013F"      //D 5자리{bit} 
+            "N10013F", "%NX10013F"      //N 5자리{bit} 올바른 표현법
 
         //U word & bit
             "U00.01", "%UW1"
@@ -57,7 +66,6 @@ type XgbMkBasic() =
             "U3.7", "%UW103"        //  3*32 + 7
             "U2.17", "%UW81"        //  2*32 + 17
 
-            (* 주소 개념은 있으나 XG5000에서 조회 불가 + 메모리 이상 접근 *)
             "U0.0.0", "%UX00"       //  {0*32+0}0
             "U0.0.3", "%UX03"       //  {0*32+0}3
             "U0.2.11","%UX2B"       //  {0*32+2}B
@@ -66,7 +74,7 @@ type XgbMkBasic() =
             (* 주소 개념은 있으나 XG5000에서 지원하지않음 *)
             //"D00003.F", "%DX63"   //  3*16 + 15
 
-            (* S는XG5000에서 접근이 가능하지만 검색할 수 없다 *)
+            (* S는XG5000에서 접근이 가능하지만 디바이스 모니터에서 검색할 수 없다 *)
 
         ]
         for (tag, expected) in tags do
@@ -247,7 +255,7 @@ type XgbMkBasic() =
 
 
     [<Test>]
-    member x.``X Add monitoring test`` () =
+    member x.``Add monitoring test`` () =
         let castValue (o : obj) : obj =
             match o with
             | :? bool as b -> b
@@ -290,5 +298,43 @@ type XgbMkBasic() =
 
     [<Test>]
     member x.``X Max memory test`` () =
+        (*
+        P M T C     0 ~ 1023
+        F           0 ~ 1023 (GX5000에서 200부터 쓰기 가능, FEnet은 불가능)
+        K L         0 ~ 4095
+        S Z         0 ~ 127
 
-        ()
+        5자리
+        D           0 ~ 10239
+        N           0 ~ 10239 (GX5000, FEnet read만 가능)
+        *)
+        let doInvalidRequest add =
+            //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우
+            //11x Unknown error?
+            (fun () -> x.Write(add, 64us))    |> ShouldFailWithSubstringT "11x"
+            (fun () -> x.Read(add) |> ignore) |> ShouldFailWithSubstringT "11x"
+
+        let doNormalRequest add =
+            //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우
+            //11x Unknown error?
+            x.Write(add, 64us)  
+            x.Read(add) |> ignore
+
+        let invalidAddresses = [
+            yield! ["P"; "M"; "T"; "C"; "K"; "L"; "S"; "Z";] |> List.map (sprintf "%s9999")
+        ]
+        invalidAddresses |> iter doInvalidRequest
+
+        let invalidaddressesD = [
+            yield! ["D";] |> List.map (sprintf "%s99999")
+        ]
+        invalidaddressesD |> iter doInvalidRequest
+
+        let invalidAddresses_nor = [
+            yield! ["P"; "M"; "T"; "C"; "K"; "L"; "S"; "Z";] |> List.map (sprintf "%s0013")
+        ]
+        invalidAddresses_nor |> iter doNormalRequest
+        let invalidaddressesD_nor = [
+            yield! ["D";] |> List.map (sprintf "%s10010")
+        ]
+        invalidaddressesD_nor |> iter doNormalRequest

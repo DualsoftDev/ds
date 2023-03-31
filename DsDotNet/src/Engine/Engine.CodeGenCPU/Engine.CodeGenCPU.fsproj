@@ -33,6 +33,7 @@
     <Compile Include="12.System.fs" />
     <Compile Include="13.ButtonLamp.fs" />
     <Compile Include="14.Extension.fs" />
+    <Compile Include="ConvertCPU.fs" />
     <Compile Include="Loader.fs" />
     <Compile Include="ExportModule.fs" />
 	<Compile Include="EntryPoint.fs" />

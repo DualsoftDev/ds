@@ -5,6 +5,7 @@ open System.Collections.Generic
 open System
 open System.Runtime.CompilerServices
 open System.Collections
+open System.Collections.Generic
 
 #nowarn "0064"
 
@@ -20,7 +21,6 @@ module Seq =
     /// 두 sequence 가 같은지 비교: Exact match
     let equal seq1 seq2 =
         Enumerable.SequenceEqual(seq1, seq2)
-
     /// 두 sequence 의 짧은 길이 만큼만 같은지 비교
     let equalShort seq1 seq2 =
         (seq1, seq2) ||> Seq.forall2 (=)

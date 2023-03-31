@@ -325,7 +325,7 @@ module rec ExpressionParser =
             [
                 for t in topLevels do
                     let text = t.GetOriginalText()
-                    tracefn $"Toplevel: {text}"
+                    //tracefn $"Toplevel: {text}"
                     assert(t.ChildCount = 1)
 
                     match t.children[0] with

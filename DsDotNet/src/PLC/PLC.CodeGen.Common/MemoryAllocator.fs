@@ -1,4 +1,5 @@
 namespace PLC.CodeGen.Common
+open System.Collections.Generic
 open Engine.Core
 open Engine.Common.FS
 
@@ -33,7 +34,7 @@ module MemoryAllocator =
     /// 주어진 memory type 에서 주소를 할당하 하는 함수 제공
     /// typ: {"M", "I", "Q"} 등이 가능하나 주로 "M"
     /// availableByteRange: 할당 가능한 [시작, 끝] byte 의 range (reservedBytes 에 포함된 부분은 제외됨)
-    /// reservedBytes: 회피 영역 - todo
+    /// reservedBytes: 회피 영역
     let createMemoryAllocator (typ:string) (availableByteRange:IntRange) (reservedBytes:int list) : PLCMemoryAllocator =
         let startByte, endByte = availableByteRange
         /// optional fragmented bit position
@@ -69,9 +70,9 @@ module MemoryAllocator =
                 if reservedBytes |> List.contains byteIndex then
                     getAddress reqMemType
                 else
-                    let allocated = $"%%{typ}{reqMemType}{bitIndex}"
-                    logDebug "Allocated address: %s" allocated
-                    allocated
+                    let address = $"%%{typ}{reqMemType}{bitIndex}"
+                    logDebug "Address %s allocated" address
+                    address
 
 
             | ("B" | "W" | "D" | "L") ->
@@ -100,15 +101,21 @@ module MemoryAllocator =
                 if byteIndex + byteSize > endByte then
                     failwith "ERROR: Limit exceeded."
 
-                if reservedBytes |> List.contains byteIndex then
+                let requiredByteIndices = [byteIndex..(byteIndex + byteSize - 1)]
+                let x = Seq.intersect requiredByteIndices reservedBytes |> Seq.any
+                if x then
                     getAddress reqMemType
                 else
-                    let allocated = $"%%{typ}{reqMemType}{byteIndex/byteSize}"
-                    logDebug "Allocated address: %s" allocated
-                    allocated
-
+                    //if reservedBytes |> List.contains byteIndex then
+                    //    getAddress reqMemType
+                    //else
+                    let address = $"%%{typ}{reqMemType}{byteIndex/byteSize}"
+                    logDebug "Address %s allocated" address
+                    address
             | _ ->
                 failwith "ERROR"
+
+
         {
             BitAllocator  = fun () -> getAddress "X"
             ByteAllocator = fun () -> getAddress "B"
@@ -119,23 +126,27 @@ module MemoryAllocator =
 
 
     type System.Type with
-        member x.GetByteSize() =
+        member x.GetBitSize() =
             match x.Name with
-            | BOOL    -> failwith "ERROR"
-            | CHAR    -> 1
-            | FLOAT32 -> 4
-            | FLOAT64 -> 8
-            | INT16   -> 2
-            | INT32   -> 4
-            | INT64   -> 8
-            | INT8    -> 1
+            | BOOL    -> 1
+            | CHAR    -> 8
+            | FLOAT32 -> 32
+            | FLOAT64 -> 64
+            | INT16   -> 16
+            | INT32   -> 32
+            | INT64   -> 64
+            | INT8    -> 8
             | STRING  -> failwith "ERROR"
-            | UINT16  -> 2
-            | UINT32  -> 4
-            | UINT64  -> 8
-            | UINT8   -> 1
+            | UINT16  -> 16
+            | UINT32  -> 32
+            | UINT64  -> 64
+            | UINT8   -> 8
             | _  -> failwith "ERROR"
 
+        member x.GetByteSize() =
+            match x.Name with
+            | BOOL  -> failwith "ERROR"
+            | _  -> max 1 (x.GetBitSize() / 8)
         member x.GetMemorySizePrefix() =
             if x = typedefof<bool> then
                 "X"

@@ -37,7 +37,7 @@ type XgbMkBasic() =
             //"N0014", "%NW0014"    //bit, word 판단을 위해 4자리 허용 안함
             //"D0033", "%DW0033"    //bit, word 판단을 위해 4자리 허용 안함
             //"D0033", "%DW0033"    //bit, word 판단을 위해 4자리 허용 안함
-            "D01033", "%DW10033"    //5자리  올바른 표현법
+            "D01033", "%DW01033"    //5자리  올바른 표현법
             "N10033", "%NW10033"    //5자리  올바른 표현법
             "L10033", "%LW10033"    //5자리  올바른 표현법
 
@@ -288,7 +288,7 @@ type XgbMkBasic() =
                         ("K0100A", true);
                         ("Z0010F", true);
                         ("L00100A", true);
-                        ("D000100.A", true);
+                        ("D00100.A", true);
                         ("P0512", 32us);
                         ("M0512", 32us);
                         ("Z0012", 32us);
@@ -346,7 +346,7 @@ type XgbMkBasic() =
         invalidAddresses |> iter doInvalidRequest
 
         let invalidaddressesD = [
-            yield! ["D"] |> List.map (sprintf "%s999999")
+            yield! ["D"] |> List.map (sprintf "%s99999")
         ]
         invalidaddressesD |> iter doInvalidRequest
 
@@ -355,6 +355,6 @@ type XgbMkBasic() =
         ]
         invalidAddresses_nor |> iter doNormalRequest
         let invalidaddressesD_nor = [
-            yield! ["D";"L"] |> List.map (sprintf "%s10010")
+            yield! ["D";"L"] |> List.map (sprintf "%s00010")
         ]
         invalidaddressesD_nor |> iter doNormalRequest

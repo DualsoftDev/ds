@@ -1,5 +1,6 @@
 namespace PLC.CodeGen.Common
 open Engine.Core
+open Engine.Common.FS
 
 [<AutoOpen>]
 module MemoryAllocator =
@@ -55,7 +56,7 @@ module MemoryAllocator =
                     | None, Some (s, e) ->
                         let bit = s * 8
                         ofBit <- Some (bit + 1)
-                        ofByteRange <- if s = e then None else Some(s+1, e)
+                        ofByteRange <- if s+1 = e then None else Some(s+1, e)
                         bit
                     | None, None ->
                         let bit = byteCursor * 8
@@ -68,7 +69,9 @@ module MemoryAllocator =
                 if reservedBytes |> List.contains byteIndex then
                     getAddress reqMemType
                 else
-                    $"%%{typ}{reqMemType}{bitIndex}"
+                    let allocated = $"%%{typ}{reqMemType}{bitIndex}"
+                    logDebug "Allocated address: %s" allocated
+                    allocated
 
 
             | ("B" | "W" | "D" | "L") ->
@@ -100,7 +103,10 @@ module MemoryAllocator =
                 if reservedBytes |> List.contains byteIndex then
                     getAddress reqMemType
                 else
-                    $"%%{typ}{reqMemType}{byteIndex/byteSize}"
+                    let allocated = $"%%{typ}{reqMemType}{byteIndex/byteSize}"
+                    logDebug "Allocated address: %s" allocated
+                    allocated
+
             | _ ->
                 failwith "ERROR"
         {

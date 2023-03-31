@@ -66,14 +66,22 @@ module ExportModule =
 
                 failwithlog $"Total {duplicatedAddresses.Length} Duplicated address items:{Environment.NewLine}{dupItems}"
 
+            let autoMemoryAllocationTags =
+                system.TagManager.Storages.Values
+                |> Seq.filter(fun f -> not <| (f :? TimerCounterBaseStruct))
+                |> Seq.filter(fun f-> not <| String.IsNullOrEmpty(f.Address) && f.Address.StartsWith("%M"))
+                |> Array.ofSeq
+
+            autoMemoryAllocationTags |> map (fun f -> f.Name) |> String.concat ", " |> logDebug "Auto Memory Allocation Tags: %s"
+
             // generate used memory byte indices
-            system.TagManager.Storages.Values
-            |> Seq.filter(fun f -> not <| (f :? TimerCounterBaseStruct))
-            |> Seq.filter(fun f-> not <| String.IsNullOrEmpty(f.Address) && f.Address.StartsWith("%M"))
+            autoMemoryAllocationTags
             |> Seq.collect(fun f -> f.Address |> getBytes)
             |> Seq.distinct
             |> Seq.sort
             |> List.ofSeq
+
+        logDebug "Used byte indices: %A" usedByteIndices
 
         let projParams:XgiProjectParams = {
             defaultXgiProjectParams with

@@ -8,31 +8,33 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module CpuLoader =
-    let private IsSpec (v:Vertex) (vaild:ConvertType) =
+    let private IsSpec (v:Vertex, vaild:ConvertType, alias:ConvertAlias)=
+        let aliasSpec    = alias = AliasTure  || alias = AliasNotCare
+        let aliasNoSpec  = alias = AliasFalse || alias = AliasNotCare
         let isVaildVertex =
             match v with
-            | :? Real   -> vaild.HasFlag(RealInFlow)
-            | :? RealExF -> vaild.HasFlag(RealExFlow)
-            | :? CallSys -> vaild.HasFlag(RealExSystem)
+            | :? Real            -> aliasNoSpec && vaild.HasFlag(RealInFlow)   
+            | :? RealExF         -> aliasNoSpec && vaild.HasFlag(RealExFlow)   
+            | :? CallSys         -> aliasNoSpec && vaild.HasFlag(RealExSystem) 
             | :? CallDev as c  ->
                 match c.Parent with
-                | DuParentFlow _ -> vaild.HasFlag(CallInFlow)
-                | DuParentReal _ -> vaild.HasFlag(CallInReal)
+                | DuParentFlow _ -> aliasNoSpec && vaild.HasFlag(CallInFlow)
+                | DuParentReal _ -> aliasNoSpec && vaild.HasFlag(CallInReal)
 
             | :? Alias as a  ->
                  match a.Parent with
                  | DuParentFlow _ ->
                      match a.TargetWrapper with
-                     |  DuAliasTargetReal _         -> vaild.HasFlag(AliasRealInFlow)
-                     |  DuAliasTargetRealExFlow _   -> vaild.HasFlag(AliasRealExInFlow)
-                     |  DuAliasTargetRealExSystem _ -> vaild.HasFlag(AliasRealExInSystem)
-                     |  DuAliasTargetCall _         -> vaild.HasFlag(AliasCallInFlow)
+                     |  DuAliasTargetReal _         -> aliasSpec && vaild.HasFlag(RealInFlow)
+                     |  DuAliasTargetRealExFlow _   -> aliasSpec && vaild.HasFlag(RealExFlow)
+                     |  DuAliasTargetRealExSystem _ -> aliasSpec && vaild.HasFlag(RealExSystem)
+                     |  DuAliasTargetCall _         -> aliasSpec && vaild.HasFlag(CallInFlow)
                  | DuParentReal _ ->
                      match a.TargetWrapper with
                      | DuAliasTargetReal _         -> failwithlog $"Error {getFuncName()}"
                      | DuAliasTargetRealExFlow _   -> failwithlog $"Error {getFuncName()}"
                      | DuAliasTargetRealExSystem _ -> failwithlog $"Error {getFuncName()}"
-                     | DuAliasTargetCall _         -> vaild.HasFlag(AliasCallInReal)
+                     | DuAliasTargetCall _         -> aliasSpec &&  vaild.HasFlag(CallInReal)
             |_ -> failwithlog $"Error {getFuncName()}"
 
         isVaildVertex
@@ -41,7 +43,7 @@ module CpuLoader =
     let private applyVertexSpec(v:Vertex) =
         let vm = v.TagManager :?> VertexManager
         [
-            if IsSpec v RealInFlow then
+            if IsSpec (v, RealInFlow, AliasFalse) then
                 yield! vm.S1_RealRGFH()
 
                 yield vm.P1_RealStartPort()
@@ -60,16 +62,15 @@ module CpuLoader =
                 yield! vm.D2_DAGTailStart()
                 yield! vm.D3_DAGCoinComplete()
 
-            if IsSpec v InFlowAll then
+            if IsSpec (v, CallInFlow ||| RealExSystem ||| RealExFlow ||| RealInFlow, AliasNotCare) then
                 yield! vm.F1_RootStart()
-            //RealInFlow ||| RealExFlow ||| AliasRealInFlow ||| AliasRealExInFlow
-            if IsSpec v RealNIndirectReal then
+            if IsSpec (v, RealExFlow ||| RealInFlow, AliasNotCare) then
                 yield! vm.F2_RootReset()
-
-            if IsSpec v InFlowWithoutReal then
+                
+            if IsSpec (v, CallInFlow ||| RealExSystem ||| RealExFlow, AliasNotCare) then
                 yield vm.F3_RootCoinRelay()
 
-            if IsSpec v (CallInReal ||| CallInFlow) then
+            if IsSpec (v, CallInReal ||| CallInFlow, AliasFalse) then
                 yield! vm.C1_CallPlanSend()
                 yield! vm.C2_CallActionOut()
                 yield! vm.C3_CallPlanReceive()
@@ -77,13 +78,13 @@ module CpuLoader =
                 yield! vm.M3_CallErrorTXMonitor()
                 yield vm.M4_CallErrorRXMonitor()
 
-            if IsSpec v CoinTypeAll then
+            if IsSpec (v, CallInReal ||| CallInFlow ||| RealExSystem ||| RealExFlow, AliasNotCare) then
                 yield! vm.S2_CoinRGFH()
-
-            if IsSpec v (RealInFlow ||| CoinTypeAll)  then
+                
+            if IsSpec (v, VertexAll, AliasNotCare) then
                 yield vm.M2_PauseMonitor()
             //test ahn
-            if IsSpec v AliasRealExInSystem then
+            if IsSpec (v, RealExSystem, AliasNotCare) then
                 yield! vm.L1_LinkStart()
 
         ]

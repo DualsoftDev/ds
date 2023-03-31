@@ -53,7 +53,7 @@ module ExportModule =
             let duplicatedAddresses =
                 usedAddresses
                 |> Array.groupBy(fun f -> f.Address)
-                |> Array.filter(fun (address, vs) -> vs.Length > 1)
+                |> Array.filter(fun (_, vs) -> vs.Length > 1)
 
             // prints duplications
             if duplicatedAddresses.Length > 0 then

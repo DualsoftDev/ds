@@ -58,12 +58,14 @@ let (|ToFEnetTag|_|) (fromCpu:CpuType) tag =
         /// Word 와 bit type 만 존재
         match tag with
         // bit devices : Full blown 만 허용.  'P1001A'.  마지막 hex digit 만 bit 로 인식
-        | RegexPattern @"^(D)(\d{5})\.([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
+        | RegexPattern @"^(D)(\d{6})\.([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
+            Some $"%%{device}X{wordOffset.ToString().PadLeft(6, '0')}{bitOffset:X}"
+        | RegexPattern @"^(D)(\d{6})$" [ DevicePattern device; Int32Pattern wordOffset; ] ->
+            Some $"%%{device}W{wordOffset.ToString().PadLeft(6, '0')}"
+        | RegexPattern @"^([LN])(\d{5})([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
             Some $"%%{device}X{wordOffset.ToString().PadLeft(5, '0')}{bitOffset:X}"
-        | RegexPattern @"^([DN])(\d{5})([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
-            Some $"%%{device}X{wordOffset.ToString().PadLeft(5, '0')}{bitOffset:X}"
-        | RegexPattern @"^([DN])(\d{5})$" [ DevicePattern device; Int32Pattern wordOffset; ] ->
-            Some $"%%{device}W{wordOffset}"
+        | RegexPattern @"^([LN])(\d{5})$" [ DevicePattern device; Int32Pattern wordOffset; ] ->
+            Some $"%%{device}W{wordOffset.ToString().PadLeft(5, '0')}"
         | RegexPattern @"^([PMLKFTCSZ])(\d{4})([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
             Some $"%%{device}X{wordOffset.ToString().PadLeft(4, '0')}{bitOffset:X}"
         // {word device} or {bit device 의 word 표현} : 'P0000'

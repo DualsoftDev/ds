@@ -32,12 +32,14 @@ type XgbMkBasic() =
             "T0045", "%TW0045"
             "C0001", "%CW0001"
             "Z0018", "%ZW0018"
-            "S0017", "%SW0017"        //S CANNOT USE BIT 
-            "L0024", "%LW0024"   
-            //"N0014", "%NW0014"    //5자리로 입력
-            //"D0033", "%DW0033"    //5자리로 입력
-            "D10033", "%DW10033"    //5자리
-            "N10033", "%NW10033"    //5자리
+            "S0017", "%SW0017"      //S CANNOT USE BIT 
+            
+            //"N0014", "%NW0014"    //bit, word 판단을 위해 4자리 허용 안함
+            //"D0033", "%DW0033"    //bit, word 판단을 위해 4자리 허용 안함
+            //"D0033", "%DW0033"    //bit, word 판단을 위해 4자리 허용 안함
+            "D01033", "%DW01033"    //5자리  올바른 표현법
+            "N10033", "%NW10033"    //5자리  올바른 표현법
+            "L10033", "%LW10033"    //5자리  올바른 표현법
 
         (* bit : word 4자리 bit한자리로 변환 *)
             "P00008", "%PX00008"
@@ -48,11 +50,13 @@ type XgbMkBasic() =
             "T00008", "%TX00008"
             "C0000F", "%CX0000F"       
             "Z0010F", "%ZX0010F"      
-            "L0011F", "%LX0011F"      
-            "N00012", "%NX00012"      
-            "D00013", "%DX00013"      
-            "D10013.F", "%DX10013F"     //5자리.bit 
-            "N10013F", "%NX10013F"     //5자리{bit} 
+
+            //"D010013.F", "%DX010013F"  //D bit, word 판단을 위해 {6자리word}.{bit}만 허용   
+            //"N0001A", "%NX00001A"      //bit, word 판단을 위해 {5자리word}{bit}만 허용    
+            //"N0013F", "%NX0013F"       //bit, word 판단을 위해 {5자리word}{bit}만 허용
+            "D10013.F", "%DX10013F"    //D 5자리.bit  올바른 표현법
+            "N10013F",  "%NX10013F"      //N 5자리{bit} 올바른 표현법
+            "L10013F",  "%LX10013F"      //N 5자리{bit} 올바른 표현법
 
         //U word & bit
             "U00.01", "%UW1"
@@ -66,10 +70,19 @@ type XgbMkBasic() =
             "U0.2.11","%UX2B"       //  {0*32+2}B
             "U1.1.1", "%UX331"      //  {1 * 32 + 1 }1
 
-            (* 주소 개념은 있으나 XG5000에서 지원하지않음 *)
-            //"D00003.F", "%DX63"   //  3*16 + 15
+            (* 
+                D 메모리 특이사항: 
+                    D의 bit접근법은 주소 개념은 XG5000 메인의 변수/설명 -> 디바이스 보기에서 지원 
+                    디바이스 모니터에서는 지원하지 않는다.
 
-            (* S는XG5000에서 접근이 가능하지만 검색할 수 없다 *)
+                S 메모리 특이사항: 
+                    S는 XG5000의 디바이스 모니터에서 0~127 단위로 접근 가능하다.
+                    디바이스 모니터에서는 bit단위로 검색할 수 없다.
+                    XG5000 메인의 변수/설명 -> 디바이스 보기에서 0.0 ~ 127.99범위로 찾아서 선택할 수 있다.
+                    FENet 통신에서는 S0 ~ S120에 WORD단위로 쓰기가 가능하지만 BIT단위는 알 수 없음
+                
+                F, N메모리는 쓰기 접근이 불가능하다. (F는 GX5000 디바이스모니터에서 200이상부터 접근 가능하지만 권장하지 않음)
+            *)
 
         ]
         for (tag, expected) in tags do
@@ -118,16 +131,26 @@ type XgbMkBasic() =
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
 
+
+
+            (*D N L memory*)
         for i in [0..15] do
-            let mem = sprintf "%%LX10%X" i
-            let memgb = sprintf "L0010%X" i
+            let mem = sprintf "%%DX10%X" i
+            let memgb = sprintf "D00010.%X" i
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
 
+            (*N메모리는 읽기만 가능*)
         for i in [0..15] do
-            let mem = sprintf "%%DX10%X" i
-            let memgb = sprintf "D0010%X" i
+            let mem = sprintf "%%NX10%X" i
+            let memgb = sprintf "N00010%X" i
+            x.ReadFEnet(mem) === false
+            x.Read(memgb) === false
+
+        for i in [0..15] do
+            let mem = sprintf "%%LX10%X" i
+            let memgb = sprintf "L00010%X" i
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
@@ -171,13 +194,14 @@ type XgbMkBasic() =
         x.ReadFEnet("%ZW100") === 123us
         x.Read("Z0100") === 123us
 
-        x.WriteFEnet("%LW100", 123us)
-        x.ReadFEnet("%LW100") === 123us
-        x.Read("L0100") === 123us
 
         x.WriteFEnet("%DW100", 123us)
         x.ReadFEnet("%DW100") === 123us
-        x.Read("D0100") === 123us
+        x.Read("D00100") === 123us
+
+        x.WriteFEnet("%LW100", 123us)
+        x.ReadFEnet("%LW100") === 123us
+        x.Read("L00100") === 123us
 
 
 
@@ -190,8 +214,8 @@ type XgbMkBasic() =
         (* N 영역은 FENet 통신과 XG5000 모두 쓰기가 불가능하다 *)
         (fun () -> x.WriteFEnet("%NW200", 123us) |> ignore)
         |> ShouldFailWithSubstringT "LS Protocol Error with unknown code = 10x"
-        x.ReadFEnet("%NW1") === 0us
-        x.Read("N0001") === 0us
+        x.ReadFEnet("%NW15") === 0us
+        x.Read("N00015") === 0us
 
         //U
         x.WriteFEnet("%UW33", 65535us)
@@ -259,12 +283,12 @@ type XgbMkBasic() =
 
         let testList : (string * obj) list = [
                         ("M00231", true);
-                        ("L0102A", true);
+                        ("L00102A", true);
                         ("P0102A", true);
                         ("K0100A", true);
                         ("Z0010F", true);
-                        ("L0100A", true);
-                        ("D0100A", true);
+                        ("L00100A", true);
+                        ("D00100.A", true);
                         ("P0512", 32us);
                         ("M0512", 32us);
                         ("Z0012", 32us);
@@ -272,8 +296,8 @@ type XgbMkBasic() =
                         ("T0512", 32us);
                         ("C0512", 32us);
                         ("S0012", 32us);
-                        ("L0512", 32us);
-                        ("D0512", 32us);
+                        ("L00512", 32us);
+                        ("D00512", 32us);
         ]
         let subscription =
             x.Conn.Subject.ToIObservable()
@@ -292,8 +316,9 @@ type XgbMkBasic() =
         noop()
 
     [<Test>]
-    member x.``X Max memory test`` () =
+    member x.``Max memory test`` () =
         (*
+        디바이스 모니터 기준
         P M T C     0 ~ 1023
         F           0 ~ 1023 (GX5000에서 200부터 쓰기 가능, FEnet은 불가능)
         K L         0 ~ 4095
@@ -321,7 +346,7 @@ type XgbMkBasic() =
         invalidAddresses |> iter doInvalidRequest
 
         let invalidaddressesD = [
-            yield! ["D";] |> List.map (sprintf "%s99999")
+            yield! ["D"] |> List.map (sprintf "%s99999")
         ]
         invalidaddressesD |> iter doInvalidRequest
 
@@ -330,6 +355,6 @@ type XgbMkBasic() =
         ]
         invalidAddresses_nor |> iter doNormalRequest
         let invalidaddressesD_nor = [
-            yield! ["D";] |> List.map (sprintf "%s10010")
+            yield! ["D";"L"] |> List.map (sprintf "%s00010")
         ]
         invalidaddressesD_nor |> iter doNormalRequest

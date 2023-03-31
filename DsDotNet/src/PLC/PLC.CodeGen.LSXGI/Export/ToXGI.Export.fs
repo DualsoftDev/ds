@@ -300,7 +300,15 @@ module XgiExportModule =
                     | _ -> ()
 
                 // symbolsGlobal = "<GlobalVariable Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol>
-                let globalStoragesXmlNode = storagesToGlobalXml x globalStorages.Values |> XmlNode.ofString
+                let globalStoragesSortedByAllocSize =
+                    globalStorages.Values
+                    |> Seq.sortByDescending(fun t ->
+                        if t :? TimerCounterBaseStruct || isNull t.Address || t.Address <> "" then
+                            0
+                        else      // t.Address 가 "" 인 경우에만 자동으로 채운다. (null 은 아님)
+                            t.DataType.GetBitSize())
+                    |> Array.ofSeq
+                let globalStoragesXmlNode = storagesToGlobalXml x globalStoragesSortedByAllocSize |> XmlNode.ofString
                 let numNewGlobals = globalStoragesXmlNode.Attributes.["Count"].Value |> System.Int32.Parse
                 // timer, counter 등을 고려했을 때는 numNewGlobals <> globalStorages.Count 일 수 있다.
 

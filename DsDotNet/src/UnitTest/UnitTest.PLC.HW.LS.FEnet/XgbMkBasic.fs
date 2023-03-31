@@ -32,13 +32,14 @@ type XgbMkBasic() =
             "T0045", "%TW0045"
             "C0001", "%CW0001"
             "Z0018", "%ZW0018"
-            "S0017", "%SW0017"        //S CANNOT USE BIT 
-            "L0024", "%LW0024"
+            "S0017", "%SW0017"      //S CANNOT USE BIT 
             
             //"N0014", "%NW0014"    //bit, word 판단을 위해 4자리 허용 안함
             //"D0033", "%DW0033"    //bit, word 판단을 위해 4자리 허용 안함
-            "D10033", "%DW10033"    //5자리  올바른 표현법
+            //"D0033", "%DW0033"    //bit, word 판단을 위해 4자리 허용 안함
+            "D01033", "%DW01033"    //5자리  올바른 표현법
             "N10033", "%NW10033"    //5자리  올바른 표현법
+            "L10033", "%LW10033"    //5자리  올바른 표현법
 
         (* bit : word 4자리 bit한자리로 변환 *)
             "P00008", "%PX00008"
@@ -49,15 +50,13 @@ type XgbMkBasic() =
             "T00008", "%TX00008"
             "C0000F", "%CX0000F"       
             "Z0010F", "%ZX0010F"      
-            "L0011F", "%LX0011F"     
-            
-            //"N00012", "%NX000012"     //bit, word 판단을 위해 4자리word{bit} 허용 안함      
-            //"D00013", "%DX000013"     //bit, word 판단을 위해 4자리word{bit} 허용 안함
-            //"D0013F", "%DX0013F"      //bit, word 판단을 위해 4자리word{bit} 허용 안함
-            //"N0013F", "%NX0013F"      //bit, word 판단을 위해 4자리word{bit} 허용 안함
-            "D10013.F", "%DX10013F"     //D 5자리.bit  올바른 표현법
-            "D10013F", "%DX10013F"      //D 5자리{bit} 
-            "N10013F", "%NX10013F"      //N 5자리{bit} 올바른 표현법
+
+            //"D010013.F", "%DX010013F"  //D bit, word 판단을 위해 {6자리word}.{bit}만 허용   
+            //"N0001A", "%NX00001A"      //bit, word 판단을 위해 {5자리word}{bit}만 허용    
+            //"N0013F", "%NX0013F"       //bit, word 판단을 위해 {5자리word}{bit}만 허용
+            "D10013.F", "%DX10013F"    //D 5자리.bit  올바른 표현법
+            "N10013F",  "%NX10013F"      //N 5자리{bit} 올바른 표현법
+            "L10013F",  "%LX10013F"      //N 5자리{bit} 올바른 표현법
 
         //U word & bit
             "U00.01", "%UW1"
@@ -71,10 +70,19 @@ type XgbMkBasic() =
             "U0.2.11","%UX2B"       //  {0*32+2}B
             "U1.1.1", "%UX331"      //  {1 * 32 + 1 }1
 
-            (* 주소 개념은 있으나 XG5000에서 지원하지않음 *)
-            //"D00003.F", "%DX63"   //  3*16 + 15
+            (* 
+                D 메모리 특이사항: 
+                    D의 bit접근법은 주소 개념은 XG5000 메인의 변수/설명 -> 디바이스 보기에서 지원 
+                    디바이스 모니터에서는 지원하지 않는다.
 
-            (* S는XG5000에서 접근이 가능하지만 디바이스 모니터에서 검색할 수 없다 *)
+                S 메모리 특이사항: 
+                    S는 XG5000의 디바이스 모니터에서 0~127 단위로 접근 가능하다.
+                    디바이스 모니터에서는 bit단위로 검색할 수 없다.
+                    XG5000 메인의 변수/설명 -> 디바이스 보기에서 0.0 ~ 127.99범위로 찾아서 선택할 수 있다.
+                    FENet 통신에서는 S0 ~ S120에 WORD단위로 쓰기가 가능하지만 BIT단위는 알 수 없음
+                
+                F, N메모리는 쓰기 접근이 불가능하다. (F는 GX5000 디바이스모니터에서 200이상부터 접근 가능하지만 권장하지 않음)
+            *)
 
         ]
         for (tag, expected) in tags do
@@ -123,16 +131,26 @@ type XgbMkBasic() =
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
 
+
+
+            (*D N L memory*)
         for i in [0..15] do
-            let mem = sprintf "%%LX10%X" i
-            let memgb = sprintf "L0010%X" i
+            let mem = sprintf "%%DX10%X" i
+            let memgb = sprintf "D00010.%X" i
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
 
+            (*N메모리는 읽기만 가능*)
         for i in [0..15] do
-            let mem = sprintf "%%DX10%X" i
-            let memgb = sprintf "D0010%X" i
+            let mem = sprintf "%%NX10%X" i
+            let memgb = sprintf "N00010%X" i
+            x.ReadFEnet(mem) === false
+            x.Read(memgb) === false
+
+        for i in [0..15] do
+            let mem = sprintf "%%LX10%X" i
+            let memgb = sprintf "L00010%X" i
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
@@ -176,13 +194,14 @@ type XgbMkBasic() =
         x.ReadFEnet("%ZW100") === 123us
         x.Read("Z0100") === 123us
 
-        x.WriteFEnet("%LW100", 123us)
-        x.ReadFEnet("%LW100") === 123us
-        x.Read("L0100") === 123us
 
         x.WriteFEnet("%DW100", 123us)
         x.ReadFEnet("%DW100") === 123us
-        x.Read("D0100") === 123us
+        x.Read("D00100") === 123us
+
+        x.WriteFEnet("%LW100", 123us)
+        x.ReadFEnet("%LW100") === 123us
+        x.Read("L00100") === 123us
 
 
 
@@ -195,8 +214,8 @@ type XgbMkBasic() =
         (* N 영역은 FENet 통신과 XG5000 모두 쓰기가 불가능하다 *)
         (fun () -> x.WriteFEnet("%NW200", 123us) |> ignore)
         |> ShouldFailWithSubstringT "LS Protocol Error with unknown code = 10x"
-        x.ReadFEnet("%NW1") === 0us
-        x.Read("N0001") === 0us
+        x.ReadFEnet("%NW15") === 0us
+        x.Read("N00015") === 0us
 
         //U
         x.WriteFEnet("%UW33", 65535us)
@@ -242,6 +261,11 @@ type XgbMkBasic() =
         noop()
 
     [<Test>]
+    member x.``x U`` () =
+        
+        ()
+
+    [<Test>]
     member x.``M with native`` () =
         let mutable w = 0x1234us
         x.Write("M0032", w)
@@ -264,12 +288,12 @@ type XgbMkBasic() =
 
         let testList : (string * obj) list = [
                         ("M00231", true);
-                        ("L0102A", true);
+                        ("L00102A", true);
                         ("P0102A", true);
                         ("K0100A", true);
                         ("Z0010F", true);
-                        ("L0100A", true);
-                        ("D0100A", true);
+                        ("L00100A", true);
+                        ("D00100.A", true);
                         ("P0512", 32us);
                         ("M0512", 32us);
                         ("Z0012", 32us);
@@ -277,8 +301,8 @@ type XgbMkBasic() =
                         ("T0512", 32us);
                         ("C0512", 32us);
                         ("S0012", 32us);
-                        ("L0512", 32us);
-                        ("D0512", 32us);
+                        ("L00512", 32us);
+                        ("D00512", 32us);
         ]
         let subscription =
             x.Conn.Subject.ToIObservable()
@@ -297,8 +321,9 @@ type XgbMkBasic() =
         noop()
 
     [<Test>]
-    member x.``X Max memory test`` () =
+    member x.``Max memory test`` () =
         (*
+        디바이스 모니터 기준
         P M T C     0 ~ 1023
         F           0 ~ 1023 (GX5000에서 200부터 쓰기 가능, FEnet은 불가능)
         K L         0 ~ 4095
@@ -326,7 +351,7 @@ type XgbMkBasic() =
         invalidAddresses |> iter doInvalidRequest
 
         let invalidaddressesD = [
-            yield! ["D";] |> List.map (sprintf "%s99999")
+            yield! ["D"] |> List.map (sprintf "%s99999")
         ]
         invalidaddressesD |> iter doInvalidRequest
 
@@ -335,6 +360,96 @@ type XgbMkBasic() =
         ]
         invalidAddresses_nor |> iter doNormalRequest
         let invalidaddressesD_nor = [
-            yield! ["D";] |> List.map (sprintf "%s10010")
+            yield! ["D";"L"] |> List.map (sprintf "%s00010")
         ]
         invalidaddressesD_nor |> iter doNormalRequest
+
+
+    [<Test>]
+    member x.``XGK Address parsing test`` () =
+        let testDevice (testBitDevice:bool) (typ:DeviceType) =
+            //let h = Regex(@"^%([PMLKFTCS])(\d{1,4})([\da-fA-F])$").Match("%P0A")
+
+
+            let strTyp = typ.ToString()
+            let qnas = [
+                if typ = DeviceType.D then
+                    if testBitDevice then
+                        yield $"{strTyp}00000.0", $"%%{strTyp}X00000.0"
+                        yield $"{strTyp}00000.1", $"%%{strTyp}X00000.1"
+                        yield $"{strTyp}00000.2", $"%%{strTyp}X00000.2"
+                        yield $"{strTyp}00001.0", $"%%{strTyp}X00001.0"
+                        yield $"{strTyp}00001.1", $"%%{strTyp}X00001.1"
+                        yield $"{strTyp}00001.2", $"%%{strTyp}X00001.2"
+                        yield $"{strTyp}00011.2", $"%%{strTyp}X00011.2"
+                        yield $"{strTyp}01011.2", $"%%{strTyp}X01011.2"
+                        yield $"{strTyp}10011.F", $"%%{strTyp}X10011.F"
+                
+                    yield $"{strTyp}00001" , $"%%{strTyp}W00001"
+                    yield $"{strTyp}00002" , $"%%{strTyp}W00002"
+                    yield $"{strTyp}00003" , $"%%{strTyp}W00003"
+                else if typ = DeviceType.N || typ = DeviceType.L then
+                    if testBitDevice then
+                        yield $"{strTyp}000000", $"%%{strTyp}X000000"
+                        yield $"{strTyp}000001", $"%%{strTyp}X000001"
+                        yield $"{strTyp}000002", $"%%{strTyp}X000002"
+                        yield $"{strTyp}000010", $"%%{strTyp}X000010"
+                        yield $"{strTyp}000011", $"%%{strTyp}X000011"
+                        yield $"{strTyp}000012", $"%%{strTyp}X000012"
+                        yield $"{strTyp}000112", $"%%{strTyp}X000112"
+                        yield $"{strTyp}010112", $"%%{strTyp}X010112"
+                        yield $"{strTyp}10011F", $"%%{strTyp}X10011F"
+                
+                    yield $"{strTyp}00001" , $"%%{strTyp}W00001"
+                    yield $"{strTyp}00002" , $"%%{strTyp}W00002"
+                    yield $"{strTyp}00003" , $"%%{strTyp}W00003"
+                else 
+                    if testBitDevice then
+                        yield $"{strTyp}00000", $"%%{strTyp}X00000"
+                        yield $"{strTyp}00001", $"%%{strTyp}X00001"
+                        yield $"{strTyp}00002", $"%%{strTyp}X00002"
+                        yield $"{strTyp}00010", $"%%{strTyp}X00010"
+                        yield $"{strTyp}00011", $"%%{strTyp}X00011"
+                        yield $"{strTyp}00012", $"%%{strTyp}X00012"
+                        yield $"{strTyp}00112", $"%%{strTyp}X00112"
+                        yield $"{strTyp}10112", $"%%{strTyp}X10112"
+                        yield $"{strTyp}1011F", $"%%{strTyp}X1011F"
+                
+                    yield $"{strTyp}0001" , $"%%{strTyp}W0001"
+                    yield $"{strTyp}0002" , $"%%{strTyp}W0002"
+                    yield $"{strTyp}0003" , $"%%{strTyp}W0003"
+            ]
+
+            for (tag, answer) in qnas do
+                let fEnetTag = tryToFEnetTag CpuType.XgbMk tag
+                fEnetTag.Value === answer
+
+        let testUDeivce() =
+            let qnas = [
+                "U0.0", "%UW0"
+                "U0.1", "%UW1"
+                "U0.31", "%UW31"
+                "U1.0", "%UW32"
+            ]
+            for (tag, answer) in qnas do
+                let fEnetTag = tryToFEnetTag CpuType.XgbMk tag
+                fEnetTag.Value === answer
+
+            let invalids = [
+                //"U0.0.0"            // XG5000 UI 상에서는 지원되지 않고, FEnet 통신으로는 지원됨.
+                "U0.32"             // U0.31 에서 끝나고, U1.0 으로 시작해야 함
+            ]
+            for tag in invalids do
+                let fEnetTag = tryToFEnetTag CpuType.XgbMk tag
+                fEnetTag.IsNone === true
+
+        let testBitAndWordDevice = testDevice true
+        let testWordDevice = testDevice false
+
+        let bitAndWordDeviceTypes = [ P; M; L; K; F; T; C; ]    //S Step제어용 디바이스 수집 불가
+        let wordDeviceTypes = [D; R; T; C]                   // U    // '사용설명서_XGK_XGB_명령어집_국문_v2.8.pdf', pp.2-12
+
+        bitAndWordDeviceTypes |> iter testBitAndWordDevice
+        wordDeviceTypes |> iter testWordDevice
+
+        testUDeivce()

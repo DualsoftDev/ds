@@ -284,7 +284,7 @@ type XgbMkBasic() =
                         ("K0100A", true);
                         ("Z0010F", true);
                         ("L0100A", true);
-                        ("D0100A", true);
+                        ("D00100.A", true);
                         ("P0512", 32us);
                         ("M0512", 32us);
                         ("Z0012", 32us);
@@ -293,7 +293,7 @@ type XgbMkBasic() =
                         ("C0512", 32us);
                         ("S0012", 32us);
                         ("L0512", 32us);
-                        ("D0512", 32us);
+                        ("D00512", 32us);
         ]
         let subscription =
             x.Conn.Subject.ToIObservable()
@@ -312,8 +312,9 @@ type XgbMkBasic() =
         noop()
 
     [<Test>]
-    member x.``X Max memory test`` () =
+    member x.``Max memory test`` () =
         (*
+        디바이스 모니터 기준
         P M T C     0 ~ 1023
         F           0 ~ 1023 (GX5000에서 200부터 쓰기 가능, FEnet은 불가능)
         K L         0 ~ 4095
@@ -341,7 +342,7 @@ type XgbMkBasic() =
         invalidAddresses |> iter doInvalidRequest
 
         let invalidaddressesD = [
-            yield! ["D";] |> List.map (sprintf "%s99999")
+            yield! ["D"; "N";] |> List.map (sprintf "%s99999")
         ]
         invalidaddressesD |> iter doInvalidRequest
 

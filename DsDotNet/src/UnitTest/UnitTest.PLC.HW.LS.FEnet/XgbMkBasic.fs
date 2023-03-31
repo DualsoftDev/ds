@@ -130,12 +130,21 @@ type XgbMkBasic() =
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
 
+            (*D N memory*)
         for i in [0..15] do
             let mem = sprintf "%%DX10%X" i
-            let memgb = sprintf "D0010%X" i
+            let memgb = sprintf "D00010.%X" i
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
+
+            (*N메모리는 읽기만 가능*)
+        for i in [0..15] do
+            let mem = sprintf "%%NX10%X" i
+            let memgb = sprintf "N00010%X" i
+            x.ReadFEnet(mem) === false
+            x.Read(memgb) === false
+
 
         (* Writing word in M P K T C Z S L D U *)
         let mutable w5 = 0x1234us
@@ -182,8 +191,7 @@ type XgbMkBasic() =
 
         x.WriteFEnet("%DW100", 123us)
         x.ReadFEnet("%DW100") === 123us
-        x.Read("D0100") === 123us
-
+        x.Read("D00100") === 123us
 
 
         (* F 영역은 FENet 통신에서 쓰기가 불가능하다. XG5000에서는 주소 200 이상에서 가능 *)
@@ -196,7 +204,7 @@ type XgbMkBasic() =
         (fun () -> x.WriteFEnet("%NW200", 123us) |> ignore)
         |> ShouldFailWithSubstringT "LS Protocol Error with unknown code = 10x"
         x.ReadFEnet("%NW1") === 0us
-        x.Read("N0001") === 0us
+        x.Read("N00001") === 0us
 
         //U
         x.WriteFEnet("%UW33", 65535us)

@@ -36,8 +36,8 @@ type XgbMkBasic() =
             
             //"N0014", "%NW0014"    //bit, word 판단을 위해 4자리 허용 안함
             //"D0033", "%DW0033"    //bit, word 판단을 위해 4자리 허용 안함
-            //"D00033", "%DW00033"  //bit, word 판단을 위해 5자리 허용 안함
-            "D010033", "%DW010033"  //6자리  올바른 표현법
+            //"D0033", "%DW0033"    //bit, word 판단을 위해 4자리 허용 안함
+            "D01033", "%DW10033"    //5자리  올바른 표현법
             "N10033", "%NW10033"    //5자리  올바른 표현법
             "L10033", "%LW10033"    //5자리  올바른 표현법
 
@@ -54,7 +54,7 @@ type XgbMkBasic() =
             //"D010013.F", "%DX010013F"  //D bit, word 판단을 위해 {6자리word}.{bit}만 허용   
             //"N0001A", "%NX00001A"      //bit, word 판단을 위해 {5자리word}{bit}만 허용    
             //"N0013F", "%NX0013F"       //bit, word 판단을 위해 {5자리word}{bit}만 허용
-            "D010013.F", "%DX010013F"    //D 5자리.bit  올바른 표현법
+            "D10013.F", "%DX10013F"    //D 5자리.bit  올바른 표현법
             "N10013F",  "%NX10013F"      //N 5자리{bit} 올바른 표현법
             "L10013F",  "%LX10013F"      //N 5자리{bit} 올바른 표현법
 
@@ -71,15 +71,17 @@ type XgbMkBasic() =
             "U1.1.1", "%UX331"      //  {1 * 32 + 1 }1
 
             (* 
-                D메모리 특이사항: 
+                D 메모리 특이사항: 
                     D의 bit접근법은 주소 개념은 XG5000 메인의 변수/설명 -> 디바이스 보기에서 지원 
                     디바이스 모니터에서는 지원하지 않는다.
-                    D메모리는 쓰기 접근이 불가능하다.
 
                 S 메모리 특이사항: 
-                    S는XG5000에서 디바이스 모니터에서 0~120 단위로 접근 가능하다.
+                    S는 XG5000의 디바이스 모니터에서 0~127 단위로 접근 가능하다.
                     디바이스 모니터에서는 bit단위로 검색할 수 없다.
-                    메인의 변수/설명 -> 디바이스 보기에서 0.0 ~ 127.99범위로 찾아서 선택할 수 있다.
+                    XG5000 메인의 변수/설명 -> 디바이스 보기에서 0.0 ~ 127.99범위로 찾아서 선택할 수 있다.
+                    FENet 통신에서는 S0 ~ S120에 WORD단위로 쓰기가 가능하지만 BIT단위는 알 수 없음
+                
+                F, N메모리는 쓰기 접근이 불가능하다. (F는 GX5000 디바이스모니터에서 200이상부터 접근 가능하지만 권장하지 않음)
             *)
 
         ]
@@ -134,7 +136,7 @@ type XgbMkBasic() =
             (*D N L memory*)
         for i in [0..15] do
             let mem = sprintf "%%DX10%X" i
-            let memgb = sprintf "D000010.%X" i
+            let memgb = sprintf "D00010.%X" i
             x.WriteFEnet(mem, true)
             x.ReadFEnet(mem) === true
             x.Read(memgb) === true
@@ -195,7 +197,7 @@ type XgbMkBasic() =
 
         x.WriteFEnet("%DW100", 123us)
         x.ReadFEnet("%DW100") === 123us
-        x.Read("D000100") === 123us
+        x.Read("D00100") === 123us
 
         x.WriteFEnet("%LW100", 123us)
         x.ReadFEnet("%LW100") === 123us
@@ -295,7 +297,7 @@ type XgbMkBasic() =
                         ("C0512", 32us);
                         ("S0012", 32us);
                         ("L00512", 32us);
-                        ("D000512", 32us);
+                        ("D00512", 32us);
         ]
         let subscription =
             x.Conn.Subject.ToIObservable()
@@ -353,6 +355,6 @@ type XgbMkBasic() =
         ]
         invalidAddresses_nor |> iter doNormalRequest
         let invalidaddressesD_nor = [
-            yield! ["D";] |> List.map (sprintf "%s010010")
+            yield! ["D";"L"] |> List.map (sprintf "%s10010")
         ]
         invalidaddressesD_nor |> iter doNormalRequest

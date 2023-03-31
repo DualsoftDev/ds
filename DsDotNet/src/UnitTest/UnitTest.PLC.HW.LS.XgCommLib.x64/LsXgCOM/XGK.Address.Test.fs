@@ -22,20 +22,51 @@ type XgkAddressTest() =
 
             let strTyp = typ.ToString()
             let qnas = [
-                if testBitDevice then
-                    yield $"{strTyp}00000", $"%%{strTyp}X00000"
-                    yield $"{strTyp}00001", $"%%{strTyp}X00001"
-                    yield $"{strTyp}00002", $"%%{strTyp}X00002"
-                    yield $"{strTyp}00010", $"%%{strTyp}X00010"
-                    yield $"{strTyp}00011", $"%%{strTyp}X00011"
-                    yield $"{strTyp}00012", $"%%{strTyp}X00012"
-                    yield $"{strTyp}00112", $"%%{strTyp}X00112"
-                    yield $"{strTyp}10112", $"%%{strTyp}X10112"
-                    yield $"{strTyp}1011F", $"%%{strTyp}X1011F"
-
-                yield $"{strTyp}0001" , $"%%{strTyp}W1"
-                yield $"{strTyp}0002" , $"%%{strTyp}W2"
-                yield $"{strTyp}0003" , $"%%{strTyp}W3"
+                if typ = DeviceType.D then
+                    if testBitDevice then
+                        yield $"{strTyp}00000.0", $"%%{strTyp}X00000.0"
+                        yield $"{strTyp}00000.1", $"%%{strTyp}X00000.1"
+                        yield $"{strTyp}00000.2", $"%%{strTyp}X00000.2"
+                        yield $"{strTyp}00001.0", $"%%{strTyp}X00001.0"
+                        yield $"{strTyp}00001.1", $"%%{strTyp}X00001.1"
+                        yield $"{strTyp}00001.2", $"%%{strTyp}X00001.2"
+                        yield $"{strTyp}00011.2", $"%%{strTyp}X00011.2"
+                        yield $"{strTyp}01011.2", $"%%{strTyp}X01011.2"
+                        yield $"{strTyp}10011.F", $"%%{strTyp}X10011.F"
+                
+                    yield $"{strTyp}00001" , $"%%{strTyp}W00001"
+                    yield $"{strTyp}00002" , $"%%{strTyp}W00002"
+                    yield $"{strTyp}00003" , $"%%{strTyp}W00003"
+                else if typ = DeviceType.N || typ = DeviceType.L then
+                    if testBitDevice then
+                        yield $"{strTyp}000000", $"%%{strTyp}X000000"
+                        yield $"{strTyp}000001", $"%%{strTyp}X000001"
+                        yield $"{strTyp}000002", $"%%{strTyp}X000002"
+                        yield $"{strTyp}000010", $"%%{strTyp}X000010"
+                        yield $"{strTyp}000011", $"%%{strTyp}X000011"
+                        yield $"{strTyp}000012", $"%%{strTyp}X000012"
+                        yield $"{strTyp}000112", $"%%{strTyp}X000112"
+                        yield $"{strTyp}010112", $"%%{strTyp}X010112"
+                        yield $"{strTyp}10011F", $"%%{strTyp}X10011F"
+                
+                    yield $"{strTyp}00001" , $"%%{strTyp}W00001"
+                    yield $"{strTyp}00002" , $"%%{strTyp}W00002"
+                    yield $"{strTyp}00003" , $"%%{strTyp}W00003"
+                else 
+                    if testBitDevice then
+                        yield $"{strTyp}00000", $"%%{strTyp}X00000"
+                        yield $"{strTyp}00001", $"%%{strTyp}X00001"
+                        yield $"{strTyp}00002", $"%%{strTyp}X00002"
+                        yield $"{strTyp}00010", $"%%{strTyp}X00010"
+                        yield $"{strTyp}00011", $"%%{strTyp}X00011"
+                        yield $"{strTyp}00012", $"%%{strTyp}X00012"
+                        yield $"{strTyp}00112", $"%%{strTyp}X00112"
+                        yield $"{strTyp}10112", $"%%{strTyp}X10112"
+                        yield $"{strTyp}1011F", $"%%{strTyp}X1011F"
+                
+                    yield $"{strTyp}0001" , $"%%{strTyp}W0001"
+                    yield $"{strTyp}0002" , $"%%{strTyp}W0002"
+                    yield $"{strTyp}0003" , $"%%{strTyp}W0003"
             ]
 
             for (tag, answer) in qnas do

@@ -21,7 +21,10 @@ module FEnetTestModule =
             let lsTag = x.CreateLsTag tag convertFEnet
             lsTag.Value <- value
             conn.WriteATag(lsTag) |> ignore
-        member x.Write(tag, value) = x.WriteTagValue(tag, value, true)
+        member x.Write(lsTag:LsTag, value) =
+            lsTag.Value <- value
+            conn.WriteATag(lsTag) |> ignore
+        member x.Write(tag:string, value) = x.WriteTagValue(tag, value, true)
         member x.WriteFEnet(tag, value) = x.WriteTagValue(tag, value, false)
         member _.Read(tag:string) = conn.ReadATag(tag)
         member _.ReadFEnet(tag:string) = conn.ReadATagFEnet(tag)

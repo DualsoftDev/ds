@@ -47,6 +47,7 @@ type LsTag internal(conn:ConnectionBase, originalTagName:string, cpu:CpuType, ?c
         assert(tName = "LsConnection" || tName = "LsSwConnection" || tName = "LsXg5000Connection" || tName = "LsXg5000COMConnection")
 
     member x.Anal = parsed
+    /// FEnet tag 변환 이전의 original tag name
     member x.TagName = originalTagName
     override x.IsBitAddress = name.StartsWith("%MX")
     override x.DataLengthType = dataLengthType

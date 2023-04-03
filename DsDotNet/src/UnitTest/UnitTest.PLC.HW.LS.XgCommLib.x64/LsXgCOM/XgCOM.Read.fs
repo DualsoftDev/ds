@@ -31,6 +31,27 @@ module XgCommLibSpec =
     let [<Literal>] MAX_RANDOM_READ_POINTS = 64
     let [<Literal>] MAX_ARRAY_BYTE_SIZE = 512   // 64*8
 
+    let convertBittoByte bit =
+        let offset = bit / 8
+        let size = bit % 8
+        (offset, size)
+
+    let convertWordtoByte word = 
+        let offset = word * 2
+        let size = 2
+        (offset, size)
+
+    let convertDWordtoByte dword = 
+        let offset = dword * 4
+        let size = 4
+        (offset, size)
+
+    let convertLWordtoByte lword = 
+        let offset = lword * 8
+        let size = 8
+        (offset, size)
+
+
 (*
     XGComLib summary : working API (V20 API 기준)
     ----------------
@@ -71,6 +92,38 @@ type XgCOM10ReadTest() =
 type XgCOM20ReadTest() =
     inherit XgCOMBaseClass20()
 
+
+
+    (*
+        bit 0 ~ 7   |   0   |   1   |   2   |   3   |   4   |   5   |   6   |   7   |
+            ||
+        byte0[0..7] |   7   |   6   |   5   |   4   |   3   |   2   |   1   |   0   |
+    *)
+    member x.ReadDevice_Bit(bstrDevice:string, nBitOffset:int, lpValue: byref<int>): int = 
+        x.CommObject.RemoveAll()
+        let _offset = nBitOffset / 8
+        let _size = 8 - nBitOffset % 8
+        let di = x.CreateDevice((char)bstrDevice, 'B', 1, _offset)
+        x.CommObject.AddDeviceInfo(di)
+        let rBuf = Array.zeroCreate<byte>(1)
+        if x.CommObject.ReadRandomDevice(rBuf) <> 1 then
+            0
+        else if (rBuf[0] &&& pown 2uy _size) > 0uy then     //bit:true      lpValue = 1
+            lpValue <- 1
+            1
+        else if (rBuf[0] &&& pown 2uy _size) = 0uy then     //bit:false     lpValue = 0
+            lpValue <- 0
+            1
+        else
+            0
+  
+  
+    //Read((int)XgCOMCodes.R_M, rBuf, 1, 0)
+    // x.CommObject.ReadDevice_Block("M", offset, &rBuf[0], MAX_ARRAY_BYTE_SIZE-1, ref nRead)
+
+
+
+
     [<Test>]
     member x.``Not working: Read/Write`` () =
         let wBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
@@ -103,6 +156,20 @@ type XgCOM20ReadTest() =
         // COM 호출 return 값 sRead 가 0 임
         sRead === 0     // 1 이 되어야 할 것 같은데...
         buf === 0       // 1 이 되어야 함...
+        noop()
+
+
+
+    [<Test>]
+    member x.``custom ReadDevice_Bit`` () =
+        let targetValue = 1                                                 //1 or 0
+        let offset = 60
+        x.CommObject.WriteDevice_Bit("W", offset, targetValue) === 1        // WriteDevice_Bit 는 정상 동작
+        let mutable buf = 0
+        let sRead = x.ReadDevice_Bit("W", offset, &buf)                     //새로 만든 ReadDevice_Bit
+        sRead === 1   
+        buf === targetValue      
+        noop()
 
 
     [<Test>]
@@ -160,6 +227,7 @@ type XgCOM20ReadTest() =
     member x.``WriteDevice_Block`` () =
         let offset = 512
         let wBuf = [| 0uy .. byte (MAX_ARRAY_BYTE_SIZE-1) |]
+        let clearBuf = Array.zeroCreate<byte> 512
         x.CommObject.WriteDevice_Block("M", offset, &(wBuf[0]), MAX_ARRAY_BYTE_SIZE) === 1      // WriteDevice_Block 는 정상 동작
 
 

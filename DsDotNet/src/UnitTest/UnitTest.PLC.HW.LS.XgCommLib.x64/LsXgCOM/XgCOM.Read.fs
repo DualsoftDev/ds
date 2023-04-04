@@ -32,16 +32,16 @@ module XgCommLibSpec =
     let [<Literal>] MAX_ARRAY_BYTE_SIZE = 512   // 64*8
 
     let getLongWordtoBit bit =
-        (bit /  64 , bit % 64)
+        bit     /  64 
 
     let getLongWordtoByte byte = 
-        (byte /  8 , byte % 8)
+        byte    /  8
 
     let getLongWordtoWord word = 
-        (word /  4 , word % 4)
+        word    /  4
 
     let getLongWordtoDword dword = 
-        (dword /  2 , dword % 2)
+        dword   /  2
 
     //let getLongWordtoBit lword = 
     //    let offset = lword * 8

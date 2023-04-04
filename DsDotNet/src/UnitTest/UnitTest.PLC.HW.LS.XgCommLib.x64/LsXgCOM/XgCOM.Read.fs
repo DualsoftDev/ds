@@ -335,56 +335,9 @@ type XgCOM20ReadTest() =
             x.CommObject.WriteDevice_Bit("M", i, 0) === 1
 
 
-
     [<Test>]
-    member x.``Long word read test`` () =
-        x.CommObject.RemoveAll()
-        let rBuf = Array.zeroCreate<byte>(64)
-        let wBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
-        let di =  x.CreateDevice('M', 'L', 100)
-        x.CommObject.AddDeviceInfo(di)
-        x.CommObject.WriteRandomDevice(wBuf)=== 1
-        x.CommObject.ReadRandomDevice(rBuf) === 1
-        noop();
-
-
-    [<Test>]
-    member x.``various memory AddDevice test`` () =
-        x.CommObject.IsConnected() === 1
-        //let plcId = x.CommObject.GetPLCID;
-        let wBuf = [| 0uy .. 7uy |]
-        let di0 = x.CreateDevice('W', 'L', 8 )  // 1 Lword? 1 byte?
-        
-        x.CommObject.RemoveAll()
-        x.CommObject.AddDeviceInfo(di0)
-        x.CommObject.WriteRandomDevice(wBuf) === 1
-        noop()
-
-
-    [<Test>]
-    member x.``read/write random L device test`` () =
-        x.CommObject.IsConnected() === 1
-        let plcId = x.CommObject.GetPLCID;
-
-        let di = x.CreateDevice('M', 'L')
-
-        let wBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
-        let rBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
-        x.CommObject.RemoveAll()
-        for i = 0 to MAX_RANDOM_READ_POINTS-1 do
-            di.lOffset <- 100 + i * 8
-            wBuf[i] <- byte i
-            x.CommObject.AddDeviceInfo(di)
-        x.CommObject.WriteRandomDevice(wBuf) === 1
-        x.CommObject.ReadRandomDevice(rBuf) === 1
-        for i = 0 to MAX_RANDOM_READ_POINTS-1 do
-            rBuf[i] === wBuf[i]
-
-
-
-
-    [<Test>]
-    member x.``Read random of B W D L test`` () =
+    member x.``Read random of "X" "B" W D L test`` () =
+        (*memoryType는 B와 X만 가능 *)
         x.CommObject.RemoveAll()
 
         let di0 = x.CreateDevice('I', 'B', 2 ,0)

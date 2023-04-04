@@ -31,25 +31,22 @@ module XgCommLibSpec =
     let [<Literal>] MAX_RANDOM_READ_POINTS = 64
     let [<Literal>] MAX_ARRAY_BYTE_SIZE = 512   // 64*8
 
-    let convertBittoByte bit =
-        let offset = bit / 8
-        let size = bit % 8
-        (offset, size)
+    let getLongWordtoBit bit =
+        (bit /  64 , bit % 64)
 
-    let convertWordtoByte word = 
-        let offset = word * 2
-        let size = 2
-        (offset, size)
+    let getLongWordtoByte byte = 
+        (byte /  8 , byte % 8)
 
-    let convertDWordtoByte dword = 
-        let offset = dword * 4
-        let size = 4
-        (offset, size)
+    let getLongWordtoWord word = 
+        (word /  4 , word % 4)
 
-    let convertLWordtoByte lword = 
-        let offset = lword * 8
-        let size = 8
-        (offset, size)
+    let getLongWordtoDword dword = 
+        (dword /  2 , dword % 2)
+
+    //let getLongWordtoBit lword = 
+    //    let offset = lword * 8
+    //    let size = 8
+    //    (offset, size)
 
 
 (*
@@ -102,7 +99,7 @@ type XgCOM20ReadTest() =
     member x.ReadDevice_Bit(bstrDevice:string, nBitOffset:int, lpValue: byref<int>): int = 
         x.CommObject.RemoveAll()
         let _offset = nBitOffset / 8
-        let _size = 8 - nBitOffset % 8
+        let _size = nBitOffset % 8
         let di = x.CreateDevice((char)bstrDevice, 'B', 1, _offset)
         x.CommObject.AddDeviceInfo(di)
         let rBuf = Array.zeroCreate<byte>(1)
@@ -163,10 +160,10 @@ type XgCOM20ReadTest() =
     [<Test>]
     member x.``custom ReadDevice_Bit`` () =
         let targetValue = 1                                                 //1 or 0
-        let offset = 60
-        x.CommObject.WriteDevice_Bit("W", offset, targetValue) === 1        // WriteDevice_Bit 는 정상 동작
+        let offset = 65
+        x.CommObject.WriteDevice_Bit("M", offset, targetValue) === 1        // WriteDevice_Bit 는 정상 동작
         let mutable buf = 0
-        let sRead = x.ReadDevice_Bit("W", offset, &buf)                     //새로 만든 ReadDevice_Bit
+        let sRead = x.ReadDevice_Bit("M", offset, &buf)                     //새로 만든 ReadDevice_Bit
         sRead === 1   
         buf === targetValue      
         noop()
@@ -332,4 +329,17 @@ type XgCOM20ReadTest() =
     member x.``Clear bit test`` () =
         for i = 0 to 1023 do
             x.CommObject.WriteDevice_Bit("M", i, 0) === 1
+
+
+
+    [<Test>]
+    member x.``Long word read test`` () =
+        x.CommObject.RemoveAll()
+        let rBuf = Array.zeroCreate<byte>(64)
+        let wBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
+        let di =  x.CreateDevice('M', 'L', 100)
+        x.CommObject.AddDeviceInfo(di)
+        x.CommObject.WriteRandomDevice(wBuf)=== 1
+        x.CommObject.ReadRandomDevice(rBuf) === 1
+        noop();
 

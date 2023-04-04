@@ -32,19 +32,24 @@ module XgCommLibSpec =
     let [<Literal>] MAX_ARRAY_BYTE_SIZE = 512   // 64*8
 
     let getLongWordfromBit bit =
-        bit     /  64 
+        (bit/8, bit%8) 
 
+    //data 기준 : byte
     let getLongWordfromByte byte = 
-        byte    /  8
+        ///offset, size
+        (byte, 0)
 
-    let getLongWordfromWord word = 
-        word    /  4
+    let getLongWordfromWord word =
+        ///offset, size
+        (word*2, 2)
 
     let getLongWordfromDword dword = 
-        dword   /  2
+        ///offset, size
+        (dword*4, 4)
 
-    //let getLongWordfromLwrod lword = 
-        //lword /2
+    let getLongWordfromLwrod lword =
+        ///offset, size
+        (lword*8, 8)
 
 
 (*
@@ -206,7 +211,6 @@ type XgCOM20ReadTest() =
             di.lOffset <- 100 + i * 8
             wBuf[i] <- byte i
             x.CommObject.AddDeviceInfo(di)
-
         x.CommObject.WriteRandomDevice(wBuf) === 1
         x.CommObject.ReadRandomDevice(rBuf) === 1
         for i = 0 to MAX_RANDOM_READ_POINTS-1 do
@@ -341,3 +345,27 @@ type XgCOM20ReadTest() =
         x.CommObject.ReadRandomDevice(rBuf) === 1
         noop();
 
+
+    [<Test>]
+    member x.``various memory AddDevice test`` () =
+        x.CommObject.IsConnected() === 1
+        //let plcId = x.CommObject.GetPLCID;
+
+        x.CreateDevice('M', 'L', 8 , 10)
+        x.CreateDevice('W', 'L', 8 , 10)
+        x.CreateDevice('I', 'L', 8 , 10)
+        x.CreateDevice('Q', 'L', 8 , 10)
+
+        x.CommObject.RemoveAll()
+        x.CommObject.AddDeviceInfo(di0)
+        x.CommObject.AddDeviceInfo(di1)
+        x.CommObject.AddDeviceInfo(di2)
+        x.CommObject.AddDeviceInfo(di3)
+        noop()
+
+
+
+
+
+        //let arr = [| 1; 2; 3; 2; 4; 3; 5 |]
+        //let distinctArr = arr |> Seq.distinct |> Seq.toArray

@@ -30,6 +30,11 @@ namespace Dsu.PLC.Common
         private object _value;
 
         /// <summary>
+        /// 사용자가 임의로 설정할 수 있는 값.
+        /// </summary>
+        public object UserObject { get; set; }
+
+        /// <summary>
         /// Tag 의 값.  최초 생성 시, connection 을 통해 값을 받아 오기 전에는 null 값을 갖는다.
         /// PLC 에 값을 write 요청할 때에는 WriteRequestValue  값을 설정한다.
         /// </summary>

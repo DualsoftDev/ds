@@ -31,6 +31,8 @@ module XgCommLibSpec =
     let [<Literal>] MAX_RANDOM_READ_POINTS = 64
     let [<Literal>] MAX_ARRAY_BYTE_SIZE = 512   // 64*8
 
+    let mutable listOfrBufs : byte[] list = []
+
     let getLongWordfromBit bit =
         (bit/8, bit%8) 
 
@@ -350,21 +352,77 @@ type XgCOM20ReadTest() =
     member x.``various memory AddDevice test`` () =
         x.CommObject.IsConnected() === 1
         //let plcId = x.CommObject.GetPLCID;
-
-        x.CreateDevice('M', 'L', 8 , 10)
-        x.CreateDevice('W', 'L', 8 , 10)
-        x.CreateDevice('I', 'L', 8 , 10)
-        x.CreateDevice('Q', 'L', 8 , 10)
-
+        let wBuf = [| 0uy .. 7uy |]
+        let di0 = x.CreateDevice('W', 'L', 8 )  // 1 Lword? 1 byte?
+        
         x.CommObject.RemoveAll()
+        x.CommObject.AddDeviceInfo(di0)
+        x.CommObject.WriteRandomDevice(wBuf) === 1
+        noop()
+
+
+    [<Test>]
+    member x.``read/write random L device test`` () =
+        x.CommObject.IsConnected() === 1
+        let plcId = x.CommObject.GetPLCID;
+
+        let di = x.CreateDevice('M', 'L')
+
+        let wBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
+        let rBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
+        x.CommObject.RemoveAll()
+        for i = 0 to MAX_RANDOM_READ_POINTS-1 do
+            di.lOffset <- 100 + i * 8
+            wBuf[i] <- byte i
+            x.CommObject.AddDeviceInfo(di)
+        x.CommObject.WriteRandomDevice(wBuf) === 1
+        x.CommObject.ReadRandomDevice(rBuf) === 1
+        for i = 0 to MAX_RANDOM_READ_POINTS-1 do
+            rBuf[i] === wBuf[i]
+
+
+
+
+    [<Test>]
+    member x.``Read random of B W D L test`` () =
+        x.CommObject.RemoveAll()
+
+        let di0 = x.CreateDevice('I', 'B', 2 ,0)
+        let di1 = x.CreateDevice('M', 'B', 8 ,128)
+        let di2 = x.CreateDevice('W', 'B', 1 ,7)
+
+
+
+        let di3 = x.CreateDevice('Q', 'B', 1 ,1)
+        
+        (*base slot offset 계산 필요* -> 사용하지 않음*)
+        //let di4 = x.CreateDevice('Q', 'X', 0 ,1)
+        //let di4 = x.CreateDevice('Q', 'X', 1 ,1)
+        //let di4 = x.CreateDevice('Q', 'X', 2 ,1)
+        //let di4 = x.CreateDevice('Q', 'X', 3 ,1)
+        //let di4 = x.CreateDevice('Q', 'X', 4 ,1)
+        //let di4 = x.CreateDevice('Q', 'X', 5 ,1)
+        //let di4 = x.CreateDevice('Q', 'X', 6 ,1)
+        //let di4 = x.CreateDevice('Q', 'X', 7 ,1)
+
+        let rBuf0 = Array.zeroCreate<byte>(2 + 8 + 1 + 1 + 8)
+        let rBuf1 = Array.zeroCreate<byte>(2)
+        let rBuf2 = Array.zeroCreate<byte>(4)
+        let rBuf3 = Array.zeroCreate<byte>(8)
         x.CommObject.AddDeviceInfo(di0)
         x.CommObject.AddDeviceInfo(di1)
         x.CommObject.AddDeviceInfo(di2)
         x.CommObject.AddDeviceInfo(di3)
-        noop()
 
-
-
+        x.CommObject.ReadRandomDevice(rBuf0) === 1
+        //x.CommObject.ReadRandomDevice(rBuf1) === 1
+        //x.CommObject.ReadRandomDevice(rBuf2) === 1
+        //x.CommObject.ReadRandomDevice(rBuf3) === 1
+        let out0 = rBuf0
+        let out1 = rBuf1
+        let out2 = rBuf2
+        let out3 = rBuf3
+        noop();
 
 
         //let arr = [| 1; 2; 3; 2; 4; 3; 5 |]

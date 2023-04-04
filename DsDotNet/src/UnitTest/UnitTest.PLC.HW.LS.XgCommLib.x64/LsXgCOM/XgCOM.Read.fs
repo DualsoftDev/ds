@@ -31,22 +31,20 @@ module XgCommLibSpec =
     let [<Literal>] MAX_RANDOM_READ_POINTS = 64
     let [<Literal>] MAX_ARRAY_BYTE_SIZE = 512   // 64*8
 
-    let getLongWordtoBit bit =
+    let getLongWordfromBit bit =
         bit     /  64 
 
-    let getLongWordtoByte byte = 
+    let getLongWordfromByte byte = 
         byte    /  8
 
-    let getLongWordtoWord word = 
+    let getLongWordfromWord word = 
         word    /  4
 
-    let getLongWordtoDword dword = 
+    let getLongWordfromDword dword = 
         dword   /  2
 
-    //let getLongWordtoBit lword = 
-    //    let offset = lword * 8
-    //    let size = 8
-    //    (offset, size)
+    //let getLongWordfromLwrod lword = 
+        //lword /2
 
 
 (*

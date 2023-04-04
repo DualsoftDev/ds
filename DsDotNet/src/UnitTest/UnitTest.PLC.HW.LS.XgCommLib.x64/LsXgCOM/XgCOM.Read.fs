@@ -31,6 +31,27 @@ module XgCommLibSpec =
     let [<Literal>] MAX_RANDOM_READ_POINTS = 64
     let [<Literal>] MAX_ARRAY_BYTE_SIZE = 512   // 64*8
 
+    let getLongWordfromBit bit =
+        (bit/8, bit%8) 
+
+    //data 기준 : byte
+    let getLongWordfromByte byte = 
+        ///offset, size
+        (byte, 0)
+
+    let getLongWordfromWord word =
+        ///offset, size
+        (word*2, 2)
+
+    let getLongWordfromDword dword = 
+        ///offset, size
+        (dword*4, 4)
+
+    let getLongWordfromLwrod lword =
+        ///offset, size
+        (lword*8, 8)
+
+
 (*
     XGComLib summary : working API (V20 API 기준)
     ----------------
@@ -71,6 +92,38 @@ type XgCOM10ReadTest() =
 type XgCOM20ReadTest() =
     inherit XgCOMBaseClass20()
 
+
+
+    (*
+        bit 0 ~ 7   |   0   |   1   |   2   |   3   |   4   |   5   |   6   |   7   |
+            ||
+        byte0[0..7] |   7   |   6   |   5   |   4   |   3   |   2   |   1   |   0   |
+    *)
+    member x.ReadDevice_Bit(bstrDevice:string, nBitOffset:int, lpValue: byref<int>): int = 
+        x.CommObject.RemoveAll()
+        let _offset = nBitOffset / 8
+        let _size = nBitOffset % 8
+        let di = x.CreateDevice((char)bstrDevice, 'B', 1, _offset)
+        x.CommObject.AddDeviceInfo(di)
+        let rBuf = Array.zeroCreate<byte>(1)
+        if x.CommObject.ReadRandomDevice(rBuf) <> 1 then
+            0
+        else if (rBuf[0] &&& pown 2uy _size) > 0uy then     //bit:true      lpValue = 1
+            lpValue <- 1
+            1
+        else if (rBuf[0] &&& pown 2uy _size) = 0uy then     //bit:false     lpValue = 0
+            lpValue <- 0
+            1
+        else
+            0
+  
+  
+    //Read((int)XgCOMCodes.R_M, rBuf, 1, 0)
+    // x.CommObject.ReadDevice_Block("M", offset, &rBuf[0], MAX_ARRAY_BYTE_SIZE-1, ref nRead)
+
+
+
+
     [<Test>]
     member x.``Not working: Read/Write`` () =
         let wBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
@@ -103,6 +156,20 @@ type XgCOM20ReadTest() =
         // COM 호출 return 값 sRead 가 0 임
         sRead === 0     // 1 이 되어야 할 것 같은데...
         buf === 0       // 1 이 되어야 함...
+        noop()
+
+
+
+    [<Test>]
+    member x.``custom ReadDevice_Bit`` () =
+        let targetValue = 1                                                 //1 or 0
+        let offset = 65
+        x.CommObject.WriteDevice_Bit("M", offset, targetValue) === 1        // WriteDevice_Bit 는 정상 동작
+        let mutable buf = 0
+        let sRead = x.ReadDevice_Bit("M", offset, &buf)                     //새로 만든 ReadDevice_Bit
+        sRead === 1   
+        buf === targetValue      
+        noop()
 
 
     [<Test>]
@@ -144,7 +211,6 @@ type XgCOM20ReadTest() =
             di.lOffset <- 100 + i * 8
             wBuf[i] <- byte i
             x.CommObject.AddDeviceInfo(di)
-
         x.CommObject.WriteRandomDevice(wBuf) === 1
         x.CommObject.ReadRandomDevice(rBuf) === 1
         for i = 0 to MAX_RANDOM_READ_POINTS-1 do
@@ -160,6 +226,7 @@ type XgCOM20ReadTest() =
     member x.``WriteDevice_Block`` () =
         let offset = 512
         let wBuf = [| 0uy .. byte (MAX_ARRAY_BYTE_SIZE-1) |]
+        let clearBuf = Array.zeroCreate<byte> 512
         x.CommObject.WriteDevice_Block("M", offset, &(wBuf[0]), MAX_ARRAY_BYTE_SIZE) === 1      // WriteDevice_Block 는 정상 동작
 
 
@@ -265,3 +332,40 @@ type XgCOM20ReadTest() =
         for i = 0 to 1023 do
             x.CommObject.WriteDevice_Bit("M", i, 0) === 1
 
+
+
+    [<Test>]
+    member x.``Long word read test`` () =
+        x.CommObject.RemoveAll()
+        let rBuf = Array.zeroCreate<byte>(64)
+        let wBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
+        let di =  x.CreateDevice('M', 'L', 100)
+        x.CommObject.AddDeviceInfo(di)
+        x.CommObject.WriteRandomDevice(wBuf)=== 1
+        x.CommObject.ReadRandomDevice(rBuf) === 1
+        noop();
+
+
+    [<Test>]
+    member x.``various memory AddDevice test`` () =
+        x.CommObject.IsConnected() === 1
+        //let plcId = x.CommObject.GetPLCID;
+
+        x.CreateDevice('M', 'L', 8 , 10)
+        x.CreateDevice('W', 'L', 8 , 10)
+        x.CreateDevice('I', 'L', 8 , 10)
+        x.CreateDevice('Q', 'L', 8 , 10)
+
+        x.CommObject.RemoveAll()
+        x.CommObject.AddDeviceInfo(di0)
+        x.CommObject.AddDeviceInfo(di1)
+        x.CommObject.AddDeviceInfo(di2)
+        x.CommObject.AddDeviceInfo(di3)
+        noop()
+
+
+
+
+
+        //let arr = [| 1; 2; 3; 2; 4; 3; 5 |]
+        //let distinctArr = arr |> Seq.distinct |> Seq.toArray

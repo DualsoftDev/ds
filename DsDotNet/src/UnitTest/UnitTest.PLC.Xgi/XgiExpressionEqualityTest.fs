@@ -142,19 +142,21 @@ type XgiExpEqualityTest() =
 
 
     [<Test>]
-    member __.``XOR test`` () =
-        let storages = Storages()
-        let code = """
-            bool b1 = false;
-            bool b2 = false;
-            bool b3 = false;
-            $b3 := $b1 <> $b2;
-"""
-        let statements = parseCode storages code
-        let f = getFuncName()
-        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
-
+    member x.``XOR test`` () =
+        lock x.Locker (fun () ->
+            autoVariableCounter <- 0
+            let storages = Storages()
+            let code = """
+                bool b1 = false;
+                bool b2 = false;
+                bool b3 = false;
+                $b3 := $b1 <> $b2;
+    """
+            let statements = parseCode storages code
+            let f = getFuncName()
+            let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+            saveTestResult f xml
+        )
 
 
 

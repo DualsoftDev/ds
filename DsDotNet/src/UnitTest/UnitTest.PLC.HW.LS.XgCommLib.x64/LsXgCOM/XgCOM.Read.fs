@@ -34,10 +34,10 @@ module XgCommLibSpec =
     let mutable listOfrBufs : byte[] list = []
 
     let getLongWordfromBit bit =
-        (bit/8, bit%8) 
+        (bit/8, bit%8)
 
     //data 기준 : byte
-    let getLongWordfromByte byte = 
+    let getLongWordfromByte byte =
         ///offset, size
         (byte, 0)
 
@@ -45,7 +45,7 @@ module XgCommLibSpec =
         ///offset, size
         (word*2, 2)
 
-    let getLongWordfromDword dword = 
+    let getLongWordfromDword dword =
         ///offset, size
         (dword*4, 4)
 
@@ -101,7 +101,7 @@ type XgCOM20ReadTest() =
             ||
         byte0[0..7] |   7   |   6   |   5   |   4   |   3   |   2   |   1   |   0   |
     *)
-    member x.ReadDevice_Bit(bstrDevice:string, nBitOffset:int, lpValue: byref<int>): int = 
+    member x.ReadDevice_Bit(bstrDevice:string, nBitOffset:int, lpValue: byref<int>): int =
         x.CommObject.RemoveAll()
         let _offset = nBitOffset / 8
         let _size = nBitOffset % 8
@@ -118,8 +118,8 @@ type XgCOM20ReadTest() =
             1
         else
             0
-  
-  
+
+
     //Read((int)XgCOMCodes.R_M, rBuf, 1, 0)
     // x.CommObject.ReadDevice_Block("M", offset, &rBuf[0], MAX_ARRAY_BYTE_SIZE-1, ref nRead)
 
@@ -169,8 +169,8 @@ type XgCOM20ReadTest() =
         x.CommObject.WriteDevice_Bit("M", offset, targetValue) === 1        // WriteDevice_Bit 는 정상 동작
         let mutable buf = 0
         let sRead = x.ReadDevice_Bit("M", offset, &buf)                     //새로 만든 ReadDevice_Bit
-        sRead === 1   
-        buf === targetValue      
+        sRead === 1
+        buf === targetValue
         noop()
 
 
@@ -354,7 +354,7 @@ type XgCOM20ReadTest() =
         //let plcId = x.CommObject.GetPLCID;
         let wBuf = [| 0uy .. 7uy |]
         let di0 = x.CreateDevice('W', 'L', 8 )  // 1 Lword? 1 byte?
-        
+
         x.CommObject.RemoveAll()
         x.CommObject.AddDeviceInfo(di0)
         x.CommObject.WriteRandomDevice(wBuf) === 1
@@ -394,7 +394,7 @@ type XgCOM20ReadTest() =
 
 
         let di3 = x.CreateDevice('Q', 'B', 1 ,1)
-        
+
         (*base slot offset 계산 필요* -> 사용하지 않음*)
         //let di4 = x.CreateDevice('Q', 'X', 0 ,1)
         //let di4 = x.CreateDevice('Q', 'X', 1 ,1)

@@ -30,16 +30,16 @@ type LsCpu(cpu, running) =
 type LsTag internal(conn:ConnectionBase, originalTagName:string, cpu:CpuType, ?convertFEnet) as this =
     inherit TagBase(conn)
     let convertFEnet = convertFEnet |? true
-    let name =
+    let fenetTagName =
         if convertFEnet then
             let cpu = (conn.Cpu :?> LsCpu).CpuType
             tryToFEnetTag cpu originalTagName |> Option.get
         else
             originalTagName
-    let parsed = tryParseTag (name) |> Option.get
+    let parsed = tryParseTag (fenetTagName) |> Option.get
     let dataLengthType = parsed.DataType.ToDataLengthType()
     do
-        this.Name <- name
+        this.Name <- originalTagName
         base.Type <- parsed.DataType.ToTagType()
 
 
@@ -47,9 +47,10 @@ type LsTag internal(conn:ConnectionBase, originalTagName:string, cpu:CpuType, ?c
         assert(tName = "LsConnection" || tName = "LsSwConnection" || tName = "LsXg5000Connection" || tName = "LsXg5000COMConnection")
 
     member x.Anal = parsed
+    member x.FEnetTagName = fenetTagName
     /// FEnet tag 변환 이전의 original tag name
     member x.TagName = originalTagName
-    override x.IsBitAddress = name.StartsWith("%MX")
+    override x.IsBitAddress = parsed.DataType = DataType.Bit
     override x.DataLengthType = dataLengthType
 
 /// LS 산전 PLC Tag for XGK
@@ -191,7 +192,7 @@ and LsConnection(parameters:LsConnectionParameters) as this =
     /// (Block 읽기 등의 optimize 반영한) channelize
     let channelize (lsTags:LsTag []) =
         let tags = lsTags |> map name
-        let tagsDic = lsTags |> Array.map(fun t -> (t.Name, t)) |> Tuple.toDictionary
+        let tagsDic = lsTags |> Array.map(fun t -> (t.FEnetTagName, t)) |> Tuple.toDictionary
 
         [
             for (channelTags, reader) in planReadTags  readRandomTagsWithNames readBlock cpu tags do
@@ -239,7 +240,10 @@ and LsConnection(parameters:LsConnectionParameters) as this =
 
 
     /// 하나의 tag 값을 읽어 낸다.  return type : obj
-    override x.ReadATag(tag) = x.ReadATag(tag.Name)
+    override x.ReadATag(tag:ITag) =
+        match tag with
+        | :? LsTag as lsTag -> x.ReadATag(lsTag.FEnetTagName)
+        | _ -> failwith "ERROR"
 
 
     /// 하나의 tag 값을 즉시 읽어 낸다.  return type: uint64.  ValueChanged event 등은 발생하지 않는다.
@@ -263,17 +267,17 @@ and LsConnection(parameters:LsConnectionParameters) as this =
         |> anal.DataType.BoxUI8
 
     member x.WriteATag(tag:ITag) =
-        let str:string = tag.Name
-        let containsChar = str.Contains("A")
-        if containsChar then
+        let lsTag = tag :?> LsTag
+        let str:string = lsTag.FEnetTagName
+        if str.StartsWith("%%A") || str.StartsWith("A") then
             logWarn "You are performing a write operation on memory A, which is not allowed on XG5000."
-        x.WriteRandomTags([|tag :?> LsTag|])
+        x.WriteRandomTags([| lsTag |])
 
 
 
     /// 복수개의 tag 값을 PLC 로부터 읽어 낸다.
     member x.ReadRandomTags (tags:LsTag []) =
-        let tagsDic = tags |> Array.map(fun t -> (t.Name, t)) |> Tuple.toDictionary
+        let tagsDic = tags |> Array.map(fun t -> (t.FEnetTagName, t)) |> Tuple.toDictionary
         for (tag, value) in readRandomTags (tags |> map name) do
             let lsTag = tagsDic.[tag]
             /// uint64 를 type 에 맞게 casting 해서 넣어 주어야 함
@@ -282,7 +286,7 @@ and LsConnection(parameters:LsConnectionParameters) as this =
 
     /// 복수개의 tag 값을 PLC 로 write
     member x.WriteRandomTags (tags:LsTag []) =
-        let tagsAndValues = tags |> map (fun t -> (t.Name, t.Anal.DataType.Unbox2UI8(t.Value)))
+        let tagsAndValues = tags |> map (fun t -> (t.FEnetTagName, t.Anal.DataType.Unbox2UI8(t.Value)))
         writeRandomTags tagsAndValues
     member x.WriteRandomTags tagsAndValues = writeRandomTags tagsAndValues
 
@@ -318,7 +322,7 @@ and LsConnection(parameters:LsConnectionParameters) as this =
 and LsChannelRequestExecutor(conn, tags, reader:CachedTagsReader) =
     inherit ChannelRequestExecutor(conn :> ConnectionBase, tags |> Seq.cast<TagBase>)
 
-    let tagsDic = tags |> map (fun t -> (t.Name, t)) |> Tuple.toDictionary
+    let tagsDic = tags |> map (fun t -> (t.FEnetTagName, t)) |> Tuple.toDictionary
 
     override x.ExecuteRead() =
         for tag, value in reader() do

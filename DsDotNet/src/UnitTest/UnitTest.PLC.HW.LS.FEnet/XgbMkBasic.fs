@@ -324,7 +324,7 @@ type XgbMkBasic() =
                 fun evt ->      //evt.Tag.Name evt.Tag.Value
                     match evt.Tag with
                     | :? LsTagXgi as evTag ->
-                        logDebug "%s value Changed %A -> %A" evTag.TagName evt.Tag.OldValue evt.Tag.Value
+                        logDebug "%s value Changed %A -> %A" evTag.Name evt.Tag.OldValue evt.Tag.Value
                         if testTags.Contains(evTag) then
                             evTag.UserObject === evTag.Value
                             testTags.Remove(evTag) |> ignore

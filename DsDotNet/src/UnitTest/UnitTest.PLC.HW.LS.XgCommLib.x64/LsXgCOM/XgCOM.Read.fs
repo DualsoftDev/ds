@@ -10,6 +10,7 @@ open Xunit
 open NUnit.Framework
 
 open Engine.Common.FS
+open System.Collections.Generic
 
 [<AutoOpen>]
 module XgCommLibSpec =
@@ -32,6 +33,19 @@ module XgCommLibSpec =
     let [<Literal>] MAX_ARRAY_BYTE_SIZE = 512   // 64*8
 
     let mutable listOfrBufs : byte[] list = []
+
+
+    [<Struct>]
+    type IData = { 
+                    MomoryType : string             //M W I Q ..
+                    DataType : string               //X B W D L
+                    LWordName : string              //변환된 LWord 메모리 이름  "ML0"
+                    Offset : byte                    //변환된 LWord 메모리 안에서의 offset
+                    Size : byte                     //byte size(X = 1, B = 1, W = 2, D = 4, L = 8)
+                    mutable DataArray : byte[]      //Array.Sub로 buf에서 참조
+                    //mutable ListOffset : int 
+                    //mutable ArrayOffset : int
+                 }
 
     let getLongWordfromBit bit =
         (bit/8, bit%8)
@@ -343,7 +357,7 @@ type XgCOM20ReadTest() =
         let di0 = x.CreateDevice('I', 'B', 2 ,0)
         let di1 = x.CreateDevice('M', 'B', 8 ,128)
         let di2 = x.CreateDevice('W', 'B', 1 ,7)
-
+        
 
 
         let di3 = x.CreateDevice('Q', 'B', 1 ,1)
@@ -377,6 +391,50 @@ type XgCOM20ReadTest() =
         let out3 = rBuf3
         noop();
 
+    [<Test>]
+    member x.``In progress.. : Input memory  initialize Test`` () =
 
-        //let arr = [| 1; 2; 3; 2; 4; 3; 5 |]
-        //let distinctArr = arr |> Seq.distinct |> Seq.toArray
+
+
+        let dict = new Dictionary<string, IData>()
+        let lWords : List<string> = new List<string>() 
+
+        //let TestInputset = [|"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154"|]
+        let TestInputset = [|"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154"|]
+
+        let testSet:string[] = TestInputset |> Array.map(fun s -> s.Replace("%",""))
+        for item in testSet do
+            if not <| dict.ContainsKey(item) then
+                let _sp:string[] = item.Split()
+                let mutable _address: byte = 0uy
+                Byte.TryParse(item.[2..item.Length-1], &_address) === true
+
+                let _data = {
+                    MomoryType = item.[0].ToString()
+                    DataType = item.[1].ToString()
+                    LWordName = item.[0].ToString() + "L" + (_address/64uy).ToString()
+                    Offset = (_address%64uy)
+                    Size = 1uy
+                    DataArray = Array.zeroCreate<byte>(0)
+                    //ListOffset = 100
+                    //ArrayOffset = 200
+                }
+                //memoryType: _split[0], DataType: _split[1], offset: _split[2.._split.Length-1])
+
+                dict.[item] <- _data
+                    
+
+        ()
+
+                    //MomoryType : string             //M W I Q ..
+                    //DataType : string               //X B W D L
+                    //LWordName : string              //변환된 LWord 메모리 이름  "ML0"
+                    //Offset : byte                    //변환된 LWord 메모리 안에서의 offset
+                    //Size : byte                     //byte size(X = 1, B = 1, W = 2, D = 4, L = 8)
+                    //mutable DataArray : byte[]      //Array.Sub로 buf에서 참조
+
+//let arr = [| 1; 2; 3; 2; 4; 3; 5 |]
+//let distinctArr = arr |> Seq.distinct |> Seq.toArray
+
+//let myArray = [|1; 2; 3; 4; 5|]
+//let subArray = Array.sub myArray 2 3

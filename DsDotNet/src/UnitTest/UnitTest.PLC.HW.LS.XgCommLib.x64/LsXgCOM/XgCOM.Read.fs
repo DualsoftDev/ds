@@ -397,8 +397,6 @@ type XgCOM20ReadTest() =
 
     [<Test>]
     member x.``In progress.. : Input memory  initialize Test`` () =
-
-
         (* 전처리, 메모리 정복struct 생성 , dictionary생성 , LWords 메모리주소 리스트 생성 *)
         let dict = new Dictionary<string, IData>()
         let mutable lWords = Set.empty

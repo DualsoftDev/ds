@@ -397,7 +397,7 @@ type XgCOM20ReadTest() =
 
         (* 메모리 정복struct 생성 , dictionary생성 , LWords 메모리주소 리스트 생성 *)
         let dict = new Dictionary<string, IData>()
-        let mutable lWords : List<string> = new List<string>()
+        let mutable lWords = Set.empty
 
         //let TestInputset = [|"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154"|]
         let TestInputset = [|"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154"|]
@@ -440,18 +440,14 @@ type XgCOM20ReadTest() =
                 }
 
                 dict.[item] <- _value
-                lWords.Add(_fullLWord);
-
-        (*LWords 리스트 중복 제거*)
-        //let distinctWords : List<string> =  List.distinctBy(fun s -> s) lWords
-        //lWords <- distinctWords   
-
+                (*LWords 리스트 중복 제거 -> list err -> set으로 자동으로 날림*)
+                lWords <- Set.add _fullLWord lWords
 
         (*LWord 단위 deviceinfo 생성, readbuf array 만들기*)
 
         (*IData의 구조체에 참조 배열 넣기*)
         (*참조 배열 모니터링 등록하기 - 모니터링 구현하기*)
-        ()
+        noop()
 
                     //MomoryType : string             //M W I Q ..
                     //DataType : string               //X B W D L

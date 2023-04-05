@@ -369,9 +369,6 @@ type XgCOM20ReadTest() =
         let di11 = x.CreateDevice('Q', 'X', 7 ,1)
 
         let rBuf0 = Array.zeroCreate<byte>(2 + 8 + 1 + 1 + 8)
-        let rBuf1 = Array.zeroCreate<byte>(2)
-        let rBuf2 = Array.zeroCreate<byte>(4)
-        let rBuf3 = Array.zeroCreate<byte>(8)
         x.CommObject.AddDeviceInfo(di0)
         x.CommObject.AddDeviceInfo(di1)
         x.CommObject.AddDeviceInfo(di2)
@@ -386,13 +383,15 @@ type XgCOM20ReadTest() =
         x.CommObject.AddDeviceInfo(di11)
 
         x.CommObject.ReadRandomDevice(rBuf0) === 1
-        //x.CommObject.ReadRandomDevice(rBuf1) === 1
-        //x.CommObject.ReadRandomDevice(rBuf2) === 1
-        //x.CommObject.ReadRandomDevice(rBuf3) === 1
         let out0 = rBuf0
-        let out1 = rBuf1
-        let out2 = rBuf2
-        let out3 = rBuf3
+        let mutable bitBuf = 0
+
+        let mutable i = 0
+        for i = 0 to 7 do
+            let b = int(rBuf0.[i + 12])
+            bitBuf <- bitBuf + b * int(Math.Pow (2, i))
+             
+        rBuf0[11]  === byte(bitBuf) 
         noop();
 
     [<Test>]
@@ -453,7 +452,9 @@ type XgCOM20ReadTest() =
             let di = x.CreateDevice(item.[0], 'B', 8, _offset * 8 )
             x.CommObject.AddDeviceInfo(di)
         //let rBuf = Array.zeroCreate<byte>(lWords.Count) 
-        let rBuf = Array.zeroCreate<byte>(lWords.Count * 8) //or MAX_ARRAY_BYTE_SIZE
+
+        //data buffer array set 만들기. MAX_ARRAY_BYTE_SIZE 를 넘길 때마다 갯수를 늘린다.
+        let rBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)      // + rBuf는 하나만 만든다. list의 array를 돌아가면서 읽고 비교하고 덮어쓴다.
         x.CommObject.ReadRandomDevice(rBuf) === 1
 
         

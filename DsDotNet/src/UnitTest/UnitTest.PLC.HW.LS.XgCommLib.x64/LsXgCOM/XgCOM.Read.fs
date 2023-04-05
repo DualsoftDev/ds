@@ -395,7 +395,7 @@ type XgCOM20ReadTest() =
     member x.``In progress.. : Input memory  initialize Test`` () =
 
 
-
+        (* 메모리 정복struct 생성 , dictionary생성 , LWords 메모리주소 리스트 생성 *)
         let dict = new Dictionary<string, IData>()
         let mutable lWords : List<string> = new List<string>()
 
@@ -410,8 +410,7 @@ type XgCOM20ReadTest() =
 
                 let _memory =  item.[0].ToString()
                 let _data = item.[1].ToString()
-                let _fullLWord = item.[0].ToString() + "L" + (_address/64uy).ToString()
-                let _sizeSnap = 
+                let _size = 
                     match _data with
                     | "X"-> 1uy
                     | "B"-> 1uy
@@ -420,24 +419,38 @@ type XgCOM20ReadTest() =
                     | "L"-> 8uy
                     | _ -> 1uy
 
+                let _offsetSnap = 
+                    match _data with
+                    | "X"-> 64uy
+                    | "B"-> 8uy
+                    | "W"-> 4uy
+                    | "D"-> 2uy
+                    | "L"-> 1uy
+                    | _ -> 1uy
+
+                let _fullLWord = item.[0].ToString() + "L" + (_address/_offsetSnap).ToString()
 
                 let _value = {
                     MomoryType = item.[0].ToString()
                     DataType = item.[1].ToString()
                     LWordName = _fullLWord
-                    Offset = _address % _sizeSnap
-                    Size = _sizeSnap
+                    Offset = _address % _offsetSnap
+                    Size = _size
                     DataArray = Array.zeroCreate<byte>(0)
-                    //ListOffset = 100
-                    //ArrayOffset = 200
                 }
 
                 dict.[item] <- _value
                 lWords.Add(_fullLWord);
 
-        let setWords = Set.ofList lWords
-        lWords <- List.ofSet setWords     
+        (*LWords 리스트 중복 제거*)
+        //let distinctWords : List<string> =  List.distinctBy(fun s -> s) lWords
+        //lWords <- distinctWords   
 
+
+        (*LWord 단위 deviceinfo 생성, readbuf array 만들기*)
+
+        (*IData의 구조체에 참조 배열 넣기*)
+        (*참조 배열 모니터링 등록하기 - 모니터링 구현하기*)
         ()
 
                     //MomoryType : string             //M W I Q ..

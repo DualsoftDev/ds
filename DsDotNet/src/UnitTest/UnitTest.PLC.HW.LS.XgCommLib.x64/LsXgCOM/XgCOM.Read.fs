@@ -357,20 +357,16 @@ type XgCOM20ReadTest() =
         let di0 = x.CreateDevice('I', 'B', 2 ,0)
         let di1 = x.CreateDevice('M', 'B', 8 ,128)
         let di2 = x.CreateDevice('W', 'B', 1 ,7)
-        
-
-
         let di3 = x.CreateDevice('Q', 'B', 1 ,1)
 
-        (*base slot offset 계산 필요* -> 사용하지 않음*)
-        //let di4 = x.CreateDevice('Q', 'X', 0 ,1)
-        //let di4 = x.CreateDevice('Q', 'X', 1 ,1)
-        //let di4 = x.CreateDevice('Q', 'X', 2 ,1)
-        //let di4 = x.CreateDevice('Q', 'X', 3 ,1)
-        //let di4 = x.CreateDevice('Q', 'X', 4 ,1)
-        //let di4 = x.CreateDevice('Q', 'X', 5 ,1)
-        //let di4 = x.CreateDevice('Q', 'X', 6 ,1)
-        //let di4 = x.CreateDevice('Q', 'X', 7 ,1)
+        let di4 = x.CreateDevice('Q', 'X', 0 ,1)
+        let di5 = x.CreateDevice('Q', 'X', 1 ,1)
+        let di6 = x.CreateDevice('Q', 'X', 2 ,1)
+        let di7 = x.CreateDevice('Q', 'X', 3 ,1)
+        let di8 = x.CreateDevice('Q', 'X', 4 ,1)
+        let di9 = x.CreateDevice('Q', 'X', 5 ,1)
+        let di10 = x.CreateDevice('Q', 'X', 6 ,1)
+        let di11 = x.CreateDevice('Q', 'X', 7 ,1)
 
         let rBuf0 = Array.zeroCreate<byte>(2 + 8 + 1 + 1 + 8)
         let rBuf1 = Array.zeroCreate<byte>(2)
@@ -380,6 +376,14 @@ type XgCOM20ReadTest() =
         x.CommObject.AddDeviceInfo(di1)
         x.CommObject.AddDeviceInfo(di2)
         x.CommObject.AddDeviceInfo(di3)
+        x.CommObject.AddDeviceInfo(di4)
+        x.CommObject.AddDeviceInfo(di5)
+        x.CommObject.AddDeviceInfo(di6)
+        x.CommObject.AddDeviceInfo(di7)
+        x.CommObject.AddDeviceInfo(di8)
+        x.CommObject.AddDeviceInfo(di9)
+        x.CommObject.AddDeviceInfo(di10)
+        x.CommObject.AddDeviceInfo(di11)
 
         x.CommObject.ReadRandomDevice(rBuf0) === 1
         //x.CommObject.ReadRandomDevice(rBuf1) === 1
@@ -395,7 +399,7 @@ type XgCOM20ReadTest() =
     member x.``In progress.. : Input memory  initialize Test`` () =
 
 
-        (* 메모리 정복struct 생성 , dictionary생성 , LWords 메모리주소 리스트 생성 *)
+        (* 전처리, 메모리 정복struct 생성 , dictionary생성 , LWords 메모리주소 리스트 생성 *)
         let dict = new Dictionary<string, IData>()
         let mutable lWords = Set.empty
 
@@ -444,29 +448,19 @@ type XgCOM20ReadTest() =
                 lWords <- Set.add _fullLWord lWords
 
         (*LWord 단위 deviceinfo 생성, readbuf array 만들기*)
+        let mutable _offset = 0
+        for item in lWords do
+            let s = item.[2..item.Length-1]
+            Int32.TryParse(item.[2..item.Length-1], &_offset) === true
+            let di = x.CreateDevice(item.[0], 'B', 8, _offset * 8 )
+            x.CommObject.AddDeviceInfo(di)
+        //let rBuf = Array.zeroCreate<byte>(lWords.Count) 
+        let rBuf = Array.zeroCreate<byte>(lWords.Count * 8) //or MAX_ARRAY_BYTE_SIZE
+        x.CommObject.ReadRandomDevice(rBuf) === 1
 
+        
+            
         (*IData의 구조체에 참조 배열 넣기*)
         (*참조 배열 모니터링 등록하기 - 모니터링 구현하기*)
+        (*readbuf 최대크기를 넘어가면, array 하나 더 만든 후 list에 넣어 관리*)
         noop()
-
-                    //MomoryType : string             //M W I Q ..
-                    //DataType : string               //X B W D L
-                    //LWordName : string              //변환된 LWord 메모리 이름  "ML0"
-                    //Offset : byte                    //변환된 LWord 메모리 안에서의 offset
-                    //Size : byte                     //byte size(X = 1, B = 1, W = 2, D = 4, L = 8)
-                    //mutable DataArray : byte[]      //Array.Sub로 buf에서 참조
-
-//let arr = [| 1; 2; 3; 2; 4; 3; 5 |]
-//let distinctArr = arr |> Seq.distinct |> Seq.toArray
-
-//let myArray = [|1; 2; 3; 4; 5|]
-//let subArray = Array.sub myArray 2 3
-
-
-            //match v.Vertex with
-            //| :? CallDev  as c  ->  Some (c)
-            //| :? Alias as a  ->
-            //    match a.TargetWrapper.GetTarget() with
-            //    | :? CallDev as call -> Some call
-            //    | _ -> None
-            //|_ -> None

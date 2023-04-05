@@ -397,7 +397,7 @@ type XgCOM20ReadTest() =
 
 
         let dict = new Dictionary<string, IData>()
-        let lWords : List<string> = new List<string>() 
+        let mutable lWords : List<string> = new List<string>()
 
         //let TestInputset = [|"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154"|]
         let TestInputset = [|"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154"|]
@@ -405,24 +405,38 @@ type XgCOM20ReadTest() =
         let testSet:string[] = TestInputset |> Array.map(fun s -> s.Replace("%",""))
         for item in testSet do
             if not <| dict.ContainsKey(item) then
-                let _sp:string[] = item.Split()
                 let mutable _address: byte = 0uy
                 Byte.TryParse(item.[2..item.Length-1], &_address) === true
 
-                let _data = {
+                let _memory =  item.[0].ToString()
+                let _data = item.[1].ToString()
+                let _fullLWord = item.[0].ToString() + "L" + (_address/64uy).ToString()
+                let _sizeSnap = 
+                    match _data with
+                    | "X"-> 1uy
+                    | "B"-> 1uy
+                    | "W"-> 2uy
+                    | "D"-> 4uy
+                    | "L"-> 8uy
+                    | _ -> 1uy
+
+
+                let _value = {
                     MomoryType = item.[0].ToString()
                     DataType = item.[1].ToString()
-                    LWordName = item.[0].ToString() + "L" + (_address/64uy).ToString()
-                    Offset = (_address%64uy)
-                    Size = 1uy
+                    LWordName = _fullLWord
+                    Offset = _address % _sizeSnap
+                    Size = _sizeSnap
                     DataArray = Array.zeroCreate<byte>(0)
                     //ListOffset = 100
                     //ArrayOffset = 200
                 }
-                //memoryType: _split[0], DataType: _split[1], offset: _split[2.._split.Length-1])
 
-                dict.[item] <- _data
-                    
+                dict.[item] <- _value
+                lWords.Add(_fullLWord);
+
+        let setWords = Set.ofList lWords
+        lWords <- List.ofSet setWords     
 
         ()
 
@@ -438,3 +452,12 @@ type XgCOM20ReadTest() =
 
 //let myArray = [|1; 2; 3; 4; 5|]
 //let subArray = Array.sub myArray 2 3
+
+
+            //match v.Vertex with
+            //| :? CallDev  as c  ->  Some (c)
+            //| :? Alias as a  ->
+            //    match a.TargetWrapper.GetTarget() with
+            //    | :? CallDev as call -> Some call
+            //    | _ -> None
+            //|_ -> None

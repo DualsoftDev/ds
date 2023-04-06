@@ -394,6 +394,11 @@ type XgCOM20ReadTest() =
         rBuf0[11]  === byte(bitBuf) 
         noop();
 
+
+
+
+
+        (* 새 프로젝트에 옮길 것 *)
     [<Test>]
     member x.``In progress.. : Input memory  initialize Test`` () =
         (* 전처리, 메모리 정복struct 생성 , dictionary생성 , LWords 메모리주소 리스트 생성 *)

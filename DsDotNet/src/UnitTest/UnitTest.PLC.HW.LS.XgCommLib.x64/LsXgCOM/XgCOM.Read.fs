@@ -11,6 +11,7 @@ open NUnit.Framework
 
 open Engine.Common.FS
 open System.Collections.Generic
+open AddressConvert
 
 [<AutoOpen>]
 module XgCommLibSpec =
@@ -407,14 +408,14 @@ type XgCOM20ReadTest() =
         let mutable lWords = Set.empty
 
         //let TestInputset = [|"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154"; "MX1.0.1"|]
-        let TestInputset = [|"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154"; "MX1.0.1"|]
+        let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5";"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154"; "MX1.0.1"|]
 
-        let testSet:string[] = TestInputset |> Array.map(fun s -> "%" + s) |> Array.map(fun s -> s.Replace("%%","%"))         //%로 통일
+        let testSet:string[] = TestInputset |> Array.map(fun s -> s.Replace("%",""))        
         for item in testSet do
             if not <| dict.ContainsKey(item) then
                 let mutable _address: byte = 0uy
+                let t = tryParseTag ("%" + item) |> Option.get
                 Byte.TryParse(item.[2..item.Length-1], &_address) === true
-
                 let _memory =  item.[0].ToString()
                 let _data = item.[1].ToString()
                 let _size = 

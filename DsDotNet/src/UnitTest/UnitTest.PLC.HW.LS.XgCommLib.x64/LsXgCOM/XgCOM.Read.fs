@@ -37,13 +37,13 @@ module XgCommLibSpec =
 
     [<Struct>]
     type IData = { 
-                    MomoryType : string             //M W I Q ..
-                    DataType : string               //X B W D L
-                    LWordName : string              //변환된 LWord 메모리 이름  "ML0"
-                    Offset : byte                    //변환된 LWord 메모리 안에서의 offset
-                    Size : byte                     //byte size(X = 1, B = 1, W = 2, D = 4, L = 8)
-                    mutable Location : int*int*int       // (listOfrBufs index, Byte index in rBuf, bit index in a byte)
-                              //mutable DataArray : byte[]      //Array.Sub로 buf에서 참조
+                    MomoryType : string                     //M W I Q ..
+                    DataType : string                       //X B W D L
+                    LWordName : string                      //변환된 LWord 메모리 이름  "ML0"
+                    Offset : byte                           //변환된 LWord 메모리 안에서의 offset
+                    Size : byte                             //byte size(X = 1, B = 1, W = 2, D = 4, L = 8)
+                    mutable Location : int*int*int*int      // ( 1. listOfrBufs index, 2. Byte index in rBuf, (3. first bit index, 4. last bit index] )
+                              //mutable DataArray : byte[]                    //Array.Sub로 buf에서 참조
                     //mutable ListOffset : int 
                     //mutable ArrayOffset : int
                  }
@@ -407,7 +407,7 @@ type XgCOM20ReadTest() =
         let mutable lWords = Set.empty
 
         //let TestInputset = [|"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154"|]
-        let TestInputset = [|"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154"|]
+        let TestInputset = [|"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154"; "MX1.0.1"|]
 
         let testSet:string[] = TestInputset |> Array.map(fun s -> s.Replace("%",""))
         for item in testSet do
@@ -425,7 +425,7 @@ type XgCOM20ReadTest() =
                     | "D"-> 4uy
                     | "L"-> 8uy
                     | _ -> 1uy
-
+                    //getBitSize
                 let _offsetSnap = 
                     match _data with
                     | "X"-> 64uy
@@ -443,7 +443,7 @@ type XgCOM20ReadTest() =
                     LWordName = _fullLWord
                     Offset = _address % _offsetSnap
                     Size = _size
-                    Location = (0,0,0)
+                    Location = (0,0,0,0)
                 }
 
                 dict.[item] <- _value

@@ -49,26 +49,6 @@ module XgCommLibSpec =
                     //mutable ArrayOffset : int
                  }
 
-    let getLongWordfromBit bit =
-        (bit/8, bit%8)
-
-    //data 기준 : byte
-    let getLongWordfromByte byte =
-        ///offset, size
-        (byte, 0)
-
-    let getLongWordfromWord word =
-        ///offset, size
-        (word*2, 2)
-
-    let getLongWordfromDword dword =
-        ///offset, size
-        (dword*4, 4)
-
-    let getLongWordfromLwrod lword =
-        ///offset, size
-        (lword*8, 8)
-
 
 (*
     XGComLib summary : working API (V20 API 기준)
@@ -410,12 +390,12 @@ type XgCOM20ReadTest() =
         //let TestInputset = [|"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154"; "MX1.0.1"|]
         let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5";"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154"; "MX1.0.1"|]
 
-        let testSet:string[] = TestInputset |> Array.map(fun s -> s.Replace("%",""))        
-        for item in testSet do
+        let inputSet:string[] = TestInputset |> Array.map(fun s -> s.Replace("%",""))        
+        for item in inputSet do
             if not <| dict.ContainsKey(item) then
                 let mutable _address: byte = 0uy
-                let t = tryParseTag ("%" + item) |> Option.get
-                Byte.TryParse(item.[2..item.Length-1], &_address) === true
+                let convertBit = getBitOffset ("%" + item)
+                //Byte.TryParse(item.[2..item.Length-1], &_address) === true
                 let _memory =  item.[0].ToString()
                 let _data = item.[1].ToString()
                 let _size = 
@@ -426,23 +406,24 @@ type XgCOM20ReadTest() =
                     | "D"-> 4uy
                     | "L"-> 8uy
                     | _ -> 1uy
-                    //getBitSize
-                let _offsetSnap = 
-                    match _data with
-                    | "X"-> 64uy
-                    | "B"-> 8uy
-                    | "W"-> 4uy
-                    | "D"-> 2uy
-                    | "L"-> 1uy
-                    | _ -> 1uy
 
-                let _fullLWord = item.[0].ToString() + "L" + (_address/_offsetSnap).ToString()
+                //let _offsetSnap = 
+                //    match _data with
+                //    | "X"-> 64uy
+                //    | "B"-> 8uy
+                //    | "W"-> 4uy
+                //    | "D"-> 2uy
+                //    | "L"-> 1uy
+                //    | _ -> 1uy
+                //let testDiv = uint64(convertBit)/64uy
+                //let _fullLWord = item.[0].ToString() + "L" + (_address/_offsetSnap).ToString()
+                let _fullLWord = item.[0].ToString() + "L" + (convertBit/64).ToString()
 
                 let _value = {
                     MomoryType = item.[0].ToString()
                     DataType = item.[1].ToString()
                     LWordName = _fullLWord
-                    Offset = _address % _offsetSnap
+                    Offset = byte (convertBit % 64)
                     Size = _size
                     Location = (0,0,0,0)
                 }

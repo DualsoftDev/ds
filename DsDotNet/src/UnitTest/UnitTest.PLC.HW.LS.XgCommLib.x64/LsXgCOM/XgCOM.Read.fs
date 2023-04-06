@@ -42,7 +42,8 @@ module XgCommLibSpec =
                     LWordName : string              //변환된 LWord 메모리 이름  "ML0"
                     Offset : byte                    //변환된 LWord 메모리 안에서의 offset
                     Size : byte                     //byte size(X = 1, B = 1, W = 2, D = 4, L = 8)
-                    mutable DataArray : byte[]      //Array.Sub로 buf에서 참조
+                    mutable Location : int*int*int       // (listOfrBufs index, Byte index in rBuf, bit index in a byte)
+                              //mutable DataArray : byte[]      //Array.Sub로 buf에서 참조
                     //mutable ListOffset : int 
                     //mutable ArrayOffset : int
                  }
@@ -442,7 +443,7 @@ type XgCOM20ReadTest() =
                     LWordName = _fullLWord
                     Offset = _address % _offsetSnap
                     Size = _size
-                    DataArray = Array.zeroCreate<byte>(0)
+                    Location = (0,0,0)
                 }
 
                 dict.[item] <- _value

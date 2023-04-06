@@ -385,10 +385,10 @@ type XgCOM20ReadTest() =
     member x.``In progress.. : Input memory  initialize Test`` () =
         (* 전처리, 메모리 정복struct 생성 , dictionary생성 , LWords 메모리주소 리스트 생성 *)
         let dict = new Dictionary<string, IData>()
-        let mutable lWords = Set.empty
+        let mutable lWordsSet = Set.empty
 
-        //let TestInputset = [|"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154"; "MX1.0.1"|]
-        let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5";"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154"; "MX1.0.1"|]
+        //let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5"; "%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154"; "MX1.0.1"|]
+        let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5";"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
 
         let inputSet:string[] = TestInputset |> Array.map(fun s -> s.Replace("%",""))        
         for item in inputSet do
@@ -429,12 +429,13 @@ type XgCOM20ReadTest() =
                 }
 
                 dict.[item] <- _value
-                (*LWords 리스트 중복 제거 -> list err -> set으로 자동으로 날림*)
-                lWords <- Set.add _fullLWord lWords
+                lWordsSet <- Set.add _fullLWord lWordsSet
 
+
+        let IWordsList = lWordsSet |> Set.toList            //Set to List 
         (*LWord 단위 deviceinfo 생성, readbuf array 만들기*)
         let mutable _offset = 0
-        for item in lWords do
+        for item in IWordsList do
             let s = item.[2..item.Length-1]
             Int32.TryParse(item.[2..item.Length-1], &_offset) === true
             let di = x.CreateDevice(item.[0], 'B', 8, _offset * 8 )

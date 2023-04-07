@@ -452,10 +452,9 @@ type XgCOM20ReadTest() =
                     |> List.mapi (fun i x -> if i = searchIndex then rBuf else x)
 
             listOfrBufs <- updatedList
+            searchIndex <- searchIndex + 1
 
-            if searchIndex < listOfrBufs.Length  then
-                searchIndex <- searchIndex + 1
-            else
+            if searchIndex = listOfrBufs.Length  then
                 searchIndex <- 0
 
             Thread.Sleep(300)

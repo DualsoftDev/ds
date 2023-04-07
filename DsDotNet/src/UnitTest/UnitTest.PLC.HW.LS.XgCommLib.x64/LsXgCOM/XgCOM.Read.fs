@@ -415,12 +415,8 @@ type XgCOM20ReadTest() =
                     | _ -> 1
 
                 let di = x.CreateDevice(item.[1], 'B', 8, convertBit * 8 / 64 )
+
                 if not <| lWords.ContainsKey(_fullLWord) then
-                    //GetLIst -> _fullLWord
-
-
-                    //targetBuf.[i % BUF_SIZE] <- 0uy
-                    
                     if stackSize = BUF_SIZE then
                         listOfrBufs <- listOfrBufs @ [ Array.zeroCreate<byte> BUF_SIZE]
                         bufIdx <- bufIdx + 1
@@ -431,16 +427,18 @@ type XgCOM20ReadTest() =
                     //lWords 등록
                     lWords.[_fullLWord] <- (di,bufIdx ,bufIdx * BUF_SIZE * 8 + stackSize * 8)
                     ()
+                let lWord = lWords[_fullLWord]
+                let _listIndex : int = lWord |> fun (_,x,_) -> x
+                let _bitOffset : int = (lWord |> fun (_,_,x) -> x) + convertBit
+                inputs.[item] <- (_listIndex , _bitOffset, _bitOffset + _bitSizeSnap)        // list,  [bit start, bit end )
 
-                inputs.[item] <- (0, convertBit, convertBit + _bitSizeSnap)        // list,  [bit start, bit end )
-
-            //let di = x.CreateDevice(item.[1], 'B', 8, _offset * 8 )
-            //x.CommObject.AddDeviceInfo(di)
-        //let rBuf = Array.zeroCreate<byte>(lWords.Count) 
 
         //data buffer array set 만들기. BUF_SIZE 를 넘길 때마다 갯수를 늘린다.
+
         let rBuf = Array.zeroCreate<byte>(BUF_SIZE)      // + rBuf는 하나만 만든다. list의 array를 돌아가면서 읽고 비교하고 덮어쓴다.
         x.CommObject.ReadRandomDevice(rBuf) === 1
+
+
 
         
             

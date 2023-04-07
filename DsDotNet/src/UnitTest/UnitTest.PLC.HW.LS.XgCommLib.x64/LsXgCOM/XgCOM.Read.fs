@@ -377,7 +377,7 @@ type XgCOM20ReadTest() =
         let inputs = new Dictionary<string, int*int*int>()        //(list index, array bit start, end)
         let mutable listOfrBufs : byte[] list = [ Array.zeroCreate<byte> BUF_SIZE ]
 
-
+        //리스트 생성, list, array index 계산용
         let mutable stackSize = 0
         let mutable bufIdx = 0
         let mutable targetBuf = listOfrBufs.[bufIdx]
@@ -422,27 +422,33 @@ type XgCOM20ReadTest() =
                         bufIdx <- bufIdx + 1
                         targetBuf <- listOfrBufs.[bufIdx]
                         stackSize <- 0
-                    else
-                        stackSize <- stackSize + 8
                     //lWords 등록
                     lWords.[_fullLWord] <- (di,bufIdx ,bufIdx * BUF_SIZE * 8 + stackSize * 8)
+                    stackSize <- stackSize + 8
                     ()
                 let lWord = lWords[_fullLWord]
-                let _listIndex : int = lWord |> fun (_,x,_) -> x
-                let _bitOffset : int = (lWord |> fun (_,_,x) -> x) + convertBit
+                let mutable (_, _listIndex, _bitOffset) = lWord
+                _bitOffset <- _bitOffset + convertBit
+                //let _listIndex : int = lWord |> fun (_,x,_) -> x
+                //let _bitOffset : int = (lWord |> fun (_,_,x) -> x) + convertBit
                 inputs.[item] <- (_listIndex , _bitOffset, _bitOffset + _bitSizeSnap)        // list,  [bit start, bit end )
 
-
         //data buffer array set 만들기. BUF_SIZE 를 넘길 때마다 갯수를 늘린다.
+        let mutable rBuf = Array.zeroCreate<byte>(BUF_SIZE)      // + rBuf는 하나만 만든다. list의 array를 돌아가면서 읽고 비교하고 덮어쓴다.
+        while true do
+            let mutable searchIndex = 0
+            for item in lWords.Keys do
+                x.CommObject.AddDeviceInfo(di)
 
-        let rBuf = Array.zeroCreate<byte>(BUF_SIZE)      // + rBuf는 하나만 만든다. list의 array를 돌아가면서 읽고 비교하고 덮어쓴다.
-        x.CommObject.ReadRandomDevice(rBuf) === 1
+
+        
+        (*참조 배열 모니터링 등록하기 - 모니터링 구현하기   -   AddDeviceInfo, ReadRandomDevice,  bitArray변환,  비교, 모니터링 - 적용, byteArray 전환*)
+        // while문 (thead //  반복 메모리 읽기)
+        //x.CommObject.AddDeviceInfo(di)
+        //x.CommObject.ReadRandomDevice(rBuf) === 1
 
 
 
         
             
-        (*IData의 구조체에 참조 배열 넣기*)
-        (*참조 배열 모니터링 등록하기 - 모니터링 구현하기*)
-        (*readbuf 최대크기를 넘어가면, array 하나 더 만든 후 list에 넣어 관리*)
         noop()

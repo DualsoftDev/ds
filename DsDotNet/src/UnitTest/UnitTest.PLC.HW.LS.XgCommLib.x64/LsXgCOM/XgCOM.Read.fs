@@ -13,6 +13,7 @@ open Engine.Common.FS
 open System.Collections.Generic
 open AddressConvert
 open PLC.CodeGen.Common
+open XGCommLib
 
 
 [<AutoOpen>]
@@ -48,11 +49,12 @@ module XgCommLibSpec =
                     LWordName : string                      //변환된 LWord 메모리 이름  "ML0"
                     Offset : int                           //변환된 LWord 메모리 안에서의 offset
                     Size : int                            //byte size(X = 1, B = 1, W = 2, D = 4, L = 8)
-                    mutable Location : int*int*int*int*int      // ( 1. listOfrBufs index, 2. Byte index in rBuf, 3. index in byte ,(4. first bit index, 5. last bit index] )
+                    mutable Location : int*int*int     // ( 1. listOfrBufs index ,[2. first bit index, 3. last bit index) )
                               //mutable DataArray : byte[]                    //Array.Sub로 buf에서 참조
                     //mutable ListOffset : int 
                     //mutable ArrayOffset : int
                  }
+
     (*///////////////////////////////////////////////*)
 
 (*
@@ -389,22 +391,25 @@ type XgCOM20ReadTest() =
     [<Test>]
     member x.``In progress.. : Input memory  initialize Test`` () =
         (* 전처리, 메모리 정복struct 생성 , dictionary생성 , LWords 메모리주소 리스트 생성 *)
-        let dict = new Dictionary<string, IData>()
+        let lWords = new Dictionary<string, DeviceInfo>()
+        //let dict = new Dictionary<string, IData>()
+        let dict = new Dictionary<string, int*int*int>()
         let mutable lWordsSet = Set.empty
 
-        //let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5"; "%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154"; "MX1.0.1"|]
-        let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5";"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
+        let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5"; "%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154"; "MX1.0.1"|]
+        //let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5";"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
 
-        let inputSet:string[] = TestInputset |> Array.map(fun s -> s.Replace("%",""))        
+        let inputSet:string[] = TestInputset |> Array.map(fun s -> "%" + s) |> Array.map(fun s -> s.Replace("%%","%"))    
         for item in inputSet do
             if not <| dict.ContainsKey(item) then
                 let mutable _address: int = 0
 
-
-                let convertBit = getBitOffset ("%" + item)
+                let _memoryType = item.[1].ToString()
+                let _dataType = item.[2].ToString()
+                let convertBit = getBitOffset (item)
                 let _fullLWord = item.[0].ToString() + "L" + (convertBit/64).ToString()
 
-                let _size = 
+                let _dataSize = 
                     match item.[1].ToString() with
                     | "X"-> 1
                     | "B"-> 1
@@ -413,9 +418,16 @@ type XgCOM20ReadTest() =
                     | "L"-> 8
                     | _ -> 1
 
+                let _bitSizeSnap = 
+                    match item.[1].ToString() with
+                    | "X"-> 0
+                    | "B"-> 8
+                    | "W"-> 16
+                    | "D"-> 32
+                    | "L"-> 64
+                    | _ -> 1
 
-
-                        (* Address.Convert로 bit offset 으로 환산 *)
+                (* Address.Convert로 bit offset 으로 환산하고 Test *)
                 let _offsetSnap = 
                     match item.[1].ToString() with
                     | "X"-> 64
@@ -424,28 +436,28 @@ type XgCOM20ReadTest() =
                     | "D"-> 2
                     | "L"-> 1
                     | _ -> 1
+                
+                let _size = _address/_offsetSnap
+                let _offset = _address%_offsetSnap   
 
 
-                if item.[0] <> 'I' && item.[0] <> 'Q' then
+                if item.[1] <> 'I' && item.[1] <> 'Q' then
                     _address <- Convert.ToInt32(item.[2..item.Length-1], 16)
                            
                     convertBit / 64 ===  _address/_offsetSnap
                     convertBit % 64 ===  _address%_offsetSnap   
-                (*/////old*)
-
+                (*/////new ===  old*)
 
                 let _value = {
-                    MomoryType = item.[0].ToString()
-                    DataType = item.[1].ToString()
+                    MomoryType = _memoryType
+                    DataType = _dataType
                     LWordName = _fullLWord
                     Offset = convertBit % 64
-                    Size = _size
-                    Location = (0,0,0,0,0)        // list, array, byte, start, end
+                    Size = _dataSize
+                    Location = (0, convertBit, convertBit + _offsetSnap)        // list,  [bit start, bit end )
                 }
 
-                //_value.Location.[3] <- _value.Offset
-                //_value.Location.[4] <- _value.Location.[3] + _value.Size
-                dict.[item] <- _value
+                dict.[item] <- (0, convertBit, convertBit + _offsetSnap)        // list,  [bit start, bit end )
                 lWordsSet <- Set.add _fullLWord lWordsSet
 
 

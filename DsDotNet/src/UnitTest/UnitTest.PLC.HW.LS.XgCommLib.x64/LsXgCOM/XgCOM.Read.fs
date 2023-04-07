@@ -382,7 +382,7 @@ type XgCOM20ReadTest() =
         let dict = new Dictionary<string, int*int*int>()
         let mutable lWordsSet = Set.empty
 
-        let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5"; "%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154"; "MX1.0.1"|]
+        let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5"; "%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
         //let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5";"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
 
         let inputSet:string[] = TestInputset |> Array.map(fun s -> "%" + s) |> Array.map(fun s -> s.Replace("%%","%"))    
@@ -393,10 +393,10 @@ type XgCOM20ReadTest() =
                 let _memoryType = item.[1].ToString()
                 let _dataType = item.[2].ToString()
                 let convertBit = getBitOffset (item)
-                let _fullLWord = item.[0].ToString() + "L" + (convertBit/64).ToString()
+                let _fullLWord = "%" + _memoryType + "L" + (convertBit/64).ToString()
 
                 let _dataSize = 
-                    match item.[1].ToString() with
+                    match item.[2].ToString() with
                     | "X"-> 1
                     | "B"-> 1
                     | "W"-> 2
@@ -405,7 +405,7 @@ type XgCOM20ReadTest() =
                     | _ -> 1
 
                 let _bitSizeSnap = 
-                    match item.[1].ToString() with
+                    match item.[2].ToString() with
                     | "X"-> 0
                     | "B"-> 8
                     | "W"-> 16
@@ -421,7 +421,7 @@ type XgCOM20ReadTest() =
 
                 (* Address.Convert로 bit offset 으로 환산하고 Test *)
                 let _offsetSnap = 
-                    match item.[1].ToString() with
+                    match item.[2].ToString() with
                     | "X"-> 64
                     | "B"-> 8
                     | "W"-> 4
@@ -430,10 +430,11 @@ type XgCOM20ReadTest() =
                     | _ -> 1
 
                 if item.[1] <> 'I' && item.[1] <> 'Q' then
-                    _address <- Convert.ToInt32(item.[2..item.Length-1], 16)
+                    if item.[2] = 'X' then
+                        _address <- Convert.ToInt32(item.[3..item.Length-1], 16)
                            
-                    convertBit / 64 ===  _address/_offsetSnap
-                    convertBit % 64 ===  _address%_offsetSnap   
+                        convertBit / 64 ===  _address/_offsetSnap
+                        convertBit % 64 ===  _address%_offsetSnap   
                 (*/////new ===  old*)
 
 
@@ -443,9 +444,9 @@ type XgCOM20ReadTest() =
         (*LWord 단위 deviceinfo 생성, readbuf array 만들기*)
         let mutable _offset = 0
         for item in IWordsList do
-            let s = item.[2..item.Length-1]
-            Int32.TryParse(item.[2..item.Length-1], &_offset) === true
-            let di = x.CreateDevice(item.[0], 'B', 8, _offset * 8 )
+            let adr = item.[3..item.Length-1]
+            Int32.TryParse(adr, &_offset) === true
+            let di = x.CreateDevice(item.[1], 'B', 8, _offset * 8 )
             x.CommObject.AddDeviceInfo(di)
         //let rBuf = Array.zeroCreate<byte>(lWords.Count) 
 

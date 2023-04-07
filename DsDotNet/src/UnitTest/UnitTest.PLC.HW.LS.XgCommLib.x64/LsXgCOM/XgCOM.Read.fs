@@ -370,13 +370,17 @@ type XgCOM20ReadTest() =
     [<Test>]
     member x.``In progress.. : Input memory  initialize Test`` () =
         //let [<Literal>] BUF_SIZE = 512
-        let BUF_SIZE = 2;
+        let BUF_SIZE = 16;
 
         (* 전처리, 메모리 정복struct 생성 , dictionary생성 , LWords 메모리주소 리스트 생성 *)
         let lWords = new Dictionary<string, DeviceInfo*int*int>()   //(DeviceInfo, list index, array bit offset)
         let inputs = new Dictionary<string, int*int*int>()        //(list index, array bit start, end)
-        let mutable lWordsSet = Set.empty
-        let mutable listOfrBufs : byte[] list = []
+        let mutable listOfrBufs : byte[] list = [ Array.zeroCreate<byte> BUF_SIZE ]
+
+
+        let mutable stackSize = 0
+        let mutable bufIdx = 0
+        let mutable targetBuf = listOfrBufs.[bufIdx]
 
 
         let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5"; "%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
@@ -410,18 +414,28 @@ type XgCOM20ReadTest() =
                     | "L"-> 64
                     | _ -> 1
 
-                lWordsSet <- Set.add _fullLWord lWordsSet
+                let di = x.CreateDevice(item.[1], 'B', 8, convertBit * 8 / 64 )
+                if not <| lWords.ContainsKey(_fullLWord) then
+                    //GetLIst -> _fullLWord
+
+
+                    //targetBuf.[i % BUF_SIZE] <- 0uy
+                    
+                    if stackSize = BUF_SIZE then
+                        listOfrBufs <- listOfrBufs @ [ Array.zeroCreate<byte> BUF_SIZE]
+                        bufIdx <- bufIdx + 1
+                        targetBuf <- listOfrBufs.[bufIdx]
+                        stackSize <- 0
+                    else
+                        stackSize <- stackSize + 8
+                    //lWords 등록
+                    lWords.[_fullLWord] <- (di,bufIdx ,bufIdx * BUF_SIZE * 8 + stackSize * 8)
+                    ()
 
                 inputs.[item] <- (0, convertBit, convertBit + _bitSizeSnap)        // list,  [bit start, bit end )
 
-        let IWordsList = lWordsSet |> Set.toList            //Set to List 
-        (*LWord 단위 deviceinfo 생성, readbuf array 만들기*)
-        let mutable _offset = 0
-        for item in IWordsList do
-            let adr = item.[3..item.Length-1]
-            Int32.TryParse(adr, &_offset) === true
-            let di = x.CreateDevice(item.[1], 'B', 8, _offset * 8 )
-            x.CommObject.AddDeviceInfo(di)
+            //let di = x.CreateDevice(item.[1], 'B', 8, _offset * 8 )
+            //x.CommObject.AddDeviceInfo(di)
         //let rBuf = Array.zeroCreate<byte>(lWords.Count) 
 
         //data buffer array set 만들기. BUF_SIZE 를 넘길 때마다 갯수를 늘린다.

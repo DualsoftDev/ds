@@ -41,20 +41,6 @@ module XgCommLibSpec =
 
      (* 새 프로젝트에 옮길 것  + MAX_ARRAY_BYTE_SIZE*)
     let mutable listOfrBufs : byte[] list = []
-
-    [<Struct>]
-    type IData = { 
-                    MomoryType : string                     //M W I Q ..
-                    DataType : string                       //X B W D L
-                    LWordName : string                      //변환된 LWord 메모리 이름  "ML0"
-                    Offset : int                           //변환된 LWord 메모리 안에서의 offset
-                    Size : int                            //byte size(X = 1, B = 1, W = 2, D = 4, L = 8)
-                    mutable Location : int*int*int     // ( 1. listOfrBufs index ,[2. first bit index, 3. last bit index) )
-                              //mutable DataArray : byte[]                    //Array.Sub로 buf에서 참조
-                    //mutable ListOffset : int 
-                    //mutable ArrayOffset : int
-                 }
-
     (*///////////////////////////////////////////////*)
 
 (*
@@ -427,6 +413,12 @@ type XgCOM20ReadTest() =
                     | "L"-> 64
                     | _ -> 1
 
+                lWordsSet <- Set.add _fullLWord lWordsSet
+
+                dict.[item] <- (0, convertBit, convertBit + _bitSizeSnap)        // list,  [bit start, bit end )
+
+
+
                 (* Address.Convert로 bit offset 으로 환산하고 Test *)
                 let _offsetSnap = 
                     match item.[1].ToString() with
@@ -436,10 +428,6 @@ type XgCOM20ReadTest() =
                     | "D"-> 2
                     | "L"-> 1
                     | _ -> 1
-                
-                let _size = _address/_offsetSnap
-                let _offset = _address%_offsetSnap   
-
 
                 if item.[1] <> 'I' && item.[1] <> 'Q' then
                     _address <- Convert.ToInt32(item.[2..item.Length-1], 16)
@@ -448,17 +436,7 @@ type XgCOM20ReadTest() =
                     convertBit % 64 ===  _address%_offsetSnap   
                 (*/////new ===  old*)
 
-                let _value = {
-                    MomoryType = _memoryType
-                    DataType = _dataType
-                    LWordName = _fullLWord
-                    Offset = convertBit % 64
-                    Size = _dataSize
-                    Location = (0, convertBit, convertBit + _offsetSnap)        // list,  [bit start, bit end )
-                }
 
-                dict.[item] <- (0, convertBit, convertBit + _offsetSnap)        // list,  [bit start, bit end )
-                lWordsSet <- Set.add _fullLWord lWordsSet
 
 
         let IWordsList = lWordsSet |> Set.toList            //Set to List 

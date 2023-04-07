@@ -36,13 +36,6 @@ module XgCommLibSpec =
     let [<Literal>] MAX_RANDOM_READ_POINTS = 64
     let [<Literal>] MAX_ARRAY_BYTE_SIZE = 512   // 64*8
 
-
-
-
-     (* 새 프로젝트에 옮길 것  + MAX_ARRAY_BYTE_SIZE*)
-    let mutable listOfrBufs : byte[] list = []
-    (*///////////////////////////////////////////////*)
-
 (*
     XGComLib summary : working API (V20 API 기준)
     ----------------
@@ -376,18 +369,22 @@ type XgCOM20ReadTest() =
         (* 새 프로젝트에 옮길 것 *)
     [<Test>]
     member x.``In progress.. : Input memory  initialize Test`` () =
+        //let [<Literal>] BUF_SIZE = 2   // 512
+        let BUF_SIZE = 2;
+
         (* 전처리, 메모리 정복struct 생성 , dictionary생성 , LWords 메모리주소 리스트 생성 *)
-        let lWords = new Dictionary<string, DeviceInfo>()
-        //let dict = new Dictionary<string, IData>()
-        let dict = new Dictionary<string, int*int*int>()
+        let lWords = new Dictionary<string, DeviceInfo*int*int>()   //(DeviceInfo, list index, array bit offset)
+        let inputs = new Dictionary<string, int*int*int>()        //(list index, array bit start, end)
         let mutable lWordsSet = Set.empty
+        let mutable listOfrBufs : byte[] list = []
+
 
         let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5"; "%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
         //let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5";"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
 
         let inputSet:string[] = TestInputset |> Array.map(fun s -> "%" + s) |> Array.map(fun s -> s.Replace("%%","%"))    
         for item in inputSet do
-            if not <| dict.ContainsKey(item) then
+            if not <| inputs.ContainsKey(item) then
                 let mutable _address: int = 0
 
                 let _memoryType = item.[1].ToString()
@@ -396,7 +393,7 @@ type XgCOM20ReadTest() =
                 let _fullLWord = "%" + _memoryType + "L" + (convertBit/64).ToString()
 
                 let _dataSize = 
-                    match item.[2].ToString() with
+                    match _dataType with
                     | "X"-> 1
                     | "B"-> 1
                     | "W"-> 2
@@ -405,7 +402,7 @@ type XgCOM20ReadTest() =
                     | _ -> 1
 
                 let _bitSizeSnap = 
-                    match item.[2].ToString() with
+                    match _dataType with
                     | "X"-> 0
                     | "B"-> 8
                     | "W"-> 16
@@ -415,27 +412,27 @@ type XgCOM20ReadTest() =
 
                 lWordsSet <- Set.add _fullLWord lWordsSet
 
-                dict.[item] <- (0, convertBit, convertBit + _bitSizeSnap)        // list,  [bit start, bit end )
+                inputs.[item] <- (0, convertBit, convertBit + _bitSizeSnap)        // list,  [bit start, bit end )
 
 
 
-                (* Address.Convert로 bit offset 으로 환산하고 Test *)
-                let _offsetSnap = 
-                    match item.[2].ToString() with
-                    | "X"-> 64
-                    | "B"-> 8
-                    | "W"-> 4
-                    | "D"-> 2
-                    | "L"-> 1
-                    | _ -> 1
+                //(* Address.Convert로 bit offset 으로 환산하고 Test *)
+                //let _offsetSnap = 
+                //    match _dataType with
+                //    | "X"-> 64
+                //    | "B"-> 8
+                //    | "W"-> 4
+                //    | "D"-> 2
+                //    | "L"-> 1
+                //    | _ -> 1
 
-                if item.[1] <> 'I' && item.[1] <> 'Q' then
-                    if item.[2] = 'X' then
-                        _address <- Convert.ToInt32(item.[3..item.Length-1], 16)
+                //if item.[1] <> 'I' && item.[1] <> 'Q' then
+                //    if item.[2] = 'X' then
+                //        _address <- Convert.ToInt32(item.[3..item.Length-1], 16)
                            
-                        convertBit / 64 ===  _address/_offsetSnap
-                        convertBit % 64 ===  _address%_offsetSnap   
-                (*/////new ===  old*)
+                //        convertBit / 64 ===  _address/_offsetSnap
+                //        convertBit % 64 ===  _address%_offsetSnap   
+                //(*/////new ===  old*)
 
 
 
@@ -450,8 +447,8 @@ type XgCOM20ReadTest() =
             x.CommObject.AddDeviceInfo(di)
         //let rBuf = Array.zeroCreate<byte>(lWords.Count) 
 
-        //data buffer array set 만들기. MAX_ARRAY_BYTE_SIZE 를 넘길 때마다 갯수를 늘린다.
-        let rBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)      // + rBuf는 하나만 만든다. list의 array를 돌아가면서 읽고 비교하고 덮어쓴다.
+        //data buffer array set 만들기. BUF_SIZE 를 넘길 때마다 갯수를 늘린다.
+        let rBuf = Array.zeroCreate<byte>(BUF_SIZE)      // + rBuf는 하나만 만든다. list의 array를 돌아가면서 읽고 비교하고 덮어쓴다.
         x.CommObject.ReadRandomDevice(rBuf) === 1
 
         

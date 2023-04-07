@@ -14,6 +14,7 @@ open System.Collections.Generic
 open AddressConvert
 open PLC.CodeGen.Common
 open XGCommLib
+open System.Threading
 
 
 [<AutoOpen>]
@@ -435,11 +436,30 @@ type XgCOM20ReadTest() =
 
         //data buffer array set 만들기. BUF_SIZE 를 넘길 때마다 갯수를 늘린다.
         let mutable rBuf = Array.zeroCreate<byte>(BUF_SIZE)      // + rBuf는 하나만 만든다. list의 array를 돌아가면서 읽고 비교하고 덮어쓴다.
+        let mutable searchIndex = 0
         while true do
-            let mutable searchIndex = 0
-            for item in lWords.Keys do
-                x.CommObject.AddDeviceInfo(di)
 
+            x.CommObject.RemoveAll()
+            rBuf <- Array.zeroCreate<byte>(BUF_SIZE)
+            for item in lWords.Values do
+                let (di, index, _)  = item
+                if searchIndex = index then
+                    x.CommObject.AddDeviceInfo(di)
+            x.CommObject.ReadRandomDevice(rBuf) === 1
+
+            let updatedList =
+                    listOfrBufs
+                    |> List.mapi (fun i x -> if i = searchIndex then rBuf else x)
+
+            listOfrBufs <- updatedList
+
+            if searchIndex < listOfrBufs.Length  then
+                searchIndex <- searchIndex + 1
+            else
+                searchIndex <- 0
+
+            Thread.Sleep(300)
+            ()
 
         
         (*참조 배열 모니터링 등록하기 - 모니터링 구현하기   -   AddDeviceInfo, ReadRandomDevice,  bitArray변환,  비교, 모니터링 - 적용, byteArray 전환*)

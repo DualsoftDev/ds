@@ -369,7 +369,7 @@ type XgCOM20ReadTest() =
         (* 새 프로젝트에 옮길 것 *)
     [<Test>]
     member x.``In progress.. : Input memory  initialize Test`` () =
-        //let [<Literal>] BUF_SIZE = 2   // 512
+        //let [<Literal>] BUF_SIZE = 512
         let BUF_SIZE = 2;
 
         (* 전처리, 메모리 정복struct 생성 , dictionary생성 , LWords 메모리주소 리스트 생성 *)
@@ -413,29 +413,6 @@ type XgCOM20ReadTest() =
                 lWordsSet <- Set.add _fullLWord lWordsSet
 
                 inputs.[item] <- (0, convertBit, convertBit + _bitSizeSnap)        // list,  [bit start, bit end )
-
-
-
-                //(* Address.Convert로 bit offset 으로 환산하고 Test *)
-                //let _offsetSnap = 
-                //    match _dataType with
-                //    | "X"-> 64
-                //    | "B"-> 8
-                //    | "W"-> 4
-                //    | "D"-> 2
-                //    | "L"-> 1
-                //    | _ -> 1
-
-                //if item.[1] <> 'I' && item.[1] <> 'Q' then
-                //    if item.[2] = 'X' then
-                //        _address <- Convert.ToInt32(item.[3..item.Length-1], 16)
-                           
-                //        convertBit / 64 ===  _address/_offsetSnap
-                //        convertBit % 64 ===  _address%_offsetSnap   
-                //(*/////new ===  old*)
-
-
-
 
         let IWordsList = lWordsSet |> Set.toList            //Set to List 
         (*LWord 단위 deviceinfo 생성, readbuf array 만들기*)

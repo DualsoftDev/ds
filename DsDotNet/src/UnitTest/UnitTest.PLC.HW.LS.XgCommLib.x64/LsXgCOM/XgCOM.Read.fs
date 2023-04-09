@@ -504,8 +504,6 @@ type XgCOM20ReadTest() =
         //x.CommObject.Connect === 1        //Fail
 
         
-        //x.CommObject.RemoveAll()
-        //x.CommObject.AddDeviceInfo(di)
         if x.CommObject.ReadRandomDevice(rBuf2) = 0 then
             x.Setup()
             x.CommObject.RemoveAll()

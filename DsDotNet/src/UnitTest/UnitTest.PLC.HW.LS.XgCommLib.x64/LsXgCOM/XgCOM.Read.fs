@@ -368,10 +368,12 @@ type XgCOM20ReadTest() =
 
 
         (* 새 프로젝트에 옮길 것 *)
+        //메모리 입력 ("%MX10") 하면 write 해주는 함수 만들기, TestInputset 0으로 초기화 후 테스트 , 각 요소 새 값을 써주고 테스트
+
     [<Test>]
     member x.``In progress.. : Input memory  initialize Test`` () =
         //let [<Literal>] BUF_SIZE = 512
-        let BUF_SIZE = 16;
+        let BUF_SIZE = 512; //16;
 
         (* 전처리, 메모리 정복struct 생성 , dictionary생성 , LWords 메모리주소 리스트 생성 *)
         let lWords = new Dictionary<string, DeviceInfo*int*int>()   //(DeviceInfo, list index, array bit offset)
@@ -438,6 +440,10 @@ type XgCOM20ReadTest() =
         let mutable rBuf = Array.zeroCreate<byte>(BUF_SIZE)      // + rBuf는 하나만 만든다. list의 array를 돌아가면서 읽고 비교하고 덮어쓴다.
         let mutable searchIndex = 0
         while true do
+            let isCn = x.CommObject.Connect("")
+            if isCn = 0 then
+                x.CommObject.Connect("") |> ignore
+
 
             x.CommObject.RemoveAll()
             rBuf <- Array.zeroCreate<byte>(BUF_SIZE)
@@ -445,8 +451,11 @@ type XgCOM20ReadTest() =
                 let (di, index, _)  = item
                 if searchIndex = index then
                     x.CommObject.AddDeviceInfo(di)
-            x.CommObject.ReadRandomDevice(rBuf) === 1
 
+            if 0 = x.CommObject.IsConnected() then
+                logDebug "Failed to connect to XG."
+            x.CommObject.ReadRandomDevice(rBuf) === 1
+            
             let updatedList =
                     listOfrBufs
                     |> List.mapi (fun i x -> if i = searchIndex then rBuf else x)
@@ -471,3 +480,62 @@ type XgCOM20ReadTest() =
         
             
         noop()
+
+    (* 
+    약 15초를 초과하면 연결이 끊어짐
+    IsConnected는 연결이 끊어져도 1이 출력됨
+    재연결하면 AddDeviceinfo를 다시 해야함
+    *)
+    [<Test>]
+    member x.``Delay and read test`` () =
+        let di = x.CreateDevice('M', 'B', 1 ,0)
+        let rBuf = Array.zeroCreate<byte>(1)
+        let rBuf2 = Array.zeroCreate<byte>(1)
+
+        x.CommObject.RemoveAll()
+        x.CommObject.AddDeviceInfo(di)
+        x.CommObject.ReadRandomDevice(rBuf) === 1
+
+        let times = 1000 * 20
+        Thread.Sleep(times)
+
+        let isCn = x.CommObject.IsConnected()
+        isCn === 1          // 1?
+        //x.CommObject.Connect === 1        //Fail
+
+        
+        //x.CommObject.RemoveAll()
+        //x.CommObject.AddDeviceInfo(di)
+        if x.CommObject.ReadRandomDevice(rBuf2) = 0 then
+            x.Setup()
+            x.CommObject.RemoveAll()
+            x.CommObject.AddDeviceInfo(di)
+            x.CommObject.ReadRandomDevice(rBuf2) === 1
+
+        rBuf === rBuf2
+
+    (* 
+    Connect 함수는 2번 사용해야 다시 연결됨
+    *)
+    [<Test>]
+    member x.``Delay and read test2`` () =
+        let di = x.CreateDevice('M', 'B', 1 ,0)
+        let rBuf = Array.zeroCreate<byte>(1)
+        let rBuf2 = Array.zeroCreate<byte>(1)
+
+        x.CommObject.RemoveAll()
+        x.CommObject.AddDeviceInfo(di)
+        x.CommObject.ReadRandomDevice(rBuf) === 1
+
+        let times = 20 * 1000
+        Thread.Sleep(times)
+
+
+        let isCn = x.CommObject.Connect("")
+        if isCn = 0 then
+            x.CommObject.Connect("") |> ignore
+        x.CommObject.RemoveAll()
+        x.CommObject.AddDeviceInfo(di)
+        x.CommObject.ReadRandomDevice(rBuf2) === 1
+
+        rBuf === rBuf2

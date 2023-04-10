@@ -15,6 +15,7 @@ open AddressConvert
 open PLC.CodeGen.Common
 open XGCommLib
 open System.Threading
+open System.Collections
 
 
 [<AutoOpen>]
@@ -373,7 +374,7 @@ type XgCOM20ReadTest() =
     [<Test>]
     member x.``In progress.. : Input memory  initialize Test`` () =
         //let [<Literal>] BUF_SIZE = 512
-        let BUF_SIZE = 512; //16;
+        let BUF_SIZE = 16; //16;  512;
 
         (* 전처리, 메모리 정복struct 생성 , dictionary생성 , LWords 메모리주소 리스트 생성 *)
         let lWords = new Dictionary<string, DeviceInfo*int*int>()   //(DeviceInfo, list index, array bit offset)
@@ -426,7 +427,7 @@ type XgCOM20ReadTest() =
                         targetBuf <- listOfrBufs.[bufIdx]
                         stackSize <- 0
                     //lWords 등록
-                    lWords.[_fullLWord] <- (di,bufIdx ,bufIdx * BUF_SIZE * 8 + stackSize * 8)
+                    lWords.[_fullLWord] <- (di,bufIdx , stackSize * 8)
                     stackSize <- stackSize + 8
                     ()
                 let lWord = lWords[_fullLWord]
@@ -456,6 +457,14 @@ type XgCOM20ReadTest() =
                 logDebug "Failed to connect to XG."
             x.CommObject.ReadRandomDevice(rBuf) === 1
             
+            let rBuf_bit = new BitArray(rBuf)
+            let byteArray = [|1uy; 15uy|]
+            let bitArray = System.Collections.BitArray(rBuf)
+
+            let binaryArray = Array.init (bitArray.Length) (fun i -> if bitArray.[i] then 1 else 0)
+            let checkArray = binaryArray.[184..192-1]
+            let decimalValue = Array.foldBack (fun x acc -> acc * 2 + int x) checkArray 0
+
             let updatedList =
                     listOfrBufs
                     |> List.mapi (fun i x -> if i = searchIndex then rBuf else x)

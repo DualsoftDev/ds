@@ -432,7 +432,7 @@ type XgCOM20ReadTest() =
     [<Test>]
     member x.``In progress.. : Input memory  initialize Test`` () =
         //let [<Literal>] BUF_SIZE = 512
-        let BUF_SIZE = 16; //16;  512;
+        let BUF_SIZE = 512; //16;  512;
 
         (* 전처리, 메모리 정복struct 생성 , dictionary생성 , LWords 메모리주소 리스트 생성 *)
         let lWords = new Dictionary<string, DeviceInfo*int*int>()   //(DeviceInfo, list index, array bit offset)
@@ -444,7 +444,7 @@ type XgCOM20ReadTest() =
         let mutable bufIdx = 0
         let mutable targetBuf = listOfrBufs.[bufIdx]
 
-        let TestInputset = [|"WX1";"WW2";"WB6";"WL1803"|]
+        let TestInputset = [|"WX1";"WW2";"WB6";"WD18"; "WL5"|]
         //let TestInputset = [|"MB8";"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5"; "%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
         //let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5";"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
 
@@ -523,15 +523,15 @@ type XgCOM20ReadTest() =
             let binaryArray_origin = Array.init (bitArray_origin.Length) (fun i -> if bitArray_origin.[i] then 1 else 0)
             let binaryArray = Array.init (bitArray.Length) (fun i -> if bitArray.[i] then 1 else 0)
 
-            let checkArray1 = binaryArray.[2..(2+1-1)]    //WX2
-            let checkArray2 = binaryArray.[32..(32+16-1)]    //WW2
-            let checkArray3 = binaryArray.[48..(48+8-1)]    //WB6
-            let checkArray4 = binaryArray.[64..(64+64-1)]    //WL1803
+            //let checkArray1 = binaryArray.[2..(2+1-1)]    //WX2
+            //let checkArray2 = binaryArray.[32..(32+16-1)]    //WW2
+            //let checkArray3 = binaryArray.[48..(48+8-1)]    //WB6
+            //let checkArray4 = binaryArray.[64..(64+64-1)]    //WL1803
 
-            let decimalValue1 = Array.foldBack (fun x acc -> acc * 2 + int x) checkArray1 0
-            let decimalValue2 = Array.foldBack (fun x acc -> acc * 2 + int x) checkArray2 0
-            let decimalValue3 = Array.foldBack (fun x acc -> acc * 2 + int x) checkArray3 0
-            let decimalValue4 = Array.foldBack (fun x acc -> acc * 2 + int x) checkArray4 0
+            //let decimalValue1 = Array.foldBack (fun x acc -> acc * 2 + int x) checkArray1 0
+            //let decimalValue2 = Array.foldBack (fun x acc -> acc * 2 + int x) checkArray2 0
+            //let decimalValue3 = Array.foldBack (fun x acc -> acc * 2 + int x) checkArray3 0
+            //let decimalValue4 = Array.foldBack (fun x acc -> acc * 2 + int x) checkArray4 0
 
             (*rbuf와 원래 array를 bit단위로 비교*)
             let findDifferentIndices (arr1: int array) (arr2: int array)  =
@@ -540,12 +540,6 @@ type XgCOM20ReadTest() =
                 |> Array.map fst
 
             let result = findDifferentIndices binaryArray binaryArray_origin
-
-
-            (*튜플 넣으면 범위 array 출력  [a,b) *)
-            let getRangeArray inputTuple: int array = 
-                let (_,x,y) = inputTuple
-                [|x..y-1|]
 
             (*result에서 출력해야하는 메모리 확인*)
             let findMemory (result: int array) min max  =    
@@ -556,8 +550,6 @@ type XgCOM20ReadTest() =
                         isContain <- true
                 isContain
 
-
-
             (*rbuf에서 메모리의 범위 찾아서 10진수로 출력*)
             let outputs : Dictionary<string, int> = new Dictionary<string, int>()
             for inp in inputs do
@@ -567,7 +559,7 @@ type XgCOM20ReadTest() =
                     let decimalValue = Array.foldBack (fun x acc -> acc * 2 + int x) checkRange 0
                     outputs.Add(inp.Key, decimalValue);
                 ()
-            //임시출력
+            //임시출력 - D L memory not working. -> offset?
             for kvp in outputs do
                 logDebug "%s => %d Changed" kvp.Key kvp.Value
             outputs.Clear()
@@ -582,7 +574,6 @@ type XgCOM20ReadTest() =
 
             if searchIndex = listOfrBufs.Length  then
                 searchIndex <- 0
-            
             
             Thread.Sleep(300)
             ()

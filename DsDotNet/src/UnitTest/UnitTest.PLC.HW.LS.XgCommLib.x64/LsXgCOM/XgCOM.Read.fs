@@ -548,8 +548,8 @@ type XgCOM20ReadTest() =
                 [|x..y-1|]
 
             (*result에서 출력해야하는 메모리 확인*)
-            let findMemory (result: int array) tuple  =    
-                let(_, min,max) = tuple
+            let findMemory (result: int array) min max  =    
+                //let(_, min,max) = tuple
                 let mutable isContain = false
                 for r in result do
                     if min <= r && max > r then
@@ -559,13 +559,18 @@ type XgCOM20ReadTest() =
 
 
             (*rbuf에서 메모리의 범위 찾아서 10진수로 출력*)
-            let Dictionary outputs = new Dictionary<string, int>()
-            let mutable memRange = [||]
-            for i in inputs.Values do
-
+            let outputs : Dictionary<string, int> = new Dictionary<string, int>()
+            for inp in inputs do
+                let (listIndex,min,max) = inp.Value
+                if listIndex = searchIndex && findMemory result min max then
+                    let checkRange = binaryArray.[min..max-1]
+                    let decimalValue = Array.foldBack (fun x acc -> acc * 2 + int x) checkRange 0
+                    outputs.Add(inp.Key, decimalValue);
                 ()
-
-
+            //임시출력
+            for kvp in outputs do
+                logDebug "%s => %d Changed" kvp.Key kvp.Value
+            outputs.Clear()
 
             (*rbuf 해당 byte array에 덮어쓰기*)
             let updatedList =
@@ -577,7 +582,8 @@ type XgCOM20ReadTest() =
 
             if searchIndex = listOfrBufs.Length  then
                 searchIndex <- 0
-
+            
+            
             Thread.Sleep(300)
             ()
 

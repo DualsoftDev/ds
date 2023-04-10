@@ -476,7 +476,7 @@ type XgCOM20ReadTest() =
                     | "L"-> 64
                     | _ -> -1
 
-                let di = x.CreateDevice(item.[1], 'B', 8, convertBit * 8 / 64 )                  //convertBit?
+                let di = x.CreateDevice(item.[1], 'B', 8, convertBit * 8 / 64 )                  
 
                 if not <| lWords.ContainsKey(_fullLWord) then
                     if stackSize = BUF_SIZE then
@@ -490,7 +490,7 @@ type XgCOM20ReadTest() =
                     ()
                 let lWord = lWords[_fullLWord]
                 let mutable (_, _listIndex, _bitOffset) = lWord
-                _bitOffset <- _bitOffset + convertBit % _bitSizeSnap                                          //convertBit?
+                _bitOffset <- _bitOffset + convertBit % _bitSizeSnap                                          
                 inputs.[item] <- (_listIndex , _bitOffset, _bitOffset + _bitSizeSnap)        // list,  [bit start, bit end )
                 ()
         //data buffer array set 만들기. BUF_SIZE 를 넘길 때마다 갯수를 늘린다.

@@ -455,17 +455,17 @@ type XgCOM20ReadTest() =
 
                 let _memoryType = item.[1].ToString()
                 let _dataType = item.[2].ToString()
-                let convertBit = getBitOffset (item)
+                let convertBit = getBitOffset (item)        // convertBit가 전체 기준이 아니라 내부 rbuf 기준으로 잡아야함  - 자체구현?
                 let _fullLWord = "%" + _memoryType + "L" + (convertBit/64).ToString()
 
-                let _dataSize = 
-                    match _dataType with
-                    | "X"-> 1
-                    | "B"-> 1
-                    | "W"-> 2
-                    | "D"-> 4
-                    | "L"-> 8
-                    | _ -> -1
+                //let _dataSize = 
+                //    match _dataType with
+                //    | "X"-> 1
+                //    | "B"-> 1
+                //    | "W"-> 2
+                //    | "D"-> 4
+                //    | "L"-> 8
+                //    | _ -> -1
 
                 let _bitSizeSnap = 
                     match _dataType with
@@ -476,7 +476,7 @@ type XgCOM20ReadTest() =
                     | "L"-> 64
                     | _ -> -1
 
-                let di = x.CreateDevice(item.[1], 'B', 8, convertBit * 8 / 64 )
+                let di = x.CreateDevice(item.[1], 'B', 8, convertBit * 8 / 64 )                  //convertBit?
 
                 if not <| lWords.ContainsKey(_fullLWord) then
                     if stackSize = BUF_SIZE then
@@ -490,9 +490,9 @@ type XgCOM20ReadTest() =
                     ()
                 let lWord = lWords[_fullLWord]
                 let mutable (_, _listIndex, _bitOffset) = lWord
-                _bitOffset <- _bitOffset + convertBit
+                _bitOffset <- _bitOffset + convertBit % _bitSizeSnap                                          //convertBit?
                 inputs.[item] <- (_listIndex , _bitOffset, _bitOffset + _bitSizeSnap)        // list,  [bit start, bit end )
-
+                ()
         //data buffer array set 만들기. BUF_SIZE 를 넘길 때마다 갯수를 늘린다.
         let mutable rBuf = Array.zeroCreate<byte>(BUF_SIZE)      // + rBuf는 하나만 만든다. list의 array를 돌아가면서 읽고 비교하고 덮어쓴다.
         let mutable searchIndex = 0

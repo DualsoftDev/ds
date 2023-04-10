@@ -386,8 +386,8 @@ type XgCOM20ReadTest() =
         let mutable bufIdx = 0
         let mutable targetBuf = listOfrBufs.[bufIdx]
 
-
-        let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5"; "%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
+        let TestInputset = [|"WX1";"WW2";"WB8";|]
+        //let TestInputset = [|"MB8";"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5"; "%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
         //let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5";"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
 
         let inputSet:string[] = TestInputset |> Array.map(fun s -> "%" + s) |> Array.map(fun s -> s.Replace("%%","%"))    
@@ -407,7 +407,7 @@ type XgCOM20ReadTest() =
                     | "W"-> 2
                     | "D"-> 4
                     | "L"-> 8
-                    | _ -> 1
+                    | _ -> -1
 
                 let _bitSizeSnap = 
                     match _dataType with
@@ -416,7 +416,7 @@ type XgCOM20ReadTest() =
                     | "W"-> 16
                     | "D"-> 32
                     | "L"-> 64
-                    | _ -> 1
+                    | _ -> -1
 
                 let di = x.CreateDevice(item.[1], 'B', 8, convertBit * 8 / 64 )
 
@@ -456,15 +456,32 @@ type XgCOM20ReadTest() =
             if 0 = x.CommObject.IsConnected() then
                 logDebug "Failed to connect to XG."
             x.CommObject.ReadRandomDevice(rBuf) === 1
-            
-            let rBuf_bit = new BitArray(rBuf)
-            let byteArray = [|1uy; 15uy|]
+
+
+            (*byte array -> bit array*)
+            let bitArray_origin = System.Collections.BitArray listOfrBufs.[searchIndex]
             let bitArray = System.Collections.BitArray(rBuf)
 
+
+
+            let binaryArray_origin = Array.init (bitArray_origin.Length) (fun i -> if bitArray_origin.[i] then 1 else 0)
             let binaryArray = Array.init (bitArray.Length) (fun i -> if bitArray.[i] then 1 else 0)
-            let checkArray = binaryArray.[184..192-1]
+
+            let checkArray = binaryArray.[32..(32+16-1)]
             let decimalValue = Array.foldBack (fun x acc -> acc * 2 + int x) checkArray 0
 
+            (*rbuf와 원래 array를 bit단위로 비교*)
+            let findDifferentIndices (arr1: int array) (arr2: int array)  =
+                Array.mapi (fun i x -> i, x) arr1
+                |> Array.filter (fun (i, x) -> x <> arr2.[i])
+                |> Array.map fst
+
+            let result = findDifferentIndices binaryArray binaryArray_origin
+            (*result에서 출력해야하는 메모리 확인*)
+            (*rbuf에서 메모리의 범위 찾아서 10진수로 출력*)
+
+
+            (*rbuf 해당 byte array에 덮어쓰기*)
             let updatedList =
                     listOfrBufs
                     |> List.mapi (fun i x -> if i = searchIndex then rBuf else x)
@@ -480,7 +497,6 @@ type XgCOM20ReadTest() =
 
         
         (*참조 배열 모니터링 등록하기 - 모니터링 구현하기   -   AddDeviceInfo, ReadRandomDevice,  bitArray변환,  비교, 모니터링 - 적용, byteArray 전환*)
-        // while문 (thead //  반복 메모리 읽기)
         //x.CommObject.AddDeviceInfo(di)
         //x.CommObject.ReadRandomDevice(rBuf) === 1
 

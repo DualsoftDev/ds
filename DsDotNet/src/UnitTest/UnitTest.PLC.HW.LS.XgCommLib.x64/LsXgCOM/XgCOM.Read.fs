@@ -365,6 +365,64 @@ type XgCOM20ReadTest() =
         noop();
 
 
+    (* 
+    약 15초를 초과하면 연결이 끊어짐
+    IsConnected는 연결이 끊어져도 1이 출력됨
+    재연결하면 AddDeviceinfo를 다시 해야함
+    *)
+    [<Test>]
+    member x.``Delay and read test`` () =
+        let di = x.CreateDevice('M', 'B', 1 ,0)
+        let rBuf = Array.zeroCreate<byte>(1)
+        let rBuf2 = Array.zeroCreate<byte>(1)
+
+        x.CommObject.RemoveAll()
+        x.CommObject.AddDeviceInfo(di)
+        x.CommObject.ReadRandomDevice(rBuf) === 1
+
+        let times = 1000 * 20
+        Thread.Sleep(times)
+
+        let isCn = x.CommObject.IsConnected()
+        isCn === 1          // 1?
+        //x.CommObject.Connect === 1        //Fail
+
+        
+        if x.CommObject.ReadRandomDevice(rBuf2) = 0 then
+            x.Setup()
+            x.CommObject.RemoveAll()
+            x.CommObject.AddDeviceInfo(di)
+            x.CommObject.ReadRandomDevice(rBuf2) === 1
+
+        rBuf === rBuf2
+
+    (* 
+    Connect 함수는 2번 사용해야 다시 연결됨
+    *)
+    [<Test>]
+    member x.``Delay and read test2`` () =
+        let di = x.CreateDevice('M', 'B', 1 ,0)
+        let rBuf = Array.zeroCreate<byte>(1)
+        let rBuf2 = Array.zeroCreate<byte>(1)
+
+        x.CommObject.RemoveAll()
+        x.CommObject.AddDeviceInfo(di)
+        x.CommObject.ReadRandomDevice(rBuf) === 1
+
+        let times = 20 * 1000
+        Thread.Sleep(times)
+
+
+        let isCn = x.CommObject.Connect("")
+        if isCn = 0 then
+            x.CommObject.Connect("") |> ignore
+        x.CommObject.RemoveAll()
+        x.CommObject.AddDeviceInfo(di)
+        x.CommObject.ReadRandomDevice(rBuf2) === 1
+
+        rBuf === rBuf2
+
+
 
 
 
@@ -478,6 +536,10 @@ type XgCOM20ReadTest() =
 
             let result = findDifferentIndices binaryArray binaryArray_origin
             (*result에서 출력해야하는 메모리 확인*)
+            
+
+
+
             (*rbuf에서 메모리의 범위 찾아서 10진수로 출력*)
 
 
@@ -506,59 +568,3 @@ type XgCOM20ReadTest() =
             
         noop()
 
-    (* 
-    약 15초를 초과하면 연결이 끊어짐
-    IsConnected는 연결이 끊어져도 1이 출력됨
-    재연결하면 AddDeviceinfo를 다시 해야함
-    *)
-    [<Test>]
-    member x.``Delay and read test`` () =
-        let di = x.CreateDevice('M', 'B', 1 ,0)
-        let rBuf = Array.zeroCreate<byte>(1)
-        let rBuf2 = Array.zeroCreate<byte>(1)
-
-        x.CommObject.RemoveAll()
-        x.CommObject.AddDeviceInfo(di)
-        x.CommObject.ReadRandomDevice(rBuf) === 1
-
-        let times = 1000 * 20
-        Thread.Sleep(times)
-
-        let isCn = x.CommObject.IsConnected()
-        isCn === 1          // 1?
-        //x.CommObject.Connect === 1        //Fail
-
-        
-        if x.CommObject.ReadRandomDevice(rBuf2) = 0 then
-            x.Setup()
-            x.CommObject.RemoveAll()
-            x.CommObject.AddDeviceInfo(di)
-            x.CommObject.ReadRandomDevice(rBuf2) === 1
-
-        rBuf === rBuf2
-
-    (* 
-    Connect 함수는 2번 사용해야 다시 연결됨
-    *)
-    [<Test>]
-    member x.``Delay and read test2`` () =
-        let di = x.CreateDevice('M', 'B', 1 ,0)
-        let rBuf = Array.zeroCreate<byte>(1)
-        let rBuf2 = Array.zeroCreate<byte>(1)
-
-        x.CommObject.RemoveAll()
-        x.CommObject.AddDeviceInfo(di)
-        x.CommObject.ReadRandomDevice(rBuf) === 1
-
-        let times = 20 * 1000
-        Thread.Sleep(times)
-
-
-        let isCn = x.CommObject.Connect("")
-        if isCn = 0 then
-            x.CommObject.Connect("") |> ignore
-        x.CommObject.RemoveAll()
-        x.CommObject.AddDeviceInfo(di)
-        x.CommObject.ReadRandomDevice(rBuf2) === 1
-
-        rBuf === rBuf2

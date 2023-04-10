@@ -384,7 +384,7 @@ type XgCOM20ReadTest() =
         Thread.Sleep(times)
 
         let isCn = x.CommObject.IsConnected()
-        isCn === 1          // 1?
+        isCn === 1                          // 1?
         //x.CommObject.Connect === 1        //Fail
 
         
@@ -444,7 +444,7 @@ type XgCOM20ReadTest() =
         let mutable bufIdx = 0
         let mutable targetBuf = listOfrBufs.[bufIdx]
 
-        let TestInputset = [|"WX1";"WW2";"WB8";|]
+        let TestInputset = [|"WX1";"WW2";"WB6";"WL1803"|]
         //let TestInputset = [|"MB8";"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5"; "%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
         //let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5";"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
 
@@ -469,7 +469,7 @@ type XgCOM20ReadTest() =
 
                 let _bitSizeSnap = 
                     match _dataType with
-                    | "X"-> 0
+                    | "X"-> 1
                     | "B"-> 8
                     | "W"-> 16
                     | "D"-> 32
@@ -491,8 +491,6 @@ type XgCOM20ReadTest() =
                 let lWord = lWords[_fullLWord]
                 let mutable (_, _listIndex, _bitOffset) = lWord
                 _bitOffset <- _bitOffset + convertBit
-                //let _listIndex : int = lWord |> fun (_,x,_) -> x
-                //let _bitOffset : int = (lWord |> fun (_,_,x) -> x) + convertBit
                 inputs.[item] <- (_listIndex , _bitOffset, _bitOffset + _bitSizeSnap)        // list,  [bit start, bit end )
 
         //data buffer array set 만들기. BUF_SIZE 를 넘길 때마다 갯수를 늘린다.
@@ -525,8 +523,15 @@ type XgCOM20ReadTest() =
             let binaryArray_origin = Array.init (bitArray_origin.Length) (fun i -> if bitArray_origin.[i] then 1 else 0)
             let binaryArray = Array.init (bitArray.Length) (fun i -> if bitArray.[i] then 1 else 0)
 
-            let checkArray = binaryArray.[32..(32+16-1)]
-            let decimalValue = Array.foldBack (fun x acc -> acc * 2 + int x) checkArray 0
+            let checkArray1 = binaryArray.[2..(2+1-1)]    //WX2
+            let checkArray2 = binaryArray.[32..(32+16-1)]    //WW2
+            let checkArray3 = binaryArray.[48..(48+8-1)]    //WB6
+            let checkArray4 = binaryArray.[64..(64+64-1)]    //WL1803
+
+            let decimalValue1 = Array.foldBack (fun x acc -> acc * 2 + int x) checkArray1 0
+            let decimalValue2 = Array.foldBack (fun x acc -> acc * 2 + int x) checkArray2 0
+            let decimalValue3 = Array.foldBack (fun x acc -> acc * 2 + int x) checkArray3 0
+            let decimalValue4 = Array.foldBack (fun x acc -> acc * 2 + int x) checkArray4 0
 
             (*rbuf와 원래 array를 bit단위로 비교*)
             let findDifferentIndices (arr1: int array) (arr2: int array)  =
@@ -535,12 +540,31 @@ type XgCOM20ReadTest() =
                 |> Array.map fst
 
             let result = findDifferentIndices binaryArray binaryArray_origin
+
+
+            (*튜플 넣으면 범위 array 출력  [a,b) *)
+            let getRangeArray inputTuple: int array = 
+                let (_,x,y) = inputTuple
+                [|x..y-1|]
+
             (*result에서 출력해야하는 메모리 확인*)
-            
+            let findMemory (result: int array) tuple  =    
+                let(_, min,max) = tuple
+                let mutable isContain = false
+                for r in result do
+                    if min <= r && max > r then
+                        isContain <- true
+                isContain
 
 
 
             (*rbuf에서 메모리의 범위 찾아서 10진수로 출력*)
+            let Dictionary outputs = new Dictionary<string, int>()
+            let mutable memRange = [||]
+            for i in inputs.Values do
+
+                ()
+
 
 
             (*rbuf 해당 byte array에 덮어쓰기*)
@@ -559,12 +583,5 @@ type XgCOM20ReadTest() =
 
         
         (*참조 배열 모니터링 등록하기 - 모니터링 구현하기   -   AddDeviceInfo, ReadRandomDevice,  bitArray변환,  비교, 모니터링 - 적용, byteArray 전환*)
-        //x.CommObject.AddDeviceInfo(di)
-        //x.CommObject.ReadRandomDevice(rBuf) === 1
-
-
-
-        
-            
         noop()
 

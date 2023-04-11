@@ -444,9 +444,14 @@ type XgCOM20ReadTest() =
         let mutable bufIdx = 0
         let mutable targetBuf = listOfrBufs.[bufIdx]
 
-        let TestInputset = [|"WX1";"WW2";"WB6";"WD18"; "WL5"|]
-        //let TestInputset = [|"MB8";"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5"; "%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
+        //let TestInputset = [|"WX1";"WW2";"WB6";"WD18"; "WL5"|]
+        let TestInputset = [|"MB8";"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5"; "%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
         //let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5";"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
+
+        let newNullByteArray = 
+            let arr = Array.zeroCreate<byte> 8 |> Option.ofObj
+            arr
+
 
         let inputSet:string[] = TestInputset |> Array.map(fun s -> "%" + s) |> Array.map(fun s -> s.Replace("%%","%"))    
         for item in inputSet do
@@ -455,7 +460,7 @@ type XgCOM20ReadTest() =
 
                 let _memoryType = item.[1].ToString()
                 let _dataType = item.[2].ToString()
-                let convertBit = getBitOffset (item)        // convertBit가 전체 기준이 아니라 내부 rbuf 기준으로 잡아야함  - 자체구현?
+                let convertBit = getBitOffset (item)     
                 let _fullLWord = "%" + _memoryType + "L" + (convertBit/64).ToString()
 
                 //let _dataSize = 
@@ -490,7 +495,7 @@ type XgCOM20ReadTest() =
                     ()
                 let lWord = lWords[_fullLWord]
                 let mutable (_, _listIndex, _bitOffset) = lWord
-                _bitOffset <- _bitOffset + convertBit % _bitSizeSnap                                          
+                _bitOffset <- _bitOffset + convertBit % 8                                          
                 inputs.[item] <- (_listIndex , _bitOffset, _bitOffset + _bitSizeSnap)        // list,  [bit start, bit end )
                 ()
         //data buffer array set 만들기. BUF_SIZE 를 넘길 때마다 갯수를 늘린다.

@@ -79,6 +79,7 @@ module Log4NetWrapper =
         logError $"{msg}{Environment.NewLine}{st}"
 
     /// failwith logging
+
     let failwithlog msg =
         logError "%s" msg
         failwith msg

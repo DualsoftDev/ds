@@ -203,6 +203,7 @@ type XgCOM20ReadTest() =
             rBuf[i] === wBuf[i]
 
         noop()
+
     [<Test>]
     member x.``write device bit test`` () =
         for i = 100 to 1024 do
@@ -432,7 +433,7 @@ type XgCOM20ReadTest() =
     [<Test>]
     member x.``In progress.. : Input memory  initialize Test`` () =
         //let [<Literal>] BUF_SIZE = 512
-        let BUF_SIZE = 512; //16;  512;
+        let BUF_SIZE = 8; //16;  512;
 
         (* 전처리, 메모리 정복struct 생성 , dictionary생성 , LWords 메모리주소 리스트 생성 *)
         let lWords = new Dictionary<string, DeviceInfo*int*int>()   //(DeviceInfo, list index, array bit offset)
@@ -444,13 +445,21 @@ type XgCOM20ReadTest() =
         let mutable bufIdx = 0
         let mutable targetBuf = listOfrBufs.[bufIdx]
 
-        //let TestInputset = [|"WX1";"WW2";"WB6";"WD18"; "WL5"|]
-        let TestInputset = [|"MB8";"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5"; "%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
-        //let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5";"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
+        //let TestInputset =  [|
+        //                        "MX0";"MX100";"MW25";"MB60";"MD12"; "ML7";
+        //                        "WX1";"WW2";"WB6";"WD18"; "WL5";
+        //                        "IX1.0.1";"IB0.0.6";"IW1.0.0";"ID1.0.1";"IL1.0.1";
+        //                        "QX1.0.1";"QB0.0.6";"QW1.0.0";"QD1.0.1";"QL1.0.1";
+        //                    |]
 
-        let newNullByteArray = 
-            let arr = Array.zeroCreate<byte> 8 |> Option.ofObj
-            arr
+        let TestInputset =  [|
+                                //"MX100";"MW25";"MB60";"MD12"; "ML7";
+                                //"QD1.0.0";"QD1.0.1";"QD1.1.0";"QD1.1.1";
+                                "QW1.0.0";"QW1.0.1";"QW1.0.2";"QW1.0.3";"QW1.1.0";"QW1.1.1";
+                            |]
+
+        //let TestInputset = [|"MB8";"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5"; "%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
+        //let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5";"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
 
 
         let inputSet:string[] = TestInputset |> Array.map(fun s -> "%" + s) |> Array.map(fun s -> s.Replace("%%","%"))    
@@ -495,7 +504,7 @@ type XgCOM20ReadTest() =
                     ()
                 let lWord = lWords[_fullLWord]
                 let mutable (_, _listIndex, _bitOffset) = lWord
-                _bitOffset <- _bitOffset + convertBit % 8                                          
+                _bitOffset <- _bitOffset + convertBit % 64                                    
                 inputs.[item] <- (_listIndex , _bitOffset, _bitOffset + _bitSizeSnap)        // list,  [bit start, bit end )
                 ()
         //data buffer array set 만들기. BUF_SIZE 를 넘길 때마다 갯수를 늘린다.
@@ -527,16 +536,6 @@ type XgCOM20ReadTest() =
 
             let binaryArray_origin = Array.init (bitArray_origin.Length) (fun i -> if bitArray_origin.[i] then 1 else 0)
             let binaryArray = Array.init (bitArray.Length) (fun i -> if bitArray.[i] then 1 else 0)
-
-            //let checkArray1 = binaryArray.[2..(2+1-1)]    //WX2
-            //let checkArray2 = binaryArray.[32..(32+16-1)]    //WW2
-            //let checkArray3 = binaryArray.[48..(48+8-1)]    //WB6
-            //let checkArray4 = binaryArray.[64..(64+64-1)]    //WL1803
-
-            //let decimalValue1 = Array.foldBack (fun x acc -> acc * 2 + int x) checkArray1 0
-            //let decimalValue2 = Array.foldBack (fun x acc -> acc * 2 + int x) checkArray2 0
-            //let decimalValue3 = Array.foldBack (fun x acc -> acc * 2 + int x) checkArray3 0
-            //let decimalValue4 = Array.foldBack (fun x acc -> acc * 2 + int x) checkArray4 0
 
             (*rbuf와 원래 array를 bit단위로 비교*)
             let findDifferentIndices (arr1: int array) (arr2: int array)  =

@@ -432,9 +432,9 @@ type XgCOM20ReadTest() =
 
     [<Test>]
     member x.``In progress.. : Input memory  initialize Test`` () =
-        //let [<Literal>] BUF_SIZE = 512
-        let BUF_SIZE = 512; //16;  512;
-        let mutable isFirst : bool = true   //처음 출력용 트리거
+        
+        let BUF_SIZE = 512; //16;  512;     //let [<Literal>] BUF_SIZE = 512
+        let mutable isFirst : bool = true   //처음에만 전체 출력, 그 다음에는 변한 값만 출력
 
         (* 전처리, 메모리 정복struct 생성 , dictionary생성 , LWords 메모리주소 리스트 생성 *)
         let lWords = new Dictionary<string, DeviceInfo*int*int>()   //(DeviceInfo, list index, array bit offset)
@@ -446,21 +446,15 @@ type XgCOM20ReadTest() =
         let mutable bufIdx = 0
         let mutable targetBuf = listOfrBufs.[bufIdx]
 
-        //let TestInputset =  [|
-        //                        "MX0";"MX100";"MW25";"MB60";"MD12"; "ML7";
-        //                        "WX1";"WW2";"WB6";"WD18"; "WL5";
-        //                        "IX1.0.1";"IB0.0.6";"IW1.0.0";"ID1.0.1";"IL1.0.1";
-        //                        "QX1.0.1";"QB0.0.6";"QW1.0.0";"QD1.0.1";"QL1.0.1";
-        //                    |]
 
         let TestInputset =  [|
-                                "MX1";"MX10";"MX50";"MX100";"MX200";"MX400";"MW25";"MB60";"MD12"; "ML7";
-                                "QD1.0.0";"QD1.0.1";"QD1.1.0";"QD1.1.1";
-                                "QW1.0.0";"QW1.0.1";"QW1.0.2";"QW1.0.3";"QW1.1.0";"QW1.1.1";
+                                "MX5";"MX50";"MX500";"MX5000";"MB100";"MW10";"MD10";"ML10";
+                                "WX5";"WX50";"WX500";"WX5000";"WB100";"WW10";"WD10";"WL10";
+                                "RX5";"RX50";"RX500";"RX5000";"RB100";"RW10";"RD10";"RL10";
+                                "QX0.0.1";"QX0.1.0";"QX1.1.1";"QB0.0.1";"QB0.1.0";"QB1.1.1";"QW0.0.1";"QW0.1.0";"QW1.1.1";"QD0.0.1";"QD0.1.0";"QD1.1.1";"QL0.0.1";"QL0.1.0";"QL1.1.1";
+                                "IX0.0.1";"IX0.1.0";"IX1.1.1";"IB0.0.1";"IB0.1.0";"IB1.1.1";"IW0.0.1";"IW0.1.0";"IW1.1.1";"ID0.0.1";"ID0.1.0";"ID1.1.1";"IL0.0.1";"IL0.1.0";"IL1.1.1";
+                                
                             |]
-
-        //let TestInputset = [|"MB8";"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5"; "%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15"; "%MW3"; "%MX15"; "%MB15"; "%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
-        //let TestInputset = [|"QX1.1.5";"IX1.0.2";"IX0.3.5";"IX0.0.5";"%WX5"; "MX8"; "%WX15"; "QX17"; "%IX15"; "QX15";"%MX15";"%WX21"; "%WX151"; "%MX155"; "%WX32"; "%MX152"; "%MX151"; "%MX154";|]
 
 
         let inputSet:string[] = TestInputset |> Array.map(fun s -> "%" + s) |> Array.map(fun s -> s.Replace("%%","%"))    
@@ -502,6 +496,8 @@ type XgCOM20ReadTest() =
         //data buffer array set 만들기. BUF_SIZE 를 넘길 때마다 갯수를 늘린다.
         let mutable rBuf = Array.zeroCreate<byte>(BUF_SIZE)      // + rBuf는 하나만 만든다. list의 array를 돌아가면서 읽고 비교하고 덮어쓴다.
         let mutable searchIndex = 0
+
+       
         while true do
             let isCn = x.CommObject.Connect("")
             if isCn = 0 then
@@ -577,7 +573,5 @@ type XgCOM20ReadTest() =
             Thread.Sleep(300)
             ()
 
-        
-        (*참조 배열 모니터링 등록하기 - 모니터링 구현하기   -   AddDeviceInfo, ReadRandomDevice,  bitArray변환,  비교, 모니터링 - 적용, byteArray 전환*)
         noop()
 

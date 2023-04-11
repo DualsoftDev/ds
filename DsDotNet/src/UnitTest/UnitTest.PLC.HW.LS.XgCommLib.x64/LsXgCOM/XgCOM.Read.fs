@@ -433,7 +433,7 @@ type XgCOM20ReadTest() =
     [<Test>]
     member x.``In progress.. : Input memory  initialize Test`` () =
         //let [<Literal>] BUF_SIZE = 512
-        let BUF_SIZE = 8; //16;  512;
+        let BUF_SIZE = 512; //16;  512;
 
         (* 전처리, 메모리 정복struct 생성 , dictionary생성 , LWords 메모리주소 리스트 생성 *)
         let lWords = new Dictionary<string, DeviceInfo*int*int>()   //(DeviceInfo, list index, array bit offset)
@@ -453,8 +453,8 @@ type XgCOM20ReadTest() =
         //                    |]
 
         let TestInputset =  [|
-                                //"MX100";"MW25";"MB60";"MD12"; "ML7";
-                                //"QD1.0.0";"QD1.0.1";"QD1.1.0";"QD1.1.1";
+                                "MX1";"MX10";"MX50";"MX100";"MX200";"MX400";"MW25";"MB60";"MD12"; "ML7";
+                                "QD1.0.0";"QD1.0.1";"QD1.1.0";"QD1.1.1";
                                 "QW1.0.0";"QW1.0.1";"QW1.0.2";"QW1.0.3";"QW1.1.0";"QW1.1.1";
                             |]
 
@@ -472,15 +472,6 @@ type XgCOM20ReadTest() =
                 let convertBit = getBitOffset (item)     
                 let _fullLWord = "%" + _memoryType + "L" + (convertBit/64).ToString()
 
-                //let _dataSize = 
-                //    match _dataType with
-                //    | "X"-> 1
-                //    | "B"-> 1
-                //    | "W"-> 2
-                //    | "D"-> 4
-                //    | "L"-> 8
-                //    | _ -> -1
-
                 let _bitSizeSnap = 
                     match _dataType with
                     | "X"-> 1
@@ -490,7 +481,7 @@ type XgCOM20ReadTest() =
                     | "L"-> 64
                     | _ -> -1
 
-                let di = x.CreateDevice(item.[1], 'B', 8, convertBit * 8 / 64 )                  
+                let di = x.CreateDevice(item.[1], 'B', 8, (convertBit / 64) * 8 )                  
 
                 if not <| lWords.ContainsKey(_fullLWord) then
                     if stackSize = BUF_SIZE then

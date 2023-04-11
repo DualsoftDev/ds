@@ -119,7 +119,7 @@ let (|LsTagPatternFEnet|_|) tag =
     match tag with
     // XGI IEC 61131 : bit
     // XGK "Z" "D"
-    | RegexPattern @"^%([PMLKFNRAWIQUZD])X([\da-fA-F]+)$" [ DevicePattern device; HexPattern bitOffset ] ->
+    | RegexPattern @"^%([PMLKFNRAWIQUZD])X([\d]+)$" [ DevicePattern device; Int32Pattern bitOffset ] ->
         createTagInfo(tag, device, DataType.Bit, bitOffset)
 
     | RegexPattern @"^%([IQU])X(\d+)\.(\d+)\.(\d+)$"

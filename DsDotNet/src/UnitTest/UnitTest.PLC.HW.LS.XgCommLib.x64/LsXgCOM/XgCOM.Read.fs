@@ -434,6 +434,7 @@ type XgCOM20ReadTest() =
     member x.``In progress.. : Input memory  initialize Test`` () =
         //let [<Literal>] BUF_SIZE = 512
         let BUF_SIZE = 512; //16;  512;
+        let mutable isFirst : bool = true   //처음 출력용 트리거
 
         (* 전처리, 메모리 정복struct 생성 , dictionary생성 , LWords 메모리주소 리스트 생성 *)
         let lWords = new Dictionary<string, DeviceInfo*int*int>()   //(DeviceInfo, list index, array bit offset)
@@ -546,19 +547,22 @@ type XgCOM20ReadTest() =
                 isContain
 
             (*rbuf에서 메모리의 범위 찾아서 10진수로 출력*)
-            let outputs : Dictionary<string, int> = new Dictionary<string, int>()
+            let outputs : Dictionary<string, uint64> = new Dictionary<string, uint64>()
+            
             for inp in inputs do
                 let (listIndex,min,max) = inp.Value
-                if listIndex = searchIndex && findMemory result min max then
+                if listIndex = searchIndex && findMemory result min max || isFirst then
                     let checkRange = binaryArray.[min..max-1]
-                    let decimalValue = Array.foldBack (fun x acc -> acc * 2 + int x) checkRange 0
-                    outputs.Add(inp.Key, decimalValue);
+                    let decimalValue : uint64 = Array.foldBack (fun x acc -> acc * 2UL + uint64 x) checkRange 0UL   //18446744073709551615 
+                    outputs.Add(inp.Key, decimalValue);                 
+
+                    
                 ()
             //임시출력
             for kvp in outputs do
                 logDebug "%s => %d Changed" kvp.Key kvp.Value
             outputs.Clear()
-
+            isFirst <- false;
             (*rbuf 해당 byte array에 덮어쓰기*)
             let updatedList =
                     listOfrBufs

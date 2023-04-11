@@ -554,7 +554,7 @@ type XgCOM20ReadTest() =
                     let decimalValue = Array.foldBack (fun x acc -> acc * 2 + int x) checkRange 0
                     outputs.Add(inp.Key, decimalValue);
                 ()
-            //임시출력 - D L memory not working. -> offset?
+            //임시출력
             for kvp in outputs do
                 logDebug "%s => %d Changed" kvp.Key kvp.Value
             outputs.Clear()

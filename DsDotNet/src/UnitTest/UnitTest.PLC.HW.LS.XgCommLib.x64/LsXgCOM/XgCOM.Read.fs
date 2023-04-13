@@ -372,7 +372,7 @@ type XgCOM20ReadTest() =
     재연결하면 AddDeviceinfo를 다시 해야함
     *)
     [<Test>]
-    member x.``Delay and read test`` () =
+    member x.``Delay.Delay and read test`` () =
         let di = x.CreateDevice('M', 'B', 1 ,0)
         let rBuf = Array.zeroCreate<byte>(1)
         let rBuf2 = Array.zeroCreate<byte>(1)
@@ -401,7 +401,7 @@ type XgCOM20ReadTest() =
     Connect 함수는 2번 사용해야 다시 연결됨
     *)
     [<Test>]
-    member x.``Delay and read test2`` () =
+    member x.``Delay.Delay and read test2`` () =
         let di = x.CreateDevice('M', 'B', 1 ,0)
         let rBuf = Array.zeroCreate<byte>(1)
         let rBuf2 = Array.zeroCreate<byte>(1)
@@ -422,156 +422,3 @@ type XgCOM20ReadTest() =
         x.CommObject.ReadRandomDevice(rBuf2) === 1
 
         rBuf === rBuf2
-
-
-
-
-
-        (* 새 프로젝트에 옮길 것 *)
-        //메모리 입력 ("%MX10") 하면 write 해주는 함수 만들기, TestInputset 0으로 초기화 후 테스트 , 각 요소 새 값을 써주고 테스트
-
-    [<Test>]
-    member x.``In progress.. : Input memory  initialize Test`` () =
-        
-        let BUF_SIZE = 512; //16;  512;     //let [<Literal>] BUF_SIZE = 512
-        let mutable isFirst : bool = true   //처음에만 전체 출력, 그 다음에는 변한 값만 출력
-
-        (* 전처리, 메모리 정복struct 생성 , dictionary생성 , LWords 메모리주소 리스트 생성 *)
-        let lWords = new Dictionary<string, DeviceInfo*int*int>()   //(DeviceInfo, list index, array bit offset)
-        let inputs = new Dictionary<string, int*int*int>()        //(list index, array bit start, end)
-        let mutable listOfrBufs : byte[] list = [ Array.zeroCreate<byte> BUF_SIZE ]
-
-        //리스트 생성, list, array index 계산용
-        let mutable stackSize = 0
-        let mutable bufIdx = 0
-        let mutable targetBuf = listOfrBufs.[bufIdx]
-
-
-        let TestInputset =  [|
-                                "MX5";"MX50";"MX500";"MX5000";"MB100";"MW10";"MD10";"ML10";
-                                "WX5";"WX50";"WX500";"WX5000";"WB100";"WW10";"WD10";"WL10";
-                                "RX5";"RX50";"RX500";"RX5000";"RB100";"RW10";"RD10";"RL10";
-                                "QX0.0.1";"QX0.1.0";"QX1.1.1";"QB0.0.1";"QB0.1.0";"QB1.1.1";"QW0.0.1";"QW0.1.0";"QW1.1.1";"QD0.0.1";"QD0.1.0";"QD1.1.1";"QL0.0.1";"QL0.1.0";"QL1.1.1";
-                                "IX0.0.1";"IX0.1.0";"IX1.1.1";"IB0.0.1";"IB0.1.0";"IB1.1.1";"IW0.0.1";"IW0.1.0";"IW1.1.1";"ID0.0.1";"ID0.1.0";"ID1.1.1";"IL0.0.1";"IL0.1.0";"IL1.1.1";
-                                
-                            |]
-
-
-        let inputSet:string[] = TestInputset |> Array.map(fun s -> "%" + s) |> Array.map(fun s -> s.Replace("%%","%"))    
-        for item in inputSet do
-            if not <| inputs.ContainsKey(item) then
-                let mutable _address: int = 0
-
-                let _memoryType = item.[1].ToString()
-                let _dataType = item.[2].ToString()
-                let convertBit = getBitOffset (item)     
-                let _fullLWord = "%" + _memoryType + "L" + (convertBit/64).ToString()
-
-                let _bitSizeSnap = 
-                    match _dataType with
-                    | "X"-> 1
-                    | "B"-> 8
-                    | "W"-> 16
-                    | "D"-> 32
-                    | "L"-> 64
-                    | _ -> -1
-
-                let di = x.CreateDevice(item.[1], 'B', 8, (convertBit / 64) * 8 )                  
-
-                if not <| lWords.ContainsKey(_fullLWord) then
-                    if stackSize = BUF_SIZE then
-                        listOfrBufs <- listOfrBufs @ [ Array.zeroCreate<byte> BUF_SIZE]
-                        bufIdx <- bufIdx + 1
-                        targetBuf <- listOfrBufs.[bufIdx]
-                        stackSize <- 0
-                    //lWords 등록
-                    lWords.[_fullLWord] <- (di,bufIdx , stackSize * 8)
-                    stackSize <- stackSize + 8
-                    ()
-                let lWord = lWords[_fullLWord]
-                let mutable (_, _listIndex, _bitOffset) = lWord
-                _bitOffset <- _bitOffset + convertBit % 64                                    
-                inputs.[item] <- (_listIndex , _bitOffset, _bitOffset + _bitSizeSnap)        // list,  [bit start, bit end )
-                ()
-        //data buffer array set 만들기. BUF_SIZE 를 넘길 때마다 갯수를 늘린다.
-        let mutable rBuf = Array.zeroCreate<byte>(BUF_SIZE)      // + rBuf는 하나만 만든다. list의 array를 돌아가면서 읽고 비교하고 덮어쓴다.
-        let mutable searchIndex = 0
-
-       
-        while true do
-            let isCn = x.CommObject.Connect("")
-            if isCn = 0 then
-                x.CommObject.Connect("") |> ignore
-
-
-            x.CommObject.RemoveAll()
-            rBuf <- Array.zeroCreate<byte>(BUF_SIZE)
-            for item in lWords.Values do
-                let (di, index, _)  = item
-                if searchIndex = index then
-                    x.CommObject.AddDeviceInfo(di)
-
-            if 0 = x.CommObject.IsConnected() then
-                logDebug "Failed to connect to XG."
-            x.CommObject.ReadRandomDevice(rBuf) === 1
-
-
-            (*byte array -> bit array*)
-            let bitArray_origin = System.Collections.BitArray listOfrBufs.[searchIndex]
-            let bitArray = System.Collections.BitArray(rBuf)
-
-
-
-            let binaryArray_origin = Array.init (bitArray_origin.Length) (fun i -> if bitArray_origin.[i] then 1 else 0)
-            let binaryArray = Array.init (bitArray.Length) (fun i -> if bitArray.[i] then 1 else 0)
-
-            (*rbuf와 원래 array를 bit단위로 비교*)
-            let findDifferentIndices (arr1: int array) (arr2: int array)  =
-                Array.mapi (fun i x -> i, x) arr1
-                |> Array.filter (fun (i, x) -> x <> arr2.[i])
-                |> Array.map fst
-
-            let result = findDifferentIndices binaryArray binaryArray_origin
-
-            (*result에서 출력해야하는 메모리 확인*)
-            let findMemory (result: int array) min max  =    
-                //let(_, min,max) = tuple
-                let mutable isContain = false
-                for r in result do
-                    if min <= r && max > r then
-                        isContain <- true
-                isContain
-
-            (*rbuf에서 메모리의 범위 찾아서 10진수로 출력*)
-            let outputs : Dictionary<string, uint64> = new Dictionary<string, uint64>()
-            
-            for inp in inputs do
-                let (listIndex,min,max) = inp.Value
-                if listIndex = searchIndex && findMemory result min max || isFirst then
-                    let checkRange = binaryArray.[min..max-1]
-                    let decimalValue : uint64 = Array.foldBack (fun x acc -> acc * 2UL + uint64 x) checkRange 0UL   //18446744073709551615 
-                    outputs.Add(inp.Key, decimalValue);                 
-
-                    
-                ()
-            //임시출력
-            for kvp in outputs do
-                logDebug "%s => %d Changed" kvp.Key kvp.Value
-            outputs.Clear()
-            isFirst <- false;
-            (*rbuf 해당 byte array에 덮어쓰기*)
-            let updatedList =
-                    listOfrBufs
-                    |> List.mapi (fun i x -> if i = searchIndex then rBuf else x)
-
-            listOfrBufs <- updatedList
-            searchIndex <- searchIndex + 1
-
-            if searchIndex = listOfrBufs.Length  then
-                searchIndex <- 0
-            
-            Thread.Sleep(300)
-            ()
-
-        noop()
-

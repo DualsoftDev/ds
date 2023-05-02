@@ -22,6 +22,7 @@ module CpuTestUtil =
             let sys = parseText systemRepo referenceDir Program.CpuTestText
             Runtime.System <- sys
             applyTagManager (sys, Storages())
+            checkCausalModel sys
             sys
 
         let sys               = LoadSampleSystem()
@@ -29,11 +30,11 @@ module CpuTestUtil =
         let flow              = sys.Flows.Find(fun f->f.Name = "MyFlow")
         let realInFlow        = flow.Graph.Vertices.First(fun f->f.Name = "Seg1") :?> Real
         let realExFlow        = flow.Graph.Vertices.First(fun f->f.Name = "F.R3") :?> RealExF
-        let callInFlow        = flow.Graph.Vertices.First(fun f->f.Name = "Ap") :?> CallDev
+        //let callInFlow        = flow.Graph.Vertices.First(fun f->f.Name = "Ap") :?> CallDev
         let callInReal        = realInFlow.Graph.Vertices.First(fun f->f.Name = "Am") :?> CallDev
 
         let aliasCallInReal   = realInFlow.Graph.Vertices.First(fun f->f.Name = "aliasCallInReal") :?> Alias
-        let aliasCallInFlow   = flow.Graph.Vertices.First(fun f->f.Name = "aliasCallInFlow") :?> Alias
+        //let aliasCallInFlow   = flow.Graph.Vertices.First(fun f->f.Name = "aliasCallInFlow") :?> Alias
         let aliasRealInFlow   = flow.Graph.Vertices.First(fun f->f.Name = "aliasRealInFlow") :?> Alias
         let aliasRealExInFlow = flow.Graph.Vertices.First(fun f->f.Name = "aliasRealExInFlow") :?> Alias
 
@@ -49,10 +50,10 @@ module CpuTestUtil =
         member x.Flows  =  sys.Flows
         member x.RInF   =  realInFlow.V
         member x.RExF   =  realExFlow.V
-        member x.CInF   =  callInFlow.V
+        //member x.CInF   =  callInFlow.V
         member x.CInR   =  callInReal.V
         member x.ACinR  =  aliasCallInReal.V
-        member x.ACInF  =  aliasCallInFlow.V
+        //member x.ACInF  =  aliasCallInFlow.V
         member x.ARInF  =  aliasRealInFlow.V
         member x.AREInF =  aliasRealExInFlow.V
         member x.Coins  =  coinTypeAll.Select(getVM)
@@ -63,6 +64,9 @@ module CpuTestUtil =
 
     let doCheck (commentedStatement:CommentedStatement) =
         let st = commentedStatement.Statement
+
+        Console.WriteLine(st.ToText())
+
         st.GetSourceStorages()
         |> Seq.filter(fun f-> not <| f.Name.StartsWith("_"))
         |> Seq.iter(fun f->f.BoxedValue <- true)

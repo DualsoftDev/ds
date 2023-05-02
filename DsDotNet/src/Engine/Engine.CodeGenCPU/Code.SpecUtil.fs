@@ -26,5 +26,5 @@ module CodeSpecUtil =
         | CallInFlow          = 0b001000
         | CallInReal          = 0b010000
 
-    let VertexAll         =  CallInReal ||| CallInFlow ||| RealExSystem ||| RealExFlow ||| RealInFlow     // 0b11111
+    let VertexAll =  CallInReal ||| CallInFlow ||| RealExSystem ||| RealExFlow ||| RealInFlow     // 0b11111
 

@@ -116,26 +116,19 @@ C4 > C5;
     let CpuTestText = """
 [sys ip = 192.168.0.1] My = {
     [flow] MyFlow = {
-        Seg1 > Seg2 > Ap > F.R3, aliasCallInFlow > aliasRealInFlow > aliasRealExInFlow ;
+        Seg1 > Seg2 > F.R3;
+        Seg2 > aliasRealInFlow > aliasRealExInFlow;
         Seg1 = {
             Ap > Am > aliasCallInReal;
         }
         Seg2 = {
-            Ap > Am ;
+            Ap > Am;
         }
 
         [aliases] = {
-            Seg1.Am = { aliasCallInReal; }
-            Ap = {aliasCallInFlow;}
-
+            Seg1.Ap = { aliasCallInReal; }
             Seg1 = { aliasRealInFlow; }
             F.R3 = { aliasRealExInFlow; }
-        }
-    }
-    [flow] "Flow.Complex" = {
-        "#Seg.Complex#" => Seg;
-        "#Seg.Complex#" = {
-            Ap > Am;
         }
     }
 
@@ -164,7 +157,7 @@ C4 > C5;
         R1              // define my local terminal real segment    // GVT.{ Segment }
             //> C."+"     // direct interface call wrapper segment    // GVT.{ CallDev }
             > Main2     // aliased to my real segment               // GVT.{ Segment | Aliased }
-            > Ap1       // aliased to interface                     // GVT.{ Segment | Aliased | CallDev }
+            //> Ap1       // aliased to interface                     // GVT.{ Segment | Aliased | CallDev }
             ;
         R2;
 

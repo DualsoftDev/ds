@@ -9,6 +9,43 @@ open System.Collections.Generic
 [<AutoOpen>]
 module CpuLoader =
 
+    let checkCausalModel(system:DsSystem) =
+        //root Edge target에 Call/AliasCall 허용 금지(Real로 반드시 부모설정후 인과처리)
+        let rootEdges  = system.Flows.Collect(fun f->f.Graph.Edges)
+        for edge in rootEdges do
+            match edge.Target with
+            | :? Real            -> ()
+            | :? RealExF         -> ()
+            | :? CallSys         -> ()
+            | :? CallDev as c  ->
+                match c.Parent with
+                | DuParentReal _ -> ()
+                | DuParentFlow _ -> failwithlog $"Call vertex can't using Target [check : {edge.ToText()}]"
+
+            | :? Alias as a  ->
+                    match a.Parent with
+                    | DuParentReal _ -> ()
+                    | DuParentFlow _ ->
+                        match a.TargetWrapper with
+                        | DuAliasTargetReal _         -> ()
+                        | DuAliasTargetRealExFlow _   -> ()
+                        | DuAliasTargetRealExSystem _ -> ()
+                        | DuAliasTargetCall _ -> failwithlog $"AliasCall vertex can't using Target [check : {edge.ToText()}]"
+
+            |_ -> failwithlog $"Error {getFuncName()}"
+
+        //let rootTarget = system.Flows.Collect(fun f->f.Graph.Edges).Select(fun e ->e.Target)
+        //let rootTargetCalls =
+        //    rootTarget.OfType<Call>()
+        //let rootTargetAliasCalls =
+        //    rootTarget.OfType<Alias>()
+        //              .Where(fun w-> w.TargetWrapper.CallTarget().IsSome)
+
+        //if rootTargetCalls.any()
+        //then failwithlog (getFuncName())
+        //if rootTargetAliasCalls.any()
+        //then failwithlog (getFuncName())
+
     let applyTagManager(system:DsSystem, storages:Storages) =
         let createTagM (sys:DsSystem) =
             Runtime.System <- sys

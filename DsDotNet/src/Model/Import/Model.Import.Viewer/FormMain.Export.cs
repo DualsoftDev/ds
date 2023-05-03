@@ -54,6 +54,7 @@ namespace Dual.Model.Import
                 {
                     WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{path} PLC 생성시작!!");
                     await Task.Delay(1);
+                    _DicCpu.Values.ForEach(f => f.Dispose());
                     _DicCpu = new Dictionary<DsSystem, DsCPU>();
                     var storages = new Storages();
                     int cnt = 0;
@@ -62,11 +63,11 @@ namespace Dual.Model.Import
                         ProcessEvent.DoWork(Convert.ToInt32((cnt++ * 1.0) / (_PPTResults.Count() * 1.0) * 100));
                         await Task.Delay(10);
                         if (!view.IsActive) continue;
-                        //var rungs = Cpu.LoadStatements(view.System, storages);
-                        //rungs.ForEach(s =>
-                        //{
-                        //    _DicCpu.Add(s.ToSystem(), new DsCPU(s.CommentedStatements(), s.ToSystem()));
-                        //});
+                        var rungs = Cpu.LoadStatements(view.System, storages);
+                        rungs.ForEach(s =>
+                        {
+                            _DicCpu.Add(s.ToSystem(), new DsCPU(s.CommentedStatements(), s.ToSystem()));
+                        });
                     }
 
 
@@ -80,9 +81,9 @@ namespace Dual.Model.Import
                         else  //기본 템플릿 CPU-E 타입으로 생성
                             ExportModuleExt.ExportXMLforXGI(SelectedSystem, path, null);
 
-                    });
 
-                    EventExternal.CPUSubscribe();
+                    if (EventExternal.DisposableCPUEvent == null) EventExternal.CPUSubscribe();
+
                     _DicCpu.ForEach(f =>
                     {
                         f.Value.Run();
@@ -94,6 +95,12 @@ namespace Dual.Model.Import
                     WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{path} PLC 생성완료!!");
 
                     ProcessEvent.DoWork(0);
+
+                    SystemView sysView = comboBox_System.SelectedItem as SystemView;
+
+                    UpdatecomboBox_SegmentHMI(sysView);
+                    UpdateSelectedCpu(sysView);
+                    });
                 });
 
             }

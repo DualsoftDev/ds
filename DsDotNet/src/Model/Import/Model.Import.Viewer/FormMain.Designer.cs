@@ -99,8 +99,8 @@ namespace Dual.Model.Import
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-            this.splitContainer1.Size = new System.Drawing.Size(1373, 346);
-            this.splitContainer1.SplitterDistance = 531;
+            this.splitContainer1.Size = new System.Drawing.Size(1155, 346);
+            this.splitContainer1.SplitterDistance = 446;
             this.splitContainer1.TabIndex = 18;
             // 
             // xtraTabControl_My
@@ -111,7 +111,7 @@ namespace Dual.Model.Import
             this.xtraTabControl_My.Location = new System.Drawing.Point(3, 0);
             this.xtraTabControl_My.Name = "xtraTabControl_My";
             this.xtraTabControl_My.SelectedIndex = 0;
-            this.xtraTabControl_My.Size = new System.Drawing.Size(528, 346);
+            this.xtraTabControl_My.Size = new System.Drawing.Size(443, 346);
             this.xtraTabControl_My.TabIndex = 8;
             // 
             // splitter2
@@ -149,7 +149,7 @@ namespace Dual.Model.Import
             // 
             this.splitContainer2.Panel2.Controls.Add(this.splitContainer5);
             this.splitContainer2.Panel2.Controls.Add(this.button_copy);
-            this.splitContainer2.Size = new System.Drawing.Size(838, 346);
+            this.splitContainer2.Size = new System.Drawing.Size(705, 346);
             this.splitContainer2.SplitterDistance = 253;
             this.splitContainer2.TabIndex = 4;
             // 
@@ -282,7 +282,7 @@ namespace Dual.Model.Import
             // 
             this.splitContainer5.Panel2.Controls.Add(this.xtraTabControl_Ex);
             this.splitContainer5.Panel2Collapsed = true;
-            this.splitContainer5.Size = new System.Drawing.Size(838, 89);
+            this.splitContainer5.Size = new System.Drawing.Size(705, 89);
             this.splitContainer5.SplitterDistance = 64;
             this.splitContainer5.TabIndex = 3;
             // 
@@ -293,7 +293,7 @@ namespace Dual.Model.Import
             this.richTextBox_ds.Location = new System.Drawing.Point(0, 0);
             this.richTextBox_ds.Name = "richTextBox_ds";
             this.richTextBox_ds.ReadOnly = true;
-            this.richTextBox_ds.Size = new System.Drawing.Size(838, 89);
+            this.richTextBox_ds.Size = new System.Drawing.Size(705, 89);
             this.richTextBox_ds.TabIndex = 2;
             this.richTextBox_ds.Text = "";
             // 
@@ -312,7 +312,7 @@ namespace Dual.Model.Import
             // button_copy
             // 
             this.button_copy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_copy.Location = new System.Drawing.Point(724, 13);
+            this.button_copy.Location = new System.Drawing.Point(591, 13);
             this.button_copy.Name = "button_copy";
             this.button_copy.Size = new System.Drawing.Size(85, 34);
             this.button_copy.TabIndex = 1;
@@ -361,7 +361,7 @@ namespace Dual.Model.Import
             this.splitContainer4.Panel2.Controls.Add(this.checkedListBox_Ex);
             this.splitContainer4.Panel2.Controls.Add(this.panel1);
             this.splitContainer4.Panel2.Controls.Add(this.richTextBox_Debug);
-            this.splitContainer4.Size = new System.Drawing.Size(1373, 746);
+            this.splitContainer4.Size = new System.Drawing.Size(1155, 747);
             this.splitContainer4.SplitterDistance = 346;
             this.splitContainer4.TabIndex = 20;
             // 
@@ -371,9 +371,9 @@ namespace Dual.Model.Import
             this.checkedListBox_sysHMI.FormattingEnabled = true;
             this.checkedListBox_sysHMI.Items.AddRange(new object[] {
             "Select System"});
-            this.checkedListBox_sysHMI.Location = new System.Drawing.Point(535, 0);
+            this.checkedListBox_sysHMI.Location = new System.Drawing.Point(317, 0);
             this.checkedListBox_sysHMI.Name = "checkedListBox_sysHMI";
-            this.checkedListBox_sysHMI.Size = new System.Drawing.Size(141, 396);
+            this.checkedListBox_sysHMI.Size = new System.Drawing.Size(141, 397);
             this.checkedListBox_sysHMI.TabIndex = 20;
             this.checkedListBox_sysHMI.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.checkedListBox_sysHMI_ItemCheck);
             // 
@@ -383,9 +383,9 @@ namespace Dual.Model.Import
             this.checkedListBox_My.FormattingEnabled = true;
             this.checkedListBox_My.Items.AddRange(new object[] {
             "Select System"});
-            this.checkedListBox_My.Location = new System.Drawing.Point(676, 0);
+            this.checkedListBox_My.Location = new System.Drawing.Point(458, 0);
             this.checkedListBox_My.Name = "checkedListBox_My";
-            this.checkedListBox_My.Size = new System.Drawing.Size(306, 396);
+            this.checkedListBox_My.Size = new System.Drawing.Size(306, 397);
             this.checkedListBox_My.TabIndex = 19;
             this.checkedListBox_My.DoubleClick += new System.EventHandler(this.checkedListBox_My_DoubleClick);
             // 
@@ -395,9 +395,9 @@ namespace Dual.Model.Import
             this.checkedListBox_Ex.FormattingEnabled = true;
             this.checkedListBox_Ex.Items.AddRange(new object[] {
             "Select Device"});
-            this.checkedListBox_Ex.Location = new System.Drawing.Point(982, 0);
+            this.checkedListBox_Ex.Location = new System.Drawing.Point(764, 0);
             this.checkedListBox_Ex.Name = "checkedListBox_Ex";
-            this.checkedListBox_Ex.Size = new System.Drawing.Size(277, 396);
+            this.checkedListBox_Ex.Size = new System.Drawing.Size(277, 397);
             this.checkedListBox_Ex.TabIndex = 18;
             this.checkedListBox_Ex.DoubleClick += new System.EventHandler(this.checkedListBox_Ex_DoubleClick);
             // 
@@ -412,9 +412,9 @@ namespace Dual.Model.Import
             this.panel1.Controls.Add(this.button_Reset);
             this.panel1.Controls.Add(this.button_Start);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel1.Location = new System.Drawing.Point(1259, 0);
+            this.panel1.Location = new System.Drawing.Point(1041, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(114, 396);
+            this.panel1.Size = new System.Drawing.Size(114, 397);
             this.panel1.TabIndex = 12;
             // 
             // button_ClearLog
@@ -484,30 +484,32 @@ namespace Dual.Model.Import
             // 
             // richTextBox_Debug
             // 
-            this.richTextBox_Debug.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.richTextBox_Debug.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.richTextBox_Debug.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.richTextBox_Debug.Location = new System.Drawing.Point(0, 0);
             this.richTextBox_Debug.Name = "richTextBox_Debug";
             this.richTextBox_Debug.ReadOnly = true;
-            this.richTextBox_Debug.Size = new System.Drawing.Size(1373, 396);
+            this.richTextBox_Debug.Size = new System.Drawing.Size(311, 396);
             this.richTextBox_Debug.TabIndex = 0;
             this.richTextBox_Debug.Text = "";
             // 
             // progressBar1
             // 
             this.progressBar1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.progressBar1.Location = new System.Drawing.Point(0, 749);
+            this.progressBar1.Location = new System.Drawing.Point(0, 750);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(1373, 26);
+            this.progressBar1.Size = new System.Drawing.Size(1155, 26);
             this.progressBar1.TabIndex = 2;
             // 
             // splitter1
             // 
             this.splitter1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.splitter1.Enabled = false;
-            this.splitter1.Location = new System.Drawing.Point(0, 746);
+            this.splitter1.Location = new System.Drawing.Point(0, 747);
             this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(1373, 3);
+            this.splitter1.Size = new System.Drawing.Size(1155, 3);
             this.splitter1.TabIndex = 22;
             this.splitter1.TabStop = false;
             // 
@@ -516,7 +518,7 @@ namespace Dual.Model.Import
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(1373, 775);
+            this.ClientSize = new System.Drawing.Size(1155, 776);
             this.Controls.Add(this.splitContainer4);
             this.Controls.Add(this.splitter1);
             this.Controls.Add(this.progressBar1);

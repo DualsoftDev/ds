@@ -72,6 +72,9 @@ module RunTime =
             runSubscription.Dispose()
             runSubscription <- null
 
+        member x.Dispose() = x.Stop()
+
+
         member x.System = sys
         member x.ToTextStatement() =
             let statementTexts = statements.Select(fun statement -> statement.ToText())

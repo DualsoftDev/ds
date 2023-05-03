@@ -20,7 +20,7 @@ namespace Dual.Model.Import
                 FormMain.TheMain.UpdateProgressBar(rx.pro);
             });
         }
-
+        public static IDisposable DisposableCPUEvent = null;
         public static void CPUSubscribe()
         {
             FormMain.TheMain._DicCpu.ForEach(x =>
@@ -37,7 +37,7 @@ namespace Dual.Model.Import
                 });
             });
 
-            CpuEvent.StatusSubject.Subscribe(rx =>
+            DisposableCPUEvent = CpuEvent.StatusSubject.Subscribe(rx =>
             {
                 var v = rx.vertex as Vertex;
                 FormMain.TheMain.Do(() =>

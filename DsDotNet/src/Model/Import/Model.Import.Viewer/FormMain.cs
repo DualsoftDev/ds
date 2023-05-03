@@ -89,6 +89,8 @@ namespace Dual.Model.Import
             checkedListBox_Ex.DisplayMember = "Display";
             checkedListBox_sysHMI.DisplayMember = "Display";
             comboBox_System.DisplayMember = "Display";
+            comboBox_Segment.DisplayMember = "Display";
+
             DU.enumValues(typeof(RuntimePackage)).Cast<RuntimePackage>()
                 .ForEach(f => comboBox_Package.Items.Add(f));
             comboBox_Package.SelectedIndex = 0;
@@ -208,7 +210,7 @@ namespace Dual.Model.Import
         {
             if ((Keys)e.KeyValue == Keys.F1) { HelpLoad(); }
             if ((Keys)e.KeyValue == Keys.F5) { ReloadPPT(); }
-            if ((Keys)e.KeyValue == Keys.F6) { TestDebug(true, false); }
+           // if ((Keys)e.KeyValue == Keys.F6) { TestDebug(true, false); }
             if ((Keys)e.KeyValue == Keys.F7) { TestDebug(false, false); }
             if ((Keys)e.KeyValue == Keys.F8) { TestDebug(false, true); }
             if ((Keys)e.KeyValue == Keys.F9) { RefreshGraph(); }
@@ -220,7 +222,7 @@ namespace Dual.Model.Import
             WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"클립보드복사 성공!! Ctrl+V로 붙여넣기 가능합니다.");
         }
 
-        private void button_CreateExcel_Click(object sender, EventArgs e)
+        private void button_CreateExcel_Click(object senderㅇ, EventArgs e)
         {
             ExportExcel();
         }
@@ -266,7 +268,7 @@ namespace Dual.Model.Import
         {
             var segHMI = comboBox_Segment.SelectedItem as SegmentView;
             if (segHMI == null) return;
-
+            if (segHMI.VertexM == null) return;
             var ucView = SelectedView;
             segHMI.VertexM.RT.Value = false;
             segHMI.VertexM.ST.Value = true;
@@ -276,6 +278,7 @@ namespace Dual.Model.Import
         {
             var segHMI = comboBox_Segment.SelectedItem as SegmentView;
             if (segHMI == null) return;
+            if (segHMI.VertexM == null) return;
 
             var ucView = SelectedView;
             segHMI.VertexM.RT.Value = true;
@@ -285,7 +288,6 @@ namespace Dual.Model.Import
 
         private void UpdateCpuUI(IEnumerable<string> text)
         {
-            comboBox_Segment.DisplayMember = "Display";
 
             if (comboBox_Segment.Items.Count > 0)
                 comboBox_Segment.SelectedIndex = 0;
@@ -360,25 +362,29 @@ namespace Dual.Model.Import
             }
         }
 
-        public void UpdateLogComboBox(IStorage storage, object value,  DsCPU cpu)
+        public void UpdateLogComboBox(IStorage storage, object value, DsCPU cpu)
         {
-            var name = value is bool ? storage.Name : $"{storage.Name}({value})";
-            var onOff = value is bool ? Convert.ToBoolean(value) : false;
-            var sd = new StorageDisplay() { Display = name, Storage = storage, Value = value, OnOff = onOff };
-            if (_SelectedCPU == cpu)
+            this.Do(() =>
             {
-                checkedListBox_My.Enabled= false;
-                checkedListBox_My.Items.Add(sd, sd.OnOff);
-                checkedListBox_My.SelectedIndex = checkedListBox_My.Items.Count - 1;
-                checkedListBox_My.Enabled= true;
-            }
-            if (_SelectedDev == cpu)
-            {
-                checkedListBox_Ex.Enabled= false;
-                checkedListBox_Ex.Items.Add(sd, sd.OnOff);
-                checkedListBox_Ex.SelectedIndex = checkedListBox_Ex.Items.Count - 1;
-                checkedListBox_Ex.Enabled= true;
-            }
+
+                var name = value is bool ? storage.Name : $"{storage.Name}({value})";
+                var onOff = value is bool ? Convert.ToBoolean(value) : false;
+                var sd = new StorageDisplay() { Display = name, Storage = storage, Value = value, OnOff = onOff };
+                if (_SelectedCPU == cpu)
+                {
+                    checkedListBox_My.Enabled = false;
+                    checkedListBox_My.Items.Add(sd, sd.OnOff);
+                    checkedListBox_My.SelectedIndex = checkedListBox_My.Items.Count - 1;
+                    checkedListBox_My.Enabled = true;
+                }
+                if (_SelectedDev == cpu)
+                {
+                    checkedListBox_Ex.Enabled = false;
+                    checkedListBox_Ex.Items.Add(sd, sd.OnOff);
+                    checkedListBox_Ex.SelectedIndex = checkedListBox_Ex.Items.Count - 1;
+                    checkedListBox_Ex.Enabled = true;
+                }
+            });
         }
         private void checkedListBox_My_DoubleClick(object sender, EventArgs e)
         {
@@ -410,8 +416,6 @@ namespace Dual.Model.Import
         private void UpdateSelectedView(SystemView sysView)
         {
             _DicVertex = new Dictionary<Vertex, ViewNode>();
-            comboBox_Segment.Items.Clear();
-
             sysView.System.GetVertices()
                 .ForEach(v =>
                 {
@@ -420,11 +424,6 @@ namespace Dual.Model.Import
                                         .First(w => w.CoreVertex.Value == v);
 
                     _DicVertex.Add(v, viewNode);
-                    if (v is Real)
-                    {
-                        comboBox_Segment.Items
-                        .Add(new SegmentView { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = v.TagManager as VertexManager });
-                    }
                 });
 
 
@@ -435,6 +434,25 @@ namespace Dual.Model.Import
             DisplayTextModel(System.Drawing.Color.Transparent, sysView.System.ToDsText());
         }
 
+        private void UpdatecomboBox_SegmentHMI(SystemView sysView)
+        {
+            comboBox_Segment.Items.Clear();
+
+            sysView.System.GetVertices()
+                .ForEach(v =>
+                {
+                    var nodes = sysView.ViewNodes.SelectMany(s => s.UsedViewNodes);
+                    var viewNode = nodes.Where(w => w.CoreVertex != null)
+                                        .First(w => w.CoreVertex.Value == v);
+
+                    if (v is Real)
+                    {
+                        comboBox_Segment.Items
+                        .Add(new SegmentView { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = v.TagManager as VertexManager });
+                    }
+                });
+        }
+
         private void UpdateSelectedCpu(SystemView sysView)
         {
 
@@ -443,18 +461,19 @@ namespace Dual.Model.Import
 
 
             int cnt = 0;
-            var text = _DicCpu[sysView.System].CommentedStatements.Select(rung =>
+            List<string> lstText = new List<string>();
+             _DicCpu[sysView.System].CommentedStatements.ForEach(rung =>
             {
                 var description = rung.comment;
                 var statement = rung.statement;
                 var targetValue = rung.TargetValue;
                 _DicStatement.Add(cnt, rung);
                 comboBox_TestExpr.Items.Add(cnt);
-                return $"{cnt++}\t[{targetValue}] Spec:{description.Replace("%", " ").Replace("$", " ")}";
+                lstText.Add( $"{cnt++}\t[{targetValue}] Spec:{description.Replace("%", " ").Replace("$", " ")}");
             });
 
             StartResetBtnUpdate(true);
-            UpdateCpuUI(text);
+            UpdateCpuUI(lstText);
 
             DisplayTextModel(System.Drawing.Color.Transparent, sysView.System.ToDsText());
         }
@@ -488,6 +507,8 @@ namespace Dual.Model.Import
         private void button_CreatePLC_Click(object sender, EventArgs e)
         {
             ExportPLC($"{_ResultDirectory}\\DSLogic{DateTime.Now.ToString("(HH-mm-ss)")}.xml");
+
+
         }
     }
 }

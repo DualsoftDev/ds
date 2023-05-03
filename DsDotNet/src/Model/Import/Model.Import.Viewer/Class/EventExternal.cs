@@ -31,7 +31,7 @@ namespace Dual.Model.Import
                 {
                     var (storage, newValue) = tuple;
 
-                    //FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{storage.Name}:{newValue}", true);
+                  //  FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{storage.Name}:{newValue}", true);
                     FormMain.TheMain.UpdateLogComboBox(storage, newValue, cpu);
 
                 });

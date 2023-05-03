@@ -95,11 +95,14 @@ namespace Dual.Model.Import
                     WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{path} PLC 생성완료!!");
 
                     ProcessEvent.DoWork(0);
+                    comboBox_System.SelectedIndex = 0;
+                    UpdateSystemUI();
+                    //SystemView sysView = comboBox_System.SelectedItem as SystemView;
 
-                    SystemView sysView = comboBox_System.SelectedItem as SystemView;
+                        //UpdatecomboBox_SegmentHMI(sysView);
+                        //UpdateSelectedCpu(sysView);
+                    richTextBox_Debug.ScrollToCaret();
 
-                    UpdatecomboBox_SegmentHMI(sysView);
-                    UpdateSelectedCpu(sysView);
                     });
                 });
 

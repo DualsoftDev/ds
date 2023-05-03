@@ -347,6 +347,12 @@ namespace Dual.Model.Import
         }
         private void comboBox_System_SelectedIndexChanged(object sender, EventArgs e)
         {
+            UpdateSystemUI();
+
+        }
+
+        private void UpdateSystemUI()
+        {
             SystemView sysView = comboBox_System.SelectedItem as SystemView;
             if (_DicCpu.ContainsKey(sysView.System))
             {
@@ -355,6 +361,7 @@ namespace Dual.Model.Import
                 UpdateSelectedCpu(sysView);
 
                 createSysHMI(sysView.System);
+                UpdatecomboBox_SegmentHMI(sysView);
             }
             else
             {

@@ -180,7 +180,7 @@ namespace Dual.Model.Import
                 splitContainer2.Panel2Collapsed = false;
                 button_OpenFolder.Visible = false;
 
-                this.Size = new Size(1920, 1000);
+                this.Size = new Size(1600, 1000);
                 _cts.Cancel();
                 _cts = new CancellationTokenSource();
 
@@ -210,7 +210,7 @@ namespace Dual.Model.Import
         {
             if ((Keys)e.KeyValue == Keys.F1) { HelpLoad(); }
             if ((Keys)e.KeyValue == Keys.F5) { ReloadPPT(); }
-           // if ((Keys)e.KeyValue == Keys.F6) { TestDebug(true, false); }
+            if ((Keys)e.KeyValue == Keys.F6) { TestDebug(true, false); }
             if ((Keys)e.KeyValue == Keys.F7) { TestDebug(false, false); }
             if ((Keys)e.KeyValue == Keys.F8) { TestDebug(false, true); }
             if ((Keys)e.KeyValue == Keys.F9) { RefreshGraph(); }
@@ -244,6 +244,7 @@ namespace Dual.Model.Import
         private  void button_TestStart_Click(object sender, EventArgs e)
         {
             StartResetBtnUpdate(true);
+            _DicCpu.Values.ForEach(f=>f.Run());
         }
         private void button_Stop_Click(object sender, EventArgs e)
         {
@@ -348,7 +349,6 @@ namespace Dual.Model.Import
         private void comboBox_System_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateSystemUI();
-
         }
 
         private void UpdateSystemUI()
@@ -501,7 +501,8 @@ namespace Dual.Model.Import
             string srcsTexs = string.Join(", ", srcs.Select(s => $"{s.Name}({s.BoxedValue})"));
             var color = bDev ? Color.White : Color.Gold;
             richTextBox_ds.AppendTextColor($"{cs.comment}".Replace("$", ""), color);
-            richTextBox_ds.AppendTextColor($"\r\n\t{tgtsTexs} = {srcsTexs}\r\n", color);
+            richTextBox_ds.AppendTextColor($"\r\n\t{cs.statement.ToText()} ", color);
+            richTextBox_ds.AppendTextColor($"\r\n\t{tgtsTexs} = {srcsTexs}\r\n", Color.LightGreen);
             richTextBox_ds.AppendTextColor("\r\n", color);
             richTextBox_ds.ScrollToCaret();
         }

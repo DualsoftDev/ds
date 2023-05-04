@@ -27,7 +27,7 @@ namespace Dual.Model.Import
             if (UtilFile.BusyCheck()) return;
             try
             {
-                ResultBtnAbleUI(false);
+                OpenAbleUI(false);
 
                 var pathXLS = UtilFile.GetNewPathXls(_PathPPTs);
 
@@ -36,7 +36,7 @@ namespace Dual.Model.Import
 
                 WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{pathXLS} 생성완료!!");
 
-                ResultBtnAbleUI(true);
+                OpenAbleUI(true);
                 Process.Start($"{pathXLS}");
                 FileWatcher.CreateFileWatcher(pathXLS);
                 _ResultDirectory = Path.GetDirectoryName(pathXLS);
@@ -70,19 +70,21 @@ namespace Dual.Model.Import
                         });
                     }
 
-
+                    //if (EventExternal.DisposableCPUEvent == null)
+                    EventExternal.CPUSubscribe();
 
                     var xmlTemplateFile = Path.ChangeExtension(_PathPPTs[0], "xml");
                     this.Do(() =>
                     {
                         if (File.Exists(xmlTemplateFile))
-                            //사용자 xg5000 Template 형식으로 생성
+                                             //사용자 xg5000 Template 형식으로 생성
                             ExportModuleExt.ExportXMLforXGI(SelectedSystem, path, xmlTemplateFile);
                         else  //기본 템플릿 CPU-E 타입으로 생성
                             ExportModuleExt.ExportXMLforXGI(SelectedSystem, path, null);
 
 
-                    if (EventExternal.DisposableCPUEvent == null) EventExternal.CPUSubscribe();
+
+                    UpdateSystemUI();
 
                     _DicCpu.ForEach(f =>
                     {
@@ -90,18 +92,14 @@ namespace Dual.Model.Import
                         f.Value.ScanOnce();
                     });
 
-                    ResultBtnAbleUI(true);
+                    OpenAbleUI(true);
+
                     _ResultDirectory = Path.GetDirectoryName(path);
                     WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{path} PLC 생성완료!!");
+                    richTextBox_Debug.ScrollToCaret();
 
                     ProcessEvent.DoWork(0);
-                    comboBox_System.SelectedIndex = 0;
-                    UpdateSystemUI();
-                    //SystemView sysView = comboBox_System.SelectedItem as SystemView;
 
-                        //UpdatecomboBox_SegmentHMI(sysView);
-                        //UpdateSelectedCpu(sysView);
-                    richTextBox_Debug.ScrollToCaret();
 
                     });
                 });

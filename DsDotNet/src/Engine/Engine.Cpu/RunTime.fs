@@ -68,14 +68,14 @@ module RunTime =
             assert(runSubscription = null)
             runSubscription <- runSubscribe()
         member x.Stop() =
-            assert(runSubscription <> null)
-            runSubscription.Dispose()
-            runSubscription <- null
+            if x.IsRunning then
+                runSubscription.Dispose()
+                runSubscription <- null
 
-        member x.Dispose() = x.Stop()
+        member x.Dispose() =  x.Stop()
 
 
         member x.System = sys
-        member x.ToTextStatement() =
-            let statementTexts = statements.Select(fun statement -> statement.ToText())
-            String.Join("\r\n", statementTexts)
+        //member x.ToTextStatement() =
+        //    let statementTexts = statements.Select(fun statement -> statement.ToText())
+        //    String.Join("\r\n", statementTexts)

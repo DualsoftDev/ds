@@ -118,7 +118,7 @@ namespace Dual.Model.Import
             if(_PathPPTs.Where(w=> !File.Exists(w)).IsEmpty())
                 ImportPPTs(_PathPPTs);
         }
-        internal void ResultBtnAbleUI(bool bAble)
+        internal void OpenAbleUI(bool bAble)
         {
             this.Do(() =>
             {

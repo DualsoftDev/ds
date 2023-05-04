@@ -31,31 +31,29 @@ namespace Dual.Model.Import
                 {
                     var (storage, newValue) = tuple;
 
-                  //  FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{storage.Name}:{newValue}", true);
                     FormMain.TheMain.UpdateLogComboBox(storage, newValue, cpu);
-
                 });
             });
-
-            DisposableCPUEvent = CpuEvent.StatusSubject.Subscribe(rx =>
+            if (DisposableCPUEvent == null)
             {
-                var v = rx.vertex as Vertex;
-                FormMain.TheMain.Do(() =>
+                DisposableCPUEvent = CpuEvent.StatusSubject.Subscribe(rx =>
                 {
-                    if (FormMain.TheMain._DicVertex.ContainsKey(v))
+                    var v = rx.vertex as Vertex;
+                    FormMain.TheMain.Do(() =>
                     {
-                        var ucView = FormMain.TheMain.SelectedView;
-                        var viewNode = FormMain.TheMain._DicVertex[v];
-                        viewNode.Status4 = rx.status;
+                        if (FormMain.TheMain._DicVertex.ContainsKey(v))
+                        {
+                            var ucView = FormMain.TheMain.SelectedView;
+                            var viewNode = FormMain.TheMain._DicVertex[v];
+                            viewNode.Status4 = rx.status;
 
-                        ucView.UpdateStatus(viewNode);
-                        FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{v.Name}:{rx.status}", true);
-                    }
-                    else { }
+                            ucView.UpdateStatus(viewNode);
+                            FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{v.Name}:{rx.status}", true);
+                        }
+                        else { }
+                    });
                 });
-
-
-            });
+            }
         }
 
 

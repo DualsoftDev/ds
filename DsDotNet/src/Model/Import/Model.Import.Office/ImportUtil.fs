@@ -334,11 +334,17 @@ module ImportU =
                     |Some(real) -> (real:?>Real).CreateEdge(mei)
                     |None ->       flow.CreateEdge(mei)
 
-                pptEdges
-                    |> Seq.filter(fun edge -> not <| edge.IsInterfaceEdge)
-                    |> Seq.iter(fun edge ->
-                        let flow = dicFlow.[edge.PageNum]
+                let edges    = pptEdges
+                               |> Seq.filter(fun edge -> not <| edge.IsInterfaceEdge)
+                let dicEdges = edges
+                               |> Seq.map(fun edge -> edge.EndNode)
+                               |> distinct
+                               |> Seq.map (fun endNode -> endNode, edges.Where(fun e -> e.EndNode = endNode))
+                               |> dict
 
+                //dummy edge 연결정보 업데이트
+                edges
+                |> Seq.iter(fun edge ->
                         let srcDummy = dummys.TryFindDummy(edge.StartNode)
                         let tgtDummy = dummys.TryFindDummy(edge.EndNode)
 
@@ -351,14 +357,21 @@ module ImportU =
                                 then
                                     let src = if srcDummy.IsNull() then edge.StartNode.Key else srcDummy.DummyNodeKey
                                     tgtDummy.AddInEdge(edge.Causal, src)
+                )
 
+                dicEdges
+                |> Seq.iter(fun dic ->
+                        let tgt      =  dic.Key
+                        let edges =  dic.Value
+                        let edge = edges.First() //동일 타겟이므로 아무거나 상관없음
+                        let flow = dicFlow.[edge.PageNum]
 
                         let getVertexs(pptNodes:pptNode seq) =
                             pptNodes.Select(fun s-> dicVertex.[s.Key])
 
                         let srcs = if(dummys.IsMember(edge.StartNode))
                                     then dummys.GetMembers(edge.StartNode) |> getVertexs
-                                    else [dicVertex.[edge.StartNode.Key]]
+                                    else edges.Select(fun e-> dicVertex[e.StartNode.Key])
 
                         let tgts = if(dummys.IsMember(edge.EndNode))
                                     then dummys.GetMembers(edge.EndNode)   |> getVertexs

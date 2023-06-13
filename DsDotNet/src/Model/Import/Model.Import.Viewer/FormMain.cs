@@ -30,6 +30,7 @@ using static Engine.Core.RuntimeGeneratorModule;
 using Engine.Common.FS;
 using static Engine.Core.TagModule;
 using static Engine.Core.TagKindModule;
+using LanguageExt;
 
 namespace Dual.Model.Import
 {
@@ -292,14 +293,6 @@ namespace Dual.Model.Import
         }
 
 
-        private void UpdateCpuUI(IEnumerable<string> text)
-        {
-
-            if (comboBox_Segment.Items.Count > 0)
-                comboBox_Segment.SelectedIndex = 0;
-
-            WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"\r\n{string.Join("\r\n", text)}");
-        }
 
 
         internal void UpdateGraphUI(IEnumerable<ViewNode> lstViewNode)
@@ -443,10 +436,10 @@ namespace Dual.Model.Import
         private void UpdateSelectedView(SystemView sysView)
         {
             _DicVertex = new Dictionary<Vertex, ViewNode>();
+            var nodes = sysView.ViewNodes.SelectMany(s => s.UsedViewNodes);
             sysView.System.GetVertices()
                 .ForEach(v =>
                 {
-                    var nodes = sysView.ViewNodes.SelectMany(s => s.UsedViewNodes);
                     var viewNode = nodes.Where(w => w.CoreVertex != null)
                                         .First(w => w.CoreVertex.Value == v);
 
@@ -466,6 +459,7 @@ namespace Dual.Model.Import
             comboBox_Segment.Items.Clear();
 
             sysView.System.GetVertices()
+                .OrderBy(v => v.QualifiedName)
                 .ForEach(v =>
                 {
                     var nodes = sysView.ViewNodes.SelectMany(s => s.UsedViewNodes);
@@ -478,6 +472,9 @@ namespace Dual.Model.Import
                         .Add(new SegmentView { Display = v.QualifiedName, Vertex = v, ViewNode = viewNode, VertexM = v.TagManager as VertexManager });
                     }
                 });
+
+            if (comboBox_Segment.Items.Count > 0)
+                comboBox_Segment.SelectedIndex = 0;
         }
 
         private void UpdateSelectedCpu(SystemView sysView)
@@ -500,8 +497,9 @@ namespace Dual.Model.Import
             });
 
             StartResetBtnUpdate(true);
-            UpdateCpuUI(lstText);
 
+
+            WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"\r\n{string.Join("\r\n", lstText)}");
             DisplayTextModel(System.Drawing.Color.Transparent, sysView.System.ToDsText());
         }
 

@@ -25,8 +25,17 @@ module RunTime =
                     //Step 2 관련수식 연산
                     if mapRungs.ContainsKey storage
                     then
+                        //IsEndPortTag 일 경우 새로운 thread 생성
+                        let endEvent = storage.IsEndPortTag()
                         for statement in mapRungs[storage] do
-                            statement.Do()
+                            if endEvent
+                                then
+                                    async {
+                                        do! Async.Sleep(1000) //debugging  sleep
+                                        statement.Do() }
+                                        |> Async.StartImmediate
+                                else
+                                    statement.Do()
                     else
                         ()
                       //  failwithlog $"Error {getFuncName()}"  //디버깅후 예외 처리
@@ -52,9 +61,6 @@ module RunTime =
                 let sts = dicSource.Filter(fun f->f.Value.Contains(rung.Key))
                 for st in sts do
                     rung.Value.Add(st.Key) |> verifyM $"Duplicated [{ st.Key.ToText()}]"
-
-
-            ()
 
         //강제 전체 연산 임시 test용
         member x.ScanOnce() =

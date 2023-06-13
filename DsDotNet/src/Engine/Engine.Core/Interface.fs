@@ -38,6 +38,7 @@ module Interface =
         /// null 인 경우, memory 주소를 할당하지 않는다.   "" 인 경우, memory 주소를 할당한다.   다른 정상 문자열이 있으면 그대로 둔다.
         abstract Address:string with get, set
         abstract DsSystem: ISystem
+        ///Storage 대상 객체 TagTarget =| TTSystem | TTFlow | TTVertex | TTApiItem | 변수 및 타이머 카운터는 None
         abstract Target: IQualifiedNamed option
         abstract TagKind: int
         abstract BoxedValue: obj with get, set

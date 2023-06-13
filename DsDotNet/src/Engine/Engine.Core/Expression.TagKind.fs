@@ -7,91 +7,101 @@ open System.Runtime.CompilerServices
 [<AutoOpen>]
 module TagKindModule =
 
+    let [<Literal>] TagStartSystem  = 0
+    let [<Literal>] TagStartFlow    = 10000
+    let [<Literal>] TagStartVertex  = 11000
+    let [<Literal>] TagStartApi     = 12000
+
     [<Flags>]
+    /// 0 ~ 9999
     type SystemTag  =
-    | on                       = 0
-    | off                      = 1
-    | auto                     = 2
-    | manual                   = 3
-    | drive                    = 4
-    | stop                     = 5
-    | emg                      = 6
-    | test                     = 7
-    | ready                    = 8
-    | clear                    = 9
-    | home                     = 10
+    | on                       = 0000
+    | off                      = 0001
+    | auto                     = 0002
+    | manual                   = 0003
+    | drive                    = 0004
+    | stop                     = 0005
+    | emg                      = 0006
+    | test                     = 0007
+    | ready                    = 0008
+    | clear                    = 0009
+    | home                     = 0010
     ///sysdatatimetag
-    | datet_yy                 = 11
-    | datet_mm                 = 12
-    | datet_dd                 = 13
-    | datet_h                  = 14
-    | datet_m                  = 15
-    | datet_s                  = 16
+    | datet_yy                 = 0011
+    | datet_mm                 = 0012
+    | datet_dd                 = 0013
+    | datet_h                  = 0014
+    | datet_m                  = 0015
+    | datet_s                  = 0016
     ///syserrortag
-    | timeout                  = 17
+    | timeout                  = 0017
 
     [<Flags>]
+    /// 10000 ~ 10999
     type FlowTag    =
-    |ready_op                  = 1000
-    |auto_op                   = 1001
-    |manual_op                 = 1002
-    |drive_op                  = 1003
-    |test_op                   = 1004
-    |stop_op                   = 1005
-    |emergency_op              = 1006
-    |idle_op                   = 1007
-    |auto_bit                  = 1008
-    |manual_bit                = 1009
-    |drive_bit                 = 1010
-    |stop_bit                  = 1011
-    |ready_bit                 = 1012
-    |clear_bit                 = 1013
-    |emg_bit                   = 1014
-    |test_bit                  = 1015
-    |home_bit                  = 1016
-    |readycondi_bit            = 1017
-    |drivecondi_bit            = 1018
+    |ready_op                  = 10000
+    |auto_op                   = 10001
+    |manual_op                 = 10002
+    |drive_op                  = 10003
+    |test_op                   = 10004
+    |stop_op                   = 10005
+    |emergency_op              = 10006
+    |idle_op                   = 10007
+    |auto_bit                  = 10008
+    |manual_bit                = 10009
+    |drive_bit                 = 10010
+    |stop_bit                  = 10011
+    |ready_bit                 = 10012
+    |clear_bit                 = 10013
+    |emg_bit                   = 10014
+    |test_bit                  = 10015
+    |home_bit                  = 10016
+    |readycondi_bit            = 10017
+    |drivecondi_bit            = 10018
 
 
     [<Flags>]
+    /// 11000 ~ 11999
     type VertexTag  =
-    |startTag                  = 2000
-    |resetTag                  = 2001
-    |endTag                    = 2002
-    |startForce                = 2003
-    |resetForce                = 2004
-    |endForce                  = 2005
-    |ready                     = 2006
-    |going                     = 2007
-    |finish                    = 2008
-    |homing                    = 2009
-    |origin                    = 2010
-    |pause                     = 2011
-    |errorTx                   = 2012
-    |errorRx                   = 2013
-    |pulse                     = 2014
-    |goingrelay                = 2015
-    |realOriginAction          = 2016
-    |relayReal                 = 2017
-    |startPort                 = 2018
-    |resetPort                 = 2019
-    |endPort                   = 2020
-    |relayCall                 = 2021
-    |counter                   = 2022
-    |timerOnDelay              = 2023
-    |timerTimeOut              = 2024
+    |startTag                  = 11000
+    |resetTag                  = 11001
+    |endTag                    = 11002
+    |startForce                = 11003
+    |resetForce                = 11004
+    |endForce                  = 11005
+    |ready                     = 11006
+    |going                     = 11007
+    |finish                    = 11008
+    |homing                    = 11009
+    |origin                    = 11010
+    |pause                     = 11011
+    |errorTx                   = 11012
+    |errorRx                   = 11013
+    |pulse                     = 11014
+    |goingrelay                = 11015
+    |realOriginAction          = 11016
+    |relayReal                 = 11017
+    |startPort                 = 11018
+    |resetPort                 = 11019
+    |endPort                   = 11020
+    |relayCall                 = 11021
+    |counter                   = 11022
+    |timerOnDelay              = 11023
+    |timerTimeOut              = 11024
 
 
     [<Flags>]
+    /// 12000 ~ 12999
     type ApiItemTag =
-    |planSet                   = 3000
-    |planRst                   = 3001
-    |planEnd                   = 3002
+    |planSet                   = 12000
+    |planRst                   = 12001
+    |planEnd                   = 12002
 
     [<Flags>]
+    /// 13000 ~ 13999
     type LinkTag    =
-    |LinkStart                 = 4000
-    |LintReset                 = 4000
+    |LinkStart                 = 13000
+    |LintReset                 = 13001
 
 
 
@@ -113,23 +123,29 @@ module TagKindModule =
         TagApiItem   : (ApiItem  * ApiItemTag) option
     }
 
+
     [<AutoOpen>]
     [<Extension>]
-    type TagKinExt =
+    type TagKindExt =
+
+        [<Extension>]
+        static member GetSystemTagKind (x:IStorage) = match x.TagKind with | InClosedRange TagStartSystem  9999 -> Some (Enum.ToObject(typeof<SystemTag>, x.TagKind) :?> SystemTag)  | _ -> None
+        [<Extension>]
+        static member GetFlowTagKind   (x:IStorage) = match x.TagKind with | InClosedRange TagStartFlow   10999 -> Some (Enum.ToObject(typeof<FlowTag>, x.TagKind) :?> FlowTag)      | _ -> None
+        [<Extension>]
+        static member GetVertexTagKind (x:IStorage) = match x.TagKind with | InClosedRange TagStartVertex 11999 -> Some (Enum.ToObject(typeof<VertexTag>, x.TagKind) :?> VertexTag)  | _ -> None
+        [<Extension>]
+        static member GetApiTagKind    (x:IStorage) = match x.TagKind with | InClosedRange TagStartApi    12999 -> Some (Enum.ToObject(typeof<ApiItemTag>, x.TagKind) :?> ApiItemTag)| _ -> None
 
         [<Extension>]
         static member GetTagInfo (x:IStorage) =
-            let toSysTag    (tagKind:int) = Enum.ToObject(typeof<SystemTag>,  tagKind) :?> SystemTag
-            let toFlowTag   (tagKind:int) = Enum.ToObject(typeof<FlowTag>,    tagKind) :?> FlowTag
-            let toVertexTag (tagKind:int) = Enum.ToObject(typeof<VertexTag>,  tagKind) :?> VertexTag
-            let toApiTag    (tagKind:int) = Enum.ToObject(typeof<ApiItemTag>, tagKind) :?> ApiItemTag
             match x.Target with
             |Some obj ->
                 match obj with
-                | :? DsSystem as s -> Some {Name= x.Name; TagTarget= TTSystem;  TagSystem= Some(s, toSysTag x.TagKind); TagFlow = None;  TagVertex = None;   TagApiItem= None}
-                | :? Flow as f     -> Some {Name= x.Name; TagTarget= TTFlow;    TagSystem= None; TagFlow = Some(f, toFlowTag x.TagKind); TagVertex = None;   TagApiItem= None}
-                | :? Vertex as v   -> Some {Name= x.Name; TagTarget= TTVertex;  TagSystem= None; TagFlow = None; TagVertex = Some(v, toVertexTag x.TagKind); TagApiItem= None}
-                | :? ApiItem as a  -> Some {Name= x.Name; TagTarget= TTApiItem; TagSystem= None; TagFlow = None; TagVertex = None; TagApiItem= Some(a, toApiTag x.TagKind)}
+                | :? DsSystem as s -> Some {Name= x.Name; TagTarget= TTSystem;  TagSystem= Some(s, x.GetSystemTagKind().Value); TagFlow = None;  TagVertex = None;   TagApiItem= None}
+                | :? Flow as f     -> Some {Name= x.Name; TagTarget= TTFlow;    TagSystem= None; TagFlow = Some(f, x.GetFlowTagKind().Value); TagVertex = None;   TagApiItem= None}
+                | :? Vertex as v   -> Some {Name= x.Name; TagTarget= TTVertex;  TagSystem= None; TagFlow = None; TagVertex = Some(v, x.GetVertexTagKind().Value); TagApiItem= None}
+                | :? ApiItem as a  -> Some {Name= x.Name; TagTarget= TTApiItem; TagSystem= None; TagFlow = None; TagVertex = None; TagApiItem= Some(a, x.GetApiTagKind().Value)}
                 |_ -> None
 
             |None -> None

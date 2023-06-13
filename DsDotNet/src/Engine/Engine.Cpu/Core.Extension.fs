@@ -44,16 +44,22 @@ module CoreExtensionsModule =
     type ExpressionExt =
         [<Extension>]
         static member NotifyStatus (x:PlanVar<bool>) =
-            let stg = (x :> IStorage)
-            if stg.Target.IsSome && (stg.Target.Value :? Vertex)
-            then
-                let tagKind = Enum.ToObject(typeof<VertexTag>,  stg.TagKind) :?> VertexTag
-                let vertex  = stg.Target.Value :?> Vertex
-                match tagKind with
-                | VertexTag.ready  -> onStatusChanged (vertex, Ready)
-                | VertexTag.going  -> onStatusChanged (vertex, Going)
-                | VertexTag.finish -> onStatusChanged (vertex, Finish)
-                | VertexTag.homing -> onStatusChanged (vertex, Homing)
+            match x.GetVertexTagKind() with
+            | Some tk ->
+                let v = (x :> IStorage).Target.Value :?> Vertex
+                match tk with
+                | VertexTag.ready  -> onStatusChanged (v, Ready)
+                | VertexTag.going  -> onStatusChanged (v, Going)
+                | VertexTag.finish -> onStatusChanged (v, Finish)
+                | VertexTag.homing -> onStatusChanged (v, Homing)
                 | _->()
 
+            | None -> ()
+
+
+        [<Extension>]
+        static member IsEndPortTag (x:IStorage) =
+            match x.GetVertexTagKind() with
+            | Some tk -> tk = VertexTag.endPort
+            | _ -> false
 

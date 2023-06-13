@@ -29,21 +29,21 @@ module TagManagerModule =
             let t = createPlanVar  s name DuBOOL true v vertexTag
             t :?> PlanVar<bool>
 
-        let startTagBit   = createTag "ST"  VertexTag.startTag
-        let resetTagBit   = createTag "RT"  VertexTag.resetTag
-        let endTagBit     = createTag "ET"  VertexTag.endTag
-        let originBit     = createTag "OG"  VertexTag.origin
-        let pauseBit      = createTag "PA"  VertexTag.pause
-        let errorTxBit    = createTag "E1"  VertexTag.errorTx
-        let errorRxBit    = createTag "E2"  VertexTag.errorRx
-        let readyBit      = createTag "R"   VertexTag.ready
-        let goingBit      = createTag "G"   VertexTag.going
-        let finishBit     = createTag "F"   VertexTag.finish
-        let homingBit     = createTag "H"   VertexTag.homing
-        let startForceBit = createTag "SF"  VertexTag.startForce
-        let resetForceBit = createTag "RF"  VertexTag.resetForce
-        let endForceBit   = createTag "EF"  VertexTag.endForce
-        let pulseBit      = createTag "PUL" VertexTag.pulse
+        let startTagBit   = createTag "ST"   VertexTag.startTag
+        let resetTagBit   = createTag "RT"   VertexTag.resetTag
+        let endTagBit     = createTag "ET"   VertexTag.endTag
+        let originBit     = createTag "OG"   VertexTag.origin
+        let pauseBit      = createTag "PA"   VertexTag.pause
+        let errorTxBit    = createTag "E1"   VertexTag.errorTx
+        let errorRxBit    = createTag "E2"   VertexTag.errorRx
+        let readyBit      = createTag "R"    VertexTag.ready
+        let goingBit      = createTag "G"    VertexTag.going
+        let finishBit     = createTag "F"    VertexTag.finish
+        let homingBit     = createTag "H"    VertexTag.homing
+        let startForceBit = createTag "SF"   VertexTag.startForce
+        let resetForceBit = createTag "RF"   VertexTag.resetForce
+        let endForceBit   = createTag "EF"   VertexTag.endForce
+        let pulseBit      = createTag "GPUL" VertexTag.goingPulse
         let goingRelays = Dictionary<Vertex, PlanVar<bool>>()
 
 
@@ -97,8 +97,8 @@ module TagManagerModule =
         member _.E2         =  errorRxBit
 
         //DummyBit
-        ///PulseStart
-        member _.PUL        = pulseBit
+        ///Going Pulse
+        member _.GPUL        = pulseBit
         ///Going Relay   //리셋 인과에 따라 필요
         member _.GR(src:Vertex) =
            let gr = createPlanVar s $"{v.Name}_GR_{src.Name}" DuBOOL true v (VertexTag.goingrelay|>int):?> PlanVar<bool>

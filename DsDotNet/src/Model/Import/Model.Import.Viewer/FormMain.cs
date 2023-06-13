@@ -276,9 +276,8 @@ namespace Dual.Model.Import
             var segHMI = comboBox_Segment.SelectedItem as SegmentView;
             if (segHMI == null) return;
             if (segHMI.VertexM == null) return;
-            var ucView = SelectedView;
-            segHMI.VertexM.RT.Value = false;
-            segHMI.VertexM.ST.Value = true;
+            segHMI.VertexM.SF.Value = true;
+            segHMI.VertexM.SF.Value = false;
         }
 
         private void button_reset_Click(object sender, EventArgs e)
@@ -286,10 +285,8 @@ namespace Dual.Model.Import
             var segHMI = comboBox_Segment.SelectedItem as SegmentView;
             if (segHMI == null) return;
             if (segHMI.VertexM == null) return;
-
-            var ucView = SelectedView;
-            segHMI.VertexM.RT.Value = true;
-            segHMI.VertexM.ST.Value = false;
+            segHMI.VertexM.RF.Value = true;
+            segHMI.VertexM.RF.Value = false;
         }
 
 

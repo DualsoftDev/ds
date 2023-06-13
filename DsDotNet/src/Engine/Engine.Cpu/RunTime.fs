@@ -25,20 +25,24 @@ module RunTime =
                     //Step 2 관련수식 연산
                     if mapRungs.ContainsKey storage
                     then
-                        //IsEndPortTag 일 경우 새로운 thread 생성
-                        let endEvent = storage.IsEndPortTag()
+                        //EndPortTag or GoingPulse 일 경우 새로운 thread 생성
+                        let endEvent = storage.IsEndThread()
                         for statement in mapRungs[storage] do
                             if endEvent
                                 then
                                     async {
-                                        do! Async.Sleep(1000) //debugging  sleep
+                                        do! Async.Sleep(1000)
                                         statement.Do() }
                                         |> Async.StartImmediate
                                 else
-                                    statement.Do()
+                                    //debugging  sleep
+                                    async {
+                                        do! Async.Sleep(20)
+                                        statement.Do()
+                                        }|> Async.RunSynchronously
+                                    //debugging  sleep
                     else
-                        ()
-                      //  failwithlog $"Error {getFuncName()}"  //디버깅후 예외 처리
+                        failwithlog $"Error {getFuncName()} : {storage.Name}"  //디버깅후 예외 처리
                     )
             subscribe
 

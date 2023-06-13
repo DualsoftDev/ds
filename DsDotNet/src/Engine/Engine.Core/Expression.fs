@@ -269,10 +269,12 @@ module ExpressionModule =
         then
             historyFlag.LastValue <- (expr.BoxedEvaluatedValue |> unbox)
             if historyFlag.LastValue |> unbox = isRising //rising 경우 TRUE 변경시점 처리
-            then storage.BoxedValue <- true
-                 storage.BoxedValue <- false
+            then
+                storage.BoxedValue <- true;storage.BoxedValue <- false
+                 //이벤트 방식이면 별도 쓰레드에서 On 이벤트 끝난후 pulseDo Off 해서 재연산 회피 test ahn
+               // async { storage.BoxedValue <- true;storage.BoxedValue <- false } |> Async.StartImmediate
+
                  //single 스켄방식이면 펄스조건 사용된 모든 Rung 처리후 Off
-                 //이벤트 방식이면 단일 쓰레드이면 이벤트 끝난후 pulseDo Off 해서 상관없을듯  //이벤트 테스트 중 ahn
 
     type Statement with
         member x.Do() =

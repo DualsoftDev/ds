@@ -58,8 +58,9 @@ module CoreExtensionsModule =
 
 
         [<Extension>]
-        static member IsEndPortTag (x:IStorage) =
+        static member IsEndThread (x:IStorage) =
             match x.GetVertexTagKind() with
-            | Some tk -> tk = VertexTag.endPort
+            | Some VertexTag.endPort -> true
+         //   | Some VertexTag.goingPulse -> true
             | _ -> false
 

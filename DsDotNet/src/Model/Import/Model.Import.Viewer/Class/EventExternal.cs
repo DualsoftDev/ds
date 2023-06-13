@@ -1,6 +1,7 @@
 using System;
 using System.Reactive.Linq;
-
+using System.Threading;
+using DocumentFormat.OpenXml.Office2021.DocumentTasks;
 using Engine.Common;
 using Engine.Common.FS;
 using Engine.Core;
@@ -27,18 +28,20 @@ namespace Dual.Model.Import
             {
                 var sys = x.Key;
                 var cpu = x.Value;
-                x.Key.ValueChangeSubject.Subscribe(tuple =>
+                x.Key.ValueChangeSubject.Subscribe(async tuple =>
                 {
                     var (storage, newValue) = tuple;
-
+                    await System.Threading.Tasks.Task.Delay(1);
                     FormMain.TheMain.UpdateLogComboBox(storage, newValue, cpu);
                 });
             });
+
             if (DisposableCPUEvent == null)
             {
-                DisposableCPUEvent = CpuEvent.StatusSubject.Subscribe(rx =>
+                DisposableCPUEvent = CpuEvent.StatusSubject.Subscribe(async rx =>
                 {
                     var v = rx.vertex as Vertex;
+                    await System.Threading.Tasks.Task.Delay(1);
                     FormMain.TheMain.Do(() =>
                     {
                         if (FormMain.TheMain._DicVertex.ContainsKey(v))
@@ -52,6 +55,7 @@ namespace Dual.Model.Import
                         }
                         else { }
                     });
+
                 });
             }
         }

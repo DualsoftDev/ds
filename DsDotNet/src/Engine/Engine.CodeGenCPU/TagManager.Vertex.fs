@@ -44,7 +44,7 @@ module TagManagerModule =
         let resetForceBit = createTag "RF"  VertexTag.resetForce
         let endForceBit   = createTag "EF"  VertexTag.endForce
         let pulseBit      = createTag "PUL" VertexTag.pulse
-        let goingRelays = HashSet<PlanVar<bool>>()
+        let goingRelays = Dictionary<Vertex, PlanVar<bool>>()
 
 
         interface ITagManager with
@@ -101,9 +101,11 @@ module TagManagerModule =
         member _.PUL        = pulseBit
         ///Going Relay   //리셋 인과에 따라 필요
         member _.GR(src:Vertex) =
-           let gr = createPlanVar s $"GR_{src.Name}" DuBOOL true v (VertexTag.goingrelay|>int):?> PlanVar<bool>
-           goingRelays.Add gr |> ignore
-           gr
+           let gr = createPlanVar s $"{v.Name}_GR_{src.Name}" DuBOOL true v (VertexTag.goingrelay|>int):?> PlanVar<bool>
+           if goingRelays.ContainsKey src
+           then goingRelays[src]
+           else goingRelays.Add (src, gr)
+                gr
 
         member _.CreateTag(name) = createTag name
 

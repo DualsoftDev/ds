@@ -209,9 +209,9 @@ namespace Dual.Model.Import
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             if ((Keys)e.KeyValue == Keys.F1) { HelpLoad(); }
-            if ((Keys)e.KeyValue == Keys.F5) { ReloadPPT(); }
-            if ((Keys)e.KeyValue == Keys.F6) { TestDebug(true, false); }
-            if ((Keys)e.KeyValue == Keys.F7) { TestDebug(false, false); }
+           // if ((Keys)e.KeyValue == Keys.F5) { ReloadPPT(); }
+           // if ((Keys)e.KeyValue == Keys.F6) { TestDebug(false, false); }
+            if ((Keys)e.KeyValue == Keys.F7) { TestDebug(true, false); }
             if ((Keys)e.KeyValue == Keys.F8) { TestDebug(false, true); }
             if ((Keys)e.KeyValue == Keys.F9) { RefreshGraph(); }
         }
@@ -233,12 +233,17 @@ namespace Dual.Model.Import
 
         private void button_ClearLog_Click(object sender, EventArgs e)
         {
+            ClearLog();
+        }
+
+        private void ClearLog()
+        {
             richTextBox_Debug.Clear();
             richTextBox_Debug.AppendText($"{DateTime.Now} : Log Clear");
             checkedListBox_My.Items.Clear();
-            checkedListBox_My.Enabled= false;
+            checkedListBox_My.Enabled = false;
             checkedListBox_Ex.Items.Clear();
-            checkedListBox_Ex.Enabled= false;
+            checkedListBox_Ex.Enabled = false;
         }
 
         private  void button_TestStart_Click(object sender, EventArgs e)
@@ -396,20 +401,35 @@ namespace Dual.Model.Import
         private void checkedListBox_My_DoubleClick(object sender, EventArgs e)
         {
             StorageDisplay sd = checkedListBox_My.SelectedItem as StorageDisplay;
-            if (sd == null) return;
-            _SelectedCPU.CommentedStatements
-                .Where(cs => getTargetStorages(cs.Statement).ToList().Contains(sd.Storage))
-                .ForEach(cs => ShowExpr(cs, false));
-        }
+            Debug.Assert(sd != null);
 
+            displayExprLog(sd.Storage);
+        }
         private void checkedListBox_Ex_DoubleClick(object sender, EventArgs e)
         {
             StorageDisplay sd = checkedListBox_Ex.SelectedItem as StorageDisplay;
-            if (sd == null) return;
-            _SelectedDev.CommentedStatements
-                .Where(cs => getTargetStorages(cs.Statement).ToList().Contains(sd.Storage))
-                .ForEach(cs => ShowExpr(cs, true));
+            Debug.Assert(sd != null);
+            displayExprLog(sd.Storage);
         }
+
+        private void displayExprLog(IStorage storage)
+        {
+            var exprs =
+                _SelectedCPU.CommentedStatements
+                    .Where(cs => getTargetStorages(cs.Statement).ToList().Contains(storage));
+
+            if (exprs.Length() > 0)
+            {
+                exprs.ForEach(cs => ShowExpr(cs));
+            }
+            else
+            {
+                richTextBox_ds.AppendTextColor($"\r\n{storage.ToText()} value : {storage.BoxedValue}     조건전용 신호\r\n", Color.WhiteSmoke);
+                richTextBox_ds.ScrollToCaret();
+            }
+        }
+
+
 
         private void checkedListBox_sysHMI_ItemCheck(object sender, ItemCheckEventArgs e)
         {
@@ -490,20 +510,19 @@ namespace Dual.Model.Import
             int index = comboBox_TestExpr.SelectedIndex;
             var cs = _DicStatement[index];
             // cs.statement.Do();
-            ShowExpr(cs, false);
+            ShowExpr(cs);
         }
 
-        private void ShowExpr(CommentedStatement cs, bool bDev)
+        private void ShowExpr(CommentedStatement cs)
         {
             var tgts = getTargetStorages(cs.statement);
             var srcs = getSourceStorages(cs.statement);
             string tgtsTexs = string.Join(", ", tgts.Select(s => $"{s.Name}({s.BoxedValue})"));
             string srcsTexs = string.Join(", ", srcs.Select(s => $"{s.Name}({s.BoxedValue})"));
-            var color = bDev ? Color.White : Color.Gold;
-            richTextBox_ds.AppendTextColor($"{cs.comment}".Replace("$", ""), color);
-            richTextBox_ds.AppendTextColor($"\r\n\t{cs.statement.ToText()} ", color);
+            richTextBox_ds.AppendTextColor($"{cs.comment}".Replace("$", ""), Color.Gold);
+            richTextBox_ds.AppendTextColor($"\r\n\t{cs.statement.ToText()} ", Color.Gold);
             richTextBox_ds.AppendTextColor($"\r\n\t{tgtsTexs} = {srcsTexs}\r\n", Color.LightGreen);
-            richTextBox_ds.AppendTextColor("\r\n", color);
+            richTextBox_ds.AppendTextColor("\r\n", Color.Gold);
             richTextBox_ds.ScrollToCaret();
         }
 

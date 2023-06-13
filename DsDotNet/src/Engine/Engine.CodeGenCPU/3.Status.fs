@@ -19,10 +19,10 @@ type VertexManager with
         let h = v.H <==        (                      v.RP.Expr  <&&>      v.EP.Expr) //    H      -   o   o
 
         [
-           withExpressionComment (getFuncName()) r
-           withExpressionComment ""       g
-           withExpressionComment ""       f
-           withExpressionComment ""       h
+           withExpressionComment $"{getFuncName()}(Ready)"        r
+           withExpressionComment $"{getFuncName()}(Going)"        g
+           withExpressionComment $"{getFuncName()}(Finish)"       f
+           withExpressionComment $"{getFuncName()}(Homming)"      h
         ]
 
     /// vertex 의 CallDev RGFH status 를 update 하는 rungs/statements 만들기
@@ -36,8 +36,8 @@ type VertexManager with
         let h = v.H <==        (                      v.RT.Expr  <&&>      v.CR.Expr) //    H      -   o   o
 
         [
-           withExpressionComment (getFuncName()) r
-           withExpressionComment ""       g
-           withExpressionComment ""       f
-           withExpressionComment ""       h
+           withExpressionComment $"{getFuncName()}(Ready)"        r
+           withExpressionComment $"{getFuncName()}(Going)"        g
+           withExpressionComment $"{getFuncName()}(Finish)"       f
+           withExpressionComment $"{getFuncName()}(Homming)"      h
         ]

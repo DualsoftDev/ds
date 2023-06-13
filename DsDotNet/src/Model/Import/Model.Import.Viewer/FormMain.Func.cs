@@ -142,6 +142,8 @@ namespace Dual.Model.Import
             {
                 _PathPPTs.Clear();
                 _PathPPTs.Add(path);
+                ClearLog();
+
                 if (bDummyTestAddress)
                 {
                     ImportPPTs(_PathPPTs);

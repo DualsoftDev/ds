@@ -66,9 +66,10 @@ module ConvertCPU =
                 yield! vm.F1_RootStart()
             if IsSpec (v, RealExFlow ||| RealInFlow, AliasNotCare) then
                 yield! vm.F2_RootReset()
+                yield! vm.F3_RootGoingRelay()
 
             if IsSpec (v, CallInFlow ||| RealExSystem ||| RealExFlow, AliasNotCare) then
-                yield vm.F3_RootCoinRelay()
+                yield vm.F4_RootCoinRelay()
 
             if IsSpec (v, CallInReal ||| CallInFlow, AliasFalse) then
                 yield! vm.C1_CallPlanSend()

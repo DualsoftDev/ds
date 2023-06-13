@@ -22,13 +22,11 @@ module RunTime =
                     | :? Tag<bool> -> ()//hmi ?
                     | _ -> ()
 
-
                     //Step 2 관련수식 연산
                     if mapRungs.ContainsKey storage
                     then
                         for statement in mapRungs[storage] do
                             statement.Do()
-                    //    async {statement.Do()}|> Async.StartImmediate
                     else
                         ()
                       //  failwithlog $"Error {getFuncName()}"  //디버깅후 예외 처리
@@ -56,6 +54,8 @@ module RunTime =
                     rung.Value.Add(st.Key) |> verifyM $"Duplicated [{ st.Key.ToText()}]"
 
 
+            ()
+
         //강제 전체 연산 임시 test용
         member x.ScanOnce() =
             for s in statements do
@@ -65,8 +65,8 @@ module RunTime =
         member x.IsRunning = runSubscription <> null
         member x.CommentedStatements = css
         member x.Run() =
-            assert(runSubscription = null)
-            runSubscription <- runSubscribe()
+            if not <| x.IsRunning then
+                runSubscription <- runSubscribe()
         member x.Stop() =
             if x.IsRunning then
                 runSubscription.Dispose()

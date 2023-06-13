@@ -26,6 +26,11 @@ type Spec02_FlowStatement() =
             real.F2_RootReset() |> doChecks
 
     [<Test>]
-    member __.``F3 Root Reset Coin`` () =
+    member __.``F3 Root Going Relay`` () =
+        for real in t.Reals do
+            real.F3_RootGoingRelay() |> doChecks
+
+    [<Test>]
+    member __.``F4 Root Reset Coin`` () =
         for coin in t.Coins do
-            coin.F3_RootCoinRelay()   |> doCheck
+            coin.F4_RootCoinRelay()   |> doCheck

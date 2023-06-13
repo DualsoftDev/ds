@@ -65,10 +65,26 @@ module CodeConvertUtil =
         | false, true -> srcsStrong |> map (fun e->e.Source) |> DuEssStrong
         | false, false -> DuEssNone
 
-    /// returns [week] * [strong] start incoming edges for target
-    let getStartEdgeSources(graph:DsGraph, target:Vertex) = getEdgeSources (graph, target, true)
-    /// returns [week] * [strong] reset incoming edges for target
-    let getResetEdgeSources(graph:DsGraph, target:Vertex) = getEdgeSources (graph, target, false)
+    /// returns [weak] start incoming edges for target
+    let getStartWeakEdgeSources(graph:DsGraph, target:Vertex) =
+        match getEdgeSources (graph, target, true) with
+        | DuEssWeak ws when ws.Any() -> ws
+        | _ -> []
+    /// returns [strong] start incoming edges for target
+    let getStartStrongEdgeSources(graph:DsGraph, target:Vertex) =
+        match getEdgeSources (graph, target, true) with
+        | DuEssStrong ss when ss.Any() -> ss
+        | _ -> []
+    /// returns [weak] reset incoming edges for target
+    let getResetWeakEdgeSources(graph:DsGraph, target:Vertex) =
+        match getEdgeSources (graph, target, false) with
+        | DuEssWeak wr when wr.Any() -> wr
+        | _ -> []
+    /// returns [strong] reset incoming edges for target
+    let getResetStrongEdgeSources(graph:DsGraph, target:Vertex) =
+        match getEdgeSources (graph, target, false) with
+        | DuEssStrong sr when sr.Any() -> sr
+        | _ -> []
 
     /// 원위치 고려했을 때, reset chain 중 하나라도 켜져 있는지 검사하는 expression 반환
     let getNeedCheckExpression(real:Real) =
@@ -144,4 +160,6 @@ module CodeConvertUtil =
                 | _ -> failwithlog $"Error {getFuncName()}"
                 )
 
-            tags.ToAndElseOn(s)
+            if tags.any()
+                then tags.ToAnd()
+                else s._off.Expr

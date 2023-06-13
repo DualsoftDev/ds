@@ -11,32 +11,31 @@ type VertexManager with
     member v.F1_RootStart(): CommentedStatement list =
         let rsts  = v.F.Expr
 
-        match getStartEdgeSources(v.Flow.Graph, v.Vertex) with
-        | DuEssWeak ws when ws.Any() ->
-            let sets = ws.GetCausalTags(v.System, true)
-            [ (sets, rsts) ==| (v.ST, getFuncName()) ]
-        | DuEssStrong ss when ss.Any() ->
-            let sets = ss.GetCausalTags(v.System, true)
-            [ (sets, rsts) --| (v.ST, getFuncName()) ]
-        | _ -> []
+        let ws =  getStartWeakEdgeSources(v.Flow.Graph, v.Vertex)
+        let sets = ws.GetCausalTags(v.System, true)
+        [ (sets, rsts) ==| (v.ST, getFuncName()) ]
 
 
-    member v.F2_RootReset() : CommentedStatement list =
+    member v.F2_RootReset() : CommentedStatement list=
         let real = v.GetPureReal()
-        match getResetEdgeSources(v.Flow.Graph, v.Vertex) with  //test ahn  srcsStrong 리셋처리
-        | DuEssWeak ws when ws.Any() ->
-            let srcs = ws.Select(getVM).Select(fun s -> s, v.GR(s.Vertex))
-            let sets  = srcs.Select(fun (_src, gr) -> gr).ToAnd()
-            let rsts  = (!!)real.V.EP.Expr
-            //going relay rungs
-            srcs.Select(fun (src, gr) -> (src.G.Expr, real.V.H.Expr) ==| (gr, getFuncName()))
-            |> Seq.append [(sets, rsts) ==| (v.RT, getFuncName())] //reset tag
-            |> Seq.toList
-        | _ -> []
+        let wr =  getResetWeakEdgeSources(v.Flow.Graph, v.Vertex)
+        let srcs = wr.Select(getVM).Select(fun s -> v.GR(s.Vertex))
+        let sets = if srcs.any()
+                   then srcs.ToAnd()
+                   else v._off.Expr
+        let rsts = (!!)real.V.EP.Expr
+        [(sets, rsts) ==| (v.RT, getFuncName())] //reset tag
+
+    member v.F3_RootGoingRelay() : CommentedStatement list =
+        let real = v.GetPureReal()
+        let wr =  getResetWeakEdgeSources(v.Flow.Graph, v.Vertex)
+        let srcs = wr.Select(getVM).Select(fun s -> s, v.GR(s.Vertex))
+        ////going relay rungs
+        srcs.Select(fun (src, gr) -> (src.G.Expr, real.V.H.Expr) ==| (gr, getFuncName()))
+        |> Seq.toList
 
 
-
-    member v.F3_RootCoinRelay() : CommentedStatement =
+    member v.F4_RootCoinRelay() : CommentedStatement =
         let v = v :?> VertexMCoin
         let ands =
             match v.Vertex  with
@@ -59,17 +58,9 @@ type VertexManager with
      member v.F0_RootStartRealOptionPulse(): CommentedStatement list =
         let rsts  = v.F.Expr
         [
-            match getStartEdgeSources(v.Flow.Graph, v.Vertex) with
-            | DuEssWeak ws when ws.Any() ->
-                let sets = ws.GetCausalTags(v.System, true)
-                        //root 시작조건 이벤트 Pulse 처리
-                yield (sets, rsts) ==| (v.PUL, getFuncName() )
-                yield (v.PUL.Expr, v.H.Expr) ==| (v.ST, getFuncName())
-            | DuEssStrong ss when ss.Any() ->
-                let sets = ss.GetCausalTags(v.System, true)
-                        //root 시작조건 이벤트 Pulse 처리
-                yield (sets, rsts) --| (v.PUL, getFuncName())
-                yield (v.PUL.Expr, v.H.Expr) --| (v.ST, getFuncName())
-            | _ ->
-                ()
+            let ws =  getStartWeakEdgeSources(v.Flow.Graph, v.Vertex)
+            let sets = ws.GetCausalTags(v.System, true)
+                    //root 시작조건 이벤트 Pulse 처리
+            yield (sets, rsts) ==| (v.PUL, getFuncName() )
+            yield (v.PUL.Expr, v.H.Expr) ==| (v.ST, getFuncName())
         ]

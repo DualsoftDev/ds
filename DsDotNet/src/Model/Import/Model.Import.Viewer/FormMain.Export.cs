@@ -15,6 +15,7 @@ using static Engine.CodeGenCPU.ExportModule;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.Interface;
+using static Engine.Core.RuntimeGeneratorModule;
 using static Engine.Cpu.RunTime;
 
 namespace Dual.Model.Import
@@ -50,7 +51,7 @@ namespace Dual.Model.Import
             if (UtilFile.BusyCheck()) return;
             try
             {
-                Task.Run(async() =>
+                Task.Run(async () =>
                 {
                     WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{path} PLC 생성시작!!");
                     await Task.Delay(1);
@@ -73,38 +74,41 @@ namespace Dual.Model.Import
                     //if (EventExternal.DisposableCPUEvent == null)
                     EventExternal.CPUSubscribe();
 
-                    var xmlTemplateFile = Path.ChangeExtension(_PathPPTs[0], "xml");
-                    this.Do(() =>
+                    if (Runtime.Package.IsLightPLC ||
+                        Runtime.Package.IsStandardPLC)
                     {
+                        var xmlTemplateFile = Path.ChangeExtension(_PathPPTs[0], "xml");
                         if (File.Exists(xmlTemplateFile))
-                                             //사용자 xg5000 Template 형식으로 생성
+                            //사용자 xg5000 Template 형식으로 생성
                             ExportModuleExt.ExportXMLforXGI(SelectedSystem, path, xmlTemplateFile);
                         else  //기본 템플릿 CPU-E 타입으로 생성
                             ExportModuleExt.ExportXMLforXGI(SelectedSystem, path, null);
+                    }
 
 
-
-                    UpdateSystemUI();
-
-                    _DicCpu.ForEach(f =>
+                    this.Do(() =>
                     {
-                        f.Value.Run();
-                        f.Value.ScanOnce();
-                    });
 
-                    OpenAbleUI(true);
+                        UpdateSystemUI();
 
-                    _ResultDirectory = Path.GetDirectoryName(path);
-                    WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{path} PLC 생성완료!!");
-                    richTextBox_Debug.ScrollToCaret();
+                        _DicCpu.ForEach(f =>
+                        {
+                            f.Value.Run();
+                            f.Value.ScanOnce();
+                        });
 
-                    ProcessEvent.DoWork(0);
+                        OpenAbleUI(true);
 
+                        _ResultDirectory = Path.GetDirectoryName(path);
+                        WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{path} PLC 생성완료!!");
+                        richTextBox_Debug.ScrollToCaret();
 
+                        ProcessEvent.DoWork(0);
                     });
                 });
 
             }
+
             catch (Exception ex) { WriteDebugMsg(DateTime.Now, MSGLevel.MsgError, ex.Message); }
             finally { ProcessEvent.DoWork(0); }
         }

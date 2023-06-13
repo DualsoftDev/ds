@@ -14,14 +14,9 @@ type VertexManager with
 
         let rsts  = v.F.Expr
         [
-            match getStartEdgeSources(v.Flow.Graph, v.Vertex) with
-            | DuEssWeak ws when ws.Any() ->
-                let sets = ws.GetCausalTags(v.System, true)
-                yield (sets, rsts) ==| (v.ST, getFuncName() )
-            | DuEssStrong ss when ss.Any() ->
-                let sets = ss.GetCausalTags(v.System, true)
-                yield (sets, rsts) --| (v.ST, getFuncName() )
-            | _ -> ()
+            let ws =  getStartWeakEdgeSources(v.Flow.Graph, v.Vertex)
+            let sets = ws.GetCausalTags(v.System, true)
+            yield (sets, rsts) ==| (v.ST, getFuncName() )
         ]
 
 

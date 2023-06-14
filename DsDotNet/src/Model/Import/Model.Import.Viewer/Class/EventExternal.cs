@@ -1,5 +1,7 @@
 using System;
+using System.Diagnostics;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Engine.Common;
@@ -24,44 +26,26 @@ namespace Dual.Model.Import
         public static IDisposable DisposableCPUEvent = null;
         public static void CPUSubscribe()
         {
-            //FormMain.TheMain._DicCpu.ForEach(x =>
-            //{
-            //    var sys = x.Key;
-            //    var cpu = x.Value;
-            //    x.Key.ValueChangeSubject.Subscribe(async tuple =>
-            //    {
-            //        var (storage, newValue) = tuple;
-            //        await Task.Delay(1000);
-            //        FormMain.TheMain.UpdateLogComboBox(storage, newValue, cpu);
-            //    });
-            //});
-
             if (DisposableCPUEvent == null)
             {
-
-                DisposableCPUEvent = CpuEvent.StatusSubject.Subscribe(async rx =>
+                DisposableCPUEvent = CpuEvent.StatusSubject.Subscribe(rx =>
                 {
                     var v = rx.vertex as Vertex;
-                    await Task.Delay(1);
-                    FormMain.TheMain.Do(() =>
+                    var ui = FormMain.TheMain;
+                    if (ui._DicVertex.ContainsKey(v))
                     {
-                        if (FormMain.TheMain._DicVertex.ContainsKey(v))
-                        {
-                            var ucView = FormMain.TheMain.SelectedView;
-                            var viewNode = FormMain.TheMain._DicVertex[v];
-                            viewNode.Status4 = rx.status;
+                        var ucView = ui.SelectedView;
+                        var viewNode = ui._DicVertex[v];
+                        viewNode.Status4 = rx.status;
 
-                            ucView.UpdateStatus(viewNode);
-                            FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{v.Name}:{rx.status}", true);
-                        }
-                        else { }
-                    });
-
+                        ucView.UpdateStatus(viewNode);
+                        ui.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{v.Name}:{rx.status}", true);
+                    }
                 });
 
-                CpuEvent.ValueSubject.Subscribe(async rx =>
+                CpuEvent.ValueSubject.Subscribe(rx =>
                 {
-                    await Task.Delay(1);
+                    Debug.WriteLine($"{rx.storage.ToText()} : {rx.value}");
                     FormMain.TheMain.UpdateLogComboBox(rx.storage, rx.value, rx.sys);
                 });
 
@@ -70,14 +54,6 @@ namespace Dual.Model.Import
 
 
 
-
-        public static void MSGSubscribe()
-        {
-            MessageEvent.MSGSubject.Subscribe(rx =>
-                {
-                    FormMain.TheMain.WriteDebugMsg(rx.Time, rx.Level, $"{rx.Message}");
-                });
-        }
 
     }
 

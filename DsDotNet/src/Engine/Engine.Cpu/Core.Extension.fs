@@ -10,6 +10,8 @@ module CoreExtensionsModule =
     type Statement with
         member x.GetTargetStorages() =
             match x with
+            | DuAssign (_expr, (:? RisingCoil as rc))  -> [ rc.Storage]
+            | DuAssign (_expr, (:? FallingCoil as fc)) -> [ fc.Storage]
             | DuAssign (_expr, target) -> [ target ]
             | DuVarDecl (_expr, var) -> [ var ]
             | DuTimer timerStatement ->
@@ -68,6 +70,7 @@ module CoreExtensionsModule =
         [<Extension>]
         static member IsEndThread (x:IStorage) =
             match x.GetVertexTagKind() with
+            //EndPortTag  일 경우 새로운 thread 생성
             | Some VertexTag.endPort -> true
          //   | Some VertexTag.goingPulse -> true
             | _ -> false

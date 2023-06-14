@@ -53,6 +53,7 @@ namespace Dual.Model.Import
 
         private DsSystem _HelpSystem;
         private DsSystem SelectedSystem => (comboBox_System.SelectedItem as SystemView).System;
+        public UCView SelectedView = null;
 
 
         public FormMain()
@@ -70,14 +71,13 @@ namespace Dual.Model.Import
             richTextBox_Debug.AppendText($"{DateTime.Now} : *.pptx 를 드랍하면 시작됩니다");
 
         }
-        public UCView SelectedView => xtraTabControl_My.SelectedTab.Tag as UCView;
+
 
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            EventExternal.ProcessSubscribe();
-            EventExternal.MSGSubscribe();
 
+            EventExternal.ProcessSubscribe();
 
             //_Demo = ImportCheck.GetDemoModel("test");
 
@@ -95,7 +95,13 @@ namespace Dual.Model.Import
             DU.enumValues(typeof(RuntimePackage)).Cast<RuntimePackage>()
                 .ForEach(f => comboBox_Package.Items.Add(f));
             comboBox_Package.SelectedIndex = 0;
+
+            xtraTabControl_My.TabIndexChanged += (ss, ee) =>
+            {
+                SelectedView = xtraTabControl_My.SelectedTab.Tag as UCView;
+            };
         }
+
 
         public void createSysHMI(DsSystem sys)
         {
@@ -271,22 +277,30 @@ namespace Dual.Model.Import
             button_Stop.Enabled = Start;
         }
 
-        private void button_start_Click(object sender, EventArgs e)
+        private async void button_start_Click(object sender, EventArgs e)
         {
             var segHMI = comboBox_Segment.SelectedItem as SegmentView;
             if (segHMI == null) return;
             if (segHMI.VertexM == null) return;
-            segHMI.VertexM.SF.Value = true;
-            segHMI.VertexM.SF.Value = false;
+
+            await Task.Run(() =>
+            {
+                segHMI.VertexM.SF.Value = true;
+                segHMI.VertexM.SF.Value = false;
+            });
         }
 
-        private void button_reset_Click(object sender, EventArgs e)
+        private async void button_reset_Click(object sender, EventArgs e)
         {
             var segHMI = comboBox_Segment.SelectedItem as SegmentView;
             if (segHMI == null) return;
             if (segHMI.VertexM == null) return;
-            segHMI.VertexM.RF.Value = true;
-            segHMI.VertexM.RF.Value = false;
+
+            await Task.Run(() =>
+            {
+                segHMI.VertexM.RF.Value = true;
+                segHMI.VertexM.RF.Value = false;
+            });
         }
 
 
@@ -309,6 +323,7 @@ namespace Dual.Model.Import
                 {
                     xtraTabControl_My.TabPages.Add(tab);
                     xtraTabControl_My.SelectedTab = tab;
+                    SelectedView = xtraTabControl_My.SelectedTab.Tag as UCView;
                 });
             });
         }

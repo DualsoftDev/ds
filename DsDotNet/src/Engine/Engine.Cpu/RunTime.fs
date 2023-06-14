@@ -16,13 +16,11 @@ module RunTime =
             let subscribe =
                 sys.ValueChangeSubject      //cpu 단위로 이벤트 필요 ahn
                  .Subscribe(fun (storage, _newValue) ->
-                    //Step 1 상태보고
-                    match storage with
-                    | :? PlanVar<bool> as p -> if p.Value then p.NotifyStatus()
-                    | :? Tag<bool> -> ()//hmi ?
-                    | _ -> ()
+                    //for UI
+                    sys.NotifyValue(storage, _newValue);
+                    sys.NotifyStatus(storage);
 
-                    //Step 2 관련수식 연산
+                    //Step 1 관련수식 연산
                     if mapRungs.ContainsKey storage
                     then
                         //EndPortTag or GoingPulse 일 경우 새로운 thread 생성

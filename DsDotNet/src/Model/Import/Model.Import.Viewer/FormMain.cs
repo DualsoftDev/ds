@@ -364,22 +364,24 @@ namespace Dual.Model.Import
             }
         }
 
-        public void UpdateLogComboBox(IStorage storage, object value, DsCPU cpu)
+        public void UpdateLogComboBox(IStorage storage, object value, ISystem sys)
         {
             this.Do(() =>
             {
-
                 var name = value is bool ? storage.Name : $"{storage.Name}({value})";
                 var onOff = value is bool ? Convert.ToBoolean(value) : false;
-                var sd = new StorageDisplay() { Display = name, Storage = storage, Value = value, OnOff = onOff };
-                if (_SelectedCPU == cpu)
+                var sd = new StorageDisplay()
+                        { Display = name, Storage = storage, Value = value, OnOff = onOff };
+
+                if (_SelectedCPU != null && _SelectedCPU.System == sys)
                 {
                     checkedListBox_My.Enabled = false;
                     checkedListBox_My.Items.Add(sd, sd.OnOff);
                     checkedListBox_My.SelectedIndex = checkedListBox_My.Items.Count - 1;
                     checkedListBox_My.Enabled = true;
                 }
-                if (_SelectedDev == cpu)
+
+                if (_SelectedDev != null && _SelectedDev.System == sys)
                 {
                     checkedListBox_Ex.Enabled = false;
                     checkedListBox_Ex.Items.Add(sd, sd.OnOff);

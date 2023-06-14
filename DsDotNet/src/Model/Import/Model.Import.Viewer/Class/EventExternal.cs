@@ -1,7 +1,7 @@
 using System;
 using System.Reactive.Linq;
 using System.Threading;
-using DocumentFormat.OpenXml.Office2021.DocumentTasks;
+using System.Threading.Tasks;
 using Engine.Common;
 using Engine.Common.FS;
 using Engine.Core;
@@ -24,24 +24,25 @@ namespace Dual.Model.Import
         public static IDisposable DisposableCPUEvent = null;
         public static void CPUSubscribe()
         {
-            FormMain.TheMain._DicCpu.ForEach(x =>
-            {
-                var sys = x.Key;
-                var cpu = x.Value;
-                x.Key.ValueChangeSubject.Subscribe(async tuple =>
-                {
-                    var (storage, newValue) = tuple;
-                    await System.Threading.Tasks.Task.Delay(1);
-                    FormMain.TheMain.UpdateLogComboBox(storage, newValue, cpu);
-                });
-            });
+            //FormMain.TheMain._DicCpu.ForEach(x =>
+            //{
+            //    var sys = x.Key;
+            //    var cpu = x.Value;
+            //    x.Key.ValueChangeSubject.Subscribe(async tuple =>
+            //    {
+            //        var (storage, newValue) = tuple;
+            //        await Task.Delay(1000);
+            //        FormMain.TheMain.UpdateLogComboBox(storage, newValue, cpu);
+            //    });
+            //});
 
             if (DisposableCPUEvent == null)
             {
+
                 DisposableCPUEvent = CpuEvent.StatusSubject.Subscribe(async rx =>
                 {
                     var v = rx.vertex as Vertex;
-                    await System.Threading.Tasks.Task.Delay(1);
+                    await Task.Delay(1);
                     FormMain.TheMain.Do(() =>
                     {
                         if (FormMain.TheMain._DicVertex.ContainsKey(v))
@@ -57,6 +58,13 @@ namespace Dual.Model.Import
                     });
 
                 });
+
+                CpuEvent.ValueSubject.Subscribe(async rx =>
+                {
+                    await Task.Delay(1);
+                    FormMain.TheMain.UpdateLogComboBox(rx.storage, rx.value, rx.sys);
+                });
+
             }
         }
 

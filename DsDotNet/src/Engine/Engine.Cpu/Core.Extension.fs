@@ -43,19 +43,27 @@ module CoreExtensionsModule =
     [<Extension>]
     type ExpressionExt =
         [<Extension>]
-        static member NotifyStatus (x:PlanVar<bool>) =
+        static member NotifyStatus (s:ISystem, x:IStorage) =
             match x.GetVertexTagKind() with
             | Some tk ->
-                let v = (x :> IStorage).Target.Value :?> Vertex
-                match tk with
-                | VertexTag.ready  -> onStatusChanged (v, Ready)
-                | VertexTag.going  -> onStatusChanged (v, Going)
-                | VertexTag.finish -> onStatusChanged (v, Finish)
-                | VertexTag.homing -> onStatusChanged (v, Homing)
-                | _->()
+                let v = x.Target.Value :?> Vertex
+                if (x :?> PlanVar<bool>).Value
+                then
+                    match tk with
+                    | VertexTag.ready  -> onStatusChanged (s, v, Ready)
+                    | VertexTag.going  -> onStatusChanged (s, v, Going)
+                    | VertexTag.finish -> onStatusChanged (s, v, Finish)
+                    | VertexTag.homing -> onStatusChanged (s, v, Homing)
+                    | _->()
 
             | None -> ()
 
+        [<Extension>]
+        static member NotifyValue (sys:ISystem, stg:IStorage, newValue:obj) =
+            match stg with
+            | :? PlanVar<bool> as _p -> onValueChanged (sys, stg, newValue)
+            | :? Tag<bool> -> ()//hmi ?
+            | _ -> ()
 
         [<Extension>]
         static member IsEndThread (x:IStorage) =

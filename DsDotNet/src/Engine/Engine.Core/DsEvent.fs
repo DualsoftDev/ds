@@ -9,10 +9,19 @@ open System.Reactive.Subjects
 module CpuEvent =
 
     type VertexStatusParam =
-                |Event of vertex:IVertex * status:Status4
+                |Event of sys:ISystem * vertex:IVertex * status:Status4
+    type ValueChangeParam =
+                |Event of sys:ISystem * storage:IStorage * value:obj
 
     let StatusSubject = new Subject<VertexStatusParam>()
+    let ValueSubject = new Subject<ValueChangeParam>()
 
-    let onStatusChanged(vertex:IVertex, status:Status4) =
-        StatusSubject.OnNext(VertexStatusParam.Event (vertex, status))
+    //for UI
+    let onStatusChanged(sys:ISystem, vertex:IVertex, status:Status4) =
+        async { StatusSubject.OnNext(VertexStatusParam.Event (sys, vertex, status)) }
+        |> Async.RunSynchronously
+    //for UI
+    let onValueChanged(sys:ISystem, stg:IStorage, v:obj) =
+        async { ValueSubject.OnNext(ValueChangeParam.Event(sys, stg, v)) }
+        |> Async.RunSynchronously
 

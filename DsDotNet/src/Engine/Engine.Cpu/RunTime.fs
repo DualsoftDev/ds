@@ -44,20 +44,6 @@ module RunTime =
                     then
                         for statement in mapRungs[storage] do
                             doExpr(statement)
-                            //match statement with
-                            //| DuAssign (_expr, (:? RisingCoil  as rc)) ->
-                            //    if rc.HistoryFlag.LastValue = true
-                            //    then
-                            //        for pulseStatement in mapRungs[rc.Storage] do
-                            //            doExpr(pulseStatement)
-
-                            //| DuAssign (_expr, (:? FallingCoil as fc)) ->
-                            //    if fc.HistoryFlag.LastValue = false
-                            //    then
-                            //        for pulseStatement in mapRungs[fc.Storage] do
-                            //            doExpr(pulseStatement)
-
-                            //| _->  ()
                     else
                         failwithlog $"Error {getFuncName()} : {storage.Name}"  //디버깅후 예외 처리
                     )

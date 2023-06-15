@@ -361,25 +361,36 @@ module ImportU =
 
                 dicEdges
                 |> Seq.iter(fun dic ->
-                        let tgt      =  dic.Key
-                        let edges =  dic.Value
-                        let edge = edges.First() //동일 타겟이므로 아무거나 상관없음
-                        let flow = dicFlow.[edge.PageNum]
+                    let tgtNode    =  dic.Key
+                    let tgtEdges   =  dic.Value
+                    let edgesTypes =  dic.Value |> Seq.distinctBy(fun e -> e.Causal) |> Seq.map(fun f->f.Causal)
 
-                        let getVertexs(pptNodes:pptNode seq) =
-                            pptNodes.Select(fun s-> dicVertex.[s.Key])
+                    edgesTypes
+                        .Select(fun e -> tgtEdges.Where(fun w-> w.Causal = e))
+                        .Iter(fun es ->
+                            let edge = es.First() //동일 타겟이므로 아무거나 상관없음
+                            let flow = dicFlow.[edge.PageNum]
 
-                        let srcs = if(dummys.IsMember(edge.StartNode))
+                            let getVertexs(pptNodes:pptNode seq) =
+                                pptNodes.Select(fun s-> dicVertex.[s.Key])
+
+                            let srcs =
+                                if(dummys.IsMember(edge.StartNode))
                                     then dummys.GetMembers(edge.StartNode) |> getVertexs
-                                    else edges.Select(fun e-> dicVertex[e.StartNode.Key])
+                                    else
+                                        es.Select(fun e-> dicVertex[e.StartNode.Key])
 
-                        let tgts = if(dummys.IsMember(edge.EndNode))
+                            let tgts =
+                                if(dummys.IsMember(edge.EndNode))
                                     then dummys.GetMembers(edge.EndNode)   |> getVertexs
                                     else [dicVertex.[edge.EndNode.Key]]
 
-                        convertEdge(edge, flow, srcs, tgts) |> ignore
+                            convertEdge(edge, flow, srcs, tgts) |> ignore
+                        )
 
-                    )
+
+
+                )
 
 
         //Safety 만들기

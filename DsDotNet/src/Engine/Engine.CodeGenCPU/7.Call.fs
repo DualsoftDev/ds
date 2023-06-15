@@ -16,8 +16,10 @@ type VertexMCoin with
         let getStartPointExpr(coin:CallDev, td:TaskDev) =
             match coin.Parent.GetCore() with
             | :? Real as r ->
-                if r.V.OriginInfo.Tasks.Select(fun (t,_)->t).Contains(td)
-                    then call._on.Expr <&&> r.V.RO.Expr
+                let tasks = r.V.OriginInfo.Tasks
+                if tasks.Where(fun (_,ty) -> ty = InitialType.On) //NeedCheck 처리 필요 test ahn
+                        .Select(fun (t,_)->t).Contains(td)
+                    then r.V.RO.Expr
                     else call._off.Expr
             | _ ->
                 call._off.Expr

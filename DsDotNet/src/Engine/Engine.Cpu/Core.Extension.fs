@@ -72,6 +72,6 @@ module CoreExtensionsModule =
             match x.GetVertexTagKind() with
             //EndPortTag  일 경우 새로운 thread 생성
             | Some VertexTag.endPort -> true
-         //   | Some VertexTag.goingPulse -> true
+            //| Some VertexTag.goingrelay -> true
             | _ -> false
 

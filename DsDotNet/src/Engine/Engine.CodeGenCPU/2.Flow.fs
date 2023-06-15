@@ -34,7 +34,7 @@ type VertexManager with
         ////going relay rungs
         [
             yield! srcs.Select(fun (src, _ ) -> (src.G.Expr, v._off.Expr)      --^ (src.GPUL, "RootGoingPulse"))
-            yield! srcs.Select(fun (src, gr) -> (src.GPUL.Expr <&&> v.F.Expr, v.H.Expr) ==| (gr, "RootGoingRelay"))
+            yield! srcs.Select(fun (src, gr) -> (src.GPUL.Expr <&&> real.V.F.Expr, real.V.H.Expr) ==| (gr, "RootGoingRelay"))
         ]
 
 

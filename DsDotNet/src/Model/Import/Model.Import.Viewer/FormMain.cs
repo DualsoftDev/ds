@@ -31,6 +31,7 @@ using Engine.Common.FS;
 using static Engine.Core.TagModule;
 using static Engine.Core.TagKindModule;
 using LanguageExt;
+using static Engine.Core.DsType;
 
 namespace Dual.Model.Import
 {
@@ -353,6 +354,8 @@ namespace Dual.Model.Import
             _SelectedDev = _DicCpu[sysView.System];
             UpdateSelectedCpu(sysView);
 
+            UpdateGraphUI(sysView.ViewNodes);
+            UpdateSelectedView(sysView);
         }
         private void comboBox_System_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -371,10 +374,7 @@ namespace Dual.Model.Import
                 createSysHMI(sysView.System);
                 UpdatecomboBox_SegmentHMI(sysView);
             }
-            else
-            {
-                UpdateSelectedView(sysView);
-            }
+            UpdateSelectedView(sysView);
         }
 
         public void UpdateLogComboBox(IStorage storage, object value, ISystem sys)

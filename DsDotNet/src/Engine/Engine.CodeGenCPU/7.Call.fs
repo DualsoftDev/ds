@@ -47,14 +47,14 @@ type VertexMCoin with
                 then yield (td.ApiItem.PS.Expr, rsts) --| (td.ActionOut, getFuncName())
         ]
 
-    member coin.C3_CallPlanReceive(): CommentedStatement list =
+    member coin.C3_CallPlanReceive(): CommentedStatement  =
         let call = coin.Vertex :?> CallDev
         let rsts = coin._off.Expr
-        [
-            for td in call.CallTargetJob.DeviceDefs do
-                let sets = td.RXs.ToAndElseOn(coin.System)
-                yield (sets, rsts) --| (coin.PE, getFuncName() )
-        ]
+
+        let tds = call.CallTargetJob.DeviceDefs.SelectMany(fun td -> td.RXs)
+        let sets = tds.ToAndElseOn(coin.System)
+        (sets, rsts) --| (coin.PE, getFuncName())
+
 
     member coin.C4_CallActionIn(): CommentedStatement list =
         let sharedCalls = coin.GetSharedCall()
@@ -73,5 +73,5 @@ type VertexMCoin with
 type VertexManager with
     member v.C1_CallPlanSend()   : CommentedStatement list = (v :?> VertexMCoin).C1_CallPlanSend()
     member v.C2_CallActionOut()  : CommentedStatement list = (v :?> VertexMCoin).C2_CallActionOut()
-    member v.C3_CallPlanReceive(): CommentedStatement list = (v :?> VertexMCoin).C3_CallPlanReceive()
+    member v.C3_CallPlanReceive(): CommentedStatement      = (v :?> VertexMCoin).C3_CallPlanReceive()
     member v.C4_CallActionIn()   : CommentedStatement list = (v :?> VertexMCoin).C4_CallActionIn()

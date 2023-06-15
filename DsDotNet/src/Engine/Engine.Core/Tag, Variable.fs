@@ -52,7 +52,8 @@ module TagVariableModule =
             and set(v) =
                 if value <> v then
                     value <- v
-                    (x:>  IStorage).DsSystem.ValueChangeSubject.OnNext(x :> IStorage, v)
+                    onValueChanged((x:>  IStorage).DsSystem, x, v)
+                 //   (x:>  IStorage).DsSystem.ValueChangeSubject.OnNext(x :> IStorage, v)
         member val Comment: string = comment with get, set
         member val Address = param.Address.ToObj() with get, set
 

@@ -85,9 +85,10 @@ module TagKindModule =
     |resetPort                 = 11019
     |endPort                   = 11020
     |relayCall                 = 11021
-    |counter                   = 11022
-    |timerOnDelay              = 11023
-    |timerTimeOut              = 11024
+    |planEnd                   = 11022
+    |counter                   = 11023
+    |timerOnDelay              = 11024
+    |timerTimeOut              = 11025
 
 
     [<Flags>]
@@ -95,7 +96,6 @@ module TagKindModule =
     type ApiItemTag =
     |planSet                   = 12000
     |planRst                   = 12001
-    |planEnd                   = 12002
 
     [<Flags>]
     /// 13000 ~ 13999

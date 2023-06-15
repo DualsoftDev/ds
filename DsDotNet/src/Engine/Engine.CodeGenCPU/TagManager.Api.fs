@@ -12,7 +12,6 @@ module ApiTagManagerModule =
         let cpv (n:string) = createPlanVar stg $"{sys.Name}_{apiItem.Name}_{n}" DuBOOL true apiItem  (ApiItemTag.planSet|>int) :?> PlanVar<bool>
         let ps = cpv "PS"
         let pr = cpv "PR"
-        let pe = cpv "PE"
 
         interface ITagManager with
             member _.Target = apiItem
@@ -22,6 +21,5 @@ module ApiTagManagerModule =
             match at with
             | ApiItemTag.planSet -> ps
             | ApiItemTag.planRst -> pr
-            | ApiItemTag.planEnd -> pe
             | _ -> failwithlog $"Error : GetApiTag {at} type not support!!"
 

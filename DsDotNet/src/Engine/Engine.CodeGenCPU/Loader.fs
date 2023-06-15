@@ -34,18 +34,6 @@ module CpuLoader =
 
             |_ -> failwithlog $"Error {getFuncName()}"
 
-        //let rootTarget = system.Flows.Collect(fun f->f.Graph.Edges).Select(fun e ->e.Target)
-        //let rootTargetCalls =
-        //    rootTarget.OfType<Call>()
-        //let rootTargetAliasCalls =
-        //    rootTarget.OfType<Alias>()
-        //              .Where(fun w-> w.TargetWrapper.CallTarget().IsSome)
-
-        //if rootTargetCalls.any()
-        //then failwithlog (getFuncName())
-        //if rootTargetAliasCalls.any()
-        //then failwithlog (getFuncName())
-
     let applyTagManager(system:DsSystem, storages:Storages) =
         let createTagM (sys:DsSystem) =
             Runtime.System <- sys
@@ -107,8 +95,8 @@ module CpuLoader =
                 system.GetRecursiveLoadeds()
                 |>Seq.map(fun s->
                     match s  with
-                    | :? Device as d ->   DevicePou (d, convertSystem(d.ReferenceSystem, false))
-                    | :? ExternalSystem as e ->  ExternalPou (e, convertSystem(e.ReferenceSystem, false))
+                    | :? Device as d         -> DevicePou   (d, convertSystem(d.ReferenceSystem, false))
+                    | :? ExternalSystem as e -> ExternalPou (e, convertSystem(e.ReferenceSystem, false))
                     | _ -> failwithlog (getFuncName())
                     )
                 //자신(Acitve) system을  CPU 변환

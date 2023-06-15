@@ -28,7 +28,7 @@ namespace Dual.Model.Import
         {
             if (DisposableCPUEvent == null)
             {
-                DisposableCPUEvent = CpuEvent.StatusSubject.Subscribe(rx =>
+                DisposableCPUEvent = CpusEvent.StatusSubject.Subscribe(rx =>
                 {
                     var v = rx.vertex as Vertex;
                     var ui = FormMain.TheMain;
@@ -43,7 +43,7 @@ namespace Dual.Model.Import
                     }
                 });
 
-                CpuEvent.ValueSubject.Subscribe(rx =>
+                CpusEvent.ValueSubject.Subscribe(rx =>
                 {
                     Debug.WriteLine($"{rx.storage.ToText()} : {rx.value}");
                     FormMain.TheMain.UpdateLogComboBox(rx.storage, rx.value, rx.sys);

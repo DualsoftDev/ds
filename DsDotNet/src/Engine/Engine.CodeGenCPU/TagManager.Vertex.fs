@@ -146,6 +146,7 @@ module TagManagerModule =
         let s    = this.Storages
         let createTag name = this.CreateTag name
         let relayCallBit  = createTag  "CR" VertexTag.relayCall
+        let planEndBit    = createTag  "PE" VertexTag.planEnd
         let sys = this.System
 
         let counterBit    = counter  s "CTR"  sys
@@ -154,6 +155,7 @@ module TagManagerModule =
 
         ///CallDev Done Relay
         member _.CR     = relayCallBit
+        member _.PE     = planEndBit
 
         ///Ring Counter
         member _.CTR    = counterBit

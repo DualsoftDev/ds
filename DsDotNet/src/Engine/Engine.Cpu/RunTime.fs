@@ -14,38 +14,40 @@ module RunTime =
         let statements = css |> Seq.map(fun f -> f.Statement)
         let runSubscribe() =
             let subscribe =
-                sys.ValueChangeSubject      //cpu 단위로 이벤트 필요 ahn
-                 .Subscribe(fun (storage, _newValue) ->
-                    //for UI
-                    sys.NotifyValue(storage, _newValue);
-                    //for UI
-                    sys.NotifyStatus(storage);
-
-                    let doExpr(statement:Statement) =
-                        let endEvent = storage.IsEndThread()
-                        if endEvent
+                CpusEvent.ValueSubject      //cpu 단위로 이벤트 필요 ahn
+                 .Subscribe(fun evt ->
+                    match evt with
+                    |Event (system, storage, _value) ->
+                        //자신 CPU와 같은 시스템 또는 참조시스템만 연산처리
+                        if system = sys || sys.ReferenceSystems.Contains(system:?> DsSystem)
                         then
-                            async {
-                                do! Async.Sleep(1000)
-                                statement.Do() }
-                                |> Async.StartImmediate
-                        else
-                            //statement.Do()
-                            //debugging  sleep
-                            async {
-                                do! Async.Sleep(10)
-                                statement.Do()
-                                }|> Async.RunSynchronously
-                            //debugging  sleep
+                            //for CPU 연산
+                            let doExpr(statement:Statement) =
+                                if storage.IsEndThread()
+                                then
+                                    async {
+                                        do! Async.Sleep(1000)
+                                        statement.Do() }
+                                        |> Async.StartImmediate
+                                else
+                                    //statement.Do()
+                                    //debugging  sleep
+                                    async {
+                                        do! Async.Sleep(10)
+                                        statement.Do()
+                                        }|> Async.RunSynchronously
+                                    //debugging  sleep
 
-
-                    //Step 1 관련수식 연산
-                    if mapRungs.ContainsKey storage
-                    then
-                        for statement in mapRungs[storage] do
-                            doExpr(statement)
-                    else
-                        failwithlog $"Error {getFuncName()} : {storage.Name}"  //디버깅후 예외 처리
+                            //Step 1 상태 UI 업데이트
+                            system.NotifyStatus(storage);
+                            //Step 2 관련수식 연산
+                            if mapRungs.ContainsKey storage
+                            then
+                                for statement in mapRungs[storage] do
+                                    doExpr(statement)
+                            else
+                                ()
+                                //failwithlog $"Error {getFuncName()} : {storage.Name}"  //디버깅후 예외 처리
                     )
             subscribe
 

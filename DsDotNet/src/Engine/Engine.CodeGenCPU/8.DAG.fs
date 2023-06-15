@@ -26,8 +26,7 @@ type VertexManager with
         [
             for coin in coins do
                 let coin = coin :?> VertexMCoin
-                let ws =  getStartWeakEdgeSources(real.Graph, coin.Vertex)
-                let sets = ws.GetCausalTags(v.System, false)
+                let sets = coin.GetWeakStartRootAndCausals()
                 yield (sets, coin.CR.Expr) ==| (coin.ST, getFuncName() )
         ]
 

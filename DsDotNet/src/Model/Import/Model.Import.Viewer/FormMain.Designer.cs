@@ -375,6 +375,7 @@ namespace Dual.Model.Import
             this.checkedListBox_sysHMI.Name = "checkedListBox_sysHMI";
             this.checkedListBox_sysHMI.Size = new System.Drawing.Size(141, 397);
             this.checkedListBox_sysHMI.TabIndex = 20;
+            this.checkedListBox_sysHMI.Visible = false;
             this.checkedListBox_sysHMI.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.checkedListBox_sysHMI_ItemCheck);
             // 
             // checkedListBox_My
@@ -491,7 +492,7 @@ namespace Dual.Model.Import
             this.richTextBox_Debug.Location = new System.Drawing.Point(0, 0);
             this.richTextBox_Debug.Name = "richTextBox_Debug";
             this.richTextBox_Debug.ReadOnly = true;
-            this.richTextBox_Debug.Size = new System.Drawing.Size(183, 396);
+            this.richTextBox_Debug.Size = new System.Drawing.Size(302, 396);
             this.richTextBox_Debug.TabIndex = 0;
             this.richTextBox_Debug.Text = "";
             // 

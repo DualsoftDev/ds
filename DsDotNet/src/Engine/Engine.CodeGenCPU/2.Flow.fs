@@ -9,36 +9,55 @@ open Engine.Common.FS
 type VertexManager with
 
     member v.F1_RootStart(): CommentedStatement list =
-        let real = v.GetPureReal()
-        let rsts  = real.V.RP.Expr <||> real.V.F.Expr
+        let real = v.Vertex :?> Real
+        let wsDirect =  v.GetWeakStartRootAndCausals()
 
-        let ws =  getStartWeakEdgeSources(v.Flow.Graph, v.Vertex)
-        let sets = ws.GetCausalTags(v.System, true)
+        let shareds = v.GetSharedReal().Select(getVM)
+        let wsShareds =
+            if shareds.any()
+            then shareds.Select(fun s -> s.GetWeakStartRootAndCausals()).ToOr()
+            else v._off.Expr
+
+        let sets = wsDirect <||> wsShareds <||> v.SF.Expr
+        let rsts  = real.V.RP.Expr <||> real.V.F.Expr
         [ (sets, rsts) ==| (v.ST, getFuncName()) ]
 
 
     member v.F2_RootReset() : CommentedStatement list=
         let real = v.GetPureReal()
-        let wr =  getResetWeakEdgeSources(v.Flow.Graph, v.Vertex)
-        let srcs = wr.Select(getVM).Select(fun s -> v.GR(s.Vertex))
-        let sets = if srcs.any()
-                   then srcs.ToAnd()
-                   else v._off.Expr
+        let wsDirect =  v.GetWeakResetRootAndCausals()
+
+        let shareds = v.GetSharedReal().Select(getVM)
+        let wsShareds =
+            if shareds.any()
+            then shareds.Select(fun s -> s.GetWeakResetRootAndCausals()).ToOr()
+            else v._off.Expr
+
+        let sets = wsDirect <||> wsShareds <||> v.RF.Expr
         let rsts = (!!)real.V.ET.Expr
         [(sets, rsts) ==| (v.RT, getFuncName())] //reset tag
 
-    member v.F3_RootGoingRelay() : CommentedStatement list =
+    member v.F3_RootGoingPulse() : CommentedStatement  =
         let real = v.GetPureReal()
-        let wr =  getResetWeakEdgeSources(v.Flow.Graph, v.Vertex)
-        let srcs = wr.Select(getVM).Select(fun s -> s, v.GR(s.Vertex))
-        ////going relay rungs
-        [
-            yield! srcs.Select(fun (src, _ ) -> (src.G.Expr, v._off.Expr)      --^ (src.GPUL, "RootGoingPulse"))
-            yield! srcs.Select(fun (src, gr) -> (src.GPUL.Expr <&&> real.V.F.Expr, real.V.H.Expr) ==| (gr, "RootGoingRelay"))
-        ]
+        (real.V.G.Expr, v._off.Expr) --^ (real.V.GPUL, "RootGoingPulse")
 
 
-    member v.F4_RootCoinRelay() : CommentedStatement =
+    member v.F4_RootGoingRelay() : CommentedStatement list =
+        let real = v.GetPureReal()
+
+        let shareds = v.GetSharedReal().Select(getVM)
+        let sets =
+            shareds @ [v]
+            |>Seq.collect(fun r ->
+                getResetWeakEdgeSources(r)
+                |>Seq.map(fun s -> s.V.GetPureReal().V, [s].GetResetCausals(r).Head())
+            )
+
+        sets
+        |> Seq.map(fun (src, gr) ->(src.GPUL.Expr <&&> real.V.F.Expr, real.V.H.Expr) ==| (gr, "RootGoingRelay"))
+        |> Seq.toList
+
+    member v.F5_RootCoinRelay() : CommentedStatement =
         let v = v :?> VertexMCoin
         let ands =
             match v.Vertex  with

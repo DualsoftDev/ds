@@ -17,8 +17,8 @@ type VertexMReal with
     member v.R2_RealJobComplete(): CommentedStatement  =
         let real = v.Vertex :?> Real
         let set  = v.G.Expr <&&> real.CoinRelays.ToAndElseOn v.System
-        let wr =  getResetWeakEdgeSources(v.Flow.Graph, v.Vertex)
-        let goingRelays = wr.Select(getVM).Select(fun s -> v.GR(s.Vertex))
+        let wr =  getResetWeakEdgeSources(v)
+        let goingRelays = wr.GetResetCausals(v)
         let rst  = v.H.Expr <&&> !!goingRelays.ToAndElseOn(v.System)
 
         (set, rst) ==| (v.ET, getFuncName())

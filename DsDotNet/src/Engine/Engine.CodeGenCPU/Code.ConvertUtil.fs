@@ -66,23 +66,23 @@ module CodeConvertUtil =
         | false, false -> DuEssNone
 
     /// returns [weak] start incoming edges for target
-    let getStartWeakEdgeSources(graph:DsGraph, target:Vertex) =
-        match getEdgeSources (graph, target, true) with
+    let getStartWeakEdgeSources(target:VertexManager) =
+        match getEdgeSources (target.Flow.Graph, target.Vertex, true) with
         | DuEssWeak ws when ws.Any() -> ws
         | _ -> []
     /// returns [strong] start incoming edges for target
-    let getStartStrongEdgeSources(graph:DsGraph, target:Vertex) =
-        match getEdgeSources (graph, target, true) with
+    let getStartStrongEdgeSources(target:VertexManager) =
+        match getEdgeSources (target.Flow.Graph, target.Vertex, true) with
         | DuEssStrong ss when ss.Any() -> ss
         | _ -> []
     /// returns [weak] reset incoming edges for target
-    let getResetWeakEdgeSources(graph:DsGraph, target:Vertex) =
-        match getEdgeSources (graph, target, false) with
+    let getResetWeakEdgeSources(target:VertexManager) =
+        match getEdgeSources (target.Flow.Graph, target.Vertex, false) with
         | DuEssWeak wr when wr.Any() -> wr
         | _ -> []
     /// returns [strong] reset incoming edges for target
-    let getResetStrongEdgeSources(graph:DsGraph, target:Vertex) =
-        match getEdgeSources (graph, target, false) with
+    let getResetStrongEdgeSources(target:VertexManager) =
+        match getEdgeSources (target.Flow.Graph, target.Vertex, false) with
         | DuEssStrong sr when sr.Any() -> sr
         | _ -> []
 
@@ -147,9 +147,9 @@ module CodeConvertUtil =
         ///Real 자신이거나 RealEx Target Real
         [<Extension>] static member GetPureReal  (v:VertexManager) = v |> getPureReal
         [<Extension>] static member GetPureCall  (v:VertexManager) = v |> getPureCall
+
         [<Extension>]
-        static member GetCausalTags(xs:Vertex seq, s:DsSystem, usingRoot:bool) =
-            let tags =
+        static member GetStartCausals(xs:Vertex seq, usingRoot:bool) =
                 xs.Select(fun f->
                 match f with
                 | :? Real    as r  -> r.V.EP
@@ -158,8 +158,28 @@ module CodeConvertUtil =
                 | :? CallDev as c  -> if usingRoot then  c.V.ET else  c.V.CR
                 | :? Alias   as a  -> if usingRoot then  a.V.ET else  a.V.CR
                 | _ -> failwithlog $"Error {getFuncName()}"
-                )
+                ).Distinct()
 
+        [<Extension>]
+        static member GetResetCausals(xs:Vertex seq, tgtV:VertexManager) =
+                xs.Select(fun f ->
+                    match f with
+                    | :? Real    as r  -> tgtV.GR(r.V.Vertex)
+                    | :? RealExF as rf -> tgtV.GR(rf.Real)//.V.EP
+                    | :? Alias   as a  -> tgtV.GR(getPureReal(a.V))
+                    | _ -> failwithlog $"Error {getFuncName()}"
+                ).Distinct()
+
+        [<Extension>]
+        static member GetWeakStartRootAndCausals  (v:VertexManager) =
+            let tags = getStartWeakEdgeSources(v).GetStartCausals(true)
             if tags.any()
                 then tags.ToAnd()
-                else s._off.Expr
+                else v._off.Expr
+
+        [<Extension>]
+        static member GetWeakResetRootAndCausals  (v:VertexManager) =
+            let tags = getResetWeakEdgeSources(v).GetResetCausals(v)
+            if tags.any()
+                then tags.ToAnd()
+                else v._off.Expr

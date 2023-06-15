@@ -14,8 +14,7 @@ type VertexManager with
 
         let rsts  = v.F.Expr
         [
-            let ws =  getStartWeakEdgeSources(v.Flow.Graph, v.Vertex)
-            let sets = ws.GetCausalTags(v.System, true)
+            let sets = v.GetWeakStartRootAndCausals()
             yield (sets, rsts) ==| (v.ST, getFuncName() )
         ]
 

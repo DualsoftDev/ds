@@ -100,11 +100,14 @@ module TagManagerModule =
         ///Going Pulse
         member _.GPUL        = pulseBit
         ///Going Relay   //리셋 인과에 따라 필요
+        //CodeConvertUtil.GetResetCausals 사용하여 생성 (RealExF, Alias 순수대상 릴레이 추출필요)
         member _.GR(src:Vertex) =
-           let gr = createPlanVar s $"{v.Name}_GR_{src.Name}" DuBOOL true v (VertexTag.goingrelay|>int):?> PlanVar<bool>
-           if goingRelays.ContainsKey src
-           then goingRelays[src]
-           else goingRelays.Add (src, gr)
+            assert(src :? Real)
+            if goingRelays.ContainsKey src
+            then goingRelays[src]
+            else
+                let gr = createPlanVar s $"{v.Name}_GR_{src.Name}" DuBOOL true v (VertexTag.goingrelay|>int):?> PlanVar<bool>
+                goingRelays.Add (src, gr)
                 gr
 
         member _.CreateTag(name) = createTag name

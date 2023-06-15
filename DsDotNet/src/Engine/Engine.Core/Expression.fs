@@ -246,6 +246,17 @@ module ExpressionModule =
     type CommentedStatement =
         | CommentedStatement of comment:string * statement:Statement
         member x.Statement = match x with | CommentedStatement (_c, s) -> s
+        member x.TargetName =
+             match x.Statement with
+             | DuAssign (_expression, target) -> target.Name
+             | DuVarDecl (_expression,variable) -> variable.Name
+             | DuTimer (t:TimerStatement) -> t.Timer.Name
+             | DuCounter (c:CounterStatement) -> c.Counter.Name
+             | DuAction (a:ActionStatement) ->
+                match a with
+                | DuCopy (_condition:IExpression<bool>, _source:IExpression,target:IStorage)-> target.Name
+             | DuAugmentedPLCFunction (_f:FunctionParameters) ->  _f.FunctionName  // Function은 항상 false 함수에 따른다.
+
         member x.TargetValue    =
             match x.Statement with
             | DuAssign (_expression, target) -> target.BoxedValue

@@ -108,7 +108,7 @@ namespace Dual.Model.Import
             checkedListBox_sysHMI.Items.Clear();
             var sysBits = Enum.GetValues(typeof(SystemTag)).Cast<SystemTag>();
             sysBits
-                .Where(w => !w.HasFlag(SystemTag.on) && !w.HasFlag(SystemTag.off))     //시스템 비트  제외
+                .Where(w => !(w == SystemTag.on || w ==SystemTag.off))     //시스템 비트  제외
                 .Select(f=> TagInfoType.GetTagSys(sys, f))
                 .OfType<PlanVar<bool>>()
                 .ForEach(tag =>
@@ -280,8 +280,7 @@ namespace Dual.Model.Import
         private async void button_start_Click(object sender, EventArgs e)
         {
             var segHMI = comboBox_Segment.SelectedItem as SegmentView;
-            if (segHMI == null) return;
-            if (segHMI.VertexM == null) return;
+            if (segHMI == null || segHMI.VertexM == null) return;
 
             await Task.Run(() =>
             {
@@ -293,8 +292,7 @@ namespace Dual.Model.Import
         private async void button_reset_Click(object sender, EventArgs e)
         {
             var segHMI = comboBox_Segment.SelectedItem as SegmentView;
-            if (segHMI == null) return;
-            if (segHMI.VertexM == null) return;
+            if (segHMI == null || segHMI.VertexM == null) return;
 
             await Task.Run(() =>
             {
@@ -438,11 +436,14 @@ namespace Dual.Model.Import
 
 
 
-        private void checkedListBox_sysHMI_ItemCheck(object sender, ItemCheckEventArgs e)
+        private async void checkedListBox_sysHMI_ItemCheck(object sender, ItemCheckEventArgs e)
         {
-            StorageDisplay sd = checkedListBox_sysHMI.Items[e.Index] as StorageDisplay;
-            if (sd == null) return;
-            sd.Storage.BoxedValue = e.NewValue == CheckState.Checked ? true : false;
+            await Task.Run(() =>
+             {
+                 StorageDisplay sd = checkedListBox_sysHMI.Items[e.Index] as StorageDisplay;
+                 if (sd == null) return;
+                 sd.Storage.BoxedValue = e.NewValue == CheckState.Checked ? true : false;
+             });
         }
 
 
@@ -504,10 +505,9 @@ namespace Dual.Model.Import
             {
                 var description = rung.comment;
                 var statement = rung.statement;
-                var targetValue = rung.TargetValue;
                 _DicStatement.Add(cnt, rung);
                 comboBox_TestExpr.Items.Add(cnt);
-                lstText.Add( $"{cnt++}\t[{targetValue}] Spec:{description.Replace("%", " ").Replace("$", " ")}");
+                lstText.Add( $"{cnt++}\t[{rung.TargetName}({rung.TargetValue})] \t\t\t Spec:{description.Replace("%", " ").Replace("$", " ")}");
             });
 
             StartResetBtnUpdate(true);

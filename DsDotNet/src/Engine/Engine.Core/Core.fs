@@ -40,7 +40,7 @@ module CoreModule =
         interface ISystem with
             member val ValueChangeSubject: Subject<IStorage * obj> = new Subject<IStorage*obj>()
         //시스템단위로 이벤트 변화 처리
-        member x.ValueChangeSubject = (x :> ISystem).ValueChangeSubject
+        //member x.ValueChangeSubject = (x :> ISystem).ValueChangeSubject
 
         /// 다른 device 을 Loading 하려는 system 입장에서 loading 된 system 참조 용
         member _.ReferenceSystem = loadedSystem
@@ -71,8 +71,10 @@ module CoreModule =
         let apiUsages = ResizeArray<ApiItem>()
         let addApiItemsForDevice (device: LoadedSystem) = device.ReferenceSystem.ApiItems |> apiUsages.AddRange
         interface ISystem with
+            [<Obsolete("please use CpusEvent.ValueSubject")>]
             member val ValueChangeSubject: Subject<IStorage * obj> =  new Subject<IStorage*obj>()
         //시스템단위로 이벤트 변화 처리
+        [<Obsolete("please use CpusEvent.ValueSubject")>]
         member x.ValueChangeSubject = (x :> ISystem).ValueChangeSubject
 
         member val Flows   = createNamedHashSet<Flow>()

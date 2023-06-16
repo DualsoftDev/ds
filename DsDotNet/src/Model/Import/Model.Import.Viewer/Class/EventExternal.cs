@@ -45,8 +45,12 @@ namespace Dual.Model.Import
 
                 CpusEvent.ValueSubject.Subscribe(rx =>
                 {
-                    Debug.WriteLine($"{DateTime.Now.ToString("hh:mm:ss.fff")}\t{rx.storage.ToText()} : {rx.value}");
-                    FormMain.TheMain.UpdateLogComboBox(rx.storage, rx.value, rx.sys);
+                    var sys = rx.Item1;
+                    var storage = rx.Item2;
+                    var value = rx.Item3;
+
+                    Debug.WriteLine($"{DateTime.Now.ToString("hh:mm:ss.fff")}\t{storage.ToText()} : {value}");
+                    FormMain.TheMain.UpdateLogComboBox(storage, value, sys);
                 });
 
             }

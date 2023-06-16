@@ -77,9 +77,9 @@ module rec TimerModule =
             tracefn "Timer subscribing to tick event"
             the20msTimer.Subscribe(fun _ -> accumulate()) |> disposables.Add
 
-            (timerStruct:>  IStorage).DsSystem.ValueChangeSubject
-                .Where(fun (storage, _newValue) -> storage = timerStruct.EN)
-                .Subscribe(fun (_storage, newValue) ->
+            CpusEvent.ValueSubject.Where(fun (system, _storage, _value) -> system = (timerStruct:>IStorage).DsSystem)
+                .Where(fun (_system, storage, _newValue) -> storage = timerStruct.EN)
+                .Subscribe(fun (_system, _storage, newValue) ->
                     if ts.ACC.Value < 0us || ts.PRE.Value < 0us then failwithlog "ERROR"
                     let rungInCondition = newValue :?> bool
                     tracefn "%A rung-condition-in=%b with DN=%b" tt rungInCondition ts.DN.Value
@@ -111,9 +111,9 @@ module rec TimerModule =
                         ts.TT.Value <- false
                 ) |> disposables.Add
 
-            (timerStruct:>  IStorage).DsSystem.ValueChangeSubject
-                .Where(fun (storage, _newValue) -> storage = ts.RES)
-                .Subscribe(fun (_storage, newValue) ->
+            CpusEvent.ValueSubject.Where(fun (system, _storage, _value) -> system = (timerStruct:>IStorage).DsSystem)
+                .Where(fun (_system, storage, _newValue) -> storage = ts.RES)
+                .Subscribe(fun (_system, _storage, newValue) ->
                     let resetCondition = newValue :?> bool
                     if resetCondition then
                         ts.ACC.Value <- 0us

@@ -25,7 +25,7 @@ module RunTime =
                             if storage.IsEndThread()
                             then
                                 async {
-                                    do! Async.Sleep(100)
+                                    do! Async.Sleep(200)
                                     statement.Do() }
                                     |> Async.StartImmediate
                             else

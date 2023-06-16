@@ -75,6 +75,6 @@ module CoreExtensionsModule =
                 match x.GetVertexTagKind() with
                 //EndPortTag  일 경우 새로운 thread 생성
                 | Some VertexTag.endPort -> true
-                | Some VertexTag.homing -> true  /// Homing 인과 H/S 필요??
+              //  | Some VertexTag.homing -> true  /// Homing 인과 H/S 필요??
                 | _ -> false
 

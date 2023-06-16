@@ -45,7 +45,8 @@ namespace Dual.Model.Import
         public Dictionary<DsSystem, IEnumerable<ViewNode>> _DicViews;
         public IEnumerable<PptResult> _PPTResults;
 
-        public Dictionary<Vertex, ViewNode> _DicVertex;
+        public Dictionary<Vertex, ViewNode> _DicVertexMy;
+        public Dictionary<Vertex, ViewNode> _DicVertexEx;
         public Dictionary<int, CommentedStatement> _DicStatement;
         public List<string> _PathPPTs = new List<string>();
         public string _ResultDirectory = "";
@@ -54,7 +55,8 @@ namespace Dual.Model.Import
 
         private DsSystem _HelpSystem;
         private DsSystem SelectedSystem => (comboBox_System.SelectedItem as SystemView).System;
-        public UCView SelectedView = null;
+        public UCView SelectedViewMy = null;
+        public UCView SelectedViewEx = null;
 
 
         public FormMain()
@@ -99,7 +101,11 @@ namespace Dual.Model.Import
 
             xtraTabControl_My.TabIndexChanged += (ss, ee) =>
             {
-                SelectedView = xtraTabControl_My.SelectedTab.Tag as UCView;
+                SelectedViewMy = xtraTabControl_My.SelectedTab.Tag as UCView;
+            };
+            xtraTabControl_Ex.TabIndexChanged += (ss, ee) =>
+            {
+                SelectedViewEx = xtraTabControl_Ex.SelectedTab.Tag as UCView;
             };
         }
 
@@ -305,9 +311,11 @@ namespace Dual.Model.Import
 
 
 
-        internal void UpdateGraphUI(IEnumerable<ViewNode> lstViewNode)
+        internal void UpdateGraphUI(IEnumerable<ViewNode> lstViewNode, bool myView)
         {
-            xtraTabControl_My.TabPages.Clear();
+            var tabControl = myView ? xtraTabControl_My : xtraTabControl_Ex;
+
+            tabControl.TabPages.Clear();
             lstViewNode.ForEach(f =>
             {
                 var flow = f.Flow.Value;
@@ -320,11 +328,15 @@ namespace Dual.Model.Import
                 tab.Text = $"{flow.System.Name}.{flow.Name}({f.Page})";
                 this.Do(() =>
                 {
-                    xtraTabControl_My.TabPages.Add(tab);
-                    xtraTabControl_My.SelectedTab = tab;
-                    SelectedView = xtraTabControl_My.SelectedTab.Tag as UCView;
+                    tabControl.TabPages.Add(tab);
+                    tabControl.SelectedTab = tab;
+                    if (myView)
+                        SelectedViewMy = tabControl.SelectedTab.Tag as UCView;
+                    else
+                        SelectedViewEx = tabControl.SelectedTab.Tag as UCView;
                 });
             });
+
         }
 
         private IEnumerable<DsSystem> GetSystems()
@@ -340,7 +352,7 @@ namespace Dual.Model.Import
             comboBox_Device.Items.Clear();
             foreach (var dev in devices)
             {
-                var vi = new SystemView() { Display = dev.Name, System = dev, ViewNodes = _DicViews[dev].ToList() };
+                var vi = new DeviceView() { Display = dev.Name, System = dev, ViewNodes = _DicViews[dev].ToList() };
                 comboBox_Device.Items.Add(vi);
             }
 
@@ -350,13 +362,12 @@ namespace Dual.Model.Import
 
         private void comboBox_Device_SelectedIndexChanged(object sender, EventArgs e)
         {
-            SystemView sysView = comboBox_Device.SelectedItem as SystemView;
-            _SelectedDev = _DicCpu[sysView.System];
-            UpdateSelectedCpu(sysView);
-
-            UpdateGraphUI(sysView.ViewNodes);
-            UpdateSelectedView(sysView);
+            DeviceView view = comboBox_Device.SelectedItem as DeviceView;
+            _SelectedDev = _DicCpu[view.System];
+            UpdateSelectedCpu(view);
+            UpdateSelectedDevice(view);
         }
+
         private void comboBox_System_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateSystemUI();
@@ -373,8 +384,8 @@ namespace Dual.Model.Import
 
                 createSysHMI(sysView.System);
                 UpdatecomboBox_SegmentHMI(sysView);
+                UpdateSelectedView(sysView);
             }
-            UpdateSelectedView(sysView);
         }
 
         public void UpdateLogComboBox(IStorage storage, object value, ISystem sys)
@@ -451,7 +462,7 @@ namespace Dual.Model.Import
 
         private void UpdateSelectedView(SystemView sysView)
         {
-            _DicVertex = new Dictionary<Vertex, ViewNode>();
+            _DicVertexMy = new Dictionary<Vertex, ViewNode>();
             var nodes = sysView.ViewNodes.SelectMany(s => s.UsedViewNodes);
             sysView.System.GetVertices()
                 .ForEach(v =>
@@ -459,15 +470,31 @@ namespace Dual.Model.Import
                     var viewNode = nodes.Where(w => w.CoreVertex != null)
                                         .First(w => w.CoreVertex.Value == v);
 
-                    _DicVertex.Add(v, viewNode);
+                    _DicVertexMy.Add(v, viewNode);
                 });
-
 
             StartResetBtnUpdate(true);
 
-            UpdateGraphUI(sysView.ViewNodes);
-
+            UpdateGraphUI(sysView.ViewNodes, true);
             DisplayTextModel(System.Drawing.Color.Transparent, sysView.System.ToDsText());
+        }
+
+        private void UpdateSelectedDevice(DeviceView view)
+        {
+            _DicVertexEx = new Dictionary<Vertex, ViewNode>();
+            var nodes = view.ViewNodes.SelectMany(s => s.UsedViewNodes);
+            view.System.GetVertices()
+                .ForEach(v =>
+                {
+                    var viewNode = nodes.Where(w => w.CoreVertex != null)
+                                        .First(w => w.CoreVertex.Value == v);
+
+                    _DicVertexEx.Add(v, viewNode);
+                });
+
+
+            UpdateGraphUI(view.ViewNodes, false);
+            DisplayTextModel(System.Drawing.Color.Transparent, view.System.ToDsText());
         }
 
         private void UpdatecomboBox_SegmentHMI(SystemView sysView)
@@ -493,16 +520,13 @@ namespace Dual.Model.Import
                 comboBox_Segment.SelectedIndex = 0;
         }
 
-        private void UpdateSelectedCpu(SystemView sysView)
+        private void UpdateSelectedCpu(DiagramView view)
         {
-
             _DicStatement = new Dictionary<int, CommentedStatement>();
             comboBox_TestExpr.Items.Clear();
-
-
             int cnt = 0;
             List<string> lstText = new List<string>();
-             _DicCpu[sysView.System].CommentedStatements.ForEach(rung =>
+             _DicCpu[view.System].CommentedStatements.ForEach(rung =>
             {
                 var description = rung.comment;
                 var statement = rung.statement;
@@ -515,7 +539,7 @@ namespace Dual.Model.Import
 
 
             WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"\r\n{string.Join("\r\n", lstText)}");
-            DisplayTextModel(System.Drawing.Color.Transparent, sysView.System.ToDsText());
+            DisplayTextModel(System.Drawing.Color.Transparent, view.System.ToDsText());
         }
 
         private void comboBox_TestExpr_SelectedIndexChanged(object sender, EventArgs e)

@@ -32,10 +32,19 @@ namespace Dual.Model.Import
                 {
                     var v = rx.vertex as Vertex;
                     var ui = FormMain.TheMain;
-                    if (ui._DicVertex.ContainsKey(v))
+                    if (ui._DicVertexMy.ContainsKey(v))
                     {
-                        var ucView = ui.SelectedView;
-                        var viewNode = ui._DicVertex[v];
+                        var ucView = ui.SelectedViewMy;
+                        var viewNode = ui._DicVertexMy[v];
+                        viewNode.Status4 = rx.status;
+
+                        ucView.UpdateStatus(viewNode);
+                        ui.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{v.Name}:{rx.status}", true);
+                    }
+                    else if (ui._DicVertexEx.ContainsKey(v))
+                    {
+                        var ucView = ui.SelectedViewEx;
+                        var viewNode = ui._DicVertexEx[v];
                         viewNode.Status4 = rx.status;
 
                         ucView.UpdateStatus(viewNode);

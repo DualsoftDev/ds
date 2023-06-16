@@ -104,12 +104,14 @@ namespace Dual.Model.Import
             this.Size = new Size(1600, 1000);
             _HelpSystem = ImportCheck.GetDemoModel("test");
             var viewNodes = ImportViewUtil.ConvertViewNodes(_HelpSystem);
-            UpdateGraphUI(viewNodes);
+            UpdateGraphUI(viewNodes, true);
         }
 
         internal void RefreshGraph()
         {
-            foreach(TabPage tab in xtraTabControl_My.TabPages)
+            foreach (TabPage tab in xtraTabControl_My.TabPages)
+                ((UCView)tab.Tag).RefreshGraph();
+            foreach (TabPage tab in xtraTabControl_Ex.TabPages)
                 ((UCView)tab.Tag).RefreshGraph();
         }
 

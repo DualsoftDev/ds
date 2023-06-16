@@ -74,7 +74,7 @@ module ConvertCPU =
             if IsSpec (v, CallInReal ||| CallInFlow, AliasFalse) then
                 yield! vm.C1_CallPlanSend()
                 yield! vm.C2_CallActionOut()
-                yield vm.C3_CallPlanReceive()
+                yield! vm.C3_CallPlanReceive()
                 yield! vm.C4_CallActionIn()
                 yield! vm.M3_CallErrorTXMonitor()
                 yield vm.M4_CallErrorRXMonitor()

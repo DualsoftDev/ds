@@ -39,11 +39,18 @@ module CodeConvertUtil =
             |_ -> failwithlog $"Error"
 
 
-    let getOriginIOs(vr:VertexMReal, initialType:InitialType) =
+    let private getOriginTasks(vr:VertexMReal, initialType:InitialType) =
         let origins = vr.OriginInfo.Tasks
         origins
             .Where(fun (_, init) -> init = initialType)
-            .Select(fun (task, _) -> task.InTag).Cast<Tag<bool>>()
+            .Select(fun (task, _) -> task)
+
+    let getOriginIOs(vr:VertexMReal, initialType:InitialType) =
+        getOriginTasks(vr, initialType).Select(fun f->f.InTag).Cast<Tag<bool>>()
+
+    let getOriginSimPlanEnds(vr:VertexMReal, initialType:InitialType) =
+        getOriginTasks(vr, initialType).Select(fun f->f.ApiItem.PE)
+
 
     /// Edge source 검색 결과 정보 : target 으로 들어오는 source vertices list 와 그것들이 약연결로 들어오는지, 강연결로 들어오는지 정보
     type EdgeSourcesWithStrength =
@@ -86,18 +93,62 @@ module CodeConvertUtil =
         | DuEssStrong sr when sr.Any() -> sr
         | _ -> []
 
-    /// 원위치 고려했을 때, reset chain 중 하나라도 켜져 있는지 검사하는 expression 반환
-    let getNeedCheckExpression(real:Real) =
+    ///// 원위치 고려했을 때, reset chain 중 하나라도 켜져 있는지 검사하는 expression 반환
+    //let getNeedCheckExpression(real:Real) =
+    //    let origins      = real.V.OriginInfo.Tasks
+    //    let resetChains  = real.V.OriginInfo.ResetChains
+
+    //    (* [ KeyValuePair(JogDef, InitialType) ] *)
+    //    let needChecks = origins.Where(fun (_, init)-> init = NeedCheck)
+
+    //    let needCheckSet:Tag<bool> list list =
+    //        let apiNameToInTagMap =
+    //            needChecks.Where(fun (task, _) -> task.ApiItem.RXs.any())
+    //                      .Map(fun   (task, _) -> task.ApiName, task.InTag)
+    //            |> Tuple.toDictionary
+    //        [
+    //            if apiNameToInTagMap.Any() then
+    //                (*
+    //                    apiNameToInTagMap: [ "A.+" => "A.+.I"; ... ]        // name => tag
+    //                    r: "A.+"
+    //                    rs ["A.+"; "A.-"]
+    //                    resetChains = [ ["A.+"; "A.-"]; ]
+    //                 *)
+    //                for rs in resetChains do
+    //                    [
+    //                        for r in rs do
+    //                            apiNameToInTagMap.TryFind(r).Map(fun intag -> intag :?> Tag<bool>)
+    //                    ] |> List.choose id
+    //        ] |> List.filter List.any
+
+
+    //    let sets:Expression<bool> list = [
+    //        for is in needCheckSet do
+    //            [   for i in is do
+    //                    i.Expr <&&> !!(is.Except([i]).ToOr())   // --| |--|/|--|/|--
+    //            ].ToOr()
+    //    ]   //각 리셋체인 단위로 하나라도 켜있으면 됨
+    //        //         resetChain1         resetChain2       ...
+    //        //      --| |--|/|--|/|--------| |--|/|--|/|--   ...
+    //        //      --|/|--| |--|/|--    --|/|--| |--|/|--
+    //        //      --|/|--|/|--| |--    --|/|--|/|--| |--
+
+    //    if sets.Any()
+    //    then sets.ToAnd()
+    //    else real._on.Expr
+
+    ///// 원위치 고려했을 때, reset chain 중 하나라도 켜져 있는지 검사하는 expression 반환
+    let private getNeedCheckTasks(real:Real) =
         let origins      = real.V.OriginInfo.Tasks
         let resetChains  = real.V.OriginInfo.ResetChains
 
         (* [ KeyValuePair(JogDef, InitialType) ] *)
         let needChecks = origins.Where(fun (_, init)-> init = NeedCheck)
 
-        let needCheckSet:Tag<bool> list list =
+        let needCheckSet:TaskDev list list =
             let apiNameToInTagMap =
                 needChecks.Where(fun (task, _) -> task.ApiItem.RXs.any())
-                          .Map(fun   (task, _) -> task.ApiName, task.InTag)
+                          .Map(fun   (task, _) -> task.ApiName, task)
                 |> Tuple.toDictionary
             [
                 if apiNameToInTagMap.Any() then
@@ -110,25 +161,40 @@ module CodeConvertUtil =
                     for rs in resetChains do
                         [
                             for r in rs do
-                                apiNameToInTagMap.TryFind(r).Map(fun intag -> intag :?> Tag<bool>)
+                                apiNameToInTagMap.TryFind(r).Map(fun intag -> intag)
                         ] |> List.choose id
             ] |> List.filter List.any
 
+        needCheckSet
 
-        let sets:Expression<bool> list = [
-            for is in needCheckSet do
-                [   for i in is do
-                        i.Expr <&&> !!(is.Except([i]).ToOr())   // --| |--|/|--|/|--
-                ].ToOr()
-        ]   //각 리셋체인 단위로 하나라도 켜있으면 됨
+    let getNeedCheckIOs(real:Real, bSim:bool) =
+        let taskMaps = getNeedCheckTasks(real)
+        let sets =
+            if bSim
+            then
+                [for is in taskMaps do
+                    let is = is.Select(fun f->f.ApiItem.PE)
+                    [
+                        for i in is do i.Expr <&&> !!(is.Except([i]).ToOr())   // --| |--|/|--|/|--
+                    ].ToOr()
+                ]
+            else
+                [for is in taskMaps do
+                    let is = is.Select(fun f->f.InTag :?> Tag<bool>)
+                    [
+                        for i in is do i.Expr <&&> !!(is.Except([i]).ToOr())   // --| |--|/|--|/|--
+                    ].ToOr()
+                ]
+                //각 리셋체인 단위로 하나라도 켜있으면 됨
             //         resetChain1         resetChain2       ...
             //      --| |--|/|--|/|--------| |--|/|--|/|--   ...
             //      --|/|--| |--|/|--    --|/|--| |--|/|--
             //      --|/|--|/|--| |--    --|/|--|/|--| |--
-
         if sets.Any()
         then sets.ToAnd()
         else real._on.Expr
+
+
 
     [<AutoOpen>]
     [<Extension>]

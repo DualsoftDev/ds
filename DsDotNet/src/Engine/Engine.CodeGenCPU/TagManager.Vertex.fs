@@ -60,6 +60,7 @@ module TagManagerModule =
 
         member _._on  = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.on)    :?> PlanVar<bool>
         member _._off  = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.off)  :?> PlanVar<bool>
+        member _._sim  = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.sim)  :?> PlanVar<bool>
 
         ///Segment Start Tag
         member _.ST         = startTagBit
@@ -146,7 +147,6 @@ module TagManagerModule =
         let s    = this.Storages
         let createTag name = this.CreateTag name
         let relayCallBit  = createTag  "CR" VertexTag.relayCall
-        let planEndBit    = createTag  "PE" VertexTag.planEnd
         let sys = this.System
 
         let counterBit    = counter  s "CTR"  sys
@@ -155,7 +155,6 @@ module TagManagerModule =
 
         ///CallDev Done Relay
         member _.CR     = relayCallBit
-        member _.PE     = planEndBit
 
         ///Ring Counter
         member _.CTR    = counterBit

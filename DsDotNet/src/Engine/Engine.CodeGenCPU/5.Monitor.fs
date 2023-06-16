@@ -12,14 +12,26 @@ type VertexManager with
     member v.M1_OriginMonitor(): CommentedStatement  =
         let v = v :?> VertexMReal
         let real = v.Vertex :?> Real
-        let ons    = getOriginIOs (v, InitialType.On)
-        let offs   = getOriginIOs (v, InitialType.Off)
-        let locks  = getNeedCheckExpression (real)
 
-        let onExpr = ons.ToAndElseOn v.System
-        let rst    = offs.ToOrElseOff v.System
+        let ons       = getOriginIOs         (v, InitialType.On)
+        let onSims    = getOriginSimPlanEnds (v, InitialType.On)
 
-        (onExpr <&&> locks, rst) --| (v.OG, getFuncName())
+        let offs      = getOriginIOs         (v, InitialType.Off)
+        let offSims   = getOriginSimPlanEnds (v, InitialType.Off)
+
+        let locks     = getNeedCheckIOs (real, false)
+        let lockSims  = getNeedCheckIOs (real ,true)
+
+        let onExpr    = ons.ToAndElseOn v.System
+        let offExpr   = offs.ToOrElseOff v.System
+
+        let onSimExpr    = onSims.ToAndElseOn v.System
+        let offSimExpr   = offSims.ToOrElseOff v.System
+
+        let set =   (onExpr    <&&> locks    <&&> (!!offExpr))
+                <||>(onSimExpr <&&> lockSims <&&> (!!offSimExpr) <&&> v._sim.Expr)
+
+        (set, v._off.Expr) --| (v.OG, getFuncName())
 
     member v.M2_PauseMonitor(): CommentedStatement  =
         let set = v.Flow.sop.Expr

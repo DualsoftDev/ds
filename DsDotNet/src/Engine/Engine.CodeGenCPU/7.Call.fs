@@ -47,14 +47,21 @@ type VertexMCoin with
                 then yield (td.ApiItem.PS.Expr, rsts) --| (td.ActionOut, getFuncName())
         ]
 
-    member coin.C3_CallPlanReceive(): CommentedStatement  =
+    //member coin.C3_CallPlanReceive(): CommentedStatement  =
+    //    let call = coin.Vertex :?> CallDev
+    //    let rsts = coin._off.Expr
+
+    //    let tds = call.CallTargetJob.DeviceDefs.SelectMany(fun td -> td.RXs)
+    //    let sets = tds.ToAndElseOn(coin.System)
+    //    (sets, rsts) --| (coin.PE, getFuncName())
+    member coin.C3_CallPlanReceive(): CommentedStatement list =
         let call = coin.Vertex :?> CallDev
         let rsts = coin._off.Expr
-
-        let tds = call.CallTargetJob.DeviceDefs.SelectMany(fun td -> td.RXs)
-        let sets = tds.ToAndElseOn(coin.System)
-        (sets, rsts) --| (coin.PE, getFuncName())
-
+        [
+            for td in call.CallTargetJob.DeviceDefs do
+                let sets = td.RXs.ToAndElseOn(coin.System)
+                yield (sets, rsts) --| (td.ApiItem.PE, getFuncName() )
+        ]
 
     member coin.C4_CallActionIn(): CommentedStatement list =
         let sharedCalls = coin.GetSharedCall()
@@ -63,9 +70,17 @@ type VertexMCoin with
         [
             for sharedCall in sharedCalls do
                 let sets =
-                    if call.UsingTon
-                        then call.V.TON.DN.Expr   //On Delay
-                        else call.INs.ToAndElseOn(coin.System)
+                    let nonSim =
+                        if call.UsingTon
+                            then call.V.TON.DN.Expr   //On Delay
+                            else call.INs.ToAndElseOn(coin.System)
+
+                    let sim = call.CallTargetJob.DeviceDefs
+                                .Select(fun f->f.ApiItem.PE)
+                                .ToAndElseOn(coin.System)
+
+                    nonSim <||> (sim <&&> coin._sim.Expr)
+
                 yield (sets, rsts) --| (sharedCall.V.ET, getFuncName() )
         ]
 
@@ -73,5 +88,5 @@ type VertexMCoin with
 type VertexManager with
     member v.C1_CallPlanSend()   : CommentedStatement list = (v :?> VertexMCoin).C1_CallPlanSend()
     member v.C2_CallActionOut()  : CommentedStatement list = (v :?> VertexMCoin).C2_CallActionOut()
-    member v.C3_CallPlanReceive(): CommentedStatement      = (v :?> VertexMCoin).C3_CallPlanReceive()
+    member v.C3_CallPlanReceive(): CommentedStatement list = (v :?> VertexMCoin).C3_CallPlanReceive()
     member v.C4_CallActionIn()   : CommentedStatement list = (v :?> VertexMCoin).C4_CallActionIn()

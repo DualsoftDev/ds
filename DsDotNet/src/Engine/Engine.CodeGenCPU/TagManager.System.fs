@@ -46,8 +46,11 @@ module SystemManagerModule =
 
         let tout     =
             let tout = dsSysUint16  "systout" true sys SystemTag.timeout
-            tout.Value <- 10000us
+            //type CountUnitType = uint16  => 32bit (msec 단위 필요) //test ahn
+            tout.Value <- 65535us
             tout
+
+        let sim    = dsSysBit "syssim"   true  sys   SystemTag.sim
 
         interface ITagManager with
             member x.Target = sys
@@ -73,4 +76,5 @@ module SystemManagerModule =
             | SystemTag.datet_m    ->    dtimem
             | SystemTag.datet_s    ->    dtimes
             | SystemTag.timeout    ->    tout
+            | SystemTag.sim        ->    sim
             | _ -> failwithlog $"Error : GetSystemTag {st} type not support!!"

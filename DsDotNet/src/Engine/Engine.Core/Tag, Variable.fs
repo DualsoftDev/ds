@@ -52,7 +52,9 @@ module TagVariableModule =
             and set(v) =
                 if value <> v then
                     value <- v
-                    onValueChanged((x:>  IStorage).DsSystem, x, v)
+                 //모델 단위로 Subscribe 에서 자신 system만 처리 (system간 TAG 링크 때문에)
+                    onValueChanged((x:>IStorage).DsSystem, x, v)
+                 //기존 시스템 단위로
                  //   (x:>  IStorage).DsSystem.ValueChangeSubject.OnNext(x :> IStorage, v)
         member val Comment: string = comment with get, set
         member val Address = param.Address.ToObj() with get, set

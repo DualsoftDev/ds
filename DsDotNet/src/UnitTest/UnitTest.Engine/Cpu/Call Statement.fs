@@ -26,7 +26,7 @@ type Spec07_CallStatement() =
     [<Test>]
     member __.``C3 Call Plan Receive`` () =
         for call in t.Calls do
-            call.C3_CallPlanReceive() |> doCheck
+            call.C3_CallPlanReceive() |> doChecks
 
 
     [<Test>]

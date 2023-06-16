@@ -165,6 +165,7 @@ module CodeConvertUtil =
 
         [<Extension>] static member ToAndElseOn(ts:#TypedValueStorage<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToAnd() else sys._on.Expr
         [<Extension>] static member ToAndElseOff(ts:#TypedValueStorage<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToAnd() else sys._off.Expr
+        [<Extension>] static member ToOrElseOn(ts:#TypedValueStorage<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToOr()  else sys._on.Expr
         [<Extension>] static member ToOrElseOff(ts:#TypedValueStorage<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToOr()  else sys._off.Expr
         [<Extension>] static member GetSharedReal(v:VertexManager) = v |> getSharedReal
         [<Extension>] static member GetSharedCall(v:VertexManager) = v |> getSharedCall
@@ -205,6 +206,16 @@ module CodeConvertUtil =
                 ).Distinct()
 
         [<Extension>]
+        static member GetResetStrongCausalReadys(xs:Vertex seq) =
+                xs.Select(fun f ->
+                    match f with
+                    | :? Real    as r  -> r.V.R
+                    | :? RealExF as rf -> rf.Real.V.R
+                    | :? Alias   as a  -> getPureReal(a.V).V.R
+                    | _ -> failwithlog $"Error {getFuncName()}"
+                ).Distinct()
+
+        [<Extension>]
         static member GetWeakStartRootAndCausals  (v:VertexManager) =
             let tags = getStartWeakEdgeSources(v).GetStartCausals(true)
             tags.ToAndElseOff(v.System)
@@ -223,3 +234,8 @@ module CodeConvertUtil =
         static member GetStrongResetRootAndCausals  (v:VertexManager) =
             let tags = getResetStrongEdgeSources(v).GetResetStrongCausals()
             tags.ToAndElseOff(v.System)
+
+        [<Extension>]
+        static member GetStrongResetRootAndReadys  (v:VertexManager) =
+            let tags = getResetStrongEdgeSources(v).GetResetStrongCausalReadys()
+            tags.ToOrElseOn(v.System)

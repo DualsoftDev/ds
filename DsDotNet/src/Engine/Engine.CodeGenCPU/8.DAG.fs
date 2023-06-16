@@ -41,3 +41,15 @@ type VertexManager with
                 let rsts = child.H.Expr
                 yield (sets, rsts) ==| (child.CR, getFuncName() )
         ]
+
+
+     member v.D4_DAGCoinReset(): CommentedStatement list =
+        let real = v.Vertex :?> Real
+        let children = real.Graph.Vertices.Select(getVM)
+        [
+            for child in children do
+                let child = child :?> VertexMCoin
+                let sets = real.V.H.Expr
+                let rsts = child.R.Expr
+                yield (sets, rsts) ==| (child.RT, getFuncName() )
+        ]

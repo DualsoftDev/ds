@@ -25,16 +25,16 @@ module RunTime =
                             if storage.IsEndThread()
                             then
                                 async {
-                                    do! Async.Sleep(1000)
+                                    do! Async.Sleep(100)
                                     statement.Do() }
                                     |> Async.StartImmediate
                             else
-                                //statement.Do()
+                                statement.Do()
                                 //debugging  sleep
-                                async {
-                                    do! Async.Sleep(10)
-                                    statement.Do()
-                                    }|> Async.RunSynchronously
+                                //async {
+                                //    do! Async.Sleep(1)
+                                //    statement.Do()
+                                //    }|> Async.RunSynchronously
                                 //debugging  sleep
                         //Step 1 상태 UI 업데이트
                         system.NotifyStatus(storage);

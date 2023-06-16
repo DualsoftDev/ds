@@ -29,3 +29,8 @@ type Spec08_DAGStatement() =
         for real in t.Reals do
             real.D3_DAGCoinRelay() |> doChecks
 
+    [<Test>]
+    member __.``D4 DAG Coin Reset`` () =
+        for real in t.Reals do
+            real.D4_DAGCoinReset() |> doChecks
+

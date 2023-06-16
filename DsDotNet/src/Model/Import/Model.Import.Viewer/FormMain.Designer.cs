@@ -117,7 +117,7 @@ namespace Dual.Model.Import
             // 
             this.splitContainer3.Panel2.Controls.Add(this.xtraTabControl_Ex);
             this.splitContainer3.Size = new System.Drawing.Size(788, 361);
-            this.splitContainer3.SplitterDistance = 601;
+            this.splitContainer3.SplitterDistance = 565;
             this.splitContainer3.TabIndex = 9;
             // 
             // xtraTabControl_My
@@ -128,7 +128,7 @@ namespace Dual.Model.Import
             this.xtraTabControl_My.Location = new System.Drawing.Point(0, 0);
             this.xtraTabControl_My.Name = "xtraTabControl_My";
             this.xtraTabControl_My.SelectedIndex = 0;
-            this.xtraTabControl_My.Size = new System.Drawing.Size(601, 361);
+            this.xtraTabControl_My.Size = new System.Drawing.Size(565, 361);
             this.xtraTabControl_My.TabIndex = 8;
             // 
             // xtraTabControl_Ex
@@ -139,7 +139,7 @@ namespace Dual.Model.Import
             this.xtraTabControl_Ex.Location = new System.Drawing.Point(0, 0);
             this.xtraTabControl_Ex.Name = "xtraTabControl_Ex";
             this.xtraTabControl_Ex.SelectedIndex = 0;
-            this.xtraTabControl_Ex.Size = new System.Drawing.Size(183, 361);
+            this.xtraTabControl_Ex.Size = new System.Drawing.Size(219, 361);
             this.xtraTabControl_Ex.TabIndex = 9;
             // 
             // splitter2
@@ -368,7 +368,7 @@ namespace Dual.Model.Import
             this.checkedListBox_sysHMI.FormattingEnabled = true;
             this.checkedListBox_sysHMI.Items.AddRange(new object[] {
             "Select System"});
-            this.checkedListBox_sysHMI.Location = new System.Drawing.Point(608, 0);
+            this.checkedListBox_sysHMI.Location = new System.Drawing.Point(588, 0);
             this.checkedListBox_sysHMI.Name = "checkedListBox_sysHMI";
             this.checkedListBox_sysHMI.Size = new System.Drawing.Size(124, 416);
             this.checkedListBox_sysHMI.TabIndex = 20;
@@ -380,7 +380,7 @@ namespace Dual.Model.Import
             this.checkedListBox_My.FormattingEnabled = true;
             this.checkedListBox_My.Items.AddRange(new object[] {
             "Select System"});
-            this.checkedListBox_My.Location = new System.Drawing.Point(732, 0);
+            this.checkedListBox_My.Location = new System.Drawing.Point(712, 0);
             this.checkedListBox_My.Name = "checkedListBox_My";
             this.checkedListBox_My.Size = new System.Drawing.Size(221, 416);
             this.checkedListBox_My.TabIndex = 19;
@@ -392,9 +392,9 @@ namespace Dual.Model.Import
             this.checkedListBox_Ex.FormattingEnabled = true;
             this.checkedListBox_Ex.Items.AddRange(new object[] {
             "Select Device"});
-            this.checkedListBox_Ex.Location = new System.Drawing.Point(953, 0);
+            this.checkedListBox_Ex.Location = new System.Drawing.Point(933, 0);
             this.checkedListBox_Ex.Name = "checkedListBox_Ex";
-            this.checkedListBox_Ex.Size = new System.Drawing.Size(193, 416);
+            this.checkedListBox_Ex.Size = new System.Drawing.Size(213, 416);
             this.checkedListBox_Ex.TabIndex = 18;
             this.checkedListBox_Ex.DoubleClick += new System.EventHandler(this.checkedListBox_Ex_DoubleClick);
             // 
@@ -488,7 +488,7 @@ namespace Dual.Model.Import
             this.richTextBox_Debug.Location = new System.Drawing.Point(3, 0);
             this.richTextBox_Debug.Name = "richTextBox_Debug";
             this.richTextBox_Debug.ReadOnly = true;
-            this.richTextBox_Debug.Size = new System.Drawing.Size(601, 416);
+            this.richTextBox_Debug.Size = new System.Drawing.Size(579, 416);
             this.richTextBox_Debug.TabIndex = 0;
             this.richTextBox_Debug.Text = "";
             // 

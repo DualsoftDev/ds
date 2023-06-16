@@ -25,10 +25,10 @@ type Spec02_FlowStatement() =
         for real in t.Reals do
             real.F2_RootReset() |> doChecks
 
-    [<Test>]
-    member __.``F3 Root Going Pulse`` () =
-        for real in t.Reals do
-            real.F3_RootGoingPulse()   |> doCheck
+    //[<Test>]
+    //member __.``F3 Root Going Pulse`` () =
+    //    for real in t.Reals do
+    //        real.F3_RootGoingPulse()   |> doCheck
 
     [<Test>]
     member __.``F4 Root Going Relay`` () =

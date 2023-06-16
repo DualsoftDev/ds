@@ -16,10 +16,14 @@ type VertexMReal with
 
     member v.R2_RealJobComplete(): CommentedStatement  =
         let real = v.Vertex :?> Real
+        let wReset =  getResetWeakEdgeSources(v)
+        let sReset =  v.GetStrongResetRootAndReadys()
+
+        let goingRelays = wReset.GetResetWeakCausals(v)
         let set  = v.G.Expr <&&> real.CoinRelays.ToAndElseOn v.System
-        //let wr =  getResetWeakEdgeSources(v)
-        //let goingRelays = wr.GetResetWeakCausals(v)
-        let rst  = v.H.Expr //<&&> !!goingRelays.ToAndElseOff(v.System)
+                    <&&> !!goingRelays.ToOrElseOff(v.System)
+                    <&&> sReset
+        let rst  = v.H.Expr
 
         (set, rst) ==| (v.ET, getFuncName())
 

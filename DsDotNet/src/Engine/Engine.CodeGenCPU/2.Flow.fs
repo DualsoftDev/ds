@@ -39,9 +39,9 @@ type VertexManager with
         let rsts = (!!)real.V.ET.Expr
         [(sets, rsts) ==| (v.RT, getFuncName())] //reset tag
 
-    member v.F3_RootGoingPulse() : CommentedStatement  =
-        let real = v.GetPureReal()
-        (real.V.G.Expr, v._off.Expr) --^ (real.V.GPUL, "RootGoingPulse")
+    //member v.F3_RootGoingPulse() : CommentedStatement  =
+    //    let real = v.GetPureReal()
+    //    (real.V.G.Expr, v._off.Expr) --^ (real.V.GPUL, "RootGoingPulse")
 
 
     member v.F4_RootGoingRelay() : CommentedStatement list =
@@ -56,7 +56,7 @@ type VertexManager with
             )
 
         sets
-        |> Seq.map(fun (src, gr) ->(src.GPUL.Expr <&&> real.V.F.Expr, real.V.R.Expr) ==| (gr, "RootGoingRelay"))
+        |> Seq.map(fun (src, gr) ->(src.G.Expr <&&> real.V.F.Expr, real.V.R.Expr) ==| (gr, "RootGoingRelay"))
         |> Seq.toList
 
     member v.F5_RootCoinRelay() : CommentedStatement =

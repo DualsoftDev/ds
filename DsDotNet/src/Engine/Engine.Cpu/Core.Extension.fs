@@ -69,9 +69,11 @@ module CoreExtensionsModule =
 
         [<Extension>]
         static member IsEndThread (x:IStorage) =
-            match x.GetVertexTagKind() with
-            //EndPortTag  일 경우 새로운 thread 생성
-            | Some VertexTag.endPort -> true
-            //| Some VertexTag.goingrelay -> true
-            | _ -> false
+            match x.GetApiTagKind() with
+            | Some _ -> true
+            | _ ->
+                match x.GetVertexTagKind() with
+                //EndPortTag  일 경우 새로운 thread 생성
+                | Some VertexTag.endPort -> true
+                | _ -> false
 

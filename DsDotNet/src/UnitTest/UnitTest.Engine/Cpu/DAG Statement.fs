@@ -25,7 +25,7 @@ type Spec08_DAGStatement() =
             real.D2_DAGTailStart() |> doChecks
 
     [<Test>]
-    member __.``D3 DAG Coin Complete`` () =
+    member __.``D3 DAG Coin Relay`` () =
         for real in t.Reals do
-            real.D3_DAGCoinComplete() |> doChecks
+            real.D3_DAGCoinRelay() |> doChecks
 

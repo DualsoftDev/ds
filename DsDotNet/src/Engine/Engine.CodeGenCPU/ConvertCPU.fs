@@ -60,7 +60,7 @@ module ConvertCPU =
 
                 yield! vm.D1_DAGHeadStart()
                 yield! vm.D2_DAGTailStart()
-                yield! vm.D3_DAGCoinComplete()
+                yield! vm.D3_DAGCoinRelay()
 
             if IsSpec (v, RealInFlow, AliasFalse) then
                 yield! vm.F1_RootStart()

@@ -39,9 +39,6 @@ module CoreModule =
         inherit FqdnObject(param.LoadedName, param.ContainerSystem)
         interface ISystem with
             member val ValueChangeSubject: Subject<IStorage * obj> = new Subject<IStorage*obj>()
-        //시스템단위로 이벤트 변화 처리
-        //member x.ValueChangeSubject = (x :> ISystem).ValueChangeSubject
-
         /// 다른 device 을 Loading 하려는 system 입장에서 loading 된 system 참조 용
         member _.ReferenceSystem = loadedSystem
 

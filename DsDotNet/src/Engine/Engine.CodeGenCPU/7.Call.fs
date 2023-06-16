@@ -19,8 +19,8 @@ type VertexMCoin with
                 let tasks = r.V.OriginInfo.Tasks
                 if tasks.Where(fun (_,ty) -> ty = InitialType.On) //NeedCheck 처리 필요 test ahn
                         .Select(fun (t,_)->t).Contains(td)
-                    then r.V.RO.Expr
-                    else call._off.Expr
+                    then r.V.RO.Expr <&&> (!!td.ApiItem.PE.Expr)
+                    else r.V.RO.Expr <&&> call._off.Expr
             | _ ->
                 call._off.Expr
 
@@ -64,8 +64,8 @@ type VertexMCoin with
         ]
 
     member coin.C4_CallActionIn(): CommentedStatement list =
-        let sharedCalls = coin.GetSharedCall()
         let call = coin.Vertex :?> CallDev
+        let sharedCalls = coin.GetSharedCall() @ [coin.Vertex]
         let rsts = coin._off.Expr
         [
             for sharedCall in sharedCalls do

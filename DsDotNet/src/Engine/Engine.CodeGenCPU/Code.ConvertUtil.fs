@@ -64,7 +64,7 @@ module CodeConvertUtil =
         let mask  = if bStartEdge then EdgeType.Start else EdgeType.Reset
 
         let srcsWeek   = edges |> filter(fun e -> e.EdgeType = mask )
-        let srcsStrong = edges |> filter(fun e -> e.EdgeType = (mask &&& EdgeType.Strong))
+        let srcsStrong = edges |> filter(fun e -> e.EdgeType = (mask ||| EdgeType.Strong))
 
         match srcsWeek.Any(), srcsStrong.Any() with
         | true, true -> failwithlog "Error Week and Strong can't connenct same node target"
@@ -93,49 +93,6 @@ module CodeConvertUtil =
         | DuEssStrong sr when sr.Any() -> sr
         | _ -> []
 
-    ///// 원위치 고려했을 때, reset chain 중 하나라도 켜져 있는지 검사하는 expression 반환
-    //let getNeedCheckExpression(real:Real) =
-    //    let origins      = real.V.OriginInfo.Tasks
-    //    let resetChains  = real.V.OriginInfo.ResetChains
-
-    //    (* [ KeyValuePair(JogDef, InitialType) ] *)
-    //    let needChecks = origins.Where(fun (_, init)-> init = NeedCheck)
-
-    //    let needCheckSet:Tag<bool> list list =
-    //        let apiNameToInTagMap =
-    //            needChecks.Where(fun (task, _) -> task.ApiItem.RXs.any())
-    //                      .Map(fun   (task, _) -> task.ApiName, task.InTag)
-    //            |> Tuple.toDictionary
-    //        [
-    //            if apiNameToInTagMap.Any() then
-    //                (*
-    //                    apiNameToInTagMap: [ "A.+" => "A.+.I"; ... ]        // name => tag
-    //                    r: "A.+"
-    //                    rs ["A.+"; "A.-"]
-    //                    resetChains = [ ["A.+"; "A.-"]; ]
-    //                 *)
-    //                for rs in resetChains do
-    //                    [
-    //                        for r in rs do
-    //                            apiNameToInTagMap.TryFind(r).Map(fun intag -> intag :?> Tag<bool>)
-    //                    ] |> List.choose id
-    //        ] |> List.filter List.any
-
-
-    //    let sets:Expression<bool> list = [
-    //        for is in needCheckSet do
-    //            [   for i in is do
-    //                    i.Expr <&&> !!(is.Except([i]).ToOr())   // --| |--|/|--|/|--
-    //            ].ToOr()
-    //    ]   //각 리셋체인 단위로 하나라도 켜있으면 됨
-    //        //         resetChain1         resetChain2       ...
-    //        //      --| |--|/|--|/|--------| |--|/|--|/|--   ...
-    //        //      --|/|--| |--|/|--    --|/|--| |--|/|--
-    //        //      --|/|--|/|--| |--    --|/|--|/|--| |--
-
-    //    if sets.Any()
-    //    then sets.ToAnd()
-    //    else real._on.Expr
 
     ///// 원위치 고려했을 때, reset chain 중 하나라도 켜져 있는지 검사하는 expression 반환
     let private getNeedCheckTasks(real:Real) =
@@ -207,6 +164,7 @@ module CodeConvertUtil =
         [<Extension>] static member CRs (FList(vms:VertexMCoin list))  : PlanVar<bool> list = vms |> map (fun vm -> vm.CR)
 
         [<Extension>] static member ToAndElseOn(ts:#TypedValueStorage<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToAnd() else sys._on.Expr
+        [<Extension>] static member ToAndElseOff(ts:#TypedValueStorage<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToAnd() else sys._off.Expr
         [<Extension>] static member ToOrElseOff(ts:#TypedValueStorage<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToOr()  else sys._off.Expr
         [<Extension>] static member GetSharedReal(v:VertexManager) = v |> getSharedReal
         [<Extension>] static member GetSharedCall(v:VertexManager) = v |> getSharedCall
@@ -227,7 +185,7 @@ module CodeConvertUtil =
                 ).Distinct()
 
         [<Extension>]
-        static member GetResetCausals(xs:Vertex seq, tgtV:VertexManager) =
+        static member GetResetWeakCausals(xs:Vertex seq, tgtV:VertexManager) =
                 xs.Select(fun f ->
                     match f with
                     | :? Real    as r  -> tgtV.GR(r.V.Vertex)
@@ -237,15 +195,31 @@ module CodeConvertUtil =
                 ).Distinct()
 
         [<Extension>]
+        static member GetResetStrongCausals(xs:Vertex seq) =
+                xs.Select(fun f ->
+                    match f with
+                    | :? Real    as r  -> r.V.G
+                    | :? RealExF as rf -> rf.Real.V.G
+                    | :? Alias   as a  -> getPureReal(a.V).V.G
+                    | _ -> failwithlog $"Error {getFuncName()}"
+                ).Distinct()
+
+        [<Extension>]
         static member GetWeakStartRootAndCausals  (v:VertexManager) =
             let tags = getStartWeakEdgeSources(v).GetStartCausals(true)
-            if tags.any()
-                then tags.ToAnd()
-                else v._off.Expr
+            tags.ToAndElseOff(v.System)
 
         [<Extension>]
         static member GetWeakResetRootAndCausals  (v:VertexManager) =
-            let tags = getResetWeakEdgeSources(v).GetResetCausals(v)
-            if tags.any()
-                then tags.ToAnd()
-                else v._off.Expr
+            let tags = getResetWeakEdgeSources(v).GetResetWeakCausals(v)
+            tags.ToAndElseOff(v.System)
+
+        [<Extension>]
+        static member GetStrongStartRootAndCausals  (v:VertexManager) =
+            let tags = getStartStrongEdgeSources(v).GetStartCausals(true)
+            tags.ToAndElseOff(v.System)
+
+        [<Extension>]
+        static member GetStrongResetRootAndCausals  (v:VertexManager) =
+            let tags = getResetStrongEdgeSources(v).GetResetStrongCausals()
+            tags.ToAndElseOff(v.System)

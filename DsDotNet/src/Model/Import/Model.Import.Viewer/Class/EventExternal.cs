@@ -48,9 +48,11 @@ namespace Dual.Model.Import
                     var sys = rx.Item1;
                     var storage = rx.Item2;
                     var value = rx.Item3;
-
-                    Debug.WriteLine($"{DateTime.Now.ToString("hh:mm:ss.fff")}\t{storage.ToText()} : {value}");
-                    FormMain.TheMain.UpdateLogComboBox(storage, value, sys);
+                    if (value is bool)
+                    {
+                        Debug.WriteLine($"{DateTime.Now.ToString("hh:mm:ss.fff")}\t{storage.ToText()} : {value}");
+                        FormMain.TheMain.UpdateLogComboBox(storage, value, sys);
+                    }
                 });
 
             }

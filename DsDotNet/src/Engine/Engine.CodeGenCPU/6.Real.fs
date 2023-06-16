@@ -18,8 +18,8 @@ type VertexMReal with
         let real = v.Vertex :?> Real
         let set  = v.G.Expr <&&> real.CoinRelays.ToAndElseOn v.System
         let wr =  getResetWeakEdgeSources(v)
-        let goingRelays = wr.GetResetCausals(v)
-        let rst  = v.H.Expr <&&> !!goingRelays.ToAndElseOn(v.System)
+        let goingRelays = wr.GetResetWeakCausals(v)
+        let rst  = v.H.Expr <&&> !!goingRelays.ToAndElseOff(v.System)
 
         (set, rst) ==| (v.ET, getFuncName())
 

@@ -11,6 +11,7 @@ type VertexManager with
     member v.F1_RootStart(): CommentedStatement list =
         let real = v.Vertex :?> Real
         let wsDirect =  v.GetWeakStartRootAndCausals()
+        let ssDirect =  v.GetStrongStartRootAndCausals()
 
         let shareds = v.GetSharedReal().Select(getVM)
         let wsShareds =
@@ -18,14 +19,15 @@ type VertexManager with
             then shareds.Select(fun s -> s.GetWeakStartRootAndCausals()).ToOr()
             else v._off.Expr
 
-        let sets = wsDirect <||> wsShareds <||> v.SF.Expr
+        let sets = wsDirect <||> wsShareds <||> v.SF.Expr <||> ssDirect
         let rsts  = real.V.RP.Expr <||> real.V.F.Expr
         [ (sets, rsts) ==| (v.ST, getFuncName()) ]
 
 
     member v.F2_RootReset() : CommentedStatement list=
         let real = v.GetPureReal()
-        let wsDirect =  v.GetWeakResetRootAndCausals()
+        let wrDirect =  v.GetWeakResetRootAndCausals()
+        let srDirect =  v.GetStrongResetRootAndCausals()
 
         let shareds = v.GetSharedReal().Select(getVM)
         let wsShareds =
@@ -33,7 +35,7 @@ type VertexManager with
             then shareds.Select(fun s -> s.GetWeakResetRootAndCausals()).ToOr()
             else v._off.Expr
 
-        let sets = wsDirect <||> wsShareds <||> v.RF.Expr
+        let sets = wrDirect <||> wsShareds  <||> v.RF.Expr <||> srDirect
         let rsts = (!!)real.V.ET.Expr
         [(sets, rsts) ==| (v.RT, getFuncName())] //reset tag
 
@@ -50,7 +52,7 @@ type VertexManager with
             shareds @ [v]
             |>Seq.collect(fun r ->
                 getResetWeakEdgeSources(r)
-                |>Seq.map(fun s -> s.V.GetPureReal().V, [s].GetResetCausals(r).Head())
+                |>Seq.map(fun s -> s.V.GetPureReal().V, [s].GetResetWeakCausals(r).Head())
             )
 
         sets

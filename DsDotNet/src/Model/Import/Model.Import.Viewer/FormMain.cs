@@ -419,8 +419,9 @@ namespace Dual.Model.Import
 
         private void displayExprLog(IStorage storage)
         {
+            var statements = _SelectedDev.CommentedStatements.Append(_SelectedCPU.CommentedStatements);
             var exprs =
-                _SelectedCPU.CommentedStatements
+                statements
                     .Where(cs => getTargetStorages(cs.Statement).ToList().Contains(storage));
 
             if (exprs.Length() > 0)

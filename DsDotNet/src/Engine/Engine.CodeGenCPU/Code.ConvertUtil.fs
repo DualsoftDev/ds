@@ -74,22 +74,22 @@ module CodeConvertUtil =
 
     /// returns [weak] start incoming edges for target
     let getStartWeakEdgeSources(target:VertexManager) =
-        match getEdgeSources (target.Flow.Graph, target.Vertex, true) with
+        match getEdgeSources (target.Vertex.Parent.GetGraph(), target.Vertex, true) with
         | DuEssWeak ws when ws.Any() -> ws
         | _ -> []
     /// returns [strong] start incoming edges for target
     let getStartStrongEdgeSources(target:VertexManager) =
-        match getEdgeSources (target.Flow.Graph, target.Vertex, true) with
+        match getEdgeSources (target.Vertex.Parent.GetGraph(), target.Vertex, true) with
         | DuEssStrong ss when ss.Any() -> ss
         | _ -> []
     /// returns [weak] reset incoming edges for target
     let getResetWeakEdgeSources(target:VertexManager) =
-        match getEdgeSources (target.Flow.Graph, target.Vertex, false) with
+        match getEdgeSources (target.Vertex.Parent.GetGraph(), target.Vertex, false) with
         | DuEssWeak wr when wr.Any() -> wr
         | _ -> []
     /// returns [strong] reset incoming edges for target
     let getResetStrongEdgeSources(target:VertexManager) =
-        match getEdgeSources (target.Flow.Graph, target.Vertex, false) with
+        match getEdgeSources (target.Vertex.Parent.GetGraph(), target.Vertex, false) with
         | DuEssStrong sr when sr.Any() -> sr
         | _ -> []
 

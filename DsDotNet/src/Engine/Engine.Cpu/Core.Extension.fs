@@ -69,7 +69,7 @@ module CoreExtensionsModule =
 
         [<Extension>]
         static member IsEndThread (x:IStorage) =
-            match x.GetApiTagKind() with
+            match x.GetApiTagKind() with  //외부 시스템 관련 신호
             | Some _ -> true
             | _ ->
                 match x.GetVertexTagKind() with

@@ -56,7 +56,7 @@ type VertexManager with
             )
 
         sets
-        |> Seq.map(fun (src, gr) ->(src.GPUL.Expr <&&> real.V.F.Expr, real.V.H.Expr) ==| (gr, "RootGoingRelay"))
+        |> Seq.map(fun (src, gr) ->(src.GPUL.Expr <&&> real.V.F.Expr, real.V.R.Expr) ==| (gr, "RootGoingRelay"))
         |> Seq.toList
 
     member v.F5_RootCoinRelay() : CommentedStatement =

@@ -33,12 +33,11 @@ type VertexManager with
 
     member v.D3_DAGCoinRelay(): CommentedStatement list =
         let real = v.Vertex :?> Real
-        let realV = v
         let children = real.Graph.Vertices.Select(getVM)
         [
             for child in children do
                 let child = child :?> VertexMCoin
                 let sets = child.ST.Expr <&&> child.ET.Expr
-                let rsts = realV.H.Expr
+                let rsts = child.H.Expr
                 yield (sets, rsts) ==| (child.CR, getFuncName() )
         ]

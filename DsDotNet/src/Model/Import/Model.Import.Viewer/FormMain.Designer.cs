@@ -368,9 +368,9 @@ namespace Dual.Model.Import
             this.checkedListBox_sysHMI.FormattingEnabled = true;
             this.checkedListBox_sysHMI.Items.AddRange(new object[] {
             "Select System"});
-            this.checkedListBox_sysHMI.Location = new System.Drawing.Point(605, 0);
+            this.checkedListBox_sysHMI.Location = new System.Drawing.Point(608, 0);
             this.checkedListBox_sysHMI.Name = "checkedListBox_sysHMI";
-            this.checkedListBox_sysHMI.Size = new System.Drawing.Size(106, 416);
+            this.checkedListBox_sysHMI.Size = new System.Drawing.Size(124, 416);
             this.checkedListBox_sysHMI.TabIndex = 20;
             this.checkedListBox_sysHMI.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.checkedListBox_sysHMI_ItemCheck);
             // 
@@ -380,9 +380,9 @@ namespace Dual.Model.Import
             this.checkedListBox_My.FormattingEnabled = true;
             this.checkedListBox_My.Items.AddRange(new object[] {
             "Select System"});
-            this.checkedListBox_My.Location = new System.Drawing.Point(711, 0);
+            this.checkedListBox_My.Location = new System.Drawing.Point(732, 0);
             this.checkedListBox_My.Name = "checkedListBox_My";
-            this.checkedListBox_My.Size = new System.Drawing.Size(158, 416);
+            this.checkedListBox_My.Size = new System.Drawing.Size(221, 416);
             this.checkedListBox_My.TabIndex = 19;
             this.checkedListBox_My.DoubleClick += new System.EventHandler(this.checkedListBox_My_DoubleClick);
             // 
@@ -392,9 +392,9 @@ namespace Dual.Model.Import
             this.checkedListBox_Ex.FormattingEnabled = true;
             this.checkedListBox_Ex.Items.AddRange(new object[] {
             "Select Device"});
-            this.checkedListBox_Ex.Location = new System.Drawing.Point(869, 0);
+            this.checkedListBox_Ex.Location = new System.Drawing.Point(953, 0);
             this.checkedListBox_Ex.Name = "checkedListBox_Ex";
-            this.checkedListBox_Ex.Size = new System.Drawing.Size(277, 416);
+            this.checkedListBox_Ex.Size = new System.Drawing.Size(193, 416);
             this.checkedListBox_Ex.TabIndex = 18;
             this.checkedListBox_Ex.DoubleClick += new System.EventHandler(this.checkedListBox_Ex_DoubleClick);
             // 

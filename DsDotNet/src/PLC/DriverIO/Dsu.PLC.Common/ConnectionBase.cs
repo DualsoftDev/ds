@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using LanguageExt;
 using static LanguageExt.Prelude;
 using log4net;
+using Dual.Common.Core;
 
 namespace Dsu.PLC.Common
 {
@@ -16,7 +17,7 @@ namespace Dsu.PLC.Common
     /// </summary>
     public abstract class ConnectionBase : IConnection
     {
-        public static ILog Logger = Global.Logger;
+        public static ILog Logger = Log4NetLogger.Logger;
         public abstract ICpu Cpu { get; }
         public virtual IConnectionParameters ConnectionParameters { get; set; }
         public bool IsUSBConnection => ConnectionParameters is IConnectionParametersUSB;
@@ -138,7 +139,7 @@ namespace Dsu.PLC.Common
         public void ClearTagNRestart()
         {
             Tags.Clear();
-          
+
             PrepareDataExchangeLoop();
         }
 
@@ -206,7 +207,7 @@ namespace Dsu.PLC.Common
                         ex.Data.Clear();
                     }
 
-                    
+
                     //ReconnectOnDemand(exceptions.First());
                 }
             }, DataExchangeCts.Token);
@@ -238,7 +239,7 @@ namespace Dsu.PLC.Common
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="disposing">명시적(using() 구문 사용 포함) Dispose() 호출시 true, Finalizer 에서 암시적으로 호출시 false</param>
         protected virtual void Dispose(bool disposing)

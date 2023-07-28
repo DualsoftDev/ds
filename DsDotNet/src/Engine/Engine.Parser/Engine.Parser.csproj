@@ -36,7 +36,6 @@
 		<PackageReference Include="Antlr4BuildTasks" Version="8.17" PrivateAssets="all" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />
 		<ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
 	</ItemGroup>
 	<ItemGroup>

@@ -1,3 +1,5 @@
+using Dual.Common.Winform;
+
 using Engine.CodeGenCPU;
 using Engine.Common;
 using Engine.Common.FS;

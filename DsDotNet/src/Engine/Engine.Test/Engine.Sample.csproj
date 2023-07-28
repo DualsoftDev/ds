@@ -16,7 +16,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />
+		<ProjectReference Include="..\..\..\..\..\nuget\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
 		<ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
 		<ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
 	</ItemGroup>

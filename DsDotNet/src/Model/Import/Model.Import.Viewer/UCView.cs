@@ -1,3 +1,6 @@
+using Dual.Common.Winform;
+using Dual.Common.Core;
+
 using Engine.Common;
 using Engine.Core;
 using Microsoft.Msagl.Drawing;

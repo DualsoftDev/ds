@@ -30,6 +30,9 @@
 	</AssemblyAttribute>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\..\nuget\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="log4net">
       <HintPath>..\..\..\..\exLib\log4net.dll</HintPath>
     </Reference>

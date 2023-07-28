@@ -5,7 +5,7 @@ open System
 open System.Linq
 open FsUnit.Xunit
 open System.Text.RegularExpressions
-open Engine.Common.FS
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module Base =

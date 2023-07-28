@@ -6,7 +6,7 @@ open NUnit.Framework
 
 open T
 open Engine.Core
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Engine.CodeGenCPU
 open PLC.CodeGen.LSXGI
 open System

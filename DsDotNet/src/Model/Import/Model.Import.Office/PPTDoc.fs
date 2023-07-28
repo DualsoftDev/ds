@@ -9,7 +9,7 @@ open DocumentFormat.OpenXml
 open System.IO
 open System
 open PPTUtil
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Model.Import.Office
 open System.Collections.Generic
 open Engine.Core

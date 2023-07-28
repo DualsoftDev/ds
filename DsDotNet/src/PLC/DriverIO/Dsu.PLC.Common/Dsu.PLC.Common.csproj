@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="LanguageExt.Core" Version="4.4.0" />
-    <PackageReference Include="System.Reactive" Version="5.0.0" />
+    <PackageReference Include="System.Reactive" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,10 +32,10 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\..\nuget\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
   </ItemGroup>
-  <ItemGroup>
+  <!--<ItemGroup>
     <Reference Include="log4net">
       <HintPath>..\..\..\..\exLib\log4net.dll</HintPath>
     </Reference>
-  </ItemGroup>
+  </ItemGroup>-->
 
 </Project>

@@ -3,7 +3,7 @@ namespace PLC.CodeGen.LSXGI
 open System.Linq
 open System.Xml
 
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Engine.Core
 open PLC.CodeGen.LSXGI
 open PLC.CodeGen.Common

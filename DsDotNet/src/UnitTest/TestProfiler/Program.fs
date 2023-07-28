@@ -4,12 +4,12 @@ open System
 open System.IO
 open Model.Import.Office
 open Engine.CodeGenCPU
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Engine.Core
 open System.IO
 open System.Linq
 open Engine.Core
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Engine.CodeGenCPU
 open PLC.CodeGen.LSXGI
 open System

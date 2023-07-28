@@ -4,10 +4,10 @@ using System.Reactive.Linq;
 using Dual.Common.Core;
 using Dual.Common.Winform;
 
-using Engine.Common.FS;
+using Dual.Common.Core.FS;
 using Engine.Core;
 
-using static Engine.Common.FS.MessageEvent;
+using static Dual.Common.Core.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 
 namespace Dual.Model.Import

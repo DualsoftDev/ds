@@ -34,10 +34,10 @@
 		<ProjectReference Include="..\..\PLC\DriverIO\Dsu.PLC.LS.FS\Dsu.PLC.LS.FS.fsproj" />
 		<ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
 	</ItemGroup>
-	<ItemGroup>
+	<!--<ItemGroup>
 		<Reference Include="log4net">
 			<HintPath>..\..\..\exLib\log4net.dll</HintPath>
 		</Reference>
-	</ItemGroup>
+	</ItemGroup>-->
 
 </Project>

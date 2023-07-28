@@ -2,7 +2,7 @@ namespace PLC.CodeGen.LSXGI
 open System
 open System.Linq
 open System.Collections.Generic
-open Engine.Common.FS
+open Dual.Common.Core.FS
 /// 래더에서 타입 체크할때 사용하기 위한 타입
 // RecordType.h : LS 산전에서 전달받은 header file
 // #define BOOL_CHECKTYPE			0x00000001

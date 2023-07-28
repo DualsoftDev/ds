@@ -6,7 +6,7 @@ open T
 open T.Expression
 open Engine.Core
 open Engine.Parser.FS
-open Engine.Common.FS
+open Dual.Common.Core.FS
 
 //[<AutoOpen>]
 module TimerTestModule =

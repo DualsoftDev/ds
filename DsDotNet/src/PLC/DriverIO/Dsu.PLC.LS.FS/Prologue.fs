@@ -1,7 +1,7 @@
 [<AutoOpen>]
 module rec PrologueModule
 
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Dsu.PLC.Common
 
 module PLCHwModel =

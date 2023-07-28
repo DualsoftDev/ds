@@ -4,7 +4,7 @@ open System.Linq
 open System.Runtime.CompilerServices
 open Engine.Core
 open System
-open Engine.Common.FS
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module ExpressionExtension =

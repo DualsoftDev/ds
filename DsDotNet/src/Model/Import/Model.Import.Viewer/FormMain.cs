@@ -12,7 +12,7 @@ using Dual.Common.Winform;
 
 
 using static Engine.CodeGenCPU.TagManagerModule;
-using static Engine.Common.FS.MessageEvent;
+using static Dual.Common.Core.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.EdgeExt;
 using static Engine.Core.SystemExt;
@@ -28,7 +28,7 @@ using static Engine.CodeGenCPU.ConvertCoreExt;
 //using static Engine.Common.FS.CollectionAlgorithm;
 using static Model.Import.Office.ImportPPTModule;
 using static Engine.Core.RuntimeGeneratorModule;
-using Engine.Common.FS;
+using Dual.Common.Core.FS;
 using static Engine.Core.TagModule;
 using static Engine.Core.TagKindModule;
 

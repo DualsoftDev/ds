@@ -3,7 +3,7 @@ namespace Model.Import.Office
 
 open System.Linq
 open Microsoft.FSharp.Collections
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Model.Import.Office
 open Engine.Core
 open System.Collections.Generic

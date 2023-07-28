@@ -2,7 +2,7 @@ namespace PLC.CodeGen.LSXGI
 
 open System.Security
 open Engine.Core
-open Engine.Common.FS
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module XgiPrologModule =

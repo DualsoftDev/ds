@@ -3,7 +3,7 @@ open System
 open System.Runtime.CompilerServices
 
 open NUnit.Framework
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Dsu.PLC.LS
 open AddressConvert
 open System.Reactive.Linq

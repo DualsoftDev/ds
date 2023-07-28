@@ -6,7 +6,7 @@ open System.Linq
 open Microsoft.Office.Interop.Excel
 open System.Drawing
 open System.Reflection
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Engine.Core
 
 [<AutoOpen>]

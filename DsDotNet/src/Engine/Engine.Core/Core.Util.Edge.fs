@@ -3,8 +3,8 @@ namespace Engine.Core
 open System.Linq
 open System.Runtime.CompilerServices
 open System.Collections.Generic
-open Engine.Common.FS
-open Engine.Common.FS
+open Dual.Common.Core.FS
+open Dual.Common.Core.FS
 
 
 [<AutoOpen>]

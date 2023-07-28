@@ -4,7 +4,7 @@ open System.Linq
 open System.Collections.Generic
 
 open Antlr4.Runtime
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Engine.Core
 open type exprParser
 open Antlr4.Runtime.Tree

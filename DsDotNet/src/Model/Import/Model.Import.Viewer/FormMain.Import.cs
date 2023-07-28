@@ -1,7 +1,7 @@
 using Dual.Common.Winform;
 
-using Engine.Common;
-using Engine.Common.FS;
+using Dual.Common.Core;
+using Dual.Common.Core.FS;
 using Engine.Core;
 using Model.Import.Office;
 using System;
@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using static Engine.Common.FS.MessageEvent;
+using static Dual.Common.Core.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.RuntimeGeneratorModule;
 using static Model.Import.Office.ImportPPTModule;

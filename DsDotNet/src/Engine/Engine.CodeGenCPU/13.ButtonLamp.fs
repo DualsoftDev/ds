@@ -3,7 +3,7 @@ module Engine.CodeGenCPU.ConvertButtonLamp
 
 open Engine.Core
 open Engine.CodeGenCPU
-open Engine.Common.FS
+open Dual.Common.Core.FS
 
 type DsSystem with
     member s.B1_ButtonOutput(): CommentedStatement list = [

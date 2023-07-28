@@ -4,7 +4,7 @@ namespace rec Engine.Core
 open System.Collections.Generic
 open System.Linq
 open System.Diagnostics
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open System
 open System.Reactive.Subjects
 

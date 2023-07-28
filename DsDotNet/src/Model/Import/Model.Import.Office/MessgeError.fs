@@ -7,7 +7,7 @@ open System.Runtime.CompilerServices
 
 open DocumentFormat.OpenXml
 open System.Collections.Concurrent
-open Engine.Common.FS
+open Dual.Common.Core.FS
 
 module WarnID =
     let _1 = 1, "Warnning message1"

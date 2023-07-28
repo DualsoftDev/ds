@@ -5,7 +5,7 @@ open System.Linq
 open PPTObjectModule
 open System
 open System.Collections.Concurrent
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Model.Import.Office
 open System.Collections.Generic
 open Engine.Core

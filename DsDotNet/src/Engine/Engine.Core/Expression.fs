@@ -1,7 +1,7 @@
 namespace rec Engine.Core
 open System
 open System.Diagnostics
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open ExpressionModule
 
 (*  expression: generic type <'T> 나 <_> 으로는 <obj> match 으로 간주됨

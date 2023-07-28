@@ -1,7 +1,7 @@
 namespace PLC.CodeGen.Common.QGraph
 
 open System.Collections.Generic
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Engine.Core
 
 //open Dual.Common.Graph.QuickGraph

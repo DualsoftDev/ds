@@ -40,9 +40,9 @@
 		<Reference Include="Interop.XGCommLib">
 		  <HintPath>..\UnitTest.PLC.HW.LS.XgCommLib.x64\LsXgCOM\Interop.XGCommLib.dll</HintPath>
 		</Reference>
-		<Reference Include="log4net">
+		<!--<Reference Include="log4net">
 			<HintPath>..\..\..\exLib\log4net.dll</HintPath>
-		</Reference>
+		</Reference>-->
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="LsXgCOM\" />

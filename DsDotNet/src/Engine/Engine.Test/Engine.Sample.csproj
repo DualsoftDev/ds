@@ -16,16 +16,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\..\..\..\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
 		<ProjectReference Include="..\..\..\..\..\nuget\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
 		<ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
 		<ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Reference Include="log4net">
+		<!--<Reference Include="log4net">
 		  <HintPath>..\..\..\exLib\log4net.dll</HintPath>
 		</Reference>
-		<Reference Include="System.Configuration" />
+		<Reference Include="System.Configuration" />-->
 	</ItemGroup>
 
 

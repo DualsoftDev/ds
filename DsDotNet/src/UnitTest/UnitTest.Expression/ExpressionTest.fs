@@ -6,7 +6,7 @@ open NUnit.Framework
 open Engine.Core
 open Engine.CodeGenCPU
 open Engine.Parser.FS
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open T
 
 [<AutoOpen>]

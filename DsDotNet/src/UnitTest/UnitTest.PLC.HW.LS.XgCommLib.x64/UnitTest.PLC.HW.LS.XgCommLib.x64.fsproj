@@ -50,9 +50,9 @@
 		<Reference Include="Interop.XGCommLib">
 		  <HintPath>LsXgCOM\Interop.XGCommLib.dll</HintPath>
 		</Reference>
-		<Reference Include="log4net">
+		<!--<Reference Include="log4net">
 			<HintPath>..\..\..\exLib\log4net.dll</HintPath>
-		</Reference>
+		</Reference>-->
 	</ItemGroup>
 
 </Project>

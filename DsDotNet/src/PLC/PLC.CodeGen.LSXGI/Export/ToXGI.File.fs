@@ -2,7 +2,7 @@ namespace PLC.CodeGen.LSXGI
 
 open System.Reflection
 
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open PLC.CodeGen.LSXGI
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 

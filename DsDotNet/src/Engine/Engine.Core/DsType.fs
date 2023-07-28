@@ -3,7 +3,7 @@ namespace Engine.Core
 
 open System.Linq
 open System.Runtime.CompilerServices
-open Engine.Common.FS
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module DsType =

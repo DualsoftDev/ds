@@ -8,7 +8,7 @@ open T
 open NUnit.Framework
 open AddressConvert
 open Engine.Core.CoreModule
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open System.Text.RegularExpressions
 
 type XgkAddressTest() =

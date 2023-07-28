@@ -6,7 +6,7 @@ open NUnit.Framework
 open Xunit
 
 open AddressConvert
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Dsu.PLC.LS
 open Dsu.PLC.Common
 open FSharpPlus.Data.ContT

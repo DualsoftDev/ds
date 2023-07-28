@@ -1,7 +1,7 @@
 namespace PLC.CodeGen.Common
 open System.Collections.Generic
 open Engine.Core
-open Engine.Common.FS
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module MemoryAllocator =
@@ -161,7 +161,7 @@ module MemoryAllocator =
 
 [<AutoOpen>]
 module IECAddressModule =
-    open Engine.Common.FS
+    open Dual.Common.Core.FS
     open System.Text.RegularExpressions
 
     /// IEC address 를 표준화한다.  e.g "%i3" => "%IX3"

@@ -2,7 +2,7 @@ namespace Engine.Parser.FS
 
 open Antlr4.Runtime.Tree
 open Engine.Core
-open Engine.Common.FS
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module ParserUtil =

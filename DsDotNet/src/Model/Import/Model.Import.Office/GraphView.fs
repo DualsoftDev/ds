@@ -2,7 +2,7 @@
 namespace Model.Import.Office
 
 
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Engine.Core
 open System.Collections.Generic
 open System.Runtime.CompilerServices

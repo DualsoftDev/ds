@@ -1,7 +1,7 @@
 using Dual.Common.Winform;
 
 using Dual.Common.Core;
-using Engine.Common.FS;
+using Dual.Common.Core.FS;
 using Model.Import.Office;
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Engine.CodeGenCPU.ExportModule;
-using static Engine.Common.FS.MessageEvent;
+using static Dual.Common.Core.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.Interface;
 using static Engine.Cpu.RunTime;

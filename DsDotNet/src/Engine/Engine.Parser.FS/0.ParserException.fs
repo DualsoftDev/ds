@@ -2,7 +2,7 @@ namespace Engine.Parser.FS
 open System
 open Antlr4.Runtime
 open Antlr4.Runtime.Tree
-open Engine.Common.FS
+open Dual.Common.Core.FS
 
 type ParserException(message:string) =
     inherit Exception(message)

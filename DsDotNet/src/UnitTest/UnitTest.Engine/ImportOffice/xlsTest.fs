@@ -2,7 +2,7 @@ namespace T
 
 
 open Engine.Core
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Engine.Parser.FS
 open Model.Import.Office
 

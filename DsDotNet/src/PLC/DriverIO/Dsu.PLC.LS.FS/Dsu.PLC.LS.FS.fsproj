@@ -35,7 +35,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-    <ProjectReference Include="..\..\..\Engine\Engine.Common.FS\Engine.Common.FS.fsproj" />
+    <ProjectReference Include="..\..\..\..\..\..\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
     <ProjectReference Include="..\Dsu.PLC.Common\Dsu.PLC.Common.csproj" />
   </ItemGroup>
 
@@ -53,9 +53,9 @@
     <_Parameter1>Ut.Dsu.PLC.FS</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
-<ItemGroup>
+<!--<ItemGroup>
   <Reference Include="log4net">
     <HintPath>..\..\..\..\exLib\log4net.dll</HintPath>
   </Reference>
-</ItemGroup>
+</ItemGroup>-->
 </Project>

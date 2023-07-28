@@ -1,7 +1,7 @@
 namespace Engine.Parser.FS
 
 open Antlr4.Runtime
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Engine.Core
 
 module FqdnParser =

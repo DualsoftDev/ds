@@ -6,7 +6,7 @@ open System.IO
 open Antlr4.Runtime.Tree
 open Antlr4.Runtime
 
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Engine.Parser
 open Engine.Core
 open type Engine.Parser.dsParser

@@ -4,7 +4,7 @@ namespace Model.Import.Office
 open System
 open System.Linq
 open Microsoft.Office.Interop.Excel
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Engine.Core
 open System.Collections.Generic
 

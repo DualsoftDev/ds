@@ -4,7 +4,7 @@ open NUnit.Framework
 open Dsu.PLC.LS
 open FSharpPlus
 open AddressConvert
-open Engine.Common.FS
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module FEnetTestModule =

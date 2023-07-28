@@ -2,9 +2,9 @@ namespace Engine.Core
 
 open System.Runtime.CompilerServices
 open System.Linq
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open System.Collections.Generic
-open Engine.Common.FS
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module OriginModule =

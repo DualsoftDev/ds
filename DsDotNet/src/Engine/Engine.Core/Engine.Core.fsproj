@@ -54,6 +54,7 @@
 
 	<ItemGroup>
 		<PackageReference Update="FSharp.Core" Version="7.0.0" />
+		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.2" />
         <PackageReference Include="System.Reactive" Version="6.0.0" />
         <PackageReference Include="Fody" Version="6.6.4">
 			<PrivateAssets>all</PrivateAssets>
@@ -62,11 +63,6 @@
 		<PackageReference Include="ModuleInit.Fody" Version="2.1.1">
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
-	</ItemGroup>
-
-
-	<ItemGroup>
-	  <ProjectReference Include="..\..\..\..\..\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
 	</ItemGroup>
 
 </Project>

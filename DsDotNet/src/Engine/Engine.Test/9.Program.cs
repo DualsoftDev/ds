@@ -21,7 +21,7 @@ class Program
 
         //PrepareThreadPool();
         SimpleExceptionHandler.InstallExceptionHandler();
-        DllVersionChecker.IsValidExDLL(Assembly.GetExecutingAssembly());
+        //DllVersionChecker.IsValidExDLL(Assembly.GetExecutingAssembly());
         var logger = Log4NetLogger.PrepareLog4Net("EngineLogger");
         Log4NetWrapper.SetLogger(logger);
 

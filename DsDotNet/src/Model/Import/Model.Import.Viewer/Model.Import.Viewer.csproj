@@ -11,6 +11,7 @@
 
 	</PropertyGroup>
 	<ItemGroup>
+		<PackageReference Include="DualSoft-Common-Core" Version="0.1.7" />
 		<PackageReference Include="DualSoft-Common-Winform" Version="0.1.1" />
 		<PackageReference Include="log4net" Version="2.0.15" />
 		<!--<PackageReference Include="FSharp.Core" Version="7.0.0" />-->

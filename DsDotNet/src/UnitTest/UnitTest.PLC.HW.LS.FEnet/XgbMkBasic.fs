@@ -8,7 +8,7 @@ open Xunit
 open AddressConvert
 open Dual.Common.Core.FS
 open Dsu.PLC.LS
-open Dsu.PLC.Common
+open Dual.PLC.Common
 open FSharpPlus.Data.ContT
 
 [<Collection("XgbMkBasic")>]

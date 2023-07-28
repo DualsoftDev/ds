@@ -7,7 +7,7 @@ open Dual.Common.Core.FS
 open Dsu.PLC.LS
 open AddressConvert
 open System.Reactive.Linq
-open Dsu.PLC.Common
+open Dual.PLC.Common
 open Xunit
 
 

@@ -89,6 +89,9 @@ namespace Dual.Model.Import
 
             checkedListBox_My.ItemCheck += (ss, ee) => { if (checkedListBox_My.Enabled) ee.NewValue = ee.CurrentValue; };
             checkedListBox_Ex.ItemCheck += (ss, ee) => { if (checkedListBox_Ex.Enabled) ee.NewValue = ee.CurrentValue; };
+
+            listBox_find.DisplayMember = "DisplayUI";
+
             checkedListBox_My.DisplayMember = "Display";
             checkedListBox_Ex.DisplayMember = "Display";
             checkedListBox_sysHMI.DisplayMember = "Display";
@@ -573,6 +576,16 @@ namespace Dual.Model.Import
             ExportPLC($"{_ResultDirectory}\\DSLogic{DateTime.Now.ToString("(HH-mm-ss)")}.xml");
 
 
+        }
+
+        private void textBox_activeFind_TextChanged(object sender, EventArgs e)
+        {
+            tabControl1.SelectedTab = tabPage_activeFliter;
+
+            var filterItems = checkedListBox_My.Items.Cast<StorageDisplay>()
+                             .Where(w => w.Display.ToLower().Contains(textBox_activeFind.Text.ToLower())).ToList();
+
+            listBox_find.DataSource = filterItems;
         }
     }
 }

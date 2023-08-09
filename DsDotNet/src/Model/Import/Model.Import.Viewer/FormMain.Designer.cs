@@ -51,10 +51,18 @@ namespace Dual.Model.Import
             this.button_TestStart = new System.Windows.Forms.Button();
             this.button_TestORG = new System.Windows.Forms.Button();
             this.splitContainer4 = new System.Windows.Forms.SplitContainer();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPage_system = new System.Windows.Forms.TabPage();
             this.checkedListBox_sysHMI = new System.Windows.Forms.CheckedListBox();
-            this.checkedListBox_My = new System.Windows.Forms.CheckedListBox();
+            this.tabPage_device = new System.Windows.Forms.TabPage();
             this.checkedListBox_Ex = new System.Windows.Forms.CheckedListBox();
+            this.tabPage_active = new System.Windows.Forms.TabPage();
+            this.checkedListBox_My = new System.Windows.Forms.CheckedListBox();
+            this.tabPage_activeFliter = new System.Windows.Forms.TabPage();
+            this.listBox_find = new System.Windows.Forms.ListBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.label4 = new System.Windows.Forms.Label();
+            this.textBox_activeFind = new System.Windows.Forms.TextBox();
             this.button_ClearLog = new System.Windows.Forms.Button();
             this.comboBox_TestExpr = new System.Windows.Forms.ComboBox();
             this.button_Stop = new System.Windows.Forms.Button();
@@ -64,14 +72,6 @@ namespace Dual.Model.Import
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tabPage_system = new System.Windows.Forms.TabPage();
-            this.tabPage_device = new System.Windows.Forms.TabPage();
-            this.tabPage_active = new System.Windows.Forms.TabPage();
-            this.tabPage_activeFliter = new System.Windows.Forms.TabPage();
-            this.listBox_find = new System.Windows.Forms.ListBox();
-            this.textBox_activeFind = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -90,12 +90,12 @@ namespace Dual.Model.Import
             this.splitContainer4.Panel1.SuspendLayout();
             this.splitContainer4.Panel2.SuspendLayout();
             this.splitContainer4.SuspendLayout();
-            this.panel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage_system.SuspendLayout();
             this.tabPage_device.SuspendLayout();
             this.tabPage_active.SuspendLayout();
             this.tabPage_activeFliter.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer1
@@ -373,6 +373,30 @@ namespace Dual.Model.Import
             this.splitContainer4.SplitterDistance = 361;
             this.splitContainer4.TabIndex = 20;
             // 
+            // tabControl1
+            // 
+            this.tabControl1.Controls.Add(this.tabPage_system);
+            this.tabControl1.Controls.Add(this.tabPage_device);
+            this.tabControl1.Controls.Add(this.tabPage_active);
+            this.tabControl1.Controls.Add(this.tabPage_activeFliter);
+            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Right;
+            this.tabControl1.Location = new System.Drawing.Point(788, 0);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(358, 416);
+            this.tabControl1.TabIndex = 21;
+            // 
+            // tabPage_system
+            // 
+            this.tabPage_system.Controls.Add(this.checkedListBox_sysHMI);
+            this.tabPage_system.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_system.Name = "tabPage_system";
+            this.tabPage_system.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_system.Size = new System.Drawing.Size(350, 390);
+            this.tabPage_system.TabIndex = 0;
+            this.tabPage_system.Text = "system";
+            this.tabPage_system.UseVisualStyleBackColor = true;
+            // 
             // checkedListBox_sysHMI
             // 
             this.checkedListBox_sysHMI.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -384,6 +408,40 @@ namespace Dual.Model.Import
             this.checkedListBox_sysHMI.Size = new System.Drawing.Size(344, 384);
             this.checkedListBox_sysHMI.TabIndex = 20;
             this.checkedListBox_sysHMI.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.checkedListBox_sysHMI_ItemCheck);
+            // 
+            // tabPage_device
+            // 
+            this.tabPage_device.Controls.Add(this.checkedListBox_Ex);
+            this.tabPage_device.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_device.Name = "tabPage_device";
+            this.tabPage_device.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_device.Size = new System.Drawing.Size(350, 390);
+            this.tabPage_device.TabIndex = 1;
+            this.tabPage_device.Text = "device";
+            this.tabPage_device.UseVisualStyleBackColor = true;
+            // 
+            // checkedListBox_Ex
+            // 
+            this.checkedListBox_Ex.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.checkedListBox_Ex.FormattingEnabled = true;
+            this.checkedListBox_Ex.Items.AddRange(new object[] {
+            "Select Device"});
+            this.checkedListBox_Ex.Location = new System.Drawing.Point(3, 3);
+            this.checkedListBox_Ex.Name = "checkedListBox_Ex";
+            this.checkedListBox_Ex.Size = new System.Drawing.Size(344, 384);
+            this.checkedListBox_Ex.TabIndex = 18;
+            this.checkedListBox_Ex.DoubleClick += new System.EventHandler(this.checkedListBox_Ex_DoubleClick);
+            // 
+            // tabPage_active
+            // 
+            this.tabPage_active.Controls.Add(this.checkedListBox_My);
+            this.tabPage_active.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_active.Name = "tabPage_active";
+            this.tabPage_active.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_active.Size = new System.Drawing.Size(350, 390);
+            this.tabPage_active.TabIndex = 2;
+            this.tabPage_active.Text = "active";
+            this.tabPage_active.UseVisualStyleBackColor = true;
             // 
             // checkedListBox_My
             // 
@@ -397,17 +455,27 @@ namespace Dual.Model.Import
             this.checkedListBox_My.TabIndex = 19;
             this.checkedListBox_My.DoubleClick += new System.EventHandler(this.checkedListBox_My_DoubleClick);
             // 
-            // checkedListBox_Ex
+            // tabPage_activeFliter
             // 
-            this.checkedListBox_Ex.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.checkedListBox_Ex.FormattingEnabled = true;
-            this.checkedListBox_Ex.Items.AddRange(new object[] {
-            "Select Device"});
-            this.checkedListBox_Ex.Location = new System.Drawing.Point(3, 3);
-            this.checkedListBox_Ex.Name = "checkedListBox_Ex";
-            this.checkedListBox_Ex.Size = new System.Drawing.Size(344, 384);
-            this.checkedListBox_Ex.TabIndex = 18;
-            this.checkedListBox_Ex.DoubleClick += new System.EventHandler(this.checkedListBox_Ex_DoubleClick);
+            this.tabPage_activeFliter.Controls.Add(this.listBox_find);
+            this.tabPage_activeFliter.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_activeFliter.Name = "tabPage_activeFliter";
+            this.tabPage_activeFliter.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_activeFliter.Size = new System.Drawing.Size(350, 390);
+            this.tabPage_activeFliter.TabIndex = 3;
+            this.tabPage_activeFliter.Text = "activeFliter";
+            this.tabPage_activeFliter.UseVisualStyleBackColor = true;
+            // 
+            // listBox_find
+            // 
+            this.listBox_find.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listBox_find.Font = new System.Drawing.Font("굴림", 12F);
+            this.listBox_find.FormattingEnabled = true;
+            this.listBox_find.ItemHeight = 16;
+            this.listBox_find.Location = new System.Drawing.Point(3, 3);
+            this.listBox_find.Name = "listBox_find";
+            this.listBox_find.Size = new System.Drawing.Size(344, 384);
+            this.listBox_find.TabIndex = 0;
             // 
             // panel1
             // 
@@ -426,6 +494,23 @@ namespace Dual.Model.Import
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(116, 416);
             this.panel1.TabIndex = 12;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(14, 259);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(62, 12);
+            this.label4.TabIndex = 12;
+            this.label4.Text = "activeFind";
+            // 
+            // textBox_activeFind
+            // 
+            this.textBox_activeFind.Location = new System.Drawing.Point(16, 274);
+            this.textBox_activeFind.Name = "textBox_activeFind";
+            this.textBox_activeFind.Size = new System.Drawing.Size(85, 21);
+            this.textBox_activeFind.TabIndex = 11;
+            this.textBox_activeFind.TextChanged += new System.EventHandler(this.textBox_activeFind_TextChanged);
             // 
             // button_ClearLog
             // 
@@ -523,90 +608,6 @@ namespace Dual.Model.Import
             this.splitter1.TabIndex = 22;
             this.splitter1.TabStop = false;
             // 
-            // tabControl1
-            // 
-            this.tabControl1.Controls.Add(this.tabPage_system);
-            this.tabControl1.Controls.Add(this.tabPage_device);
-            this.tabControl1.Controls.Add(this.tabPage_active);
-            this.tabControl1.Controls.Add(this.tabPage_activeFliter);
-            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.tabControl1.Location = new System.Drawing.Point(788, 0);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(358, 416);
-            this.tabControl1.TabIndex = 21;
-            // 
-            // tabPage_system
-            // 
-            this.tabPage_system.Controls.Add(this.checkedListBox_sysHMI);
-            this.tabPage_system.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_system.Name = "tabPage_system";
-            this.tabPage_system.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_system.Size = new System.Drawing.Size(350, 390);
-            this.tabPage_system.TabIndex = 0;
-            this.tabPage_system.Text = "system";
-            this.tabPage_system.UseVisualStyleBackColor = true;
-            // 
-            // tabPage_device
-            // 
-            this.tabPage_device.Controls.Add(this.checkedListBox_Ex);
-            this.tabPage_device.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_device.Name = "tabPage_device";
-            this.tabPage_device.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_device.Size = new System.Drawing.Size(350, 390);
-            this.tabPage_device.TabIndex = 1;
-            this.tabPage_device.Text = "device";
-            this.tabPage_device.UseVisualStyleBackColor = true;
-            // 
-            // tabPage_active
-            // 
-            this.tabPage_active.Controls.Add(this.checkedListBox_My);
-            this.tabPage_active.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_active.Name = "tabPage_active";
-            this.tabPage_active.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_active.Size = new System.Drawing.Size(350, 390);
-            this.tabPage_active.TabIndex = 2;
-            this.tabPage_active.Text = "active";
-            this.tabPage_active.UseVisualStyleBackColor = true;
-            // 
-            // tabPage_activeFliter
-            // 
-            this.tabPage_activeFliter.Controls.Add(this.listBox_find);
-            this.tabPage_activeFliter.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_activeFliter.Name = "tabPage_activeFliter";
-            this.tabPage_activeFliter.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_activeFliter.Size = new System.Drawing.Size(350, 390);
-            this.tabPage_activeFliter.TabIndex = 3;
-            this.tabPage_activeFliter.Text = "activeFliter";
-            this.tabPage_activeFliter.UseVisualStyleBackColor = true;
-            // 
-            // listBox_find
-            // 
-            this.listBox_find.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listBox_find.FormattingEnabled = true;
-            this.listBox_find.ItemHeight = 12;
-            this.listBox_find.Location = new System.Drawing.Point(3, 3);
-            this.listBox_find.Name = "listBox_find";
-            this.listBox_find.Size = new System.Drawing.Size(344, 384);
-            this.listBox_find.TabIndex = 0;
-            // 
-            // textBox_activeFind
-            // 
-            this.textBox_activeFind.Location = new System.Drawing.Point(16, 274);
-            this.textBox_activeFind.Name = "textBox_activeFind";
-            this.textBox_activeFind.Size = new System.Drawing.Size(85, 21);
-            this.textBox_activeFind.TabIndex = 11;
-            this.textBox_activeFind.TextChanged += new System.EventHandler(this.textBox_activeFind_TextChanged);
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(14, 259);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(62, 12);
-            this.label4.TabIndex = 12;
-            this.label4.Text = "activeFind";
-            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
@@ -642,13 +643,13 @@ namespace Dual.Model.Import
             this.splitContainer4.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer4)).EndInit();
             this.splitContainer4.ResumeLayout(false);
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.tabPage_system.ResumeLayout(false);
             this.tabPage_device.ResumeLayout(false);
             this.tabPage_active.ResumeLayout(false);
             this.tabPage_activeFliter.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
 
         }

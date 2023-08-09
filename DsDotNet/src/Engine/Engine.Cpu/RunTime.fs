@@ -22,13 +22,13 @@ module RunTime =
                  .Subscribe(fun (system, storage, _value) ->
                         //for CPU 연산
                         let doExpr(statement:Statement) =
-                            //if storage.IsEndThread()
-                            //then
-                            //    async {
-                            //        do! Async.Sleep(200)
-                            //        statement.Do() }
-                            //        |> Async.StartImmediate
-                            //else
+                            if storage.IsStartThread() 
+                            then
+                                async {
+                                    do! Async.Sleep(200)
+                                    statement.Do() }
+                                    |> Async.StartImmediate
+                            else
                                 statement.Do()
                                 //debugging  sleep
                                 //async {

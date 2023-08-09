@@ -27,7 +27,7 @@ module XgiPrologModule =
             | RegexPattern @"^%([IQMR][XBWDL]?)(\d+)$"  _
             |   RegexPattern @"^%([IQ][XBWDL]?)(\d+)\.(\d+)$"  _
             |   RegexPattern @"^%([IQ][XBWDL]?)(\d+)\.(\d+)\.(\d+)$" _ -> Ok true
-            |   RegexPattern @"^%M([BWDL])(\d+)\.(\d+)$" [size; Int32Pattern n1; Int32Pattern n2; ] when
+            |   RegexPattern @"^%M([BWDL])(\d+)\.(\d+)$" [size; Int32Pattern _; Int32Pattern n2; ] when
                     (size="B" && 0 <= n2 && n2 < 8 )
                     || (size="W" && 0 <= n2 && n2 < 16 )
                     || (size="D" && 0 <= n2 && n2 < 32 )

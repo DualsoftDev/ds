@@ -58,9 +58,11 @@ module CodeConvertUtil =
         | DuEssStrong of Vertex list
         | DuEssNone
 
-    /// returns [week] * [strong] incoming edges
-    let private getEdgeSources(graph:DsGraph, target:Vertex, bStartEdge:bool) =
-        let edges = graph.GetIncomingEdges(target) |> List.ofSeq
+    /// returns [week] * [strong] incoming/outgoing edges
+    let private getEdgeSources(graph:DsGraph, target:Vertex, bStartEdge:bool, incomming:bool) =
+        let edges = if incomming
+                    then graph.GetIncomingEdges(target) |> List.ofSeq
+                    else graph.GetOutgoingEdges(target) |> List.ofSeq
         let mask  = if bStartEdge then EdgeType.Start else EdgeType.Reset
 
         let srcsWeek   = edges |> filter(fun e -> e.EdgeType = mask )
@@ -68,28 +70,28 @@ module CodeConvertUtil =
 
         match srcsWeek.Any(), srcsStrong.Any() with
         | true, true -> failwithlog "Error Week and Strong can't connenct same node target"
-        | true, false -> srcsWeek |> map (fun e->e.Source) |> DuEssWeak
-        | false, true -> srcsStrong |> map (fun e->e.Source) |> DuEssStrong
+        | true, false -> srcsWeek   |> map (fun e->if incomming then e.Source else e.Target) |> DuEssWeak
+        | false, true -> srcsStrong |> map (fun e->if incomming then e.Source else e.Target) |> DuEssStrong
         | false, false -> DuEssNone
 
-    /// returns [weak] start incoming edges for target
-    let getStartWeakEdgeSources(target:VertexManager) =
-        match getEdgeSources (target.Vertex.Parent.GetGraph(), target.Vertex, true) with
+    /// returns [weak] start incoming/outgoing edges for target
+    let getStartWeakEdgeSources(target:VertexManager, incomming:bool) =
+        match getEdgeSources (target.Vertex.Parent.GetGraph(), target.Vertex, true, incomming) with
         | DuEssWeak ws when ws.Any() -> ws
         | _ -> []
-    /// returns [strong] start incoming edges for target
-    let getStartStrongEdgeSources(target:VertexManager) =
-        match getEdgeSources (target.Vertex.Parent.GetGraph(), target.Vertex, true) with
+    /// returns [strong] start incoming/outgoing edges for target
+    let getStartStrongEdgeSources(target:VertexManager, incomming:bool) =
+        match getEdgeSources (target.Vertex.Parent.GetGraph(), target.Vertex, true, incomming) with
         | DuEssStrong ss when ss.Any() -> ss
         | _ -> []
-    /// returns [weak] reset incoming edges for target
-    let getResetWeakEdgeSources(target:VertexManager) =
-        match getEdgeSources (target.Vertex.Parent.GetGraph(), target.Vertex, false) with
+    /// returns [weak] reset incoming/outgoing edges for target
+    let getResetWeakEdgeSources(target:VertexManager, incomming:bool) =
+        match getEdgeSources (target.Vertex.Parent.GetGraph(), target.Vertex, false, incomming) with
         | DuEssWeak wr when wr.Any() -> wr
         | _ -> []
-    /// returns [strong] reset incoming edges for target
-    let getResetStrongEdgeSources(target:VertexManager) =
-        match getEdgeSources (target.Vertex.Parent.GetGraph(), target.Vertex, false) with
+    /// returns [strong] reset incoming/outgoing edges for target
+    let getResetStrongEdgeSources(target:VertexManager, incomming:bool) =
+        match getEdgeSources (target.Vertex.Parent.GetGraph(), target.Vertex, false, incomming) with
         | DuEssStrong sr when sr.Any() -> sr
         | _ -> []
 
@@ -184,7 +186,7 @@ module CodeConvertUtil =
                 | :? Alias   as a  -> if usingRoot then  a.V.ET else  a.V.CR
                 | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
-
+        //리셋 원인
         [<Extension>]
         static member GetResetWeakCausals(xs:Vertex seq, tgtV:VertexManager) =
                 xs.Select(fun f ->
@@ -194,6 +196,17 @@ module CodeConvertUtil =
                     | :? Alias   as a  -> tgtV.GR(getPureReal(a.V))
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
+        //리셋 결과
+        [<Extension>]
+        static member GetResetWeakResults(xs:Vertex seq, tgtV:VertexManager) =
+                xs.Select(fun f ->
+                    match f with
+                    | :? Real    as r  -> r.V.GR(tgtV.Vertex)
+                    | :? RealExF as rf -> rf.Real.V.GR(tgtV.Vertex)//.V.EP
+                    | :? Alias   as a  -> getPureReal(a.V).V.GR(tgtV.Vertex)
+                    | _ -> failwithlog $"Error {getFuncName()}"
+                ).Distinct()
+
 
         [<Extension>]
         static member GetResetStrongCausals(xs:Vertex seq) =
@@ -217,25 +230,25 @@ module CodeConvertUtil =
 
         [<Extension>]
         static member GetWeakStartRootAndCausals  (v:VertexManager) =
-            let tags = getStartWeakEdgeSources(v).GetStartCausals(true)
+            let tags = getStartWeakEdgeSources(v, true).GetStartCausals(true)
             tags.ToAndElseOff(v.System)
 
         [<Extension>]
         static member GetWeakResetRootAndCausals  (v:VertexManager) =
-            let tags = getResetWeakEdgeSources(v).GetResetWeakCausals(v)
+            let tags = getResetWeakEdgeSources(v, true).GetResetWeakCausals(v)
             tags.ToAndElseOff(v.System)
 
         [<Extension>]
         static member GetStrongStartRootAndCausals  (v:VertexManager) =
-            let tags = getStartStrongEdgeSources(v).GetStartCausals(true)
+            let tags = getStartStrongEdgeSources(v, true).GetStartCausals(true)
             tags.ToAndElseOff(v.System)
 
         [<Extension>]
         static member GetStrongResetRootAndCausals  (v:VertexManager) =
-            let tags = getResetStrongEdgeSources(v).GetResetStrongCausals()
+            let tags = getResetStrongEdgeSources(v, true).GetResetStrongCausals()
             tags.ToAndElseOff(v.System)
 
         [<Extension>]
         static member GetStrongResetRootAndReadys  (v:VertexManager) =
-            let tags = getResetStrongEdgeSources(v).GetResetStrongCausalReadys()
+            let tags = getResetStrongEdgeSources(v, true).GetResetStrongCausalReadys()
             tags.ToOrElseOn(v.System)

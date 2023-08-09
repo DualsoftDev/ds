@@ -54,7 +54,7 @@ module ExpressionModule =
             member x.Name      = x.Name
             member x.Arguments = x.Arguments
 
-
+    [<DebuggerDisplay("{ToText(true)}")>]
     type Expression<'T when 'T:equality> =
         | DuTerminal of Terminal<'T>
         | DuFunction of FunctionSpec<'T>  //FunctionBody:(Arguments -> 'T) * Name * Arguments

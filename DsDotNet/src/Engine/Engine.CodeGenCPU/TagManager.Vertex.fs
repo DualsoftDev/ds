@@ -43,7 +43,7 @@ module TagManagerModule =
         let startForceBit = createTag "SF"   VertexTag.startForce
         let resetForceBit = createTag "RF"   VertexTag.resetForce
         let endForceBit   = createTag "EF"   VertexTag.endForce
-        //let pulseBit      = createTag "GPUL" VertexTag.goingPulse
+        let goingRelayGroup      = createTag "GG" VertexTag.goingRelayGroup
         let goingRelays = Dictionary<Vertex, PlanVar<bool>>()
 
 
@@ -98,8 +98,8 @@ module TagManagerModule =
         member _.E2         =  errorRxBit
 
         //DummyBit
-        ///Going Pulse
-        //member _.GPUL        = pulseBit
+        ///Going Relay Group
+        member _.GG        = goingRelayGroup
         ///Going Relay   //리셋 인과에 따라 필요
         //CodeConvertUtil.GetResetCausals 사용하여 생성 (RealExF, Alias 순수대상 릴레이 추출필요)
         member _.GR(src:Vertex) =

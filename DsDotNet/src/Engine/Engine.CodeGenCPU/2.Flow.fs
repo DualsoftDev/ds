@@ -51,12 +51,14 @@ type VertexManager with
         let sets =
             shareds @ [v]
             |>Seq.collect(fun r ->
-                getResetWeakEdgeSources(r)
+                getResetWeakEdgeSources(r, true)
                 |>Seq.map(fun s -> s.V.GetPureReal().V, [s].GetResetWeakCausals(r).Head())
             )
 
         sets
-        |> Seq.map(fun (src, gr) ->(src.G.Expr <&&> real.V.F.Expr, real.V.R.Expr) ==| (gr, "RootGoingRelay"))
+        |> Seq.map(fun (src, gr) ->
+            (  src.G.Expr   <&&> real.V.F.Expr //set
+            , real.V.R.Expr <&&> src.GG.Expr) ==| (gr, "RootGoingRelay"))    //rst
         |> Seq.toList
 
     member v.F5_RootCoinRelay() : CommentedStatement =

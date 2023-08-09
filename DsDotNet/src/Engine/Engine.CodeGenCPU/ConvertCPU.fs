@@ -56,6 +56,7 @@ module ConvertCPU =
 
                 yield vm.R1_RealInitialStart()
                 yield vm.R2_RealJobComplete()
+                yield vm.R2_1_GoingRelayGroup();
                 yield vm.R3_RealStartPoint()
 
                 yield! vm.D1_DAGHeadStart()

@@ -91,6 +91,7 @@ namespace Dual.Model.Import
             checkedListBox_Ex.ItemCheck += (ss, ee) => { if (checkedListBox_Ex.Enabled) ee.NewValue = ee.CurrentValue; };
 
             listBox_find.DisplayMember = "DisplayUI";
+            listBox_find.SelectionMode = SelectionMode.MultiExtended;
 
             checkedListBox_My.DisplayMember = "Display";
             checkedListBox_Ex.DisplayMember = "Display";
@@ -110,6 +111,38 @@ namespace Dual.Model.Import
             {
                 SelectedViewEx = xtraTabControl_Ex.SelectedTab.Tag as UCView;
             };
+
+
+            //listBox_find.DrawMode = DrawMode.OwnerDrawFixed;
+            //listBox_find.DrawItem += (ss, ee) =>
+            //{
+
+            //    var sel = listBox_find.SelectedItem as StorageDisplay;
+
+            //    SolidBrush backgroundBrush = new SolidBrush(Color.Transparent);
+            //    SolidBrush selectgroundBrush = new SolidBrush(Color.GreenYellow);
+            //    SolidBrush textgroundBrush = new SolidBrush(Color.Black);
+
+            //    for (int index = 0 ; index < listBox_find.Items.Count; index++)
+            //    {
+            //        if (sel == null)
+            //            sel = listBox_find.Items[0] as StorageDisplay;
+
+            //        Graphics g = ee.Graphics;
+            //        var cur = ((StorageDisplay)listBox_find.Items[index]);
+            //        bool selectSame = sel.Display == cur.Display;
+
+            //        //background:
+            //        ee.DrawBackground();
+             
+            //        g.FillRectangle(selectSame ? selectgroundBrush : backgroundBrush, ee.Bounds);
+            //        //text:
+            //        g.DrawString(cur.DisplayUI, ee.Font, textgroundBrush, listBox_find.GetItemRectangle(index).Location);
+                   
+            //    }
+
+            //    //ee.DrawFocusRectangle();
+            //};
         }
 
 
@@ -591,5 +624,26 @@ namespace Dual.Model.Import
 
             listBox_find.DataSource = filterItems;
         }
+
+        private void listBox_find_DoubleClick(object sender, EventArgs e)
+        {
+            var sel = listBox_find.SelectedItem as StorageDisplay;
+            listBox_find.BeginUpdate();
+            listBox_find.ClearSelected();
+
+            var sames = listBox_find.Items.Cast<StorageDisplay>().Where(w => w.Display == sel.Display).ToList();
+
+            for (int index = 0; index < listBox_find.Items.Count; index++)
+            {
+                if(sames.Contains(listBox_find.Items[index]))
+                    listBox_find.SetSelected(index, true);
+                else 
+                    listBox_find.SetSelected(index, false);
+            }
+
+            listBox_find.EndUpdate();
+
+        }
+
     }
 }

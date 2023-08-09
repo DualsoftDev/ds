@@ -21,28 +21,26 @@ module RunTime =
                  .Where(fun (system, _storage, _value) -> system = sys || sys.ReferenceSystems.Contains(system:?> DsSystem))
                  .Subscribe(fun (system, storage, _value) ->
                         //for CPU 연산
-                        let doExpr(statement:Statement) =
-                            if storage.IsStartThread() 
-                            then
-                                async {
-                                    do! Async.Sleep(200)
-                                    statement.Do() }
-                                    |> Async.StartImmediate
-                            else
-                                statement.Do()
-                                //debugging  sleep
                                 //async {
-                                //    do! Async.Sleep(1)
-                                //    statement.Do()
-                                //    }|> Async.RunSynchronously
-                                //debugging  sleep
+                                //    do! Async.Sleep(200)
+                                //    statement.Do() }
+                                //    |> Async.StartImmediate
                         //Step 1 상태 UI 업데이트
                         system.NotifyStatus(storage);
                         //Step 2 관련수식 연산
                         if mapRungs.ContainsKey storage
                         then
                             for statement in mapRungs[storage] do
-                                doExpr(statement)
+                                if storage.IsStartThread() 
+                                then
+                                    //statement.Do()
+                                    async {
+                                        do! Async.Sleep(200)
+                                        statement.Do() }
+                                        |> Async.StartImmediate
+                                else
+                                    statement.Do()
+
                         else
                             ()
                             //failwithlog $"Error {getFuncName()} : {storage.Name}"  //디버깅후 예외 처리

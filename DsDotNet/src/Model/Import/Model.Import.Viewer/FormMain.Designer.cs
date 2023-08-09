@@ -476,6 +476,7 @@ namespace Dual.Model.Import
             this.listBox_find.Name = "listBox_find";
             this.listBox_find.Size = new System.Drawing.Size(344, 384);
             this.listBox_find.TabIndex = 0;
+            this.listBox_find.DoubleClick += new System.EventHandler(this.listBox_find_DoubleClick);
             // 
             // panel1
             // 

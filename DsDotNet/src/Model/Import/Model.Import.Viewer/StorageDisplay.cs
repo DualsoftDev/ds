@@ -19,7 +19,7 @@ namespace Dual.Model.Import
             {
                 var t = TagKindExt.GetVertexTagKind(Storage);
                 if (t != null)
-                    return $"{((bool)Value ? "●" : "X")}  {t.Value}\t{Display}";
+                    return $"{((bool)Value ? "●" : "X")}    {t.Value}\t{Display}";
                 else
                     return $"{((bool)Value ? "●" : "X")} \t\t{Display}";
             }

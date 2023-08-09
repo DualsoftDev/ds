@@ -83,7 +83,10 @@ module CoreExtensionsModule =
             match x.GetApiTagKind() with  //외부 시스템 관련 신호
             | Some _ -> true
             | _ ->
-                match x.GetVertexTagKind() with
-                | Some VertexTag.startPort -> true
-                | _ -> false
-
+                if Convert.ToBoolean(x.BoxedValue) //ON 신호만 StartThread 생성
+                then
+                    match x.GetVertexTagKind() with
+                    | Some VertexTag.startPort -> true
+                    | _ -> false
+                else           
+                    false

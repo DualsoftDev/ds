@@ -102,12 +102,11 @@ namespace Dual.Model.Import
             DU.enumValues(typeof(RuntimePackage)).Cast<RuntimePackage>()
                 .ForEach(f => comboBox_Package.Items.Add(f));
             comboBox_Package.SelectedIndex = 0;
-
-            xtraTabControl_My.TabIndexChanged += (ss, ee) =>
+            xtraTabControl_My.SelectedIndexChanged += (ss, ee) =>
             {
                 SelectedViewMy = xtraTabControl_My.SelectedTab.Tag as UCView;
             };
-            xtraTabControl_Ex.TabIndexChanged += (ss, ee) =>
+            xtraTabControl_Ex.SelectedIndexChanged += (ss, ee) =>
             {
                 SelectedViewEx = xtraTabControl_Ex.SelectedTab.Tag as UCView;
             };
@@ -146,19 +145,35 @@ namespace Dual.Model.Import
         }
 
 
-        public void createSysHMI(DsSystem sys)
+        public void createSysHMI(DsSystem sys, bool autoRun)
         {
-            checkedListBox_sysHMI.Items.Clear();
-            var sysBits = Enum.GetValues(typeof(SystemTag)).Cast<SystemTag>();
-            sysBits
-                .Where(w => !(w == SystemTag.on || w ==SystemTag.off))     //시스템 비트  제외
-                .Select(f=> TagInfoType.GetTagSys(sys, f))
-                .OfType<PlanVar<bool>>()
-                .ForEach(tag =>
-                {
-                var sd = new StorageDisplay() { Display = tag.Name, Storage = tag, Value = tag.Value, OnOff = Convert.ToBoolean(tag.Value) };
-                checkedListBox_sysHMI.Items.Add(sd);
-                checkedListBox_sysHMI.SetItemChecked(checkedListBox_sysHMI.Items.Count - 1, sd.OnOff);
+            this.Do(() =>
+            {
+
+
+                checkedListBox_sysHMI.Items.Clear();
+                var sysBits = Enum.GetValues(typeof(SystemTag)).Cast<SystemTag>();
+                sysBits
+                    .Where(w => !(w == SystemTag.on || w == SystemTag.off))     //시스템 비트  제외
+                    .Select(f => TagInfoType.GetTagSys(sys, f))
+                    .OfType<PlanVar<bool>>()
+                    .ForEach(tag =>
+                    {
+                        if (autoRun)
+                        {
+                            int kind = ((IStorage)tag).TagKind;
+                            if (
+                               kind == (int)SystemTag.auto
+                                || kind == (int)SystemTag.drive
+                                || kind == (int)SystemTag.ready
+                                || kind == (int)SystemTag.sim
+                                )
+                                tag.Value = true;
+                        }
+                        var sd = new StorageDisplay() { Display = tag.Name, Storage = tag, Value = tag.Value, OnOff = Convert.ToBoolean(tag.Value) };
+                        checkedListBox_sysHMI.Items.Add(sd);
+                        checkedListBox_sysHMI.SetItemChecked(checkedListBox_sysHMI.Items.Count - 1, sd.OnOff);
+                    });
             });
         }
 
@@ -424,7 +439,7 @@ namespace Dual.Model.Import
                 UpdateDevice(sysView);
                 UpdateSelectedCpu(sysView);
 
-                createSysHMI(sysView.System);
+                createSysHMI(sysView.System, false);
                 UpdatecomboBox_SegmentHMI(sysView);
                 UpdateSelectedView(sysView);
             }
@@ -657,6 +672,20 @@ namespace Dual.Model.Import
             });
 
             listBox_find.DataSource = filterItems;
+        }
+
+        private  void button_autorun_Click(object sender, EventArgs e)
+        {
+
+             Task.Run(() =>
+            {
+                _DicCpu.ForEach(f =>
+                {
+                    f.Value.Run();
+                    createSysHMI(f.Key, true);
+                });
+            });
+
         }
     }
 }

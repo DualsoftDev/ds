@@ -91,11 +91,7 @@ namespace Dual.Model.Import
 
                         UpdateSystemUI();
 
-                        _DicCpu.ForEach(f =>
-                        {
-                            f.Value.Run();
-                            f.Value.ScanOnce();
-                        });
+                    
 
                         OpenAbleUI(true);
 

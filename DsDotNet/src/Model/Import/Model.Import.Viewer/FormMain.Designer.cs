@@ -61,6 +61,10 @@ namespace Dual.Model.Import
             this.tabPage_activeFliter = new System.Windows.Forms.TabPage();
             this.listBox_find = new System.Windows.Forms.ListBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.button_find = new System.Windows.Forms.Button();
+            this.checkBox_SkipLog = new System.Windows.Forms.CheckBox();
+            this.checkBox_Reset = new System.Windows.Forms.CheckBox();
+            this.checkBox_Start = new System.Windows.Forms.CheckBox();
             this.label4 = new System.Windows.Forms.Label();
             this.textBox_activeFind = new System.Windows.Forms.TextBox();
             this.button_ClearLog = new System.Windows.Forms.Button();
@@ -70,10 +74,7 @@ namespace Dual.Model.Import
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.checkBox_Start = new System.Windows.Forms.CheckBox();
-            this.checkBox_Reset = new System.Windows.Forms.CheckBox();
-            this.checkBox_SkipLog = new System.Windows.Forms.CheckBox();
-            this.button_find = new System.Windows.Forms.Button();
+            this.button_autorun = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -482,6 +483,7 @@ namespace Dual.Model.Import
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.button_autorun);
             this.panel1.Controls.Add(this.button_find);
             this.panel1.Controls.Add(this.checkBox_SkipLog);
             this.panel1.Controls.Add(this.checkBox_Reset);
@@ -500,10 +502,53 @@ namespace Dual.Model.Import
             this.panel1.Size = new System.Drawing.Size(116, 416);
             this.panel1.TabIndex = 12;
             // 
+            // button_find
+            // 
+            this.button_find.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_find.Location = new System.Drawing.Point(58, 343);
+            this.button_find.Name = "button_find";
+            this.button_find.Size = new System.Drawing.Size(44, 20);
+            this.button_find.TabIndex = 15;
+            this.button_find.Text = "Find";
+            this.button_find.UseVisualStyleBackColor = true;
+            this.button_find.Click += new System.EventHandler(this.button_find_Click);
+            // 
+            // checkBox_SkipLog
+            // 
+            this.checkBox_SkipLog.AutoSize = true;
+            this.checkBox_SkipLog.Location = new System.Drawing.Point(16, 393);
+            this.checkBox_SkipLog.Name = "checkBox_SkipLog";
+            this.checkBox_SkipLog.Size = new System.Drawing.Size(69, 16);
+            this.checkBox_SkipLog.TabIndex = 14;
+            this.checkBox_SkipLog.Text = "SkipLog";
+            this.checkBox_SkipLog.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_Reset
+            // 
+            this.checkBox_Reset.AutoSize = true;
+            this.checkBox_Reset.Location = new System.Drawing.Point(17, 218);
+            this.checkBox_Reset.Name = "checkBox_Reset";
+            this.checkBox_Reset.Size = new System.Drawing.Size(56, 16);
+            this.checkBox_Reset.TabIndex = 13;
+            this.checkBox_Reset.Text = "Reset";
+            this.checkBox_Reset.UseVisualStyleBackColor = true;
+            this.checkBox_Reset.CheckedChanged += new System.EventHandler(this.checkBox_Reset_CheckedChanged);
+            // 
+            // checkBox_Start
+            // 
+            this.checkBox_Start.AutoSize = true;
+            this.checkBox_Start.Location = new System.Drawing.Point(17, 196);
+            this.checkBox_Start.Name = "checkBox_Start";
+            this.checkBox_Start.Size = new System.Drawing.Size(49, 16);
+            this.checkBox_Start.TabIndex = 13;
+            this.checkBox_Start.Text = "Start";
+            this.checkBox_Start.UseVisualStyleBackColor = true;
+            this.checkBox_Start.CheckedChanged += new System.EventHandler(this.checkBox_Start_CheckedChanged);
+            // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(14, 259);
+            this.label4.Location = new System.Drawing.Point(14, 347);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(38, 12);
             this.label4.TabIndex = 12;
@@ -511,7 +556,7 @@ namespace Dual.Model.Import
             // 
             // textBox_activeFind
             // 
-            this.textBox_activeFind.Location = new System.Drawing.Point(16, 278);
+            this.textBox_activeFind.Location = new System.Drawing.Point(16, 366);
             this.textBox_activeFind.Name = "textBox_activeFind";
             this.textBox_activeFind.Size = new System.Drawing.Size(85, 21);
             this.textBox_activeFind.TabIndex = 11;
@@ -533,7 +578,7 @@ namespace Dual.Model.Import
             this.comboBox_TestExpr.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_TestExpr.DropDownWidth = 500;
             this.comboBox_TestExpr.FormattingEnabled = true;
-            this.comboBox_TestExpr.Location = new System.Drawing.Point(16, 219);
+            this.comboBox_TestExpr.Location = new System.Drawing.Point(17, 254);
             this.comboBox_TestExpr.Name = "comboBox_TestExpr";
             this.comboBox_TestExpr.Size = new System.Drawing.Size(85, 20);
             this.comboBox_TestExpr.TabIndex = 10;
@@ -555,7 +600,7 @@ namespace Dual.Model.Import
             this.comboBox_Segment.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox_Segment.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_Segment.FormattingEnabled = true;
-            this.comboBox_Segment.Location = new System.Drawing.Point(16, 135);
+            this.comboBox_Segment.Location = new System.Drawing.Point(17, 170);
             this.comboBox_Segment.Name = "comboBox_Segment";
             this.comboBox_Segment.Size = new System.Drawing.Size(85, 20);
             this.comboBox_Segment.TabIndex = 6;
@@ -591,48 +636,16 @@ namespace Dual.Model.Import
             this.splitter1.TabIndex = 22;
             this.splitter1.TabStop = false;
             // 
-            // checkBox_Start
+            // button_autorun
             // 
-            this.checkBox_Start.AutoSize = true;
-            this.checkBox_Start.Location = new System.Drawing.Point(16, 161);
-            this.checkBox_Start.Name = "checkBox_Start";
-            this.checkBox_Start.Size = new System.Drawing.Size(49, 16);
-            this.checkBox_Start.TabIndex = 13;
-            this.checkBox_Start.Text = "Start";
-            this.checkBox_Start.UseVisualStyleBackColor = true;
-            this.checkBox_Start.CheckedChanged += new System.EventHandler(this.checkBox_Start_CheckedChanged);
-            // 
-            // checkBox_Reset
-            // 
-            this.checkBox_Reset.AutoSize = true;
-            this.checkBox_Reset.Location = new System.Drawing.Point(16, 183);
-            this.checkBox_Reset.Name = "checkBox_Reset";
-            this.checkBox_Reset.Size = new System.Drawing.Size(56, 16);
-            this.checkBox_Reset.TabIndex = 13;
-            this.checkBox_Reset.Text = "Reset";
-            this.checkBox_Reset.UseVisualStyleBackColor = true;
-            this.checkBox_Reset.CheckedChanged += new System.EventHandler(this.checkBox_Reset_CheckedChanged);
-            // 
-            // checkBox_SkipLog
-            // 
-            this.checkBox_SkipLog.AutoSize = true;
-            this.checkBox_SkipLog.Location = new System.Drawing.Point(16, 393);
-            this.checkBox_SkipLog.Name = "checkBox_SkipLog";
-            this.checkBox_SkipLog.Size = new System.Drawing.Size(69, 16);
-            this.checkBox_SkipLog.TabIndex = 14;
-            this.checkBox_SkipLog.Text = "SkipLog";
-            this.checkBox_SkipLog.UseVisualStyleBackColor = true;
-            // 
-            // button_find
-            // 
-            this.button_find.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_find.Location = new System.Drawing.Point(58, 255);
-            this.button_find.Name = "button_find";
-            this.button_find.Size = new System.Drawing.Size(44, 20);
-            this.button_find.TabIndex = 15;
-            this.button_find.Text = "Find";
-            this.button_find.UseVisualStyleBackColor = true;
-            this.button_find.Click += new System.EventHandler(this.button_find_Click);
+            this.button_autorun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_autorun.Location = new System.Drawing.Point(16, 133);
+            this.button_autorun.Name = "button_autorun";
+            this.button_autorun.Size = new System.Drawing.Size(85, 20);
+            this.button_autorun.TabIndex = 16;
+            this.button_autorun.Text = "auto run";
+            this.button_autorun.UseVisualStyleBackColor = true;
+            this.button_autorun.Click += new System.EventHandler(this.button_autorun_Click);
             // 
             // FormMain
             // 
@@ -727,6 +740,7 @@ namespace Dual.Model.Import
         private System.Windows.Forms.CheckBox checkBox_Start;
         private System.Windows.Forms.CheckBox checkBox_SkipLog;
         private System.Windows.Forms.Button button_find;
+        private System.Windows.Forms.Button button_autorun;
     }
 }
 

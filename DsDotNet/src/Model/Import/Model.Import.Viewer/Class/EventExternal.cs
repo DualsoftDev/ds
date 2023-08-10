@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Engine.Common;
 using Engine.Common.FS;
 using Engine.Core;
-
+using Model.Import.Office;
 using static Engine.Common.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 
@@ -33,23 +33,9 @@ namespace Dual.Model.Import
                     var v = rx.vertex as Vertex;
                     var ui = FormMain.TheMain;
                     if (ui._DicVertexMy.ContainsKey(v))
-                    {
-                        var ucView = ui.SelectedViewMy;
-                        var viewNode = ui._DicVertexMy[v];
-                        viewNode.Status4 = rx.status;
-
-                        ucView.UpdateStatus(viewNode);
-                        ui.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{v.Name}:{rx.status}", true);
-                    }
+                        UpdateView(rx, ui.SelectedViewMy, ui._DicVertexMy[v]);
                     else if (ui._DicVertexEx.ContainsKey(v))
-                    {
-                        var ucView = ui.SelectedViewEx;
-                        var viewNode = ui._DicVertexEx[v];
-                        viewNode.Status4 = rx.status;
-
-                        ucView.UpdateStatus(viewNode);
-                        ui.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{v.Name}:{rx.status}", true);
-                    }
+                        UpdateView(rx, ui.SelectedViewEx, ui._DicVertexEx[v]);
                 });
 
                 CpusEvent.ValueSubject.Subscribe(rx =>
@@ -67,9 +53,15 @@ namespace Dual.Model.Import
             }
         }
 
+        private static void UpdateView(CpusEvent.VertexStatusParam rx, UCView ucView, ViewModule.ViewNode viewNode)
+        {
+            viewNode.Status4 = rx.status;
+            var v = rx.vertex as Vertex;
 
+            ucView.UpdateStatus(viewNode);
 
-
+            FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{v.Name}:{rx.status}", true);
+        }
     }
 
 }

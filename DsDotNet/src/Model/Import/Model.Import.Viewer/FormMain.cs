@@ -324,28 +324,20 @@ namespace Dual.Model.Import
             button_Stop.Enabled = Start;
         }
 
-        private async void button_start_Click(object sender, EventArgs e)
+     
+
+        private void checkBox_Start_CheckedChanged(object sender, EventArgs e)
         {
             var segHMI = comboBox_Segment.SelectedItem as SegmentView;
             if (segHMI == null || segHMI.VertexM == null) return;
-
-            await Task.Run(() =>
-            {
-                segHMI.VertexM.SF.Value = true;
-                segHMI.VertexM.SF.Value = false;
-            });
+            segHMI.VertexM.SF.Value = checkBox_Start.Checked;
         }
 
-        private async void button_reset_Click(object sender, EventArgs e)
+        private void checkBox_Reset_CheckedChanged(object sender, EventArgs e)
         {
             var segHMI = comboBox_Segment.SelectedItem as SegmentView;
             if (segHMI == null || segHMI.VertexM == null) return;
-
-            await Task.Run(() =>
-            {
-                segHMI.VertexM.RF.Value = true;
-                segHMI.VertexM.RF.Value = false;
-            });
+            segHMI.VertexM.RF.Value = checkBox_Start.Checked;
         }
 
 
@@ -571,8 +563,9 @@ namespace Dual.Model.Import
                 var description = rung.comment;
                 var statement = rung.statement;
                 _DicStatement.Add(cnt, rung);
-                comboBox_TestExpr.Items.Add(cnt);
-                lstText.Add( $"{cnt++}\t[{rung.TargetName}({rung.TargetValue})] \t\t\t Spec:{description.Replace("%", " ").Replace("$", " ")}");
+                var txt = $"{cnt++};\t[{rung.TargetName}] \t\t\t Spec:{description.Replace("%", " ").Replace("$", " ")}";
+                comboBox_TestExpr.Items.Add(txt);
+                lstText.Add(txt);
             });
 
             StartResetBtnUpdate(true);
@@ -584,8 +577,8 @@ namespace Dual.Model.Import
 
         private void comboBox_TestExpr_SelectedIndexChanged(object sender, EventArgs e)
         {
-            int index = comboBox_TestExpr.SelectedIndex;
-            var cs = _DicStatement[index];
+            var txtNum = comboBox_TestExpr.SelectedItem.ToString().Split(';')[0];  
+            var cs = _DicStatement[Convert.ToInt32(txtNum)];
             // cs.statement.Do();
             ShowExpr(cs);
         }
@@ -644,6 +637,5 @@ namespace Dual.Model.Import
             listBox_find.EndUpdate();
 
         }
-
     }
 }

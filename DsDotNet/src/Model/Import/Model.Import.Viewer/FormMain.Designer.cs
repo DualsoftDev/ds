@@ -67,11 +67,12 @@ namespace Dual.Model.Import
             this.comboBox_TestExpr = new System.Windows.Forms.ComboBox();
             this.button_Stop = new System.Windows.Forms.Button();
             this.comboBox_Segment = new System.Windows.Forms.ComboBox();
-            this.button_Reset = new System.Windows.Forms.Button();
-            this.button_Start = new System.Windows.Forms.Button();
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.checkBox_Start = new System.Windows.Forms.CheckBox();
+            this.checkBox_Reset = new System.Windows.Forms.CheckBox();
+            this.checkBox_SkipLog = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -480,6 +481,9 @@ namespace Dual.Model.Import
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.checkBox_SkipLog);
+            this.panel1.Controls.Add(this.checkBox_Reset);
+            this.panel1.Controls.Add(this.checkBox_Start);
             this.panel1.Controls.Add(this.label4);
             this.panel1.Controls.Add(this.textBox_activeFind);
             this.panel1.Controls.Add(this.button_ClearLog);
@@ -488,8 +492,6 @@ namespace Dual.Model.Import
             this.panel1.Controls.Add(this.button_TestStart);
             this.panel1.Controls.Add(this.button_Stop);
             this.panel1.Controls.Add(this.comboBox_Segment);
-            this.panel1.Controls.Add(this.button_Reset);
-            this.panel1.Controls.Add(this.button_Start);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
             this.panel1.Location = new System.Drawing.Point(1146, 0);
             this.panel1.Name = "panel1";
@@ -528,6 +530,7 @@ namespace Dual.Model.Import
             // 
             this.comboBox_TestExpr.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox_TestExpr.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_TestExpr.DropDownWidth = 500;
             this.comboBox_TestExpr.FormattingEnabled = true;
             this.comboBox_TestExpr.Location = new System.Drawing.Point(16, 219);
             this.comboBox_TestExpr.Name = "comboBox_TestExpr";
@@ -555,28 +558,6 @@ namespace Dual.Model.Import
             this.comboBox_Segment.Name = "comboBox_Segment";
             this.comboBox_Segment.Size = new System.Drawing.Size(85, 20);
             this.comboBox_Segment.TabIndex = 6;
-            // 
-            // button_Reset
-            // 
-            this.button_Reset.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Reset.Location = new System.Drawing.Point(16, 191);
-            this.button_Reset.Name = "button_Reset";
-            this.button_Reset.Size = new System.Drawing.Size(85, 20);
-            this.button_Reset.TabIndex = 8;
-            this.button_Reset.Text = "Reset";
-            this.button_Reset.UseVisualStyleBackColor = true;
-            this.button_Reset.Click += new System.EventHandler(this.button_reset_Click);
-            // 
-            // button_Start
-            // 
-            this.button_Start.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Start.Location = new System.Drawing.Point(16, 163);
-            this.button_Start.Name = "button_Start";
-            this.button_Start.Size = new System.Drawing.Size(85, 20);
-            this.button_Start.TabIndex = 7;
-            this.button_Start.Text = "Start";
-            this.button_Start.UseVisualStyleBackColor = true;
-            this.button_Start.Click += new System.EventHandler(this.button_start_Click);
             // 
             // richTextBox_Debug
             // 
@@ -608,6 +589,38 @@ namespace Dual.Model.Import
             this.splitter1.Size = new System.Drawing.Size(1262, 3);
             this.splitter1.TabIndex = 22;
             this.splitter1.TabStop = false;
+            // 
+            // checkBox_Start
+            // 
+            this.checkBox_Start.AutoSize = true;
+            this.checkBox_Start.Location = new System.Drawing.Point(16, 161);
+            this.checkBox_Start.Name = "checkBox_Start";
+            this.checkBox_Start.Size = new System.Drawing.Size(49, 16);
+            this.checkBox_Start.TabIndex = 13;
+            this.checkBox_Start.Text = "Start";
+            this.checkBox_Start.UseVisualStyleBackColor = true;
+            this.checkBox_Start.CheckedChanged += new System.EventHandler(this.checkBox_Start_CheckedChanged);
+            // 
+            // checkBox_Reset
+            // 
+            this.checkBox_Reset.AutoSize = true;
+            this.checkBox_Reset.Location = new System.Drawing.Point(16, 183);
+            this.checkBox_Reset.Name = "checkBox_Reset";
+            this.checkBox_Reset.Size = new System.Drawing.Size(56, 16);
+            this.checkBox_Reset.TabIndex = 13;
+            this.checkBox_Reset.Text = "Reset";
+            this.checkBox_Reset.UseVisualStyleBackColor = true;
+            this.checkBox_Reset.CheckedChanged += new System.EventHandler(this.checkBox_Reset_CheckedChanged);
+            // 
+            // checkBox_SkipLog
+            // 
+            this.checkBox_SkipLog.AutoSize = true;
+            this.checkBox_SkipLog.Location = new System.Drawing.Point(16, 393);
+            this.checkBox_SkipLog.Name = "checkBox_SkipLog";
+            this.checkBox_SkipLog.Size = new System.Drawing.Size(69, 16);
+            this.checkBox_SkipLog.TabIndex = 14;
+            this.checkBox_SkipLog.Text = "SkipLog";
+            this.checkBox_SkipLog.UseVisualStyleBackColor = true;
             // 
             // FormMain
             // 
@@ -674,8 +687,6 @@ namespace Dual.Model.Import
         private System.Windows.Forms.Button button_TestORG;
         private System.Windows.Forms.TabControl xtraTabControl_My;
         private System.Windows.Forms.Splitter splitter2;
-        private System.Windows.Forms.Button button_Reset;
-        private System.Windows.Forms.Button button_Start;
         private System.Windows.Forms.ComboBox comboBox_Segment;
         private System.Windows.Forms.Button button_Stop;
         private System.Windows.Forms.Label label1;
@@ -700,6 +711,9 @@ namespace Dual.Model.Import
         private System.Windows.Forms.ListBox listBox_find;
         private System.Windows.Forms.TextBox textBox_activeFind;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.CheckBox checkBox_Reset;
+        private System.Windows.Forms.CheckBox checkBox_Start;
+        private System.Windows.Forms.CheckBox checkBox_SkipLog;
     }
 }
 

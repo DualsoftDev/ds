@@ -79,6 +79,8 @@ namespace Dual.Model.Import
 
         internal void WriteDebugMsg(DateTime time, MSGLevel level, string msg, bool bScrollToCaret = false)
         {
+            if (checkBox_SkipLog.Checked)
+                return;
             this.Do(() =>
             {
                 var color = Color.Black;

@@ -8,6 +8,7 @@ open System.Reactive.Linq
 open System.Reactive.Disposables
 open System.Collections.Generic
 open System.Collections.Concurrent
+open System.Threading.Tasks
 
 [<AutoOpen>]
 module RunTime =
@@ -20,30 +21,33 @@ module RunTime =
                 //자신 CPU와 같은 시스템 또는 참조시스템만 연산처리
                  .Where(fun (system, _storage, _value) -> system = sys || sys.ReferenceSystems.Contains(system:?> DsSystem))
                  .Subscribe(fun (system, storage, _value) ->
-                        //for CPU 연산
-                                //async {
-                                //    do! Async.Sleep(200)
-                                //    statement.Do() }
-                                //    |> Async.StartImmediate
                         //Step 1 상태 UI 업데이트
                         system.NotifyStatus(storage);
                         //Step 2 관련수식 연산
-                        if mapRungs.ContainsKey storage
-                        then
-                            for statement in mapRungs[storage] do
-                                if storage.IsStartThread() 
-                                then
-                                    //statement.Do()
-                                    async {
-                                        do! Async.Sleep(200)
-                                        statement.Do() }
-                                        |> Async.StartImmediate
-                                else
-                                    statement.Do()
+                        //if mapRungs.ContainsKey storage
+                        //then
+                        //    mapRungs[storage]
+                        //    |> Seq.map (fun f-> async { f.Do() } )
+                        //    |> Async.Parallel
+                        //    |> Async.Ignore
+                        //    |> Async.RunSynchronously
+                                     
 
-                        else
-                            ()
+                        //else
+                        //    ()
                             //failwithlog $"Error {getFuncName()} : {storage.Name}"  //디버깅후 예외 처리
+                            
+                            //for statement in mapRungs[storage] do
+                            //    if storage.IsStartThread() 
+                            //    then
+                            //        //statement.Do()
+                            //        async {
+                            //            do! Async.Sleep(200)
+                            //            statement.Do() }
+                            //            |> Async.StartImmediate
+                            //    else
+                            //        statement.Do()
+
                     )
             subscribe
 
@@ -78,6 +82,12 @@ module RunTime =
         member x.Run() =
             if not <| x.IsRunning then
                 runSubscription <- runSubscribe()
+                async {
+                        while x.IsRunning
+                            do x.ScanOnce()
+                               do! Async.Sleep(1)
+                }|> Async.StartImmediate
+
         member x.Stop() =
             if x.IsRunning then
                 runSubscription.Dispose()

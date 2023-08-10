@@ -37,8 +37,6 @@
 		<Content Include="FodyWeavers.xml" />
 	</ItemGroup>
 
-	<ItemGroup />
-
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
 	</ItemGroup>
@@ -56,6 +54,13 @@
 		<PackageReference Include="ModuleInit.Fody" Version="2.1.1">
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <Reference Include="log4net">
+	    <HintPath>..\..\..\exLib\log4net.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 

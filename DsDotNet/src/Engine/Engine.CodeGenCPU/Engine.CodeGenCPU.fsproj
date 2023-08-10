@@ -61,4 +61,10 @@
 		  <PrivateAssets>all</PrivateAssets>
 	  </PackageReference>
   </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="log4net">
+      <HintPath>..\..\..\exLib\log4net.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

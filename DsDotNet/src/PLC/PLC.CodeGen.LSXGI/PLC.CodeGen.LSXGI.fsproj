@@ -81,6 +81,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Reference Include="log4net">
+	    <HintPath>..\..\..\exLib\log4net.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
+	<ItemGroup>
 	  <PackageReference Update="FSharp.Core" Version="7.0.0" />
 	</ItemGroup>
 

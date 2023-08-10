@@ -51,6 +51,9 @@
     <Reference Include="DocumentFormat.OpenXml">
       <HintPath>..\..\..\exLib\DocumentFormat.OpenXml.dll</HintPath>
     </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\..\..\..\exLib\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="System.Reactive">
       <HintPath>..\..\..\exLib\System.Reactive.dll</HintPath>
     </Reference>

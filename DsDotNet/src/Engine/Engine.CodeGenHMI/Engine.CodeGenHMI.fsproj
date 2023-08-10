@@ -26,6 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="log4net">
+      <HintPath>..\..\..\exLib\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\..\exLib\Newtonsoft.Json.dll</HintPath>
     </Reference>

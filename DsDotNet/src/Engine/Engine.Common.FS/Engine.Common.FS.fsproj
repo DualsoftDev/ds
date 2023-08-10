@@ -4,6 +4,7 @@
 		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
 		<TargetFramework>net48</TargetFramework>
 		<RootNamespace>Engine.Common.FS</RootNamespace>
+		<OutputPath>$(SolutionDir)\bin</OutputPath>
 		<LangVersion>7.0</LangVersion>
 	</PropertyGroup>
 

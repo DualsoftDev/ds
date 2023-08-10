@@ -29,8 +29,10 @@ type VertexMReal with
 
     member v.R2_1_GoingRelayGroup(): CommentedStatement  =
         let goingRelays = getResetWeakEdgeSources(v, false).GetResetWeakResults(v)
-        let set  = goingRelays.ToAndElseOn(v.System) <||> v.SF.Expr
-        let rst  = if goingRelays.any() then  v.ET.Expr else v._off.Expr
+        let set = goingRelays.ToAndElseOn(v.System) <||> v.SF.Expr
+        let rst = if goingRelays.any() 
+                  then v.ET.Expr  <&&> !!goingRelays.ToOr()
+                  else v._off.Expr
 
         (set, rst) ==| (v.GG, getFuncName())
 

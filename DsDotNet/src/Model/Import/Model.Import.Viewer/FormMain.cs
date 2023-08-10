@@ -337,7 +337,7 @@ namespace Dual.Model.Import
         {
             var segHMI = comboBox_Segment.SelectedItem as SegmentView;
             if (segHMI == null || segHMI.VertexM == null) return;
-            segHMI.VertexM.RF.Value = checkBox_Start.Checked;
+            segHMI.VertexM.RF.Value = checkBox_Reset.Checked;
         }
 
 

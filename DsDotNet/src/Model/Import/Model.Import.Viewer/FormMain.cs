@@ -188,6 +188,16 @@ namespace Dual.Model.Import
                 //ppt 만 로딩시
                 if (_PathPPTs.Count > 0 && xlsx == "")
                     ImportPPTs(_PathPPTs);
+                SystemView sysView = comboBox_System.SelectedItem as SystemView;
+                UpdateSelectedView(sysView);
+
+                var vi = new DeviceView()
+                {
+                    Display = _DicViews.First().Key.Name,
+                    System = _DicViews.First().Key,
+                    ViewNodes = _DicViews.First().Value.ToList()
+                };
+                UpdateSelectedDevice(vi);
                 //xls 만 로딩시
                 if (_PathPPTs.Count == 0 && xlsx != "")
                     ImportExcel(xlsx);
@@ -241,7 +251,7 @@ namespace Dual.Model.Import
                 });
 
                 ImportPowerPoint(paths);
-
+              
 
                 button_CreateExcel.Visible = true;
                 pictureBox_xls.Visible = true;

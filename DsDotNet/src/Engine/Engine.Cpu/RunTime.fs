@@ -85,7 +85,7 @@ module RunTime =
                 async {
                         while x.IsRunning
                             do x.ScanOnce()
-                               do! Async.Sleep(500)
+                               do! Async.Sleep(100)
                 }|> Async.StartImmediate
 
         member x.Stop() =

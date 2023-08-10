@@ -19,14 +19,16 @@ namespace Dual.Model.Import
             {
                 var t = TagKindExt.GetVertexTagKind(Storage);
                 if (t != null)
-                    return $"{((bool)Value ? "●" : "X")}    {t.Value}\t{Display}";
+                    return $"{LogCnt:00000} {((bool)Value ? "●" : "X")}    {t.Value}\t{Display}";
                 else
-                    return $"{((bool)Value ? "●" : "X")} \t\t{Display}";
+                    return $"{LogCnt:00000} {((bool)Value ? "●" : "X")} \t\t{Display}";
             }
         }
         public string Display { get; set; }
         public IStorage Storage { get; set; }
         public object Value { get; set; }
         public bool OnOff { get; set; }
+        public int LogCnt { get; set; }
+        
     }
 }

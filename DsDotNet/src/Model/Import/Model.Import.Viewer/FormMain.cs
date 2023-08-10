@@ -422,6 +422,9 @@ namespace Dual.Model.Import
 
         public void UpdateLogComboBox(IStorage storage, object value, ISystem sys)
         {
+            if (checkBox_SkipLog.Checked)
+                return;
+
             this.Do(() =>
             {
                 var name = value is bool ? storage.Name : $"{storage.Name}({value})";
@@ -608,16 +611,7 @@ namespace Dual.Model.Import
 
         }
 
-        private void textBox_activeFind_TextChanged(object sender, EventArgs e)
-        {
-            tabControl1.SelectedTab = tabPage_activeFliter;
-
-            var filterItems = checkedListBox_My.Items.Cast<StorageDisplay>()
-                             .Where(w => w.Display.ToLower().Contains(textBox_activeFind.Text.ToLower())).ToList();
-
-            listBox_find.DataSource = filterItems;
-        }
-
+      
         private void listBox_find_DoubleClick(object sender, EventArgs e)
         {
             var sel = listBox_find.SelectedItem as StorageDisplay;
@@ -636,6 +630,23 @@ namespace Dual.Model.Import
 
             listBox_find.EndUpdate();
 
+        }
+
+        private void button_find_Click(object sender, EventArgs e)
+        {
+            tabControl1.SelectedTab = tabPage_activeFliter;
+            var logs = checkedListBox_My.Items.Cast<StorageDisplay>();
+
+            var filterItems =
+                             logs.Where(w => w.Display.ToLower().Contains(textBox_activeFind.Text.ToLower())).ToList();
+           
+
+            filterItems.ForEach(f =>
+            {
+                f.LogCnt = logs.Count(c => c.Display == f.Display);
+            });
+
+            listBox_find.DataSource = filterItems;
         }
     }
 }

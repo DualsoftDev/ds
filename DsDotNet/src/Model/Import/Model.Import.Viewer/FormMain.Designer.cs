@@ -73,6 +73,7 @@ namespace Dual.Model.Import
             this.checkBox_Start = new System.Windows.Forms.CheckBox();
             this.checkBox_Reset = new System.Windows.Forms.CheckBox();
             this.checkBox_SkipLog = new System.Windows.Forms.CheckBox();
+            this.button_find = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -481,6 +482,7 @@ namespace Dual.Model.Import
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.button_find);
             this.panel1.Controls.Add(this.checkBox_SkipLog);
             this.panel1.Controls.Add(this.checkBox_Reset);
             this.panel1.Controls.Add(this.checkBox_Start);
@@ -503,17 +505,16 @@ namespace Dual.Model.Import
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(14, 259);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(62, 12);
+            this.label4.Size = new System.Drawing.Size(38, 12);
             this.label4.TabIndex = 12;
-            this.label4.Text = "activeFind";
+            this.label4.Text = "active";
             // 
             // textBox_activeFind
             // 
-            this.textBox_activeFind.Location = new System.Drawing.Point(16, 274);
+            this.textBox_activeFind.Location = new System.Drawing.Point(16, 278);
             this.textBox_activeFind.Name = "textBox_activeFind";
             this.textBox_activeFind.Size = new System.Drawing.Size(85, 21);
             this.textBox_activeFind.TabIndex = 11;
-            this.textBox_activeFind.TextChanged += new System.EventHandler(this.textBox_activeFind_TextChanged);
             // 
             // button_ClearLog
             // 
@@ -622,6 +623,17 @@ namespace Dual.Model.Import
             this.checkBox_SkipLog.Text = "SkipLog";
             this.checkBox_SkipLog.UseVisualStyleBackColor = true;
             // 
+            // button_find
+            // 
+            this.button_find.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_find.Location = new System.Drawing.Point(58, 255);
+            this.button_find.Name = "button_find";
+            this.button_find.Size = new System.Drawing.Size(44, 20);
+            this.button_find.TabIndex = 15;
+            this.button_find.Text = "Find";
+            this.button_find.UseVisualStyleBackColor = true;
+            this.button_find.Click += new System.EventHandler(this.button_find_Click);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
@@ -714,6 +726,7 @@ namespace Dual.Model.Import
         private System.Windows.Forms.CheckBox checkBox_Reset;
         private System.Windows.Forms.CheckBox checkBox_Start;
         private System.Windows.Forms.CheckBox checkBox_SkipLog;
+        private System.Windows.Forms.Button button_find;
     }
 }
 

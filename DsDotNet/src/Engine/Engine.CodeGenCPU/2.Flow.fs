@@ -35,9 +35,13 @@ type VertexManager with
             then shareds.Select(fun s -> s.GetWeakResetRootAndCausals()).ToOr()
             else v._off.Expr
 
-        let sets = wrDirect <||> wsShareds  <||> v.RF.Expr <||> srDirect
-        let rsts = (!!)real.V.ET.Expr
-        [(sets, rsts) ==| (v.RT, getFuncName())] //reset tag
+        let sets =  (
+                    (wrDirect <||> wsShareds  <||> srDirect<||> v.RT.Expr)
+                    <&&> real.V.ET.Expr
+                    ) 
+                    <||> v.RF.Expr 
+        let rsts = v._off.Expr 
+        [(sets, rsts) --| (v.RT, getFuncName())] //reset tag
 
     //member v.F3_RootGoingPulse() : CommentedStatement  =
     //    let real = v.GetPureReal()

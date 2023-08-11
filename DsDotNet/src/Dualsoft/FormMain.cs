@@ -44,17 +44,10 @@ namespace Dualsoft
 
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            DialogResult dr = XtraMessageBox.Show("종료하시겠습니까?", "종료확인",
-                MessageBoxButtons.YesNo, MessageBoxIcon.Information);
-
-            if (dr == DialogResult.No)
-            {
+            if (MBox.AskYesNo("종료하시겠습니까?", K.AppName) == DialogResult.No)
                 e.Cancel = true;
-            }
             else
-            {
                 LayoutForm.SaveLayout(dockManager);
-            }
         }
 
 

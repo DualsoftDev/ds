@@ -37,8 +37,6 @@ namespace Dualsoft
                 var skinPalette= skin.Split(';')[1]; 
                 UserLookAndFeel.Default.SetSkinStyle(skinName, skinPalette);
             }
-
         }
-
     }
 }

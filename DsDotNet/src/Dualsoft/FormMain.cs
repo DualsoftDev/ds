@@ -72,8 +72,13 @@ namespace Dualsoft
             else
             {
                 var files = FileOpenSave.OpenFiles();
-                if(!files.IsNullOrEmpty())
+                if (!files.IsNullOrEmpty())
+                {
                     ImportPowerPoint(files);
+                    accordionControlElement_Model.Expanded = true;
+                    accordionControlElement_System.Expanded = true;
+                    accordionControlElement_Device.Expanded = false;
+                }
             }
         }
 
@@ -81,6 +86,8 @@ namespace Dualsoft
         {
 
         }
+
+        
     }
 
 }

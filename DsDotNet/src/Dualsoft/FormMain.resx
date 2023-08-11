@@ -174,7 +174,7 @@
         cz0iQmx1ZSIgLz4NCjwvc3ZnPgs=
 </value>
   </data>
-  <data name="accordionControlElement_model.ImageOptions.SvgImage" type="DevExpress.Utils.Svg.SvgImage, DevExpress.Data.v21.2" mimetype="application/x-microsoft.net.object.bytearray.base64">
+  <data name="accordionControlElement_Model.ImageOptions.SvgImage" type="DevExpress.Utils.Svg.SvgImage, DevExpress.Data.v21.2" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         AAEAAAD/////AQAAAAAAAAAMAgAAAFpEZXZFeHByZXNzLkRhdGEudjIxLjIsIFZlcnNpb249MjEuMi4x
         Mi4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI4OGQxNzU0ZDcwMGU0OWEFAQAAAB1E
@@ -2853,7 +2853,7 @@
   <data name="FormMain.IconOptions.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
-        vgAADr4B6kKxwAAALDxJREFUeF7tnfe/FMXS/+XkzMk555wTQRAUFRRQQUURRMwBFcSAoogoBhRMqKAI
+        vQAADr0BR/uQrQAALDxJREFUeF7tnfe/FMXS/+XkzMk555wTQRAUFRRQQUURRMwBFcSAoogoBhRMqKAI
         CiJBBSUnyfmiXq/p+jzf+9z/pL7z6WVgz57ecPZsmO6pH96vo3CY3enp+kx1dXXVFRf+dxgxDGNPWABs
         wk//zw3/kfzZRWTXYfSCBUBxYKg/G0b88/8Np1/Afx0/f/7PcLpg/N35v3vp9B89dPyf3XT4Qhf9eL6L
         Dp7tpP2nO2nvyQ7ac6JD/Nxn/P8B488PGX+P3zv2Szed+q2Hzv27V3wOPkNc3+UzWCzUhgVAAYSRORu5

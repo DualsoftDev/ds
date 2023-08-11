@@ -35,11 +35,13 @@ namespace Dualsoft
             this.barManager1 = new DevExpress.XtraBars.BarManager(this.components);
             this.bar3 = new DevExpress.XtraBars.Bar();
             this.skinPaletteDropDownButtonItem1 = new DevExpress.XtraBars.SkinPaletteDropDownButtonItem();
-            this.barStaticItem1 = new DevExpress.XtraBars.BarStaticItem();
+            this.barEditItem_Process = new DevExpress.XtraBars.BarEditItem();
+            this.repositoryItemProgressBar1 = new DevExpress.XtraEditors.Repository.RepositoryItemProgressBar();
             this.barDockControlTop = new DevExpress.XtraBars.BarDockControl();
             this.barDockControlBottom = new DevExpress.XtraBars.BarDockControl();
             this.barDockControlLeft = new DevExpress.XtraBars.BarDockControl();
             this.barDockControlRight = new DevExpress.XtraBars.BarDockControl();
+            this.barStaticItem1 = new DevExpress.XtraBars.BarStaticItem();
             this.panelContainer1 = new DevExpress.XtraBars.Docking.DockPanel();
             this.dockPanel1 = new DevExpress.XtraBars.Docking.DockPanel();
             this.dockPanel1_Container = new DevExpress.XtraBars.Docking.ControlContainer();
@@ -51,18 +53,17 @@ namespace Dualsoft
             this.documentGroup1 = new DevExpress.XtraBars.Docking2010.Views.Tabbed.DocumentGroup(this.components);
             this.accordionControl2 = new DevExpress.XtraBars.Navigation.AccordionControl();
             this.accordionControlElement_Model = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlElement_System = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlElement_Device = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement_sim = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement_Import = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement_ImportPPT = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement_ImportXls = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement_Export = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.barEditItem_Process = new DevExpress.XtraBars.BarEditItem();
-            this.repositoryItemProgressBar1 = new DevExpress.XtraEditors.Repository.RepositoryItemProgressBar();
-            this.accordionControlElement_System = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.accordionControlElement_Device = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             ((System.ComponentModel.ISupportInitialize)(this.document1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dockManager)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManager1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.repositoryItemProgressBar1)).BeginInit();
             this.panelContainer1.SuspendLayout();
             this.dockPanel1.SuspendLayout();
             this.dockPanel2.SuspendLayout();
@@ -71,7 +72,6 @@ namespace Dualsoft
             ((System.ComponentModel.ISupportInitialize)(this.document3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.documentGroup1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.accordionControl2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.repositoryItemProgressBar1)).BeginInit();
             this.SuspendLayout();
             // 
             // document1
@@ -140,11 +140,16 @@ namespace Dualsoft
             this.skinPaletteDropDownButtonItem1.Id = 1;
             this.skinPaletteDropDownButtonItem1.Name = "skinPaletteDropDownButtonItem1";
             // 
-            // barStaticItem1
+            // barEditItem_Process
             // 
-            this.barStaticItem1.Caption = "Ready";
-            this.barStaticItem1.Id = 0;
-            this.barStaticItem1.Name = "barStaticItem1";
+            this.barEditItem_Process.Caption = "barEditItem1";
+            this.barEditItem_Process.Edit = this.repositoryItemProgressBar1;
+            this.barEditItem_Process.Id = 2;
+            this.barEditItem_Process.Name = "barEditItem_Process";
+            // 
+            // repositoryItemProgressBar1
+            // 
+            this.repositoryItemProgressBar1.Name = "repositoryItemProgressBar1";
             // 
             // barDockControlTop
             // 
@@ -177,6 +182,12 @@ namespace Dualsoft
             this.barDockControlRight.Location = new System.Drawing.Point(1337, 0);
             this.barDockControlRight.Manager = this.barManager1;
             this.barDockControlRight.Size = new System.Drawing.Size(0, 818);
+            // 
+            // barStaticItem1
+            // 
+            this.barStaticItem1.Caption = "Ready";
+            this.barStaticItem1.Id = 0;
+            this.barStaticItem1.Name = "barStaticItem1";
             // 
             // panelContainer1
             // 
@@ -275,10 +286,22 @@ namespace Dualsoft
             this.accordionControlElement_Model.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.accordionControlElement_System,
             this.accordionControlElement_Device});
-            this.accordionControlElement_Model.Expanded = true;
-            this.accordionControlElement_Model.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement_model.ImageOptions.SvgImage")));
+            this.accordionControlElement_Model.Expanded = false;
+            this.accordionControlElement_Model.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement_Model.ImageOptions.SvgImage")));
             this.accordionControlElement_Model.Name = "accordionControlElement_Model";
             this.accordionControlElement_Model.Text = "모델";
+            // 
+            // accordionControlElement_System
+            // 
+            this.accordionControlElement_System.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement_System.ImageOptions.SvgImage")));
+            this.accordionControlElement_System.Name = "accordionControlElement_System";
+            this.accordionControlElement_System.Text = "시스템";
+            // 
+            // accordionControlElement_Device
+            // 
+            this.accordionControlElement_Device.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement_Device.ImageOptions.SvgImage")));
+            this.accordionControlElement_Device.Name = "accordionControlElement_Device";
+            this.accordionControlElement_Device.Text = "디바이스";
             // 
             // accordionControlElement_sim
             // 
@@ -286,6 +309,7 @@ namespace Dualsoft
             this.accordionControlElement_sim.Appearance.Default.Options.UseFont = true;
             this.accordionControlElement_sim.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement_sim.ImageOptions.SvgImage")));
             this.accordionControlElement_sim.Name = "accordionControlElement_sim";
+            this.accordionControlElement_sim.Expanded = false;
             this.accordionControlElement_sim.Text = "시뮬레이션";
             // 
             // accordionControlElement_Import
@@ -332,29 +356,6 @@ namespace Dualsoft
             this.accordionControlElement_Export.Name = "accordionControlElement_Export";
             this.accordionControlElement_Export.Text = "내보내기";
             // 
-            // barEditItem_Process
-            // 
-            this.barEditItem_Process.Caption = "barEditItem1";
-            this.barEditItem_Process.Edit = this.repositoryItemProgressBar1;
-            this.barEditItem_Process.Id = 2;
-            this.barEditItem_Process.Name = "barEditItem_Process";
-            // 
-            // repositoryItemProgressBar1
-            // 
-            this.repositoryItemProgressBar1.Name = "repositoryItemProgressBar1";
-            // 
-            // accordionControlElement_System
-            // 
-            this.accordionControlElement_System.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement_System.ImageOptions.SvgImage")));
-            this.accordionControlElement_System.Name = "accordionControlElement_System";
-            this.accordionControlElement_System.Text = "시스템";
-            // 
-            // accordionControlElement_Device
-            // 
-            this.accordionControlElement_Device.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement_Device.ImageOptions.SvgImage")));
-            this.accordionControlElement_Device.Name = "accordionControlElement_Device";
-            this.accordionControlElement_Device.Text = "디바이스";
-            // 
             // FormMain
             // 
             this.Appearance.Options.UseFont = true;
@@ -380,6 +381,7 @@ namespace Dualsoft
             ((System.ComponentModel.ISupportInitialize)(this.document1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dockManager)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManager1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.repositoryItemProgressBar1)).EndInit();
             this.panelContainer1.ResumeLayout(false);
             this.dockPanel1.ResumeLayout(false);
             this.dockPanel2.ResumeLayout(false);
@@ -388,7 +390,6 @@ namespace Dualsoft
             ((System.ComponentModel.ISupportInitialize)(this.document3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.documentGroup1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.accordionControl2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.repositoryItemProgressBar1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

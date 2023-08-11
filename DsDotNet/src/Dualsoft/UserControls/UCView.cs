@@ -19,12 +19,12 @@ using Vertex = Engine.Core.CoreModule.Vertex;
 
 namespace Dualsoft
 {
-    public partial class UCView : UserControl
+    public partial class UcView : UserControl
     {
         private readonly GViewer viewer = new Microsoft.Msagl.GraphViewerGdi.GViewer();
 
         public Flow Flow { get; set; }
-        public UCView()
+        public UcView()
         {
             InitializeComponent();
 
@@ -67,7 +67,7 @@ namespace Dualsoft
             //layoutSetting.Decay = 0.8;
 
             viewer.Graph.LayoutAlgorithmSettings = layoutSetting;
-            SetBackColor(System.Drawing.Color.FromArgb(33, 33, 33));
+            SetBackColor(System.Drawing.Color.FromArgb(133,133, 133));
 
             viewNode.Singles.ForEach(f => DrawSeg(viewer.Graph.RootSubgraph, f));
             viewNode.Edges.ForEach(f => DrawMEdge(viewer.Graph.RootSubgraph, f));
@@ -356,10 +356,8 @@ namespace Dualsoft
             else if (newStatus == Status4.Homing) node.Attr.FillColor = Color.DimGray;
         }
 
-        internal void SetBackColor(System.Drawing.Color color)
+        public void SetBackColor(System.Drawing.Color color)
         {
-            // var backColor = System.Drawing.Color.FromArgb(color.R, color.G, color.B);
-            //listBoxControl_Que.BackColor = backColor;
             var gColor = Color.Red;
             gColor.R = color.R;
             gColor.G = color.G;

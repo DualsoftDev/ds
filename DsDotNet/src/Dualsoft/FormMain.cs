@@ -1,5 +1,6 @@
 using DevExpress.XtraEditors;
-using Engine.Common.FS;
+using Dual.Common.Core;
+using Dual.Common.Core.FS;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -67,12 +68,12 @@ namespace Dualsoft
 
         private void accordionControlElement_ImportPPT_Click(object sender, EventArgs e)
         {
-            if (ProcessEvent.IsBusy())
+            if (0 < ProcessEvent.CurrProcess && ProcessEvent.CurrProcess < 100)
                 XtraMessageBox.Show("파일 처리중 입니다.", $"{K.AppName}", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             else
             {
                 var files = FileOpenSave.OpenFiles();
-                if (!files.IsNullOrEmpty())
+                if (files != null)
                 {
                     ImportPowerPoint(files);
                     accordionControlElement_Model.Expanded = true;

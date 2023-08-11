@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Engine.Common;
+using Dual.Common.Core;
 using static Model.Import.Office.ImportPPTModule;
 using DevExpress.XtraBars.Docking2010.Views;
 using Dualsoft.Form;

@@ -1,4 +1,5 @@
-using Engine.Common;
+using Dual.Common.Core;
+using Dual.Common.Winform;
 using Engine.Core;
 using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;
@@ -297,11 +298,7 @@ namespace Dualsoft
 
         public void RefreshGraph()
         {
-            viewer.Do(() =>
-            {
-                viewer.Refresh();
-            });
-
+            viewer.Do(() => viewer.Refresh());
         }
 
 

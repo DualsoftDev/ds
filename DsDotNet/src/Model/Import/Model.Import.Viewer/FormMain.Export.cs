@@ -16,6 +16,7 @@ using static Engine.Core.CoreModule;
 using static Engine.Core.Interface;
 using static Engine.Core.RuntimeGeneratorModule;
 using static Engine.Cpu.RunTime;
+using static Engine.CodeGenCPU.CpuLoader;
 
 namespace Dual.Model.Import
 {

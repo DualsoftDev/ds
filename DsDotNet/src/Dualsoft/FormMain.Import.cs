@@ -1,13 +1,13 @@
 using DevExpress.XtraBars.Navigation;
 using DevExpress.XtraEditors;
-using Engine.Common.FS;
+using Dual.Common.Core.FS;
 using Engine.Core;
 using Model.Import.Office;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using static Engine.Common.FS.MessageEvent;
+using static Dual.Common.Core.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Model.Import.Office.ImportPPTModule;
 using static Model.Import.Office.ViewModule;

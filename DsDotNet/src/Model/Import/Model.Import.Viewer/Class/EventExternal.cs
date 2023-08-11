@@ -9,6 +9,8 @@ using Engine.Core;
 
 using static Dual.Common.Core.FS.MessageEvent;
 using static Engine.Core.CoreModule;
+using Model.Import.Office;
+using System.Diagnostics;
 
 namespace Dual.Model.Import
 {
@@ -23,41 +25,44 @@ namespace Dual.Model.Import
             });
         }
 
+        static IDisposable DisposableCPUEvent;
         public static void CPUSubscribe()
         {
-            FormMain.TheMain._DicCpu.ForEach(x =>
+            if (DisposableCPUEvent == null)
             {
-                var sys = x.Key;
-                var cpu = x.Value;
-                x.Key.ValueChangeSubject.Subscribe(tuple =>
+                DisposableCPUEvent = CpusEvent.StatusSubject.Subscribe(rx =>
                 {
-                    var (storage, newValue) = tuple;
-
-                    //FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{storage.Name}:{newValue}", true);
-                    FormMain.TheMain.UpdateLogComboBox(storage, newValue, cpu);
-
+                    var v = rx.vertex as Vertex;
+                    var ui = FormMain.TheMain;
+                    if (ui._DicVertexMy.ContainsKey(v))
+                        UpdateView(rx, ui.SelectedViewMy, ui._DicVertexMy[v]);
+                    else if (ui._DicVertexEx.ContainsKey(v))
+                        UpdateView(rx, ui.SelectedViewEx, ui._DicVertexEx[v]);
                 });
-            });
 
-            CpuEvent.StatusSubject.Subscribe(rx =>
-            {
-                var v = rx.vertex as Vertex;
-                FormMain.TheMain.Do(() =>
+                CpusEvent.ValueSubject.Subscribe(rx =>
                 {
-                    if (FormMain.TheMain._DicVertex.ContainsKey(v))
+                    var sys = rx.Item1;
+                    var storage = rx.Item2;
+                    var value = rx.Item3;
+                    if (value is bool)
                     {
-                        var ucView = FormMain.TheMain.SelectedView;
-                        var viewNode = FormMain.TheMain._DicVertex[v];
-                        viewNode.Status4 = rx.status;
-
-                        ucView.UpdateStatus(viewNode);
-                        FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{v.Name}:{rx.status}", true);
+                        Debug.WriteLine($"{DateTime.Now.ToString("hh:mm:ss.fff")}\t{storage.ToText()} : {value}");
+                        FormMain.TheMain.UpdateLogComboBox(storage, value, sys);
                     }
-                    else { }
                 });
 
+            }
+        }
 
-            });
+        private static void UpdateView(CpusEvent.VertexStatusParam rx, UCView ucView, ViewModule.ViewNode viewNode)
+        {
+            viewNode.Status4 = rx.status;
+            var v = rx.vertex as Vertex;
+
+            ucView.UpdateStatus(viewNode);
+
+            FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{v.Name}:{rx.status}", true);
         }
 
 

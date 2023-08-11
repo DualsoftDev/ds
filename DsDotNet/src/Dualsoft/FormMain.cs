@@ -82,7 +82,11 @@ namespace Dualsoft
             }
         }
 
-     
+        private void accordionControlElement_ResetLayout_Click(object sender, EventArgs e)
+        {
+            dockManager.RestoreLayoutFromXml($"{Global.DefaultAppSettingFolder}\\default_layout.xml");
+            dockManager.ForceInitialize();
+        }
     }
 
 }

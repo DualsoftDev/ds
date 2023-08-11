@@ -1,14 +1,8 @@
 using DevExpress.XtraBars.Navigation;
-using DevExpress.XtraEditors;
 using Dual.Common.Core.FS;
-using Engine.Core;
 using Model.Import.Office;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
-using static Dual.Common.Core.FS.MessageEvent;
-using static Engine.Core.CoreModule;
 using static Model.Import.Office.ImportPPTModule;
 using static Model.Import.Office.ViewModule;
 
@@ -25,11 +19,11 @@ namespace Dualsoft
                 var _PPTResults = ImportPPT.GetLoadingAllSystem(paths);
                 ProcessEvent.DoWork(100);
 
-            
+
                 foreach (var ppt in _PPTResults)
                 {
                     var ele = new AccordionControlElement()
-                    { Style = ElementStyle.Group, Text = ppt.System.Name};
+                    { Style = ElementStyle.Group, Text = ppt.System.Name };
 
                     if (ppt.IsActive)
                     {
@@ -47,7 +41,7 @@ namespace Dualsoft
             {
                 MessageBox.Show(ex.Message);
             }
-            finally { ProcessEvent.DoWork(100); }     
+            finally { ProcessEvent.DoWork(100); }
         }
 
         private void appendFlows(PptResult ppt, AccordionControlElement ele)

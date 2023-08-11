@@ -1,8 +1,3 @@
-using DevExpress.LookAndFeel;
-using DevExpress.XtraBars.Ribbon;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -14,7 +9,7 @@ namespace Dualsoft
     {
         public static string[] OpenFiles()
         {
-            string[] files;   
+            string[] files;
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
                 openFileDialog.InitialDirectory =

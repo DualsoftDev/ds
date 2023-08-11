@@ -1,15 +1,6 @@
-using DevExpress.XtraEditors;
-using Engine.Core;
-using Model.Import.Office;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Dual.Common.Core;
-using static Model.Import.Office.ImportPPTModule;
 using DevExpress.XtraBars.Docking2010.Views;
 using Dualsoft.Form;
+using System.Linq;
 using static Engine.Core.CoreModule;
 using static Model.Import.Office.ViewModule;
 
@@ -17,7 +8,7 @@ namespace Dualsoft
 {
     public partial class FormMain : DevExpress.XtraEditors.XtraForm
     {
-     
+
 
         private void CreateDocOrSelect(ViewNode v)
         {

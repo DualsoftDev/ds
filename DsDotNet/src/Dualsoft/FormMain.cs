@@ -1,13 +1,7 @@
 using DevExpress.XtraEditors;
-using Dual.Common.Core;
 using Dual.Common.Core.FS;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Dualsoft
 {
@@ -63,8 +57,6 @@ namespace Dualsoft
             }
         }
 
-
-     
 
         private void accordionControlElement_ImportPPT_Click(object sender, EventArgs e)
         {

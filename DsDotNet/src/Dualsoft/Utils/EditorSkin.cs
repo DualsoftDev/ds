@@ -1,9 +1,4 @@
 using DevExpress.LookAndFeel;
-using DevExpress.XtraBars.Ribbon;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
 
 namespace Dualsoft
 {
@@ -33,8 +28,8 @@ namespace Dualsoft
             else
             {
                 var skin = GetSkin();
-                var skinName = skin.Split(';')[0]; 
-                var skinPalette= skin.Split(';')[1]; 
+                var skinName = skin.Split(';')[0];
+                var skinPalette = skin.Split(';')[1];
                 UserLookAndFeel.Default.SetSkinStyle(skinName, skinPalette);
             }
         }

@@ -1,6 +1,4 @@
 using DevExpress.LookAndFeel;
-using DevExpress.XtraSplashScreen;
-using Dualsoft.Utils;
 using System;
 using System.Windows.Forms;
 
@@ -18,7 +16,7 @@ namespace Dualsoft
             Application.SetCompatibleTextRenderingDefault(false);
 
 
-            EditorSkin.InitSetting(SkinSvgPalette.Bezier.VSBlue);   
+            EditorSkin.InitSetting(SkinSvgPalette.Bezier.VSBlue);
             var main = new FormMain();
 #if !DEBUG
             SplashScreenManager.ShowForm(main, typeof(SplashScreenDS));

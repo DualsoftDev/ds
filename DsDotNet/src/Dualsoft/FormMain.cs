@@ -1,35 +1,34 @@
-using DevExpress.XtraBars;
-using DevExpress.XtraBars.Docking;
-using DevExpress.XtraBars.Docking2010.Views.WindowsUI;
+using DevExpress.XtraEditors;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Windows.Forms;
 
 namespace Dualsoft
 {
-    public partial class FormMain : DevExpress.XtraBars.FluentDesignSystem.FluentDesignForm
+    public partial class FormMain : DevExpress.XtraEditors.XtraForm
     {
         public FormMain()
         {
             InitializeComponent();
+
+            this.KeyPreview = true;
         }
+
 
         private void FormMain_Load(object sender, EventArgs e)
         {
-            CenterToScreen();   
             Text = $"Dualsoft v{Global.AppVersion}";
             LayoutForm.LoadLayout(dockManager);
+            InitializationEventSetting();
 
         }
-
- 
+        void InitializationEventSetting()
+        {
+            tabbedView1.QueryControl += (s, e) =>
+            {
+                if (e.Control == null)  //Devexpress MDI Control
+                    e.Control = new System.Windows.Forms.Control();
+            };
+        }
 
         private void FormMain_Shown(object sender, EventArgs e)
         {
@@ -40,7 +39,37 @@ namespace Dualsoft
 
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            LayoutForm.SaveLayout(dockManager);
+            DialogResult dr = XtraMessageBox.Show("종료하시겠습니까?", "종료확인",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+
+            if (dr == DialogResult.No)
+            {
+                e.Cancel = true;
+            }
+            else
+            {
+                LayoutForm.SaveLayout(dockManager);
+            }
         }
+
+
+        private void CreateNewDocument()
+        {
+            //string docKey = "Task1";
+            //BaseDocument document = tabbedView1.Documents.Where(w => w.Control.Name == docKey).FirstOrDefault();
+            //if (document != null) tabbedView1.Controller.Activate(document);
+            //else
+            //{
+            //    //UCTaskUI_Form form = new UCTaskUI_Form();
+            //    //form.Name = docKey;
+            //    //form.MdiParent = this;
+            //    //form.Text = docKey;
+            //    //form.Show();
+            //    document = tabbedView1.Documents.Where(w => w.Control.Name == docKey).FirstOrDefault();
+            //    document.Caption = docKey;
+            //}
+        }
+
     }
+
 }

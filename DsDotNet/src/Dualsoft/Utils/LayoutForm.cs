@@ -1,8 +1,4 @@
 using DevExpress.XtraBars.Docking;
-using log4net;
-
-
-using System;
 using System.IO;
 
 namespace Dualsoft

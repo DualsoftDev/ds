@@ -117,11 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <metadata name="barManager1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>223, 17</value>
-  </metadata>
   <metadata name="dockManager.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>348, 17</value>
+    <value>133, 27</value>
   </metadata>
   <assembly alias="DevExpress.Data.v21.2" name="DevExpress.Data.v21.2, Version=21.2.12.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
   <data name="accordionControlElement_model.ImageOptions.SvgImage" type="DevExpress.Utils.Svg.SvgImage, DevExpress.Data.v21.2" mimetype="application/x-microsoft.net.object.bytearray.base64">
@@ -215,11 +212,14 @@
         NCAyMiwyMCAgIiBjbGFzcz0iQmx1ZSIgLz4NCiAgPC9nPg0KPC9zdmc+Cw==
 </value>
   </data>
+  <metadata name="barManager1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>11, 24</value>
+  </metadata>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="FormMain.IconOptions.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
-        vwAADr8BOAVTJAAALDxJREFUeF7tnfe/FMXS/+XkzMk555wTQRAUFRRQQUURRMwBFcSAoogoBhRMqKAI
+        wQAADsEBuJFr7QAALDxJREFUeF7tnfe/FMXS/+XkzMk555wTQRAUFRRQQUURRMwBFcSAoogoBhRMqKAI
         CiJBBSUnyfmiXq/p+jzf+9z/pL7z6WVgz57ecPZsmO6pH96vo3CY3enp+kx1dXXVFRf+dxgxDGNPWABs
         wk//zw3/kfzZRWTXYfSCBUBxYKg/G0b88/8Np1/Afx0/f/7PcLpg/N35v3vp9B89dPyf3XT4Qhf9eL6L
         Dp7tpP2nO2nvyQ7ac6JD/Nxn/P8B488PGX+P3zv2Szed+q2Hzv27V3wOPkNc3+UzWCzUhgVAAYSRORu5
@@ -411,4 +411,7 @@
         PxbmHnldAAAAAElFTkSuQmCC
 </value>
   </data>
+  <metadata name="documentManager.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>252, 29</value>
+  </metadata>
 </root>

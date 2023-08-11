@@ -53,6 +53,7 @@ namespace Dualsoft
             this.accordionControlElement_sim = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement_Import = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement_Export = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.skinPaletteDropDownButtonItem1 = new DevExpress.XtraBars.SkinPaletteDropDownButtonItem();
             ((System.ComponentModel.ISupportInitialize)(this.document1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dockManager)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManager1)).BeginInit();
@@ -104,8 +105,9 @@ namespace Dualsoft
             this.barManager1.DockManager = this.dockManager;
             this.barManager1.Form = this;
             this.barManager1.Items.AddRange(new DevExpress.XtraBars.BarItem[] {
-            this.barStaticItem1});
-            this.barManager1.MaxItemId = 1;
+            this.barStaticItem1,
+            this.skinPaletteDropDownButtonItem1});
+            this.barManager1.MaxItemId = 2;
             this.barManager1.StatusBar = this.bar3;
             // 
             // bar3
@@ -116,6 +118,7 @@ namespace Dualsoft
             this.bar3.DockRow = 0;
             this.bar3.DockStyle = DevExpress.XtraBars.BarDockStyle.Bottom;
             this.bar3.LinksPersistInfo.AddRange(new DevExpress.XtraBars.LinkPersistInfo[] {
+            new DevExpress.XtraBars.LinkPersistInfo(this.skinPaletteDropDownButtonItem1),
             new DevExpress.XtraBars.LinkPersistInfo(this.barStaticItem1)});
             this.bar3.OptionsBar.AllowQuickCustomization = false;
             this.bar3.OptionsBar.DrawDragBorder = false;
@@ -140,9 +143,9 @@ namespace Dualsoft
             // 
             this.barDockControlBottom.CausesValidation = false;
             this.barDockControlBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.barDockControlBottom.Location = new System.Drawing.Point(0, 820);
+            this.barDockControlBottom.Location = new System.Drawing.Point(0, 818);
             this.barDockControlBottom.Manager = this.barManager1;
-            this.barDockControlBottom.Size = new System.Drawing.Size(1337, 25);
+            this.barDockControlBottom.Size = new System.Drawing.Size(1337, 27);
             // 
             // barDockControlLeft
             // 
@@ -150,7 +153,7 @@ namespace Dualsoft
             this.barDockControlLeft.Dock = System.Windows.Forms.DockStyle.Left;
             this.barDockControlLeft.Location = new System.Drawing.Point(0, 0);
             this.barDockControlLeft.Manager = this.barManager1;
-            this.barDockControlLeft.Size = new System.Drawing.Size(0, 820);
+            this.barDockControlLeft.Size = new System.Drawing.Size(0, 818);
             // 
             // barDockControlRight
             // 
@@ -158,7 +161,7 @@ namespace Dualsoft
             this.barDockControlRight.Dock = System.Windows.Forms.DockStyle.Right;
             this.barDockControlRight.Location = new System.Drawing.Point(1337, 0);
             this.barDockControlRight.Manager = this.barManager1;
-            this.barDockControlRight.Size = new System.Drawing.Size(0, 820);
+            this.barDockControlRight.Size = new System.Drawing.Size(0, 818);
             // 
             // panelContainer1
             // 
@@ -169,7 +172,7 @@ namespace Dualsoft
             this.panelContainer1.Location = new System.Drawing.Point(1124, 0);
             this.panelContainer1.Name = "panelContainer1";
             this.panelContainer1.OriginalSize = new System.Drawing.Size(213, 200);
-            this.panelContainer1.Size = new System.Drawing.Size(213, 820);
+            this.panelContainer1.Size = new System.Drawing.Size(213, 818);
             this.panelContainer1.Text = "panelContainer1";
             // 
             // dockPanel1
@@ -180,8 +183,8 @@ namespace Dualsoft
             this.dockPanel1.Location = new System.Drawing.Point(0, 0);
             this.dockPanel1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.dockPanel1.Name = "dockPanel1";
-            this.dockPanel1.OriginalSize = new System.Drawing.Size(213, 387);
-            this.dockPanel1.Size = new System.Drawing.Size(213, 411);
+            this.dockPanel1.OriginalSize = new System.Drawing.Size(213, 411);
+            this.dockPanel1.Size = new System.Drawing.Size(213, 410);
             this.dockPanel1.Text = "Property";
             // 
             // dockPanel1_Container
@@ -189,7 +192,7 @@ namespace Dualsoft
             this.dockPanel1_Container.Location = new System.Drawing.Point(4, 26);
             this.dockPanel1_Container.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.dockPanel1_Container.Name = "dockPanel1_Container";
-            this.dockPanel1_Container.Size = new System.Drawing.Size(206, 381);
+            this.dockPanel1_Container.Size = new System.Drawing.Size(206, 380);
             this.dockPanel1_Container.TabIndex = 0;
             // 
             // dockPanel2
@@ -198,11 +201,11 @@ namespace Dualsoft
             this.dockPanel2.Dock = DevExpress.XtraBars.Docking.DockingStyle.Fill;
             this.dockPanel2.FloatVertical = true;
             this.dockPanel2.ID = new System.Guid("e2b1525a-f97a-48d8-a364-d6bb5144ac35");
-            this.dockPanel2.Location = new System.Drawing.Point(0, 411);
+            this.dockPanel2.Location = new System.Drawing.Point(0, 410);
             this.dockPanel2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.dockPanel2.Name = "dockPanel2";
-            this.dockPanel2.OriginalSize = new System.Drawing.Size(213, 385);
-            this.dockPanel2.Size = new System.Drawing.Size(213, 409);
+            this.dockPanel2.OriginalSize = new System.Drawing.Size(213, 409);
+            this.dockPanel2.Size = new System.Drawing.Size(213, 408);
             this.dockPanel2.Text = "Log";
             // 
             // dockPanel2_Container
@@ -210,7 +213,7 @@ namespace Dualsoft
             this.dockPanel2_Container.Location = new System.Drawing.Point(4, 26);
             this.dockPanel2_Container.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.dockPanel2_Container.Name = "dockPanel2_Container";
-            this.dockPanel2_Container.Size = new System.Drawing.Size(206, 380);
+            this.dockPanel2_Container.Size = new System.Drawing.Size(206, 379);
             this.dockPanel2_Container.TabIndex = 0;
             // 
             // documentManager
@@ -246,7 +249,7 @@ namespace Dualsoft
             this.accordionControl2.Location = new System.Drawing.Point(0, 0);
             this.accordionControl2.Name = "accordionControl2";
             this.accordionControl2.ScrollBarMode = DevExpress.XtraBars.Navigation.ScrollBarMode.Touch;
-            this.accordionControl2.Size = new System.Drawing.Size(260, 820);
+            this.accordionControl2.Size = new System.Drawing.Size(260, 818);
             this.accordionControl2.TabIndex = 22;
             this.accordionControl2.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.HamburgerMenu;
             // 
@@ -281,6 +284,11 @@ namespace Dualsoft
             this.accordionControlElement_Export.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement_Export.ImageOptions.SvgImage")));
             this.accordionControlElement_Export.Name = "accordionControlElement_Export";
             this.accordionControlElement_Export.Text = "내보내기";
+            // 
+            // skinPaletteDropDownButtonItem1
+            // 
+            this.skinPaletteDropDownButtonItem1.Id = 1;
+            this.skinPaletteDropDownButtonItem1.Name = "skinPaletteDropDownButtonItem1";
             // 
             // FormMain
             // 
@@ -344,5 +352,6 @@ namespace Dualsoft
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement_sim;
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement_Import;
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement_Export;
+        private DevExpress.XtraBars.SkinPaletteDropDownButtonItem skinPaletteDropDownButtonItem1;
     }
 }

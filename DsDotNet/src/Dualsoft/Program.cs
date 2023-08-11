@@ -16,8 +16,7 @@ namespace Dualsoft
             Application.SetCompatibleTextRenderingDefault(false);
 
 
-            UserLookAndFeel.Default.SetSkinStyle(SkinSvgPalette.Bezier.VSBlue);
-
+            EditorSkin.InitSetting(SkinSvgPalette.Bezier.VSBlue);   
             var main = new FormMain();
 #if !DEBUG
             SplashScreenManager.ShowForm(main, typeof(SplashScreenDS));

@@ -1,4 +1,6 @@
 using DevExpress.LookAndFeel;
+using DevExpress.XtraSplashScreen;
+using Dualsoft.Utils;
 using System;
 using System.Windows.Forms;
 

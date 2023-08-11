@@ -1,0 +1,32 @@
+using DevExpress.XtraBars.Docking;
+using log4net;
+
+
+using System;
+using System.IO;
+
+namespace Dualsoft
+{
+    public static class LayoutForm
+    {
+
+        internal static void LoadLayout(DockManager docM)
+        {
+            if (!Directory.Exists(Global.DefaultAppSettingFolder))
+                Directory.CreateDirectory(Global.DefaultAppSettingFolder);
+
+            docM.BeginUpdate();
+            docM.SaveLayoutToXml($"{Global.DefaultAppSettingFolder}\\default_layout.xml");
+            if (File.Exists($"{Global.DefaultAppSettingFolder}\\layout.xml"))
+                docM.RestoreLayoutFromXml($"{Global.DefaultAppSettingFolder}\\layout.xml");
+            docM.EndUpdate();
+        }
+
+        internal static void SaveLayout(DockManager docM)
+        {
+            docM.SaveLayoutToXml($"{Global.DefaultAppSettingFolder}\\layout.xml");
+        }
+    }
+}
+
+

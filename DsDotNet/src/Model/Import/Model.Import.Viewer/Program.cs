@@ -1,5 +1,6 @@
-using Engine.Common;
-using Engine.Common.FS;
+using Dual.Common.Core;
+
+using Dual.Common.Core.FS;
 
 using System;
 using System.Reflection;
@@ -20,9 +21,8 @@ namespace Dual.Model.Import
             SimpleExceptionHandler.InstallExceptionHandler();
 
             // DllVersionChecker.IsValidExDLL(Assembly.GetExecutingAssembly());
-            var logger = Log4NetHelper.PrepareLog4Net("ViewerLogger");
+            var logger = Log4NetLogger.PrepareLog4Net("ViewerLogger");
             Log4NetWrapper.SetLogger(logger);
-            Global.Logger = logger;
             logger.Info("Model import viewer started.");
 
 

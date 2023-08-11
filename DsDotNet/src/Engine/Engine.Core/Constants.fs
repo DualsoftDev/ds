@@ -2,7 +2,7 @@
 namespace Engine.Core
 
 open System
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
 
 [<AutoOpen>]

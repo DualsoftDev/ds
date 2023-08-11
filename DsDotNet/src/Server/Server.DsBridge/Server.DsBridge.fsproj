@@ -17,13 +17,18 @@
     <ProjectReference Include="..\Server.Common.NMF\Server.Common.NMF.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
+	<ItemGroup>
+		<!--<PackageReference Include="log4net" Version="2.0.15" />-->
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+	</ItemGroup>
+
+	<ItemGroup>
     <Reference Include="IOApi_CLRLib">
       <HintPath>..\..\..\exLib\IOApi_CLRLib.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
+    <!--<Reference Include="Newtonsoft.Json">
       <HintPath>..\..\..\exLib\Newtonsoft.Json.dll</HintPath>
-    </Reference>
+    </Reference>-->
     <Reference Include="WMX3Api_CLRLib">
       <HintPath>..\..\..\exLib\WMX3Api_CLRLib.dll</HintPath>
     </Reference>

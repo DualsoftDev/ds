@@ -3,11 +3,11 @@ open System
 open System.Runtime.CompilerServices
 
 open NUnit.Framework
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Dsu.PLC.LS
 open AddressConvert
 open System.Reactive.Linq
-open Dsu.PLC.Common
+open Dual.PLC.Common
 open Xunit
 
 
@@ -400,7 +400,7 @@ type XgiBasic() =
             F   =   0       ~   1023
         *)
 
-        let doInvalidRequest add =
+        let doInvalidRequest (add:string) =
             //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우(0x4)
             (fun () -> x.Write(add, 64UL))    |> ShouldFailWithSubstringT "0x4"
             (fun () -> x.Read(add) |> ignore) |> ShouldFailWithSubstringT "0x4"

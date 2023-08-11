@@ -4,7 +4,7 @@ open System.Collections.Generic
 open System.Diagnostics
 
 open Engine.Core
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open type Engine.Parser.dsParser
 open Antlr4.Runtime
 open type DsParser

@@ -5,7 +5,7 @@ open System.Linq
 
 open PLC.CodeGen.Common
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Engine.Core
 open FB
 open ConvertorPrologModule

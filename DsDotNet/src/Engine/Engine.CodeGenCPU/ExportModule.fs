@@ -4,7 +4,7 @@ open System.IO
 open System.Linq
 open System.Runtime.CompilerServices
 open Engine.Core
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open PLC.CodeGen.LSXGI
 open PLC.CodeGen.Common
 open System

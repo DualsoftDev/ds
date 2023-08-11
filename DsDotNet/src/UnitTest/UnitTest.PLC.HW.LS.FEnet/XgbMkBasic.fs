@@ -1,12 +1,15 @@
 namespace T
 
-open NUnit.Framework
-open AddressConvert
-open Engine.Common.FS
-open Dsu.PLC.LS
-open Xunit
 open System.Reactive.Linq
-open Dsu.PLC.Common
+open System.Collections.Generic
+open NUnit.Framework
+open Xunit
+
+open AddressConvert
+open Dual.Common.Core.FS
+open Dsu.PLC.LS
+open Dual.PLC.Common
+open FSharpPlus.Data.ContT
 
 [<Collection("XgbMkBasic")>]
 type XgbMkBasic() =
@@ -25,15 +28,15 @@ type XgbMkBasic() =
     member x.``Address convert test`` () =
         let tags = [
         (* word *)
-            "P0000", "%PW0000"     
+            "P0000", "%PW0000"
             "M0001", "%MW0001"
             "K0101", "%KW0101"
             "F0334", "%FW0334"
             "T0045", "%TW0045"
             "C0001", "%CW0001"
             "Z0018", "%ZW0018"
-            "S0017", "%SW0017"      //S CANNOT USE BIT 
-            
+            "S0017", "%SW0017"      //S CANNOT USE BIT
+
             //"N0014", "%NW0014"    //bit, word 판단을 위해 4자리 허용 안함
             //"D0033", "%DW0033"    //bit, word 판단을 위해 4자리 허용 안함
             //"D0033", "%DW0033"    //bit, word 판단을 위해 4자리 허용 안함
@@ -48,11 +51,11 @@ type XgbMkBasic() =
             "K0000A", "%KX0000A"
             "F00001", "%FX00001"
             "T00008", "%TX00008"
-            "C0000F", "%CX0000F"       
-            "Z0010F", "%ZX0010F"      
+            "C0000F", "%CX0000F"
+            "Z0010F", "%ZX0010F"
 
-            //"D010013.F", "%DX010013F"  //D bit, word 판단을 위해 {6자리word}.{bit}만 허용   
-            //"N0001A", "%NX00001A"      //bit, word 판단을 위해 {5자리word}{bit}만 허용    
+            //"D010013.F", "%DX010013F"  //D bit, word 판단을 위해 {6자리word}.{bit}만 허용
+            //"N0001A", "%NX00001A"      //bit, word 판단을 위해 {5자리word}{bit}만 허용
             //"N0013F", "%NX0013F"       //bit, word 판단을 위해 {5자리word}{bit}만 허용
             "D10013.F", "%DX10013F"    //D 5자리.bit  올바른 표현법
             "N10013F",  "%NX10013F"      //N 5자리{bit} 올바른 표현법
@@ -70,17 +73,17 @@ type XgbMkBasic() =
             "U0.2.11","%UX2B"       //  {0*32+2}B
             "U1.1.1", "%UX331"      //  {1 * 32 + 1 }1
 
-            (* 
-                D 메모리 특이사항: 
-                    D의 bit접근법은 주소 개념은 XG5000 메인의 변수/설명 -> 디바이스 보기에서 지원 
+            (*
+                D 메모리 특이사항:
+                    D의 bit접근법은 주소 개념은 XG5000 메인의 변수/설명 -> 디바이스 보기에서 지원
                     디바이스 모니터에서는 지원하지 않는다.
 
-                S 메모리 특이사항: 
+                S 메모리 특이사항:
                     S는 XG5000의 디바이스 모니터에서 0~127 단위로 접근 가능하다.
                     디바이스 모니터에서는 bit단위로 검색할 수 없다.
                     XG5000 메인의 변수/설명 -> 디바이스 보기에서 0.0 ~ 127.99범위로 찾아서 선택할 수 있다.
                     FENet 통신에서는 S0 ~ S120에 WORD단위로 쓰기가 가능하지만 BIT단위는 알 수 없음
-                
+
                 F, N메모리는 쓰기 접근이 불가능하다. (F는 GX5000 디바이스모니터에서 200이상부터 접근 가능하지만 권장하지 않음)
             *)
 
@@ -262,7 +265,7 @@ type XgbMkBasic() =
 
     [<Test>]
     member x.``x U`` () =
-        
+
         ()
 
     [<Test>]
@@ -286,38 +289,62 @@ type XgbMkBasic() =
             | :? uint16 as ui16 -> ui16
             | _ -> failwith "Invalid type"
 
-        let testList : (string * obj) list = [
-                        ("M00231", true);
-                        ("L00102A", true);
-                        ("P0102A", true);
-                        ("K0100A", true);
-                        ("Z0010F", true);
-                        ("L00100A", true);
-                        ("D00100.A", true);
-                        ("P0512", 32us);
-                        ("M0512", 32us);
-                        ("Z0012", 32us);
-                        ("K0512", 32us);
-                        ("T0512", 32us);
-                        ("C0512", 32us);
-                        ("S0012", 32us);
-                        ("L00512", 32us);
-                        ("D00512", 32us);
-        ]
+        let testTags:HashSet<LsTagXgi> =
+            let createTag (name, valueToBeWritten) =
+                let tag = LsTagXgi(x.Conn, name)
+                tag.UserObject <- valueToBeWritten
+                tag
+
+            let testList : (string * obj) list = [
+                ("M00231",   true);
+                ("L00102A",  true);
+                ("P0102A",   true);
+                ("K0100A",   true);
+                ("Z0010F",   true);
+                ("L00100A",  true);
+                ("D00100.A", true);
+                ("P0512",    32us);
+                ("M0512",    32us);
+                ("Z0012",    32us);
+                ("K0512",    32us);
+                ("T0512",    32us);
+                ("C0512",    32us);
+                ("S0012",    32us);
+                ("L00512",   32us);
+                ("D00512",   32us);
+            ]
+
+            testList |> map createTag |> HashSet
+
+        let mutable finished = false
         let subscription =
             x.Conn.Subject.ToIObservable()
             |> Observable.OfType<TagValueChangedEvent>
-            |> fun x -> x.Subscribe(fun evt ->      //evt.Tag.Name evt.Tag.Value
-                            for (tag, value) in testList  do
-                                if tag.Equals evt.Tag.Name then
-                                    castValue value === evt.Tag.Value
-                            logDebug "%s value Changed %A -> %A" evt.Tag.Name evt.Tag.OldValue evt.Tag.Value
-                            ignore())
+            |> fun x -> x.Subscribe(
+                fun evt ->      //evt.Tag.Name evt.Tag.Value
+                    match evt.Tag with
+                    | :? LsTagXgi as evTag ->
+                        logDebug "%s value Changed %A -> %A" evTag.Name evt.Tag.OldValue evt.Tag.Value
+                        if testTags.Contains(evTag) then
+                            evTag.UserObject === evTag.Value
+                            testTags.Remove(evTag) |> ignore
+                            if testTags.isEmpty() then
+                                finished <- true
+                    | _ ->
+                        () )
 
-        for (tag, value) in testList do
-            let input = castValue value
-            x.Write(tag, input)
-            x.Conn.AddMonitoringTag(LsTagXgi(x.Conn, tag)) |> ignore
+        for t in testTags do
+            x.Conn.AddMonitoringTag(t) |> ignore
+
+        for t in testTags do
+            let input = castValue t.UserObject
+            x.Write(t, input)
+
+        while not finished do
+            System.Threading.Thread.Sleep(50)
+        subscription.Dispose()
+
+        testTags.isEmpty() === true
         noop()
 
     [<Test>]
@@ -333,35 +360,26 @@ type XgbMkBasic() =
         D           0 ~ 10239
         N           0 ~ 10239 (GX5000, FEnet read만 가능)
         *)
-        let doInvalidRequest add =
+        let doInvalidRequest (addr:string) =
             //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우
             //11x Unknown error?
-            (fun () -> x.Write(add, 64us))    |> ShouldFailWithSubstringT "11x"
-            (fun () -> x.Read(add) |> ignore) |> ShouldFailWithSubstringT "11x"
+            (fun () -> x.Write(addr, 64us))    |> ShouldFailWithSubstringT "11x"
+            (fun () -> x.Read(addr) |> ignore) |> ShouldFailWithSubstringT "11x"
 
-        let doNormalRequest add =
-            //System.Exception : LS Protocol Error: 각 디바이스별 지원하는 영역을 초과해서 요구한 경우
-            //11x Unknown error?
-            x.Write(add, 64us)  
-            x.Read(add) |> ignore
+        let doNormalRequest (addr:string) =
+            x.Write(addr, 64us)
+            x.Read(addr) === 64us
 
-        let invalidAddresses = [
-            yield! ["P"; "M"; "T"; "C"; "K"; "L"; "S"; "Z";] |> List.map (sprintf "%s9999")
-        ]
+        let invalidAddresses = ["P"; "M"; "T"; "C"; "K"; "L"; "S"; "Z";] |> map (sprintf "%s9999")
         invalidAddresses |> iter doInvalidRequest
 
-        let invalidaddressesD = [
-            yield! ["D"] |> List.map (sprintf "%s99999")
-        ]
+        let invalidaddressesD = [ "D99999" ];
         invalidaddressesD |> iter doInvalidRequest
 
-        let invalidAddresses_nor = [
-            yield! ["P"; "M"; "T"; "C"; "K"; "L"; "S"; "Z";] |> List.map (sprintf "%s0013")
-        ]
+        let invalidAddresses_nor = ["P"; "M"; "T"; "C"; "K"; "L"; "S"; "Z";] |> map (sprintf "%s0013")
         invalidAddresses_nor |> iter doNormalRequest
-        let invalidaddressesD_nor = [
-            yield! ["D";"L"] |> List.map (sprintf "%s00010")
-        ]
+
+        let invalidaddressesD_nor = ["D";"L"] |> map (sprintf "%s00010")
         invalidaddressesD_nor |> iter doNormalRequest
 
 
@@ -373,7 +391,8 @@ type XgbMkBasic() =
 
             let strTyp = typ.ToString()
             let qnas = [
-                if typ = DeviceType.D then
+                match typ with
+                | DeviceType.D ->
                     if testBitDevice then
                         yield $"{strTyp}00000.0", $"%%{strTyp}X00000.0"
                         yield $"{strTyp}00000.1", $"%%{strTyp}X00000.1"
@@ -384,11 +403,11 @@ type XgbMkBasic() =
                         yield $"{strTyp}00011.2", $"%%{strTyp}X00011.2"
                         yield $"{strTyp}01011.2", $"%%{strTyp}X01011.2"
                         yield $"{strTyp}10011.F", $"%%{strTyp}X10011.F"
-                
+
                     yield $"{strTyp}00001" , $"%%{strTyp}W00001"
                     yield $"{strTyp}00002" , $"%%{strTyp}W00002"
                     yield $"{strTyp}00003" , $"%%{strTyp}W00003"
-                else if typ = DeviceType.N || typ = DeviceType.L then
+                | DeviceType.N | DeviceType.L ->
                     if testBitDevice then
                         yield $"{strTyp}000000", $"%%{strTyp}X000000"
                         yield $"{strTyp}000001", $"%%{strTyp}X000001"
@@ -399,11 +418,11 @@ type XgbMkBasic() =
                         yield $"{strTyp}000112", $"%%{strTyp}X000112"
                         yield $"{strTyp}010112", $"%%{strTyp}X010112"
                         yield $"{strTyp}10011F", $"%%{strTyp}X10011F"
-                
+
                     yield $"{strTyp}00001" , $"%%{strTyp}W00001"
                     yield $"{strTyp}00002" , $"%%{strTyp}W00002"
                     yield $"{strTyp}00003" , $"%%{strTyp}W00003"
-                else 
+                | _ ->
                     if testBitDevice then
                         yield $"{strTyp}00000", $"%%{strTyp}X00000"
                         yield $"{strTyp}00001", $"%%{strTyp}X00001"
@@ -414,7 +433,7 @@ type XgbMkBasic() =
                         yield $"{strTyp}00112", $"%%{strTyp}X00112"
                         yield $"{strTyp}10112", $"%%{strTyp}X10112"
                         yield $"{strTyp}1011F", $"%%{strTyp}X1011F"
-                
+
                     yield $"{strTyp}0001" , $"%%{strTyp}W0001"
                     yield $"{strTyp}0002" , $"%%{strTyp}W0002"
                     yield $"{strTyp}0003" , $"%%{strTyp}W0003"
@@ -426,10 +445,10 @@ type XgbMkBasic() =
 
         let testUDeivce() =
             let qnas = [
-                "U0.0", "%UW0"
-                "U0.1", "%UW1"
+                "U0.0",  "%UW0"
+                "U0.1",  "%UW1"
                 "U0.31", "%UW31"
-                "U1.0", "%UW32"
+                "U1.0",  "%UW32"
             ]
             for (tag, answer) in qnas do
                 let fEnetTag = tryToFEnetTag CpuType.XgbMk tag

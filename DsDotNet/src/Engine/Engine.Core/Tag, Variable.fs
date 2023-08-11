@@ -3,7 +3,7 @@ namespace Engine.Core
 open System.Diagnostics
 open System.Collections.Generic
 
-open Engine.Common.FS
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 

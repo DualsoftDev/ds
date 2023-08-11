@@ -2,7 +2,7 @@ namespace rec Engine.Core
 
 open System.IO
 open Newtonsoft.Json
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Engine.Parser.FS
 open System.Collections.Generic
 

@@ -6,7 +6,7 @@ open System.Linq
 open Antlr4.Runtime.Tree
 open Antlr4.Runtime
 
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Engine.Core
 open type Engine.Parser.dsParser
 open System.Collections.Generic

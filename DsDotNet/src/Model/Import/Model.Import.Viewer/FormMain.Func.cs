@@ -1,13 +1,15 @@
+using Dual.Common.Winform;
+
 using Engine.CodeGenCPU;
-using Engine.Common;
-using Engine.Common.FS;
+using Dual.Common.Core;
+using Dual.Common.Core.FS;
 using Model.Import.Office;
 using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using static Engine.Common.FS.MessageEvent;
+using static Dual.Common.Core.FS.MessageEvent;
 using static Engine.Core.DsTextProperty;
 using static Model.Import.Office.ImportPPTModule;
 using static Model.Import.Office.ImportViewModule;

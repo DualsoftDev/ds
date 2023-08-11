@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFrameworks>net48;</TargetFrameworks>
+		<TargetFrameworks>net48</TargetFrameworks>
 		<!--<TargetFrameworks>net48;netcoreapp3.1</TargetFrameworks>-->
 		<RootNamespace>Engine.Sample</RootNamespace>
 		<LangVersion>11.0</LangVersion>
@@ -12,20 +12,21 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="DualSoft-Common-Core" Version="0.1.7" />
+	  <PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.2" />
 	  <PackageReference Include="FSharp.Core" Version="7.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Engine.Common\Engine.Common.csproj" />
 		<ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
 		<ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Reference Include="log4net">
+		<!--<Reference Include="log4net">
 		  <HintPath>..\..\..\exLib\log4net.dll</HintPath>
 		</Reference>
-		<Reference Include="System.Configuration" />
+		<Reference Include="System.Configuration" />-->
 	</ItemGroup>
 
 

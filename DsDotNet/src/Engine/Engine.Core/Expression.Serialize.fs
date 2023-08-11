@@ -1,6 +1,6 @@
 namespace Engine.Core
 open System.Collections.Generic
-open Engine.Common.FS
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module rec ExpressionSerializeModule =

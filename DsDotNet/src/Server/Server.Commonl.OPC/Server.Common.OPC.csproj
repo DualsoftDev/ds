@@ -12,11 +12,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
     <ProjectReference Include="..\..\Engine\Engine.CodeGenHMI\Engine.CodeGenHMI.fsproj" />
-    <ProjectReference Include="..\..\Engine\Engine.Common.FS\Engine.Common.FS.fsproj" />
-    <ProjectReference Include="..\..\Engine\Engine.Common\Engine.Common.csproj" />
     <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
   </ItemGroup>
-  <ItemGroup>
+  <!--<ItemGroup>
     <Reference Include="Confluent.Kafka">
       <HintPath>..\..\..\exLib\Confluent.Kafka.dll</HintPath>
     </Reference>
@@ -26,5 +24,5 @@
     <Reference Include="System.Reactive">
       <HintPath>..\..\exLib\System.Reactive.dll</HintPath>
     </Reference>
-  </ItemGroup>
+  </ItemGroup>-->
 </Project>

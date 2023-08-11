@@ -3,7 +3,7 @@ namespace Engine.CodeGenCPU
 open System.Linq
 open System.Runtime.CompilerServices
 open Engine.Core
-open Engine.Common.FS
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module CodeConvertUtil =

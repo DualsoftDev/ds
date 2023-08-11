@@ -3,7 +3,7 @@ namespace Model.Import.Office
 
 open System.Linq
 open PPTUtil
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Model.Import.Office
 open System.Collections.Generic
 open Engine.Core

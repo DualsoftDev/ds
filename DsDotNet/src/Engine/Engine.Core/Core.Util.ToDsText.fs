@@ -1,7 +1,7 @@
 namespace Engine.Core
 
 open System.Linq
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open System.Collections.Generic
 open System.Runtime.CompilerServices
 

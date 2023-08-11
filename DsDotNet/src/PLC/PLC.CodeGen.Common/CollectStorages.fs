@@ -1,6 +1,6 @@
 namespace PLC.CodeGen.Common
 
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Engine.Core
 
 [<AutoOpen>]

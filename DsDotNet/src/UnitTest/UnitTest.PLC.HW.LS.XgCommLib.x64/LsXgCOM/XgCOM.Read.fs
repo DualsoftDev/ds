@@ -9,7 +9,14 @@ open System
 open Xunit
 open NUnit.Framework
 
-open Engine.Common.FS
+open Dual.Common.Core.FS
+open System.Collections.Generic
+open AddressConvert
+open PLC.CodeGen.Common
+open XGCommLib
+open System.Threading
+open System.Collections
+
 
 [<AutoOpen>]
 module XgCommLibSpec =
@@ -71,6 +78,38 @@ type XgCOM10ReadTest() =
 type XgCOM20ReadTest() =
     inherit XgCOMBaseClass20()
 
+
+
+    (*
+        bit 0 ~ 7   |   0   |   1   |   2   |   3   |   4   |   5   |   6   |   7   |
+            ||
+        byte0[0..7] |   7   |   6   |   5   |   4   |   3   |   2   |   1   |   0   |
+    *)
+    member x.ReadDevice_Bit(bstrDevice:string, nBitOffset:int, lpValue: byref<int>): int =
+        x.CommObject.RemoveAll()
+        let _offset = nBitOffset / 8
+        let _size = nBitOffset % 8
+        let di = x.CreateDevice((char)bstrDevice, 'B', 1, _offset)
+        x.CommObject.AddDeviceInfo(di)
+        let rBuf = Array.zeroCreate<byte>(1)
+        if x.CommObject.ReadRandomDevice(rBuf) <> 1 then
+            0
+        else if (rBuf[0] &&& pown 2uy _size) > 0uy then     //bit:true      lpValue = 1
+            lpValue <- 1
+            1
+        else if (rBuf[0] &&& pown 2uy _size) = 0uy then     //bit:false     lpValue = 0
+            lpValue <- 0
+            1
+        else
+            0
+
+
+    //Read((int)XgCOMCodes.R_M, rBuf, 1, 0)
+    // x.CommObject.ReadDevice_Block("M", offset, &rBuf[0], MAX_ARRAY_BYTE_SIZE-1, ref nRead)
+
+
+
+
     [<Test>]
     member x.``Not working: Read/Write`` () =
         let wBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
@@ -103,6 +142,20 @@ type XgCOM20ReadTest() =
         // COM 호출 return 값 sRead 가 0 임
         sRead === 0     // 1 이 되어야 할 것 같은데...
         buf === 0       // 1 이 되어야 함...
+        noop()
+
+
+
+    [<Test>]
+    member x.``custom ReadDevice_Bit`` () =
+        let targetValue = 1                                                 //1 or 0
+        let offset = 65
+        x.CommObject.WriteDevice_Bit("M", offset, targetValue) === 1        // WriteDevice_Bit 는 정상 동작
+        let mutable buf = 0
+        let sRead = x.ReadDevice_Bit("M", offset, &buf)                     //새로 만든 ReadDevice_Bit
+        sRead === 1
+        buf === targetValue
+        noop()
 
 
     [<Test>]
@@ -144,13 +197,13 @@ type XgCOM20ReadTest() =
             di.lOffset <- 100 + i * 8
             wBuf[i] <- byte i
             x.CommObject.AddDeviceInfo(di)
-
         x.CommObject.WriteRandomDevice(wBuf) === 1
         x.CommObject.ReadRandomDevice(rBuf) === 1
         for i = 0 to MAX_RANDOM_READ_POINTS-1 do
             rBuf[i] === wBuf[i]
 
         noop()
+
     [<Test>]
     member x.``write device bit test`` () =
         for i = 100 to 1024 do
@@ -160,6 +213,7 @@ type XgCOM20ReadTest() =
     member x.``WriteDevice_Block`` () =
         let offset = 512
         let wBuf = [| 0uy .. byte (MAX_ARRAY_BYTE_SIZE-1) |]
+        let clearBuf = Array.zeroCreate<byte> 512
         x.CommObject.WriteDevice_Block("M", offset, &(wBuf[0]), MAX_ARRAY_BYTE_SIZE) === 1      // WriteDevice_Block 는 정상 동작
 
 
@@ -265,3 +319,106 @@ type XgCOM20ReadTest() =
         for i = 0 to 1023 do
             x.CommObject.WriteDevice_Bit("M", i, 0) === 1
 
+
+    [<Test>]
+    member x.``Read random of "X" "B" W D L test`` () =
+        (*memoryType는 B와 X만 가능 *)
+        x.CommObject.RemoveAll()
+
+        let di0 = x.CreateDevice('I', 'B', 2 ,0)
+        let di1 = x.CreateDevice('M', 'B', 8 ,128)
+        let di2 = x.CreateDevice('W', 'B', 1 ,7)
+        let di3 = x.CreateDevice('Q', 'B', 1 ,1)
+
+        let di4 = x.CreateDevice('Q', 'X', 0 ,1)
+        let di5 = x.CreateDevice('Q', 'X', 1 ,1)
+        let di6 = x.CreateDevice('Q', 'X', 2 ,1)
+        let di7 = x.CreateDevice('Q', 'X', 3 ,1)
+        let di8 = x.CreateDevice('Q', 'X', 4 ,1)
+        let di9 = x.CreateDevice('Q', 'X', 5 ,1)
+        let di10 = x.CreateDevice('Q', 'X', 6 ,1)
+        let di11 = x.CreateDevice('Q', 'X', 7 ,1)
+
+        let rBuf0 = Array.zeroCreate<byte>(2 + 8 + 1 + 1 + 8)
+        x.CommObject.AddDeviceInfo(di0)
+        x.CommObject.AddDeviceInfo(di1)
+        x.CommObject.AddDeviceInfo(di2)
+        x.CommObject.AddDeviceInfo(di3)
+        x.CommObject.AddDeviceInfo(di4)
+        x.CommObject.AddDeviceInfo(di5)
+        x.CommObject.AddDeviceInfo(di6)
+        x.CommObject.AddDeviceInfo(di7)
+        x.CommObject.AddDeviceInfo(di8)
+        x.CommObject.AddDeviceInfo(di9)
+        x.CommObject.AddDeviceInfo(di10)
+        x.CommObject.AddDeviceInfo(di11)
+
+        x.CommObject.ReadRandomDevice(rBuf0) === 1
+        let out0 = rBuf0
+        let mutable bitBuf = 0
+
+        let mutable i = 0
+        for i = 0 to 7 do
+            let b = int(rBuf0.[i + 12])
+            bitBuf <- bitBuf + b * int(Math.Pow (2, i))
+             
+        rBuf0[11]  === byte(bitBuf) 
+        noop();
+
+
+    (* 
+    약 15초를 초과하면 연결이 끊어짐
+    IsConnected는 연결이 끊어져도 1이 출력됨
+    재연결하면 AddDeviceinfo를 다시 해야함
+    *)
+    [<Test>]
+    member x.``Delay.Delay and read test`` () =
+        let di = x.CreateDevice('M', 'B', 1 ,0)
+        let rBuf = Array.zeroCreate<byte>(1)
+        let rBuf2 = Array.zeroCreate<byte>(1)
+
+        x.CommObject.RemoveAll()
+        x.CommObject.AddDeviceInfo(di)
+        x.CommObject.ReadRandomDevice(rBuf) === 1
+
+        let times = 1000 * 20
+        Thread.Sleep(times)
+
+        let isCn = x.CommObject.IsConnected()
+        isCn === 1                          // 1?
+        //x.CommObject.Connect === 1        //Fail
+
+        
+        if x.CommObject.ReadRandomDevice(rBuf2) = 0 then
+            x.Setup()
+            x.CommObject.RemoveAll()
+            x.CommObject.AddDeviceInfo(di)
+            x.CommObject.ReadRandomDevice(rBuf2) === 1
+
+        rBuf === rBuf2
+
+    (* 
+    Connect 함수는 2번 사용해야 다시 연결됨
+    *)
+    [<Test>]
+    member x.``Delay.Delay and read test2`` () =
+        let di = x.CreateDevice('M', 'B', 1 ,0)
+        let rBuf = Array.zeroCreate<byte>(1)
+        let rBuf2 = Array.zeroCreate<byte>(1)
+
+        x.CommObject.RemoveAll()
+        x.CommObject.AddDeviceInfo(di)
+        x.CommObject.ReadRandomDevice(rBuf) === 1
+
+        let times = 20 * 1000
+        Thread.Sleep(times)
+
+
+        let isCn = x.CommObject.Connect("")
+        if isCn = 0 then
+            x.CommObject.Connect("") |> ignore
+        x.CommObject.RemoveAll()
+        x.CommObject.AddDeviceInfo(di)
+        x.CommObject.ReadRandomDevice(rBuf2) === 1
+
+        rBuf === rBuf2

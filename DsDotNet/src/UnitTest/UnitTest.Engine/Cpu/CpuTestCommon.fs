@@ -6,7 +6,7 @@ open Engine.Parser.FS
 open T
 open System
 open Engine.Core
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Engine.Cpu
 open Engine.CodeGenCPU
 open System.Linq

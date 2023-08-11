@@ -3,7 +3,7 @@ namespace Engine.Parser.FS
 open System
 open System.Collections.Generic
 open Engine.Core
-open Engine.Common.FS
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module ParserOptionModule =

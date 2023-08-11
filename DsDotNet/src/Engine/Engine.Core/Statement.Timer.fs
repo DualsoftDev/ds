@@ -1,6 +1,6 @@
 namespace Engine.Core
 
-open Engine.Common.FS
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module TimerStatementModule =

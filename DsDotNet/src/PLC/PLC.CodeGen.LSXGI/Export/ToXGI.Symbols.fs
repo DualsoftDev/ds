@@ -4,7 +4,7 @@ open System
 open System.Linq
 open System.Collections.Generic
 open System.Security
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Engine.Core
 open PLC.CodeGen.Common
 open PLC.CodeGen.LSXGI

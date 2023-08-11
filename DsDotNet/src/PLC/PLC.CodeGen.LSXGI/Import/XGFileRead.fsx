@@ -1,11 +1,11 @@
 namespace PLC.CodeGen.LSXGI
 
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open System.Xml
 open System.Net
 open System.Collections.Generic
 open AddressConvert
-open Engine.Common.FS
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module FileRead =

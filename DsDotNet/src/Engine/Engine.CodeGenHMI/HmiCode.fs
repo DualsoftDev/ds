@@ -2,7 +2,7 @@ namespace Engine.CodeGenHMI
 
 open System.Collections.Generic
 open Engine.Core
-open Engine.Common.FS
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module HmiGenModule =

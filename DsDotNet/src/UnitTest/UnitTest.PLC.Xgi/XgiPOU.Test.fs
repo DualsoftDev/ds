@@ -4,7 +4,7 @@ open NUnit.Framework
 
 open Engine.Parser.FS
 open Engine.Core
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open PLC.CodeGen.LSXGI
 open PLC.CodeGen.Common
 
@@ -142,10 +142,10 @@ type XgiPOUTest() =
             bool xm2 = false;
             bool xm3 = false;
 
-            int8 bm0 = 0y;
-            int8 bm1 = 0y;
-            int8 bm2 = 0y;
-            int8 bm3 = 0y;
+            int8 y0 = 0y;
+            int8 y1 = 0y;
+            int8 y2 = 0y;
+            int8 y3 = 0y;
 
             int nm0 = 0;
             int nm1 = 0;
@@ -154,7 +154,7 @@ type XgiPOUTest() =
 """
         let f = getFuncName()
         parseCode globalStorages code |> ignore
-        for n in ["xm0"; "xm1"; "xm2"; "xm3"; "bm0"; "bm1"; "bm2"; "bm3"; "nm0"; "nm1"; "nm2"; "nm3"] do
+        for n in ["xm0"; "xm1"; "xm2"; "xm3"; "y0"; "y1"; "y2"; "y3"; "nm0"; "nm1"; "nm2"; "nm3"] do
             globalStorages[n].Address <- ""       // force to allocate Memory
 
         let projectParams = {
@@ -166,7 +166,7 @@ type XgiPOUTest() =
         let xml = projectParams.GenerateXmlString()
 
         globalStorages["gg1"].Address === null
-        globalStorages["xm0"].Address === "%MX24"
+        globalStorages["xm0"].Address === "%MX320"
 
         saveTestResult f xml
 

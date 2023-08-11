@@ -1,6 +1,6 @@
 namespace PLC.CodeGen.LSXGI
 
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open System.Xml
 open System
 

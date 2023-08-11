@@ -3,7 +3,7 @@ module Engine.CodeGenCPU.ConvertPort
 
 open Engine.CodeGenCPU
 open Engine.Core
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open System.Linq
 
 //Port 처리 Set 공용 함수

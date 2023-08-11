@@ -2,8 +2,8 @@ namespace T
 
 open NUnit.Framework
 open Engine.Core
-open Engine.Common.FS.Log4NetWrapper
-open Engine.Common.FS
+open Dual.Common.Core.FS.Log4NetWrapper
+open Dual.Common.Core.FS
 
 
 [<AutoOpen>]

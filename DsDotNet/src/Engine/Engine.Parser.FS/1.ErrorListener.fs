@@ -4,7 +4,7 @@ namespace Engine.Parser.FS
 open System.IO
 open System.Runtime.InteropServices
 open Antlr4.Runtime
-open Engine.Common.FS
+open Dual.Common.Core.FS
 
 type ParserError(line:int, column:int, message:string, ambient:string)=
     member val Line = line

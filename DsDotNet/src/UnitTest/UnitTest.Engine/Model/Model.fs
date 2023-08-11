@@ -4,7 +4,7 @@ namespace T
 open System.Linq
 open Engine
 open Engine.Core
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open NUnit.Framework
 open Engine.Parser.FS
 

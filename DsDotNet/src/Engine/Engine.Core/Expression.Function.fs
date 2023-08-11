@@ -2,7 +2,7 @@ namespace rec Engine.Core
 open System
 open System.Linq
 open System.Runtime.CompilerServices
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open System.Collections.Generic
 
 module private ExpressionHelperModule =

@@ -1,10 +1,10 @@
 namespace Engine.CodeGenCPU
 
 open Engine.Core
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open System.Text.RegularExpressions
 open System
-open Engine.Common.FS.ForwardDecl.ShowForwardDeclSample
+open Dual.Common.Core.FS.ForwardDecl.ShowForwardDeclSample
 
 [<AutoOpen>]
 module TagManagerUtil =

@@ -3,6 +3,7 @@
   <PropertyGroup>
 	  <TargetFramework>net6.0</TargetFramework>
 	  <PlatformTarget>x86</PlatformTarget>
+	  <NoWarn>NU1702</NoWarn>			<!--ProjectReference 'F:\Git\ds\DsDotNet\src\PLC\DriverIO\Dsu.PLC.LS.FS\Dsu.PLC.LS.FS.fsproj' was resolved using '.NETFramework,Version=v4.8' instead of the project target framework '.NETCoreApp,Version=v6.0'. This project may not be fully compatible with your project.-->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -39,9 +40,9 @@
 		<Reference Include="Interop.XGCommLib">
 		  <HintPath>..\UnitTest.PLC.HW.LS.XgCommLib.x64\LsXgCOM\Interop.XGCommLib.dll</HintPath>
 		</Reference>
-		<Reference Include="log4net">
+		<!--<Reference Include="log4net">
 			<HintPath>..\..\..\exLib\log4net.dll</HintPath>
-		</Reference>
+		</Reference>-->
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="LsXgCOM\" />

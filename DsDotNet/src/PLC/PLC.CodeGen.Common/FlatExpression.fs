@@ -1,7 +1,7 @@
 namespace PLC.CodeGen.Common
 
 open System.Diagnostics
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Engine.Core
 
 [<AutoOpen>]

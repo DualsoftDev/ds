@@ -1,4 +1,6 @@
-using Engine.Common;
+using Dual.Common.Winform;
+using Dual.Common.Core;
+
 using Engine.Core;
 using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;

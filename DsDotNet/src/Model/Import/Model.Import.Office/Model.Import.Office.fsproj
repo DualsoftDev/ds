@@ -36,12 +36,11 @@
   <ItemGroup>
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.18.0" />
     <PackageReference Include="Microsoft.Office.Interop.Excel" Version="15.0.4795.1001" />
-    <PackageReference Include="System.Reactive" Version="5.0.0" />
+    <PackageReference Include="System.Reactive" Version="6.0.0" />
   </ItemGroup>
 
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Engine\Engine.Common.FS\Engine.Common.FS.fsproj" />
     <ProjectReference Include="..\..\..\Engine\Engine.Core\Engine.Core.fsproj" />
     <ProjectReference Include="..\..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
   </ItemGroup>

@@ -1,6 +1,7 @@
-using Engine.Common.FS;
 using System.Reflection;
 using System.Threading;
+using Dual.Common.Core;
+using Dual.Common.Core.FS;
 
 namespace Engine.Sample;
 
@@ -20,10 +21,9 @@ class Program
 
         //PrepareThreadPool();
         SimpleExceptionHandler.InstallExceptionHandler();
-        DllVersionChecker.IsValidExDLL(Assembly.GetExecutingAssembly());
-        var logger = Log4NetHelper.PrepareLog4Net("EngineLogger");
+        //DllVersionChecker.IsValidExDLL(Assembly.GetExecutingAssembly());
+        var logger = Log4NetLogger.PrepareLog4Net("EngineLogger");
         Log4NetWrapper.SetLogger(logger);
-        Global.Logger = logger;
 
         logger.Info("Sample Runner started.");
 

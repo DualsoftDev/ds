@@ -1,7 +1,7 @@
 namespace Engine.Cpu
 
 open Engine.Core
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open System
 open System.Linq
 open System.Reactive.Linq

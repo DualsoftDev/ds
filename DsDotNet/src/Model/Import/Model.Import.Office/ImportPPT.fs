@@ -4,7 +4,7 @@ namespace Model.Import.Office
 open System.Linq
 open PPTObjectModule
 open System.Collections.Generic
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open Model.Import.Office
 open Engine.Core
 open System.IO

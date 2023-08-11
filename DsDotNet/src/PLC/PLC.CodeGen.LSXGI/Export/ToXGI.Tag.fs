@@ -2,7 +2,7 @@ namespace PLC.CodeGen.LSXGI
 
 open System.Diagnostics
 
-open Engine.Common.FS
+open Dual.Common.Core.FS
 open System.Security
 open Engine.Core
 open System

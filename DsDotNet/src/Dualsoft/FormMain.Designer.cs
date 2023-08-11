@@ -77,6 +77,9 @@ namespace Dualsoft
             this.accordionControlElement_Setting = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement9 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement_ResetLayout = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlElement8 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlElement10 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlElement_HMI = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             ((System.ComponentModel.ISupportInitialize)(this.document1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dockManager)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManager1)).BeginInit();
@@ -291,11 +294,11 @@ namespace Dualsoft
             this.accordionControlSeparator2,
             this.accordionControlElement_Import,
             this.accordionControlSeparator3,
-            this.accordionControlElement_Export,
             this.accordionControlSeparator1,
             this.accordionControlElement_Setting});
             this.accordionControl2.Location = new System.Drawing.Point(0, 0);
             this.accordionControl2.Name = "accordionControl2";
+            this.accordionControl2.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Footer;
             this.accordionControl2.ScrollBarMode = DevExpress.XtraBars.Navigation.ScrollBarMode.Touch;
             this.accordionControl2.Size = new System.Drawing.Size(260, 818);
             this.accordionControl2.TabIndex = 22;
@@ -330,9 +333,8 @@ namespace Dualsoft
             this.accordionControlElement_sim.Appearance.Default.Font = new System.Drawing.Font("Tahoma", 12F);
             this.accordionControlElement_sim.Appearance.Default.Options.UseFont = true;
             this.accordionControlElement_sim.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
-            this.accordionControlElement_Play,
-            this.accordionControlElement_Stop,
-            this.accordionControlElement_Reset});
+            this.accordionControlElement10,
+            this.accordionControlElement_HMI});
             this.accordionControlElement_sim.Expanded = true;
             this.accordionControlElement_sim.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement_sim.ImageOptions.SvgImage")));
             this.accordionControlElement_sim.Name = "accordionControlElement_sim";
@@ -364,12 +366,12 @@ namespace Dualsoft
             this.accordionControlElement_Import.Appearance.Default.Font = new System.Drawing.Font("Tahoma", 12F);
             this.accordionControlElement_Import.Appearance.Default.Options.UseFont = true;
             this.accordionControlElement_Import.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
-            this.accordionControlElement_ImportPPT,
-            this.accordionControlElement_ImportXls});
+            this.accordionControlElement8,
+            this.accordionControlElement_Export});
             this.accordionControlElement_Import.Expanded = true;
             this.accordionControlElement_Import.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement_Import.ImageOptions.SvgImage")));
             this.accordionControlElement_Import.Name = "accordionControlElement_Import";
-            this.accordionControlElement_Import.Text = "가져오기";
+            this.accordionControlElement_Import.Text = "가져오기/내보내기";
             // 
             // accordionControlElement_ImportPPT
             // 
@@ -488,6 +490,7 @@ namespace Dualsoft
             this.accordionControlElement9.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.accordionControlElement_ResetLayout});
             this.accordionControlElement9.Expanded = true;
+            this.accordionControlElement9.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement9.ImageOptions.SvgImage")));
             this.accordionControlElement9.Name = "accordionControlElement9";
             this.accordionControlElement9.Text = "Layout";
             // 
@@ -498,6 +501,34 @@ namespace Dualsoft
             this.accordionControlElement_ResetLayout.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.accordionControlElement_ResetLayout.Text = "복원";
             this.accordionControlElement_ResetLayout.Click += new System.EventHandler(this.accordionControlElement_ResetLayout_Click);
+            // 
+            // accordionControlElement8
+            // 
+            this.accordionControlElement8.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
+            this.accordionControlElement_ImportXls,
+            this.accordionControlElement_ImportPPT});
+            this.accordionControlElement8.Expanded = true;
+            this.accordionControlElement8.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement8.ImageOptions.SvgImage")));
+            this.accordionControlElement8.Name = "accordionControlElement8";
+            this.accordionControlElement8.Text = "가져오기";
+            // 
+            // accordionControlElement10
+            // 
+            this.accordionControlElement10.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
+            this.accordionControlElement_Play,
+            this.accordionControlElement_Stop,
+            this.accordionControlElement_Reset});
+            this.accordionControlElement10.Expanded = true;
+            this.accordionControlElement10.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement10.ImageOptions.SvgImage")));
+            this.accordionControlElement10.Name = "accordionControlElement10";
+            this.accordionControlElement10.Text = "Control";
+            // 
+            // accordionControlElement_HMI
+            // 
+            this.accordionControlElement_HMI.Expanded = true;
+            this.accordionControlElement_HMI.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement11.ImageOptions.SvgImage")));
+            this.accordionControlElement_HMI.Name = "accordionControlElement_HMI";
+            this.accordionControlElement_HMI.Text = "HMI";
             // 
             // FormMain
             // 
@@ -586,5 +617,8 @@ namespace Dualsoft
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement_Setting;
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement9;
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement_ResetLayout;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement8;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement10;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement_HMI;
     }
 }

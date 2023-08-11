@@ -55,8 +55,8 @@ type VertexManager with
         let sets =
             shareds @ [v]
             |>Seq.collect(fun r ->
-                getResetWeakEdgeSources(r, true)
-                |>Seq.map(fun s -> s.V.GetPureReal().V, [s].GetResetWeakCausals(r).Head())
+                getResetWeakEdgeSources(r)
+                |>Seq.map(fun s -> s.V.GetPureReal().V, [s].GetResetCausals(r).Head())
             )
 
         sets

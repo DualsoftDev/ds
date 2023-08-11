@@ -32,7 +32,9 @@ namespace Dualsoft
 
     public static class K
     {
+        public const string AppName = "Dualsoft";
         public const string RegSkin = "RegSkin";
+        public const string LastPath = "LastPath";
        
 
     }

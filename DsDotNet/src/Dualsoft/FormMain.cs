@@ -1,6 +1,12 @@
 using DevExpress.XtraEditors;
+using Engine.Common.FS;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Dualsoft
 {
@@ -28,6 +34,10 @@ namespace Dualsoft
                 if (e.Control == null)  //Devexpress MDI Control
                     e.Control = new System.Windows.Forms.Control();
             };
+            ProcessEvent.ProcessSubject.Subscribe(rx =>
+            {
+                UpdateProcessUI(rx.pro);
+            });
         }
 
         private void FormMain_Shown(object sender, EventArgs e)
@@ -53,26 +63,18 @@ namespace Dualsoft
         }
 
 
-        private void CreateNewDocument()
-        {
-            //string docKey = "Task1";
-            //BaseDocument document = tabbedView1.Documents.Where(w => w.Control.Name == docKey).FirstOrDefault();
-            //if (document != null) tabbedView1.Controller.Activate(document);
-            //else
-            //{
-            //    //UCTaskUI_Form form = new UCTaskUI_Form();
-            //    //form.Name = docKey;
-            //    //form.MdiParent = this;
-            //    //form.Text = docKey;
-            //    //form.Show();
-            //    document = tabbedView1.Documents.Where(w => w.Control.Name == docKey).FirstOrDefault();
-            //    document.Caption = docKey;
-            //}
-        }
+     
 
         private void accordionControlElement_ImportPPT_Click(object sender, EventArgs e)
         {
-
+            if (ProcessEvent.IsBusy())
+                XtraMessageBox.Show("파일 처리중 입니다.", $"{K.AppName}", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            else
+            {
+                var files = FileOpenSave.OpenFiles();
+                if(!files.IsNullOrEmpty())
+                    ImportPowerPoint(files);
+            }
         }
 
         private void accordionControlElement_ImportXls_Click(object sender, EventArgs e)

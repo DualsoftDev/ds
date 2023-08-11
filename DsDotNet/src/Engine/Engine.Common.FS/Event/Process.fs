@@ -17,3 +17,4 @@ module ProcessEvent =
         currProcess <- pro
         ProcessSubject.OnNext(ProParam.PRO (DateTime.Now, pro))
 
+    let IsBusy()  = 0 < currProcess && currProcess < 100 

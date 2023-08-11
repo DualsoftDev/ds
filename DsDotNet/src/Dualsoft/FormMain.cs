@@ -70,6 +70,15 @@ namespace Dualsoft
             //}
         }
 
+        private void accordionControlElement_ImportPPT_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void accordionControlElement_ImportXls_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 
 }

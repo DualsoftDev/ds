@@ -34,6 +34,7 @@ namespace Dualsoft
             this.dockManager = new DevExpress.XtraBars.Docking.DockManager(this.components);
             this.barManager1 = new DevExpress.XtraBars.BarManager(this.components);
             this.bar3 = new DevExpress.XtraBars.Bar();
+            this.skinPaletteDropDownButtonItem1 = new DevExpress.XtraBars.SkinPaletteDropDownButtonItem();
             this.barStaticItem1 = new DevExpress.XtraBars.BarStaticItem();
             this.barDockControlTop = new DevExpress.XtraBars.BarDockControl();
             this.barDockControlBottom = new DevExpress.XtraBars.BarDockControl();
@@ -53,7 +54,8 @@ namespace Dualsoft
             this.accordionControlElement_sim = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement_Import = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement_Export = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.skinPaletteDropDownButtonItem1 = new DevExpress.XtraBars.SkinPaletteDropDownButtonItem();
+            this.accordionControlElement_ImportPPT = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlElement_ImportXls = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             ((System.ComponentModel.ISupportInitialize)(this.document1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dockManager)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManager1)).BeginInit();
@@ -124,6 +126,11 @@ namespace Dualsoft
             this.bar3.OptionsBar.DrawDragBorder = false;
             this.bar3.OptionsBar.UseWholeRow = true;
             this.bar3.Text = "Status bar";
+            // 
+            // skinPaletteDropDownButtonItem1
+            // 
+            this.skinPaletteDropDownButtonItem1.Id = 1;
+            this.skinPaletteDropDownButtonItem1.Name = "skinPaletteDropDownButtonItem1";
             // 
             // barStaticItem1
             // 
@@ -273,6 +280,10 @@ namespace Dualsoft
             // 
             this.accordionControlElement_Import.Appearance.Default.Font = new System.Drawing.Font("Tahoma", 12F);
             this.accordionControlElement_Import.Appearance.Default.Options.UseFont = true;
+            this.accordionControlElement_Import.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
+            this.accordionControlElement_ImportPPT,
+            this.accordionControlElement_ImportXls});
+            this.accordionControlElement_Import.Expanded = true;
             this.accordionControlElement_Import.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement_Import.ImageOptions.SvgImage")));
             this.accordionControlElement_Import.Name = "accordionControlElement_Import";
             this.accordionControlElement_Import.Text = "가져오기";
@@ -285,10 +296,19 @@ namespace Dualsoft
             this.accordionControlElement_Export.Name = "accordionControlElement_Export";
             this.accordionControlElement_Export.Text = "내보내기";
             // 
-            // skinPaletteDropDownButtonItem1
+            // accordionControlElement_ImportPPT
             // 
-            this.skinPaletteDropDownButtonItem1.Id = 1;
-            this.skinPaletteDropDownButtonItem1.Name = "skinPaletteDropDownButtonItem1";
+            this.accordionControlElement_ImportPPT.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement_ImportPPT.ImageOptions.SvgImage")));
+            this.accordionControlElement_ImportPPT.Name = "accordionControlElement_ImportPPT";
+            this.accordionControlElement_ImportPPT.Text = "파워포인트";
+            this.accordionControlElement_ImportPPT.Click += new System.EventHandler(this.accordionControlElement_ImportPPT_Click);
+            // 
+            // accordionControlElement_ImportXls
+            // 
+            this.accordionControlElement_ImportXls.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement_ImportXls.ImageOptions.SvgImage")));
+            this.accordionControlElement_ImportXls.Name = "accordionControlElement_ImportXls";
+            this.accordionControlElement_ImportXls.Text = "엑셀";
+            this.accordionControlElement_ImportXls.Click += new System.EventHandler(this.accordionControlElement_ImportXls_Click);
             // 
             // FormMain
             // 
@@ -353,5 +373,7 @@ namespace Dualsoft
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement_Import;
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement_Export;
         private DevExpress.XtraBars.SkinPaletteDropDownButtonItem skinPaletteDropDownButtonItem1;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement_ImportPPT;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement_ImportXls;
     }
 }

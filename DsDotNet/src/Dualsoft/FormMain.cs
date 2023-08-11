@@ -82,12 +82,7 @@ namespace Dualsoft
             }
         }
 
-        private void accordionControlElement_ImportXls_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        
+     
     }
 
 }

@@ -67,7 +67,7 @@ namespace Dualsoft
             //layoutSetting.Decay = 0.8;
 
             viewer.Graph.LayoutAlgorithmSettings = layoutSetting;
-            SetBackColor(System.Drawing.Color.FromArgb(133,133, 133));
+            SetBackColor(System.Drawing.Color.FromArgb(33, 33, 33));
 
             viewNode.Singles.ForEach(f => DrawSeg(viewer.Graph.RootSubgraph, f));
             viewNode.Edges.ForEach(f => DrawMEdge(viewer.Graph.RootSubgraph, f));

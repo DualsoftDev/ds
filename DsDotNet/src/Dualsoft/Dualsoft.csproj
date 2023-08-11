@@ -149,7 +149,7 @@
     <Compile Include="Utils\FileOpenSave.cs" />
     <Compile Include="Utils\EditorSkin.cs" />
     <Compile Include="Utils\LayoutForm.cs" />
-    <Compile Include="Utils\Global.cs" />
+    <Compile Include="Utils\GlobalStatic.cs" />
     <Compile Include="Utils\SplashScreenDS.cs">
       <SubType>Form</SubType>
     </Compile>

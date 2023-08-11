@@ -14,7 +14,7 @@ namespace Dualsoft
             {
                 openFileDialog.InitialDirectory =
                     DSRegistry.GetValue(K.LastPath) == null ?
-                    Global.DefaultFolder : DSRegistry.GetValue(K.LastPath).ToString();
+                    GlobalStatic.DefaultFolder : DSRegistry.GetValue(K.LastPath).ToString();
 
                 openFileDialog.Filter =
                 "PPTX files (*.pptx)|*.pptx|" +

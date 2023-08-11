@@ -8,19 +8,19 @@ namespace Dualsoft
 
         internal static void LoadLayout(DockManager docM)
         {
-            if (!Directory.Exists(Global.DefaultAppSettingFolder))
-                Directory.CreateDirectory(Global.DefaultAppSettingFolder);
+            if (!Directory.Exists(GlobalStatic.DefaultAppSettingFolder))
+                Directory.CreateDirectory(GlobalStatic.DefaultAppSettingFolder);
 
             docM.BeginUpdate();
-            docM.SaveLayoutToXml($"{Global.DefaultAppSettingFolder}\\default_layout.xml");
-            if (File.Exists($"{Global.DefaultAppSettingFolder}\\layout.xml"))
-                docM.RestoreLayoutFromXml($"{Global.DefaultAppSettingFolder}\\layout.xml");
+            docM.SaveLayoutToXml($"{GlobalStatic.DefaultAppSettingFolder}\\default_layout.xml");
+            if (File.Exists($"{GlobalStatic.DefaultAppSettingFolder}\\layout.xml"))
+                docM.RestoreLayoutFromXml($"{GlobalStatic.DefaultAppSettingFolder}\\layout.xml");
             docM.EndUpdate();
         }
 
         internal static void SaveLayout(DockManager docM)
         {
-            docM.SaveLayoutToXml($"{Global.DefaultAppSettingFolder}\\layout.xml");
+            docM.SaveLayoutToXml($"{GlobalStatic.DefaultAppSettingFolder}\\layout.xml");
         }
     }
 }

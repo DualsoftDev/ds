@@ -1,4 +1,6 @@
 using DevExpress.LookAndFeel;
+using Dual.Common.Core;
+using Dual.Common.Winform;
 using System;
 using System.Windows.Forms;
 
@@ -14,7 +16,18 @@ namespace Dualsoft
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            var exceptionHander = new Action<Exception>(ex =>
+            {
+                Log4NetLogger.Logger.Error($":::: Unhandled exception\r\n{ex}");
+#if DEBUG
+                MBox.Error(ex.Message, "Error");
+#endif
+            });
 
+            UnhandledExceptionHandler.DefaultActionOnUnhandledException = exceptionHander;
+            UnhandledExceptionHandler.DefaultActionOnUnhandledThreadException = exceptionHander;
+            UnhandledExceptionHandler.DefaultActionOnUnhandledUnobservedTaskException = exceptionHander;
+            UnhandledExceptionHandler.InstallUnhandledExceptionHandler();
 
             EditorSkin.InitSetting(SkinSvgPalette.Bezier.VSBlue);
             var main = new FormMain();

@@ -1,4 +1,6 @@
 using DevExpress.LookAndFeel;
+using DevExpress.XtraSplashScreen;
+using DSModeler.Utils;
 using Dual.Common.Core;
 using Dual.Common.Winform;
 using System;
@@ -31,10 +33,9 @@ namespace DSModeler
             UnhandledExceptionHandler.DefaultActionOnUnhandledThreadException = exceptionHander;
             UnhandledExceptionHandler.DefaultActionOnUnhandledUnobservedTaskException = exceptionHander;
             UnhandledExceptionHandler.InstallUnhandledExceptionHandler();
-
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            EditorSkin.InitSetting(SkinSvgPalette.Bezier.VSBlue);
+            EditorSkin.InitSetting("The Bezier", "Gloom Gloom");
             var main = new FormMain();
 #if !DEBUG
             SplashScreenManager.ShowForm(main, typeof(SplashScreenDS));

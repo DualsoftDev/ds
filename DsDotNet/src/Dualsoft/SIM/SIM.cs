@@ -1,11 +1,8 @@
-using DevExpress.XtraBars.Navigation;
 using Dual.Common.Core;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using static Engine.CodeGenCPU.ConvertCoreExt;
-using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.Core.CoreModule;
 using static Engine.Core.Interface;
 using static Engine.Core.TagKindModule;
@@ -43,12 +40,20 @@ namespace DSModeler
                 var system = f.Key;
                 var cpu = f.Value;
 
-                cpu.Run();
                 SIM.RunSimMode(system);
+                cpu.Run();
             });
         }
         public static void Step(Dictionary<DsSystem, DsCPU> dic)
         {
+            dic.ForEach(f =>
+            {
+                var system = f.Key;
+                var cpu = f.Value;
+
+                SIM.RunSimMode(system);
+                cpu.Step();
+            });
         }
         public static void Stop(Dictionary<DsSystem, DsCPU> dic)
         {
@@ -60,6 +65,11 @@ namespace DSModeler
         }
         public static void Reset(Dictionary<DsSystem, DsCPU> dic)
         {
+            dic.ForEach(f =>
+            {
+                var cpu = f.Value;
+                cpu.Reset();
+            });
         }
     }
 

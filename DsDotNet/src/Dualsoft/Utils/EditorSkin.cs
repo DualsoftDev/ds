@@ -15,7 +15,7 @@ namespace DSModeler
             return DSRegistry.GetValue(K.RegSkin).ToString();
         }
 
-        internal static void InitSetting(SkinSvgPalette defaultSkin)
+        internal static void InitSetting(string skinName, string skinPalette)
         {
             UserLookAndFeel.Default.StyleChanged += (s, e) =>
             {
@@ -24,13 +24,13 @@ namespace DSModeler
             };
 
             if (DSRegistry.GetValue(K.RegSkin) == null)
-                UserLookAndFeel.Default.SetSkinStyle(defaultSkin);
+                UserLookAndFeel.Default.SetSkinStyle(skinName, skinPalette);
             else
             {
                 var skin = GetSkin();
-                var skinName = skin.Split(';')[0];
-                var skinPalette = skin.Split(';')[1];
-                UserLookAndFeel.Default.SetSkinStyle(skinName, skinPalette);
+                var sn = skin.Split(';')[0];
+                var sp = skin.Split(';')[1];
+                UserLookAndFeel.Default.SetSkinStyle(sn, sp);
             }
         }
     }

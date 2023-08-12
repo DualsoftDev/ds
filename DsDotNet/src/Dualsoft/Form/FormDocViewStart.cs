@@ -5,10 +5,6 @@ namespace DSModeler.Form
         public FormDocViewStart()
         {
             InitializeComponent();
-
-        
         }
-
-
     }
 }

@@ -1,15 +1,7 @@
 using DevExpress.XtraBars.Navigation;
-using Dual.Common.Core;
-using Dual.Common.Core.FS;
 using Model.Import.Office;
-using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using static Engine.CodeGenCPU.TagManagerModule;
-using static Engine.Core.CoreModule;
 using static Model.Import.Office.ImportPPTModule;
-using static Model.Import.Office.ViewModule;
 
 namespace DSModeler
 {
@@ -27,7 +19,7 @@ namespace DSModeler
             }
         }
 
-        public static List<AccordionControlElement> AppandFlows(PptResult ppt, AccordionControlElement ele)
+        public static List<AccordionControlElement> AppandFlows(FormMain formMain, PptResult ppt, AccordionControlElement ele)
         {
             List<AccordionControlElement> lstAce = new List<AccordionControlElement>();
             foreach (var v in ppt.Views)
@@ -36,6 +28,9 @@ namespace DSModeler
 
                 var eleFlow = new AccordionControlElement()
                 { Style = ElementStyle.Item, Text = v.Flow.Value.Name, Tag = v };
+                eleFlow.Click += (s, e) => {
+                    formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
+                };
                 lstAce.Add(eleFlow);
                 ele.Elements.Add(eleFlow);
             }

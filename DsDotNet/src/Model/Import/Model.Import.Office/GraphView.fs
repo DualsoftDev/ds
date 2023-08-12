@@ -59,7 +59,7 @@ module rec ViewModule =
                             [
                                 yield! thisChildren
                                 yield! thisChildren |> Seq.collect(fun x->x.UsedViewNodes)
-                            ]
+                            ] |> Seq.distinct
 
 
     let getViewEdge(edge:ModelingEdgeInfo<string> ,dummy:pptDummy , dummys:pptDummy seq,  dicV:IDictionary<Vertex, ViewNode>, dicDummy:IDictionary<string, ViewNode>) =

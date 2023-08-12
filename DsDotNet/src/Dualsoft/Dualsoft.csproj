@@ -43,6 +43,9 @@
     <Reference Include="DevExpress.XtraBars.v21.2" />
     <Reference Include="DevExpress.Sparkline.v21.2.Core" />
     <Reference Include="DevExpress.XtraEditors.v21.2" />
+    <Reference Include="DevExpress.XtraLayout.v21.2, Version=21.2.12.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraPrinting.v21.2, Version=21.2.12.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraVerticalGrid.v21.2, Version=21.2.12.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="Dual.Common.Core, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\DualSoft-Common-Core.0.1.8\lib\net48\Dual.Common.Core.dll</HintPath>
     </Reference>
@@ -83,6 +86,7 @@
     <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
     </Reference>
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -123,10 +127,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FormMain.UtilUI.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FormMain.Func.cs">
+    <Compile Include="FormMain.Events.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FormMain.Import.cs">
@@ -137,6 +138,18 @@
     </Compile>
     <Compile Include="FormMain.Designer.cs">
       <DependentUpon>FormMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form\FormDocPLCLS.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\FormDocPLCLS.Designer.cs">
+      <DependentUpon>FormDocPLCLS.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Form\FormDocDS.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form\FormDocDS.Designer.cs">
+      <DependentUpon>FormDocDS.cs</DependentUpon>
     </Compile>
     <Compile Include="Form\FormDocViewStart.cs">
       <SubType>Form</SubType>
@@ -152,25 +165,40 @@
     </Compile>
     <Compile Include="DocControl\DocControl.cs" />
     <Compile Include="Import\PPT.cs" />
+    <Compile Include="Utils\PropertyRecordExtension.cs" />
+    <Compile Include="Utils\UcPropertyGrid.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Utils\UcPropertyGrid.Designer.cs">
+      <DependentUpon>UcPropertyGrid.cs</DependentUpon>
+    </Compile>
     <Compile Include="SIM\SIM.cs" />
+    <Compile Include="Event\EventExternal.cs" />
     <Compile Include="Model\Model.cs" />
     <Compile Include="HMI\HMI.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UserControls\UcLog.cs">
+    <Compile Include="Utils\DXWaitForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Utils\DXWaitForm.Designer.cs">
+      <DependentUpon>DXWaitForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ViewDiagram\UCView.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UserControls\UcLog.Designer.cs">
+    <Compile Include="ViewDiagram\UCView.Designer.cs">
+      <DependentUpon>UCView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Log\UcLog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Log\UcLog.Designer.cs">
       <DependentUpon>UcLog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="UserControls\UcView.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UserControls\UcView.Designer.cs">
-      <DependentUpon>UcView.cs</DependentUpon>
     </Compile>
     <Compile Include="Utils\FileOpenSave.cs" />
     <Compile Include="Utils\EditorSkin.cs" />
+    <Compile Include="Utils\LastFiles.cs" />
     <Compile Include="Utils\LayoutForm.cs" />
     <Compile Include="Utils\GlobalStatic.cs" />
     <Compile Include="Utils\SplashScreenDS.cs">
@@ -182,6 +210,12 @@
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\FormDocPLCLS.resx">
+      <DependentUpon>FormDocPLCLS.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form\FormDocDS.resx">
+      <DependentUpon>FormDocDS.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form\FormDocViewStart.resx">
       <DependentUpon>FormDocViewStart.cs</DependentUpon>
@@ -200,11 +234,17 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="UserControls\UcLog.resx">
-      <DependentUpon>UcLog.cs</DependentUpon>
+    <EmbeddedResource Include="Utils\DXWaitForm.resx">
+      <DependentUpon>DXWaitForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UserControls\UcView.resx">
-      <DependentUpon>UcView.cs</DependentUpon>
+    <EmbeddedResource Include="Utils\UcPropertyGrid.resx">
+      <DependentUpon>UcPropertyGrid.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ViewDiagram\UCView.resx">
+      <DependentUpon>UCView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Log\UcLog.resx">
+      <DependentUpon>UcLog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Utils\SplashScreenDS.resx">
       <DependentUpon>SplashScreenDS.cs</DependentUpon>

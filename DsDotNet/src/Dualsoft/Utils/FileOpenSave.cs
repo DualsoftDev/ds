@@ -19,7 +19,7 @@ namespace DSModeler
                 openFileDialog.Filter =
                 "PPTX files (*.pptx)|*.pptx|" +
                 "All files (*.*)|*.*";
-                openFileDialog.Multiselect = true;
+                openFileDialog.Multiselect = false;  //단일 파일로 동일 폴더에 경로에 있는것을 Active로 자동 해석
                 if (openFileDialog.ShowDialog() != DialogResult.OK)
                     return null;
 

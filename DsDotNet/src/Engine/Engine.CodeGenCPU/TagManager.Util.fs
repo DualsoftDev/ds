@@ -89,10 +89,18 @@ module TagManagerUtil =
 
     type InOut = | In | Out | Memory
     type BridgeType = | Device | Button | Lamp | Condition
+    let mutable inCnt = -1;
+    let mutable outCnt = -1;
+    let mutable memCnt = -1;
+    let resetSimDevCnt() = inCnt<- -1;outCnt<- -1;memCnt<- -1;
     let createBridgeTag(stg:Storages, name, addr:string, inOut:InOut, bridge:BridgeType, sys): ITag option=
         let address =
             if Runtime.Package = RuntimePackage.Simulation
-            then Some("simTag")
+            then
+                match inOut with
+                | In     -> inCnt<-inCnt+1;  Some($"%%MX{inCnt}")
+                | Out    -> outCnt<-outCnt+1;Some($"%%MX{100000+outCnt}")
+                | Memory ->  failwithlog "error: Memory not supported "
             else                 
                 let addr = addr.ToUpper()
                 match bridge with

@@ -1,3 +1,4 @@
+using DevExpress.Utils.Routing;
 using Dual.Common.Core;
 using Dual.Common.Winform;
 using Engine.Core;
@@ -25,6 +26,7 @@ namespace DSModeler
         private readonly GViewer viewer = new Microsoft.Msagl.GraphViewerGdi.GViewer();
 
         public Flow Flow { get; set; }
+        public ViewNode MasterNode { get; set; }
         public UcView()
         {
             InitializeComponent();
@@ -49,6 +51,7 @@ namespace DSModeler
         public void SetGraph(ViewNode viewNode, Flow flow)
         {
             Flow = flow;
+            MasterNode = viewNode;
             //sub 그래프 불가
             //viewer.Graph.LayoutAlgorithmSettings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings();
             //viewer.Graph.LayoutAlgorithmSettings = new RankingLayoutSettings();

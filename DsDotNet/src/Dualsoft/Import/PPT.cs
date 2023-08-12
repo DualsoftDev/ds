@@ -1,30 +1,22 @@
 using DevExpress.XtraBars.Docking2010.Views.Tabbed;
-using DevExpress.XtraBars.Docking2010.Views;
 using DevExpress.XtraBars.Navigation;
-using DSModeler.Form;
-using Dual.Common.Core;
-using Model.Import.Office;
-using System;
-using System.Drawing;
-using System.Linq;
-using static Engine.CodeGenCPU.TagManagerModule;
-using static Engine.Core.CoreModule;
-using static Model.Import.Office.ImportPPTModule;
-using static Model.Import.Office.ViewModule;
-using DevExpress.XtraEditors;
+using DevExpress.XtraPrinting.BarCode;
 using Dual.Common.Core.FS;
-using System.Windows.Forms;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using static Engine.CodeGenCPU.CpuLoader;
+using static Engine.Core.CoreModule;
 using static Engine.Core.Interface;
 using static Engine.Cpu.RunTime;
-using System.Collections.Generic;
-using System.IO;
+using static Model.Import.Office.ImportPPTModule;
+using static Model.Import.Office.ViewModule;
 
 namespace DSModeler
 {
     public static class PPT
     {
-      
+
         public static Dictionary<DsSystem, DsCPU> ImportPowerPoint(string[] files
             , FormMain formMain
             , TabbedView tab
@@ -47,18 +39,22 @@ namespace DSModeler
                     foreach (var pou in pous)
                         dicCpu.Add(pou.ToSystem(), new DsCPU(pou.CommentedStatements(), pou.ToSystem()));
 
-                    HMI.CreateHMIBtn(ace_HMI, ppt.System);
+                    HMI.CreateHMIBtn(formMain, ace_HMI, ppt.System);
+                    formMain.ActiveSys = ppt.System;
                 }
 
                 var ele = new AccordionControlElement()
-                { Style = ElementStyle.Group, Text = ppt.System.Name };
+                { Style = ElementStyle.Group, Text = ppt.System.Name , Tag = ppt.System};
+                ele.Click += (s, e) => {
+                    formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
+                };
 
                 if (ppt.IsActive)
                     ace_System.Elements.Add(ele);
                 else
                     ace_Device.Elements.Add(ele);
 
-                var lstFlowAce = Model.AppandFlows(ppt, ele);
+                var lstFlowAce = Model.AppandFlows(formMain, ppt, ele);
                 lstFlowAce.ForEach(f =>
                     f.Click += (s, e) =>
                     {
@@ -71,7 +67,7 @@ namespace DSModeler
             ace_System.Expanded = true;
             ace_Device.Expanded = false;
             ProcessEvent.DoWork(100);
-
+            
             return dicCpu;
         }
     }

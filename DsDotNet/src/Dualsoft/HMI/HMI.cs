@@ -3,6 +3,7 @@ using Dual.Common.Core;
 using System;
 using System.Drawing;
 using System.Linq;
+using System.Windows.Forms;
 using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.Core.CoreModule;
 
@@ -10,16 +11,22 @@ namespace DSModeler
 {
     public static class HMI
     {
-        public static void CreateHMIBtn(AccordionControlElement ace_HMI, DsSystem sys)
+        public static void CreateHMIBtn(FormMain formMain, AccordionControlElement ace_HMI, DsSystem sys)
         {
             var eleSys = new AccordionControlElement()
-            { Style = ElementStyle.Group, Text = sys.Name };
+            { Style = ElementStyle.Group, Text = sys.Name, Tag = sys };
+            eleSys.Click += (s, e) => {
+                formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
+            };
             ace_HMI.Elements.Add(eleSys);
 
             foreach (var flow in sys.Flows)
             {
                 var eleFlow = new AccordionControlElement()
-                { Style = ElementStyle.Group, Text = flow.Name };
+                { Style = ElementStyle.Group, Text = flow.Name, Tag = flow };
+                eleFlow.Click += (s, e) => {
+                    formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
+                };
                 eleSys.Elements.Add(eleFlow);
 
                 flow.Graph.Vertices
@@ -27,7 +34,10 @@ namespace DSModeler
                .OfType<Real>()
                .ForEach(v =>
                {
-                   var realEle = new AccordionControlElement() { Style = ElementStyle.Item, Text = $"{v.Name}" };
+                   var realEle = new AccordionControlElement() { Style = ElementStyle.Item, Text = $"{v.Name}", Tag = v };
+                   realEle.Click += (s, e) => { 
+                       formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
+                   };
                    AccordionContextButton acb1 = createAcb(v, false);
                    AccordionContextButton acb2 = createAcb(v, true);
 

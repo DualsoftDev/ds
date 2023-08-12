@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DSModeler
@@ -179,7 +180,7 @@ namespace DSModeler
         public async void DoAppend(LoggingEvent logEntry)
         {
             await this.DoAsync(tcs =>
-            {
+            { 
                 try
                 {
                     var msg = logEntry.MessageObject.ToString();
@@ -214,6 +215,8 @@ namespace DSModeler
 
                 tcs.SetResult(true);
             });
+
+            await Task.Yield(); 
         }
     }
 }

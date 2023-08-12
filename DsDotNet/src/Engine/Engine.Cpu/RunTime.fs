@@ -85,13 +85,32 @@ module RunTime =
                 async {
                         while x.IsRunning
                             do x.ScanOnce()
-                               do! Async.Sleep(1)
+                               do! Async.Sleep(50)
                 }|> Async.StartImmediate
 
         member x.Stop() =
             if x.IsRunning then
                 runSubscription.Dispose()
                 runSubscription <- null
+
+        member x.Step() =
+            x.Stop() 
+            runSubscription <- runSubscribe()
+            x.ScanOnce() 
+            x.Stop() 
+
+        member x.Reset() =
+            x.Stop() 
+            sys.TagManager
+               .Storages.Where(fun w-> w.Value.TagKind <> (int)SystemTag.on)
+                        .Iter(fun s->
+                            let stg = s.Value
+                            match stg with
+                            | :? TimerCounterBaseStruct as tc ->()  //todo 타이머 카운터 리셋도 필요
+                            | _ -> 
+                                stg.BoxedValue <- textToDataType(stg.DataType.Name).DefaultValue()  
+                )   
+
 
         member x.Dispose() =  x.Stop()
         member x.System = sys

@@ -93,6 +93,8 @@ module ConvertCoreExt =
                     |> iter (fun t -> b.OutTag <- t)
 
         member x.GenerationIO() =
+            TagManagerUtil.resetSimDevCnt() 
+
             x.GenerationTaskDevIO()
             x.GenerationButtonIO()
             x.GenerationLampIO()

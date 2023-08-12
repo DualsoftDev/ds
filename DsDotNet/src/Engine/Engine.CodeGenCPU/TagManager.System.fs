@@ -24,7 +24,10 @@ module SystemManagerModule =
         let dsSysUint8  name autoAddr target (t:SystemTag) = (dsSysTag DuUINT8  name  autoAddr target t) :?> PlanVar<uint8>
         let dsSysUint16 name autoAddr target (t:SystemTag) = (dsSysTag DuUINT16 name  autoAddr target t) :?> PlanVar<uint16>
 
-        let on     = dsSysBit "_on"     false   sys   SystemTag.on
+        let on     = let onBit = dsSysBit "_on"     false   sys   SystemTag.on
+                     onBit.Value <- true  //항상 ON
+                     onBit
+
         let off    = dsSysBit "_off"    false   sys   SystemTag.off
         let auto   = dsSysBit "sysauto"   true  sys   SystemTag.auto
         let manual = dsSysBit "sysmanual" true  sys   SystemTag.manual

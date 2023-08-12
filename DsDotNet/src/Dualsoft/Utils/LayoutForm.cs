@@ -22,6 +22,12 @@ namespace DSModeler
         {
             docM.SaveLayoutToXml($"{Global.DefaultAppSettingFolder}\\layout.xml");
         }
+        internal static void RestoreLayoutFromXml(DockManager docM)
+        {
+            docM.RestoreLayoutFromXml($"{Global.DefaultAppSettingFolder}\\default_layout.xml");
+            docM.ForceInitialize();
+        }
+
     }
 }
 

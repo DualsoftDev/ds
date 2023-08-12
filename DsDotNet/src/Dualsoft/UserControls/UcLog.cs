@@ -1,9 +1,7 @@
 using DevExpress.XtraEditors.Controls;
 using Dual.Common.Core;
-using Dual.Common.Winform;
 using log4net.Appender;
 using log4net.Core;
-using log4net.Repository.Hierarchy;
 
 using System;
 using System.Data;
@@ -11,7 +9,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DSModeler
@@ -40,7 +37,7 @@ namespace DSModeler
             InitializeComponent();
         }
         System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UcLog));
-        Image copyImg => resources.GetObject("copyBtn.ImageOptions.Image") as Image;    
+        Image copyImg => resources.GetObject("copyBtn.ImageOptions.Image") as Image;
         Image clearImg => resources.GetObject("copyBtn.ImageOptions.Image") as Image;
         Image clearAllImg => resources.GetObject("copyAllBtn.ImageOptions.Image") as Image;
         Image logLevelBtnImg => resources.GetObject("logLevelBtn.ImageOptions.Image") as Image;
@@ -49,7 +46,7 @@ namespace DSModeler
         {
             this.Dock = DockStyle.Fill;
 
-           
+
         }
 
         public void InitLoad()
@@ -177,7 +174,7 @@ namespace DSModeler
         }
 
         public void Close() { }
-     
+
 
         public async void DoAppend(LoggingEvent logEntry)
         {

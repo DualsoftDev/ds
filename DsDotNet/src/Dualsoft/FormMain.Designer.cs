@@ -61,6 +61,7 @@ namespace DSModeler
             this.ace_sim = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace10 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Play = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.ace_Step = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Stop = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Reset = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_HMI = new DevExpress.XtraBars.Navigation.AccordionControlElement();
@@ -375,6 +376,7 @@ namespace DSModeler
             // 
             this.ace10.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.ace_Play,
+            this.ace_Step,
             this.ace_Stop,
             this.ace_Reset});
             this.ace10.Expanded = true;
@@ -384,26 +386,54 @@ namespace DSModeler
             // 
             // ace_Play
             // 
+            this.ace_Play.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.HeaderControl),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons)});
             this.ace_Play.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_Play.ImageOptions.SvgImage")));
             this.ace_Play.Name = "ace_Play";
             this.ace_Play.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-            this.ace_Play.Text = "PLAY";
+            this.ace_Play.Text = "   PLAY";
             this.ace_Play.Click += new System.EventHandler(this.ace_Play_Click);
+            // 
+            // ace_Step
+            // 
+            this.ace_Step.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.HeaderControl),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons)});
+            this.ace_Step.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_Step.ImageOptions.SvgImage")));
+            this.ace_Step.Name = "ace_Step";
+            this.ace_Step.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.ace_Step.Text = "   STEP";
+            this.ace_Step.Click += new System.EventHandler(this.ace_Step_Click);
             // 
             // ace_Stop
             // 
+            this.ace_Stop.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.HeaderControl),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons)});
             this.ace_Stop.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_Stop.ImageOptions.SvgImage")));
             this.ace_Stop.Name = "ace_Stop";
             this.ace_Stop.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-            this.ace_Stop.Text = "STOP";
+            this.ace_Stop.Text = "   STOP";
             this.ace_Stop.Click += new System.EventHandler(this.ace_Stop_Click);
             // 
             // ace_Reset
             // 
+            this.ace_Reset.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.HeaderControl),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons)});
             this.ace_Reset.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_Reset.ImageOptions.SvgImage")));
             this.ace_Reset.Name = "ace_Reset";
             this.ace_Reset.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-            this.ace_Reset.Text = "RESET";
+            this.ace_Reset.Text = "  RESET";
             this.ace_Reset.Click += new System.EventHandler(this.ace_Reset_Click);
             // 
             // ace_HMI
@@ -653,5 +683,6 @@ namespace DSModeler
         private UcView ucView1;
         private UcLog ucLog1;
         private DevExpress.XtraBars.Docking.DockPanel panelContainer1;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement ace_Step;
     }
 }

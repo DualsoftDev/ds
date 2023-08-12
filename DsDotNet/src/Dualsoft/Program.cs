@@ -15,7 +15,7 @@ namespace DSModeler
         [STAThread]
         static void Main()
         {
-        
+
             var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             Global.LogLevel = Log4NetLogger.Initialize(config.FilePath, "DSModelerLogger");  // "App.config"
 
@@ -39,7 +39,7 @@ namespace DSModeler
 #if !DEBUG
             SplashScreenManager.ShowForm(main, typeof(SplashScreenDS));
 #endif
-            
+
             Application.Run(main);
         }
     }

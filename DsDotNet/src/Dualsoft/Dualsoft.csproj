@@ -150,6 +150,11 @@
     <Compile Include="Form\FormDocView.Designer.cs">
       <DependentUpon>FormDocView.cs</DependentUpon>
     </Compile>
+    <Compile Include="DocControl\DocControl.cs" />
+    <Compile Include="Import\PPT.cs" />
+    <Compile Include="SIM\SIM.cs" />
+    <Compile Include="Model\Model.cs" />
+    <Compile Include="HMI\HMI.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserControls\UcLog.cs">

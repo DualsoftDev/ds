@@ -14,8 +14,6 @@
     <DefineConstants>TRACE;USEV20</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup />
-
   <ItemGroup>
     <Compile Include="..\UnitTest.PLC.HW.LS.XgCommLib.x64\LsXgCOM\TestFixture.PLC.HW.fs" Link="LsXgCOM\TestFixture.PLC.HW.fs" />
     <Compile Include="..\UnitTest.PLC.HW.LS.XgCommLib.x64\LsXgCOM\XgCOM.Read.fs" Link="LsXgCOM\XgCOM.Read.fs" />
@@ -24,6 +22,8 @@
   </ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.2" />
+		<PackageReference Include="DualSoft-PLC-LS-FS" Version="0.1.2" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
 		<PackageReference Include="FsUnit" Version="5.0.4" />
@@ -33,16 +33,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\PLC\DriverIO\Dsu.PLC.LS.FS\Dsu.PLC.LS.FS.fsproj" />
 		<ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="Interop.XGCommLib">
 		  <HintPath>..\UnitTest.PLC.HW.LS.XgCommLib.x64\LsXgCOM\Interop.XGCommLib.dll</HintPath>
 		</Reference>
-		<!--<Reference Include="log4net">
-			<HintPath>..\..\..\exLib\log4net.dll</HintPath>
-		</Reference>-->
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="LsXgCOM\" />

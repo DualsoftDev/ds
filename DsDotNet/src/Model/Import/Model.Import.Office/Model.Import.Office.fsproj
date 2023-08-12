@@ -5,8 +5,8 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<RootNamespace>Model.Import.Office</RootNamespace>
     <OutputType>Library</OutputType>
-
-    <AssemblyName>Model.Import.Office</AssemblyName>
+	  <OutputPath>$(SolutionDir)\bin</OutputPath>
+	  <AssemblyName>Model.Import.Office</AssemblyName>
 
     <Version>1.0.1</Version>
   </PropertyGroup>
@@ -36,30 +36,16 @@
   <ItemGroup>
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.18.0" />
     <PackageReference Include="Microsoft.Office.Interop.Excel" Version="15.0.4795.1001" />
-    <PackageReference Include="System.Reactive" Version="6.0.0" />
   </ItemGroup>
 
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Engine\Engine.Core\Engine.Core.fsproj" />
     <ProjectReference Include="..\..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
   </ItemGroup>
 
 
   <ItemGroup>
-    <Reference Include="DocumentFormat.OpenXml">
-      <HintPath>..\..\..\exLib\DocumentFormat.OpenXml.dll</HintPath>
-    </Reference>
-    <Reference Include="log4net">
-      <HintPath>..\..\..\..\exLib\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Reactive">
-      <HintPath>..\..\..\exLib\System.Reactive.dll</HintPath>
-    </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="7.0.0" />
-  </ItemGroup>
 </Project>

@@ -6,7 +6,8 @@
 		<LangVersion>7.0</LangVersion>
 		<!--<OutputType>Library</OutputType>-->
 		<!--<OutputType>Exe</OutputType>-->
-        <OtherFlags>--warnon:1182</OtherFlags>
+		<OutputPath>$(SolutionDir)\bin</OutputPath>
+		<OtherFlags>--warnon:1182</OtherFlags>
 	</PropertyGroup>
 
   <ItemGroup>
@@ -25,17 +26,9 @@
 	<Content Include="FodyWeavers.xml" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="log4net">
-      <HintPath>..\..\..\exLib\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\..\exLib\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+  
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="7.0.0" />
 	  <PackageReference Include="Fody" Version="6.6.4">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

@@ -6,5 +6,5 @@ open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module ControlServerHmiMap =
-    type HmiMap (model:Model) =
+    type HmiMap (__:Model) =
         member x.res = ""

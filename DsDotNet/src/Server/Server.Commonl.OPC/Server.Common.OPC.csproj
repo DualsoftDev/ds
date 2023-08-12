@@ -1,28 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net48</TargetFrameworks>
     <!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
 	  <LangVersion>11.0</LangVersion>
+	  <OutputPath>$(SolutionDir)\bin</OutputPath>
 	  <RootNamespace>Server.Control.Opc</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="FSharp.Core" Version="7.0.0" />
+	  <PackageReference Include="DualSoft-Common-Core" Version="0.1.7" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
     <ProjectReference Include="..\..\Engine\Engine.CodeGenHMI\Engine.CodeGenHMI.fsproj" />
     <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
   </ItemGroup>
-  <!--<ItemGroup>
-    <Reference Include="Confluent.Kafka">
-      <HintPath>..\..\..\exLib\Confluent.Kafka.dll</HintPath>
-    </Reference>
-    <Reference Include="log4net">
-      <HintPath>..\..\..\exLib\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Reactive">
-      <HintPath>..\..\exLib\System.Reactive.dll</HintPath>
-    </Reference>
-  </ItemGroup>-->
+  
 </Project>

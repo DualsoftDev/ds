@@ -38,11 +38,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
 	</ItemGroup>
-	<!--<ItemGroup>
-		<Reference Include="log4net">
-			<HintPath>..\..\..\exLib\log4net.dll</HintPath>
-		</Reference>
-	</ItemGroup>-->
+	
 	<ItemGroup>
 	  <Folder Include="Obsolete\" />
 	</ItemGroup>

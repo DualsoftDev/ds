@@ -14,19 +14,11 @@
 	<ItemGroup>
 	  <PackageReference Include="DualSoft-Common-Core" Version="0.1.7" />
 	  <PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.2" />
-	  <PackageReference Include="FSharp.Core" Version="7.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
 		<ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<!--<Reference Include="log4net">
-		  <HintPath>..\..\..\exLib\log4net.dll</HintPath>
-		</Reference>
-		<Reference Include="System.Configuration" />-->
 	</ItemGroup>
 
 

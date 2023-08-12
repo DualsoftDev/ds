@@ -114,7 +114,7 @@ type XgCOM20ReadTest() =
     member x.``Not working: Read/Write`` () =
         let wBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
         let rBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
-        rBuf[0] = 0xFFuy
+        rBuf[0] <- 0xFFuy
 
         let sWrite = x.CommObject.Write((int)XgCOMCodes.W_M, wBuf, 1, 0)
         let sRead = x.CommObject.Read((int)XgCOMCodes.R_M, rBuf, 1, 0)

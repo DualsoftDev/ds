@@ -15,7 +15,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Update="FSharp.Core" Version="7.0.0" />
 		<ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
 		<ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
 	</ItemGroup>

@@ -18,6 +18,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.2" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
 		<PackageReference Include="FsUnit" Version="5.0.4" />
@@ -51,12 +52,5 @@
 
 		<ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
 	</ItemGroup>
-	<!--<ItemGroup>
-	  <Reference Include="log4net">
-	    <HintPath>..\..\..\exLib\log4net.dll</HintPath>
-	  </Reference>
-	</ItemGroup>-->
-	<ItemGroup>
-	  <PackageReference Update="FSharp.Core" Version="7.0.0" />
-	</ItemGroup>
+
 </Project>

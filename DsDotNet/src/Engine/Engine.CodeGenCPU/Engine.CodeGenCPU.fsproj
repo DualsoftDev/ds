@@ -4,6 +4,7 @@
 		<TargetFramework>net48</TargetFramework>
 		<RootNamespace>Engine.CodeGenCPU</RootNamespace>
 		<LangVersion>7.0</LangVersion>
+		<OutputPath>$(SolutionDir)\bin</OutputPath>
 		<OutputType>Library</OutputType>
         <OtherFlags>--warnon:1182</OtherFlags>
 	</PropertyGroup>
@@ -42,7 +43,6 @@
 
   <ItemGroup>
     <PackageReference Include="DualSoft-PLC-LS-FS" Version="0.1.2" />
-    <PackageReference Include="System.Text.Json" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -51,7 +51,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="7.0.0" />
 	  <PackageReference Include="Fody" Version="6.6.4">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -61,9 +60,4 @@
 	  </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="log4net">
-      <HintPath>..\..\..\exLib\log4net.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 </Project>

@@ -91,12 +91,15 @@ module TagManagerUtil =
     type BridgeType = | Device | Button | Lamp | Condition
     let createBridgeTag(stg:Storages, name, addr:string, inOut:InOut, bridge:BridgeType, sys): ITag option=
         let address =
-            let addr = addr.ToUpper()
-            match bridge with
-            | Device    -> if addr <> "" then Some addr else failwithlog $"Error Device {name} 주소가 없습니다."
-            | Button    -> if addr <> "" then Some addr else None
-            | Lamp      -> if addr <> "" then Some addr else failwithlog $"Error Lamp {name}  주소가 없습니다."
-            | Condition -> if addr <> "" then Some addr else failwithlog $"Error Condition {name} 주소가 없습니다."
+            if Runtime.Package = RuntimePackage.Simulation
+            then Some("simTag")
+            else                 
+                let addr = addr.ToUpper()
+                match bridge with
+                | Device    -> if addr <> "" then Some addr else failwithlog $"Error Device {name} 주소가 없습니다."
+                | Button    -> if addr <> "" then Some addr else None
+                | Lamp      -> if addr <> "" then Some addr else failwithlog $"Error Lamp {name}  주소가 없습니다."
+                | Condition -> if addr <> "" then Some addr else failwithlog $"Error Condition {name} 주소가 없습니다."
 
         if address.IsSome
         then

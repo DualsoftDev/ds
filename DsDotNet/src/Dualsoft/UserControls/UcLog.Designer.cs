@@ -35,8 +35,8 @@ namespace DSModeler
             this.copyBtn = new DevExpress.XtraEditors.SimpleButton();
             this.clearBtn = new DevExpress.XtraEditors.SimpleButton();
             this.copyAllBtn = new DevExpress.XtraEditors.SimpleButton();
-            this.listBoxControlOutput = new DevExpress.XtraEditors.ListBoxControl();
             this.logLevelBtn = new DevExpress.XtraEditors.SimpleButton();
+            this.listBoxControlOutput = new DevExpress.XtraEditors.ListBoxControl();
             ((System.ComponentModel.ISupportInitialize)(this.listBoxControlOutput)).BeginInit();
             this.SuspendLayout();
             // 
@@ -76,15 +76,6 @@ namespace DSModeler
             this.copyAllBtn.Text = "copyAll";
             this.copyAllBtn.Visible = false;
             // 
-            // listBoxControlOutput
-            // 
-            this.listBoxControlOutput.ContextMenuStrip = this.contextMenuStrip1;
-            this.listBoxControlOutput.Location = new System.Drawing.Point(20, 24);
-            this.listBoxControlOutput.Margin = new System.Windows.Forms.Padding(2);
-            this.listBoxControlOutput.Name = "listBoxControlOutput";
-            this.listBoxControlOutput.Size = new System.Drawing.Size(262, 150);
-            this.listBoxControlOutput.TabIndex = 3;
-            // 
             // logLevelBtn
             // 
             this.logLevelBtn.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("logLevelBtn.ImageOptions.Image")));
@@ -95,12 +86,22 @@ namespace DSModeler
             this.logLevelBtn.Text = "logLevel";
             this.logLevelBtn.Visible = false;
             // 
+            // listBoxControlOutput
+            // 
+            this.listBoxControlOutput.ContextMenuStrip = this.contextMenuStrip1;
+            this.listBoxControlOutput.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listBoxControlOutput.Location = new System.Drawing.Point(0, 0);
+            this.listBoxControlOutput.Margin = new System.Windows.Forms.Padding(2);
+            this.listBoxControlOutput.Name = "listBoxControlOutput";
+            this.listBoxControlOutput.Size = new System.Drawing.Size(435, 197);
+            this.listBoxControlOutput.TabIndex = 5;
+            // 
             // UcLog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.logLevelBtn);
             this.Controls.Add(this.listBoxControlOutput);
+            this.Controls.Add(this.logLevelBtn);
             this.Controls.Add(this.copyAllBtn);
             this.Controls.Add(this.clearBtn);
             this.Controls.Add(this.copyBtn);
@@ -118,7 +119,7 @@ namespace DSModeler
         private DevExpress.XtraEditors.SimpleButton copyBtn;
         private DevExpress.XtraEditors.SimpleButton clearBtn;
         private DevExpress.XtraEditors.SimpleButton copyAllBtn;
-        private DevExpress.XtraEditors.ListBoxControl listBoxControlOutput;
         private DevExpress.XtraEditors.SimpleButton logLevelBtn;
+        private DevExpress.XtraEditors.ListBoxControl listBoxControlOutput;
     }
 }

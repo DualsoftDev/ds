@@ -6,11 +6,11 @@ open Dual.Common.Core.FS
 [<AutoOpen>]
 module RuntimeGeneratorModule =
     type RuntimeTargetType = WINDOWS | XGI | XGK | AB | MELSEC
-    type RuntimePackage    = StandardPC | StandardPLC | LightPC | LightPLC
+    type RuntimePackage    = Simulation | StandardPC | StandardPLC | LightPC | LightPLC
 
     type Runtime() =
         static let mutable runtimeTarget = WINDOWS
-        static let mutable runtimePackage = StandardPC
+        static let mutable runtimePackage = Simulation
         static let targetChangedSubject = new Subject<RuntimeTargetType>()
         static let packageChangedSubject = new Subject<RuntimePackage>()
         static let mutable dsSystem:ISystem option = None

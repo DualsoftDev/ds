@@ -1,4 +1,4 @@
-namespace Dualsoft.Form
+namespace DSModeler.Form
 {
     public partial class FormDocView : DevExpress.XtraEditors.XtraForm
     {

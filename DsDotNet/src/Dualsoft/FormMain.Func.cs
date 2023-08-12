@@ -1,10 +1,10 @@
 using DevExpress.XtraBars.Docking2010.Views;
-using Dualsoft.Form;
+using DSModeler.Form;
 using System.Linq;
 using static Engine.Core.CoreModule;
 using static Model.Import.Office.ViewModule;
 
-namespace Dualsoft
+namespace DSModeler
 {
     public partial class FormMain : DevExpress.XtraEditors.XtraForm
     {

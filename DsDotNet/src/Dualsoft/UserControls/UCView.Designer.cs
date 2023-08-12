@@ -1,5 +1,5 @@
 
-namespace Dualsoft
+namespace DSModeler
 {
     partial class UcView
     {

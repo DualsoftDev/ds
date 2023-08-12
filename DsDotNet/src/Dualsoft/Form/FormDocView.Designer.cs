@@ -1,4 +1,4 @@
-﻿namespace Dualsoft.Form
+namespace DSModeler.Form
 {
     partial class FormDocView
     {
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.ucView1 = new Dualsoft.UcView();
+            this.ucView1 = new DSModeler.UcView();
             this.SuspendLayout();
             // 
             // ucView1

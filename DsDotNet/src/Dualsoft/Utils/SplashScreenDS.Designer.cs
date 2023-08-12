@@ -1,5 +1,5 @@
 ﻿
-namespace Dualsoft.Utils
+namespace DSModeler.Utils
 {
     partial class SplashScreenDS
     {

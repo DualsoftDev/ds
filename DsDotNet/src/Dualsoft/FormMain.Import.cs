@@ -6,7 +6,7 @@ using System.Windows.Forms;
 using static Model.Import.Office.ImportPPTModule;
 using static Model.Import.Office.ViewModule;
 
-namespace Dualsoft
+namespace DSModeler
 {
     public partial class FormMain : DevExpress.XtraEditors.XtraForm
     {
@@ -27,12 +27,12 @@ namespace Dualsoft
 
                     if (ppt.IsActive)
                     {
-                        accordionControlElement_System.Elements.Add(ele);
+                        ace_System.Elements.Add(ele);
                         appendFlows(ppt, ele);
                     }
                     else
                     {
-                        accordionControlElement_Device.Elements.Add(ele);
+                        ace_Device.Elements.Add(ele);
                         appendFlows(ppt, ele);
                     }
                 }

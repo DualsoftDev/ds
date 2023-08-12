@@ -2,7 +2,7 @@ using DevExpress.XtraSplashScreen;
 using System;
 using System.Reflection;
 
-namespace Dualsoft.Utils
+namespace DSModeler.Utils
 {
     public partial class SplashScreenDS : SplashScreen
     {

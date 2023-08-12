@@ -18,7 +18,7 @@ using Edge = Microsoft.Msagl.Drawing.Edge;
 using Vertex = Engine.Core.CoreModule.Vertex;
 
 
-namespace Dualsoft
+namespace DSModeler
 {
     public partial class UcView : UserControl
     {

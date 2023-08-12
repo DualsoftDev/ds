@@ -7,8 +7,8 @@
     <ProjectGuid>{56258FD1-89FD-442E-899C-501D7408F0C4}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Dualsoft</RootNamespace>
-    <AssemblyName>Dualsoft</AssemblyName>
+    <RootNamespace>DSModeler</RootNamespace>
+    <AssemblyName>DSModeler</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -140,6 +140,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UserControls\UcLog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\UcLog.Designer.cs">
+      <DependentUpon>UcLog.cs</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\UcView.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -172,7 +178,11 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="UserControls\UcLog.resx">
+      <DependentUpon>UcLog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UserControls\UcView.resx">
       <DependentUpon>UcView.cs</DependentUpon>
     </EmbeddedResource>

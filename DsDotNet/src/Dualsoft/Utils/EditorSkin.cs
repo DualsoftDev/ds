@@ -1,6 +1,6 @@
 using DevExpress.LookAndFeel;
 
-namespace Dualsoft
+namespace DSModeler
 {
 
     public static class EditorSkin

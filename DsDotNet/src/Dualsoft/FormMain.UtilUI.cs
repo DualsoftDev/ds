@@ -1,7 +1,7 @@
 using Dual.Common.Core;
 using Dual.Common.Winform;
 
-namespace Dualsoft
+namespace DSModeler
 {
     public partial class FormMain : DevExpress.XtraEditors.XtraForm
     {

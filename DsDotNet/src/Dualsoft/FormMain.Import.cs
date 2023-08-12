@@ -86,11 +86,14 @@ namespace DSModeler
 
             clearSubElements(ace_System);
             clearSubElements(ace_Device);
+            clearSubElements(ace_HMI);
+            
 
             void clearSubElements(AccordionControlElement ele)
             {
                 foreach (var subEle in ele.Elements)
                     clearSubElements(subEle);
+                ele.Elements.Clear();
             }
         }
 

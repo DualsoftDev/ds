@@ -83,14 +83,14 @@ namespace DSModeler
             this.ace_PLCXGI = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace4 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace5 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.ace11 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.ace_ExportExcel = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlElement2 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlSeparator3 = new DevExpress.XtraBars.Navigation.AccordionControlSeparator();
             this.accordionControlSeparator1 = new DevExpress.XtraBars.Navigation.AccordionControlSeparator();
             this.ace_Setting = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace9 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_ResetLayout = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.ace11 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.ace_ExportExcel = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.accordionControlElement2 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             ((System.ComponentModel.ISupportInitialize)(this.document1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dockManager)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManager1)).BeginInit();
@@ -647,6 +647,30 @@ namespace DSModeler
             this.ace5.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.ace5.Text = "AB Logix5000";
             // 
+            // ace11
+            // 
+            this.ace11.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
+            this.ace_ExportExcel,
+            this.accordionControlElement2});
+            this.ace11.Expanded = true;
+            this.ace11.Name = "ace11";
+            this.ace11.Text = "문서";
+            // 
+            // ace_ExportExcel
+            // 
+            this.ace_ExportExcel.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_ExportExcel.ImageOptions.SvgImage")));
+            this.ace_ExportExcel.Name = "ace_ExportExcel";
+            this.ace_ExportExcel.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.ace_ExportExcel.Text = "IO LIST";
+            this.ace_ExportExcel.Click += new System.EventHandler(this.ace_ExportExcel_Click);
+            // 
+            // accordionControlElement2
+            // 
+            this.accordionControlElement2.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement2.ImageOptions.SvgImage")));
+            this.accordionControlElement2.Name = "accordionControlElement2";
+            this.accordionControlElement2.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.accordionControlElement2.Text = "손서도";
+            // 
             // accordionControlSeparator3
             // 
             this.accordionControlSeparator3.Name = "accordionControlSeparator3";
@@ -679,30 +703,6 @@ namespace DSModeler
             this.ace_ResetLayout.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.ace_ResetLayout.Text = "복원";
             this.ace_ResetLayout.Click += new System.EventHandler(this.ace_ResetLayout_Click);
-            // 
-            // ace11
-            // 
-            this.ace11.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
-            this.ace_ExportExcel,
-            this.accordionControlElement2});
-            this.ace11.Expanded = true;
-            this.ace11.Name = "ace11";
-            this.ace11.Text = "문서";
-            // 
-            // ace_ExportExcel
-            // 
-            this.ace_ExportExcel.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_ExportExcel.ImageOptions.SvgImage")));
-            this.ace_ExportExcel.Name = "ace_ExportExcel";
-            this.ace_ExportExcel.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-            this.ace_ExportExcel.Text = "IO LIST";
-            this.ace_ExportExcel.Click += new System.EventHandler(this.ace_ExportExcel_Click);
-            // 
-            // accordionControlElement2
-            // 
-            this.accordionControlElement2.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement2.ImageOptions.SvgImage")));
-            this.accordionControlElement2.Name = "accordionControlElement2";
-            this.accordionControlElement2.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-            this.accordionControlElement2.Text = "손서도";
             // 
             // FormMain
             // 

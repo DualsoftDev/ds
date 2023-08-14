@@ -4,6 +4,9 @@ using Dual.Common.Core.FS;
 using Dual.Common.Winform;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
@@ -13,7 +16,7 @@ namespace DSModeler
 {
     public partial class FormMain : DevExpress.XtraEditors.XtraForm
     {
-        public DsSystem ActiveSys = null;  
+        public DsSystem ActiveSys = null;
         public Dictionary<DsSystem, DsCPU> DicCpu = new Dictionary<DsSystem, DsCPU>();
         public Dictionary<Vertex, Status4> DicStatus = new Dictionary<Vertex, Status4>();
         public PropertyGridControl PropertyGrid => ucPropertyGrid1.PropertyGrid;
@@ -46,16 +49,16 @@ namespace DSModeler
             Global.Logger.Info($"Starting Dualsoft v{Global.AppVersion}");
         }
 
-       
+
         private void FormMain_Shown(object sender, EventArgs e) { }
 
-        private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
+        private async void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (MBox.AskYesNo("종료하시겠습니까?", K.AppName) == DialogResult.No)
                 e.Cancel = true;
             else
             {
-                SIM.Reset(DicCpu);
+                await SIM.Reset(DicCpu);
                 LayoutForm.SaveLayout(dockManager);
             }
         }
@@ -74,14 +77,19 @@ namespace DSModeler
         private void ace_ImportPPT_Click(object sender, EventArgs e) => ImportPowerPointWapper(null);
         private void ace_pptReload_Click(object sender, EventArgs e) => ImportPowerPointWapper(LastFiles.Get());
         private void ace_ResetLayout_Click(object sender, EventArgs e) => LayoutForm.RestoreLayoutFromXml(dockManager);
-        private void ace_Play_Click(object sender, EventArgs e) => SIM.Play(DicCpu);
-        private void ace_Step_Click(object sender, EventArgs e) => SIM.Step(DicCpu);
-        private void ace_Stop_Click(object sender, EventArgs e) => SIM.Stop(DicCpu);
-        private void ace_Reset_Click(object sender, EventArgs e) => SIM.Reset(DicCpu);
+        private async void ace_Play_Click(object sender, EventArgs e) => await SIM.Play(DicCpu);
+        private async void ace_Step_Click(object sender, EventArgs e) => await SIM.Step(DicCpu);
+        private async void ace_Stop_Click(object sender, EventArgs e) => await SIM.Stop(DicCpu);
+        private async void ace_Reset_Click(object sender, EventArgs e) => await SIM.Reset(DicCpu);
 
         private void ace_pcWindow_Click(object sender, EventArgs e) => DocControl.CreateDocDS(this, tabbedView1);
-        private void ace_PLCXGI_Click(object sender, EventArgs e) => DocControl.CreateDocPLCLS(this, tabbedView1);
 
-       
+        private void ace_PLCXGI_Click(object sender, EventArgs e) => DocControl.CreateDocPLCLS(this, tabbedView1);
+        private void spinEdit_Speed_EditValueChanged(object sender, EventArgs e) => Global.SimSpeed = Convert.ToInt32(spinEdit_Speed.EditValue);
+        private void simpleButton_OpenPLC_Click(object sender, EventArgs e)
+        {
+            if (IsLoadedPPT())
+                Process.Start(Path.GetDirectoryName(LastFiles.Get().First()));
+        }
     }
 }

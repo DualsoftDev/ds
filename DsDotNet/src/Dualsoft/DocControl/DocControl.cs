@@ -82,6 +82,8 @@ namespace DSModeler
             else  //기본 템플릿 CPU-E 타입으로 생성
                 ExportModuleExt.ExportXMLforXGI(form.ActiveSys, fullpath, null);
 
+            //Storages 연결이슈로  새로 준비 
+            form.ImportPowerPointWapper(LastFiles.Get());
 
             BaseDocument document = tab.Documents.Where(w => w.Control.Name == docKey).FirstOrDefault();
             FormDocPLCLS view;
@@ -105,9 +107,7 @@ namespace DSModeler
 
             view.MemoEditDS.Text = File.ReadAllText(fullpath);
 
-            //Storages 연결이슈로  새로 준비 
-            form.ImportPowerPointWapper(LastFiles.Get());
-
+           
             SplashScreenManager.CloseForm();
         }
 

@@ -2,6 +2,7 @@ using Dual.Common.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using static Engine.CodeGenCPU.ConvertCoreExt;
 using static Engine.Core.CoreModule;
 using static Engine.Core.Interface;
@@ -33,42 +34,55 @@ namespace DSModeler
                 });
         }
 
-        public static void Play(Dictionary<DsSystem, DsCPU> dic)
+        public static async Task Play(Dictionary<DsSystem, DsCPU> dic)
         {
-            dic.ForEach(f =>
-            {
-                var system = f.Key;
-                var cpu = f.Value;
+            await Task.Run(() =>
+             {
+                 dic.ForEach(f =>
+                 {
+                     var system = f.Key;
+                     var cpu = f.Value;
 
-                SIM.RunSimMode(system);
-                cpu.Run();
-            });
+                     SIM.RunSimMode(system);
+                     cpu.Run();
+                 });
+             });
         }
-        public static void Step(Dictionary<DsSystem, DsCPU> dic)
-        {
-            dic.ForEach(f =>
-            {
-                var system = f.Key;
-                var cpu = f.Value;
 
-                SIM.RunSimMode(system);
-                cpu.Step();
+        public static async Task Step(Dictionary<DsSystem, DsCPU> dic)
+        {
+            await Task.Run(() =>
+            {
+                dic.ForEach(f =>
+                {
+                    var system = f.Key;
+                    var cpu = f.Value;
+
+                    SIM.RunSimMode(system);
+                    cpu.Step();
+                });
             });
         }
-        public static void Stop(Dictionary<DsSystem, DsCPU> dic)
+        public static async Task Stop(Dictionary<DsSystem, DsCPU> dic)
         {
-            dic.ForEach(f =>
+            await Task.Run(() =>
             {
-                var cpu = f.Value;
-                cpu.Stop();
+                dic.ForEach(f =>
+                {
+                    var cpu = f.Value;
+                    cpu.Stop();
+                });
             });
         }
-        public static void Reset(Dictionary<DsSystem, DsCPU> dic)
+        public static async Task Reset(Dictionary<DsSystem, DsCPU> dic)
         {
-            dic.ForEach(f =>
+            await Task.Run(() =>
             {
-                var cpu = f.Value;
-                cpu.Reset();
+                dic.ForEach(f =>
+                {
+                    var cpu = f.Value;
+                    cpu.Reset();
+                });
             });
         }
     }

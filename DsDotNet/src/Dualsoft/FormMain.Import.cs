@@ -65,6 +65,8 @@ namespace DSModeler
             tabbedView1.Controller.CloseAll();
             tabbedView1.Documents.Clear();
 
+            simpleButton_OpenPLC.Visible = false;
+
             Model.ClearSubBtn(ace_System);
             Model.ClearSubBtn(ace_Device);
             Model.ClearSubBtn(ace_HMI);

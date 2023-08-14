@@ -27,6 +27,7 @@ namespace DSModeler
     {
         public static ILog Logger => Log4NetLogger.Logger;
         public static string LogLevel { get; set; }
+        public static int SimSpeed { get; set; } = 0;
 
         public static Version ver = Assembly.GetEntryAssembly().GetName().Version;
 

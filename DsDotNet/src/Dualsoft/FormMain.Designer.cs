@@ -46,6 +46,7 @@ namespace DSModeler
             this.panelContainer1 = new DevExpress.XtraBars.Docking.DockPanel();
             this.dockPanel1 = new DevExpress.XtraBars.Docking.DockPanel();
             this.dockPanel1_Container = new DevExpress.XtraBars.Docking.ControlContainer();
+            this.ucPropertyGrid1 = new DSModeler.UcPropertyGrid();
             this.dockPanel2 = new DevExpress.XtraBars.Docking.DockPanel();
             this.dockPanel2_Container = new DevExpress.XtraBars.Docking.ControlContainer();
             this.ucLog1 = new DSModeler.UcLog();
@@ -55,6 +56,8 @@ namespace DSModeler
             this.document3 = new DevExpress.XtraBars.Docking2010.Views.Tabbed.Document(this.components);
             this.documentGroup1 = new DevExpress.XtraBars.Docking2010.Views.Tabbed.DocumentGroup(this.components);
             this.accordionControl2 = new DevExpress.XtraBars.Navigation.AccordionControl();
+            this.spinEdit_Speed = new DevExpress.XtraEditors.SpinEdit();
+            this.simpleButton_OpenPLC = new DevExpress.XtraEditors.SimpleButton();
             this.ace_Model = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_System = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Device = new DevExpress.XtraBars.Navigation.AccordionControlElement();
@@ -85,7 +88,9 @@ namespace DSModeler
             this.ace_Setting = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace9 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_ResetLayout = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.ucPropertyGrid1 = new DSModeler.UcPropertyGrid();
+            this.ace11 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.ace_ExportExcel = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlElement2 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             ((System.ComponentModel.ISupportInitialize)(this.document1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dockManager)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManager1)).BeginInit();
@@ -100,6 +105,8 @@ namespace DSModeler
             ((System.ComponentModel.ISupportInitialize)(this.document3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.documentGroup1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.accordionControl2)).BeginInit();
+            this.accordionControl2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.spinEdit_Speed.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // document1
@@ -259,6 +266,14 @@ namespace DSModeler
             this.dockPanel1_Container.Size = new System.Drawing.Size(198, 276);
             this.dockPanel1_Container.TabIndex = 0;
             // 
+            // ucPropertyGrid1
+            // 
+            this.ucPropertyGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ucPropertyGrid1.Location = new System.Drawing.Point(0, 0);
+            this.ucPropertyGrid1.Name = "ucPropertyGrid1";
+            this.ucPropertyGrid1.Size = new System.Drawing.Size(198, 276);
+            this.ucPropertyGrid1.TabIndex = 0;
+            // 
             // dockPanel2
             // 
             this.dockPanel2.Controls.Add(this.dockPanel2_Container);
@@ -327,6 +342,8 @@ namespace DSModeler
             // 
             // accordionControl2
             // 
+            this.accordionControl2.Controls.Add(this.spinEdit_Speed);
+            this.accordionControl2.Controls.Add(this.simpleButton_OpenPLC);
             this.accordionControl2.Dock = System.Windows.Forms.DockStyle.Left;
             this.accordionControl2.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.ace_Model,
@@ -344,6 +361,45 @@ namespace DSModeler
             this.accordionControl2.Size = new System.Drawing.Size(328, 611);
             this.accordionControl2.TabIndex = 22;
             this.accordionControl2.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.HamburgerMenu;
+            // 
+            // spinEdit_Speed
+            // 
+            this.spinEdit_Speed.EditValue = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.spinEdit_Speed.Location = new System.Drawing.Point(242, 57);
+            this.spinEdit_Speed.MenuManager = this.barManager1;
+            this.spinEdit_Speed.Name = "spinEdit_Speed";
+            this.spinEdit_Speed.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.spinEdit_Speed.Properties.MaxValue = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            this.spinEdit_Speed.Properties.MinValue = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.spinEdit_Speed.Size = new System.Drawing.Size(43, 20);
+            this.spinEdit_Speed.TabIndex = 3;
+            this.spinEdit_Speed.ToolTip = "SPEED";
+            this.spinEdit_Speed.EditValueChanged += new System.EventHandler(this.spinEdit_Speed_EditValueChanged);
+            // 
+            // simpleButton_OpenPLC
+            // 
+            this.simpleButton_OpenPLC.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.LeftCenter;
+            this.simpleButton_OpenPLC.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("simpleButton_OpenPLC.ImageOptions.SvgImage")));
+            this.simpleButton_OpenPLC.Location = new System.Drawing.Point(223, 344);
+            this.simpleButton_OpenPLC.Name = "simpleButton_OpenPLC";
+            this.simpleButton_OpenPLC.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
+            this.simpleButton_OpenPLC.Size = new System.Drawing.Size(75, 23);
+            this.simpleButton_OpenPLC.TabIndex = 7;
+            this.simpleButton_OpenPLC.Visible = false;
+            this.simpleButton_OpenPLC.Click += new System.EventHandler(this.simpleButton_OpenPLC_Click);
             // 
             // ace_Model
             // 
@@ -395,6 +451,7 @@ namespace DSModeler
             this.ace_Stop,
             this.ace_Reset});
             this.ace10.Expanded = true;
+            this.ace10.HeaderControl = this.spinEdit_Speed;
             this.ace10.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace10.ImageOptions.SvgImage")));
             this.ace10.Name = "ace10";
             this.ace10.Text = "Control";
@@ -529,7 +586,8 @@ namespace DSModeler
             this.ace_Export.Appearance.Default.Options.UseFont = true;
             this.ace_Export.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.ace1,
-            this.ace2});
+            this.ace2,
+            this.ace11});
             this.ace_Export.Expanded = true;
             this.ace_Export.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_Export.ImageOptions.SvgImage")));
             this.ace_Export.Name = "ace_Export";
@@ -570,6 +628,7 @@ namespace DSModeler
             // 
             // ace_PLCXGI
             // 
+            this.ace_PLCXGI.HeaderControl = this.simpleButton_OpenPLC;
             this.ace_PLCXGI.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_PLCXGI.ImageOptions.SvgImage")));
             this.ace_PLCXGI.Name = "ace_PLCXGI";
             this.ace_PLCXGI.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
@@ -621,13 +680,29 @@ namespace DSModeler
             this.ace_ResetLayout.Text = "복원";
             this.ace_ResetLayout.Click += new System.EventHandler(this.ace_ResetLayout_Click);
             // 
-            // ucPropertyGrid1
+            // ace11
             // 
-            this.ucPropertyGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ucPropertyGrid1.Location = new System.Drawing.Point(0, 0);
-            this.ucPropertyGrid1.Name = "ucPropertyGrid1";
-            this.ucPropertyGrid1.Size = new System.Drawing.Size(198, 276);
-            this.ucPropertyGrid1.TabIndex = 0;
+            this.ace11.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
+            this.ace_ExportExcel,
+            this.accordionControlElement2});
+            this.ace11.Expanded = true;
+            this.ace11.Name = "ace11";
+            this.ace11.Text = "문서";
+            // 
+            // ace_ExportExcel
+            // 
+            this.ace_ExportExcel.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_ExportExcel.ImageOptions.SvgImage")));
+            this.ace_ExportExcel.Name = "ace_ExportExcel";
+            this.ace_ExportExcel.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.ace_ExportExcel.Text = "IO LIST";
+            this.ace_ExportExcel.Click += new System.EventHandler(this.ace_ExportExcel_Click);
+            // 
+            // accordionControlElement2
+            // 
+            this.accordionControlElement2.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement2.ImageOptions.SvgImage")));
+            this.accordionControlElement2.Name = "accordionControlElement2";
+            this.accordionControlElement2.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.accordionControlElement2.Text = "손서도";
             // 
             // FormMain
             // 
@@ -665,6 +740,8 @@ namespace DSModeler
             ((System.ComponentModel.ISupportInitialize)(this.document3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.documentGroup1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.accordionControl2)).EndInit();
+            this.accordionControl2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.spinEdit_Speed.Properties)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -727,5 +804,10 @@ namespace DSModeler
         private DevExpress.XtraBars.BarStaticItem barStaticItem_procText;
         private DevExpress.XtraBars.Navigation.AccordionControlElement ace_pptReload;
         private UcPropertyGrid ucPropertyGrid1;
+        private DevExpress.XtraEditors.SpinEdit spinEdit_Speed;
+        private DevExpress.XtraEditors.SimpleButton simpleButton_OpenPLC;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement ace11;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement ace_ExportExcel;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement2;
     }
 }

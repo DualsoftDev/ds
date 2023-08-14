@@ -200,7 +200,7 @@
     <Compile Include="Utils\EditorSkin.cs" />
     <Compile Include="Utils\LastFiles.cs" />
     <Compile Include="Utils\LayoutForm.cs" />
-    <Compile Include="Utils\GlobalStatic.cs" />
+    <Compile Include="GlobalStatic.cs" />
     <Compile Include="Utils\SplashScreenDS.cs">
       <SubType>Form</SubType>
     </Compile>

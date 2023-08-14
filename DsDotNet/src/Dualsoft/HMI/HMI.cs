@@ -53,15 +53,22 @@ namespace DSModeler
 
                 if (start)
                 {
-                    acb.Click += (s, e) => { StartHMI(((AccordionContextButton)s).Tag as Real); };
+                    acb.Click += (s, e) =>
+                    {
+                        AccordionContextButton btn = UpdateBtn(s);
+                        StartHMI(btn.Tag as Real);
+                    };
                     acb.AppearanceNormal.ForeColor = Color.Lime;
                     acb.AppearanceHover.ForeColor = Color.Green;
                     acb.ToolTip = "START";
                 }
                 else
                 {
-                    acb.Click += (s, e) => { ResetHMI(((AccordionContextButton)s).Tag as Real); };
-                    acb.AppearanceNormal.ForeColor = Color.DarkRed;
+                    acb.Click += (s, e) => {
+                        AccordionContextButton btn = UpdateBtn(s);
+                        ResetHMI(btn.Tag as Real);
+                    }; 
+                    acb.AppearanceNormal.ForeColor = Color.IndianRed;
                     acb.AppearanceHover.ForeColor = Color.Red;
                     acb.ToolTip = "RESET";
                 }
@@ -92,6 +99,17 @@ namespace DSModeler
             }
         }
 
+        private static AccordionContextButton UpdateBtn(object s)
+        {
+            var btn = (AccordionContextButton)s;
+            var btns = btn.Collection.OfType<AccordionContextButton>().ToList();
+            //전체 자동 숨기기
+            btns.Iter(b => b.Visibility = DevExpress.Utils.ContextItemVisibility.Auto);
+            //해당 버튼 만 보이기
+            btn.Visibility = DevExpress.Utils.ContextItemVisibility.Visible;
+
+            return btn;
+        }
     }
 
 }

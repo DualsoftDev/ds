@@ -4,12 +4,8 @@ using Dual.Common.Core;
 using Dual.Common.Core.FS;
 using Dual.Common.Winform;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using static Engine.Core.CoreModule;
-using static Engine.Core.DsType;
-using static Engine.Cpu.RunTime;
 
 namespace DSModeler
 {
@@ -34,7 +30,7 @@ namespace DSModeler
                 if (e.KeyData == Keys.F4)
                     ImportPowerPointWapper(null);
                 if (e.KeyData == Keys.F5)
-                    ImportPowerPointWapper(LastFiles.Get());
+                    ImportPowerPointWapper(Files.GetLast());
             };
 
             tabbedView1.QueryControl += (s, e) =>
@@ -45,9 +41,8 @@ namespace DSModeler
             tabbedView1.DocumentSelected += (s, e) =>
             {
                 var docForm = e.Document.Tag as FormDocView;
-                if (docForm != null)
-                    DocControl.DrawStatus(this, docForm.UcView.MasterNode, docForm);
-
+                if (docForm != null && docForm.UcView.MasterNode != null)
+                    ViewDraw.DrawStatus(this, docForm.UcView.MasterNode, docForm);
             };
             ProcessEvent.ProcessSubject.Subscribe(rx =>
             {

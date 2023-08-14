@@ -1,5 +1,4 @@
 using DevExpress.LookAndFeel;
-using DevExpress.Skins;
 
 namespace DSModeler
 {

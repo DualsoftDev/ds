@@ -1,6 +1,6 @@
 namespace DSModeler.Form
 {
-    partial class FormDocDS
+    partial class FormDocText
     {
         /// <summary>
         /// Required designer variable.
@@ -28,33 +28,36 @@ namespace DSModeler.Form
         /// </summary>
         private void InitializeComponent()
         {
-            this.memoEdit_DS = new DevExpress.XtraEditors.MemoEdit();
-            ((System.ComponentModel.ISupportInitialize)(this.memoEdit_DS.Properties)).BeginInit();
+            this.richTextBox_ds = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
             // 
-            // memoEdit_DS
+            // richTextBox_ds
             // 
-            this.memoEdit_DS.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.memoEdit_DS.Location = new System.Drawing.Point(0, 0);
-            this.memoEdit_DS.Name = "memoEdit_DS";
-            this.memoEdit_DS.Size = new System.Drawing.Size(694, 665);
-            this.memoEdit_DS.TabIndex = 0;
+            this.richTextBox_ds.AcceptsTab = true;
+            this.richTextBox_ds.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(33)))), ((int)(((byte)(33)))));
+            this.richTextBox_ds.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.richTextBox_ds.ForeColor = System.Drawing.Color.BlanchedAlmond;
+            this.richTextBox_ds.Location = new System.Drawing.Point(0, 0);
+            this.richTextBox_ds.Name = "richTextBox_ds";
+            this.richTextBox_ds.ReadOnly = true;
+            this.richTextBox_ds.Size = new System.Drawing.Size(694, 665);
+            this.richTextBox_ds.TabIndex = 3;
+            this.richTextBox_ds.Text = "";
             // 
-            // FormDocDS
+            // FormDocText
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(694, 665);
-            this.Controls.Add(this.memoEdit_DS);
-            this.Name = "FormDocDS";
+            this.Controls.Add(this.richTextBox_ds);
+            this.Name = "FormDocText";
             this.Text = "Start";
-            ((System.ComponentModel.ISupportInitialize)(this.memoEdit_DS.Properties)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private DevExpress.XtraEditors.MemoEdit memoEdit_DS;
+        private System.Windows.Forms.RichTextBox richTextBox_ds;
     }
 }

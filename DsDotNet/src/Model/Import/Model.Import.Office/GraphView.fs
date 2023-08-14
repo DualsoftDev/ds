@@ -7,6 +7,7 @@ open Engine.Core
 open System.Collections.Generic
 open System.Runtime.CompilerServices
 open System.Linq
+open System.ComponentModel
 
 [<AutoOpen>]
 module rec ViewModule =
@@ -14,7 +15,6 @@ module rec ViewModule =
 
     type ViewNode(name:string, viewType:ViewType, coreVertex:Vertex option, btnType:BtnType option, lampType:LampType option, cType:ConditionType option)  =
 
-        new (viewType) = ViewNode("", viewType, None, None, None, None)
         new (name, viewType) = ViewNode(name, viewType, None, None, None, None)
         new (coreVertex:Vertex) =
               let name =
@@ -32,27 +32,40 @@ module rec ViewModule =
         new (name, lampType:LampType) = ViewNode(name, VLAMP, None, None, Some(lampType), None)
         new (name, cType:ConditionType) = ViewNode(name, VCONDITION, None, None, None, Some(cType))
 
+        [<Browsable(false)>]
         member val Edges = HashSet<ModelingEdgeInfo<ViewNode>>()
+        [<Browsable(false)>]
         member val Singles = HashSet<ViewNode>()
+        [<Browsable(false)>]
         member val Status4 = Status4.Homing with get, set
         member val ViewType = viewType with get, set
+        [<Browsable(false)>]
         member val Flow:Flow option = None with get, set
+        [<ReadOnly(true)>]
         member val Page = 0 with get, set
 
+        [<Browsable(false)>]
         member x.DummyAdded = x.Edges |> Seq.collect(fun e-> e.Sources @ e.Targets)
                                       |> Seq.filter(fun v -> v.ViewType = VDUMMY)
                                       |> Seq.isEmpty |> not
 
+        [<Browsable(false)>]
         member x.CoreVertex = coreVertex
+        [<Browsable(false)>]
         member x.BtnType =  btnType
+        [<Browsable(false)>]
         member x.LampType =  lampType
+        [<Browsable(false)>]
         member x.ConditionType =  cType
+        [<Browsable(false)>]
         member x.IsChildExist =  x.Edges.Count>0 || x.Singles.Count>0
         member x.Name =  name
+        [<Browsable(false)>]
         member x.UIKey = if coreVertex.IsSome
                          then $"{name};{coreVertex.Value.QualifiedName.GetHashCode()}"
                          else $"{name};{x.GetHashCode()}"
 
+        [<Browsable(false)>]
         member x.UsedViewNodes =
                             let thisChildren  = x.Edges |> Seq.collect(fun e-> e.Sources @ e.Targets)
                                                         |> Seq.append x.Singles
@@ -67,7 +80,7 @@ module rec ViewModule =
             let createDummy() =
                 if dicDummy.ContainsKey(dummyKey) then dicDummy.[dummyKey]
                 else
-                     let viewNode = ViewNode(ViewType.VDUMMY)
+                     let viewNode = ViewNode("", ViewType.VDUMMY)
                      let dummy  = dummys.First(fun f-> f.DummyNodeKey = dummyKey)
 
                      dummy.Members |> Seq.iter(fun f-> viewNode.Singles.Add(dicV.[f])|>ignore)

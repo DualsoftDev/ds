@@ -10,6 +10,7 @@ open System.Collections.Generic
 open System.Runtime.InteropServices
 open Dual.Common.Core.FS
 open System.Text.RegularExpressions
+open System.ComponentModel
 
 
 [<AutoOpen>]
@@ -134,12 +135,14 @@ module TextUtil =
             member x.NameComponents = [| yield! parent.NameComponents; x.Name |]
             member x.QualifiedName = combine "." x.NameComponents
         member x.Name with get() = (x :> INamed).Name and set(v) = (x :> INamed).Name <- v
+        [<Browsable(false)>]
         member x.NameComponents = (x :> IQualifiedNamed).NameComponents
+        [<Browsable(false)>]
         member x.QualifiedName = (x :> IQualifiedNamed).QualifiedName
         abstract member GetRelativeName: Fqdn -> string
         default x.GetRelativeName(referencePath:Fqdn) =
             getRelativeName referencePath x.NameComponents
-
+        [<Browsable(false)>]
         member val TagManager = getNull<ITagManager>() with get, set
 
 

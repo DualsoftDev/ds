@@ -47,8 +47,8 @@ module Interface =
         abstract Comment: string with get, set
         abstract ToBoxedExpression : unit -> obj    /// IExpression<'T> 의 boxed 형태의 expression 생성
 
-    and ISystem =
-        abstract ValueChangeSubject : Subject<IStorage*obj>
+    and ISystem = interface end
+        //abstract ValueChangeSubject : Subject<IStorage*obj>
 
     /// terminal expression 이 될 수 있는 객체.  Tag, Variable, Literal.  IExpression 은 아님
     type IExpressionizableTerminal =

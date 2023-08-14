@@ -1,4 +1,3 @@
-using DevExpress.Utils.Routing;
 using Dual.Common.Core;
 using Dual.Common.Winform;
 using Engine.Core;
@@ -344,7 +343,7 @@ namespace DSModeler
         {
             if (newStatus == Status4.Ready) node.Attr.Color = Color.DarkOliveGreen;
             else if (newStatus == Status4.Going) node.Attr.Color = Color.DarkGoldenrod;
-            else if (newStatus == Status4.Finish) node.Attr.Color = Color.DarkBlue;
+            else if (newStatus == Status4.Finish) node.Attr.Color = Color.RoyalBlue;
             else if (newStatus == Status4.Homing) node.Attr.Color = Color.DimGray;
         }
 

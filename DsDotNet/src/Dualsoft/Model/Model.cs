@@ -28,7 +28,8 @@ namespace DSModeler
 
                 var eleFlow = new AccordionControlElement()
                 { Style = ElementStyle.Item, Text = v.Flow.Value.Name, Tag = v };
-                eleFlow.Click += (s, e) => {
+                eleFlow.Click += (s, e) =>
+                {
                     formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
                 };
                 lstAce.Add(eleFlow);
@@ -36,6 +37,7 @@ namespace DSModeler
             }
             return lstAce;
         }
+
     }
 }
 

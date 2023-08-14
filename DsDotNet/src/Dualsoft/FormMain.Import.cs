@@ -1,15 +1,16 @@
+using DevExpress.XtraEditors;
 using Dual.Common.Core.FS;
+using Engine.Core;
+using Engine.Cpu;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.EdgeExt;
+using static Engine.Core.ExpressionModule;
 using static Engine.Cpu.RunTime;
-
-
-using DevExpress.XtraEditors;
-using System.Linq;
 
 namespace DSModeler
 {
@@ -34,7 +35,10 @@ namespace DSModeler
                     clearModel();
 
                     DicCpu = PPT.ImportPowerPoint(files, this, tabbedView1, ace_Model, ace_System, ace_Device, ace_HMI);
-                    LastFiles.Set(files);
+
+                    createRungExprCombobox(DicCpu[Global.ActiveSys]);
+                    Files.SetLast(files);
+
                     DicStatus = new Dictionary<Vertex, Status4>();
 
                     foreach (var item in DicCpu)
@@ -71,5 +75,27 @@ namespace DSModeler
             Model.ClearSubBtn(ace_Device);
             Model.ClearSubBtn(ace_HMI);
         }
+
+        void createRungExprCombobox(DsCPU dsCPU)
+        {
+            var dicStatement = new Dictionary<string, CommentedStatement>();
+            comboBoxEdit_Expr.Properties.Items.Clear();
+            comboBoxEdit_Expr.Properties.SelectedIndexChanged += (ss, ee) =>
+            {
+                var textForm = DocControl.CreateDocExpr(this, tabbedView1);
+                if (textForm == null) return;
+                DSFile.UpdateExpr(dicStatement, textForm, comboBoxEdit_Expr);
+            };
+
+            int cnt = 0;
+            foreach (var rung in dsCPU.CommentedStatements)
+            {
+                dicStatement.Add($"{cnt++}", rung);
+                var txt = $"{cnt};\t[{rung.TargetName}][{rung.TargetValue}] \t\t\t Spec:{rung.comment.Replace("%", " ").Replace("$", " ")}";
+                comboBoxEdit_Expr.Properties.Items.Add(txt);
+            }
+        }
+
+     
     }
 }

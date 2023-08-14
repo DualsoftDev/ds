@@ -1,6 +1,5 @@
 using DevExpress.XtraBars.Docking2010.Views.Tabbed;
 using DevExpress.XtraBars.Navigation;
-using DevExpress.XtraPrinting.BarCode;
 using Dual.Common.Core.FS;
 using System;
 using System.Collections.Generic;
@@ -40,12 +39,13 @@ namespace DSModeler
                         dicCpu.Add(pou.ToSystem(), new DsCPU(pou.CommentedStatements(), pou.ToSystem()));
 
                     HMI.CreateHMIBtn(formMain, ace_HMI, ppt.System);
-                    formMain.ActiveSys = ppt.System;
+                    Global.ActiveSys = ppt.System;
                 }
 
                 var ele = new AccordionControlElement()
-                { Style = ElementStyle.Group, Text = ppt.System.Name , Tag = ppt.System};
-                ele.Click += (s, e) => {
+                { Style = ElementStyle.Group, Text = ppt.System.Name, Tag = ppt.System };
+                ele.Click += (s, e) =>
+                {
                     formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
                 };
 
@@ -67,7 +67,7 @@ namespace DSModeler
             ace_System.Expanded = true;
             ace_Device.Expanded = false;
             ProcessEvent.DoWork(100);
-            
+
             return dicCpu;
         }
     }

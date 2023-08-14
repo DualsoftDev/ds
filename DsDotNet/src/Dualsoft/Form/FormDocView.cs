@@ -5,6 +5,7 @@ namespace DSModeler.Form
         public FormDocView()
         {
             InitializeComponent();
+
         }
 
         public UcView UcView => ucView1;

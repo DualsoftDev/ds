@@ -7,6 +7,7 @@ open System.Diagnostics
 open Dual.Common.Core.FS
 open System
 open System.Reactive.Subjects
+open System.ComponentModel
 
 [<AutoOpen>]
 module CoreModule =
@@ -37,8 +38,7 @@ module CoreModule =
     [<AbstractClass>]
     type LoadedSystem(loadedSystem:DsSystem, param:DeviceLoadParameters)  =
         inherit FqdnObject(param.LoadedName, param.ContainerSystem)
-        interface ISystem with
-            member val ValueChangeSubject: Subject<IStorage * obj> = new Subject<IStorage*obj>()
+        interface ISystem 
         /// 다른 device 을 Loading 하려는 system 입장에서 loading 된 system 참조 용
         member _.ReferenceSystem = loadedSystem
 
@@ -51,53 +51,57 @@ module CoreModule =
         member _.OriginName:string = loadedSystem.Name
 
     /// *.ds file 을 읽어 들여서 새로운 instance 를 만들어 넣기 위한 구조
-    and Device(loadedDevice:DsSystem, param:DeviceLoadParameters) =
+   
+    and 
+        Device(loadedDevice:DsSystem, param:DeviceLoadParameters) =
         inherit LoadedSystem(loadedDevice, param)
 
     /// shared instance.  *.ds file 의 절대 경로 기준으로 하나의 instance 만 생성하고 이를 참조하는 개념
-    and ExternalSystem(loadedSystem:DsSystem, param:DeviceLoadParameters) =
+    and
+        ExternalSystem(loadedSystem:DsSystem, param:DeviceLoadParameters) =
         inherit LoadedSystem(loadedSystem, param)
         member _.HostIp = param.HostIp
 
-    type DsSystem (name:string, hostIp:string) (*, ?onCreation:DsSystem -> unit) as this*) =
+    type DsSystem (name:string, hostIp:string) =
         inherit FqdnObject(name, createFqdnObject([||]))
-        //    // this system 객체가 생성되고 나서 수행해야 할 작업 수행.  external system loading 시, 공유하기 위한 정보를 marking
-        //    onCreation.Iter(fun f -> f this)
-
         let loadedSystems = createNamedHashSet<LoadedSystem>()
         let apiUsages = ResizeArray<ApiItem>()
         let addApiItemsForDevice (device: LoadedSystem) = device.ReferenceSystem.ApiItems |> apiUsages.AddRange
-        interface ISystem with
-            [<Obsolete("please use CpusEvent.ValueSubject")>]
-            member val ValueChangeSubject: Subject<IStorage * obj> =  new Subject<IStorage*obj>()
-        //시스템단위로 이벤트 변화 처리
-        [<Obsolete("please use CpusEvent.ValueSubject")>]
-        member x.ValueChangeSubject = (x :> ISystem).ValueChangeSubject
 
-        member val Flows   = createNamedHashSet<Flow>()
-        //시스템에서 호출가능한 작업리스트 (CallDev => Job => ApiItems => Addresses)
-        member val Jobs    = ResizeArray<Job>()
-
-
+        interface ISystem 
         member _.AddLoadedSystem(childSys) = loadedSystems.Add(childSys)
                                              |> verifyM $"Duplicated LoadedSystem name [{childSys.Name}]"
                                              addApiItemsForDevice childSys
 
+        [<Browsable(false)>]
         member _.ReferenceSystems = loadedSystems.Select(fun s->s.ReferenceSystem)
+        [<Browsable(false)>]
         member _.LoadedSystems    = loadedSystems |> seq
-        member _.Devices          = loadedSystems.OfType<Device>()
-        member _.ExternalSystems  = loadedSystems.OfType<ExternalSystem>()
+        member _.Devices          = loadedSystems.OfType<Device>()         |> Seq.toArray 
+        member _.ExternalSystems  = loadedSystems.OfType<ExternalSystem>() |> Seq.toArray
+
+        [<Browsable(false)>]
         member _.ApiUsages = apiUsages |> seq
         member _.HostIp = hostIp
 
+        member val Jobs    = ResizeArray<Job>()
         /// 사용자 입력 code block(s).  "<@{" 와 "}@>" 사이의 text(s) : todo 복수개의 block 이 허용되면, serialize 할 때 해당 위치에 맞춰서 serialize 해야 하는데...
+       
+        [<Browsable(false)>]
+        member val Flows   = createNamedHashSet<Flow>()
+        //시스템에서 호출가능한 작업리스트 (CallDev => Job => ApiItems => Addresses)
+        [<Browsable(false)>]
         member val OriginalCodeBlocks = ResizeArray<string>()
+        [<Browsable(false)>]
         member val Statements = ResizeArray<Statement>()
+        [<Browsable(false)>]
         member val Variables = ResizeArray<VariableData>()
-
+        [<Browsable(false)>]
         member val ApiItems = createNamedHashSet<ApiItem>()
+        [<Browsable(false)>]
         member val ApiResetInfos = HashSet<ApiResetInfo>()
         ///시스템 전체시작 버튼누름시 수행되야하는 Real목록
+        [<Browsable(false)>]
         member val StartPoints = createQualifiedNamedHashSet<Real>()
         ///시스템 버튼 소속 Flows 정보 setting은 AddButton 사용
         member val internal Buttons = HashSet<ButtonDef>()
@@ -110,10 +114,14 @@ module CoreModule =
 
     type Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
+        [<Browsable(false)>]
         member val Graph = DsGraph()
+        [<Browsable(false)>]
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
+        [<Browsable(false)>]
         member val AliasDefs = Dictionary<Fqdn, AliasDef>(nameComponentsComparer())
 
+        [<Browsable(false)>]
         member x.System = system
         static member Create(name:string, system:DsSystem) =
             let flow = Flow(name, system)
@@ -172,8 +180,11 @@ module CoreModule =
         inherit FqdnObject(names.Combine(), parent.GetCore())
 
         interface INamedVertex
+        [<Browsable(false)>]
         member _.Parent = parent
+        [<Browsable(false)>]
         member _.PureNames = names
+        [<Browsable(false)>]
         member _.ParentNPureNames = ([parent.GetCore().Name] @ names).ToArray()
         override x.GetRelativeName(_referencePath:Fqdn) = x.PureNames.Combine()
 
@@ -192,13 +203,16 @@ module CoreModule =
     type Real private (name:string, flow:Flow) =
         inherit Vertex([|name|], DuParentFlow flow)
 
+        [<Browsable(false)>]
         member val Graph = DsGraph()
+        [<Browsable(false)>]
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
+        [<Browsable(false)>]
         member _.Flow = flow
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
-    and RealOtherFlow private (names:Fqdn, target:Real, parent) =
+    and RealOtherFlow private (names:Fqdn, target:Real, parent)  =
         inherit Indirect(names, parent)
         member _.Real = target
         interface ISafetyConditoinHolder with

@@ -1,4 +1,3 @@
-using DevExpress.LookAndFeel;
 using DevExpress.XtraSplashScreen;
 using DSModeler.Utils;
 using Dual.Common.Core;

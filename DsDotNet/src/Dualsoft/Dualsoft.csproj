@@ -29,7 +29,7 @@
     <SuiteName>Dualsoft</SuiteName>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
     <DisallowUrlActivation>true</DisallowUrlActivation>
-    <ApplicationRevision>7</ApplicationRevision>
+    <ApplicationRevision>8</ApplicationRevision>
     <ApplicationVersion>0.9.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <ExcludeDeploymentUrl>true</ExcludeDeploymentUrl>
@@ -81,6 +81,9 @@
   <PropertyGroup>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="DevExpress.Data.Desktop.v21.2" />
     <Reference Include="DevExpress.Data.v21.2" />
@@ -93,19 +96,13 @@
     <Reference Include="DevExpress.XtraPrinting.v21.2, Version=21.2.12.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
     <Reference Include="DevExpress.XtraVerticalGrid.v21.2, Version=21.2.12.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="Dual.Common.Core, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\DualSoft-Common-Core.0.1.8\lib\net48\Dual.Common.Core.dll</HintPath>
+      <HintPath>..\..\packages\DualSoft-Common-Core.0.1.10\lib\net48\Dual.Common.Core.dll</HintPath>
     </Reference>
     <Reference Include="Dual.Common.Core.FS, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\DualSoft-Common-Core-FS.0.1.2\lib\net48\Dual.Common.Core.FS.dll</HintPath>
     </Reference>
     <Reference Include="Dual.Common.Winform, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\DualSoft-Common-Winform.0.1.1\lib\net48\Dual.Common.Winform.dll</HintPath>
-    </Reference>
-    <Reference Include="Engine.CodeGenCPU">
-      <HintPath>..\..\bin\net48\Engine.CodeGenCPU.dll</HintPath>
-    </Reference>
-    <Reference Include="Engine.Cpu">
-      <HintPath>..\..\bin\net48\Engine.Cpu.dll</HintPath>
+      <HintPath>..\..\packages\DualSoft-Common-Winform.0.1.2\lib\net48\Dual.Common.Winform.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Core, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\packages\FSharp.Core.7.0.0\lib\netstandard2.0\FSharp.Core.dll</HintPath>
@@ -185,23 +182,17 @@
     <Compile Include="FormMain.Designer.cs">
       <DependentUpon>FormMain.cs</DependentUpon>
     </Compile>
-    <Compile Include="Form\FormDocPLCLS.cs">
+    <Compile Include="Form\FormDocTEXT.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form\FormDocPLCLS.Designer.cs">
-      <DependentUpon>FormDocPLCLS.cs</DependentUpon>
+    <Compile Include="Form\FormDocTEXT.Designer.cs">
+      <DependentUpon>FormDocTEXT.cs</DependentUpon>
     </Compile>
-    <Compile Include="Form\FormDocDS.cs">
+    <Compile Include="Form\FormDocImage.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form\FormDocDS.Designer.cs">
-      <DependentUpon>FormDocDS.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Form\FormDocViewStart.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Form\FormDocViewStart.Designer.cs">
-      <DependentUpon>FormDocViewStart.cs</DependentUpon>
+    <Compile Include="Form\FormDocImage.Designer.cs">
+      <DependentUpon>FormDocImage.cs</DependentUpon>
     </Compile>
     <Compile Include="Form\FormDocView.cs">
       <SubType>Form</SubType>
@@ -210,15 +201,21 @@
       <DependentUpon>FormDocView.cs</DependentUpon>
     </Compile>
     <Compile Include="DocControl\DocControl.cs" />
-    <Compile Include="Import\PPT.cs" />
+    <Compile Include="Import, Export\PLC.cs" />
+    <Compile Include="Import, Export\DSFile.cs" />
+    <Compile Include="Import, Export\XLS.cs" />
+    <Compile Include="Import, Export\PPT.cs" />
+    <Compile Include="SIM\SIMProperty.cs" />
+    <Compile Include="Utils\DSRegistry.cs" />
+    <Compile Include="Utils\MessageBox.cs" />
     <Compile Include="Utils\PropertyRecordExtension.cs" />
-    <Compile Include="Utils\UcPropertyGrid.cs">
+    <Compile Include="Property\UcPropertyGrid.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Utils\UcPropertyGrid.Designer.cs">
+    <Compile Include="Property\UcPropertyGrid.Designer.cs">
       <DependentUpon>UcPropertyGrid.cs</DependentUpon>
     </Compile>
-    <Compile Include="SIM\SIM.cs" />
+    <Compile Include="SIM\SIMControl.cs" />
     <Compile Include="Event\EventExternal.cs" />
     <Compile Include="Model\Model.cs" />
     <Compile Include="HMI\HMI.cs" />
@@ -244,7 +241,7 @@
     </Compile>
     <Compile Include="Utils\FileOpenSave.cs" />
     <Compile Include="Utils\EditorSkin.cs" />
-    <Compile Include="Utils\LastFiles.cs" />
+    <Compile Include="Utils\Files.cs" />
     <Compile Include="Utils\LayoutForm.cs" />
     <Compile Include="GlobalStatic.cs" />
     <Compile Include="Utils\SplashScreenDS.cs">
@@ -253,18 +250,16 @@
     <Compile Include="Utils\SplashScreenDS.Designer.cs">
       <DependentUpon>SplashScreenDS.cs</DependentUpon>
     </Compile>
+    <Compile Include="ViewDiagram\ViewDraw.cs" />
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form\FormDocPLCLS.resx">
-      <DependentUpon>FormDocPLCLS.cs</DependentUpon>
+    <EmbeddedResource Include="Form\FormDocTEXT.resx">
+      <DependentUpon>FormDocTEXT.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form\FormDocDS.resx">
-      <DependentUpon>FormDocDS.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Form\FormDocViewStart.resx">
-      <DependentUpon>FormDocViewStart.cs</DependentUpon>
+    <EmbeddedResource Include="Form\FormDocImage.resx">
+      <DependentUpon>FormDocImage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form\FormDocView.resx">
       <DependentUpon>FormDocView.cs</DependentUpon>
@@ -283,7 +278,7 @@
     <EmbeddedResource Include="Utils\DXWaitForm.resx">
       <DependentUpon>DXWaitForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Utils\UcPropertyGrid.resx">
+    <EmbeddedResource Include="Property\UcPropertyGrid.resx">
       <DependentUpon>UcPropertyGrid.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ViewDiagram\UCView.resx">
@@ -296,7 +291,6 @@
       <DependentUpon>SplashScreenDS.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="App.config" />
-    <None Include="Dualsoft_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
@@ -313,9 +307,17 @@
     <Content Include="logo_Dualsoft.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj">
+      <Project>{cdb56c55-5a93-4cde-a8d4-e2e5454dab86}</Project>
+      <Name>Engine.CodeGenCPU</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Engine\Engine.Core\Engine.Core.fsproj">
       <Project>{40d8f531-bf68-4fab-a5dc-57277c3de2c8}</Project>
       <Name>Engine.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Engine\Engine.Cpu\Engine.Cpu.fsproj">
+      <Project>{8cf6c4f7-5a55-43bd-aad6-788e75fca0b8}</Project>
+      <Name>Engine.Cpu</Name>
     </ProjectReference>
     <ProjectReference Include="..\Model\Import\Model.Import.Office\Model.Import.Office.fsproj">
       <Project>{5b8c9e88-ffc3-403b-adae-1923bcc6b8fb}</Project>

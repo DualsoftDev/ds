@@ -43,7 +43,7 @@ module ImportViewModule =
             )
 
     let ConvertFlow(flow:Flow, dummys:pptDummy seq)  =
-        let newNode = ViewNode(VFLOW)
+        let newNode = ViewNode(flow.Name, VFLOW)
         newNode.Flow <- Some flow
         let edgeInfos = flow.ModelingEdges
         let lands = flow.Graph.Islands

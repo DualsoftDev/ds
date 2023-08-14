@@ -21,13 +21,15 @@ namespace DSModeler
         public const string RegSkin = "RegSkin";
         public const string LastPath = "LastPath";
         public const string LastFiles = "LastFiles";
-
+        public const string SimSpeed = "SimSpeed";
+        
     }
     public static class Global
     {
         public static ILog Logger => Log4NetLogger.Logger;
         public static string LogLevel { get; set; }
-        public static int SimSpeed { get; set; } = 0;
+        public static int SimSpeed { get; set; } = 3;
+        public static bool SimLogHide{ get; set; } 
 
         public static Version ver = Assembly.GetEntryAssembly().GetName().Version;
 

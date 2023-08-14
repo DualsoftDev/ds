@@ -12,7 +12,7 @@ using static Engine.Cpu.RunTime;
 
 namespace DSModeler
 {
-    public static class SIM
+    public static class SIMControl
     {
 
         public static void RunSimMode(DsSystem sys)
@@ -43,7 +43,7 @@ namespace DSModeler
                      var system = f.Key;
                      var cpu = f.Value;
 
-                     SIM.RunSimMode(system);
+                     SIMControl.RunSimMode(system);
                      cpu.Run();
                  });
              });
@@ -58,7 +58,7 @@ namespace DSModeler
                     var system = f.Key;
                     var cpu = f.Value;
 
-                    SIM.RunSimMode(system);
+                    SIMControl.RunSimMode(system);
                     cpu.Step();
                 });
             });

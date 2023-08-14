@@ -21,6 +21,7 @@ namespace DSModeler
             int delayMsec = 0;
             switch (Global.SimSpeed)
             {
+                case 0: delayMsec = 1000; ; break;
                 case 1: delayMsec = 500; ; break;
                 case 2: delayMsec = 100; ; break;
                 case 3: delayMsec = 50; ; break;
@@ -53,8 +54,11 @@ namespace DSModeler
                         Global.StatusChangeSubject.OnNext(Tuple.Create(v, rx.status));
 
                         dicStatus[v] = rx.status;
-                        var txt = $"{DateTime.Now:hh:mm:ss.fff}  {txtStatus}  {v.ToText()}";
-                        Global.Logger.Info(txt);
+                        if (!Global.SimLogHide)
+                        {
+                            var txt = $"{DateTime.Now:hh:mm:ss.fff}  {txtStatus}  {v.ToText()}";
+                            Global.Logger.Info(txt);
+                        }
                         await Task.Yield();
                     }).Wait();
                 });
@@ -63,6 +67,7 @@ namespace DSModeler
             {
                 DisposableCPUEventValue = CpusEvent.ValueSubject.Subscribe(rx =>
                 {
+                    if (Global.SimLogHide) return;
                     Task.Run(async () =>
                      {
                          var sys = rx.Item1;

@@ -9,7 +9,7 @@ using static Engine.Core.CoreModule;
 
 namespace DSModeler
 {
-    public static class PropertyRecordExtension
+    public static class PropertyRecordExt
     {
         public static object Propertize(this IEnumerable<Vertex> vertices)
         {

@@ -3,9 +3,9 @@ using Model.Import.Office;
 using System.Collections.Generic;
 using static Model.Import.Office.ImportPPTModule;
 
-namespace DSModeler
+namespace DSModeler.Tree
 {
-    public static class Model
+    public static class ModelTree
     {
         public static void ClearSubBtn(AccordionControlElement ace)
         {
@@ -37,6 +37,7 @@ namespace DSModeler
             }
             return lstAce;
         }
+
 
     }
 }

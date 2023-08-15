@@ -6,10 +6,15 @@ using System.Linq;
 using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.Core.CoreModule;
 
-namespace DSModeler
+namespace DSModeler.Tree
 {
-    public static class HMI
+    public static class HMITree
     {
+        static readonly Color startColor = Color.Green;
+        static readonly Color resetColor = Color.Red;
+        static readonly string startToolTip = "START";
+        static readonly string resetToolTip = "RESET";
+        static readonly Color offColor = Color.RoyalBlue;
         public static void CreateHMIBtn(FormMain formMain, AccordionControlElement ace_HMI, DsSystem sys)
         {
             var eleSys = new AccordionControlElement()
@@ -51,29 +56,33 @@ namespace DSModeler
 
             AccordionContextButton createAcb(Vertex v, bool start)
             {
+
                 var acb = new AccordionContextButton() { Tag = v };
+                acb.Visibility = DevExpress.Utils.ContextItemVisibility.Visible;
 
                 if (start)
                 {
                     acb.Click += (s, e) =>
                     {
                         AccordionContextButton btn = UpdateBtn(s);
-                        StartHMI(btn.Tag as Real);
+                        bool on = btn.AppearanceNormal.ForeColor != offColor;
+                        StartHMI(btn.Tag as Real, on);
                     };
-                    acb.AppearanceNormal.ForeColor = Color.Lime;
-                    acb.AppearanceHover.ForeColor = Color.Green;
-                    acb.ToolTip = "START";
+                    acb.AppearanceNormal.ForeColor = Color.RoyalBlue;
+                    acb.AppearanceHover.ForeColor = startColor;
+                    acb.ToolTip = startToolTip;
                 }
                 else
                 {
                     acb.Click += (s, e) =>
                     {
                         AccordionContextButton btn = UpdateBtn(s);
-                        ResetHMI(btn.Tag as Real);
+                        bool on = btn.AppearanceNormal.ForeColor != offColor;
+                        ResetHMI(btn.Tag as Real, on);
                     };
-                    acb.AppearanceNormal.ForeColor = Color.IndianRed;
-                    acb.AppearanceHover.ForeColor = Color.Red;
-                    acb.ToolTip = "RESET";
+                    acb.AppearanceNormal.ForeColor = Color.RoyalBlue;
+                    acb.AppearanceHover.ForeColor = resetColor;
+                    acb.ToolTip = resetToolTip;
                 }
 
                 acb.AppearanceNormal.Options.UseForeColor = true;
@@ -87,32 +96,48 @@ namespace DSModeler
 
                 return acb;
 
-                void StartHMI(Real real)
+                void StartHMI(Real real, bool on)
                 {
-                    var vv = real.TagManager as VertexManager;
-                    vv.SF.Value = true;
-                    vv.RF.Value = false;
+                    var vv = (real.TagManager as VertexManager);
+                    vv.SF.Value = on;
                 }
-                void ResetHMI(Real real)
+                void ResetHMI(Real real, bool on)
                 {
                     var vv = real.TagManager as VertexManager;
-                    vv.RF.Value = true;
-                    vv.SF.Value = false;
+                    vv.RF.Value = on;
                 }
             }
         }
 
+
         private static AccordionContextButton UpdateBtn(object s)
         {
             var btn = (AccordionContextButton)s;
-            var btns = btn.Collection.OfType<AccordionContextButton>().ToList();
-            //전체 자동 숨기기
-            btns.Iter(b => b.Visibility = DevExpress.Utils.ContextItemVisibility.Auto);
-            //해당 버튼 만 보이기
-            btn.Visibility = DevExpress.Utils.ContextItemVisibility.Visible;
+            if (btn.AppearanceNormal.ForeColor != offColor)
+                btn.AppearanceNormal.ForeColor = offColor;
+            else
+                btn.AppearanceNormal.ForeColor = btn.ToolTip == startToolTip ? startColor : resetColor;
 
             return btn;
         }
+        public static void OffHMIBtn(AccordionControlElement ace_HMI)
+        {
+            OffHMISubBtn(ace_HMI);
+        }
+        private static void OffHMISubBtn(AccordionControlElement ace)
+        {
+            offSubElements(ace);
+
+            void offSubElements(AccordionControlElement ele)
+            {
+                foreach (var subEle in ele.Elements)
+                    offSubElements(subEle);
+                ele.Elements.Iter(i => i.ContextButtons
+                        .Iter(b => b.AppearanceNormal.ForeColor = offColor));
+            }
+        }
+
+
     }
 
 }

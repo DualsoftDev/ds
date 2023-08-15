@@ -1,11 +1,8 @@
-using DevExpress.Office;
-using DevExpress.Xpo.Logger;
 using DevExpress.XtraEditors.Controls;
 using Dual.Common.Core;
 using Dual.Common.Winform;
 using log4net.Appender;
 using log4net.Core;
-using log4net.Repository.Hierarchy;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -49,7 +46,7 @@ namespace DSModeler
         Image logLevelChkImg => resources.GetObject("ImgChk.ImageOptions.Image") as Image;
 
 
-        
+
 
         private void UcLog_Load(object sender, EventArgs args)
         {
@@ -151,7 +148,7 @@ namespace DSModeler
             log_menu.DropDownItems.AddRange(logLvlControls.ToArray());
             items.Add(log_menu);
 
-           
+
             listBoxControlOutput.MouseClick += (s, e) =>
             {
                 if (e.Button == MouseButtons.Right)
@@ -233,6 +230,6 @@ namespace DSModeler
             await Task.Yield();
         }
 
-     
+
     }
 }

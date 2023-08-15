@@ -1,6 +1,6 @@
-using DevExpress.XtraBars.Docking2010.Views.Tabbed;
 using DevExpress.XtraEditors;
 using DSModeler.Form;
+using DSModeler.Tree;
 using Dual.Common.Core.FS;
 using Dual.Common.Winform;
 using Engine.Cpu;
@@ -66,28 +66,30 @@ namespace DSModeler
             });
         }
 
-        public static void UpdateExpr
-            (Dictionary<string, CommentedStatement> dicStatement
-            , FormDocText textForm
-            , ComboBoxEdit comboBoxEdit_Expr)
+    
+        internal static void UpdateExpr(
+              FormDocText textForm
+            , LogicStatement logicStatement)
         {
-         
-            string num = comboBoxEdit_Expr.SelectedItem.ToString().Split(';')[0];
-            CommentedStatement cs = dicStatement[num];
+            CommentedStatement cs = logicStatement.GetCommentedStatement();
             var tgts = CoreExtensionsModule.getTargetStorages(cs.statement);
             var srcs = CoreExtensionsModule.getSourceStorages(cs.statement);
             string tgtsTexs = string.Join(", ", tgts.Select(s => $"{s.Name}({s.BoxedValue})"));
             string srcsTexs = string.Join(", ", srcs.Select(s => $"{s.Name}({s.BoxedValue})"));
             string comments = cs.comment.IsNullOrEmpty() ? "Empty expression contact only" : cs.comment;
 
-            textForm.AppendTextColor($"{num} : {comments}\n".Replace("$", ""), Color.Gold);
+            textForm.AppendTextColor($"{comments}\n".Replace("$", ""), Color.Goldenrod);
+
+
+
             textForm.AppendTextColor($"\r\n\t{cs.statement.ToText().Replace("$", "")} ", Color.Gold);
+
+
+
             textForm.AppendTextColor($"\r\n\t{tgtsTexs} = {srcsTexs}\r\n", Color.LightGreen);
             textForm.AppendTextColor("\r\n", Color.Gold);
             textForm.TextEditDS.ScrollToCaret();
         }
-
-       
     }
 
 }

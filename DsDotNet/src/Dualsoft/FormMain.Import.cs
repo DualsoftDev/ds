@@ -1,15 +1,12 @@
 using DevExpress.XtraEditors;
 using Dual.Common.Core.FS;
 using Engine.Core;
-using Engine.Cpu;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.EdgeExt;
-using static Engine.Core.ExpressionModule;
 using static Engine.Cpu.RunTime;
 
 namespace DSModeler
@@ -32,11 +29,11 @@ namespace DSModeler
 
                 if (files != null)
                 {
-                    clearModel();
+                    ClearModel();
 
                     DicCpu = PPT.ImportPowerPoint(files, this, tabbedView1, ace_Model, ace_System, ace_Device, ace_HMI);
 
-                    createRungExprCombobox(DicCpu[Global.ActiveSys]);
+                    Tree.LogicTree.CreateRungExprCombobox(DicCpu[Global.ActiveSys], this, tabbedView1, gridLookUpEdit_Expr);
                     Files.SetLast(files);
 
                     DicStatus = new Dictionary<Vertex, Status4>();
@@ -60,7 +57,7 @@ namespace DSModeler
 
         }
 
-        void clearModel()
+        void ClearModel()
         {
             foreach (var item in DicCpu.Values)
                 item.Dispose();
@@ -69,33 +66,10 @@ namespace DSModeler
             tabbedView1.Controller.CloseAll();
             tabbedView1.Documents.Clear();
 
-            simpleButton_OpenPLC.Visible = false;
 
-            Model.ClearSubBtn(ace_System);
-            Model.ClearSubBtn(ace_Device);
-            Model.ClearSubBtn(ace_HMI);
+            Tree.ModelTree.ClearSubBtn(ace_System);
+            Tree.ModelTree.ClearSubBtn(ace_Device);
+            Tree.ModelTree.ClearSubBtn(ace_HMI);
         }
-
-        void createRungExprCombobox(DsCPU dsCPU)
-        {
-            var dicStatement = new Dictionary<string, CommentedStatement>();
-            comboBoxEdit_Expr.Properties.Items.Clear();
-            comboBoxEdit_Expr.Properties.SelectedIndexChanged += (ss, ee) =>
-            {
-                var textForm = DocControl.CreateDocExpr(this, tabbedView1);
-                if (textForm == null) return;
-                DSFile.UpdateExpr(dicStatement, textForm, comboBoxEdit_Expr);
-            };
-
-            int cnt = 0;
-            foreach (var rung in dsCPU.CommentedStatements)
-            {
-                dicStatement.Add($"{cnt++}", rung);
-                var txt = $"{cnt};\t[{rung.TargetName}][{rung.TargetValue}] \t\t\t Spec:{rung.comment.Replace("%", " ").Replace("$", " ")}";
-                comboBoxEdit_Expr.Properties.Items.Add(txt);
-            }
-        }
-
-     
     }
 }

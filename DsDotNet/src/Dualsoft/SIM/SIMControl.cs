@@ -1,3 +1,5 @@
+using DevExpress.XtraBars.Navigation;
+using DSModeler.Tree;
 using Dual.Common.Core;
 using System;
 using System.Collections.Generic;
@@ -34,23 +36,26 @@ namespace DSModeler
                 });
         }
 
-        public static async Task Play(Dictionary<DsSystem, DsCPU> dic)
+        public static async Task Play(Dictionary<DsSystem, DsCPU> dic, AccordionControlElement ace_Play)
         {
+            SimTree.SimPlayUI(ace_Play, true);
             await Task.Run(() =>
-             {
-                 dic.ForEach(f =>
-                 {
-                     var system = f.Key;
-                     var cpu = f.Value;
+            {
+                dic.ForEach(f =>
+                {
+                    var system = f.Key;
+                    var cpu = f.Value;
 
-                     SIMControl.RunSimMode(system);
-                     cpu.Run();
-                 });
-             });
+                    SIMControl.RunSimMode(system);
+                    cpu.Run();
+                });
+            });
         }
 
-        public static async Task Step(Dictionary<DsSystem, DsCPU> dic)
+
+        public static async Task Step(Dictionary<DsSystem, DsCPU> dic, AccordionControlElement ace_Play)
         {
+            SimTree.SimPlayUI(ace_Play, false);
             await Task.Run(() =>
             {
                 dic.ForEach(f =>
@@ -63,8 +68,9 @@ namespace DSModeler
                 });
             });
         }
-        public static async Task Stop(Dictionary<DsSystem, DsCPU> dic)
+        public static async Task Stop(Dictionary<DsSystem, DsCPU> dic, AccordionControlElement ace_Play)
         {
+            SimTree.SimPlayUI(ace_Play, false);
             await Task.Run(() =>
             {
                 dic.ForEach(f =>
@@ -74,8 +80,12 @@ namespace DSModeler
                 });
             });
         }
-        public static async Task Reset(Dictionary<DsSystem, DsCPU> dic)
+        public static async Task Reset(Dictionary<DsSystem, DsCPU> dic
+            , AccordionControlElement ace_Play
+            , AccordionControlElement ace_HMI)
         {
+            SimTree.SimPlayUI(ace_Play, false);
+            HMITree.OffHMIBtn(ace_HMI);
             await Task.Run(() =>
             {
                 dic.ForEach(f =>

@@ -31,14 +31,14 @@ module RunTime =
                         //    |> Async.Parallel
                         //    |> Async.Ignore
                         //    |> Async.RunSynchronously
-                                     
+
 
                         //else
                         //    ()
                             //failwithlog $"Error {getFuncName()} : {storage.Name}"  //디버깅후 예외 처리
-                            
+
                             //for statement in mapRungs[storage] do
-                            //    if storage.IsStartThread() 
+                            //    if storage.IsStartThread()
                             //    then
                             //        //statement.Do()
                             //        async {
@@ -94,22 +94,23 @@ module RunTime =
                 runSubscription <- null
 
         member x.Step() =
-            x.Stop() 
+            x.Stop()
             runSubscription <- runSubscribe()
-            x.ScanOnce() 
-            x.Stop() 
+            x.ScanOnce()
+            x.Stop()
 
         member x.Reset() =
-            x.Stop() 
+            x.Stop()
             sys.TagManager
                .Storages.Where(fun w-> w.Value.TagKind <> (int)SystemTag.on)
                         .Iter(fun s->
                             let stg = s.Value
                             match stg with
-                            | :? TimerCounterBaseStruct as tc ->()  //todo 타이머 카운터 리셋도 필요
-                            | _ -> 
-                                stg.BoxedValue <- textToDataType(stg.DataType.Name).DefaultValue()  
-                )   
+                            | :? TimerCounterBaseStruct as tc ->
+                                tc.Clear()  // 타이머 카운터 리셋
+                            | _ ->
+                                stg.BoxedValue <- textToDataType(stg.DataType.Name).DefaultValue()
+                )
 
 
         member x.Dispose() =  x.Stop()

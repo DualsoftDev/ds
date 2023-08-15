@@ -160,7 +160,12 @@ module rec CounterModule =
         member _.UN:VariableBase<bool> = cp.UN  // Underflow
         member _.LD:VariableBase<bool> = cp.LD  // Load (XGI)
         member _.Type = cp.Type
-
+        override x.Clear() =
+            base.Clear()
+            x.OV.Value <- false
+            x.UN.Value <- false
+            x.CU.Value <- false
+            x.CD.Value <- false
 
     type ICounter = interface end
 
@@ -281,31 +286,19 @@ module rec CounterModule =
                         cs.DN.Value <- false
             ) |> disposables.Add
 
+
         let registerReset() =
             CpusEvent.ValueSubject.Where(fun (system, _storage, _value) -> system = (counterStruct:>IStorage).DsSystem)
                 .Where(fun (_system, storage, _newValue) -> storage = cs.RES && cs.RES.Value)
                 .Subscribe(fun (_system, _storage, _newValue) ->
                     tracefn "Counter reset requested"
-                    if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
-                    cs.ACC.Value <- 0us
-                    cs.DN.Value <- false
-                    cs.CU.Value <- false
-                    cs.CD.Value <- false
-                    cs.OV.Value <- false
-                    cs.UN.Value <- false
+                    if cs.ACC.Value < 0us || cs.PRE.Value < 0us then
+                        failwithlog "ERROR"
+                    cs.Clear()
             ) |> disposables.Add
 
-
-        let clear() =
-            cs.OV.Value <- false
-            cs.UN.Value <- false
-            cs.DN.Value <- false
-            cs.CU.Value <- false
-            cs.CD.Value <- false
-            cs.ACC.Value <- 0us
-
         do
-            clear()
+            cs.Clear()
             registerReset()
             match cs, counterType with
             | :? CTUStruct, CTU -> registerCTU()

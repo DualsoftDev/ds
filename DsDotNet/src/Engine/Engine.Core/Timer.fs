@@ -154,6 +154,13 @@ module rec TimerModule =
         member _.RES:VariableBase<bool> = res
         /// XGI load
         member _.LD:VariableBase<bool> = res
+        abstract member Clear:unit -> unit
+        default x.Clear() =
+            x.DN.Value <- false
+            x.PRE.Value <- 0us      // preset 도 clear 해야 하는가?
+            x.ACC.Value <- 0us
+            x.RES.Value <- false
+            x.LD.Value <- false
 
     let addTagsToStorages (storages:Storages) (ts:IStorage seq) =
         for t in ts do
@@ -194,14 +201,16 @@ module rec TimerModule =
             storages.Add(name, ts)
             ts
 
-
-    type TimerStruct with
         /// Clear EN, TT, DN bits
         member x.ClearBits() =
             x.EN.Value <- false
             x.TT.Value <- false
             x.DN.Value <- false
-        member x.Clear() =
+
+        override x.Clear() =
+            base.Clear()
             x.ClearBits()
             x.ACC.Value <- 0us
+            // x.PRE.Value <- 0us       // preset 도 clear 해야 하는가?
+
 

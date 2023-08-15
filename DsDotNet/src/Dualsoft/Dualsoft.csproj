@@ -103,7 +103,6 @@
     </Reference>
     <Reference Include="Dual.Common.Winform, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\DualSoft-Common-Winform.0.1.2\lib\net48\Dual.Common.Winform.dll</HintPath>
-      <HintPath>..\..\packages\DualSoft-Common-Winform.0.1.1\lib\net48\Dual.Common.Winform.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Core, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\packages\FSharp.Core.7.0.0\lib\netstandard2.0\FSharp.Core.dll</HintPath>
@@ -209,8 +208,6 @@
     <Compile Include="SIM\SIMProperty.cs" />
     <Compile Include="Utils\DSRegistry.cs" />
     <Compile Include="Utils\MessageBox.cs" />
-    <Compile Include="Import\PPT.cs" />
-    <Compile Include="SIM\SIMProperty.cs" />
     <Compile Include="Utils\PropertyRecordExtension.cs" />
     <Compile Include="Property\UcPropertyGrid.cs">
       <SubType>UserControl</SubType>

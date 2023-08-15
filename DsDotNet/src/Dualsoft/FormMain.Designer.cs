@@ -58,20 +58,22 @@ namespace DSModeler
             this.accordionControl2 = new DevExpress.XtraBars.Navigation.AccordionControl();
             this.simpleButton_OpenPLC = new DevExpress.XtraEditors.SimpleButton();
             this.accordionContentContainer1 = new DevExpress.XtraBars.Navigation.AccordionContentContainer();
-            this.labelControl3 = new DevExpress.XtraEditors.LabelControl();
-            this.comboBoxEdit_Expr = new DevExpress.XtraEditors.ComboBoxEdit();
             this.toggleSwitch_simLog = new DevExpress.XtraEditors.ToggleSwitch();
             this.labelControl2 = new DevExpress.XtraEditors.LabelControl();
             this.ratingControl_Speed = new DevExpress.XtraEditors.RatingControl();
             this.labelControl1 = new DevExpress.XtraEditors.LabelControl();
             this.accordionContentContainer2 = new DevExpress.XtraBars.Navigation.AccordionContentContainer();
             this.simpleButton_layoutReset = new DevExpress.XtraEditors.SimpleButton();
+            this.accordionContentContainer3 = new DevExpress.XtraBars.Navigation.AccordionContentContainer();
+            this.labelControl3 = new DevExpress.XtraEditors.LabelControl();
+            this.gridLookUpEdit_Expr = new DevExpress.XtraEditors.GridLookUpEdit();
+            this.gridLookUpEdit1View_Expr = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.ace_Model = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_System = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Device = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlSeparator4 = new DevExpress.XtraBars.Navigation.AccordionControlSeparator();
             this.ace_sim = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.ace10 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.ace_SimRoot = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Play = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Step = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Stop = new DevExpress.XtraBars.Navigation.AccordionControlElement();
@@ -99,6 +101,7 @@ namespace DSModeler
             this.ace_Setting = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace9 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement1 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlElement3 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             ((System.ComponentModel.ISupportInitialize)(this.document1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dockManager)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManager1)).BeginInit();
@@ -115,10 +118,12 @@ namespace DSModeler
             ((System.ComponentModel.ISupportInitialize)(this.accordionControl2)).BeginInit();
             this.accordionControl2.SuspendLayout();
             this.accordionContentContainer1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.comboBoxEdit_Expr.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_simLog.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ratingControl_Speed.Properties)).BeginInit();
             this.accordionContentContainer2.SuspendLayout();
+            this.accordionContentContainer3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit_Expr.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View_Expr)).BeginInit();
             this.SuspendLayout();
             // 
             // document1
@@ -357,6 +362,7 @@ namespace DSModeler
             this.accordionControl2.Controls.Add(this.simpleButton_OpenPLC);
             this.accordionControl2.Controls.Add(this.accordionContentContainer1);
             this.accordionControl2.Controls.Add(this.accordionContentContainer2);
+            this.accordionControl2.Controls.Add(this.accordionContentContainer3);
             this.accordionControl2.Dock = System.Windows.Forms.DockStyle.Left;
             this.accordionControl2.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.ace_Model,
@@ -384,41 +390,17 @@ namespace DSModeler
             this.simpleButton_OpenPLC.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
             this.simpleButton_OpenPLC.Size = new System.Drawing.Size(75, 23);
             this.simpleButton_OpenPLC.TabIndex = 7;
-            this.simpleButton_OpenPLC.Visible = false;
             this.simpleButton_OpenPLC.Click += new System.EventHandler(this.simpleButton_OpenPLC_Click);
             // 
             // accordionContentContainer1
             // 
-            this.accordionContentContainer1.Controls.Add(this.labelControl3);
-            this.accordionContentContainer1.Controls.Add(this.comboBoxEdit_Expr);
             this.accordionContentContainer1.Controls.Add(this.toggleSwitch_simLog);
             this.accordionContentContainer1.Controls.Add(this.labelControl2);
             this.accordionContentContainer1.Controls.Add(this.ratingControl_Speed);
             this.accordionContentContainer1.Controls.Add(this.labelControl1);
             this.accordionContentContainer1.Name = "accordionContentContainer1";
-            this.accordionContentContainer1.Size = new System.Drawing.Size(309, 247);
+            this.accordionContentContainer1.Size = new System.Drawing.Size(309, 63);
             this.accordionContentContainer1.TabIndex = 11;
-            // 
-            // labelControl3
-            // 
-            this.labelControl3.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
-            this.labelControl3.Appearance.Options.UseFont = true;
-            this.labelControl3.Location = new System.Drawing.Point(30, 57);
-            this.labelControl3.Name = "labelControl3";
-            this.labelControl3.Size = new System.Drawing.Size(28, 19);
-            this.labelControl3.TabIndex = 5;
-            this.labelControl3.Text = "수식";
-            // 
-            // comboBoxEdit_Expr
-            // 
-            this.comboBoxEdit_Expr.Location = new System.Drawing.Point(64, 56);
-            this.comboBoxEdit_Expr.MenuManager = this.barManager1;
-            this.comboBoxEdit_Expr.Name = "comboBoxEdit_Expr";
-            this.comboBoxEdit_Expr.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.comboBoxEdit_Expr.Properties.DropDownRows = 20;
-            this.comboBoxEdit_Expr.Size = new System.Drawing.Size(198, 20);
-            this.comboBoxEdit_Expr.TabIndex = 4;
             // 
             // toggleSwitch_simLog
             // 
@@ -492,6 +474,45 @@ namespace DSModeler
             this.simpleButton_layoutReset.Text = "창 복원";
             this.simpleButton_layoutReset.Click += new System.EventHandler(this.simpleButton_layoutReset_Click);
             // 
+            // accordionContentContainer3
+            // 
+            this.accordionContentContainer3.Controls.Add(this.labelControl3);
+            this.accordionContentContainer3.Controls.Add(this.gridLookUpEdit_Expr);
+            this.accordionContentContainer3.Name = "accordionContentContainer3";
+            this.accordionContentContainer3.Size = new System.Drawing.Size(309, 337);
+            this.accordionContentContainer3.TabIndex = 19;
+            // 
+            // labelControl3
+            // 
+            this.labelControl3.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
+            this.labelControl3.Appearance.Options.UseFont = true;
+            this.labelControl3.Location = new System.Drawing.Point(10, 4);
+            this.labelControl3.Name = "labelControl3";
+            this.labelControl3.Size = new System.Drawing.Size(28, 19);
+            this.labelControl3.TabIndex = 5;
+            this.labelControl3.Text = "수식";
+            // 
+            // gridLookUpEdit_Expr
+            // 
+            this.gridLookUpEdit_Expr.EditValue = "[EditVasd";
+            this.gridLookUpEdit_Expr.Location = new System.Drawing.Point(44, 3);
+            this.gridLookUpEdit_Expr.MenuManager = this.barManager1;
+            this.gridLookUpEdit_Expr.Name = "gridLookUpEdit_Expr";
+            this.gridLookUpEdit_Expr.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.gridLookUpEdit_Expr.Properties.NullText = "수식을 선택하세요";
+            this.gridLookUpEdit_Expr.Properties.PopupView = this.gridLookUpEdit1View_Expr;
+            this.gridLookUpEdit_Expr.Size = new System.Drawing.Size(265, 20);
+            this.gridLookUpEdit_Expr.TabIndex = 0;
+            // 
+            // gridLookUpEdit1View_Expr
+            // 
+            this.gridLookUpEdit1View_Expr.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
+            this.gridLookUpEdit1View_Expr.Name = "gridLookUpEdit1View_Expr";
+            this.gridLookUpEdit1View_Expr.OptionsSelection.EnableAppearanceFocusedCell = false;
+            this.gridLookUpEdit1View_Expr.OptionsView.ShowGroupPanel = false;
+            this.gridLookUpEdit1View_Expr.PreviewLineCount = 20;
+            // 
             // ace_Model
             // 
             this.ace_Model.Appearance.Default.Font = new System.Drawing.Font("Tahoma", 12F);
@@ -526,24 +547,24 @@ namespace DSModeler
             this.ace_sim.Appearance.Default.Font = new System.Drawing.Font("Tahoma", 12F);
             this.ace_sim.Appearance.Default.Options.UseFont = true;
             this.ace_sim.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
-            this.ace10,
+            this.ace_SimRoot,
             this.ace_HMI});
             this.ace_sim.Expanded = true;
             this.ace_sim.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_sim.ImageOptions.SvgImage")));
             this.ace_sim.Name = "ace_sim";
             this.ace_sim.Text = "시뮬레이션";
             // 
-            // ace10
+            // ace_SimRoot
             // 
-            this.ace10.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
+            this.ace_SimRoot.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.ace_Play,
             this.ace_Step,
             this.ace_Stop,
             this.ace_Reset});
-            this.ace10.Expanded = true;
-            this.ace10.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace10.ImageOptions.SvgImage")));
-            this.ace10.Name = "ace10";
-            this.ace10.Text = "Control";
+            this.ace_SimRoot.Expanded = true;
+            this.ace_SimRoot.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_SimRoot.ImageOptions.SvgImage")));
+            this.ace_SimRoot.Name = "ace_SimRoot";
+            this.ace_SimRoot.Text = "Control";
             // 
             // ace_Play
             // 
@@ -772,7 +793,8 @@ namespace DSModeler
             // 
             this.ace_Setting.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.ace9,
-            this.accordionControlElement1});
+            this.accordionControlElement1,
+            this.accordionControlElement3});
             this.ace_Setting.Expanded = true;
             this.ace_Setting.Name = "ace_Setting";
             this.ace_Setting.Text = "설정";
@@ -793,6 +815,15 @@ namespace DSModeler
             this.accordionControlElement1.Name = "accordionControlElement1";
             this.accordionControlElement1.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.accordionControlElement1.Text = "Simulation";
+            // 
+            // accordionControlElement3
+            // 
+            this.accordionControlElement3.ContentContainer = this.accordionContentContainer3;
+            this.accordionControlElement3.Expanded = true;
+            this.accordionControlElement3.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement3.ImageOptions.SvgImage")));
+            this.accordionControlElement3.Name = "accordionControlElement3";
+            this.accordionControlElement3.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.accordionControlElement3.Text = "Logic";
             // 
             // FormMain
             // 
@@ -833,10 +864,13 @@ namespace DSModeler
             this.accordionControl2.ResumeLayout(false);
             this.accordionContentContainer1.ResumeLayout(false);
             this.accordionContentContainer1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.comboBoxEdit_Expr.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_simLog.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.ratingControl_Speed.Properties)).EndInit();
             this.accordionContentContainer2.ResumeLayout(false);
+            this.accordionContentContainer3.ResumeLayout(false);
+            this.accordionContentContainer3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit_Expr.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View_Expr)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -889,7 +923,7 @@ namespace DSModeler
         private DevExpress.XtraBars.Navigation.AccordionControlElement ace_Setting;
         private DevExpress.XtraBars.Navigation.AccordionControlElement ace9;
         private DevExpress.XtraBars.Navigation.AccordionControlElement ace8;
-        private DevExpress.XtraBars.Navigation.AccordionControlElement ace10;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement ace_SimRoot;
         private DevExpress.XtraBars.Navigation.AccordionControlElement ace_HMI;
         private UcView ucView1;
         private UcLog ucLog1;
@@ -911,6 +945,9 @@ namespace DSModeler
         private DevExpress.XtraEditors.ToggleSwitch toggleSwitch_simLog;
         private DevExpress.XtraEditors.LabelControl labelControl2;
         private DevExpress.XtraEditors.LabelControl labelControl3;
-        private DevExpress.XtraEditors.ComboBoxEdit comboBoxEdit_Expr;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement3;
+        private DevExpress.XtraBars.Navigation.AccordionContentContainer accordionContentContainer3;
+        private DevExpress.XtraEditors.GridLookUpEdit gridLookUpEdit_Expr;
+        private DevExpress.XtraGrid.Views.Grid.GridView gridLookUpEdit1View_Expr;
     }
 }

@@ -1,4 +1,5 @@
 using DevExpress.XtraVerticalGrid;
+using DSModeler.Tree;
 using Dual.Common.Core;
 using System;
 using System.Collections.Generic;
@@ -31,10 +32,16 @@ namespace DSModeler
 
             InitializationEventSetting();
             InitializationLogger();
+            InitializationUIControl();
 
-#if !DEBUG
-            DevExpress.XtraSplashScreen.SplashScreenManager.CloseForm();
-#endif
+            if (!Global.IsDebug)
+                DevExpress.XtraSplashScreen.SplashScreenManager.CloseForm();
+        } 
+
+        private void InitializationUIControl()
+        {
+            LogicTree.InitControl(gridLookUpEdit_Expr, gridLookUpEdit1View_Expr);
+            ratingControl_Speed.EditValue = SIMProperty.GetSpeed();
         }
 
         private void InitializationLogger()
@@ -44,11 +51,7 @@ namespace DSModeler
             Global.Logger.Info($"Starting Dualsoft v{Global.AppVersion}");
         }
 
-
-        private void FormMain_Shown(object sender, EventArgs e)
-        {
-            ratingControl_Speed.EditValue = SIMProperty.GetSpeed();
-        }
+        private void FormMain_Shown(object sender, EventArgs e) { }
 
         private async void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -57,35 +60,23 @@ namespace DSModeler
             else
             {
                 LayoutForm.SaveLayout(dockManager);
-                await SIMControl.Reset(DicCpu);  //뒤에 실행안됨 주의   test ahn
+                await SIMControl.Reset(DicCpu, ace_Play, ace_HMI);
             }
         }
 
 
-
-
-        private async void ace_Play_Click(object sender, EventArgs e) => await SIMControl.Play(DicCpu);
-        private async void ace_Step_Click(object sender, EventArgs e) => await SIMControl.Step(DicCpu);
-        private async void ace_Stop_Click(object sender, EventArgs e) => await SIMControl.Stop(DicCpu);
-        private async void ace_Reset_Click(object sender, EventArgs e) => await SIMControl.Reset(DicCpu);
-
-        private void ace_pcWindow_Click(object sender, EventArgs e) 
-            => DocControl.CreateDocDS(this, tabbedView1);
-        private void ace_PLCXGI_Click(object sender, EventArgs e)
-            => DocControl.CreateDocPLCLS(this, tabbedView1);
-        private void ratingControl_Speed_EditValueChanged(object sender, EventArgs e)
-            => SIMProperty.SetSpeed(Convert.ToInt32(ratingControl_Speed.EditValue));
-        private void toggleSwitch_simLog_Toggled(object sender, EventArgs e)
-            => Global.SimLogHide = toggleSwitch_simLog.IsOn;
-        private void simpleButton_OpenPLC_Click(object sender, EventArgs e)
-            => PLC.OpenPLCFolder();
-        private void ace_ExportExcel_Click(object sender, EventArgs e) 
-            => XLS.ExportExcel();
-        private void ace_ImportPPT_Click(object sender, EventArgs e)
-            => ImportPowerPointWapper(null);
-        private void ace_pptReload_Click(object sender, EventArgs e)
-            => ImportPowerPointWapper(Files.GetLast());
-        private void simpleButton_layoutReset_Click(object sender, EventArgs e)
-            => LayoutForm.RestoreLayoutFromXml(dockManager);
+        private async void ace_Play_Click(object s, EventArgs e) => await SIMControl.Play(DicCpu, ace_Play);
+        private async void ace_Step_Click(object s, EventArgs e) => await SIMControl.Step(DicCpu, ace_Play);
+        private async void ace_Stop_Click(object s, EventArgs e) => await SIMControl.Stop(DicCpu, ace_Play);
+        private async void ace_Reset_Click(object s, EventArgs e) => await SIMControl.Reset(DicCpu, ace_Play, ace_HMI);
+        private void ace_pcWindow_Click(object s, EventArgs e) => DocControl.CreateDocDS(this, tabbedView1);
+        private void ace_PLCXGI_Click(object s, EventArgs e) => DocControl.CreateDocPLCLS(this, tabbedView1);
+        private void ratingControl_Speed_EditValueChanged(object s, EventArgs e) => SIMProperty.SetSpeed(Convert.ToInt32(ratingControl_Speed.EditValue));
+        private void toggleSwitch_simLog_Toggled(object sender, EventArgs e) => Global.SimLogHide = toggleSwitch_simLog.IsOn;
+        private void simpleButton_OpenPLC_Click(object s, EventArgs e) => PLC.OpenPLCFolder();
+        private void ace_ExportExcel_Click(object s, EventArgs e) => XLS.ExportExcel();
+        private void ace_ImportPPT_Click(object s, EventArgs e) => ImportPowerPointWapper(null);
+        private void ace_pptReload_Click(object sender, EventArgs e) => ImportPowerPointWapper(Files.GetLast());
+        private void simpleButton_layoutReset_Click(object s, EventArgs e) => LayoutForm.RestoreLayoutFromXml(dockManager);
     }
 }

@@ -1,12 +1,11 @@
 using DevExpress.XtraBars.Docking2010.Views;
 using DevExpress.XtraBars.Docking2010.Views.Tabbed;
+using DevExpress.XtraEditors;
 using DSModeler.Form;
 using System.IO;
-using System.Windows.Forms;
 using System.Linq;
 using static Engine.Core.CoreModule;
 using static Model.Import.Office.ViewModule;
-using DevExpress.XtraEditors;
 
 namespace DSModeler
 {
@@ -65,14 +64,14 @@ namespace DSModeler
             string docKey = K.DocExpression;
 
             FormDocText formChiild = new FormDocText();
-            formChiild = CreateDocForm(formChiild, formParent, tab, docKey) as FormDocText; 
-            return formChiild;  
+            formChiild = CreateDocForm(formChiild, formParent, tab, docKey) as FormDocText;
+            return formChiild;
 
         }
 
         public static void CreateDocPLCLS(FormMain formParent, TabbedView tab)
         {
-            if (!Global.IsLoadedPPT()) return ;
+            if (!Global.IsLoadedPPT()) return;
             var fullpath = PLC.Export();
             string docKey = K.DocPLC;
 
@@ -84,16 +83,16 @@ namespace DSModeler
             formChiild.TextEditDS.Text = File.ReadAllText(fullpath);
         }
 
-   
+
         public static void CreateDocOrSelect(FormMain formParent, TabbedView tab, ViewNode v)
         {
-            if (!Global.IsLoadedPPT()) return ;
+            if (!Global.IsLoadedPPT()) return;
             Flow flow = v.Flow.Value;
             string docKey = flow.QualifiedName;
 
             FormDocView formChiild = new FormDocView();
-            formChiild = CreateDocForm(formChiild, formParent, tab, docKey) as FormDocView; 
-            if(formChiild.UcView.MasterNode == null)    
+            formChiild = CreateDocForm(formChiild, formParent, tab, docKey) as FormDocView;
+            if (formChiild.UcView.MasterNode == null)
                 formChiild.UcView.SetGraph(v, flow);
             //상태 업데이트
             ViewDraw.DrawStatus(formParent, v, formChiild);

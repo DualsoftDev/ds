@@ -1,5 +1,6 @@
 using DevExpress.XtraBars.Docking2010.Views.Tabbed;
 using DevExpress.XtraBars.Navigation;
+using DSModeler.Tree;
 using Dual.Common.Core.FS;
 using System;
 using System.Collections.Generic;
@@ -38,7 +39,7 @@ namespace DSModeler
                     foreach (var pou in pous)
                         dicCpu.Add(pou.ToSystem(), new DsCPU(pou.CommentedStatements(), pou.ToSystem()));
 
-                    HMI.CreateHMIBtn(formMain, ace_HMI, ppt.System);
+                    HMITree.CreateHMIBtn(formMain, ace_HMI, ppt.System);
                     Global.ActiveSys = ppt.System;
                 }
 
@@ -54,7 +55,7 @@ namespace DSModeler
                 else
                     ace_Device.Elements.Add(ele);
 
-                var lstFlowAce = Model.AppandFlows(formMain, ppt, ele);
+                var lstFlowAce = Tree.ModelTree.AppandFlows(formMain, ppt, ele);
                 lstFlowAce.ForEach(f =>
                     f.Click += (s, e) =>
                     {

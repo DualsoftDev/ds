@@ -29,8 +29,8 @@
     <SuiteName>Dualsoft</SuiteName>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
     <DisallowUrlActivation>true</DisallowUrlActivation>
-    <ApplicationRevision>8</ApplicationRevision>
-    <ApplicationVersion>0.9.0.%2a</ApplicationVersion>
+    <ApplicationRevision>10</ApplicationRevision>
+    <ApplicationVersion>0.9.1.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <ExcludeDeploymentUrl>true</ExcludeDeploymentUrl>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -60,7 +60,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>logo_Dualsoft.ico</ApplicationIcon>
+    <ApplicationIcon>Icon\logo_Dualsoft.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>25F33FDBF7CE707F3795986F440BE9AE814BF16D</ManifestCertificateThumbprint>
@@ -92,6 +92,7 @@
     <Reference Include="DevExpress.XtraBars.v21.2" />
     <Reference Include="DevExpress.Sparkline.v21.2.Core" />
     <Reference Include="DevExpress.XtraEditors.v21.2" />
+    <Reference Include="DevExpress.XtraGrid.v21.2, Version=21.2.12.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.XtraLayout.v21.2, Version=21.2.12.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
     <Reference Include="DevExpress.XtraPrinting.v21.2, Version=21.2.12.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
     <Reference Include="DevExpress.XtraVerticalGrid.v21.2, Version=21.2.12.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
@@ -206,9 +207,11 @@
     <Compile Include="Import, Export\XLS.cs" />
     <Compile Include="Import, Export\PPT.cs" />
     <Compile Include="SIM\SIMProperty.cs" />
+    <Compile Include="Tree\LogicTree.cs" />
+    <Compile Include="Tree\SimTree.cs" />
     <Compile Include="Utils\DSRegistry.cs" />
     <Compile Include="Utils\MessageBox.cs" />
-    <Compile Include="Utils\PropertyRecordExtension.cs" />
+    <Compile Include="Utils\PropertyRecordExt.cs" />
     <Compile Include="Property\UcPropertyGrid.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -217,8 +220,8 @@
     </Compile>
     <Compile Include="SIM\SIMControl.cs" />
     <Compile Include="Event\EventExternal.cs" />
-    <Compile Include="Model\Model.cs" />
-    <Compile Include="HMI\HMI.cs" />
+    <Compile Include="Tree\ModelTree.cs" />
+    <Compile Include="Tree\HMITree.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\DXWaitForm.cs">
@@ -291,7 +294,7 @@
       <DependentUpon>SplashScreenDS.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="App.config" />
-    <None Include="packages.config" />
+    <None Include="Properties\packages.config" />
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -304,7 +307,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="logo_Dualsoft.ico" />
+    <Content Include="Icon\logo_Dualsoft.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj">
@@ -838,6 +841,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.

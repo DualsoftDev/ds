@@ -21,11 +21,14 @@ namespace DSModeler
         public const string DocPLC = "PLC 생성";
         public const string DocDS = "모델 출력";
         public const string DocExpression = "수식";
+        public const string RegPath = "SOFTWARE\\Dualsoft\\DSModeler";
+
 
     }
     public static class Global
     {
         public static ILog Logger => Log4NetLogger.Logger;
+        public static bool IsDebug { get;  set; }  
         public static string LogLevel { get; set; }
         public static int SimSpeed { get; set; } = 3;
         public static bool SimLogHide { get; set; }

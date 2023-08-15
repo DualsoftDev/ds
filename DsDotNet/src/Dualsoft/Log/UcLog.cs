@@ -1,11 +1,8 @@
-using DevExpress.Office;
-using DevExpress.Xpo.Logger;
 using DevExpress.XtraEditors.Controls;
 using Dual.Common.Core;
 using Dual.Common.Winform;
 using log4net.Appender;
 using log4net.Core;
-using log4net.Repository.Hierarchy;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -49,7 +46,7 @@ namespace DSModeler
         Image logLevelChkImg => resources.GetObject("ImgChk.ImageOptions.Image") as Image;
 
 
-        
+
 
         private void UcLog_Load(object sender, EventArgs args)
         {
@@ -151,7 +148,7 @@ namespace DSModeler
             log_menu.DropDownItems.AddRange(logLvlControls.ToArray());
             items.Add(log_menu);
 
-           
+
             listBoxControlOutput.MouseClick += (s, e) =>
             {
                 if (e.Button == MouseButtons.Right)
@@ -190,6 +187,7 @@ namespace DSModeler
 
         public void Close() { }
 
+        int cnt = 0;
 
         public async void DoAppend(LoggingEvent logEntry)
         {
@@ -208,7 +206,7 @@ namespace DSModeler
                     var lines = msg.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
                     if (lines.Length > 0)
                     {
-                        var fmtMsg = string.Format($"<color={cr}>{now} [{level}]: {lines[0]}</color>");
+                        var fmtMsg = string.Format($"<color={cr}>{now} [{level}]:\t{cnt++}\t{lines[0]}</color>");
                         Items.Add(fmtMsg);
 
                         for (int i = 1; i < lines.Length; i++)
@@ -233,6 +231,6 @@ namespace DSModeler
             await Task.Yield();
         }
 
-     
+
     }
 }

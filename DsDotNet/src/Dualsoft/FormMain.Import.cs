@@ -1,8 +1,11 @@
 using DevExpress.XtraEditors;
+using DSModeler.Tree;
 using Dual.Common.Core.FS;
+using Dual.Common.Winform;
 using Engine.Core;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
@@ -29,36 +32,40 @@ namespace DSModeler
 
                 if (files != null)
                 {
-                    ClearModel();
-
-                    DicCpu = PPT.ImportPowerPoint(files, this, tabbedView1, ace_Model, ace_System, ace_Device, ace_HMI);
-
-                    Tree.LogicTree.CreateRungExprCombobox(DicCpu[Global.ActiveSys], this, tabbedView1, gridLookUpEdit_Expr);
-                    Files.SetLast(files);
-
-                    DicStatus = new Dictionary<Vertex, Status4>();
-
-                    foreach (var item in DicCpu)
+                    Task.Run(async () =>
                     {
-                        var sys = item.Key;
-                        var reals = sys.GetVertices().OfType<Vertex>();
-                        foreach (var r in reals)
-                            DicStatus.Add(r, Status4.Homing);
-                    }
+                        await this.DoAsync(async tsc =>
+                        {
+                            await ClearModel();
 
+                            DicCpu = PPT.ImportPowerPoint(files, this, tabbedView1, ace_Model, ace_System, ace_Device, ace_HMI);
 
-                    Global.Logger.Info("PPTX 파일 로딩이 완료 되었습니다.");
+                            Tree.LogicTree.CreateRungExprCombobox(DicCpu[Global.ActiveSys], this, tabbedView1, gridLookUpEdit_Expr);
+                            Files.SetLast(files);
+
+                            DicStatus = new Dictionary<Vertex, Status4>();
+
+                            foreach (var item in DicCpu)
+                            {
+                                var sys = item.Key;
+                                var reals = sys.GetVertices().OfType<Vertex>();
+                                foreach (var r in reals)
+                                    DicStatus.Add(r, Status4.Homing);
+                            }
+
+                            EventCPU.CPUSubscribe(DicStatus);
+                            Global.Logger.Info("PPTX 파일 로딩이 완료 되었습니다.");
+                            tsc.SetResult(true);
+                        });
+                    });
                 }
-
-                EventCPU.CPUSubscribe(DicStatus);
-
             }
-
-
         }
 
-        void ClearModel()
+        async Task ClearModel()
         {
+            await SIMControl.Reset(DicCpu, ace_Play, ace_HMI);
+
             foreach (var item in DicCpu.Values)
                 item.Dispose();
             DicCpu = new Dictionary<DsSystem, DsCPU>();

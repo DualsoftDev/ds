@@ -32,6 +32,7 @@ namespace DSModeler
         public static string LogLevel { get; set; }
         public static int SimSpeed { get; set; } = 3;
         public static bool SimLogHide { get; set; }
+        public static bool SimReset { get; set; }
         public static string ExportPathPLC { get; set; }
         public static string ExportPathXLS { get; set; }
 
@@ -40,6 +41,7 @@ namespace DSModeler
         public static Version ver = Assembly.GetEntryAssembly().GetName().Version;
 
         public static Subject<Tuple<CoreModule.Vertex, Status4>> StatusChangeSubject = new Subject<Tuple<CoreModule.Vertex, Status4>>();
+        public static Subject<int> StatusChangeLogCount = new Subject<int>();
 
         public static string DefaultFolder =>
             Path.Combine(

@@ -95,7 +95,7 @@ namespace DSModeler
             if (formChiild.UcView.MasterNode == null)
                 formChiild.UcView.SetGraph(v, flow);
             //상태 업데이트
-            ViewDraw.DrawStatus(formParent, v, formChiild);
+            ViewDraw.DrawStatus(v, formChiild);
         }
     }
 }

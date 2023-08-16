@@ -151,3 +151,16 @@ module TagKindModule =
                 |_ -> None
 
             |None -> None
+
+        [<Extension>]
+        static member GetVertexTagKindText (x:IStorage) =
+            let info = x.GetTagInfo()
+            match info with
+            |Some t -> 
+                match t.TagTarget with
+                |TTSystem -> x.GetSystemTagKind().Value.ToString()
+                |TTFlow -> x.GetFlowTagKind().Value.ToString()
+                |TTVertex -> x.GetVertexTagKind().Value.ToString()
+                |TTApiItem -> x.GetApiTagKind().Value.ToString()
+            |None -> "None"
+            

@@ -42,8 +42,9 @@ namespace DSModeler
             {
                 var docForm = e.Document.Tag as FormDocView;
                 if (docForm != null && docForm.UcView.MasterNode != null)
-                    ViewDraw.DrawStatus(this, docForm.UcView.MasterNode, docForm);
+                    ViewDraw.DrawStatus(docForm.UcView.MasterNode, docForm);
             };
+
             ProcessEvent.ProcessSubject.Subscribe(rx =>
             {
                 this.Do(() =>
@@ -79,6 +80,20 @@ namespace DSModeler
                     }
                 });
             });
+
+            Global.StatusChangeLogCount.Subscribe(_ =>
+            {
+                this.Do(() =>
+                {
+                    barStaticItem_logCnt.Caption = $"logs:{LogicLog.ValueLogs.Count}";
+                });
+            });
+
+        }
+
+        private void GridLookUpEdit_Log_BeforePopup(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
         }
     }
 }

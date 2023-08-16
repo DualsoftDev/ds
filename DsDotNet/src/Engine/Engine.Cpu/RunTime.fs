@@ -17,13 +17,11 @@ module RunTime =
     |Event
     |Scan
 
-    type DsCPU(css:CommentedStatement seq, sys:DsSystem) =
+    type DsCPU(css:CommentedStatement seq, sys:DsSystem, cpuMode:cpuRunMode) =
         let mapRungs = ConcurrentDictionary<IStorage, HashSet<Statement>>()
         let statements = css |> Seq.map(fun f -> f.Statement)
         let mutable cts = new CancellationTokenSource()
-
-        //let cpuMode = Event
-        let cpuMode = Scan
+       
 
         let runSubscribe() =
             let subscribe =
@@ -48,29 +46,22 @@ module RunTime =
                             //|> Async.Parallel
                             //|> Async.Ignore
                             //|> Async.RunSynchronously
-
-
-                        //else
-                        //    ()
-                            //failwithlog $"Error {getFuncName()} : {storage.Name}"  //디버깅후 예외 처리
-
-                            //for statement in mapRungs[storage] do
-                            //    if storage.IsStartThread()
-                            //    then
-                            //        //statement.Do()
-                            //        async {
-                            //            do! Async.Sleep(200)
-                            //            statement.Do() }
-                            //            |> Async.StartImmediate
-                            //    else
-                            //        statement.Do()
-
                     )
             subscribe
 
-        let mutable runSubscription:IDisposable = null
+        let mutable runSubsc:IDisposable = null
         let mutable run:bool = false
 
+        let simPreAction() =  
+            let simTags = 
+                sys.TagManager.Storages
+                   .Where(fun w-> 
+                                w.Value.TagKind = (int)SystemTag.auto
+                                ||   w.Value.TagKind = (int)SystemTag.drive
+                                ||   w.Value.TagKind = (int)SystemTag.ready
+                                ||   w.Value.TagKind = (int)SystemTag.sim
+                        )
+            simTags.Iter(fun t -> t.Value.BoxedValue <-  true) 
         do
             let total =
                 [ for s in statements do
@@ -89,6 +80,8 @@ module RunTime =
                 for st in sts do
                     rung.Value.Add(st.Key) |> verifyM $"Duplicated [{ st.Key.ToText()}]"
 
+            runSubsc <- runSubscribe()
+
         //강제 전체 연산 임시 test용
         member x.ScanOnce() =
             let scanTask = async {
@@ -104,9 +97,7 @@ module RunTime =
         member x.Run() =
             if not <| run then
                 run <- true
-                if runSubscription = null
-                then runSubscription <- runSubscribe()
-
+                simPreAction()
                 if cpuMode = Scan
                 then 
                     let t = async {
@@ -122,10 +113,6 @@ module RunTime =
             cts.Cancel()
             cts <- new CancellationTokenSource() 
             run <- false;
-            if runSubscription <> null
-            then 
-                runSubscription.Dispose()
-                runSubscription <- null
 
         member x.Step() =
             x.Stop()
@@ -143,12 +130,12 @@ module RunTime =
                         tc.Clear()  // 타이머 카운터 리셋
                     | _ ->
                         stg.BoxedValue <- textToDataType(stg.DataType.Name).DefaultValue()
+                //조건 1번 평가 (for : Ready State 이벤트)
+                for s in statements do s.Do() 
             }
             Async.StartImmediate(t, cts.Token)
 
+
         member x.Dispose() =  
             cts.Cancel()
-            if runSubscription <> null then
-                runSubscription.Dispose()
-                runSubscription <- null
-
+            runSubsc.Dispose()

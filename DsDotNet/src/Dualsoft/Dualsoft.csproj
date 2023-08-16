@@ -30,7 +30,7 @@
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
     <AutorunEnabled>true</AutorunEnabled>
     <DisallowUrlActivation>true</DisallowUrlActivation>
-    <ApplicationRevision>3</ApplicationRevision>
+    <ApplicationRevision>5</ApplicationRevision>
     <ApplicationVersion>0.9.1.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <ExcludeDeploymentUrl>true</ExcludeDeploymentUrl>
@@ -207,6 +207,7 @@
     <Compile Include="Import, Export\DSFile.cs" />
     <Compile Include="Import, Export\XLS.cs" />
     <Compile Include="Import, Export\PPT.cs" />
+    <Compile Include="Log\LogicLog.cs" />
     <Compile Include="SIM\SIMProperty.cs" />
     <Compile Include="Tree\LogicTree.cs" />
     <Compile Include="Tree\SimTree.cs" />

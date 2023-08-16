@@ -82,7 +82,7 @@ module rec TimerModule =
                 .Subscribe(fun (_system, _storage, newValue) ->
                     if ts.ACC.Value < 0us || ts.PRE.Value < 0us then failwithlog "ERROR"
                     let rungInCondition = newValue :?> bool
-                    tracefn "%A rung-condition-in=%b with DN=%b" tt rungInCondition ts.DN.Value
+                    //tracefn "%A rung-condition-in=%b with DN=%b" tt rungInCondition ts.DN.Value
                     match tt, rungInCondition with
                     | TON, true ->
                         ts.TT.Value <- not ts.DN.Value

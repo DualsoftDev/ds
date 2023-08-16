@@ -226,7 +226,6 @@ namespace DSModeler
                 tcs.SetResult(true);
             });
 
-            await Task.Yield();
         }
 
 

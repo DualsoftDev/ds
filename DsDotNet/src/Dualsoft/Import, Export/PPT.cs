@@ -37,7 +37,11 @@ namespace DSModeler
                 {
                     var pous = Cpu.LoadStatements(ppt.System, storages);
                     foreach (var pou in pous)
-                        dicCpu.Add(pou.ToSystem(), new DsCPU(pou.CommentedStatements(), pou.ToSystem()));
+                    {
+                        var mode = pou.ToSystem() == ppt.System ?   //my system 이면 Event 나머지 디바이스는 scan
+                            cpuRunMode.Event : cpuRunMode.Scan;
+                        dicCpu.Add(pou.ToSystem(), new DsCPU(pou.CommentedStatements(), pou.ToSystem(), cpuRunMode.Scan));
+                    }
 
                     HMITree.CreateHMIBtn(formMain, ace_HMI, ppt.System);
                     Global.ActiveSys = ppt.System;

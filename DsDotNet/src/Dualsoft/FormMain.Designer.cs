@@ -35,6 +35,7 @@ namespace DSModeler
             this.barManager1 = new DevExpress.XtraBars.BarManager(this.components);
             this.bar3 = new DevExpress.XtraBars.Bar();
             this.skinPaletteDropDownButtonItem1 = new DevExpress.XtraBars.SkinPaletteDropDownButtonItem();
+            this.barStaticItem_logCnt = new DevExpress.XtraBars.BarStaticItem();
             this.barEditItem_Process = new DevExpress.XtraBars.BarEditItem();
             this.repositoryItemProgressBar1 = new DevExpress.XtraEditors.Repository.RepositoryItemProgressBar();
             this.barStaticItem_procText = new DevExpress.XtraBars.BarStaticItem();
@@ -43,6 +44,7 @@ namespace DSModeler
             this.barDockControlLeft = new DevExpress.XtraBars.BarDockControl();
             this.barDockControlRight = new DevExpress.XtraBars.BarDockControl();
             this.barStaticItem1 = new DevExpress.XtraBars.BarStaticItem();
+            this.barStaticItem2 = new DevExpress.XtraBars.BarStaticItem();
             this.panelContainer1 = new DevExpress.XtraBars.Docking.DockPanel();
             this.dockPanel1 = new DevExpress.XtraBars.Docking.DockPanel();
             this.dockPanel1_Container = new DevExpress.XtraBars.Docking.ControlContainer();
@@ -62,12 +64,15 @@ namespace DSModeler
             this.labelControl2 = new DevExpress.XtraEditors.LabelControl();
             this.ratingControl_Speed = new DevExpress.XtraEditors.RatingControl();
             this.labelControl1 = new DevExpress.XtraEditors.LabelControl();
-            this.accordionContentContainer2 = new DevExpress.XtraBars.Navigation.AccordionContentContainer();
-            this.simpleButton_layoutReset = new DevExpress.XtraEditors.SimpleButton();
             this.accordionContentContainer3 = new DevExpress.XtraBars.Navigation.AccordionContentContainer();
+            this.labelControl4 = new DevExpress.XtraEditors.LabelControl();
+            this.gridLookUpEdit_Log = new DevExpress.XtraEditors.GridLookUpEdit();
+            this.gridLookUpEdit1View_Log = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.labelControl3 = new DevExpress.XtraEditors.LabelControl();
             this.gridLookUpEdit_Expr = new DevExpress.XtraEditors.GridLookUpEdit();
             this.gridLookUpEdit1View_Expr = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.accordionContentContainer2 = new DevExpress.XtraBars.Navigation.AccordionContentContainer();
+            this.simpleButton_layoutReset = new DevExpress.XtraEditors.SimpleButton();
             this.ace_Model = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_System = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Device = new DevExpress.XtraBars.Navigation.AccordionControlElement();
@@ -75,8 +80,8 @@ namespace DSModeler
             this.ace_sim = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_SimRoot = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Play = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.ace_Step = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Stop = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.ace_Step = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Reset = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_HMI = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlSeparator2 = new DevExpress.XtraBars.Navigation.AccordionControlSeparator();
@@ -99,9 +104,9 @@ namespace DSModeler
             this.accordionControlSeparator3 = new DevExpress.XtraBars.Navigation.AccordionControlSeparator();
             this.accordionControlSeparator1 = new DevExpress.XtraBars.Navigation.AccordionControlSeparator();
             this.ace_Setting = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.ace9 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.accordionControlElement1 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement3 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.accordionControlElement1 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.ace9 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             ((System.ComponentModel.ISupportInitialize)(this.document1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dockManager)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManager1)).BeginInit();
@@ -120,10 +125,12 @@ namespace DSModeler
             this.accordionContentContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_simLog.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ratingControl_Speed.Properties)).BeginInit();
-            this.accordionContentContainer2.SuspendLayout();
             this.accordionContentContainer3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit_Log.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View_Log)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit_Expr.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View_Expr)).BeginInit();
+            this.accordionContentContainer2.SuspendLayout();
             this.SuspendLayout();
             // 
             // document1
@@ -167,8 +174,10 @@ namespace DSModeler
             this.barStaticItem1,
             this.skinPaletteDropDownButtonItem1,
             this.barEditItem_Process,
-            this.barStaticItem_procText});
-            this.barManager1.MaxItemId = 4;
+            this.barStaticItem_procText,
+            this.barStaticItem2,
+            this.barStaticItem_logCnt});
+            this.barManager1.MaxItemId = 6;
             this.barManager1.RepositoryItems.AddRange(new DevExpress.XtraEditors.Repository.RepositoryItem[] {
             this.repositoryItemProgressBar1});
             this.barManager1.StatusBar = this.bar3;
@@ -182,6 +191,7 @@ namespace DSModeler
             this.bar3.DockStyle = DevExpress.XtraBars.BarDockStyle.Bottom;
             this.bar3.LinksPersistInfo.AddRange(new DevExpress.XtraBars.LinkPersistInfo[] {
             new DevExpress.XtraBars.LinkPersistInfo(this.skinPaletteDropDownButtonItem1),
+            new DevExpress.XtraBars.LinkPersistInfo(this.barStaticItem_logCnt),
             new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.Width, this.barEditItem_Process, "", false, true, true, 1347),
             new DevExpress.XtraBars.LinkPersistInfo(this.barStaticItem_procText)});
             this.bar3.OptionsBar.AllowQuickCustomization = false;
@@ -193,6 +203,11 @@ namespace DSModeler
             // 
             this.skinPaletteDropDownButtonItem1.Id = 1;
             this.skinPaletteDropDownButtonItem1.Name = "skinPaletteDropDownButtonItem1";
+            // 
+            // barStaticItem_logCnt
+            // 
+            this.barStaticItem_logCnt.Id = 5;
+            this.barStaticItem_logCnt.Name = "barStaticItem_logCnt";
             // 
             // barEditItem_Process
             // 
@@ -249,6 +264,12 @@ namespace DSModeler
             this.barStaticItem1.Caption = "Ready";
             this.barStaticItem1.Id = 0;
             this.barStaticItem1.Name = "barStaticItem1";
+            // 
+            // barStaticItem2
+            // 
+            this.barStaticItem2.Caption = "barStaticItem2";
+            this.barStaticItem2.Id = 4;
+            this.barStaticItem2.Name = "barStaticItem2";
             // 
             // panelContainer1
             // 
@@ -361,8 +382,8 @@ namespace DSModeler
             // 
             this.accordionControl2.Controls.Add(this.simpleButton_OpenPLC);
             this.accordionControl2.Controls.Add(this.accordionContentContainer1);
-            this.accordionControl2.Controls.Add(this.accordionContentContainer2);
             this.accordionControl2.Controls.Add(this.accordionContentContainer3);
+            this.accordionControl2.Controls.Add(this.accordionContentContainer2);
             this.accordionControl2.Dock = System.Windows.Forms.DockStyle.Left;
             this.accordionControl2.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.ace_Model,
@@ -411,6 +432,7 @@ namespace DSModeler
             this.toggleSwitch_simLog.Properties.OnText = "On";
             this.toggleSwitch_simLog.Size = new System.Drawing.Size(95, 19);
             this.toggleSwitch_simLog.TabIndex = 3;
+            this.toggleSwitch_simLog.Visible = false;
             this.toggleSwitch_simLog.Toggled += new System.EventHandler(this.toggleSwitch_simLog_Toggled);
             // 
             // labelControl2
@@ -422,6 +444,7 @@ namespace DSModeler
             this.labelControl2.Size = new System.Drawing.Size(131, 19);
             this.labelControl2.TabIndex = 2;
             this.labelControl2.Text = "시뮬레이션 로그숨김";
+            this.labelControl2.Visible = false;
             // 
             // ratingControl_Speed
             // 
@@ -453,34 +476,46 @@ namespace DSModeler
             this.labelControl1.TabIndex = 0;
             this.labelControl1.Text = "시뮬레이션 속도";
             // 
-            // accordionContentContainer2
-            // 
-            this.accordionContentContainer2.Controls.Add(this.simpleButton_layoutReset);
-            this.accordionContentContainer2.Name = "accordionContentContainer2";
-            this.accordionContentContainer2.Size = new System.Drawing.Size(309, 33);
-            this.accordionContentContainer2.TabIndex = 15;
-            // 
-            // simpleButton_layoutReset
-            // 
-            this.simpleButton_layoutReset.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
-            this.simpleButton_layoutReset.Appearance.Options.UseFont = true;
-            this.simpleButton_layoutReset.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.RightCenter;
-            this.simpleButton_layoutReset.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("simpleButton_layoutReset.ImageOptions.SvgImage")));
-            this.simpleButton_layoutReset.Location = new System.Drawing.Point(30, 0);
-            this.simpleButton_layoutReset.Name = "simpleButton_layoutReset";
-            this.simpleButton_layoutReset.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
-            this.simpleButton_layoutReset.Size = new System.Drawing.Size(103, 29);
-            this.simpleButton_layoutReset.TabIndex = 0;
-            this.simpleButton_layoutReset.Text = "창 복원";
-            this.simpleButton_layoutReset.Click += new System.EventHandler(this.simpleButton_layoutReset_Click);
-            // 
             // accordionContentContainer3
             // 
+            this.accordionContentContainer3.Controls.Add(this.labelControl4);
+            this.accordionContentContainer3.Controls.Add(this.gridLookUpEdit_Log);
             this.accordionContentContainer3.Controls.Add(this.labelControl3);
             this.accordionContentContainer3.Controls.Add(this.gridLookUpEdit_Expr);
             this.accordionContentContainer3.Name = "accordionContentContainer3";
-            this.accordionContentContainer3.Size = new System.Drawing.Size(309, 337);
+            this.accordionContentContainer3.Size = new System.Drawing.Size(309, 61);
             this.accordionContentContainer3.TabIndex = 19;
+            // 
+            // labelControl4
+            // 
+            this.labelControl4.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
+            this.labelControl4.Appearance.Options.UseFont = true;
+            this.labelControl4.Location = new System.Drawing.Point(10, 30);
+            this.labelControl4.Name = "labelControl4";
+            this.labelControl4.Size = new System.Drawing.Size(28, 19);
+            this.labelControl4.TabIndex = 7;
+            this.labelControl4.Text = "로그";
+            // 
+            // gridLookUpEdit_Log
+            // 
+            this.gridLookUpEdit_Log.EditValue = "[EditVasd";
+            this.gridLookUpEdit_Log.Location = new System.Drawing.Point(44, 29);
+            this.gridLookUpEdit_Log.MenuManager = this.barManager1;
+            this.gridLookUpEdit_Log.Name = "gridLookUpEdit_Log";
+            this.gridLookUpEdit_Log.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.gridLookUpEdit_Log.Properties.NullText = "";
+            this.gridLookUpEdit_Log.Properties.PopupView = this.gridLookUpEdit1View_Log;
+            this.gridLookUpEdit_Log.Size = new System.Drawing.Size(265, 20);
+            this.gridLookUpEdit_Log.TabIndex = 6;
+            // 
+            // gridLookUpEdit1View_Log
+            // 
+            this.gridLookUpEdit1View_Log.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
+            this.gridLookUpEdit1View_Log.Name = "gridLookUpEdit1View_Log";
+            this.gridLookUpEdit1View_Log.OptionsSelection.EnableAppearanceFocusedCell = false;
+            this.gridLookUpEdit1View_Log.OptionsView.ShowGroupPanel = false;
+            this.gridLookUpEdit1View_Log.PreviewLineCount = 20;
             // 
             // labelControl3
             // 
@@ -512,6 +547,27 @@ namespace DSModeler
             this.gridLookUpEdit1View_Expr.OptionsSelection.EnableAppearanceFocusedCell = false;
             this.gridLookUpEdit1View_Expr.OptionsView.ShowGroupPanel = false;
             this.gridLookUpEdit1View_Expr.PreviewLineCount = 20;
+            // 
+            // accordionContentContainer2
+            // 
+            this.accordionContentContainer2.Controls.Add(this.simpleButton_layoutReset);
+            this.accordionContentContainer2.Name = "accordionContentContainer2";
+            this.accordionContentContainer2.Size = new System.Drawing.Size(309, 33);
+            this.accordionContentContainer2.TabIndex = 15;
+            // 
+            // simpleButton_layoutReset
+            // 
+            this.simpleButton_layoutReset.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
+            this.simpleButton_layoutReset.Appearance.Options.UseFont = true;
+            this.simpleButton_layoutReset.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.RightCenter;
+            this.simpleButton_layoutReset.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("simpleButton_layoutReset.ImageOptions.SvgImage")));
+            this.simpleButton_layoutReset.Location = new System.Drawing.Point(30, 0);
+            this.simpleButton_layoutReset.Name = "simpleButton_layoutReset";
+            this.simpleButton_layoutReset.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
+            this.simpleButton_layoutReset.Size = new System.Drawing.Size(103, 29);
+            this.simpleButton_layoutReset.TabIndex = 0;
+            this.simpleButton_layoutReset.Text = "창 복원";
+            this.simpleButton_layoutReset.Click += new System.EventHandler(this.simpleButton_layoutReset_Click);
             // 
             // ace_Model
             // 
@@ -579,19 +635,6 @@ namespace DSModeler
             this.ace_Play.Text = "   PLAY";
             this.ace_Play.Click += new System.EventHandler(this.ace_Play_Click);
             // 
-            // ace_Step
-            // 
-            this.ace_Step.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
-            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
-            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
-            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.HeaderControl),
-            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons)});
-            this.ace_Step.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_Step.ImageOptions.SvgImage")));
-            this.ace_Step.Name = "ace_Step";
-            this.ace_Step.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-            this.ace_Step.Text = "   STEP";
-            this.ace_Step.Click += new System.EventHandler(this.ace_Step_Click);
-            // 
             // ace_Stop
             // 
             this.ace_Stop.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
@@ -604,6 +647,19 @@ namespace DSModeler
             this.ace_Stop.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.ace_Stop.Text = "   STOP";
             this.ace_Stop.Click += new System.EventHandler(this.ace_Stop_Click);
+            // 
+            // ace_Step
+            // 
+            this.ace_Step.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.HeaderControl),
+            new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.ContextButtons)});
+            this.ace_Step.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_Step.ImageOptions.SvgImage")));
+            this.ace_Step.Name = "ace_Step";
+            this.ace_Step.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.ace_Step.Text = "   STEP";
+            this.ace_Step.Click += new System.EventHandler(this.ace_Step_Click);
             // 
             // ace_Reset
             // 
@@ -792,20 +848,21 @@ namespace DSModeler
             // ace_Setting
             // 
             this.ace_Setting.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
-            this.ace9,
+            this.accordionControlElement3,
             this.accordionControlElement1,
-            this.accordionControlElement3});
+            this.ace9});
             this.ace_Setting.Expanded = true;
             this.ace_Setting.Name = "ace_Setting";
             this.ace_Setting.Text = "설정";
             // 
-            // ace9
+            // accordionControlElement3
             // 
-            this.ace9.ContentContainer = this.accordionContentContainer2;
-            this.ace9.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace9.ImageOptions.SvgImage")));
-            this.ace9.Name = "ace9";
-            this.ace9.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-            this.ace9.Text = "Layout";
+            this.accordionControlElement3.ContentContainer = this.accordionContentContainer3;
+            this.accordionControlElement3.Expanded = true;
+            this.accordionControlElement3.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement3.ImageOptions.SvgImage")));
+            this.accordionControlElement3.Name = "accordionControlElement3";
+            this.accordionControlElement3.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.accordionControlElement3.Text = "Logic";
             // 
             // accordionControlElement1
             // 
@@ -816,14 +873,14 @@ namespace DSModeler
             this.accordionControlElement1.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.accordionControlElement1.Text = "Simulation";
             // 
-            // accordionControlElement3
+            // ace9
             // 
-            this.accordionControlElement3.ContentContainer = this.accordionContentContainer3;
-            this.accordionControlElement3.Expanded = true;
-            this.accordionControlElement3.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement3.ImageOptions.SvgImage")));
-            this.accordionControlElement3.Name = "accordionControlElement3";
-            this.accordionControlElement3.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-            this.accordionControlElement3.Text = "Logic";
+            this.ace9.ContentContainer = this.accordionContentContainer2;
+            this.ace9.Expanded = true;
+            this.ace9.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace9.ImageOptions.SvgImage")));
+            this.ace9.Name = "ace9";
+            this.ace9.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.ace9.Text = "Layout";
             // 
             // FormMain
             // 
@@ -866,11 +923,13 @@ namespace DSModeler
             this.accordionContentContainer1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_simLog.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.ratingControl_Speed.Properties)).EndInit();
-            this.accordionContentContainer2.ResumeLayout(false);
             this.accordionContentContainer3.ResumeLayout(false);
             this.accordionContentContainer3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit_Log.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View_Log)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit_Expr.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View_Expr)).EndInit();
+            this.accordionContentContainer2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -949,5 +1008,10 @@ namespace DSModeler
         private DevExpress.XtraBars.Navigation.AccordionContentContainer accordionContentContainer3;
         private DevExpress.XtraEditors.GridLookUpEdit gridLookUpEdit_Expr;
         private DevExpress.XtraGrid.Views.Grid.GridView gridLookUpEdit1View_Expr;
+        private DevExpress.XtraEditors.LabelControl labelControl4;
+        private DevExpress.XtraEditors.GridLookUpEdit gridLookUpEdit_Log;
+        private DevExpress.XtraGrid.Views.Grid.GridView gridLookUpEdit1View_Log;
+        private DevExpress.XtraBars.BarStaticItem barStaticItem_logCnt;
+        private DevExpress.XtraBars.BarStaticItem barStaticItem2;
     }
 }

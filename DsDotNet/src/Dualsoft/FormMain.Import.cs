@@ -43,17 +43,17 @@ namespace DSModeler
                             Tree.LogicTree.CreateRungExprCombobox(DicCpu[Global.ActiveSys], this, tabbedView1, gridLookUpEdit_Expr);
                             Files.SetLast(files);
 
-                            DicStatus = new Dictionary<Vertex, Status4>();
+                            ViewDraw.DicStatus = new Dictionary<Vertex, Status4>();
 
                             foreach (var item in DicCpu)
                             {
                                 var sys = item.Key;
                                 var reals = sys.GetVertices().OfType<Vertex>();
                                 foreach (var r in reals)
-                                    DicStatus.Add(r, Status4.Homing);
+                                    ViewDraw.DicStatus.Add(r, Status4.Homing);
                             }
 
-                            EventCPU.CPUSubscribe(DicStatus);
+                            EventCPU.CPUSubscribe(ViewDraw.DicStatus);
                             Global.Logger.Info("PPTX 파일 로딩이 완료 되었습니다.");
                             tsc.SetResult(true);
                         });
@@ -73,7 +73,8 @@ namespace DSModeler
 
             tabbedView1.Controller.CloseAll();
             tabbedView1.Documents.Clear();
-
+            barStaticItem_logCnt.Caption = "";
+            LogicLog.ValueLogs.Clear(); 
 
             Tree.ModelTree.ClearSubBtn(ace_System);
             Tree.ModelTree.ClearSubBtn(ace_Device);

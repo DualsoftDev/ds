@@ -4,6 +4,7 @@ using DSModeler.Tree;
 using Dual.Common.Core;
 using System;
 using System.Collections.Generic;
+using System.Web.UI.WebControls;
 using System.Windows.Forms;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
@@ -11,10 +12,9 @@ using static Engine.Cpu.RunTime;
 
 namespace DSModeler
 {
-    public partial class FormMain : DevExpress.XtraEditors.XtraForm
+    public partial class FormMain : XtraForm
     {
         public Dictionary<DsSystem, DsCPU> DicCpu = new Dictionary<DsSystem, DsCPU>();
-        public Dictionary<Vertex, Status4> DicStatus = new Dictionary<Vertex, Status4>();
         public PropertyGridControl PropertyGrid => ucPropertyGrid1.PropertyGrid;
 
 
@@ -41,6 +41,9 @@ namespace DSModeler
 
         private void InitializationUIControl()
         {
+            LogicLog.InitControl(gridLookUpEdit_Log, gridLookUpEdit1View_Log);
+            gridLookUpEdit_Log.Properties.DataSource = LogicLog.ValueLogs;
+
             LogicTree.InitControl(gridLookUpEdit_Expr, gridLookUpEdit1View_Expr);
             ratingControl_Speed.EditValue = SIMProperty.GetSpeed();
         }
@@ -80,5 +83,7 @@ namespace DSModeler
         private void ace_ImportPPT_Click(object s, EventArgs e) => ImportPowerPointWapper(null);
         private void ace_pptReload_Click(object sender, EventArgs e) => ImportPowerPointWapper(Files.GetLast());
         private void simpleButton_layoutReset_Click(object s, EventArgs e) => LayoutForm.RestoreLayoutFromXml(dockManager);
+
+      
     }
 }

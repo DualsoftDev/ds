@@ -81,12 +81,14 @@ namespace DSModeler
             textForm.AppendTextColor($"{comments}\n".Replace("$", ""), Color.Goldenrod);
 
 
+            var txtSt = cs.statement.ToText().Replace("$", "");
+            var target = txtSt.Split(':')[0];
+            var expr = txtSt.Replace(target, "").TrimStart(':');
 
-            textForm.AppendTextColor($"\r\n\t{cs.statement.ToText().Replace("$", "")} ", Color.Gold);
+            textForm.AppendTextColor($"\r\n\t{target}", Color.Gold);
+            textForm.AppendTextColor($"\r\n\t\t{expr}", Color.Gold);
 
-
-
-            textForm.AppendTextColor($"\r\n\t{tgtsTexs} = {srcsTexs}\r\n", Color.LightGreen);
+            textForm.AppendTextColor($"\r\n\t{tgtsTexs}\r\n\t\t= {srcsTexs}\r\n", Color.LightGreen);
             textForm.AppendTextColor("\r\n", Color.Gold);
             textForm.TextEditDS.ScrollToCaret();
         }

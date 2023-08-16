@@ -500,7 +500,7 @@ namespace DSModeler
             this.gridLookUpEdit_Expr.Name = "gridLookUpEdit_Expr";
             this.gridLookUpEdit_Expr.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.gridLookUpEdit_Expr.Properties.NullText = "수식을 선택하세요";
+            this.gridLookUpEdit_Expr.Properties.NullText = "먼저 파일을 불러오세요";
             this.gridLookUpEdit_Expr.Properties.PopupView = this.gridLookUpEdit1View_Expr;
             this.gridLookUpEdit_Expr.Size = new System.Drawing.Size(265, 20);
             this.gridLookUpEdit_Expr.TabIndex = 0;

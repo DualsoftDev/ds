@@ -39,6 +39,7 @@ namespace DSModeler
 
         public static void Play(Dictionary<DsSystem, DsCPU> dic, AccordionControlElement ace_Play)
         {
+            if (!Global.IsLoadedPPT()) return;
             SimTree.SimPlayUI(ace_Play, true);
             RunSimMode(Global.ActiveSys);
 
@@ -50,6 +51,7 @@ namespace DSModeler
 
         public static void Step(Dictionary<DsSystem, DsCPU> dic, AccordionControlElement ace_Play)
         {
+            if (!Global.IsLoadedPPT()) return;
             SimTree.SimPlayUI(ace_Play, false);
             RunSimMode(Global.ActiveSys);
             Task.WhenAll(dic.Values.Select(s =>
@@ -58,6 +60,7 @@ namespace DSModeler
         }
         public static void Stop(Dictionary<DsSystem, DsCPU> dic, AccordionControlElement ace_Play)
         {
+            if (!Global.IsLoadedPPT()) return;
             SimTree.SimPlayUI(ace_Play, false);
             Task.WhenAll(dic.Values.Select(s =>
                           Task.Run(() => s.Stop()))
@@ -67,6 +70,7 @@ namespace DSModeler
             , AccordionControlElement ace_Play
             , AccordionControlElement ace_HMI)
         {
+            if (!Global.IsLoadedPPT()) return;
             SimTree.SimPlayUI(ace_Play, false);
             HMITree.OffHMIBtn(ace_HMI);
             Task.WhenAll(dic.Values.Select(s =>

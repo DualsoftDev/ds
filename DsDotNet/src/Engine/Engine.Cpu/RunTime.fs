@@ -13,26 +13,41 @@ open System.Threading
 
 [<AutoOpen>]
 module RunTime =
+    type cpuRunMode =
+    |Event
+    |Scan
+
     type DsCPU(css:CommentedStatement seq, sys:DsSystem) =
         let mapRungs = ConcurrentDictionary<IStorage, HashSet<Statement>>()
         let statements = css |> Seq.map(fun f -> f.Statement)
         let mutable cts = new CancellationTokenSource()
+
+        //let cpuMode = Event
+        let cpuMode = Scan
+
         let runSubscribe() =
             let subscribe =
                 CpusEvent.ValueSubject      //cpu 단위로 이벤트 필요 ahn
                 //자신 CPU와 같은 시스템 또는 참조시스템만 연산처리
                  .Where(fun (system, _storage, _value) -> system = sys || sys.ReferenceSystems.Contains(system:?> DsSystem))
                  .Subscribe(fun (system, storage, _value) ->
-                        //Step 1 상태 UI 업데이트
-                        system.NotifyStatus(storage);
-                        //Step 2 관련수식 연산
-                        //if mapRungs.ContainsKey storage
-                        //then
-                        //    mapRungs[storage]
-                        //    |> Seq.map (fun f-> async { f.Do() } )
-                        //    |> Async.Parallel
-                        //    |> Async.Ignore
-                        //    |> Async.RunSynchronously
+                    //Step 1 상태 UI 업데이트
+                    system.NotifyStatus(storage);
+                    //Step 2 관련수식 연산
+
+                    if cpuMode = Event
+                    then 
+                        if mapRungs.ContainsKey storage
+                        then
+                            for f in mapRungs[storage]
+                                do 
+                                async { f.Do()}|> Async.StartImmediate
+                                        
+                            //mapRungs[storage]
+                            //|> Seq.map (fun f-> async { f.Do() } )
+                            //|> Async.Parallel
+                            //|> Async.Ignore
+                            //|> Async.RunSynchronously
 
 
                         //else
@@ -92,17 +107,25 @@ module RunTime =
                 if runSubscription = null
                 then runSubscription <- runSubscribe()
 
-                let t = async {
-                        while run do                             
-                            for s in statements do s.Do() 
-                            //do! Async.Sleep(0)  //시스템 병렬 개별 Task 실행으로 필요 없음
-                        }
-                Async.StartImmediate(t, cts.Token) 
+                if cpuMode = Scan
+                then 
+                    let t = async {
+                            while run do                             
+                                for s in statements do s.Do() 
+                                //do! Async.Sleep(0)  //시스템 병렬 개별 Task 실행으로 필요 없음
+                            }
+                    Async.StartImmediate(t, cts.Token) |> ignore
+                else
+                    x.ScanOnce()|> ignore // _ON 이벤트 없는 조건때문에 한번 스켄 수행
 
         member x.Stop() =
             cts.Cancel()
             cts <- new CancellationTokenSource() 
             run <- false;
+            if runSubscription <> null
+            then 
+                runSubscription.Dispose()
+                runSubscription <- null
 
         member x.Step() =
             x.Stop()

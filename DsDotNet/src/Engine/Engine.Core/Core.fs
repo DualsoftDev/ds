@@ -245,6 +245,7 @@ module CoreModule =
 
     type TagAddress = string
     [<AbstractClass>]
+    [<DebuggerDisplay("{ApiName}")>]
     type DsTask (api:ApiItem, loadedName:string) =
         member _.ApiItem = api
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함

@@ -64,7 +64,8 @@ namespace DSModeler
 
         void ClearModel()
         {
-            SIMControl.Reset(DicCpu, ace_Play, ace_HMI);
+            if(Global.ActiveSys != null)
+                SIMControl.Reset(DicCpu, ace_Play, ace_HMI);
 
             foreach (var item in DicCpu.Values)
                 item.Dispose();

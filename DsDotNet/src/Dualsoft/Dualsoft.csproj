@@ -30,6 +30,7 @@
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
     <DisallowUrlActivation>true</DisallowUrlActivation>
     <ApplicationRevision>11</ApplicationRevision>
+    <ApplicationRevision>10</ApplicationRevision>
     <ApplicationVersion>0.9.1.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <ExcludeDeploymentUrl>true</ExcludeDeploymentUrl>

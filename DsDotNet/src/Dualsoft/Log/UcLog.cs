@@ -187,6 +187,7 @@ namespace DSModeler
 
         public void Close() { }
 
+        int cnt = 0;
 
         public async void DoAppend(LoggingEvent logEntry)
         {
@@ -205,7 +206,7 @@ namespace DSModeler
                     var lines = msg.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
                     if (lines.Length > 0)
                     {
-                        var fmtMsg = string.Format($"<color={cr}>{now} [{level}]: {lines[0]}</color>");
+                        var fmtMsg = string.Format($"<color={cr}>{now} [{level}]:\t{cnt++}\t{lines[0]}</color>");
                         Items.Add(fmtMsg);
 
                         for (int i = 1; i < lines.Length; i++)

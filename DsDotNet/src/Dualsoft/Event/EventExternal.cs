@@ -47,13 +47,15 @@ namespace DSModeler
                             default:
                                 break;
                         }
-                        Global.StatusChangeSubject.OnNext(Tuple.Create(v, rx.status));
+                        if (DisposableCPUEventStatus != null) //외부에서 CPUUnsubscribe() 했을 경우가 아니면
+                            Global.StatusChangeSubject.OnNext(Tuple.Create(v, rx.status));
 
                         dicStatus[v] = rx.status;
                         if (!Global.SimLogHide)
                         {
                             var txt = $"{DateTime.Now:hh:mm:ss.fff}  {txtStatus}  {v.ToText()}";
-                            Global.Logger.Info(txt);
+                            if (DisposableCPUEventStatus != null) //외부에서 CPUUnsubscribe() 했을 경우가 아니면
+                                Global.Logger.Info(txt);
                         }
                         await Task.Yield();
                     }).Wait();
@@ -77,7 +79,8 @@ namespace DSModeler
                                                     "○" : txtValue;
 
                              var txt = $"{DateTime.Now.ToString("hh:mm:ss.fff")}  {txtValue}  {storage.ToText()}";
-                             Global.Logger.Info(txt);
+                             if (DisposableCPUEventValue != null) //외부에서 CPUUnsubscribe() 했을 경우가 아니면
+                                 Global.Logger.Info(txt);
                          }
                          await Task.Delay(GetDelayMsec());
                      }).Wait();

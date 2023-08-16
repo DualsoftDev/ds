@@ -1,3 +1,4 @@
+using DevExpress.XtraEditors;
 using DevExpress.XtraVerticalGrid;
 using DSModeler.Tree;
 using Dual.Common.Core;
@@ -53,22 +54,23 @@ namespace DSModeler
 
         private void FormMain_Shown(object sender, EventArgs e) { }
 
-        private async void FormMain_FormClosing(object sender, FormClosingEventArgs e)
+        private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (MBox.AskYesNo("종료하시겠습니까?", K.AppName) == DialogResult.No)
                 e.Cancel = true;
             else
             {
                 LayoutForm.SaveLayout(dockManager);
-                await SIMControl.Reset(DicCpu, ace_Play, ace_HMI);
+                SIMControl.Disconnect(DicCpu);
+                EventCPU.CPUUnsubscribe();
             }
         }
 
 
-        private async void ace_Play_Click(object s, EventArgs e) => await SIMControl.Play(DicCpu, ace_Play);
-        private async void ace_Step_Click(object s, EventArgs e) => await SIMControl.Step(DicCpu, ace_Play);
-        private async void ace_Stop_Click(object s, EventArgs e) => await SIMControl.Stop(DicCpu, ace_Play);
-        private async void ace_Reset_Click(object s, EventArgs e) => await SIMControl.Reset(DicCpu, ace_Play, ace_HMI);
+        private void ace_Play_Click(object s, EventArgs e) => SIMControl.Play(DicCpu, ace_Play);
+        private void ace_Step_Click(object s, EventArgs e) => SIMControl.Step(DicCpu, ace_Play);
+        private void ace_Stop_Click(object s, EventArgs e) => SIMControl.Stop(DicCpu, ace_Play);
+        private void ace_Reset_Click(object s, EventArgs e) => SIMControl.Reset(DicCpu, ace_Play, ace_HMI);
         private void ace_pcWindow_Click(object s, EventArgs e) => DocControl.CreateDocDS(this, tabbedView1);
         private void ace_PLCXGI_Click(object s, EventArgs e) => DocControl.CreateDocPLCLS(this, tabbedView1);
         private void ratingControl_Speed_EditValueChanged(object s, EventArgs e) => SIMProperty.SetSpeed(Convert.ToInt32(ratingControl_Speed.EditValue));

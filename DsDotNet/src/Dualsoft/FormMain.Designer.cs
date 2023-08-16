@@ -558,8 +558,8 @@ namespace DSModeler
             // 
             this.ace_SimRoot.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.ace_Play,
-            this.ace_Step,
             this.ace_Stop,
+            this.ace_Step,
             this.ace_Reset});
             this.ace_SimRoot.Expanded = true;
             this.ace_SimRoot.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_SimRoot.ImageOptions.SvgImage")));

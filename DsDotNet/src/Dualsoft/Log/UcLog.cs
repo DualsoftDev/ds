@@ -40,7 +40,7 @@ namespace DSModeler
         }
         System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UcLog));
         Image copyImg => resources.GetObject("copyBtn.ImageOptions.Image") as Image;
-        Image clearImg => resources.GetObject("copyBtn.ImageOptions.Image") as Image;
+        Image clearImg => resources.GetObject("clearBtn.ImageOptions.Image") as Image;
         Image clearAllImg => resources.GetObject("copyAllBtn.ImageOptions.Image") as Image;
         Image logLevelBtnImg => resources.GetObject("logLevelBtn.ImageOptions.Image") as Image;
         Image logLevelChkImg => resources.GetObject("ImgChk.ImageOptions.Image") as Image;
@@ -187,8 +187,6 @@ namespace DSModeler
 
         public void Close() { }
 
-        int cnt = 0;
-
         public async void DoAppend(LoggingEvent logEntry)
         {
             await this.DoAsync(tcs =>
@@ -206,7 +204,7 @@ namespace DSModeler
                     var lines = msg.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
                     if (lines.Length > 0)
                     {
-                        var fmtMsg = string.Format($"<color={cr}>{now} [{level}]:\t{cnt++}\t{lines[0]}</color>");
+                        var fmtMsg = string.Format($"<color={cr}>{now} [{level}]:{lines[0]}</color>");
                         Items.Add(fmtMsg);
 
                         for (int i = 1; i < lines.Length; i++)

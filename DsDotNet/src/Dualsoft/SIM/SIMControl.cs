@@ -4,6 +4,7 @@ using Dual.Common.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using static Engine.CodeGenCPU.ConvertCoreExt;
 using static Engine.Core.CoreModule;
@@ -36,67 +37,50 @@ namespace DSModeler
                 });
         }
 
-        public static async Task Play(Dictionary<DsSystem, DsCPU> dic, AccordionControlElement ace_Play)
+        public static void Play(Dictionary<DsSystem, DsCPU> dic, AccordionControlElement ace_Play)
         {
             SimTree.SimPlayUI(ace_Play, true);
-            await Task.Run(() =>
-            {
-                dic.ForEach(f =>
-                {
-                    var system = f.Key;
-                    var cpu = f.Value;
+            RunSimMode(Global.ActiveSys);
 
-                    SIMControl.RunSimMode(system);
-                    cpu.Run();
-                });
-            });
+            Task.WhenAll(dic.Values.Select(s => 
+                            Task.Run(() => s.Run()))
+                );
         }
 
 
-        public static async Task Step(Dictionary<DsSystem, DsCPU> dic, AccordionControlElement ace_Play)
+        public static void Step(Dictionary<DsSystem, DsCPU> dic, AccordionControlElement ace_Play)
         {
             SimTree.SimPlayUI(ace_Play, false);
-            await Task.Run(() =>
-            {
-                dic.ForEach(f =>
-                {
-                    var system = f.Key;
-                    var cpu = f.Value;
-
-                    SIMControl.RunSimMode(system);
-                    cpu.Step();
-                });
-            });
+            RunSimMode(Global.ActiveSys);
+            Task.WhenAll(dic.Values.Select(s =>
+                          Task.Run(() => s.Step()))
+              );
         }
-        public static async Task Stop(Dictionary<DsSystem, DsCPU> dic, AccordionControlElement ace_Play)
+        public static void Stop(Dictionary<DsSystem, DsCPU> dic, AccordionControlElement ace_Play)
         {
             SimTree.SimPlayUI(ace_Play, false);
-            await Task.Run(() =>
-            {
-                dic.ForEach(f =>
-                {
-                    var cpu = f.Value;
-                    cpu.Stop();
-                });
-            });
+            Task.WhenAll(dic.Values.Select(s =>
+                          Task.Run(() => s.Stop()))
+              );
         }
-        public static async Task Reset(Dictionary<DsSystem, DsCPU> dic
+        public static void Reset(Dictionary<DsSystem, DsCPU> dic
             , AccordionControlElement ace_Play
             , AccordionControlElement ace_HMI)
         {
             SimTree.SimPlayUI(ace_Play, false);
             HMITree.OffHMIBtn(ace_HMI);
-            await Task.Run(() =>
-            {
-                dic.ForEach(f =>
-                {
-                    var cpu = f.Value;
-                    cpu.Reset();
-                });
-            });
+            Task.WhenAll(dic.Values.Select(s =>
+                           Task.Run(() => s.Reset()))
+               );
+        }
+
+        public static void Disconnect(Dictionary<DsSystem, DsCPU> dic)
+        {
+            Task.WhenAll(dic.Values.Select(s =>
+                          Task.Run(() => s.Dispose()))
+              );
         }
     }
-
 }
 
 

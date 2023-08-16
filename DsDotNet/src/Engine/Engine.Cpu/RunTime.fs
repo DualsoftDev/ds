@@ -9,12 +9,14 @@ open System.Reactive.Disposables
 open System.Collections.Generic
 open System.Collections.Concurrent
 open System.Threading.Tasks
+open System.Threading
 
 [<AutoOpen>]
 module RunTime =
     type DsCPU(css:CommentedStatement seq, sys:DsSystem) =
         let mapRungs = ConcurrentDictionary<IStorage, HashSet<Statement>>()
         let statements = css |> Seq.map(fun f -> f.Statement)
+        let mutable cts = new CancellationTokenSource()
         let runSubscribe() =
             let subscribe =
                 CpusEvent.ValueSubject      //cpu 단위로 이벤트 필요 ahn
@@ -52,6 +54,7 @@ module RunTime =
             subscribe
 
         let mutable runSubscription:IDisposable = null
+        let mutable run:bool = false
 
         do
             let total =
@@ -73,45 +76,56 @@ module RunTime =
 
         //강제 전체 연산 임시 test용
         member x.ScanOnce() =
-            for s in statements do
-                s.Do()
+            let scanTask = async {
+                    for s in statements do //cts.Token 의해서 멈춤
+                    s.Do() }
+            Async.StartAsTask(scanTask, TaskCreationOptions.None, cts.Token) 
+            |> Async.AwaitTask
 
-            ///running 이 Some 이면 Expression 처리 동작 중
-        member x.IsRunning = runSubscription <> null
+        member x.IsRunning = run
+        member x.System = sys
         member x.CommentedStatements = css
+
         member x.Run() =
-            if not <| x.IsRunning then
-                runSubscription <- runSubscribe()
-                async {
-                        while x.IsRunning
-                            do x.ScanOnce()
-                               do! Async.Sleep(50)
-                }|> Async.StartImmediate
+            if not <| run then
+                run <- true
+                if runSubscription = null
+                then runSubscription <- runSubscribe()
+
+                let t = async {
+                        while run do                             
+                            for s in statements do s.Do() 
+                            //do! Async.Sleep(0)  //시스템 병렬 개별 Task 실행으로 필요 없음
+                        }
+                Async.StartImmediate(t, cts.Token) 
 
         member x.Stop() =
-            if x.IsRunning then
-                runSubscription.Dispose()
-                runSubscription <- null
+            cts.Cancel()
+            cts <- new CancellationTokenSource() 
+            run <- false;
 
         member x.Step() =
             x.Stop()
-            runSubscription <- runSubscribe()
-            x.ScanOnce()
-            x.Stop()
+            x.ScanOnce() |> ignore
 
         member x.Reset() =
             x.Stop()
-            sys.TagManager
-               .Storages.Where(fun w-> w.Value.TagKind <> (int)SystemTag.on)
-                        .Iter(fun s->
-                            let stg = s.Value
-                            match stg with
-                            | :? TimerCounterBaseStruct as tc ->
-                                tc.Clear()  // 타이머 카운터 리셋
-                            | _ ->
-                                stg.BoxedValue <- textToDataType(stg.DataType.Name).DefaultValue()
-                )
+            let t = async {
+                let stgs =  sys.TagManager.Storages
+                               .Where(fun w-> w.Value.TagKind <> (int)SystemTag.on)
+                for tag in stgs do
+                    let stg = tag.Value
+                    match stg with
+                    | :? TimerCounterBaseStruct as tc ->
+                        tc.Clear()  // 타이머 카운터 리셋
+                    | _ ->
+                        stg.BoxedValue <- textToDataType(stg.DataType.Name).DefaultValue()
+            }
+            Async.StartImmediate(t, cts.Token)
 
+        member x.Dispose() =  
+            cts.Cancel()
+            if runSubscription <> null then
+                runSubscription.Dispose()
+                runSubscription <- null
 
-        member x.Dispose() =  x.Stop()
-        member x.System = sys

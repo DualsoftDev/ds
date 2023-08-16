@@ -57,7 +57,8 @@ namespace DSModeler
                             if (DisposableCPUEventStatus != null) //외부에서 CPUUnsubscribe() 했을 경우가 아니면
                                 Global.Logger.Info(txt);
                         }
-                        await Task.Yield();
+                        //await Task.Yield();
+                        await Task.Delay(10);
                     }).Wait();
                 });
             }

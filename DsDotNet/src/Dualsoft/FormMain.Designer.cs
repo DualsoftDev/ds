@@ -587,6 +587,7 @@ namespace DSModeler
             this.ace_System.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_System.ImageOptions.SvgImage")));
             this.ace_System.Name = "ace_System";
             this.ace_System.Text = "시스템";
+            this.ace_System.Click += new System.EventHandler(this.ace_System_Click);
             // 
             // ace_Device
             // 

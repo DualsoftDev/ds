@@ -38,7 +38,7 @@ namespace DSModeler
         public static string ExportPathXLS { get; set; }
 
         public static DsSystem ActiveSys { get; set; }
-        public static cpuRunMode CpuRunMode { get; set; } = cpuRunMode.Scan;
+        public static CpuRunMode CpuRunMode { get; set; } = CpuRunMode.Scan;
 
         public static Version ver = Assembly.GetEntryAssembly().GetName().Version;
 

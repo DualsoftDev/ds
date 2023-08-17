@@ -11,7 +11,7 @@ open System.Threading
 module RunTime =
 
 
-    type DsCPU(css:CommentedStatement seq, sys:DsSystem, cpuMode:cpuRunMode) =
+    type DsCPU(css:CommentedStatement seq, sys:DsSystem, cpuMode:CpuRunMode) =
         let mapRungs = Dictionary<IStorage, HashSet<Statement>>()
         let statements = css |> Seq.map(fun f -> f.Statement)
         let mutable cts = new CancellationTokenSource()
@@ -23,8 +23,10 @@ module RunTime =
                          }
      
         do
-            updateRungMap(statements, mapRungs)
-            runSubsc <- runSubscribe(mapRungs, sys, cpuMode)
+            if cpuMode <> CpuRunMode.Non
+            then 
+                updateRungMap(statements, mapRungs)
+                runSubsc <- runSubscribe(mapRungs, sys, cpuMode)
 
         //강제 전체 연산 임시 test용
         member x.ScanOnce() =

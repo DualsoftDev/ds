@@ -10,7 +10,8 @@ open System.Collections.Generic
 [<AutoOpen>]
 module RunTimeUtil =
 
-    type cpuRunMode =
+    type CpuRunMode =
+    |Non
     |Event
     |Scan
 
@@ -65,7 +66,7 @@ module RunTimeUtil =
             }
 
     ///Status4 상태보고 및 cpuRunMode.Event 처리 
-    let runSubscribe(mapRungs:Dictionary<IStorage, HashSet<Statement>>, sys:DsSystem, cpuMode:cpuRunMode) =
+    let runSubscribe(mapRungs:Dictionary<IStorage, HashSet<Statement>>, sys:DsSystem, cpuMode:CpuRunMode) =
         let subscribe =
             CpusEvent.ValueSubject      
             //자신 CPU와 같은 시스템 또는 참조시스템만 연산처리

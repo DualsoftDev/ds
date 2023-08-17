@@ -1,5 +1,6 @@
 using DevExpress.XtraBars.Navigation;
 using Dual.Common.Core;
+using Dual.Common.Winform;
 using System;
 using System.Drawing;
 using System.Linq;
@@ -16,104 +17,106 @@ namespace DSModeler.Tree
         static readonly string startToolTip = "START";
         static readonly string resetToolTip = "RESET";
         static readonly Color offColor = Color.RoyalBlue;
-        public static void CreateHMIBtn(FormMain formMain, AccordionControlElement ace_HMI, DsSystem sys)
+        public static async Task CreateHMIBtn(FormMain formMain, AccordionControlElement ace_HMI, DsSystem sys)
         {
-            var eleSys = new AccordionControlElement()
-            { Style = ElementStyle.Group, Text = sys.Name, Tag = sys };
-            eleSys.Click += (s, e) =>
+            await formMain.DoAsync(tsc =>
             {
-                formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
-            };
-            ace_HMI.Elements.Add(eleSys);
-
-            foreach (var flow in sys.Flows)
-            {
-                var eleFlow = new AccordionControlElement()
-                { Style = ElementStyle.Group, Text = flow.Name, Tag = flow };
-                eleFlow.Click += (s, e) =>
+                var eleSys = new AccordionControlElement()
+                { Style = ElementStyle.Group, Text = sys.Name, Tag = sys };
+                eleSys.Click += (s, e) =>
                 {
                     formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
                 };
-                eleSys.Elements.Add(eleFlow);
+                ace_HMI.Elements.Add(eleSys);
+                foreach (var flow in sys.Flows)
+                {
+                    var eleFlow = new AccordionControlElement()
+                    { Style = ElementStyle.Group, Text = flow.Name, Tag = flow };
+                    eleFlow.Click += (s, e) =>
+                    {
+                        formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
+                    };
+                    eleSys.Elements.Add(eleFlow);
 
-                flow.Graph.Vertices
-               .OrderBy(v => v.QualifiedName)
-               .OfType<Real>()
-               .ForEach(v =>
-               {
-                   var realEle = new AccordionControlElement() { Style = ElementStyle.Item, Text = $"{v.Name}", Tag = v };
-                   realEle.Click += (s, e) =>
+                    flow.Graph.Vertices
+                   .OrderBy(v => v.QualifiedName)
+                   .OfType<Real>()
+                   .ForEach(v =>
                    {
-                       formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
-                   };
-                   AccordionContextButton acb1 = createAcb(v, false);
-                   AccordionContextButton acb2 = createAcb(v, true);
+                       var realEle = new AccordionControlElement() { Style = ElementStyle.Item, Text = $"{v.Name}", Tag = v };
+                       realEle.Click += (s, e) =>
+                       {
+                           formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
+                       };
+                       AccordionContextButton acb1 = createAcb(v, false);
+                       AccordionContextButton acb2 = createAcb(v, true);
 
-                   realEle.ContextButtons.Add(acb1);
-                   realEle.ContextButtons.Add(acb2);
-                   eleFlow.Elements.Add(realEle);
-               });
-            }
-
-            AccordionContextButton createAcb(Vertex v, bool start)
-            {
-
-                var acb = new AccordionContextButton() { Tag = v };
-                acb.Visibility = DevExpress.Utils.ContextItemVisibility.Visible;
-
-                if (start)
-                {
-                    acb.Click += (s, e) =>
-                    {
-                        AccordionContextButton btn = UpdateBtn(s);
-                        bool on = btn.AppearanceNormal.ForeColor != offColor;
-                        StartHMI(btn.Tag as Real, on);
-                    };
-                    acb.AppearanceNormal.ForeColor = Color.RoyalBlue;
-                    acb.AppearanceHover.ForeColor = startColor;
-                    acb.ToolTip = startToolTip;
+                       realEle.ContextButtons.Add(acb1);
+                       realEle.ContextButtons.Add(acb2);
+                       eleFlow.Elements.Add(realEle);
+                   });
                 }
-                else
+                AccordionContextButton createAcb(Vertex v, bool start)
                 {
-                    acb.Click += (s, e) =>
-                    {
-                        AccordionContextButton btn = UpdateBtn(s);
-                        bool on = btn.AppearanceNormal.ForeColor != offColor;
-                        ResetHMI(btn.Tag as Real, on);
-                    };
-                    acb.AppearanceNormal.ForeColor = Color.RoyalBlue;
-                    acb.AppearanceHover.ForeColor = resetColor;
-                    acb.ToolTip = resetToolTip;
-                }
 
-                acb.AppearanceNormal.Options.UseForeColor = true;
-                acb.AppearanceHover.Options.UseForeColor = true;
-                acb.AllowGlyphSkinning = DevExpress.Utils.DefaultBoolean.True;
-                acb.AlignmentOptions.Panel = DevExpress.Utils.ContextItemPanel.Center;
-                acb.AlignmentOptions.Position = DevExpress.Utils.ContextItemPosition.Far;
-                acb.Id = Guid.NewGuid();
-                acb.ImageOptionsCollection.ItemNormal.UseDefaultImage = true;
-                acb.Name = acb.Id.ToString();
+                    var acb = new AccordionContextButton() { Tag = v };
+                    acb.Visibility = DevExpress.Utils.ContextItemVisibility.Visible;
 
-                return acb;
+                    if (start)
+                    {
+                        acb.Click += (s, e) =>
+                        {
+                            AccordionContextButton btn = UpdateBtn(s);
+                            bool on = btn.AppearanceNormal.ForeColor != offColor;
+                            StartHMI(btn.Tag as Real, on);
+                        };
+                        acb.AppearanceNormal.ForeColor = Color.RoyalBlue;
+                        acb.AppearanceHover.ForeColor = startColor;
+                        acb.ToolTip = startToolTip;
+                    }
+                    else
+                    {
+                        acb.Click += (s, e) =>
+                        {
+                            AccordionContextButton btn = UpdateBtn(s);
+                            bool on = btn.AppearanceNormal.ForeColor != offColor;
+                            ResetHMI(btn.Tag as Real, on);
+                        };
+                        acb.AppearanceNormal.ForeColor = Color.RoyalBlue;
+                        acb.AppearanceHover.ForeColor = resetColor;
+                        acb.ToolTip = resetToolTip;
+                    }
 
-                void StartHMI(Real real, bool on)
-                {
-                    Task.Run(() =>
+                    acb.AppearanceNormal.Options.UseForeColor = true;
+                    acb.AppearanceHover.Options.UseForeColor = true;
+                    acb.AllowGlyphSkinning = DevExpress.Utils.DefaultBoolean.True;
+                    acb.AlignmentOptions.Panel = DevExpress.Utils.ContextItemPanel.Center;
+                    acb.AlignmentOptions.Position = DevExpress.Utils.ContextItemPosition.Far;
+                    acb.Id = Guid.NewGuid();
+                    acb.ImageOptionsCollection.ItemNormal.UseDefaultImage = true;
+                    acb.Name = acb.Id.ToString();
+
+                    return acb;
+
+                    void StartHMI(Real real, bool on)
                     {
-                        var vv = (real.TagManager as VertexManager);
-                        vv.SF.Value = on;
-                    });
-                }
-                void ResetHMI(Real real, bool on)
-                {
-                    Task.Run(() =>
+                        Task.Run(() =>
+                        {
+                            var vv = (real.TagManager as VertexManager);
+                            vv.SF.Value = on;
+                        });
+                    }
+                    void ResetHMI(Real real, bool on)
                     {
-                        var vv = (real.TagManager as VertexManager);
-                        vv.RF.Value = on;
-                    });
+                        Task.Run(() =>
+                        {
+                            var vv = (real.TagManager as VertexManager);
+                            vv.RF.Value = on;
+                        });
+                    }
                 }
-            }
+                tsc.SetResult(true);
+            });
         }
 
 

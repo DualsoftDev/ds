@@ -1,11 +1,7 @@
-using DevExpress.Printing.Utils.DocumentStoring;
-using DevExpress.Utils.Behaviors.Common;
-using Dual.Common.Core;
 using Engine.Core;
 using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using static Engine.Core.CoreModule;
 using static Engine.Core.Interface;
@@ -20,7 +16,7 @@ namespace DSModeler
         static IDisposable DisposableCPUEventStatus;
         private static int GetDelayMsec()
         {
-            int delayMsec = 0;
+            int delayMsec;
             switch (Global.SimSpeed)
             {
                 case 0: delayMsec = 1000; ; break;

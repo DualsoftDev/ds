@@ -7,6 +7,7 @@ using System.Reactive.Subjects;
 using System.Reflection;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
+using static Engine.Cpu.RunTimeUtil;
 
 namespace DSModeler
 {
@@ -37,6 +38,7 @@ namespace DSModeler
         public static string ExportPathXLS { get; set; }
 
         public static DsSystem ActiveSys { get; set; }
+        public static cpuRunMode CpuRunMode { get; set; } = cpuRunMode.Scan;
 
         public static Version ver = Assembly.GetEntryAssembly().GetName().Version;
 

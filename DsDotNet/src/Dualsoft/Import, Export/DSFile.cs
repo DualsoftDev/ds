@@ -39,7 +39,7 @@ namespace DSModeler
             return lst;
         }
 
-        public static void DrawDSText(FormMain form, FormDocText view)
+        public static void DrawDSText(FormDocText view)
         {
             Task.Run(async () =>
             {
@@ -48,7 +48,7 @@ namespace DSModeler
                     view.TextEditDS.ResetText();
                     int cnt = 0;
                     string dsText = "";
-                    foreach (var sys in form.DicCpu.Keys)
+                    foreach (var sys in SIMControl.DicCpu.Keys)
                         dsText += $"{sys.ToDsText()}\r\n\r\n";
 
                     var colorTexts = ToTextColorDS(dsText);

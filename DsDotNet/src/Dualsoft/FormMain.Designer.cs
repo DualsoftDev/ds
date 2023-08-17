@@ -233,15 +233,15 @@ namespace DSModeler
             this.barDockControlTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.barDockControlTop.Location = new System.Drawing.Point(0, 0);
             this.barDockControlTop.Manager = this.barManager1;
-            this.barDockControlTop.Size = new System.Drawing.Size(1178, 0);
+            this.barDockControlTop.Size = new System.Drawing.Size(1369, 0);
             // 
             // barDockControlBottom
             // 
             this.barDockControlBottom.CausesValidation = false;
             this.barDockControlBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.barDockControlBottom.Location = new System.Drawing.Point(0, 611);
+            this.barDockControlBottom.Location = new System.Drawing.Point(0, 806);
             this.barDockControlBottom.Manager = this.barManager1;
-            this.barDockControlBottom.Size = new System.Drawing.Size(1178, 27);
+            this.barDockControlBottom.Size = new System.Drawing.Size(1369, 27);
             // 
             // barDockControlLeft
             // 
@@ -249,15 +249,15 @@ namespace DSModeler
             this.barDockControlLeft.Dock = System.Windows.Forms.DockStyle.Left;
             this.barDockControlLeft.Location = new System.Drawing.Point(0, 0);
             this.barDockControlLeft.Manager = this.barManager1;
-            this.barDockControlLeft.Size = new System.Drawing.Size(0, 611);
+            this.barDockControlLeft.Size = new System.Drawing.Size(0, 806);
             // 
             // barDockControlRight
             // 
             this.barDockControlRight.CausesValidation = false;
             this.barDockControlRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.barDockControlRight.Location = new System.Drawing.Point(1178, 0);
+            this.barDockControlRight.Location = new System.Drawing.Point(1369, 0);
             this.barDockControlRight.Manager = this.barManager1;
-            this.barDockControlRight.Size = new System.Drawing.Size(0, 611);
+            this.barDockControlRight.Size = new System.Drawing.Size(0, 806);
             // 
             // barStaticItem1
             // 
@@ -277,10 +277,10 @@ namespace DSModeler
             this.panelContainer1.Controls.Add(this.dockPanel2);
             this.panelContainer1.Dock = DevExpress.XtraBars.Docking.DockingStyle.Right;
             this.panelContainer1.ID = new System.Guid("65bd18dd-cacd-46d2-9f60-cc9be65c8417");
-            this.panelContainer1.Location = new System.Drawing.Point(973, 0);
+            this.panelContainer1.Location = new System.Drawing.Point(1164, 0);
             this.panelContainer1.Name = "panelContainer1";
             this.panelContainer1.OriginalSize = new System.Drawing.Size(205, 200);
-            this.panelContainer1.Size = new System.Drawing.Size(205, 611);
+            this.panelContainer1.Size = new System.Drawing.Size(205, 806);
             this.panelContainer1.Text = "panelContainer1";
             // 
             // dockPanel1
@@ -291,8 +291,8 @@ namespace DSModeler
             this.dockPanel1.Location = new System.Drawing.Point(0, 0);
             this.dockPanel1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.dockPanel1.Name = "dockPanel1";
-            this.dockPanel1.OriginalSize = new System.Drawing.Size(205, 425);
-            this.dockPanel1.Size = new System.Drawing.Size(205, 306);
+            this.dockPanel1.OriginalSize = new System.Drawing.Size(205, 306);
+            this.dockPanel1.Size = new System.Drawing.Size(205, 404);
             this.dockPanel1.Text = "Property";
             // 
             // dockPanel1_Container
@@ -301,7 +301,7 @@ namespace DSModeler
             this.dockPanel1_Container.Location = new System.Drawing.Point(4, 26);
             this.dockPanel1_Container.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.dockPanel1_Container.Name = "dockPanel1_Container";
-            this.dockPanel1_Container.Size = new System.Drawing.Size(198, 276);
+            this.dockPanel1_Container.Size = new System.Drawing.Size(198, 374);
             this.dockPanel1_Container.TabIndex = 0;
             // 
             // ucPropertyGrid1
@@ -309,7 +309,7 @@ namespace DSModeler
             this.ucPropertyGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ucPropertyGrid1.Location = new System.Drawing.Point(0, 0);
             this.ucPropertyGrid1.Name = "ucPropertyGrid1";
-            this.ucPropertyGrid1.Size = new System.Drawing.Size(198, 276);
+            this.ucPropertyGrid1.Size = new System.Drawing.Size(198, 374);
             this.ucPropertyGrid1.TabIndex = 0;
             // 
             // dockPanel2
@@ -318,11 +318,11 @@ namespace DSModeler
             this.dockPanel2.Dock = DevExpress.XtraBars.Docking.DockingStyle.Fill;
             this.dockPanel2.FloatVertical = true;
             this.dockPanel2.ID = new System.Guid("e2b1525a-f97a-48d8-a364-d6bb5144ac35");
-            this.dockPanel2.Location = new System.Drawing.Point(0, 306);
+            this.dockPanel2.Location = new System.Drawing.Point(0, 404);
             this.dockPanel2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.dockPanel2.Name = "dockPanel2";
-            this.dockPanel2.OriginalSize = new System.Drawing.Size(205, 424);
-            this.dockPanel2.Size = new System.Drawing.Size(205, 305);
+            this.dockPanel2.OriginalSize = new System.Drawing.Size(205, 305);
+            this.dockPanel2.Size = new System.Drawing.Size(205, 402);
             this.dockPanel2.Text = "Log";
             // 
             // dockPanel2_Container
@@ -332,7 +332,7 @@ namespace DSModeler
             this.dockPanel2_Container.Location = new System.Drawing.Point(4, 26);
             this.dockPanel2_Container.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.dockPanel2_Container.Name = "dockPanel2_Container";
-            this.dockPanel2_Container.Size = new System.Drawing.Size(198, 276);
+            this.dockPanel2_Container.Size = new System.Drawing.Size(198, 373);
             this.dockPanel2_Container.TabIndex = 0;
             // 
             // ucLog1
@@ -342,7 +342,7 @@ namespace DSModeler
             this.ucLog1.Margin = new System.Windows.Forms.Padding(2);
             this.ucLog1.Name = "ucLog1";
             this.ucLog1.SelectedIndex = -1;
-            this.ucLog1.Size = new System.Drawing.Size(198, 276);
+            this.ucLog1.Size = new System.Drawing.Size(198, 373);
             this.ucLog1.TabIndex = 1;
             this.ucLog1.TrackEndOfLine = true;
             // 
@@ -398,7 +398,7 @@ namespace DSModeler
             this.accordionControl2.Name = "accordionControl2";
             this.accordionControl2.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Footer;
             this.accordionControl2.ScrollBarMode = DevExpress.XtraBars.Navigation.ScrollBarMode.Touch;
-            this.accordionControl2.Size = new System.Drawing.Size(328, 611);
+            this.accordionControl2.Size = new System.Drawing.Size(328, 806);
             this.accordionControl2.TabIndex = 22;
             this.accordionControl2.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.HamburgerMenu;
             // 
@@ -888,7 +888,7 @@ namespace DSModeler
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(1178, 638);
+            this.ClientSize = new System.Drawing.Size(1369, 833);
             this.Controls.Add(this.accordionControl2);
             this.Controls.Add(this.panelContainer1);
             this.Controls.Add(this.barDockControlLeft);

@@ -3,6 +3,7 @@ using Dual.Common.Core;
 using System;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.Core.CoreModule;
 
@@ -98,13 +99,19 @@ namespace DSModeler.Tree
 
                 void StartHMI(Real real, bool on)
                 {
-                    var vv = (real.TagManager as VertexManager);
-                    vv.SF.Value = on;
+                    Task.Run(() =>
+                    {
+                        var vv = (real.TagManager as VertexManager);
+                        vv.SF.Value = on;
+                    });
                 }
                 void ResetHMI(Real real, bool on)
                 {
-                    var vv = real.TagManager as VertexManager;
-                    vv.RF.Value = on;
+                    Task.Run(() =>
+                    {
+                        var vv = (real.TagManager as VertexManager);
+                        vv.RF.Value = on;
+                    });
                 }
             }
         }

@@ -9,6 +9,7 @@ using static Engine.CodeGenCPU.CpuLoader;
 using static Engine.Core.CoreModule;
 using static Engine.Core.Interface;
 using static Engine.Cpu.RunTime;
+using static Engine.Cpu.RunTimeUtil;
 using static Model.Import.Office.ImportPPTModule;
 using static Model.Import.Office.ViewModule;
 
@@ -37,11 +38,10 @@ namespace DSModeler
                 {
                     var pous = Cpu.LoadStatements(ppt.System, storages);
                     foreach (var pou in pous)
-                    {
-                        var mode = pou.ToSystem() == ppt.System ?   //my system 이면 Event 나머지 디바이스는 scan
-                            cpuRunMode.Event : cpuRunMode.Scan;
-                        dicCpu.Add(pou.ToSystem(), new DsCPU(pou.CommentedStatements(), pou.ToSystem(), cpuRunMode.Scan));
-                    }
+                        dicCpu.Add(pou.ToSystem()
+                            , new DsCPU(pou.CommentedStatements()
+                            , pou.ToSystem()
+                            , Global.CpuRunMode));
 
                     HMITree.CreateHMIBtn(formMain, ace_HMI, ppt.System);
                     Global.ActiveSys = ppt.System;
@@ -67,6 +67,8 @@ namespace DSModeler
                         DocControl.CreateDocOrSelect(formMain, tab, viewNode);
                     });
             }
+
+            SIMControl.RunCpus = SIMControl.GetRunCpus(dicCpu);
 
             ace_Model.Expanded = true;
             ace_System.Expanded = true;

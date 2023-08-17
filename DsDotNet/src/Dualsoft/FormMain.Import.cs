@@ -38,14 +38,14 @@ namespace DSModeler
                         {
                             ClearModel();
 
-                            DicCpu = PPT.ImportPowerPoint(files, this, tabbedView1, ace_Model, ace_System, ace_Device, ace_HMI);
+                            SIMControl.DicCpu = PPT.ImportPowerPoint(files, this, tabbedView1, ace_Model, ace_System, ace_Device, ace_HMI);
 
-                            Tree.LogicTree.CreateRungExprCombobox(DicCpu[Global.ActiveSys], this, tabbedView1, gridLookUpEdit_Expr);
+                            Tree.LogicTree.CreateRungExprCombobox(SIMControl.DicCpu[Global.ActiveSys], this, tabbedView1, gridLookUpEdit_Expr);
                             Files.SetLast(files);
 
                             ViewDraw.DicStatus = new Dictionary<Vertex, Status4>();
 
-                            foreach (var item in DicCpu)
+                            foreach (var item in SIMControl.DicCpu)
                             {
                                 var sys = item.Key;
                                 var reals = sys.GetVertices().OfType<Vertex>();
@@ -65,11 +65,11 @@ namespace DSModeler
         void ClearModel()
         {
             if(Global.ActiveSys != null)
-                SIMControl.Reset(DicCpu, ace_Play, ace_HMI);
+                SIMControl.Reset(ace_Play, ace_HMI);
 
-            foreach (var item in DicCpu.Values)
+            foreach (var item in SIMControl.DicCpu.Values)
                 item.Dispose();
-            DicCpu = new Dictionary<DsSystem, DsCPU>();
+            SIMControl.DicCpu = new Dictionary<DsSystem, DsCPU>();
 
             tabbedView1.Controller.CloseAll();
             tabbedView1.Documents.Clear();

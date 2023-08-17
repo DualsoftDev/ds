@@ -55,7 +55,7 @@ namespace DSModeler
             FormDocText formChiild = new FormDocText();
             CreateDocForm(formChiild, formParent, tab, docKey);
 
-            DSFile.DrawDSText(formParent, formChiild);
+            DSFile.DrawDSText(formChiild);
         }
 
         public static FormDocText CreateDocExpr(FormMain formParent, TabbedView tab)

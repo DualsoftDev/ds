@@ -14,7 +14,6 @@ namespace DSModeler
 {
     public partial class FormMain : XtraForm
     {
-        public Dictionary<DsSystem, DsCPU> DicCpu = new Dictionary<DsSystem, DsCPU>();
         public PropertyGridControl PropertyGrid => ucPropertyGrid1.PropertyGrid;
 
 
@@ -64,16 +63,16 @@ namespace DSModeler
             else
             {
                 LayoutForm.SaveLayout(dockManager);
-                SIMControl.Disconnect(DicCpu);
+                SIMControl.Disconnect(SIMControl.DicCpu);
                 EventCPU.CPUUnsubscribe();
             }
         }
 
 
-        private void ace_Play_Click(object s, EventArgs e) => SIMControl.Play(DicCpu, ace_Play);
-        private void ace_Step_Click(object s, EventArgs e) => SIMControl.Step(DicCpu, ace_Play);
-        private void ace_Stop_Click(object s, EventArgs e) => SIMControl.Stop(DicCpu, ace_Play);
-        private void ace_Reset_Click(object s, EventArgs e) => SIMControl.Reset(DicCpu, ace_Play, ace_HMI);
+        private void ace_Play_Click(object s, EventArgs e) => SIMControl.Play(ace_Play);
+        private void ace_Step_Click(object s, EventArgs e) => SIMControl.Step(ace_Play);
+        private void ace_Stop_Click(object s, EventArgs e) => SIMControl.Stop(ace_Play);
+        private void ace_Reset_Click(object s, EventArgs e) => SIMControl.Reset(ace_Play, ace_HMI);
         private void ace_pcWindow_Click(object s, EventArgs e) => DocControl.CreateDocDS(this, tabbedView1);
         private void ace_PLCXGI_Click(object s, EventArgs e) => DocControl.CreateDocPLCLS(this, tabbedView1);
         private void ratingControl_Speed_EditValueChanged(object s, EventArgs e) => SIMProperty.SetSpeed(Convert.ToInt32(ratingControl_Speed.EditValue));

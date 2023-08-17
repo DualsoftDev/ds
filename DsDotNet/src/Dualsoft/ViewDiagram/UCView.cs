@@ -300,7 +300,8 @@ namespace DSModeler
 
         public void RefreshGraph()
         {
-            viewer.Do(() => viewer.Refresh());
+            viewer.Refresh();
+            //viewer.Do(() => viewer.Refresh());
         }
 
 

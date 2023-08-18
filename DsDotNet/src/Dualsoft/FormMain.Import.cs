@@ -1,12 +1,9 @@
 using DevExpress.XtraEditors;
-using DSModeler.Tree;
 using Dual.Common.Core;
-using Dual.Common.Winform;
 using Engine.Core;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.EdgeExt;
@@ -58,7 +55,7 @@ namespace DSModeler
 
         void ClearModel()
         {
-            if(Global.ActiveSys != null)
+            if (Global.ActiveSys != null)
                 SIMControl.Reset(ace_Play, ace_HMI);
 
             SIMControl.RunCpus.Iter(cpu => cpu.Dispose());

@@ -65,7 +65,7 @@ namespace DSModeler
             {
                 Global.LayoutMenuFooter = toggleSwitch_menuNonFooter.IsOn;
                 DSRegistry.SetValue(K.LayoutMenuFooter, Global.LayoutMenuFooter);
-                
+
                 if (toggleSwitch_menuNonFooter.IsOn)
                     ac_Main.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Default;
                 else
@@ -119,6 +119,6 @@ namespace DSModeler
 
         }
 
-  
+
     }
 }

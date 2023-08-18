@@ -1,6 +1,5 @@
 using DevExpress.XtraEditors;
 using Dual.Common.Core;
-using Dual.Common.Core.FS;
 using Engine.Core;
 using log4net;
 using System;
@@ -33,7 +32,7 @@ namespace DSModeler
     public static class Global
     {
         public static ILog Logger => Log4NetLogger.Logger;
-        public static bool IsDebug { get;  set; }  
+        public static bool IsDebug { get; set; }
         public static string LogLevel { get; set; }
         public static int SimSpeed { get; set; } = 3;
         public static bool LayoutMenuFooter { get; set; }

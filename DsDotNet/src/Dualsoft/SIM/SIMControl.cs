@@ -1,18 +1,12 @@
-using DevExpress.Data.Extensions;
 using DevExpress.XtraBars.Navigation;
-using DevExpress.XtraEditors.Filtering.Repository;
 using DSModeler.Tree;
 using Dual.Common.Core;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Threading;
 using System.Threading.Tasks;
 
 using static Engine.Core.CoreModule;
 using static Engine.Cpu.RunTime;
-using static Engine.Cpu.RunTimeUtil;
 
 namespace DSModeler
 {
@@ -40,7 +34,7 @@ namespace DSModeler
                 var passiveCPU =
                     new DsCPU(
                     passiveStatements
-                  , dicCpu.Keys.First(w=> w != Global.ActiveSys)  // 가장 처음 디바이스
+                  , dicCpu.Keys.First(w => w != Global.ActiveSys)  // 가장 처음 디바이스
                   , Global.CpuRunMode);
                 runCpus.Add(passiveCPU);
             }
@@ -86,7 +80,7 @@ namespace DSModeler
               );
             Global.Logger.Info("시뮬레이션 : Step");
         }
-        public static void Stop( AccordionControlElement ace_Play)
+        public static void Stop(AccordionControlElement ace_Play)
         {
             if (!Global.IsLoadedPPT()) return;
             Global.SimReset = false;

@@ -1,4 +1,3 @@
-using DevExpress.Data.WcfLinq.Helpers;
 using DevExpress.XtraBars.Docking2010.Views.Tabbed;
 using DevExpress.XtraBars.Navigation;
 using DSModeler.Tree;
@@ -9,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static DevExpress.Utils.Drawing.Helpers.NativeMethods;
 using static Engine.CodeGenCPU.CpuLoader;
 using static Engine.Core.CoreModule;
 using static Engine.Core.Interface;

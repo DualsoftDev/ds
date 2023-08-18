@@ -1,4 +1,3 @@
-using DevExpress.XtraEditors;
 using DSModeler.Form;
 using DSModeler.Tree;
 using Dual.Common.Core;
@@ -67,7 +66,7 @@ namespace DSModeler
             });
         }
 
-    
+
         internal static void UpdateExpr(
               FormDocText textForm
             , LogicStatement logicStatement)

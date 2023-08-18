@@ -1,5 +1,4 @@
 using DSModeler.Form;
-using Dual.Common.Core;
 using System.Collections.Generic;
 using System.Linq;
 using static Engine.Core.CoreModule;
@@ -12,8 +11,8 @@ namespace DSModeler
     {
         public static Dictionary<Vertex, Status4> DicStatus = new Dictionary<Vertex, Status4>();
 
-   
-        public static void DrawStatus( ViewNode v, FormDocView view)
+
+        public static void DrawStatus(ViewNode v, FormDocView view)
         {
             var viewNodes = v.UsedViewNodes.Where(w => w.CoreVertex != null);
             foreach (var f in viewNodes)

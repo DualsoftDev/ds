@@ -42,7 +42,7 @@ namespace DSModeler.Tree
         , DevExpress.XtraBars.Docking2010.Views.Tabbed.TabbedView tabbedView1
         , GridLookUpEdit gridLookUpEdit_Expr)
         {
-            
+
 
             formMain.Do(() =>
             {

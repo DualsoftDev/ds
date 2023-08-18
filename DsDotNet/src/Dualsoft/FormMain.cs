@@ -2,16 +2,8 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraVerticalGrid;
 using DSModeler.Tree;
 using Dual.Common.Core;
-using Microsoft.Msagl.Routing.ConstrainedDelaunayTriangulation;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Web.UI.WebControls;
 using System.Windows.Forms;
-using static Engine.Core.CoreModule;
-using static Engine.Core.DsType;
-using static Engine.Cpu.RunTime;
-using static Model.Import.Office.ImportPPTModule;
 
 namespace DSModeler
 {
@@ -39,7 +31,7 @@ namespace DSModeler
 
             if (!Global.IsDebug)
                 DevExpress.XtraSplashScreen.SplashScreenManager.CloseForm();
-        } 
+        }
 
         private void InitializationUIControl()
         {
@@ -82,13 +74,13 @@ namespace DSModeler
         private void ace_pcWindow_Click(object s, EventArgs e) => DocControl.CreateDocDS(this, tabbedView1);
         private void ace_PLCXGI_Click(object s, EventArgs e) => DocControl.CreateDocPLCLS(this, tabbedView1);
         private void ratingControl_Speed_EditValueChanged(object s, EventArgs e) => SIMProperty.SetSpeed(Convert.ToInt32(ratingControl_Speed.EditValue));
-           
+
         private void simpleButton_OpenPLC_Click(object s, EventArgs e) => PLC.OpenPLCFolder();
         private void ace_ExportExcel_Click(object s, EventArgs e) => XLS.ExportExcel();
         private void ace_ImportPPT_Click(object s, EventArgs e) => ImportPowerPointWapper(null);
         private void ace_pptReload_Click(object sender, EventArgs e) => ImportPowerPointWapper(Files.GetLast());
         private void simpleButton_layoutReset_Click(object s, EventArgs e) => LayoutForm.RestoreLayoutFromXml(dockManager);
 
-       
+
     }
 }

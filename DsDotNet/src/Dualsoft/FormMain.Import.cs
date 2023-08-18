@@ -64,7 +64,7 @@ namespace DSModeler
             if(Global.ActiveSys != null)
                 SIMControl.Reset(ace_Play, ace_HMI);
 
-            foreach (var item in SIMControl.DicCpu.Values)
+            foreach (var item in SIMControl.RunCpus)
                 item.Dispose();
             SIMControl.DicCpu = new Dictionary<DsSystem, DsCPU>();
 

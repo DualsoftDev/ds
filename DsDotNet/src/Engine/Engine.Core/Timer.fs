@@ -130,10 +130,12 @@ module rec TimerModule =
     [<AbstractClass>]
     type TimerCounterBaseStruct (name, dn, pre, acc, res, sys) =
         let unsupported() = failwithlog "ERROR: not supported"
+        let mutable tagChanged = false
         interface IStorage with
             member _.DsSystem = sys
             member x.Target = None
             member x.TagKind = -1
+            member x.TagChanged  with get() = tagChanged and set(v) = tagChanged <- v
             member x.Name with get() = x.Name and set(_v) = unsupported()
             member _.Address with get() = unsupported() and set(_v) = unsupported()
             member _.DataType = typedefof<TimerCounterBaseStruct>

@@ -4,10 +4,12 @@ open Engine.Core
 open System.Runtime.CompilerServices
 open System.Text.RegularExpressions
 open System
+open System.Collections.Generic
 
 [<AutoOpen>]
 module CoreExtensionsModule =
     type Statement with
+     
         member x.GetTargetStorages() =
             match x with
             | DuAssign (_expr, (:? RisingCoil as rc))  -> [ rc.Storage]
@@ -36,6 +38,13 @@ module CoreExtensionsModule =
             | DuAction (DuCopy (condition, _source, _target)) -> condition.CollectStorages()
             | DuAugmentedPLCFunction _ -> []
 
+        member x.TargeChangeds(mapRungs:Dictionary<IStorage, HashSet<Statement>>) =
+            x.GetTargetStorages()
+            |> Seq.where(fun (stg) -> stg.TagChanged)
+            |> Seq.collect(fun (stg) -> mapRungs[stg])
+       
+        member x.TargeChangedClear() =
+            x.GetTargetStorages() |> Seq.iter(fun (stg) -> stg.TagChanged <- false)
 
 
     let getTargetStorages (x:Statement) = x.GetTargetStorages() |> List.toSeq

@@ -112,7 +112,7 @@ namespace DSModeler
             Global.Logger.Info("시뮬레이션 : Reset");
         }
 
-        public static void Disconnect(Dictionary<DsSystem, DsCPU> dic)
+        public static void Disconnect()
         {
             Task.WhenAll(RunCpus.Select(s =>
                           Task.Run(() => s.Dispose()))

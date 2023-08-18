@@ -1,5 +1,6 @@
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Grid;
+using Dual.Common.Winform;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -28,7 +29,6 @@ namespace DSModeler.Tree
         public static void InitControl(GridLookUpEdit gle, GridView gv)
         {
 
-            gle.Properties.BestFitMode = DevExpress.XtraEditors.Controls.BestFitMode.BestFitResizePopup;
             gle.Properties.DisplayMember = "Display";
 
             gv.PreviewLineCount = 20;
@@ -42,15 +42,13 @@ namespace DSModeler.Tree
         , DevExpress.XtraBars.Docking2010.Views.Tabbed.TabbedView tabbedView1
         , GridLookUpEdit gridLookUpEdit_Expr)
         {
-            var css = dsCPU.CommentedStatements.Select(s => new LogicStatement(s));
+            
 
-            gridLookUpEdit_Expr.Properties.DataSource = css;
-            gridLookUpEdit_Expr.EditValueChanged += (ss, ee) =>
+            formMain.Do(() =>
             {
-                var textForm = DocControl.CreateDocExpr(formMain, tabbedView1);
-                if (textForm == null) return;
-                DSFile.UpdateExpr(textForm, gridLookUpEdit_Expr.EditValue as LogicStatement);
-            };
+                var css = dsCPU.CommentedStatements.Select(s => new LogicStatement(s));
+                gridLookUpEdit_Expr.Properties.DataSource = css;
+            });
         }
     }
 }

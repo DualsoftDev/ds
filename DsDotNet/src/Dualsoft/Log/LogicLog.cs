@@ -32,7 +32,6 @@ namespace DSModeler
         }
         public static void InitControl(GridLookUpEdit gle, GridView gv)
         {
-            gle.Properties.BestFitMode = DevExpress.XtraEditors.Controls.BestFitMode.BestFitResizePopup;
             gle.Properties.DisplayMember = "Name";
 
             gv.PreviewLineCount = 20;

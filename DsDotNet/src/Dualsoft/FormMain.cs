@@ -67,7 +67,7 @@ namespace DSModeler
             else
             {
                 LayoutForm.SaveLayout(dockManager);
-                SIMControl.Disconnect(SIMControl.DicCpu);
+                SIMControl.Disconnect();
                 EventCPU.CPUUnsubscribe();
             }
         }
@@ -87,20 +87,6 @@ namespace DSModeler
         private void ace_pptReload_Click(object sender, EventArgs e) => ImportPowerPointWapper(Files.GetLast());
         private void simpleButton_layoutReset_Click(object s, EventArgs e) => LayoutForm.RestoreLayoutFromXml(dockManager);
 
-        private  void ace_System_Click(object sender, EventArgs e)
-        {
-
-            Task.Run(async () =>
-            {
-                for (int i = 0; i < 1000; i++)
-                {
-                    var v = Convert.ToInt32(i / 1000.0 * 100);
-                    Global.Logger.Info(v);
-                    ProcessEvent.DoWork(v);
-                    await  Task.Yield();
-                }
-            });
-          
-        }
+       
     }
 }

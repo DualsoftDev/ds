@@ -1,5 +1,6 @@
 using DevExpress.XtraEditors;
 using DSModeler.Form;
+using DSModeler.Tree;
 using Dual.Common.Core;
 using Dual.Common.Core.FS;
 using Dual.Common.Winform;
@@ -43,6 +44,21 @@ namespace DSModeler
                 var docForm = e.Document.Tag as FormDocView;
                 if (docForm != null && docForm.UcView.MasterNode != null)
                     ViewDraw.DrawStatus(docForm.UcView.MasterNode, docForm);
+            };
+
+            gridLookUpEdit_Expr.EditValueChanged += (ss, ee) =>
+            {
+                var textForm = DocControl.CreateDocExpr(this, tabbedView1);
+                if (textForm == null) return;
+                DSFile.UpdateExpr(textForm, gridLookUpEdit_Expr.EditValue as LogicStatement);
+            };
+            gridLookUpEdit_Expr.BeforePopup += (ss, ee) =>
+            {
+                gridLookUpEdit_Expr.Properties.BestFitMode = DevExpress.XtraEditors.Controls.BestFitMode.BestFitResizePopup;
+            };
+            gridLookUpEdit_Log.BeforePopup += (ss, ee) =>
+            {
+                gridLookUpEdit_Log.Properties.BestFitMode = DevExpress.XtraEditors.Controls.BestFitMode.BestFitResizePopup;
             };
 
             ProcessEvent.ProcessSubject.Subscribe(rx =>
@@ -91,9 +107,6 @@ namespace DSModeler
 
         }
 
-        private void GridLookUpEdit_Log_BeforePopup(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
+  
     }
 }

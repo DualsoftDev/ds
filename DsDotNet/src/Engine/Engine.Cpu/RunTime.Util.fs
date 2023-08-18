@@ -48,12 +48,12 @@ module RunTimeUtil =
                             ||   w.Value.TagKind = (int)SystemTag.sim
                     )
         simTags.Iter(fun t -> t.Value.BoxedValue <-  true) 
-
+ 
     ///HMI Reset Async task
-    let getAsyncReset(statements:Statement seq, sys:DsSystem) = 
+    let getAsyncReset(statements:Statement seq, sys:DsSystem, systemOn) = 
             async {
                 let stgs =  sys.TagManager.Storages
-                               .Where(fun w-> w.Value.TagKind <> (int)SystemTag.on)
+                               .Where(fun w-> w.Value <> systemOn)
                 for tag in stgs do
                     let stg = tag.Value
                     match stg with

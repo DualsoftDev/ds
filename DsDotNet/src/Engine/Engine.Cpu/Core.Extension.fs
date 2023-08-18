@@ -53,6 +53,14 @@ module CoreExtensionsModule =
 
     [<Extension>]
     type ExpressionExt =
+        [<Extension>] static member ChangedTags (xs:IStorage seq) = xs |> Seq.where(fun w -> w.TagChanged)
+        [<Extension>] static member ChangedTagsClear (xs:IStorage seq, sys:DsSystem) = 
+                                xs |> Seq.where(fun w -> w.DsSystem = sys)//자신 시스템에서만 TagChanged  <- false 가능
+                                   |> Seq.iter(fun w -> w.TagChanged <- false)
+        [<Extension>] static member ExecutableStatements (xs:IStorage seq, mRung:Dictionary<IStorage, HashSet<Statement>>) = 
+                                xs |> Seq.collect(fun stg -> mRung[stg]) 
+                                   |> Seq.toList            //list 아니면 TagChanged 정보 없는 초기화 이후 정보 가져오더라도 항목 유지
+       
         [<Extension>]
         static member NotifyStatus (s:ISystem, x:IStorage) =
             match x.GetVertexTagKind() with

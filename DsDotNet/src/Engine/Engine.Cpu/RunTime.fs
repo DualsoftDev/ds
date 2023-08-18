@@ -13,6 +13,7 @@ module RunTime =
 
     type DsCPU(css:CommentedStatement seq, sys:DsSystem, cpuMode:CpuRunMode) =
         let mapRungs = Dictionary<IStorage, HashSet<Statement>>()
+        let cpuStorages = mapRungs.Keys
         let statements = css |> Seq.map(fun f -> f.Statement)
         let systemOn =  sys.TagManager.Storages
                            .First(fun w-> w.Value.TagKind = (int)SystemTag.on).Value
@@ -24,17 +25,16 @@ module RunTime =
             async { 
                 //시스템 ON 및 값변경이 없는 조건 수식은  관련 수식은 Changed Event가 없어서한번 수행해줌
                 for s in statements do s.Do() 
-
                 //나머지 수식은 Changed Event가 있는것만 수행해줌
                 while run do   
 
-                    let tags = mapRungs.Keys |> Seq.where(fun (stg) -> stg.TagChanged)
-                    let doSrcs = tags |> Seq.collect(fun stg -> mapRungs[stg]) |> Seq.toList
-                        
-                    if doSrcs.any() 
+                    let chTags = cpuStorages.ChangedTags()
+                    let states = chTags.ExecutableStatements(mapRungs) 
+                  
+                    if states.any() 
                     then
-                        tags |> Seq.iter(fun (stg) -> stg.TagChanged <- false)   //Do 처리 수식 구한후 Changed 초기화
-                        doSrcs |> Seq.iter(fun s -> s.Do())
+                        chTags.ChangedTagsClear(sys)
+                        states.Iter(fun s->s.Do())
             }
      
         do

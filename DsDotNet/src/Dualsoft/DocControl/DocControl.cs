@@ -58,13 +58,14 @@ namespace DSModeler
             DSFile.DrawDSText(formChiild);
         }
 
-        public static FormDocText CreateDocExpr(FormMain formParent, TabbedView tab)
+        public static FormDocText CreateDocExprOrSelect(FormMain formParent, TabbedView tab)
         {
             if (!Global.IsLoadedPPT()) return null;
             string docKey = K.DocExpression;
 
             FormDocText formChiild = new FormDocText();
             formChiild = CreateDocForm(formChiild, formParent, tab, docKey) as FormDocText;
+            formChiild.Activate();
             return formChiild;
 
         }

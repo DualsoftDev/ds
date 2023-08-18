@@ -33,8 +33,8 @@ namespace DSModeler
                 {
                     await PPT.ImportPowerPoint(files, this, tabbedView1, ace_Model, ace_System, ace_Device, ace_HMI);
 
+                    Tree.LogicTree.UpdateExpr(gridLookUpEdit_Expr, toggleSwitch_showDeviceExpr.IsOn);
 
-                    Tree.LogicTree.CreateRungExprCombobox(SIMControl.DicCpu[Global.ActiveSys], this, tabbedView1, gridLookUpEdit_Expr);
                     Files.SetLast(files);
 
                     ViewDraw.DicStatus = new Dictionary<Vertex, Status4>();

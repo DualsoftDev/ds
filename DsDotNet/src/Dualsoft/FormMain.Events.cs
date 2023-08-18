@@ -4,9 +4,12 @@ using DSModeler.Tree;
 using Dual.Common.Core;
 using Dual.Common.Winform;
 using Engine.Core;
+using Microsoft.FSharp.Core;
 using System;
 using System.Linq;
 using System.Windows.Forms;
+using static DevExpress.Data.Filtering.Helpers.SubExprHelper;
+using static Engine.Cpu.RunTime;
 
 namespace DSModeler
 {
@@ -48,7 +51,7 @@ namespace DSModeler
 
             gridLookUpEdit_Expr.EditValueChanged += (ss, ee) =>
             {
-                var textForm = DocControl.CreateDocExpr(this, tabbedView1);
+                var textForm = DocControl.CreateDocExprOrSelect(this, tabbedView1);
                 if (textForm == null) return;
                 DSFile.UpdateExpr(textForm, gridLookUpEdit_Expr.EditValue as LogicStatement);
             };
@@ -70,6 +73,11 @@ namespace DSModeler
                     ac_Main.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Default;
                 else
                     ac_Main.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Footer;
+            };
+
+            toggleSwitch_showDeviceExpr.Toggled += (ss, ee) =>
+            {
+                LogicTree.UpdateExpr(gridLookUpEdit_Expr, toggleSwitch_showDeviceExpr.IsOn);
             };
 
 
@@ -119,6 +127,6 @@ namespace DSModeler
 
         }
 
-
+     
     }
 }

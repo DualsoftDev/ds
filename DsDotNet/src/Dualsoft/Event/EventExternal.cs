@@ -14,21 +14,7 @@ namespace DSModeler
 
         static IDisposable DisposableCPUEventValue;
         static IDisposable DisposableCPUEventStatus;
-        private static int GetDelayMsec()
-        {
-            int delayMsec;
-            switch (Global.SimSpeed)
-            {
-                case 0: delayMsec = 1000; ; break;
-                case 1: delayMsec = 500; ; break;
-                case 2: delayMsec = 200; ; break;
-                case 3: delayMsec = 50; ; break;
-                case 4: delayMsec = 20; ; break;
-                case 5: delayMsec = 5; ; break;
-                default: delayMsec = 5; ; break;
-            }
-            return delayMsec;
-        }
+       
 
         public static void CPUSubscribe(Dictionary<Vertex, DsType.Status4> dicStatus)
         {
@@ -69,7 +55,7 @@ namespace DSModeler
                     if (Global.SimReset)
                         Task.Yield(); //리셋은 시뮬레이션 속도 영향 없음
                     else
-                        Task.Delay(GetDelayMsec()).Wait();
+                        Task.Delay(SIMProperty.GetDelayMsec()).Wait();
                 });
             }
         }

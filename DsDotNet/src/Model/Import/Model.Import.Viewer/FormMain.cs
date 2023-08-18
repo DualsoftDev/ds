@@ -12,7 +12,6 @@ using Dual.Common.Winform;
 
 
 using static Engine.CodeGenCPU.TagManagerModule;
-using static Dual.Common.Core.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.EdgeExt;
 using static Engine.Core.SystemExt;
@@ -33,9 +32,16 @@ using static Engine.Core.TagModule;
 using static Engine.Core.TagKindModule;
 using LanguageExt;
 using static Engine.Core.DsType;
+using static Dual.Common.Core.FS.MessageEvent;
 
 namespace Dual.Model.Import
 {
+    public enum MSGLevel
+    {
+        MsgInfo,
+        MsgWarn,
+        MsgError,
+    };
     public partial class FormMain : Form
     {
         public static FormMain TheMain;
@@ -277,7 +283,7 @@ namespace Dual.Model.Import
             }
             catch
             {
-                ProcessEvent.DoWork(0);
+                DsProcessEvent.DoWork(0);
             }
 
         }

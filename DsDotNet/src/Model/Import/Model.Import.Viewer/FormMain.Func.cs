@@ -9,12 +9,12 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using static Dual.Common.Core.FS.MessageEvent;
 using static Engine.Core.DsTextProperty;
 using static Model.Import.Office.ImportPPTModule;
 using static Model.Import.Office.ImportViewModule;
 using static Model.Import.Office.PPTObjectModule;
 using Color = System.Drawing.Color;
+using Engine.Core;
 
 namespace Dual.Model.Import
 {
@@ -65,7 +65,7 @@ namespace Dual.Model.Import
                         {
                             rndColor = Color.FromArgb(r.Next(130, 230), r.Next(130, 230), r.Next(130, 230));
                             this.Do(() => richTextBox_ds.ScrollToCaret());
-                            ProcessEvent.DoWork(pro);
+                            DsProcessEvent.DoWork(pro);
                         }
                         richTextBox_ds.AppendTextColor(f + "\n", rndColor);
                     }
@@ -76,7 +76,7 @@ namespace Dual.Model.Import
 
             this.Do(() => richTextBox_ds.Select(0, 0));
             this.Do(() => richTextBox_ds.ScrollToCaret());
-            ProcessEvent.DoWork(0);
+            DsProcessEvent.DoWork(0);
         }
 
         internal void WriteDebugMsg(DateTime time, MSGLevel level, string msg, bool bScrollToCaret = false)
@@ -86,14 +86,14 @@ namespace Dual.Model.Import
             this.Do(() =>
             {
                 var color = Color.Black;
-                if (level.IsMsgError)
+                if (level == MSGLevel.MsgError)
                 {
                     richTextBox_Debug.AppendTextColor($"\r\n{msg}", Color.Red);
-                    ProcessEvent.DoWork(0);
+                    DsProcessEvent.DoWork(0);
                 }
                 else
                 {
-                    if (level.IsMsgWarn) color = Color.Purple;
+                    if (level == MSGLevel.MsgWarn) color = Color.Purple;
                     richTextBox_Debug.AppendTextColor($"\r\n{time} : {msg}", color);
                 }
                 if (bScrollToCaret)

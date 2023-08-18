@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using static Engine.CodeGenCPU.ExportModule;
-using ProcessEvent = Dual.Common.Core.FS.ProcessEvent;
 
 namespace DSModeler
 {

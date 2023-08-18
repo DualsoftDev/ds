@@ -11,13 +11,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Engine.CodeGenCPU.ExportModule;
-using static Dual.Common.Core.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.Interface;
 using static Engine.Core.RuntimeGeneratorModule;
 using static Engine.Cpu.RunTime;
 using static Engine.CodeGenCPU.CpuLoader;
 using static Engine.Cpu.RunTimeUtil;
+using Engine.Core;
 
 namespace Dual.Model.Import
 {
@@ -44,7 +44,7 @@ namespace Dual.Model.Import
                 _ResultDirectory = Path.GetDirectoryName(pathXLS);
             }
             catch (Exception ex) { WriteDebugMsg(DateTime.Now, MSGLevel.MsgError, ex.Message); }
-            finally { ProcessEvent.DoWork(0); }
+            finally { DsProcessEvent.DoWork(0); }
         }
 
         internal void ExportPLC(string path)
@@ -62,7 +62,7 @@ namespace Dual.Model.Import
                     int cnt = 0;
                     foreach (var view in _PPTResults)
                     {
-                        ProcessEvent.DoWork(Convert.ToInt32((cnt++ * 1.0) / (_PPTResults.Count() * 1.0) * 100));
+                        DsProcessEvent.DoWork(Convert.ToInt32((cnt++ * 1.0) / (_PPTResults.Count() * 1.0) * 100));
                         await Task.Delay(10);
                         if (!view.IsActive) continue;
                         var rungs = Cpu.LoadStatements(view.System, storages);
@@ -100,14 +100,14 @@ namespace Dual.Model.Import
                         WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{path} PLC 생성완료!!");
                         richTextBox_Debug.ScrollToCaret();
 
-                        ProcessEvent.DoWork(0);
+                        DsProcessEvent.DoWork(0);
                     });
                 });
 
             }
 
             catch (Exception ex) { WriteDebugMsg(DateTime.Now, MSGLevel.MsgError, ex.Message); }
-            finally { ProcessEvent.DoWork(0); }
+            finally { DsProcessEvent.DoWork(0); }
         }
     }
 }

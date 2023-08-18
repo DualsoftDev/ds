@@ -3,6 +3,7 @@ using DSModeler.Form;
 using DSModeler.Tree;
 using Dual.Common.Core;
 using Dual.Common.Winform;
+using Engine.Core;
 using System;
 using System.Linq;
 using System.Windows.Forms;
@@ -72,7 +73,7 @@ namespace DSModeler
             };
 
 
-            Dual.Common.Core.FS.ProcessEvent.ProcessSubject.Subscribe(rx =>
+            DsProcessEvent.ProcessSubject.Subscribe(rx =>
             {
                 this.Do(() =>
                 {

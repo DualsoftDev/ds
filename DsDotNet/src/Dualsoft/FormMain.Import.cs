@@ -12,52 +12,47 @@ using static Engine.Core.DsType;
 using static Engine.Core.EdgeExt;
 using static Engine.Cpu.RunTime;
 
-using ProcessEvent = Dual.Common.Core.FS.ProcessEvent;
 
 namespace DSModeler
 {
     public partial class FormMain : XtraForm
     {
-        public  void ImportPowerPointWapper(string[] lastFiles)
+        public void ImportPowerPointWapper(string[] lastFiles)
         {
+            if (Global.BusyCheck()) return;
 
-            if (0 < ProcessEvent.currProcess && ProcessEvent.currProcess < 100)
-                XtraMessageBox.Show("파일 처리중 입니다.", $"{K.AppName}", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            EventCPU.CPUUnsubscribe();
+            string[] files;
+            if (lastFiles.IsNullOrEmpty())
+                files = FileOpenSave.OpenFiles();
             else
+                files = lastFiles;
+
+            if (files != null)
             {
-                EventCPU.CPUUnsubscribe();
-                string[] files;
-                if (lastFiles.IsNullOrEmpty())
-                    files = FileOpenSave.OpenFiles();
-                else
-                    files = lastFiles;
 
-                if (files != null)
+                ClearModel();
+                Task.Run(async () =>
                 {
+                    await PPT.ImportPowerPoint(files, this, tabbedView1, ace_Model, ace_System, ace_Device, ace_HMI);
 
-                    ClearModel();
-                    Task.Run(async () =>
+
+                    Tree.LogicTree.CreateRungExprCombobox(SIMControl.DicCpu[Global.ActiveSys], this, tabbedView1, gridLookUpEdit_Expr);
+                    Files.SetLast(files);
+
+                    ViewDraw.DicStatus = new Dictionary<Vertex, Status4>();
+
+                    foreach (var item in SIMControl.DicCpu)
                     {
-                        await PPT.ImportPowerPoint(files, this, tabbedView1, ace_Model, ace_System, ace_Device, ace_HMI);
+                        var sys = item.Key;
+                        var reals = sys.GetVertices().OfType<Vertex>();
+                        foreach (var r in reals)
+                            ViewDraw.DicStatus.Add(r, Status4.Homing);
+                    }
 
-
-                        Tree.LogicTree.CreateRungExprCombobox(SIMControl.DicCpu[Global.ActiveSys], this, tabbedView1, gridLookUpEdit_Expr);
-                        Files.SetLast(files);
-
-                        ViewDraw.DicStatus = new Dictionary<Vertex, Status4>();
-
-                        foreach (var item in SIMControl.DicCpu)
-                        {
-                            var sys = item.Key;
-                            var reals = sys.GetVertices().OfType<Vertex>();
-                            foreach (var r in reals)
-                                ViewDraw.DicStatus.Add(r, Status4.Homing);
-                        }
-
-                        EventCPU.CPUSubscribe(ViewDraw.DicStatus);
-                        Global.Logger.Info("PPTX 파일 로딩이 완료 되었습니다.");
-                    });
-                }
+                    EventCPU.CPUSubscribe(ViewDraw.DicStatus);
+                    Global.Logger.Info("PPTX 파일 로딩이 완료 되었습니다.");
+                });
             }
         }
 

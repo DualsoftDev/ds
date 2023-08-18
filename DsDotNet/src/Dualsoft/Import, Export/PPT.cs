@@ -4,6 +4,7 @@ using DevExpress.XtraBars.Navigation;
 using DSModeler.Tree;
 
 using Dual.Common.Winform;
+using Engine.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,6 @@ using static Engine.Cpu.RunTime;
 using static Engine.Cpu.RunTimeUtil;
 using static Model.Import.Office.ImportPPTModule;
 using static Model.Import.Office.ViewModule;
-using ProcessEvent = Dual.Common.Core.FS.ProcessEvent;
 
 namespace DSModeler
 {
@@ -52,7 +52,7 @@ namespace DSModeler
                                     , new DsCPU(pou.CommentedStatements()
                                     , pou.ToSystem()
                                     , runMode));
-                                ProcessEvent.DoWork(Convert.ToInt32((cnt++ * 1.0) / pous.Count() * 100));
+                                DsProcessEvent.DoWork(Convert.ToInt32((cnt++ * 1.0) / pous.Count() * 100));
                                 await Task.Delay(1);
                             }
 
@@ -89,7 +89,7 @@ namespace DSModeler
                 ace_Model.Expanded = true;
                 ace_System.Expanded = true;
                 ace_Device.Expanded = false;
-                ProcessEvent.DoWork(100);
+                DsProcessEvent.DoWork(100);
                 tsc.SetResult(true);
             });
 

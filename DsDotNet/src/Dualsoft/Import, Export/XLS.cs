@@ -13,6 +13,7 @@ namespace DSModeler
         public static void ExportExcel()
         {
             if (!Global.IsLoadedPPT()) return;
+            if (Global.BusyCheck()) return;
             Task.Run(() =>
             {
                 var pathXLS = Path.ChangeExtension(Files.GetLast().First(), "xlsx");

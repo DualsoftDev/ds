@@ -3,6 +3,7 @@ using DSModeler.Form;
 using DSModeler.Tree;
 using Dual.Common.Core;
 using Dual.Common.Winform;
+using Engine.Core;
 using Engine.Cpu;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,6 @@ using System.Threading.Tasks;
 using static Engine.Core.DsTextProperty;
 using static Engine.Core.ExpressionModule;
 using static Engine.Core.SystemToDsExt;
-using ProcessEvent = Dual.Common.Core.FS.ProcessEvent;
 
 namespace DSModeler
 {
@@ -55,12 +55,12 @@ namespace DSModeler
                     var colorTexts = ToTextColorDS(dsText);
                     foreach (var f in colorTexts)
                     {
-                        ProcessEvent.DoWork(Convert.ToInt32((cnt++ * 1.0) / (colorTexts.Count()) * 100.0));
+                        DsProcessEvent.DoWork(Convert.ToInt32((cnt++ * 1.0) / (colorTexts.Count()) * 100.0));
                         view.AppendTextColor(f.Item1, f.Item2);
                         await Task.Delay(5);
                     }
 
-                    ProcessEvent.DoWork(100);
+                    DsProcessEvent.DoWork(100);
 
                     tsc.SetResult(true);
                 });

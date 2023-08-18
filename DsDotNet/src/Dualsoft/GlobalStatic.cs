@@ -1,10 +1,13 @@
+using DevExpress.XtraEditors;
 using Dual.Common.Core;
+using Dual.Common.Core.FS;
 using Engine.Core;
 using log4net;
 using System;
 using System.IO;
 using System.Reactive.Subjects;
 using System.Reflection;
+using System.Windows.Forms;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Cpu.RunTimeUtil;
@@ -62,6 +65,15 @@ namespace DSModeler
             }
             else
                 return true;
+        }
+        public static bool BusyCheck()
+        {
+            if (0 < DsProcessEvent.CurrProcess && DsProcessEvent.CurrProcess < 100)
+            {
+                XtraMessageBox.Show("프로세스 처리 작업중입니다.", $"{K.AppName}", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return true;
+            }
+            return false;
         }
 
         public static string DefaultAppSettingFolder => Path.Combine(DefaultFolder, "AppSetting");

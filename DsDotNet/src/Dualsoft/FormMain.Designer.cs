@@ -639,6 +639,7 @@ namespace DSModeler
             this.ace_Stop,
             this.ace_Step,
             this.ace_Reset});
+            this.ace_SimRoot.Expanded = true;
             this.ace_SimRoot.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_SimRoot.ImageOptions.SvgImage")));
             this.ace_SimRoot.Name = "ace_SimRoot";
             this.ace_SimRoot.Text = "Control";
@@ -697,7 +698,6 @@ namespace DSModeler
             // 
             // ace_HMI
             // 
-            this.ace_HMI.Expanded = true;
             this.ace_HMI.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_HMI.ImageOptions.SvgImage")));
             this.ace_HMI.Name = "ace_HMI";
             this.ace_HMI.Text = "HMI";

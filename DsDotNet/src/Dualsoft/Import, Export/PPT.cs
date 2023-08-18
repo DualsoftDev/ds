@@ -48,7 +48,7 @@ namespace DSModeler
                                 var runMode = pou.ToSystem() == ppt.System ? Global.CpuRunMode : CpuRunMode.Non;
                                 dicCpu.Add(pou.ToSystem()
                                     , new DsCPU(pou.CommentedStatements()
-                                    , pou.ToSystem()
+                                    , new List<DsSystem>() { pou.ToSystem() }
                                     , runMode));
                                 DsProcessEvent.DoWork(Convert.ToInt32((cnt++ * 1.0) / pous.Count() * 100));
                                 await Task.Delay(1);
@@ -80,8 +80,9 @@ namespace DSModeler
                             DocControl.CreateDocOrSelect(formMain, tab, viewNode);
                         });
                 }
-
-                SIMControl.RunCpus = SIMControl.GetRunCpus(dicCpu);
+                
+                //SIMControl.RunCpus = SIMControl.GetRunCpus(dicCpu);
+                SIMControl.RunCpus = SIMControl.GetRunCpuSingle(dicCpu);
                 SIMControl.DicCpu = dicCpu;
 
                 ace_Model.Expanded = true;

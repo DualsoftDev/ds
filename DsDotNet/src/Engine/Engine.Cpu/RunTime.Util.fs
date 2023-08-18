@@ -15,15 +15,16 @@ module RunTimeUtil =
     |Event
     |Scan
 
-    ///statements 전체에 대하여 target tag가 
-    ///다른 Statement에 조건으로 사용된 map-Rungs 만들기
-    let updateRungMap(statements:Statement seq, mapRungs:Dictionary<IStorage, HashSet<Statement>>) = 
-        let total =
+    let getTotalTags(statements:Statement seq) =
                 [ for s in statements do
                     yield! s.GetSourceStorages()
                     yield! s.GetTargetStorages()
                 ].Distinct()
 
+    ///statements 전체에 대하여 target tag가 
+    ///다른 Statement에 조건으로 사용된 map-Rungs 만들기
+    let updateRungMap(statements:Statement seq, mapRungs:Dictionary<IStorage, HashSet<Statement>>) = 
+        let total = getTotalTags  statements
         for item in total do
             mapRungs.TryAdd (item, HashSet<Statement>())|> verifyM $"Duplicated [{item.ToText()}]"
         let dicSource =
@@ -50,20 +51,55 @@ module RunTimeUtil =
         simTags.Iter(fun t -> t.Value.BoxedValue <-  true) 
  
     ///HMI Reset Async task
-    let getAsyncReset(statements:Statement seq, sys:DsSystem, systemOn) = 
+    let getAsyncReset(statements:Statement seq, systems:DsSystem seq, activeSys:bool) = 
+            
             async {
-                let stgs =  sys.TagManager.Storages
-                               .Where(fun w-> w.Value <> systemOn)
-                for tag in stgs do
-                    let stg = tag.Value
-                    match stg with
-                    | :? TimerCounterBaseStruct as tc ->
-                        tc.Clear()  // 타이머 카운터 리셋
-                    | _ ->
-                        stg.BoxedValue <- textToDataType(stg.DataType.Name).DefaultValue()
+                let stgs = systems.First().TagManager.Storages
+                let systemOn =  stgs.First(fun w-> w.Value.TagKind = (int)SystemTag.on).Value
+                let stgs =  stgs.Where(fun w-> w.Value <> systemOn)
+                             
+                if activeSys
+                then 
+                    for tag in stgs do
+                        let stg = tag.Value
+                        match stg with
+                        | :? TimerCounterBaseStruct as tc ->
+                            tc.Clear()  // 타이머 카운터 리셋
+                        | _ ->
+                            stg.BoxedValue <- textToDataType(stg.DataType.Name).DefaultValue()
+
                 //조건 1번 평가 (for : Ready State 이벤트)
                 for s in statements do s.Do() 
+                let total = getTotalTags  statements
+                let chTags = total.ChangedTags()
+                chTags.Iter(fun f->  f.DsSystem.NotifyStatus(f)) //상태보고
+                chTags.ChangedTagsClear(systems)
             }
+
+
+    ///HMI Reset  
+    let syncReset(statements:Statement seq, systems:DsSystem seq, activeSys:bool) = 
+        let stgs = systems.First().TagManager.Storages
+        let systemOn =  stgs.First(fun w-> w.Value.TagKind = (int)SystemTag.on).Value
+        let stgs =  stgs.Where(fun w-> w.Value <> systemOn)
+                             
+        if activeSys
+        then 
+            for tag in stgs do
+                let stg = tag.Value
+                match stg with
+                | :? TimerCounterBaseStruct as tc ->
+                    tc.Clear()  // 타이머 카운터 리셋
+                | _ ->
+                    stg.BoxedValue <- textToDataType(stg.DataType.Name).DefaultValue()
+
+        //조건 1번 평가 (for : Ready State 이벤트)
+        for s in statements do s.Do() 
+        let total = getTotalTags  statements
+        let chTags = total.ChangedTags()
+
+        chTags.Iter(fun f->  f.DsSystem.NotifyStatus(f)) //상태보고
+        chTags.ChangedTagsClear(systems)
 
     ///Status4 상태보고 및 cpuRunMode.Event 처리 
     let runSubscribe(mapRungs:Dictionary<IStorage, HashSet<Statement>>, sys:DsSystem, cpuMode:CpuRunMode) =
@@ -87,3 +123,4 @@ module RunTimeUtil =
                     |> Async.RunSynchronously
                 )
         subscribe
+

@@ -68,7 +68,7 @@ namespace Dual.Model.Import
                         var rungs = Cpu.LoadStatements(view.System, storages);
                         rungs.ForEach(s =>
                         {
-                            _DicCpu.Add(s.ToSystem(), new DsCPU(s.CommentedStatements(), s.ToSystem(), CpuRunMode.Scan));
+                            _DicCpu.Add(s.ToSystem(), new DsCPU(s.CommentedStatements(), new List<DsSystem>() { s.ToSystem() }, CpuRunMode.Scan));
                         });
                     }
 

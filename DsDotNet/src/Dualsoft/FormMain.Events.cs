@@ -117,11 +117,12 @@ namespace DSModeler
                 });
             });
 
-            Global.StatusChangeLogCount.Subscribe(_ =>
+            Global.StatusChangeLogCount.Subscribe(rx =>
             {
                 this.Do(() =>
                 {
-                    barStaticItem_logCnt.Caption = $"logs:{LogicLog.ValueLogs.Count}";
+                    barStaticItem_logCnt.Caption 
+                        = $"logs:{rx.Item1} TimeSpan {rx.Item2:ss\\.fff}sec";
                 });
             });
 

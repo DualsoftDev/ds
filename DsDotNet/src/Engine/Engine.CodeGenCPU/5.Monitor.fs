@@ -23,7 +23,7 @@ type VertexManager with
         let lockSims  = getNeedCheckIOs (real ,true)
 
         let onExpr    = ons.ToAndElseOn v.System
-        let offExpr   = offs.ToOrElseOff v.System
+        let offExpr   = offs.ToOrElseOff v.System   
 
         let onSimExpr    = onSims.ToAndElseOn v.System
         let offSimExpr   = offSims.ToOrElseOff v.System

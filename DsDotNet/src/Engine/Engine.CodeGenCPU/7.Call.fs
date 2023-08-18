@@ -19,7 +19,7 @@ type VertexMCoin with
                 let tasks = r.V.OriginInfo.Tasks
                 if tasks.Where(fun (_,ty) -> ty = InitialType.On) //NeedCheck 처리 필요 test ahn
                         .Select(fun (t,_)->t).Contains(td)
-                    then r.V.RO.Expr <&&> (!!td.ApiItem.PE.Expr)
+                    then r.V.RO.Expr //<&&> (!!td.ApiItem.PE.Expr)
                     else r.V.RO.Expr <&&> call._off.Expr
             | _ ->
                 call._off.Expr
@@ -29,12 +29,16 @@ type VertexMCoin with
                 let sets = (dop <&&> startTags) <||>
                            (mop <&&> forceStarts) <||>
                            (rop <&&> getStartPointExpr (call, td))
-
-                let rsts = td.MutualResets(coin.System)
+                           <&&>
+                           !!td.MutualResets(coin.System)
                              .Select(fun f -> f.ApiItem.PS)
-                             .ToOrElseOff(coin.System)
+                             .ToAndElseOff(coin.System)
+                let rsts = 
+                
+                      (coin.CR.Expr <||> (call.Parent.GetCore():?>Real).V.OG.Expr)
+                      <&&> td.ApiItem.PE.Expr
 
-                yield (sets, rsts) --| (td.ApiItem.PS, getFuncName())
+                yield (sets, rsts) ==| (td.ApiItem.PS, getFuncName())
         ]
 
 
@@ -47,20 +51,13 @@ type VertexMCoin with
                 then yield (td.ApiItem.PS.Expr, rsts) --| (td.ActionOut, getFuncName())
         ]
 
-    //member coin.C3_CallPlanReceive(): CommentedStatement  =
-    //    let call = coin.Vertex :?> CallDev
-    //    let rsts = coin._off.Expr
-
-    //    let tds = call.CallTargetJob.DeviceDefs.SelectMany(fun td -> td.RXs)
-    //    let sets = tds.ToAndElseOn(coin.System)
-    //    (sets, rsts) --| (coin.PE, getFuncName())
+  
     member coin.C3_CallPlanReceive(): CommentedStatement list =
         let call = coin.Vertex :?> CallDev
-        let rsts = coin._off.Expr
         [
             for td in call.CallTargetJob.DeviceDefs do
-                let sets = td.RXs.ToAndElseOn(coin.System)
-                yield (sets, rsts) --| (td.ApiItem.PE, getFuncName() )
+                let sets = td.ApiItem.PS.Expr <&&> td.RXs.ToAndElseOn(coin.System) 
+                yield (sets, coin._off.Expr) --| (td.ApiItem.PE, getFuncName() )
         ]
 
     member coin.C4_CallActionIn(): CommentedStatement list =

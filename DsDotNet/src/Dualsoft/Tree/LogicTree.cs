@@ -45,8 +45,8 @@ namespace DSModeler.Tree
 
                 var dsCPUs =
                     device ?
-                     SIMControl.RunCpus.Where(w => w.System != Global.ActiveSys)
-                    : SIMControl.RunCpus.Where(w => w.System == Global.ActiveSys);
+                     SIMControl.RunCpus.Where(w => !w.Systems.Contains( Global.ActiveSys))
+                    : SIMControl.RunCpus.Where(w => w.Systems.Contains( Global.ActiveSys));
 
                 var css = dsCPUs
                             .SelectMany(c => c.CommentedStatements

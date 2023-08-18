@@ -51,7 +51,6 @@ module CodeConvertUtil =
     let getOriginSimPlanEnds(vr:VertexMReal, initialType:InitialType) =
         getOriginTasks(vr, initialType).Select(fun f->f.ApiItem.PE)
 
-
     /// Edge source 검색 결과 정보 : target 으로 들어오는 source vertices list 와 그것들이 약연결로 들어오는지, 강연결로 들어오는지 정보
     type EdgeSourcesWithStrength =
         | DuEssWeak of Vertex list
@@ -244,6 +243,11 @@ module CodeConvertUtil =
         [<Extension>]
         static member GetWeakStartRootAndCausals  (v:VertexManager) =
             let tags = getStartWeakEdgeSources(v).GetStartCausals(true)
+            tags.ToAndElseOff(v.System)
+
+        [<Extension>]
+        static member GetWeakStartDAGAndCausals  (v:VertexManager) =
+            let tags = getStartWeakEdgeSources(v).GetStartCausals(false)
             tags.ToAndElseOff(v.System)
 
         [<Extension>]

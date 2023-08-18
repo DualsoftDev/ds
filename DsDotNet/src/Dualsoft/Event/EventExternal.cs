@@ -1,6 +1,8 @@
+using DevExpress.Accessibility;
 using Engine.Core;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using static Engine.Core.CoreModule;
@@ -36,7 +38,9 @@ namespace DSModeler
                     // if (DisposableCPUEventStatus != null) //외부에서 CPUUnsubscribe() 했을 경우가 아니면
                     dicStatus[v] = rx.status;
                     Global.StatusChangeSubject.OnNext(Tuple.Create(v, dicStatus[v]));
-                    AddLogicLog(v.QualifiedName, txtStatus, rx.status.ToString(), v.Parent.GetSystem());
+                    var log = CreateLogicLog(v.QualifiedName, txtStatus, rx.status.ToString(), v.Parent.GetSystem());
+                    LogicLog.TryAdd(log);
+
                 });
             }
             if (DisposableCPUEventValue == null)
@@ -48,8 +52,9 @@ namespace DSModeler
                     {
                         var sys = rx.Item1;
                         var storage = rx.Item2;
-                        AddLogicLog(storage.Name, value.ToString(), TagKindExt.GetVertexTagKindText(storage), sys);
-                        Global.StatusChangeLogCount.OnNext(LogicLog.ValueLogs.Count);
+                        var log = CreateLogicLog(storage.Name, value.ToString(), TagKindExt.GetVertexTagKindText(storage), sys);
+                        LogicLog.TryAdd(log);
+            
                     }
 
                     if (Global.SimReset)
@@ -60,7 +65,7 @@ namespace DSModeler
             }
         }
 
-        private static void AddLogicLog(string name, string value, string tagKind, ISystem sys)
+        private static ValueLog CreateLogicLog(string name, string value, string tagKind, ISystem sys)
         {
             var valueLog = new ValueLog()
             {
@@ -69,7 +74,8 @@ namespace DSModeler
                 System = ((DsSystem)sys).Name,
                 TagKind = tagKind
             };
-            LogicLog.TryAdd(valueLog);
+
+            return valueLog;
         }
 
         //var txt = $"{DateTime.Now:hh:mm:ss.fff}  {txtStatus}  {v.ToText()}";

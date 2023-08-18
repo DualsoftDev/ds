@@ -2,6 +2,7 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Grid;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DSModeler
 {
@@ -16,7 +17,12 @@ namespace DSModeler
         {
             lock (_lock)
             {
-                ValueLogs.Add(v);
+                var lastTime = ValueLogs.Any() ? ValueLogs.Last().GetTime() : DateTime.Now;
+                 
+                var evt = Tuple.Create(LogicLog.ValueLogs.Count, v.GapTime(lastTime));
+                Global.StatusChangeLogCount.OnNext(evt);
+
+                ValueLogs.Add(v);       
             }
         }
         public static void InitControl(GridLookUpEdit gle, GridView gv)
@@ -31,13 +37,14 @@ namespace DSModeler
 
     public class ValueLog
     {
-        public ValueLog() { }
         private DateTime time = DateTime.Now;
         public string Time => time.ToString("HH:mm:ss.fff");
         public string Name { get; set; }
         public string Value { get; set; }
         public string System { get; set; }
         public string TagKind { get; set; }
+        public TimeSpan GapTime(DateTime t) => time.Subtract(t);
+        public DateTime GetTime() => time;
     }
 
 

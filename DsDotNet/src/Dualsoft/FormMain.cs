@@ -74,7 +74,6 @@ namespace DSModeler
         private void ace_pcWindow_Click(object s, EventArgs e) => DocControl.CreateDocDS(this, tabbedView1);
         private void ace_PLCXGI_Click(object s, EventArgs e) => DocControl.CreateDocPLCLS(this, tabbedView1);
         private void ratingControl_Speed_EditValueChanged(object s, EventArgs e) => SIMProperty.SetSpeed(Convert.ToInt32(ratingControl_Speed.EditValue));
-
         private void simpleButton_OpenPLC_Click(object s, EventArgs e) => PLC.OpenPLCFolder();
         private void ace_ExportExcel_Click(object s, EventArgs e) => XLS.ExportExcel();
         private void ace_ImportPPT_Click(object s, EventArgs e) => ImportPowerPointWapper(null);

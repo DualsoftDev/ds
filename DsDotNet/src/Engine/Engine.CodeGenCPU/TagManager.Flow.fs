@@ -9,7 +9,7 @@ module FlowManagerModule =
     type FlowManager (f:Flow)  =
         let sys =  f.System
         let s =  sys.TagManager.Storages
-        let cpv name (flowTag:FlowTag) = createPlanVar s name DuBOOL true f (int flowTag)
+        let cpv name (flowTag:FlowTag) = createPlanVar s name DuBOOL true f (int flowTag) f.System
         let fn = f.Name
 
         let f_rop        = cpv $"ROP_{fn}"     FlowTag.ready_op             // Ready Operation State

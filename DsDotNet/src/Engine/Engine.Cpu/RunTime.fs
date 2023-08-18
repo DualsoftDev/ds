@@ -11,15 +11,14 @@ open System.Threading
 module RunTime =
 
 
-    type DsCPU(css:CommentedStatement seq, sys:DsSystem, cpuMode:CpuRunMode) =
+    type DsCPU(css:CommentedStatement seq, systems:DsSystem seq, cpuMode:CpuRunMode) =
         let mapRungs = Dictionary<IStorage, HashSet<Statement>>()
         let cpuStorages = mapRungs.Keys
         let statements = css |> Seq.map(fun f -> f.Statement)
-        let systemOn =  sys.TagManager.Storages
-                           .First(fun w-> w.Value.TagKind = (int)SystemTag.on).Value
+     
                            
         let mutable cts = new CancellationTokenSource()
-        let mutable runSubsc:IDisposable = null
+        //let mutable runSubsc:IDisposable = null
         let mutable run:bool = false
         let asyncStart = 
             async { 
@@ -31,21 +30,27 @@ module RunTime =
                     let chTags = cpuStorages.ChangedTags()
                     let states = chTags.ExecutableStatements(mapRungs) 
                   
-                    if states.any() 
+                    if states.any()  
                     then
-                        chTags.ChangedTagsClear(sys)
-                        states
-                        |> Seq.map (fun f-> async { f.Do() } )
-                        |> Async.Sequential
-                        |> Async.Ignore
-                        |> Async.RunSynchronously
+                        chTags.ChangedTagsClear(systems)
+                        if chTags.any(fun t->t.TagChanged) 
+                        then 
+                            let a = chTags
+                            ()
+                        chTags.Iter(fun f->  f.DsSystem.NotifyStatus(f)) //상태보고
+                        states.Iter(fun f->  f.Do()  )
+
+                        //|> Seq.map (fun f-> async { f.Do() } )
+                        //|> Async.Sequential
+                        //|> Async.Ignore
+                        //|> Async.RunSynchronously
             }
      
         do
             if cpuMode <> CpuRunMode.Non
             then 
                 updateRungMap(statements, mapRungs)
-                runSubsc <- runSubscribe(mapRungs, sys, cpuMode)
+                //runSubsc <- runSubscribe(mapRungs, sys, cpuMode)
 
         //강제 전체 연산 임시 test용
         member x.ScanOnce() =
@@ -55,14 +60,14 @@ module RunTime =
             Async.StartAsTask(scanTask, TaskCreationOptions.None, cts.Token) 
             |> Async.AwaitTask
 
+        member x.Systems = systems
         member x.IsRunning = run
-        member x.System = sys
         member x.CommentedStatements = css
 
         member x.Run() =
             if not <| run then 
                 run <- true
-                simPreAction(sys)
+                systems.Iter(fun sys-> simPreAction(sys))
 
                 if cpuMode = Scan
                 then 
@@ -81,8 +86,13 @@ module RunTime =
 
         member x.Reset() =
             x.Stop()
-            Async.StartImmediate(getAsyncReset(statements, sys, systemOn), cts.Token)
+            syncReset(statements, systems, false);
+            //Async.StartImmediate(getAsyncReset(statements, systems, false), cts.Token)
+        member x.ResetActive() =
+            x.Stop()
+            syncReset(statements, systems, true);
+            //Async.StartImmediate(getAsyncReset(statements, systems, true), cts.Token)
 
         member x.Dispose() =  
             cts.Cancel()
-            runSubsc.Dispose()
+            //runSubsc.Dispose()

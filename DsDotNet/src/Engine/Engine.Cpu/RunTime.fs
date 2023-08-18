@@ -34,7 +34,11 @@ module RunTime =
                     if states.any() 
                     then
                         chTags.ChangedTagsClear(sys)
-                        states.Iter(fun s->s.Do())
+                        states
+                        |> Seq.map (fun f-> async { f.Do() } )
+                        |> Async.Sequential
+                        |> Async.Ignore
+                        |> Async.RunSynchronously
             }
      
         do

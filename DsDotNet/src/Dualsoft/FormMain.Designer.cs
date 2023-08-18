@@ -62,6 +62,8 @@ namespace DSModeler
             this.ratingControl_Speed = new DevExpress.XtraEditors.RatingControl();
             this.labelControl1 = new DevExpress.XtraEditors.LabelControl();
             this.accordionContentContainer3 = new DevExpress.XtraBars.Navigation.AccordionContentContainer();
+            this.toggleSwitch_showDeviceExpr = new DevExpress.XtraEditors.ToggleSwitch();
+            this.labelControl5 = new DevExpress.XtraEditors.LabelControl();
             this.labelControl4 = new DevExpress.XtraEditors.LabelControl();
             this.gridLookUpEdit_Log = new DevExpress.XtraEditors.GridLookUpEdit();
             this.gridLookUpEdit1View_Log = new DevExpress.XtraGrid.Views.Grid.GridView();
@@ -107,8 +109,6 @@ namespace DSModeler
             this.accordionControlElement3 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement1 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace9 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.toggleSwitch_showDeviceExpr = new DevExpress.XtraEditors.ToggleSwitch();
-            this.labelControl5 = new DevExpress.XtraEditors.LabelControl();
             ((System.ComponentModel.ISupportInitialize)(this.document1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dockManager)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManager1)).BeginInit();
@@ -127,13 +127,13 @@ namespace DSModeler
             this.accordionContentContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ratingControl_Speed.Properties)).BeginInit();
             this.accordionContentContainer3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_showDeviceExpr.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit_Log.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View_Log)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit_Expr.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View_Expr)).BeginInit();
             this.accordionContentContainer2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_menuNonFooter.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_showDeviceExpr.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // document1
@@ -455,6 +455,26 @@ namespace DSModeler
             this.accordionContentContainer3.Size = new System.Drawing.Size(309, 89);
             this.accordionContentContainer3.TabIndex = 19;
             // 
+            // toggleSwitch_showDeviceExpr
+            // 
+            this.toggleSwitch_showDeviceExpr.Location = new System.Drawing.Point(172, 8);
+            this.toggleSwitch_showDeviceExpr.MenuManager = this.barManager1;
+            this.toggleSwitch_showDeviceExpr.Name = "toggleSwitch_showDeviceExpr";
+            this.toggleSwitch_showDeviceExpr.Properties.OffText = "Off";
+            this.toggleSwitch_showDeviceExpr.Properties.OnText = "On";
+            this.toggleSwitch_showDeviceExpr.Size = new System.Drawing.Size(95, 19);
+            this.toggleSwitch_showDeviceExpr.TabIndex = 5;
+            // 
+            // labelControl5
+            // 
+            this.labelControl5.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
+            this.labelControl5.Appearance.Options.UseFont = true;
+            this.labelControl5.Location = new System.Drawing.Point(45, 7);
+            this.labelControl5.Name = "labelControl5";
+            this.labelControl5.Size = new System.Drawing.Size(117, 19);
+            this.labelControl5.TabIndex = 4;
+            this.labelControl5.Text = "디바이스 수식보기";
+            // 
             // labelControl4
             // 
             this.labelControl4.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
@@ -564,7 +584,7 @@ namespace DSModeler
             // 
             this.simpleButton_OpenPLC.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.LeftCenter;
             this.simpleButton_OpenPLC.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("simpleButton_OpenPLC.ImageOptions.SvgImage")));
-            this.simpleButton_OpenPLC.Location = new System.Drawing.Point(223, 324);
+            this.simpleButton_OpenPLC.Location = new System.Drawing.Point(223, 344);
             this.simpleButton_OpenPLC.Name = "simpleButton_OpenPLC";
             this.simpleButton_OpenPLC.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
             this.simpleButton_OpenPLC.Size = new System.Drawing.Size(75, 23);
@@ -700,10 +720,13 @@ namespace DSModeler
             // 
             // ace8
             // 
+            this.ace8.Appearance.Default.Font = new System.Drawing.Font("Tahoma", 12F);
+            this.ace8.Appearance.Default.Options.UseFont = true;
             this.ace8.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.ace_ImportXls,
             this.ace_ImportPPT,
             this.ace_pptReload});
+            this.ace8.Expanded = true;
             this.ace8.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace8.ImageOptions.SvgImage")));
             this.ace8.Name = "ace8";
             this.ace8.Text = "가져오기";
@@ -754,6 +777,7 @@ namespace DSModeler
             this.ace1,
             this.ace2,
             this.ace11});
+            this.ace_Export.Expanded = true;
             this.ace_Export.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_Export.ImageOptions.SvgImage")));
             this.ace_Export.Name = "ace_Export";
             this.ace_Export.Text = "내보내기";
@@ -834,7 +858,7 @@ namespace DSModeler
             this.accordionControlElement2.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement2.ImageOptions.SvgImage")));
             this.accordionControlElement2.Name = "accordionControlElement2";
             this.accordionControlElement2.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-            this.accordionControlElement2.Text = "손서도";
+            this.accordionControlElement2.Text = "순서도";
             // 
             // accordionControlSeparator3
             // 
@@ -881,26 +905,6 @@ namespace DSModeler
             this.ace9.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.ace9.Text = "Layout";
             // 
-            // toggleSwitch_showDeviceExpr
-            // 
-            this.toggleSwitch_showDeviceExpr.Location = new System.Drawing.Point(172, 8);
-            this.toggleSwitch_showDeviceExpr.MenuManager = this.barManager1;
-            this.toggleSwitch_showDeviceExpr.Name = "toggleSwitch_showDeviceExpr";
-            this.toggleSwitch_showDeviceExpr.Properties.OffText = "Off";
-            this.toggleSwitch_showDeviceExpr.Properties.OnText = "On";
-            this.toggleSwitch_showDeviceExpr.Size = new System.Drawing.Size(95, 19);
-            this.toggleSwitch_showDeviceExpr.TabIndex = 5;
-            // 
-            // labelControl5
-            // 
-            this.labelControl5.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
-            this.labelControl5.Appearance.Options.UseFont = true;
-            this.labelControl5.Location = new System.Drawing.Point(45, 7);
-            this.labelControl5.Name = "labelControl5";
-            this.labelControl5.Size = new System.Drawing.Size(117, 19);
-            this.labelControl5.TabIndex = 4;
-            this.labelControl5.Text = "디바이스 수식보기";
-            // 
             // FormMain
             // 
             this.Appearance.Options.UseFont = true;
@@ -943,6 +947,7 @@ namespace DSModeler
             ((System.ComponentModel.ISupportInitialize)(this.ratingControl_Speed.Properties)).EndInit();
             this.accordionContentContainer3.ResumeLayout(false);
             this.accordionContentContainer3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_showDeviceExpr.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit_Log.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View_Log)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit_Expr.Properties)).EndInit();
@@ -950,7 +955,6 @@ namespace DSModeler
             this.accordionContentContainer2.ResumeLayout(false);
             this.accordionContentContainer2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_menuNonFooter.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_showDeviceExpr.Properties)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

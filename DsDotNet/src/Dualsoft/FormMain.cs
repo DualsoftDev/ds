@@ -2,7 +2,6 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraVerticalGrid;
 using DSModeler.Tree;
 using Dual.Common.Core;
-using Dual.Common.Core.FS;
 using Microsoft.Msagl.Routing.ConstrainedDelaunayTriangulation;
 using System;
 using System.Collections.Generic;

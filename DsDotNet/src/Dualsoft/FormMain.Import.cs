@@ -1,6 +1,6 @@
 using DevExpress.XtraEditors;
 using DSModeler.Tree;
-using Dual.Common.Core.FS;
+using Dual.Common.Core;
 using Dual.Common.Winform;
 using Engine.Core;
 using System.Collections.Generic;
@@ -11,6 +11,8 @@ using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.EdgeExt;
 using static Engine.Cpu.RunTime;
+
+using ProcessEvent = Dual.Common.Core.FS.ProcessEvent;
 
 namespace DSModeler
 {
@@ -64,8 +66,7 @@ namespace DSModeler
             if(Global.ActiveSys != null)
                 SIMControl.Reset(ace_Play, ace_HMI);
 
-            foreach (var item in SIMControl.RunCpus)
-                item.Dispose();
+            SIMControl.RunCpus.Iter(cpu => cpu.Dispose());
             SIMControl.DicCpu = new Dictionary<DsSystem, DsCPU>();
 
             tabbedView1.Controller.CloseAll();

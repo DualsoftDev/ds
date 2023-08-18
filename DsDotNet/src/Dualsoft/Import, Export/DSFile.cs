@@ -1,7 +1,7 @@
 using DevExpress.XtraEditors;
 using DSModeler.Form;
 using DSModeler.Tree;
-using Dual.Common.Core.FS;
+using Dual.Common.Core;
 using Dual.Common.Winform;
 using Engine.Cpu;
 using System;
@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using static Engine.Core.DsTextProperty;
 using static Engine.Core.ExpressionModule;
 using static Engine.Core.SystemToDsExt;
+using ProcessEvent = Dual.Common.Core.FS.ProcessEvent;
 
 namespace DSModeler
 {

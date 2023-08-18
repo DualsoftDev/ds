@@ -2,7 +2,7 @@ using DevExpress.Data.WcfLinq.Helpers;
 using DevExpress.XtraBars.Docking2010.Views.Tabbed;
 using DevExpress.XtraBars.Navigation;
 using DSModeler.Tree;
-using Dual.Common.Core.FS;
+
 using Dual.Common.Winform;
 using System;
 using System.Collections.Generic;
@@ -16,6 +16,7 @@ using static Engine.Cpu.RunTime;
 using static Engine.Cpu.RunTimeUtil;
 using static Model.Import.Office.ImportPPTModule;
 using static Model.Import.Office.ViewModule;
+using ProcessEvent = Dual.Common.Core.FS.ProcessEvent;
 
 namespace DSModeler
 {

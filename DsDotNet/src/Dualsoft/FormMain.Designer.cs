@@ -57,11 +57,8 @@ namespace DSModeler
             this.documentManager = new DevExpress.XtraBars.Docking2010.DocumentManager(this.components);
             this.document3 = new DevExpress.XtraBars.Docking2010.Views.Tabbed.Document(this.components);
             this.documentGroup1 = new DevExpress.XtraBars.Docking2010.Views.Tabbed.DocumentGroup(this.components);
-            this.accordionControl2 = new DevExpress.XtraBars.Navigation.AccordionControl();
-            this.simpleButton_OpenPLC = new DevExpress.XtraEditors.SimpleButton();
+            this.ac_Main = new DevExpress.XtraBars.Navigation.AccordionControl();
             this.accordionContentContainer1 = new DevExpress.XtraBars.Navigation.AccordionContentContainer();
-            this.toggleSwitch_simLog = new DevExpress.XtraEditors.ToggleSwitch();
-            this.labelControl2 = new DevExpress.XtraEditors.LabelControl();
             this.ratingControl_Speed = new DevExpress.XtraEditors.RatingControl();
             this.labelControl1 = new DevExpress.XtraEditors.LabelControl();
             this.accordionContentContainer3 = new DevExpress.XtraBars.Navigation.AccordionContentContainer();
@@ -72,7 +69,10 @@ namespace DSModeler
             this.gridLookUpEdit_Expr = new DevExpress.XtraEditors.GridLookUpEdit();
             this.gridLookUpEdit1View_Expr = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.accordionContentContainer2 = new DevExpress.XtraBars.Navigation.AccordionContentContainer();
+            this.toggleSwitch_menuNonFooter = new DevExpress.XtraEditors.ToggleSwitch();
             this.simpleButton_layoutReset = new DevExpress.XtraEditors.SimpleButton();
+            this.labelControl2 = new DevExpress.XtraEditors.LabelControl();
+            this.simpleButton_OpenPLC = new DevExpress.XtraEditors.SimpleButton();
             this.ace_Model = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_System = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Device = new DevExpress.XtraBars.Navigation.AccordionControlElement();
@@ -120,10 +120,9 @@ namespace DSModeler
             ((System.ComponentModel.ISupportInitialize)(this.documentManager)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.document3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.documentGroup1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.accordionControl2)).BeginInit();
-            this.accordionControl2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ac_Main)).BeginInit();
+            this.ac_Main.SuspendLayout();
             this.accordionContentContainer1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_simLog.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ratingControl_Speed.Properties)).BeginInit();
             this.accordionContentContainer3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit_Log.Properties)).BeginInit();
@@ -131,6 +130,7 @@ namespace DSModeler
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit_Expr.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View_Expr)).BeginInit();
             this.accordionContentContainer2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_menuNonFooter.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // document1
@@ -378,14 +378,14 @@ namespace DSModeler
             this.document1,
             this.document3});
             // 
-            // accordionControl2
+            // ac_Main
             // 
-            this.accordionControl2.Controls.Add(this.simpleButton_OpenPLC);
-            this.accordionControl2.Controls.Add(this.accordionContentContainer1);
-            this.accordionControl2.Controls.Add(this.accordionContentContainer3);
-            this.accordionControl2.Controls.Add(this.accordionContentContainer2);
-            this.accordionControl2.Dock = System.Windows.Forms.DockStyle.Left;
-            this.accordionControl2.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
+            this.ac_Main.Controls.Add(this.accordionContentContainer1);
+            this.ac_Main.Controls.Add(this.accordionContentContainer3);
+            this.ac_Main.Controls.Add(this.accordionContentContainer2);
+            this.ac_Main.Controls.Add(this.simpleButton_OpenPLC);
+            this.ac_Main.Dock = System.Windows.Forms.DockStyle.Left;
+            this.ac_Main.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.ace_Model,
             this.accordionControlSeparator4,
             this.ace_sim,
@@ -394,57 +394,21 @@ namespace DSModeler
             this.accordionControlSeparator3,
             this.accordionControlSeparator1,
             this.ace_Setting});
-            this.accordionControl2.Location = new System.Drawing.Point(0, 0);
-            this.accordionControl2.Name = "accordionControl2";
-            this.accordionControl2.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Footer;
-            this.accordionControl2.ScrollBarMode = DevExpress.XtraBars.Navigation.ScrollBarMode.Touch;
-            this.accordionControl2.Size = new System.Drawing.Size(328, 806);
-            this.accordionControl2.TabIndex = 22;
-            this.accordionControl2.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.HamburgerMenu;
-            // 
-            // simpleButton_OpenPLC
-            // 
-            this.simpleButton_OpenPLC.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.LeftCenter;
-            this.simpleButton_OpenPLC.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("simpleButton_OpenPLC.ImageOptions.SvgImage")));
-            this.simpleButton_OpenPLC.Location = new System.Drawing.Point(223, 344);
-            this.simpleButton_OpenPLC.Name = "simpleButton_OpenPLC";
-            this.simpleButton_OpenPLC.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
-            this.simpleButton_OpenPLC.Size = new System.Drawing.Size(75, 23);
-            this.simpleButton_OpenPLC.TabIndex = 7;
-            this.simpleButton_OpenPLC.Click += new System.EventHandler(this.simpleButton_OpenPLC_Click);
+            this.ac_Main.Location = new System.Drawing.Point(0, 0);
+            this.ac_Main.Name = "ac_Main";
+            this.ac_Main.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Footer;
+            this.ac_Main.ScrollBarMode = DevExpress.XtraBars.Navigation.ScrollBarMode.Touch;
+            this.ac_Main.Size = new System.Drawing.Size(328, 806);
+            this.ac_Main.TabIndex = 22;
+            this.ac_Main.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.HamburgerMenu;
             // 
             // accordionContentContainer1
             // 
-            this.accordionContentContainer1.Controls.Add(this.toggleSwitch_simLog);
-            this.accordionContentContainer1.Controls.Add(this.labelControl2);
             this.accordionContentContainer1.Controls.Add(this.ratingControl_Speed);
             this.accordionContentContainer1.Controls.Add(this.labelControl1);
             this.accordionContentContainer1.Name = "accordionContentContainer1";
             this.accordionContentContainer1.Size = new System.Drawing.Size(309, 63);
             this.accordionContentContainer1.TabIndex = 11;
-            // 
-            // toggleSwitch_simLog
-            // 
-            this.toggleSwitch_simLog.Location = new System.Drawing.Point(167, 31);
-            this.toggleSwitch_simLog.MenuManager = this.barManager1;
-            this.toggleSwitch_simLog.Name = "toggleSwitch_simLog";
-            this.toggleSwitch_simLog.Properties.OffText = "Off";
-            this.toggleSwitch_simLog.Properties.OnText = "On";
-            this.toggleSwitch_simLog.Size = new System.Drawing.Size(95, 19);
-            this.toggleSwitch_simLog.TabIndex = 3;
-            this.toggleSwitch_simLog.Visible = false;
-            this.toggleSwitch_simLog.Toggled += new System.EventHandler(this.toggleSwitch_simLog_Toggled);
-            // 
-            // labelControl2
-            // 
-            this.labelControl2.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
-            this.labelControl2.Appearance.Options.UseFont = true;
-            this.labelControl2.Location = new System.Drawing.Point(30, 30);
-            this.labelControl2.Name = "labelControl2";
-            this.labelControl2.Size = new System.Drawing.Size(131, 19);
-            this.labelControl2.TabIndex = 2;
-            this.labelControl2.Text = "시뮬레이션 로그숨김";
-            this.labelControl2.Visible = false;
             // 
             // ratingControl_Speed
             // 
@@ -550,10 +514,22 @@ namespace DSModeler
             // 
             // accordionContentContainer2
             // 
+            this.accordionContentContainer2.Controls.Add(this.toggleSwitch_menuNonFooter);
             this.accordionContentContainer2.Controls.Add(this.simpleButton_layoutReset);
+            this.accordionContentContainer2.Controls.Add(this.labelControl2);
             this.accordionContentContainer2.Name = "accordionContentContainer2";
-            this.accordionContentContainer2.Size = new System.Drawing.Size(309, 33);
+            this.accordionContentContainer2.Size = new System.Drawing.Size(309, 67);
             this.accordionContentContainer2.TabIndex = 15;
+            // 
+            // toggleSwitch_menuFooter
+            // 
+            this.toggleSwitch_menuNonFooter.Location = new System.Drawing.Point(157, 33);
+            this.toggleSwitch_menuNonFooter.MenuManager = this.barManager1;
+            this.toggleSwitch_menuNonFooter.Name = "toggleSwitch_menuFooter";
+            this.toggleSwitch_menuNonFooter.Properties.OffText = "Off";
+            this.toggleSwitch_menuNonFooter.Properties.OnText = "On";
+            this.toggleSwitch_menuNonFooter.Size = new System.Drawing.Size(95, 19);
+            this.toggleSwitch_menuNonFooter.TabIndex = 3;
             // 
             // simpleButton_layoutReset
             // 
@@ -568,6 +544,27 @@ namespace DSModeler
             this.simpleButton_layoutReset.TabIndex = 0;
             this.simpleButton_layoutReset.Text = "창 복원";
             this.simpleButton_layoutReset.Click += new System.EventHandler(this.simpleButton_layoutReset_Click);
+            // 
+            // labelControl2
+            // 
+            this.labelControl2.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
+            this.labelControl2.Appearance.Options.UseFont = true;
+            this.labelControl2.Location = new System.Drawing.Point(30, 35);
+            this.labelControl2.Name = "labelControl2";
+            this.labelControl2.Size = new System.Drawing.Size(84, 19);
+            this.labelControl2.TabIndex = 2;
+            this.labelControl2.Text = "매뉴펼처보기";
+            // 
+            // simpleButton_OpenPLC
+            // 
+            this.simpleButton_OpenPLC.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.LeftCenter;
+            this.simpleButton_OpenPLC.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("simpleButton_OpenPLC.ImageOptions.SvgImage")));
+            this.simpleButton_OpenPLC.Location = new System.Drawing.Point(223, 324);
+            this.simpleButton_OpenPLC.Name = "simpleButton_OpenPLC";
+            this.simpleButton_OpenPLC.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
+            this.simpleButton_OpenPLC.Size = new System.Drawing.Size(75, 23);
+            this.simpleButton_OpenPLC.TabIndex = 7;
+            this.simpleButton_OpenPLC.Click += new System.EventHandler(this.simpleButton_OpenPLC_Click);
             // 
             // ace_Model
             // 
@@ -617,7 +614,6 @@ namespace DSModeler
             this.ace_Stop,
             this.ace_Step,
             this.ace_Reset});
-            this.ace_SimRoot.Expanded = true;
             this.ace_SimRoot.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_SimRoot.ImageOptions.SvgImage")));
             this.ace_SimRoot.Name = "ace_SimRoot";
             this.ace_SimRoot.Text = "Control";
@@ -703,7 +699,6 @@ namespace DSModeler
             this.ace_ImportXls,
             this.ace_ImportPPT,
             this.ace_pptReload});
-            this.ace8.Expanded = true;
             this.ace8.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace8.ImageOptions.SvgImage")));
             this.ace8.Name = "ace8";
             this.ace8.Text = "가져오기";
@@ -754,7 +749,6 @@ namespace DSModeler
             this.ace1,
             this.ace2,
             this.ace11});
-            this.ace_Export.Expanded = true;
             this.ace_Export.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_Export.ImageOptions.SvgImage")));
             this.ace_Export.Name = "ace_Export";
             this.ace_Export.Text = "내보내기";
@@ -889,7 +883,7 @@ namespace DSModeler
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(1369, 833);
-            this.Controls.Add(this.accordionControl2);
+            this.Controls.Add(this.ac_Main);
             this.Controls.Add(this.panelContainer1);
             this.Controls.Add(this.barDockControlLeft);
             this.Controls.Add(this.barDockControlRight);
@@ -917,11 +911,10 @@ namespace DSModeler
             ((System.ComponentModel.ISupportInitialize)(this.documentManager)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.document3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.documentGroup1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.accordionControl2)).EndInit();
-            this.accordionControl2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.ac_Main)).EndInit();
+            this.ac_Main.ResumeLayout(false);
             this.accordionContentContainer1.ResumeLayout(false);
             this.accordionContentContainer1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_simLog.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.ratingControl_Speed.Properties)).EndInit();
             this.accordionContentContainer3.ResumeLayout(false);
             this.accordionContentContainer3.PerformLayout();
@@ -930,6 +923,8 @@ namespace DSModeler
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit_Expr.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View_Expr)).EndInit();
             this.accordionContentContainer2.ResumeLayout(false);
+            this.accordionContentContainer2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_menuNonFooter.Properties)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -953,7 +948,7 @@ namespace DSModeler
         private DevExpress.XtraBars.BarDockControl barDockControlTop;
         private DevExpress.XtraBars.BarDockControl barDockControlBottom;
         private DevExpress.XtraBars.BarDockControl barDockControlRight;
-        private DevExpress.XtraBars.Navigation.AccordionControl accordionControl2;
+        private DevExpress.XtraBars.Navigation.AccordionControl ac_Main;
         private DevExpress.XtraBars.Navigation.AccordionControlElement ace_Model;
         private DevExpress.XtraBars.Navigation.AccordionControlElement ace_sim;
         private DevExpress.XtraBars.Navigation.AccordionControlElement ace_Import;
@@ -1001,7 +996,7 @@ namespace DSModeler
         private DevExpress.XtraEditors.LabelControl labelControl1;
         private DevExpress.XtraBars.Navigation.AccordionContentContainer accordionContentContainer2;
         private DevExpress.XtraEditors.SimpleButton simpleButton_layoutReset;
-        private DevExpress.XtraEditors.ToggleSwitch toggleSwitch_simLog;
+        private DevExpress.XtraEditors.ToggleSwitch toggleSwitch_menuNonFooter;
         private DevExpress.XtraEditors.LabelControl labelControl2;
         private DevExpress.XtraEditors.LabelControl labelControl3;
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement3;

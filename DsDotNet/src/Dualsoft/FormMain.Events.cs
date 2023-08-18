@@ -61,6 +61,18 @@ namespace DSModeler
                 gridLookUpEdit_Log.Properties.BestFitMode = DevExpress.XtraEditors.Controls.BestFitMode.BestFitResizePopup;
             };
 
+            toggleSwitch_menuNonFooter.Toggled += (ss, ee) =>
+            {
+                Global.LayoutMenuFooter = toggleSwitch_menuNonFooter.IsOn;
+                DSRegistry.SetValue(K.LayoutMenuFooter, Global.LayoutMenuFooter);
+                
+                if (toggleSwitch_menuNonFooter.IsOn)
+                    ac_Main.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Default;
+                else
+                    ac_Main.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Footer;
+            };
+
+
             ProcessEvent.ProcessSubject.Subscribe(rx =>
             {
                 this.Do(() =>

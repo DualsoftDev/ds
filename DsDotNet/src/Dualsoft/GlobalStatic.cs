@@ -18,6 +18,7 @@ namespace DSModeler
         public const string LastPath = "LastPath";
         public const string LastFiles = "LastFiles";
         public const string SimSpeed = "SimSpeed";
+        public const string LayoutMenuFooter = "LayoutMenuFooter";
         public const string DocStartPage = "시작 페이지";
         public const string DocPLC = "PLC 생성";
         public const string DocDS = "모델 출력";
@@ -32,7 +33,7 @@ namespace DSModeler
         public static bool IsDebug { get;  set; }  
         public static string LogLevel { get; set; }
         public static int SimSpeed { get; set; } = 3;
-        public static bool SimLogHide { get; set; }
+        public static bool LayoutMenuFooter { get; set; }
         public static bool SimReset { get; set; }
         public static string ExportPathPLC { get; set; }
         public static string ExportPathXLS { get; set; }

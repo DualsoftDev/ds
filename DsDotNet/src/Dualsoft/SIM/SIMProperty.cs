@@ -4,7 +4,22 @@ namespace DSModeler
 {
     public static class SIMProperty
     {
-        static readonly int _defaultSpeed = 3;
+        static readonly int _defaultSpeed = 4;
+        public static int GetDelayMsec()
+        {
+            int delayMsec;
+            switch (Global.SimSpeed)
+            {
+                case 0: delayMsec = 1000; ; break;
+                case 1: delayMsec = 500; ; break;
+                case 2: delayMsec = 100; ; break;
+                case 3: delayMsec = 20; ; break;
+                case 4: delayMsec = 5; ; break;
+                case 5: delayMsec = 0; ; break;
+                default: delayMsec = 5; ; break;
+            }
+            return delayMsec;
+        }
         public static void SetSpeed(int speed)
         {
             Global.SimSpeed = speed;
@@ -21,6 +36,7 @@ namespace DSModeler
                 return _defaultSpeed;
             }
         }
+
     }
 }
 

@@ -37,17 +37,22 @@ namespace DSModeler.Tree
             gv.OptionsView.ShowGroupPanel = false;
         }
 
-        public static void CreateRungExprCombobox(DsCPU dsCPU
-        , FormMain formMain
-        , DevExpress.XtraBars.Docking2010.Views.Tabbed.TabbedView tabbedView1
-        , GridLookUpEdit gridLookUpEdit_Expr)
+
+        public static void UpdateExpr(GridLookUpEdit gExpr, bool device)
         {
-
-
-            formMain.Do(() =>
+            gExpr.Do(() =>
             {
-                var css = dsCPU.CommentedStatements.Select(s => new LogicStatement(s));
-                gridLookUpEdit_Expr.Properties.DataSource = css;
+
+                var dsCPUs =
+                    device ?
+                     SIMControl.RunCpus.Where(w => w.System != Global.ActiveSys)
+                    : SIMControl.RunCpus.Where(w => w.System == Global.ActiveSys);
+
+                var css = dsCPUs
+                            .SelectMany(c => c.CommentedStatements
+                                .Select(s => new LogicStatement(s)));
+
+                gExpr.Properties.DataSource = css;
             });
         }
     }

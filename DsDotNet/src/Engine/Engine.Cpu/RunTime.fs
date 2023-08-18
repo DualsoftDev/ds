@@ -33,7 +33,14 @@ module RunTime =
                         
                     if doSrcs.any() 
                     then
-                        tags |> Seq.iter(fun (stg) -> stg.TagChanged <- false)   //Do 처리 수식 구한후 Changed 초기화
+                        
+                        //assert(tags.any(fun t->t.DsSystem <> sys))
+                        //if tags.any(fun f-> f.Name.Contains("SensorRET") )
+                        //then  
+                        //    let a = tags.any();
+                        //    ()
+                        tags.Where(fun w->w.DsSystem = sys)         //자신 시스템에서만 TagChanged  <- false 가능
+                        |> Seq.iter(fun (stg) -> stg.TagChanged <- false)   //Do 처리 수식 구한후 Changed 초기화
                         doSrcs |> Seq.iter(fun s -> s.Do())
             }
      

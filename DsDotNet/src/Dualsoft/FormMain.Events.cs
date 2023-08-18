@@ -4,9 +4,12 @@ using DSModeler.Tree;
 using Dual.Common.Core;
 using Dual.Common.Winform;
 using Engine.Core;
+using Microsoft.FSharp.Core;
 using System;
 using System.Linq;
 using System.Windows.Forms;
+using static DevExpress.Data.Filtering.Helpers.SubExprHelper;
+using static Engine.Cpu.RunTime;
 
 namespace DSModeler
 {
@@ -72,6 +75,11 @@ namespace DSModeler
                     ac_Main.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Footer;
             };
 
+            toggleSwitch_showDeviceExpr.Toggled += (ss, ee) =>
+            {
+                LogicTree.UpdateExpr(gridLookUpEdit_Expr, toggleSwitch_showDeviceExpr.IsOn);
+            };
+
 
             DsProcessEvent.ProcessSubject.Subscribe(rx =>
             {
@@ -119,6 +127,6 @@ namespace DSModeler
 
         }
 
-
+     
     }
 }

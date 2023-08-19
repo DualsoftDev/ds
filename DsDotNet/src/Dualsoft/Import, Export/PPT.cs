@@ -84,6 +84,7 @@ namespace DSModeler
                 //SIMControl.RunCpus = SIMControl.GetRunCpus(dicCpu);
                 SIMControl.RunCpus = SIMControl.GetRunCpuSingle(dicCpu);
                 SIMControl.DicCpu = dicCpu;
+                SIMControl.ReadySim();
 
                 ace_Model.Expanded = true;
                 ace_System.Expanded = true;

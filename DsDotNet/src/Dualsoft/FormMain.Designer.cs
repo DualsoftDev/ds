@@ -109,6 +109,7 @@ namespace DSModeler
             this.accordionControlElement3 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement1 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace9 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.btn_StepLongPress = new DevExpress.XtraEditors.SimpleButton();
             ((System.ComponentModel.ISupportInitialize)(this.document1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dockManager)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManager1)).BeginInit();
@@ -387,6 +388,7 @@ namespace DSModeler
             this.ac_Main.Controls.Add(this.accordionContentContainer3);
             this.ac_Main.Controls.Add(this.accordionContentContainer2);
             this.ac_Main.Controls.Add(this.simpleButton_OpenPLC);
+            this.ac_Main.Controls.Add(this.btn_StepLongPress);
             this.ac_Main.Dock = System.Windows.Forms.DockStyle.Left;
             this.ac_Main.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.ace_Model,
@@ -672,6 +674,7 @@ namespace DSModeler
             // 
             // ace_Step
             // 
+            this.ace_Step.HeaderControl = this.btn_StepLongPress;
             this.ace_Step.HeaderTemplate.AddRange(new DevExpress.XtraBars.Navigation.HeaderElementInfo[] {
             new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Text),
             new DevExpress.XtraBars.Navigation.HeaderElementInfo(DevExpress.XtraBars.Navigation.HeaderElementType.Image),
@@ -905,6 +908,16 @@ namespace DSModeler
             this.ace9.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.ace9.Text = "Layout";
             // 
+            // simpleButton_StepLongPress
+            // 
+            this.btn_StepLongPress.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("simpleButton1.ImageOptions.SvgImage")));
+            this.btn_StepLongPress.Location = new System.Drawing.Point(215, 118);
+            this.btn_StepLongPress.Name = "simpleButton_StepLongPress";
+            this.btn_StepLongPress.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
+            this.btn_StepLongPress.Size = new System.Drawing.Size(83, 23);
+            this.btn_StepLongPress.TabIndex = 23;
+            this.btn_StepLongPress.Text = "연속누름";
+            // 
             // FormMain
             // 
             this.Appearance.Options.UseFont = true;
@@ -1040,5 +1053,6 @@ namespace DSModeler
         private DevExpress.XtraBars.BarStaticItem barStaticItem2;
         private DevExpress.XtraEditors.ToggleSwitch toggleSwitch_showDeviceExpr;
         private DevExpress.XtraEditors.LabelControl labelControl5;
+        private DevExpress.XtraEditors.SimpleButton btn_StepLongPress;
     }
 }

@@ -33,6 +33,7 @@ namespace DSModeler
                 DevExpress.XtraSplashScreen.SplashScreenManager.CloseForm();
         }
 
+        readonly Timer timerLongPress = new Timer { Interval = 100 };
         private void InitializationUIControl()
         {
             LogicLog.InitControl(gridLookUpEdit_Log, gridLookUpEdit1View_Log);
@@ -43,6 +44,19 @@ namespace DSModeler
 
             var regSpeed = DSRegistry.GetValue(K.LayoutMenuFooter);
             toggleSwitch_menuNonFooter.IsOn = Convert.ToBoolean(regSpeed) != false;
+
+
+            timerLongPress.Tick += (sender, e) => {
+                SIMControl.Step(ace_Play);
+            };
+            btn_StepLongPress.MouseDown += (sender, e) => timerLongPress.Start();
+            btn_StepLongPress.MouseUp += (sender, e) => timerLongPress.Stop();
+            btn_StepLongPress.Disposed += (sender, e) =>
+            {
+                timerLongPress.Stop();
+                timerLongPress.Dispose();
+            };
+
         }
 
         private void InitializationLogger()

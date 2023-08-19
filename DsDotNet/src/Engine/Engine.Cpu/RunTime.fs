@@ -33,17 +33,10 @@ module RunTime =
                     if states.any()  
                     then
                         chTags.ChangedTagsClear(systems)
-                        if chTags.any(fun t->t.TagChanged) 
-                        then 
-                            let a = chTags
-                            ()
+                      
                         chTags.Iter(fun f->  f.DsSystem.NotifyStatus(f)) //상태보고
                         states.Iter(fun f->  f.Do()  )
 
-                        //|> Seq.map (fun f-> async { f.Do() } )
-                        //|> Async.Sequential
-                        //|> Async.Ignore
-                        //|> Async.RunSynchronously
             }
      
         do
@@ -53,27 +46,22 @@ module RunTime =
                 //runSubsc <- runSubscribe(mapRungs, sys, cpuMode)
 
         //강제 전체 연산 임시 test용
-        member x.ScanOnce() =
-            let scanTask = async {
-                    for s in statements do //cts.Token 의해서 멈춤
-                    s.Do() }
-            Async.StartAsTask(scanTask, TaskCreationOptions.None, cts.Token) 
-            |> Async.AwaitTask
+        //member x.ScanOnce() =
+        //    let scanTask = async {
+        //            for s in statements do //cts.Token 의해서 멈춤
+        //            s.Do() }
+        //    Async.StartAsTask(scanTask, TaskCreationOptions.None, cts.Token) 
+        //    |> Async.AwaitTask
 
         member x.Systems = systems
         member x.IsRunning = run
         member x.CommentedStatements = css
 
+        member x.ReadySim() = systems.Iter(fun sys-> simPreAction(sys))
         member x.Run() =
             if not <| run then 
                 run <- true
-                systems.Iter(fun sys-> simPreAction(sys))
-
-                if cpuMode = Scan
-                then 
-                    Async.StartImmediate(asyncStart, cts.Token) |> ignore
-                else
-                    x.ScanOnce()|> ignore // _ON 이벤트 없는 조건때문에 한번 스켄 수행
+                Async.StartImmediate(asyncStart, cts.Token) |> ignore
 
         member x.Stop() =
             cts.Cancel()
@@ -82,16 +70,14 @@ module RunTime =
 
         member x.Step() =
             x.Stop()
-            x.ScanOnce() |> ignore
+            singleScan(statements, systems)
 
         member x.Reset() =
             x.Stop()
             syncReset(statements, systems, false);
-            //Async.StartImmediate(getAsyncReset(statements, systems, false), cts.Token)
         member x.ResetActive() =
             x.Stop()
             syncReset(statements, systems, true);
-            //Async.StartImmediate(getAsyncReset(statements, systems, true), cts.Token)
 
         member x.Dispose() =  
             cts.Cancel()

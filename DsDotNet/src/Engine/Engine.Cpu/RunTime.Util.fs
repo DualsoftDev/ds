@@ -76,6 +76,13 @@ module RunTimeUtil =
                 chTags.ChangedTagsClear(systems)
             }
 
+    let singleScan (statements:Statement seq, systems:DsSystem seq) =
+        for s in statements do s.Do() 
+        let total = getTotalTags  statements
+        let chTags = total.ChangedTags()
+
+        chTags.Iter(fun f->  f.DsSystem.NotifyStatus(f)) //상태보고
+        chTags.ChangedTagsClear(systems)
 
     ///HMI Reset  
     let syncReset(statements:Statement seq, systems:DsSystem seq, activeSys:bool) = 
@@ -94,12 +101,7 @@ module RunTimeUtil =
                     stg.BoxedValue <- textToDataType(stg.DataType.Name).DefaultValue()
 
         //조건 1번 평가 (for : Ready State 이벤트)
-        for s in statements do s.Do() 
-        let total = getTotalTags  statements
-        let chTags = total.ChangedTags()
-
-        chTags.Iter(fun f->  f.DsSystem.NotifyStatus(f)) //상태보고
-        chTags.ChangedTagsClear(systems)
+        singleScan (statements, systems)
 
     ///Status4 상태보고 및 cpuRunMode.Event 처리 
     let runSubscribe(mapRungs:Dictionary<IStorage, HashSet<Statement>>, sys:DsSystem, cpuMode:CpuRunMode) =

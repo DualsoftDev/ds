@@ -139,6 +139,13 @@ namespace DSModeler
                           Task.Run(() => s.Dispose()))
               );
         }
+
+        public static void ReadySim()
+        {
+            Task.WhenAll(RunCpus.Select(s =>
+                          Task.Run(() => s.ReadySim()))
+              );
+        }
     }
 }
 

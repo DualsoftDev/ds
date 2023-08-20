@@ -203,6 +203,7 @@
       <DependentUpon>FormDocView.cs</DependentUpon>
     </Compile>
     <Compile Include="DocControl\DocControl.cs" />
+    <Compile Include="HW\PaixNMC.cs" />
     <Compile Include="Import, Export\PLC.cs" />
     <Compile Include="Import, Export\DSFile.cs" />
     <Compile Include="Import, Export\XLS.cs" />
@@ -327,6 +328,10 @@
     <ProjectReference Include="..\Model\Import\Model.Import.Office\Model.Import.Office.fsproj">
       <Project>{5b8c9e88-ffc3-403b-adae-1923bcc6b8fb}</Project>
       <Name>Model.Import.Office</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Server\Server.Common.NMC\Server.Common.NMC.csproj">
+      <Project>{07965281-9f14-43a4-8bf5-0ddfed55284c}</Project>
+      <Name>Server.Common.NMC</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

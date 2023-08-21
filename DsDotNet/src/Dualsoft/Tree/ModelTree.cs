@@ -2,6 +2,7 @@ using DevExpress.XtraBars.Navigation;
 using Model.Import.Office;
 using System.Collections.Generic;
 using static Model.Import.Office.ImportPPTModule;
+using static Model.Import.Office.ViewModule;
 
 namespace DSModeler.Tree
 {
@@ -38,7 +39,28 @@ namespace DSModeler.Tree
             return lstAce;
         }
 
+        public static void CreateModelBtn(FormMain formMain, PptResult ppt)
+        {
+            var ele = new AccordionControlElement()
+            { Style = ElementStyle.Group, Text = ppt.System.Name, Tag = ppt.System };
+            ele.Click += (s, e) =>
+            {
+                formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
+            };
 
+            if (ppt.IsActive)
+                formMain.Ace_System.Elements.Add(ele);
+            else
+                formMain.Ace_Device.Elements.Add(ele);
+
+            var lstFlowAce = Tree.ModelTree.AppandFlows(formMain, ppt, ele);
+            lstFlowAce.ForEach(f =>
+                f.Click += (s, e) =>
+                {
+                    var viewNode = ((AccordionControlElement)s).Tag as ViewNode;
+                    DocControl.CreateDocOrSelect(formMain, viewNode);
+                });
+        }
     }
 }
 

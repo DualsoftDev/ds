@@ -85,14 +85,14 @@ namespace DSModeler
         }
 
 
-        public static void CreateDocOrSelect(FormMain formParent, TabbedView tab, ViewNode v)
+        public static void CreateDocOrSelect(FormMain formParent, ViewNode v)
         {
             if (!Global.IsLoadedPPT()) return;
             Flow flow = v.Flow.Value;
             string docKey = flow.QualifiedName;
 
             FormDocView formChiild = new FormDocView();
-            formChiild = CreateDocForm(formChiild, formParent, tab, docKey) as FormDocView;
+            formChiild = CreateDocForm(formChiild, formParent, formParent.TabbedView, docKey) as FormDocView;
             if (formChiild.UcView.MasterNode == null)
                 formChiild.UcView.SetGraph(v, flow);
             //상태 업데이트

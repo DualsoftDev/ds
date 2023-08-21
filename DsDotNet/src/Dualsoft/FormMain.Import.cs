@@ -1,9 +1,11 @@
 using DevExpress.XtraEditors;
+using DevExpress.XtraPrinting.Export.Pdf;
 using Dual.Common.Core;
 using Engine.Core;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static Engine.CodeGenCPU.CpuLoader;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.EdgeExt;
@@ -31,7 +33,7 @@ namespace DSModeler
                 ClearModel();
                 Task.Run(async () =>
                 {
-                    await PPT.ImportPowerPoint(files, this, tabbedView1, ace_Model, ace_System, ace_Device, ace_HMI);
+                    await PPT.ImportPowerPoint(files, this);
 
                     Tree.LogicTree.UpdateExpr(gridLookUpEdit_Expr, toggleSwitch_showDeviceExpr.IsOn);
 
@@ -39,7 +41,7 @@ namespace DSModeler
 
                     ViewDraw.DicStatus = new Dictionary<Vertex, Status4>();
 
-                    foreach (var item in SIMControl.DicCpu)
+                    foreach (var item in SIMControl.DicPou)
                     {
                         var sys = item.Key;
                         var reals = sys.GetVertices().OfType<Vertex>();
@@ -59,10 +61,10 @@ namespace DSModeler
                 SIMControl.Reset(ace_Play, ace_HMI);
 
             SIMControl.RunCpus.Iter(cpu => cpu.Dispose());
-            SIMControl.DicCpu = new Dictionary<DsSystem, DsCPU>();
+            SIMControl.DicPou = new Dictionary<DsSystem, PouGen>();
 
-            tabbedView1.Controller.CloseAll();
-            tabbedView1.Documents.Clear();
+            tabbedView_Doc.Controller.CloseAll();
+            tabbedView_Doc.Documents.Clear();
             barStaticItem_logCnt.Caption = "";
             LogicLog.ValueLogs.Clear();
 

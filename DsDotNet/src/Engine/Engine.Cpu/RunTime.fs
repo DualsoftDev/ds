@@ -12,9 +12,9 @@ module RunTime =
 
 
     type DsCPU(css:CommentedStatement seq, systems:DsSystem seq, cpuMode:RuntimePackage) =
-        let mapRungs = Dictionary<IStorage, HashSet<Statement>>()
-        let cpuStorages = mapRungs.Keys
         let statements = css |> Seq.map(fun f -> f.Statement)
+        let mapRungs = getRungMap(statements)
+        let cpuStorages = mapRungs.Keys
      
         let mutable cts = new CancellationTokenSource()
         let mutable run:bool = false
@@ -38,7 +38,7 @@ module RunTime =
                         states.Iter(fun f->  f.Do())
             }
         do 
-            updateRungMap(statements, mapRungs)
+            ()
 
 
         member x.Systems = systems

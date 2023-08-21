@@ -1,15 +1,20 @@
 using DevExpress.Utils.Extensions;
 using DevExpress.Utils.Filtering.Internal;
+using DevExpress.Utils.Serializing.Helpers;
 using DevExpress.XtraBars.Navigation;
 using DSModeler.Tree;
 using Dual.Common.Core;
+using Engine.Core;
+using Microsoft.Msagl.Routing.ConstrainedDelaunayTriangulation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static Engine.CodeGenCPU.CpuLoader;
 using static Engine.Core.CoreModule;
 using static Engine.Core.ExpressionForwardDeclModule;
+using static Engine.Core.ExpressionModule;
 using static Engine.Core.TagModule;
 using static Engine.Cpu.RunTime;
 using static Engine.Cpu.RunTimeUtil;
@@ -19,7 +24,7 @@ namespace DSModeler
     public static class SIMControl
     {
 
-        public static Dictionary<DsSystem, DsCPU> DicCpu = new Dictionary<DsSystem, DsCPU>();
+        public static Dictionary<DsSystem, PouGen> DicPou = new Dictionary<DsSystem, PouGen>();
         public static List<DsCPU> RunCpus = new List<DsCPU>();
         public static Dictionary<string, ITag> DicActionInput = new Dictionary<string, ITag>();
 
@@ -34,52 +39,62 @@ namespace DSModeler
             return actionInputs;
         }
 
-        public static List<DsCPU> GetRunCpuSingle(Dictionary<DsSystem, DsCPU> dicCpu)
+        public static async Task CreateRunCpuSingle()
         {
             DicActionInput = GetActionInputs(Global.ActiveSys);
             List<DsCPU> runCpus = new List<DsCPU>();
+            List<CommentedStatement> css = new List<CommentedStatement>();
+            int cnt = 0;
+            foreach (var cpu in DicPou.Values)
+            {
+                DsProcessEvent.DoWork(Convert.ToInt32(((cnt++ * 1.0) / DicPou.Values.Count()) * 50 + 50));
+                css.AddRange(cpu.CommentedStatements().ToList());
+                await Task.Delay(1);
+            }
 
             var passiveCPU =
-           new DsCPU(
-           dicCpu.Values.SelectMany(d => d.CommentedStatements)
-         , dicCpu.Values.SelectMany(d => d.Systems)
-         , Global.CpuRunMode);
+               new DsCPU(
+               css
+             , DicPou.Values.Select(s => s.ToSystem())
+             , Global.CpuRunMode);
 
             runCpus.Add(passiveCPU);
-            return runCpus;
+            RunCpus = runCpus;
         }
         /// <summary>
         /// ThreadPool.GetMinThreads 제한으로 멀티로 동시에 돌리는게 한계(thread 스위칭으로 더느림)
         /// Active 1 - Passive n개로 돌림  PC의 절반 CPU 활용
         /// </summary>
         /// <returns></returns>
-        public static List<DsCPU> GetRunCpus(Dictionary<DsSystem, DsCPU> dicCpu)
+        public static async Task GetRunCpus()
         {
+            await Task.Yield();
+
             DicActionInput = GetActionInputs(Global.ActiveSys);
 
             List<DsCPU> runCpus = new List<DsCPU>();
             //Global.ActiveSys 제외한  PC의 절반 CPU 활용
             var ableCpuCnt = (Environment.ProcessorCount - 1) / 2;
 
-            var devices = dicCpu.Values.Where(d => !d.Systems.Contains( Global.ActiveSys)).ToList();
+            var devices = DicPou.Values.Where(d => d.ToSystem() != Global.ActiveSys).ToList();
             if (devices.Any()) //1개이상은 외부 Device 존재
             {
-                Dictionary<int, List<DsCPU>> cpus = new Dictionary<int, List<DsCPU>>();
+                Dictionary<int, List<PouGen>> pous = new Dictionary<int, List<PouGen>>();
                 for (int i = 0; i < devices.Count(); i++)
                 {
                     var index = i % ableCpuCnt; //cpu 개수 만큼 만듬
-                    if (!cpus.ContainsKey(index))
-                        cpus.Add(index, new List<DsCPU> { devices[i] });
+                    if (!pous.ContainsKey(index))
+                        pous.Add(index, new List<PouGen> { devices[i] });
                     else
-                        cpus[index].Add(devices[i]);
+                        pous[index].Add(devices[i]);
                 }
 
-                foreach (var cpu in cpus)
+                foreach (var pouSet in pous.Values)
                 {
                     var passiveCPU =
                    new DsCPU(
-                   cpu.Value.SelectMany(d => d.CommentedStatements)
-                 , cpu.Value.SelectMany(d => d.Systems)
+                    pouSet.SelectMany(s => s.CommentedStatements())
+                 , pouSet.Select(d => d.ToSystem())
                  , Global.CpuRunMode);
 
                     runCpus.Add(passiveCPU);
@@ -87,12 +102,21 @@ namespace DSModeler
 
             }
 
-            var activeCPU = dicCpu[Global.ActiveSys];
+            var activeCPU = CreateCpu(DicPou[Global.ActiveSys]);
             runCpus.Add(activeCPU);
 
-            return runCpus;
+            RunCpus = runCpus;
         }
 
+        public static DsCPU CreateCpu(PouGen pou)
+        {
+            var cpu = new DsCPU(
+                pou.CommentedStatements(),
+                new List<DsSystem>() { pou.ToSystem() },
+                Global.CpuRunMode);
+
+            return cpu ;
+        }
 
         public static void Play(AccordionControlElement ace_Play)
         {
@@ -138,7 +162,7 @@ namespace DSModeler
             Global.SimReset = true;
             SimTree.SimPlayUI(ace_Play, false);
             HMITree.OffHMIBtn(ace_HMI);
-            var activeCpu = DicCpu[Global.ActiveSys];
+            var activeCpu = RunCpus.First(w => w.Systems.Contains(Global.ActiveSys));
 
             Task.Run(() =>
             {

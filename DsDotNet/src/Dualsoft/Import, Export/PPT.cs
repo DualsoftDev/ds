@@ -22,16 +22,9 @@ namespace DSModeler
     public static class PPT
     {
 
-        public static async Task ImportPowerPoint(string[] files
-            , FormMain formMain
-            , TabbedView tab
-            , AccordionControlElement ace_Model
-            , AccordionControlElement ace_System
-            , AccordionControlElement ace_Device
-            , AccordionControlElement ace_HMI)
+        public static async Task ImportPowerPoint(string[] files, FormMain formMain)
         {
-            Dictionary<DsSystem, DsCPU> dicCpu = new Dictionary<DsSystem, DsCPU>();
-
+            Dictionary<DsSystem, PouGen> dicCpu = new Dictionary<DsSystem, PouGen>();
             var _PPTResults = ImportPPT.GetLoadingAllSystem(files);
             var storages = new Storages();
             int cnt = 0;
@@ -43,57 +36,36 @@ namespace DSModeler
                     {
                         await Task.Run(async () =>
                         {
-                            var pous = Cpu.LoadStatements(ppt.System, storages);
+                            var pous = Cpu.LoadStatements(ppt.System, storages).ToList();
                             foreach (var pou in pous)
                             {
-                                dicCpu.Add(pou.ToSystem()
-                                    , new DsCPU(pou.CommentedStatements()
-                                    , new List<DsSystem>() { pou.ToSystem() }
-                                    , Global.CpuRunMode));
-                                DsProcessEvent.DoWork(Convert.ToInt32((cnt++ * 1.0) / pous.Count() * 100));
+                                dicCpu.Add(pou.ToSystem(), pou);
+                                DsProcessEvent.DoWork(Convert.ToInt32((cnt++ * 1.0) / pous.Count() * 50));
                                 await Task.Delay(1);
                             }
 
-                            await HMITree.CreateHMIBtn(formMain, ace_HMI, ppt.System);
+                            await HMITree.CreateHMIBtn(formMain, ppt);
                             Global.ActiveSys = ppt.System;
                         });
                     }
 
-
-                    var ele = new AccordionControlElement()
-                    { Style = ElementStyle.Group, Text = ppt.System.Name, Tag = ppt.System };
-                    ele.Click += (s, e) =>
-                    {
-                        formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
-                    };
-
-                    if (ppt.IsActive)
-                        ace_System.Elements.Add(ele);
-                    else
-                        ace_Device.Elements.Add(ele);
-
-                    var lstFlowAce = Tree.ModelTree.AppandFlows(formMain, ppt, ele);
-                    lstFlowAce.ForEach(f =>
-                        f.Click += (s, e) =>
-                        {
-                            var viewNode = ((AccordionControlElement)s).Tag as ViewNode;
-                            DocControl.CreateDocOrSelect(formMain, tab, viewNode);
-                        });
+                    ModelTree.CreateModelBtn(formMain, ppt);
                 }
-                
-                //SIMControl.RunCpus = SIMControl.GetRunCpus(dicCpu);
-                SIMControl.RunCpus = SIMControl.GetRunCpuSingle(dicCpu);
-                SIMControl.DicCpu = dicCpu;
-                //SIMControl.ReadyMode();
 
-                ace_Model.Expanded = true;
-                ace_System.Expanded = true;
-                ace_Device.Expanded = false;
+                SIMControl.DicPou = dicCpu;
+                await SIMControl.CreateRunCpuSingle();
+                //SIMControl.RunCpus = SIMControl.GetRunCpus();
+
+                formMain.Ace_Model.Expanded = true;
+                formMain.Ace_System.Expanded = true;
+                formMain.Ace_Device.Expanded = false;
                 DsProcessEvent.DoWork(100);
                 tsc.SetResult(true);
             });
 
         }
+
+
     }
 }
 

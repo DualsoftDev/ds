@@ -12,10 +12,10 @@ module RunTimeUtil =
 
 
     let getTotalTags(statements:Statement seq) =
-                [ for s in statements do
-                    yield! s.GetSourceStorages()
-                    yield! s.GetTargetStorages()
-                ].Distinct()
+        [ for s in statements do
+            yield! s.GetSourceStorages()
+            yield! s.GetTargetStorages()
+        ].Distinct()
 
     ///statements 전체에 대하여 target tag가 
     ///다른 Statement에 조건으로 사용된 map-Rungs 만들기
@@ -32,6 +32,20 @@ module RunTimeUtil =
             let sts = dicSource.Filter(fun f->f.Value.Contains(rung.Key))
             for st in sts do
                 rung.Value.Add(st.Key) |> verifyM $"Duplicated [{ st.Key.ToText()}]"
+
+    let getRungMap(statements:Statement seq) = 
+        let total = getTotalTags  statements
+        let dicSource =
+            statements
+                .Select(fun s -> s, s.GetSourceStorages())
+                |> dict |> Dictionary
+
+        let map = 
+            total.Select(fun item ->
+                let sts = dicSource.Filter(fun f->f.Value.Contains(item))
+                item, sts.Select(fun st -> st.Key)       
+            )
+        map |> dict
 
 
     ///시뮬레이션 이전에 사용자 HMI 대신 눌러주기

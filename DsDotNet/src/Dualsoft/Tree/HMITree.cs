@@ -1,12 +1,16 @@
+using DevExpress.XtraBars.Docking2010.Views.Tabbed;
 using DevExpress.XtraBars.Navigation;
 using Dual.Common.Core;
 using Dual.Common.Winform;
+using Model.Import.Office;
 using System;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.Core.CoreModule;
+using static Model.Import.Office.ImportPPTModule;
+using static Model.Import.Office.ViewModule;
 
 namespace DSModeler.Tree
 {
@@ -17,24 +21,32 @@ namespace DSModeler.Tree
         static readonly string startToolTip = "START";
         static readonly string resetToolTip = "RESET";
         static readonly Color offColor = Color.RoyalBlue;
-        public static async Task CreateHMIBtn(FormMain formMain, AccordionControlElement ace_HMI, DsSystem sys)
+        public static async Task CreateHMIBtn(FormMain formMain, PptResult ppt)
         {
             await formMain.DoAsync(tsc =>
             {
+                var sys = ppt.System;
                 var eleSys = new AccordionControlElement()
                 { Style = ElementStyle.Group, Text = sys.Name, Tag = sys };
                 eleSys.Click += (s, e) =>
                 {
                     formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
                 };
-                ace_HMI.Elements.Add(eleSys);
+                formMain.Ace_HMI.Elements.Add(eleSys);
                 foreach (var flow in sys.Flows)
                 {
                     var eleFlow = new AccordionControlElement()
                     { Style = ElementStyle.Group, Text = flow.Name, Tag = flow };
                     eleFlow.Click += (s, e) =>
                     {
-                        formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
+                        var eleTagFlow = ((AccordionControlElement)s).Tag as Flow;
+                        formMain.PropertyGrid.SelectedObject = eleTagFlow;
+
+                        var view = ppt.Views
+                                       .Where(w => w.ViewType == InterfaceClass.ViewType.VFLOW)
+                                       .First(w => w.Flow.Value == eleTagFlow);
+
+                        DocControl.CreateDocOrSelect(formMain, view);
                     };
                     eleSys.Elements.Add(eleFlow);
 

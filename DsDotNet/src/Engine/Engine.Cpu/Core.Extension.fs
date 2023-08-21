@@ -60,7 +60,7 @@ module CoreExtensionsModule =
         [<Extension>] static member ChangedTagsClear (xs:IStorage seq, systems:DsSystem seq) = 
                         xs |> Seq.where(fun w ->  systems.any(fun s-> s:>ISystem = w.DsSystem))//자신 시스템에서만 TagChanged  <- false 가능
                            |> Seq.iter(fun w -> w.TagChanged <- false)
-        [<Extension>] static member ExecutableStatements (xs:IStorage seq, mRung:Dictionary<IStorage, HashSet<Statement>>) = 
+        [<Extension>] static member ExecutableStatements (xs:IStorage seq, mRung:IDictionary<IStorage, Statement seq>) = 
                         xs |> Seq.collect(fun stg -> mRung[stg]) 
        
         [<Extension>]

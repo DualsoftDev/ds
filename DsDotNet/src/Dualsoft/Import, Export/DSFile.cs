@@ -48,7 +48,7 @@ namespace DSModeler
                     view.TextEditDS.ResetText();
                     int cnt = 0;
                     string dsText = "";
-                    foreach (var sys in SIMControl.DicCpu.Keys)
+                    foreach (var sys in SIMControl.DicPou.Keys)
                         dsText += $"{sys.ToDsText()}\r\n\r\n";
 
                     var colorTexts = ToTextColorDS(dsText);

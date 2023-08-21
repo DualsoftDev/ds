@@ -42,12 +42,12 @@ namespace DSModeler
             };
  
 
-            tabbedView1.QueryControl += (s, e) =>
+            tabbedView_Doc.QueryControl += (s, e) =>
             {
                 if (e.Control == null)  //Devexpress MDI Control
                     e.Control = new System.Windows.Forms.Control();
             };
-            tabbedView1.DocumentSelected += (s, e) =>
+            tabbedView_Doc.DocumentSelected += (s, e) =>
             {
                 var docForm = e.Document.Tag as FormDocView;
                 if (docForm != null && docForm.UcView.MasterNode != null)
@@ -56,7 +56,7 @@ namespace DSModeler
 
             gridLookUpEdit_Expr.EditValueChanged += (s, e) =>
             {
-                var textForm = DocControl.CreateDocExprOrSelect(this, tabbedView1);
+                var textForm = DocControl.CreateDocExprOrSelect(this, tabbedView_Doc);
                 if (textForm == null) return;
                 DSFile.UpdateExpr(textForm, gridLookUpEdit_Expr.EditValue as LogicStatement);
             };
@@ -150,7 +150,7 @@ namespace DSModeler
             {
                 this.Do(() =>
                 {
-                    var visibleFroms = tabbedView1.Documents
+                    var visibleFroms = tabbedView_Doc.Documents
                                         .Where(w => w.IsVisible)
                                         .Select(s => s.Tag)
                                         .OfType<FormDocView>();

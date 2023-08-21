@@ -1,4 +1,5 @@
 using DevExpress.Utils.Extensions;
+using DevExpress.Utils.Filtering.Internal;
 using DevExpress.XtraBars.Navigation;
 using DSModeler.Tree;
 using Dual.Common.Core;
@@ -8,6 +9,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Engine.Core.CoreModule;
+using static Engine.Core.ExpressionForwardDeclModule;
+using static Engine.Core.TagModule;
 using static Engine.Cpu.RunTime;
 using static Engine.Cpu.RunTimeUtil;
 
@@ -18,10 +21,22 @@ namespace DSModeler
 
         public static Dictionary<DsSystem, DsCPU> DicCpu = new Dictionary<DsSystem, DsCPU>();
         public static List<DsCPU> RunCpus = new List<DsCPU>();
+        public static Dictionary<string, ITag> DicActionInput = new Dictionary<string, ITag>();
 
-      
+        public static Dictionary<string, ITag> GetActionInputs(DsSystem sys)
+        {
+            var actionInputs = new Dictionary<string, ITag>();
+
+            sys.Jobs.Iter(j => j.DeviceDefs
+                                .Where(w => !w.InAddress.IsNullOrEmpty())
+                                .Iter(d => actionInputs.Add(d.InAddress, d.InTag))) ;
+
+            return actionInputs;
+        }
+
         public static List<DsCPU> GetRunCpuSingle(Dictionary<DsSystem, DsCPU> dicCpu)
         {
+            DicActionInput = GetActionInputs(Global.ActiveSys);
             List<DsCPU> runCpus = new List<DsCPU>();
 
             var passiveCPU =
@@ -40,6 +55,8 @@ namespace DSModeler
         /// <returns></returns>
         public static List<DsCPU> GetRunCpus(Dictionary<DsSystem, DsCPU> dicCpu)
         {
+            DicActionInput = GetActionInputs(Global.ActiveSys);
+
             List<DsCPU> runCpus = new List<DsCPU>();
             //Global.ActiveSys 제외한  PC의 절반 CPU 활용
             var ableCpuCnt = (Environment.ProcessorCount - 1) / 2;

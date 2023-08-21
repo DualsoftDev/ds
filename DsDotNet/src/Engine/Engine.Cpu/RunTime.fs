@@ -34,9 +34,8 @@ module RunTime =
                         chTags.Iter(fun f-> 
                             f.DsSystem.NotifyStatus(f) //상태보고
                             f.DsSystem.NotifyHwOutput(f) //물리 Out 보고
-                                            ) 
-                        states.Iter(fun f->  f.Do()  )
-
+                            ) 
+                        states.Iter(fun f->  f.Do())
             }
         do 
             updateRungMap(statements, mapRungs)
@@ -71,4 +70,3 @@ module RunTime =
 
         member x.Dispose() =  
             cts.Cancel()
-            //runSubsc.Dispose()

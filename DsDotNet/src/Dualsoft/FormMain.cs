@@ -1,3 +1,4 @@
+using DevExpress.Xpo.DB.Helpers;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraVerticalGrid;
@@ -18,7 +19,7 @@ namespace DSModeler
     {
         public PropertyGridControl PropertyGrid => ucPropertyGrid1.PropertyGrid;
 
-        public PaixNMC _PaixNMC;
+        public PaixDriver _PaixNMF;
         public FormMain()
         {
             InitializeComponent();
@@ -37,7 +38,7 @@ namespace DSModeler
             InitializationLogger();
             InitializationUIControl();
 
-            textEdit_IP.Text = K.DefaultIP;
+            PaixDrivers.SelectPaixHW = Global.PaixHW;
 
             if (!Global.IsDebug)
                 DevExpress.XtraSplashScreen.SplashScreenManager.CloseForm();
@@ -65,6 +66,9 @@ namespace DSModeler
             var runStartOut = DSRegistry.GetValue(K.RunStartOut);
             spinEdit_StartOut.Properties.MinValue = 0;
             spinEdit_StartOut.EditValue = runStartOut == null ? 0 : Convert.ToInt32(runStartOut);
+            
+            var ip = DSRegistry.GetValue(K.RunHWIP);
+            textEdit_IP.Text = ip == null ? K.RunDefaultIP : ip.ToString();
 
             timerLongPress.Tick += (sender, e) => {
                 SIMControl.Step(ace_Play);

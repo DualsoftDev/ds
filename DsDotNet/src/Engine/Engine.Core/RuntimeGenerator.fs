@@ -8,14 +8,6 @@ module RuntimeGeneratorModule =
     type RuntimeTargetType = WINDOWS | XGI | XGK | AB | MELSEC
     type RuntimePackage    = Simulation | StandardPC | StandardPLC | LightPC | LightPLC
         with
-            member x.ToRuntimePackage(s:string) =
-                match s with
-                | "Simulation" -> Simulation
-                | "StandardPC" -> StandardPC
-                | "StandardPLC" -> StandardPLC
-                | "LightPC" -> LightPC
-                | "LightPLC" -> LightPLC
-                | _-> failwithlog $"Error {getFuncName()}"      
             member x.IsPackagePC() =
                 match x with
                 | StandardPC | LightPC -> true
@@ -30,6 +22,14 @@ module RuntimeGeneratorModule =
                 | _ -> false
 
     let RuntimePackageList =  [ Simulation; StandardPC; StandardPLC; LightPC; LightPLC]
+    let ToRuntimePackage(s:string) =
+                match s with
+                | "Simulation" -> Simulation
+                | "StandardPC" -> StandardPC
+                | "StandardPLC" -> StandardPLC
+                | "LightPC" -> LightPC
+                | "LightPLC" -> LightPLC
+                | _-> failwithlog $"Error {getFuncName()}"    
 
     type Runtime() =
         static let mutable runtimeTarget = WINDOWS

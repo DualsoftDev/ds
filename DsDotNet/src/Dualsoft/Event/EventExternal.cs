@@ -9,6 +9,7 @@ using static Engine.Core.CoreModule;
 using static Engine.Core.Interface;
 using static Engine.Core.TagKindModule;
 using static Engine.Core.TagModule;
+using static Engine.Cpu.RunTime;
 
 namespace DSModeler
 {
@@ -78,10 +79,11 @@ namespace DSModeler
             }
             if (DisposableHWPaix == null)
             {
-                Global.ValueChangeSubjectPaix.Subscribe(rx =>
+                Global.ValueChangeSubjectPaixInputs.Subscribe(rx =>
                 {
                     var index = rx.Item1;
                     var value = rx.Item2;
+                    
 
                     Global.Logger.Debug($"{index} value: {value}");
                 });

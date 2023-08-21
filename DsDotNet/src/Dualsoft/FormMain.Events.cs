@@ -8,6 +8,7 @@ using Engine.Core;
 using Microsoft.FSharp.Core;
 using System;
 using System.Linq;
+using System.Net;
 using System.Windows.Forms;
 using static DevExpress.Data.Filtering.Helpers.SubExprHelper;
 using static Engine.Core.RuntimeGeneratorModule;
@@ -67,9 +68,9 @@ namespace DSModeler
             {
                 gridLookUpEdit_Log.Properties.BestFitMode = BestFitMode.BestFitResizePopup;
             };
-            comboBoxEdit_RunMode.SelectedIndexChanged += (s, e) =>
+            comboBoxEdit_RunMode.EditValueChanging += (s, e) =>
             {
-                Global.CpuRunMode = (RuntimePackage)comboBoxEdit_RunMode.EditValue;
+                Global.CpuRunMode = ToRuntimePackage(e.NewValue.ToString());
                 DSRegistry.SetValue(K.CpuRunMode, Global.CpuRunMode);
             };
 
@@ -99,15 +100,16 @@ namespace DSModeler
                 Global.LayoutMenuFooter = toggleSwitch_menuNonFooter.IsOn;
                 DSRegistry.SetValue(K.LayoutMenuFooter, Global.LayoutMenuFooter);
 
-                if (toggleSwitch_menuNonFooter.IsOn)
-                {
-                    ac_Main.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Default;
-                    ac_Main.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.Standard;
-                }
-                else
+                if (Global.LayoutMenuFooter)
                 {
                     ac_Main.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Footer;
                     ac_Main.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.HamburgerMenu;
+                }
+                else
+                {
+
+                    ac_Main.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Default;
+                    ac_Main.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.Standard;
                 }
             };
 
@@ -119,11 +121,15 @@ namespace DSModeler
 
             textEdit_IP.TextChanged += (s, e) =>
             {
-                if (Global.CpuRunMode.IsStandardPC)
+                IPAddress.TryParse(textEdit_IP.Text, out IPAddress addr);
+                if (addr == null) return;
+
+                if (Global.CpuRunMode.IsPackagePC())
                 {
-                    _PaixNMC?.Dispose();
-                    _PaixNMC = new PaixNMC(textEdit_IP.Text, Global.RunStartIn, Global.RunStartOut);
-                    var a = _PaixNMC.Open();
+                    DSRegistry.SetValue(K.RunHWIP, textEdit_IP.Text);
+                    _PaixNMF?.Dispose();
+                    _PaixNMF = new PaixDriver(textEdit_IP.Text, Global.RunStartIn, Global.RunStartOut);
+                    var a = _PaixNMF.Open();
                 }
             };
 

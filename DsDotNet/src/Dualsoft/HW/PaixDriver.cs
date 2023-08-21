@@ -1,4 +1,5 @@
 using Server.Common.NMC;
+using Server.Common.NMF;
 using System;
 using System.Collections;
 using System.Linq;
@@ -8,14 +9,13 @@ using System.Threading.Tasks;
 
 namespace DSModeler
 {
-    public class PaixNMC
+    public class PaixDriver
     {
         public string IP { get; set; }
         public bool Running { get; private set; }
-        public short IPNum => Convert.ToSByte(IP.Split('.')[3]);
         public short[] NumIn { get; set; }
         public short[] NumOut { get; set; }
-        public PaixNMC(string ip, int numIn, int numOut)
+        public PaixDriver(string ip, int numIn, int numOut)
         {
             IP = ip;
             NumIn = new short[numIn];
@@ -27,10 +27,8 @@ namespace DSModeler
             IPAddress.TryParse(IP, out IPAddress addr);
             if (addr == null)
             { MBox.Error($"{IP} ip 형식으로 올바르지 않습니다."); return false; }
-
-            var nRet = NMC2.nmc_PingCheck(IPNum, 500);
-            if (nRet == 0)
-                return NMC2.nmc_OpenDevice(IPNum) == 0;
+            if (PaixDrivers.Ping(IP) == 0)
+                return PaixDrivers.Open(IP) == 0;
             else
                 return false;
         }
@@ -38,7 +36,7 @@ namespace DSModeler
         public bool Dispose()
         {
             Running = false;
-            NMC2.nmc_CloseDevice(IPNum);
+            PaixDrivers.Close(IP);
             return true;
         }
 
@@ -52,15 +50,14 @@ namespace DSModeler
                 {
                     await Task.Delay(10);
                     var oldNum = NumIn.ToList();
-                    NMC2.nmc_GetDIOInput(IPNum, NumIn);
-
+                    PaixDrivers.GetInput(IP, NumIn);
                     if (!oldNum.ToArray().Equals(NumIn))
                     {
                         var oldBits = getBitArray(oldNum.ToArray());
                         var newBits = getBitArray(NumIn);
-                        var diffBits = oldBits.Xor(newBits);
-                        for (int i = 0; i < diffBits.Count; i++)
-                            Global.ValueChangeSubjectPaix.OnNext(Tuple.Create(i, diffBits[i]));
+                        for (int i = 0; i < newBits.Count; i++)
+                            if (oldBits[i] != newBits[i])
+                                Global.ValueChangeSubjectPaixInputs.OnNext(Tuple.Create(i, newBits[i]));
                     }
 
                     BitArray getBitArray(short[] shortArr)
@@ -81,22 +78,9 @@ namespace DSModeler
         public void SetBit(short index, bool bOn)
         {
             if (Running)
-                NMC2.nmc_SetDIOOutPin(IPNum, index, Convert.ToInt16(bOn));
+                PaixDrivers.SetOutput(IP, index, Convert.ToInt16(bOn));
             else
                 MBox.Error($"{IP} Run을 수행을 먼저하세요");
-        }
-        public bool? GetBit(short index)
-        {
-            if (Running)
-            {
-                NMC2.nmc_GetDIOInPin(IPNum, index, out short data);
-                return Convert.ToBoolean(data);
-            }
-            else
-            {
-                MBox.Error($"{IP} Run을 수행을 먼저하세요");
-                return null;
-            }
         }
     }
 }

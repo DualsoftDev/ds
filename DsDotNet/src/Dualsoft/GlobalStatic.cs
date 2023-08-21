@@ -7,6 +7,7 @@ using System.IO;
 using System.Reactive.Subjects;
 using System.Reflection;
 using System.Windows.Forms;
+using static DSModeler.PaixDrivers;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.RuntimeGeneratorModule;
@@ -25,12 +26,13 @@ namespace DSModeler
         public const string CpuRunMode = "CpuRunMode";
         public const string RunStartIn = "RunStartIn";
         public const string RunStartOut = "RunStartOut";
+        public const string RunHWIP = "RunHWIP";
+        public const string RunDefaultIP = "192.168.0.66";
         public const string DocStartPage = "시작 페이지";
         public const string DocPLC = "PLC 생성";
         public const string DocDS = "모델 출력";
         public const string DocExpression = "수식";
         public const string RegPath = "SOFTWARE\\Dualsoft\\DSModeler";
-        public const string DefaultIP = "192.168.0.11";
     }
     public static class Global
     {
@@ -46,12 +48,13 @@ namespace DSModeler
         public static string ExportPathXLS { get; set; }
         public static DsSystem ActiveSys { get; set; }
         public static RuntimePackage CpuRunMode { get; set; } = RuntimePackage.Simulation;
+        public static PaixHW PaixHW { get; set; } = PaixHW.NMF;
 
         public static Version ver = Assembly.GetEntryAssembly().GetName().Version;
 
         public static Subject<Tuple<CoreModule.Vertex, Status4>> StatusChangeSubject = new Subject<Tuple<CoreModule.Vertex, Status4>>();
         public static Subject<Tuple<int, TimeSpan>> StatusChangeLogCount = new  Subject<Tuple<int, TimeSpan>>();
-        public static Subject<Tuple<int, bool>> ValueChangeSubjectPaix = new Subject<Tuple<int, bool>>();
+        public static Subject<Tuple<int, bool>> ValueChangeSubjectPaixInputs = new Subject<Tuple<int, bool>>();
 
         public static string DefaultFolder =>
             Path.Combine(

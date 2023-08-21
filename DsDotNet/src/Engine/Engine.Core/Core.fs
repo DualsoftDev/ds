@@ -250,7 +250,7 @@ module CoreModule =
         inherit FqdnObject(api.Name, createFqdnObject([|loadedName|]))
         member _.ApiItem = api
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
-        member val ApiName = this.Name
+        member val ApiName = this.QualifiedName
 
     /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { FWD = Mt.fwd; }
     type TaskSys (api:ApiItem, systemName:string) =

@@ -21,6 +21,7 @@ module CpuTestUtil =
             let referenceDir = @$"{__SOURCE_DIRECTORY__}\..\..\UnitTest.Model"
             let sys = parseText systemRepo referenceDir Program.CpuTestText
             Runtime.System <- sys
+            Runtime.Package <- RuntimePackage.StandardPLC
             applyTagManager (sys, Storages())
             checkCausalModel sys
             sys

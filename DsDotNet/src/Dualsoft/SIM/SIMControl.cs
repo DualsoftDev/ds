@@ -6,9 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+using System.Windows.Forms;
 using static Engine.Core.CoreModule;
 using static Engine.Cpu.RunTime;
+using static Engine.Cpu.RunTimeUtil;
 
 namespace DSModeler
 {
@@ -18,11 +19,7 @@ namespace DSModeler
         public static Dictionary<DsSystem, DsCPU> DicCpu = new Dictionary<DsSystem, DsCPU>();
         public static List<DsCPU> RunCpus = new List<DsCPU>();
 
-        /// <summary>
-        /// ThreadPool.GetMinThreads 제한으로 멀티로 동시에 돌리는게 한계(thread 스위칭으로 더느림)
-        /// Active 1 - Passive n개로 돌림  PC의 절반 CPU 활용
-        /// </summary>
-        /// <returns></returns>
+      
         public static List<DsCPU> GetRunCpuSingle(Dictionary<DsSystem, DsCPU> dicCpu)
         {
             List<DsCPU> runCpus = new List<DsCPU>();
@@ -36,6 +33,11 @@ namespace DSModeler
             runCpus.Add(passiveCPU);
             return runCpus;
         }
+        /// <summary>
+        /// ThreadPool.GetMinThreads 제한으로 멀티로 동시에 돌리는게 한계(thread 스위칭으로 더느림)
+        /// Active 1 - Passive n개로 돌림  PC의 절반 CPU 활용
+        /// </summary>
+        /// <returns></returns>
         public static List<DsCPU> GetRunCpus(Dictionary<DsSystem, DsCPU> dicCpu)
         {
             List<DsCPU> runCpus = new List<DsCPU>();
@@ -140,12 +142,13 @@ namespace DSModeler
               );
         }
 
-        public static void ReadySim()
-        {
-            Task.WhenAll(RunCpus.Select(s =>
-                          Task.Run(() => s.ReadySim()))
-              );
-        }
+        //public static void ReadyMode()
+        //{
+        //    Task.WhenAll(RunCpus.Select(s =>
+        //                  Task.Run(() => s.ReadyMode()))
+        //      );
+        //}
+      
     }
 }
 

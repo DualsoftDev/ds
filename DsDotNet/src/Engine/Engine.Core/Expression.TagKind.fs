@@ -11,6 +11,7 @@ module TagKindModule =
     let [<Literal>] TagStartFlow    = 10000
     let [<Literal>] TagStartVertex  = 11000
     let [<Literal>] TagStartApi     = 12000
+    let [<Literal>] TagStartAction  = 14000
 
     [<Flags>]
     /// 0 ~ 9999
@@ -105,6 +106,13 @@ module TagKindModule =
     |LinkStart                 = 13000
     |LintReset                 = 13001
 
+    [<Flags>]
+    /// 14000 ~ 14999
+    type ActionTag    =
+    |ActionIn                 = 14000
+    |ActionOut                = 14001
+    |ActionMemory             = 14002
+
 
 
 
@@ -114,6 +122,7 @@ module TagKindModule =
     | TTFlow
     | TTVertex
     | TTApiItem
+    | TTAction
 
     [<AutoOpen>]
     type TagDsInfo = {
@@ -123,6 +132,7 @@ module TagKindModule =
         TagFlow      : (Flow     * FlowTag   ) option
         TagVertex    : (Vertex   * VertexTag ) option
         TagApiItem   : (ApiItem  * ApiItemTag) option
+        TagAction    : (DsTask   * ActionTag ) option
     }
 
 
@@ -138,16 +148,19 @@ module TagKindModule =
         static member GetVertexTagKind (x:IStorage) = match x.TagKind with | InClosedRange TagStartVertex 11999 -> Some (Enum.ToObject(typeof<VertexTag>, x.TagKind) :?> VertexTag)  | _ -> None
         [<Extension>]
         static member GetApiTagKind    (x:IStorage) = match x.TagKind with | InClosedRange TagStartApi    12999 -> Some (Enum.ToObject(typeof<ApiItemTag>, x.TagKind) :?> ApiItemTag)| _ -> None
+        [<Extension>]
+        static member GetActionTagKind (x:IStorage) = match x.TagKind with | InClosedRange TagStartAction 14999 -> Some (Enum.ToObject(typeof<ActionTag>, x.TagKind) :?> ActionTag)| _ -> None
 
         [<Extension>]
         static member GetTagInfo (x:IStorage) =
             match x.Target with
             |Some obj ->
                 match obj with
-                | :? DsSystem as s -> Some {Name= x.Name; TagTarget= TTSystem;  TagSystem= Some(s, x.GetSystemTagKind().Value); TagFlow = None;  TagVertex = None;   TagApiItem= None}
-                | :? Flow as f     -> Some {Name= x.Name; TagTarget= TTFlow;    TagSystem= None; TagFlow = Some(f, x.GetFlowTagKind().Value); TagVertex = None;   TagApiItem= None}
-                | :? Vertex as v   -> Some {Name= x.Name; TagTarget= TTVertex;  TagSystem= None; TagFlow = None; TagVertex = Some(v, x.GetVertexTagKind().Value); TagApiItem= None}
-                | :? ApiItem as a  -> Some {Name= x.Name; TagTarget= TTApiItem; TagSystem= None; TagFlow = None; TagVertex = None; TagApiItem= Some(a, x.GetApiTagKind().Value)}
+                | :? DsSystem as s -> Some {Name= x.Name; TagTarget= TTSystem;  TagSystem= Some(s, x.GetSystemTagKind().Value); TagFlow = None;  TagVertex = None;   TagApiItem= None; TagAction= None}
+                | :? Flow as f     -> Some {Name= x.Name; TagTarget= TTFlow;    TagSystem= None; TagFlow = Some(f, x.GetFlowTagKind().Value); TagVertex = None;   TagApiItem= None; TagAction= None}
+                | :? Vertex as v   -> Some {Name= x.Name; TagTarget= TTVertex;  TagSystem= None; TagFlow = None; TagVertex = Some(v, x.GetVertexTagKind().Value); TagApiItem= None; TagAction= None}
+                | :? ApiItem as a  -> Some {Name= x.Name; TagTarget= TTApiItem; TagSystem= None; TagFlow = None; TagVertex = None; TagApiItem= Some(a, x.GetApiTagKind().Value); TagAction= None}
+                | :? DsTask  as d  -> Some {Name= x.Name; TagTarget= TTAction;  TagSystem= None; TagFlow = None; TagVertex = None; TagApiItem= None; TagAction= Some(d, x.GetActionTagKind().Value);}
                 |_ -> None
 
             |None -> None
@@ -162,5 +175,6 @@ module TagKindModule =
                 |TTFlow -> x.GetFlowTagKind().Value.ToString()
                 |TTVertex -> x.GetVertexTagKind().Value.ToString()
                 |TTApiItem -> x.GetApiTagKind().Value.ToString()
+                |TTAction  -> x.GetActionTagKind().Value.ToString()
             |None -> "None"
             

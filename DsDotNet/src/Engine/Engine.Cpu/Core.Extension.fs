@@ -64,6 +64,16 @@ module CoreExtensionsModule =
                         xs |> Seq.collect(fun stg -> mRung[stg]) 
        
         [<Extension>]
+        static member NotifyHwOutput (s:ISystem, x:IStorage) =
+            match x.GetActionTagKind() with
+            | Some tk ->
+                match tk with
+                | ActionTag.ActionOut->  onValueHWChanged (s, x, x.BoxedValue)
+                | _ ->()
+
+            | None -> ()
+
+        [<Extension>]
         static member NotifyStatus (s:ISystem, x:IStorage) =
             match x.GetVertexTagKind() with
             | Some tk ->

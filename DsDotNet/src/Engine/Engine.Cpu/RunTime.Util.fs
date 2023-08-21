@@ -10,10 +10,6 @@ open System.Collections.Generic
 [<AutoOpen>]
 module RunTimeUtil =
 
-    type CpuRunMode =
-    |Non
-    |Event
-    |Scan
 
     let getTotalTags(statements:Statement seq) =
                 [ for s in statements do
@@ -39,42 +35,18 @@ module RunTimeUtil =
 
 
     ///시뮬레이션 이전에 사용자 HMI 대신 눌러주기
-    let simPreAction(sys:DsSystem) =  
+    let preAction(sys:DsSystem, mode:RuntimePackage ) =  
         let simTags = 
             sys.TagManager.Storages
                 .Where(fun w-> 
                             w.Value.TagKind = (int)SystemTag.auto
                             ||   w.Value.TagKind = (int)SystemTag.drive
                             ||   w.Value.TagKind = (int)SystemTag.ready
-                            ||   w.Value.TagKind = (int)SystemTag.sim
+                            || ( w.Value.TagKind = (int)SystemTag.sim && mode = RuntimePackage.Simulation)
                     )
         simTags.Iter(fun t -> t.Value.BoxedValue <-  true) 
  
-    ///HMI Reset Async task
-    let getAsyncReset(statements:Statement seq, systems:DsSystem seq, activeSys:bool) = 
-            
-            async {
-                let stgs = systems.First().TagManager.Storages
-                let systemOn =  stgs.First(fun w-> w.Value.TagKind = (int)SystemTag.on).Value
-                let stgs =  stgs.Where(fun w-> w.Value <> systemOn)
-                             
-                if activeSys
-                then 
-                    for tag in stgs do
-                        let stg = tag.Value
-                        match stg with
-                        | :? TimerCounterBaseStruct as tc ->
-                            tc.Clear()  // 타이머 카운터 리셋
-                        | _ ->
-                            stg.BoxedValue <- textToDataType(stg.DataType.Name).DefaultValue()
 
-                //조건 1번 평가 (for : Ready State 이벤트)
-                for s in statements do s.Do() 
-                let total = getTotalTags  statements
-                let chTags = total.ChangedTags()
-                chTags.Iter(fun f->  f.DsSystem.NotifyStatus(f)) //상태보고
-                chTags.ChangedTagsClear(systems)
-            }
 
     let singleScan (statements:Statement seq, systems:DsSystem seq) =
         for s in statements do s.Do() 
@@ -103,26 +75,26 @@ module RunTimeUtil =
         //조건 1번 평가 (for : Ready State 이벤트)
         singleScan (statements, systems)
 
-    ///Status4 상태보고 및 cpuRunMode.Event 처리 
-    let runSubscribe(mapRungs:Dictionary<IStorage, HashSet<Statement>>, sys:DsSystem, cpuMode:CpuRunMode) =
-        let subscribe =
-            CpusEvent.ValueSubject      
-            //자신 CPU와 같은 시스템 또는 참조시스템만 연산처리
-                .Where(fun (system, _storage, _value) -> system = sys || sys.ReferenceSystems.Contains(system:?> DsSystem))
-                .Subscribe(fun (system, storage, _value) ->
-                //Step 1 상태 UI 업데이트
-                system.NotifyStatus(storage);
-                //Step 2 관련수식 연산
-                if cpuMode = Event && mapRungs.ContainsKey storage
-                then
-                    //for f in mapRungs[storage]
-                    //    do async{ f.Do()} |> Async.StartImmediate
+    /////Status4 상태보고 및 cpuRunMode.Event 처리 
+    //let runSubscribe(mapRungs:Dictionary<IStorage, HashSet<Statement>>, sys:DsSystem, cpuMode:CpuRunMode) =
+    //    let subscribe =
+    //        CpusEvent.ValueSubject      
+    //        //자신 CPU와 같은 시스템 또는 참조시스템만 연산처리
+    //            .Where(fun (system, _storage, _value) -> system = sys || sys.ReferenceSystems.Contains(system:?> DsSystem))
+    //            .Subscribe(fun (system, storage, _value) ->
+    //            //Step 1 상태 UI 업데이트
+    //            system.NotifyStatus(storage);
+    //            //Step 2 관련수식 연산
+    //            if cpuMode = ControlPc && mapRungs.ContainsKey storage
+    //            then
+    //                //for f in mapRungs[storage]
+    //                //    do async{ f.Do()} |> Async.StartImmediate
                                         
-                    mapRungs[storage]
-                    |> Seq.map (fun f-> async { f.Do() } )
-                    |> Async.Parallel
-                    |> Async.Ignore
-                    |> Async.RunSynchronously
-                )
-        subscribe
+    //                mapRungs[storage]
+    //                |> Seq.map (fun f-> async { f.Do() } )
+    //                |> Async.Parallel
+    //                |> Async.Ignore
+    //                |> Async.RunSynchronously
+    //            )
+    //    subscribe
 

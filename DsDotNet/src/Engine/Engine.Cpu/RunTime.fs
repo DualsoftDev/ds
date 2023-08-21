@@ -11,14 +11,12 @@ open System.Threading
 module RunTime =
 
 
-    type DsCPU(css:CommentedStatement seq, systems:DsSystem seq, cpuMode:CpuRunMode) =
+    type DsCPU(css:CommentedStatement seq, systems:DsSystem seq, cpuMode:RuntimePackage) =
         let mapRungs = Dictionary<IStorage, HashSet<Statement>>()
         let cpuStorages = mapRungs.Keys
         let statements = css |> Seq.map(fun f -> f.Statement)
      
-                           
         let mutable cts = new CancellationTokenSource()
-        //let mutable runSubsc:IDisposable = null
         let mutable run:bool = false
         let asyncStart = 
             async { 
@@ -33,33 +31,24 @@ module RunTime =
                     if states.any()  
                     then
                         chTags.ChangedTagsClear(systems)
-                      
-                        chTags.Iter(fun f->  f.DsSystem.NotifyStatus(f)) //상태보고
+                        chTags.Iter(fun f-> 
+                            f.DsSystem.NotifyStatus(f) //상태보고
+                            f.DsSystem.NotifyHwOutput(f) //물리 Out 보고
+                                            ) 
                         states.Iter(fun f->  f.Do()  )
 
             }
-     
-        do
-            if cpuMode <> CpuRunMode.Non
-            then 
-                updateRungMap(statements, mapRungs)
-                //runSubsc <- runSubscribe(mapRungs, sys, cpuMode)
+        do 
+            updateRungMap(statements, mapRungs)
 
-        //강제 전체 연산 임시 test용
-        //member x.ScanOnce() =
-        //    let scanTask = async {
-        //            for s in statements do //cts.Token 의해서 멈춤
-        //            s.Do() }
-        //    Async.StartAsTask(scanTask, TaskCreationOptions.None, cts.Token) 
-        //    |> Async.AwaitTask
 
         member x.Systems = systems
         member x.IsRunning = run
         member x.CommentedStatements = css
-
-        member x.ReadySim() = systems.Iter(fun sys-> simPreAction(sys))
+        
         member x.Run() =
             if not <| run then 
+                systems.Iter(fun sys-> preAction(sys, cpuMode))
                 run <- true
                 Async.StartImmediate(asyncStart, cts.Token) |> ignore
 
@@ -70,6 +59,7 @@ module RunTime =
 
         member x.Step() =
             x.Stop()
+            systems.Iter(fun sys-> preAction(sys, cpuMode))
             singleScan(statements, systems)
 
         member x.Reset() =

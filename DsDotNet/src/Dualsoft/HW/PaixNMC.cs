@@ -35,6 +35,14 @@ namespace DSModeler
                 return false;
         }
 
+        public bool Dispose()
+        {
+            Running = false;
+            NMC2.nmc_CloseDevice(IPNum);
+            return true;
+        }
+
+
         public void Run()
         {
             Running = true;

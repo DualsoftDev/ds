@@ -97,6 +97,7 @@ namespace DSModeler
             }));
 
             var logger = ((log4net.Repository.Hierarchy.Logger)Log4NetLogger.Logger.Logger);
+            logger.Level = Level.All;
 
             ToolStripMenuItem log_menu = new ToolStripMenuItem("Log Level", logLevelBtnImg);
             var logItemError = new ToolStripMenuItem("Error", null);

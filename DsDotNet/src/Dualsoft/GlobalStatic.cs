@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Windows.Forms;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
+using static Engine.Core.RuntimeGeneratorModule;
 using static Engine.Cpu.RunTimeUtil;
 
 namespace DSModeler
@@ -21,13 +22,15 @@ namespace DSModeler
         public const string LastFiles = "LastFiles";
         public const string SimSpeed = "SimSpeed";
         public const string LayoutMenuFooter = "LayoutMenuFooter";
+        public const string CpuRunMode = "CpuRunMode";
+        public const string RunStartIn = "RunStartIn";
+        public const string RunStartOut = "RunStartOut";
         public const string DocStartPage = "시작 페이지";
         public const string DocPLC = "PLC 생성";
         public const string DocDS = "모델 출력";
         public const string DocExpression = "수식";
         public const string RegPath = "SOFTWARE\\Dualsoft\\DSModeler";
-
-
+        public const string DefaultIP = "192.168.0.11";
     }
     public static class Global
     {
@@ -35,13 +38,14 @@ namespace DSModeler
         public static bool IsDebug { get; set; }
         public static string LogLevel { get; set; }
         public static int SimSpeed { get; set; } = 3;
+        public static int RunStartIn { get; set; } = 0;
+        public static int RunStartOut { get; set; } = 0;
         public static bool LayoutMenuFooter { get; set; }
         public static bool SimReset { get; set; }
         public static string ExportPathPLC { get; set; }
         public static string ExportPathXLS { get; set; }
-
         public static DsSystem ActiveSys { get; set; }
-        public static CpuRunMode CpuRunMode { get; set; } = CpuRunMode.Scan;
+        public static RuntimePackage CpuRunMode { get; set; } = RuntimePackage.Simulation;
 
         public static Version ver = Assembly.GetEntryAssembly().GetName().Version;
 

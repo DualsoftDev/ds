@@ -93,14 +93,15 @@ module TagManagerUtil =
     let mutable outCnt = -1;
     let mutable memCnt = -1;
     let resetSimDevCnt() = inCnt<- -1;outCnt<- -1;memCnt<- -1;
-    let createBridgeTag(stg:Storages, name, addr:string, inOut:InOut, bridge:BridgeType, sys): ITag option=
+    let createBridgeTag(stg:Storages, name, addr:string, inOut:ActionTag, bridge:BridgeType, sys, task:IQualifiedNamed option): ITag option=
         let address =
             if Runtime.Package = RuntimePackage.Simulation
             then
                 match inOut with
-                | In     -> inCnt<-inCnt+1;  Some($"%%MX{inCnt}")
-                | Out    -> outCnt<-outCnt+1;Some($"%%MX{100000+outCnt}")
-                | Memory ->  failwithlog "error: Memory not supported "
+                | ActionTag.ActionIn     -> inCnt<-inCnt+1;  Some($"%%MX{inCnt}")
+                | ActionTag.ActionOut    -> outCnt<-outCnt+1;Some($"%%MX{100000+outCnt}")
+                | ActionTag.ActionMemory ->  failwithlog "error: Memory not supported "
+                | _ -> failwithlog "error: ActionTag create "
             else                 
                 let addr = addr.ToUpper()
                 match bridge with
@@ -113,13 +114,14 @@ module TagManagerUtil =
         then
             let name =
                 match inOut with
-                | In  -> $"{name}_I"
-                | Out -> $"{name}_O"
-                | Memory -> failwithlog "error: Memory not supported "
+                | ActionTag.ActionIn    -> $"{name}_I"
+                | ActionTag.ActionOut   -> $"{name}_O"
+                | ActionTag.ActionMemory   -> failwithlog "error: Memory not supported "
+                | _ -> failwithlog "error: ActionTag create "
 
             let plcName = getPlcTagAbleName name stg
             let t =
-                let param = {defaultStorageCreationParams(false) with Name=plcName; Address=address; System=sys}
+                let param = {defaultStorageCreationParams(false) with Name=plcName; Address=address; System=sys; TagKind = (int)inOut; Target = task}
                 (Tag(param) :> ITag)
             stg.Add(t.Name, t)
             Some t

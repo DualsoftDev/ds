@@ -1,9 +1,16 @@
 using DevExpress.XtraEditors;
+using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraVerticalGrid;
 using DSModeler.Tree;
 using Dual.Common.Core;
+using Engine.Core;
+using Microsoft.Msagl.Routing.Spline.Bundling;
 using System;
+using System.Linq;
 using System.Windows.Forms;
+using static Engine.Core.RuntimeGeneratorModule;
+using static Engine.Core.TagKindModule;
+using static Engine.Cpu.RunTimeUtil;
 
 namespace DSModeler
 {
@@ -11,7 +18,7 @@ namespace DSModeler
     {
         public PropertyGridControl PropertyGrid => ucPropertyGrid1.PropertyGrid;
 
-
+        public PaixNMC _PaixNMC;
         public FormMain()
         {
             InitializeComponent();
@@ -25,9 +32,12 @@ namespace DSModeler
             LayoutForm.LoadLayout(dockManager);
             DocControl.CreateDocStart(this, tabbedView1);
 
+
             InitializationEventSetting();
             InitializationLogger();
             InitializationUIControl();
+
+            textEdit_IP.Text = K.DefaultIP;
 
             if (!Global.IsDebug)
                 DevExpress.XtraSplashScreen.SplashScreenManager.CloseForm();
@@ -44,7 +54,17 @@ namespace DSModeler
 
             var regSpeed = DSRegistry.GetValue(K.LayoutMenuFooter);
             toggleSwitch_menuNonFooter.IsOn = Convert.ToBoolean(regSpeed) != false;
+           ;
+            comboBoxEdit_RunMode.Properties.Items.AddRange(RuntimePackageList.ToArray());
+            var cpuRunMode = DSRegistry.GetValue(K.CpuRunMode);
+            comboBoxEdit_RunMode.EditValue = cpuRunMode == null ? RuntimePackage.Simulation : cpuRunMode;
 
+            var runStartIn = DSRegistry.GetValue(K.RunStartIn);
+            spinEdit_StartIn.Properties.MinValue = 0;
+            spinEdit_StartIn.EditValue = runStartIn == null ? 0 : Convert.ToInt32(runStartIn);
+            var runStartOut = DSRegistry.GetValue(K.RunStartOut);
+            spinEdit_StartOut.Properties.MinValue = 0;
+            spinEdit_StartOut.EditValue = runStartOut == null ? 0 : Convert.ToInt32(runStartOut);
 
             timerLongPress.Tick += (sender, e) => {
                 SIMControl.Step(ace_Play);
@@ -94,6 +114,6 @@ namespace DSModeler
         private void ace_pptReload_Click(object sender, EventArgs e) => ImportPowerPointWapper(Files.GetLast());
         private void simpleButton_layoutReset_Click(object s, EventArgs e) => LayoutForm.RestoreLayoutFromXml(dockManager);
 
-       
+      
     }
 }

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using static Engine.CodeGenCPU.CpuLoader;
 using static Engine.Core.CoreModule;
 using static Engine.Core.Interface;
+using static Engine.Core.RuntimeGeneratorModule;
 using static Engine.Cpu.RunTime;
 using static Engine.Cpu.RunTimeUtil;
 using static Model.Import.Office.ImportPPTModule;
@@ -45,11 +46,10 @@ namespace DSModeler
                             var pous = Cpu.LoadStatements(ppt.System, storages);
                             foreach (var pou in pous)
                             {
-                                var runMode = pou.ToSystem() == ppt.System ? Global.CpuRunMode : CpuRunMode.Non;
                                 dicCpu.Add(pou.ToSystem()
                                     , new DsCPU(pou.CommentedStatements()
                                     , new List<DsSystem>() { pou.ToSystem() }
-                                    , runMode));
+                                    , Global.CpuRunMode));
                                 DsProcessEvent.DoWork(Convert.ToInt32((cnt++ * 1.0) / pous.Count() * 100));
                                 await Task.Delay(1);
                             }
@@ -84,7 +84,7 @@ namespace DSModeler
                 //SIMControl.RunCpus = SIMControl.GetRunCpus(dicCpu);
                 SIMControl.RunCpus = SIMControl.GetRunCpuSingle(dicCpu);
                 SIMControl.DicCpu = dicCpu;
-                SIMControl.ReadySim();
+                //SIMControl.ReadyMode();
 
                 ace_Model.Expanded = true;
                 ace_System.Expanded = true;

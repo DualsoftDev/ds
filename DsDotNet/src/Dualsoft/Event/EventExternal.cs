@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using static Engine.Core.CoreModule;
 using static Engine.Core.Interface;
 using static Engine.Core.TagKindModule;
+using static Engine.Core.TagModule;
 
 namespace DSModeler
 {
@@ -15,7 +16,9 @@ namespace DSModeler
     {
 
         static IDisposable DisposableCPUEventValue;
+        static IDisposable DisposableCPUEventHWValue;
         static IDisposable DisposableCPUEventStatus;
+        static IDisposable DisposableHWPaix;
        
 
         public static void CPUSubscribe(Dictionary<Vertex, DsType.Status4> dicStatus)
@@ -63,6 +66,26 @@ namespace DSModeler
                         Task.Delay(SIMProperty.GetDelayMsec()).Wait();
                 });
             }
+            if (DisposableCPUEventHWValue == null)
+            {
+                DisposableCPUEventHWValue = CpusEvent.ValueHWSubject.Subscribe(rx =>
+                {
+                    var value = rx.Item3;
+                    var storage = rx.Item2 as Tag<bool>;
+
+                    Global.Logger.Debug($"{storage.Address} value: {value}");
+                });
+            }
+            if (DisposableHWPaix == null)
+            {
+                Global.ValueChangeSubjectPaix.Subscribe(rx =>
+                {
+                    var index = rx.Item1;
+                    var value = rx.Item2;
+
+                    Global.Logger.Debug($"{index} value: {value}");
+                });
+            }
         }
 
         private static ValueLog CreateLogicLog(string name, string value, string tagKind, ISystem sys)
@@ -78,24 +101,17 @@ namespace DSModeler
             return valueLog;
         }
 
-        //var txt = $"{DateTime.Now:hh:mm:ss.fff}  {txtStatus}  {v.ToText()}";
-        //if (DisposableCPUEventStatus != null) //외부에서 CPUUnsubscribe() 했을 경우가 아니면
-        //    Global.Logger.Info(txt);
-
-        //var txtValue = value.ToString();
-        //txtValue = txtValue == "True"
-        //               ? "●" : txtValue == "False" ?
-        //                       "○" : txtValue;
-
-        //var txt = $"{DateTime.Now.ToString("hh:mm:ss.fff")}  {txtValue}  {storage.ToText()}";
-        //if (DisposableCPUEventValue != null) //외부에서 CPUUnsubscribe() 했을 경우가 아니면
-        //    Global.Logger.Info(txt);
+      
         public static void CPUUnsubscribe()
         {
             DisposableCPUEventStatus?.Dispose();
             DisposableCPUEventStatus = null;
             DisposableCPUEventValue?.Dispose();
             DisposableCPUEventValue = null;
+            DisposableCPUEventHWValue?.Dispose();
+            DisposableCPUEventHWValue = null;
+            DisposableHWPaix?.Dispose();
+            DisposableHWPaix = null;
         }
 
     }

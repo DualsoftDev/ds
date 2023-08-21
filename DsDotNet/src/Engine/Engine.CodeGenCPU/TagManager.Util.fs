@@ -95,13 +95,14 @@ module TagManagerUtil =
     let resetSimDevCnt() = inCnt<- -1;outCnt<- -1;memCnt<- -1;
     let createBridgeTag(stg:Storages, name, addr:string, inOut:ActionTag, bridge:BridgeType, sys, task:IQualifiedNamed option): ITag option=
         let address =
-            if Runtime.Package = RuntimePackage.Simulation
+            if Runtime.Package.IsPackageSIM() || Runtime.Package.IsPackagePC()
             then
                 match inOut with
-                | ActionTag.ActionIn     -> inCnt<-inCnt+1;  Some($"%%MX{inCnt}")
-                | ActionTag.ActionOut    -> outCnt<-outCnt+1;Some($"%%MX{100000+outCnt}")
+                | ActionTag.ActionIn     -> inCnt<-inCnt+1;  Some($"%%I{inCnt}")
+                | ActionTag.ActionOut    -> outCnt<-outCnt+1;Some($"%%O{outCnt}")
                 | ActionTag.ActionMemory ->  failwithlog "error: Memory not supported "
                 | _ -> failwithlog "error: ActionTag create "
+
             else                 
                 let addr = addr.ToUpper()
                 match bridge with

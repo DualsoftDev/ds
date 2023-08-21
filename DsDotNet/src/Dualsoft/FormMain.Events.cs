@@ -71,7 +71,10 @@ namespace DSModeler
             comboBoxEdit_RunMode.EditValueChanging += (s, e) =>
             {
                 Global.CpuRunMode = ToRuntimePackage(e.NewValue.ToString());
+                Runtime.Package = Global.CpuRunMode;
                 DSRegistry.SetValue(K.CpuRunMode, Global.CpuRunMode);
+                if(e.OldValue != null)
+                    ImportPowerPointWapper(Files.GetLast());
             };
 
             spinEdit_StartIn.Properties.EditValueChanging += (s, e) => UpdateRunStartInOut(e, true);

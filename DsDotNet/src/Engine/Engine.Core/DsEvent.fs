@@ -15,7 +15,7 @@ module CpusEvent =
 
     let StatusSubject = new Subject<VertexStatusParam>()
     let ValueSubject  = new Subject<ISystem * IStorage * obj>()
-    let ValueHWSubject  = new Subject<ISystem * IStorage * obj>()
+    let ValueHWOutSubject  = new Subject<ISystem * IStorage * obj>()
 
     let onStatusChanged(sys:ISystem, vertex:IVertex, status:Status4) =
         StatusSubject.OnNext(VertexStatusParam.Event (sys, vertex, status))
@@ -23,7 +23,7 @@ module CpusEvent =
         ValueSubject.OnNext(sys, stg, v)
 
     let onValueHWChanged(sys:ISystem, stg:IStorage, v:obj) =
-        ValueHWSubject.OnNext(sys, stg, v)
+        ValueHWOutSubject.OnNext(sys, stg, v)
 
 [<AutoOpen>]
 module DsProcessEvent =

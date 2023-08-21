@@ -16,11 +16,11 @@ namespace DSModeler
     public static class EventCPU
     {
 
-        static IDisposable DisposableCPUEventValue;
-        static IDisposable DisposableCPUEventHWValue;
         static IDisposable DisposableCPUEventStatus;
-        static IDisposable DisposableHWPaix;
-       
+        static IDisposable DisposableCPUEventValue;
+        static IDisposable DisposableHWPaixOutput;
+        static IDisposable DisposableHWPaixInput;
+
 
         public static void CPUSubscribe(Dictionary<Vertex, DsType.Status4> dicStatus)
         {
@@ -49,7 +49,7 @@ namespace DSModeler
             }
             if (DisposableCPUEventValue == null)
             {
-                DisposableCPUEventValue = CpusEvent.ValueSubject.Subscribe(rx =>
+                DisposableHWPaixOutput = CpusEvent.ValueSubject.Subscribe(rx =>
                 {
                     var value = rx.Item3;
                     if (value is bool)
@@ -58,7 +58,7 @@ namespace DSModeler
                         var storage = rx.Item2;
                         var log = CreateLogicLog(storage.Name, value.ToString(), TagKindExt.GetVertexTagKindText(storage), sys);
                         LogicLog.TryAdd(log);
-            
+
                     }
 
                     if (Global.SimReset)
@@ -67,25 +67,25 @@ namespace DSModeler
                         Task.Delay(SIMProperty.GetDelayMsec()).Wait();
                 });
             }
-            if (DisposableCPUEventHWValue == null)
+            if (DisposableHWPaixOutput == null)
             {
-                DisposableCPUEventHWValue = CpusEvent.ValueHWSubject.Subscribe(rx =>
+                DisposableHWPaixOutput = CpusEvent.ValueHWOutSubject.Subscribe(rx =>
                 {
                     var value = rx.Item3;
-                    var storage = rx.Item2 as Tag<bool>;
+                    var tag = rx.Item2 as Tag<bool>;
 
-                    Global.Logger.Debug($"{storage.Address} value: {value}");
+                    Global.Logger.Debug($"PaixO {tag.Address} value: {value} [{tag.Name}]");
                 });
             }
-            if (DisposableHWPaix == null)
+            if (DisposableHWPaixInput == null)
             {
-                Global.ValueChangeSubjectPaixInputs.Subscribe(rx =>
+                DisposableHWPaixInput = Global.ValueChangeSubjectPaixInputs.Subscribe(rx =>
                 {
                     var index = rx.Item1;
                     var value = rx.Item2;
-                    
-
-                    Global.Logger.Debug($"{index} value: {value}");
+                    var tag = SIMControl.DicActionInput[$"I{index}"];
+                    tag.BoxedValue = value;
+                    Global.Logger.Debug($"PaixI {tag.Address} value: {value} [{tag.Name}]");
                 });
             }
         }
@@ -110,10 +110,10 @@ namespace DSModeler
             DisposableCPUEventStatus = null;
             DisposableCPUEventValue?.Dispose();
             DisposableCPUEventValue = null;
-            DisposableCPUEventHWValue?.Dispose();
-            DisposableCPUEventHWValue = null;
-            DisposableHWPaix?.Dispose();
-            DisposableHWPaix = null;
+            DisposableHWPaixOutput?.Dispose();
+            DisposableHWPaixOutput = null;
+            DisposableHWPaixInput?.Dispose();
+            DisposableHWPaixInput = null;
         }
 
     }

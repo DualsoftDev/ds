@@ -38,7 +38,6 @@ namespace DSModeler
     {
         public static ILog Logger => Log4NetLogger.Logger;
         public static bool IsDebug { get; set; }
-        public static string LogLevel { get; set; }
         public static int SimSpeed { get; set; } = 3;
         public static int RunStartIn { get; set; } = 0;
         public static int RunStartOut { get; set; } = 0;

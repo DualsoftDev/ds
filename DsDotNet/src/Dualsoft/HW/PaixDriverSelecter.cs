@@ -13,13 +13,15 @@ namespace DSModeler
 
     public static class PaixDrivers
     {
-        public static PaixHW SelectPaixHW { get; set; } = PaixHW.NMC2;
-        public static short[] GetIPSplit(string ipText) => ipText.Split('.').Select(s => Convert.ToInt16(s)).ToArray();
         public enum PaixHW
         {
             NMC2,
             NMF
         }
+
+        public static PaixHW SelectPaixHW { get; set; } = PaixHW.NMC2;
+        public static short[] GetIPSplit(string ipText) => ipText.Split('.').Select(s => Convert.ToInt16(s)).ToArray();
+
 
         public static short Ping(string ipText)
         {

@@ -20,7 +20,7 @@ namespace DSModeler
             Global.IsDebug = true;
 #endif
             var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            Global.LogLevel = Log4NetLogger.Initialize(config.FilePath, "DSModelerLogger");  // "App.config"
+            Log4NetLogger.Initialize(config.FilePath, "DSModelerLogger");  // "App.config"
 
             var exceptionHander = new Action<Exception>(ex =>
             {

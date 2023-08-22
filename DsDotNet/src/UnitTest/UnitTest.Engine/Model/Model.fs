@@ -18,7 +18,7 @@ module private ModelComparisonHelper =
         let system = parseText systemRepo referenceDir originalText
         validateGraphOfSystem system
 
-        let generated = system.ToDsText();
+        let generated = system.ToDsText(true);
         generated =~= answer
 
 

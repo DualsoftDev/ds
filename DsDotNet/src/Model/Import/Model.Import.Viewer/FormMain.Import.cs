@@ -70,7 +70,7 @@ namespace Dual.Model.Import
 
                 this.Do(() =>
                 {
-                    DisplayTextModel(Color.FromArgb(0, 150, 0), SelectedSystem.ToDsText());
+                    DisplayTextModel(Color.FromArgb(0, 150, 0), SelectedSystem.ToDsText(true));
                     richTextBox_ds.ScrollToCaret();
                     button_copy.Visible = true;
 

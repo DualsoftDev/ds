@@ -106,6 +106,7 @@ module ImportPPTModule =
             theSys, doc
 
         member internal x.GetImportModel(systemRepo:ShareableSystemRepository, pptReop:Dictionary<DsSystem, pptDoc>,  path:string, loadingType:ParserLoadingType) =
+            let emptyFile = "파일 이름오류"
             try
                 //active는 시스템이름으로 ppt 파일 이름을 사용
                 let mySys = DsSystem(getSystemName path, "localhost")
@@ -128,7 +129,7 @@ module ImportPPTModule =
                 //MSGInfo($"전체 부모   count [{doc.Parents.Keys.Count}]")
                 mySys, viewNodes
 
-            with ex ->  failwithf  $"{ex.Message}\t [ErrPath:{pathStack.First()}]"
+            with ex ->  failwithf  @$"{ex.Message}\t [ErrPath:{if pathStack.any() then pathStack.First() else emptyFile }]"
 
     let private fromPPTs(paths:string seq) =
 
@@ -199,4 +200,4 @@ module ImportPPTModule =
                             let removeTarget = relative.Replace("ds", "")
                             let rootDirectroy = absolute.Substring(0, absolute.length() - removeTarget.length())
 
-                            system.ToDsText(), rootDirectroy, relative)
+                            system.ToDsText(true), rootDirectroy, relative)

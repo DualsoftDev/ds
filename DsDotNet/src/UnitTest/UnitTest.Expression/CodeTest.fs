@@ -186,7 +186,7 @@ double myDouble = 3.14 + 3.14;
             system.Statements[0].ToText() === "float32 myFloat32 = 3.140000105f + 3.140000105f"
             system.Statements[1].ToText() === "float32 mySingle = 3.140000105f + 3.140000105f"
 
-            let text = system.ToDsText()
+            let text = system.ToDsText(true)
             ds =~= text
             ()
 

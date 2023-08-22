@@ -542,7 +542,7 @@ namespace Dual.Model.Import
             StartResetBtnUpdate(true);
 
             UpdateGraphUI(sysView.ViewNodes, true);
-            DisplayTextModel(System.Drawing.Color.Transparent, sysView.System.ToDsText());
+            DisplayTextModel(System.Drawing.Color.Transparent, sysView.System.ToDsText(true));
         }
 
         private void UpdateSelectedDevice(DeviceView view)
@@ -560,7 +560,7 @@ namespace Dual.Model.Import
 
 
             UpdateGraphUI(view.ViewNodes, false);
-            DisplayTextModel(System.Drawing.Color.Transparent, view.System.ToDsText());
+            DisplayTextModel(System.Drawing.Color.Transparent, view.System.ToDsText(true));
         }
 
         private void UpdatecomboBox_SegmentHMI(SystemView sysView)
@@ -606,7 +606,7 @@ namespace Dual.Model.Import
 
 
             WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"\r\n{string.Join("\r\n", lstText)}");
-            DisplayTextModel(System.Drawing.Color.Transparent, view.System.ToDsText());
+            DisplayTextModel(System.Drawing.Color.Transparent, view.System.ToDsText(true));
         }
 
         private void comboBox_TestExpr_SelectedIndexChanged(object sender, EventArgs e)

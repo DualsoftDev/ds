@@ -47,7 +47,7 @@ module ModelBuildupTests1 =
             let vCallM = CallDev.Create( callAm, DuParentReal real)
             real.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", vCallM)) |> ignore
 
-            let generated = system.ToDsText()
+            let generated = system.ToDsText(true)
             let answer = """
 [sys ip = localhost] My = {
     [flow] F = {
@@ -85,7 +85,7 @@ module ModelBuildupTests1 =
             let call2 = CallDev.Create(callAp, DuParentFlow flow)
 
             flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", call2)) |> ignore
-            let generated = system.ToDsText()
+            let generated = system.ToDsText(true)
             let answer = """
 [sys ip = localhost] My = {
     [flow] F = {
@@ -117,7 +117,7 @@ module ModelBuildupTests1 =
             let real3 = Real.Create("R3", flow2)
 
             flow2.CreateEdge(ModelingEdgeInfo<Vertex>(real2, ">", real3)) |> ignore
-            let generated = system.ToDsText()
+            let generated = system.ToDsText(true)
             let answer = """
 [sys ip = localhost] My = {
     [flow] F = {
@@ -148,7 +148,7 @@ module ModelBuildupTests1 =
 
             ApiResetInfo.Create(system, "Adv", ModelingEdgeType.Interlock, "Ret") |> ignore
 
-            let generated = system.ToDsText()
+            let generated = system.ToDsText(true)
             let answer = """
 [sys ip = localhost] My = {
     [flow] F = {
@@ -183,7 +183,7 @@ module ModelBuildupTests1 =
             system.AddButton(BtnType.DuEmergencyBTN, "STOP2", "%I1","%Q1",flow2, new HashSet<Func>())
             system.AddButton(BtnType.DuDriveBTN, "START2", "%I1","%Q1",flow2, new HashSet<Func>())
 
-            let generated = system.ToDsText()
+            let generated = system.ToDsText(true)
             let answer = """
 [sys ip = localhost] My = {
     [flow] F = {
@@ -256,7 +256,7 @@ module ModelBuildupTests1 =
 //            ] |> system.Observes.AddRange
 
 
-//            let generated = system.ToDsText()
+//            let generated = system.ToDsText(true)
 //            let answer = """
 //[sys ip = localhost] My = {
 //    [flow] F = {

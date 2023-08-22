@@ -10,7 +10,7 @@ module internal ToDsTextModule =
     let getTab n = Seq.init n (fun _ -> "    ") |> String.concat ""
     let lb, rb = "{", "}"
     let combineLines = ofNotNullAny >> joinLines
-
+    let mutable  pCooment = true //printComment
 
     type private MEI = ModelingEdgeInfo<Vertex>
     let private modelingEdgeInfosToDs (es:MEI seq) (tab:string) =
@@ -53,7 +53,7 @@ module internal ToDsTextModule =
                             $"{sn2}{arrow} {getVsAndTypes ts}"
                         comments.Add($"{comment}")
                     yield ";"
-                    yield ("\t\t// " + comments.JoinWith("") + ";")
+                    if pCooment then yield ("\t\t// " + comments.JoinWith("") + ";")
                 ] |> String.concat ""
         ]
 
@@ -70,8 +70,9 @@ module internal ToDsTextModule =
                 yield $"{tab}{rb}"
 
             let notMentioned = graph.Islands.Except(stems.Cast<Vertex>()).ToArray()
+            let comment  = if pCooment then "// island"  else ""
             for island in notMentioned do
-                yield $"{getTab (indent+1)}{island.Name.QuoteOnDemand()}; // island"
+                yield $"{getTab (indent+1)}{island.Name.QuoteOnDemand()}; {comment}"
         ]
 
     let flowToDs (flow:Flow) (indent:int) =
@@ -113,7 +114,8 @@ module internal ToDsTextModule =
                 yield $"{tab}{rb}"
         ] |> combineLines
 
-    let rec systemToDs (system:DsSystem) (indent:int) =
+    let rec systemToDs (system:DsSystem) (indent:int) (printComment:bool)=
+        pCooment <- printComment
         let tab = getTab indent
         let tab2 = getTab 2
         let tab3 = getTab 3
@@ -223,20 +225,7 @@ module internal ToDsTextModule =
                 yield buttonsToDs("h", system.HomeButtons)
                 yield $"{tab}{rb}"
 
-            //let lmps =
-            //    let alllmps = [
-            //        system.AutoModeLamps;
-            //        system.ManualLamps;
-            //        system.DriveLamps;
-            //        system.StopLamps;
-            //        system.EmergencyLamps;
-            //        system.TestLamps;
-            //        system.ReadyLamps;
-            //        system.IdleLamps;
-            //    ]
-            //    alllmps
-            //    |> List.map(fun b -> b |> List.ofSeq)
-            //    |> List.collect id
+
             if system.Lamps.Any() then
                 yield $"{tab}[lamps] = {lb}"
                 let lampsToDs(category:string, lamps:LampDef seq) =
@@ -366,16 +355,17 @@ module internal ToDsTextModule =
                 if safeties.Any()  then yield safeties
                 if layouts.Any()   then yield layouts
                 yield $"{tab}{rb}"
-
+            let commentDevice(d:Device) = if pCooment then  $"// {d.AbsoluteFilePath}" else "";
             for d in system.Devices do
-                yield $"{tab}[device file={quote d.UserSpecifiedFilePath}] {d.Name}; // {d.AbsoluteFilePath}"
-
+                yield $"{tab}[device file={quote d.UserSpecifiedFilePath}] {d.Name}; {commentDevice d}"
+            
+            let commentSystem(es:ExternalSystem) = if pCooment then  $"// {es.AbsoluteFilePath}" else "";
             for es in system.ExternalSystems do
                 let ip =
                     match es.HostIp with
                     | Some host -> $" ip={quote host}"
                     | _ -> ""
-                yield $"{tab}[external file={quote es.UserSpecifiedFilePath}{ip}] {es.Name}; // {es.AbsoluteFilePath}"
+                yield $"{tab}[external file={quote es.UserSpecifiedFilePath}{ip}] {es.Name}; {commentSystem es}"
 
             //Commands/Observes는 JobDef에 저장 (Variables는 OriginalCodeBlocks ?? System.Variables ??)
             yield codeBlockToDs system
@@ -388,9 +378,9 @@ module internal ToDsTextModule =
         ] |> combineLines
 
     type DsSystem with
-        member x.ToDsText() = systemToDs x 1
+        member x.ToDsText(printComment:bool) = systemToDs x 1 printComment
 
 
 [<Extension>]
 type SystemToDsExt =
-    [<Extension>] static member ToDsText (system:DsSystem) = systemToDs system 1
+    [<Extension>] static member ToDsText (system:DsSystem, printComment:bool) = systemToDs system 1 printComment

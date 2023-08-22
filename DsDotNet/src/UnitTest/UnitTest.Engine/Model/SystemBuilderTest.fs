@@ -75,7 +75,7 @@ module SystemBuilderTest =
 //                    //    })
 //                }
 
-//            let generated = system.ToDsText()
+//            let generated = system.ToDsText(true)
 //            logDebug $"{generated}"
 //            let answer = """
 //[sys] MySystem = {

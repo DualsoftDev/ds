@@ -49,7 +49,7 @@ namespace DSModeler
                     int cnt = 0;
                     string dsText = "";
                     foreach (var sys in SIMControl.DicPou.Keys)
-                        dsText += $"{sys.ToDsText()}\r\n\r\n";
+                        dsText += $"{sys.ToDsText(Global.IsDebug)}\r\n\r\n";
 
                     var colorTexts = ToTextColorDS(dsText);
                     foreach (var f in colorTexts)

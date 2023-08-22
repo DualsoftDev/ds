@@ -59,15 +59,17 @@ namespace DSModeler
             this.documentGroup1 = new DevExpress.XtraBars.Docking2010.Views.Tabbed.DocumentGroup(this.components);
             this.ac_Main = new DevExpress.XtraBars.Navigation.AccordionControl();
             this.accordionContentContainer2 = new DevExpress.XtraBars.Navigation.AccordionContentContainer();
-            this.toggleSwitch_menuNonFooter = new DevExpress.XtraEditors.ToggleSwitch();
+            this.toggleSwitch_menuExpand = new DevExpress.XtraEditors.ToggleSwitch();
             this.simpleButton_layoutReset = new DevExpress.XtraEditors.SimpleButton();
             this.labelControl2 = new DevExpress.XtraEditors.LabelControl();
             this.btn_StepLongPress = new DevExpress.XtraEditors.SimpleButton();
             this.accordionContentContainer5 = new DevExpress.XtraBars.Navigation.AccordionContentContainer();
+            this.comboBoxEdit_RunMode = new DevExpress.XtraEditors.ComboBoxEdit();
             this.spinEdit_StartOut = new DevExpress.XtraEditors.SpinEdit();
             this.labelControl9 = new DevExpress.XtraEditors.LabelControl();
             this.spinEdit_StartIn = new DevExpress.XtraEditors.SpinEdit();
             this.labelControl8 = new DevExpress.XtraEditors.LabelControl();
+            this.labelControl10 = new DevExpress.XtraEditors.LabelControl();
             this.labelControl7 = new DevExpress.XtraEditors.LabelControl();
             this.textEdit_IP = new DevExpress.XtraEditors.TextEdit();
             this.labelControl6 = new DevExpress.XtraEditors.LabelControl();
@@ -115,8 +117,6 @@ namespace DSModeler
             this.accordionControlElement1 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement4 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace9 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.labelControl10 = new DevExpress.XtraEditors.LabelControl();
-            this.comboBoxEdit_RunMode = new DevExpress.XtraEditors.ComboBoxEdit();
             ((System.ComponentModel.ISupportInitialize)(this.document1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dockManager)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManager1)).BeginInit();
@@ -133,8 +133,9 @@ namespace DSModeler
             ((System.ComponentModel.ISupportInitialize)(this.ac_Main)).BeginInit();
             this.ac_Main.SuspendLayout();
             this.accordionContentContainer2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_menuNonFooter.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_menuExpand.Properties)).BeginInit();
             this.accordionContentContainer5.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.comboBoxEdit_RunMode.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.spinEdit_StartOut.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.spinEdit_StartIn.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.textEdit_IP.Properties)).BeginInit();
@@ -146,7 +147,6 @@ namespace DSModeler
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View_Log)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit_Expr.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View_Expr)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.comboBoxEdit_RunMode.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // document1
@@ -410,28 +410,30 @@ namespace DSModeler
             this.ace_Setting});
             this.ac_Main.Location = new System.Drawing.Point(0, 0);
             this.ac_Main.Name = "ac_Main";
+            this.ac_Main.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Footer;
             this.ac_Main.ScrollBarMode = DevExpress.XtraBars.Navigation.ScrollBarMode.Touch;
             this.ac_Main.Size = new System.Drawing.Size(328, 806);
             this.ac_Main.TabIndex = 22;
+            this.ac_Main.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.HamburgerMenu;
             // 
             // accordionContentContainer2
             // 
-            this.accordionContentContainer2.Controls.Add(this.toggleSwitch_menuNonFooter);
+            this.accordionContentContainer2.Controls.Add(this.toggleSwitch_menuExpand);
             this.accordionContentContainer2.Controls.Add(this.simpleButton_layoutReset);
             this.accordionContentContainer2.Controls.Add(this.labelControl2);
             this.accordionContentContainer2.Name = "accordionContentContainer2";
             this.accordionContentContainer2.Size = new System.Drawing.Size(309, 67);
             this.accordionContentContainer2.TabIndex = 15;
             // 
-            // toggleSwitch_menuNonFooter
+            // toggleSwitch_menuExpand
             // 
-            this.toggleSwitch_menuNonFooter.Location = new System.Drawing.Point(157, 35);
-            this.toggleSwitch_menuNonFooter.MenuManager = this.barManager1;
-            this.toggleSwitch_menuNonFooter.Name = "toggleSwitch_menuNonFooter";
-            this.toggleSwitch_menuNonFooter.Properties.OffText = "Off";
-            this.toggleSwitch_menuNonFooter.Properties.OnText = "On";
-            this.toggleSwitch_menuNonFooter.Size = new System.Drawing.Size(95, 19);
-            this.toggleSwitch_menuNonFooter.TabIndex = 3;
+            this.toggleSwitch_menuExpand.Location = new System.Drawing.Point(157, 35);
+            this.toggleSwitch_menuExpand.MenuManager = this.barManager1;
+            this.toggleSwitch_menuExpand.Name = "toggleSwitch_menuExpand";
+            this.toggleSwitch_menuExpand.Properties.OffText = "Off";
+            this.toggleSwitch_menuExpand.Properties.OnText = "On";
+            this.toggleSwitch_menuExpand.Size = new System.Drawing.Size(95, 19);
+            this.toggleSwitch_menuExpand.TabIndex = 3;
             // 
             // simpleButton_layoutReset
             // 
@@ -460,7 +462,7 @@ namespace DSModeler
             // btn_StepLongPress
             // 
             this.btn_StepLongPress.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btn_StepLongPress.ImageOptions.SvgImage")));
-            this.btn_StepLongPress.Location = new System.Drawing.Point(217, 215);
+            this.btn_StepLongPress.Location = new System.Drawing.Point(215, 284);
             this.btn_StepLongPress.Name = "btn_StepLongPress";
             this.btn_StepLongPress.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
             this.btn_StepLongPress.Size = new System.Drawing.Size(83, 23);
@@ -481,6 +483,17 @@ namespace DSModeler
             this.accordionContentContainer5.Name = "accordionContentContainer5";
             this.accordionContentContainer5.Size = new System.Drawing.Size(309, 89);
             this.accordionContentContainer5.TabIndex = 28;
+            // 
+            // comboBoxEdit_RunMode
+            // 
+            this.comboBoxEdit_RunMode.Location = new System.Drawing.Point(133, 62);
+            this.comboBoxEdit_RunMode.MenuManager = this.barManager1;
+            this.comboBoxEdit_RunMode.Name = "comboBoxEdit_RunMode";
+            this.comboBoxEdit_RunMode.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.comboBoxEdit_RunMode.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+            this.comboBoxEdit_RunMode.Size = new System.Drawing.Size(164, 20);
+            this.comboBoxEdit_RunMode.TabIndex = 7;
             // 
             // spinEdit_StartOut
             // 
@@ -529,6 +542,16 @@ namespace DSModeler
             this.labelControl8.Size = new System.Drawing.Size(33, 19);
             this.labelControl8.TabIndex = 5;
             this.labelControl8.Text = "OUT";
+            // 
+            // labelControl10
+            // 
+            this.labelControl10.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
+            this.labelControl10.Appearance.Options.UseFont = true;
+            this.labelControl10.Location = new System.Drawing.Point(110, 36);
+            this.labelControl10.Name = "labelControl10";
+            this.labelControl10.Size = new System.Drawing.Size(17, 19);
+            this.labelControl10.TabIndex = 5;
+            this.labelControl10.Text = "IN";
             // 
             // labelControl7
             // 
@@ -1009,27 +1032,6 @@ namespace DSModeler
             this.ace9.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.ace9.Text = "Layout";
             // 
-            // labelControl10
-            // 
-            this.labelControl10.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
-            this.labelControl10.Appearance.Options.UseFont = true;
-            this.labelControl10.Location = new System.Drawing.Point(110, 36);
-            this.labelControl10.Name = "labelControl10";
-            this.labelControl10.Size = new System.Drawing.Size(17, 19);
-            this.labelControl10.TabIndex = 5;
-            this.labelControl10.Text = "IN";
-            // 
-            // comboBoxEdit_RunMode
-            // 
-            this.comboBoxEdit_RunMode.Location = new System.Drawing.Point(133, 62);
-            this.comboBoxEdit_RunMode.MenuManager = this.barManager1;
-            this.comboBoxEdit_RunMode.Name = "comboBoxEdit_RunMode";
-            this.comboBoxEdit_RunMode.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.comboBoxEdit_RunMode.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
-            this.comboBoxEdit_RunMode.Size = new System.Drawing.Size(164, 20);
-            this.comboBoxEdit_RunMode.TabIndex = 7;
-            // 
             // FormMain
             // 
             this.Appearance.Options.UseFont = true;
@@ -1069,9 +1071,10 @@ namespace DSModeler
             this.ac_Main.ResumeLayout(false);
             this.accordionContentContainer2.ResumeLayout(false);
             this.accordionContentContainer2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_menuNonFooter.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_menuExpand.Properties)).EndInit();
             this.accordionContentContainer5.ResumeLayout(false);
             this.accordionContentContainer5.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.comboBoxEdit_RunMode.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.spinEdit_StartOut.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.spinEdit_StartIn.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.textEdit_IP.Properties)).EndInit();
@@ -1085,7 +1088,6 @@ namespace DSModeler
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View_Log)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit_Expr.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View_Expr)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.comboBoxEdit_RunMode.Properties)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1153,7 +1155,7 @@ namespace DSModeler
         private DevExpress.XtraEditors.LabelControl labelControl1;
         private DevExpress.XtraBars.Navigation.AccordionContentContainer accordionContentContainer2;
         private DevExpress.XtraEditors.SimpleButton simpleButton_layoutReset;
-        private DevExpress.XtraEditors.ToggleSwitch toggleSwitch_menuNonFooter;
+        private DevExpress.XtraEditors.ToggleSwitch toggleSwitch_menuExpand;
         private DevExpress.XtraEditors.LabelControl labelControl2;
         private DevExpress.XtraEditors.LabelControl labelControl3;
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement3;

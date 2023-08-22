@@ -2,9 +2,11 @@ using DevExpress.XtraBars.Docking2010.Views;
 using DevExpress.XtraBars.Docking2010.Views.Tabbed;
 using DevExpress.XtraEditors;
 using DSModeler.Form;
+using System;
 using System.IO;
 using System.Linq;
 using static Engine.Core.CoreModule;
+using static Engine.Core.RuntimeGeneratorModule;
 using static Model.Import.Office.ViewModule;
 
 namespace DSModeler
@@ -73,6 +75,14 @@ namespace DSModeler
         public static void CreateDocPLCLS(FormMain formParent, TabbedView tab)
         {
             if (!Global.IsLoadedPPT()) return;
+
+            if (!RuntimeDS.Package.IsPackagePLC())
+            {
+                MBox.Warn("설정 H/W 에서 PLC를 선택해야 합니다.");
+                return;
+            }
+
+
             var fullpath = PLC.Export();
             string docKey = K.DocPLC;
 

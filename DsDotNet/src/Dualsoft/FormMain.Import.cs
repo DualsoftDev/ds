@@ -2,6 +2,7 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraPrinting.Export.Pdf;
 using Dual.Common.Core;
 using Engine.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,29 +30,31 @@ namespace DSModeler
 
             if (files != null)
             {
-
-                ClearModel();
-                Task.Run(async () =>
-                {
-                    await PPT.ImportPowerPoint(files, this);
-
-                    Tree.LogicTree.UpdateExpr(gridLookUpEdit_Expr, toggleSwitch_showDeviceExpr.IsOn);
-
-                    Files.SetLast(files);
-
-                    ViewDraw.DicStatus = new Dictionary<Vertex, Status4>();
-
-                    foreach (var item in SIMControl.DicPou)
+ 
+                    ClearModel(); 
+                    Task.Run(async () =>
                     {
-                        var sys = item.Key;
-                        var reals = sys.GetVertices().OfType<Vertex>();
-                        foreach (var r in reals)
-                            ViewDraw.DicStatus.Add(r, Status4.Homing);
-                    }
+                        Files.SetLast(files);
+                        bool loadOK = await PPT.ImportPowerPoint(files, this);
+                        if (!loadOK) { return;  } 
 
-                    EventCPU.CPUSubscribe(ViewDraw.DicStatus);
-                    Global.Logger.Info("PPTX 파일 로딩이 완료 되었습니다.");
-                });
+                        Tree.LogicTree.UpdateExpr(gridLookUpEdit_Expr, toggleSwitch_showDeviceExpr.IsOn);
+
+
+                        ViewDraw.DicStatus = new Dictionary<Vertex, Status4>();
+
+                        foreach (var item in SIMControl.DicPou)
+                        {
+                            var sys = item.Key;
+                            var reals = sys.GetVertices().OfType<Vertex>();
+                            foreach (var r in reals)
+                                ViewDraw.DicStatus.Add(r, Status4.Homing);
+                        }
+
+                        EventCPU.CPUSubscribe(ViewDraw.DicStatus);
+                        Global.Logger.Info("PPTX 파일 로딩이 완료 되었습니다.");
+                    });
+
             }
         }
 

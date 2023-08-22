@@ -632,7 +632,7 @@ namespace Dual.Model.Import
 
         private void comboBox_Package_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Runtime.Package = comboBox_Package.SelectedItem as RuntimePackage;
+            RuntimeDS.Package = comboBox_Package.SelectedItem as RuntimePackage;
         }
 
         private void button_CreatePLC_Click(object sender, EventArgs e)

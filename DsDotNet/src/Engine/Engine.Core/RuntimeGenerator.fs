@@ -14,7 +14,7 @@ module RuntimeGeneratorModule =
                 | _ -> false
             member x.IsPackagePLC() =
                 match x with
-                | StandardPLC | StandardPLC -> true
+                | StandardPLC | LightPLC -> true
                 | _ -> false
             member x.IsPackageSIM() =
                 match x with
@@ -31,16 +31,16 @@ module RuntimeGeneratorModule =
                 | "LightPLC" -> LightPLC
                 | _-> failwithlog $"Error {getFuncName()}"    
 
-    type Runtime() =
+    type RuntimeDS() =
         static let mutable runtimeTarget = WINDOWS
         static let mutable runtimePackage = Simulation
         static let targetChangedSubject = new Subject<RuntimeTargetType>()
         static let packageChangedSubject = new Subject<RuntimePackage>()
         static let mutable dsSystem:ISystem option = None
+        static let mutable autoAddress:bool = false
         static member Target
             with get() = runtimeTarget
             and set(v) =
-                //if v <> runtimeTarget then
                 runtimeTarget <- v
                 targetChangedSubject.OnNext(v)
         static member TargetChangedSubject = targetChangedSubject
@@ -54,5 +54,9 @@ module RuntimeGeneratorModule =
         static member System
             with get() = dsSystem.Value
             and set(v) = dsSystem <- Some v
+        static member AutoAddress
+            with get() = autoAddress 
+            and set(v) = autoAddress <-  v
 
+          
           

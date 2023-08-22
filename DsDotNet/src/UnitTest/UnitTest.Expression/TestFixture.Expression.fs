@@ -7,10 +7,10 @@ open Engine.Core
 module ExpressionFixtures =
     let sys = DsSystem("testSys", "localhost")
     let setRuntimeTarget(runtimeTarget:RuntimeTargetType) =
-        let runtimeTargetBackup = Runtime.Target
-        Runtime.Target <- runtimeTarget
-        Runtime.System <- sys
-        disposable { Runtime.Target <- runtimeTargetBackup }
+        let runtimeTargetBackup = RuntimeDS.Target
+        RuntimeDS.Target <- runtimeTarget
+        RuntimeDS.System <- sys
+        disposable { RuntimeDS.Target <- runtimeTargetBackup }
 
 
     [<AbstractClass>]

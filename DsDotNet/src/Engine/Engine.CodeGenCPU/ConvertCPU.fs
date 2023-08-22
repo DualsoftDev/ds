@@ -125,7 +125,7 @@ module ConvertCPU =
 
 
     let convertSystem(sys:DsSystem, isActive:bool) =
-        Runtime.System <- sys
+        RuntimeDS.System <- sys
         //DsSystem 물리 IO 생성
         sys.GenerationIO()
 

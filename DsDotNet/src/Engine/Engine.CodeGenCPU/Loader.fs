@@ -36,7 +36,7 @@ module CpuLoader =
 
     let applyTagManager(system:DsSystem, storages:Storages) =
         let createTagM (sys:DsSystem) =
-            Runtime.System <- sys
+            RuntimeDS.System <- sys
 
             sys.TagManager <- SystemManager(sys, storages)
             sys.Flows.Iter(fun f->f.TagManager <- FlowManager(f))

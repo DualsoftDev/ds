@@ -9,12 +9,14 @@ using Microsoft.Msagl.Routing.ConstrainedDelaunayTriangulation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.DesignerServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Engine.CodeGenCPU.CpuLoader;
 using static Engine.Core.CoreModule;
 using static Engine.Core.ExpressionForwardDeclModule;
 using static Engine.Core.ExpressionModule;
+using static Engine.Core.RuntimeGeneratorModule;
 using static Engine.Core.TagModule;
 using static Engine.Cpu.RunTime;
 using static Engine.Cpu.RunTimeUtil;
@@ -121,6 +123,11 @@ namespace DSModeler
         public static void Play(AccordionControlElement ace_Play)
         {
             if (!Global.IsLoadedPPT()) return;
+            if (RuntimeDS.Package.IsPackagePLC())
+            {
+                MBox.Warn("설젱 H/W 에서 Simution or PC 타입을 선택하세요");
+                return;
+            }
             Global.SimReset = false;
             SimTree.SimPlayUI(ace_Play, true);
 

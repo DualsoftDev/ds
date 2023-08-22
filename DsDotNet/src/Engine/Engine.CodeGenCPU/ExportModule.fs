@@ -101,7 +101,7 @@ module ExportModule =
         projParams.GenerateXmlString()
 
     let exportXMLforXGI(system:DsSystem, path:string, existingLSISprj) =
-        Runtime.Target <- XGI
+        RuntimeDS.Target <- XGI
         let globalStorage = new Storages()
         let localStorage =  new Storages()
         let result = Cpu.LoadStatements(system, globalStorage)

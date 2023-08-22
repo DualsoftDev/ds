@@ -75,8 +75,8 @@ namespace Dual.Model.Import
                     //if (EventExternal.DisposableCPUEvent == null)
                     EventExternal.CPUSubscribe();
 
-                    if (Runtime.Package.IsLightPLC ||
-                        Runtime.Package.IsStandardPLC)
+                    if (RuntimeDS.Package.IsLightPLC ||
+                        RuntimeDS.Package.IsStandardPLC)
                     {
                         var xmlTemplateFile = Path.ChangeExtension(_PathPPTs[0], "xml");
                         if (File.Exists(xmlTemplateFile))

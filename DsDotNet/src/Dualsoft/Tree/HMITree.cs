@@ -100,7 +100,7 @@ namespace DSModeler.Tree
                     }
 
                     acb.AppearanceNormal.Options.UseForeColor = true;
-                    acb.AppearanceHover.Options.UseForeColor = true;
+                    acb.AppearanceHover.Options.UseForeColor = false;
                     acb.AllowGlyphSkinning = DevExpress.Utils.DefaultBoolean.True;
                     acb.AlignmentOptions.Panel = DevExpress.Utils.ContextItemPanel.Center;
                     acb.AlignmentOptions.Position = DevExpress.Utils.ContextItemPosition.Far;

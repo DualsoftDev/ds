@@ -100,8 +100,8 @@ module MiscTestModule =
         [<Test>]
         member __.``Generic test`` () =
             let sys = DsSystem("testSys", "localhost")
-            Runtime.Target <- XGI
-            Runtime.System <- sys
+            RuntimeDS.Target <- XGI
+            RuntimeDS.System <- sys
 
             let anal(v:IValue<'T>) =
                 let innerType = typedefof<'T>

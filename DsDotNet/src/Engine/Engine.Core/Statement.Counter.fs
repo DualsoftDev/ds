@@ -61,7 +61,7 @@ module CounterStatementModule =
             let typ = cParams.Type
             let name = cParams.Name
             let preset = cParams.Preset
-            let sys = Runtime.System
+            let sys = RuntimeDS.System
             match typ with
             | CTU  -> CTUStruct.Create (typ, storages, name, preset, accum, sys) :> CounterBaseStruct
             | CTD  -> CTDStruct.Create (typ, storages, name, preset, accum, sys)

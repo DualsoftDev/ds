@@ -152,7 +152,7 @@ module ConvertCoreExt =
                 if hasNot(b.Funcs)then !!inTag else inTag    )
 
     let private getButtonExprWrtRuntimePackage(f:Flow, btns:ButtonDef seq) : Expression<bool> =
-        match Runtime.Package with
+        match RuntimeDS.Package with
         | (StandardPC | StandardPLC | Simulation) ->
             let exprs = getButtonExpr(f, btns)
             if exprs.any() then exprs.ToOr() else f.System._off.Expr

@@ -22,7 +22,7 @@ namespace DSModeler
         public const string LastPath = "LastPath";
         public const string LastFiles = "LastFiles";
         public const string SimSpeed = "SimSpeed";
-        public const string LayoutMenuFooter = "LayoutMenuFooter";
+        public const string LayoutMenuExpand = "LayoutMenuExpand";
         public const string CpuRunMode = "CpuRunMode";
         public const string RunStartIn = "RunStartIn";
         public const string RunStartOut = "RunStartOut";
@@ -41,7 +41,7 @@ namespace DSModeler
         public static int SimSpeed { get; set; } = 3;
         public static int RunStartIn { get; set; } = 0;
         public static int RunStartOut { get; set; } = 0;
-        public static bool LayoutMenuFooter { get; set; }
+        public static bool LayoutMenumExpand { get; set; }
         public static bool SimReset { get; set; }
         public static string ExportPathPLC { get; set; }
         public static string ExportPathXLS { get; set; }

@@ -18,29 +18,29 @@ module XgiFixtures =
             Engine.CodeGenCPU.ModuleInitializer.Initialize()
             autoVariableCounter <- 0
 
-        let mutable runtimeTarget = Runtime.Target
+        let mutable runtimeTarget = RuntimeDS.Target
         let sys = DsSystem("testSys", "localhost")
         [<SetUp>]
         member x.Setup () =
-            Runtime.Target <- x.GetCurrentRuntimeTarget()
-            Runtime.System <- sys
+            RuntimeDS.Target <- x.GetCurrentRuntimeTarget()
+            RuntimeDS.System <- sys
 
         [<TearDown>]
         member __.TearDown () =
-            Runtime.Target <- runtimeTarget
-            Runtime.System <- sys
+            RuntimeDS.Target <- runtimeTarget
+            RuntimeDS.System <- sys
 
         abstract GetCurrentRuntimeTarget: unit -> RuntimeTargetType
 
         override x.GetCurrentRuntimeTarget() = XGI
 
     let setRuntimeTarget(runtimeTarget:RuntimeTargetType) =
-        let runtimeTargetBackup = Runtime.Target
-        Runtime.Target <- runtimeTarget
-        disposable { Runtime.Target <- runtimeTargetBackup }
+        let runtimeTargetBackup = RuntimeDS.Target
+        RuntimeDS.Target <- runtimeTarget
+        disposable { RuntimeDS.Target <- runtimeTargetBackup }
 
     let generateXmlForTest projName (storages:Storages) (commentedStatements:CommentedStatement list) : string =
-        verify (Runtime.Target = XGI)
+        verify (RuntimeDS.Target = XGI)
 
         let prjParams = defaultXgiProjectParams
         let globalStorages = storages

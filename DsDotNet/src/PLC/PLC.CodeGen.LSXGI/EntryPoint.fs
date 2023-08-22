@@ -9,7 +9,7 @@ module ModuleInitializer =
 
         fwdCreateSymbolInfo <- XGITag.createSymbolInfo
 
-        Runtime.TargetChangedSubject.Subscribe(fun newRuntimeTarget ->
+        RuntimeDS.TargetChangedSubject.Subscribe(fun newRuntimeTarget ->
             match newRuntimeTarget with
             | XGI ->
                 ()

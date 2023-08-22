@@ -30,7 +30,7 @@ let main argv =
         let systemRepo   = ShareableSystemRepository ()
         let referenceDir = testDir
         let sys = parseText systemRepo referenceDir textDs
-        Runtime.System <- sys
+        RuntimeDS.System <- sys
         applyTagManager (sys, Storages())
         sys
 

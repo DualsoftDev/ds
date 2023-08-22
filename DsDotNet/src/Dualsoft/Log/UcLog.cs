@@ -207,6 +207,7 @@ namespace DSModeler
                         var fmtMsg = string.Format($"<color={cr}>{now} [{level}]:{lines[0]}</color>");
                         Items.Add(fmtMsg);
 
+
                         for (int i = 1; i < lines.Length; i++)
                         {
                             fmtMsg = $"<color={cr}>    {lines[i]}</color>";

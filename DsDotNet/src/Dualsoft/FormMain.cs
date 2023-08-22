@@ -48,6 +48,7 @@ namespace DSModeler
             InitializationUIControl();
 
             PaixDrivers.SelectPaixHW = Global.PaixHW;
+            RuntimeDS.AutoAddress = true;
 
             if (!Global.IsDebug)
                 DevExpress.XtraSplashScreen.SplashScreenManager.CloseForm();
@@ -62,9 +63,7 @@ namespace DSModeler
             LogicTree.InitControl(gridLookUpEdit_Expr, gridLookUpEdit1View_Expr);
             ratingControl_Speed.EditValue = SIMProperty.GetSpeed();
 
-            var regSpeed = DSRegistry.GetValue(K.LayoutMenuFooter);
-            toggleSwitch_menuNonFooter.IsOn = Convert.ToBoolean(regSpeed) != false;
-            ;
+         
             comboBoxEdit_RunMode.Properties.Items.AddRange(RuntimePackageList.ToArray());
             var cpuRunMode = DSRegistry.GetValue(K.CpuRunMode);
             comboBoxEdit_RunMode.EditValue = cpuRunMode == null ? RuntimePackage.Simulation : cpuRunMode;
@@ -78,6 +77,9 @@ namespace DSModeler
 
             var ip = DSRegistry.GetValue(K.RunHWIP);
             textEdit_IP.Text = ip == null ? K.RunDefaultIP : ip.ToString();
+           
+            var menuExpand = DSRegistry.GetValue(K.LayoutMenuExpand);
+            toggleSwitch_menuExpand.IsOn = Convert.ToBoolean(menuExpand);
 
             timerLongPress.Tick += (sender, e) =>
             {

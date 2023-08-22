@@ -71,7 +71,7 @@ namespace DSModeler
             comboBoxEdit_RunMode.EditValueChanging += (s, e) =>
             {
                 Global.CpuRunMode = ToRuntimePackage(e.NewValue.ToString());
-                Runtime.Package = Global.CpuRunMode;
+                RuntimeDS.Package = Global.CpuRunMode;
                 DSRegistry.SetValue(K.CpuRunMode, Global.CpuRunMode);
                 if(e.OldValue != null)
                     ImportPowerPointWapper(Files.GetLast());
@@ -98,21 +98,21 @@ namespace DSModeler
                 }
             }
 
-            toggleSwitch_menuNonFooter.Toggled += (s, e) =>
+            toggleSwitch_menuExpand.Toggled += (s, e) =>
             {
-                Global.LayoutMenuFooter = toggleSwitch_menuNonFooter.IsOn;
-                DSRegistry.SetValue(K.LayoutMenuFooter, Global.LayoutMenuFooter);
+                Global.LayoutMenumExpand = toggleSwitch_menuExpand.IsOn;
+                DSRegistry.SetValue(K.LayoutMenuExpand, Global.LayoutMenumExpand);
 
-                if (Global.LayoutMenuFooter)
+                if (Global.LayoutMenumExpand)
                 {
-                    ac_Main.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Footer;
-                    ac_Main.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.HamburgerMenu;
+                    ac_Main.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Default;
+                    ac_Main.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.Standard;
                 }
                 else
                 {
 
-                    ac_Main.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Default;
-                    ac_Main.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.Standard;
+                    ac_Main.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Footer;
+                    ac_Main.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.HamburgerMenu;
                 }
             };
 

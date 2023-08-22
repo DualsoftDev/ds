@@ -10,7 +10,6 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using Engine.Core;
-using static Dual.Common.Core.FS.MessageEvent;
 using Microsoft.FSharp.Core;
 using System.Runtime.CompilerServices;
 

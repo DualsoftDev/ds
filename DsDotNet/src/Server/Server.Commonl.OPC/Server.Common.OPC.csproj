@@ -7,7 +7,7 @@
 	  <RootNamespace>Server.Control.Opc</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-	  <PackageReference Include="DualSoft-Common-Core" Version="0.1.7" />
+	  <PackageReference Include="DualSoft-Common-Core" Version="0.1.12" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />

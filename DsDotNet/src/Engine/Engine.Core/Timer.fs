@@ -72,7 +72,7 @@ module rec TimerModule =
         let disposables = new CompositeDisposable()
 
         do
-            ts.Clear()
+            ts.ResetStruct()
 
             tracefn "Timer subscribing to tick event"
             the20msTimer.Subscribe(fun _ -> accumulate()) |> disposables.Add
@@ -86,7 +86,7 @@ module rec TimerModule =
                     match tt, rungInCondition with
                     | TON, true ->
                         ts.TT.Value <- not ts.DN.Value
-                    | TON, false -> ts.Clear()
+                    | TON, false -> ts.ResetStruct()
 
                     | TOF, false ->
                         ts.EN.Value <- false
@@ -156,13 +156,16 @@ module rec TimerModule =
         member _.RES:VariableBase<bool> = res
         /// XGI load
         member _.LD:VariableBase<bool> = res
-        abstract member Clear:unit -> unit
-        default x.Clear() =
-            x.DN.Value <- false
-            x.PRE.Value <- 0us      // preset 도 clear 해야 하는가?
-            x.ACC.Value <- 0us
-            x.RES.Value <- false
-            x.LD.Value <- false
+        abstract member ResetStruct:unit -> unit
+        default x.ResetStruct() =
+            let clearBool(b:VariableBase<bool>) =
+                if b |> isItNull |> not then
+                    b.Value <- false
+            // -- preset 은 clear 대상이 아님: x.PRE,     reset 도 clear 해야 하는가? -- ???  x.RES
+            clearVarBoolsOnDemand( [x.DN; x.LD;] )
+            clearBool(x.LD)
+            if x.ACC |> isItNull |> not then
+                x.ACC.Value <- 0us
 
     let addTagsToStorages (storages:Storages) (ts:IStorage seq) =
         for t in ts do
@@ -205,14 +208,12 @@ module rec TimerModule =
 
         /// Clear EN, TT, DN bits
         member x.ClearBits() =
-            x.EN.Value <- false
-            x.TT.Value <- false
-            x.DN.Value <- false
+            clearVarBoolsOnDemand( [x.EN; x.TT; x.DN;] )
 
-        override x.Clear() =
-            base.Clear()
+        override x.ResetStruct() =
+            base.ResetStruct()
             x.ClearBits()
             x.ACC.Value <- 0us
             // x.PRE.Value <- 0us       // preset 도 clear 해야 하는가?
-
+            ()
 

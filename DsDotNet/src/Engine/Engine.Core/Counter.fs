@@ -160,12 +160,9 @@ module rec CounterModule =
         member _.UN:VariableBase<bool> = cp.UN  // Underflow
         member _.LD:VariableBase<bool> = cp.LD  // Load (XGI)
         member _.Type = cp.Type
-        override x.Clear() =
-            base.Clear()
-            x.OV.Value <- false
-            x.UN.Value <- false
-            x.CU.Value <- false
-            x.CD.Value <- false
+        override x.ResetStruct() =
+            base.ResetStruct()
+            clearVarBoolsOnDemand([x.OV; x.UN; x.CU; x.CD;]);
 
     type ICounter = interface end
 
@@ -294,11 +291,12 @@ module rec CounterModule =
                     tracefn "Counter reset requested"
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then
                         failwithlog "ERROR"
-                    cs.Clear()
+                    cs.ACC.Value <- 0us
+                    clearVarBoolsOnDemand( [cs.DN; cs.CU; cs.CD; cs.OV; cs.UN;] )
             ) |> disposables.Add
 
         do
-            cs.Clear()
+            cs.ResetStruct()
             registerReset()
             match cs, counterType with
             | :? CTUStruct, CTU -> registerCTU()

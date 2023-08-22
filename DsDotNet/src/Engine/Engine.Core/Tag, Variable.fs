@@ -137,6 +137,9 @@ module ExpressionPrologModule =
     let mutable fwdCreateUShortMemberVariable = let dummy (_tagName:string) (_initValue:uint16) : VariableBase<uint16> = failwithlog "Should be reimplemented." in dummy
     let mutable fwdFlattenExpression          = let dummy (_expr:IExpression)                   : IFlatExpression      = failwithlog "Should be reimplemented." in dummy
 
-
+    let clearVarBoolsOnDemand(varbools:VariableBase<bool> seq) =
+        varbools
+        |> filter (isItNull >> not)
+        |> iter(fun vb -> vb.Value <- false)
 
 

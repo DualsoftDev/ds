@@ -107,7 +107,7 @@ module RunTime =
                             let stg = s.Value
                             match stg with
                             | :? TimerCounterBaseStruct as tc ->
-                                tc.Clear()  // 타이머 카운터 리셋
+                                tc.ResetStruct()  // 타이머 카운터 리셋
                             | _ ->
                                 stg.BoxedValue <- textToDataType(stg.DataType.Name).DefaultValue()
                 )

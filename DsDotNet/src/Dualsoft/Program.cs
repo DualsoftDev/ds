@@ -1,4 +1,3 @@
-using DevExpress.LookAndFeel;
 using DevExpress.XtraSplashScreen;
 using DSModeler.Utils;
 using Dual.Common.Core;
@@ -17,16 +16,17 @@ namespace DSModeler
         [STAThread]
         static void Main()
         {
-
+#if DEBUG
+            Global.IsDebug = true;
+#endif
             var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            Global.LogLevel = Log4NetLogger.Initialize(config.FilePath, "DSModelerLogger");  // "App.config"
+            Log4NetLogger.Initialize(config.FilePath, "DSModelerLogger");  // "App.config"
 
             var exceptionHander = new Action<Exception>(ex =>
             {
                 Log4NetLogger.Logger.Error($":::: Unhandled exception\r\n{ex}");
-#if DEBUG
-                MBox.Error(ex.Message, "Error");
-#endif
+                if (Global.IsDebug)
+                    MBox.Error(ex.Message, "Error");
             });
 
             UnhandledExceptionHandler.DefaultActionOnUnhandledException = exceptionHander;
@@ -37,10 +37,10 @@ namespace DSModeler
             Application.SetCompatibleTextRenderingDefault(false);
             EditorSkin.InitSetting("The Bezier", "Gloom Gloom");
             var main = new FormMain();
-#if !DEBUG
-            SplashScreenManager.ShowForm(main, typeof(SplashScreenDS));
-#endif
 
+
+            if (!Global.IsDebug)
+                SplashScreenManager.ShowForm(main, typeof(SplashScreenDS));
             Application.Run(main);
         }
     }

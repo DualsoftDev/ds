@@ -1,15 +1,15 @@
 using DevExpress.XtraEditors.Controls;
 using Dual.Common.Core;
+using Dual.Common.Winform;
 using log4net.Appender;
 using log4net.Core;
-
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DSModeler
@@ -39,15 +39,17 @@ namespace DSModeler
         }
         System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UcLog));
         Image copyImg => resources.GetObject("copyBtn.ImageOptions.Image") as Image;
-        Image clearImg => resources.GetObject("copyBtn.ImageOptions.Image") as Image;
+        Image clearImg => resources.GetObject("clearBtn.ImageOptions.Image") as Image;
         Image clearAllImg => resources.GetObject("copyAllBtn.ImageOptions.Image") as Image;
         Image logLevelBtnImg => resources.GetObject("logLevelBtn.ImageOptions.Image") as Image;
+        Image logLevelChkImg => resources.GetObject("ImgChk.ImageOptions.Image") as Image;
+
+
+
 
         private void UcLog_Load(object sender, EventArgs args)
         {
             this.Dock = DockStyle.Fill;
-
-
         }
 
         public void InitLoad()
@@ -72,7 +74,10 @@ namespace DSModeler
 
                 var text = String.Join("\r\n", strings);
                 if (!text.IsNullOrEmpty())
+                {
+                    Clipboard.Clear();
                     Clipboard.SetText(text);
+                }
             }));
 
             items.Add(new ToolStripMenuItem("Copy selected", copyImg, (o, a) =>
@@ -85,57 +90,63 @@ namespace DSModeler
 
                 var text = String.Join("\r\n", strings);
                 if (!text.IsNullOrEmpty())
+                {
+                    Clipboard.Clear();
                     Clipboard.SetText(text);
+                }
             }));
 
-            ToolStripMenuItem log_menu =
-                new ToolStripMenuItem("Log Level", logLevelBtnImg, (o, a) =>
-                {
-                    var strings =
-                        from item in listBoxControlOutput.SelectedItems
-                        let str = item.ToString()
-                        select Regex.Replace(str, "<.*?>", "")
-                    ;
-
-                    var text = String.Join("\r\n", strings);
-                    if (!text.IsNullOrEmpty())
-                        Clipboard.SetText(text);
-                });
-
-            /*
-             * Set Logger Level {
-             */
             var logger = ((log4net.Repository.Hierarchy.Logger)Log4NetLogger.Logger.Logger);
+            logger.Level = Level.All;
 
-            var logItemError = new ToolStripMenuItem("Error", null, (o, a) => logger.Level = Level.Error);
-            var logItemWarn = new ToolStripMenuItem("Warn", null, (o, a) => logger.Level = Level.Warn);
-            var logItemInfo = new ToolStripMenuItem("Info", null, (o, a) => logger.Level = Level.Info);
-            var logItemDebug = new ToolStripMenuItem("Debug", null, (o, a) => logger.Level = Level.Debug);
+            ToolStripMenuItem log_menu = new ToolStripMenuItem("Log Level", logLevelBtnImg);
+            var logItemError = new ToolStripMenuItem("Error", null);
+            var logItemWarn = new ToolStripMenuItem("Warn", null);
+            var logItemInfo = new ToolStripMenuItem("Info", null);
+            var logItemDebug = new ToolStripMenuItem("Debug", null);
+            var logItemAll = new ToolStripMenuItem("All", null);
+            logItemAll.Image = logLevelChkImg;
 
-            log_menu.DropDownItems.Add(logItemError);
-            log_menu.DropDownItems.Add(logItemWarn);
-            log_menu.DropDownItems.Add(logItemInfo);
-            log_menu.DropDownItems.Add(logItemDebug);
-
-
-            //멈춤현상 있어서 일단 삭제
-            //items.Add(log_menu);
-            var level = logger.Level;
-            ToolStripMenuItem logItem;
-
-            switch (level.ToString())
+            var logLvlControls = new List<ToolStripMenuItem>()
             {
-                case "ERROR": logItem = logItemError; break;
-                case "WARN": logItem = logItemWarn; break;
-                case "INFO": logItem = logItemInfo; break;
-                default: logItem = logItemDebug; break;
-            }
+                logItemError
+                    ,logItemWarn
+                    ,logItemInfo
+                    ,logItemDebug
+                    ,logItemAll
+            };
 
+            logLvlControls.Iter(i => i.Click += (ss, ee) =>
+            {
+                var tool = (ToolStripMenuItem)ss;
+                Level sellvl = getLevel(tool.Text);
+                logLvlControls.Iter(c =>
+                {
+                    c.Checked = false;
+                    c.Image = null;
+                });
+                tool.Checked = true;
+                tool.Image = logLevelChkImg;
 
-            logItem.CheckState = CheckState.Checked;
-            /*
-             * } Set Logger Level
-             */
+                logger.Level = sellvl;
+
+                Level getLevel(string lvl)
+                {
+                    Level l;
+                    switch (lvl.ToUpper())
+                    {
+                        case "ERROR": l = Level.Error; break;
+                        case "WARN": l = Level.Warn; break;
+                        case "INFO": l = Level.Info; break;
+                        case "DEBUG": l = Level.Debug; break;
+                        case "ALL": l = Level.All; break;
+                        default: l = Level.All; break;
+                    }
+                    return l;
+                }
+            });
+            log_menu.DropDownItems.AddRange(logLvlControls.ToArray());
+            items.Add(log_menu);
 
 
             listBoxControlOutput.MouseClick += (s, e) =>
@@ -176,11 +187,10 @@ namespace DSModeler
 
         public void Close() { }
 
-
         public async void DoAppend(LoggingEvent logEntry)
         {
             await this.DoAsync(tcs =>
-            { 
+            {
                 try
                 {
                     var msg = logEntry.MessageObject.ToString();
@@ -194,7 +204,7 @@ namespace DSModeler
                     var lines = msg.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
                     if (lines.Length > 0)
                     {
-                        var fmtMsg = string.Format($"<color={cr}>{now} [{level}]: {lines[0]}</color>");
+                        var fmtMsg = string.Format($"<color={cr}>{now} [{level}]:{lines[0]}</color>");
                         Items.Add(fmtMsg);
 
                         for (int i = 1; i < lines.Length; i++)
@@ -216,7 +226,8 @@ namespace DSModeler
                 tcs.SetResult(true);
             });
 
-            await Task.Yield(); 
         }
+
+
     }
 }

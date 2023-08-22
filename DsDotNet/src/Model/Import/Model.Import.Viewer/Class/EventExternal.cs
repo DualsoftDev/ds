@@ -7,7 +7,6 @@ using Dual.Common.Winform;
 using Dual.Common.Core.FS;
 using Engine.Core;
 
-using static Dual.Common.Core.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using Model.Import.Office;
 using System.Diagnostics;
@@ -19,7 +18,7 @@ namespace Dual.Model.Import
 
         public static void ProcessSubscribe()
         {
-            ProcessEvent.ProcessSubject.Subscribe(rx =>
+            DsProcessEvent.ProcessSubject.Subscribe(rx =>
             {
                 FormMain.TheMain.UpdateProgressBar(rx.pro);
             });
@@ -62,19 +61,13 @@ namespace Dual.Model.Import
 
             ucView.UpdateStatus(viewNode);
 
-            FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{v.Name}:{rx.status}", true);
+            //FormMain.TheMain.WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{v.Name}:{rx.status}", true);
         }
 
 
 
 
-        public static void MSGSubscribe()
-        {
-            MessageEvent.MSGSubject.Subscribe(rx =>
-                {
-                    FormMain.TheMain.WriteDebugMsg(rx.Time, rx.Level, $"{rx.Message}");
-                });
-        }
+ 
 
     }
 

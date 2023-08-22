@@ -9,6 +9,10 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using Engine.Core;
+using static Dual.Common.Core.FS.MessageEvent;
+using Microsoft.FSharp.Core;
+using System.Runtime.CompilerServices;
 
 namespace Dual.Model.Import
 {
@@ -46,16 +50,17 @@ namespace Dual.Model.Import
 
         public static bool BusyCheck()
         {
-            if (ProcessEvent.CurrProcess != 0)
+            if (DsProcessEvent.CurrProcess != 0)
             {
-                MessageEvent.MSGWarn("변환 작업중입니다.");
+                MessageBox.Show("프로세스 처리 작업중입니다.", "Model.Import.Viewer", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return true;
             }
             return false;
         }
 
-
+      
     }
+
     public static class RichTextBoxExtensions
     {
         public static void AppendTextColor(this RichTextBox box, string text, Color color)

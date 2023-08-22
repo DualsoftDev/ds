@@ -12,7 +12,6 @@ using Dual.Common.Winform;
 
 
 using static Engine.CodeGenCPU.TagManagerModule;
-using static Dual.Common.Core.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.EdgeExt;
 using static Engine.Core.SystemExt;
@@ -33,9 +32,16 @@ using static Engine.Core.TagModule;
 using static Engine.Core.TagKindModule;
 using LanguageExt;
 using static Engine.Core.DsType;
+using static Dual.Common.Core.FS.MessageEvent;
 
 namespace Dual.Model.Import
 {
+    public enum MSGLevel
+    {
+        MsgInfo,
+        MsgWarn,
+        MsgError,
+    };
     public partial class FormMain : Form
     {
         public static FormMain TheMain;
@@ -277,7 +283,7 @@ namespace Dual.Model.Import
             }
             catch
             {
-                ProcessEvent.DoWork(0);
+                DsProcessEvent.DoWork(0);
             }
 
         }
@@ -458,21 +464,21 @@ namespace Dual.Model.Import
                 var sd = new StorageDisplay()
                         { Display = name, Storage = storage, Value = value, OnOff = onOff };
 
-                if (_SelectedCPU != null && _SelectedCPU.System == sys)
-                {
-                    checkedListBox_My.Enabled = false;
-                    checkedListBox_My.Items.Add(sd, sd.OnOff);
-                    checkedListBox_My.SelectedIndex = checkedListBox_My.Items.Count - 1;
-                    checkedListBox_My.Enabled = true;
-                }
+                //if (_SelectedCPU != null && _SelectedCPU.System == sys)
+                //{
+                //    checkedListBox_My.Enabled = false;
+                //    checkedListBox_My.Items.Add(sd, sd.OnOff);
+                //    checkedListBox_My.SelectedIndex = checkedListBox_My.Items.Count - 1;
+                //    checkedListBox_My.Enabled = true;
+                //}
 
-                if (_SelectedDev != null && _SelectedDev.System == sys)
-                {
-                    checkedListBox_Ex.Enabled = false;
-                    checkedListBox_Ex.Items.Add(sd, sd.OnOff);
-                    checkedListBox_Ex.SelectedIndex = checkedListBox_Ex.Items.Count - 1;
-                    checkedListBox_Ex.Enabled = true;
-                }
+                //if (_SelectedDev != null && _SelectedDev.System == sys)
+                //{
+                //    checkedListBox_Ex.Enabled = false;
+                //    checkedListBox_Ex.Items.Add(sd, sd.OnOff);
+                //    checkedListBox_Ex.SelectedIndex = checkedListBox_Ex.Items.Count - 1;
+                //    checkedListBox_Ex.Enabled = true;
+                //}
             });
         }
         private void checkedListBox_My_DoubleClick(object sender, EventArgs e)

@@ -61,6 +61,7 @@ namespace Dual.Model.Import
             this.tabPage_activeFliter = new System.Windows.Forms.TabPage();
             this.listBox_find = new System.Windows.Forms.ListBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.button_autorun = new System.Windows.Forms.Button();
             this.button_find = new System.Windows.Forms.Button();
             this.checkBox_SkipLog = new System.Windows.Forms.CheckBox();
             this.checkBox_Reset = new System.Windows.Forms.CheckBox();
@@ -74,7 +75,6 @@ namespace Dual.Model.Import
             this.richTextBox_Debug = new System.Windows.Forms.RichTextBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.button_autorun = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -502,6 +502,17 @@ namespace Dual.Model.Import
             this.panel1.Size = new System.Drawing.Size(116, 416);
             this.panel1.TabIndex = 12;
             // 
+            // button_autorun
+            // 
+            this.button_autorun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_autorun.Location = new System.Drawing.Point(16, 133);
+            this.button_autorun.Name = "button_autorun";
+            this.button_autorun.Size = new System.Drawing.Size(85, 20);
+            this.button_autorun.TabIndex = 16;
+            this.button_autorun.Text = "auto run";
+            this.button_autorun.UseVisualStyleBackColor = true;
+            this.button_autorun.Click += new System.EventHandler(this.button_autorun_Click);
+            // 
             // button_find
             // 
             this.button_find.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -635,17 +646,6 @@ namespace Dual.Model.Import
             this.splitter1.Size = new System.Drawing.Size(1262, 3);
             this.splitter1.TabIndex = 22;
             this.splitter1.TabStop = false;
-            // 
-            // button_autorun
-            // 
-            this.button_autorun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_autorun.Location = new System.Drawing.Point(16, 133);
-            this.button_autorun.Name = "button_autorun";
-            this.button_autorun.Size = new System.Drawing.Size(85, 20);
-            this.button_autorun.TabIndex = 16;
-            this.button_autorun.Text = "auto run";
-            this.button_autorun.UseVisualStyleBackColor = true;
-            this.button_autorun.Click += new System.EventHandler(this.button_autorun_Click);
             // 
             // FormMain
             // 

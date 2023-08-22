@@ -4,114 +4,69 @@ open Engine.Core
 open Dual.Common.Core.FS
 open System
 open System.Linq
-open System.Reactive.Linq
-open System.Reactive.Disposables
 open System.Collections.Generic
-open System.Collections.Concurrent
 open System.Threading.Tasks
-
+open System.Threading
 [<AutoOpen>]
 module RunTime =
-    type DsCPU(css:CommentedStatement seq, sys:DsSystem) =
-        let mapRungs = ConcurrentDictionary<IStorage, HashSet<Statement>>()
+
+
+    type DsCPU(css:CommentedStatement seq, systems:DsSystem seq, cpuMode:RuntimePackage) =
         let statements = css |> Seq.map(fun f -> f.Statement)
-        let runSubscribe() =
-            let subscribe =
-                CpusEvent.ValueSubject      //cpu 단위로 이벤트 필요 ahn
-                //자신 CPU와 같은 시스템 또는 참조시스템만 연산처리
-                 .Where(fun (system, _storage, _value) -> system = sys || sys.ReferenceSystems.Contains(system:?> DsSystem))
-                 .Subscribe(fun (system, storage, _value) ->
-                        //Step 1 상태 UI 업데이트
-                        system.NotifyStatus(storage);
-                        //Step 2 관련수식 연산
-                        //if mapRungs.ContainsKey storage
-                        //then
-                        //    mapRungs[storage]
-                        //    |> Seq.map (fun f-> async { f.Do() } )
-                        //    |> Async.Parallel
-                        //    |> Async.Ignore
-                        //    |> Async.RunSynchronously
+        let mapRungs = getRungMap(statements)
+        let cpuStorages = mapRungs.Keys
+     
+        let mutable cts = new CancellationTokenSource()
+        let mutable run:bool = false
+        let asyncStart = 
+            async { 
+                //시스템 ON 및 값변경이 없는 조건 수식은  관련 수식은 Changed Event가 없어서한번 수행해줌
+                for s in statements do s.Do() 
+                //나머지 수식은 Changed Event가 있는것만 수행해줌
+                while run do   
+
+                    let chTags = cpuStorages.ChangedTags()
+                    let states = chTags.ExecutableStatements(mapRungs) 
+                  
+                    if states.any()  
+                    then
+                        chTags.ChangedTagsClear(systems)
+                        chTags.Iter(fun f-> 
+                            f.DsSystem.NotifyStatus(f) //상태보고
+                            f.DsSystem.NotifyHwOutput(f) //물리 Out 보고
+                            ) 
+                        states.Iter(fun f->  f.Do())
+            }
+        do 
+            ()
 
 
-                        //else
-                        //    ()
-                            //failwithlog $"Error {getFuncName()} : {storage.Name}"  //디버깅후 예외 처리
-
-                            //for statement in mapRungs[storage] do
-                            //    if storage.IsStartThread()
-                            //    then
-                            //        //statement.Do()
-                            //        async {
-                            //            do! Async.Sleep(200)
-                            //            statement.Do() }
-                            //            |> Async.StartImmediate
-                            //    else
-                            //        statement.Do()
-
-                    )
-            subscribe
-
-        let mutable runSubscription:IDisposable = null
-
-        do
-            let total =
-                [ for s in statements do
-                    yield! s.GetSourceStorages()
-                    yield! s.GetTargetStorages()
-                ].Distinct()
-            for item in total do
-                mapRungs.TryAdd (item, HashSet<Statement>())|> verifyM $"Duplicated [{item.ToText()}]"
-            let dicSource =
-                statements
-                    .Select(fun s -> s, s.GetSourceStorages())
-                    |> dict |> Dictionary
-
-            for rung in mapRungs do
-                let sts = dicSource.Filter(fun f->f.Value.Contains(rung.Key))
-                for st in sts do
-                    rung.Value.Add(st.Key) |> verifyM $"Duplicated [{ st.Key.ToText()}]"
-
-        //강제 전체 연산 임시 test용
-        member x.ScanOnce() =
-            for s in statements do
-                s.Do()
-
-            ///running 이 Some 이면 Expression 처리 동작 중
-        member x.IsRunning = runSubscription <> null
+        member x.Systems = systems
+        member x.IsRunning = run
         member x.CommentedStatements = css
+        
         member x.Run() =
-            if not <| x.IsRunning then
-                runSubscription <- runSubscribe()
-                async {
-                        while x.IsRunning
-                            do x.ScanOnce()
-                               do! Async.Sleep(50)
-                }|> Async.StartImmediate
+            if not <| run then 
+                systems.Iter(fun sys-> preAction(sys, cpuMode))
+                run <- true
+                Async.StartImmediate(asyncStart, cts.Token) |> ignore
 
         member x.Stop() =
-            if x.IsRunning then
-                runSubscription.Dispose()
-                runSubscription <- null
+            cts.Cancel()
+            cts <- new CancellationTokenSource() 
+            run <- false;
 
         member x.Step() =
             x.Stop()
-            runSubscription <- runSubscribe()
-            x.ScanOnce()
-            x.Stop()
+            systems.Iter(fun sys-> preAction(sys, cpuMode))
+            singleScan(statements, systems)
 
         member x.Reset() =
             x.Stop()
-            sys.TagManager
-               .Storages.Where(fun w-> w.Value.TagKind <> (int)SystemTag.on)
-                        .Iter(fun s->
-                            let stg = s.Value
-                            match stg with
-                            | :? TimerCounterBaseStruct as tc ->
-                                tc.ResetStruct()  // 타이머 카운터 리셋
-                            | _ ->
-                                stg.BoxedValue <- textToDataType(stg.DataType.Name).DefaultValue()
-                )
+            syncReset(statements, systems, false);
+        member x.ResetActive() =
+            x.Stop()
+            syncReset(statements, systems, true);
 
-
-        member x.Dispose() =  x.Stop()
-        member x.System = sys
+        member x.Dispose() =  
+            cts.Cancel()

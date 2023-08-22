@@ -41,7 +41,7 @@ type VertexMReal with
                   (v.H.Expr <&&> !!v.OG.Expr)
         let rst = v._off.Expr
 
-        (set, rst) ==| (v.RO, getFuncName())
+        (set, rst) --| (v.RO, getFuncName())
 
 type VertexManager with
     member v.R1_RealInitialStart(): CommentedStatement  = (v :?> VertexMReal).R1_RealInitialStart()

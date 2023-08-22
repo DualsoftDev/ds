@@ -44,6 +44,7 @@ module TagVariableModule =
     type TypedValueStorage<'T when 'T:equality>(param:StorageCreationParams<'T>) =
         let {Name=name; Value=initValue; Comment=comment; IsGlobal=isGlobal } = param
         let mutable value = initValue
+        let mutable tagChanged = false
         let comment = comment |? ""
         member _.Name: string = name
         member val IsGlobal = isGlobal with get, set
@@ -52,6 +53,7 @@ module TagVariableModule =
             and set(v) =
                 if value <> v then
                     value <- v
+                    tagChanged <- true
                  //모델 단위로 Subscribe 에서 자신 system만 처리 (system간 TAG 링크 때문에)
                     onValueChanged((x:>IStorage).DsSystem, x, v)
                  //기존 시스템 단위로
@@ -63,6 +65,7 @@ module TagVariableModule =
             member x.DsSystem = param.System
             member x.Target = param.Target
             member x.TagKind = param.TagKind
+            member x.TagChanged  with get() = tagChanged and set(v) = tagChanged <- v
             member x.DataType = typedefof<'T>
             member x.IsGlobal with get() = x.IsGlobal and set(v) = x.IsGlobal <- v
             member x.Comment with get() = x.Comment and set(v) = x.Comment <- v

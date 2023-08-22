@@ -41,6 +41,7 @@ module Interface =
         ///Storage 대상 객체 TagTarget =| TTSystem | TTFlow | TTVertex | TTApiItem | 변수 및 타이머 카운터는 None
         abstract Target: IQualifiedNamed option
         abstract TagKind: int
+        abstract TagChanged: bool with get, set
         abstract BoxedValue: obj with get, set
         abstract DataType : System.Type
         abstract IsGlobal : bool with get, set

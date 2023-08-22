@@ -26,7 +26,7 @@ type VertexManager with
         [
             for coin in coins do
                 let coin = coin :?> VertexMCoin
-                let sets = coin.GetWeakStartRootAndCausals()
+                let sets = coin.GetWeakStartDAGAndCausals()
                 yield (sets, coin.CR.Expr <||> !!v.Flow.dop.Expr) ==| (coin.ST, getFuncName() )
         ]
 

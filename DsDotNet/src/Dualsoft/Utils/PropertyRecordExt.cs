@@ -1,16 +1,15 @@
+using Dual.Common.Core;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
-using System.Linq;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
-using DevExpress.Utils.Text;
-using Dual.Common.Core;
+using System.Linq;
 using static Engine.Core.CoreModule;
 
 namespace DSModeler
 {
-    public static class PropertyRecordExtension
+    public static class PropertyRecordExt
     {
         public static object Propertize(this IEnumerable<Vertex> vertices)
         {
@@ -40,7 +39,7 @@ namespace DSModeler
         }
 
         string strSelector(Func<Vertex, string> func) => _vertices.Select(func).Distinct().Count() == 1 ? func(_vertices[0]) : _multi;
-      
+
         [DisplayName("오브젝트 이름"), Editable(false)]
         public string PartName => strSelector(r => r.Name);
 

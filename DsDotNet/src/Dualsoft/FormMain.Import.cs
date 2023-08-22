@@ -1,15 +1,16 @@
-using Dual.Common.Core.FS;
+using DevExpress.XtraEditors;
+using DevExpress.XtraPrinting.Export.Pdf;
+using Dual.Common.Core;
+using Engine.Core;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Windows.Forms;
+using System.Linq;
+using System.Threading.Tasks;
+using static Engine.CodeGenCPU.CpuLoader;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.EdgeExt;
 using static Engine.Cpu.RunTime;
 
-
-using DevExpress.XtraEditors;
-using System.Linq;
 
 namespace DSModeler
 {
@@ -17,59 +18,61 @@ namespace DSModeler
     {
         public void ImportPowerPointWapper(string[] lastFiles)
         {
+            if (Global.BusyCheck()) return;
 
-            if (0 < ProcessEvent.CurrProcess && ProcessEvent.CurrProcess < 100)
-                XtraMessageBox.Show("파일 처리중 입니다.", $"{K.AppName}", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            EventCPU.CPUUnsubscribe();
+            string[] files;
+            if (lastFiles.IsNullOrEmpty())
+                files = FileOpenSave.OpenFiles();
             else
+                files = lastFiles;
+
+            if (files != null)
             {
-                EventCPU.CPUUnsubscribe();
-                string[] files;
-                if (lastFiles.IsNullOrEmpty())
-                    files = FileOpenSave.OpenFiles();
-                else
-                    files = lastFiles;
 
-                if (files != null)
+                ClearModel();
+                Task.Run(async () =>
                 {
-                    clearModel();
+                    await PPT.ImportPowerPoint(files, this);
 
-                    DicCpu = PPT.ImportPowerPoint(files, this, tabbedView1, ace_Model, ace_System, ace_Device, ace_HMI);
-                    LastFiles.Set(files);
-                    DicStatus = new Dictionary<Vertex, Status4>();
+                    Tree.LogicTree.UpdateExpr(gridLookUpEdit_Expr, toggleSwitch_showDeviceExpr.IsOn);
 
-                    foreach (var item in DicCpu)
+                    Files.SetLast(files);
+
+                    ViewDraw.DicStatus = new Dictionary<Vertex, Status4>();
+
+                    foreach (var item in SIMControl.DicPou)
                     {
                         var sys = item.Key;
                         var reals = sys.GetVertices().OfType<Vertex>();
                         foreach (var r in reals)
-                            DicStatus.Add(r, Status4.Homing);
+                            ViewDraw.DicStatus.Add(r, Status4.Homing);
                     }
 
-
+                    EventCPU.CPUSubscribe(ViewDraw.DicStatus);
                     Global.Logger.Info("PPTX 파일 로딩이 완료 되었습니다.");
-                }
-
-                EventCPU.CPUSubscribe(DicStatus);
-
+                });
             }
-
-
         }
 
-        void clearModel()
+        void ClearModel()
         {
-            foreach (var item in DicCpu.Values)
-                item.Dispose();
-            DicCpu = new Dictionary<DsSystem, DsCPU>();
+            if (Global.ActiveSys != null)
+                SIMControl.Reset(ace_Play, ace_HMI);
 
-            tabbedView1.Controller.CloseAll();
-            tabbedView1.Documents.Clear();
+            SIMControl.RunCpus.Iter(cpu => cpu.Dispose());
+            SIMControl.DicPou = new Dictionary<DsSystem, PouGen>();
 
-            simpleButton_OpenPLC.Visible = false;
+            tabbedView_Doc.Controller.CloseAll();
+            tabbedView_Doc.Documents.Clear();
+            barStaticItem_logCnt.Caption = "";
+            LogicLog.ValueLogs.Clear();
 
-            Model.ClearSubBtn(ace_System);
-            Model.ClearSubBtn(ace_Device);
-            Model.ClearSubBtn(ace_HMI);
+            Global.ActiveSys = null;
+
+            Tree.ModelTree.ClearSubBtn(ace_System);
+            Tree.ModelTree.ClearSubBtn(ace_Device);
+            Tree.ModelTree.ClearSubBtn(ace_HMI);
         }
     }
 }

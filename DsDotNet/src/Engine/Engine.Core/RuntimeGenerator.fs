@@ -7,6 +7,29 @@ open Dual.Common.Core.FS
 module RuntimeGeneratorModule =
     type RuntimeTargetType = WINDOWS | XGI | XGK | AB | MELSEC
     type RuntimePackage    = Simulation | StandardPC | StandardPLC | LightPC | LightPLC
+        with
+            member x.IsPackagePC() =
+                match x with
+                | StandardPC | LightPC -> true
+                | _ -> false
+            member x.IsPackagePLC() =
+                match x with
+                | StandardPLC | StandardPLC -> true
+                | _ -> false
+            member x.IsPackageSIM() =
+                match x with
+                | Simulation -> true
+                | _ -> false
+
+    let RuntimePackageList =  [ Simulation; StandardPC; StandardPLC; LightPC; LightPLC]
+    let ToRuntimePackage(s:string) =
+                match s with
+                | "Simulation" -> Simulation
+                | "StandardPC" -> StandardPC
+                | "StandardPLC" -> StandardPLC
+                | "LightPC" -> LightPC
+                | "LightPLC" -> LightPLC
+                | _-> failwithlog $"Error {getFuncName()}"    
 
     type Runtime() =
         static let mutable runtimeTarget = WINDOWS
@@ -32,4 +55,4 @@ module RuntimeGeneratorModule =
             with get() = dsSystem.Value
             and set(v) = dsSystem <- Some v
 
-
+          

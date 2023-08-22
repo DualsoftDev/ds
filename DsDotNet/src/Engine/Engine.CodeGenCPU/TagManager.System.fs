@@ -15,7 +15,7 @@ module SystemManagerModule =
                 let systemTag = systemTag |> int
                 match dt with
                 | (DuBOOL | DuUINT16 | DuUINT8) ->
-                    createPlanVar stg  name  dt  autoAddr target systemTag
+                    createPlanVar stg  name  dt  autoAddr target systemTag sys
                 | _ -> failwithlog $"not support system TagType {dt}"
 
 

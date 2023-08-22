@@ -1,14 +1,6 @@
-using DevExpress.XtraEditors;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using DevExpress.XtraVerticalGrid;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace DSModeler
 {
@@ -45,7 +37,7 @@ namespace DSModeler
             //PropertyGrid.OptionsBehavior.Editable = false;
             PropertyGrid.OptionsBehavior.PropertySort = DevExpress.XtraVerticalGrid.PropertySort.NoSort;
             PropertyGrid.OptionsView.AllowReadOnlyRowAppearance = DevExpress.Utils.DefaultBoolean.True;
-            PropertyGrid.OptionsView.ShowRootCategories = false;     
+            PropertyGrid.OptionsView.ShowRootCategories = false;
             PropertyGrid.ActiveViewType = PropertyGridView.Office;
 
             //PropertyGrid.OptionsView.FixedLineWidth = 1;

@@ -26,7 +26,7 @@ module TagManagerModule =
         let createTag(mark) (vertexTag:VertexTag) =
             let vertexTag = vertexTag |> int
             let name = $"{v.QualifiedName}_{mark}"
-            let t = createPlanVar  s name DuBOOL true v vertexTag
+            let t = createPlanVar  s name DuBOOL true v vertexTag sys
             t :?> PlanVar<bool>
 
         let startTagBit   = createTag "ST"   VertexTag.startTag
@@ -88,7 +88,7 @@ module TagManagerModule =
         member _.H          = homingBit
 
         //Monitor
-        ///OriGin Monitor
+        ///Origin Monitor
         member _.OG         =  originBit
         ///PAuse Monitor
         member _.PA         =  pauseBit
@@ -107,7 +107,8 @@ module TagManagerModule =
             if goingRelays.ContainsKey src
             then goingRelays[src]
             else
-                let gr = createPlanVar s $"{v.Name}_GR_{src.Name}" DuBOOL true v (VertexTag.goingrelay|>int):?> PlanVar<bool>
+                let gr =
+                    createPlanVar s $"{v.Name}_GR_{src.Name}" DuBOOL true v (VertexTag.goingrelay|>int) sys:?> PlanVar<bool> 
                 goingRelays.Add (src, gr)
                 gr
 

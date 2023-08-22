@@ -37,6 +37,7 @@ namespace DSModeler.Form
             this.ucView1.Flow = null;
             this.ucView1.Location = new System.Drawing.Point(0, 0);
             this.ucView1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.ucView1.MasterNode = null;
             this.ucView1.Name = "ucView1";
             this.ucView1.Size = new System.Drawing.Size(694, 665);
             this.ucView1.TabIndex = 0;

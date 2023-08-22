@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using static Dual.Common.Core.FS.MessageEvent;
 using static Engine.Core.CoreModule;
 using static Engine.Core.RuntimeGeneratorModule;
 using static Model.Import.Office.ImportPPTModule;
@@ -50,13 +49,13 @@ namespace Dual.Model.Import
                 paths.ForEach(f =>
                     WriteDebugMsg(DateTime.Now, MSGLevel.MsgWarn, $"{f} 불러오기 성공!!"));
 
-                ProcessEvent.DoWork(0);
+                DsProcessEvent.DoWork(0);
             }
             catch (Exception ex)
             {
                 WriteDebugMsg(DateTime.Now, MSGLevel.MsgError, ex.Message);
             }
-            finally { ProcessEvent.DoWork(0); }
+            finally { DsProcessEvent.DoWork(0); }
         }
 
         internal void ImportExcel(string path)
@@ -64,7 +63,7 @@ namespace Dual.Model.Import
             if (UtilFile.BusyCheck()) return;
             try
             {
-                MSGInfo($"{path} 불러오는 중!!");
+                WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{path} 불러오는 중!!");
                 Runtime.Target = RuntimeTargetType.XGI;
 
                 ImportIOTable.ApplyExcel(path, GetSystems());
@@ -75,15 +74,15 @@ namespace Dual.Model.Import
                     richTextBox_ds.ScrollToCaret();
                     button_copy.Visible = true;
 
-                    MSGInfo($"{path} 적용완료!!");
-                    MSGWarn($"파워포인트와 엑셀을 동시에 가져오면 IO 매칭된 설정값을 가져올수 있습니다.!!");
+                    WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{path} 적용완료!!");
+                    WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"파워포인트와 엑셀을 동시에 가져오면 IO 매칭된 설정값을 가져올수 있습니다.!!");
                     button_CreatePLC.Visible = true;
                 });
 
             }
 
             catch (Exception ex) { WriteDebugMsg(DateTime.Now, MSGLevel.MsgError, ex.Message); }
-            finally { ProcessEvent.DoWork(0); }
+            finally { DsProcessEvent.DoWork(0); }
         }
     }
 }

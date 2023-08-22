@@ -45,10 +45,10 @@ module TagManagerUtil =
 
 
     /// fillAutoAddress : PLC 에 내릴 때, 자동으로 주소를 할당할 지의 여부
-    let private createPlanVarHelper(stg:Storages, name:string, dataType:DataType, fillAutoAddress:bool, target:IQualifiedNamed, tagIndex:int) : IStorage =
+    let private createPlanVarHelper(stg:Storages, name:string, dataType:DataType, fillAutoAddress:bool, target:IQualifiedNamed, tagIndex:int,  system:ISystem) : IStorage =
         let v = dataType.DefaultValue()
         let address = if fillAutoAddress then Some "" else None
-        let createParam () = {defaultStorageCreationParams(unbox v) with Name=name; IsGlobal=true; Address=address; Target= Some target; TagKind = tagIndex}
+        let createParam () = {defaultStorageCreationParams(unbox v) with Name=name; IsGlobal=true; Address=address; Target= Some target; TagKind = tagIndex;System= system}
         let t:IStorage =
             match dataType with
             | DuINT8    -> PlanVar<int8>  (createParam())
@@ -79,9 +79,9 @@ module TagManagerUtil =
         let cs = CTRStruct.Create(CounterType.CTR, storages, name, 0us, 0us, sys)
         cs
 
-    let createPlanVar (storages:Storages) (name:string) (dataType:DataType) (fillAutoAddress:bool) (target:IQualifiedNamed) (tagIndex:int) =
+    let createPlanVar (storages:Storages) (name:string) (dataType:DataType) (fillAutoAddress:bool) (target:IQualifiedNamed) (tagIndex:int) (sys:ISystem) =
         let name = getPlcTagAbleName name storages
-        let t= createPlanVarHelper (storages, name, dataType, fillAutoAddress, target, tagIndex)
+        let t= createPlanVarHelper (storages, name, dataType, fillAutoAddress, target, tagIndex, sys)
         t
 
     //let createPlanVarBool (storages:Storages) name (fillAutoAddress:bool) (target:IQualifiedNamed)=
@@ -93,14 +93,16 @@ module TagManagerUtil =
     let mutable outCnt = -1;
     let mutable memCnt = -1;
     let resetSimDevCnt() = inCnt<- -1;outCnt<- -1;memCnt<- -1;
-    let createBridgeTag(stg:Storages, name, addr:string, inOut:InOut, bridge:BridgeType, sys): ITag option=
+    let createBridgeTag(stg:Storages, name, addr:string, inOut:ActionTag, bridge:BridgeType, sys, task:IQualifiedNamed option): ITag option=
         let address =
-            if Runtime.Package = RuntimePackage.Simulation
+            if Runtime.Package.IsPackageSIM() || Runtime.Package.IsPackagePC()
             then
                 match inOut with
-                | In     -> inCnt<-inCnt+1;  Some($"%%MX{inCnt}")
-                | Out    -> outCnt<-outCnt+1;Some($"%%MX{100000+outCnt}")
-                | Memory ->  failwithlog "error: Memory not supported "
+                | ActionTag.ActionIn     -> inCnt<-inCnt+1;  Some($"%%I{inCnt}")
+                | ActionTag.ActionOut    -> outCnt<-outCnt+1;Some($"%%O{outCnt}")
+                | ActionTag.ActionMemory ->  failwithlog "error: Memory not supported "
+                | _ -> failwithlog "error: ActionTag create "
+
             else                 
                 let addr = addr.ToUpper()
                 match bridge with
@@ -113,13 +115,14 @@ module TagManagerUtil =
         then
             let name =
                 match inOut with
-                | In  -> $"{name}_I"
-                | Out -> $"{name}_O"
-                | Memory -> failwithlog "error: Memory not supported "
+                | ActionTag.ActionIn    -> $"{name}_I"
+                | ActionTag.ActionOut   -> $"{name}_O"
+                | ActionTag.ActionMemory   -> failwithlog "error: Memory not supported "
+                | _ -> failwithlog "error: ActionTag create "
 
             let plcName = getPlcTagAbleName name stg
             let t =
-                let param = {defaultStorageCreationParams(false) with Name=plcName; Address=address; System=sys}
+                let param = {defaultStorageCreationParams(false) with Name=plcName; Address=address; System=sys; TagKind = (int)inOut; Target = task}
                 (Tag(param) :> ITag)
             stg.Add(t.Name, t)
             Some t

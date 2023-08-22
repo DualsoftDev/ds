@@ -62,21 +62,21 @@ module ConvertCoreExt =
 
         member private x.GenerationLampIO() =
             for lamp in x.SystemLamps do
-                match createBridgeTag(x.Storages, lamp.Name, lamp.OutAddress, Out ,BridgeType.Lamp, x) with
+                match createBridgeTag(x.Storages, lamp.Name, lamp.OutAddress,  ActionTag.ActionOut  ,BridgeType.Lamp, x , None) with
                 | Some t ->  lamp.OutTag  <- t
                 | None -> ()
 
         member private x.GenerationCondition() =
             for sc in x.SystemConditions do
-                match createBridgeTag(x.Storages, sc.Name, sc.InAddress, In ,BridgeType.Condition, x) with
+                match createBridgeTag(x.Storages, sc.Name, sc.InAddress, ActionTag.ActionIn ,BridgeType.Condition, x, None) with
                 | Some t ->  sc.InTag  <- t
                 | None -> ()
 
         member private x.GenerationButtonIO() =
             for b in x.SystemButtons do
-                createBridgeTag(x.Storages, b.Name, b.InAddress, In ,BridgeType.Button, x)
+                createBridgeTag(x.Storages, b.Name, b.InAddress, ActionTag.ActionIn ,BridgeType.Button, x, None)
                 |> iter (fun t -> b.InTag   <- t)
-                createBridgeTag(x.Storages, b.Name, b.OutAddress, Out ,BridgeType.Button, x)
+                createBridgeTag(x.Storages, b.Name, b.OutAddress, ActionTag.ActionOut ,BridgeType.Button, x, None)
                 |> iter (fun t -> b.OutTag  <- t)
 
         member private x.GenerationTaskDevIO() =
@@ -86,11 +86,17 @@ module ConvertCoreExt =
                 then failwithlog $"Error {getFuncName()}"
 
                 if b.ApiItem.RXs.any() then
-                    createBridgeTag(x.Storages, b.ApiName, b.InAddress, In ,BridgeType.Device, x)
-                    |> iter (fun t -> b.InTag <- t)
+                    createBridgeTag(x.Storages, b.ApiName, b.InAddress, ActionTag.ActionIn ,BridgeType.Device, x , Some(b))
+                    |> iter (fun t -> 
+                            b.InTag <- t
+                            b.InAddress <- t.Address
+                            )
                 if b.ApiItem.TXs.any() then
-                    createBridgeTag(x.Storages, b.ApiName, b.OutAddress, Out ,BridgeType.Device, x)
-                    |> iter (fun t -> b.OutTag <- t)
+                    createBridgeTag(x.Storages, b.ApiName, b.OutAddress, ActionTag.ActionOut ,BridgeType.Device, x, Some(b))
+                    |> iter (fun t -> 
+                            b.OutTag <- t
+                            b.OutAddress <- t.Address
+                            )
 
         member x.GenerationIO() =
             TagManagerUtil.resetSimDevCnt() 

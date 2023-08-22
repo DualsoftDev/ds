@@ -40,7 +40,7 @@ module CpuLoader =
 
             sys.TagManager <- SystemManager(sys, storages)
             sys.Flows.Iter(fun f->f.TagManager <- FlowManager(f))
-            sys.ApiItems.Iter(fun a->a.TagManager <- ApiItemManager(a))
+            sys.ApiItems.Iter(fun a->a.TagManager <- ApiItemManager(a, system))
             sys.GetVertices().Iter(fun v->
                 match v with
                 | :? Real

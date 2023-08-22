@@ -1,15 +1,19 @@
 using DevExpress.XtraEditors;
+using DevExpress.XtraEditors.Controls;
 using DSModeler.Form;
+using DSModeler.Tree;
 using Dual.Common.Core;
-using Dual.Common.Core.FS;
 using Dual.Common.Winform;
+using Engine.Core;
+using Microsoft.FSharp.Core;
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Windows.Forms;
-using static Engine.Core.CoreModule;
-using static Engine.Core.DsType;
+using static DevExpress.Data.Filtering.Helpers.SubExprHelper;
+using static Engine.Core.RuntimeGeneratorModule;
 using static Engine.Cpu.RunTime;
+using static Engine.Cpu.RunTimeUtil;
 
 namespace DSModeler
 {
@@ -34,22 +38,106 @@ namespace DSModeler
                 if (e.KeyData == Keys.F4)
                     ImportPowerPointWapper(null);
                 if (e.KeyData == Keys.F5)
-                    ImportPowerPointWapper(LastFiles.Get());
+                    ImportPowerPointWapper(Files.GetLast());
             };
+ 
 
-            tabbedView1.QueryControl += (s, e) =>
+            tabbedView_Doc.QueryControl += (s, e) =>
             {
                 if (e.Control == null)  //Devexpress MDI Control
                     e.Control = new System.Windows.Forms.Control();
             };
-            tabbedView1.DocumentSelected += (s, e) =>
+            tabbedView_Doc.DocumentSelected += (s, e) =>
             {
                 var docForm = e.Document.Tag as FormDocView;
-                if (docForm != null)
-                    DocControl.DrawStatus(this, docForm.UcView.MasterNode, docForm);
-
+                if (docForm != null && docForm.UcView.MasterNode != null)
+                    ViewDraw.DrawStatus(docForm.UcView.MasterNode, docForm);
             };
-            ProcessEvent.ProcessSubject.Subscribe(rx =>
+
+            gridLookUpEdit_Expr.EditValueChanged += (s, e) =>
+            {
+                var textForm = DocControl.CreateDocExprOrSelect(this, tabbedView_Doc);
+                if (textForm == null) return;
+                DSFile.UpdateExpr(textForm, gridLookUpEdit_Expr.EditValue as LogicStatement);
+            };
+            gridLookUpEdit_Expr.BeforePopup += (s, e) =>
+            {
+                gridLookUpEdit_Expr.Properties.BestFitMode = BestFitMode.BestFitResizePopup;
+            };
+            gridLookUpEdit_Log.BeforePopup += (s, e) =>
+            {
+                gridLookUpEdit_Log.Properties.BestFitMode = BestFitMode.BestFitResizePopup;
+            };
+            comboBoxEdit_RunMode.EditValueChanging += (s, e) =>
+            {
+                Global.CpuRunMode = ToRuntimePackage(e.NewValue.ToString());
+                Runtime.Package = Global.CpuRunMode;
+                DSRegistry.SetValue(K.CpuRunMode, Global.CpuRunMode);
+                if(e.OldValue != null)
+                    ImportPowerPointWapper(Files.GetLast());
+            };
+
+            spinEdit_StartIn.Properties.EditValueChanging += (s, e) => UpdateRunStartInOut(e, true);
+            spinEdit_StartOut.Properties.EditValueChanging += (s, e) => UpdateRunStartInOut(e, false);
+            void UpdateRunStartInOut(ChangingEventArgs e, bool bIn)
+            {
+                var textValue = e.NewValue.ToString().Split('.')[0];
+                e.Cancel = Convert.ToInt32(textValue) < 0;
+                if (!e.Cancel)
+                {
+                    if (bIn)
+                    {
+                        Global.RunStartIn = Convert.ToInt32(textValue);
+                        DSRegistry.SetValue(K.RunStartIn, Global.RunStartIn);
+                    }
+                    else
+                    {
+                        Global.RunStartOut = Convert.ToInt32(textValue);
+                        DSRegistry.SetValue(K.RunStartOut, Global.RunStartOut);
+                    }
+                }
+            }
+
+            toggleSwitch_menuNonFooter.Toggled += (s, e) =>
+            {
+                Global.LayoutMenuFooter = toggleSwitch_menuNonFooter.IsOn;
+                DSRegistry.SetValue(K.LayoutMenuFooter, Global.LayoutMenuFooter);
+
+                if (Global.LayoutMenuFooter)
+                {
+                    ac_Main.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Footer;
+                    ac_Main.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.HamburgerMenu;
+                }
+                else
+                {
+
+                    ac_Main.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Default;
+                    ac_Main.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.Standard;
+                }
+            };
+
+            toggleSwitch_showDeviceExpr.Toggled += (s, e) =>
+            {
+                LogicTree.UpdateExpr(gridLookUpEdit_Expr, toggleSwitch_showDeviceExpr.IsOn);
+            };
+
+
+            textEdit_IP.TextChanged += (s, e) =>
+            {
+                IPAddress.TryParse(textEdit_IP.Text, out IPAddress addr);
+                if (addr == null) return;
+
+                if (Global.CpuRunMode.IsPackagePC())
+                {
+                    DSRegistry.SetValue(K.RunHWIP, textEdit_IP.Text);
+                    _PaixNMF?.Dispose();
+                    _PaixNMF = new PaixDriver(textEdit_IP.Text, Global.RunStartIn, Global.RunStartOut);
+                    var a = _PaixNMF.Open();
+                }
+            };
+
+
+            DsProcessEvent.ProcessSubject.Subscribe(rx =>
             {
                 this.Do(() =>
                 {
@@ -62,7 +150,7 @@ namespace DSModeler
             {
                 this.Do(() =>
                 {
-                    var visibleFroms = tabbedView1.Documents
+                    var visibleFroms = tabbedView_Doc.Documents
                                         .Where(w => w.IsVisible)
                                         .Select(s => s.Tag)
                                         .OfType<FormDocView>();
@@ -84,6 +172,19 @@ namespace DSModeler
                     }
                 });
             });
+
+            Global.StatusChangeLogCount.Subscribe(rx =>
+            {
+                this.Do(() =>
+                {
+                    barStaticItem_logCnt.Caption 
+                        = $"logs:{rx.Item1} TimeSpan {rx.Item2:ss\\.fff}sec";
+                });
+            });
+
         }
+
+      
+
     }
 }

@@ -28,9 +28,10 @@
     <PublisherName>Dual Inc.</PublisherName>
     <SuiteName>Dualsoft</SuiteName>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
+    <AutorunEnabled>true</AutorunEnabled>
     <DisallowUrlActivation>true</DisallowUrlActivation>
-    <ApplicationRevision>7</ApplicationRevision>
-    <ApplicationVersion>0.9.0.%2a</ApplicationVersion>
+    <ApplicationRevision>9</ApplicationRevision>
+    <ApplicationVersion>0.9.1.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <ExcludeDeploymentUrl>true</ExcludeDeploymentUrl>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -60,7 +61,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>logo_Dualsoft.ico</ApplicationIcon>
+    <ApplicationIcon>Icon\logo_Dualsoft.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>25F33FDBF7CE707F3795986F440BE9AE814BF16D</ManifestCertificateThumbprint>
@@ -81,6 +82,9 @@
   <PropertyGroup>
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="DevExpress.Data.Desktop.v21.2" />
     <Reference Include="DevExpress.Data.v21.2" />
@@ -89,17 +93,18 @@
     <Reference Include="DevExpress.XtraBars.v21.2" />
     <Reference Include="DevExpress.Sparkline.v21.2.Core" />
     <Reference Include="DevExpress.XtraEditors.v21.2" />
+    <Reference Include="DevExpress.XtraGrid.v21.2, Version=21.2.12.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.XtraLayout.v21.2, Version=21.2.12.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
     <Reference Include="DevExpress.XtraPrinting.v21.2, Version=21.2.12.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
     <Reference Include="DevExpress.XtraVerticalGrid.v21.2, Version=21.2.12.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="Dual.Common.Core, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\DualSoft-Common-Core.0.1.8\lib\net48\Dual.Common.Core.dll</HintPath>
+      <HintPath>..\..\packages\DualSoft-Common-Core.0.1.10\lib\net48\Dual.Common.Core.dll</HintPath>
     </Reference>
     <Reference Include="Dual.Common.Core.FS, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\DualSoft-Common-Core-FS.0.1.2\lib\net48\Dual.Common.Core.FS.dll</HintPath>
     </Reference>
     <Reference Include="Dual.Common.Winform, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\DualSoft-Common-Winform.0.1.1\lib\net48\Dual.Common.Winform.dll</HintPath>
+      <HintPath>..\..\packages\DualSoft-Common-Winform.0.1.2\lib\net48\Dual.Common.Winform.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Core, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\packages\FSharp.Core.7.0.0\lib\netstandard2.0\FSharp.Core.dll</HintPath>
@@ -179,23 +184,17 @@
     <Compile Include="FormMain.Designer.cs">
       <DependentUpon>FormMain.cs</DependentUpon>
     </Compile>
-    <Compile Include="Form\FormDocPLCLS.cs">
+    <Compile Include="Form\FormDocTEXT.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form\FormDocPLCLS.Designer.cs">
-      <DependentUpon>FormDocPLCLS.cs</DependentUpon>
+    <Compile Include="Form\FormDocTEXT.Designer.cs">
+      <DependentUpon>FormDocTEXT.cs</DependentUpon>
     </Compile>
-    <Compile Include="Form\FormDocDS.cs">
+    <Compile Include="Form\FormDocImage.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form\FormDocDS.Designer.cs">
-      <DependentUpon>FormDocDS.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Form\FormDocViewStart.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Form\FormDocViewStart.Designer.cs">
-      <DependentUpon>FormDocViewStart.cs</DependentUpon>
+    <Compile Include="Form\FormDocImage.Designer.cs">
+      <DependentUpon>FormDocImage.cs</DependentUpon>
     </Compile>
     <Compile Include="Form\FormDocView.cs">
       <SubType>Form</SubType>
@@ -204,9 +203,19 @@
       <DependentUpon>FormDocView.cs</DependentUpon>
     </Compile>
     <Compile Include="DocControl\DocControl.cs" />
-    <Compile Include="Import\PPT.cs" />
+    <Compile Include="HW\PaixDriverSelecter.cs" />
+    <Compile Include="HW\PaixDriver.cs" />
+    <Compile Include="Import, Export\PLC.cs" />
+    <Compile Include="Import, Export\DSFile.cs" />
+    <Compile Include="Import, Export\XLS.cs" />
+    <Compile Include="Import, Export\PPT.cs" />
+    <Compile Include="Log\LogicLog.cs" />
     <Compile Include="SIM\SIMProperty.cs" />
-    <Compile Include="Utils\PropertyRecordExtension.cs" />
+    <Compile Include="Tree\LogicTree.cs" />
+    <Compile Include="Tree\SimTree.cs" />
+    <Compile Include="Utils\DSRegistry.cs" />
+    <Compile Include="Utils\MessageBox.cs" />
+    <Compile Include="Utils\PropertyRecordExt.cs" />
     <Compile Include="Property\UcPropertyGrid.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -215,8 +224,8 @@
     </Compile>
     <Compile Include="SIM\SIMControl.cs" />
     <Compile Include="Event\EventExternal.cs" />
-    <Compile Include="Model\Model.cs" />
-    <Compile Include="HMI\HMI.cs" />
+    <Compile Include="Tree\ModelTree.cs" />
+    <Compile Include="Tree\HMITree.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\DXWaitForm.cs">
@@ -239,7 +248,7 @@
     </Compile>
     <Compile Include="Utils\FileOpenSave.cs" />
     <Compile Include="Utils\EditorSkin.cs" />
-    <Compile Include="Utils\LastFiles.cs" />
+    <Compile Include="Utils\Files.cs" />
     <Compile Include="Utils\LayoutForm.cs" />
     <Compile Include="GlobalStatic.cs" />
     <Compile Include="Utils\SplashScreenDS.cs">
@@ -248,18 +257,16 @@
     <Compile Include="Utils\SplashScreenDS.Designer.cs">
       <DependentUpon>SplashScreenDS.cs</DependentUpon>
     </Compile>
+    <Compile Include="ViewDiagram\ViewDraw.cs" />
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form\FormDocPLCLS.resx">
-      <DependentUpon>FormDocPLCLS.cs</DependentUpon>
+    <EmbeddedResource Include="Form\FormDocTEXT.resx">
+      <DependentUpon>FormDocTEXT.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form\FormDocDS.resx">
-      <DependentUpon>FormDocDS.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Form\FormDocViewStart.resx">
-      <DependentUpon>FormDocViewStart.cs</DependentUpon>
+    <EmbeddedResource Include="Form\FormDocImage.resx">
+      <DependentUpon>FormDocImage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form\FormDocView.resx">
       <DependentUpon>FormDocView.cs</DependentUpon>
@@ -292,6 +299,7 @@
     </EmbeddedResource>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="Properties\packages.config" />
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -304,7 +312,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="logo_Dualsoft.ico" />
+    <Content Include="Icon\logo_Dualsoft.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj">
@@ -322,6 +330,14 @@
     <ProjectReference Include="..\Model\Import\Model.Import.Office\Model.Import.Office.fsproj">
       <Project>{5b8c9e88-ffc3-403b-adae-1923bcc6b8fb}</Project>
       <Name>Model.Import.Office</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Server\Server.Common.NMC\Server.Common.NMC.csproj">
+      <Project>{07965281-9f14-43a4-8bf5-0ddfed55284c}</Project>
+      <Name>Server.Common.NMC</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Server\Server.Common.NMF\Server.Common.NMF.csproj">
+      <Project>{bc08c008-ca79-4795-add8-90b8cce1bd15}</Project>
+      <Name>Server.Common.NMF</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -829,7 +845,7 @@
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.8">
       <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4.8%28x86 및 x64%29</ProductName>
+      <ProductName>Microsoft .NET Framework 4.8 %28x86 and x64%29</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
@@ -838,6 +854,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.

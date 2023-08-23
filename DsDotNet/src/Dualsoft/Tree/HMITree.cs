@@ -33,8 +33,12 @@ namespace DSModeler.Tree
                     formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
                 };
                 formMain.Ace_HMI.Elements.Add(eleSys);
-                foreach (var flow in sys.Flows)
+                var nodeFlows = ppt.Views.Where(w => w.ViewType == InterfaceClass.ViewType.VFLOW)
+                                         .Where(w => w.UsedViewNodes.Any())
+                                         .ToDictionary(s => s.Flow.Value, s=> s);
+                foreach (var flowDic in nodeFlows)
                 {
+                    var flow = flowDic.Key;
                     var eleFlow = new AccordionControlElement()
                     { Style = ElementStyle.Group, Text = flow.Name, Tag = flow };
                     eleFlow.Click += (s, e) =>
@@ -42,11 +46,7 @@ namespace DSModeler.Tree
                         var eleTagFlow = ((AccordionControlElement)s).Tag as Flow;
                         formMain.PropertyGrid.SelectedObject = eleTagFlow;
 
-                        var view = ppt.Views
-                                       .Where(w => w.ViewType == InterfaceClass.ViewType.VFLOW)
-                                       .First(w => w.Flow.Value == eleTagFlow);
-
-                        DocControl.CreateDocOrSelect(formMain, view);
+                        DocControl.CreateDocOrSelect(formMain, flowDic.Value);
                     };
                     eleSys.Elements.Add(eleFlow);
 

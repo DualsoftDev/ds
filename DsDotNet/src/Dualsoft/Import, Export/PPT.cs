@@ -45,7 +45,6 @@ namespace DSModeler
                                     DsProcessEvent.DoWork(Convert.ToInt32((cnt++ * 1.0) / pous.Count() * 50));
                                     await Task.Delay(1);
                                 }
-
                                 await HMITree.CreateHMIBtn(formMain, ppt);
                                 Global.ActiveSys = ppt.System;
                             });

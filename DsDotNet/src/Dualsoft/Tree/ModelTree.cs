@@ -1,6 +1,7 @@
 using DevExpress.XtraBars.Navigation;
 using Model.Import.Office;
 using System.Collections.Generic;
+using System.Linq;
 using static Model.Import.Office.ImportPPTModule;
 using static Model.Import.Office.ViewModule;
 
@@ -23,12 +24,13 @@ namespace DSModeler.Tree
         public static List<AccordionControlElement> AppandFlows(FormMain formMain, PptResult ppt, AccordionControlElement ele)
         {
             List<AccordionControlElement> lstAce = new List<AccordionControlElement>();
-            foreach (var v in ppt.Views)
+            var nodeFlows = ppt.Views.Where(w => w.ViewType == InterfaceClass.ViewType.VFLOW)
+                                     .Where(w => w.UsedViewNodes.Any())
+                                     .ToDictionary(s => s.Flow.Value, s => s);
+            foreach (var flowDic in nodeFlows)
             {
-                if (v.ViewType != InterfaceClass.ViewType.VFLOW) continue;
-
                 var eleFlow = new AccordionControlElement()
-                { Style = ElementStyle.Item, Text = v.Flow.Value.Name, Tag = v };
+                { Style = ElementStyle.Item, Text = flowDic.Key.Name, Tag = flowDic.Value };
                 eleFlow.Click += (s, e) =>
                 {
                     formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;

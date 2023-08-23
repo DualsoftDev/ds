@@ -36,11 +36,12 @@ module ImportViewModule =
                         |> Seq.iter(fun src ->
                                     newNode.Edges.Add(ModelingEdgeInfo<ViewNode>(dicV.[src], edge.EdgeSymbol, dicV.[edge.Targets[0]])) |>ignore)
             )
-        real.GetDummyReal(dummys, dicV, dicDummy)
-        |> Seq.iter(fun e->
-            if newNode.DummyAdded |> not
-            then newNode.Edges.Add(e) |>ignore
-            )
+        if newNode.DummyEdgeAdded   |> not 
+        then real.GetDummyEdgeReal(dummys, dicV, dicDummy) |> Seq.iter(fun e->  newNode.Edges.Add(e) |>ignore )
+           
+        if newNode.DummySingleAdded   |> not 
+        then real.GetDummySingleReal(dummys, dicV, dicDummy) |> Seq.iter(fun e->  newNode.Singles.Add(e) |>ignore )
+           
 
     let ConvertFlow(flow:Flow, dummys:pptDummy seq)  =
         let newNode = ViewNode(flow.Name, VFLOW)
@@ -57,6 +58,7 @@ module ImportViewModule =
                 | :? CallDev | :? Alias-> ()
                 | _ -> failwithf "vertex type ERROR"
             dicV.[vertex]
+
 
         lands
         |>Seq.filter(fun vertex -> dummyMembers.Contains(vertex) |> not)
@@ -81,8 +83,9 @@ module ImportViewModule =
                                     newNode.Edges.Add(ModelingEdgeInfo<ViewNode>(dicV.[src], edge.EdgeSymbol, dicV.[edge.Targets[0]])) |>ignore)
             )
 
-        flow.GetDummyFlow(dummys, dicV, dicDummy)
-        |> Seq.iter(fun e-> newNode.Edges.Add(e) |>ignore)
+        flow.GetDummyEdgeFlow(dummys, dicV, dicDummy) |> Seq.iter(fun e-> newNode.Edges.Add(e) |>ignore)
+        flow.GetDummySingleFlow(dummys, dicV, dicDummy) |> Seq.iter(fun v-> newNode.Singles.Add(v) |>ignore)
+        
 
         newNode
 

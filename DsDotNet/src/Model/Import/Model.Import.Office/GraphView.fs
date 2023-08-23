@@ -45,10 +45,13 @@ module rec ViewModule =
         member val Page = 0 with get, set
 
         [<Browsable(false)>]
-        member x.DummyAdded = x.Edges |> Seq.collect(fun e-> e.Sources @ e.Targets)
-                                      |> Seq.filter(fun v -> v.ViewType = VDUMMY)
-                                      |> Seq.isEmpty |> not
-
+        member x.DummyEdgeAdded = x.Edges |> Seq.collect(fun e-> e.Sources @ e.Targets)
+                                          |> Seq.filter(fun v -> v.ViewType = VDUMMY)
+                                          |> Seq.any
+        [<Browsable(false)>]
+        member x.DummySingleAdded = x.Singles 
+                                          |> Seq.filter(fun v -> v.ViewType = VDUMMY)
+                                          |> Seq.any
         [<Browsable(false)>]
         member x.CoreVertex = coreVertex
         [<Browsable(false)>]
@@ -97,18 +100,43 @@ module rec ViewModule =
 [<Extension>]
 type ViewModuleExt =
     [<Extension>]
-    static member GetDummyFlow(flow:Flow, dummys:pptDummy seq, dicV:IDictionary<Vertex, ViewNode>, dicDummy:IDictionary<string, ViewNode>) =
+    static member GetDummyEdgeFlow(flow:Flow, dummys:pptDummy seq, dicV:IDictionary<Vertex, ViewNode>, dicDummy:IDictionary<string, ViewNode>) =
             dummys
             |> Seq.filter(fun dummy  -> dummy.GetParent().GetCore() = flow)
             |> Seq.collect(fun dummy -> dummy.Edges
                                         |> Seq.map(fun edge -> getViewEdge(edge, dummy, dummys, dicV, dicDummy)))
 
     [<Extension>]
-    static member GetDummyReal(real:Real, dummys:pptDummy seq, dicV:IDictionary<Vertex, ViewNode>, dicDummy:IDictionary<string, ViewNode>) =
+    static member GetDummySingleFlow(flow:Flow, dummys:pptDummy seq, dicV:IDictionary<Vertex, ViewNode>, dicDummy:IDictionary<string, ViewNode>) =
+            dummys
+            |> Seq.filter(fun dummy  -> dummy.GetParent().GetCore() = flow)
+            |> Seq.filter(fun dummy  -> not <| dummy.Edges.any())
+            |> Seq.map(fun dummy ->
+                    let viewNode = ViewNode("", ViewType.VDUMMY)
+                    dummy.Members |> Seq.iter(fun f-> viewNode.Singles.Add(dicV.[f])|>ignore)
+                    viewNode
+                    )
+
+
+                                        
+    [<Extension>]
+    static member GetDummyEdgeReal(real:Real, dummys:pptDummy seq, dicV:IDictionary<Vertex, ViewNode>, dicDummy:IDictionary<string, ViewNode>) =
             dummys
             |> Seq.filter(fun dummy  -> dummy.GetParent().GetCore() = real)
             |> Seq.collect(fun dummy -> dummy.Edges
                                         |> Seq.map(fun edge -> getViewEdge(edge, dummy, dummys, dicV, dicDummy)))
+    [<Extension>]
+    static member GetDummySingleReal(real:Real, dummys:pptDummy seq, dicV:IDictionary<Vertex, ViewNode>, dicDummy:IDictionary<string, ViewNode>) =
+            dummys
+            |> Seq.filter(fun dummy  -> dummy.GetParent().GetCore() = real)
+            |> Seq.filter(fun dummy  -> not <| dummy.Edges.any())
+            |> Seq.map(fun dummy ->
+                    let viewNode = ViewNode("", ViewType.VDUMMY)
+                    dummy.Members |> Seq.iter(fun f-> viewNode.Singles.Add(dicV.[f])|>ignore)
+                    viewNode
+                    )
+
+                                        
 
     [<Extension>]
     static member GetDummyMembers(dummys:pptDummy seq) =   dummys  |> Seq.collect(fun f-> f.Members)

@@ -104,14 +104,14 @@ namespace DSModeler
             this.ace_Export = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace1 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_pcWindow = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.ace7 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.ace_pcLinux = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace2 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_PLCXGI = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.ace4 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.ace5 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.ace_PLCWork3 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.ace_PLCLogix5000 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace11 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_ExportExcel = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.accordionControlElement2 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.ace_DocDiagram = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Setting = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement3 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement1 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
@@ -585,7 +585,7 @@ namespace DSModeler
             // 
             this.simpleButton_OpenPLC.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.LeftCenter;
             this.simpleButton_OpenPLC.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("simpleButton_OpenPLC.ImageOptions.SvgImage")));
-            this.simpleButton_OpenPLC.Location = new System.Drawing.Point(225, 446);
+            this.simpleButton_OpenPLC.Location = new System.Drawing.Point(223, 344);
             this.simpleButton_OpenPLC.Name = "simpleButton_OpenPLC";
             this.simpleButton_OpenPLC.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
             this.simpleButton_OpenPLC.Size = new System.Drawing.Size(75, 23);
@@ -852,6 +852,7 @@ namespace DSModeler
             this.ace_ImportXls,
             this.ace_ImportPPT,
             this.ace_pptReload});
+            this.ace8.Expanded = true;
             this.ace8.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace8.ImageOptions.SvgImage")));
             this.ace8.Name = "ace8";
             this.ace8.Text = "가져오기";
@@ -867,6 +868,7 @@ namespace DSModeler
             this.ace_ImportXls.Name = "ace_ImportXls";
             this.ace_ImportXls.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.ace_ImportXls.Text = "엑셀";
+            this.ace_ImportXls.Click += new System.EventHandler(this.ace_ImportXls_Click);
             // 
             // ace_ImportPPT
             // 
@@ -902,6 +904,7 @@ namespace DSModeler
             this.ace1,
             this.ace2,
             this.ace11});
+            this.ace_Export.Expanded = true;
             this.ace_Export.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_Export.ImageOptions.SvgImage")));
             this.ace_Export.Name = "ace_Export";
             this.ace_Export.Text = "내보내기";
@@ -910,7 +913,7 @@ namespace DSModeler
             // 
             this.ace1.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.ace_pcWindow,
-            this.ace7});
+            this.ace_pcLinux});
             this.ace1.Expanded = true;
             this.ace1.Name = "ace1";
             this.ace1.Text = "PC Control";
@@ -923,18 +926,19 @@ namespace DSModeler
             this.ace_pcWindow.Text = "Window";
             this.ace_pcWindow.Click += new System.EventHandler(this.ace_pcWindow_Click);
             // 
-            // ace7
+            // ace_pcLinux
             // 
-            this.ace7.Name = "ace7";
-            this.ace7.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-            this.ace7.Text = "Linux";
+            this.ace_pcLinux.Name = "ace_pcLinux";
+            this.ace_pcLinux.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.ace_pcLinux.Text = "Linux";
+            this.ace_pcLinux.Click += new System.EventHandler(this.ace_pcLinux_Click);
             // 
             // ace2
             // 
             this.ace2.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.ace_PLCXGI,
-            this.ace4,
-            this.ace5});
+            this.ace_PLCWork3,
+            this.ace_PLCLogix5000});
             this.ace2.Expanded = true;
             this.ace2.Name = "ace2";
             this.ace2.Text = "PLC Control";
@@ -948,23 +952,25 @@ namespace DSModeler
             this.ace_PLCXGI.Text = "LS XG5000 (XGI)";
             this.ace_PLCXGI.Click += new System.EventHandler(this.ace_PLCXGI_Click);
             // 
-            // ace4
+            // ace_PLCWork3
             // 
-            this.ace4.Name = "ace4";
-            this.ace4.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-            this.ace4.Text = "GX Work3";
+            this.ace_PLCWork3.Name = "ace_PLCWork3";
+            this.ace_PLCWork3.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.ace_PLCWork3.Text = "GX Work3";
+            this.ace_PLCWork3.Click += new System.EventHandler(this.ace_PLCWork3_Click);
             // 
-            // ace5
+            // ace_PLCLogix5000
             // 
-            this.ace5.Name = "ace5";
-            this.ace5.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-            this.ace5.Text = "AB Logix5000";
+            this.ace_PLCLogix5000.Name = "ace_PLCLogix5000";
+            this.ace_PLCLogix5000.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.ace_PLCLogix5000.Text = "AB Logix5000";
+            this.ace_PLCLogix5000.Click += new System.EventHandler(this.ace_PLCLogix5000_Click);
             // 
             // ace11
             // 
             this.ace11.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.ace_ExportExcel,
-            this.accordionControlElement2});
+            this.ace_DocDiagram});
             this.ace11.Expanded = true;
             this.ace11.Name = "ace11";
             this.ace11.Text = "문서";
@@ -977,12 +983,13 @@ namespace DSModeler
             this.ace_ExportExcel.Text = "IO LIST";
             this.ace_ExportExcel.Click += new System.EventHandler(this.ace_ExportExcel_Click);
             // 
-            // accordionControlElement2
+            // ace_DocDiagram
             // 
-            this.accordionControlElement2.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement2.ImageOptions.SvgImage")));
-            this.accordionControlElement2.Name = "accordionControlElement2";
-            this.accordionControlElement2.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-            this.accordionControlElement2.Text = "순서도";
+            this.ace_DocDiagram.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement2.ImageOptions.SvgImage")));
+            this.ace_DocDiagram.Name = "ace_DocDiagram";
+            this.ace_DocDiagram.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.ace_DocDiagram.Text = "순서도";
+            this.ace_DocDiagram.Click += new System.EventHandler(this.ace_DocDiagram_Click);
             // 
             // ace_Setting
             // 
@@ -1126,10 +1133,10 @@ namespace DSModeler
         private DevExpress.XtraBars.Navigation.AccordionControlElement ace1;
         private DevExpress.XtraBars.Navigation.AccordionControlElement ace2;
         private DevExpress.XtraBars.Navigation.AccordionControlElement ace_pcWindow;
-        private DevExpress.XtraBars.Navigation.AccordionControlElement ace7;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement ace_pcLinux;
         private DevExpress.XtraBars.Navigation.AccordionControlElement ace_PLCXGI;
-        private DevExpress.XtraBars.Navigation.AccordionControlElement ace4;
-        private DevExpress.XtraBars.Navigation.AccordionControlElement ace5;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement ace_PLCWork3;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement ace_PLCLogix5000;
         private DevExpress.XtraBars.Navigation.AccordionControlElement ace_Play;
         private DevExpress.XtraBars.Navigation.AccordionControlElement ace_Stop;
         private DevExpress.XtraBars.Navigation.AccordionControlElement ace_Reset;
@@ -1148,7 +1155,7 @@ namespace DSModeler
         private DevExpress.XtraEditors.SimpleButton simpleButton_OpenPLC;
         private DevExpress.XtraBars.Navigation.AccordionControlElement ace11;
         private DevExpress.XtraBars.Navigation.AccordionControlElement ace_ExportExcel;
-        private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement2;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement ace_DocDiagram;
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement1;
         private DevExpress.XtraBars.Navigation.AccordionContentContainer accordionContentContainer1;
         private DevExpress.XtraEditors.RatingControl ratingControl_Speed;

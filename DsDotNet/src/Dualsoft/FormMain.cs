@@ -4,6 +4,7 @@ using DevExpress.XtraBars.Navigation;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraVerticalGrid;
+using DSModeler;
 using DSModeler.Tree;
 using Dual.Common.Core;
 using Engine.Core;
@@ -129,7 +130,10 @@ namespace DSModeler
         private void ace_ImportPPT_Click(object s, EventArgs e) => ImportPowerPointWapper(null);
         private void ace_pptReload_Click(object sender, EventArgs e) => ImportPowerPointWapper(Files.GetLast());
         private void simpleButton_layoutReset_Click(object s, EventArgs e) => LayoutForm.RestoreLayoutFromXml(dockManager);
-
-
+        private void ace_ImportXls_Click(object sender, EventArgs e) => Global.Notimplemented();
+        private void ace_pcLinux_Click(object sender, EventArgs e) => Global.Notimplemented();
+        private void ace_DocDiagram_Click(object sender, EventArgs e) => Global.Notimplemented();
+        private void ace_PLCLogix5000_Click(object sender, EventArgs e) => Global.Notimplemented();
+        private void ace_PLCWork3_Click(object sender, EventArgs e) => Global.Notimplemented();
     }
 }

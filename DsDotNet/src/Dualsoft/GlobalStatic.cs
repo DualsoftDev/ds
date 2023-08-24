@@ -76,12 +76,13 @@ namespace DSModeler
         {
             if (0 < DsProcessEvent.CurrProcess && DsProcessEvent.CurrProcess < 100)
             {
-                XtraMessageBox.Show("프로세스 처리 작업중입니다.", $"{K.AppName}", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MBox.Warn("프로세스 처리 작업중입니다.");
                 return true;
             }
             return false;
         }
 
+        public static void Notimplemented() => MBox.Warn("기능이 제한 되었습니다. 기능 문의는 han@dualsoft.com 연락주세요");
         public static string DefaultAppSettingFolder => Path.Combine(DefaultFolder, "AppSetting");
         public static string AppVersion => $"{ver.Major}.{ver.Minor}.{ver.Build}";
 

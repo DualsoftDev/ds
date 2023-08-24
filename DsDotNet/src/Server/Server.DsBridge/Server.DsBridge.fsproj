@@ -33,7 +33,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy $(SolutionDir)\exLib\NMC2.dll $(TargetDir)\NMC2.dll&#xD;&#xA;copy $(SolutionDir)\exLib\NMF.dll $(TargetDir)\NMF.dll&#xD;&#xA;copy $(SolutionDir)\exLib\IMDll.dll $(TargetDir)\IMDll.dll&#xD;&#xA;copy $(ProjectDir)\config.json $(TargetDir)\config.json" />
+    <Exec Command="copy $(SolutionDir)\exLib\IMDll.dll $(TargetDir)\IMDll.dll&#xD;&#xA;copy $(ProjectDir)\config.json $(TargetDir)\config.json" />
   </Target>
 
 </Project>

@@ -123,9 +123,9 @@ namespace DSModeler
         public static void Play(AccordionControlElement ace_Play)
         {
             if (!Global.IsLoadedPPT()) return;
-            if (RuntimeDS.Package.IsPackagePLC())
+            if (!RuntimeDS.Package.IsSimulation)
             {
-                MBox.Warn("설젱 H/W 에서 Simution or PC 타입을 선택하세요");
+                MBox.Warn("설젱 H/W 에서 Simution 타입을 선택하세요");
                 return;
             }
             Global.SimReset = false;
@@ -142,6 +142,11 @@ namespace DSModeler
         public static void Step(AccordionControlElement ace_Play)
         {
             if (!Global.IsLoadedPPT()) return;
+            if (!RuntimeDS.Package.IsSimulation)
+            {
+                MBox.Warn("설젱 H/W 에서 Simution 타입을 선택하세요");
+                return;
+            }
             Global.SimReset = false;
             SimTree.SimPlayUI(ace_Play, false);
 

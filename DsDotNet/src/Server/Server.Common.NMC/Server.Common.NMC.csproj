@@ -7,4 +7,8 @@
 	  <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy $(SolutionDir)\exLib\NMC2.dll $(TargetDir)\NMC2.dll" />
+  </Target>
+
 </Project>

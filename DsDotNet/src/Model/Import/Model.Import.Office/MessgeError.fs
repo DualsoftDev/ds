@@ -16,7 +16,7 @@ module WarnID =
 module ErrID =
     // PPT Error (1 ~ 999)
     let _1 = "사용불가 도형입니다."
-    let _2 = "Spare"
+    let _2 = "중복된 Page 이름이 존재합니다."
     let _3 = "사용불가 연결 방식 입니다."
     let _4 = "선이 도형에 연결이 안되었습니다."
     let _5 = "선이 시작쪽 도형에 연결이 안되었습니다."

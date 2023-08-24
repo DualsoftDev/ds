@@ -286,7 +286,10 @@ module CoreModule =
         member _.Operand1 = operand1  // "+"
         member _.Operand2 = operand2  // "-"
         member _.Operator = operator  // "<||>"
-        member _.ToDsText() = sprintf "%s %s %s" operand1 (operator.ToText()) operand2  //"+" <||> "-"
+        member _.ToDsText() = 
+            let src = operand1.QuoteOnDemand()
+            let tgt = operand2.QuoteOnDemand()
+            sprintf "%s %s %s"  src (operator.ToText()) tgt  //"+" <||> "-"
         static member Create(system:DsSystem, operand1, operator, operand2) =
             let ri = ApiResetInfo(operand1, operator, operand2)
             system.ApiResetInfos.Add(ri) |> verifyM $"Duplicated interface ResetInfo [{ri.ToDsText()}]"

@@ -56,7 +56,8 @@ module ImportPPTModule =
 
             //시스템 로딩시 중복이름을 부를 수 없다.
             CheckSameCopy(doc)
-
+            SameFlowName(doc)
+            
             let reloading(newSys:DsSystem, paras) =
                 let (sys, newDoc:pptDoc) = loadSystem(repo, pptReop, newSys, paras)
                 sys
@@ -129,7 +130,9 @@ module ImportPPTModule =
                 //MSGInfo($"전체 부모   count [{doc.Parents.Keys.Count}]")
                 mySys, viewNodes
 
-            with ex ->  failwithf  @$"{ex.Message}\t [ErrPath:{if pathStack.any() then pathStack.First() else emptyFile }]"
+            with ex ->  
+                dicPptDoc.Iter(fun f->f.Value.Close())
+                failwithf  @$"{ex.Message}\t [ErrPath:{if pathStack.any() then pathStack.First() else emptyFile }]"
 
     let private fromPPTs(paths:string seq) =
 

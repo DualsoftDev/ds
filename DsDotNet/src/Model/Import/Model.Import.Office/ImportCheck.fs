@@ -91,17 +91,19 @@ module ImportCheck =
                     )
                     )
 
-        //page 타이틀 중복체크
-        let SameSysFlowName(systems:DsSystem seq, dicFlow: Dictionary<int, Flow>) =
-            let sysNames = systems.Select(fun s->s.Name)
-            systems.ForEach(fun sys->
-                sys.Flows.ForEach(fun flow ->
-                    if sysNames.Contains(flow.Name)
-                    then
-                        let page = dicFlow.Where(fun w-> w.Value = flow).First().Key
-                        Office.ErrorPPT(ErrorCase.Name, ErrID._31, $"시스템이름 : {flow.System.Name}",page, $"중복페이지 : {page}")  )
-                    )
 
+
+        //page 타이틀 중복체크
+        let SameFlowName(doc:pptDoc) =
+            let duplicatePages = doc.Pages
+                                    .Where(fun f->f.IsUsing && not<|f.Title.IsNullOrEmpty())
+                                    .GroupBy(fun f->f.Title)
+                                    .SelectMany(fun f->f.Skip(1));
+
+            duplicatePages.Iter  (fun page-> 
+                 Office.ErrorPPT(ErrorCase.Name, ErrID._2, $"중복이름 : {page.Title}",page.PageNum, $"중복페이지") 
+            )
+            
 
         //let ValidPath(nodes:pptNode seq, model:MModel) =
         //    let checkNodeName(nodes:pptNode seq) =

@@ -210,6 +210,8 @@ namespace DSModeler
         {
             {
                 //nNode.Attr.Color = Color.DarkGoldenrod;
+                nNode.Attr.LineWidth = 2;
+
 
                 if (viewNode.ViewType == ViewType.VBUTTON)
                 {

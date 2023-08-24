@@ -23,6 +23,7 @@ namespace DSModeler
         public const string LastFiles = "LastFiles";
         public const string SimSpeed = "SimSpeed";
         public const string LayoutMenuExpand = "LayoutMenuExpand";
+        public const string LayoutGraphLineType = "LayoutGraphLineType";
         public const string CpuRunMode = "CpuRunMode";
         public const string RunStartIn = "RunStartIn";
         public const string RunStartOut = "RunStartOut";
@@ -42,6 +43,7 @@ namespace DSModeler
         public static int RunStartIn { get; set; } = 0;
         public static int RunStartOut { get; set; } = 0;
         public static bool LayoutMenumExpand { get; set; }
+        public static bool LayoutGraphLineType { get; set; }
         public static bool SimReset { get; set; }
         public static string ExportPathPLC { get; set; }
         public static string ExportPathXLS { get; set; }

@@ -82,6 +82,9 @@ namespace DSModeler
             var menuExpand = DSRegistry.GetValue(K.LayoutMenuExpand);
             toggleSwitch_menuExpand.IsOn = Convert.ToBoolean(menuExpand);
 
+            var layoutGraphLineType = DSRegistry.GetValue(K.LayoutGraphLineType);
+            toggleSwitch_LayoutGraph.IsOn = Convert.ToBoolean(layoutGraphLineType);
+
             timerLongPress.Tick += (sender, e) =>
             {
                 SIMControl.Step(ace_Play);
@@ -135,5 +138,7 @@ namespace DSModeler
         private void ace_DocDiagram_Click(object sender, EventArgs e) => Global.Notimplemented();
         private void ace_PLCLogix5000_Click(object sender, EventArgs e) => Global.Notimplemented();
         private void ace_PLCWork3_Click(object sender, EventArgs e) => Global.Notimplemented();
+
+     
     }
 }

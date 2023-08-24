@@ -46,7 +46,7 @@ namespace DSModeler
             return lstDummy.Where(w => w.Members.Contains(vertex)).Count() > 0;
         }
 
-        public void SetGraph(ViewNode viewNode, Flow flow)
+        public void SetGraph(ViewNode viewNode, Flow flow, bool bSmallGap)
         {
             Flow = flow;
             MasterNode = viewNode;
@@ -54,21 +54,29 @@ namespace DSModeler
             //viewer.Graph.LayoutAlgorithmSettings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings();
             //viewer.Graph.LayoutAlgorithmSettings = new RankingLayoutSettings();
             //sub 그래프 가능
-            viewer.Graph = new Graph() { LayoutAlgorithmSettings = new SugiyamaLayoutSettings() };
+            viewer.Graph = new Graph() {};
             var layoutSetting = new Microsoft.Msagl.Layout.Layered.SugiyamaLayoutSettings();
-            layoutSetting.LayerSeparation = 20;
-            layoutSetting.NodeSeparation = 20;
-            layoutSetting.ClusterMargin = 20;
-            //viewer.Graph = new Graph() { LayoutAlgorithmSettings = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings() };
-            //var layoutSetting = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings();
-            //layoutSetting.NodeSeparation = 50;
-            //layoutSetting.ClusterMargin = 30;
-            //layoutSetting.LogScaleEdgeForces = false;
-            //layoutSetting.RepulsiveForceConstant = 0.01;
-            //layoutSetting.EdgeRoutingSettings.EdgeRoutingMode = Microsoft.Msagl.Core.Routing.EdgeRoutingMode.SugiyamaSplines;
-            //layoutSetting.Decay = 0.8;
+            //var layoutSetting = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings(); 
+
+            if (bSmallGap)
+            {
+                layoutSetting.PackingMethod = Microsoft.Msagl.Core.Layout.PackingMethod.Compact;
+                layoutSetting.NodeSeparation = 5;
+                layoutSetting.ClusterMargin = 5;
+                layoutSetting.LiftCrossEdges = false;
+                layoutSetting.PackingAspectRatio = 5;
+                
+            }
+            else
+            {
+                layoutSetting.PackingMethod = Microsoft.Msagl.Core.Layout.PackingMethod.Columns;
+                layoutSetting.LayerSeparation = 30;
+                layoutSetting.NodeSeparation = 30;
+                layoutSetting.ClusterMargin = 30;
+            }
 
             viewer.Graph.LayoutAlgorithmSettings = layoutSetting;
+
             SetBackColor(System.Drawing.Color.FromArgb(33, 33, 33));
 
             viewNode.Singles.ForEach(f => DrawSeg(viewer.Graph.RootSubgraph, f));

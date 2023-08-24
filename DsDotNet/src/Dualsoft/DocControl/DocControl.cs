@@ -104,7 +104,7 @@ namespace DSModeler
             FormDocView formChiild = new FormDocView();
             formChiild = CreateDocForm(formChiild, formParent, formParent.TabbedView, docKey) as FormDocView;
             if (formChiild.UcView.MasterNode == null)
-                formChiild.UcView.SetGraph(v, flow);
+                formChiild.UcView.SetGraph(v, flow, Global.LayoutGraphLineType);
             //상태 업데이트
             ViewDraw.DrawStatus(v, formChiild);
         }

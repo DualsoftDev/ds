@@ -116,6 +116,12 @@ namespace DSModeler
                 }
             };
 
+            toggleSwitch_LayoutGraph.Toggled += (s, e) =>
+            {
+                Global.LayoutGraphLineType = toggleSwitch_LayoutGraph.IsOn;
+                DSRegistry.SetValue(K.LayoutGraphLineType, Global.LayoutGraphLineType);
+            };
+       
             toggleSwitch_showDeviceExpr.Toggled += (s, e) =>
             {
                 LogicTree.UpdateExpr(gridLookUpEdit_Expr, toggleSwitch_showDeviceExpr.IsOn);

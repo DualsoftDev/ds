@@ -59,7 +59,9 @@ namespace DSModeler
             this.documentGroup1 = new DevExpress.XtraBars.Docking2010.Views.Tabbed.DocumentGroup(this.components);
             this.ac_Main = new DevExpress.XtraBars.Navigation.AccordionControl();
             this.accordionContentContainer2 = new DevExpress.XtraBars.Navigation.AccordionContentContainer();
+            this.toggleSwitch_LayoutGraph = new DevExpress.XtraEditors.ToggleSwitch();
             this.toggleSwitch_menuExpand = new DevExpress.XtraEditors.ToggleSwitch();
+            this.labelControl11 = new DevExpress.XtraEditors.LabelControl();
             this.simpleButton_layoutReset = new DevExpress.XtraEditors.SimpleButton();
             this.labelControl2 = new DevExpress.XtraEditors.LabelControl();
             this.btn_StepLongPress = new DevExpress.XtraEditors.SimpleButton();
@@ -133,6 +135,7 @@ namespace DSModeler
             ((System.ComponentModel.ISupportInitialize)(this.ac_Main)).BeginInit();
             this.ac_Main.SuspendLayout();
             this.accordionContentContainer2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_LayoutGraph.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_menuExpand.Properties)).BeginInit();
             this.accordionContentContainer5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.comboBoxEdit_RunMode.Properties)).BeginInit();
@@ -418,22 +421,43 @@ namespace DSModeler
             // 
             // accordionContentContainer2
             // 
+            this.accordionContentContainer2.Controls.Add(this.toggleSwitch_LayoutGraph);
             this.accordionContentContainer2.Controls.Add(this.toggleSwitch_menuExpand);
+            this.accordionContentContainer2.Controls.Add(this.labelControl11);
             this.accordionContentContainer2.Controls.Add(this.simpleButton_layoutReset);
             this.accordionContentContainer2.Controls.Add(this.labelControl2);
             this.accordionContentContainer2.Name = "accordionContentContainer2";
-            this.accordionContentContainer2.Size = new System.Drawing.Size(309, 67);
+            this.accordionContentContainer2.Size = new System.Drawing.Size(309, 126);
             this.accordionContentContainer2.TabIndex = 15;
+            // 
+            // toggleSwitch_LayoutGraph
+            // 
+            this.toggleSwitch_LayoutGraph.Location = new System.Drawing.Point(158, 38);
+            this.toggleSwitch_LayoutGraph.Name = "toggleSwitch_LayoutGraph";
+            this.toggleSwitch_LayoutGraph.Properties.OffText = "Off";
+            this.toggleSwitch_LayoutGraph.Properties.OnText = "On";
+            this.toggleSwitch_LayoutGraph.Size = new System.Drawing.Size(95, 19);
+            this.toggleSwitch_LayoutGraph.TabIndex = 3;
             // 
             // toggleSwitch_menuExpand
             // 
-            this.toggleSwitch_menuExpand.Location = new System.Drawing.Point(157, 35);
+            this.toggleSwitch_menuExpand.Location = new System.Drawing.Point(158, 63);
             this.toggleSwitch_menuExpand.MenuManager = this.barManager1;
             this.toggleSwitch_menuExpand.Name = "toggleSwitch_menuExpand";
             this.toggleSwitch_menuExpand.Properties.OffText = "Off";
             this.toggleSwitch_menuExpand.Properties.OnText = "On";
             this.toggleSwitch_menuExpand.Size = new System.Drawing.Size(95, 19);
             this.toggleSwitch_menuExpand.TabIndex = 3;
+            // 
+            // labelControl11
+            // 
+            this.labelControl11.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
+            this.labelControl11.Appearance.Options.UseFont = true;
+            this.labelControl11.Location = new System.Drawing.Point(21, 38);
+            this.labelControl11.Name = "labelControl11";
+            this.labelControl11.Size = new System.Drawing.Size(98, 19);
+            this.labelControl11.TabIndex = 2;
+            this.labelControl11.Text = "그래프좁게보기";
             // 
             // simpleButton_layoutReset
             // 
@@ -453,7 +477,7 @@ namespace DSModeler
             // 
             this.labelControl2.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
             this.labelControl2.Appearance.Options.UseFont = true;
-            this.labelControl2.Location = new System.Drawing.Point(20, 35);
+            this.labelControl2.Location = new System.Drawing.Point(21, 63);
             this.labelControl2.Name = "labelControl2";
             this.labelControl2.Size = new System.Drawing.Size(84, 19);
             this.labelControl2.TabIndex = 2;
@@ -985,7 +1009,7 @@ namespace DSModeler
             // 
             // ace_DocDiagram
             // 
-            this.ace_DocDiagram.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement2.ImageOptions.SvgImage")));
+            this.ace_DocDiagram.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_DocDiagram.ImageOptions.SvgImage")));
             this.ace_DocDiagram.Name = "ace_DocDiagram";
             this.ace_DocDiagram.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.ace_DocDiagram.Text = "순서도";
@@ -1078,6 +1102,7 @@ namespace DSModeler
             this.ac_Main.ResumeLayout(false);
             this.accordionContentContainer2.ResumeLayout(false);
             this.accordionContentContainer2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_LayoutGraph.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_menuExpand.Properties)).EndInit();
             this.accordionContentContainer5.ResumeLayout(false);
             this.accordionContentContainer5.PerformLayout();
@@ -1188,5 +1213,7 @@ namespace DSModeler
         private DevExpress.XtraEditors.LabelControl labelControl9;
         private DevExpress.XtraEditors.LabelControl labelControl10;
         private DevExpress.XtraEditors.ComboBoxEdit comboBoxEdit_RunMode;
+        private DevExpress.XtraEditors.ToggleSwitch toggleSwitch_LayoutGraph;
+        private DevExpress.XtraEditors.LabelControl labelControl11;
     }
 }

@@ -117,23 +117,12 @@ module TagKindModule =
 
 
     [<AutoOpen>]
-    type TagTarget =
-    | TTSystem
-    | TTFlow
-    | TTVertex
-    | TTApiItem
-    | TTAction
-
-    [<AutoOpen>]
-    type TagDsInfo = {
-        Name: string
-        TagTarget : TagTarget
-        TagSystem    : (DsSystem * SystemTag ) option
-        TagFlow      : (Flow     * FlowTag   ) option
-        TagVertex    : (Vertex   * VertexTag ) option
-        TagApiItem   : (ApiItem  * ApiItemTag) option
-        TagAction    : (DsTask   * ActionTag ) option
-    }
+    type TagTargetDS =
+    | TTSystem  of FqdnObject * SystemTag
+    | TTFlow    of FqdnObject * FlowTag
+    | TTVertex  of FqdnObject * VertexTag
+    | TTApiItem of FqdnObject * ApiItemTag
+    | TTAction  of FqdnObject * ActionTag
 
 
     [<AutoOpen>]
@@ -156,13 +145,12 @@ module TagKindModule =
             match x.Target with
             |Some obj ->
                 match obj with
-                | :? DsSystem as s -> Some {Name= x.Name; TagTarget= TTSystem;  TagSystem= Some(s, x.GetSystemTagKind().Value); TagFlow = None;  TagVertex = None;   TagApiItem= None; TagAction= None}
-                | :? Flow as f     -> Some {Name= x.Name; TagTarget= TTFlow;    TagSystem= None; TagFlow = Some(f, x.GetFlowTagKind().Value); TagVertex = None;   TagApiItem= None; TagAction= None}
-                | :? Vertex as v   -> Some {Name= x.Name; TagTarget= TTVertex;  TagSystem= None; TagFlow = None; TagVertex = Some(v, x.GetVertexTagKind().Value); TagApiItem= None; TagAction= None}
-                | :? ApiItem as a  -> Some {Name= x.Name; TagTarget= TTApiItem; TagSystem= None; TagFlow = None; TagVertex = None; TagApiItem= Some(a, x.GetApiTagKind().Value); TagAction= None}
-                | :? DsTask  as d  -> Some {Name= x.Name; TagTarget= TTAction;  TagSystem= None; TagFlow = None; TagVertex = None; TagApiItem= None; TagAction= Some(d, x.GetActionTagKind().Value);}
+                | :? DsSystem as s ->Some( TTSystem (s,  x.GetSystemTagKind().Value))
+                | :? Flow as f     ->Some( TTFlow (f,  x.GetFlowTagKind().Value))
+                | :? Vertex as v   ->Some( TTVertex (v,  x.GetVertexTagKind().Value))
+                | :? ApiItem as a  ->Some( TTApiItem (a,  x.GetApiTagKind().Value))
+                | :? DsTask  as d  ->Some( TTAction (d,  x.GetActionTagKind().Value))
                 |_ -> None
-
             |None -> None
 
         [<Extension>]
@@ -170,11 +158,11 @@ module TagKindModule =
             let info = x.GetTagInfo()
             match info with
             |Some t -> 
-                match t.TagTarget with
-                |TTSystem -> x.GetSystemTagKind().Value.ToString()
-                |TTFlow -> x.GetFlowTagKind().Value.ToString()
-                |TTVertex -> x.GetVertexTagKind().Value.ToString()
-                |TTApiItem -> x.GetApiTagKind().Value.ToString()
-                |TTAction  -> x.GetActionTagKind().Value.ToString()
+                match t with
+                |TTSystem (_,tag) -> tag.ToString()
+                |TTFlow (_,tag) -> tag.ToString()
+                |TTVertex (_,tag) -> tag.ToString()
+                |TTApiItem (_,tag) -> tag.ToString()
+                |TTAction (_,tag) -> tag.ToString()
             |None -> "None"
             

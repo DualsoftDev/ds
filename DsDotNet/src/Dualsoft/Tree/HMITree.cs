@@ -79,10 +79,8 @@ namespace DSModeler.Tree
                         acb.Click += (s, e) =>
                         {
                             AccordionContextButton btn = UpdateBtn(s);
-                            bool on = btn.AppearanceNormal.ForeColor != offColor;
-                            StartHMI(btn.Tag as Real, on);
+                            StartHMI(btn.Tag as Real);
                         };
-                        acb.AppearanceNormal.ForeColor = Color.RoyalBlue;
                         acb.AppearanceHover.ForeColor = startColor;
                         acb.ToolTip = startToolTip;
                     }
@@ -91,15 +89,12 @@ namespace DSModeler.Tree
                         acb.Click += (s, e) =>
                         {
                             AccordionContextButton btn = UpdateBtn(s);
-                            bool on = btn.AppearanceNormal.ForeColor != offColor;
-                            ResetHMI(btn.Tag as Real, on);
+                            ResetHMI(btn.Tag as Real);
                         };
-                        acb.AppearanceNormal.ForeColor = Color.RoyalBlue;
                         acb.AppearanceHover.ForeColor = resetColor;
                         acb.ToolTip = resetToolTip;
                     }
 
-                    acb.AppearanceNormal.Options.UseForeColor = true;
                     acb.AppearanceHover.Options.UseForeColor = true;
                     acb.AllowGlyphSkinning = DevExpress.Utils.DefaultBoolean.True;
                     acb.AlignmentOptions.Panel = DevExpress.Utils.ContextItemPanel.Center;
@@ -110,20 +105,20 @@ namespace DSModeler.Tree
 
                     return acb;
 
-                    void StartHMI(Real real, bool on)
+                    void StartHMI(Real real)
                     {
                         Task.Run(() =>
                         {
                             var vv = (real.TagManager as VertexManager);
-                            vv.SF.Value = on;
+                            vv.SF.Value = true;
                         });
                     }
-                    void ResetHMI(Real real, bool on)
+                    void ResetHMI(Real real)
                     {
                         Task.Run(() =>
                         {
                             var vv = (real.TagManager as VertexManager);
-                            vv.RF.Value = on;
+                            vv.RF.Value = true;
                         });
                     }
                 }
@@ -135,10 +130,10 @@ namespace DSModeler.Tree
         private static AccordionContextButton UpdateBtn(object s)
         {
             var btn = (AccordionContextButton)s;
-            if (btn.AppearanceNormal.ForeColor != offColor)
-                btn.AppearanceNormal.ForeColor = offColor;
-            else
-                btn.AppearanceNormal.ForeColor = btn.ToolTip == startToolTip ? startColor : resetColor;
+            //if (btn.AppearanceNormal.ForeColor != offColor)
+            //    btn.AppearanceNormal.ForeColor = offColor;
+            //else
+            //    btn.AppearanceNormal.ForeColor = btn.ToolTip == startToolTip ? startColor : resetColor;
 
             return btn;
         }

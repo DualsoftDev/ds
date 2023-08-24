@@ -62,32 +62,67 @@ module CoreExtensionsModule =
                            |> Seq.iter(fun w -> w.TagChanged <- false)
         [<Extension>] static member ExecutableStatements (xs:IStorage seq, mRung:IDictionary<IStorage, Statement seq>) = 
                         xs |> Seq.collect(fun stg -> mRung[stg]) 
-       
         [<Extension>]
-        static member NotifyHwOutput (s:ISystem, x:IStorage) =
-            match x.GetActionTagKind() with
-            | Some tk ->
-                match tk with
-                | ActionTag.ActionOut->  onValueHWChanged (s, x, x.BoxedValue)
-                | _ ->()
-
-            | None -> ()
+        static member NotifyPreExcute (s:ISystem, x:IStorage) =
+            match x.GetTagInfo() with
+                |Some t -> 
+                    match t with
+                    |TTSystem (_,_) -> ()
+                    |TTFlow   (_,_) -> ()
+                    |TTVertex (v,tag) -> 
+                                if (x :?> PlanVar<bool>).Value
+                                then
+                                    match tag with
+                                        | VertexTag.ready  -> onStatusChanged (s, v:?>Vertex, Ready)
+                                        | VertexTag.going  -> onStatusChanged (s, v:?>Vertex, Going)
+                                        | VertexTag.finish -> onStatusChanged (s, v:?>Vertex, Finish)
+                                        | VertexTag.homing -> onStatusChanged (s, v:?>Vertex, Homing)
+                                        | _->()
+                    |TTApiItem(_,_) -> ()
+                    |TTAction (_,_) -> onValueHWChanged (s, x, x.BoxedValue)
+                |None -> ()
 
         [<Extension>]
-        static member NotifyStatus (s:ISystem, x:IStorage) =
-            match x.GetVertexTagKind() with
-            | Some tk ->
-                let v = x.Target.Value :?> Vertex
-                if (x :?> PlanVar<bool>).Value
-                then
-                    match tk with
-                    | VertexTag.ready  -> onStatusChanged (s, v, Ready)
-                    | VertexTag.going  -> onStatusChanged (s, v, Going)
-                    | VertexTag.finish -> onStatusChanged (s, v, Finish)
-                    | VertexTag.homing -> onStatusChanged (s, v, Homing)
-                    | _->()
+        static member NotifyPostExcute (_:ISystem, x:IStorage) =
+            match x.GetTagInfo() with
+                |Some t -> 
+                    match t with
+                    |TTSystem (_,_) -> ()
+                    |TTFlow   (_,_) -> ()
+                    |TTVertex (_,tag) ->   match tag with
+                                            | VertexTag.startForce 
+                                            | VertexTag.resetForce -> x.BoxedValue <- false
+                                            | _->()
+                    |TTApiItem(_,_) -> ()
+                    |TTAction (_,_) -> ()
+                |None -> ()
 
-            | None -> ()
+
+        //[<Extension>]
+        //static member NotifyHwOutput (s:ISystem, x:IStorage) =
+        //    match x.GetActionTagKind() with
+        //    | Some tk ->
+        //        match tk with
+        //        | ActionTag.ActionOut->  onValueHWChanged (s, x, x.BoxedValue)
+        //        | _ ->()
+
+        //    | None -> ()
+
+        //[<Extension>]
+        //static member NotifyStatus (s:ISystem, x:IStorage) =
+        //    match x.GetVertexTagKind() with
+        //    | Some tk ->
+        //        let v = x.Target.Value :?> Vertex
+        //        if (x :?> PlanVar<bool>).Value
+        //        then
+        //            match tk with
+        //            | VertexTag.ready  -> onStatusChanged (s, v, Ready)
+        //            | VertexTag.going  -> onStatusChanged (s, v, Going)
+        //            | VertexTag.finish -> onStatusChanged (s, v, Finish)
+        //            | VertexTag.homing -> onStatusChanged (s, v, Homing)
+        //            | _->()
+
+        //    | None -> ()
 
         [<Extension>]
         static member NotifyValue (sys:ISystem, stg:IStorage, newValue:obj) =

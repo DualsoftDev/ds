@@ -67,7 +67,7 @@ module RunTimeUtil =
         let total = getTotalTags  statements
         let chTags = total.ChangedTags()
 
-        chTags.Iter(fun f->  f.DsSystem.NotifyStatus(f)) //상태보고
+        chTags.Iter(fun f->  f.DsSystem.NotifyPreExcute(f)) 
         chTags.ChangedTagsClear(systems)
 
     ///HMI Reset

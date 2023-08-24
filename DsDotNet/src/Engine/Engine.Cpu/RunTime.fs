@@ -26,16 +26,14 @@ module RunTime =
                 while run do   
 
                     let chTags = cpuStorages.ChangedTags()
-                    let states = chTags.ExecutableStatements(mapRungs) 
+                    let exeStates = chTags.ExecutableStatements(mapRungs) 
                   
-                    if states.any()  
+                    if exeStates.any()  
                     then
                         chTags.ChangedTagsClear(systems)
-                        chTags.Iter(fun f-> 
-                            f.DsSystem.NotifyStatus(f) //상태보고
-                            f.DsSystem.NotifyHwOutput(f) //물리 Out 보고
-                            ) 
-                        states.Iter(fun f->  f.Do())
+                        chTags.Iter(fun f->  f.DsSystem.NotifyPreExcute(f) )  // 상태보고/물리Out 처리
+                        exeStates.Iter(fun f->  f.Do())
+                        chTags.Iter(fun f->  f.DsSystem.NotifyPostExcute(f) )  // HMI Forceoff 처리
             }
         do 
             ()

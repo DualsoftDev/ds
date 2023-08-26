@@ -47,15 +47,15 @@ namespace DSModeler
         public static bool SimReset { get; set; }
         public static string ExportPathPLC { get; set; }
         public static string ExportPathXLS { get; set; }
+        public static string RunHWIP { get; set; }
         public static DsSystem ActiveSys { get; set; }
         public static RuntimePackage CpuRunMode { get; set; } = RuntimePackage.Simulation;
-        public static PaixHW PaixHW { get; set; } = PaixHW.NMF;
+        public static PaixHW PaixHW { get; set; } = PaixHW.WMX;
 
         public static Version ver = Assembly.GetEntryAssembly().GetName().Version;
 
         public static Subject<Tuple<CoreModule.Vertex, Status4>> StatusChangeSubject = new Subject<Tuple<CoreModule.Vertex, Status4>>();
         public static Subject<Tuple<int, TimeSpan>> StatusChangeLogCount = new  Subject<Tuple<int, TimeSpan>>();
-        public static Subject<Tuple<int, bool>> ValueChangeSubjectPaixInputs = new Subject<Tuple<int, bool>>();
 
         public static string DefaultFolder =>
             Path.Combine(

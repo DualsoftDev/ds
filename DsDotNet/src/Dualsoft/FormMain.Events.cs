@@ -129,17 +129,20 @@ namespace DSModeler
             };
 
 
-            textEdit_IP.TextChanged += (s, e) =>
+            textEdit_IP.EditValueChanging += (s, e) =>
             {
-                IPAddress.TryParse(textEdit_IP.Text, out IPAddress addr);
+                IPAddress.TryParse(e.NewValue.ToString(), out IPAddress addr);
                 if (addr == null) return;
 
                 if (Global.CpuRunMode.IsPackagePC())
                 {
-                    DSRegistry.SetValue(K.RunHWIP, textEdit_IP.Text);
+                    DSRegistry.SetValue(K.RunHWIP, e.NewValue);
                     _PaixNMF?.Dispose();
-                    _PaixNMF = new PaixDriver(textEdit_IP.Text, Global.RunStartIn, Global.RunStartOut);
-                    var a = _PaixNMF.Open();
+                    _PaixNMF = new PaixDriver(e.NewValue.ToString(), Global.RunStartIn, Global.RunStartOut);
+                    if (_PaixNMF.Open())
+                        Global.Logger.Info($"{Global.RunHWIP} 연결에 성공 하였습니다." );
+                    else
+                        Global.Logger.Warn($"{Global.RunHWIP} 연결에 실패 하였습니다. 통신 연결을 확인하세요" );
                 }
             };
 

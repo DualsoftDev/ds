@@ -1,5 +1,6 @@
 using Server.Common.NMC;
 using Server.Common.NMF;
+using Server.Common.WMX3;
 using System;
 using System.Collections;
 using System.Linq;
@@ -51,24 +52,26 @@ namespace DSModeler
                     await Task.Delay(10);
                     var oldNum = NumIn.ToList();
                     PaixDrivers.GetInput(IP, NumIn);
-                    if (!oldNum.ToArray().Equals(NumIn))
+                    for (int iByte = 0; iByte < NumIn.Length; iByte++)
                     {
-                        var oldBits = getBitArray(oldNum.ToArray());
-                        var newBits = getBitArray(NumIn);
-                        for (int i = 0; i < newBits.Count; i++)
-                            if (oldBits[i] != newBits[i])
-                                Global.ValueChangeSubjectPaixInputs.OnNext(Tuple.Create(i, newBits[i]));
-                    }
+                        if (NumIn[iByte] == oldNum[iByte])
+                            continue;
+                        var oldShort = new BitArray(oldNum[iByte]);
+                        var newShort = new BitArray(NumIn[iByte]);
 
-                    BitArray getBitArray(short[] shortArr)
-                    {
-                        var arrByte = Array.ConvertAll<short, byte>(shortArr, delegate (short item) { return (byte)item; });
-                        return new BitArray(arrByte);
+                        for (int iBit = 0; iBit < oldShort.Length; iBit++) //short size
+                            if (oldShort[iBit] != newShort[iBit])
+                                HWEvent.ValueChangeSubjectPaixInputs.OnNext(Tuple.Create(iBit, newShort[iBit]));
                     }
                 }
             });
         }
 
+        BitArray getBitArray(short[] shortArr)
+        {
+            var arrByte = Array.ConvertAll<short, byte>(shortArr, delegate (short item) { return (byte)item; });
+            return new BitArray(arrByte);
+        }
 
         public void Stop()
         {

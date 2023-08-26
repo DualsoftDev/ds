@@ -339,6 +339,10 @@
       <Project>{bc08c008-ca79-4795-add8-90b8cce1bd15}</Project>
       <Name>Server.Common.NMF</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Server\Server.Common.WMX3\Server.Common.WMX3.csproj">
+      <Project>{a68f8e70-e287-46da-84be-b65232600f04}</Project>
+      <Name>Server.Common.WMX3</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <PublishFile Include="cs\FSharp.Core.resources">

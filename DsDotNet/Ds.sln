@@ -88,6 +88,8 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "UnitTest.PLC.HW.LS.FEnet", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dualsoft", "src\Dualsoft\Dualsoft.csproj", "{56258FD1-89FD-442E-899C-501D7408F0C4}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server.Common.WMX3", "src\Server\Server.Common.WMX3\Server.Common.WMX3.csproj", "{A68F8E70-E287-46DA-84BE-B65232600F04}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -206,6 +208,10 @@ Global
 		{56258FD1-89FD-442E-899C-501D7408F0C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56258FD1-89FD-442E-899C-501D7408F0C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56258FD1-89FD-442E-899C-501D7408F0C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A68F8E70-E287-46DA-84BE-B65232600F04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A68F8E70-E287-46DA-84BE-B65232600F04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A68F8E70-E287-46DA-84BE-B65232600F04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A68F8E70-E287-46DA-84BE-B65232600F04}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -243,6 +249,7 @@ Global
 		{D3B38574-AA08-4701-BDBB-F9D7BECE970E} = {BCF8AC63-491C-4D8E-81EC-88032ED4CF05}
 		{964D6002-A01A-46F2-9332-C3A8CA9B930F} = {BCF8AC63-491C-4D8E-81EC-88032ED4CF05}
 		{F312CACE-B656-4479-9240-3D95CBC50C82} = {BCF8AC63-491C-4D8E-81EC-88032ED4CF05}
+		{A68F8E70-E287-46DA-84BE-B65232600F04} = {04398A19-7AF6-4D97-A66D-7791167D65AB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B36D7B1-CD69-44C5-8E57-DE46AC18C1F7}

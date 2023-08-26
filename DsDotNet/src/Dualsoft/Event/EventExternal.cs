@@ -1,5 +1,6 @@
 using DevExpress.Accessibility;
 using Engine.Core;
+using Server.Common.WMX3;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -79,7 +80,7 @@ namespace DSModeler
             }
             if (DisposableHWPaixInput == null)
             {
-                DisposableHWPaixInput = Global.ValueChangeSubjectPaixInputs.Subscribe(rx =>
+                DisposableHWPaixInput = HWEvent.ValueChangeSubjectPaixInputs.Subscribe(rx =>
                 {
                     var index = rx.Item1;
                     var value = rx.Item2;

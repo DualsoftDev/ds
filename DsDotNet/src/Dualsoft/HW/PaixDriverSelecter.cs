@@ -16,12 +16,13 @@ namespace DSModeler
         public enum PaixHW
         {
             NMC2,
-            NMF
+            NMF,
+            WMX // WMX_ETHERCAT
         }
 
-        public static PaixHW SelectPaixHW { get; set; } = PaixHW.NMC2;
-        public static short[] GetIPSplit(string ipText) => ipText.Split('.').Select(s => Convert.ToInt16(s)).ToArray();
-
+        public static PaixHW SelectPaixHW { get; set; } 
+        public static short[] GetIPSplit(string ipText)
+            => ipText.Split('.').Select(s => Convert.ToInt16(s)).ToArray();
 
         public static short Ping(string ipText)
         {
@@ -31,6 +32,7 @@ namespace DSModeler
             {
                 case PaixHW.NMC2: ret = NMC2.nmc_PingCheck(ip[3], 500); break;
                 case PaixHW.NMF: ret = NMF.nmf_PingCheck(ip[3], ip[0], ip[1], ip[2], 500); break;
+                case PaixHW.WMX: ret = NMF.nmf_PingCheck(ip[3], ip[0], ip[1], ip[2], 500); break;
                 default:
                     new Exception($"HW {SelectPaixHW} is not supported");
                     break;

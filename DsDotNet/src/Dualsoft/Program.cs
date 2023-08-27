@@ -35,9 +35,8 @@ namespace DSModeler
             UnhandledExceptionHandler.InstallUnhandledExceptionHandler();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            EditorSkin.InitSetting("The Bezier", "Gloom Gloom");
+            EditorSkin.InitSetting("The Bezier", "Mercury Ice");
             var main = new FormMain();
-
 
             if (!Global.IsDebug)
                 SplashScreenManager.ShowForm(main, typeof(SplashScreenDS));

@@ -1,6 +1,6 @@
 using Server.Common.NMC;
 using Server.Common.NMF;
-using Server.Common.WMX3;
+using Server.HW.WMX3;
 using System;
 using System.Collections;
 using System.Linq;

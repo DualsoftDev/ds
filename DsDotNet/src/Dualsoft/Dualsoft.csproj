@@ -339,9 +339,13 @@
       <Project>{bc08c008-ca79-4795-add8-90b8cce1bd15}</Project>
       <Name>Server.Common.NMF</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Server\Server.Common.WMX3\Server.Common.WMX3.csproj">
-      <Project>{a68f8e70-e287-46da-84be-b65232600f04}</Project>
-      <Name>Server.Common.WMX3</Name>
+    <ProjectReference Include="..\Server\Server.HW.Common\Server.HW.Common.csproj">
+      <Project>{f9c31dc9-a512-4c41-a3c6-87e9506ec212}</Project>
+      <Name>Server.HW.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Server\Server.HW.WMX3\Server.HW.WMX3.csproj">
+      <Project>{a5aab509-f6ae-4665-8bda-a78434d5572e}</Project>
+      <Name>Server.HW.WMX3</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

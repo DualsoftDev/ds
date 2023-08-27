@@ -1,6 +1,6 @@
 using DevExpress.Accessibility;
 using Engine.Core;
-using Server.Common.WMX3;
+using Server.HW.WMX3;
 using System;
 using System.Collections.Generic;
 using System.Linq;

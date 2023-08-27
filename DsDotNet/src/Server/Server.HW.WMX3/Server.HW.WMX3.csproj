@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>net48</TargetFrameworks>
+		<LangVersion>11.0</LangVersion>
+		<OutputPath>$(SolutionDir)\bin</OutputPath>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	<ItemGroup>
+	  <PackageReference Include="System.Reactive" Version="6.0.0" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\Server.HW.Common\Server.HW.Common.csproj" />
+	</ItemGroup>
+  <ItemGroup>
+    <Reference Include="IOApi_CLRLib">
+      <HintPath>..\..\..\exLib\IOApi_CLRLib.dll</HintPath>
+    </Reference>
+    <Reference Include="WMX3Api_CLRLib">
+      <HintPath>..\..\..\exLib\WMX3Api_CLRLib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

@@ -6,10 +6,9 @@ using System.Net.NetworkInformation;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
-using Server.Common;
 using WMX3ApiCLR;
 
-namespace Server.Common.WMX3;
+namespace Server.HW.WMX3;
 
 public static class HWEvent
 {

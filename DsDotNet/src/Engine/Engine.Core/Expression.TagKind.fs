@@ -3,6 +3,7 @@ namespace Engine.Core
 open Dual.Common.Core.FS
 open System
 open System.Runtime.CompilerServices
+open System.Reactive.Subjects
 
 [<AutoOpen>]
 module TagKindModule =
@@ -114,16 +115,17 @@ module TagKindModule =
     |ActionMemory             = 14002
 
 
+    type TagDS =
+    |EventSystem   of  Tag:IStorage * Target:DsSystem * TagKind:SystemTag
+    |EventFlow     of  Tag:IStorage * Target:Flow     * TagKind:FlowTag
+    |EventVertex   of  Tag:IStorage * Target:Vertex   * TagKind:VertexTag
+    |EventApiItem  of  Tag:IStorage * Target:ApiItem  * TagKind:ApiItemTag
+    |EventAction   of  Tag:IStorage * Target:DsTask   * TagKind:ActionTag
 
-
-    [<AutoOpen>]
-    type TagTargetDS =
-    | TTSystem  of FqdnObject * SystemTag
-    | TTFlow    of FqdnObject * FlowTag
-    | TTVertex  of FqdnObject * VertexTag
-    | TTApiItem of FqdnObject * ApiItemTag
-    | TTAction  of FqdnObject * ActionTag
-
+    let TagDSSubject = new Subject<TagDS>()
+    
+    let onTagDSChanged(tagDS :TagDS) =
+        TagDSSubject.OnNext(tagDS)
 
     [<AutoOpen>]
     [<Extension>]
@@ -145,11 +147,11 @@ module TagKindModule =
             match x.Target with
             |Some obj ->
                 match obj with
-                | :? DsSystem as s ->Some( TTSystem (s,  x.GetSystemTagKind().Value))
-                | :? Flow as f     ->Some( TTFlow (f,  x.GetFlowTagKind().Value))
-                | :? Vertex as v   ->Some( TTVertex (v,  x.GetVertexTagKind().Value))
-                | :? ApiItem as a  ->Some( TTApiItem (a,  x.GetApiTagKind().Value))
-                | :? DsTask  as d  ->Some( TTAction (d,  x.GetActionTagKind().Value))
+                | :? DsSystem as s ->Some( EventSystem  (x, s, x.GetSystemTagKind().Value))
+                | :? Flow as f     ->Some( EventFlow    (x, f, x.GetFlowTagKind().Value))
+                | :? Vertex as v   ->Some( EventVertex  (x, v, x.GetVertexTagKind().Value))
+                | :? ApiItem as a  ->Some( EventApiItem (x, a, x.GetApiTagKind().Value))
+                | :? DsTask  as d  ->Some( EventAction  (x, d, x.GetActionTagKind().Value))
                 |_ -> None
             |None -> None
 
@@ -159,10 +161,18 @@ module TagKindModule =
             match info with
             |Some t -> 
                 match t with
-                |TTSystem (_,tag) -> tag.ToString()
-                |TTFlow (_,tag) -> tag.ToString()
-                |TTVertex (_,tag) -> tag.ToString()
-                |TTApiItem (_,tag) -> tag.ToString()
-                |TTAction (_,tag) -> tag.ToString()
+                |EventSystem (_,_,kind) -> kind.ToString()
+                |EventFlow (_,_,kind) -> kind.ToString()
+                |EventVertex (_,_,kind) -> kind.ToString()
+                |EventApiItem (_,_,kind) -> kind.ToString()
+                |EventAction (_,_,kind) -> kind.ToString()
             |None -> "None"
-            
+
+        [<Extension>]
+        static member GetText (x:TagDS) =
+            match x with
+            |EventSystem (tag, target, kind) -> $"{tag.Name}, {target.Name}, {kind}";
+            |EventFlow   (tag, target, kind) -> $"{tag.Name}, {target.Name}, {kind}";
+            |EventVertex (tag, target, kind) -> $"{tag.Name}, {target.Name}, {kind}";
+            |EventApiItem(tag, target, kind) -> $"{tag.Name}, {target.Name}, {kind}";
+            |EventAction (tag, target, kind) -> $"{tag.Name}, {target.Name}, {kind}";

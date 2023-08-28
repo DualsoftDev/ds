@@ -537,7 +537,7 @@ namespace DSModeler
             // spinEdit_StartOut
             // 
             this.spinEdit_StartOut.EditValue = new decimal(new int[] {
-            0,
+            3,
             0,
             0,
             0});
@@ -561,7 +561,7 @@ namespace DSModeler
             // spinEdit_StartIn
             // 
             this.spinEdit_StartIn.EditValue = new decimal(new int[] {
-            0,
+            3,
             0,
             0,
             0});
@@ -803,12 +803,12 @@ namespace DSModeler
             this.labelControl12.TabIndex = 7;
             this.labelControl12.Text = "선택디바이스";
             // 
-            // gridLookUpEdit_Device
+            // gle_Device
             // 
             this.gle_Device.EditValue = "[EditVasd";
             this.gle_Device.Location = new System.Drawing.Point(97, 14);
             this.gle_Device.MenuManager = this.barManager1;
-            this.gle_Device.Name = "gridLookUpEdit_Device";
+            this.gle_Device.Name = "gle_Device";
             this.gle_Device.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
             this.gle_Device.Properties.NullText = "먼저 파일을 불러오세요";

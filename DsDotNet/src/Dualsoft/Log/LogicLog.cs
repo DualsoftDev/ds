@@ -1,8 +1,12 @@
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Grid;
+using Server.HW.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Engine.Core.CoreModule;
+using static Engine.Core.Interface;
+using static Engine.Core.TagKindModule;
 
 namespace DSModeler
 {
@@ -33,6 +37,8 @@ namespace DSModeler
             gv.OptionsView.ShowAutoFilterRow = true;
             gv.OptionsView.ShowGroupPanel = false;
         }
+
+     
     }
 
     public class ValueLog

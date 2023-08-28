@@ -273,10 +273,23 @@ namespace DSModeler
 
         public static void SetBit(WMXTag tag, bool value)
         {
-            tag.WriteRequestValue = value;
+            if (RuntimeDS.Package.IsPackagePC())
+                tag.WriteRequestValue = value;
+            else
+                MBox.Warn("설정 H/W 에서 PC 타입을 선택하세요");
         }
 
+        internal static void ReConnect()
+        {
+            if(Global.PaixDriver != null) Global.PaixDriver.Conn.Disconnect();  
 
+            Global.PaixDriver = new PaixDriver(Global.PaixHW, Global.RunHWIP, Global.RunCountIn, Global.RunCountOut);
+            if (Global.PaixDriver.Open())
+                Global.Logger.Info($"{Global.PaixHW} {Global.RunHWIP} 연결에 성공 하였습니다.");
+            else
+
+                Global.Logger.Warn($"{Global.PaixHW} {Global.RunHWIP} 연결에 실패 하였습니다. 통신 연결을 확인하세요");
+        }
     }
 }
 

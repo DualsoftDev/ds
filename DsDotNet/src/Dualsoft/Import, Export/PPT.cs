@@ -54,7 +54,6 @@ namespace DSModeler
                     }
 
                     PcControl.DicPou = dicCpu;
-                    await PcControl.CreateRunCpuSingle();
 
 
                     formMain.Ace_Model.Expanded = true;

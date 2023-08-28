@@ -36,7 +36,6 @@ namespace DSModeler
                     {
                         Files.SetLast(files);
                         bool loadOK = await PPT.ImportPowerPoint(files, this);
-                        PcControl.UpdateDevice(gle_Device);
 
                         if (!loadOK) { return;  } 
 
@@ -54,6 +53,14 @@ namespace DSModeler
                         }
 
                         EventCPU.CPUSubscribe(ViewDraw.DicStatus);
+
+                        if (Global.CpuRunMode.IsPackagePC())
+                        {
+                            PcControl.ReConnect();
+                            PcControl.UpdateDevice(gle_Device);
+                            await PcControl.CreateRunCpuSingle();
+                        }
+
                         Global.Logger.Info("PPTX 파일 로딩이 완료 되었습니다.");
                     });
 

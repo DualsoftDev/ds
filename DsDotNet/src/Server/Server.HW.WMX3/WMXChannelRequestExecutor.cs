@@ -70,8 +70,8 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
             if (newData[iByte] == oldData[iByte])
                 continue;
 
-            var oldBits = new BitArray(oldData[iByte]);
-            var newBits = new BitArray(newData[iByte]);
+            var oldBits = new BitArray(new byte[] { oldData[iByte] });
+            var newBits = new BitArray(new byte[] { newData[iByte] });
 
             for (int iBit = 0; iBit < newBits.Length; iBit++)
                 if (oldBits[iBit] != newBits[iBit])

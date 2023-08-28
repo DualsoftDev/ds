@@ -33,7 +33,7 @@ module RunTime =
                         chTags.ChangedTagsClear(systems)
                         chTags.Iter(fun f->  f.DsSystem.NotifyPreExcute(f) )  // 상태보고/물리Out 처리
                         exeStates.Iter(fun f->  f.Do())
-                        chTags.Iter(fun f->  f.DsSystem.NotifyPostExcute(f) )  // HMI Forceoff 처리
+                        //chTags.Iter(fun f->  f.DsSystem.NotifyPostExcute(f) )  // HMI Forceoff 처리
             }
         do 
             ()

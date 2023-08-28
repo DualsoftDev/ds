@@ -25,11 +25,11 @@ module DriverIOLSModuleTest =
                 match tag.GetTagInfo() with
                 | Some t ->
                     match t  with
-                    |TTSystem   (s,tag)->  s :?> DsSystem |> ignore //관련 Ds Server 작업
-                    |TTFlow     (s,tag)->  s :?> Flow |> ignore //관련 Ds Server 작업
-                    |TTVertex   (s,tag)->  s :?> Vertex |> ignore //관련 Ds Server 작업
-                    |TTApiItem  (s,tag)->  s :?> ApiItem |> ignore //관련 Ds Server 작업
-                    |TTAction   (s,tag)->  s :?> DsTask |> ignore //관련 Ds Server 작업
+                    |EventSystem   (s,tag,tagKind)->  s :?> DsSystem |> ignore //관련 Ds Server 작업
+                    |EventFlow     (s,tag,tagKind)->  s :?> Flow |> ignore //관련 Ds Server 작업
+                    |EventVertex   (s,tag,tagKind)->  s :?> Vertex |> ignore //관련 Ds Server 작업
+                    |EventApiItem  (s,tag,tagKind)->  s :?> ApiItem |> ignore //관련 Ds Server 작업
+                    |EventAction   (s,tag,tagKind)->  s :?> DsTask |> ignore //관련 Ds Server 작업
 
                 | None -> ()    //Ds Server와 관련없는 Timmer 등등.. GetTagInfo None
 

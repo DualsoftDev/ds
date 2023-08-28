@@ -137,13 +137,9 @@ namespace DSModeler
 
                 if (Global.CpuRunMode.IsPackagePC())
                 {
-
                     DSRegistry.SetValue(K.RunHWIP, e.NewValue);
-                    Global.PaixDriver = new PaixDriver(Global.PaixHW, e.NewValue.ToString(), Global.RunCountIn, Global.RunCountOut);
-                    if (Global.PaixDriver.Open())
-                        Global.Logger.Info($"{Global.PaixHW} {Global.RunHWIP} 연결에 성공 하였습니다.");
-                    else
-                        Global.Logger.Warn($"{Global.PaixHW} {Global.RunHWIP} 연결에 실패 하였습니다. 통신 연결을 확인하세요");
+                    Global.RunHWIP = e.NewValue.ToString();
+                    PcControl.ReConnect();
                 }
             };
 

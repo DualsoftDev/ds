@@ -6,6 +6,7 @@ using Dual.Common.Core;
 using Dual.Common.Winform;
 using Engine.Core;
 using Microsoft.FSharp.Core;
+using Server.HW.WMX3;
 using System;
 using System.Linq;
 using System.Net;
@@ -78,9 +79,9 @@ namespace DSModeler
                     ImportPowerPointWapper(Files.GetLast());
             };
 
-            spinEdit_StartIn.Properties.EditValueChanging += (s, e) => UpdateRunStartInOut(e, true);
-            spinEdit_StartOut.Properties.EditValueChanging += (s, e) => UpdateRunStartInOut(e, false);
-            void UpdateRunStartInOut(ChangingEventArgs e, bool bIn)
+            spinEdit_StartIn.Properties.EditValueChanging += (s, e) => UpdateRunCountInOut(e, true);
+            spinEdit_StartOut.Properties.EditValueChanging += (s, e) => UpdateRunCountInOut(e, false);
+            void UpdateRunCountInOut(ChangingEventArgs e, bool bIn)
             {
                 var textValue = e.NewValue.ToString().Split('.')[0];
                 e.Cancel = Convert.ToInt32(textValue) < 0;
@@ -88,13 +89,13 @@ namespace DSModeler
                 {
                     if (bIn)
                     {
-                        Global.RunStartIn = Convert.ToInt32(textValue);
-                        DSRegistry.SetValue(K.RunStartIn, Global.RunStartIn);
+                        Global.RunCountIn = Convert.ToInt32(textValue);
+                        DSRegistry.SetValue(K.RunCountIn, Global.RunCountIn);
                     }
                     else
                     {
-                        Global.RunStartOut = Convert.ToInt32(textValue);
-                        DSRegistry.SetValue(K.RunStartOut, Global.RunStartOut);
+                        Global.RunCountOut = Convert.ToInt32(textValue);
+                        DSRegistry.SetValue(K.RunCountOut, Global.RunCountOut);
                     }
                 }
             }
@@ -136,15 +137,18 @@ namespace DSModeler
 
                 if (Global.CpuRunMode.IsPackagePC())
                 {
+
                     DSRegistry.SetValue(K.RunHWIP, e.NewValue);
-                    _PaixNMF?.Dispose();
-                    _PaixNMF = new PaixDriver(e.NewValue.ToString(), Global.RunStartIn, Global.RunStartOut);
-                    if (_PaixNMF.Open())
-                        Global.Logger.Info($"{Global.RunHWIP} 연결에 성공 하였습니다." );
+                    Global.PaixDriver = new PaixDriver(Global.PaixHW, e.NewValue.ToString(), Global.RunCountIn, Global.RunCountOut);
+                    if (Global.PaixDriver.Open())
+                        Global.Logger.Info($"{Global.PaixHW} {Global.RunHWIP} 연결에 성공 하였습니다.");
                     else
-                        Global.Logger.Warn($"{Global.RunHWIP} 연결에 실패 하였습니다. 통신 연결을 확인하세요" );
+                        Global.Logger.Warn($"{Global.PaixHW} {Global.RunHWIP} 연결에 실패 하였습니다. 통신 연결을 확인하세요");
                 }
             };
+
+            checkButton_ADV.CheckedChanged += (s, e) => PcControl.SetBit(gle_Device.EditValue as WMXTag, checkButton_ADV.Checked);
+            checkButton_RET.CheckedChanged += (s, e) => PcControl.SetBit(gle_Device.EditValue as WMXTag, checkButton_RET.Checked);
 
 
             DsProcessEvent.ProcessSubject.Subscribe(rx =>

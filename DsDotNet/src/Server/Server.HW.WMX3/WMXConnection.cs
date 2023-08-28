@@ -1,8 +1,8 @@
+using Server.HW.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Server.HW.Common;
 using WMX3ApiCLR;
 
 namespace Server.HW.WMX3;
@@ -26,6 +26,7 @@ public class WMXConnection : ConnectionBase
         InData = Enumerable.Repeat((byte)0, count: numIn).ToArray();
         OutData = Enumerable.Repeat((byte)0, count: numOut).ToArray();
         _connectionParameters = parameters;
+        PerRequestDelay = (int)parameters.TimeoutScan.TotalMilliseconds;
     }
 
     public override IConnectionParameters ConnectionParameters
@@ -36,34 +37,38 @@ public class WMXConnection : ConnectionBase
 
     public uint TimeoutConnecting => (uint)_connectionParameters.TimeoutConnecting.TotalMilliseconds;
 
-    public bool IsConnected { get; private set; }
+    private bool _IsConnected;
+
+    public override bool IsConnected { get { return _IsConnected; } }
     public bool IsCreatedDevice { get; private set; }
 
     public override bool Connect()
     {
-        if (IsConnected)
+        if (_IsConnected)
             return true;
 
         try
         {
             if (!IsCreatedDevice)
             {
-                _wmx3Lib.CreateDevice("C:\\Program Files\\SoftServo\\WMX3\\",//설치 PC만 사용 가능  ip설정 필요없음
-                  DeviceType.DeviceTypeNormal, TimeoutConnecting);
+                var ret = _wmx3Lib.CreateDevice("C:\\Program Files\\SoftServo\\WMX3\\",//설치 PC만 사용 가능  ip설정 필요없음
+                    DeviceType.DeviceTypeNormal, TimeoutConnecting);
 
-                IsCreatedDevice = true; //CreateDevice 리턴값 확인 필요
+                IsCreatedDevice = ret == 0;
+            }
+            if (IsCreatedDevice)
+            {
+                EngineStatus _enStatus = new EngineStatus();
+                _IsConnected = SpinWait.SpinUntil(() =>
+                {
+                    _wmx3Lib.StartCommunication(TimeoutConnecting);
+                    _wmx3Lib.GetEngineStatus(ref _enStatus);
+                    return _enStatus.State == EngineState.Communicating;
+
+                }, _connectionParameters.TimeoutConnecting);
             }
 
-            EngineStatus _enStatus = new EngineStatus();
-            IsConnected = SpinWait.SpinUntil(() =>
-            {
-                _wmx3Lib.StartCommunication(TimeoutConnecting);
-                _wmx3Lib.GetEngineStatus(ref _enStatus);
-                return _enStatus.State == EngineState.Communicating;
-
-            }, _connectionParameters.TimeoutConnecting);
-
-            return IsConnected;
+            return _IsConnected;
         }
         catch (Exception)
         {
@@ -93,5 +98,6 @@ public class WMXConnection : ConnectionBase
         yield return channel;
     }
 
-    public override object ReadATag(ITagHW tag) => null;
+
+    public override object ReadATag(ITagHW tag) => throw new NotImplementedException();
 }

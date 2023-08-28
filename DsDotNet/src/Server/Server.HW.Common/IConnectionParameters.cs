@@ -7,7 +7,7 @@ namespace Server.HW.Common
     /// </summary>
     public interface IConnectionParameters
     {
-        
+
     }
 
     /// <summary>
@@ -22,7 +22,7 @@ namespace Server.HW.Common
     /// S/W HW connection interface
     /// </summary>
     public interface IConnectionParametersSimulator : IConnectionParameters
-    {        
+    {
     }
 
     /// <summary>
@@ -31,7 +31,7 @@ namespace Server.HW.Common
     public interface IConnectionParametersEthernet : IConnectionParameters
     {
         string Ip { get; }
-        ushort Port { get;}
+        ushort Port { get; }
         TimeSpan Timeout { get; set; }
         TransportProtocol TransportProtocol { get; }
     }
@@ -41,7 +41,7 @@ namespace Server.HW.Common
     /// </summary>
     public interface IConnectionParametersEtherCAT : IConnectionParameters
     {
-        TimeSpan TimeoutConnecting { get; set; } 
+        TimeSpan TimeoutConnecting { get; set; }
         TimeSpan TimeoutScan { get; set; }
 
     }

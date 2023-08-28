@@ -7,7 +7,6 @@ using System.IO;
 using System.Reactive.Subjects;
 using System.Reflection;
 using System.Windows.Forms;
-using static DSModeler.PaixDrivers;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.RuntimeGeneratorModule;
@@ -25,8 +24,8 @@ namespace DSModeler
         public const string LayoutMenuExpand = "LayoutMenuExpand";
         public const string LayoutGraphLineType = "LayoutGraphLineType";
         public const string CpuRunMode = "CpuRunMode";
-        public const string RunStartIn = "RunStartIn";
-        public const string RunStartOut = "RunStartOut";
+        public const string RunCountIn = "RunCountIn";
+        public const string RunCountOut = "RunCountOut";
         public const string RunHWIP = "RunHWIP";
         public const string RunDefaultIP = "192.168.0.66";
         public const string DocStartPage = "시작 페이지";
@@ -40,8 +39,8 @@ namespace DSModeler
         public static ILog Logger => Log4NetLogger.Logger;
         public static bool IsDebug { get; set; }
         public static int SimSpeed { get; set; } = 3;
-        public static int RunStartIn { get; set; } = 0;
-        public static int RunStartOut { get; set; } = 0;
+        public static int RunCountIn { get; set; } = 0;
+        public static int RunCountOut { get; set; } = 0;
         public static bool LayoutMenumExpand { get; set; }
         public static bool LayoutGraphLineType { get; set; }
         public static bool SimReset { get; set; }
@@ -51,6 +50,7 @@ namespace DSModeler
         public static DsSystem ActiveSys { get; set; }
         public static RuntimePackage CpuRunMode { get; set; } = RuntimePackage.Simulation;
         public static PaixHW PaixHW { get; set; } = PaixHW.WMX;
+        public static PaixDriver PaixDriver { get; set; }
 
         public static Version ver = Assembly.GetEntryAssembly().GetName().Version;
 
@@ -59,7 +59,7 @@ namespace DSModeler
 
         public static string DefaultFolder =>
             Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "Dualsoft",
                 "Modeler"
             );

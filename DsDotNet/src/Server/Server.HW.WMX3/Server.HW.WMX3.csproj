@@ -6,6 +6,12 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<ItemGroup>
+	  <None Remove="DsWMX3Handler.csx" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Compile Include="DsWMX3Handler.csx" />
+	</ItemGroup>
+	<ItemGroup>
 	  <PackageReference Include="System.Reactive" Version="6.0.0" />
 	</ItemGroup>
 	<ItemGroup>

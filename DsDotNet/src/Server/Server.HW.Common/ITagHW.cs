@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Server.HW.Common
 {
-    public enum TagType
+    public enum TagDataType
     {
         Bool,
         Byte,
@@ -21,6 +15,12 @@ namespace Server.HW.Common
         Uint64,
         String,
     }
+    public enum TagIOType
+    {
+        Input,
+        Output,
+        Memory,
+    }
 
     /// <summary>
     /// IO 접점.  
@@ -28,7 +28,8 @@ namespace Server.HW.Common
     public interface ITagHW
     {
         object Value { get; set; }
-        string Name { get; set; }     
-        TagType Type { get; }
+        string Name { get; set; }
+        TagDataType DataType { get; }
+        TagIOType IOType { get; }
     }
 }

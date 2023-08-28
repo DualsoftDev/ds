@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using LanguageExt;
 
 namespace Server.HW.Common
 {
@@ -35,13 +34,12 @@ namespace Server.HW.Common
         /// <summary>
         /// HW 에 쓰기 요청하는 값.  Value 에 직접 write 하게 되면 HW 에서 읽은 값과 혼동이 온다.
         /// </summary>
-        public object WriteRequestValue { internal get; set; }
+        public object WriteRequestValue { get; set; }
 
         public virtual string Name { get; set; }
-        public virtual TagType Type { get; set; }
-        public DateTime Timestamp { get; set; }
-
-        public virtual Option<int> BitOffset { get; protected set; }
+        public virtual TagDataType DataType { get; set; }
+        public virtual TagIOType IOType { get; set; }
+        public virtual int BitOffset { get; protected set; }
 
         /// <summary>
         /// Melsec, Fuji 등의 HW 에 대해서 tag 의 byte offset 을 반환한다.  AB 의 경우처럼 환산 불가면 null
@@ -49,9 +47,9 @@ namespace Server.HW.Common
         /// Melsec
         ///     X23 -> 0x23 = 35-th bit -> 5-th byte -> 5
         /// </summary>
-        public virtual Option<int> ByteOffset { get; protected set; }
+        public virtual int ByteOffset { get; protected set; }
         public int NumDots => Name.Count(c => c == '.');
-        public virtual bool IsBitAddress { get { return Type == TagType.Bool; } }
+        public virtual bool IsBitAddress { get { return DataType == TagDataType.Bool; } }
 
         public TagHW(ConnectionBase connection) { ConnectionBase = connection; }
     }

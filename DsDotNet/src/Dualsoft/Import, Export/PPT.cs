@@ -53,8 +53,9 @@ namespace DSModeler
                         ModelTree.CreateModelBtn(formMain, ppt);
                     }
 
-                    SIMControl.DicPou = dicCpu;
-                    await SIMControl.CreateRunCpuSingle();
+                    PcControl.DicPou = dicCpu;
+                    await PcControl.CreateRunCpuSingle();
+
 
                     formMain.Ace_Model.Expanded = true;
                     formMain.Ace_System.Expanded = true;

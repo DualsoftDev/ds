@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +13,7 @@ public static class HWEvent
     public static Subject<Tuple<int, bool>> ValueChangeSubjectPaixInputs = new Subject<Tuple<int, bool>>();
 }
 
-public class DsPaixHandlerWMX3 
+public class DsPaixHandlerWMX3
 {
     private WMX3Api Wmx3Lib;
     private EngineStatus EnStatus;
@@ -35,11 +33,11 @@ public class DsPaixHandlerWMX3
     public int TimeOutScanIO { get; private set; } = 10;
     public DsPaixHandlerWMX3(int numIn, int numOut)
     {
-        Wmx3Lib    = new WMX3Api();
-        EnStatus   = new EngineStatus();
+        Wmx3Lib = new WMX3Api();
+        EnStatus = new EngineStatus();
         Wmx3Lib_Io = new Io(Wmx3Lib);
-        _inData     = Enumerable.Repeat((byte)0, count: numIn).ToArray();
-        _outData    = Enumerable.Repeat((byte)0, count: numOut).ToArray();
+        _inData = Enumerable.Repeat((byte)0, count: numIn).ToArray();
+        _outData = Enumerable.Repeat((byte)0, count: numOut).ToArray();
         Wmx3Lib.CreateDevice("C:\\Program Files\\SoftServo\\WMX3\\",//설치 PC만 사용 가능  ip설정 필요없음
                     DeviceType.DeviceTypeNormal, (uint)TimeOutConnect);
 
@@ -51,7 +49,7 @@ public class DsPaixHandlerWMX3
                 IsAvailable = true;
 
             return IsAvailable;
-        }, new TimeSpan(0, 0, 0, 0, TimeOutConnect) );
+        }, new TimeSpan(0, 0, 0, 0, TimeOutConnect));
 
 
     }
@@ -67,7 +65,7 @@ public class DsPaixHandlerWMX3
     }
 
 
-   
+
     public void SetOutBit(int idx, bool onoff)
     {
         if (IsAvailable)

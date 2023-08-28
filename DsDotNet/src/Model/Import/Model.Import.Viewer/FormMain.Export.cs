@@ -34,7 +34,7 @@ namespace Dual.Model.Import
                 var pathXLS = UtilFile.GetNewPathXls(_PathPPTs);
 
                 Directory.CreateDirectory(Path.GetDirectoryName(pathXLS));
-                ExportIOTable.ToFiie(GetSystems(), pathXLS);
+                //ExportIOTable.ToFile(GetSystems(), pathXLS);
 
                 WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{pathXLS} 생성완료!!");
 

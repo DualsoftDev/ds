@@ -2,12 +2,18 @@ using DevExpress.Utils.Extensions;
 using DevExpress.Utils.Filtering.Internal;
 using DevExpress.Utils.Serializing.Helpers;
 using DevExpress.XtraBars.Navigation;
+using DevExpress.XtraEditors;
+using DevExpress.XtraEditors.Controls;
 using DSModeler.Tree;
 using Dual.Common.Core;
+using Dual.Common.Winform;
 using Engine.Core;
 using Microsoft.Msagl.Routing.ConstrainedDelaunayTriangulation;
+using Server.HW.Common;
+using Server.HW.WMX3;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.DesignerServices;
 using System.Threading.Tasks;
@@ -23,27 +29,82 @@ using static Engine.Cpu.RunTimeUtil;
 
 namespace DSModeler
 {
-    public static class SIMControl
+    public static class PcControl
     {
 
         public static Dictionary<DsSystem, PouGen> DicPou = new Dictionary<DsSystem, PouGen>();
         public static List<DsCPU> RunCpus = new List<DsCPU>();
-        public static Dictionary<string, ITag> DicActionInput = new Dictionary<string, ITag>();
+        public static Dictionary<TagHW, ITag> DicActionIn = new Dictionary<TagHW, ITag>();
+        public static Dictionary<ITag, TagHW> DicActionOut = new Dictionary<ITag, TagHW>();
 
-        public static Dictionary<string, ITag> GetActionInputs(DsSystem sys)
+        public static Dictionary<TagHW, ITag> GetActionInputs(DsSystem sys)
         {
-            var actionInputs = new Dictionary<string, ITag>();
+            var actions = new Dictionary<TagHW, ITag>();
 
             sys.Jobs.Iter(j => j.DeviceDefs
                                 .Where(w => !w.InAddress.IsNullOrEmpty())
-                                .Iter(d => actionInputs.Add(d.InAddress, d.InTag))) ;
+                                .Iter(d => actions.Add(getTagHW(d.InTag, true), d.InTag)));
 
-            return actionInputs;
+            return actions;
+        }
+        public static Dictionary<ITag, TagHW> GetActionOutputs(DsSystem sys)
+        {
+            var actions = new Dictionary<ITag, TagHW>();
+
+            sys.Jobs.Iter(j => j.DeviceDefs
+                                .Where(w => !w.OutAddress.IsNullOrEmpty())
+                                .Iter(d => actions.Add(d.OutTag, getTagHW(d.OutTag, false))));
+
+            return actions;
         }
 
+        private static TagHW getTagHW(ITag dsTag, bool bInput)
+        {
+            string name = dsTag.Name;
+            string address = dsTag.Address;
+
+            if (address.IsNullOrEmpty() || dsTag == null)
+                MBox.Error($"{dsTag}");
+
+            var tag = new WMXTag(Global.PaixDriver.Conn as WMXConnection, name);
+            var index = address.ToUpper().TrimStart('I').TrimStart('O');
+            tag.SetAddress(Convert.ToInt32(index));
+            tag.IOType = bInput? TagIOType.Input : TagIOType.Output;        
+
+            return tag;
+        }
+
+
+        private static void CreatePcControl()
+        {
+            if (Global.CpuRunMode.IsPackagePC())
+            {
+                DicActionIn = GetActionInputs(Global.ActiveSys);
+                DicActionOut = GetActionOutputs(Global.ActiveSys);
+                Global.PaixDriver.Conn.AddMonitoringTags(DicActionIn.Keys);
+                Global.PaixDriver.Conn.AddMonitoringTags(DicActionOut.Values);
+            }
+        }
+        public static void UpdateDevice(GridLookUpEdit gDevice)
+        {
+            gDevice.BeforePopup += (s, e) =>
+            {
+                gDevice.Properties.BestFitMode = BestFitMode.BestFitResizePopup;
+            };
+
+            gDevice.Do(() =>
+            {
+                var tags = DicActionIn.Keys.Cast<WMXTag>().ToList();
+                tags.AddRange(DicActionOut.Values.Cast<WMXTag>());
+                gDevice.Properties.DataSource = tags;
+                gDevice.Properties.DisplayMember = "Name";
+            });
+        }
+        
         public static async Task CreateRunCpuSingle()
         {
-            DicActionInput = GetActionInputs(Global.ActiveSys);
+            CreatePcControl();
+
             List<DsCPU> runCpus = new List<DsCPU>();
             List<CommentedStatement> css = new List<CommentedStatement>();
             int cnt = 0;
@@ -63,6 +124,8 @@ namespace DSModeler
             runCpus.Add(passiveCPU);
             RunCpus = runCpus;
         }
+
+
         /// <summary>
         /// ThreadPool.GetMinThreads 제한으로 멀티로 동시에 돌리는게 한계(thread 스위칭으로 더느림)
         /// Active 1 - Passive n개로 돌림  PC의 절반 CPU 활용
@@ -72,7 +135,7 @@ namespace DSModeler
         {
             await Task.Yield();
 
-            DicActionInput = GetActionInputs(Global.ActiveSys);
+            CreatePcControl();
 
             List<DsCPU> runCpus = new List<DsCPU>();
             //Global.ActiveSys 제외한  PC의 절반 CPU 활용
@@ -123,32 +186,35 @@ namespace DSModeler
         public static void Play(AccordionControlElement ace_Play)
         {
             if (!Global.IsLoadedPPT()) return;
-            if (!RuntimeDS.Package.IsSimulation)
+            SimTree.PlayUI(ace_Play, true);
+
+            if (RuntimeDS.Package.IsSimulation || RuntimeDS.Package.IsPackagePC())
             {
-                MBox.Warn("설젱 H/W 에서 Simution 타입을 선택하세요");
-                return;
+                Global.SimReset = false;
+                if (RuntimeDS.Package.IsStandardPC)
+                    Global.PaixDriver.Start();
+
+                Task.WhenAll(RunCpus.Select(s =>
+                                Task.Run(() => s.Run()))
+                    );
+               
+                Global.Logger.Info("시뮬레이션 : Run");
             }
-            Global.SimReset = false;
-            SimTree.SimPlayUI(ace_Play, true);
-
-            Task.WhenAll(RunCpus.Select(s =>
-                            Task.Run(() => s.Run()))
-                );
-
-            Global.Logger.Info("시뮬레이션 : Run");
+            else
+                MBox.Warn("설정 H/W 에서 Simution 타입을 선택하세요");
         }
 
 
         public static void Step(AccordionControlElement ace_Play)
         {
             if (!Global.IsLoadedPPT()) return;
+            SimTree.PlayUI(ace_Play, false);
             if (!RuntimeDS.Package.IsSimulation)
             {
                 MBox.Warn("설젱 H/W 에서 Simution 타입을 선택하세요");
                 return;
             }
             Global.SimReset = false;
-            SimTree.SimPlayUI(ace_Play, false);
 
             Task.WhenAll(RunCpus.Select(s =>
                           Task.Run(() => s.Step()))
@@ -158,21 +224,31 @@ namespace DSModeler
         public static void Stop(AccordionControlElement ace_Play)
         {
             if (!Global.IsLoadedPPT()) return;
-            Global.SimReset = false;
-            SimTree.SimPlayUI(ace_Play, false);
+            SimTree.PlayUI(ace_Play, false);
 
-            Task.WhenAll(RunCpus.Select(s =>
-                          Task.Run(() => s.Stop()))
-              );
-            Global.Logger.Info("시뮬레이션 : Stop");
+            if (RuntimeDS.Package.IsSimulation || RuntimeDS.Package.IsPackagePC())
+            {
+                Global.SimReset = false;
+               
+                Task.WhenAll(RunCpus.Select(s =>
+                              Task.Run(() => s.Stop()))
+                  );
+
+                if (RuntimeDS.Package.IsStandardPC)
+                    Global.PaixDriver.Stop();
+
+                Global.Logger.Info("시뮬레이션 : Stop");
+            }
+            else
+                MBox.Warn("설정 H/W 에서 Simution 타입을 선택하세요");
         }
         public static void Reset(
               AccordionControlElement ace_Play
             , AccordionControlElement ace_HMI)
         {
             if (!Global.IsLoadedPPT()) return;
+            SimTree.PlayUI(ace_Play, false);
             Global.SimReset = true;
-            SimTree.SimPlayUI(ace_Play, false);
             HMITree.OffHMIBtn(ace_HMI);
             var activeCpu = RunCpus.First(w => w.Systems.Contains(Global.ActiveSys));
 
@@ -195,13 +271,12 @@ namespace DSModeler
               );
         }
 
-        //public static void ReadyMode()
-        //{
-        //    Task.WhenAll(RunCpus.Select(s =>
-        //                  Task.Run(() => s.ReadyMode()))
-        //      );
-        //}
-      
+        public static void SetBit(WMXTag tag, bool value)
+        {
+            tag.WriteRequestValue = value;
+        }
+
+
     }
 }
 

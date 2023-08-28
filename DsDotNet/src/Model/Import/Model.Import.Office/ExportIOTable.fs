@@ -3,7 +3,6 @@ namespace Model.Import.Office
 
 open System
 open System.Linq
-open Microsoft.Office.Interop.Excel
 open System.Drawing
 open System.Reflection
 open Dual.Common.Core.FS
@@ -107,77 +106,79 @@ module ExportIOTable =
         emptyLine()
         dt
 
-    let ToFiie(systems:DsSystem seq, excelFilePath:string) =
-        let disableCellStyle(range:Microsoft.Office.Interop.Excel.Range ) =
-            range.Interior.Color <- Color.LightGray;
-            range.Font.Bold <- true;
-            range.Borders.LineStyle <- XlLineStyle.xlContinuous;
-            range.Borders.Weight <- 2;
+    let ToDataSet(system:DsSystem) = ToTable system
 
-        let cellMerge(range:Microsoft.Office.Interop.Excel.Range ) =
-            range.Merge(true)
+    //let ToFile(systems:DsSystem seq, excelFilePath:string) =
+    //    let disableCellStyle(range:Microsoft.Office.Interop.Excel.Range ) =
+    //        range.Interior.Color <- Color.LightGray;
+    //        range.Font.Bold <- true;
+    //        range.Borders.LineStyle <- XlLineStyle.xlContinuous;
+    //        range.Borders.Weight <- 2;
 
-        let enableCellStyle(range:Microsoft.Office.Interop.Excel.Range ) =
-                   range.Interior.Color <- Color.LightYellow;
-                   range.Borders.LineStyle <- XlLineStyle.xlDash;
+    //    let cellMerge(range:Microsoft.Office.Interop.Excel.Range ) =
+    //        range.Merge(true)
 
-        let autoFitNFilterColumn(range:Microsoft.Office.Interop.Excel.Range ) =
-                   range.AutoFilter(1, Type.Missing, XlAutoFilterOperator.xlAnd, Type.Missing, true) |> ignore
-                   range.EntireColumn.AutoFit() |> ignore
+    //    let enableCellStyle(range:Microsoft.Office.Interop.Excel.Range ) =
+    //               range.Interior.Color <- Color.LightYellow;
+    //               range.Borders.LineStyle <- XlLineStyle.xlDash;
 
-        let mutable curRow = 0
-        let createWorkSheet(tbl:Data.DataTable, wb:Workbook, totalRows:int) =
-            let rowsCnt = tbl.Rows.Count
-            let colsCnt = tbl.Columns.Count
-            //  create worksheet
-            let workSheet = wb.Worksheets.Add Missing.Value :?> Worksheet
-            workSheet.Name <- tbl.TableName
+    //    let autoFitNFilterColumn(range:Microsoft.Office.Interop.Excel.Range ) =
+    //               range.AutoFilter(1, Type.Missing, XlAutoFilterOperator.xlAnd, Type.Missing, true) |> ignore
+    //               range.EntireColumn.AutoFit() |> ignore
 
-            //// now we resize the columns
-            let excelCellrange = workSheet.Range(workSheet.Cells.[1, 1], workSheet.Cells.[rowsCnt+ 1, colsCnt]);
-            disableCellStyle(excelCellrange)
+    //    let mutable curRow = 0
+    //    let createWorkSheet(tbl:Data.DataTable, wb:Workbook, totalRows:int) =
+    //        let rowsCnt = tbl.Rows.Count
+    //        let colsCnt = tbl.Columns.Count
+    //        //  create worksheet
+    //        let workSheet = wb.Worksheets.Add Missing.Value :?> Worksheet
+    //        workSheet.Name <- tbl.TableName
 
-            for colIndex in [|0..colsCnt-1|] do
-                workSheet.Cells.[1,colIndex+1] <- tbl.Columns.[colIndex].ColumnName
-            //// rows
-            for rowsIndex in [|0..rowsCnt-1|] do
-                curRow<-curRow+1
-                DoWork(Convert.ToSingle(curRow) / Convert.ToSingle(totalRows) * 100f |> int);
-                for colIndex in [|0..colsCnt-1|] do
-                    workSheet.Cells.[rowsIndex + 2, colIndex + 1] <- tbl.Rows.[rowsIndex].[colIndex]
-                    let cellText =tbl.Rows.[rowsIndex].[colIndex].ToString()
-                    if(cellText = "" || (cellText.StartsWith("'") && cellText.StartsWith("'-")|>not))
-                    then
-                        let excelCellrange = workSheet.Range(workSheet.Cells.[rowsIndex + 2, colIndex + 1], workSheet.Cells.[rowsIndex + 2, colIndex + 1])
-                        enableCellStyle(excelCellrange)
+    //        //// now we resize the columns
+    //        let excelCellrange = workSheet.Range(workSheet.Cells.[1, 1], workSheet.Cells.[rowsCnt+ 1, colsCnt]);
+    //        disableCellStyle(excelCellrange)
 
-                    //if(colIndex = 0)
-                    //then cellMerge(workSheet.Range(workSheet.Cells.[rowsIndex + 2, colIndex + 6], workSheet.Cells.[rowsIndex + 2, colIndex + 9]))
+    //        for colIndex in [|0..colsCnt-1|] do
+    //            workSheet.Cells.[1,colIndex+1] <- tbl.Columns.[colIndex].ColumnName
+    //        //// rows
+    //        for rowsIndex in [|0..rowsCnt-1|] do
+    //            curRow<-curRow+1
+    //            DoWork(Convert.ToSingle(curRow) / Convert.ToSingle(totalRows) * 100f |> int);
+    //            for colIndex in [|0..colsCnt-1|] do
+    //                workSheet.Cells.[rowsIndex + 2, colIndex + 1] <- tbl.Rows.[rowsIndex].[colIndex]
+    //                let cellText =tbl.Rows.[rowsIndex].[colIndex].ToString()
+    //                if(cellText = "" || (cellText.StartsWith("'") && cellText.StartsWith("'-")|>not))
+    //                then
+    //                    let excelCellrange = workSheet.Range(workSheet.Cells.[rowsIndex + 2, colIndex + 1], workSheet.Cells.[rowsIndex + 2, colIndex + 1])
+    //                    enableCellStyle(excelCellrange)
 
-            workSheet.Range(workSheet.Cells.[1, 1], workSheet.Cells.[rowsCnt + 1, colsCnt]) |> autoFitNFilterColumn
+    //                //if(colIndex = 0)
+    //                //then cellMerge(workSheet.Range(workSheet.Cells.[rowsIndex + 2, colIndex + 6], workSheet.Cells.[rowsIndex + 2, colIndex + 9]))
+
+    //        workSheet.Range(workSheet.Cells.[1, 1], workSheet.Cells.[rowsCnt + 1, colsCnt]) |> autoFitNFilterColumn
 
 
-        // load excel, and create a new workbook
-        let excelApp = new ApplicationClass(Visible = false)
-        let wb = excelApp.Workbooks.Add Missing.Value
-        let firstSheet = wb.ActiveSheet :?> Worksheet
-        excelApp.ScreenUpdating <- false
+    //    // load excel, and create a new workbook
+    //    let excelApp = new ApplicationClass(Visible = false)
+    //    let wb = excelApp.Workbooks.Add Missing.Value
+    //    let firstSheet = wb.ActiveSheet :?> Worksheet
+    //    excelApp.ScreenUpdating <- false
 
-        let tables =  systems
-                        |> Seq.map(fun s ->  ToTable s)
-                        |> Seq.sortBy(fun f->f.TableName)
+    //    let tables =  systems
+    //                    |> Seq.map(fun s ->  ToTable s)
+    //                    |> Seq.sortBy(fun f->f.TableName)
 
-        let totalRows = tables
-                        |> Seq.map(fun t -> t.Rows.Count)
-                        |> Seq.sum
+    //    let totalRows = tables
+    //                    |> Seq.map(fun t -> t.Rows.Count)
+    //                    |> Seq.sum
 
-        tables
-        |> Seq.iter(fun d -> createWorkSheet (d, wb, totalRows))
+    //    tables
+    //    |> Seq.iter(fun d -> createWorkSheet (d, wb, totalRows))
 
-            //처음 자동으로 생성된 빈 Sheet 삭제
-        firstSheet.Delete()
-        wb.SaveAs(excelFilePath)
-        excelApp.Quit()
+    //        //처음 자동으로 생성된 빈 Sheet 삭제
+    //    firstSheet.Delete()
+    //    wb.SaveAs(excelFilePath)
+    //    excelApp.Quit()
 
 
 

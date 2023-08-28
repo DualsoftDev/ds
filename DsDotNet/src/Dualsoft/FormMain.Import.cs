@@ -36,6 +36,8 @@ namespace DSModeler
                     {
                         Files.SetLast(files);
                         bool loadOK = await PPT.ImportPowerPoint(files, this);
+                        PcControl.UpdateDevice(gle_Device);
+
                         if (!loadOK) { return;  } 
 
                         Tree.LogicTree.UpdateExpr(gridLookUpEdit_Expr, toggleSwitch_showDeviceExpr.IsOn);
@@ -43,7 +45,7 @@ namespace DSModeler
 
                         ViewDraw.DicStatus = new Dictionary<Vertex, Status4>();
 
-                        foreach (var item in SIMControl.DicPou)
+                        foreach (var item in PcControl.DicPou)
                         {
                             var sys = item.Key;
                             var reals = sys.GetVertices().OfType<Vertex>();
@@ -61,10 +63,10 @@ namespace DSModeler
         void ClearModel()
         {
             if (Global.ActiveSys != null)
-                SIMControl.Reset(ace_Play, ace_HMI);
+                PcControl.Reset(ace_Play, ace_HMI);
 
-            SIMControl.RunCpus.Iter(cpu => cpu.Dispose());
-            SIMControl.DicPou = new Dictionary<DsSystem, PouGen>();
+            PcControl.RunCpus.Iter(cpu => cpu.Dispose());
+            PcControl.DicPou = new Dictionary<DsSystem, PouGen>();
 
             tabbedView_Doc.Controller.CloseAll();
             tabbedView_Doc.Documents.Clear();

@@ -1,6 +1,5 @@
 using Server.HW.Common;
 using System;
-using System.Threading;
 
 namespace Server.HW.WMX3;
 

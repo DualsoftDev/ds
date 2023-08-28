@@ -1,6 +1,4 @@
-﻿using System;
 using System.Collections.Generic;
-using LanguageExt;
 
 namespace Server.HW.Common
 {
@@ -19,14 +17,14 @@ namespace Server.HW.Common
         }
 
 
-        public Try<bool> TryExecuteRead()
+        public bool TryExecuteRead()
         {
-            return () => ExecuteRead();
+            return ExecuteRead();
         }
 
         /// <summary>
         /// Channel 을 통해서 packet 을 전송하고, 받은 packet 결과를 분석해서 Tags 에 저장.  각 HW maker 에 따라 다르게 구현한다.
         /// </summary>
         public abstract bool ExecuteRead();
-	}
+    }
 }

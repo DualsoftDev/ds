@@ -1,5 +1,7 @@
+using Dual.Common.Core;
 using Server.Common.NMC;
 using Server.Common.NMF;
+using Server.HW.Common;
 using Server.HW.WMX3;
 using System;
 using System.Collections;
@@ -10,80 +12,61 @@ using System.Threading.Tasks;
 
 namespace DSModeler
 {
+    public enum PaixHW
+    {
+        NMC2,
+        NMF,
+        WMX // WMX_ETHERCAT
+    }
+
     public class PaixDriver
     {
         public string IP { get; set; }
-        public bool Running { get; private set; }
-        public short[] NumIn { get; set; }
-        public short[] NumOut { get; set; }
-        public PaixDriver(string ip, int numIn, int numOut)
+        public ConnectionBase Conn { get; set; }
+        private PaixHW _paixHW;
+        public PaixDriver(PaixHW paixHW, string ip, int numIn, int numOut)
         {
-            IP = ip;
-            NumIn = new short[numIn];
-            NumOut = new short[numOut];
+            _paixHW = paixHW;
+            IP = PaixHW.WMX == paixHW ? "127.0.0.1" : ip; //모벤시스 sw ethercat 로컬 PC만 작동하는 버전
+
+            if (PaixHW.WMX == paixHW)
+            {
+                var connPara = new WMXConnectionParameters(TimeSpan.FromSeconds(2), TimeSpan.FromMilliseconds(20));
+                Conn = new WMXConnection(connPara, numIn, numOut);
+            }
+            else if (PaixHW.NMC2 == paixHW) { /*...*/}
+            else if (PaixHW.NMF == paixHW) { /*...*/}
         }
 
         public bool Open()
         {
             IPAddress.TryParse(IP, out IPAddress addr);
-            if (addr == null)
-            { MBox.Error($"{IP} ip 형식으로 올바르지 않습니다."); return false; }
-            if (PaixDrivers.Ping(IP) == 0)
-                return PaixDrivers.Open(IP) == 0;
-            else
-                return false;
+            if (addr == null) { MBox.Error($"{IP} ip 형식으로 올바르지 않습니다."); return false; }
+
+            return Conn.Connect();
+        }
+        public bool Close()
+        {
+            return Conn.Disconnect();
         }
 
-        public bool Dispose()
+        public void Start()
         {
-            Running = false;
-            PaixDrivers.Close(IP);
-            return true;
-        }
+            if (!Conn.IsConnected)
+                Open();
 
-
-        public void Run()
-        {
-            Running = true;
-            Task.Run(async () =>
+            if (!Conn.IsRunning)
             {
-                while (Running)
+                Task.Run(async () =>
                 {
-                    await Task.Delay(10);
-                    var oldNum = NumIn.ToList();
-                    PaixDrivers.GetInput(IP, NumIn);
-                    for (int iByte = 0; iByte < NumIn.Length; iByte++)
-                    {
-                        if (NumIn[iByte] == oldNum[iByte])
-                            continue;
-                        var oldShort = new BitArray(oldNum[iByte]);
-                        var newShort = new BitArray(NumIn[iByte]);
-
-                        for (int iBit = 0; iBit < oldShort.Length; iBit++) //short size
-                            if (oldShort[iBit] != newShort[iBit])
-                                HWEvent.ValueChangeSubjectPaixInputs.OnNext(Tuple.Create(iBit, newShort[iBit]));
-                    }
-                }
-            });
+                    await Conn.StartDataExchangeLoopAsync();
+                });
+            }
         }
-
-        BitArray getBitArray(short[] shortArr)
-        {
-            var arrByte = Array.ConvertAll<short, byte>(shortArr, delegate (short item) { return (byte)item; });
-            return new BitArray(arrByte);
-        }
-
         public void Stop()
         {
-            Running = false;
-        }
-
-        public void SetBit(short index, bool bOn)
-        {
-            if (Running)
-                PaixDrivers.SetOutput(IP, index, Convert.ToInt16(bOn));
-            else
-                MBox.Error($"{IP} Run을 수행을 먼저하세요");
+            if (Conn.IsRunning)
+                Conn.StopDataExchangeLoop();
         }
     }
 }

@@ -1,8 +1,5 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Server.HW.Common
 {
@@ -18,7 +15,7 @@ namespace Server.HW.Common
     }
     public class TagAddEvent : TagEvent
     {
-        public TagAddEvent(TagHW tag) : base(tag) {}
+        public TagAddEvent(TagHW tag) : base(tag) { }
     }
 
     public class TagsAddEvent : IObservableEvent

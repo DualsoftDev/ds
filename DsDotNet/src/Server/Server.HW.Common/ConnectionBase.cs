@@ -1,12 +1,10 @@
 using System;
-using System.Diagnostics;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
-using LanguageExt;
-using static LanguageExt.Prelude;
 
 namespace Server.HW.Common
 {
@@ -31,7 +29,8 @@ namespace Server.HW.Common
         /// Delay in milliseconds between HW requests
         /// </summary>
         public int PerRequestDelay { get; set; } = 1000;
-
+        public abstract bool IsConnected { get; }
+        public bool IsRunning { get; private set; }
         public abstract bool Connect();
 
         public virtual bool Disconnect()
@@ -50,25 +49,17 @@ namespace Server.HW.Common
         }
 
         public abstract TagHW CreateTag(string name);
-        public Try<TagHW> TryCreateTag(string name) => () => CreateTag(name);
+        public TagHW TryCreateTag(string name) =>  CreateTag(name);
 
-        public IEnumerable<Try<TagHW>> TryCreateTags(IEnumerable<string> tagNames)
+        public IEnumerable<TagHW> TryCreateTags(IEnumerable<string> tagNames)
         {
             return from tname in tagNames
-                select TryCreateTag(tname);
+                   select TryCreateTag(tname);
         }
 
         public IEnumerable<TagHW> CreateTags(IEnumerable<string> tagNames)
         {
-            var tags = from trial in TryCreateTags(tagNames)
-                       select match(trial,
-                    Succ: v => v,
-                    Fail: ex =>
-                    {
-                        Trace.WriteLine($"Exception: {ex}");
-                        return null;
-                    }
-                );
+            var tags = TryCreateTags(tagNames);
 
             return tags.ToArray();
         }
@@ -117,13 +108,13 @@ namespace Server.HW.Common
         public virtual bool AddMonitoringTags(IEnumerable<TagHW> tags)
         {
             var arr = tags.Select(t => AddMonitoringTag(t)).ToArray();
-            return arr.ForAll(identity);
+            return arr.Any(w => !w);
         }
 
         public virtual void ResetMonitoringTags(IEnumerable<TagHW> tags)
         {
             Tags.Clear();
-            foreach(var t in tags)
+            foreach (var t in tags)
             {
                 Tags.Add(t.Name, t);
                 Subject.OnNext(new TagsAddEvent(tags));
@@ -135,7 +126,7 @@ namespace Server.HW.Common
         public void ClearTagNRestart()
         {
             Tags.Clear();
-          
+
             PrepareDataExchangeLoop();
         }
 
@@ -153,21 +144,24 @@ namespace Server.HW.Common
         /// </summary>
         public virtual IEnumerable<Exception> ReadAllChannels()
         {
-            var query =
-                (
-                    from ch in _channels
-                    select match(ch.TryExecuteRead(),
-                        Succ: v => null,
-                        Fail: ex => ex)
-                ).ToArray();
-
-            return query.Where(ex => ex != null).ToArray();
+            try
+            {
+                foreach (var channel in _channels)
+                {
+                    channel.TryExecuteRead();
+                }
+                return new List<Exception>() { };
+            }
+            catch (Exception ex)
+            {
+                return new List<Exception> { ex };
+            }
         }
 
 
         public virtual IEnumerable<Exception> WriteAllChannels() { yield break; }
 
-        public IEnumerable<Exception> SingleScan(bool prepare=false)
+        public IEnumerable<Exception> SingleScan(bool prepare = false)
         {
             Trace.WriteLine("Starting SingleScan()");
             if (prepare)
@@ -181,11 +175,12 @@ namespace Server.HW.Common
         public virtual async Task StartDataExchangeLoopAsync()
         {
             Trace.WriteLine("Starting StartDataExchangeLoopAsync()");
+            IsRunning = true;
             PrepareDataExchangeLoop();
             DataExchangeCts = new CancellationTokenSource();
             await Task.Run(async () =>
             {
-                while (DataExchangeCts != null && ! DataExchangeCts.IsCancellationRequested )
+                while (DataExchangeCts != null && !DataExchangeCts.IsCancellationRequested)
                 {
                     await Task.Delay(PerRequestDelay);
                     Trace.WriteLine("Monitoring...");
@@ -195,10 +190,13 @@ namespace Server.HW.Common
                         ReconnectOnDemand(exceptions.First());
                 }
             }, DataExchangeCts.Token);
+
+
         }
 
         public void StopDataExchangeLoop()
         {
+            IsRunning = false;
             DataExchangeCts.Cancel();
             DataExchangeCts.Dispose();
             DataExchangeCts = null;

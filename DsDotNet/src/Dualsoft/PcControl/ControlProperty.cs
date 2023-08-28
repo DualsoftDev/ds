@@ -2,7 +2,7 @@ using System;
 
 namespace DSModeler
 {
-    public static class SIMProperty
+    public static class ControlProperty
     {
         static readonly int _defaultSpeed = 4;
         public static int GetDelayMsec()

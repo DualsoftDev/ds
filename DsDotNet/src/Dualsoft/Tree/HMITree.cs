@@ -126,7 +126,6 @@ namespace DSModeler.Tree
             });
         }
 
-
         private static AccordionContextButton UpdateBtn(object s)
         {
             var btn = (AccordionContextButton)s;

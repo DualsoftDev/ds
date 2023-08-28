@@ -1,5 +1,6 @@
 using DevExpress.Accessibility;
 using Engine.Core;
+using Server.HW.Common;
 using Server.HW.WMX3;
 using System;
 using System.Collections.Generic;
@@ -50,7 +51,7 @@ namespace DSModeler
             }
             if (DisposableCPUEventValue == null)
             {
-                DisposableHWPaixOutput = CpusEvent.ValueSubject.Subscribe(rx =>
+                DisposableCPUEventValue = CpusEvent.ValueSubject.Subscribe(rx =>
                 {
                     var value = rx.Item3;
                     if (value is bool)
@@ -65,28 +66,31 @@ namespace DSModeler
                     if (Global.SimReset)
                         Task.Yield(); //리셋은 시뮬레이션 속도 영향 없음
                     else
-                        Task.Delay(SIMProperty.GetDelayMsec()).Wait();
+                        Task.Delay(ControlProperty.GetDelayMsec()).Wait();
                 });
             }
-            if (DisposableHWPaixOutput == null)
+            if (DisposableHWPaixOutput == null && Global.CpuRunMode.IsPackagePC())
             {
                 DisposableHWPaixOutput = CpusEvent.ValueHWOutSubject.Subscribe(rx =>
                 {
                     var value = rx.Item3;
                     var tag = rx.Item2 as Tag<bool>;
+                    var tagHW = PcControl.DicActionOut[tag];
+                    tagHW.WriteRequestValue = value; 
 
-                    Global.Logger.Debug($"PaixO {tag.Address} value: {value} [{tag.Name}]");
+                    Global.Logger.Debug($"PaixO {tag.Address} value: {tag.Value} [{tag.Name}]");
                 });
             }
-            if (DisposableHWPaixInput == null)
+            if (DisposableHWPaixInput == null && Global.CpuRunMode.IsPackagePC())
             {
-                DisposableHWPaixInput = HWEvent.ValueChangeSubjectPaixInputs.Subscribe(rx =>
+                DisposableHWPaixInput = Global.PaixDriver.Conn.Subject.OfType<TagValueChangedEvent>()
+                .Subscribe(evt =>
                 {
-                    var index = rx.Item1;
-                    var value = rx.Item2;
-                    var tag = SIMControl.DicActionInput[$"I{index}"];
-                    tag.BoxedValue = value;
-                    Global.Logger.Debug($"PaixI {tag.Address} value: {value} [{tag.Name}]");
+                    var t = evt.Tag as WMXTag;
+                    var tag = PcControl.DicActionIn[t];
+                    tag.BoxedValue = t.Value;
+
+                    Global.Logger.Debug($"PaixI {tag.Address} value: {tag.BoxedValue} [{tag.Name}]");
                 });
             }
         }

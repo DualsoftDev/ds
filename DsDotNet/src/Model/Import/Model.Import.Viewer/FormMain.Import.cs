@@ -66,7 +66,7 @@ namespace Dual.Model.Import
                 WriteDebugMsg(DateTime.Now, MSGLevel.MsgInfo, $"{path} 불러오는 중!!");
                 RuntimeDS.Target = RuntimeTargetType.XGI;
 
-                ImportIOTable.ApplyExcel(path, GetSystems());
+                //ImportIOTable.ApplyExcel(path, GetSystems());
 
                 this.Do(() =>
                 {

@@ -39,7 +39,7 @@ namespace Server.HW.Common
             return true;
         }
 
-        public virtual void ReconnectOnDemand(Exception ex)
+        public virtual void ReconnectOnDemand()
         {
             Trace.WriteLine("Reconnecting on demand.");
             DataExchangeCts.Cancel();
@@ -140,36 +140,26 @@ namespace Server.HW.Common
 
         /// <summary>
         /// Batch read registered tags
-        /// 읽을 때, 발생한 오류들을 exception list 로 반환
         /// </summary>
-        public virtual IEnumerable<Exception> ReadAllChannels()
+        public virtual void ReadAllChannels()
         {
-            try
+            foreach (var channel in _channels)
             {
-                foreach (var channel in _channels)
-                {
-                    channel.TryExecuteRead();
-                }
-                return new List<Exception>() { };
-            }
-            catch (Exception ex)
-            {
-                return new List<Exception> { ex };
+                channel.TryExecuteRead();
             }
         }
 
 
-        public virtual IEnumerable<Exception> WriteAllChannels() { yield break; }
+        public virtual void WriteAllChannels() {  }
 
-        public IEnumerable<Exception> SingleScan(bool prepare = false)
+        public void SingleScan(bool prepare = false)
         {
             Trace.WriteLine("Starting SingleScan()");
             if (prepare)
                 PrepareDataExchangeLoop();
 
-            return ReadAllChannels()
-                .Concat(WriteAllChannels())
-                ;
+             ReadAllChannels();
+             WriteAllChannels();
         }
 
         public virtual async Task StartDataExchangeLoopAsync()
@@ -185,9 +175,9 @@ namespace Server.HW.Common
                     await Task.Delay(PerRequestDelay);
                     Trace.WriteLine("Monitoring...");
 
-                    var exceptions = SingleScan();
-                    if (exceptions.Any())
-                        ReconnectOnDemand(exceptions.First());
+                    SingleScan();
+                    //if (exceptions.Any())
+                    //    ReconnectOnDemand(exceptions.First());
                 }
             }, DataExchangeCts.Token);
 

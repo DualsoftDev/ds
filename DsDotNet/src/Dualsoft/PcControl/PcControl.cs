@@ -67,8 +67,7 @@ namespace DSModeler
                 MBox.Error($"{dsTag}");
 
             var tag = new WMXTag(Global.PaixDriver.Conn as WMXConnection, name);
-            var index = address.ToUpper().TrimStart('I').TrimStart('O');
-            tag.SetAddress(Convert.ToInt32(index));
+            tag.SetAddress(address);
             tag.IOType = bInput? TagIOType.Input : TagIOType.Output;        
 
             return tag;
@@ -79,6 +78,7 @@ namespace DSModeler
         {
             if (Global.CpuRunMode.IsPackagePC())
             {
+                PcControl.CreateConnect();
                 DicActionIn = GetActionInputs(Global.ActiveSys);
                 DicActionOut = GetActionOutputs(Global.ActiveSys);
                 Global.PaixDriver.Conn.AddMonitoringTags(DicActionIn.Keys);
@@ -87,10 +87,7 @@ namespace DSModeler
         }
         public static void UpdateDevice(GridLookUpEdit gDevice)
         {
-            gDevice.BeforePopup += (s, e) =>
-            {
-                gDevice.Properties.BestFitMode = BestFitMode.BestFitResizePopup;
-            };
+       
 
             gDevice.Do(() =>
             {
@@ -123,6 +120,7 @@ namespace DSModeler
 
             runCpus.Add(passiveCPU);
             RunCpus = runCpus;
+            DsProcessEvent.DoWork(100);
         }
 
 
@@ -252,6 +250,8 @@ namespace DSModeler
             HMITree.OffHMIBtn(ace_HMI);
             var activeCpu = RunCpus.First(w => w.Systems.Contains(Global.ActiveSys));
 
+            if (RuntimeDS.Package.IsStandardPC)
+                Global.PaixDriver.Stop();
             Task.Run(() =>
             {
                 Task.Run(() => activeCpu.ResetActive()).Wait();
@@ -279,15 +279,17 @@ namespace DSModeler
                 MBox.Warn("설정 H/W 에서 PC 타입을 선택하세요");
         }
 
-        internal static void ReConnect()
+        internal static void CreateConnect()
         {
             if(Global.PaixDriver != null) Global.PaixDriver.Conn.Disconnect();  
+
+            if(Global.RunCountIn + Global.RunCountOut == 0)
+                Global.Logger.Error($"IO Slot 개수가 0입니다. IO통신이 불가능합니다.");
 
             Global.PaixDriver = new PaixDriver(Global.PaixHW, Global.RunHWIP, Global.RunCountIn, Global.RunCountOut);
             if (Global.PaixDriver.Open())
                 Global.Logger.Info($"{Global.PaixHW} {Global.RunHWIP} 연결에 성공 하였습니다.");
             else
-
                 Global.Logger.Warn($"{Global.PaixHW} {Global.RunHWIP} 연결에 실패 하였습니다. 통신 연결을 확인하세요");
         }
     }

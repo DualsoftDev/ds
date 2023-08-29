@@ -30,16 +30,17 @@ namespace DSModeler
 
             if (files != null)
             {
- 
-                    ClearModel(); 
-                    Task.Run(async () =>
+
+                ClearModel();
+                Task.Run(async () =>
+                {
+                    try
                     {
                         Files.SetLast(files);
                         bool loadOK = await PPT.ImportPowerPoint(files, this);
 
-                        if (!loadOK) { return;  } 
+                        if (!loadOK) { return; }
 
-                        Tree.LogicTree.UpdateExpr(gridLookUpEdit_Expr, toggleSwitch_showDeviceExpr.IsOn);
 
 
                         ViewDraw.DicStatus = new Dictionary<Vertex, Status4>();
@@ -52,24 +53,24 @@ namespace DSModeler
                                 ViewDraw.DicStatus.Add(r, Status4.Homing);
                         }
 
+                        await PcControl.CreateRunCpuSingle();
+                        PcControl.UpdateDevice(gle_Device);
+
                         EventCPU.CPUSubscribe(ViewDraw.DicStatus);
 
-                        if (Global.CpuRunMode.IsPackagePC())
-                        {
-                            PcControl.ReConnect();
-                            PcControl.UpdateDevice(gle_Device);
-                            await PcControl.CreateRunCpuSingle();
-                        }
+                        Tree.LogicTree.UpdateExpr(gle_Expr, toggleSwitch_showDeviceExpr.IsOn);
 
                         Global.Logger.Info("PPTX 파일 로딩이 완료 되었습니다.");
-                    });
+                    }
+                    catch (Exception ex) { Global.Logger.Error(ex.Message); }
+                });
 
             }
         }
 
         void ClearModel()
         {
-            if (Global.ActiveSys != null)
+            if (PcControl.RunCpus.Any())
                 PcControl.Reset(ace_Play, ace_HMI);
 
             PcControl.RunCpus.Iter(cpu => cpu.Dispose());

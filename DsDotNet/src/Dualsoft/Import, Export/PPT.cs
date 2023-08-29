@@ -59,7 +59,6 @@ namespace DSModeler
                     formMain.Ace_Model.Expanded = true;
                     formMain.Ace_System.Expanded = true;
                     formMain.Ace_Device.Expanded = false;
-                    DsProcessEvent.DoWork(100);
                     tsc.SetResult(true);
                 });
                 return true;

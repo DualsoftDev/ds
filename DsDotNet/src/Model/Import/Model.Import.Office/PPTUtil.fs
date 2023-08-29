@@ -362,3 +362,28 @@ module PPTUtil =
                         let Cy = doc.PresentationPart.Presentation.SlideSize.Cy
                         Cx |> int, Cy |> int
 
+        [<Extension>]
+        static member GetTable(doc:PresentationDocument, colCnt:int) =
+                    let dt = new System.Data.DataTable();
+                    for i in 0..colCnt-1 do dt.Columns.Add $"col{i}"|>ignore
+                    
+                    Office.SildesSkipHide(doc)
+                    |> Seq.iter (fun slidePart ->
+                        let gfs = slidePart.Slide.CommonSlideData.ShapeTree.Descendants<DocumentFormat.OpenXml.Presentation.GraphicFrame>()
+                        let tables = gfs.SelectMany(fun s -> s.Descendants<DocumentFormat.OpenXml.Drawing.Graphic>())
+                                        .SelectMany(fun s -> s.Descendants<DocumentFormat.OpenXml.Drawing.GraphicData>())
+                                        .SelectMany(fun s -> s.Descendants<DocumentFormat.OpenXml.Drawing.Table>())
+                        
+                        let rows = tables.SelectMany(fun s -> s.Descendants<DocumentFormat.OpenXml.Drawing.TableRow>())
+                        rows |> Seq.iter (fun row ->
+                                let cells = row.Descendants<DocumentFormat.OpenXml.Drawing.TableCell>()
+                                if cells.Count() = colCnt
+                                then 
+                                    let rowTemp = dt.NewRow()
+                                    rowTemp.ItemArray <- (cells.Select(fun c -> c.InnerText)|> Seq.cast<obj>|> Seq.toArray)
+                                    rowTemp |> dt.Rows.Add |>ignore
+                      )
+                    )
+                    dt
+     
+

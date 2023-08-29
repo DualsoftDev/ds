@@ -1,4 +1,5 @@
 using Server.HW.Common;
+using System;
 
 namespace Server.HW.WMX3;
 public class WMXTag : TagHW
@@ -11,12 +12,29 @@ public class WMXTag : TagHW
         connection.AddMonitoringTag(this);
 
     }
-    public int Address { get; private set; }
-    public void SetAddress(int offsetBit)
+    public string Address { get; private set; } = string.Empty; 
+    public int AddressIndex => ByteOffset* 8 + BitOffset;  
+    public void SetAddress(string name)
     {
-        Address = offsetBit;
-        ByteOffset = offsetBit / 8;
-        BitOffset = offsetBit % 8;
+        var upperName = name.ToUpper();
+
+        if (upperName.StartsWith("I"))
+            this.IOType = TagIOType.Input;
+        else if (upperName.StartsWith("O"))
+            this.IOType = TagIOType.Output;
+        else if (upperName.StartsWith("M"))
+            this.IOType = TagIOType.Memory;
+        else
+            throw new HWExceptionTag("Address Head Type Error");
+
+        if (upperName.Split('.').Length != 2)
+            throw new HWExceptionTag("WMXTag type [Device][Byte].[Bit] ex I12.4, M0.0");
+
+        var byteBit = name.TrimStart('I').TrimStart('O').TrimStart('M');
+
+        Address = upperName;
+        ByteOffset = Convert.ToInt32(byteBit.Split('.')[0]);
+        BitOffset = Convert.ToInt32(byteBit.Split('.')[1]);
     }
     public sealed override string Name
     {

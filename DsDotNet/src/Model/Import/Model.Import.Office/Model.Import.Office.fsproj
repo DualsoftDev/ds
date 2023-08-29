@@ -26,10 +26,10 @@
     <Compile Include="GraphView.fs" />
     <Compile Include="ImportCheck.fs" />
     <Compile Include="ImportUtilView.fs" />
-    <Compile Include="ImportUtil.fs" />
-    <Compile Include="ImportPPT.fs" />
     <Compile Include="ImportIOTable.fs" />
     <Compile Include="ExportIOTable.fs" />
+    <Compile Include="ImportUtil.fs" />
+    <Compile Include="ImportPPT.fs" />
   </ItemGroup>
 
 

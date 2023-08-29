@@ -48,32 +48,43 @@ namespace DSModeler
             InitializationLogger();
             InitializationUIControl();
 
-            RuntimeDS.AutoAddress = true;
 
             if (!Global.IsDebug)
                 DevExpress.XtraSplashScreen.SplashScreenManager.CloseForm();
         }
 
         readonly Timer timerLongPress = new Timer { Interval = 100 };
+        private void InitGridLookUpEdit(GridLookUpEdit gle, GridView gv)
+        {
+            gle.Properties.DisplayMember = "Display";
+
+            gv.PreviewLineCount = 20;
+            gv.OptionsSelection.EnableAppearanceFocusedCell = false;
+            gv.OptionsView.ShowAutoFilterRow = true;
+            gv.OptionsView.ShowGroupPanel = false;
+        }
+
         private void InitializationUIControl()
         {
-            LogicLog.InitControl(gridLookUpEdit_Log, gridLookUpEdit1View_Log);
-            gridLookUpEdit_Log.Properties.DataSource = LogicLog.ValueLogs;
+            InitGridLookUpEdit(gle_Log, gleView_Log);
+            InitGridLookUpEdit(gle_Expr, gleView_Expr);
+            InitGridLookUpEdit(gle_Device, gleView_Device);
 
-            LogicTree.InitControl(gridLookUpEdit_Expr, gridLookUpEdit1View_Expr);
+            gle_Log.Properties.DataSource = LogicLog.ValueLogs;
+
+
             ratingControl_Speed.EditValue = ControlProperty.GetSpeed();
-
 
             comboBoxEdit_RunMode.Properties.Items.AddRange(RuntimePackageList.ToArray());
             var cpuRunMode = DSRegistry.GetValue(K.CpuRunMode);
             comboBoxEdit_RunMode.EditValue = cpuRunMode == null ? RuntimePackage.Simulation : cpuRunMode;
 
             var RunCountIn = DSRegistry.GetValue(K.RunCountIn);
-            spinEdit_StartIn.Properties.MinValue = 0;
-            spinEdit_StartIn.EditValue = RunCountIn == null ? 0 : Convert.ToInt32(RunCountIn);
+            spinEdit_StartIn.Properties.MinValue = 1;
+            spinEdit_StartIn.EditValue = RunCountIn == null ? 1 : Convert.ToInt32(RunCountIn);
             var RunCountOut = DSRegistry.GetValue(K.RunCountOut);
-            spinEdit_StartOut.Properties.MinValue = 0;
-            spinEdit_StartOut.EditValue = RunCountOut == null ? 0 : Convert.ToInt32(RunCountOut);
+            spinEdit_StartOut.Properties.MinValue = 1;
+            spinEdit_StartOut.EditValue = RunCountOut == null ? 1 : Convert.ToInt32(RunCountOut);
 
             var ip = DSRegistry.GetValue(K.RunHWIP);
             textEdit_IP.Text = ip == null ? K.RunDefaultIP : ip.ToString();
@@ -137,5 +148,7 @@ namespace DSModeler
         private void ace_DocDiagram_Click(object sender, EventArgs e) => Global.Notimplemented();
         private void ace_PLCLogix5000_Click(object sender, EventArgs e) => Global.Notimplemented();
         private void ace_PLCWork3_Click(object sender, EventArgs e) => Global.Notimplemented();
+
+      
     }
 }

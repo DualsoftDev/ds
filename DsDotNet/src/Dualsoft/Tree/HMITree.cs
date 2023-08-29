@@ -1,14 +1,18 @@
 using DevExpress.XtraBars.Docking2010.Views.Tabbed;
 using DevExpress.XtraBars.Navigation;
+using DevExpress.XtraEditors;
+using DevExpress.XtraGrid.Views.Grid;
 using Dual.Common.Core;
 using Dual.Common.Winform;
 using Model.Import.Office;
+using Server.HW.Common;
 using System;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.Core.CoreModule;
+using static Engine.Core.ExpressionForwardDeclModule;
 using static Model.Import.Office.ImportPPTModule;
 using static Model.Import.Office.ViewModule;
 
@@ -107,18 +111,22 @@ namespace DSModeler.Tree
 
                     void StartHMI(Real real)
                     {
-                        Task.Run(() =>
+                        Task.Run(async() =>
                         {
                             var vv = (real.TagManager as VertexManager);
                             vv.SF.Value = true;
+                            await Task.Delay(500);
+                            vv.SF.Value = false;
                         });
                     }
                     void ResetHMI(Real real)
                     {
-                        Task.Run(() =>
+                        Task.Run(async () =>
                         {
                             var vv = (real.TagManager as VertexManager);
                             vv.RF.Value = true;
+                            await Task.Delay(500);
+                            vv.RF.Value = false;
                         });
                     }
                 }
@@ -153,7 +161,7 @@ namespace DSModeler.Tree
             }
         }
 
-
+        
     }
 
 }

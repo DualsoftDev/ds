@@ -10,6 +10,7 @@ open System.Collections.Generic
 [<AutoOpen>]
 module ImportIOTable =
 
+    [<Flags>]
     type IOColumn =
     | Case      = 0
     | Name      = 1
@@ -19,160 +20,118 @@ module ImportIOTable =
     | Job       = 5
     | Func      = 6
 
-    //let ApplyExcel(path:string, systems:DsSystem seq) =
-    //    let sys = systems.Head()
-    //    let FromExcel(path:string) =
-    //        let dataset = new System.Data.DataSet()
-    //        let excelApp = new ApplicationClass(Visible = false)
-    //                // 워크북 열기
-    //        let workBook = excelApp.Workbooks.Open(path);
+    let ApplyIO(sys:DsSystem, dt:Data.DataTable) =
 
-    //        workBook.Worksheets
-    //        |> Seq.cast<Worksheet>
-    //        |> Seq.iter(fun workSheet ->
-    //            let rowCnt = workSheet.UsedRange.Rows.Count
-    //            let colCnt = workSheet.UsedRange.Columns.Count
+        try
+            let autoFillAddress(x:string) =
+                if x = "" then x
+                else
+                    match RuntimeDS.Target with
+                    |XGI -> if  not <| x.StartsWith("%")   then "%"+x else x
+                    |_ ->   x
 
-    //            let dtResult = dataset.Tables.Add()
-    //            dtResult.TableName <- workSheet.Name
+            let functionUpdate(funcText, funcs:HashSet<Func>, tableIO:Data.DataTable, isJob:bool) =
+                funcs.Clear()
+                if not <| ((trimSpace funcText) = "" || funcText = "-" ||  funcText = "↑")
+                then getFunctions(funcText)
+                        |> Seq.iter(fun (name, parms) ->
+                            if (not<|isJob) && name <> "n"
+                            then Office.ErrorXLS(ErrorCase.Name, ErrID._1005, $"{name}", tableIO.TableName)
+                            funcs.Add(Func(name, parms)) |>ignore )
+            
+            let dicJob = sys.Jobs |> Seq.collect(fun f-> f.DeviceDefs) |> Seq.map(fun j->j.ApiName, j) |> dict
+            let updateDev(row:Data.DataRow, tableIO:Data.DataTable) =
+                let devName  = $"{row.[(int)IOColumn.Name]}"
+                if not <| dicJob.ContainsKey(devName)
+                then Office.ErrorXLS(ErrorCase.Name, ErrID._1006, tableIO.TableName,  $"오류 이름 {devName}.")
+                let dev = dicJob.[devName]
+                dev.InAddress  <- $"{row.[(int)IOColumn.Input]}" |> autoFillAddress
+                dev.OutAddress <- $"{row.[(int)IOColumn.Output]}"|> autoFillAddress
 
-    //            for column in [|1..colCnt|] do
-    //                dtResult.Columns.Add($"{column}") |> ignore
+                let jobName  = $"{row.[(int)IOColumn.Job]}"
+                let func  = $"{row.[(int)IOColumn.Func]}"
 
-    //            for row in [|2..rowCnt|] do
-    //                DoWork((int)(Convert.ToSingle(row + 1) / (rowCnt|>float32) * 50f));
-    //                let newRow = dtResult.NewRow(); // DataTable에 새 행 할당
-    //                for column in [|1..colCnt|] do
-    //                    let data = workSheet.Cells.[row, column]  :?> Range
-    //                    newRow.[column-1] <- data.Value2
+                match sys.Jobs.TryFind(fun f-> f.Name = jobName) with
+                | Some job ->  functionUpdate (func, job.Funcs, tableIO, true)
+                | None -> if "↑" <> jobName //이름이 위와 같지 않은 경우
+                            then Office.ErrorXLS(ErrorCase.Name, ErrID._1004, tableIO.TableName,  $"오류 이름 {jobName}.")
 
-    //                dtResult.Rows.Add(newRow) |> ignore
-    //        )
-    //        //    let workSheet = workBook.Worksheets.get_Item(1)  :?> Worksheet // 엑셀 첫번째 워크시트 가져오기
-    //        // 사용중인 셀 범위를 가져오기
-    //        workBook.Close();   // 워크북 닫기
-    //        excelApp.Quit();        // 엑셀 어플리케이션 종료
+            let updateVar(row:Data.DataRow, tableIO:Data.DataTable) =
+                let name      = $"{row.[(int)IOColumn.Name]}"
+                let dataType  = $"{row.[(int)IOColumn.DataType]}" |> textToDataType
+                let initValue = $"{row.[(int)IOColumn.Output]}"
+                let variableData = VariableData(name, dataType, initValue)
+                sys.Variables.Add(variableData)
 
-    //        dataset
+            let updateBtn(row:Data.DataRow, btntype:BtnType, tableIO:Data.DataTable) =
+                let name  = $"{row.[(int)IOColumn.Name]}"
+                let input = $"{row.[(int)IOColumn.Input]}"  |> autoFillAddress
+                let output= $"{row.[(int)IOColumn.Output]}" |> autoFillAddress
+                let func  = $"{row.[(int)IOColumn.Func]}"
 
-    //    let dataset = FromExcel(path)
-    //    try
-    //        let autoFillAddress(x:string) =
-    //            if x = "" then x
-    //            else
-    //                match RuntimeDS.Target with
-    //                |XGI -> if  not <| x.StartsWith("%")   then "%"+x else x
-    //                |_ ->   x
+                let btns = sys.SystemButtons.Where(fun w->w.ButtonType = btntype)
+                match btns.TryFind(fun f -> f.Name = name) with
+                | Some btn -> btn.InAddress <- input
+                              btn.OutAddress <- output
+                              functionUpdate (func, btn.Funcs, tableIO, false)
+                | None -> Office.ErrorXLS(ErrorCase.Name, ErrID._1001, $"{name}", tableIO.TableName)
 
-    //        let functionUpdate(funcText, funcs:HashSet<Func>, tableIO:Data.DataTable, isJob:bool) =
-    //            funcs.Clear()
-    //            if funcText <> "" && funcText <> "-"
-    //            then getFunctions(funcText)
-    //                    |> Seq.iter(fun (name, parms) ->
-    //                        if (not<|isJob) && name <> "n"
-    //                        then Office.ErrorXLS(ErrorCase.Name, ErrID._1005, $"{name}", tableIO.TableName, path)
-    //                        funcs.Add(Func(name, parms)) |>ignore )
+            let updateLamp(row:Data.DataRow, lampType:LampType, tableIO:Data.DataTable) =
+                let name  = $"{row.[(int)IOColumn.Name]}"
+                let output= $"{row.[(int)IOColumn.Output]}" |> autoFillAddress
+                let func  = $"{row.[(int)IOColumn.Func]}"
 
-    //        let updateDev(row:Data.DataRow, tableIO:Data.DataTable) =
-    //            let dicJob = sys.Jobs |> Seq.collect(fun f-> f.DeviceDefs) |> Seq.map(fun j->j.ApiName, j) |> dict
-    //            let devName  = $"{row.[(int)IOColumn.Name]}"
-    //            if not <| dicJob.ContainsKey(devName)
-    //            then Office.ErrorXLS(ErrorCase.Name, ErrID._1006, tableIO.TableName,  $"오류 이름 {devName}.")
-    //            let dev = dicJob.[devName]
-    //            dev.InAddress  <- $"{row.[(int)IOColumn.Input]}" |> autoFillAddress
-    //            dev.OutAddress <- $"{row.[(int)IOColumn.Output]}"|> autoFillAddress
+                let lamps = sys.SystemLamps.Where(fun w->w.LampType = lampType)
+                match lamps.TryFind(fun f -> f.Name = name) with
+                | Some lamp -> lamp.OutAddress <- output
+                               functionUpdate (func, lamp.Funcs, tableIO, false)
+                | None -> Office.ErrorXLS(ErrorCase.Name, ErrID._1002, $"{name}", tableIO.TableName)
 
-    //            let jobName  = $"{row.[(int)IOColumn.Job]}"
-    //            let func  = $"{row.[(int)IOColumn.Func]}"
+            let updateCondition (row:Data.DataRow, cType:ConditionType, tableIO:Data.DataTable) =
+                let name  = $"{row.[(int)IOColumn.Name]}"
+                let output= $"{row.[(int)IOColumn.Input]}" |> autoFillAddress
+                let func  = $"{row.[(int)IOColumn.Func]}"
 
-    //            match sys.Jobs.TryFind(fun f-> f.Name = jobName) with
-    //            | Some job ->  functionUpdate (func, job.Funcs, tableIO, true)
-    //            | None -> if "↑" <> jobName //이름이 위와 같지 않은 경우
-    //                        then Office.ErrorXLS(ErrorCase.Name, ErrID._1004, tableIO.TableName,  $"오류 이름 {jobName}.")
+                let conds = sys.SystemConditions.Where(fun w->w.ConditionType = cType)
+                match conds.TryFind(fun f -> f.Name = name) with
+                | Some cond -> cond.InAddress <- output
+                               functionUpdate (func, cond.Funcs, tableIO, false)
+                | None -> Office.ErrorXLS(ErrorCase.Name, ErrID._1002, $"{name}", tableIO.TableName)
 
-    //        let updateVar(row:Data.DataRow, tableIO:Data.DataTable) =
-    //            let name      = $"{row.[(int)IOColumn.Name]}"
-    //            let dataType  = $"{row.[(int)IOColumn.DataType]}" |> textToDataType
-    //            let initValue = $"{row.[(int)IOColumn.Output]}"
-    //            let variableData = VariableData(name, dataType, initValue)
-    //            sys.Variables.Add(variableData)
+          
+            let tableIO = dt
+            for row in tableIO.Rows do
+                let case = $"{row.[(int)IOColumn.Case]}"
+                if(trimSpace $"{row.[(int)IOColumn.Name]}" <> ""//name 존재시만
+                && case <> $"{IOColumn.Case}") //header 스킵
+                then
+                    match TextToXlsType(case) with
+                    | XlsAddress        -> updateDev(row, tableIO)
+                    | XlsVariable       -> updateVar(row, tableIO)
 
-    //        let updateBtn(row:Data.DataRow, btntype:BtnType, tableIO:Data.DataTable) =
-    //            let name  = $"{row.[(int)IOColumn.Name]}"
-    //            let input = $"{row.[(int)IOColumn.Input]}"  |> autoFillAddress
-    //            let output= $"{row.[(int)IOColumn.Output]}" |> autoFillAddress
-    //            let func  = $"{row.[(int)IOColumn.Func]}"
+                    | XlsAutoBTN        -> updateBtn  (row, BtnType.DuAutoBTN             , tableIO)
+                    | XlsManualBTN      -> updateBtn  (row, BtnType.DuManualBTN           , tableIO)
+                    | XlsDriveBTN       -> updateBtn  (row, BtnType.DuDriveBTN            , tableIO)
+                    | XlsStopBTN        -> updateBtn  (row, BtnType.DuStopBTN             , tableIO)
+                    | XlsEmergencyBTN   -> updateBtn  (row, BtnType.DuEmergencyBTN        , tableIO)
+                    | XlsTestBTN        -> updateBtn  (row, BtnType.DuTestBTN             , tableIO)
+                    | XlsReadyBTN       -> updateBtn  (row, BtnType.DuReadyBTN            , tableIO)
+                    | XlsClearBTN       -> updateBtn  (row, BtnType.DuClearBTN            , tableIO)
+                    | XlsHomeBTN        -> updateBtn  (row, BtnType.DuHomeBTN             , tableIO)
 
-    //            let btns = sys.SystemButtons.Where(fun w->w.ButtonType = btntype)
-    //            match btns.TryFind(fun f -> f.Name = name) with
-    //            | Some btn -> btn.InAddress <- input
-    //                          btn.OutAddress <- output
-    //                          functionUpdate (func, btn.Funcs, tableIO, false)
-    //            | None -> Office.ErrorXLS(ErrorCase.Name, ErrID._1001, $"{name}", tableIO.TableName, path)
+                    | XlsAutoLamp       -> updateLamp (row, LampType.DuAutoLamp       , tableIO)
+                    | XlsManualLamp     -> updateLamp (row, LampType.DuManualLamp     , tableIO)
+                    | XlsDriveLamp      -> updateLamp (row, LampType.DuDriveLamp      , tableIO)
+                    | XlsStopLamp       -> updateLamp (row, LampType.DuStopLamp       , tableIO)
+                    | XlsEmergencyLamp  -> updateLamp (row, LampType.DuEmergencyLamp  , tableIO)
+                    | XlsTestLamp       -> updateLamp (row, LampType.DuTestDriveLamp  , tableIO)
+                    | XlsReadyLamp      -> updateLamp (row, LampType.DuReadyLamp      , tableIO)
+                    | XlsIdleLamp       -> updateLamp (row, LampType.DuIdleLamp       , tableIO)
 
-    //        let updateLamp(row:Data.DataRow, lampType:LampType, tableIO:Data.DataTable) =
-    //            let name  = $"{row.[(int)IOColumn.Name]}"
-    //            let output= $"{row.[(int)IOColumn.Output]}" |> autoFillAddress
-    //            let func  = $"{row.[(int)IOColumn.Func]}"
-
-    //            let lamps = sys.SystemLamps.Where(fun w->w.LampType = lampType)
-    //            match lamps.TryFind(fun f -> f.Name = name) with
-    //            | Some lamp -> lamp.OutAddress <- output
-    //                           functionUpdate (func, lamp.Funcs, tableIO, false)
-    //            | None -> Office.ErrorXLS(ErrorCase.Name, ErrID._1002, $"{name}", tableIO.TableName, path)
-
-    //        let updateCondition (row:Data.DataRow, cType:ConditionType, tableIO:Data.DataTable) =
-    //            let name  = $"{row.[(int)IOColumn.Name]}"
-    //            let output= $"{row.[(int)IOColumn.Input]}" |> autoFillAddress
-    //            let func  = $"{row.[(int)IOColumn.Func]}"
-
-    //            let conds = sys.SystemConditions.Where(fun w->w.ConditionType = cType)
-    //            match conds.TryFind(fun f -> f.Name = name) with
-    //            | Some cond -> cond.InAddress <- output
-    //                           functionUpdate (func, cond.Funcs, tableIO, false)
-    //            | None -> Office.ErrorXLS(ErrorCase.Name, ErrID._1002, $"{name}", tableIO.TableName, path)
-
-    //        systems
-    //        |> Seq.iter(fun sys ->
-    //            let tableIOs = dataset.Tables
-    //                            |> Seq.cast<System.Data.DataTable>
-    //                            |> Seq.filter(fun tb -> tb.TableName = sys.Name)
-
-    //            if tableIOs.length()  = 0
-    //            then Office.ErrorXLS(ErrorCase.Name, ErrID._1003, "",  $"오류 이름 {sys.Name}.")
-
-    //            let tableIO = tableIOs |> Seq.head
-    //            for row in tableIO.Rows do
-    //                if($"{row.[(int)IOColumn.Name]}" = ""|>not && $"{row.[(int)IOColumn.Name]}" = "-"|>not) //name 존재시만
-    //                then
-    //                    match TextToXlsType($"{row.[(int)IOColumn.Case]}") with
-    //                    | XlsAddress        -> updateDev(row, tableIO)
-    //                    | XlsVariable       -> updateVar(row, tableIO)
-
-    //                    | XlsAutoBTN        -> updateBtn  (row, BtnType.DuAutoBTN             , tableIO)
-    //                    | XlsManualBTN      -> updateBtn  (row, BtnType.DuManualBTN           , tableIO)
-    //                    | XlsDriveBTN       -> updateBtn  (row, BtnType.DuDriveBTN            , tableIO)
-    //                    | XlsStopBTN        -> updateBtn  (row, BtnType.DuStopBTN             , tableIO)
-    //                    | XlsEmergencyBTN   -> updateBtn  (row, BtnType.DuEmergencyBTN        , tableIO)
-    //                    | XlsTestBTN        -> updateBtn  (row, BtnType.DuTestBTN             , tableIO)
-    //                    | XlsReadyBTN       -> updateBtn  (row, BtnType.DuReadyBTN            , tableIO)
-    //                    | XlsClearBTN       -> updateBtn  (row, BtnType.DuClearBTN            , tableIO)
-    //                    | XlsHomeBTN        -> updateBtn  (row, BtnType.DuHomeBTN             , tableIO)
-
-    //                    | XlsAutoLamp       -> updateLamp (row, LampType.DuAutoLamp       , tableIO)
-    //                    | XlsManualLamp     -> updateLamp (row, LampType.DuManualLamp     , tableIO)
-    //                    | XlsDriveLamp      -> updateLamp (row, LampType.DuDriveLamp      , tableIO)
-    //                    | XlsStopLamp       -> updateLamp (row, LampType.DuStopLamp       , tableIO)
-    //                    | XlsEmergencyLamp  -> updateLamp (row, LampType.DuEmergencyLamp  , tableIO)
-    //                    | XlsTestLamp       -> updateLamp (row, LampType.DuTestDriveLamp  , tableIO)
-    //                    | XlsReadyLamp      -> updateLamp (row, LampType.DuReadyLamp      , tableIO)
-    //                    | XlsIdleLamp       -> updateLamp (row, LampType.DuIdleLamp       , tableIO)
-
-    //                    | XlsConditionReady -> updateCondition (row, ConditionType.DuReadyState , tableIO)
-    //                    | XlsConditionDrive -> updateCondition (row, ConditionType.DuDriveState , tableIO)
-    //        )
-    //    with ex ->  failwithf  $"{ex.Message}"
-    //    DoWork(0);
+                    | XlsConditionReady -> updateCondition (row, ConditionType.DuReadyState , tableIO)
+                    | XlsConditionDrive -> updateCondition (row, ConditionType.DuDriveState , tableIO)
+       
+        with ex ->  failwithf  $"{ex.Message}"
 
 
 

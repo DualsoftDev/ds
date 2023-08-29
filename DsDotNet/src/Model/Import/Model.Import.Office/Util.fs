@@ -13,7 +13,7 @@ module Util =
         inherit ConcurrentDictionary<'T, 'T>()
         member x.TryAdd(item:'T) = x.TryAdd(item, item)
 
-    let trimSpace(text:string) =   text.TrimStart(' ').TrimEnd(' ')
+    let trimSpace(text:string) =   text.Trim()
 
     let GetSquareBrackets(name:string, bHead:bool) =
         let pattern   = "(?<=\[).*?(?=\])"  //대괄호 안에 내용은 무조건 가져온다

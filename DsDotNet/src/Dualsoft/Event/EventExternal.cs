@@ -110,7 +110,9 @@ namespace DSModeler
                         if (evt.IsEventVertex)
                         {
                             var t = evt as EventVertex;
-                            var txtStatus = "[DEBUG]";
+                            var txtStatus = "";
+                            var sys = t.Target.Parent.GetSystem();
+                            var tagKind = TagKindExt.GetVertexTagKindText(t.Tag);
                             switch (t.TagKind)
                             {
                                 case VertexTag.ready:  txtStatus = "[R]"; dicStatus[t.Target] = Status4.Ready; break;
@@ -120,19 +122,18 @@ namespace DSModeler
                                 default:
                                     break;
                             }
-                            if (txtStatus == "[DEBUG]")
+                            if (txtStatus != "" &&  (bool)t.Tag.BoxedValue)
                             {
                                 Task.Delay(ControlProperty.GetDelayMsec()).Wait();
-                                var logV = CreateLogicLog(t.Tag.Name, t.Tag.BoxedValue.ToString(), t.Tag.TagKind.ToString(), t.Target.Parent.GetSystem());
+                                var logV = CreateLogicLog(t.Tag.Name, txtStatus, tagKind, sys);
                                 LogicLog.TryAdd(logV);
                             }
-                            else
-                            {
+                          
                                
-                                Global.StatusChangeSubject.OnNext(Tuple.Create(t.Target, dicStatus[t.Target]));
-                                var logS = CreateLogicLog(t.Target.QualifiedName, txtStatus, $"{dicStatus[t.Target]}", t.Target.Parent.GetSystem());
-                                LogicLog.TryAdd(logS);
-                            }
+                            Global.StatusChangeSubject.OnNext(Tuple.Create(t.Target, dicStatus[t.Target]));
+                            var logS = CreateLogicLog(t.Target.QualifiedName, t.Tag.BoxedValue.ToString(), tagKind, sys);
+                            LogicLog.TryAdd(logS);
+                           
 
                         }
                         else if (evt.IsEventAction && Global.CpuRunMode.IsPackagePC())

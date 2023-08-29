@@ -29,7 +29,7 @@ namespace DSModeler
                 ValueLogs.Add(v);       
             }
         }
-        public static void InitControl(GridLookUpEdit gle, GridView gv)
+        public static void InitControl( GridLookUpEdit gle, GridView gv)
         {
             gle.Properties.DisplayMember = "Name";
 

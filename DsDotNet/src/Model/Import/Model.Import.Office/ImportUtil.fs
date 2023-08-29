@@ -469,7 +469,11 @@ module ImportU =
                             api.AddTXs(txs)|>ignore
                             api.AddRXs(rxs)|>ignore
                             )
-
+        [<Extension>]
+        static member UpdateActionIO (doc:pptDoc, sys:DsSystem) =
+            let table = doc.GetTable  (System.Enum.GetValues(typedefof<IOColumn>).Length)
+            ApplyIO (sys, table)
+            
         [<Extension>]
         static member BuildSystem (doc:pptDoc, sys:DsSystem) =
             doc.MakeJobs(sys)

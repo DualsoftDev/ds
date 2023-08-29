@@ -13,6 +13,7 @@ using System.Net;
 using System.Windows.Forms;
 using static DevExpress.Data.Filtering.Helpers.SubExprHelper;
 using static Engine.CodeGenCPU.TagManagerModule;
+using static Engine.Core.CoreModule;
 using static Engine.Core.RuntimeGeneratorModule;
 using static Engine.Cpu.RunTime;
 using static Engine.Cpu.RunTimeUtil;
@@ -56,20 +57,20 @@ namespace DSModeler
                     ViewDraw.DrawStatus(docForm.UcView.MasterNode, docForm);
             };
 
-            gridLookUpEdit_Expr.EditValueChanged += (s, e) =>
+            gle_Expr.EditValueChanged += (s, e) =>
             {
                 var textForm = DocControl.CreateDocExprOrSelect(this, tabbedView_Doc);
                 if (textForm == null) return;
-                DSFile.UpdateExpr(textForm, gridLookUpEdit_Expr.EditValue as LogicStatement);
+                DSFile.UpdateExpr(textForm, gle_Expr.EditValue as LogicStatement);
             };
-            gridLookUpEdit_Expr.BeforePopup += (s, e) =>
-            {
-                gridLookUpEdit_Expr.Properties.BestFitMode = BestFitMode.BestFitResizePopup;
-            };
-            gridLookUpEdit_Log.BeforePopup += (s, e) =>
-            {
-                gridLookUpEdit_Log.Properties.BestFitMode = BestFitMode.BestFitResizePopup;
-            };
+
+            gle_Expr.BeforePopup += (s, e) =>
+                gle_Expr.Properties.BestFitMode = BestFitMode.BestFitResizePopup;
+            gle_Log.BeforePopup += (s, e) =>
+                gle_Log.Properties.BestFitMode = BestFitMode.BestFitResizePopup;
+            gle_Device.BeforePopup += (s, e) =>
+                gle_Device.Properties.BestFitMode = BestFitMode.BestFitResizePopup;
+
             comboBoxEdit_RunMode.EditValueChanging += (s, e) =>
             {
                 Global.CpuRunMode = ToRuntimePackage(e.NewValue.ToString());
@@ -79,26 +80,36 @@ namespace DSModeler
                     ImportPowerPointWapper(Files.GetLast());
             };
 
-            spinEdit_StartIn.Properties.EditValueChanging += (s, e) => UpdateRunCountInOut(e, true);
-            spinEdit_StartOut.Properties.EditValueChanging += (s, e) => UpdateRunCountInOut(e, false);
-            void UpdateRunCountInOut(ChangingEventArgs e, bool bIn)
+            spinEdit_StartIn.Properties.EditValueChanged += (s, e) =>
             {
-                var textValue = e.NewValue.ToString().Split('.')[0];
-                e.Cancel = Convert.ToInt32(textValue) < 0;
-                if (!e.Cancel)
-                {
-                    if (bIn)
-                    {
-                        Global.RunCountIn = Convert.ToInt32(textValue);
-                        DSRegistry.SetValue(K.RunCountIn, Global.RunCountIn);
-                    }
-                    else
-                    {
-                        Global.RunCountOut = Convert.ToInt32(textValue);
-                        DSRegistry.SetValue(K.RunCountOut, Global.RunCountOut);
-                    }
-                }
-            }
+                Global.RunCountIn = Convert.ToInt32(spinEdit_StartIn.EditValue);
+                DSRegistry.SetValue(K.RunCountIn, Global.RunCountIn);
+            };
+            spinEdit_StartOut.Properties.EditValueChanged += (s, e) =>
+            {
+                Global.RunCountOut = Convert.ToInt32(spinEdit_StartOut.EditValue);
+                DSRegistry.SetValue(K.RunCountOut, Global.RunCountOut);
+            };
+            
+            //UpdateRunCountInOut(false);
+            //void UpdateRunCountInOut(ChangingEventArgs e, bool bIn)
+            //{
+            //    var textValue = e.NewValue.ToString().Split('.')[0];
+            //    e.Cancel = Convert.ToInt32(textValue) < 1;
+            //    if (!e.Cancel) 
+            //    {
+            //        if (bIn)
+            //        {
+            //            Global.RunCountIn = Convert.ToInt32(textValue);
+            //            DSRegistry.SetValue(K.RunCountIn, Global.RunCountIn);
+            //        }
+            //        else
+            //        {
+            //            Global.RunCountOut = Convert.ToInt32(textValue);
+            //            DSRegistry.SetValue(K.RunCountOut, Global.RunCountOut);
+            //        }
+            //    }
+            //}
 
             toggleSwitch_menuExpand.Toggled += (s, e) =>
             {
@@ -126,7 +137,7 @@ namespace DSModeler
        
             toggleSwitch_showDeviceExpr.Toggled += (s, e) =>
             {
-                LogicTree.UpdateExpr(gridLookUpEdit_Expr, toggleSwitch_showDeviceExpr.IsOn);
+                LogicTree.UpdateExpr(gle_Expr, toggleSwitch_showDeviceExpr.IsOn);
             };
 
 
@@ -134,18 +145,16 @@ namespace DSModeler
             {
                 IPAddress.TryParse(e.NewValue.ToString(), out IPAddress addr);
                 if (addr == null) return;
+                DSRegistry.SetValue(K.RunHWIP, e.NewValue);
+                Global.RunHWIP = e.NewValue.ToString();
 
-                if (Global.CpuRunMode.IsPackagePC())
-                {
-                    DSRegistry.SetValue(K.RunHWIP, e.NewValue);
-                    Global.RunHWIP = e.NewValue.ToString();
-                    PcControl.ReConnect();
-                }
+                if (Global.CpuRunMode.IsPackagePC() && PcControl.RunCpus.Any())
+                    PcControl.CreateConnect();
             };
 
-            checkButton_ADV.CheckedChanged += (s, e) => PcControl.SetBit(gle_Device.EditValue as WMXTag, checkButton_ADV.Checked);
-            checkButton_RET.CheckedChanged += (s, e) => PcControl.SetBit(gle_Device.EditValue as WMXTag, checkButton_RET.Checked);
-
+            btn_ON.Click += (s, e) => PcControl.SetBit(gle_Device.EditValue as WMXTag, true);
+            btn_OFF.Click += (s, e) => PcControl.SetBit(gle_Device.EditValue as WMXTag, false);
+           
 
             DsProcessEvent.ProcessSubject.Subscribe(rx =>
             {

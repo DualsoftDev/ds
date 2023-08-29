@@ -37,7 +37,6 @@ module RuntimeGeneratorModule =
         static let targetChangedSubject = new Subject<RuntimeTargetType>()
         static let packageChangedSubject = new Subject<RuntimePackage>()
         static let mutable dsSystem:ISystem option = None
-        static let mutable autoAddress:bool = false
         static member Target
             with get() = runtimeTarget
             and set(v) =
@@ -54,9 +53,6 @@ module RuntimeGeneratorModule =
         static member System
             with get() = dsSystem.Value
             and set(v) = dsSystem <- Some v
-        static member AutoAddress
-            with get() = autoAddress 
-            and set(v) = autoAddress <-  v
-
+   
           
           

@@ -95,24 +95,8 @@ module TagManagerUtil =
     let resetSimDevCnt() = inCnt<- -1;outCnt<- -1;memCnt<- -1;
     let createBridgeTag(stg:Storages, name, addr:string, inOut:ActionTag, bridge:BridgeType, sys, task:IQualifiedNamed option): ITag option=
         let address =
-            if RuntimeDS.Package.IsPackageSIM() || RuntimeDS.Package.IsPackagePC()
+            if addr <> ""  
             then
-                match inOut with
-                | ActionTag.ActionIn     -> inCnt<-inCnt+1;  Some($"I{inCnt}")
-                | ActionTag.ActionOut    -> outCnt<-outCnt+1;Some($"O{outCnt}")
-                | ActionTag.ActionMemory ->  failwithlog "error: Memory not supported "
-                | _ -> failwithlog "error: ActionTag create "
-
-            elif RuntimeDS.AutoAddress  
-            then 
-                match inOut with
-                | ActionTag.ActionIn     -> inCnt<-inCnt+1;  Some($"%%IX{inCnt}")
-                | ActionTag.ActionOut    -> outCnt<-outCnt+1;Some($"%%QX{outCnt}")
-                | ActionTag.ActionMemory ->  failwithlog "error: Memory not supported "
-                | _ -> failwithlog "error: ActionTag create "
-                    
-
-            else 
                 let addr = addr.ToUpper()
                 match bridge with
                 | Device    -> if addr <> "" then Some addr else failwithlog $"Error Device {name} 주소가 없습니다."
@@ -120,6 +104,24 @@ module TagManagerUtil =
                 | Lamp      -> if addr <> "" then Some addr else failwithlog $"Error Lamp {name}  주소가 없습니다."
                 | Condition -> if addr <> "" then Some addr else failwithlog $"Error Condition {name} 주소가 없습니다."
 
+            elif RuntimeDS.Package.IsPackageSIM() || RuntimeDS.Package.IsPackagePC() 
+            then
+                match inOut with
+                | ActionTag.ActionIn     -> inCnt<-inCnt+1;  Some($"I{inCnt/8}.{inCnt%8}")
+                | ActionTag.ActionOut    -> outCnt<-outCnt+1;Some($"O{outCnt/8}.{outCnt%8}")
+                | ActionTag.ActionMemory ->  failwithlog "error: Memory not supported "
+                | _ -> failwithlog "error: ActionTag create "
+
+            elif RuntimeDS.Package.IsPackagePLC()
+            then 
+                match inOut with
+                | ActionTag.ActionIn     -> inCnt<-inCnt+1;  Some($"%%IW{inCnt/16}.{inCnt%16}")
+                | ActionTag.ActionOut    -> outCnt<-outCnt+1;Some($"%%QW{outCnt/16}.{outCnt%16}")
+                | ActionTag.ActionMemory -> failwithlog "error: Memory not supported "
+                | _ -> failwithlog "error: ActionTag create "
+            else 
+                None
+       
 
         if address.IsSome
         then

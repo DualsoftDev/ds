@@ -69,7 +69,6 @@ namespace DSModeler
             this.comboBoxEdit_RunMode = new DevExpress.XtraEditors.ComboBoxEdit();
             this.spinEdit_StartOut = new DevExpress.XtraEditors.SpinEdit();
             this.labelControl9 = new DevExpress.XtraEditors.LabelControl();
-            this.spinEdit_StartIn = new DevExpress.XtraEditors.SpinEdit();
             this.labelControl8 = new DevExpress.XtraEditors.LabelControl();
             this.labelControl10 = new DevExpress.XtraEditors.LabelControl();
             this.labelControl7 = new DevExpress.XtraEditors.LabelControl();
@@ -83,17 +82,17 @@ namespace DSModeler
             this.toggleSwitch_showDeviceExpr = new DevExpress.XtraEditors.ToggleSwitch();
             this.labelControl5 = new DevExpress.XtraEditors.LabelControl();
             this.labelControl4 = new DevExpress.XtraEditors.LabelControl();
-            this.gridLookUpEdit_Log = new DevExpress.XtraEditors.GridLookUpEdit();
-            this.gridLookUpEdit1View_Log = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.gle_Log = new DevExpress.XtraEditors.GridLookUpEdit();
+            this.gleView_Log = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.labelControl3 = new DevExpress.XtraEditors.LabelControl();
-            this.gridLookUpEdit_Expr = new DevExpress.XtraEditors.GridLookUpEdit();
-            this.gridLookUpEdit1View_Expr = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.gle_Expr = new DevExpress.XtraEditors.GridLookUpEdit();
+            this.gleView_Expr = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.accordionContentContainer4 = new DevExpress.XtraBars.Navigation.AccordionContentContainer();
-            this.checkButton_RET = new DevExpress.XtraEditors.CheckButton();
-            this.checkButton_ADV = new DevExpress.XtraEditors.CheckButton();
+            this.btn_ON = new DevExpress.XtraEditors.SimpleButton();
+            this.btn_OFF = new DevExpress.XtraEditors.SimpleButton();
             this.labelControl12 = new DevExpress.XtraEditors.LabelControl();
             this.gle_Device = new DevExpress.XtraEditors.GridLookUpEdit();
-            this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.gleView_Device = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.ace_Model = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_System = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Device = new DevExpress.XtraBars.Navigation.AccordionControlElement();
@@ -128,6 +127,7 @@ namespace DSModeler
             this.ace9 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.gridControl_exprotExcel = new DevExpress.XtraGrid.GridControl();
             this.gridView_exprotExcel = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.spinEdit_StartIn = new DevExpress.XtraEditors.SpinEdit();
             ((System.ComponentModel.ISupportInitialize)(this.document1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dockManager)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManager1)).BeginInit();
@@ -149,21 +149,21 @@ namespace DSModeler
             this.accordionContentContainer5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.comboBoxEdit_RunMode.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.spinEdit_StartOut.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.spinEdit_StartIn.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.textEdit_IP.Properties)).BeginInit();
             this.accordionContentContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ratingControl_Speed.Properties)).BeginInit();
             this.accordionContentContainer3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_showDeviceExpr.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit_Log.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View_Log)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit_Expr.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View_Expr)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gle_Log.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gleView_Log)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gle_Expr.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gleView_Expr)).BeginInit();
             this.accordionContentContainer4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gle_Device.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gleView_Device)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl_exprotExcel)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView_exprotExcel)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.spinEdit_StartIn.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // document1
@@ -245,7 +245,7 @@ namespace DSModeler
             // barEditItem_Process
             // 
             this.barEditItem_Process.AutoFillWidth = true;
-            this.barEditItem_Process.Caption = "barEditItem1";
+            this.barEditItem_Process.Caption = "Prcess";
             this.barEditItem_Process.Edit = this.repositoryItemProgressBar1;
             this.barEditItem_Process.Id = 2;
             this.barEditItem_Process.Name = "barEditItem_Process";
@@ -510,10 +510,10 @@ namespace DSModeler
             // 
             // accordionContentContainer5
             // 
+            this.accordionContentContainer5.Controls.Add(this.spinEdit_StartIn);
             this.accordionContentContainer5.Controls.Add(this.comboBoxEdit_RunMode);
             this.accordionContentContainer5.Controls.Add(this.spinEdit_StartOut);
             this.accordionContentContainer5.Controls.Add(this.labelControl9);
-            this.accordionContentContainer5.Controls.Add(this.spinEdit_StartIn);
             this.accordionContentContainer5.Controls.Add(this.labelControl8);
             this.accordionContentContainer5.Controls.Add(this.labelControl10);
             this.accordionContentContainer5.Controls.Add(this.labelControl7);
@@ -537,7 +537,7 @@ namespace DSModeler
             // spinEdit_StartOut
             // 
             this.spinEdit_StartOut.EditValue = new decimal(new int[] {
-            3,
+            1,
             0,
             0,
             0});
@@ -545,6 +545,16 @@ namespace DSModeler
             this.spinEdit_StartOut.Name = "spinEdit_StartOut";
             this.spinEdit_StartOut.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.spinEdit_StartOut.Properties.MaxValue = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+            this.spinEdit_StartOut.Properties.MinValue = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             this.spinEdit_StartOut.Size = new System.Drawing.Size(57, 20);
             this.spinEdit_StartOut.TabIndex = 6;
             // 
@@ -557,20 +567,6 @@ namespace DSModeler
             this.labelControl9.Size = new System.Drawing.Size(91, 19);
             this.labelControl9.TabIndex = 2;
             this.labelControl9.Text = "Run HW 모드";
-            // 
-            // spinEdit_StartIn
-            // 
-            this.spinEdit_StartIn.EditValue = new decimal(new int[] {
-            3,
-            0,
-            0,
-            0});
-            this.spinEdit_StartIn.Location = new System.Drawing.Point(133, 35);
-            this.spinEdit_StartIn.Name = "spinEdit_StartIn";
-            this.spinEdit_StartIn.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.spinEdit_StartIn.Size = new System.Drawing.Size(62, 20);
-            this.spinEdit_StartIn.TabIndex = 6;
             // 
             // labelControl8
             // 
@@ -674,9 +670,9 @@ namespace DSModeler
             this.accordionContentContainer3.Controls.Add(this.toggleSwitch_showDeviceExpr);
             this.accordionContentContainer3.Controls.Add(this.labelControl5);
             this.accordionContentContainer3.Controls.Add(this.labelControl4);
-            this.accordionContentContainer3.Controls.Add(this.gridLookUpEdit_Log);
+            this.accordionContentContainer3.Controls.Add(this.gle_Log);
             this.accordionContentContainer3.Controls.Add(this.labelControl3);
-            this.accordionContentContainer3.Controls.Add(this.gridLookUpEdit_Expr);
+            this.accordionContentContainer3.Controls.Add(this.gle_Expr);
             this.accordionContentContainer3.Name = "accordionContentContainer3";
             this.accordionContentContainer3.Size = new System.Drawing.Size(309, 89);
             this.accordionContentContainer3.TabIndex = 19;
@@ -711,26 +707,26 @@ namespace DSModeler
             this.labelControl4.TabIndex = 7;
             this.labelControl4.Text = "로그";
             // 
-            // gridLookUpEdit_Log
+            // gle_Log
             // 
-            this.gridLookUpEdit_Log.EditValue = "[EditVasd";
-            this.gridLookUpEdit_Log.Location = new System.Drawing.Point(44, 58);
-            this.gridLookUpEdit_Log.MenuManager = this.barManager1;
-            this.gridLookUpEdit_Log.Name = "gridLookUpEdit_Log";
-            this.gridLookUpEdit_Log.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            this.gle_Log.EditValue = "[EditVasd";
+            this.gle_Log.Location = new System.Drawing.Point(44, 58);
+            this.gle_Log.MenuManager = this.barManager1;
+            this.gle_Log.Name = "gle_Log";
+            this.gle_Log.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.gridLookUpEdit_Log.Properties.NullText = "";
-            this.gridLookUpEdit_Log.Properties.PopupView = this.gridLookUpEdit1View_Log;
-            this.gridLookUpEdit_Log.Size = new System.Drawing.Size(265, 20);
-            this.gridLookUpEdit_Log.TabIndex = 6;
+            this.gle_Log.Properties.NullText = "";
+            this.gle_Log.Properties.PopupView = this.gleView_Log;
+            this.gle_Log.Size = new System.Drawing.Size(265, 20);
+            this.gle_Log.TabIndex = 6;
             // 
-            // gridLookUpEdit1View_Log
+            // gle1View_Log
             // 
-            this.gridLookUpEdit1View_Log.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
-            this.gridLookUpEdit1View_Log.Name = "gridLookUpEdit1View_Log";
-            this.gridLookUpEdit1View_Log.OptionsSelection.EnableAppearanceFocusedCell = false;
-            this.gridLookUpEdit1View_Log.OptionsView.ShowGroupPanel = false;
-            this.gridLookUpEdit1View_Log.PreviewLineCount = 20;
+            this.gleView_Log.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
+            this.gleView_Log.Name = "gle1View_Log";
+            this.gleView_Log.OptionsSelection.EnableAppearanceFocusedCell = false;
+            this.gleView_Log.OptionsView.ShowGroupPanel = false;
+            this.gleView_Log.PreviewLineCount = 20;
             // 
             // labelControl3
             // 
@@ -742,56 +738,56 @@ namespace DSModeler
             this.labelControl3.TabIndex = 5;
             this.labelControl3.Text = "수식";
             // 
-            // gridLookUpEdit_Expr
+            // gle_Expr
             // 
-            this.gridLookUpEdit_Expr.EditValue = "[EditVasd";
-            this.gridLookUpEdit_Expr.Location = new System.Drawing.Point(44, 32);
-            this.gridLookUpEdit_Expr.MenuManager = this.barManager1;
-            this.gridLookUpEdit_Expr.Name = "gridLookUpEdit_Expr";
-            this.gridLookUpEdit_Expr.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            this.gle_Expr.EditValue = "[EditVasd";
+            this.gle_Expr.Location = new System.Drawing.Point(44, 32);
+            this.gle_Expr.MenuManager = this.barManager1;
+            this.gle_Expr.Name = "gle_Expr";
+            this.gle_Expr.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.gridLookUpEdit_Expr.Properties.NullText = "먼저 파일을 불러오세요";
-            this.gridLookUpEdit_Expr.Properties.PopupView = this.gridLookUpEdit1View_Expr;
-            this.gridLookUpEdit_Expr.Size = new System.Drawing.Size(265, 20);
-            this.gridLookUpEdit_Expr.TabIndex = 0;
+            this.gle_Expr.Properties.NullText = "먼저 파일을 불러오세요";
+            this.gle_Expr.Properties.PopupView = this.gleView_Expr;
+            this.gle_Expr.Size = new System.Drawing.Size(265, 20);
+            this.gle_Expr.TabIndex = 0;
             // 
-            // gridLookUpEdit1View_Expr
+            // gle1View_Expr
             // 
-            this.gridLookUpEdit1View_Expr.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
-            this.gridLookUpEdit1View_Expr.Name = "gridLookUpEdit1View_Expr";
-            this.gridLookUpEdit1View_Expr.OptionsSelection.EnableAppearanceFocusedCell = false;
-            this.gridLookUpEdit1View_Expr.OptionsView.ShowGroupPanel = false;
-            this.gridLookUpEdit1View_Expr.PreviewLineCount = 20;
+            this.gleView_Expr.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
+            this.gleView_Expr.Name = "gle1View_Expr";
+            this.gleView_Expr.OptionsSelection.EnableAppearanceFocusedCell = false;
+            this.gleView_Expr.OptionsView.ShowGroupPanel = false;
+            this.gleView_Expr.PreviewLineCount = 20;
             // 
             // accordionContentContainer4
             // 
-            this.accordionContentContainer4.Controls.Add(this.checkButton_RET);
-            this.accordionContentContainer4.Controls.Add(this.checkButton_ADV);
+            this.accordionContentContainer4.Controls.Add(this.btn_ON);
+            this.accordionContentContainer4.Controls.Add(this.btn_OFF);
             this.accordionContentContainer4.Controls.Add(this.labelControl12);
             this.accordionContentContainer4.Controls.Add(this.gle_Device);
             this.accordionContentContainer4.Name = "accordionContentContainer4";
             this.accordionContentContainer4.Size = new System.Drawing.Size(309, 76);
             this.accordionContentContainer4.TabIndex = 32;
             // 
-            // checkButton_RET
+            // btn_ON
             // 
-            this.checkButton_RET.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("checkButton_RET.ImageOptions.SvgImage")));
-            this.checkButton_RET.Location = new System.Drawing.Point(162, 39);
-            this.checkButton_RET.Name = "checkButton_RET";
-            this.checkButton_RET.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
-            this.checkButton_RET.Size = new System.Drawing.Size(79, 29);
-            this.checkButton_RET.TabIndex = 10;
-            this.checkButton_RET.Text = "후진";
+            this.btn_ON.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btn_ON.ImageOptions.SvgImage")));
+            this.btn_ON.Location = new System.Drawing.Point(97, 40);
+            this.btn_ON.Name = "btn_ON";
+            this.btn_ON.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
+            this.btn_ON.Size = new System.Drawing.Size(75, 33);
+            this.btn_ON.TabIndex = 11;
+            this.btn_ON.Text = "ON";
             // 
-            // checkButton_ADV
+            // btn_OFF
             // 
-            this.checkButton_ADV.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("checkButton_ADV.ImageOptions.SvgImage")));
-            this.checkButton_ADV.Location = new System.Drawing.Point(66, 39);
-            this.checkButton_ADV.Name = "checkButton_ADV";
-            this.checkButton_ADV.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
-            this.checkButton_ADV.Size = new System.Drawing.Size(79, 29);
-            this.checkButton_ADV.TabIndex = 9;
-            this.checkButton_ADV.Text = "전진";
+            this.btn_OFF.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btn_OFF.ImageOptions.SvgImage")));
+            this.btn_OFF.Location = new System.Drawing.Point(187, 39);
+            this.btn_OFF.Name = "btn_OFF";
+            this.btn_OFF.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
+            this.btn_OFF.Size = new System.Drawing.Size(75, 36);
+            this.btn_OFF.TabIndex = 11;
+            this.btn_OFF.Text = "OFF";
             // 
             // labelControl12
             // 
@@ -812,17 +808,17 @@ namespace DSModeler
             this.gle_Device.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
             this.gle_Device.Properties.NullText = "먼저 파일을 불러오세요";
-            this.gle_Device.Properties.PopupView = this.gridView1;
+            this.gle_Device.Properties.PopupView = this.gleView_Device;
             this.gle_Device.Size = new System.Drawing.Size(209, 20);
             this.gle_Device.TabIndex = 6;
             // 
             // gridView1
             // 
-            this.gridView1.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
-            this.gridView1.Name = "gridView1";
-            this.gridView1.OptionsSelection.EnableAppearanceFocusedCell = false;
-            this.gridView1.OptionsView.ShowGroupPanel = false;
-            this.gridView1.PreviewLineCount = 20;
+            this.gleView_Device.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
+            this.gleView_Device.Name = "gridView1";
+            this.gleView_Device.OptionsSelection.EnableAppearanceFocusedCell = false;
+            this.gleView_Device.OptionsView.ShowGroupPanel = false;
+            this.gleView_Device.PreviewLineCount = 20;
             // 
             // ace_Model
             // 
@@ -1160,6 +1156,31 @@ namespace DSModeler
             this.gridView_exprotExcel.GridControl = this.gridControl_exprotExcel;
             this.gridView_exprotExcel.Name = "gridView_exprotExcel";
             // 
+            // spinEdit_StartIn
+            // 
+            this.spinEdit_StartIn.EditValue = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.spinEdit_StartIn.Location = new System.Drawing.Point(133, 34);
+            this.spinEdit_StartIn.MenuManager = this.barManager1;
+            this.spinEdit_StartIn.Name = "spinEdit_StartIn";
+            this.spinEdit_StartIn.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.spinEdit_StartIn.Properties.MaxValue = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+            this.spinEdit_StartIn.Properties.MinValue = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.spinEdit_StartIn.Size = new System.Drawing.Size(59, 20);
+            this.spinEdit_StartIn.TabIndex = 8;
+            // 
             // FormMain
             // 
             this.Appearance.Options.UseFont = true;
@@ -1206,7 +1227,6 @@ namespace DSModeler
             this.accordionContentContainer5.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.comboBoxEdit_RunMode.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.spinEdit_StartOut.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.spinEdit_StartIn.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.textEdit_IP.Properties)).EndInit();
             this.accordionContentContainer1.ResumeLayout(false);
             this.accordionContentContainer1.PerformLayout();
@@ -1214,16 +1234,17 @@ namespace DSModeler
             this.accordionContentContainer3.ResumeLayout(false);
             this.accordionContentContainer3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_showDeviceExpr.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit_Log.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View_Log)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit_Expr.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View_Expr)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gle_Log.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gleView_Log)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gle_Expr.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gleView_Expr)).EndInit();
             this.accordionContentContainer4.ResumeLayout(false);
             this.accordionContentContainer4.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gle_Device.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gleView_Device)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl_exprotExcel)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView_exprotExcel)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.spinEdit_StartIn.Properties)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1295,11 +1316,11 @@ namespace DSModeler
         private DevExpress.XtraEditors.LabelControl labelControl3;
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement3;
         private DevExpress.XtraBars.Navigation.AccordionContentContainer accordionContentContainer3;
-        private DevExpress.XtraEditors.GridLookUpEdit gridLookUpEdit_Expr;
-        private DevExpress.XtraGrid.Views.Grid.GridView gridLookUpEdit1View_Expr;
+        private DevExpress.XtraEditors.GridLookUpEdit gle_Expr;
+        private DevExpress.XtraGrid.Views.Grid.GridView gleView_Expr;
         private DevExpress.XtraEditors.LabelControl labelControl4;
-        private DevExpress.XtraEditors.GridLookUpEdit gridLookUpEdit_Log;
-        private DevExpress.XtraGrid.Views.Grid.GridView gridLookUpEdit1View_Log;
+        private DevExpress.XtraEditors.GridLookUpEdit gle_Log;
+        private DevExpress.XtraGrid.Views.Grid.GridView gleView_Log;
         private DevExpress.XtraBars.BarStaticItem barStaticItem_logCnt;
         private DevExpress.XtraBars.BarStaticItem barStaticItem2;
         private DevExpress.XtraEditors.ToggleSwitch toggleSwitch_showDeviceExpr;
@@ -1308,7 +1329,6 @@ namespace DSModeler
         private DevExpress.XtraBars.Navigation.AccordionContentContainer accordionContentContainer5;
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement4;
         private DevExpress.XtraEditors.SpinEdit spinEdit_StartOut;
-        private DevExpress.XtraEditors.SpinEdit spinEdit_StartIn;
         private DevExpress.XtraEditors.LabelControl labelControl8;
         private DevExpress.XtraEditors.LabelControl labelControl7;
         private DevExpress.XtraEditors.TextEdit textEdit_IP;
@@ -1323,10 +1343,11 @@ namespace DSModeler
         private DevExpress.XtraBars.Navigation.AccordionContentContainer accordionContentContainer4;
         private DevExpress.XtraEditors.LabelControl labelControl12;
         private DevExpress.XtraEditors.GridLookUpEdit gle_Device;
-        private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
+        private DevExpress.XtraGrid.Views.Grid.GridView gleView_Device;
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement2;
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement5;
-        private DevExpress.XtraEditors.CheckButton checkButton_ADV;
-        private DevExpress.XtraEditors.CheckButton checkButton_RET;
+        private DevExpress.XtraEditors.SimpleButton btn_ON;
+        private DevExpress.XtraEditors.SimpleButton btn_OFF;
+        private DevExpress.XtraEditors.SpinEdit spinEdit_StartIn;
     }
 }

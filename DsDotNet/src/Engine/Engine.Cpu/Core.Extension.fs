@@ -39,14 +39,7 @@ module CoreExtensionsModule =
             | DuAction (DuCopy (condition, _source, _target)) -> condition.CollectStorages()
             | DuAugmentedPLCFunction _ -> []
 
-        member x.TargeChangeds(mapRungs:Dictionary<IStorage, HashSet<Statement>>) =
-            x.GetTargetStorages()
-            |> Seq.where(fun (stg) -> stg.TagChanged)
-            |> Seq.collect(fun (stg) -> mapRungs[stg])
-       
-        member x.TargeChangedClear() =
-            x.GetTargetStorages() |> Seq.iter(fun (stg) -> stg.TagChanged <- false)
-
+      
 
     let getTargetStorages (x:Statement) = x.GetTargetStorages() |> List.toSeq
     let getSourceStorages (x:Statement) = x.GetSourceStorages() |> List.toSeq
@@ -57,32 +50,20 @@ module CoreExtensionsModule =
         [<Extension>] static member ChangedTags (xs:IStorage seq) = 
                         xs |> Seq.where(fun w -> w.TagChanged)
                            |> Seq.toList   //list 아니면 TagChanged 정보 없는 초기화 이후 정보 가져오더라도 항목 유지
+
         [<Extension>] static member ChangedTagsClear (xs:IStorage seq, systems:DsSystem seq) = 
                         xs |> Seq.where(fun w ->  systems.any(fun s-> s:>ISystem = w.DsSystem))//자신 시스템에서만 TagChanged  <- false 가능
                            |> Seq.iter(fun w -> w.TagChanged <- false)
+
         [<Extension>] static member ExecutableStatements (xs:IStorage seq, mRung:IDictionary<IStorage, Statement seq>) = 
                         xs |> Seq.collect(fun stg -> mRung[stg]) 
-        [<Extension>]
-        static member NotifyPreExcute (_:ISystem, x:IStorage) = 
-            match  x.GetTagInfo() with
-                |Some t -> onTagDSChanged t
-                |_->()
-            //        match t with
-            //        |TTSystem (_,_) -> ()
-            //        |TTFlow   (_,_) -> ()
-            //        |TTVertex (v,tag) -> 
-            //                    if (x :?> PlanVar<bool>).Value
-            //                    then
-            //                        match tag with
-            //                            | VertexTag.ready  -> onStatusChanged (s, v:?>Vertex, Ready)
-            //                            | VertexTag.going  -> onStatusChanged (s, v:?>Vertex, Going)
-            //                            | VertexTag.finish -> onStatusChanged (s, v:?>Vertex, Finish)
-            //                            | VertexTag.homing -> onStatusChanged (s, v:?>Vertex, Homing)
-            //                            | _->()
-            //        |TTApiItem(_,_) -> ()
-            //        |TTAction (_,_) -> () 
-            //    |None -> ()
 
+        [<Extension>] static member NotifyPreExcute (_:ISystem, x:IStorage) = 
+                        match  x.GetTagInfo() with
+                        |Some t -> onTagDSChanged t
+                        |_ -> ()
+        
+        
         //[<Extension>]
         //static member NotifyPostExcute (_:ISystem, x:IStorage) =
         //    match x.GetTagInfo() with
@@ -99,38 +80,6 @@ module CoreExtensionsModule =
         //        |None -> ()
 
 
-        //[<Extension>]
-        //static member NotifyHwOutput (s:ISystem, x:IStorage) =
-        //    match x.GetActionTagKind() with
-        //    | Some tk ->
-        //        match tk with
-        //        | ActionTag.ActionOut->  onValueHWChanged (s, x, x.BoxedValue)
-        //        | _ ->()
-
-        //    | None -> ()
-
-        //[<Extension>]
-        //static member NotifyStatus (s:ISystem, x:IStorage) =
-        //    match x.GetVertexTagKind() with
-        //    | Some tk ->
-        //        let v = x.Target.Value :?> Vertex
-        //        if (x :?> PlanVar<bool>).Value
-        //        then
-        //            match tk with
-        //            | VertexTag.ready  -> onStatusChanged (s, v, Ready)
-        //            | VertexTag.going  -> onStatusChanged (s, v, Going)
-        //            | VertexTag.finish -> onStatusChanged (s, v, Finish)
-        //            | VertexTag.homing -> onStatusChanged (s, v, Homing)
-        //            | _->()
-
-        //    | None -> ()
-
-        [<Extension>]
-        static member NotifyValue (sys:ISystem, stg:IStorage, newValue:obj) =
-            match stg with
-            | :? PlanVar<bool> as _p -> onValueChanged (sys, stg, newValue)
-            | :? Tag<bool> -> ()//hmi ?
-            | _ -> ()
 
         [<Extension>]
         static member IsEndThread (x:IStorage) =

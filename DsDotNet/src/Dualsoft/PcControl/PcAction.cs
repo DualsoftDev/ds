@@ -1,22 +1,10 @@
-using DevExpress.Utils.Extensions;
 using DevExpress.XtraBars.Navigation;
-using DevExpress.XtraEditors;
 using DSModeler.Tree;
-using Dual.Common.Core;
-using Dual.Common.Winform;
-using Engine.Core;
-using Server.HW.Common;
 using Server.HW.WMX3;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static Engine.CodeGenCPU.CpuLoader;
-using static Engine.Core.CoreModule;
-using static Engine.Core.ExpressionForwardDeclModule;
-using static Engine.Core.ExpressionModule;
 using static Engine.Core.RuntimeGeneratorModule;
-using static Engine.Cpu.RunTime;
 
 namespace DSModeler
 {

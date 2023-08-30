@@ -1,7 +1,5 @@
 using DevExpress.Utils.Extensions;
-using DevExpress.XtraBars.Navigation;
 using DevExpress.XtraEditors;
-using DSModeler.Tree;
 using Dual.Common.Core;
 using Dual.Common.Winform;
 using Engine.Core;
@@ -15,14 +13,12 @@ using static Engine.CodeGenCPU.CpuLoader;
 using static Engine.Core.CoreModule;
 using static Engine.Core.ExpressionForwardDeclModule;
 using static Engine.Core.ExpressionModule;
-using static Engine.Core.RuntimeGeneratorModule;
 using static Engine.Cpu.RunTime;
 
 namespace DSModeler
 {
     public static class PcControl
     {
-        public static Dictionary<DsSystem, PouGen> DicPou = new Dictionary<DsSystem, PouGen>();
         public static List<DsCPU> RunCpus = new List<DsCPU>();
         public static Dictionary<TagHW, ITag> DicActionIn = new Dictionary<TagHW, ITag>();
         public static Dictionary<ITag, TagHW> DicActionOut = new Dictionary<ITag, TagHW>();
@@ -77,8 +73,6 @@ namespace DSModeler
         }
         public static void UpdateDevice(GridLookUpEdit gDevice)
         {
-
-
             gDevice.Do(() =>
             {
                 var tags = DicActionIn.Keys.Cast<WMXTag>().ToList();
@@ -88,7 +82,7 @@ namespace DSModeler
             });
         }
 
-        public static async Task CreateRunCpuSingle()
+        public static async Task CreateRunCpuSingle(Dictionary<DsSystem, PouGen> DicPou)
         {
             CreatePcControl();
 
@@ -119,7 +113,7 @@ namespace DSModeler
         /// Active 1 - Passive n개로 돌림  PC의 절반 CPU 활용
         /// </summary>
         /// <returns></returns>
-        public static async Task GetRunCpus()
+        public static async Task GetRunCpus(Dictionary<DsSystem, PouGen> DicPou)
         {
             await Task.Yield();
 
@@ -169,6 +163,28 @@ namespace DSModeler
                 Global.CpuRunMode);
 
             return cpu;
+        }
+
+        public static void ClearModel(FormMain frmMain)
+        {
+            frmMain.Do(() =>
+            {
+                if (PcControl.RunCpus.Any())
+                    PcAction.Reset(frmMain.Ace_Play, frmMain.Ace_HMI);
+
+                PcControl.RunCpus.Iter(cpu => cpu.Dispose());
+
+                frmMain.TabbedView.Controller.CloseAll();
+                frmMain.TabbedView.Documents.Clear();
+                frmMain.LogCountText.Caption = "";
+                LogicLog.ValueLogs.Clear();
+
+                Global.ActiveSys = null;
+
+                Tree.ModelTree.ClearSubBtn(frmMain.Ace_System);
+                Tree.ModelTree.ClearSubBtn(frmMain.Ace_Device);
+                Tree.ModelTree.ClearSubBtn(frmMain.Ace_HMI);
+            });
         }
 
     }

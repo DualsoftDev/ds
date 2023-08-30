@@ -1,16 +1,6 @@
-using DevExpress.Data.Filtering;
 using DevExpress.XtraEditors;
-using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
-using Dual.Common.Core;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using static Engine.Core.CoreModule;
 
 namespace DSModeler
 {

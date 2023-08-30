@@ -60,18 +60,18 @@ namespace DSModeler
             if (bSmallGap)
             {
                 layoutSetting.PackingMethod = Microsoft.Msagl.Core.Layout.PackingMethod.Compact;
-                layoutSetting.NodeSeparation = 5;
-                layoutSetting.ClusterMargin = 5;
+                layoutSetting.NodeSeparation = 2;
+                layoutSetting.ClusterMargin = 2;
                 layoutSetting.LiftCrossEdges = false;
-                layoutSetting.PackingAspectRatio = 5;
+                layoutSetting.PackingAspectRatio = 2;
 
             }
             else
             {
                 layoutSetting.PackingMethod = Microsoft.Msagl.Core.Layout.PackingMethod.Columns;
-                layoutSetting.LayerSeparation = 30;
-                layoutSetting.NodeSeparation = 30;
-                layoutSetting.ClusterMargin = 30;
+                layoutSetting.LayerSeparation = 20;
+                layoutSetting.NodeSeparation = 20;
+                layoutSetting.ClusterMargin = 5;
             }
 
             viewer.Graph.LayoutAlgorithmSettings = layoutSetting;

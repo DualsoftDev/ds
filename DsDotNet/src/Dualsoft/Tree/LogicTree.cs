@@ -1,5 +1,4 @@
 using DevExpress.XtraEditors;
-using DevExpress.XtraGrid.Views.Grid;
 using Dual.Common.Winform;
 using System.Collections.Generic;
 using System.ComponentModel;

@@ -16,7 +16,7 @@ namespace DSModeler
     public static class PPT
     {
 
-        public static async Task<bool> ImportPowerPoint(string[] files, FormMain formMain)
+        public static async Task<Dictionary<DsSystem, PouGen>> ImportPowerPoint(string[] files, FormMain formMain)
         {
             Dictionary<DsSystem, PouGen> dicCpu = new Dictionary<DsSystem, PouGen>();
             var ret = ImportPPT.GetLoadingAllSystem(files);
@@ -47,7 +47,6 @@ namespace DSModeler
                     ModelTree.CreateModelBtn(formMain, ppt);
                 }
 
-                PcControl.DicPou = dicCpu;
 
 
                 formMain.Ace_Model.Expanded = true;
@@ -55,7 +54,7 @@ namespace DSModeler
                 formMain.Ace_Device.Expanded = false;
                 tsc.SetResult(true);
             });
-            return true;
+            return dicCpu;
         }
     }
 }

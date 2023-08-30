@@ -10,8 +10,8 @@ namespace DSModeler
             int delayMsec;
             switch (Global.SimSpeed)
             {
-                case 0: delayMsec = 1000; ; break;
-                case 1: delayMsec = 500; ; break;
+                case 0: delayMsec = 500; ; break;
+                case 1: delayMsec = 200; ; break;
                 case 2: delayMsec = 100; ; break;
                 case 3: delayMsec = 20; ; break;
                 case 4: delayMsec = 5; ; break;

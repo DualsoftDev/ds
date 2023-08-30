@@ -161,25 +161,6 @@ namespace DSModeler
                             node.Status4 = rx.Item2;
                             form.UcView.UpdateStatus(node);
                         }
-
-                        //var vs = form.UcView.MasterNode
-                        //               .UsedViewNodes
-                        //               .Where(w => w.CoreVertex != null)
-                        //               .Select(s => s.CoreVertex.Value.TagManager as VertexManager)
-                        //               .SelectMany(s => getSharedReal(getPureReal(s).TagManager as VertexManager))
-                        //               .Where(f => f == rx.Item1);
-
-                        //form.UcView.MasterNode
-                        //           .UsedViewNodes
-                        //           .Where(w => w.CoreVertex != null)
-                        //           .Where(w => vs.Contains(w.CoreVertex.Value))
-                        //           .Iter(node =>
-                        //           {
-
-                        //               node.Status4 = rx.Item2;
-                        //               form.UcView.UpdateStatus(node);
-                        //           });
-
                     }
                 });
             });

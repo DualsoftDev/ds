@@ -1,4 +1,3 @@
-using DevExpress.SpreadsheetSource.Xlsx.Import;
 using DSModeler.Form;
 using DSModeler.Tree;
 using Dual.Common.Core;
@@ -9,9 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
-using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
 using static Engine.Core.ExpressionModule;
 using static Engine.Core.SystemToDsExt;
@@ -64,7 +61,7 @@ namespace DSModeler
                     view.TextEdit.ResetText();
                     int cnt = 0;
                     string dsText = "";
-                    foreach (var sys in PcControl.DicPou.Keys)
+                    foreach (var sys in PcControl.RunCpus.SelectMany(s => s.Systems))
                         dsText += $"{sys.ToDsText(Global.IsDebug)}\r\n\r\n";
 
                     var colorTexts = ToTextColorDS(dsText);

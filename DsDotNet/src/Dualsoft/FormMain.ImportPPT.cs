@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static Engine.CodeGenCPU.CpuLoader;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.EdgeExt;
@@ -36,14 +35,14 @@ namespace DSModeler
                 try
                 {
                     ImportingPPT = true;
-                    ClearModel();
+                    PcControl.ClearModel(this);
                     Files.SetLast(files);
-                    bool loadOK = await PPT.ImportPowerPoint(files, this);
-                    if (!loadOK) { return; }
+                    var dicCpu = await PPT.ImportPowerPoint(files, this);
+                    if (!dicCpu.Any()) { return; }
 
                     ViewDraw.DicStatus = new Dictionary<Vertex, Status4>();
 
-                    foreach (var item in PcControl.DicPou)
+                    foreach (var item in dicCpu)
                     {
                         var sys = item.Key;
                         var reals = sys.GetVertices().OfType<Vertex>();
@@ -51,7 +50,7 @@ namespace DSModeler
                             ViewDraw.DicStatus.Add(r, Status4.Homing);
                     }
 
-                    await PcControl.CreateRunCpuSingle();
+                    await PcControl.CreateRunCpuSingle(dicCpu);
                     PcControl.UpdateDevice(gle_Device);
 
                     EventCPU.CPUSubscribe(ViewDraw.DicStatus);
@@ -65,27 +64,5 @@ namespace DSModeler
             });
         }
 
-        void ClearModel()
-        {
-            this.Do(() =>
-            {
-                if (PcControl.RunCpus.Any())
-                    PcAction.Reset(ace_Play, ace_HMI);
-
-                PcControl.RunCpus.Iter(cpu => cpu.Dispose());
-                PcControl.DicPou = new Dictionary<DsSystem, PouGen>();
-
-                tabbedView_Doc.Controller.CloseAll();
-                tabbedView_Doc.Documents.Clear();
-                barStaticItem_logCnt.Caption = "";
-                LogicLog.ValueLogs.Clear();
-
-                Global.ActiveSys = null;
-
-                Tree.ModelTree.ClearSubBtn(ace_System);
-                Tree.ModelTree.ClearSubBtn(ace_Device);
-                Tree.ModelTree.ClearSubBtn(ace_HMI);
-            });
-        }
     }
 }

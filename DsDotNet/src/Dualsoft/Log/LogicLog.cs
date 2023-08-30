@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Engine.Core.CoreModule;
+using static Engine.Core.DsType;
 using static Engine.Core.Interface;
 using static Engine.Core.TagKindModule;
 
@@ -24,7 +25,7 @@ namespace DSModeler
                 var lastTime = ValueLogs.Any() ? ValueLogs.Last().GetTime() : DateTime.Now;
                  
                 var evt = Tuple.Create(LogicLog.ValueLogs.Count, v.GapTime(lastTime));
-                Global.StatusChangeLogCount.OnNext(evt);
+                Global.ChangeLogCount.OnNext(evt);
 
                 ValueLogs.Add(v);       
             }
@@ -38,7 +39,29 @@ namespace DSModeler
             gv.OptionsView.ShowGroupPanel = false;
         }
 
-     
+        internal static void AddLogicLog(TagDS.EventVertex t)
+        {
+            var txtStatus = "";
+            switch (t.TagKind)
+            {
+                case VertexTag.ready: txtStatus = "[R]";  break;
+                case VertexTag.going: txtStatus = "[G]";  break;
+                case VertexTag.finish: txtStatus = "[F]"; break;
+                case VertexTag.homing: txtStatus = "[H]"; break;
+                default:
+                    break;
+            }
+
+            var valueLog = new ValueLog()
+            {
+                Name = t.Tag.Name,
+                Value = txtStatus == "" ? t.Tag.BoxedValue.ToString() : txtStatus,
+                System = t.Target.Parent.GetSystem().Name,
+                TagKind = TagKindExt.GetVertexTagKindText(t.Tag)
+            };
+
+            TryAdd(valueLog);
+        }
     }
 
     public class ValueLog

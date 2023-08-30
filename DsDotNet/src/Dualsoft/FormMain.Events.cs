@@ -210,7 +210,7 @@ namespace DSModeler
                 });
             });
 
-            Global.StatusChangeLogCount.Subscribe(rx =>
+            Global.ChangeLogCount.Subscribe(rx =>
             {
                 this.Do(() =>
                 {

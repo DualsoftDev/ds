@@ -55,7 +55,7 @@ namespace DSModeler
         public static Version ver = Assembly.GetEntryAssembly().GetName().Version;
 
         public static Subject<Tuple<CoreModule.Vertex, Status4>> StatusChangeSubject = new Subject<Tuple<CoreModule.Vertex, Status4>>();
-        public static Subject<Tuple<int, TimeSpan>> StatusChangeLogCount = new  Subject<Tuple<int, TimeSpan>>();
+        public static Subject<Tuple<int, TimeSpan>> ChangeLogCount = new  Subject<Tuple<int, TimeSpan>>();
 
         public static string DefaultFolder =>
             Path.Combine(

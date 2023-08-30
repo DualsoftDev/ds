@@ -220,6 +220,6 @@ module HmiGenModule =
                     true, null
                 with | ex -> false, ex.Message
             let body = hmiInfos.Values |> List.ofSeq
-            { from = "hmi"; success = success; body = body; error = message; }
+            { from = "modeler"; success = success; body = body; error = message; }
 
         member x.Generate() = generate()

@@ -21,12 +21,14 @@ namespace DSModeler
             //try
             //{
                 Dictionary<DsSystem, PouGen> dicCpu = new Dictionary<DsSystem, PouGen>();
-                var _PPTResults = ImportPPT.GetLoadingAllSystem(files);
+                var ret = ImportPPT.GetLoadingAllSystem(files);
+                formMain.Model = ret.Item1;
+                var PPTResults = ret.Item2;
                 var storages = new Storages();
                 int cnt = 0;
                 await formMain.DoAsync(async tsc =>
                 {
-                    foreach (var ppt in _PPTResults)
+                    foreach (var ppt in PPTResults)
                     {
                         if (ppt.IsActive)
                         {

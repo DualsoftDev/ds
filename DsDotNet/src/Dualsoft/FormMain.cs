@@ -6,6 +6,7 @@ using DevExpress.XtraGrid.Views.Grid.ViewInfo;
 using DevExpress.XtraVerticalGrid;
 using DSModeler.Tree;
 using Dual.Common.Core;
+using Engine.Core;
 using System;
 using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
@@ -19,6 +20,8 @@ namespace DSModeler
 {
     public partial class FormMain : XtraForm
     {
+        public ModelLoaderModule.Model Model;
+
         public PropertyGridControl PropertyGrid => ucPropertyGrid1.PropertyGrid;
 
         public TabbedView TabbedView => tabbedView_Doc;

@@ -50,6 +50,7 @@ namespace Dual.Model.Import
         public Dictionary<DsSystem, DsCPU> _DicCpu = new Dictionary<DsSystem, DsCPU>();
         public Dictionary<DsSystem, IEnumerable<ViewNode>> _DicViews;
         public IEnumerable<PptResult> _PPTResults;
+        public ModelLoaderModule.Model _PPTModel;
 
         public Dictionary<Vertex, ViewNode> _DicVertexMy;
         public Dictionary<Vertex, ViewNode> _DicVertexEx;

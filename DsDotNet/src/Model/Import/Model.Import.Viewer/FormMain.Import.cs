@@ -26,7 +26,10 @@ namespace Dual.Model.Import
             if (UtilFile.BusyCheck()) return;
             try
             {
-                _PPTResults = ImportPPT.GetLoadingAllSystem(paths);
+                var ret = ImportPPT.GetLoadingAllSystem(paths);
+                _PPTModel = ret.Item1;
+                _PPTResults = ret.Item2;
+
                 _DicViews = new Dictionary<DsSystem, IEnumerable<ViewModule.ViewNode>>();
                 var storages = new Dictionary<string, Interface.IStorage>();
                 foreach (var view in _PPTResults)

@@ -191,7 +191,7 @@ module ImportPPTModule =
         static member GetLoadingAllSystem (paths:string seq) =
              fromPPTs paths
              |> fun (model, views, pptRepo)
-                    -> pptRepo
+                    -> model, pptRepo
                         |> Seq.map(fun f->
                             {   System= f.Key
                                 Views = f.Value.MakeGraphView(f.Key)

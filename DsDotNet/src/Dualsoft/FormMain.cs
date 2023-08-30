@@ -4,6 +4,7 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraGrid.Views.Grid.ViewInfo;
 using DevExpress.XtraVerticalGrid;
+using DSModeler.Tree;
 using Dual.Common.Core;
 using System;
 using System.Diagnostics.Eventing.Reader;
@@ -50,34 +51,13 @@ namespace DSModeler
         }
 
         readonly Timer timerLongPress = new Timer { Interval = 100 };
-        private void InitGridLookUpEdit(GridLookUpEdit gle, GridView gv)
-        {
-            gle.Properties.DisplayMember = "Display";
-
-            gv.PreviewLineCount = 20;
-            gv.OptionsSelection.EnableAppearanceFocusedCell = false;
-            gv.OptionsView.ShowAutoFilterRow = true;
-            gv.OptionsView.ShowGroupPanel = false;
-            gv.CustomDrawCell += (s, e) =>
-            {
-                if (e.Column.FieldName == "IOType")
-                {
-                    if (e.DisplayText.ToString().ToUpper() == "INPUT")
-                        e.Cache.FillRectangle(Color.RoyalBlue, e.Bounds);
-                    else
-                        e.Cache.FillRectangle(Color.Salmon, e.Bounds);
-
-                    e.Appearance.DrawString(e.Cache, e.DisplayText, e.Bounds);
-                    e.Handled = true;
-                }
-            };
-        }
+       
 
         private void InitializationUIControl()
         {
-            InitGridLookUpEdit(gle_Log, gleView_Log);
-            InitGridLookUpEdit(gle_Expr, gleView_Expr);
-            InitGridLookUpEdit(gle_Device, gleView_Device);
+            LookupEditExt.InitEdit(gle_Log, gleView_Log);
+            LookupEditExt.InitEdit(gle_Expr, gleView_Expr);
+            LookupEditExt.InitEdit(gle_Device, gleView_Device);
 
             gle_Log.Properties.DataSource = LogicLog.ValueLogs;
 
@@ -159,5 +139,6 @@ namespace DSModeler
         private void ace_PLCWork3_Click(object sender, EventArgs e) => Global.Notimplemented();
         private void ace_ExportWebHMI_Click(object sender, EventArgs e) => HMI.Export();
         private void simpleButton_ClearLog_Click(object sender, EventArgs e) => LogicLog.ValueLogs.Clear();
+        private void simpleButton_AllExpr_Click(object sender, EventArgs e) => DSFile.UpdateExprAll(this);
     }
 }

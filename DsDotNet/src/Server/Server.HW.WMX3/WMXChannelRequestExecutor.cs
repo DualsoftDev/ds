@@ -1,6 +1,7 @@
 using Server.HW.Common;
 using Server.HW.WMX3;
 using System;
+using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,14 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
         : base(connection, tags)
     {
         var wmxTags = tags.Cast<WMXTag>().Where(w => w.DataType == TagDataType.Bool);
-
+        wmxTags.ToList().ForEach(f =>
+        {
+            if (f.DataType == TagDataType.Bool)
+                f.Value = false;
+            else
+                f.Value = 0;
+        });
+      
         _WMXInBitTags = wmxTags
             .Where(w => w.IOType == TagIOType.Input)
             .ToDictionary(s => s.ByteOffset * 8 + s.BitOffset, s => s);
@@ -62,6 +70,8 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
             }
         }
     }
+
+  
 
     private void UpdateIO(byte[] newData, byte[] oldData, bool bInput)
     {

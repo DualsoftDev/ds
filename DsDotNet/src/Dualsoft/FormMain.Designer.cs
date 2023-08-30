@@ -130,6 +130,7 @@ namespace DSModeler
             this.ace9 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.gridControl_exprotExcel = new DevExpress.XtraGrid.GridControl();
             this.gridView_exprotExcel = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.simpleButton_AllExpr = new DevExpress.XtraEditors.SimpleButton();
             ((System.ComponentModel.ISupportInitialize)(this.document1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dockManager)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManager1)).BeginInit();
@@ -502,7 +503,7 @@ namespace DSModeler
             // btn_StepLongPress
             // 
             this.btn_StepLongPress.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btn_StepLongPress.ImageOptions.SvgImage")));
-            this.btn_StepLongPress.Location = new System.Drawing.Point(215, 284);
+            this.btn_StepLongPress.Location = new System.Drawing.Point(215, -218);
             this.btn_StepLongPress.Name = "btn_StepLongPress";
             this.btn_StepLongPress.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
             this.btn_StepLongPress.Size = new System.Drawing.Size(83, 23);
@@ -646,7 +647,7 @@ namespace DSModeler
             // 
             this.simpleButton_OpenPLC.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.LeftCenter;
             this.simpleButton_OpenPLC.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("simpleButton_OpenPLC.ImageOptions.SvgImage")));
-            this.simpleButton_OpenPLC.Location = new System.Drawing.Point(223, 690);
+            this.simpleButton_OpenPLC.Location = new System.Drawing.Point(223, 188);
             this.simpleButton_OpenPLC.Name = "simpleButton_OpenPLC";
             this.simpleButton_OpenPLC.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
             this.simpleButton_OpenPLC.Size = new System.Drawing.Size(75, 23);
@@ -693,6 +694,7 @@ namespace DSModeler
             // 
             // accordionContentContainer3
             // 
+            this.accordionContentContainer3.Controls.Add(this.simpleButton_AllExpr);
             this.accordionContentContainer3.Controls.Add(this.simpleButton_ClearLog);
             this.accordionContentContainer3.Controls.Add(this.toggleSwitch_showDeviceExpr);
             this.accordionContentContainer3.Controls.Add(this.labelControl5);
@@ -789,7 +791,7 @@ namespace DSModeler
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
             this.gle_Expr.Properties.NullText = "먼저 파일을 불러오세요";
             this.gle_Expr.Properties.PopupView = this.gleView_Expr;
-            this.gle_Expr.Size = new System.Drawing.Size(265, 20);
+            this.gle_Expr.Size = new System.Drawing.Size(153, 20);
             this.gle_Expr.TabIndex = 0;
             // 
             // gleView_Expr
@@ -1211,6 +1213,20 @@ namespace DSModeler
             this.gridView_exprotExcel.GridControl = this.gridControl_exprotExcel;
             this.gridView_exprotExcel.Name = "gridView_exprotExcel";
             // 
+            // simpleButton_AllExpr
+            // 
+            this.simpleButton_AllExpr.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
+            this.simpleButton_AllExpr.Appearance.Options.UseFont = true;
+            this.simpleButton_AllExpr.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.RightCenter;
+            this.simpleButton_AllExpr.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("simpleButton1.ImageOptions.SvgImage")));
+            this.simpleButton_AllExpr.Location = new System.Drawing.Point(203, 30);
+            this.simpleButton_AllExpr.Name = "simpleButton_AllExpr";
+            this.simpleButton_AllExpr.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
+            this.simpleButton_AllExpr.Size = new System.Drawing.Size(103, 29);
+            this.simpleButton_AllExpr.TabIndex = 4;
+            this.simpleButton_AllExpr.Text = "전체수식";
+            this.simpleButton_AllExpr.Click += new System.EventHandler(this.simpleButton_AllExpr_Click);
+            // 
             // FormMain
             // 
             this.Appearance.Options.UseFont = true;
@@ -1381,5 +1397,6 @@ namespace DSModeler
         private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement6;
         private DevExpress.XtraBars.Navigation.AccordionControlElement ace_ExportWebHMI;
         private DevExpress.XtraEditors.SimpleButton simpleButton_ClearLog;
+        private DevExpress.XtraEditors.SimpleButton simpleButton_AllExpr;
     }
 }

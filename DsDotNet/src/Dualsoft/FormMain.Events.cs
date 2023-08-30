@@ -85,26 +85,6 @@ namespace DSModeler
                 DSRegistry.SetValue(K.RunCountOut, Global.RunCountOut);
             };
 
-            //UpdateRunCountInOut(false);
-            //void UpdateRunCountInOut(ChangingEventArgs e, bool bIn)
-            //{
-            //    var textValue = e.NewValue.ToString().Split('.')[0];
-            //    e.Cancel = Convert.ToInt32(textValue) < 1;
-            //    if (!e.Cancel) 
-            //    {
-            //        if (bIn)
-            //        {
-            //            Global.RunCountIn = Convert.ToInt32(textValue);
-            //            DSRegistry.SetValue(K.RunCountIn, Global.RunCountIn);
-            //        }
-            //        else
-            //        {
-            //            Global.RunCountOut = Convert.ToInt32(textValue);
-            //            DSRegistry.SetValue(K.RunCountOut, Global.RunCountOut);
-            //        }
-            //    }
-            //}
-
             toggleSwitch_menuExpand.Toggled += (s, e) =>
             {
                 Global.LayoutMenumExpand = toggleSwitch_menuExpand.IsOn;

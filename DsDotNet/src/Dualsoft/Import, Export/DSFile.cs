@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using static Engine.Core.DsTextProperty;
 using static Engine.Core.ExpressionModule;
@@ -78,6 +79,19 @@ namespace DSModeler
             });
         }
 
+
+
+        internal static void UpdateExprAll(
+                     FormMain formMain
+                   )
+        {
+            //var textForm = DocControl.CreateDocExprOrSelect(this, tabbedView_Doc);
+            //if (textForm == null) return;
+            //DSFile.UpdateExpr(textForm, gle_Expr.EditValue as LogicStatement);
+
+
+        
+    }
 
         internal static void UpdateExpr(
               FormDocText textForm

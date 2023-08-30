@@ -31,7 +31,7 @@
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
     <AutorunEnabled>true</AutorunEnabled>
     <DisallowUrlActivation>true</DisallowUrlActivation>
-    <ApplicationRevision>14</ApplicationRevision>
+    <ApplicationRevision>15</ApplicationRevision>
     <ApplicationVersion>0.9.3.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <ExcludeDeploymentUrl>true</ExcludeDeploymentUrl>
@@ -217,6 +217,7 @@
     <Compile Include="Tree\SimTree.cs" />
     <Compile Include="Utils\DSRegistry.cs" />
     <Compile Include="Utils\MessageBox.cs" />
+    <Compile Include="Utils\LookupEditExt.cs" />
     <Compile Include="Utils\PropertyRecordExt.cs" />
     <Compile Include="Property\UcPropertyGrid.cs">
       <SubType>UserControl</SubType>

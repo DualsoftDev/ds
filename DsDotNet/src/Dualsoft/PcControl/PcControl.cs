@@ -22,7 +22,6 @@ namespace DSModeler
 {
     public static class PcControl
     {
-
         public static Dictionary<DsSystem, PouGen> DicPou = new Dictionary<DsSystem, PouGen>();
         public static List<DsCPU> RunCpus = new List<DsCPU>();
         public static Dictionary<TagHW, ITag> DicActionIn = new Dictionary<TagHW, ITag>();

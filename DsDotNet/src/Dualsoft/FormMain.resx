@@ -198,7 +198,7 @@
         LDEuOCw0LDRoLTRsNiw2bDYtNkgyOHoiIGNsYXNzPSJHcmVlbiIgLz4NCjwvc3ZnPgs=
 </value>
   </data>
-  <data name="simpleButton1.ImageOptions.SvgImage" type="DevExpress.Utils.Svg.SvgImage, DevExpress.Data.v21.2" mimetype="application/x-microsoft.net.object.bytearray.base64">
+  <data name="simpleButton_ClearLog.ImageOptions.SvgImage" type="DevExpress.Utils.Svg.SvgImage, DevExpress.Data.v21.2" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         AAEAAAD/////AQAAAAAAAAAMAgAAAFpEZXZFeHByZXNzLkRhdGEudjIxLjIsIFZlcnNpb249MjEuMi4x
         Mi4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI4OGQxNzU0ZDcwMGU0OWEFAQAAAB1E

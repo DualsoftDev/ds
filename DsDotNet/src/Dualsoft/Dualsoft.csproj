@@ -31,7 +31,7 @@
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
     <AutorunEnabled>true</AutorunEnabled>
     <DisallowUrlActivation>true</DisallowUrlActivation>
-    <ApplicationRevision>12</ApplicationRevision>
+    <ApplicationRevision>14</ApplicationRevision>
     <ApplicationVersion>0.9.3.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <ExcludeDeploymentUrl>true</ExcludeDeploymentUrl>
@@ -212,6 +212,7 @@
     <Compile Include="Import, Export\PPT.cs" />
     <Compile Include="Log\LogicLog.cs" />
     <Compile Include="PcControl\ControlProperty.cs" />
+    <Compile Include="PcControl\PcAction.cs" />
     <Compile Include="Tree\LogicTree.cs" />
     <Compile Include="Tree\SimTree.cs" />
     <Compile Include="Utils\DSRegistry.cs" />

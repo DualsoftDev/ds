@@ -1,5 +1,6 @@
 using Server.HW.Common;
 using System;
+using System.Windows.Media;
 
 namespace Server.HW.WMX3;
 public class WMXTag : TagHW
@@ -12,8 +13,20 @@ public class WMXTag : TagHW
         connection.AddMonitoringTag(this);
 
     }
-    public string Address { get; private set; } = string.Empty; 
-    public int AddressIndex => ByteOffset* 8 + BitOffset;  
+    public string Address { get; private set; } = string.Empty;
+    public sealed override string Name
+    {
+        get { return base.Name; }
+        set { base.Name = value; }
+    }
+
+
+    public sealed override object Value
+    {
+        get { return base.Value; }
+        set { base.Value = value; }
+    }
+
     public void SetAddress(string name)
     {
         var upperName = name.ToUpper();
@@ -36,18 +49,5 @@ public class WMXTag : TagHW
         ByteOffset = Convert.ToInt32(byteBit.Split('.')[0]);
         BitOffset = Convert.ToInt32(byteBit.Split('.')[1]);
     }
-    public sealed override string Name
-    {
-        get { return base.Name; }
-        set { base.Name = value; }
-    }
-
-
-    public sealed override object Value
-    {
-        get { return base.Value; }
-        set { base.Value = value; }
-    }
-
 
 }

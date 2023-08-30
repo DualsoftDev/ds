@@ -1,20 +1,14 @@
-using DevExpress.XtraBars.Docking2010.Views.Tabbed;
 using DevExpress.XtraBars.Navigation;
-using DevExpress.XtraEditors;
-using DevExpress.XtraGrid.Views.Grid;
 using Dual.Common.Core;
 using Dual.Common.Winform;
 using Model.Import.Office;
-using Server.HW.Common;
 using System;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.Core.CoreModule;
-using static Engine.Core.ExpressionForwardDeclModule;
 using static Model.Import.Office.ImportPPTModule;
-using static Model.Import.Office.ViewModule;
 
 namespace DSModeler.Tree
 {
@@ -39,7 +33,7 @@ namespace DSModeler.Tree
                 formMain.Ace_HMI.Elements.Add(eleSys);
                 var nodeFlows = ppt.Views.Where(w => w.ViewType == InterfaceClass.ViewType.VFLOW)
                                          .Where(w => w.UsedViewNodes.Any())
-                                         .ToDictionary(s => s.Flow.Value, s=> s);
+                                         .ToDictionary(s => s.Flow.Value, s => s);
                 foreach (var flowDic in nodeFlows)
                 {
                     var flow = flowDic.Key;
@@ -111,7 +105,7 @@ namespace DSModeler.Tree
 
                     void StartHMI(Real real)
                     {
-                        Task.Run(async() =>
+                        Task.Run(async () =>
                         {
                             var vv = (real.TagManager as VertexManager);
                             vv.SF.Value = true;
@@ -161,7 +155,7 @@ namespace DSModeler.Tree
             }
         }
 
-        
+
     }
 
 }

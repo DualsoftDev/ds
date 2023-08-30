@@ -1,5 +1,3 @@
-using DevExpress.XtraBars.Docking2010.Views.Tabbed;
-using DevExpress.XtraBars.Navigation;
 using DSModeler.Tree;
 
 using Dual.Common.Winform;
@@ -11,11 +9,7 @@ using System.Threading.Tasks;
 using static Engine.CodeGenCPU.CpuLoader;
 using static Engine.Core.CoreModule;
 using static Engine.Core.Interface;
-using static Engine.Core.RuntimeGeneratorModule;
-using static Engine.Cpu.RunTime;
-using static Engine.Cpu.RunTimeUtil;
 using static Model.Import.Office.ImportPPTModule;
-using static Model.Import.Office.ViewModule;
 
 namespace DSModeler
 {

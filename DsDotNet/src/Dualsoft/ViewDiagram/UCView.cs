@@ -2,7 +2,6 @@ using Dual.Common.Core;
 using Engine.Core;
 using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;
-using Microsoft.Msagl.Layout.Layered;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
@@ -54,7 +53,7 @@ namespace DSModeler
             //viewer.Graph.LayoutAlgorithmSettings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings();
             //viewer.Graph.LayoutAlgorithmSettings = new RankingLayoutSettings();
             //sub 그래프 가능
-            viewer.Graph = new Graph() {};
+            viewer.Graph = new Graph() { };
             var layoutSetting = new Microsoft.Msagl.Layout.Layered.SugiyamaLayoutSettings();
             //var layoutSetting = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings(); 
 
@@ -65,7 +64,7 @@ namespace DSModeler
                 layoutSetting.ClusterMargin = 5;
                 layoutSetting.LiftCrossEdges = false;
                 layoutSetting.PackingAspectRatio = 5;
-                
+
             }
             else
             {

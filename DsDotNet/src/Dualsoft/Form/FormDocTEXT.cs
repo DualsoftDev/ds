@@ -11,7 +11,7 @@ namespace DSModeler.Form
             InitializeComponent();
         }
 
-        public RichTextBox TextEditDS => richTextBox_ds;
+        public RichTextBox TextEdit => richTextBox_ds;
         public void AppendTextColor(string text, Color color)
         {
             var box = richTextBox_ds;
@@ -25,5 +25,7 @@ namespace DSModeler.Form
                 box.SelectionColor = box.ForeColor;
             });
         }
+
+
     }
 }

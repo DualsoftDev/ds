@@ -1,22 +1,18 @@
-using DevExpress.Xpo.DB.Helpers;
 using DevExpress.XtraBars.Docking2010.Views.Tabbed;
 using DevExpress.XtraBars.Navigation;
 using DevExpress.XtraEditors;
-using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Views.Grid;
+using DevExpress.XtraGrid.Views.Grid.ViewInfo;
 using DevExpress.XtraVerticalGrid;
-using DSModeler;
-using DSModeler.Tree;
 using Dual.Common.Core;
-using Engine.Core;
-using Microsoft.Msagl.Routing.Spline.Bundling;
-using Server.HW.WMX3;
 using System;
+using System.Diagnostics.Eventing.Reader;
+using System.Drawing;
 using System.Linq;
+using System.Web.UI.WebControls;
 using System.Windows.Forms;
 using static Engine.Core.RuntimeGeneratorModule;
-using static Engine.Core.TagKindModule;
-using static Engine.Cpu.RunTimeUtil;
+using GridView = DevExpress.XtraGrid.Views.Grid.GridView;
 
 namespace DSModeler
 {
@@ -62,6 +58,19 @@ namespace DSModeler
             gv.OptionsSelection.EnableAppearanceFocusedCell = false;
             gv.OptionsView.ShowAutoFilterRow = true;
             gv.OptionsView.ShowGroupPanel = false;
+            gv.CustomDrawCell += (s, e) =>
+            {
+                if (e.Column.FieldName == "IOType")
+                {
+                    if (e.DisplayText.ToString().ToUpper() == "INPUT")
+                        e.Cache.FillRectangle(Color.RoyalBlue, e.Bounds);
+                    else
+                        e.Cache.FillRectangle(Color.Salmon, e.Bounds);
+
+                    e.Appearance.DrawString(e.Cache, e.DisplayText, e.Bounds);
+                    e.Handled = true;
+                }
+            };
         }
 
         private void InitializationUIControl()
@@ -97,7 +106,7 @@ namespace DSModeler
 
             timerLongPress.Tick += (sender, e) =>
             {
-                PcControl.Step(ace_Play);
+                PcAction.Step(ace_Play);
             };
             btn_StepLongPress.MouseDown += (sender, e) => timerLongPress.Start();
             btn_StepLongPress.MouseUp += (sender, e) => timerLongPress.Stop();
@@ -125,16 +134,16 @@ namespace DSModeler
             else
             {
                 LayoutForm.SaveLayout(dockManager);
-                PcControl.Disconnect();
+                PcAction.Disconnect();
                 EventCPU.CPUUnsubscribe();
             }
         }
 
 
-        private void ace_Play_Click(object s, EventArgs e) => PcControl.Play(ace_Play);
-        private void ace_Step_Click(object s, EventArgs e) => PcControl.Step(ace_Play);
-        private void ace_Stop_Click(object s, EventArgs e) => PcControl.Stop(ace_Play);
-        private void ace_Reset_Click(object s, EventArgs e) => PcControl.Reset(ace_Play, ace_HMI);
+        private void ace_Play_Click(object s, EventArgs e) => PcAction.Play(ace_Play);
+        private void ace_Step_Click(object s, EventArgs e) => PcAction.Step(ace_Play);
+        private void ace_Stop_Click(object s, EventArgs e) => PcAction.Stop(ace_Play);
+        private void ace_Reset_Click(object s, EventArgs e) => PcAction.Reset(ace_Play, ace_HMI);
         private void ace_pcWindow_Click(object s, EventArgs e) => DocControl.CreateDocDS(this, tabbedView_Doc);
         private void ace_PLCXGI_Click(object s, EventArgs e) => DocControl.CreateDocPLCLS(this, tabbedView_Doc);
         private void ratingControl_Speed_EditValueChanged(object s, EventArgs e) => ControlProperty.SetSpeed(Convert.ToInt32(ratingControl_Speed.EditValue));

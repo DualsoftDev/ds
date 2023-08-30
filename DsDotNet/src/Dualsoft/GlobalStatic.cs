@@ -1,4 +1,3 @@
-using DevExpress.XtraEditors;
 using Dual.Common.Core;
 using Engine.Core;
 using log4net;
@@ -6,11 +5,9 @@ using System;
 using System.IO;
 using System.Reactive.Subjects;
 using System.Reflection;
-using System.Windows.Forms;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.RuntimeGeneratorModule;
-using static Engine.Cpu.RunTimeUtil;
 
 namespace DSModeler
 {
@@ -55,7 +52,7 @@ namespace DSModeler
         public static Version ver = Assembly.GetEntryAssembly().GetName().Version;
 
         public static Subject<Tuple<CoreModule.Vertex, Status4>> StatusChangeSubject = new Subject<Tuple<CoreModule.Vertex, Status4>>();
-        public static Subject<Tuple<int, TimeSpan>> ChangeLogCount = new  Subject<Tuple<int, TimeSpan>>();
+        public static Subject<Tuple<int, TimeSpan>> ChangeLogCount = new Subject<Tuple<int, TimeSpan>>();
 
         public static string DefaultFolder =>
             Path.Combine(

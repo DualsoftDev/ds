@@ -1,3 +1,4 @@
+using DevExpress.SpreadsheetSource.Xlsx.Import;
 using DSModeler.Form;
 using DSModeler.Tree;
 using Dual.Common.Core;
@@ -23,16 +24,29 @@ namespace DSModeler
             var textLines = dsText.Split('\n');
             Random r = new Random();
             Color rndColor = Color.LightGoldenrodYellow;
-            textLines.ToList().ForEach(f =>
+
+            List<string> textGroup = new List<string>();
+            string temp = "";
+            textLines.Iter(f =>
             {
+                temp += $"\n{f}";
+
                 if (f.StartsWith($"[{TextSystem}") || f.Contains($"[{TextFlow}]")  //[flow] F = {} 한줄제외
                     || f.Contains($"[{TextAddress}]")
                     || f.Contains($"[{TextLayout}]")
                     || f.Contains($"[{TextJobs}]")
+                    || f.Contains($"[{TextDevice} ")
                     )
                 {
-                    rndColor = Color.FromArgb(r.Next(130, 230), r.Next(130, 230), r.Next(130, 230));
+                    textGroup.Add(temp.TrimStart('\n'));
+                    temp = "";
                 }
+            });
+            textGroup.Add(temp.TrimStart('\n'));
+
+            textGroup.ForEach(f =>
+            {
+                rndColor = Color.FromArgb(r.Next(130, 230), r.Next(130, 230), r.Next(130, 230));
                 lst.Add(System.Tuple.Create(f, rndColor));
             });
 
@@ -41,11 +55,11 @@ namespace DSModeler
 
         public static void DrawDSText(FormDocText view)
         {
-            Task.Run(async () =>
+            Task.Run(() =>
             {
-                await view.TextEditDS.DoAsync(async tsc =>
+                view.Do(async () =>
                 {
-                    view.TextEditDS.ResetText();
+                    view.TextEdit.ResetText();
                     int cnt = 0;
                     string dsText = "";
                     foreach (var sys in PcControl.DicPou.Keys)
@@ -56,12 +70,10 @@ namespace DSModeler
                     {
                         DsProcessEvent.DoWork(Convert.ToInt32((cnt++ * 1.0) / (colorTexts.Count()) * 100.0));
                         view.AppendTextColor(f.Item1, f.Item2);
-                        await Task.Delay(5);
+                        await Task.Yield();
                     }
 
                     DsProcessEvent.DoWork(100);
-
-                    tsc.SetResult(true);
                 });
             });
         }
@@ -90,7 +102,7 @@ namespace DSModeler
 
             textForm.AppendTextColor($"\r\n\t{tgtsTexs}\r\n\t\t= {srcsTexs}\r\n", Color.LightGreen);
             textForm.AppendTextColor("\r\n", Color.Gold);
-            textForm.TextEditDS.ScrollToCaret();
+            textForm.TextEdit.ScrollToCaret();
         }
     }
 

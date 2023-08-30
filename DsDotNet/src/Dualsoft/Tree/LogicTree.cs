@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using static Engine.Core.ExpressionModule;
-using static Engine.Cpu.RunTime;
 
 namespace DSModeler.Tree
 {
@@ -26,18 +25,6 @@ namespace DSModeler.Tree
 
     public static class LogicTree
     {
-        public static void InitControl(GridLookUpEdit gle, GridView gv)
-        {
-
-            gle.Properties.DisplayMember = "Display";
-
-            gv.PreviewLineCount = 20;
-            gv.OptionsSelection.EnableAppearanceFocusedCell = false;
-            gv.OptionsView.ShowAutoFilterRow = true;
-            gv.OptionsView.ShowGroupPanel = false;
-        }
-
-
         public static void UpdateExpr(GridLookUpEdit gExpr, bool device)
         {
             gExpr.Do(() =>
@@ -45,8 +32,8 @@ namespace DSModeler.Tree
 
                 var dsCPUs =
                     device ?
-                     PcControl.RunCpus.Where(w => !w.Systems.Contains( Global.ActiveSys))
-                    : PcControl.RunCpus.Where(w => w.Systems.Contains( Global.ActiveSys));
+                     PcControl.RunCpus.Where(w => !w.Systems.Contains(Global.ActiveSys))
+                    : PcControl.RunCpus.Where(w => w.Systems.Contains(Global.ActiveSys));
 
                 var css = dsCPUs
                             .SelectMany(c => c.CommentedStatements

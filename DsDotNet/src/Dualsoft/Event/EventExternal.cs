@@ -1,23 +1,16 @@
-using DevExpress.Accessibility;
-using DevExpress.Utils.Behaviors.Common;
 using Engine.Core;
-using Microsoft.FSharp.Core;
 using Server.HW.Common;
 using Server.HW.WMX3;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
-using static Engine.Core.Interface;
 using static Engine.Core.TagKindModule;
 using static Engine.Core.TagKindModule.TagDS;
 using static Engine.Core.TagModule;
-using static Engine.Cpu.RunTime;
 
 namespace DSModeler
 {
@@ -63,9 +56,9 @@ namespace DSModeler
                                 default: break;
                             }
 
-                            if (isStatus &&  (bool)t.Tag.BoxedValue)
+                            if (isStatus && (bool)t.Tag.BoxedValue)
                                 Global.StatusChangeSubject.OnNext(Tuple.Create(t.Target, dicStatus[t.Target]));
-                          
+
                             LogicLog.AddLogicLog(t);
                             Task.Delay(ControlProperty.GetDelayMsec()).Wait();
                         }
@@ -85,8 +78,8 @@ namespace DSModeler
 
         }
 
-    
-      
+
+
         public static void CPUUnsubscribe()
         {
             DisposableHWPaixInput?.Dispose();

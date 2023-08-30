@@ -2,7 +2,6 @@ using DevExpress.XtraBars.Docking2010.Views;
 using DevExpress.XtraBars.Docking2010.Views.Tabbed;
 using DevExpress.XtraEditors;
 using DSModeler.Form;
-using System;
 using System.IO;
 using System.Linq;
 using static Engine.Core.CoreModule;
@@ -91,7 +90,7 @@ namespace DSModeler
 
             FormDocText formChiild = new FormDocText();
             CreateDocForm(formChiild, formParent, tab, docKey);
-            formChiild.TextEditDS.Text = File.ReadAllText(fullpath);
+            formChiild.TextEdit.Text = File.ReadAllText(fullpath);
         }
 
 

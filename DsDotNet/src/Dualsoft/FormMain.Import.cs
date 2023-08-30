@@ -1,5 +1,4 @@
 using DevExpress.XtraEditors;
-using DevExpress.XtraPrinting.Export.Pdf;
 using Dual.Common.Core;
 using Engine.Core;
 using System;
@@ -10,7 +9,6 @@ using static Engine.CodeGenCPU.CpuLoader;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.EdgeExt;
-using static Engine.Cpu.RunTime;
 
 
 namespace DSModeler
@@ -38,11 +36,8 @@ namespace DSModeler
                     {
                         Files.SetLast(files);
                         bool loadOK = await PPT.ImportPowerPoint(files, this);
-
                         if (!loadOK) { return; }
-
-
-
+                        
                         ViewDraw.DicStatus = new Dictionary<Vertex, Status4>();
 
                         foreach (var item in PcControl.DicPou)
@@ -71,7 +66,7 @@ namespace DSModeler
         void ClearModel()
         {
             if (PcControl.RunCpus.Any())
-                PcControl.Reset(ace_Play, ace_HMI);
+                PcAction.Reset(ace_Play, ace_HMI);
 
             PcControl.RunCpus.Iter(cpu => cpu.Dispose());
             PcControl.DicPou = new Dictionary<DsSystem, PouGen>();

@@ -5,6 +5,8 @@ namespace Server.HW.Common
 {
     public abstract class TagHW : ITagHW
     {
+        public virtual TagIOType IOType { get; set; }
+        public virtual TagDataType DataType { get; set; }
         public ConnectionBase ConnectionBase { get; private set; }
 
         /// <summary> Tag parsing tokens </summary>
@@ -37,8 +39,7 @@ namespace Server.HW.Common
         public object WriteRequestValue { get; set; }
 
         public virtual string Name { get; set; }
-        public virtual TagDataType DataType { get; set; }
-        public virtual TagIOType IOType { get; set; }
+
         public virtual int BitOffset { get; protected set; }
 
         /// <summary>

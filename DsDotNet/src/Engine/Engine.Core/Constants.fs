@@ -265,6 +265,7 @@ module DsTextProperty =
     let [<Literal>] TextAlias   = "alias"
     let [<Literal>] TextLayout  = "layouts"
     let [<Literal>] TextJobs    = "jobs"
+    let [<Literal>] TextDevice    = "device"
 
 
 [<AutoOpen>]

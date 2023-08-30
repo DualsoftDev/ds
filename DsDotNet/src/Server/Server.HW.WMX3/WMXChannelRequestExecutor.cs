@@ -18,11 +18,11 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
 
         _WMXInBitTags = wmxTags
             .Where(w => w.IOType == TagIOType.Input)
-            .ToDictionary(s => s.AddressIndex, s => s);
+            .ToDictionary(s => s.ByteOffset * 8 + s.BitOffset, s => s);
 
         _WMXOutBitTags = wmxTags
             .Where(w => w.IOType == TagIOType.Output)
-            .ToDictionary(s => s.AddressIndex, s => s);
+            .ToDictionary(s => s.ByteOffset * 8 + s.BitOffset, s => s);
     }
 
 
@@ -69,6 +69,11 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
         {
             if (newData[iByte] == oldData[iByte])
                 continue;
+
+            if (bInput)
+                WMXConnection.InData[iByte] = newData[iByte];
+            else
+                WMXConnection.OutData[iByte] = newData[iByte];
 
             var oldBits = new BitArray(new byte[] { oldData[iByte] });
             var newBits = new BitArray(new byte[] { newData[iByte] });

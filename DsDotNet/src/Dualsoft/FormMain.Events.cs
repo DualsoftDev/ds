@@ -5,18 +5,12 @@ using DSModeler.Tree;
 using Dual.Common.Core;
 using Dual.Common.Winform;
 using Engine.Core;
-using Microsoft.FSharp.Core;
 using Server.HW.WMX3;
 using System;
 using System.Linq;
 using System.Net;
 using System.Windows.Forms;
-using static DevExpress.Data.Filtering.Helpers.SubExprHelper;
-using static Engine.CodeGenCPU.TagManagerModule;
-using static Engine.Core.CoreModule;
 using static Engine.Core.RuntimeGeneratorModule;
-using static Engine.Cpu.RunTime;
-using static Engine.Cpu.RunTimeUtil;
 
 namespace DSModeler
 {
@@ -43,7 +37,7 @@ namespace DSModeler
                 if (e.KeyData == Keys.F5)
                     ImportPowerPointWapper(Files.GetLast());
             };
- 
+
 
             tabbedView_Doc.QueryControl += (s, e) =>
             {
@@ -76,7 +70,7 @@ namespace DSModeler
                 Global.CpuRunMode = ToRuntimePackage(e.NewValue.ToString());
                 RuntimeDS.Package = Global.CpuRunMode;
                 DSRegistry.SetValue(K.CpuRunMode, Global.CpuRunMode);
-                if(e.OldValue != null)
+                if (e.OldValue != null)
                     ImportPowerPointWapper(Files.GetLast());
             };
 
@@ -90,7 +84,7 @@ namespace DSModeler
                 Global.RunCountOut = Convert.ToInt32(spinEdit_StartOut.EditValue);
                 DSRegistry.SetValue(K.RunCountOut, Global.RunCountOut);
             };
-            
+
             //UpdateRunCountInOut(false);
             //void UpdateRunCountInOut(ChangingEventArgs e, bool bIn)
             //{
@@ -134,7 +128,7 @@ namespace DSModeler
                 Global.LayoutGraphLineType = toggleSwitch_LayoutGraph.IsOn;
                 DSRegistry.SetValue(K.LayoutGraphLineType, Global.LayoutGraphLineType);
             };
-       
+
             toggleSwitch_showDeviceExpr.Toggled += (s, e) =>
             {
                 LogicTree.UpdateExpr(gle_Expr, toggleSwitch_showDeviceExpr.IsOn);
@@ -149,12 +143,12 @@ namespace DSModeler
                 Global.RunHWIP = e.NewValue.ToString();
 
                 if (Global.CpuRunMode.IsPackagePC() && PcControl.RunCpus.Any())
-                    PcControl.CreateConnect();
+                    PcAction.CreateConnect();
             };
 
-            btn_ON.Click += (s, e) => PcControl.SetBit(gle_Device.EditValue as WMXTag, true);
-            btn_OFF.Click += (s, e) => PcControl.SetBit(gle_Device.EditValue as WMXTag, false);
-           
+            btn_ON.Click += (s, e) => PcAction.SetBit(gle_Device.EditValue as WMXTag, true);
+            btn_OFF.Click += (s, e) => PcAction.SetBit(gle_Device.EditValue as WMXTag, false);
+
 
             DsProcessEvent.ProcessSubject.Subscribe(rx =>
             {
@@ -214,14 +208,14 @@ namespace DSModeler
             {
                 this.Do(() =>
                 {
-                    barStaticItem_logCnt.Caption 
+                    barStaticItem_logCnt.Caption
                         = $"logs:{rx.Item1} TimeSpan {rx.Item2:ss\\.fff}sec";
                 });
             });
 
         }
 
-      
+
 
     }
 }

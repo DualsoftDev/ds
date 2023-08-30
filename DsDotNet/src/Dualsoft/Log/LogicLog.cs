@@ -1,12 +1,8 @@
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Grid;
-using Server.HW.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Engine.Core.CoreModule;
-using static Engine.Core.DsType;
-using static Engine.Core.Interface;
 using static Engine.Core.TagKindModule;
 
 namespace DSModeler
@@ -23,14 +19,14 @@ namespace DSModeler
             lock (_lock)
             {
                 var lastTime = ValueLogs.Any() ? ValueLogs.Last().GetTime() : DateTime.Now;
-                 
+
                 var evt = Tuple.Create(LogicLog.ValueLogs.Count, v.GapTime(lastTime));
                 Global.ChangeLogCount.OnNext(evt);
 
-                ValueLogs.Add(v);       
+                ValueLogs.Add(v);
             }
         }
-        public static void InitControl( GridLookUpEdit gle, GridView gv)
+        public static void InitControl(GridLookUpEdit gle, GridView gv)
         {
             gle.Properties.DisplayMember = "Name";
 
@@ -44,8 +40,8 @@ namespace DSModeler
             var txtStatus = "";
             switch (t.TagKind)
             {
-                case VertexTag.ready: txtStatus = "[R]";  break;
-                case VertexTag.going: txtStatus = "[G]";  break;
+                case VertexTag.ready: txtStatus = "[R]"; break;
+                case VertexTag.going: txtStatus = "[G]"; break;
                 case VertexTag.finish: txtStatus = "[F]"; break;
                 case VertexTag.homing: txtStatus = "[H]"; break;
                 default:

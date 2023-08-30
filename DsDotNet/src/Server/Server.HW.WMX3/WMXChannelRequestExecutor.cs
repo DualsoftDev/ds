@@ -23,7 +23,8 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
             else
                 f.Value = 0;
         });
-      
+        connection.ClearData();
+
         _WMXInBitTags = wmxTags
             .Where(w => w.IOType == TagIOType.Input)
             .ToDictionary(s => s.ByteOffset * 8 + s.BitOffset, s => s);

@@ -13,6 +13,8 @@ public class WMXConnection : ConnectionBase
     private WMX3Api _wmx3Lib;
     public byte[] InData { get; private set; }
     public byte[] OutData { get; private set; }
+    public int InCnt { get; private set; }
+    public int OutCnt  { get; private set; }
     internal IEnumerable<WMXTag> WMXTags => Tags.Values.OfType<WMXTag>();
     internal Io WMX3Lib_Io => _wmx3Lib_Io;
 
@@ -23,10 +25,11 @@ public class WMXConnection : ConnectionBase
     {
         _wmx3Lib = new WMX3Api();
         _wmx3Lib_Io = new Io(_wmx3Lib);
-        InData = Enumerable.Repeat((byte)0, count: numIn).ToArray();
-        OutData = Enumerable.Repeat((byte)0, count: numOut).ToArray();
+        InCnt = numIn;
+        OutCnt = numOut;
         _connectionParameters = parameters;
         PerRequestDelay = (int)parameters.TimeoutScan.TotalMilliseconds;
+        ClearData();
     }
 
     public override IConnectionParameters ConnectionParameters
@@ -41,6 +44,11 @@ public class WMXConnection : ConnectionBase
 
     public override bool IsConnected { get { return _IsConnected; } }
     public bool IsCreatedDevice { get; private set; }
+    public void ClearData()
+    {
+        InData = Enumerable.Repeat((byte)0, count: InCnt).ToArray();
+        OutData = Enumerable.Repeat((byte)0, count: OutCnt).ToArray();
+    }
 
     public override bool Connect()
     {
@@ -80,7 +88,7 @@ public class WMXConnection : ConnectionBase
     protected override void Dispose(bool disposing)
     {
         // Stop Communication.
-        _wmx3Lib?.StopCommunication(TimeoutConnecting);
+        //_wmx3Lib?.StopCommunication(TimeoutConnecting);
         // Discard the device.
         _wmx3Lib?.CloseDevice();
         _wmx3Lib_Io?.Dispose();

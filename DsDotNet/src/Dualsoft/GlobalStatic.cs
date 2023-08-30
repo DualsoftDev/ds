@@ -29,6 +29,7 @@ namespace DSModeler
         public const string DocPLC = "PLC 생성";
         public const string DocDS = "모델 출력";
         public const string DocExpression = "수식";
+        public const string DocExpressionAll = "수식전체";
         public const string RegPath = "SOFTWARE\\Dualsoft\\DSModeler";
     }
     public static class Global

@@ -70,6 +70,16 @@ namespace DSModeler
             return formChiild;
 
         }
+        public static FormDocText CreateDocExprAllOrSelect(FormMain formParent, TabbedView tab)
+        {
+            if (!Global.IsLoadedPPT()) return null;
+            string docKey = K.DocExpressionAll;
+
+            FormDocText formChiild = new FormDocText();
+            formChiild = CreateDocForm(formChiild, formParent, tab, docKey) as FormDocText;
+            formChiild.Activate();
+            return formChiild;
+        }
 
         public static void CreateDocPLCLS(FormMain formParent, TabbedView tab)
         {

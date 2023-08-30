@@ -18,8 +18,8 @@ namespace DSModeler
 
         public static async Task<bool> ImportPowerPoint(string[] files, FormMain formMain)
         {
-            try
-            {
+            //try
+            //{
                 Dictionary<DsSystem, PouGen> dicCpu = new Dictionary<DsSystem, PouGen>();
                 var _PPTResults = ImportPPT.GetLoadingAllSystem(files);
                 var storages = new Storages();
@@ -56,8 +56,8 @@ namespace DSModeler
                     tsc.SetResult(true);
                 });
                 return true;
-            }
-            catch (Exception ex) { Global.Logger.Error(ex.Message); return false; }
+            //}
+            //catch (Exception ex) { Global.Logger.Error(ex.Message); return false; }
         }
 
 

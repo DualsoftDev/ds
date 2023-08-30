@@ -1,6 +1,7 @@
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Grid;
 using Dual.Common.Winform;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -29,18 +30,22 @@ namespace DSModeler.Tree
         {
             gExpr.Do(() =>
             {
-
-                var dsCPUs =
-                    device ?
-                     PcControl.RunCpus.Where(w => !w.Systems.Contains(Global.ActiveSys))
-                    : PcControl.RunCpus.Where(w => w.Systems.Contains(Global.ActiveSys));
-
-                var css = dsCPUs
-                            .SelectMany(c => c.CommentedStatements
-                                .Select(s => new LogicStatement(s)));
-
+                IEnumerable<LogicStatement> css = GetLogicStatement(device);
                 gExpr.Properties.DataSource = css;
             });
+        }
+
+        public static IEnumerable<LogicStatement> GetLogicStatement(bool device)
+        {
+            var dsCPUs =
+                    device ?
+                      PcControl.RunCpus.Where(w => !w.Systems.Contains(Global.ActiveSys))
+                    : PcControl.RunCpus.Where(w => w.Systems.Contains(Global.ActiveSys));
+
+            var css = dsCPUs
+                        .SelectMany(c => c.CommentedStatements
+                            .Select(s => new LogicStatement(s)));
+            return css;
         }
     }
 }

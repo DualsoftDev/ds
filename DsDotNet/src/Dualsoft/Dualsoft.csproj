@@ -31,7 +31,7 @@
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
     <AutorunEnabled>true</AutorunEnabled>
     <DisallowUrlActivation>true</DisallowUrlActivation>
-    <ApplicationRevision>17</ApplicationRevision>
+    <ApplicationRevision>18</ApplicationRevision>
     <ApplicationVersion>0.9.3.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <ExcludeDeploymentUrl>true</ExcludeDeploymentUrl>
@@ -179,7 +179,7 @@
     <Compile Include="FormMain.Events.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormMain.Import.cs">
+    <Compile Include="FormMain.ImportPPT.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FormMain.cs">

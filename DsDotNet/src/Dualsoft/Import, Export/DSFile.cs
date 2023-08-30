@@ -11,6 +11,7 @@ using System.Drawing;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
 using static Engine.Core.ExpressionModule;
 using static Engine.Core.SystemToDsExt;
@@ -81,23 +82,27 @@ namespace DSModeler
 
 
 
-        internal static void UpdateExprAll(
-                     FormMain formMain
-                   )
+        internal static void UpdateExprAll(FormMain formMain, bool device)
         {
-            //var textForm = DocControl.CreateDocExprOrSelect(this, tabbedView_Doc);
-            //if (textForm == null) return;
-            //DSFile.UpdateExpr(textForm, gle_Expr.EditValue as LogicStatement);
+            var textForm = DocControl.CreateDocExprAllOrSelect(formMain, formMain.TabbedView);
+            var css = LogicTree.GetLogicStatement(device);
+            var texts = css.Select(cs => cs.GetCommentedStatement().Statement.ToText());
 
-
-        
-    }
+            textForm.TextEdit.AppendText($"{String.Join("\r\n", texts)}");
+            textForm.TextEdit.ScrollToCaret();
+        }
 
         internal static void UpdateExpr(
               FormDocText textForm
             , LogicStatement logicStatement)
         {
             CommentedStatement cs = logicStatement.GetCommentedStatement();
+            DrawExpr(textForm, cs);
+            textForm.TextEdit.ScrollToCaret();
+        }
+
+        private static void DrawExpr(FormDocText textForm, CommentedStatement cs)
+        {
             var tgts = CoreExtensionsModule.getTargetStorages(cs.statement);
             var srcs = CoreExtensionsModule.getSourceStorages(cs.statement);
             string tgtsTexs = string.Join(", ", tgts.Select(s => $"{s.Name}({s.BoxedValue})"));
@@ -116,7 +121,6 @@ namespace DSModeler
 
             textForm.AppendTextColor($"\r\n\t{tgtsTexs}\r\n\t\t= {srcsTexs}\r\n", Color.LightGreen);
             textForm.AppendTextColor("\r\n", Color.Gold);
-            textForm.TextEdit.ScrollToCaret();
         }
     }
 

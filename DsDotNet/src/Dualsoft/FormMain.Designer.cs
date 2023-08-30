@@ -105,8 +105,8 @@ namespace DSModeler
             this.ace_Stop = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Step = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Reset = new DevExpress.XtraBars.Navigation.AccordionControlElement();
-            this.ace_HMI = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement2 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.ace_HMI = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Import = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace8 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_ImportPPT = new DevExpress.XtraBars.Navigation.AccordionControlElement();
@@ -541,6 +541,7 @@ namespace DSModeler
             this.simpleButton_AllExpr.Appearance.Font = new System.Drawing.Font("Tahoma", 12F);
             this.simpleButton_AllExpr.Appearance.Options.UseFont = true;
             this.simpleButton_AllExpr.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.RightCenter;
+            this.simpleButton_AllExpr.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("simpleButton_AllExpr.ImageOptions.SvgImage")));
             this.simpleButton_AllExpr.Location = new System.Drawing.Point(203, 30);
             this.simpleButton_AllExpr.Name = "simpleButton_AllExpr";
             this.simpleButton_AllExpr.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
@@ -982,14 +983,6 @@ namespace DSModeler
             this.ace_Reset.Text = "  RESET";
             this.ace_Reset.Click += new System.EventHandler(this.ace_Reset_Click);
             // 
-            // ace_HMI
-            // 
-            this.ace_HMI.Appearance.Normal.Font = new System.Drawing.Font("Tahoma", 10F);
-            this.ace_HMI.Appearance.Normal.Options.UseFont = true;
-            this.ace_HMI.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_HMI.ImageOptions.SvgImage")));
-            this.ace_HMI.Name = "ace_HMI";
-            this.ace_HMI.Text = "HMI 자동";
-            // 
             // accordionControlElement2
             // 
             this.accordionControlElement2.Appearance.Normal.Font = new System.Drawing.Font("Tahoma", 10F);
@@ -999,6 +992,14 @@ namespace DSModeler
             this.accordionControlElement2.Name = "accordionControlElement2";
             this.accordionControlElement2.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.accordionControlElement2.Text = "수동 조작";
+            // 
+            // ace_HMI
+            // 
+            this.ace_HMI.Appearance.Normal.Font = new System.Drawing.Font("Tahoma", 10F);
+            this.ace_HMI.Appearance.Normal.Options.UseFont = true;
+            this.ace_HMI.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_HMI.ImageOptions.SvgImage")));
+            this.ace_HMI.Name = "ace_HMI";
+            this.ace_HMI.Text = "HMI 자동";
             // 
             // ace_Import
             // 

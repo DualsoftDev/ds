@@ -1,0 +1,91 @@
+using DevExpress.XtraEditors;
+using Dual.Common.Core;
+using Dual.Common.Winform;
+using Engine.Core;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using static Engine.CodeGenCPU.CpuLoader;
+using static Engine.Core.CoreModule;
+using static Engine.Core.DsType;
+using static Engine.Core.EdgeExt;
+
+
+namespace DSModeler
+{
+    public partial class FormMain : XtraForm
+    {
+        bool ImportingPPT = false;
+        public void ImportPowerPointWapper(string[] lastFiles)
+        {
+            if (ImportingPPT) return;
+            if (Global.BusyCheck()) return;
+
+            EventCPU.CPUUnsubscribe();
+            string[] files;
+            if (lastFiles.IsNullOrEmpty())
+                files = FileOpenSave.OpenFiles();
+            else
+                files = lastFiles;
+
+            if (files == null) return;
+
+            Task.Run(async () =>
+            {
+                try
+                {
+                    ImportingPPT = true;
+                    ClearModel();
+                    Files.SetLast(files);
+                    bool loadOK = await PPT.ImportPowerPoint(files, this);
+                    if (!loadOK) { return; }
+
+                    ViewDraw.DicStatus = new Dictionary<Vertex, Status4>();
+
+                    foreach (var item in PcControl.DicPou)
+                    {
+                        var sys = item.Key;
+                        var reals = sys.GetVertices().OfType<Vertex>();
+                        foreach (var r in reals)
+                            ViewDraw.DicStatus.Add(r, Status4.Homing);
+                    }
+
+                    await PcControl.CreateRunCpuSingle();
+                    PcControl.UpdateDevice(gle_Device);
+
+                    EventCPU.CPUSubscribe(ViewDraw.DicStatus);
+
+                    Tree.LogicTree.UpdateExpr(gle_Expr, toggleSwitch_showDeviceExpr.IsOn);
+
+                    Global.Logger.Info("PPTX 파일 로딩이 완료 되었습니다.");
+                    ImportingPPT = false;
+                }
+                catch (Exception ex) { ImportingPPT = false; Global.Logger.Error(ex.Message); }
+            });
+        }
+
+        void ClearModel()
+        {
+            this.Do(() =>
+            {
+                if (PcControl.RunCpus.Any())
+                    PcAction.Reset(ace_Play, ace_HMI);
+
+                PcControl.RunCpus.Iter(cpu => cpu.Dispose());
+                PcControl.DicPou = new Dictionary<DsSystem, PouGen>();
+
+                tabbedView_Doc.Controller.CloseAll();
+                tabbedView_Doc.Documents.Clear();
+                barStaticItem_logCnt.Caption = "";
+                LogicLog.ValueLogs.Clear();
+
+                Global.ActiveSys = null;
+
+                Tree.ModelTree.ClearSubBtn(ace_System);
+                Tree.ModelTree.ClearSubBtn(ace_Device);
+                Tree.ModelTree.ClearSubBtn(ace_HMI);
+            });
+        }
+    }
+}

@@ -94,7 +94,7 @@ module TagManagerUtil =
     let mutable memCnt = -1;
     let resetSimDevCnt() = inCnt<- -1;outCnt<- -1;memCnt<- -1;
     let createBridgeTag(stg:Storages, name, addr:string, inOut:ActionTag, bridge:BridgeType, sys, task:IQualifiedNamed option): ITag option=
-        let address =
+        let address =           //todo ahn 자동 주소 경고 띄우기 
             if addr <> ""  
             then
                 let addr = addr.ToUpper()

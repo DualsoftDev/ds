@@ -52,7 +52,8 @@ module ImportPPTModule =
                 else
                     let doc = Office.Open(pathPPT)
                     let pptDoc = pptDoc(pathPPT , paras, doc)
-                    dicPptDoc.Add(pathPPT, doc); pptDoc
+                    dicPptDoc.Add(pathPPT, doc) 
+                    pptDoc
 
             //시스템 로딩시 중복이름을 부를 수 없다.
             CheckSameCopy(doc)

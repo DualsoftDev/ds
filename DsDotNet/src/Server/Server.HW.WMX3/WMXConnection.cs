@@ -80,11 +80,11 @@ public class WMXConnection : ConnectionBase
     protected override void Dispose(bool disposing)
     {
         // Stop Communication.
-        _wmx3Lib.StopCommunication(TimeoutConnecting);
+        _wmx3Lib?.StopCommunication(TimeoutConnecting);
         // Discard the device.
-        _wmx3Lib.CloseDevice();
-        _wmx3Lib_Io.Dispose();
-        _wmx3Lib.Dispose();
+        _wmx3Lib?.CloseDevice();
+        _wmx3Lib_Io?.Dispose();
+        _wmx3Lib?.Dispose();
 
         base.Dispose(disposing);
     }

@@ -148,7 +148,6 @@ namespace DSModeler
         private void ace_DocDiagram_Click(object sender, EventArgs e) => Global.Notimplemented();
         private void ace_PLCLogix5000_Click(object sender, EventArgs e) => Global.Notimplemented();
         private void ace_PLCWork3_Click(object sender, EventArgs e) => Global.Notimplemented();
-
-      
+        private void ace_ExportWebHMI_Click(object sender, EventArgs e) => HMI.Export();
     }
 }

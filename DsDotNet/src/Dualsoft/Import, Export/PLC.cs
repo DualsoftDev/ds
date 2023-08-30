@@ -20,7 +20,7 @@ namespace DSModeler
         {
             if (!Global.IsLoadedPPT())
             {
-                Global.Logger.Warn("PLC 내보내기를 먼저 수행하세요");
+                Global.Logger.Warn("PPTX 가져오기를 먼저 수행하세요");
                 return "";
             }
             SplashScreenManager.ShowForm(typeof(DXWaitForm));

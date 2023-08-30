@@ -66,6 +66,7 @@ namespace DSModeler
             this.labelControl2 = new DevExpress.XtraEditors.LabelControl();
             this.btn_StepLongPress = new DevExpress.XtraEditors.SimpleButton();
             this.accordionContentContainer5 = new DevExpress.XtraBars.Navigation.AccordionContentContainer();
+            this.spinEdit_StartIn = new DevExpress.XtraEditors.SpinEdit();
             this.comboBoxEdit_RunMode = new DevExpress.XtraEditors.ComboBoxEdit();
             this.spinEdit_StartOut = new DevExpress.XtraEditors.SpinEdit();
             this.labelControl9 = new DevExpress.XtraEditors.LabelControl();
@@ -127,7 +128,8 @@ namespace DSModeler
             this.ace9 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.gridControl_exprotExcel = new DevExpress.XtraGrid.GridControl();
             this.gridView_exprotExcel = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.spinEdit_StartIn = new DevExpress.XtraEditors.SpinEdit();
+            this.accordionControlElement6 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.ace_ExportWebHMI = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             ((System.ComponentModel.ISupportInitialize)(this.document1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dockManager)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManager1)).BeginInit();
@@ -147,6 +149,7 @@ namespace DSModeler
             ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_LayoutGraph.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_menuExpand.Properties)).BeginInit();
             this.accordionContentContainer5.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.spinEdit_StartIn.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.comboBoxEdit_RunMode.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.spinEdit_StartOut.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.textEdit_IP.Properties)).BeginInit();
@@ -163,7 +166,6 @@ namespace DSModeler
             ((System.ComponentModel.ISupportInitialize)(this.gleView_Device)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl_exprotExcel)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView_exprotExcel)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.spinEdit_StartIn.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // document1
@@ -523,6 +525,31 @@ namespace DSModeler
             this.accordionContentContainer5.Size = new System.Drawing.Size(309, 89);
             this.accordionContentContainer5.TabIndex = 28;
             // 
+            // spinEdit_StartIn
+            // 
+            this.spinEdit_StartIn.EditValue = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.spinEdit_StartIn.Location = new System.Drawing.Point(133, 34);
+            this.spinEdit_StartIn.MenuManager = this.barManager1;
+            this.spinEdit_StartIn.Name = "spinEdit_StartIn";
+            this.spinEdit_StartIn.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.spinEdit_StartIn.Properties.MaxValue = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+            this.spinEdit_StartIn.Properties.MinValue = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.spinEdit_StartIn.Size = new System.Drawing.Size(59, 20);
+            this.spinEdit_StartIn.TabIndex = 8;
+            // 
             // comboBoxEdit_RunMode
             // 
             this.comboBoxEdit_RunMode.Location = new System.Drawing.Point(133, 62);
@@ -720,10 +747,10 @@ namespace DSModeler
             this.gle_Log.Size = new System.Drawing.Size(265, 20);
             this.gle_Log.TabIndex = 6;
             // 
-            // gle1View_Log
+            // gleView_Log
             // 
             this.gleView_Log.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
-            this.gleView_Log.Name = "gle1View_Log";
+            this.gleView_Log.Name = "gleView_Log";
             this.gleView_Log.OptionsSelection.EnableAppearanceFocusedCell = false;
             this.gleView_Log.OptionsView.ShowGroupPanel = false;
             this.gleView_Log.PreviewLineCount = 20;
@@ -751,10 +778,10 @@ namespace DSModeler
             this.gle_Expr.Size = new System.Drawing.Size(265, 20);
             this.gle_Expr.TabIndex = 0;
             // 
-            // gle1View_Expr
+            // gleView_Expr
             // 
             this.gleView_Expr.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
-            this.gleView_Expr.Name = "gle1View_Expr";
+            this.gleView_Expr.Name = "gleView_Expr";
             this.gleView_Expr.OptionsSelection.EnableAppearanceFocusedCell = false;
             this.gleView_Expr.OptionsView.ShowGroupPanel = false;
             this.gleView_Expr.PreviewLineCount = 20;
@@ -812,10 +839,10 @@ namespace DSModeler
             this.gle_Device.Size = new System.Drawing.Size(209, 20);
             this.gle_Device.TabIndex = 6;
             // 
-            // gridView1
+            // gleView_Device
             // 
             this.gleView_Device.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
-            this.gleView_Device.Name = "gridView1";
+            this.gleView_Device.Name = "gleView_Device";
             this.gleView_Device.OptionsSelection.EnableAppearanceFocusedCell = false;
             this.gleView_Device.OptionsView.ShowGroupPanel = false;
             this.gleView_Device.PreviewLineCount = 20;
@@ -1002,7 +1029,8 @@ namespace DSModeler
             this.ace_Export.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.ace1,
             this.ace2,
-            this.ace11});
+            this.ace11,
+            this.accordionControlElement6});
             this.ace_Export.Expanded = true;
             this.ace_Export.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_Export.ImageOptions.SvgImage")));
             this.ace_Export.Name = "ace_Export";
@@ -1156,30 +1184,21 @@ namespace DSModeler
             this.gridView_exprotExcel.GridControl = this.gridControl_exprotExcel;
             this.gridView_exprotExcel.Name = "gridView_exprotExcel";
             // 
-            // spinEdit_StartIn
+            // accordionControlElement6
             // 
-            this.spinEdit_StartIn.EditValue = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.spinEdit_StartIn.Location = new System.Drawing.Point(133, 34);
-            this.spinEdit_StartIn.MenuManager = this.barManager1;
-            this.spinEdit_StartIn.Name = "spinEdit_StartIn";
-            this.spinEdit_StartIn.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.spinEdit_StartIn.Properties.MaxValue = new decimal(new int[] {
-            65535,
-            0,
-            0,
-            0});
-            this.spinEdit_StartIn.Properties.MinValue = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.spinEdit_StartIn.Size = new System.Drawing.Size(59, 20);
-            this.spinEdit_StartIn.TabIndex = 8;
+            this.accordionControlElement6.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
+            this.ace_ExportWebHMI});
+            this.accordionControlElement6.Expanded = true;
+            this.accordionControlElement6.Name = "accordionControlElement6";
+            this.accordionControlElement6.Text = "HMI";
+            // 
+            // ace_ExportWebHMI
+            // 
+            this.ace_ExportWebHMI.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement7.ImageOptions.SvgImage")));
+            this.ace_ExportWebHMI.Name = "ace_ExportWebHMI";
+            this.ace_ExportWebHMI.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.ace_ExportWebHMI.Text = "Web HMI";
+            this.ace_ExportWebHMI.Click += new System.EventHandler(this.ace_ExportWebHMI_Click);
             // 
             // FormMain
             // 
@@ -1225,6 +1244,7 @@ namespace DSModeler
             ((System.ComponentModel.ISupportInitialize)(this.toggleSwitch_menuExpand.Properties)).EndInit();
             this.accordionContentContainer5.ResumeLayout(false);
             this.accordionContentContainer5.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.spinEdit_StartIn.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.comboBoxEdit_RunMode.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.spinEdit_StartOut.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.textEdit_IP.Properties)).EndInit();
@@ -1244,7 +1264,6 @@ namespace DSModeler
             ((System.ComponentModel.ISupportInitialize)(this.gleView_Device)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl_exprotExcel)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView_exprotExcel)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.spinEdit_StartIn.Properties)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1349,5 +1368,7 @@ namespace DSModeler
         private DevExpress.XtraEditors.SimpleButton btn_ON;
         private DevExpress.XtraEditors.SimpleButton btn_OFF;
         private DevExpress.XtraEditors.SpinEdit spinEdit_StartIn;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement accordionControlElement6;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement ace_ExportWebHMI;
     }
 }

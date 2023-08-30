@@ -60,7 +60,12 @@ namespace DSModeler
                                 Global.StatusChangeSubject.OnNext(Tuple.Create(t.Target, dicStatus[t.Target]));
 
                             LogicLog.AddLogicLog(t);
-                            Task.Delay(ControlProperty.GetDelayMsec()).Wait();
+
+                            if (Global.CpuRunMode.IsSimulation)
+                                Task.Delay(ControlProperty.GetDelayMsec()).Wait();
+                            else
+                                Task.Yield();
+
                         }
                         else if (evt.IsEventAction && Global.CpuRunMode.IsPackagePC())
                         {

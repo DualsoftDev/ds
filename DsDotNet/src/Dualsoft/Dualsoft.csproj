@@ -325,6 +325,10 @@
       <Project>{cdb56c55-5a93-4cde-a8d4-e2e5454dab86}</Project>
       <Name>Engine.CodeGenCPU</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Engine\Engine.CodeGenHMI\Engine.CodeGenHMI.fsproj">
+      <Project>{c4a7f50f-d23e-4239-b1c4-1c68c0bbbada}</Project>
+      <Name>Engine.CodeGenHMI</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Engine\Engine.Core\Engine.Core.fsproj">
       <Project>{40d8f531-bf68-4fab-a5dc-57277c3de2c8}</Project>
       <Name>Engine.Core</Name>

@@ -29,7 +29,7 @@ public class WMXTag : TagHW
 
     public void SetAddress(string name)
     {
-        var upperName = name.ToUpper();
+        var upperName = name.ToUpper().Trim();
 
         if (upperName.StartsWith("I"))
             this.IOType = TagIOType.Input;
@@ -43,7 +43,7 @@ public class WMXTag : TagHW
         if (upperName.Split('.').Length != 2)
             throw new HWExceptionTag("WMXTag type [Device][Byte].[Bit] ex I12.4, M0.0");
 
-        var byteBit = name.TrimStart('I').TrimStart('O').TrimStart('M');
+        var byteBit = upperName.TrimStart('I').TrimStart('O').TrimStart('M');
 
         Address = upperName;
         ByteOffset = Convert.ToInt32(byteBit.Split('.')[0]);

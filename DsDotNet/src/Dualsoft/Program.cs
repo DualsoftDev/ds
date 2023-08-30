@@ -2,6 +2,7 @@ using DevExpress.XtraSplashScreen;
 using DSModeler.Utils;
 using Dual.Common.Core;
 using Dual.Common.Winform;
+using Engine.Core;
 using System;
 using System.Configuration;
 using System.Windows.Forms;
@@ -24,6 +25,7 @@ namespace DSModeler
 
             var exceptionHander = new Action<Exception>(ex =>
             {
+                DsProcessEvent.DoWork(100);
                 Log4NetLogger.Logger.Error($":::: Unhandled exception\r\n{ex}");
                 if (Global.IsDebug)
                     MBox.Error(ex.Message, "Error");

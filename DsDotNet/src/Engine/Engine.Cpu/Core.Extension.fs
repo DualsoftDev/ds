@@ -58,28 +58,8 @@ module CoreExtensionsModule =
         [<Extension>] static member ExecutableStatements (xs:IStorage seq, mRung:IDictionary<IStorage, Statement seq>) = 
                         xs |> Seq.collect(fun stg -> mRung[stg]) 
 
-        [<Extension>] static member NotifyPreExcute (_:ISystem, x:IStorage) = 
-                        match  x.GetTagInfo() with
-                        |Some t -> onTagDSChanged t
-                        |_ -> ()
-        
-        
-        //[<Extension>]
-        //static member NotifyPostExcute (_:ISystem, x:IStorage) =
-        //    match x.GetTagInfo() with
-        //        |Some t -> 
-        //            match t with
-        //            |TTSystem (_,_) -> ()
-        //            |TTFlow   (_,_) -> ()
-        //            |TTVertex (_,tag) ->   match tag with
-        //                                    | VertexTag.startForce 
-        //                                    | VertexTag.resetForce -> x.BoxedValue <- false
-        //                                    | _->()
-        //            |TTApiItem(_,_) -> ()
-        //            |TTAction (_,_) -> ()
-        //        |None -> ()
-
-
+      
+                        
 
         [<Extension>]
         static member IsEndThread (x:IStorage) =

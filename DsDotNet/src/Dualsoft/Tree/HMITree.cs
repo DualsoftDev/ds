@@ -105,22 +105,22 @@ namespace DSModeler.Tree
 
                     void StartHMI(Real real)
                     {
-                        Task.Run(async () =>
+                        Task.Run( () =>
                         {
                             var vv = (real.TagManager as VertexManager);
                             vv.SF.Value = true;
-                            await Task.Delay(500);
-                            vv.SF.Value = false;
+                            //await Task.Delay(500);  //CPU에서 자동으로 NotifyPostExcute에서 꺼짐 Web HMI 붙히면 변경 필요
+                            //vv.SF.Value = false;
                         });
                     }
                     void ResetHMI(Real real)
                     {
-                        Task.Run(async () =>
+                        Task.Run( () =>
                         {
                             var vv = (real.TagManager as VertexManager);
                             vv.RF.Value = true;
-                            await Task.Delay(500);
-                            vv.RF.Value = false;
+                            //await Task.Delay(500);  //CPU에서 자동으로 NotifyPostExcute에서 꺼짐 Web HMI 붙히면 변경 필요
+                            //vv.RF.Value = false;
                         });
                     }
                 }

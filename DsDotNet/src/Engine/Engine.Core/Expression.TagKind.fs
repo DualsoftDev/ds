@@ -100,7 +100,6 @@ module TagKindModule =
     |planSet                   = 12000
     |planRst                   = 12001
     |planEnd                   = 12002
-    |planPulse                 = 12003
 
     [<Flags>]
     /// 13000 ~ 13999

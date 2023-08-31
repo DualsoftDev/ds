@@ -35,7 +35,6 @@ module ConvertCoreExt =
         member a.PS     = getAM(a).GetApiTag(ApiItemTag.planSet)
         member a.PR     = getAM(a).GetApiTag(ApiItemTag.planRst)
         member a.PE     = getAM(a).GetApiTag(ApiItemTag.planEnd)
-        member a.PP     = getAM(a).GetApiTag(ApiItemTag.planPulse)
 
     type DsSystem with
         member private s.GetPv<'T when 'T:equality >(st:SystemTag) =

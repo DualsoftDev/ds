@@ -13,7 +13,6 @@ module ApiTagManagerModule =
         let ps = cpv ("PS", apiItem, apiItem.System )
         let pr = cpv ("PR", apiItem, apiItem.System )
         let pe = cpv ("PE", apiItem, activeSys )
-        let pp = cpv ("PP", apiItem, activeSys )
 
         interface ITagManager with
             member _.Target = apiItem
@@ -24,6 +23,5 @@ module ApiTagManagerModule =
             | ApiItemTag.planSet   -> ps
             | ApiItemTag.planRst   -> pr
             | ApiItemTag.planEnd   -> pe
-            | ApiItemTag.planPulse -> pp
             | _ -> failwithlog $"Error : GetApiTag {at} type not support!!"
 

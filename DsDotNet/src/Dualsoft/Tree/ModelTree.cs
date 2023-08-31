@@ -1,4 +1,5 @@
 using DevExpress.XtraBars.Navigation;
+using Dual.Common.Winform;
 using Model.Import.Office;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,25 +44,28 @@ namespace DSModeler.Tree
 
         public static void CreateModelBtn(FormMain formMain, PptResult ppt)
         {
-            var ele = new AccordionControlElement()
-            { Style = ElementStyle.Group, Text = ppt.System.Name, Tag = ppt.System };
-            ele.Click += (s, e) =>
+            formMain.Do(() =>
             {
-                formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
-            };
-
-            if (ppt.IsActive)
-                formMain.Ace_System.Elements.Add(ele);
-            else
-                formMain.Ace_Device.Elements.Add(ele);
-
-            var lstFlowAce = Tree.ModelTree.AppandFlows(formMain, ppt, ele);
-            lstFlowAce.ForEach(f =>
-                f.Click += (s, e) =>
+                var ele = new AccordionControlElement()
+                { Style = ElementStyle.Group, Text = ppt.System.Name, Tag = ppt.System };
+                ele.Click += (s, e) =>
                 {
-                    var viewNode = ((AccordionControlElement)s).Tag as ViewNode;
-                    DocControl.CreateDocOrSelect(formMain, viewNode);
-                });
+                    formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
+                };
+
+                if (ppt.IsActive)
+                    formMain.Ace_System.Elements.Add(ele);
+                else
+                    formMain.Ace_Device.Elements.Add(ele);
+
+                var lstFlowAce = Tree.ModelTree.AppandFlows(formMain, ppt, ele);
+                lstFlowAce.ForEach(f =>
+                    f.Click += (s, e) =>
+                    {
+                        var viewNode = ((AccordionControlElement)s).Tag as ViewNode;
+                        DocControl.CreateDocOrSelect(formMain, viewNode);
+                    });
+            });
         }
     }
 }

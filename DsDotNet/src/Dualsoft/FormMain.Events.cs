@@ -140,31 +140,7 @@ namespace DSModeler
                 });
             });
 
-            Global.StatusChangeSubject.Subscribe(rx =>
-            {
-                this.Do(() =>
-                {
-                    var visibleFroms = tabbedView_Doc.Documents
-                                        .Where(w => w.IsVisible)
-                                        .Select(s => s.Tag)
-                                        .OfType<FormDocView>();
-
-                    foreach (var form in visibleFroms)
-                    {
-                        var nodes = form.UcView.MasterNode
-                                            .UsedViewNodes
-                                            .Where(w => w.CoreVertex != null)
-                                            .Where(f => f.CoreVertex.Value == rx.Item1);
-
-                        if (nodes.Any())
-                        {
-                            var node = nodes.First();
-                            node.Status4 = rx.Item2;
-                            form.UcView.UpdateStatus(node);
-                        }
-                    }
-                });
-            });
+            
 
             Global.ChangeLogCount.Subscribe(rx =>
             {

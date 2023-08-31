@@ -2,8 +2,10 @@ using Dual.Common.Core;
 using Engine.Core;
 using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.Hosting;
 using System.Windows.Forms;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsText;
@@ -286,7 +288,7 @@ namespace DSModeler
                     nNode.Attr.FillColor = GetDrawColor(System.Drawing.Color.FromArgb(25, 25, 25));
                 }
                 if (viewNode.ViewType == ViewType.VCALL)
-                    nNode.Attr.Shape = Shape.Ellipse;
+                    nNode.Attr.Shape = Shape.Box;
                 if (viewNode.ViewType == ViewType.VIF)
                 {
                     if (viewNode.IsChildExist)
@@ -311,33 +313,46 @@ namespace DSModeler
             viewer.Refresh();
             //viewer.Do(() => viewer.Refresh());
         }
-
-
-        public void UpdateStatus(ViewNode viewNode)
+        private Node findNode(ViewNode viewNode)
         {
-            Node node = viewer.Graph.FindNode(viewNode.UIKey);
+            Node node =  viewer.Graph.FindNode(viewNode.UIKey);
             if (node == null)
             {
                 if (viewer.Graph.SubgraphMap.ContainsKey(viewNode.UIKey))
-                    node = viewer.Graph.SubgraphMap[viewNode.UIKey];
+                    return viewer.Graph.SubgraphMap[viewNode.UIKey];
                 else
-                    return;
+                    return null;
             }
-            //node.Attr.Color = Color.White;
-            //node.Label.FontColor = Color.White;
-            if (viewNode != null)
+            return node;
+        }
+
+        public void UpdateValue(ViewNode viewNode, object item2)
+        {
+            Node node = findNode(viewNode);
+            if (node != null)
             {
-                if (viewNode.ViewType == ViewType.VREAL)
-                    UpdateLineColor(viewNode.Status4, node);
-                else
-                    UpdateFillColor(viewNode.Status4, node);
+                var dataExist = Convert.ToDouble(item2) != 0;
+                UpdateFillColor(dataExist, node);
+                RefreshGraph();
             }
+        }
+
+        private void UpdateFillColor(bool dataExist, Node node)
+        {
+            if (dataExist)
+                node.Attr.FillColor = Color.DarkOliveGreen;
             else
+                node.Attr.FillColor = Color.DimGray;
+        }
+
+        public void UpdateStatus(ViewNode viewNode)
+        {
+            Node node = findNode(viewNode);
+            if (node != null)
             {
-
+                    UpdateLineColor(viewNode.Status4, node);
+                RefreshGraph();
             }
-
-            RefreshGraph();
         }
 
         private static void UpdateFontColor(Status4 newStatus, Node node)
@@ -356,13 +371,7 @@ namespace DSModeler
             else if (newStatus == Status4.Homing) node.Attr.Color = Color.DimGray;
         }
 
-        private static void UpdateFillColor(Status4 newStatus, Node node)
-        {
-            if (newStatus == Status4.Ready) node.Attr.FillColor = Color.DarkOliveGreen;
-            else if (newStatus == Status4.Going) node.Attr.FillColor = Color.DarkGoldenrod;
-            else if (newStatus == Status4.Finish) node.Attr.FillColor = Color.DarkBlue;
-            else if (newStatus == Status4.Homing) node.Attr.FillColor = Color.DimGray;
-        }
+  
 
         public void SetBackColor(System.Drawing.Color color)
         {
@@ -377,5 +386,7 @@ namespace DSModeler
 
             return gColor;
         }
+
+    
     }
 }

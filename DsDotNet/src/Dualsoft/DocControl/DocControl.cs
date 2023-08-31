@@ -2,6 +2,7 @@ using DevExpress.XtraBars.Docking2010.Views;
 using DevExpress.XtraBars.Docking2010.Views.Tabbed;
 using DevExpress.XtraEditors;
 using DSModeler.Form;
+using Dual.Common.Winform;
 using System.IO;
 using System.Linq;
 using static Engine.Core.CoreModule;
@@ -107,15 +108,18 @@ namespace DSModeler
         public static void CreateDocOrSelect(FormMain formParent, ViewNode v)
         {
             if (!Global.IsLoadedPPT()) return;
-            Flow flow = v.Flow.Value;
-            string docKey = flow.QualifiedName;
+            formParent.Do(() =>
+            {
+                Flow flow = v.Flow.Value;
+                string docKey = flow.QualifiedName;
 
-            FormDocView formChiild = new FormDocView();
-            formChiild = CreateDocForm(formChiild, formParent, formParent.TabbedView, docKey) as FormDocView;
-            if (formChiild.UcView.MasterNode == null)
-                formChiild.UcView.SetGraph(v, flow, Global.LayoutGraphLineType);
-            //상태 업데이트
-            ViewDraw.DrawStatus(v, formChiild);
+                FormDocView formChiild = new FormDocView();
+                formChiild = CreateDocForm(formChiild, formParent, formParent.TabbedView, docKey) as FormDocView;
+                if (formChiild.UcView.MasterNode == null)
+                    formChiild.UcView.SetGraph(v, flow, Global.LayoutGraphLineType);
+                //상태 업데이트
+                ViewDraw.DrawStatus(v, formChiild);
+            });
         }
     }
 }

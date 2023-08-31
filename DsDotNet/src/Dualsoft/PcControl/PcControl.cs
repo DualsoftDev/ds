@@ -20,37 +20,53 @@ namespace DSModeler
     public static class PcControl
     {
         public static List<DsCPU> RunCpus = new List<DsCPU>();
-        public static Dictionary<TagHW, ITag> DicActionIn = new Dictionary<TagHW, ITag>();
+        public static Dictionary<TagHW, IEnumerable<ITag>> DicActionIn = new Dictionary<TagHW, IEnumerable<ITag>>();
         public static Dictionary<ITag, TagHW> DicActionOut = new Dictionary<ITag, TagHW>();
 
-        public static Dictionary<TagHW, ITag> GetActionInputs(DsSystem sys)
+        public static Dictionary<TagHW, IEnumerable<ITag>> GetActionInputs(DsSystem sys)
         {
-            var actions = new Dictionary<TagHW, ITag>();
-
-            sys.Jobs.Iter(j => j.DeviceDefs
-                                .Where(w => !w.InAddress.IsNullOrEmpty())
-                                .Iter(d => actions.Add(getTagHW(d.InTag, true), d.InTag)));
-
+            var actions = new Dictionary<TagHW, IEnumerable<ITag>>();
+            var inTags 
+                 = sys.Jobs
+                      .SelectMany(j => j.DeviceDefs.Select(s => s.InTag))
+                      .Where(w => w != null);
+          
+            inTags
+              .GroupBy(g => g.Address)
+              .Iter(g => 
+              {
+                  var hwTag = getTagHW(g.Key, g.Key, true);
+                  actions.Add(hwTag, g.Select(s=>s));
+              });
+       
             return actions;
         }
         public static Dictionary<ITag, TagHW> GetActionOutputs(DsSystem sys)
         {
             var actions = new Dictionary<ITag, TagHW>();
+            var inTags
+                 = sys.Jobs
+                      .SelectMany(j => j.DeviceDefs.Select(s => s.OutTag))
+                      .Where(w => w != null);
 
-            sys.Jobs.Iter(j => j.DeviceDefs
-                                .Where(w => !w.OutAddress.IsNullOrEmpty())
-                                .Iter(d => actions.Add(d.OutTag, getTagHW(d.OutTag, false))));
+            inTags
+              .GroupBy(g => g.Address)
+              .Iter(g =>
+              {
+                  var hwTag = getTagHW(g.Key, g.Key, false);
+                  g.Iter(s => actions.Add(s, hwTag));
+              });
 
             return actions;
         }
 
-        private static TagHW getTagHW(ITag dsTag, bool bInput)
+        private static TagHW getTagHW(string name, string address, bool bInput)
         {
-            string name = dsTag.Name;
-            string address = dsTag.Address;
+            //string name = dsTag.Name;
+            //string address = dsTag.Address;
 
-            if (address.IsNullOrEmpty() || dsTag == null)
-                MBox.Error($"{dsTag}");
+            //if (address.IsNullOrEmpty() || dsTag == null)
+            //    MBox.Error($"{dsTag}");
 
             var tag = new WMXTag(Global.PaixDriver.Conn as WMXConnection, name);
             tag.SetAddress(address);

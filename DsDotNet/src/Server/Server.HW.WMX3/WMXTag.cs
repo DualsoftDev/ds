@@ -49,5 +49,6 @@ public class WMXTag : TagHW
         ByteOffset = Convert.ToInt32(byteBit.Split('.')[0]);
         BitOffset = Convert.ToInt32(byteBit.Split('.')[1]);
     }
+    public int GetBitIndex() => ByteOffset * 8 + BitOffset;
 
 }

@@ -10,7 +10,6 @@ namespace DSModeler
 {
     public static class PcAction
     {
-
         public static void Play(AccordionControlElement ace_Play)
         {
             if (!Global.IsLoadedPPT()) return;
@@ -81,7 +80,7 @@ namespace DSModeler
             var activeCpu = PcControl.RunCpus.First(w => w.Systems.Contains(Global.ActiveSys));
 
             if (RuntimeDS.Package.IsStandardPC)
-                Global.PaixDriver.Stop();
+                Global.PaixDriver?.Stop();
 
             Task.Run(() =>
             {

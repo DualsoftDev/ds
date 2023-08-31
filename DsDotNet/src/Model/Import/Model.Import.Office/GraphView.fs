@@ -17,16 +17,19 @@ module rec ViewModule =
 
         new (name, viewType) = ViewNode(name, viewType, None, None, None, None)
         new (coreVertex:Vertex) =
-              let name =
+              let name, vType =
                   match coreVertex  with
                     | :? Alias as a -> match a.TargetWrapper with
-                                       | DuAliasTargetReal r -> r.Name
-                                       | DuAliasTargetCall c -> c.Name
-                                       | DuAliasTargetRealExFlow rf -> rf.Name
-                                       | DuAliasTargetRealExSystem rs -> rs.Name
-                    | _ -> coreVertex.Name
+                                       | DuAliasTargetReal r -> r.Name , VREAL
+                                       | DuAliasTargetCall c -> c.Name , VCALL
+                                       | DuAliasTargetRealExFlow rf -> rf.Name , VREALEx
+                                       | DuAliasTargetRealExSystem rs -> rs.Name , VREALEx
+                    | :? Call as c -> c.Name, VCALL
+                    | :? Real as c -> c.Name, VREAL
+                    | :? RealExF as c -> c.Name, VREALEx
+                    | _ -> coreVertex.Name, VFLOW
 
-              ViewNode(name, VREAL, Some(coreVertex),  None, None, None)
+              ViewNode(name, vType, Some(coreVertex),  None, None, None)
 
         new (name, btnType:BtnType) = ViewNode(name, VBUTTON, None, Some(btnType), None, None)
         new (name, lampType:LampType) = ViewNode(name, VLAMP, None, None, Some(lampType), None)

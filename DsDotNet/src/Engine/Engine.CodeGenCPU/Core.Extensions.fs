@@ -83,7 +83,7 @@ module ConvertCoreExt =
             let taskDevices = x.Jobs |> Seq.collect(fun j -> j.DeviceDefs)
             for b in taskDevices do
                 if b.ApiItem.RXs.length() = 0 && b.ApiItem.TXs.length() = 0
-                then failwithlog $"Error {getFuncName()}"
+                then failwith $"Error {getFuncName()}"
 
                 if b.ApiItem.RXs.any() then
                     createBridgeTag(x.Storages, b.ApiName, b.InAddress, ActionTag.ActionIn ,BridgeType.Device, x , Some(b))

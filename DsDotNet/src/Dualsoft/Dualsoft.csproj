@@ -31,7 +31,7 @@
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
     <AutorunEnabled>true</AutorunEnabled>
     <DisallowUrlActivation>true</DisallowUrlActivation>
-    <ApplicationRevision>25</ApplicationRevision>
+    <ApplicationRevision>27</ApplicationRevision>
     <ApplicationVersion>0.9.3.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <ExcludeDeploymentUrl>true</ExcludeDeploymentUrl>
@@ -231,7 +231,7 @@
       <DependentUpon>UcPropertyGrid.cs</DependentUpon>
     </Compile>
     <Compile Include="PcControl\PcControl.cs" />
-    <Compile Include="Event\EventExternal.cs" />
+    <Compile Include="Event\EventCPU.cs" />
     <Compile Include="Tree\ModelTree.cs" />
     <Compile Include="Tree\HMITree.cs" />
     <Compile Include="Program.cs" />

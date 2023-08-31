@@ -283,7 +283,7 @@ namespace DSModeler
                 if (viewNode.ViewType == ViewType.VDUMMY)
                 {
                     nNode.Attr.Shape = Shape.Box;
-                    nNode.Attr.FillColor = Color.Black;
+                    nNode.Attr.FillColor = GetDrawColor(System.Drawing.Color.FromArgb(25, 25, 25));
                 }
                 if (viewNode.ViewType == ViewType.VCALL)
                     nNode.Attr.Shape = Shape.Ellipse;
@@ -366,11 +366,16 @@ namespace DSModeler
 
         public void SetBackColor(System.Drawing.Color color)
         {
+            viewer.Graph.Attr.BackgroundColor = GetDrawColor(color);
+        }
+        public Color GetDrawColor(System.Drawing.Color color)
+        {
             var gColor = Color.Red;
             gColor.R = color.R;
             gColor.G = color.G;
             gColor.B = color.B;
-            viewer.Graph.Attr.BackgroundColor = gColor;
+
+            return gColor;
         }
     }
 }

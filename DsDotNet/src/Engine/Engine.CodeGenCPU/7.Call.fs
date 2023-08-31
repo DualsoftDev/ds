@@ -26,17 +26,18 @@ type VertexMCoin with
 
         [
             for td in call.CallTargetJob.DeviceDefs do
-                let sets = (dop <&&> startTags) <||>
-                           (mop <&&> forceStarts) <||>
-                           (rop <&&> getStartPointExpr (call, td))
+                let sets = (dop <&&> startTags <||> getStartPointExpr (call, td)) <||>
+                           (mop <&&> forceStarts) 
                            <&&>
                            !!td.MutualResets(coin.System)
+                             .Where(fun f -> f.ApiItem = td.ApiItem)
                              .Select(fun f -> f.ApiItem.PS)
                              .ToAndElseOff(coin.System)
-                let rsts = 
-                
-                      (coin.CR.Expr <||> (call.Parent.GetCore():?>Real).V.OG.Expr)
-                      <&&> td.ApiItem.PE.Expr
+                           <&&>
+                           !!td.ApiItem.PE.Expr
+
+                let rsts = (dop <&&> coin.CR.Expr)
+                           <||> (mop  <&&> coin.ET.Expr)
 
                 yield (sets, rsts) ==| (td.ApiItem.PS, getFuncName())
         ]
@@ -56,7 +57,9 @@ type VertexMCoin with
         let call = coin.Vertex :?> CallDev
         [
             for td in call.CallTargetJob.DeviceDefs do
-                let sets = td.ApiItem.PS.Expr <&&> td.RXs.ToAndElseOn(coin.System) 
+
+                let sets =  td.RXs.ToAndElseOn(coin.System) 
+
                 yield (sets, coin._off.Expr) --| (td.ApiItem.PE, getFuncName() )
         ]
 
@@ -67,16 +70,16 @@ type VertexMCoin with
         [
             for sharedCall in sharedCalls do
                 let sets =
-                    let nonSim =
+                    let action =
                         if call.UsingTon
                             then call.V.TON.DN.Expr   //On Delay
                             else call.INs.ToAndElseOn(coin.System)
 
-                    let sim = call.CallTargetJob.DeviceDefs
-                                .Select(fun f->f.ApiItem.PE)
-                                .ToAndElseOn(coin.System)
+                    let plan = call.CallTargetJob.DeviceDefs
+                                   |>Seq.collect(fun f-> [f.ApiItem.PE; f.ApiItem.PS])
 
-                    nonSim <||> (sim <&&> coin._sim.Expr)
+                    plan.ToAndElseOn(coin.System) 
+                    <&&> (action <||> coin._sim.Expr)
 
                 yield (sets, rsts) --| (sharedCall.V.ET, getFuncName() )
         ]

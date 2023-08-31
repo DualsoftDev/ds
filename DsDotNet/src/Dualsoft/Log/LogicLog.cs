@@ -1,9 +1,11 @@
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Grid;
+using Dual.Common.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Engine.Core.TagKindModule;
+using static Engine.Core.TagKindModule.TagDS;
 
 namespace DSModeler
 {
@@ -35,30 +37,37 @@ namespace DSModeler
             gv.OptionsView.ShowGroupPanel = false;
         }
 
-        internal static void AddLogicLog(TagDS.EventVertex t)
+        internal static void AddLogicLog(TagDS evt)
         {
-            var txtStatus = "";
-            switch (t.TagKind)
-            {
-                case VertexTag.ready: txtStatus = "[R]"; break;
-                case VertexTag.going: txtStatus = "[G]"; break;
-                case VertexTag.finish: txtStatus = "[F]"; break;
-                case VertexTag.homing: txtStatus = "[H]"; break;
-                default:
-                    break;
-            }
+            //var txtStatus = "";
+            //if (evt.IsEventVertex)
+            //{
+            //    var t = evt as EventVertex;
+            //    switch (t.TagKind)
+            //    {
+            //        case VertexTag.ready: txtStatus = "[R]"; break;
+            //        case VertexTag.going: txtStatus = "[G]"; break;
+            //        case VertexTag.finish: txtStatus = "[F]"; break;
+            //        case VertexTag.homing: txtStatus = "[H]"; break;
+            //        default:
+            //            break;
+            //    }
+            //}
 
+            //var value = txtStatus == "" ? TagKindExt.GetTagValueText(evt) : txtStatus;
             var valueLog = new ValueLog()
             {
-                Name = t.Tag.Name,
-                Value = txtStatus == "" ? t.Tag.BoxedValue.ToString() : txtStatus,
-                System = t.Target.Parent.GetSystem().Name,
-                TagKind = TagKindExt.GetVertexTagKindText(t.Tag)
+                Name = TagKindExt.GetTagNameText(evt),
+                Value = TagKindExt.GetTagValueText(evt),
+                System = TagKindExt.GetTagSystem(evt).Name,
+                TagKind = TagKindExt.GetTagKindText(evt)
             };
 
             TryAdd(valueLog);
         }
     }
+
+   
 
     public class ValueLog
     {

@@ -100,6 +100,7 @@ module TagKindModule =
     |planSet                   = 12000
     |planRst                   = 12001
     |planEnd                   = 12002
+    |planPulse                 = 12003
 
     [<Flags>]
     /// 13000 ~ 13999
@@ -156,23 +157,38 @@ module TagKindModule =
             |None -> None
 
         [<Extension>]
-        static member GetVertexTagKindText (x:IStorage) =
-            let info = x.GetTagInfo()
-            match info with
-            |Some t -> 
-                match t with
-                |EventSystem (_,_,kind) -> kind.ToString()
-                |EventFlow (_,_,kind) -> kind.ToString()
-                |EventVertex (_,_,kind) -> kind.ToString()
-                |EventApiItem (_,_,kind) -> kind.ToString()
-                |EventAction (_,_,kind) -> kind.ToString()
-            |None -> "None"
+        static member GetTagKindText (x:TagDS) =
+            match x with
+            |EventSystem (_,_,kind) -> kind.ToString()
+            |EventFlow (_,_,kind) -> kind.ToString()
+            |EventVertex (_,_,kind) -> kind.ToString()
+            |EventApiItem (_,_,kind) -> kind.ToString()
+            |EventAction (_,_,kind) -> kind.ToString()
 
         [<Extension>]
-        static member GetText (x:TagDS) =
+        static member GetTagNameText(x:TagDS) =
             match x with
-            |EventSystem (tag, target, kind) -> $"{tag.Name}, {target.Name}, {kind}";
-            |EventFlow   (tag, target, kind) -> $"{tag.Name}, {target.Name}, {kind}";
-            |EventVertex (tag, target, kind) -> $"{tag.Name}, {target.Name}, {kind}";
-            |EventApiItem(tag, target, kind) -> $"{tag.Name}, {target.Name}, {kind}";
-            |EventAction (tag, target, kind) -> $"{tag.Name}, {target.Name}, {kind}";
+            |EventSystem (tag, _,_) -> $"{tag.Name}"
+            |EventFlow   (tag, _,_) -> $"{tag.Name}"
+            |EventVertex (tag, _,_) -> $"{tag.Name}"
+            |EventApiItem(tag, _,_) -> $"{tag.Name}"
+            |EventAction (tag, _,_) -> $"{tag.Name}"
+
+        [<Extension>]
+        static member GetTagValueText(x:TagDS) =
+            match x with
+            |EventSystem (tag, _,_) -> $"{tag.BoxedValue}"
+            |EventFlow   (tag, _,_) -> $"{tag.BoxedValue}"
+            |EventVertex (tag, _,_) -> $"{tag.BoxedValue}"
+            |EventApiItem(tag, _,_) -> $"{tag.BoxedValue}"
+            |EventAction (tag, _,_) -> $"{tag.BoxedValue}"
+
+        [<Extension>]
+        static member GetTagSystem(x:TagDS) =
+            match x with
+            |EventSystem (tag, _,_) -> tag.DsSystem :?> DsSystem
+            |EventFlow   (tag, _,_) -> tag.DsSystem :?> DsSystem 
+            |EventVertex (tag, _,_) -> tag.DsSystem :?> DsSystem 
+            |EventApiItem(tag, _,_) -> tag.DsSystem :?> DsSystem 
+            |EventAction (tag, _,_) -> tag.DsSystem :?> DsSystem 
+

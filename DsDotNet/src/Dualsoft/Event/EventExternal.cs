@@ -43,6 +43,7 @@ namespace DSModeler
                     TagDSSubject
                     .Subscribe(evt =>
                     {
+
                         if (evt.IsEventVertex)
                         {
                             var t = evt as EventVertex;
@@ -59,7 +60,6 @@ namespace DSModeler
                             if (isStatus && (bool)t.Tag.BoxedValue)
                                 Global.StatusChangeSubject.OnNext(Tuple.Create(t.Target, dicStatus[t.Target]));
 
-                            LogicLog.AddLogicLog(t);
 
                             if (Global.CpuRunMode.IsSimulation)
                                 Task.Delay(ControlProperty.GetDelayMsec()).Wait();
@@ -78,6 +78,8 @@ namespace DSModeler
 
                             Global.Logger.Debug($"HW_OUT {tag.Address} value: {tag.Value} [{tag.Name}]");
                         }
+
+                        LogicLog.AddLogicLog(evt);
                     });
             }
 

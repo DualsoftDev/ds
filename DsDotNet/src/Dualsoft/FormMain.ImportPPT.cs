@@ -40,22 +40,14 @@ namespace DSModeler
                     var dicCpu = await PPT.ImportPowerPoint(files, this);
                     if (!dicCpu.Any()) { return; }
 
-                    ViewDraw.DicStatus = new Dictionary<Vertex, Status4>();
-
-                    foreach (var item in dicCpu)
-                    {
-                        var sys = item.Key;
-                        var reals = sys.GetVertices().OfType<Vertex>();
-                        foreach (var r in reals)
-                            ViewDraw.DicStatus.Add(r, Status4.Homing);
-                    }
-
                     await PcControl.CreateRunCpuSingle(dicCpu);
                     PcControl.UpdateDevice(gle_Device);
 
                     EventCPU.CPUSubscribe(ViewDraw.DicStatus);
 
                     Tree.LogicTree.UpdateExpr(gle_Expr, toggleSwitch_showDeviceExpr.IsOn);
+
+
 
                     Global.Logger.Info("PPTX 파일 로딩이 완료 되었습니다.");
                     ImportingPPT = false;

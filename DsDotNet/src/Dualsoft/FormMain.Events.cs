@@ -51,6 +51,7 @@ namespace DSModeler
                 //    ViewDraw.DrawStatus(docForm.UcView.MasterNode, docForm);
             };
 
+        
             gle_Expr.EditValueChanged += (s, e) =>
             {
                 var textForm = DocControl.CreateDocExprOrSelect(this, tabbedView_Doc);

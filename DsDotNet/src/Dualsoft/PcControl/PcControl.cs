@@ -173,6 +173,7 @@ namespace DSModeler
                     PcAction.Reset(frmMain.Ace_Play, frmMain.Ace_HMI);
 
                 PcControl.RunCpus.Iter(cpu => cpu.Dispose());
+                RecentDocs.SetRecentDoc(frmMain.TabbedView.Documents.Select(d => d.Caption));
 
                 frmMain.TabbedView.Controller.CloseAll();
                 frmMain.TabbedView.Documents.Clear();

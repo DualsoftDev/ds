@@ -1,7 +1,9 @@
+using DevExpress.Utils.Extensions;
 using DSModeler.Tree;
-
+using Dual.Common.Core;
 using Dual.Common.Winform;
 using Engine.Core;
+using Model.Import.Office;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,9 +26,12 @@ namespace DSModeler
             var PPTResults = ret.Item2;
             var storages = new Storages();
             int cnt = 0;
+
+            var recentDocs = RecentDocs.GetRegistryRecentDocs();
+
             await formMain.DoAsync(async tsc =>
             {
-                foreach (var ppt in PPTResults)
+                foreach (var ppt in PPTResults.OrderByDescending(o=>o.IsActive))
                 {
                     if (ppt.IsActive)
                     {
@@ -45,6 +50,13 @@ namespace DSModeler
                     }
 
                     ModelTree.CreateModelBtn(formMain, ppt);
+                    ViewDraw.DrawInitStatus(dicCpu);
+
+                    var nodeFlows = ppt.Views.Where(w => w.ViewType == InterfaceClass.ViewType.VFLOW)
+                                   .Where(w => w.UsedViewNodes.Any())
+                                   .Where(w => recentDocs.Contains(w.Flow.Value.QualifiedName));
+                    
+                    nodeFlows.Iter(f=> DocControl.CreateDocOrSelect(formMain, f));
                 }
 
 

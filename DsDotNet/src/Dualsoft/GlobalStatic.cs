@@ -17,6 +17,7 @@ namespace DSModeler
         public const string RegSkin = "RegSkin";
         public const string LastPath = "LastPath";
         public const string LastFiles = "LastFiles";
+        public const string LastDocs = "LastDocs";
         public const string SimSpeed = "SimSpeed";
         public const string LayoutMenuExpand = "LayoutMenuExpand";
         public const string LayoutGraphLineType = "LayoutGraphLineType";

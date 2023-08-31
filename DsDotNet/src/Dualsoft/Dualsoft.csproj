@@ -31,7 +31,7 @@
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
     <AutorunEnabled>true</AutorunEnabled>
     <DisallowUrlActivation>true</DisallowUrlActivation>
-    <ApplicationRevision>24</ApplicationRevision>
+    <ApplicationRevision>25</ApplicationRevision>
     <ApplicationVersion>0.9.3.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <ExcludeDeploymentUrl>true</ExcludeDeploymentUrl>
@@ -223,6 +223,7 @@
     <Compile Include="Utils\MessageBox.cs" />
     <Compile Include="Utils\LookupEditExt.cs" />
     <Compile Include="Utils\PropertyRecordExt.cs" />
+    <Compile Include="Utils\RecentDocs.cs" />
     <Compile Include="Property\UcPropertyGrid.cs">
       <SubType>UserControl</SubType>
     </Compile>

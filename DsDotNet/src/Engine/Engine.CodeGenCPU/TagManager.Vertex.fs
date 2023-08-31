@@ -108,7 +108,7 @@ module TagManagerModule =
             then goingRelays[src]
             else
                 let gr =
-                    createPlanVar s $"{v.Name}_GR_{src.Name}" DuBOOL true v (VertexTag.goingrelay|>int) sys:?> PlanVar<bool> 
+                    createPlanVar s $"{v.Name}_GR_SRC_{src.Name}" DuBOOL true v (VertexTag.goingrelay|>int) sys:?> PlanVar<bool> 
                 goingRelays.Add (src, gr)
                 gr
 

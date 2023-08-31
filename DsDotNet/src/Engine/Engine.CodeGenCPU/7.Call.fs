@@ -9,7 +9,7 @@ open Dual.Common.Core.FS
 type VertexMCoin with
     member coin.C1_CallPlanSend(): CommentedStatement list =
         let call = coin.Vertex :?> CallDev
-        let dop, mop, rop = coin.Flow.dop.Expr, coin.Flow.mop.Expr, coin.Flow.rop.Expr
+        let dop, mop = coin.Flow.dop.Expr, coin.Flow.mop.Expr
         let sharedCalls = coin.GetSharedCall().Select(getVM)
         let startTags   = ([coin.ST] @ sharedCalls.STs()).ToOr()
         let forceStarts = ([coin.SF] @ sharedCalls.SFs()).ToOr()

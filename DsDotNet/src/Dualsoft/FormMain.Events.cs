@@ -46,9 +46,9 @@ namespace DSModeler
             };
             tabbedView_Doc.DocumentSelected += (s, e) =>
             {
-                var docForm = e.Document.Tag as FormDocView;
-                if (docForm != null && docForm.UcView.MasterNode != null)
-                    ViewDraw.DrawStatus(docForm.UcView.MasterNode, docForm);
+                //var docForm = e.Document.Tag as FormDocView;
+                //if (docForm != null && docForm.UcView.MasterNode != null)
+                //    ViewDraw.DrawStatus(docForm.UcView.MasterNode, docForm);
             };
 
             gle_Expr.EditValueChanged += (s, e) =>

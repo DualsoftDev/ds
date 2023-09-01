@@ -265,8 +265,10 @@ module ConvertCoreExt =
 
         member c.INs           = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionIN)
         member c.OUTs          = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun j -> j.ActionOut)
-
-
+        
+        member c.PSs          = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PS )
+        member c.PEs          = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PE )
+        
         member c.MutualResets =
             c.CallTargetJob.DeviceDefs
                 .SelectMany(fun j -> j.ApiItem.System.GetMutualResetApis(j.ApiItem))
@@ -290,7 +292,8 @@ module ConvertCoreExt =
     type TaskDev with
         member td.ActionIN  = td.InTag  :?> Tag<bool>
         member td.ActionOut = td.OutTag :?> Tag<bool>
-        member td.RXs       = td.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.EP)
+        member td.RXTags       = td.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.EP)
+        member td.TXTags       = td.ApiItem.TXs |> Seq.map getVMReal |> Seq.map(fun f->f.SP)
 
         member td.MutualResets(x:DsSystem) =
             td.ApiItem.System.GetMutualResetApis(td.ApiItem)

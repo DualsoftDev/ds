@@ -13,6 +13,9 @@ type VertexMCoin with
         let sharedCalls = coin.GetSharedCall().Select(getVM)
         let startTags   = ([coin.ST] @ sharedCalls.STs()).ToOr()
         let forceStarts = ([coin.SF] @ sharedCalls.SFs()).ToOr()
+
+                          
+        let interlockPE (td:TaskDev) = if td.ApiItem.RXs.any() then  td.ApiItem.PE.Expr else coin._off.Expr
         let getStartPointExpr(coin:CallDev, td:TaskDev) =
             match coin.Parent.GetCore() with
             | :? Real as r ->
@@ -34,7 +37,7 @@ type VertexMCoin with
                              .Select(fun f -> f.ApiItem.PS)
                              .ToAndElseOff(coin.System)
                            <&&>
-                           !!td.ApiItem.PE.Expr
+                           !!(interlockPE td)
 
                 let rsts = (dop <&&> coin.CR.Expr)
                            <||> (mop  <&&> coin.ET.Expr)
@@ -58,7 +61,7 @@ type VertexMCoin with
         [
             for td in call.CallTargetJob.DeviceDefs do
 
-                let sets =  td.RXs.ToAndElseOn(coin.System) 
+                let sets =  td.RXTags.ToAndElseOn(coin.System) 
 
                 yield (sets, coin._off.Expr) --| (td.ApiItem.PE, getFuncName() )
         ]
@@ -74,12 +77,10 @@ type VertexMCoin with
                         if call.UsingTon
                             then call.V.TON.DN.Expr   //On Delay
                             else call.INs.ToAndElseOn(coin.System)
-
-                    let plan = call.CallTargetJob.DeviceDefs
-                                   |>Seq.collect(fun f-> [f.ApiItem.PE; f.ApiItem.PS])
-
-                    plan.ToAndElseOn(coin.System) 
-                    <&&> (action <||> coin._sim.Expr)
+                  
+                    (action <||> coin._sim.Expr)
+                    <&&> call.PSs.ToAndElseOn(coin.System) 
+                    <&&> call.PEs.ToAndElseOn(coin.System) 
 
                 yield (sets, rsts) --| (sharedCall.V.ET, getFuncName() )
         ]

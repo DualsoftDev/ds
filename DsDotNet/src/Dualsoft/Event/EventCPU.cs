@@ -42,7 +42,7 @@ namespace DSModeler
                         {
                             tag.BoxedValue = t.Value;
                             var dev = tag.Target.Value as TaskDev;
-                            if (dev != null)
+                            if (dev != null && ViewDraw.DicTask.ContainsKey(dev)) //job만정의 하고 call에 사용  안함
                             {
                                 var vs = ViewDraw.DicTask[dev];
                                 vs.Iter(v => ViewDraw.ActionChangeSubject

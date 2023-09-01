@@ -337,14 +337,7 @@ namespace DSModeler
             }
         }
 
-        private void UpdateFillColor(bool dataExist, Node node)
-        {
-            if (dataExist)
-                node.Attr.FillColor = Color.DarkOliveGreen;
-            else
-                node.Attr.FillColor = Color.DimGray;
-        }
-
+     
         public void UpdateStatus(ViewNode viewNode)
         {
             Node node = findNode(viewNode);
@@ -355,7 +348,7 @@ namespace DSModeler
             }
         }
 
-        private static void UpdateFontColor(Status4 newStatus, Node node)
+        private  void UpdateFontColor(Status4 newStatus, Node node)
         {
             if (newStatus == Status4.Ready) node.Label.FontColor = Color.DarkGreen;
             else if (newStatus == Status4.Going) node.Label.FontColor = Color.DarkKhaki;
@@ -363,7 +356,7 @@ namespace DSModeler
             else if (newStatus == Status4.Homing) node.Label.FontColor = Color.Black;
         }
 
-        private static void UpdateLineColor(Status4 newStatus, Node node)
+        private  void UpdateLineColor(Status4 newStatus, Node node)
         {
             if (newStatus == Status4.Ready) node.Attr.Color = Color.DarkOliveGreen;
             else if (newStatus == Status4.Going) node.Attr.Color = Color.DarkGoldenrod;
@@ -371,7 +364,14 @@ namespace DSModeler
             else if (newStatus == Status4.Homing) node.Attr.Color = Color.DimGray;
         }
 
-  
+        private void UpdateFillColor(bool dataExist, Node node)
+        {
+            if (dataExist)
+                node.Attr.FillColor = Color.DarkSlateBlue;
+            else
+                node.Attr.FillColor = Color.DimGray;
+        }
+
 
         public void SetBackColor(System.Drawing.Color color)
         {

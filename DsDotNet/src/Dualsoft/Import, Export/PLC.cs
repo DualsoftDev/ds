@@ -29,7 +29,7 @@ namespace DSModeler
             var xmlFileName = Path.GetFileNameWithoutExtension(xmlTemplateFile) + "_gen.xml";
             var xmlDriectory = Path.GetDirectoryName(xmlTemplateFile);
             var fullpath = Path.Combine(xmlDriectory, xmlFileName);
-            var newPath = Files.GetNewPath(fullpath);
+            var newPath = Files.GetNewFileName(fullpath);
             Global.ExportPathPLC = newPath;
             if (File.Exists(xmlTemplateFile))
                 //사용자 xg5000 Template 형식으로 생성

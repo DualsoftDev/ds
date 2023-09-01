@@ -96,6 +96,7 @@ namespace DSModeler
             this.labelControl12 = new DevExpress.XtraEditors.LabelControl();
             this.gle_Device = new DevExpress.XtraEditors.GridLookUpEdit();
             this.gleView_Device = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.simpleButton_ExportDStoFile = new DevExpress.XtraEditors.SimpleButton();
             this.ace_Model = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_System = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Device = new DevExpress.XtraBars.Navigation.AccordionControlElement();
@@ -423,6 +424,7 @@ namespace DSModeler
             this.ac_Main.Controls.Add(this.accordionContentContainer5);
             this.ac_Main.Controls.Add(this.accordionContentContainer1);
             this.ac_Main.Controls.Add(this.accordionContentContainer4);
+            this.ac_Main.Controls.Add(this.simpleButton_ExportDStoFile);
             this.ac_Main.Dock = System.Windows.Forms.DockStyle.Left;
             this.ac_Main.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.ace_Model,
@@ -878,6 +880,17 @@ namespace DSModeler
             this.gleView_Device.OptionsView.ShowGroupPanel = false;
             this.gleView_Device.PreviewLineCount = 20;
             // 
+            // simpleButton_ExportDStoFile
+            // 
+            this.simpleButton_ExportDStoFile.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.LeftCenter;
+            this.simpleButton_ExportDStoFile.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("simpleButton_ExportDStoFile.ImageOptions.SvgImage")));
+            this.simpleButton_ExportDStoFile.Location = new System.Drawing.Point(223, 224);
+            this.simpleButton_ExportDStoFile.Name = "simpleButton_ExportDStoFile";
+            this.simpleButton_ExportDStoFile.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
+            this.simpleButton_ExportDStoFile.Size = new System.Drawing.Size(75, 23);
+            this.simpleButton_ExportDStoFile.TabIndex = 36;
+            this.simpleButton_ExportDStoFile.Click += new System.EventHandler(this.simpleButton_ExportDStoFile_Click);
+            // 
             // ace_Model
             // 
             this.ace_Model.Appearance.Default.Font = new System.Drawing.Font("Tahoma", 12F);
@@ -1076,6 +1089,7 @@ namespace DSModeler
             // 
             // ace_pcWindow
             // 
+            this.ace_pcWindow.HeaderControl = this.simpleButton_ExportDStoFile;
             this.ace_pcWindow.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_pcWindow.ImageOptions.SvgImage")));
             this.ace_pcWindow.Name = "ace_pcWindow";
             this.ace_pcWindow.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
@@ -1399,5 +1413,6 @@ namespace DSModeler
         private DevExpress.XtraBars.Navigation.AccordionControlElement ace_ExportWebHMI;
         private DevExpress.XtraEditors.SimpleButton simpleButton_ClearLog;
         private DevExpress.XtraEditors.SimpleButton simpleButton_AllExpr;
+        private DevExpress.XtraEditors.SimpleButton simpleButton_ExportDStoFile;
     }
 }

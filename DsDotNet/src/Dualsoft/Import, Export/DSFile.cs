@@ -1,3 +1,4 @@
+using DevExpress.XtraSplashScreen;
 using DSModeler.Form;
 using DSModeler.Tree;
 using Dual.Common.Core;
@@ -6,17 +7,75 @@ using Engine.Core;
 using Engine.Cpu;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using static Engine.Core.DsTextProperty;
 using static Engine.Core.ExpressionModule;
+using static Engine.Core.ModelLoaderModule;
 using static Engine.Core.SystemToDsExt;
 
 namespace DSModeler
 {
     public static class DSFile
     {
+        public static void OpenDSFolder()
+        {
+            if (Global.IsLoadedPPT() && !Global.ExportPathDS.IsNullOrEmpty())
+                Process.Start(Path.GetDirectoryName(Global.ExportPathDS));
+        }
+        private static void Export()
+        {
+            if (!Global.IsLoadedPPT())
+                Global.Logger.Warn("PPTX 가져오기를 먼저 수행하세요");
+
+            SplashScreenManager.ShowForm(typeof(DXWaitForm));
+            var pptPath = Files.GetLast().First();
+            var libDir = Path.GetDirectoryName(pptPath); //동일 디렉토리 경로
+
+            var newFile = Files.GetNewFileName(pptPath);
+            var directory = Path.GetDirectoryName(newFile);
+
+
+            var dsFile = Path.ChangeExtension(newFile, ".ds");
+            var confFile = Path.ChangeExtension(newFile, ".json");
+
+            List<string> dsCpuSys = new List<string>();
+            dsCpuSys.Add(dsFile);
+
+            Global.ExportPathDS = dsFile;
+            Global.ActiveSys.Devices.ForEach(s =>
+            {
+                ExportLoadedSystem(s, directory);
+            });
+            Global.ActiveSys.ExternalSystems.ForEach(s =>
+            {
+                var path = ExportLoadedSystem(s, directory);
+                dsCpuSys.Add(path);   
+            });
+
+
+            File.WriteAllText(dsFile, Global.ActiveSys.ToDsText(false));
+            ModelLoader.SaveConfigWithPath(confFile, dsCpuSys);
+
+            SplashScreenManager.CloseForm();
+        }
+
+        private static string ExportLoadedSystem(CoreModule.LoadedSystem s, string directory)
+        {
+            var relativePath =
+               $"{directory}\\{s.UserSpecifiedFilePath}";
+
+            Directory.CreateDirectory(Path.GetDirectoryName(relativePath));
+            s.ReferenceSystem.Name = Path.GetFileNameWithoutExtension(relativePath);
+
+            File.WriteAllText(relativePath, s.ReferenceSystem.ToDsText(false));
+
+            return relativePath;
+        }
+
         public static List<Tuple<string, Color>> ToTextColorDS(string dsText)
         {
             var lst = new List<Tuple<string, Color>>();
@@ -52,6 +111,9 @@ namespace DSModeler
             return lst;
         }
 
+
+    
+
         public static void DrawDSText(FormDocText view)
         {
             Task.Run(() =>
@@ -71,6 +133,8 @@ namespace DSModeler
                         view.AppendTextColor(f.Item1, f.Item2);
                         await Task.Yield();
                     }
+
+                    Export();
 
                     DsProcessEvent.DoWork(100);
                 });

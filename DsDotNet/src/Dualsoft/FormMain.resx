@@ -286,6 +286,26 @@
         L2c+DQo8L3N2Zz4L
 </value>
   </data>
+  <data name="simpleButton_ExportDStoFile.ImageOptions.SvgImage" type="DevExpress.Utils.Svg.SvgImage, DevExpress.Data.v21.2" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        AAEAAAD/////AQAAAAAAAAAMAgAAAFpEZXZFeHByZXNzLkRhdGEudjIxLjIsIFZlcnNpb249MjEuMi4x
+        Mi4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI4OGQxNzU0ZDcwMGU0OWEFAQAAAB1E
+        ZXZFeHByZXNzLlV0aWxzLlN2Zy5TdmdJbWFnZQEAAAAERGF0YQcCAgAAAAkDAAAADwMAAAADAwAAAu+7
+        vzw/eG1sIHZlcnNpb249JzEuMCcgZW5jb2Rpbmc9J1VURi04Jz8+DQo8c3ZnIHg9IjBweCIgeT0iMHB4
+        IiB2aWV3Qm94PSIwIDAgMzIgMzIiIHZlcnNpb249IjEuMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3Jn
+        LzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeG1sOnNw
+        YWNlPSJwcmVzZXJ2ZSIgaWQ9Ik9wZW4yIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAz
+        MiAzMiI+DQogIDxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+CgkuR3JlZW57ZmlsbDojMDM5QzIzO30KCS5Z
+        ZWxsb3d7ZmlsbDojRkZCMTE1O30KCS5zdDB7b3BhY2l0eTowLjc1O30KPC9zdHlsZT4NCiAgPGcgY2xh
+        c3M9InN0MCI+DQogICAgPHBhdGggZD0iTTE5LjIsMTBIMTJWN2MwLTAuNi0wLjQtMS0xLTFIM0MyLjQs
+        NiwyLDYuNSwyLDd2MThjMCwwLjIsMCwwLjMsMC4xLDAuNGMwLDAsMC4xLTAuMSwwLjEtMC4ybDUuNS0x
+        MCAgIEM4LDE0LjUsOC43LDE0LDkuNSwxNGgxMy43TDE5LjIsMTB6IiBjbGFzcz0iWWVsbG93IiAvPg0K
+        ICA8L2c+DQogIDxwYXRoIGQ9Ik0yOS4zLDE2SDkuNkw0LDI2aDE5LjhjMC41LDAsMS4xLTAuMiwxLjMt
+        MC42bDQuOS04LjlDMzAuMSwxNi4yLDI5LjgsMTYsMjkuMywxNnoiIGNsYXNzPSJZZWxsb3ciIC8+DQog
+        IDxwYXRoIGQ9Ik0yOCw4YzAtMy4zLTIuNy02LTYtNnMtNiwyLjctNiw2YzAtMi4yLDEuOC00LDQtNHM0
+        LDEuOCw0LDRoLTRsNiw2bDYtNkgyOHoiIGNsYXNzPSJHcmVlbiIgLz4NCjwvc3ZnPgs=
+</value>
+  </data>
   <data name="ace_System.ImageOptions.SvgImage" type="DevExpress.Utils.Svg.SvgImage, DevExpress.Data.v21.2" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         AAEAAAD/////AQAAAAAAAAAMAgAAAFpEZXZFeHByZXNzLkRhdGEudjIxLjIsIFZlcnNpb249MjEuMi4x

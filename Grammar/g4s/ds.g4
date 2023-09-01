@@ -97,10 +97,10 @@ IPV4: [1-9][0-9]*'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*);
 
 TAG_ADDRESS: ValidTagStart ValidTagChar*;
    fragment ValidTagStart
-      : '%'   // | ('a' .. 'z') | ('A' .. 'Z') | '_' | HANGUL_CHAR
+      : ('a' .. 'z') | ('A' .. 'Z') // '%' | '_' | HANGUL_CHAR
       ;
    fragment ValidTagChar
-      : DOT | ValidIdChar | ('0' .. '9') | HangulChar
+      : ('0' .. '9')(('0' .. '9'))* DOT | ('0' .. '9') | HangulChar
       ;
 
 SQUOTE: '\'';

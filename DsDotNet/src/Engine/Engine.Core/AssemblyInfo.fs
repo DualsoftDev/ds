@@ -10,5 +10,6 @@ open System.Runtime.InteropServices
 [<assembly: InternalsVisibleTo("Model.Import.Viewer")>]
 [<assembly: InternalsVisibleTo("Dualsoft")>]
 [<assembly: InternalsVisibleTo("TestProfiler")>]
+[<assembly: InternalsVisibleTo("Newtonsoft.Json")>]
 
 do ()

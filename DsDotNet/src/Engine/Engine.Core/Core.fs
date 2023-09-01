@@ -1,13 +1,14 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
 namespace rec Engine.Core
 
-open System.Collections.Generic
 open System.Linq
 open System.Diagnostics
+open System.Collections.Generic
 open Dual.Common.Core.FS
 open System
 open System.Reactive.Subjects
 open System.ComponentModel
+open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module CoreModule =
@@ -109,9 +110,7 @@ module CoreModule =
         member val internal Lamps   = HashSet<LampDef>()
         ///시스템 조건 (운전/준비) 정보  setting은 AddCondition 사용
         member val internal Conditions   = HashSet<ConditionDef>()
-
-
-
+    
     type Flow private (name:string, system:DsSystem) =
         inherit FqdnObject(name, system)
         [<Browsable(false)>]
@@ -178,7 +177,6 @@ module CoreModule =
     [<AbstractClass>]
     type Vertex (names:Fqdn, parent:ParentWrapper)  =
         inherit FqdnObject(names.Combine(), parent.GetCore())
-
         interface INamedVertex
         [<Browsable(false)>]
         member _.Parent = parent

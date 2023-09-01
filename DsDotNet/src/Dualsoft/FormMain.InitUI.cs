@@ -8,7 +8,7 @@ namespace DSModeler
 {
     public partial class FormMain : XtraForm
     {
-        readonly Timer timerLongPress = new Timer { Interval = 100 };
+        readonly Timer timerLongPress = new Timer { Interval = 10 };
 
         private void InitializationUIControl()
         {

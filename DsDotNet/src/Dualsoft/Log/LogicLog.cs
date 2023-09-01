@@ -39,28 +39,13 @@ namespace DSModeler
 
         internal static void AddLogicLog(TagDS evt)
         {
-            //var txtStatus = "";
-            //if (evt.IsEventVertex)
-            //{
-            //    var t = evt as EventVertex;
-            //    switch (t.TagKind)
-            //    {
-            //        case VertexTag.ready: txtStatus = "[R]"; break;
-            //        case VertexTag.going: txtStatus = "[G]"; break;
-            //        case VertexTag.finish: txtStatus = "[F]"; break;
-            //        case VertexTag.homing: txtStatus = "[H]"; break;
-            //        default:
-            //            break;
-            //    }
-            //}
-
-            //var value = txtStatus == "" ? TagKindExt.GetTagValueText(evt) : txtStatus;
+            var logData = TagKindExt.GetTagToText(evt).Split(';');
             var valueLog = new ValueLog()
             {
-                Name = TagKindExt.GetTagNameText(evt),
-                Value = TagKindExt.GetTagValueText(evt),
-                System = TagKindExt.GetTagSystem(evt).Name,
-                TagKind = TagKindExt.GetTagKindText(evt)
+                Name = logData[0],
+                Value = logData[1],
+                System = logData[2],
+                TagKind = logData[3],
             };
 
             TryAdd(valueLog);

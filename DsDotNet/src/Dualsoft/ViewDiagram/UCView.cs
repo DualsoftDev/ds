@@ -80,8 +80,8 @@ namespace DSModeler
 
             SetBackColor(System.Drawing.Color.FromArgb(33, 33, 33));
 
-            viewNode.Singles.ForEach(f => DrawSeg(viewer.Graph.RootSubgraph, f));
-            viewNode.Edges.ForEach(f => DrawMEdge(viewer.Graph.RootSubgraph, f));
+            viewNode.GetSingles().ForEach(f => DrawSeg(viewer.Graph.RootSubgraph, f));
+            viewNode.GetEdges().ForEach(f => DrawMEdge(viewer.Graph.RootSubgraph, f));
 
             viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
         }
@@ -137,12 +137,12 @@ namespace DSModeler
 
             if (bDrawSub)
             {
-                viewNode.Edges.ForEach(f =>
+                viewNode.GetEdges().ForEach(f =>
                 {
                     DrawMEdge(subG, f);
                 });
 
-                viewNode.Singles.ForEach(subSeg => DrawSeg(subG, subSeg));
+                viewNode.GetSingles().ForEach(subSeg => DrawSeg(subG, subSeg));
 
 
             }

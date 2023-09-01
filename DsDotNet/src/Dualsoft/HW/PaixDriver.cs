@@ -1,3 +1,4 @@
+using Dual.Common.Core;
 using Server.HW.Common;
 using Server.HW.WMX3;
 using System;
@@ -60,7 +61,11 @@ namespace DSModeler
         public void Stop()
         {
             if (Conn.IsRunning)
+            {
+
+                Conn.Tags.ForEach(tag => { tag.Value.WriteRequestValue = false; });
                 Conn.StopDataExchangeLoop();
+            }
         }
     }
 }

@@ -18,29 +18,29 @@ module ImportViewModule =
         let dicDummy = Dictionary<string, ViewNode>()
         let dummyMembers = dummys.GetDummyMembers()
 
-        if newNode.Singles.length() = 0
+        if newNode.GetSingles().length() = 0
         then
             lands
             |>Seq.filter(fun vertex -> dummyMembers.Contains(vertex) |> not)
             |>Seq.iter(fun vertex ->
                     match vertex  with
-                    | :? CallDev | :? Alias-> newNode.Singles.Add(dicV.[vertex]) |>ignore
+                    | :? CallDev | :? Alias-> newNode.AddSingles(dicV.[vertex]) |>ignore
                     | _ -> failwithf "vertex type ERROR" )
 
-        if newNode.Edges.length() = 0
+        if newNode.GetEdges().length() = 0
         then
             edgeInfos
             |>Seq.filter(fun edge -> (dummyMembers.Contains(edge.Sources[0]) || dummyMembers.Contains(edge.Targets[0]))|>not)
             |>Seq.iter(fun edge ->
                         edge.Sources
                         |> Seq.iter(fun src ->
-                                    newNode.Edges.Add(ModelingEdgeInfo<ViewNode>(dicV.[src], edge.EdgeSymbol, dicV.[edge.Targets[0]])) |>ignore)
+                                    newNode.AddEdge(ModelingEdgeInfo<ViewNode>(dicV.[src], edge.EdgeSymbol, dicV.[edge.Targets[0]])) |>ignore)
             )
         if newNode.DummyEdgeAdded   |> not 
-        then real.GetDummyEdgeReal(dummys, dicV, dicDummy) |> Seq.iter(fun e->  newNode.Edges.Add(e) |>ignore )
+        then real.GetDummyEdgeReal(dummys, dicV, dicDummy) |> Seq.iter(fun e->  newNode.AddEdge(e) |>ignore )
            
         if newNode.DummySingleAdded   |> not 
-        then real.GetDummySingleReal(dummys, dicV, dicDummy) |> Seq.iter(fun e->  newNode.Singles.Add(e) |>ignore )
+        then real.GetDummySingleReal(dummys, dicV, dicDummy) |> Seq.iter(fun e->  newNode.AddSingles(e) |>ignore )
            
 
     let ConvertFlow(flow:Flow, dummys:pptDummy seq)  =
@@ -62,7 +62,7 @@ module ImportViewModule =
 
         lands
         |>Seq.filter(fun vertex -> dummyMembers.Contains(vertex) |> not)
-        |>Seq.iter(fun vertex -> newNode.Singles.Add(convertReal(vertex))|>ignore)
+        |>Seq.iter(fun vertex -> newNode.AddSingles(convertReal(vertex))|>ignore)
 
         edgeInfos
         |>Seq.filter(fun edge -> (dummyMembers.Contains(edge.Sources[0]) || dummyMembers.Contains(edge.Targets[0]))|>not)
@@ -80,11 +80,11 @@ module ImportViewModule =
 
                     edge.Sources
                     |> Seq.iter(fun src ->
-                                    newNode.Edges.Add(ModelingEdgeInfo<ViewNode>(dicV.[src], edge.EdgeSymbol, dicV.[edge.Targets[0]])) |>ignore)
+                                    newNode.AddEdge(ModelingEdgeInfo<ViewNode>(dicV.[src], edge.EdgeSymbol, dicV.[edge.Targets[0]])) |>ignore)
             )
 
-        flow.GetDummyEdgeFlow(dummys, dicV, dicDummy) |> Seq.iter(fun e-> newNode.Edges.Add(e) |>ignore)
-        flow.GetDummySingleFlow(dummys, dicV, dicDummy) |> Seq.iter(fun v-> newNode.Singles.Add(v) |>ignore)
+        flow.GetDummyEdgeFlow(dummys, dicV, dicDummy) |> Seq.iter(fun e-> newNode.AddEdge(e) |>ignore)
+        flow.GetDummySingleFlow(dummys, dicV, dicDummy) |> Seq.iter(fun v-> newNode.AddSingles(v) |>ignore)
         
 
         newNode
@@ -92,43 +92,43 @@ module ImportViewModule =
     let UpdateLampNodes(system:DsSystem, flow:Flow, node:ViewNode)  =
         let newNode = ViewNode("Lamps", VLAMP)
 
-        system.AutoLamps.Where(fun w->      w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuAutoLamp))      |>ignore)
-        system.ManualLamps.Where(fun w->    w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuManualLamp))    |>ignore)
-        system.DriveLamps.Where(fun w->     w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuDriveLamp))     |>ignore)
-        system.StopLamps.Where(fun w->      w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuStopLamp))      |>ignore)
-        system.EmergencyLamps.Where(fun w-> w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuEmergencyLamp)) |>ignore)
-        system.TestLamps.Where(fun w->      w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuTestDriveLamp)) |>ignore)
-        system.ReadyLamps.Where(fun w->     w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuReadyLamp))     |>ignore)
-        system.IdleLamps.Where(fun w->      w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuIdleLamp))      |>ignore)
+        system.AutoLamps.Where(fun w->      w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.AddSingles(ViewNode(b.Name, DuAutoLamp))      |>ignore)
+        system.ManualLamps.Where(fun w->    w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.AddSingles(ViewNode(b.Name, DuManualLamp))    |>ignore)
+        system.DriveLamps.Where(fun w->     w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.AddSingles(ViewNode(b.Name, DuDriveLamp))     |>ignore)
+        system.StopLamps.Where(fun w->      w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.AddSingles(ViewNode(b.Name, DuStopLamp))      |>ignore)
+        system.EmergencyLamps.Where(fun w-> w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.AddSingles(ViewNode(b.Name, DuEmergencyLamp)) |>ignore)
+        system.TestLamps.Where(fun w->      w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.AddSingles(ViewNode(b.Name, DuTestDriveLamp)) |>ignore)
+        system.ReadyLamps.Where(fun w->     w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.AddSingles(ViewNode(b.Name, DuReadyLamp))     |>ignore)
+        system.IdleLamps.Where(fun w->      w.SettingFlow = flow) |> Seq.iter(fun b-> newNode.AddSingles(ViewNode(b.Name, DuIdleLamp))      |>ignore)
 
-        if newNode.Singles.Count > 0
-        then node.Singles.Add(newNode) |> ignore
+        if newNode.GetSingles().Count() > 0
+        then node.AddSingles(newNode) |> ignore
 
     let UpdateBtnNodes(system:DsSystem, flow:Flow, node:ViewNode)  =
 
         let newNode = ViewNode("Buttons", VBUTTON)
 
-        system.AutoButtons.Where(fun w->w.SettingFlows.Contains(flow))       |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuAutoBTN)     ) |>ignore)
-        system.ManualButtons.Where(fun w->w.SettingFlows.Contains(flow))     |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuManualBTN)   ) |>ignore)
-        system.DriveButtons.Where(fun w->w.SettingFlows.Contains(flow))      |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuDriveBTN)    ) |>ignore)
-        system.StopButtons.Where(fun w->w.SettingFlows.Contains(flow))       |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuStopBTN)     ) |>ignore)
-        system.ClearButtons.Where(fun w->w.SettingFlows.Contains(flow))      |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuClearBTN)    ) |>ignore)
-        system.EmergencyButtons.Where(fun w->w.SettingFlows.Contains(flow))  |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuEmergencyBTN)) |>ignore)
-        system.TestButtons.Where(fun w->w.SettingFlows.Contains(flow))       |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuTestBTN)     ) |>ignore)
-        system.HomeButtons.Where(fun w->w.SettingFlows.Contains(flow))       |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuHomeBTN)     ) |>ignore)
-        system.ReadyButtons.Where(fun w->w.SettingFlows.Contains(flow))      |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuReadyBTN)    ) |>ignore)
+        system.AutoButtons.Where(fun w->w.SettingFlows.Contains(flow))       |> Seq.iter(fun b-> newNode.AddSingles(ViewNode(b.Name, DuAutoBTN)     ) |>ignore)
+        system.ManualButtons.Where(fun w->w.SettingFlows.Contains(flow))     |> Seq.iter(fun b-> newNode.AddSingles(ViewNode(b.Name, DuManualBTN)   ) |>ignore)
+        system.DriveButtons.Where(fun w->w.SettingFlows.Contains(flow))      |> Seq.iter(fun b-> newNode.AddSingles(ViewNode(b.Name, DuDriveBTN)    ) |>ignore)
+        system.StopButtons.Where(fun w->w.SettingFlows.Contains(flow))       |> Seq.iter(fun b-> newNode.AddSingles(ViewNode(b.Name, DuStopBTN)     ) |>ignore)
+        system.ClearButtons.Where(fun w->w.SettingFlows.Contains(flow))      |> Seq.iter(fun b-> newNode.AddSingles(ViewNode(b.Name, DuClearBTN)    ) |>ignore)
+        system.EmergencyButtons.Where(fun w->w.SettingFlows.Contains(flow))  |> Seq.iter(fun b-> newNode.AddSingles(ViewNode(b.Name, DuEmergencyBTN)) |>ignore)
+        system.TestButtons.Where(fun w->w.SettingFlows.Contains(flow))       |> Seq.iter(fun b-> newNode.AddSingles(ViewNode(b.Name, DuTestBTN)     ) |>ignore)
+        system.HomeButtons.Where(fun w->w.SettingFlows.Contains(flow))       |> Seq.iter(fun b-> newNode.AddSingles(ViewNode(b.Name, DuHomeBTN)     ) |>ignore)
+        system.ReadyButtons.Where(fun w->w.SettingFlows.Contains(flow))      |> Seq.iter(fun b-> newNode.AddSingles(ViewNode(b.Name, DuReadyBTN)    ) |>ignore)
 
-        if newNode.Singles.Count > 0
-        then node.Singles.Add(newNode) |> ignore
+        if newNode.GetSingles().Count() > 0
+        then node.AddSingles(newNode) |> ignore
 
     let UpdateConditionNodes(system:DsSystem, flow:Flow, node:ViewNode)  =
         let newNode = ViewNode("Condition", VCONDITION)
 
-        system.AutoButtons.Where(fun w->w.SettingFlows.Contains(flow))       |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuReadyState)) |>ignore)
-        system.ManualButtons.Where(fun w->w.SettingFlows.Contains(flow))     |> Seq.iter(fun b-> newNode.Singles.Add(ViewNode(b.Name, DuDriveState)) |>ignore)
+        system.AutoButtons.Where(fun w->w.SettingFlows.Contains(flow))       |> Seq.iter(fun b-> newNode.AddSingles(ViewNode(b.Name, DuReadyState)) |>ignore)
+        system.ManualButtons.Where(fun w->w.SettingFlows.Contains(flow))     |> Seq.iter(fun b-> newNode.AddSingles(ViewNode(b.Name, DuDriveState)) |>ignore)
 
-        if newNode.Singles.Count > 0
-        then node.Singles.Add(newNode) |> ignore
+        if newNode.GetSingles().Count() > 0
+        then node.AddSingles(newNode) |> ignore
 
     let UpdateApiItems(system:DsSystem, page:int, pptNodes: pptNode seq, node:ViewNode)  =
 
@@ -139,12 +139,12 @@ module ImportViewModule =
 
             let findApiNode = pptNodes.Where(fun f->f.Name = api.Name && f.PageNum = page)
             if findApiNode.Count() > 0
-            then newNode.Singles.Add(ViewNode(api.Name, VIF)) |>ignore
+            then newNode.AddSingles(ViewNode(api.Name, VIF)) |>ignore
 
             )
 
-        if newNode.Singles.Count > 0
-        then node.Singles.Add(newNode) |> ignore
+        if newNode.GetSingles().Count() > 0
+        then node.AddSingles(newNode) |> ignore
 
     //let rec ConvertRuntimeEdge(graph:Graph<Vertex, Edge>)  =
     //    let newNode = ViewNode()

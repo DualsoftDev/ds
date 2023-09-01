@@ -155,39 +155,12 @@ module TagKindModule =
                 |_ -> None
             |None -> None
 
+      
         [<Extension>]
-        static member GetTagKindText (x:TagDS) =
+        static member GetTagToText(x:TagDS) =
             match x with
-            |EventSystem (_,_,kind) -> kind.ToString()
-            |EventFlow (_,_,kind) -> kind.ToString()
-            |EventVertex (_,_,kind) -> kind.ToString()
-            |EventApiItem (_,_,kind) -> kind.ToString()
-            |EventAction (_,_,kind) -> kind.ToString()
-
-        [<Extension>]
-        static member GetTagNameText(x:TagDS) =
-            match x with
-            |EventSystem (tag, _,_) -> $"{tag.Name}"
-            |EventFlow   (tag, _,_) -> $"{tag.Name}"
-            |EventVertex (tag, _,_) -> $"{tag.Name}"
-            |EventApiItem(tag, _,_) -> $"{tag.Name}"
-            |EventAction (tag, _,_) -> $"{tag.Name}"
-
-        [<Extension>]
-        static member GetTagValueText(x:TagDS) =
-            match x with
-            |EventSystem (tag, _,_) -> $"{tag.BoxedValue}"
-            |EventFlow   (tag, _,_) -> $"{tag.BoxedValue}"
-            |EventVertex (tag, _,_) -> $"{tag.BoxedValue}"
-            |EventApiItem(tag, _,_) -> $"{tag.BoxedValue}"
-            |EventAction (tag, _,_) -> $"{tag.BoxedValue}"
-
-        [<Extension>]
-        static member GetTagSystem(x:TagDS) =
-            match x with
-            |EventSystem (tag, _,_) -> tag.DsSystem :?> DsSystem
-            |EventFlow   (tag, _,_) -> tag.DsSystem :?> DsSystem 
-            |EventVertex (tag, _,_) -> tag.DsSystem :?> DsSystem 
-            |EventApiItem(tag, _,_) -> tag.DsSystem :?> DsSystem 
-            |EventAction (tag, _,_) -> tag.DsSystem :?> DsSystem 
-
+            |EventSystem (tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
+            |EventFlow   (tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
+            |EventVertex (tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
+            |EventApiItem(tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
+            |EventAction (tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"

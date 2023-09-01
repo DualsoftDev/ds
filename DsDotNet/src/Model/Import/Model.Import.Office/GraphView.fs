@@ -14,6 +14,9 @@ module rec ViewModule =
 
 
     type ViewNode(name:string, viewType:ViewType, coreVertex:Vertex option, btnType:BtnType option, lampType:LampType option, cType:ConditionType option)  =
+        let dicUsedVertex = new Dictionary<Vertex, ViewNode>()
+        let edges = HashSet<ModelingEdgeInfo<ViewNode>>()
+        let singles = HashSet<ViewNode>()
 
         new (name, viewType) = ViewNode(name, viewType, None, None, None, None)
         new (coreVertex:Vertex) =
@@ -35,10 +38,7 @@ module rec ViewModule =
         new (name, lampType:LampType) = ViewNode(name, VLAMP, None, None, Some(lampType), None)
         new (name, cType:ConditionType) = ViewNode(name, VCONDITION, None, None, None, Some(cType))
 
-        [<Browsable(false)>]
-        member val Edges = HashSet<ModelingEdgeInfo<ViewNode>>()
-        [<Browsable(false)>]
-        member val Singles = HashSet<ViewNode>()
+
         [<Browsable(false)>]
         member val Status4 = Status4.Homing with get, set
         member val ViewType = viewType with get, set
@@ -46,13 +46,24 @@ module rec ViewModule =
         member val Flow:Flow option = None with get, set
         [<ReadOnly(true)>]
         member val Page = 0 with get, set
+        
+        member x.GetEdges() = edges.ToArray()
+        member x.AddEdge(edge:ModelingEdgeInfo<ViewNode>) =
+                        edges.Add edge |> ignore
+                        x.UsedViewVertexNodes(true) |> ignore
+
+        member x.GetSingles() = singles.ToArray()
+        member x.AddSingles(single:ViewNode) = 
+                        singles.Add single |> ignore 
+                        x.UsedViewVertexNodes(true) |> ignore
+         
 
         [<Browsable(false)>]
-        member x.DummyEdgeAdded = x.Edges |> Seq.collect(fun e-> e.Sources @ e.Targets)
+        member x.DummyEdgeAdded = edges |> Seq.collect(fun e-> e.Sources @ e.Targets)
                                           |> Seq.filter(fun v -> v.ViewType = VDUMMY)
                                           |> Seq.any
         [<Browsable(false)>]
-        member x.DummySingleAdded = x.Singles 
+        member x.DummySingleAdded = singles 
                                           |> Seq.filter(fun v -> v.ViewType = VDUMMY)
                                           |> Seq.any
         [<Browsable(false)>]
@@ -64,7 +75,7 @@ module rec ViewModule =
         [<Browsable(false)>]
         member x.ConditionType =  cType
         [<Browsable(false)>]
-        member x.IsChildExist =  x.Edges.Count>0 || x.Singles.Count>0
+        member x.IsChildExist =  edges.Count>0 || singles.Count>0
         member x.Name =  name
         [<Browsable(false)>]
         member x.UIKey = if coreVertex.IsSome
@@ -73,12 +84,23 @@ module rec ViewModule =
 
         [<Browsable(false)>]
         member x.UsedViewNodes =
-                            let thisChildren  = x.Edges |> Seq.collect(fun e-> e.Sources @ e.Targets)
-                                                        |> Seq.append x.Singles
+                            let thisChildren  = edges |> Seq.collect(fun e-> e.Sources @ e.Targets)
+                                                        |> Seq.append singles
                             [
                                 yield! thisChildren
                                 yield! thisChildren |> Seq.collect(fun x->x.UsedViewNodes)
                             ] |> Seq.distinct
+
+        [<Browsable(false)>]
+        member x.UsedViewVertexNodes(newDic:bool) =
+                        if newDic || dicUsedVertex.Count = 0  //성능 때문에 한번만 만듬 //Edges  Singles 업데이트될 경우 같이 업데이트 필요
+                        then
+                            dicUsedVertex.Clear()
+                            let used = x.UsedViewNodes
+                            used |> Seq.where(fun f->f.CoreVertex.IsSome)
+                                 |> Seq.iter(fun f->  dicUsedVertex.Add( f.CoreVertex.Value, f))       
+                         
+                        dicUsedVertex
 
 
     let getViewEdge(edge:ModelingEdgeInfo<string> ,dummy:pptDummy , dummys:pptDummy seq,  dicV:IDictionary<Vertex, ViewNode>, dicDummy:IDictionary<string, ViewNode>) =
@@ -89,7 +111,7 @@ module rec ViewModule =
                      let viewNode = ViewNode("", ViewType.VDUMMY)
                      let dummy  = dummys.First(fun f-> f.DummyNodeKey = dummyKey)
 
-                     dummy.Members |> Seq.iter(fun f-> viewNode.Singles.Add(dicV.[f])|>ignore)
+                     dummy.Members |> Seq.iter(fun f-> viewNode.AddSingles(dicV.[f])|>ignore)
                      dicDummy.Add(dummyKey, viewNode) |>ignore
                      viewNode
             let findV = dummy.GetVertex(dummyKey);
@@ -116,7 +138,7 @@ type ViewModuleExt =
             |> Seq.filter(fun dummy  -> not <| dummy.Edges.any())
             |> Seq.map(fun dummy ->
                     let viewNode = ViewNode("", ViewType.VDUMMY)
-                    dummy.Members |> Seq.iter(fun f-> viewNode.Singles.Add(dicV.[f])|>ignore)
+                    dummy.Members |> Seq.iter(fun f-> viewNode.AddSingles(dicV.[f])|>ignore)
                     viewNode
                     )
 
@@ -135,7 +157,7 @@ type ViewModuleExt =
             |> Seq.filter(fun dummy  -> not <| dummy.Edges.any())
             |> Seq.map(fun dummy ->
                     let viewNode = ViewNode("", ViewType.VDUMMY)
-                    dummy.Members |> Seq.iter(fun f-> viewNode.Singles.Add(dicV.[f])|>ignore)
+                    dummy.Members |> Seq.iter(fun f-> viewNode.AddSingles(dicV.[f])|>ignore)
                     viewNode
                     )
 

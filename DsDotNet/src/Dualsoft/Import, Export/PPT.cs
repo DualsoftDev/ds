@@ -60,12 +60,12 @@ namespace DSModeler
                 nodeFlows.Iter(f => DocControl.CreateDocOrSelect(formMain, f));
             }
 
-            //formMain.Do(() =>
-            //{
-            //    formMain.Ace_Model.Expanded = true;
-            //    formMain.Ace_System.Expanded = true;
-            //    formMain.Ace_Device.Expanded = false;
-            //});
+            formMain.Do(() =>
+            {
+                //formMain.Ace_Model.Expanded = false;
+                formMain.Ace_System.Expanded = false;
+                formMain.Ace_Device.Expanded = false;
+            });
             //tsc.SetResult(true);
             //});
             return dicCpu;

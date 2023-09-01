@@ -1,4 +1,5 @@
 using DevExpress.XtraEditors;
+using DSModeler.Tree;
 using Dual.Common.Core;
 using Dual.Common.Winform;
 using Engine.Core;
@@ -45,9 +46,7 @@ namespace DSModeler
 
                     EventCPU.CPUSubscribe(ViewDraw.DicStatus);
 
-                    Tree.LogicTree.UpdateExpr(gle_Expr, toggleSwitch_showDeviceExpr.IsOn);
-
-
+                    LogicTree.UpdateExpr(gle_Expr, toggleSwitch_showDeviceExpr.IsOn);
 
                     Global.Logger.Info("PPTX 파일 로딩이 완료 되었습니다.");
                     ImportingPPT = false;

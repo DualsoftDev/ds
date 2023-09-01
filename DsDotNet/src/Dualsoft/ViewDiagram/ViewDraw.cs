@@ -43,31 +43,25 @@ namespace DSModeler
                     foreach (var r in ret)
                     {
                         var form = r.Item1;
-                        var nodes = r.Item2;
-                        if (nodes.Any())
-                        {
-                            var node = nodes.First();
+                        var node = r.Item2;
                             node.Status4 = rx.Item2;
                             form.UcView.UpdateStatus(node);
-                        }
                     }
                 });
             });
         }
 
-        private static IEnumerable<Tuple<FormDocView, IEnumerable<ViewNode>>> GetViewNode(FormMain formMain, Vertex v)
+        private static IEnumerable<Tuple<FormDocView, ViewNode>> GetViewNode(FormMain formMain, Vertex v)
         {
             var visibleFroms = formMain.TabbedView.Documents
                                 .Where(w => w.IsVisible)
                                 .Select(s => s.Tag)
-                                .OfType<FormDocView>();
+                                .OfType<FormDocView>()
+                                .Where(w => w.UcView.Flow == v.Parent.GetFlow());
 
-            return visibleFroms.Select(s => Tuple.Create(s,
-                                                s.UcView.MasterNode
-                                                .UsedViewNodes
-                                                .Where(w => w.CoreVertex != null)
-                                                .Where(f => f.CoreVertex.Value == v)));
 
+
+            return visibleFroms.Select(s => Tuple.Create(s, s.UcView.MasterNode.UsedViewVertexNodes(false)[v]));
         }
 
         public static void DrawInitActionTask(FormMain formMain, Dictionary<DsSystem, CpuLoader.PouGen> dicCpu)
@@ -81,7 +75,7 @@ namespace DSModeler
                      .Distinct()
                      .Iter(d =>
                      {
-                         var finds = calls.Where(w => w.CallTargetJob.DeviceDefs.Contains(d));  
+                         var finds = calls.Where(w => w.CallTargetJob.DeviceDefs.Contains(d));
                          DicTask.Add(d, finds);
                      });
             }
@@ -94,12 +88,8 @@ namespace DSModeler
                     foreach (var r in ret)
                     {
                         var form = r.Item1;
-                        var nodes = r.Item2;
-                        if (nodes.Any())
-                        {
-                            var node = nodes.First();
-                            form.UcView.UpdateValue(node, rx.Item2);
-                        }
+                        var node = r.Item2;
+                        form.UcView.UpdateValue(node, rx.Item2);
                     }
                 });
             });

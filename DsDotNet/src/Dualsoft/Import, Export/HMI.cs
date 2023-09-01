@@ -18,6 +18,7 @@ using Engine.Core;
 using Engine.Parser.FS;
 using Microsoft.Msagl.GraphViewerGdi;
 using static Engine.Parser.FS.ParserOptionModule;
+using System.Linq;
 
 namespace DSModeler
 {
@@ -43,7 +44,7 @@ namespace DSModeler
             );
 
             string dsText = "";
-            foreach (var sys in PcControl.DicPou.Keys)
+            foreach (var sys in PcControl.RunCpus.SelectMany(s=>s.Systems))
                 dsText += $"{sys.ToDsText(Global.IsDebug)}\r\n\r\n";
 
             var systemRepo = new Dictionary<string, DsSystem>();

@@ -26,3 +26,4 @@ Grammar/CsParser/bin/
 *.zip
 *.xgwx
 
+/DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample*

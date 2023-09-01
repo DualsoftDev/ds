@@ -12,6 +12,7 @@ type VertexManager with
         let real = v.Vertex :?> Real
         let wsDirect =  v.GetWeakStartRootAndCausals()
         let ssDirect =  v.GetStrongStartRootAndCausals()
+        let planSets = v.System.GetPSs(real).ToOrElseOff(v.System)
 
         let shareds = v.GetSharedReal().Select(getVM)
         let wsShareds =
@@ -19,7 +20,7 @@ type VertexManager with
             then shareds.Select(fun s -> s.GetWeakStartRootAndCausals()).ToOr()
             else v._off.Expr
 
-        let sets = wsDirect <||> wsShareds <||> v.SF.Expr <||> ssDirect
+        let sets = wsDirect <||> wsShareds <||> v.SF.Expr <||> ssDirect <||> planSets
         let rsts  = real.V.RP.Expr <||> real.V.F.Expr
         [ (sets, rsts) ==| (v.ST, getFuncName()) ]
 

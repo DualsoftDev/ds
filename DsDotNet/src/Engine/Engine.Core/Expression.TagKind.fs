@@ -155,24 +155,12 @@ module TagKindModule =
                 |_ -> None
             |None -> None
 
+      
         [<Extension>]
-        static member GetVertexTagKindText (x:IStorage) =
-            let info = x.GetTagInfo()
-            match info with
-            |Some t -> 
-                match t with
-                |EventSystem (_,_,kind) -> kind.ToString()
-                |EventFlow (_,_,kind) -> kind.ToString()
-                |EventVertex (_,_,kind) -> kind.ToString()
-                |EventApiItem (_,_,kind) -> kind.ToString()
-                |EventAction (_,_,kind) -> kind.ToString()
-            |None -> "None"
-
-        [<Extension>]
-        static member GetText (x:TagDS) =
+        static member GetTagToText(x:TagDS) =
             match x with
-            |EventSystem (tag, target, kind) -> $"{tag.Name}, {target.Name}, {kind}";
-            |EventFlow   (tag, target, kind) -> $"{tag.Name}, {target.Name}, {kind}";
-            |EventVertex (tag, target, kind) -> $"{tag.Name}, {target.Name}, {kind}";
-            |EventApiItem(tag, target, kind) -> $"{tag.Name}, {target.Name}, {kind}";
-            |EventAction (tag, target, kind) -> $"{tag.Name}, {target.Name}, {kind}";
+            |EventSystem (tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
+            |EventFlow   (tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
+            |EventVertex (tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
+            |EventApiItem(tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
+            |EventAction (tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"

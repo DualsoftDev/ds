@@ -21,7 +21,7 @@ namespace DSModeler
                 gc.Do(() =>
                 {
                     var pathXLS = Path.ChangeExtension(Files.GetLast().First(), "xlsx");
-                    var newPath = Files.GetNewPath(pathXLS);
+                    var newPath = Files.GetNewFileName(pathXLS);
                     Global.ExportPathXLS = newPath;
 
                     var datatable = ExportIOTable.ToDataSet(Global.ActiveSys);

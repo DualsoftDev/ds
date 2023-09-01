@@ -11,6 +11,25 @@ open System.Collections.Generic
 module RunTimeUtil =
 
 
+    
+    let notifyPreExcute ( x:IStorage) = 
+            match  x.GetTagInfo() with
+            |Some t -> onTagDSChanged t
+            |_ -> ()
+        
+    let  notifyPostExcute ( x:IStorage) =
+            match x.GetTagInfo() with
+            |Some t -> 
+                match t with
+                |EventVertex (tag,_,kind) ->
+                        match kind with
+                        | VertexTag.startForce 
+                        | VertexTag.resetForce -> tag.BoxedValue <- false 
+                        | _-> ()
+                |_ -> ()
+            |None -> ()
+
+
     let getTotalTags(statements:Statement seq) =
         [ for s in statements do
             yield! s.GetSourceStorages()
@@ -67,9 +86,10 @@ module RunTimeUtil =
         let total = getTotalTags  statements
         let chTags = total.ChangedTags()
 
-        chTags.Iter(fun f->  f.DsSystem.NotifyPreExcute(f)) 
+        chTags.Iter(notifyPreExcute) 
         chTags.ChangedTagsClear(systems)
-
+        chTags.Iter(notifyPostExcute) 
+        
     ///HMI Reset
     let syncReset(statements:Statement seq, systems:DsSystem seq, activeSys:bool) =
         let stgs = systems.First().TagManager.Storages

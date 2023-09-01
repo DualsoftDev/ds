@@ -31,6 +31,7 @@ module CodeConvertUtil =
             match v.Vertex with
             | :? Real   as r  -> r
             | :? RealExF as rf -> rf.Real
+            | :? CallSys as cs  ->  failwithlog $"Error"
             | :? Alias  as a  ->
                 match a.TargetWrapper.GetTarget() with
                 | :? Real as real -> real
@@ -218,6 +219,7 @@ module CodeConvertUtil =
                     | :? Real    as r  -> r.V.GR(tgtV.Vertex)
                     | :? RealExF as rf -> rf.Real.V.GR(tgtV.Vertex)//.V.EP
                     | :? Alias   as a  -> getPureReal(a.V).V.GR(tgtV.Vertex)
+                    | :? CallSys as cs  -> cs.V.GR(tgtV.Vertex)
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
 
@@ -229,6 +231,7 @@ module CodeConvertUtil =
                     | :? Real    as r  -> r.V.G
                     | :? RealExF as rf -> rf.Real.V.G
                     | :? Alias   as a  -> getPureReal(a.V).V.G
+                    | :? CallSys as cs  -> cs.V.G
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
 

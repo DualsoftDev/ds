@@ -24,17 +24,14 @@ namespace DSModeler
             return recents.ToArray();
         }
 
-        public static string GetNewPath(string path)
+        public static string GetNewFileName(string path)
         {
-            var newPath = Path.Combine(Path.GetDirectoryName(path)
-                        , string.Join("_", Path.GetFileNameWithoutExtension(path)));
+            var directory = Path.GetDirectoryName(path);
 
-            var extension = Path.GetExtension(path);
-            var excelName = Path.GetFileNameWithoutExtension(newPath) + $"_{DateTime.Now.ToString("yyMMdd(HH-mm-ss)")}.{extension}";
-            var excelDirectory = Path.Combine(Path.GetDirectoryName(newPath), Path.GetFileNameWithoutExtension(excelName));
-            Directory.CreateDirectory(excelDirectory);
+            var newDirectory = directory + $"_{DateTime.Now:yyMMdd_HH_mm_ss}";
+            Directory.CreateDirectory(newDirectory);
 
-            return Path.Combine(excelDirectory, excelName);
+            return Path.Combine(newDirectory, Path.GetFileName(path));
         }
     }
 }

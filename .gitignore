@@ -22,5 +22,7 @@ Grammar/CsParser/bin/
 /DsDotNet/src/UnitTest/**/*.dst
 /DsDotNet/src/UnitTest/**/*.xgdb
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/*.xml
-packages.config
+/DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/*gen*
 *.zip
+*.xgwx
+

@@ -1,14 +1,6 @@
 using DevExpress.XtraEditors;
-using DevExpress.XtraEditors.Controls;
-using DSModeler.Form;
-using DSModeler.Tree;
-using Dual.Common.Core;
-using Dual.Common.Winform;
-using Engine.Core;
-using Server.HW.WMX3;
 using System;
 using System.Linq;
-using System.Net;
 using System.Windows.Forms;
 using static Engine.Core.RuntimeGeneratorModule;
 
@@ -16,8 +8,23 @@ namespace DSModeler
 {
     public partial class FormMain : XtraForm
     {
+        readonly Timer timerLongPress = new Timer { Interval = 10 };
+
         private void InitializationUIControl()
         {
+            timerLongPress.Tick += (sender, e) =>
+            {
+                PcAction.Step(ace_Play);
+            };
+            btn_StepLongPress.MouseDown += (sender, e) => timerLongPress.Start();
+            btn_StepLongPress.MouseUp += (sender, e) => timerLongPress.Stop();
+            btn_StepLongPress.Disposed += (sender, e) =>
+            {
+                timerLongPress.Stop();
+                timerLongPress.Dispose();
+            };
+
+
             LookupEditExt.InitEdit(gle_Log, gleView_Log);
             LookupEditExt.InitEdit(gle_Expr, gleView_Expr);
             LookupEditExt.InitEdit(gle_Device, gleView_Device);
@@ -47,17 +54,6 @@ namespace DSModeler
             var layoutGraphLineType = DSRegistry.GetValue(K.LayoutGraphLineType);
             toggleSwitch_LayoutGraph.IsOn = Convert.ToBoolean(layoutGraphLineType);
 
-            timerLongPress.Tick += (sender, e) =>
-            {
-                PcAction.Step(ace_Play);
-            };
-            btn_StepLongPress.MouseDown += (sender, e) => timerLongPress.Start();
-            btn_StepLongPress.MouseUp += (sender, e) => timerLongPress.Stop();
-            btn_StepLongPress.Disposed += (sender, e) =>
-            {
-                timerLongPress.Stop();
-                timerLongPress.Dispose();
-            };
 
         }
 

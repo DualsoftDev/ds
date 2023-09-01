@@ -73,7 +73,10 @@ module ConvertCPU =
             if IsSpec (v, CallInFlow ||| RealExSystem ||| RealExFlow, AliasNotCare) then
                 yield vm.F5_RootCoinRelay()
 
-            if IsSpec (v, CallInReal ||| CallInFlow, AliasFalse) then
+            if IsSpec (v, CallInFlow , AliasFalse) then
+                yield! vm.C5_CallActionInRoot()
+
+            if IsSpec (v, CallInReal , AliasFalse) then
                 yield! vm.C1_CallPlanSend()
                 yield! vm.C2_CallActionOut()
                 yield! vm.C3_CallPlanReceive()

@@ -58,28 +58,8 @@ module CoreExtensionsModule =
         [<Extension>] static member ExecutableStatements (xs:IStorage seq, mRung:IDictionary<IStorage, Statement seq>) = 
                         xs |> Seq.collect(fun stg -> mRung[stg]) 
 
-        [<Extension>] static member NotifyPreExcute (_:ISystem, x:IStorage) = 
-                        match  x.GetTagInfo() with
-                        |Some t -> onTagDSChanged t
-                        |_ -> ()
-        
-        
-        //[<Extension>]
-        //static member NotifyPostExcute (_:ISystem, x:IStorage) =
-        //    match x.GetTagInfo() with
-        //        |Some t -> 
-        //            match t with
-        //            |TTSystem (_,_) -> ()
-        //            |TTFlow   (_,_) -> ()
-        //            |TTVertex (_,tag) ->   match tag with
-        //                                    | VertexTag.startForce 
-        //                                    | VertexTag.resetForce -> x.BoxedValue <- false
-        //                                    | _->()
-        //            |TTApiItem(_,_) -> ()
-        //            |TTAction (_,_) -> ()
-        //        |None -> ()
-
-
+      
+                        
 
         [<Extension>]
         static member IsEndThread (x:IStorage) =
@@ -91,7 +71,7 @@ module CoreExtensionsModule =
                 | Some VertexTag.endPort -> true
                 | Some VertexTag.relayCall -> true  /// relayCall 인과 H/S 필요??
                 | _ -> false
-
+                
         [<Extension>]
         static member IsStartThread (x:IStorage) =
             match x.GetApiTagKind() with  //외부 시스템 관련 신호

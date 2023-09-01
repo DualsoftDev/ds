@@ -1,4 +1,7 @@
+using DevExpress.XtraEditors.Designer.Utils;
+using Dual.Common.Core;
 using Engine.Core;
+using Microsoft.Msagl.GraphmapsWithMesh;
 using Server.HW.Common;
 using Server.HW.WMX3;
 using System;
@@ -20,8 +23,7 @@ namespace DSModeler
         static IDisposable DisposableHWPaixInput;
         static IDisposable DisposableTagDS;
 
-
-        public static void CPUSubscribe(Dictionary<Vertex, DsType.Status4> dicStatus)
+        public static void CPUSubscribe(Dictionary<CoreModule.Vertex, DsType.Status4> dicStatus)
         {
             if (DisposableHWPaixInput == null && Global.CpuRunMode.IsPackagePC())
             {
@@ -29,11 +31,26 @@ namespace DSModeler
                 .Subscribe(evt =>
                 {
                     var t = evt.Tag as WMXTag;
-                    if (t.IOType == TagIOType.Output) return;
-                    var tag = PcControl.DicActionIn[t];
-                    tag.BoxedValue = t.Value;
-
-                    Global.Logger.Debug($"HW_IN {tag.Address} value: {tag.BoxedValue} [{tag.Name}]");
+                    if (t.IOType == TagIOType.Output)
+                    {
+                        Global.Logger.Debug($"HW_OUT {t.Address} value: {t.Value}");
+                    }
+                    if (t.IOType == TagIOType.Input)
+                    {
+                        var tags = PcControl.DicActionIn[t];
+                        tags.Iter(tag =>
+                        {
+                            tag.BoxedValue = t.Value;
+                            var dev = tag.Target.Value as TaskDev;
+                            if (dev != null && ViewDraw.DicTask.ContainsKey(dev)) //job만정의 하고 call에 사용  안함
+                            {
+                                var vs = ViewDraw.DicTask[dev];
+                                vs.Iter(v => ViewDraw.ActionChangeSubject
+                                                   .OnNext(System.Tuple.Create(v, t.Value)));
+                            }
+                        });
+                        Global.Logger.Debug($"HW_IN {t.Address} value: {t.Value}");
+                    }
                 });
             }
 
@@ -57,10 +74,14 @@ namespace DSModeler
                             }
 
                             if (isStatus && (bool)t.Tag.BoxedValue)
-                                Global.StatusChangeSubject.OnNext(Tuple.Create(t.Target, dicStatus[t.Target]));
+                                ViewDraw.StatusChangeSubject.OnNext(System.Tuple.Create(t.Target, dicStatus[t.Target]));
 
-                            LogicLog.AddLogicLog(t);
-                            Task.Delay(ControlProperty.GetDelayMsec()).Wait();
+
+                            if (Global.CpuRunMode.IsSimulation)
+                                Task.Delay(ControlProperty.GetDelayMsec()).Wait();
+                            else
+                                Task.Yield();
+
                         }
                         else if (evt.IsEventAction && Global.CpuRunMode.IsPackagePC())
                         {
@@ -71,8 +92,9 @@ namespace DSModeler
                                 tagHW.WriteRequestValue = tag.Value;
                             }
 
-                            Global.Logger.Debug($"HW_OUT {tag.Address} value: {tag.Value} [{tag.Name}]");
                         }
+
+                        LogicLog.AddLogicLog(evt);
                     });
             }
 

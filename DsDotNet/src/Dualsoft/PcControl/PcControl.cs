@@ -1,7 +1,5 @@
 using DevExpress.Utils.Extensions;
-using DevExpress.XtraBars.Navigation;
 using DevExpress.XtraEditors;
-using DSModeler.Tree;
 using Dual.Common.Core;
 using Dual.Common.Winform;
 using Engine.Core;
@@ -15,46 +13,60 @@ using static Engine.CodeGenCPU.CpuLoader;
 using static Engine.Core.CoreModule;
 using static Engine.Core.ExpressionForwardDeclModule;
 using static Engine.Core.ExpressionModule;
-using static Engine.Core.RuntimeGeneratorModule;
 using static Engine.Cpu.RunTime;
 
 namespace DSModeler
 {
     public static class PcControl
     {
-        public static Dictionary<DsSystem, PouGen> DicPou = new Dictionary<DsSystem, PouGen>();
         public static List<DsCPU> RunCpus = new List<DsCPU>();
-        public static Dictionary<TagHW, ITag> DicActionIn = new Dictionary<TagHW, ITag>();
+        public static Dictionary<TagHW, IEnumerable<ITag>> DicActionIn = new Dictionary<TagHW, IEnumerable<ITag>>();
         public static Dictionary<ITag, TagHW> DicActionOut = new Dictionary<ITag, TagHW>();
 
-        public static Dictionary<TagHW, ITag> GetActionInputs(DsSystem sys)
+        public static Dictionary<TagHW, IEnumerable<ITag>> GetActionInputs(DsSystem sys)
         {
-            var actions = new Dictionary<TagHW, ITag>();
-
-            sys.Jobs.Iter(j => j.DeviceDefs
-                                .Where(w => !w.InAddress.IsNullOrEmpty())
-                                .Iter(d => actions.Add(getTagHW(d.InTag, true), d.InTag)));
-
+            var actions = new Dictionary<TagHW, IEnumerable<ITag>>();
+            var inTags 
+                 = sys.Jobs
+                      .SelectMany(j => j.DeviceDefs.Select(s => s.InTag))
+                      .Where(w => w != null);
+          
+            inTags
+              .GroupBy(g => g.Address)
+              .Iter(g => 
+              {
+                  var hwTag = getTagHW(g.Key, g.Key, true);
+                  actions.Add(hwTag, g.Select(s=>s));
+              });
+       
             return actions;
         }
         public static Dictionary<ITag, TagHW> GetActionOutputs(DsSystem sys)
         {
             var actions = new Dictionary<ITag, TagHW>();
+            var inTags
+                 = sys.Jobs
+                      .SelectMany(j => j.DeviceDefs.Select(s => s.OutTag))
+                      .Where(w => w != null);
 
-            sys.Jobs.Iter(j => j.DeviceDefs
-                                .Where(w => !w.OutAddress.IsNullOrEmpty())
-                                .Iter(d => actions.Add(d.OutTag, getTagHW(d.OutTag, false))));
+            inTags
+              .GroupBy(g => g.Address)
+              .Iter(g =>
+              {
+                  var hwTag = getTagHW(g.Key, g.Key, false);
+                  g.Iter(s => actions.Add(s, hwTag));
+              });
 
             return actions;
         }
 
-        private static TagHW getTagHW(ITag dsTag, bool bInput)
+        private static TagHW getTagHW(string name, string address, bool bInput)
         {
-            string name = dsTag.Name;
-            string address = dsTag.Address;
+            //string name = dsTag.Name;
+            //string address = dsTag.Address;
 
-            if (address.IsNullOrEmpty() || dsTag == null)
-                MBox.Error($"{dsTag}");
+            //if (address.IsNullOrEmpty() || dsTag == null)
+            //    MBox.Error($"{dsTag}");
 
             var tag = new WMXTag(Global.PaixDriver.Conn as WMXConnection, name);
             tag.SetAddress(address);
@@ -77,8 +89,6 @@ namespace DSModeler
         }
         public static void UpdateDevice(GridLookUpEdit gDevice)
         {
-
-
             gDevice.Do(() =>
             {
                 var tags = DicActionIn.Keys.Cast<WMXTag>().ToList();
@@ -88,7 +98,7 @@ namespace DSModeler
             });
         }
 
-        public static async Task CreateRunCpuSingle()
+        public static async Task CreateRunCpuSingle(Dictionary<DsSystem, PouGen> DicPou)
         {
             CreatePcControl();
 
@@ -119,7 +129,7 @@ namespace DSModeler
         /// Active 1 - Passive n개로 돌림  PC의 절반 CPU 활용
         /// </summary>
         /// <returns></returns>
-        public static async Task GetRunCpus()
+        public static async Task GetRunCpus(Dictionary<DsSystem, PouGen> DicPou)
         {
             await Task.Yield();
 
@@ -169,6 +179,29 @@ namespace DSModeler
                 Global.CpuRunMode);
 
             return cpu;
+        }
+
+        public static void ClearModel(FormMain frmMain)
+        {
+            frmMain.Do(() =>
+            {
+                if (PcControl.RunCpus.Any())
+                    PcAction.Reset(frmMain.Ace_Play, frmMain.Ace_HMI);
+
+                PcControl.RunCpus.Iter(cpu => cpu.Dispose());
+                RecentDocs.SetRecentDoc(frmMain.TabbedView.Documents.Select(d => d.Caption));
+
+                frmMain.TabbedView.Controller.CloseAll();
+                frmMain.TabbedView.Documents.Clear();
+                frmMain.LogCountText.Caption = "";
+                LogicLog.ValueLogs.Clear();
+
+                Global.ActiveSys = null;
+
+                Tree.ModelTree.ClearSubBtn(frmMain.Ace_System);
+                Tree.ModelTree.ClearSubBtn(frmMain.Ace_Device);
+                Tree.ModelTree.ClearSubBtn(frmMain.Ace_HMI);
+            });
         }
 
     }

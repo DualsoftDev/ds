@@ -29,6 +29,10 @@ module ModelLoader =
         let json = JsonConvert.SerializeObject(modelConfig, jsonSettings)
         File.WriteAllText(path, json)
 
+    let SaveConfigWithPath (path: FilePath) (sysRunPaths: string seq) =
+        let cfg =
+            {   DsFilePaths = sysRunPaths.ToFSharpList() }
+        SaveConfig path cfg 
 
     let private loadSystemFromDsFile (systemRepo:ShareableSystemRepository) (dsFilePath) =
         let text = File.ReadAllText(dsFilePath)

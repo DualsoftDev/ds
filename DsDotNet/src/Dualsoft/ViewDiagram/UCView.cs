@@ -2,8 +2,10 @@ using Dual.Common.Core;
 using Engine.Core;
 using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.Hosting;
 using System.Windows.Forms;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsText;
@@ -60,26 +62,26 @@ namespace DSModeler
             if (bSmallGap)
             {
                 layoutSetting.PackingMethod = Microsoft.Msagl.Core.Layout.PackingMethod.Compact;
-                layoutSetting.NodeSeparation = 5;
-                layoutSetting.ClusterMargin = 5;
+                layoutSetting.NodeSeparation = 2;
+                layoutSetting.ClusterMargin = 2;
                 layoutSetting.LiftCrossEdges = false;
-                layoutSetting.PackingAspectRatio = 5;
+                layoutSetting.PackingAspectRatio = 2;
 
             }
             else
             {
                 layoutSetting.PackingMethod = Microsoft.Msagl.Core.Layout.PackingMethod.Columns;
-                layoutSetting.LayerSeparation = 30;
-                layoutSetting.NodeSeparation = 30;
-                layoutSetting.ClusterMargin = 30;
+                layoutSetting.LayerSeparation = 20;
+                layoutSetting.NodeSeparation = 20;
+                layoutSetting.ClusterMargin = 5;
             }
 
             viewer.Graph.LayoutAlgorithmSettings = layoutSetting;
 
             SetBackColor(System.Drawing.Color.FromArgb(33, 33, 33));
 
-            viewNode.Singles.ForEach(f => DrawSeg(viewer.Graph.RootSubgraph, f));
-            viewNode.Edges.ForEach(f => DrawMEdge(viewer.Graph.RootSubgraph, f));
+            viewNode.GetSingles().ForEach(f => DrawSeg(viewer.Graph.RootSubgraph, f));
+            viewNode.GetEdges().ForEach(f => DrawMEdge(viewer.Graph.RootSubgraph, f));
 
             viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
         }
@@ -135,12 +137,12 @@ namespace DSModeler
 
             if (bDrawSub)
             {
-                viewNode.Edges.ForEach(f =>
+                viewNode.GetEdges().ForEach(f =>
                 {
                     DrawMEdge(subG, f);
                 });
 
-                viewNode.Singles.ForEach(subSeg => DrawSeg(subG, subSeg));
+                viewNode.GetSingles().ForEach(subSeg => DrawSeg(subG, subSeg));
 
 
             }
@@ -283,10 +285,10 @@ namespace DSModeler
                 if (viewNode.ViewType == ViewType.VDUMMY)
                 {
                     nNode.Attr.Shape = Shape.Box;
-                    nNode.Attr.FillColor = Color.Black;
+                    nNode.Attr.FillColor = GetDrawColor(System.Drawing.Color.FromArgb(25, 25, 25));
                 }
                 if (viewNode.ViewType == ViewType.VCALL)
-                    nNode.Attr.Shape = Shape.Ellipse;
+                    nNode.Attr.Shape = Shape.Box;
                 if (viewNode.ViewType == ViewType.VIF)
                 {
                     if (viewNode.IsChildExist)
@@ -311,36 +313,42 @@ namespace DSModeler
             viewer.Refresh();
             //viewer.Do(() => viewer.Refresh());
         }
-
-
-        public void UpdateStatus(ViewNode viewNode)
+        private Node findNode(ViewNode viewNode)
         {
-            Node node = viewer.Graph.FindNode(viewNode.UIKey);
+            Node node =  viewer.Graph.FindNode(viewNode.UIKey);
             if (node == null)
             {
                 if (viewer.Graph.SubgraphMap.ContainsKey(viewNode.UIKey))
-                    node = viewer.Graph.SubgraphMap[viewNode.UIKey];
+                    return viewer.Graph.SubgraphMap[viewNode.UIKey];
                 else
-                    return;
+                    return null;
             }
-            //node.Attr.Color = Color.White;
-            //node.Label.FontColor = Color.White;
-            if (viewNode != null)
-            {
-                if (viewNode.ViewType == ViewType.VREAL)
-                    UpdateLineColor(viewNode.Status4, node);
-                else
-                    UpdateFillColor(viewNode.Status4, node);
-            }
-            else
-            {
-
-            }
-
-            RefreshGraph();
+            return node;
         }
 
-        private static void UpdateFontColor(Status4 newStatus, Node node)
+        public void UpdateValue(ViewNode viewNode, object item2)
+        {
+            Node node = findNode(viewNode);
+            if (node != null)
+            {
+                var dataExist = Convert.ToDouble(item2) != 0;
+                UpdateFillColor(dataExist, node);
+                RefreshGraph();
+            }
+        }
+
+     
+        public void UpdateStatus(ViewNode viewNode)
+        {
+            Node node = findNode(viewNode);
+            if (node != null)
+            {
+                    UpdateLineColor(viewNode.Status4, node);
+                RefreshGraph();
+            }
+        }
+
+        private  void UpdateFontColor(Status4 newStatus, Node node)
         {
             if (newStatus == Status4.Ready) node.Label.FontColor = Color.DarkGreen;
             else if (newStatus == Status4.Going) node.Label.FontColor = Color.DarkKhaki;
@@ -348,7 +356,7 @@ namespace DSModeler
             else if (newStatus == Status4.Homing) node.Label.FontColor = Color.Black;
         }
 
-        private static void UpdateLineColor(Status4 newStatus, Node node)
+        private  void UpdateLineColor(Status4 newStatus, Node node)
         {
             if (newStatus == Status4.Ready) node.Attr.Color = Color.DarkOliveGreen;
             else if (newStatus == Status4.Going) node.Attr.Color = Color.DarkGoldenrod;
@@ -356,21 +364,29 @@ namespace DSModeler
             else if (newStatus == Status4.Homing) node.Attr.Color = Color.DimGray;
         }
 
-        private static void UpdateFillColor(Status4 newStatus, Node node)
+        private void UpdateFillColor(bool dataExist, Node node)
         {
-            if (newStatus == Status4.Ready) node.Attr.FillColor = Color.DarkOliveGreen;
-            else if (newStatus == Status4.Going) node.Attr.FillColor = Color.DarkGoldenrod;
-            else if (newStatus == Status4.Finish) node.Attr.FillColor = Color.DarkBlue;
-            else if (newStatus == Status4.Homing) node.Attr.FillColor = Color.DimGray;
+            if (dataExist)
+                node.Attr.FillColor = Color.DarkSlateBlue;
+            else
+                node.Attr.FillColor = Color.DimGray;
         }
 
+
         public void SetBackColor(System.Drawing.Color color)
+        {
+            viewer.Graph.Attr.BackgroundColor = GetDrawColor(color);
+        }
+        public Color GetDrawColor(System.Drawing.Color color)
         {
             var gColor = Color.Red;
             gColor.R = color.R;
             gColor.G = color.G;
             gColor.B = color.B;
-            viewer.Graph.Attr.BackgroundColor = gColor;
+
+            return gColor;
         }
+
+    
     }
 }

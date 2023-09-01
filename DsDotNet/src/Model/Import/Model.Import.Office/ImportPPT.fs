@@ -16,8 +16,8 @@ open DocumentFormat.OpenXml.Packaging
 module ImportPPTModule =
 
     let dicPptDoc = Dictionary<string, PresentationDocument>()
+    let pathStack = Stack<string>()
     type internal ImportPowerPoint() =
-        let pathStack = Stack<string>()
 
         let getParams(systemRepo:ShareableSystemRepository, directoryName:string
                     , userPath:string, loadedName:string, containerSystem:DsSystem
@@ -113,8 +113,6 @@ module ImportPPTModule =
             theSys, doc
 
         member internal x.GetImportModel(systemRepo:ShareableSystemRepository, pptReop:Dictionary<DsSystem, pptDoc>,  path:string, loadingType:ParserLoadingType) =
-            let emptyFile = "파일 이름오류"
-            try
                 //active는 시스템이름으로 ppt 파일 이름을 사용
                 let mySys = DsSystem(getSystemName path, "localhost")
                 let paras = getParams(systemRepo
@@ -136,39 +134,41 @@ module ImportPPTModule =
                 //MSGInfo($"전체 부모   count [{doc.Parents.Keys.Count}]")
                 mySys, viewNodes
 
-            with ex ->  
-                dicPptDoc.Iter(fun f->f.Value.Close())
-                failwithf  @$"{ex.Message}\t [ErrPath:{if pathStack.any() then pathStack.First() else emptyFile }]"
-
+         
     let private fromPPTs(paths:string seq) =
+        let emptyFile = "파일 이름오류"
+        try
+            dicPptDoc.Clear()
+            let systemRepo = ShareableSystemRepository()
+            let pptRepo    = Dictionary<DsSystem, pptDoc>()
 
-        dicPptDoc.Clear()
-        let systemRepo = ShareableSystemRepository()
-        let pptRepo    = Dictionary<DsSystem, pptDoc>()
+            let cfg = {DsFilePaths = paths |> Seq.toList}
 
-        let cfg = {DsFilePaths = paths |> Seq.toList}
+            let results =
+                [
+                    for dsFile in cfg.DsFilePaths do
+                          let ppt = ImportPowerPoint()
+                          ppt.GetImportModel(systemRepo, pptRepo, dsFile, ParserLoadingType.DuNone)
+                ]
 
-        let results =
-            [
-                for dsFile in cfg.DsFilePaths do
-                      let ppt = ImportPowerPoint()
-                      ppt.GetImportModel(systemRepo, pptRepo, dsFile, ParserLoadingType.DuNone)
-            ]
+            //ExternalSystem 순환참조때문에 완성못한 시스템 BuildSystem 마무리하기
+            pptRepo
+                .Where(fun dic -> not <| dic.Value.IsBuilded)
+                .ForEach(fun dic ->
+                    let dsSystem = dic.Key
+                    let pptDoc = dic.Value
+                    pptDoc.BuildSystem(dsSystem))
 
-        //ExternalSystem 순환참조때문에 완성못한 시스템 BuildSystem 마무리하기
-        pptRepo
-            .Where(fun dic -> not <| dic.Value.IsBuilded)
-            .ForEach(fun dic ->
-                let dsSystem = dic.Key
-                let pptDoc = dic.Value
-                pptDoc.BuildSystem(dsSystem))
+            //사용한 ppt doc 일괄 닫기 (열린문서 재 사용이 있어서 사용후 전체 한번에 닫기)
+            dicPptDoc.Iter(fun f->f.Value.Close())
 
-        //사용한 ppt doc 일괄 닫기 (열린문서 재 사용이 있어서 사용후 전체 한번에 닫기)
-        dicPptDoc.Iter(fun f->f.Value.Close())
+            let systems =  results.Select(fun (sys, view) -> sys) |> Seq.toList
+            let views   =  results |> dict
+            { Config = cfg; Systems = systems}, views, pptRepo
 
-        let systems =  results.Select(fun (sys, view) -> sys) |> Seq.toList
-        let views   =  results |> dict
-        { Config = cfg; Systems = systems}, views, pptRepo
+        with ex ->  
+            dicPptDoc.Iter(fun f->f.Value.Close())
+            failwithf  @$"{ex.Message}\t [ErrPath:{if pathStack.any() then pathStack.First() else emptyFile }]"
 
     type PptResult = {
         System: DsSystem

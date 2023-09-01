@@ -46,11 +46,12 @@ namespace DSModeler
             };
             tabbedView_Doc.DocumentSelected += (s, e) =>
             {
-                var docForm = e.Document.Tag as FormDocView;
-                if (docForm != null && docForm.UcView.MasterNode != null)
-                    ViewDraw.DrawStatus(docForm.UcView.MasterNode, docForm);
+                //var docForm = e.Document.Tag as FormDocView;
+                //if (docForm != null && docForm.UcView.MasterNode != null)
+                //    ViewDraw.DrawStatus(docForm.UcView.MasterNode, docForm);
             };
 
+        
             gle_Expr.EditValueChanged += (s, e) =>
             {
                 var textForm = DocControl.CreateDocExprOrSelect(this, tabbedView_Doc);
@@ -139,50 +140,7 @@ namespace DSModeler
                 });
             });
 
-            Global.StatusChangeSubject.Subscribe(rx =>
-            {
-                this.Do(() =>
-                {
-                    var visibleFroms = tabbedView_Doc.Documents
-                                        .Where(w => w.IsVisible)
-                                        .Select(s => s.Tag)
-                                        .OfType<FormDocView>();
-
-                    foreach (var form in visibleFroms)
-                    {
-                        var nodes = form.UcView.MasterNode
-                                            .UsedViewNodes
-                                            .Where(w => w.CoreVertex != null)
-                                            .Where(f => f.CoreVertex.Value == rx.Item1);
-
-                        if (nodes.Any())
-                        {
-                            var node = nodes.First();
-                            node.Status4 = rx.Item2;
-                            form.UcView.UpdateStatus(node);
-                        }
-
-                        //var vs = form.UcView.MasterNode
-                        //               .UsedViewNodes
-                        //               .Where(w => w.CoreVertex != null)
-                        //               .Select(s => s.CoreVertex.Value.TagManager as VertexManager)
-                        //               .SelectMany(s => getSharedReal(getPureReal(s).TagManager as VertexManager))
-                        //               .Where(f => f == rx.Item1);
-
-                        //form.UcView.MasterNode
-                        //           .UsedViewNodes
-                        //           .Where(w => w.CoreVertex != null)
-                        //           .Where(w => vs.Contains(w.CoreVertex.Value))
-                        //           .Iter(node =>
-                        //           {
-
-                        //               node.Status4 = rx.Item2;
-                        //               form.UcView.UpdateStatus(node);
-                        //           });
-
-                    }
-                });
-            });
+            
 
             Global.ChangeLogCount.Subscribe(rx =>
             {

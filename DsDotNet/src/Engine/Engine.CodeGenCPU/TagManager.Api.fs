@@ -20,8 +20,8 @@ module ApiTagManagerModule =
 
         member f.GetApiTag(at:ApiItemTag) =
             match at with
-            | ApiItemTag.planSet -> ps
-            | ApiItemTag.planRst -> pr
-            | ApiItemTag.planEnd -> pe
+            | ApiItemTag.planSet   -> ps
+            | ApiItemTag.planRst   -> pr
+            | ApiItemTag.planEnd   -> pe
             | _ -> failwithlog $"Error : GetApiTag {at} type not support!!"
 

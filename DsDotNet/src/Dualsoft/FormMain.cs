@@ -1,20 +1,12 @@
+using DevExpress.XtraBars;
 using DevExpress.XtraBars.Docking2010.Views.Tabbed;
 using DevExpress.XtraBars.Navigation;
 using DevExpress.XtraEditors;
-using DevExpress.XtraGrid.Views.Grid;
-using DevExpress.XtraGrid.Views.Grid.ViewInfo;
 using DevExpress.XtraVerticalGrid;
-using DSModeler.Tree;
 using Dual.Common.Core;
 using Engine.Core;
 using System;
-using System.Diagnostics.Eventing.Reader;
-using System.Drawing;
-using System.Linq;
-using System.Web.UI.WebControls;
 using System.Windows.Forms;
-using static Engine.Core.RuntimeGeneratorModule;
-using GridView = DevExpress.XtraGrid.Views.Grid.GridView;
 
 namespace DSModeler
 {
@@ -26,9 +18,13 @@ namespace DSModeler
 
         public TabbedView TabbedView => tabbedView_Doc;
         public AccordionControlElement Ace_Model => ace_Model;
+        public AccordionControlElement Ace_Play=> ace_Play;
         public AccordionControlElement Ace_System => ace_System;
         public AccordionControlElement Ace_Device => ace_Device;
         public AccordionControlElement Ace_HMI => ace_HMI;
+        public BarStaticItem LogCountText => barStaticItem_logCnt;
+
+        
 
         public FormMain()
         {
@@ -53,8 +49,7 @@ namespace DSModeler
                 DevExpress.XtraSplashScreen.SplashScreenManager.CloseForm();
         }
 
-        readonly Timer timerLongPress = new Timer { Interval = 100 };
-       
+
 
 
         private void InitializationLogger()
@@ -99,5 +94,6 @@ namespace DSModeler
         private void ace_ExportWebHMI_Click(object sender, EventArgs e) => HMI.Export(this);
         private void simpleButton_ClearLog_Click(object sender, EventArgs e) => LogicLog.ValueLogs.Clear();
         private void simpleButton_AllExpr_Click(object sender, EventArgs e) => DSFile.UpdateExprAll(this, toggleSwitch_showDeviceExpr.IsOn);
+        private void simpleButton_ExportDStoFile_Click(object sender, EventArgs e) => DSFile.OpenDSFolder();
     }
 }

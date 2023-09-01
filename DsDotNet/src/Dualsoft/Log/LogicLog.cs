@@ -1,9 +1,11 @@
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Grid;
+using Dual.Common.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Engine.Core.TagKindModule;
+using static Engine.Core.TagKindModule.TagDS;
 
 namespace DSModeler
 {
@@ -35,30 +37,22 @@ namespace DSModeler
             gv.OptionsView.ShowGroupPanel = false;
         }
 
-        internal static void AddLogicLog(TagDS.EventVertex t)
+        internal static void AddLogicLog(TagDS evt)
         {
-            var txtStatus = "";
-            switch (t.TagKind)
-            {
-                case VertexTag.ready: txtStatus = "[R]"; break;
-                case VertexTag.going: txtStatus = "[G]"; break;
-                case VertexTag.finish: txtStatus = "[F]"; break;
-                case VertexTag.homing: txtStatus = "[H]"; break;
-                default:
-                    break;
-            }
-
+            var logData = TagKindExt.GetTagToText(evt).Split(';');
             var valueLog = new ValueLog()
             {
-                Name = t.Tag.Name,
-                Value = txtStatus == "" ? t.Tag.BoxedValue.ToString() : txtStatus,
-                System = t.Target.Parent.GetSystem().Name,
-                TagKind = TagKindExt.GetVertexTagKindText(t.Tag)
+                Name = logData[0],
+                Value = logData[1],
+                System = logData[2],
+                TagKind = logData[3],
             };
 
             TryAdd(valueLog);
         }
     }
+
+   
 
     public class ValueLog
     {

@@ -71,7 +71,7 @@ module CoreExtensionsModule =
                 | Some VertexTag.endPort -> true
                 | Some VertexTag.relayCall -> true  /// relayCall 인과 H/S 필요??
                 | _ -> false
-
+                
         [<Extension>]
         static member IsStartThread (x:IStorage) =
             match x.GetApiTagKind() with  //외부 시스템 관련 신호

@@ -23,7 +23,7 @@ namespace DSModeler
         static IDisposable DisposableHWPaixInput;
         static IDisposable DisposableTagDS;
 
-        public static void CPUSubscribe(Dictionary<CoreModule.Vertex, DsType.Status4> dicStatus)
+        public static void CPUSubscribe()
         {
             if (DisposableHWPaixInput == null && Global.CpuRunMode.IsPackagePC())
             {
@@ -66,15 +66,15 @@ namespace DSModeler
                             var isStatus = false;
                             switch (t.TagKind)
                             {
-                                case VertexTag.ready: dicStatus[t.Target] = Status4.Ready; isStatus = true; break;
-                                case VertexTag.going: dicStatus[t.Target] = Status4.Going; isStatus = true; break;
-                                case VertexTag.finish: dicStatus[t.Target] = Status4.Finish; isStatus = true; break;
-                                case VertexTag.homing: dicStatus[t.Target] = Status4.Homing; isStatus = true; break;
+                                case VertexTag.ready: ViewDraw.DicStatus[t.Target] = Status4.Ready; isStatus = true; break;
+                                case VertexTag.going: ViewDraw.DicStatus[t.Target] = Status4.Going; isStatus = true; break;
+                                case VertexTag.finish: ViewDraw.DicStatus[t.Target] = Status4.Finish; isStatus = true; break;
+                                case VertexTag.homing: ViewDraw.DicStatus[t.Target] = Status4.Homing; isStatus = true; break;
                                 default: break;
                             }
 
                             if (isStatus && (bool)t.Tag.BoxedValue)
-                                ViewDraw.StatusChangeSubject.OnNext(System.Tuple.Create(t.Target, dicStatus[t.Target]));
+                                ViewDraw.StatusChangeSubject.OnNext(t.Target);
 
 
                             if (Global.CpuRunMode.IsSimulation)

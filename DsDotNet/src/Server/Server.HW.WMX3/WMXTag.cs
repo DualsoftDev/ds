@@ -13,13 +13,12 @@ public class WMXTag : TagHW
         connection.AddMonitoringTag(this);
 
     }
-    public string Address { get; private set; } = string.Empty;
     public sealed override string Name
     {
         get { return base.Name; }
         set { base.Name = value; }
     }
-
+    public string Address { get; private set; } = string.Empty;
 
     public sealed override object Value
     {

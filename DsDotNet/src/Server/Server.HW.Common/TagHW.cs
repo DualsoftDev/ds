@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Server.HW.Common
@@ -7,11 +8,12 @@ namespace Server.HW.Common
     {
         public virtual TagIOType IOType { get; set; }
         public virtual TagDataType DataType { get; set; }
+        [Browsable(false)]
         public ConnectionBase ConnectionBase { get; private set; }
 
         /// <summary> Tag parsing tokens </summary>
         protected virtual string[] Tokens { get; set; }
-
+        [Browsable(false)]
         public object OldValue { get; protected set; }
         private object _value;
 
@@ -35,11 +37,12 @@ namespace Server.HW.Common
 
         /// <summary>
         /// HW 에 쓰기 요청하는 값.  Value 에 직접 write 하게 되면 HW 에서 읽은 값과 혼동이 온다.
+        [Browsable(false)]
         /// </summary>
         public object WriteRequestValue { get; set; }
 
         public virtual string Name { get; set; }
-
+        [Browsable(false)]
         public virtual int BitOffset { get; protected set; }
 
         /// <summary>
@@ -48,8 +51,13 @@ namespace Server.HW.Common
         /// Melsec
         ///     X23 -> 0x23 = 35-th bit -> 5-th byte -> 5
         /// </summary>
+        [Browsable(false)]
         public virtual int ByteOffset { get; protected set; }
+        [Browsable(false)]
+
         public int NumDots => Name.Count(c => c == '.');
+        [Browsable(false)]
+
         public virtual bool IsBitAddress { get { return DataType == TagDataType.Bool; } }
 
         public TagHW(ConnectionBase connection) { ConnectionBase = connection; }

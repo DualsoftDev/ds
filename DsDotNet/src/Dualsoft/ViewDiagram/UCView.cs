@@ -1,4 +1,5 @@
 using Dual.Common.Core;
+using Dual.Common.Winform;
 using Engine.Core;
 using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;
@@ -6,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Hosting;
+using System.Web.UI.WebControls;
 using System.Windows.Forms;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsText;
@@ -15,6 +17,7 @@ using static Model.Import.Office.PPTDummyModule;
 using static Model.Import.Office.ViewModule;
 using Color = Microsoft.Msagl.Drawing.Color;
 using Edge = Microsoft.Msagl.Drawing.Edge;
+using Style = Microsoft.Msagl.Drawing.Style;
 using Vertex = Engine.Core.CoreModule.Vertex;
 
 
@@ -310,8 +313,7 @@ namespace DSModeler
 
         public void RefreshGraph()
         {
-            viewer.Refresh();
-            //viewer.Do(() => viewer.Refresh());
+            viewer.Do(() => viewer.Refresh());
         }
         private Node findNode(ViewNode viewNode)
         {

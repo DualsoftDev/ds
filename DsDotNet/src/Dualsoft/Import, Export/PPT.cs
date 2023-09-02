@@ -50,7 +50,7 @@ namespace DSModeler
                 }
 
                 ModelTree.CreateModelBtn(formMain, ppt);
-                ViewDraw.DrawInitStatus(formMain, dicCpu);
+                ViewDraw.DrawInitStatus(formMain.TabbedView, dicCpu);
                 ViewDraw.DrawInitActionTask(formMain, dicCpu);
                 
                 var nodeFlows = ppt.Views.Where(w => w.ViewType == InterfaceClass.ViewType.VFLOW)

@@ -44,7 +44,7 @@ namespace DSModeler
                     await PcControl.CreateRunCpuSingle(dicCpu);
                     PcControl.UpdateDevice(gle_Device);
 
-                    EventCPU.CPUSubscribe(ViewDraw.DicStatus);
+                    EventCPU.CPUSubscribe();
 
                     LogicTree.UpdateExpr(gle_Expr, toggleSwitch_showDeviceExpr.IsOn);
 

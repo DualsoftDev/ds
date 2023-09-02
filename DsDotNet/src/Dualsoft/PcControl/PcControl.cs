@@ -35,7 +35,8 @@ namespace DSModeler
               .GroupBy(g => g.Address)
               .Iter(g => 
               {
-                  var hwTag = getTagHW(g.Key, g.Key, true);
+                  var names = String.Join(", ", g.Select(s => s.Name));
+                  var hwTag = getTagHW(names, g.Key, true);
                   actions.Add(hwTag, g.Select(s=>s));
               });
        
@@ -53,7 +54,8 @@ namespace DSModeler
               .GroupBy(g => g.Address)
               .Iter(g =>
               {
-                  var hwTag = getTagHW(g.Key, g.Key, false);
+                  var names = String.Join(", ", g.Select(s => s.Name));
+                  var hwTag = getTagHW(names, g.Key, false);
                   g.Iter(s => actions.Add(s, hwTag));
               });
 
@@ -62,11 +64,8 @@ namespace DSModeler
 
         private static TagHW getTagHW(string name, string address, bool bInput)
         {
-            //string name = dsTag.Name;
-            //string address = dsTag.Address;
-
-            //if (address.IsNullOrEmpty() || dsTag == null)
-            //    MBox.Error($"{dsTag}");
+            if (address.IsNullOrEmpty())
+                MBox.Error($"주소가 없습니다. {name}");
 
             var tag = new WMXTag(Global.PaixDriver.Conn as WMXConnection, name);
             tag.SetAddress(address);

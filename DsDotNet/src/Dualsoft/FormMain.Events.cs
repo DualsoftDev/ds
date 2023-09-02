@@ -1,3 +1,4 @@
+using DevExpress.XtraBars.Docking2010.Views.Tabbed;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using DSModeler.Form;
@@ -7,10 +8,15 @@ using Dual.Common.Winform;
 using Engine.Core;
 using Server.HW.WMX3;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reactive.Subjects;
 using System.Windows.Forms;
+using static Engine.Core.CoreModule;
+using static Engine.Core.DsType;
 using static Engine.Core.RuntimeGeneratorModule;
+using static Model.Import.Office.ViewModule;
 
 namespace DSModeler
 {
@@ -44,14 +50,8 @@ namespace DSModeler
                 if (e.Control == null)  //Devexpress MDI Control
                     e.Control = new System.Windows.Forms.Control();
             };
-            tabbedView_Doc.DocumentSelected += (s, e) =>
-            {
-                //var docForm = e.Document.Tag as FormDocView;
-                //if (docForm != null && docForm.UcView.MasterNode != null)
-                //    ViewDraw.DrawStatus(docForm.UcView.MasterNode, docForm);
-            };
 
-        
+
             gle_Expr.EditValueChanged += (s, e) =>
             {
                 var textForm = DocControl.CreateDocExprOrSelect(this, tabbedView_Doc);
@@ -130,6 +130,14 @@ namespace DSModeler
             btn_ON.Click += (s, e) => PcAction.SetBit(gle_Device.EditValue as WMXTag, true);
             btn_OFF.Click += (s, e) => PcAction.SetBit(gle_Device.EditValue as WMXTag, false);
 
+            Global.ChangeLogCount.Subscribe(rx =>
+            {
+                this.Do(() =>
+                {
+                    barStaticItem_logCnt.Caption
+                        = $"logs:{rx.Item1} TimeSpan {rx.Item2:ss\\.fff}sec";
+                });
+            });
 
             DsProcessEvent.ProcessSubject.Subscribe(rx =>
             {
@@ -140,20 +148,40 @@ namespace DSModeler
                 });
             });
 
-            
-
-            Global.ChangeLogCount.Subscribe(rx =>
+            ViewDraw.StatusChangeSubject.Subscribe(rx =>
             {
-                this.Do(() =>
+                var ret = GetViewNode(rx);
+                foreach (var r in ret)
                 {
-                    barStaticItem_logCnt.Caption
-                        = $"logs:{rx.Item1} TimeSpan {rx.Item2:ss\\.fff}sec";
-                });
+                    var form = r.Item1;
+                    var node = r.Item2;
+                    node.Status4 = ViewDraw.DicStatus[rx];
+                    form.UcView.UpdateStatus(node);
+                }
             });
 
+            ViewDraw.ActionChangeSubject.Subscribe(rx =>
+            {
+                var ret = GetViewNode(rx.Item1);
+                foreach (var r in ret)
+                {
+                    var form = r.Item1;
+                    var node = r.Item2;
+                    form.UcView.UpdateValue(node, rx.Item2);
+                }
+            });
+
+            List<Tuple<FormDocView, ViewNode>> GetViewNode(Vertex v)
+            {
+                return tabbedView_Doc.Documents
+                             .Where(d => d.IsVisible)
+                             .Select(d => d.Tag)
+                             .OfType<FormDocView>()
+                             .Where(w => w.UcView.Flow == v.Parent.GetFlow())
+                             .Select(s => Tuple.Create(s, s.UcView.MasterNode.UsedViewVertexNodes(false)[v]))
+                             .ToList();     
+                             
+            }
         }
-
-
-
     }
 }

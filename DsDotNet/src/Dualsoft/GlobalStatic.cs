@@ -1,7 +1,12 @@
+using DevExpress.XtraEditors;
+using DevExpress.XtraTabbedMdi;
+using DSModeler.Form;
 using Dual.Common.Core;
+using Dual.Common.Core.FS;
 using Engine.Core;
 using log4net;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reactive.Subjects;
 using System.Reflection;
@@ -53,9 +58,8 @@ namespace DSModeler
         public static PaixDriver PaixDriver { get; set; }
 
         public static Version ver = Assembly.GetEntryAssembly().GetName().Version;
-        
+        public static Subject<Tuple<CoreModule.Vertex, Status4>> StatusChangeSubject = new Subject<Tuple<CoreModule.Vertex, Status4>>();
         public static Subject<Tuple<int, TimeSpan>> ChangeLogCount = new Subject<Tuple<int, TimeSpan>>();
-
         public static string DefaultFolder =>
             Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),

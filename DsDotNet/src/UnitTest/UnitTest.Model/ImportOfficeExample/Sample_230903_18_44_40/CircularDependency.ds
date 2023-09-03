@@ -1,0 +1,15 @@
+[sys ip = localhost] CircularDependency = {
+    [flow] Page1 = {
+    }
+    [flow] F = {
+        F_LH_RBTCLEAR > F_RH_SUBDONE;
+    }
+    [jobs] = {
+        F_LH_RBTCOMPL = F_LH.RBTCOMPL;
+        F_LH_RBTCLEAR = F_LH.RBTCLEAR;
+        F_RH_SUBDONE = F_RH.SUBDONE;
+        F_RH_ASSYGO = F_RH.ASSYGO;
+    }
+    [external file="main.ds"] F_LH; 
+    [external file="SubAssy.ds"] F_RH; 
+}

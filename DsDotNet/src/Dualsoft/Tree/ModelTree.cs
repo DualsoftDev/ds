@@ -3,6 +3,8 @@ using Dual.Common.Winform;
 using Model.Import.Office;
 using System.Collections.Generic;
 using System.Linq;
+using static Engine.CodeGenCPU.CpuLoader;
+using static Engine.Core.CoreModule;
 using static Model.Import.Office.ImportPPTModule;
 using static Model.Import.Office.ViewModule;
 
@@ -22,10 +24,10 @@ namespace DSModeler.Tree
             }
         }
 
-        public static List<AccordionControlElement> AppandFlows(FormMain formMain, PptResult ppt, AccordionControlElement ele)
+        public static List<AccordionControlElement> AppandFlows(FormMain formMain, IEnumerable<ViewNode> views, AccordionControlElement ele)
         {
             List<AccordionControlElement> lstAce = new List<AccordionControlElement>();
-            var nodeFlows = ppt.Views.Where(w => w.ViewType == InterfaceClass.ViewType.VFLOW)
+            var nodeFlows = views.Where(w => w.ViewType == InterfaceClass.ViewType.VFLOW)
                                      .Where(w => w.UsedViewNodes.Any())
                                      .ToDictionary(s => s.Flow.Value, s => s);
             foreach (var flowDic in nodeFlows)
@@ -42,23 +44,25 @@ namespace DSModeler.Tree
             return lstAce;
         }
 
-        public static void CreateModelBtn(FormMain formMain, PptResult ppt)
+        public static void CreateModelBtn(FormMain formMain, DsSystem sys, IEnumerable<ViewNode> views, PouGen pou)
         {
             formMain.Do(() =>
             {
                 var ele = new AccordionControlElement()
-                { Style = ElementStyle.Group, Text = ppt.System.Name, Tag = ppt.System };
+                { Style = ElementStyle.Group, Text = sys.Name, Tag = sys };
                 ele.Click += (s, e) =>
                 {
                     formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
                 };
 
-                if (ppt.IsActive)
+                if (pou.IsActive)
                     formMain.Ace_System.Elements.Add(ele);
-                else
+                else if (pou.IsDevice)
                     formMain.Ace_Device.Elements.Add(ele);
+                else if (pou.IsExternal)
+                    formMain.Ace_ExSystem.Elements.Add(ele);
 
-                var lstFlowAce = Tree.ModelTree.AppandFlows(formMain, ppt, ele);
+                var lstFlowAce = Tree.ModelTree.AppandFlows(formMain, views, ele);
                 lstFlowAce.ForEach(f =>
                     f.Click += (s, e) =>
                     {

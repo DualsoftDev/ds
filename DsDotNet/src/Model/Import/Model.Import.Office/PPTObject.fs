@@ -144,10 +144,9 @@ module PPTObjectModule =
             then  shape.ErrorName(ErrID._19, iPage)
 
         match nodeType with
-        | REALExF      -> ()
-        | REALExS
-        | CALL        -> if  name.Contains("$")|>not
-                         then  shape.ErrorName(ErrID._12, iPage)
+        | REALExF     -> if  name.Contains(".")|>not then  shape.ErrorName(ErrID._54, iPage)
+        | REALExS     -> if  name.Contains("$")|>not then  shape.ErrorName(ErrID._55, iPage)
+        | CALL        -> if  name.Contains("$")|>not then  shape.ErrorName(ErrID._56, iPage)
 
         | OPEN_CPU
         | OPEN_SYS

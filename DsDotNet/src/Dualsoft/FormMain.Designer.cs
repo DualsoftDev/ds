@@ -132,6 +132,7 @@ namespace DSModeler
             this.ace9 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.gridControl_exprotExcel = new DevExpress.XtraGrid.GridControl();
             this.gridView_exprotExcel = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.ace_ExSystem = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             ((System.ComponentModel.ISupportInitialize)(this.document1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dockManager)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManager1)).BeginInit();
@@ -897,7 +898,8 @@ namespace DSModeler
             this.ace_Model.Appearance.Default.Options.UseFont = true;
             this.ace_Model.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.ace_System,
-            this.ace_Device});
+            this.ace_Device,
+            this.ace_ExSystem});
             this.ace_Model.Expanded = true;
             this.ace_Model.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_Model.ImageOptions.SvgImage")));
             this.ace_Model.Name = "ace_Model";
@@ -1242,6 +1244,12 @@ namespace DSModeler
             this.gridView_exprotExcel.GridControl = this.gridControl_exprotExcel;
             this.gridView_exprotExcel.Name = "gridView_exprotExcel";
             // 
+            // ace_ExSystem
+            // 
+            this.ace_ExSystem.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement5.ImageOptions.SvgImage")));
+            this.ace_ExSystem.Name = "ace_ExSystem";
+            this.ace_ExSystem.Text = "외부시스템";
+            // 
             // FormMain
             // 
             this.Appearance.Options.UseFont = true;
@@ -1414,5 +1422,6 @@ namespace DSModeler
         private DevExpress.XtraEditors.SimpleButton simpleButton_ClearLog;
         private DevExpress.XtraEditors.SimpleButton simpleButton_AllExpr;
         private DevExpress.XtraEditors.SimpleButton simpleButton_ExportDStoFile;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement ace_ExSystem;
     }
 }

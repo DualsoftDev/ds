@@ -22,6 +22,8 @@ namespace DSModeler
         public AccordionControlElement Ace_System => ace_System;
         public AccordionControlElement Ace_Device => ace_Device;
         public AccordionControlElement Ace_HMI => ace_HMI;
+        public AccordionControlElement Ace_ExSystem => ace_ExSystem;
+        
         public BarStaticItem LogCountText => barStaticItem_logCnt;
 
         

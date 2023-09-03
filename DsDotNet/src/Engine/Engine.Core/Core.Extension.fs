@@ -14,22 +14,33 @@ module CoreExtensionModule =
     let getButtons (sys:DsSystem, btnType:BtnType) = sys.Buttons.Where(fun f->f.ButtonType = btnType)
     let getLamps (sys:DsSystem, lampType:LampType) = sys.Lamps.Where(fun f->f.LampType = lampType)
     let getConditions (sys:DsSystem, cType:ConditionType) = sys.Conditions.Where(fun f->f.ConditionType = cType)
-    let getRecursiveSystems (sys:DsSystem) =
-            [
-                yield! sys.ReferenceSystems
-                yield! sys.ReferenceSystems |> Seq.collect(fun f->f |> getRecursiveSystems)
-            ] |> List.toSeq
-    let getRecursiveLoadeds (sys:ISystem) =
-            let dsSys =
-                match sys  with
-                | :? DsSystem as d -> d
-                | :? Device as d -> d.ReferenceSystem
-                | :? ExternalSystem as d -> d.ReferenceSystem
-                | _ -> failwithlog $"Error {getFuncName()}"
-            [
-                yield! dsSys.LoadedSystems |> Seq.cast<ISystem>
-                yield! dsSys.LoadedSystems |> Seq.collect(fun f-> f |> getRecursiveLoadeds)
-            ] |> List.toSeq
+    
+    let getRecursiveLoadeds (system:DsSystem) =
+        let loadeds = Dictionary<string, LoadedSystem>()  //ExternalSystem은 절대경로 Key, 나머지는 시스템 이름 Key
+        let keyName (s:LoadedSystem)= 
+            if s :? ExternalSystem 
+            then s.AbsoluteFilePath 
+            else s.QualifiedName
+        
+        let addSystem (addSys, name:string) :bool =
+            let name = name.ToLower()
+            if not <| loadeds.ContainsKey name
+            then 
+                loadeds.Add (name, addSys);true
+            else 
+                false
+
+        let rec recLoadeds(sys:LoadedSystem) =
+            sys.ReferenceSystem
+               .LoadedSystems.Iter(fun s-> 
+                        if addSystem (s, keyName s)
+                        then recLoadeds s
+                        )
+   
+        system.LoadedSystems.Iter(fun s -> addSystem (s, keyName s)|>ignore) //최상위 부터 등록
+        system.LoadedSystems.Iter(recLoadeds)
+        loadeds.Values.ToArray()
+
 
     let checkSystem(system:DsSystem, targetFlow:Flow, itemName:string) =
                 if system <> targetFlow.System
@@ -112,7 +123,6 @@ module CoreExtensionModule =
                 .Select(fun s->x.ApiItems.Find(fun f->f.Name = s.Value))
 
         member x.DeviceDefs = x.Jobs |> Seq.collect(fun s->s.DeviceDefs)
-        member x.GetRecursiveSystems() =  x |> getRecursiveSystems
 
     type CallDev with
         member x.System = x.Parent.GetSystem()
@@ -122,7 +132,5 @@ module CoreExtensionModule =
 [<Extension>]
 type SystemExt =
     [<Extension>]
-    static member GetRecursiveSystems (x:DsSystem) : DsSystem seq = x |> getRecursiveSystems
-    [<Extension>]
-    static member GetRecursiveLoadeds (x:DsSystem) : ISystem seq  = x |> getRecursiveLoadeds
-
+    static member GetRecursiveLoadeds (x:DsSystem) : LoadedSystem seq  = getRecursiveLoadeds(x)
+   

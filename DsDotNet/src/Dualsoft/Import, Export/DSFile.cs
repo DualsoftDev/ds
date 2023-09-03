@@ -12,6 +12,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
 using static Engine.Core.ExpressionModule;
 using static Engine.Core.ModelLoaderModule;
@@ -46,16 +47,26 @@ namespace DSModeler
             dsCpuSys.Add(dsFile);
 
             Global.ExportPathDS = dsFile;
-            Global.ActiveSys.Devices.ForEach(s =>
-            {
-                ExportLoadedSystem(s, directory);
-            });
-            Global.ActiveSys.ExternalSystems.ForEach(s =>
-            {
-                var path = ExportLoadedSystem(s, directory);
-                dsCpuSys.Add(path);   
-            });
+            //Global.ActiveSys.Devices.ForEach(s =>
+            //{
+            //    ExportLoadedSystem(s, directory);
+            //});
+            //Global.ActiveSys.ExternalSystems.ForEach(s =>
+            //{
+            //    var path = ExportLoadedSystem(s, directory);
+            //    dsCpuSys.Add(path);   
+            //});
 
+            Global.ActiveSys.GetRecursiveLoadeds().ForEach(s =>
+            {
+                if (s is Device)
+                    ExportLoadedSystem(s, directory);
+                if (s is ExternalSystem)
+                {
+                    var path = ExportLoadedSystem(s, directory);
+                    dsCpuSys.Add(path);
+                }
+            });
 
             File.WriteAllText(dsFile, Global.ActiveSys.ToDsText(false));
             ModelLoader.SaveConfigWithPath(confFile, dsCpuSys);

@@ -1,0 +1,36 @@
+[sys] SubAssy = {
+    [flow] Line = {
+        Assy반출지시 |> Assy반출지시;
+        Line_sys1_RBTCOMPL > Assy반출지시 > Assy반출;
+        GoSub => Blue공급및고정 => Assy반출;
+        Blue공급및고정 = {
+            Line_Conv_MOVE1 > Line_Clamp_ADV > Line_Clamp_RET;
+        }
+        Assy반출 = {
+            Line_Upper_ADV > Line_Conv_JOBCLEAR;
+            Line_Upper_ADV > Line_Conv_MOVE2 > Line_Upper_ADV_1 > Line_Upper_RET;
+        }
+        [aliases] = {
+            Assy반출.Line_Upper_ADV = { Line_Upper_ADV_1; }
+        }
+    }
+    [jobs] = {
+        Line_Clamp_ADV = { Line_Clamp.ADV(I0.0, O0.0); }
+        Line_Clamp_RET = { Line_Clamp.RET(I0.1, O0.1); }
+        Line_Conv_MOVE1 = { Line_Conv.MOVE1(I0.2, O0.2); }
+        Line_Conv_MOVE2 = { Line_Conv.MOVE2(I0.3, O0.3); }
+        Line_Conv_JOBCLEAR = { Line_Conv.JOBCLEAR(_, O0.4); }
+        Line_Upper_ADV = { Line_Upper.ADV(I0.4, O0.5); }
+        Line_Upper_RET = { Line_Upper.RET(I0.5, O0.6); }
+        Line_sys1_RBTCOMPL = Line_sys1.RBTCOMPL;
+        Line_sys1_RBTCLEAR = Line_sys1.RBTCLEAR;
+    }
+    [interfaces] = {
+        SUBDONE = { _ ~ Line.Blue공급및고정 }
+        ASSYGO = { Line.Assy반출지시 ~ _ }
+    }
+    [device file="lib/Cylinder/Double.ds"] Line_Clamp; 
+    [device file="lib/Conveyor/CV_JobClear.ds"] Line_Conv; 
+    [device file="lib/Cylinder/Double.ds"] Line_Upper; 
+    [external file="Main.ds"] Line_sys1; 
+}

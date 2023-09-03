@@ -1,0 +1,50 @@
+[sys ip = localhost] s = {
+    [flow] Page1 = {
+    }
+    [flow] 컨베이어 = {
+        R1 = {
+            컨베이어_PinB_ADV > 컨베이어_conv_REMOVE;
+            컨베이어_conv_MOVE > 컨베이어_PinB_ADV > 컨베이어_PinB_RET;
+        }
+            R2; 
+    }
+    [flow] S11 = {
+        R3, R2 => R4 => R5;
+        R5 => R6 => R1 => R2;
+        R1 => R3;
+        R4 = {
+            S11_Latch_ADV > S11_Latch_RET;
+        }
+        R2 = {
+            S11_Clamp_ADV > S11_Clamp_RET;
+        }
+        R1 = {
+            S11_PinA_ADV > S11_PinB_ADV;
+            S11_PinB_ADV, S11_PinA_RET > S11_PinB_RET;
+            S11_PinA_ADV > S11_PinA_RET;
+        }
+    }
+    [jobs] = {
+        컨베이어_conv_MOVE = { 컨베이어_conv.MOVE(I0.0, O0.0); }
+        컨베이어_conv_REMOVE = { 컨베이어_conv.REMOVE(I0.1, O0.1); }
+        컨베이어_PinB_ADV = { 컨베이어_PinB.ADV(I0.2, O0.2); }
+        컨베이어_PinB_RET = { 컨베이어_PinB.RET(I0.3, O0.3); }
+        S11_PinB_ADV = { S11_PinB.ADV(I0.4, O0.4); }
+        S11_PinB_RET = { S11_PinB.RET(I0.5, O0.5); }
+        S11_Clamp_ADV = { S11_Clamp1.ADV(I0.6, O0.6); S11_Clamp2.ADV(I0.7, O0.7); }
+        S11_Clamp_RET = { S11_Clamp1.RET(I1.0, O1.0); S11_Clamp2.RET(I1.1, O1.1); }
+        S11_Latch_ADV = { S11_Latch1.ADV(I1.2, O1.2); S11_Latch2.ADV(I1.3, O1.3); S11_Latch3.ADV(I1.4, O1.4); }
+        S11_Latch_RET = { S11_Latch1.RET(I1.5, O1.5); S11_Latch2.RET(I1.6, O1.6); S11_Latch3.RET(I1.7, O1.7); }
+        S11_PinA_ADV = { S11_PinA.ADV(I2.0, O2.0); }
+        S11_PinA_RET = { S11_PinA.RET(I2.1, O2.1); }
+    }
+    [device file="lib/Conveyor/CV.ds"] 컨베이어_conv; 
+    [device file="lib/Cylinder/Double.ds"] 컨베이어_PinB; 
+    [device file="lib/Cylinder/Double.ds"] S11_PinB; 
+    [device file="lib/Cylinder/Double.ds"] S11_Clamp1; 
+    [device file="lib/Cylinder/Double.ds"] S11_Clamp2; 
+    [device file="lib/Cylinder/Double.ds"] S11_Latch1; 
+    [device file="lib/Cylinder/Double.ds"] S11_Latch2; 
+    [device file="lib/Cylinder/Double.ds"] S11_Latch3; 
+    [device file="lib/Cylinder/Double.ds"] S11_PinA; 
+}

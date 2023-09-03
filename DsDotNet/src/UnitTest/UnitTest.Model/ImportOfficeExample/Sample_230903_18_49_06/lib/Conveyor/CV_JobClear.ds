@@ -1,0 +1,12 @@
+[sys] CV_JobClear = {
+    [flow] CV = {
+        "work end" |> "work end" |> PartOut;
+        "DownCV+", PartIn => PartOut;
+        "UpCV+" => PartIn;
+    }
+    [interfaces] = {
+        MOVE1 = { CV."UpCV+" ~ CV.PartIn }
+        MOVE2 = { CV."DownCV+" ~ CV.PartOut }
+        JOBCLEAR = { CV."work end" ~ _ }
+    }
+}

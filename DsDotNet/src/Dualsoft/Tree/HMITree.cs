@@ -1,14 +1,17 @@
+using DevExpress.Utils.Filtering.Internal;
 using DevExpress.XtraBars.Navigation;
 using Dual.Common.Core;
 using Dual.Common.Winform;
 using Model.Import.Office;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.Core.CoreModule;
 using static Model.Import.Office.ImportPPTModule;
+using static Model.Import.Office.ViewModule;
 
 namespace DSModeler.Tree
 {
@@ -19,19 +22,18 @@ namespace DSModeler.Tree
         static readonly string startToolTip = "START";
         static readonly string resetToolTip = "RESET";
         static readonly Color offColor = Color.RoyalBlue;
-        public static async Task CreateHMIBtn(FormMain formMain, PptResult ppt)
+        public static async Task CreateHMIBtn(FormMain formMain, DsSystem sys, IEnumerable<ViewNode> views)
         {
             await formMain.DoAsync(tsc =>
             {
-                var sys = ppt.System;
-                var eleSys = new AccordionControlElement()
-                { Style = ElementStyle.Group, Text = sys.Name, Tag = sys };
-                eleSys.Click += (s, e) =>
-                {
-                    formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
-                };
-                formMain.Ace_HMI.Elements.Add(eleSys);
-                var nodeFlows = ppt.Views.Where(w => w.ViewType == InterfaceClass.ViewType.VFLOW)
+                //var eleSys = new AccordionControlElement()
+                //{ Style = ElementStyle.Group, Text = sys.Name, Tag = sys };
+                //eleSys.Click += (s, e) =>
+                //{
+                //    formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
+                //};
+                //formMain.Ace_HMI.Elements.Add(eleSys);
+                var nodeFlows = views.Where(w => w.ViewType == InterfaceClass.ViewType.VFLOW)
                                          .Where(w => w.UsedViewNodes.Any())
                                          .ToDictionary(s => s.Flow.Value, s => s);
                 foreach (var flowDic in nodeFlows)
@@ -46,7 +48,7 @@ namespace DSModeler.Tree
 
                         DocControl.CreateDocOrSelect(formMain, flowDic.Value);
                     };
-                    eleSys.Elements.Add(eleFlow);
+                    formMain.Ace_HMI.Elements.Add(eleFlow);
 
                     flow.Graph.Vertices
                    .OrderBy(v => v.QualifiedName)

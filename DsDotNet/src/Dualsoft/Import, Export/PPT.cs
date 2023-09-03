@@ -23,43 +23,43 @@ namespace DSModeler
             Dictionary<DsSystem, PouGen> dicCpu = new Dictionary<DsSystem, PouGen>();
             var ret = ImportPPT.GetLoadingAllSystem(files);
             formMain.Model = ret.Item1;
-            var PPTResults = ret.Item2;
+            var pptResults = ret.Item2;
             var storages = new Storages();
             int cnt = 0;
 
             var recentDocs = RecentDocs.GetRegistryRecentDocs();
+            var activeSys = pptResults.First(f => f.IsActive).System;
+            Global.ActiveSys = activeSys;
 
-            //await formMain.DoAsync(async tsc =>
-            //{
-            foreach (var ppt in PPTResults.OrderByDescending(o => o.IsActive))
+
+            var pous = Cpu.LoadStatements(activeSys, storages).ToList();
+            foreach (var pou in pous)
             {
-                if (ppt.IsActive)
-                {
-                    //   await Task.Run(async () =>
-                    //   {
-                    var pous = Cpu.LoadStatements(ppt.System, storages).ToList();
-                    foreach (var pou in pous)
-                    {
-                        dicCpu.Add(pou.ToSystem(), pou);
-                        DsProcessEvent.DoWork(Convert.ToInt32((cnt++ * 1.0) / pous.Count() * 50));
-                        await Task.Delay(1);
-                    }
-                    await HMITree.CreateHMIBtn(formMain, ppt);
-                    Global.ActiveSys = ppt.System;
-                    // });
-                }
+                var sys = pou.ToSystem();
+                var viewSet = pptResults.First(f=>f.System == sys).Views;  
 
-                ModelTree.CreateModelBtn(formMain, ppt);
+                dicCpu.Add(sys, pou);
+             
+
+                if (activeSys == sys) await HMITree.CreateHMIBtn(formMain, sys, viewSet);
+
+
+                ModelTree.CreateModelBtn(formMain, sys, viewSet, pou);
+
                 ViewDraw.DrawInitStatus(formMain.TabbedView, dicCpu);
                 ViewDraw.DrawInitActionTask(formMain, dicCpu);
-                
-                var nodeFlows = ppt.Views.Where(w => w.ViewType == InterfaceClass.ViewType.VFLOW)
+
+                var nodeFlows = viewSet.Where(w => w.ViewType == InterfaceClass.ViewType.VFLOW)
                                .Where(w => w.UsedViewNodes.Any())
                                .Where(w => recentDocs.Contains(w.Flow.Value.QualifiedName));
 
                 nodeFlows.Iter(f => DocControl.CreateDocOrSelect(formMain, f));
-            }
 
+                DsProcessEvent.DoWork(Convert.ToInt32((cnt++ * 1.0) / pous.Count() * 50));
+                await Task.Delay(1);
+            }
+                  
+           
             formMain.Do(() =>
             {
                 //formMain.Ace_Model.Expanded = false;

@@ -216,7 +216,8 @@ module PPTDocModule =
         member val Parents = parents
         member val Dummys  = dummys
 
-        member val Name =  name
+        member val Name = name
+        member val Path = path
         member val DirectoryName =  getSystemDirectoryName path
 
         member val DicFlow = Dictionary<int, Flow>() // page , flow

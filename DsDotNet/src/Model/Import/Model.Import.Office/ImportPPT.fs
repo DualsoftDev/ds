@@ -112,7 +112,7 @@ module ImportPPTModule =
             pptReop.Add (theSys, doc)
             theSys, doc
 
-        member internal x.GetImportModel(systemRepo:ShareableSystemRepository, pptReop:Dictionary<DsSystem, pptDoc>,  path:string, loadingType:ParserLoadingType) =
+        member internal x.GetImportModel(systemRepo:ShareableSystemRepository, pptReop:Dictionary<DsSystem, pptDoc>,  path:string) =
                 //active는 시스템이름으로 ppt 파일 이름을 사용
                 let mySys = DsSystem(getSystemName path, "localhost")
                 let paras = getParams(systemRepo
@@ -123,20 +123,10 @@ module ImportPPTModule =
                             , Some mySys.HostIp
                             , DuNone)
 
-                let mySys, doc = loadSystem(systemRepo, pptReop, mySys, paras)
-                //Dummy 및 UI Flow, Node, Edge 만들기
-                let viewNodes = doc.MakeGraphView(mySys)
-
-
-                //MSGInfo($"전체 장표   count [{doc.Pages.Count()}]")
-                //MSGInfo($"전체 도형   count [{doc.Nodes.Count()}]")
-                //MSGInfo($"전체 연결   count [{doc.Edges.Count()}]")
-                //MSGInfo($"전체 부모   count [{doc.Parents.Keys.Count}]")
-                mySys, viewNodes
-
+                loadSystem(systemRepo, pptReop, mySys, paras)
+              
          
     let private fromPPTs(paths:string seq) =
-        let emptyFile = "파일 이름오류"
         try
             dicPptDoc.Clear()
             let systemRepo = ShareableSystemRepository()
@@ -148,7 +138,7 @@ module ImportPPTModule =
                 [
                     for dsFile in cfg.DsFilePaths do
                           let ppt = ImportPowerPoint()
-                          ppt.GetImportModel(systemRepo, pptRepo, dsFile, ParserLoadingType.DuNone)
+                          ppt.GetImportModel(systemRepo, pptRepo, dsFile)
                 ]
 
             //ExternalSystem 순환참조때문에 완성못한 시스템 BuildSystem 마무리하기
@@ -157,7 +147,10 @@ module ImportPPTModule =
                 .ForEach(fun dic ->
                     let dsSystem = dic.Key
                     let pptDoc = dic.Value
-                    pptDoc.BuildSystem(dsSystem))
+                    pathStack.Push(pptDoc.Path)
+                    pptDoc.BuildSystem(dsSystem)
+                    pathStack.Pop() |> ignore
+                    )
 
             //사용한 ppt doc 일괄 닫기 (열린문서 재 사용이 있어서 사용후 전체 한번에 닫기)
             dicPptDoc.Iter(fun f->f.Value.Close())
@@ -168,7 +161,7 @@ module ImportPPTModule =
 
         with ex ->  
             dicPptDoc.Iter(fun f->f.Value.Close())
-            failwithf  @$"{ex.Message}\t [ErrPath:{if pathStack.any() then pathStack.First() else emptyFile }]"
+            failwithf  @$"{ex.Message} [ErrPath:{if pathStack.any() then pathStack.First() else paths.First() }]" //첫페이지 아니면 stack에 존재
 
     type PptResult = {
         System: DsSystem

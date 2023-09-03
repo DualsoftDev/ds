@@ -1,0 +1,44 @@
+[sys] main = {
+    [flow] Line = {
+        로봇Clear |> 로봇Clear |> 로봇조립Sub;
+        Clear |> Clear |> Assy반출 |> Green공급및고정;
+        Line_Rbt_XP > 로봇조립Sub;
+        Line_sys2_SUBDONE, 로봇조립Main => 로봇조립Sub;
+        Line_Rbt_XM > 로봇조립Main;
+        GoMain => Green공급및고정 => 로봇조립Main;
+        Green공급및고정 = {
+            Line_Conv_MOVE > Line_Clamp_ADV > Line_Clamp_RET;
+        }
+        로봇조립Sub = {
+            Line_Rbt_GRIBRET > Line_Rbt_ZM;
+            Line_Rbt_ZP > Line_Rbt_GRIBRET > Line_Rbt_XM;
+        }
+        로봇조립Main = {
+            Line_Rbt_GRIBADV > Line_Conv_REMOVE;
+            Line_Rbt_GRIBADV > Line_Rbt_XP;
+            Line_Rbt_ZP > Line_Rbt_GRIBADV > Line_Rbt_ZM;
+        }
+    }
+    [jobs] = {
+        Line_Rbt_ZM = { Line_Rbt.ZM(I0.0, O0.0); }
+        Line_Rbt_XP = { Line_Rbt.XP(I0.1, O0.1); }
+        Line_Rbt_XM = { Line_Rbt.XM(I0.2, O0.2); }
+        Line_Rbt_GRIBADV = { Line_Rbt.GRIBADV(I0.3, O0.3); }
+        Line_Rbt_GRIBRET = { Line_Rbt.GRIBRET(I0.4, O0.4); }
+        Line_Rbt_ZP = { Line_Rbt.ZP(I0.5, O0.5); }
+        Line_Clamp_ADV = { Line_Clamp.ADV(I0.6, O0.6); }
+        Line_Clamp_RET = { Line_Clamp.RET(I0.7, O0.7); }
+        Line_Conv_MOVE = { Line_Conv.MOVE(I1.0, O1.0); }
+        Line_Conv_REMOVE = { Line_Conv.REMOVE(I1.1, O1.1); }
+        Line_sys2_SUBDONE = Line_sys2.SUBDONE;
+        Line_sys2_ASSYGO = Line_sys2.ASSYGO;
+    }
+    [interfaces] = {
+        RBTCOMPL = { _ ~ Line.로봇조립Sub }
+        RBTCLEAR = { Line.로봇Clear ~ _ }
+    }
+    [device file="lib/Robot/Axis2.ds"] Line_Rbt; 
+    [device file="lib/Cylinder/Double.ds"] Line_Clamp; 
+    [device file="lib/Conveyor/CV.ds"] Line_Conv; 
+    [external file="SubAssy.ds"] Line_sys2; 
+}

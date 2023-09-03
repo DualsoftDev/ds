@@ -412,7 +412,7 @@ namespace Dual.Model.Import
         }
         private void UpdateDevice(SystemView sysView)
         {
-            var devices = sysView.System.GetRecursiveSystems();
+            var devices = sysView.System.GetRecursiveLoadeds().Cast<DsSystem>();
             comboBox_Device.Items.Clear();
             foreach (var dev in devices)
             {

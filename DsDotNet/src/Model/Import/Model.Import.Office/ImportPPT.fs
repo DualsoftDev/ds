@@ -35,9 +35,9 @@ module ImportPPTModule =
 
         let getLoadingType(nodeType:NodeType) =
             match nodeType with
-            | OPEN_SYS
-            | OPEN_CPU -> DuExternal
-            | COPY_SYS -> DuExternal
+            | OPEN_SYS_LINK
+            | OPEN_SYS_CALL -> DuExternal
+            | COPY_DEV -> DuDevice
             | _ -> failwithlog "error"
 
 
@@ -73,8 +73,8 @@ module ImportPPTModule =
                 let hostIp = if paras.HostIp.IsSome then paras.HostIp.Value else ""
 
                 match node.NodeType with
-                |OPEN_CPU
-                |OPEN_SYS ->
+                |OPEN_SYS_CALL
+                |OPEN_SYS_LINK ->
                     let exLoaded =
                         if repo.ContainsKey paras.AbsoluteFilePath
                         then
@@ -89,7 +89,7 @@ module ImportPPTModule =
 
                     theSys.AddLoadedSystem(exLoaded)
 
-                |COPY_SYS ->
+                |COPY_DEV ->
                     let newDevSys = DsSystem(paras.LoadedName, hostIp)
                     let sys = reloading(newDevSys, paras)
                     theSys.AddLoadedSystem(Device(sys, paras))

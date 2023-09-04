@@ -184,10 +184,10 @@ namespace DSModeler
         {
             frmMain.Do(() =>
             {
-                if (PcControl.RunCpus.Any())
+                if (RunCpus.Any()) 
                     PcAction.Reset(frmMain.Ace_Play, frmMain.Ace_HMI);
 
-                PcControl.RunCpus.Iter(cpu => cpu.Dispose());
+                RunCpus.Iter(cpu => cpu.Dispose());
                 RecentDocs.SetRecentDoc(frmMain.TabbedView.Documents.Select(d => d.Caption));
 
                 frmMain.TabbedView.Controller.CloseAll();

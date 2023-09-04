@@ -1,0 +1,13 @@
+[sys] Master_Line = {
+    [flow] Page1 = {
+    }
+    [flow] Flow = {
+            R1; // island
+            R2; // island
+    }
+    [interfaces] = {
+        Func2 = { _ ~ Flow.R2 }
+        Func1 = { Flow.R1 ~ Flow.R2 }
+    }
+}
+

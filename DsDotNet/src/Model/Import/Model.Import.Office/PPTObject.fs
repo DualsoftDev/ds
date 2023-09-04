@@ -148,9 +148,9 @@ module PPTObjectModule =
         | REALExS     -> if  name.Contains("$")|>not then  shape.ErrorName(ErrID._55, iPage)
         | CALL        -> if  name.Contains("$")|>not then  shape.ErrorName(ErrID._56, iPage)
 
-        | OPEN_CPU
-        | OPEN_SYS
-        | COPY_SYS  ->   let name, number = GetTailNumber(shape.InnerText)
+        | OPEN_SYS_CALL
+        | OPEN_SYS_LINK
+        | COPY_DEV  ->   let name, number = GetTailNumber(shape.InnerText)
                          if GetSquareBrackets(name, false).length() = 0
                          then  shape.ErrorName(ErrID._7, iPage)
         | IF_DEVICE
@@ -233,10 +233,8 @@ module PPTObjectModule =
                     jobInfos[jobBaseName].Add(copy)|>ignore)
 
             else
-                let copys =
-                    barckets.Split(';')
-                    |> trimStartEndSeq
-                    |> Seq.map(fun sys -> $"{pageTitle}_{sys}")
+                let copyRows = barckets.Split(';').Select(fun s->s.Trim())
+                let copys = copyRows.Select(fun sys -> $"{pageTitle}_{sys}")
 
                 if copys.Distinct().length() <> copys.length()
                 then Office.ErrorName(shape, ErrID._33, iPage)
@@ -292,9 +290,9 @@ module PPTObjectModule =
                 elif(shape.CheckFoldedCornerPlate())
                 then
                     if name.Contains("/")
-                    then OPEN_SYS
-                    else OPEN_CPU
-                elif(shape.CheckFoldedCornerRound()) then COPY_SYS
+                    then OPEN_SYS_LINK
+                    else OPEN_SYS_CALL
+                elif(shape.CheckFoldedCornerRound()) then COPY_DEV
                 elif(shape.CheckEllipse())           then CALL
                 elif(shape.CheckBevelShapePlate())   then LAMP
                 elif(shape.CheckBevelShapeRound())   then BUTTON
@@ -310,9 +308,9 @@ module PPTObjectModule =
                      |> fun text -> if text = ""|>not then updateSafety text
             |IF_DEVICE ->   updateDeviceIF  shape.InnerText
             |IF_LINK   ->   updateLinkIF    shape.InnerText
-            |OPEN_CPU
-            |OPEN_SYS
-            |COPY_SYS ->
+            |OPEN_SYS_CALL
+            |OPEN_SYS_LINK
+            |COPY_DEV ->
                      let name, number = GetTailNumber(shape.InnerText)
                      GetSquareBrackets(name, false)
                         |> fun text ->
@@ -329,6 +327,8 @@ module PPTObjectModule =
         member x.Shape = shape
         member x.CopySys  = copySystems
         member x.JobInfos  = jobInfos
+        member x.JobCallNames  = jobInfos.Keys
+        
         member x.Safeties = safeties
         member x.IfName  = ifName
         member x.IfTXs   = ifTXs

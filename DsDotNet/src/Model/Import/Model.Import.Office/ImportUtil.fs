@@ -14,11 +14,21 @@ open System.Runtime.CompilerServices
 [<AutoOpen>]
 module ImportU =
 
-    let private createCallVertex(mySys:DsSystem, node:pptNode, parentReal:Real Option, parentFlow:Flow Option, dicSeg:Dictionary<string, Vertex>) =
+    let private createCallVertex(mySys:DsSystem, node:pptNode
+            , parentReal:Real Option
+            , parentFlow:Flow Option
+            , dicSeg:Dictionary<string, Vertex>
+            , jobCallNames:string seq
+            ) =
         let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
 
         let call =
             let jobName = sysName+"_"+apiName
+
+            if not <| jobCallNames.Contains(sysName)
+            then 
+                node.Shape.ErrorName(ErrID._48, node.PageNum)
+
             match mySys.Jobs.TryFind(fun job -> job.Name = jobName) with
             |Some job ->
                 if job.DeviceDefs.any()
@@ -100,8 +110,8 @@ module ImportU =
                              .Select(fun tgt -> getApiItems(mySys, tgt, api.Name), tgt)
                              .Select(fun (api, tgt)->
                                 match node.NodeType with
-                                | OPEN_CPU            -> TaskSys(api, tgt)           :> DsTask
-                                | OPEN_SYS | COPY_SYS -> TaskDev(api, "", "", tgt) :> DsTask
+                                | OPEN_SYS_CALL            -> TaskSys(api, tgt)         :> DsTask
+                                | OPEN_SYS_LINK | COPY_DEV -> TaskDev(api, "", "", tgt) :> DsTask
                                 | _-> failwithlog "Error MakeJobs"
                                 )
 
@@ -271,6 +281,10 @@ module ImportU =
                         )
 
                 let createCall() =
+
+                    let jobCallNames = pptNodes.Where(fun node -> node.NodeType.IsLoadSys) 
+                                               |> Seq.collect(fun node -> node.JobCallNames)
+
                     pptNodes
                     |> Seq.filter(fun node -> node.Alias.IsNone)
                     |> Seq.filter(fun node -> node.NodeType.IsCall)
@@ -284,7 +298,7 @@ module ImportU =
 
                                 if parentReal.IsSome || parentFlow.IsSome
                                 then
-                                    createCallVertex(mySys, node, parentReal, parentFlow, dicVertex)
+                                    createCallVertex(mySys, node, parentReal, parentFlow, dicVertex, jobCallNames)
                             )
 
                 let createAlias() =

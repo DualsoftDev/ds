@@ -36,9 +36,8 @@ namespace DSModeler
             var pptPath = Files.GetLast().First();
             var libDir = Path.GetDirectoryName(pptPath); //동일 디렉토리 경로
 
-            var newFile = Files.GetNewFileName(pptPath);
+            var newFile = Files.GetNewFileName(pptPath, "DS");
             var directory = Path.GetDirectoryName(newFile);
-
 
             var dsFile = Path.ChangeExtension(newFile, ".ds");
             var confFile = Path.ChangeExtension(newFile, ".json");
@@ -47,15 +46,6 @@ namespace DSModeler
             dsCpuSys.Add(dsFile);
 
             Global.ExportPathDS = dsFile;
-            //Global.ActiveSys.Devices.ForEach(s =>
-            //{
-            //    ExportLoadedSystem(s, directory);
-            //});
-            //Global.ActiveSys.ExternalSystems.ForEach(s =>
-            //{
-            //    var path = ExportLoadedSystem(s, directory);
-            //    dsCpuSys.Add(path);   
-            //});
 
             Global.ActiveSys.GetRecursiveLoadeds().ForEach(s =>
             {
@@ -64,7 +54,8 @@ namespace DSModeler
                 if (s is ExternalSystem)
                 {
                     var path = ExportLoadedSystem(s, directory);
-                    dsCpuSys.Add(path);
+                    if (path != "")
+                        dsCpuSys.Add(path);
                 }
             });
 
@@ -74,17 +65,38 @@ namespace DSModeler
             SplashScreenManager.CloseForm();
         }
 
-        private static string ExportLoadedSystem(CoreModule.LoadedSystem s, string directory)
+        private static string ExportLoadedSystem(LoadedSystem s, string dirNew)
         {
-            var relativePath =
-               $"{directory}\\{s.UserSpecifiedFilePath}";
+            string commonDir = "";
+            var lib = dirNew.ToLower().Split('\\');  
+            var abs = s.AbsoluteFilePath.ToLower().Split('\\');
+            DirectoryInfo di = new DirectoryInfo(dirNew);
 
-            Directory.CreateDirectory(Path.GetDirectoryName(relativePath));
-            s.ReferenceSystem.Name = Path.GetFileNameWithoutExtension(relativePath);
+            for (int i = 0; i < abs.Length ; i++)
+            {
+                if (lib.Length == i || abs[i] != lib[i])
+                {
+                    if (lib.Length - 1 != i) 
+                    {
+                        Global.Logger.Error($"{s.AbsoluteFilePath}.pptx " +
+                            $"\r\nSystem Library호출은 {di.Parent.FullName} 동일/하위 폴더야 합니다.");
+                        return "";
+                    }
+                    break;
+                }
+                else
+                    commonDir += abs[i] + "\\";
+            }
 
-            File.WriteAllText(relativePath, s.ReferenceSystem.ToDsText(false));
+            var relativePath = s.AbsoluteFilePath.ToLower().Replace(commonDir.ToLower(), "");
+            var absPath = $"{dirNew}\\{relativePath}.ds";
 
-            return relativePath;
+            Directory.CreateDirectory(Path.GetDirectoryName(absPath));
+            s.ReferenceSystem.Name = Path.GetFileNameWithoutExtension(absPath);
+
+            File.WriteAllText(absPath, s.ReferenceSystem.ToDsText(false));
+
+            return absPath;
         }
 
         public static List<Tuple<string, Color>> ToTextColorDS(string dsText)
@@ -127,9 +139,9 @@ namespace DSModeler
 
         public static void DrawDSText(FormDocText view)
         {
-            Task.Run(() =>
+            Task.Run(async() =>
             {
-                view.Do(async () =>
+                await view.DoAsync(tcs =>
                 {
                     view.TextEdit.ResetText();
                     int cnt = 0;
@@ -142,12 +154,12 @@ namespace DSModeler
                     {
                         DsProcessEvent.DoWork(Convert.ToInt32((cnt++ * 1.0) / (colorTexts.Count()) * 100.0));
                         view.AppendTextColor(f.Item1, f.Item2);
-                        await Task.Yield();
                     }
 
                     Export();
 
                     DsProcessEvent.DoWork(100);
+                    tcs.SetResult(true);
                 });
             });
         }

@@ -24,11 +24,12 @@ namespace DSModeler
             return recents.ToArray();
         }
 
-        public static string GetNewFileName(string path)
+        public static string GetNewFileName(string path, string type)
         {
             var directory = Path.GetDirectoryName(path);
+            var fileName = Path.GetFileNameWithoutExtension(path);
 
-            var newDirectory = directory + $"_{DateTime.Now:yyMMdd_HH_mm_ss}";
+            var newDirectory = $"{directory}\\{fileName}_{type}_autogen_{DateTime.Now:yyMMdd_HH_mm_ss}";
             Directory.CreateDirectory(newDirectory);
 
             return Path.Combine(newDirectory, Path.GetFileName(path));

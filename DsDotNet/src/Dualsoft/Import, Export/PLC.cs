@@ -26,10 +26,10 @@ namespace DSModeler
             SplashScreenManager.ShowForm(typeof(DXWaitForm));
 
             var xmlTemplateFile = Path.ChangeExtension(Files.GetLast().First(), "xml");
-            var xmlFileName = Path.GetFileNameWithoutExtension(xmlTemplateFile) + "_gen.xml";
+            var xmlFileName = Path.GetFileName(xmlTemplateFile);
             var xmlDriectory = Path.GetDirectoryName(xmlTemplateFile);
             var fullpath = Path.Combine(xmlDriectory, xmlFileName);
-            var newPath = Files.GetNewFileName(fullpath);
+            var newPath = Files.GetNewFileName(fullpath, "PLC");
             Global.ExportPathPLC = newPath;
             if (File.Exists(xmlTemplateFile))
                 //사용자 xg5000 Template 형식으로 생성

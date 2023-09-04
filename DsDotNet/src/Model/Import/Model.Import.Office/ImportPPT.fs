@@ -66,6 +66,8 @@ module ImportPPTModule =
             doc.GetCopyPathNName()
             |> Seq.iter(fun (userPath, loadedName, node) ->
 
+                let path =  Path.GetFullPath(Path.Combine(doc.DirectoryName, userPath))
+                
                 let paras = getParams(repo, doc.DirectoryName, userPath
                             , loadedName, theSys, None, getLoadingType node.NodeType)
                 let hostIp = if paras.HostIp.IsSome then paras.HostIp.Value else ""

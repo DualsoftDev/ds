@@ -21,6 +21,13 @@ module CpuLoader =
             | ActivePou    (s, _p) -> s
             | DevicePou    (d, _p) -> d.ReferenceSystem
             | ExternalPou  (e, _p) -> e.ReferenceSystem
+
+        member x.ToExternalSystem() =
+            match x with
+            | ActivePou    (_, _p) -> None
+            | DevicePou    (_, _p) -> None 
+            | ExternalPou  (e, _p) -> Some e
+
         member x.CommentedStatements() =
             match x with
             | ActivePou    (_s, p) -> p

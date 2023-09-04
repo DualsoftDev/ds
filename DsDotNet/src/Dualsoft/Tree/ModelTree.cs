@@ -60,7 +60,11 @@ namespace DSModeler.Tree
                 else if (pou.IsDevice)
                     formMain.Ace_Device.Elements.Add(ele);
                 else if (pou.IsExternal)
+                {
+                    var extSys = pou.ToExternalSystem().Value;
+                    ele.Text = extSys.Name; 
                     formMain.Ace_ExSystem.Elements.Add(ele);
+                }
 
                 var lstFlowAce = Tree.ModelTree.AppandFlows(formMain, views, ele);
                 lstFlowAce.ForEach(f =>

@@ -199,6 +199,7 @@ namespace DSModeler
 
                 Tree.ModelTree.ClearSubBtn(frmMain.Ace_System);
                 Tree.ModelTree.ClearSubBtn(frmMain.Ace_Device);
+                Tree.ModelTree.ClearSubBtn(frmMain.Ace_ExSystem);
                 Tree.ModelTree.ClearSubBtn(frmMain.Ace_HMI);
             });
         }

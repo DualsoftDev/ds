@@ -43,13 +43,16 @@ namespace DSModeler
                 new Newtonsoft.Json.Converters.StringEnumConverter()
             );
 
-            string dsText = "";
-            foreach (var sys in PcControl.RunCpus.SelectMany(s=>s.Systems))
-                dsText += $"{sys.ToDsText(Global.IsDebug)}\r\n\r\n";
+            //string dsText = "";
+            //foreach (var sys in PcControl.RunCpus.SelectMany(s=>s.Systems))
+            //    dsText += $"{sys.ToDsText(Global.IsDebug)}\r\n\r\n";
 
             var systemRepo = new Dictionary<string, DsSystem>();
-            var option = ParserOptions.Create4Runtime(systemRepo, "./", "ActiveCpuName", "./", ParserLoadingType.DuNone);
-            var newSys = ModelParser.ParseFromString(dsText, option);
+            var jsonPath = Global.ExportPathDS.Replace(".ds", ".json");
+            var md = ModelLoader.LoadFromConfig(jsonPath);
+            var newSys = md.Systems;
+            //var option = ParserOptions.Create4Runtime(systemRepo, "./", "ActiveCpuName", "./", ParserLoadingType.DuNone);
+            //var newSys = ModelParser.ParseFromString(dsText, option);
 
             var json = JsonConvert.SerializeObject(model, settings);
             //var md = JsonConvert.DeserializeObject<Engine.Core.ModelLoaderModule.Model>(json);

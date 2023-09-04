@@ -4,7 +4,6 @@ open System.Linq
 open System.Runtime.CompilerServices
 open System.Collections.Generic
 open Dual.Common.Core.FS
-open Dual.Common.Core.FS
 
 
 [<AutoOpen>]
@@ -130,8 +129,8 @@ module EdgeModule =
 
     let validateGraphOfSystem(system:DsSystem) =
         for f in system.Flows do
-            f.Graph.Validate() |> ignore
-            f.Graph.Vertices.OfType<Real>().Iter(fun r -> r.Graph.Validate() |> ignore)
+            f.Graph.Validate(true) |> ignore
+            f.Graph.Vertices.OfType<Real>().Iter(fun r -> r.Graph.Validate(true) |> ignore)
 
     let guardedValidateSystem(system:DsSystem) =
             try validateGraphOfSystem system

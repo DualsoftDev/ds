@@ -3,7 +3,6 @@ namespace Engine.Core
 
 open System.Runtime.CompilerServices
 open System.Collections.Generic
-open System
 open System.Linq
 open Dual.Common.Core.FS
 
@@ -190,20 +189,18 @@ module internal GraphHelperModule =
         sccs
 
 
-    let validateGraph (graph:Graph<'V, 'E>) =
+    let validateGraph (graph:Graph<'V, 'E>, needCyclicGraphc:bool) =
         let edges =
             graph.Edges
                 .Where(fun e -> not <| e.EdgeType.HasFlag(EdgeType.Reset))
                 .ToArray()
-
         let sccs = findStronglyConnectedComponents graph edges
-        if sccs.Any() then
+        if sccs.Any() && not(needCyclicGraphc) then
             let msg =
                 [ for vs in sccs do
                     vs.Select(fun v -> v.Name).JoinWith(", ").EncloseWith2("[", "]")
                 ].JoinWith("\r\n")
             failwithlogf $"ERROR: Cyclic graph on {msg}"
-
         true
 
 
@@ -212,5 +209,5 @@ module internal GraphHelperModule =
 type GraphHelper =
     [<Extension>] static member Dump(graph:Graph<_, _>) = dumpGraph(graph)
     [<Extension>] static member GetVertices(edge:IEdge<'V>) = [edge.Source; edge.Target]
-    [<Extension>] static member Validate(graph:Graph<'V, 'E>) = validateGraph graph
+    [<Extension>] static member Validate(graph:Graph<'V, 'E>, needCyclicGraphc:bool) = validateGraph(graph, needCyclicGraphc)
 

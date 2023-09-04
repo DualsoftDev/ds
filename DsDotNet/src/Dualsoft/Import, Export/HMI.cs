@@ -33,34 +33,25 @@ namespace DSModeler
             }
             
             SplashScreenManager.ShowForm(typeof(DXWaitForm));
-            var model = formMain.Model;
-            var settings = new JsonSerializerSettings
-            {
-                PreserveReferencesHandling = PreserveReferencesHandling.Objects,
-                TypeNameHandling = TypeNameHandling.All
-            };
-            settings.Converters.Add(
-                new Newtonsoft.Json.Converters.StringEnumConverter()
-            );
+            //var model = formMain.Model;
+            //var settings = new JsonSerializerSettings
+            //{
+            //    PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+            //    TypeNameHandling = TypeNameHandling.All
+            //};
+            //settings.Converters.Add(
+            //    new Newtonsoft.Json.Converters.StringEnumConverter()
+            //);
 
-            //string dsText = "";
-            //foreach (var sys in PcControl.RunCpus.SelectMany(s=>s.Systems))
-            //    dsText += $"{sys.ToDsText(Global.IsDebug)}\r\n\r\n";
-
-            var systemRepo = new Dictionary<string, DsSystem>();
             var jsonPath = Global.ExportPathDS.Replace(".ds", ".json");
-            var md = ModelLoader.LoadFromConfig(jsonPath);
-            var newSys = md.Systems;
-            //var option = ParserOptions.Create4Runtime(systemRepo, "./", "ActiveCpuName", "./", ParserLoadingType.DuNone);
-            //var newSys = ModelParser.ParseFromString(dsText, option);
+            var model = ModelLoader.LoadFromConfig(jsonPath);
+            var newSys = model.Systems;
 
-            var json = JsonConvert.SerializeObject(model, settings);
-            //var md = JsonConvert.DeserializeObject<Engine.Core.ModelLoaderModule.Model>(json);
-            //var hmiGenModule = new HmiGenModule.HmiCode(model);
+            //var json = JsonConvert.SerializeObject(model, settings);
             //var json = CodeGenHandler.JsonWrapping(hmiGenModule.Generate());
             SplashScreenManager.CloseForm();
 
-            return json;
+            return "";
         }
     }
 }

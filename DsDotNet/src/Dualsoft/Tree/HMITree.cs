@@ -2,7 +2,7 @@ using DevExpress.Utils.Filtering.Internal;
 using DevExpress.XtraBars.Navigation;
 using Dual.Common.Core;
 using Dual.Common.Winform;
-using Model.Import.Office;
+using Engine.Import.Office;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -10,8 +10,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.Core.CoreModule;
-using static Model.Import.Office.ImportPPTModule;
-using static Model.Import.Office.ViewModule;
+using static Engine.Import.Office.ImportPPTModule;
+using static Engine.Import.Office.ViewModule;
 
 namespace DSModeler.Tree
 {

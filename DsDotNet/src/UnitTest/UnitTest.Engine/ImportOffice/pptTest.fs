@@ -6,7 +6,7 @@ open Engine.Core
 open Dual.Common.Core.FS
 open NUnit.Framework
 open Engine.Parser.FS
-open Model.Import.Office
+open Engine.Import.Office
 
 
 [<AutoOpen>]

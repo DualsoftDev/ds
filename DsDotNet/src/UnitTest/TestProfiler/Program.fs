@@ -2,7 +2,7 @@
 
 open System
 open System.IO
-open Model.Import.Office
+open Engine.Import.Office
 open Engine.CodeGenCPU
 open Dual.Common.Core.FS
 open Engine.Core
@@ -13,7 +13,7 @@ open Dual.Common.Core.FS
 open Engine.CodeGenCPU
 open PLC.CodeGen.LSXGI
 open System
-open Model.Import.Office
+open Engine.Import.Office
 open Engine.Parser.FS
 
 

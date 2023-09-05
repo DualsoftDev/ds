@@ -3,7 +3,7 @@ using DSModeler.Tree;
 using Dual.Common.Core;
 using Dual.Common.Winform;
 using Engine.Core;
-using Model.Import.Office;
+using Engine.Import.Office;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using static Engine.CodeGenCPU.CpuLoader;
 using static Engine.Core.CoreModule;
 using static Engine.Core.Interface;
-using static Model.Import.Office.ImportPPTModule;
+using static Engine.Import.Office.ImportPPTModule;
 
 namespace DSModeler
 {

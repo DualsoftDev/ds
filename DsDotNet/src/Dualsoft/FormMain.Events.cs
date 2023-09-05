@@ -16,7 +16,7 @@ using System.Windows.Forms;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.RuntimeGeneratorModule;
-using static Model.Import.Office.ViewModule;
+using static Engine.Import.Office.ViewModule;
 
 namespace DSModeler
 {

@@ -31,7 +31,7 @@
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
     <AutorunEnabled>true</AutorunEnabled>
     <DisallowUrlActivation>true</DisallowUrlActivation>
-    <ApplicationRevision>33</ApplicationRevision>
+    <ApplicationRevision>34</ApplicationRevision>
     <ApplicationVersion>0.9.3.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <ExcludeDeploymentUrl>true</ExcludeDeploymentUrl>
@@ -334,9 +334,9 @@
       <Project>{8cf6c4f7-5a55-43bd-aad6-788e75fca0b8}</Project>
       <Name>Engine.Cpu</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Model\Import\Model.Import.Office\Model.Import.Office.fsproj">
-      <Project>{5b8c9e88-ffc3-403b-adae-1923bcc6b8fb}</Project>
-      <Name>Model.Import.Office</Name>
+    <ProjectReference Include="..\Engine\Engine.Import.Office\Engine.Import.Office.fsproj">
+      <Project>{f51c980f-5a93-437f-8d94-c7e20c6c900d}</Project>
+      <Name>Engine.Import.Office</Name>
     </ProjectReference>
     <ProjectReference Include="..\Server\Server.Common.NMC\Server.Common.NMC.csproj">
       <Project>{07965281-9f14-43a4-8bf5-0ddfed55284c}</Project>

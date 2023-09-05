@@ -1,12 +1,12 @@
 {
   "profiles": {
-    "Console.SignalR.Server": {
+    "Dualsoft": {
       "commandName": "Project",
-      "launchBrowser": false,
+      "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "https://localhost:53455;http://localhost:53456"
+      "applicationUrl": "https://localhost:53896;http://localhost:53897"
     }
   }
 }

@@ -92,10 +92,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server.HW.Common", "src\Ser
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server.HW.WMX3", "src\Server\Server.HW.WMX3\Server.HW.WMX3.csproj", "{A5AAB509-F6AE-4665-8BDA-A78434D5572E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppApi.SignalR", "src\AppApi.SignalR\AppApi.SignalR.csproj", "{5015C25C-AFFE-4F97-8B50-60A21DF8B584}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Console.SignalR.Server", "src\Console.SignalR.Server\Console.SignalR.Server.csproj", "{72DF51C1-3516-4909-BFAD-C3B6074D92FD}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -222,14 +218,6 @@ Global
 		{A5AAB509-F6AE-4665-8BDA-A78434D5572E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A5AAB509-F6AE-4665-8BDA-A78434D5572E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A5AAB509-F6AE-4665-8BDA-A78434D5572E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5015C25C-AFFE-4F97-8B50-60A21DF8B584}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5015C25C-AFFE-4F97-8B50-60A21DF8B584}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5015C25C-AFFE-4F97-8B50-60A21DF8B584}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5015C25C-AFFE-4F97-8B50-60A21DF8B584}.Release|Any CPU.Build.0 = Release|Any CPU
-		{72DF51C1-3516-4909-BFAD-C3B6074D92FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{72DF51C1-3516-4909-BFAD-C3B6074D92FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{72DF51C1-3516-4909-BFAD-C3B6074D92FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{72DF51C1-3516-4909-BFAD-C3B6074D92FD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

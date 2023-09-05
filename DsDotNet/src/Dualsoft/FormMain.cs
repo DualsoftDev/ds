@@ -36,7 +36,7 @@ namespace DSModeler
         }
 
 
-        private async void FormMain_Load(object sender, EventArgs e)
+        private void FormMain_Load(object sender, EventArgs e)
         {
             Text = $"Dualsoft v{Global.AppVersion}";
             LayoutForm.LoadLayout(dockManager);
@@ -45,14 +45,11 @@ namespace DSModeler
             InitializationEventSetting();
             InitializationLogger();
             InitializationUIControl();
-            await InitializationClientSignalRAsync();
+            _ = Task.Run(async () => await InitializationClientSignalRAsync());
 
             if (!Global.IsDebug)
                 DevExpress.XtraSplashScreen.SplashScreenManager.CloseForm();
         }
-
-
-
 
         private void InitializationLogger()
         {

@@ -15,7 +15,6 @@ using System.Threading.Tasks;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsTextProperty;
 using static Engine.Core.ExpressionModule;
-using static Engine.Core.ModelLoaderModule;
 using static Engine.Core.SystemToDsExt;
 
 namespace DSModeler
@@ -68,15 +67,15 @@ namespace DSModeler
         private static string ExportLoadedSystem(LoadedSystem s, string dirNew)
         {
             string commonDir = "";
-            var lib = dirNew.ToLower().Split('\\');  
+            var lib = dirNew.ToLower().Split('\\');
             var abs = s.AbsoluteFilePath.ToLower().Split('\\');
             DirectoryInfo di = new DirectoryInfo(dirNew);
 
-            for (int i = 0; i < abs.Length ; i++)
+            for (int i = 0; i < abs.Length; i++)
             {
                 if (lib.Length == i || abs[i] != lib[i])
                 {
-                    if (lib.Length - 1 != i) 
+                    if (lib.Length - 1 != i)
                     {
                         Global.Logger.Error($"{s.AbsoluteFilePath}.pptx " +
                             $"\r\nSystem Library호출은 {di.Parent.FullName} 동일/하위 폴더야 합니다.");
@@ -135,11 +134,11 @@ namespace DSModeler
         }
 
 
-    
+
 
         public static void DrawDSText(FormDocText view)
         {
-            Task.Run(async() =>
+            Task.Run(async () =>
             {
                 await view.DoAsync(tcs =>
                 {

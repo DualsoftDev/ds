@@ -50,10 +50,7 @@ module CoreModule =
         member _.UserSpecifiedFilePath:string = param.UserSpecifiedFilePath
         member _.AbsoluteFilePath:string = param.AbsoluteFilePath
         member _.LoadingType:ParserLoadingType = param.LoadingType
-        //member _.LoadedName:string = param.LoadedName
-        //member _.OriginName:string = loadedSystem.Name
-        ///초기 Loading부터 하나씩 추가하여 External system을 명확히 구분한다.(Root.Factory.Shop.Line.Station.Unit.Device...)
-        member val AbsoluteParents = ResizeArray<DsSystem>()
+
 
     /// *.ds file 을 읽어 들여서 새로운 instance 를 만들어 넣기 위한 구조
    

@@ -1,11 +1,8 @@
 using DevExpress.XtraBars.Navigation;
+using Dual.Common.Core;
 using Dual.Common.Winform;
-using Engine.Import.Office;
 using System.Collections.Generic;
-using System.Linq;
-using static Engine.CodeGenCPU.CpuLoader;
 using static Engine.Core.CoreModule;
-using static Engine.Import.Office.ImportPPTModule;
 using static Engine.Import.Office.ViewModule;
 
 namespace DSModeler.Tree
@@ -24,16 +21,15 @@ namespace DSModeler.Tree
             }
         }
 
-        public static List<AccordionControlElement> AppandFlows(FormMain formMain, IEnumerable<ViewNode> views, AccordionControlElement ele)
+        private static List<AccordionControlElement> appandFlows(FormMain formMain, Dictionary<Flow, ViewNode> viewAll, DsSystem sys, AccordionControlElement ele)
         {
             List<AccordionControlElement> lstAce = new List<AccordionControlElement>();
-            var nodeFlows = views.Where(w => w.ViewType == InterfaceClass.ViewType.VFLOW)
-                                     .Where(w => w.UsedViewNodes.Any())
-                                     .ToDictionary(s => s.Flow.Value, s => s);
-            foreach (var flowDic in nodeFlows)
+            foreach (var flow in sys.Flows)
             {
+                if (!viewAll.ContainsKey(flow)) continue;// flow에 내용이 없는것은 생략
+
                 var eleFlow = new AccordionControlElement()
-                { Style = ElementStyle.Item, Text = flowDic.Key.Name, Tag = flowDic.Value };
+                { Style = ElementStyle.Item, Text = flow.Name, Tag = viewAll[flow] };
                 eleFlow.Click += (s, e) =>
                 {
                     formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
@@ -44,37 +40,52 @@ namespace DSModeler.Tree
             return lstAce;
         }
 
-        public static void CreateModelBtn(FormMain formMain, DsSystem sys, IEnumerable<ViewNode> views, PouGen pou)
+        public static void CreateActiveSystemBtn(FormMain formMain, DsSystem sys, Dictionary<Flow, ViewNode> viewAll)
         {
             formMain.Do(() =>
             {
                 var ele = new AccordionControlElement()
                 { Style = ElementStyle.Group, Text = sys.Name, Tag = sys };
-                ele.Click += (s, e) =>
-                {
-                    formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
-                };
+                ele.Click += (s, e) => formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
 
-                if (pou.IsActive)
-                    formMain.Ace_System.Elements.Add(ele);
-                else if (pou.IsDevice)
-                    formMain.Ace_Device.Elements.Add(ele);
-                else if (pou.IsExternal)
-                {
-                    var extSys = pou.ToExternalSystem().Value;
-                    ele.Text = extSys.Name; 
-                    formMain.Ace_ExSystem.Elements.Add(ele);
-                }
+                formMain.Ace_System.Elements.Add(ele);
 
-                var lstFlowAce = Tree.ModelTree.AppandFlows(formMain, views, ele);
+                var lstFlowAce = appandFlows(formMain, viewAll, sys, ele);
                 lstFlowAce.ForEach(f =>
                     f.Click += (s, e) =>
                     {
                         var viewNode = ((AccordionControlElement)s).Tag as ViewNode;
                         DocControl.CreateDocOrSelect(formMain, viewNode);
                     });
+
+                sys.ExternalSystems.Iter(s => createLoadedSystemBtn(formMain, s.ReferenceSystem, viewAll, formMain.Ace_ExSystem));
+                sys.Devices.Iter(s => createLoadedSystemBtn(formMain, s.ReferenceSystem, viewAll, formMain.Ace_Device));
             });
         }
+        private static void createLoadedSystemBtn(FormMain formMain, DsSystem sys
+            , Dictionary<Flow, ViewNode> viewAll
+            , AccordionControlElement eleParent)
+        {
+            formMain.Do(() =>
+            {
+                var ele = new AccordionControlElement()
+                { Style = ElementStyle.Group, Text = sys.Name, Tag = sys };
+                ele.Click += (s, e) => formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
+
+                var lstFlowAce = appandFlows(formMain, viewAll, sys, ele);
+                lstFlowAce.ForEach(f =>
+                    f.Click += (s, e) =>
+                    {
+                        var viewNode = ((AccordionControlElement)s).Tag as ViewNode;
+                        DocControl.CreateDocOrSelect(formMain, viewNode);
+                    });
+
+                eleParent.Elements.Add(ele);
+
+                sys.LoadedSystems.Iter(s => createLoadedSystemBtn(formMain, s.ReferenceSystem, viewAll, ele));
+            });
+        }
+
     }
 }
 

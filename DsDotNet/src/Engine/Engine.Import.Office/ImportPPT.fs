@@ -85,7 +85,7 @@ module ImportPPTModule =
                             else
                                 Device(newSys, paras) :> LoadedSystem 
 
-                    newLoad.AbsoluteParents.AddRange(parents)  
+                    
                     loadedParentStack.Pop() |> ignore
 
                     newLoad

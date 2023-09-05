@@ -26,20 +26,20 @@ namespace DSModeler
         public static Dictionary<TagHW, IEnumerable<ITag>> GetActionInputs(DsSystem sys)
         {
             var actions = new Dictionary<TagHW, IEnumerable<ITag>>();
-            var inTags 
+            var inTags
                  = sys.Jobs
                       .SelectMany(j => j.DeviceDefs.Select(s => s.InTag))
                       .Where(w => w != null);
-          
+
             inTags
               .GroupBy(g => g.Address)
-              .Iter(g => 
+              .Iter(g =>
               {
                   var names = String.Join(", ", g.Select(s => s.Name));
                   var hwTag = getTagHW(names, g.Key, true);
-                  actions.Add(hwTag, g.Select(s=>s));
+                  actions.Add(hwTag, g.Select(s => s));
               });
-       
+
             return actions;
         }
         public static Dictionary<ITag, TagHW> GetActionOutputs(DsSystem sys)
@@ -184,7 +184,7 @@ namespace DSModeler
         {
             frmMain.Do(() =>
             {
-                if (RunCpus.Any()) 
+                if (RunCpus.Any())
                     PcAction.Reset(frmMain.Ace_Play, frmMain.Ace_HMI);
 
                 RunCpus.Iter(cpu => cpu.Dispose());

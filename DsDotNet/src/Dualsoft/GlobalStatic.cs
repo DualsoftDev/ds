@@ -1,12 +1,7 @@
-using DevExpress.XtraEditors;
-using DevExpress.XtraTabbedMdi;
-using DSModeler.Form;
 using Dual.Common.Core;
-using Dual.Common.Core.FS;
 using Engine.Core;
 using log4net;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reactive.Subjects;
 using System.Reflection;
@@ -48,7 +43,7 @@ namespace DSModeler
         public static bool LayoutMenumExpand { get; set; }
         public static bool LayoutGraphLineType { get; set; }
         public static bool SimReset { get; set; }
-        public static string ExportPathDS  { get; set; }
+        public static string ExportPathDS { get; set; }
         public static string ExportPathPLC { get; set; }
         public static string ExportPathXLS { get; set; }
         public static string RunHWIP { get; set; }

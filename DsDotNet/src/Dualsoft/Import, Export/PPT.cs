@@ -33,16 +33,21 @@ namespace DSModeler
 
 
             var pous = Cpu.LoadStatements(activeSys, storages).ToList();
+            var viewAll = pptResults.SelectMany(f => f.Views)
+                                    .Where(w => w.ViewType == InterfaceClass.ViewType.VFLOW)
+                                    //.Where(w => w.UsedViewNodes.Any())
+                                    .ToDictionary(s => s.Flow.Value, ss => ss);
+            ModelTree.CreateActiveSystemBtn(formMain, activeSys, viewAll);
+
             foreach (var pou in pous)
             {
                 var sys = pou.ToSystem();
-                var viewSet = pptResults.First(f=>f.System == sys).Views;  
+                var viewSet = pptResults.First(f => f.System == sys).Views;
 
                 dicCpu.Add(sys, pou);
-             
+
                 if (activeSys == sys) await HMITree.CreateHMIBtn(formMain, sys, viewSet);
 
-                ModelTree.CreateModelBtn(formMain, sys, viewSet, pou);
 
                 ViewDraw.DrawInitStatus(formMain.TabbedView, dicCpu);
                 ViewDraw.DrawInitActionTask(formMain, dicCpu);
@@ -56,8 +61,8 @@ namespace DSModeler
                 DsProcessEvent.DoWork(Convert.ToInt32((cnt++ * 1.0) / pous.Count() * 50));
                 await Task.Delay(1);
             }
-                  
-           
+
+
             formMain.Do(() =>
             {
                 //formMain.Ace_Model.Expanded = false;

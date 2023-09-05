@@ -1,4 +1,3 @@
-using DevExpress.Utils.Filtering.Internal;
 using DevExpress.XtraBars.Navigation;
 using Dual.Common.Core;
 using Dual.Common.Winform;
@@ -10,7 +9,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.Core.CoreModule;
-using static Engine.Import.Office.ImportPPTModule;
 using static Engine.Import.Office.ViewModule;
 
 namespace DSModeler.Tree
@@ -107,7 +105,7 @@ namespace DSModeler.Tree
 
                     void StartHMI(Real real)
                     {
-                        Task.Run( () =>
+                        Task.Run(() =>
                         {
                             var vv = (real.TagManager as VertexManager);
                             vv.SF.Value = true;
@@ -117,7 +115,7 @@ namespace DSModeler.Tree
                     }
                     void ResetHMI(Real real)
                     {
-                        Task.Run( () =>
+                        Task.Run(() =>
                         {
                             var vv = (real.TagManager as VertexManager);
                             vv.RF.Value = true;

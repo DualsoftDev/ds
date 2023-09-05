@@ -1,20 +1,16 @@
+using DevExpress.XtraBars.Docking2010.Views.Tabbed;
 using DSModeler.Form;
+using Dual.Common.Core;
 using Engine.CodeGenCPU;
+using Engine.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Subjects;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
-using static Engine.Cpu.RunTime;
 using static Engine.Core.EdgeExt;
-
 using static Engine.Import.Office.ViewModule;
-using Dual.Common.Core;
-using Engine.Core;
-using System.Reactive.Subjects;
-using System;
-using System.Windows.Forms;
-using Dual.Common.Winform;
-using DevExpress.XtraBars.Docking2010.Views.Tabbed;
 
 namespace DSModeler
 {
@@ -37,7 +33,7 @@ namespace DSModeler
             }
         }
 
-     
+
         public static void DrawInitActionTask(FormMain formMain, Dictionary<DsSystem, CpuLoader.PouGen> dicCpu)
         {
             DicTask = new Dictionary<DsTask, IEnumerable<Vertex>>();

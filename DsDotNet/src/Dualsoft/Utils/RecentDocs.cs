@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 
 namespace DSModeler
@@ -13,7 +12,7 @@ namespace DSModeler
             DSRegistry.SetValue(K.LastDocs, String.Join("|;|", docs));
         }
 
-       
+
 
         public static List<string> GetRegistryRecentDocs()
         {

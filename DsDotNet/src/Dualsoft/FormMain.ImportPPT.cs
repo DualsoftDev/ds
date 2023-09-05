@@ -47,9 +47,10 @@ namespace DSModeler
                     Global.Logger.Info("PPTX 파일 로딩이 완료 되었습니다.");
                     ImportingPPT = false;
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     PcControl.RunCpus.Clear();
-                    Global.ActiveSys = null; 
+                    Global.ActiveSys = null;
                     ImportingPPT = false;
                     DsProcessEvent.DoWork(100);
                     Global.Logger.Error(ex.Message);

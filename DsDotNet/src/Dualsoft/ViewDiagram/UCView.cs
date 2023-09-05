@@ -6,8 +6,6 @@ using Microsoft.Msagl.GraphViewerGdi;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Hosting;
-using System.Web.UI.WebControls;
 using System.Windows.Forms;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsText;
@@ -317,7 +315,7 @@ namespace DSModeler
         }
         private Node findNode(ViewNode viewNode)
         {
-            Node node =  viewer.Graph.FindNode(viewNode.UIKey);
+            Node node = viewer.Graph.FindNode(viewNode.UIKey);
             if (node == null)
             {
                 if (viewer.Graph.SubgraphMap.ContainsKey(viewNode.UIKey))
@@ -339,18 +337,18 @@ namespace DSModeler
             }
         }
 
-     
+
         public void UpdateStatus(ViewNode viewNode)
         {
             Node node = findNode(viewNode);
             if (node != null)
             {
-                    UpdateLineColor(viewNode.Status4, node);
+                UpdateLineColor(viewNode.Status4, node);
                 RefreshGraph();
             }
         }
 
-        private  void UpdateFontColor(Status4 newStatus, Node node)
+        private void UpdateFontColor(Status4 newStatus, Node node)
         {
             if (newStatus == Status4.Ready) node.Label.FontColor = Color.DarkGreen;
             else if (newStatus == Status4.Going) node.Label.FontColor = Color.DarkKhaki;
@@ -358,7 +356,7 @@ namespace DSModeler
             else if (newStatus == Status4.Homing) node.Label.FontColor = Color.Black;
         }
 
-        private  void UpdateLineColor(Status4 newStatus, Node node)
+        private void UpdateLineColor(Status4 newStatus, Node node)
         {
             if (newStatus == Status4.Ready) node.Attr.Color = Color.DarkOliveGreen;
             else if (newStatus == Status4.Going) node.Attr.Color = Color.DarkGoldenrod;
@@ -389,6 +387,6 @@ namespace DSModeler
             return gColor;
         }
 
-    
+
     }
 }

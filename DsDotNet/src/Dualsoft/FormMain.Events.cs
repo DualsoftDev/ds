@@ -1,4 +1,3 @@
-using DevExpress.XtraBars.Docking2010.Views.Tabbed;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using DSModeler.Form;
@@ -11,10 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Reactive.Subjects;
 using System.Windows.Forms;
 using static Engine.Core.CoreModule;
-using static Engine.Core.DsType;
 using static Engine.Core.RuntimeGeneratorModule;
 using static Engine.Import.Office.ViewModule;
 
@@ -179,8 +176,8 @@ namespace DSModeler
                              .OfType<FormDocView>()
                              .Where(w => w.UcView.Flow == v.Parent.GetFlow())
                              .Select(s => Tuple.Create(s, s.UcView.MasterNode.UsedViewVertexNodes(false)[v]))
-                             .ToList();     
-                             
+                             .ToList();
+
             }
         }
     }

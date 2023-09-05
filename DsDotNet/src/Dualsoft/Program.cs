@@ -16,7 +16,7 @@ namespace DSModeler
         /// </summary>
         [STAThread]
         static void Main()
-       {
+        {
 #if DEBUG
             Global.IsDebug = true;
 #endif

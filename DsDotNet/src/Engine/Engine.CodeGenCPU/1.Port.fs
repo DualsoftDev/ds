@@ -8,7 +8,7 @@ open System.Linq
 
 //Port 처리 Set 공용 함수
 let private getPortSetBits(v:VertexManager) (rse:SREType) =
-    let real = v.Vertex :?> Real
+    //let real = v.Vertex :?> Real
     //let planSets = v.System.GetPSs(real).ToOrElseOff(v.System)
     let shareds = v.GetSharedReal().Select(getVM)
 

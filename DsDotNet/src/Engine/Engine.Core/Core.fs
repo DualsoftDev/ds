@@ -18,7 +18,7 @@ module CoreModule =
             member _.NameComponents = nameComponents
             member x.QualifiedName = nameComponents.Combine() }
 
-    type ParserLoadingType = DuNone | DuDevice | DuExternal
+    type ParserLoadingType = DuNone | DuDevice | DuExternal 
     /// External system loading 시, 공유하기 위한 정보를 담을 곳
     type ShareableSystemRepository = Dictionary<string, DsSystem>
 
@@ -38,19 +38,22 @@ module CoreModule =
     [<AbstractClass>]
     type LoadedSystem(loadedSystem:DsSystem, param:DeviceLoadParameters)  =
         inherit FqdnObject(param.LoadedName, param.ContainerSystem)
+        let mutable loadedName = param.LoadedName //로딩 주체에따라 Runtime에 변경
         interface ISystem 
+        member _.LoadedName with get() = loadedName and set(value) = loadedName <- value
+        
         /// 다른 device 을 Loading 하려는 system 입장에서 loading 된 system 참조 용
         member _.ReferenceSystem = loadedSystem
-
         /// Loading 된 system 입장에 자신을 포함하는 container system
         member _.ContainerSystem = param.ContainerSystem
         /// Loading 을 위해서 사용자가 지정한 file path.  serialize 시, 절대 path 를 사용하지 않기 위한 용도로 사용된다.
         member _.UserSpecifiedFilePath:string = param.UserSpecifiedFilePath
         member _.AbsoluteFilePath:string = param.AbsoluteFilePath
-        member _.LoadedName:string = param.LoadedName
-        member _.OriginName:string = loadedSystem.Name
+        member _.LoadingType:ParserLoadingType = param.LoadingType
+        //member _.LoadedName:string = param.LoadedName
+        //member _.OriginName:string = loadedSystem.Name
         ///초기 Loading부터 하나씩 추가하여 External system을 명확히 구분한다.(Root.Factory.Shop.Line.Station.Unit.Device...)
-        member val AbsoluteParents = ResizeArray<LoadedSystem>()
+        member val AbsoluteParents = ResizeArray<DsSystem>()
 
     /// *.ds file 을 읽어 들여서 새로운 instance 를 만들어 넣기 위한 구조
    

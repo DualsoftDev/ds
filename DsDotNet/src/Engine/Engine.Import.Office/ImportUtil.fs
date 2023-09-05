@@ -110,8 +110,8 @@ module ImportU =
                              .Select(fun tgt -> getApiItems(mySys, tgt, api.Name), tgt)
                              .Select(fun (api, tgt)->
                                 match node.NodeType with
-                                | OPEN_SYS_CALL            -> TaskSys(api, tgt)         :> DsTask
-                                | OPEN_SYS_LINK | COPY_DEV -> TaskDev(api, "", "", tgt) :> DsTask
+                                | OPEN_EXSYS_LINK             -> TaskSys(api, tgt)         :> DsTask
+                                | OPEN_EXSYS_CALL  | COPY_DEV -> TaskDev(api, "", "", tgt) :> DsTask
                                 | _-> failwithlog "Error MakeJobs"
                                 )
 
@@ -126,20 +126,7 @@ module ImportU =
                 )
             )
 
-        //Interface 만들기
-        [<Extension>]
-        static member MakeInterfaces (doc :pptDoc, sys:DsSystem) =
-            let checkName = HashSet<string>()
-            doc.Nodes
-            |> Seq.filter(fun node -> node.NodeType.IsIF)
-            |> Seq.iter(fun node ->
-
-                    if checkName.Add(node.IfName) |> not
-                    then node.Shape.ErrorName(ErrID._25, node.PageNum)
-
-                    let apiName = node.IfName
-                    ApiItem.Create(apiName, sys) |> ignore
-            )
+    
 
         //Interface Reset 정보 만들기
         [<Extension>]
@@ -183,6 +170,22 @@ module ImportU =
                 |> Seq.pairwiseWindingFull  //2개식 조합
                 |> Seq.iter(fun (src, tgt) -> createInterlockInfos (src, tgt)))
 
+        //Interface 만들기
+        [<Extension>]
+        static member MakeInterfaces (doc :pptDoc, sys:DsSystem) =
+            let checkName = HashSet<string>()
+            doc.Nodes
+            |> Seq.filter(fun node -> node.NodeType.IsIF)
+            |> Seq.iter(fun node ->
+
+                    if checkName.Add(node.IfName) |> not
+                    then node.Shape.ErrorName(ErrID._25, node.PageNum)
+
+                    let apiName = node.IfName
+                    ApiItem.Create(apiName, sys) |> ignore
+            )
+
+            doc.MakeInterfaceResets |>ignore
 
         //MFlow 리스트 만들기
         [<Extension>]

@@ -1,15 +1,11 @@
 using DevExpress.XtraEditors;
 using DSModeler.Tree;
 using Dual.Common.Core;
-using Dual.Common.Winform;
 using Engine.Core;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static Engine.Core.CoreModule;
-using static Engine.Core.DsType;
-using static Engine.Core.EdgeExt;
+
 
 
 namespace DSModeler
@@ -54,7 +50,8 @@ namespace DSModeler
                 catch (Exception ex) {
                     PcControl.RunCpus.Clear();
                     Global.ActiveSys = null; 
-                    ImportingPPT = false; 
+                    ImportingPPT = false;
+                    DsProcessEvent.DoWork(100);
                     Global.Logger.Error(ex.Message);
                 }
             });

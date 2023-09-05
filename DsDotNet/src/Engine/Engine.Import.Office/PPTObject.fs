@@ -148,8 +148,8 @@ module PPTObjectModule =
         | REALExS     -> if  name.Contains("$")|>not then  shape.ErrorName(ErrID._55, iPage)
         | CALL        -> if  name.Contains("$")|>not then  shape.ErrorName(ErrID._56, iPage)
 
-        | OPEN_SYS_CALL
-        | OPEN_SYS_LINK
+        | OPEN_EXSYS_CALL
+        | OPEN_EXSYS_LINK
         | COPY_DEV  ->   let name, number = GetTailNumber(shape.InnerText)
                          if GetSquareBrackets(name, false).length() = 0
                          then  shape.ErrorName(ErrID._7, iPage)
@@ -290,8 +290,8 @@ module PPTObjectModule =
                 elif(shape.CheckFoldedCornerPlate())
                 then
                     if name.Contains("/")
-                    then OPEN_SYS_LINK
-                    else OPEN_SYS_CALL
+                    then OPEN_EXSYS_CALL
+                    else OPEN_EXSYS_LINK
                 elif(shape.CheckFoldedCornerRound()) then COPY_DEV
                 elif(shape.CheckEllipse())           then CALL
                 elif(shape.CheckBevelShapePlate())   then LAMP
@@ -308,8 +308,8 @@ module PPTObjectModule =
                      |> fun text -> if text = ""|>not then updateSafety text
             |IF_DEVICE ->   updateDeviceIF  shape.InnerText
             |IF_LINK   ->   updateLinkIF    shape.InnerText
-            |OPEN_SYS_CALL
-            |OPEN_SYS_LINK
+            |OPEN_EXSYS_CALL
+            |OPEN_EXSYS_LINK
             |COPY_DEV ->
                      let name, number = GetTailNumber(shape.InnerText)
                      GetSquareBrackets(name, false)

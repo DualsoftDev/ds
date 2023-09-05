@@ -2,25 +2,32 @@
 namespace Engine.Import.Office
 
 open System.Linq
-open PPTObjectModule
 open System.Collections.Generic
 open Dual.Common.Core.FS
 open Engine.Import.Office
 open Engine.Core
 open System.IO
-open Engine.Core.ModelLoaderModule
 open System.Runtime.CompilerServices
 open DocumentFormat.OpenXml.Packaging
+open System
 
 [<AutoOpen>]
 module ImportPPTModule =
 
     let dicPptDoc = Dictionary<string, PresentationDocument>()
-    let pathStack = Stack<string>()
-    let mutable currSystem = getNull<LoadedSystem>()
-    type internal ImportPowerPoint() =
+    let pathStack = Stack<string>()     //파일 오픈시 예외 로그 path PPT Stack
+    let loadedParentStack = Stack<DsSystem>()  //LoadedSystem.AbsoluteParents 구성하여 ExternalSystem 구분 및 UI Tree 구조 구성
+    let dicLoaded  = Dictionary<LoadedSystem, string>() // LoadedSystem 부모, 형제 호출시 Runtime에 변경하기 위한 정보 사전
+    let getHashKeys (skipCnt:int, path:string) =
+              String.Join(",",  loadedParentStack.ToHashSet()
+                                .Skip(skipCnt).Reverse()
+                                .Select(fun s->s.GetHashCode().ToString())
+                                .Append(path)
+                )
 
-        let getParams(systemRepo:ShareableSystemRepository, directoryName:string
+    type internal ImportPowerPoint() =
+        let sRepo = ShareableSystemRepository()  
+        let getParams(directoryName:string
                     , userPath:string, loadedName:string, containerSystem:DsSystem
                     , hostIp:string option, loadingType) =
             {
@@ -28,27 +35,21 @@ module ImportPPTModule =
                 AbsoluteFilePath = Path.GetFullPath(Path.Combine(directoryName, userPath))
                 UserSpecifiedFilePath = userPath + ".ds"
                 LoadedName = loadedName
-                ShareableSystemRepository = systemRepo
+                ShareableSystemRepository =  sRepo
 
                 HostIp = hostIp
                 LoadingType = loadingType
             }
-
-        let getLoadingType(nodeType:NodeType) =
-            match nodeType with
-            | OPEN_SYS_LINK
-            | OPEN_SYS_CALL -> DuExternal
-            | COPY_DEV -> DuDevice
-            | _ -> failwithlog "error"
-
-        let rec loadSystem(repo:ShareableSystemRepository, pptReop:Dictionary<DsSystem, pptDoc>, theSys:DsSystem, paras:DeviceLoadParameters) =
+        
+         
+        let rec loadSystem(pptReop:Dictionary<DsSystem, pptDoc>, theSys:DsSystem, paras:DeviceLoadParameters) =
             pathStack.Push(paras.AbsoluteFilePath)
 
             let pathPPT = paras.AbsoluteFilePath+".pptx"
-
+          
             let doc =
                 if dicPptDoc.ContainsKey pathPPT
-                then pptDoc(pathPPT , paras, dicPptDoc[pathPPT])
+                then pptDoc(pathPPT, paras, dicPptDoc[pathPPT])
                 else
                     let doc = Office.Open(pathPPT)
                     let pptDoc = pptDoc(pathPPT , paras, doc)
@@ -58,48 +59,67 @@ module ImportPPTModule =
             //시스템 로딩시 중복이름을 부를 수 없다.
             CheckSameCopy(doc)
             SameFlowName(doc)
-            
-            let reloading(newSys:DsSystem, paras) =
-                let (sys, newDoc:pptDoc) = loadSystem(repo, pptReop, newSys, paras)
-                sys
-
+ 
             doc.GetCopyPathNName()
             |> Seq.iter(fun (userPath, loadedName, node) ->
 
-                let path =  Path.GetFullPath(Path.Combine(doc.DirectoryName, userPath))
-                
-                let paras = getParams(repo, doc.DirectoryName, userPath
-                            , loadedName, theSys, None, getLoadingType node.NodeType)
+                let paras = getParams(doc.DirectoryName, userPath
+                            , loadedName, theSys, None,  node.NodeType.GetLoadingType())
                 let hostIp = if paras.HostIp.IsSome then paras.HostIp.Value else ""
 
-                match node.NodeType with
-                |OPEN_SYS_CALL
-                |OPEN_SYS_LINK ->
-                    let exLoaded =
-                        if repo.ContainsKey paras.AbsoluteFilePath
-                        then
-                            ExternalSystem(repo[paras.AbsoluteFilePath], paras)
+                let addNewLoadedSys(newSys:DsSystem, bExtSys:bool, bOPEN_EXSYS_LINK:bool) =
+                   
+                    loadedParentStack.Push(newSys)
+                    loadSystem(pptReop, newSys, paras) |> ignore
+
+                    let parents = loadedParentStack.ToHashSet().Skip(1).Reverse()  //자신 제외
+                    let newLoad = 
+                        if bExtSys 
+                            then
+                                let skipCnt = if bOPEN_EXSYS_LINK then 2 else 1 //LINK 이면 형제 관계
+                                let exSys = ExternalSystem(newSys, paras) 
+
+                                let key =  getHashKeys(skipCnt, paras.AbsoluteFilePath)
+                                sRepo.Add(key, exSys.ReferenceSystem)
+                                exSys :> LoadedSystem 
+                            else
+                                Device(newSys, paras) :> LoadedSystem 
+
+                    newLoad.AbsoluteParents.AddRange(parents)  
+                    loadedParentStack.Pop() |> ignore
+
+                    newLoad
+
+                let addNewExtSysLoaded(skipCnt) = 
+                    let key = getHashKeys(skipCnt, paras.AbsoluteFilePath)
+                    let exSys=
+                        if sRepo.ContainsKey (key)
+                        then 
+                            ExternalSystem (sRepo[key], paras) :> LoadedSystem 
                         else
-                            let newExSys = DsSystem(paras.LoadedName, hostIp)
-                            repo.Add (paras.AbsoluteFilePath, newExSys)
+                            let newSys = DsSystem(paras.LoadedName, hostIp)
+                            addNewLoadedSys (newSys, true, node.NodeType = OPEN_EXSYS_LINK) 
 
-                            let sys = reloading(newExSys, paras)
-                            let exNewLoad = ExternalSystem(sys, paras)
-                            exNewLoad
+                    theSys.AddLoadedSystem(exSys)
+                    dicLoaded.Add (exSys, paras.LoadedName)
 
-                    theSys.AddLoadedSystem(exLoaded)
-
+                match node.NodeType with
+                |OPEN_EXSYS_CALL -> addNewExtSysLoaded 0
+                |OPEN_EXSYS_LINK -> addNewExtSysLoaded 1 //LINK 이면 형제 관계
                 |COPY_DEV ->
-                    let newDevSys = DsSystem(paras.LoadedName, hostIp)
-                    let sys = reloading(newDevSys, paras)
-                    theSys.AddLoadedSystem(Device(sys, paras))
+                        let device = addNewLoadedSys (DsSystem(paras.LoadedName, hostIp), false, false)
+                        theSys.AddLoadedSystem(device)
 
                 |_ ->   failwithlog "error"
             )
 
+            
+      
+
+            theSys.ExternalSystems.Iter(fun f-> f.LoadedName <- dicLoaded[f])
+
             //ExternalSystem 위하여 인터페이스는 공통으로 시스템 생성시 만들어 줌
             doc.MakeInterfaces(theSys)
-            doc.MakeInterfaceResets(theSys)
 
             if paras.LoadingType = DuNone || paras.LoadingType  = DuDevice 
             then //External system 은 Interfaces만 만들고 나중에 buildSystem 수행
@@ -114,24 +134,26 @@ module ImportPPTModule =
             pptReop.Add (theSys, doc)
             theSys, doc
 
-        member internal x.GetImportModel(systemRepo:ShareableSystemRepository, pptReop:Dictionary<DsSystem, pptDoc>, path:string) =
+        member internal x.GetImportModel( pptReop:Dictionary<DsSystem, pptDoc>, path:string) =
                 //active는 시스템이름으로 ppt 파일 이름을 사용
                 let mySys = DsSystem(getSystemName path, "localhost")
-                let paras = getParams(systemRepo
-                            , getSystemDirectoryName path
+                let paras = getParams(
+                              getSystemDirectoryName path
                             , getSystemName path
                             , mySys.Name
                             , mySys
                             , Some mySys.HostIp
-                            , DuNone)
-
-                loadSystem(systemRepo, pptReop, mySys, paras)
+                            , DuNone
+                            )
+                dicLoaded.Clear() 
+                loadedParentStack.Clear()
+                loadedParentStack.Push mySys
+                loadSystem(pptReop, mySys, paras)
               
          
     let private fromPPTs(paths:string seq) =
         try
             dicPptDoc.Clear()
-            let systemRepo = ShareableSystemRepository()
             let pptRepo    = Dictionary<DsSystem, pptDoc>()
 
             let cfg = {DsFilePaths = paths |> Seq.toList}
@@ -140,7 +162,7 @@ module ImportPPTModule =
                 [
                     for dsFile in cfg.DsFilePaths do
                           let ppt = ImportPowerPoint()
-                          ppt.GetImportModel(systemRepo, pptRepo, dsFile)
+                          ppt.GetImportModel(pptRepo, dsFile)
                 ]
 
             //ExternalSystem 순환참조때문에 완성못한 시스템 BuildSystem 마무리하기

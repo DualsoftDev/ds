@@ -40,9 +40,7 @@ namespace DSModeler
 
                 dicCpu.Add(sys, pou);
              
-
                 if (activeSys == sys) await HMITree.CreateHMIBtn(formMain, sys, viewSet);
-
 
                 ModelTree.CreateModelBtn(formMain, sys, viewSet, pou);
 

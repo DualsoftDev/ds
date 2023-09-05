@@ -11,50 +11,32 @@ open System.Runtime.CompilerServices
 [<AutoOpen>]
 module CoreExtensionModule =
 
-    let getButtons (sys:DsSystem, btnType:BtnType) = sys.Buttons.Where(fun f->f.ButtonType = btnType)
-    let getLamps (sys:DsSystem, lampType:LampType) = sys.Lamps.Where(fun f->f.LampType = lampType)
-    let getConditions (sys:DsSystem, cType:ConditionType) = sys.Conditions.Where(fun f->f.ConditionType = cType)
-
-    let getRecursiveLoadeds (system:DsSystem) =
-        let loadeds   = Dictionary<string, LoadedSystem>()  //ExternalSystem은 절대경로 Key, 나머지는 시스템 이름 Key
-        let fullNames = Dictionary<LoadedSystem, string>()  //Loading된 시스템 Root로 부터 합성 경로이름
-        let rec createfullName(sys:LoadedSystem ,parent:string) =
-            sys.ReferenceSystem
-               .LoadedSystems.Iter(fun f->
-                            fullNames.Add (f, $"{parent}|{f.QualifiedName}")
-                            createfullName (f, fullNames[f])
-                )
-               
-        system.LoadedSystems.Iter(fun f-> fullNames.Add (f, $"Root|{f.QualifiedName}")) //최상위 부터 등록
-        system.LoadedSystems.Iter(fun f-> createfullName (f, fullNames[f])) 
-
-        let keyName (s:LoadedSystem)= 
-            if s :? ExternalSystem 
-            then s.AbsoluteFilePath 
-            else fullNames[s] 
+    let getRecursiveLoadeds (system:DsSystem) = 
+        let loadeds = Dictionary<LoadedSystem, DsSystem>()  
         
-        let addSystem (addSys:LoadedSystem, name:string)  =
-            let name = name.ToLower()
-            if not <| loadeds.ContainsKey name
-            then 
-                loadeds.Add (name, addSys)
-                Some (addSys)
-            else 
-                None
-
         let rec recLoadeds(sys:LoadedSystem) =
             sys.ReferenceSystem
-               .LoadedSystems.Choose(fun s-> addSystem (s, keyName s)).ToList() //tolist 우선 연산 동일 root 먼저 등록
-               .Iter(recLoadeds)
+               .LoadedSystems
+               .Where(fun w->not <| loadeds.ContainsKey w)// external 참조 자식들은 LoadedSystem 이 같다
+               .Iter(fun s->
+                    loadeds.Add(s, s.ReferenceSystem)
+                    recLoadeds s
+                )
    
-        system.LoadedSystems.Iter(fun s -> addSystem (s, keyName s)|>ignore) //최상위 부터 등록
+        system.LoadedSystems.Iter(fun s ->loadeds.Add(s, s.ReferenceSystem)) //최상위 부터 등록
         system.LoadedSystems.Iter(recLoadeds)
 
-        loadeds.Values.ToArray()
+        loadeds
+
 
     let checkSystem(system:DsSystem, targetFlow:Flow, itemName:string) =
                 if system <> targetFlow.System
                 then failwithf $"add item [{itemName}] in flow ({targetFlow.System.Name} != {system.Name}) is not same system"
+
+    let getButtons (sys:DsSystem, btnType:BtnType) = sys.Buttons.Where(fun f->f.ButtonType = btnType)
+    let getLamps (sys:DsSystem, lampType:LampType) = sys.Lamps.Where(fun f->f.LampType = lampType)
+    let getConditions (sys:DsSystem, cType:ConditionType) = sys.Conditions.Where(fun f->f.ConditionType = cType)
+
 
     type DsSystem with
         member x.AddButton(btnType:BtnType, btnName:string, inAddress:TagAddress, outAddress:TagAddress, flow:Flow, funcs:HashSet<Func>) =
@@ -142,5 +124,7 @@ module CoreExtensionModule =
 [<Extension>]
 type SystemExt =
     [<Extension>]
-    static member GetRecursiveLoadeds (x:DsSystem) : LoadedSystem seq  = getRecursiveLoadeds(x)
+    static member GetRecursiveLoadeds (x:DsSystem) : LoadedSystem seq  = getRecursiveLoadeds(x).Keys
+    [<Extension>]
+    static member GetRecursiveLoadedSystems (x:DsSystem) : DsSystem seq  = getRecursiveLoadeds(x).Values
    

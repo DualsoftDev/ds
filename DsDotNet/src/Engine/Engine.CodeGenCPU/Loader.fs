@@ -69,14 +69,6 @@ module CpuLoader =
             |_ -> failwithlog $"Error {getFuncName()}"
 
 
-    let getRecursiveLoadedSystems (xs:LoadedSystem seq) : DsSystem seq  =
-            xs
-            |>Seq.map(fun s->
-                match s with
-                | :? Device as d         -> d.ReferenceSystem
-                | :? ExternalSystem as e -> e.ReferenceSystem
-                | _ -> failwithlog (getFuncName())
-                )
 
     let applyTagManager(system:DsSystem, storages:Storages) =
         let createTagM (sys:DsSystem) =
@@ -95,9 +87,10 @@ module CpuLoader =
                 | _ -> failwithlog (getFuncName()))
 
         createTagM system
-        system.GetRecursiveLoadeds()
-                |> getRecursiveLoadedSystems
-                |> Seq.iter(createTagM)
+        system.GetRecursiveLoadedSystems()
+              .Distinct()
+              .Iter(createTagM)
+             
 
 
     [<Extension>]
@@ -108,8 +101,9 @@ module CpuLoader =
             applyTagManager (system, storages)
             let result =
                 //자신(Acitve)이 Loading 한 system을 재귀적으로 한번에 가져와 CPU 변환
-                system.GetRecursiveLoadeds()
-                |>Seq.map(fun s->
+                system.GetRecursiveLoadeds() 
+                |> Seq.distinctBy(fun f->f.ReferenceSystem)
+                |> Seq.map(fun s ->
                     match s with
                     | :? Device as d         -> DevicePou   (d, convertSystem(d.ReferenceSystem, false))
                     | :? ExternalSystem as e -> ExternalPou (e, convertSystem(e.ReferenceSystem, false))

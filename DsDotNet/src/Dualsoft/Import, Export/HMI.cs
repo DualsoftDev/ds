@@ -19,6 +19,10 @@ using Engine.Parser.FS;
 using Microsoft.Msagl.GraphViewerGdi;
 using static Engine.Parser.FS.ParserOptionModule;
 using System.Linq;
+using System.Web.UI.WebControls;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace DSModeler
 {
@@ -43,10 +47,24 @@ namespace DSModeler
             //    new Newtonsoft.Json.Converters.StringEnumConverter()
             //);
 
-            var jsonPath = Global.ExportPathDS.Replace(".ds", ".json");
-            var model = ModelLoader.LoadFromConfig(jsonPath);
-            var newSys = model.Systems;
+            var modelPath = new { body = Global.ExportPathDS.Replace(".ds", ".json") };
+            //var model = ModelLoader.LoadFromConfig(jsonPath);
+            //var newSys = model.Systems;
+            var jsonData = JsonConvert.SerializeObject(modelPath);
+            var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
+            using (var client = new HttpClient())
+            {
+                var response = client.PostAsync($"https://localhost:44300/modeluploader/upload", content).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Data successfully sent", "succeed");
+                }
+                else
+                {
+                    MessageBox.Show($"Error: {response.ReasonPhrase}", "Failed");
+                }
+            }
             //var json = JsonConvert.SerializeObject(model, settings);
             //var json = CodeGenHandler.JsonWrapping(hmiGenModule.Generate());
             SplashScreenManager.CloseForm();

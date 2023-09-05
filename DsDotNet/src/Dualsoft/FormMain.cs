@@ -7,6 +7,8 @@ using Dual.Common.Core;
 using Engine.Core;
 using System;
 using System.Windows.Forms;
+using Microsoft.AspNetCore.SignalR.Client;
+using System.Threading.Tasks;
 
 namespace DSModeler
 {
@@ -24,7 +26,8 @@ namespace DSModeler
         public AccordionControlElement Ace_HMI => ace_HMI;
         public BarStaticItem LogCountText => barStaticItem_logCnt;
 
-        
+        public HubConnection connection;
+
 
         public FormMain()
         {
@@ -33,17 +36,16 @@ namespace DSModeler
         }
 
 
-        private void FormMain_Load(object sender, EventArgs e)
+        private async void FormMain_Load(object sender, EventArgs e)
         {
             Text = $"Dualsoft v{Global.AppVersion}";
             LayoutForm.LoadLayout(dockManager);
             DocControl.CreateDocStart(this, tabbedView_Doc);
 
-
             InitializationEventSetting();
             InitializationLogger();
             InitializationUIControl();
-
+            await InitializationClientSignalRAsync();
 
             if (!Global.IsDebug)
                 DevExpress.XtraSplashScreen.SplashScreenManager.CloseForm();
@@ -73,6 +75,14 @@ namespace DSModeler
             }
         }
 
+        private async Task InitializationClientSignalRAsync()
+        {
+            connection = new HubConnectionBuilder()
+                .WithUrl("https://localhost:53455/samplehub")
+                .Build()
+                ;
+            await connection.StartAsync();
+        }
 
         private void ace_Play_Click(object s, EventArgs e) => PcAction.Play(ace_Play);
         private void ace_Step_Click(object s, EventArgs e) => PcAction.Step(ace_Play);

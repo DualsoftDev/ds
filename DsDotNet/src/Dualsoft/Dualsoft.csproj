@@ -208,6 +208,25 @@
       <DependentUpon>FormDocView.cs</DependentUpon>
     </Compile>
     <Compile Include="DocControl\DocControl.cs" />
+    <Compile Include="HMIData\SampleData.cs" />
+    <Compile Include="HMIViews\GroupDetailPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="HMIViews\GroupDetailPage.Designer.cs">
+      <DependentUpon>GroupDetailPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="HMIViews\GroupItemDetailPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="HMIViews\GroupItemDetailPage.Designer.cs">
+      <DependentUpon>GroupItemDetailPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="HMIViews\ItemDetailPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="HMIViews\ItemDetailPage.Designer.cs">
+      <DependentUpon>ItemDetailPage.cs</DependentUpon>
+    </Compile>
     <Compile Include="HW\PaixDriver.cs" />
     <Compile Include="Import, Export\HMI.cs" />
     <Compile Include="Import, Export\PLC.cs" />
@@ -215,6 +234,12 @@
     <Compile Include="Import, Export\XLS.cs" />
     <Compile Include="Import, Export\PPT.cs" />
     <Compile Include="Log\LogicLog.cs" />
+    <Compile Include="HMInForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="HMInForm.Designer.cs">
+      <DependentUpon>HMInForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="PcControl\ControlProperty.cs" />
     <Compile Include="PcControl\PcAction.cs" />
     <Compile Include="Tree\LogicTree.cs" />
@@ -279,6 +304,18 @@
     <EmbeddedResource Include="Form\FormDocView.resx">
       <DependentUpon>FormDocView.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="HMIViews\GroupDetailPage.resx">
+      <DependentUpon>GroupDetailPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HMIViews\GroupItemDetailPage.resx">
+      <DependentUpon>GroupItemDetailPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HMIViews\ItemDetailPage.resx">
+      <DependentUpon>ItemDetailPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HMInForm.resx">
+      <DependentUpon>HMInForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\licenses.licx" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -319,6 +356,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Assets\DarkGray.png" />
+    <EmbeddedResource Include="Assets\LightGray.png" />
+    <EmbeddedResource Include="Assets\MediumGray.png" />
     <Content Include="Icon\logo_Dualsoft.ico" />
   </ItemGroup>
   <ItemGroup>

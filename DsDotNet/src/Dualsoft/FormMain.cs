@@ -93,7 +93,13 @@ namespace DSModeler
         private void ace_DocDiagram_Click(object sender, EventArgs e) => Global.Notimplemented();
         private void ace_PLCLogix5000_Click(object sender, EventArgs e) => Global.Notimplemented();
         private void ace_PLCWork3_Click(object sender, EventArgs e) => Global.Notimplemented();
-        private void ace_ExportWebHMI_Click(object sender, EventArgs e) => HMI.Export();
+        private void ace_ExportWebHMI_Click(object sender, EventArgs e)
+        {
+            if (!Global.IsLoadedPPT()) return;
+            HMI.Export();
+
+            (new HMIForm(Global.ActiveSys)).Show(); 
+        }
         private void simpleButton_ClearLog_Click(object sender, EventArgs e) => LogicLog.ValueLogs.Clear();
         private void simpleButton_AllExpr_Click(object sender, EventArgs e) => DSFile.UpdateExprAll(this, toggleSwitch_showDeviceExpr.IsOn);
         private void simpleButton_ExportDStoFile_Click(object sender, EventArgs e) => DSFile.OpenDSFolder();

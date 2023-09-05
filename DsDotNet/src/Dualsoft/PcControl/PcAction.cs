@@ -27,10 +27,10 @@ namespace DSModeler
                                 Task.Run(() => s.Run()))
                     );
 
-                FormMain.formMain.connection.On<string>("S2CSet", tag =>
+                FormMain.formMain.connection.On<Tuple<string, int>>("S2CSet", tpl =>
                 {
-                    //Console.WriteLine($"Got value change notification from server: {tag}={value}");
-                    MessageBox.Show($"Got value change notification from server: {tag}", "get change value");
+                    MessageBox.Show($"Got value change notification from server: {tpl.Item1} = {tpl.Item2}", "get change value");
+                    //MessageBox.Show($"Got value change notification from server: {tag}", "get change value");
                 });
 
                 Global.Logger.Info("시뮬레이션 : Run");

@@ -1,9 +1,11 @@
 using DevExpress.XtraBars.Navigation;
 using DSModeler.Tree;
+using Microsoft.AspNetCore.SignalR.Client;
 using Server.HW.WMX3;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using static Engine.Core.RuntimeGeneratorModule;
 
 namespace DSModeler
@@ -24,6 +26,12 @@ namespace DSModeler
                 Task.WhenAll(PcControl.RunCpus.Select(s =>
                                 Task.Run(() => s.Run()))
                     );
+
+                FormMain.formMain.connection.On<string>("S2CSet", tag =>
+                {
+                    //Console.WriteLine($"Got value change notification from server: {tag}={value}");
+                    MessageBox.Show($"Got value change notification from server: {tag}", "get change value");
+                });
 
                 Global.Logger.Info("시뮬레이션 : Run");
             }

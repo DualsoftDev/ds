@@ -28,6 +28,8 @@ namespace DSModeler
 
         public HubConnection connection;
 
+        public static FormMain formMain;
+
 
         public FormMain()
         {
@@ -46,7 +48,7 @@ namespace DSModeler
             InitializationLogger();
             InitializationUIControl();
             _ = Task.Run(async () => await InitializationClientSignalRAsync());
-
+            formMain = this;
             if (!Global.IsDebug)
                 DevExpress.XtraSplashScreen.SplashScreenManager.CloseForm();
         }
@@ -75,7 +77,7 @@ namespace DSModeler
         private async Task InitializationClientSignalRAsync()
         {
             connection = new HubConnectionBuilder()
-                .WithUrl("https://localhost:53455/samplehub")
+                .WithUrl("https://localhost:5001/hub/ds")
                 .Build()
                 ;
             await connection.StartAsync();

@@ -16,13 +16,15 @@ type DsSystem with
                           .Where(fun f->f.UsingTon)
         let aliasCalls = allVertices.GetAliasTypeCalls()
                           .Where(fun f -> f.TargetWrapper.CallTarget().Value.UsingTon)
+
+      
         [
             for call in calls do
-                let sets = call.V.ST.Expr <&&>  call.INs.ToAndElseOn s
+                let sets = call.V.ST.Expr <&&>  call.INsFuns
                 yield (sets) --@ (call.V.TON, call.PresetTime, getFuncName())
 
             for alias in aliasCalls do
                 let call = alias.V.GetPureCall().Value
-                let sets = alias.V.ST.Expr <&&> alias.TargetWrapper.CallTarget().Value.INs.ToAndElseOn s
+                let sets = alias.V.ST.Expr <&&> alias.TargetWrapper.CallTarget().Value.INsFuns
                 yield (sets) --@ (alias.V.TON, call.PresetTime, getFuncName())
         ]

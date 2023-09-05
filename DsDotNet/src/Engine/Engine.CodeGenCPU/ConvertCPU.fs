@@ -70,7 +70,7 @@ module ConvertCPU =
               //  yield vm.F3_RootGoingPulse()
                 yield! vm.F4_RootGoingRelay()
 
-            if IsSpec (v, CallInFlow ||| RealExSystem ||| RealExFlow, AliasNotCare) then
+            if IsSpec (v, (*CallInFlow |||*) RealExSystem ||| RealExFlow, AliasNotCare) then
                 yield vm.F5_RootCoinRelay()
 
             if IsSpec (v, CallInFlow , AliasFalse) then

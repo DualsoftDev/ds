@@ -76,7 +76,7 @@ type VertexManager with
                 match v.GetPureCall() with
                 | Some call ->  if call.UsingTon
                                 then call.V.TON.DN |> var2expr
-                                else call.INs.ToAndElseOn(v.System)
+                                else call.INsFuns
                 | None -> v.CR.Expr
             | _ ->
                 failwithlog $"Error"

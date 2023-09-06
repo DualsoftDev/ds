@@ -1,5 +1,6 @@
 using DevExpress.XtraBars.Docking2010.Views.WindowsUI;
 using DevExpress.XtraEditors;
+using DevExpress.XtraLayout.Resizing;
 using Dual.Common.Core;
 
 namespace DSModeler
@@ -16,7 +17,9 @@ namespace DSModeler
         {
             InitializeComponent();
             pageGroupCore = new PageGroup();
-            pageGroupCore.Caption = dataGroup.Title;
+            pageGroupCore.Caption = dataGroup.Title + " 상세 페이지";
+
+
             if (dataGroup.Image != null)
                 imageControl.Image = dataGroup.Image;
             labelSubtitle.Text = dataGroup.Subtitle;

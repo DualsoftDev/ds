@@ -15,7 +15,6 @@ namespace DSModeler
         public ModelLoaderModule.Model Model;
 
         public PropertyGridControl PropertyGrid => ucPropertyGrid1.PropertyGrid;
-
         public TabbedView TabbedView => tabbedView_Doc;
         public AccordionControlElement Ace_Model => ace_Model;
         public AccordionControlElement Ace_Play => ace_Play;
@@ -23,7 +22,6 @@ namespace DSModeler
         public AccordionControlElement Ace_Device => ace_Device;
         public AccordionControlElement Ace_HMI => ace_HMI;
         public AccordionControlElement Ace_ExSystem => ace_ExSystem;
-
         public BarStaticItem LogCountText => barStaticItem_logCnt;
 
 
@@ -46,12 +44,9 @@ namespace DSModeler
             InitializationLogger();
             InitializationUIControl();
 
-
             if (!Global.IsDebug)
                 DevExpress.XtraSplashScreen.SplashScreenManager.CloseForm();
         }
-
-
 
 
         private void InitializationLogger()

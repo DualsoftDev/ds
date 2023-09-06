@@ -49,11 +49,13 @@ namespace DSModeler
             // 
             this.windowsUIView.Appearance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(33)))), ((int)(((byte)(33)))));
             this.windowsUIView.Appearance.Options.UseBackColor = true;
-            this.windowsUIView.AppearanceCaption.Font = new System.Drawing.Font("Segoe UI Light", 36F);
+            this.windowsUIView.AppearanceCaption.Font = new System.Drawing.Font("Segoe UI Light", 56F);
             this.windowsUIView.AppearanceCaption.Options.UseFont = true;
             this.windowsUIView.Caption = "Header";
             this.windowsUIView.ContentContainers.AddRange(new DevExpress.XtraBars.Docking2010.Views.WindowsUI.IContentContainer[] {
             this.tileContainerDS});
+            this.windowsUIView.Tiles.AddRange(new DevExpress.XtraBars.Docking2010.Views.WindowsUI.BaseTile[] {
+             });
             // 
             // tileContainerDS
             // 

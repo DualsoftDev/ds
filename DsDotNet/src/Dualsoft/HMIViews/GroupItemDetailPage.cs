@@ -34,8 +34,11 @@ namespace DSModeler
             if (view != null)
             {
                 pageGroupCore.Parent = this.Tag as IContentContainer;
-                pageGroupCore.SetSelected(pageGroupCore.Items[indexCore]);
-                view.ActivateContainer(pageGroupCore);
+                if (pageGroupCore.Items.Count > indexCore)
+                {
+                    pageGroupCore.SetSelected(pageGroupCore.Items[indexCore]);
+                    view.ActivateContainer(pageGroupCore);
+                }
             }
         }
     }

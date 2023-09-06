@@ -29,7 +29,7 @@ namespace DSModeler
         public string GroupName { get { return groupName; } }
         public string Subtitle { get { return subtitleCore; } }
         public Bitmap Image { get { return imageCore; } }
-        public string Description { get { return descriptionCore; } }
+        public string Description { get { return descriptionCore; } set { descriptionCore = value; }}
         public DsHMIDataCommon(string title, string subtitle, Bitmap image, string description, string group)
         {
             titleCore = title;
@@ -150,14 +150,14 @@ namespace DSModeler
             DsHMIDataFlow flow = new DsHMIDataFlow("전체 조작반", "System", "", sys.HostIp);
             flowsCore.Add(flow);
             flow.AddItem(new DsHMIDataBtn("Auto", "", Resources.btn_OffAuto, "", flow.Name));
-            flow.AddItem(new DsHMIDataBtn("Manual", "", Resources.btn_OnManual, "", flow.Name));
+            flow.AddItem(new DsHMIDataBtn("Manual", "", Resources.btn_OffManual, "", flow.Name));
             flow.AddItem(new DsHMIDataBtn("Clear", "", Resources.btn_OffClear, "", flow.Name));
             flow.AddItem(new DsHMIDataBtn("Ready", "", Resources.btn_OffReady, "", flow.Name));
             flow.AddItem(new DsHMIDataBtn("Stop", "", Resources.btn_OffStop, "", flow.Name));
             flow.AddItem(new DsHMIDataBtn("Drive", "", Resources.btn_OffDrive, "", flow.Name));
             flow.AddItem(new DsHMIDataBtn("Test", "", Resources.btn_OffTest, "", flow.Name));
             flow.AddItem(new DsHMIDataBtn("Home", "", Resources.btn_OffHome, "", flow.Name));
-            flow.AddItem(new DsHMIDataBtn("Emergency", "", Resources.btn_OffEmg, "", flow.Name));
+            flow.AddItem(new DsHMIDataBtn("Emg", "", Resources.btn_OffEmg, "", flow.Name));
         }
     }
 

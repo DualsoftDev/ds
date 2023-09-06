@@ -31,7 +31,7 @@
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
     <AutorunEnabled>true</AutorunEnabled>
     <DisallowUrlActivation>true</DisallowUrlActivation>
-    <ApplicationRevision>2</ApplicationRevision>
+    <ApplicationRevision>3</ApplicationRevision>
     <ApplicationVersion>0.9.4.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <ExcludeDeploymentUrl>true</ExcludeDeploymentUrl>
@@ -356,6 +356,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\btn_OnTest.png" />
+    <None Include="Resources\btn_OnStop.png" />
+    <None Include="Resources\btn_OnReady.png" />
+    <None Include="Resources\btn_OnHome.png" />
+    <None Include="Resources\btn_OnEmg.png" />
+    <None Include="Resources\btn_OnDrive.png" />
+    <None Include="Resources\btn_OnClear.png" />
     <None Include="Resources\btn_PushManual.png" />
     <None Include="Resources\btn_PushAuto.png" />
     <None Include="Resources\btn_OffReady.png" />

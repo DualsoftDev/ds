@@ -49,7 +49,6 @@ namespace DSModeler
                 }
             }
 
-
             return new DsHMIDataSource(hmi);
         }
 
@@ -67,10 +66,17 @@ namespace DSModeler
                 {
                     ItemDetailPage itemDetailPage = new ItemDetailPage(item);
                     itemDetailPage.Dock = System.Windows.Forms.DockStyle.Fill;
-                    BaseDocument document = windowsUIView.AddDocument(itemDetailPage);
-                    document.Caption = item.Title;
-                    pageGroup.Items.Add(document as Document);
-                    CreateTile(document as Document, item).ActivationTarget = pageGroup;
+                    //BaseDocument document = windowsUIView.AddDocument(itemDetailPage);
+                    //document.Caption = item.Title;
+                    //pageGroup.Items.Add(document as Document);
+                    var tile = CreateTile(item);//
+
+
+                    if(!(item is DsHMIDataBtn))
+                    {
+                        tile.ActivationTarget = pageGroup;
+                    }
+
                 }
             }
             windowsUIView.ActivateContainer(tileContainerDS);
@@ -78,14 +84,14 @@ namespace DSModeler
         }
 
         
-        Tile CreateTile(Document document, DsHMIDataCommon item)
+        Tile CreateTile(DsHMIDataCommon item)
         {
             Tile tile = new Tile();
             //tile.Document = document;
             tile.Group = item.GroupName;
             tile.BackgroundImage = item.Image;
             tile.Properties.BackgroundImageScaleMode = TileItemImageScaleMode.Stretch;
-
+            //tile.Enabled =  false;
             tile.Tag = item;
             tile.Elements.Add(CreateTileItemElement(item.Subtitle, TileItemContentAlignment.MiddleCenter, Point.Empty, 20));
             tile.Appearances.Selected.BackColor = tile.Appearances.Hovered.BackColor = tile.Appearances.Normal.BackColor = Color.FromArgb(140, 140, 140);
@@ -98,21 +104,41 @@ namespace DSModeler
 
             //(tileContainerFlow as ITileControl).OnItemClick(s=>s);
 
+            tile.Click += (s, e) =>
+            {
+                
+            };
+
+            
+
+
 
             tile.Press += (s, e) =>
             {
-
-                switch ((e.Tile.Tag as DsHMIDataBtn).Title)
+                if (e.Tile.Tag is DsHMIDataBtn)
                 {
-                    case "Auto": e.Tile.BackgroundImage = Resources.btn_PushAuto; break;
-                    case "Manual": e.Tile.BackgroundImage = Resources.btn_PushManual; break;
+                    var btn = (e.Tile.Tag as DsHMIDataBtn);
+                    if (btn.Description != "ON")
+                        btn.Description = "ON";
+                    else
+                        btn.Description = "OFF";
 
-                    default: break;
-                };
+                    switch (btn.Title)
+                    {
+                        case "Auto": e.Tile.BackgroundImage = btn.Description == "OFF" ? Resources.btn_OffAuto : Resources.btn_OnAuto; break;
+                        case "Manual": e.Tile.BackgroundImage = btn.Description == "OFF" ? Resources.btn_OffManual : Resources.btn_OnManual; break;
+                        case "Drive": e.Tile.BackgroundImage = btn.Description == "OFF" ? Resources.btn_OffDrive : Resources.btn_OnDrive; break;
+                        case "Test": e.Tile.BackgroundImage = btn.Description == "OFF" ? Resources.btn_OffTest : Resources.btn_OnTest; break;
+                        case "Home": e.Tile.BackgroundImage = btn.Description == "OFF" ? Resources.btn_OffHome : Resources.btn_OnHome; break;
+                        case "Ready": e.Tile.BackgroundImage = btn.Description == "OFF" ? Resources.btn_OffReady : Resources.btn_OnReady; break;
+                        case "Clear": e.Tile.BackgroundImage = btn.Description == "OFF" ? Resources.btn_OffClear : Resources.btn_OnClear; break;
+                        case "Emg": e.Tile.BackgroundImage = btn.Description == "OFF" ? Resources.btn_OffEmg : Resources.btn_OnEmg; break;
+                        case "Stop": e.Tile.BackgroundImage = btn.Description == "OFF" ? Resources.btn_OffStop : Resources.btn_OnStop; break;
+                        default: break;
+                    };
+                }
              
             };
-          
-
             windowsUIView.Tiles.Add(tile);
             tileContainerDS.Items.Add(tile);
             return tile;
@@ -151,7 +177,8 @@ namespace DSModeler
             DsHMIDataFlow tileGroup = (e.Button.Properties.Tag as DsHMIDataFlow);
             if (tileGroup != null)
             {
-                windowsUIView.ActivateContainer(groupsItemDetailPage[tileGroup]);
+                if(groupsItemDetailPage.ContainsKey(tileGroup))
+                    windowsUIView.ActivateContainer(groupsItemDetailPage[tileGroup]);
             }
         }
 

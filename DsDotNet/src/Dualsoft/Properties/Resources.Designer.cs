@@ -163,6 +163,46 @@ namespace DSModeler.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap 형식의 지역화된 리소스를 찾습니다.
         /// </summary>
+        internal static System.Drawing.Bitmap btn_OnClear {
+            get {
+                object obj = ResourceManager.GetObject("btn_OnClear", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap 형식의 지역화된 리소스를 찾습니다.
+        /// </summary>
+        internal static System.Drawing.Bitmap btn_OnDrive {
+            get {
+                object obj = ResourceManager.GetObject("btn_OnDrive", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap 형식의 지역화된 리소스를 찾습니다.
+        /// </summary>
+        internal static System.Drawing.Bitmap btn_OnEmg {
+            get {
+                object obj = ResourceManager.GetObject("btn_OnEmg", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap 형식의 지역화된 리소스를 찾습니다.
+        /// </summary>
+        internal static System.Drawing.Bitmap btn_OnHome {
+            get {
+                object obj = ResourceManager.GetObject("btn_OnHome", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap 형식의 지역화된 리소스를 찾습니다.
+        /// </summary>
         internal static System.Drawing.Bitmap btn_OnManual {
             get {
                 object obj = ResourceManager.GetObject("btn_OnManual", resourceCulture);
@@ -173,9 +213,9 @@ namespace DSModeler.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap 형식의 지역화된 리소스를 찾습니다.
         /// </summary>
-        internal static System.Drawing.Bitmap btn_PushAuto {
+        internal static System.Drawing.Bitmap btn_OnReady {
             get {
-                object obj = ResourceManager.GetObject("btn_PushAuto", resourceCulture);
+                object obj = ResourceManager.GetObject("btn_OnReady", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -183,9 +223,19 @@ namespace DSModeler.Properties {
         /// <summary>
         ///   System.Drawing.Bitmap 형식의 지역화된 리소스를 찾습니다.
         /// </summary>
-        internal static System.Drawing.Bitmap btn_PushManual {
+        internal static System.Drawing.Bitmap btn_OnStop {
             get {
-                object obj = ResourceManager.GetObject("btn_PushManual", resourceCulture);
+                object obj = ResourceManager.GetObject("btn_OnStop", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Drawing.Bitmap 형식의 지역화된 리소스를 찾습니다.
+        /// </summary>
+        internal static System.Drawing.Bitmap btn_OnTest {
+            get {
+                object obj = ResourceManager.GetObject("btn_OnTest", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

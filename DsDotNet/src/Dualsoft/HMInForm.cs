@@ -8,6 +8,9 @@ using System.Linq;
 using static DevExpress.Skins.SolidColorHelper;
 using System.Web.UI.WebControls;
 using static Engine.Core.CoreModule;
+using DSModeler.Properties;
+using System.Runtime.CompilerServices;
+using Dual.Common.Core;
 
 namespace DSModeler
 {
@@ -22,19 +25,26 @@ namespace DSModeler
             groupsItemDetailPage = new Dictionary<DsHMIDataFlow, PageGroup>();
             _dataSource = CreateHMIData(sys);
             CreateLayout();
+            this.KeyPreview = true;
+            this.MouseUp += (s, e) =>
+            {
+                tileContainerFlow.Items.Iter(tile => tile.BackgroundImage = Resources.btn_OffHome); ;
+            };
+            
         }
 
         private DsHMIDataSource CreateHMIData(DsSystem sys)
         {
             this.windowsUIView.Caption = sys.Name;
-            DsHMIDataModel hmi = new DsHMIDataModel();  
+            DsHMIDataModel hmi = new DsHMIDataModel();
+            hmi.CreateSystem(sys);
             foreach (var flow in sys.Flows)
             {
                 hmi.CreateFlow(flow.Name, flow.Name, "subtitle", "img", "descr");
 
                 foreach (var real in flow.Graph.Vertices.OfType<Real>())
                 {
-                    var realData = new DsHMIDataReal(real.Name, real.Name, "imagePath", "description", "content", flow.Name);
+                    var realData = new DsHMIDataReal(real.Name, real.Name, "description", "content", flow.Name);
                     hmi.AddRealItem(realData);
                 }
             }
@@ -53,7 +63,7 @@ namespace DSModeler
                 pageGroup.Caption = group.Title;
                 windowsUIView.ContentContainers.Add(pageGroup);
                 groupsItemDetailPage.Add(group, CreateGroupItemDetailPage(group, pageGroup));
-                foreach (DsHMIDataReal item in group.Items)
+                foreach (DsHMIDataCommon item in group.Items)
                 {
                     ItemDetailPage itemDetailPage = new ItemDetailPage(item);
                     itemDetailPage.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -66,17 +76,43 @@ namespace DSModeler
             windowsUIView.ActivateContainer(tileContainerFlow);
             tileContainerFlow.ButtonClick += new DevExpress.XtraBars.Docking2010.ButtonEventHandler(buttonClick);
         }
-        Tile CreateTile(Document document, DsHMIDataReal item)
+
+        
+        Tile CreateTile(Document document, DsHMIDataCommon item)
         {
             Tile tile = new Tile();
-            tile.Document = document;
-            tile.Group = item.FlowName;
+            //tile.Document = document;
+            tile.Group = item.GroupName;
+            tile.BackgroundImage = item.Image;
+            tile.Properties.BackgroundImageScaleMode = TileItemImageScaleMode.Stretch;
+
             tile.Tag = item;
-            tile.Elements.Add(CreateTileItemElement(item.Subtitle, TileItemContentAlignment.BottomLeft, Point.Empty, 9));
-            tile.Elements.Add(CreateTileItemElement(item.Subtitle, TileItemContentAlignment.Manual, new Point(0, 100), 12));
+            tile.Elements.Add(CreateTileItemElement(item.Subtitle, TileItemContentAlignment.MiddleCenter, Point.Empty, 20));
             tile.Appearances.Selected.BackColor = tile.Appearances.Hovered.BackColor = tile.Appearances.Normal.BackColor = Color.FromArgb(140, 140, 140);
             tile.Appearances.Selected.BorderColor = tile.Appearances.Hovered.BorderColor = tile.Appearances.Normal.BorderColor = Color.FromArgb(140, 140, 140);
-            tile.Click += new TileClickEventHandler(tile_Click);
+            //tile.Click += new TileClickEventHandler(tile_Click);
+            //tile.Click += (s, e) =>
+            //{
+            //    e.Tile.BackgroundImage = Resources.btn_PushAuto;
+            //};
+
+            //(tileContainerFlow as ITileControl).OnItemClick(s=>s);
+
+
+            tile.Press += (s, e) =>
+            {
+
+                switch ((e.Tile.Tag as DsHMIDataBtn).Title)
+                {
+                    case "Auto": e.Tile.BackgroundImage = Resources.btn_PushAuto; break;
+                    case "Manual": e.Tile.BackgroundImage = Resources.btn_PushManual; break;
+
+                    default: break;
+                };
+             
+            };
+          
+
             windowsUIView.Tiles.Add(tile);
             tileContainerFlow.Items.Add(tile);
             return tile;

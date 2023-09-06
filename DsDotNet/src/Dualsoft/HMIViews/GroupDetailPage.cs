@@ -1,5 +1,6 @@
 using DevExpress.XtraBars.Docking2010.Views.WindowsUI;
 using DevExpress.XtraEditors;
+using Dual.Common.Core;
 
 namespace DSModeler
 {
@@ -16,7 +17,8 @@ namespace DSModeler
             InitializeComponent();
             pageGroupCore = new PageGroup();
             pageGroupCore.Caption = dataGroup.Title;
-            imageControl.Image = DevExpress.Utils.ResourceImageHelper.CreateImageFromResources(dataGroup.ImagePath, typeof(HMIForm).Assembly);
+            if (dataGroup.Image != null)
+                imageControl.Image = dataGroup.Image;
             labelSubtitle.Text = dataGroup.Subtitle;
             labelDescription.Text = dataGroup.Description;
             CreateLayout(dataGroup, child);

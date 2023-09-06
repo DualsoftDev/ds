@@ -18,6 +18,7 @@ namespace DSModeler
             }
 
             SplashScreenManager.ShowForm(typeof(DXWaitForm));
+            Global.Logger.Warn("Web Server 시작이 필요합니다.");
 
             SplashScreenManager.CloseForm();
 

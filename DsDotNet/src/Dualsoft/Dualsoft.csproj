@@ -31,7 +31,7 @@
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
     <AutorunEnabled>true</AutorunEnabled>
     <DisallowUrlActivation>true</DisallowUrlActivation>
-    <ApplicationRevision>34</ApplicationRevision>
+    <ApplicationRevision>35</ApplicationRevision>
     <ApplicationVersion>0.9.3.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <ExcludeDeploymentUrl>true</ExcludeDeploymentUrl>
@@ -242,6 +242,11 @@
     </Compile>
     <Compile Include="PcControl\ControlProperty.cs" />
     <Compile Include="PcControl\PcAction.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Tree\LogicTree.cs" />
     <Compile Include="Tree\SimTree.cs" />
     <Compile Include="Utils\DSRegistry.cs" />
@@ -319,14 +324,9 @@
     <EmbeddedResource Include="Properties\licenses.licx" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <EmbeddedResource Include="Utils\DXWaitForm.resx">
       <DependentUpon>DXWaitForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -356,6 +356,22 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\btn_PushManual.png" />
+    <None Include="Resources\btn_PushAuto.png" />
+    <None Include="Resources\btn_OffReady.png" />
+    <None Include="Resources\btn_OffTest.png" />
+    <None Include="Resources\btn_OffStop.png" />
+    <None Include="Resources\btn_OffHome.png" />
+    <None Include="Resources\btn_OffEmg.png" />
+    <None Include="Resources\btn_OffDrive.png" />
+    <None Include="Resources\btn_OffClear.png" />
+    <None Include="Resources\btn_OnManual.png" />
+    <None Include="Resources\btn_OnAuto.png" />
+    <None Include="Resources\btn_OffManual.png" />
+    <None Include="Resources\btn_OffAuto.png" />
+    <None Include="Resources\btn_blueOn.png" />
+    <None Include="Resources\btn_blueOff.png" />
+    <None Include="Resources\auto.png" />
     <EmbeddedResource Include="Assets\DarkGray.png" />
     <EmbeddedResource Include="Assets\LightGray.png" />
     <EmbeddedResource Include="Assets\MediumGray.png" />

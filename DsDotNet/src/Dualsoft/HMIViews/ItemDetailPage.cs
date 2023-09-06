@@ -1,4 +1,5 @@
 using DevExpress.XtraEditors;
+using Dual.Common.Core;
 
 namespace DSModeler
 {
@@ -8,13 +9,14 @@ namespace DSModeler
     /// </summary>
     public partial class ItemDetailPage : XtraUserControl
     {
-        public ItemDetailPage(DsHMIDataReal item)
+        public ItemDetailPage(DsHMIDataCommon item)
         {
             InitializeComponent();
             labelTitle.Text = item.Title;
             labelSubtitle.Text = item.Subtitle;
-            imageControl.Image = DevExpress.Utils.ResourceImageHelper.CreateImageFromResources(item.ImagePath, typeof(ItemDetailPage).Assembly);
-            labelContent.Text = item.Content;
+            if (item.Image != null)
+                imageControl.Image = item.Image;
+            labelContent.Text = item.Subtitle;
         }
     }
 }

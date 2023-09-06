@@ -25,7 +25,7 @@ namespace DSModeler
         public const string RunCountIn = "RunCountIn";
         public const string RunCountOut = "RunCountOut";
         public const string RunHWIP = "RunHWIP";
-        public const string RunDefaultIP = "192.168.0.66";
+        public const string RunDefaultIP = "192.168.0.100";
         public const string DocStartPage = "시작 페이지";
         public const string DocPLC = "PLC 생성";
         public const string DocDS = "모델 출력";

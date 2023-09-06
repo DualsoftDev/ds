@@ -85,6 +85,7 @@ module CodeElements =
                         let preset   = Regex.Replace(presetTime, @"\D", "");//숫자 추출
 
                         match timetype with
+                        | ""  //단위 없으면 msec
                         | "ms"| "msec"-> preset|> CountUnitType.Parse
                         | "s" | "sec" -> let presetMsec = ((preset |> Convert.ToInt32) * 1000)
                                          presetMsec.ToString() |> CountUnitType.Parse

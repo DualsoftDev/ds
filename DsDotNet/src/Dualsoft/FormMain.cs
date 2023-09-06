@@ -85,8 +85,8 @@ namespace DSModeler
         private void ratingControl_Speed_EditValueChanged(object s, EventArgs e) => ControlProperty.SetSpeed(Convert.ToInt32(ratingControl_Speed.EditValue));
         private void simpleButton_OpenPLC_Click(object s, EventArgs e) => PLC.OpenPLCFolder();
         private void ace_ExportExcel_Click(object s, EventArgs e) => XLS.ExportExcel(gridControl_exprotExcel);
-        private void ace_ImportPPT_Click(object s, EventArgs e) => ImportPowerPointWapper(null);
-        private void ace_pptReload_Click(object sender, EventArgs e) => ImportPowerPointWapper(Files.GetLast());
+        private async void ace_ImportPPT_Click(object s, EventArgs e) => await ImportPowerPointWapper(null);
+        private async void ace_pptReload_Click(object sender, EventArgs e) =>await ImportPowerPointWapper(Files.GetLast());
         private void simpleButton_layoutReset_Click(object s, EventArgs e) => LayoutForm.RestoreLayoutFromXml(dockManager);
         private void ace_ImportXls_Click(object sender, EventArgs e) => Global.Notimplemented();
         private void ace_pcLinux_Click(object sender, EventArgs e) => Global.Notimplemented();
@@ -98,10 +98,22 @@ namespace DSModeler
             if (!Global.IsLoadedPPT()) return;
             HMI.Export();
 
-            (new HMIForm(Global.ActiveSys)).Show(); 
         }
         private void simpleButton_ClearLog_Click(object sender, EventArgs e) => LogicLog.ValueLogs.Clear();
         private void simpleButton_AllExpr_Click(object sender, EventArgs e) => DSFile.UpdateExprAll(this, toggleSwitch_showDeviceExpr.IsOn);
         private void simpleButton_ExportDStoFile_Click(object sender, EventArgs e) => DSFile.OpenDSFolder();
+
+        private void ace_ExportAppHMI_Click(object sender, EventArgs e)
+        {
+            foreach (System.Windows.Forms.Form frm in Application.OpenForms)
+            {
+                if (frm.Name == "HMIForm")
+                {
+                    frm.Activate();
+                    return;
+                }
+            }
+            (new HMIForm(Global.ActiveSys)).Show();
+        }
     }
 }

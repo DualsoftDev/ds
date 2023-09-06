@@ -23,20 +23,34 @@ namespace DSModeler
                 Global.Logger.Warn("PPTX 가져오기를 먼저 수행하세요");
                 return "";
             }
-            SplashScreenManager.ShowForm(typeof(DXWaitForm));
+            var newPath = "";
 
-            var xmlTemplateFile = Path.ChangeExtension(Files.GetLast().First(), "xml");
-            var xmlFileName = Path.GetFileName(xmlTemplateFile);
-            var xmlDriectory = Path.GetDirectoryName(xmlTemplateFile);
-            var fullpath = Path.Combine(xmlDriectory, xmlFileName);
-            var newPath = Files.GetNewFileName(fullpath, "PLC");
-            Global.ExportPathPLC = newPath;
-            if (File.Exists(xmlTemplateFile))
-                //사용자 xg5000 Template 형식으로 생성
-                ExportModuleExt.ExportXMLforXGI(Global.ActiveSys, newPath, xmlTemplateFile);
-            else  //기본 템플릿 CPU-E 타입으로 생성
-                ExportModuleExt.ExportXMLforXGI(Global.ActiveSys, newPath, null);
-            SplashScreenManager.CloseForm();
+            try
+            {
+                SplashScreenManager.ShowForm(typeof(DXWaitForm));
+
+                var xmlTemplateFile = Path.ChangeExtension(Files.GetLast().First(), "xml");
+                var xmlFileName = Path.GetFileName(xmlTemplateFile);
+                var xmlDriectory = Path.GetDirectoryName(xmlTemplateFile);
+                var fullpath = Path.Combine(xmlDriectory, xmlFileName);
+                newPath = Files.GetNewFileName(fullpath, "PLC");
+                Global.ExportPathPLC = newPath;
+                if (File.Exists(xmlTemplateFile))
+                    //사용자 xg5000 Template 형식으로 생성
+                    ExportModuleExt.ExportXMLforXGI(Global.ActiveSys, newPath, xmlTemplateFile);
+                else  //기본 템플릿 CPU-E 타입으로 생성
+                    ExportModuleExt.ExportXMLforXGI(Global.ActiveSys, newPath, null);
+
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
+
+            finally 
+            {
+                SplashScreenManager.CloseForm();
+            }
 
             return newPath;
         }

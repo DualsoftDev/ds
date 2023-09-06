@@ -1,5 +1,6 @@
 using DevExpress.XtraBars.Docking2010;
 using DevExpress.XtraBars.Docking2010.Views.WindowsUI;
+using Dual.Common.Core;
 using System;
 
 namespace DSModeler
@@ -18,7 +19,8 @@ namespace DSModeler
             indexCore = index;
             labelTitle.Text = item.Title;
             labelSubtitle.Text = item.Subtitle;
-            imageControl.Image = DevExpress.Utils.ResourceImageHelper.CreateImageFromResources(item.ImagePath, typeof(ItemDetailPage).Assembly);
+            if (item.Image != null)
+                imageControl.Image = item.Image;
             labelDescription.Text = item.Description;
         }
         private void imageControlClick(object sender, EventArgs e)

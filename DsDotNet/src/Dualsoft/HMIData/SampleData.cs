@@ -1,7 +1,9 @@
 using DevExpress.XtraBars.Docking2010.Views.WindowsUI;
+using DSModeler.Properties;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using static Engine.Core.CoreModule;
@@ -21,17 +23,20 @@ namespace DSModeler
     /// </summary>
     public class DsHMIDataCommon
     {
-        string subtitleCore, imagePathCore, descriptionCore, titleCore;
+        string subtitleCore, descriptionCore, titleCore, groupName;
+        Bitmap imageCore;
         public string Title { get { return titleCore; } }
+        public string GroupName { get { return groupName; } }
         public string Subtitle { get { return subtitleCore; } }
-        public string ImagePath { get { return imagePathCore; } }
+        public Bitmap Image { get { return imageCore; } }
         public string Description { get { return descriptionCore; } }
-        public DsHMIDataCommon(string title, string subtitle, string imagePath, string description)
+        public DsHMIDataCommon(string title, string subtitle, Bitmap image, string description, string group)
         {
             titleCore = title;
             subtitleCore = subtitle;
-            imagePathCore = imagePath;
+            imageCore = image;
             descriptionCore = description;
+            groupName = group;
         }
         public DsHMIDataCommon() { }
     }
@@ -40,25 +45,25 @@ namespace DSModeler
     /// </summary>
     public class DsHMIDataReal : DsHMIDataCommon
     {
-        string contentCore, flowNameCore;
-        public DsHMIDataReal(string title, string subtitle, string imagePath, string description, string content, string flowName)
-            : base(title, subtitle, imagePath, description)
+        string contentCore;
+        public DsHMIDataReal(string title, string subtitle, string description, string content, string flowName)
+            : base(title, subtitle, null, description, flowName)
         {
             contentCore = content;
-            flowNameCore = flowName;
         }
         public string Content { get { return contentCore; } }
-        public string FlowName { get { return flowNameCore; } }
     }
     /// <summary>
     /// Generic item data model.
     /// </summary>
     public class DsHMIDataBtn : DsHMIDataCommon
     {
-        public DsHMIDataBtn(string title, string subtitle, string imagePath, string description)
-            : base(title, subtitle, imagePath, description)
+
+        public DsHMIDataBtn(string title, string subtitle, Bitmap image, string description, string group)
+            : base(title, subtitle, image, description, group)
         {
         }
+      
     }
     /// <summary>
     /// Generic flow data model.
@@ -73,8 +78,8 @@ namespace DSModeler
             this.nameCore = name;
             itemsCore = new Collection<DsHMIDataCommon>();
         }
-        public DsHMIDataFlow(string name, string title, string subtitle, string imagePath, string description)
-            : base(title, subtitle, imagePath, description)
+        public DsHMIDataFlow(string name, string title, string subtitle,  string description)
+            : base(title, subtitle, null, description, "")
         {
             this.nameCore = name;
             itemsCore = new Collection<DsHMIDataCommon>();
@@ -121,7 +126,7 @@ namespace DSModeler
         public bool AddRealItem(DsHMIDataReal tile)
         {
             if (tile == null) return false;
-            string flowName = tile.FlowName == null ? "" : tile.FlowName;
+            string flowName = tile.GroupName == null ? "" : tile.GroupName;
             DsHMIDataFlow thisFlow = GetFlow(flowName);
             if (thisFlow == null)
             {
@@ -137,17 +142,22 @@ namespace DSModeler
         public void CreateFlow(string name, string title, string subtitle, string imagePath, string description)
         {
             if (ContainsFlow(name)) return;
-            DsHMIDataFlow flow = new DsHMIDataFlow(name, title, subtitle, imagePath, description);
+            DsHMIDataFlow flow = new DsHMIDataFlow(name, title, subtitle, description);
             flowsCore.Add(flow);
         }
         public void CreateSystem(DsSystem sys)
         {
-            DsHMIDataFlow flow = new DsHMIDataFlow(sys.Name, sys.Name, sys.Name, "", sys.HostIp);
-            flow.AddItem(new DsHMIDataBtn("Auto", "A", "", ""));
-            flow.AddItem(new DsHMIDataBtn("Maunual", "A", "", ""));
-            flow.AddItem(new DsHMIDataBtn("Drive", "A", "", ""));
-            flow.AddItem(new DsHMIDataBtn("Stop", "A", "", ""));
-            flow.AddItem(new DsHMIDataBtn("Clear", "A", "", ""));
+            DsHMIDataFlow flow = new DsHMIDataFlow("전체 조작반", "System", "", sys.HostIp);
+            flowsCore.Add(flow);
+            flow.AddItem(new DsHMIDataBtn("Auto", "", Resources.btn_OffAuto, "", flow.Name));
+            flow.AddItem(new DsHMIDataBtn("Manual", "", Resources.btn_OnManual, "", flow.Name));
+            flow.AddItem(new DsHMIDataBtn("Clear", "", Resources.btn_OffClear, "", flow.Name));
+            flow.AddItem(new DsHMIDataBtn("Ready", "", Resources.btn_OffReady, "", flow.Name));
+            flow.AddItem(new DsHMIDataBtn("Stop", "", Resources.btn_OffStop, "", flow.Name));
+            flow.AddItem(new DsHMIDataBtn("Drive", "", Resources.btn_OffDrive, "", flow.Name));
+            flow.AddItem(new DsHMIDataBtn("Test", "", Resources.btn_OffTest, "", flow.Name));
+            flow.AddItem(new DsHMIDataBtn("Home", "", Resources.btn_OffHome, "", flow.Name));
+            flow.AddItem(new DsHMIDataBtn("Emergency", "", Resources.btn_OffEmg, "", flow.Name));
         }
     }
 
@@ -163,241 +173,7 @@ namespace DSModeler
         public DsHMIDataSource(DsHMIDataModel dataCore)
         {
             _dataCore = dataCore;
-            //String ITEM_CONTENT = String.Format("Item Content: {0}\n\n{0}\n\n{0}\n\n{0}\n\n{0}\n\n{0}",
-            //            "Curabitur class aliquam vestibulum nam curae maecenas sed integer cras phasellus suspendisse quisque donec dis praesent accumsan bibendum pellentesque condimentum adipiscing etiam consequat vivamus dictumst aliquam duis convallis scelerisque est parturient ullamcorper aliquet fusce suspendisse nunc hac eleifend amet blandit facilisi condimentum commodo scelerisque faucibus aenean ullamcorper ante mauris dignissim consectetuer nullam lorem vestibulum habitant conubia elementum pellentesque morbi facilisis arcu sollicitudin diam cubilia aptent vestibulum auctor eget dapibus pellentesque inceptos leo egestas interdum nulla consectetuer suspendisse adipiscing pellentesque proin lobortis sollicitudin augue elit mus congue fermentum parturient fringilla euismod feugiat");
-            //dataCore.CreateFlow("Flow-1",
-            //        "Flow Title: 1",
-            //        "Flow Subtitle: 1",
-            //        typeof(HMIForm).Namespace + ".Assets.DarkGray.png",
-            //        "Flow Description: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus tempor scelerisque lorem in vehicula. Aliquam tincidunt, lacus ut sagittis tristique, turpis massa volutpat augue, eu rutrum ligula ante a ante");
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 1",
-            //        "Item Subtitle: 1",
-            //        typeof(HMIForm).Namespace + ".Assets.LightGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //        "Flow-1"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 2",
-            //        "Item Subtitle: 2",
-            //        typeof(HMIForm).Namespace + ".Assets.DarkGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //        "Flow-1"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 3",
-            //        "Item Subtitle: 3",
-            //        typeof(HMIForm).Namespace + ".Assets.MediumGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //        "Flow-1"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 4",
-            //        "Item Subtitle: 4",
-            //        typeof(HMIForm).Namespace + ".Assets.DarkGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //        "Flow-1"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 5",
-            //        "Item Subtitle: 5",
-            //        typeof(HMIForm).Namespace + ".Assets.MediumGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //        "Flow-1"));
-
-            //dataCore.CreateFlow("Flow-2",
-            //        "Flow Title: 2",
-            //        "Flow Subtitle: 2",
-            //        typeof(HMIForm).Namespace + ".Assets.LightGray.png",
-            //        "Flow Description: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus tempor scelerisque lorem in vehicula. Aliquam tincidunt, lacus ut sagittis tristique, turpis massa volutpat augue, eu rutrum ligula ante a ante");
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 1",
-            //        "Item Subtitle: 1",
-            //        typeof(HMIForm).Namespace + ".Assets.DarkGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //        "Flow-2"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 2",
-            //        "Item Subtitle: 2",
-            //        typeof(HMIForm).Namespace + ".Assets.MediumGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //        "Flow-2"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 3",
-            //        "Item Subtitle: 3",
-            //        typeof(HMIForm).Namespace + ".Assets.LightGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //        "Flow-2"));
-
-            //dataCore.CreateFlow("Flow-3",
-            //        "Flow Title: 3",
-            //        "Flow Subtitle: 3",
-            //        typeof(HMIForm).Namespace + ".Assets.MediumGray.png",
-            //        "Flow Description: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus tempor scelerisque lorem in vehicula. Aliquam tincidunt, lacus ut sagittis tristique, turpis massa volutpat augue, eu rutrum ligula ante a ante");
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 1",
-            //        "Item Subtitle: 1",
-            //        typeof(HMIForm).Namespace + ".Assets.MediumGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //        "Flow-3"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 2",
-            //        "Item Subtitle: 2",
-            //        typeof(HMIForm).Namespace + ".Assets.LightGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //        "Flow-3"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 3",
-            //        "Item Subtitle: 3",
-            //        typeof(HMIForm).Namespace + ".Assets.DarkGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //        "Flow-3"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 4",
-            //        "Item Subtitle: 4",
-            //        typeof(HMIForm).Namespace + ".Assets.LightGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //           "Flow-3"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 5",
-            //        "Item Subtitle: 5",
-            //        typeof(HMIForm).Namespace + ".Assets.MediumGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //           "Flow-3"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 6",
-            //        "Item Subtitle: 6",
-            //        typeof(HMIForm).Namespace + ".Assets.DarkGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //            "Flow-3"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 7",
-            //        "Item Subtitle: 7",
-            //        typeof(HMIForm).Namespace + ".Assets.MediumGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //             "Flow-3"));
-
-            //dataCore.CreateFlow("Flow-4",
-            //        "Flow Title: 4",
-            //        "Flow Subtitle: 4",
-            //        typeof(HMIForm).Namespace + ".Assets.LightGray.png",
-            //        "Flow Description: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus tempor scelerisque lorem in vehicula. Aliquam tincidunt, lacus ut sagittis tristique, turpis massa volutpat augue, eu rutrum ligula ante a ante");
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 1",
-            //        "Item Subtitle: 1",
-            //        typeof(HMIForm).Namespace + ".Assets.DarkGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //              "Flow-4"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 2",
-            //        "Item Subtitle: 2",
-            //        typeof(HMIForm).Namespace + ".Assets.LightGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //              "Flow-4"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 3",
-            //        "Item Subtitle: 3",
-            //        typeof(HMIForm).Namespace + ".Assets.DarkGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //              "Flow-4"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 4",
-            //        "Item Subtitle: 4",
-            //        typeof(HMIForm).Namespace + ".Assets.LightGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //              "Flow-4"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 5",
-            //        "Item Subtitle: 5",
-            //        typeof(HMIForm).Namespace + ".Assets.MediumGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //              "Flow-4"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 6",
-            //        "Item Subtitle: 6",
-            //        typeof(HMIForm).Namespace + ".Assets.LightGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //              "Flow-4"));
-
-            //dataCore.CreateFlow("Flow-5",
-            //        "Flow Title: 5",
-            //        "Flow Subtitle: 5",
-            //        typeof(HMIForm).Namespace + ".Assets.MediumGray.png",
-            //        "Flow Description: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus tempor scelerisque lorem in vehicula. Aliquam tincidunt, lacus ut sagittis tristique, turpis massa volutpat augue, eu rutrum ligula ante a ante");
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 1",
-            //        "Item Subtitle: 1",
-            //        typeof(HMIForm).Namespace + ".Assets.LightGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //              "Flow-5"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 2",
-            //        "Item Subtitle: 2",
-            //        typeof(HMIForm).Namespace + ".Assets.DarkGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //              "Flow-5"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 3",
-            //        "Item Subtitle: 3",
-            //        typeof(HMIForm).Namespace + ".Assets.LightGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //              "Flow-5"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 4",
-            //        "Item Subtitle: 4",
-            //        typeof(HMIForm).Namespace + ".Assets.MediumGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //              "Flow-5"));
-
-            //dataCore.CreateFlow("Flow-6",
-            //        "Flow Title: 6",
-            //        "Flow Subtitle: 6",
-            //        typeof(HMIForm).Namespace + ".Assets.DarkGray.png",
-            //        "Flow Description: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus tempor scelerisque lorem in vehicula. Aliquam tincidunt, lacus ut sagittis tristique, turpis massa volutpat augue, eu rutrum ligula ante a ante");
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 1",
-            //        "Item Subtitle: 1",
-            //        typeof(HMIForm).Namespace + ".Assets.LightGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //              "Flow-6"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 2",
-            //        "Item Subtitle: 2",
-            //        typeof(HMIForm).Namespace + ".Assets.DarkGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //              "Flow-6"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 3",
-            //        "Item Subtitle: 3",
-            //        typeof(HMIForm).Namespace + ".Assets.MediumGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //              "Flow-6"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 4",
-            //        "Item Subtitle: 4",
-            //        typeof(HMIForm).Namespace + ".Assets.DarkGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //              "Flow-6"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 5",
-            //        "Item Subtitle: 5",
-            //        typeof(HMIForm).Namespace + ".Assets.LightGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //               "Flow-6"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 6",
-            //        "Item Subtitle: 6",
-            //        typeof(HMIForm).Namespace + ".Assets.MediumGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //              "Flow-6"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 7",
-            //        "Item Subtitle: 7",
-            //        typeof(HMIForm).Namespace + ".Assets.DarkGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //              "Flow-6"));
-            //dataCore.AddItem(new DsHMIDataReal("Item Title: 8",
-            //        "Item Subtitle: 8",
-            //        typeof(HMIForm).Namespace + ".Assets.LightGray.png",
-            //        "Item Description: Pellentesque porta, mauris quis interdum vehicula, urna sapien ultrices velit, nec venenatis dui odio in augue. Cras posuere, enim a cursus convallis, neque turpis malesuada erat, ut adipiscing neque tortor ac erat.",
-            //        ITEM_CONTENT,
-            //              "Flow-6"));
+            
         }
         public DsHMIDataModel Data { get { return _dataCore; } }
     }

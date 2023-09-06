@@ -13,7 +13,7 @@ namespace DSModeler
     public partial class FormMain : XtraForm
     {
         bool ImportingPPT = false;
-        public void ImportPowerPointWapper(string[] lastFiles)
+        public async Task ImportPowerPointWapper(string[] lastFiles)
         {
             if (ImportingPPT) return;
             if (Global.BusyCheck()) return;
@@ -27,7 +27,7 @@ namespace DSModeler
 
             if (files == null) return;
 
-            Task.Run(async () =>
+            await Task.Run(async () =>
             {
                 try
                 {

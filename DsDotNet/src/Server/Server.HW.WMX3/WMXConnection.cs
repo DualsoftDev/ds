@@ -1,3 +1,4 @@
+using DsXgComm.Monitoring;
 using Dual.PLC.Common;
 using FSharpPlus.Control;
 using Server.HW.Common;
@@ -5,7 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Xml.Linq;
 using WMX3ApiCLR;
+using XGCommLib;
 using static DsXgComm.Connect;
 using ChannelRequestExecutor = Server.HW.Common.ChannelRequestExecutor;
 using ConnectionBase = Server.HW.Common.ConnectionBase;
@@ -87,8 +90,9 @@ public class WMXConnection : ConnectionBase
 
             //    }, _connectionParameters.TimeoutConnecting);
             //}
-
-            return ConnLS.Connect(_Ip + ":2004"); ;
+            //
+            
+            return ConnLS.Connect(_Ip + ":2004");
         }
         catch (Exception)
         {

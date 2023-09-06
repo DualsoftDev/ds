@@ -50,29 +50,7 @@ module Connect =
         member x.Disconnect () =
             x.CommObject.Disconnect()
 
-        member x.WriteBit(deviceType:string, bitOffset:int, value:int) =
-            x.CommObject.WriteDevice_Bit (deviceType, bitOffset, value) |>ignore
 
-        member x.ReadBit(bstrDevice:char): byte array =
-           
-
-            let rBuf = Array.zeroCreate<byte>(MAX_RANDOM_READ_POINTS)
-            x.CommObject.RemoveAll()
-        
-            for i = 0 to MAX_RANDOM_READ_POINTS-1 do
-                let di = x.Factory.CreateDevice()
-                di.ucDeviceType <- Convert.ToByte('I')
-                di.ucDataType <- Convert.ToByte('B')
-                di.lSize <- 8
-                di.lOffset <- i * 8
-                //wBuf[i] <- byte i
-                x.CommObject.AddDeviceInfo(di)
-            // working : 단 random device 갯수가 64 이하 일 때...
-            if x.CommObject.ReadRandomDevice rBuf <> 1 then
-                            failwith "ReadRandomDevice ERROR"
-            rBuf
-
-     
 
         member x.CreateLWordDevice(deviceType:DeviceType, offset:int) : DeviceInfo =
             let di = x.Factory.CreateDevice()
@@ -90,6 +68,26 @@ module Connect =
             di.lSize <- 8
             di.lOffset <- 8 * offset
             di
+
+        
+        member x.WriteBit(deviceType:string, bitOffset:int, value:int) =
+            x.CommObject.WriteDevice_Bit (deviceType, bitOffset, value) |>ignore
+
+        member x.ReadBit(bstrDevice:char): byte array =
+           
+
+            let di = x.CreateDevice('I', 'B', 64 ,0)
+            let rBuf = Array.zeroCreate<byte>(64)
+            let rBuf2 = Array.zeroCreate<byte>(64)
+
+            x.CommObject.RemoveAll()
+            x.CommObject.AddDeviceInfo(di)
+            if x.CommObject.ReadRandomDevice rBuf <> 1 then
+                  failwith "ReadRandomDevice ERROR"
+
+            rBuf
+
+     
 
 
         [<Obsolete>]

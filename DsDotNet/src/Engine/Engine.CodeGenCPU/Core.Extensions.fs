@@ -270,7 +270,7 @@ module ConvertCoreExt =
         
         member c.PresetTime =   if c.UsingTon
                                 then c.CallTargetJob.Funcs.First(fun f->f.Name = TextOnDelayTimer).GetDelayTime()
-                                else failwith $"{c.Name} not use timer"
+                                else failwith $"{c.Name} not use timer" 
 
         member c.PresetCounter = if c.UsingCtr
                                  then c.CallTargetJob.Funcs.First(fun f->f.Name = TextRingCounter).GetRingCount()

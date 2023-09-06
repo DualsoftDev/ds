@@ -41,6 +41,7 @@ module CodeElements =
                 genTargetText name varType initValue
 
     let getFunctions (text:string) =
+        let text = text.Trim()
         if not <| text.StartsWith "$"
         then failwith "function text start keyword is '$' ex)$m 100 R100"
         text.Split('$')

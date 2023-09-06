@@ -5,21 +5,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WebHMI.Shared
+namespace WebHMI.Shared;
+
+public class DsModelLoader
 {
-    public class DsModelLoader
+    public static bool storeModel(byte[] model)
     {
-        public static bool storeModel(byte[] model)
+        try
         {
-            try
-            {
-                File.WriteAllBytes("E:\\tmp.zip", model);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
+            File.WriteAllBytes("E:\\tmp.zip", model);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            return false;
         }
     }
 }

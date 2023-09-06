@@ -17,6 +17,7 @@ using static Engine.Core.DsTextProperty;
 using static Engine.Core.ExpressionModule;
 using static Engine.Core.ModelLoaderModule;
 using static Engine.Core.SystemToDsExt;
+using System.Windows;
 
 namespace DSModeler
 {
@@ -29,6 +30,7 @@ namespace DSModeler
                 var zipDir = Path.GetDirectoryName(Global.ExportPathDS);
                 var rp = new Repository(zipDir);
                 rp.CompressDirectory();
+                MessageBox.Show($"{zipDir}.zip 파일 저장 성공");
             }
         }
         private static void Export()

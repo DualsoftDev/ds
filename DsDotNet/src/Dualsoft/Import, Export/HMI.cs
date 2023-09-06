@@ -44,7 +44,7 @@ public static class HMI
         var client = new HttpClient() { BaseAddress = new Uri("https://localhost:5001") };
         HttpResponseMessage response = await client.PostAsJsonAsync("api/upload", zipBytes);
         if (response.IsSuccessStatusCode)
-            MessageBox.Show("Data successfully sent", "succeed");
+            MessageBox.Show("Data has uploaded", "succeed");
         else
             MessageBox.Show($"Error: {response.ReasonPhrase}", "Failed");
         SplashScreenManager.CloseForm();

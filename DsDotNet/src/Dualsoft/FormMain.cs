@@ -47,7 +47,7 @@ namespace DSModeler
             InitializationEventSetting();
             InitializationLogger();
             InitializationUIControl();
-            //_ = Task.Run(async () => await InitializationClientSignalRAsync());
+            _ = Task.Run(async () => await InitializationClientSignalRAsync());
             formMain = this;
             if (!Global.IsDebug)
                 DevExpress.XtraSplashScreen.SplashScreenManager.CloseForm();

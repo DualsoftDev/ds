@@ -1,4 +1,36 @@
-﻿var builder = WebApplication.CreateBuilder(args);
+﻿using WebHMI.Server.Demons;
+using WebHMI.Server.Hubs;
+
+var builder = WebApplication.CreateBuilder(args);
+IServiceCollection services = builder.Services;
+
+// Add services to the container.
+services.AddSignalR();
+builder.Configuration.AddEnvironmentVariables();
+builder.Host.UseContentRoot(Directory.GetCurrentDirectory());
+services.AddSingleton<Demon>();
+services.AddHostedService(provider => provider.GetService<Demon>());
+
+// Add services required for using options
+services.AddOptions();
+const string _corsPolicyName = "CorsPolicy";
+
+// https://www.syncfusion.com/faq/blazor/general/how-do-you-enable-cors-in-a-blazor-server-application
+services.AddCors(options =>
+{
+    options.AddPolicy(_corsPolicyName, policy =>
+    {
+        policy.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                ;
+
+        policy.WithOrigins("http://localhost:*")
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                ;
+    });
+});
 
 // Add services to the container.
 
@@ -28,9 +60,12 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseCors(_corsPolicyName);
 
 app.MapRazorPages();
 app.MapControllers();
+app.MapHub<DsHub>("/hub/ds")
+    .RequireCors(_corsPolicyName);
 app.MapFallbackToFile("index.html");
 
 app.Run();

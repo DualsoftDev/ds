@@ -8,6 +8,8 @@ open System
 
 [<AutoOpen>]
 module ConvertCoreExt =
+    
+
 
 
 
@@ -15,6 +17,8 @@ module ConvertCoreExt =
     let hasCount(xs:Func seq) = xs.Any(fun f->f.Name = TextRingCounter)
     let hasMove (xs:Func seq) = xs.Any(fun f->f.Name = TextMove)
     let hasNot  (xs:Func seq) = xs.Any(fun f->f.Name = TextNot )
+
+
 
     let getVM(v:Vertex)     = v.TagManager :?> VertexManager
     let getVMReal(v:Vertex) = v.TagManager :?> VertexMReal
@@ -250,7 +254,11 @@ module ConvertCoreExt =
             writeAble |> map (getFM(f).GetFlowTag)
 
     type TaskDev with
-        member td.ActionIN  = td.InTag  :?> Tag<bool>
+        member td.ActionIN  = 
+                            if hasNot td.Funcs 
+                            then !!(td.InTag  :?> Tag<bool>).Expr 
+                            else (td.InTag  :?> Tag<bool>).Expr
+
         member td.ActionOut = td.OutTag :?> Tag<bool>
         member td.RXTags       = td.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.EP)
         member td.TXTags       = td.ApiItem.TXs |> Seq.map getVMReal |> Seq.map(fun f->f.SP)
@@ -282,13 +290,10 @@ module ConvertCoreExt =
         member c.PEs          = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PE )
         
       
+        //개별 부정의 AND  <안전하게 전부 확인>
         member c.INsFuns  =   
-        
                             let ins = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionIN)
-                            if  c.UsingNot
-                                  //개별 부정의 AND  <안전하게 전부 확인>
-                                  then if ins.any() then !!ins.ToOr() else c._on.Expr
-                                  else if ins.any() then ins.ToAnd()  else c._on.Expr
+                            if ins.any() then !!ins.ToOr() else c._on.Expr
 
         member c.MutualResets =
             c.CallTargetJob.DeviceDefs

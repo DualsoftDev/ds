@@ -241,9 +241,13 @@ module CoreModule =
     /// Job 정의: CallDev 이 호출하는 Job 항목
     type Job (name:string, tasks:DsTask list) =
         inherit Named(name)
+        let mutable funcs = HashSet<Func>()
         member x.DeviceDefs = tasks.OfType<TaskDev>()
         member x.LinkDefs   = tasks.OfType<TaskSys>()
-        member val Funcs  = HashSet<Func>() with get, set
+        member x.SetFuncs(func) = 
+                    tasks.Iter(fun t->t.Funcs <- func) 
+                    funcs <- func
+        member x.Funcs = funcs.ToArray() //일괄 셋팅만 가능 append 불가
 
     type TagAddress = string
     [<AbstractClass>]
@@ -253,6 +257,7 @@ module CoreModule =
         member _.ApiItem = api
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
         member val ApiName = this.QualifiedName
+        member val Funcs  = HashSet<Func>() with get, set
 
     /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { FWD = Mt.fwd; }
     type TaskSys (api:ApiItem, systemName:string) =

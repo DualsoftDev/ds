@@ -120,7 +120,7 @@ module internal ToDsTextModule =
         let tab2 = getTab 2
         let tab3 = getTab 3
         let tab4 = getTab 4
-        let printFuncions (targetName:string) (funcs:HashSet<Func>) =
+        let printFuncions (targetName:string) (funcs:Func seq) =
             [
                 $"{tab3}{targetName}.func = {lb}"
                 for func in funcs do

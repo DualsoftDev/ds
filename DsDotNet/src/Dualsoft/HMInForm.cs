@@ -11,6 +11,8 @@ using static Engine.Core.CoreModule;
 using DSModeler.Properties;
 using System.Runtime.CompilerServices;
 using Dual.Common.Core;
+using DevExpress.XtraBars.Docking2010;
+using DevExpress.Utils;
 
 namespace DSModeler
 {
@@ -79,6 +81,52 @@ namespace DSModeler
 
                 }
             }
+
+            //PageGroup pg = CteatePageGroup("SPC_TOP");
+            //CreatTileLog(pg);
+            var btn1 = new WindowsUIButton("MODE", true, new WindowsUIButtonImageOptions() { Image = Resources.btn_OnStop , SvgImageSize = new Size(10,10)}, ButtonStyle.PushButton, "운전모드", 0, true, null, true, false, true, null, 0, true);
+            var btn2 = new WindowsUIButton("STATE", true, new WindowsUIButtonImageOptions() { Image = Resources.btn_OffEmg }, ButtonStyle.PushButton, "운전상태", 1, true, null, true, false, true, null, 0, true);
+
+
+            //windowsUIButtonPanel.AllowGlyphSkinning = true;
+            WindowsUIButton checkBtn1 = new WindowsUIButton()
+            {
+                Caption = "Left",
+                Style = ButtonStyle.CheckButton,
+                ImageUri = "AlignLeft;Size16x16;GrayScaled",
+                GroupIndex = 1
+            };
+            WindowsUIButton checkBtn2 = new WindowsUIButton()
+            {
+                Caption = "Center",
+                Style = ButtonStyle.CheckButton,
+                ImageUri = "AlignCenter;Size16x16;GrayScaled",
+                GroupIndex = 1
+            };
+            WindowsUIButton checkBtn3 = new WindowsUIButton()
+            {
+                Caption = "Right",
+                Style = ButtonStyle.CheckButton,
+                ImageUri = "AlignRight;Size16x16;GrayScaled",
+                GroupIndex = 1
+            };
+            WindowsUIButton pushBtn1 = new WindowsUIButton()
+            {
+                Caption = "Home",
+                Style = ButtonStyle.PushButton,
+                ImageUri = "Home;Size16x16;GrayScaled"
+            };
+            //windowsUIButtonPanel1.Buttons.AddRange(new WindowsUIButton[] { checkBtn1, checkBtn2, checkBtn3, pushBtn1 });
+
+
+            //windowsUIButtonPanel1.Buttons.Insert(3, new WindowsUISeparator());
+
+
+            tileContainerDS.Buttons.Add(btn1);
+            tileContainerDS.Buttons.Add(btn2);
+            //tileContainerDS.Buttons[pg.Caption].Properties.Tag = pg;
+
+
             windowsUIView.ActivateContainer(tileContainerDS);
             tileContainerDS.ButtonClick += new DevExpress.XtraBars.Docking2010.ButtonEventHandler(buttonClick);
         }

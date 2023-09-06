@@ -26,7 +26,7 @@ namespace DSModeler
 
             if (PaixHW.WMX == paixHW)
             {
-                var connPara = new WMXConnectionParameters(TimeSpan.FromSeconds(2), TimeSpan.FromMilliseconds(20));
+                var connPara = new WMXConnectionParameters(Global.RunHWIP, TimeSpan.FromSeconds(2), TimeSpan.FromMilliseconds(20));
                 Conn = new WMXConnection(connPara, numIn, numOut);
             }
             else if (PaixHW.NMC2 == paixHW) { /*...*/}

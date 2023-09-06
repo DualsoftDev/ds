@@ -43,6 +43,7 @@ namespace Server.HW.Common
     {
         TimeSpan TimeoutConnecting { get; set; }
         TimeSpan TimeoutScan { get; set; }
+        string IP{ get; set; }
 
     }
 

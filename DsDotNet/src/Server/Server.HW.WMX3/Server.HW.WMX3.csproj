@@ -12,9 +12,21 @@
 	  <Compile Include="DsWMX3Handler.csx" />
 	</ItemGroup>
 	<ItemGroup>
+	  <COMReference Include="XGCommLib">
+	    <VersionMinor>0</VersionMinor>
+	    <VersionMajor>1</VersionMajor>
+	    <Guid>2cff650c-6df0-48ae-9b06-c8dd467e0cd3</Guid>
+	    <Lcid>0</Lcid>
+	    <WrapperTool>tlbimp</WrapperTool>
+	    <Isolated>false</Isolated>
+	    <EmbedInteropTypes>true</EmbedInteropTypes>
+	  </COMReference>
+	</ItemGroup>
+	<ItemGroup>
 	  <PackageReference Include="System.Reactive" Version="6.0.0" />
 	</ItemGroup>
 	<ItemGroup>
+	  <ProjectReference Include="..\..\HW\LSPLC\Dual.PLC.LS.XgCOM.FS\Dual.PLC.LS.XgCOM.FS.fsproj" />
 	  <ProjectReference Include="..\Server.HW.Common\Server.HW.Common.csproj" />
 	</ItemGroup>
   <ItemGroup>

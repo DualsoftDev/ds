@@ -36,7 +36,7 @@ namespace DSModeler
               .Iter(g =>
               {
                   var names = String.Join(", ", g.Select(s => s.Name));
-                  var hwTag = getTagHW(names, g.Key, true);
+                  var hwTag = getTagHW(names, g.Key);
                   actions.Add(hwTag, g.Select(s => s));
               });
 
@@ -55,21 +55,21 @@ namespace DSModeler
               .Iter(g =>
               {
                   var names = String.Join(", ", g.Select(s => s.Name));
-                  var hwTag = getTagHW(names, g.Key, false);
+                  var hwTag = getTagHW(names, g.Key);
                   g.Iter(s => actions.Add(s, hwTag));
               });
 
             return actions;
         }
 
-        private static TagHW getTagHW(string name, string address, bool bInput)
+        private static TagHW getTagHW(string name, string address)
         {
             if (address.IsNullOrEmpty())
                 MBox.Error($"주소가 없습니다. {name}");
 
             var tag = new WMXTag(Global.PaixDriver.Conn as WMXConnection, name);
             tag.SetAddress(address);
-            tag.IOType = bInput ? TagIOType.Input : TagIOType.Output;
+            //tag.IOType = bInput ? TagIOType.Input : TagIOType.Output;
 
             return tag;
         }

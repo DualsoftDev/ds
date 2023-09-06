@@ -85,19 +85,19 @@ namespace DSModeler
         private void ratingControl_Speed_EditValueChanged(object s, EventArgs e) => ControlProperty.SetSpeed(Convert.ToInt32(ratingControl_Speed.EditValue));
         private void simpleButton_OpenPLC_Click(object s, EventArgs e) => PLC.OpenPLCFolder();
         private void ace_ExportExcel_Click(object s, EventArgs e) => XLS.ExportExcel(gridControl_exprotExcel);
-        private async void ace_ImportPPT_Click(object s, EventArgs e) => await ImportPowerPointWapper(null);
-        private async void ace_pptReload_Click(object sender, EventArgs e) =>await ImportPowerPointWapper(Files.GetLast());
+        private  async void ace_ImportPPT_Click(object s, EventArgs e) =>await  ImportPowerPointWapper(null);
+        private  async void ace_pptReload_Click(object sender, EventArgs e) => await ImportPowerPointWapper(Files.GetLast());
         private void simpleButton_layoutReset_Click(object s, EventArgs e) => LayoutForm.RestoreLayoutFromXml(dockManager);
         private void ace_ImportXls_Click(object sender, EventArgs e) => Global.Notimplemented();
         private void ace_pcLinux_Click(object sender, EventArgs e) => Global.Notimplemented();
         private void ace_DocDiagram_Click(object sender, EventArgs e) => Global.Notimplemented();
         private void ace_PLCLogix5000_Click(object sender, EventArgs e) => Global.Notimplemented();
-        private void ace_PLCWork3_Click(object sender, EventArgs e) => Global.Notimplemented();
+        private void ace_PLCWork3_Click(object sender, EventArgs e) =>  Global.Notimplemented();
+    
         private void ace_ExportWebHMI_Click(object sender, EventArgs e)
         {
             if (!Global.IsLoadedPPT()) return;
             HMI.Export();
-
         }
         private void simpleButton_ClearLog_Click(object sender, EventArgs e) => LogicLog.ValueLogs.Clear();
         private void simpleButton_AllExpr_Click(object sender, EventArgs e) => DSFile.UpdateExprAll(this, toggleSwitch_showDeviceExpr.IsOn);

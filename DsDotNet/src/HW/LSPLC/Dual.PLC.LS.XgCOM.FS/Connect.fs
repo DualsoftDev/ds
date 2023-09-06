@@ -54,14 +54,15 @@ module Connect =
             x.CommObject.WriteDevice_Bit (deviceType, bitOffset, value) |>ignore
 
         member x.ReadBit(bstrDevice:char): byte array =
-            x.CommObject.RemoveAll()
-            let di = x.Factory.CreateDevice()
-            di.ucDeviceType <- Convert.ToByte(bstrDevice)
-            di.ucDataType <- Convert.ToByte('B')
+           
 
             let rBuf = Array.zeroCreate<byte>(MAX_RANDOM_READ_POINTS)
             x.CommObject.RemoveAll()
+        
             for i = 0 to MAX_RANDOM_READ_POINTS-1 do
+                let di = x.Factory.CreateDevice()
+                di.ucDeviceType <- Convert.ToByte('I')
+                di.ucDataType <- Convert.ToByte('B')
                 di.lSize <- 8
                 di.lOffset <- i * 8
                 //wBuf[i] <- byte i

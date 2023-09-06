@@ -89,7 +89,7 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
                 if (outTag.Address.StartsWith("%MX"))
                     WMXConnection.ConnLS.WriteBit("M", outTag.GetBitIndex(), Convert.ToInt32(outTag.WriteRequestValue));
                 if (outTag.Address.StartsWith("%QX"))
-                    WMXConnection.ConnLS.WriteBit("M", outTag.GetBitIndex(), Convert.ToInt32(outTag.WriteRequestValue));
+                    WMXConnection.ConnLS.WriteBit("Q", outTag.GetBitIndex(), Convert.ToInt32(outTag.WriteRequestValue));
                 //else
                 //            WMXConnection.WMX3Lib_Io.SetOutBit(outTag.ByteOffset, outTag.BitOffset, Convert.ToByte(outTag.WriteRequestValue));
             }

@@ -52,7 +52,10 @@ module ImportIOTable =
                 let func  = $"{row.[(int)IOColumn.Func]}"
 
                 match sys.Jobs.TryFind(fun f-> f.Name = jobName) with
-                | Some job ->  functionUpdate (func, job.Funcs, tableIO, true)
+                | Some job -> 
+                            let funcs = new HashSet<Func>()
+                            functionUpdate (func, funcs, tableIO, true)
+                            job.SetFuncs funcs
                 | None -> if "↑" <> jobName //이름이 위와 같지 않은 경우
                             then Office.ErrorXLS(ErrorCase.Name, ErrID._1004, tableIO.TableName,  $"오류 이름 {jobName}.")
 

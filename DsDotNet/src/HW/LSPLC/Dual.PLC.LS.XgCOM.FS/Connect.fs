@@ -76,9 +76,8 @@ module Connect =
         member x.ReadBit(bstrDevice:char): byte array =
            
 
-            let di = x.CreateDevice('I', 'B', 64 ,0)
+            let di = x.CreateDevice('I', 'B', 8 ,0)
             let rBuf = Array.zeroCreate<byte>(64)
-            let rBuf2 = Array.zeroCreate<byte>(64)
 
             x.CommObject.RemoveAll()
             x.CommObject.AddDeviceInfo(di)

@@ -99,7 +99,7 @@ namespace DSModeler
             Task.Run(async () =>
             {
                 //Storages 연결이슈로  새로 준비 
-                await formParent.ImportPowerPointWapper(Files.GetLast());
+               await formParent.ImportPowerPointWapper(Files.GetLast());
                 await formParent.DoAsync(tsc =>
                 {
                     FormDocText formChiild = new FormDocText();

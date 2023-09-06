@@ -1,3 +1,4 @@
+using LanguageExt.ClassInstances.Pred;
 using Server.HW.Common;
 using Server.HW.WMX3;
 using System;
@@ -5,12 +6,14 @@ using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.Management;
 
 internal class WMXChannelRequestExecutor : ChannelRequestExecutor
 {
     public WMXConnection WMXConnection { get { return (WMXConnection)Connection; } }
     private Dictionary<int, WMXTag> _WMXInBitTags = new Dictionary<int, WMXTag>();
     private Dictionary<int, WMXTag> _WMXOutBitTags = new Dictionary<int, WMXTag>();
+    private Dictionary<int, WMXTag> _LSMemoryBitTags = new Dictionary<int, WMXTag>();
 
     public WMXChannelRequestExecutor(WMXConnection connection, IEnumerable<TagHW> tags)
         : base(connection, tags)
@@ -32,6 +35,10 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
         _WMXOutBitTags = wmxTags
             .Where(w => w.IOType == TagIOType.Output)
             .ToDictionary(s => s.GetBitIndex(), s => s);
+        
+        _LSMemoryBitTags = wmxTags
+             .Where(w => w.IOType == TagIOType.Memory)
+             .ToDictionary(s => s.GetBitIndex(), s => s);
     }
 
 
@@ -62,17 +69,23 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
 
     public void excuteWriteOutputs()
     {
-        foreach (var outTag in _WMXOutBitTags.Values)
+        var outputNMemory = _WMXOutBitTags.Values.ToList();
+        outputNMemory.AddRange(_LSMemoryBitTags.Values);
+
+        foreach (var outTag in outputNMemory)
         {
+            if (outTag.WriteRequestValue == null) continue;
             if (outTag.Value != outTag.WriteRequestValue)
             {
                 outTag.Value = outTag.WriteRequestValue;
-                WMXConnection.WMX3Lib_Io.SetOutBit(outTag.ByteOffset, outTag.BitOffset, Convert.ToByte(outTag.Value));
+
+                if (outTag.Address.StartsWith("%MX"))
+                    WMXConnection.ConnLS.WriteBit("M", outTag.ByteOffset * 8 + outTag.BitOffset, Convert.ToByte(outTag.Value));
+                else
+                    WMXConnection.WMX3Lib_Io.SetOutBit(outTag.ByteOffset, outTag.BitOffset, Convert.ToByte(outTag.Value));
             }
         }
     }
-
-
 
     private void UpdateIO(byte[] newData, byte[] oldData, bool bInput)
     {

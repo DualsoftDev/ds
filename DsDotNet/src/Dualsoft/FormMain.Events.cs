@@ -27,18 +27,18 @@ namespace DSModeler
             {
                 if (e.Data.GetDataPresent(DataFormats.FileDrop)) e.Effect = DragDropEffects.Copy;
             };
-            this.DragDrop += async (s, e) =>
+            this.DragDrop +=  async (s, e) =>
             {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
                 if (files.Length > 0)
-                 await   ImportPowerPointWapper(files);
+                  await  ImportPowerPointWapper(files);
             };
-            this.KeyDown += async (s, e) =>
+            this.KeyDown +=  async (s, e) =>
             {
                 if (e.KeyData == Keys.F4)
-                  await  ImportPowerPointWapper(null);
+                   await ImportPowerPointWapper(null);
                 if (e.KeyData == Keys.F5)
-                 await  ImportPowerPointWapper(Files.GetLast());
+                  await ImportPowerPointWapper(Files.GetLast());
             };
 
 
@@ -63,13 +63,13 @@ namespace DSModeler
             gle_Device.BeforePopup += (s, e) =>
                 gle_Device.Properties.BestFitMode = BestFitMode.BestFitResizePopup;
 
-            comboBoxEdit_RunMode.EditValueChanging += async (s, e) =>
+            comboBoxEdit_RunMode.EditValueChanging +=  async (s, e) =>
             {
                 Global.CpuRunMode = ToRuntimePackage(e.NewValue.ToString());
                 RuntimeDS.Package = Global.CpuRunMode;
                 DSRegistry.SetValue(K.CpuRunMode, Global.CpuRunMode);
                 if (e.OldValue != null)
-                 await   ImportPowerPointWapper(Files.GetLast());
+                  await  ImportPowerPointWapper(Files.GetLast());
             };
 
             spinEdit_StartIn.Properties.EditValueChanged += (s, e) =>

@@ -1,9 +1,15 @@
+using Dual.PLC.Common;
+using FSharpPlus.Control;
 using Server.HW.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using WMX3ApiCLR;
+using static DsXgComm.Connect;
+using ChannelRequestExecutor = Server.HW.Common.ChannelRequestExecutor;
+using ConnectionBase = Server.HW.Common.ConnectionBase;
+using IConnectionParameters = Server.HW.Common.IConnectionParameters;
 
 namespace Server.HW.WMX3;
 
@@ -15,10 +21,12 @@ public class WMXConnection : ConnectionBase
     public byte[] OutData { get; private set; }
     private int _InCnt;
     private int _OutCnt;
+    private string _Ip;
     internal IEnumerable<WMXTag> WMXTags => Tags.Values.OfType<WMXTag>();
     internal Io WMX3Lib_Io => _wmx3Lib_Io;
 
     private WMXConnectionParameters _connectionParameters;
+    public DsXgConnection ConnLS { get; private set; }
 
     public WMXConnection(WMXConnectionParameters parameters, int numIn, int numOut)
         : base(parameters)
@@ -30,6 +38,8 @@ public class WMXConnection : ConnectionBase
         _connectionParameters = parameters;
         PerRequestDelay = (int)parameters.TimeoutScan.TotalMilliseconds;
         ClearData();
+        _Ip = parameters.IP;
+        ConnLS = new DsXgConnection();
     }
 
     public override IConnectionParameters ConnectionParameters
@@ -57,6 +67,8 @@ public class WMXConnection : ConnectionBase
 
         try
         {
+            ConnLS.Connect(_Ip  + ":2004");
+
             if (!IsCreatedDevice)
             {
                 var ret = _wmx3Lib.CreateDevice("C:\\Program Files\\SoftServo\\WMX3\\",//설치 PC만 사용 가능  ip설정 필요없음
@@ -93,7 +105,7 @@ public class WMXConnection : ConnectionBase
         _wmx3Lib?.CloseDevice();
         _wmx3Lib_Io?.Dispose();
         _wmx3Lib?.Dispose();
-
+        ConnLS.Disconnect(); 
         base.Dispose(disposing);
     }
 

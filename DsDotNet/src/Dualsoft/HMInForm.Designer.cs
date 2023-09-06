@@ -31,10 +31,10 @@ namespace DSModeler
             this.components = new System.ComponentModel.Container();
             this.documentManager1 = new DevExpress.XtraBars.Docking2010.DocumentManager(this.components);
             this.windowsUIView = new DevExpress.XtraBars.Docking2010.Views.WindowsUI.WindowsUIView(this.components);
-            this.tileContainerFlow = new DevExpress.XtraBars.Docking2010.Views.WindowsUI.TileContainer(this.components);
+            this.tileContainerDS = new DevExpress.XtraBars.Docking2010.Views.WindowsUI.TileContainer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.documentManager1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.windowsUIView)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.tileContainerFlow)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.tileContainerDS)).BeginInit();
             this.SuspendLayout();
             // 
             // documentManager1
@@ -52,14 +52,14 @@ namespace DSModeler
             this.windowsUIView.AppearanceCaption.Options.UseFont = true;
             this.windowsUIView.Caption = "Header";
             this.windowsUIView.ContentContainers.AddRange(new DevExpress.XtraBars.Docking2010.Views.WindowsUI.IContentContainer[] {
-            this.tileContainerFlow});
+            this.tileContainerDS});
             // 
-            // tileContainerSys
+            // tileContainerDS
             // 
-            this.tileContainerFlow.Name = "tileContainer1";
-            this.tileContainerFlow.Properties.Orientation = System.Windows.Forms.Orientation.Vertical;
-            this.tileContainerFlow.Properties.Padding = new System.Windows.Forms.Padding(30, 0, 30, 0);
-            this.tileContainerFlow.Properties.ShowGroupText = DevExpress.Utils.DefaultBoolean.True;
+            this.tileContainerDS.Name = "tileContainer1";
+            this.tileContainerDS.Properties.Orientation = System.Windows.Forms.Orientation.Vertical;
+            this.tileContainerDS.Properties.Padding = new System.Windows.Forms.Padding(30, 0, 30, 0);
+            this.tileContainerDS.Properties.ShowGroupText = DevExpress.Utils.DefaultBoolean.True;
             // 
             // HMIForm
             // 
@@ -71,9 +71,11 @@ namespace DSModeler
             this.Name = "HMIForm";
             this.Text = "Form1";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.Load += new System.EventHandler(this.HMIForm_Load);
+            this.Shown += new System.EventHandler(this.HMIForm_Shown);
             ((System.ComponentModel.ISupportInitialize)(this.documentManager1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.windowsUIView)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.tileContainerFlow)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.tileContainerDS)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -82,7 +84,7 @@ namespace DSModeler
 
         private DevExpress.XtraBars.Docking2010.DocumentManager documentManager1;
         private DevExpress.XtraBars.Docking2010.Views.WindowsUI.WindowsUIView windowsUIView;
-        private DevExpress.XtraBars.Docking2010.Views.WindowsUI.TileContainer tileContainerFlow;
+        private DevExpress.XtraBars.Docking2010.Views.WindowsUI.TileContainer tileContainerDS;
     }
 }
 

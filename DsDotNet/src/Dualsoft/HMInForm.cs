@@ -28,7 +28,7 @@ namespace DSModeler
             this.KeyPreview = true;
             this.MouseUp += (s, e) =>
             {
-                tileContainerFlow.Items.Iter(tile => tile.BackgroundImage = Resources.btn_OffHome); ;
+                tileContainerDS.Items.Iter(tile => tile.BackgroundImage = Resources.btn_OffHome); ;
             };
             
         }
@@ -57,9 +57,9 @@ namespace DSModeler
         {
             foreach (DsHMIDataFlow group in _dataSource.Data.Flows)
             {
-                tileContainerFlow.Buttons.Add(new DevExpress.XtraBars.Docking2010.WindowsUIButton(group.Title, null, -1, DevExpress.XtraBars.Docking2010.ImageLocation.AboveText, DevExpress.XtraBars.Docking2010.ButtonStyle.PushButton, null, true, -1, true, null, false, false, true, null, group, -1, false, false));
+                tileContainerDS.Buttons.Add(new DevExpress.XtraBars.Docking2010.WindowsUIButton(group.Title, null, -1, DevExpress.XtraBars.Docking2010.ImageLocation.AboveText, DevExpress.XtraBars.Docking2010.ButtonStyle.PushButton, null, true, -1, true, null, false, false, true, null, group, -1, false, false));
                 PageGroup pageGroup = new PageGroup();
-                pageGroup.Parent = tileContainerFlow;
+                pageGroup.Parent = tileContainerDS;
                 pageGroup.Caption = group.Title;
                 windowsUIView.ContentContainers.Add(pageGroup);
                 groupsItemDetailPage.Add(group, CreateGroupItemDetailPage(group, pageGroup));
@@ -73,8 +73,8 @@ namespace DSModeler
                     CreateTile(document as Document, item).ActivationTarget = pageGroup;
                 }
             }
-            windowsUIView.ActivateContainer(tileContainerFlow);
-            tileContainerFlow.ButtonClick += new DevExpress.XtraBars.Docking2010.ButtonEventHandler(buttonClick);
+            windowsUIView.ActivateContainer(tileContainerDS);
+            tileContainerDS.ButtonClick += new DevExpress.XtraBars.Docking2010.ButtonEventHandler(buttonClick);
         }
 
         
@@ -114,7 +114,7 @@ namespace DSModeler
           
 
             windowsUIView.Tiles.Add(tile);
-            tileContainerFlow.Items.Add(tile);
+            tileContainerDS.Items.Add(tile);
             return tile;
         }
         TileItemElement CreateTileItemElement(string text, TileItemContentAlignment alignment, Point location, float fontSize)
@@ -130,7 +130,7 @@ namespace DSModeler
             PageGroup page = ((e.Tile as Tile).ActivationTarget as PageGroup);
             if (page != null)
             {
-                page.Parent = tileContainerFlow;
+                page.Parent = tileContainerDS;
                 page.SetSelected((e.Tile as Tile).Document);
             }
         }
@@ -139,7 +139,7 @@ namespace DSModeler
             GroupDetailPage page = new GroupDetailPage(group, child);
             PageGroup pageGroup = page.PageGroup;
             BaseDocument document = windowsUIView.AddDocument(page);
-            pageGroup.Parent = tileContainerFlow;
+            pageGroup.Parent = tileContainerDS;
             pageGroup.Properties.ShowPageHeaders = DevExpress.Utils.DefaultBoolean.False;
             pageGroup.Items.Add(document as Document);
             windowsUIView.ContentContainers.Add(pageGroup);
@@ -153,6 +153,16 @@ namespace DSModeler
             {
                 windowsUIView.ActivateContainer(groupsItemDetailPage[tileGroup]);
             }
+        }
+
+        private void HMIForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void HMIForm_Shown(object sender, EventArgs e)
+        {
+            //tileContainerDS.
         }
     }
 }

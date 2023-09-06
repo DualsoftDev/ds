@@ -6,12 +6,14 @@ namespace Server.HW.Common
     {
         public TimeSpan TimeoutConnecting { get; set; } = TimeSpan.FromSeconds(10);
         public TimeSpan TimeoutScan { get; set; } = TimeSpan.FromMilliseconds(50);
+        public string IP { get; set; } = "";
 
 
-        public ConnectionParametersEtherCAT(TimeSpan timeoutConnecting, TimeSpan timeoutScan)
+        public ConnectionParametersEtherCAT(string ip, TimeSpan timeoutConnecting, TimeSpan timeoutScan)
         {
             TimeoutConnecting = timeoutConnecting;
             TimeoutScan = timeoutScan;
+            IP = ip;    
         }
     }
 }

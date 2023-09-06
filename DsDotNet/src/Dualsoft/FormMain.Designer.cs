@@ -278,9 +278,9 @@ namespace DSModeler
             // 
             this.barDockControlBottom.CausesValidation = false;
             this.barDockControlBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.barDockControlBottom.Location = new System.Drawing.Point(0, 807);
+            this.barDockControlBottom.Location = new System.Drawing.Point(0, 806);
             this.barDockControlBottom.Manager = this.barManager1;
-            this.barDockControlBottom.Size = new System.Drawing.Size(1369, 26);
+            this.barDockControlBottom.Size = new System.Drawing.Size(1369, 27);
             // 
             // barDockControlLeft
             // 
@@ -288,7 +288,7 @@ namespace DSModeler
             this.barDockControlLeft.Dock = System.Windows.Forms.DockStyle.Left;
             this.barDockControlLeft.Location = new System.Drawing.Point(0, 0);
             this.barDockControlLeft.Manager = this.barManager1;
-            this.barDockControlLeft.Size = new System.Drawing.Size(0, 807);
+            this.barDockControlLeft.Size = new System.Drawing.Size(0, 806);
             // 
             // barDockControlRight
             // 
@@ -296,7 +296,7 @@ namespace DSModeler
             this.barDockControlRight.Dock = System.Windows.Forms.DockStyle.Right;
             this.barDockControlRight.Location = new System.Drawing.Point(1369, 0);
             this.barDockControlRight.Manager = this.barManager1;
-            this.barDockControlRight.Size = new System.Drawing.Size(0, 807);
+            this.barDockControlRight.Size = new System.Drawing.Size(0, 806);
             // 
             // barStaticItem1
             // 
@@ -319,7 +319,7 @@ namespace DSModeler
             this.panelContainer1.Location = new System.Drawing.Point(1164, 0);
             this.panelContainer1.Name = "panelContainer1";
             this.panelContainer1.OriginalSize = new System.Drawing.Size(205, 200);
-            this.panelContainer1.Size = new System.Drawing.Size(205, 807);
+            this.panelContainer1.Size = new System.Drawing.Size(205, 806);
             this.panelContainer1.Text = "panelContainer1";
             // 
             // dockPanel1
@@ -330,17 +330,17 @@ namespace DSModeler
             this.dockPanel1.Location = new System.Drawing.Point(0, 0);
             this.dockPanel1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.dockPanel1.Name = "dockPanel1";
-            this.dockPanel1.OriginalSize = new System.Drawing.Size(205, 404);
-            this.dockPanel1.Size = new System.Drawing.Size(205, 405);
+            this.dockPanel1.OriginalSize = new System.Drawing.Size(205, 405);
+            this.dockPanel1.Size = new System.Drawing.Size(205, 404);
             this.dockPanel1.Text = "Property";
             // 
             // dockPanel1_Container
             // 
             this.dockPanel1_Container.Controls.Add(this.ucPropertyGrid1);
-            this.dockPanel1_Container.Location = new System.Drawing.Point(4, 30);
+            this.dockPanel1_Container.Location = new System.Drawing.Point(4, 26);
             this.dockPanel1_Container.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.dockPanel1_Container.Name = "dockPanel1_Container";
-            this.dockPanel1_Container.Size = new System.Drawing.Size(198, 371);
+            this.dockPanel1_Container.Size = new System.Drawing.Size(198, 374);
             this.dockPanel1_Container.TabIndex = 0;
             // 
             // ucPropertyGrid1
@@ -348,7 +348,7 @@ namespace DSModeler
             this.ucPropertyGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ucPropertyGrid1.Location = new System.Drawing.Point(0, 0);
             this.ucPropertyGrid1.Name = "ucPropertyGrid1";
-            this.ucPropertyGrid1.Size = new System.Drawing.Size(198, 371);
+            this.ucPropertyGrid1.Size = new System.Drawing.Size(198, 374);
             this.ucPropertyGrid1.TabIndex = 0;
             // 
             // dockPanel2
@@ -357,7 +357,7 @@ namespace DSModeler
             this.dockPanel2.Dock = DevExpress.XtraBars.Docking.DockingStyle.Fill;
             this.dockPanel2.FloatVertical = true;
             this.dockPanel2.ID = new System.Guid("e2b1525a-f97a-48d8-a364-d6bb5144ac35");
-            this.dockPanel2.Location = new System.Drawing.Point(0, 405);
+            this.dockPanel2.Location = new System.Drawing.Point(0, 404);
             this.dockPanel2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.dockPanel2.Name = "dockPanel2";
             this.dockPanel2.OriginalSize = new System.Drawing.Size(205, 402);
@@ -368,10 +368,10 @@ namespace DSModeler
             // 
             this.dockPanel2_Container.Controls.Add(this.ucLog1);
             this.dockPanel2_Container.Controls.Add(this.ucView1);
-            this.dockPanel2_Container.Location = new System.Drawing.Point(4, 30);
+            this.dockPanel2_Container.Location = new System.Drawing.Point(4, 26);
             this.dockPanel2_Container.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.dockPanel2_Container.Name = "dockPanel2_Container";
-            this.dockPanel2_Container.Size = new System.Drawing.Size(198, 369);
+            this.dockPanel2_Container.Size = new System.Drawing.Size(198, 373);
             this.dockPanel2_Container.TabIndex = 0;
             // 
             // ucLog1
@@ -381,7 +381,7 @@ namespace DSModeler
             this.ucLog1.Margin = new System.Windows.Forms.Padding(2);
             this.ucLog1.Name = "ucLog1";
             this.ucLog1.SelectedIndex = -1;
-            this.ucLog1.Size = new System.Drawing.Size(198, 369);
+            this.ucLog1.Size = new System.Drawing.Size(198, 373);
             this.ucLog1.TabIndex = 1;
             this.ucLog1.TrackEndOfLine = true;
             // 
@@ -437,7 +437,7 @@ namespace DSModeler
             this.ac_Main.Name = "ac_Main";
             this.ac_Main.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Footer;
             this.ac_Main.ScrollBarMode = DevExpress.XtraBars.Navigation.ScrollBarMode.Touch;
-            this.ac_Main.Size = new System.Drawing.Size(328, 807);
+            this.ac_Main.Size = new System.Drawing.Size(328, 806);
             this.ac_Main.TabIndex = 22;
             this.ac_Main.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.HamburgerMenu;
             // 
@@ -458,7 +458,7 @@ namespace DSModeler
             this.toggleSwitch_LayoutGraph.Name = "toggleSwitch_LayoutGraph";
             this.toggleSwitch_LayoutGraph.Properties.OffText = "Off";
             this.toggleSwitch_LayoutGraph.Properties.OnText = "On";
-            this.toggleSwitch_LayoutGraph.Size = new System.Drawing.Size(95, 21);
+            this.toggleSwitch_LayoutGraph.Size = new System.Drawing.Size(95, 19);
             this.toggleSwitch_LayoutGraph.TabIndex = 3;
             // 
             // toggleSwitch_menuExpand
@@ -468,7 +468,7 @@ namespace DSModeler
             this.toggleSwitch_menuExpand.Name = "toggleSwitch_menuExpand";
             this.toggleSwitch_menuExpand.Properties.OffText = "Off";
             this.toggleSwitch_menuExpand.Properties.OnText = "On";
-            this.toggleSwitch_menuExpand.Size = new System.Drawing.Size(95, 21);
+            this.toggleSwitch_menuExpand.Size = new System.Drawing.Size(95, 19);
             this.toggleSwitch_menuExpand.TabIndex = 3;
             // 
             // labelControl11
@@ -519,7 +519,7 @@ namespace DSModeler
             // 
             this.simpleButton_OpenPLC.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.LeftCenter;
             this.simpleButton_OpenPLC.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("simpleButton_OpenPLC.ImageOptions.SvgImage")));
-            this.simpleButton_OpenPLC.Location = new System.Drawing.Point(226, 333);
+            this.simpleButton_OpenPLC.Location = new System.Drawing.Point(223, 314);
             this.simpleButton_OpenPLC.Name = "simpleButton_OpenPLC";
             this.simpleButton_OpenPLC.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
             this.simpleButton_OpenPLC.Size = new System.Drawing.Size(75, 23);
@@ -575,7 +575,7 @@ namespace DSModeler
             this.toggleSwitch_showDeviceExpr.Name = "toggleSwitch_showDeviceExpr";
             this.toggleSwitch_showDeviceExpr.Properties.OffText = "Off";
             this.toggleSwitch_showDeviceExpr.Properties.OnText = "On";
-            this.toggleSwitch_showDeviceExpr.Size = new System.Drawing.Size(95, 21);
+            this.toggleSwitch_showDeviceExpr.Size = new System.Drawing.Size(95, 19);
             this.toggleSwitch_showDeviceExpr.TabIndex = 5;
             // 
             // labelControl5
@@ -886,7 +886,7 @@ namespace DSModeler
             // 
             this.simpleButton_ExportDStoFile.ImageOptions.ImageToTextAlignment = DevExpress.XtraEditors.ImageAlignToText.LeftCenter;
             this.simpleButton_ExportDStoFile.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("simpleButton_ExportDStoFile.ImageOptions.SvgImage")));
-            this.simpleButton_ExportDStoFile.Location = new System.Drawing.Point(226, 233);
+            this.simpleButton_ExportDStoFile.Location = new System.Drawing.Point(223, 224);
             this.simpleButton_ExportDStoFile.Name = "simpleButton_ExportDStoFile";
             this.simpleButton_ExportDStoFile.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
             this.simpleButton_ExportDStoFile.Size = new System.Drawing.Size(75, 23);
@@ -1189,7 +1189,7 @@ namespace DSModeler
             // 
             // ace_ExportAppHMI
             // 
-            this.ace_ExportAppHMI.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement5.ImageOptions.SvgImage")));
+            this.ace_ExportAppHMI.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_ExportAppHMI.ImageOptions.SvgImage")));
             this.ace_ExportAppHMI.Name = "ace_ExportAppHMI";
             this.ace_ExportAppHMI.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.ace_ExportAppHMI.Text = "App HMI";
@@ -1212,7 +1212,6 @@ namespace DSModeler
             // accordionControlElement3
             // 
             this.accordionControlElement3.ContentContainer = this.accordionContentContainer3;
-            this.accordionControlElement3.Expanded = true;
             this.accordionControlElement3.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement3.ImageOptions.SvgImage")));
             this.accordionControlElement3.Name = "accordionControlElement3";
             this.accordionControlElement3.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
@@ -1221,6 +1220,7 @@ namespace DSModeler
             // accordionControlElement1
             // 
             this.accordionControlElement1.ContentContainer = this.accordionContentContainer1;
+            this.accordionControlElement1.Expanded = true;
             this.accordionControlElement1.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement1.ImageOptions.SvgImage")));
             this.accordionControlElement1.Name = "accordionControlElement1";
             this.accordionControlElement1.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
@@ -1229,6 +1229,7 @@ namespace DSModeler
             // accordionControlElement4
             // 
             this.accordionControlElement4.ContentContainer = this.accordionContentContainer5;
+            this.accordionControlElement4.Expanded = true;
             this.accordionControlElement4.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement4.ImageOptions.SvgImage")));
             this.accordionControlElement4.Name = "accordionControlElement4";
             this.accordionControlElement4.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
@@ -1237,7 +1238,6 @@ namespace DSModeler
             // ace9
             // 
             this.ace9.ContentContainer = this.accordionContentContainer2;
-            this.ace9.Expanded = true;
             this.ace9.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace9.ImageOptions.SvgImage")));
             this.ace9.Name = "ace9";
             this.ace9.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;

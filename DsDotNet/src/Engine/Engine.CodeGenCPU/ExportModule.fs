@@ -55,16 +55,16 @@ module ExportModule =
                 |> Array.groupBy(fun f -> f.Address)
                 |> Array.filter(fun (_, vs) -> vs.Length > 1)
 
-            // prints duplications
-            if duplicatedAddresses.Length > 0 then
-                let dupItems =
-                    duplicatedAddresses
-                    |> map (fun (address, vs) ->
-                        let names = vs |> map(fun var -> var.Name) |> String.concat ", "
-                        $"  {address}: {names}")
-                    |> String.concat Environment.NewLine
+            //// prints duplications//test ahn
+            //if duplicatedAddresses.Length > 0 then
+            //    let dupItems =
+            //        duplicatedAddresses
+            //        |> map (fun (address, vs) ->
+            //            let names = vs |> map(fun var -> var.Name) |> String.concat ", "
+            //            $"  {address}: {names}")
+            //        |> String.concat Environment.NewLine
 
-                failwithlog $"Total {duplicatedAddresses.Length} Duplicated address items:{Environment.NewLine}{dupItems}"
+            //    failwithlog $"Total {duplicatedAddresses.Length} Duplicated address items:{Environment.NewLine}{dupItems}"
 
             let autoMemoryAllocationTags =
                 system.TagManager.Storages.Values

@@ -1,3 +1,4 @@
+using DevExpress.Utils.Behaviors.Common;
 using DevExpress.XtraBars.Docking2010.Views.WindowsUI;
 using DSModeler.Properties;
 using System;
@@ -6,6 +7,9 @@ using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using static Engine.CodeGenCPU.FlowManagerModule;
+using static Engine.CodeGenCPU.SystemManagerModule;
+using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.Core.CoreModule;
 
 // The data model defined by this file serves as a representative example of a strongly-typed
@@ -25,18 +29,21 @@ namespace DSModeler
     {
         string subtitleCore, descriptionCore, titleCore, groupName;
         Bitmap imageCore;
+        Engine.Core.Interface.IStorage storage; 
         public string Title { get { return titleCore; } }
         public string GroupName { get { return groupName; } }
         public string Subtitle { get { return subtitleCore; } }
         public Bitmap Image { get { return imageCore; } }
+        public Engine.Core.Interface.IStorage Storage { get { return storage; } }
         public string Description { get { return descriptionCore; } set { descriptionCore = value; }}
-        public DsHMIDataCommon(string title, string subtitle, Bitmap image, string description, string group)
+        public DsHMIDataCommon(Engine.Core.Interface.IStorage stg, string title, string subtitle, Bitmap image, string description, string group)
         {
             titleCore = title;
             subtitleCore = subtitle;
             imageCore = image;
             descriptionCore = description;
             groupName = group;
+            storage = stg;
         }
         public DsHMIDataCommon() { }
     }
@@ -46,8 +53,8 @@ namespace DSModeler
     public class DsHMIDataReal : DsHMIDataCommon
     {
         string contentCore;
-        public DsHMIDataReal(string title, string subtitle, string description, string content, string flowName)
-            : base(title, subtitle, null, description, flowName)
+        public DsHMIDataReal(Engine.Core.Interface.IStorage stg,  string title, string subtitle, string description, string content, string flowName)
+            : base(stg, title, subtitle, null, description, flowName)
         {
             contentCore = content;
         }
@@ -59,8 +66,8 @@ namespace DSModeler
     public class DsHMIDataBtn : DsHMIDataCommon
     {
 
-        public DsHMIDataBtn(string title, string subtitle, Bitmap image, string description, string group)
-            : base(title, subtitle, image, description, group)
+        public DsHMIDataBtn(Engine.Core.Interface.IStorage storage, string title, string subtitle, Bitmap image, string description, string group)
+            : base(storage, title, subtitle, image, description, group)
         {
         }
       
@@ -78,8 +85,8 @@ namespace DSModeler
             this.nameCore = name;
             itemsCore = new Collection<DsHMIDataCommon>();
         }
-        public DsHMIDataFlow(string name, string title, string subtitle,  string description)
-            : base(title, subtitle, null, description, "")
+        public DsHMIDataFlow(Engine.Core.Interface.IStorage stg, string name, string title, string subtitle,  string description)
+            : base(stg,  title, subtitle, null, description, "")
         {
             this.nameCore = name;
             itemsCore = new Collection<DsHMIDataCommon>();
@@ -139,25 +146,32 @@ namespace DSModeler
         {
             return GetFlow(name) != null;
         }
-        public void CreateFlow(string name, string title, string subtitle, string imagePath, string description)
+        public void CreateFlow(Flow flow, string name, string title, string subtitle, string imagePath, string description)
         {
             if (ContainsFlow(name)) return;
-            DsHMIDataFlow flow = new DsHMIDataFlow(name, title, subtitle, description);
-            flowsCore.Add(flow);
+            var fm = flow.TagManager as FlowManager;
+            var fEmg = fm.GetFlowTag(Engine.Core.TagKindModule.FlowTag.emergency_op);
+
+            DsHMIDataFlow dsflow = new DsHMIDataFlow(fEmg, name, title, subtitle, description);
+            flowsCore.Add(dsflow);
         }
         public void CreateSystem(DsSystem sys)
         {
-            DsHMIDataFlow flow = new DsHMIDataFlow("전체 조작반", "System", "", sys.HostIp);
+
+            var sm = (sys.TagManager as SystemManager);
+            var sysEmg = sm.GetSystemTag(Engine.Core.TagKindModule.SystemTag.emg);
+            DsHMIDataFlow flow = new DsHMIDataFlow(sysEmg ,"전체 조작반", "System", "", sys.HostIp);
+
             flowsCore.Add(flow);
-            flow.AddItem(new DsHMIDataBtn("Auto", "", Resources.btn_OffAuto, "", flow.Name));
-            flow.AddItem(new DsHMIDataBtn("Manual", "", Resources.btn_OffManual, "", flow.Name));
-            flow.AddItem(new DsHMIDataBtn("Clear", "", Resources.btn_OffClear, "", flow.Name));
-            flow.AddItem(new DsHMIDataBtn("Ready", "", Resources.btn_OffReady, "", flow.Name));
-            flow.AddItem(new DsHMIDataBtn("Stop", "", Resources.btn_OffStop, "", flow.Name));
-            flow.AddItem(new DsHMIDataBtn("Drive", "", Resources.btn_OffDrive, "", flow.Name));
-            flow.AddItem(new DsHMIDataBtn("Test", "", Resources.btn_OffTest, "", flow.Name));
-            flow.AddItem(new DsHMIDataBtn("Home", "", Resources.btn_OffHome, "", flow.Name));
-            flow.AddItem(new DsHMIDataBtn("Emg", "", Resources.btn_OffEmg, "", flow.Name));
+            flow.AddItem(new DsHMIDataBtn(sm.GetSystemTag(Engine.Core.TagKindModule.SystemTag.auto), "Auto", "", Resources.btn_OffAuto, "", flow.Name));
+            flow.AddItem(new DsHMIDataBtn(sm.GetSystemTag(Engine.Core.TagKindModule.SystemTag.manual), "Manual", "", Resources.btn_OffManual, "", flow.Name));
+            flow.AddItem(new DsHMIDataBtn(sm.GetSystemTag(Engine.Core.TagKindModule.SystemTag.clear), "Clear", "", Resources.btn_OffClear, "", flow.Name));
+            flow.AddItem(new DsHMIDataBtn(sm.GetSystemTag(Engine.Core.TagKindModule.SystemTag.ready), "Ready", "", Resources.btn_OffReady, "", flow.Name));
+            flow.AddItem(new DsHMIDataBtn(sm.GetSystemTag(Engine.Core.TagKindModule.SystemTag.stop), "Stop", "", Resources.btn_OffStop, "", flow.Name));
+            flow.AddItem(new DsHMIDataBtn(sm.GetSystemTag(Engine.Core.TagKindModule.SystemTag.drive), "Drive", "", Resources.btn_OffDrive, "", flow.Name));
+            flow.AddItem(new DsHMIDataBtn(sm.GetSystemTag(Engine.Core.TagKindModule.SystemTag.test), "Test", "", Resources.btn_OffTest, "", flow.Name));
+            flow.AddItem(new DsHMIDataBtn(sm.GetSystemTag(Engine.Core.TagKindModule.SystemTag.home), "Home", "", Resources.btn_OffHome, "", flow.Name));
+            flow.AddItem(new DsHMIDataBtn(sm.GetSystemTag(Engine.Core.TagKindModule.SystemTag.emg), "Emg", "", Resources.btn_OffEmg, "", flow.Name));
         }
     }
 

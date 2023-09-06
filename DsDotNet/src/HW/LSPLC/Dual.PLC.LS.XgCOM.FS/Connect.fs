@@ -6,6 +6,8 @@ open System
 open System.Threading
 
 module Connect =
+    let [<Literal>] MAX_RANDOM_READ_POINTS = 64
+    let [<Literal>] MAX_ARRAY_BYTE_SIZE = 512   // 64*8
     type DsXgConnection() =
         let (|?) = defaultArg
         let tryCnt = 3
@@ -50,6 +52,26 @@ module Connect =
 
         member x.WriteBit(deviceType:string, bitOffset:int, value:int) =
             x.CommObject.WriteDevice_Bit (deviceType, bitOffset, value) |>ignore
+
+        member x.ReadBit(bstrDevice:char): byte array =
+            x.CommObject.RemoveAll()
+            let di = x.Factory.CreateDevice()
+            di.ucDeviceType <- Convert.ToByte(bstrDevice)
+            di.ucDataType <- Convert.ToByte('B')
+
+            let rBuf = Array.zeroCreate<byte>(MAX_RANDOM_READ_POINTS)
+            x.CommObject.RemoveAll()
+            for i = 0 to MAX_RANDOM_READ_POINTS-1 do
+                di.lSize <- 8
+                di.lOffset <- i * 8
+                //wBuf[i] <- byte i
+                x.CommObject.AddDeviceInfo(di)
+            // working : 단 random device 갯수가 64 이하 일 때...
+            if x.CommObject.ReadRandomDevice rBuf <> 1 then
+                            failwith "ReadRandomDevice ERROR"
+            rBuf
+
+     
 
         member x.CreateLWordDevice(deviceType:DeviceType, offset:int) : DeviceInfo =
             let di = x.Factory.CreateDevice()

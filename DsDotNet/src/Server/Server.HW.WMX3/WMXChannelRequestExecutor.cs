@@ -45,7 +45,7 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
     public override bool ExecuteRead()
     {
         excuteReadInputs();
-        excuteReadOutputs();
+        //excuteReadOutputs();
         excuteWriteOutputs();
         return true;
     }
@@ -55,7 +55,15 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
         var inData = WMXConnection.InData;
         var oldData = inData.ToList().ToArray();
 
-        WMXConnection.WMX3Lib_Io.GetInBytes(0, inData.Length, ref inData);
+        var ret =  WMXConnection.ConnLS.ReadBit('I');
+
+        for (int i = 0; i < inData.Length; i++)
+        {
+            inData[i] = ret[i];
+        }
+     
+        //WMXConnection.WMX3Lib_Io.GetInBytes(0, inData.Length, ref inData);
+
         UpdateIO(inData, oldData, true);
     }
     public void excuteReadOutputs()
@@ -80,8 +88,10 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
                 outTag.Value = outTag.WriteRequestValue;
                 if (outTag.Address.StartsWith("%MX"))
                     WMXConnection.ConnLS.WriteBit("M", outTag.GetBitIndex(), Convert.ToInt32(outTag.WriteRequestValue));
-                else
-                    WMXConnection.WMX3Lib_Io.SetOutBit(outTag.ByteOffset, outTag.BitOffset, Convert.ToByte(outTag.WriteRequestValue));
+                if (outTag.Address.StartsWith("%QX"))
+                    WMXConnection.ConnLS.WriteBit("M", outTag.GetBitIndex(), Convert.ToInt32(outTag.WriteRequestValue));
+                //else
+                //            WMXConnection.WMX3Lib_Io.SetOutBit(outTag.ByteOffset, outTag.BitOffset, Convert.ToByte(outTag.WriteRequestValue));
             }
         }
     }

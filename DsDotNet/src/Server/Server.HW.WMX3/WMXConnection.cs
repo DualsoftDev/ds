@@ -67,28 +67,28 @@ public class WMXConnection : ConnectionBase
 
         try
         {
-            ConnLS.Connect(_Ip  + ":2004");
 
-            if (!IsCreatedDevice)
-            {
-                var ret = _wmx3Lib.CreateDevice("C:\\Program Files\\SoftServo\\WMX3\\",//설치 PC만 사용 가능  ip설정 필요없음
-                    DeviceType.DeviceTypeNormal, TimeoutConnecting);
 
-                IsCreatedDevice = ret == 0;
-            }
-            if (IsCreatedDevice)
-            {
-                EngineStatus _enStatus = new EngineStatus();
-                _IsConnected = SpinWait.SpinUntil(() =>
-                {
-                    _wmx3Lib.StartCommunication(TimeoutConnecting);
-                    _wmx3Lib.GetEngineStatus(ref _enStatus);
-                    return _enStatus.State == EngineState.Communicating;
+            //if (!IsCreatedDevice)
+            //{
+            //    var ret = _wmx3Lib.CreateDevice("C:\\Program Files\\SoftServo\\WMX3\\",//설치 PC만 사용 가능  ip설정 필요없음
+            //        DeviceType.DeviceTypeNormal, TimeoutConnecting);
 
-                }, _connectionParameters.TimeoutConnecting);
-            }
+            //    IsCreatedDevice = ret == 0;
+            //}
+            //if (IsCreatedDevice)
+            //{
+            //    EngineStatus _enStatus = new EngineStatus();
+            //    _IsConnected = SpinWait.SpinUntil(() =>
+            //    {
+            //        _wmx3Lib.StartCommunication(TimeoutConnecting);
+            //        _wmx3Lib.GetEngineStatus(ref _enStatus);
+            //        return _enStatus.State == EngineState.Communicating;
 
-            return _IsConnected;
+            //    }, _connectionParameters.TimeoutConnecting);
+            //}
+
+            return ConnLS.Connect(_Ip + ":2004"); ;
         }
         catch (Exception)
         {

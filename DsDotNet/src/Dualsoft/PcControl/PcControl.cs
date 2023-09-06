@@ -29,7 +29,8 @@ namespace DSModeler
             var inTags
                  = sys.Jobs
                       .SelectMany(j => j.DeviceDefs.Select(s => s.InTag))
-                      .Where(w => w != null);
+                      .Where(w => w != null)
+                      .Where(w => !w.Address.Trim().IsNullOrEmpty());
 
             inTags
               .GroupBy(g => g.Address)
@@ -45,12 +46,13 @@ namespace DSModeler
         public static Dictionary<ITag, TagHW> GetActionOutputs(DsSystem sys)
         {
             var actions = new Dictionary<ITag, TagHW>();
-            var inTags
+            var outTags
                  = sys.Jobs
                       .SelectMany(j => j.DeviceDefs.Select(s => s.OutTag))
-                      .Where(w => w != null);
+                      .Where(w => w != null)
+                      .Where(w => !w.Address.Trim().IsNullOrEmpty());
 
-            inTags
+            outTags
               .GroupBy(g => g.Address)
               .Iter(g =>
               {

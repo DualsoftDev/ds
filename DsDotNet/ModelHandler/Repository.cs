@@ -9,7 +9,9 @@ public class Repository : IDisposable
 {
     public ZipFile? ZipFile { get; private set; }
     FileLock? _zipLock;
-    public IDisposable CreateZipFileUnlokcRegion()
+    string zipDir;
+    string zipPath;
+    public IDisposable CreateZipFileUnlockRegion()
     {
         if (_zipLock != null)
         {
@@ -21,8 +23,10 @@ public class Repository : IDisposable
     }
     public TempFolder TempFolder { get; } = new TempFolder();
 
-    public Repository(string zipPath)
+    public Repository(string _zipDir)
     {
+        zipDir = _zipDir;
+        zipPath = zipDir + ".zip";
         if (File.Exists(zipPath))
         {
             ZipFile = ZipFile.Read(zipPath, new ReadOptions() { Encoding = Encoding.UTF8 });
@@ -38,6 +42,12 @@ public class Repository : IDisposable
             };
             _zipLock = new FileLock(zipPath);
         }
+    }
+
+    public void CompressDirectory()
+    {
+        ZipFile!.AddDirectory(zipDir);
+        ZipFile.Save(zipPath);
     }
 
     public void Dispose()

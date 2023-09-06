@@ -47,7 +47,7 @@ namespace DSModeler
             InitializationEventSetting();
             InitializationLogger();
             InitializationUIControl();
-            _ = Task.Run(async () => await InitializationClientSignalRAsync());
+            //_ = Task.Run(async () => await InitializationClientSignalRAsync());
             formMain = this;
             if (!Global.IsDebug)
                 DevExpress.XtraSplashScreen.SplashScreenManager.CloseForm();
@@ -100,9 +100,9 @@ namespace DSModeler
         private void ace_DocDiagram_Click(object sender, EventArgs e) => Global.Notimplemented();
         private void ace_PLCLogix5000_Click(object sender, EventArgs e) => Global.Notimplemented();
         private void ace_PLCWork3_Click(object sender, EventArgs e) => Global.Notimplemented();
-        private void ace_ExportWebHMI_Click(object sender, EventArgs e) => HMI.Export(this);
+        private void ace_ExportWebHMI_Click(object sender, EventArgs e) => Task.Run(() => HMI.ExportAsync(this));
         private void simpleButton_ClearLog_Click(object sender, EventArgs e) => LogicLog.ValueLogs.Clear();
         private void simpleButton_AllExpr_Click(object sender, EventArgs e) => DSFile.UpdateExprAll(this, toggleSwitch_showDeviceExpr.IsOn);
-        private void simpleButton_ExportDStoFile_Click(object sender, EventArgs e) => DSFile.OpenDSFolder();
+        private void simpleButton_ExportDStoFile_Click(object sender, EventArgs e) => DSFile.ZipDSFolder();
     }
 }

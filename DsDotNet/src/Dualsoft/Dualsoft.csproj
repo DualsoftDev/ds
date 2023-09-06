@@ -84,6 +84,7 @@
     <Content Include="Icon\logo_Dualsoft.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ModelHandler\ModelHandler.csproj" />
     <ProjectReference Include="..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
     <ProjectReference Include="..\Engine\Engine.CodeGenHMI\Engine.CodeGenHMI.fsproj" />
     <ProjectReference Include="..\Engine\Engine.Core\Engine.Core.fsproj" />

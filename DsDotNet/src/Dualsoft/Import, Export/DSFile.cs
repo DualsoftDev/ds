@@ -12,6 +12,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using ModelHandler;
 using static Engine.Core.DsTextProperty;
 using static Engine.Core.ExpressionModule;
 using static Engine.Core.ModelLoaderModule;
@@ -21,10 +22,14 @@ namespace DSModeler
 {
     public static class DSFile
     {
-        public static void OpenDSFolder()
+        public static void ZipDSFolder()
         {
             if (Global.IsLoadedPPT() && !Global.ExportPathDS.IsNullOrEmpty())
-                Process.Start(Path.GetDirectoryName(Global.ExportPathDS));
+            {
+                var zipDir = Path.GetDirectoryName(Global.ExportPathDS);
+                var rp = new Repository(zipDir);
+                rp.CompressDirectory();
+            }
         }
         private static void Export()
         {

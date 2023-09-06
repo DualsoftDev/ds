@@ -22,12 +22,15 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.XtraRichEdit.Import.Html;
+using LanguageExt.Pipes;
+using System.Net.Http.Json;
 
 namespace DSModeler
 {
     public static class HMI
     {
-        public static string Export(FormMain formMain)
+        public static async Task<string> ExportAsync(FormMain formMain)
         {
             if (!Global.IsLoadedPPT())
             {
@@ -36,36 +39,14 @@ namespace DSModeler
             }
             
             SplashScreenManager.ShowForm(typeof(DXWaitForm));
-            //var model = formMain.Model;
-            //var settings = new JsonSerializerSettings
-            //{
-            //    PreserveReferencesHandling = PreserveReferencesHandling.Objects,
-            //    TypeNameHandling = TypeNameHandling.All
-            //};
-            //settings.Converters.Add(
-            //    new Newtonsoft.Json.Converters.StringEnumConverter()
-            //);
-
-            var modelPath = new { body = Global.ExportPathDS.Replace(".ds", ".json") };
-            //var model = ModelLoader.LoadFromConfig(jsonPath);
-            //var newSys = model.Systems;
-            var jsonData = JsonConvert.SerializeObject(modelPath);
-            var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-
-            using (var client = new HttpClient())
-            {
-                var response = client.PostAsync($"https://localhost:44300/modeluploader/upload", content).Result;
-                if (response.IsSuccessStatusCode)
-                {
-                    MessageBox.Show("Data successfully sent", "succeed");
-                }
-                else
-                {
-                    MessageBox.Show($"Error: {response.ReasonPhrase}", "Failed");
-                }
-            }
-            //var json = JsonConvert.SerializeObject(model, settings);
-            //var json = CodeGenHandler.JsonWrapping(hmiGenModule.Generate());
+            var zipPath = Path.GetDirectoryName(Global.ExportPathDS) + ".zip";
+            var zipBytes = File.ReadAllBytes(zipPath);
+            var client = new HttpClient() { BaseAddress = new Uri("https://localhost:5001") };
+            HttpResponseMessage response = await client.PostAsJsonAsync("api/upload", zipBytes);
+            if (response.IsSuccessStatusCode)
+                MessageBox.Show("Data successfully sent", "succeed");
+            else
+                MessageBox.Show($"Error: {response.ReasonPhrase}", "Failed");
             SplashScreenManager.CloseForm();
 
             return "";

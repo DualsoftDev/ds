@@ -292,8 +292,13 @@ module ConvertCoreExt =
       
         //개별 부정의 AND  <안전하게 전부 확인>
         member c.INsFuns  =   
+                            //let ins = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionIN)
+                            //if ins.any() then !!ins.ToOr() else c._on.Expr
                             let ins = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionIN)
-                            if ins.any() then !!ins.ToOr() else c._on.Expr
+                            if  c.UsingNot
+                                  //개별 부정의 AND  <안전하게 전부 확인>
+                                  then if ins.any() then !!ins.ToOr() else c._on.Expr
+                                  else if ins.any() then ins.ToAnd()  else c._on.Expr
 
         member c.MutualResets =
             c.CallTargetJob.DeviceDefs

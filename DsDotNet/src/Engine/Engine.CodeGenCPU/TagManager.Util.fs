@@ -92,7 +92,7 @@ module TagManagerUtil =
     let mutable inCnt = -1;
     let mutable outCnt = -1;
     let mutable memCnt = -1;
-    let resetSimDevCnt() = inCnt<- -1;outCnt<- -1;memCnt<- -1;
+    let resetSimDevCnt() = inCnt<- 10000;outCnt<- 10000;memCnt<- 10000;
     let createBridgeTag(stg:Storages, name, addr:string, inOut:ActionTag, bridge:BridgeType, sys, task:IQualifiedNamed option): ITag option=
         let address =           //todo ahn 자동 주소 경고 띄우기 
             if addr <> ""  

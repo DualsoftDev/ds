@@ -45,7 +45,7 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
     public override bool ExecuteRead()
     {
         excuteReadInputs();
-        excuteReadOutputs();
+        //excuteReadOutputs();
         excuteWriteOutputs();
         return true;
     }

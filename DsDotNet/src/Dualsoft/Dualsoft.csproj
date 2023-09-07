@@ -33,6 +33,7 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+	<UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>..\..\bin\net48\</OutputPath>
@@ -69,7 +70,6 @@
   <ItemGroup>
     <Reference Include="Engine.Parser.FS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="System.Configuration" />
-    <Reference Include="System.Windows" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="ViewDiagram\UCView.cs">

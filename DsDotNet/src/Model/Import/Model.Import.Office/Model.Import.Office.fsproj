@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
 
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<RootNamespace>Model.Import.Office</RootNamespace>
@@ -40,11 +40,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
-  </ItemGroup>
-
-
-  <ItemGroup>
-    <Reference Include="WindowsBase" />
   </ItemGroup>
 
 </Project>

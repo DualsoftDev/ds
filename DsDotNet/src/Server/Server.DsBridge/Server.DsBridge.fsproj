@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-	<TargetFramework>net48</TargetFramework>
+	<TargetFramework>net6.0</TargetFramework>
 	  <OutputPath>$(SolutionDir)\bin</OutputPath>
 	  <LangVersion>7.0</LangVersion>
 	  <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>

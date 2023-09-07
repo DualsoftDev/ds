@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>net48</TargetFrameworks>
+		<TargetFrameworks>net6.0-windows</TargetFrameworks>
 		<LangVersion>7.0</LangVersion>
 		<RootNamespace>Model.DsEditor</RootNamespace>
 		<OutputPath>$(SolutionDir)\bin</OutputPath>
 		<OutputType>WinExe</OutputType>
 		<PlatformTarget>AnyCPU</PlatformTarget>
+		<UseWindowsForms>true</UseWindowsForms>
 
 
 	</PropertyGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
 	  <ProjectReference Include="..\Import\Model.Import.Office\Model.Import.Office.fsproj" />
-	</ItemGroup>
-	<ItemGroup>
-	  <Reference Include="System.Windows.Forms" />
 	</ItemGroup>
 	<ItemGroup>
 	  <Compile Update="FormMain.cs">

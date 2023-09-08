@@ -7,43 +7,42 @@ using System.Linq;
 using System.Runtime.Versioning;
 using static Engine.CodeGenCPU.ExportModule;
 
-namespace DSModeler
+namespace DSModeler;
+[SupportedOSPlatform("windows")]
+public static class PLC
 {
-    public static class PLC
+
+    public static void OpenPLCFolder()
     {
+        if (Global.IsLoadedPPT() && !Global.ExportPathPLC.IsNullOrEmpty())
+            Process.Start(Path.GetDirectoryName(Global.ExportPathPLC));
+    }
 
-        public static void OpenPLCFolder()
+    [SupportedOSPlatform("windows")]
+    public static string Export()
+    {
+        if (!Global.IsLoadedPPT())
         {
-            if (Global.IsLoadedPPT() && !Global.ExportPathPLC.IsNullOrEmpty())
-                Process.Start(Path.GetDirectoryName(Global.ExportPathPLC));
+            Global.Logger.Warn("PPTX 가져오기를 먼저 수행하세요");
+            return "";
         }
+        SplashScreenManager.ShowForm(typeof(DXWaitForm));
 
-        [SupportedOSPlatform("windows")]
-        public static string Export()
-        {
-            if (!Global.IsLoadedPPT())
-            {
-                Global.Logger.Warn("PPTX 가져오기를 먼저 수행하세요");
-                return "";
-            }
-            SplashScreenManager.ShowForm(typeof(DXWaitForm));
+        var xmlTemplateFile = Path.ChangeExtension(Files.GetLast().First(), "xml");
+        var xmlFileName = Path.GetFileNameWithoutExtension(xmlTemplateFile) + "_gen.xml";
+        var xmlDriectory = Path.GetDirectoryName(xmlTemplateFile);
+        var fullpath = Path.Combine(xmlDriectory, xmlFileName);
+        var newPath = Files.GetNewFileName(fullpath);
+        Global.ExportPathPLC = newPath;
+        if (File.Exists(xmlTemplateFile))
+            //사용자 xg5000 Template 형식으로 생성
+            ExportModuleExt.ExportXMLforXGI(Global.ActiveSys, newPath, xmlTemplateFile);
+        else  //기본 템플릿 CPU-E 타입으로 생성
+            ExportModuleExt.ExportXMLforXGI(Global.ActiveSys, newPath, null);
 
-            var xmlTemplateFile = Path.ChangeExtension(Files.GetLast().First(), "xml");
-            var xmlFileName = Path.GetFileNameWithoutExtension(xmlTemplateFile) + "_gen.xml";
-            var xmlDriectory = Path.GetDirectoryName(xmlTemplateFile);
-            var fullpath = Path.Combine(xmlDriectory, xmlFileName);
-            var newPath = Files.GetNewFileName(fullpath);
-            Global.ExportPathPLC = newPath;
-            if (File.Exists(xmlTemplateFile))
-                //사용자 xg5000 Template 형식으로 생성
-                ExportModuleExt.ExportXMLforXGI(Global.ActiveSys, newPath, xmlTemplateFile);
-            else  //기본 템플릿 CPU-E 타입으로 생성
-                ExportModuleExt.ExportXMLforXGI(Global.ActiveSys, newPath, null);
+        SplashScreenManager.CloseForm();
 
-            SplashScreenManager.CloseForm();
-
-            return newPath;
-        }
+        return newPath;
     }
 }
 

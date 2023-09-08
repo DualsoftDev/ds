@@ -1,44 +1,26 @@
+using AppHMI;
 using DevExpress.XtraSplashScreen;
-using System.Text;
-using Engine.CodeGenHMI;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.IO;
-using DevExpress.ClipboardSource.SpreadsheetML;
-using System.Runtime.InteropServices.ComTypes;
-using static Engine.Core.CoreModule;
 using Dual.Common.Core.FS;
-using System.Collections.Generic;
-using static Engine.Core.DsText;
-using static Engine.Core.SystemToDsExt;
-using Engine.Core;
-using Engine.Parser.FS;
-using Microsoft.Msagl.GraphViewerGdi;
-using static Engine.Parser.FS.ParserOptionModule;
-using System.Linq;
+using System;
+using System.IO;
 using System.Net.Http;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using DevExpress.XtraRichEdit.Import.Html;
-using LanguageExt.Pipes;
 using System.Net.Http.Json;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace DSModeler;
 [SupportedOSPlatform("windows")]
 public static class HMI
 {
-    public static async Task<string> ExportAsync(FormMain formMain)
+    public static async Task<string> ExportWebAsync(FormMain formMain)
     {
         if (!Global.IsLoadedPPT())
         {
             Global.Logger.Warn("PPTX 가져오기를 먼저 수행하세요");
             return "";
         }
-        
+
         SplashScreenManager.ShowForm(typeof(DXWaitForm));
         var zipPath = Path.GetDirectoryName(Global.ExportPathDS) + ".zip";
         var zipBytes = File.ReadAllBytes(zipPath);
@@ -51,5 +33,27 @@ public static class HMI
         SplashScreenManager.CloseForm();
 
         return "";
+    }
+
+
+    public static void ExportApp()
+    {
+        if (!Global.IsLoadedPPT()) return;
+        if (Global.ExportPathDS.IsNullOrEmpty())
+        {
+            MBox.Warn("PC Control 내보내기를 먼저 수행하세요");
+            return;
+        }
+
+        foreach (System.Windows.Forms.Form frm in Application.OpenForms)
+        {
+            if (frm.Name == "MainFormHMI")
+            {
+                frm.Activate();
+                return;
+            }
+        }
+        var appHMI = new MainFormHMI();
+        appHMI.LoadHMI(Global.ExportPathDS);
     }
 }

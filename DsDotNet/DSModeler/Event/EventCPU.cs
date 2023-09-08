@@ -1,4 +1,3 @@
-using Dual.Common.Core;
 using Server.HW.Common;
 using Server.HW.XG5K;
 using System;
@@ -20,58 +19,58 @@ public static class EventCPU
     static IDisposable DisposableHWPaixInput;
     static IDisposable DisposableTagDS;
 
-        public static void CPUSubscribe()
+    public static void CPUSubscribe()
+    {
+        if (DisposableHWPaixInput == null && Global.CpuRunMode.IsPackagePC())
         {
-            if (DisposableHWPaixInput == null && Global.CpuRunMode.IsPackagePC())
+            DisposableHWPaixInput = Global.PaixDriver.Conn.Subject.OfType<TagValueChangedEvent>()
+            .Subscribe(evt =>
             {
-                DisposableHWPaixInput = Global.PaixDriver.Conn.Subject.OfType<TagValueChangedEvent>()
+                var t = evt.Tag as XG5KTag;
+                if (t.IOType == TagIOType.Output)
+                {
+                    Global.Logger.Debug($"HW_OUT {t.Address} value: {t.Value}");
+                }
+                if (t.IOType == TagIOType.Input)
+                {
+                    var tags = PcControl.DicActionIn[t];
+                    tags.Iter(tag =>
+                    {
+                        tag.BoxedValue = t.Value;
+                        var dev = tag.Target.Value as TaskDev;
+                        if (dev != null && ViewDraw.DicTask.ContainsKey(dev)) //job만정의 하고 call에 사용  안함
+                        {
+                            var vs = ViewDraw.DicTask[dev];
+                            vs.Iter(v => ViewDraw.ActionChangeSubject
+                                               .OnNext(System.Tuple.Create(v, t.Value)));
+                        }
+                    });
+                    Global.Logger.Debug($"HW_IN {t.Address} value: {t.Value}");
+                }
+            });
+        }
+
+        if (DisposableTagDS == null)
+        {
+            DisposableTagDS =
+                TagDSSubject
                 .Subscribe(evt =>
                 {
-                    var t = evt.Tag as XG5KTag;
-                    if (t.IOType == TagIOType.Output)
+                    if (evt.IsEventVertex)
                     {
-                        Global.Logger.Debug($"HW_OUT {t.Address} value: {t.Value}");
-                    }
-                    if (t.IOType == TagIOType.Input)
-                    {
-                        var tags = PcControl.DicActionIn[t];
-                        tags.Iter(tag =>
+                        var t = evt as EventVertex;
+                        var isStatus = false;
+                        switch (t.TagKind)
                         {
-                            tag.BoxedValue = t.Value;
-                            var dev = tag.Target.Value as TaskDev;
-                            if (dev != null && ViewDraw.DicTask.ContainsKey(dev)) //job만정의 하고 call에 사용  안함
-                            {
-                                var vs = ViewDraw.DicTask[dev];
-                                vs.Iter(v => ViewDraw.ActionChangeSubject
-                                                   .OnNext(System.Tuple.Create(v, t.Value)));
-                            }
-                        });
-                        Global.Logger.Debug($"HW_IN {t.Address} value: {t.Value}");
-                    }
-                });
-            }
+                            case VertexTag.ready: ViewDraw.DicStatus[t.Target] = Status4.Ready; isStatus = true; break;
+                            case VertexTag.going: ViewDraw.DicStatus[t.Target] = Status4.Going; isStatus = true; break;
+                            case VertexTag.finish: ViewDraw.DicStatus[t.Target] = Status4.Finish; isStatus = true; break;
+                            case VertexTag.homing: ViewDraw.DicStatus[t.Target] = Status4.Homing; isStatus = true; break;
+                            default: break;
+                        }
 
-            if (DisposableTagDS == null)
-            {
-                DisposableTagDS =
-                    TagDSSubject
-                    .Subscribe(evt =>
-                    {
-                        if (evt.IsEventVertex)
-                        {
-                            var t = evt as EventVertex;
-                            var isStatus = false;
-                            switch (t.TagKind)
-                            {
-                                case VertexTag.ready: ViewDraw.DicStatus[t.Target] = Status4.Ready; isStatus = true; break;
-                                case VertexTag.going: ViewDraw.DicStatus[t.Target] = Status4.Going; isStatus = true; break;
-                                case VertexTag.finish: ViewDraw.DicStatus[t.Target] = Status4.Finish; isStatus = true; break;
-                                case VertexTag.homing: ViewDraw.DicStatus[t.Target] = Status4.Homing; isStatus = true; break;
-                                default: break;
-                            }
-
-                            if (isStatus && (bool)t.Tag.BoxedValue)
-                                ViewDraw.StatusChangeSubject.OnNext(t.Target);
+                        if (isStatus && (bool)t.Tag.BoxedValue)
+                            ViewDraw.StatusChangeSubject.OnNext(t.Target);
 
 
                         if (Global.CpuRunMode.IsSimulation)

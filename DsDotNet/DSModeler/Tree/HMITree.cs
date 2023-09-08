@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.Core.CoreModule;

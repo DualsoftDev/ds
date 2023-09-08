@@ -5,8 +5,8 @@ using DSModeler.Form;
 using Dual.Common.Winform;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
 using static Engine.Core.CoreModule;
 using static Engine.Core.RuntimeGeneratorModule;
 using static Engine.Import.Office.ViewModule;
@@ -101,7 +101,7 @@ namespace DSModeler
             Task.Run(async () =>
             {
                 //Storages 연결이슈로  새로 준비 
-               await formParent.ImportPowerPointWapper(Files.GetLast());
+                await formParent.ImportPowerPointWapper(Files.GetLast());
                 await formParent.DoAsync(tsc =>
                 {
                     FormDocText formChiild = new FormDocText();

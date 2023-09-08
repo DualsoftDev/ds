@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AppHMI\AppHMI.csproj" />
     <ProjectReference Include="..\ModelHandler\ModelHandler.csproj" />
     <ProjectReference Include="..\src\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
     <ProjectReference Include="..\src\Engine\Engine.CodeGenHMI\Engine.CodeGenHMI.fsproj" />
@@ -49,6 +50,9 @@
     <Compile Update="ViewDiagram\UCView.cs">
       <SubType>UserControl</SubType>
     </Compile>
+		  <Compile Update="FormMain.cs">
+			  <SubType>Form</SubType>
+		  </Compile>
   </ItemGroup>
 
   <!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">

@@ -34,6 +34,6 @@ public static class Files
         var newDirectory = $"{directory}\\{fileName}_{type}_autogen_{dt}";
         Directory.CreateDirectory(newDirectory);
         var flieNamePost = fileNameTimeMarking ? $"{fileName}_{dt}" : fileName;
-        return Path.Combine(newDirectory, $"{flieNamePost}.{fileExtension}");
+        return Path.Combine(newDirectory, $"{flieNamePost}{fileExtension}");
     }
 }

@@ -17,7 +17,7 @@ namespace DSModeler
         {
             if (ImportingPPT) return;
             if (Global.BusyCheck()) return;
-             
+
             EventCPU.CPUUnsubscribe();
             string[] files;
             if (lastFiles.IsNullOrEmpty())

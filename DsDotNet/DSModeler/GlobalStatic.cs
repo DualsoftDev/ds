@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Reactive.Subjects;
 using System.Reflection;
-using System.Runtime.Versioning;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.RuntimeGeneratorModule;

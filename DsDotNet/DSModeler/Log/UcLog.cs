@@ -123,7 +123,7 @@ namespace DSModeler
                 var tool = (ToolStripMenuItem)ss;
                 Level sellvl = getLevel(tool.Text);
                 logLvlControls.Iter(c =>
-                { 
+                {
                     c.Checked = false;
                     c.Image = null;
                 });

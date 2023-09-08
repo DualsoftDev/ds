@@ -13,7 +13,7 @@ public static class RecentDocs
         DSRegistry.SetValue(K.LastDocs, String.Join("|;|", docs));
     }
 
-   
+
 
     public static List<string> GetRegistryRecentDocs()
     {

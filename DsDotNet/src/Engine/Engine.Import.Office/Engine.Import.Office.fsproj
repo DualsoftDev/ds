@@ -5,7 +5,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<RootNamespace>Engine.Import.Office</RootNamespace>
     <OutputType>Library</OutputType>
-	  <OutputPath>$(SolutionDir)\bin</OutputPath>
+	  <OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
 	  <AssemblyName>Engine.Import.Office</AssemblyName>
 
     <Version>1.0.1</Version>

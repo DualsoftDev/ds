@@ -4,10 +4,10 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<RootNamespace>Engine.CodeGenCPU</RootNamespace>
 		<LangVersion>7.0</LangVersion>
-		<OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
+		<OutputPath>$(SolutionDir)\bin\$(TargetDir)</OutputPath>
 		<OutputType>Library</OutputType>
         <OtherFlags>--warnon:1182</OtherFlags>
-        <BaseOutputPath></BaseOutputPath>
+        <BaseOutputPath>$(SolutionDir)\bin\$(TargetDir)</BaseOutputPath>
 	</PropertyGroup>
 
   <ItemGroup>

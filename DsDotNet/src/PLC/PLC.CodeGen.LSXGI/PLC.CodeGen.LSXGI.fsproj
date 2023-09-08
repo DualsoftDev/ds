@@ -5,7 +5,7 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<RootNamespace>PLC.CodeGen.LSXGI</RootNamespace>
 		<LangVersion>7.0</LangVersion>
-		<OutputPath>$(SolutionDir)\bin</OutputPath>
+		<OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
 	</PropertyGroup>
 

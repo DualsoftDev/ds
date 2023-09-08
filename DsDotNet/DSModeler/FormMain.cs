@@ -79,7 +79,7 @@ namespace DSModeler
         private async Task InitializationClientSignalRAsync()
         {
             connection = new HubConnectionBuilder()
-                .WithUrl("https://localhost:5001/hub/ds")
+                .WithUrl("http://localhost:5000/hub/ds")
                 .Build()
                 ;
             await connection.StartAsync();

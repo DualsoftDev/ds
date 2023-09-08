@@ -6,7 +6,7 @@
 		<LangVersion>7.0</LangVersion>
 		<!--<OutputType>Library</OutputType>-->
 		<!--<OutputType>Exe</OutputType>-->
-		<OutputPath>$(SolutionDir)\bin</OutputPath>
+		<OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
 		<OtherFlags>--warnon:1182</OtherFlags>
 	</PropertyGroup>
 

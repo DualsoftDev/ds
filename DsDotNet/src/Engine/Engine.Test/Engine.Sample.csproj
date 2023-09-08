@@ -7,7 +7,7 @@
 		<RootNamespace>Engine.Sample</RootNamespace>
 		<LangVersion>11.0</LangVersion>
 		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
-		<OutputPath>$(SolutionDir)\bin</OutputPath>
+		<OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>
 

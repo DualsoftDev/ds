@@ -13,7 +13,7 @@ public class DsModelLoader
     {
         try
         {
-            File.WriteAllBytes("E:\\tmp.zip", model);
+            File.WriteAllBytes("tmp.zip", model);
             return true;
         }
         catch (Exception ex)

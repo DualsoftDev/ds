@@ -42,7 +42,7 @@ public static class HMI
         SplashScreenManager.ShowForm(typeof(DXWaitForm));
         var zipPath = Path.GetDirectoryName(Global.ExportPathDS) + ".zip";
         var zipBytes = File.ReadAllBytes(zipPath);
-        var client = new HttpClient() { BaseAddress = new Uri("https://localhost:5001") };
+        var client = new HttpClient() { BaseAddress = new Uri("http://localhost:5000") };
         HttpResponseMessage response = await client.PostAsJsonAsync("api/upload", zipBytes);
         if (response.IsSuccessStatusCode)
             MessageBox.Show("Data has uploaded", "succeed");

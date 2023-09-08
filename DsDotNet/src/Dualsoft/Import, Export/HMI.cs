@@ -25,9 +25,10 @@ using System.Windows.Forms;
 using DevExpress.XtraRichEdit.Import.Html;
 using LanguageExt.Pipes;
 using System.Net.Http.Json;
+using System.Runtime.Versioning;
 
 namespace DSModeler;
-
+[SupportedOSPlatform("windows")]
 public static class HMI
 {
     public static async Task<string> ExportAsync(FormMain formMain)

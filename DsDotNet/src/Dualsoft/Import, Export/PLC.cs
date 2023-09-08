@@ -1,8 +1,10 @@
 using DevExpress.XtraSplashScreen;
 using Dual.Common.Core;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using static Engine.CodeGenCPU.ExportModule;
 
 namespace DSModeler
@@ -16,6 +18,7 @@ namespace DSModeler
                 Process.Start(Path.GetDirectoryName(Global.ExportPathPLC));
         }
 
+        [SupportedOSPlatform("windows")]
         public static string Export()
         {
             if (!Global.IsLoadedPPT())
@@ -36,6 +39,7 @@ namespace DSModeler
                 ExportModuleExt.ExportXMLforXGI(Global.ActiveSys, newPath, xmlTemplateFile);
             else  //기본 템플릿 CPU-E 타입으로 생성
                 ExportModuleExt.ExportXMLforXGI(Global.ActiveSys, newPath, null);
+
             SplashScreenManager.CloseForm();
 
             return newPath;

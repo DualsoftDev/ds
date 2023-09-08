@@ -14,103 +14,103 @@ using System.Reactive.Subjects;
 using System;
 using System.Windows.Forms;
 using Dual.Common.Winform;
+using System.Runtime.Versioning;
 
-namespace DSModeler
+namespace DSModeler;
+[SupportedOSPlatform("windows")]
+public static class ViewDraw
 {
-    public static class ViewDraw
+    public static Dictionary<Vertex, Status4> DicStatus;
+    public static Dictionary<DsTask, IEnumerable<Vertex>> DicTask;
+    public static Subject<Tuple<CoreModule.Vertex, Status4>> StatusChangeSubject = new Subject<Tuple<CoreModule.Vertex, Status4>>();
+    public static Subject<Tuple<CoreModule.Vertex, object>> ActionChangeSubject = new Subject<Tuple<CoreModule.Vertex, object>>();
+
+    public static void DrawInitStatus(FormMain formMain, Dictionary<DsSystem, CpuLoader.PouGen> dicCpu)
     {
-        public static Dictionary<Vertex, Status4> DicStatus;
-        public static Dictionary<DsTask, IEnumerable<Vertex>> DicTask;
-        public static Subject<Tuple<CoreModule.Vertex, Status4>> StatusChangeSubject = new Subject<Tuple<CoreModule.Vertex, Status4>>();
-        public static Subject<Tuple<CoreModule.Vertex, object>> ActionChangeSubject = new Subject<Tuple<CoreModule.Vertex, object>>();
-
-        public static void DrawInitStatus(FormMain formMain, Dictionary<DsSystem, CpuLoader.PouGen> dicCpu)
+        DicStatus = new Dictionary<Vertex, Status4>();
+        foreach (var item in dicCpu)
         {
-            DicStatus = new Dictionary<Vertex, Status4>();
-            foreach (var item in dicCpu)
-            {
-                var sys = item.Key;
-                var reals = sys.GetVertices().OfType<Vertex>();
-                foreach (var r in reals)
-                    ViewDraw.DicStatus.Add(r, Status4.Homing);
-            }
-
-            StatusChangeSubject.Subscribe(rx =>
-            {
-                formMain.Do(() =>
-                {
-                    var ret = GetViewNode(formMain, rx.Item1);
-                    foreach (var r in ret)
-                    {
-                        var form = r.Item1;
-                        var node = r.Item2;
-                            node.Status4 = rx.Item2;
-                            form.UcView.UpdateStatus(node);
-                    }
-                });
-            });
+            var sys = item.Key;
+            var reals = sys.GetVertices().OfType<Vertex>();
+            foreach (var r in reals)
+                ViewDraw.DicStatus.Add(r, Status4.Homing);
         }
 
-        private static IEnumerable<Tuple<FormDocView, ViewNode>> GetViewNode(FormMain formMain, Vertex v)
+        StatusChangeSubject.Subscribe(rx =>
         {
-            var visibleFroms = formMain.TabbedView.Documents
-                                .Where(w => w.IsVisible)
-                                .Select(s => s.Tag)
-                                .OfType<FormDocView>()
-                                .Where(w => w.UcView.Flow == v.Parent.GetFlow());
-
-
-
-            return visibleFroms.Select(s => Tuple.Create(s, s.UcView.MasterNode.UsedViewVertexNodes(false)[v]));
-        }
-
-        public static void DrawInitActionTask(FormMain formMain, Dictionary<DsSystem, CpuLoader.PouGen> dicCpu)
-        {
-            DicTask = new Dictionary<DsTask, IEnumerable<Vertex>>();
-            foreach (var item in dicCpu)
+            formMain.Do(() =>
             {
-                var sys = item.Key;
-                var calls = sys.GetVertices().OfType<Call>();
-                calls.SelectMany(s => s.CallTargetJob.DeviceDefs)
-                     .Distinct()
-                     .Iter(d =>
-                     {
-                         var finds = calls.Where(w => w.CallTargetJob.DeviceDefs.Contains(d));
-                         DicTask.Add(d, finds);
-                     });
-            }
-
-            ActionChangeSubject.Subscribe(rx =>
-            {
-                formMain.Do(() =>
+                var ret = GetViewNode(formMain, rx.Item1);
+                foreach (var r in ret)
                 {
-                    var ret = GetViewNode(formMain, rx.Item1);
-                    foreach (var r in ret)
-                    {
-                        var form = r.Item1;
-                        var node = r.Item2;
-                        form.UcView.UpdateValue(node, rx.Item2);
-                    }
-                });
-            });
-        }
-
-
-        public static void DrawStatus(ViewNode v, FormDocView view)
-        {
-            var viewNodes = v.UsedViewNodes.Where(w => w.CoreVertex != null);
-            foreach (var f in viewNodes)
-            {
-                if (DicStatus.ContainsKey(f.CoreVertex.Value))
-                {
-                    f.Status4 = DicStatus[f.CoreVertex.Value];
-                    view.UcView.UpdateStatus(f);
+                    var form = r.Item1;
+                    var node = r.Item2;
+                        node.Status4 = rx.Item2;
+                        form.UcView.UpdateStatus(node);
                 }
-            }
+            });
+        });
+    }
+
+    private static IEnumerable<Tuple<FormDocView, ViewNode>> GetViewNode(FormMain formMain, Vertex v)
+    {
+        var visibleFroms = formMain.TabbedView.Documents
+                            .Where(w => w.IsVisible)
+                            .Select(s => s.Tag)
+                            .OfType<FormDocView>()
+                            .Where(w => w.UcView.Flow == v.Parent.GetFlow());
+
+
+
+        return visibleFroms.Select(s => Tuple.Create(s, s.UcView.MasterNode.UsedViewVertexNodes(false)[v]));
+    }
+
+    public static void DrawInitActionTask(FormMain formMain, Dictionary<DsSystem, CpuLoader.PouGen> dicCpu)
+    {
+        DicTask = new Dictionary<DsTask, IEnumerable<Vertex>>();
+        foreach (var item in dicCpu)
+        {
+            var sys = item.Key;
+            var calls = sys.GetVertices().OfType<Call>();
+            calls.SelectMany(s => s.CallTargetJob.DeviceDefs)
+                 .Distinct()
+                 .Iter(d =>
+                 {
+                     var finds = calls.Where(w => w.CallTargetJob.DeviceDefs.Contains(d));
+                     DicTask.Add(d, finds);
+                 });
         }
 
-
+        ActionChangeSubject.Subscribe(rx =>
+        {
+            formMain.Do(() =>
+            {
+                var ret = GetViewNode(formMain, rx.Item1);
+                foreach (var r in ret)
+                {
+                    var form = r.Item1;
+                    var node = r.Item2;
+                    form.UcView.UpdateValue(node, rx.Item2);
+                }
+            });
+        });
     }
+
+
+    public static void DrawStatus(ViewNode v, FormDocView view)
+    {
+        var viewNodes = v.UsedViewNodes.Where(w => w.CoreVertex != null);
+        foreach (var f in viewNodes)
+        {
+            if (DicStatus.ContainsKey(f.CoreVertex.Value))
+            {
+                f.Status4 = DicStatus[f.CoreVertex.Value];
+                view.UcView.UpdateStatus(f);
+            }
+        }
+    }
+
+
 }
 
 

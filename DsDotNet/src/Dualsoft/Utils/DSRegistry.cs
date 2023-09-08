@@ -1,7 +1,9 @@
 using Microsoft.Win32;
+using System.Runtime.Versioning;
 
 namespace DSModeler
 {
+    [SupportedOSPlatform("windows")]
     public static class DSRegistry
     {
         static RegistryKey _registryKey => Registry.CurrentUser.CreateSubKey($@"{K.RegPath}");

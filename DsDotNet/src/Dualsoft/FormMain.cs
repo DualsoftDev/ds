@@ -9,9 +9,11 @@ using System;
 using System.Windows.Forms;
 using Microsoft.AspNetCore.SignalR.Client;
 using System.Threading.Tasks;
+using System.Runtime.Versioning;
 
 namespace DSModeler
 {
+    [SupportedOSPlatform("windows")]
     public partial class FormMain : XtraForm
     {
         public ModelLoaderModule.Model Model;

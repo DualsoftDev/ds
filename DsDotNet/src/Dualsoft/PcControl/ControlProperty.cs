@@ -1,7 +1,9 @@
 using System;
+using System.Runtime.Versioning;
 
 namespace DSModeler
 {
+    [SupportedOSPlatform("windows")]
     public static class ControlProperty
     {
         static readonly int _defaultSpeed = 4;

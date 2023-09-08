@@ -5,12 +5,14 @@ using DSModeler.Form;
 using Dual.Common.Winform;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using static Engine.Core.CoreModule;
 using static Engine.Core.RuntimeGeneratorModule;
 using static Model.Import.Office.ViewModule;
 
 namespace DSModeler
 {
+    [SupportedOSPlatform("windows")]
     public static class DocControl
     {
         private static XtraForm CreateDocForm(

@@ -4,12 +4,13 @@ using Dual.Common.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 using static Engine.Core.TagKindModule;
 using static Engine.Core.TagKindModule.TagDS;
 
 namespace DSModeler
 {
-
+    [SupportedOSPlatform("windows")]
     public static class LogicLog
     {
 

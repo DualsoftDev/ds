@@ -1,9 +1,11 @@
 using DevExpress.XtraVerticalGrid;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Windows.Forms;
 
 namespace DSModeler
 {
+    [SupportedOSPlatform("windows")]
     public partial class UcPropertyGrid : DevExpress.XtraEditors.XtraUserControl
     {
         public PropertyGridControl PropertyGrid => propertyGridControl1;

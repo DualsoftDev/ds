@@ -18,9 +18,11 @@ using static Engine.Core.ExpressionModule;
 using static Engine.Core.ModelLoaderModule;
 using static Engine.Core.SystemToDsExt;
 using System.Windows;
+using System.Runtime.Versioning;
 
 namespace DSModeler
 {
+    [SupportedOSPlatform("windows")]
     public static class DSFile
     {
         public static void ZipDSFolder()

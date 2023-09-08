@@ -9,11 +9,13 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace DSModeler
 {
+    [SupportedOSPlatform("windows")]
     public partial class UcLog
         : UserControl
         , IAppender

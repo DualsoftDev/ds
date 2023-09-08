@@ -4,11 +4,13 @@ using DevExpress.XtraWaitForm;
 using Dual.Common.Winform;
 using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Windows.Forms;
 
 namespace DSModeler
 {
+    [SupportedOSPlatform("windows")]
     [ComVisible(false)]
     public partial class DXWaitForm : WaitForm, IFormProgressbar
     {

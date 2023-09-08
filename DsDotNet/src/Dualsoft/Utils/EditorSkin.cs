@@ -1,8 +1,9 @@
 using DevExpress.LookAndFeel;
+using System.Runtime.Versioning;
 
 namespace DSModeler
 {
-
+    [SupportedOSPlatform("windows")]
     public static class EditorSkin
     {
         public static void SetSkin(string name)

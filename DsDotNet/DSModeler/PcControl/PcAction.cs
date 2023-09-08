@@ -1,6 +1,6 @@
 using DevExpress.XtraBars.Navigation;
 using DSModeler.Tree;
-//using Microsoft.AspNetCore.SignalR.Client; <<shin>>
+using Microsoft.AspNetCore.SignalR.Client;
 using Server.HW.WMX3;
 using System;
 using System.Linq;
@@ -28,11 +28,11 @@ public static class PcAction
                             Task.Run(() => s.Run()))
                 );
 
-            //FormMain.formMain.connection.On<Tuple<string, int>>("S2CSet", tpl =>
-            //{
-            //    MessageBox.Show($"Got value change notification from server: {tpl.Item1} = {tpl.Item2}", "get change value");
-            //    //MessageBox.Show($"Got value change notification from server: {tag}", "get change value");
-            //}); <<shin>>
+            FormMain.formMain.connection.On<Tuple<string, int>>("S2CSet", tpl =>
+            {
+                MessageBox.Show($"Got value change notification from server: {tpl.Item1} = {tpl.Item2}", "get change value");
+                //MessageBox.Show($"Got value change notification from server: {tag}", "get change value");
+            });
 
             Global.Logger.Info("시뮬레이션 : Run");
         }

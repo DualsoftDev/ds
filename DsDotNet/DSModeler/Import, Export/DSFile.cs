@@ -13,7 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using static Engine.Core.CoreModule;
-//using ModelHandler; <<shin>>
+using ModelHandler;
 using static Engine.Core.DsTextProperty;
 using static Engine.Core.ExpressionModule;
 using static Engine.Core.SystemToDsExt;
@@ -27,20 +27,15 @@ namespace DSModeler
     {
         public static void ZipDSFolder()
         {
-            //if (Global.IsLoadedPPT() && !Global.ExportPathDS.IsNullOrEmpty())  <<shin>>
-            //{
-            //    var zipDir = Path.GetDirectoryName(Global.ExportPathDS);
-            //    var rp = new Repository(zipDir);
-            //    rp.CompressDirectory();
-            //    MessageBox.Show($"{zipDir}.zip 파일 저장 성공");
-            //}
+            if (Global.IsLoadedPPT() && !Global.ExportPathDS.IsNullOrEmpty())
+            {
+                var zipDir = Path.GetDirectoryName(Global.ExportPathDS);
+                var rp = new Repository(zipDir);
+                rp.CompressDirectory();
+                MessageBox.Show($"{zipDir}.zip 파일 저장 성공");
+            }
         }
 
-        public static void OpenDSFolder()
-        {
-            if (Global.IsLoadedPPT() && !Global.ExportPathDS.IsNullOrEmpty())
-                Process.Start(Path.GetDirectoryName(Global.ExportPathDS));
-        }
         private static void Export()
         {
             if (!Global.IsLoadedPPT())

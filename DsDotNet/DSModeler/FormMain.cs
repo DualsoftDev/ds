@@ -7,7 +7,7 @@ using Dual.Common.Core;
 using Engine.Core;
 using System;
 using System.Windows.Forms;
-//using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.AspNetCore.SignalR.Client;
 using System.Threading.Tasks;
 using System.Runtime.Versioning;
 
@@ -28,7 +28,7 @@ namespace DSModeler
         public AccordionControlElement Ace_ExSystem => ace_ExSystem;
         public BarStaticItem LogCountText => barStaticItem_logCnt;
 
-        //public HubConnection connection;  //<<shin>>
+        public HubConnection connection;  //<<shin>>
 
         public static FormMain formMain;
 
@@ -78,11 +78,11 @@ namespace DSModeler
 
         private async Task InitializationClientSignalRAsync()
         {
-            //connection = new HubConnectionBuilder()  <<shin>>
-            //    .WithUrl("https://localhost:5001/hub/ds")
-            //    .Build()
-            //    ;
-            //await connection.StartAsync();
+            connection = new HubConnectionBuilder()
+                .WithUrl("https://localhost:5001/hub/ds")
+                .Build()
+                ;
+            await connection.StartAsync();
         }
 
         private void ace_Play_Click(object s, EventArgs e) => PcAction.Play(ace_Play);
@@ -110,7 +110,7 @@ namespace DSModeler
         }
         private void simpleButton_ClearLog_Click(object sender, EventArgs e) => LogicLog.ValueLogs.Clear();
         private void simpleButton_AllExpr_Click(object sender, EventArgs e) => DSFile.UpdateExprAll(this, toggleSwitch_showDeviceExpr.IsOn);
-        private void simpleButton_ExportDStoFile_Click(object sender, EventArgs e) => DSFile.OpenDSFolder();  //open
+        private void simpleButton_ExportDStoFile_Click(object sender, EventArgs e) => DSFile.ZipDSFolder();  //open
 
         private void ace_ExportAppHMI_Click(object sender, EventArgs e)
         {

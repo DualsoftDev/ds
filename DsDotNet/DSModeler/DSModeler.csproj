@@ -35,7 +35,7 @@
     <ProjectReference Include="..\src\PLC\PLC.CodeGen.LSXGI\PLC.CodeGen.LSXGI.fsproj" />
     <ProjectReference Include="..\src\PLC\PLC.CodeGen.LSXGK\PLC.CodeGen.LSXGK.fsproj" />
     <ProjectReference Include="..\src\Server\Server.HW.Common\Server.HW.Common.csproj" />
-    <ProjectReference Include="..\src\Server\Server.HW.WMX3\Server.HW.XG5K.csproj" />
+    <ProjectReference Include="..\src\Server\Server.HW.XG5K\Server.HW.XG5K.csproj" />
   </ItemGroup>
 
   <ItemGroup>

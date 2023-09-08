@@ -36,6 +36,10 @@
     <ProjectReference Include="..\src\PLC\PLC.CodeGen.LSXGK\PLC.CodeGen.LSXGK.fsproj" />
     <ProjectReference Include="..\src\Server\Server.HW.Common\Server.HW.Common.csproj" />
     <ProjectReference Include="..\src\Server\Server.HW.XG5K\Server.HW.XG5K.csproj" />
+	<None Include="$(SolutionDir)exLib\XGCommLib64.dll">
+		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	</None>
   </ItemGroup>
 
   <ItemGroup>
@@ -46,5 +50,9 @@
       <SubType>UserControl</SubType>
     </Compile>
   </ItemGroup>
+
+  <!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy $(SolutionDir)exLib\XGCommLib64.dll $(TargetDir)XGCommLib64.dll" />
+  </Target>-->
 
 </Project>

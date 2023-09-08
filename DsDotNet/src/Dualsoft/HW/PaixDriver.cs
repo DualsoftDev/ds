@@ -36,7 +36,7 @@ namespace DSModeler
         public bool Open()
         {
             IPAddress.TryParse(IP, out IPAddress addr);
-            if (addr == null) { MBox.Error($"{IP} ip 형식으로 올바르지 않습니다."); return false; }
+            if (addr == null && OperatingSystem.IsWindows()) { MBox.Error($"{IP} ip 형식으로 올바르지 않습니다."); return false; }
 
             return Conn.Connect();
         }

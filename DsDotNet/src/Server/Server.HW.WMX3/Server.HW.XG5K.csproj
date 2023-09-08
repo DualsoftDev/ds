@@ -6,12 +6,6 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<ItemGroup>
-	  <None Remove="DsWMX3Handler.csx" />
-	</ItemGroup>
-	<ItemGroup>
-	  <Compile Include="DsWMX3Handler.csx" />
-	</ItemGroup>
-	<ItemGroup>
 	  <COMReference Include="XGCommLib">
 	    <VersionMinor>0</VersionMinor>
 	    <VersionMajor>1</VersionMajor>
@@ -29,13 +23,5 @@
 	  <ProjectReference Include="..\..\HW\LSPLC\Dual.PLC.LS.XgCOM.FS\Dual.PLC.LS.XgCOM.FS.fsproj" />
 	  <ProjectReference Include="..\Server.HW.Common\Server.HW.Common.csproj" />
 	</ItemGroup>
-  <ItemGroup>
-    <Reference Include="IOApi_CLRLib">
-      <HintPath>..\..\..\exLib\IOApi_CLRLib.dll</HintPath>
-    </Reference>
-    <Reference Include="WMX3Api_CLRLib">
-      <HintPath>..\..\..\exLib\WMX3Api_CLRLib.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 
 </Project>

@@ -74,7 +74,7 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "UnitTest.PLC.HW.LS.FEnet", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server.HW.Common", "src\Server\Server.HW.Common\Server.HW.Common.csproj", "{F9C31DC9-A512-4C41-A3C6-87E9506EC212}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server.HW.WMX3", "src\Server\Server.HW.WMX3\Server.HW.WMX3.csproj", "{A5AAB509-F6AE-4665-8BDA-A78434D5572E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server.HW.XG5K", "src\Server\Server.HW.WMX3\Server.HW.XG5K.csproj", "{A5AAB509-F6AE-4665-8BDA-A78434D5572E}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Engine.Import.Office", "src\Engine\Engine.Import.Office\Engine.Import.Office.fsproj", "{F51C980F-5A93-437F-8D94-C7E20C6C900D}"
 EndProject

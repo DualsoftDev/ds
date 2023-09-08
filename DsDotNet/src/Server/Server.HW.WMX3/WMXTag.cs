@@ -2,11 +2,11 @@ using Server.HW.Common;
 using System;
 //using System.Windows.Media;
 
-namespace Server.HW.WMX3;
-public class WMXTag : TagHW
+namespace Server.HW.XG5K;
+public class XG5KTag : TagHW
 {
-    private WMXConnection Connection => (WMXConnection)ConnectionBase;
-    public WMXTag(WMXConnection connection, string name)
+    private XG5KConnection Connection => (XG5KConnection)ConnectionBase;
+    public XG5KTag(XG5KConnection connection, string name)
         : base(connection)
     {
         Name = name;
@@ -46,7 +46,7 @@ public class WMXTag : TagHW
             if (upperName.Contains("."))
             {
                 if (upperName.Split('.').Length != 3)
-                    throw new HWExceptionTag("WMXTag IEC type %[Device][CPU].[SLOT].[ID] ex %IX0.12.4, %MX1");
+                    throw new HWExceptionTag("XG5KTag IEC type %[Device][CPU].[SLOT].[ID] ex %IX0.12.4, %MX1");
                 else
                     byteBit = upperName.Replace("%IX0.", "").Replace("%QX0.", "");
             }
@@ -59,7 +59,7 @@ public class WMXTag : TagHW
         else
         {
             if (upperName.Split('.').Length != 2)
-                throw new HWExceptionTag("WMXTag type [Device][Byte].[Bit] ex I12.4, M0.0");
+                throw new HWExceptionTag("XG5KTag type [Device][Byte].[Bit] ex I12.4, M0.0");
 
             byteBit = upperName.TrimStart('I').TrimStart('O').TrimStart('M');
         }

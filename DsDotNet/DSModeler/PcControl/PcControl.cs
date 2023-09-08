@@ -4,7 +4,7 @@ using Dual.Common.Core;
 using Dual.Common.Winform;
 using Engine.Core;
 using Server.HW.Common;
-using Server.HW.WMX3;
+using Server.HW.XG5K;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,7 +70,7 @@ public static class PcControl
             if (address.IsNullOrEmpty())
                 MBox.Error($"주소가 없습니다. {name}");
 
-            var tag = new WMXTag(Global.PaixDriver.Conn as WMXConnection, name);
+            var tag = new XG5KTag(Global.PaixDriver.Conn as XG5KConnection, name);
             tag.SetAddress(address);
             //tag.IOType = bInput ? TagIOType.Input : TagIOType.Output;
 
@@ -93,8 +93,8 @@ public static class PcControl
     {
         gDevice.Do(() =>
         {
-            var tags = DicActionIn.Keys.Cast<WMXTag>().ToList();
-            tags.AddRange(DicActionOut.Values.Cast<WMXTag>());
+            var tags = DicActionIn.Keys.Cast<XG5KTag>().ToList();
+            tags.AddRange(DicActionOut.Values.Cast<XG5KTag>());
             gDevice.Properties.DataSource = tags;
             gDevice.Properties.DisplayMember = "Name";
         });

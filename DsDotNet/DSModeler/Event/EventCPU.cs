@@ -1,6 +1,6 @@
 using Dual.Common.Core;
 using Server.HW.Common;
-using Server.HW.WMX3;
+using Server.HW.XG5K;
 using System;
 using System.Linq;
 using System.Reactive.Linq;
@@ -27,7 +27,7 @@ public static class EventCPU
                 DisposableHWPaixInput = Global.PaixDriver.Conn.Subject.OfType<TagValueChangedEvent>()
                 .Subscribe(evt =>
                 {
-                    var t = evt.Tag as WMXTag;
+                    var t = evt.Tag as XG5KTag;
                     if (t.IOType == TagIOType.Output)
                     {
                         Global.Logger.Debug($"HW_OUT {t.Address} value: {t.Value}");

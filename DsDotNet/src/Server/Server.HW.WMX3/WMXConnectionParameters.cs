@@ -1,11 +1,11 @@
 using Server.HW.Common;
 using System;
 
-namespace Server.HW.WMX3;
+namespace Server.HW.XG5K;
 
-public class WMXConnectionParameters : ConnectionParametersEtherCAT
+public class XG5KConnectionParameters : ConnectionParametersEtherCAT
 {
-    public WMXConnectionParameters(string ip, TimeSpan timeoutConnecting, TimeSpan timeoutScan)
+    public XG5KConnectionParameters(string ip, TimeSpan timeoutConnecting, TimeSpan timeoutScan)
     : base(ip, timeoutConnecting, timeoutScan)
     {
     }

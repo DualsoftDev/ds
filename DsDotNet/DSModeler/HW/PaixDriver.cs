@@ -1,6 +1,6 @@
 using Dual.Common.Core;
 using Server.HW.Common;
-using Server.HW.WMX3;
+using Server.HW.XG5K;
 using System;
 using System.Net;
 using System.Threading.Tasks;
@@ -26,8 +26,8 @@ namespace DSModeler
 
             if (PaixHW.WMX == paixHW)
             {
-                var connPara = new WMXConnectionParameters(Global.RunHWIP, TimeSpan.FromSeconds(2), TimeSpan.FromMilliseconds(50));
-                Conn = new WMXConnection(connPara, numIn, numOut);
+                var connPara = new XG5KConnectionParameters(Global.RunHWIP, TimeSpan.FromSeconds(2), TimeSpan.FromMilliseconds(50));
+                Conn = new XG5KConnection(connPara, numIn, numOut);
             }
             else if (PaixHW.NMC2 == paixHW) { /*...*/}
             else if (PaixHW.NMF == paixHW) { /*...*/}

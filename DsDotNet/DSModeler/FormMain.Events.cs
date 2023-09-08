@@ -5,7 +5,7 @@ using DSModeler.Tree;
 using Dual.Common.Core;
 using Dual.Common.Winform;
 using Engine.Core;
-using Server.HW.WMX3;
+using Server.HW.XG5K;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -124,8 +124,8 @@ namespace DSModeler
                     PcAction.CreateConnect();
             };
 
-            btn_ON.Click += (s, e) => PcAction.SetBit(gle_Device.EditValue as WMXTag, true);
-            btn_OFF.Click += (s, e) => PcAction.SetBit(gle_Device.EditValue as WMXTag, false);
+            btn_ON.Click += (s, e) => PcAction.SetBit(gle_Device.EditValue as XG5KTag, true);
+            btn_OFF.Click += (s, e) => PcAction.SetBit(gle_Device.EditValue as XG5KTag, false);
 
             Global.ChangeLogCount.Subscribe(rx =>
             {

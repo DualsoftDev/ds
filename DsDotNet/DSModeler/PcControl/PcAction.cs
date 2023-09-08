@@ -1,7 +1,7 @@
 using DevExpress.XtraBars.Navigation;
 using DSModeler.Tree;
 using Microsoft.AspNetCore.SignalR.Client;
-using Server.HW.WMX3;
+using Server.HW.XG5K;
 using System;
 using System.Linq;
 using System.Runtime.Versioning;
@@ -110,7 +110,7 @@ public static class PcAction
           );
     }
 
-    public static void SetBit(WMXTag tag, bool value)
+    public static void SetBit(XG5KTag tag, bool value)
     {
         if (RuntimeDS.Package.IsPackagePC())
             tag.WriteRequestValue = value;

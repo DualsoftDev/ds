@@ -1,23 +1,23 @@
 using LanguageExt.ClassInstances.Pred;
 using Server.HW.Common;
-using Server.HW.WMX3;
+using Server.HW.XG5K;
 using System;
 using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-internal class WMXChannelRequestExecutor : ChannelRequestExecutor
+internal class XG5KChannelRequestExecutor : ChannelRequestExecutor
 {
-    public WMXConnection WMXConnection { get { return (WMXConnection)Connection; } }
-    private Dictionary<int, WMXTag> _WMXInBitTags = new Dictionary<int, WMXTag>();
-    private Dictionary<int, WMXTag> _WMXOutBitTags = new Dictionary<int, WMXTag>();
-    private Dictionary<int, WMXTag> _LSMemoryBitTags = new Dictionary<int, WMXTag>();
+    public XG5KConnection XG5KConnection { get { return (XG5KConnection)Connection; } }
+    private Dictionary<int, XG5KTag> _XG5KInBitTags = new Dictionary<int, XG5KTag>();
+    private Dictionary<int, XG5KTag> _XG5KOutBitTags = new Dictionary<int, XG5KTag>();
+    private Dictionary<int, XG5KTag> _LSMemoryBitTags = new Dictionary<int, XG5KTag>();
 
-    public WMXChannelRequestExecutor(WMXConnection connection, IEnumerable<TagHW> tags)
+    public XG5KChannelRequestExecutor(XG5KConnection connection, IEnumerable<TagHW> tags)
         : base(connection, tags)
     {
-        var wmxTags = tags.Cast<WMXTag>().Where(w => w.DataType == TagDataType.Bool);
+        var wmxTags = tags.Cast<XG5KTag>().Where(w => w.DataType == TagDataType.Bool);
         wmxTags.ToList().ForEach(f =>
         {
             if (f.DataType == TagDataType.Bool)
@@ -27,11 +27,11 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
         });
         connection.ClearData();
 
-        _WMXInBitTags = wmxTags
+        _XG5KInBitTags = wmxTags
             .Where(w => w.IOType == TagIOType.Input)
             .ToDictionary(s => s.GetBitIndex(), s => s);
 
-        _WMXOutBitTags = wmxTags
+        _XG5KOutBitTags = wmxTags
             .Where(w => w.IOType == TagIOType.Output)
             .ToDictionary(s => s.GetBitIndex(), s => s);
         
@@ -51,32 +51,32 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
 
     public void excuteReadInputs()
     {
-        var inData = WMXConnection.InData;
+        var inData = XG5KConnection.InData;
         var oldData = inData.ToList().ToArray();
 
-        var ret =  WMXConnection.ConnLS.ReadBit('I');
+        var ret =  XG5KConnection.ConnLS.ReadBit('I');
 
         for (int i = 0; i < inData.Length; i++)
         {
             inData[i] = ret[i];
         }
      
-        //WMXConnection.WMX3Lib_Io.GetInBytes(0, inData.Length, ref inData);
+        //XG5KConnection.XG5KLib_Io.GetInBytes(0, inData.Length, ref inData);
 
         UpdateIO(inData, oldData, true);
     }
     public void excuteReadOutputs()
     {
-        var outData = WMXConnection.OutData;
+        var outData = XG5KConnection.OutData;
         var oldData = outData.ToList().ToArray();
 
-        WMXConnection.WMX3Lib_Io.GetOutBytes(0, outData.Length, ref outData);
+        //XG5KConnection.XG5KLib_Io.GetOutBytes(0, outData.Length, ref outData);
         UpdateIO(outData, oldData, false);
     }
 
     public void excuteWriteOutputs()
     {
-        var outputNMemory = _WMXOutBitTags.Values.ToList();
+        var outputNMemory = _XG5KOutBitTags.Values.ToList();
         outputNMemory.AddRange(_LSMemoryBitTags.Values);
 
         foreach (var outTag in outputNMemory)
@@ -86,11 +86,11 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
             {
                 outTag.Value = outTag.WriteRequestValue;
                 if (outTag.Address.StartsWith("%MX"))
-                    WMXConnection.ConnLS.WriteBit("M", outTag.GetBitIndex(), Convert.ToInt32(outTag.WriteRequestValue));
+                    XG5KConnection.ConnLS.WriteBit("M", outTag.GetBitIndex(), Convert.ToInt32(outTag.WriteRequestValue));
                 if (outTag.Address.StartsWith("%QX"))
-                    WMXConnection.ConnLS.WriteBit("Q", outTag.GetBitIndex(), Convert.ToInt32(outTag.WriteRequestValue));
+                    XG5KConnection.ConnLS.WriteBit("Q", outTag.GetBitIndex(), Convert.ToInt32(outTag.WriteRequestValue));
                 //else
-                //            WMXConnection.WMX3Lib_Io.SetOutBit(outTag.ByteOffset, outTag.BitOffset, Convert.ToByte(outTag.WriteRequestValue));
+                //            XG5KConnection.XG5KLib_Io.SetOutBit(outTag.ByteOffset, outTag.BitOffset, Convert.ToByte(outTag.WriteRequestValue));
             }
         }
     }
@@ -103,9 +103,9 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
                 continue;
 
             if (bInput)
-                WMXConnection.InData[iByte] = newData[iByte];
+                XG5KConnection.InData[iByte] = newData[iByte];
             else
-                WMXConnection.OutData[iByte] = newData[iByte];
+                XG5KConnection.OutData[iByte] = newData[iByte];
 
             var oldBits = new BitArray(new byte[] { oldData[iByte] });
             var newBits = new BitArray(new byte[] { newData[iByte] });
@@ -117,13 +117,13 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
                     var value = newBits[iBit];
                     if (bInput)
                     {
-                        if (_WMXInBitTags.ContainsKey(index))
-                            _WMXInBitTags[index].Value = value;
+                        if (_XG5KInBitTags.ContainsKey(index))
+                            _XG5KInBitTags[index].Value = value;
                     }
                     else
                     {
-                        if (_WMXOutBitTags.ContainsKey(index))
-                            _WMXOutBitTags[index].Value = value;
+                        if (_XG5KOutBitTags.ContainsKey(index))
+                            _XG5KOutBitTags[index].Value = value;
                     }
                 }
         }

@@ -42,6 +42,13 @@
 	<ItemGroup>
 	  <Folder Include="Obsolete\" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<AssemblyAttribute Include="System.CLSCompliantAttribute">
+			<_Parameter1>true</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
+
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<NoWarn>3021;1701;1702;NU1504;NU1505;NU1701</NoWarn>
 		<!-- NU1504 for vscode Ionide

@@ -100,6 +100,7 @@ namespace DSModeler
             this.ace_Model = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_System = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Device = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.ace_ExSystem = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_sim = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_SimRoot = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Play = new DevExpress.XtraBars.Navigation.AccordionControlElement();
@@ -125,6 +126,7 @@ namespace DSModeler
             this.ace_DocDiagram = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement6 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_ExportWebHMI = new DevExpress.XtraBars.Navigation.AccordionControlElement();
+            this.ace_ExportAppHMI = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.ace_Setting = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement3 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             this.accordionControlElement1 = new DevExpress.XtraBars.Navigation.AccordionControlElement();
@@ -328,7 +330,7 @@ namespace DSModeler
             this.dockPanel1.Location = new System.Drawing.Point(0, 0);
             this.dockPanel1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.dockPanel1.Name = "dockPanel1";
-            this.dockPanel1.OriginalSize = new System.Drawing.Size(205, 404);
+            this.dockPanel1.OriginalSize = new System.Drawing.Size(205, 405);
             this.dockPanel1.Size = new System.Drawing.Size(205, 404);
             this.dockPanel1.Text = "Property";
             // 
@@ -897,7 +899,8 @@ namespace DSModeler
             this.ace_Model.Appearance.Default.Options.UseFont = true;
             this.ace_Model.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
             this.ace_System,
-            this.ace_Device});
+            this.ace_Device,
+            this.ace_ExSystem});
             this.ace_Model.Expanded = true;
             this.ace_Model.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_Model.ImageOptions.SvgImage")));
             this.ace_Model.Name = "ace_Model";
@@ -915,6 +918,12 @@ namespace DSModeler
             this.ace_Device.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_Device.ImageOptions.SvgImage")));
             this.ace_Device.Name = "ace_Device";
             this.ace_Device.Text = "디바이스";
+            // 
+            // ace_ExSystem
+            // 
+            this.ace_ExSystem.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_ExSystem.ImageOptions.SvgImage")));
+            this.ace_ExSystem.Name = "ace_ExSystem";
+            this.ace_ExSystem.Text = "외부시스템";
             // 
             // ace_sim
             // 
@@ -1164,7 +1173,8 @@ namespace DSModeler
             // accordionControlElement6
             // 
             this.accordionControlElement6.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] {
-            this.ace_ExportWebHMI});
+            this.ace_ExportWebHMI,
+            this.ace_ExportAppHMI});
             this.accordionControlElement6.Expanded = true;
             this.accordionControlElement6.Name = "accordionControlElement6";
             this.accordionControlElement6.Text = "HMI";
@@ -1176,6 +1186,14 @@ namespace DSModeler
             this.ace_ExportWebHMI.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
             this.ace_ExportWebHMI.Text = "Web HMI";
             this.ace_ExportWebHMI.Click += new System.EventHandler(this.ace_ExportWebHMI_Click);
+            // 
+            // ace_ExportAppHMI
+            // 
+            this.ace_ExportAppHMI.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace_ExportAppHMI.ImageOptions.SvgImage")));
+            this.ace_ExportAppHMI.Name = "ace_ExportAppHMI";
+            this.ace_ExportAppHMI.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
+            this.ace_ExportAppHMI.Text = "App HMI";
+            this.ace_ExportAppHMI.Click += new System.EventHandler(this.ace_ExportAppHMI_Click);
             // 
             // ace_Setting
             // 
@@ -1194,7 +1212,6 @@ namespace DSModeler
             // accordionControlElement3
             // 
             this.accordionControlElement3.ContentContainer = this.accordionContentContainer3;
-            this.accordionControlElement3.Expanded = true;
             this.accordionControlElement3.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement3.ImageOptions.SvgImage")));
             this.accordionControlElement3.Name = "accordionControlElement3";
             this.accordionControlElement3.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
@@ -1203,6 +1220,7 @@ namespace DSModeler
             // accordionControlElement1
             // 
             this.accordionControlElement1.ContentContainer = this.accordionContentContainer1;
+            this.accordionControlElement1.Expanded = true;
             this.accordionControlElement1.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement1.ImageOptions.SvgImage")));
             this.accordionControlElement1.Name = "accordionControlElement1";
             this.accordionControlElement1.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
@@ -1211,6 +1229,7 @@ namespace DSModeler
             // accordionControlElement4
             // 
             this.accordionControlElement4.ContentContainer = this.accordionContentContainer5;
+            this.accordionControlElement4.Expanded = true;
             this.accordionControlElement4.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("accordionControlElement4.ImageOptions.SvgImage")));
             this.accordionControlElement4.Name = "accordionControlElement4";
             this.accordionControlElement4.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
@@ -1219,7 +1238,6 @@ namespace DSModeler
             // ace9
             // 
             this.ace9.ContentContainer = this.accordionContentContainer2;
-            this.ace9.Expanded = true;
             this.ace9.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("ace9.ImageOptions.SvgImage")));
             this.ace9.Name = "ace9";
             this.ace9.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
@@ -1414,5 +1432,7 @@ namespace DSModeler
         private DevExpress.XtraEditors.SimpleButton simpleButton_ClearLog;
         private DevExpress.XtraEditors.SimpleButton simpleButton_AllExpr;
         private DevExpress.XtraEditors.SimpleButton simpleButton_ExportDStoFile;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement ace_ExSystem;
+        private DevExpress.XtraBars.Navigation.AccordionControlElement ace_ExportAppHMI;
     }
 }

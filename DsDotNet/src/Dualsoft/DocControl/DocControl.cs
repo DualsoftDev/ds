@@ -5,10 +5,11 @@ using DSModeler.Form;
 using Dual.Common.Winform;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Runtime.Versioning;
 using static Engine.Core.CoreModule;
 using static Engine.Core.RuntimeGeneratorModule;
-using static Model.Import.Office.ViewModule;
+using static Engine.Import.Office.ViewModule;
 
 namespace DSModeler
 {
@@ -57,9 +58,8 @@ namespace DSModeler
             string docKey = K.DocDS;
 
             FormDocText formChiild = new FormDocText();
-            CreateDocForm(formChiild, formParent, tab, docKey);
-
-            DSFile.DrawDSText(formChiild);
+            FormDocText form = CreateDocForm(formChiild, formParent, tab, docKey) as FormDocText;
+            DSFile.DrawDSText(form);
         }
 
         public static FormDocText CreateDocExprOrSelect(FormMain formParent, TabbedView tab)
@@ -98,12 +98,18 @@ namespace DSModeler
             var fullpath = PLC.Export();
             string docKey = K.DocPLC;
 
-            //Storages 연결이슈로  새로 준비 
-            formParent.ImportPowerPointWapper(Files.GetLast());
-
-            FormDocText formChiild = new FormDocText();
-            CreateDocForm(formChiild, formParent, tab, docKey);
-            formChiild.TextEdit.Text = File.ReadAllText(fullpath);
+            Task.Run(async () =>
+            {
+                //Storages 연결이슈로  새로 준비 
+               await formParent.ImportPowerPointWapper(Files.GetLast());
+                await formParent.DoAsync(tsc =>
+                {
+                    FormDocText formChiild = new FormDocText();
+                    CreateDocForm(formChiild, formParent, tab, docKey);
+                    formChiild.TextEdit.Text = File.ReadAllText(fullpath);
+                    tsc.SetResult(true);
+                });
+            });
         }
 
 

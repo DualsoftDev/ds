@@ -1,0 +1,14 @@
+[sys ip = localhost] Weld = {
+    [flow] Page1 = {
+    }
+    [flow] Flow = {
+    }
+    [interfaces] = {
+        RESET = { _ ~ _ }
+        HOME = { _ ~ _ }
+        WELD = { _ ~ _ }
+        RESET <||> HOME;
+        WELD <||> RESET;
+        WELD <||> HOME;
+    }
+}

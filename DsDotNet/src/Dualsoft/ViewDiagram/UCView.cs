@@ -1,4 +1,5 @@
 using Dual.Common.Core;
+using Dual.Common.Winform;
 using Engine.Core;
 using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;
@@ -9,11 +10,12 @@ using System.Windows.Forms;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsText;
 using static Engine.Core.DsType;
-using static Model.Import.Office.InterfaceClass;
-using static Model.Import.Office.PPTDummyModule;
-using static Model.Import.Office.ViewModule;
+using static Engine.Import.Office.InterfaceClass;
+using static Engine.Import.Office.PPTDummyModule;
+using static Engine.Import.Office.ViewModule;
 using Color = Microsoft.Msagl.Drawing.Color;
 using Edge = Microsoft.Msagl.Drawing.Edge;
+using Style = Microsoft.Msagl.Drawing.Style;
 using Vertex = Engine.Core.CoreModule.Vertex;
 
 
@@ -309,12 +311,11 @@ namespace DSModeler
 
         public void RefreshGraph()
         {
-            viewer.Refresh();
-            //viewer.Do(() => viewer.Refresh());
+            viewer.Do(() => viewer.Refresh());
         }
         private Node findNode(ViewNode viewNode)
         {
-            Node node =  viewer.Graph.FindNode(viewNode.UIKey);
+            Node node = viewer.Graph.FindNode(viewNode.UIKey);
             if (node == null)
             {
                 if (viewer.Graph.SubgraphMap.ContainsKey(viewNode.UIKey))
@@ -336,18 +337,18 @@ namespace DSModeler
             }
         }
 
-     
+
         public void UpdateStatus(ViewNode viewNode)
         {
             Node node = findNode(viewNode);
             if (node != null)
             {
-                    UpdateLineColor(viewNode.Status4, node);
+                UpdateLineColor(viewNode.Status4, node);
                 RefreshGraph();
             }
         }
 
-        private  void UpdateFontColor(Status4 newStatus, Node node)
+        private void UpdateFontColor(Status4 newStatus, Node node)
         {
             if (newStatus == Status4.Ready) node.Label.FontColor = Color.DarkGreen;
             else if (newStatus == Status4.Going) node.Label.FontColor = Color.DarkKhaki;
@@ -355,7 +356,7 @@ namespace DSModeler
             else if (newStatus == Status4.Homing) node.Label.FontColor = Color.Black;
         }
 
-        private  void UpdateLineColor(Status4 newStatus, Node node)
+        private void UpdateLineColor(Status4 newStatus, Node node)
         {
             if (newStatus == Status4.Ready) node.Attr.Color = Color.DarkOliveGreen;
             else if (newStatus == Status4.Going) node.Attr.Color = Color.DarkGoldenrod;
@@ -386,6 +387,6 @@ namespace DSModeler
             return gColor;
         }
 
-    
+
     }
 }

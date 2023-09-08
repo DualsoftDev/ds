@@ -49,7 +49,7 @@ module CoreExtensionsModule =
     type ExpressionExt =
         [<Extension>] static member ChangedTags (xs:IStorage seq) = 
                         xs |> Seq.where(fun w -> w.TagChanged)
-                           |> Seq.toList   //list 아니면 TagChanged 정보 없는 초기화 이후 정보 가져오더라도 항목 유지
+                           |> Seq.toArray   //list 아니면 TagChanged 정보 없는 초기화 이후 정보 가져오더라도 항목 유지
 
         [<Extension>] static member ChangedTagsClear (xs:IStorage seq, systems:DsSystem seq) = 
                         xs |> Seq.where(fun w ->  systems.any(fun s-> s:>ISystem = w.DsSystem))//자신 시스템에서만 TagChanged  <- false 가능

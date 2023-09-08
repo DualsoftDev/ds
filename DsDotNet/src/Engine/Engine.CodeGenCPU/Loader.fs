@@ -9,6 +9,40 @@ open System.Collections.Generic
 [<AutoOpen>]
 module CpuLoader =
 
+
+
+    //프로그램 내려가는 그룹
+    type PouGen =
+    | ActivePou    of DsSystem * CommentedStatement list
+    | DevicePou    of Device * CommentedStatement list
+    | ExternalPou  of ExternalSystem * CommentedStatement list
+        member x.ToSystem() =
+            match x with
+            | ActivePou    (s, _p) -> s
+            | DevicePou    (d, _p) -> d.ReferenceSystem
+            | ExternalPou  (e, _p) -> e.ReferenceSystem
+
+        member x.ToExternalSystem() =
+            match x with
+            | ActivePou    (_, _p) -> None
+            | DevicePou    (_, _p) -> None 
+            | ExternalPou  (e, _p) -> Some e
+
+        member x.CommentedStatements() =
+            match x with
+            | ActivePou    (_s, p) -> p
+            | DevicePou    (_d, p) -> p
+            | ExternalPou  (_e, p) -> p
+        member x.TaskName() =
+            match x with
+            | ActivePou   _ -> "Active"
+            | DevicePou   _ -> "Devices"
+            | ExternalPou _ -> "ExternalCpu"
+        member x.IsActive   = match x with | ActivePou   _ -> true | _ -> false
+        member x.IsDevice   = match x with | DevicePou   _ -> true | _ -> false
+        member x.IsExternal = match x with | ExternalPou _ -> true | _ -> false
+
+
     let checkCausalModel(system:DsSystem) =
         //root Edge target에 Call/AliasCall 허용 금지(Real로 반드시 부모설정후 인과처리)
         let rootEdges  = system.Flows.Collect(fun f->f.Graph.Edges)
@@ -34,8 +68,11 @@ module CpuLoader =
 
             |_ -> failwithlog $"Error {getFuncName()}"
 
+
+
     let applyTagManager(system:DsSystem, storages:Storages) =
         let createTagM (sys:DsSystem) =
+            tracefn($"createTagM System: {sys.Name}")
             RuntimeDS.System <- sys
 
             sys.TagManager <- SystemManager(sys, storages)
@@ -49,39 +86,11 @@ module CpuLoader =
                     -> v.TagManager <-  VertexMCoin(v)
                 | _ -> failwithlog (getFuncName()))
 
-        let rec tagManagerBuild(sys:DsSystem)  =
-            createTagM (sys)
-            sys.LoadedSystems
-                  .Iter(fun s->  tagManagerBuild (s.ReferenceSystem))
-
-        tagManagerBuild (system)
-
-
-
-    //프로그램 내려가는 그룹
-    type PouGen =
-    | ActivePou    of DsSystem * CommentedStatement list
-    | DevicePou    of Device * CommentedStatement list
-    | ExternalPou  of ExternalSystem * CommentedStatement list
-        member x.ToSystem() =
-            match x with
-            | ActivePou    (s, _p) -> s
-            | DevicePou    (d, _p) -> d.ReferenceSystem
-            | ExternalPou  (e, _p) -> e.ReferenceSystem
-        member x.CommentedStatements() =
-            match x with
-            | ActivePou    (_s, p) -> p
-            | DevicePou    (_d, p) -> p
-            | ExternalPou  (_e, p) -> p
-        member x.TaskName() =
-            match x with
-            | ActivePou   _ -> "Active"
-            | DevicePou   _ -> "Devices"
-            | ExternalPou _ -> "ExternalCpu"
-        member x.IsActive   = match x with | ActivePou   _ -> true | _ -> false
-        member x.IsDevice   = match x with | DevicePou   _ -> true | _ -> false
-        member x.IsExternal = match x with | ExternalPou _ -> true | _ -> false
-
+        createTagM system
+        system.GetRecursiveLoadedSystems()
+              .Distinct()
+              .Iter(createTagM)
+             
 
 
     [<Extension>]
@@ -92,9 +101,10 @@ module CpuLoader =
             applyTagManager (system, storages)
             let result =
                 //자신(Acitve)이 Loading 한 system을 재귀적으로 한번에 가져와 CPU 변환
-                system.GetRecursiveLoadeds()
-                |>Seq.map(fun s->
-                    match s  with
+                system.GetRecursiveLoadeds() 
+                |> Seq.distinctBy(fun f->f.ReferenceSystem)
+                |> Seq.map(fun s ->
+                    match s with
                     | :? Device as d         -> DevicePou   (d, convertSystem(d.ReferenceSystem, false))
                     | :? ExternalSystem as e -> ExternalPou (e, convertSystem(e.ReferenceSystem, false))
                     | _ -> failwithlog (getFuncName())

@@ -10,7 +10,7 @@ open Dual.Common.Core.FS
 open Engine.CodeGenCPU
 open PLC.CodeGen.LSXGI
 open System
-open Model.Import.Office
+open Engine.Import.Office
 
 type TestAllCase() =
     inherit EngineTestBaseClass()

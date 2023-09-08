@@ -6,7 +6,7 @@ open Engine.Core
 open Dual.Common.Core.FS
 open NUnit.Framework
 open Engine.Parser.FS
-open Model.Import.Office
+open Engine.Import.Office
 
 
 [<AutoOpen>]
@@ -17,7 +17,7 @@ module pptTestModule =
         let systemRepo = ShareableSystemRepository()
         model.Systems.ForEach(fun system->
             let dsText =  system.ToDsText(true)
-            let libdir = @$"{__SOURCE_DIRECTORY__}\..\..\UnitTest.Model\ImportOfficeExample\Sample\"
+            let libdir = @$"{__SOURCE_DIRECTORY__}\..\..\UnitTest.Model\ImportOfficeExample\ppt\"
             let helper = ModelParser.ParseFromString2(dsText, ParserOptions.Create4Runtime(systemRepo, libdir, "localhost", None, DuNone))
             let reGenerated = helper.TheSystem.ToDsText(true)
             reGenerated.Length =!= 0 //파싱 확인만 text 비교는 순서바뀌어서 불가능

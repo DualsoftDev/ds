@@ -1,12 +1,10 @@
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Grid;
-using Dual.Common.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Versioning;
 using static Engine.Core.TagKindModule;
-using static Engine.Core.TagKindModule.TagDS;
 
 namespace DSModeler
 {
@@ -53,7 +51,7 @@ namespace DSModeler
         }
     }
 
-   
+
 
     public class ValueLog
     {

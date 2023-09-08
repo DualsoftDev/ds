@@ -1,3 +1,4 @@
+using LanguageExt.ClassInstances.Pred;
 using Server.HW.Common;
 using Server.HW.WMX3;
 using System;
@@ -11,6 +12,7 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
     public WMXConnection WMXConnection { get { return (WMXConnection)Connection; } }
     private Dictionary<int, WMXTag> _WMXInBitTags = new Dictionary<int, WMXTag>();
     private Dictionary<int, WMXTag> _WMXOutBitTags = new Dictionary<int, WMXTag>();
+    private Dictionary<int, WMXTag> _LSMemoryBitTags = new Dictionary<int, WMXTag>();
 
     public WMXChannelRequestExecutor(WMXConnection connection, IEnumerable<TagHW> tags)
         : base(connection, tags)
@@ -32,13 +34,17 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
         _WMXOutBitTags = wmxTags
             .Where(w => w.IOType == TagIOType.Output)
             .ToDictionary(s => s.GetBitIndex(), s => s);
+        
+        _LSMemoryBitTags = wmxTags
+             .Where(w => w.IOType == TagIOType.Memory)
+             .ToDictionary(s => s.GetBitIndex(), s => s);
     }
 
 
     public override bool ExecuteRead()
     {
         excuteReadInputs();
-        excuteReadOutputs();
+        //excuteReadOutputs();
         excuteWriteOutputs();
         return true;
     }
@@ -48,7 +54,15 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
         var inData = WMXConnection.InData;
         var oldData = inData.ToList().ToArray();
 
-        WMXConnection.WMX3Lib_Io.GetInBytes(0, inData.Length, ref inData);
+        var ret =  WMXConnection.ConnLS.ReadBit('I');
+
+        for (int i = 0; i < inData.Length; i++)
+        {
+            inData[i] = ret[i];
+        }
+     
+        //WMXConnection.WMX3Lib_Io.GetInBytes(0, inData.Length, ref inData);
+
         UpdateIO(inData, oldData, true);
     }
     public void excuteReadOutputs()
@@ -62,17 +76,24 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
 
     public void excuteWriteOutputs()
     {
-        foreach (var outTag in _WMXOutBitTags.Values)
+        var outputNMemory = _WMXOutBitTags.Values.ToList();
+        outputNMemory.AddRange(_LSMemoryBitTags.Values);
+
+        foreach (var outTag in outputNMemory)
         {
+            if (outTag.WriteRequestValue == null) continue;
             if (outTag.Value != outTag.WriteRequestValue)
             {
                 outTag.Value = outTag.WriteRequestValue;
-                WMXConnection.WMX3Lib_Io.SetOutBit(outTag.ByteOffset, outTag.BitOffset, Convert.ToByte(outTag.Value));
+                if (outTag.Address.StartsWith("%MX"))
+                    WMXConnection.ConnLS.WriteBit("M", outTag.GetBitIndex(), Convert.ToInt32(outTag.WriteRequestValue));
+                if (outTag.Address.StartsWith("%QX"))
+                    WMXConnection.ConnLS.WriteBit("Q", outTag.GetBitIndex(), Convert.ToInt32(outTag.WriteRequestValue));
+                //else
+                //            WMXConnection.WMX3Lib_Io.SetOutBit(outTag.ByteOffset, outTag.BitOffset, Convert.ToByte(outTag.WriteRequestValue));
             }
         }
     }
-
-
 
     private void UpdateIO(byte[] newData, byte[] oldData, bool bInput)
     {

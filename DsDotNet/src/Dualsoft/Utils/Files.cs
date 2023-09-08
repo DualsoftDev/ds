@@ -25,13 +25,16 @@ public static class Files
         return recents.ToArray();
     }
 
-    public static string GetNewFileName(string path)
-    {
-        var directory = Path.GetDirectoryName(path);
-
-        var newDirectory = directory + $"_{DateTime.Now:yyMMdd_HH_mm_ss}";
-        Directory.CreateDirectory(newDirectory);
-
-        return Path.Combine(newDirectory, Path.GetFileName(path));
+        public static string GetNewFileName(string path, string type, bool fileNameTimeMarking = false)
+        {
+            var directory = Path.GetDirectoryName(path);
+            var fileName = Path.GetFileNameWithoutExtension(path);
+            var fileExtension = Path.GetExtension(path);
+            var dt = $"{DateTime.Now:yyMMdd_HH_mm_ss}";
+            var newDirectory = $"{directory}\\{fileName}_{type}_autogen_{dt}";
+            Directory.CreateDirectory(newDirectory);
+            var flieNamePost = fileNameTimeMarking ? $"{fileName}_{dt}" : fileName;
+            return Path.Combine(newDirectory, $"{flieNamePost}.{fileExtension}");
+        }
     }
 }

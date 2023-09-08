@@ -8,6 +8,8 @@ open System
 
 [<AutoOpen>]
 module ConvertCoreExt =
+    
+
 
 
 
@@ -15,6 +17,8 @@ module ConvertCoreExt =
     let hasCount(xs:Func seq) = xs.Any(fun f->f.Name = TextRingCounter)
     let hasMove (xs:Func seq) = xs.Any(fun f->f.Name = TextMove)
     let hasNot  (xs:Func seq) = xs.Any(fun f->f.Name = TextNot )
+
+
 
     let getVM(v:Vertex)     = v.TagManager :?> VertexManager
     let getVMReal(v:Vertex) = v.TagManager :?> VertexMReal
@@ -249,26 +253,53 @@ module ConvertCoreExt =
                 ]
             writeAble |> map (getFM(f).GetFlowTag)
 
+    type TaskDev with
+        member td.ActionIN  = 
+                            if hasNot td.Funcs 
+                            then !!(td.InTag  :?> Tag<bool>).Expr 
+                            else (td.InTag  :?> Tag<bool>).Expr
+
+        member td.ActionOut = td.OutTag :?> Tag<bool>
+        member td.RXTags       = td.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.EP)
+        member td.TXTags       = td.ApiItem.TXs |> Seq.map getVMReal |> Seq.map(fun f->f.SP)
+
+        member td.MutualResets(x:DsSystem) =
+            td.ApiItem.System.GetMutualResetApis(td.ApiItem)
+                .SelectMany(fun a -> x.DeviceDefs.Where(fun w-> w.ApiItem = a))
+
     type CallDev with
         member c.UsingTon  = c.CallTargetJob.Funcs |> hasTime
         member c.UsingCtr  = c.CallTargetJob.Funcs |> hasCount
         member c.UsingNot  = c.CallTargetJob.Funcs |> hasNot
         member c.UsingMove = c.CallTargetJob.Funcs |> hasMove
-
+        member c._on     = c.System._on
+        member c._off     = c.System._off
+    
+        
         member c.PresetTime =   if c.UsingTon
                                 then c.CallTargetJob.Funcs.First(fun f->f.Name = TextOnDelayTimer).GetDelayTime()
-                                else failwith $"{c.Name} not use timer"
+                                else failwith $"{c.Name} not use timer" 
 
         member c.PresetCounter = if c.UsingCtr
                                  then c.CallTargetJob.Funcs.First(fun f->f.Name = TextRingCounter).GetRingCount()
                                  else failwith $"{c.Name} not use counter"
-
-        member c.INs           = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionIN)
-        member c.OUTs          = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun j -> j.ActionOut)
+                                 //LinkDefs todo 구현 필요
+        //member c.INs           = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionIN)
         
         member c.PSs          = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PS )
         member c.PEs          = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PE )
         
+      
+        //개별 부정의 AND  <안전하게 전부 확인>
+        member c.INsFuns  =   
+                            //let ins = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionIN)
+                            //if ins.any() then !!ins.ToOr() else c._on.Expr
+                            let ins = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionIN)
+                            if  c.UsingNot
+                                  //개별 부정의 AND  <안전하게 전부 확인>
+                                  then if ins.any() then !!ins.ToOr() else c._on.Expr
+                                  else if ins.any() then ins.ToAnd()  else c._on.Expr
+
         member c.MutualResets =
             c.CallTargetJob.DeviceDefs
                 .SelectMany(fun j -> j.ApiItem.System.GetMutualResetApis(j.ApiItem))
@@ -289,15 +320,6 @@ module ConvertCoreExt =
         member r._off = r.Parent.GetSystem()._off
 
 
-    type TaskDev with
-        member td.ActionIN  = td.InTag  :?> Tag<bool>
-        member td.ActionOut = td.OutTag :?> Tag<bool>
-        member td.RXTags       = td.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.EP)
-        member td.TXTags       = td.ApiItem.TXs |> Seq.map getVMReal |> Seq.map(fun f->f.SP)
-
-        member td.MutualResets(x:DsSystem) =
-            td.ApiItem.System.GetMutualResetApis(td.ApiItem)
-                .SelectMany(fun a -> x.DeviceDefs.Where(fun w-> w.ApiItem = a))
 
     [<AutoOpen>]
     [<Extension>]

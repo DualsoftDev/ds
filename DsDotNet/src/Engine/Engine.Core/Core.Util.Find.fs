@@ -65,7 +65,8 @@ module internal ModelFindModule =
     let tryFindJob (system:DsSystem) name            = system.Jobs.TryFind(nameEq name)
 
     let tryFindExternalSystem (system:DsSystem) name   = system.ExternalSystems.TryFind(nameEq name)
-    let tryFindLoadedSystem (system:DsSystem) name   = system.LoadedSystems.TryFind(nameEq name)
+    let tryFindLoadedSystem (system:DsSystem) name   = 
+                     system.LoadedSystems.TryFind(fun s->s.LoadedName = name)
     let tryFindReferenceSystem (system:DsSystem) name   =
                      system.LoadedSystems.Select(fun s->s.ReferenceSystem).TryFind(nameEq name)
 

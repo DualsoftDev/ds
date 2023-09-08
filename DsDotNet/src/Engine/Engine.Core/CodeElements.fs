@@ -41,6 +41,7 @@ module CodeElements =
                 genTargetText name varType initValue
 
     let getFunctions (text:string) =
+        let text = text.Trim()
         if not <| text.StartsWith "$"
         then failwith "function text start keyword is '$' ex)$m 100 R100"
         text.Split('$')
@@ -85,6 +86,7 @@ module CodeElements =
                         let preset   = Regex.Replace(presetTime, @"\D", "");//숫자 추출
 
                         match timetype with
+                        | ""  //단위 없으면 msec
                         | "ms"| "msec"-> preset|> CountUnitType.Parse
                         | "s" | "sec" -> let presetMsec = ((preset |> Convert.ToInt32) * 1000)
                                          presetMsec.ToString() |> CountUnitType.Parse

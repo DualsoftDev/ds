@@ -19,13 +19,13 @@ namespace DSModeler
         public ModelLoaderModule.Model Model;
 
         public PropertyGridControl PropertyGrid => ucPropertyGrid1.PropertyGrid;
-
         public TabbedView TabbedView => tabbedView_Doc;
         public AccordionControlElement Ace_Model => ace_Model;
-        public AccordionControlElement Ace_Play=> ace_Play;
+        public AccordionControlElement Ace_Play => ace_Play;
         public AccordionControlElement Ace_System => ace_System;
         public AccordionControlElement Ace_Device => ace_Device;
         public AccordionControlElement Ace_HMI => ace_HMI;
+        public AccordionControlElement Ace_ExSystem => ace_ExSystem;
         public BarStaticItem LogCountText => barStaticItem_logCnt;
 
         public HubConnection connection;
@@ -94,17 +94,35 @@ namespace DSModeler
         private void ratingControl_Speed_EditValueChanged(object s, EventArgs e) => ControlProperty.SetSpeed(Convert.ToInt32(ratingControl_Speed.EditValue));
         private void simpleButton_OpenPLC_Click(object s, EventArgs e) => PLC.OpenPLCFolder();
         private void ace_ExportExcel_Click(object s, EventArgs e) => XLS.ExportExcel(gridControl_exprotExcel);
-        private void ace_ImportPPT_Click(object s, EventArgs e) => ImportPowerPointWapper(null);
-        private void ace_pptReload_Click(object sender, EventArgs e) => ImportPowerPointWapper(Files.GetLast());
+        private  async void ace_ImportPPT_Click(object s, EventArgs e) =>await  ImportPowerPointWapper(null);
+        private  async void ace_pptReload_Click(object sender, EventArgs e) => await ImportPowerPointWapper(Files.GetLast());
         private void simpleButton_layoutReset_Click(object s, EventArgs e) => LayoutForm.RestoreLayoutFromXml(dockManager);
         private void ace_ImportXls_Click(object sender, EventArgs e) => Global.Notimplemented();
         private void ace_pcLinux_Click(object sender, EventArgs e) => Global.Notimplemented();
         private void ace_DocDiagram_Click(object sender, EventArgs e) => Global.Notimplemented();
         private void ace_PLCLogix5000_Click(object sender, EventArgs e) => Global.Notimplemented();
-        private void ace_PLCWork3_Click(object sender, EventArgs e) => Global.Notimplemented();
-        private void ace_ExportWebHMI_Click(object sender, EventArgs e) => Task.Run(() => HMI.ExportAsync(this));
+        private void ace_PLCWork3_Click(object sender, EventArgs e) =>  Global.Notimplemented();
+    
+        private void ace_ExportWebHMI_Click(object sender, EventArgs e)
+        {
+            if (!Global.IsLoadedPPT()) return;
+            HMI.Export();
+        }
         private void simpleButton_ClearLog_Click(object sender, EventArgs e) => LogicLog.ValueLogs.Clear();
         private void simpleButton_AllExpr_Click(object sender, EventArgs e) => DSFile.UpdateExprAll(this, toggleSwitch_showDeviceExpr.IsOn);
-        private void simpleButton_ExportDStoFile_Click(object sender, EventArgs e) => DSFile.ZipDSFolder();
+        private void simpleButton_ExportDStoFile_Click(object sender, EventArgs e) => DSFile.OpenDSFolder();
+
+        private void ace_ExportAppHMI_Click(object sender, EventArgs e)
+        {
+            foreach (System.Windows.Forms.Form frm in Application.OpenForms)
+            {
+                if (frm.Name == "HMIForm")
+                {
+                    frm.Activate();
+                    return;
+                }
+            }
+            (new HMIForm(Global.ActiveSys)).Show();
+        }
     }
 }

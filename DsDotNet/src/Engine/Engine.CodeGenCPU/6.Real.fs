@@ -28,12 +28,27 @@ type VertexMReal with
 
         (set, rst) ==| (v.ET, getFuncName())
 
+
+    //member v.R2_1_GoingRelayGroup(): CommentedStatement  =
+    //    //let real = v.Vertex :?> Real
+    //    //let planSets = v.System.GetPSs(real).ToOrElseOff(v.System)
+
+    //    let goingRelays = getResetWeakEdgeTargets(v).GetResetResults(v)
+    //    let set = goingRelays.ToAndElseOn(v.System) <||> v.SF.Expr///  <||> planSets
+    //    let rst = if goingRelays.any() 
+    //              then v.ET.Expr  <&&> !!goingRelays.ToOr()
+    //              else v._off.Expr
+
+    //    (set, rst) ==| (v.GG, getFuncName())
+
     member v.R2_1_GoingRelayGroup(): CommentedStatement  =
         //let real = v.Vertex :?> Real
         //let planSets = v.System.GetPSs(real).ToOrElseOff(v.System)
 
+        let goingRelayTargetReadys = getResetWeakEdgeTargets(v).Select(fun r->r.V.R)
         let goingRelays = getResetWeakEdgeTargets(v).GetResetResults(v)
-        let set = goingRelays.ToAndElseOn(v.System) <||> v.SF.Expr///  <||> planSets
+        let set = goingRelays.ToAndElseOn(v.System) <&&> goingRelayTargetReadys.ToAndElseOn(v.System)
+                  <||> v.SF.Expr///  <||> planSets
         let rst = if goingRelays.any() 
                   then v.ET.Expr  <&&> !!goingRelays.ToOr()
                   else v._off.Expr

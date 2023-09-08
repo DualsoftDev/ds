@@ -19,7 +19,7 @@ module CoreModule =
             member _.NameComponents = nameComponents
             member x.QualifiedName = nameComponents.Combine() }
 
-    type ParserLoadingType = DuNone | DuDevice | DuExternal
+    type ParserLoadingType = DuNone | DuDevice | DuExternal 
     /// External system loading 시, 공유하기 위한 정보를 담을 곳
     type ShareableSystemRepository = Dictionary<string, DsSystem>
 
@@ -39,17 +39,19 @@ module CoreModule =
     [<AbstractClass>]
     type LoadedSystem(loadedSystem:DsSystem, param:DeviceLoadParameters)  =
         inherit FqdnObject(param.LoadedName, param.ContainerSystem)
+        let mutable loadedName = param.LoadedName //로딩 주체에따라 Runtime에 변경
         interface ISystem 
+        member _.LoadedName with get() = loadedName and set(value) = loadedName <- value
+        
         /// 다른 device 을 Loading 하려는 system 입장에서 loading 된 system 참조 용
         member _.ReferenceSystem = loadedSystem
-
         /// Loading 된 system 입장에 자신을 포함하는 container system
         member _.ContainerSystem = param.ContainerSystem
         /// Loading 을 위해서 사용자가 지정한 file path.  serialize 시, 절대 path 를 사용하지 않기 위한 용도로 사용된다.
         member _.UserSpecifiedFilePath:string = param.UserSpecifiedFilePath
         member _.AbsoluteFilePath:string = param.AbsoluteFilePath
-        member _.LoadedName:string = param.LoadedName
-        member _.OriginName:string = loadedSystem.Name
+        member _.LoadingType:ParserLoadingType = param.LoadingType
+
 
     /// *.ds file 을 읽어 들여서 새로운 instance 를 만들어 넣기 위한 구조
    
@@ -237,9 +239,13 @@ module CoreModule =
     /// Job 정의: CallDev 이 호출하는 Job 항목
     type Job (name:string, tasks:DsTask list) =
         inherit Named(name)
+        let mutable funcs = HashSet<Func>()
         member x.DeviceDefs = tasks.OfType<TaskDev>()
         member x.LinkDefs   = tasks.OfType<TaskSys>()
-        member val Funcs  = HashSet<Func>() with get, set
+        member x.SetFuncs(func) = 
+                    tasks.Iter(fun t->t.Funcs <- func) 
+                    funcs <- func
+        member x.Funcs = funcs.ToArray() //일괄 셋팅만 가능 append 불가
 
     type TagAddress = string
     [<AbstractClass>]
@@ -249,6 +255,7 @@ module CoreModule =
         member _.ApiItem = api
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
         member val ApiName = this.QualifiedName
+        member val Funcs  = HashSet<Func>() with get, set
 
     /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { FWD = Mt.fwd; }
     type TaskSys (api:ApiItem, systemName:string) =

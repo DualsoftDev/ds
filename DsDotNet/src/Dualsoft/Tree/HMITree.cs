@@ -1,53 +1,53 @@
 using DevExpress.XtraBars.Navigation;
 using Dual.Common.Core;
 using Dual.Common.Winform;
-using Model.Import.Office;
+using Engine.Import.Office;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.Core.CoreModule;
-using static Model.Import.Office.ImportPPTModule;
+using static Engine.Import.Office.ViewModule;
 
-namespace DSModeler.Tree;
-[SupportedOSPlatform("windows")]
-public static class HMITree
+namespace DSModeler.Tree
 {
-    static readonly Color startColor = Color.Green;
-    static readonly Color resetColor = Color.Red;
-    static readonly string startToolTip = "START";
-    static readonly string resetToolTip = "RESET";
-    static readonly Color offColor = Color.RoyalBlue;
-    public static async Task CreateHMIBtn(FormMain formMain, PptResult ppt)
+    public static class HMITree
     {
-        await formMain.DoAsync(tsc =>
+        static readonly Color startColor = Color.Green;
+        static readonly Color resetColor = Color.Red;
+        static readonly string startToolTip = "START";
+        static readonly string resetToolTip = "RESET";
+        static readonly Color offColor = Color.RoyalBlue;
+        public static async Task CreateHMIBtn(FormMain formMain, DsSystem sys, IEnumerable<ViewNode> views)
         {
-            var sys = ppt.System;
-            var eleSys = new AccordionControlElement()
-            { Style = ElementStyle.Group, Text = sys.Name, Tag = sys };
-            eleSys.Click += (s, e) =>
+            await formMain.DoAsync(tsc =>
             {
-                formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
-            };
-            formMain.Ace_HMI.Elements.Add(eleSys);
-            var nodeFlows = ppt.Views.Where(w => w.ViewType == InterfaceClass.ViewType.VFLOW)
-                                     .Where(w => w.UsedViewNodes.Any())
-                                     .ToDictionary(s => s.Flow.Value, s => s);
-            foreach (var flowDic in nodeFlows)
-            {
-                var flow = flowDic.Key;
-                var eleFlow = new AccordionControlElement()
-                { Style = ElementStyle.Group, Text = flow.Name, Tag = flow };
-                eleFlow.Click += (s, e) =>
+                //var eleSys = new AccordionControlElement()
+                //{ Style = ElementStyle.Group, Text = sys.Name, Tag = sys };
+                //eleSys.Click += (s, e) =>
+                //{
+                //    formMain.PropertyGrid.SelectedObject = ((AccordionControlElement)s).Tag;
+                //};
+                //formMain.Ace_HMI.Elements.Add(eleSys);
+                var nodeFlows = views.Where(w => w.ViewType == InterfaceClass.ViewType.VFLOW)
+                                         .Where(w => w.UsedViewNodes.Any())
+                                         .ToDictionary(s => s.Flow.Value, s => s);
+                foreach (var flowDic in nodeFlows)
                 {
-                    var eleTagFlow = ((AccordionControlElement)s).Tag as Flow;
-                    formMain.PropertyGrid.SelectedObject = eleTagFlow;
+                    var flow = flowDic.Key;
+                    var eleFlow = new AccordionControlElement()
+                    { Style = ElementStyle.Group, Text = flow.Name, Tag = flow };
+                    eleFlow.Click += (s, e) =>
+                    {
+                        var eleTagFlow = ((AccordionControlElement)s).Tag as Flow;
+                        formMain.PropertyGrid.SelectedObject = eleTagFlow;
 
-                    DocControl.CreateDocOrSelect(formMain, flowDic.Value);
-                };
-                eleSys.Elements.Add(eleFlow);
+                        DocControl.CreateDocOrSelect(formMain, flowDic.Value);
+                    };
+                    formMain.Ace_HMI.Elements.Add(eleFlow);
 
                 flow.Graph.Vertices
                .OrderBy(v => v.QualifiedName)
@@ -104,30 +104,30 @@ public static class HMITree
 
                 return acb;
 
-                void StartHMI(Real real)
-                {
-                    Task.Run( () =>
+                    void StartHMI(Real real)
                     {
-                        var vv = (real.TagManager as VertexManager);
-                        vv.SF.Value = true;
-                        //await Task.Delay(500);  //CPU에서 자동으로 NotifyPostExcute에서 꺼짐 Web HMI 붙히면 변경 필요
-                        //vv.SF.Value = false;
-                    });
-                }
-                void ResetHMI(Real real)
-                {
-                    Task.Run( () =>
+                        Task.Run(() =>
+                        {
+                            var vv = (real.TagManager as VertexManager);
+                            vv.SF.Value = true;
+                            //await Task.Delay(500);  //CPU에서 자동으로 NotifyPostExcute에서 꺼짐 Web HMI 붙히면 변경 필요
+                            //vv.SF.Value = false;
+                        });
+                    }
+                    void ResetHMI(Real real)
                     {
-                        var vv = (real.TagManager as VertexManager);
-                        vv.RF.Value = true;
-                        //await Task.Delay(500);  //CPU에서 자동으로 NotifyPostExcute에서 꺼짐 Web HMI 붙히면 변경 필요
-                        //vv.RF.Value = false;
-                    });
+                        Task.Run(() =>
+                        {
+                            var vv = (real.TagManager as VertexManager);
+                            vv.RF.Value = true;
+                            //await Task.Delay(500);  //CPU에서 자동으로 NotifyPostExcute에서 꺼짐 Web HMI 붙히면 변경 필요
+                            //vv.RF.Value = false;
+                        });
+                    }
                 }
-            }
-            tsc.SetResult(true);
-        });
-    }
+                tsc.SetResult(true);
+            });
+        }
 
     private static AccordionContextButton UpdateBtn(object s)
     {

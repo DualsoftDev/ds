@@ -11,29 +11,32 @@ open System.Runtime.CompilerServices
 [<AutoOpen>]
 module CoreExtensionModule =
 
-    let getButtons (sys:DsSystem, btnType:BtnType) = sys.Buttons.Where(fun f->f.ButtonType = btnType)
-    let getLamps (sys:DsSystem, lampType:LampType) = sys.Lamps.Where(fun f->f.LampType = lampType)
-    let getConditions (sys:DsSystem, cType:ConditionType) = sys.Conditions.Where(fun f->f.ConditionType = cType)
-    let getRecursiveSystems (sys:DsSystem) =
-            [
-                yield! sys.ReferenceSystems
-                yield! sys.ReferenceSystems |> Seq.collect(fun f->f |> getRecursiveSystems)
-            ] |> List.toSeq
-    let getRecursiveLoadeds (sys:ISystem) =
-            let dsSys =
-                match sys  with
-                | :? DsSystem as d -> d
-                | :? Device as d -> d.ReferenceSystem
-                | :? ExternalSystem as d -> d.ReferenceSystem
-                | _ -> failwithlog $"Error {getFuncName()}"
-            [
-                yield! dsSys.LoadedSystems |> Seq.cast<ISystem>
-                yield! dsSys.LoadedSystems |> Seq.collect(fun f-> f |> getRecursiveLoadeds)
-            ] |> List.toSeq
+    let getRecursiveLoadeds (system:DsSystem) = 
+        let loadeds = Dictionary<LoadedSystem, DsSystem>()  
+        
+        let rec recLoadeds(sys:LoadedSystem) =
+            sys.ReferenceSystem
+               .LoadedSystems
+               .Where(fun w->not <| loadeds.ContainsKey w)// external 참조 자식들은 LoadedSystem 이 같다
+               .Iter(fun s->
+                    loadeds.Add(s, s.ReferenceSystem)
+                    recLoadeds s
+                )
+   
+        system.LoadedSystems.Iter(fun s ->loadeds.Add(s, s.ReferenceSystem)) //최상위 부터 등록
+        system.LoadedSystems.Iter(recLoadeds)
+
+        loadeds
+
 
     let checkSystem(system:DsSystem, targetFlow:Flow, itemName:string) =
                 if system <> targetFlow.System
                 then failwithf $"add item [{itemName}] in flow ({targetFlow.System.Name} != {system.Name}) is not same system"
+
+    let getButtons (sys:DsSystem, btnType:BtnType) = sys.Buttons.Where(fun f->f.ButtonType = btnType)
+    let getLamps (sys:DsSystem, lampType:LampType) = sys.Lamps.Where(fun f->f.LampType = lampType)
+    let getConditions (sys:DsSystem, cType:ConditionType) = sys.Conditions.Where(fun f->f.ConditionType = cType)
+
 
     type DsSystem with
         member x.AddButton(btnType:BtnType, btnName:string, inAddress:TagAddress, outAddress:TagAddress, flow:Flow, funcs:HashSet<Func>) =
@@ -112,7 +115,6 @@ module CoreExtensionModule =
                 .Select(fun s->x.ApiItems.Find(fun f->f.Name = s.Value))
 
         member x.DeviceDefs = x.Jobs |> Seq.collect(fun s->s.DeviceDefs)
-        member x.GetRecursiveSystems() =  x |> getRecursiveSystems
 
     type CallDev with
         member x.System = x.Parent.GetSystem()
@@ -122,7 +124,7 @@ module CoreExtensionModule =
 [<Extension>]
 type SystemExt =
     [<Extension>]
-    static member GetRecursiveSystems (x:DsSystem) : DsSystem seq = x |> getRecursiveSystems
+    static member GetRecursiveLoadeds (x:DsSystem) : LoadedSystem seq  = getRecursiveLoadeds(x).Keys
     [<Extension>]
-    static member GetRecursiveLoadeds (x:DsSystem) : ISystem seq  = x |> getRecursiveLoadeds
-
+    static member GetRecursiveLoadedSystems (x:DsSystem) : DsSystem seq  = getRecursiveLoadeds(x).Values
+   

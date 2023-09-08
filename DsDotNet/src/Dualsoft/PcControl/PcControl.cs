@@ -24,54 +24,55 @@ public static class PcControl
     public static Dictionary<TagHW, IEnumerable<ITag>> DicActionIn = new Dictionary<TagHW, IEnumerable<ITag>>();
     public static Dictionary<ITag, TagHW> DicActionOut = new Dictionary<ITag, TagHW>();
 
-    public static Dictionary<TagHW, IEnumerable<ITag>> GetActionInputs(DsSystem sys)
-    {
-        var actions = new Dictionary<TagHW, IEnumerable<ITag>>();
-        var inTags 
-             = sys.Jobs
-                  .SelectMany(j => j.DeviceDefs.Select(s => s.InTag))
-                  .Where(w => w != null);
-      
-        inTags
-          .GroupBy(g => g.Address)
-          .Iter(g => 
-          {
-              var hwTag = getTagHW(g.Key, g.Key, true);
-              actions.Add(hwTag, g.Select(s=>s));
-          });
-   
+        public static Dictionary<TagHW, IEnumerable<ITag>> GetActionInputs(DsSystem sys)
+        {
+            var actions = new Dictionary<TagHW, IEnumerable<ITag>>();
+            var inTags
+                 = sys.Jobs
+                      .SelectMany(j => j.DeviceDefs.Select(s => s.InTag))
+                      .Where(w => w != null)
+                      .Where(w => !w.Address.Trim().IsNullOrEmpty());
+
+            inTags
+              .GroupBy(g => g.Address)
+              .Iter(g =>
+              {
+                  var names = String.Join(", ", g.Select(s => s.Name));
+                  var hwTag = getTagHW(names, g.Key);
+                  actions.Add(hwTag, g.Select(s => s));
+              });
+
+            return actions;
+        }
+        public static Dictionary<ITag, TagHW> GetActionOutputs(DsSystem sys)
+        {
+            var actions = new Dictionary<ITag, TagHW>();
+            var outTags
+                 = sys.Jobs
+                      .SelectMany(j => j.DeviceDefs.Select(s => s.OutTag))
+                      .Where(w => w != null)
+                      .Where(w => !w.Address.Trim().IsNullOrEmpty());
+
+            outTags
+              .GroupBy(g => g.Address)
+              .Iter(g =>
+              {
+                  var names = String.Join(", ", g.Select(s => s.Name));
+                  var hwTag = getTagHW(names, g.Key);
+                  g.Iter(s => actions.Add(s, hwTag));
+              });
+
         return actions;
     }
-    public static Dictionary<ITag, TagHW> GetActionOutputs(DsSystem sys)
-    {
-        var actions = new Dictionary<ITag, TagHW>();
-        var inTags
-             = sys.Jobs
-                  .SelectMany(j => j.DeviceDefs.Select(s => s.OutTag))
-                  .Where(w => w != null);
 
-        inTags
-          .GroupBy(g => g.Address)
-          .Iter(g =>
-          {
-              var hwTag = getTagHW(g.Key, g.Key, false);
-              g.Iter(s => actions.Add(s, hwTag));
-          });
+        private static TagHW getTagHW(string name, string address)
+        {
+            if (address.IsNullOrEmpty())
+                MBox.Error($"주소가 없습니다. {name}");
 
-        return actions;
-    }
-
-    private static TagHW getTagHW(string name, string address, bool bInput)
-    {
-        //string name = dsTag.Name;
-        //string address = dsTag.Address;
-
-        //if (address.IsNullOrEmpty() || dsTag == null)
-        //    MBox.Error($"{dsTag}");
-
-        var tag = new WMXTag(Global.PaixDriver.Conn as WMXConnection, name);
-        tag.SetAddress(address);
-        tag.IOType = bInput ? TagIOType.Input : TagIOType.Output;
+            var tag = new WMXTag(Global.PaixDriver.Conn as WMXConnection, name);
+            tag.SetAddress(address);
+            //tag.IOType = bInput ? TagIOType.Input : TagIOType.Output;
 
         return tag;
     }
@@ -182,15 +183,15 @@ public static class PcControl
         return cpu;
     }
 
-    public static void ClearModel(FormMain frmMain)
-    {
-        frmMain.Do(() =>
+        public static void ClearModel(FormMain frmMain)
         {
-            if (PcControl.RunCpus.Any())
-                PcAction.Reset(frmMain.Ace_Play, frmMain.Ace_HMI);
+            frmMain.Do(() =>
+            {
+                if (RunCpus.Any())
+                    PcAction.Reset(frmMain.Ace_Play, frmMain.Ace_HMI);
 
-            PcControl.RunCpus.Iter(cpu => cpu.Dispose());
-            RecentDocs.SetRecentDoc(frmMain.TabbedView.Documents.Select(d => d.Caption));
+                RunCpus.Iter(cpu => cpu.Dispose());
+                RecentDocs.SetRecentDoc(frmMain.TabbedView.Documents.Select(d => d.Caption));
 
             frmMain.TabbedView.Controller.CloseAll();
             frmMain.TabbedView.Documents.Clear();
@@ -199,11 +200,12 @@ public static class PcControl
 
             Global.ActiveSys = null;
 
-            Tree.ModelTree.ClearSubBtn(frmMain.Ace_System);
-            Tree.ModelTree.ClearSubBtn(frmMain.Ace_Device);
-            Tree.ModelTree.ClearSubBtn(frmMain.Ace_HMI);
-        });
-    }
+                Tree.ModelTree.ClearSubBtn(frmMain.Ace_System);
+                Tree.ModelTree.ClearSubBtn(frmMain.Ace_Device);
+                Tree.ModelTree.ClearSubBtn(frmMain.Ace_ExSystem);
+                Tree.ModelTree.ClearSubBtn(frmMain.Ace_HMI);
+            });
+        }
 
 }
 

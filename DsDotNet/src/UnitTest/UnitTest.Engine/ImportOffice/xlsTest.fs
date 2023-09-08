@@ -4,7 +4,7 @@ namespace T
 open Engine.Core
 open Dual.Common.Core.FS
 open Engine.Parser.FS
-open Model.Import.Office
+open Engine.Import.Office
 
 
 [<AutoOpen>]

@@ -1,0 +1,184 @@
+using DevExpress.XtraEditors;
+using DevExpress.XtraEditors.Controls;
+using DSModeler.Form;
+using DSModeler.Tree;
+using Dual.Common.Core;
+using Dual.Common.Winform;
+using Engine.Core;
+using Server.HW.WMX3;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Windows.Forms;
+using static Engine.Core.CoreModule;
+using static Engine.Core.RuntimeGeneratorModule;
+using static Engine.Import.Office.ViewModule;
+
+namespace DSModeler
+{
+    public partial class FormMain : XtraForm
+    {
+
+        void InitializationEventSetting()
+        {
+            this.AllowDrop = true;
+            this.DragEnter += (s, e) =>
+            {
+                if (e.Data.GetDataPresent(DataFormats.FileDrop)) e.Effect = DragDropEffects.Copy;
+            };
+            this.DragDrop +=  async (s, e) =>
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                if (files.Length > 0)
+                  await  ImportPowerPointWapper(files);
+            };
+            this.KeyDown +=  async (s, e) =>
+            {
+                if (e.KeyData == Keys.F4)
+                   await ImportPowerPointWapper(null);
+                if (e.KeyData == Keys.F5)
+                  await ImportPowerPointWapper(Files.GetLast());
+            };
+
+
+            tabbedView_Doc.QueryControl += (s, e) =>
+            {
+                if (e.Control == null)  //Devexpress MDI Control
+                    e.Control = new System.Windows.Forms.Control();
+            };
+
+
+            gle_Expr.EditValueChanged += (s, e) =>
+            {
+                var textForm = DocControl.CreateDocExprOrSelect(this, tabbedView_Doc);
+                if (textForm == null) return;
+                DSFile.UpdateExpr(textForm, gle_Expr.EditValue as LogicStatement);
+            };
+
+            gle_Expr.BeforePopup += (s, e) =>
+                gle_Expr.Properties.BestFitMode = BestFitMode.BestFitResizePopup;
+            gle_Log.BeforePopup += (s, e) =>
+                gle_Log.Properties.BestFitMode = BestFitMode.BestFitResizePopup;
+            gle_Device.BeforePopup += (s, e) =>
+                gle_Device.Properties.BestFitMode = BestFitMode.BestFitResizePopup;
+
+            comboBoxEdit_RunMode.EditValueChanging +=  async (s, e) =>
+            {
+                Global.CpuRunMode = ToRuntimePackage(e.NewValue.ToString());
+                RuntimeDS.Package = Global.CpuRunMode;
+                DSRegistry.SetValue(K.CpuRunMode, Global.CpuRunMode);
+                if (e.OldValue != null)
+                  await  ImportPowerPointWapper(Files.GetLast());
+            };
+
+            spinEdit_StartIn.Properties.EditValueChanged += (s, e) =>
+            {
+                Global.RunCountIn = Convert.ToInt32(spinEdit_StartIn.EditValue);
+                DSRegistry.SetValue(K.RunCountIn, Global.RunCountIn);
+            };
+            spinEdit_StartOut.Properties.EditValueChanged += (s, e) =>
+            {
+                Global.RunCountOut = Convert.ToInt32(spinEdit_StartOut.EditValue);
+                DSRegistry.SetValue(K.RunCountOut, Global.RunCountOut);
+            };
+
+            toggleSwitch_menuExpand.Toggled += (s, e) =>
+            {
+                Global.LayoutMenumExpand = toggleSwitch_menuExpand.IsOn;
+                DSRegistry.SetValue(K.LayoutMenuExpand, Global.LayoutMenumExpand);
+
+                if (Global.LayoutMenumExpand)
+                {
+                    ac_Main.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Default;
+                    ac_Main.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.Standard;
+                }
+                else
+                {
+
+                    ac_Main.RootDisplayMode = DevExpress.XtraBars.Navigation.AccordionControlRootDisplayMode.Footer;
+                    ac_Main.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.HamburgerMenu;
+                }
+            };
+
+            toggleSwitch_LayoutGraph.Toggled += (s, e) =>
+            {
+                Global.LayoutGraphLineType = toggleSwitch_LayoutGraph.IsOn;
+                DSRegistry.SetValue(K.LayoutGraphLineType, Global.LayoutGraphLineType);
+            };
+
+            toggleSwitch_showDeviceExpr.Toggled += (s, e) =>
+            {
+                LogicTree.UpdateExpr(gle_Expr, toggleSwitch_showDeviceExpr.IsOn);
+            };
+
+
+            textEdit_IP.EditValueChanging += (s, e) =>
+            {
+                IPAddress.TryParse(e.NewValue.ToString(), out IPAddress addr);
+                if (addr == null) return;
+                DSRegistry.SetValue(K.RunHWIP, e.NewValue);
+                Global.RunHWIP = e.NewValue.ToString();
+
+                if (Global.CpuRunMode.IsPackagePC() && PcControl.RunCpus.Any())
+                    PcAction.CreateConnect();
+            };
+
+            btn_ON.Click += (s, e) => PcAction.SetBit(gle_Device.EditValue as WMXTag, true);
+            btn_OFF.Click += (s, e) => PcAction.SetBit(gle_Device.EditValue as WMXTag, false);
+
+            Global.ChangeLogCount.Subscribe(rx =>
+            {
+                this.Do(() =>
+                {
+                    barStaticItem_logCnt.Caption
+                        = $"logs:{rx.Item1} TimeSpan {rx.Item2:ss\\.fff}sec";
+                });
+            });
+
+            DsProcessEvent.ProcessSubject.Subscribe(rx =>
+            {
+                this.Do(() =>
+                {
+                    barEditItem_Process.EditValue = rx.pro;
+                    barStaticItem_procText.Caption = $"{rx.pro}%";
+                });
+            });
+
+            ViewDraw.StatusChangeSubject.Subscribe(rx =>
+            {
+                var ret = GetViewNode(rx);
+                foreach (var r in ret)
+                {
+                    var form = r.Item1;
+                    var node = r.Item2;
+                    node.Status4 = ViewDraw.DicStatus[rx];
+                    form.UcView.UpdateStatus(node);
+                }
+            });
+
+            ViewDraw.ActionChangeSubject.Subscribe(rx =>
+            {
+                var ret = GetViewNode(rx.Item1);
+                foreach (var r in ret)
+                {
+                    var form = r.Item1;
+                    var node = r.Item2;
+                    form.UcView.UpdateValue(node, rx.Item2);
+                }
+            });
+
+            List<Tuple<FormDocView, ViewNode>> GetViewNode(Vertex v)
+            {
+                return tabbedView_Doc.Documents
+                             .Where(d => d.IsVisible)
+                             .Select(d => d.Tag)
+                             .OfType<FormDocView>()
+                             .Where(w => w.UcView.Flow == v.Parent.GetFlow())
+                             .Select(s => Tuple.Create(s, s.UcView.MasterNode.UsedViewVertexNodes(false)[v]))
+                             .ToList();
+
+            }
+        }
+    }
+}

@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <Content Include="Icon\logo_Dualsoft.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DevExpress.Win.Design" Version="23.1.*-*" />
+    <PackageReference Include="DualSoft-Common-Core" Version="0.1.13" />
+    <PackageReference Include="DualSoft-Common-Winform" Version="0.1.3" />
+    <PackageReference Include="log4net" Version="2.0.15" />
+    <PackageReference Include="Microsoft.Msagl.GraphViewerGDI" Version="1.1.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
+    <ProjectReference Include="..\src\Engine\Engine.CodeGenHMI\Engine.CodeGenHMI.fsproj" />
+    <ProjectReference Include="..\src\Engine\Engine.Core\Engine.Core.fsproj" />
+    <ProjectReference Include="..\src\Engine\Engine.Cpu\Engine.Cpu.fsproj" />
+    <ProjectReference Include="..\src\Engine\Engine.Import.Office\Engine.Import.Office.fsproj" />
+    <ProjectReference Include="..\src\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
+    <ProjectReference Include="..\src\Engine\Engine.Parser\Engine.Parser.csproj" />
+    <ProjectReference Include="..\src\HW\LSPLC\Dual.PLC.LS.XgCOM.FS\Dual.PLC.LS.XgCOM.FS.fsproj" />
+    <ProjectReference Include="..\src\PLC\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
+    <ProjectReference Include="..\src\PLC\PLC.CodeGen.LSXGI\PLC.CodeGen.LSXGI.fsproj" />
+    <ProjectReference Include="..\src\PLC\PLC.CodeGen.LSXGK\PLC.CodeGen.LSXGK.fsproj" />
+    <ProjectReference Include="..\src\Server\Server.HW.Common\Server.HW.Common.csproj" />
+    <ProjectReference Include="..\src\Server\Server.HW.WMX3\Server.HW.WMX3.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Log\UcLog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="ViewDiagram\UCView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+  </ItemGroup>
+
+</Project>

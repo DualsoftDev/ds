@@ -40,6 +40,10 @@ public class WMXConnection : ConnectionBase
         _OutCnt = numOut;
         _connectionParameters = parameters;
         PerRequestDelay = (int)parameters.TimeoutScan.TotalMilliseconds;
+
+        InData = Enumerable.Repeat((byte)0, count: _InCnt).ToArray();
+        OutData = Enumerable.Repeat((byte)0, count: _OutCnt).ToArray();
+
         ClearData();
         _Ip = parameters.IP;
         ConnLS = new DsXgConnection();
@@ -53,7 +57,7 @@ public class WMXConnection : ConnectionBase
 
     public uint TimeoutConnecting => (uint)_connectionParameters.TimeoutConnecting.TotalMilliseconds;
 
-    private bool _IsConnected;
+    private bool _IsConnected = false;
 
     public override bool IsConnected { get { return _IsConnected; } }
     public bool IsCreatedDevice { get; private set; }

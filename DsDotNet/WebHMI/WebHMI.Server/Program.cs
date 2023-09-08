@@ -9,7 +9,8 @@ services.AddSignalR();
 builder.Configuration.AddEnvironmentVariables();
 builder.Host.UseContentRoot(Directory.GetCurrentDirectory());
 services.AddSingleton<Demon>();
-services.AddHostedService(provider => provider.GetService<Demon>());
+//services.AddHostedService(provider => provider.GetService<Demon>());
+services.AddHostedService(provider => provider.GetRequiredService<Demon>()); // exception log 필요
 
 // Add services required for using options
 services.AddOptions();

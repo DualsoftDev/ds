@@ -11,11 +11,7 @@ namespace DSModeler;
 public static class PLC
 {
 
-    public static void OpenPLCFolder()
-    {
-        if (Global.IsLoadedPPT() && !Global.ExportPathPLC.IsNullOrEmpty())
-            Process.Start(Path.GetDirectoryName(Global.ExportPathPLC));
-    }
+   
 
     public static string Export()
     {

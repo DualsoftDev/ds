@@ -28,11 +28,11 @@ public static class PcAction
                             Task.Run(() => s.Run()))
                 );
 
-            FormMain.formMain.connection.On<Tuple<string, int>>("S2CSet", tpl =>
-            {
-                MessageBox.Show($"Got value change notification from server: {tpl.Item1} = {tpl.Item2}", "get change value");
-                //MessageBox.Show($"Got value change notification from server: {tag}", "get change value");
-            });
+            //FormMain.formMain.connection.On<Tuple<string, int>>("S2CSet", tpl =>  //<<shin>>
+            //{
+            //    MessageBox.Show($"Got value change notification from server: {tpl.Item1} = {tpl.Item2}", "get change value");
+            //    //MessageBox.Show($"Got value change notification from server: {tag}", "get change value");
+            //});
 
             Global.Logger.Info("시뮬레이션 : Run");
         }

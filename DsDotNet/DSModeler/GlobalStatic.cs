@@ -2,6 +2,7 @@ using Dual.Common.Core;
 using Engine.Core;
 using log4net;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reactive.Subjects;
 using System.Reflection;
@@ -81,7 +82,16 @@ namespace DSModeler
             }
             return false;
         }
-
+        public static void OpenFolder(string path)
+        {
+            if (Global.IsLoadedPPT())
+            {
+                if (path.IsNullOrEmpty())
+                    MBox.Warn("내보내기를 먼저 수행하세요.");
+                else
+                    Process.Start(new ProcessStartInfo { FileName = Path.GetDirectoryName(path), UseShellExecute = true });
+            }
+        }
         public static void Notimplemented() => MBox.Warn("기능이 제한 되었습니다. 기능 문의는 han@dualsoft.com 연락주세요");
         public static string DefaultAppSettingFolder => Path.Combine(DefaultFolder, "AppSetting");
         public static string AppVersion => $"{ver.Major}.{ver.Minor}.{ver.Build}";

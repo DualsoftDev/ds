@@ -28,7 +28,7 @@ namespace DSModeler
         public AccordionControlElement Ace_ExSystem => ace_ExSystem;
         public BarStaticItem LogCountText => barStaticItem_logCnt;
 
-        public HubConnection connection;  //<<shin>>
+        public HubConnection connection;  
 
         public static FormMain formMain;
 
@@ -49,7 +49,7 @@ namespace DSModeler
             InitializationEventSetting();
             InitializationLogger();
             InitializationUIControl();
-            _ = Task.Run(async () => await InitializationClientSignalRAsync());
+            //_ = Task.Run(async () => await InitializationClientSignalRAsync()); //<<shin>>
             formMain = this;
             if (!Global.IsDebug)
                 DevExpress.XtraSplashScreen.SplashScreenManager.CloseForm();
@@ -92,7 +92,7 @@ namespace DSModeler
         private void ace_pcWindow_Click(object s, EventArgs e) => DocControl.CreateDocDS(this, tabbedView_Doc);
         private void ace_PLCXGI_Click(object s, EventArgs e) => DocControl.CreateDocPLCLS(this, tabbedView_Doc);
         private void ratingControl_Speed_EditValueChanged(object s, EventArgs e) => ControlProperty.SetSpeed(Convert.ToInt32(ratingControl_Speed.EditValue));
-        private void simpleButton_OpenPLC_Click(object s, EventArgs e) => PLC.OpenPLCFolder();
+        private void simpleButton_OpenPLC_Click(object s, EventArgs e) => Global.OpenFolder(Global.ExportPathDS);
         private void ace_ExportExcel_Click(object s, EventArgs e) => XLS.ExportExcel(gridControl_exprotExcel);
         private async void ace_ImportPPT_Click(object s, EventArgs e) => await ImportPowerPointWapper(null);
         private async void ace_pptReload_Click(object sender, EventArgs e) => await ImportPowerPointWapper(Files.GetLast());
@@ -102,11 +102,11 @@ namespace DSModeler
         private void ace_DocDiagram_Click(object sender, EventArgs e) => Global.Notimplemented();
         private void ace_PLCLogix5000_Click(object sender, EventArgs e) => Global.Notimplemented();
         private void ace_PLCWork3_Click(object sender, EventArgs e) => Global.Notimplemented();
-
         private async void ace_ExportWebHMI_Click(object sender, EventArgs e) => await HMI.ExportWebAsync(this);
         private void simpleButton_ClearLog_Click(object sender, EventArgs e) => LogicLog.ValueLogs.Clear();
         private void simpleButton_AllExpr_Click(object sender, EventArgs e) => DSFile.UpdateExprAll(this, toggleSwitch_showDeviceExpr.IsOn);
-        private void simpleButton_ExportDStoFile_Click(object sender, EventArgs e) => DSFile.ZipDSFolder();  //open
+        private void simpleButton_ExportDStoFile_Click(object sender, EventArgs e) => Global.OpenFolder(Global.ExportPathDS);
+        //DSFile.ZipDSFolder();  //open  <<shin>>  누번누르면 예외
         private void ace_ExportAppHMI_Click(object sender, EventArgs e) => HMI.ExportApp();
 
     }

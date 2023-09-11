@@ -1,6 +1,3 @@
-using DsXgComm.Monitoring;
-using Dual.PLC.Common;
-using FSharpPlus.Control;
 using Server.HW.Common;
 using System;
 using System.Collections.Generic;
@@ -9,7 +6,6 @@ using System.Threading;
 using System.Xml.Linq;
 using WMX3ApiCLR;
 using XGCommLib;
-using static DsXgComm.Connect;
 using ChannelRequestExecutor = Server.HW.Common.ChannelRequestExecutor;
 using ConnectionBase = Server.HW.Common.ConnectionBase;
 using IConnectionParameters = Server.HW.Common.IConnectionParameters;
@@ -29,7 +25,6 @@ public class WMXConnection : ConnectionBase
     internal Io WMX3Lib_Io => _wmx3Lib_Io;
 
     private WMXConnectionParameters _connectionParameters;
-    public DsXgConnection ConnLS { get; private set; }
 
     public WMXConnection(WMXConnectionParameters parameters, int numIn, int numOut)
         : base(parameters)
@@ -43,7 +38,6 @@ public class WMXConnection : ConnectionBase
         InData = Enumerable.Repeat((byte)0, count: _InCnt).ToArray();
         OutData = Enumerable.Repeat((byte)0, count: _OutCnt).ToArray();
         _Ip = parameters.IP;
-        ConnLS = new DsXgConnection();
     }
 
     public override IConnectionParameters ConnectionParameters
@@ -107,7 +101,6 @@ public class WMXConnection : ConnectionBase
         _wmx3Lib?.CloseDevice();
         _wmx3Lib_Io?.Dispose();
         _wmx3Lib?.Dispose();
-        ConnLS.Disconnect(); 
         base.Dispose(disposing);
     }
 

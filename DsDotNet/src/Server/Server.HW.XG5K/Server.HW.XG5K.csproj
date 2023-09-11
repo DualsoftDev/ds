@@ -20,7 +20,7 @@
 	  <PackageReference Include="System.Reactive" Version="6.0.0" />
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\..\HW\LSPLC\Dual.PLC.LS.XgCOM.FS\Dual.PLC.LS.XgCOM.FS.fsproj" />
+	  <ProjectReference Include="..\Dual.PLC.LS.XgCOM.FS\Dual.PLC.LS.XgCOM.FS.fsproj" />
 	  <ProjectReference Include="..\Server.HW.Common\Server.HW.Common.csproj" />
 	</ItemGroup>
 

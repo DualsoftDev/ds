@@ -1,4 +1,3 @@
-using LanguageExt.ClassInstances.Pred;
 using Server.HW.Common;
 using Server.HW.WMX3;
 using System;
@@ -54,13 +53,6 @@ internal class WMXChannelRequestExecutor : ChannelRequestExecutor
         var inData = WMXConnection.InData;
         var oldData = inData.ToList().ToArray();
 
-        var ret =  WMXConnection.ConnLS.ReadBit('I');
-
-        for (int i = 0; i < inData.Length; i++)
-        {
-            inData[i] = ret[i];
-        }
-     
         WMXConnection.WMX3Lib_Io.GetInBytes(0, inData.Length, ref inData);
 
         UpdateIO(inData, oldData, true);

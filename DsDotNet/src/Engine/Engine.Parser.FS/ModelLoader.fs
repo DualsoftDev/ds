@@ -6,16 +6,7 @@ open Dual.Common.Core.FS
 open Engine.Parser.FS
 open System.Collections.Generic
 
-[<AutoOpen>]
-module ModelLoaderModule =
-    type FilePath = string
-    type ModelConfig = {
-        DsFilePaths: FilePath list
-    }
-    type Model = {
-        Config: ModelConfig
-        Systems : DsSystem list
-    }
+
 
 [<RequireQualifiedAccess>]
 module ModelLoader =

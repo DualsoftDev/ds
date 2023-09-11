@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net7.0-windows</TargetFramework>
+    <TargetFrameworks>net7.0-windows</TargetFrameworks>
     <UseWindowsForms>true</UseWindowsForms>
     <BaseOutputPath>..\bin</BaseOutputPath>
   </PropertyGroup>
@@ -22,8 +22,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AppHMI\AppHMI.csproj" />
-    <ProjectReference Include="..\ModelHandler\ModelHandler.csproj" />
+    <ProjectReference Include="..\HMI\AppHMI\AppHMI.csproj" />
+    <ProjectReference Include="..\HMI\ModelHandler\ModelHandler.csproj" />
+    <ProjectReference Include="..\src\Diagram\WinFormsApp1\Diagram.View.MSAGL.csproj" />
     <ProjectReference Include="..\src\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
     <ProjectReference Include="..\src\Engine\Engine.CodeGenHMI\Engine.CodeGenHMI.fsproj" />
     <ProjectReference Include="..\src\Engine\Engine.Core\Engine.Core.fsproj" />
@@ -45,9 +46,6 @@
 
   <ItemGroup>
     <Compile Update="Log\UcLog.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Update="ViewDiagram\UCView.cs">
       <SubType>UserControl</SubType>
     </Compile>
 	<Compile Update="FormMain.cs">

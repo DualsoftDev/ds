@@ -11,9 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Engine\Engine.Core\Engine.Core.fsproj" />
-    <ProjectReference Include="..\src\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
-    <ProjectReference Include="..\src\Engine\Engine.Parser\Engine.Parser.csproj" />
+    <ProjectReference Include="..\..\src\Engine\Engine.Core\Engine.Core.fsproj" />
+    <ProjectReference Include="..\..\src\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
+    <ProjectReference Include="..\..\src\Engine\Engine.Parser\Engine.Parser.csproj" />
   </ItemGroup>
 
   <ItemGroup>

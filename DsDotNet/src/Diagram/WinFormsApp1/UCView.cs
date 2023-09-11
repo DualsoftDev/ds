@@ -19,7 +19,7 @@ using Style = Microsoft.Msagl.Drawing.Style;
 using Vertex = Engine.Core.CoreModule.Vertex;
 
 
-namespace DSModeler
+namespace Diagram.View.MSAGL
 {
     public partial class UcView : UserControl
     {

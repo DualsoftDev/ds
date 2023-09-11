@@ -1,8 +1,10 @@
 using Diagram.View.MSAGL;
+using System.Windows.Forms;
 
-namespace DSModeler.Form
+
+namespace PowerPointAddInForDS
 {
-    public partial class FormDocView : DevExpress.XtraEditors.XtraForm
+    public partial class FormDocView : Form
     {
         public FormDocView()
         {

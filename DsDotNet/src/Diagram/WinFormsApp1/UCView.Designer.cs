@@ -1,5 +1,5 @@
 
-namespace DSModeler
+namespace Diagram.View.MSAGL
 {
     partial class UcView
     {

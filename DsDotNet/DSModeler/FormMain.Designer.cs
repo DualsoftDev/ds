@@ -1,3 +1,5 @@
+using Diagram.View.MSAGL;
+
 namespace DSModeler
 {
     partial class FormMain

@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFrameworks>net7.0-windows;net48</TargetFrameworks>
+		<UseWindowsForms>true</UseWindowsForms>
+		<OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="AutomaticGraphLayout.GraphViewerGDI" Version="1.1.12" />
+	  <PackageReference Include="DualSoft-Common-Core" Version="0.1.13" />
+	  <PackageReference Include="DualSoft-Common-Winform" Version="0.1.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
+	  <ProjectReference Include="..\..\Engine\Engine.Import.Office\Engine.Import.Office.fsproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="UCView.cs">
+	    <SubType>UserControl</SubType>
+	  </Compile>
+	</ItemGroup>
+	
+</Project>

@@ -264,15 +264,15 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Diagram\WinFormsApp1\Diagram.View.MSAGL.csproj">
+    <ProjectReference Include="..\..\src\Diagram\WinFormsApp1\Diagram.View.MSAGL.csproj">
       <Project>{faf20375-04d3-4258-9a91-6c265c72fe9a}</Project>
       <Name>Diagram.View.MSAGL</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj">
+    <ProjectReference Include="..\..\src\Engine\Engine.Core\Engine.Core.fsproj">
       <Project>{40d8f531-bf68-4fab-a5dc-57277c3de2c8}</Project>
       <Name>Engine.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Engine\Engine.Import.Office\Engine.Import.Office.fsproj">
+    <ProjectReference Include="..\..\src\Engine\Engine.Import.Office\Engine.Import.Office.fsproj">
       <Project>{f51c980f-5a93-437f-8d94-c7e20c6c900d}</Project>
       <Name>Engine.Import.Office</Name>
     </ProjectReference>

@@ -5,9 +5,9 @@ open XGCommLib
 open System
 open System.Threading
 
+[<AutoOpen>]
 module Connect =
-    let [<Literal>] MAX_RANDOM_READ_POINTS = 64
-    let [<Literal>] MAX_ARRAY_BYTE_SIZE = 512   // 64*8
+
     type DsXgConnection() =
         let (|?) = defaultArg
         let tryCnt = 3
@@ -35,10 +35,6 @@ module Connect =
             x.CommObject <- x.Factory.GetMLDPCommObject20(connStr)
             let isCn = tryFunction tryCnt x.CommObject.Connect "" "Connecting"
             Thread.Sleep(500)
-            //x.CommObject.WriteDevice_Bit ("M", 7, 1) |>ignore
-            //Thread.Sleep(500)
-            //x.CommObject.WriteDevice_Bit ("M", 7, 0) |>ignore
-
             isCn
 
         member x.CheckConnect() : bool=
@@ -51,66 +47,72 @@ module Connect =
             x.CommObject.Disconnect()
 
 
-
         member x.CreateLWordDevice(deviceType:DeviceType, offset:int) : DeviceInfo =
             let di = x.Factory.CreateDevice()
-            let dt =
-                match deviceType with
-                | DeviceType.M -> 'M'
-                | DeviceType.I -> 'I'
-                | DeviceType.Q -> 'Q'
-                | DeviceType.W -> 'W'
-                | DeviceType.R -> 'R'
-                | _ -> failwithlog $"Unsupported device type {deviceType}"
-
-            di.ucDeviceType <- Convert.ToByte(dt)
+            
+            di.ucDeviceType <- Convert.ToByte(dTypeChar deviceType)
             di.ucDataType <- Convert.ToByte('B')
             di.lSize <- 8
             di.lOffset <- 8 * offset
             di
 
+        member x.CreateWriteDevice(tag:XgTagInfo) : DeviceInfo =
+            let di = x.Factory.CreateDevice()
+            
+            di.ucDeviceType <- Convert.ToByte(dTypeChar tag.Device)
+            di.ucDataType <-  tag.RandomReadWriteDataType
+            di.lSize <-   tag.ByteSize
+            di.lOffset <- tag.ByteOffset
+            di
+
         
+        //ScanIO.Scan 와 동시사용시 Thread 충돌 가능  ScanIO.Scan 사용에 writeTags() 내부에 동작 Tag WriteValue 변경시 자동으로 써짐
         member x.WriteBit(deviceType:string, bitOffset:int, value:int) =
-            x.CommObject.WriteDevice_Bit (deviceType, bitOffset, value) |>ignore
+            if x.CommObject.WriteDevice_Bit (deviceType, bitOffset, value) <> 1 then
+                   failwith $"WriteBit deviceType{deviceType}, bitOffset{bitOffset}, value{value}ERROR"
 
-        member x.ReadBit(bstrDevice:char): byte array =
-           
+        //ScanIO.Scan 와 동시사용시 Thread 충돌 가능  ScanIO.Scan 사용에 writeTags() 내부에 동작 Tag WriteValue 변경시 자동으로 써짐
+        member x.WriteDevices(tags:XgTagInfo array) =
+            let writableTags = tags|>Seq.filter(fun t->t.WriteValue <> null)    //쓰기 대상 선별
+            let batches = chunkBySumByteSize MAX_RANDOM_BYTE_POINTS writableTags
 
-            let di = x.CreateDevice('I', 'B', 8 ,0)
-            let rBuf = Array.zeroCreate<byte>(64)
+            batches
+            |> Seq.iter(fun batch ->
 
-            x.CommObject.RemoveAll()
-            x.CommObject.AddDeviceInfo(di)
-            if x.CommObject.ReadRandomDevice rBuf <> 1 then
-                  failwith "ReadRandomDevice ERROR"
+                x.CommObject.RemoveAll()
 
-            rBuf
+                batch
+                |> Seq.map(x.CreateWriteDevice)
+                |> Seq.iter(x.CommObject.AddDeviceInfo)
 
-      
+                let wBuf = getBuffer(batch, false)
+                if x.CommObject.WriteRandomDevice wBuf <> 1 then
+                   failwith "WriteRandomDevice ERROR"
+            )    
 
+            writableTags.Iter(fun t->t.WriteValue <- null)     //쓰기 대상 선별 후 WriteValue 지우기
 
-        [<Obsolete>]
-        member private x.CreateDevice(deviceType:char, memType:char, ?size:int, ?offset:int) : DeviceInfo =
-            let size = size |? 8
-            let offset = offset |? 0
-            let di = x.Factory.CreateDevice()
-            di.ucDeviceType <- Convert.ToByte(deviceType)
-            di.ucDataType <- Convert.ToByte(memType)
-            di.lSize <- size
-            di.lOffset <- offset
-            di
+        //ScanIO.Scan 와 동시사용시 Thread 충돌 가능  PLCScanTagChangedSubject 사용 하거나 ScanIO.Scan 중지후 사용
+        member x.ReadDevices(tags:XgTagInfo seq) =
 
-        [<Obsolete>]
-        member x.CreateMByteDevice(offset:int) : DeviceInfo =
-            let di = x.Factory.CreateDevice()
-            di.ucDeviceType <- Convert.ToByte('M')
-            di.ucDataType <- Convert.ToByte('B')
-            di.lSize <- 1
-            di.lOffset <- offset
-            di
+            let batches = chunkBySumByteSize MAX_RANDOM_BYTE_POINTS tags
+            batches
+            |> Seq.collect(fun batch ->
 
+                x.CommObject.RemoveAll()
 
+                batch
+                |> Seq.map(x.CreateWriteDevice)
+                |> Seq.iter(x.CommObject.AddDeviceInfo)
 
+                let rBuf = getBuffer(batch, true)
+
+                if x.CommObject.ReadRandomDevice rBuf <> 1 then
+                   failwith "ReadRandomDevice ERROR"
+
+                bufferToTagValue(batch, rBuf)
+            )
+            
 
 
 

@@ -38,10 +38,18 @@
     <ProjectReference Include="..\src\Server\Dual.PLC.LS.XgCOM.FS\Dual.PLC.LS.XgCOM.FS.fsproj" />
     <ProjectReference Include="..\src\Server\Server.HW.Common\Server.HW.Common.csproj" />
     <ProjectReference Include="..\src\Server\Server.HW.XG5K\Server.HW.XG5K.csproj" />
+    <!--<None Remove="D:\ds\ds_Master\DsDotNet\exLib\XGCommLib64.dll" />
+    <None Remove="D:\ds\ds_Master\DsDotNet\exLib\XGCommLib64.dll" />
 	<None Include="$(SolutionDir)exLib\XGCommLib64.dll">
 		<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-	</None>
+	</None>-->
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Interop.XGCommLib">
+      <HintPath>..\exLib\Interop.XGCommLib.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>

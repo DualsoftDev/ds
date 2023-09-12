@@ -90,6 +90,7 @@ module XgCOMFixtures =
             x.CommObject.Disconnect() |> ignore
             ()
 
+        member x.ConnStr = connStr
         member x.CreateDevice(deviceType:char, memType:char, ?size:int, ?offset:int) : DeviceInfo =
             let size = size |? 8
             let offset = offset |? 0

@@ -1,4 +1,4 @@
-using DsXgComm.Monitoring;
+using DsXgComm;
 using Dual.PLC.Common;
 using FSharpPlus.Control;
 using Server.HW.Common;

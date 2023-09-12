@@ -1,11 +1,15 @@
 ﻿using DevExpress.XtraSplashScreen;
 using DSModeler.Utils;
+using DsXgComm;
 using DsXgComm.Monitoring;
 using Dual.Common.Core;
 using Dual.Common.Winform;
 using Engine.Core;
 using System;
 using System.Configuration;
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DSModeler
@@ -21,10 +25,7 @@ namespace DSModeler
 #if DEBUG
             Global.IsDebug = true;
 #endif
-
-            //ScanIO s = new ScanIO();
-            //    s.Test();
-
+          
             var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             Log4NetLogger.Initialize(config.FilePath, "DSModelerLogger");  // "App.config"
 
@@ -44,10 +45,27 @@ namespace DSModeler
             Application.SetCompatibleTextRenderingDefault(false);
             EditorSkin.InitSetting("The Bezier", "Mercury Ice");
             var main = new FormMain();
+            
+            PLCMonitorEngine s = new PLCMonitorEngine();
+            Task.Run(() =>
+            {
+                s.TestScan();
+            });
+
+
+            s.PLCTagChangedSubject.Subscribe(x => { 
+                Trace.WriteLine($"{x.Tag} => {x.Value}");
+
+                //ds value update  
+
+            });
 
             if (!Global.IsDebug)
                 SplashScreenManager.ShowForm(main, typeof(SplashScreenDS));
             Application.Run(main);
+
+          
+
         }
     }
 }

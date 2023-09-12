@@ -11,9 +11,10 @@ open System.Reactive.Subjects
 open System.Diagnostics
 open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
+open DsXgComm
 
 [<AutoOpen>]
-module internal MonitorUtil =
+module MonitorUtil =
     let noop() = ()
     let getDiffBitPositions(n1:UInt64, n2:UInt64) =
         let xor = n1 ^^^ n2
@@ -23,6 +24,21 @@ module internal MonitorUtil =
                     yield i
         ]
 
+    let creatTags (tags:string seq)= 
+        let tags = tags |> Seq.distinct |> Array.ofSeq
+        let tis = [|
+            for t in tags do
+                let ti = tryParseTag t
+                let xti =
+                    match ti with
+                    | Some ti -> XgTagInfo(ti)
+                    | _ -> failwithlog $"Unknown tag {t}"
+                yield xti
+        |]
+        let tagInfos = tis |> Array.sortBy(fun t -> t.BitOffset)
+        tagInfos
+
+
     [<Extension>]
     type ArrayExtension =
         [<Extension>] static member GetLWord(bs:byte[], lwOffset) = BitConverter.ToUInt64(bs, lwOffset*8)
@@ -31,22 +47,6 @@ type ChangedTagInfo(plcIp, tag, value) =
     member x.PLCIp:string = plcIp
     member x.Tag:string = tag
     member x.Value:obj = value
-
-[<DebuggerDisplay("{Tag}=>{LWordTag}, {BitOffset}, {LWordOffset}:{StartBitOffset}")>]
-type internal XgTagInfo(fenetTagInfo:LsFEnetTagInfo) =
-    let ti = fenetTagInfo
-    member x.Tag = ti.Tag
-    member x.Device = ti.Device
-    member x.DataType = ti.DataType
-    member x.BitOffset = ti.BitOffset
-
-    member val LWordOffset = -1 with get, set
-    /// 주어진 byte array 에서 현재 tag 에 해당하는 bit 의 값을 읽어 낼 수 있는 방법 정의
-    member val BitSetChecker = fun (bs:byte[]) -> false with get, set
-    /// FormLWordOffset 기준 bit offset
-    member x.StartBitOffset = x.BitOffset % 64
-    /// 현재 tag 의 값을 LWord 환산 했을 때의 이름
-    member x.LWordTag = $"%%{x.Device}L{x.BitOffset/64}"
 
 type internal LWBatch(lwTagNames:string seq, buffer:byte[], deviceInfos:DeviceInfo seq, tags:XgTagInfo seq) =
     member x.Tags = tags |> Array.ofSeq
@@ -76,7 +76,24 @@ type PLCMonitorEngine() =
                      "%RX131071";
                      "%RW8191.15";
                 ]
-        x.Monitor("192.168.0.100:2004", tags, true, 50)
+        x.Monitor("192.168.0.100:2004", tags, true, 50, false)
+
+     member x.TestScan() =
+
+        let sameAddresses = [ "%IX127.15.63"; "%IL2047.63"; "%ID4095.31"; "%IW8191.15"; "%IB16383.7" ]
+        let tagInfos = sameAddresses |> List.map (tryParseTag >> Option.get)
+        //let tags = [ 1; 3; 9; 31; 33; 65; 255; 1025; ] @ [ for i in [1..66] -> i*2*64+1 ]
+        //           |> List.map (sprintf "%%MX%d")
+        let tags = [ 
+                        "%IX131071"  
+                        "%QX131071"  
+                        "%MX4194303" 
+                        "%LX180159"  
+                        "%RX524287"  
+                        "%WX8388607" 
+                        "%FX65535"   
+                ]
+        x.Monitor("192.168.0.100:2004", tags, true, 5, true)
     (*
      * tags: ["%MX1"; "%MX3"; "%MX9"; "%MX31"; "%MX64"; "%MX129"; ]
      * tagInfos : tag -> LWTag, StartBitOffset
@@ -93,23 +110,12 @@ type PLCMonitorEngine() =
             "%ML2" -> ["%MX129";]
         [1?] LWord 가 64개 이상 인 경우 추가로 생성
      *)
-    member private x.MonitorImpl(plcIp, tags:string seq, runSynchronously:bool, delayms:int) =
+    member private x.MonitorImpl(plcIp, tags:string seq, runSynchronously:bool, delayms:int, bScanWrite:bool) =
         logInfo $"Start PLC monitoring on {plcIp}"
         let conn = new DsXgConnection()
         let isConnected_ = conn.Connect(plcIp)  // don't remove
         
-        let tags = tags |> Seq.distinct |> Array.ofSeq
-        let tis = [|
-            for t in tags do
-                let ti = tryParseTag t
-                let xti =
-                    match ti with
-                    | Some ti -> XgTagInfo(ti)
-                    | _ -> failwithlog $"Unknown tag {t}"
-                yield xti
-        |]
-        let tagInfos = tis |> Array.sortBy(fun t -> t.BitOffset)
-
+        let tagInfos = creatTags tags 
         let chunkInfos =
             tagInfos
             |> Array.groupBy(fun ti -> ti.LWordTag)
@@ -159,8 +165,13 @@ type PLCMonitorEngine() =
             let buffer = Array.zeroCreate<byte>(1024)
             let notifiedOnces = ResizeArray<LWBatch>()
             while true do
+                if bScanWrite
+                then 
+                    conn.WriteDevices(tagInfos) //쓰기 대상이 있으면 먼저쓰고 읽기
+
                 for batch in batches do
-                    do! Async.Sleep 20
+                    do! Async.Sleep delayms
+
                     if not isSingleBatch then
                         conn.CommObject.RemoveAll()
                         batch.DeviceInfos |> Seq.iter conn.CommObject.AddDeviceInfo
@@ -201,7 +212,7 @@ type PLCMonitorEngine() =
                     for n in [0..oldBuffer.Length-1] do
                         oldBuffer.[n] <- buffer.[n]
 
-                do! Async.Sleep delayms
+                
 
             // 여기까지 수행될 일은 사실 없어야 한다.  (thread 자체가 kill 되므로)
             logInfo "Stoped PLC monitoring."
@@ -222,13 +233,15 @@ type PLCMonitorEngine() =
             logInfo $"Stop PLC monitoring service on {plcIp}"
             cts.Cancel())
 
-    member x.Monitor(plcIp, tags:string seq, runSynchronously:bool, delayms:int) =
+    member x.Monitor(plcIp, tags:string seq, runSynchronously:bool, delayms:int, bScanWrite:bool) =
         let tags = tags |> List.ofSeq
         match tags with
         | [] ->
             logWarn $"No monitoring target tags"
             Disposable.Create(fun () -> ())
         | _ ->
-            x.MonitorImpl(plcIp, tags, runSynchronously, delayms)
-    member x.Monitor(plcIp, tags:string seq) = x.Monitor(plcIp, tags, false, 50)
+            x.MonitorImpl(plcIp, tags, runSynchronously, delayms, bScanWrite)
 
+    member x.Monitor(plcIp, tags:string seq)           = x.Monitor(plcIp, tags, false, 50, false)
+    member x.Scan(plcIp, tags:string seq, delayms:int) = x.Monitor(plcIp, tags, false, delayms, true)
+   

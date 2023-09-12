@@ -16,6 +16,8 @@ open PLC.CodeGen.Common
 open XGCommLib
 open System.Threading
 open System.Collections
+open DsXgComm.Monitoring
+open DsXgComm
 
 
 [<AutoOpen>]
@@ -171,19 +173,7 @@ type XgCOM20ReadTest() =
         ////x.CommObject.ReadDevice_Block("M", offset, &rBuf[0], MAX_ARRAY_BYTE_SIZE-1, &nRead)
 
         noop()
-
-    [<Test>]
-    member x.``WriteRandomDevice`` () =
-        let di = x.CreateDevice('M', 'B')
-
-        let wBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
-        x.CommObject.RemoveAll()
-        for i = 0 to MAX_RANDOM_READ_POINTS-1 do
-            di.lOffset <- 0 + i * 8
-            wBuf[i] <- 0xFFuy
-            x.CommObject.AddDeviceInfo(di)
-        x.CommObject.WriteRandomDevice(wBuf) === 1
-
+        
 
     [<Test>]
     member x.``read/write random device test`` () =
@@ -424,3 +414,61 @@ type XgCOM20ReadTest() =
         x.CommObject.ReadRandomDevice(rBuf2) === 1
 
         rBuf === rBuf2
+
+
+
+[<Collection("SerialXgiGenerationTest")>]
+type DsXgConnectionTest() =
+
+
+   
+    [<Test>]
+    member x.``WriteRandomDevice for XGTags`` () =
+        let tags =
+            [ 
+            // LongMax ;  DwordMax  ;   WordMax  ; ByteMax     ; BitMax       ; BitMax(IEC I/O)
+            "%IL2047"  ; "%ID4095"  ; "%IW8191"  ; "%IB16383"  ; "%IX131071"  ; "%IX127.15.63" ;
+            "%QL2047"  ; "%QD4095"  ; "%QW8191"  ; "%QB16383"  ; "%QX131071"  ; "%QX127.15.63" ;
+            "%ML65535" ; "%MD131071"; "%MW262143"; "%MB524287" ; "%MX4194303" ; 
+            "%LL2815"  ; "%LD5631"  ; "%LW11263" ; "%LB22519"  ; "%LX180159"  ; 
+            "%RL8191"  ; "%RD16383" ; "%RW32767" ; "%RB65535"  ; "%RX524287"  ; 
+            "%WL131071"; "%WD262143"; "%WW524287"; "%WB1048575"; "%WX8388607" ; 
+            "%FL1023"  ; "%FD2047"  ; "%FW4095"  ; "%FB8191"   ; "%FX65535"   ; 
+                     
+            // LongMin ;  DwordMin  ;   WordMin  ; ByteMin     ; BitMin       ; BitMin(IEC I/O)
+//배선확인  //"%IL0"     ; "%ID0"     ; "%IW0"     ; "%IB0"      ; "%IX0"       ; "%IX0.0.0" ;
+//사고출력  //"%QL0"     ; "%QD0"     ; "%QW0"     ; "%QB0"      ; "%QX0"       ; "%QX0.0.0" ;
+            "%ML0"     ; "%MD0"     ; "%MW0"     ; "%MB0"      ; "%MX0"       ; 
+            "%LL0"     ; "%LD0"     ; "%LW0"     ; "%LB0"      ; "%LX0"       ; 
+            "%RL0"     ; "%RD0"     ; "%RW0"     ; "%RB0"      ; "%RX0"       ; 
+            "%WL0"     ; "%WD0"     ; "%WW0"     ; "%WB0"      ; "%WX0"       ; 
+          //  "%FL0"     ; "%FD0"     ; "%FW0"     ; "%FB0"      ; "%FX0"   // F 시스템 영역 초기영역 쓰기 금지(CPU 에러나서 리셋해야함)
+            ]
+    
+        let conn = DsXgConnection()
+        let isConnected_ = conn.Connect("192.168.0.100:2004") 
+        let tagInfos = creatTags(tags)
+        tagInfos.Iter(fun t->
+            match t.DataType with 
+            |DataType.Bit   -> t.WriteValue <- true
+            |DataType.Byte  -> t.WriteValue <- 0xFFuy
+            |DataType.Word  -> t.WriteValue <- 0xFFFFus
+            |DataType.DWord -> t.WriteValue <- 0xFFFFFFFFu
+            |DataType.LWord -> t.WriteValue <- 0xFFFFFFFFFFFFFFFFUL
+            //|DataType.Bit   -> t.WriteValue <- false
+            //|DataType.Byte  -> t.WriteValue <- 0x0uy
+            //|DataType.Word  -> t.WriteValue <- 0x0us
+            //|DataType.DWord -> t.WriteValue <- 0x0u
+            //|DataType.LWord -> t.WriteValue <- 0x0UL
+            |DataType.Continuous ->
+                failwithlog $"Unsupported device type DataType.Continuous"
+            )
+            
+        let writeValues = tagInfos.Map(fun f->f.WriteValue) |> Seq.toList
+
+        conn.WriteDevices tagInfos
+        let ret = conn.ReadDevices tagInfos
+
+        let readValues = ret.Map(fun f->f.Value) |> Seq.toList
+
+        writeValues === readValues

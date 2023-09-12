@@ -53,13 +53,13 @@ internal class XG5KChannelRequestExecutor : ChannelRequestExecutor
     {
         var inData = XG5KConnection.InData;
         var oldData = inData.ToList().ToArray();
+        //test ahn
+        //var ret =  XG5KConnection.ConnLS.ReadBit('I');
 
-        var ret =  XG5KConnection.ConnLS.ReadBit('I');
-
-        for (int i = 0; i < inData.Length; i++)
-        {
-            inData[i] = ret[i];
-        }
+        //for (int i = 0; i < inData.Length; i++)
+        //{
+        //    inData[i] = ret[i];
+        //}
      
         //XG5KConnection.XG5KLib_Io.GetInBytes(0, inData.Length, ref inData);
 

@@ -18,9 +18,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Include="XgTagInfo.fs" />
 		<Compile Include="Connect.fs" />
 		<Compile Include="Monitoring.fs" />
-		<Compile Include="ScanIO.fs" />
 		<COMReference Include="XGCommLib">
 		  <WrapperTool>tlbimp</WrapperTool>
 		  <VersionMinor>0</VersionMinor>
@@ -39,6 +39,13 @@
 		<PackageReference Include="DualSoft-PLC-LS-FS" Version="0.1.2" />
 		<PackageReference Include="System.Reactive" Version="6.0.0" />
 		<PackageReference Include="log4net" Version="2.0.15" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <Reference Include="Interop.XGCommLib">
+	    <HintPath>..\..\..\exLib\Interop.XGCommLib.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">

@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFrameworks>net7.0</TargetFrameworks>
+	<TargetFrameworks>net7.0-windows</TargetFrameworks>
 	<LangVersion>11.0</LangVersion>
-	  <OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
+	  <OutputPath>$(SolutionDir)\bin\</OutputPath>
 	  <Nullable>enable</Nullable>
   </PropertyGroup>
 

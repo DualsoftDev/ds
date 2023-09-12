@@ -4,7 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFrameworks>net7.0-windows</TargetFrameworks>
     <UseWindowsForms>true</UseWindowsForms>
-    <BaseOutputPath>..\bin</BaseOutputPath>
+	  <OutputPath>$(SolutionDir)\bin\</OutputPath>
   </PropertyGroup>
 
 
@@ -32,10 +32,10 @@
     <ProjectReference Include="..\src\Engine\Engine.Import.Office\Engine.Import.Office.fsproj" />
     <ProjectReference Include="..\src\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
     <ProjectReference Include="..\src\Engine\Engine.Parser\Engine.Parser.csproj" />
-    <ProjectReference Include="..\src\HW\LSPLC\Dual.PLC.LS.XgCOM.FS\Dual.PLC.LS.XgCOM.FS.fsproj" />
     <ProjectReference Include="..\src\PLC\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
     <ProjectReference Include="..\src\PLC\PLC.CodeGen.LSXGI\PLC.CodeGen.LSXGI.fsproj" />
     <ProjectReference Include="..\src\PLC\PLC.CodeGen.LSXGK\PLC.CodeGen.LSXGK.fsproj" />
+    <ProjectReference Include="..\src\Server\Dual.PLC.LS.XgCOM.FS\Dual.PLC.LS.XgCOM.FS.fsproj" />
     <ProjectReference Include="..\src\Server\Server.HW.Common\Server.HW.Common.csproj" />
     <ProjectReference Include="..\src\Server\Server.HW.XG5K\Server.HW.XG5K.csproj" />
 	<None Include="$(SolutionDir)exLib\XGCommLib64.dll">

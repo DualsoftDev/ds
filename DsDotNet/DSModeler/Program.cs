@@ -1,5 +1,6 @@
 ﻿using DevExpress.XtraSplashScreen;
 using DSModeler.Utils;
+using DsXgComm.Monitoring;
 using Dual.Common.Core;
 using Dual.Common.Winform;
 using Engine.Core;
@@ -20,6 +21,10 @@ namespace DSModeler
 #if DEBUG
             Global.IsDebug = true;
 #endif
+
+            //ScanIO s = new ScanIO();
+            //    s.Test();
+
             var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             Log4NetLogger.Initialize(config.FilePath, "DSModelerLogger");  // "App.config"
 

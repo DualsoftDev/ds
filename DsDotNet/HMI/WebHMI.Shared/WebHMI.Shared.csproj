@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <BaseOutputPath>$(SolutionDir)\bin</BaseOutputPath>
+	  <OutputPath>$(SolutionDir)\bin\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <SupportedPlatform Include="browser" />

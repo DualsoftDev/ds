@@ -2,10 +2,10 @@
 
 	<PropertyGroup>
 		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net7.0-windows</TargetFramework>
 		<RootNamespace>PLC.CodeGen.Common</RootNamespace>
 		<LangVersion>7.0</LangVersion>
-		<OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
         <OtherFlags>--warnon:1182</OtherFlags>
     </PropertyGroup>

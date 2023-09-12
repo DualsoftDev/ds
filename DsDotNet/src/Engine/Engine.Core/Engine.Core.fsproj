@@ -2,10 +2,10 @@
 
 	<PropertyGroup>
 		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
-		<TargetFrameworks>net7.0;net48</TargetFrameworks>
+		<TargetFrameworks>net7.0-windows;net48</TargetFrameworks>
 		<RootNamespace>Engine.Base</RootNamespace>
 		<LangVersion>7.0</LangVersion>
-		<OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
     </PropertyGroup>
 

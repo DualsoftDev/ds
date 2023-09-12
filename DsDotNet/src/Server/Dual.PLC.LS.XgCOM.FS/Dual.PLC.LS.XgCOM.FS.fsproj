@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net7.0-windows</TargetFramework>
 		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<LangVersion>7.0</LangVersion>
 		<OutputType>Library</OutputType>
@@ -14,26 +14,23 @@
 		<Version>0.1.1</Version>
 		<Company>Dual Inc.</Company>
 		<Authors>Dual Inc.</Authors>
-		<OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<Compile Include="Connect.fs" />
 		<Compile Include="Monitoring.fs" />
-		<None Include="Snippets.fsx" />
-	</ItemGroup>
-
-	<ItemGroup>
+		<Compile Include="ScanIO.fs" />
 		<COMReference Include="XGCommLib">
-			<WrapperTool>tlbimp</WrapperTool>
-			<VersionMinor>0</VersionMinor>
-			<VersionMajor>1</VersionMajor>
-			<Guid>2cff650c-6df0-48ae-9b06-c8dd467e0cd3</Guid>
-			<Lcid>0</Lcid>
-			<Isolated>false</Isolated>
-			<EmbedInteropTypes>true</EmbedInteropTypes>
-			<Private>true</Private>
+		  <WrapperTool>tlbimp</WrapperTool>
+		  <VersionMinor>0</VersionMinor>
+		  <VersionMajor>1</VersionMajor>
+		  <Guid>2cff650c-6df0-48ae-9b06-c8dd467e0cd3</Guid>
+		  <Lcid>0</Lcid>
+		  <Isolated>false</Isolated>
+		  <EmbedInteropTypes>true</EmbedInteropTypes>
 		</COMReference>
+		<None Include="Snippets.fsx" />
 	</ItemGroup>
 
 

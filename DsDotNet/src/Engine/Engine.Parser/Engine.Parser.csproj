@@ -16,10 +16,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<!--<OutputType>Library</OutputType>-->
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net7.0-windows</TargetFramework>
 		<RootNamespace>Engine.Parser</RootNamespace>
 		<LangVersion>11.0</LangVersion>
-		<OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
 	</PropertyGroup>
 	<ItemGroup>

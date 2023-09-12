@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net48</TargetFrameworks>
+    <TargetFrameworks>net7.0-windows;net48</TargetFrameworks>
 
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<RootNamespace>Engine.Import.Office</RootNamespace>
     <OutputType>Library</OutputType>
-	  <OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
+	  <OutputPath>$(SolutionDir)\bin\</OutputPath>
 	  <AssemblyName>Engine.Import.Office</AssemblyName>
 
     <Version>1.0.1</Version>

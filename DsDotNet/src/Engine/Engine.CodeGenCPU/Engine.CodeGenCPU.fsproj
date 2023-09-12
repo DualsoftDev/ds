@@ -1,13 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net7.0-windows</TargetFramework>
 		<RootNamespace>Engine.CodeGenCPU</RootNamespace>
 		<LangVersion>7.0</LangVersion>
-		<OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 		<OutputType>Library</OutputType>
         <OtherFlags>--warnon:1182</OtherFlags>
-        <BaseOutputPath></BaseOutputPath>
 	</PropertyGroup>
 
   <ItemGroup>

@@ -26,6 +26,7 @@ module XgCOMFixtures =
 #endif
 
 
+    //대신 XgCOMBaseClass20 사용"
     [<AbstractClass>]
     type XgCOMBaseClass(?connStr) =
         inherit TestBaseClass("HWPLCLogger")
@@ -34,7 +35,7 @@ module XgCOMFixtures =
                 failwithlog "Platform and X64 compile flag mismatch"
 
         //let connStr = connStr |? "192.168.0.101:2004"
-        let connStr = connStr |? "192.168.0.111:2004"
+        let connStr = connStr |? "192.168.0.100:2004"
 
         member val CommObject:CommObject = null with get, set
         member val Factory:CommObjectFactory = null with get, set
@@ -66,7 +67,7 @@ module XgCOMFixtures =
             if (Environment.Is64BitProcess <> isX64Defined ) then
                 failwithlog "Platform and X64 compile flag mismatch"
 
-        let connStr = connStr |? "192.168.0.111:2004"
+        let connStr = connStr |? "192.168.0.100:2004"
 
         member val CommObject:CommObject20 = null with get, set
         member val Factory:CommObjectFactory20 = null with get, set

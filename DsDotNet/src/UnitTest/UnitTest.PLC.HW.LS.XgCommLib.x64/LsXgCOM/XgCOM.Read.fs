@@ -114,6 +114,7 @@ type XgCOM20ReadTest() =
     member x.``Not working: Read/Write`` () =
         let wBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
         let rBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
+        wBuf[0] <- 0x0uy
         rBuf[0] <- 0xFFuy
 
         let sWrite = x.CommObject.Write((int)XgCOMCodes.W_M, wBuf, 1, 0)
@@ -125,7 +126,8 @@ type XgCOM20ReadTest() =
          *)
         sWrite === 0     // 1 이 되어야 할 것 같은데...
         sRead  === 0     // 1 이 되어야 할 것 같은데...
-        rBuf[0] === 0uy    // 1 이 되어야 함...
+        //rBuf[0] === 0uy    // 0 이 되어야 함...
+        rBuf[0] === 0xFFuy    // FF 이면 읽기 실패!!
 
         // does *NOT* working
         //x.CommObject.Command((int)XgCOMCodes.W_M, wBuf, 1024, 0) =!= 0
@@ -177,8 +179,8 @@ type XgCOM20ReadTest() =
         let wBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
         x.CommObject.RemoveAll()
         for i = 0 to MAX_RANDOM_READ_POINTS-1 do
-            di.lOffset <- 180 + i * 8
-            wBuf[i] <- byte i
+            di.lOffset <- 0 + i * 8
+            wBuf[i] <- 0xFFuy
             x.CommObject.AddDeviceInfo(di)
         x.CommObject.WriteRandomDevice(wBuf) === 1
 

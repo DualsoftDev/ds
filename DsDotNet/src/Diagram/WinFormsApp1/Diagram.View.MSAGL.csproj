@@ -4,7 +4,7 @@
 		<OutputType>Library</OutputType>
 		<TargetFrameworks>net7.0-windows;net48</TargetFrameworks>
 		<UseWindowsForms>true</UseWindowsForms>
-		<OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>

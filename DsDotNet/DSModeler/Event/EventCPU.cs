@@ -1,98 +1,91 @@
-using Server.HW.Common;
-using Server.HW.XG5K;
-using System;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Runtime.Versioning;
-using System.Threading.Tasks;
-using static Engine.Core.CoreModule;
-using static Engine.Core.DsType;
-using static Engine.Core.TagKindModule;
-using static Engine.Core.TagKindModule.TagDS;
-using static Engine.Core.TagModule;
 
-namespace DSModeler;
+
+using DevExpress.CodeParser;
+
+namespace DSModeler.Event;
 [SupportedOSPlatform("windows")]
 public static class EventCPU
 {
-
-    static IDisposable DisposableHWPaixInput;
-    static IDisposable DisposableTagDS;
+    private static IDisposable DisposableHWDSInput;
+    private static IDisposable DisposableTagDS;
 
     public static void CPUSubscribe()
     {
-        if (DisposableHWPaixInput == null && Global.CpuRunMode.IsPackagePC())
+        if (DisposableHWDSInput == null && Global.CpuRunMode.IsPackagePC())
         {
-            DisposableHWPaixInput = Global.PaixDriver.Conn.Subject.OfType<TagValueChangedEvent>()
+            DisposableHWDSInput = Global.DsDriver.Conn.Subject.OfType<TagValueChangedEvent>()
             .Subscribe(evt =>
             {
-                var t = evt.Tag as XG5KTag;
+                TagHW t = evt.Tag as TagHW;
                 if (t.IOType == TagIOType.Output)
                 {
-                    Global.Logger.Debug($"HW_OUT {t.Address} value: {t.Value}");
+                    Global.Logger.Debug($"HW_OUT {t.Name}({t.Address}) value: {t.Value}");
                 }
                 if (t.IOType == TagIOType.Input)
                 {
-                    var tags = PcControl.DicActionIn[t];
+                    var tags = PcContr.DicActionIn[t];
                     tags.Iter(tag =>
                     {
                         tag.BoxedValue = t.Value;
-                        var dev = tag.Target.Value as TaskDev;
-                        if (dev != null && ViewDraw.DicTask.ContainsKey(dev)) //job만정의 하고 call에 사용  안함
+                        if (tag.Target.Value is TaskDev dev && ViewDraw.DicTask.ContainsKey(dev)) //job만정의 하고 call에 사용  안함
                         {
-                            var vs = ViewDraw.DicTask[dev];
-                            vs.Iter(v => ViewDraw.ActionChangeSubject
-                                               .OnNext(System.Tuple.Create(v, t.Value)));
+                            IEnumerable<Vertex> vs = ViewDraw.DicTask[dev];
+                            _ = vs.Iter(v => ViewDraw.ActionChangeSubject
+                                               .OnNext(Tuple.Create(v, t.Value)));
                         }
                     });
-                    Global.Logger.Debug($"HW_IN {t.Address} value: {t.Value}");
+                    Global.Logger.Debug($"HW_IN {t.Name}({t.Address}) value: {t.Value}");
                 }
             });
         }
 
-        if (DisposableTagDS == null)
-        {
-            DisposableTagDS =
+        DisposableTagDS ??=
                 TagDSSubject
                 .Subscribe(evt =>
                 {
                     if (evt.IsEventVertex)
                     {
-                        var t = evt as EventVertex;
-                        var isStatus = false;
-                        switch (t.TagKind)
-                        {
-                            case VertexTag.ready: ViewDraw.DicStatus[t.Target] = Status4.Ready; isStatus = true; break;
-                            case VertexTag.going: ViewDraw.DicStatus[t.Target] = Status4.Going; isStatus = true; break;
-                            case VertexTag.finish: ViewDraw.DicStatus[t.Target] = Status4.Finish; isStatus = true; break;
-                            case VertexTag.homing: ViewDraw.DicStatus[t.Target] = Status4.Homing; isStatus = true; break;
-                            default: break;
-                        }
+                        EventVertex t = evt as EventVertex;
+                        bool isStatus = t.TagKind == VertexTag.ready
+                                      || t.TagKind == VertexTag.going
+                                      || t.TagKind == VertexTag.finish
+                                      || t.TagKind == VertexTag.homing;
+
+                    
 
                         if (isStatus && (bool)t.Tag.BoxedValue)
-                            ViewDraw.StatusChangeSubject.OnNext(t.Target);
-
+                        {
+                            ViewDraw.StatusChangeSubject.OnNext(t);
+                        }
 
                         if (Global.CpuRunMode.IsSimulation)
+                        {
                             Task.Delay(ControlProperty.GetDelayMsec()).Wait();
+                        }
                         else
-                            Task.Yield();
-
+                        {
+                            _ = Task.Yield();
+                        }
                     }
                     else if (evt.IsEventAction && Global.CpuRunMode.IsPackagePC())
                     {
-                        var tag = (evt as EventAction).Tag as Tag<bool>;
-                        if (PcControl.DicActionOut.ContainsKey(tag))
+                        Tag<bool> tag = (evt as EventAction).Tag as Tag<bool>;
+                        if (PcContr.DicActionOut.ContainsKey(tag))
                         {
-                            var tagHW = PcControl.DicActionOut[tag];
-                            tagHW.WriteRequestValue = tag.Value;
+                            var tagHW = PcContr.DicActionOut[tag];
+
+                            if (Global.DSHW.Company == Company.LSE)
+                                ((XG5KTag)tagHW).XgPLCTag.WriteValue = tag.Value;
+                            else
+                                tagHW.WriteRequestValue = tag.Value;
+
+
                         }
 
                     }
 
                     LogicLog.AddLogicLog(evt);
                 });
-        }
 
     }
 
@@ -100,8 +93,8 @@ public static class EventCPU
 
     public static void CPUUnsubscribe()
     {
-        DisposableHWPaixInput?.Dispose();
-        DisposableHWPaixInput = null;
+        DisposableHWDSInput?.Dispose();
+        DisposableHWDSInput = null;
         DisposableTagDS?.Dispose();
         DisposableTagDS = null;
     }

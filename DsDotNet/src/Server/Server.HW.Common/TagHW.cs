@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Net;
 
 namespace Server.HW.Common
 {
@@ -44,6 +45,7 @@ namespace Server.HW.Common
         public virtual string Name { get; set; }
         [Browsable(false)]
         public virtual int BitOffset { get; protected set; }
+        public string Address { get; private set; } = string.Empty;
 
         /// <summary>
         /// Melsec, Fuji 등의 HW 에 대해서 tag 의 byte offset 을 반환한다.  AB 의 경우처럼 환산 불가면 null
@@ -61,5 +63,14 @@ namespace Server.HW.Common
         public virtual bool IsBitAddress { get { return DataType == TagDataType.Bool; } }
 
         public TagHW(ConnectionBase connection) { ConnectionBase = connection; }
+        public void SetAddress(string name, int bitOffset, TagIOType tagIOType)
+        {
+            var upperName = name.ToUpper().Trim();
+            Address = upperName;
+            IOType = tagIOType;
+            ByteOffset = bitOffset / 8;
+            BitOffset = bitOffset;
+        }
+     
     }
 }

@@ -1,21 +1,16 @@
-using DevExpress.XtraVerticalGrid;
-using System.Linq;
-using System.Runtime.Versioning;
-using System.Windows.Forms;
-
 namespace DSModeler
 {
     [SupportedOSPlatform("windows")]
     public partial class UcPropertyGrid : DevExpress.XtraEditors.XtraUserControl
     {
-        public PropertyGridControl PropertyGrid => propertyGridControl1;
+        public PropertyGridControl PropertyGrid { get; private set; }
         public UcPropertyGrid()
         {
             InitializeComponent();
             PropertyGrid.Dock = DockStyle.Fill;
             PropertyGrid.DataSourceChanged += (s, e) =>
             {
-                var sel = PropertyGrid.SelectedObject ?? (PropertyGrid.SelectedObjects?.FirstOrDefault());
+                object sel = PropertyGrid.SelectedObject ?? (PropertyGrid.SelectedObjects?.FirstOrDefault());
                 //if (sel is Record r)
                 //{
                 //    //Rows["Display"].Visible = false;

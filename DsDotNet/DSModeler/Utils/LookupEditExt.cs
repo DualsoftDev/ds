@@ -1,9 +1,4 @@
-using DevExpress.XtraEditors;
-using DevExpress.XtraGrid.Views.Grid;
-using System.Drawing;
-using System.Runtime.Versioning;
-
-namespace DSModeler;
+namespace DSModeler.Utils;
 [SupportedOSPlatform("windows")]
 public static class LookupEditExt
 {
@@ -19,14 +14,35 @@ public static class LookupEditExt
         {
             if (e.Column.FieldName == "IOType")
             {
-                var cellValue = e.DisplayText.ToString().ToUpper();
+                string cellValue = e.DisplayText.ToString().ToUpper();
                 if (cellValue == "INPUT")
+                {
                     e.Cache.FillRectangle(Color.RoyalBlue, e.Bounds);
+                }
                 else if (cellValue == "OUTPUT")
+                {
                     e.Cache.FillRectangle(Color.Salmon, e.Bounds);
+                }
                 else
+                {
                     e.Cache.FillRectangle(Color.Transparent, e.Bounds);
+                }
 
+                e.Appearance.DrawString(e.Cache, e.DisplayText, e.Bounds);
+                e.Handled = true;
+            }
+
+            if (e.Column.FieldName == "Value")
+            {
+                string cellValue = e.DisplayText.ToString().ToUpper();
+                if (cellValue == "TRUE")
+                {
+                    e.Cache.FillRectangle(Color.Green, e.Bounds);
+                }
+                else
+                {
+                    e.Cache.FillRectangle(Color.Transparent, e.Bounds);
+                }
 
                 e.Appearance.DrawString(e.Cache, e.DisplayText, e.Bounds);
                 e.Handled = true;

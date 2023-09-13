@@ -1,5 +1,3 @@
-using DevExpress.XtraEditors;
-
 namespace DSModeler.Form
 {
     public partial class FormDocImage : DevExpress.XtraEditors.XtraForm
@@ -8,7 +6,7 @@ namespace DSModeler.Form
         {
             InitializeComponent();
         }
-        public PictureEdit ImageControl => pictureEdit;
+        public PictureEdit ImageControl { get; private set; }
 
     }
 }

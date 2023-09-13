@@ -107,16 +107,16 @@ module TagManagerUtil =
             elif RuntimeDS.Package.IsPackageSIM() || RuntimeDS.Package.IsPackagePC() 
             then
                 match inOut with
-                | ActionTag.ActionIn     -> inCnt<-inCnt+1;  Some($"I{inCnt/8}.{inCnt%8}")
-                | ActionTag.ActionOut    -> outCnt<-outCnt+1;Some($"O{outCnt/8}.{outCnt%8}")
-                | ActionTag.ActionMemory ->  failwithlog "error: Memory not supported "
+                | ActionTag.ActionIn     -> inCnt<-inCnt+1;  Some($"%%IW{inCnt/16}.{inCnt%16}") //일단 LS 규격으로
+                | ActionTag.ActionOut    -> outCnt<-outCnt+1;Some($"%%QW{outCnt/16}.{outCnt%16}")
+                | ActionTag.ActionMemory -> failwithlog "error: Memory not supported "
                 | _ -> failwithlog "error: ActionTag create "
 
             elif RuntimeDS.Package.IsPackagePLC()
             then 
                 match inOut with
-                | ActionTag.ActionIn     -> inCnt<-inCnt+1;  Some($"%%IX0.{inCnt/16}.{inCnt%16}")
-                | ActionTag.ActionOut    -> outCnt<-outCnt+1;Some($"%%QX0.{outCnt/16}.{outCnt%16}")
+                | ActionTag.ActionIn     -> inCnt<-inCnt+1;  Some($"%%IW{inCnt/16}.{inCnt%16}") //일단 LS 규격으로
+                | ActionTag.ActionOut    -> outCnt<-outCnt+1;Some($"%%QW{outCnt/16}.{outCnt%16}")
                 | ActionTag.ActionMemory -> failwithlog "error: Memory not supported "
                 | _ -> failwithlog "error: ActionTag create "
             else 

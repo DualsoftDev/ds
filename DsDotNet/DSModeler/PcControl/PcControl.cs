@@ -1,44 +1,29 @@
-using DevExpress.Utils.Extensions;
-using DevExpress.XtraEditors;
-using Dual.Common.Core;
-using Dual.Common.Winform;
-using Engine.Core;
-using Server.HW.Common;
-using Server.HW.XG5K;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Versioning;
-using System.Threading.Tasks;
-using static Engine.CodeGenCPU.CpuLoader;
+
+using DocumentFormat.OpenXml.Wordprocessing;
 using static Engine.Core.CoreModule;
-using static Engine.Core.ExpressionForwardDeclModule;
-using static Engine.Core.ExpressionModule;
-using static Engine.Cpu.RunTime;
 
-namespace DSModeler;
+namespace DSModeler.PcControl;
 [SupportedOSPlatform("windows")]
-public static class PcControl
+public static class PcContr
 {
-    public static List<DsCPU> RunCpus = new List<DsCPU>();
-    public static Dictionary<TagHW, IEnumerable<ITag>> DicActionIn = new Dictionary<TagHW, IEnumerable<ITag>>();
-    public static Dictionary<ITag, TagHW> DicActionOut = new Dictionary<ITag, TagHW>();
-
+    public static List<DsCPU> RunCpus = new();
+    public static Dictionary<TagHW, IEnumerable<ITag>> DicActionIn;
+    public static Dictionary<ITag, TagHW> DicActionOut;
     public static Dictionary<TagHW, IEnumerable<ITag>> GetActionInputs(DsSystem sys)
     {
-        var actions = new Dictionary<TagHW, IEnumerable<ITag>>();
-        var inTags
+        Dictionary<TagHW, IEnumerable<ITag>> actions = new();
+        IEnumerable<ITag> inTags
              = sys.Jobs
                   .SelectMany(j => j.DeviceDefs.Select(s => s.InTag))
                   .Where(w => w != null)
                   .Where(w => !w.Address.Trim().IsNullOrEmpty());
 
-        inTags
+        _ = inTags
           .GroupBy(g => g.Address)
           .Iter(g =>
           {
-              var names = String.Join(", ", g.Select(s => s.Name));
-              var hwTag = getTagHW(names, g.Key);
+              string names = string.Join(", ", g.Select(s => s.Name));
+              TagHW hwTag = getTagHW(names, g.Key);
               actions.Add(hwTag, g.Select(s => s));
           });
 
@@ -46,20 +31,20 @@ public static class PcControl
     }
     public static Dictionary<ITag, TagHW> GetActionOutputs(DsSystem sys)
     {
-        var actions = new Dictionary<ITag, TagHW>();
-        var outTags
+        Dictionary<ITag, TagHW> actions = new();
+        IEnumerable<ITag> outTags
              = sys.Jobs
                   .SelectMany(j => j.DeviceDefs.Select(s => s.OutTag))
                   .Where(w => w != null)
                   .Where(w => !w.Address.Trim().IsNullOrEmpty());
 
-        outTags
+        _ = outTags
           .GroupBy(g => g.Address)
           .Iter(g =>
           {
-              var names = String.Join(", ", g.Select(s => s.Name));
-              var hwTag = getTagHW(names, g.Key);
-              g.Iter(s => actions.Add(s, hwTag));
+              string names = string.Join(", ", g.Select(s => s.Name));
+              TagHW hwTag = getTagHW(names, g.Key);
+              _ = g.Iter(s => actions.Add(s, hwTag));
           });
 
         return actions;
@@ -68,54 +53,75 @@ public static class PcControl
     private static TagHW getTagHW(string name, string address)
     {
         if (address.IsNullOrEmpty())
-            MBox.Error($"주소가 없습니다. {name}");
+            _ = MBox.Error($"주소가 없습니다. {name}");
 
-        var tag = new XG5KTag(Global.PaixDriver.Conn as XG5KConnection, name);
-        tag.SetAddress(address);
-        //tag.IOType = bInput ? TagIOType.Input : TagIOType.Output;
+        TagHW tag = null;
+        if (HwModels.GetListByCompany(Company.LSE).Contains(Global.DSHW))
+        {
+            var xgTag = AddressConvert.tryParseTagByCpu(address, Global.DSHW.ModelId);
+            if (xgTag != null)
+            {
+                TagIOType ioType = TagIOType.Memory;
+
+                if (xgTag.Value.GetIOM() == "I") ioType = TagIOType.Input;
+                else if (xgTag.Value.GetIOM() == "O") ioType = TagIOType.Output;
+                else if (xgTag.Value.GetIOM() == "M") ioType = TagIOType.Memory;
+
+                tag = new XG5KTag(Global.DsDriver.Conn as XG5KConnection, name);
+                tag.SetAddress(address, tag.BitOffset, ioType);
+            }
+        }
+        else if (HwModels.GetListByCompany(Company.PAIX).Contains(Global.DSHW))
+        {
+            ///...
+        }
+        if(tag == null)
+            _ = MBox.Error($"TAG 등록실패 name:{name}, address:{address}");
+
 
         return tag;
     }
 
 
-    private static void CreatePcControl()
+    private static void CreatePcControl(GridLookUpEdit gDevice)
     {
-        if (Global.CpuRunMode.IsPackagePC())
-        {
-            PcAction.CreateConnect();
-            DicActionIn = GetActionInputs(Global.ActiveSys);
-            DicActionOut = GetActionOutputs(Global.ActiveSys);
-            Global.PaixDriver.Conn.AddMonitoringTags(DicActionIn.Keys);
-            Global.PaixDriver.Conn.AddMonitoringTags(DicActionOut.Values);
-        }
-    }
-    public static void UpdateDevice(GridLookUpEdit gDevice)
-    {
+        PcAction.CreateConnect();
+        DicActionIn = GetActionInputs(Global.ActiveSys);
+        DicActionOut = GetActionOutputs(Global.ActiveSys);
+        _ = Global.DsDriver.Conn.AddMonitoringTags(DicActionIn.Keys.Distinct());
+        _ = Global.DsDriver.Conn.AddMonitoringTags(DicActionOut.Values.Distinct());
+
+      
         gDevice.Do(() =>
         {
-            var tags = DicActionIn.Keys.Cast<XG5KTag>().ToList();
-            tags.AddRange(DicActionOut.Values.Cast<XG5KTag>());
+            List<TagHW> tags = DicActionIn.Keys.Cast<TagHW>().ToList();
+            tags.AddRange(DicActionOut.Values.Cast<TagHW>());
             gDevice.Properties.DataSource = tags;
             gDevice.Properties.DisplayMember = "Name";
         });
     }
 
-    public static async Task CreateRunCpuSingle(Dictionary<DsSystem, PouGen> DicPou)
-    {
-        CreatePcControl();
+   
 
-        List<DsCPU> runCpus = new List<DsCPU>();
-        List<CommentedStatement> css = new List<CommentedStatement>();
-        int cnt = 0;
-        foreach (var cpu in DicPou.Values)
+    public static async Task CreateRunCpuSingle(Dictionary<DsSystem, PouGen> DicPou, GridLookUpEdit gDevice)
+    {
+        if (Global.CpuRunMode.IsPackagePC())
         {
-            DsProcessEvent.DoWork(Convert.ToInt32(((cnt++ * 1.0) / DicPou.Values.Count()) * 50 + 50));
+            CreatePcControl(gDevice);
+        }
+
+        List<DsCPU> runCpus = new();
+        List<CommentedStatement> css = new();
+        int cnt = 0;
+        foreach (PouGen cpu in DicPou.Values)
+        {
+            DsProcessEvent.DoWork(Convert.ToInt32((cnt++ * 1.0 / DicPou.Values.Count() * 50) + 50));
             css.AddRange(cpu.CommentedStatements().ToList());
             await Task.Delay(1);
         }
 
-        var passiveCPU =
-           new DsCPU(
+        DsCPU passiveCPU =
+           new(
            css
          , DicPou.Values.Select(s => s.ToSystem())
          , Global.CpuRunMode);
@@ -131,51 +137,58 @@ public static class PcControl
     /// Active 1 - Passive n개로 돌림  PC의 절반 CPU 활용
     /// </summary>
     /// <returns></returns>
-    public static async Task GetRunCpus(Dictionary<DsSystem, PouGen> DicPou)
-    {
-        await Task.Yield();
+    //public static async Task GetRunCpus(Dictionary<DsSystem, PouGen> DicPou, GridLookUpEdit gDevice)
+    //{
+    //    await Task.Yield();
 
-        CreatePcControl();
+    //    if (Global.CpuRunMode.IsPackagePC())
+    //    {
+    //        CreatePcControl(gDevice);
+    //    }
 
-        List<DsCPU> runCpus = new List<DsCPU>();
-        //Global.ActiveSys 제외한  PC의 절반 CPU 활용
-        var ableCpuCnt = (Environment.ProcessorCount - 1) / 2;
+    //    List<DsCPU> runCpus = new();
+    //    //Global.ActiveSys 제외한  PC의 절반 CPU 활용
+    //    int ableCpuCnt = (Environment.ProcessorCount - 1) / 2;
 
-        var devices = DicPou.Values.Where(d => d.ToSystem() != Global.ActiveSys).ToList();
-        if (devices.Any()) //1개이상은 외부 Device 존재
-        {
-            Dictionary<int, List<PouGen>> pous = new Dictionary<int, List<PouGen>>();
-            for (int i = 0; i < devices.Count(); i++)
-            {
-                var index = i % ableCpuCnt; //cpu 개수 만큼 만듬
-                if (!pous.ContainsKey(index))
-                    pous.Add(index, new List<PouGen> { devices[i] });
-                else
-                    pous[index].Add(devices[i]);
-            }
+    //    List<PouGen> devices = DicPou.Values.Where(d => d.ToSystem() != Global.ActiveSys).ToList();
+    //    if (devices.Any()) //1개이상은 외부 Device 존재
+    //    {
+    //        Dictionary<int, List<PouGen>> pous = new();
+    //        for (int i = 0; i < devices.Count(); i++)
+    //        {
+    //            int index = i % ableCpuCnt; //cpu 개수 만큼 만듬
+    //            if (!pous.ContainsKey(index))
+    //            {
+    //                pous.Add(index, new List<PouGen> { devices[i] });
+    //            }
+    //            else
+    //            {
+    //                pous[index].Add(devices[i]);
+    //            }
+    //        }
 
-            foreach (var pouSet in pous.Values)
-            {
-                var passiveCPU =
-               new DsCPU(
-                pouSet.SelectMany(s => s.CommentedStatements())
-             , pouSet.Select(d => d.ToSystem())
-             , Global.CpuRunMode);
+    //        foreach (List<PouGen> pouSet in pous.Values)
+    //        {
+    //            DsCPU passiveCPU =
+    //           new(
+    //            pouSet.SelectMany(s => s.CommentedStatements())
+    //         , pouSet.Select(d => d.ToSystem())
+    //         , Global.CpuRunMode);
 
-                runCpus.Add(passiveCPU);
-            }
+    //            runCpus.Add(passiveCPU);
+    //        }
 
-        }
+    //    }
 
-        var activeCPU = CreateCpu(DicPou[Global.ActiveSys]);
-        runCpus.Add(activeCPU);
+    //    DsCPU activeCPU = CreateCpu(DicPou[Global.ActiveSys]);
+    //    runCpus.Add(activeCPU);
 
-        RunCpus = runCpus;
-    }
+    //    RunCpus = runCpus;
+    //}
 
     public static DsCPU CreateCpu(PouGen pou)
     {
-        var cpu = new DsCPU(
+        DsCPU cpu = new(
             pou.CommentedStatements(),
             new List<DsSystem>() { pou.ToSystem() },
             Global.CpuRunMode);
@@ -183,30 +196,15 @@ public static class PcControl
         return cpu;
     }
 
-    public static void ClearModel(FormMain frmMain)
+    internal static void Stop()
     {
-        frmMain.Do(() =>
-        {
-            if (RunCpus.Any())
-                PcAction.Reset(frmMain.Ace_Play, frmMain.Ace_HMI);
+        var con = Global.DsDriver.Conn as XG5KConnection;
+        con.Stop();
 
-            RunCpus.Iter(cpu => cpu.Dispose());
-            RecentDocs.SetRecentDoc(frmMain.TabbedView.Documents.Select(d => d.Caption));
+        PcContr.DicActionIn = null;
+        PcContr.DicActionOut = null;
 
-            frmMain.TabbedView.Controller.CloseAll();
-            frmMain.TabbedView.Documents.Clear();
-            frmMain.LogCountText.Caption = "";
-            LogicLog.ValueLogs.Clear();
-
-            Global.ActiveSys = null;
-
-            Tree.ModelTree.ClearSubBtn(frmMain.Ace_System);
-            Tree.ModelTree.ClearSubBtn(frmMain.Ace_Device);
-            Tree.ModelTree.ClearSubBtn(frmMain.Ace_ExSystem);
-            Tree.ModelTree.ClearSubBtn(frmMain.Ace_HMI);
-        });
     }
-
 }
 
 

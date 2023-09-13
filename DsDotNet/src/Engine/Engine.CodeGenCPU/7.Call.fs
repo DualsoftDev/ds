@@ -22,7 +22,8 @@ type VertexMCoin with
                 let tasks = r.V.OriginInfo.Tasks
                 if tasks.Where(fun (_,ty) -> ty = InitialType.On) //NeedCheck 처리 필요 test ahn
                         .Select(fun (t,_)->t).Contains(td)
-                    then r.V.RO.Expr //<&&> (!!td.ApiItem.PE.Expr)
+                    then r.V.RO.Expr <&&> !!td.MutualResetExpr(coin.System)
+                                             
                     else r.V.RO.Expr <&&> call._off.Expr
             | _ ->
                 call._off.Expr
@@ -32,17 +33,15 @@ type VertexMCoin with
                 let sets = (dop <&&> startTags <||> getStartPointExpr (call, td)) <||>
                            (mop <&&> forceStarts) 
                            <&&>
-                           !!td.MutualResets(coin.System)
-                             .Where(fun f -> f.ApiItem = td.ApiItem)
-                             .Select(fun f -> f.ApiItem.PS)
-                             .ToAndElseOff(coin.System)
+                           !!td.MutualReset(coin.System).Select(fun f -> f.ApiItem.PS)
+                               .ToAndElseOff(coin.System)
                            <&&>
                            !!(interlockPE td)
 
-                let rsts = (dop <&&> coin.CR.Expr)
-                           <||> (mop  <&&> coin.ET.Expr)
+                //let rsts = (dop <&&> coin.CR.Expr)
+                //           <||> (mop  <&&> coin.ET.Expr)
 
-                yield (sets, rsts) ==| (td.ApiItem.PS, getFuncName())
+                yield (sets, coin.ET.Expr) ==| (td.ApiItem.PS, getFuncName())
         ]
 
 

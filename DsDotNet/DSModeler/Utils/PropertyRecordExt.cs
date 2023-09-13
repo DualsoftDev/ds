@@ -1,24 +1,16 @@
-using Dual.Common.Core;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
-using System.Linq;
-using static Engine.Core.CoreModule;
 
-namespace DSModeler
+namespace DSModeler.Utils
 {
     public static class PropertyRecordExt
     {
         public static object Propertize(this IEnumerable<Vertex> vertices)
         {
-            if (vertices.NonNullAny())
+            if (vertices != null && vertices.Any())
             {
-                var records = vertices.ToArray();
-                if (records.Length == 1)
-                    return records[0];
-                return new PropertyRecords(vertices);
+                Vertex[] records = vertices.ToArray();
+                return records.Length == 1 ? records[0] : new PropertyRecords(vertices);
             }
             return null;
         }
@@ -30,15 +22,18 @@ namespace DSModeler
     /// </summary>
     public class PropertyRecords
     {
-        string _multi = "중복속성";
-        Vertex[] _vertices;
+        private readonly string _multi = "중복속성";
+        private readonly Vertex[] _vertices;
         public PropertyRecords(IEnumerable<Vertex> vertices)
         {
             Debug.Assert(vertices.Count() > 1);
             _vertices = vertices.ToArray();
         }
 
-        string strSelector(Func<Vertex, string> func) => _vertices.Select(func).Distinct().Count() == 1 ? func(_vertices[0]) : _multi;
+        private string strSelector(Func<Vertex, string> func)
+        {
+            return _vertices.Select(func).Distinct().Count() == 1 ? func(_vertices[0]) : _multi;
+        }
 
         [DisplayName("오브젝트 이름"), Editable(false)]
         public string PartName => strSelector(r => r.Name);

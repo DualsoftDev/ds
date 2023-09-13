@@ -418,8 +418,7 @@ type XgCOM20ReadTest() =
 
 
 [<Collection("SerialXgiGenerationTest")>]
-type DsXgConnectionTest() =
-
+type DsXgRandomDeviceTest() =
 
    
     [<Test>]

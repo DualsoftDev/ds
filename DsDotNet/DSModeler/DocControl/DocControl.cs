@@ -1,29 +1,18 @@
-using DevExpress.XtraBars.Docking2010.Views;
-using DevExpress.XtraBars.Docking2010.Views.Tabbed;
-using DevExpress.XtraEditors;
-using DSModeler.Form;
-using Dual.Common.Winform;
-using System.IO;
-using System.Linq;
-using System.Runtime.Versioning;
-using System.Threading.Tasks;
-using static Engine.Core.CoreModule;
-using static Engine.Core.RuntimeGeneratorModule;
-using static Engine.Import.Office.ViewModule;
 
-namespace DSModeler
+
+namespace DSModeler.DocControl
 {
     [SupportedOSPlatform("windows")]
-    public static class DocControl
+    public static class DocContr
     {
         private static XtraForm CreateDocForm(
             XtraForm formChiild
           , FormMain formParent, TabbedView tab, string docKey)
         {
-            var document = GetDoc(tab, docKey);
+            BaseDocument document = GetDoc(tab, docKey);
             if (document != null)
             {
-                tab.Controller.Activate(document);
+                _ = tab.Controller.Activate(document);
                 formChiild = document.Tag as XtraForm;
             }
             else
@@ -49,25 +38,33 @@ namespace DSModeler
         public static void CreateDocStart(FormMain formParent, TabbedView tab)
         {
             string docKey = K.DocStartPage;
-            CreateDocForm(new FormDocImage(), formParent, tab, docKey);
+            _ = CreateDocForm(new FormDocImage(), formParent, tab, docKey);
         }
 
         public static void CreateDocDS(FormMain formParent, TabbedView tab)
         {
-            if (!Global.IsLoadedPPT()) return;
+            if (!Global.IsLoadedPPT())
+            {
+                return;
+            }
+
             string docKey = K.DocDS;
 
-            FormDocText formChiild = new FormDocText();
+            FormDocText formChiild = new();
             FormDocText form = CreateDocForm(formChiild, formParent, tab, docKey) as FormDocText;
             DSFile.DrawDSText(form);
         }
 
         public static FormDocText CreateDocExprOrSelect(FormMain formParent, TabbedView tab)
         {
-            if (!Global.IsLoadedPPT()) return null;
+            if (!Global.IsLoadedPPT())
+            {
+                return null;
+            }
+
             string docKey = K.DocExpression;
 
-            FormDocText formChiild = new FormDocText();
+            FormDocText formChiild = new();
             formChiild = CreateDocForm(formChiild, formParent, tab, docKey) as FormDocText;
             formChiild.Activate();
             return formChiild;
@@ -75,10 +72,14 @@ namespace DSModeler
         }
         public static FormDocText CreateDocExprAllOrSelect(FormMain formParent, TabbedView tab)
         {
-            if (!Global.IsLoadedPPT()) return null;
+            if (!Global.IsLoadedPPT())
+            {
+                return null;
+            }
+
             string docKey = K.DocExpressionAll;
 
-            FormDocText formChiild = new FormDocText();
+            FormDocText formChiild = new();
             formChiild = CreateDocForm(formChiild, formParent, tab, docKey) as FormDocText;
             formChiild.Activate();
             return formChiild;
@@ -86,26 +87,29 @@ namespace DSModeler
 
         public static void CreateDocPLCLS(FormMain formParent, TabbedView tab)
         {
-            if (!Global.IsLoadedPPT()) return;
+            if (!Global.IsLoadedPPT())
+            {
+                return;
+            }
 
             if (!RuntimeDS.Package.IsPackagePLC())
             {
-                MBox.Warn("설정 H/W 에서 PLC를 선택해야 합니다.");
+                _ = MBox.Warn("설정 H/W 에서 PLC를 선택해야 합니다.");
                 return;
             }
 
 
-            var fullpath = PLC.Export();
+            string fullpath = PLC.Export();
             string docKey = K.DocPLC;
 
-            Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
                 //Storages 연결이슈로  새로 준비 
                 await formParent.ImportPowerPointWapper(Files.GetLast());
                 await formParent.DoAsync(tsc =>
                 {
-                    FormDocText formChiild = new FormDocText();
-                    CreateDocForm(formChiild, formParent, tab, docKey);
+                    FormDocText formChiild = new();
+                    _ = CreateDocForm(formChiild, formParent, tab, docKey);
                     formChiild.TextEdit.Text = File.ReadAllText(fullpath);
                     tsc.SetResult(true);
                 });
@@ -115,18 +119,24 @@ namespace DSModeler
 
         public static void CreateDocOrSelect(FormMain formParent, ViewNode v)
         {
-            if (!Global.IsLoadedPPT()) return;
+            if (!Global.IsLoadedPPT())
+            {
+                return;
+            }
+
             formParent.Do(() =>
             {
                 Flow flow = v.Flow.Value;
                 string docKey = flow.QualifiedName;
 
-                FormDocView formChiild = new FormDocView();
+                FormDocView formChiild = new();
                 formChiild = CreateDocForm(formChiild, formParent, formParent.TabbedView, docKey) as FormDocView;
                 if (formChiild.UcView.MasterNode == null)
+                {
                     formChiild.UcView.SetGraph(v, flow, Global.LayoutGraphLineType);
-                //상태 업데이트
-                ViewDraw.DrawStatus(v, formChiild);
+                }
+                //상태 및 값 업데이트
+                ViewDraw.DrawStatusNValue(v, formChiild);
             });
         }
     }

@@ -1,63 +1,77 @@
-using DevExpress.XtraEditors;
-using DevExpress.XtraEditors.Controls;
-using DSModeler.Form;
-using DSModeler.Tree;
-using Dual.Common.Core;
-using Dual.Common.Winform;
-using Engine.Core;
-using Server.HW.XG5K;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Windows.Forms;
-using static Engine.Core.CoreModule;
-using static Engine.Core.RuntimeGeneratorModule;
-using static Engine.Import.Office.ViewModule;
+
+using DataFormats = System.Windows.Forms.DataFormats;
+using DragDropEffects = System.Windows.Forms.DragDropEffects;
 
 namespace DSModeler
 {
     public partial class FormMain : XtraForm
     {
-
-        void InitializationEventSetting()
+        private void InitializationEventSetting()
         {
-            this.AllowDrop = true;
-            this.DragEnter += (s, e) =>
+            AllowDrop = true;
+            DragEnter += (s, e) =>
             {
-                if (e.Data.GetDataPresent(DataFormats.FileDrop)) e.Effect = DragDropEffects.Copy;
+                if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                {
+                    e.Effect = DragDropEffects.Copy;
+                }
             };
-            this.DragDrop += async (s, e) =>
+            DragDrop += async (s, e) =>
             {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
                 if (files.Length > 0)
+                {
                     await ImportPowerPointWapper(files);
+                }
             };
-            this.KeyDown += async (s, e) =>
+            KeyDown += async (s, e) =>
             {
                 if (e.KeyData == Keys.F4)
+                {
                     await ImportPowerPointWapper(null);
+                }
+
                 if (e.KeyData == Keys.F5)
+                {
                     await ImportPowerPointWapper(Files.GetLast());
+                }
             };
 
 
-            tabbedView_Doc.QueryControl += (s, e) =>
+            TabbedView.QueryControl += (s, e) =>
             {
-                if (e.Control == null)  //Devexpress MDI Control
-                    e.Control = new System.Windows.Forms.Control();
+                e.Control ??= new System.Windows.Forms.Control();
             };
 
 
             gle_Expr.EditValueChanged += (s, e) =>
             {
-                var textForm = DocControl.CreateDocExprOrSelect(this, tabbedView_Doc);
-                if (textForm == null) return;
+
+                var textForm = DocContr.CreateDocExprOrSelect(this, TabbedView);
+                if (textForm == null)
+                {
+                    return;
+                }
+
                 DSFile.UpdateExpr(textForm, gle_Expr.EditValue as LogicStatement);
             };
 
+            gle_HW.EditValueChanged += (s, e) =>
+            {
+                //gleView_HW.GridControl.ExportToXlsx(@"D:\hwMaker.xlsx");
+                HwModel hw = HwModels.GetModelByNumber((int)gle_HW.EditValue);
+                if (hw != null)
+                {
+                    Global.DSHW = hw;
+                    DSRegistry.SetValue(RegKey.RunHWDevice, hw.ToTextRegister);
+                }
+            };
+            
+
             gle_Expr.BeforePopup += (s, e) =>
                 gle_Expr.Properties.BestFitMode = BestFitMode.BestFitResizePopup;
+            gle_HW.BeforePopup += (s, e) =>
+                gle_HW.Properties.BestFitMode = BestFitMode.BestFitResizePopup;
             gle_Log.BeforePopup += (s, e) =>
                 gle_Log.Properties.BestFitMode = BestFitMode.BestFitResizePopup;
             gle_Device.BeforePopup += (s, e) =>
@@ -67,26 +81,28 @@ namespace DSModeler
             {
                 Global.CpuRunMode = ToRuntimePackage(e.NewValue.ToString());
                 RuntimeDS.Package = Global.CpuRunMode;
-                DSRegistry.SetValue(K.CpuRunMode, Global.CpuRunMode);
+                DSRegistry.SetValue(RegKey.CpuRunMode, Global.CpuRunMode);
                 if (e.OldValue != null)
+                {
                     await ImportPowerPointWapper(Files.GetLast());
+                }
             };
 
             spinEdit_StartIn.Properties.EditValueChanged += (s, e) =>
             {
                 Global.RunCountIn = Convert.ToInt32(spinEdit_StartIn.EditValue);
-                DSRegistry.SetValue(K.RunCountIn, Global.RunCountIn);
+                DSRegistry.SetValue(RegKey.RunCountIn, Global.RunCountIn);
             };
             spinEdit_StartOut.Properties.EditValueChanged += (s, e) =>
             {
                 Global.RunCountOut = Convert.ToInt32(spinEdit_StartOut.EditValue);
-                DSRegistry.SetValue(K.RunCountOut, Global.RunCountOut);
+                DSRegistry.SetValue(RegKey.RunCountOut, Global.RunCountOut);
             };
 
             toggleSwitch_menuExpand.Toggled += (s, e) =>
             {
                 Global.LayoutMenumExpand = toggleSwitch_menuExpand.IsOn;
-                DSRegistry.SetValue(K.LayoutMenuExpand, Global.LayoutMenumExpand);
+                DSRegistry.SetValue(RegKey.LayoutMenuExpand, Global.LayoutMenumExpand);
 
                 if (Global.LayoutMenumExpand)
                 {
@@ -104,7 +120,7 @@ namespace DSModeler
             toggleSwitch_LayoutGraph.Toggled += (s, e) =>
             {
                 Global.LayoutGraphLineType = toggleSwitch_LayoutGraph.IsOn;
-                DSRegistry.SetValue(K.LayoutGraphLineType, Global.LayoutGraphLineType);
+                DSRegistry.SetValue(RegKey.LayoutGraphLineType, Global.LayoutGraphLineType);
             };
 
             toggleSwitch_showDeviceExpr.Toggled += (s, e) =>
@@ -115,28 +131,32 @@ namespace DSModeler
 
             textEdit_IP.EditValueChanging += (s, e) =>
             {
-                IPAddress.TryParse(e.NewValue.ToString(), out IPAddress addr);
-                if (addr == null) return;
-                DSRegistry.SetValue(K.RunHWIP, e.NewValue);
+                _ = IPAddress.TryParse(e.NewValue.ToString(), out IPAddress addr);
+                if (addr == null)
+                {
+                    return;
+                }
+
+                DSRegistry.SetValue(RegKey.RunHWIP, e.NewValue);
                 Global.RunHWIP = e.NewValue.ToString();
 
-                if (Global.CpuRunMode.IsPackagePC() && PcControl.RunCpus.Any())
+                if (Global.CpuRunMode.IsPackagePC() && PcContr.RunCpus.Any())
+                {
                     PcAction.CreateConnect();
+                }
             };
 
-            btn_ON.Click += (s, e) => PcAction.SetBit(gle_Device.EditValue as XG5KTag, true);
-            btn_OFF.Click += (s, e) => PcAction.SetBit(gle_Device.EditValue as XG5KTag, false);
-
-            Global.ChangeLogCount.Subscribe(rx =>
+    
+            _ = Global.ChangeLogCount.Subscribe(rx =>
             {
                 this.Do(() =>
                 {
-                    barStaticItem_logCnt.Caption
+                    LogCountText.Caption
                         = $"logs:{rx.Item1} TimeSpan {rx.Item2:ss\\.fff}sec";
                 });
             });
 
-            DsProcessEvent.ProcessSubject.Subscribe(rx =>
+            _ = DsProcessEvent.ProcessSubject.Subscribe(rx =>
             {
                 this.Do(() =>
                 {
@@ -145,32 +165,46 @@ namespace DSModeler
                 });
             });
 
-            ViewDraw.StatusChangeSubject.Subscribe(rx =>
+            _ = ViewDraw.StatusChangeSubject.Subscribe(rx =>
             {
-                var ret = GetViewNode(rx);
-                foreach (var r in ret)
+                switch (rx.TagKind)
                 {
-                    var form = r.Item1;
-                    var node = r.Item2;
-                    node.Status4 = ViewDraw.DicStatus[rx];
+                    case VertexTag.ready: ViewDraw.DicSV[rx.Target]= Tuple.Create(Status4.Ready, ViewDraw.DicSV[rx.Target].Item2);   break;
+                    case VertexTag.going: ViewDraw.DicSV[rx.Target]= Tuple.Create(Status4.Going, ViewDraw.DicSV[rx.Target].Item2);   break;
+                    case VertexTag.finish:ViewDraw.DicSV[rx.Target] = Tuple.Create(Status4.Finish, ViewDraw.DicSV[rx.Target].Item2); break;
+                    case VertexTag.homing: ViewDraw.DicSV[rx.Target] = Tuple.Create(Status4.Homing, ViewDraw.DicSV[rx.Target].Item2); break;
+                    default: break;
+                }
+
+                List<Tuple<FormDocView, ViewNode>> ret = GetViewNode(rx.Target);
+                foreach (Tuple<FormDocView, ViewNode> r in ret)
+                {
+                    FormDocView form = r.Item1;
+                    ViewNode node = r.Item2;
+                    node.Status4 = ViewDraw.DicSV[rx.Target].Item1;
                     form.UcView.UpdateStatus(node);
                 }
             });
 
-            ViewDraw.ActionChangeSubject.Subscribe(rx =>
+            _ = ViewDraw.ActionChangeSubject.Subscribe(rx =>
             {
-                var ret = GetViewNode(rx.Item1);
-                foreach (var r in ret)
+                var vertex = rx.Item1;
+                var value = Convert.ToBoolean(rx.Item2);
+
+                ViewDraw.DicSV[vertex] = Tuple.Create(ViewDraw.DicSV[vertex].Item1, value);
+
+                List<Tuple<FormDocView, ViewNode>> ret = GetViewNode(vertex);
+                foreach (Tuple<FormDocView, ViewNode> r in ret)
                 {
-                    var form = r.Item1;
-                    var node = r.Item2;
+                    FormDocView form = r.Item1;
+                    ViewNode node = r.Item2;
                     form.UcView.UpdateValue(node, rx.Item2);
                 }
             });
 
             List<Tuple<FormDocView, ViewNode>> GetViewNode(Vertex v)
             {
-                return tabbedView_Doc.Documents
+                return TabbedView.Documents
                              .Where(d => d.IsVisible)
                              .Select(d => d.Tag)
                              .OfType<FormDocView>()

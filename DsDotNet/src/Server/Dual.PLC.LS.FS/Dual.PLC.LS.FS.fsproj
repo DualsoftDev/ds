@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>net48;net5.0</TargetFrameworks>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<LangVersion>7.0</LangVersion>
+		<OutputType>Library</OutputType>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<RootNamespace>Dual.PLC.LS.FS</RootNamespace>
+		<PackageId>DualSoft-PLC-LS-FS</PackageId>
+		<PackageTags>PLC,LS.FS,Dual</PackageTags>
+		<Description>Dual.PLC.LS.FS</Description>
+		<Title>Dual.PLC.LS.FS</Title>
+		<Version>0.1.2</Version>
+		<Company>Dual Inc.</Company>
+		<Authors>Dual Inc.</Authors>
+		<OutputPath>$(SolutionDir)\bin</OutputPath>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Include="DeviceSizeInfo.csv" />
+		<None Include="Documents\사용설명서_XGT FEnet_국문_V2.1.pdf" />
+		<None Include="Documents\(PC)XGT_FEnet+Protocol.pdf" />
+		<None Include="Documents\PLC_XGT_상담기준서_Ethernet 전용 프로토콜 PC와 통신 방법 _KO_V1_공개.pdf" />
+		<None Include="Documents\User's Manual_XGT FEnet_V2.30.pdf" />
+		<Content Include="Documents\Performance.txt" />
+		<Content Include="Documents\LS protocol.txt" />
+		<Content Include="Documents\ToDo.txt" />
+		<Compile Include="Prologue.fs" />
+		<Compile Include="Address.Convert.fs" />
+		<None Include="Address.Convert.fsx" />
+		<Compile Include="Cluster.fs" />
+		<Compile Include="Packet.fs" />
+		<Compile Include="Packet.Debug.fs" />
+		<Compile Include="LsConnection.fs" />
+		<None Include="Scripts\Script.fsx" />
+		<None Include="Scripts\Cluster.fsx" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Update="FSharp.Core" Version="7.0.0" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.3" />
+		<PackageReference Include="DualSoft-PLC-Common" Version="0.1.1" />
+		<PackageReference Include="FSharp.Data" Version="6.3.0" />
+		<PackageReference Include="FSharpPlus" Version="1.4.1" />
+		<PackageReference Include="log4net" Version="2.0.15" />
+	</ItemGroup>
+</Project>

@@ -19,6 +19,8 @@
     <PackageReference Include="log4net" Version="2.0.15" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.10" />
     <PackageReference Include="Microsoft.Msagl.GraphViewerGDI" Version="1.1.7" />
+    <PackageReference Include="System.Reactive.Linq" Version="6.0.0" />
+    <PackageReference Include="System.Runtime.Serialization.Schema" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,7 +37,8 @@
     <ProjectReference Include="..\src\PLC\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
     <ProjectReference Include="..\src\PLC\PLC.CodeGen.LSXGI\PLC.CodeGen.LSXGI.fsproj" />
     <ProjectReference Include="..\src\PLC\PLC.CodeGen.LSXGK\PLC.CodeGen.LSXGK.fsproj" />
-    <ProjectReference Include="..\src\Server\Dual.PLC.LS.XgCOM.FS\Dual.PLC.LS.XgCOM.FS.fsproj" />
+    <ProjectReference Include="..\src\Server\Dual.PLC.LS.FS\Dual.PLC.LS.FS.fsproj" />
+    <ProjectReference Include="..\src\Server\Dual.PLC.LS.XgCOM4DS.FS\Dual.PLC.LS.XgCOM4DS.FS.fsproj" />
     <ProjectReference Include="..\src\Server\Server.HW.Common\Server.HW.Common.csproj" />
     <ProjectReference Include="..\src\Server\Server.HW.XG5K\Server.HW.XG5K.csproj" />
     <!--<None Remove="D:\ds\ds_Master\DsDotNet\exLib\XGCommLib64.dll" />
@@ -59,6 +62,18 @@
 	<Compile Update="FormMain.cs">
 		<SubType>Form</SubType>
 	</Compile>
+	<Compile Update="Properties\Resources.Designer.cs">
+	  <DesignTime>True</DesignTime>
+	  <AutoGen>True</AutoGen>
+	  <DependentUpon>Resources.resx</DependentUpon>
+	</Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
   <!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">

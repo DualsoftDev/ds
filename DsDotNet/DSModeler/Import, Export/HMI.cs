@@ -1,13 +1,6 @@
-using AppHMI;
-using DevExpress.XtraSplashScreen;
-using Dual.Common.Core.FS;
-using System;
-using System.IO;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Runtime.Versioning;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using Application = System.Windows.Forms.Application;
+using MessageBox = System.Windows.Forms.MessageBox;
+
 
 namespace DSModeler;
 [SupportedOSPlatform("windows")]
@@ -22,14 +15,14 @@ public static class HMI
         }
 
         SplashScreenManager.ShowForm(typeof(DXWaitForm));
-        var zipPath = Path.GetDirectoryName(Global.ExportPathDS) + ".zip";
-        var zipBytes = File.ReadAllBytes(zipPath);
-        var client = new HttpClient() { BaseAddress = new Uri("http://localhost:5000") };
+        string zipPath = Path.GetDirectoryName(Global.ExportPathDS) + ".zip";
+        byte[] zipBytes = File.ReadAllBytes(zipPath);
+        HttpClient client = new() { BaseAddress = new Uri("http://localhost:5000") };
         HttpResponseMessage response = await client.PostAsJsonAsync("api/upload", zipBytes);
-        if (response.IsSuccessStatusCode)
-            MessageBox.Show("Data has uploaded", "succeed");
-        else
-            MessageBox.Show($"Error: {response.ReasonPhrase}", "Failed");
+        _ = response.IsSuccessStatusCode
+            ? MessageBox.Show("Data has uploaded", "succeed")
+            : MessageBox.Show($"Error: {response.ReasonPhrase}", "Failed");
+
         SplashScreenManager.CloseForm();
 
         return "";
@@ -38,22 +31,28 @@ public static class HMI
 
     public static void ExportApp()
     {
-        if (!Global.IsLoadedPPT()) return;
-        if (Global.ExportPathDS.IsNullOrEmpty())
+        if (!Global.IsLoadedPPT())
         {
-            MBox.Warn("PC Control 내보내기를 먼저 수행하세요");
             return;
         }
 
-        foreach (System.Windows.Forms.Form frm in Application.OpenForms)
+        if (!Global.ExportPathDS.IsNullOrEmpty())
         {
-            if (frm.Name == "MainFormHMI")
+            foreach (System.Windows.Forms.Form frm in Application.OpenForms)
             {
-                frm.Activate();
-                return;
+                if (frm.Name == "MainFormHMI")
+                {
+                    frm.Activate();
+                    return;
+                }
             }
+            MainFormHMI appHMI = new();
+            appHMI.LoadHMI(Global.ExportPathDS);
         }
-        var appHMI = new MainFormHMI();
-        appHMI.LoadHMI(Global.ExportPathDS);
+        else
+        {
+            _ = MBox.Warn("PC Control 내보내기를 먼저 수행하세요");
+            return;
+        }
     }
 }

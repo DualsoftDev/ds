@@ -1,7 +1,3 @@
-using DevExpress.XtraBars.Navigation;
-using System.Drawing;
-using System.Runtime.Versioning;
-
 namespace DSModeler.Tree
 {
     [SupportedOSPlatform("windows")]

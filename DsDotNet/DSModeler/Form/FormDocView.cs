@@ -1,4 +1,3 @@
-using Diagram.View.MSAGL;
 
 namespace DSModeler.Form
 {
@@ -10,7 +9,7 @@ namespace DSModeler.Form
 
         }
 
-        public UcView UcView => ucView1;
+        public UcView UcView { get; private set; }
 
     }
 }

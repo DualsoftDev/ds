@@ -1,23 +1,4 @@
-using DevExpress.XtraSplashScreen;
-using DSModeler.Form;
-using DSModeler.Tree;
-using Dual.Common.Core;
-using Dual.Common.Winform;
-using Engine.Core;
-using Engine.Cpu;
-using ModelHandler;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Runtime.Versioning;
-using System.Threading.Tasks;
-using System.Windows;
-using static Engine.Core.CoreModule;
-using static Engine.Core.DsTextProperty;
-using static Engine.Core.ExpressionModule;
-using static Engine.Core.SystemToDsExt;
+using MessageBox = System.Windows.Forms.MessageBox;
 
 namespace DSModeler
 {
@@ -28,42 +9,51 @@ namespace DSModeler
         {
             if (Global.IsLoadedPPT() && !Global.ExportPathDS.IsNullOrEmpty())
             {
-                var zipDir = Path.GetDirectoryName(Global.ExportPathDS);
-                var rp = new Repository(zipDir);
+                string zipDir = Path.GetDirectoryName(Global.ExportPathDS);
+                Repository rp = new(zipDir);
                 rp.CompressDirectory();
-                MessageBox.Show($"{zipDir}.zip 파일 저장 성공");
+                _ = MessageBox.Show($"{zipDir}.zip 파일 저장 성공");
             }
         }
 
         private static void Export()
         {
             if (!Global.IsLoadedPPT())
+            {
                 Global.Logger.Warn("PPTX 가져오기를 먼저 수행하세요");
+            }
 
             SplashScreenManager.ShowForm(typeof(DXWaitForm));
-            var pptPath = Files.GetLast().First();
-            var libDir = Path.GetDirectoryName(pptPath); //동일 디렉토리 경로
+            string pptPath = Files.GetLast().First();
+            string libDir = Path.GetDirectoryName(pptPath); //동일 디렉토리 경로
 
-            var newFile = Files.GetNewFileName(pptPath, "DS");
-            var directory = Path.GetDirectoryName(newFile);
+            string newFile = Files.GetNewFileName(pptPath, "DS");
+            string directory = Path.GetDirectoryName(newFile);
 
-            var dsFile = Path.ChangeExtension(newFile, ".ds");
-            var confFile = Path.ChangeExtension(newFile, ".json");
+            string dsFile = Path.ChangeExtension(newFile, ".ds");
+            string confFile = Path.ChangeExtension(newFile, ".json");
 
-            List<string> dsCpuSys = new List<string>();
-            dsCpuSys.Add(dsFile);
+            List<string> dsCpuSys = new()
+            {
+                dsFile
+            };
 
             Global.ExportPathDS = dsFile;
 
-            Global.ActiveSys.GetRecursiveLoadeds().ForEach(s =>
+            Global.ActiveSys.GetRecursiveLoadeds().Iter(s =>
             {
                 if (s is Device)
-                    ExportLoadedSystem(s, directory);
+                {
+                    _ = ExportLoadedSystem(s, directory);
+                }
+
                 if (s is ExternalSystem)
                 {
-                    var path = ExportLoadedSystem(s, directory);
+                    string path = ExportLoadedSystem(s, directory);
                     if (path != "")
+                    {
                         dsCpuSys.Add(path);
+                    }
                 }
             });
 
@@ -76,9 +66,9 @@ namespace DSModeler
         private static string ExportLoadedSystem(LoadedSystem s, string dirNew)
         {
             string commonDir = "";
-            var lib = dirNew.ToLower().Split('\\');
-            var abs = s.AbsoluteFilePath.ToLower().Split('\\');
-            DirectoryInfo di = new DirectoryInfo(dirNew);
+            string[] lib = dirNew.ToLower().Split('\\');
+            string[] abs = s.AbsoluteFilePath.ToLower().Split('\\');
+            DirectoryInfo di = new(dirNew);
 
             for (int i = 0; i < abs.Length; i++)
             {
@@ -93,13 +83,15 @@ namespace DSModeler
                     break;
                 }
                 else
+                {
                     commonDir += abs[i] + "\\";
+                }
             }
 
-            var relativePath = s.AbsoluteFilePath.ToLower().Replace(commonDir.ToLower(), "");
-            var absPath = $"{dirNew}\\{relativePath}.ds";
+            string relativePath = s.AbsoluteFilePath.ToLower().Replace(commonDir.ToLower(), "");
+            string absPath = $"{dirNew}\\{relativePath}.ds";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(absPath));
+            _ = Directory.CreateDirectory(Path.GetDirectoryName(absPath));
             s.ReferenceSystem.Name = Path.GetFileNameWithoutExtension(absPath);
 
             File.WriteAllText(absPath, s.ReferenceSystem.ToDsText(false));
@@ -109,14 +101,14 @@ namespace DSModeler
 
         public static List<Tuple<string, Color>> ToTextColorDS(string dsText)
         {
-            var lst = new List<Tuple<string, Color>>();
-            var textLines = dsText.Split('\n');
-            Random r = new Random();
+            List<Tuple<string, Color>> lst = new();
+            string[] textLines = dsText.Split('\n');
+            Random r = new();
             Color rndColor = Color.LightGoldenrodYellow;
 
-            List<string> textGroup = new List<string>();
+            List<string> textGroup = new();
             string temp = "";
-            textLines.Iter(f =>
+            _ = textLines.Iter(f =>
             {
                 temp += $"\n{f}";
 
@@ -154,13 +146,15 @@ namespace DSModeler
                     view.TextEdit.ResetText();
                     int cnt = 0;
                     string dsText = "";
-                    foreach (var sys in PcControl.RunCpus.SelectMany(s => s.Systems))
-                        dsText += $"{sys.ToDsText(Global.IsDebug)}\r\n\r\n";
-
-                    var colorTexts = ToTextColorDS(dsText);
-                    foreach (var f in colorTexts)
+                    foreach (var sys in PcContr.RunCpus.SelectMany(s => s.Systems))
                     {
-                        DsProcessEvent.DoWork(Convert.ToInt32((cnt++ * 1.0) / (colorTexts.Count()) * 100.0));
+                        dsText += $"{sys.ToDsText(Global.IsDebug)}\r\n\r\n";
+                    }
+
+                    List<Tuple<string, Color>> colorTexts = ToTextColorDS(dsText);
+                    foreach (Tuple<string, Color> f in colorTexts)
+                    {
+                        DsProcessEvent.DoWork(Convert.ToInt32(cnt++ * 1.0 / colorTexts.Count() * 100.0));
                         view.AppendTextColor(f.Item1, f.Item2);
                     }
 
@@ -176,11 +170,11 @@ namespace DSModeler
 
         internal static void UpdateExprAll(FormMain formMain, bool device)
         {
-            var textForm = DocControl.CreateDocExprAllOrSelect(formMain, formMain.TabbedView);
-            var css = LogicTree.GetLogicStatement(device);
-            var texts = css.Select(cs => cs.GetCommentedStatement().Statement.ToText());
+            var textForm = DocContr.CreateDocExprAllOrSelect(formMain, formMain.TabbedView);
+            IEnumerable<LogicStatement> css = LogicTree.GetLogicStatement(device);
+            IEnumerable<string> texts = css.Select(cs => cs.GetCommentedStatement().Statement.ToText());
 
-            textForm.TextEdit.AppendText($"{String.Join("\r\n", texts)}");
+            textForm.TextEdit.AppendText($"{string.Join("\r\n", texts)}");
             textForm.TextEdit.ScrollToCaret();
         }
 
@@ -195,8 +189,8 @@ namespace DSModeler
 
         private static void DrawExpr(FormDocText textForm, CommentedStatement cs)
         {
-            var tgts = CoreExtensionsModule.getTargetStorages(cs.statement);
-            var srcs = CoreExtensionsModule.getSourceStorages(cs.statement);
+            IEnumerable<Interface.IStorage> tgts = CoreExtensionsModule.getTargetStorages(cs.statement);
+            IEnumerable<Interface.IStorage> srcs = CoreExtensionsModule.getSourceStorages(cs.statement);
             string tgtsTexs = string.Join(", ", tgts.Select(s => $"{s.Name}({s.BoxedValue})"));
             string srcsTexs = string.Join(", ", srcs.Select(s => $"{s.Name}({s.BoxedValue})"));
             string comments = cs.comment.IsNullOrEmpty() ? "Empty expression contact only" : cs.comment;
@@ -204,9 +198,9 @@ namespace DSModeler
             textForm.AppendTextColor($"{comments}\n".Replace("$", ""), Color.Goldenrod);
 
 
-            var txtSt = cs.statement.ToText().Replace("$", "");
-            var target = txtSt.Split(':')[0];
-            var expr = txtSt.Replace(target, "").TrimStart(':');
+            string txtSt = cs.statement.ToText().Replace("$", "");
+            string target = txtSt.Split(':')[0];
+            string expr = txtSt.Replace(target, "").TrimStart(':');
 
             textForm.AppendTextColor($"\r\n\t{target}", Color.Gold);
             textForm.AppendTextColor($"\r\n\t\t{expr}", Color.Gold);

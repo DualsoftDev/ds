@@ -1,9 +1,6 @@
-using DevExpress.XtraEditors;
 using System.Media;
-using System.Runtime.Versioning;
-using System.Windows.Forms;
 
-namespace DSModeler;
+namespace DSModeler.Utils;
 [SupportedOSPlatform("windows")]
 public static class MBox
 {

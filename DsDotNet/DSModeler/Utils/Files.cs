@@ -1,25 +1,19 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.Versioning;
-
-namespace DSModeler;
+namespace DSModeler.Utils;
 
 [SupportedOSPlatform("windows")]
 public static class Files
 {
     public static void SetLast(string[] filePath)
     {
-        DSRegistry.SetValue(K.LastFiles, String.Join("|", filePath));
+        DSRegistry.SetValue(RegKey.LastFiles, string.Join("|", filePath));
     }
 
 
     public static string[] GetLast()
     {
-        var recentlist = DSRegistry.GetValue(K.LastFiles);
+        object recentlist = DSRegistry.GetValue(RegKey.LastFiles);
 
-        var recents = recentlist == null ? new List<string>()
+        List<string> recents = recentlist == null ? new List<string>()
                     : recentlist.ToString().Split("|".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).ToList();
 
         return recents.ToArray();
@@ -27,13 +21,13 @@ public static class Files
 
     public static string GetNewFileName(string path, string type, bool fileNameTimeMarking = false)
     {
-        var directory = Path.GetDirectoryName(path);
-        var fileName = Path.GetFileNameWithoutExtension(path);
-        var fileExtension = Path.GetExtension(path);
-        var dt = $"{DateTime.Now:yyMMdd_HH_mm_ss}";
-        var newDirectory = $"{directory}\\{fileName}_{type}_autogen_{dt}";
-        Directory.CreateDirectory(newDirectory);
-        var flieNamePost = fileNameTimeMarking ? $"{fileName}_{dt}" : fileName;
+        string directory = Path.GetDirectoryName(path);
+        string fileName = Path.GetFileNameWithoutExtension(path);
+        string fileExtension = Path.GetExtension(path);
+        string dt = $"{DateTime.Now:yyMMdd_HH_mm_ss}";
+        string newDirectory = $"{directory}\\{fileName}_{type}_autogen_{dt}";
+        _ = Directory.CreateDirectory(newDirectory);
+        string flieNamePost = fileNameTimeMarking ? $"{fileName}_{dt}" : fileName;
         return Path.Combine(newDirectory, $"{flieNamePost}{fileExtension}");
     }
 }

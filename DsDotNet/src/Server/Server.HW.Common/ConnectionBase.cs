@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ namespace Server.HW.Common
         public bool IsUSBConnection => ConnectionParameters is IConnectionParametersUSB;
         public bool IsEthernetConnection => ConnectionParameters is IConnectionParametersEthernet;
 
+        ///  TagName Key , TagHW Value
         public Dictionary<string, TagHW> Tags { get; } = new Dictionary<string, TagHW>();
 
 
@@ -36,6 +38,7 @@ namespace Server.HW.Common
         public virtual bool Disconnect()
         {
             Dispose();
+
             return true;
         }
 
@@ -71,26 +74,15 @@ namespace Server.HW.Common
         public virtual void WriteTags(IEnumerable<ITagHW> tags) { throw new NotImplementedException("Not yet implemented."); }
 
         public Subject<IObservableEvent> Subject { get; } = new Subject<IObservableEvent>();
-        //protected List<IDisposable> _subscriptions = new List<IDisposable>();
-        //public void AddSubscription(IDisposable subscription) { _subscriptions.Add(subscription); }
+        protected List<IDisposable> _subscriptions = new List<IDisposable>();
+        public void AddSubscription(IDisposable subscription) { _subscriptions.Add(subscription); }
+
+
 
         public ConnectionBase(IConnectionParameters parameters)
         {
             ConnectionParameters = parameters;
             Trace.WriteLine("ConnectionBase()");
-
-            //AddSubscription(Subject.OfType<TagAddEvent>().Subscribe(evt =>
-            //{
-            //    var tag = evt.Tag;
-            //    _tags.Add(tag.Name, tag);
-            //}));
-
-            //AddSubscription(Subject.OfType<TagsAddEvent>().Subscribe(evt =>
-            //{
-            //    var tag = evt.Tags;
-            //    _tags.Add(tag.Name, tag);
-            //}));
-
         }
 
         public virtual bool AddMonitoringTag(TagHW tag)
@@ -130,6 +122,11 @@ namespace Server.HW.Common
             PrepareDataExchangeLoop();
         }
 
+        public void ForceIOEvent()
+        {
+            foreach (var t in Tags.Values)
+                Subject.OnNext(new TagValueChangedEvent(t));
+        }
 
         public abstract IEnumerable<ChannelRequestExecutor> Channelize(IEnumerable<TagHW> tags);
 
@@ -175,9 +172,15 @@ namespace Server.HW.Common
                     await Task.Delay(PerRequestDelay);
                     Trace.WriteLine("Monitoring...");
 
-                    SingleScan();
-                    //if (exceptions.Any())
-                    //    ReconnectOnDemand(exceptions.First());
+                    try
+                    {
+                        SingleScan();
+                    }
+                    catch (Exception ex)
+                    {
+                        new HWExceptionChannel("Scan Error check Communication", ex);
+                        ReconnectOnDemand();
+                    }  
                 }
             }, DataExchangeCts.Token);
 

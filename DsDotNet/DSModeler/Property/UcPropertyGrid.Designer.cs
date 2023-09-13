@@ -29,32 +29,31 @@ namespace DSModeler
         /// </summary>
         private void InitializeComponent()
         {
-            this.propertyGridControl1 = new DevExpress.XtraVerticalGrid.PropertyGridControl();
-            ((System.ComponentModel.ISupportInitialize)(this.propertyGridControl1)).BeginInit();
+            this.PropertyGrid = new DevExpress.XtraVerticalGrid.PropertyGridControl();
+            ((System.ComponentModel.ISupportInitialize)(this.PropertyGrid)).BeginInit();
             this.SuspendLayout();
             // 
             // propertyGridControl1
             // 
-            this.propertyGridControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.propertyGridControl1.Location = new System.Drawing.Point(0, 0);
-            this.propertyGridControl1.Name = "propertyGridControl1";
-            this.propertyGridControl1.Size = new System.Drawing.Size(916, 601);
-            this.propertyGridControl1.TabIndex = 0;
+            this.PropertyGrid.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.PropertyGrid.Location = new System.Drawing.Point(0, 0);
+            this.PropertyGrid.Name = "propertyGridControl1";
+            this.PropertyGrid.Size = new System.Drawing.Size(916, 601);
+            this.PropertyGrid.TabIndex = 0;
             // 
             // UcPropertyGrid
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.propertyGridControl1);
+            this.Controls.Add(this.PropertyGrid);
             this.Name = "UcPropertyGrid";
             this.Size = new System.Drawing.Size(916, 601);
-            ((System.ComponentModel.ISupportInitialize)(this.propertyGridControl1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PropertyGrid)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private DevExpress.XtraVerticalGrid.PropertyGridControl propertyGridControl1;
     }
 }

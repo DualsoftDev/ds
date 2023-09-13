@@ -185,7 +185,7 @@ module ImportU =
                     ApiItem.Create(apiName, sys) |> ignore
             )
 
-            doc.MakeInterfaceResets |>ignore
+            doc.MakeInterfaceResets sys
 
         //MFlow 리스트 만들기
         [<Extension>]

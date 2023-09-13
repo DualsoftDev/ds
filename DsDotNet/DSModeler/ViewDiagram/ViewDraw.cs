@@ -1,35 +1,32 @@
-using DevExpress.XtraBars.Docking2010.Views.Tabbed;
-using DSModeler.Form;
-using Dual.Common.Core;
-using Engine.CodeGenCPU;
-using Engine.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Subjects;
-using static Engine.Core.CoreModule;
-using static Engine.Core.DsType;
-using static Engine.Core.EdgeExt;
-using static Engine.Import.Office.ViewModule;
 
-namespace DSModeler
+
+using DevExpress.DataAccess.UI.Native.ObjectBinding;
+
+namespace DSModeler.ViewDiagram
 {
     public static class ViewDraw
     {
-        public static Dictionary<Vertex, Status4> DicStatus;
+        /// <summary>
+        /// DicStatusNValue
+        /// </summary>
+        public static Dictionary<Vertex, Tuple<Status4, bool>> DicSV;  
+                                                                                 
+                                                                                 
         public static Dictionary<DsTask, IEnumerable<Vertex>> DicTask;
-        public static Subject<CoreModule.Vertex> StatusChangeSubject = new Subject<Vertex>();
-        public static Subject<Tuple<CoreModule.Vertex, object>> ActionChangeSubject = new Subject<Tuple<CoreModule.Vertex, object>>();
+        public static Subject<EventVertex> StatusChangeSubject = new();
+        public static Subject<Tuple<Vertex, object>> ActionChangeSubject = new();
 
         public static void DrawInitStatus(TabbedView tv, Dictionary<DsSystem, CpuLoader.PouGen> dicCpu)
         {
-            DicStatus = new Dictionary<Vertex, Status4>();
-            foreach (var item in dicCpu)
+            DicSV = new Dictionary<Vertex, Tuple<Status4, bool>>();
+            foreach (KeyValuePair<DsSystem, CpuLoader.PouGen> item in dicCpu)
             {
-                var sys = item.Key;
-                var reals = sys.GetVertices().OfType<Vertex>();
-                foreach (var r in reals)
-                    ViewDraw.DicStatus.Add(r, Status4.Homing);
+                DsSystem sys = item.Key;
+                IEnumerable<Vertex> reals = sys.GetVertices().OfType<Vertex>();
+                foreach (Vertex r in reals)
+                {
+                    DicSV.Add(r, Tuple.Create(Status4.Homing, false));
+                }
             }
         }
 
@@ -37,30 +34,32 @@ namespace DSModeler
         public static void DrawInitActionTask(FormMain formMain, Dictionary<DsSystem, CpuLoader.PouGen> dicCpu)
         {
             DicTask = new Dictionary<DsTask, IEnumerable<Vertex>>();
-            foreach (var item in dicCpu)
+            foreach (KeyValuePair<DsSystem, CpuLoader.PouGen> item in dicCpu)
             {
-                var sys = item.Key;
-                var calls = sys.GetVertices().OfType<Call>();
-                calls.SelectMany(s => s.CallTargetJob.DeviceDefs)
+                DsSystem sys = item.Key;
+                IEnumerable<Call> calls = sys.GetVertices().OfType<Call>();
+                _ = calls.SelectMany(s => s.CallTargetJob.DeviceDefs)
                      .Distinct()
                      .Iter(d =>
                      {
-                         var finds = calls.Where(w => w.CallTargetJob.DeviceDefs.Contains(d));
+                         IEnumerable<Call> finds = calls.Where(w => w.CallTargetJob.DeviceDefs.Contains(d));
                          DicTask.Add(d, finds);
                      });
             }
         }
 
 
-        public static void DrawStatus(ViewNode v, FormDocView view)
+        public static void DrawStatusNValue(ViewNode v, FormDocView view)
         {
-            var viewNodes = v.UsedViewNodes.Where(w => w.CoreVertex != null);
-            foreach (var f in viewNodes)
+            IEnumerable<ViewNode> viewNodes = v.UsedViewNodes.Where(w => w.CoreVertex != null);
+            foreach (ViewNode f in viewNodes)
             {
-                if (DicStatus.ContainsKey(f.CoreVertex.Value))
+                if (DicSV.ContainsKey(f.CoreVertex.Value))
                 {
-                    f.Status4 = DicStatus[f.CoreVertex.Value];
+                    f.Status4 = DicSV[f.CoreVertex.Value].Item1;
+                    var value = DicSV[f.CoreVertex.Value].Item2;
                     view.UcView.UpdateStatus(f);
+                    view.UcView.UpdateValue(f, value);
                 }
             }
         }

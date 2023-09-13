@@ -1,12 +1,4 @@
-using DevExpress.XtraEditors;
-using DevExpress.XtraGrid.Views.Grid;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Versioning;
-using static Engine.Core.TagKindModule;
-
-namespace DSModeler
+namespace DSModeler.Log
 {
     [SupportedOSPlatform("windows")]
     public static class LogicLog
@@ -14,14 +6,14 @@ namespace DSModeler
 
         public static List<ValueLog> ValueLogs { get; set; } = new List<ValueLog>();
 
-        private static object _lock = new object();
+        private static readonly object _lock = new();
         public static void TryAdd(ValueLog v)
         {
             lock (_lock)
             {
-                var lastTime = ValueLogs.Any() ? ValueLogs.Last().GetTime() : DateTime.Now;
+                DateTime lastTime = ValueLogs.Any() ? ValueLogs.Last().GetTime() : DateTime.Now;
 
-                var evt = Tuple.Create(LogicLog.ValueLogs.Count, v.GapTime(lastTime));
+                Tuple<int, TimeSpan> evt = Tuple.Create(ValueLogs.Count, v.GapTime(lastTime));
                 Global.ChangeLogCount.OnNext(evt);
 
                 ValueLogs.Add(v);
@@ -38,8 +30,8 @@ namespace DSModeler
 
         internal static void AddLogicLog(TagDS evt)
         {
-            var logData = TagKindExt.GetTagToText(evt).Split(';');
-            var valueLog = new ValueLog()
+            string[] logData = TagKindExt.GetTagToText(evt).Split(';');
+            ValueLog valueLog = new()
             {
                 Name = logData[0],
                 Value = logData[1],
@@ -55,14 +47,21 @@ namespace DSModeler
 
     public class ValueLog
     {
-        private DateTime time = DateTime.Now;
+        private readonly DateTime time = DateTime.Now;
         public string Time => time.ToString("HH:mm:ss.fff");
         public string Name { get; set; }
         public string Value { get; set; }
         public string System { get; set; }
         public string TagKind { get; set; }
-        public TimeSpan GapTime(DateTime t) => time.Subtract(t);
-        public DateTime GetTime() => time;
+        public TimeSpan GapTime(DateTime t)
+        {
+            return time.Subtract(t);
+        }
+
+        public DateTime GetTime()
+        {
+            return time;
+        }
     }
 
 

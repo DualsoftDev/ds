@@ -1,17 +1,9 @@
-using DevExpress.XtraEditors.Controls;
-using Dual.Common.Core;
-using Dual.Common.Winform;
 using log4net.Appender;
 using log4net.Core;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
+using Clipboard = System.Windows.Forms.Clipboard;
+using FontStyle = System.Drawing.FontStyle;
 
 namespace DSModeler
 {
@@ -39,19 +31,25 @@ namespace DSModeler
         {
             InitializeComponent();
         }
-        System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UcLog));
-        Image copyImg => resources.GetObject("copyBtn.ImageOptions.Image") as Image;
-        Image clearImg => resources.GetObject("clearBtn.ImageOptions.Image") as Image;
-        Image clearAllImg => resources.GetObject("copyAllBtn.ImageOptions.Image") as Image;
-        Image logLevelBtnImg => resources.GetObject("logLevelBtn.ImageOptions.Image") as Image;
-        Image logLevelChkImg => resources.GetObject("ImgChk.ImageOptions.Image") as Image;
+
+        private readonly System.ComponentModel.ComponentResourceManager resources = new(typeof(UcLog));
+
+        private Image copyImg => resources.GetObject("copyBtn.ImageOptions.Image") as Image;
+
+        private Image clearImg => resources.GetObject("clearBtn.ImageOptions.Image") as Image;
+
+        private Image clearAllImg => resources.GetObject("copyAllBtn.ImageOptions.Image") as Image;
+
+        private Image logLevelBtnImg => resources.GetObject("logLevelBtn.ImageOptions.Image") as Image;
+
+        private Image logLevelChkImg => resources.GetObject("ImgChk.ImageOptions.Image") as Image;
 
 
 
 
         private void UcLog_Load(object sender, EventArgs args)
         {
-            this.Dock = DockStyle.Fill;
+            Dock = DockStyle.Fill;
         }
 
         public void InitLoad()
@@ -59,22 +57,22 @@ namespace DSModeler
             listBoxControlOutput.Dock = DockStyle.Fill;
             listBoxControlOutput.AllowHtmlDraw = DevExpress.Utils.DefaultBoolean.True;
 
-            var items = listBoxControlOutput.ContextMenuStrip.Items;
-            items.Add(new ToolStripMenuItem("Clear", clearImg, (o, a) =>
+            ToolStripItemCollection items = listBoxControlOutput.ContextMenuStrip.Items;
+            _ = items.Add(new ToolStripMenuItem("Clear", clearImg, (o, a) =>
             {
                 listBoxControlOutput.Items.Clear();
                 listBoxControlOutput.SelectedIndex = 0;
             }));
 
-            items.Add(new ToolStripMenuItem("Copy all", clearAllImg, (o, a) =>
+            _ = items.Add(new ToolStripMenuItem("Copy all", clearAllImg, (o, a) =>
             {
-                var strings =
+                IEnumerable<string> strings =
                     from n in Enumerable.Range(0, listBoxControlOutput.Items.Count)
                     let t = listBoxControlOutput.Items[n].ToString()
                     select Regex.Replace(t, "<.*?>", "")
                     ;
 
-                var text = String.Join("\r\n", strings);
+                string text = string.Join("\r\n", strings);
                 if (!text.IsNullOrEmpty())
                 {
                     Clipboard.Clear();
@@ -82,34 +80,36 @@ namespace DSModeler
                 }
             }));
 
-            items.Add(new ToolStripMenuItem("Copy selected", copyImg, (o, a) =>
+            _ = items.Add(new ToolStripMenuItem("Copy selected", copyImg, (o, a) =>
             {
-                var strings =
+                IEnumerable<string> strings =
                     from item in listBoxControlOutput.SelectedItems
                     let str = item.ToString()
                     select Regex.Replace(str, "<.*?>", "")
                 ;
 
-                var text = String.Join("\r\n", strings);
+                string text = string.Join("\r\n", strings);
                 if (!text.IsNullOrEmpty())
                 {
                     Clipboard.Clear();
                     Clipboard.SetText(text);
                 }
             }));
-            var a = Log4NetLogger.Logger;
-            var logger = ((log4net.Repository.Hierarchy.Logger)Log4NetLogger.Logger.Logger);
+            log4net.ILog a = Log4NetLogger.Logger;
+            log4net.Repository.Hierarchy.Logger logger = (log4net.Repository.Hierarchy.Logger)Log4NetLogger.Logger.Logger;
             logger.Level = Level.All;
 
-            ToolStripMenuItem log_menu = new ToolStripMenuItem("Log Level", logLevelBtnImg);
-            var logItemError = new ToolStripMenuItem("Error", null);
-            var logItemWarn = new ToolStripMenuItem("Warn", null);
-            var logItemInfo = new ToolStripMenuItem("Info", null);
-            var logItemDebug = new ToolStripMenuItem("Debug", null);
-            var logItemAll = new ToolStripMenuItem("All", null);
-            logItemAll.Image = logLevelChkImg;
+            ToolStripMenuItem log_menu = new("Log Level", logLevelBtnImg);
+            ToolStripMenuItem logItemError = new("Error", null);
+            ToolStripMenuItem logItemWarn = new("Warn", null);
+            ToolStripMenuItem logItemInfo = new("Info", null);
+            ToolStripMenuItem logItemDebug = new("Debug", null);
+            ToolStripMenuItem logItemAll = new("All", null)
+            {
+                Image = logLevelChkImg
+            };
 
-            var logLvlControls = new List<ToolStripMenuItem>()
+            List<ToolStripMenuItem> logLvlControls = new()
             {
                 logItemError
                     ,logItemWarn
@@ -118,11 +118,11 @@ namespace DSModeler
                     ,logItemAll
             };
 
-            logLvlControls.Iter(i => i.Click += (ss, ee) =>
+            _ = logLvlControls.Iter(i => i.Click += (ss, ee) =>
             {
-                var tool = (ToolStripMenuItem)ss;
+                ToolStripMenuItem tool = (ToolStripMenuItem)ss;
                 Level sellvl = getLevel(tool.Text);
-                logLvlControls.Iter(c =>
+                _ = logLvlControls.Iter(c =>
                 {
                     c.Checked = false;
                     c.Image = null;
@@ -132,41 +132,42 @@ namespace DSModeler
 
                 logger.Level = sellvl;
 
-                Level getLevel(string lvl)
+                static Level getLevel(string lvl)
                 {
-                    Level l;
-                    switch (lvl.ToUpper())
+                    Level l = lvl.ToUpper() switch
                     {
-                        case "ERROR": l = Level.Error; break;
-                        case "WARN": l = Level.Warn; break;
-                        case "INFO": l = Level.Info; break;
-                        case "DEBUG": l = Level.Debug; break;
-                        case "ALL": l = Level.All; break;
-                        default: l = Level.All; break;
-                    }
+                        "ERROR" => Level.Error,
+                        "WARN" => Level.Warn,
+                        "INFO" => Level.Info,
+                        "DEBUG" => Level.Debug,
+                        "ALL" => Level.All,
+                        _ => Level.All,
+                    };
                     return l;
                 }
             });
             log_menu.DropDownItems.AddRange(logLvlControls.ToArray());
-            items.Add(log_menu);
+            _ = items.Add(log_menu);
 
 
             listBoxControlOutput.MouseClick += (s, e) =>
             {
                 if (e.Button == MouseButtons.Right)
+                {
                     listBoxControlOutput.ContextMenuStrip.Show();
+                }
             };
 
             listBoxControlOutput.DrawItem += (s, e) =>
             {
                 Brush selectedItemBackBrush = Brushes.SteelBlue;
-                string itemText = this.listBoxControlOutput.GetItemText(e.Index);
+                string itemText = listBoxControlOutput.GetItemText(e.Index);
                 if ((e.State & DrawItemState.Selected) != 0)
                 {
                     e.Cache.FillRectangle(selectedItemBackBrush, e.Bounds);
-                    using (Font f = new Font(e.Appearance.Font.Name, e.Appearance.Font.Size, FontStyle.Bold))
+                    using (Font f = new(e.Appearance.Font.Name, e.Appearance.Font.Size, FontStyle.Bold))
                     {
-                        var m = Regex.Match(itemText, @"(?<=\<.+\>)(.*?)(?=<\/.+>)");
+                        Match m = Regex.Match(itemText, @"(?<=\<.+\>)(.*?)(?=<\/.+>)");
                         e.Cache.DrawString(m.Value, f, Brushes.White, e.Bounds, e.Appearance.GetStringFormat());
                     }
                     e.Handled = true;
@@ -177,14 +178,14 @@ namespace DSModeler
 
         public static Color GetLogLevelColor(string levelName)
         {
-            switch (levelName)
+            return levelName switch
             {
-                case "DEBUG": return Color.Chocolate;
-                case "INFO": return Color.Navy;
-                case "ERROR": return Color.Red;
-                case "WARN": return Color.Brown;
-                default: return Color.Black;
-            }
+                "DEBUG" => Color.Chocolate,
+                "INFO" => Color.Navy,
+                "ERROR" => Color.Red,
+                "WARN" => Color.Brown,
+                _ => Color.Black,
+            };
         }
 
         public void Close() { }
@@ -195,29 +196,31 @@ namespace DSModeler
             {
                 try
                 {
-                    var msg = logEntry.MessageObject.ToString();
-                    var level = logEntry.Level.Name;
-                    var cr = GetLogLevelColor(level).Name;
-                    var now = logEntry.TimeStamp.ToString("HH:mm:ss.fff");
+                    string msg = logEntry.MessageObject.ToString();
+                    string level = logEntry.Level.Name;
+                    string cr = GetLogLevelColor(level).Name;
+                    string now = logEntry.TimeStamp.ToString("HH:mm:ss.fff");
                     //Trace.WriteLine(msg);
                     /*
                      * multi-line message 처리
                      */
-                    var lines = msg.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
+                    string[] lines = msg.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).ToArray();
                     if (lines.Length > 0)
                     {
-                        var fmtMsg = string.Format($"<color={cr}>{now} [{level}]:{lines[0]}</color>");
-                        Items.Add(fmtMsg);
+                        string fmtMsg = string.Format($"<color={cr}>{now} [{level}]:{lines[0]}</color>");
+                        _ = Items.Add(fmtMsg);
 
 
                         for (int i = 1; i < lines.Length; i++)
                         {
                             fmtMsg = $"<color={cr}>    {lines[i]}</color>";
-                            Items.Add(fmtMsg);
+                            _ = Items.Add(fmtMsg);
                         }
 
                         if (TrackEndOfLine)
+                        {
                             SelectedIndex = Items.Count - 1;
+                        }
                     }
                 }
                 catch (Exception ex)

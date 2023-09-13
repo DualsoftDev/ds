@@ -1,20 +1,17 @@
-using DevExpress.XtraEditors;
-using Dual.Common.Winform;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Runtime.Versioning;
-using static Engine.Core.ExpressionModule;
 
 namespace DSModeler.Tree;
 
 [SupportedOSPlatform("windows")]
 public class LogicStatement
 {
-    CommentedStatement _cs;
+    private readonly CommentedStatement _cs;
     public LogicStatement(CommentedStatement cs) { _cs = cs; }
-    public CommentedStatement GetCommentedStatement() => _cs;
+    public CommentedStatement GetCommentedStatement()
+    {
+        return _cs;
+    }
 
     public string TargetName => _cs.TargetName;
 
@@ -38,12 +35,12 @@ public static class LogicTree
 
     public static IEnumerable<LogicStatement> GetLogicStatement(bool device)
     {
-        var dsCPUs =
+        IEnumerable<Engine.Cpu.RunTime.DsCPU> dsCPUs =
                 device ?
-                  PcControl.RunCpus.Where(w => !w.Systems.Contains(Global.ActiveSys))
-                : PcControl.RunCpus.Where(w => w.Systems.Contains(Global.ActiveSys));
+                  PcContr.RunCpus.Where(w => !w.Systems.Contains(Global.ActiveSys))
+                : PcContr.RunCpus.Where(w => w.Systems.Contains(Global.ActiveSys));
 
-        var css = dsCPUs
+        IEnumerable<LogicStatement> css = dsCPUs
                     .SelectMany(c => c.CommentedStatements
                         .Select(s => new LogicStatement(s)));
         return css;

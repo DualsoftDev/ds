@@ -1,16 +1,4 @@
-﻿using DevExpress.XtraSplashScreen;
-using DSModeler.Utils;
-using DsXgComm;
-using DsXgComm.Monitoring;
-using Dual.Common.Core;
-using Dual.Common.Winform;
-using Engine.Core;
-using System;
-using System.Configuration;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using Application = System.Windows.Forms.Application;
 
 namespace DSModeler
 {
@@ -20,21 +8,23 @@ namespace DSModeler
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        private static void Main()
         {
 #if DEBUG
             Global.IsDebug = true;
 #endif
-          
-            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+
+            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             Log4NetLogger.Initialize(config.FilePath, "DSModelerLogger");  // "App.config"
 
-            var exceptionHander = new Action<Exception>(ex =>
+            Action<Exception> exceptionHander = new(ex =>
             {
                 DsProcessEvent.DoWork(100);
                 Log4NetLogger.Logger.Error($":::: Unhandled exception\r\n{ex}");
                 if (Global.IsDebug)
+                {
                     MBox.Error(ex.Message, "Error");
+                }
             });
 
             UnhandledExceptionHandler.DefaultActionOnUnhandledException = exceptionHander;
@@ -44,28 +34,23 @@ namespace DSModeler
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             EditorSkin.InitSetting("The Bezier", "Mercury Ice");
-            var main = new FormMain();
-            
-            PLCMonitorEngine s = new PLCMonitorEngine();
-            Task.Run(() =>
-            {
-                s.TestScan();
-            });
+            FormMain main = new();
 
+            if (!Global.IsDebug) SplashScreenManager.ShowForm(main, typeof(SplashScreenDS));
 
-            s.PLCTagChangedSubject.Subscribe(x => { 
-                Trace.WriteLine($"{x.Tag} => {x.Value}");
+            //PLCMonitorEngine s = new();
+            //Task.Run(() =>
+            //{
+            //    s.TestScan();
+            //});
+            //s.PLCTagChangedSubject.Subscribe(x =>
+            //{
+            //    Trace.WriteLine($"{x.Tag} => {x.Value}");
 
-                //ds value update  
+            //    //ds value update  
+            //});
 
-            });
-
-            if (!Global.IsDebug)
-                SplashScreenManager.ShowForm(main, typeof(SplashScreenDS));
             Application.Run(main);
-
-          
-
         }
     }
 }

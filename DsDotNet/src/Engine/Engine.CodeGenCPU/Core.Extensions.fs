@@ -254,7 +254,7 @@ module ConvertCoreExt =
             writeAble |> map (getFM(f).GetFlowTag)
 
     type TaskDev with
-        member td.ActionIN  = 
+        member td.ActionINFunc  = 
                             if hasNot td.Funcs 
                             then !!(td.InTag  :?> Tag<bool>).Expr 
                             else (td.InTag  :?> Tag<bool>).Expr
@@ -263,9 +263,16 @@ module ConvertCoreExt =
         member td.RXTags       = td.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.EP)
         member td.TXTags       = td.ApiItem.TXs |> Seq.map getVMReal |> Seq.map(fun f->f.SP)
 
-        member td.MutualResets(x:DsSystem) =
-            td.ApiItem.System.GetMutualResetApis(td.ApiItem)
-                .SelectMany(fun a -> x.DeviceDefs.Where(fun w-> w.ApiItem = a))
+        member td.MutualReset(x:DsSystem) =
+            let exMutualApis = td.ApiItem.System.GetMutualResetApis(td.ApiItem)
+            let myMutualDevs = 
+                    exMutualApis.SelectMany(fun api -> 
+                                x.DeviceDefs.Where(fun dev-> dev.ApiItem = api))
+            myMutualDevs
+
+        member td.MutualResetExpr(x:DsSystem) =
+            let myMutualDevs =  td.MutualReset(x).Select(fun d->d.ActionINFunc)
+            if myMutualDevs.any() then myMutualDevs.ToAnd() else x._on.Expr
 
     type CallDev with
         member c.UsingTon  = c.CallTargetJob.Funcs |> hasTime
@@ -289,12 +296,19 @@ module ConvertCoreExt =
         member c.PSs          = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PS )
         member c.PEs          = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PE )
         
-      
+        //member c.MutualResetDevsByCall(x:DsSystem, td:TaskDev) =
+        //           let myMutualDevs = c.CallTargetJob.DeviceDefs
+        //                               .SelectMany(fun d->d.MutualResetDevs(x))
+        //                               .Where(fun d->d = td)
+                               
+        //           let ins = myMutualDevs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionINFunc)
+        //           if ins.any() then ins.ToAnd() else x._on.Expr
+
         //개별 부정의 AND  <안전하게 전부 확인>
         member c.INsFuns  =   
-                            //let ins = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionIN)
+                            //let ins = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionINFunc)
                             //if ins.any() then !!ins.ToOr() else c._on.Expr
-                            let ins = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionIN)
+                            let ins = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionINFunc)
                             if  c.UsingNot
                                   //개별 부정의 AND  <안전하게 전부 확인>
                                   then if ins.any() then !!ins.ToOr() else c._on.Expr

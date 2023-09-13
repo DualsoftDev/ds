@@ -1,30 +1,23 @@
-using DevExpress.XtraBars.Navigation;
-using DSModeler.Tree;
-using Microsoft.AspNetCore.SignalR.Client;
-using Server.HW.XG5K;
-using System;
-using System.Linq;
-using System.Runtime.Versioning;
-using System.Threading.Tasks;
-using System.Windows;
-using static Engine.Core.RuntimeGeneratorModule;
 
-namespace DSModeler;
+namespace DSModeler.PcControl;
 [SupportedOSPlatform("windows")]
 public static class PcAction
 {
     public static void Play(AccordionControlElement ace_Play)
     {
-        if (!Global.IsLoadedPPT()) return;
+        if (!Global.IsLoadedPPT())
+        {
+            return;
+        }
+
         SimTree.PlayUI(ace_Play, true);
 
         if (RuntimeDS.Package.IsSimulation || RuntimeDS.Package.IsPackagePC())
         {
             Global.SimReset = false;
-            if (RuntimeDS.Package.IsStandardPC)
-                Global.PaixDriver.Start();
+  
 
-            Task.WhenAll(PcControl.RunCpus.Select(s =>
+            _ = Task.WhenAll(PcContr.RunCpus.Select(s =>
                             Task.Run(() => s.Run()))
                 );
 
@@ -37,65 +30,104 @@ public static class PcAction
             Global.Logger.Info("시뮬레이션 : Run");
         }
         else
-            MBox.Warn("설정 H/W 에서 Simution 타입을 선택하세요");
+        {
+            _ = MBox.Warn("설정 H/W 에서 Simution 타입을 선택하세요");
+        }
     }
 
 
     public static void Step(AccordionControlElement ace_Play)
     {
-        if (!Global.IsLoadedPPT()) return;
+        if (!Global.IsLoadedPPT())
+        {
+            return;
+        }
+
         SimTree.PlayUI(ace_Play, false);
         if (!RuntimeDS.Package.IsSimulation)
         {
-            MBox.Warn("설젱 H/W 에서 Simution 타입을 선택하세요");
+            _ = MBox.Warn("설젱 H/W 에서 Simution 타입을 선택하세요");
             return;
         }
         Global.SimReset = false;
 
-        Task.WhenAll(PcControl.RunCpus.Select(s =>
+        _ = Task.WhenAll(PcContr.RunCpus.Select(s =>
                       Task.Run(() => s.Step()))
           );
         Global.Logger.Info("시뮬레이션 : Step");
     }
     public static void Stop(AccordionControlElement ace_Play)
     {
-        if (!Global.IsLoadedPPT()) return;
+        if (!Global.IsLoadedPPT())
+        {
+            return;
+        }
+
         SimTree.PlayUI(ace_Play, false);
 
         if (RuntimeDS.Package.IsSimulation || RuntimeDS.Package.IsPackagePC())
         {
             Global.SimReset = false;
 
-            Task.WhenAll(PcControl.RunCpus.Select(s =>
+            _ = Task.WhenAll(PcContr.RunCpus.Select(s =>
                           Task.Run(() => s.Stop()))
               );
 
             if (RuntimeDS.Package.IsStandardPC)
-                Global.PaixDriver.Stop();
+            {
+                Global.DsDriver.Stop();
+            }
 
             Global.Logger.Info("시뮬레이션 : Stop");
         }
         else
-            MBox.Warn("설정 H/W 에서 Simution 타입을 선택하세요");
+        {
+            _ = MBox.Warn("설정 H/W 에서 Simution 타입을 선택하세요");
+        }
     }
     public static void Reset(
           AccordionControlElement ace_Play
         , AccordionControlElement ace_HMI)
     {
-        if (!Global.IsLoadedPPT()) return;
+        if (!Global.IsLoadedPPT())
+        {
+            return;
+        }
+
         SimTree.PlayUI(ace_Play, false);
         Global.SimReset = true;
         HMITree.OffHMIBtn(ace_HMI);
-        var activeCpu = PcControl.RunCpus.First(w => w.Systems.Contains(Global.ActiveSys));
+        Engine.Cpu.RunTime.DsCPU activeCpu = PcContr.RunCpus.First(w => w.Systems.Contains(Global.ActiveSys));
 
         if (RuntimeDS.Package.IsStandardPC)
-            Global.PaixDriver?.Stop();
+        {
+            if (PcContr.DicActionOut != null)
+            {
+                Task.Run(async () =>
+                {
+                    if (Global.DSHW.Company == Company.LSE)
+                    {
+                        PcContr.DicActionOut.Values.Cast<XG5KTag>().Iter(t => t.XgPLCTag.WriteValue = false);
+                        while (PcContr.DicActionOut.Values.Cast<XG5KTag>().Where(t => t.XgPLCTag.WriteValue != null).Any()) await Task.Delay(1);
+                    }
+                    else
+                    {
+                        PcContr.DicActionOut.Values.Iter(t => t.WriteRequestValue = false);
+                        while (PcContr.DicActionOut.Values.Where(t => t.WriteRequestValue != null).Any()) await Task.Delay(1);
+                    }
 
-        Task.Run(() =>
+
+                }).Wait();
+
+                Global.DsDriver.Conn.ForceIOEvent();
+            }
+        }
+
+        _ = Task.Run(() =>
         {
             Task.Run(() => activeCpu.ResetActive()).Wait();
 
-            Task.WhenAll(PcControl.RunCpus.Where(w => w != activeCpu).Select(s =>
+            _ = Task.WhenAll(PcContr.RunCpus.Where(w => w != activeCpu).Select(s =>
                 Task.Run(() => s.Reset()))
             );
         });
@@ -105,30 +137,47 @@ public static class PcAction
 
     public static void Disconnect()
     {
-        Task.WhenAll(PcControl.RunCpus.Select(s =>
+        _ = Task.WhenAll(PcContr.RunCpus.Select(s =>
                       Task.Run(() => s.Dispose()))
           );
     }
 
-    public static void SetBit(XG5KTag tag, bool value)
+    public static void SetBit(TagHW tag, bool value)
     {
+        if (tag == null) return;
         if (RuntimeDS.Package.IsPackagePC())
-            tag.WriteRequestValue = value;
+        {
+            if (Global.DSHW.Company == Company.LSE)
+            {
+                var tagHW = PcContr.DicActionOut.Values.First(f => f == tag);
+                ((XG5KTag)tagHW).XgPLCTag.WriteValue = value;
+            }
+            else
+                tag.WriteRequestValue = value;
+        }
         else
-            MBox.Warn("설정 H/W 에서 PC 타입을 선택하세요");
+        {
+            _ = MBox.Warn("설정 H/W 에서 PC 타입을 선택하세요");
+        }
     }
 
     internal static void CreateConnect()
     {
-        if (Global.PaixDriver != null) Global.PaixDriver.Conn.Disconnect();
+        _ = (Global.DsDriver?.Conn.Disconnect());
 
         if (Global.RunCountIn + Global.RunCountOut == 0)
+        {
             Global.Logger.Error($"IO Slot 개수가 0입니다. IO통신이 불가능합니다.");
+        }
 
-        Global.PaixDriver = new PaixDriver(Global.PaixHW, Global.RunHWIP, Global.RunCountIn, Global.RunCountOut);
-        if (Global.PaixDriver.Open())
-            Global.Logger.Info($"{Global.PaixHW} {Global.RunHWIP} 연결에 성공 하였습니다.");
+        Global.DsDriver = new DsDriver(Global.DSHW, Global.RunHWIP, Global.RunCountIn, Global.RunCountOut);
+        if (Global.DsDriver.Open())
+        {
+            Global.Logger.Info($"{Global.DSHW} {Global.RunHWIP} 연결에 성공 하였습니다.");
+        }
         else
-            Global.Logger.Warn($"{Global.PaixHW} {Global.RunHWIP} 연결에 실패 하였습니다. 통신 연결을 확인하세요");
+        {
+            Global.Logger.Warn($"{Global.DSHW} {Global.RunHWIP} 연결에 실패 하였습니다. 통신 연결을 확인하세요");
+        }
     }
 }

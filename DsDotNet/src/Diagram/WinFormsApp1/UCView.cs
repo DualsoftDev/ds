@@ -367,9 +367,9 @@ namespace Diagram.View.MSAGL
         private void UpdateFillColor(bool dataExist, Node node)
         {
             if (dataExist)
-                node.Attr.FillColor = Color.DarkSlateBlue;
+                node.Attr.FillColor = Color.DarkGreen;
             else
-                node.Attr.FillColor = Color.DimGray;
+                node.Attr.FillColor = Color.Black;
         }
 
 

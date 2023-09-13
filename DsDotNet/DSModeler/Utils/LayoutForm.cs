@@ -1,8 +1,6 @@
 using DevExpress.XtraBars.Docking;
-using System.IO;
-using System.Runtime.Versioning;
 
-namespace DSModeler;
+namespace DSModeler.Utils;
 [SupportedOSPlatform("windows")]
 public static class LayoutForm
 {
@@ -10,12 +8,17 @@ public static class LayoutForm
     internal static void LoadLayout(DockManager docM)
     {
         if (!Directory.Exists(Global.DefaultAppSettingFolder))
-            Directory.CreateDirectory(Global.DefaultAppSettingFolder);
+        {
+            _ = Directory.CreateDirectory(Global.DefaultAppSettingFolder);
+        }
 
         docM.BeginUpdate();
         docM.SaveLayoutToXml($"{Global.DefaultAppSettingFolder}\\default_layout.xml");
         if (File.Exists($"{Global.DefaultAppSettingFolder}\\layout.xml"))
+        {
             docM.RestoreLayoutFromXml($"{Global.DefaultAppSettingFolder}\\layout.xml");
+        }
+
         docM.EndUpdate();
     }
 

@@ -1,7 +1,3 @@
-using Dual.Common.Winform;
-using System.Drawing;
-using System.Windows.Forms;
-
 namespace DSModeler.Form
 {
     public partial class FormDocText : DevExpress.XtraEditors.XtraForm
@@ -11,10 +7,10 @@ namespace DSModeler.Form
             InitializeComponent();
         }
 
-        public RichTextBox TextEdit => richTextBox_ds;
+        public RichTextBox TextEdit { get; private set; }
         public void AppendTextColor(string text, Color color)
         {
-            var box = richTextBox_ds;
+            RichTextBox box = TextEdit;
             box.Do(() =>
             {
                 box.SelectionStart = box.TextLength;

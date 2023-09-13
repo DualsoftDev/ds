@@ -1,38 +1,24 @@
-using Dual.Common.Core;
-using Engine.Core;
-using log4net;
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Reactive.Subjects;
-using System.Reflection;
-using static Engine.Core.CoreModule;
-using static Engine.Core.DsType;
-using static Engine.Core.RuntimeGeneratorModule;
+
 
 namespace DSModeler
 {
     public static class K
     {
         public const string AppName = "DSModeler";
-        public const string RegSkin = "RegSkin";
-        public const string LastPath = "LastPath";
-        public const string LastFiles = "LastFiles";
-        public const string LastDocs = "LastDocs";
-        public const string SimSpeed = "SimSpeed";
-        public const string LayoutMenuExpand = "LayoutMenuExpand";
-        public const string LayoutGraphLineType = "LayoutGraphLineType";
-        public const string CpuRunMode = "CpuRunMode";
-        public const string RunCountIn = "RunCountIn";
-        public const string RunCountOut = "RunCountOut";
-        public const string RunHWIP = "RunHWIP";
         public const string RunDefaultIP = "192.168.0.100";
         public const string DocStartPage = "시작 페이지";
         public const string DocPLC = "PLC 생성";
         public const string DocDS = "모델 출력";
         public const string DocExpression = "수식";
         public const string DocExpressionAll = "수식전체";
-        public const string RegPath = "SOFTWARE\\Dualsoft\\DSModeler";
+
+
+        
+    }
+    public static class Company
+    {
+        public const string LSE = "LS Electric";
+        public const string PAIX = "PAIX";
     }
     public static class Global
     {
@@ -48,14 +34,15 @@ namespace DSModeler
         public static string ExportPathPLC { get; set; }
         public static string ExportPathXLS { get; set; }
         public static string RunHWIP { get; set; }
+        public static string RunHWDevice { get; set; }
         public static DsSystem ActiveSys { get; set; }
         public static RuntimePackage CpuRunMode { get; set; } = RuntimePackage.Simulation;
-        public static PaixHW PaixHW { get; set; } = PaixHW.WMX;
-        public static PaixDriver PaixDriver { get; set; }
+        public static HwModel DSHW { get; set; } 
+        public static DsDriver DsDriver { get; set; }
 
         public static Version ver = Assembly.GetEntryAssembly().GetName().Version;
-        public static Subject<Tuple<CoreModule.Vertex, Status4>> StatusChangeSubject = new Subject<Tuple<CoreModule.Vertex, Status4>>();
-        public static Subject<Tuple<int, TimeSpan>> ChangeLogCount = new Subject<Tuple<int, TimeSpan>>();
+        public static Subject<Tuple<CoreModule.Vertex, Status4>> StatusChangeSubject = new();
+        public static Subject<Tuple<int, TimeSpan>> ChangeLogCount = new();
         public static string DefaultFolder =>
             Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -71,13 +58,15 @@ namespace DSModeler
                 return false;
             }
             else
+            {
                 return true;
+            }
         }
         public static bool BusyCheck()
         {
-            if (0 < DsProcessEvent.CurrProcess && DsProcessEvent.CurrProcess < 100)
+            if (DsProcessEvent.CurrProcess is > 0 and < 100)
             {
-                MBox.Warn("프로세스 처리 작업중입니다.");
+                _ = MBox.Warn("프로세스 처리 작업중입니다.");
                 return true;
             }
             return false;
@@ -87,12 +76,20 @@ namespace DSModeler
             if (Global.IsLoadedPPT())
             {
                 if (path.IsNullOrEmpty())
-                    MBox.Warn("내보내기를 먼저 수행하세요.");
+                {
+                    _ = MBox.Warn("내보내기를 먼저 수행하세요.");
+                }
                 else
-                    Process.Start(new ProcessStartInfo { FileName = Path.GetDirectoryName(path), UseShellExecute = true });
+                {
+                    _ = Process.Start(new ProcessStartInfo { FileName = Path.GetDirectoryName(path), UseShellExecute = true });
+                }
             }
         }
-        public static void Notimplemented() => MBox.Warn("기능이 제한 되었습니다. 기능 문의는 han@dualsoft.com 연락주세요");
+        public static void Notimplemented()
+        {
+            _ = MBox.Warn("기능이 제한 되었습니다. 기능 문의는 han@dualsoft.com 연락주세요");
+        }
+
         public static string DefaultAppSettingFolder => Path.Combine(DefaultFolder, "AppSetting");
         public static string AppVersion => $"{ver.Major}.{ver.Minor}.{ver.Build}";
 

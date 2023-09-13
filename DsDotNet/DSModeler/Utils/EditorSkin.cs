@@ -1,36 +1,37 @@
 using DevExpress.LookAndFeel;
-using System.Runtime.Versioning;
 
-namespace DSModeler
+namespace DSModeler.Utils
 {
     [SupportedOSPlatform("windows")]
     public static class EditorSkin
     {
         public static void SetSkin(string name)
         {
-            DSRegistry.SetValue(K.RegSkin, name);
+            DSRegistry.SetValue(RegKey.RegSkin, name);
         }
 
         public static string GetSkin()
         {
-            return DSRegistry.GetValue(K.RegSkin).ToString();
+            return DSRegistry.GetValue(RegKey.RegSkin).ToString();
         }
 
         internal static void InitSetting(string skinName, string skinPalette)
         {
             UserLookAndFeel.Default.StyleChanged += (s, e) =>
             {
-                var skin = s as UserLookAndFeel;
-                EditorSkin.SetSkin($"{skin.ActiveSkinName};{skin.ActiveSvgPaletteName}");
+                UserLookAndFeel skin = s as UserLookAndFeel;
+                SetSkin($"{skin.ActiveSkinName};{skin.ActiveSvgPaletteName}");
             };
 
-            if (DSRegistry.GetValue(K.RegSkin) == null)
+            if (DSRegistry.GetValue(RegKey.RegSkin) == null)
+            {
                 UserLookAndFeel.Default.SetSkinStyle(skinName, skinPalette);
+            }
             else
             {
-                var skin = GetSkin();
-                var sn = skin.Split(';')[0];
-                var sp = skin.Split(';')[1];
+                string skin = GetSkin();
+                string sn = skin.Split(';')[0];
+                string sp = skin.Split(';')[1];
                 UserLookAndFeel.Default.SetSkinStyle(sn, sp);
             }
         }

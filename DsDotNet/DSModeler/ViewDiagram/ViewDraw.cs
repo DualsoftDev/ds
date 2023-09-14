@@ -1,7 +1,3 @@
-
-
-using DevExpress.DataAccess.UI.Native.ObjectBinding;
-
 namespace DSModeler.ViewDiagram
 {
     public static class ViewDraw
@@ -9,9 +5,9 @@ namespace DSModeler.ViewDiagram
         /// <summary>
         /// DicStatusNValue
         /// </summary>
-        public static Dictionary<Vertex, Tuple<Status4, bool>> DicSV;  
-                                                                                 
-                                                                                 
+        public static Dictionary<Vertex, Tuple<Status4, bool>> DicSV;
+
+
         public static Dictionary<DsTask, IEnumerable<Vertex>> DicTask;
         public static Subject<EventVertex> StatusChangeSubject = new();
         public static Subject<Tuple<Vertex, object>> ActionChangeSubject = new();

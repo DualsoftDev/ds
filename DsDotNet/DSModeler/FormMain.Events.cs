@@ -66,7 +66,7 @@ namespace DSModeler
                     DSRegistry.SetValue(RegKey.RunHWDevice, hw.ToTextRegister);
                 }
             };
-            
+
 
             gle_Expr.BeforePopup += (s, e) =>
                 gle_Expr.Properties.BestFitMode = BestFitMode.BestFitResizePopup;
@@ -146,7 +146,7 @@ namespace DSModeler
                 }
             };
 
-    
+
             _ = Global.ChangeLogCount.Subscribe(rx =>
             {
                 this.Do(() =>
@@ -169,9 +169,9 @@ namespace DSModeler
             {
                 switch (rx.TagKind)
                 {
-                    case VertexTag.ready: ViewDraw.DicSV[rx.Target]= Tuple.Create(Status4.Ready, ViewDraw.DicSV[rx.Target].Item2);   break;
-                    case VertexTag.going: ViewDraw.DicSV[rx.Target]= Tuple.Create(Status4.Going, ViewDraw.DicSV[rx.Target].Item2);   break;
-                    case VertexTag.finish:ViewDraw.DicSV[rx.Target] = Tuple.Create(Status4.Finish, ViewDraw.DicSV[rx.Target].Item2); break;
+                    case VertexTag.ready: ViewDraw.DicSV[rx.Target] = Tuple.Create(Status4.Ready, ViewDraw.DicSV[rx.Target].Item2); break;
+                    case VertexTag.going: ViewDraw.DicSV[rx.Target] = Tuple.Create(Status4.Going, ViewDraw.DicSV[rx.Target].Item2); break;
+                    case VertexTag.finish: ViewDraw.DicSV[rx.Target] = Tuple.Create(Status4.Finish, ViewDraw.DicSV[rx.Target].Item2); break;
                     case VertexTag.homing: ViewDraw.DicSV[rx.Target] = Tuple.Create(Status4.Homing, ViewDraw.DicSV[rx.Target].Item2); break;
                     default: break;
                 }

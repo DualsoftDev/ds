@@ -12,7 +12,7 @@ namespace PowerPointAddInForDS
 
         }
 
-        public UcView UcView => ucView1;
+        public UcView UcView { get; private set; }
 
     }
 }

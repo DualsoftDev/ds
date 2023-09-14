@@ -35,7 +35,6 @@
 
 	<ItemGroup>
 		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.3" />
-		<PackageReference Include="DualSoft-PLC-LS-FS" Version="0.1.2" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
 		<PackageReference Include="FsUnit" Version="5.0.4" />
@@ -45,7 +44,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\Server\Dual.PLC.LS.XgCOM.FS\Dual.PLC.LS.XgCOM.FS.fsproj" />
+		<ProjectReference Include="..\..\Server\Dual.PLC.LS.FS\Dual.PLC.LS.FS.fsproj" />
+		<ProjectReference Include="..\..\Server\Dual.PLC.LS.XgCOM4DS.FS\Dual.PLC.LS.XgCOM4DS.FS.fsproj" />
 		<ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
 	</ItemGroup>
 	<ItemGroup>

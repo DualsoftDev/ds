@@ -15,7 +15,7 @@ public static class PcAction
         if (RuntimeDS.Package.IsSimulation || RuntimeDS.Package.IsPackagePC())
         {
             Global.SimReset = false;
-  
+
 
             _ = Task.WhenAll(PcContr.RunCpus.Select(s =>
                             Task.Run(() => s.Run()))

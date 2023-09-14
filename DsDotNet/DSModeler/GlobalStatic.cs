@@ -13,7 +13,7 @@ namespace DSModeler
         public const string DocExpressionAll = "수식전체";
 
 
-        
+
     }
     public static class Company
     {
@@ -37,7 +37,7 @@ namespace DSModeler
         public static string RunHWDevice { get; set; }
         public static DsSystem ActiveSys { get; set; }
         public static RuntimePackage CpuRunMode { get; set; } = RuntimePackage.Simulation;
-        public static HwModel DSHW { get; set; } 
+        public static HwModel DSHW { get; set; }
         public static DsDriver DsDriver { get; set; }
 
         public static Version ver = Assembly.GetEntryAssembly().GetName().Version;

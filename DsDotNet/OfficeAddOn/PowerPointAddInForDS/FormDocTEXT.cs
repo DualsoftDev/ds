@@ -10,10 +10,10 @@ namespace PowerPointAddInForDS
             InitializeComponent();
         }
 
-        public RichTextBox TextEdit => richTextBox_ds;
+        public RichTextBox TextEdit { get; private set; }
         public void AppendTextColor(string text, Color color)
         {
-            var box = richTextBox_ds;
+            RichTextBox box = TextEdit;
 
             box.SelectionStart = box.TextLength;
             box.SelectionLength = 0;

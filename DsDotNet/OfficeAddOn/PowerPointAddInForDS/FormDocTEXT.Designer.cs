@@ -30,28 +30,28 @@ namespace PowerPointAddInForDS
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormDocText));
-            this.richTextBox_ds = new System.Windows.Forms.RichTextBox();
+            this.TextEdit = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
             // 
             // richTextBox_ds
             // 
-            this.richTextBox_ds.AcceptsTab = true;
-            this.richTextBox_ds.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(33)))), ((int)(((byte)(33)))));
-            this.richTextBox_ds.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBox_ds.ForeColor = System.Drawing.Color.BlanchedAlmond;
-            this.richTextBox_ds.Location = new System.Drawing.Point(0, 0);
-            this.richTextBox_ds.Name = "richTextBox_ds";
-            this.richTextBox_ds.ReadOnly = true;
-            this.richTextBox_ds.Size = new System.Drawing.Size(694, 570);
-            this.richTextBox_ds.TabIndex = 3;
-            this.richTextBox_ds.Text = "";
+            this.TextEdit.AcceptsTab = true;
+            this.TextEdit.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(33)))), ((int)(((byte)(33)))), ((int)(((byte)(33)))));
+            this.TextEdit.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.TextEdit.ForeColor = System.Drawing.Color.BlanchedAlmond;
+            this.TextEdit.Location = new System.Drawing.Point(0, 0);
+            this.TextEdit.Name = "richTextBox_ds";
+            this.TextEdit.ReadOnly = true;
+            this.TextEdit.Size = new System.Drawing.Size(694, 570);
+            this.TextEdit.TabIndex = 3;
+            this.TextEdit.Text = "";
             // 
             // FormDocText
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(694, 570);
-            this.Controls.Add(this.richTextBox_ds);
+            this.Controls.Add(this.TextEdit);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FormDocText";
@@ -63,6 +63,5 @@ namespace PowerPointAddInForDS
 
         #endregion
 
-        private System.Windows.Forms.RichTextBox richTextBox_ds;
     }
 }

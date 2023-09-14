@@ -21,7 +21,6 @@ global using DSModeler.PcControl;
 global using DSModeler.Tree;
 global using DSModeler.Utils;
 global using DSModeler.ViewDiagram;
-global using DsXgComm.Monitoring;
 global using Dual.Common.Core;
 global using Dual.Common.Winform;
 global using Engine.CodeGenCPU;

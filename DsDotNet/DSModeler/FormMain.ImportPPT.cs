@@ -65,10 +65,10 @@ namespace DSModeler
                 _ = PcContr.RunCpus.Iter(cpu => cpu.Dispose());
                 RecentDocs.SetRecentDoc(TabbedView.Documents.Select(d => d.Caption));
 
-            
+
                 if (Global.DsDriver != null)
                     PcContr.Stop();
-             
+
                 _ = TabbedView.Controller.CloseAll();
                 TabbedView.Documents.Clear();
                 LogCountText.Caption = "";

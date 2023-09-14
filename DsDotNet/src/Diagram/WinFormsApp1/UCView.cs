@@ -23,7 +23,7 @@ namespace Diagram.View.MSAGL
 {
     public partial class UcView : UserControl
     {
-        private readonly GViewer viewer = new Microsoft.Msagl.GraphViewerGdi.GViewer();
+        private readonly GViewer viewer = new();
 
         public Flow Flow { get; set; }
         public ViewNode MasterNode { get; set; }
@@ -35,15 +35,15 @@ namespace Diagram.View.MSAGL
             viewer.PanButtonPressed = true;
             viewer.ToolBarIsVisible = false;
 
-            this.Controls.Add(viewer);
+            Controls.Add(viewer);
 
 
         }
 
         //private Dictionary<Tuple<MSeg, Status4>, int> _dicCycle = new Dictionary<Tuple<MSeg, Status4>, int>();
-        private Dictionary<string, Node> _dicDrawing = new Dictionary<string, Node>();
+        private readonly Dictionary<string, Node> _dicDrawing = new();
 
-        bool IsDummyMember(List<pptDummy> lstDummy, Vertex vertex)
+        private bool IsDummyMember(List<pptDummy> lstDummy, Vertex vertex)
         {
             return lstDummy.Where(w => w.Members.Contains(vertex)).Count() > 0;
         }
@@ -57,7 +57,7 @@ namespace Diagram.View.MSAGL
             //viewer.Graph.LayoutAlgorithmSettings = new RankingLayoutSettings();
             //sub 그래프 가능
             viewer.Graph = new Graph() { };
-            var layoutSetting = new Microsoft.Msagl.Layout.Layered.SugiyamaLayoutSettings();
+            Microsoft.Msagl.Layout.Layered.SugiyamaLayoutSettings layoutSetting = new();
             //var layoutSetting = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings(); 
 
             if (bSmallGap)
@@ -101,14 +101,22 @@ namespace Diagram.View.MSAGL
             bool bDrawSubSrc = edge.Sources[0].IsChildExist;
             bool bDrawSubTgt = edge.Targets[0].IsChildExist;
 
-            var mEdgeSrc = edge.Sources[0];
-            var mEdgeTgt = edge.Targets[0];
-            var subGSrc = new Subgraph(mEdgeSrc.UIKey);
-            var subGTgt = new Subgraph(mEdgeTgt.UIKey);
+            ViewNode mEdgeSrc = edge.Sources[0];
+            ViewNode mEdgeTgt = edge.Targets[0];
+            Subgraph subGSrc = new(mEdgeSrc.UIKey);
+            Subgraph subGTgt = new(mEdgeTgt.UIKey);
 
-            if (bDrawSubSrc) subgraph.AddSubgraph(subGSrc);
-            if (bDrawSubTgt) subgraph.AddSubgraph(subGTgt);
-            var gEdge = viewer.Graph.AddEdge(subGSrc.Id, "", subGTgt.Id);
+            if (bDrawSubSrc)
+            {
+                subgraph.AddSubgraph(subGSrc);
+            }
+
+            if (bDrawSubTgt)
+            {
+                subgraph.AddSubgraph(subGTgt);
+            }
+
+            Edge gEdge = viewer.Graph.AddEdge(subGSrc.Id, "", subGTgt.Id);
             DrawEdgeStyle(gEdge, edge, true);
             DrawSub(subgraph, mEdgeSrc, subGSrc, gEdge.SourceNode, bDrawSubSrc);
             DrawSub(subgraph, mEdgeTgt, subGTgt, gEdge.TargetNode, bDrawSubTgt);
@@ -118,10 +126,14 @@ namespace Diagram.View.MSAGL
         private Subgraph DrawSeg(Subgraph parentGraph, ViewNode viewNode)
         {
 
-            var subGraph = new Subgraph(viewNode.UIKey);
+            Subgraph subGraph = new(viewNode.UIKey);
 
-            if (viewNode.IsChildExist) parentGraph.AddSubgraph(subGraph);
-            var gEdge = viewer.Graph.AddEdge(subGraph.Id, "", subGraph.Id);
+            if (viewNode.IsChildExist)
+            {
+                parentGraph.AddSubgraph(subGraph);
+            }
+
+            Edge gEdge = viewer.Graph.AddEdge(subGraph.Id, "", subGraph.Id);
             UpdateLabelText(gEdge.SourceNode);
             UpdateNodeView(gEdge.SourceNode, viewNode);
             gEdge.IsVisible = false;
@@ -133,8 +145,14 @@ namespace Diagram.View.MSAGL
 
         private void DrawSub(Subgraph parentGraph, ViewNode viewNode, Subgraph subG, Node gNode, bool bDrawSub)
         {
-            if (_dicDrawing.ContainsKey(gNode.Id)) return;
-            else _dicDrawing.Add(gNode.Id, gNode);
+            if (_dicDrawing.ContainsKey(gNode.Id))
+            {
+                return;
+            }
+            else
+            {
+                _dicDrawing.Add(gNode.Id, gNode);
+            }
 
             if (bDrawSub)
             {
@@ -148,7 +166,9 @@ namespace Diagram.View.MSAGL
 
             }
             else
+            {
                 parentGraph.AddNode(gNode);
+            }
         }
 
 
@@ -159,7 +179,7 @@ namespace Diagram.View.MSAGL
             gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Generalization;
 
             gEdge.Attr.Color = Color.White;
-            var et = edge.EdgeSymbol.ToModelEdge();
+            ModelingEdgeType et = edge.EdgeSymbol.ToModelEdge();
             if (et == ModelingEdgeType.StartEdge)
             {
                 gEdge.Attr.AddStyle(Style.Solid);
@@ -207,8 +227,8 @@ namespace Diagram.View.MSAGL
             if (model)
             {
 
-                var src = edge.Sources[0];
-                var tgt = edge.Targets[0];
+                ViewNode src = edge.Sources[0];
+                ViewNode tgt = edge.Targets[0];
 
                 UpdateNodeView(gEdge.SourceNode, src);
                 UpdateNodeView(gEdge.TargetNode, tgt);
@@ -233,15 +253,50 @@ namespace Diagram.View.MSAGL
                     else
                     {
                         nNode.Attr.Shape = Shape.Ellipse;
-                        if (viewNode.BtnType.Value == BtnType.DuAutoBTN) nNode.Attr.FillColor = Color.DodgerBlue;
-                        if (viewNode.BtnType.Value == BtnType.DuManualBTN) nNode.Attr.FillColor = Color.DarkSlateBlue;
-                        if (viewNode.BtnType.Value == BtnType.DuDriveBTN) nNode.Attr.FillColor = Color.DarkGoldenrod;
-                        if (viewNode.BtnType.Value == BtnType.DuStopBTN) nNode.Attr.FillColor = Color.Firebrick;
-                        if (viewNode.BtnType.Value == BtnType.DuEmergencyBTN) nNode.Attr.FillColor = Color.MediumVioletRed;
-                        if (viewNode.BtnType.Value == BtnType.DuTestBTN) nNode.Attr.FillColor = Color.CadetBlue;
-                        if (viewNode.BtnType.Value == BtnType.DuReadyBTN) nNode.Attr.FillColor = Color.Green;
-                        if (viewNode.BtnType.Value == BtnType.DuHomeBTN) nNode.Attr.FillColor = Color.DarkGray;
-                        if (viewNode.BtnType.Value == BtnType.DuClearBTN) nNode.Attr.FillColor = Color.DarkOliveGreen;
+                        if (viewNode.BtnType.Value == BtnType.DuAutoBTN)
+                        {
+                            nNode.Attr.FillColor = Color.DodgerBlue;
+                        }
+
+                        if (viewNode.BtnType.Value == BtnType.DuManualBTN)
+                        {
+                            nNode.Attr.FillColor = Color.DarkSlateBlue;
+                        }
+
+                        if (viewNode.BtnType.Value == BtnType.DuDriveBTN)
+                        {
+                            nNode.Attr.FillColor = Color.DarkGoldenrod;
+                        }
+
+                        if (viewNode.BtnType.Value == BtnType.DuStopBTN)
+                        {
+                            nNode.Attr.FillColor = Color.Firebrick;
+                        }
+
+                        if (viewNode.BtnType.Value == BtnType.DuEmergencyBTN)
+                        {
+                            nNode.Attr.FillColor = Color.MediumVioletRed;
+                        }
+
+                        if (viewNode.BtnType.Value == BtnType.DuTestBTN)
+                        {
+                            nNode.Attr.FillColor = Color.CadetBlue;
+                        }
+
+                        if (viewNode.BtnType.Value == BtnType.DuReadyBTN)
+                        {
+                            nNode.Attr.FillColor = Color.Green;
+                        }
+
+                        if (viewNode.BtnType.Value == BtnType.DuHomeBTN)
+                        {
+                            nNode.Attr.FillColor = Color.DarkGray;
+                        }
+
+                        if (viewNode.BtnType.Value == BtnType.DuClearBTN)
+                        {
+                            nNode.Attr.FillColor = Color.DarkOliveGreen;
+                        }
                     }
                 }
                 if (viewNode.ViewType == ViewType.VLAMP)
@@ -255,14 +310,45 @@ namespace Diagram.View.MSAGL
                     {
 
                         nNode.Attr.Shape = Shape.Box;
-                        if (viewNode.LampType.Value == LampType.DuAutoLamp) nNode.Attr.FillColor = Color.DodgerBlue;
-                        if (viewNode.LampType.Value == LampType.DuManualLamp) nNode.Attr.FillColor = Color.DarkSlateBlue;
-                        if (viewNode.LampType.Value == LampType.DuDriveLamp) nNode.Attr.FillColor = Color.DarkGoldenrod;
-                        if (viewNode.LampType.Value == LampType.DuStopLamp) nNode.Attr.FillColor = Color.Firebrick;
-                        if (viewNode.LampType.Value == LampType.DuEmergencyLamp) nNode.Attr.FillColor = Color.MediumVioletRed;
-                        if (viewNode.LampType.Value == LampType.DuTestDriveLamp) nNode.Attr.FillColor = Color.CadetBlue;
-                        if (viewNode.LampType.Value == LampType.DuReadyLamp) nNode.Attr.FillColor = Color.Green;
-                        if (viewNode.LampType.Value == LampType.DuIdleLamp) nNode.Attr.FillColor = Color.DarkGray;
+                        if (viewNode.LampType.Value == LampType.DuAutoLamp)
+                        {
+                            nNode.Attr.FillColor = Color.DodgerBlue;
+                        }
+
+                        if (viewNode.LampType.Value == LampType.DuManualLamp)
+                        {
+                            nNode.Attr.FillColor = Color.DarkSlateBlue;
+                        }
+
+                        if (viewNode.LampType.Value == LampType.DuDriveLamp)
+                        {
+                            nNode.Attr.FillColor = Color.DarkGoldenrod;
+                        }
+
+                        if (viewNode.LampType.Value == LampType.DuStopLamp)
+                        {
+                            nNode.Attr.FillColor = Color.Firebrick;
+                        }
+
+                        if (viewNode.LampType.Value == LampType.DuEmergencyLamp)
+                        {
+                            nNode.Attr.FillColor = Color.MediumVioletRed;
+                        }
+
+                        if (viewNode.LampType.Value == LampType.DuTestDriveLamp)
+                        {
+                            nNode.Attr.FillColor = Color.CadetBlue;
+                        }
+
+                        if (viewNode.LampType.Value == LampType.DuReadyLamp)
+                        {
+                            nNode.Attr.FillColor = Color.Green;
+                        }
+
+                        if (viewNode.LampType.Value == LampType.DuIdleLamp)
+                        {
+                            nNode.Attr.FillColor = Color.DarkGray;
+                        }
                     }
                 }
 
@@ -276,20 +362,33 @@ namespace Diagram.View.MSAGL
                     else
                     {
                         nNode.Attr.Shape = Shape.Box;
-                        if (viewNode.ConditionType.Value == ConditionType.DuReadyState) nNode.Attr.FillColor = Color.DodgerBlue;
-                        if (viewNode.ConditionType.Value == ConditionType.DuDriveState) nNode.Attr.FillColor = Color.DarkSlateBlue;
+                        if (viewNode.ConditionType.Value == ConditionType.DuReadyState)
+                        {
+                            nNode.Attr.FillColor = Color.DodgerBlue;
+                        }
+
+                        if (viewNode.ConditionType.Value == ConditionType.DuDriveState)
+                        {
+                            nNode.Attr.FillColor = Color.DarkSlateBlue;
+                        }
                     }
                 }
 
                 if (viewNode.ViewType == ViewType.VREAL)
+                {
                     nNode.Attr.Shape = Shape.Box;
+                }
+
                 if (viewNode.ViewType == ViewType.VDUMMY)
                 {
                     nNode.Attr.Shape = Shape.Box;
                     nNode.Attr.FillColor = GetDrawColor(System.Drawing.Color.FromArgb(25, 25, 25));
                 }
                 if (viewNode.ViewType == ViewType.VCALL)
+                {
                     nNode.Attr.Shape = Shape.Box;
+                }
+
                 if (viewNode.ViewType == ViewType.VIF)
                 {
                     if (viewNode.IsChildExist)
@@ -311,19 +410,14 @@ namespace Diagram.View.MSAGL
 
         public void RefreshGraph()
         {
-            viewer.Do(() => viewer.Refresh());
+            viewer.Do(viewer.Refresh);
         }
         private Node findNode(ViewNode viewNode)
         {
             Node node = viewer.Graph.FindNode(viewNode.UIKey);
-            if (node == null)
-            {
-                if (viewer.Graph.SubgraphMap.ContainsKey(viewNode.UIKey))
-                    return viewer.Graph.SubgraphMap[viewNode.UIKey];
-                else
-                    return null;
-            }
-            return node;
+            return node == null
+                ? viewer.Graph.SubgraphMap.ContainsKey(viewNode.UIKey) ? viewer.Graph.SubgraphMap[viewNode.UIKey] : (Node)null
+                : node;
         }
 
         public void UpdateValue(ViewNode viewNode, object item2)
@@ -331,7 +425,7 @@ namespace Diagram.View.MSAGL
             Node node = findNode(viewNode);
             if (node != null)
             {
-                var dataExist = Convert.ToDouble(item2) != 0;
+                bool dataExist = Convert.ToDouble(item2) != 0;
                 UpdateFillColor(dataExist, node);
                 RefreshGraph();
             }
@@ -350,26 +444,47 @@ namespace Diagram.View.MSAGL
 
         private void UpdateFontColor(Status4 newStatus, Node node)
         {
-            if (newStatus == Status4.Ready) node.Label.FontColor = Color.DarkGreen;
-            else if (newStatus == Status4.Going) node.Label.FontColor = Color.DarkKhaki;
-            else if (newStatus == Status4.Finish) node.Label.FontColor = Color.DarkBlue;
-            else if (newStatus == Status4.Homing) node.Label.FontColor = Color.Black;
+            if (newStatus == Status4.Ready)
+            {
+                node.Label.FontColor = Color.DarkGreen;
+            }
+            else if (newStatus == Status4.Going)
+            {
+                node.Label.FontColor = Color.DarkKhaki;
+            }
+            else if (newStatus == Status4.Finish)
+            {
+                node.Label.FontColor = Color.DarkBlue;
+            }
+            else if (newStatus == Status4.Homing)
+            {
+                node.Label.FontColor = Color.Black;
+            }
         }
 
         private void UpdateLineColor(Status4 newStatus, Node node)
         {
-            if (newStatus == Status4.Ready) node.Attr.Color = Color.DarkOliveGreen;
-            else if (newStatus == Status4.Going) node.Attr.Color = Color.DarkGoldenrod;
-            else if (newStatus == Status4.Finish) node.Attr.Color = Color.RoyalBlue;
-            else if (newStatus == Status4.Homing) node.Attr.Color = Color.DimGray;
+            if (newStatus == Status4.Ready)
+            {
+                node.Attr.Color = Color.DarkOliveGreen;
+            }
+            else if (newStatus == Status4.Going)
+            {
+                node.Attr.Color = Color.DarkGoldenrod;
+            }
+            else if (newStatus == Status4.Finish)
+            {
+                node.Attr.Color = Color.RoyalBlue;
+            }
+            else if (newStatus == Status4.Homing)
+            {
+                node.Attr.Color = Color.DimGray;
+            }
         }
 
         private void UpdateFillColor(bool dataExist, Node node)
         {
-            if (dataExist)
-                node.Attr.FillColor = Color.DarkGreen;
-            else
-                node.Attr.FillColor = Color.Black;
+            node.Attr.FillColor = dataExist ? Color.DarkGreen : Color.Black;
         }
 
 
@@ -379,7 +494,7 @@ namespace Diagram.View.MSAGL
         }
         public Color GetDrawColor(System.Drawing.Color color)
         {
-            var gColor = Color.Red;
+            Color gColor = Color.Red;
             gColor.R = color.R;
             gColor.G = color.G;
             gColor.B = color.B;

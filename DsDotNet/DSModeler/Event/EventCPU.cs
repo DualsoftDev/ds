@@ -1,7 +1,3 @@
-
-
-using DevExpress.CodeParser;
-
 namespace DSModeler.Event;
 [SupportedOSPlatform("windows")]
 public static class EventCPU
@@ -51,7 +47,7 @@ public static class EventCPU
                                       || t.TagKind == VertexTag.finish
                                       || t.TagKind == VertexTag.homing;
 
-                    
+
 
                         if (isStatus && (bool)t.Tag.BoxedValue)
                         {

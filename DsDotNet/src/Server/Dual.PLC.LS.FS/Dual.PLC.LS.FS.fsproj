@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>net48;net5.0</TargetFrameworks>
+		<TargetFrameworks>net48;net7.0-windows</TargetFrameworks>
 		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<LangVersion>7.0</LangVersion>
 		<OutputType>Library</OutputType>

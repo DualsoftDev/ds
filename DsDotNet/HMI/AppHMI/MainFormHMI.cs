@@ -1,15 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using DevExpress.XtraEditors;
-using Engine.Core;
-using static Engine.Core.ModelLoaderModule;
+﻿using Engine.Core;
+using System;
 using System.IO;
 
 namespace AppHMI
@@ -26,8 +16,8 @@ namespace AppHMI
         }
         public void LoadHMI(string dsPath)
         {
-            var confFile = Path.ChangeExtension(dsPath, ".json");
-            var model = ModelLoader.LoadFromConfig(confFile);
+            string confFile = Path.ChangeExtension(dsPath, ".json");
+            _ = ModelLoader.LoadFromConfig(confFile);
 
             /////////////////////
             //........
@@ -38,12 +28,12 @@ namespace AppHMI
             /////////////////////
 
 
-            this.Show();
+            Show();
         }
 
         private void barButtonItem_close_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
-            this.Close();
+            Close();
         }
     }
 }

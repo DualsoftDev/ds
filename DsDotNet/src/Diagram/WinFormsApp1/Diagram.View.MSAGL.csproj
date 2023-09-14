@@ -4,6 +4,7 @@
 		<OutputType>Library</OutputType>
 		<TargetFrameworks>net7.0-windows;net48</TargetFrameworks>
 		<UseWindowsForms>true</UseWindowsForms>
+		<LangVersion>11.0</LangVersion>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 	</PropertyGroup>
 

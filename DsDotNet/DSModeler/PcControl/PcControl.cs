@@ -1,7 +1,3 @@
-
-using DocumentFormat.OpenXml.Wordprocessing;
-using static Engine.Core.CoreModule;
-
 namespace DSModeler.PcControl;
 [SupportedOSPlatform("windows")]
 public static class PcContr
@@ -75,7 +71,7 @@ public static class PcContr
         {
             ///...
         }
-        if(tag == null)
+        if (tag == null)
             _ = MBox.Error($"TAG 등록실패 name:{name}, address:{address}");
 
 
@@ -91,7 +87,7 @@ public static class PcContr
         _ = Global.DsDriver.Conn.AddMonitoringTags(DicActionIn.Keys.Distinct());
         _ = Global.DsDriver.Conn.AddMonitoringTags(DicActionOut.Values.Distinct());
 
-      
+
         gDevice.Do(() =>
         {
             List<TagHW> tags = DicActionIn.Keys.Cast<TagHW>().ToList();
@@ -101,7 +97,7 @@ public static class PcContr
         });
     }
 
-   
+
 
     public static async Task CreateRunCpuSingle(Dictionary<DsSystem, PouGen> DicPou, GridLookUpEdit gDevice)
     {

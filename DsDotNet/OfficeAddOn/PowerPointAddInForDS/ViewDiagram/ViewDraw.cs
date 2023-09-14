@@ -20,17 +20,19 @@ namespace PowerPointAddInForDS
         public static void DrawInitStatus(DsSystem sys)
         {
             DicStatus = new Dictionary<Vertex, Status4>();
-            var reals = sys.GetVertices().OfType<Vertex>();
-            foreach (var r in reals)
+            IEnumerable<Vertex> reals = sys.GetVertices().OfType<Vertex>();
+            foreach (Vertex r in reals)
+            {
                 ViewDraw.DicStatus.Add(r, Status4.Homing);
+            }
         }
 
 
 
         public static void DrawStatus(ViewNode v, FormDocView view)
         {
-            var viewNodes = v.UsedViewNodes.Where(w => w.CoreVertex != null);
-            foreach (var f in viewNodes)
+            IEnumerable<ViewNode> viewNodes = v.UsedViewNodes.Where(w => w.CoreVertex != null);
+            foreach (ViewNode f in viewNodes)
             {
                 if (DicStatus.ContainsKey(f.CoreVertex.Value))
                 {

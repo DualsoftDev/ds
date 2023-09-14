@@ -1,7 +1,7 @@
 
 namespace DSModeler.HW
 {
-   
+
 
     public class DsDriver
     {
@@ -16,7 +16,7 @@ namespace DSModeler.HW
             if (modelHW.Company == Company.LSE)
             {
                 XG5KConnectionParameters connPara = new(TimeSpan.FromMilliseconds(50), Global.RunHWIP);
-                Conn = new XG5KConnection(connPara, 200,  numIn, numOut);
+                Conn = new XG5KConnection(connPara, 200, numIn, numOut);
             }
             else if (modelHW.Company == Company.PAIX) { /*...*/}
         }
@@ -49,7 +49,7 @@ namespace DSModeler.HW
             }
         }
 
-      
+
         public void Stop()
         {
             if (Conn.IsRunning)

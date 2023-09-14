@@ -1,4 +1,3 @@
-using static PrologueModule;
 using Timer = System.Windows.Forms.Timer;
 
 namespace DSModeler
@@ -28,7 +27,7 @@ namespace DSModeler
             LookupEditExt.InitEdit(gle_HW, gleView_HW);
 
             gle_HW.Properties.DisplayMember = "Name";
-            gle_HW.Properties.ValueMember   = "Number";
+            gle_HW.Properties.ValueMember = "Number";
 
             gle_Log.Properties.DataSource = LogicLog.ValueLogs;
             gle_HW.Properties.DataSource = HwModels.List;

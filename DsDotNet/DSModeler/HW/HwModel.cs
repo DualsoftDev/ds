@@ -1,7 +1,4 @@
-
-using DevExpress.Diagram.Core.Native;
 using System.ComponentModel;
-using System.Windows.Media.Animation;
 using static PrologueModule;
 
 namespace DSModeler.HW

@@ -7,19 +7,12 @@
 		<RootNamespace>T</RootNamespace>
 		<IsPackable>false</IsPackable>
 		<GenerateProgramFile>false</GenerateProgramFile>
+		<NoWarn>NU1702</NoWarn>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-	  <NoWarn>NU1702</NoWarn>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-	  <NoWarn>NU1702</NoWarn>
-	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.3" />
-		<PackageReference Include="DualSoft-PLC-LS-FS" Version="0.1.2" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
 		<PackageReference Include="FsUnit" Version="5.0.4" />
@@ -58,6 +51,7 @@
 
 		<ProjectReference Include="..\..\PLC\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
 		<ProjectReference Include="..\..\PLC\PLC.CodeGen.LSXGI\PLC.CodeGen.LSXGI.fsproj" />
+		<ProjectReference Include="..\..\Server\Dual.PLC.LS.FS\Dual.PLC.LS.FS.fsproj" />
 
 		<ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
 	</ItemGroup>

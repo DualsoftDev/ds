@@ -466,8 +466,8 @@ type DsXgRandomDeviceTest() =
         let writeValues = tagInfos.Map(fun f->f.WriteValue) |> Seq.toList
 
         conn.WriteDevices tagInfos
-        let ret = conn.ReadDevices tagInfos
+        conn.ReadDevices tagInfos
 
-        let readValues = ret.Map(fun f->f.Value) |> Seq.toList
+        let readValues = tagInfos.Map(fun f->f.Value) |> Seq.toList
 
         writeValues === readValues

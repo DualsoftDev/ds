@@ -1,3 +1,5 @@
+using DsXgComm;
+
 namespace DSModeler.Event;
 [SupportedOSPlatform("windows")]
 public static class EventCPU
@@ -15,22 +17,21 @@ public static class EventCPU
                 TagHW t = evt.Tag as TagHW;
                 if (t.IOType == TagIOType.Output)
                 {
-                    Global.Logger.Debug($"HW_OUT {t.Name}({t.Address}) value: {t.Value}");
+                    Global.Logger.Debug($"□HW_OUT {t.Name}({t.Address}) value: {t.Value}");
                 }
                 if (t.IOType == TagIOType.Input)
                 {
                     var tags = PcContr.DicActionIn[t];
                     tags.Iter(tag =>
                     {
-                        tag.BoxedValue = t.Value;
+                        tag.BoxedValue = t.Value == null ? t.DefaultValue : t.Value;    
                         if (tag.Target.Value is TaskDev dev && ViewDraw.DicTask.ContainsKey(dev)) //job만정의 하고 call에 사용  안함
                         {
                             IEnumerable<Vertex> vs = ViewDraw.DicTask[dev];
-                            _ = vs.Iter(v => ViewDraw.ActionChangeSubject
-                                               .OnNext(Tuple.Create(v, t.Value)));
+                            _ = vs.Iter(v => ViewDraw.ActionChangeSubject.OnNext(Tuple.Create(v, t.Value)));
                         }
+                        Global.Logger.Debug($"■HW_IN {tag.Name}({t.Address}) value: {tag.BoxedValue}");
                     });
-                    Global.Logger.Debug($"HW_IN {t.Name}({t.Address}) value: {t.Value}");
                 }
             });
         }

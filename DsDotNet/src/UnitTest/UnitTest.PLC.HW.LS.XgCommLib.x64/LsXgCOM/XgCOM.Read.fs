@@ -444,8 +444,8 @@ type DsXgRandomDeviceTest() =
           //  "%FL0"     ; "%FD0"     ; "%FW0"     ; "%FB0"      ; "%FX0"   // F 시스템 영역 초기영역 쓰기 금지(CPU 에러나서 리셋해야함)
             ]
     
-        let conn = DsXgConnection()
-        let isConnected_ = conn.Connect("192.168.0.100:2004") 
+        let conn = XGTConnection("192.168.0.100:2004")
+        let isConnected_ = conn.Connect() 
         let tagInfos = creatTags(tags)
         tagInfos.Iter(fun t->
             match t.DataType with 

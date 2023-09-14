@@ -9,11 +9,11 @@ namespace DSModeler.PcControl
             int delayMsec;
             switch (Global.SimSpeed)
             {
-                case 0: delayMsec = 500; ; break;
-                case 1: delayMsec = 200; ; break;
-                case 2: delayMsec = 100; ; break;
-                case 3: delayMsec = 20; ; break;
-                case 4: delayMsec = 5; ; break;
+                case 0: delayMsec = 200; ; break;
+                case 1: delayMsec = 100; ; break;
+                case 2: delayMsec = 10; ; break;
+                case 3: delayMsec = 5; ; break;
+                case 4: delayMsec = 1; ; break;
                 case 5: delayMsec = 0; ; break;
                 default: delayMsec = 5; ; break;
             }

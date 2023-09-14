@@ -254,6 +254,7 @@ module ConvertCoreExt =
             writeAble |> map (getFM(f).GetFlowTag)
 
     type TaskDev with
+        member td.ExistIn  = td.ApiItem.RXs.any()
         member td.ActionINFunc  = 
                             if hasNot td.Funcs 
                             then !!(td.InTag  :?> Tag<bool>).Expr 
@@ -271,7 +272,7 @@ module ConvertCoreExt =
             myMutualDevs
 
         member td.MutualResetExpr(x:DsSystem) =
-            let myMutualDevs =  td.MutualReset(x).Select(fun d->d.ActionINFunc)
+            let myMutualDevs =  td.MutualReset(x).Where(fun d->d.ExistIn).Select(fun d->d.ActionINFunc)
             if myMutualDevs.any() then myMutualDevs.ToAnd() else x._on.Expr
 
     type CallDev with

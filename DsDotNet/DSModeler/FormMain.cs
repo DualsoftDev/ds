@@ -81,7 +81,7 @@ namespace DSModeler
         private void ace_Play_Click(object s, EventArgs e) => PcAction.Play(ace_Play);
         private void ace_Step_Click(object s, EventArgs e) => PcAction.Step(ace_Play);
         private void ace_Stop_Click(object s, EventArgs e) => PcAction.Stop(ace_Play);
-        private void ace_Reset_Click(object s, EventArgs e) => PcAction.Reset(ace_Play, ace_HMI);
+        private void ace_Reset_Click(object s, EventArgs e) => PcAction.Reset(ace_Play, ace_HMI, gle_Device);
 
         private void simpleButton_OpenPLC_Click(object s, EventArgs e) => Global.OpenFolder(Global.ExportPathDS);
         private void ace_ImportXls_Click(object sender, EventArgs e) => Global.Notimplemented();

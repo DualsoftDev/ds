@@ -27,7 +27,7 @@ public static class PcAction
             //    //MessageBox.Show($"Got value change notification from server: {tag}", "get change value");
             //});
 
-            Global.Logger.Info("시뮬레이션 : Run");
+            Global.Logger.Info("Push Run");
         }
         else
         {
@@ -44,9 +44,9 @@ public static class PcAction
         }
 
         SimTree.PlayUI(ace_Play, false);
-        if (!RuntimeDS.Package.IsSimulation)
+        if (RuntimeDS.Package.IsPackagePLC())
         {
-            _ = MBox.Warn("설젱 H/W 에서 Simution 타입을 선택하세요");
+            _ = MBox.Warn("설정 H/W 에서 Simution or PC 타입을 선택하세요");
             return;
         }
         Global.SimReset = false;
@@ -54,7 +54,7 @@ public static class PcAction
         _ = Task.WhenAll(PcContr.RunCpus.Select(s =>
                       Task.Run(() => s.Step()))
           );
-        Global.Logger.Info("시뮬레이션 : Step");
+        Global.Logger.Info("Push Step");
     }
     public static void Stop(AccordionControlElement ace_Play)
     {
@@ -78,7 +78,7 @@ public static class PcAction
                 Global.DsDriver.Stop();
             }
 
-            Global.Logger.Info("시뮬레이션 : Stop");
+            Global.Logger.Info("Push Stop");
         }
         else
         {
@@ -87,40 +87,40 @@ public static class PcAction
     }
     public static void Reset(
           AccordionControlElement ace_Play
-        , AccordionControlElement ace_HMI)
+        , AccordionControlElement ace_HMI
+        , GridLookUpEdit gDevice)
     {
-        if (!Global.IsLoadedPPT())
-        {
-            return;
-        }
+        if (!Global.IsLoadedPPT()) return;
 
         SimTree.PlayUI(ace_Play, false);
         Global.SimReset = true;
         HMITree.OffHMIBtn(ace_HMI);
         Engine.Cpu.RunTime.DsCPU activeCpu = PcContr.RunCpus.First(w => w.Systems.Contains(Global.ActiveSys));
 
-        if (RuntimeDS.Package.IsStandardPC)
+        if (RuntimeDS.Package.IsStandardPC && Global.DsDriver != null)
         {
-            if (PcContr.DicActionOut != null)
+            Task.Run(async () =>
             {
-                Task.Run(async () =>
+                var tags = PcContr.DicActionOut.Values;
+                if (Global.DSHW.Company == Company.LSE)
                 {
-                    if (Global.DSHW.Company == Company.LSE)
-                    {
-                        PcContr.DicActionOut.Values.Cast<XG5KTag>().Iter(t => t.XgPLCTag.WriteValue = false);
-                        while (PcContr.DicActionOut.Values.Cast<XG5KTag>().Where(t => t.XgPLCTag.WriteValue != null).Any()) await Task.Delay(1);
-                    }
-                    else
-                    {
-                        PcContr.DicActionOut.Values.Iter(t => t.WriteRequestValue = false);
-                        while (PcContr.DicActionOut.Values.Where(t => t.WriteRequestValue != null).Any()) await Task.Delay(1);
-                    }
+                    tags.Cast<XG5KTag>().Iter(t => t.XgPLCTag.WriteValue = false);
+                    while (tags.Cast<XG5KTag>().Where(t => t.XgPLCTag.WriteValue != null).Any())
+                        await Task.Delay(1);
+                }
+                else
+                {
+                    tags.Iter(t => t.WriteRequestValue = false);
+                    while (tags.Where(t => t.WriteRequestValue != null).Any()) 
+                        await Task.Delay(1);
+                }
 
+                while (tags.Where(t => t.WriteRequestValue != null).Any())
+                    await Task.Delay(1);
 
-                }).Wait();
-
-                Global.DsDriver.Conn.ForceIOEvent();
-            }
+                Global.DsDriver.Stop();
+                PcContr.CreatePcControl(gDevice);
+            });
         }
 
         _ = Task.Run(() =>
@@ -132,7 +132,7 @@ public static class PcAction
             );
         });
 
-        Global.Logger.Info("시뮬레이션 : Reset");
+        Global.Logger.Info("Push Reset");
     }
 
     public static void Disconnect()

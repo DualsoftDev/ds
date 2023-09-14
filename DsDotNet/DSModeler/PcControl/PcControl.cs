@@ -1,3 +1,6 @@
+using DsXgComm.Monitoring;
+using static Engine.Core.CoreModule;
+
 namespace DSModeler.PcControl;
 [SupportedOSPlatform("windows")]
 public static class PcContr
@@ -79,14 +82,30 @@ public static class PcContr
     }
 
 
-    private static void CreatePcControl(GridLookUpEdit gDevice)
+    public static void CreatePcControl(GridLookUpEdit gDevice)
     {
         PcAction.CreateConnect();
         DicActionIn = GetActionInputs(Global.ActiveSys);
         DicActionOut = GetActionOutputs(Global.ActiveSys);
+        Global.DsDriver.Conn.Tags.Clear();
         _ = Global.DsDriver.Conn.AddMonitoringTags(DicActionIn.Keys.Distinct());
         _ = Global.DsDriver.Conn.AddMonitoringTags(DicActionOut.Values.Distinct());
 
+        var tags = Global.DsDriver.Conn.Tags.Values;
+        var xgTags = MonitorUtil.creatTags(tags.OfType<XG5KTag>().Select(s => s.Address));
+
+        xgTags.Iter(t =>
+        {
+            tags.Where(w => w.Address == t.Tag)
+                       .OfType<XG5KTag>()
+                       .Iter(xg5kTag => xg5kTag.XgPLCTag = t);
+        });
+
+        if (Global.DSHW.Company == Company.LSE)
+        {
+            var conXg = Global.DsDriver.Conn as XG5KConnection;
+            conXg.XgTagInfos.AddRange(xgTags);
+        }
 
         gDevice.Do(() =>
         {
@@ -98,12 +117,12 @@ public static class PcContr
     }
 
 
-
     public static async Task CreateRunCpuSingle(Dictionary<DsSystem, PouGen> DicPou, GridLookUpEdit gDevice)
     {
         if (Global.CpuRunMode.IsPackagePC())
         {
             CreatePcControl(gDevice);
+           
         }
 
         List<DsCPU> runCpus = new();
@@ -196,11 +215,11 @@ public static class PcContr
     {
         var con = Global.DsDriver.Conn as XG5KConnection;
         con.Stop();
-
-        PcContr.DicActionIn = null;
-        PcContr.DicActionOut = null;
-
     }
+
+
+    
+           
 }
 
 

@@ -17,6 +17,7 @@ using IConnectionParameters = Server.HW.Common.IConnectionParameters;
 using System.Net.NetworkInformation;
 using TagValueChangedEvent = Server.HW.Common.TagValueChangedEvent;
 using LanguageExt;
+using static DsXgComm.XGTagModule;
 
 namespace Server.HW.XG5K;
 
@@ -25,10 +26,11 @@ public class XG5KConnection : ConnectionBase
     private int _InCnt;
     private int _OutCnt;
     private string _Ip;
-    internal IEnumerable<XG5KTag> XG5KTags => Tags.Values.OfType<XG5KTag>();
 
     private XG5KConnectionParameters _connectionParameters;
-    private DsXgConnection _cpu = new();
+    private XGTConnection _cpu = null;
+
+    public List<XgTagInfo> XgTagInfos = new List<XgTagInfo>();  
 
     public XG5KConnection(XG5KConnectionParameters parameters, int scanDelay,  int numIn, int numOut)
         : base(parameters)
@@ -52,8 +54,9 @@ public class XG5KConnection : ConnectionBase
 
     public override bool IsConnected { get { return _IsConnected; } }
     public bool IsCreatedDevice { get; private set; }
-  
-    public void Stop() => _cpu?.Stop();
+    private static IDisposable DisposablePLCTagSubject;
+
+    public void Stop() => _cpu?.ScanStop();
     public bool Start()
     {
         if (!_IsConnected)
@@ -62,25 +65,18 @@ public class XG5KConnection : ConnectionBase
 
         Task.Run(() =>
         {
-            var tags = XG5KTags.Select(s => s.Address);
-            var xgTags = MonitorUtil.creatTags(tags);
-            xgTags.Iter(t =>
-            {
-                Tags.Values.Where(w => w.Address == t.Tag)
-                           .OfType<XG5KTag>()
-                           .Iter(xg5kTag => xg5kTag.XgPLCTag = t);
-            });
-
+          
+            if (DisposablePLCTagSubject != null) DisposablePLCTagSubject.Dispose(); 
+            
             var addressDic = Tags.Values.ToDictionary(s => s.Address, d => d);
-
-            XGTagModule.PLCTagSubject.Subscribe(x =>
+            DisposablePLCTagSubject = XGTagModule.PLCTagSubject.Subscribe(x =>
             {
                 var tag = addressDic[x.Tag];
                 tag.Value = x.Value;
                 Trace.WriteLine($"{x.Tag} => {x.Value}");
             });
 
-            _cpu.Scan(xgTags, PerRequestDelay);
+            _cpu.ScanRun(XgTagInfos, PerRequestDelay);
         });
 
       
@@ -102,8 +98,8 @@ public class XG5KConnection : ConnectionBase
             }
             else
             {
-                _IsConnected = _cpu.Connect(_Ip);
-                
+                 _cpu = new XGTConnection(_Ip);
+                _IsConnected = _cpu.Connect();
             }
 
 

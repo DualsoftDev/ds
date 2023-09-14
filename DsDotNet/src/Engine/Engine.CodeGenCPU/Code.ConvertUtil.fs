@@ -49,7 +49,9 @@ module CodeConvertUtil =
     let getOriginIOExprs(vr:VertexMReal, initialType:InitialType) =
         let vs = getOriginTasks(vr, initialType)
         let vs = vs.Where(fun f->f.InTag.IsNonNull())
-        vs.Select(fun f-> f.ActionINFunc)
+        vs
+          .Where(fun f-> f.ExistIn)
+          .Select(fun f-> f.ActionINFunc)
 
     let getOriginSimPlanEnds(vr:VertexMReal, initialType:InitialType) =
         getOriginTasks(vr, initialType).Select(fun f->f.ApiItem.PE)

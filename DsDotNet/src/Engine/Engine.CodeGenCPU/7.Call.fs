@@ -22,10 +22,10 @@ type VertexMCoin with
                 let tasks = r.V.OriginInfo.Tasks
                 if tasks.Where(fun (_,ty) -> ty = InitialType.On) //NeedCheck 처리 필요 test ahn
                         .Select(fun (t,_)->t).Contains(td)
-                    then r.V.RO.Expr <&&> !!td.MutualResetExpr(coin.System)
+                    then r.V.RO.Expr <&&> if td.ExistIn then !!td.ActionINFunc else call._on.Expr
                                              
                     else r.V.RO.Expr <&&> call._off.Expr
-            | _ ->
+            | _ -> 
                 call._off.Expr
 
         [

@@ -59,12 +59,11 @@ namespace DSModeler
             {
                 if (PcContr.RunCpus.Any())
                 {
-                    PcAction.Reset(ace_Play, ace_HMI);
+                    PcAction.Reset(ace_Play, ace_HMI, gle_Device);
                 }
 
                 _ = PcContr.RunCpus.Iter(cpu => cpu.Dispose());
                 RecentDocs.SetRecentDoc(TabbedView.Documents.Select(d => d.Caption));
-
 
                 if (Global.DsDriver != null)
                     PcContr.Stop();

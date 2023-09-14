@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Net;
 
@@ -46,6 +47,33 @@ namespace Server.HW.Common
         [Browsable(false)]
         public virtual int BitOffset { get; protected set; }
         public string Address { get; private set; } = string.Empty;
+
+
+        public object DefaultValue
+        {
+            get
+            {
+                switch (DataType)
+                {
+                    case TagDataType.Bool: return false;
+                    case TagDataType.Single: return 0.0f;
+                    case TagDataType.Double: return 0.0;
+                    case TagDataType.Int16 : return (short)0;
+                    case TagDataType.Int32 : return 0;
+                    case TagDataType.Int64 : return 0L;
+                    case TagDataType.Sbyte: return (sbyte)0;
+                    case TagDataType.String: return "";
+                    case TagDataType.Uint16: return (ushort)0;
+                    case TagDataType.Uint32: return 0U;
+                    case TagDataType.Uint64: return 0UL;
+                    case TagDataType.Byte: return (byte)0;
+                    default: throw new Exception("Unsupported type.");
+                }
+            }
+        }
+
+
+               
 
         /// <summary>
         /// Melsec, Fuji 등의 HW 에 대해서 tag 의 byte offset 을 반환한다.  AB 의 경우처럼 환산 불가면 null

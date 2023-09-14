@@ -8,8 +8,24 @@ open System.Threading
 [<AutoOpen>]
 module Connect =
 
-    type DsXgConnection() =
+    type ScanReadWrite =
+        | ReadOnly
+        | WriteOnly
+        | WriteRead
+        with
+        member x.IsWrite = 
+            match x with
+            |WriteRead|WriteOnly ->  true
+            |ReadOnly -> false
+        member x.IsRead = 
+            match x with
+            |WriteRead|ReadOnly ->  true
+            |WriteOnly -> false
+
+    type XGTConnection(connStr) =
         let mutable cts = new CancellationTokenSource()
+        let mutable run:bool = false
+
         let (|?) = defaultArg
         let tryCnt = 3
         let rec tryFunction budget (f: 'T -> int) (arg: 'T) (name:string) : bool =
@@ -29,14 +45,14 @@ module Connect =
         member val Factory:CommObjectFactory20 = null with get, set
         member val Delayms:int = 10 with get, set
 
-        member x.Connect (connStr : string) : bool =
+        member x.Connect () : bool =
             x.Factory <-
                 // DO NOT WORK : let t = Type.GetTypeFromProgID("XGCommLib.CommObjectFactory")
                 let t = Type.GetTypeFromCLSID(Guid("7BBF93C0-7C64-4205-A2B0-45D4BD1F51DC")) // CommObjectFactory
                 Activator.CreateInstance(t) :?> CommObjectFactory20
             x.CommObject <- x.Factory.GetMLDPCommObject20(connStr)
             let isCn = tryFunction tryCnt x.CommObject.Connect "" "Connecting"
-            Thread.Sleep(500)
+            Thread.Sleep(200)
             isCn
 
         member x.CheckConnect() : bool=
@@ -45,13 +61,13 @@ module Connect =
                 isCn <- tryFunction tryCnt x.CommObject.Connect "" "Connecting"
             isCn
 
-        member x.Disconnect () =
-            x.Stop()
+   
+        member x.Disconnect() =
             x.CommObject.Disconnect()
 
-        member x.Stop() = 
-            cts.Cancel()
-            cts <- new CancellationTokenSource() 
+        member x.ReConnect() =
+            x.Disconnect() |> ignore
+            x.Connect()
 
         member x.CreateLWordDevice(deviceType:DeviceType, offset:int) : DeviceInfo =
             let di = x.Factory.CreateDevice()
@@ -79,60 +95,78 @@ module Connect =
 
         //ScanIO.Scan 와 동시사용시 Thread 충돌 가능  ScanIO.Scan 사용에 writeTags() 내부에 동작 Tag WriteValue 변경시 자동으로 써짐
         member x.WriteDevices(tags:XgTagInfo seq) =
-            let writableTags = tags|>Seq.filter(fun t->t.WriteValue <> null)    //쓰기 대상 선별
-            let batches = chunkBySumByteSize MAX_RANDOM_BYTE_POINTS writableTags
-            async{
-                for batch in batches do
-                    x.CommObject.RemoveAll()
-
-                    batch
-                    |> Seq.map(x.CreateWriteDevice)
-                    |> Seq.iter(x.CommObject.AddDeviceInfo)
-
-                    let wBuf = getBuffer(batch, false)
-                    if x.CommObject.WriteRandomDevice wBuf <> 1 then
-                       failwithf "WriteRandomDevice ERROR"
-                    else
-                        batch.Iter(fun t-> tracefn $"Tag {t.Tag} write {t.WriteValue}")   
-                    do! Async.Sleep x.Delayms
-            }
-            |> Async.RunSynchronously     
-          
-
-            writableTags.Iter(fun t->t.WriteValue <- null)     //쓰기 대상 선별 후 WriteValue 지우기
-
-        //ScanIO.Scan 와 동시사용시 Thread 충돌 가능  PLCScanTagChangedSubject 사용 하거나 ScanIO.Scan 중지후 사용
+            cts <- new CancellationTokenSource() 
+            let writeAsync = async {x.WriteReadDevices (tags, WriteOnly)}
+            try
+            Async.RunSynchronously (writeAsync, cancellationToken = cts.Token)
+            with :? OperationCanceledException ->
+            printfn "WriteDevices Canceled"
+        
         member x.ReadDevices(tags:XgTagInfo seq) =
+            cts <- new CancellationTokenSource() 
+            let readAsync = async {x.WriteReadDevices (tags, ReadOnly)}
+            try
+            Async.RunSynchronously (readAsync, cancellationToken = cts.Token)
+            with :? OperationCanceledException ->
+            printfn "ReadDevices Canceled"
 
-            let batches = chunkBySumByteSize MAX_RANDOM_BYTE_POINTS tags
-            async{
-                for batch in batches do
 
+        member x.WriteReadDevices(tags:XgTagInfo seq, readWrite:ScanReadWrite) =
+            let addComObj(batch) =
                     x.CommObject.RemoveAll()
-
-                    batch
-                    |> Seq.map(x.CreateWriteDevice)
+                    batch 
+                    |> Seq.map(x.CreateWriteDevice) 
                     |> Seq.iter(x.CommObject.AddDeviceInfo)
+                                    
+            let getBatched(batchTags) = 
+                    chunkBySumByteSize MAX_RANDOM_BYTE_POINTS batchTags
+                            
+            let getReadRandom()  = 
+                    let batches = getBatched(tags) 
+                    for batch in batches do
+                        let rBuf = getBufferRead batch
+                        addComObj batch
+                        if x.CommObject.ReadRandomDevice rBuf <> 1 then
+                            tracefn "ReadRandomDevice ERROR"
+                        else
+                            bufferToTagValue(batch, rBuf)
+            let getWriteRandom()  = 
+                    let writableTags = tags |> Seq.filter(fun t->t.WriteValue <> null) |> Seq.toArray    //쓰기 대상 선별
+                    let batches = getBatched(writableTags) 
+                    for batch in batches do
+                        let rBuf = getBufferWrite batch
+                        addComObj batch
+                     
+                        if x.CommObject.WriteRandomDevice rBuf <> 1 then
+                            tracefn "WriteRandomDevice ERROR"
+                        else
+                                batch.Iter(fun t->t.WriteValue <- null)     //쓰기 대상 선별 후 WriteValue 지우기
 
-                    let rBuf = getBuffer(batch, true)
+            match readWrite with
+            |ReadOnly ->  getReadRandom()
+            |WriteOnly -> getWriteRandom()
+            |WriteRead -> getWriteRandom()
+                          getReadRandom()
 
-                    if x.CommObject.ReadRandomDevice rBuf <> 1 then
-                       failwithf "ReadRandomDevice ERROR"
-                    else
-                        bufferToTagValue(batch, rBuf)
-                    do! Async.Sleep x.Delayms
-            }
-            |> Async.RunSynchronously     
-        member x.Scan(tags:XgTagInfo seq, delayms:int) = 
-            x.Delayms <- delayms
-            let asyncStart = async { 
-      
-                while not<|cts.IsCancellationRequested do   
-                    x.WriteDevices tags
-                    x.ReadDevices tags |>ignore
-            } 
-            
-            Async.StartImmediate(asyncStart, cts.Token) |> ignore
+        member x.ScanRun(tags:XgTagInfo seq, delayms:int) =
+            x.ReConnect() |> ignore
+             
+            if not <| run then 
+                run <- true
+                let scanAsync = async {
+                        while run do   
+                            x.WriteReadDevices(tags, WriteRead)
+                            do! Async.Sleep delayms
+                }
+                Async.StartImmediate(scanAsync, cts.Token)// |> ignore
+ 
+                
+        member x.ScanStop() =
+            cts.Cancel()
+            cts <- new CancellationTokenSource() 
+            run <- false;
+            x.Disconnect()
+
 
 
             

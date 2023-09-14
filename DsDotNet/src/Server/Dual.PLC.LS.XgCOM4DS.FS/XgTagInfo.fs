@@ -15,7 +15,7 @@ module XGTagModule =
     let [<Literal>] MAX_RANDOM_BYTE_POINTS = 64
     let [<Literal>] MAX_ARRAY_BYTE_SIZE = 512   // 64*8
    
-
+ 
     [<DebuggerDisplay("{Tag}=>{LWordTag}, {BitOffset}, {LWordOffset}:{StartBitOffset}")>]
     type XgTagInfo(fenetTagInfo:LsFEnetTagInfo) =
         let ti = fenetTagInfo
@@ -88,6 +88,7 @@ module XGTagModule =
             |DataType.LWord ->  assert(byteArr.length() = 8);BitConverter.ToUInt64(byteArr)   |> box
             |DataType.Continuous ->
                 failwithlog $"Unsupported device type DataType.Continuous"
+    
 
     let chunkBySumByteSize maxSize (tags:XgTagInfo seq) =
         let tags = tags.ToFSharpList()
@@ -103,7 +104,7 @@ module XGTagModule =
         tags |> loop [] 0 [] |> List.rev
 
 
-    let getBuffer (tags:XgTagInfo list, bRead:bool) =
+    let private getBuffer (tags:XgTagInfo list, bRead:bool) =
         let sumByte = tags |> Seq.map(fun t ->t.ByteSize) |> Seq.sum
         let buff = Array.zeroCreate<byte>(sumByte)
         let mutable offset = 0
@@ -120,6 +121,8 @@ module XGTagModule =
             offset <- offset + tags[i].ByteSize-1
 
         buff
+    let getBufferRead  (tags:XgTagInfo list) = getBuffer (tags, true)
+    let getBufferWrite (tags:XgTagInfo list) = getBuffer (tags, false)
 
     let PLCTagSubject = new Subject<XgTagInfo>()
     let bufferToTagValue (tags:XgTagInfo list, buff:byte array) =
@@ -133,6 +136,6 @@ module XGTagModule =
             then 
                 logDebug $"Tag change detected: {tags[i].Tag} = {tags[i].Value}"
                 tags[i].Value <- newValue
-                PLCTagSubject.OnNext( tags[i])
+                PLCTagSubject.OnNext(tags[i])
 
             offset <- offset + tags[i].ByteSize-1

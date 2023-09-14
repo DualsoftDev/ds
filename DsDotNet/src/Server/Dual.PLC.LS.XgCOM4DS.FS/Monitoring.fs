@@ -122,8 +122,8 @@ type PLCMonitorEngine() =
      *)
     member private x.MonitorImpl(plcIp, tags:string seq, runSynchronously:bool, delayms:int, bScanWrite:bool) =
         logInfo $"Start PLC monitoring on {plcIp}"
-        let conn = new DsXgConnection()
-        let isConnected_ = conn.Connect(plcIp)  // don't remove
+        let conn = new XGTConnection(plcIp)
+        let isConnected_ = conn.Connect()  // don't remove
         
         let tagInfos = creatTags tags 
         plcTags.AddRange tagInfos |> ignore

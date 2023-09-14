@@ -32,8 +32,8 @@
 		<Antlr4 Include="..\..\..\..\Grammar\g4s\expr.g4" Link="g4s\expr.g4" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.3" />
-		<PackageReference Include="Antlr4BuildTasks" Version="8.17" PrivateAssets="all" />
+		<PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
+		<PackageReference Include="Antlr4BuildTasks" Version="12.2.0" PrivateAssets="all" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />

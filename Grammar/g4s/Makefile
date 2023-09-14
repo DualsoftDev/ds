@@ -1,8 +1,10 @@
 .ONESHELL: # Applies to every targets in the file!
 
+#jar := /usr/local/lib/antlr-4.10.1-complete.jar
+jar := /usr/local/lib/antlr4-4.13.0-complete.jar
 
-antlr4=java -Xmx500M -cp /usr/local/lib/antlr-4.10.1-complete.jar org.antlr.v4.Tool
-grun=java -Xmx500M -cp /usr/local/lib/antlr-4.10.1-complete.jar:. org.antlr.v4.gui.TestRig
+antlr4=java -Xmx500M -cp $(jar) org.antlr.v4.Tool
+grun=java -Xmx500M -cp $(jar):. org.antlr.v4.gui.TestRig
 
 grun:
 	@java -version
@@ -22,7 +24,7 @@ gui:
 	$(grun) ds model -gui < g4test/prop.ds
 
 test:
-	@export CLASSPATH=".:/usr/local/lib/antlr-4.10.1-complete.jar:$$CLASSPATH"
+	@export CLASSPATH=".:$(jar):$$CLASSPATH"
 #	for f in g4test/*; do
 #		echo $$f
 #		$(grun) ds causals < g4test/causals.txt
@@ -87,3 +89,4 @@ java-install:
 	choco install javaruntime 8.0.231
 	choco install jdk8 8.0.211
 	choco install jre8 8.0.321
+	# https://download.oracle.com/java/20/latest/jdk-20_windows-x64_bin.exe

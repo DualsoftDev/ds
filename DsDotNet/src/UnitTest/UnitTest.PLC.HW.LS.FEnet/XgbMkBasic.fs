@@ -45,21 +45,21 @@ type XgbMkBasic() =
             "L10033", "%LW10033"    //5자리  올바른 표현법
 
         (* bit : word 4자리 bit한자리로 변환 *)
-            "P00008", "%PX00008"
-            "M01010", "%MX01010"
-            "M00100", "%MX00100"
-            "K0000A", "%KX0000A"
-            "F00001", "%FX00001"
-            "T00008", "%TX00008"
-            "C0000F", "%CX0000F"
-            "Z0010F", "%ZX0010F"
+            "P00008", "%PX0000.8"
+            "M01010", "%MX0101.0"
+            "M00100", "%MX0010.0"
+            "K0000A", "%KX0000.A"
+            "F00001", "%FX0000.1"
+            "T00008", "%TX0000.8"
+            "C0000F", "%CX0000.F"
+            "Z0010F", "%ZX0010.F"
 
             //"D010013.F", "%DX010013F"  //D bit, word 판단을 위해 {6자리word}.{bit}만 허용
             //"N0001A", "%NX00001A"      //bit, word 판단을 위해 {5자리word}{bit}만 허용
             //"N0013F", "%NX0013F"       //bit, word 판단을 위해 {5자리word}{bit}만 허용
-            "D10013.F", "%DX10013F"    //D 5자리.bit  올바른 표현법
-            "N10013F",  "%NX10013F"      //N 5자리{bit} 올바른 표현법
-            "L10013F",  "%LX10013F"      //N 5자리{bit} 올바른 표현법
+            "D10013.F", "%DX10013.F"    //D 5자리.bit  올바른 표현법
+            "N10013F",  "%NX10013.F"      //N 5자리{bit} 올바른 표현법
+            "L10013F",  "%LX10013.F"      //N 5자리{bit} 올바른 표현법
 
         //U word & bit
             "U00.01", "%UW1"
@@ -440,8 +440,8 @@ type XgbMkBasic() =
             ]
 
             for (tag, answer) in qnas do
-                let fEnetTag = tryToFEnetTag CpuType.XgbMk tag
-                fEnetTag.Value === answer
+                let lsTag = new LsTagXgk(x.Conn, tag)
+                lsTag.FEnetTagName === answer
 
         let testUDeivce() =
             let qnas = [
@@ -451,15 +451,15 @@ type XgbMkBasic() =
                 "U1.0",  "%UW32"
             ]
             for (tag, answer) in qnas do
-                let fEnetTag = tryToFEnetTag CpuType.XgbMk tag
-                fEnetTag.Value === answer
+                let lsTag = new LsTagXgk(x.Conn, tag)
+                lsTag.FEnetTagName === answer
 
             let invalids = [
                 //"U0.0.0"            // XG5000 UI 상에서는 지원되지 않고, FEnet 통신으로는 지원됨.
                 "U0.32"             // U0.31 에서 끝나고, U1.0 으로 시작해야 함
             ]
             for tag in invalids do
-                let fEnetTag = tryToFEnetTag CpuType.XgbMk tag
+                let fEnetTag = tryToFEnetTag CpuType.Xgk tag
                 fEnetTag.IsNone === true
 
         let testBitAndWordDevice = testDevice true

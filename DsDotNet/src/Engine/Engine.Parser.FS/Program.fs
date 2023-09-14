@@ -116,7 +116,7 @@ C4 > C5;
     let CpuTestText = """
 [sys ip = 192.168.0.1] My = {
     [flow] MyFlow = {
-        Seg1 > Seg2 > F.R3;
+        Ap > Seg1 > Seg2 > F.R3 > aliasCallInFlow;
         Seg2 > aliasRealInFlow > aliasRealExInFlow;
         Seg1 = {
             Ap > Am > aliasCallInReal;
@@ -126,7 +126,7 @@ C4 > C5;
         }
 
         [aliases] = {
-            Seg1.Ap = { aliasCallInReal; }
+            Seg1.Ap = { aliasCallInFlow; aliasCallInReal; }
             Seg1 = { aliasRealInFlow; }
             F.R3 = { aliasRealExInFlow; }
         }

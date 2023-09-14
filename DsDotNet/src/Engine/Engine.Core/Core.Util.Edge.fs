@@ -129,8 +129,8 @@ module EdgeModule =
 
     let validateGraphOfSystem(system:DsSystem) =
         for f in system.Flows do
-            f.Graph.Validate(true) |> ignore
-            f.Graph.Vertices.OfType<Real>().Iter(fun r -> r.Graph.Validate(true) |> ignore)
+            f.Graph.Validate(true) |> ignore    //flow는 사이클 허용
+            f.Graph.Vertices.OfType<Real>().Iter(fun r -> r.Graph.Validate(false) |> ignore) //real는 사이클 허용 X
 
     let guardedValidateSystem(system:DsSystem) =
             try validateGraphOfSystem system

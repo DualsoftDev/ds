@@ -189,13 +189,13 @@ module internal GraphHelperModule =
         sccs
 
 
-    let validateGraph (graph:Graph<'V, 'E>, needCyclicGraphc:bool) =
+    let validateGraph (graph:Graph<'V, 'E>, allowCyclicGraph:bool) =
         let edges =
             graph.Edges
                 .Where(fun e -> not <| e.EdgeType.HasFlag(EdgeType.Reset))
                 .ToArray()
         let sccs = findStronglyConnectedComponents graph edges
-        if sccs.Any() && not(needCyclicGraphc) then
+        if sccs.Any() && not(allowCyclicGraph) then
             let msg =
                 [ for vs in sccs do
                     vs.Select(fun v -> v.Name).JoinWith(", ").EncloseWith2("[", "]")
@@ -209,5 +209,5 @@ module internal GraphHelperModule =
 type GraphHelper =
     [<Extension>] static member Dump(graph:Graph<_, _>) = dumpGraph(graph)
     [<Extension>] static member GetVertices(edge:IEdge<'V>) = [edge.Source; edge.Target]
-    [<Extension>] static member Validate(graph:Graph<'V, 'E>, needCyclicGraphc:bool) = validateGraph(graph, needCyclicGraphc)
+    [<Extension>] static member Validate(graph:Graph<'V, 'E>, allowCyclicGraph:bool) = validateGraph(graph, allowCyclicGraph)
 

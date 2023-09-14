@@ -43,8 +43,7 @@ namespace Engine
 [sys] My = {
     [flow] F = {
         Main = {
-            Ap > Am;
-            Am > Ap;
+            Ap > Am > Ap;
         }
     }
     [jobs] = {

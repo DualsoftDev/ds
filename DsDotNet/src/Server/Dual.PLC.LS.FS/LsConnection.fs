@@ -47,7 +47,7 @@ type LsTag internal(conn:ConnectionBase, originalTagName:string, cpu:CpuType, ?c
         assert(tName = "LsConnection" || tName = "LsSwConnection" || tName = "LsXg5000Connection" || tName = "LsXg5000COMConnection")
 
     member x.Anal = parsed
-    member x.FEnetTagName = fenetTagName
+    member x.FEnetTagName = fenetTagName.Replace(".", "")
     /// FEnet tag 변환 이전의 original tag name
     member x.TagName = originalTagName
     override x.IsBitAddress = parsed.DataType = DataType.Bit
@@ -251,14 +251,12 @@ and LsConnection(parameters:LsConnectionParameters) as this =
 
     /// 하나의 tag 값을 즉시 읽어 낸다.  return type: obj.  ValueChanged event 등은 발생하지 않는다.
     /// tag 는 cpu type 에 맞는 문법으로 기술되어 있어야 한다.
-    member x.ReadATag(tag:string) =
-        option {
-            let! fEnetTag = tryToFEnetTag cpu tag
-            // todo : tag 를 cpu type 에 맞게 FEnet format 으로 변환해서 호출 해야 함...
-            let! anal = tryParseTag fEnetTag
-            return x.ReadATagUI8(fEnetTag)
-            |> anal.DataType.BoxUI8
-        } |> Option.get
+     //| CpuType.Xgi   
+     //| CpuType.Xgk   
+     //| CpuType.XgbMk   3기종 가능
+    member x.ReadATag(tagAddress:string) =
+        let lsTag = createTag tagAddress :?> LsTag
+        x.ReadATagUI8(lsTag.FEnetTagName) |> lsTag.Anal.DataType.BoxUI8
 
     /// LS PLC FEnet 통신 규약에 정의된 tag format 으로 읽어 낸다.
     member x.ReadATagFEnet(fEnetTag:string) =

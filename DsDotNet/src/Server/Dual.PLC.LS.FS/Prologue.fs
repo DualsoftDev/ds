@@ -261,6 +261,5 @@ type LsFEnetTagInfo = {
             then 
                 failwithf $"size over tag:{tag}, device:{device}{bitOffset}, dataType{dataType}"
 
-
         {Tag = tag; Device=device; DataType=dataType; BitOffset=bitOffset;}
   

@@ -66,7 +66,7 @@ let isXgkTag tag =
     || Regex.IsMatch(@"^([DRUPMNLKFTCSZ])(\d{4})$", tag)
 
 
-/// e.g XGK cpu 의 tag "P0000A" 를 FEnet 통신을 위한 tag 인 "%PX10" 으로 변환해서 반환
+/// e.g XGK cpu 의 tag "P0000A" 를 FEnet 통신을 위한 tag 인 "%PX0000A" 으로 변환해서 반환
 /// e.g "P0011" -> "%PW11"
 /// e.g "P0011F" -> "%PX191" (11*16 + 15 = 191)
 let (|ToFEnetTag|_|) (fromCpu:CpuType) (tag:string) =
@@ -76,15 +76,19 @@ let (|ToFEnetTag|_|) (fromCpu:CpuType) (tag:string) =
         match tag with
         // bit devices : Full blown 만 허용.  'P1001A'.  마지막 hex digit 만 bit 로 인식
         | RegexPattern @"^(D)(\d{5})\.([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
-            Some $"%%{device}X{wordOffset.ToString().PadLeft(5, '0')}{bitOffset:X}"
+            Some $"%%{device}X{wordOffset.ToString().PadLeft(5, '0')}.{bitOffset:X}"
         | RegexPattern @"^(D)(\d{5})$" [ DevicePattern device; Int32Pattern wordOffset; ] ->
             Some $"%%{device}W{wordOffset.ToString().PadLeft(5, '0')}"
         | RegexPattern @"^([LN])(\d{5})([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
-            Some $"%%{device}X{wordOffset.ToString().PadLeft(5, '0')}{bitOffset:X}"
+            Some $"%%{device}X{wordOffset.ToString().PadLeft(5, '0')}.{bitOffset:X}"
         | RegexPattern @"^([LN])(\d{5})$" [ DevicePattern device; Int32Pattern wordOffset; ] ->
             Some $"%%{device}W{wordOffset.ToString().PadLeft(5, '0')}"
+        
+        //XGK XGB 통신을위해 임의 변환 P00002 -> %PX00002
         | RegexPattern @"^([PMLKFTCSZ])(\d{4})([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
-            Some $"%%{device}X{wordOffset.ToString().PadLeft(4, '0')}{bitOffset:X}"
+            Some $"%%{device}X{wordOffset.ToString().PadLeft(4, '0')}.{bitOffset:X}"
+        | RegexPattern @"^([LND])(\d{5})([\da-fA-F])$" [ DevicePattern device; Int32Pattern wordOffset; HexPattern bitOffset] ->
+            Some $"%%{device}X{wordOffset.ToString().PadLeft(5, '0')}.{bitOffset:X}"
         // {word device} or {bit device 의 word 표현} : 'P0000'
         | RegexPattern @"^([RPMLKFTCSZ])(\d{4})$" [ DevicePattern device; Int32Pattern wordOffset; ] ->
             Some $"%%{device}W{wordOffset.ToString().PadLeft(4, '0')}"
@@ -136,9 +140,6 @@ let (|LsTagPatternFEnet|_|) ((modelId:int option), (tag:string)) =
     match tag with
     // XGI IEC 61131 : bit
     // XGK "Z" "D"
-    | RegexPattern @"^%([PMLKFNRAWIQUZD])X([\d]+)$" [ DevicePattern device; Int32Pattern bitOffset ] ->
-        createTagInfo(tag, device, DataType.Bit, bitOffset, modelId)
-
     | RegexPattern @"^%([IQU])X(\d+)\.(\d+)\.(\d+)$"        //%IX127.15.63(O),    %IX10.20.63(X) => (중간 word 단위)
         [DevicePattern device; Int32Pattern file; WordSubBitPattern element; LWordSubBitPattern bit] ->
         let baseStep : int =
@@ -164,23 +165,24 @@ let (|LsTagPatternFEnet|_|) ((modelId:int option), (tag:string)) =
     //        Device    = device
     //        DataType  = dataType
     //        BitOffset = fileOffset + byteOffset + bit }
+    
 
+    | RegexPattern @"^%([PMLKFNRAWIQUZDSTC])X([\d]+).([\da-fA-F])$"
+        [ DevicePattern device; Int32Pattern offset; HexPattern bitOffset ] ->
+        createTagInfo(tag, device, DataType.Bit, offset * DataType.Word.GetBitLength() + bitOffset, modelId)
 
-    | RegexPattern @"^%([PMLKFNRAWIQU])B([\da-fA-F]+)\.(\d+)$"
-       [DevicePattern device;  Int32Pattern offset; ByteSubBitPattern bit;] ->
-        createTagInfo(tag, device, DataType.Bit, offset * DataType.Byte.GetBitLength() + bit, modelId)
+    | RegexPattern @"^%([PMLKFNRAWIQUZD])X([\d]+)$"
+        [ DevicePattern device; Int32Pattern bitOffset; ] ->
+        createTagInfo(tag, device, DataType.Bit, bitOffset, modelId)
 
-    | RegexPattern @"^%([PMLKFNRAWIQU])W([\da-fA-F]+)\.(\d+)$"
-       [DevicePattern device;   Int32Pattern offset; WordSubBitPattern bit;] ->
-        createTagInfo(tag, device, DataType.Bit, offset * DataType.Word.GetBitLength() + bit, modelId)
-
-    | RegexPattern @"^%([PMLKFNRAWIQU])D([\da-fA-F]+)\.(\d+)$"
-       [DevicePattern device;   Int32Pattern offset; DWordSubBitPattern bit;] ->
-        createTagInfo(tag, device, DataType.Bit, offset * DataType.DWord.GetBitLength() + bit, modelId)
-
-    | RegexPattern @"^%([PMLKFNRAWIQU])L([\da-fA-F]+)\.(\d+)$"
-       [DevicePattern device;  Int32Pattern offset; LWordSubBitPattern bit;] ->
-        createTagInfo(tag, device, DataType.Bit, offset * DataType.LWord.GetBitLength() + bit, modelId)
+    | RegexPattern @"^%([PMLKFNRAWIQUZD])([BWDL])(\d+)\.(\d+)$"
+       [DevicePattern device;  DataTypePattern dataType; Int32Pattern offset;  LWordSubBitPattern bit;] ->
+        match dataType with
+        |DataType.Byte  -> createTagInfo(tag, device, DataType.Bit, offset * DataType.Byte.GetBitLength() + bit, modelId)
+        |DataType.Word  -> createTagInfo(tag, device, DataType.Bit, offset * DataType.Word.GetBitLength() + bit, modelId)
+        |DataType.DWord -> createTagInfo(tag, device, DataType.Bit, offset * DataType.DWord.GetBitLength() + bit, modelId)
+        |DataType.LWord -> createTagInfo(tag, device, DataType.Bit, offset * DataType.LWord.GetBitLength() + bit, modelId)
+        |_ -> failwithlog "Failed to parse tag : %s" tag
 
 
     //  XGI IEC 61131 : byte / word / dword / lword

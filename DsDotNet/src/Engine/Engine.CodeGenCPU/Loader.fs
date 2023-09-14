@@ -64,7 +64,7 @@ module CpuLoader =
                         | DuAliasTargetReal _         -> ()
                         | DuAliasTargetRealExFlow _   -> ()
                         | DuAliasTargetRealExSystem _ -> ()
-                        | DuAliasTargetCall _ -> failwithlog $"AliasCall vertex can't using Target [check : {edge.ToText()}]"
+                        | DuAliasTargetCall _ -> ()//failwithlog $"AliasCall vertex can't using Target [check : {edge.ToText()}]"
 
             |_ -> failwithlog $"Error {getFuncName()}"
 

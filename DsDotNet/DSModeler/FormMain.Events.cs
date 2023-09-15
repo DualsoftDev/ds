@@ -61,10 +61,15 @@ namespace DSModeler
                 //gleView_HW.GridControl.ExportToXlsx(@"D:\hwMaker.xlsx");
                 HwModel hw = HwModels.GetModelByNumber((int)gle_HW.EditValue);
                 if (hw != null)
-                {
+                { 
                     Global.DSHW = hw;
                     DSRegistry.SetValue(RegKey.RunHWDevice, hw.ToTextRegister);
+                } 
+                else
+                { 
+                    Global.DSHW = HwModels.List.First();
                 }
+                DSRegistry.SetValue(RegKey.RunHWDevice, Global.DSHW.ToTextRegister);
             };
 
 

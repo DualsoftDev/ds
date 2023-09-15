@@ -1,4 +1,6 @@
+using DevExpress.CodeParser;
 using DsXgComm;
+using System.Threading;
 
 namespace DSModeler.Event;
 [SupportedOSPlatform("windows")]
@@ -12,7 +14,7 @@ public static class EventCPU
         if (DisposableHWDSInput == null && Global.CpuRunMode.IsPackagePC())
         {
             DisposableHWDSInput = Global.DsDriver.Conn.Subject.OfType<TagValueChangedEvent>()
-            .Subscribe(evt =>
+            .Subscribe( evt =>
             {
                 TagHW t = evt.Tag as TagHW;
                 if (t.IOType == TagIOType.Output)
@@ -21,6 +23,11 @@ public static class EventCPU
                 }
                 if (t.IOType == TagIOType.Input)
                 {
+                    if (!PcContr.DicActionIn.ContainsKey(t))
+                        return;
+
+                   Thread.Sleep     (80); ;
+
                     var tags = PcContr.DicActionIn[t];
                     tags.Iter(tag =>
                     {

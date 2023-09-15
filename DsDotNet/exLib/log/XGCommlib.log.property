@@ -1,0 +1,10 @@
+# property configurator test file
+log4cpp.rootCategory=DEBUG, FileAppender
+log4cpp.category.default=DEBUG, FileAppender
+
+log4cpp.appender.FileAppender=RollingFileAppender
+log4cpp.appender.FileAppender.fileName=log/XGComLib.log
+log4cpp.appender.FileAppender.maxFileSize=102400
+log4cpp.appender.FileAppender.maxBackupIndex=100
+log4cpp.appender.FileAppender.layout=PatternLayout
+log4cpp.appender.FileAppender.layout.ConversionPattern= %% %d [%c] %m %n

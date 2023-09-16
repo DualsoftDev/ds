@@ -178,16 +178,19 @@ type XgCOM20ReadTest() =
     [<Test>]
     member x.``read/write random device test`` () =
         x.CommObject.IsConnected() === 1
-        let plcId = x.CommObject.GetPLCID;
+        let longSize = 8 // 8byte
 
-        let di = x.CreateDevice('M', 'B')
+        let di = x.Factory.CreateDevice()
+        di.ucDeviceType <- Convert.ToByte('R')
+        di.ucDataType <- Convert.ToByte('B')
+        di.lSize <-   longSize
 
         let wBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
         let rBuf = Array.zeroCreate<byte>(MAX_ARRAY_BYTE_SIZE)
         x.CommObject.RemoveAll()
         for i = 0 to MAX_RANDOM_READ_POINTS-1 do
-            di.lOffset <- 100 + i * 8
-            wBuf[i] <- byte i
+            di.lOffset <- 0 + i*longSize
+            wBuf[i*longSize] <- byte i
             x.CommObject.AddDeviceInfo(di)
         x.CommObject.WriteRandomDevice(wBuf) === 1
         x.CommObject.ReadRandomDevice(rBuf) === 1

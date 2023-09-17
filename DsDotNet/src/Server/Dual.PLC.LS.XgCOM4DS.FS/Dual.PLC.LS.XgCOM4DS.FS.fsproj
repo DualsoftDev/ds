@@ -5,15 +5,6 @@
 		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<LangVersion>7.0</LangVersion>
 		<OutputType>Library</OutputType>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-		<RootNamespace>Dual.PLC.LS.XgCOM4DS.FS</RootNamespace>
-		<PackageId>DualSoft-PLC-LS-XgCOM4DS-FS</PackageId>
-		<PackageTags>XgCOM4DS,PLC,LS.FS,Dual</PackageTags>
-		<Description>Dual.PLC.LS.XgCOM4DS.FS</Description>
-		<Title>Dual.PLC.LS.XgCOM4DS.FS</Title>
-		<Version>0.1.1</Version>
-		<Company>Dual Inc.</Company>
-		<Authors>Dual Inc.</Authors>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 	</PropertyGroup>
 

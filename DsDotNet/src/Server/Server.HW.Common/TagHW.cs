@@ -6,7 +6,7 @@ using System.Net;
 
 namespace Server.HW.Common
 {
-    public abstract class TagHW : ITagHW
+    public  class TagHW : ITagHW
     {
         public virtual TagIOType IOType { get; set; }
         public virtual TagDataType DataType { get; set; }

@@ -31,3 +31,4 @@ Grammar/CsParser/bin/
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/**/*.zip
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/**/*.ds
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/**/*.json
+/.vs

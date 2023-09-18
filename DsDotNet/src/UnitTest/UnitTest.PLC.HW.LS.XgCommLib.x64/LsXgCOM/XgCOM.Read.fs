@@ -181,7 +181,7 @@ type XgCOM20ReadTest() =
         let longSize = 8 // 8byte
 
         let di = x.Factory.CreateDevice()
-        di.ucDeviceType <- Convert.ToByte('M')
+        di.ucDeviceType <- Convert.ToByte('R')
         di.ucDataType <- Convert.ToByte('B')
         di.lSize <-   longSize
 

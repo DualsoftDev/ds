@@ -66,7 +66,7 @@ module CpuTestUtil =
     let doCheck (commentedStatement:CommentedStatement) =
         let st = commentedStatement.Statement
 
-        Console.WriteLine(st.ToText())
+        System.Diagnostics.Debug.WriteLine(st.ToText())
 
         st.GetSourceStorages()
         |> Seq.filter(fun f-> not <| f.Name.StartsWith("_"))

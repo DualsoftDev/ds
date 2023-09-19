@@ -24,7 +24,7 @@ module ImportIOTable =
 
         try
             let autoFillAddress(x:string) =
-                if x = "" then x
+                if x.Trim() = "" then ""
                 else
                     match RuntimeDS.Target with
                     |XGI -> if  not <| x.StartsWith("%")   then "%"+x else x

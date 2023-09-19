@@ -47,14 +47,25 @@ module ImportPPTModule =
 
             let pathPPT = paras.AbsoluteFilePath+".pptx"
           
+            //let doc =
+            //    if dicPptDoc.ContainsKey pathPPT
+            //    then pptDoc(pathPPT, paras, dicPptDoc[pathPPT])
+            //    else
+            //        let doc = Office.Open(pathPPT)
+            //        let pptDoc = pptDoc(pathPPT , paras, doc)
+            //        dicPptDoc.Add(pathPPT, doc) 
+            //        System.Diagnostics.Debug.WriteLine "dicPptDoc.Add(pathPPT, doc)"
+            //        pptDoc
+
+
             let doc =
-                if dicPptDoc.ContainsKey pathPPT
-                then pptDoc(pathPPT, paras, dicPptDoc[pathPPT])
-                else
-                    let doc = Office.Open(pathPPT)
-                    let pptDoc = pptDoc(pathPPT , paras, doc)
-                    dicPptDoc.Add(pathPPT, doc) 
-                    pptDoc
+                match dicPptDoc.TryGetValue pathPPT with
+                | true, existingDoc -> pptDoc(pathPPT, paras, existingDoc)
+                | false, _ ->
+                    let newDoc = Office.Open(pathPPT)
+                    dicPptDoc.Add(pathPPT, newDoc)
+                    pptDoc(pathPPT, paras, newDoc)
+
 
             //시스템 로딩시 중복이름을 부를 수 없다.
             CheckSameCopy(doc)
@@ -153,39 +164,43 @@ module ImportPPTModule =
          
     let private fromPPTs(paths:string seq) =
         try
+            try
+                System.Diagnostics.Debug.WriteLine " dicPptDoc.Clear()"
+
+                let pptRepo    = Dictionary<DsSystem, pptDoc>()
+
+                let cfg = {DsFilePaths = paths |> Seq.toList}
+
+                let results =
+                    [
+                        for dsFile in cfg.DsFilePaths do
+                              let ppt = new ImportPowerPoint()
+                              ppt.GetImportModel(pptRepo, dsFile)
+                    ]
+
+                //ExternalSystem 순환참조때문에 완성못한 시스템 BuildSystem 마무리하기
+                pptRepo
+                    .Where(fun dic -> not <| dic.Value.IsBuilded)
+                    .ForEach(fun dic ->
+                        let dsSystem = dic.Key
+                        let pptDoc = dic.Value
+                        pathStack.Push(pptDoc.Path)
+                        pptDoc.BuildSystem(dsSystem)
+                        pathStack.Pop() |> ignore
+                        )
+
+                //사용한 ppt doc 일괄 닫기 (열린문서 재 사용이 있어서 사용후 전체 한번에 닫기)
+                //dicPptDoc.Iter(fun f->f.Value.Close())
+
+                let systems =  results.Select(fun (sys, view) -> sys) |> Seq.toList
+                let views   =  results |> dict
+                { Config = cfg; Systems = systems}, views, pptRepo
+      
+            with ex ->  
+                failwithf  @$"{ex.Message} [ErrPath:{if pathStack.any() then pathStack.First() else paths.First() }]" //첫페이지 아니면 stack에 존재
+        finally 
+            dicPptDoc.Iter(fun f->f.Value.Close())
             dicPptDoc.Clear()
-            let pptRepo    = Dictionary<DsSystem, pptDoc>()
-
-            let cfg = {DsFilePaths = paths |> Seq.toList}
-
-            let results =
-                [
-                    for dsFile in cfg.DsFilePaths do
-                          let ppt = ImportPowerPoint()
-                          ppt.GetImportModel(pptRepo, dsFile)
-                ]
-
-            //ExternalSystem 순환참조때문에 완성못한 시스템 BuildSystem 마무리하기
-            pptRepo
-                .Where(fun dic -> not <| dic.Value.IsBuilded)
-                .ForEach(fun dic ->
-                    let dsSystem = dic.Key
-                    let pptDoc = dic.Value
-                    pathStack.Push(pptDoc.Path)
-                    pptDoc.BuildSystem(dsSystem)
-                    pathStack.Pop() |> ignore
-                    )
-
-            //사용한 ppt doc 일괄 닫기 (열린문서 재 사용이 있어서 사용후 전체 한번에 닫기)
-            dicPptDoc.Iter(fun f->f.Value.Close())
-
-            let systems =  results.Select(fun (sys, view) -> sys) |> Seq.toList
-            let views   =  results |> dict
-            { Config = cfg; Systems = systems}, views, pptRepo
-
-        with ex ->  
-            dicPptDoc.Iter(fun f->f.Value.Close())
-            failwithf  @$"{ex.Message} [ErrPath:{if pathStack.any() then pathStack.First() else paths.First() }]" //첫페이지 아니면 stack에 존재
 
     type PptResult = {
         System: DsSystem

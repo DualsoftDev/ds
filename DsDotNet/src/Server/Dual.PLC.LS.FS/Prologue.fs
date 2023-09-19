@@ -243,7 +243,17 @@ type LsFEnetTagInfo = {
     member x.ByteLength = (max 8 x.BitLength) / 8
     member x.BitLength  = x.DataType.GetBitLength()
     member x.ByteOffset = x.BitOffset / 8
-    member x.WordOffset = x.BitOffset / 16
+    member x.OffsetByDataType = 
+        match x.DataType with
+        | Bit    -> x.BitOffset
+        | Byte   -> x.BitOffset/8
+        | Word   -> x.BitOffset/16
+        | DWord  -> x.BitOffset/32
+        | LWord  -> x.BitOffset/64
+        | Continuous 
+              ->  failwithf $"error Continuous tag :{x.Tag}"
+        
+        
     member x.GetIOM() = 
             match x.Device with
             |I -> "I" |Q -> "O"

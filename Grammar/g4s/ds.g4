@@ -286,7 +286,7 @@ jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|linkListing|funcSet)* RBRACE;
     interfaceLink: identifier12;
 
     funcSet: identifier12 '=' LBRACE (() | funcDef (SEIMCOLON funcDef)* (SEIMCOLON)?) RBRACE;
-    funcDef:  '$' funcName (argument (argument)*);
+    funcDef:  '$' funcName (argument (argument)*)?;
     funcName: identifier1;
 
 codeBlock: CODE_BLOCK;

@@ -145,7 +145,7 @@ module internal ToDsTextModule =
                 yield flowToDs f indent
 
             if system.Jobs.Any() then
-                let addressPrint (addr:string) = if addr = "" then "_" else addr
+                let addressPrint (addr:string) = if isNullOrEmpty addr || addr = "　" then "_" else addr
                 let printDev (ai:TaskDev) = $"{ai.ApiName}({addressPrint ai.InAddress}, {addressPrint ai.OutAddress})"
                 let printLink (ai:TaskSys) = $"{ai.ApiName}"
                 yield $"{tab}[jobs] = {lb}"

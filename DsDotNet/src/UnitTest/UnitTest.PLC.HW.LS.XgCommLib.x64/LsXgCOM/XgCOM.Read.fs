@@ -16,8 +16,8 @@ open PLC.CodeGen.Common
 open XGCommLib
 open System.Threading
 open System.Collections
-open DsXgComm.Monitoring
 open DsXgComm
+open DsXgComm.Monitoring
 
 
 [<AutoOpen>]

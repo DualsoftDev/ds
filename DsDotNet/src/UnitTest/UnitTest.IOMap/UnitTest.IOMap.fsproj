@@ -22,7 +22,8 @@
 
 	<ItemGroup>
 		<Compile Include="TestFixture.Engine.fs" />
-		<Compile Include="IOMapApiTest.fs" />
+		<Compile Include="IOMapBasic.fs" />
+		<Compile Include="IOMapAdvance.fs" />
 		<None Include="App.config" />
 		<Compile Include="Main.fs" />
 	</ItemGroup>

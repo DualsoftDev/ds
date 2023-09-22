@@ -1,0 +1,60 @@
+C:\XG5000\XGCommLib.dll
+
+
+OLE/COM viewer 실행
+	File > View type lib... > C:\XG5000\XGCommLib.dll 선택
+
+
+
+
+
+https://smart-factory-plc.tistory.com/260
+Cnet I/F 모듈
+	file:///C:/Users/kwak/Downloads/XGT%20%ED%94%84%EB%A1%9C%ED%86%A0%EC%BD%9C.pdf
+
+
+
+https://pureholic.tistory.com/47
+	Serial port CNet 통신 예제
+
+https://sonar2.tistory.com/96
+	XGB PLC 시리얼통신 테스트
+
+
+http://www.autobase.biz/korean/AutoBaseHelp/Help10/Plc_scan/XGT_ENET.htm
+XGT Ethernet 통신 드라이버
+
+
+
+http://www.kcl-vision.co.kr/inobbs/bbs_read.php?code=ibd00_pds&nbd=ibd00_pds&uid=1&page=1&start=0&thread=1&no=1&field=&key=&mode=&login_mode=&list_count=&dbcal=no&lng=kor
+LS산전 PLC Interface Component(DLL) 
+
+3 	 	XGT_CommDriver C# Sample 	195 		19/01/03 	운영자  
+2 	 	XGT_CommDriver C++ Sample 	92 		19/01/03 	운영자  
+1 	 	LS산전 PLC Interface Component(DLL)
+
+
+
+
+https://tsblog.simulz.kr/883
+  D1000번지의 16비트값을 읽는 코드
+
+	송신 데이터
+	4C5349532D58475400000000A0330200110003405400020000000100070025445731303030
+
+
+	수신 데이터
+	4C5349532D584754000004013F02000E000324550002000201000001000200744E
+
+
+
+
+
+https://github.com/GavinYellow/SharpSCADA/issues/14
+	https://github.com/GavinYellow/SharpSCADA/files/1777816/XGT.zip
+
+LS PLC
+IP: 192.168.0.223 
+Port : 2004, 2003
+
+

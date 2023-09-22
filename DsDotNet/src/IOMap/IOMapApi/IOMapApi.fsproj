@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFrameworks>net48;net7.0-windows</TargetFrameworks>
+    <OutputPath>$(SolutionDir)\bin</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="MemoryUtil.fs" />
+    <Compile Include="MemoryIO.fs" />
+    <Compile Include="MemoryIOEvent.fs" />
+    <Compile Include="MemoryIOManager.fs" />
+  </ItemGroup>
+
+</Project>

@@ -10,7 +10,6 @@ open Dual.Common.Core.FS
 open Engine.Cpu
 open Engine.CodeGenCPU
 open System.Linq
-open Dsu.PLC.LS
 
 [<AutoOpen>]
 module DriverIOLSCommonTest =
@@ -18,9 +17,9 @@ module DriverIOLSCommonTest =
     type DriverIOLSCommon() =
         inherit EngineTestBaseClass()
 
-        let conn = new LsConnection(LsConnectionParameters("192.168.0.101"))
+        //let conn = new LsConnection(LsConnectionParameters("192.168.0.101"))
 
-        member x.Connection = conn
+        //member x.Connection = conn
 
         //[<Test>]
         //member __.``XXXX LS Connection test`` () =

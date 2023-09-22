@@ -4,6 +4,7 @@ open System
 open System.IO
 open Engine.Import.Office
 open Engine.CodeGenCPU
+open Engine.CodeGenPLC
 open Dual.Common.Core.FS
 open Engine.Core
 open System.IO

@@ -1,0 +1,27 @@
+global using DevExpress.Utils.Extensions;
+global using DevExpress.XtraBars;
+global using DevExpress.XtraBars.Docking2010.Views;
+global using DevExpress.XtraBars.Docking2010.Views.Tabbed;
+global using DevExpress.XtraBars.Navigation;
+global using DevExpress.XtraEditors;
+global using DevExpress.XtraEditors.Controls;
+global using DevExpress.XtraGrid;
+global using DevExpress.XtraGrid.Views.Grid;
+global using DevExpress.XtraPrinting;
+global using DevExpress.XtraSplashScreen;
+global using DevExpress.XtraVerticalGrid;
+
+global using System;
+global using System.Collections.Generic;
+global using System.Configuration;
+global using System.Diagnostics;
+global using System.Drawing;
+global using System.IO;
+global using System.Linq;
+global using System.Net;
+global using System.Net.Http;
+global using System.Net.Http.Json;
+global using System.Reflection;
+global using System.Runtime.Versioning;
+global using System.Threading.Tasks;
+global using System.Windows.Forms;

@@ -29,9 +29,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\..\Apps\IOMap\IOMapApi\IOMapApiForDS.fsproj" />
-		<ProjectReference Include="..\..\..\Apps\IOMap\IOMapForDS\IOMapApi.fsproj" />
-		<ProjectReference Include="..\..\..\Apps\IOMap\IOMapService\IOMapService.fsproj" />
+		<ProjectReference Include="..\..\IOMap\IOMapApi\IOMapApiForDS.fsproj" />
+		<ProjectReference Include="..\..\IOMap\IOMapForDS\IOMapApi.fsproj" />
 		<ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
 	</ItemGroup>
 </Project>

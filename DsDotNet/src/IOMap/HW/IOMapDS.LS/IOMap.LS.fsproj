@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0-windows</TargetFramework>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<LangVersion>7.0</LangVersion>
+		<OutputType>Exe</OutputType>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="PLCTypeList.csv" />
+		<None Include="DeviceSizeInfoForComm.csv" />
+		<Compile Include="Connect.fs" />
+		<Compile Include="DeviceSizeInfo.fs" />
+		<Compile Include="ScanIO.fs" />
+		<Compile Include="Program.fs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\..\PLC\Dual.PLC.LS.FS\PLC.LS.FS.fsproj" />
+	  <ProjectReference Include="..\..\IOMapApi\IOMapApi.fsproj" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <Reference Include="Interop.XGCommLib">
+	    <HintPath>..\..\..\..\exLib\Interop.XGCommLib.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Command="echo ProjectDir: $(ProjectDir)" />
+		<Exec Command="echo OutputPath: $(OutputPath)" />
+	</Target>
+
+</Project>

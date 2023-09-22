@@ -8,6 +8,7 @@ open T
 open Engine.Core
 open Dual.Common.Core.FS
 open Engine.CodeGenCPU
+open Engine.CodeGenPLC
 open PLC.CodeGen.LSXGI
 open System
 open Engine.Import.Office

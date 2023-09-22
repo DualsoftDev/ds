@@ -32,8 +32,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\Server\Dual.PLC.LS.FS\Dual.PLC.LS.FS.fsproj" />
-		<ProjectReference Include="..\..\Server\Dual.PLC.LS.XgCOM4DS.FS\Dual.PLC.LS.XgCOM4DS.FS.fsproj" />
 		<ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
 	</ItemGroup>
 	<ItemGroup>

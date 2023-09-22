@@ -36,14 +36,12 @@
     <Compile Include="14.Extension.fs" />
     <Compile Include="ConvertCPU.fs" />
     <Compile Include="Loader.fs" />
-    <Compile Include="ExportModule.fs" />
 	<Compile Include="EntryPoint.fs" />
 	<Content Include="FodyWeavers.xml" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\PLC\PLC.CodeGen.LSXGI\PLC.CodeGen.LSXGI.fsproj" />
-    <ProjectReference Include="..\..\Server\Dual.PLC.LS.FS\Dual.PLC.LS.FS.fsproj" />
     <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
   </ItemGroup>
 

@@ -1,4 +1,4 @@
-﻿namespace IOMapApi
+namespace IOMapApi
 
 open System
 open System.Collections.Generic
@@ -31,8 +31,7 @@ module MemoryIOEventImpl =
                 |> List.iter (fun bit ->
                     if hasBitChanged oldByte newByte bit then
                         let v = (newByte &&& (1uy <<< bit)) <> 0uy
-                        if v then
-                            MemoryChanged.Trigger(MemoryChangedEventArgs<obj>(deviceName, uint64(i * 8 + bit), v)))
+                        MemoryChanged.Trigger(MemoryChangedEventArgs<obj>(deviceName, uint64(i * 8 + bit), v)))
 
             if i % 8 = 0 && i < currentData.Length - 7 
                && BitConverter.ToUInt64(currentData, i) <> BitConverter.ToUInt64(newData, i) then 

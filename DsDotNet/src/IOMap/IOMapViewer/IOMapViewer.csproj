@@ -18,7 +18,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HW\IOMapDS.LS\IOMap.LS.fsproj" />
-    <ProjectReference Include="..\IOMapForDS\IOMapApiForDS.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="IOMapForModeler">
+      <HintPath>..\IOMapForModeler\obj\Debug\net7.0-windows\ref\IOMapForModeler.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>

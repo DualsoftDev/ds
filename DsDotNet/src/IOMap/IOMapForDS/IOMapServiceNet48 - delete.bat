@@ -9,28 +9,28 @@ if %errorLevel% == 0 (
     exit
 )
 
-REM ¼­ºñ½º ÀÌ¸§ ¼³Á¤
+REM ì„œë¹„ìŠ¤ ì´ë¦„ ì„¤ì •
 set SERVICE_NAME=IOMapService
 
-REM ¼­ºñ½º°¡ Á¸ÀçÇÏ´ÂÁö È®ÀÎ
+REM ì„œë¹„ìŠ¤ê°€ ì¡´ìž¬í•˜ëŠ”ì§€ í™•ì¸
 sc query %SERVICE_NAME% >nul 2>&1
 if %ERRORLEVEL% neq 0 (
     echo The service %SERVICE_NAME% does not exist.
     
 )
 
-REM ¼­ºñ½º ÁßÁö
+REM ì„œë¹„ìŠ¤ ì¤‘ì§€
 echo Stopping the service %SERVICE_NAME%...
 sc stop %SERVICE_NAME%
 
-REM ¼­ºñ½º°¡ ¿ÏÀüÈ÷ ÁßÁöµÉ ¶§±îÁö ´ë±â (¿¹: 2ÃÊ ´ë±â)
+REM ì„œë¹„ìŠ¤ê°€ ì™„ì „ížˆ ì¤‘ì§€ë  ë•Œê¹Œì§€ ëŒ€ê¸° (ì˜ˆ: 2ì´ˆ ëŒ€ê¸°)
 timeout /t 2 /nobreak
 
-REM ¼­ºñ½º »èÁ¦
+REM ì„œë¹„ìŠ¤ ì‚­ì œ
 echo Deleting the service %SERVICE_NAME%...
 sc delete %SERVICE_NAME%
 
-REM °á°ú È®ÀÎ
+REM ê²°ê³¼ í™•ì¸
 if %ERRORLEVEL% equ 0 (
     echo The service %SERVICE_NAME% was deleted successfully.
 ) else (
@@ -41,4 +41,4 @@ echo Data exePath: %~dp0..\..\..\bin\net48\IOMapService.exe
 
 
 echo end!
-pause
+REM pause

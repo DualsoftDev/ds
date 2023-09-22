@@ -36,8 +36,8 @@ module Fixtures =
                     //"UnitTest\E",int max
                 ]
         do
+            //IOMapApiForDS.HwServiceManagerImpl.IOMapServiceDelete()      
             ()
-
         member x.MAPS =  maps
         
         member x.CreateMap() = 

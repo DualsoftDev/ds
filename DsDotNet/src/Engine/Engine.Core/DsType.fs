@@ -7,37 +7,38 @@ open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module DsType =
-    ///Seg 상태 (Default 'Homing')
+
+    /// Describes the segment status with default being 'Homing'
     type Status4 =
         | Ready
         | Going
         | Finish
         | Homing
 
-    ///BtnType  종류
+    /// Represents different button types
     type BtnType =
-        | DuAutoBTN      //자동 Select 버튼
-        | DuManualBTN    //수동 Select 버튼
-        | DuDriveBTN     //운전 Push 버튼
-        | DuTestBTN      //시운전 시작 Push 버튼
-        | DuStopBTN      //정지 Push 버튼
-        | DuEmergencyBTN //비상 Push 버튼
-        | DuClearBTN     //해지 Push 버튼
-        | DuHomeBTN      //홈(원위치) Push 버튼
-        | DuReadyBTN     //운전 준비 Push 버튼
+        | DuAutoBTN      // Automatic Select button
+        | DuManualBTN    // Manual Select button
+        | DuDriveBTN     // Drive Push button
+        | DuTestBTN      // Test Drive Start Push button
+        | DuStopBTN      // Stop Push button
+        | DuEmergencyBTN // Emergency Push button
+        | DuClearBTN     // Clear Push button
+        | DuHomeBTN      // Home (Original position) Push button
+        | DuReadyBTN     // Drive Ready Push button
 
-   
-    ///LampType  종류 
+    /// Represents different lamp types
     type LampType =
-        | DuAutoLamp      //자동  버튼
-        | DuManualLamp    //수동  버튼
-        | DuDriveLamp     //운전  램프
-        | DuStopLamp      //정지  램프
-        | DuEmergencyLamp //비상  램프
-        | DuTestDriveLamp //시운전  램프
-        | DuReadyLamp     //준비  램프
-        | DuIdleLamp      //대기  램프
+        | DuAutoLamp      // Automatic button lamp
+        | DuManualLamp    // Manual button lamp
+        | DuDriveLamp     // Drive lamp
+        | DuStopLamp      // Stop lamp
+        | DuEmergencyLamp // Emergency lamp
+        | DuTestDriveLamp // Test Drive lamp
+        | DuReadyLamp     // Ready lamp
+        | DuIdleLamp      // Idle lamp
 
+    /// Represents different condition types
     type ConditionType =
         | DuReadyState
         | DuDriveState

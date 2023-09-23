@@ -2,30 +2,21 @@ namespace Engine.Core
 
 open System.Diagnostics
 open System.Collections.Generic
-
 open Dual.Common.Core.FS
 
 [<AutoOpen>]
-
 module TagVariableModule =
     type StorageCreationParams<'T when 'T:equality> = {
         Name: string
         Value: 'T
-        /// 1. None 이면 자동으로 주소를 할당하지 않음
-        /// 2. "" 이면 자동으로 주소를 할당
-        /// 3. 그외의 문자열이면 그것 자체의 주소를 사용
         Address: string option
         Comment: string option
         System: ISystem
         Target: IQualifiedNamed option
-        /// TAG 종류  ex)going = 2007
-        /// SystemTag (0 ~ 999)
-        /// FlowTag   (1000 ~ 1999)
-        /// VertexTag (2000 ~ 2999)
-        /// ApiTag    (3000 ~ 3999)
-        TagKind : int
+        TagKind: int
         IsGlobal: bool
     }
+
     let defaultStorageCreationParams(value) = {
         Name = ""
         Value = value
@@ -33,10 +24,9 @@ module TagVariableModule =
         Comment = None
         System = RuntimeDS.System
         Target = None
-        TagKind = -1 //Target이 None일 경우 -1
+        TagKind = -1
         IsGlobal = false
     }
-
 
 
     [<AbstractClass>]

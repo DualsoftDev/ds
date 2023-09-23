@@ -6,6 +6,23 @@ open System.Runtime.CompilerServices
 open System.Text.RegularExpressions
 open System
 open System.Collections.Generic
+open System.Reactive.Subjects
+
+
+
+[<AutoOpen>]
+module DsProcessEvent =
+
+    type ProParam = |PRO of Time:DateTime * pro:int
+
+    let mutable CurrProcess:int = 0
+    let ProcessSubject = new Subject<ProParam>()
+
+    let DoWork  (pro:int) =
+        CurrProcess <- pro
+        ProcessSubject.OnNext(ProParam.PRO (DateTime.Now, pro))
+
+
 
 [<AutoOpen>]
 module CoreExtensionsModule =

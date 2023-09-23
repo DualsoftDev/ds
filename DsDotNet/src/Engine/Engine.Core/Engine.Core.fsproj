@@ -13,14 +13,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="Test.fsx" />
 		<Compile Include="Constants.fs" />
 		<Compile Include="Interface.fs" />
 		<Compile Include="DsType.fs" />
 		<Compile Include="DsEvent.fs" />
 		<Compile Include="Prolog.fs" />
-		<Compile Include="Named.fs" />
+		<Compile Include="Text.fs" />
+		<Compile Include="Fqdn.fs" />
+		<Compile Include="UniqueName.fs" />
 		<Compile Include="Graph.fs" />
+		<Compile Include="GraphHelper.fs" />
 		<Compile Include="RuntimeGenerator.fs" />
 		<Compile Include="TypeConversion.fs" />
 		<Compile Include="Expression.Interfaces.fs" />

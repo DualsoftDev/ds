@@ -1,4 +1,6 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
+// Dual Inc.에 저작권이 있습니다. 모든 권한 보유.
+
 namespace rec Engine.Core
 
 open System.Linq
@@ -12,87 +14,82 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module CoreModule =
-    /// Creates FQDN(Fully Qualified Domain Name) object
-    let createFqdnObject (nameComponents:string array) = {
-        new IQualifiedNamed with
-            member _.Name with get() = nameComponents.LastOrDefault() and set(_v) = failwithlog "ERROR"
-            member _.NameComponents = nameComponents
-            member x.QualifiedName = nameComponents.Combine() }
+    /// FQDN(Fully Qualified Domain Name) 객체를 생성합니다.
+    let createFqdnObject (nameComponents: string array) = 
+        {
+            new IQualifiedNamed with
+                member _.Name with get() = nameComponents.LastOrDefault() and set(_v) = failwithlog "ERROR"
+                member _.NameComponents = nameComponents
+                member x.QualifiedName = nameComponents.Combine()
+        }
 
+    // 파서 로딩 타입 정의
     type ParserLoadingType = DuNone | DuDevice | DuExternal 
-    /// External system loading 시, 공유하기 위한 정보를 담을 곳
+
+    /// External 시스템 로딩 시 공유할 정보를 저장하는 클래스
     type ShareableSystemRepository = Dictionary<string, DsSystem>
 
+    // 장치 로딩 파라미터 정의
     type DeviceLoadParameters = {
-        /// Loading 된 system 입장에 자신을 포함하는 container system
-        ContainerSystem        : DsSystem
-        AbsoluteFilePath       : string
-        /// Loading 을 위해서 사용자가 지정한 file path.  serialize 시, 절대 path 를 사용하지 않기 위한 용도로 사용된다.
-        UserSpecifiedFilePath  : string
-        /// *.ds 에 정의된 이름과 loading 할 때의 이름은 다를 수 있다.
-        LoadedName             : string
+        /// 로딩된 시스템이 속한 컨테이너 시스템
+        ContainerSystem: DsSystem
+        AbsoluteFilePath: string
+        /// 로딩을 위해 사용자가 지정한 파일 경로. 직렬화 시에는 절대 경로를 사용하지 않기 위한 용도로 사용됩니다.
+        UserSpecifiedFilePath: string
+        /// *.ds 파일에서 정의된 이름과 로딩할 때의 이름이 다를 수 있습니다.
+        LoadedName: string
         ShareableSystemRepository: ShareableSystemRepository
-        HostIp : string option
-        LoadingType:ParserLoadingType
+        HostIp: string option
+        LoadingType: ParserLoadingType
     }
 
     [<AbstractClass>]
-    type LoadedSystem(loadedSystem:DsSystem, param:DeviceLoadParameters)  =
+    type LoadedSystem (loadedSystem: DsSystem, param: DeviceLoadParameters) =
         inherit FqdnObject(param.LoadedName, param.ContainerSystem)
-        let mutable loadedName = param.LoadedName //로딩 주체에따라 Runtime에 변경
+        let mutable loadedName = param.LoadedName // 로딩 주체에 따라 런타임에 변경
         interface ISystem 
         member _.LoadedName with get() = loadedName and set(value) = loadedName <- value
         
-        /// 다른 device 을 Loading 하려는 system 입장에서 loading 된 system 참조 용
+        /// 다른 장치를 로딩하려는 시스템에서 로딩된 시스템을 참조합니다.
         member _.ReferenceSystem = loadedSystem
-        /// Loading 된 system 입장에 자신을 포함하는 container system
         member _.ContainerSystem = param.ContainerSystem
-        /// Loading 을 위해서 사용자가 지정한 file path.  serialize 시, 절대 path 를 사용하지 않기 위한 용도로 사용된다.
         member _.UserSpecifiedFilePath:string = param.UserSpecifiedFilePath
         member _.AbsoluteFilePath:string = param.AbsoluteFilePath
-        member _.LoadingType:ParserLoadingType = param.LoadingType
+        member _.LoadingType: ParserLoadingType = param.LoadingType
 
-
-    /// *.ds file 을 읽어 들여서 새로운 instance 를 만들어 넣기 위한 구조
-   
-    and 
-        Device(loadedDevice:DsSystem, param:DeviceLoadParameters) =
+    /// *.ds 파일을 읽어 새로운 인스턴스를 만들어 삽입하는 구조입니다.
+    and Device (loadedDevice: DsSystem, param: DeviceLoadParameters) =
         inherit LoadedSystem(loadedDevice, param)
 
-    /// shared instance.  *.ds file 의 절대 경로 기준으로 하나의 instance 만 생성하고 이를 참조하는 개념
-    and
-        ExternalSystem(loadedSystem:DsSystem, param:DeviceLoadParameters) =
+    /// 공유 인스턴스. *.ds 파일의 절대 경로를 기준으로 하나의 인스턴스만 생성하고 이를 참조하는 개념입니다.
+    and ExternalSystem (loadedSystem: DsSystem, param: DeviceLoadParameters) =
         inherit LoadedSystem(loadedSystem, param)
         member _.HostIp = param.HostIp
 
-    type DsSystem (name:string, hostIp:string) =
+    type DsSystem (name: string, hostIp: string) =
         inherit FqdnObject(name, createFqdnObject([||]))
         let loadedSystems = createNamedHashSet<LoadedSystem>()
         let apiUsages = ResizeArray<ApiItem>()
         let addApiItemsForDevice (device: LoadedSystem) = device.ReferenceSystem.ApiItems |> apiUsages.AddRange
 
         interface ISystem 
-        member _.AddLoadedSystem(childSys) = loadedSystems.Add(childSys)
-                                             |> verifyM $"Duplicated LoadedSystem name [{childSys.Name}]"
-                                             addApiItemsForDevice childSys
+        member _.AddLoadedSystem(childSys) = 
+            loadedSystems.Add(childSys)
+            |> verifyM $"중복된 로드된 시스템 이름 [{childSys.Name}]"
+            addApiItemsForDevice childSys
 
         [<Browsable(false)>]
-        member _.ReferenceSystems = loadedSystems.Select(fun s->s.ReferenceSystem)
+        member _.ReferenceSystems = loadedSystems.Select(fun s -> s.ReferenceSystem)
         [<Browsable(false)>]
-        member _.LoadedSystems    = loadedSystems |> seq
-        member _.Devices          = loadedSystems.OfType<Device>()         |> Seq.toArray 
-        member _.ExternalSystems  = loadedSystems.OfType<ExternalSystem>() |> Seq.toArray
-
+        member _.LoadedSystems = loadedSystems |> seq
+        member _.Devices = loadedSystems.OfType<Device>() |> Seq.toArray 
+        member _.ExternalSystems = loadedSystems.OfType<ExternalSystem>() |> Seq.toArray
         [<Browsable(false)>]
         member _.ApiUsages = apiUsages |> seq
         member _.HostIp = hostIp
-
-        member val Jobs    = ResizeArray<Job>()
-        /// 사용자 입력 code block(s).  "<@{" 와 "}@>" 사이의 text(s) : todo 복수개의 block 이 허용되면, serialize 할 때 해당 위치에 맞춰서 serialize 해야 하는데...
-       
+        member val Jobs = ResizeArray<Job>()
         [<Browsable(false)>]
-        member val Flows   = createNamedHashSet<Flow>()
-        //시스템에서 호출가능한 작업리스트 (CallDev => Job => ApiItems => Addresses)
+        member val Flows = createNamedHashSet<Flow>()
         [<Browsable(false)>]
         member val OriginalCodeBlocks = ResizeArray<string>()
         [<Browsable(false)>]
@@ -103,17 +100,13 @@ module CoreModule =
         member val ApiItems = createNamedHashSet<ApiItem>()
         [<Browsable(false)>]
         member val ApiResetInfos = HashSet<ApiResetInfo>()
-        ///시스템 전체시작 버튼누름시 수행되야하는 Real목록
         [<Browsable(false)>]
         member val StartPoints = createQualifiedNamedHashSet<Real>()
-        ///시스템 버튼 소속 Flows 정보 setting은 AddButton 사용
         member val internal Buttons = HashSet<ButtonDef>()
-        ///시스템 램프 소속 Flow 정보  setting은 AddLamp 사용
-        member val internal Lamps   = HashSet<LampDef>()
-        ///시스템 조건 (운전/준비) 정보  setting은 AddCondition 사용
-        member val internal Conditions   = HashSet<ConditionDef>()
-    
-    type Flow private (name:string, system:DsSystem) =
+        member val internal Lamps = HashSet<LampDef>()
+        member val internal Conditions = HashSet<ConditionDef>()
+
+    type Flow private (name: string, system: DsSystem) =
         inherit FqdnObject(name, system)
         [<Browsable(false)>]
         member val Graph = DsGraph()
@@ -124,55 +117,52 @@ module CoreModule =
 
         [<Browsable(false)>]
         member x.System = system
-        static member Create(name:string, system:DsSystem) =
+
+        static member Create(name: string, system: DsSystem) =
             let flow = Flow(name, system)
-            system.Flows.Add(flow) |> verifyM $"Duplicated flow name [{name}]"
+            system.Flows.Add(flow) |> verifyM $"중복된 플로우 이름 [{name}]"
             flow
 
-    and ButtonDef (name:string, btnType:BtnType, inAddress:TagAddress, outAddress:TagAddress, flows:HashSet<Flow>, funcs:HashSet<Func>) =
+    and ButtonDef (name: string, btnType: BtnType, inAddress: TagAddress, outAddress: TagAddress, flows: HashSet<Flow>, funcs: HashSet<Func>) =
         member x.Name = name
         member x.ButtonType = btnType
-        ///버튼 동작을 위한 외부 IO 입력 주소
-        member val InAddress = inAddress with get,set
-        ///버튼 동작을 위한 외부 IO 출력 주소
-        member val OutAddress = outAddress  with get,set
-
-        //CPU 생성시 할당됨 InTag
+        /// 버튼 작동을 위한 외부 IO 입력 주소
+        member val InAddress = inAddress with get, set
+        /// 버튼 작동을 위한 외부 IO 출력 주소
+        member val OutAddress = outAddress  with get, set
+        /// CPU 생성 시 할당됨 InTag
         member val InTag = getNull<ITag>() with get, set
-        //CPU 생성시 할당됨 OutTag
+        /// CPU 생성 시 할당됨 OutTag
         member val OutTag = getNull<ITag>() with get, set
-        member val SettingFlows  = flows with get, set
-        member val Funcs  = funcs with get, set
+        member val SettingFlows = flows with get, set
+        member val Funcs = funcs with get, set
 
-
-    and LampDef (name:string, lampType:LampType, outAddress:TagAddress, flow:Flow, funcs:HashSet<Func>) =
+    and LampDef (name: string, lampType: LampType, outAddress: TagAddress, flow: Flow, funcs: HashSet<Func>) =
         member x.Name = name
         member x.LampType = lampType
-        ///램프 동작을 위한 외부 IO 출력 주소
-        member val OutAddress = outAddress  with get,set
-
-        //CPU 생성시 할당됨 OutTag
+        /// 램프 작동을 위한 외부 IO 출력 주소
+        member val OutAddress = outAddress  with get, set
+        /// CPU 생성 시 할당됨 OutTag
         member val OutTag = getNull<ITag>() with get, set
-        ///단일 Flow 단위로 Lamp 상태 출력
-        member val SettingFlow  = flow with get, set
-        member val Funcs  = funcs with get, set
+        /// 단일 플로우 단위로 램프 상태 출력
+        member val SettingFlow = flow with get, set
+        member val Funcs = funcs with get, set
 
-    and ConditionDef (name:string, conditionType:ConditionType, inAddress:TagAddress, flows:HashSet<Flow>, funcs:HashSet<Func>) =
+    and ConditionDef (name: string, conditionType: ConditionType, inAddress: TagAddress, flows: HashSet<Flow>, funcs: HashSet<Func>) =
         member x.Name = name
         member x.ConditionType = conditionType
-        ///조건을 위한 외부 IO 출력 주소
-        member val InAddress = inAddress  with get,set
-
-        //CPU 생성시 할당됨 InTag
+        /// 조건을 위한 외부 IO 출력 주소
+        member val InAddress = inAddress  with get, set
+        /// CPU 생성 시 할당됨 InTag
         member val InTag = getNull<ITag>() with get, set
-        ///단일 Flow 단위로 Condition 상태 출력
-        member val SettingFlows  = flows with get, set
-        member val Funcs  = funcs with get, set
+        /// 단일 플로우 단위로 조건 상태 출력
+        member val SettingFlows = flows with get, set
+        member val Funcs = funcs with get, set
 
-    and AliasDef(aliasKey:Fqdn, target:AliasTargetWrapper option, mnemonics:string []) =
+    and AliasDef(aliasKey: Fqdn, target: AliasTargetWrapper option, mnemonics: string []) =
         member _.AliasKey = aliasKey
         member val AliasTarget = target with get, set
-        member val Mnemonincs = mnemonics |> ResizeArray
+        member val Mnemonics = mnemonics |> ResizeArray
 
     /// leaf or stem(parenting)
     /// Graph 상의 vertex 를 점유하는 named object : Real, Alias, CallDev
@@ -446,7 +436,7 @@ module CoreModule =
                     | DuAliasTargetRealExSystem rs -> rs.GetAliasTargetToDs() // 고쳐야 함
                 let ads = flow.AliasDefs
                 match ads.TryFind(aliasKey) with
-                | Some ad -> ad.Mnemonincs.AddIfNotContains(name) |> ignore
+                | Some ad -> ad.Mnemonics.AddIfNotContains(name) |> ignore
                 | None -> ads.Add(aliasKey, AliasDef(aliasKey, Some target, [|name|]))
 
             createAliasDefOnDemand()

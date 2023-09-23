@@ -1,13 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0-windows</TargetFramework>
-		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
-		<LangVersion>7.0</LangVersion>
 		<OutputType>Exe</OutputType>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-		<OutputPath>$(SolutionDir)\bin\</OutputPath>
+		<TargetFrameworks>net7.0-windows</TargetFrameworks>
+		<OutputPath>$(SolutionDir)\bin</OutputPath>
 	</PropertyGroup>
+
 
 	<ItemGroup>
 		<Compile Include="Connect.fs" />

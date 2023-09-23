@@ -146,21 +146,6 @@ module TextUtil =
         member val TagManager = getNull<ITagManager>() with get, set
 
 
-[<RequireQualifiedAccess>]
-module UniqueName =
-    type NameGenerator = (unit -> string)
-    let private genDict = Dictionary<string, NameGenerator>(StringComparer.OrdinalIgnoreCase)
-    let generate prefix =
-        let name =
-            if genDict.ContainsKey prefix then
-                genDict.[prefix]()
-            else
-                let f = incrementalKeywordGenerator prefix 0
-                genDict.Add(prefix, f)
-                f()
-        Regex.Replace(name, $"^{prefix}", prefix, RegexOptions.IgnoreCase)
-    let resetAll() = genDict.Clear()
-
 [<Extension>]
 type NameUtil =
     /// DS 문법에서 사용하는 identifier (Segment, flow, call 등의 이름)가 적법한지 검사.
@@ -175,12 +160,4 @@ type NameUtil =
     [<Extension>] static member CreateNameComparer() = nameComparer()
     [<Extension>] static member CreateNameComponentsComparer() = nameComponentsComparer()
     [<Extension>] static member GetRelativeName(fqdn:Fqdn, referencePath:Fqdn) = getRelativeName referencePath fqdn
-
-
-    [<Extension>]
-    static member TryFindWithName (namedObjects:#INamed seq, name:string) =
-        namedObjects.TryFind(fun obj -> obj.Name = name)
-    [<Extension>]
-    static member TryFindWithNameComponents (namedObjects:#IQualifiedNamed seq, nameComponents:Fqdn) =
-        namedObjects.TryFind(fun obj -> obj.NameComponents = nameComponents)
 

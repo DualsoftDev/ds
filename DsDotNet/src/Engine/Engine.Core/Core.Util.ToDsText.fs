@@ -86,7 +86,7 @@ module internal ToDsTextModule =
                 let tab = getTab (indent+1)
                 yield $"{tab}[aliases] = {lb}"
                 for a in aliasDefs do
-                    let mnemonics = (a.Mnemonincs |> String.concat "; ") + ";"
+                    let mnemonics = (a.Mnemonics |> String.concat "; ") + ";"
                     let tab = getTab (indent+2)
                     let aliasKey =
                         match a.AliasTarget with

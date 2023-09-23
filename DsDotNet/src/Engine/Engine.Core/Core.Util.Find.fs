@@ -108,12 +108,12 @@ module internal ModelFindModule =
 
     let tryFindAliasTarget (flow:Flow) aliasMnemonic =
         flow.AliasDefs.Values
-            .Where(fun ad -> ad.Mnemonincs.Contains(aliasMnemonic))
+            .Where(fun ad -> ad.Mnemonics.Contains(aliasMnemonic))
             .TryExactlyOne()
             .Bind(fun ad -> ad.AliasTarget)
 
     let tryFindAliasDefWithMnemonic (flow:Flow) aliasMnemonic =
-        flow.AliasDefs.Values.TryFind(fun ad -> ad.Mnemonincs.Contains(aliasMnemonic))
+        flow.AliasDefs.Values.TryFind(fun ad -> ad.Mnemonics.Contains(aliasMnemonic))
 
     let getVertexSharedReal(real:Real) =
         let sharedAlias =

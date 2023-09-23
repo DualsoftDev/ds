@@ -466,25 +466,25 @@ namespace Diagram.View.MSAGL
         {
             if (newStatus == Status4.Ready)
             {
-                node.Attr.Color = Color.DarkOliveGreen;
+                node.Attr.FillColor = Color.DarkOliveGreen;
             }
             else if (newStatus == Status4.Going)
             {
-                node.Attr.Color = Color.DarkGoldenrod;
+                node.Attr.FillColor = Color.DarkGoldenrod;
             }
             else if (newStatus == Status4.Finish)
             {
-                node.Attr.Color = Color.RoyalBlue;
+                node.Attr.FillColor = Color.RoyalBlue;
             }
             else if (newStatus == Status4.Homing)
             {
-                node.Attr.Color = Color.DimGray;
+                node.Attr.FillColor = Color.DimGray;
             }
         }
 
         private void UpdateFillColor(bool dataExist, Node node)
         {
-            node.Attr.FillColor = dataExist ? Color.DarkGreen : Color.Black;
+            node.Attr.Color = dataExist ? Color.DarkGreen : Color.Black;
         }
 
 

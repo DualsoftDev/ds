@@ -365,15 +365,15 @@ module ImportU =
                         let srcDummy = dummys.TryFindDummy(edge.StartNode)
                         let tgtDummy = dummys.TryFindDummy(edge.EndNode)
 
-                        if(srcDummy.IsNonNull())
+                        if(srcDummy.IsSome)
                             then
-                                let tgt = if tgtDummy.IsNull() then edge.EndNode.Key else tgtDummy.DummyNodeKey
-                                srcDummy.AddOutEdge(edge.Causal, tgt)
+                                let tgt = if tgtDummy.IsNone then edge.EndNode.Key else tgtDummy.Value.DummyNodeKey
+                                srcDummy.Value.AddOutEdge(edge.Causal, tgt)
                             else
-                                if(tgtDummy.IsNonNull())
+                                if(tgtDummy.IsSome)
                                 then
-                                    let src = if srcDummy.IsNull() then edge.StartNode.Key else srcDummy.DummyNodeKey
-                                    tgtDummy.AddInEdge(edge.Causal, src)
+                                    let src = if srcDummy.IsNone then edge.StartNode.Key else srcDummy.Value.DummyNodeKey
+                                    tgtDummy.Value.AddInEdge(edge.Causal, src)
                 )
 
                 dicEdges

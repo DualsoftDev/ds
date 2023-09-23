@@ -161,36 +161,7 @@ module PPTObjectModule =
         | CONDITION
         | LAMP        -> checkDotErr()
 
-    let getBtnType(key:string) =
-        match (TrimSpace key).ToUpper() with
-        | "A"   -> BtnType.DuAutoBTN
-        | "M"   -> BtnType.DuManualBTN
-        | "D"   -> BtnType.DuDriveBTN
-        | "S"   -> BtnType.DuStopBTN
-        | "E"   -> BtnType.DuEmergencyBTN
-        | "T"   -> BtnType.DuTestBTN
-        | "R"   -> BtnType.DuReadyBTN
-        | "H"   -> BtnType.DuHomeBTN
-        | "C"   -> BtnType.DuClearBTN
-        | _     ->  failwith $"{key} is Error Type"
-
-    let getLampType(key:string) =
-        match (TrimSpace key).ToUpper() with
-        | "A"   -> LampType.DuAutoLamp
-        | "M"   -> LampType.DuManualLamp
-        | "D"   -> LampType.DuDriveLamp
-        | "S"   -> LampType.DuStopLamp
-        | "E"   -> LampType.DuEmergencyLamp
-        | "T"   -> LampType.DuTestDriveLamp
-        | "R"   -> LampType.DuReadyLamp
-        | "I"   -> LampType.DuIdleLamp
-        | _     ->  failwith $"{key} is Error Type"
-
-    let getConditionType(key:string) =
-        match (TrimSpace key).ToUpper() with
-        | "R"   -> ConditionType.DuReadyState
-        | "D"   -> ConditionType.DuDriveState
-        | _     ->  failwith $"{key} is Error Type"
+    
 
 
     let IsDummyShape(shape:Shape) = shape.IsDashShape() && (shape.CheckRectangle()||shape.CheckEllipse())

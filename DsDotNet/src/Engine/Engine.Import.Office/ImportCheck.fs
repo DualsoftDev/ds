@@ -58,18 +58,6 @@ module ImportCheck =
 
 
 
-        //let CheckMakeCopyApi(nodes:pptNode seq, dicSys:Dictionary<int, DsSystem>) =
-        //    let dicName = ConcurrentDictionary<string, string>()
-        //    let sysNames = dicSys.Values.Select(fun s->s.Name)
-        //    nodes
-        //        |> Seq.filter(fun node -> node.NodeType = COPY)
-        //        |> Seq.iter(fun node ->
-
-        //            if(sysNames.Contains(node.Name)|> not)
-        //            then Office.ErrorPPT(Name, ErrID._32,  node.Shape.InnerText, node.PageNum, $"확인 시스템 이름 : {node.Name}")
-        //            )
-
-
         let SameEdgeErr(pptEdges:pptEdge seq) =
             let dicSameCheck = Dictionary<string, string>()
             pptEdges |> Seq.iter(fun edge ->
@@ -104,59 +92,3 @@ module ImportCheck =
                  Office.ErrorPPT(ErrorCase.Name, ErrID._2, $"중복이름 : {page.Title}",page.PageNum, $"중복페이지") 
             )
             
-
-        //let ValidPath(nodes:pptNode seq, model:MModel) =
-        //    let checkNodeName(nodes:pptNode seq) =
-        //        nodes.Filter(fun node -> node.NodeType.IsCall || node.NodeType.IsReal)
-        //             .ForEach(fun node -> if node.Name.Contains(";") then node.Shape.ErrorName(29, node.PageNum))
-
-        //    let checkSameNodeType(nodes:pptNode seq, model:MModel) =
-        //        let dicSame = ConcurrentDictionary<string, pptNode>()
-        //        nodes.ForEach(fun node ->
-        //            let flow = model.GetFlow(node.PageNum)
-
-        //            let nodekey = sprintf "%s;%s" flow.Name node.Name
-        //            if(dicSame.ContainsKey(nodekey)|>not)
-        //            then dicSame.TryAdd(nodekey, node)|> ignore
-
-        //            let oldNode = dicSame.[nodekey]
-        //            if((node.NodeType = oldNode.NodeType)|>not)
-        //            then
-        //                MSGError($"도형오류 :타입이 다른 같은이름이 존재합니다 \t[Page{node.PageNum}: {nodekey}({node.NodeType}) != ({oldNode.NodeType}) ({node.Shape.ShapeName()})]")
-
-        //       )
-
-        //    let myFlowNames  = model.Flows.Filter(fun flow -> flow.System.Name = TextMySys).Map(fun s->s.Name)
-        //    let exSysNamesDic  = model.Systems.Filter(fun sys->sys.Name = TextMySys|>not).Map(fun sys -> sys.Name, sys) |> dict
-
-        //    nodes.ForEach(fun node ->
-        //        if(node.Name.Contains('.'))
-        //        then
-        //            if(node.Name.Split('.').Length > 2)
-        //            then Office.ErrorName(node.Shape, 26, node.PageNum)
-
-        //            if node.NodeType.IsReal
-        //            then
-        //                if(myFlowNames.Contains(node.Name.Split('.').[0])|> not)
-        //                then Office.ErrorName(node.Shape, 27, node.PageNum)
-        //            elif node.NodeType.IsCall
-        //            then
-
-        //                let callSys, callIf = node.CallName.Split('.').[0], node.CallName.Split('.').[1]
-
-        //                if(exSysNamesDic.ContainsKey(callSys)|> not)
-        //                then
-        //                     let exSysNamesText = exSysNamesDic.Keys |> Seq.sort |> String.concat ";\n"
-        //                     let errText = $"\n{callSys} 시스템은 \n[{exSysNamesText}]에 없습니다."
-        //                     Office.ErrorPPT(ErrorCase.Name, 32, Office.ShapeName(node.Shape), node.PageNum, errText)
-        //                else
-        //                     let libSys = exSysNamesDic.[callSys]
-        //                     if (libSys.IFNames.Contains(callIf)|> not)
-        //                     then
-        //                         let libSysIFText = libSys.IFNames |> String.concat "; "
-        //                         let errText = $"{callIf} 행위는  {libSys.Name} = [{libSysIFText}]에 없습니다."
-        //                         Office.ErrorPPT(ErrorCase.Name, 33, Office.ShapeName(node.Shape), node.PageNum, errText)
-        //    )
-        //    checkNodeName(nodes)
-        //    checkSameNodeType(nodes, model)
-

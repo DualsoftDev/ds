@@ -115,7 +115,7 @@ module rec ViewModule =
                      dicDummy.Add(dummyKey, viewNode) |>ignore
                      viewNode
             let findV = dummy.GetVertex(dummyKey);
-            let vertex = if findV.IsNonNull() then dicV.[findV] else createDummy()
+            let vertex = if findV.IsSome then dicV.[findV.Value.Value] else createDummy()
             vertex
 
         let src = getVertex (edge.Sources[0]);

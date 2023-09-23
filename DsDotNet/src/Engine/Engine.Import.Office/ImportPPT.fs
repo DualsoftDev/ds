@@ -47,16 +47,6 @@ module ImportPPTModule =
 
             let pathPPT = paras.AbsoluteFilePath+".pptx"
           
-            //let doc =
-            //    if dicPptDoc.ContainsKey pathPPT
-            //    then pptDoc(pathPPT, paras, dicPptDoc[pathPPT])
-            //    else
-            //        let doc = Office.Open(pathPPT)
-            //        let pptDoc = pptDoc(pathPPT , paras, doc)
-            //        dicPptDoc.Add(pathPPT, doc) 
-            //        System.Diagnostics.Debug.WriteLine "dicPptDoc.Add(pathPPT, doc)"
-            //        pptDoc
-
 
             let doc =
                 match dicPptDoc.TryGetValue pathPPT with

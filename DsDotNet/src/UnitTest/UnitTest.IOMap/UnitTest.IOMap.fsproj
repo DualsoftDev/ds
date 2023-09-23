@@ -2,7 +2,6 @@
 
 	<PropertyGroup>
 		<TargetFramework>net7.0-windows</TargetFramework>
-		<!--<TargetFramework>net48</TargetFramework>-->
 
 		<RootNamespace>T.IOMap</RootNamespace>
 		<IsPackable>false</IsPackable>

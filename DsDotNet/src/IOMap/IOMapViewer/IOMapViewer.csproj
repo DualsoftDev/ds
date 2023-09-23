@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -18,13 +18,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HW\IOMapDS.LS\IOMap.LS.fsproj" />
+    <ProjectReference Include="..\IOMapForModeler\IOMapForModeler.fsproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="IOMapForModeler">
-      <HintPath>..\IOMapForModeler\obj\Debug\net7.0-windows\ref\IOMapForModeler.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 
   <ItemGroup>
     <Compile Update="FormMain.cs">

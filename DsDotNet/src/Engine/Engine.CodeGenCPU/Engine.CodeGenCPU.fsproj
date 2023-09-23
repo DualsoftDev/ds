@@ -1,58 +1,56 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
-		<TargetFramework>net7.0-windows</TargetFramework>
+		<TargetFrameworks>net7.0-windows;net48</TargetFrameworks>
 		<RootNamespace>Engine.CodeGenCPU</RootNamespace>
 		<LangVersion>7.0</LangVersion>
-		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 		<OutputType>Library</OutputType>
-        <OtherFlags>--warnon:1182</OtherFlags>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
+		<OtherFlags>--warnon:1182</OtherFlags>
 	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="TagManager.Util.fs" />
-    <Compile Include="TagManager.System.fs" />
-    <Compile Include="TagManager.Flow.fs" />
-    <Compile Include="TagManager.Vertex.fs" />
-    <Compile Include="TagManager.Api.fs" />
-    <Compile Include="TagManager.Link.fs" />
-    <Compile Include="Expression.Extension.fs" />
-    <Compile Include="Core.Extensions.fs" />
-    <Compile Include="Code.SpecUtil.fs" />
-    <Compile Include="Code.ConvertUtil.fs" />
-    <Compile Include="1.Port.fs" />
-    <Compile Include="2.Flow.fs" />
-    <Compile Include="3.Status.fs" />
-    <Compile Include="4.OperationMode.fs" />
-    <Compile Include="5.Monitor.fs" />
-    <Compile Include="6.Real.fs" />
-    <Compile Include="7.Call.fs" />
-    <Compile Include="8.DAG.fs" />
-    <Compile Include="9.Timer.fs" />
-    <Compile Include="10.Counter.fs" />
-    <Compile Include="11.Link.fs" />
-    <Compile Include="12.System.fs" />
-    <Compile Include="13.ButtonLamp.fs" />
-    <Compile Include="14.Extension.fs" />
-    <Compile Include="ConvertCPU.fs" />
-    <Compile Include="Loader.fs" />
-	<Compile Include="EntryPoint.fs" />
-	<Content Include="FodyWeavers.xml" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Include="TagManager.Util.fs" />
+		<Compile Include="TagManager.System.fs" />
+		<Compile Include="TagManager.Flow.fs" />
+		<Compile Include="TagManager.Vertex.fs" />
+		<Compile Include="TagManager.Api.fs" />
+		<Compile Include="TagManager.Link.fs" />
+		<Compile Include="Expression.Extension.fs" />
+		<Compile Include="Core.Extensions.fs" />
+		<Compile Include="Code.SpecUtil.fs" />
+		<Compile Include="Code.ConvertUtil.fs" />
+		<Compile Include="1.Port.fs" />
+		<Compile Include="2.Flow.fs" />
+		<Compile Include="3.Status.fs" />
+		<Compile Include="4.OperationMode.fs" />
+		<Compile Include="5.Monitor.fs" />
+		<Compile Include="6.Real.fs" />
+		<Compile Include="7.Call.fs" />
+		<Compile Include="8.DAG.fs" />
+		<Compile Include="9.Timer.fs" />
+		<Compile Include="10.Counter.fs" />
+		<Compile Include="11.Link.fs" />
+		<Compile Include="12.System.fs" />
+		<Compile Include="13.ButtonLamp.fs" />
+		<Compile Include="14.Extension.fs" />
+		<Compile Include="ConvertCPU.fs" />
+		<Compile Include="Loader.fs" />
+		<Compile Include="EntryPoint.fs" />
+		<Content Include="FodyWeavers.xml" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\PLC\PLC.CodeGen.LSXGI\PLC.CodeGen.LSXGI.fsproj" />
-    <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Fody" Version="6.6.4">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="ModuleInit.Fody" Version="2.1.1">
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+	</ItemGroup>
 
-  <ItemGroup>
-	  <PackageReference Include="Fody" Version="6.6.4">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
-	  <PackageReference Include="ModuleInit.Fody" Version="2.1.1">
-		  <PrivateAssets>all</PrivateAssets>
-	  </PackageReference>
-  </ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
+	</ItemGroup>
 
 </Project>

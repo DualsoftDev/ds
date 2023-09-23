@@ -240,7 +240,7 @@ namespace Diagram.View.MSAGL
         {
             {
                 //nNode.Attr.Color = Color.DarkGoldenrod;
-                nNode.Attr.LineWidth = 3;
+                nNode.Attr.LineWidth = 4;
 
 
                 if (viewNode.ViewType == ViewType.VBUTTON)
@@ -484,7 +484,7 @@ namespace Diagram.View.MSAGL
 
         private void UpdateFillColor(bool dataExist, Node node)
         {
-            node.Attr.Color = dataExist ? Color.DarkGreen : Color.Black;
+            node.Attr.Color = dataExist ? Color.DeepSkyBlue : Color.Black;
         }
 
 

@@ -21,3 +21,4 @@ type IHwTag =
     abstract member GetTarget : unit -> IQualifiedNamed
     abstract member GetDeviceAddress : unit -> string
     abstract member GetTagAddress : unit -> string
+    abstract member ActionOutput : unit -> unit

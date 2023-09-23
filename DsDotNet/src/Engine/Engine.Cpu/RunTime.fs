@@ -18,22 +18,26 @@ module RunTime =
      
         let mutable cts = new CancellationTokenSource()
         let mutable run:bool = false
+
+        let scanOnce() = 
+                    //나머지 수식은 Changed Event가 있는것만 수행해줌
+            let chTags = cpuStorages.ChangedTags()
+            let exeStates = chTags.ExecutableStatements(mapRungs) 
+            chTags.ChangedTagsClear(systems)
+
+            chTags.Iter(notifyPreExcute)  // 상태보고/물리Out 처리
+                  
+            if exeStates.any() then exeStates.Iter(fun s->s.Do())
+
+            chTags.Iter(notifyPostExcute)  // HMI Forceoff 처리
+
+
         let asyncStart = 
             async { 
                 //시스템 ON 및 값변경이 없는 조건 수식은  관련 수식은 Changed Event가 없어서한번 수행해줌
                 for s in statements do s.Do() 
-                //나머지 수식은 Changed Event가 있는것만 수행해줌
                 while run do   
-
-                    let chTags = cpuStorages.ChangedTags()
-                    let exeStates = chTags.ExecutableStatements(mapRungs) 
-                  
-                    if exeStates.any()  
-                    then
-                        chTags.ChangedTagsClear(systems)
-                        chTags.Iter(notifyPreExcute)  // 상태보고/물리Out 처리
-                        exeStates.Iter(fun f->  f.Do())
-                        chTags.Iter(notifyPostExcute)  // HMI Forceoff 처리
+                    scanOnce()
             }
         do 
             ()
@@ -56,8 +60,9 @@ module RunTime =
 
         member x.Step() =
             x.Stop()
-            systems.Iter(fun sys-> preAction(sys, cpuMode))
-            singleScan(statements, systems)
+            scanOnce()
+            //systems.Iter(fun sys-> preAction(sys, cpuMode))
+            //singleScan(statements, systems)
 
         member x.Reset() =
             x.Stop()

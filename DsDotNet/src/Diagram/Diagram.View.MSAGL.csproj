@@ -15,8 +15,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
-	  <ProjectReference Include="..\..\Engine\Engine.Import.Office\Engine.Import.Office.fsproj" />
+	  <ProjectReference Include="..\Engine\Engine.Core\Engine.Core.fsproj" />
+	  <ProjectReference Include="..\Engine\Engine.Import.Office\Engine.Import.Office.fsproj" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -10,6 +10,7 @@ open Dual.Common.Core.FS
 open IOMapApi
 open System.IO.MemoryMappedFiles
 open System
+open IOMapForModeler
 
 [<AutoOpen>]
 module Fixtures =
@@ -36,8 +37,12 @@ module Fixtures =
                     //"UnitTest\E",int max
                 ]
         do
-            //IOMapApiForDS.HwServiceManagerImpl.IOMapServiceDelete()      
-            ()
+
+
+            HwServiceManagerImpl.IOMapServiceDelete()      
+
+
+
         member x.MAPS =  maps
         
         member x.CreateMap() = 

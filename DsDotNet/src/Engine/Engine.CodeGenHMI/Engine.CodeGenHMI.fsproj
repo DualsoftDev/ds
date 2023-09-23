@@ -2,10 +2,9 @@
 	<PropertyGroup>
 		<!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
 		<TargetFramework>net7.0-windows</TargetFramework>
-		<RootNamespace>Engine.CodeGen</RootNamespace>
+		<RootNamespace>Engine.CodeGenHMI</RootNamespace>
 		<LangVersion>7.0</LangVersion>
-		<!--<OutputType>Library</OutputType>-->
-		<!--<OutputType>Exe</OutputType>-->
+		<OutputType>Library</OutputType>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 		<OtherFlags>--warnon:1182</OtherFlags>
 	</PropertyGroup>

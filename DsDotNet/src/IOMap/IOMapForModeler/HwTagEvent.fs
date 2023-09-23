@@ -8,7 +8,7 @@ module HwTagEventModule =
     
     let CreateHwTagEvent(devices, hwTags:IHwTag seq) =
 
-        let hwTagValueChanged = new Event<IHwTag>()
+        //let hwTagValueChanged = new Event<IHwTag>()
         let dicTag = hwTags |> Seq.groupBy(fun t-> t.GetDeviceAddress())
                             |> dict
 
@@ -19,13 +19,13 @@ module HwTagEventModule =
                     let hwTags = dicTag[key]
                     hwTags |>Seq.iter (fun t->
                         t.Value <- args.Value
-                        hwTagValueChanged.Trigger t)
+                       (* hwTagValueChanged.Trigger t*))
                 else 
                     System.Diagnostics.Debug.WriteLine $"{key} has been changed, but this tag has not been assigned to DS Tag."
                 ) |>ignore
 
         MemoryIOEventImpl.create devices
-        hwTagValueChanged.Publish
+        //hwTagValueChanged.Publish
 
 
     let RunTagEvent() =

@@ -40,14 +40,14 @@ namespace IOMapViewer
 
 
             gridControl1.DataSource = m.GetMemoryAsDataTable();
-            var evt = HwTagEventModule.CreateHwTagEvent(new string[] { m.Device }, new  List<IHwTag>());
-            evt.Subscribe(args =>
-            {
-                if(args.Value is bool)
-                    Debug.WriteLine($"{args}  BitIndex");
-                if (args.Value is UInt64)              
-                    Debug.WriteLine($"{args}  UInt64Index");
-            });
+            /*var evt =*/ HwTagEventModule.CreateHwTagEvent(new string[] { m.Device }, new  List<IHwTag>());
+            //evt.Subscribe(args =>
+            //{
+            //    if(args.Value is bool)
+            //        Debug.WriteLine($"{args}  BitIndex");
+            //    if (args.Value is UInt64)              
+            //        Debug.WriteLine($"{args}  UInt64Index");
+            //});
             Task.Run(() => HwTagEventModule.RunTagEvent());
         }
 

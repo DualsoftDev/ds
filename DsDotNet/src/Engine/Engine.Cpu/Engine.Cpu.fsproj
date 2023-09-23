@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<OutputType>Library</OutputType>
-		<TargetFramework>net7.0-windows</TargetFramework>
+		<TargetFrameworks>net7.0-windows;net48</TargetFrameworks>
 		<RootNamespace>Engine.Cpu</RootNamespace>
 		<LangVersion>7.0</LangVersion>
+		<OutputType>Library</OutputType>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
-        <OtherFlags>--warnon:1182</OtherFlags>
+		<OtherFlags>--warnon:1182</OtherFlags>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -16,8 +16,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
-		<ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
+	  <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
 	</ItemGroup>
 
 </Project>

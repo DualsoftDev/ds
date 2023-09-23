@@ -15,12 +15,8 @@ module HwTagModule =
             member _.Name = baseTag.Name
             member _.Address = baseTag.Address
             member _.MemoryName = memoryName
-            member _.Value 
-                with get() = box baseTag.BoxedValue 
-                and set v = 
-                    baseTag.BoxedValue <- v
-                    HwTagWriteModule.WriteAction(this:> IHwTag);
-
+            member _.Value with get() = box baseTag.BoxedValue and set v =  baseTag.BoxedValue <- v
+            member _.ActionOutput() =  HwTagWriteModule.WriteAction(this:> IHwTag);
             member _.GetTarget() = baseTag.Target.Value
             member _.GetDeviceAddress() = @$"{memoryName}{baseTag.BoxedValue.GetType().Name}{index}"  //ex DW123 , IB6235, IX123  디바이스 타입은 hw maker별로 자유롭게
             member _.GetTagAddress() = baseTag.Address

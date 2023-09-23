@@ -7,6 +7,7 @@
 		<IsPackable>false</IsPackable>
 		<GenerateProgramFile>false</GenerateProgramFile>
 		<NoWarn>NU1702</NoWarn>
+		<RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -29,6 +30,12 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\IOMap\IOMapApi\IOMapApi.fsproj" />
+		<ProjectReference Include="..\..\IOMap\IOMapForModeler\IOMapForModeler.fsproj" />
 		<ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
 	</ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Command="copy $(SolutionDir)bin\net7.0-windows\IOMapService_delete.bat $(TargetDir)IOMapService_delete.bat" />
+	</Target>
+
 </Project>

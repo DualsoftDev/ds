@@ -15,7 +15,7 @@ module XgiFixtures =
     type XgiTestBaseClass() =
         inherit TestBaseClass("EngineLogger")
         do
-            Engine.CodeGenCPU.ModuleInitializer.Initialize()
+            //Engine.CodeGenCPU.ModuleInitializer.Initialize()
             autoVariableCounter <- 0
 
         let mutable runtimeTarget = RuntimeDS.Target

@@ -2,15 +2,14 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>net7.0-windows;net48</TargetFrameworks>
-		<RootNamespace>Engine.Base</RootNamespace>
+		<RootNamespace>Engine.Core</RootNamespace>
+		<OutputType>Library</OutputType>
 		<LangVersion>7.0</LangVersion>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
     </PropertyGroup>
 
-	<ItemGroup>
-	  <None Remove="C:\Users\kwak\.nuget\packages\fsharp.core\6.0.6\contentFiles\any\netstandard2.0\FSharp.Core.xml" />
-	</ItemGroup>
+
 
 	<ItemGroup>
 		<Compile Include="Constants.fs" />

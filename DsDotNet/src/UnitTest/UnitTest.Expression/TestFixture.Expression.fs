@@ -17,5 +17,5 @@ module ExpressionFixtures =
     type ExpressionTestBaseClass() =
         inherit TestBaseClass("EngineLogger")
         do
-            Engine.CodeGenCPU.ModuleInitializer.Initialize()
+            //Engine.CodeGenCPU.ModuleInitializer.Initialize()
             setRuntimeTarget XGI |> ignore

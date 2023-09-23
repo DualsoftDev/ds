@@ -17,11 +17,10 @@ module ScanImpl =
 
         let conn = XGTConnection(ip);
        
-        let deviceCPUInfos = DeviceSize.GetCPUInfos cpu 
         let memorySet = 
-
+            let mInfos = HwModelManager.GetMemoryInfos(cpu) 
             let createResults = 
-                DeviceSize.GetMemoryInfos(cpu) 
+                mInfos
                 |> Seq.map(fun (d, path)->
                     let size =  d.nSizeWord*2
                     path, MemoryIOManager.Create(path, size))
@@ -37,7 +36,7 @@ module ScanImpl =
             then                    // new memory set created 되면 1초 대기
                 Thread.Sleep(1000)  // IOMapService  로딩 대기 1초 간격으로 신규파일 자동로딩
 
-            DeviceSize.GetMemoryInfos cpu
+            mInfos
             |>Seq.map(fun (d, key) -> d.strDevice, MemoryIO(@$"{key}"))
             |> dict
        
@@ -78,11 +77,11 @@ module ScanImpl =
             conn.Connect() |> ignore
 
         member x.DoScan() = 
-            deviceCPUInfos 
-            |> Seq.where(fun device -> ["I";"Q";"M";"R"]|>Seq.contains device.strDevice)
-            |> Seq.iter(fun device ->
-                let maxByte = device.nSizeWord * 2
-                let dName = device.strDevice
+            memorySet 
+            |> Seq.where(fun m -> ["I";"Q";"M";"R"]|>Seq.contains m.Key)
+            |> Seq.iter(fun m ->
+                let maxByte = m.Value.MemorySize
+                let dName = m.Key
                 //Console.WriteLine($"strDevice {dName}, offset {0}, maxSizeByte {maxSizeByte}")
 
                 //for i=0 to maxByte/512 do

@@ -1,4 +1,4 @@
-﻿namespace IOMapApi
+namespace IOMapApi
 
 open System
 open System.IO
@@ -10,9 +10,14 @@ module MemoryUtilImpl =
     let mutable TestMode = false
 
     let BasePath =
+        let path = 
             Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
             "Dualsoft", "MemoryFile")
+        
+        if not (Directory.Exists(path)) then
+            Directory.CreateDirectory(path) |> ignore
+        path
 
     let LogDirectory = Path.Combine(BasePath, "Log")
 

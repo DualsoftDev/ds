@@ -31,4 +31,8 @@
 		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.3" />
 		<PackageReference Include="log4net" Version="2.0.15" />
 	</ItemGroup>
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Command="copy $(ProjectDir)DeviceSizeInfo.csv $(TargetDir)DeviceSizeInfo.csv" />
+		<Exec Command="copy $(ProjectDir)PLCTypeList.csv $(TargetDir)PLCTypeList.csv" />
+	</Target>
 </Project>

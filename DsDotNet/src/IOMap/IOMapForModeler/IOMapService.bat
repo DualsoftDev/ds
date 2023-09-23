@@ -9,46 +9,46 @@ if %errorLevel% == 0 (
     exit
 )
 
-REM ¼­ºñ½º ÀÌ¸§ ¼³Á¤
+REM ì„œë¹„ìŠ¤ ì´ë¦„ ì„¤ì •
 set SERVICE_NAME=IOMapService
 
-REM ¼­ºñ½º°¡ Á¸ÀçÇÏ´ÂÁö È®ÀÎ
+REM ì„œë¹„ìŠ¤ê°€ ì¡´ì¬í•˜ëŠ”ì§€ í™•ì¸
 sc query %SERVICE_NAME% >nul 2>&1
 if %ERRORLEVEL% neq 0 (
     echo The service %SERVICE_NAME% does not exist.
     
 )
 
-REM ¼­ºñ½º ÁßÁö
+REM ì„œë¹„ìŠ¤ ì¤‘ì§€
 echo Stopping the service %SERVICE_NAME%...
 sc stop %SERVICE_NAME%
 
-REM ¼­ºñ½º°¡ ¿ÏÀüÈ÷ ÁßÁöµÉ ¶§±îÁö ´ë±â (¿¹: 2ÃÊ ´ë±â)
+REM ì„œë¹„ìŠ¤ê°€ ì™„ì „íˆ ì¤‘ì§€ë  ë•Œê¹Œì§€ ëŒ€ê¸° (ì˜ˆ: 2ì´ˆ ëŒ€ê¸°)
 timeout /t 2 /nobreak
 
-REM ¼­ºñ½º »èÁ¦
+REM ì„œë¹„ìŠ¤ ì‚­ì œ
 echo Deleting the service %SERVICE_NAME%...
 sc delete %SERVICE_NAME%
 
-REM °á°ú È®ÀÎ
+REM ê²°ê³¼ í™•ì¸
 if %ERRORLEVEL% equ 0 (
     echo The service %SERVICE_NAME% was deleted successfully.
 ) else (
     echo Failed to delete the service %SERVICE_NAME%.
 )
 
-echo Data exePath: %~dp0..\..\..\bin\net48\IOMapService.exe
+echo Data exePath: %~dp0IOMapService.exe
 REM Install the service (assuming your service executable is named IOMap.exe)
-sc create %SERVICE_NAME% binPath= %~dp0..\..\..\bin\net48\IOMapService.exe start= auto
-REM ¼­ºñ½º°¡ ½ÇÆĞÇÒ °æ¿ì 5ÃÊ ÈÄ¿¡ ¼­ºñ½º¸¦ ÀÚµ¿À¸·Î Àç½ÃÀÛÇÕ´Ï´Ù. reset= 60Àº 60ÃÊ µ¿¾È ¹®Á¦°¡ ¹ß»ıÇÏÁö ¾ÊÀ» °æ¿ì ½ÇÆĞ Ä«¿îÅÍ¸¦ Àç¼³Á¤
+sc create %SERVICE_NAME% binPath= %~dp0IOMapService.exe start= auto
+REM ì„œë¹„ìŠ¤ê°€ ì‹¤íŒ¨í•  ê²½ìš° 5ì´ˆ í›„ì— ì„œë¹„ìŠ¤ë¥¼ ìë™ìœ¼ë¡œ ì¬ì‹œì‘í•©ë‹ˆë‹¤. reset= 60ì€ 60ì´ˆ ë™ì•ˆ ë¬¸ì œê°€ ë°œìƒí•˜ì§€ ì•Šì„ ê²½ìš° ì‹¤íŒ¨ ì¹´ìš´í„°ë¥¼ ì¬ì„¤ì •
 sc failure %SERVICE_NAME% reset= 60 actions= restart/5000
 REM Start the service
 sc start %SERVICE_NAME%
 
-REM ¼­ºñ½º ¼³¸í ¼³Á¤
+REM ì„œë¹„ìŠ¤ ì„¤ëª… ì„¤ì •
 set SERVICE_DESCRIPTION=Dualsoft memory IO service 
 
-REM ¼­ºñ½º ¼³¸í ¾÷µ¥ÀÌÆ®
+REM ì„œë¹„ìŠ¤ ì„¤ëª… ì—…ë°ì´íŠ¸
 sc description %SERVICE_NAME% "%SERVICE_DESCRIPTION%"
 
 timeout /t 2 /nobreak

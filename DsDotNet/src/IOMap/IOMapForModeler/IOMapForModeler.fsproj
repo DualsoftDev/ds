@@ -9,12 +9,17 @@
 	</PropertyGroup>
   <ItemGroup>
 	  
+    <None Include="IOMapService_delete.bat" />
+	  
+    <None Include="IOMapService.bat" />
+	  
     <Compile Include="IHwTag.fs" />
     <Compile Include="HwTagWrite.fs" />
     <Compile Include="HwTag.fs" />
     <Compile Include="HwTagEvent.fs" />
     <Compile Include="HwServiceManager.fs" />
   </ItemGroup>
+  <ItemGroup />
 
   <ItemGroup>
     <PackageReference Include="System.Reactive" Version="6.0.0" />
@@ -25,5 +30,10 @@
     <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
     <ProjectReference Include="..\IOMapApi\IOMapApi.fsproj" />
   </ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Command="copy $(ProjectDir)IOMapService_delete.bat $(TargetDir)IOMapService_delete.bat" />
+		<Exec Command="copy $(ProjectDir)IOMapService.bat $(TargetDir)IOMapService.bat" />
+	</Target>
 
 </Project>

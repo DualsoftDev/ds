@@ -37,7 +37,7 @@ if %ERRORLEVEL% equ 0 (
     echo Failed to delete the service %SERVICE_NAME%.
 )
 
-echo Data exePath: %~dp0..\..\..\bin\net48\IOMapService.exe
+echo Data exePath: %~dp0IOMapService.exe
 
 
 echo end!

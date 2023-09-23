@@ -10,10 +10,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="PLCTypeList.csv" />
-		<None Include="DeviceSizeInfoForComm.csv" />
 		<Compile Include="Connect.fs" />
-		<Compile Include="DeviceSizeInfo.fs" />
 		<Compile Include="ScanIO.fs" />
 		<Compile Include="Program.fs" />
 	</ItemGroup>

@@ -37,8 +37,12 @@ let GetModelName(cpuId:int) =
     //| _ -> failwith "ERROR"
     $"CpuID: {cpuId}"
 
-let pathDevice = Path.Combine(__SOURCE_DIRECTORY__, "DeviceSizeInfo.csv")
-let pathCpu    = Path.Combine(__SOURCE_DIRECTORY__, "PLCTypeList.csv")
+
+
+let pathDevice = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "DeviceSizeInfo.csv")
+let pathCpu    = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "PLCTypeList.csv")
+//let pathDevice = Path.Combine(__SOURCE_DIRECTORY__, "DeviceSizeInfo.csv")
+//let pathCpu    = Path.Combine(__SOURCE_DIRECTORY__, "PLCTypeList.csv")
 let folderNfile m d = @$"LS Electric\{m.strPLCType.Split('-')[0]}\{d.strDevice}"
     
 let parseCSV filePath =

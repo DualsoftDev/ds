@@ -1,4 +1,4 @@
-﻿namespace IOMapApi
+namespace IOMapApi
 
 open System
 open System.Data
@@ -19,8 +19,6 @@ module MemoryIOApi =
         let path = Path.Combine(MemoryUtilImpl.BasePath, $@"{device}")
         let filesize = FileInfo(path).Length |> int
         
-        let bitSize = 8
-
         let semaphore = match Semaphore.TryOpenExisting(MemoryUtilImpl.getSemaphoreKey device)
                         with true, s -> s 
                              | _ -> new Semaphore(1, 1, MemoryUtilImpl.getSemaphoreKey device)

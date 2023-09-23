@@ -14,10 +14,8 @@ namespace IOMapViewer
 {
     public partial class FormView : DevExpress.XtraEditors.XtraForm
     {
-
-        //  string testMemory = @"TEST";
-
-        MemoryIO m = new MemoryIO(@"LS Electric\XGI\R");
+        MemoryIO m = new MemoryIO(@"UnitTest\A");
+        
 
         public FormView()
         {
@@ -25,7 +23,6 @@ namespace IOMapViewer
         }
         private void ViewForm_Load(object sender, EventArgs e)
         {
-
             Task.Run(() =>
             {
                 string processName = "IOMap.LS";

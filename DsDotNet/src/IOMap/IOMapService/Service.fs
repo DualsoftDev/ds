@@ -1,4 +1,4 @@
-﻿namespace DsMemoryService
+namespace DsMemoryService
 
 open System.IO
 open System.Reactive
@@ -13,21 +13,36 @@ open System.Collections.Generic
 open IOMapApi.MemoryIOEventImpl
 open IOMapApi.MemoryUtilImpl
 open System.Diagnostics
+open MMFSecurity
+open Microsoft.Win32.SafeHandles
 
 type MMF = MemoryMappedFile
 
 module ServiceImpl =
 
-    let getMMFSecurity() =  //MemoryMappedFileSecurity 이것때문에 net48로 구동중
-        let mmfSec = MemoryMappedFileSecurity()
-        mmfSec.AddAccessRule(
-            AccessRule<MemoryMappedFileRights>(
-                SecurityIdentifier(WellKnownSidType.WorldSid, null), 
-                MemoryMappedFileRights.ReadWrite, 
-                AccessControlType.Allow)
-        )
-        mmfSec
 
+//net48로 구동 방법
+    //let getMMFSecurity() =  //MemoryMappedFileSecurity 이것때문에 net48로 구동중
+    //    let mmfSec = MemoryMappedFileSecurity()
+    //    mmfSec.AddAccessRule(
+    //        AccessRule<MemoryMappedFileRights>(
+    //            SecurityIdentifier(WellKnownSidType.WorldSid, null), 
+    //            MemoryMappedFileRights.ReadWrite, 
+    //            AccessControlType.Allow)
+    //    )
+    //    mmfSec
+    //let filePath = Path.Combine(MemoryUtilImpl.BasePath, $@"{device}")
+            //use fs = new FileStream(filePath, FileMode.Open)
+            //MMF.CreateFromFile(filePath, FileMode.Open, getMMFName device)  //권한 생략
+            // 메모리 맵 파일 생성
+            //MMF.CreateFromFile(
+            //    fs,
+            //    getMMFName device,
+            //    fs.Length,
+            //    MemoryMappedFileAccess.ReadWrite, 
+            //    getMMFSecurity(),
+            //    HandleInheritability.None, 
+            //    leaveOpen = true)  
     
     type IOMapService() =
         inherit ServiceBase(ServiceName = "IOMapService")
@@ -38,24 +53,13 @@ module ServiceImpl =
 
         let log msg = File.AppendAllText(logPath,$"{System.DateTime.Now} : {msg}\n")
         let load(device: string) =
-            let filePath = Path.Combine(MemoryUtilImpl.BasePath, $@"{device}")
-            use fs = new FileStream(filePath, FileMode.Open)
-           
-            //MMF.CreateFromFile(filePath, FileMode.Open, getMMFName device)  //권한 생략
-            // 메모리 맵 파일 생성
-            MMF.CreateFromFile(
-                fs,
-                getMMFName device,
-                fs.Length,
-                MemoryMappedFileAccess.ReadWrite, 
-                getMMFSecurity(),
-                HandleInheritability.None, 
-                leaveOpen = true)  
+            
 
+            CreateFileMappingApplySecurity device
 
         let cts = new CancellationTokenSource()
         
-        let loaded = new Dictionary<string, MemoryMappedFile>()
+        let loaded = new Dictionary<string, IntPtr>()
         let loadFiles xs  =
             xs |> Array.map (fun f-> f, load f)
                |> Array.iter(fun (f,m) -> loaded.Add(f,m))
@@ -65,8 +69,8 @@ module ServiceImpl =
                 try
                     while not cts.IsCancellationRequested
                         do
-                        let handles = String.Join(", ", loaded |>Seq.map(fun d->d.Key))
-                        log $"LoadedFiles: {handles}"
+                        let names = String.Join(", ", loaded |>Seq.map(fun d->d.Key))
+                        log $"LoadedFiles: {names}"
                         log "IOMapService is running."
                         do! Async.Sleep(60000) //  60초 간격으로 로그 출력
 

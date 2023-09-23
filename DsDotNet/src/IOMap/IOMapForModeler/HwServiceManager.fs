@@ -19,10 +19,11 @@ module HwServiceManagerImpl =
     let private getServiceStatus(serviceName: string) =
         let services = ServiceController.GetServices()
         services |> Array.tryFind (fun s -> s.ServiceName = serviceName)
+    
+    let serviceName = "IOMapService"
 
     let IOMapServiceRun() =
-        let serviceName = "IOMapService"
-        let batFilePath = Path.Combine(__SOURCE_DIRECTORY__, "IOMapServiceNet48.bat")
+        let batFilePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "IOMapService.bat")
         match getServiceStatus(serviceName) with
         | Some(service) when service.Status <> ServiceControllerStatus.Running -> waitForServiceWithBat(batFilePath)
         | Some(_) -> Console.WriteLine($"IOMapService is already running.")
@@ -31,8 +32,7 @@ module HwServiceManagerImpl =
             waitForServiceWithBat(batFilePath)
 
     let IOMapServiceDelete() =
-        let serviceName = "IOMapService"
-        let batFilePath = Path.Combine(__SOURCE_DIRECTORY__, "IOMapServiceNet48 - delete.bat")
+        let batFilePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "IOMapService_delete.bat")
         match getServiceStatus(serviceName) with
         | Some(_) -> waitForServiceWithBat(batFilePath)
         | None -> Console.WriteLine($"{serviceName} not found. Attempting to delete using BAT file.")

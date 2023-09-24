@@ -164,3 +164,13 @@ module TagKindModule =
             |EventVertex (tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
             |EventApiItem(tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
             |EventAction (tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
+        
+        
+        [<Extension>]
+        static member IsStatusTag(x:TagDS) =
+            match x with
+            |EventVertex (_, _, kind) -> kind = VertexTag.ready
+                                          || kind = VertexTag.going
+                                          || kind = VertexTag.finish
+                                          || kind = VertexTag.homing
+            |_->false

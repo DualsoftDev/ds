@@ -23,8 +23,10 @@ module PPTDocModule =
     let getSystemDirectoryName(path:string) = FileInfo(path).DirectoryName
     let getSystemName(name:string) =
         let fileName = Path.GetFileNameWithoutExtension(name)
+        if fileName.Contains(" ")            
+        then Office.ErrorPPT(ErrorCase.Name, ErrID._57, $"{fileName}", 0)
         if fileName.IsQuotationRequired()
-        then Office.ErrorPPT(ErrorCase.Name, ErrID._44, $"SystemNamePath : {name}", 0, $"SystemName : {fileName}")
+        then Office.ErrorPPT(ErrorCase.Name, ErrID._58, $"{fileName}", 0)
         fileName
 
     let updateAliasPPT (

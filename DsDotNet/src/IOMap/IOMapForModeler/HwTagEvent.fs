@@ -12,7 +12,7 @@ module HwTagEventModule =
         let dicTag = hwTags |> Seq.groupBy(fun t-> t.GetDeviceAddress())
                             |> dict
 
-        MemoryIOEventImpl.MemoryChanged.Publish.Subscribe(fun args -> 
+        let evt = MemoryIOEventImpl.MemoryChanged.Publish.Subscribe(fun args -> 
                 let key = args.GetDeviceAddress()
                 if dicTag.ContainsKey(key) 
                 then 
@@ -22,10 +22,10 @@ module HwTagEventModule =
                        (* hwTagValueChanged.Trigger t*))
                 else 
                     System.Diagnostics.Debug.WriteLine $"{key} has been changed, but this tag has not been assigned to DS Tag."
-                ) |>ignore
+                )
 
         MemoryIOEventImpl.create devices
-        //hwTagValueChanged.Publish
+        evt
 
 
     let RunTagEvent() =

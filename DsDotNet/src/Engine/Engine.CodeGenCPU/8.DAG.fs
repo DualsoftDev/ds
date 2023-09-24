@@ -13,11 +13,12 @@ type VertexManager with
         let real = v.Vertex :?> Real
         let v = v :?> VertexMReal
         let coins = real.Graph.Inits.Select(getVM)
-        let sets = v.RR.Expr
+        let sets = v.RR.Expr <&&>  v.G.Expr
         [
             for coin in coins do
                 let coin = coin :?> VertexMCoin
-                yield (sets, coin.CR.Expr <||> !!v.Flow.dop.Expr) ==| (coin.ST, getFuncName())
+                let rsts = coin.CR.Expr <||>coin.RT.Expr <||> !!v.Flow.dop.Expr
+                yield (sets, rsts) ==| (coin.ST, getFuncName())
         ]
 
     member v.D2_DAGTailStart(): CommentedStatement list =
@@ -26,8 +27,9 @@ type VertexManager with
         [
             for coin in coins do
                 let coin = coin :?> VertexMCoin
-                let sets = coin.GetWeakStartDAGAndCausals()
-                yield (sets, coin.CR.Expr <||> !!v.Flow.dop.Expr) ==| (coin.ST, getFuncName() )
+                let sets = coin.GetWeakStartDAGAndCausals()  <&&>  v.G.Expr
+                let rsts = coin.CR.Expr <||>coin.RT.Expr <||> !!v.Flow.dop.Expr
+                yield (sets, rsts) ==| (coin.ST, getFuncName() )
         ]
 
 
@@ -37,8 +39,8 @@ type VertexManager with
         [
             for child in children do
                 let child = child :?> VertexMCoin
-                let sets = child.ST.Expr <&&> child.ET.Expr
-                let rsts = child.H.Expr
+                let sets = child.ST.Expr <&&> child.ET.Expr<&&> real.V.G.Expr
+                let rsts = child.RT.Expr
                 yield (sets, rsts) ==| (child.CR, getFuncName() )
         ]
 
@@ -49,7 +51,7 @@ type VertexManager with
         [
             for child in children do
                 let child = child :?> VertexMCoin
-                let sets = real.V.H.Expr
+                let sets = real.V.RP.Expr
                 let rsts = child.R.Expr
                 yield (sets, rsts) ==| (child.RT, getFuncName() )
         ]

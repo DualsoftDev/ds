@@ -37,10 +37,15 @@ module ImportViewModule =
                                     newNode.AddEdge(ModelingEdgeInfo<ViewNode>(dicV.[src], edge.EdgeSymbol, dicV.[edge.Targets[0]])) |>ignore)
             )
         if newNode.DummyEdgeAdded   |> not 
-        then real.GetDummyEdgeReal(dummys, dicV, dicDummy) |> Seq.iter(fun e->  newNode.AddEdge(e) |>ignore )
+        then 
+            let es = real.GetDummyEdgeReal(dummys, dicV, dicDummy)
+            es |> Seq.iter(fun e-> newNode.AddEdge(e) |>ignore)
+        
            
         if newNode.DummySingleAdded   |> not 
-        then real.GetDummySingleReal(dummys, dicV, dicDummy) |> Seq.iter(fun e->  newNode.AddSingles(e) |>ignore )
+        then 
+            let ss =  real.GetDummySingleReal(dummys, dicV, dicDummy) 
+            ss |> Seq.iter(fun v-> newNode.AddSingles(v) |>ignore)
            
 
     let ConvertFlow(flow:Flow, dummys:pptDummy seq)  =
@@ -83,8 +88,11 @@ module ImportViewModule =
                                     newNode.AddEdge(ModelingEdgeInfo<ViewNode>(dicV.[src], edge.EdgeSymbol, dicV.[edge.Targets[0]])) |>ignore)
             )
 
-        flow.GetDummyEdgeFlow(dummys, dicV, dicDummy) |> Seq.iter(fun e-> newNode.AddEdge(e) |>ignore)
-        flow.GetDummySingleFlow(dummys, dicV, dicDummy) |> Seq.iter(fun v-> newNode.AddSingles(v) |>ignore)
+
+        let es = flow.GetDummyEdgeFlow(dummys, dicV, dicDummy)
+        let ss =  flow.GetDummySingleFlow(dummys, dicV, dicDummy) 
+        es |> Seq.iter(fun e-> newNode.AddEdge(e) |>ignore)
+        ss |> Seq.iter(fun v-> newNode.AddSingles(v) |>ignore)
         
 
         newNode

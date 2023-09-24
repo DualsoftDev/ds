@@ -10,7 +10,7 @@ type VertexMReal with
 
     member v.R1_RealInitialStart(): CommentedStatement  =
         let set = v.G.Expr <&&> v.OG.Expr
-        let rst = v.H.Expr
+        let rst = v.RP.Expr
 
         (set, rst) ==| (v.RR, getFuncName())
 

@@ -43,7 +43,7 @@ module ImportIOTable =
             let updateDev(row:Data.DataRow, tableIO:Data.DataTable) =
                 let devName  = $"{row.[(int)IOColumn.Name]}"
                 if not <| dicJob.ContainsKey(devName)
-                then Office.ErrorXLS(ErrorCase.Name, ErrID._1006, tableIO.TableName,  $"오류 이름 {devName}.")
+                then Office.ErrorXLS(ErrorCase.Name, ErrID._1006, tableIO.TableName,  $"{devName}.")
                 let dev = dicJob.[devName]
                 dev.InAddress  <- $"{row.[(int)IOColumn.Input]}" |> autoFillAddress
                 dev.OutAddress <- $"{row.[(int)IOColumn.Output]}"|> autoFillAddress

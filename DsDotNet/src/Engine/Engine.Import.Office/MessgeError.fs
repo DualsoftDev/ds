@@ -59,7 +59,7 @@ module ErrID =
     let _42 = "Api TXs~Rxs 이름이 소속된 Flow가 없습니다."
 
     let _43 = "Api 지시/관찰 구성은 '~' 으로 구분합니다. ex) ApiName[TXs ~ RXs]"
-    let _44 = "System 이름 시작은 특수문자 및 숫자는 불가능합니다.(이름 내부에 공백 미지원)"
+    let _44 = "spare"
     let _45 = "System 인터페이스 순환관계가 존재합니다."
     let _46 = "CallDev 이름은 '.' 으로 구분되어야 합니다.(ex: systemA.Inferface3)"
     let _47 = "호출 Interface에 해당하는 대상 시스템이 없습니다."
@@ -72,6 +72,8 @@ module ErrID =
     let _54 = "다른 Flow의 Work 정의는 '.' 기호로 나타냅니다. ex) Flow2.Work3"
     let _55 = "외부 시스템(CPU)은  호출은 '$' 기호로 나타냅니다. ex) System(CPU)$SystemApiName"
     let _56 = "외부 시스템(Device) 호출은 '$' 기호로 나타냅니다. ex) System(Device)$DeviceApiName"
+    let _57 = "PPT 파일이름 공백발견, 다른이름저장이 필요합니다."
+    let _58 = "System 이름 시작은 특수문자 및 숫자는 불가능합니다."
 
     // Excel Error (1001 ~ )
     let _1001 = "시스템에 버튼 이름이 없습니다."
@@ -107,11 +109,11 @@ module MessgeError =
             let itemName =  if(userMsg.IsSome && (userMsg.Value = ""|>not))
                             then $"[Page{page}:{objName}({userMsg.Value})"
                             else $"[Page{page}:{objName}"
-            failwithf  $"[{case.ToText()}] {msg} \t\t{itemName}]"
+            failwithf  $"[{case.ToText()}] {msg} \t{itemName}"
 
         [<Extension>]
         static member ErrorXLS(case:ErrorCase, msg:string,  objName:string, tabName:string, ?userMsg:string) =
             let itemName =  if(userMsg.IsSome && (userMsg.Value = ""|>not))
-                            then $"[Sheet {tabName}:{objName}({userMsg.Value})"
-                            else $"[Sheet {tabName}:{objName}"
-            failwithf  $"[{case.ToText()}] {msg} \t\t{itemName}]"
+                            then $"{objName}({userMsg.Value})"
+                            else $"{objName}"
+            failwithf  $"[{case.ToText()}] {msg} \t{itemName}"

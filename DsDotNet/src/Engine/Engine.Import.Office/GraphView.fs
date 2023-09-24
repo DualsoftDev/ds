@@ -18,6 +18,17 @@ module rec ViewModule =
         let edges = HashSet<ModelingEdgeInfo<ViewNode>>()
         let singles = HashSet<ViewNode>()
 
+
+        let usedViewNodes() =        
+            let thisChildren  = edges |> Seq.collect(fun e-> e.Sources @ e.Targets)
+                                        |> Seq.append singles
+            [
+                yield! thisChildren
+                yield! thisChildren |> Seq.collect(fun x->x.UsedViewNodes)
+
+            ] |> Seq.distinct
+
+
         new (name, viewType) = ViewNode(name, viewType, None, None, None, None)
         new (coreVertex:Vertex) =
               let name, vType =
@@ -83,16 +94,12 @@ module rec ViewModule =
                          else $"{name};{x.GetHashCode()}"
 
         [<Browsable(false)>]
-        member x.UsedViewNodes =
-                            let thisChildren  = edges |> Seq.collect(fun e-> e.Sources @ e.Targets)
-                                                        |> Seq.append singles
-                            [
-                                yield! thisChildren
-                                yield! thisChildren |> Seq.collect(fun x->x.UsedViewNodes)
-                            ] |> Seq.distinct
+        member x.UsedViewNodes = usedViewNodes()
 
         [<Browsable(false)>]
-        member x.UsedViewVertexNodes(newDic:bool) =
+        member x.UsedViewVertexNodes() = x.UsedViewVertexNodes(false)
+        [<Browsable(false)>]
+        member private x.UsedViewVertexNodes(newDic:bool) =
                         if newDic || dicUsedVertex.Count = 0  //성능 때문에 한번만 만듬 //Edges  Singles 업데이트될 경우 같이 업데이트 필요
                         then
                             dicUsedVertex.Clear()
@@ -128,14 +135,19 @@ type ViewModuleExt =
     static member GetDummyEdgeFlow(flow:Flow, dummys:pptDummy seq, dicV:IDictionary<Vertex, ViewNode>, dicDummy:IDictionary<string, ViewNode>) =
             dummys
             |> Seq.filter(fun dummy  -> dummy.GetParent().GetCore() = flow)
-            |> Seq.collect(fun dummy -> dummy.Edges
+            |> Seq.collect(fun dummy -> dummy.DummyEdges
                                         |> Seq.map(fun edge -> getViewEdge(edge, dummy, dummys, dicV, dicDummy)))
 
     [<Extension>]
     static member GetDummySingleFlow(flow:Flow, dummys:pptDummy seq, dicV:IDictionary<Vertex, ViewNode>, dicDummy:IDictionary<string, ViewNode>) =
+            let connectedDummys =
+                dummys |> Seq.collect(fun d->d.DummyEdges) 
+                       |> Seq.collect(fun e->[e.Sources[0];e.Targets[0]])
+                       |> Seq.distinct
+
             dummys
             |> Seq.filter(fun dummy  -> dummy.GetParent().GetCore() = flow)
-            |> Seq.filter(fun dummy  -> not <| dummy.Edges.any())
+            |> Seq.filter(fun dummy  -> not <| connectedDummys.Contains(dummy.DummyNodeKey))
             |> Seq.map(fun dummy ->
                     let viewNode = ViewNode("", ViewType.VDUMMY)
                     dummy.Members |> Seq.iter(fun f-> viewNode.AddSingles(dicV.[f])|>ignore)
@@ -148,13 +160,19 @@ type ViewModuleExt =
     static member GetDummyEdgeReal(real:Real, dummys:pptDummy seq, dicV:IDictionary<Vertex, ViewNode>, dicDummy:IDictionary<string, ViewNode>) =
             dummys
             |> Seq.filter(fun dummy  -> dummy.GetParent().GetCore() = real)
-            |> Seq.collect(fun dummy -> dummy.Edges
+            |> Seq.collect(fun dummy -> dummy.DummyEdges
                                         |> Seq.map(fun edge -> getViewEdge(edge, dummy, dummys, dicV, dicDummy)))
     [<Extension>]
     static member GetDummySingleReal(real:Real, dummys:pptDummy seq, dicV:IDictionary<Vertex, ViewNode>, dicDummy:IDictionary<string, ViewNode>) =
+            let connectedDummys =
+                dummys |> Seq.collect(fun d->d.DummyEdges) 
+                       |> Seq.collect(fun e->[e.Sources[0];e.Targets[0]])
+                       |> Seq.distinct
+
+
             dummys
             |> Seq.filter(fun dummy  -> dummy.GetParent().GetCore() = real)
-            |> Seq.filter(fun dummy  -> not <| dummy.Edges.any())
+            |> Seq.filter(fun dummy  -> not <| connectedDummys.Contains(dummy.DummyNodeKey))
             |> Seq.map(fun dummy ->
                     let viewNode = ViewNode("", ViewType.VDUMMY)
                     dummy.Members |> Seq.iter(fun f-> viewNode.AddSingles(dicV.[f])|>ignore)

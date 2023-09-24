@@ -466,7 +466,7 @@ namespace Diagram.View.MSAGL
         {
             if (newStatus == Status4.Ready)
             {
-                node.Attr.FillColor = Color.DarkOliveGreen;
+                node.Attr.FillColor = Color.DarkGreen;
             }
             else if (newStatus == Status4.Going)
             {

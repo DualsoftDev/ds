@@ -21,7 +21,7 @@ module PPTDummyModule =
 
         member x.Page = page
         member x.DummyNodeKey = dummyNode
-        member x.Edges = dummyEdges
+        member x.DummyEdges = dummyEdges
         member x.Members = vertices
 
         member x.GetVertex(name:string) =

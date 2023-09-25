@@ -31,7 +31,11 @@ module TagManagerModule =
 
         let startTagBit   = createTag "ST"   VertexTag.startTag
         let resetTagBit   = createTag "RT"   VertexTag.resetTag
-        let endTagBit     = createTag "ET"   VertexTag.endTag
+        let endTagBit     =
+            let et = createTag "ET"   VertexTag.endTag
+            if v :? Real && (v :?> Real).Finished
+            then et.Value <- true           
+            et
         let originBit     = createTag "OG"   VertexTag.origin
         let pauseBit      = createTag "PA"   VertexTag.pause
         let errorTxBit    = createTag "E1"   VertexTag.errorTx

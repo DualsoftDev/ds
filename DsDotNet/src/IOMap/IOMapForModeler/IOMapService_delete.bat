@@ -39,6 +39,7 @@ if %ERRORLEVEL% equ 0 (
 
 echo Data exePath: %~dp0IOMapService.exe
 
+timeout /t 2 /nobreak
 
 echo end!
 REM pause

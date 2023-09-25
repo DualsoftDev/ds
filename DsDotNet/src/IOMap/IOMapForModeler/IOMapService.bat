@@ -51,7 +51,7 @@ set SERVICE_DESCRIPTION=Dualsoft memory IO service
 REM 서비스 설명 업데이트
 sc description %SERVICE_NAME% "%SERVICE_DESCRIPTION%"
 
-timeout /t 20 /nobreak
+timeout /t 2 /nobreak
 
 echo end!
 REM  pause

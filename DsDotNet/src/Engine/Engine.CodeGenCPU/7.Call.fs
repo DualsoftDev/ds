@@ -15,7 +15,7 @@ type VertexMCoin with
         let forceStarts = ([coin.SF] @ sharedCalls.SFs()).ToOr()
 
                           
-        let interlockPE (td:TaskDev) = if td.ApiItem.RXs.any() then  td.ApiItem.PE.Expr else coin._off.Expr
+        //let interlockPE (td:TaskDev) = if td.ApiItem.RXs.any() then  td.ApiItem.PE.Expr else coin._off.Expr
         let getStartPointExpr(coin:CallDev, td:TaskDev) =
             match coin.Parent.GetCore() with
             | :? Real as r ->
@@ -35,9 +35,9 @@ type VertexMCoin with
                            <&&>
                            !!td.MutualReset(coin.System).Select(fun f -> f.ApiItem.PS)
                                .ToAndElseOff(coin.System)
-                           <&&>
-                           !!(interlockPE td)
-
+                           //<&&>
+                           //!!(interlockPE td)
+                            
                 //let rsts = (dop <&&> coin.CR.Expr)
                 //           <||> (mop  <&&> coin.ET.Expr)
 

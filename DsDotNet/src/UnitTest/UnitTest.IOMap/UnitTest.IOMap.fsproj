@@ -35,7 +35,7 @@
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="copy $(SolutionDir)bin\net7.0-windows\IOMapService_delete.bat $(TargetDir)IOMapService_delete.bat" />
+		<Exec Command="copy $(SolutionDir)bin\net7.0\IOMapService_delete.bat $(TargetDir)IOMapService_delete.bat" />
 	</Target>
 
 </Project>

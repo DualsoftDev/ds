@@ -78,29 +78,19 @@ module CoreModule =
             |> verifyM $"중복된 로드된 시스템 이름 [{childSys.Name}]"
             addApiItemsForDevice childSys
 
-        [<Browsable(false)>]
         member _.ReferenceSystems = loadedSystems.Select(fun s -> s.ReferenceSystem)
-        [<Browsable(false)>]
         member _.LoadedSystems = loadedSystems |> seq
         member _.Devices = loadedSystems.OfType<Device>() |> Seq.toArray 
         member _.ExternalSystems = loadedSystems.OfType<ExternalSystem>() |> Seq.toArray
-        [<Browsable(false)>]
         member _.ApiUsages = apiUsages |> seq
         member _.HostIp = hostIp
         member val Jobs = ResizeArray<Job>()
-        [<Browsable(false)>]
         member val Flows = createNamedHashSet<Flow>()
-        [<Browsable(false)>]
         member val OriginalCodeBlocks = ResizeArray<string>()
-        [<Browsable(false)>]
         member val Statements = ResizeArray<Statement>()
-        [<Browsable(false)>]
         member val Variables = ResizeArray<VariableData>()
-        [<Browsable(false)>]
         member val ApiItems = createNamedHashSet<ApiItem>()
-        [<Browsable(false)>]
         member val ApiResetInfos = HashSet<ApiResetInfo>()
-        [<Browsable(false)>]
         member val StartPoints = createQualifiedNamedHashSet<Real>()
         member val internal Buttons = HashSet<ButtonDef>()
         member val internal Lamps = HashSet<LampDef>()
@@ -108,14 +98,14 @@ module CoreModule =
 
     type Flow private (name: string, system: DsSystem) =
         inherit FqdnObject(name, system)
-        [<Browsable(false)>]
+        
         member val Graph = DsGraph()
-        [<Browsable(false)>]
+        
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
-        [<Browsable(false)>]
+        
         member val AliasDefs = Dictionary<Fqdn, AliasDef>(nameComponentsComparer())
 
-        [<Browsable(false)>]
+        
         member x.System = system
 
         static member Create(name: string, system: DsSystem) =
@@ -170,11 +160,11 @@ module CoreModule =
     type Vertex (names:Fqdn, parent:ParentWrapper)  =
         inherit FqdnObject(names.Combine(), parent.GetCore())
         interface INamedVertex
-        [<Browsable(false)>]
+        
         member _.Parent = parent
-        [<Browsable(false)>]
+        
         member _.PureNames = names
-        [<Browsable(false)>]
+        
         member _.ParentNPureNames = ([parent.GetCore().Name] @ names).ToArray()
         override x.GetRelativeName(_referencePath:Fqdn) = x.PureNames.Combine()
 
@@ -193,14 +183,17 @@ module CoreModule =
     type Real private (name:string, flow:Flow) =
         inherit Vertex([|name|], DuParentFlow flow)
 
-        [<Browsable(false)>]
+        
         member val Graph = DsGraph()
-        [<Browsable(false)>]
+        
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
-        [<Browsable(false)>]
+        
         member _.Flow = flow
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
+
+        member x.Finished:bool = name = "RET"  //parser 적용전까지는 임시로 사용
+        //member val Finished:bool = false with get, set
 
     and RealOtherFlow private (names:Fqdn, target:Real, parent)  =
         inherit Indirect(names, parent)
@@ -382,6 +375,7 @@ module CoreModule =
                 then [|x.Flow.Name; x.Name|]  //other flow
                 else [| x.Name |]             //my    flow
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
+
 
 
     type RealExF = RealOtherFlow

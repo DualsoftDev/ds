@@ -1,7 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0-windows</TargetFramework>
+		<TargetFramework>net7.0</TargetFramework>
 		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<LangVersion>7.0</LangVersion>
 		<OutputType>Exe</OutputType>

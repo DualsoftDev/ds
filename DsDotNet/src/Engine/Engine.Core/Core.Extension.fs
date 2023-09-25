@@ -124,7 +124,10 @@ module CoreExtensionModule =
 [<Extension>]
 type SystemExt =
     [<Extension>]
-    static member GetRecursiveLoadeds (x:DsSystem) : LoadedSystem seq  = getRecursiveLoadeds(x).Keys
+    static member GetRecursiveLoadeds (x:DsSystem) : LoadedSystem seq = getRecursiveLoadeds(x).Keys
     [<Extension>]
-    static member GetRecursiveLoadedSystems (x:DsSystem) : DsSystem seq  = getRecursiveLoadeds(x).Values
-   
+    static member GetRecursiveLoadedSystems (x:DsSystem) : DsSystem seq = getRecursiveLoadeds(x).Values
+    [<Extension>]
+    static member GetButtons (x:DsSystem, btnType:BtnType) :IEnumerable<ButtonDef> = getButtons(x, btnType)
+    [<Extension>]
+    static member GetLamps (x:DsSystem, lampType:LampType) :IEnumerable<LampDef> = getLamps(x, lampType)

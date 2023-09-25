@@ -14,22 +14,23 @@ type VertexManager with
         let real = v.Vertex :?> Real
 
         let ons       = getOriginIOExprs     (v, InitialType.On)
-        let onSims    = getOriginSimPlanEnds (v, InitialType.On)
+        //let onSims    = getOriginSimPlanEnds (v, InitialType.On)
 
         let offs      = getOriginIOExprs     (v, InitialType.Off)
-        let offSims   = getOriginSimPlanEnds (v, InitialType.Off)
+        //let offSims   = getOriginSimPlanEnds (v, InitialType.Off)
 
         let locks     = getNeedCheckIOs (real, false)
-        let lockSims  = getNeedCheckIOs (real ,true)
+        //let lockSims  = getNeedCheckIOs (real ,true)
 
         let onExpr    = if ons.any() then ons.ToAnd() else v._on.Expr
         let offExpr   = if offs.any() then offs.ToOr() else v._off.Expr
 
-        let onSimExpr    = onSims.ToAndElseOn v.System
-        let offSimExpr   = offSims.ToOrElseOff v.System
+        //let onSimExpr    = onSims.ToAndElseOn v.System
+        //let offSimExpr   = offSims.ToOrElseOff v.System
 
         let set =   (onExpr    <&&> locks    <&&> (!!offExpr))
-                <||>(onSimExpr <&&> lockSims <&&> (!!offSimExpr) <&&> v._sim.Expr)
+                //<||>(onSimExpr <&&> lockSims <&&> (!!offSimExpr) <&&> v._sim.Expr)
+                    <||>  v._sim.Expr   // Simulation 임시 패스  todo : System Plan Real에 초기값(상태저장) 기능 완성시 까지 대기  
 
         (set, v._off.Expr) --| (v.OG, getFuncName())
 

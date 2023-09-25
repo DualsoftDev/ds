@@ -55,7 +55,7 @@ namespace IOMapViewer
 
         private async void FormView_Shown(object sender, EventArgs ee)
         {
-            //ScanIO ss = new ScanIO("192.168.0.100:2004", "XGI-CPUUN");
+            //ScanIO ss = new ScanIO("192.168.0.103:2004", "XGK-CPUE");
 
             while (true)
             {

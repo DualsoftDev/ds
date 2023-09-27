@@ -25,7 +25,10 @@ module PPTObjectModule =
     let CopyName(name:string, cnt) = sprintf "Copy%d_%s" cnt (name.Replace(".", "_"))
 
     let GetSysNApi(flowName:string, name:string) =
-        $"{flowName}_{TrimSpace (name.Split('$').[0])}", TrimSpace(name.Split('$').[1])
+        let splitchar =  if name.Contains '.' then '.' else '$'
+   
+        $"{flowName}_{TrimSpace (name.Split(splitchar).[0])}", TrimSpace(name.Split(splitchar).[1])
+            
     let GetSysNFlow(fileName:string, name:string, pageNum:int) =
             if(name.StartsWith("$"))
                 then
@@ -146,7 +149,7 @@ module PPTObjectModule =
         match nodeType with
         | REALExF     -> if  name.Contains(".")|>not then  shape.ErrorName(ErrID._54, iPage)
         | REALExS     -> if  name.Contains("$")|>not then  shape.ErrorName(ErrID._55, iPage)
-        | CALL        -> if  name.Contains("$")|>not then  shape.ErrorName(ErrID._56, iPage)
+        | CALL        -> if  not (name.Contains("$") || name.Contains(".")) then shape.ErrorName(ErrID._56, iPage)
 
         | OPEN_EXSYS_CALL
         | OPEN_EXSYS_LINK
@@ -306,6 +309,7 @@ module PPTObjectModule =
         member x.IfRXs   = ifRXs
         member x.NodeType = nodeType
         member x.PageTitle    = pageTitle
+        member x.IsLibCall    =  nodeType = CALL && name.Contains '.' 
 
         member val Id =  shape.GetId()
         member val Key =  Objkey(iPage, shape.GetId())

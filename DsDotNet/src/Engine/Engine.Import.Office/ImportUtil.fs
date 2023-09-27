@@ -25,7 +25,7 @@ module ImportU =
         let call =
             let jobName = sysName+"_"+apiName
 
-            if not <| jobCallNames.Contains(sysName)
+            if not (jobCallNames.Contains(sysName) || node.IsLibCall)
             then 
                 node.Shape.ErrorName(ErrID._48, node.PageNum)
 
@@ -96,6 +96,39 @@ module ImportU =
 
             doc.Nodes
             |> Seq.filter(fun node -> node.NodeType.IsLoadSys)
+            |> Seq.iter(fun node ->
+                node.JobInfos
+                |> Seq.iter(fun jobSet ->
+                    let jobBase = jobSet.Key
+                    let JobTargetSystem = jobSet.Value.First()
+                    //ppt에서는 동일한 디바이스만 동시 Job구성 가능하여  아무시스템이나 찾아도 API는 같음
+                    let refSystem = mySys.TryFindLoadedSystem(JobTargetSystem).Value.ReferenceSystem
+
+                    refSystem.ApiItems.ForEach(fun api->
+                        let devs =
+                            jobSet.Value
+                             .Select(fun tgt -> getApiItems(mySys, tgt, api.Name), tgt)
+                             .Select(fun (api, tgt)->
+                                match node.NodeType with
+                                | OPEN_EXSYS_LINK             -> TaskSys(api, tgt)         :> DsTask
+                                | OPEN_EXSYS_CALL  | COPY_DEV -> TaskDev(api, "", "", tgt) :> DsTask
+                                | _-> failwithlog "Error MakeJobs"
+                                )
+
+
+                        let job = Job(jobBase+"_"+api.Name, devs |> Seq.toList)
+                        if dicJobName.ContainsKey(job.Name)
+                        then Office.ErrorName(node.Shape, ErrID._33, node.PageNum)
+                        else dicJobName.Add(job.Name, job)
+
+                        mySys.Jobs.Add(job)
+                    )
+                )
+            )
+
+
+            doc.Nodes
+            |> Seq.filter(fun node -> node.IsLibCall)
             |> Seq.iter(fun node ->
                 node.JobInfos
                 |> Seq.iter(fun jobSet ->
@@ -283,14 +316,18 @@ module ImportU =
                             dicVertex.Add(node.Key, real)
                         )
 
+
+                let calls  =
+                     pptNodes
+                        |> Seq.filter(fun node -> node.Alias.IsNone)
+                        |> Seq.filter(fun node -> node.NodeType.IsCall)
+
                 let createCall() =
 
                     let jobCallNames = pptNodes.Where(fun node -> node.NodeType.IsLoadSys) 
                                                |> Seq.collect(fun node -> node.JobCallNames)
 
-                    pptNodes
-                    |> Seq.filter(fun node -> node.Alias.IsNone)
-                    |> Seq.filter(fun node -> node.NodeType.IsCall)
+                    calls
                     |> Seq.iter(fun node ->
                                 let parentReal = if dicChildParent.ContainsKey(node)
                                                     then Some(dicVertex.[dicChildParent.[node].Key] :?> Real)

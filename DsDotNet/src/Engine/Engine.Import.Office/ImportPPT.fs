@@ -189,7 +189,7 @@ module ImportPPTModule =
             with ex ->  
                 failwithf  @$"{ex.Message} [ErrPath:{if pathStack.any() then pathStack.First() else paths.First() }]" //첫페이지 아니면 stack에 존재
         finally 
-            dicPptDoc.Where(fun f->not<| f.Value.IsNonNull())
+            dicPptDoc.Where(fun f->f.Value.IsNonNull())
                      .Iter(fun  f->f.Value.Close())
             dicPptDoc.Clear()
 

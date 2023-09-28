@@ -75,7 +75,7 @@ module ErrID =
     let _57 = "PPT 파일이름 공백발견, 다른이름저장이 필요합니다."
     let _58 = "System 이름 시작은 특수문자 및 숫자는 불가능합니다."
 
-    // Excel Error (1001 ~ )
+    // IO Mapping Error (1001 ~ )
     let _1001 = "시스템에 버튼 이름이 없습니다."
     let _1002 = "시스템에 램프 이름이 없습니다."
     let _1003 = "해당 시스템 이름이 엑셀 Sheet에 없습니다."
@@ -88,7 +88,7 @@ module ErrID =
     //
 
 [<AutoOpen>]
-module MessgeError =
+module MessgePPTError =
 
     type ErrorCase  = Shape | Conn | Page | Group | Name | Path
         with
@@ -101,19 +101,16 @@ module MessgeError =
             |Name  -> "이름오류"
             |Path  -> "경로오류"
 
+  
     [<Extension>]
     type Office =
 
         [<Extension>]
         static member ErrorPPT(case:ErrorCase, msg:string,  objName:string, page:int, ?userMsg:string) =
+              
+           
             let itemName =  if(userMsg.IsSome && (userMsg.Value = ""|>not))
-                            then $"[Page{page}:{objName}({userMsg.Value})"
+                            then $"[Page{page}:{objName} ({userMsg.Value})"
                             else $"[Page{page}:{objName}"
             failwithf  $"[{case.ToText()}] {msg} \t{itemName}"
 
-        [<Extension>]
-        static member ErrorXLS(case:ErrorCase, msg:string,  objName:string, tabName:string, ?userMsg:string) =
-            let itemName =  if(userMsg.IsSome && (userMsg.Value = ""|>not))
-                            then $"{objName}({userMsg.Value})"
-                            else $"{objName}"
-            failwithf  $"[{case.ToText()}] {msg} \t{itemName}"

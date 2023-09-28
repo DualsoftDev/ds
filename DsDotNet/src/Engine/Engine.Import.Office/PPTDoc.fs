@@ -135,77 +135,76 @@ module PPTDocModule =
             let sildeSize = Office.SildeSize(doc)
             let sildeMasters = Office.SildesMasterAll(doc)
 
-            try
 
-                sildeMasters |> Seq.iter (fun slideMaster -> masterPages.Add(masterPages.Count+1, slideMaster) |>ignore )
-                sildesAll    |> Seq.iter (fun (slidePart, show, page) -> pages.Add(slidePart, pptPage(slidePart, page, show)) |>ignore )
+            sildeMasters |> Seq.iter (fun slideMaster -> masterPages.Add(masterPages.Count+1, slideMaster) |>ignore )
+            sildesAll    |> Seq.iter (fun (slidePart, show, page) -> pages.Add(slidePart, pptPage(slidePart, page, show)) |>ignore )
 
-                let dicShape = Dictionary<int, HashSet<Tuple<Shape,bool>>>()
-                shapes
-                |> Seq.iter (fun (shape, page, geometry, isDash) ->
-                            if(dicShape.ContainsKey(page)|>not)
-                            then dicShape.Add(page, HashSet<Tuple<Shape,bool>>()) |> ignore
-                            dicShape.[page].Add(shape, isDash) |> ignore
+            let dicShape = Dictionary<int, HashSet<Tuple<Shape,bool>>>()
+            shapes
+            |> Seq.iter (fun (shape, page, geometry, isDash) ->
+                        if(dicShape.ContainsKey(page)|>not)
+                        then dicShape.Add(page, HashSet<Tuple<Shape,bool>>()) |> ignore
+                        dicShape.[page].Add(shape, isDash) |> ignore
+            )
+
+            shapes
+            |> Seq.iter (fun (shape, page, geometry, isDash) ->
+
+                        let pagePPT = pages.Values.Filter(fun w->w.PageNum = page).First()
+                        let sysName, flowName = GetSysNFlow(name, pagePPT.Title, pagePPT.PageNum)
+
+                        let node = pptNode(shape, page, flowName)
+                        if(node.Name ="") then shape.ErrorName(ErrID._13, page)
+                        nodes.Add(node.Key, node)  |>ignore )
+
+            let dicParentCheck = Dictionary<string, int>()
+            allGroups
+            |> Seq.iter (fun (page, groups) ->
+                groups|> getValidGroup
+                |> Seq.iter (fun group ->
+                    let groupAllNodes = getGroupParentsChildren(page, group, nodes)
+                    if groupAllNodes.any()
+                    then
+                        let pptGroup = pptRealGroup(page, groupAllNodes)
+
+                        let parent = pptGroup.Parent.Value;
+                        if(dicParentCheck.TryAdd(pptGroup.RealKey, pptGroup.PageNum)) then
+                            parents.Add(parent, pptGroup.Children)
+                        else
+                            Office.ErrorPPT(Group, ErrID._17, $"{dicParentCheck.[pptGroup.RealKey]}-{parent.Name}", pptGroup.PageNum)
                 )
-
-                shapes
-                |> Seq.iter (fun (shape, page, geometry, isDash) ->
-
-                            let pagePPT = pages.Values.Filter(fun w->w.PageNum = page).First()
-                            let sysName, flowName = GetSysNFlow(name, pagePPT.Title, pagePPT.PageNum)
-
-                            let node = pptNode(shape, page, flowName)
-                            if(node.Name ="") then shape.ErrorName(ErrID._13, page)
-                            nodes.Add(node.Key, node)  |>ignore )
-
-                let dicParentCheck = Dictionary<string, int>()
-                allGroups
-                |> Seq.iter (fun (page, groups) ->
-                    groups|> getValidGroup
-                    |> Seq.iter (fun group ->
-                        let groupAllNodes = getGroupParentsChildren(page, group, nodes)
-                        if groupAllNodes.any()
-                        then
-                            let pptGroup = pptRealGroup(page, groupAllNodes)
-
-                            let parent = pptGroup.Parent.Value;
-                            if(dicParentCheck.TryAdd(pptGroup.RealKey, pptGroup.PageNum)) then
-                                parents.Add(parent, pptGroup.Children)
-                            else
-                                Office.ErrorPPT(Group, ErrID._17, $"{dicParentCheck.[pptGroup.RealKey]}-{parent.Name}", pptGroup.PageNum)
-                    )
-                )
+            )
 
 
-                connections
-                |> Seq.iter (fun (slide, conns) ->
-                    conns
-                          |> Seq.iter (fun (conn, Id, startId, endId) ->
-                            let iPage = pages.[slide].PageNum
+            connections
+            |> Seq.iter (fun (slide, conns) ->
+                conns
+                        |> Seq.iter (fun (conn, Id, startId, endId) ->
+                        let iPage = pages.[slide].PageNum
 
 
-                            if(startId = 0u && endId = 0u) then  conn.ErrorConnect(ErrID._4, "","", iPage)
-                            if(startId = 0u) then  conn.ErrorConnect(ErrID._15, "", $"{nodes.[Objkey(iPage, endId)].Name}", iPage)
-                            if(endId = 0u)   then  conn.ErrorConnect(ErrID._16, $"{nodes.[Objkey(iPage, startId)].Name}", "", iPage)
+                        if(startId = 0u && endId = 0u) then  conn.ErrorConnect(ErrID._4, "","", iPage)
+                        if(startId = 0u) then  conn.ErrorConnect(ErrID._15, "", $"{nodes.[Objkey(iPage, endId)].Name}", iPage)
+                        if(endId = 0u)   then  conn.ErrorConnect(ErrID._16, $"{nodes.[Objkey(iPage, startId)].Name}", "", iPage)
 
-                            let sNode = nodes.[Objkey(iPage, startId)]
-                            let eNode = nodes.[Objkey(iPage, endId)]
-                            let sName = if(nodes.ContainsKey(sNode.Key)) then sNode.Name else ""
-                            let eName = if(nodes.ContainsKey(eNode.Key)) then eNode.Name else ""
+                        let sNode = nodes.[Objkey(iPage, startId)]
+                        let eNode = nodes.[Objkey(iPage, endId)]
+                        let sName = if(nodes.ContainsKey(sNode.Key)) then sNode.Name else ""
+                        let eName = if(nodes.ContainsKey(eNode.Key)) then eNode.Name else ""
 
-                            if(nodes.ContainsKey(sNode.Key)|>not) then  conn.ErrorConnect(ErrID._14, $"{sName}", "", iPage)
-                            if(nodes.ContainsKey(eNode.Key)|>not) then  conn.ErrorConnect(ErrID._14, $"{eName}", "", iPage)
+                        if(nodes.ContainsKey(sNode.Key)|>not) then  conn.ErrorConnect(ErrID._14, $"{sName}", "", iPage)
+                        if(nodes.ContainsKey(eNode.Key)|>not) then  conn.ErrorConnect(ErrID._14, $"{eName}", "", iPage)
 
-                            if conn.IsNonDirectional()
-                            then dummys.AddDummys([|sNode; eNode|])
-                            else edges.Add(pptEdge(conn, Id, iPage ,sNode, eNode)) |>ignore
-                        ))
+                        if conn.IsNonDirectional()
+                        then dummys.AddDummys([|sNode; eNode|])
+                        else edges.Add(pptEdge(conn, Id, iPage ,sNode, eNode)) |>ignore
+                    ))
 
 
-                updateAliasPPT(nodes, pages, parents)
+            updateAliasPPT(nodes, pages, parents)
 
-            with ex -> doc.Close()
-                       failwithf  $"{ex.Message}"
+            //with ex -> doc.Close()
+            //           failwithf  $"{ex.Message}"
 
 
         member x.GetTable(colCnt:int) = doc.GetTable colCnt     

@@ -31,27 +31,33 @@ module PPTUtil =
     type SlideId = Presentation.SlideId
     type GroupShape = Presentation.GroupShape
 
+      ///page(Item1), objID(Item2), msg(Item3)
+    let ErrorPPTNotify = new Event<int*uint*string>() 
     [<Extension>]
     type Office =
-
         [<Extension>]
         static member ErrorName(shape:Shape, errMsg:string,  page:int) =
+               ErrorPPTNotify.Trigger (page, Office.ShapeID(shape), errMsg)
                Office.ErrorPPT(ErrorCase.Name, errMsg, Office.ShapeName(shape), page, shape.InnerText)
 
         [<Extension>]
         static member ErrorPath(shape:Shape, errMsg:string,  page:int, path:string) =
+               ErrorPPTNotify.Trigger (page, Office.ShapeID(shape), errMsg)
                Office.ErrorPPT(ErrorCase.Page, errMsg, Office.ShapeName(shape), page, path)
 
         [<Extension>]
         static member ErrorShape(shape:Shape, errMsg:string,  page:int) =
+               ErrorPPTNotify.Trigger (page, Office.ShapeID(shape), errMsg)
                Office.ErrorPPT(ErrorCase.Shape, errMsg, Office.ShapeName(shape), page, shape.InnerText)
 
         [<Extension>]
         static member ErrorConnect(conn:#ConnectionShape, errMsg:string, text:string,  page:int) =
+               ErrorPPTNotify.Trigger (page, Office.ConnectionShapeID(conn), errMsg)
                Office.ErrorPPT(ErrorCase.Conn, errMsg, $"{Office.EdgeName(conn)}[{text}]", page, conn.InnerText)
 
         [<Extension>]
         static member ErrorConnect(conn:#ConnectionShape, errMsg:string, src:string, tgt:string,  page:int) =
+               ErrorPPTNotify.Trigger (page, Office.ConnectionShapeID(conn), errMsg)
                Office.ErrorConnect(conn, errMsg, $"{Office.EdgeName(conn)}[{src}~{tgt}]", page)
 
         ///power point 문서를 Openxml로 열기 (*.pptx 형식만 지원)
@@ -114,6 +120,17 @@ module PPTUtil =
                         let shapeProperties = shape.Descendants<NonVisualShapeProperties>().FirstOrDefault();
                         let prop = shapeProperties.Descendants<NonVisualDrawingProperties>().FirstOrDefault();
                         prop.Name.Value
+
+        [<Extension>]
+        static member ShapeID(shape:Shape) =
+                        let shapeProperties = shape.Descendants<NonVisualShapeProperties>().FirstOrDefault();
+                        let prop = shapeProperties.Descendants<NonVisualDrawingProperties>().FirstOrDefault();
+                        prop.Id.Value
+        [<Extension>]
+        static member ConnectionShapeID(shape:ConnectionShape) =
+                        let shapeProperties = shape.Descendants<NonVisualConnectionShapeProperties>().FirstOrDefault();
+                        let prop = shapeProperties.Descendants<NonVisualDrawingProperties>().FirstOrDefault();
+                        prop.Id.Value
 
         [<Extension>]
         static member GroupName(gShape:#GroupShape) =

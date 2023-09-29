@@ -217,7 +217,7 @@ module ImportPPTModule =
                     -> model, pptRepo
                         |> Seq.map(fun f->
                             {   System= f.Key
-                                Views = f.Value.MakeGraphView(f.Key)
+                                Views = f.Value.GetGraphView(f.Key)
                                 IsActive = model.Systems.Contains(f.Key)}  )
         [<Extension>]
         static member GetDsFilesWithLib (paths:string seq) =

@@ -32,9 +32,11 @@ module ImportViewModule =
             edgeInfos
             |>Seq.filter(fun edge -> (dummyMembers.Contains(edge.Sources[0]) || dummyMembers.Contains(edge.Targets[0]))|>not)
             |>Seq.iter(fun edge ->
-                        edge.Sources
-                        |> Seq.iter(fun src ->
-                                    newNode.AddEdge(ModelingEdgeInfo<ViewNode>(dicV.[src], edge.EdgeSymbol, dicV.[edge.Targets[0]])) |>ignore)
+                edge.Sources
+                |> Seq.iter(fun src ->
+                    edge.Targets |> Seq.iter(fun tgt ->
+                        newNode.AddEdge(ModelingEdgeInfo<ViewNode>(dicV.[src], edge.EdgeSymbol, dicV.[tgt])) |>ignore)
+                        )
             )
         if newNode.DummyEdgeAdded   |> not 
         then 
@@ -154,6 +156,17 @@ module ImportViewModule =
         if newNode.GetSingles().Count() > 0
         then node.AddSingles(newNode) |> ignore
 
+    let UpdateApi(system:DsSystem,  node:ViewNode)  =
+
+        let newNode = ViewNode("Interface", VIF)
+
+        system.ApiItems
+        |> Seq.iter(fun api ->newNode.AddSingles(ViewNode(api.Name, VIF)) |>ignore
+            )
+
+        if newNode.GetSingles().Count() > 0
+        then node.AddSingles(newNode) |> ignore
+
     //let rec ConvertRuntimeEdge(graph:Graph<Vertex, Edge>)  =
     //    let newNode = ViewNode()
     //    let dicV = graph.Vertices.Select(fun v-> v, ViewNode(v)) |> dict
@@ -175,12 +188,9 @@ module ImportViewModule =
 
     [<Extension>]
     type ImportViewUtil =
+                    
         [<Extension>]
-        static member ConvertViewNodes (mySys:DsSystem) =
-                    mySys.Flows.Select(fun f ->ConvertFlow (f, []))
-
-        [<Extension>]
-        static member MakeGraphView (doc:pptDoc, mySys:DsSystem) =
+        static member GetGraphView (doc:pptDoc, mySys:DsSystem) =
                 let dicVertex = doc.DicVertex
                 let dicFlow = doc.DicFlow
 
@@ -198,6 +208,24 @@ module ImportViewModule =
                         UpdateApiItems(flow.System, page, doc.DicNodes.Values.Where(fun f->f.NodeType.IsIF), flowNode)
 
                         flowNode.Page <- page; //flowNode.Flow <- Some(flow)
+                        flowNode)
+
+                let viewNodes =  getFlowNodes(mySys.Flows)
+
+                viewNodes
+
+        [<Extension>]
+        static member GetViewNodes (mySys:DsSystem) =
+                let getFlowNodes(flows:Flow seq) =
+                    flows |>Seq.map(fun flow ->
+                        let flowNode = ConvertFlow(flow, [])
+
+                        UpdateLampNodes(flow.System, flow, flowNode)
+                        UpdateBtnNodes(flow.System, flow, flowNode)
+                        UpdateConditionNodes(flow.System, flow, flowNode)
+
+                        UpdateApi(flow.System,  flowNode)
+
                         flowNode)
 
                 let viewNodes =  getFlowNodes(mySys.Flows)

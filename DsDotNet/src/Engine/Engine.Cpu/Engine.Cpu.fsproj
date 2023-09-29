@@ -4,7 +4,7 @@
 		<TargetFrameworks>net7.0;net48</TargetFrameworks>
 		<RootNamespace>Engine.Cpu</RootNamespace>
 		<LangVersion>7.0</LangVersion>
-		<OutputType>Library</OutputType>
+		<OutputType>Exe</OutputType>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 		<OtherFlags>--warnon:1182</OtherFlags>
 	</PropertyGroup>
@@ -13,6 +13,7 @@
 		<Compile Include="Core.Extension.fs" />
 		<Compile Include="RunTime.Util.fs" />
 		<Compile Include="RunTime.fs" />
+		<Compile Include="Program.fs" />
 	</ItemGroup>
 
 	<ItemGroup>

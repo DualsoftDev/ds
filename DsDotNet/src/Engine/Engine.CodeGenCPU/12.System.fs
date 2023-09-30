@@ -20,14 +20,14 @@ type DsSystem with
                 yield (s._ready.Expr , s._off.Expr) --| (flow.ready,  "")
         ]
 
-    member s.Y2_SystemConditionReady(): CommentedStatement list = [
-        for f in s.Flows do
-            let readys = getConditionInputs(f, s.ReadyConditions)
-            yield (readys.ToAndElseOn(s), s._off.Expr) --| (f.scr, getFuncName())
-        ]
+    //member s.Y2_SystemConditionReady(): CommentedStatement list = [
+    //    for f in s.Flows do
+    //        let readys = getConditionInputs(f, s.ReadyConditions)
+    //        yield (readys.ToAndElseOn(s), s._off.Expr) --| (f.scr, getFuncName())
+    //    ]
 
-    member s.Y3_SystemConditionDrive(): CommentedStatement list = [
-        for f in s.Flows do
-            let drives = getConditionInputs(f, s.DriveConditions)
-            yield (drives.ToAndElseOn(s), s._off.Expr) --| (f.scd, getFuncName() )
-        ]
+    //member s.Y3_SystemConditionDrive(): CommentedStatement list = [
+    //    for f in s.Flows do
+    //        let drives = getConditionInputs(f, s.DriveConditions)
+    //        yield (drives.ToAndElseOn(s), s._off.Expr) --| (f.scd, getFuncName() )
+    //    ]

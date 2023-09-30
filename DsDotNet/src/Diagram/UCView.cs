@@ -442,24 +442,37 @@ namespace Diagram.View.MSAGL
             }
         }
 
-        private void UpdateFontColor(Status4 newStatus, Node node)
+
+
+        public void UpdateError(ViewNode viewNode, bool txErr, bool rxErr)
         {
-            if (newStatus == Status4.Ready)
+            Node node = findNode(viewNode);
+            if (node != null)
             {
-                node.Label.FontColor = Color.DarkGreen;
+                UpdateFontColor(txErr, rxErr, node);
+                RefreshGraph();
             }
-            else if (newStatus == Status4.Going)
+        }
+
+        private void UpdateFontColor(bool txErr, bool rxErr, Node node)
+        {
+            if (txErr)
             {
-                node.Label.FontColor = Color.DarkKhaki;
+                node.Label.FontColor = Color.Red;
+                node.Label.Text = $"{node.Label.Text}\n[Timeout Error]";
             }
-            else if (newStatus == Status4.Finish)
+            if (rxErr)
             {
-                node.Label.FontColor = Color.DarkBlue;
+                node.Label.FontColor = Color.Red;
+                node.Label.Text = $"{node.Label.Text}\n[Sensor Error]";
             }
-            else if (newStatus == Status4.Homing)
+
+            if (!txErr && !rxErr)
             {
-                node.Label.FontColor = Color.Black;
+                node.Label.FontColor = Color.White;
+                node.Label.Text = node.Label.Text.Split('\n')[0];
             }
+
         }
 
         private void UpdateLineColor(Status4 newStatus, Node node)
@@ -481,6 +494,8 @@ namespace Diagram.View.MSAGL
                 node.Attr.FillColor = Color.DimGray;
             }
         }
+
+       
 
         private void UpdateFillColor(bool dataExist, Node node)
         {

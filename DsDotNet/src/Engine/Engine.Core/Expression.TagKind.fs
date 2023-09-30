@@ -174,3 +174,10 @@ module TagKindModule =
                                           || kind = VertexTag.finish
                                           || kind = VertexTag.homing
             |_->false
+
+        [<Extension>]
+        static member IsErrTag(x:TagDS) =
+            match x with
+            |EventVertex (_, _, kind) -> kind = VertexTag.errorTx
+                                          || kind = VertexTag.errorRx
+            |_->false

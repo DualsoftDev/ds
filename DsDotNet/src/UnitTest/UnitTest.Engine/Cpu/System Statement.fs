@@ -18,12 +18,12 @@ type Spec13_SystemStatement() =
     member __.``Y1 System Bit Set Flow`` () =
         t.Sys.Y1_SystemBitSetFlow() |> doChecks
 
-    [<Test>]
-    member __.``Y2 System Condition Ready`` () =
-        t.Sys.Y2_SystemConditionReady() |> doChecks
+    //[<Test>]
+    //member __.``Y2 System Condition Ready`` () =
+    //    t.Sys.Y2_SystemConditionReady() |> doChecks
 
-    [<Test>]
-    member __.``Y3 System Condition Drive`` () =
-        t.Sys.Y3_SystemConditionDrive() |> doChecks
+    //[<Test>]
+    //member __.``Y3 System Condition Drive`` () =
+    //    t.Sys.Y3_SystemConditionDrive() |> doChecks
 
 

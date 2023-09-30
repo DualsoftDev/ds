@@ -9,16 +9,10 @@ open System
 [<AutoOpen>]
 module ConvertCoreExt =
     
-
-
-
-
     let hasTime (xs:Func seq) = xs.Any(fun f->f.Name = TextOnDelayTimer)
     let hasCount(xs:Func seq) = xs.Any(fun f->f.Name = TextRingCounter)
     let hasMove (xs:Func seq) = xs.Any(fun f->f.Name = TextMove)
     let hasNot  (xs:Func seq) = xs.Any(fun f->f.Name = TextNot )
-
-
 
     let getVM(v:Vertex)     = v.TagManager :?> VertexManager
     let getVMReal(v:Vertex) = v.TagManager :?> VertexMReal
@@ -203,8 +197,8 @@ module ConvertCoreExt =
         member f.emg    = getFM(f).GetFlowTag(FlowTag.emg_bit     )
         member f.test   = getFM(f).GetFlowTag(FlowTag.test_bit    )
         member f.home   = getFM(f).GetFlowTag(FlowTag.home_bit    )
-        member f.scr    = getFM(f).GetFlowTag(FlowTag.readycondi_bit    )
-        member f.scd    = getFM(f).GetFlowTag(FlowTag.drivecondi_bit    )
+        //member f.scr    = getFM(f).GetFlowTag(FlowTag.readycondi_bit    )
+        //member f.scd    = getFM(f).GetFlowTag(FlowTag.drivecondi_bit    )
         member f.F = f |> getFM
         member f._on     = f.System._on
         member f._off    = f.System._off
@@ -306,15 +300,11 @@ module ConvertCoreExt =
         //           if ins.any() then ins.ToAnd() else x._on.Expr
 
         //개별 부정의 AND  <안전하게 전부 확인>
-        member c.INsFuns  =   
-                            let ins = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionINFunc)
+        member c.INsFuns  = let ins = c.CallTargetJob.DeviceDefs
+                                        .Where(fun j -> j.ApiItem.RXs.any())
+                                        .Select(fun j -> j.ActionINFunc)
                             if ins.any() then ins.ToAnd() else c._on.Expr
-                            //let ins = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionINFunc)
-                            //if  c.UsingNot
-                            //      //개별 부정의 AND  <안전하게 전부 확인>
-                            //      then if ins.any() then !!ins.ToOr() else c._on.Expr
-                            //      else if ins.any() then ins.ToAnd()  else c._on.Expr
-
+                         
         member c.MutualResets =
             c.CallTargetJob.DeviceDefs
                 .SelectMany(fun j -> j.ApiItem.System.GetMutualResetApis(j.ApiItem))

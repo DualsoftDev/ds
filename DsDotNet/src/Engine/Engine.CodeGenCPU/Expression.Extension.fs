@@ -9,53 +9,28 @@ open Dual.Common.Core.FS
 [<AutoOpen>]
 module ExpressionExtension =
 
-    //  Statement
-    /// boolean AND operator
-    let (<&&>) (left: Expression<bool>) (right: Expression<bool>) = fLogicalAnd [ left; right ]
-
-    /// boolean OR operator
-    let (<||>) (left: Expression<bool>) (right: Expression<bool>) = fLogicalOr [ left; right ]
-
-    /// boolean NOT operator
-    let (!!)   (exp: Expression<bool>) = fLogicalNot [exp]
-
-    /// Assign statement
-    let (<==)  (storage: IStorage) (exp: IExpression) = DuAssign(exp, storage)
-
-    /// Assign rising statement
-    let (<=^)  (rising: RisingCoil)   (exp: IExpression) = DuAssign(exp, rising)
-
-    /// Assign falling statement
-    let (<=!^) (falling: FallingCoil) (exp: IExpression) = DuAssign(exp, falling)
-
-    /// Create Timer Coil Statement
-    let (<=@)  (ts: TimerStruct) (sets: IExpression<bool> option, rsts:IExpression<bool> option) =
-        TimerStatement.CreateTONUsingStructure(ts, sets, rsts)
-
-    /// Create Counter Coil Statement
-    let (<=%)  (cs: CTRStruct) (sets: IExpression<bool> option) =
-        CounterStatement.CreateCTRUsingStructure(cs, sets)
-
-    // Extenstion Comment Statement
-    /// Create None Relay Coil Statement
-    let (--|) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TypedValueStorage<bool>, comment:string) =
-        coil <== (sets <&&> (!! rsts))
-        |> withExpressionComment comment
-
-    /// Create Relay Coil Statement
-    let (==|) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TypedValueStorage<bool> , comment:string) =
-        coil <== ((sets <||> var2expr coil) <&&> (!! rsts))
-        |> withExpressionComment comment
+    let inline binaryOp f left right = f [left; right]
+    let inline unaryOp  f exp = f [exp]
+    
+    let (<&&>) left right = binaryOp fLogicalAnd left right
+    let (<||>) left right = binaryOp fLogicalOr left right
+    let (!!) exp = unaryOp fLogicalNot exp
+    let (<==) storage exp  = DuAssign(exp, storage)
+    let (<=^) rising exp   = DuAssign(exp, rising)
+    let (<=!^) falling exp = DuAssign(exp, falling)
+  
+    let inline coilOp op sets rsts (coil, comment) = 
+        (op sets rsts coil) |> withExpressionComment comment
+        
+    let (--|) (sets_rsts, coil_comment) = coilOp (fun sets rsts coil -> coil <== (sets <&&> (!! rsts))) sets_rsts coil_comment
+    let (==|) (sets_rsts, coil_comment) = coilOp (fun sets rsts coil -> coil <== ((sets <||> var2expr coil) <&&> (!! rsts))) sets_rsts coil_comment
 
     ///// Create One Scan Relay Coils Statement
-    let (--^) (sets: Expression<bool>) (coil: TypedValueStorage<bool>, relay: TypedValueStorage<bool>, comment:string) =
-        [
-            relay <== ((sets           <||> var2expr relay) <&&> (!! (var2expr coil))) |> withExpressionComment comment
-            coil  <== ((var2expr relay <||> var2expr coil ) <&&> (sets))    |> withExpressionComment comment
-        ]
-
-        
-
+    //let (--^) (sets: Expression<bool>) (coil: TypedValueStorage<bool>, relay: TypedValueStorage<bool>, comment:string) =
+    //    [
+    //        relay <== ((sets           <||> var2expr relay) <&&> (!! (var2expr coil))) |> withExpressionComment comment
+    //        coil  <== ((var2expr relay <||> var2expr coil ) <&&> (sets))    |> withExpressionComment comment
+    //    ]
     ///// Create None Relay rising Pulse Coil Statement
     //let (--^) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TypedValueStorage<bool>, comment:string) =
     //    let rising:RisingCoil = {Storage = coil; HistoryFlag = HistoryFlag(); System = (coil :> IStorage).DsSystem}
@@ -71,13 +46,12 @@ module ExpressionExtension =
     /// Create Timer Coil Statement
     let (--@) (rungInCondition: IExpression<bool>) (timerCoil: TimerStruct, preset:CountUnitType, comment:string) =
         timerCoil.PRE.Value <- preset
-        timerCoil <=@ (Some rungInCondition, None)
+        TimerStatement.CreateTONUsingStructure(timerCoil, Some rungInCondition, None)
         |> withExpressionComment comment
-
     /// Create Counter Coil Statement
     let (--%) (rungInCondition: IExpression<bool>) (counterCoil: CTRStruct, preset:CountUnitType, comment:string) =
         counterCoil.PRE.Value <- preset
-        counterCoil <=% (Some rungInCondition)
+        CounterStatement.CreateCTRUsingStructure(counterCoil, Some rungInCondition)
         |> withExpressionComment comment
 
     let private tryTags2LogicalAndOrExpr (fLogical: IExpression list -> Expression<bool>) (FList(ts:#TypedValueStorage<bool> list)) : Expression<bool> option =

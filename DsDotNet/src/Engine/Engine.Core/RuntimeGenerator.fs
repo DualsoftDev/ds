@@ -52,6 +52,7 @@ module RuntimeGeneratorModule =
         static let targetChangedSubject = new Subject<RuntimeTargetType>()
         static let packageChangedSubject = new Subject<RuntimePackage>()
         static let mutable dsSystem: ISystem option = None
+        static let mutable callTimeout = 10000us
 
         static member Target
             with get() = runtimeTarget
@@ -59,6 +60,7 @@ module RuntimeGeneratorModule =
                 runtimeTarget <- v
                 targetChangedSubject.OnNext(v)
 
+        static member TimeoutCall = callTimeout
         static member TargetChangedSubject = targetChangedSubject
 
         static member Package

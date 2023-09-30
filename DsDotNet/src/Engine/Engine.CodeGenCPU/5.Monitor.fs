@@ -14,23 +14,22 @@ type VertexManager with
         let real = v.Vertex :?> Real
 
         let ons       = getOriginIOExprs     (v, InitialType.On)
-        //let onSims    = getOriginSimPlanEnds (v, InitialType.On)
+        let onSims    = getOriginSimPlanEnds (v, InitialType.On)
 
         let offs      = getOriginIOExprs     (v, InitialType.Off)
-        //let offSims   = getOriginSimPlanEnds (v, InitialType.Off)
+        let offSims   = getOriginSimPlanEnds (v, InitialType.Off)
 
         let locks     = getNeedCheckIOs (real, false)
-        //let lockSims  = getNeedCheckIOs (real ,true)
+        let lockSims  = getNeedCheckIOs (real ,true)
 
         let onExpr    = if ons.any() then ons.ToAnd() else v._on.Expr
         let offExpr   = if offs.any() then offs.ToOr() else v._off.Expr
 
-        //let onSimExpr    = onSims.ToAndElseOn v.System
-        //let offSimExpr   = offSims.ToOrElseOff v.System
+        let onSimExpr    = onSims.ToAndElseOn v.System
+        let offSimExpr   = offSims.ToOrElseOff v.System
 
         let set =   (onExpr    <&&> locks    <&&> (!!offExpr))
-                //<||>(onSimExpr <&&> lockSims <&&> (!!offSimExpr) <&&> v._sim.Expr)
-                    <||>  v._sim.Expr   // Simulation 임시 패스  todo : System Plan Real에 초기값(상태저장) 기능 완성시 까지 대기  
+                <||>(onSimExpr <&&> lockSims <&&> (!!offSimExpr) <&&> v._sim.Expr)
 
         (set, v._off.Expr) --| (v.OG, getFuncName())
 
@@ -42,7 +41,7 @@ type VertexManager with
 
     member v.M3_CallErrorTXMonitor(): CommentedStatement list =
         let v= v :?> VertexMCoin
-        let set = v.G.Expr <&&> v.TON.DN.Expr
+        let set = v.G.Expr <&&> v.TOUT.DN.Expr
         let rst = v.Flow.clear.Expr
         [
             //test ahn  going 직전시간 기준 타임아웃 시간 받기
@@ -81,7 +80,7 @@ type VertexManager with
         let set = real.ErrorTXs.ToOrElseOff v.System
         let rst = v._off.Expr
 
-        (set, rst) ==| (v.E1, getFuncName())
+        (set, rst) --| (v.E1, getFuncName())
 
 
     member v.M6_RealErrorRXMonitor(): CommentedStatement  =
@@ -89,5 +88,5 @@ type VertexManager with
         let set = real.ErrorRXs.ToOrElseOff v.System
         let rst = v._off.Expr
 
-        (set, rst) ==| (v.E2, getFuncName())
+        (set, rst) --| (v.E2, getFuncName())
 

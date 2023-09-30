@@ -44,10 +44,6 @@ type VertexManager with
         let rsts = v._off.Expr 
         [(sets, rsts) --| (v.RT, getFuncName())] //reset tag
 
-    //member v.F3_RootGoingPulse() : CommentedStatement  =
-    //    let real = v.GetPureReal()
-    //    (real.V.G.Expr, v._off.Expr) --^ (real.V.GPUL, "RootGoingPulse")
-
 
     member v.F4_RootGoingRelay() : CommentedStatement list =
         let real = v.GetPureReal()
@@ -75,7 +71,7 @@ type VertexManager with
             | :? CallDev | :? Alias ->
                 match v.GetPureCall() with
                 | Some call ->  if call.UsingTon
-                                then call.V.TON.DN |> var2expr
+                                then call.V.TDON.DN |> var2expr
                                 else call.INsFuns
                 | None -> v.CR.Expr
             | _ ->
@@ -85,13 +81,3 @@ type VertexManager with
         let rsts = !!v.ST.Expr
         (sets, rsts) ==| (v.CR, getFuncName())
 
-    //option Spec 확정 필요
-     //member v.F0_RootStartRealOptionPulse(): CommentedStatement list =
-     //   let rsts  = v.F.Expr
-     //   [
-     //       let ws =  getStartWeakEdgeSources(v.Flow.Graph, v.Vertex)
-     //       let sets = ws.GetCausalTags(v.System, true)
-     //               //root 시작조건 이벤트 Pulse 처리
-     //       yield (sets, rsts) --^ (v.PUL, getFuncName() )
-     //       yield (v.PUL.Expr, v.H.Expr) ==| (v.ST, getFuncName())
-     //   ]

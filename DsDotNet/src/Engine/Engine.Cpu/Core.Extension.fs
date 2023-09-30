@@ -34,12 +34,8 @@ module CoreExtensionsModule =
             | DuAssign (_expr, (:? FallingCoil as fc)) -> [ fc.Storage]
             | DuAssign (_expr, target) -> [ target ]
             | DuVarDecl (_expr, var) -> [ var ]
-            | DuTimer timerStatement ->
-                [ for s in timerStatement.Timer.InputEvaluateStatements do
-                    yield! s.GetTargetStorages() ]
-            | DuCounter counterStatement ->
-                [ for s in counterStatement.Counter.InputEvaluateStatements do
-                    yield! s.GetTargetStorages() ]
+            | DuTimer timerStatement -> [timerStatement.Timer.DN ]
+            | DuCounter counterStatement -> [counterStatement.Counter.DN ]
             | DuAction (DuCopy (_condition, _source, target)) -> [ target ]
             | DuAugmentedPLCFunction _ -> []
 
@@ -47,7 +43,7 @@ module CoreExtensionsModule =
             match x with
             | DuAssign (expr, _target) -> expr.CollectStorages()
             | DuVarDecl (expr, _var) -> expr.CollectStorages()
-            | DuTimer timerStatement ->
+            | DuTimer timerStatement -> 
                 [ for s in timerStatement.Timer.InputEvaluateStatements do
                     yield! s.GetSourceStorages() ]
             | DuCounter counterStatement ->

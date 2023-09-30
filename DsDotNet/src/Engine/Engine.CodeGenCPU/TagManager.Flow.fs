@@ -20,17 +20,17 @@ module FlowManagerModule =
         let f_dop        = cpv $"DOP_{fn}"     FlowTag.stop_op              // Drive Operation Mode
         let f_top        = cpv $"TOP_{fn}"     FlowTag.emergency_op         // Test  Operation Mode (시운전)
         let f_iop        = cpv $"IOP_{fn}"     FlowTag.idle_op              // Idle  Operation Mode
-        let f_readycondi = cpv $"SCR_{fn}"     FlowTag.auto_bit             //system condition ready
-        let f_drivecondi = cpv $"SCD_{fn}"     FlowTag.manual_bit           //system condition drive
-        let f_auto       = cpv $"auto_{fn}"    FlowTag.drive_bit
-        let f_manual     = cpv $"manual_{fn}"  FlowTag.stop_bit
-        let f_drive      = cpv $"drive_{fn}"   FlowTag.ready_bit
-        let f_stop       = cpv $"stop_{fn}"    FlowTag.clear_bit
-        let f_ready      = cpv $"ready_{fn}"   FlowTag.emg_bit
-        let f_clear      = cpv $"clear_{fn}"   FlowTag.test_bit
-        let f_emg        = cpv $"emg_{fn}"     FlowTag.home_bit
-        let f_test       = cpv $"test_{fn}"    FlowTag.readycondi_bit
-        let f_home       = cpv $"home_{fn}"    FlowTag.drivecondi_bit
+        //let f_readycondi = cpv $"SCR_{fn}"     FlowTag.readycondi_bit             //system condition ready
+        //let f_drivecondi = cpv $"SCD_{fn}"     FlowTag.drivecondi_bit           //system condition drive
+        let f_auto       = cpv $"auto_{fn}"    FlowTag.auto_bit       
+        let f_manual     = cpv $"manual_{fn}"  FlowTag.manual_bit     
+        let f_drive      = cpv $"drive_{fn}"   FlowTag.drive_bit
+        let f_stop       = cpv $"stop_{fn}"    FlowTag.stop_bit
+        let f_ready      = cpv $"ready_{fn}"   FlowTag.ready_bit
+        let f_clear      = cpv $"clear_{fn}"   FlowTag.clear_bit
+        let f_emg        = cpv $"emg_{fn}"     FlowTag.emg_bit
+        let f_test       = cpv $"test_{fn}"    FlowTag.test_bit
+        let f_home       = cpv $"home_{fn}"    FlowTag.home_bit
 
         interface ITagManager with
             member x.Target = f
@@ -57,7 +57,7 @@ module FlowManagerModule =
                 | FlowTag.emg_bit         -> f_emg
                 | FlowTag.test_bit        -> f_test
                 | FlowTag.home_bit        -> f_home
-                | FlowTag.readycondi_bit  -> f_readycondi
-                | FlowTag.drivecondi_bit  -> f_drivecondi
+                //| FlowTag.readycondi_bit  -> f_readycondi
+                //| FlowTag.drivecondi_bit  -> f_drivecondi
                 | _ -> failwithlog $"Error : GetFlowTag {ft} type not support!!"
             t :?> PlanVar<bool>

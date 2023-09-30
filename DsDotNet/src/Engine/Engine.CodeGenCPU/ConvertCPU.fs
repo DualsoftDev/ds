@@ -81,8 +81,8 @@ module ConvertCPU =
                 yield! vm.C2_CallActionOut()
                 yield! vm.C3_CallPlanReceive()
                 yield! vm.C4_CallActionIn()
-                //yield! vm.M3_CallErrorTXMonitor() //test ahn Real 기준으로 Coin 대상으로 다시 작성 필요
-                //yield vm.M4_CallErrorRXMonitor()  //test ahn Real 기준으로 Coin 대상으로 다시 작성 필요
+                yield! vm.M3_CallErrorTXMonitor() //test ahn Real 기준으로 Coin 대상으로 다시 작성 필요
+                yield vm.M4_CallErrorRXMonitor()  //test ahn Real 기준으로 Coin 대상으로 다시 작성 필요
 
             if IsSpec (v, CallInReal ||| CallInFlow ||| RealExSystem ||| RealExFlow, AliasNotCare) then
                 yield! vm.S2_CoinRGFH()
@@ -100,8 +100,8 @@ module ConvertCPU =
             yield! s.B1_ButtonOutput()
             yield! s.B2_ModeLamp()
             yield! s.Y1_SystemBitSetFlow()
-            yield! s.Y2_SystemConditionReady()
-            yield! s.Y3_SystemConditionDrive()
+            //yield! s.Y2_SystemConditionReady()
+            //yield! s.Y3_SystemConditionDrive()
         ]
 
 

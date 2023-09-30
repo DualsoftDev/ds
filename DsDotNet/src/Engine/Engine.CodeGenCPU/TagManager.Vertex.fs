@@ -8,7 +8,7 @@ open System
 [<AutoOpen>]
 module TagManagerModule =
 
-       //    타입 | 구분       | Tag    | Port  (Real Only) | Force HMI |
+    //    타입 | 구분       | Tag    | Port  (Real Only) | Force HMI |
     //__________________________________________________________________
     //   PLAN | Start	| ST    | SP              | SF        |
     //   PLAN | Reset	| RT	| RP              | RF        |
@@ -155,8 +155,8 @@ module TagManagerModule =
         let sys = this.System
 
         let counterBit    = counter  s "CTR"  sys
-        let timerOnDelayBit = timer  s "TON"  sys
-        let timerTimeOutBit = timer  s "TOUT" sys
+        let timerOnDelayBit = timer  s "TON"  sys  RuntimeDS.TimeoutCall
+        let timerTimeOutBit = timer  s "TOUT" sys  RuntimeDS.TimeoutCall
 
         ///CallDev Done Relay
         member _.CR     = relayCallBit
@@ -164,7 +164,7 @@ module TagManagerModule =
         ///Ring Counter
         member _.CTR    = counterBit
         ///Timer on delay
-        member _.TON    = timerOnDelayBit
+        member _.TDON    = timerOnDelayBit
         ///Timer time out
         member _.TOUT   = timerTimeOutBit
 

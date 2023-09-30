@@ -2,6 +2,7 @@ namespace Engine.CodeGenCPU
 
 open Engine.Core
 open Dual.Common.Core.FS
+open System.Reactive.Linq
 open System.Text.RegularExpressions
 open System
 open Dual.Common.Core.FS.ForwardDecl.ShowForwardDeclSample
@@ -9,39 +10,26 @@ open Dual.Common.Core.FS.ForwardDecl.ShowForwardDeclSample
 [<AutoOpen>]
 module TagManagerUtil =
 
-    //'_' 시작 TAG 이름은 사용자 정의 불가 하여 앞쪽에 중복처리 문자
-    // _(n)_ 하나씩 증가 ex)  _1_tagName, _2_tagName, _3_tagName
-    //UniqueName.generate 대신사용
-    //let getUniqueName (storages:Storages) (name:string) =
-    //    let removePrefix x = Regex.Replace(x, "^_\d+_", "")
-    //    let rec unique (name:string) (cnt:int) (storages:Storages) =
-    //        if storages.ContainsKey name
-    //            then unique $"_{cnt+1}_{name |> removePrefix}" (cnt+1) storages
-    //            else name
-
-    //    unique name 0 storages
-
-    let getValidName (name:string) =
-        let ableChar(c:char) =
-            Char.IsNumber(c) ||
-            ['[';']'].ToResizeArray().Contains(c)
-        [
-            for c in name do
-                if ableChar(c) || c.IsValidIdentifier()
-                then yield c.ToString()
-                else yield "_"
-
-        ] |> String.concat ""
 
     let getPlcTagAbleName (name:string) (storages:Storages) =
-        let vName = name |> getValidName
+        let getValidName (name:string) =
+            name 
+            |> Seq.map (fun c ->
+                match c with
+                | _ when Char.IsNumber(c) 
+                        || c.IsValidIdentifier() 
+                        || ['['; ']'].ToResizeArray().Contains(c) -> c.ToString()
+                | _ -> "_")
+            |> String.concat ""
 
         let rec generateUntilValid(inputName:string) =
             if storages.ContainsKey inputName then
                 generateUntilValid(UniqueName.generate inputName)
             else
                 inputName
-        generateUntilValid(vName)
+
+        name |> getValidName |> generateUntilValid
+
 
 
     /// fillAutoAddress : PLC 에 내릴 때, 자동으로 주소를 할당할 지의 여부
@@ -69,9 +57,9 @@ module TagManagerUtil =
         t
 
 
-    let timer  (storages:Storages)  name sys =
+    let timer  (storages:Storages)  name sys pres=
         let name = getPlcTagAbleName name storages
-        let ts = TimerStruct.Create(TimerType.TON, storages, name, 0us, 0us, sys)
+        let ts = TimerStruct.Create(TimerType.TON, storages, name, pres, 0us, sys)
         ts
 
     let counter (storages:Storages) name sys =
@@ -84,10 +72,7 @@ module TagManagerUtil =
         let t= createPlanVarHelper (storages, name, dataType, fillAutoAddress, target, tagIndex, sys)
         t
 
-    //let createPlanVarBool (storages:Storages) name (fillAutoAddress:bool) (target:IQualifiedNamed)=
-    //    createPlanVar storages name DuBOOL fillAutoAddress target :?> PlanVar<bool>
 
-    type InOut = | In | Out | Memory
     type BridgeType = | Device | Button | Lamp | Condition
     let mutable inCnt = -1;
     let mutable outCnt = -1;
@@ -104,23 +89,24 @@ module TagManagerUtil =
                 | Lamp      -> if addr <> "" then Some addr else failwithlog $"Error Lamp {name}  주소가 없습니다."
                 | Condition -> if addr <> "" then Some addr else failwithlog $"Error Condition {name} 주소가 없습니다."
 
-            elif RuntimeDS.Package.IsPackageSIM() || RuntimeDS.Package.IsPackagePC() 
-            then
+            else
                 match inOut with
-                | ActionTag.ActionIn     -> inCnt<-inCnt+1;  Some($"%%IW{inCnt/16}.{inCnt%16}") //일단 LS 규격으로
-                | ActionTag.ActionOut    -> outCnt<-outCnt+1;Some($"%%QW{outCnt/16}.{outCnt%16}")
-                | ActionTag.ActionMemory -> failwithlog "error: Memory not supported "
-                | _ -> failwithlog "error: ActionTag create "
+                | ActionTag.ActionIn  -> inCnt<-inCnt+1
+                                         if RuntimeDS.Package.IsPackagePLC()
+                                         then
+                                             Some($"%%IW{inCnt/16}.{inCnt%16}") //일단 LS 규격으로
+                                         else 
+                                             Some($"I{inCnt/16}.{inCnt%16}") 
 
-            elif RuntimeDS.Package.IsPackagePLC()
-            then 
-                match inOut with
-                | ActionTag.ActionIn     -> inCnt<-inCnt+1;  Some($"%%IW{inCnt/16}.{inCnt%16}") //일단 LS 규격으로
-                | ActionTag.ActionOut    -> outCnt<-outCnt+1;Some($"%%QW{outCnt/16}.{outCnt%16}")
+                | ActionTag.ActionOut -> outCnt<-outCnt+1
+                                         if RuntimeDS.Package.IsPackagePLC()
+                                         then
+                                             Some($"%%QW{outCnt/16}.{outCnt%16}") //일단 LS 규격으로
+                                         else 
+                                             Some($"O{outCnt/16}.{outCnt%16}")
+
                 | ActionTag.ActionMemory -> failwithlog "error: Memory not supported "
                 | _ -> failwithlog "error: ActionTag create "
-            else 
-                None
        
 
         if address.IsSome

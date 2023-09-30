@@ -11,7 +11,7 @@ type Flow with
 
     member f.O1_ReadyOperationState(): CommentedStatement =
         let set = f.ready.Expr <||> f.BtnReadyExpr
-        let rst = !!f.scr.Expr <||> f.eop.Expr <||> f.sop.Expr
+        let rst = f.eop.Expr <||> f.sop.Expr
 
         (set, rst) ==| (f.rop, getFuncName())
 
@@ -37,19 +37,19 @@ type Flow with
     member f.O5_StopOperationState(): CommentedStatement =
         let set = (f.stop.Expr <||> f.BtnStopExpr <||> f.sop.Expr) <&&> !!f.BtnClearExpr
         let setErrs = f.GetVerticesWithInReal().Select(getVM).ERRs().ToOrElseOff(f.System)
-        let rst = f._off.Expr //test ahn lightPLC 모드 준비중
+        let rst = f.clear.Expr //test ahn lightPLC 모드 준비중
 
-        (set <||> setErrs, rst) --| (f.sop, getFuncName())
+        (set <||> setErrs, rst) ==| (f.sop, getFuncName())
 
     member f.O6_DriveOperationMode (): CommentedStatement =
         let set = f.drive.Expr <||> f.BtnDriveExpr
-        let rst = !!f.aop.Expr <||> !!f.scd.Expr  <||> f.top.Expr
+        let rst = !!f.aop.Expr <||>  f.top.Expr
 
         (set, rst) ==| (f.dop, getFuncName())
 
     member f.O7_TestOperationMode (): CommentedStatement =
         let set = f.test.Expr <||> f.BtnTestExpr
-        let rst = !!f.aop.Expr <||> !!f.scd.Expr  <||> f.dop.Expr
+        let rst = !!f.aop.Expr <||> f.dop.Expr
 
         (set, rst) ==| (f.top, getFuncName())
 

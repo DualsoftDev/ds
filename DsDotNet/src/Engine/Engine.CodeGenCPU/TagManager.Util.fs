@@ -57,9 +57,9 @@ module TagManagerUtil =
         t
 
 
-    let timer  (storages:Storages)  name sys pres=
+    let timer  (storages:Storages)  name sys =
         let name = getPlcTagAbleName name storages
-        let ts = TimerStruct.Create(TimerType.TON, storages, name, pres, 0us, sys)
+        let ts = TimerStruct.Create(TimerType.TON, storages, name, 0us, 0us, sys)
         ts
 
     let counter (storages:Storages) name sys =
@@ -92,14 +92,14 @@ module TagManagerUtil =
             else
                 match inOut with
                 | ActionTag.ActionIn  -> inCnt<-inCnt+1
-                                         if RuntimeDS.Package.IsPackagePLC()
+                                         if RuntimeDS.Package.IsPackagePLC() || RuntimeDS.Package.IsPackagePC()
                                          then
                                              Some($"%%IW{inCnt/16}.{inCnt%16}") //일단 LS 규격으로
                                          else 
                                              Some($"I{inCnt/16}.{inCnt%16}") 
 
                 | ActionTag.ActionOut -> outCnt<-outCnt+1
-                                         if RuntimeDS.Package.IsPackagePLC()
+                                         if RuntimeDS.Package.IsPackagePLC() || RuntimeDS.Package.IsPackagePC()
                                          then
                                              Some($"%%QW{outCnt/16}.{outCnt%16}") //일단 LS 규격으로
                                          else 

@@ -60,16 +60,17 @@ type VertexManager with
         let onErr =
             let on =
                 [ for (input, rxs) in In_Rxs do
-                    input.Expr <&&> !!rxs.Select(fun f -> f.G).ToAndElseOn(v.System) ]
+                    input.Expr <&&> rxs.Select(fun f -> f.G).ToOr() ]
             if on.Any() then on.ToOr() else v.System._off.Expr
 
         let offErr =
             let off =
                 [ for (input, rxs) in In_Rxs do
-                    input.Expr <&&> rxs.Select(fun f -> f.H).ToOrElseOff(v.System)]
+                    !!input.Expr <&&> rxs.Select(fun f -> f.H).ToOr()]
             if off.Any() then off.ToOr() else v.System._off.Expr
 
-        let set = (onErr <||> offErr)
+        let set =  v.System._off.Expr  //test ahn
+        //let set = onErr <||> offErr
         let rst = v.Flow.clear.Expr
 
         (set, rst) ==| (v.E2, getFuncName())

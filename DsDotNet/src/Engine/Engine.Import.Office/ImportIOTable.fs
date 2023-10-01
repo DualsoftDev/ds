@@ -30,10 +30,10 @@ module ImportIOTable =
                     |XGI -> if  not <| x.StartsWith("%")   then "%"+x else x
                     |_ ->   x
 
-            let functionUpdate(funcText, funcs:HashSet<Func>, tableIO:Data.DataTable, isJob:bool) =
+            let functionUpdate(name, funcText, funcs:HashSet<Func>, tableIO:Data.DataTable, isJob:bool) =
                 funcs.Clear()
                 if not <| ((trimSpace funcText) = "" || funcText = "-" ||  funcText = "↑")
-                then getFunctions(funcText)
+                then getFunctions(name, funcText)
                         |> Seq.iter(fun (name, parms) ->
                             if (not<|isJob) && name <> "n"
                             then Office.ErrorPPT(ErrorCase.Name, ErrID._1005, $"{name}", 0)
@@ -54,7 +54,7 @@ module ImportIOTable =
                 match sys.Jobs.TryFind(fun f-> f.Name = jobName) with
                 | Some job -> 
                             let funcs = new HashSet<Func>()
-                            functionUpdate (func, funcs, tableIO, true)
+                            functionUpdate (job.Name, func, funcs, tableIO, true)
                             job.SetFuncs funcs
                 | None -> if "↑" <> jobName //이름이 위와 같지 않은 경우
                             then Office.ErrorPPT(ErrorCase.Name, ErrID._1004, $"오류 이름 {jobName}.", 0)
@@ -76,7 +76,7 @@ module ImportIOTable =
                 match btns.TryFind(fun f -> f.Name = name) with
                 | Some btn -> btn.InAddress <- input
                               btn.OutAddress <- output
-                              functionUpdate (func, btn.Funcs, tableIO, false)
+                              functionUpdate (btn.Name, func, btn.Funcs, tableIO, false)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{name}", 0)
 
             let updateLamp(row:Data.DataRow, lampType:LampType, tableIO:Data.DataTable) =
@@ -87,7 +87,7 @@ module ImportIOTable =
                 let lamps = sys.SystemLamps.Where(fun w->w.LampType = lampType)
                 match lamps.TryFind(fun f -> f.Name = name) with
                 | Some lamp -> lamp.OutAddress <- output
-                               functionUpdate (func, lamp.Funcs, tableIO, false)
+                               functionUpdate (lamp.Name, func, lamp.Funcs, tableIO, false)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", 0)
 
             let updateCondition (row:Data.DataRow, cType:ConditionType, tableIO:Data.DataTable) =
@@ -98,7 +98,7 @@ module ImportIOTable =
                 let conds = sys.SystemConditions.Where(fun w->w.ConditionType = cType)
                 match conds.TryFind(fun f -> f.Name = name) with
                 | Some cond -> cond.InAddress <- output
-                               functionUpdate (func, cond.Funcs, tableIO, false)
+                               functionUpdate (cond.Name, func, cond.Funcs, tableIO, false)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", 0)
 
           

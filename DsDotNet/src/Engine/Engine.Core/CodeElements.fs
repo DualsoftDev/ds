@@ -40,14 +40,16 @@ module CodeElements =
             else
                 genTargetText name varType initValue
 
-    let getFunctions (text:string) =
-        let text = text.Trim()
+    let getFunctions (name, text:string) =
+        let text = text.Trim().ToLower()
         if not <| text.StartsWith "$"
         then failwith "function text start keyword is '$' ex)$m 100 R100"
         text.Split('$')
         |> Seq.tail
         |> Seq.map(fun line ->
             let line = line.Split(';')[0]  //줄바꿈 제거
+            if (not <| line.Contains " " && line <> "n")  //$n 부정은 공백없음
+            then failwith $"{name} Function parameters require a space ' '. ex)$t 1000"
             //function Name
             line.Split(' ')    |> Seq.head
             //function Parameters

@@ -155,8 +155,8 @@ module TagManagerModule =
         let sys = this.System
 
         let counterBit    = counter  s "CTR"  sys
-        let timerOnDelayBit = timer  s "TON"  sys  RuntimeDS.TimeoutCall
-        let timerTimeOutBit = timer  s "TOUT" sys  RuntimeDS.TimeoutCall
+        let timerOnDelayBit = timer  s "TON"  sys 
+        let timerTimeOutBit = timer  s "TOUT" sys 
 
         ///CallDev Done Relay
         member _.CR     = relayCallBit

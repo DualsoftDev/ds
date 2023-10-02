@@ -231,3 +231,9 @@ module ImportViewModule =
                 let viewNodes =  getFlowNodes(mySys.Flows)
 
                 viewNodes
+
+        [<Extension>]
+        static member GetViewNodesLoadingsNThis (mySys:DsSystem) =
+                let loads = mySys.GetRecursiveLoadedSystems()
+                                 .SelectMany(fun s->s.GetViewNodes())
+                mySys.GetViewNodes() @ loads

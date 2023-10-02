@@ -86,7 +86,7 @@ module internal ToDsTextModule =
                 let tab = getTab (indent+1)
                 yield $"{tab}[aliases] = {lb}"
                 for a in aliasDefs do
-                    let mnemonics = (a.Mnemonics |> String.concat "; ") + ";"
+                    let mnemonics = (a.Mnemonics.Select(fun f->f.QuoteOnDemand()) |> String.concat "; ") + ";"
                     let tab = getTab (indent+2)
                     let aliasKey =
                         match a.AliasTarget with
@@ -96,7 +96,7 @@ module internal ToDsTextModule =
                         | Some(DuAliasTargetRealExSystem rs) -> rs.GetAliasTargetToDs().Combine()
                         | None -> failwithlog "ERROR"
 
-                    yield $"{tab}{aliasKey} = {lb} {mnemonics} {rb}"
+                    yield $"{tab}{aliasKey.QuoteOnDemand()} = {lb} {mnemonics} {rb}"
                 yield $"{tab}{rb}"
 
             yield $"{tab}{rb}"

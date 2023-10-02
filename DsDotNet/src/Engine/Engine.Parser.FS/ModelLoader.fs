@@ -5,9 +5,11 @@ open Newtonsoft.Json
 open Dual.Common.Core.FS
 open Engine.Parser.FS
 open System.Collections.Generic
+open System.Runtime.CompilerServices
 
 
 
+[<AutoOpen>]
 [<RequireQualifiedAccess>]
 module ModelLoader =
     let private jsonSettings = JsonSerializerSettings()
@@ -51,6 +53,76 @@ module ModelLoader =
                     |> loadSystemFromDsFile systemRepo
             ]
         { Config = cfg; Systems = systems}
+
+    let getNewFileName (path: string) (ftype: string) =
+        let directory = Path.GetDirectoryName(path)
+        let fileName = Path.GetFileNameWithoutExtension(path)
+        let fileExtension = Path.GetExtension(path)
+        let dt = System.DateTime.Now.ToString("yyMMdd_HH_mm_ss")
+        let newDirectory = sprintf "%s\\%s_%s_autogen\\%s" directory fileName ftype dt
+        Directory.CreateDirectory(newDirectory) |> ignore
+        let fileNamePost = fileName
+        Path.Combine(newDirectory, sprintf "%s%s" fileNamePost fileExtension)
+
+    let exportLoadedSystem (s: LoadedSystem) (dirNew: string) =
+        let mutable commonDir = ""
+
+        let lib = dirNew.ToLower().Split('\\')
+        let abs = s.AbsoluteFilePath.ToLower().Split('\\')
+        let di = DirectoryInfo(dirNew)
+        let mutable shouldBreak = false
+
+        for i in 0 .. abs.Length - 1 do
+            if not shouldBreak then
+                if i >= lib.Length || abs.[i] <> lib.[i] then
+                    if i <> lib.Length - 2 then   //abs\\s_autogen\\date\\...    2 레벨 하위에 생성
+                        failwithf  $"{s.AbsoluteFilePath}.pptx \r\nSystem Library호출은 {di.Parent.FullName} 동일/하위 폴더야 합니다." 
+                    shouldBreak <- true
+                else
+                    commonDir <- commonDir + abs.[i] + "\\"
+
+        let relativePath = s.AbsoluteFilePath.ToLower().Replace(commonDir.ToLower(), "")
+        let absPath = sprintf "%s\\%s.ds" dirNew relativePath
+
+        if not (File.Exists(absPath)) then
+            Directory.CreateDirectory(Path.GetDirectoryName(absPath)) |> ignore
+            let refName = s.ReferenceSystem.Name
+            let libName = Path.GetFileNameWithoutExtension(absPath)
+
+            s.ReferenceSystem.Name <- libName
+            File.WriteAllText(absPath, s.ReferenceSystem.ToDsText(false))
+            s.ReferenceSystem.Name <- refName
+
+        absPath
+
+        
+[<Extension>]
+type ModelLoaderExt =
+    [<Extension>] 
+    static member PPTToDSExport (sys:DsSystem, pptPath:string) = 
+
+        let newFile = getNewFileName pptPath  "DS" 
+        let directory = Path.GetDirectoryName(newFile)
+
+        let dsFile = Path.ChangeExtension(newFile, ".ds")
+        let confFile = Path.ChangeExtension(newFile, ".json")
+
+        let mutable dsCpuSys = [dsFile.Replace(Path.GetDirectoryName(dsFile) + "\\", "")]
+
+        for s in sys.GetRecursiveLoadeds() do
+            match s with
+            | :? Device -> ignore(exportLoadedSystem s  directory)
+            | :? ExternalSystem ->
+                let path = exportLoadedSystem s  directory 
+                if path <> "" then
+                    dsCpuSys <- path :: dsCpuSys
+            | _ -> ()
+
+        File.WriteAllText(dsFile, sys.ToDsText(false))
+        ModelLoader.SaveConfigWithPath confFile  dsCpuSys 
+
+        dsFile
+
 
 module private TestLoadConfig =
     let testme() =

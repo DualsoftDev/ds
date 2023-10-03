@@ -76,6 +76,7 @@ module internal ToDsTextModule =
         ]
 
     let flowToDs (flow:Flow) (indent:int) =
+        let getName (xs:string array) = getRawName xs true
         let tab = getTab indent
         [
             yield $"{tab}[flow] {flow.Name.QuoteOnDemand()} = {lb}"
@@ -90,13 +91,13 @@ module internal ToDsTextModule =
                     let tab = getTab (indent+2)
                     let aliasKey =
                         match a.AliasTarget with
-                        | Some(DuAliasTargetReal real) -> real.GetAliasTargetToDs(flow).Combine()
-                        | Some(DuAliasTargetCall call) -> call.GetAliasTargetToDs().Combine()
-                        | Some(DuAliasTargetRealExFlow rf) -> rf.Real.GetAliasTargetToDs(flow).Combine()
-                        | Some(DuAliasTargetRealExSystem rs) -> rs.GetAliasTargetToDs().Combine()
+                        | Some(DuAliasTargetReal real) -> real.GetAliasTargetToDs(flow) |> getName
+                        | Some(DuAliasTargetCall call) -> call.GetAliasTargetToDs() |> getName
+                        | Some(DuAliasTargetRealExFlow rf) -> rf.Real.GetAliasTargetToDs(flow) |> getName
+                        | Some(DuAliasTargetRealExSystem rs) -> rs.GetAliasTargetToDs() |> getName
                         | None -> failwithlog "ERROR"
 
-                    yield $"{tab}{aliasKey.QuoteOnDemand()} = {lb} {mnemonics} {rb}"
+                    yield $"{tab}{aliasKey} = {lb} {mnemonics} {rb}"
                 yield $"{tab}{rb}"
 
             yield $"{tab}{rb}"

@@ -14,7 +14,7 @@ module RunTimeUtil =
     
     let notifyPreExcute ( x:IStorage) = 
             match  x.GetTagInfo() with
-            |Some t -> onTagDSChanged t
+            |Some t -> t.OnChanged()
             |_ -> ()
         
     let  notifyPostExcute ( x:IStorage) =

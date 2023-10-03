@@ -123,14 +123,12 @@ module TagKindModule =
     |EventAction   of  Tag:IStorage * Target:DsTask   * TagKind:ActionTag
 
     let TagDSSubject = new Subject<TagDS>()
-    
-    let onTagDSChanged(tagDS :TagDS) =
-        TagDSSubject.OnNext(tagDS)
 
     [<AutoOpen>]
     [<Extension>]
     type TagKindExt =
-
+        [<Extension>]
+        static member OnChanged (tagDS:TagDS) =   TagDSSubject.OnNext(tagDS)
         [<Extension>]
         static member GetSystemTagKind (x:IStorage) = match x.TagKind with | InClosedRange TagStartSystem  9999 -> Some (Enum.ToObject(typeof<SystemTag>, x.TagKind) :?> SystemTag)  | _ -> None
         [<Extension>]

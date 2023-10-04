@@ -94,7 +94,7 @@ module rec ViewModule =
         member x.Name =  name
         [<Browsable(false)>]
         member x.UIKey = if coreVertex.IsSome
-                         then $"{name};{coreVertex.Value.QualifiedName.GetHashCode()}"
+                         then $"{x.PureVertex.Value.Name};{coreVertex.Value.QualifiedName.GetHashCode()}"
                          else $"{name};{x.GetHashCode()}"
 
         [<Browsable(false)>]

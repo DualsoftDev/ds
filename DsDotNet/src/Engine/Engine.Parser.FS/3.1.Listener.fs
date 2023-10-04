@@ -301,7 +301,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 tryFindJob pw name |> Option.isSome
 
             let isJobOrAlias (pw:ParentWrapper, Fqdn(vetexPath)) =
-                isJobName (pw.GetFlow().System, vetexPath.Last()) || isAliasMnemonic (pw, vetexPath.JoinWith("."))
+                isJobName (pw.GetFlow().System, vetexPath.Last()) || isAliasMnemonic (pw, vetexPath.CombineQuoteOnDemand())
 
             let candidates = candidateCtxs.Select(getContainerChildPair)
 
@@ -319,19 +319,19 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                             then
                                 Real.Create(r, flow) |> ignore
 
-                        | 1, c::[] when not <| (isAliasMnemonic (parent, ctxInfo.Names.Combine())) ->
+                        | 1, c::[] when not <| (isAliasMnemonic (parent, ctxInfo.Names.CombineQuoteOnDemand())) ->
                             let job = tryFindJob system c |> Option.get
                             if job.DeviceDefs.any() then CallDev.Create(job, parent) |> ignore
                             if job.LinkDefs.any()   then CallSys.Create(job, parent) |> ignore
 
-                        | 1, realorFlow::cr::[] when not <| isAliasMnemonic (parent, ctxInfo.Names.Combine()) ->
+                        | 1, realorFlow::cr::[] when not <| isAliasMnemonic (parent, ctxInfo.Names.CombineQuoteOnDemand()) ->
                             let otherFlowReal = tryFindReal system realorFlow cr |> Option.get
                             RealOtherFlow.Create(otherFlowReal, parent) |> ignore
                             tracefn $"{realorFlow}.{cr} should already have been created."
 
-                        | 2, q::[] when isAliasMnemonic (parent, ctxInfo.Names.Combine()) ->
+                        | 2, q::[] when isAliasMnemonic (parent, ctxInfo.Names.CombineQuoteOnDemand()) ->
                             let flow = parent.GetFlow()
-                            let aliasDef = tryFindAliasDefWithMnemonic flow q |> Option.get
+                            let aliasDef = tryFindAliasDefWithMnemonic flow (q.QuoteOnDemand()) |> Option.get
                             Alias.Create(q, aliasDef.AliasTarget.Value, parent) |> ignore
 
                         | _, _q::[] -> ()

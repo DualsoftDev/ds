@@ -73,7 +73,7 @@ CODE_BLOCK: CODE_BLOCK_START (BLOCK_COMMENT|LINE_COMMENT|CODE_BLOCK|.)*? CODE_BL
 
 fragment Identifier: ValidIdStart ValidIdChar*;
    // lexical rule for hangul characters
-    fragment HangulChar: [\uAC00-\uD7A3]+;
+    fragment HangulChar: [\u3131-\u3163|\uAC00-\uD7A3]+;
 
     fragment ValidIdStart
     : ('a' .. 'z') | ('A' .. 'Z') | '_' | HangulChar

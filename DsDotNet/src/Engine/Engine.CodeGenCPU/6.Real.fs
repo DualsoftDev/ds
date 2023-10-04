@@ -44,9 +44,9 @@ type VertexMReal with
     member v.R2_1_GoingRelayGroup(): CommentedStatement  =
         //let real = v.Vertex :?> Real
         //let planSets = v.System.GetPSs(real).ToOrElseOff(v.System)
-
-        let goingRelayTargetReadys = getResetWeakEdgeTargets(v).Select(fun r->r.V.R)
-        let goingRelays = getResetWeakEdgeTargets(v).GetResetResults(v)
+        let resetTargets = getResetWeakEdgeTargets(v)
+        let goingRelayTargetReadys = resetTargets.Select(fun r-> r.GetPure().V.R)
+        let goingRelays = resetTargets.GetResetResults(v)
         let set = goingRelays.ToAndElseOn(v.System) <&&> goingRelayTargetReadys.ToAndElseOn(v.System)
                   <||> v.SF.Expr///  <||> planSets
         let rst = if goingRelays.any() 

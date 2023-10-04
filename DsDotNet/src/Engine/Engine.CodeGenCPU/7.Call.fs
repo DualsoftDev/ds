@@ -52,7 +52,7 @@ type VertexMCoin with
             for td in call.CallTargetJob.DeviceDefs do
                 if td.ApiItem.TXs.any()
                 then 
-                    let sets = td.ApiItem.PE.Expr <&&> td.ApiItem.PS.Expr
+                    let sets = td.ApiItem.PE.Expr <&&> td.ApiItem.PS.Expr <&&> call.Parent.GetFlow().drive.Expr
                     yield (sets, rsts) --| (td.ActionOut, getFuncName())
         ]
 
@@ -67,7 +67,7 @@ type VertexMCoin with
                 yield (sets, coin._off.Expr) --| (td.ApiItem.PE, getFuncName() )
         ]
 
-    member coin.C4_5_CallActionIn(): CommentedStatement list =
+    member coin.C4_5_CallActionIn(bRoot:bool): CommentedStatement list =
         let call = coin.Vertex :?> CallDev
         let sharedCalls = coin.GetSharedCall() @ [coin.Vertex]
         
@@ -81,9 +81,8 @@ type VertexMCoin with
                             else call.INsFuns
                   
                     (action <||> coin._sim.Expr)
-                    <&&> call.PEs.ToAndElseOn(coin.System) 
-                    //<&&> if bRoot then coin._on.Expr
-                    //              else call.PSs.ToAndElseOn(coin.System) 
+                    <&&> if bRoot then coin._on.Expr
+                                  else call.PEs.ToAndElseOn(coin.System) 
 
                 yield (sets, rsts) --| (sharedCall.V.ET, getFuncName() )
         ]
@@ -95,5 +94,5 @@ type VertexManager with
     member v.C1_CallPlanSend()       : CommentedStatement list = (v :?> VertexMCoin).C1_CallPlanSend()
     member v.C2_CallActionOut()      : CommentedStatement list = (v :?> VertexMCoin).C2_CallActionOut()
     member v.C3_CallPlanReceive()    : CommentedStatement list = (v :?> VertexMCoin).C3_CallPlanReceive()
-    member v.C4_CallActionIn()       : CommentedStatement list = (v :?> VertexMCoin).C4_5_CallActionIn()
-    member v.C5_CallActionInRoot()   : CommentedStatement list = (v :?> VertexMCoin).C4_5_CallActionIn()
+    member v.C4_CallActionIn()       : CommentedStatement list = (v :?> VertexMCoin).C4_5_CallActionIn(false)
+    member v.C5_CallActionInRoot()   : CommentedStatement list = (v :?> VertexMCoin).C4_5_CallActionIn(true)

@@ -179,7 +179,7 @@ module CodeConvertUtil =
                 | :? RealExF as rf -> rf.Real.V.EP
                 | :? CallSys as rs -> rs.V.ET
                 | :? CallDev as c  -> if usingRoot then  c.V.ET else  c.V.CR
-                | :? Alias   as a  -> if usingRoot then  a.V.ET else  a.V.CR
+                | :? Alias   as a  -> if usingRoot then getPure(a.V.Vertex).V.ET else a.V.CR
                 | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
         //리셋 원인
@@ -189,7 +189,7 @@ module CodeConvertUtil =
                     match f with
                     | :? Real    as r  -> tgtV.GR(r.V.Vertex)
                     | :? RealExF as rf -> tgtV.GR(rf.Real)//.V.EP
-                    | :? Alias   as a  -> tgtV.GR(getPureReal(a.V.Vertex))
+                    | :? Alias   as a  -> tgtV.GR(a.V.Vertex.GetPure())
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
         //리셋 결과
@@ -199,7 +199,7 @@ module CodeConvertUtil =
                     match f with
                     | :? Real    as r  -> r.V.GR(tgtV.Vertex)
                     | :? RealExF as rf -> rf.Real.V.GR(tgtV.Vertex)//.V.EP
-                    | :? Alias   as a  -> getPureReal(a.V.Vertex).V.GR(tgtV.Vertex)
+                    | :? Alias   as a  -> a.V.Vertex.GetPure().V.GR(tgtV.Vertex)
                     | :? CallSys as cs  -> cs.V.GR(tgtV.Vertex)
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
@@ -211,7 +211,7 @@ module CodeConvertUtil =
                     match f with
                     | :? Real    as r  -> r.V.G
                     | :? RealExF as rf -> rf.Real.V.G
-                    | :? Alias   as a  -> getPureReal(a.V.Vertex).V.G
+                    | :? Alias   as a  -> a.V.Vertex.GetPure().V.G
                     | :? CallSys as cs  -> cs.V.G
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
@@ -222,7 +222,7 @@ module CodeConvertUtil =
                     match f with
                     | :? Real    as r  -> r.V.R
                     | :? RealExF as rf -> rf.Real.V.R
-                    | :? Alias   as a  -> getPureReal(a.V.Vertex).V.R
+                    | :? Alias   as a  -> a.V.Vertex.GetPure().V.R
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
 

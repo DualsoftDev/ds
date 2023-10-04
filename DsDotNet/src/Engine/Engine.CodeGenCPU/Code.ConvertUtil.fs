@@ -16,28 +16,7 @@ module CodeConvertUtil =
     let getSharedCall(v:VertexManager) : Vertex seq =
             (v.Vertex :?> CallDev).GetVertexSharedCall()
 
-        ///CallDev 자신이거나 Alias Target CallDev
-    let getPureCall(v:VertexManager) : CallDev option=
-            match v.Vertex with
-            | :? CallDev  as c  ->  Some (c)
-            | :? Alias as a  ->
-                match a.TargetWrapper.GetTarget() with
-                | :? CallDev as call -> Some call
-                | _ -> None
-            |_ -> None
-
-        ///Real 자신이거나 RealEx Target Real
-    let getPureReal(v:VertexManager)  : Real =
-            match v.Vertex with
-            | :? Real   as r  -> r
-            | :? RealExF as rf -> rf.Real
-            | :? CallSys as _  ->  failwithlog $"Error"
-            | :? Alias  as a  ->
-                match a.TargetWrapper.GetTarget() with
-                | :? Real as real -> real
-                | :? RealExF as rf -> rf.Real
-                | _ -> failwithlog $"Error"
-            |_ -> failwithlog $"Error"
+      
 
 
     let private getOriginTasks(vr:VertexMReal, initialType:InitialType) =
@@ -189,8 +168,8 @@ module CodeConvertUtil =
         [<Extension>] static member GetSharedReal(v:VertexManager) = v |> getSharedReal
         [<Extension>] static member GetSharedCall(v:VertexManager) = v |> getSharedCall
         ///Real 자신이거나 RealEx Target Real
-        [<Extension>] static member GetPureReal  (v:VertexManager) = v |> getPureReal
-        [<Extension>] static member GetPureCall  (v:VertexManager) = v |> getPureCall
+        [<Extension>] static member GetPureReal  (v:VertexManager) = v.Vertex |> getPureReal
+        [<Extension>] static member GetPureCall  (v:VertexManager) = v.Vertex |> getPureCall
 
         [<Extension>]
         static member GetStartCausals(xs:Vertex seq, usingRoot:bool) =
@@ -210,7 +189,7 @@ module CodeConvertUtil =
                     match f with
                     | :? Real    as r  -> tgtV.GR(r.V.Vertex)
                     | :? RealExF as rf -> tgtV.GR(rf.Real)//.V.EP
-                    | :? Alias   as a  -> tgtV.GR(getPureReal(a.V))
+                    | :? Alias   as a  -> tgtV.GR(getPureReal(a.V.Vertex))
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
         //리셋 결과
@@ -220,7 +199,7 @@ module CodeConvertUtil =
                     match f with
                     | :? Real    as r  -> r.V.GR(tgtV.Vertex)
                     | :? RealExF as rf -> rf.Real.V.GR(tgtV.Vertex)//.V.EP
-                    | :? Alias   as a  -> getPureReal(a.V).V.GR(tgtV.Vertex)
+                    | :? Alias   as a  -> getPureReal(a.V.Vertex).V.GR(tgtV.Vertex)
                     | :? CallSys as cs  -> cs.V.GR(tgtV.Vertex)
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
@@ -232,7 +211,7 @@ module CodeConvertUtil =
                     match f with
                     | :? Real    as r  -> r.V.G
                     | :? RealExF as rf -> rf.Real.V.G
-                    | :? Alias   as a  -> getPureReal(a.V).V.G
+                    | :? Alias   as a  -> getPureReal(a.V.Vertex).V.G
                     | :? CallSys as cs  -> cs.V.G
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
@@ -243,7 +222,7 @@ module CodeConvertUtil =
                     match f with
                     | :? Real    as r  -> r.V.R
                     | :? RealExF as rf -> rf.Real.V.R
-                    | :? Alias   as a  -> getPureReal(a.V).V.R
+                    | :? Alias   as a  -> getPureReal(a.V.Vertex).V.R
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
 

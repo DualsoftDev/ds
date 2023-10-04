@@ -173,7 +173,7 @@ module PPTObjectModule =
         member x.PageNum = iPage
         member x.SlidePart = slidePart
         member x.IsUsing = bShow
-        member x.Title = slidePart.PageTitle()
+        member x.Title = slidePart.PageTitle(false)
 
     type pptNode(shape:Presentation.Shape, iPage:int, pageTitle:string)  =
         let copySystems = Dictionary<string, string>() //copyName, orgiName

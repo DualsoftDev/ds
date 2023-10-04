@@ -163,6 +163,17 @@ module TagKindModule =
             |EventApiItem(tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
             |EventAction (tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
         
+
+        [<Extension>]
+        static member GetSystem(x:TagDS) =
+            match x with
+            |EventSystem (_, obj, _) -> obj
+            |EventFlow   (_, obj, _) -> obj.System
+            |EventVertex (_, obj, _) -> obj.Parent.GetSystem()       
+            |EventApiItem(_, obj, _) -> obj.System
+            |EventAction (_, obj, _) -> obj.ApiItem.System
+        
+        
         
         [<Extension>]
         static member IsStatusTag(x:TagDS) =

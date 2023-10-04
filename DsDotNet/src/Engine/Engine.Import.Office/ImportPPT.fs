@@ -155,8 +155,6 @@ module ImportPPTModule =
     let private fromPPTs(paths:string seq) =
         try
             try
-                System.Diagnostics.Debug.WriteLine " dicPptDoc.Clear()"
-
                 let pptRepo    = Dictionary<DsSystem, pptDoc>()
 
                 let cfg = {DsFilePaths = paths |> Seq.toList}
@@ -187,7 +185,7 @@ module ImportPPTModule =
                 { Config = cfg; Systems = systems}, views, pptRepo
       
             with ex ->  
-                failwithf  @$"{ex.Message} [ErrPath:{if pathStack.any() then pathStack.First() else paths.First() }]" //첫페이지 아니면 stack에 존재
+                failwithf  @$"{ex.Message} [ErrPath:{if pathStack.any() then pathStack.First() else      paths.First() }]" //첫페이지 아니면 stack에 존재
         finally 
             dicPptDoc.Where(fun f->f.Value.IsNonNull())
                      .Iter(fun  f->f.Value.Close())

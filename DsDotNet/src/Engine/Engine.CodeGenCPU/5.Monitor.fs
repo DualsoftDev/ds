@@ -69,7 +69,7 @@ type VertexManager with
                     !!input.Expr <&&> rxs.Select(fun f -> f.H).ToOr()]
             if off.Any() then off.ToOr() else v.System._off.Expr
 
-        let set = onErr <||> offErr
+        let set = (onErr <||> offErr) <&&> !!v._sim.Expr
         let rst = v.Flow.clear.Expr
 
         (set, rst) ==| (v.E2, getFuncName())

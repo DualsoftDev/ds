@@ -80,6 +80,10 @@ module rec ViewModule =
         [<Browsable(false)>]
         member x.CoreVertex = coreVertex
         [<Browsable(false)>]
+        member x.PureVertex = if coreVertex.IsSome 
+                              then coreVertex.Value.GetPure() |> Some
+                              else None
+        [<Browsable(false)>]
         member x.BtnType =  btnType
         [<Browsable(false)>]
         member x.LampType =  lampType

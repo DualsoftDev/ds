@@ -290,13 +290,17 @@ module PPTUtil =
 
 
         [<Extension>]
-        static member PageTitle(slidePart:#SlidePart) =
+        static member PageTitle(slidePart:#SlidePart, headTitle:bool) =
                 let tilteTexts =
                     slidePart.Slide.CommonSlideData.ShapeTree.Descendants<Shape>()
                         |> Seq.filter(fun shape -> shape.Descendants<ApplicationNonVisualDrawingProperties>().Any())
                         |> Seq.map(fun shape -> shape, shape.Descendants<ApplicationNonVisualDrawingProperties>().First())
                         |> Seq.filter(fun (shape, tilte) -> tilte.Descendants<PlaceholderShape>().Any())
-                        |> Seq.filter(fun (shape, tilte) -> tilte.Descendants<PlaceholderShape>().First().Type.Value = Presentation.PlaceholderValues.Title)
+                        |> Seq.filter(fun (shape, tilte) -> tilte.Descendants<PlaceholderShape>().First().Type <> null)
+                        |> Seq.filter(fun (shape, tilte) -> 
+                                                    (not(headTitle) && tilte.Descendants<PlaceholderShape>().First().Type.Value = Presentation.PlaceholderValues.Title)
+                                                    ||  (headTitle  && tilte.Descendants<PlaceholderShape>().First().Type.Value = Presentation.PlaceholderValues.CenteredTitle)
+                                )
                         |> Seq.map(fun (shape, tilte) -> shape.InnerText)
 
                 if(tilteTexts.Any())

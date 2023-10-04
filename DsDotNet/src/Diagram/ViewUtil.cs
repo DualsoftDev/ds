@@ -49,8 +49,9 @@ namespace Diagram.View.MSAGL
                 node => nodes.Where(w => w.PureVertex.Value == node.CoreVertex.Value)
                              .Select(n => Tuple.Create(n, dicUcView[n]))
             );
-
-            foreach (Vertex v in system.GetVertices().OfType<Vertex>())
+            var systems = system.GetRecursiveLoadedSystems().ToList();
+            systems.Add(system);
+            foreach (Vertex v in systems.SelectMany(s=>s.GetVertices().OfType<Vertex>()))
             {
                 var tasks = (v is Call c) ? c.CallTargetJob.DeviceDefs.Cast<DsTask>().ToList() : new List<DsTask>();
                 DicNode[v] = CreateViewVertex(v, dicViewNodes[v], tasks);
@@ -71,7 +72,6 @@ namespace Diagram.View.MSAGL
             _Disposable?.Dispose();
             _Disposable = VertexChangeSubject.Subscribe(rx =>
             {
-
                 if (rx.IsEventVertex)
                 {
                     EventVertex ev = rx as EventVertex;

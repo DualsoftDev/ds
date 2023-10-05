@@ -72,7 +72,7 @@ module XgiFixtures =
 module XgiGenerationTestModule =
     let projectDir =
         let src = __SOURCE_DIRECTORY__
-        let key = @"UnitTest\UnitTest.PLC.Xgi"
+        let key = @"UnitTest/UnitTest.PLC.Xgi"
         let tail = src.IndexOf(key) + key.Length
         src.Substring(0, tail)
     let xmlDir = Path.Combine(projectDir, "XgiXmls")
@@ -80,8 +80,8 @@ module XgiGenerationTestModule =
 
     let saveTestResult testFunctionName (xml:string) =
         let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
-        File.WriteAllText($@"{xmlDir}\{testFunctionName}.xml", crlfXml)
-        let answerXml = File.ReadAllText($@"{xmlAnswerDir}\{testFunctionName}.xml")
+        File.WriteAllText($@"{xmlDir}/{testFunctionName}.xml", crlfXml)
+        let answerXml = File.ReadAllText($"{xmlAnswerDir}/{testFunctionName}.xml")
         System.String.Compare(answerXml, xml, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols) === 0
 
     let codeForBits = """

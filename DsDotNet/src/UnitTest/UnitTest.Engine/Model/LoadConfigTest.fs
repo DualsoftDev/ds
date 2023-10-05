@@ -10,7 +10,7 @@ module LoadConfigTestModule =
     type LoadConfigTest() =
         inherit EngineTestBaseClass()
 
-        let libdir = @$"{__SOURCE_DIRECTORY__}\..\..\UnitTest.Model"
+        let libdir = @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model"
         let configFile = @"test-model-config.json"
 
         let loadConfigTest() =

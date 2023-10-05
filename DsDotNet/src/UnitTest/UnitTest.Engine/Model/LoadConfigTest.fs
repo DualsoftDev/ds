@@ -10,14 +10,14 @@ module LoadConfigTestModule =
     type LoadConfigTest() =
         inherit EngineTestBaseClass()
 
-        let libdir = @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model"
+        let libdir = System.IO.Path.GetFullPath @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model"
         let configFile = @"test-model-config.json"
 
         let loadConfigTest() =
             let cfg =
                 {   DsFilePaths = [
-                        $@"{libdir}\cylinder.ds"
-                        $@"{libdir}\station.ds" ] }
+                        $@"{libdir}/cylinder.ds"
+                        $@"{libdir}/station.ds" ] }
             ModelLoader.SaveConfig configFile cfg
             let cfg2 = ModelLoader.LoadConfig configFile
             cfg === cfg2

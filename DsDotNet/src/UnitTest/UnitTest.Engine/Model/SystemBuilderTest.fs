@@ -13,7 +13,7 @@ module SystemBuilderTest =
 //        do
 //            Fixtures.SetUpTest()
 
-//        let libdir = @$"{__SOURCE_DIRECTORY__}\..\Libraries"
+//        let libdir = @$"{__SOURCE_DIRECTORY__}/../Libraries"
 //        let compare = compare libdir
 //        let compareExact x = compare x x
 //        [<Test>]

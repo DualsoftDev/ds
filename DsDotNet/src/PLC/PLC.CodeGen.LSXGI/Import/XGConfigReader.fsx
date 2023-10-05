@@ -7,19 +7,19 @@ open System
 [<AutoOpen>]
 module XGConfigReader  =
 
-    //let [<Literal>] testSampleXGIDemoKit =    __SOURCE_DIRECTORY__ + @"\..\..\LS\Xg5000Sample\DEMOKIT.xml"
-    //let [<Literal>] testSampleXGI =    __SOURCE_DIRECTORY__ + @"\..\..\LS\Xg5000Sample\XGI Socket.xml"
-    //let [<Literal>] testSampleXGK =    __SOURCE_DIRECTORY__ + @"\..\..\LS\Xg5000Sample\XGK Socket.xml"
-    //let [<Literal>] testSampleXGKDevice =    __SOURCE_DIRECTORY__ + @"\..\..\LS\Xg5000Sample\XGK Device.xml"
-    //let [<Literal>] testSampleXGB =    __SOURCE_DIRECTORY__ + @"\..\..\LS\Xg5000Sample\XGB Socket.xml"
+    //let [<Literal>] testSampleXGIDemoKit =    __SOURCE_DIRECTORY__ + @"/../../LS/Xg5000Sample/DEMOKIT.xml"
+    //let [<Literal>] testSampleXGI =    __SOURCE_DIRECTORY__ + @"/../../LS/Xg5000Sample/XGI Socket.xml"
+    //let [<Literal>] testSampleXGK =    __SOURCE_DIRECTORY__ + @"/../../LS/Xg5000Sample/XGK Socket.xml"
+    //let [<Literal>] testSampleXGKDevice =    __SOURCE_DIRECTORY__ + @"/../../LS/Xg5000Sample/XGK Device.xml"
+    //let [<Literal>] testSampleXGB =    __SOURCE_DIRECTORY__ + @"/../../LS/Xg5000Sample/XGB Socket.xml"
 
 
-    //내부 코드로 이동 ConfigXML\FLAG_INFO_0.fs  FLAG_COMMENT.fs ...
-    //let [<Literal>] pathConfigCPU =     __SOURCE_DIRECTORY__ + @"\..\..\LS\Xg5000Config\PLC_TYPE_LIST.xml"
-    //let [<Literal>] pathConfigIO =      __SOURCE_DIRECTORY__ + @"\..\..\LS\Xg5000Config\tblIOModule.xml"
-    //let [<Literal>] pathConfigDevice =  __SOURCE_DIRECTORY__ + @"\..\..\LS\Xg5000Config\DEVICE_INFO.xml"
-    //let [<Literal>] pathConfigFlag =    __SOURCE_DIRECTORY__ + @"\..\..\LS\Xg5000Config\FLAG_INFO_0.xml"
-    //let [<Literal>] pathConfigFlagComment =    __SOURCE_DIRECTORY__ + @"\..\..\LS\Xg5000Config\FLAG_COMMENT.xml"
+    //내부 코드로 이동 ConfigXML/FLAG_INFO_0.fs  FLAG_COMMENT.fs ...
+    //let [<Literal>] pathConfigCPU =     __SOURCE_DIRECTORY__ + @"/../../LS/Xg5000Config/PLC_TYPE_LIST.xml"
+    //let [<Literal>] pathConfigIO =      __SOURCE_DIRECTORY__ + @"/../../LS/Xg5000Config/tblIOModule.xml"
+    //let [<Literal>] pathConfigDevice =  __SOURCE_DIRECTORY__ + @"/../../LS/Xg5000Config/DEVICE_INFO.xml"
+    //let [<Literal>] pathConfigFlag =    __SOURCE_DIRECTORY__ + @"/../../LS/Xg5000Config/FLAG_INFO_0.xml"
+    //let [<Literal>] pathConfigFlagComment =    __SOURCE_DIRECTORY__ + @"/../../LS/Xg5000Config/FLAG_COMMENT.xml"
 
     let [<Literal>] xmlCnfPath =  "Project/Configurations/Configuration"
 

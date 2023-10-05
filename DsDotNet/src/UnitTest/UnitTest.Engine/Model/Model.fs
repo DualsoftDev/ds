@@ -168,7 +168,7 @@ module ModelTests1 =
         inherit EngineTestBaseClass()
 
         let systemRepo = ShareableSystemRepository()
-        let compare = compare systemRepo @$"{__SOURCE_DIRECTORY__}\..\..\UnitTest.Model"
+        let compare = compare systemRepo @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model"
 
         [<Test>]
         member __.``RecursiveSystem test`` () =

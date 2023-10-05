@@ -22,6 +22,8 @@ linux-target-sln:
 	@dotnet sln Ds.linux.sln remove Apps/DSModeler/DSModeler.csproj
 	@dotnet sln Ds.linux.sln remove Apps/OfficeAddOn/PowerPointAddInForDS/PowerPointAddInForDS.csproj
 
+	@(cd linux-build; rm -f test-engine.sln; dotnet new sln -n test-engine; dotnet sln add ../src/UnitTest/UnitTest.Engine/UnitTest.Engine.fsproj)
+
 linux:	
 	@dotnet build Ds.linux.sln
 

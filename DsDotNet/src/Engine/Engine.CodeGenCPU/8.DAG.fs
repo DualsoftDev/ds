@@ -46,8 +46,7 @@ type VertexManager with
                             else call.INsFuns
                   
                     (action <||> coin._sim.Expr) <&&> call.PEs.ToAndElseOn(coin.System) 
-                    //<&&> if bRoot then coin._on.Expr
-                    //              else call.PEs.ToAndElseOn(coin.System) 
+                  
 
                 let sets = coin.ST.Expr <&&> setEnd <&&> real.V.G.Expr
                 let rsts = coin.RT.Expr

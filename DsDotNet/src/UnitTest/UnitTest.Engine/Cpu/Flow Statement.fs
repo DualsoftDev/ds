@@ -25,17 +25,9 @@ type Spec02_FlowStatement() =
         for real in t.Reals do
             real.F2_RootReset() |> doChecks
 
-    //[<Test>]
-    //member __.``F3 Root Going Pulse`` () =
-    //    for real in t.Reals do
-    //        real.F3_RootGoingPulse()   |> doCheck
+    [<Test>]
+    member __.``F3 VertexEnd WithOutReal`` () =
+        for real in t.ALL.Except(t.Reals) do
+            real.F3_VertexEndWithOutReal() |> doCheck
 
-    //[<Test>]
-    //member __.``F4 Root Going Relay`` () =
-    //    for real in t.Reals do
-    //        real.F4_RootGoingRelay() |> doChecks
-
-    //[<Test>]
-    //member __.``F5 Root Reset Coin`` () =
-    //    for coin in t.Coins do
-    //        coin.F5_RootCoinRelay()   |> doCheck
+            

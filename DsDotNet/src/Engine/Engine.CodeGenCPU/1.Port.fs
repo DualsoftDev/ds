@@ -5,6 +5,10 @@ open Engine.CodeGenCPU
 open Engine.Core
 open Dual.Common.Core.FS
 open System.Linq
+  
+/// 삭제 대기중 test ahn   SP-> ST   RP -> RT  EP -> ET 로 대체중
+
+
 
 ////Port 처리 Set 공용 함수
 //let private getPortSetBits(v:VertexManager) (rse:SREType) =

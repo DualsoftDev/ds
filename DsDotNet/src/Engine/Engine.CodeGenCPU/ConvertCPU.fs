@@ -67,22 +67,16 @@ module ConvertCPU =
                 yield! vm.F1_RootStart()
                 yield! vm.F2_RootReset()
 
-            //if IsSpec (v, CallInFlow ||| RealExSystem ||| RealExFlow, AliasNotCare) then
-            //    yield! vm.D3_DAGCoinEnd()
-
-            //if IsSpec (v, CallInFlow , AliasFalse) then
-            //    yield! vm.C5_CallActionInRoot()
+            if IsSpec (v, CallInFlow ||| RealExSystem ||| RealExFlow, AliasNotCare) then
+                yield vm.F3_VertexEndWithOutReal()
 
             if IsSpec (v, CallInReal , AliasFalse) then
                 yield! vm.C1_CallPlanSend()
                 yield! vm.C2_CallActionOut()
                 yield! vm.C3_CallPlanReceive()
-                //yield! vm.C4_CallActionIn()
                 yield! vm.M3_CallErrorTXMonitor() //test ahn Real 기준으로 Coin 대상으로 다시 작성 필요
                 yield vm.M4_CallErrorRXMonitor()  //test ahn Real 기준으로 Coin 대상으로 다시 작성 필요
 
-            //if IsSpec (v, CallInReal ||| CallInFlow ||| RealExSystem ||| RealExFlow, AliasNotCare) then
-            //    yield! vm.S1_RGFH()
 
             if IsSpec (v, VertexAll, AliasNotCare) then
                 yield vm.M2_PauseMonitor()

@@ -45,22 +45,22 @@ type VertexManager with
         [(sets, rsts) --| (v.RT, getFuncName())] //reset tag
 
 
-    //member v.F5_RootCoinRelay() : CommentedStatement =
-    //    let v = v :?> VertexMCoin
-    //    let ands =
-    //        match v.Vertex  with
-    //        | :? RealExF as rf -> rf.V.ET.Expr
-    //        | :? CallSys as rs -> rs.V.ET.Expr
-    //        | :? CallDev | :? Alias ->
-    //            match v.GetPureCall() with
-    //            | Some call ->  if call.UsingTon
-    //                            then call.V.TDON.DN |> var2expr
-    //                            else call.INsFuns
-    //            | None -> v.ET.Expr
-    //        | _ ->
-    //            failwithlog $"Error"
+    member v.F3_VertexEndWithOutReal() : CommentedStatement  =
+        let sets =
+            match v.Vertex  with
+            | :? Alias   as rf -> rf.V.GetPure().V.ET.Expr
+            | :? RealExF as rf -> rf.V.GetPure().V.ET.Expr
+            | :? CallSys as cs -> cs.V.ET.Expr
+            | :? CallDev as call ->
+                let action =
+                    if call.UsingTon
+                            then call.V.TDON.DN.Expr   //On Delay
+                            else call.INsFuns
+                  
+                (action <||> v._sim.Expr)
+            | _ ->
+                failwithlog $"Error"
 
-    //    let sets = ands <&&> v.ET.Expr
-    //    let rsts = !!v.ST.Expr
-    //    (sets, rsts) ==| (v.ET, getFuncName())
+        let rsts = v._off.Expr
+        (sets, rsts) --| (v.ET, getFuncName())
 

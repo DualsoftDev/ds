@@ -29,8 +29,8 @@ type Spec07_CallStatement() =
             call.C3_CallPlanReceive() |> doChecks
 
 
-    [<Test>]
-    member __.``C4 Call Action In`` () =
-        for call in t.Calls do
-            call.C4_CallActionIn() |> doChecks
+    //[<Test>]
+    //member __.``C4 Call Action In`` () =
+    //    for call in t.Calls do
+    //        call.C4_CallActionIn() |> doChecks
 

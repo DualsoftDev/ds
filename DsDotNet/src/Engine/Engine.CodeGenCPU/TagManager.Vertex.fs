@@ -47,8 +47,8 @@ module TagManagerModule =
         let startForceBit = createTag "SF"   VertexTag.startForce
         let resetForceBit = createTag "RF"   VertexTag.resetForce
         let endForceBit   = createTag "EF"   VertexTag.endForce
-        let goingRelayGroup      = createTag "GG" VertexTag.goingRelayGroup
-        let goingRelays = Dictionary<Vertex, PlanVar<bool>>()
+        //let goingRelayGroup      = createTag "GG" VertexTag.goingRelayGroup
+        //let goingRelays = Dictionary<Vertex, PlanVar<bool>>()
 
 
         interface ITagManager with
@@ -103,18 +103,18 @@ module TagManagerModule =
 
         //DummyBit
         ///Going Relay Group
-        member _.GG        = goingRelayGroup
-        ///Going Relay   //리셋 인과에 따라 필요
-        //CodeConvertUtil.GetResetCausals 사용하여 생성 (RealExF, Alias 순수대상 릴레이 추출필요)
-        member _.GR(src:Vertex) =
-            assert(src :? Real)
-            if goingRelays.ContainsKey src
-            then goingRelays[src]
-            else
-                let gr =
-                    createPlanVar s $"{v.GetPure().Name}_GR_SRC_{src.Name}" DuBOOL true v (VertexTag.goingrelay|>int) sys:?> PlanVar<bool> 
-                goingRelays.Add (src, gr)
-                gr
+        //member _.GG        = goingRelayGroup
+        /////Going Relay   //리셋 인과에 따라 필요
+        ////CodeConvertUtil.GetResetCausals 사용하여 생성 (RealExF, Alias 순수대상 릴레이 추출필요)
+        //member _.GR(src:Vertex) =
+        //    assert(src :? Real)
+        //    if goingRelays.ContainsKey src
+        //    then goingRelays[src]
+        //    else
+        //        let gr =
+        //            createPlanVar s $"{v.Name}_GR_SRC_{src.Name}" DuBOOL true v (VertexTag.goingrelay|>int) sys:?> PlanVar<bool> 
+        //        goingRelays.Add (src, gr)
+        //        gr
 
         member _.CreateTag(name) = createTag name
 
@@ -123,9 +123,6 @@ module TagManagerModule =
         inherit VertexManager(v)
         let mutable originInfo:OriginInfo = defaultOriginInfo (v:?> Real)
         let createTag name = this.CreateTag name
-        let endPortBit    = createTag  "EP" VertexTag.endPort
-        let resetPortBit  = createTag  "RP" VertexTag.resetPort
-        let startPortBit  = createTag  "SP" VertexTag.startPort
 
         let relayRealBit      = createTag "RR" VertexTag.relayReal
         let realOriginAction  = createTag "RO" VertexTag.realOriginAction
@@ -138,28 +135,22 @@ module TagManagerModule =
         member _.RO         = realOriginAction
         ///Real Init Relay
         member _.RR         = relayRealBit
-        //Port
-        ///Segment Start Port
-        member _.SP         = startPortBit
-        ///Segment Reset Port
-        member _.RP         = resetPortBit
-        ///Segment End Port
-        member _.EP         = endPortBit
+     
 
 
     type VertexMCoin(v:Vertex)as this =
         inherit VertexManager(v)
         let s    = this.Storages
         let createTag name = this.CreateTag name
-        let relayCallBit  = createTag  "CR" VertexTag.relayCall
+        //let relayCallBit  = createTag  "CR" VertexTag.relayCall
         let sys = this.System
 
         let counterBit    = counter  s "CTR"  sys
         let timerOnDelayBit = timer  s "TON"  sys 
         let timerTimeOutBit = timer  s "TOUT" sys 
 
-        ///CallDev Done Relay
-        member _.CR     = relayCallBit
+        /////CallDev Done Relay
+        //member _.CR     = relayCallBit
 
         ///Ring Counter
         member _.CTR    = counterBit

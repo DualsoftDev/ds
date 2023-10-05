@@ -21,7 +21,7 @@ type VertexManager with
             else v._off.Expr
 
         let sets = wsDirect <||> wsShareds <||> v.SF.Expr <||> ssDirect <||> planSets
-        let rsts  = real.V.RP.Expr <||> real.V.F.Expr
+        let rsts  = real.V.RT.Expr <||> real.V.F.Expr
         [ (sets, rsts) ==| (v.ST, getFuncName()) ]
 
 
@@ -45,39 +45,22 @@ type VertexManager with
         [(sets, rsts) --| (v.RT, getFuncName())] //reset tag
 
 
-    member v.F4_RootGoingRelay() : CommentedStatement list =
-        let real = v.GetPureReal()
+    //member v.F5_RootCoinRelay() : CommentedStatement =
+    //    let v = v :?> VertexMCoin
+    //    let ands =
+    //        match v.Vertex  with
+    //        | :? RealExF as rf -> rf.V.ET.Expr
+    //        | :? CallSys as rs -> rs.V.ET.Expr
+    //        | :? CallDev | :? Alias ->
+    //            match v.GetPureCall() with
+    //            | Some call ->  if call.UsingTon
+    //                            then call.V.TDON.DN |> var2expr
+    //                            else call.INsFuns
+    //            | None -> v.ET.Expr
+    //        | _ ->
+    //            failwithlog $"Error"
 
-        let shareds = v.GetSharedReal().Select(getVM)
-        let sets =
-            shareds @ [v]
-            |>Seq.collect(fun r ->
-                getResetWeakEdgeSources(r)
-                |>Seq.map(fun s -> s.V.GetPureReal().V, [s].GetResetCausals(r).Head())
-            )
-
-        sets
-        |> Seq.map(fun (src, gr) ->
-            (  src.G.Expr   <&&> real.V.F.Expr //set
-            , real.V.R.Expr <&&> src.GG.Expr) ==| (gr, "RootGoingRelay"))    //rst
-        |> Seq.toList
-
-    member v.F5_RootCoinRelay() : CommentedStatement =
-        let v = v :?> VertexMCoin
-        let ands =
-            match v.Vertex  with
-            | :? RealExF as rf -> rf.V.CR.Expr
-            | :? CallSys as rs -> rs.V.CR.Expr
-            | :? CallDev | :? Alias ->
-                match v.GetPureCall() with
-                | Some call ->  if call.UsingTon
-                                then call.V.TDON.DN |> var2expr
-                                else call.INsFuns
-                | None -> v.CR.Expr
-            | _ ->
-                failwithlog $"Error"
-
-        let sets = ands <&&> v.ET.Expr
-        let rsts = !!v.ST.Expr
-        (sets, rsts) ==| (v.CR, getFuncName())
+    //    let sets = ands <&&> v.ET.Expr
+    //    let rsts = !!v.ST.Expr
+    //    (sets, rsts) ==| (v.ET, getFuncName())
 

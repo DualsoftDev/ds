@@ -255,8 +255,8 @@ module ConvertCoreExt =
                             else (td.InTag  :?> Tag<bool>).Expr
 
         member td.ActionOut = td.OutTag :?> Tag<bool>
-        member td.RXTags       = td.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.EP)
-        member td.TXTags       = td.ApiItem.TXs |> Seq.map getVMReal |> Seq.map(fun f->f.SP)
+        member td.RXTags       = td.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.ET)
+        member td.TXTags       = td.ApiItem.TXs |> Seq.map getVMReal |> Seq.map(fun f->f.ST)
 
         member td.MutualReset(x:DsSystem) =
             let exMutualApis = td.ApiItem.System.GetMutualResetApis(td.ApiItem)
@@ -312,7 +312,7 @@ module ConvertCoreExt =
 
     type Real with
         member r.V = r.TagManager :?> VertexMReal
-        member r.CoinRelays = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.CR)
+        member r.CoinRelays = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ET)
         member r.ErrorTXs   = r.Graph.Vertices.Select(getVM    ).Select(fun f->f.E1)
         member r.ErrorRXs   = r.Graph.Vertices.Select(getVM    ).Select(fun f->f.E2)
 

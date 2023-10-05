@@ -44,11 +44,11 @@ module ConvertCPU =
         let vm = v.TagManager :?> VertexManager
         [
             if IsSpec (v, RealInFlow, AliasFalse) then
-                yield! vm.S1_RealRGFH()
+                //yield! vm.S1_RGFH()
 
-                yield vm.P1_RealStartPort()
-                yield vm.P2_RealResetPort()
-                yield vm.P3_RealEndPort()
+                //yield vm.P1_RealStartPort()
+                //yield vm.P2_RealResetPort()
+                //yield vm.P3_RealEndPort()
 
                 yield vm.M1_OriginMonitor()
                 yield vm.M5_RealErrorTXMonitor()
@@ -56,39 +56,37 @@ module ConvertCPU =
 
                 yield vm.R1_RealInitialStart()
                 yield vm.R2_RealJobComplete()
-                yield vm.R2_1_GoingRelayGroup();
+                //yield vm.R2_1_GoingRelayGroup();
                 yield vm.R3_RealStartPoint()
 
                 yield! vm.D1_DAGHeadStart()
                 yield! vm.D2_DAGTailStart()
-                yield! vm.D3_DAGCoinRelay()
+                yield! vm.D3_DAGCoinEnd(false)
                 yield! vm.D4_DAGCoinReset()
 
-            if IsSpec (v, RealInFlow, AliasFalse) then
                 yield! vm.F1_RootStart()
                 yield! vm.F2_RootReset()
-              //  yield vm.F3_RootGoingPulse()
-                yield! vm.F4_RootGoingRelay()
 
-            if IsSpec (v, (*CallInFlow |||*) RealExSystem ||| RealExFlow, AliasNotCare) then
-                yield vm.F5_RootCoinRelay()
+            if IsSpec (v, CallInFlow ||| RealExSystem ||| RealExFlow, AliasNotCare) then
+                yield! vm.D3_DAGCoinEnd(true)
 
-            if IsSpec (v, CallInFlow , AliasFalse) then
-                yield! vm.C5_CallActionInRoot()
+            //if IsSpec (v, CallInFlow , AliasFalse) then
+            //    yield! vm.C5_CallActionInRoot()
 
             if IsSpec (v, CallInReal , AliasFalse) then
                 yield! vm.C1_CallPlanSend()
                 yield! vm.C2_CallActionOut()
                 yield! vm.C3_CallPlanReceive()
-                yield! vm.C4_CallActionIn()
+                //yield! vm.C4_CallActionIn()
                 yield! vm.M3_CallErrorTXMonitor() //test ahn Real 기준으로 Coin 대상으로 다시 작성 필요
                 yield vm.M4_CallErrorRXMonitor()  //test ahn Real 기준으로 Coin 대상으로 다시 작성 필요
 
-            if IsSpec (v, CallInReal ||| CallInFlow ||| RealExSystem ||| RealExFlow, AliasNotCare) then
-                yield! vm.S2_CoinRGFH()
+            //if IsSpec (v, CallInReal ||| CallInFlow ||| RealExSystem ||| RealExFlow, AliasNotCare) then
+            //    yield! vm.S1_RGFH()
 
             if IsSpec (v, VertexAll, AliasNotCare) then
                 yield vm.M2_PauseMonitor()
+                yield! vm.S1_RGFH()
             //test ahn
             if IsSpec (v, RealExSystem, AliasNotCare) then
                 yield! vm.L1_LinkStart()

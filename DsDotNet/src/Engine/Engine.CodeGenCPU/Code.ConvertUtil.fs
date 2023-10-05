@@ -159,7 +159,7 @@ module CodeConvertUtil =
         [<Extension>] static member RTs (FList(vms:VertexManager list)): PlanVar<bool> list = vms |> map (fun vm -> vm.RT)
         [<Extension>] static member ETs (FList(vms:VertexManager list)): PlanVar<bool> list = vms |> map (fun vm -> vm.ET)
         [<Extension>] static member ERRs(FList(vms:VertexManager list)): PlanVar<bool> list = vms |> bind(fun vm -> [vm.E1; vm.E2])
-        [<Extension>] static member CRs (FList(vms:VertexMCoin list))  : PlanVar<bool> list = vms |> map (fun vm -> vm.CR)
+        //[<Extension>] static member CRs (FList(vms:VertexMCoin list))  : PlanVar<bool> list = vms |> map (fun vm -> vm.CR)
 
         [<Extension>] static member ToAndElseOn(ts:#TypedValueStorage<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToAnd() else sys._on.Expr
         [<Extension>] static member ToAndElseOff(ts:#TypedValueStorage<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToAnd() else sys._off.Expr
@@ -170,39 +170,40 @@ module CodeConvertUtil =
         ///Real 자신이거나 RealEx Target Real
         [<Extension>] static member GetPureReal  (v:VertexManager) = v.Vertex |> getPureReal
         [<Extension>] static member GetPureCall  (v:VertexManager) = v.Vertex |> getPureCall
+        [<Extension>] static member GetPure      (v:VertexManager) = v.Vertex |> getPure
 
         [<Extension>]
         static member GetStartCausals(xs:Vertex seq, usingRoot:bool) =
                 xs.Select(fun f->
                 match f with
-                | :? Real    as r  -> r.V.EP
-                | :? RealExF as rf -> rf.Real.V.EP
+                | :? Real    as r  -> r.V.ET
+                | :? RealExF as rf -> rf.Real.V.ET
                 | :? CallSys as rs -> rs.V.ET
-                | :? CallDev as c  -> if usingRoot then  c.V.ET else  c.V.CR
-                | :? Alias   as a  -> if usingRoot then getPure(a.V.Vertex).V.ET else a.V.CR
+                | :? CallDev as c  -> c.V.ET
+                | :? Alias   as a  -> if usingRoot then getPure(a.V.Vertex).V.ET else a.V.ET
                 | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
         //리셋 원인
         [<Extension>]
-        static member GetResetCausals(xs:Vertex seq, tgtV:VertexManager) =
+        static member GetResetCausals(xs:Vertex seq) =
                 xs.Select(fun f ->
                     match f with
-                    | :? Real    as r  -> tgtV.GR(r.V.Vertex)
-                    | :? RealExF as rf -> tgtV.GR(rf.Real)//.V.EP
-                    | :? Alias   as a  -> tgtV.GR(a.V.Vertex.GetPure())
+                    | :? Real    as r  -> r.V.G
+                    | :? RealExF as rf -> rf.V.G
+                    | :? Alias   as a  -> a.GetPure().V.G
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
-        //리셋 결과
-        [<Extension>]
-        static member GetResetResults(xs:Vertex seq, tgtV:VertexManager) =
-                xs.Select(fun f ->
-                    match f with
-                    | :? Real    as r  -> r.V.GR(tgtV.Vertex)
-                    | :? RealExF as rf -> rf.Real.V.GR(tgtV.Vertex)//.V.EP
-                    | :? Alias   as a  -> a.V.Vertex.GetPure().V.GR(tgtV.Vertex)
-                    | :? CallSys as cs  -> cs.V.GR(tgtV.Vertex)
-                    | _ -> failwithlog $"Error {getFuncName()}"
-                ).Distinct()
+        ////리셋 결과
+        //[<Extension>]
+        //static member GetResetResults(xs:Vertex seq, tgtV:VertexManager) =
+        //        xs.Select(fun f ->
+        //            match f with
+        //            | :? Real    as r  -> r.V.GR(tgtV.Vertex)
+        //            | :? RealExF as rf -> rf.Real.V.GR(tgtV.Vertex)//.V.EP
+        //            | :? Alias   as a  -> a.V.Vertex.V.GR(tgtV.Vertex)
+        //            | :? CallSys as cs  -> cs.V.GR(tgtV.Vertex)
+        //            | _ -> failwithlog $"Error {getFuncName()}"
+        //        ).Distinct()
 
 
         [<Extension>]
@@ -211,7 +212,7 @@ module CodeConvertUtil =
                     match f with
                     | :? Real    as r  -> r.V.G
                     | :? RealExF as rf -> rf.Real.V.G
-                    | :? Alias   as a  -> a.V.Vertex.GetPure().V.G
+                    | :? Alias   as a  -> a.V.G
                     | :? CallSys as cs  -> cs.V.G
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
@@ -222,7 +223,7 @@ module CodeConvertUtil =
                     match f with
                     | :? Real    as r  -> r.V.R
                     | :? RealExF as rf -> rf.Real.V.R
-                    | :? Alias   as a  -> a.V.Vertex.GetPure().V.R
+                    | :? Alias   as a  -> a.V.R
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
 
@@ -238,7 +239,7 @@ module CodeConvertUtil =
 
         [<Extension>]
         static member GetWeakResetRootAndCausals  (v:VertexManager) =
-            let tags = getResetWeakEdgeSources(v).GetResetCausals(v)
+            let tags = getResetWeakEdgeSources(v).GetResetCausals()
             tags.ToAndElseOff(v.System)
 
         [<Extension>]

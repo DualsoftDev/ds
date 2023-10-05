@@ -25,9 +25,14 @@ type Spec08_DAGStatement() =
             real.D2_DAGTailStart() |> doChecks
 
     [<Test>]
-    member __.``D3 DAG Coin Relay`` () =
+    member __.``D3 DAG Coin End InFlow`` () =
         for real in t.Reals do
-            real.D3_DAGCoinRelay() |> doChecks
+            real.D3_DAGCoinEnd(true) |> doChecks
+    
+    [<Test>]
+    member __.``D3 DAG Coin End InReal`` () =
+        for real in t.Reals do
+            real.D3_DAGCoinEnd(false) |> doChecks
 
     [<Test>]
     member __.``D4 DAG Coin Reset`` () =

@@ -21,6 +21,7 @@ using Vertex = Engine.Core.CoreModule.Vertex;
 
 namespace Diagram.View.MSAGL
 {
+
     public partial class UcView : UserControl
     {
         private readonly GViewer viewer = new();
@@ -36,9 +37,11 @@ namespace Diagram.View.MSAGL
             viewer.ToolBarIsVisible = false;
 
             Controls.Add(viewer);
-
-
         }
+
+        int node_attr_linewidth = 3;
+        int edge_attr_linewidthWeek = 2;
+        int edge_attr_linewidthStrong = 4;
 
         //private Dictionary<Tuple<MSeg, Status4>, int> _dicCycle = new Dictionary<Tuple<MSeg, Status4>, int>();
         private readonly Dictionary<string, Node> _dicDrawing = new();
@@ -184,12 +187,12 @@ namespace Diagram.View.MSAGL
             {
                 gEdge.Attr.AddStyle(Style.Solid);
                 gEdge.Attr.Color = Color.DeepSkyBlue;
-                gEdge.Attr.LineWidth = 2;
+                gEdge.Attr.LineWidth = edge_attr_linewidthWeek;
             }
             else if (et == ModelingEdgeType.StartPush)
             {
                 gEdge.Attr.AddStyle(Style.Solid);
-                gEdge.Attr.LineWidth = 4;
+                gEdge.Attr.LineWidth = edge_attr_linewidthStrong;
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
                 gEdge.Attr.Color = Color.DeepSkyBlue;
             }
@@ -197,12 +200,12 @@ namespace Diagram.View.MSAGL
             {
                 gEdge.Attr.AddStyle(Style.Dashed);
                 gEdge.Attr.Color = Color.Green;
-                gEdge.Attr.LineWidth = 2;
+                gEdge.Attr.LineWidth = edge_attr_linewidthWeek;
             }
             else if (et == ModelingEdgeType.ResetPush)
             {
                 gEdge.Attr.AddStyle(Style.Dashed);
-                gEdge.Attr.LineWidth = 4;
+                gEdge.Attr.LineWidth = edge_attr_linewidthStrong;
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
                 gEdge.Attr.Color = Color.Green;
             }
@@ -235,12 +238,11 @@ namespace Diagram.View.MSAGL
 
             }
         }
-
         private void UpdateNodeView(Node nNode, ViewNode viewNode)
         {
             {
                 //nNode.Attr.Color = Color.DarkGoldenrod;
-                nNode.Attr.LineWidth = 4;
+                nNode.Attr.LineWidth = node_attr_linewidth;
 
 
                 if (viewNode.ViewType == ViewType.VBUTTON)
@@ -449,28 +451,31 @@ namespace Diagram.View.MSAGL
             Node node = findNode(viewNode);
             if (node != null)
             {
-                UpdateFontColor(txErr, rxErr, node);
+                UpdateFontColor(txErr, rxErr, node, viewNode.ViewType);
                 RefreshGraph();
             }
         }
 
-        private void UpdateFontColor(bool txErr, bool rxErr, Node node)
+        private void UpdateFontColor(bool txErr, bool rxErr, Node node, ViewType viewType)
         {
             if (txErr)
             {
                 node.Label.FontColor = Color.Red;
-                node.Label.Text = $"{node.Label.Text}\n[Timeout Error]";
+                if(viewType != ViewType.VREAL)
+                    node.Label.Text = $"{node.Label.Text}\n[Timeout Error]";
             }
             if (rxErr)
             {
                 node.Label.FontColor = Color.Red;
-                node.Label.Text = $"{node.Label.Text}\n[Sensor Error]";
+                if(viewType != ViewType.VREAL)
+                    node.Label.Text = $"{node.Label.Text}\n[Sensor Error]";
             }
 
             if (!txErr && !rxErr)
             {
                 node.Label.FontColor = Color.White;
-                node.Label.Text = node.Label.Text.Split('\n')[0];
+                if(viewType != ViewType.VREAL)
+                    node.Label.Text = node.Label.Text.Split('\n')[0];
             }
 
         }

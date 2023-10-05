@@ -61,14 +61,14 @@ module ConvertCPU =
 
                 yield! vm.D1_DAGHeadStart()
                 yield! vm.D2_DAGTailStart()
-                yield! vm.D3_DAGCoinEnd(false)
+                yield! vm.D3_DAGCoinEnd()
                 yield! vm.D4_DAGCoinReset()
 
                 yield! vm.F1_RootStart()
                 yield! vm.F2_RootReset()
 
-            if IsSpec (v, CallInFlow ||| RealExSystem ||| RealExFlow, AliasNotCare) then
-                yield! vm.D3_DAGCoinEnd(true)
+            //if IsSpec (v, CallInFlow ||| RealExSystem ||| RealExFlow, AliasNotCare) then
+            //    yield! vm.D3_DAGCoinEnd()
 
             //if IsSpec (v, CallInFlow , AliasFalse) then
             //    yield! vm.C5_CallActionInRoot()

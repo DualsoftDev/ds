@@ -32,22 +32,22 @@ type VertexManager with
                 yield (sets, rsts) ==| (coin.ST, getFuncName() )
         ]
         
-    member v.D3_DAGCoinEnd(bRoot:bool): CommentedStatement list =
+    member v.D3_DAGCoinEnd(): CommentedStatement list =
         let real = v.Vertex :?> Real
         let children = real.Graph.Vertices.Select(getVM)
         [
             for child in children do
                 let coin = child :?> VertexMCoin
-                let call = coin.Vertex :?> CallDev
+                let call = coin.GetPure().V.Vertex :?> CallDev
                 let setEnd =
                     let action =
                         if call.UsingTon
                             then call.V.TDON.DN.Expr   //On Delay
                             else call.INsFuns
                   
-                    (action <||> coin._sim.Expr)
-                    <&&> if bRoot then coin._on.Expr
-                                  else call.PEs.ToAndElseOn(coin.System) 
+                    (action <||> coin._sim.Expr) <&&> call.PEs.ToAndElseOn(coin.System) 
+                    //<&&> if bRoot then coin._on.Expr
+                    //              else call.PEs.ToAndElseOn(coin.System) 
 
                 let sets = coin.ST.Expr <&&> setEnd <&&> real.V.G.Expr
                 let rsts = coin.RT.Expr

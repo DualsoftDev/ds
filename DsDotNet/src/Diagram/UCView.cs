@@ -438,8 +438,7 @@ namespace Diagram.View.MSAGL
             if (node != null)
             {
                 bool dataExist = Convert.ToDouble(item2) != 0;
-                var edges = findEdgeTargetSame(node);
-                edges.Iter(e => UpdateEdgeColor(dataExist, e));      
+                UpdateLineWidth(dataExist, node);
                 RefreshGraph();
             }
         }
@@ -513,19 +512,23 @@ namespace Diagram.View.MSAGL
             }
         }
 
-       
+
 
         private void UpdateFillColor(bool dataExist, Node node)
         {
             node.Attr.Color = dataExist ? Color.PeachPuff : Color.Black;
+        }
+        private void UpdateLineWidth(bool dataExist, Node node)
+        {
+            node.Attr.LineWidth = dataExist ? 6 : 3;
         }
 
         private void UpdateEdgeColor(bool dataExist, Edge edge)
         {
             edge.Attr.Color = dataExist ? Color.PeachPuff : Color.DarkGray;
         }
+     
 
-        
 
 
         public void SetBackColor(System.Drawing.Color color)

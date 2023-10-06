@@ -58,8 +58,10 @@ namespace Diagram.View.MSAGL
             {
                 v.Value.DsTasks.Cast<TaskDev>().Iter(t =>
                 {
-                    DicActionTag[t.InTag] = v.Value;
-                    DicActionTag[t.OutTag] = v.Value;
+                    if(t.InTag != null)
+                        DicActionTag[t.InTag] = v.Value;
+                    if(t.OutTag != null)
+                        DicActionTag[t.OutTag] = v.Value;
                 });
             }
 

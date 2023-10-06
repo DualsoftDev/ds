@@ -38,16 +38,16 @@ module ModelLoader =
         let systemRepo = ShareableSystemRepository()
         let envPaths = collectEnvironmentVariablePaths()
         let cfg = LoadConfig config
-        let dirs = config.Replace('/', '\\').Split('\\') |> List.ofArray
-        let dir = StringExt.JoinWith(dirs.RemoveAt(dirs.Length - 1), "\\")
+        let dirs = config.Split('/') |> List.ofArray
+        let dir = StringExt.JoinWith(dirs.RemoveAt(dirs.Length - 1), "/")
         let systems =
             [
                 for dsFile in cfg.DsFilePaths do 
                     [
                         dsFile;
-                        $"{dir}\\{dsFile}";
+                        $"{dir}/{dsFile}";
                         for path in envPaths do
-                            $"{path}\\{dsFile}"
+                            $"{path}/{dsFile}"
                     ] 
                     |> fileExistChecker
                     |> loadSystemFromDsFile systemRepo
@@ -59,7 +59,7 @@ module ModelLoader =
         let fileName = Path.GetFileNameWithoutExtension(path)
         let fileExtension = Path.GetExtension(path)
         let dt = System.DateTime.Now.ToString("yyMMdd_HH_mm_ss")
-        let newDirectory = sprintf "%s\\%s_%s_autogen\\%s" directory fileName ftype dt
+        let newDirectory = sprintf "%s/%s_%s_autogen/%s" directory fileName ftype dt
         Directory.CreateDirectory(newDirectory) |> ignore
         let fileNamePost = fileName
         Path.Combine(newDirectory, sprintf "%s%s" fileNamePost fileExtension)
@@ -67,22 +67,22 @@ module ModelLoader =
     let exportLoadedSystem (s: LoadedSystem) (dirNew: string) =
         let mutable commonDir = ""
 
-        let lib = dirNew.ToLower().Split('\\')
-        let abs = s.AbsoluteFilePath.ToLower().Split('\\')
+        let lib = dirNew.ToLower().Split('/')
+        let abs = s.AbsoluteFilePath.ToLower().Split('/')
         let di = DirectoryInfo(dirNew)
         let mutable shouldBreak = false
 
         for i in 0 .. abs.Length - 1 do
             if not shouldBreak then
                 if i >= lib.Length || abs.[i] <> lib.[i] then
-                    if i <> lib.Length - 2 then   //abs\\s_autogen\\date\\...    2 레벨 하위에 생성
+                    if i <> lib.Length - 2 then   //abs/s_autogen/date/...    2 레벨 하위에 생성
                         failwithf  $"{s.AbsoluteFilePath}.pptx \r\nSystem Library호출은 {di.Parent.FullName} 동일/하위 폴더야 합니다." 
                     shouldBreak <- true
                 else
-                    commonDir <- commonDir + abs.[i] + "\\"
+                    commonDir <- commonDir + abs.[i] + "/"
 
         let relativePath = s.AbsoluteFilePath.ToLower().Replace(commonDir.ToLower(), "")
-        let absPath = sprintf "%s\\%s.ds" dirNew relativePath
+        let absPath = sprintf "%s/%s.ds" dirNew relativePath
 
         if not (File.Exists(absPath)) then
             Directory.CreateDirectory(Path.GetDirectoryName(absPath)) |> ignore
@@ -107,7 +107,7 @@ type ModelLoaderExt =
         let dsFile = Path.ChangeExtension(newFile, ".ds")
         let confFile = Path.ChangeExtension(newFile, ".json")
 
-        let mutable dsCpuSys = [dsFile.Replace(Path.GetDirectoryName(dsFile) + "\\", "")]
+        let mutable dsCpuSys = [dsFile.Replace(Path.GetDirectoryName(dsFile) + "/", "")]
 
         for s in sys.GetRecursiveLoadeds() do
             match s with

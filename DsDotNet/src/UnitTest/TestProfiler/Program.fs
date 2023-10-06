@@ -25,7 +25,7 @@ let main argv =
         let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
         helper.TheSystem
 
-    let testDir = @$"{__SOURCE_DIRECTORY__}\..\UnitTest.Model\ImportOfficeExample\sample"
+    let testDir = @$"{__SOURCE_DIRECTORY__}/../UnitTest.Model/ImportOfficeExample/sample"
 
     let loadSampleSystem(textDs:string)  =
         let systemRepo   = ShareableSystemRepository ()
@@ -36,7 +36,7 @@ let main argv =
         sys
 
     let sampleDirectory = testDir
-    let dsPath = sampleDirectory + "\s_car.ds"
+    let dsPath = sampleDirectory + "/s_car.ds"
     let txt= File.ReadAllText(dsPath);
     let sys = loadSampleSystem(txt)
     let result = exportXMLforXGI(sys, "XXXXXXXXX", None)
@@ -59,11 +59,11 @@ let main argv =
     //    for c in sys.Conditions do
     //        c.InAddress <- "%MX777"
 
-    //let testDir = @$"{__SOURCE_DIRECTORY__}\..\UnitTest.Model\ImportOfficeExample\sample"
+    //let testDir = @$"{__SOURCE_DIRECTORY__}/../UnitTest.Model/ImportOfficeExample/sample"
 
     //let sampleDirectory = testDir
     //let myTemplate testName = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../UnitTest.PLC.Xgi/XgiXmls/{testName}.xml")
-    //let pptPath = sampleDirectory + "\s_car.pptx"
+    //let pptPath = sampleDirectory + "/s_car.pptx"
     //let model = ImportPPT.GetModel [ pptPath ]
     //model.Systems.ForEach(testAddressSetting)
 

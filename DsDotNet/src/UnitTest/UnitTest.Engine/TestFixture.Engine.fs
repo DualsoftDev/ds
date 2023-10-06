@@ -6,5 +6,5 @@ module Fixtures =
     type EngineTestBaseClass() =
         inherit TestBaseClass("EngineLogger")
         do
-        ()
+            ()
             //Engine.CodeGenCPU.ModuleInitializer.Initialize()

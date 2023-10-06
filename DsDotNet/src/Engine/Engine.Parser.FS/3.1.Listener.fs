@@ -154,9 +154,9 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
         let envPaths = collectEnvironmentVariablePaths()
         let targetPath(directory:string) = [
             simpleFilePath
-            $"{directory}\\{simpleFilePath}"
+            $"{directory}/{simpleFilePath}"
             for path in envPaths do
-                $"{path}\\{simpleFilePath}" ] |> fileExistChecker
+                $"{path}/{simpleFilePath}" ] |> fileExistChecker
 
         let absoluteFilePath =
             let dir = x.ParserOptions.ReferencePath

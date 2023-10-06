@@ -18,7 +18,7 @@ module CpuTestUtil =
 
         let LoadSampleSystem()  =
             let systemRepo   = ShareableSystemRepository ()
-            let referenceDir = @$"{__SOURCE_DIRECTORY__}\..\..\UnitTest.Model"
+            let referenceDir = @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model"
             let sys = parseText systemRepo referenceDir Program.CpuTestText
             RuntimeDS.System <- sys
             RuntimeDS.Package <- RuntimePackage.StandardPLC

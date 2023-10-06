@@ -19,7 +19,7 @@
 		<Compile Include="Core.Extensions.fs" />
 		<Compile Include="Code.SpecUtil.fs" />
 		<Compile Include="Code.ConvertUtil.fs" />
-		<Compile Include="1.Port.fs" />
+		<Compile Include="1.ButtonLamp.fs" />
 		<Compile Include="2.Flow.fs" />
 		<Compile Include="3.Status.fs" />
 		<Compile Include="4.OperationMode.fs" />
@@ -31,8 +31,7 @@
 		<Compile Include="10.Counter.fs" />
 		<Compile Include="11.Link.fs" />
 		<Compile Include="12.System.fs" />
-		<Compile Include="13.ButtonLamp.fs" />
-		<Compile Include="14.Extension.fs" />
+		<Compile Include="13.Extension.fs" />
 		<Compile Include="ConvertCPU.fs" />
 		<Compile Include="Loader.fs" />
 		<Compile Include="EntryPoint.fs" />

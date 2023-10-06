@@ -47,8 +47,6 @@ module TagManagerModule =
         let startForceBit = createTag "SF"   VertexTag.startForce
         let resetForceBit = createTag "RF"   VertexTag.resetForce
         let endForceBit   = createTag "EF"   VertexTag.endForce
-        //let goingRelayGroup      = createTag "GG" VertexTag.goingRelayGroup
-        //let goingRelays = Dictionary<Vertex, PlanVar<bool>>()
 
 
         interface ITagManager with
@@ -101,21 +99,6 @@ module TagManagerModule =
         ///Error Rx Monitor
         member _.E2         =  errorRxBit
 
-        //DummyBit
-        ///Going Relay Group
-        //member _.GG        = goingRelayGroup
-        /////Going Relay   //리셋 인과에 따라 필요
-        ////CodeConvertUtil.GetResetCausals 사용하여 생성 (RealExF, Alias 순수대상 릴레이 추출필요)
-        //member _.GR(src:Vertex) =
-        //    assert(src :? Real)
-        //    if goingRelays.ContainsKey src
-        //    then goingRelays[src]
-        //    else
-        //        let gr =
-        //            createPlanVar s $"{v.Name}_GR_SRC_{src.Name}" DuBOOL true v (VertexTag.goingrelay|>int) sys:?> PlanVar<bool> 
-        //        goingRelays.Add (src, gr)
-        //        gr
-
         member _.CreateTag(name) = createTag name
 
 
@@ -142,7 +125,6 @@ module TagManagerModule =
         inherit VertexManager(v)
         let s    = this.Storages
         let createTag name = this.CreateTag name
-        //let relayCallBit  = createTag  "CR" VertexTag.relayCall
         let sys = this.System
 
         let counterBit    = counter  s "CTR"  sys

@@ -1,9 +1,6 @@
-using DocumentFormat.OpenXml.Spreadsheet;
 using Dual.Common.Core;
 using Engine.Core;
-using Microsoft.Msagl.Layout.LargeGraphLayout;
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
@@ -11,12 +8,10 @@ using System.Reactive.Subjects;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.EdgeExt;
-using static Engine.Core.ExpressionForwardDeclModule;
 using static Engine.Core.Interface;
 using static Engine.Core.TagKindModule;
 using static Engine.Core.TagKindModule.TagDS;
 using static Engine.Import.Office.ViewModule;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Tuple = System.Tuple;
 
 namespace Diagram.View.MSAGL
@@ -45,29 +40,38 @@ namespace Diagram.View.MSAGL
                 .SelectMany(entry => entry.Key.UsedViewNodes.Select(node => new { Node = node, UcView = entry.Value }))
                 .ToDictionary(item => item.Node, item => item.UcView);
 
-            var nodes = dicView.Keys.SelectMany(view => view.UsedViewNodes.Where(node => node.CoreVertex != null));
+            var nodes = dicView.Keys
+                .SelectMany(view => view.UsedViewNodes.Where(node => node.CoreVertex != null));
+
             var dicViewNodes = nodes.ToDictionary(
                 node => node.CoreVertex.Value,
                 node => nodes.Where(w => w.PureVertex.Value == node.CoreVertex.Value)
                              .Select(n => Tuple.Create(n, dicUcView[n]))
             );
-            var systems = system.GetRecursiveLoadedSystems().ToList();
-            systems.Add(system);
-            foreach (Vertex v in systems.SelectMany(s=>s.GetVertices().OfType<Vertex>()))
+
+            foreach (Vertex v in GetVerties(system))
             {
                 var tasks = (v is Call c) ? c.CallTargetJob.DeviceDefs.Cast<DsTask>().ToList() : new List<DsTask>();
                 DicNode[v] = CreateViewVertex(v, dicViewNodes[v], tasks);
             }
-
             foreach (var v in DicNode)
             {
                 v.Value.DsTasks.Cast<TaskDev>().Iter(t =>
                 {
                     DicActionTag[t.InTag] = v.Value;
+                    DicActionTag[t.OutTag] = v.Value;
                 });
             }
 
             ViewChangeSubject();
+        }
+
+        private static IEnumerable<Vertex> GetVerties(DsSystem system)
+        {
+            var systems = system.GetRecursiveLoadedSystems().ToList();
+            systems.Add(system);
+
+            return systems.SelectMany(s => s.GetVertices().OfType<Vertex>());
         }
 
         public static Subject<TagDS> VertexChangeSubject = new();
@@ -118,19 +122,17 @@ namespace Diagram.View.MSAGL
                 if (rx.IsEventAction)
                 {
                     EventAction ea = rx as EventAction;
-                    if (DicActionTag.ContainsKey(ea.Tag))//output은 표기안함
+                    var viewNode = DicActionTag[ea.Tag];
+                    viewNode.ViewNodes.Iter(dic =>
                     {
-                        var viewNode = DicActionTag[ea.Tag];
-                        viewNode.Value = ea.Tag.BoxedValue;
-                        viewNode.ViewNodes.Iter(dic =>
-                        {
-                            dic.Item2.UpdateValue(dic.Item1, viewNode.Value);
-                        });
-                    }
+                        if(ea.Tag.TagKind == (int)ActionTag.ActionIn)
+                            dic.Item2.UpdateInValue(dic.Item1, ea.Tag.BoxedValue);
+                        if (ea.Tag.TagKind == (int)ActionTag.ActionOut)
+                            dic.Item2.UpdateOutValue(dic.Item1, ea.Tag.BoxedValue);
+                    });
                 }
             });
         }
-
     }
 }
 

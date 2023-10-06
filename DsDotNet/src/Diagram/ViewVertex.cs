@@ -14,7 +14,6 @@ namespace Diagram.View.MSAGL
         public List<DsTask> DsTasks { get; set; }
         public bool ErrorTX { get; set; }
         public bool ErrorRX { get; set; }
-        public object Value { get; set; }
     }
 }
 

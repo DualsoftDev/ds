@@ -59,7 +59,7 @@ module ErrID =
     let _42 = "Api TXs~Rxs 이름이 소속된 Flow가 없습니다."
 
     let _43 = "Api 지시/관찰 구성은 '~' 으로 구분합니다. ex) ApiName[TXs ~ RXs]"
-    let _44 = "spare"
+    let _44 = "파일 경로는 '/' 사용만 가능합니다. \\ 사용불가"
     let _45 = "System 인터페이스 순환관계가 존재합니다."
     let _46 = "CallDev 이름은 '.' 으로 구분되어야 합니다.(ex: systemA.Inferface3)"
     let _47 = "호출 Interface에 해당하는 대상 시스템이 없습니다."

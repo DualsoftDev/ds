@@ -11,6 +11,8 @@ using System.Reactive.Subjects;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.EdgeExt;
+using static Engine.Core.ExpressionForwardDeclModule;
+using static Engine.Core.Interface;
 using static Engine.Core.TagKindModule;
 using static Engine.Core.TagKindModule.TagDS;
 using static Engine.Import.Office.ViewModule;
@@ -23,7 +25,7 @@ namespace Diagram.View.MSAGL
     public static class ViewUtil
     {
         public static Dictionary<Vertex, ViewVertex> DicNode;
-        public static Dictionary<DsTask, ViewVertex> DicTask;
+        public static Dictionary<IStorage, ViewVertex> DicActionTag;
         private static ViewVertex CreateViewVertex(Vertex v, IEnumerable<Tuple<ViewNode, UcView>> viewNodes, List<DsTask> tasks)
         {
             return new ViewVertex()
@@ -38,7 +40,7 @@ namespace Diagram.View.MSAGL
         public static void DrawInit(DsSystem system, Dictionary<ViewNode, UcView> dicView)
         {
             DicNode = new Dictionary<Vertex, ViewVertex>();
-            DicTask = new Dictionary<DsTask, ViewVertex>();
+            DicActionTag = new Dictionary<IStorage, ViewVertex>();
             var dicUcView = dicView
                 .SelectMany(entry => entry.Key.UsedViewNodes.Select(node => new { Node = node, UcView = entry.Value }))
                 .ToDictionary(item => item.Node, item => item.UcView);
@@ -59,7 +61,10 @@ namespace Diagram.View.MSAGL
 
             foreach (var v in DicNode)
             {
-                v.Value.DsTasks.Iter(t => DicTask[t] = v.Value);
+                v.Value.DsTasks.Cast<TaskDev>().Iter(t =>
+                {
+                    DicActionTag[t.InTag] = v.Value;
+                });
             }
 
             ViewChangeSubject();
@@ -102,7 +107,7 @@ namespace Diagram.View.MSAGL
                             vv.ErrorRX = (bool)ev.Tag.BoxedValue;
                         else
                             throw new Exception($"not ErrTag {TagKindExt.GetTagToText(rx)}");
-                       
+
                         vv.ViewNodes.Iter(dic =>
                         {
                             dic.Item2.UpdateError(dic.Item1, vv.ErrorTX, vv.ErrorRX);
@@ -113,12 +118,15 @@ namespace Diagram.View.MSAGL
                 if (rx.IsEventAction)
                 {
                     EventAction ea = rx as EventAction;
-                    var viewNode = DicTask[ea.Target];
-                    viewNode.Value = ea.Tag.BoxedValue;
-                    viewNode.ViewNodes.Iter(dic =>
+                    if (DicActionTag.ContainsKey(ea.Tag))//output은 표기안함
                     {
-                        dic.Item2.UpdateValue(dic.Item1, viewNode.Value);
-                    });
+                        var viewNode = DicActionTag[ea.Tag];
+                        viewNode.Value = ea.Tag.BoxedValue;
+                        viewNode.ViewNodes.Iter(dic =>
+                        {
+                            dic.Item2.UpdateValue(dic.Item1, viewNode.Value);
+                        });
+                    }
                 }
             });
         }

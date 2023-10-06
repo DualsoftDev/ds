@@ -94,7 +94,7 @@ namespace Diagram.View.MSAGL
         {
             nNode.LabelText = nNode.LabelText.Split(';')[0];
             nNode.Label.FontColor = Color.White;
-            nNode.Attr.Color = Color.White;
+            nNode.Attr.Color = Color.Black;
 
         }
 
@@ -504,7 +504,7 @@ namespace Diagram.View.MSAGL
 
         private void UpdateFillColor(bool dataExist, Node node)
         {
-            node.Attr.Color = dataExist ? Color.DeepSkyBlue : Color.Black;
+            node.Attr.Color = dataExist ? Color.PeachPuff : Color.Black;
         }
 
 

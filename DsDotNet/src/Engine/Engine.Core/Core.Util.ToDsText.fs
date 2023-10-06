@@ -358,7 +358,7 @@ module internal ToDsTextModule =
                 yield $"{tab}{rb}"
             let commentDevice(d:Device) = if pCooment then  $"// {d.AbsoluteFilePath}" else "";
             for d in system.Devices do
-                yield $"{tab}[device file={quote d.UserSpecifiedFilePath}] {d.Name}; {commentDevice d}"
+                yield $"{tab}[device file={quote d.UserSpecifiedFilePath}] {d.Name.QuoteOnDemand()}; {commentDevice d}"
             
             let commentSystem(es:ExternalSystem) = if pCooment then  $"// {es.AbsoluteFilePath}" else "";
             for es in system.ExternalSystems do

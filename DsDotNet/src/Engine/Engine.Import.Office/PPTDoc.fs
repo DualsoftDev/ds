@@ -136,6 +136,13 @@ module PPTDocModule =
             let sildeMasters = Office.SildesMasterAll(doc)
 
             sildeMasters |> Seq.iter (fun slideMaster -> masterPages.Add(masterPages.Count+1, slideMaster) |>ignore )
+            
+            sildesAll    
+                |> Seq.iter  (fun (slidePart, show, page) ->
+                        if (slidePart.PageTitle(false) = "" && slidePart.PageTitle(true) = "")
+                        then Office.ErrorPPT(Page, ErrID._59 , "Title Err" , page))
+
+
             sildesAll    
                 |> Seq.iter  (fun (slidePart, show, page) ->
                         if (slidePart.PageTitle(false) <> "")

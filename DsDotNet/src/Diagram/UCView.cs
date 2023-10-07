@@ -43,7 +43,6 @@ namespace Diagram.View.MSAGL
         int edge_attr_linewidthWeek = 2;
         int edge_attr_linewidthStrong = 4;
 
-        //private Dictionary<Tuple<MSeg, Status4>, int> _dicCycle = new Dictionary<Tuple<MSeg, Status4>, int>();
         private readonly Dictionary<string, Node> _dicDrawing = new();
 
         private bool IsDummyMember(List<pptDummy> lstDummy, Vertex vertex)

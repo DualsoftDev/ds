@@ -9,7 +9,8 @@ namespace Diagram.View.MSAGL
     public class ViewVertex
     {
         public Vertex Vertex { get; set; }
-        public List<Tuple<ViewNode, UcView>> ViewNodes { get; set; }  //alias 포함
+        public List<ViewNode> ViewNodes { get; set; }  //alias 포함
+        public ViewNode FlowNode { get; set; }  //UcViewNode
         public Status4 Status { get; set; }
         public List<DsTask> DsTasks { get; set; }
         public bool ErrorTX { get; set; }

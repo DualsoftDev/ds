@@ -58,7 +58,8 @@ type VertexMCoin with
             for td in call.CallTargetJob.DeviceDefs do
                 if td.ApiItem.TXs.any()
                 then 
-                    let sets = td.ApiItem.PE.Expr <&&> td.ApiItem.PS.Expr <&&> call.Parent.GetFlow().drive.Expr
+                    let sets = td.ApiItem.PE.Expr <&&> td.ApiItem.PS.Expr 
+                           <&&> call.Parent.GetFlow().drive.Expr
                     yield (sets, rsts) --| (td.ActionOut, getFuncName())
         ]
 

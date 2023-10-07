@@ -132,7 +132,7 @@ module internal ModelFindModule =
 
     let getVertexSharedCall(call:CallDev) =
         let sharedAlias =
-            call.Parent.GetFlow().GetVerticesWithInReal()
+            call.Parent.GetFlow().GetVerticesOfFlow()
               .GetAliasTypeCalls()
               .Where(fun a -> a.TargetWrapper.CallTarget().Value = call)
               .Cast<Vertex>()

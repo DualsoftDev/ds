@@ -30,20 +30,6 @@ type VertexMReal with
 
 
 
-    //member v.R2_1_GoingRelayGroup(): CommentedStatement  =
-    //    assert (v.Vertex :? Real)
-
-
-    //    let targetReadys = getResetWeakEdgeTargets(v).Select(fun r-> r.GetPure().V.R)
-    //    let goingRelays  = getResetWeakEdgeTargets(v).GetResetResults(v)
-    //    let set = goingRelays.ToAndElseOn(v.System) <&&> targetReadys.ToAndElseOn(v.System)
-    //              <||> v.SF.Expr
-    //    let rst = if goingRelays.any() 
-    //              then v.ET.Expr  //<&&> !!goingRelays.ToOr()
-    //              else v._off.Expr
-
-    //    (set, rst) ==| (v.GG, getFuncName())
-
     member v.R3_RealStartPoint(): CommentedStatement  =
         let set = (v.G.Expr <&&> !!v.RR.Expr) <||>
                   (v.H.Expr <&&> !!v.OG.Expr)
@@ -54,5 +40,4 @@ type VertexMReal with
 type VertexManager with
     member v.R1_RealInitialStart(): CommentedStatement  = (v :?> VertexMReal).R1_RealInitialStart()
     member v.R2_RealJobComplete() : CommentedStatement  = (v :?> VertexMReal).R2_RealJobComplete()
-    //member v.R2_1_GoingRelayGroup()  : CommentedStatement    = (v :?> VertexMReal).R2_1_GoingRelayGroup()
     member v.R3_RealStartPoint()  : CommentedStatement  = (v :?> VertexMReal).R3_RealStartPoint()

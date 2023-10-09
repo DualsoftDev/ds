@@ -7,11 +7,8 @@ open Dual.Common.Core.FS
 
 type VertexManager with
 
-    /// vertex 의 Real RGFH status 를 update 하는 rungs/statements 만들기
     member v.S1_RGFH(): CommentedStatement list =
-        //let endTag = if v :? VertexMReal
-        //             then v.ET.Expr
-        //             else (v :?> VertexMCoin).ET.Expr                              //  Status   ST  RT  CR
+                                                                                      //  Status   ST  RT  CR
         //                                                                           //----------------------
         let r = v.R  <== (( (!!) v.ST.Expr                       <&&> (!!) v.ET.Expr) //    R      x   -   x
                           <||> ( v.ST.Expr <&&>       v.RT.Expr  <&&> (!!) v.ET.Expr))//           o   o   x

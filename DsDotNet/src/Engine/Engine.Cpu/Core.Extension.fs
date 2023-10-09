@@ -95,7 +95,6 @@ module CoreExtensionsModule =
                     match x.GetVertexTagKind() with
                     | Some VertexTag.startPort -> true
                     | Some VertexTag.going -> false
-                    | Some VertexTag.goingrelay -> false
                     | _ -> false
                 else           
                     false

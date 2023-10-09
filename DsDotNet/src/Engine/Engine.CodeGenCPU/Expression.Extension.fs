@@ -31,17 +31,6 @@ module ExpressionExtension =
     //        relay <== ((sets           <||> var2expr relay) <&&> (!! (var2expr coil))) |> withExpressionComment comment
     //        coil  <== ((var2expr relay <||> var2expr coil ) <&&> (sets))    |> withExpressionComment comment
     //    ]
-    ///// Create None Relay rising Pulse Coil Statement
-    //let (--^) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TypedValueStorage<bool>, comment:string) =
-    //    let rising:RisingCoil = {Storage = coil; HistoryFlag = HistoryFlag(); System = (coil :> IStorage).DsSystem}
-    //    rising <=^ (sets <&&> (!! rsts))
-    //    |> withExpressionComment comment
-
-    ///// Create None Relay falling Pulse Coil Statement
-    //let (--!^) (sets: Expression<bool>, rsts: Expression<bool>) (coil: TypedValueStorage<bool>, comment:string) =
-    //    let falling:FallingCoil = {Storage = coil; HistoryFlag = HistoryFlag(); System = (coil :> IStorage).DsSystem}
-    //    falling <=!^ (sets <&&> (!! rsts))
-    //    |> withExpressionComment comment
 
     /// Create Timer Coil Statement
     let (--@) (rungInCondition: IExpression<bool>) (timerCoil: TimerStruct, preset:CountUnitType, comment:string) =

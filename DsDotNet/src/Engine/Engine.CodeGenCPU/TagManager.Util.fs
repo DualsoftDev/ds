@@ -3,7 +3,6 @@ namespace Engine.CodeGenCPU
 open Engine.Core
 open Dual.Common.Core.FS
 open System.Reactive.Linq
-open System.Text.RegularExpressions
 open System
 open Dual.Common.Core.FS.ForwardDecl.ShowForwardDeclSample
 

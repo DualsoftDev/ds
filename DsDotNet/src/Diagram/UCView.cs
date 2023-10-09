@@ -94,7 +94,7 @@ namespace Diagram.View.MSAGL
         {
             nNode.LabelText = nNode.LabelText.Split(';')[0];
             nNode.Label.FontColor = Color.White;
-            nNode.Attr.Color = Color.White;
+            nNode.Attr.Color = Color.Black;
 
         }
 
@@ -181,12 +181,11 @@ namespace Diagram.View.MSAGL
             //gEdge.Label.FontColor = Color.White;
             gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Generalization;
 
-            gEdge.Attr.Color = Color.White;
+            gEdge.Attr.Color = Color.DarkGray;
             ModelingEdgeType et = edge.EdgeSymbol.ToModelEdge();
             if (et == ModelingEdgeType.StartEdge)
             {
                 gEdge.Attr.AddStyle(Style.Solid);
-                gEdge.Attr.Color = Color.DeepSkyBlue;
                 gEdge.Attr.LineWidth = edge_attr_linewidthWeek;
             }
             else if (et == ModelingEdgeType.StartPush)
@@ -194,12 +193,10 @@ namespace Diagram.View.MSAGL
                 gEdge.Attr.AddStyle(Style.Solid);
                 gEdge.Attr.LineWidth = edge_attr_linewidthStrong;
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
-                gEdge.Attr.Color = Color.DeepSkyBlue;
             }
             else if (et == ModelingEdgeType.ResetEdge)
             {
                 gEdge.Attr.AddStyle(Style.Dashed);
-                gEdge.Attr.Color = Color.Green;
                 gEdge.Attr.LineWidth = edge_attr_linewidthWeek;
             }
             else if (et == ModelingEdgeType.ResetPush)
@@ -207,7 +204,6 @@ namespace Diagram.View.MSAGL
                 gEdge.Attr.AddStyle(Style.Dashed);
                 gEdge.Attr.LineWidth = edge_attr_linewidthStrong;
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
-                gEdge.Attr.Color = Color.Green;
             }
 
             else if (et == ModelingEdgeType.Interlock)
@@ -215,13 +211,11 @@ namespace Diagram.View.MSAGL
                 gEdge.Attr.AddStyle(Style.Dashed);
                 gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
-                gEdge.Attr.Color = Color.PaleGoldenrod;
             }
             else if (et == ModelingEdgeType.StartReset)
             {
                 gEdge.Attr.AddStyle(Style.Solid);
                 gEdge.Attr.ArrowheadAtSource = ArrowStyle.Tee;
-                gEdge.Attr.Color = Color.PaleGoldenrod;
             }
 
             UpdateLabelText(gEdge.SourceNode);
@@ -422,7 +416,13 @@ namespace Diagram.View.MSAGL
                 : node;
         }
 
-        public void UpdateValue(ViewNode viewNode, object item2)
+        private IEnumerable<Edge> findEdgeTargetSame(Node node)
+        {
+            var edges = viewer.Graph.Edges.Where(w => w.TargetNode == node);
+            return edges;
+        }
+
+        public void UpdateInValue(ViewNode viewNode, object item2)
         {
             Node node = findNode(viewNode);
             if (node != null)
@@ -432,6 +432,18 @@ namespace Diagram.View.MSAGL
                 RefreshGraph();
             }
         }
+        public void UpdateOutValue(ViewNode viewNode, object item2)
+        {
+            Node node = findNode(viewNode);
+            if (node != null)
+            {
+                bool dataExist = Convert.ToDouble(item2) != 0;
+                UpdateLineWidth(dataExist, node);
+                RefreshGraph();
+            }
+        }
+
+        
 
 
         public void UpdateStatus(ViewNode viewNode)
@@ -500,12 +512,23 @@ namespace Diagram.View.MSAGL
             }
         }
 
-       
+
 
         private void UpdateFillColor(bool dataExist, Node node)
         {
-            node.Attr.Color = dataExist ? Color.DeepSkyBlue : Color.Black;
+            node.Attr.Color = dataExist ? Color.PeachPuff : Color.Black;
         }
+        private void UpdateLineWidth(bool dataExist, Node node)
+        {
+            node.Attr.LineWidth = dataExist ? 6 : 3;
+        }
+
+        private void UpdateEdgeColor(bool dataExist, Edge edge)
+        {
+            edge.Attr.Color = dataExist ? Color.PeachPuff : Color.DarkGray;
+        }
+     
+
 
 
         public void SetBackColor(System.Drawing.Color color)

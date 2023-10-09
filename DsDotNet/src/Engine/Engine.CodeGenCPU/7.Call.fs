@@ -73,32 +73,8 @@ type VertexMCoin with
                 yield (sets, coin._off.Expr) --| (td.ApiItem.PE, getFuncName() )
         ]
 
-    //member coin.C4_5_CallActionIn(bRoot:bool): CommentedStatement list =
-    //    let call = coin.Vertex :?> CallDev
-    //    let sharedCalls = coin.GetSharedCall() @ [coin.Vertex]
-        
-    //    let rsts = coin._off.Expr
-    //    [
-    //        for sharedCall in sharedCalls do
-    //            let sets =
-    //                let action =
-    //                    if call.UsingTon
-    //                        then call.V.TDON.DN.Expr   //On Delay
-    //                        else call.INsFuns
-                  
-    //                (action <||> coin._sim.Expr)
-    //                <&&> if bRoot then coin._on.Expr
-    //                              else call.PEs.ToAndElseOn(coin.System) 
-
-    //            yield (sets, rsts) --| (sharedCall.V.ET, getFuncName() )
-    //    ]
-
-   
-
 
 type VertexManager with
     member v.C1_CallPlanSend()       : CommentedStatement list = (v :?> VertexMCoin).C1_CallPlanSend()
     member v.C2_CallActionOut()      : CommentedStatement list = (v :?> VertexMCoin).C2_CallActionOut()
     member v.C3_CallPlanReceive()    : CommentedStatement list = (v :?> VertexMCoin).C3_CallPlanReceive()
-    //member v.C4_CallActionIn()       : CommentedStatement list = (v :?> VertexMCoin).C4_5_CallActionIn(false)
-    //member v.C5_CallActionInRoot()   : CommentedStatement list = (v :?> VertexMCoin).C4_5_CallActionIn(true)

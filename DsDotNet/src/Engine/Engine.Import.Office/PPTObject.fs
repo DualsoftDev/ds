@@ -156,6 +156,10 @@ module PPTObjectModule =
         | COPY_DEV  ->   let name, number = GetTailNumber(shape.InnerText)
                          if GetSquareBrackets(name, false).length() = 0
                          then  shape.ErrorName(ErrID._7, iPage)
+                         if GetBracketsReplaceName(name).Contains(@"\") 
+                         then  shape.ErrorName(ErrID._44, iPage)
+
+
         | IF_DEVICE
         | IF_LINK
         | REAL

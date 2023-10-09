@@ -159,7 +159,6 @@ module CodeConvertUtil =
         [<Extension>] static member RTs (FList(vms:VertexManager list)): PlanVar<bool> list = vms |> map (fun vm -> vm.RT)
         [<Extension>] static member ETs (FList(vms:VertexManager list)): PlanVar<bool> list = vms |> map (fun vm -> vm.ET)
         [<Extension>] static member ERRs(FList(vms:VertexManager list)): PlanVar<bool> list = vms |> bind(fun vm -> [vm.E1; vm.E2])
-        //[<Extension>] static member CRs (FList(vms:VertexMCoin list))  : PlanVar<bool> list = vms |> map (fun vm -> vm.CR)
 
         [<Extension>] static member ToAndElseOn(ts:#TypedValueStorage<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToAnd() else sys._on.Expr
         [<Extension>] static member ToAndElseOff(ts:#TypedValueStorage<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToAnd() else sys._off.Expr
@@ -193,18 +192,7 @@ module CodeConvertUtil =
                     | :? Alias   as a  -> a.GetPure().V.G
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
-        ////리셋 결과
-        //[<Extension>]
-        //static member GetResetResults(xs:Vertex seq, tgtV:VertexManager) =
-        //        xs.Select(fun f ->
-        //            match f with
-        //            | :? Real    as r  -> r.V.GR(tgtV.Vertex)
-        //            | :? RealExF as rf -> rf.Real.V.GR(tgtV.Vertex)//.V.EP
-        //            | :? Alias   as a  -> a.V.Vertex.V.GR(tgtV.Vertex)
-        //            | :? CallSys as cs  -> cs.V.GR(tgtV.Vertex)
-        //            | _ -> failwithlog $"Error {getFuncName()}"
-        //        ).Distinct()
-
+   
 
         [<Extension>]
         static member GetResetStrongCausals(xs:Vertex seq) =

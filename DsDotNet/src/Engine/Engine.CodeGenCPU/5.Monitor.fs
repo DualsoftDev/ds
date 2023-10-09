@@ -55,18 +55,18 @@ type VertexManager with
         let In_Rxs =
             [ for j in call.CallTargetJob.DeviceDefs do
                 if j.ApiItem.RXs.Any()
-                then yield j.InTag:?>Tag<bool>, j.ApiItem.RXs.Select(getVM) ]
+                then yield j.ActionINFunc, j.ApiItem.RXs.Select(getVM) ]
 
         let onErr =
             let on =
                 [ for (input, rxs) in In_Rxs do
-                    input.Expr <&&> rxs.Select(fun f -> f.G).ToOr() ]
+                    input <&&> rxs.Select(fun f -> f.G).ToOr() ]
             if on.Any() then on.ToOr() else v.System._off.Expr
 
         let offErr =
             let off =
                 [ for (input, rxs) in In_Rxs do
-                    !!input.Expr <&&> rxs.Select(fun f -> f.H).ToOr()]
+                    !!input <&&> rxs.Select(fun f -> f.H).ToOr()]
             if off.Any() then off.ToOr() else v.System._off.Expr
 
         let set = (onErr <||> offErr) <&&> !!v._sim.Expr

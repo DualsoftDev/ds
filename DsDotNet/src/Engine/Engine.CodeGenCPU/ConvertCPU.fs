@@ -44,11 +44,6 @@ module ConvertCPU =
         let vm = v.TagManager :?> VertexManager
         [
             if IsSpec (v, RealInFlow, AliasFalse) then
-                //yield! vm.S1_RGFH()
-
-                //yield vm.P1_RealStartPort()
-                //yield vm.P2_RealResetPort()
-                //yield vm.P3_RealEndPort()
 
                 yield vm.M1_OriginMonitor()
                 yield vm.M5_RealErrorTXMonitor()
@@ -56,7 +51,6 @@ module ConvertCPU =
 
                 yield vm.R1_RealInitialStart()
                 yield vm.R2_RealJobComplete()
-                //yield vm.R2_1_GoingRelayGroup();
                 yield vm.R3_RealStartPoint()
 
                 yield! vm.D1_DAGHeadStart()

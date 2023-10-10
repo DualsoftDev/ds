@@ -36,7 +36,7 @@ module Zmq =
             | _ -> None
             
 
-        member private x.handleRequest (request: string) =
+        member private x.handleRequest (request: string) : IIOResult =
             logDebug $"Handling request: {request}"
             let tokens = request.Split(' ', StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
             let command = tokens[0]
@@ -76,14 +76,16 @@ module Zmq =
 
             match command with
             | "read" ->
-                args |> map (fun a -> $"{a}={readAddress(a)}")
-                |> joinWith " "
+                let result =
+                    args |> map (fun a -> $"{a}={readAddress(a)}")
+                    |> joinWith " "
+                ReadResultString(result)
 
             | "write" ->
                 args |> iter (fun a -> writeAddressWithValue(a))
-                "OK"
+                WriteResultOK()
             | _ ->
-                "Unknown request"
+                ReadResultError $"Unknown request: {request}"
 
         member x.Run() =
             // start a separate thread to run the server
@@ -95,7 +97,15 @@ module Zmq =
                     while not cancellationToken.IsCancellationRequested do
                         let message = respSocket.ReceiveFrameString()
                         let response = x.handleRequest message
-                        respSocket.SendFrame(response)
+                        match response with
+                        | :? ReadResultString as ok ->
+                            respSocket.SendFrame(ok.Result)
+                        | :? WriteResultOK as ok ->
+                            respSocket.SendFrame("OK")
+                        | :? IIOResultNG as ng ->
+                            respSocket.SendFrame(ng.Error)
+                        | _ ->
+                            failwithf($"Unknown response type: {response.GetType()}")
                     ))
             th.Start()
             th
@@ -114,7 +124,7 @@ module Zmq =
             member x.Dispose() =
                 reqSocket.Close()
 
-        member x.SendRequest(request:string) =
+        member x.SendRequest(request:string) : string =
             reqSocket.SendFrame(request)
             reqSocket.ReceiveFrameString()
 

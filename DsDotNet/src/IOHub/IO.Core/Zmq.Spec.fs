@@ -1,10 +1,49 @@
 namespace IO.Core
+open System
 
 [<AutoOpen>]
 module ZmqSpec =
-    type ReadResult(error:string, result:obj) =
-        member val Error = error with get, set
-        member val Result = result  with get, set
+    type IIOResult = interface end
+    type IIOResultOK = inherit IIOResult
+    type IIOResultNG =
+        inherit IIOResult
+        abstract member Error:string
+
+    [<AbstractClass>]
+    type IOResult(error:string) =
+        member x.Error = error
+        member x.IsOK = String.IsNullOrEmpty(error)
+        interface IIOResult
+
+    [<AbstractClass>]
+    type ReadResult(error:string) =
+        inherit IOResult(error)
+
+    type ReadResultArray<'T>(results:'T[]) =
+        inherit ReadResult(null)
+        interface IIOResultOK
+        member val Results = results
+
+    type ReadResultString(result:string) =
+        inherit ReadResult(null)
+        interface IIOResultOK
+        member val Result = result
+
+    type ReadResultError(error:string) =
+        inherit ReadResult(error)
+        interface IIOResultNG with
+            member x.Error = error
+
+    type WriteResultOK() =
+        inherit IOResult(null)
+        interface IIOResultOK
+    type WriteResultError(error:string) =
+        inherit IOResult(error)
+        interface IIOResultNG with
+            member x.Error = error
+
+
+
 
     /// MW100 : name='M', type='W', offset=100.  (MX30, MD1234, ML1234, ..)
     type AddressSpec(name:string, typ:string, offset:int) =

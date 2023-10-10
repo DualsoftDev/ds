@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFrameworks>net7.0;net48</TargetFrameworks>
@@ -55,7 +55,7 @@
 	
 
 	<ItemGroup>
-		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.4" />
+		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.5" />
         <PackageReference Include="System.Reactive" Version="6.0.0" />
         <PackageReference Include="Fody" Version="6.6.4">
 			<PrivateAssets>all</PrivateAssets>

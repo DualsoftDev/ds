@@ -10,6 +10,8 @@
 		<Content Include="appsettings.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
+		<Compile Include="Zmq.Spec.fs" />
+		<Compile Include="Zmq.BufferManager.fs" />
 		<Compile Include="Zmq.fs" />
 	</ItemGroup>
 
@@ -17,7 +19,7 @@
 		<PackageReference Include="log4net" Version="2.0.15" />
 		<PackageReference Include="NetMQ" Version="4.0.1.13" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.4" />
+		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.5" />
 	</ItemGroup>
 
 </Project>

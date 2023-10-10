@@ -16,6 +16,7 @@ module FileLayer =
         member val Error = error with get, set
         member val Result = result  with get, set
 
+    /// MW100 : name='M', type='W', offset=100.  (MX30, MD1234, ML1234, ..)
     type AddressSpec(name:string, typ:string, offset:int) =
         member val Name = name with get, set
         member val Offset = offset with get, set
@@ -33,7 +34,7 @@ module FileLayer =
         member val ServicePort = servicePort with get, set
         member val Files = files with get, set
 
-    type MemoryBuffer(stream:FileStream) =
+    type BufferManager(stream:FileStream) =
         let locker = obj()  // 객체를 lock용으로 사용
         //member x.Type = typ
         member x.FileStream = stream
@@ -58,6 +59,36 @@ module FileLayer =
         member x.readU16(offset:int) = x.readU16s(offset, 1)[0]
         member x.readU32(offset:int) = x.readU32s(offset, 1)[0]
         member x.readU64(offset:int) = x.readU64s(offset, 1)[0]
+
+        member x.readU8s (offset: int, count: int) : byte[] =
+            lock locker (fun () ->
+                let buffer = Array.zeroCreate<byte> count
+                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
+                stream.Read(buffer, 0, count) |> ignore
+                buffer
+            );
+        member x.readU16s (offset: int, count: int) : uint16[] =
+            lock locker (fun () ->
+                let buffer = Array.zeroCreate<byte> (count * 2)
+                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
+                stream.Read(buffer, 0, count * 2) |> ignore
+                Array.init count (fun i -> System.BitConverter.ToUInt16(buffer, i * 2))
+            )
+        member x.readU32s (offset: int, count: int) : uint32[] =
+            lock locker (fun () ->
+                let buffer = Array.zeroCreate<byte> (count * 4)
+                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
+                stream.Read(buffer, 0, count * 4) |> ignore
+                Array.init count (fun i -> System.BitConverter.ToUInt32(buffer, i * 4))
+            )
+        member x.readU64s (offset: int, count: int) : uint64[] =
+            lock locker (fun () ->
+                let buffer = Array.zeroCreate<byte> (count * 8)
+                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
+                stream.Read(buffer, 0, count * 8) |> ignore
+                Array.init count (fun i -> System.BitConverter.ToUInt64(buffer, i * 8))
+            )
+
 
         member x.writeBit(offset:int, value:bool) =
             // 바이트 위치 및 해당 바이트 내의 비트 위치 계산
@@ -104,45 +135,6 @@ module FileLayer =
                 stream.Write(buffer, 0, buffer.Length)
             )
 
-
-        member x.readU8s (offset: int, count: int) : byte[] =
-            lock locker (fun () ->
-                let buffer = Array.zeroCreate<byte> count
-                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
-                stream.Read(buffer, 0, count) |> ignore
-                buffer
-            );
-        member x.readU16s (offset: int, count: int) : uint16[] =
-            lock locker (fun () ->
-                let buffer = Array.zeroCreate<byte> (count * 2)
-                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
-                stream.Read(buffer, 0, count * 2) |> ignore
-                Array.init count (fun i -> System.BitConverter.ToUInt16(buffer, i * 2))
-            )
-        member x.readU32s (offset: int, count: int) : uint32[] =
-            lock locker (fun () ->
-                let buffer = Array.zeroCreate<byte> (count * 4)
-                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
-                stream.Read(buffer, 0, count * 4) |> ignore
-                Array.init count (fun i -> System.BitConverter.ToUInt32(buffer, i * 4))
-            )
-        member x.readU64s (offset: int, count: int) : uint64[] =
-            lock locker (fun () ->
-                let buffer = Array.zeroCreate<byte> (count * 8)
-                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
-                stream.Read(buffer, 0, count * 8) |> ignore
-                Array.init count (fun i -> System.BitConverter.ToUInt64(buffer, i * 8))
-            )
-
-
-        member x.writeByte (offset: int, value: byte) =
-            lock locker (fun () ->
-                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
-                stream.Write([| value |], 0, 1)
-                stream.Flush()  // Ensure that the changes are written immediately to the file
-            )
-
-
 [<AutoOpen>]
 module Extension =
     type IOFileSpec with
@@ -166,19 +158,20 @@ module Zmq =
     type Server(memoryFilesSpec:IOSpec, cancellationToken:CancellationToken) =
         let port = memoryFilesSpec.ServicePort
         let dir = memoryFilesSpec.Location
-        let streams = new Dictionary<string, MemoryBuffer>()
+        let streams = new Dictionary<string, BufferManager>()
         do
             for mfs in memoryFilesSpec.Files do
                 let stream = mfs.InitiaizeFile(dir)
-                streams.Add(mfs.Name, new MemoryBuffer(stream))
+                streams.Add(mfs.Name, new BufferManager(stream))
 
         let (|AddressPattern|_|) (str: string) =
             let memTypes = streams.Keys.JoinWith "|"
             let dataTypes = "x|b|w|d|l"
-            let pat = sprintf "([%s])([%s])(\d+)" memTypes dataTypes
+            let pattern = sprintf "([%s])([%s])(\d+)" memTypes dataTypes
             match str with
-            | RegexPattern pat [m; d; Int32Pattern offset] -> Some(AddressSpec(m, d, offset))
+            | RegexPattern pattern [m; d; Int32Pattern offset] -> Some(AddressSpec(m, d, offset))
             | _ -> None
+
         let (|AddressAssignPattern|_|) (str: string) =
             match str with
             | RegexPattern "(\w+)=(\w+)" [AddressPattern addr; value] ->
@@ -202,7 +195,7 @@ module Zmq =
                             let stream = streams[ap.Name]
 
                             let result =
-                                match ap.Type with
+                                match ap.Type.ToLower() with
                                 | "x" -> stream.readBit(offset) :> obj
                                 | "b" -> stream.readU8(offset)
                                 | "w" -> stream.readU16(offset)
@@ -222,7 +215,7 @@ module Zmq =
                         let offset = ap.Offset
                         let stream = streams[ap.Name]
 
-                        match ap.Type with
+                        match ap.Type.ToLower() with
                         | "x" -> stream.writeBit(offset, bool.Parse(value))
                         | "b" -> stream.writeU8(offset,  Byte.Parse(value))
                         | "w" -> stream.writeU16(offset, UInt16.Parse(value))
@@ -254,6 +247,7 @@ module Zmq =
             member x.Dispose() =
                 streams.Values |> iter (fun stream -> stream.FileStream.Dispose())
 
+    /// serverAddress: "tcp://localhost:5555" or "tcp://*:5555"
     type Client(serverAddress:string) =
         let reqSocket = new RequestSocket()
         do

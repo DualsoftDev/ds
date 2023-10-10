@@ -10,7 +10,7 @@
 		<Content Include="appsettings.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Compile Include="Library.fs" />
+		<Compile Include="Zmq.fs" />
 	</ItemGroup>
 
 	<ItemGroup>

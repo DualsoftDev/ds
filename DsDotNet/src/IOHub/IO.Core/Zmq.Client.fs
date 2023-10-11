@@ -66,6 +66,13 @@ module ZmqClientModule =
                 failwithf($"Error: {result}")
 
 
+        member x.WriteBits(name:string, offsets:int[], values:bool[]) =
+            let byteValues = values |> map (fun v -> if v then 1uy else 0uy)
+            buildPartial(reqSocket, "wx", name, offsets)
+                .SendFrame(byteValues)
+
+            verifyReceiveOK reqSocket
+
         member x.WriteBytes(name:string, offsets:int[], values:byte[]) =
             buildPartial(reqSocket, "wb", name, offsets)
                 .SendFrame(values)
@@ -76,6 +83,18 @@ module ZmqClientModule =
         member x.WriteUInt16s(name:string, offsets:int[], values:uint16[]) =
             buildPartial(reqSocket, "ww", name, offsets)
                 .SendFrame(ByteConverter.ToBytes<uint16>(values))
+
+            verifyReceiveOK reqSocket
+
+        member x.WriteUInt32s(name:string, offsets:int[], values:uint32[]) =
+            buildPartial(reqSocket, "wd", name, offsets)
+                .SendFrame(ByteConverter.ToBytes<uint32>(values))
+
+            verifyReceiveOK reqSocket
+
+        member x.WriteUInt64s(name:string, offsets:int[], values:uint64[]) =
+            buildPartial(reqSocket, "wl", name, offsets)
+                .SendFrame(ByteConverter.ToBytes<uint64>(values))
 
             verifyReceiveOK reqSocket
 

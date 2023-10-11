@@ -45,6 +45,10 @@ module ZmqTestMain =
         let wr2 = client.WriteBytes("M", [|0; 1; 2; 3|], [|1uy; 0uy; 55uy; 0uy|])
         let bytes:byte[] = client.ReadBytes("M", [|0; 1; 2; 3|])
         let words:uint16[] = client.ReadUInt16s("M", [|0; 1; 2; 3|])
+
+
+        let wr3 = client.WriteBits("M", [|0; 7|], [|true; true|])
+        let rr3 = client.ReadBytes("M", [|0|])
         //serverThread.Join()
      
         let mutable key = ""

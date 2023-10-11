@@ -1,8 +1,10 @@
 namespace IO.Core
 open System
+open System.Diagnostics.CodeAnalysis
 
 [<AutoOpen>]
 module ZmqSpec =
+    [<AllowNullLiteral>]
     type IIOResult = interface end
     type IIOResultOK = inherit IIOResult
     type IIOResultNG =

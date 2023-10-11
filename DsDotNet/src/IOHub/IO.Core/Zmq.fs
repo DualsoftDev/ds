@@ -157,6 +157,7 @@ module Zmq =
                 while not cancellationToken.IsCancellationRequested do
                     let response = x.handleRequest respSocket
                     match response with
+                    | null -> ()
                     | :? ReadResultString as ok ->
                         respSocket.SendFrame(ok.Result)
                     | :? WriteResultOK as ok ->
@@ -169,6 +170,8 @@ module Zmq =
                         respSocket.SendFrame(ng.Error)
                     | _ ->
                         failwithf($"Unknown response type: {response.GetType()}")
+                Console.WriteLine("Cancellation request detected!")
+
             )) |> tee (fun t -> t.Start())
 
         interface IDisposable with
@@ -258,6 +261,13 @@ module Main =
 
         let port = ioSpec.ServicePort
         let cts = new CancellationTokenSource()
+
+        let handleCancelKey (args: ConsoleCancelEventArgs) =
+            Console.WriteLine("Ctrl+C pressed!")
+            cts.Cancel()
+            //args.Cancel <- true // 프로그램을 종료하지 않도록 설정 (선택 사항)
+        Console.CancelKeyPress.Add(handleCancelKey)
+
         let server = new Zmq.Server(ioSpec, cts.Token)
         let serverThread = server.Run()
 
@@ -279,7 +289,8 @@ module Main =
         let wr2 = client.WriteBytes("M", [|0; 1; 2; 3|], [|1uy; 0uy; 55uy; 0uy|])
         let bytes:byte[] = client.ReadBytes("M", [|0; 1; 2; 3|])
         let words:uint16[] = client.ReadUInt16s("M", [|0; 1; 2; 3|])
-        serverThread.Join()
+        //serverThread.Join()
      
+        Console.WriteLine("Server terminated!")
         
         0

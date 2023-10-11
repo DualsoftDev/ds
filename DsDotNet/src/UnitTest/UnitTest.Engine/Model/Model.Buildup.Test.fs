@@ -15,7 +15,7 @@ module ModelBuildupTests1 =
         inherit EngineTestBaseClass()
 
         let systemRepo = ShareableSystemRepository()
-        let libdir = @$"{__SOURCE_DIRECTORY__}\..\..\UnitTest.Model"
+        let libdir = @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model"
         let compare = compare systemRepo libdir
         let compareExact x = compare x x
 
@@ -25,7 +25,7 @@ module ModelBuildupTests1 =
             let system = DsSystem("My", "localhost")
             let flow = Flow.Create("F", system)
             let real = Real.Create("Main", flow)
-            let dev = system.LoadDeviceAs(systemRepo, "A", @$"{libdir}\cylinder.ds", "cylinder.ds")
+            let dev = system.LoadDeviceAs(systemRepo, "A", @$"{libdir}/cylinder.ds", "cylinder.ds")
 
             let apis = system.ApiUsages
             let apiP = apis.First(fun ai -> ai.Name = "+")
@@ -205,7 +205,7 @@ module ModelBuildupTests1 =
             STOP2(%I1, %Q1) = { F2; }
         }
     }
-    [device file="cylinder.ds"] A; // D:\Git\ds-Master\DsDotNet\src\UnitTest\UnitTest.Model\cylinder.ds
+    [device file="cylinder.ds"] A; // D:/Git/ds-Master/DsDotNet/src/UnitTest/UnitTest.Model/cylinder.ds
 }
 """
             logDebug $"{generated}"

@@ -22,7 +22,11 @@ linux-target-sln:
 	@dotnet sln Ds.linux.sln remove Apps/DSModeler/DSModeler.csproj
 	@dotnet sln Ds.linux.sln remove Apps/OfficeAddOn/PowerPointAddInForDS/PowerPointAddInForDS.csproj
 
+	@(cd linux-build; rm -f test-engine.sln; dotnet new sln -n test-engine; dotnet sln add ../src/UnitTest/UnitTest.Engine/UnitTest.Engine.fsproj)
+
 linux:	
+	@rm -f src/Engine/Engine.Parser/g4s
+	@(cd src/Engine/Engine.Parser; ln -s ../../../../Grammar/g4s)
 	@dotnet build Ds.linux.sln
 
 # -- 다음 project 에서 net48 target 제거

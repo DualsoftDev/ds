@@ -112,6 +112,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ClientSamples", "ClientSamp
 	ProjectSection(SolutionItems) = preProject
 		src\IOHub\ClientSamples\CppClient.cpp = src\IOHub\ClientSamples\CppClient.cpp
 		src\IOHub\ClientSamples\Makefile = src\IOHub\ClientSamples\Makefile
+		src\IOHub\ClientSamples\FSharpClient.fsx = src\IOHub\ClientSamples\FSharpClient.fsx
 	EndProjectSection
 EndProject
 Global

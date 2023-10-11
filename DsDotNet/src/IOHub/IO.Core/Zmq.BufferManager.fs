@@ -41,21 +41,21 @@ module ZmqBufferManager =
         member x.readU16s (offset: int, count: int) : uint16[] =
             lock locker (fun () ->
                 let buffer = Array.zeroCreate<byte> (count * 2)
-                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
+                stream.Seek(int64 (offset * 2), SeekOrigin.Begin) |> ignore
                 stream.Read(buffer, 0, count * 2) |> ignore
                 Array.init count (fun i -> System.BitConverter.ToUInt16(buffer, i * 2))
             )
         member x.readU32s (offset: int, count: int) : uint32[] =
             lock locker (fun () ->
                 let buffer = Array.zeroCreate<byte> (count * 4)
-                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
+                stream.Seek(int64 (offset * 4), SeekOrigin.Begin) |> ignore
                 stream.Read(buffer, 0, count * 4) |> ignore
                 Array.init count (fun i -> System.BitConverter.ToUInt32(buffer, i * 4))
             )
         member x.readU64s (offset: int, count: int) : uint64[] =
             lock locker (fun () ->
                 let buffer = Array.zeroCreate<byte> (count * 8)
-                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
+                stream.Seek(int64 (offset * 8), SeekOrigin.Begin) |> ignore
                 stream.Read(buffer, 0, count * 8) |> ignore
                 Array.init count (fun i -> System.BitConverter.ToUInt64(buffer, i * 8))
             )

@@ -10,8 +10,40 @@ open Newtonsoft.Json
 open Dual.Common.Core.FS
 open System.Collections.Generic
 
-
 module Zmq =
+    type DataTypeConverter() =
+        static member ToBytes<'T> (values: 'T[]) =
+            values
+            |> Array.collect (fun value ->
+                match box value with
+                | :? byte as v -> [| v |] // 이미 바이트이므로 배열로 변환
+                | :? uint16 as v -> System.BitConverter.GetBytes(v)
+                | :? uint32 as v -> System.BitConverter.GetBytes(v)
+                | :? uint64 as v -> System.BitConverter.GetBytes(v)
+                | :? int32  as v -> System.BitConverter.GetBytes(v)
+                | _ -> failwithf "Type %O is not supported" typeof<'T>)
+
+        static member BytesToTypeArray<'T> (bytes: byte[]) : 'T[] =
+            if sizeof<'T> = 0 || bytes.Length % sizeof<'T> <> 0 then
+                failwithf "The length of the byte array should be a multiple of %d for %O conversion." sizeof<'T> typeof<'T>
+
+            Array.init (bytes.Length / sizeof<'T>) (fun i ->
+                let value : obj = 
+                    match typedefof<'T> with
+                    | t when t = typedefof<uint16> -> box (System.BitConverter.ToUInt16(bytes, i * sizeof<'T>))
+                    | t when t = typedefof<int32> -> box (System.BitConverter.ToInt32(bytes, i * sizeof<'T>))
+                    | _ -> failwithf "Type %O is not supported for conversion from bytes" typeof<'T>
+                value)
+            |> Array.map (fun v -> unbox<'T> v)  // unbox to the target type
+
+    //let bytesToInts (bytes: byte[]) =
+    //    if bytes.Length % 4 <> 0 then
+    //        failwith "The length of the byte array should be a multiple of 4 for int32 conversion."
+
+    //    Array.init (bytes.Length / 4) (fun i ->
+    //        System.BitConverter.ToInt32(bytes, i * 4))
+
+
     type Server(memoryFilesSpec:IOSpec, cancellationToken:CancellationToken) =
         let port = memoryFilesSpec.ServicePort
         let dir = memoryFilesSpec.Location
@@ -36,7 +68,8 @@ module Zmq =
             | _ -> None
             
 
-        member private x.handleRequest (request: string) : IIOResult =
+        member private x.handleRequest (respSocket:ResponseSocket) : IIOResult =
+            let request = respSocket.ReceiveFrameString()
             logDebug $"Handling request: {request}"
             let tokens = request.Split(' ', StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
             let command = tokens[0]
@@ -84,31 +117,59 @@ module Zmq =
             | "write" ->
                 args |> iter (fun a -> writeAddressWithValue(a))
                 WriteResultOK()
+
+            | "rb" ->
+                let name = respSocket.ReceiveFrameString().ToLower()
+                let indices =
+                    let address = respSocket.ReceiveFrameBytes()
+                    DataTypeConverter.BytesToTypeArray<int>(address)
+                let result = indices |> map (streams[name].readU8)
+                ReadResultArray<byte>(result)
+
+            | "rw" ->
+                let name = respSocket.ReceiveFrameString().ToLower()
+                let indices =
+                    let address = respSocket.ReceiveFrameBytes()
+                    DataTypeConverter.BytesToTypeArray<int>(address)
+                let result = indices |> map (streams[name].readU16)
+                ReadResultArray<uint16>(result)
+
+            | "wb" ->
+                let name = respSocket.ReceiveFrameString().ToLower()
+                let indices, values =
+                    let address = respSocket.ReceiveFrameBytes()
+                    let values = respSocket.ReceiveFrameBytes()
+                    DataTypeConverter.BytesToTypeArray<int>(address), values
+                if indices.Length <> values.Length then
+                    failwithf($"The number of indices and values should be the same.")
+
+                Array.zip indices values |> iter ( fun (index, value) -> streams[name].writeU8(index, value))
+                WriteResultOK()
             | _ ->
                 ReadResultError $"Unknown request: {request}"
 
         member x.Run() =
             // start a separate thread to run the server
-            let th =
-                Thread(ThreadStart(fun () ->
-                    use respSocket = new ResponseSocket()
-                    respSocket.Bind($"tcp://*:{port}")
+            Thread(ThreadStart(fun () ->
+                use respSocket = new ResponseSocket()
+                respSocket.Bind($"tcp://*:{port}")
                 
-                    while not cancellationToken.IsCancellationRequested do
-                        let message = respSocket.ReceiveFrameString()
-                        let response = x.handleRequest message
-                        match response with
-                        | :? ReadResultString as ok ->
-                            respSocket.SendFrame(ok.Result)
-                        | :? WriteResultOK as ok ->
-                            respSocket.SendFrame("OK")
-                        | :? IIOResultNG as ng ->
-                            respSocket.SendFrame(ng.Error)
-                        | _ ->
-                            failwithf($"Unknown response type: {response.GetType()}")
-                    ))
-            th.Start()
-            th
+                while not cancellationToken.IsCancellationRequested do
+                    let response = x.handleRequest respSocket
+                    match response with
+                    | :? ReadResultString as ok ->
+                        respSocket.SendFrame(ok.Result)
+                    | :? WriteResultOK as ok ->
+                        respSocket.SendFrame("OK")
+                    | :? ReadResultArray<byte> as ok ->
+                        respSocket.SendMoreFrame("OK").SendFrame(ok.Results)
+                    | :? ReadResultArray<uint16> as ok ->
+                        respSocket.SendMoreFrame("OK").SendFrame(DataTypeConverter.ToBytes<uint16>(ok.Results))
+                    | :? IIOResultNG as ng ->
+                        respSocket.SendFrame(ng.Error)
+                    | _ ->
+                        failwithf($"Unknown response type: {response.GetType()}")
+            )) |> tee (fun t -> t.Start())
 
         interface IDisposable with
             member x.Dispose() =
@@ -128,7 +189,64 @@ module Zmq =
             reqSocket.SendFrame(request)
             reqSocket.ReceiveFrameString()
 
+        member x.ReadBytes(name:string, offsets:int[]) : byte[] =
+            reqSocket
+                .SendMoreFrame("rb")
+                .SendMoreFrame(name)
+                .SendFrame(DataTypeConverter.ToBytes<int>(offsets))
+            let result = reqSocket.ReceiveFrameString()
+            match result with
+            | "OK" ->
+                let buffer = reqSocket.ReceiveFrameBytes()
+                buffer
+            | _ ->
+                failwithf($"Error: {result}")
 
+
+        member x.ReadUInt16s(name:string, offsets:int[]) : uint16[] =
+            let xxx = DataTypeConverter.ToBytes<int>(offsets)
+            // 데이터를 요청하는 메시지 전송
+            reqSocket
+                .SendMoreFrame("rw")
+                .SendMoreFrame(name)
+                .SendFrame(DataTypeConverter.ToBytes<int>(offsets))
+
+            // 서버로부터 응답 수신
+            let result = reqSocket.ReceiveFrameString()
+            match result with
+            | "OK" ->
+                let buffer = reqSocket.ReceiveFrameBytes()
+                DataTypeConverter.BytesToTypeArray<uint16>(buffer) // 바이트 배열을 uint16 배열로 변환
+            | _ ->
+                failwithf($"Error: {result}")
+
+
+        member x.WriteBytes(name:string, offsets:int[], values:byte[]) =
+            reqSocket
+                .SendMoreFrame("wb")
+                .SendMoreFrame(name)
+                .SendMoreFrame(DataTypeConverter.ToBytes<int>(offsets))
+                .SendFrame(values)
+
+            let result = reqSocket.ReceiveFrameString()
+            match result with
+            | "OK" -> ()
+            | _ ->
+                failwithf($"Error: {result}")
+
+
+        member x.WriteUInt16s(name:string, offsets:int[], values:uint16[]) =
+            reqSocket
+                .SendMoreFrame("wu16")
+                .SendMoreFrame(name)
+                .SendMoreFrame(DataTypeConverter.ToBytes<int>(offsets))
+                .SendFrame(DataTypeConverter.ToBytes<uint16>(values))
+
+            let result = reqSocket.ReceiveFrameString()
+            match result with
+            | "OK" -> ()
+            | _ ->
+                failwithf($"Error: {result}")
 
 module Main =
     [<EntryPoint>]
@@ -144,6 +262,7 @@ module Main =
         let serverThread = server.Run()
 
         let client = new Zmq.Client($"tcp://localhost:{port}")
+
         let rr0 = client.SendRequest("read Mw100 Mx30 Md1234")
         let result = client.SendRequest("read Mw100 Mx30")
         let result2 = client.SendRequest("read Mw100 Mb70 Mx30 Md50 Ml50")
@@ -151,6 +270,15 @@ module Main =
         let wr = client.SendRequest("write Mw100=1 Mx30=false Md1234=1234")
         let rr = client.SendRequest("read Mw100 Mx30 Md1234")
         let xxx = result
+
+        let wr2 = client.WriteBytes("M", [|0; 1; 2; 3|], [|0uy; 1uy; 2uy; 3uy|])
+        let bytes:byte[] = client.ReadBytes("M", [|0; 1; 2; 3|])
+        let words:uint16[] = client.ReadUInt16s("M", [|0; 1; 2; 3|])
+
+
+        let wr2 = client.WriteBytes("M", [|0; 1; 2; 3|], [|1uy; 0uy; 55uy; 0uy|])
+        let bytes:byte[] = client.ReadBytes("M", [|0; 1; 2; 3|])
+        let words:uint16[] = client.ReadUInt16s("M", [|0; 1; 2; 3|])
         serverThread.Join()
      
         

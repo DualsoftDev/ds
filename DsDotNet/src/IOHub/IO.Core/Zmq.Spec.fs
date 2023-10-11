@@ -37,6 +37,7 @@ module ZmqSpec =
     type WriteResultOK() =
         inherit IOResult(null)
         interface IIOResultOK
+
     type WriteResultError(error:string) =
         inherit IOResult(error)
         interface IIOResultNG with

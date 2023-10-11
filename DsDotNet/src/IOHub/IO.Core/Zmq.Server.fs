@@ -6,8 +6,6 @@ open System.Threading
 open System.Threading.Tasks
 open NetMQ
 open NetMQ.Sockets
-open System.IO
-open Newtonsoft.Json
 open Dual.Common.Core.FS
 open System.Collections.Generic
 
@@ -36,6 +34,8 @@ module ZmqServerModule =
             | _ -> None
             
 
+        let mutable terminated = false
+        member x.IsTerminated with get() = terminated
         member private x.handleRequest (respSocket:ResponseSocket) : IIOResult =
             let mutable request = ""
             if respSocket.TryReceiveFrameString(&request) then
@@ -137,9 +137,8 @@ module ZmqServerModule =
 
 
         member x.Run() =
-            //Task.Run(fun () ->
             // start a separate thread to run the server
-            Thread(ThreadStart(fun () ->
+            Task.Run(fun () ->
                 use respSocket = new ResponseSocket()
                 respSocket.Bind($"tcp://*:{port}")
                 
@@ -168,10 +167,10 @@ module ZmqServerModule =
                         respSocket.SendFrame(ex.Message)
                 Console.WriteLine("Cancellation request detected!")
                 (x :> IDisposable).Dispose()
-
-            )) |> tee (fun t -> t.Start())
-            //)
+                terminated <- true
+            )
 
         interface IDisposable with
             member x.Dispose() =
+                logDebug "Disposing server..."
                 streams.Values |> iter (fun stream -> stream.FileStream.Dispose())

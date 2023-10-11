@@ -5,6 +5,7 @@ open System.IO
 open Newtonsoft.Json
 open ZmqServerModule
 open ZmqClientModule
+open Dual.Common.Core.FS
 
 module ZmqTestMain =
     [<EntryPoint>]
@@ -18,7 +19,7 @@ module ZmqTestMain =
         let cts = new CancellationTokenSource()
 
         let handleCancelKey (args: ConsoleCancelEventArgs) =
-            Console.WriteLine("Ctrl+C pressed!")
+            logDebug("Ctrl+C pressed!")
             cts.Cancel()
             args.Cancel <- true // 프로그램을 종료하지 않도록 설정 (선택 사항)
         Console.CancelKeyPress.Add(handleCancelKey)
@@ -28,7 +29,7 @@ module ZmqTestMain =
 
         let client = new Client($"tcp://localhost:{port}")
 
-        let rr0 = client.SendRequest("read Mw100 Mx30 Md1234")
+        let rr0 = client.SendRequest("read Mw100 Mx30 Md12")
         let result = client.SendRequest("read Mw100 Mx30")
         let result2 = client.SendRequest("read Mw100 Mb70 Mx30 Md50 Ml50")
         //let result3 = client.SendRequest("read [Mw100..Mw30]")
@@ -46,8 +47,6 @@ module ZmqTestMain =
         let words:uint16[] = client.ReadUInt16s("M", [|0; 1; 2; 3|])
         //serverThread.Join()
      
-        Console.WriteLine("Waiting server terminated...")
-        
         let mutable key = ""
         while ( key <> null && not cts.IsCancellationRequested ) do
             key <- Console.ReadLine()
@@ -60,5 +59,10 @@ module ZmqTestMain =
                     Console.WriteLine(result)
                 ()
 
-        Console.WriteLine("Exiting...")
+        while(not server.IsTerminated) do
+            logDebug("Waiting server terminated...")
+            Thread.Sleep(1000)
+        
+        logDebug("Exiting...")
+        Thread.Sleep(1000)
         0

@@ -136,9 +136,9 @@ module ZmqBufferManagerExtension =
             let offset = int64 offset
             let length = x.FileStream.Length
             if offset < 0 then
-                failwithf($"Invalid offset.  non-negative value required : {offset}")
+                failwithlogf($"Invalid offset.  non-negative value required : {offset}")
             if offset >= length then
-                failwithf($"Invalid offset: {offset}.  Exceed length limit {length})")
+                failwithlogf($"Invalid offset: {offset}.  Exceed length limit {length})")
         member x.VerifyIndices(offsets:int[]) =
             offsets |> iter (fun offset -> x.VerifyIndices(offset))
 

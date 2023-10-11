@@ -8,19 +8,27 @@ int main()
     zmq::socket_t socket(context, ZMQ_REQ);
     // WSL host 에서 서버가 구동 중이라면, WSL host 의 ip address 를 적어야 한다.
     socket.connect("tcp://192.168.9.2:5555");
-    std::string req = "read Mw100 Mx30 Md1234";
+    
+    while (true) {
+        std::cout << "Enter command(or 'q' to quit): ";
+        std::string userInput;
+        std::getline(std::cin, userInput);
 
-    auto len = req.length();
-    zmq::message_t request(len+1);
-    memcpy(request.data(), req.c_str(), len+1);
-    std::cout << "Sending " << req << "..." << std::endl;
-	socket.send(request, zmq::send_flags::none);
+        if (userInput == "q") {
+            break;
+        }
 
-    zmq::message_t reply;
-    auto _ = socket.recv(reply, zmq::recv_flags::none);
-    std::string reply_str(static_cast<char*>(reply.data()), reply.size());
-    std::cout << "Received: " << reply_str << std::endl;
+        auto len = userInput.length();
+        zmq::message_t request(len + 1);
+        memcpy(request.data(), userInput.c_str(), len + 1);
+        std::cout << "Sending " << userInput << "..." << std::endl;
+        socket.send(request, zmq::send_flags::none);
+
+        zmq::message_t reply;
+        auto _ = socket.recv(reply, zmq::recv_flags::none);
+        std::string reply_str(static_cast<char*>(reply.data()), reply.size());
+        std::cout << "Received: " << reply_str << std::endl;
+    }
 
     return 0;
 }
-

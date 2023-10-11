@@ -9,6 +9,7 @@ module ZmqBufferManager =
         let locker = obj()  // 객체를 lock용으로 사용
         //member x.Type = typ
         member x.FileStream = stream
+        member x.Flush() = stream.Flush()
         member x.readBits (offset: int, count: int) : bool[] =
             let startByte = offset / 8
             let endByte = startByte + count / 8
@@ -81,28 +82,28 @@ module ZmqBufferManager =
 
         member x.writeU8 (offset:int, value:byte) =
             lock locker (fun () ->
-                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
+                stream.Seek(int64 (offset * 1), SeekOrigin.Begin) |> ignore
                 stream.WriteByte(value)
             )
 
         member x.writeU16(offset:int, value:uint16) =
             lock locker (fun () ->
                 let buffer = System.BitConverter.GetBytes(value)
-                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
+                stream.Seek(int64 (offset * 2), SeekOrigin.Begin) |> ignore
                 stream.Write(buffer, 0, buffer.Length)
             )
 
         member x.writeU32(offset:int, value:uint32) =
             lock locker (fun () ->
                 let buffer = System.BitConverter.GetBytes(value)
-                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
+                stream.Seek(int64 (offset * 4), SeekOrigin.Begin) |> ignore
                 stream.Write(buffer, 0, buffer.Length)
             )
 
         member x.writeU64(offset:int, value:uint64) =
             lock locker (fun () ->
                 let buffer = System.BitConverter.GetBytes(value)
-                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
+                stream.Seek(int64 (offset * 8), SeekOrigin.Begin) |> ignore
                 stream.Write(buffer, 0, buffer.Length)
             )
 
@@ -123,5 +124,21 @@ module ZmqBufferManagerExtension =
                 fs <- new FileStream(path, FileMode.Create, FileAccess.ReadWrite)
                 let buffer = Array.zeroCreate<byte> x.Length
                 fs.Write(buffer, 0, x.Length)
+                fs.Seek(0, SeekOrigin.Begin) |> ignore
+                fs.SetLength(x.Length)
+                let xxx = fs.Length
+                Console.WriteLine($"File length : {fs.Length}")
+                fs.Flush()
             fs
+
+    type BufferManager with
+        member x.VerifyIndices(offset:int) =
+            let offset = int64 offset
+            let length = x.FileStream.Length
+            if offset < 0 then
+                failwithf($"Invalid offset.  non-negative value required : {offset}")
+            if offset >= length then
+                failwithf($"Invalid offset: {offset}.  Exceed length limit {length})")
+        member x.VerifyIndices(offsets:int[]) =
+            offsets |> iter (fun offset -> x.VerifyIndices(offset))
 

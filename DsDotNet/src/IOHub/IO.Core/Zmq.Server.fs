@@ -3,6 +3,7 @@
 namespace IO.Core
 open System
 open System.Threading
+open System.Threading.Tasks
 open NetMQ
 open NetMQ.Sockets
 open System.IO
@@ -36,112 +37,141 @@ module ZmqServerModule =
             
 
         member private x.handleRequest (respSocket:ResponseSocket) : IIOResult =
-            let request = respSocket.ReceiveFrameString()
-            logDebug $"Handling request: {request}"
-            let tokens = request.Split(' ', StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
-            let command = tokens[0]
-            let args = tokens[1..] |> map(fun s -> s.ToLower())
-            let readAddress(address:string) : obj =
-                match address with
-                | AddressPattern addr ->
-                    let ap = addr
-                    let offset = ap.Offset
-                    let stream = streams[ap.Name]
+            let mutable request = ""
+            if respSocket.TryReceiveFrameString(&request) then
+                // 메시지를 처리하는 코드, 여기에서 'message'를 사용할 수 있습니다.
+                //let request = respSocket.ReceiveFrameString()
+                logDebug $"Handling request: {request}"
+                let tokens = request.Split(' ', StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
+                let command = tokens[0]
+                let args = tokens[1..] |> map(fun s -> s.ToLower())
+                let readAddress(address:string) : obj =
+                    match address with
+                    | AddressPattern addr ->
+                        let ap = addr
+                        let offset = ap.Offset
+                        let stream = streams[ap.Name]
 
-                    match ap.Type with
-                    | "x" -> stream.readBit(offset) :> obj
-                    | "b" -> stream.readU8(offset)
-                    | "w" -> stream.readU16(offset)
-                    | "d" -> stream.readU32(offset)
-                    | "l" -> stream.readU64(offset)
-                    | _ -> failwithf($"Unknown data type : {ap.Type}")
-                | _ -> failwithf($"Unknown address pattern : {address}")
+                        match ap.Type with
+                        | "x" -> stream.VerifyIndices(offset / 8); stream.readBit(offset) :> obj
+                        | "b" -> stream.VerifyIndices(offset * 1); stream.readU8(offset)
+                        | "w" -> stream.VerifyIndices(offset * 2); stream.readU16(offset)
+                        | "d" -> stream.VerifyIndices(offset * 4); stream.readU32(offset)
+                        | "l" -> stream.VerifyIndices(offset * 8); stream.readU64(offset)
+                        | _ -> failwithf($"Unknown data type : {ap.Type}")
+                    | _ -> failwithf($"Unknown address pattern : {address}")
 
-            let writeAddressWithValue(addressWithAssignValue:string) =
-                match addressWithAssignValue with
-                | AddressAssignPattern (addressPattern, value) ->
-                    let ap = addressPattern
-                    let offset = ap.Offset
-                    let stream = streams[ap.Name]
+                let writeAddressWithValue(addressWithAssignValue:string) =
+                    match addressWithAssignValue with
+                    | AddressAssignPattern (addressPattern, value) ->
+                        let ap = addressPattern
+                        let offset = ap.Offset
+                        let stream = streams[ap.Name]
 
-                    match ap.Type with
-                    | "x" -> stream.writeBit(offset, bool.Parse(value))
-                    | "b" -> stream.writeU8(offset,  Byte.Parse(value))
-                    | "w" -> stream.writeU16(offset, UInt16.Parse(value))
-                    | "d" -> stream.writeU32(offset, UInt32.Parse(value))
-                    | "l" -> stream.writeU64(offset, UInt64.Parse(value))
-                    | _ -> failwithf($"Unknown data type : {ap.Type}")
+                        match ap.Type with
+                        | "x" -> stream.VerifyIndices(offset / 8); stream.writeBit(offset, bool.Parse(value))
+                        | "b" -> stream.VerifyIndices(offset * 1); stream.writeU8(offset,  Byte.Parse(value))
+                        | "w" -> stream.VerifyIndices(offset * 2); stream.writeU16(offset, UInt16.Parse(value))
+                        | "d" -> stream.VerifyIndices(offset * 4); stream.writeU32(offset, UInt32.Parse(value))
+                        | "l" -> stream.VerifyIndices(offset * 8); stream.writeU64(offset, UInt64.Parse(value))
+                        | _ -> failwithf($"Unknown data type : {ap.Type}")
 
-                | _ -> failwithf($"Unknown address with assignment pattern : {addressWithAssignValue}")
+                        stream.Flush()
 
-            match command with
-            | "read" ->
-                let result =
-                    args |> map (fun a -> $"{a}={readAddress(a)}")
-                    |> joinWith " "
-                ReadResultString(result)
+                    | _ -> failwithf($"Unknown address with assignment pattern : {addressWithAssignValue}")
 
-            | "write" ->
-                args |> iter (fun a -> writeAddressWithValue(a))
-                WriteResultOK()
+                match command with
+                | "read" ->
+                    let result =
+                        args |> map (fun a -> $"{a}={readAddress(a)}")
+                        |> joinWith " "
+                    ReadResultString(result)
 
-            | "rb" ->
-                let name = respSocket.ReceiveFrameString().ToLower()
-                let indices =
-                    let address = respSocket.ReceiveFrameBytes()
-                    ByteConverter.BytesToTypeArray<int>(address)
-                let result = indices |> map (streams[name].readU8)
-                ReadResultArray<byte>(result)
+                | "write" ->
+                    args |> iter (fun a -> writeAddressWithValue(a))
+                    WriteResultOK()
 
-            | "rw" ->
-                let name = respSocket.ReceiveFrameString().ToLower()
-                let indices =
-                    let address = respSocket.ReceiveFrameBytes()
-                    ByteConverter.BytesToTypeArray<int>(address)
-                let result = indices |> map (streams[name].readU16)
-                ReadResultArray<uint16>(result)
+                | "rb" ->
+                    let stream =
+                        let name = respSocket.ReceiveFrameString().ToLower()
+                        streams[name]
+                    let indices =
+                        let address = respSocket.ReceiveFrameBytes()
+                        ByteConverter.BytesToTypeArray<int>(address)
+                    stream.VerifyIndices(indices)
+                    let result = indices |> map (stream.readU8)
+                    ReadResultArray<byte>(result)
 
-            | "wb" ->
-                let name = respSocket.ReceiveFrameString().ToLower()
-                let indices, values =
-                    let address = respSocket.ReceiveFrameBytes()
-                    let values = respSocket.ReceiveFrameBytes()
-                    ByteConverter.BytesToTypeArray<int>(address), values
-                if indices.Length <> values.Length then
-                    failwithf($"The number of indices and values should be the same.")
+                | "rw" ->
+                    let stream =
+                        let name = respSocket.ReceiveFrameString().ToLower()
+                        streams[name]
+                    let indices =
+                        let address = respSocket.ReceiveFrameBytes()
+                        ByteConverter.BytesToTypeArray<int>(address)
+                    stream.VerifyIndices(indices |> map (fun n -> n * 2))
+                    let result = indices |> map (stream.readU16)
+                    ReadResultArray<uint16>(result)
 
-                Array.zip indices values |> iter ( fun (index, value) -> streams[name].writeU8(index, value))
-                WriteResultOK()
-            | _ ->
-                ReadResultError $"Unknown request: {request}"
+                | "wb" ->
+                    let stream =
+                        let name = respSocket.ReceiveFrameString().ToLower()
+                        streams[name]
+                    let indices, values =
+                        let address = respSocket.ReceiveFrameBytes()
+                        let values = respSocket.ReceiveFrameBytes()
+                        ByteConverter.BytesToTypeArray<int>(address), values
+                    stream.VerifyIndices(indices)
+                    if indices.Length <> values.Length then
+                        failwithf($"The number of indices and values should be the same.")
+
+                    Array.zip indices values |> iter ( fun (index, value) -> stream.writeU8(index, value))
+                    stream.Flush()
+                    WriteResultOK()
+                | _ ->
+                    ReadResultError $"Unknown request: {request}"
+            else
+                null
+
+
+
 
         member x.Run() =
+            //Task.Run(fun () ->
             // start a separate thread to run the server
             Thread(ThreadStart(fun () ->
                 use respSocket = new ResponseSocket()
                 respSocket.Bind($"tcp://*:{port}")
                 
                 while not cancellationToken.IsCancellationRequested do
-                    let response = x.handleRequest respSocket
-                    match response with
-                    | null -> ()
-                    | :? ReadResultString as ok ->
-                        respSocket.SendFrame(ok.Result)
-                    | :? WriteResultOK as ok ->
-                        respSocket.SendFrame("OK")
-                    | :? ReadResultArray<byte> as ok ->
-                        respSocket.SendMoreFrame("OK").SendFrame(ok.Results)
-                    | :? ReadResultArray<uint16> as ok ->
-                        respSocket.SendMoreFrame("OK").SendFrame(ByteConverter.ToBytes<uint16>(ok.Results))
-                    | :? IIOResultNG as ng ->
-                        respSocket.SendFrame(ng.Error)
-                    | _ ->
-                        failwithf($"Unknown response type: {response.GetType()}")
+                    try
+                        let response = x.handleRequest respSocket
+                        match response with
+                        | null ->
+                            // 현재, request 가 없는 경우
+                            // Async.Sleep(???)
+                            ()
+                        | :? ReadResultString as ok ->
+                            respSocket.SendFrame(ok.Result)
+                        | :? WriteResultOK as ok ->
+                            respSocket.SendFrame("OK")
+                        | :? ReadResultArray<byte> as ok ->
+                            respSocket.SendMoreFrame("OK").SendFrame(ok.Results)
+                        | :? ReadResultArray<uint16> as ok ->
+                            respSocket.SendMoreFrame("OK").SendFrame(ByteConverter.ToBytes<uint16>(ok.Results))
+                        | :? IIOResultNG as ng ->
+                            respSocket.SendFrame(ng.Error)
+                        | _ ->
+                            failwithf($"Unknown response type: {response.GetType()}")
+                    with ex ->
+                        logError $"Error occured while handling request: {ex.Message}"
+                        respSocket.SendFrame(ex.Message)
                 Console.WriteLine("Cancellation request detected!")
+                (x :> IDisposable).Dispose()
 
             )) |> tee (fun t -> t.Start())
+            //)
 
         interface IDisposable with
             member x.Dispose() =
                 streams.Values |> iter (fun stream -> stream.FileStream.Dispose())
-

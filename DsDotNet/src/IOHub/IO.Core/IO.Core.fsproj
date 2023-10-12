@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<OutputType>Exe</OutputType>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Content Include="appsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Compile Include="Zmq.Spec.fs" />
+		<Compile Include="Zmq.BufferManager.fs" />
+		<Compile Include="Zmq.Server.fs" />
+		<Compile Include="Zmq.Client.fs" />
+		<Compile Include="Zmq.TestMain.fs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="log4net" Version="2.0.15" />
+		<PackageReference Include="NetMQ" Version="4.0.1.13" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.6" />
+	</ItemGroup>
+
+</Project>

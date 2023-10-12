@@ -16,15 +16,12 @@ type VertexMReal with
 
     member v.R2_RealJobComplete(): CommentedStatement  =
         let real = v.Vertex :?> Real
+        let wReset =  v.GetWeakResetRootAndReadys()
         let sReset =  v.GetStrongResetRootAndReadys()
-        //let planSets = v.System.GetPSs(real).ToOrElseOff(v.System)
-
         let setCoins = real.CoinRelays.ToAndElseOn v.System
-        let rstCoins = real.CoinRelays.ToOrElseOff v.System
-        let set  = v.G.Expr <&&> setCoins
-                    //<&&> (v.GG.Expr <||> planSets )
-                    <&&> sReset
-        let rst  = v.H.Expr <&&> !!rstCoins
+
+        let set  = v.G.Expr <&&> setCoins  <&&> wReset <&&> sReset
+        let rst  = v.H.Expr
 
         (set, rst) ==| (v.ET, getFuncName())
 

@@ -30,7 +30,7 @@ module RunTime =
             if exeStates.any() then exeStates.Iter(fun s->s.Do())
 
             chTags.Iter(notifyPostExcute)  // HMI Forceoff 처리
-
+            
 
         let asyncStart = 
             async { 
@@ -39,37 +39,32 @@ module RunTime =
                 while run do   
                     scanOnce()
             }
+
+        let doRun() = 
+            if not <| run 
+            then 
+                systems.Iter(fun sys-> preAction(sys, cpuMode))
+                run <- true
+                Async.StartImmediate(asyncStart, cts.Token) |> ignore
+
+        let doStop() = 
+            cts.Cancel()
+            cts <- new CancellationTokenSource() 
+            run <- false;
+
         do 
             ()
-
 
         member x.Systems = systems
         member x.IsRunning = run
         member x.CommentedStatements = css
         
-        member x.Run() =
-            if not <| run then 
-                systems.Iter(fun sys-> preAction(sys, cpuMode))
-                run <- true
-                Async.StartImmediate(asyncStart, cts.Token) |> ignore
-
-        member x.Stop() =
-            cts.Cancel()
-            cts <- new CancellationTokenSource() 
-            run <- false;
-
-        member x.Step() =
-            x.Stop()
-            scanOnce()
-            //systems.Iter(fun sys-> preAction(sys, cpuMode))
-            //singleScan(statements, systems)
-
+        member x.Dispose() = doStop()
+        member x.Run()  = doRun()
+        member x.Stop() = doStop()
+        member x.Step() = doStop();scanOnce()
         member x.Reset() =
-            x.Stop()
-            syncReset(statements, systems, false);
-        member x.ResetActive() =
-            x.Stop()
-            syncReset(statements, systems, true);
+            doStop()
+            syncReset(systems, false);
+            scanOnce()
 
-        member x.Dispose() =  
-            cts.Cancel()

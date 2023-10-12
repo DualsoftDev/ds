@@ -20,6 +20,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Reference Include="Engine.CodeGenCPU">
+	    <HintPath>..\..\bin\net48\Engine.CodeGenCPU.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Compile Update="UCView.cs">
 	    <SubType>UserControl</SubType>
 	  </Compile>

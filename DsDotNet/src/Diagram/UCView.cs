@@ -455,34 +455,29 @@ namespace Diagram.View.MSAGL
             }
         }
 
-
-
-        public void UpdateError(ViewNode viewNode, bool txErr, bool rxErr)
+        internal void UpdateError(ViewNode viewNode, bool isError, string errorText)
         {
+
             Node node = findNode(viewNode);
             if (node != null)
             {
-                UpdateFontColor(txErr, rxErr, node, viewNode.ViewType);
+                UpdateFontColor(isError, errorText,  node, viewNode.ViewType);
                 RefreshGraph();
+
             }
         }
 
-        private void UpdateFontColor(bool txErr, bool rxErr, Node node, ViewType viewType)
-        {
-            if (txErr)
-            {
-                node.Label.FontColor = Color.Red;
-                if(viewType != ViewType.VREAL)
-                    node.Label.Text = $"{node.Label.Text}\n[Timeout Error]";
-            }
-            if (rxErr)
-            {
-                node.Label.FontColor = Color.Red;
-                if(viewType != ViewType.VREAL)
-                    node.Label.Text = $"{node.Label.Text}\n[Sensor Error]";
-            }
+       
 
-            if (!txErr && !rxErr)
+        private void UpdateFontColor(bool err, string errText, Node node, ViewType viewType)
+        {
+            if (err)
+            {
+                node.Label.FontColor = Color.Red;
+                if(viewType != ViewType.VREAL)
+                    node.Label.Text = $"{node.Label.Text}\n{errText}";
+            }
+            else
             {
                 node.Label.FontColor = Color.White;
                 if(viewType != ViewType.VREAL)
@@ -544,6 +539,6 @@ namespace Diagram.View.MSAGL
             return gColor;
         }
 
-
+     
     }
 }

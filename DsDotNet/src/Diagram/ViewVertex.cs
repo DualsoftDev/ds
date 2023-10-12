@@ -13,8 +13,8 @@ namespace Diagram.View.MSAGL
         public ViewNode FlowNode { get; set; }  //UcViewNode
         public Status4 Status { get; set; }
         public List<DsTask> DsTasks { get; set; }
-        public bool ErrorTX { get; set; }
-        public bool ErrorRX { get; set; }
+        public bool IsError { get; set; }
+        public string ErrorText { get; set; }
     }
 }
 

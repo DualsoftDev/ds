@@ -2,6 +2,7 @@ namespace Engine.CodeGenCPU
 
 open Engine.Core
 open Dual.Common.Core.FS
+open System
 
 [<AutoOpen>]
 module ApiTagManagerModule =
@@ -13,21 +14,36 @@ module ApiTagManagerModule =
         let ps = cpv ("PS", apiItem, apiItem.System, ApiItemTag.planSet)
         let pr = cpv ("PR", apiItem, apiItem.System, ApiItemTag.planRst )
         let pe = cpv ("PE", apiItem, activeSys, ApiItemTag.planEnd )
-        let txerrovertime = cpv ("TXErr", apiItem, apiItem.System, ApiItemTag.txErrTimeOver  )
+        let txerrtrend = cpv ("TXErrTrend", apiItem, apiItem.System, ApiItemTag.txErrTrend  )
+        let txerrovertime = cpv ("TXErrOverTime", apiItem, apiItem.System, ApiItemTag.txErrTimeOver  )
         let rxerrShort = cpv ("RXErrShort", apiItem, apiItem.System, ApiItemTag.rxErrShort  )
         let rxerrOpen  = cpv ("RXErrOpen", apiItem, apiItem.System, ApiItemTag.rxErrOpen  )
         let timerTimeOutBit = timer  stg "TOUT" apiItem.System   
-
+        
         interface ITagManager with
             member _.Target = apiItem
             member _.Storages = stg
 
+
+        member _.ErrorText   = 
+                        let err1 = if txerrtrend.Value then "동작편차" else ""
+                        let err2 = if txerrovertime.Value then "동작시간" else ""
+                        let err3 = if rxerrShort.Value then "센서접촉" else ""
+                        let err4 = if rxerrOpen.Value then "센서단선" else ""
+                        let errs =[err1;err2;err3;err4]|> Seq.where(fun f->f <> "")
+                        if errs.any()
+                        then
+                            let errText = String.Join(",", errs)
+                            $"{apiItem.Name}_이상 : {errText}"
+                        else 
+                            ""
 
         ///Timer time out
         member _.TOUT   = timerTimeOutBit
         member _.PS   = ps
         member _.PR   = pr
         member _.PE   = pe
+        member _.TXErrTrend    = txerrtrend
         member _.TXErrOverTime   = txerrovertime
         member _.RXErrShort  = rxerrShort
         member _.RXErrOpen   = rxerrOpen

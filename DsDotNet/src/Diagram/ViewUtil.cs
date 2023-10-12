@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.InteropServices.ComTypes;
+using static Engine.CodeGenCPU.ApiTagManagerModule;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.EdgeExt;
@@ -110,21 +111,24 @@ namespace Diagram.View.MSAGL
                             });
                         }
                     }
-                    if (TagKindExt.IsErrTag(rx))
+                    if (TagKindExt.IsErrTag(rx) && ev.Target is CallDev call)
                     {
                         var vv = DicNode[ev.Target];
-                        if (ev.TagKind == VertexTag.errorTx)
-                            vv.ErrorTX = (bool)ev.Tag.BoxedValue;
-                        else if (ev.TagKind == VertexTag.errorRx)
-                            vv.ErrorRX = (bool)ev.Tag.BoxedValue;
-                        else
-                            throw new Exception($"not ErrTag {TagKindExt.GetTagToText(rx)}");
+                        vv.IsError = (bool)ev.Tag.BoxedValue;
+
+                        var errs =
+                            call.CallTargetJob.DeviceDefs.Select(s => s.ApiItem.TagManager)
+                                    .Cast<ApiItemManager>()
+                                    .Select(s => s.ErrorText);
+
+                        vv.ErrorText = String.Join("\r", errs);
+                       
                         var ucView = UcViews.Where(w => w.MasterNode == vv.FlowNode).FirstOrDefault();
                         if (ucView != null)
                         {
                             vv.ViewNodes.Iter(node =>
                             {
-                                ucView.UpdateError(node, vv.ErrorTX, vv.ErrorRX);
+                                ucView.UpdateError(node, vv.IsError, vv.ErrorText);
                             });
                         }
                     }

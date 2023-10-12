@@ -26,17 +26,17 @@ module ApiTagManagerModule =
 
 
         member _.ErrorText   = 
-                        let err1 = if txerrtrend.Value then "동작편차" else ""
-                        let err2 = if txerrovertime.Value then "동작시간" else ""
-                        let err3 = if rxerrShort.Value then "센서접촉" else ""
-                        let err4 = if rxerrOpen.Value then "센서단선" else ""
-                        let errs =[err1;err2;err3;err4]|> Seq.where(fun f->f <> "")
-                        if errs.any()
-                        then
-                            let errText = String.Join(",", errs)
-                            $"{apiItem.Name}_이상 : {errText}"
-                        else 
-                            ""
+            let err1 = if txerrtrend.Value then "동작편차" else ""
+            let err2 = if txerrovertime.Value then "동작시간" else ""
+            let err3 = if rxerrShort.Value then "센서쇼트" else ""
+            let err4 = if rxerrOpen.Value then "센서단선" else ""
+            let errs =[err1;err2;err3;err4]|> Seq.where(fun f->f <> "")
+            if errs.any()
+            then
+                let errText = String.Join(",", errs)
+                $"{activeSys.Name}_이상 : {errText}"
+            else 
+                ""
 
         ///Timer time out
         member _.TOUT   = timerTimeOutBit

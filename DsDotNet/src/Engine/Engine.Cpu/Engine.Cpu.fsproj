@@ -4,7 +4,7 @@
 		<TargetFrameworks>net7.0;net48</TargetFrameworks>
 		<RootNamespace>Engine.Cpu</RootNamespace>
 		<LangVersion>7.0</LangVersion>
-		<OutputType>Exe</OutputType>
+		<OutputType>Library</OutputType>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 		<OtherFlags>--warnon:1182</OtherFlags>
 	</PropertyGroup>

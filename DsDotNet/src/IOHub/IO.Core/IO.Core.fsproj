@@ -24,4 +24,8 @@
 		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.6" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\IO.Spec\IO.Spec.csproj" />
+	</ItemGroup>
+
 </Project>

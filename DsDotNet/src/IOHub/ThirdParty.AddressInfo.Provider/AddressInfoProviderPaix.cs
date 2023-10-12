@@ -2,7 +2,7 @@ using IO.Spec;
 
 namespace ThirdParty.AddressInfo.Provider
 {
-    public class AddressInfoProviderLsXGI : IAddressInfoProvider
+    public class AddressInfoProviderPaix : IAddressInfoProvider
     {
         public bool GetAddressInfo(string address, out string memoryType, out int byteOffset, out int bitOffset, out int contentBitLength)
         {
@@ -12,7 +12,7 @@ namespace ThirdParty.AddressInfo.Provider
             try
             {
                 address = address.ToLower().TrimStart('%');
-                if (address[0] == 'i' || address[0] == 'q' || address[0] == 'm')
+                if (address[0] == 'i' || address[0] == 'o')
                 {
                     memoryType = address[0].ToString();
                     int read1(string addr) => int.Parse(addr);
@@ -58,16 +58,6 @@ namespace ThirdParty.AddressInfo.Provider
                             break;
                     }
 
-                    //contentBitLength = address[1] switch
-                    //{
-                    //    'x' => 1,
-                    //    'b' => 8,
-                    //    'w' => 16,
-                    //    'd' => 32,
-                    //    'l' => 64,
-                    //    _ => throw new NotImplementedException(),
-                    //};
-
                     return true;
                 }
             }
@@ -79,3 +69,4 @@ namespace ThirdParty.AddressInfo.Provider
         }
     }
 }
+

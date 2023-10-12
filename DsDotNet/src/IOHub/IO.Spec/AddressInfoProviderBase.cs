@@ -2,10 +2,27 @@ namespace IO.Spec
 {
     public interface IAddressInfoProvider
     {
-        bool GetAddressInfo(string address, out int byteOffset, out int bitOffset, out int contentBitLength);
+        bool GetAddressInfo(string address, out string memoryType, out int byteOffset, out int bitOffset, out int contentBitLength);
     }
-    //public abstract class AddressInfoProviderBase
-    //{
+    public abstract class AddressInfoProviderBase : IAddressInfoProvider
+    {
+        public abstract bool GetAddressInfo(string address, out string memoryType, out int byteOffset, out int bitOffset, out int contentBitLength);
+    }
 
-    //}
+    public class AddressInfoProviderLsXGI : IAddressInfoProvider
+    {
+        public bool GetAddressInfo(string address, out string memoryType, out int byteOffset, out int bitOffset, out int contentBitLength)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class AddressInfoProviderPaix : IAddressInfoProvider
+    {
+        public bool GetAddressInfo(string address, out string memoryType, out int byteOffset, out int bitOffset, out int contentBitLength)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
 }

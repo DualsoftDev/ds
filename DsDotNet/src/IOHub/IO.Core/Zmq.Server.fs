@@ -9,21 +9,62 @@ open NetMQ.Sockets
 open Dual.Common.Core.FS
 open System.Collections.Generic
 open System.IO
+open System.Runtime.Remoting
+open IO.Spec
 
 module ZmqServerModule =
     type Server(ioSpec:IOSpec, cancellationToken:CancellationToken) =
         let port = ioSpec.ServicePort
         let streams = new Dictionary<string, BufferManager>()
 
+        let showSamples (vendorSpec:VendorSpec) (addressExtractor:IAddressInfoProvider) =
+            let v = vendorSpec
+            match v.Name with
+            | "Paix" ->
+                match addressExtractor.GetAddressInfo("ox12.1") with
+                | true, memoryType, byteOffset, bitOffset, contentBitLength ->
+                    assert (memoryType = "o")
+                    assert (bitOffset = 1)
+                    assert (byteOffset = 12)
+                    assert (contentBitLength = 1)
+                | _ ->
+                    failwithf($"Invalid address format: {v.Name}, {v.Dll}, {v.ClassName}")
+                match addressExtractor.GetAddressInfo("ob12") with
+                | true, memoryType, byteOffset, bitOffset, contentBitLength ->
+                    assert (memoryType = "o")
+                    assert (bitOffset = 0)
+                    assert (byteOffset = 12)
+                    assert (contentBitLength = 8)
+                | _ ->
+                    failwithf($"Invalid address format: {v.Name}, {v.Dll}, {v.ClassName}")
+            | "LsXGI" ->
+                match addressExtractor.GetAddressInfo("%IX30.3") with
+                | true, memoryType, byteOffset, bitOffset, contentBitLength ->
+                    assert (memoryType = "i")
+                    assert (bitOffset = 3)
+                    assert (byteOffset = 30)
+                    assert (contentBitLength = 1)
+                | _ ->
+                    failwithf($"Invalid address format: {v.Name}, {v.Dll}, {v.ClassName}")
+            | _ ->
+                ()
+
         do
             for v in ioSpec.Vendors do
-            for f in v.Files do
-                let dir, key =
-                    match v.Location with
-                    | "" | null -> ioSpec.TopLevelLocation, f.Name
-                    | _ -> Path.Combine(ioSpec.TopLevelLocation, v.Location), $"{v.Location}/{f.Name}"
-                let stream = f.InitiaizeFile(dir)
-                streams.Add(key, new BufferManager(stream))
+                let addressExtractor:IAddressInfoProvider =
+                    let oh:ObjectHandle = Activator.CreateInstanceFrom(v.Dll, v.ClassName)
+                    let obj:obj = oh.Unwrap()
+                    obj :?> IAddressInfoProvider
+
+                showSamples v addressExtractor
+
+                for f in v.Files do
+                    let dir, key =
+                        match v.Location with
+                        | "" | null -> ioSpec.TopLevelLocation, f.Name
+                        | _ -> Path.Combine(ioSpec.TopLevelLocation, v.Location), $"{v.Location}/{f.Name}"
+                    let stream = f.InitiaizeFile(dir)
+                    streams.Add(key, new BufferManager(stream))
 
         let (|AddressPattern|_|) (str: string) =
             let memTypes = streams.Keys.JoinWith "|"

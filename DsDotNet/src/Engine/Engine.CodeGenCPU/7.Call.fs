@@ -46,6 +46,7 @@ type VertexMCoin with
                   
                     (action <||> coin._sim.Expr)
                     <&&> call.PEs.ToAndElseOn(coin.System) 
+                    <&&> !!dop 
 
                 yield (sets, rsts) ==| (td.ApiItem.PS, getFuncName())
         ]

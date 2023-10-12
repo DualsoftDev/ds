@@ -37,11 +37,10 @@ type Flow with
     member f.O5_StopOperationState(): CommentedStatement =
         let set = (f.stop.Expr <||> f.BtnStopExpr <||> f.sop.Expr) <&&> !!f.BtnClearExpr
         let setErrs = f.Graph.Vertices.OfType<Real>().Select(getVM) 
-                        |> Seq.collect(fun r-> [|r.E1.Expr; r.E2.Expr|])
-        //let setErrs = f.GetVerticesWithInReal().Select(getVM).ERRs().ToOrElseOff(f.System)
+                        |> Seq.collect(fun r-> [|r.E1; r.E2|])
         let rst = f.clear.Expr //test ahn lightPLC 모드 준비중
 
-        (set <||> setErrs.ToOr(), rst) ==| (f.sop, getFuncName())
+        (set <||> setErrs.ToOrElseOff(f.System), rst) ==| (f.sop, getFuncName())
 
     member f.O6_DriveOperationMode (): CommentedStatement =
         let set = f.drive.Expr <||> f.BtnDriveExpr

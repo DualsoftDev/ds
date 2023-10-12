@@ -11,7 +11,7 @@ module ZmqTestMain =
     [<EntryPoint>]
     let main _ = 
         let ioSpec:IOSpec =
-            "appsettings.json"
+            "zmqsettings.json"
             |> File.ReadAllText
             |> JsonConvert.DeserializeObject<IOSpec>
 

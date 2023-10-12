@@ -207,6 +207,7 @@ module ZmqServerModule =
         member x.Run() =
             // start a separate thread to run the server
             Task.Run(fun () ->
+                logInfo $"Starting server on port {port}..."
                 use respSocket = new ResponseSocket()
                 respSocket.Bind($"tcp://*:{port}")
                 

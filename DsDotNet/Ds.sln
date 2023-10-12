@@ -111,9 +111,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ClientSamples", "ClientSamples", "{1ABCD66C-D3ED-44E9-9D5C-BDB4CB852D33}"
 	ProjectSection(SolutionItems) = preProject
 		src\IOHub\ClientSamples\CppClient.cpp = src\IOHub\ClientSamples\CppClient.cpp
-		src\IOHub\ClientSamples\Makefile = src\IOHub\ClientSamples\Makefile
 		src\IOHub\ClientSamples\FSharpClient.fsx = src\IOHub\ClientSamples\FSharpClient.fsx
+		src\IOHub\ClientSamples\Makefile = src\IOHub\ClientSamples\Makefile
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IO.WebServer", "src\IOHub\IO.WebServer\IO.WebServer.csproj", "{35D7BB38-105C-49E8-A929-B36588684CDD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -253,6 +255,10 @@ Global
 		{D704ABA3-0599-4C83-8835-5056D273C9F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D704ABA3-0599-4C83-8835-5056D273C9F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D704ABA3-0599-4C83-8835-5056D273C9F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35D7BB38-105C-49E8-A929-B36588684CDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35D7BB38-105C-49E8-A929-B36588684CDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35D7BB38-105C-49E8-A929-B36588684CDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35D7BB38-105C-49E8-A929-B36588684CDD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -301,6 +307,7 @@ Global
 		{47F783C7-DCB1-4773-872D-38E041A182D9} = {BF60BC93-E09B-4E5F-9D85-95A519479D54}
 		{D704ABA3-0599-4C83-8835-5056D273C9F7} = {47F783C7-DCB1-4773-872D-38E041A182D9}
 		{1ABCD66C-D3ED-44E9-9D5C-BDB4CB852D33} = {47F783C7-DCB1-4773-872D-38E041A182D9}
+		{35D7BB38-105C-49E8-A929-B36588684CDD} = {47F783C7-DCB1-4773-872D-38E041A182D9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B36D7B1-CD69-44C5-8E57-DE46AC18C1F7}

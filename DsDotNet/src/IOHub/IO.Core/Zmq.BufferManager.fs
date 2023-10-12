@@ -120,6 +120,7 @@ module ZmqBufferManagerExtension =
                     failwithf($"File [{path}] length mismatch : {fs.Length} <> {x.Length}")
             else
                 logInfo($"Creating new file : {path}")
+                Directory.CreateDirectory(Path.GetDirectoryName(path)) |> ignore
                 // create zero-filled file with length = x.Length
                 fs <- new FileStream(path, FileMode.Create, FileAccess.ReadWrite)
                 let buffer = Array.zeroCreate<byte> x.Length

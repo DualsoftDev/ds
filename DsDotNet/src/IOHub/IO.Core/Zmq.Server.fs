@@ -8,28 +8,34 @@ open NetMQ
 open NetMQ.Sockets
 open Dual.Common.Core.FS
 open System.Collections.Generic
+open System.IO
 
 module ZmqServerModule =
-    type Server(memoryFilesSpec:IOSpec, cancellationToken:CancellationToken) =
-        let port = memoryFilesSpec.ServicePort
-        let dir = memoryFilesSpec.Location
+    type Server(ioSpec:IOSpec, cancellationToken:CancellationToken) =
+        let port = ioSpec.ServicePort
         let streams = new Dictionary<string, BufferManager>()
+
         do
-            for mfs in memoryFilesSpec.Files do
-                let stream = mfs.InitiaizeFile(dir)
-                streams.Add(mfs.Name, new BufferManager(stream))
+            for v in ioSpec.Vendors do
+            for f in v.Files do
+                let dir, key =
+                    match v.Location with
+                    | "" | null -> ioSpec.TopLevelLocation, f.Name
+                    | _ -> Path.Combine(ioSpec.TopLevelLocation, v.Location), $"{v.Location}/{f.Name}"
+                let stream = f.InitiaizeFile(dir)
+                streams.Add(key, new BufferManager(stream))
 
         let (|AddressPattern|_|) (str: string) =
             let memTypes = streams.Keys.JoinWith "|"
             let dataTypes = "x|b|w|d|l"
-            let pattern = sprintf "([%s])([%s])(\d+)" memTypes dataTypes
+            let pattern = sprintf "^(%s)([%s])(\d+)" memTypes dataTypes
             match str with
             | RegexPattern pattern [m; d; Int32Pattern offset] -> Some(AddressSpec(m, d, offset))
             | _ -> None
 
         let (|AddressAssignPattern|_|) (str: string) =
             match str with
-            | RegexPattern "(\w+)=(\w+)" [AddressPattern addr; value] ->
+            | RegexPattern "([^=]+)=(\w+)" [AddressPattern addr; value] ->
                 Some(addr, value)
             | _ -> None
             
@@ -47,7 +53,6 @@ module ZmqServerModule =
                 logDebug $"Handling request: {request}"
                 let tokens = request.Split(' ', StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
                 let command = tokens[0]
-                let args = tokens[1..] |> map(fun s -> s.ToLower())
                 let readAddress(address:string) : obj =
                     match address with
                     | AddressPattern addr ->
@@ -102,6 +107,7 @@ module ZmqServerModule =
                     let values = respSocket.ReceiveFrameBytes()
                     stream, indices, values
 
+                let args = tokens[1..] |> map(fun s -> s.ToLower())
                 match command with
                 | "read" ->
                     let result =

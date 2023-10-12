@@ -1,41 +1,44 @@
 {
   "ServicePort": 5555,
-  "Location": "/tmp/iomaps",
-  "Files": [
+  "TopLevelLocation": "/tmp/iomaps",
+  "Vendors": [
     {
-      "Name": "I",
-      "Length": 65535,
-      "ValidRanges": [
+      "Name": "LsXGI",
+      "Location": "",
+      "Dll": "F:\\Git\\ds\\DsDotNet\\src\\IOHub\\ThirdParty.AddressInfo.Provider\\bin\\Debug\\net7.0\\ThirdParty.AddressInfo.Provider.dll",
+      "ClassName": "ThirdParty.AddressInfo.Provider.AddressInfoProviderLsXGI",
+      "Accepts": "%[IQM]*",
+      "Files": [
         {
-          "Start": 0,
-          "End": 255
+          "Name": "I",
+          "Length": 65535
         },
         {
-          "Start": 300,
-          "End": 500
+          "Name": "Q",
+          "Length": 1023
+        },
+        {
+          "Name": "M",
+          "Length": 2048
         }
       ]
     },
     {
-      "Name": "Q",
-      "Length": 1023,
-      "ValidRanges": [
+      "Name": "Paix",
+      "Location": "p",
+      "Dll": "F:\\Git\\ds\\DsDotNet\\src\\IOHub\\ThirdParty.AddressInfo.Provider\\bin\\Debug\\net7.0\\ThirdParty.AddressInfo.Provider.dll",
+      "ClassName": "ThirdParty.AddressInfo.Provider.AddressInfoProviderPaix",
+      "Accepts": "p/[IOio]*",
+      "Files": [
         {
-          "Start": 100,
-          "End": 200
-        }
-      ]
-    },
-    {
-      "Name": "M",
-      "Length": 2048,
-      "ValidRanges": [
+          "Name": "I",
+          "Length": 65535
+        },
         {
-          "Start": 100,
-          "End": 200
+          "Name": "O",
+          "Length": 1023
         }
       ]
     }
-
   ]
 }

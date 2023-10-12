@@ -1,6 +1,8 @@
 namespace IO.Core
 open System
 open System.Diagnostics.CodeAnalysis
+open System.IO
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module ZmqSpec =
@@ -54,16 +56,56 @@ module ZmqSpec =
         member val Offset = offset with get, set
         member val Type = typ.ToLower() with get, set
 
-    type ByteRange(s, e) = 
-        member val Start = s with get, set
-        member val End = e with get, set
-    type IOFileSpec(name:string, length:int, validRanges:ByteRange[]) =
-        member val Name = name.ToLower()  with get, set
-        member val Length = length with get, set
-        member val ValidRanges:ByteRange[] = validRanges with get, set
-    type IOSpec(servicePort:int, files:IOFileSpec[]) =
-        member val Location = "." with get, set
-        member val ServicePort = servicePort with get, set
-        member val Files = files with get, set
 
+    (*
+  "Vendors": [
+    {
+      "Name": "LsXGI",
+      "Location": "/tmp/iomaps",
+      "Dll": "F:\\Git\\ds\\DsDotNet\\src\\IOHub\\ThirdParty.AddressInfo.Provider\\bin\\Debug\\net7.0\\ThirdParty.AddressInfo.Provider.dll",
+      "ClassName": "ThirdParty.AddressInfo.Provider.AddressInfoProviderLsXGI",
+      "Accepts": "%[IQM]*",
+      "Files": [
+        {
+          "Name": "I",
+          "Length": 65535
+        },
+        ...
+    
+    *)
+
+
+    type IOFileSpec() =
+        member val Name = ""  with get, set
+        member val Length = 0 with get, set
+        member val Vendor:VendorSpec = null with get, set
+    
+    and [<AllowNullLiteral>] VendorSpec() =
+        member val Name = "" with get, set
+        member val Location = "" with get, set
+        member val Dll = "" with get, set
+        member val ClassName = "" with get, set
+        member val Accepts = "" with get, set
+        member val Files:IOFileSpec[] = [||] with get, set
+    type IOSpec() =
+        member val ServicePort = 0 with get, set
+        member val TopLevelLocation = "" with get, set
+        member val Vendors:VendorSpec[] = [||] with get, set
+
+    let private sep = Path.DirectorySeparatorChar
+    let regulatePath (dir:string) = dir.Replace('\\', sep).ToLower()
+    let regulateDir (dir:string) = (regulatePath dir).TrimEnd(sep)
+
+    type IOSpec with
+        member x.Regulate() =
+            x.TopLevelLocation <- regulateDir x.TopLevelLocation
+            for v in x.Vendors do
+                v.Location <- regulateDir v.Location
+                v.Dll <- regulateDir v.Dll
+                v.Accepts <- v.Accepts.ToLower()
+                for f in v.Files do
+                    f.Vendor <- v
+                    f.Name <- f.Name.ToLower()
+                    if f.Length <= 0 then
+                        failwithlogf $"Invalid file length {f.Length} on file {f.Name}"
 

@@ -7,6 +7,8 @@ open System.Linq
 open System.Collections.Generic
 open System.Threading.Tasks
 open System.Threading
+open Engine.Core.TagKindModule
+
 [<AutoOpen>]
 module RunTime =
 
@@ -20,7 +22,7 @@ module RunTime =
         let mutable run:bool = false
 
         let scanOnce() = 
-                    //나머지 수식은 Changed Event가 있는것만 수행해줌
+            //나머지 수식은 Changed Event가 있는것만 수행해줌
             let chTags = cpuStorages.ChangedTags()
             let exeStates = chTags.ExecutableStatements(mapRungs) 
             chTags.ChangedTagsClear(systems)
@@ -30,14 +32,14 @@ module RunTime =
             if exeStates.any() then exeStates.Iter(fun s->s.Do())
 
             chTags.Iter(notifyPostExcute)  // HMI Forceoff 처리
-            
+            chTags
 
         let asyncStart = 
             async { 
                 //시스템 ON 및 값변경이 없는 조건 수식은  관련 수식은 Changed Event가 없어서한번 수행해줌
                 for s in statements do s.Do() 
                 while run do   
-                    scanOnce()
+                    scanOnce() |> ignore
             }
 
         let doRun() = 
@@ -63,6 +65,15 @@ module RunTime =
         member x.Run()  = doRun()
         member x.Stop() = doStop()
         member x.Step() = doStop();scanOnce()
+        member x.StepByStatus(activeSys:DsSystem) = 
+            doStop()
+            let mutable endStepByStatus = false
+            while not(endStepByStatus) do
+                let chTags = scanOnce()
+                endStepByStatus <- chTags.isEmpty() 
+                                || chTags.Where(fun f->f.DsSystem = activeSys)
+                                         .Where(fun f->f.IsStatusTag()).any()
+
         member x.Reset() =
             doStop()
             syncReset(systems, false);

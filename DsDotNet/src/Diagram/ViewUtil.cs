@@ -111,7 +111,7 @@ namespace Diagram.View.MSAGL
                             });
                         }
                     }
-                    if (TagKindExt.IsErrTag(rx) && ev.Target is CallDev call)
+                    if (TagKindExt.IsVertexErrTag(rx) && ev.Target is CallDev call)
                     {
                         var vv = DicNode[ev.Target];
                         vv.IsError = (bool)ev.Tag.BoxedValue;
@@ -121,7 +121,7 @@ namespace Diagram.View.MSAGL
                                     .Cast<ApiItemManager>()
                                     .Select(s => s.ErrorText);
 
-                        vv.ErrorText = String.Join("\r", errs);
+                        vv.ErrorText = String.Join("\r\n", errs);
                        
                         var ucView = UcViews.Where(w => w.MasterNode == vv.FlowNode).FirstOrDefault();
                         if (ucView != null)

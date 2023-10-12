@@ -188,8 +188,15 @@ module TagKindModule =
             |_->false
 
         [<Extension>]
-        static member IsErrTag(x:TagDS) =
+        static member IsVertexErrTag(x:TagDS) =
             match x with
             |EventVertex (_, _, kind) -> kind = VertexTag.errorTx
                                           || kind = VertexTag.errorRx
             |_->false
+
+        [<Extension>]
+        static member IsStatusTag(x:IStorage) =
+            x.TagKind = int(VertexTag.ready)
+            || x.TagKind = int(VertexTag.going)
+            || x.TagKind = int(VertexTag.finish)
+            || x.TagKind = int(VertexTag.homing)

@@ -66,9 +66,11 @@ module ModelLoader =
 
     let exportLoadedSystem (s: LoadedSystem) (dirNew: string) =
         let mutable commonDir = ""
-
-        let lib = dirNew.ToLower().Split('/')
-        let abs = s.AbsoluteFilePath.ToLower().Split('/')
+        let fileNew = FileInfo(dirNew).FullName.ToLower().Replace("\\", "/")
+        let fileAbs = FileInfo(s.AbsoluteFilePath).FullName.ToLower().Replace("\\", "/")
+        
+        let lib = fileNew.Split('/')
+        let abs = fileAbs.Split('/')
         let di = DirectoryInfo(dirNew)
         let mutable shouldBreak = false
 
@@ -81,7 +83,7 @@ module ModelLoader =
                 else
                     commonDir <- commonDir + abs.[i] + "/"
 
-        let relativePath = s.AbsoluteFilePath.ToLower().Replace(commonDir.ToLower(), "")
+        let relativePath = fileAbs.Replace(commonDir.ToLower(), "")
         let absPath = sprintf "%s/%s.ds" dirNew relativePath
 
         if not (File.Exists(absPath)) then

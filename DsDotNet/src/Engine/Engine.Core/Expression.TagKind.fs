@@ -97,7 +97,10 @@ module TagKindModule =
     |planSet                   = 12000
     |planRst                   = 12001
     |planEnd                   = 12002
-    |timeOut                   = 12003
+    |txErrTrand                = 12003
+    |txErrTimeOver             = 12004
+    |rxErrShort                = 12005
+    |rxErrOpen                 = 12006
 
 
 

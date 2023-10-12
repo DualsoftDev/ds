@@ -68,8 +68,8 @@ module ConvertCPU =
                 yield! vm.C1_CallPlanSend()
                 yield! vm.C2_CallActionOut()
                 yield! vm.C3_CallPlanReceive()
-                yield! vm.M3_CallErrorTXMonitor() //test ahn Real 기준으로 Coin 대상으로 다시 작성 필요
-                yield vm.M4_CallErrorRXMonitor()  //test ahn Real 기준으로 Coin 대상으로 다시 작성 필요
+                yield! vm.M3_CallErrorTXMonitor() 
+                yield! vm.M4_CallErrorRXMonitor() 
 
 
             if IsSpec (v, VertexAll, AliasNotCare) then

@@ -33,7 +33,7 @@ type Spec05_MonitorStatement() =
     [<Test>]
     member __.``M4 Call Error RX Monitor`` () =
         for coin in t.Calls do
-            coin.M4_CallErrorRXMonitor() |> doCheck
+            coin.M4_CallErrorRXMonitor() |> doChecks
 
     [<Test>]
     member __.``M5 Real Error TX Monitor`` () =

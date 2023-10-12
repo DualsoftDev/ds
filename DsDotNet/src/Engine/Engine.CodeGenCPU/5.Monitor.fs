@@ -43,44 +43,34 @@ type VertexManager with
         let v= v :?> VertexMCoin
         let call= v.Vertex.GetPure() :?> CallDev
         let rst = v.Flow.clear.Expr
-        [
-            let tds = call.CallTargetJob.DeviceDefs
+        let tds = call.CallTargetJob.DeviceDefs
                           .Where(fun f->f.ApiItem.TXs.any() && f.ApiItem.RXs.any())
-           
+        [
+          
             for td in tds do
                 let api = td.ApiItem
                 let running = api.PS.Expr <&&> !!td.ActionINFunc 
                 yield running --@ (api.TOUT, v.System._tout.Value, getFuncName())
-                yield (api.TOUT.DN.Expr, rst) ==| (api.TXErr , getFuncName())
+                yield (api.TOUT.DN.Expr, rst) ==| (api.TXErrOverTime , getFuncName())
 
-            let sets = tds.Select(fun s->s.ApiItem.TXErr).ToOrElseOff(v.System)
+            let sets = tds.Select(fun s->s.ApiItem.TXErrOverTime).ToOrElseOff(v.System)
             yield (sets, v._off.Expr) --| (v.E1, getFuncName())
         ]
 
-    member v.M4_CallErrorRXMonitor(): CommentedStatement  =
-        let call = v.Vertex :?> CallDev
-        let In_Rxs =
-            [ for j in call.CallTargetJob.DeviceDefs do
-                if j.ApiItem.RXs.Any()
-                then yield j.ActionINFunc, j.ApiItem.RXs.Select(getVM) ]
-
-        let onErr =
-            let on =
-                [ for (input, rxs) in In_Rxs do
-                    input <&&> rxs.Select(fun f -> f.G).ToOr() ]
-            if on.Any() then on.ToOr() else v.System._off.Expr
-
-        let offErr =
-            let off =
-                [ for (input, rxs) in In_Rxs do
-                    !!input <&&> rxs.Select(fun f -> f.H).ToOr()]
-            if off.Any() then off.ToOr() else v.System._off.Expr
-
-        let set = (onErr <||> offErr) <&&> !!v._sim.Expr
+    member v.M4_CallErrorRXMonitor(): CommentedStatement list =
+        let call= v.Vertex.GetPure() :?> CallDev
         let rst = v.Flow.clear.Expr
+        let tds = call.CallTargetJob.DeviceDefs.Where(fun f->f.ApiItem.RXs.any())
+        [
+            for td in tds do
+                let input, rxs = td.ActionINFunc, td.ApiItem.RXs.Select(getVM)
 
-        (set, rst) ==| (v.E2, getFuncName())
+                yield (input   <&&> rxs.Select(fun f -> f.G).ToOr() , rst<||>v._sim.Expr) ==| (td.ApiItem.RXErrShort, getFuncName())
+                yield (!!input <&&> rxs.Select(fun f -> f.H).ToOr() , rst<||>v._sim.Expr) ==| (td.ApiItem.RXErrOpen,  getFuncName())
 
+            let sets = tds |> Seq.collect(fun s->[s.ApiItem.RXErrOpen;s.ApiItem.RXErrShort])
+            yield (sets.ToOrElseOff(v.System), v._off.Expr) --| (v.E2, getFuncName())
+        ]
 
     member v.M5_RealErrorTXMonitor(): CommentedStatement  =
         let real = v.Vertex :?> Real

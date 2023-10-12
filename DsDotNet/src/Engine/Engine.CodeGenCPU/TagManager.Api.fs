@@ -13,15 +13,19 @@ module ApiTagManagerModule =
         let ps = cpv ("PS", apiItem, apiItem.System )
         let pr = cpv ("PR", apiItem, apiItem.System )
         let pe = cpv ("PE", apiItem, activeSys )
+        let txerr = cpv ("TXErr", apiItem, activeSys )
+        let rxerr = cpv ("RXErr", apiItem, activeSys )
+        let timerTimeOutBit = timer  stg "TOUT" activeSys 
 
         interface ITagManager with
             member _.Target = apiItem
             member _.Storages = stg
 
-        member f.GetApiTag(at:ApiItemTag) =
-            match at with
-            | ApiItemTag.planSet   -> ps
-            | ApiItemTag.planRst   -> pr
-            | ApiItemTag.planEnd   -> pe
-            | _ -> failwithlog $"Error : GetApiTag {at} type not support!!"
 
+        ///Timer time out
+        member _.TOUT   = timerTimeOutBit
+        member _.PS   = ps
+        member _.PR   = pr
+        member _.PE   = pe
+        member _.TXErr   = txerr
+        member _.RXErr   = rxerr

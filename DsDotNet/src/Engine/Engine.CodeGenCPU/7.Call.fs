@@ -46,7 +46,6 @@ type VertexMCoin with
                   
                     (action <||> coin._sim.Expr)
                     <&&> call.PEs.ToAndElseOn(coin.System) 
-                    <&&> !!dop 
 
                 yield (sets, rsts) ==| (td.ApiItem.PS, getFuncName())
         ]
@@ -60,7 +59,7 @@ type VertexMCoin with
                 if td.ApiItem.TXs.any()
                 then 
                     let sets = td.ApiItem.PE.Expr <&&> td.ApiItem.PS.Expr 
-                           <&&> call.Parent.GetFlow().drive.Expr
+                           <&&> coin.Flow.dop.Expr
                     yield (sets, rsts) --| (td.ActionOut, getFuncName())
         ]
 

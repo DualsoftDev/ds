@@ -89,7 +89,6 @@ module TagKindModule =
     |relayCall                 = 11021
     |counter                   = 11022
     |timerOnDelay              = 11023
-    |timerTimeOut              = 11024
 
 
     [<Flags>]
@@ -98,6 +97,9 @@ module TagKindModule =
     |planSet                   = 12000
     |planRst                   = 12001
     |planEnd                   = 12002
+    |timeOut                   = 12003
+
+
 
     [<Flags>]
     /// 13000 ~ 13999

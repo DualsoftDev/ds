@@ -30,9 +30,12 @@ module ConvertCoreExt =
                |> Tuple.toDictionary
 
     type ApiItem with
-        member a.PS     = getAM(a).GetApiTag(ApiItemTag.planSet)
-        member a.PR     = getAM(a).GetApiTag(ApiItemTag.planRst)
-        member a.PE     = getAM(a).GetApiTag(ApiItemTag.planEnd)
+        member a.PS     = getAM(a).PS
+        member a.PR     = getAM(a).PR
+        member a.PE     = getAM(a).PE
+        member a.TOUT     = getAM(a).TOUT
+        member a.TXErr     = getAM(a).TXErr
+        member a.RXErr     = getAM(a).RXErr
 
     type DsSystem with
         member private s.GetPv<'T when 'T:equality >(st:SystemTag) =
@@ -331,4 +334,3 @@ module ConvertCoreExt =
     type TagInfoType =
         [<Extension>] static member GetTagSys  (x:DsSystem ,typ:SystemTag)  = getSM(x).GetSystemTag(typ)
         [<Extension>] static member GetTagFlow (x:Flow     ,typ:FlowTag)    = getFM(x).GetFlowTag(typ )
-        [<Extension>] static member GetTagApi  (x:ApiItem  ,typ:ApiItemTag) = getAM(x).GetApiTag(typ)

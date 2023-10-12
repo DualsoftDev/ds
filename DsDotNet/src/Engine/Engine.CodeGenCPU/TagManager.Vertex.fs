@@ -129,7 +129,6 @@ module TagManagerModule =
 
         let counterBit    = counter  s "CTR"  sys
         let timerOnDelayBit = timer  s "TON"  sys 
-        let timerTimeOutBit = timer  s "TOUT" sys 
 
         /////CallDev Done Relay
         //member _.CR     = relayCallBit
@@ -138,8 +137,5 @@ module TagManagerModule =
         member _.CTR    = counterBit
         ///Timer on delay
         member _.TDON    = timerOnDelayBit
-        ///Timer time out
-        member _.TOUT   = timerTimeOutBit
-
 
 

@@ -41,13 +41,19 @@ type VertexManager with
 
     member v.M3_CallErrorTXMonitor(): CommentedStatement list =
         let v= v :?> VertexMCoin
-        let set = v.G.Expr <&&> v.TOUT.DN.Expr
+        let call= v.Vertex :?> CallDev
         let rst = v.Flow.clear.Expr
         [
-            //test ahn  going 직전시간 기준 타임아웃 시간 받기
-            // 일단을 system 10초 타임아웃
-            (v.G.Expr) --@ (v.TOUT, v.System._tout.Value, getFuncName())
-            (set, rst) ==| (v.E1, getFuncName())
+            let tds = call.CallTargetJob.DeviceDefs
+                          .Where(fun f->f.ApiItem.TXs.any() && f.ApiItem.RXs.any())
+           
+            for td in tds do
+                let running = td.ApiItem.PS.Expr  <&&> !!td.ActionINFunc 
+                yield (running)--@ (td.ApiItem.TOUT, v.System._tout.Value, getFuncName())
+                yield (running <&&> td.ApiItem.TOUT.DN.Expr   , rst) ==| (td.ApiItem.TXErr , getFuncName())
+
+            let sets = tds.Select(fun s->s.ApiItem.TXErr).ToOrElseOff(v.System)
+            yield (sets, v._off.Expr) --| (v.E1, getFuncName())
         ]
 
     member v.M4_CallErrorRXMonitor(): CommentedStatement  =

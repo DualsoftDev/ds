@@ -41,16 +41,17 @@ type VertexManager with
 
     member v.M3_CallErrorTXMonitor(): CommentedStatement list =
         let v= v :?> VertexMCoin
-        let call= v.Vertex :?> CallDev
+        let call= v.Vertex.GetPure() :?> CallDev
         let rst = v.Flow.clear.Expr
         [
             let tds = call.CallTargetJob.DeviceDefs
                           .Where(fun f->f.ApiItem.TXs.any() && f.ApiItem.RXs.any())
            
             for td in tds do
-                let running = td.ApiItem.PS.Expr  <&&> !!td.ActionINFunc 
-                yield (running)--@ (td.ApiItem.TOUT, v.System._tout.Value, getFuncName())
-                yield (running <&&> td.ApiItem.TOUT.DN.Expr   , rst) ==| (td.ApiItem.TXErr , getFuncName())
+                let api = td.ApiItem
+                let running = api.PS.Expr <&&> !!td.ActionINFunc 
+                yield running --@ (api.TOUT, v.System._tout.Value, getFuncName())
+                yield (api.TOUT.DN.Expr, rst) ==| (api.TXErr , getFuncName())
 
             let sets = tds.Select(fun s->s.ApiItem.TXErr).ToOrElseOff(v.System)
             yield (sets, v._off.Expr) --| (v.E1, getFuncName())

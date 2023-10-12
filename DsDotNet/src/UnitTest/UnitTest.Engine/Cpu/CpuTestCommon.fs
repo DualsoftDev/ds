@@ -40,7 +40,7 @@ module CpuTestUtil =
         let aliasRealExInFlow = flow.Graph.Vertices.First(fun f->f.Name = "aliasRealExInFlow") :?> Alias
 
         let callTypeAll       = vertices.OfType<CallDev>().Cast<Vertex>()
-        let coinTypeAll       = vertices.Except(vertices.OfType<Real>().Cast<Vertex>())
+        let coinTypeAll       = vertices.Except(vertices.OfType<Real>().Cast<Vertex>()).Where(fun f->f.Parent.GetCore() :? Real)
         let realTypeAll       = vertices.OfType<Real>()
         let vertexAll         = vertices
         do

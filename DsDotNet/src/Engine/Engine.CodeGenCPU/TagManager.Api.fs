@@ -13,9 +13,9 @@ module ApiTagManagerModule =
         let ps = cpv ("PS", apiItem, apiItem.System )
         let pr = cpv ("PR", apiItem, apiItem.System )
         let pe = cpv ("PE", apiItem, activeSys )
-        let txerr = cpv ("TXErr", apiItem, activeSys )
-        let rxerr = cpv ("RXErr", apiItem, activeSys )
-        let timerTimeOutBit = timer  stg "TOUT" activeSys 
+        let txerr = cpv ("TXErr", apiItem, apiItem.System  )
+        let rxerr = cpv ("RXErr", apiItem, apiItem.System  )
+        let timerTimeOutBit = timer  stg "TOUT" apiItem.System  
 
         interface ITagManager with
             member _.Target = apiItem

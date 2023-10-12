@@ -15,7 +15,7 @@ let main argv =
 
 
     let servicesToRun = [| new IOMapService() :> ServiceBase |]
-    ServiceBase.Run(servicesToRun)
+    ServiceBase.Run(servicesToRun) 
 
     //let svc = new IOMapService()
     //svc.Load @"UnitTest\A" |> ignore

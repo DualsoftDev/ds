@@ -59,14 +59,21 @@ type VertexManager with
 
     member v.M4_CallErrorRXMonitor(): CommentedStatement list =
         let call= v.Vertex.GetPure() :?> CallDev
+        let dop = call.V.Flow.dop.Expr
         let rst = v.Flow.clear.Expr
         let tds = call.CallTargetJob.DeviceDefs.Where(fun f->f.ApiItem.RXs.any())
         [
             for td in tds do
                 let input, rxs = td.ActionINFunc, td.ApiItem.RXs.Select(getVM)
+                let offPulse  = td.ApiItem.RXErrOpenOffPulse
+                let offPulseSet  = td.ApiItem.RXErrOpenOffPulseSet
+                let onPulse   = td.ApiItem.RXErrShortOnPulse
+                let onPulseSet   = td.ApiItem.RXErrShortOnPulseSet
+                yield! input --^ (onPulse, onPulseSet, "RXErrShortOnPulse")
+                yield! !!input --^ (offPulse, offPulseSet, "RXErrOpenOffPulse")
 
-                yield (input   <&&> rxs.Select(fun f -> f.G).ToOr() , rst<||>v._sim.Expr) ==| (td.ApiItem.RXErrShort, getFuncName())
-                yield (!!input <&&> rxs.Select(fun f -> f.H).ToOr() , rst<||>v._sim.Expr) ==| (td.ApiItem.RXErrOpen,  getFuncName())
+                yield (dop <&&> onPulseSet.Expr   <&&> rxs.Select(fun f -> f.F).ToAnd() , rst<||>v._sim.Expr) ==| (td.ApiItem.RXErrShort, getFuncName())
+                yield (dop <&&> offPulseSet.Expr  <&&> rxs.Select(fun f -> f.R).ToAnd() , rst<||>v._sim.Expr) ==| (td.ApiItem.RXErrOpen,  getFuncName())
 
             let sets = tds |> Seq.collect(fun s->[s.ApiItem.RXErrOpen;s.ApiItem.RXErrShort])
             yield (sets.ToOrElseOff(v.System), v._off.Expr) --| (v.E2, getFuncName())

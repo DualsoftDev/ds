@@ -17,7 +17,11 @@ module ApiTagManagerModule =
         let txerrtrend = cpv ("TXErrTrend", apiItem, apiItem.System, ApiItemTag.txErrTrend  )
         let txerrovertime = cpv ("TXErrOverTime", apiItem, apiItem.System, ApiItemTag.txErrTimeOver  )
         let rxerrShort = cpv ("RXErrShort", apiItem, apiItem.System, ApiItemTag.rxErrShort  )
+        let rxerrShortOnPulse  = cpv ("RXErrShortOnPulse", apiItem, apiItem.System, ApiItemTag.rxErrShortPulse  )
+        let rxerrShortOnPulseSet  = cpv ("RXErrShortOnPulseSet", apiItem, apiItem.System, ApiItemTag.rxErrShortPulseSet  )
         let rxerrOpen  = cpv ("RXErrOpen", apiItem, apiItem.System, ApiItemTag.rxErrOpen  )
+        let rxerrOpenOffPulse  = cpv ("RXErrOpenOffPulse", apiItem, apiItem.System, ApiItemTag.rxErrOpenPulse  )
+        let rxerrOpenOffPulseSet  = cpv ("RXErrOpenOffPulseSet", apiItem, apiItem.System, ApiItemTag.rxErrOpenPulseSet  )
         let timerTimeOutBit = timer  stg "TOUT" apiItem.System   
         
         interface ITagManager with
@@ -46,4 +50,8 @@ module ApiTagManagerModule =
         member _.TXErrTrend    = txerrtrend
         member _.TXErrOverTime   = txerrovertime
         member _.RXErrShort  = rxerrShort
+        member _.RXErrShortOnPulse  = rxerrShortOnPulse
+        member _.RXErrShortOnPulseSet  = rxerrShortOnPulseSet
         member _.RXErrOpen   = rxerrOpen
+        member _.RXErrOpenOffPulse  = rxerrOpenOffPulse
+        member _.RXErrOpenOffPulseSet  = rxerrOpenOffPulseSet

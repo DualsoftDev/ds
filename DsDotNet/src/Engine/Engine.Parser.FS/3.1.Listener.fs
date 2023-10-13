@@ -399,7 +399,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                             let apiItem =
                                 option {
                                     let! apiPoint = tryFindCallingApiItem system device api
-                                    let! addressCtx = callList.TryFindFirstChild<AddressInOutContext>()
+                                    let! addressCtx = apiDefCtx.TryFindFirstChild<AddressInOutContext>()
                                     let! txAddressCtx = addressCtx.TryFindFirstChild<OutAddrContext>()
                                     let! rxAddressCtx = addressCtx.TryFindFirstChild<InAddrContext>()
                                     let tx = getAddress(txAddressCtx) |>replaceSkipAddress

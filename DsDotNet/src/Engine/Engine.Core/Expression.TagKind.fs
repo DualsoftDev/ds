@@ -100,11 +100,13 @@ module TagKindModule =
     |txErrTrend                = 12003
     |txErrTimeOver             = 12004
     |rxErrShort                = 12005
-    |rxErrShortPulse           = 12006
-    |rxErrShortPulseSet        = 12007
-    |rxErrOpen                 = 12008
-    |rxErrOpenPulse            = 12009
-    |rxErrOpenPulseSet         = 12010
+    |rxErrShortOn              = 12006
+    |rxErrShortRising          = 12007
+    |rxErrShortTemp            = 12008
+    |rxErrOpen                 = 12009
+    |rxErrOpenOff              = 12010
+    |rxErrOpenRising           = 12011
+    |rxErrOpenTemp             = 12012
 
 
 

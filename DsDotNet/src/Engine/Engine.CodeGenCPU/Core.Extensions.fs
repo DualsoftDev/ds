@@ -36,11 +36,14 @@ module ConvertCoreExt =
         member a.TOUT   = getAM(a).TOUT   
         member a.TXErrOverTime   = getAM(a).TXErrOverTime
         member a.RXErrOpen       = getAM(a).RXErrOpen
-        member a.RXErrOpenOffPulse  = getAM(a).RXErrOpenOffPulse
-        member a.RXErrOpenOffPulseSet  = getAM(a).RXErrOpenOffPulseSet
+        member a.RXErrOpenOff  = getAM(a).RXErrOpenOff
+        member a.RXErrOpenTemp  = getAM(a).RXErrOpenTemp
+        member a.RXErrOpenRising  = getAM(a).RXErrOpenRising
+
         member a.RXErrShort      = getAM(a).RXErrShort
-        member a.RXErrShortOnPulse = getAM(a).RXErrShortOnPulse
-        member a.RXErrShortOnPulseSet = getAM(a).RXErrShortOnPulseSet
+        member a.RXErrShortOn = getAM(a).RXErrShortOn
+        member a.RXErrShortRising = getAM(a).RXErrShortRising
+        member a.RXErrShortTemp = getAM(a).RXErrShortTemp
 
     type DsSystem with
         member private s.GetPv<'T when 'T:equality >(st:SystemTag) =

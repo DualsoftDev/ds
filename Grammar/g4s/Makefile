@@ -1,18 +1,18 @@
 .ONESHELL: # Applies to every targets in the file!
 
-#jar := /usr/local/lib/antlr-4.10.1-complete.jar
-jar := /usr/local/lib/antlr4-4.13.0-complete.jar
+jar := antlr4-4.13.0-complete.jar
+jarPath := /usr/local/lib/$(jar)
 
-antlr4=java -Xmx500M -cp $(jar) org.antlr.v4.Tool
-grun=java -Xmx500M -cp $(jar):. org.antlr.v4.gui.TestRig
+antlr4=java -Xmx500M -cp $(jarPath) org.antlr.v4.Tool
+grun=java -Xmx500M -cp $(jarPath):. org.antlr.v4.gui.TestRig
 
 grun:
-	@java -version
-	@$(antlr4) dsLexer.g4
-	@$(antlr4) ds.g4
-	@$(antlr4) fqdn.g4
-	@$(antlr4) expr.g4
-	@javac *.java
+	java -version
+	$(antlr4) dsLexer.g4
+	$(antlr4) ds.g4
+	$(antlr4) fqdn.g4
+	$(antlr4) expr.g4
+	javac *.java
 	@echo 'echo "A || B, #g(X), C > D, E || F;" | grun ds causals -gui'
 
 tokens:
@@ -24,7 +24,7 @@ gui:
 	$(grun) ds model -gui < g4test/prop.ds
 
 test:
-	@export CLASSPATH=".:$(jar):$$CLASSPATH"
+	@export CLASSPATH=".:$(jarPath):$$CLASSPATH"
 #	for f in g4test/*; do
 #		echo $$f
 #		$(grun) ds causals < g4test/causals.txt
@@ -69,7 +69,7 @@ test:
 	$(grun) ds expressions < g4test/expressions.txt
 
 cs:
-	java -jar antlr-4.10.1-complete.jar -package NameSpace -Dlanguage=CSharp -visitor -o CSharp/Generated g4s/ds.g4
+	java -jar $(jarPath) -package NameSpace -Dlanguage=CSharp -visitor -o CSharp/Generated g4s/ds.g4
 
 clean:
 	@rm -rf CSharp/Generated
@@ -85,8 +85,11 @@ xxx:
 	dotnet build
 	dotnet run
 
+antlrjar := https://www.antlr.org/download/$(jar)
 java-install:
-	choco install javaruntime 8.0.231
-	choco install jdk8 8.0.211
-	choco install jre8 8.0.321
+	# choco install python
+	pip install antlr4-tools
+	mkdir -p /usr/local/lib
+	cd /usr/local/lib
+	curl -O $(antlrjar)
 	# https://download.oracle.com/java/20/latest/jdk-20_windows-x64_bin.exe

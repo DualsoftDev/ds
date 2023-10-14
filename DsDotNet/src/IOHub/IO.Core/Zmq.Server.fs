@@ -15,7 +15,9 @@ open IO.Spec
 module ZmqServerModule =
     type Server(ioSpec:IOSpec, cancellationToken:CancellationToken) =
         let port = ioSpec.ServicePort
-        let streams = new Dictionary<string, BufferManager>()
+        let streams = new Dictionary<FileStream, BufferManager>()
+        let streams2 = new Dictionary<string, BufferManager>()
+        let tagDic = new Dictionary<string, AddressSpec>()
 
         let showSamples (vendorSpec:VendorSpec) (addressExtractor:IAddressInfoProvider) =
             let v = vendorSpec
@@ -51,28 +53,53 @@ module ZmqServerModule =
 
         do
             for v in ioSpec.Vendors do
-                let addressExtractor:IAddressInfoProvider =
+                v.AddressResolver <-
                     let oh:ObjectHandle = Activator.CreateInstanceFrom(v.Dll, v.ClassName)
                     let obj:obj = oh.Unwrap()
                     obj :?> IAddressInfoProvider
 
-                showSamples v addressExtractor
+                showSamples v v.AddressResolver
 
                 for f in v.Files do
                     let dir, key =
                         match v.Location with
                         | "" | null -> ioSpec.TopLevelLocation, f.Name
                         | _ -> Path.Combine(ioSpec.TopLevelLocation, v.Location), $"{v.Location}/{f.Name}"
-                    let stream = f.InitiaizeFile(dir)
-                    streams.Add(key, new BufferManager(stream))
+                    f.InitiaizeFile(dir)
+                    let bufferManager = new BufferManager(f)
+                    streams.Add(f.FileStream, bufferManager)
+                    let key = if v.Location.NonNullAny() then $"{v.Location}/{f.Name}" else f.Name
+                    streams2.Add(key, bufferManager)
 
+        let getVendor (addr:string) : (VendorSpec * string) =
+            match addr with
+            | RegexPattern "^([^/]+)/(\w+)$" [vendor; address] ->
+                let v =
+                    ioSpec.Vendors
+                    |> Seq.find (fun v -> v.Location = vendor)
+                v, address
+            | _ ->
+                let v =
+                    ioSpec.Vendors
+                    |> Seq.find (fun v -> v.Location = "")
+                v, addr
+
+        // e.g "p/ob1"
         let (|AddressPattern|_|) (str: string) =
-            let memTypes = streams.Keys.JoinWith "|"
-            let dataTypes = "x|b|w|d|l"
-            let pattern = sprintf "^(%s)([%s])(\d+)" memTypes dataTypes
-            match str with
-            | RegexPattern pattern [m; d; Int32Pattern offset] -> Some(AddressSpec(m, d, offset))
-            | _ -> None
+            if tagDic.ContainsKey(str) then
+                Some(tagDic.[str])
+            else
+                option {
+                    let (vendor, address) = getVendor str
+                    match vendor.AddressResolver.GetAddressInfo(address) with
+                    | true, memType, byteOffset, bitOffset, contentBitLength ->
+                        let! f = vendor.Files |> Seq.tryFind(fun f -> f.Name = memType)
+                        let addressSpec = AddressSpec(f, bitSizeToEnum(contentBitLength), byteOffset, bitOffset)
+                        tagDic.Add(str, addressSpec)
+                        return addressSpec
+                    | _ ->
+                        return! None
+                }
 
         let (|AddressAssignPattern|_|) (str: string) =
             match str with
@@ -94,21 +121,25 @@ module ZmqServerModule =
                 logDebug $"Handling request: {request}"
                 let tokens = request.Split(' ', StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
                 let command = tokens[0]
+
                 let readAddress(address:string) : obj =
                     match address with
-                    | AddressPattern addr ->
-                        let ap = addr
-                        let offset = ap.Offset
-                        let stream = streams[ap.Name]
+                    | AddressPattern ap ->
+                        let byteOffset = ap.OffsetByte
+                        let stream = streams[ap.IOFileSpec.FileStream]
+                        if ap.IOFileSpec.Length < byteOffset then
+                            failwith $"Invalid address: {address}"
 
-                        match ap.Type with
-                        | "x" -> stream.VerifyIndices(offset / 8); stream.readBit(offset) :> obj
-                        | "b" -> stream.VerifyIndices(offset * 1); stream.readU8(offset)
-                        | "w" -> stream.VerifyIndices(offset * 2); stream.readU16(offset)
-                        | "d" -> stream.VerifyIndices(offset * 4); stream.readU32(offset)
-                        | "l" -> stream.VerifyIndices(offset * 8); stream.readU64(offset)
-                        | _ -> failwithf($"Unknown data type : {ap.Type}")
-                    | _ -> failwithf($"Unknown address pattern : {address}")
+                        match ap.DataType with
+                        | PLCMemoryBitSize.Bit   -> stream.readBit(byteOffset * 8 + ap.OffsetBit) :> obj
+                        | PLCMemoryBitSize.Byte  -> stream.readU8(byteOffset)
+                        | PLCMemoryBitSize.Word  -> stream.readU16(byteOffset)
+                        | PLCMemoryBitSize.DWord -> stream.readU32(byteOffset)
+                        | PLCMemoryBitSize.LWord -> stream.readU64(byteOffset)
+                        | _ ->
+                            failwithf($"Unknown data type : {ap.DataType}")
+                    | _ ->
+                        failwithf($"Unknown address pattern : {address}")
 
                 let writeAddressWithValue(addressWithAssignValue:string) =
                     let parseBool (s:string) =
@@ -119,30 +150,38 @@ module ZmqServerModule =
                     match addressWithAssignValue with
                     | AddressAssignPattern (addressPattern, value) ->
                         let ap = addressPattern
-                        let offset = ap.Offset
-                        let stream = streams[ap.Name]
+                        let byteOffset = ap.OffsetByte
+                        let stream = streams[ap.IOFileSpec.FileStream]
+                        if ap.IOFileSpec.Length <= byteOffset then
+                            failwith $"Invalid address: {addressPattern}"
 
-                        match ap.Type with
-                        | "x" -> stream.VerifyIndices(offset / 8); stream.writeBit(offset, parseBool(value))
-                        | "b" -> stream.VerifyIndices(offset * 1); stream.writeU8(offset,  Byte.Parse(value))
-                        | "w" -> stream.VerifyIndices(offset * 2); stream.writeU16(offset, UInt16.Parse(value))
-                        | "d" -> stream.VerifyIndices(offset * 4); stream.writeU32(offset, UInt32.Parse(value))
-                        | "l" -> stream.VerifyIndices(offset * 8); stream.writeU64(offset, UInt64.Parse(value))
-                        | _ -> failwithf($"Unknown data type : {ap.Type}")
+                        match ap.DataType with
+                        | PLCMemoryBitSize.Bit   -> stream.writeBit(byteOffset, ap.OffsetBit, parseBool(value))
+                        | PLCMemoryBitSize.Byte  -> stream.writeU8(byteOffset,  Byte.Parse(value))
+                        | PLCMemoryBitSize.Word  -> stream.writeU16(byteOffset, UInt16.Parse(value))
+                        | PLCMemoryBitSize.DWord -> stream.writeU32(byteOffset, UInt32.Parse(value))
+                        | PLCMemoryBitSize.LWord -> stream.writeU64(byteOffset, UInt64.Parse(value))
+                        | _ -> failwithf($"Unknown data type : {ap.DataType}")
 
                         stream.Flush()
 
                     | _ -> failwithf($"Unknown address with assignment pattern : {addressWithAssignValue}")
 
-                let fetchStreamAndIndices (respSocket:ResponseSocket) =
+                let fetchStreamAndIndices (isBitIndex:bool) (respSocket:ResponseSocket) =
                     let stream =
                         let name = respSocket.ReceiveFrameString().ToLower()
-                        streams[name]
+                        streams2[name]
                     let indices =
                         let address = respSocket.ReceiveFrameBytes()
                         ByteConverter.BytesToTypeArray<int>(address)
+                    for byteIndex in indices |> map (fun n -> if isBitIndex then n / 8 else n) do
+                        if stream.FileStream.Length <= byteIndex then
+                            failwithf($"Invalid address: {byteIndex}")
                     stream, indices
-                let fetchForRead = fetchStreamAndIndices
+
+                let fetchForRead = fetchStreamAndIndices false
+                let fetchForReadBit = fetchStreamAndIndices true
+
                 let fetchForWrite (respSocket:ResponseSocket) =
                     let stream, indices = fetchForRead respSocket
                     let values = respSocket.ReceiveFrameBytes()
@@ -161,7 +200,7 @@ module ZmqServerModule =
                     WriteResultOK()
 
                 | "rx" ->
-                    let stream, indices = fetchForRead respSocket
+                    let stream, indices = fetchForReadBit respSocket
                     stream.VerifyIndices(indices |> map (fun n -> n / 8))
                     let result = indices |> map (stream.readBit)
                     ReadResultArray<bool>(result)

@@ -2,16 +2,18 @@ namespace IO.Core
 open System
 open System.IO
 open Dual.Common.Core.FS
+open IO.Spec
 
 [<AutoOpen>]
 module ZmqBufferManager =
-    type BufferManager(stream:FileStream) =
+    type BufferManager(fileSpec:IOFileSpec) =
+        let stream:FileStream = fileSpec.FileStream
         let locker = obj()  // 객체를 lock용으로 사용
         //member x.Type = typ
         member x.FileStream = stream
         member x.Flush() = stream.Flush()
-        member x.readBits (offset: int, count: int) : bool[] =
-            let startByte = offset / 8
+        member x.readBits (bitOffset: int, count: int) : bool[] =
+            let startByte = bitOffset / 8
             let endByte = startByte + count / 8
             let byteCount = endByte - startByte + 1
             let buffer:byte[] = x.readU8s(startByte, byteCount)
@@ -21,16 +23,18 @@ module ZmqBufferManager =
                 buffer
                    |> Array.map (fun b -> Convert.ToString(b, 2).PadLeft(8, '0'))
                    |> Array.collect (fun s -> s.ToCharArray())
-                   |> Array.skip  (offset % 8)
+                   |> Array.skip  (bitOffset % 8)
                    |> Array.map (fun c -> c = '1')
                    |> Array.take count
                    |> Array.ofSeq
             bits
-        member x.readBit(offset:int) = x.readBits(offset, 1)[0]
-        member x.readU8 (offset:int) = x.readU8s(offset, 1)[0]
-        member x.readU16(offset:int) = x.readU16s(offset, 1)[0]
-        member x.readU32(offset:int) = x.readU32s(offset, 1)[0]
-        member x.readU64(offset:int) = x.readU64s(offset, 1)[0]
+
+        //member x.readBit(byteOffset:int, bitOffset:int) = x.readBits(byteOffset * 8 + bitOffset, 1)[0]
+        member x.readBit(bitOffset:int) = x.readBits(bitOffset, 1)[0]
+        member x.readU8 (byteOffset:int) = x.readU8s(byteOffset, 1)[0]
+        member x.readU16(byteOffset:int) = x.readU16s(byteOffset, 1)[0]
+        member x.readU32(byteOffset:int) = x.readU32s(byteOffset, 1)[0]
+        member x.readU64(byteOffset:int) = x.readU64s(byteOffset, 1)[0]
 
         member x.readU8s (offset: int, count: int) : byte[] =
             lock locker (fun () ->
@@ -42,32 +46,28 @@ module ZmqBufferManager =
         member x.readU16s (offset: int, count: int) : uint16[] =
             lock locker (fun () ->
                 let buffer = Array.zeroCreate<byte> (count * 2)
-                stream.Seek(int64 (offset * 2), SeekOrigin.Begin) |> ignore
+                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
                 stream.Read(buffer, 0, count * 2) |> ignore
                 Array.init count (fun i -> System.BitConverter.ToUInt16(buffer, i * 2))
             )
         member x.readU32s (offset: int, count: int) : uint32[] =
             lock locker (fun () ->
                 let buffer = Array.zeroCreate<byte> (count * 4)
-                stream.Seek(int64 (offset * 4), SeekOrigin.Begin) |> ignore
+                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
                 stream.Read(buffer, 0, count * 4) |> ignore
                 Array.init count (fun i -> System.BitConverter.ToUInt32(buffer, i * 4))
             )
         member x.readU64s (offset: int, count: int) : uint64[] =
             lock locker (fun () ->
                 let buffer = Array.zeroCreate<byte> (count * 8)
-                stream.Seek(int64 (offset * 8), SeekOrigin.Begin) |> ignore
+                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
                 stream.Read(buffer, 0, count * 8) |> ignore
                 Array.init count (fun i -> System.BitConverter.ToUInt64(buffer, i * 8))
             )
 
 
-        member x.writeBit(offset:int, value:bool) =
-            // 바이트 위치 및 해당 바이트 내의 비트 위치 계산
-            let byteIndex = offset / 8
-            let bitIndex = offset % 8
-
-            // 해당 위치의 바이트를 읽기
+        member x.writeBit(bitIndex:int, value:bool) = x.writeBit(bitIndex / 8, bitIndex % 8, value)
+        member x.writeBit(byteIndex:int, bitIndex:int, value:bool) =
             let currentByte = x.readU8(byteIndex)
 
             // 비트를 설정하거나 클리어
@@ -82,35 +82,35 @@ module ZmqBufferManager =
 
         member x.writeU8 (offset:int, value:byte) =
             lock locker (fun () ->
-                stream.Seek(int64 (offset * 1), SeekOrigin.Begin) |> ignore
+                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
                 stream.WriteByte(value)
             )
 
         member x.writeU16(offset:int, value:uint16) =
             lock locker (fun () ->
                 let buffer = System.BitConverter.GetBytes(value)
-                stream.Seek(int64 (offset * 2), SeekOrigin.Begin) |> ignore
+                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
                 stream.Write(buffer, 0, buffer.Length)
             )
 
         member x.writeU32(offset:int, value:uint32) =
             lock locker (fun () ->
                 let buffer = System.BitConverter.GetBytes(value)
-                stream.Seek(int64 (offset * 4), SeekOrigin.Begin) |> ignore
+                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
                 stream.Write(buffer, 0, buffer.Length)
             )
 
         member x.writeU64(offset:int, value:uint64) =
             lock locker (fun () ->
                 let buffer = System.BitConverter.GetBytes(value)
-                stream.Seek(int64 (offset * 8), SeekOrigin.Begin) |> ignore
+                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
                 stream.Write(buffer, 0, buffer.Length)
             )
 
 [<AutoOpen>]
 module ZmqBufferManagerExtension =
     type IOFileSpec with
-        member x.InitiaizeFile(dir:string) : FileStream =
+        member x.InitiaizeFile(dir:string) =
             let path = Path.Combine(dir, x.Name)
             let mutable fs:FileStream = null
             if (File.Exists path) then
@@ -130,7 +130,7 @@ module ZmqBufferManagerExtension =
                 let xxx = fs.Length
                 Console.WriteLine($"File length : {fs.Length}")
                 fs.Flush()
-            fs
+            x.FileStream <- fs
 
     type BufferManager with
         member x.VerifyIndices(offset:int) =
@@ -143,3 +143,21 @@ module ZmqBufferManagerExtension =
         member x.VerifyIndices(offsets:int[]) =
             offsets |> iter (fun offset -> x.VerifyIndices(offset))
 
+    //let private bitSizeToDataType n =
+    //    match n with
+    //    | 1 -> "x"
+    //    | 8 -> "b"
+    //    | 16 -> "w"
+    //    | 32 -> "d"
+    //    | 64 -> "l"
+    //    | _ -> failwithf($"Invalid bit size: {n}")
+
+
+    //type IAddressInfoProvider with
+    //    member x.GetPickInfo(address:string) =
+    //        match x.GetAddressInfo(address) with
+    //        | true, memTypes, byteOffset, bitOffset, contentBitLength ->
+    //                Some(AddressSpec(memTypes, d, offset))
+
+    //        let addressInfo = x.GetAddressInfo .[address]
+    //        addressInfo

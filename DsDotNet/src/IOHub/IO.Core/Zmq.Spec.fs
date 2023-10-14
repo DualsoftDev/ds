@@ -3,6 +3,7 @@ open System
 open System.Diagnostics.CodeAnalysis
 open System.IO
 open Dual.Common.Core.FS
+open IO.Spec
 
 [<AutoOpen>]
 module ZmqSpec =
@@ -48,13 +49,21 @@ module ZmqSpec =
             member x.Error = error
 
 
+    type PLCMemoryBitSize =
+        | Bit = 1
+        | Byte = 8
+        | Word = 16
+        | DWord = 32
+        | LWord = 64
+
 
 
     /// MW100 : name='M', type='W', offset=100.  (MX30, MD1234, ML1234, ..)
-    type AddressSpec(name:string, typ:string, offset:int) =
-        member val Name = name.ToLower() with get, set
-        member val Offset = offset with get, set
-        member val Type = typ.ToLower() with get, set
+    type AddressSpec(fileSpec:IOFileSpec, dataType:PLCMemoryBitSize, offsetByte:int, offsetBit:int) =
+        member val IOFileSpec = fileSpec
+        member val DataType = dataType
+        member val OffsetByte = offsetByte
+        member val OffsetBit = offsetBit
 
 
     (*
@@ -75,10 +84,13 @@ module ZmqSpec =
     *)
 
 
-    type IOFileSpec() =
+    and IOFileSpec() =
         member val Name = ""  with get, set
         member val Length = 0 with get, set
+
+        // reference to parent
         member val Vendor:VendorSpec = null with get, set
+        member val FileStream:FileStream = null with get, set
     
     and [<AllowNullLiteral>] VendorSpec() =
         member val Name = "" with get, set
@@ -87,6 +99,7 @@ module ZmqSpec =
         member val ClassName = "" with get, set
         member val Accepts = "" with get, set
         member val Files:IOFileSpec[] = [||] with get, set
+        member val AddressResolver:IAddressInfoProvider = null with get, set
     type IOSpec() =
         member val ServicePort = 0 with get, set
         member val TopLevelLocation = "" with get, set
@@ -109,3 +122,12 @@ module ZmqSpec =
                     if f.Length <= 0 then
                         failwithlogf $"Invalid file length {f.Length} on file {f.Name}"
 
+
+    let bitSizeToEnum(bitSize:int) =
+        match bitSize with
+        | 1 -> PLCMemoryBitSize.Bit
+        | 8 -> PLCMemoryBitSize.Byte
+        | 16 -> PLCMemoryBitSize.Word
+        | 32 -> PLCMemoryBitSize.DWord
+        | 64 -> PLCMemoryBitSize.LWord
+        | _ -> failwithf($"Invalid bit size: {bitSize}")

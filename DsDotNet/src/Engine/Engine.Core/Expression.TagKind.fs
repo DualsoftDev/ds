@@ -89,6 +89,7 @@ module TagKindModule =
     |relayCall                 = 11021
     |counter                   = 11022
     |timerOnDelay              = 11023
+    |goingRealy                = 11024
 
 
     [<Flags>]

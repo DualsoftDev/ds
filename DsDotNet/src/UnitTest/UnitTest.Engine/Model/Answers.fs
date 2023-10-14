@@ -364,33 +364,31 @@ module ModelComponentAnswers =
     let linkAndLinkAliases = """
 [sys] Control = {
     [flow] F = {
-        Main <||> Reset;		// Main(Real)<||> Reset(Real);
-        FWD <| Main |> BWD;		// FWD(CallSys)<| Main(Real) |> BWD(CallSys);
-        FWD > BWD > Main |> FWD2 |> BWD2;		// FWD(CallSys)> BWD(CallSys) > Main(Real) |> FWD2(Alias) |> BWD2(Alias);
-        Main = {
-            mv1up, mv2dn > mv1dn, mv2up;		// mv1up(CallDev), mv2dn(CallDev)> mv1dn(CallDev), mv2up(CallDev);
-        }
-        [aliases] = {
-            FWD = { FWD2; }
-            BWD = { BWD2; }
-        }
-    }
-    [jobs] = {
-        mv1up = { M1.Up(%I300, %Q300); }
-        mv1dn = { M1.Dn(%I301, %Q301); }
-        mv2up = { M2.Up(%I302, %Q302); }
-        mv2dn = { M2.Dn(%I303, %Q303); }
-        FWD = Mt.fwd;
-        BWD = Mt.bwd;
+		Main = { mv1up, mv2dn > mv1dn, mv2up; }
+		FWD > BWD > Main;
+		Main <||> Reset;
+		
+		[aliases] = {
+			FWD = { FWD2; }
+			BWD = { BWD2; }
+		}
     }
     [interfaces] = {
         G = { F.Main ~ F.Main }
         R = { F.Reset ~ F.Reset }
         G <||> R;
     }
-    [external file="HmiCodeGenExample/test_sample/device/MovingLifter1.ds" ip="localhost"] M1;
-    [external file="HmiCodeGenExample/test_sample/device/MovingLifter2.ds" ip="localhost"] M2;
-    [external file="HmiCodeGenExample/test_sample/device/motor.ds" ip="localhost"] Mt;
+	[jobs] = {
+		mv1up = { M1.Up(%I300, %Q300); }
+		mv1dn = { M1.Dn(%I301, %Q301); }
+		mv2up = { M2.Up(%I302, %Q302); }
+		mv2dn = { M2.Dn(%I303, %Q303); }
+		FWD = Mt.fwd;
+		BWD = Mt.bwd;
+	}
+    [external file=""HmiCodeGenExample/test_sample/device/MovingLifter1.ds"" ip=""localhost""] M1;
+    [external file=""HmiCodeGenExample/test_sample/device/MovingLifter2.ds"" ip=""localhost""] M2;
+	[external file=""HmiCodeGenExample/test_sample/device/motor.ds"" ip=""localhost""] Mt;
 }
 """
 

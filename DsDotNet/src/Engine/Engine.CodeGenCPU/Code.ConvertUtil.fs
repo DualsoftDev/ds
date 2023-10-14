@@ -35,6 +35,8 @@ module CodeConvertUtil =
     let getOriginSimPlanEnds(vr:VertexMReal, initialType:InitialType) =
         getOriginTasks(vr, initialType).Select(fun f->f.ApiItem.PE)
 
+   
+
     /// Edge source 검색 결과 정보 : target 으로 들어오는 source vertices list 와 그것들이 약연결로 들어오는지, 강연결로 들어오는지 정보
     type EdgeSourcesWithStrength =
         | DuEssWeak of Vertex list
@@ -45,6 +47,8 @@ module CodeConvertUtil =
     let private getEdgeSources(graph:DsGraph, target:Vertex, bStartEdge:bool) =
         let edges = graph.GetIncomingEdges(target) |> List.ofSeq
         let mask  = if bStartEdge then EdgeType.Start else EdgeType.Reset
+
+
 
         let srcsWeek   = edges |> filter(fun e -> e.EdgeType = mask )
         let srcsStrong = edges |> filter(fun e -> e.EdgeType = (mask ||| EdgeType.Strong))
@@ -186,21 +190,12 @@ module CodeConvertUtil =
         [<Extension>]
         static member GetResetCausals(xs:Vertex seq) =
                 xs.Select(fun f ->
-                    match f with
+                    match getPure f with
                     | :? Real    as r  -> r.V.GR
                     | :? RealExF as rf -> rf.Real.V.GR
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
    
-
-        [<Extension>]
-        static member GetResetStrongCausals(xs:Vertex seq) =
-                xs.Select(fun f ->
-                    match f with
-                    | :? Real    as r  -> r.V.GR
-                    | :? RealExF as rf -> rf.Real.V.GR
-                    | _ -> failwithlog $"Error {getFuncName()}"
-                ).Distinct()
 
         //[<Extension>]
         //static member GetResetTargetReady(xs:Vertex seq) =
@@ -234,7 +229,7 @@ module CodeConvertUtil =
 
         [<Extension>]
         static member GetStrongResetRootAndCausals  (v:VertexManager) =
-            let tags = getResetStrongEdgeSources(v).GetResetStrongCausals()
+            let tags = getResetStrongEdgeSources(v).GetResetCausals()
             tags.ToAndElseOff(v.System)
 
         //[<Extension>]

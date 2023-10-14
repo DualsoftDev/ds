@@ -42,8 +42,6 @@ namespace Engine
     [flow] F = {
         Main = {
             Ap >> Am;
-            Ap ||> Am;
-            Ap <|| Am;
         }
     }
     [jobs] = {
@@ -310,7 +308,7 @@ namespace Engine
         public static string Dup = @"
 [sys] L = {
     [flow] FF = {
-        A, Ap > C |> Ap;
+        A, Ap > C;
     }
     [jobs] = {
         Ap = { A.""+""(%I1, %Q1); }
@@ -465,15 +463,9 @@ namespace Engine
         public static string TaskLinkorDevice = @"
     [sys] Control = {
     [flow] F = {
-        Main <||> Reset;		
-        FWD <| Main |> BWD;		
-        FWD > BWD > Main |> FWD2 |> BWD2;		
+        FWD > BWD > Main <||> Reset;		// FWD(CallSys)> BWD(CallSys) > Main(Real) <||> Reset(Real);
         Main = {
-            mv1up > mv1dn;		
-        }
-        [aliases] = {
-            FWD = { FWD2; }
-            BWD = { BWD2; }
+            mv1up > mv1dn;		// mv1up(CallDev)> mv1dn(CallDev);
         }
     }
     [jobs] = {
@@ -487,10 +479,11 @@ namespace Engine
         R = { F.Reset ~ F.Reset }
         G <||> R;
     }
-    [device file=""cylinder.ds""] A;
-    [external file=""systemRH.ds"" ip=""localhost""] sysR;
-    [external file=""systemLH.ds"" ip=""localhost""] sysL;
+    [device file=""cylinder.ds""] A; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+    [external file=""systemRH.ds"" ip=""localhost""] sysR; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/systemRH.ds
+    [external file=""systemLH.ds"" ip=""localhost""] sysL; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/systemLH.ds
 }";
+
 
         public static string ExternalSegmentCall = @"
 [sys] MY = {
@@ -546,7 +539,7 @@ namespace Engine
         Main = {
             // AVp1 |> Am1;
             // 정보로서의 CallDev 상호 리셋
-            Ap1 <||> Am1;
+            //Ap1 <||> Am1;
             Ap > Am; 
         }
         [aliases] = {
@@ -565,33 +558,33 @@ namespace Engine
         public static string LinkAndLinkAliases = @"
 [sys] Control = {
     [flow] F = {
-		Main = { mv1up, mv2dn > mv1dn, mv2up; }
-		FWD > BWD > Main |> FWD2 |> BWD2;
-		Main <||> Reset;
-		FWD <| Main |> BWD;
-		
-		[aliases] = {
-			FWD = { FWD2; }
-			BWD = { BWD2; }
-		}
+        FWD > BWD > Main <||> Reset;		// FWD(CallSys)> BWD(CallSys) > Main(Real) <||> Reset(Real);
+        Main = {
+            mv1up, mv2dn > mv1dn, mv2up;		// mv1up(CallDev), mv2dn(CallDev)> mv1dn(CallDev), mv2up(CallDev);
+        }
+        [aliases] = {
+            FWD = { FWD2; }
+            BWD = { BWD2; }
+        }
+    }
+    [jobs] = {
+        mv1up = { M1.Up(%I300, %Q300); }
+        mv1dn = { M1.Dn(%I301, %Q301); }
+        mv2up = { M2.Up(%I302, %Q302); }
+        mv2dn = { M2.Dn(%I303, %Q303); }
+        FWD = Mt.fwd;
+        BWD = Mt.bwd;
     }
     [interfaces] = {
         G = { F.Main ~ F.Main }
         R = { F.Reset ~ F.Reset }
         G <||> R;
     }
-	[jobs] = {
-		mv1up = { M1.Up(%I300, %Q300); }
-		mv1dn = { M1.Dn(%I301, %Q301); }
-		mv2up = { M2.Up(%I302, %Q302); }
-		mv2dn = { M2.Dn(%I303, %Q303); }
-		FWD = Mt.fwd;
-		BWD = Mt.bwd;
-	}
-    [external file=""HmiCodeGenExample/test_sample/device/MovingLifter1.ds"" ip=""localhost""] M1;
-    [external file=""HmiCodeGenExample/test_sample/device/MovingLifter2.ds"" ip=""localhost""] M2;
-	[external file=""HmiCodeGenExample/test_sample/device/motor.ds"" ip=""localhost""] Mt;
+    [external file=""HmiCodeGenExample/test_sample/device/MovingLifter1.ds"" ip=""localhost""] M1; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/HmiCodeGenExample/test_sample/device/MovingLifter1.ds
+    [external file=""HmiCodeGenExample/test_sample/device/MovingLifter2.ds"" ip=""localhost""] M2; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/HmiCodeGenExample/test_sample/device/MovingLifter2.ds
+    [external file=""HmiCodeGenExample/test_sample/device/motor.ds"" ip=""localhost""] Mt; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/HmiCodeGenExample/test_sample/device/motor.ds
 }
+
 ";
 
         public static string Diamond = @"

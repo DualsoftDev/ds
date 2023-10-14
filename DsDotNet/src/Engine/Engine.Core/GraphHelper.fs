@@ -109,7 +109,7 @@ module internal GraphHelperModule =
         sccs
 
 
-    let validateGraph (graph:Graph<'V, 'E>, allowCyclicGraph:bool) =
+    let validateCylce (graph:Graph<'V, 'E>, allowCyclicGraph:bool) =
         let edges =
             graph.Edges
                 .Where(fun e -> not <| e.EdgeType.HasFlag(EdgeType.Reset))
@@ -123,11 +123,9 @@ module internal GraphHelperModule =
             failwithlogf $"ERROR: Cyclic graph on {msg}"
         true
 
-
-
 [<Extension>]
 type GraphHelper =
     [<Extension>] static member Dump(graph:Graph<_, _>) = dumpGraph(graph)
     [<Extension>] static member GetVertices(edge:IEdge<'V>) = [edge.Source; edge.Target]
-    [<Extension>] static member Validate(graph:Graph<'V, 'E>, allowCyclicGraph:bool) = validateGraph(graph, allowCyclicGraph)
+    [<Extension>] static member ValidateCylce(graph:Graph<'V, 'E>, allowCyclicGraph:bool) = validateCylce(graph, allowCyclicGraph)
 

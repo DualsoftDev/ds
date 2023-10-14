@@ -45,14 +45,14 @@ module ModelBuildupTests1 =
 
             let vCallP = CallDev.Create( callAp, DuParentReal real)
             let vCallM = CallDev.Create( callAm, DuParentReal real)
-            real.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", vCallM)) |> ignore
+            real.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, "<", vCallM)) |> ignore
 
             let generated = system.ToDsText(true)
             let answer = """
 [sys ip = localhost] My = {
     [flow] F = {
         Main = {
-            Ap > Am;
+            Ap < Am;
         }
     }
     [jobs] = {
@@ -84,12 +84,12 @@ module ModelBuildupTests1 =
             let vCallP = Alias.Create("Main2", DuAliasTargetReal real, DuParentFlow flow)
             let call2 = CallDev.Create(callAp, DuParentFlow flow)
 
-            flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, ">", call2)) |> ignore
+            flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, "<", call2)) |> ignore
             let generated = system.ToDsText(true)
             let answer = """
 [sys ip = localhost] My = {
     [flow] F = {
-        Main2 > Ap;		// Main2(Alias)> Ap(CallDev);
+        Main2 < Ap;		// Main2(Alias)< Ap(CallDev);
         Main; // island
         [aliases] = {
             Main = { Main2; }

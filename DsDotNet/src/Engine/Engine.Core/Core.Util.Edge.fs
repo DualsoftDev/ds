@@ -164,7 +164,7 @@ module EdgeModule =
             | _ -> failwithlog $"Error"
         |_ -> failwithlog $"Error"
             
-    let validateEdge(graph:Graph<Vertex, Edge> ) =
+    let private validateEdge(graph:Graph<Vertex, Edge>, bRoot:bool) =
         graph.Edges
             .Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset))
             .Iter(fun edge ->
@@ -172,19 +172,34 @@ module EdgeModule =
                     match getPure v with 
                     | :? Real    -> ()
                     | :? RealExF -> ()
-                    | _ -> failwithlog $"Error Reset {edge.Source.Name} |> {edge.Target.Name} [reset source Real or RealEx]"
-            )
-        )
+                    | _ -> failwithlog $"Error Reset {edge.Source.Name} |> {edge.Target.Name} [reset edge using Real or RealEx]"
+            ))
 
+        //if bRoot  //test ahn
+        //then
+        //    graph.Edges
+        //        .Where(fun e -> e.EdgeType.HasFlag(EdgeType.Start))
+        //        .Iter(fun edge ->
+        //            match getPure edge.Target with 
+        //            | :? Real    -> ()
+        //            | :? RealExF -> ()
+        //            | :? CallSys -> ()
+        //            | _ -> failwithlog $"Error Start {edge.Source.Name} |> {edge.Target.Name} [start target can't not use Call]"
+        //        )
+
+    let validateSystemEdge(system:DsSystem) =
+         for f in system.Flows do
+            validateEdge (f.Graph ,true)
+            f.Graph.Vertices.OfType<Real>().Iter(fun r -> 
+                    validateEdge (r.Graph, false)
+                )
 
     let validateGraphOfSystem(system:DsSystem) =
+        validateSystemEdge system
         for f in system.Flows do
             f.Graph.ValidateCylce(true) |> ignore    //flow는 사이클 허용
-            validateEdge f.Graph
             f.Graph.Vertices.OfType<Real>().Iter(fun r -> 
-            
                 r.Graph.ValidateCylce(false) |> ignore //real는 사이클 허용 X
-                validateEdge r.Graph
                 )
 
 

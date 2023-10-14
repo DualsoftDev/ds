@@ -397,30 +397,31 @@ module ModelComponentAnswers =
     let answerT6Aliases = """
 [sys ip = localhost] T6_Alias = {
     [flow] Page1 = {
-        C1 > C2;
-        AndFlow.R2 > OrFlow.R1;
+        C1 > C2;		// C1(CallDev)> C2(CallDev);
+        AndFlow.R2 > OrFlow.R1;		// AndFlow.R2(RealOtherFlow)> OrFlow.R1(RealOtherFlow);
     }
     [flow] AndFlow = {
-        R1 > R3;
-        R2 > R3;
+        R1 > R3;		// R1(Real)> R3(Real);
+        R2 > R3;		// R2(Real)> R3(Real);
     }
     [flow] OrFlow = {
-        R1 > R3;
-        R2 > Copy1_R3;
+        R1 > R3;		// R1(Real)> R3(Real);
+        R2 > Copy1_R3;		// R2(Real)> Copy1_R3(Alias);
         [aliases] = {
             R3 = { Copy1_R3; AliasToR3; }
             AndFlow.R3 = { AndFlowR3; OtherFlowR3; }
         }
     }
     [jobs] = {
-        C1 = { B."+"(%I1, %Q1); A."+"(%I1, %Q1); }
-        C1.func = {
-            $t 2000;
-            $c 5;
-        }
-        C2 = { A."-"(_, %Q3); B."-"(_, %Q3); }
+        C1 = { B."+"(%I1, %Q1); A."+"(_, %Q999.2343); }
+            C1.func = {
+                $t 2000;
+                $c 5;
+            }
+        C2 = { A."-"(_, %Q3); B."-"(%I1, _); }
     }
-    [device file="cylinder.ds"] B;
-    [external file="cylinder.ds" ip="192.168.0.1"] A;
+    [device file="cylinder.ds"] B; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+    [external file="cylinder.ds" ip="192.168.0.1"] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
 }
+
 """

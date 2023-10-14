@@ -45,14 +45,23 @@ module RunTime =
         let doRun() = 
             if not <| run 
             then 
-                systems.Iter(fun sys-> preAction(sys, cpuMode))
+                systems.Iter(fun sys-> preAction(sys, cpuMode, true))
                 run <- true
                 Async.StartImmediate(asyncStart, cts.Token) |> ignore
 
         let doStop() = 
+            systems.Iter(fun sys-> preAction(sys, cpuMode, false))
+            scanOnce()|>ignore
             cts.Cancel()
             cts <- new CancellationTokenSource() 
             run <- false;
+        let doStepByStatus(activeSys) = 
+            let mutable endStepByStatus = false
+            while not(endStepByStatus) do
+                let chTags = scanOnce()
+                endStepByStatus <- chTags.isEmpty() 
+                                || chTags.Where(fun f->f.DsSystem = activeSys)
+                                         .Where(fun f->f.IsStatusTag()).any()
 
         do 
             ()
@@ -67,12 +76,7 @@ module RunTime =
         member x.Step() = doStop();scanOnce()
         member x.StepByStatus(activeSys:DsSystem) = 
             doStop()
-            let mutable endStepByStatus = false
-            while not(endStepByStatus) do
-                let chTags = scanOnce()
-                endStepByStatus <- chTags.isEmpty() 
-                                || chTags.Where(fun f->f.DsSystem = activeSys)
-                                         .Where(fun f->f.IsStatusTag()).any()
+            doStepByStatus(activeSys)
 
         member x.Reset() =
             doStop()

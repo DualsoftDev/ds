@@ -42,7 +42,7 @@ type VertexManager with
                 let setEnd =
                     let action =
                         if call.UsingTon
-                            then call.V.TDON.DN.Expr   //On Delay
+                            then call.INsFuns <&&> call.V.TDON.DN.Expr   //On Delay
                             else call.INsFuns
                   
                     (action <||> coin._sim.Expr) <&&> call.PEs.ToAndElseOn(coin.System) 

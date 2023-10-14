@@ -58,6 +58,11 @@ module rec ViewModule =
         [<ReadOnly(true)>]
         member val Page = 0 with get, set
         
+        member x.IsVertex = 
+            viewType = ViewType.VREAL
+            || viewType = ViewType.VCALL
+            || viewType = ViewType.VREALEx
+           
         member x.GetEdges() = edges.ToArray()
         member x.AddEdge(edge:ModelingEdgeInfo<ViewNode>) =
                         edges.Add edge |> ignore

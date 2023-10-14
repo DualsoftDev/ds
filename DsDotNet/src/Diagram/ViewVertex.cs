@@ -14,6 +14,8 @@ namespace Diagram.View.MSAGL
         public Status4 Status { get; set; }
         public List<DsTask> DsTasks { get; set; }
         public bool IsError { get; set; }
+        public bool LampInput { get; set; }
+        public bool LampOutput { get; set; }
         public string ErrorText { get; set; }
     }
 }

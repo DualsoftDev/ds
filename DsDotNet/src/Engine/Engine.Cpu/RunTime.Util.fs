@@ -53,7 +53,7 @@ module RunTimeUtil =
 
 
     ///시뮬레이션 이전에 사용자 HMI 대신 눌러주기
-    let preAction(sys:DsSystem, mode:RuntimePackage ) =
+    let preAction(sys:DsSystem, mode:RuntimePackage, on:bool) =
         let simTags =
             sys.TagManager.Storages
                 .Where(fun w->
@@ -62,7 +62,7 @@ module RunTimeUtil =
                             ||   w.Value.TagKind = (int)SystemTag.ready
                             || ( w.Value.TagKind = (int)SystemTag.sim && mode = RuntimePackage.Simulation)
                     )
-        simTags.Iter(fun t -> t.Value.BoxedValue <-  true)
+        simTags.Iter(fun t -> t.Value.BoxedValue <-  on)
 
 
 

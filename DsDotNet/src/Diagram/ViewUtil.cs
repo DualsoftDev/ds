@@ -76,7 +76,7 @@ namespace Diagram.View.MSAGL
             return systems.SelectMany(s => s.GetVertices().OfType<Vertex>());
         }
 
-        public static List<UcView> UcViews { get; set; } = new List<UcView>();  
+        public static List<UcView> UcViews { get; set; } = new List<UcView>();
         public static Subject<TagDS> VertexChangeSubject = new();
         private static IDisposable _Disposable;
         public static void ViewChangeSubject()
@@ -122,7 +122,7 @@ namespace Diagram.View.MSAGL
                                     .Select(s => s.ErrorText);
 
                         vv.ErrorText = String.Join("\r\n", errs);
-                       
+
                         var ucView = UcViews.Where(w => w.MasterNode == vv.FlowNode).FirstOrDefault();
                         if (ucView != null)
                         {
@@ -145,10 +145,23 @@ namespace Diagram.View.MSAGL
                     {
                         viewNode.ViewNodes.Iter(node =>
                         {
+
+                            var tags = viewNode.DsTasks.Cast<TaskDev>();
+
                             if (ea.Tag.TagKind == (int)ActionTag.ActionIn)
-                                ucView.UpdateInValue(node, ea.Tag.BoxedValue);
-                            if (ea.Tag.TagKind == (int)ActionTag.ActionOut)
-                                ucView.UpdateOutValue(node, ea.Tag.BoxedValue);
+                            {
+                                var off = tags.Select(s =>Convert.ToUInt64(s.InTag.BoxedValue))
+                                       .Where(w => w == 0).Any();
+                                viewNode.LampInput = !off;
+                                ucView.UpdateInValue(node, !off);
+                            }
+                            else if (ea.Tag.TagKind == (int)ActionTag.ActionOut)
+                            {
+                                var on = tags.Select(s => Convert.ToUInt64(s.OutTag.BoxedValue))
+                                       .Where(w => w != 0).Any();
+                                viewNode.LampOutput = on;
+                                ucView.UpdateOutValue(node, on);
+                            }
                         });
                     }
                 }

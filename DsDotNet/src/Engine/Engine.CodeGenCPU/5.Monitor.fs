@@ -68,7 +68,7 @@ type VertexManager with
                 let input, rxs = td.ActionINFunc, td.ApiItem.RXs.Select(getVM)
                 let offSet     = td.ApiItem.RXErrOpenOff
                 let offRising  = td.ApiItem.RXErrOpenRising
-                let offTemp     = td.ApiItem.RXErrOpenTemp
+                let offTemp    = td.ApiItem.RXErrOpenTemp
                 let offErr     = td.ApiItem.RXErrOpen
 
                 let onSet      = td.ApiItem.RXErrShortOn

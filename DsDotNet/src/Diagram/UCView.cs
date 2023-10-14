@@ -445,7 +445,13 @@ namespace Diagram.View.MSAGL
             }
         }
 
-        
+        public void UpdateViewNode(ViewNode viewNode, ViewVertex vv)
+        {
+            UpdateStatus(viewNode);
+            UpdateInValue(viewNode, vv.LampInput);
+            UpdateOutValue(viewNode, vv.LampOutput);
+            UpdateError(viewNode, vv.IsError, vv.ErrorText);
+        }
 
 
         public void UpdateStatus(ViewNode viewNode)
@@ -458,7 +464,7 @@ namespace Diagram.View.MSAGL
             }
         }
 
-        internal void UpdateError(ViewNode viewNode, bool isError, string errorText)
+        public void UpdateError(ViewNode viewNode, bool isError, string errorText)
         {
 
             Node node = findNode(viewNode);

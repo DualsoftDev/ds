@@ -17,13 +17,13 @@ module ApiTagManagerModule =
         let txerrtrend = cpv ("TXErrTrend", apiItem, apiItem.System, ApiItemTag.txErrTrend  )
         let txerrovertime = cpv ("TXErrOverTime", apiItem, apiItem.System, ApiItemTag.txErrTimeOver  )
         let rxerrShort = cpv ("RXErrShort", apiItem, apiItem.System, ApiItemTag.rxErrShort  )
-        let rxErrShortOn  = cpv ("RxErrShortOn", apiItem, apiItem.System, ApiItemTag.rxErrShortOn  )
-        let rxErrShortRising  = cpv ("RxErrShortRising", apiItem, apiItem.System, ApiItemTag.rxErrShortRising  )
-        let rxErrShortTemp = cpv ("RxErrShortTemp", apiItem, apiItem.System, ApiItemTag.rxErrShortTemp  )
+        let rxErrShortOn  = cpv ("RxShortOn", apiItem, apiItem.System, ApiItemTag.rxErrShortOn  )
+        let rxErrShortRising  = cpv ("RxShortRising", apiItem, apiItem.System, ApiItemTag.rxErrShortRising  )
+        let rxErrShortTemp = cpv ("RxShortTemp", apiItem, apiItem.System, ApiItemTag.rxErrShortTemp  )
         let rxerrOpen  = cpv ("RXErrOpen", apiItem, apiItem.System, ApiItemTag.rxErrOpen  )
-        let rxErrOpenOff  = cpv ("RxErrOpenOff", apiItem, apiItem.System, ApiItemTag.rxErrOpenOff  )
-        let rxErrOpenRising  = cpv ("RxErrOpenRising", apiItem, apiItem.System, ApiItemTag.rxErrOpenRising  )
-        let rxErrOpenTemp  = cpv ("RxErrOpenTemp", apiItem, apiItem.System, ApiItemTag.rxErrOpenTemp)
+        let rxErrOpenOff  = cpv ("RxOpenOff", apiItem, apiItem.System, ApiItemTag.rxErrOpenOff  )
+        let rxErrOpenRising  = cpv ("RxOpenRising", apiItem, apiItem.System, ApiItemTag.rxErrOpenRising  )
+        let rxErrOpenTemp  = cpv ("RxOpenTemp", apiItem, apiItem.System, ApiItemTag.rxErrOpenTemp)
 
 
 

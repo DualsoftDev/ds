@@ -45,7 +45,6 @@ module RunTime =
         let doRun() = 
             if not <| run 
             then 
-                systems.Iter(fun sys-> preAction(sys, cpuMode, true))
                 run <- true
                 Async.StartImmediate(asyncStart, cts.Token) |> ignore
 
@@ -72,6 +71,8 @@ module RunTime =
         
         member x.Dispose() = doStop()
         member x.Run()  = doRun()
+        member x.AutoDriveSetting()  =          
+            systems.Iter(fun sys-> preAction(sys, cpuMode, true))
         member x.Stop() = doStop()
         member x.Step() = doStop();scanOnce()
         member x.StepByStatus(activeSys:DsSystem) = 

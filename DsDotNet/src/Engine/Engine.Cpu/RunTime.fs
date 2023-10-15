@@ -49,11 +49,10 @@ module RunTime =
                 Async.StartImmediate(asyncStart, cts.Token) |> ignore
 
         let doStop() = 
-            systems.Iter(fun sys-> preAction(sys, cpuMode, false))
-            scanOnce()|>ignore
             cts.Cancel()
             cts <- new CancellationTokenSource() 
             run <- false;
+
         let doStepByStatus(activeSys) = 
             let mutable endStepByStatus = false
             while not(endStepByStatus) do

@@ -228,12 +228,12 @@ module ConvertCoreExt =
         member f.BtnHomeExpr  = getButtonExprWrtRuntimePackage(f, f.System.HomeButtons     )
 
         member f.ModeAutoHwExpr =
-            let auto = if f.SelectAutoExpr.any()   then f.SelectAutoExpr.ToAnd()    else f._on.Expr
+            let auto = if f.SelectAutoExpr.any()   then f.SelectAutoExpr.ToAnd()    else f.System._auto.Expr
           //  let ableAuto = if f.SelectManualExpr.any() then !!f.SelectManualExpr.ToOr() else f._on.Expr
             auto// <&&> ableAuto  반대조건 봐야하나 ?
 
         member f.ModeManualHwExpr =
-            let manual = if f.SelectManualExpr.any() then f.SelectManualExpr.ToAnd() else f._off.Expr
+            let manual = if f.SelectManualExpr.any() then f.SelectManualExpr.ToAnd() else f.System._manual.Expr
           //  let ableManual = if f.SelectAutoExpr.any()   then !!f.SelectAutoExpr.ToOr()  else f._on.Expr
             manual// <&&> ableManual 반대조건 봐야하나 ?
 

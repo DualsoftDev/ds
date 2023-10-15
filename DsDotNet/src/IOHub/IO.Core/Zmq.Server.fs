@@ -15,8 +15,7 @@ open IO.Spec
 module ZmqServerModule =
     type Server(ioSpec:IOSpec, cancellationToken:CancellationToken) =
         let port = ioSpec.ServicePort
-        let streams = new Dictionary<FileStream, BufferManager>()
-        let streams2 = new Dictionary<string, BufferManager>()
+        let bufferManagers = new Dictionary<string, BufferManager>()
         let tagDic = new Dictionary<string, AddressSpec>()
 
         let showSamples (vendorSpec:VendorSpec) (addressExtractor:IAddressInfoProvider) =
@@ -67,9 +66,8 @@ module ZmqServerModule =
                         | _ -> Path.Combine(ioSpec.TopLevelLocation, v.Location), $"{v.Location}/{f.Name}"
                     f.InitiaizeFile(dir)
                     let bufferManager = new BufferManager(f)
-                    streams.Add(f.FileStream, bufferManager)
                     let key = if v.Location.NonNullAny() then $"{v.Location}/{f.Name}" else f.Name
-                    streams2.Add(key, bufferManager)
+                    bufferManagers.Add(key, bufferManager)
 
         let getVendor (addr:string) : (VendorSpec * string) =
             match addr with
@@ -116,8 +114,6 @@ module ZmqServerModule =
             if not <| respSocket.TryReceiveFrameString(&request) then
                 null
             else
-                // 메시지를 처리하는 코드, 여기에서 'message'를 사용할 수 있습니다.
-                //let request = respSocket.ReceiveFrameString()
                 logDebug $"Handling request: {request}"
                 let tokens = request.Split(' ', StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
                 let command = tokens[0]
@@ -126,16 +122,15 @@ module ZmqServerModule =
                     match address with
                     | AddressPattern ap ->
                         let byteOffset = ap.OffsetByte
-                        let stream = streams[ap.IOFileSpec.FileStream]
-                        if ap.IOFileSpec.Length < byteOffset then
-                            failwith $"Invalid address: {address}"
+                        let bufferManager = ap.IOFileSpec.BufferManager :?> BufferManager
+                        bufferManager.VerifyIndices([|byteOffset|])
 
                         match ap.DataType with
-                        | PLCMemoryBitSize.Bit   -> stream.readBit(byteOffset * 8 + ap.OffsetBit) :> obj
-                        | PLCMemoryBitSize.Byte  -> stream.readU8(byteOffset)
-                        | PLCMemoryBitSize.Word  -> stream.readU16(byteOffset)
-                        | PLCMemoryBitSize.DWord -> stream.readU32(byteOffset)
-                        | PLCMemoryBitSize.LWord -> stream.readU64(byteOffset)
+                        | PLCMemoryBitSize.Bit   -> bufferManager.readBit(byteOffset * 8 + ap.OffsetBit) :> obj
+                        | PLCMemoryBitSize.Byte  -> bufferManager.readU8(byteOffset)
+                        | PLCMemoryBitSize.Word  -> bufferManager.readU16(byteOffset)
+                        | PLCMemoryBitSize.DWord -> bufferManager.readU32(byteOffset)
+                        | PLCMemoryBitSize.LWord -> bufferManager.readU64(byteOffset)
                         | _ ->
                             failwithf($"Unknown data type : {ap.DataType}")
                     | _ ->
@@ -151,41 +146,40 @@ module ZmqServerModule =
                     | AddressAssignPattern (addressPattern, value) ->
                         let ap = addressPattern
                         let byteOffset = ap.OffsetByte
-                        let stream = streams[ap.IOFileSpec.FileStream]
-                        if ap.IOFileSpec.Length <= byteOffset then
-                            failwith $"Invalid address: {addressPattern}"
+                        let bufferManager = ap.IOFileSpec.BufferManager :?> BufferManager
+                        bufferManager.VerifyIndices([|byteOffset|])
 
                         match ap.DataType with
-                        | PLCMemoryBitSize.Bit   -> stream.writeBit(byteOffset, ap.OffsetBit, parseBool(value))
-                        | PLCMemoryBitSize.Byte  -> stream.writeU8(byteOffset,  Byte.Parse(value))
-                        | PLCMemoryBitSize.Word  -> stream.writeU16(byteOffset, UInt16.Parse(value))
-                        | PLCMemoryBitSize.DWord -> stream.writeU32(byteOffset, UInt32.Parse(value))
-                        | PLCMemoryBitSize.LWord -> stream.writeU64(byteOffset, UInt64.Parse(value))
+                        | PLCMemoryBitSize.Bit   -> bufferManager.writeBit(byteOffset, ap.OffsetBit, parseBool(value))
+                        | PLCMemoryBitSize.Byte  -> bufferManager.writeU8(byteOffset,  Byte.Parse(value))
+                        | PLCMemoryBitSize.Word  -> bufferManager.writeU16(byteOffset, UInt16.Parse(value))
+                        | PLCMemoryBitSize.DWord -> bufferManager.writeU32(byteOffset, UInt32.Parse(value))
+                        | PLCMemoryBitSize.LWord -> bufferManager.writeU64(byteOffset, UInt64.Parse(value))
                         | _ -> failwithf($"Unknown data type : {ap.DataType}")
 
-                        stream.Flush()
+                        bufferManager.Flush()
 
                     | _ -> failwithf($"Unknown address with assignment pattern : {addressWithAssignValue}")
 
-                let fetchStreamAndIndices (isBitIndex:bool) (respSocket:ResponseSocket) =
-                    let stream =
+                let fetchBufferManagerAndIndices (isBitIndex:bool) (respSocket:ResponseSocket) =
+                    let bufferManager =
                         let name = respSocket.ReceiveFrameString().ToLower()
-                        streams2[name]
+                        bufferManagers[name]
                     let indices =
                         let address = respSocket.ReceiveFrameBytes()
                         ByteConverter.BytesToTypeArray<int>(address)
                     for byteIndex in indices |> map (fun n -> if isBitIndex then n / 8 else n) do
-                        if stream.FileStream.Length <= byteIndex then
+                        if bufferManager.FileStream.Length <= byteIndex then
                             failwithf($"Invalid address: {byteIndex}")
-                    stream, indices
+                    bufferManager, indices
 
-                let fetchForRead = fetchStreamAndIndices false
-                let fetchForReadBit = fetchStreamAndIndices true
+                let fetchForRead = fetchBufferManagerAndIndices false
+                let fetchForReadBit = fetchBufferManagerAndIndices true
 
                 let fetchForWrite (respSocket:ResponseSocket) =
-                    let stream, indices = fetchForRead respSocket
+                    let bm, indices = fetchForRead respSocket
                     let values = respSocket.ReceiveFrameBytes()
-                    stream, indices, values
+                    bm, indices, values
 
                 let args = tokens[1..] |> map(fun s -> s.ToLower())
                 match command with
@@ -200,37 +194,37 @@ module ZmqServerModule =
                     WriteResultOK()
 
                 | "rx" ->
-                    let stream, indices = fetchForReadBit respSocket
-                    stream.VerifyIndices(indices |> map (fun n -> n / 8))
-                    let result = indices |> map (stream.readBit)
+                    let bm, indices = fetchForReadBit respSocket
+                    bm.VerifyIndices(indices |> map (fun n -> n / 8))
+                    let result = indices |> map (bm.readBit)
                     ReadResultArray<bool>(result)
                 | "rb" ->
-                    let stream, indices = fetchForRead respSocket
-                    stream.VerifyIndices(indices)
-                    let result = indices |> map (stream.readU8)
+                    let bm, indices = fetchForRead respSocket
+                    bm.VerifyIndices(indices)
+                    let result = indices |> map (bm.readU8)
                     ReadResultArray<byte>(result)
 
                 | "rw" ->
-                    let stream, indices = fetchForRead respSocket
-                    stream.VerifyIndices(indices |> map (fun n -> n * 2))
-                    let result = indices |> map (stream.readU16)
+                    let bm, indices = fetchForRead respSocket
+                    bm.VerifyIndices(indices |> map (fun n -> n * 2))
+                    let result = indices |> map (bm.readU16)
                     ReadResultArray<uint16>(result)
 
                 | "rd" ->
-                    let stream, indices = fetchForRead respSocket
-                    stream.VerifyIndices(indices |> map (fun n -> n * 4))
-                    let result = indices |> map (stream.readU32)
+                    let bm, indices = fetchForRead respSocket
+                    bm.VerifyIndices(indices |> map (fun n -> n * 4))
+                    let result = indices |> map (bm.readU32)
                     ReadResultArray<uint32>(result)
 
                 | "rl" ->
-                    let stream, indices = fetchForRead respSocket
-                    stream.VerifyIndices(indices |> map (fun n -> n * 8))
-                    let result = indices |> map (stream.readU64)
+                    let bm, indices = fetchForRead respSocket
+                    bm.VerifyIndices(indices |> map (fun n -> n * 8))
+                    let result = indices |> map (bm.readU64)
                     ReadResultArray<uint64>(result)
 
                 | "wx" ->
-                    let stream, indices, values = fetchForWrite respSocket
-                    stream.VerifyIndices(indices |> map (fun n -> n / 8))
+                    let bm, indices, values = fetchForWrite respSocket
+                    bm.VerifyIndices(indices |> map (fun n -> n / 8))
                     if indices.Length <> values.Length then
                         failwithf($"The number of indices and values should be the same.")
 
@@ -240,48 +234,48 @@ module ZmqServerModule =
                             | 1uy -> true
                             | 0uy -> false
                             | _ -> failwithf($"Invalid value: {values.[i]}")
-                        stream.writeBit(indices[i], value)
+                        bm.writeBit(indices[i], value)
 
-                    stream.Flush()
+                    bm.Flush()
                     WriteResultOK()
                 | "wb" ->
-                    let stream, indices, values = fetchForWrite respSocket
-                    stream.VerifyIndices(indices)
+                    let bm, indices, values = fetchForWrite respSocket
+                    bm.VerifyIndices(indices)
                     if indices.Length <> values.Length then
                         failwithf($"The number of indices and values should be the same.")
 
-                    Array.zip indices values |> iter ( fun (index, value) -> stream.writeU8(index, value))
-                    stream.Flush()
+                    Array.zip indices values |> iter ( fun (index, value) -> bm.writeU8(index, value))
+                    bm.Flush()
                     WriteResultOK()
 
                 | "ww" ->
-                    let stream, indices, values = fetchForWrite respSocket
-                    stream.VerifyIndices(indices |> map (fun n -> n * 2))
+                    let bm, indices, values = fetchForWrite respSocket
+                    bm.VerifyIndices(indices |> map (fun n -> n * 2))
                     if indices.Length <> values.Length / 2 then
                         failwithf($"The number of indices and values should be the same.")
 
-                    Array.zip indices (ByteConverter.BytesToTypeArray<uint16>(values)) |> iter ( fun (index, value) -> stream.writeU16(index, value))
-                    stream.Flush()
+                    Array.zip indices (ByteConverter.BytesToTypeArray<uint16>(values)) |> iter ( fun (index, value) -> bm.writeU16(index, value))
+                    bm.Flush()
                     WriteResultOK()
 
                 | "wd" ->
-                    let stream, indices, values = fetchForWrite respSocket
-                    stream.VerifyIndices(indices |> map (fun n -> n * 4))
+                    let bm, indices, values = fetchForWrite respSocket
+                    bm.VerifyIndices(indices |> map (fun n -> n * 4))
                     if indices.Length <> values.Length / 4 then
                         failwithf($"The number of indices and values should be the same.")
 
-                    Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) |> iter ( fun (index, value) -> stream.writeU32(index, value))
-                    stream.Flush()
+                    Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) |> iter ( fun (index, value) -> bm.writeU32(index, value))
+                    bm.Flush()
                     WriteResultOK()
 
                 | "wl" ->
-                    let stream, indices, values = fetchForWrite respSocket
-                    stream.VerifyIndices(indices |> map (fun n -> n * 8))
+                    let bm, indices, values = fetchForWrite respSocket
+                    bm.VerifyIndices(indices |> map (fun n -> n * 8))
                     if indices.Length <> values.Length / 8 then
                         failwithf($"The number of indices and values should be the same.")
 
-                    Array.zip indices (ByteConverter.BytesToTypeArray<uint64>(values)) |> iter ( fun (index, value) -> stream.writeU64(index, value))
-                    stream.Flush()
+                    Array.zip indices (ByteConverter.BytesToTypeArray<uint64>(values)) |> iter ( fun (index, value) -> bm.writeU64(index, value))
+                    bm.Flush()
                     WriteResultOK()
 
                 | _ ->
@@ -320,7 +314,8 @@ module ZmqServerModule =
                     with ex ->
                         logError $"Error occured while handling request: {ex.Message}"
                         respSocket.SendFrame(ex.Message)
-                Console.WriteLine("Cancellation request detected!")
+
+                logInfo("Cancellation request detected!")
                 (x :> IDisposable).Dispose()
                 terminated <- true
             )
@@ -328,4 +323,4 @@ module ZmqServerModule =
         interface IDisposable with
             member x.Dispose() =
                 logDebug "Disposing server..."
-                streams.Values |> iter (fun stream -> stream.FileStream.Dispose())
+                bufferManagers.Values |> iter (fun stream -> stream.FileStream.Dispose())

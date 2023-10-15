@@ -6,10 +6,15 @@ open IO.Spec
 
 [<AutoOpen>]
 module ZmqBufferManager =
-    type BufferManager(fileSpec:IOFileSpec) =
+    type BufferManager(fileSpec:IOFileSpec) as this =
         let stream:FileStream = fileSpec.FileStream
         let locker = obj()  // 객체를 lock용으로 사용
-        //member x.Type = typ
+
+        do
+            fileSpec.BufferManager <- this
+
+        interface IBufferManager
+
         member x.FileStream = stream
         member x.Flush() = stream.Flush()
         member x.readBits (bitOffset: int, count: int) : bool[] =
@@ -143,21 +148,3 @@ module ZmqBufferManagerExtension =
         member x.VerifyIndices(offsets:int[]) =
             offsets |> iter (fun offset -> x.VerifyIndices(offset))
 
-    //let private bitSizeToDataType n =
-    //    match n with
-    //    | 1 -> "x"
-    //    | 8 -> "b"
-    //    | 16 -> "w"
-    //    | 32 -> "d"
-    //    | 64 -> "l"
-    //    | _ -> failwithf($"Invalid bit size: {n}")
-
-
-    //type IAddressInfoProvider with
-    //    member x.GetPickInfo(address:string) =
-    //        match x.GetAddressInfo(address) with
-    //        | true, memTypes, byteOffset, bitOffset, contentBitLength ->
-    //                Some(AddressSpec(memTypes, d, offset))
-
-    //        let addressInfo = x.GetAddressInfo .[address]
-    //        addressInfo

@@ -1,6 +1,5 @@
 namespace IO.Core
 open System
-open System.Diagnostics.CodeAnalysis
 open System.IO
 open Dual.Common.Core.FS
 open IO.Spec
@@ -83,7 +82,7 @@ module ZmqSpec =
     
     *)
 
-
+    and [<AllowNullLiteral>] IBufferManager = interface end
     and IOFileSpec() =
         member val Name = ""  with get, set
         member val Length = 0 with get, set
@@ -91,6 +90,7 @@ module ZmqSpec =
         // reference to parent
         member val Vendor:VendorSpec = null with get, set
         member val FileStream:FileStream = null with get, set
+        member val BufferManager:IBufferManager = null with get, set
     
     and [<AllowNullLiteral>] VendorSpec() =
         member val Name = "" with get, set
@@ -100,6 +100,7 @@ module ZmqSpec =
         member val Accepts = "" with get, set
         member val Files:IOFileSpec[] = [||] with get, set
         member val AddressResolver:IAddressInfoProvider = null with get, set
+
     type IOSpec() =
         member val ServicePort = 0 with get, set
         member val TopLevelLocation = "" with get, set

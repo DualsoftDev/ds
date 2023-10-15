@@ -39,12 +39,13 @@ type VertexMCoin with
                         if td.ExistIn
                         then
                             if call.UsingTon
-                                then td.ActionINFunc <&&> call.V.TDON.DN.Expr   //On Delay
+                                then call.V.TDON.DN.Expr   //On Delay
                                 else td.ActionINFunc
                         else call._off.Expr
 
                     (action <||> coin._sim.Expr)
                     <&&> td.ApiItem.PE.Expr
+                    <||> !!dop
 
                 yield (sets, rsts) ==| (td.ApiItem.PS, getFuncName())
         ]

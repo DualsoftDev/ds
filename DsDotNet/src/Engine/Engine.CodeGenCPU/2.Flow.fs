@@ -54,7 +54,7 @@ type VertexManager with
             | :? CallDev as call ->
                 let action =
                     if call.UsingTon
-                            then call.INsFuns <&&> call.V.TDON.DN.Expr   //On Delay
+                            then call.V.TDON.DN.Expr   //On Delay
                             else call.INsFuns
                   
                 (action <||> v._sim.Expr)

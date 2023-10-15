@@ -50,7 +50,7 @@ module SystemManagerModule =
         let tout     =
             let tout = dsSysUint16  "systout" true sys SystemTag.timeout 
             //type CountUnitType = uint16  => 32bit (msec 단위 필요) //test ahn
-            tout.Value <- 10000us
+            tout.Value <- 15000us
             tout
 
         let sim    = dsSysBit "syssim"   true  sys   SystemTag.sim

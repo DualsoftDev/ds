@@ -23,17 +23,18 @@ namespace Diagram.View.MSAGL
     public static class ViewUtil
     {
         public static Dictionary<Vertex, ViewVertex> DicNode = new();
-        public static Dictionary<IStorage, ViewVertex> DicActionTag = new();
+        public static Dictionary<IStorage, List<ViewVertex>> DicActionTag = new();
         private static ViewVertex CreateViewVertex(ViewNode fv, Vertex v, IEnumerable<ViewNode> viewNodes, List<DsTask> tasks)
         {
-            return new ViewVertex()
+            var nodes = new ViewVertex()
             {
                 Vertex = v,
-                ViewNodes = viewNodes.ToList(),
                 FlowNode = fv,
                 Status = Status4.Homing,
                 DsTasks = tasks,
-            };
+            }; ;
+            nodes.SetViewNodes(viewNodes.ToList());
+            return nodes;
         }
 
         public static void ViewInit(DsSystem system, IEnumerable<ViewNode> flowViews)
@@ -46,23 +47,32 @@ namespace Diagram.View.MSAGL
 
             var dicViewNodes = nodes.ToDictionary(
                 node => node.CoreVertex.Value,
-                node => nodes.Where(w => w.PureVertex.Value == node.CoreVertex.Value)
+                node => nodes.Where(w => w.PureVertex.Value == node.CoreVertex.Value
+                                      || w.CoreVertex.Value == node.CoreVertex.Value)
             );
 
             flowViews.Iter(fv =>
             {
                 foreach (Vertex v in fv.Flow.Value.GetVerticesOfFlow())
                 {
-                    var tasks = (v is Call c) ? c.CallTargetJob.DeviceDefs.Cast<DsTask>().ToList() : new List<DsTask>();
+                    var tasks = (v.GetPure() is Call c) ? c.CallTargetJob.DeviceDefs.Cast<DsTask>().ToList() : new List<DsTask>();
                     var viewVertex = CreateViewVertex(fv, v, dicViewNodes[v], tasks);
                     DicNode[v] = viewVertex;
 
                     viewVertex.DsTasks.Cast<TaskDev>().Iter(t =>
                      {
                          if (t.InTag != null)
-                             DicActionTag[t.InTag] = viewVertex;
+                         {
+                             if (!DicActionTag.ContainsKey(t.InTag))
+                                 DicActionTag.Add(t.InTag, new List<ViewVertex>());
+                             DicActionTag[t.InTag].Add(viewVertex);
+                         }
                          if (t.OutTag != null)
-                             DicActionTag[t.OutTag] = viewVertex;
+                         {
+                             if (!DicActionTag.ContainsKey(t.OutTag))
+                                 DicActionTag.Add(t.OutTag, new List<ViewVertex>());
+                             DicActionTag[t.OutTag].Add(viewVertex);
+                         }
                      });
                 }
             });
@@ -102,14 +112,11 @@ namespace Diagram.View.MSAGL
                         }
                         var vv = DicNode[ev.Target];
                         var ucView = UcViews.Where(w => w.MasterNode == vv.FlowNode).FirstOrDefault();
-                        if (ucView != null)
+                        vv.DisplayNodes.Iter(node =>
                         {
-                            vv.ViewNodes.Iter(node =>
-                            {
-                                node.Status4 = status;
-                                ucView.UpdateStatus(node);
-                            });
-                        }
+                            node.Status4 = status;
+                            if (ucView != null) ucView.UpdateStatus(node);
+                        });
                     }
                     if (TagKindExt.IsVertexErrTag(rx) && ev.Target is CallDev call)
                     {
@@ -126,7 +133,7 @@ namespace Diagram.View.MSAGL
                         var ucView = UcViews.Where(w => w.MasterNode == vv.FlowNode).FirstOrDefault();
                         if (ucView != null)
                         {
-                            vv.ViewNodes.Iter(node =>
+                            vv.DisplayNodes.Iter(node =>
                             {
                                 ucView.UpdateError(node, vv.IsError, vv.ErrorText);
                             });
@@ -139,31 +146,31 @@ namespace Diagram.View.MSAGL
                     EventAction ea = rx as EventAction;
                     if (!DicActionTag.ContainsKey(ea.Tag)) return;
 
-                    var viewNode = DicActionTag[ea.Tag];
-                    var ucView = UcViews.Where(w => w.MasterNode == viewNode.FlowNode).FirstOrDefault();
-                    if (ucView != null)
+                    var viewNodes = DicActionTag[ea.Tag];
+                    var ucView = UcViews.Where(w => viewNodes.Select(n => n.FlowNode).Contains(w.MasterNode)).FirstOrDefault();
+                    viewNodes.Iter(n =>
                     {
-                        viewNode.ViewNodes.Iter(node =>
+                        n.DisplayNodes.Iter(node =>
                         {
 
-                            var tags = viewNode.DsTasks.Cast<TaskDev>();
+                            var tags = n.DsTasks.Cast<TaskDev>();
 
                             if (ea.Tag.TagKind == (int)ActionTag.ActionIn)
                             {
-                                var off = tags.Select(s =>Convert.ToUInt64(s.InTag.BoxedValue))
+                                var off = tags.Select(s => Convert.ToUInt64(s.InTag.BoxedValue))
                                        .Where(w => w == 0).Any();
-                                viewNode.LampInput = !off;
-                                ucView.UpdateInValue(node, !off);
+                                n.LampInput = !off;
+                                if (ucView != null) ucView.UpdateInValue(node, !off);
                             }
                             else if (ea.Tag.TagKind == (int)ActionTag.ActionOut)
                             {
                                 var on = tags.Select(s => Convert.ToUInt64(s.OutTag.BoxedValue))
                                        .Where(w => w != 0).Any();
-                                viewNode.LampOutput = on;
-                                ucView.UpdateOutValue(node, on);
+                                n.LampOutput = on;
+                                if (ucView != null) ucView.UpdateOutValue(node, on);
                             }
                         });
-                    }
+                    });
                 }
             });
         }

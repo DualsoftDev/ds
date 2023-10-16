@@ -89,6 +89,7 @@ module TagKindModule =
     |relayCall                 = 11021
     |counter                   = 11022
     |timerOnDelay              = 11023
+    |goingRealy                = 11024
 
 
     [<Flags>]
@@ -100,7 +101,13 @@ module TagKindModule =
     |txErrTrend                = 12003
     |txErrTimeOver             = 12004
     |rxErrShort                = 12005
-    |rxErrOpen                 = 12006
+    |rxErrShortOn              = 12006
+    |rxErrShortRising          = 12007
+    |rxErrShortTemp            = 12008
+    |rxErrOpen                 = 12009
+    |rxErrOpenOff              = 12010
+    |rxErrOpenRising           = 12011
+    |rxErrOpenTemp             = 12012
 
 
 
@@ -188,8 +195,15 @@ module TagKindModule =
             |_->false
 
         [<Extension>]
-        static member IsErrTag(x:TagDS) =
+        static member IsVertexErrTag(x:TagDS) =
             match x with
             |EventVertex (_, _, kind) -> kind = VertexTag.errorTx
                                           || kind = VertexTag.errorRx
             |_->false
+
+        [<Extension>]
+        static member IsStatusTag(x:IStorage) =
+            x.TagKind = int(VertexTag.ready)
+            || x.TagKind = int(VertexTag.going)
+            || x.TagKind = int(VertexTag.finish)
+            || x.TagKind = int(VertexTag.homing)

@@ -50,7 +50,7 @@ module ConvertCPU =
                 yield vm.M6_RealErrorRXMonitor()
 
                 yield vm.R1_RealInitialStart()
-                yield vm.R2_RealJobComplete()
+                yield! vm.R2_RealJobComplete()
                 yield vm.R3_RealStartPoint()
 
                 yield! vm.D1_DAGHeadStart()

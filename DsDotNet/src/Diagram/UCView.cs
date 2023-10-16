@@ -39,10 +39,12 @@ namespace Diagram.View.MSAGL
             Controls.Add(viewer);
         }
 
-        int node_attr_linewidth = 3;
-        int edge_attr_linewidthWeek = 2;
-        int edge_attr_linewidthStrong = 4;
-
+        int node_attr_linewidthH = 8;
+        int node_attr_linewidthL = 3;
+        int edge_attr_linewidthWeek = 1;
+        int edge_attr_linewidthStrong = 2;
+        int nnode_label_fontsize = 6;
+        
         private readonly Dictionary<string, Node> _dicDrawing = new();
 
         private bool IsDummyMember(List<pptDummy> lstDummy, Vertex vertex)
@@ -75,8 +77,8 @@ namespace Diagram.View.MSAGL
             {
                 layoutSetting.PackingMethod = Microsoft.Msagl.Core.Layout.PackingMethod.Columns;
                 layoutSetting.LayerSeparation = 20;
-                layoutSetting.NodeSeparation = 20;
-                layoutSetting.ClusterMargin = 5;
+                layoutSetting.NodeSeparation = 40;
+                layoutSetting.ClusterMargin = 10;
             }
 
             viewer.Graph.LayoutAlgorithmSettings = layoutSetting;
@@ -94,6 +96,7 @@ namespace Diagram.View.MSAGL
             nNode.LabelText = nNode.LabelText.Split(';')[0];
             nNode.Label.FontColor = Color.White;
             nNode.Attr.Color = Color.Black;
+            nNode.Label.FontSize = nnode_label_fontsize;
 
         }
 
@@ -235,7 +238,7 @@ namespace Diagram.View.MSAGL
         {
             {
                 //nNode.Attr.Color = Color.DarkGoldenrod;
-                nNode.Attr.LineWidth = node_attr_linewidth;
+                nNode.Attr.LineWidth = node_attr_linewidthL;
 
 
                 if (viewNode.ViewType == ViewType.VBUTTON)
@@ -442,7 +445,13 @@ namespace Diagram.View.MSAGL
             }
         }
 
-        
+        public void UpdateViewNode(ViewNode viewNode, ViewVertex vv)
+        {
+            UpdateStatus(viewNode);
+            UpdateInValue(viewNode, vv.LampInput);
+            UpdateOutValue(viewNode, vv.LampOutput);
+            UpdateError(viewNode, vv.IsError, vv.ErrorText);
+        }
 
 
         public void UpdateStatus(ViewNode viewNode)
@@ -455,7 +464,7 @@ namespace Diagram.View.MSAGL
             }
         }
 
-        internal void UpdateError(ViewNode viewNode, bool isError, string errorText)
+        public void UpdateError(ViewNode viewNode, bool isError, string errorText)
         {
 
             Node node = findNode(viewNode);
@@ -471,17 +480,18 @@ namespace Diagram.View.MSAGL
 
         private void UpdateFontColor(bool err, string errText, Node node, ViewType viewType)
         {
+            var org = node.Label.Text.Split('\n')[0];
             if (err)
             {
                 node.Label.FontColor = Color.Red;
                 if(viewType != ViewType.VREAL)
-                    node.Label.Text = $"{node.Label.Text}\n{errText}";
+                    node.Label.Text = $"{org}\n{errText}";
             }
             else
             {
                 node.Label.FontColor = Color.White;
                 if(viewType != ViewType.VREAL)
-                    node.Label.Text = node.Label.Text.Split('\n')[0];
+                    node.Label.Text = org;
             }
 
         }
@@ -514,7 +524,7 @@ namespace Diagram.View.MSAGL
         }
         private void UpdateLineWidth(bool dataExist, Node node)
         {
-            node.Attr.LineWidth = dataExist ? 6 : 3;
+            node.Attr.LineWidth = dataExist ? node_attr_linewidthH : node_attr_linewidthL;
         }
 
         private void UpdateEdgeColor(bool dataExist, Edge edge)

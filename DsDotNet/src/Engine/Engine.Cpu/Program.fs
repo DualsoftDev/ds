@@ -1,8 +1,8 @@
-open Engine.Cpu
+namespace Engine.Cpu
 
-[<EntryPoint>]
-let main _ = 
+//[<EntryPoint>]
+//let main _ = 
 
      
         
-    0
+//    0

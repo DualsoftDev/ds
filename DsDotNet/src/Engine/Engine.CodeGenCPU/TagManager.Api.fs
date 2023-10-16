@@ -17,7 +17,16 @@ module ApiTagManagerModule =
         let txerrtrend = cpv ("TXErrTrend", apiItem, apiItem.System, ApiItemTag.txErrTrend  )
         let txerrovertime = cpv ("TXErrOverTime", apiItem, apiItem.System, ApiItemTag.txErrTimeOver  )
         let rxerrShort = cpv ("RXErrShort", apiItem, apiItem.System, ApiItemTag.rxErrShort  )
+        let rxErrShortOn  = cpv ("RxShortOn", apiItem, apiItem.System, ApiItemTag.rxErrShortOn  )
+        let rxErrShortRising  = cpv ("RxShortRising", apiItem, apiItem.System, ApiItemTag.rxErrShortRising  )
+        let rxErrShortTemp = cpv ("RxShortTemp", apiItem, apiItem.System, ApiItemTag.rxErrShortTemp  )
         let rxerrOpen  = cpv ("RXErrOpen", apiItem, apiItem.System, ApiItemTag.rxErrOpen  )
+        let rxErrOpenOff  = cpv ("RxOpenOff", apiItem, apiItem.System, ApiItemTag.rxErrOpenOff  )
+        let rxErrOpenRising  = cpv ("RxOpenRising", apiItem, apiItem.System, ApiItemTag.rxErrOpenRising  )
+        let rxErrOpenTemp  = cpv ("RxOpenTemp", apiItem, apiItem.System, ApiItemTag.rxErrOpenTemp)
+
+
+
         let timerTimeOutBit = timer  stg "TOUT" apiItem.System   
         
         interface ITagManager with
@@ -26,17 +35,17 @@ module ApiTagManagerModule =
 
 
         member _.ErrorText   = 
-                        let err1 = if txerrtrend.Value then "동작편차" else ""
-                        let err2 = if txerrovertime.Value then "동작시간" else ""
-                        let err3 = if rxerrShort.Value then "센서접촉" else ""
-                        let err4 = if rxerrOpen.Value then "센서단선" else ""
-                        let errs =[err1;err2;err3;err4]|> Seq.where(fun f->f <> "")
-                        if errs.any()
-                        then
-                            let errText = String.Join(",", errs)
-                            $"{apiItem.Name}_이상 : {errText}"
-                        else 
-                            ""
+            let err1 = if txerrtrend.Value      then "동작편차" else ""
+            let err2 = if txerrovertime.Value   then "동작시간" else ""
+            let err3 = if rxerrShort.Value      then "센서쇼트" else ""
+            let err4 = if rxerrOpen.Value       then "센서단선" else ""
+            let errs =[err1;err2;err3;err4]|> Seq.where(fun f->f <> "")
+            if errs.any()
+            then
+                let errText = String.Join(",", errs)
+                $"{apiItem.System.Name} {errText} 이상"
+            else 
+                ""
 
         ///Timer time out
         member _.TOUT   = timerTimeOutBit
@@ -46,4 +55,13 @@ module ApiTagManagerModule =
         member _.TXErrTrend    = txerrtrend
         member _.TXErrOverTime   = txerrovertime
         member _.RXErrShort  = rxerrShort
+        member _.RXErrShortOn  = rxErrShortOn
+        member _.RXErrShortRising  = rxErrShortRising
+        member _.RXErrShortTemp  = rxErrShortTemp
+
+
+
         member _.RXErrOpen   = rxerrOpen
+        member _.RXErrOpenOff  = rxErrOpenOff
+        member _.RXErrOpenRising  = rxErrOpenRising
+        member _.RXErrOpenTemp  = rxErrOpenTemp

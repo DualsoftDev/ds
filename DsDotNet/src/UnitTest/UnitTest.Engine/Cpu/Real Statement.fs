@@ -22,7 +22,7 @@ type Spec06_RealStatement() =
     [<Test>]
     member __.``R2 Real Job Complete`` () =
             for real in t.Reals do
-                real.R2_RealJobComplete() |> doCheck
+                real.R2_RealJobComplete() |> doChecks
 
     [<Test>]
     member __.``R3 Real Start Point`` () =

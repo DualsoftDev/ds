@@ -14,8 +14,6 @@ type VertexMCoin with
         let startTags   = ([coin.ST] @ sharedCalls.STs()).ToOr()
         let forceStarts = ([coin.SF] @ sharedCalls.SFs()).ToOr()
 
-                          
-        //let interlockPE (td:TaskDev) = if td.ApiItem.RXs.any() then  td.ApiItem.PE.Expr else coin._off.Expr
         let getStartPointExpr(coin:CallDev, td:TaskDev) =
             match coin.Parent.GetCore() with
             | :? Real as r ->
@@ -23,29 +21,31 @@ type VertexMCoin with
                 if tasks.Where(fun (_,ty) -> ty = InitialType.On) //NeedCheck 처리 필요 test ahn
                         .Select(fun (t,_)->t).Contains(td)
                     then r.V.RO.Expr <&&> if td.ExistIn then !!td.ActionINFunc else call._on.Expr
-                                             
                     else r.V.RO.Expr <&&> call._off.Expr
             | _ -> 
                 call._off.Expr
 
         [
             for td in call.CallTargetJob.DeviceDefs do
-                let sets = (dop <&&> startTags <||> getStartPointExpr (call, td)) <||>
-                           (mop <&&> forceStarts) 
-                           <&&>
-                           !!td.MutualReset(coin.System).Select(fun f -> f.ApiItem.PS)
-                               .ToAndElseOff(coin.System)
-                           //<&&>
-                           //!!(interlockPE td)
+                let sets = 
+                    ((dop <&&> startTags <||> getStartPointExpr (call, td)) <||> (mop <&&> forceStarts))
+                <&&>
+                    !!td.MutualReset(coin.System)
+                        .Select(fun f -> f.ApiItem.PS)
+                        .ToAndElseOff(coin.System)
 
                 let rsts =
                     let action =
-                        if call.UsingTon
-                            then call.V.TDON.DN.Expr   //On Delay
-                            else call.INsFuns
-                  
+                        if td.ExistIn
+                        then
+                            if call.UsingTon
+                                then call.V.TDON.DN.Expr   //On Delay
+                                else td.ActionINFunc
+                        else call._off.Expr
+
                     (action <||> coin._sim.Expr)
-                    <&&> call.PEs.ToAndElseOn(coin.System) 
+                    <&&> td.ApiItem.PE.Expr
+                    <||> !!dop
 
                 yield (sets, rsts) ==| (td.ApiItem.PS, getFuncName())
         ]

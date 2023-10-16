@@ -42,6 +42,7 @@ type VertexManager with
     member v.M3_CallErrorTXMonitor(): CommentedStatement list =
         let v= v :?> VertexMCoin
         let call= v.Vertex.GetPure() :?> CallDev
+        let dop = call.V.Flow.dop.Expr
         let rst = v.Flow.clear.Expr
         let tds = call.CallTargetJob.DeviceDefs
                           .Where(fun f->f.ApiItem.TXs.any() && f.ApiItem.RXs.any())
@@ -49,7 +50,7 @@ type VertexManager with
           
             for td in tds do
                 let api = td.ApiItem
-                let running = api.PS.Expr <&&> !!td.ActionINFunc 
+                let running = api.PS.Expr <&&> !!td.ActionINFunc  <&&> dop
                 yield running --@ (api.TOUT, v.System._tout.Value, getFuncName())
                 yield (api.TOUT.DN.Expr, rst) ==| (api.TXErrOverTime , getFuncName())
 
@@ -59,14 +60,27 @@ type VertexManager with
 
     member v.M4_CallErrorRXMonitor(): CommentedStatement list =
         let call= v.Vertex.GetPure() :?> CallDev
+        let dop = call.V.Flow.dop.Expr
         let rst = v.Flow.clear.Expr
         let tds = call.CallTargetJob.DeviceDefs.Where(fun f->f.ApiItem.RXs.any())
         [
             for td in tds do
                 let input, rxs = td.ActionINFunc, td.ApiItem.RXs.Select(getVM)
+                let offSet     = td.ApiItem.RXErrOpenOff
+                let offRising  = td.ApiItem.RXErrOpenRising
+                let offTemp    = td.ApiItem.RXErrOpenTemp
+                let offErr     = td.ApiItem.RXErrOpen
 
-                yield (input   <&&> rxs.Select(fun f -> f.G).ToOr() , rst<||>v._sim.Expr) ==| (td.ApiItem.RXErrShort, getFuncName())
-                yield (!!input <&&> rxs.Select(fun f -> f.H).ToOr() , rst<||>v._sim.Expr) ==| (td.ApiItem.RXErrOpen,  getFuncName())
+                let onSet      = td.ApiItem.RXErrShortOn
+                let onRising   = td.ApiItem.RXErrShortRising
+                let onTenmp    = td.ApiItem.RXErrShortTemp
+                let onErr      = td.ApiItem.RXErrShort
+
+                yield! (input  , onErr.Expr)   --^ (onRising,   onSet, onTenmp, "RXErrShortOn")
+                yield! (!!input, offErr.Expr)  --^ (offRising, offSet, offTemp, "RXErrOpenOff")
+
+                yield (dop <&&> onRising.Expr  <&&> rxs.Select(fun f -> f.R).ToAnd() , rst<||>v._sim.Expr) ==| (onErr,   getFuncName())
+                yield (dop <&&> offRising.Expr <&&> rxs.Select(fun f -> f.F).ToAnd() , rst<||>v._sim.Expr) ==| (offErr,  getFuncName())
 
             let sets = tds |> Seq.collect(fun s->[s.ApiItem.RXErrOpen;s.ApiItem.RXErrShort])
             yield (sets.ToOrElseOff(v.System), v._off.Expr) --| (v.E2, getFuncName())

@@ -99,7 +99,7 @@ module ModelTests1 =
 
         [<Test>]
         member __.``Model component [StrongCausal] test`` () =
-            compare ParserTest.StrongCausal answerStrongCausal
+            compareExact ParserTest.StrongCausal 
 
         [<Test>]
         member __.``Model component [Buttons] test`` () =
@@ -123,7 +123,7 @@ module ModelTests1 =
 
         [<Test>]
         member __.``Model component [Link and link aliases] test`` () =
-            compare ParserTest.LinkAndLinkAliases linkAndLinkAliases
+            compareExact ParserTest.LinkAndLinkAliases 
 
         [<Test>]
         member __.``Model component [QualifiedName] test`` () =
@@ -139,7 +139,7 @@ module ModelTests1 =
 
         [<Test>]
         member __.``Model component [Task Device/Link (old:JobDef)] test`` () =
-            compare ParserTest.TaskLinkorDevice answerTaskLinkorDevice
+            compareExact ParserTest.TaskLinkorDevice 
 
         //[<Test>]
         //member __.``X Ppt20221213Text test`` () =

@@ -65,10 +65,10 @@ module JSONSettingTestModule =
                     let (ows:uint64[], err_) = client.ReadUInt64s("p/o", indices)
                     SeqEq ows values
 
-                check_po_bytes()
                 check_po_words()
                 check_po_dwords()
                 check_po_lwords()
+                check_po_bytes()
 
             let checkTopLevel() =
                 // LsXgi(=>"") 의 q 파일
@@ -119,6 +119,23 @@ module JSONSettingTestModule =
 
             checkTopLevel()
             checkSubFile()
+
+        [<Test>]
+        member _.ReadWritePoints() =
+            let zmqInfo = Zmq.Initialize (__SOURCE_DIRECTORY__ + @"/../../IOHub/IO.Core/zmqsettings.json")
+            let server, client, cts = zmqInfo.Server, zmqInfo.Client, zmqInfo.CancellationTokenSource
+            let venders = zmqInfo.IOSpec.Vendors
+            let p = venders |> Array.find (fun (v:VendorSpec) -> v.Location = "p")
+            let po = p.Files |> Array.find (fun (v:IOFileSpec) -> v.Name = "o")
+            po.GetPath() === "p/o"
+            let l = venders |> Array.find (fun (v:VendorSpec) -> v.Location = "")
+            let lq = l.Files |> Array.find (fun (v:IOFileSpec) -> v.Name = "q")
+            lq.GetPath() === "q"
+
+
+            let length = po.Length
+            let v, err = client.Read("p/%ob255")
+            ()
 
 
         [<Test>]

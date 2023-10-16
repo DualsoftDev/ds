@@ -15,7 +15,11 @@ open IO.Spec
 module ZmqServerModule =
     type Server(ioSpec:IOSpec, cancellationToken:CancellationToken) =
         let port = ioSpec.ServicePort
+
+        /// e.g {"p/o", <Paix Output Buffer manager>}
         let bufferManagers = new Dictionary<string, BufferManager>()
+
+        /// tag 별 address 정보를 저장하는 dictionary
         let tagDic = new Dictionary<string, AddressSpec>()
 
         //let showSamples (vendorSpec:VendorSpec) (addressExtractor:IAddressInfoProvider) =
@@ -71,7 +75,7 @@ module ZmqServerModule =
 
         let getVendor (addr:string) : (VendorSpec * string) =
             match addr with
-            | RegexPattern "^([^/]+)/(\w+)$" [vendor; address] ->
+            | RegexPattern "^([^/]+)/([^/]+)$" [vendor; address] ->
                 let v =
                     ioSpec.Vendors
                     |> Seq.find (fun v -> v.Location = vendor)
@@ -188,6 +192,16 @@ module ZmqServerModule =
                         args |> map (fun a -> $"{a}={readAddress(a)}")
                         |> joinWith " "
                     ReadResultString(result)
+                | "r" ->
+                    let result = readAddress(tokens[1])
+                    match result with
+                    | :? bool   as n -> ReadResultSingle<bool>(n)
+                    | :? byte   as n -> ReadResultSingle<byte>(n)
+                    | :? uint16 as n -> ReadResultSingle<uint16>(n)
+                    | :? uint32 as n -> ReadResultSingle<uint32>(n)
+                    | :? uint64 as n -> ReadResultSingle<uint64>(n)
+                    | _ -> failwithf $"Unknown type {tokens[1]}"
+
 
                 | "write" ->
                     args |> iter (fun a -> writeAddressWithValue(a))
@@ -310,6 +324,17 @@ module ZmqServerModule =
                             respSocket.SendFrame(ok.Result)
                         | :? WriteResultOK as ok ->
                             respSocket.SendFrame("OK")
+
+                        | :? ReadResultSingle<byte> as ok ->
+                            respSocket.SendMoreFrame("OK").SendFrame([|ok.Result|])
+                        | :? ReadResultSingle<uint16> as ok ->
+                            respSocket.SendMoreFrame("OK").SendFrame(BitConverter.GetBytes(ok.Result))
+                        | :? ReadResultSingle<uint32> as ok ->
+                            respSocket.SendMoreFrame("OK").SendFrame(BitConverter.GetBytes(ok.Result))
+                        | :? ReadResultSingle<uint64> as ok ->
+                            respSocket.SendMoreFrame("OK").SendFrame(BitConverter.GetBytes(ok.Result))
+
+
                         | :? ReadResultArray<byte> as ok ->
                             respSocket.SendMoreFrame("OK").SendFrame(ok.Results)
                         | :? ReadResultArray<uint16> as ok ->
@@ -318,6 +343,10 @@ module ZmqServerModule =
                             respSocket.SendMoreFrame("OK").SendFrame(ByteConverter.ToBytes<uint32>(ok.Results))
                         | :? ReadResultArray<uint64> as ok ->
                             respSocket.SendMoreFrame("OK").SendFrame(ByteConverter.ToBytes<uint64>(ok.Results))
+
+
+
+
                         | :? IIOResultNG as ng ->
                             respSocket.SendFrame(ng.Error)
                         | _ ->

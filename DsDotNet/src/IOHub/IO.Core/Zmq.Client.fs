@@ -43,6 +43,17 @@ module ZmqClientModule =
             reqSocket.SendFrame(request)
             reqSocket.ReceiveFrameString()
 
+        member x.Read(tag:string) : obj * ErrorMessage =
+            reqSocket.SendFrame($"r {tag}")
+            let result = reqSocket.ReceiveFrameString()
+            match result with
+            | "OK" ->
+                let buffer = reqSocket.ReceiveFrameBytes()
+                buffer, null
+            | _ ->
+                logError($"Error: {result}")
+                null, result
+            
         member x.ReadBytes(name:string, offsets:int[]) : byte[] * ErrorMessage =
             sendReadRequest(reqSocket, "rb", name, offsets)
             let result = reqSocket.ReceiveFrameString()

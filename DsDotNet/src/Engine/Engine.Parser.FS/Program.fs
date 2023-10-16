@@ -28,7 +28,7 @@ module Program =
     let EveryScenarioText = """
 [sys ip = 192.168.0.1] My = {
     [flow] MyFlow = {
-        Seg1 > Seg2 > Ap;
+        Seg1 > Seg2;
         Seg1 = {
             Ap > Am;
         }
@@ -65,7 +65,7 @@ C4 > C5;
         R1              // define my local terminal real segment    // GVT.{ Segment }
             //> C."+"     // direct interface call wrapper segment    // GVT.{ CallDev }
             > Main2     // aliased to my real segment               // GVT.{ Segment | Aliased }
-            > Ap1       // aliased to interface                     // GVT.{ Segment | Aliased | CallDev }
+                        // aliased to interface                     // GVT.{ Segment | Aliased | CallDev }
             ;
         R2;
 
@@ -116,7 +116,7 @@ C4 > C5;
     let CpuTestText = """
 [sys ip = 192.168.0.1] My = {
     [flow] MyFlow = {
-        Ap > Seg1 > Seg2 > F.R3 > aliasCallInFlow;
+        Ap > Seg1 > Seg2 > F.R3;
         Seg2 > aliasRealInFlow > aliasRealExInFlow;
         Seg1 = {
             Ap > Am > aliasCallInReal;
@@ -235,8 +235,9 @@ C4 > C5;
     let DuplicatedCallsText = """
 [sys] My = {
     [flow] F = {
-        Fp > Fm;
-        Fm > Gm;
+        main = {
+                Fp > Fm > Gm;
+        }
     }
     [jobs] = {
         Fp = { F."+"(%I1, %Q1); }
@@ -251,7 +252,7 @@ C4 > C5;
     let CausalsText = """
 [sys] L = {
     [flow] F = {
-        Ap > Am;
+        //Ap > Am;
         Main = {
 
            // Ap1 > Bp1;
@@ -262,8 +263,6 @@ C4 > C5;
             //{ Ap1; Bp1; } > { Am1; Bm1; }
         }
         [aliases] = {
-            Ap = { Ap1; Ap2; Ap3; }
-            Am = { Am1; Am2; Am3; }
             Main.Bp = { Bp1; Bp2; Bp3; }
             //Bm = { Bm1; Bm2; Bm3; } Vextex에 없으면 정의불가
         }
@@ -275,12 +274,7 @@ C4 > C5;
         Bm = { B."-"(%I4, %Q4); }
     }
 
-    [prop] = {
-        [safety] = {
-            F.Main = { F.Ap; F.Am; }
-            F.Ap = { F.Main; }
-        }
-    }
+    
 
     [device file="cylinder.ds"] A;
     [device file="cylinder.ds"] B;

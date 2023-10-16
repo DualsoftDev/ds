@@ -41,7 +41,7 @@ module ZmqTestMain =
         // ---- third party ----
         // wb
         let wr2 = client.WriteBytes("p/o", [|0; 1; 2; 3|], [|99uy; 98uy; 97uy; 96uy|])
-        let bytes:byte[] = client.ReadBytes("p/o", [|0; 1; 2; 3|])
+        let (bytes:byte[], err_) = client.ReadBytes("p/o", [|0; 1; 2; 3|])
 
      
         let mutable key = ""

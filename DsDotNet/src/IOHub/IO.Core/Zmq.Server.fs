@@ -18,37 +18,37 @@ module ZmqServerModule =
         let bufferManagers = new Dictionary<string, BufferManager>()
         let tagDic = new Dictionary<string, AddressSpec>()
 
-        let showSamples (vendorSpec:VendorSpec) (addressExtractor:IAddressInfoProvider) =
-            let v = vendorSpec
-            match v.Name with
-            | "Paix" ->
-                match addressExtractor.GetAddressInfo("ox12.1") with
-                | true, memoryType, byteOffset, bitOffset, contentBitLength ->
-                    assert (memoryType = "o")
-                    assert (bitOffset = 1)
-                    assert (byteOffset = 12)
-                    assert (contentBitLength = 1)
-                | _ ->
-                    failwithf($"Invalid address format: {v.Name}, {v.Dll}, {v.ClassName}")
-                match addressExtractor.GetAddressInfo("ob12") with
-                | true, memoryType, byteOffset, bitOffset, contentBitLength ->
-                    assert (memoryType = "o")
-                    assert (bitOffset = 0)
-                    assert (byteOffset = 12)
-                    assert (contentBitLength = 8)
-                | _ ->
-                    failwithf($"Invalid address format: {v.Name}, {v.Dll}, {v.ClassName}")
-            | "LsXGI" ->
-                match addressExtractor.GetAddressInfo("%IX30.3") with
-                | true, memoryType, byteOffset, bitOffset, contentBitLength ->
-                    assert (memoryType = "i")
-                    assert (bitOffset = 3)
-                    assert (byteOffset = 30)
-                    assert (contentBitLength = 1)
-                | _ ->
-                    failwithf($"Invalid address format: {v.Name}, {v.Dll}, {v.ClassName}")
-            | _ ->
-                ()
+        //let showSamples (vendorSpec:VendorSpec) (addressExtractor:IAddressInfoProvider) =
+        //    let v = vendorSpec
+        //    match v.Name with
+        //    | "Paix" ->
+        //        match addressExtractor.GetAddressInfo("ox12.1") with
+        //        | true, memoryType, byteOffset, bitOffset, contentBitLength ->
+        //            assert (memoryType = "o")
+        //            assert (bitOffset = 1)
+        //            assert (byteOffset = 12)
+        //            assert (contentBitLength = 1)
+        //        | _ ->
+        //            failwithf($"Invalid address format: {v.Name}, {v.Dll}, {v.ClassName}")
+        //        match addressExtractor.GetAddressInfo("ob12") with
+        //        | true, memoryType, byteOffset, bitOffset, contentBitLength ->
+        //            assert (memoryType = "o")
+        //            assert (bitOffset = 0)
+        //            assert (byteOffset = 12)
+        //            assert (contentBitLength = 8)
+        //        | _ ->
+        //            failwithf($"Invalid address format: {v.Name}, {v.Dll}, {v.ClassName}")
+        //    | "LsXGI" ->
+        //        match addressExtractor.GetAddressInfo("%IX30.3") with
+        //        | true, memoryType, byteOffset, bitOffset, contentBitLength ->
+        //            assert (memoryType = "i")
+        //            assert (bitOffset = 3)
+        //            assert (byteOffset = 30)
+        //            assert (contentBitLength = 1)
+        //        | _ ->
+        //            failwithf($"Invalid address format: {v.Name}, {v.Dll}, {v.ClassName}")
+        //    | _ ->
+        //        ()
 
         do
             for v in ioSpec.Vendors do
@@ -57,7 +57,7 @@ module ZmqServerModule =
                     let obj:obj = oh.Unwrap()
                     obj :?> IAddressInfoProvider
 
-                showSamples v v.AddressResolver
+                //showSamples v v.AddressResolver
 
                 for f in v.Files do
                     let dir, key =

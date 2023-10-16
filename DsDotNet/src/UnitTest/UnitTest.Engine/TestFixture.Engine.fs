@@ -1,4 +1,5 @@
 namespace T
+open Dual.UnitTest.Common.FS
 
 [<AutoOpen>]
 module Fixtures =

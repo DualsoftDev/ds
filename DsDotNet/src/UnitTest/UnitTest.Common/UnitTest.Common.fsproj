@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
@@ -16,16 +16,16 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.7" />
+		<PackageReference Include="DualSoft-UnitTest-Common-FS" Version="0.1.2" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
 		<PackageReference Include="FsUnit" Version="5.0.4" />
 		<PackageReference Include="FsUnit.xUnit" Version="5.0.4" />
-		<PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
+		<PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
 		<PackageReference Include="xunit" Version="2.4.2" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Include="OnlyOnce.fs" />
 		<Compile Include="TestFixture.fs" />
 		<Compile Include="CpuTestCommon.fs" />
 	</ItemGroup>

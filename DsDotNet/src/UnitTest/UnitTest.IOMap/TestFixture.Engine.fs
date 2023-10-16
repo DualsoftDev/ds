@@ -1,6 +1,8 @@
 namespace T.IOMap
 
 open NUnit.Framework
+open Dual.UnitTest.Common.FS
+
 open System.Collections.Generic
 open IOMapApi.MemoryIOApi
 open FsUnit.Xunit

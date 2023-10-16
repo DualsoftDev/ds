@@ -24,7 +24,12 @@ module ModelLoader =
 
     let SaveConfigWithPath (path: FilePath) (sysRunPaths: string seq) =
         let cfg =
-            {   DsFilePaths = sysRunPaths.ToFSharpList() }
+            {
+                DsFilePaths = 
+                    sysRunPaths
+                    |> Seq.map(fun path -> path.Replace("\\", "/"))
+                    |> Seq.toList
+            }
         SaveConfig path cfg 
 
     let private loadSystemFromDsFile (systemRepo:ShareableSystemRepository) (dsFilePath) =

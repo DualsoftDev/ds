@@ -2,13 +2,12 @@ namespace T.IOHub
 
 open T
 open NUnit.Framework
-open System.Collections.Generic
-open FsUnit.Xunit
 open Dual.Common.Core.FS
 open System
-open System.IO
 open IO.Core
-open Newtonsoft.Json
+open System.Threading
+open IO.Core.ZmqServerModule
+open IO.Core.ZmqClientModule
 
 [<AutoOpen>]
 module JSONSettingTestModule =
@@ -20,10 +19,5 @@ module JSONSettingTestModule =
 
         [<Test>]
         member _.ParseJSON() =
-            let ioSpec:IOSpec =
-                __SOURCE_DIRECTORY__ + @"/../../IOHub/IO.Core/zmqsettings.json"
-                |> File.ReadAllText
-                |> JsonConvert.DeserializeObject<IOSpec>
-            ioSpec.Regulate()
-
+            let zmqInfo = Zmq.Initialize (__SOURCE_DIRECTORY__ + @"/../../IOHub/IO.Core/zmqsettings.json")
             ()

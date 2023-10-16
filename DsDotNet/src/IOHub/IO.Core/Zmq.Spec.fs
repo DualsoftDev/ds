@@ -3,9 +3,10 @@ open System
 open System.IO
 open Dual.Common.Core.FS
 open IO.Spec
+open Newtonsoft.Json
 
 [<AutoOpen>]
-module ZmqSpec =
+module rec ZmqSpec =
     [<AllowNullLiteral>]
     type IIOResult = interface end
     type IIOResultOK = inherit IIOResult
@@ -82,7 +83,8 @@ module ZmqSpec =
     
     *)
 
-    and [<AllowNullLiteral>] IBufferManager = interface end
+    [<AllowNullLiteral>] 
+    type IBufferManager = interface end
     and IOFileSpec() =
         member val Name = ""  with get, set
         member val Length = 0 with get, set
@@ -92,7 +94,8 @@ module ZmqSpec =
         member val FileStream:FileStream = null with get, set
         member val BufferManager:IBufferManager = null with get, set
     
-    and [<AllowNullLiteral>] VendorSpec() =
+    [<AllowNullLiteral>] 
+    type  VendorSpec() =
         member val Name = "" with get, set
         member val Location = "" with get, set
         member val Dll = "" with get, set
@@ -105,23 +108,27 @@ module ZmqSpec =
         member val ServicePort = 0 with get, set
         member val TopLevelLocation = "" with get, set
         member val Vendors:VendorSpec[] = [||] with get, set
+        static member FromJsonFile(jsonPath:string) =
+            jsonPath
+            |> File.ReadAllText
+            |> JsonConvert.DeserializeObject<IOSpec>
+            |> tee regulate
 
-    let private sep = Path.DirectorySeparatorChar
-    let regulatePath (dir:string) = dir.Replace('\\', sep).ToLower()
-    let regulateDir (dir:string) = (regulatePath dir).TrimEnd(sep)
 
-    type IOSpec with
-        member x.Regulate() =
-            x.TopLevelLocation <- regulateDir x.TopLevelLocation
-            for v in x.Vendors do
-                v.Location <- regulateDir v.Location
-                v.Dll <- regulateDir v.Dll
-                v.Accepts <- v.Accepts.ToLower()
-                for f in v.Files do
-                    f.Vendor <- v
-                    f.Name <- f.Name.ToLower()
-                    if f.Length <= 0 then
-                        failwithlogf $"Invalid file length {f.Length} on file {f.Name}"
+    let regulate (x:IOSpec) =
+        let sep = Path.DirectorySeparatorChar
+        let regulatePath (dir:string) = dir.Replace('\\', sep).ToLower()
+        let regulateDir (dir:string) = (regulatePath dir).TrimEnd(sep)
+        x.TopLevelLocation <- regulateDir x.TopLevelLocation
+        for v in x.Vendors do
+            v.Location <- regulateDir v.Location
+            v.Dll <- regulateDir v.Dll
+            v.Accepts <- v.Accepts.ToLower()
+            for f in v.Files do
+                f.Vendor <- v
+                f.Name <- f.Name.ToLower()
+                if f.Length <= 0 then
+                    failwithlogf $"Invalid file length {f.Length} on file {f.Name}"
 
 
     let bitSizeToEnum(bitSize:int) =

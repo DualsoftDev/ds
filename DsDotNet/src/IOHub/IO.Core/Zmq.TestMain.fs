@@ -10,11 +10,7 @@ open Dual.Common.Core.FS
 module ZmqTestMain =
     [<EntryPoint>]
     let main _ = 
-        let ioSpec:IOSpec =
-            "zmqsettings.json"
-            |> File.ReadAllText
-            |> JsonConvert.DeserializeObject<IOSpec>
-        ioSpec.Regulate()
+        let ioSpec = IOSpec.FromJsonFile "zmqsettings.json"
 
         let port = ioSpec.ServicePort
         let cts = new CancellationTokenSource()

@@ -1,4 +1,5 @@
 namespace T.Expression
+open Dual.UnitTest.Common.FS
 
 open NUnit.Framework
 open T

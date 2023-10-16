@@ -1,5 +1,6 @@
 namespace T
 
+open Dual.UnitTest.Common.FS
 open System.IO
 open System.Globalization
 

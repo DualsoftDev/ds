@@ -11,7 +11,7 @@ module Zmq =
         IOSpec:IOSpec
         Server:Server
         Client:Client
-        Cts:CancellationTokenSource
+        CancellationTokenSource:CancellationTokenSource
     }
     
     let Initialize(settingJsonPath:string) : ZmqInfo =
@@ -21,5 +21,5 @@ module Zmq =
 
         let server = new Server(ioSpec, cts.Token) |> tee (fun x -> x.Run())
         let client = new Client($"tcp://localhost:{port}")
-        { IOSpec = ioSpec; Server = server; Client = client; Cts = cts }
+        { IOSpec = ioSpec; Server = server; Client = client; CancellationTokenSource = cts }
 

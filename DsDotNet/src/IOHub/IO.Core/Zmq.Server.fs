@@ -169,7 +169,7 @@ module ZmqServerModule =
                         let address = respSocket.ReceiveFrameBytes()
                         ByteConverter.BytesToTypeArray<int>(address)
                     for byteIndex in indices |> map (fun n -> if isBitIndex then n / 8 else n) do
-                        if bufferManager.FileStream.Length <= byteIndex then
+                        if bufferManager.FileStream.Length < byteIndex then
                             failwithf($"Invalid address: {byteIndex}")
                     bufferManager, indices
 

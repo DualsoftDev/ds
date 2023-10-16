@@ -11,11 +11,11 @@
       "Files": [
         {
           "Name": "I",
-          "Length": 65535
+          "Length": 65536
         },
         {
           "Name": "Q",
-          "Length": 1023
+          "Length": 1024
         },
         {
           "Name": "M",
@@ -32,11 +32,11 @@
       "Files": [
         {
           "Name": "I",
-          "Length": 65535
+          "Length": 65536
         },
         {
           "Name": "O",
-          "Length": 1023
+          "Length": 1024
         }
       ]
     }

@@ -1,4 +1,5 @@
 using Dual.Common.Core;
+using Engine.CodeGenCPU;
 using Engine.Core;
 using Microsoft.Msagl.GraphViewerGdi;
 using System;
@@ -122,13 +123,7 @@ namespace Diagram.View.MSAGL
                     {
                         var vv = DicNode[ev.Target];
                         vv.IsError = (bool)ev.Tag.BoxedValue;
-
-                        var errs =
-                            call.CallTargetJob.DeviceDefs.Select(s => s.ApiItem.TagManager)
-                                    .Cast<ApiItemManager>()
-                                    .Select(s => s.ErrorText);
-
-                        vv.ErrorText = String.Join("\r\n", errs);
+                        vv.ErrorText = ConvertCoreExt.errText(call);
 
                         var ucView = UcViews.Where(w => w.MasterNode == vv.FlowNode).FirstOrDefault();
                         if (ucView != null)

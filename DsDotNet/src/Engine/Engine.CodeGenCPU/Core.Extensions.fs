@@ -22,6 +22,14 @@ module ConvertCoreExt =
     let getFM (x:Flow)     = x.TagManager :?> FlowManager
     let getAM (x:ApiItem)  = x.TagManager :?> ApiItemManager
 
+
+
+    let errText (x:CallDev)  = 
+        String.Join("\n", x.CallTargetJob.DeviceDefs
+                        .Select(fun s -> s.ApiItem.TagManager)
+                        .Cast<ApiItemManager>()
+                        .Select(fun s -> s.ErrorText))
+
     let getOriginInfos(sys:DsSystem) =
         let reals = sys.GetVertices().OfType<Real>()
         reals.Select(fun r->
@@ -281,6 +289,8 @@ module ConvertCoreExt =
             if myMutualDevs.any() then myMutualDevs.ToAnd() else x._on.Expr
 
     type CallDev with
+       
+                                    
         member c.UsingTon  = c.CallTargetJob.Funcs |> hasTime
         member c.UsingCtr  = c.CallTargetJob.Funcs |> hasCount
         member c.UsingNot  = c.CallTargetJob.Funcs |> hasNot

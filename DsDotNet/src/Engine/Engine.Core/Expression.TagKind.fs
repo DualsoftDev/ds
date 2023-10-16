@@ -145,6 +145,7 @@ module TagKindModule =
         Name  : string //FQDN 고유이름
         Value : obj    //Tag 값
         Kind  : int    //Tag 종류 ex) going = 11007
+        Message : string //에러 내용 및 기타 전달 Message 
     }
 
     [<AutoOpen>]
@@ -184,7 +185,17 @@ module TagKindModule =
             |EventVertex (i, _, _) -> i       
             |EventApiItem(i, _, _) -> i
             |EventAction (i, _, _) -> i
-        
+
+
+        [<Extension>]
+        static member GetTarget(x:TagDS) =
+            match x with
+            |EventSystem ( _, target, _) -> target |> box
+            |EventFlow   ( _, target, _) -> target |> box
+            |EventVertex ( _, target, _) -> target |> box
+            |EventApiItem( _, target, _) -> target |> box
+            |EventAction ( _, target, _) -> target |> box
+
       
         [<Extension>]
         static member GetTagToText(x:TagDS) =
@@ -196,14 +207,13 @@ module TagKindModule =
             |EventAction (tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
         
         [<Extension>]
-        static member GetWebDS(x:TagDS) =
+        static member GetWebTag(x:TagDS) =
             match x with
-            |EventSystem (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.BoxedValue;  Kind = tag.TagKind}
-            |EventFlow   (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.BoxedValue;  Kind = tag.TagKind}
-            |EventVertex (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.BoxedValue;  Kind = tag.TagKind}
-            |EventApiItem(tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.BoxedValue;  Kind = tag.TagKind}
-            |EventAction (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.BoxedValue;  Kind = tag.TagKind}
-     
+            |EventSystem (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.BoxedValue; Kind = tag.TagKind; Message = ""}
+            |EventFlow   (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.BoxedValue; Kind = tag.TagKind; Message = ""}
+            |EventVertex (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.BoxedValue; Kind = tag.TagKind; Message = ""}
+            |EventApiItem(tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.BoxedValue; Kind = tag.TagKind; Message = ""}
+            |EventAction (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.BoxedValue; Kind = tag.TagKind; Message = ""}
 
         [<Extension>]
         static member GetSystem(x:TagDS) =
@@ -213,8 +223,6 @@ module TagKindModule =
             |EventVertex (_, obj, _) -> obj.Parent.GetSystem()       
             |EventApiItem(_, obj, _) -> obj.System
             |EventAction (_, obj, _) -> obj.ApiItem.System
-        
-        
         
         [<Extension>]
         static member IsStatusTag(x:TagDS) =

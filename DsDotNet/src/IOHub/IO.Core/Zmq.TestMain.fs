@@ -1,23 +1,13 @@
 namespace IO.Core
 open System
 open System.Threading
-open System.IO
-open Newtonsoft.Json
-open ZmqServerModule
-open ZmqClientModule
 open Dual.Common.Core.FS
 
 module ZmqTestMain =
     [<EntryPoint>]
     let main _ = 
-        let ioSpec:IOSpec =
-            "zmqsettings.json"
-            |> File.ReadAllText
-            |> JsonConvert.DeserializeObject<IOSpec>
-        ioSpec.Regulate()
-
-        let port = ioSpec.ServicePort
-        let cts = new CancellationTokenSource()
+        let zmqInfo = Zmq.Initialize "zmqsettings.json"
+        let server, client, cts = zmqInfo.Server, zmqInfo.Client, zmqInfo.CancellationTokenSource
 
         let handleCancelKey (args: ConsoleCancelEventArgs) =
             logDebug("Ctrl+C pressed!")
@@ -25,10 +15,6 @@ module ZmqTestMain =
             args.Cancel <- true // 프로그램을 종료하지 않도록 설정 (선택 사항)
         Console.CancelKeyPress.Add(handleCancelKey)
 
-        let server = new Server(ioSpec, cts.Token)
-        let serverThread = server.Run()
-
-        let client = new Client($"tcp://localhost:{port}")
 
         //let rr0 = client.SendRequest("read Mw100 Mx30 Md12")
         //let result = client.SendRequest("read Mw100 Mx30")

@@ -264,6 +264,7 @@ module ZmqServerModule =
                     if indices.Length <> values.Length / 4 then
                         failwithf($"The number of indices and values should be the same.")
 
+                    let xxx = Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) 
                     Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) |> iter ( fun (index, value) -> bm.writeU32(index, value))
                     bm.Flush()
                     WriteResultOK()
@@ -278,6 +279,12 @@ module ZmqServerModule =
                     bm.Flush()
                     WriteResultOK()
 
+                | "cl" ->
+                    let name = respSocket.ReceiveFrameString().ToLower()
+                    let bm = bufferManagers[name]
+                    bm.clear()
+                    bm.Flush()
+                    WriteResultOK()
                 | _ ->
                     ReadResultError $"Unknown request: {request}"
 
@@ -307,6 +314,10 @@ module ZmqServerModule =
                             respSocket.SendMoreFrame("OK").SendFrame(ok.Results)
                         | :? ReadResultArray<uint16> as ok ->
                             respSocket.SendMoreFrame("OK").SendFrame(ByteConverter.ToBytes<uint16>(ok.Results))
+                        | :? ReadResultArray<uint32> as ok ->
+                            respSocket.SendMoreFrame("OK").SendFrame(ByteConverter.ToBytes<uint32>(ok.Results))
+                        | :? ReadResultArray<uint64> as ok ->
+                            respSocket.SendMoreFrame("OK").SendFrame(ByteConverter.ToBytes<uint64>(ok.Results))
                         | :? IIOResultNG as ng ->
                             respSocket.SendFrame(ng.Error)
                         | _ ->

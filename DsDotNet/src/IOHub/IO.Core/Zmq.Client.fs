@@ -53,17 +53,37 @@ module ZmqClientModule =
                 failwithf($"Error: {result}")
 
 
-        member x.ReadUInt16s(name:string, offsets:int[]) : uint16[] =
-            sendReadRequest(reqSocket, "rw", name, offsets)
+        // command: "rw", "rd", "rl"
+        member private x.ReadTypes<'T>(command:string, name:string, offsets:int[]) : 'T[] =
+            sendReadRequest(reqSocket, command, name, offsets)
 
             // 서버로부터 응답 수신
             let result = reqSocket.ReceiveFrameString()
             match result with
             | "OK" ->
                 let buffer = reqSocket.ReceiveFrameBytes()
-                ByteConverter.BytesToTypeArray<uint16>(buffer) // 바이트 배열을 uint16 배열로 변환
+                ByteConverter.BytesToTypeArray<'T>(buffer) // 바이트 배열을 uint16 배열로 변환
             | _ ->
                 failwithf($"Error: {result}")
+
+        member x.ReadUInt16s(name:string, offsets:int[]) : uint16[] =
+            x.ReadTypes<uint16>("rw", name, offsets)
+        member x.ReadUInt32s(name:string, offsets:int[]) : uint32[] =
+            x.ReadTypes<uint32>("rd", name, offsets)
+        member x.ReadUInt64s(name:string, offsets:int[]) : uint64[] =
+            x.ReadTypes<uint64>("rl", name, offsets)
+
+        //member x.ReadUInt16s(name:string, offsets:int[]) : uint16[] =
+        //    sendReadRequest(reqSocket, "rw", name, offsets)
+
+        //    // 서버로부터 응답 수신
+        //    let result = reqSocket.ReceiveFrameString()
+        //    match result with
+        //    | "OK" ->
+        //        let buffer = reqSocket.ReceiveFrameBytes()
+        //        ByteConverter.BytesToTypeArray<uint16>(buffer) // 바이트 배열을 uint16 배열로 변환
+        //    | _ ->
+        //        failwithf($"Error: {result}")
 
 
         member x.WriteBits(name:string, offsets:int[], values:bool[]) =
@@ -98,3 +118,9 @@ module ZmqClientModule =
 
             verifyReceiveOK reqSocket
 
+        member x.ClearAll(name:string) =
+            reqSocket
+                .SendMoreFrame("cl")
+                .SendFrame(name)
+
+            verifyReceiveOK reqSocket

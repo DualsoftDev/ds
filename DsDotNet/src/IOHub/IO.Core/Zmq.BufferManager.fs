@@ -41,29 +41,33 @@ module ZmqBufferManager =
         member x.readU32(byteOffset:int) = x.readU32s(byteOffset, 1)[0]
         member x.readU64(byteOffset:int) = x.readU64s(byteOffset, 1)[0]
 
-        member x.readU8s (offset: int, count: int) : byte[] =
+        member x.readU8s (byteOffset: int, count: int) : byte[] =
             lock locker (fun () ->
+                let offset = byteOffset
                 let buffer = Array.zeroCreate<byte> count
                 stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
                 stream.Read(buffer, 0, count) |> ignore
                 buffer
             );
-        member x.readU16s (offset: int, count: int) : uint16[] =
+        member x.readU16s (wordOffset: int, count: int) : uint16[] =
             lock locker (fun () ->
+                let offset = wordOffset * 2
                 let buffer = Array.zeroCreate<byte> (count * 2)
                 stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
                 stream.Read(buffer, 0, count * 2) |> ignore
                 Array.init count (fun i -> System.BitConverter.ToUInt16(buffer, i * 2))
             )
-        member x.readU32s (offset: int, count: int) : uint32[] =
+        member x.readU32s (dwordOffset: int, count: int) : uint32[] =
             lock locker (fun () ->
+                let offset = dwordOffset * 4
                 let buffer = Array.zeroCreate<byte> (count * 4)
                 stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
                 stream.Read(buffer, 0, count * 4) |> ignore
                 Array.init count (fun i -> System.BitConverter.ToUInt32(buffer, i * 4))
             )
-        member x.readU64s (offset: int, count: int) : uint64[] =
+        member x.readU64s (lwordOffset: int, count: int) : uint64[] =
             lock locker (fun () ->
+                let offset = lwordOffset * 8
                 let buffer = Array.zeroCreate<byte> (count * 8)
                 stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
                 stream.Read(buffer, 0, count * 8) |> ignore
@@ -91,25 +95,34 @@ module ZmqBufferManager =
                 stream.WriteByte(value)
             )
 
-        member x.writeU16(offset:int, value:uint16) =
+        member x.writeU16(wordOffset:int, value:uint16) =
             lock locker (fun () ->
+                let byteOffset = wordOffset * 2
+                let buffer = System.BitConverter.GetBytes(value)
+                stream.Seek(int64 byteOffset, SeekOrigin.Begin) |> ignore
+                stream.Write(buffer, 0, buffer.Length)
+            )
+
+        member x.writeU32(dwordOffset:int, value:uint32) =
+            lock locker (fun () ->
+                let offset = dwordOffset * 4
                 let buffer = System.BitConverter.GetBytes(value)
                 stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
                 stream.Write(buffer, 0, buffer.Length)
             )
 
-        member x.writeU32(offset:int, value:uint32) =
+        member x.writeU64(lwordOffset:int, value:uint64) =
             lock locker (fun () ->
+                let offset = lwordOffset * 8
                 let buffer = System.BitConverter.GetBytes(value)
                 stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
                 stream.Write(buffer, 0, buffer.Length)
             )
-
-        member x.writeU64(offset:int, value:uint64) =
+        member x.clear() =
             lock locker (fun () ->
-                let buffer = System.BitConverter.GetBytes(value)
-                stream.Seek(int64 offset, SeekOrigin.Begin) |> ignore
-                stream.Write(buffer, 0, buffer.Length)
+                stream.Seek(0L, SeekOrigin.Begin) |> ignore
+                for i in 0L .. (stream.Length - 1L) do
+                    stream.WriteByte(0uy)
             )
 
 [<AutoOpen>]

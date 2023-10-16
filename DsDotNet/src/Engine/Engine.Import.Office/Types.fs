@@ -8,6 +8,22 @@ open Dual.Common.Core.FS
 [<AutoOpen>]
 module InterfaceClass =
 
+    let [<Literal>] TextADV = "ADV"
+    let [<Literal>] TextADVAlias1 = "+"
+    let [<Literal>] TextADVAlias2 = "DO"
+    let [<Literal>] TextRET = "RET"
+    let [<Literal>] TextRETAlias1 = "-"
+    let [<Literal>] TextRETAlias2 = "UNDO"
+
+    let isDsCommonLib(name:string) = 
+        let name = name.ToUpper() 
+        name= TextADV
+        ||  name= TextADVAlias1
+        ||  name= TextADVAlias2
+        ||  name= TextRET
+        ||  name= TextRETAlias1
+        ||  name= TextRETAlias2
+
  ///인과의 노드 종류
     type NodeType =
         | REAL          //실제 나의 시스템 1 bit

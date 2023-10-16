@@ -10,10 +10,58 @@ open Dual.Common.Core.FS
 open Engine.Import.Office
 open Engine.Core
 open System.Runtime.CompilerServices
+open System.IO
 
 [<AutoOpen>]
 module ImportU =
+    let getParams(directoryName:string
+                    , userPath:string, loadedName:string, containerSystem:DsSystem
+                    , hostIp:string option, loadingType, sRepo) =
+            {
+                ContainerSystem = containerSystem
+                AbsoluteFilePath = Path.GetFullPath(Path.Combine(directoryName, userPath))
+                UserSpecifiedFilePath = userPath + ".ds"
+                LoadedName = loadedName
+                ShareableSystemRepository =  sRepo
 
+                HostIp = hostIp
+                LoadingType = loadingType
+            }
+
+    let private getApiItems(sys:DsSystem, refSys:string, apiName:string) =
+            let refSystem = sys.TryFindLoadedSystem(refSys).Value.ReferenceSystem
+            refSystem.TryFindExportApiItem([|refSystem.Name;apiName|]).Value
+
+    let private createDsCommonLibCall(devName:string, ifName:string)  =
+        let newSys = DsSystem(devName, "")
+        let paras = getParams(
+                              getSystemDirectoryName ""
+                            , getSystemName ""
+                            , newSys.Name
+                            , newSys
+                            , Some newSys.HostIp
+                            , DuNone
+                            , ShareableSystemRepository()  
+                            )
+        Device(newSys, paras) :> LoadedSystem 
+    //    let devs =
+    //        let api = getApiItems()
+    //        jobSet.Value
+    //            .Select(fun tgt -> getApiItems(mySys, tgt, api.Name), tgt)
+    //            .Select(fun (api, tgt)->
+    //            match node.NodeType with
+    //            | OPEN_EXSYS_LINK             -> TaskSys(api, tgt)         :> DsTask
+    //            | OPEN_EXSYS_CALL  | COPY_DEV -> TaskDev(api, "", "", tgt) :> DsTask
+    //            | _-> failwithlog "Error MakeJobs"
+    //            )
+    //    let job = Job(jobBase+"_"+api.Name, devs |> Seq.toList)
+    //    if dicJobName.ContainsKey(job.Name)
+    //    then Office.ErrorName(node.Shape, ErrID._33, node.PageNum)
+    //    else dicJobName.Add(job.Name, job)
+
+    //    mySys.Jobs.Add(job)
+    //    CallDev.Create(job, DuParentReal (parentReal.Value))
+      
     let private createCallVertex(mySys:DsSystem, node:pptNode
             , parentReal:Real Option
             , parentFlow:Flow Option
@@ -39,7 +87,15 @@ module ImportU =
                 else
                     node.Shape.ErrorName(ErrID._52, node.PageNum)
 
-            |None -> node.Shape.ErrorName(ErrID._49, node.PageNum)
+            |None ->
+                let ifName = node.Name.Split('.');
+                if  ifName.Length = 2 && isDsCommonLib(ifName[1])
+                then 
+                    //createDsCommonLibCall(ifName[0], ifName[1])
+                    node.Shape.ErrorName(ErrID._49, node.PageNum)
+                   
+                else 
+                    node.Shape.ErrorName(ErrID._49, node.PageNum)
 
         dicSeg.Add(node.Key, call)
 
@@ -72,9 +128,6 @@ module ImportU =
                 else None
 
 
-    let private getApiItems(sys:DsSystem, refSys:string, apiName:string) =
-                let refSystem = sys.TryFindLoadedSystem(refSys).Value.ReferenceSystem
-                refSystem.TryFindExportApiItem([|refSystem.Name;apiName|]).Value
 
     let private getOtherFlowReal(flows:Flow seq, nodeEx:pptNode) =
                 let flowName, nodeName = nodeEx.Name.Split('.')[0], nodeEx.Name.Split('.')[1]

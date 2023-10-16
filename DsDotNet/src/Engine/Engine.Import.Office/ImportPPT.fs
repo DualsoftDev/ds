@@ -27,19 +27,7 @@ module ImportPPTModule =
 
     type internal ImportPowerPoint() =
         let sRepo = ShareableSystemRepository()  
-        let getParams(directoryName:string
-                    , userPath:string, loadedName:string, containerSystem:DsSystem
-                    , hostIp:string option, loadingType) =
-            {
-                ContainerSystem = containerSystem
-                AbsoluteFilePath = Path.GetFullPath(Path.Combine(directoryName, userPath))
-                UserSpecifiedFilePath = userPath + ".ds"
-                LoadedName = loadedName
-                ShareableSystemRepository =  sRepo
-
-                HostIp = hostIp
-                LoadingType = loadingType
-            }
+        
         
          
         let rec loadSystem(pptReop:Dictionary<DsSystem, pptDoc>, theSys:DsSystem, paras:DeviceLoadParameters) =
@@ -65,7 +53,7 @@ module ImportPPTModule =
             |> Seq.iter(fun (userPath, loadedName, node) ->
 
                 let paras = getParams(doc.DirectoryName, userPath
-                            , loadedName, theSys, None,  node.NodeType.GetLoadingType())
+                            , loadedName, theSys, None,  node.NodeType.GetLoadingType(), sRepo)
                 let hostIp = if paras.HostIp.IsSome then paras.HostIp.Value else ""
 
                 let addNewLoadedSys(newSys:DsSystem, bExtSys:bool, bOPEN_EXSYS_LINK:bool) =
@@ -145,6 +133,7 @@ module ImportPPTModule =
                             , mySys
                             , Some mySys.HostIp
                             , DuNone
+                            , sRepo
                             )
                 dicLoaded.Clear() 
                 loadedParentStack.Clear()

@@ -17,7 +17,9 @@ module HwTagEventModule =
                 if dicTag.ContainsKey(key) 
                 then 
                     let hwTags = dicTag[key]
-                    hwTags |>Seq.iter (fun t->
+                    hwTags
+                        |>Seq.where (fun t-> t.IOType = Input)
+                        |>Seq.iter (fun t->
                         t.Value <- args.Value
                        (* hwTagValueChanged.Trigger t*))
                 else 

@@ -53,7 +53,7 @@ module RunTimeUtil =
 
 
     ///시뮬레이션 이전에 사용자 HMI 대신 눌러주기
-    let preAction(sys:DsSystem, mode:RuntimePackage ) =
+    let preAction(sys:DsSystem, mode:RuntimePackage, on:bool) =
         let simTags =
             sys.TagManager.Storages
                 .Where(fun w->
@@ -62,21 +62,12 @@ module RunTimeUtil =
                             ||   w.Value.TagKind = (int)SystemTag.ready
                             || ( w.Value.TagKind = (int)SystemTag.sim && mode = RuntimePackage.Simulation)
                     )
-        simTags.Iter(fun t -> t.Value.BoxedValue <-  true)
+        simTags.Iter(fun t -> t.Value.BoxedValue <-  on)
 
 
 
-    let singleScan (statements:Statement seq, systems:DsSystem seq) =
-        for s in statements do s.Do()
-        let total = getTotalTags  statements
-        let chTags = total.ChangedTags()
-
-        chTags.Iter(notifyPreExcute) 
-        chTags.ChangedTagsClear(systems)
-        chTags.Iter(notifyPostExcute) 
-        
     ///HMI Reset
-    let syncReset(statements:Statement seq, systems:DsSystem seq, activeSys:bool) =
+    let syncReset((*statements:Statement seq,*) systems:DsSystem seq, activeSys:bool) =
         let stgs = systems.First().TagManager.Storages
         let systemOn =  stgs.First(fun w-> w.Value.TagKind = (int)SystemTag.on).Value
         let stgs =  stgs.Where(fun w-> w.Value <> systemOn)
@@ -91,5 +82,3 @@ module RunTimeUtil =
                 | _ ->
                     stg.BoxedValue <- textToDataType(stg.DataType.Name).DefaultValue()
 
-        //조건 1번 평가 (for : Ready State 이벤트)
-        singleScan (statements, systems)

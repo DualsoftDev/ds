@@ -9,8 +9,8 @@ type VertexManager with
 
     member v.S1_RGFH(): CommentedStatement list =
                                                                                       //  Status   ST  RT  CR
-        //                                                                           //----------------------
-        let r = v.R  <== (( (!!) v.ST.Expr                       <&&> (!!) v.ET.Expr) //    R      x   -   x
+                                                                                      //----------------------
+        let r = v.R <==  (( (!!) v.ST.Expr                       <&&> (!!) v.ET.Expr) //    R      x   -   x
                           <||> ( v.ST.Expr <&&>       v.RT.Expr  <&&> (!!) v.ET.Expr))//           o   o   x
         let g = v.G <==        ( v.ST.Expr <&&>  (!!) v.RT.Expr  <&&> (!!) v.ET.Expr) //    G      o   x   x
         let f = v.F <==        (                 (!!) v.RT.Expr  <&&>      v.ET.Expr) //    F      -   x   o

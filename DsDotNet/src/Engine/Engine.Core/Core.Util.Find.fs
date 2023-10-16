@@ -139,42 +139,6 @@ module internal ModelFindModule =
 
         sharedAlias
 
-      ///CallDev 자신이거나 Alias Target CallDev
-    let getPureCall(v:Vertex) : CallDev option=
-        match v with
-        | :? CallDev  as c  ->  Some (c)
-        | :? Alias as a  ->
-            match a.TargetWrapper.GetTarget() with
-            | :? CallDev as call -> Some call
-            | _ -> None
-        |_ -> None
-
-        ///Real 자신이거나 RealEx Target Real
-    let getPureReal(v:Vertex)  : Real =
-        match v with
-        | :? Real   as r  -> r
-        | :? RealExF as rf -> rf.Real
-        | :? CallSys as _  -> failwithlog $"Error"
-        | :? Alias  as a  ->
-            match a.TargetWrapper.GetTarget() with
-            | :? Real as real -> real
-            | :? RealExF as rf -> rf.Real
-            | _ -> failwithlog $"Error"
-        |_ -> failwithlog $"Error"
-
-    let getPure(v:Vertex) : Vertex =
-        match v with
-        | :? Real   as r  -> r:> Vertex 
-        | :? RealExF as rf -> rf.Real:> Vertex 
-        | :? CallDev  as c  -> c :> Vertex 
-        | :? CallSys as _  -> failwithlog $"Error"
-        | :? Alias  as a  ->
-            match a.TargetWrapper.GetTarget() with
-            | :? Real as real -> real:> Vertex 
-            | :? RealExF as rf -> rf.Real:> Vertex 
-            | :? CallDev as call -> call :> Vertex 
-            | _ -> failwithlog $"Error"
-        |_ -> failwithlog $"Error"
 
     type DsSystem with
         member x.TryFindGraphVertex(Fqdn(fqdn)) = tryFindGraphVertex x fqdn

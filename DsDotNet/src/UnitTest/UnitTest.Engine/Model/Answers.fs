@@ -364,63 +364,62 @@ module ModelComponentAnswers =
     let linkAndLinkAliases = """
 [sys] Control = {
     [flow] F = {
-        Main <||> Reset;		// Main(Real)<||> Reset(Real);
-        FWD <| Main |> BWD;		// FWD(CallSys)<| Main(Real) |> BWD(CallSys);
-        FWD > BWD > Main |> FWD2 |> BWD2;		// FWD(CallSys)> BWD(CallSys) > Main(Real) |> FWD2(Alias) |> BWD2(Alias);
-        Main = {
-            mv1up, mv2dn > mv1dn, mv2up;		// mv1up(CallDev), mv2dn(CallDev)> mv1dn(CallDev), mv2up(CallDev);
-        }
-        [aliases] = {
-            FWD = { FWD2; }
-            BWD = { BWD2; }
-        }
-    }
-    [jobs] = {
-        mv1up = { M1.Up(%I300, %Q300); }
-        mv1dn = { M1.Dn(%I301, %Q301); }
-        mv2up = { M2.Up(%I302, %Q302); }
-        mv2dn = { M2.Dn(%I303, %Q303); }
-        FWD = Mt.fwd;
-        BWD = Mt.bwd;
+		Main = { mv1up, mv2dn > mv1dn, mv2up; }
+		FWD > BWD > Main;
+		Main <||> Reset;
+		
+		[aliases] = {
+			FWD = { FWD2; }
+			BWD = { BWD2; }
+		}
     }
     [interfaces] = {
         G = { F.Main ~ F.Main }
         R = { F.Reset ~ F.Reset }
         G <||> R;
     }
-    [external file="HmiCodeGenExample/test_sample/device/MovingLifter1.ds" ip="localhost"] M1;
-    [external file="HmiCodeGenExample/test_sample/device/MovingLifter2.ds" ip="localhost"] M2;
-    [external file="HmiCodeGenExample/test_sample/device/motor.ds" ip="localhost"] Mt;
+	[jobs] = {
+		mv1up = { M1.Up(%I300, %Q300); }
+		mv1dn = { M1.Dn(%I301, %Q301); }
+		mv2up = { M2.Up(%I302, %Q302); }
+		mv2dn = { M2.Dn(%I303, %Q303); }
+		FWD = Mt.fwd;
+		BWD = Mt.bwd;
+	}
+    [external file=""HmiCodeGenExample/test_sample/device/MovingLifter1.ds"" ip=""localhost""] M1;
+    [external file=""HmiCodeGenExample/test_sample/device/MovingLifter2.ds"" ip=""localhost""] M2;
+	[external file=""HmiCodeGenExample/test_sample/device/motor.ds"" ip=""localhost""] Mt;
 }
 """
 
     let answerT6Aliases = """
 [sys ip = localhost] T6_Alias = {
     [flow] Page1 = {
-        C1 > C2;
-        AndFlow.R2 > OrFlow.R1;
+        C1 > C2;		// C1(CallDev)> C2(CallDev);
+        AndFlow.R2 > OrFlow.R1;		// AndFlow.R2(RealOtherFlow)> OrFlow.R1(RealOtherFlow);
     }
     [flow] AndFlow = {
-        R1 > R3;
-        R2 > R3;
+        R1 > R3;		// R1(Real)> R3(Real);
+        R2 > R3;		// R2(Real)> R3(Real);
     }
     [flow] OrFlow = {
-        R1 > R3;
-        R2 > Copy1_R3;
+        R1 > R3;		// R1(Real)> R3(Real);
+        R2 > Copy1_R3;		// R2(Real)> Copy1_R3(Alias);
         [aliases] = {
             R3 = { Copy1_R3; AliasToR3; }
             AndFlow.R3 = { AndFlowR3; OtherFlowR3; }
         }
     }
     [jobs] = {
-        C1 = { B."+"(%I1, %Q1); A."+"(%I1, %Q1); }
-        C1.func = {
-            $t 2000;
-            $c 5;
-        }
-        C2 = { A."-"(_, %Q3); B."-"(_, %Q3); }
+        C1 = { B."+"(%I1, %Q1); A."+"(_, %Q999.2343); }
+            C1.func = {
+                $t 2000;
+                $c 5;
+            }
+        C2 = { A."-"(_, %Q3); B."-"(%I1, _); }
     }
-    [device file="cylinder.ds"] B;
-    [external file="cylinder.ds" ip="192.168.0.1"] A;
+    [device file="cylinder.ds"] B; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+    [external file="cylinder.ds" ip="192.168.0.1"] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
 }
+
 """

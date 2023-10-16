@@ -127,10 +127,81 @@ module EdgeModule =
         for f in system.Flows do
             createMRIEdgesTransitiveClosure f
 
+      ///CallDev 자신이거나 Alias Target CallDev
+    let getPureCall(v:Vertex) : CallDev option=
+        match v with
+        | :? CallDev  as c  ->  Some (c)
+        | :? Alias as a  ->
+            match a.TargetWrapper.GetTarget() with
+            | :? CallDev as call -> Some call
+            | _ -> None
+        |_ -> None
+
+        ///Real 자신이거나 RealEx Target Real
+    let getPureReal(v:Vertex)  : Real =
+        match v with
+        | :? Real   as r  -> r
+        | :? RealExF as rf -> rf.Real
+        | :? CallSys as _  -> failwithlog $"Error"
+        | :? Alias  as a  ->
+            match a.TargetWrapper.GetTarget() with
+            | :? Real as real -> real
+            | :? RealExF as rf -> rf.Real
+            | _ -> failwithlog $"Error"
+        |_ -> failwithlog $"Error"
+
+    let getPure(v:Vertex) : Vertex =
+        match v with
+        | :? Real   as r  -> r:> Vertex 
+        | :? RealExF as rf -> rf.Real:> Vertex 
+        | :? CallDev  as c  -> c :> Vertex 
+        | :? CallSys as s  ->  s :> Vertex 
+        | :? Alias  as a  ->
+            match a.TargetWrapper.GetTarget() with
+            | :? Real as real -> real:> Vertex 
+            | :? RealExF as rf -> rf.Real:> Vertex 
+            | :? CallDev as call -> call :> Vertex 
+            | _ -> failwithlog $"Error"
+        |_ -> failwithlog $"Error"
+            
+    let private validateEdge(graph:Graph<Vertex, Edge>, bRoot:bool) =
+        graph.Edges
+            .Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset))
+            .Iter(fun edge ->
+                [edge.Source ;edge.Target].Iter(fun v->
+                    match getPure v with 
+                    | :? Real    -> ()
+                    | :? RealExF -> ()
+                    | _ -> failwithlog $"Error Reset {edge.Source.Name} |> {edge.Target.Name} [reset edge using Real or RealEx]"
+            ))
+
+        //if bRoot  //test ahn
+        //then
+        //    graph.Edges
+        //        .Where(fun e -> e.EdgeType.HasFlag(EdgeType.Start))
+        //        .Iter(fun edge ->
+        //            match getPure edge.Target with 
+        //            | :? Real    -> ()
+        //            | :? RealExF -> ()
+        //            | :? CallSys -> ()
+        //            | _ -> failwithlog $"Error Start {edge.Source.Name} |> {edge.Target.Name} [start target can't not use Call]"
+        //        )
+
+    let validateSystemEdge(system:DsSystem) =
+         for f in system.Flows do
+            validateEdge (f.Graph ,true)
+            f.Graph.Vertices.OfType<Real>().Iter(fun r -> 
+                    validateEdge (r.Graph, false)
+                )
+
     let validateGraphOfSystem(system:DsSystem) =
+        validateSystemEdge system
         for f in system.Flows do
-            f.Graph.Validate(true) |> ignore    //flow는 사이클 허용
-            f.Graph.Vertices.OfType<Real>().Iter(fun r -> r.Graph.Validate(false) |> ignore) //real는 사이클 허용 X
+            f.Graph.ValidateCylce(true) |> ignore    //flow는 사이클 허용
+            f.Graph.Vertices.OfType<Real>().Iter(fun r -> 
+                r.Graph.ValidateCylce(false) |> ignore //real는 사이클 허용 X
+                )
+
 
     let guardedValidateSystem(system:DsSystem) =
             try validateGraphOfSystem system
@@ -156,6 +227,7 @@ module EdgeModule =
     type DsSystem with
         member x.CreateMRIEdgesTransitiveClosure() = createMRIEdgesTransitiveClosure4System x
         member x.ValidateGraph() = validateGraphOfSystem x
+                                   
 
     type Flow with
         member x.CreateEdge(modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =

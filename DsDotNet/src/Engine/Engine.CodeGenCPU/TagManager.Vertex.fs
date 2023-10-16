@@ -107,6 +107,7 @@ module TagManagerModule =
         let mutable originInfo:OriginInfo = defaultOriginInfo (v:?> Real)
         let createTag name = this.CreateTag name
 
+        let relayGoingBit     = createTag "GR" VertexTag.goingRealy
         let relayRealBit      = createTag "RR" VertexTag.relayReal
         let realOriginAction  = createTag "RO" VertexTag.realOriginAction
 
@@ -118,6 +119,8 @@ module TagManagerModule =
         member _.RO         = realOriginAction
         ///Real Init Relay
         member _.RR         = relayRealBit
+        ///Real Going Relay
+        member _.GR         = relayGoingBit
      
 
 

@@ -33,10 +33,17 @@ module ConvertCoreExt =
         member a.PS     = getAM(a).PS
         member a.PR     = getAM(a).PR
         member a.PE     = getAM(a).PE
-        member a.TOUT     = getAM(a).TOUT   
-        member a.TXErrOverTime     = getAM(a).TXErrOverTime
-        member a.RXErrOpen     = getAM(a).RXErrOpen
-        member a.RXErrShort     = getAM(a).RXErrShort
+        member a.TOUT   = getAM(a).TOUT   
+        member a.TXErrOverTime   = getAM(a).TXErrOverTime
+        member a.RXErrOpen       = getAM(a).RXErrOpen
+        member a.RXErrOpenOff  = getAM(a).RXErrOpenOff
+        member a.RXErrOpenTemp  = getAM(a).RXErrOpenTemp
+        member a.RXErrOpenRising  = getAM(a).RXErrOpenRising
+
+        member a.RXErrShort      = getAM(a).RXErrShort
+        member a.RXErrShortOn = getAM(a).RXErrShortOn
+        member a.RXErrShortRising = getAM(a).RXErrShortRising
+        member a.RXErrShortTemp = getAM(a).RXErrShortTemp
 
     type DsSystem with
         member private s.GetPv<'T when 'T:equality >(st:SystemTag) =
@@ -221,12 +228,12 @@ module ConvertCoreExt =
         member f.BtnHomeExpr  = getButtonExprWrtRuntimePackage(f, f.System.HomeButtons     )
 
         member f.ModeAutoHwExpr =
-            let auto = if f.SelectAutoExpr.any()   then f.SelectAutoExpr.ToAnd()    else f._on.Expr
+            let auto = if f.SelectAutoExpr.any()   then f.SelectAutoExpr.ToAnd()    else f.System._auto.Expr
           //  let ableAuto = if f.SelectManualExpr.any() then !!f.SelectManualExpr.ToOr() else f._on.Expr
             auto// <&&> ableAuto  반대조건 봐야하나 ?
 
         member f.ModeManualHwExpr =
-            let manual = if f.SelectManualExpr.any() then f.SelectManualExpr.ToAnd() else f._off.Expr
+            let manual = if f.SelectManualExpr.any() then f.SelectManualExpr.ToAnd() else f.System._manual.Expr
           //  let ableManual = if f.SelectAutoExpr.any()   then !!f.SelectAutoExpr.ToOr()  else f._on.Expr
             manual// <&&> ableManual 반대조건 봐야하나 ?
 

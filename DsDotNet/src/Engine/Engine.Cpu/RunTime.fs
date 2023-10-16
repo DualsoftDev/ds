@@ -7,6 +7,8 @@ open System.Linq
 open System.Collections.Generic
 open System.Threading.Tasks
 open System.Threading
+open Engine.Core.TagKindModule
+
 [<AutoOpen>]
 module RunTime =
 
@@ -20,7 +22,7 @@ module RunTime =
         let mutable run:bool = false
 
         let scanOnce() = 
-                    //나머지 수식은 Changed Event가 있는것만 수행해줌
+            //나머지 수식은 Changed Event가 있는것만 수행해줌
             let chTags = cpuStorages.ChangedTags()
             let exeStates = chTags.ExecutableStatements(mapRungs) 
             chTags.ChangedTagsClear(systems)
@@ -30,46 +32,54 @@ module RunTime =
             if exeStates.any() then exeStates.Iter(fun s->s.Do())
 
             chTags.Iter(notifyPostExcute)  // HMI Forceoff 처리
-
+            chTags
 
         let asyncStart = 
             async { 
                 //시스템 ON 및 값변경이 없는 조건 수식은  관련 수식은 Changed Event가 없어서한번 수행해줌
                 for s in statements do s.Do() 
                 while run do   
-                    scanOnce()
+                    scanOnce() |> ignore
             }
+
+        let doRun() = 
+            if not <| run 
+            then 
+                run <- true
+                Async.StartImmediate(asyncStart, cts.Token) |> ignore
+
+        let doStop() = 
+            cts.Cancel()
+            cts <- new CancellationTokenSource() 
+            run <- false;
+
+        let doStepByStatus(activeSys) = 
+            let mutable endStepByStatus = false
+            while not(endStepByStatus) do
+                let chTags = scanOnce()
+                endStepByStatus <- chTags.isEmpty() 
+                                || chTags.Where(fun f->f.DsSystem = activeSys)
+                                         .Where(fun f->f.IsStatusTag()).any()
+
         do 
             ()
-
 
         member x.Systems = systems
         member x.IsRunning = run
         member x.CommentedStatements = css
         
-        member x.Run() =
-            if not <| run then 
-                systems.Iter(fun sys-> preAction(sys, cpuMode))
-                run <- true
-                Async.StartImmediate(asyncStart, cts.Token) |> ignore
-
-        member x.Stop() =
-            cts.Cancel()
-            cts <- new CancellationTokenSource() 
-            run <- false;
-
-        member x.Step() =
-            x.Stop()
-            scanOnce()
-            //systems.Iter(fun sys-> preAction(sys, cpuMode))
-            //singleScan(statements, systems)
+        member x.Dispose() = doStop()
+        member x.Run()  = doRun()
+        member x.AutoDriveSetting()  =          
+            systems.Iter(fun sys-> preAction(sys, cpuMode, true))
+        member x.Stop() = doStop()
+        member x.Step() = doStop();scanOnce()
+        member x.StepByStatus(activeSys:DsSystem) = 
+            doStop()
+            doStepByStatus(activeSys)
 
         member x.Reset() =
-            x.Stop()
-            syncReset(statements, systems, false);
-        member x.ResetActive() =
-            x.Stop()
-            syncReset(statements, systems, true);
+            doStop()
+            syncReset(systems, false);
+            scanOnce()
 
-        member x.Dispose() =  
-            cts.Cancel()

@@ -25,12 +25,13 @@ module ExpressionExtension =
     let (--|) (sets_rsts, coil_comment) = coilOp (fun sets rsts coil -> coil <== (sets <&&> (!! rsts))) sets_rsts coil_comment
     let (==|) (sets_rsts, coil_comment) = coilOp (fun sets rsts coil -> coil <== ((sets <||> var2expr coil) <&&> (!! rsts))) sets_rsts coil_comment
 
-    ///// Create One Scan Relay Coils Statement
-    //let (--^) (sets: Expression<bool>) (coil: TypedValueStorage<bool>, relay: TypedValueStorage<bool>, comment:string) =
-    //    [
-    //        relay <== ((sets           <||> var2expr relay) <&&> (!! (var2expr coil))) |> withExpressionComment comment
-    //        coil  <== ((var2expr relay <||> var2expr coil ) <&&> (sets))    |> withExpressionComment comment
-    //    ]
+    /// Create One Scan Relay Coils Statement
+    let (--^) (sets: Expression<bool>, rsts: Expression<bool>) (rising: TypedValueStorage<bool>, risingRelay: TypedValueStorage<bool>, risingTemp : TypedValueStorage<bool>, comment:string) =
+        [
+            rising      <== (sets <&&> !!rsts <&&> !!(var2expr risingRelay)) |> withExpressionComment comment
+            risingTemp  <== (sets) |> withExpressionComment comment
+            risingRelay <== (var2expr rising <||> var2expr risingRelay <&&> var2expr risingTemp <&&> !!rsts) |> withExpressionComment comment
+        ]
 
     /// Create Timer Coil Statement
     let (--@) (rungInCondition: IExpression<bool>) (timerCoil: TimerStruct, preset:CountUnitType, comment:string) =

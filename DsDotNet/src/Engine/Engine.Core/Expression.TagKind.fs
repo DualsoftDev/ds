@@ -124,13 +124,14 @@ module TagKindModule =
     |ActionOut                = 14001
     |ActionMemory             = 14002
 
-
+    [<Serializable>]
     type TagDS =
-    |EventSystem   of  Tag:IStorage * Target:DsSystem * TagKind:SystemTag
-    |EventFlow     of  Tag:IStorage * Target:Flow     * TagKind:FlowTag
-    |EventVertex   of  Tag:IStorage * Target:Vertex   * TagKind:VertexTag
-    |EventApiItem  of  Tag:IStorage * Target:ApiItem  * TagKind:ApiItemTag
-    |EventAction   of  Tag:IStorage * Target:DsTask   * TagKind:ActionTag
+        | EventSystem of Tag: IStorage * Target: DsSystem * TagKind: SystemTag
+        | EventFlow of Tag: IStorage * Target: Flow * TagKind: FlowTag
+        | EventVertex of Tag: IStorage * Target: Vertex * TagKind: VertexTag
+        | EventApiItem of Tag: IStorage * Target: ApiItem * TagKind: ApiItemTag
+        | EventAction of Tag: IStorage * Target: DsTask * TagKind: ActionTag
+
 
     let TagDSSubject = new Subject<TagDS>()
 
@@ -162,7 +163,16 @@ module TagKindModule =
                 | :? DsTask  as d  ->Some( EventAction  (x, d, x.GetActionTagKind().Value))
                 |_ -> None
             |None -> None
-
+   
+        [<Extension>]
+        static member GetStorage(x:TagDS) =
+            match x with
+            |EventSystem (i, _, _) -> i
+            |EventFlow   (i, _, _) -> i
+            |EventVertex (i, _, _) -> i       
+            |EventApiItem(i, _, _) -> i
+            |EventAction (i, _, _) -> i
+        
       
         [<Extension>]
         static member GetTagToText(x:TagDS) =
@@ -172,7 +182,7 @@ module TagKindModule =
             |EventVertex (tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
             |EventApiItem(tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
             |EventAction (tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
-        
+     
 
         [<Extension>]
         static member GetSystem(x:TagDS) =
@@ -197,7 +207,7 @@ module TagKindModule =
         [<Extension>]
         static member IsVertexErrTag(x:TagDS) =
             match x with
-            |EventVertex (_, _, kind) -> kind = VertexTag.errorTx
+            |EventVertex (_, _, kind) ->     kind = VertexTag.errorTx
                                           || kind = VertexTag.errorRx
             |_->false
 

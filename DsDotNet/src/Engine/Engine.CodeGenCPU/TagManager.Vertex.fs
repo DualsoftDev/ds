@@ -44,9 +44,9 @@ module TagManagerModule =
         let goingBit      = createTag "G"    VertexTag.going
         let finishBit     = createTag "F"    VertexTag.finish
         let homingBit     = createTag "H"    VertexTag.homing
-        let startForceBit = createTag "SF"   VertexTag.startForce
-        let resetForceBit = createTag "RF"   VertexTag.resetForce
-        let endForceBit   = createTag "EF"   VertexTag.endForce
+        let forceOnBit    = createTag "SF"   VertexTag.forceOn
+        let forceOffBit   = createTag "RF"   VertexTag.forceOff
+        //let endForceBit   = createTag "EF"   VertexTag.endForce
 
 
         interface ITagManager with
@@ -73,11 +73,9 @@ module TagManagerModule =
 
         //Force
         ///StartForce HMI
-        member _.SF         = startForceBit
+        member _.SF         = forceOnBit
         ///ResetForce HMI
-        member _.RF         = resetForceBit
-        ///EndForce HMI
-        member _.EF         = endForceBit
+        member _.RF         = forceOffBit
 
         //Status
         ///Ready Status

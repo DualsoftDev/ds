@@ -70,9 +70,11 @@ module TagKindModule =
     |startTag                  = 11000
     |resetTag                  = 11001
     |endTag                    = 11002
-    |startForce                = 11003
-    |resetForce                = 11004
-    |endForce                  = 11005
+
+    |forceOn                   = 11003
+    |forceOff                  = 11004
+    //|spare                  = 11005
+
     |ready                     = 11006
     |going                     = 11007
     |finish                    = 11008
@@ -83,9 +85,14 @@ module TagKindModule =
     |errorRx                   = 11013
     |realOriginAction          = 11016
     |relayReal                 = 11017
-    |startPort                 = 11018
-    |resetPort                 = 11019
-    |endPort                   = 11020
+
+
+    //삭제대기
+    //|startPort                 = 11018
+    //|resetPort                 = 11019
+    //|endPort                   = 11020
+    //삭제대기
+
     |relayCall                 = 11021
     |counter                   = 11022
     |timerOnDelay              = 11023
@@ -124,7 +131,6 @@ module TagKindModule =
     |ActionOut                = 14001
     |ActionMemory             = 14002
 
-    [<Serializable>]
     type TagDS =
         | EventSystem of Tag: IStorage * Target: DsSystem * TagKind: SystemTag
         | EventFlow of Tag: IStorage * Target: Flow * TagKind: FlowTag
@@ -134,6 +140,12 @@ module TagKindModule =
 
 
     let TagDSSubject = new Subject<TagDS>()
+
+    type TagWeb = {
+        Name  : string //FQDN 고유이름
+        Value : obj    //Tag 값
+        Kind  : int    //Tag 종류 ex) going = 11007
+    }
 
     [<AutoOpen>]
     [<Extension>]
@@ -182,6 +194,15 @@ module TagKindModule =
             |EventVertex (tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
             |EventApiItem(tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
             |EventAction (tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
+        
+        [<Extension>]
+        static member GetWebDS(x:TagDS) =
+            match x with
+            |EventSystem (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.BoxedValue;  Kind = tag.TagKind}
+            |EventFlow   (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.BoxedValue;  Kind = tag.TagKind}
+            |EventVertex (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.BoxedValue;  Kind = tag.TagKind}
+            |EventApiItem(tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.BoxedValue;  Kind = tag.TagKind}
+            |EventAction (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.BoxedValue;  Kind = tag.TagKind}
      
 
         [<Extension>]

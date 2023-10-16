@@ -23,8 +23,8 @@ module RunTimeUtil =
                 match t with
                 |EventVertex (tag,_,kind) ->
                         match kind with
-                        | VertexTag.startForce 
-                        | VertexTag.resetForce -> tag.BoxedValue <- false 
+                        | VertexTag.forceOn 
+                        | VertexTag.forceOff -> tag.BoxedValue <- false 
                         | _-> ()
                 |_ -> ()
             |None -> ()

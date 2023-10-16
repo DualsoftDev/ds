@@ -72,29 +72,3 @@ module CoreExtensionsModule =
                         xs |> Seq.collect(fun stg -> mRung[stg]) 
 
       
-                        
-
-        [<Extension>]
-        static member IsEndThread (x:IStorage) =
-            match x.GetApiTagKind() with  //외부 시스템 관련 신호
-            | Some _ -> true
-            | _ ->
-                match x.GetVertexTagKind() with
-                //EndPortTag  일 경우 새로운 thread 생성
-                | Some VertexTag.endPort -> true
-                | Some VertexTag.relayCall -> true  /// relayCall 인과 H/S 필요??
-                | _ -> false
-                
-        [<Extension>]
-        static member IsStartThread (x:IStorage) =
-            match x.GetApiTagKind() with  //외부 시스템 관련 신호
-            | Some _ -> true
-            | _ ->
-                if Convert.ToBoolean(x.BoxedValue) //ON 신호만 StartThread 생성
-                then
-                    match x.GetVertexTagKind() with
-                    | Some VertexTag.startPort -> true
-                    | Some VertexTag.going -> false
-                    | _ -> false
-                else           
-                    false

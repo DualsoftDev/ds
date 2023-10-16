@@ -7,17 +7,18 @@ open NetMQ.Sockets
 open Dual.Common.Core.FS
 
 module ZmqClientModule =
+    type ErrorMessage = string
     /// serverAddress: "tcp://localhost:5555" or "tcp://*:5555"
     type Client(serverAddress:string) =
         let reqSocket = new RequestSocket()
         do
             reqSocket.Connect(serverAddress)
                 
-        let verifyReceiveOK(reqSocket:RequestSocket) =
+        let verifyReceiveOK(reqSocket:RequestSocket) : ErrorMessage =
             let result = reqSocket.ReceiveFrameString()
             match result with
-            | "OK" -> ()
-            | _ -> failwithf($"Error: {result}")
+            | "OK" -> null
+            | _ -> $"Error: {result}"
 
         let buildCommandAndName(reqSocket:RequestSocket, command:string, name:string) : IOutgoingSocket =
             reqSocket
@@ -42,19 +43,20 @@ module ZmqClientModule =
             reqSocket.SendFrame(request)
             reqSocket.ReceiveFrameString()
 
-        member x.ReadBytes(name:string, offsets:int[]) : byte[] =
+        member x.ReadBytes(name:string, offsets:int[]) : byte[] * ErrorMessage =
             sendReadRequest(reqSocket, "rb", name, offsets)
             let result = reqSocket.ReceiveFrameString()
             match result with
             | "OK" ->
                 let buffer = reqSocket.ReceiveFrameBytes()
-                buffer
+                buffer, null
             | _ ->
-                failwithf($"Error: {result}")
+                logError($"Error: {result}")
+                null, result
 
 
         // command: "rw", "rd", "rl"
-        member private x.ReadTypes<'T>(command:string, name:string, offsets:int[]) : 'T[] =
+        member private x.ReadTypes<'T>(command:string, name:string, offsets:int[]) : 'T[] * ErrorMessage =
             sendReadRequest(reqSocket, command, name, offsets)
 
             // 서버로부터 응답 수신
@@ -62,15 +64,17 @@ module ZmqClientModule =
             match result with
             | "OK" ->
                 let buffer = reqSocket.ReceiveFrameBytes()
-                ByteConverter.BytesToTypeArray<'T>(buffer) // 바이트 배열을 uint16 배열로 변환
+                let arr = ByteConverter.BytesToTypeArray<'T>(buffer) // 바이트 배열을 uint16 배열로 변환
+                arr, null
             | _ ->
-                failwithf($"Error: {result}")
+                logError($"Error: {result}")
+                null, result
 
-        member x.ReadUInt16s(name:string, offsets:int[]) : uint16[] =
+        member x.ReadUInt16s(name:string, offsets:int[]) : uint16[] * ErrorMessage =
             x.ReadTypes<uint16>("rw", name, offsets)
-        member x.ReadUInt32s(name:string, offsets:int[]) : uint32[] =
+        member x.ReadUInt32s(name:string, offsets:int[]) : uint32[] * ErrorMessage=
             x.ReadTypes<uint32>("rd", name, offsets)
-        member x.ReadUInt64s(name:string, offsets:int[]) : uint64[] =
+        member x.ReadUInt64s(name:string, offsets:int[]) : uint64[] * ErrorMessage=
             x.ReadTypes<uint64>("rl", name, offsets)
 
         //member x.ReadUInt16s(name:string, offsets:int[]) : uint16[] =

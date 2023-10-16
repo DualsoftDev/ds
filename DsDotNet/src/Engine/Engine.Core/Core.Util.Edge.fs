@@ -175,17 +175,17 @@ module EdgeModule =
                     | _ -> failwithlog $"Error Reset {edge.Source.Name} |> {edge.Target.Name} [reset edge using Real or RealEx]"
             ))
 
-        //if bRoot  //test ahn
-        //then
-        //    graph.Edges
-        //        .Where(fun e -> e.EdgeType.HasFlag(EdgeType.Start))
-        //        .Iter(fun edge ->
-        //            match getPure edge.Target with 
-        //            | :? Real    -> ()
-        //            | :? RealExF -> ()
-        //            | :? CallSys -> ()
-        //            | _ -> failwithlog $"Error Start {edge.Source.Name} |> {edge.Target.Name} [start target can't not use Call]"
-        //        )
+        if bRoot  
+        then
+            graph.Edges
+                .Where(fun e -> e.EdgeType.HasFlag(EdgeType.Start))
+                .Iter(fun edge ->
+                    match getPure edge.Target with 
+                    | :? Real    -> ()
+                    | :? RealExF -> ()
+                    | :? CallSys -> ()
+                    | _ -> failwithlog $"Error Start {edge.Source.Name} |> {edge.Target.Name} [start target can't not use Call]"
+                )
 
     let validateSystemEdge(system:DsSystem) =
          for f in system.Flows do

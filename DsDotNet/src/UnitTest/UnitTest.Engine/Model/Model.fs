@@ -67,7 +67,7 @@ module ModelTests1 =
         [<Test>]
         member __.``CausalsText test`` () =
             logInfo "=== CausalsText"
-            compare Program.CausalsText answerCausalsText
+            compareExact Program.CausalsText 
 
         [<Test>]
         member __.``AdoptoedValidText test`` () =
@@ -82,7 +82,7 @@ module ModelTests1 =
         [<Test>]
         member __.``DuplicatedCallsText test`` () =
             logInfo "=== DuplicatedCallsText"
-            compare Program.DuplicatedCallsText answerDuplicatedCallsText
+            compareExact Program.DuplicatedCallsText 
 
         [<Test>]
         member __.``SplittedMRIEdgesText test`` () =
@@ -96,7 +96,7 @@ module ModelTests1 =
 
         [<Test>]
         member __.``Model component [SafetyValid] test`` () =
-            compareExact ParserTest.SafetyValid
+            compare ParserTest.SafetyValid answerSafetyValid
 
         [<Test>]
         member __.``Model component [StrongCausal] test`` () =
@@ -132,7 +132,7 @@ module ModelTests1 =
 
         [<Test>]
         member __.``Model component [T6 alias] test`` () =
-            compare ParserTest.T6Alias answerT6Aliases
+            compare ParserTest.T6Alias  answerT6Alias
 
         [<Test>]
         member __.``Model component [external circular dependency] test`` () =

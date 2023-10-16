@@ -8,32 +8,27 @@ namespace Engine
         public static string SafetyValid = @"
 [sys] L = {
     [flow] F = {
-        Ap > Am;
+        Am > Main2;	     
+        Ap > Main;		
+	                    
         Main = {
-            Ap1 > Am1;
+            Ap > Am;		// Ap(CallDev)> Am(CallDev);
         }
-        [aliases] = {
-            Ap = { Ap1; Ap2; Ap3; }
-            Am = { Am1; Am2; Am3; }
+        Main2 = {
+            Ap > Am;		// Ap(CallDev)> Am(CallDev);
         }
-        // ---- flow 내의 safety block 없애는 걸로...
-        //[safety] = {
-        //    Main = {C.F.Sp; C.F.Sm}
-        //}
     }
     [jobs] = {
-        Ap = { A.""+""(%I1, %Q1); }
         Am = { A.""-""(%I2, %Q2); }
+        Ap = { A.""+""(%I1, %Q1); }
     }
-
     [prop] = {
         [safety] = {
-            F.Main = { F.Ap; F.Am; }
-            F.Ap = { F.Main; }
+        F.Main = { F.Ap; F.Am; }
+        F.Ap = { F.Main; }
         }
     }
-
-    [device file=""cylinder.ds""] A;
+    [device file=""cylinder.ds""] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
 }
 
 ";
@@ -427,11 +422,10 @@ namespace Engine
 }
 ";
 
-        public static string T6Alias = @"
+        public static string T6Alias =@"
 [sys ip = localhost] T6_Alias = {
     [flow] Page1 = {
         AndFlow.R2 > OrFlow.R1;
-        C1 > C2;
     }
     [flow] AndFlow = {
         R2 > R3;
@@ -441,8 +435,7 @@ namespace Engine
         R2 > Copy1_R3;
         R1 > R3;
         [aliases] = {
-            R3 = { Copy1_R3; AliasToR3; }
-            AndFlow.R3 = { AndFlowR3; OtherFlowR3; }
+            R3 = { Copy1_R3; }
         }
     }
     [jobs] = {

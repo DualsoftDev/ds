@@ -71,8 +71,8 @@ module TagKindModule =
     |resetTag                  = 11001
     |endTag                    = 11002
 
-    |forceOn                   = 11003
-    |forceOff                  = 11004
+    //|spare                   = 11003
+    //|spare                  = 11004
     //|spare                  = 11005
 
     |ready                     = 11006
@@ -86,17 +86,15 @@ module TagKindModule =
     |realOriginAction          = 11016
     |relayReal                 = 11017
 
+    |forceStart                = 11018
+    |forceReset                = 11019
+    |forceOn                   = 11020
+    |forceOff                  = 11021
 
-    //삭제대기
-    //|startPort                 = 11018
-    //|resetPort                 = 11019
-    //|endPort                   = 11020
-    //삭제대기
-
-    |relayCall                 = 11021
-    |counter                   = 11022
-    |timerOnDelay              = 11023
-    |goingRealy                = 11024
+    |relayCall                 = 11022
+    |counter                   = 11023
+    |timerOnDelay              = 11024
+    |goingRealy                = 11025
 
 
     [<Flags>]

@@ -19,8 +19,8 @@ type VertexMReal with
         let setCoins = real.CoinRelays.ToAndElseOn v.System
 
         [   
-            (v.G.Expr, v.ET.Expr) --| (v.GR, getFuncName())  //finish 전에 GR 한번 연결 
-            (v.GR.Expr <&&> setCoins , v.H.Expr) ==| (v.ET, getFuncName())
+            (v.G.Expr, v.ET.Expr) --| (v.GG, getFuncName())  //finish 전에 GR 한번 연결 
+            (v.GG.Expr <&&> setCoins <||> v.ON.Expr , v.H.Expr <||> v.OFF.Expr) ==| (v.ET, getFuncName())
         ]
 
     member v.R3_RealStartPoint(): CommentedStatement  =

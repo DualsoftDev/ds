@@ -44,9 +44,11 @@ module TagManagerModule =
         let goingBit      = createTag "G"    VertexTag.going
         let finishBit     = createTag "F"    VertexTag.finish
         let homingBit     = createTag "H"    VertexTag.homing
-        let forceOnBit    = createTag "SF"   VertexTag.forceOn
-        let forceOffBit   = createTag "RF"   VertexTag.forceOff
-        //let endForceBit   = createTag "EF"   VertexTag.endForce
+
+        let forceStartBit = createTag "SF"   VertexTag.forceStart
+        let forceResetBit = createTag "RF"   VertexTag.forceReset
+        let forceOnBit    = createTag "ON"   VertexTag.forceOn
+        let forceOffBit   = createTag "OFF"   VertexTag.forceOff
 
 
         interface ITagManager with
@@ -72,10 +74,14 @@ module TagManagerModule =
         member _.ET         = endTagBit
 
         //Force
-        ///StartForce HMI
-        member _.SF         = forceOnBit
-        ///ResetForce HMI
-        member _.RF         = forceOffBit
+        ///forceOnBit HMI
+        member _.ON         = forceOnBit
+        ///forceOffBit HMI
+        member _.OFF         = forceOffBit
+        ///forceStartBit HMI
+        member _.SF         = forceStartBit
+        ///forceResetBit HMI
+        member _.RF         = forceResetBit
 
         //Status
         ///Ready Status
@@ -105,7 +111,7 @@ module TagManagerModule =
         let mutable originInfo:OriginInfo = defaultOriginInfo (v:?> Real)
         let createTag name = this.CreateTag name
 
-        let relayGoingBit     = createTag "GR" VertexTag.goingRealy
+        let relayGoingBit     = createTag "GG" VertexTag.goingRealy
         let relayRealBit      = createTag "RR" VertexTag.relayReal
         let realOriginAction  = createTag "RO" VertexTag.realOriginAction
 
@@ -118,7 +124,7 @@ module TagManagerModule =
         ///Real Init Relay
         member _.RR         = relayRealBit
         ///Real Going Relay
-        member _.GR         = relayGoingBit
+        member _.GG         = relayGoingBit
      
 
 

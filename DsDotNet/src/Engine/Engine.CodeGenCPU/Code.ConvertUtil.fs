@@ -179,11 +179,11 @@ module CodeConvertUtil =
         static member GetStartCausals(xs:Vertex seq, usingRoot:bool) =
                 xs.Select(fun f->
                 match f with
-                | :? Real    as r  -> r.V.ET
-                | :? RealExF as rf -> rf.Real.V.ET
-                | :? CallSys as rs -> rs.V.ET
-                | :? CallDev as c  -> c.V.ET
-                | :? Alias   as a  -> if usingRoot then getPure(a.V.Vertex).V.ET else a.V.ET
+                | :? Real    as r  -> r.V.F
+                | :? RealExF as rf -> rf.Real.V.F
+                | :? CallSys as rs -> rs.V.F
+                | :? CallDev as c  -> c.V.F
+                | :? Alias   as a  -> if usingRoot then getPure(a.V.Vertex).V.F else a.V.F
                 | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
         //리셋 원인
@@ -191,8 +191,8 @@ module CodeConvertUtil =
         static member GetResetCausals(xs:Vertex seq) =
                 xs.Select(fun f ->
                     match getPure f with
-                    | :? Real    as r  -> r.V.GR
-                    | :? RealExF as rf -> rf.Real.V.GR
+                    | :? Real    as r  -> r.V.GG
+                    | :? RealExF as rf -> rf.Real.V.GG
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
    

@@ -73,13 +73,17 @@ module RunTime =
         member x.AutoDriveSetting()  =          
             systems.Iter(fun sys-> preAction(sys, cpuMode, true))
         member x.Stop() = doStop()
-        member x.Step() = doStop();scanOnce()
+
+        member x.Step() =
+            doStop()
+            scanOnce()
+
         member x.StepByStatus(activeSys:DsSystem) = 
             doStop()
             doStepByStatus(activeSys)
 
         member x.Reset() =
             doStop()
-            syncReset(systems, false);
+            syncReset(systems, false)
             scanOnce()
 

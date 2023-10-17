@@ -16,6 +16,7 @@
 		<Compile Include="Interface.fs" />
 		<Compile Include="DsType.fs" />
 		<Compile Include="DsEvent.fs" />
+		<Compile Include="DsLog.fs" />
 		<Compile Include="Prolog.fs" />
 		<Compile Include="Text.fs" />
 		<Compile Include="Fqdn.fs" />

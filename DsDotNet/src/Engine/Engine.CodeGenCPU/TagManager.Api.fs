@@ -37,8 +37,8 @@ module ApiTagManagerModule =
         member _.ErrorText   = 
             let err1 = if txerrtrend.Value      then "동작편차" else ""
             let err2 = if txerrovertime.Value   then "동작시간" else ""
-            let err3 = if rxerrShort.Value      then "센서쇼트" else ""
-            let err4 = if rxerrOpen.Value       then "센서단선" else ""
+            let err3 = if rxerrShort.Value      then "센서감지" else ""
+            let err4 = if rxerrOpen.Value       then "센서오프" else ""
             let errs =[err1;err2;err3;err4]|> Seq.where(fun f->f <> "")
             if errs.any()
             then

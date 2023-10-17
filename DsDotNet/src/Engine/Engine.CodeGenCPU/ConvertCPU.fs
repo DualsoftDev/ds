@@ -86,8 +86,8 @@ module ConvertCPU =
             yield! s.B1_ButtonOutput()
             yield! s.B2_ModeLamp()
             yield! s.Y1_SystemBitSetFlow()
-            //yield! s.Y2_SystemConditionReady()
-            //yield! s.Y3_SystemConditionDrive()
+            yield s.Y2_SystemError()
+            yield s.Y3_SystemPause()
         ]
 
 
@@ -103,6 +103,12 @@ module ConvertCPU =
             yield f.O6_DriveOperationMode()
             yield f.O7_TestOperationMode()
             yield f.O8_IdleOperationMode()
+        ]
+
+    let private applyFlowMonitorSpec(f:Flow) =
+        [
+            yield f.F1_FlowError()
+            yield f.F2_FlowPause()
         ]
 
     let private applyTimerCounterSpec(s:DsSystem) =
@@ -128,6 +134,7 @@ module ConvertCPU =
             //Flow 적용
             for f in sys.Flows do
                 yield! applyOperationModeSpec f
+                yield! applyFlowMonitorSpec f
 
 
             //Vertex 적용

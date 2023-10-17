@@ -53,6 +53,8 @@ module SystemManagerModule =
             tout.Value <- 15000us
             tout
 
+        let sysError    = dsSysBit "sysError"   true  sys   SystemTag.sysError
+        let sysPause    = dsSysBit "sysPause"   true  sys   SystemTag.sysPause
         let sim    = dsSysBit "syssim"   true  sys   SystemTag.sim
 
         interface ITagManager with
@@ -79,5 +81,7 @@ module SystemManagerModule =
             | SystemTag.datet_m    ->    dtimem
             | SystemTag.datet_s    ->    dtimes
             | SystemTag.timeout    ->    tout
+            | SystemTag.sysError   ->    sysError
+            | SystemTag.sysPause   ->    sysPause
             | SystemTag.sim        ->    sim
             | _ -> failwithlog $"Error : GetSystemTag {st} type not support!!"

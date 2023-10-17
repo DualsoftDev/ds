@@ -35,8 +35,11 @@ module TagKindModule =
     | datet_h                  = 0014
     | datet_m                  = 0015
     | datet_s                  = 0016
-    ///syserrortag
+    ///systxErrTimetag
     | timeout                  = 0017
+    ///stopType
+    | sysError                 = 0020
+    | sysPause                 = 0021
     ///simulation
     | sim                      = 9999
 
@@ -62,7 +65,10 @@ module TagKindModule =
     |home_bit                  = 10016
     |readycondi_bit            = 10017
     |drivecondi_bit            = 10018
-
+    
+    ///stopType
+    | flowError                = 10020
+    | flowPause                = 10021
 
     [<Flags>]
     /// 11000 ~ 11999

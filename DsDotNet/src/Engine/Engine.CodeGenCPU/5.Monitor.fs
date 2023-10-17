@@ -101,3 +101,5 @@ type VertexManager with
 
         (set, rst) --| (v.E2, getFuncName())
 
+            
+  

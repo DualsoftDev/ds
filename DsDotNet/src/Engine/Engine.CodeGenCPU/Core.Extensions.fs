@@ -73,6 +73,8 @@ module ConvertCoreExt =
         member s._dtimeh   = s.GetPv<uint8>(SystemTag.datet_h )
         member s._dtimem   = s.GetPv<uint8>(SystemTag.datet_m )
         member s._dtimes   = s.GetPv<uint8>(SystemTag.datet_s )
+        member s._pause    = s.GetPv<bool>(SystemTag.sysPause)
+        member s._err      = s.GetPv<bool>(SystemTag.sysError)
         member s._tout     = s.GetPv<uint16>(SystemTag.timeout)
         member x.S = x |> getSM
         member x.Storages = x.TagManager.Storages
@@ -216,8 +218,8 @@ module ConvertCoreExt =
         member f.emg    = getFM(f).GetFlowTag(FlowTag.emg_bit     )
         member f.test   = getFM(f).GetFlowTag(FlowTag.test_bit    )
         member f.home   = getFM(f).GetFlowTag(FlowTag.home_bit    )
-        //member f.scr    = getFM(f).GetFlowTag(FlowTag.readycondi_bit    )
-        //member f.scd    = getFM(f).GetFlowTag(FlowTag.drivecondi_bit    )
+        member f.error  = getFM(f).GetFlowTag(FlowTag.flowError    )
+        member f.pause    = getFM(f).GetFlowTag(FlowTag.flowPause    )
         member f.F = f |> getFM
         member f._on     = f.System._on
         member f._off    = f.System._off
@@ -336,6 +338,7 @@ module ConvertCoreExt =
         member r.CoinRelays = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ET)
         member r.ErrorTXs   = r.Graph.Vertices.Select(getVM    ).Select(fun f->f.E1)
         member r.ErrorRXs   = r.Graph.Vertices.Select(getVM    ).Select(fun f->f.E2)
+        member r.Errors     = r.ErrorTXs @ r.ErrorRXs 
 
     type Indirect with
         member a.V = a.TagManager :?> VertexMCoin

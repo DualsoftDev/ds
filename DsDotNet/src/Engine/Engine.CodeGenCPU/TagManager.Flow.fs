@@ -31,11 +31,12 @@ module FlowManagerModule =
         let f_emg        = cpv $"emg_{fn}"     FlowTag.emg_bit
         let f_test       = cpv $"test_{fn}"    FlowTag.test_bit
         let f_home       = cpv $"home_{fn}"    FlowTag.home_bit
-
+        let f_error      = cpv $"error_{fn}"   FlowTag.flowError
+        let f_pause      = cpv $"pause_{fn}"   FlowTag.flowPause
+       
         interface ITagManager with
             member x.Target = f
             member x.Storages = s
-
 
         member f.GetFlowTag(ft:FlowTag)     =
             let t =
@@ -57,7 +58,7 @@ module FlowManagerModule =
                 | FlowTag.emg_bit         -> f_emg
                 | FlowTag.test_bit        -> f_test
                 | FlowTag.home_bit        -> f_home
-                //| FlowTag.readycondi_bit  -> f_readycondi
-                //| FlowTag.drivecondi_bit  -> f_drivecondi
+                | FlowTag.flowError       -> f_error
+                | FlowTag.flowPause       -> f_pause
                 | _ -> failwithlog $"Error : GetFlowTag {ft} type not support!!"
             t :?> PlanVar<bool>

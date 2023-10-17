@@ -141,7 +141,7 @@ module TagKindModule =
 
     type TagWeb = {
         Name  : string //FQDN 고유이름
-        Value : obj    //Tag 값
+        Value : string*obj //TypeName, Tag 값
         Kind  : int    //Tag 종류 ex) going = 11007
         Message : string //에러 내용 및 기타 전달 Message 
     }
@@ -207,11 +207,11 @@ module TagKindModule =
         [<Extension>]
         static member GetWebTag(x:TagDS) =
             match x with
-            |EventSystem (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.BoxedValue; Kind = tag.TagKind; Message = ""}
-            |EventFlow   (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.BoxedValue; Kind = tag.TagKind; Message = ""}
-            |EventVertex (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.BoxedValue; Kind = tag.TagKind; Message = ""}
-            |EventApiItem(tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.BoxedValue; Kind = tag.TagKind; Message = ""}
-            |EventAction (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.BoxedValue; Kind = tag.TagKind; Message = ""}
+            |EventSystem (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.DataType.Name,tag.BoxedValue; Kind = tag.TagKind; Message = ""}
+            |EventFlow   (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.DataType.Name,tag.BoxedValue; Kind = tag.TagKind; Message = ""}
+            |EventVertex (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.DataType.Name,tag.BoxedValue; Kind = tag.TagKind; Message = ""}
+            |EventApiItem(tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.DataType.Name,tag.BoxedValue; Kind = tag.TagKind; Message = ""}
+            |EventAction (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.DataType.Name,tag.BoxedValue; Kind = tag.TagKind; Message = ""}
 
         [<Extension>]
         static member GetSystem(x:TagDS) =

@@ -252,6 +252,16 @@ module TagKindModule =
             |_->false
 
         [<Extension>]
+        static member IsApiErrTag(x:TagDS) =
+            match x with
+            |EventApiItem (_, _, kind) ->     kind = ApiItemTag.rxErrOpen
+                                           || kind = ApiItemTag.rxErrShort
+                                           || kind = ApiItemTag.txErrTimeOver
+                                           || kind = ApiItemTag.txErrTrendOut
+                                           || kind = ApiItemTag.trxErr
+            |_->false
+
+        [<Extension>]
         static member IsStatusTag(x:IStorage) =
             x.TagKind = int(VertexTag.ready)
             || x.TagKind = int(VertexTag.going)
@@ -283,3 +293,11 @@ module TagKindModule =
                                           || kind = ApiItemTag.trxErr 
                                           
             |EventAction (_, _, _) -> false
+
+        //[<Extension>]
+        //static member IsNeedSaveDBLog(x:TagDS) =
+        //    match x with
+        //    |EventVertex (_, _, kind) -> 
+        //                                   kind = VertexTag.going       
+                                          
+        //    |_ -> false

@@ -62,8 +62,14 @@ WHERE
         task {
             let! timeSpans = collectDurationsONAsync(conn, fqdn, tagKind)
             return
-                timeSpans
-                |> Seq.averageBy (fun ts -> float ts.Ticks)
-                |> int64
-                |> TimeSpan.FromTicks            
+                 if timeSpans.any()
+                 then
+                    timeSpans
+                    |> Seq.averageBy (fun ts -> float ts.Ticks)
+                    |> int64
+                    |> TimeSpan.FromTicks  
+                 else 
+                    TimeSpan() // 계산된 지속 시간이 없는 경우
+
+          
         }

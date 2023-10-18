@@ -424,54 +424,54 @@ namespace Diagram.View.MSAGL
             return edges;
         }
 
-        public void UpdateInValue(ViewNode viewNode, object item2)
+        public void UpdateInValue(ViewNode viewNode, object item2, bool vRefresh = true)
         {
             Node node = findNode(viewNode);
             if (node != null)
             {
                 bool dataExist = Convert.ToDouble(item2) != 0;
                 UpdateFillColor(dataExist, node);
-                RefreshGraph();
+                if (vRefresh) RefreshGraph();
             }
         }
-        public void UpdateOutValue(ViewNode viewNode, object item2)
+        public void UpdateOutValue(ViewNode viewNode, object item2, bool vRefresh = true)
         {
             Node node = findNode(viewNode);
             if (node != null)
             {
                 bool dataExist = Convert.ToDouble(item2) != 0;
                 UpdateLineWidth(dataExist, node);
-                RefreshGraph();
+             if(vRefresh) RefreshGraph();
             }
         }
 
-        public void UpdateViewNode(ViewNode viewNode, ViewVertex vv)
+        public void UpdateViewNode(ViewNode viewNode, ViewVertex vv, bool vRefresh = true)
         {
-            UpdateStatus(viewNode);
-            UpdateInValue(viewNode, vv.LampInput);
-            UpdateOutValue(viewNode, vv.LampOutput);
-            UpdateError(viewNode, vv.IsError, vv.ErrorText);
+            UpdateStatus(viewNode, vRefresh);
+            UpdateInValue(viewNode, vv.LampInput, vRefresh);
+            UpdateOutValue(viewNode, vv.LampOutput, vRefresh);
+            UpdateError(viewNode, vv.IsError, vv.ErrorText, vRefresh);
         }
 
 
-        public void UpdateStatus(ViewNode viewNode)
+        public void UpdateStatus(ViewNode viewNode, bool vRefresh = true)
         {
             Node node = findNode(viewNode);
             if (node != null)
             {
                 UpdateLineColor(viewNode.Status4, node);
-                RefreshGraph();
+        if (vRefresh) RefreshGraph();
             }
         }
 
-        public void UpdateError(ViewNode viewNode, bool isError, string errorText)
-        {
+        public void UpdateError(ViewNode viewNode, bool isError, string errorText, bool vRefresh = true)
+{
 
             Node node = findNode(viewNode);
             if (node != null)
             {
                 UpdateFontColor(isError, errorText,  node, viewNode.ViewType);
-                RefreshGraph();
+                if(vRefresh) RefreshGraph();
 
             }
         }

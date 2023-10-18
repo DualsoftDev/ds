@@ -75,6 +75,7 @@ CREATE VIEW [{Vn.Log}] AS
             
             let newStorages =
                 storages
+                |> filter (fun s -> s.Target.IsSome) //test ahn
                 |> filter (fun s -> not <| existingFqdns.Contains(s.Target.Value.QualifiedName))
                 |> Array.ofSeq
 

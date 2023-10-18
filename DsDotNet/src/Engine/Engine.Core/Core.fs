@@ -49,6 +49,8 @@ module CoreModule =
         let mutable loadedName = param.LoadedName // 로딩 주체에 따라 런타임에 변경
         interface ISystem 
         member _.LoadedName with get() = loadedName and set(value) = loadedName <- value
+        member val Xywh:Xywh = null with get, set
+        member val ErrorMsg:string = "" with get, set
         
         /// 다른 장치를 로딩하려는 시스템에서 로딩된 시스템을 참조합니다.
         member _.ReferenceSystem = loadedSystem

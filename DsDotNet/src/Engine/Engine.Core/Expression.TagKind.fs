@@ -40,6 +40,10 @@ module TagKindModule =
     ///stopType
     | sysError                 = 0020
     | sysPause                 = 0021
+    | sysDrive                 = 0022
+
+
+
     ///simulation
     | sim                      = 9999
 
@@ -191,6 +195,8 @@ module TagKindModule =
             |EventAction (i, _, _) -> i
 
 
+
+
         [<Extension>]
         static member GetTarget(x:TagDS) =
             match x with
@@ -250,3 +256,21 @@ module TagKindModule =
             || x.TagKind = int(VertexTag.going)
             || x.TagKind = int(VertexTag.finish)
             || x.TagKind = int(VertexTag.homing)
+
+
+    
+        [<Extension>]
+        static member IsNeedSaveDBLog(x:TagDS) =
+            match x with
+            |EventSystem (_, _, kind) ->  kind = SystemTag.sysDrive  
+                                          || kind = SystemTag.sysError
+            |EventFlow   (_, _, kind) ->  kind= FlowTag.drive_op
+                                          || kind= FlowTag.flowError
+            |EventVertex (_, _, kind) ->  kind = VertexTag.ready
+                                          || kind = VertexTag.going       
+                                          || kind = VertexTag.finish       
+                                          || kind = VertexTag.homing       
+                                          || kind = VertexTag.errorRx       
+                                          || kind = VertexTag.errorTx       
+            |EventApiItem(_, _, _) -> false
+            |EventAction (_, _, _) -> false

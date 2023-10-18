@@ -1,5 +1,7 @@
 namespace Engine.Core
 
+open Dual.Common.Core.FS.Prelude
+
 
 [<AutoOpen>]
 module DsLogModule =

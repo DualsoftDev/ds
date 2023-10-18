@@ -1,16 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Library</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>net7.0</TargetFramework>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="InfoApp.fs" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Include="DBLogger.ORM.fs" />
+		<Compile Include="InfoApp.fs" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="DualSoft-Common-Db" Version="0.1.2" />
+		<PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.9" />
+		<PackageReference Include="Dapper" Version="2.0.143" />
+	</ItemGroup>
 
 </Project>

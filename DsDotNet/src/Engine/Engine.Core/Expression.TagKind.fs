@@ -113,7 +113,7 @@ module TagKindModule =
     |planSet                   = 12000
     |planRst                   = 12001
     |planEnd                   = 12002
-    |txErrTrend                = 12003
+    |txErrTrendOut             = 12003
     |txErrTimeOver             = 12004
     |rxErrShort                = 12005
     |rxErrShortOn              = 12006
@@ -279,7 +279,7 @@ module TagKindModule =
             |EventApiItem(_, _, kind) ->  kind = ApiItemTag.rxErrOpen
                                           || kind = ApiItemTag.rxErrShort 
                                           || kind = ApiItemTag.txErrTimeOver 
-                                          || kind = ApiItemTag.txErrTrend 
+                                          || kind = ApiItemTag.txErrTrendOut 
                                           || kind = ApiItemTag.trxErr 
                                           
             |EventAction (_, _, _) -> false

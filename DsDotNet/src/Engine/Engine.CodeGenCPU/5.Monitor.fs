@@ -85,6 +85,7 @@ type VertexManager with
             let sets = tds |> Seq.collect(fun s->[s.ApiItem.RXErrOpen;s.ApiItem.RXErrShort])
             yield (sets.ToOrElseOff(v.System), v._off.Expr) --| (v.E2, getFuncName())
         ]
+        
 
     member v.M5_RealErrorTXMonitor(): CommentedStatement  =
         let real = v.Vertex :?> Real
@@ -101,5 +102,20 @@ type VertexManager with
 
         (set, rst) --| (v.E2, getFuncName())
 
-            
   
+
+    member v.M7_CallErrorTRXMonitor(): CommentedStatement list =
+        let v= v :?> VertexMCoin
+        let call= v.Vertex.GetPure() :?> CallDev
+        let tds = call.CallTargetJob.DeviceDefs
+        [
+            for td in tds do
+                let errs = 
+                    [
+                        td.ApiItem.RXErrOpen
+                        td.ApiItem.RXErrShort
+                        td.ApiItem.TXErrOverTime
+                        td.ApiItem.TXErrTrendOut
+                    ]
+                yield (errs.ToOrElseOff(v.System) , v._off.Expr) --| (td.ApiItem.TRxErr,   getFuncName())
+        ]

@@ -43,6 +43,8 @@ module RunTime =
             }
 
         let doRun() = 
+            systems.Iter(fun sys-> cpuModeToggle(sys, cpuMode))
+            
             if not <| run 
             then 
                 run <- true

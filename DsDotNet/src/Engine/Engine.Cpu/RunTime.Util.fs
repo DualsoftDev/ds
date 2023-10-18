@@ -53,10 +53,10 @@ module RunTimeUtil =
             )
         map |> dict
 
-
-    ///시뮬레이션 이전에 사용자 HMI 대신 눌러주기
+        
+    ///사용자 autoStartTags HMI 대신 눌러주기
     let preAction(sys:DsSystem, mode:RuntimePackage, on:bool) =
-        let simTags =
+        let autoStartTags =
             sys.TagManager.Storages
                 .Where(fun w->
                             w.Value.TagKind = (int)SystemTag.auto
@@ -64,8 +64,14 @@ module RunTimeUtil =
                             ||   w.Value.TagKind = (int)SystemTag.ready
                             || ( w.Value.TagKind = (int)SystemTag.sim && mode = RuntimePackage.Simulation)
                     )
-        simTags.Iter(fun t -> t.Value.BoxedValue <-  on)
+        autoStartTags.Iter(fun t -> t.Value.BoxedValue <-  on)
 
+
+    ///시뮬레이션 비트 토글
+    let cpuModeToggle(sys:DsSystem, mode:RuntimePackage) =
+        sys.TagManager.Storages
+            .Where(fun w->  w.Value.TagKind = (int)SystemTag.sim)
+            .Iter(fun t -> t.Value.BoxedValue <- (mode = RuntimePackage.Simulation))
 
 
     ///HMI Reset

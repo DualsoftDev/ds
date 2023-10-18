@@ -47,6 +47,7 @@ module ConvertCoreExt =
         member a.PR     = getAM(a).PR
         member a.PE     = getAM(a).PE
         member a.TOUT   = getAM(a).TOUT   
+        member a.TXErrTrendOut   = getAM(a).TXErrTrendOut
         member a.TXErrOverTime   = getAM(a).TXErrOverTime
         member a.RXErrOpen       = getAM(a).RXErrOpen
         member a.RXErrOpenOff  = getAM(a).RXErrOpenOff
@@ -57,6 +58,11 @@ module ConvertCoreExt =
         member a.RXErrShortOn = getAM(a).RXErrShortOn
         member a.RXErrShortRising = getAM(a).RXErrShortRising
         member a.RXErrShortTemp = getAM(a).RXErrShortTemp
+
+        member a.TRxErr = getAM(a).TRxErr
+
+
+        
 
     type DsSystem with
         member private s.GetPv<'T when 'T:equality >(st:SystemTag) =

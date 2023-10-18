@@ -42,7 +42,7 @@ module TagKindModule =
     | sysPause                 = 0021
     | sysDrive                 = 0022
 
-
+    
 
     ///simulation
     | sim                      = 9999
@@ -123,9 +123,9 @@ module TagKindModule =
     |rxErrOpenOff              = 12010
     |rxErrOpenRising           = 12011
     |rxErrOpenTemp             = 12012
-    |trxErr                    = 12014
+    |trxErr                    = 12013
 
-
+    
 
     [<Flags>]
     /// 13000 ~ 13999
@@ -252,23 +252,11 @@ module TagKindModule =
             |_->false
 
         [<Extension>]
-        static member IsApiErrTag(x:TagDS) =
-            match x with
-            |EventApiItem (_, _, kind) ->     kind = ApiItemTag.rxErrOpen
-                                           || kind = ApiItemTag.rxErrShort
-                                           || kind = ApiItemTag.txErrTimeOver
-                                           || kind = ApiItemTag.txErrTrendOut
-                                           || kind = ApiItemTag.trxErr
-            |_->false
-
-        [<Extension>]
         static member IsStatusTag(x:IStorage) =
             x.TagKind = int(VertexTag.ready)
             || x.TagKind = int(VertexTag.going)
             || x.TagKind = int(VertexTag.finish)
             || x.TagKind = int(VertexTag.homing)
-
-
     
         [<Extension>]
         static member IsNeedSaveDBLog(x:TagDS) =
@@ -286,18 +274,5 @@ module TagKindModule =
                                           || kind = VertexTag.errorRx       
                                           || kind = VertexTag.errorTx  
                                           
-            |EventApiItem(_, _, kind) ->  kind = ApiItemTag.rxErrOpen
-                                          || kind = ApiItemTag.rxErrShort 
-                                          || kind = ApiItemTag.txErrTimeOver 
-                                          || kind = ApiItemTag.txErrTrendOut 
-                                          || kind = ApiItemTag.trxErr 
-                                          
+            |EventApiItem(_, _, kind) ->  kind = ApiItemTag.trxErr
             |EventAction (_, _, _) -> false
-
-        //[<Extension>]
-        //static member IsNeedSaveDBLog(x:TagDS) =
-        //    match x with
-        //    |EventVertex (_, _, kind) -> 
-        //                                   kind = VertexTag.going       
-                                          
-        //    |_ -> false

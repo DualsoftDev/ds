@@ -54,7 +54,7 @@ type VertexManager with
                 let running = api.PS.Expr <&&> !!td.ActionINFunc  <&&> dop
                 yield running --@ (api.TOUT, v.System._tout.Value, getFuncName())
                 //yield (api.TOUT.DN.Expr <||> real.V.RF.Expr , rst) ==| (api.TXErrOverTime , getFuncName())
-                yield (api.TOUT.DN.Expr <||> real.V.RF.Expr , rst) ==| (api.TXErrOverTime , getFuncName())  //for demo  test ahn
+                yield (api.TOUT.DN.Expr <||> (real.V.RF.Expr  <&&> v._sim.Expr), rst) ==| (api.TXErrOverTime , getFuncName())  //for demo  test ahn
 
             let sets = tds.Select(fun s->s.ApiItem.TXErrOverTime).ToOrElseOff(v.System)
             yield (sets, v._off.Expr) --| (v.E1, getFuncName())
@@ -105,7 +105,6 @@ type VertexManager with
         (set, rst) --| (v.E2, getFuncName())
 
   
-
     member v.M7_CallErrorTRXMonitor(): CommentedStatement list =
         let v= v :?> VertexMCoin
         let call= v.Vertex.GetPure() :?> CallDev

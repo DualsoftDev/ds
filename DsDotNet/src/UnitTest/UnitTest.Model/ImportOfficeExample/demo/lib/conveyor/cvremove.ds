@@ -1,0 +1,9 @@
+[sys] cvremove = {
+    [flow] CV = {
+        REMOVE <||> MOVE;
+    }
+    [interfaces] = {
+        MOVE = { CV.MOVE ~ CV.MOVE }
+        REMOVE = { CV.REMOVE ~ CV.REMOVE }
+    }
+}

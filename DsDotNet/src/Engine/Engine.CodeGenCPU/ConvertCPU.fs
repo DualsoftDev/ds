@@ -70,7 +70,8 @@ module ConvertCPU =
                 yield! vm.C3_CallPlanReceive()
                 yield! vm.M3_CallErrorTXMonitor() 
                 yield! vm.M4_CallErrorRXMonitor() 
-
+                yield! vm.M7_CallErrorTRXMonitor() 
+                
 
             if IsSpec (v, VertexAll, AliasNotCare) then
                 yield vm.M2_PauseMonitor()

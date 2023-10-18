@@ -30,6 +30,11 @@ module ConvertCoreExt =
                         .Cast<ApiItemManager>()
                         .Select(fun s -> s.ErrorText))
 
+
+    let errTextByDevice (x:CallDev)  = 
+        x.CallTargetJob.DeviceDefs
+                        .Select(fun s ->s.ApiName, (s.ApiItem.TagManager :?> ApiItemManager).ErrorText)
+
     let getOriginInfos(sys:DsSystem) =
         let reals = sys.GetVertices().OfType<Real>()
         reals.Select(fun r->

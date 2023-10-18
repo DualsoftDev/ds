@@ -11,7 +11,7 @@ open System.Collections.Generic
 
 
 [<AutoOpen>]
-module DBLoggerModule =
+module internal DBLoggerImpl =
     // database table names
     module Tn =
         let Storage = "storage"
@@ -51,7 +51,7 @@ CREATE VIEW [{Vn.Log}] AS
     ;
     """
     let connectionString = ConfigurationManager.ConnectionStrings["DBLoggerConnectionString"].ConnectionString;
-    let private createConnection() =
+    let createConnection() =
         new SqliteConnection(connectionString) |> tee (fun conn -> conn.Open())
 
     let createLoggerDBSchema() =
@@ -59,7 +59,7 @@ CREATE VIEW [{Vn.Log}] AS
         if not <| conn.IsTableExistsAsync(Tn.Log).Result then
             conn.Execute(sqlCreateSchema, null) |> ignore
 
-    let InitializeOnDemandAsync(systems:DsSystem seq) =
+    let initializeOnDemandAsync(systems:DsSystem seq) =
         task {
             use conn = createConnection()
             use! tr = conn.BeginTransactionAsync()
@@ -100,7 +100,7 @@ CREATE VIEW [{Vn.Log}] AS
         | UInt64 d -> decimal d
         | _ -> failwith "ERROR"
 
-    let InsertDBLogAsync(x:DsLog) =
+    let insertDBLogAsync(x:DsLog) =
         use conn = createConnection()
         task {
             match  x.Storage.Target with
@@ -120,4 +120,11 @@ CREATE VIEW [{Vn.Log}] AS
             | None ->
                 failwith "NOT yet!!"
         }
+
+    let countFromDBAsync(fqdn:string, tagKind:int, value:bool) =
+        use conn = createConnection()
+        conn.QuerySingleAsync<int>(
+            $"""SELECT COUNT(*) FROM [{Vn.Log}]
+                WHERE fqdn=@Fqdn AND tagKind=@TagKind AND value=@Value;""", {|Fqdn=fqdn; TagKind=tagKind; Value=value|})
+
 

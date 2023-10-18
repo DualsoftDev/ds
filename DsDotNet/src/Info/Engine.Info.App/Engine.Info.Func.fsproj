@@ -6,7 +6,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<None Include="SQL.md" />
 		<Compile Include="DBLogger.ORM.fs" />
+		<Compile Include="DBLogger.Query.fs" />
+		<Compile Include="DBLogger.fs" />
 		<Compile Include="InfoApp.fs" />
 	</ItemGroup>
 

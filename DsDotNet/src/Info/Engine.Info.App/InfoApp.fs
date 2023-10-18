@@ -6,6 +6,14 @@ open Engine.Core
 [<AutoOpen>]
 module InfoAppM =
 
+    let GetCountSum (logs: seq<DsLog>, tagKind: int, fqdn: string) =
+        ///////////
+        ///////////
+        /////////// 구현
+        ///////////
+        ///////////
+        0
+
     // 로그 목록과 태그 종류, FQDN을 인수로 받는 함수입니다.
     let GetAverage (logs: seq<DsLog>, tagKind: int, fqdn: string) =
         

@@ -123,6 +123,7 @@ module TagKindModule =
     |rxErrOpenOff              = 12010
     |rxErrOpenRising           = 12011
     |rxErrOpenTemp             = 12012
+    |trxErr                    = 12014
 
 
 
@@ -264,13 +265,21 @@ module TagKindModule =
             match x with
             |EventSystem (_, _, kind) ->  kind = SystemTag.sysDrive  
                                           || kind = SystemTag.sysError
+
             |EventFlow   (_, _, kind) ->  kind= FlowTag.drive_op
                                           || kind= FlowTag.flowError
+
             |EventVertex (_, _, kind) ->  kind = VertexTag.ready
                                           || kind = VertexTag.going       
                                           || kind = VertexTag.finish       
                                           || kind = VertexTag.homing       
                                           || kind = VertexTag.errorRx       
-                                          || kind = VertexTag.errorTx       
-            |EventApiItem(_, _, _) -> false
+                                          || kind = VertexTag.errorTx  
+                                          
+            |EventApiItem(_, _, kind) ->  kind = ApiItemTag.rxErrOpen
+                                          || kind = ApiItemTag.rxErrShort 
+                                          || kind = ApiItemTag.txErrTimeOver 
+                                          || kind = ApiItemTag.txErrTrend 
+                                          || kind = ApiItemTag.trxErr 
+                                          
             |EventAction (_, _, _) -> false

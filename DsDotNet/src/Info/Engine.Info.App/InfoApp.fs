@@ -1,4 +1,4 @@
-namespace Engine.Info.App
+namespace Engine.Info.Func
 
 open System
 open System.Collections.Generic // 사용되지 않는 네임스페이스를 제거합니다.

@@ -128,7 +128,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Info", "Info", "{A856882D-6
 		src\Info\DSInfo.pptx = src\Info\DSInfo.pptx
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Engine.Info.App", "src\Info\Engine.Info.App\Engine.Info.App.fsproj", "{74D6F2B9-B5EC-4174-9D4A-7199DA394C78}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Engine.Info.Func", "src\Info\Engine.Info.App\Engine.Info.Func.fsproj", "{74D6F2B9-B5EC-4174-9D4A-7199DA394C78}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

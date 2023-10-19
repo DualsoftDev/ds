@@ -2,16 +2,9 @@ namespace Engine.Info
 
 open System
 open System.Threading.Tasks
-open System.Configuration;
 open Dapper
-open Engine.Core
-open Microsoft.Data.Sqlite
 open Dual.Common.Core.FS
-open Dual.Common.Db
-open System.Collections.Generic
 open System.Data
-open System
-open System
 
 
 module DBLoggerQueryImpl =
@@ -19,9 +12,9 @@ module DBLoggerQueryImpl =
         member val At: DateTime = DateTime.MaxValue with get, set
         member val PrevAt: DateTime = DateTime.MaxValue with get, set
 
-    let private collectDurationONHelperAsync(conn:IDbConnection, fqdn:string, tagKind:int) =
-        conn.QueryAsync<ORMTimeDiff>(
-        $"""
+    let private collectDurationONHelperAsync (conn: IDbConnection, fqdn: string, tagKind: int) =
+        let query =
+            $"""
 WITH ChangeEvents AS (
 SELECT
     [fqdn],
@@ -49,27 +42,29 @@ ChangeEvents
 WHERE
 [prevValue] = 1 AND [value] = 0
 ;
-""", {|Fqdn=fqdn; TagKind=tagKind|})
+"""
 
-    let collectDurationsONAsync(conn:IDbConnection, fqdn:string, tagKind:int) : Task<TimeSpan seq> =
+        conn.QueryAsync<ORMTimeDiff>(query, {| Fqdn = fqdn; TagKind = tagKind |})
+
+    let collectDurationsONAsync (conn: IDbConnection, fqdn: string, tagKind: int) : Task<TimeSpan seq> =
         task {
-            let! durations = collectDurationONHelperAsync(conn, fqdn, tagKind)
+            let! (durations: ORMTimeDiff seq) = collectDurationONHelperAsync (conn, fqdn, tagKind)
             return durations |> map (fun d -> d.At - d.PrevAt)
         }
 
 
-    let getAverageONDurationAsync(conn:IDbConnection, fqdn:string, tagKind:int) : Task<TimeSpan> =
+    let getAverageONDurationAsync (conn: IDbConnection, fqdn: string, tagKind: int) : Task<TimeSpan> =
         task {
-            let! timeSpans = collectDurationsONAsync(conn, fqdn, tagKind)
+            let! timeSpans = collectDurationsONAsync (conn, fqdn, tagKind)
+
             return
-                 if timeSpans.any()
-                 then
+                if timeSpans.any () then
                     timeSpans
                     |> Seq.averageBy (fun ts -> float ts.Ticks)
                     |> int64
-                    |> TimeSpan.FromTicks  
-                 else 
+                    |> TimeSpan.FromTicks
+                else
                     TimeSpan() // 계산된 지속 시간이 없는 경우
 
-          
+
         }

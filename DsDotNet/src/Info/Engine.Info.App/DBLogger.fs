@@ -4,8 +4,8 @@ open Engine.Core
 
 type DBLogger() =
     static member CreateLoggerDBSchema() = DBLoggerImpl.createLoggerDBSchema()
-    static member CountFromDBAsync(fqdn:string, tagKind:int) = DBLoggerImpl.countFromDBAsync(fqdn, tagKind, true)
-    static member CountFromDB(fqdn:string, tagKind:int) = DBLogger.CountFromDBAsync(fqdn, tagKind).Result
+    static member CountFromDBAsync(fqdns:string seq, tagKinds:int seq) = DBLoggerImpl.countFromDBAsync(fqdns, tagKinds, true)
+    static member CountFromDB(fqdn:string, tagKind:int) = DBLogger.CountFromDBAsync([|fqdn|], [|tagKind|]).Result
     static member InsertDBLogAsync(log:DsLog) = DBLoggerImpl.insertDBLogAsync(log:DsLog)
     static member InitializeOnDemandAsync(systems:DsSystem seq) = DBLoggerImpl.initializeOnDemandAsync(systems)
 

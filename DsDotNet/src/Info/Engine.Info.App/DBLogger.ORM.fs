@@ -121,10 +121,20 @@ CREATE VIEW [{Vn.Log}] AS
                 failwith "NOT yet!!"
         }
 
-    let countFromDBAsync(fqdn:string, tagKind:int, value:bool) =
+    //let countFromDBAsync(fqdn:string, tagKind:int, value:bool) =
+    //    use conn = createConnection()
+    //    conn.QuerySingleAsync<int>(
+    //        $"""SELECT COUNT(*) FROM [{Vn.Log}]
+    //            WHERE fqdn=@Fqdn AND tagKind=@TagKind AND value=@Value;""", {|Fqdn=fqdn; TagKind=tagKind; Value=value|})
+
+    let countFromDBAsync(fqdns:string seq, tagKinds:int seq, value:bool) =
         use conn = createConnection()
         conn.QuerySingleAsync<int>(
             $"""SELECT COUNT(*) FROM [{Vn.Log}]
-                WHERE fqdn=@Fqdn AND tagKind=@TagKind AND value=@Value;""", {|Fqdn=fqdn; TagKind=tagKind; Value=value|})
+                WHERE
+                    fqdn IN @Fqdns
+                AND tagKind IN @TagKinds
+                AND value=@Value;"""
+                , {|Fqdns=fqdns; TagKinds=tagKinds; Value=value|})
 
 

@@ -219,12 +219,15 @@ module TagKindModule =
         
         [<Extension>]
         static member GetWebTag(x:TagDS) =
+            let createTagWeb (tag:IStorage) (obj:IQualifiedNamed) =
+                let tpl = tag.DataType.Name, tag.BoxedValue
+                { Name = obj.QualifiedName; Value = tpl; Kind = tag.TagKind; Message = ""}
             match x with
-            |EventSystem (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.DataType.Name,tag.BoxedValue; Kind = tag.TagKind; Message = ""}
-            |EventFlow   (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.DataType.Name,tag.BoxedValue; Kind = tag.TagKind; Message = ""}
-            |EventVertex (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.DataType.Name,tag.BoxedValue; Kind = tag.TagKind; Message = ""}
-            |EventApiItem(tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.DataType.Name,tag.BoxedValue; Kind = tag.TagKind; Message = ""}
-            |EventAction (tag, obj, _) -> {Name = obj.QualifiedName; Value = tag.DataType.Name,tag.BoxedValue; Kind = tag.TagKind; Message = ""}
+            | EventSystem (tag, obj, _) -> createTagWeb tag obj
+            | EventFlow   (tag, obj, _) -> createTagWeb tag obj
+            | EventVertex (tag, obj, _) -> createTagWeb tag obj
+            | EventApiItem(tag, obj, _) -> createTagWeb tag obj
+            | EventAction (tag, obj, _) -> createTagWeb tag obj
 
         [<Extension>]
         static member GetSystem(x:TagDS) =

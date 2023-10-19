@@ -2,22 +2,22 @@ namespace Engine.Info
 
 open Engine.Core
 
-module DBLogger =
-    let CreateLoggerDBSchema() = DBLoggerImpl.createLoggerDBSchema()
-    let CountFromDBAsync(fqdn:string, tagKind:int) = DBLoggerImpl.countFromDBAsync(fqdn, tagKind, true)
-    let CountFromDB(fqdn:string, tagKind:int) = CountFromDBAsync(fqdn, tagKind).Result
-    let InsertDBLogAsync(log:DsLog) = DBLoggerImpl.insertDBLogAsync(log:DsLog)
-    let InitializeOnDemandAsync(systems:DsSystem seq) = DBLoggerImpl.initializeOnDemandAsync(systems)
+type DBLogger() =
+    static member CreateLoggerDBSchema() = DBLoggerImpl.createLoggerDBSchema()
+    static member CountFromDBAsync(fqdn:string, tagKind:int) = DBLoggerImpl.countFromDBAsync(fqdn, tagKind, true)
+    static member CountFromDB(fqdn:string, tagKind:int) = DBLogger.CountFromDBAsync(fqdn, tagKind).Result
+    static member InsertDBLogAsync(log:DsLog) = DBLoggerImpl.insertDBLogAsync(log:DsLog)
+    static member InitializeOnDemandAsync(systems:DsSystem seq) = DBLoggerImpl.initializeOnDemandAsync(systems)
 
 
-    let CollectDurationsONAsync(fqdn, tagKind) =
+    static member  CollectDurationsONAsync(fqdn, tagKind) =
         use conn = createConnection()
         DBLoggerQueryImpl.collectDurationsONAsync(conn, fqdn, tagKind)
 
-    let GetAverageONDurationAsync(fqdn, tagKind) =
+    static member  GetAverageONDurationAsync(fqdn, tagKind) =
         use conn = createConnection()
         DBLoggerQueryImpl.getAverageONDurationAsync(conn, fqdn, tagKind)
 
-    let GetAverageONDurationSeconds(fqdn, tagKind) =
-        GetAverageONDurationAsync(fqdn, tagKind).Result.TotalSeconds
+    static member GetAverageONDurationSeconds(fqdn, tagKind) =
+        DBLogger.GetAverageONDurationAsync(fqdn, tagKind).Result.TotalSeconds
 

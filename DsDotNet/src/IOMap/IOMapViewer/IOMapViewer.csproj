@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DevExpress.Win.Design" Version="23.1.4" />
-    <PackageReference Include="devexpress.win.grid" Version="23.1.4" />
+	  <PackageReference Include="DevExpress.Win.Design" Version="23.1.*-*" />
+	  <PackageReference Include="devexpress.win.grid" Version="23.1.4" />
     <PackageReference Include="devexpress.win.navigation" Version="23.1.4" />
     <PackageReference Include="DualSoft-Common-Core" Version="0.1.15" />
     <PackageReference Include="DualSoft-Common-Winform" Version="0.1.3" />

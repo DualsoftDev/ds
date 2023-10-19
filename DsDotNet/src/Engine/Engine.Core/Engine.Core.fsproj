@@ -56,7 +56,7 @@
 	
 
 	<ItemGroup>
-		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.7" />
+		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.8" />
         <PackageReference Include="System.Reactive" Version="6.0.0" />
         <PackageReference Include="Fody" Version="6.6.4">
 			<PrivateAssets>all</PrivateAssets>

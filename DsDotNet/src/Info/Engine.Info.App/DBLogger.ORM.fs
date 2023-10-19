@@ -16,6 +16,7 @@ module internal DBLoggerImpl =
     module Tn =
         let Storage = "storage"
         let Log = "log"
+        let Error = "error"
     // database view names
     module Vn =
         let Log = "vwLog"
@@ -35,7 +36,16 @@ CREATE TABLE [{Tn.Log}] (
     , [storageId]   INTEGER NOT NULL
     , [at]          DATETIME2(7) NOT NULL
     , [value]       NUMERIC NOT NULL
+    , FOREIGN KEY(storageId) REFERENCES {Tn.Storage}(id)
 );
+
+-- CREATE TABLE [{Tn.Error}] (
+--     [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+--     , [logId]       INTEGER NOT NULL
+--     , [message]     NVARCHAR(1024) NOT NULL CHECK(LENGTH(message) <= 1024)
+--     , FOREIGN KEY(logId) REFERENCES {Tn.Log}(id)
+-- );
+
 
 CREATE VIEW [{Vn.Log}] AS
     SELECT
@@ -110,7 +120,7 @@ CREATE VIEW [{Vn.Log}] AS
                     conn.QuerySingleOrDefaultAsync<int>(
                         $"""SELECT id FROM [{Tn.Storage}]
                             WHERE fqdn=@Fqdn AND tagKind=@TagKind;""", {|Fqdn=fqdn; TagKind=x.Storage.TagKind|})
-                let value = toDecimal x.Value
+                let value = toDecimal x.Storage.BoxedValue
                 let! _ = conn.ExecuteAsync(
                     $"""INSERT INTO [{Tn.Log}]
                         (at, storageId, value)

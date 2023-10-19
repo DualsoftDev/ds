@@ -19,9 +19,9 @@ module OriginModule =
         ///On, Off 상관없음
         | NotCare
 
-     /// Remove duplicates in seq seq
-    let removeDuplicates (source:'T seq) =
-        source |> Seq.collect id |> Seq.distinct
+     /// Remove duplicates in seq
+    let removeDuplicates (xs:'T seq) =
+        xs |> Seq.collect id |> Seq.distinct
 
     let compareIsIncludedWithOrder (now:'T seq) (compare:'T seq) =
         let t = [|

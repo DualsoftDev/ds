@@ -141,11 +141,11 @@ module TagKindModule =
     |ActionMemory             = 14002
 
     type TagDS =
-        | EventSystem of Tag: IStorage * Target: DsSystem * TagKind: SystemTag
-        | EventFlow of Tag: IStorage * Target: Flow * TagKind: FlowTag
-        | EventVertex of Tag: IStorage * Target: Vertex * TagKind: VertexTag
-        | EventApiItem of Tag: IStorage * Target: ApiItem * TagKind: ApiItemTag
-        | EventAction of Tag: IStorage * Target: DsTask * TagKind: ActionTag
+        | EventSystem  of Tag: IStorage * Target: DsSystem * TagKind: SystemTag
+        | EventFlow    of Tag: IStorage * Target: Flow     * TagKind: FlowTag
+        | EventVertex  of Tag: IStorage * Target: Vertex   * TagKind: VertexTag
+        | EventApiItem of Tag: IStorage * Target: ApiItem  * TagKind: ApiItemTag
+        | EventAction  of Tag: IStorage * Target: DsTask   * TagKind: ActionTag
 
 
     let TagDSSubject = new Subject<TagDS>()
@@ -160,18 +160,12 @@ module TagKindModule =
     [<AutoOpen>]
     [<Extension>]
     type TagKindExt =
-        [<Extension>]
-        static member OnChanged (tagDS:TagDS) =   TagDSSubject.OnNext(tagDS)
-        [<Extension>]
-        static member GetSystemTagKind (x:IStorage) = match x.TagKind with | InClosedRange TagStartSystem  9999 -> Some (Enum.ToObject(typeof<SystemTag>, x.TagKind) :?> SystemTag)  | _ -> None
-        [<Extension>]
-        static member GetFlowTagKind   (x:IStorage) = match x.TagKind with | InClosedRange TagStartFlow   10999 -> Some (Enum.ToObject(typeof<FlowTag>, x.TagKind) :?> FlowTag)      | _ -> None
-        [<Extension>]
-        static member GetVertexTagKind (x:IStorage) = match x.TagKind with | InClosedRange TagStartVertex 11999 -> Some (Enum.ToObject(typeof<VertexTag>, x.TagKind) :?> VertexTag)  | _ -> None
-        [<Extension>]
-        static member GetApiTagKind    (x:IStorage) = match x.TagKind with | InClosedRange TagStartApi    12999 -> Some (Enum.ToObject(typeof<ApiItemTag>, x.TagKind) :?> ApiItemTag)| _ -> None
-        [<Extension>]
-        static member GetActionTagKind (x:IStorage) = match x.TagKind with | InClosedRange TagStartAction 14999 -> Some (Enum.ToObject(typeof<ActionTag>, x.TagKind) :?> ActionTag)| _ -> None
+        [<Extension>] static member OnChanged (tagDS:TagDS) = TagDSSubject.OnNext(tagDS)
+        [<Extension>] static member GetSystemTagKind (x:IStorage) = DU.tryGetEnumValue<SystemTag>(x.TagKind)
+        [<Extension>] static member GetFlowTagKind   (x:IStorage) = DU.tryGetEnumValue<FlowTag>(x.TagKind)
+        [<Extension>] static member GetVertexTagKind (x:IStorage) = DU.tryGetEnumValue<VertexTag>(x.TagKind)
+        [<Extension>] static member GetApiTagKind    (x:IStorage) = DU.tryGetEnumValue<ApiItemTag>(x.TagKind)
+        [<Extension>] static member GetActionTagKind (x:IStorage) = DU.tryGetEnumValue<ActionTag>(x.TagKind)
 
         [<Extension>]
         static member GetTagInfo (x:IStorage) =
@@ -210,12 +204,13 @@ module TagKindModule =
       
         [<Extension>]
         static member GetTagToText(x:TagDS) =
+            let getText(tag:IStorage) (obj:INamed) kind = $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
             match x with
-            |EventSystem (tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
-            |EventFlow   (tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
-            |EventVertex (tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
-            |EventApiItem(tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
-            |EventAction (tag, obj, kind) -> $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
+            |EventSystem (tag, obj, kind) -> getText tag obj kind
+            |EventFlow   (tag, obj, kind) -> getText tag obj kind
+            |EventVertex (tag, obj, kind) -> getText tag obj kind
+            |EventApiItem(tag, obj, kind) -> getText tag obj kind
+            |EventAction (tag, obj, kind) -> getText tag obj kind
         
         [<Extension>]
         static member GetWebTag(x:TagDS) =
@@ -241,41 +236,44 @@ module TagKindModule =
         [<Extension>]
         static member IsStatusTag(x:TagDS) =
             match x with
-            |EventVertex (_, _, kind) -> kind = VertexTag.ready
-                                          || kind = VertexTag.going
-                                          || kind = VertexTag.finish
-                                          || kind = VertexTag.homing
-            |_->false
+            |EventVertex (_, _, kind) ->
+                kind.IsOneOf( VertexTag.ready
+                            , VertexTag.going
+                            , VertexTag.finish
+                            , VertexTag.homing)
+            |_ -> false
 
         [<Extension>]
         static member IsVertexErrTag(x:TagDS) =
             match x with
-            |EventVertex (_, _, kind) ->     kind = VertexTag.errorTx
-                                          || kind = VertexTag.errorRx
+            |EventVertex (_, _, kind) ->  kind.IsOneOf(  VertexTag.errorTx
+                                                       , VertexTag.errorRx)
             |_->false
 
         [<Extension>]
         static member IsStatusTag(x:IStorage) =
-            x.TagKind = int(VertexTag.ready)
-            || x.TagKind = int(VertexTag.going)
-            || x.TagKind = int(VertexTag.finish)
-            || x.TagKind = int(VertexTag.homing)
+            x.TagKind.IsOneOf(
+                  int VertexTag.ready
+                , int VertexTag.going
+                , int VertexTag.finish
+                , int VertexTag.homing)
     
         [<Extension>]
         static member IsNeedSaveDBLog(x:TagDS) =
             match x with
-            |EventSystem (_, _, kind) ->  kind = SystemTag.sysDrive  
-                                          || kind = SystemTag.sysError
+            |EventSystem (_, _, kind) ->  kind.IsOneOf(  SystemTag.sysDrive  
+                                                       , SystemTag.sysError)
 
-            |EventFlow   (_, _, kind) ->  kind= FlowTag.drive_op
-                                          || kind= FlowTag.flowError
+            |EventFlow   (_, _, kind) ->  kind.IsOneOf(  FlowTag.drive_op
+                                                       , FlowTag.flowError)
 
-            |EventVertex (_, _, kind) ->  kind = VertexTag.ready
-                                          || kind = VertexTag.going       
-                                          || kind = VertexTag.finish       
-                                          || kind = VertexTag.homing       
-                                          || kind = VertexTag.errorRx       
-                                          || kind = VertexTag.errorTx  
+            |EventVertex (_, _, kind) ->  kind.IsOneOf(
+                                            VertexTag.ready
+                                          , VertexTag.going       
+                                          , VertexTag.finish       
+                                          , VertexTag.homing       
+                                          , VertexTag.errorRx       
+                                          , VertexTag.errorTx)
                                           
             |EventApiItem(_, _, kind) ->  kind = ApiItemTag.trxErr
             |EventAction (_, _, _) -> false

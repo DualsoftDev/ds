@@ -131,13 +131,13 @@ module HmiGenModule =
             for button, btnType in buttons do
                 addButton button null btnType hmiInfos
                 match btnType with
-                | ButtonType.Test | ButtonType.Drive ->
+                | (ButtonType.Test | ButtonType.Drive) ->
                     for sys in model.Systems do
                         for sp in sys.StartPoints do
                             hmiInfos[button].targets.Add(sp.QualifiedName)
-                | ButtonType.Auto | ButtonType.Manual | ButtonType.Emergency
-                | ButtonType.Stop | ButtonType.Clear  | ButtonType.Home
-                | ButtonType.Ready ->
+                | ( ButtonType.Auto | ButtonType.Manual | ButtonType.Emergency
+                  | ButtonType.Stop | ButtonType.Clear  | ButtonType.Home
+                  | ButtonType.Ready ) ->
                     for flow in flowNames do hmiInfos[button].targets.Add(flow)
                 | _ ->
                     failwithlog "type error"
@@ -160,10 +160,10 @@ module HmiGenModule =
                     | DuAliasTargetRealExSystem s -> nameRealExS system s.Name
                 let vertName =
                     match vertex with
-                    | :? CallDev as c                -> jobName c
+                    | :? CallDev as c             -> jobName c
                     | :? Real as r                -> r.QualifiedName
                     | :? RealOtherFlow as f       -> f.QualifiedName
-                    | :? CallSys as s     -> nameRealExS system s.Name
+                    | :? CallSys as s             -> nameRealExS system s.Name
                     | :? Alias as a               -> aliasName a
                     | _ -> null
                 addToUsedIn vertName system.Name

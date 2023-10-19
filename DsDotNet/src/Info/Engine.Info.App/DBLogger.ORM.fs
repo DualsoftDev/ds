@@ -134,7 +134,16 @@ CREATE VIEW [{Vn.Log}] AS
                 WHERE
                     fqdn IN @Fqdns
                 AND tagKind IN @TagKinds
-                AND value=@Value;"""
+                AND value=@Value;""" 
                 , {|Fqdns=fqdns; TagKinds=tagKinds; Value=value|})
 
 
+    // 지정된 조건에 따라 마지막 'Value'를 반환하는 함수
+    let GetLastValueFromDBAsync (fqdn: string, tagKind: int) =
+        use conn = createConnection()
+        conn.QuerySingleOrDefaultAsync<bool>( 
+            $"""SELECT TOP 1 Value FROM [{Vn.Log}]
+                WHERE fqdn=@Fqdn AND tagKind=@TagKind
+                ORDER BY at DESC;""", {|Fqdn=fqdn; TagKind=tagKind|}) 
+
+      

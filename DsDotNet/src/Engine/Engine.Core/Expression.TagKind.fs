@@ -13,6 +13,7 @@ module TagKindModule =
     let [<Literal>] TagStartVertex  = 11000
     let [<Literal>] TagStartApi     = 12000
     let [<Literal>] TagStartAction  = 14000
+    let InnerTag = -1
 
     [<Flags>]
     /// 0 ~ 9999
@@ -266,6 +267,7 @@ module TagKindModule =
             match x with
             |EventSystem (_, _, kind) ->  kind = SystemTag.sysDrive  
                                           || kind = SystemTag.sysError
+                                          || kind = SystemTag.clear    
 
             |EventFlow   (_, _, kind) ->  kind= FlowTag.drive_op
                                           || kind= FlowTag.flowError
@@ -278,4 +280,8 @@ module TagKindModule =
                                           || kind = VertexTag.errorTx  
                                           
             |EventApiItem(_, _, kind) ->  kind = ApiItemTag.trxErr
+                                          || kind = ApiItemTag.rxErrOpen  
+                                          || kind = ApiItemTag.rxErrShort  
+                                          || kind = ApiItemTag.txErrTimeOver  
+                                          || kind = ApiItemTag.txErrTrendOut  
             |EventAction (_, _, _) -> false

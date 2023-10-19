@@ -75,7 +75,7 @@ CREATE VIEW [{Vn.Log}] AS
             
             let newStorages =
                 storages
-                |> filter (fun s -> s.Target.IsSome) //test ahn
+                |> filter (fun s -> s.TagKind <> InnerTag) // 내부변수
                 |> filter (fun s -> not <| existingFqdns.Contains(s.Target.Value.QualifiedName))
                 |> Array.ofSeq
 
@@ -137,13 +137,12 @@ CREATE VIEW [{Vn.Log}] AS
                 AND value=@Value;""" 
                 , {|Fqdns=fqdns; TagKinds=tagKinds; Value=value|})
 
-
+                
     // 지정된 조건에 따라 마지막 'Value'를 반환하는 함수
     let GetLastValueFromDBAsync (fqdn: string, tagKind: int) =
         use conn = createConnection()
         conn.QuerySingleOrDefaultAsync<bool>( 
-            $"""SELECT TOP 1 Value FROM [{Vn.Log}]
+            $"""SELECT Value FROM [{Vn.Log}]
                 WHERE fqdn=@Fqdn AND tagKind=@TagKind
-                ORDER BY at DESC;""", {|Fqdn=fqdn; TagKind=tagKind|}) 
-
-      
+                ORDER BY at DESC
+                LIMIT 1;""", {|Fqdn=fqdn; TagKind=tagKind|}) 

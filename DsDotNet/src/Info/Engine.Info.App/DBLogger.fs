@@ -8,6 +8,7 @@ type DBLogger() =
     static member CountFromDB(fqdn:string, tagKind:int) = DBLogger.CountFromDBAsync([|fqdn|], [|tagKind|]).Result
     static member InsertDBLogAsync(log:DsLog) = DBLoggerImpl.insertDBLogAsync(log:DsLog)
     static member InitializeOnDemandAsync(systems:DsSystem seq) = DBLoggerImpl.initializeOnDemandAsync(systems)
+    static member GetLastValueFromDBAsync(fqdn:string, tagKind:int) = DBLoggerImpl.GetLastValueFromDBAsync(fqdn, tagKind)
 
 
     static member  CollectDurationsONAsync(fqdn, tagKind) =

@@ -13,6 +13,7 @@ module TagKindModule =
     let [<Literal>] TagStartVertex  = 11000
     let [<Literal>] TagStartApi     = 12000
     let [<Literal>] TagStartAction  = 14000
+    let InnerTag = -1
 
     [<Flags>]
     /// 0 ~ 9999
@@ -262,7 +263,8 @@ module TagKindModule =
         static member IsNeedSaveDBLog(x:TagDS) =
             match x with
             |EventSystem (_, _, kind) ->  kind.IsOneOf(  SystemTag.sysDrive  
-                                                       , SystemTag.sysError)
+                                                       , SystemTag.sysError
+                                                       , SystemTag.clear)
 
             |EventFlow   (_, _, kind) ->  kind.IsOneOf(  FlowTag.drive_op
                                                        , FlowTag.flowError)
@@ -276,4 +278,8 @@ module TagKindModule =
                                           , VertexTag.errorTx)
                                           
             |EventApiItem(_, _, kind) ->  kind = ApiItemTag.trxErr
+                                          || kind = ApiItemTag.rxErrOpen  
+                                          || kind = ApiItemTag.rxErrShort  
+                                          || kind = ApiItemTag.txErrTimeOver  
+                                          || kind = ApiItemTag.txErrTrendOut  
             |EventAction (_, _, _) -> false

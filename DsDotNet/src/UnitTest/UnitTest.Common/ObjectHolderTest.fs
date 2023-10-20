@@ -1,10 +1,9 @@
 namespace T
 
-open Dual.Common.Core
+open Dual.Common.Core.FS
 open Dual.UnitTest.Common.FS
 open NUnit.Framework
 open System
-open System.Text.Json
 open Newtonsoft.Json
 
 
@@ -31,9 +30,30 @@ module ObjectHolderTestModule =
             //un64_.Value.GetType() === typeof<JsonElement>
             ()
 
-
         [<Test>]
         member _.ObjectHolderSerializeTest() =
+            let serializeTest v = 
+                let holder = ObjectHolder.Create(v)
+                let str1 = JsonConvert.SerializeObject holder
+                let str2 = holder.Serialize()
+                str1 === str2
+                ObjectHolder.Deserialize(str1).Serialize() === str1
+
+
+            serializeTest 1234567890123456789UL
+            serializeTest 123456789L          
+            serializeTest 123456789u          
+            serializeTest 123456789           
+            serializeTest 1234us              
+            serializeTest 1234s               
+            serializeTest false               
+            serializeTest 'a'                 
+            serializeTest 255uy               
+            serializeTest "hello, world"
+
+
+        [<Test>]
+        member _.ObjectHolderSerializeValueTest() =
 
             ObjectHolder.Create(1234567890123456789UL).GetValue().GetType() === typeof<uint64>
             ObjectHolder.Create(123456789L)           .GetValue().GetType() === typeof<int64>

@@ -45,8 +45,7 @@ module RunTime =
         let doRun() = 
             systems.Iter(fun sys-> cpuModeToggle(sys, cpuMode))
             
-            if not <| run 
-            then 
+            if not run then 
                 run <- true
                 Async.StartImmediate(asyncStart, cts.Token) |> ignore
 
@@ -55,13 +54,15 @@ module RunTime =
             cts <- new CancellationTokenSource() 
             run <- false;
 
-        let doStepByStatus(activeSys) = 
-            let mutable endStepByStatus = false
-            while not(endStepByStatus) do
-                let chTags = scanOnce()
-                endStepByStatus <- chTags.isEmpty() 
-                                || chTags.Where(fun f->f.DsSystem = activeSys)
-                                         .Where(fun f->f.IsStatusTag()).any()
+        let doStepByStatusAsync(activeSys) =
+            task {
+                let mutable endStepByStatus = false
+                while not(endStepByStatus) do
+                    let chTags = scanOnce()
+                    endStepByStatus <- chTags.isEmpty() 
+                                    || chTags.Where(fun f->f.DsSystem = activeSys)
+                                             .Where(fun f->f.IsStatusTag()).any()
+            }
 
         do 
             ()
@@ -80,9 +81,9 @@ module RunTime =
             doStop()
             scanOnce()
 
-        member x.StepByStatus(activeSys:DsSystem) = 
+        member x.StepByStatusAsync(activeSys:DsSystem) = 
             doStop()
-            doStepByStatus(activeSys)
+            doStepByStatusAsync(activeSys)
 
         member x.Reset() =
             doStop()

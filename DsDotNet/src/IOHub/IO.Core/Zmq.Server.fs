@@ -293,7 +293,7 @@ module ZmqServerModule =
 
         member x.Run() =
             // start a separate thread to run the server
-            Task.Run(fun () ->
+            let f() =
                 logInfo $"Starting server on port {port}..."
                 use respSocket = new ResponseSocket()
                 respSocket.Bind($"tcp://*:{port}")
@@ -329,7 +329,8 @@ module ZmqServerModule =
                 logInfo("Cancellation request detected!")
                 (x :> IDisposable).Dispose()
                 terminated <- true
-            )
+
+            Task.Factory.StartNew(f, TaskCreationOptions.LongRunning)
 
         interface IDisposable with
             member x.Dispose() =

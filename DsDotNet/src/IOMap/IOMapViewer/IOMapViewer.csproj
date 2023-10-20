@@ -11,7 +11,7 @@
 	  <PackageReference Include="DevExpress.Win.Design" Version="23.1.*-*" />
 	  <PackageReference Include="devexpress.win.grid" Version="23.1.*-*" />
     <PackageReference Include="devexpress.win.navigation" Version="23.1.*-*" />
-    <PackageReference Include="DualSoft-Common-Core" Version="0.1.15" />
+    <PackageReference Include="DualSoft-Common-Core" Version="0.1.16" />
     <PackageReference Include="DualSoft-Common-Winform" Version="0.1.3" />
     <PackageReference Include="log4net" Version="2.0.15" />
   </ItemGroup>

@@ -7,7 +7,9 @@ clean: dotnet-restore
 
 clean-nuget: dotnet-restore
 	@rm -rf $(shell cygpath $(USERPROFILE))/.nuget/packages/dualsoft-*
+	@rm -rf ./packages/dualsoft-*
 
+Clean: clean clean-nuget
 
 nuget-feed:
 	@nuget sources add -name DevExpress -source https://nuget.devexpress.com/BdOUvsNXVt4bl2W97d8nTSstfBviZAR3IHZcjOglqI8dgjsJtu/api

@@ -14,9 +14,31 @@ module ObjectHolderTestModule =
         new() = NaiveHolder(null)
         member val Value = value with get, set
 
+    type FSharpRecord = {
+        Name  : string
+        Value : obj
+        Message : string
+        Tuple: obj*string
+    }
 
     [<TestFixture>]
     type ObjectHolderTest() =
+        [<Test>]
+        member _.FSharpRecordSerializeTest_NewtonSoft() =
+            let x = {Name="kwak"; Value=3.14; Message="Hello"; Tuple=(3, "three")}
+            let str = JsonConvert.SerializeObject(x)
+            let xx = JsonConvert.DeserializeObject<FSharpRecord>(str)
+            let str2 = JsonConvert.SerializeObject(xx)
+            str === str2
+
+        [<Test>]
+        member _.FSharpRecordSerializeTest_SystemText() =
+            let x = {Name="kwak"; Value=3.14; Message="Hello"; Tuple=(3, "three")}
+            let str = System.Text.Json.JsonSerializer.Serialize(x)
+            let xx = System.Text.Json.JsonSerializer.Deserialize<FSharpRecord>(str)
+            let str2 = System.Text.Json.JsonSerializer.Serialize(xx)
+            str === str2
+
         [<Test>]
         member _.DefaultSerializeTest() =
             let x = ObjectHolder()

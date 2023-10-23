@@ -72,8 +72,8 @@ module RunTimeUtil =
         sys.TagManager.Storages
             .Where(fun w->  w.Value.TagKind = (int)SystemTag.sim)
             .Iter(fun t -> t.Value.BoxedValue <- (mode = RuntimePackage.Simulation))
-
-
+  
+   
     ///HMI Reset
     let syncReset((*statements:Statement seq,*) systems:DsSystem seq, activeSys:bool) =
         let stgs = systems.First().TagManager.Storages

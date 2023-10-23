@@ -45,6 +45,7 @@ module RunTime =
         let doRun() = 
             systems.Iter(fun sys-> cpuModeToggle(sys, cpuMode))
             
+            
             if not run then 
                 run <- true
                 Async.StartImmediate(asyncStart, cts.Token) |> ignore
@@ -75,6 +76,7 @@ module RunTime =
         member x.Run()  = doRun()
         member x.AutoDriveSetting()  =          
             systems.Iter(fun sys-> preAction(sys, cpuMode, true))
+
         member x.Stop() = doStop()
 
         member x.Step() =

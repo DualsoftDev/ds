@@ -123,7 +123,7 @@ namespace Diagram.View.MSAGL
                     {
                         var vv = DicNode[ev.Target];
                         vv.IsError = (bool)ev.Tag.BoxedValue;
-                        vv.ErrorText = ConvertCoreExt.errText(call);
+                        vv.ErrorText = string.Join("\n", ConvertCoreExt.errTexts(call));
 
                         var ucView = UcViews.Where(w => w.MasterNode == vv.FlowNode).FirstOrDefault();
                         if (ucView != null)

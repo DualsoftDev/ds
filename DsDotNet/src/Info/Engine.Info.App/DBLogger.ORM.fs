@@ -110,26 +110,32 @@ CREATE VIEW [{Vn.Log}] AS
         | UInt64 d -> decimal d
         | _ -> failwith "ERROR"
 
-    let insertDBLogAsync(x:DsLog) =
+
+    let insertDBLogsAsync(xs:DsLog seq) =
         use conn = createConnection()
         task {
-            match  x.Storage.Target with
-            | Some t ->
-                let fqdn = t.QualifiedName
-                let! storageId =
-                    conn.QuerySingleOrDefaultAsync<int>(
-                        $"""SELECT id FROM [{Tn.Storage}]
-                            WHERE fqdn=@Fqdn AND tagKind=@TagKind;""", {|Fqdn=fqdn; TagKind=x.Storage.TagKind|})
-                let value = toDecimal x.Storage.BoxedValue
-                let! _ = conn.ExecuteAsync(
-                    $"""INSERT INTO [{Tn.Log}]
-                        (at, storageId, value)
-                        VALUES (@At, @StorageId, @Value)
-                    """, {| At=x.Time; StorageId=storageId; Value=value |})
-                ()
-            | None ->
-                failwith "NOT yet!!"
+            use! tr = conn.BeginTransactionAsync()
+            for x in xs do
+                match  x.Storage.Target with
+                | Some t ->
+                    let fqdn = t.QualifiedName
+                    let! storageId =
+                        conn.QuerySingleOrDefaultAsync<int>(
+                            $"""SELECT id FROM [{Tn.Storage}]
+                                WHERE fqdn= @Fqdn AND tagKind=@TagKind;""", {|Fqdn=fqdn; TagKind=x.Storage.TagKind|})
+                    let value = toDecimal x.Storage.BoxedValue
+                    let! _ = conn.ExecuteAsync(
+                        $"""INSERT INTO [{Tn.Log}]
+                            (at, storageId, value)
+                            VALUES (@At, @StorageId, @Value)
+                        """, {| At=x.Time; StorageId=storageId; Value=value |})
+                    ()
+                | None ->
+                    failwith "NOT yet!!"
+            do! tr.CommitAsync()
         }
+
+    let insertDBLogAsync(x:DsLog) = insertDBLogsAsync([x])
 
     //let countFromDBAsync(fqdn:string, tagKind:int, value:bool) =
     //    use conn = createConnection()

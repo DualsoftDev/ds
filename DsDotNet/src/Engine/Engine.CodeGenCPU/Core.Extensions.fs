@@ -24,11 +24,12 @@ module ConvertCoreExt =
 
 
 
-    let errText (x:CallDev)  = 
-        String.Join("\n", x.CallTargetJob.DeviceDefs
+    let errTexts (x:CallDev)  = 
+        x.CallTargetJob.DeviceDefs
                         .Select(fun s -> s.ApiItem.TagManager)
                         .Cast<ApiItemManager>()
-                        .Select(fun s -> s.ErrorText))
+                        .Where(fun w ->not(w.ErrorText.IsNullOrEmpty()))
+                        .Select(fun s -> s.ErrorText)
 
 
     let errTextByDevice (x:CallDev)  = 

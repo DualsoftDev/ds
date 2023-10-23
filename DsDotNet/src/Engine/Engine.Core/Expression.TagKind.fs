@@ -153,133 +153,137 @@ module TagKindModule =
 
     type TagWeb = {
         Name  : string //FQDN 고유이름
-        Value : string*obj //TypeName, Tag 값
+        _SerializedObject : string
         Kind  : int    //Tag 종류 ex) going = 11007
         Message : string //에러 내용 및 기타 전달 Message 
     }
+    type TagWeb with
+        member x.Value:obj = ObjectHolder.Deserialize(x._SerializedObject).GetValue()
 
-    [<AutoOpen>]
+[<AutoOpen>]
+[<Extension>]
+type TagKindExt =
+    [<Extension>] static member OnChanged (tagDS:TagDS) = TagDSSubject.OnNext(tagDS)
+    [<Extension>] static member GetSystemTagKind (x:IStorage) = DU.tryGetEnumValue<SystemTag>(x.TagKind)
+    [<Extension>] static member GetFlowTagKind   (x:IStorage) = DU.tryGetEnumValue<FlowTag>(x.TagKind)
+    [<Extension>] static member GetVertexTagKind (x:IStorage) = DU.tryGetEnumValue<VertexTag>(x.TagKind)
+    [<Extension>] static member GetApiTagKind    (x:IStorage) = DU.tryGetEnumValue<ApiItemTag>(x.TagKind)
+    [<Extension>] static member GetActionTagKind (x:IStorage) = DU.tryGetEnumValue<ActionTag>(x.TagKind)
+    [<Extension>] static member GetValue (x:TagWeb) : obj = x.Value
+
     [<Extension>]
-    type TagKindExt =
-        [<Extension>] static member OnChanged (tagDS:TagDS) = TagDSSubject.OnNext(tagDS)
-        [<Extension>] static member GetSystemTagKind (x:IStorage) = DU.tryGetEnumValue<SystemTag>(x.TagKind)
-        [<Extension>] static member GetFlowTagKind   (x:IStorage) = DU.tryGetEnumValue<FlowTag>(x.TagKind)
-        [<Extension>] static member GetVertexTagKind (x:IStorage) = DU.tryGetEnumValue<VertexTag>(x.TagKind)
-        [<Extension>] static member GetApiTagKind    (x:IStorage) = DU.tryGetEnumValue<ApiItemTag>(x.TagKind)
-        [<Extension>] static member GetActionTagKind (x:IStorage) = DU.tryGetEnumValue<ActionTag>(x.TagKind)
-
-        [<Extension>]
-        static member GetTagInfo (x:IStorage) =
-            match x.Target with
-            |Some obj ->
-                match obj with
-                | :? DsSystem as s ->Some( EventSystem  (x, s, x.GetSystemTagKind().Value))
-                | :? Flow as f     ->Some( EventFlow    (x, f, x.GetFlowTagKind().Value))
-                | :? Vertex as v   ->Some( EventVertex  (x, v, x.GetVertexTagKind().Value))
-                | :? ApiItem as a  ->Some( EventApiItem (x, a, x.GetApiTagKind().Value))
-                | :? DsTask  as d  ->Some( EventAction  (x, d, x.GetActionTagKind().Value))
-                |_ -> None
-            |None -> None
+    static member GetTagInfo (x:IStorage) =
+        match x.Target with
+        |Some obj ->
+            match obj with
+            | :? DsSystem as s ->Some( EventSystem  (x, s, x.GetSystemTagKind().Value))
+            | :? Flow as f     ->Some( EventFlow    (x, f, x.GetFlowTagKind().Value))
+            | :? Vertex as v   ->Some( EventVertex  (x, v, x.GetVertexTagKind().Value))
+            | :? ApiItem as a  ->Some( EventApiItem (x, a, x.GetApiTagKind().Value))
+            | :? DsTask  as d  ->Some( EventAction  (x, d, x.GetActionTagKind().Value))
+            |_ -> None
+        |None -> None
    
-        [<Extension>]
-        static member GetStorage(x:TagDS) =
-            match x with
-            |EventSystem (i, _, _) -> i
-            |EventFlow   (i, _, _) -> i
-            |EventVertex (i, _, _) -> i       
-            |EventApiItem(i, _, _) -> i
-            |EventAction (i, _, _) -> i
+    [<Extension>]
+    static member GetStorage(x:TagDS) =
+        match x with
+        |EventSystem (i, _, _) -> i
+        |EventFlow   (i, _, _) -> i
+        |EventVertex (i, _, _) -> i       
+        |EventApiItem(i, _, _) -> i
+        |EventAction (i, _, _) -> i
 
 
 
 
-        [<Extension>]
-        static member GetTarget(x:TagDS) =
-            match x with
-            |EventSystem ( _, target, _) -> target |> box
-            |EventFlow   ( _, target, _) -> target |> box
-            |EventVertex ( _, target, _) -> target |> box
-            |EventApiItem( _, target, _) -> target |> box
-            |EventAction ( _, target, _) -> target |> box
+    [<Extension>]
+    static member GetTarget(x:TagDS) =
+        match x with
+        |EventSystem ( _, target, _) -> target |> box
+        |EventFlow   ( _, target, _) -> target |> box
+        |EventVertex ( _, target, _) -> target |> box
+        |EventApiItem( _, target, _) -> target |> box
+        |EventAction ( _, target, _) -> target |> box
 
       
-        [<Extension>]
-        static member GetTagToText(x:TagDS) =
-            let getText(tag:IStorage) (obj:INamed) kind = $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
-            match x with
-            |EventSystem (tag, obj, kind) -> getText tag obj kind
-            |EventFlow   (tag, obj, kind) -> getText tag obj kind
-            |EventVertex (tag, obj, kind) -> getText tag obj kind
-            |EventApiItem(tag, obj, kind) -> getText tag obj kind
-            |EventAction (tag, obj, kind) -> getText tag obj kind
+    [<Extension>]
+    static member GetTagToText(x:TagDS) =
+        let getText(tag:IStorage) (obj:INamed) kind = $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
+        match x with
+        |EventSystem (tag, obj, kind) -> getText tag obj kind
+        |EventFlow   (tag, obj, kind) -> getText tag obj kind
+        |EventVertex (tag, obj, kind) -> getText tag obj kind
+        |EventApiItem(tag, obj, kind) -> getText tag obj kind
+        |EventAction (tag, obj, kind) -> getText tag obj kind
         
-        [<Extension>]
-        static member GetWebTag(x:TagDS) =
-            let createTagWeb (tag:IStorage) (obj:IQualifiedNamed) =
-                let tpl = tag.DataType.Name, tag.BoxedValue
-                { Name = obj.QualifiedName; Value = tpl; Kind = tag.TagKind; Message = ""}
-            match x with
-            | EventSystem (tag, obj, _) -> createTagWeb tag obj
-            | EventFlow   (tag, obj, _) -> createTagWeb tag obj
-            | EventVertex (tag, obj, _) -> createTagWeb tag obj
-            | EventApiItem(tag, obj, _) -> createTagWeb tag obj
-            | EventAction (tag, obj, _) -> createTagWeb tag obj
+    [<Extension>]
+    static member GetWebTag(x:TagDS) : TagWeb =
+        let createTagWeb (tag:IStorage) (obj:IQualifiedNamed) =
+            { Name = obj.QualifiedName; _SerializedObject = ObjectHolder.Create(tag.BoxedValue).Serialize(); Kind = tag.TagKind; Message = ""}
+        match x with
+        | EventSystem (tag, obj, _) -> createTagWeb tag obj
+        | EventFlow   (tag, obj, _) -> createTagWeb tag obj
+        | EventVertex (tag, obj, _) -> createTagWeb tag obj
+        | EventApiItem(tag, obj, _) -> createTagWeb tag obj
+        | EventAction (tag, obj, _) -> createTagWeb tag obj
 
-        [<Extension>]
-        static member GetSystem(x:TagDS) =
-            match x with
-            |EventSystem (_, obj, _) -> obj
-            |EventFlow   (_, obj, _) -> obj.System
-            |EventVertex (_, obj, _) -> obj.Parent.GetSystem()       
-            |EventApiItem(_, obj, _) -> obj.System
-            |EventAction (_, obj, _) -> obj.ApiItem.System
+    [<Extension>] static member SetMessage(x:TagWeb, messsage) : TagWeb = {x with Message=messsage}
+
+    [<Extension>]
+    static member GetSystem(x:TagDS) =
+        match x with
+        |EventSystem (_, obj, _) -> obj
+        |EventFlow   (_, obj, _) -> obj.System
+        |EventVertex (_, obj, _) -> obj.Parent.GetSystem()       
+        |EventApiItem(_, obj, _) -> obj.System
+        |EventAction (_, obj, _) -> obj.ApiItem.System
         
-        [<Extension>]
-        static member IsStatusTag(x:TagDS) =
-            match x with
-            |EventVertex (_, _, kind) ->
-                kind.IsOneOf( VertexTag.ready
-                            , VertexTag.going
-                            , VertexTag.finish
-                            , VertexTag.homing)
-            |_ -> false
+    [<Extension>]
+    static member IsStatusTag(x:TagDS) =
+        match x with
+        |EventVertex (_, _, kind) ->
+            kind.IsOneOf( VertexTag.ready
+                        , VertexTag.going
+                        , VertexTag.finish
+                        , VertexTag.homing)
+        |_ -> false
 
-        [<Extension>]
-        static member IsVertexErrTag(x:TagDS) =
-            match x with
-            |EventVertex (_, _, kind) ->  kind.IsOneOf(  VertexTag.errorTx
-                                                       , VertexTag.errorRx)
-            |_->false
+    [<Extension>]
+    static member IsVertexErrTag(x:TagDS) =
+        match x with
+        |EventVertex (_, _, kind) ->  kind.IsOneOf(  VertexTag.errorTx
+                                                    , VertexTag.errorRx)
+        |_->false
 
-        [<Extension>]
-        static member IsStatusTag(x:IStorage) =
-            x.TagKind.IsOneOf(
-                  int VertexTag.ready
-                , int VertexTag.going
-                , int VertexTag.finish
-                , int VertexTag.homing)
+    [<Extension>]
+    static member IsStatusTag(x:IStorage) =
+        x.TagKind.IsOneOf(
+                int VertexTag.ready
+            , int VertexTag.going
+            , int VertexTag.finish
+            , int VertexTag.homing)
     
-        [<Extension>]
-        static member IsNeedSaveDBLog(x:TagDS) =
-            match x with
-            |EventSystem (_, _, kind) ->  kind.IsOneOf(  SystemTag.sysDrive  
-                                                       , SystemTag.sysError
-                                                       , SystemTag.clear)
+    [<Extension>]
+    static member IsNeedSaveDBLog(x:TagDS) =
+        match x with
+        |EventSystem (_, _, kind) ->  kind.IsOneOf(  SystemTag.sysDrive  
+                                                    , SystemTag.sysError
+                                                    , SystemTag.clear)
 
-            |EventFlow   (_, _, kind) ->  kind.IsOneOf(  FlowTag.drive_op
-                                                       , FlowTag.flowError)
+        |EventFlow   (_, _, kind) ->  kind.IsOneOf(  FlowTag.drive_op
+                                                    , FlowTag.flowError)
 
-            |EventVertex (_, _, kind) ->  kind.IsOneOf(
-                                            VertexTag.ready
-                                          , VertexTag.going       
-                                          , VertexTag.finish       
-                                          , VertexTag.homing       
-                                          , VertexTag.errorRx       
-                                          , VertexTag.errorTx)
+        |EventVertex (_, _, kind) ->  kind.IsOneOf(
+                                        VertexTag.ready
+                                        , VertexTag.going       
+                                        , VertexTag.finish       
+                                        , VertexTag.homing       
+                                        , VertexTag.errorRx       
+                                        , VertexTag.errorTx)
                                           
-            |EventApiItem(_, _, kind) ->  kind = ApiItemTag.trxErr
-                                          || kind = ApiItemTag.rxErrOpen  
-                                          || kind = ApiItemTag.rxErrShort  
-                                          || kind = ApiItemTag.txErrTimeOver  
-                                          || kind = ApiItemTag.txErrTrendOut  
-            |EventAction (_, _, _) -> false
+        |EventApiItem(_, _, kind) ->  kind = ApiItemTag.trxErr
+                                        || kind = ApiItemTag.rxErrOpen  
+                                        || kind = ApiItemTag.rxErrShort  
+                                        || kind = ApiItemTag.txErrTimeOver  
+                                        || kind = ApiItemTag.txErrTrendOut  
+        |EventAction (_, _, _) -> false

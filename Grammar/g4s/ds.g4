@@ -226,7 +226,7 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ipSpec ']' externalSystemN
         }
     }
  */
-propsBlock: '[' 'prop' ']' EQ LBRACE (safetyBlock|layoutBlock)* RBRACE;
+propsBlock: '[' 'prop' ']' EQ LBRACE (safetyBlock|layoutBlock|finishBlock|disableBlock)* RBRACE;
     safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
         safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
             // Real|CallDev = { ((Real|CallDev);)* }
@@ -234,13 +234,19 @@ propsBlock: '[' 'prop' ']' EQ LBRACE (safetyBlock|layoutBlock)* RBRACE;
             safetyValues: identifier23 (SEIMCOLON identifier23)* (SEIMCOLON)?;
 
     layoutBlock: '[' 'layouts' ']' '=' LBRACE (positionDef)* RBRACE;
-        positionDef: callName '=' xywh;
-            callName: identifier23;
+        positionDef: deviceOrApiName '=' xywh;
+            deviceOrApiName: identifier12;
             xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEIMCOLON)?;
             x: INTEGER;
             y: INTEGER;
             w: INTEGER;
             h: INTEGER;
+    finishBlock: '[' 'finish' ']' '=' LBRACE (finishListing)* RBRACE;
+        finishTarget: identifier2;
+        finishListing: finishTarget (SEIMCOLON finishTarget)* (SEIMCOLON)?;
+    disableBlock: '[' 'disable' ']' '=' LBRACE (disableListing)* RBRACE;
+        disableTarget: identifier3;
+        disableListing: disableTarget (SEIMCOLON disableTarget)* (SEIMCOLON)?;
 
 flowBlock
     : '[' 'flow' ']' identifier1 '=' LBRACE (

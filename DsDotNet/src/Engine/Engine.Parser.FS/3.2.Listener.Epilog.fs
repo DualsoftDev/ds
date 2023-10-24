@@ -277,9 +277,9 @@ module EtcListenerModule =
 
             let positionDefs = ctx.Descendants<PositionDefContext>().ToArray()
             for posiDef in positionDefs do
-                let callNamePath = posiDef.callName().TryCollectNameComponents()|> Option.get
+                let deviceOrApiNamePath = posiDef.deviceOrApiName().TryCollectNameComponents()|> Option.get
                 let xywh = posiDef.xywh()
-                let call = tryFindCall x.TheSystem callNamePath |> Option.get
+                let call = tryFindCall x.TheSystem deviceOrApiNamePath |> Option.get
 
                 match xywh.x().GetText(), xywh.y().GetText(), xywh.w().GetText(), xywh.h().GetText() with
                 | Int32Pattern x, Int32Pattern y, Int32Pattern w, Int32Pattern h ->

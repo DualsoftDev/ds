@@ -94,6 +94,7 @@ module rec ZmqSpec =
         member val FileStream:FileStream = null with get, set
         member val BufferManager:IBufferManager = null with get, set
     
+    // Activator.CreateInstanceFrom(v.Dll, v.ClassName) 를 이용
     [<AllowNullLiteral>] 
     type  VendorSpec() =
         member val Name = "" with get, set

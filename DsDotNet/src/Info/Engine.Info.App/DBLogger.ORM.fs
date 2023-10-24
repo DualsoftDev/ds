@@ -81,23 +81,24 @@ CREATE VIEW [{Vn.Log}] AS
         member val DataType = dataTypeName with get, set
         member val Name     = name         with get, set
 
-    type ORMLog(storageId:int, at:DateTime, value:obj) =
-        new() = ORMLog(-1, DateTime.MaxValue, null)
-        member val Id = -1 with get, set
+    type ORMLog(id:int, storageId:int, at:DateTime, value:obj) =
+        new() = ORMLog(-1, -1, DateTime.MaxValue, null)
+        member val Id = id with get, set
         member val StorageId = storageId with get, set
         member val At = at with get, set
         member val Value = value with get, set
 
     type Log(storage:Storage, at:DateTime, value:obj) =
-        inherit ORMLog(storage.Id, at, value)
+        inherit ORMLog( (if isItNull(storage) then -1 else storage.Id) , storage.Id, at, value)
         new() = Log(getNull<Storage>(), DateTime.MaxValue, null)
         member val Storage   = storage with get, set
         member val At        = at      with get, set
         member val Value:obj = value   with get, set
-        static member Create(log:DsLog, storages:Dictionary<string, Storage>) =
-            ()
 
-    let mutable private g_storages:Storage[] = [||]
+    type StorageKey = int*string
+    let mutable private storages = Dictionary<StorageKey, Storage>()
+    let mutable private logs:Log list = []
+    let getStorageKey(s:Storage):StorageKey = s.TagKind, s.Fqdn
 
     let initializeOnDemandAsync(systems:DsSystem seq) =
         task {
@@ -115,12 +116,17 @@ CREATE VIEW [{Vn.Log}] AS
                 |> toArray
             
             let! dbStorages = conn.QueryAsync<Storage>($"SELECT * FROM [{Tn.Storage}]")
-            let dbStorageKeys = HashSet<int*string>(dbStorages |> map (fun s -> s.TagKind, s.Fqdn))
+            let dbStorages =
+                dbStorages |> map (fun s -> getStorageKey s, s)
+                |> Tuple.toDictionary
 
             let existingStorages, newStorages = 
                 systemStorages
-                |> Seq.partition (fun s -> dbStorageKeys.Contains((s.TagKind, s.Fqdn)))
+                |> Seq.partition (fun s -> dbStorages.ContainsKey(getStorageKey s))
 
+            for s in existingStorages do
+                s.Id <- dbStorages[getStorageKey s].Id
+                
 
             for s in newStorages do
                 let! id = conn.InsertAndQueryLastRowIdAsync(tr,
@@ -130,10 +136,28 @@ CREATE VIEW [{Vn.Log}] AS
                         ;
                     """, {|Name=s.Name; Fqdn=s.Fqdn; TagKind=s.TagKind; DataType=s.DataType|})
                 s.Id <- id
-                
+
+            let! existingLogs = conn.QueryAsync<ORMLog>($"SELECT * FROM [{Tn.Log}]")
+
             do! tr.CommitAsync()
 
-            g_storages <- existingStorages @ newStorages
+            storages <-
+                (existingStorages @ newStorages)
+                |> map (fun s -> getStorageKey s, s)
+                |> Tuple.toDictionary
+
+            let logs_ =
+                let storagesById =
+                    storages.Values
+                    |> map (fun s -> s.Id, s)
+                    |> Tuple.toDictionary
+                [ for l in existingLogs |> Seq.sortByDescending(fun l -> l.Id) do
+                    let storage = storagesById[l.Id]
+                    let log:Log = Log(storage, l.At, l.Value)
+                    yield log
+                ]
+                
+            logs <- logs_
         }
 
     let private toDecimal (value:obj) =
@@ -150,11 +174,8 @@ CREATE VIEW [{Vn.Log}] AS
             for x in xs do
                 match  x.Storage.Target with
                 | Some t ->
-                    let fqdn = t.QualifiedName
-                    let! storageId =
-                        conn.QuerySingleOrDefaultAsync<int>(
-                            $"""SELECT id FROM [{Tn.Storage}]
-                                WHERE fqdn= @Fqdn AND tagKind=@TagKind;""", {|Fqdn=fqdn; TagKind=x.Storage.TagKind|})
+                    let key = x.Storage.TagKind, t.QualifiedName
+                    let storageId = storages[key].Id
                     let value = toDecimal x.Storage.BoxedValue
                     let! _ = conn.ExecuteAsync(
                         $"""INSERT INTO [{Tn.Log}]

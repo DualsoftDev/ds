@@ -69,39 +69,71 @@ CREATE VIEW [{Vn.Log}] AS
         if not <| conn.IsTableExistsAsync(Tn.Log).Result then
             conn.Execute(sqlCreateSchema, null) |> ignore
 
+
+
+
+    type Storage(id:int, tagKind:int, fqdn:string, dataTypeName:string, name:string) =
+        new() = Storage(-1, -1, null, null, null)
+        new(iStorage:IStorage) = Storage(-1, iStorage.TagKind, iStorage.Target.Value.QualifiedName, iStorage.DataType.Name, iStorage.Name)
+        member val Id:int   = id           with get, set
+        member val Fqdn     = fqdn         with get, set
+        member val TagKind  = tagKind      with get, set
+        member val DataType = dataTypeName with get, set
+        member val Name     = name         with get, set
+
+    type ORMLog(storageId:int, at:DateTime, value:obj) =
+        new() = ORMLog(-1, DateTime.MaxValue, null)
+        member val Id = -1 with get, set
+        member val StorageId = storageId with get, set
+        member val At = at with get, set
+        member val Value = value with get, set
+
+    type Log(storage:Storage, at:DateTime, value:obj) =
+        inherit ORMLog(storage.Id, at, value)
+        new() = Log(getNull<Storage>(), DateTime.MaxValue, null)
+        member val Storage   = storage with get, set
+        member val At        = at      with get, set
+        member val Value:obj = value   with get, set
+        static member Create(log:DsLog, storages:Dictionary<string, Storage>) =
+            ()
+
+    let mutable private g_storages:Storage[] = [||]
+
     let initializeOnDemandAsync(systems:DsSystem seq) =
         task {
             use conn = createConnection()
             use! tr = conn.BeginTransactionAsync()
-            let! existingFqdns = conn.QueryAsync<string>($"SELECT fqdn FROM [{Tn.Storage}]")
-            let existingFqdns = HashSet<string>(existingFqdns)
                                 
-            let storages: IStorage seq =
+            let systemStorages: Storage array =
                 systems
                 |> map (fun s -> s.TagManager)
                 |> distinct
                 |> Seq.collect (fun tagManager -> tagManager.Storages.Values)
-                |> distinct
-            
-            let newStorages =
-                storages
                 |> filter (fun s -> s.TagKind <> InnerTag) // 내부변수
-                |> filter (fun s -> not <| existingFqdns.Contains(s.Target.Value.QualifiedName))
-                |> Array.ofSeq
+                |> distinct
+                |> map Storage
+                |> toArray
+            
+            let! dbStorages = conn.QueryAsync<Storage>($"SELECT * FROM [{Tn.Storage}]")
+            let dbStorageKeys = HashSet<int*string>(dbStorages |> map (fun s -> s.TagKind, s.Fqdn))
+
+            let existingStorages, newStorages = 
+                systemStorages
+                |> Seq.partition (fun s -> dbStorageKeys.Contains((s.TagKind, s.Fqdn)))
+
 
             for s in newStorages do
-                let fqdn = s.Target.Value.QualifiedName
-                let dataType = s.DataType.Name
-                let! _ = conn.ExecuteAsync(
+                let! id = conn.InsertAndQueryLastRowIdAsync(tr,
                     $"""INSERT INTO [{Tn.Storage}]
                         (name, fqdn, tagKind, dataType)
                         VALUES (@Name, @Fqdn, @TagKind, @DataType)
                         ;
-                    """, {|Name=s.Name; Fqdn=fqdn; TagKind=s.TagKind; DataType=dataType|})
-                ()
+                    """, {|Name=s.Name; Fqdn=s.Fqdn; TagKind=s.TagKind; DataType=s.DataType|})
+                s.Id <- id
                 
             do! tr.CommitAsync()
-            ()
+
+            g_storages <- existingStorages @ newStorages
         }
 
     let private toDecimal (value:obj) =

@@ -68,8 +68,6 @@ module TagKindModule =
     |emg_bit                   = 10014
     |test_bit                  = 10015
     |home_bit                  = 10016
-    |readycondi_bit            = 10017
-    |drivecondi_bit            = 10018
     
     ///stopType
     | flowError                = 10020
@@ -81,10 +79,10 @@ module TagKindModule =
     |startTag                  = 11000
     |resetTag                  = 11001
     |endTag                    = 11002
-
+    
     //|spare                   = 11003
-    //|spare                  = 11004
-    //|spare                  = 11005
+    //|spare                   = 11004
+    //|spare                   = 11005
 
     |ready                     = 11006
     |going                     = 11007

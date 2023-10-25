@@ -15,11 +15,11 @@ type DBLogger() =
 
     static member  CollectDurationsONAsync(fqdn, tagKind) =
         use conn = createConnection()
-        DBLoggerQueryImpl.collectDurationsONAsync(conn, fqdn, tagKind)
+        DBLoggerQueryImpl.collectDurationsON(DBLoggerImpl.loggerInfo, fqdn, tagKind)
 
     static member  GetAverageONDurationAsync(fqdn, tagKind) =
         use conn = createConnection()
-        DBLoggerQueryImpl.getAverageONDurationAsync(conn, fqdn, tagKind)
+        DBLoggerQueryImpl.getAverageONDurationAsync(DBLoggerImpl.loggerInfo, fqdn, tagKind)
 
     static member GetAverageONDurationSeconds(fqdn, tagKind) =
         DBLogger.GetAverageONDurationAsync(fqdn, tagKind).Result.TotalSeconds

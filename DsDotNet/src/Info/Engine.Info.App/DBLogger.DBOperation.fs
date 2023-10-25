@@ -2,6 +2,7 @@ namespace Engine.Info
 
 open System
 open System.Configuration;
+open System.Collections.Concurrent
 open Dapper
 open Engine.Core
 open Microsoft.Data.Sqlite
@@ -84,6 +85,7 @@ module internal DBLoggerImpl =
             return LoggerInfoSet(existingStorages @ newStorages, isReader)
         }
 
+    /// 주기적으로 DB -> memory 로 log 를 read
     let fetchNewLogs() =
         use conn = createConnection()
         let newLogs = conn.Query<ORMLog>($"SELECT * FROM [{Tn.Log}] WHERE id > {loggerInfo.LastLogId} ORDER BY id DESC;")            
@@ -92,6 +94,46 @@ module internal DBLoggerImpl =
             loggerInfo.Logs <- newLogs @ loggerInfo.Logs
             loggerInfo.LastLogId <- newLogs |> List.maxBy(fun l -> l.Id) |> fun l -> l.Id
             logDebug $"Feteched {newLogs.length()} new logs.  Total logs = {loggerInfo.Logs.length()}"
+
+    /// 주기적으로 memory -> DB 로 log 를 write
+    let queue = ConcurrentQueue<ORMLog>()
+    // 큐를 배열로 바꾸고 비우는 함수
+    let drainQueueToArray (queue: ConcurrentQueue<'T>) : 'T[] =
+        // 결과를 저장할 리스트
+        let results = new ResizeArray<'T>()
+
+        // 큐가 빌 때까지 반복해서 항목을 Dequeue
+        let rec drainQueue () =
+            match queue.TryDequeue() with
+            | true, item ->
+                results.Add(item)
+                drainQueue ()
+            | false, _ -> 
+                () // 큐가 비었으므로 종료
+    
+        // 큐 드레이닝 시작
+        drainQueue ()
+
+        // 리스트를 배열로 변환하여 반환
+        results.ToArray()
+
+    let dequeAndWriteDBAsync() =
+        task {
+            let newLogs = drainQueueToArray(queue)
+            if newLogs.any() then
+                logDebug $"Writing {newLogs.length()} new logs."
+                use conn = createConnection()
+                use! tr = conn.BeginTransactionAsync()
+                for l in newLogs do
+                    let! _ = conn.ExecuteAsync(
+                        $"""INSERT INTO [{Tn.Log}]
+                            (at, storageId, value)
+                            VALUES (@At, @StorageId, @Value)
+                        """, {| At=l.At; StorageId=l.StorageId; Value=l.Value |})
+                    ()
+                do! tr.CommitAsync()
+        }
+
 
     let createLoggerInfoSetForReaderAsync(systems:DsSystem seq) : Task<LoggerInfoSet> =
         task {
@@ -120,24 +162,28 @@ module internal DBLoggerImpl =
             return li
         }
 
-    let mutable readerDisposables = new CompositeDisposable()
+    let interval = System.Reactive.Linq.Observable.Interval(TimeSpan.FromSeconds(1))
+    let mutable disposables = new CompositeDisposable()
+
     let initializeLogReaderOnDemandAsync(systems:DsSystem seq) =
-        dispose readerDisposables
-        readerDisposables <- new CompositeDisposable()
+        dispose disposables
+        disposables <- new CompositeDisposable()
 
         task {
             let! li = createLoggerInfoSetForReaderAsync(systems)
-            let subs =
-                System.Reactive.Linq.Observable.Interval(TimeSpan.FromSeconds(1))
-                    .Subscribe(fun counter -> fetchNewLogs())
-            readerDisposables.Add(subs)
             loggerInfo <- li
+
+            interval.Subscribe(fun counter -> fetchNewLogs())
+            |> disposables.Add
         }
 
     let initializeLogWriterOnDemandAsync(systems:DsSystem seq) =
         task {
             let! li = createLogInfoSetForWriterAsync(systems)
             loggerInfo <- li
+
+            interval.Subscribe(fun counter -> dequeAndWriteDBAsync().Wait())
+            |> disposables.Add
         }
 
     let private toDecimal (value:obj) =
@@ -147,29 +193,19 @@ module internal DBLoggerImpl =
         | _ -> failwith "ERROR"
 
 
-    let insertDBLogsAsync(xs:DsLog seq) =
+    let enqueLogsForInsert(xs:DsLog seq) =
         verify(not loggerInfo.IsLogReader)
-        use conn = createConnection()
-        task {
-            use! tr = conn.BeginTransactionAsync()
-            for x in xs do
-                match  x.Storage.Target with
-                | Some t ->
-                    let key = x.Storage.TagKind, t.QualifiedName
-                    let storageId = loggerInfo.Storages[key].Id
-                    let value = toDecimal x.Storage.BoxedValue
-                    let! _ = conn.ExecuteAsync(
-                        $"""INSERT INTO [{Tn.Log}]
-                            (at, storageId, value)
-                            VALUES (@At, @StorageId, @Value)
-                        """, {| At=x.Time; StorageId=storageId; Value=value |})
-                    ()
-                | None ->
-                    failwith "NOT yet!!"
-            do! tr.CommitAsync()
-        }
+        for x in xs do
+            match  x.Storage.Target with
+            | Some t ->
+                let key = x.Storage.TagKind, t.QualifiedName
+                let storageId = loggerInfo.Storages[key].Id
+                let value = toDecimal x.Storage.BoxedValue
+                ORMLog(-1, storageId, x.Time, value) |> queue.Enqueue
+            | None ->
+                failwith "NOT yet!!"
 
-    let insertDBLogAsync(x:DsLog) = insertDBLogsAsync([x])
+    let enqueLogForInsert(x:DsLog) = enqueLogsForInsert([x])
 
     //let countLogAsync(fqdn:string, tagKind:int, value:bool) =
     //    use conn = createConnection()

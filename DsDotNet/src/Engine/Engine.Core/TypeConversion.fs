@@ -182,6 +182,7 @@ module TypeConversionModule =
         | :? single as n -> Some (n <> 0.f)
         | :? double as n -> Some (n <> 0.0)
         | Int32 n -> Some (n <> 0)      (* int32 로 변환 가능한 모든 numeric type 포함 *)
+        | Int64 n -> Some (n <> 0)      (* int32 로 변환 가능한 모든 numeric type 포함 *)
         | _ -> None  // bool casting 실패
 
     let toBool    x = (|Bool|_|)    x |> Option.get

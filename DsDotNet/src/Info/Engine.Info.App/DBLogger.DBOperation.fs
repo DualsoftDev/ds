@@ -10,6 +10,7 @@ open Dual.Common.Db
 open System.Collections.Generic
 open System.Data
 open System.Reactive.Disposables
+open System.Threading.Tasks
 open DBLoggerORM
 
 [<AutoOpen>]
@@ -42,8 +43,8 @@ module internal DBLoggerImpl =
 
 
     let mutable loggerInfo = getNull<LoggerInfoSet>()
-
-    let private initializeCommonOnDemandAsync(systems:DsSystem seq, conn:IDbConnection, tr:IDbTransaction, isReader:bool) =
+    
+    let private createLogInfoSetCommonAsync(systems:DsSystem seq, conn:IDbConnection, tr:IDbTransaction, isReader:bool) : Task<LoggerInfoSet> =
         Log4NetWrapper.logWithTrace <- true
 
         task {
@@ -92,6 +93,32 @@ module internal DBLoggerImpl =
             loggerInfo.LastLogId <- newLogs |> List.maxBy(fun l -> l.Id) |> fun l -> l.Id
             logDebug $"Feteched {newLogs.length()} new logs.  Total logs = {loggerInfo.Logs.length()}"
 
+    let createLoggerInfoSetForReaderAsync(systems:DsSystem seq) : Task<LoggerInfoSet> =
+        task {
+            use conn = createConnection()
+            use! tr = conn.BeginTransactionAsync()
+
+            let! li = createLogInfoSetCommonAsync(systems, conn, tr, true)
+
+            let! existingLogs = conn.QueryAsync<ORMLog>($"SELECT * FROM [{Tn.Log}]")
+
+            do! tr.CommitAsync()
+
+            li.InitializeForReader(existingLogs)
+            return li
+        }
+
+
+    let createLogInfoSetForWriterAsync(systems:DsSystem seq) : Task<LoggerInfoSet> =
+        task {
+            use conn = createConnection()
+            use! tr = conn.BeginTransactionAsync()
+            let isReader = false
+            let! li = createLogInfoSetCommonAsync(systems, conn, tr, isReader)
+            do! tr.CommitAsync()
+
+            return li
+        }
 
     let mutable readerDisposables = new CompositeDisposable()
     let initializeLogReaderOnDemandAsync(systems:DsSystem seq) =
@@ -99,33 +126,18 @@ module internal DBLoggerImpl =
         readerDisposables <- new CompositeDisposable()
 
         task {
-            use conn = createConnection()
-            use! tr = conn.BeginTransactionAsync()
-
-            let! li = initializeCommonOnDemandAsync(systems, conn, tr, true)
-            loggerInfo <- li
-
-            let! existingLogs = conn.QueryAsync<ORMLog>($"SELECT * FROM [{Tn.Log}]")
-
-            do! tr.CommitAsync()
-
-            loggerInfo.InitializeForReader(existingLogs)
-
-
+            let! li = createLoggerInfoSetForReaderAsync(systems)
             let subs =
                 System.Reactive.Linq.Observable.Interval(TimeSpan.FromSeconds(1))
                     .Subscribe(fun counter -> fetchNewLogs())
             readerDisposables.Add(subs)
+            loggerInfo <- li
         }
 
     let initializeLogWriterOnDemandAsync(systems:DsSystem seq) =
         task {
-            use conn = createConnection()
-            use! tr = conn.BeginTransactionAsync()
-            let isReader = false
-            let! li = initializeCommonOnDemandAsync(systems, conn, tr, isReader)
+            let! li = createLogInfoSetForWriterAsync(systems)
             loggerInfo <- li
-            do! tr.CommitAsync()
         }
 
     let private toDecimal (value:obj) =
@@ -159,28 +171,24 @@ module internal DBLoggerImpl =
 
     let insertDBLogAsync(x:DsLog) = insertDBLogsAsync([x])
 
-    //let countFromDBAsync(fqdn:string, tagKind:int, value:bool) =
+    //let countLogAsync(fqdn:string, tagKind:int, value:bool) =
     //    use conn = createConnection()
     //    conn.QuerySingleAsync<int>(
     //        $"""SELECT COUNT(*) FROM [{Vn.Log}]
     //            WHERE fqdn=@Fqdn AND tagKind=@TagKind AND value=@Value;""", {|Fqdn=fqdn; TagKind=tagKind; Value=value|})
 
-    let countFromDBAsync(fqdns:string seq, tagKinds:int seq, value:bool) =
-        use conn = createConnection()
-        conn.QuerySingleAsync<int>(
-            $"""SELECT COUNT(*) FROM [{Vn.Log}]
-                WHERE
-                    fqdn IN @Fqdns
-                AND tagKind IN @TagKinds
-                AND value=@Value;""" 
-                , {|Fqdns=fqdns; TagKinds=tagKinds; Value=value|})
-
+    let countLog(loggerInfo:LoggerInfoSet, fqdns:string seq, tagKinds:int seq, value:bool) =
+        let fqdns = fqdns |> HashSet
+        let tagKinds = tagKinds |> HashSet
+        loggerInfo.Logs
+            |> Seq.count(fun l ->
+                l.Value = value
+                && fqdns.Contains(l.Storage.Fqdn)
+                && tagKinds.Contains(l.Storage.TagKind))
                 
     // 지정된 조건에 따라 마지막 'Value'를 반환하는 함수
-    let GetLastValueFromDBAsync (fqdn: string, tagKind: int) =
-        use conn = createConnection()
-        conn.QuerySingleOrDefaultAsync<bool>( 
-            $"""SELECT Value FROM [{Vn.Log}]
-                WHERE fqdn=@Fqdn AND tagKind=@TagKind
-                ORDER BY at DESC
-                LIMIT 1;""", {|Fqdn=fqdn; TagKind=tagKind|}) 
+    let getLastValue (loggerInfo:LoggerInfoSet, fqdn: string, tagKind: int) : bool option =
+        loggerInfo.Logs
+            |> Seq.tryFind(fun l -> l.Storage.TagKind = tagKind && l.Storage.Fqdn = fqdn)
+            |> bind (fun l -> (|Bool|_|) l.Value)
+

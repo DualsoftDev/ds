@@ -4,13 +4,13 @@ open Engine.Core
 
 type DBLogger() =
     static member CreateLoggerDBSchema() = DBLoggerImpl.createLoggerDBSchema()
-    static member CountFromDBAsync(fqdns:string seq, tagKinds:int seq) = DBLoggerImpl.countFromDBAsync(fqdns, tagKinds, true)
-    static member CountFromDB(fqdn:string, tagKind:int) = DBLogger.CountFromDBAsync([|fqdn|], [|tagKind|]).Result
+    static member CountLog(fqdns:string seq, tagKinds:int seq) = DBLoggerImpl.countLog(DBLoggerImpl.loggerInfo, fqdns, tagKinds, true)
+    static member CountLog(fqdn:string, tagKind:int) = DBLogger.CountLog([|fqdn|], [|tagKind|])
     static member InsertDBLogAsync(log:DsLog) = DBLoggerImpl.insertDBLogAsync(log:DsLog)
     static member InsertDBLogsAsync(logs:DsLog seq) = DBLoggerImpl.insertDBLogsAsync(logs:DsLog seq)
     static member InitializeLogWriterOnDemandAsync(systems:DsSystem seq) = DBLoggerImpl.initializeLogWriterOnDemandAsync(systems)
     static member InitializeLogReaderOnDemandAsync(systems:DsSystem seq) = DBLoggerImpl.initializeLogReaderOnDemandAsync(systems)
-    static member GetLastValueFromDBAsync(fqdn:string, tagKind:int) = DBLoggerImpl.GetLastValueFromDBAsync(fqdn, tagKind)
+    static member GetLastValue(fqdn:string, tagKind:int) = DBLoggerImpl.getLastValue(DBLoggerImpl.loggerInfo, fqdn, tagKind).Value
     
 
     static member  CollectDurationsONAsync(fqdn, tagKind) =

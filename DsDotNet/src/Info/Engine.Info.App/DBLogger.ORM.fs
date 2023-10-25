@@ -1,15 +1,9 @@
 namespace Engine.Info
 
 open System
-open System.Configuration;
-open Dapper
 open Engine.Core
-open Microsoft.Data.Sqlite
 open Dual.Common.Core.FS
-open Dual.Common.Db
 open System.Collections.Generic
-open System.Data
-open System.Reactive.Disposables
 
 
 [<AutoOpen>]

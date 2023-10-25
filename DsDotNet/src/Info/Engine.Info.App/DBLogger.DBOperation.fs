@@ -16,11 +16,12 @@ open DBLoggerORM
 
 [<AutoOpen>]
 module internal DBLoggerImpl =
-    let connectionString = ConfigurationManager.ConnectionStrings["DBLoggerConnectionString"].ConnectionString;
+    let mutable connectionString = "";
     let createConnection() =
         new SqliteConnection(connectionString) |> tee (fun conn -> conn.Open())
 
-    let createLoggerDBSchema() =
+    let createLoggerDBSchema(connStr:string) =
+        connectionString <- connStr
         use conn = createConnection()
         if not <| conn.IsTableExistsAsync(Tn.Log).Result then
             conn.Execute(sqlCreateSchema, null) |> ignore

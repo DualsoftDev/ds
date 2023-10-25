@@ -11,7 +11,9 @@
 		<Compile Include="DBLogger.DBOperation.fs" />
 		<Compile Include="DBLogger.Query.fs" />
 		<Compile Include="DBLogger.fs" />
+		<Compile Include="DBLogger.Test.fs" />
 		<Compile Include="InfoApp.fs" />
+		<Compile Include="AssemblyInfo.fs" />
 	</ItemGroup>
 
 	<ItemGroup>

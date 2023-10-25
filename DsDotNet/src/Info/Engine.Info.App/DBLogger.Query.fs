@@ -1,24 +1,19 @@
 namespace Engine.Info
 
 open System
-open System.Threading.Tasks
-open Dapper
 open Dual.Common.Core.FS
-open System.Data
 open Engine.Core
 
 module DBLoggerQueryImpl =
-    //type ORMTimeDiff() =
-    //    member val At: DateTime = DateTime.MaxValue with get, set
-    //    member val PrevAt: DateTime = DateTime.MaxValue with get, set
 
     let private collectDurationONHelper (loggerInfo:LoggerInfoSet, fqdn: string, tagKind: int) =
+        /// head 에 최신(最新) 정보가, last 에 최고(最古) 정보 수록
         let logs =
             loggerInfo.Logs
             |> filter(fun l -> l.Storage.TagKind = tagKind && l.Storage.Fqdn = fqdn)
-            |> List.skipWhile(fun l -> toBool(l.Value) = false)
+            |> List.skipWhile(fun l -> toBool(l.Value) = true)  // 최신에 켜져서 가동 중인 frame 무시
+
         let rec inspectLog (logs:Log list) =
-            // head 에 최신(最新) 정보가, last 에 최고(最古) 정보 수록
             [   match logs with
                 | ([] | _::[]) -> ()
                 | off::on::tails when toBool(on.Value) && not <| toBool(off.Value) ->
@@ -35,22 +30,20 @@ module DBLoggerQueryImpl =
             ]
         logs |> inspectLog
 
-    let internal collectDurationsON (loggerInfo:LoggerInfoSet, fqdn: string, tagKind: int) : TimeSpan array =
+    let internal collectONDurations (loggerInfo:LoggerInfoSet, fqdn: string, tagKind: int) : TimeSpan array =
         collectDurationONHelper (loggerInfo, fqdn, tagKind)
         |> map (fun (prev, curr) -> curr.At - prev.At)
+        |> Seq.rev
         |> toArray
 
 
-    let internal getAverageONDurationAsync (loggerInfo:LoggerInfoSet, fqdn: string, tagKind: int) : Task<TimeSpan> =
-        task {
-            let timeSpans = collectDurationsON (loggerInfo, fqdn, tagKind)
+    let internal getAverageONDuration (loggerInfo:LoggerInfoSet, fqdn: string, tagKind: int) : TimeSpan =
+        let timeSpans = collectONDurations (loggerInfo, fqdn, tagKind)
 
-            return
-                if timeSpans.any () then
-                    timeSpans
-                    |> Seq.averageBy (fun ts -> float ts.Ticks)
-                    |> int64
-                    |> TimeSpan.FromTicks
-                else
-                    TimeSpan() // 계산된 지속 시간이 없는 경우
-        }
+        if timeSpans.any () then
+            timeSpans
+            |> Seq.averageBy (fun ts -> float ts.Ticks)
+            |> int64
+            |> TimeSpan.FromTicks
+        else
+            TimeSpan() // 계산된 지속 시간이 없는 경우

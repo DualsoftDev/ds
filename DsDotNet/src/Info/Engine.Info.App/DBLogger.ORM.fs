@@ -98,15 +98,54 @@ CREATE VIEW [{Vn.Log}] AS
         member val Value:obj = value   with get, set
 
     type StorageKey = int*string
-    let mutable storages = Dictionary<StorageKey, Storage>()
-    let mutable storagesById = Dictionary<int, Storage>()
-    let mutable logs:Log list = []
-    let mutable isLogReader = None
-    let mutable lastLogId = -1
-    let getStorageKey(s:Storage):StorageKey = s.TagKind, s.Fqdn
 
-    let private initializeCommonOnDemandAsync(systems:DsSystem seq, conn:IDbConnection, tr:IDbTransaction) =
+    let getStorageKey(s:Storage):StorageKey = s.TagKind, s.Fqdn
+    type ILoggerInfoSet = interface end
+    let mutable fwdOrmLog2Log = let dummy (loggerInfo:ILoggerInfoSet) (ormLog:ORMLog) : Log = failwithlog "Should be reimplemented." in dummy
+
+    type LoggerInfoSet(storages:Storage seq, isReader:bool) =
+        let storageDic =
+            storages
+            |> map (fun s -> getStorageKey s, s)
+            |> Tuple.toDictionary
+
+        interface ILoggerInfoSet
+        member x.Storages = storageDic
+        member val StoragesById:Dictionary<int, Storage> = null with get, set
+        member val Logs:Log list = [] with get, set
+        member x.IsLogReader = isReader
+        member val LastLogId = -1 with get, set
+
+        member x.InitializeForReader(ormLogs:ORMLog seq) =
+            x.StoragesById <-
+                x.Storages.Values
+                |> map (fun s -> s.Id, s)
+                |> Tuple.toDictionary
+
+            x.Logs <- ormLogs |> Seq.sortByDescending(fun l -> l.Id) |> map (fwdOrmLog2Log x) |> toList
+            if x.Logs.any() then
+                x.LastLogId <- x.Logs |> List.maxBy(fun l -> l.Id) |> fun l -> l.Id
+
+    let ormLog2Log (iLoggerInfo:ILoggerInfoSet) (l:ORMLog) =
+        let loggerInfo = iLoggerInfo :?> LoggerInfoSet
+        let storage = loggerInfo.StoragesById[l.StorageId]
+        Log(l.Id, storage, l.At, l.Value)// |> tee (fun ll -> ll.Id = l.Id)
+    do
+        fwdOrmLog2Log <- ormLog2Log
+
+
+
+    let mutable loggerInfo = getNull<LoggerInfoSet>()
+
+    //let mutable storages = Dictionary<StorageKey, Storage>()
+    //let mutable storagesById = Dictionary<int, Storage>()
+    //let mutable logs:Log list = []
+    //let mutable isLogReader = None
+    //let mutable lastLogId = -1
+
+    let private initializeCommonOnDemandAsync(systems:DsSystem seq, conn:IDbConnection, tr:IDbTransaction, isReader:bool) =
         Log4NetWrapper.logWithTrace <- true
+
         task {
             let systemStorages: Storage array =
                 systems
@@ -141,29 +180,21 @@ CREATE VIEW [{Vn.Log}] AS
                     """, {|Name=s.Name; Fqdn=s.Fqdn; TagKind=s.TagKind; DataType=s.DataType|})
                 s.Id <- id
 
-            storages <-
-                (existingStorages @ newStorages)
-                |> map (fun s -> getStorageKey s, s)
-                |> Tuple.toDictionary
+            return LoggerInfoSet(existingStorages @ newStorages, isReader)
         }
-
-    let ormLog2Log (l:ORMLog) =
-        let storage = storagesById[l.StorageId]
-        Log(l.Id, storage, l.At, l.Value)// |> tee (fun ll -> ll.Id = l.Id)
 
     let fetchNewLogs() =
         use conn = createConnection()
-        let newLogs = conn.Query<ORMLog>($"SELECT * FROM [{Tn.Log}] WHERE id > {lastLogId} ORDER BY id DESC;")            
+        let newLogs = conn.Query<ORMLog>($"SELECT * FROM [{Tn.Log}] WHERE id > {loggerInfo.LastLogId} ORDER BY id DESC;")            
         if newLogs.any() then
-            let newLogs = newLogs |> map ormLog2Log |> toList
-            logs <- newLogs @ logs
-            lastLogId <- newLogs |> List.maxBy(fun l -> l.Id) |> fun l -> l.Id
-            logDebug $"Feteched {newLogs.length()} new logs.  Total logs = {logs.length()}"
+            let newLogs = newLogs |> map (ormLog2Log loggerInfo) |> toList
+            loggerInfo.Logs <- newLogs @ loggerInfo.Logs
+            loggerInfo.LastLogId <- newLogs |> List.maxBy(fun l -> l.Id) |> fun l -> l.Id
+            logDebug $"Feteched {newLogs.length()} new logs.  Total logs = {loggerInfo.Logs.length()}"
 
 
     let mutable readerDisposables = new CompositeDisposable()
     let initializeLogReaderOnDemandAsync(systems:DsSystem seq) =
-        isLogReader <- Some true
         dispose readerDisposables
         readerDisposables <- new CompositeDisposable()
 
@@ -171,21 +202,15 @@ CREATE VIEW [{Vn.Log}] AS
             use conn = createConnection()
             use! tr = conn.BeginTransactionAsync()
 
-            do! initializeCommonOnDemandAsync(systems, conn, tr)
+            let! li = initializeCommonOnDemandAsync(systems, conn, tr, true)
+            loggerInfo <- li
 
             let! existingLogs = conn.QueryAsync<ORMLog>($"SELECT * FROM [{Tn.Log}]")
 
             do! tr.CommitAsync()
 
+            loggerInfo.InitializeForReader(existingLogs)
 
-            storagesById <-
-                storages.Values
-                |> map (fun s -> s.Id, s)
-                |> Tuple.toDictionary
-
-            logs <- existingLogs |> Seq.sortByDescending(fun l -> l.Id) |> map ormLog2Log |> toList
-            if logs.any() then
-                lastLogId <- logs |> List.maxBy(fun l -> l.Id) |> fun l -> l.Id
 
             let subs =
                 System.Reactive.Linq.Observable.Interval(TimeSpan.FromSeconds(1))
@@ -194,11 +219,12 @@ CREATE VIEW [{Vn.Log}] AS
         }
 
     let initializeLogWriterOnDemandAsync(systems:DsSystem seq) =
-        isLogReader <- Some false
         task {
             use conn = createConnection()
             use! tr = conn.BeginTransactionAsync()
-            do! initializeCommonOnDemandAsync(systems, conn, tr)
+            let isReader = false
+            let! li = initializeCommonOnDemandAsync(systems, conn, tr, isReader)
+            loggerInfo <- li
             do! tr.CommitAsync()
         }
 
@@ -210,7 +236,7 @@ CREATE VIEW [{Vn.Log}] AS
 
 
     let insertDBLogsAsync(xs:DsLog seq) =
-        verify(isLogReader = Some false)
+        verify(not loggerInfo.IsLogReader)
         use conn = createConnection()
         task {
             use! tr = conn.BeginTransactionAsync()
@@ -218,7 +244,7 @@ CREATE VIEW [{Vn.Log}] AS
                 match  x.Storage.Target with
                 | Some t ->
                     let key = x.Storage.TagKind, t.QualifiedName
-                    let storageId = storages[key].Id
+                    let storageId = loggerInfo.Storages[key].Id
                     let value = toDecimal x.Storage.BoxedValue
                     let! _ = conn.ExecuteAsync(
                         $"""INSERT INTO [{Tn.Log}]

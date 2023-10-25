@@ -4,9 +4,9 @@ open System
 open Dual.Common.Core.FS
 open Engine.Core
 
-module DBLoggerQueryImpl =
+module internal DBLoggerQueryImpl =
 
-    let private collectDurationONHelper (loggerInfo:LoggerInfoSet, fqdn: string, tagKind: int) =
+    let collectDurationONLogPairs (loggerInfo:LoggerInfoSet, fqdn: string, tagKind: int) : (Log*Log) array=
         /// head 에 최신(最新) 정보가, last 에 최고(最古) 정보 수록
         let logs =
             loggerInfo.Logs
@@ -14,7 +14,8 @@ module DBLoggerQueryImpl =
             |> List.skipWhile(fun l -> toBool(l.Value) = true)  // 최신에 켜져서 가동 중인 frame 무시
 
         let rec inspectLog (logs:Log list) =
-            [   match logs with
+            seq {
+                match logs with
                 | ([] | _::[]) -> ()
                 | off::on::tails when toBool(on.Value) && not <| toBool(off.Value) ->
                     yield (on, off)
@@ -27,17 +28,15 @@ module DBLoggerQueryImpl =
                 | off::tails when not <| toBool(off.Value) ->
                     yield! inspectLog tails
                 | _ -> failwith "ERROR"
-            ]
-        logs |> inspectLog
+            }
+        logs |> inspectLog |> Seq.rev |> toArray
 
-    let internal collectONDurations (loggerInfo:LoggerInfoSet, fqdn: string, tagKind: int) : TimeSpan array =
-        collectDurationONHelper (loggerInfo, fqdn, tagKind)
+    let collectONDurations (loggerInfo:LoggerInfoSet, fqdn: string, tagKind: int) : TimeSpan array =
+        collectDurationONLogPairs (loggerInfo, fqdn, tagKind)
         |> map (fun (prev, curr) -> curr.At - prev.At)
-        |> Seq.rev
-        |> toArray
 
 
-    let internal getAverageONDuration (loggerInfo:LoggerInfoSet, fqdn: string, tagKind: int) : TimeSpan =
+    let getAverageONDuration (loggerInfo:LoggerInfoSet, fqdn: string, tagKind: int) : TimeSpan option =
         let timeSpans = collectONDurations (loggerInfo, fqdn, tagKind)
 
         if timeSpans.any () then
@@ -45,5 +44,6 @@ module DBLoggerQueryImpl =
             |> Seq.averageBy (fun ts -> float ts.Ticks)
             |> int64
             |> TimeSpan.FromTicks
+            |> Some
         else
-            TimeSpan() // 계산된 지속 시간이 없는 경우
+            None // 계산된 지속 시간이 없는 경우

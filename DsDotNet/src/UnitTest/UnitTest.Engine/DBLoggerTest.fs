@@ -31,31 +31,32 @@ module DBLoggerTestModule =
                 now.AddSeconds(counter())
             helper
 
+        let cyl1Error = createStorage "cyl1.trxErr" (int ApiItemTag.trxErr)
+        (*             2s      1s
+                      +--|--+  +--+
+                ------+     +--+  +--------
+        *)
+        let logs =
+            [   createLog cyl1Error (nextSecond()) true     // 최고
+                do
+                    nextSecond() |> ignore
+                createLog cyl1Error (nextSecond()) false
+                createLog cyl1Error (nextSecond()) true
+                createLog cyl1Error (nextSecond()) false    // 최신
+            ] |> List.rev
+
+        let storages = [
+            cyl1Error
+            createStorage "my.Test2.TRXERR" (int ApiItemTag.trxErr)
+        ]
+
+        let logSet = createTestLoggerInfoSetForReader(storages, logs)
+        let fqdn, kind = cyl1Error.Fqdn, int ApiItemTag.trxErr
+
         [<Test>]
         member __.``Basic Test`` () =
-            let cyl1Error = createStorage "cyl1.trxErr" (int ApiItemTag.trxErr)
             let cyl2Error = createStorage "cyl2.trxErr" (int ApiItemTag.trxErr)
             let cyl2Error = createStorage "cyl2.trxErr" (int ApiItemTag.trxErr)
-            let storages = [
-                cyl1Error
-                createStorage "my.Test2.TRXERR" (int ApiItemTag.trxErr)
-            ]
-
-            (*                2s      1s
-                            +--|--+  +--+
-                      ------+     +--+  +--------
-             *)
-            let logs =
-                [   createLog cyl1Error (nextSecond()) true     // 최고
-                    do
-                        nextSecond() |> ignore
-                    createLog cyl1Error (nextSecond()) false
-                    createLog cyl1Error (nextSecond()) true
-                    createLog cyl1Error (nextSecond()) false    // 최신
-                ] |> List.rev
-
-            let logSet = createTestLoggerInfoSetForReader(storages, logs)
-            let fqdn, kind = cyl1Error.Fqdn, int ApiItemTag.trxErr
 
             2 === DBLogger.CountLog(fqdn, kind, logSet)
             false === DBLogger.GetLastValue(fqdn, kind, logSet)
@@ -64,7 +65,7 @@ module DBLoggerTestModule =
             onsTimeSpans |> SeqEq [TimeSpan.FromSeconds(2.0); TimeSpan.FromSeconds(1.0)]
 
             let avgONs = DBLogger.GetAverageONDuration(fqdn, kind, logSet)
-            avgONs.TotalMilliseconds === 1500.0
+            avgONs.Value.TotalMilliseconds === 1500.0
 
 
             // log 하나 추가 후, 동일 test
@@ -78,5 +79,9 @@ module DBLoggerTestModule =
             onsTimeSpans |> SeqEq [TimeSpan.FromSeconds(2.0); TimeSpan.FromSeconds(1.0)]
 
             let avgONs = DBLogger.GetAverageONDuration(fqdn, kind, logSet)
-            avgONs.TotalMilliseconds === 1500.0
+            avgONs.Value.TotalMilliseconds === 1500.0
+            ()
+
+        [<Test>]
+        member __.``Mean Time Test`` () =
             ()

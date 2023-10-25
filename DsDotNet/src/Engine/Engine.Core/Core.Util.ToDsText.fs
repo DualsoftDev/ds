@@ -329,27 +329,34 @@ module internal ToDsTextModule =
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
-            let calls =
-                [   for f in system.Flows do
-                        yield! f.Graph.Vertices.OfType<CallDev>()
-                ] |> List.distinct
-
-            let withLayouts = calls.Where(fun call -> call.Xywh <> null)
+            let devicesWithLayouts = 
+                system.Devices
+                |> Seq.where(fun device -> device.Xywh <> null)
+                |> Seq.toList
+            let deviceApisWithLayouts = 
+                system.Devices
+                |> Seq.map(fun device -> 
+                    device.ReferenceSystem.ApiItems
+                    |> Seq.where(fun api -> api.Xywh <> null)
+                ) 
+                |> Seq.flatten
+                |> Seq.toList
             let layouts =
+                let makeList (name:string) (xywh:Xywh) =
+                    let posi =
+                        if xywh.W.HasValue then
+                            $"({xywh.X}, {xywh.Y}, {xywh.W.Value}, {xywh.H.Value})"
+                        else
+                            $"({xywh.X}, {xywh.Y})"
+                    $"{tab2}{name} = {posi}"
                 [
-                    if withLayouts.Any() then
-                        yield $"{tab2}[layouts] = {lb}"
-                        for call in withLayouts do
-                            let xywh = call.Xywh
-                            let posi =
-                                if xywh.W.HasValue then
-                                    $"({xywh.X}, {xywh.Y}, {xywh.W.Value}, {xywh.H.Value})"
-                                else
-                                    $"({xywh.X}, {xywh.Y})"
-                            yield $"{tab2}{call.Name} = {posi}"
-
-                        yield $"{tab2}{rb}"
-                ] |> combineLines
+                    yield $"{tab2}[layouts] = {lb}"
+                    for device in devicesWithLayouts do
+                        yield makeList device.Name device.Xywh
+                    for deviceApi in deviceApisWithLayouts do
+                        yield makeList deviceApi.Name deviceApi.Xywh
+                    yield $"{tab2}{rb}"
+                ]  |> combineLines
 
             if safeties.Any() || layouts.Any() then
                 yield $"{tab}[prop] = {lb}"

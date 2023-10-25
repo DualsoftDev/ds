@@ -265,30 +265,30 @@ module EtcListenerModule =
         //    x.TheSystem.Observes.Add(observes)
 
 
-        member x.ProcessLayouts(ctx:SystemContext) =
-            (* [layouts] = {
-                   L.T.Cp = (30, 50)            // xy
-                   L.T.Cm = (60, 50, 20, 20)    // xywh
-            } *)
-
-            let layouts = ctx.Descendants<LayoutBlockContext>().ToArray()
-            if layouts.Length > 1 then
-                raise <| ParserException("Layouts block should exist only once", ctx)
-
-            let positionDefs = ctx.Descendants<PositionDefContext>().ToArray()
-            for posiDef in positionDefs do
-                let deviceOrApiNamePath = posiDef.deviceOrApiName().TryCollectNameComponents()|> Option.get
-                let xywh = posiDef.xywh()
-                let call = tryFindCall x.TheSystem deviceOrApiNamePath |> Option.get
-
-                match xywh.x().GetText(), xywh.y().GetText(), xywh.w().GetText(), xywh.h().GetText() with
-                | Int32Pattern x, Int32Pattern y, Int32Pattern w, Int32Pattern h ->
-                    match call with
-                    | :? CallDev -> (call:?>CallDev).Xywh <- new Xywh(x, y, w, h)
-                    | _ -> ()
-                | Int32Pattern x, Int32Pattern y, null, null ->
-                    match call with
-                    | :? CallDev -> (call:?>CallDev).Xywh <- new Xywh(x, y, Nullable(), Nullable())
-                    | _ -> ()
-                | _ ->
-                    failwithlog "ERROR"
+        //member x.ProcessLayouts(ctx:SystemContext) =
+        //    (* [layouts] = {
+        //           L.T.Cp = (30, 50)            // xy
+        //           L.T.Cm = (60, 50, 20, 20)    // xywh
+        //    } *)
+        //
+        //    let layouts = ctx.Descendants<LayoutBlockContext>().ToArray()
+        //    if layouts.Length > 1 then
+        //        raise <| ParserException("Layouts block should exist only once", ctx)
+        //
+        //    let positionDefs = ctx.Descendants<PositionDefContext>().ToArray()
+        //    for posiDef in positionDefs do
+        //        let deviceOrApiNamePath = posiDef.deviceOrApiName().TryCollectNameComponents()|> Option.get
+        //        let xywh = posiDef.xywh()
+        //        let call = tryFindCall x.TheSystem deviceOrApiNamePath |> Option.get
+        //
+        //        match xywh.x().GetText(), xywh.y().GetText(), xywh.w().GetText(), xywh.h().GetText() with
+        //        | Int32Pattern x, Int32Pattern y, Int32Pattern w, Int32Pattern h ->
+        //            match call with
+        //            | :? CallDev -> (call:?>CallDev).Xywh <- new Xywh(x, y, w, h)
+        //            | _ -> ()
+        //        | Int32Pattern x, Int32Pattern y, null, null ->
+        //            match call with
+        //            | :? CallDev -> (call:?>CallDev).Xywh <- new Xywh(x, y, Nullable(), Nullable())
+        //            | _ -> ()
+        //        | _ ->
+        //            failwithlog "ERROR"

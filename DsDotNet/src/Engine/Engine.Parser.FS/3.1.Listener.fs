@@ -1,5 +1,6 @@
 namespace rec Engine.Parser.FS
 
+open System
 open System.Linq
 open System.IO
 
@@ -494,6 +495,66 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 return ad
             }
 
+        let fillXywh (system:DsSystem) (listLayoutCtx:List<dsParser.LayoutBlockContext>) = 
+            let tryParseAndReturn (text : string) =
+                let mutable value = 0
+                if Int32.TryParse(text, &value) then
+                    value
+                else
+                    failwith "Conversion failed : xywh need to write into integer value"
+            let genXywh (xywh:dsParser.XywhContext) = 
+                new Xywh(
+                    tryParseAndReturn(getText(xywh.x())),
+                    tryParseAndReturn(getText(xywh.y())),
+                    tryParseAndReturn(getText(xywh.w())),
+                    tryParseAndReturn(getText(xywh.h()))
+                )
+            for layoutCtx in listLayoutCtx do
+                let listPositionDefCtx = layoutCtx.Descendants<PositionDefContext>().ToList()
+                for positionDef in listPositionDefCtx do
+                    let nameCtx = positionDef.TryFindFirstChild<Identifier12Context>() |> Option.get
+                    let name = getText nameCtx
+                    let xywh = positionDef.TryFindFirstChild<XywhContext>() |> Option.get |> genXywh
+                    match (collectNameComponents nameCtx).Count() with
+                    | 1 -> 
+                        let device = FindExtension.TryFindLoadedSystem(system, name) |> Option.get
+                        device.Xywh <- xywh
+                    | 2 -> 
+                        system.LoadedSystems 
+                        |> map(fun device -> device.ReferenceSystem.TryFindExportApiItem(collectNameComponents nameCtx))
+                        |> iter(fun apiItem -> if not(apiItem.IsNone) then apiItem.Value.Xywh <- xywh)
+                    | _ -> failwith "invalid name component"
+
+        let fillFinished (system:DsSystem) (listFinishedCtx:List<dsParser.FinishBlockContext>) =
+            for finishedCtx in listFinishedCtx do
+                let listFinished = finishedCtx.Descendants<FinishTargetContext>().ToList()
+                for finished in listFinished do
+                    let fqdn = collectNameComponents finished // in array.. [0] : flow, [1] : real
+                    let real = tryFindReal system fqdn[0] fqdn[1]
+                    if not(real.IsNone) then
+                        real.Value.Finished <- true
+                    else
+                        failwith $"Couldn't find target real object name {getText(finished)}"
+
+        let fillDisabled (system:DsSystem) (listDisabledCtx:List<dsParser.DisableBlockContext>) =
+            for disabledCtx in listDisabledCtx do
+                let listDisabled = disabledCtx.Descendants<DisableTargetContext>().ToList()
+                for disabled in listDisabled do
+                    let fqdn = collectNameComponents disabled
+                    let coin = system.TryFindCall fqdn
+                    if not(coin.IsNone) then
+                        (coin.Value :?> Call).Disabled <- true
+                    else
+                        failwith $"Couldn't find target coin object name {getText(disabled)}"
+            
+        let fillProperties (x:DsParserListener) (ctx:PropsBlockContext) = 
+            let theSystem  = x.TheSystem
+            //device, call에 layout xywh 채우기
+            ctx.Descendants<LayoutBlockContext>().ToList() |> fillXywh theSystem
+            //Real에 finished 채우기
+            ctx.Descendants<FinishBlockContext>().ToList() |> fillFinished theSystem
+            //Call에 disable, xywh 채우기
+            ctx.Descendants<DisableBlockContext>().ToList() |> fillDisabled theSystem
 
         for ctx in sysctx.Descendants<JobBlockContext>() do
             createTaskDevice  x.TheSystem ctx
@@ -515,6 +576,9 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
 
         for ctx in sysctx.Descendants<InterfaceDefContext>() do
             fillInterfaceDef x.TheSystem ctx |> ignore
+        
+        for ctx in sysctx.Descendants<PropsBlockContext>() do
+            fillProperties x ctx
 
         guardedValidateSystem system
 

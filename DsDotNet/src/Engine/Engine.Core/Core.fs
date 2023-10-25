@@ -201,8 +201,8 @@ module CoreModule =
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
-        member x.Finished:bool = name = "RET"  //parser 적용전까지는 임시로 사용
-        //member val Finished:bool = false with get, set
+        //member x.Finished:bool = name = "RET"  //parser 적용전까지는 임시로 사용
+        member val Finished:bool = false with get, set
 
     and RealOtherFlow private (names:Fqdn, target:Real, parent)  =
         inherit Indirect(names, parent)
@@ -214,7 +214,7 @@ module CoreModule =
     type Call (target:Job, parent) =
         inherit Indirect(target.Name, parent)
         member _.CallTargetJob = target
-        member val Xywh:Xywh = null with get, set
+        member val Disabled:bool = false with get, set
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
@@ -276,6 +276,7 @@ module CoreModule =
         member _.System = system
         member val TXs = createQualifiedNamedHashSet<Real>()
         member val RXs = createQualifiedNamedHashSet<Real>()
+        member val Xywh:Xywh = null with get, set
 
 
     /// API 의 reset 정보:  "+" <||> "-";

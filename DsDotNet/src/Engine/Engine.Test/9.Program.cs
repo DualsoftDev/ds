@@ -35,9 +35,9 @@ class Program
         //Tester.DoSampleTestTriangle();
         //Tester.DoSampleTestAddressesAndLayouts();
 
-        Engine.Parser.FS.Program.Main(null);
-
-        SampleRunner.Run(ParserTest.SafetyValid);
+        //Engine.Parser.FS.Program.Main(null);
+        SampleRunner.Run(Tester.DoSampleTestAddressesAndLayouts());
+        //SampleRunner.Run(ParserTest.SafetyValid);
         //SampleRunner.Run(ParserTest.StrongCausal);
         //SampleRunner.Run(ParserTest.Buttons);
         //SampleRunner.Run(ParserTest.Dup);
@@ -50,10 +50,10 @@ class Program
         //SampleRunner.Run(ParserTest.MyFlowReference);
         //SampleRunner.Run(ParserTest.Error);
 
-        InvalidDuplicationTest.Test(InvalidDuplicationTest.DupSystemNameModel);
-        InvalidDuplicationTest.Test(InvalidDuplicationTest.DupFlowNameModel);
-        InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel1);
-        InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel2);
+        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupSystemNameModel);
+        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupFlowNameModel);
+        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel1);
+        //InvalidDuplicationTest.Test(InvalidDuplicationTest.DupParentingModel2);
         Console.ReadKey();
     }
 }

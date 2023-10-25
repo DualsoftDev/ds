@@ -43,7 +43,7 @@ module ModelParser =
         //for ctx in sysctx.Descendants<ObserveDefContext>() do
         //    listener.ProcessObserveDef(ctx)
 
-        listener.ProcessLayouts(sysctx)
+        //listener.ProcessLayouts(sysctx)
 
         listener
 

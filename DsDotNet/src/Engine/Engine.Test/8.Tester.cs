@@ -100,7 +100,7 @@ public class Tester
     public static string DoSampleTestAddressesAndLayouts()
     {
         var text = @"
-[sys ip = localhost] KIT = {
+[sys ip = localhost] KITDemo = {
     [flow] IO_9 = {
     }
     [flow] KIT = {
@@ -232,7 +232,7 @@ public class Tester
 	        KIT_2nd_usb = (1474,758,144,144);
         }
         [finish] = { KIT.A1Work; KIT.""5OUT""; }
-        [disable] = { KIT.KIT.A1Work.KIT_Cv_Frt_MOVE; KIT.KIT.""5OUT"".KIT_Out_RET; }
+        [disable] = { KIT.A1Work.KIT_Cv_Frt_MOVE; KIT.""5OUT"".KIT_Out_RET; }
     }
 }
 ";

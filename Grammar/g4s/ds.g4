@@ -245,7 +245,7 @@ propsBlock: '[' 'prop' ']' EQ LBRACE (safetyBlock|layoutBlock|finishBlock|disabl
         finishTarget: identifier2;
         finishListing: finishTarget (SEIMCOLON finishTarget)* (SEIMCOLON)?;
     disableBlock: '[' 'disable' ']' '=' LBRACE (disableListing)* RBRACE;
-        disableTarget: (identifier3 | identifier4);
+        disableTarget: identifier23;
         disableListing: disableTarget (SEIMCOLON disableTarget)* (SEIMCOLON)?;
 
 flowBlock

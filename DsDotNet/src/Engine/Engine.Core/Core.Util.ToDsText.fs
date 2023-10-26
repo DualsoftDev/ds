@@ -350,12 +350,13 @@ module internal ToDsTextModule =
                             $"({xywh.X}, {xywh.Y})"
                     $"{tab2}{name} = {posi}"
                 [
-                    yield $"{tab2}[layouts] = {lb}"
-                    for device in devicesWithLayouts do
-                        yield makeList device.Name device.Xywh
-                    for deviceApi in deviceApisWithLayouts do
-                        yield makeList deviceApi.Name deviceApi.Xywh
-                    yield $"{tab2}{rb}"
+                    if devicesWithLayouts.Any() || deviceApisWithLayouts.Any() then
+                        yield $"{tab2}[layouts] = {lb}"
+                        for device in devicesWithLayouts do
+                            yield makeList device.Name device.Xywh
+                        for deviceApi in deviceApisWithLayouts do
+                            yield makeList deviceApi.Name deviceApi.Xywh
+                        yield $"{tab2}{rb}"
                 ]  |> combineLines
 
             if safeties.Any() || layouts.Any() then

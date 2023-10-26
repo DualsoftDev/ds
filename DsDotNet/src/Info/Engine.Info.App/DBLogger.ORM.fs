@@ -99,7 +99,7 @@ INSERT INTO [{Tn.Storage}]
 
     let getStorageKey(s:Storage):StorageKey = s.TagKind, s.Fqdn
 
-    type LoggerInfoSet(storages:Storage seq, isReader:bool) =
+    type LogSet(storages:Storage seq, isReader:bool) =
         let storageDic =
             storages
             |> map (fun s -> getStorageKey s, s)

@@ -16,9 +16,9 @@ open DBLoggerORM
 
 [<AutoOpen>]
 module internal DBLoggerTestModule =
-    let createTestLoggerInfoSetForReader(storages:Storage seq, ormLogs:ORMLog seq) : LoggerInfoSet =
+    let createTestLoggerInfoSetForReader(storages:Storage seq, ormLogs:ORMLog seq) : LogSet =
         let isReader = true
-        let logSet = new LoggerInfoSet(storages, isReader)
+        let logSet = new LogSet(storages, isReader)
         logSet.InitializeForReader(ormLogs)
         logSet
 

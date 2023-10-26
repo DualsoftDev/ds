@@ -540,8 +540,8 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
             for disabledCtx in listDisabledCtx do
                 let listDisabled = disabledCtx.Descendants<DisableTargetContext>().ToList()
                 for disabled in listDisabled do
-                    let fqdn = collectNameComponents disabled
-                    let coin = system.TryFindCall fqdn
+                    let fqdn = collectNameComponents disabled |> List.ofArray
+                    let coin = tryFindSystemInner system fqdn
                     if not(coin.IsNone) then
                         (coin.Value :?> Call).Disabled <- true
                     else

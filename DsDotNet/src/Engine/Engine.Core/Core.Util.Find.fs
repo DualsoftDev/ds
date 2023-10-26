@@ -8,42 +8,41 @@ open System.Runtime.CompilerServices
 module internal ModelFindModule =
     let nameComponentsEq (Fqdn(ys)) (xs:IQualifiedNamed) = xs.NameComponents = ys
     let nameEq (name:string) (x:INamed) = x.Name = name
+    
+    let tryFindInLoadedSystem (_device:LoadedSystem) (Fqdn(_fqdn)) =
+        failwithlog "Not yet implemented"
+        None
+
+    let rec tryFindSystemInner (system:DsSystem) (xs:string list) : obj option =
+        match xs with
+        | [] -> Some system
+        | f::xs1 when system.Flows.Any(nameEq f) ->
+            let flow = system.Flows.First(nameEq f)
+            match xs1 with
+            | [] -> Some flow
+            | r::xs2 ->
+                match flow.Graph.FindVertex(r) |> box with
+                | :? CallDev as call-> Some call
+                | :? CallSys as call-> Some call
+                | :? Real as real->
+                    match xs2 with
+                    | [] -> Some real
+                    | remaining ->
+                        option {
+                            let! v = real.Graph.TryFindVertex(remaining.Combine())
+                            return box v
+                        }
+                | _ -> None
+
+        | dev::xs when system.LoadedSystems.Any(nameEq dev) ->
+            let device = system.LoadedSystems.Find(nameEq dev)
+            match xs with
+            | [] -> Some device
+            | _ -> tryFindInLoadedSystem device (xs.ToArray())
+        | _ -> failwithlog "ERROR"
 
     let tryFindGraphVertex(system:DsSystem) (Fqdn(fqdn)) : obj option =
         //let inline nameComponentsEq xs ys = (^T: (member NameComponents: Fqdn) xs) = (^T: (member NameComponents: Fqdn) ys)
-
-        let tryFindInLoadedSystem (_device:LoadedSystem) (Fqdn(_fqdn)) =
-            failwithlog "Not yet implemented"
-            None
-
-        let rec tryFindSystemInner (system:DsSystem) (xs:string list) : obj option =
-            match xs with
-            | [] -> Some system
-            | f::xs1 when system.Flows.Any(nameEq f) ->
-                let flow = system.Flows.First(nameEq f)
-                match xs1 with
-                | [] -> Some flow
-                | r::xs2 ->
-                    match flow.Graph.FindVertex(r) |> box with
-                    | :? CallDev as call-> Some call
-                    | :? CallSys as call-> Some call
-                    | :? Real as real->
-                        match xs2 with
-                        | [] -> Some real
-                        | remaining ->
-                            option {
-                                let! v = real.Graph.TryFindVertex(remaining.Combine())
-                                return box v
-                            }
-                    | _ -> None
-
-            | dev::xs when system.LoadedSystems.Any(nameEq dev) ->
-                let device = system.LoadedSystems.Find(nameEq dev)
-                match xs with
-                | [] -> Some device
-                | _ -> tryFindInLoadedSystem device (xs.ToArray())
-            | _ -> failwithlog "ERROR"
-
 
         let fqdn = fqdn.ToFSharpList()
         match fqdn with

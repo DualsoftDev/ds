@@ -1,70 +1,49 @@
 namespace Engine.Info
 
 open System
-open System.Threading.Tasks
-open Dapper
 open Dual.Common.Core.FS
-open System.Data
+open Engine.Core
+
+module internal DBLoggerQueryImpl =
+
+    let collectDurationONLogPairs (loggerInfo:LoggerInfoSet, fqdn: string, tagKind: int) : (Log*Log) array=
+        /// head 에 최신(最新) 정보가, last 에 최고(最古) 정보 수록
+        let logs =
+            loggerInfo.Logs
+            |> filter(fun l -> l.Storage.TagKind = tagKind && l.Storage.Fqdn = fqdn)
+            |> List.skipWhile(fun l -> toBool(l.Value) = true)  // 최신에 켜져서 가동 중인 frame 무시
+
+        let rec inspectLog (logs:Log list) =
+            seq {
+                match logs with
+                | ([] | _::[]) -> ()
+                | off::on::tails when toBool(on.Value) && not <| toBool(off.Value) ->
+                    yield (on, off)
+                    yield! inspectLog tails
+                | on::off::tails when toBool(on.Value) && not <| toBool(off.Value) ->
+                    yield! inspectLog (off::tails)
+
+                | on1::on2::tails when toBool(on1.Value) && toBool(on2.Value) ->
+                    yield! inspectLog (on2::tails)
+                | off::tails when not <| toBool(off.Value) ->
+                    yield! inspectLog tails
+                | _ -> failwith "ERROR"
+            }
+        logs |> inspectLog |> Seq.rev |> toArray
+
+    let collectONDurations (loggerInfo:LoggerInfoSet, fqdn: string, tagKind: int) : TimeSpan array =
+        collectDurationONLogPairs (loggerInfo, fqdn, tagKind)
+        |> map (fun (prev, curr) -> curr.At - prev.At)
 
 
-module DBLoggerQueryImpl =
-    type ORMTimeDiff() =
-        member val At: DateTime = DateTime.MaxValue with get, set
-        member val PrevAt: DateTime = DateTime.MaxValue with get, set
+    let getAverageONDuration (loggerInfo:LoggerInfoSet, fqdn: string, tagKind: int) : TimeSpan option =
+        let timeSpans = collectONDurations (loggerInfo, fqdn, tagKind)
 
-    let private collectDurationONHelperAsync (conn: IDbConnection, fqdn: string, tagKind: int) =
-        let query =
-            $"""
-WITH ChangeEvents AS (
-SELECT
-    [fqdn],
-    [tagKind],
-    [at],
-    [value],
-    LAG([value]) OVER (PARTITION BY [fqdn], [tagKind] ORDER BY [at]) AS prevValue,
-    LAG([at]) OVER (PARTITION BY [fqdn], [tagKind] ORDER BY [at]) AS prevAt
-FROM
-    [{Vn.Log}]
-WHERE
-    [fqdn] = @Fqdn -- 여기에 원하는 fqdn 값을 입력
-    AND [tagKind] = @TagKind -- 여기에 원하는 tagKind 값을 입력
-)
-
-SELECT
--- [fqdn],
--- [tagKind],
--- prevValue,
--- [value],
-[at],
-prevAt
-FROM
-ChangeEvents
-WHERE
-[prevValue] = 1 AND [value] = 0
-;
-"""
-
-        conn.QueryAsync<ORMTimeDiff>(query, {| Fqdn = fqdn; TagKind = tagKind |})
-
-    let collectDurationsONAsync (conn: IDbConnection, fqdn: string, tagKind: int) : Task<TimeSpan seq> =
-        task {
-            let! (durations: ORMTimeDiff seq) = collectDurationONHelperAsync (conn, fqdn, tagKind)
-            return durations |> map (fun d -> d.At - d.PrevAt)
-        }
-
-
-    let getAverageONDurationAsync (conn: IDbConnection, fqdn: string, tagKind: int) : Task<TimeSpan> =
-        task {
-            let! timeSpans = collectDurationsONAsync (conn, fqdn, tagKind)
-
-            return
-                if timeSpans.any () then
-                    timeSpans
-                    |> Seq.averageBy (fun ts -> float ts.Ticks)
-                    |> int64
-                    |> TimeSpan.FromTicks
-                else
-                    TimeSpan() // 계산된 지속 시간이 없는 경우
-
-
-        }
+        if timeSpans.any () then
+            timeSpans
+            |> Seq.averageBy (fun ts -> float ts.Ticks)
+            |> int64
+            |> TimeSpan.FromTicks
+            |> Some
+        else
+            None // 계산된 지속 시간이 없는 경우

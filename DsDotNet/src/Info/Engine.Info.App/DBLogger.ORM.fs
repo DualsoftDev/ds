@@ -1,17 +1,14 @@
 namespace Engine.Info
 
 open System
-open System.Configuration;
-open Dapper
 open Engine.Core
-open Microsoft.Data.Sqlite
 open Dual.Common.Core.FS
-open Dual.Common.Db
 open System.Collections.Generic
+open System.Reactive.Disposables
 
 
 [<AutoOpen>]
-module internal DBLoggerImpl =
+module internal DBLoggerORM =
     // database table names
     module Tn =
         let Storage = "storage"
@@ -28,7 +25,7 @@ CREATE TABLE [{Tn.Storage}] (
     , [fqdn]        NVARCHAR(64) NOT NULL CHECK(LENGTH(fqdn) <= 64)
     , [tagKind]     INTEGER NOT NULL
     , [dataType]    NVARCHAR(64) NOT NULL CHECK(LENGTH(dataType) <= 64)
-    , CONSTRAINT uniq_fqdn UNIQUE (fqdn, tagKind)
+    , CONSTRAINT uniq_fqdn UNIQUE (fqdn, tagKind, dataType, name)
 );
 
 CREATE TABLE [{Tn.Log}] (
@@ -59,106 +56,54 @@ CREATE VIEW [{Vn.Log}] AS
     JOIN [{Tn.Storage}] stg
     ON [stg].[id] = [log].[storageId]
     ;
+
+INSERT INTO [{Tn.Storage}]
+    (id, name, fqdn, tagKind, dataType)
+    VALUES (0, 'system-power', 'System.Power', -1, "Boolean")
+    ;
     """
-    let connectionString = ConfigurationManager.ConnectionStrings["DBLoggerConnectionString"].ConnectionString;
-    let createConnection() =
-        new SqliteConnection(connectionString) |> tee (fun conn -> conn.Open())
 
-    let createLoggerDBSchema() =
-        use conn = createConnection()
-        if not <| conn.IsTableExistsAsync(Tn.Log).Result then
-            conn.Execute(sqlCreateSchema, null) |> ignore
+    type Storage(id:int, tagKind:int, fqdn:string, dataTypeName:string, name:string) =
+        new() = Storage(-1, -1, null, null, null)
+        new(iStorage:IStorage) = Storage(-1, iStorage.TagKind, iStorage.Target.Value.QualifiedName, iStorage.DataType.Name, iStorage.Name)
+        member val Id:int   = id           with get, set
+        member val Fqdn     = fqdn         with get, set
+        member val TagKind  = tagKind      with get, set
+        member val DataType = dataTypeName with get, set
+        member val Name     = name         with get, set
 
-    let initializeOnDemandAsync(systems:DsSystem seq) =
-        task {
-            use conn = createConnection()
-            use! tr = conn.BeginTransactionAsync()
-            let! existingFqdns = conn.QueryAsync<string>($"SELECT fqdn FROM [{Tn.Storage}]")
-            let existingFqdns = HashSet<string>(existingFqdns)
-                                
-            let storages: IStorage seq =
-                systems
-                |> map (fun s -> s.TagManager)
-                |> distinct
-                |> Seq.collect (fun tagManager -> tagManager.Storages.Values)
-                |> distinct
-            
-            let newStorages =
-                storages
-                |> filter (fun s -> s.TagKind <> InnerTag) // 내부변수
-                |> filter (fun s -> not <| existingFqdns.Contains(s.Target.Value.QualifiedName))
-                |> Array.ofSeq
+    type ORMLog(id:int, storageId:int, at:DateTime, value:obj) =
+        new() = ORMLog(-1, -1, DateTime.MaxValue, null)
+        member val Id = id with get, set
+        member val StorageId = storageId with get, set
+        member val At = at with get, set
+        member val Value = value with get, set
 
-            for s in newStorages do
-                let fqdn = s.Target.Value.QualifiedName
-                let dataType = s.DataType.Name
-                let! _ = conn.ExecuteAsync(
-                    $"""INSERT INTO [{Tn.Storage}]
-                        (name, fqdn, tagKind, dataType)
-                        VALUES (@Name, @Fqdn, @TagKind, @DataType)
-                        ;
-                    """, {|Name=s.Name; Fqdn=fqdn; TagKind=s.TagKind; DataType=dataType|})
-                ()
-                
-            do! tr.CommitAsync()
-            ()
-        }
+    type Log(id:int, storage:Storage, at:DateTime, value:obj) =
+        inherit ORMLog(id , storage.Id, at, value)
+        new() = Log(-1, getNull<Storage>(), DateTime.MaxValue, null)
+        member val Storage   = storage with get, set
+        member val At        = at      with get, set
+        member val Value:obj = value   with get, set
 
-    let private toDecimal (value:obj) =
-        match toBool value with
-        | Bool b -> (if b then 1 else 0) |> decimal
-        | UInt64 d -> decimal d
-        | _ -> failwith "ERROR"
+    type StorageKey = int*string
 
+    let getStorageKey(s:Storage):StorageKey = s.TagKind, s.Fqdn
 
-    let insertDBLogsAsync(xs:DsLog seq) =
-        use conn = createConnection()
-        task {
-            use! tr = conn.BeginTransactionAsync()
-            for x in xs do
-                match  x.Storage.Target with
-                | Some t ->
-                    let fqdn = t.QualifiedName
-                    let! storageId =
-                        conn.QuerySingleOrDefaultAsync<int>(
-                            $"""SELECT id FROM [{Tn.Storage}]
-                                WHERE fqdn= @Fqdn AND tagKind=@TagKind;""", {|Fqdn=fqdn; TagKind=x.Storage.TagKind|})
-                    let value = toDecimal x.Storage.BoxedValue
-                    let! _ = conn.ExecuteAsync(
-                        $"""INSERT INTO [{Tn.Log}]
-                            (at, storageId, value)
-                            VALUES (@At, @StorageId, @Value)
-                        """, {| At=x.Time; StorageId=storageId; Value=value |})
-                    ()
-                | None ->
-                    failwith "NOT yet!!"
-            do! tr.CommitAsync()
-        }
+    type LoggerInfoSet(storages:Storage seq, isReader:bool) =
+        let storageDic =
+            storages
+            |> map (fun s -> getStorageKey s, s)
+            |> Tuple.toDictionary
+        let disposables = new CompositeDisposable()
 
-    let insertDBLogAsync(x:DsLog) = insertDBLogsAsync([x])
+        member x.Storages = storageDic
+        member val StoragesById:Dictionary<int, Storage> = null with get, set
+        /// head 에 최신(最新) 정보가, last 에 최고(最古) 정보 수록
+        member val Logs:Log list = [] with get, set
+        member x.IsLogReader = isReader
+        member val LastLogId = -1 with get, set
+        member x.Disposables = disposables
 
-    //let countFromDBAsync(fqdn:string, tagKind:int, value:bool) =
-    //    use conn = createConnection()
-    //    conn.QuerySingleAsync<int>(
-    //        $"""SELECT COUNT(*) FROM [{Vn.Log}]
-    //            WHERE fqdn=@Fqdn AND tagKind=@TagKind AND value=@Value;""", {|Fqdn=fqdn; TagKind=tagKind; Value=value|})
-
-    let countFromDBAsync(fqdns:string seq, tagKinds:int seq, value:bool) =
-        use conn = createConnection()
-        conn.QuerySingleAsync<int>(
-            $"""SELECT COUNT(*) FROM [{Vn.Log}]
-                WHERE
-                    fqdn IN @Fqdns
-                AND tagKind IN @TagKinds
-                AND value=@Value;""" 
-                , {|Fqdns=fqdns; TagKinds=tagKinds; Value=value|})
-
-                
-    // 지정된 조건에 따라 마지막 'Value'를 반환하는 함수
-    let GetLastValueFromDBAsync (fqdn: string, tagKind: int) =
-        use conn = createConnection()
-        conn.QuerySingleOrDefaultAsync<bool>( 
-            $"""SELECT Value FROM [{Vn.Log}]
-                WHERE fqdn=@Fqdn AND tagKind=@TagKind
-                ORDER BY at DESC
-                LIMIT 1;""", {|Fqdn=fqdn; TagKind=tagKind|}) 
+        interface IDisposable with
+            override x.Dispose() = x.Disposables.Dispose()

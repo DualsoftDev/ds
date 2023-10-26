@@ -45,6 +45,7 @@ module internal DBLoggerImpl =
 
 
     let mutable loggerInfo = getNull<LoggerInfoSet>()
+    let systemPowerStorage = Storage(0, 0, "System.Power", "Boolean", "system-power")
     
     let private createLogInfoSetCommonAsync(systems:DsSystem seq, conn:IDbConnection, tr:IDbTransaction, isReader:bool) : Task<LoggerInfoSet> =
         Log4NetWrapper.logWithTrace <- true
@@ -83,7 +84,7 @@ module internal DBLoggerImpl =
                     """, {|Name=s.Name; Fqdn=s.Fqdn; TagKind=s.TagKind; DataType=s.DataType|})
                 s.Id <- id
 
-            return LoggerInfoSet(existingStorages @ newStorages, isReader)
+            return LoggerInfoSet( [systemPowerStorage] @ existingStorages @ newStorages, isReader)
         }
 
     /// 주기적으로 DB -> memory 로 log 를 read
@@ -126,15 +127,36 @@ module internal DBLoggerImpl =
                 use conn = createConnection()
                 use! tr = conn.BeginTransactionAsync()
                 for l in newLogs do
-                    let! _ = conn.ExecuteAsync(
+                    let query =
                         $"""INSERT INTO [{Tn.Log}]
                             (at, storageId, value)
                             VALUES (@At, @StorageId, @Value)
-                        """, {| At=l.At; StorageId=l.StorageId; Value=l.Value |})
+                        """
+                    let! _ = conn.ExecuteAsync(query, {| At=l.At; StorageId=l.StorageId; Value=l.Value |})
                     ()
                 do! tr.CommitAsync()
         }
 
+    let private toDecimal (value:obj) =
+        match toBool value with
+        | Bool b -> (if b then 1 else 0) |> decimal
+        | UInt64 d -> decimal d
+        | _ -> failwith "ERROR"
+
+
+    let enqueLogsForInsert(xs:DsLog seq) =
+        verify(not loggerInfo.IsLogReader)
+        for x in xs do
+            match  x.Storage.Target with
+            | Some t ->
+                let key = x.Storage.TagKind, t.QualifiedName
+                let storageId = loggerInfo.Storages[key].Id
+                let value = toDecimal x.Storage.BoxedValue
+                ORMLog(-1, storageId, x.Time, value) |> queue.Enqueue
+            | None ->
+                failwith "NOT yet!!"
+
+    let enqueLogForInsert(x:DsLog) = enqueLogsForInsert([x])
 
     let createLoggerInfoSetForReaderAsync(systems:DsSystem seq) : Task<LoggerInfoSet> =
         task {
@@ -163,6 +185,9 @@ module internal DBLoggerImpl =
             return li
         }
 
+    let markSystemStart() =
+        ORMLog(-1, 0, DateTime.Now, true) |> queue.Enqueue
+
     let interval = System.Reactive.Linq.Observable.Interval(TimeSpan.FromSeconds(1))
     let mutable disposables = new CompositeDisposable()
 
@@ -183,30 +208,12 @@ module internal DBLoggerImpl =
             let! li = createLogInfoSetForWriterAsync(systems)
             loggerInfo <- li
 
+            markSystemStart()
+
             interval.Subscribe(fun counter -> dequeAndWriteDBAsync().Wait())
             |> disposables.Add
         }
 
-    let private toDecimal (value:obj) =
-        match toBool value with
-        | Bool b -> (if b then 1 else 0) |> decimal
-        | UInt64 d -> decimal d
-        | _ -> failwith "ERROR"
-
-
-    let enqueLogsForInsert(xs:DsLog seq) =
-        verify(not loggerInfo.IsLogReader)
-        for x in xs do
-            match  x.Storage.Target with
-            | Some t ->
-                let key = x.Storage.TagKind, t.QualifiedName
-                let storageId = loggerInfo.Storages[key].Id
-                let value = toDecimal x.Storage.BoxedValue
-                ORMLog(-1, storageId, x.Time, value) |> queue.Enqueue
-            | None ->
-                failwith "NOT yet!!"
-
-    let enqueLogForInsert(x:DsLog) = enqueLogsForInsert([x])
 
     //let countLogAsync(fqdn:string, tagKind:int, value:bool) =
     //    use conn = createConnection()

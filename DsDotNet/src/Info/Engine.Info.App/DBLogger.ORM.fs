@@ -55,6 +55,11 @@ CREATE VIEW [{Vn.Log}] AS
     JOIN [{Tn.Storage}] stg
     ON [stg].[id] = [log].[storageId]
     ;
+
+INSERT INTO [{Tn.Storage}]
+    (id, name, fqdn, tagKind, dataType)
+    VALUES (0, 'system-power', 'System.Power', -1, "Boolean")
+    ;
     """
 
     type Storage(id:int, tagKind:int, fqdn:string, dataTypeName:string, name:string) =

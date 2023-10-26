@@ -43,7 +43,6 @@ module internal ModelFindModule =
 
     let tryFindGraphVertex(system:DsSystem) (Fqdn(fqdn)) : obj option =
         //let inline nameComponentsEq xs ys = (^T: (member NameComponents: Fqdn) xs) = (^T: (member NameComponents: Fqdn) ys)
-
         let fqdn = fqdn.ToFSharpList()
         match fqdn with
         | [] -> failwithlog "ERROR: name not given"
@@ -60,20 +59,15 @@ module internal ModelFindModule =
                 failwithlog "ERROR"
         }
 
-    let tryFindFlow(system:DsSystem) (name:string)   = system.Flows.TryFind(nameEq name)
-    let tryFindJob (system:DsSystem) name            = system.Jobs.TryFind(nameEq name)
-
-    let tryFindExternalSystem (system:DsSystem) name   = system.ExternalSystems.TryFind(nameEq name)
-    let tryFindLoadedSystem (system:DsSystem) name   = 
-                     system.LoadedSystems.TryFind(fun s->s.LoadedName = name)
-    let tryFindReferenceSystem (system:DsSystem) name   =
-                     system.LoadedSystems.Select(fun s->s.ReferenceSystem).TryFind(nameEq name)
-
+    let tryFindFlow(system:DsSystem) (name:string)    = system.Flows.TryFind(nameEq name)
+    let tryFindJob (system:DsSystem) name             = system.Jobs.TryFind(nameEq name)
+    let tryFindExternalSystem (system:DsSystem) name  = system.ExternalSystems.TryFind(nameEq name)
+    let tryFindLoadedSystem (system:DsSystem) name    = system.LoadedSystems.TryFind(fun s->s.LoadedName = name)
+    let tryFindReferenceSystem (system:DsSystem) name = system.LoadedSystems.Select(fun s->s.ReferenceSystem).TryFind(nameEq name)
 
     let rec tryFindExportApiItem(system:DsSystem) (Fqdn(apiPath)) =
         let _sysName, apiKey = apiPath[0], apiPath[1]
         system.ApiItems.TryFindWithName(apiKey)
-
     and tryFindCallingApiItem (system:DsSystem) targetSystemName targetApiName =
         let findedLoadedSystem = tryFindLoadedSystem system targetSystemName
         let targetSystem = findedLoadedSystem.Value.ReferenceSystem
@@ -142,7 +136,6 @@ module internal ModelFindModule =
     type DsSystem with
         member x.TryFindGraphVertex(Fqdn(fqdn)) = tryFindGraphVertex x fqdn
         member x.TryFindGraphVertex<'V when 'V :> IVertex>(Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn
-
         member x.TryFindExportApiItem(Fqdn(apiPath)) = tryFindExportApiItem x apiPath
         member x.TryFindCall(callPath:Fqdn) = tryFindCall x callPath
         member x.TryFindRealOtherSystem(realExSPath:Fqdn) = tryFindRealOtherSystem x realExSPath

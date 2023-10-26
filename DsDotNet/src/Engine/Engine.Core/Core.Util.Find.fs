@@ -46,9 +46,8 @@ module internal ModelFindModule =
         let fqdn = fqdn.ToFSharpList()
         match fqdn with
         | [] -> failwithlog "ERROR: name not given"
-        | s::xs when s = system.Name -> tryFindSystemInner system xs
+        //| s::xs when s = system.Name -> tryFindSystemInner system xs
         | _ -> tryFindSystemInner system fqdn
-
 
     let tryFindGraphVertexT<'V when 'V :> IVertex>(system:DsSystem) (Fqdn(fqdn)) =
         option {
@@ -86,12 +85,12 @@ module internal ModelFindModule =
              |None -> None
         else None
 
-    let tryFindRealOtherSystem (system:DsSystem) (Fqdn(realExSPath)) =
-        if tryFindJob system (realExSPath.Last()) |> Option.isSome
-        then match tryFindGraphVertex system realExSPath with
-             |Some(v) -> Some(v :?> CallSys)
-             |None -> None
-        else None
+    //let tryFindRealOtherSystem (system:DsSystem) (Fqdn(realExSPath)) =
+    //    if tryFindJob system (realExSPath.Last()) |> Option.isSome
+    //    then match tryFindGraphVertex system realExSPath with
+    //         |Some(v) -> Some(v :?> CallSys)
+    //         |None -> None
+    //    else None
 
     let tryFindReal system flowName name =
         let flow = tryFindFlow system flowName |> Option.get
@@ -138,7 +137,7 @@ module internal ModelFindModule =
         member x.TryFindGraphVertex<'V when 'V :> IVertex>(Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn
         member x.TryFindExportApiItem(Fqdn(apiPath)) = tryFindExportApiItem x apiPath
         member x.TryFindCall(callPath:Fqdn) = tryFindCall x callPath
-        member x.TryFindRealOtherSystem(realExSPath:Fqdn) = tryFindRealOtherSystem x realExSPath
+        //member x.TryFindRealOtherSystem(realExSPath:Fqdn) = tryFindRealOtherSystem x realExSPath
         member x.TryFindFlow(flowName:string) = tryFindFlow x flowName
         member x.TryFindJob (jobName:string) =  tryFindJob  x jobName
         member x.TryFindReal(system) flowName realName =  tryFindReal  system flowName realName

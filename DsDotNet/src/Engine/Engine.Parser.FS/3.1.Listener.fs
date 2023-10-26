@@ -349,7 +349,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
             let findSegments(fqdns:Fqdn[]):Real[] =
                 fqdns
                     .Where(fun fqdn -> fqdn <> null)
-                    .Select(fun s -> system.TryFindGraphVertex<Real>(s))
+                    .Select(fun s -> tryFindReal system s[1] s[2]) // in fqdn.. [0] : system, [1] : flow, [2] : real, [3] call...
                     .Tap(fun x -> assert(x.IsSome))
                     .Choose(id)
                     .ToArray()

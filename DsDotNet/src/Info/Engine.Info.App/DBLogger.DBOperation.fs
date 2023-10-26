@@ -20,11 +20,47 @@ module internal DBLoggerImpl =
     let createConnection() =
         new SqliteConnection(connectionString) |> tee (fun conn -> conn.Open())
 
+    type EnumEx() =
+        static member Extract<'T when 'T: struct>() =
+            let typ = typeof<'T>
+            let values =
+                Enum.GetValues(typ) :?> 'T[]
+                |> Seq.cast<int> |> toArray
+
+            let names = Enum.GetNames(typ) |> map (fun n -> $"{typ.Name}.{n}")
+            Array.zip values names
+
+
     let createLoggerDBSchema(connStr:string) =
-        connectionString <- connStr
-        use conn = createConnection()
-        if not <| conn.IsTableExistsAsync(Tn.Log).Result then
-            conn.Execute(sqlCreateSchema, null) |> ignore
+        task {
+            connectionString <- connStr
+            use conn = createConnection()
+            use! tr = conn.BeginTransactionAsync()
+            let! exists = conn.IsTableExistsAsync(Tn.Log)
+            if not exists then
+                let! _ = conn.ExecuteAsync(sqlCreateSchema, tr)
+                ()
+
+            let! exists = conn.IsTableExistsAsync(Tn.TagKind)
+            if not exists then
+                let enums =
+                    EnumEx.Extract<SystemTag>()
+                    @ EnumEx.Extract<FlowTag>()
+                    @ EnumEx.Extract<VertexTag>()
+                    @ EnumEx.Extract<ApiItemTag>()
+                    @ EnumEx.Extract<ActionTag>()
+
+                for (id, name) in enums do
+                    let query = $"INSERT INTO [{Tn.TagKind}] (id, name) VALUES (@Id, @Name);"
+                    let! _ = conn.ExecuteAsync(query, {|Id=id; Name=name|}, tr)
+                    ()
+
+            do! tr.CommitAsync()
+        }
+
+
+
+
 
 
     let ormLog2Log (loggerInfo:LoggerInfoSet) (l:ORMLog) =

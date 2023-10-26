@@ -14,6 +14,7 @@ module internal DBLoggerORM =
         let Storage = "storage"
         let Log = "log"
         let Error = "error"
+        let TagKind = "tagKind"
     // database view names
     module Vn =
         let Log = "vwLog"
@@ -43,6 +44,11 @@ CREATE TABLE [{Tn.Log}] (
 --     , FOREIGN KEY(logId) REFERENCES {Tn.Log}(id)
 -- );
 
+CREATE TABLE [{Tn.TagKind}] (
+    [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+    , [name]        NVARCHAR(64) NOT NULL CHECK(LENGTH(name) <= 64)
+);
+
 
 CREATE VIEW [{Vn.Log}] AS
     SELECT
@@ -50,11 +56,14 @@ CREATE VIEW [{Vn.Log}] AS
         , log.[storageId] AS storageId
         , stg.[fqdn] AS fqdn
         , stg.[tagKind] AS tagKind
+        , tagKind.[name] AS tagKindName
         , log.[at] AS at
         , log.[value] AS value
     FROM [{Tn.Log}] log
     JOIN [{Tn.Storage}] stg
     ON [stg].[id] = [log].[storageId]
+    JOIN [{Tn.TagKind}] tagKind
+    ON [stg].[tagKind] = [tagKind].[id]
     ;
 
 INSERT INTO [{Tn.Storage}]

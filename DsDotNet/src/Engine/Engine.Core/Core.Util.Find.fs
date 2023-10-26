@@ -9,9 +9,9 @@ module internal ModelFindModule =
     let nameComponentsEq (Fqdn(ys)) (xs:IQualifiedNamed) = xs.NameComponents = ys
     let nameEq (name:string) (x:INamed) = x.Name = name
     
-    let tryFindInLoadedSystem (_device:LoadedSystem) (Fqdn(_fqdn)) =
-        failwithlog "Not yet implemented"
-        None
+    //let tryFindInLoadedSystem (_device:LoadedSystem) (Fqdn(_fqdn)) =
+    //    failwithlog "Not yet implemented"
+    //    None
 
     let rec tryFindSystemInner (system:DsSystem) (xs:string list) : obj option =
         match xs with
@@ -38,7 +38,7 @@ module internal ModelFindModule =
             let device = system.LoadedSystems.Find(nameEq dev)
             match xs with
             | [] -> Some device
-            | _ -> tryFindInLoadedSystem device (xs.ToArray())
+            | _ -> None//tryFindInLoadedSystem device (xs.ToArray())
         | _ -> failwithlog "ERROR"
 
     let tryFindGraphVertex(system:DsSystem) (Fqdn(fqdn)) : obj option =

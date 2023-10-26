@@ -564,12 +564,13 @@ module ImportU =
 
                                 if dicFlow.Values.Where(fun w->w.Name = flowName).IsEmpty()
                                 then Office.ErrorPPT(Name, ErrID._42, $"원인이름{flowName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
-                                let vertex = sys.TryFindGraphVertex([|sys.Name;flowName;realName|])
+                                let vertex = sys.TryFindRealVertex(flowName, realName)
                                 if vertex.IsNone
                                 then Office.ErrorPPT(Name, ErrID._41, $"원인이름{realName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
-                                match vertex.Value with
-                                | :? Real as r -> r
-                                | _ -> failwithlog "Error "
+                                //match vertex.Value with
+                                //| :? Real as r -> r
+                                //| _ -> failwithlog "Error "
+                                vertex.Value
 
                             let txs = node.IfTXs |> Seq.map(fun f-> findReal(f))
                             let rxs = node.IfRXs |> Seq.map(fun f-> findReal(f))

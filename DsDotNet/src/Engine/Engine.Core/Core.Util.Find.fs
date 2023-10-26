@@ -46,7 +46,7 @@ module internal ModelFindModule =
         let fqdn = fqdn.ToFSharpList()
         match fqdn with
         | [] -> failwithlog "ERROR: name not given"
-        | s::xs when s = system.Name -> tryFindSystemInner system xs
+        //| s::xs when s = system.Name -> tryFindSystemInner system xs
         | _ -> tryFindSystemInner system fqdn
 
     let tryFindGraphVertexT<'V when 'V :> IVertex>(system:DsSystem) (Fqdn(fqdn)) =
@@ -82,13 +82,6 @@ module internal ModelFindModule =
                 | :? CallDev -> Some(v)
                 | :? CallSys -> Some(v)
                 | _ -> None
-             |None -> None
-        else None
-
-    let tryFindRealOtherSystem (system:DsSystem) (Fqdn(realExSPath)) =
-        if tryFindJob system (realExSPath.Last()) |> Option.isSome
-        then match tryFindGraphVertex system realExSPath with
-             |Some(v) -> Some(v :?> CallSys)
              |None -> None
         else None
 
@@ -137,10 +130,9 @@ module internal ModelFindModule =
         member x.TryFindGraphVertex<'V when 'V :> IVertex>(Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn
         member x.TryFindExportApiItem(Fqdn(apiPath)) = tryFindExportApiItem x apiPath
         member x.TryFindCall(callPath:Fqdn) = tryFindCall x callPath
-        member x.TryFindRealOtherSystem(realExSPath:Fqdn) = tryFindRealOtherSystem x realExSPath
         member x.TryFindFlow(flowName:string) = tryFindFlow x flowName
         member x.TryFindJob (jobName:string) =  tryFindJob  x jobName
-        member x.TryFindReal(system) flowName realName =  tryFindReal  system flowName realName
+        member x.TryFindReal system flowName realName =  tryFindReal  system flowName realName
         member x.TryFindLoadedSystem     (system:DsSystem)  name = tryFindLoadedSystem system name
         member x.TryFindReferenceSystem  (system:DsSystem)  name = tryFindReferenceSystem system name
 
@@ -155,7 +147,7 @@ type FindExtension =
     [<Extension>] static member TryFindExportApiItem(x:DsSystem, Fqdn(apiPath)) = tryFindExportApiItem x apiPath
     [<Extension>] static member TryFindGraphVertex  (x:DsSystem, Fqdn(fqdn)) = tryFindGraphVertex x fqdn
     [<Extension>] static member TryFindGraphVertex<'V when 'V :> IVertex>(x:DsSystem, Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn
-
+    [<Extension>] static member TryFindRealVertex (x:DsSystem, flowName, realName) =  tryFindReal x flowName realName
     [<Extension>] static member GetVertexSharedReal (x:Real) = getVertexSharedReal x
     [<Extension>] static member GetVertexSharedCall (x:CallDev) = getVertexSharedCall x
     [<Extension>] static member GetPure (x:Vertex) = getPure x

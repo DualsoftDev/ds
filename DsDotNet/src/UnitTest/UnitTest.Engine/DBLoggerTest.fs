@@ -50,7 +50,8 @@ module DBLoggerTestModule =
             createStorage "my.Test2.TRXERR" (int ApiItemTag.trxErr)
         ]
 
-        let logSet = createTestLoggerInfoSetForReader(storages, logs)
+        let querySet = QuerySet()
+        let logSet = createTestLoggerInfoSetForReader(querySet, storages, logs)
         let fqdn, kind = cyl1Error.Fqdn, int ApiItemTag.trxErr
 
         [<Test>]
@@ -70,7 +71,7 @@ module DBLoggerTestModule =
 
             // log 하나 추가 후, 동일 test
             let lastOn = createLog cyl1Error (nextSecond()) true
-            let logSet = createTestLoggerInfoSetForReader(storages, lastOn::logs)
+            let logSet = createTestLoggerInfoSetForReader(querySet, storages, lastOn::logs)
 
             3 === DBLogger.CountLog(fqdn, kind, logSet)
             true === DBLogger.GetLastValue(fqdn, kind, logSet)

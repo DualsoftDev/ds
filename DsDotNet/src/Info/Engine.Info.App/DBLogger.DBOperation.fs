@@ -74,7 +74,18 @@ module internal DBLoggerImpl =
                 |> map (fun s -> s.Id, s)
                 |> Tuple.toDictionary
 
-            x.Logs <- ormLogs |> Seq.sortByDescending(fun l -> l.Id) |> map (ormLog2Log x) |> toList
+            let logs =
+                ormLogs
+                |> Seq.sortByDescending(fun l -> l.Id)
+                |> map (ormLog2Log x)
+                |> toArray
+            // TODO: summary 작성
+            let groups =
+                logs |> Seq.groupBy(fun l -> getStorageKey x.StoragesById[l.StorageId] )
+            for (key, group) in groups do
+                x.Summaries[key].Build(group)
+
+            x.Logs <- logs |> toList
             if x.Logs.any() then
                 x.LastLogId <- x.Logs |> List.maxBy(fun l -> l.Id) |> fun l -> l.Id
 
@@ -83,7 +94,7 @@ module internal DBLoggerImpl =
     let mutable logSet = getNull<LogSet>()
     let systemPowerStorage = Storage(0, 0, "System.Power", "Boolean", "system-power")
     
-    let private createLogInfoSetCommonAsync(systems:DsSystem seq, conn:IDbConnection, tr:IDbTransaction, isReader:bool) : Task<LogSet> =
+    let private createLogInfoSetCommonAsync(querySet:QuerySet, systems:DsSystem seq, conn:IDbConnection, tr:IDbTransaction, isReader:bool) : Task<LogSet> =
         Log4NetWrapper.logWithTrace <- true
 
         task {
@@ -120,7 +131,7 @@ module internal DBLoggerImpl =
                     """, {|Name=s.Name; Fqdn=s.Fqdn; TagKind=s.TagKind; DataType=s.DataType|})
                 s.Id <- id
 
-            return new LogSet( [systemPowerStorage] @ existingStorages @ newStorages, isReader)
+            return new LogSet(querySet, [systemPowerStorage] @ existingStorages @ newStorages, isReader)
         }
 
     /// 주기적으로 DB -> memory 로 log 를 read
@@ -194,14 +205,17 @@ module internal DBLoggerImpl =
 
     let enqueLogForInsert(x:DsLog) = enqueLogsForInsert([x])
 
-    let createLoggerInfoSetForReaderAsync(systems:DsSystem seq) : Task<LogSet> =
+    let createLoggerInfoSetForReaderAsync(querySet:QuerySet, systems:DsSystem seq) : Task<LogSet> =
         task {
             use conn = createConnection()
             use! tr = conn.BeginTransactionAsync()
 
-            let! li = createLogInfoSetCommonAsync(systems, conn, tr, true)
+            let! li = createLogInfoSetCommonAsync(querySet, systems, conn, tr, true)
 
-            let! existingLogs = conn.QueryAsync<ORMLog>($"SELECT * FROM [{Tn.Log}]")
+            let! existingLogs =
+                conn.QueryAsync<ORMLog>(
+                    $"SELECT * FROM [{Tn.Log}] WHERE at BETWEEN @START AND @END",
+                    {|START=querySet.StartTime; END=querySet.EndTime|})
 
             do! tr.CommitAsync()
 
@@ -215,7 +229,7 @@ module internal DBLoggerImpl =
             use conn = createConnection()
             use! tr = conn.BeginTransactionAsync()
             let isReader = false
-            let! li = createLogInfoSetCommonAsync(systems, conn, tr, isReader)
+            let! li = createLogInfoSetCommonAsync(null, systems, conn, tr, isReader)
             do! tr.CommitAsync()
 
             return li
@@ -241,10 +255,10 @@ module internal DBLoggerImpl =
 
     let interval = System.Reactive.Linq.Observable.Interval(TimeSpan.FromSeconds(1))
 
-    let initializeLogReaderOnDemandAsync(systems:DsSystem seq) =
+    let initializeLogReaderOnDemandAsync(querySet:QuerySet, systems:DsSystem seq) =
 
         task {
-            let! li = createLoggerInfoSetForReaderAsync(systems)
+            let! li = createLoggerInfoSetForReaderAsync(querySet, systems)
             logSet <- li
 
             interval.Subscribe(fun counter -> fetchNewLogs())

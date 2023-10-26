@@ -5,6 +5,7 @@ open Engine.Core
 open Dual.Common.Core.FS
 open System.Collections.Generic
 open System.Reactive.Disposables
+open System.Diagnostics.CodeAnalysis
 
 
 [<AutoOpen>]
@@ -72,6 +73,13 @@ INSERT INTO [{Tn.Storage}]
     ;
     """
 
+    /// DB logging query 기준
+    [<AllowNullLiteral>]
+    type QuerySet(interval:DateTime*DateTime) =
+        new() = QuerySet((DateTime.MinValue, DateTime.MaxValue))
+        member x.StartTime = fst interval
+        member x.EndTime = snd interval
+
     type Storage(id:int, tagKind:int, fqdn:string, dataTypeName:string, name:string) =
         new() = Storage(-1, -1, null, null, null)
         new(iStorage:IStorage) = Storage(-1, iStorage.TagKind, iStorage.Target.Value.QualifiedName, iStorage.DataType.Name, iStorage.Name)
@@ -99,13 +107,28 @@ INSERT INTO [{Tn.Storage}]
 
     let getStorageKey(s:Storage):StorageKey = s.TagKind, s.Fqdn
 
-    type LogSet(storages:Storage seq, isReader:bool) =
+    type Summary(logSet:LogSet, count:int, sum:uint64) =
+        /// Number rising
+        member val Count = count with get, set
+        /// Duration sum (milisec)
+        member val Sum = sum with get, set
+        member x.LogSet = logSet
+
+    and LogSet(querySet:QuerySet, storages:Storage seq, isReader:bool) as this =
         let storageDic =
             storages
             |> map (fun s -> getStorageKey s, s)
             |> Tuple.toDictionary
+
+        let summaryDic =
+            storages
+            |> map (fun s -> getStorageKey s, Summary(this, 0, 0UL))
+            |> Tuple.toDictionary
+
         let disposables = new CompositeDisposable()
 
+        member x.QuerySet = querySet
+        member x.Summaries = summaryDic
         member x.Storages = storageDic
         member val StoragesById:Dictionary<int, Storage> = null with get, set
         /// head 에 최신(最新) 정보가, last 에 최고(最古) 정보 수록
@@ -116,3 +139,7 @@ INSERT INTO [{Tn.Storage}]
 
         interface IDisposable with
             override x.Dispose() = x.Disposables.Dispose()
+
+    type Summary with
+        member x.Build(logs:Log seq) =
+            ()

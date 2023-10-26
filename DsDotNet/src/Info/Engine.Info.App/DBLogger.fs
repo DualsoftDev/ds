@@ -2,14 +2,16 @@ namespace Engine.Info
 
 open Engine.Core
 open Dual.Common.Core.FS
+open System
 
 type DBLogger() =
-    let logSetSelector (logSet:LogSet) = if isItNull(logSet) then DBLoggerImpl.logSet else logSet
+    static let querySet = QuerySet((DateTime.MinValue, DateTime.MaxValue))
+
     static member CreateLoggerDBSchema(connectionString) = DBLoggerImpl.createLoggerDBSchema(connectionString)
     static member EnqueLogForInsert(log:DsLog) = DBLoggerImpl.enqueLogForInsert(log:DsLog)
     static member EnqueLogsForInsert(logs:DsLog seq) = DBLoggerImpl.enqueLogsForInsert(logs:DsLog seq)
     static member InitializeLogWriterOnDemandAsync(systems:DsSystem seq) = DBLoggerImpl.initializeLogWriterOnDemandAsync(systems)
-    static member InitializeLogReaderOnDemandAsync(systems:DsSystem seq) = DBLoggerImpl.initializeLogReaderOnDemandAsync(systems)
+    static member InitializeLogReaderOnDemandAsync(systems:DsSystem seq) = DBLoggerImpl.initializeLogReaderOnDemandAsync(querySet, systems)
 
     // { unit test 등의 debugging 용
     static member internal CountLog(fqdns:string seq, tagKinds:int seq, logSet:LogSet) = DBLoggerImpl.countLog(logSet, fqdns, tagKinds, true)

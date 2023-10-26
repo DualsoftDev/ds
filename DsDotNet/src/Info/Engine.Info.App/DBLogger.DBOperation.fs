@@ -84,7 +84,7 @@ module internal DBLoggerImpl =
                     """, {|Name=s.Name; Fqdn=s.Fqdn; TagKind=s.TagKind; DataType=s.DataType|})
                 s.Id <- id
 
-            return LoggerInfoSet( [systemPowerStorage] @ existingStorages @ newStorages, isReader)
+            return new LoggerInfoSet( [systemPowerStorage] @ existingStorages @ newStorages, isReader)
         }
 
     /// 주기적으로 DB -> memory 로 log 를 read
@@ -186,21 +186,35 @@ module internal DBLoggerImpl =
         }
 
     let markSystemStart() =
+        use conn = createConnection()
+        let lastLog = conn.QueryFirstOrDefault<ORMLog>($"SELECT * FROM [{Tn.Log}] ORDER BY id DESC LIMIT 1;")
+        if isItNull(lastLog) then
+            ()
+        else if lastLog.StorageId <> 0 || lastLog.Value <> 0 then
+            ignore
+            <| conn.Execute($"""INSERT INTO [{Tn.Log}]
+                    (at, storageId, value)
+                    VALUES (@At, @StorageId, @Value)"""
+                    , {| At=lastLog.At; StorageId=0; Value=false |})
+
         ORMLog(-1, 0, DateTime.Now, true) |> queue.Enqueue
 
+    let markSystemShutdown() =
+        ORMLog(-1, 0, DateTime.Now, false) |> queue.Enqueue
+        dequeAndWriteDBAsync().Wait()
+
     let interval = System.Reactive.Linq.Observable.Interval(TimeSpan.FromSeconds(1))
-    let mutable disposables = new CompositeDisposable()
 
     let initializeLogReaderOnDemandAsync(systems:DsSystem seq) =
-        dispose disposables
-        disposables <- new CompositeDisposable()
 
         task {
             let! li = createLoggerInfoSetForReaderAsync(systems)
             loggerInfo <- li
 
             interval.Subscribe(fun counter -> fetchNewLogs())
-            |> disposables.Add
+            |> li.Disposables.Add
+
+            return (li :> IDisposable)
         }
 
     let initializeLogWriterOnDemandAsync(systems:DsSystem seq) =
@@ -210,8 +224,12 @@ module internal DBLoggerImpl =
 
             markSystemStart()
 
+            Disposable.Create(fun () -> markSystemShutdown())
+            |> li.Disposables.Add
             interval.Subscribe(fun counter -> dequeAndWriteDBAsync().Wait())
-            |> disposables.Add
+            |> li.Disposables.Add
+
+            return (li :> IDisposable)
         }
 
 

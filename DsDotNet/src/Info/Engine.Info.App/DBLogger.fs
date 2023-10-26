@@ -21,7 +21,7 @@ type DBLogger() =
 
     static member CountLog(fqdns:string seq, tagKinds:int seq) = DBLoggerImpl.countLog(DBLoggerImpl.loggerInfo, fqdns, tagKinds, true)
     static member CountLog(fqdn:string, tagKind:int) = DBLogger.CountLog([|fqdn|], [|tagKind|])
-    static member GetLastValue(fqdn:string, tagKind:int) = DBLoggerImpl.getLastValue(DBLoggerImpl.loggerInfo, fqdn, tagKind).Value
+    static member GetLastValue(fqdn:string, tagKind:int) = DBLoggerImpl.getLastValue(DBLoggerImpl.loggerInfo, fqdn, tagKind) |> Option.toNullable
     
 
     static member CollectONDurations   (fqdn, tagKind) = DBLoggerQueryImpl.collectONDurations(DBLoggerImpl.loggerInfo, fqdn, tagKind)

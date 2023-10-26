@@ -4,6 +4,7 @@ open System
 open Engine.Core
 open Dual.Common.Core.FS
 open System.Collections.Generic
+open System.Reactive.Disposables
 
 
 [<AutoOpen>]
@@ -94,6 +95,7 @@ INSERT INTO [{Tn.Storage}]
             storages
             |> map (fun s -> getStorageKey s, s)
             |> Tuple.toDictionary
+        let disposables = new CompositeDisposable()
 
         member x.Storages = storageDic
         member val StoragesById:Dictionary<int, Storage> = null with get, set
@@ -101,3 +103,7 @@ INSERT INTO [{Tn.Storage}]
         member val Logs:Log list = [] with get, set
         member x.IsLogReader = isReader
         member val LastLogId = -1 with get, set
+        member x.Disposables = disposables
+
+        interface IDisposable with
+            override x.Dispose() = x.Disposables.Dispose()

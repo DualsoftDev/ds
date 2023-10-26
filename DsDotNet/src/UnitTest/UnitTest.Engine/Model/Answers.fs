@@ -19,7 +19,7 @@ module ModelAnswers =
 """
  
     let answerEveryScenarioText = """
-    [sys ip = 192.168.0.1] My = {
+[sys ip = 192.168.0.1] My = {
     [flow] MyFlow = {
         Seg1 > Seg2; 		// Seg1(Real)> Seg2(Real)
         Seg1 = {
@@ -66,8 +66,11 @@ module ModelAnswers =
     }
     [prop] = {
         [safety] = {
-            F.Main = { F.Main.Ap; }
-            F.Main.Am = { F.Main; }
+        F.Main = { F.Main.Ap; }
+        F.Main.Am = { F.Main; }
+        }
+        [layouts] = {
+        A = (1309, 405, 205, 83)
         }
     }
     [device file="cylinder.ds"] A; // D:/Git/ds-Master/DsDotNet/src/UnitTest/UnitTest.Model/cylinder.ds

@@ -58,7 +58,7 @@ module DsParserHelperModule =
                 let! flowName = ci.Flow
                 match ci.Tuples with
                 | Some _sys, Some flow, Some parenting, _ ->
-                    let! real = tryFindReal x flow parenting
+                    let! real = tryFindReal x [flow; parenting]
                     return DuParentReal real
                 | Some _sys, Some _flow, None, _ ->
                     let! f = tryFindFlow x flowName

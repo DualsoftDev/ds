@@ -326,7 +326,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                             if job.LinkDefs.any()   then CallSys.Create(job, parent) |> ignore
 
                         | 1, realorFlow::cr::[] when not <| isAliasMnemonic (parent, ctxInfo.Names.CombineQuoteOnDemand()) ->
-                            let otherFlowReal = tryFindReal system realorFlow cr |> Option.get
+                            let otherFlowReal = tryFindReal system [realorFlow; cr] |> Option.get
                             RealOtherFlow.Create(otherFlowReal, parent) |> ignore
                             tracefn $"{realorFlow}.{cr} should already have been created."
 
@@ -349,7 +349,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
             let findSegments(fqdns:Fqdn[]):Real[] =
                 fqdns
                     .Where(fun fqdn -> fqdn <> null)
-                    .Select(fun s -> tryFindReal system s[1] s[2]) // in fqdn.. [0] : system, [1] : flow, [2] : real, [3] call...
+                    .Select(fun s -> tryFindReal system (s |> List.ofArray)) // in fqdn.. [0] : system, [1] : flow, [2] : real, [3] call...
                     .Tap(fun x -> assert(x.IsSome))
                     .Choose(id)
                     .ToArray()
@@ -451,7 +451,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                         let ns = aliasKeys.ToFSharpList()
                         match ns with
                         | rc::[] -> //Flow.R or Flow.C
-                            match flow.System.TryFindReal flow.System flow.Name rc  with
+                            match flow.System.TryFindReal [ flow.Name; rc ]  with
                             | Some r -> r |> DuAliasTargetReal
                             | None ->
                                 let vertex = flow.System.TryFindCall ([flow.Name;rc].ToArray()) |> Option.get
@@ -530,7 +530,7 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 let listFinished = finishedCtx.Descendants<FinishTargetContext>().ToList()
                 for finished in listFinished do
                     let fqdn = collectNameComponents finished // in array.. [0] : flow, [1] : real
-                    let real = tryFindReal system fqdn[0] fqdn[1]
+                    let real = tryFindReal system (fqdn |> List.ofArray)
                     if not(real.IsNone) then
                         real.Value.Finished <- true
                     else

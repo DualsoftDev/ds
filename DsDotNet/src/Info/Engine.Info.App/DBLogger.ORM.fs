@@ -5,6 +5,8 @@ open Engine.Core
 open Dual.Common.Core.FS
 open System.Collections.Generic
 open System.Reactive.Disposables
+open System.Diagnostics.CodeAnalysis
+open System.Runtime.CompilerServices
 
 
 [<AutoOpen>]
@@ -14,6 +16,7 @@ module internal DBLoggerORM =
         let Storage = "storage"
         let Log = "log"
         let Error = "error"
+        let TagKind = "tagKind"
     // database view names
     module Vn =
         let Log = "vwLog"
@@ -43,6 +46,11 @@ CREATE TABLE [{Tn.Log}] (
 --     , FOREIGN KEY(logId) REFERENCES {Tn.Log}(id)
 -- );
 
+CREATE TABLE [{Tn.TagKind}] (
+    [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+    , [name]        NVARCHAR(64) NOT NULL CHECK(LENGTH(name) <= 64)
+);
+
 
 CREATE VIEW [{Vn.Log}] AS
     SELECT
@@ -50,11 +58,14 @@ CREATE VIEW [{Vn.Log}] AS
         , log.[storageId] AS storageId
         , stg.[fqdn] AS fqdn
         , stg.[tagKind] AS tagKind
+        , tagKind.[name] AS tagKindName
         , log.[at] AS at
         , log.[value] AS value
     FROM [{Tn.Log}] log
     JOIN [{Tn.Storage}] stg
     ON [stg].[id] = [log].[storageId]
+    JOIN [{Tn.TagKind}] tagKind
+    ON [stg].[tagKind] = [tagKind].[id]
     ;
 
 INSERT INTO [{Tn.Storage}]
@@ -62,6 +73,13 @@ INSERT INTO [{Tn.Storage}]
     VALUES (0, 'system-power', 'System.Power', -1, "Boolean")
     ;
     """
+
+    /// DB logging query 기준
+    [<AllowNullLiteral>]
+    type QuerySet(interval:DateTime*DateTime) =
+        new() = QuerySet((DateTime.MinValue, DateTime.MaxValue))
+        member x.StartTime = fst interval
+        member x.EndTime = snd interval
 
     type Storage(id:int, tagKind:int, fqdn:string, dataTypeName:string, name:string) =
         new() = Storage(-1, -1, null, null, null)
@@ -86,24 +104,49 @@ INSERT INTO [{Tn.Storage}]
         member val At        = at      with get, set
         member val Value:obj = value   with get, set
 
-    type StorageKey = int*string
+    type TagKind = int
+    type Fqdn = string
+    type StorageKey = TagKind*Fqdn
 
     let getStorageKey(s:Storage):StorageKey = s.TagKind, s.Fqdn
 
-    type LoggerInfoSet(storages:Storage seq, isReader:bool) =
+    type Summary(logSet:LogSet, storageKey:StorageKey, count:int, sum:double) =
+        /// Number rising
+        member val Count = count with get, set
+        /// Duration sum (sec 단위)
+        member val Sum = sum with get, set
+        /// Container reference
+        member x.LogSet = logSet
+        member x.StorageKey = storageKey
+        member val LastLog:Log option = None with get, set
+
+    and LogSet(querySet:QuerySet, storages:Storage seq, isReader:bool) as this =
         let storageDic =
             storages
             |> map (fun s -> getStorageKey s, s)
             |> Tuple.toDictionary
+
+        let summaryDic =
+            storages
+            |> map (fun s ->
+                let key = getStorageKey s
+                key, Summary(this, key, 0, 0.))
+            |> Tuple.toDictionary
+
         let disposables = new CompositeDisposable()
 
+        member x.QuerySet = querySet
+        member x.Summaries = summaryDic
         member x.Storages = storageDic
         member val StoragesById:Dictionary<int, Storage> = null with get, set
-        /// head 에 최신(最新) 정보가, last 에 최고(最古) 정보 수록
-        member val Logs:Log list = [] with get, set
+        ///// head 에 최신(最新) 정보가, last 에 최고(最古) 정보 수록
+        //member val Logs:Log list = [] with get, set
+        member val LastLog:Log option = None with get, set
         member x.IsLogReader = isReader
         member val LastLogId = -1 with get, set
         member x.Disposables = disposables
+        member x.GetSummary(summaryKey:StorageKey) = summaryDic[summaryKey]
 
         interface IDisposable with
             override x.Dispose() = x.Disposables.Dispose()
+

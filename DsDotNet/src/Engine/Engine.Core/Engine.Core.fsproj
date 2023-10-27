@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net7.0;net48</TargetFrameworks>
+		<TargetFrameworks>net7.0</TargetFrameworks>
 		<RootNamespace>Engine.Core</RootNamespace>
 		<OutputType>Library</OutputType>
 		<LangVersion>7.0</LangVersion>
@@ -16,6 +16,7 @@
 		<Compile Include="Interface.fs" />
 		<Compile Include="DsType.fs" />
 		<Compile Include="DsEvent.fs" />
+		<Compile Include="PathManager.fs" />
 		<Compile Include="DsLog.fs" />
 		<Compile Include="Prolog.fs" />
 		<Compile Include="Text.fs" />

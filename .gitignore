@@ -32,3 +32,4 @@ Grammar/CsParser/bin/
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/**/*.ds
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/**/*.json
 /.vs
+/DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/demo/ppt/kit_DS_autogen/*

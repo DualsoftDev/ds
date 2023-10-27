@@ -99,6 +99,18 @@ module ModelTests1 =
             compare ParserTest.SafetyValid answerSafetyValid
 
         [<Test>]
+        member __.``Model component [LayoutValid] test`` () =
+            compare ParserTest.SafetyValid answerSafetyValid
+
+        [<Test>]
+        member __.``Model component [FinishValid] test`` () =
+            compare ParserTest.SafetyValid answerSafetyValid
+
+        [<Test>]
+        member __.``Model component [DisableValid] test`` () =
+            compare ParserTest.SafetyValid answerSafetyValid
+
+        [<Test>]
         member __.``Model component [StrongCausal] test`` () =
             compareExact ParserTest.StrongCausal 
 

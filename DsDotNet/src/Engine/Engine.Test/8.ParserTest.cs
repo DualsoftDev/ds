@@ -32,6 +32,88 @@ namespace Engine
 }
 
 ";
+        public static string LayoutValid = @"
+[sys] L = {
+    [flow] F = {
+        Am > Main2;	     
+        Ap > Main;		
+	                    
+        Main = {
+            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+        }
+        Main2 = {
+            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+        }
+    }
+    [jobs] = {
+        Am = { A.""-""(%I2, %Q2); }
+        Ap = { A.""+""(%I1, %Q1); }
+    }
+    [prop] = {
+        [layout] = {
+            A = (945, 123, 45, 67);
+            B.""+"" = (1244, 254, 56, 54)
+        }
+    }
+    [device file=""cylinder.ds""] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+    [device file=""cylinder.ds""] B; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+}
+
+";
+        public static string FinishValid = @"
+[sys] L = {
+    [flow] F = {
+        Am > Main2;	     
+        Ap > Main;		
+	                    
+        Main = {
+            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+        }
+        Main2 = {
+            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+        }
+    }
+    [jobs] = {
+        Am = { A.""-""(%I2, %Q2); }
+        Ap = { A.""+""(%I1, %Q1); }
+    }
+    [prop] = {
+        [finish] = {
+            F.Main2;
+            F.Main;
+        }
+    }
+    [device file=""cylinder.ds""] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+}
+
+";
+        public static string DiableValid = @"
+[sys] L = {
+    [flow] F = {
+        Am > Main2;	     
+        Ap > Main;		
+	                    
+        Main = {
+            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+        }
+        Main2 = {
+            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+        }
+    }
+    [jobs] = {
+        Am = { A.""-""(%I2, %Q2); }
+        Ap = { A.""+""(%I1, %Q1); }
+    }
+    [prop] = {
+        [disalbe] = {
+            F.Main.Am;
+            F.Am;
+        }
+    }
+    [device file=""cylinder.ds""] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+}
+
+";
         public static string StrongCausal = @"
 [sys] L = {
     [flow] F = {

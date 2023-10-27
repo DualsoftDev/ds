@@ -72,6 +72,7 @@ module ModelAnswers =
         [layouts] = {
             A = (1309, 405, 205, 83);
             B."+" = (1400, 300, 300, 300);
+            B."-" = (1600, 500, 300, 300);
         }
         [finish] = {
             F.R2;
@@ -107,8 +108,6 @@ module ModelAnswers =
 }
 """
 
-
-
     let answerSafetyValid = """
 [sys] L = {
     [flow] F = {
@@ -134,8 +133,85 @@ module ModelAnswers =
     }
     [device file="cylinder.ds"] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
 }
-
-
+"""
+    let answerLayoutValid = """
+[sys] L = {
+    [flow] F = {
+        Am > Main2;	     
+        Ap > Main;		
+	                    
+        Main = {
+            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+        }
+        Main2 = {
+            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+        }
+    }
+    [jobs] = {
+        Am = { A.""-""(%I2, %Q2); }
+        Ap = { A.""+""(%I1, %Q1); }
+    }
+    [prop] = {
+        [layout] = {
+            A = (945, 123, 45, 67);
+            B.""+"" = (1244, 254, 56, 54)
+        }
+    }
+    [device file=""cylinder.ds""] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+    [device file=""cylinder.ds""] B; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+}
+"""
+    let answerFinishValid = """
+[sys] L = {
+    [flow] F = {
+        Am > Main2;	     
+        Ap > Main;		
+	                    
+        Main = {
+            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+        }
+        Main2 = {
+            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+        }
+    }
+    [jobs] = {
+        Am = { A.""-""(%I2, %Q2); }
+        Ap = { A.""+""(%I1, %Q1); }
+    }
+    [prop] = {
+        [finish] = {
+            F.Main2;
+            F.Main;
+        }
+    }
+    [device file="cylinder.ds"] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+}
+"""
+    let answerDiableValid = """
+[sys] L = {
+    [flow] F = {
+        Ap > Main;		
+        Am > Main2;	     
+	                    
+        Main = {
+            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+        }
+        Main2 = {
+            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+        }
+    }
+    [jobs] = {
+        Am = { A."-"(%I2, %Q2); }
+        Ap = { A."+"(%I1, %Q1); }
+    }
+    [prop] = {
+        [disalbe] = {
+            F.Main.Am;
+            F.Am;
+        }
+    }
+    [device file="cylinder.ds"] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+}
 """
     let answerDuplicatedEdgesText = """
 [sys] B = {

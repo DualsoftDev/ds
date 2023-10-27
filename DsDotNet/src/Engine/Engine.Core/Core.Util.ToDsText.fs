@@ -325,7 +325,7 @@ module internal ToDsTextModule =
                         yield $"{tab2}[safety] = {lb}"
                         for safetyHolder in withSafeties do
                             let conds = safetyHolder.SafetyConditions.Select(safetyConditionName).JoinWith("; ") + ";"
-                            yield $"{tab2}{safetyConditionHolderName safetyHolder} = {lb} {conds} {rb}"
+                            yield $"{tab3}{safetyConditionHolderName safetyHolder} = {lb} {conds} {rb}"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
@@ -345,24 +345,63 @@ module internal ToDsTextModule =
                 let makeList (name:string) (xywh:Xywh) =
                     let posi =
                         if xywh.W.HasValue then
-                            $"({xywh.X}, {xywh.Y}, {xywh.W.Value}, {xywh.H.Value})"
+                            $"({xywh.X}, {xywh.Y}, {xywh.W.Value}, {xywh.H.Value});"
                         else
-                            $"({xywh.X}, {xywh.Y})"
-                    $"{tab2}{name} = {posi}"
+                            $"({xywh.X}, {xywh.Y});"
+                    $"{tab3}{name} = {posi}"
                 [
                     if devicesWithLayouts.Any() || deviceApisWithLayouts.Any() then
                         yield $"{tab2}[layouts] = {lb}"
                         for device in devicesWithLayouts do
                             yield makeList device.Name device.Xywh
                         for deviceApi in deviceApisWithLayouts do
-                            yield makeList deviceApi.Name deviceApi.Xywh
+                            yield makeList deviceApi.QualifiedName deviceApi.Xywh
                         yield $"{tab2}{rb}"
-                ]  |> combineLines
-
-            if safeties.Any() || layouts.Any() then
+                ] |> combineLines
+            let finishedReals =
+                [
+                    for flow in system.Flows do
+                    for vert in flow.Graph.Vertices do
+                        match vert with
+                        | :? Real as real -> if real.Finished then yield real
+                        | _ -> ()
+                ]
+            let finished = 
+                [
+                if finishedReals.Any() then
+                    yield $"{tab2}[finish] = {lb}"
+                    for real in finishedReals do
+                        yield $"{tab3}{real.Flow.Name}.{real.Name};"
+                    yield $"{tab2}{rb}"
+                ] |> combineLines
+            let disabledVertices = 
+                [
+                    for flow in system.Flows do
+                    for rootVert in flow.Graph.Vertices do
+                        match rootVert with
+                        | :? Real as real ->
+                            for vert in real.Graph.Vertices do
+                                match vert with
+                                | :? Call as call ->
+                                    if call.Disabled then yield call
+                                | _ -> ()
+                        | _ -> ()
+                ]
+            let disabled = 
+                [
+                if disabledVertices.Any() then
+                    yield $"{tab2}[disable] = {lb}"
+                    for vert in disabledVertices do
+                        let compo = vert.NameComponents
+                        yield $"{tab3}{compo[1]}.{compo[2]}.{compo[3]};"
+                    yield $"{tab2}{rb}"
+                ] |> combineLines
+            if safeties.Any() || layouts.Any() || finished.Any() || disabled.Any() then
                 yield $"{tab}[prop] = {lb}"
                 if safeties.Any()  then yield safeties
                 if layouts.Any()   then yield layouts
+                if finished.Any()  then yield finished
+                if disabled.Any()  then yield disabled
                 yield $"{tab}{rb}"
             let commentDevice(d:Device) = if pCooment then  $"// {d.AbsoluteFilePath}" else "";
             for d in system.Devices do

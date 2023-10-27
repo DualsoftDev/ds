@@ -509,20 +509,30 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                     tryParseAndReturn(getText(xywh.w())),
                     tryParseAndReturn(getText(xywh.h()))
                 )
+            let putXywh (task:DsTask) (xywh:Xywh) = 
+                task.ApiItem.Xywh <- xywh
+            let iterTasks (nameCompo:Fqdn) (xywh:Xywh) (tasks:List<'T>) = 
+                if tasks.Any() then 
+                    let task = tasks.TryFindWithNameComponents(nameCompo)
+                    if task.IsSome then
+                        putXywh task.Value xywh
             for layoutCtx in listLayoutCtx do
                 let listPositionDefCtx = layoutCtx.Descendants<PositionDefContext>().ToList()
                 for positionDef in listPositionDefCtx do
                     let nameCtx = positionDef.TryFindFirstChild<Identifier12Context>() |> Option.get
                     let name = getText nameCtx
                     let xywh = positionDef.TryFindFirstChild<XywhContext>() |> Option.get |> genXywh
-                    match (collectNameComponents nameCtx).Count() with
+                    let nameCompo = collectNameComponents nameCtx
+                    match (nameCompo).Count() with
                     | 1 -> 
                         let device = FindExtension.TryFindLoadedSystem(system, name) |> Option.get
                         device.Xywh <- xywh
                     | 2 -> 
-                        system.LoadedSystems 
-                        |> map(fun device -> device.ReferenceSystem.TryFindExportApiItem(collectNameComponents nameCtx))
-                        |> iter(fun apiItem -> if not(apiItem.IsNone) then apiItem.Value.Xywh <- xywh)
+                        system.Jobs
+                        |> iter(fun job ->
+                            job.DeviceDefs.ToList() |> iterTasks nameCompo xywh 
+                            job.LinkDefs.ToList()   |> iterTasks nameCompo xywh
+                        )
                     | _ -> failwith "invalid name component"
 
         let fillFinished (system:DsSystem) (listFinishedCtx:List<dsParser.FinishBlockContext>) =
@@ -548,16 +558,16 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                         failwith $"Couldn't find target coin object name {getText(disabled)}"
             
         let fillProperties (x:DsParserListener) (ctx:PropsBlockContext) = 
-            let theSystem  = x.TheSystem
+            let theSystem = x.TheSystem
             //device, call에 layout xywh 채우기
             ctx.Descendants<LayoutBlockContext>().ToList() |> fillXywh theSystem
             //Real에 finished 채우기
             ctx.Descendants<FinishBlockContext>().ToList() |> fillFinished theSystem
-            //Call에 disable, xywh 채우기
+            //Call에 disable 채우기
             ctx.Descendants<DisableBlockContext>().ToList() |> fillDisabled theSystem
 
         for ctx in sysctx.Descendants<JobBlockContext>() do
-            createTaskDevice  x.TheSystem ctx
+            createTaskDevice x.TheSystem ctx
             createTaskLink x.TheSystem ctx
 
         for ctx in sysctx.Descendants<AliasListingContext>() do

@@ -89,8 +89,8 @@ public class Tester
     }
 }
 [layouts] = {
-       L.T.Cp = (30, 50)            // xy
-       L.T.Cm = (60, 50, 20, 20)    // xywh
+       T.Cp = (30, 50);            // xy
+       T.Cm = (60, 50, 20, 20);    // xywh
 }
 ";
 

@@ -118,7 +118,7 @@ INSERT INTO [{Tn.Storage}]
         /// Container reference
         member x.LogSet = logSet
         member x.StorageKey = storageKey
-        member val LastValue:obj = null with get, set
+        member val LastLog:Log option = None with get, set
 
     and LogSet(querySet:QuerySet, storages:Storage seq, isReader:bool) as this =
         let storageDic =
@@ -139,8 +139,9 @@ INSERT INTO [{Tn.Storage}]
         member x.Summaries = summaryDic
         member x.Storages = storageDic
         member val StoragesById:Dictionary<int, Storage> = null with get, set
-        /// head 에 최신(最新) 정보가, last 에 최고(最古) 정보 수록
-        member val Logs:Log list = [] with get, set
+        ///// head 에 최신(最新) 정보가, last 에 최고(最古) 정보 수록
+        //member val Logs:Log list = [] with get, set
+        member val LastLog:Log option = None with get, set
         member x.IsLogReader = isReader
         member val LastLogId = -1 with get, set
         member x.Disposables = disposables

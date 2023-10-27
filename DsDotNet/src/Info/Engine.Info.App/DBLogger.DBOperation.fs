@@ -77,7 +77,6 @@ module internal DBLoggerImpl =
 
             let logs =
                 ormLogs
-                //|> Seq.sortByDescending(fun l -> l.Id)
                 |> map (ormLog2Log x)
                 |> toArray
             // TODO: summary 작성
@@ -86,10 +85,8 @@ module internal DBLoggerImpl =
             for (key, group) in groups do
                 x.Summaries[key].Build(group)
 
-            x.Logs <- logs |> toList
-            if x.Logs.any() then
-                x.LastLogId <- x.Logs |> List.maxBy(fun l -> l.Id) |> fun l -> l.Id
-
+            if logs.any() then
+                x.LastLog <- logs |> Seq.tryLast
 
 
     let mutable logSet = getNull<LogSet>()
@@ -141,9 +138,8 @@ module internal DBLoggerImpl =
         let newLogs = conn.Query<ORMLog>($"SELECT * FROM [{Tn.Log}] WHERE id > {logSet.LastLogId} ORDER BY id DESC;")            
         if newLogs.any() then
             let newLogs = newLogs |> map (ormLog2Log logSet) |> toList
-            logSet.Logs <- newLogs @ logSet.Logs
-            logSet.LastLogId <- newLogs |> List.maxBy(fun l -> l.Id) |> fun l -> l.Id
-            logDebug $"Feteched {newLogs.length()} new logs.  Total logs = {logSet.Logs.length()}"
+            logDebug $"Feteched {newLogs.length()} new logs."
+            logSet.BuildIncremental newLogs
 
     /// 주기적으로 memory -> DB 로 log 를 write
     let queue = ConcurrentQueue<ORMLog>()
@@ -211,7 +207,7 @@ module internal DBLoggerImpl =
             use conn = createConnection()
             use! tr = conn.BeginTransactionAsync()
 
-            let! li = createLogInfoSetCommonAsync(querySet, systems, conn, tr, true)
+            let! logSet = createLogInfoSetCommonAsync(querySet, systems, conn, tr, true)
 
             let! existingLogs =
                 conn.QueryAsync<ORMLog>(
@@ -220,8 +216,8 @@ module internal DBLoggerImpl =
 
             do! tr.CommitAsync()
 
-            li.InitializeForReader(existingLogs)
-            return li
+            logSet.InitializeForReader(existingLogs)
+            return logSet
         }
 
 
@@ -230,10 +226,10 @@ module internal DBLoggerImpl =
             use conn = createConnection()
             use! tr = conn.BeginTransactionAsync()
             let isReader = false
-            let! li = createLogInfoSetCommonAsync(null, systems, conn, tr, isReader)
+            let! logSet = createLogInfoSetCommonAsync(null, systems, conn, tr, isReader)
             do! tr.CommitAsync()
 
-            return li
+            return logSet
         }
 
     let markSystemStart() =
@@ -300,7 +296,8 @@ module internal DBLoggerImpl =
                 
     // 지정된 조건에 따라 마지막 'Value'를 반환하는 함수
     let getLastValue (logSet:LogSet, fqdn: string, tagKind: int) : bool option =
-        match logSet.GetSummary(tagKind, fqdn).LastValue with
-        | (:? bool as b) -> Some b
-        | _ -> None
+        option {
+            let! lastLog = logSet.GetSummary(tagKind, fqdn).LastLog
+            return lastLog.Value :?> bool
+        }
 

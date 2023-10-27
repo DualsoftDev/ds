@@ -79,9 +79,27 @@ module internal DBLoggerQueryImpl =
 
             x.Count <- count
             x.Sum <- sum
-            x.LastValue <- 
-                match logs.TryLast() with
-                | Some l -> l.Value
-                | _ -> null
+            x.LastLog <- logs.TryLast()
+            ()
 
+        member x.BuildIncremental(FList(newLogs:Log list)) =
+            let lastLog = newLogs |> Seq.tryLast
+            match x.LastLog, lastLog with
+            | Some l, Some last ->
+                if l.Value = last.Value then
+                    failwithlogf $"ERROR.  duplicated consecutive values detected."
+            | _  -> ()
+
+            x.LastLog <- lastLog
+
+    type LogSet with
+        member x.BuildIncremental(newLogs:Log seq) =
+            let logs = newLogs
+            let groups =
+                logs |> Seq.groupBy(fun l -> getStorageKey x.StoragesById[l.StorageId] )
+            for (key, group) in groups do
+                x.Summaries[key].BuildIncremental(group)
+
+            if logs.any() then
+                x.LastLog <- logs |> Seq.tryLast
             ()

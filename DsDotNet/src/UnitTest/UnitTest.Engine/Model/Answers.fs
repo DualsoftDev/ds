@@ -207,7 +207,7 @@ module ModelAnswers =
     [prop] = {
         [disalbe] = {
             F.Main.Am;
-            F.Am;
+            F.Main2.Am;
         }
     }
     [device file="cylinder.ds"] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds

@@ -56,8 +56,9 @@ module internal DBLoggerImpl =
                 failwithlogf $"Database can't be sync'ed for {connectionString}"
         }
 
-    let createLoggerDBSchemaAsync(connStr:string, pptPath:string, config:string) =
+    let createLoggerDBSchemaAsync(connStr:string, modelCompileInfo:ModelCompileInfo) =
         task {
+            let pptPath, config = modelCompileInfo.PptPath, modelCompileInfo.ConfigPath
             connectionString <- connStr
 
             use conn = createConnection()
@@ -287,10 +288,10 @@ module internal DBLoggerImpl =
             return logSet_
         }
 
-    let initializeLogWriterOnDemandAsync(systems:DsSystem seq, connString:string, pptPath:string, config:string) =
+    let initializeLogWriterOnDemandAsync(systems:DsSystem seq, connString:string, modelCompileInfo:ModelCompileInfo) =
         task {
             connectionString <- connString
-            do! createLoggerDBSchemaAsync(connString, pptPath, config)
+            do! createLoggerDBSchemaAsync(connString, modelCompileInfo)
             let! logSet_ = createLogInfoSetForWriterAsync(systems)
             logSet <- logSet_
 

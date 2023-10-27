@@ -10,9 +10,9 @@ type DBLogger() =
 
     static member EnqueLogForInsert(log:DsLog) = DBLoggerImpl.enqueLogForInsert(log:DsLog)
     static member EnqueLogsForInsert(logs:DsLog seq) = DBLoggerImpl.enqueLogsForInsert(logs:DsLog seq)
-    static member InitializeLogWriterOnDemandAsync(systems:DsSystem seq, connectionString:string, pptPath:string, config:string) =
+    static member InitializeLogWriterOnDemandAsync(systems:DsSystem seq, connectionString:string, modelCompileInfo:ModelCompileInfo) =
         task {
-            let! logSet = DBLoggerImpl.initializeLogWriterOnDemandAsync(systems, connectionString, pptPath, config)
+            let! logSet = DBLoggerImpl.initializeLogWriterOnDemandAsync(systems, connectionString, modelCompileInfo)
             return logSet :> IDisposable
         }
     static member InitializeLogReaderOnDemandAsync(systems:DsSystem seq, connectionString:string) =

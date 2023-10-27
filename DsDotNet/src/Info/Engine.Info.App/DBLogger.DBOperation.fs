@@ -56,7 +56,7 @@ module internal DBLoggerImpl =
                 failwithlogf $"Database can't be sync'ed for {connectionString}"
         }
 
-    let createLoggerDBSchemaAsync(connStr:string) =
+    let createLoggerDBSchemaAsync(connStr:string, pptPath:string, config:string) =
         task {
             connectionString <- connStr
 
@@ -68,6 +68,15 @@ module internal DBLoggerImpl =
                 // schema 새로 생성
                 let! _ = conn.ExecuteAsync(sqlCreateSchema, tr)
                 ()
+
+            let! _ = conn.ExecuteAsync($"""INSERT OR REPLACE INTO [{Tn.Property}]
+                                      (name, value)
+                                      VALUES(@Name, @Value);"""
+                                      , {|Name="ppt"; Value=pptPath|}, tr)
+            let! _ = conn.ExecuteAsync($"""INSERT OR REPLACE INTO [{Tn.Property}]
+                                      (name, value)
+                                      VALUES(@Name, @Value);"""
+                                      , {|Name="ds"; Value=config|}, tr)
 
             let! newTagKindInfos = getNewTagKindInfosAsync(conn, tr)
             for (id, name) in newTagKindInfos do
@@ -278,10 +287,10 @@ module internal DBLoggerImpl =
             return logSet_
         }
 
-    let initializeLogWriterOnDemandAsync(systems:DsSystem seq, connString:string) =
+    let initializeLogWriterOnDemandAsync(systems:DsSystem seq, connString:string, pptPath:string, config:string) =
         task {
             connectionString <- connString
-            do! createLoggerDBSchemaAsync(connString)
+            do! createLoggerDBSchemaAsync(connString, pptPath, config)
             let! logSet_ = createLogInfoSetForWriterAsync(systems)
             logSet <- logSet_
 
@@ -306,4 +315,9 @@ module internal DBLoggerImpl =
             let! lastLog = logSet.GetSummary(tagKind, fqdn).LastLog
             return lastLog.Value |> toBool
         }
+
+    let getDsFilePath (connectionString:string) =
+        use conn = new SqliteConnection(connectionString) |> tee (fun conn -> conn.Open())
+        conn.QueryFirstOrDefault<string>($"SELECT value FROM [{Tn.Property}] WHERE name = @Name", {|Name="ds"|})
+
 

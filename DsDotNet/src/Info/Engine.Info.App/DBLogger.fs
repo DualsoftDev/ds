@@ -3,15 +3,16 @@ namespace Engine.Info
 open Engine.Core
 open Dual.Common.Core.FS
 open System
+open DBLoggerImpl
 
 type DBLogger() =
     static let querySet = QuerySet((DateTime.MinValue, DateTime.MaxValue))
 
     static member EnqueLogForInsert(log:DsLog) = DBLoggerImpl.enqueLogForInsert(log:DsLog)
     static member EnqueLogsForInsert(logs:DsLog seq) = DBLoggerImpl.enqueLogsForInsert(logs:DsLog seq)
-    static member InitializeLogWriterOnDemandAsync(systems:DsSystem seq, connectionString:string) =
+    static member InitializeLogWriterOnDemandAsync(systems:DsSystem seq, connectionString:string, pptPath:string, config:string) =
         task {
-            let! logSet = DBLoggerImpl.initializeLogWriterOnDemandAsync(systems, connectionString)
+            let! logSet = DBLoggerImpl.initializeLogWriterOnDemandAsync(systems, connectionString, pptPath, config)
             return logSet :> IDisposable
         }
     static member InitializeLogReaderOnDemandAsync(systems:DsSystem seq, connectionString:string) =
@@ -35,4 +36,6 @@ type DBLogger() =
 
     static member Sum     (fqdn, tagKind) = DBLoggerQueryImpl.sum(DBLoggerImpl.logSet, fqdn, tagKind)
     static member Average (fqdn, tagKind) = DBLoggerQueryImpl.average(DBLoggerImpl.logSet, fqdn, tagKind)
+
+    static member GetDsFilePath (connectionString:string) = DBLoggerImpl.getDsFilePath(connectionString)
 

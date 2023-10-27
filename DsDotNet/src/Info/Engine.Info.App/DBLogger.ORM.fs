@@ -15,6 +15,7 @@ module internal DBLoggerORM =
         let Log = "log"
         let Error = "error"
         let TagKind = "tagKind"
+        let Property = "property"
     // database view names
     module Vn =
         let Log = "vwLog"
@@ -42,6 +43,12 @@ CREATE TABLE [{Tn.TagKind}] (
     [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
     , [name]        NVARCHAR(64) UNIQUE NOT NULL CHECK(LENGTH(name) <= 64)
     , CONSTRAINT uniq_row UNIQUE (id, name)
+);
+
+CREATE TABLE [{Tn.Property}] (
+    [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+    , [name]        NVARCHAR(64) UNIQUE NOT NULL CHECK(LENGTH(name) <= 64)
+    , [value]       NVARCHAR(64) NOT NULL CHECK(LENGTH(name) <= 64)
 );
 
 

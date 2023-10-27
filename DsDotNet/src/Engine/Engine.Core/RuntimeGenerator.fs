@@ -14,6 +14,7 @@ module RuntimeGeneratorModule =
         | MELSEC
 
     type RuntimePackage = 
+        | SimulationDubug 
         | Simulation 
         | StandardPC 
         | StandardPLC 
@@ -32,13 +33,14 @@ module RuntimeGeneratorModule =
 
         member x.IsPackageSIM() =
             match x with
-            | Simulation -> true
+            | Simulation | SimulationDubug -> true
             | _ -> false
 
-    let RuntimePackageList = [Simulation; StandardPC; StandardPLC; LightPC; LightPLC]
+    let RuntimePackageList = [Simulation; SimulationDubug; StandardPC; StandardPLC; LightPC; LightPLC]
 
     let ToRuntimePackage s =
         match s with
+        | "SimulationDubug" -> SimulationDubug
         | "Simulation" -> Simulation
         | "StandardPC" -> StandardPC
         | "StandardPLC" -> StandardPLC

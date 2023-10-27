@@ -53,8 +53,11 @@ type VertexManager with
                 let api = td.ApiItem
                 let running = api.PS.Expr <&&> !!td.ActionINFunc  <&&> dop
                 yield running --@ (api.TOUT, v.System._tout.Value, getFuncName())
-                //yield (api.TOUT.DN.Expr <||> real.V.RF.Expr , rst) ==| (api.TXErrOverTime , getFuncName())
-                yield (api.TOUT.DN.Expr <||> (real.V.RF.Expr  <&&> v._sim.Expr), rst) ==| (api.TXErrOverTime , getFuncName())  //for demo  test ahn
+                if(RuntimeDS.Package = RuntimePackage.SimulationDubug)
+                then 
+                    yield (api.TOUT.DN.Expr <||> (real.V.RF.Expr  <&&> v._sim.Expr), rst) ==| (api.TXErrOverTime , getFuncName())
+                else 
+                    yield (api.TOUT.DN.Expr, rst) ==| (api.TXErrOverTime , getFuncName())
 
             let sets = tds.Select(fun s->s.ApiItem.TXErrOverTime).ToOrElseOff(v.System)
             yield (sets, v._off.Expr) --| (v.E1, getFuncName())

@@ -7,11 +7,10 @@ open System
 type DBLogger() =
     static let querySet = QuerySet((DateTime.MinValue, DateTime.MaxValue))
 
-    static member CreateLoggerDBSchema(connectionString) = DBLoggerImpl.createLoggerDBSchema(connectionString)
     static member EnqueLogForInsert(log:DsLog) = DBLoggerImpl.enqueLogForInsert(log:DsLog)
     static member EnqueLogsForInsert(logs:DsLog seq) = DBLoggerImpl.enqueLogsForInsert(logs:DsLog seq)
-    static member InitializeLogWriterOnDemandAsync(systems:DsSystem seq) = DBLoggerImpl.initializeLogWriterOnDemandAsync(systems)
-    static member InitializeLogReaderOnDemandAsync(systems:DsSystem seq) = DBLoggerImpl.initializeLogReaderOnDemandAsync(querySet, systems)
+    static member InitializeLogWriterOnDemandAsync(systems:DsSystem seq, connectionString:string) = DBLoggerImpl.initializeLogWriterOnDemandAsync(systems, connectionString)
+    static member InitializeLogReaderOnDemandAsync(systems:DsSystem seq, connectionString:string) = DBLoggerImpl.initializeLogReaderOnDemandAsync(querySet, systems, connectionString)
 
     // { unit test 등의 debugging 용
     static member internal Count       (fqdns:string seq, tagKinds:int seq, logSet:LogSet) = DBLoggerImpl.count(logSet, fqdns, tagKinds, true)

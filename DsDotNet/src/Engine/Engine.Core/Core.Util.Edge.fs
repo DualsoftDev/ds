@@ -172,7 +172,7 @@ module EdgeModule =
                     match getPure v with 
                     | :? Real    -> ()
                     | :? RealExF -> ()
-                    | _ -> failwithlog $"Error Reset {edge.Source.Name} |> {edge.Target.Name} [reset edge using Real or RealEx]"
+                    | _ -> failwithlog $"Reset Edge  {edge.Source.Name} |> {edge.Target.Name} [reset edge using Real or RealEx]"
             ))
 
         if bRoot  
@@ -184,7 +184,7 @@ module EdgeModule =
                     | :? Real    -> ()
                     | :? RealExF -> ()
                     | :? CallSys -> ()
-                    | _ -> failwithlog $"Error Start {edge.Source.Name} |> {edge.Target.Name} [start target can't not use Call]"
+                    | _ -> failwithlog $"Start Edge {edge.Source.Name} |> {edge.Target.Name} [start target can't not use Call[Action-Work그룹설정확인]]"
                 )
 
     let validateSystemEdge(system:DsSystem) =

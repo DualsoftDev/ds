@@ -68,6 +68,7 @@ module internal DBLoggerImpl =
         Log(l.Id, storage, l.At, l.Value)// |> tee (fun ll -> ll.Id = l.Id)
 
     type LogSet with
+        // ormLogs: id 순(시간 순) 정렬
         member x.InitializeForReader(ormLogs:ORMLog seq) =
             x.StoragesById <-
                 x.Storages.Values
@@ -76,7 +77,7 @@ module internal DBLoggerImpl =
 
             let logs =
                 ormLogs
-                |> Seq.sortByDescending(fun l -> l.Id)
+                //|> Seq.sortByDescending(fun l -> l.Id)
                 |> map (ormLog2Log x)
                 |> toArray
             // TODO: summary 작성
@@ -214,7 +215,7 @@ module internal DBLoggerImpl =
 
             let! existingLogs =
                 conn.QueryAsync<ORMLog>(
-                    $"SELECT * FROM [{Tn.Log}] WHERE at BETWEEN @START AND @END",
+                    $"SELECT * FROM [{Tn.Log}] WHERE at BETWEEN @START AND @END ORDER BY id;",
                     {|START=querySet.StartTime; END=querySet.EndTime|})
 
             do! tr.CommitAsync()
@@ -290,17 +291,16 @@ module internal DBLoggerImpl =
     //            WHERE fqdn=@Fqdn AND tagKind=@TagKind AND value=@Value;""", {|Fqdn=fqdn; TagKind=tagKind; Value=value|})
 
     let countLog(logSet:LogSet, fqdns:string seq, tagKinds:int seq, value:bool) =
-        let fqdns = fqdns |> HashSet
-        let tagKinds = tagKinds |> HashSet
-        logSet.Logs
-            |> Seq.count(fun l ->
-                l.Value = value
-                && fqdns.Contains(l.Storage.Fqdn)
-                && tagKinds.Contains(l.Storage.TagKind))
+        let mutable count = 0
+        for fqdn in fqdns do
+            for tagKind in tagKinds do
+                let summary = logSet.GetSummary(tagKind, fqdn)
+                count <- count + summary.Count
+        count
                 
     // 지정된 조건에 따라 마지막 'Value'를 반환하는 함수
     let getLastValue (logSet:LogSet, fqdn: string, tagKind: int) : bool option =
-        logSet.Logs
-            |> Seq.tryFind(fun l -> l.Storage.TagKind = tagKind && l.Storage.Fqdn = fqdn)
-            |> bind (fun l -> (|Bool|_|) l.Value)
+        match logSet.GetSummary(tagKind, fqdn).LastValue with
+        | (:? bool as b) -> Some b
+        | _ -> None
 

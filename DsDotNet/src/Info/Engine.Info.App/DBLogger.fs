@@ -17,8 +17,8 @@ type DBLogger() =
     static member internal CountLog(fqdns:string seq, tagKinds:int seq, logSet:LogSet) = DBLoggerImpl.countLog(logSet, fqdns, tagKinds, true)
     static member internal CountLog(fqdn:string, tagKind:int, logSet:LogSet) = DBLogger.CountLog([|fqdn|], [|tagKind|], logSet)
     static member internal GetLastValue(fqdn:string, tagKind:int, logSet:LogSet) = DBLoggerImpl.getLastValue(logSet, fqdn, tagKind).Value
-    static member internal CollectONDurations(fqdn, tagKind, logSet:LogSet) = DBLoggerQueryImpl.collectONDurations(logSet, fqdn, tagKind)
-    static member internal GetAverageONDuration(fqdn, tagKind, logSet:LogSet) = DBLoggerQueryImpl.getAverageONDuration(logSet, fqdn, tagKind)  |> Option.toNullable
+    static member internal CollectONDurations(fqdn, tagKind, logSet:LogSet) = DBLoggerQueryImpl.sum(logSet, fqdn, tagKind)
+    static member internal GetAverageONDuration(fqdn, tagKind, logSet:LogSet) = DBLoggerQueryImpl.average(logSet, fqdn, tagKind)
     // }
 
     static member CountLog(fqdns:string seq, tagKinds:int seq) = DBLoggerImpl.countLog(DBLoggerImpl.logSet, fqdns, tagKinds, true)
@@ -26,10 +26,6 @@ type DBLogger() =
     static member GetLastValue(fqdn:string, tagKind:int) = DBLoggerImpl.getLastValue(DBLoggerImpl.logSet, fqdn, tagKind) |> Option.toNullable
     
 
-    static member CollectONDurations   (fqdn, tagKind) = DBLoggerQueryImpl.collectONDurations(DBLoggerImpl.logSet, fqdn, tagKind)
-    static member GetAverageONDuration (fqdn, tagKind) = DBLoggerQueryImpl.getAverageONDuration(DBLoggerImpl.logSet, fqdn, tagKind) |> Option.toNullable
-    static member GetAverageONDurationSeconds(fqdn, tagKind) =
-        DBLoggerQueryImpl.getAverageONDuration(DBLoggerImpl.logSet, fqdn, tagKind)
-        |> Option.map(fun d -> d.TotalSeconds)
-        |> Option.toNullable
+    static member CollectONDurations   (fqdn, tagKind) = DBLoggerQueryImpl.sum(DBLoggerImpl.logSet, fqdn, tagKind)
+    static member GetAverageONDuration (fqdn, tagKind) = DBLoggerQueryImpl.average(DBLoggerImpl.logSet, fqdn, tagKind)
 

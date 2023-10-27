@@ -43,7 +43,7 @@ module DBLoggerTestModule =
                 createLog cyl1Error (nextSecond()) false
                 createLog cyl1Error (nextSecond()) true
                 createLog cyl1Error (nextSecond()) false    // 최신
-            ] |> List.rev
+            ]
 
         let storages = [
             cyl1Error
@@ -63,24 +63,41 @@ module DBLoggerTestModule =
             false === DBLogger.GetLastValue(fqdn, kind, logSet)
 
             let onsTimeSpans = DBLogger.CollectONDurations(fqdn, kind, logSet)
-            onsTimeSpans |> SeqEq [TimeSpan.FromSeconds(2.0); TimeSpan.FromSeconds(1.0)]
+            onsTimeSpans === 2.0 + 1.0
 
             let avgONs = DBLogger.GetAverageONDuration(fqdn, kind, logSet)
-            avgONs.Value.TotalMilliseconds === 1500.0
+            avgONs === 1.5
 
 
-            // log 하나 추가 후, 동일 test
+            // ON log 하나만 추가 된 후, 동일 test : cycle 미 완성
             let lastOn = createLog cyl1Error (nextSecond()) true
-            let logSet = createTestLoggerInfoSetForReader(querySet, storages, lastOn::logs)
+            let mutable logs = logs @ [lastOn]
+            let logSet = createTestLoggerInfoSetForReader(querySet, storages, logs)
 
-            3 === DBLogger.CountLog(fqdn, kind, logSet)
+            2 === DBLogger.CountLog(fqdn, kind, logSet)
             true === DBLogger.GetLastValue(fqdn, kind, logSet)
 
             let onsTimeSpans = DBLogger.CollectONDurations(fqdn, kind, logSet)
-            onsTimeSpans |> SeqEq [TimeSpan.FromSeconds(2.0); TimeSpan.FromSeconds(1.0)]
+            onsTimeSpans === 2.0 + 1.0
 
             let avgONs = DBLogger.GetAverageONDuration(fqdn, kind, logSet)
-            avgONs.Value.TotalMilliseconds === 1500.0
+            avgONs === 1.5
+
+
+            // OFF log 하나 더 추가해서 duration 완성된 후, 동일 test
+            let lastOn = createLog cyl1Error (nextSecond()) false
+            logs <- logs @ [lastOn]
+            let logSet = createTestLoggerInfoSetForReader(querySet, storages, logs)
+
+            3 === DBLogger.CountLog(fqdn, kind, logSet)
+            false === DBLogger.GetLastValue(fqdn, kind, logSet)
+
+            let onsTimeSpans = DBLogger.CollectONDurations(fqdn, kind, logSet)
+            onsTimeSpans === 2.0 + 1.0 + 1.0
+
+            let avgONs = DBLogger.GetAverageONDuration(fqdn, kind, logSet)
+            avgONs === 4.0 / 3.0
+
             ()
 
         [<Test>]

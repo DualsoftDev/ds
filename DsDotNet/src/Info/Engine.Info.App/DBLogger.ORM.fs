@@ -6,6 +6,7 @@ open Dual.Common.Core.FS
 open System.Collections.Generic
 open System.Reactive.Disposables
 open System.Diagnostics.CodeAnalysis
+open System.Runtime.CompilerServices
 
 
 [<AutoOpen>]
@@ -103,16 +104,21 @@ INSERT INTO [{Tn.Storage}]
         member val At        = at      with get, set
         member val Value:obj = value   with get, set
 
-    type StorageKey = int*string
+    type TagKind = int
+    type Fqdn = string
+    type StorageKey = TagKind*Fqdn
 
     let getStorageKey(s:Storage):StorageKey = s.TagKind, s.Fqdn
 
-    type Summary(logSet:LogSet, count:int, sum:uint64) =
+    type Summary(logSet:LogSet, storageKey:StorageKey, count:int, sum:double) =
         /// Number rising
         member val Count = count with get, set
-        /// Duration sum (milisec)
+        /// Duration sum (sec 단위)
         member val Sum = sum with get, set
+        /// Container reference
         member x.LogSet = logSet
+        member x.StorageKey = storageKey
+        member val LastValue:obj = null with get, set
 
     and LogSet(querySet:QuerySet, storages:Storage seq, isReader:bool) as this =
         let storageDic =
@@ -122,7 +128,9 @@ INSERT INTO [{Tn.Storage}]
 
         let summaryDic =
             storages
-            |> map (fun s -> getStorageKey s, Summary(this, 0, 0UL))
+            |> map (fun s ->
+                let key = getStorageKey s
+                key, Summary(this, key, 0, 0.))
             |> Tuple.toDictionary
 
         let disposables = new CompositeDisposable()
@@ -136,10 +144,8 @@ INSERT INTO [{Tn.Storage}]
         member x.IsLogReader = isReader
         member val LastLogId = -1 with get, set
         member x.Disposables = disposables
+        member x.GetSummary(summaryKey:StorageKey) = summaryDic[summaryKey]
 
         interface IDisposable with
             override x.Dispose() = x.Disposables.Dispose()
 
-    type Summary with
-        member x.Build(logs:Log seq) =
-            ()

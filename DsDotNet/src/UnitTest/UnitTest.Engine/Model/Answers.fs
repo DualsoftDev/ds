@@ -70,7 +70,15 @@ module ModelAnswers =
         F.Main.Am = { F.Main; }
         }
         [layouts] = {
-        A = (1309, 405, 205, 83)
+            A = (1309, 405, 205, 83);
+            B."+" = (1400, 300, 300, 300);
+        }
+        [finish] = {
+            F.R2;
+            F.R1;
+        }
+        [disable] = {
+            F.Main.Ap;
         }
     }
     [device file="cylinder.ds"] A; // D:/Git/ds-Master/DsDotNet/src/UnitTest/UnitTest.Model/cylinder.ds

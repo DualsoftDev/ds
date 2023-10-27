@@ -329,22 +329,21 @@ module internal ToDsTextModule =
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
+            let getFiltered filter (container:IEnumerable<'T>) = 
+                container
+                |> Seq.where filter
+                |> Seq.toList
+            let getSelectedAndFiltered selecter filter (container:IEnumerable<'T>)= 
+                container
+                |> Seq.map selecter
+                |> Seq.flatten
+                |> getFiltered filter
             let devicesWithLayouts = 
-                system.Devices
-                |> Seq.where(fun device -> device.Xywh <> null)
-                |> Seq.toList
+                system.Devices |> getFiltered (fun device -> device.Xywh <> null)
             let deviceApisWithLayouts = 
-                system.Jobs
-                |> Seq.map(fun job -> job.DeviceDefs) 
-                |> Seq.flatten
-                |> Seq.where(fun dev -> dev.ApiItem.Xywh <> null)
-                |> Seq.toList
+                system.Jobs |> getSelectedAndFiltered(fun job -> job.DeviceDefs) (fun dev -> dev.ApiItem.Xywh <> null)
             let exSystemApisWithLayouts = 
-                system.Jobs
-                |> Seq.map(fun job -> job.LinkDefs) 
-                |> Seq.flatten
-                |> Seq.where(fun dev -> dev.ApiItem.Xywh <> null)
-                |> Seq.toList
+                system.Jobs |> getSelectedAndFiltered(fun job -> job.LinkDefs) (fun dev -> dev.ApiItem.Xywh <> null)
             let layouts =
                 let makeList (name:string) (xywh:Xywh) =
                     let posi =

@@ -40,7 +40,8 @@ CREATE TABLE [{Tn.Log}] (
 
 CREATE TABLE [{Tn.TagKind}] (
     [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
-    , [name]        NVARCHAR(64) NOT NULL CHECK(LENGTH(name) <= 64)
+    , [name]        NVARCHAR(64) UNIQUE NOT NULL CHECK(LENGTH(name) <= 64)
+    , CONSTRAINT uniq_row UNIQUE (id, name)
 );
 
 
@@ -83,6 +84,11 @@ CREATE VIEW [{Vn.Log}] AS
         member val StorageId = storageId with get, set
         member val At = at with get, set
         member val Value = value with get, set
+
+    /// tagKind table row
+    type ORMTagKind() =
+        member val Id = 0 with get, set
+        member val Name = "" with get, set
 
     type Log(id:int, storage:Storage, at:DateTime, value:obj) =
         inherit ORMLog(id , storage.Id, at, value)

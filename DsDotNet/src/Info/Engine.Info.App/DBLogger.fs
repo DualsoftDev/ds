@@ -9,8 +9,16 @@ type DBLogger() =
 
     static member EnqueLogForInsert(log:DsLog) = DBLoggerImpl.enqueLogForInsert(log:DsLog)
     static member EnqueLogsForInsert(logs:DsLog seq) = DBLoggerImpl.enqueLogsForInsert(logs:DsLog seq)
-    static member InitializeLogWriterOnDemandAsync(systems:DsSystem seq, connectionString:string) = DBLoggerImpl.initializeLogWriterOnDemandAsync(systems, connectionString)
-    static member InitializeLogReaderOnDemandAsync(systems:DsSystem seq, connectionString:string) = DBLoggerImpl.initializeLogReaderOnDemandAsync(querySet, systems, connectionString)
+    static member InitializeLogWriterOnDemandAsync(systems:DsSystem seq, connectionString:string) =
+        task {
+            let! logSet = DBLoggerImpl.initializeLogWriterOnDemandAsync(systems, connectionString)
+            return logSet :> IDisposable
+        }
+    static member InitializeLogReaderOnDemandAsync(systems:DsSystem seq, connectionString:string) =
+        task {
+            let! logSet = DBLoggerImpl.initializeLogReaderOnDemandAsync(querySet, systems, connectionString)
+            return logSet :> IDisposable
+        }
 
     // { unit test 등의 debugging 용
     static member internal Count       (fqdns:string seq, tagKinds:int seq, logSet:LogSet) = DBLoggerImpl.count(logSet, fqdns, tagKinds, true)

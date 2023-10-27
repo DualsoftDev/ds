@@ -1,7 +1,6 @@
 namespace Engine.Info
 
 open System
-open System.Collections.Concurrent
 open Dapper
 open Engine.Core
 open Microsoft.Data.Sqlite
@@ -9,7 +8,10 @@ open Dual.Common.Core.FS
 open Dual.Common.Db
 open System.Data
 open System.Threading.Tasks
+open System.Collections.Generic
+open System.Collections.Concurrent
 open DBLoggerORM
+
 
 [<AutoOpen>]
 module internal DBLoggerImpl =
@@ -17,8 +19,9 @@ module internal DBLoggerImpl =
     let createConnection() =
         new SqliteConnection(connectionString) |> tee (fun conn -> conn.Open())
 
+    type TagKindTuple = TagKind*string
     type EnumEx() =
-        static member Extract<'T when 'T: struct>() =
+        static member Extract<'T when 'T: struct>() : TagKindTuple array =
             let typ = typeof<'T>
             let values =
                 Enum.GetValues(typ) :?> 'T[]
@@ -27,33 +30,53 @@ module internal DBLoggerImpl =
             let names = Enum.GetNames(typ) |> map (fun n -> $"{typ.Name}.{n}")
             Array.zip values names
 
+    let getAllTagKinds(): TagKindTuple array =
+        EnumEx.Extract<SystemTag>()
+        @ EnumEx.Extract<FlowTag>()
+        @ EnumEx.Extract<VertexTag>()
+        @ EnumEx.Extract<ApiItemTag>()
+        @ EnumEx.Extract<ActionTag>()
+
+
+    let getNewTagKindInfosAsync(conn:IDbConnection, tr:IDbTransaction) =
+        let tagKindInfos = getAllTagKinds()
+        task {
+            let! existingTagKindMap = conn.QueryAsync<ORMTagKind>($"SELECT * FROM [{Tn.TagKind}];", null, tr)
+            let existingTagKindHash =
+                existingTagKindMap 
+                |> map (fun t -> t.Id, t.Name)
+                |> HashSet
+            return tagKindInfos |> filter(fun t -> not <| existingTagKindHash.Contains(t))
+        }
+
+    let checkDbForReaderAsync(conn:IDbConnection, tr:IDbTransaction) =
+        task {
+            let! newTagKindInfos = getNewTagKindInfosAsync(conn, tr)
+            if newTagKindInfos.any() then
+                failwithlogf $"Database can't be sync'ed for {connectionString}"
+        }
 
     let createLoggerDBSchemaAsync(connStr:string) =
         task {
             connectionString <- connStr
+
             use conn = createConnection()
             use! tr = conn.BeginTransactionAsync()
-            let! existsLogTable = conn.IsTableExistsAsync(Tn.Log)
-            if not existsLogTable then
+
+            let! exists = conn.IsTableExistsAsync(Tn.Storage)
+            if not exists then
+                // schema 새로 생성
                 let! _ = conn.ExecuteAsync(sqlCreateSchema, tr)
+                ()
 
-                let enums =
-                    EnumEx.Extract<SystemTag>()
-                    @ EnumEx.Extract<FlowTag>()
-                    @ EnumEx.Extract<VertexTag>()
-                    @ EnumEx.Extract<ApiItemTag>()
-                    @ EnumEx.Extract<ActionTag>()
-
-                for (id, name) in enums do
-                    let query = $"INSERT INTO [{Tn.TagKind}] (id, name) VALUES (@Id, @Name);"
-                    let! _ = conn.ExecuteAsync(query, {|Id=id; Name=name|}, tr)
-                    ()
+            let! newTagKindInfos = getNewTagKindInfosAsync(conn, tr)
+            for (id, name) in newTagKindInfos do
+                let query = $"INSERT INTO [{Tn.TagKind}] (id, name) VALUES (@Id, @Name);"
+                let! _ = conn.ExecuteAsync(query, {|Id=id; Name=name|}, tr)
+                ()
 
             do! tr.CommitAsync()
         }
-
-
-
 
 
 
@@ -87,7 +110,6 @@ module internal DBLoggerImpl =
     
     let private createLogInfoSetCommonAsync(querySet:QuerySet, systems:DsSystem seq, conn:IDbConnection, tr:IDbTransaction, isReader:bool) : Task<LogSet> =
         Log4NetWrapper.logWithTrace <- true
-
         task {
             let systemStorages: Storage array =
                 systems
@@ -100,7 +122,7 @@ module internal DBLoggerImpl =
                 |> toArray
 
             if isReader && not <| conn.IsTableExistsAsync(Tn.Storage).Result then
-                failwithlogf $"Database not read for {connectionString}"
+                failwithlogf $"Database not ready for {connectionString}"
             
             let! dbStorages = conn.QueryAsync<Storage>($"SELECT * FROM [{Tn.Storage}]")
             let dbStorages =
@@ -115,17 +137,20 @@ module internal DBLoggerImpl =
             for s in existingStorages do
                 s.Id <- dbStorages[getStorageKey s].Id
                 
+            if newStorages.any() then
+                if isReader then
+                    failwithlogf $"Database can't be sync'ed for {connectionString}"
+                else
+                    for s in newStorages do
+                        let! id = conn.InsertAndQueryLastRowIdAsync(tr,
+                            $"""INSERT INTO [{Tn.Storage}]
+                                (name, fqdn, tagKind, dataType)
+                                VALUES (@Name, @Fqdn, @TagKind, @DataType)
+                                ;
+                            """, {|Name=s.Name; Fqdn=s.Fqdn; TagKind=s.TagKind; DataType=s.DataType|})
+                        s.Id <- id
 
-            for s in newStorages do
-                let! id = conn.InsertAndQueryLastRowIdAsync(tr,
-                    $"""INSERT INTO [{Tn.Storage}]
-                        (name, fqdn, tagKind, dataType)
-                        VALUES (@Name, @Fqdn, @TagKind, @DataType)
-                        ;
-                    """, {|Name=s.Name; Fqdn=s.Fqdn; TagKind=s.TagKind; DataType=s.DataType|})
-                s.Id <- id
-
-            return new LogSet(querySet, (*[systemPowerStorage] @*) existingStorages @ newStorages, isReader)
+            return new LogSet(querySet, existingStorages @ newStorages, isReader)
         }
 
     /// 주기적으로 DB -> memory 로 log 를 read
@@ -143,6 +168,7 @@ module internal DBLoggerImpl =
 
     /// 주기적으로 memory -> DB 로 log 를 write
     let queue = ConcurrentQueue<ORMLog>()
+
     // 큐를 배열로 바꾸고 비우는 함수
     let drainQueueToArray (queue: ConcurrentQueue<'T>) : 'T[] =
         // 결과를 저장할 리스트
@@ -164,6 +190,7 @@ module internal DBLoggerImpl =
         results.ToArray()
 
     let dequeAndWriteDBAsync() =
+        verify(not logSet.IsLogReader)
         task {
             let newLogs = drainQueueToArray(queue)
             if newLogs.any() then
@@ -216,6 +243,8 @@ module internal DBLoggerImpl =
                     $"SELECT * FROM [{Tn.Log}] WHERE at BETWEEN @START AND @END ORDER BY id;",
                     {|START=querySet.StartTime; END=querySet.EndTime|})
 
+            do! checkDbForReaderAsync(conn, tr)
+
             do! tr.CommitAsync()
 
             logSet.InitializeForReader(existingLogs)
@@ -246,7 +275,7 @@ module internal DBLoggerImpl =
             interval.Subscribe(fun counter -> fetchNewLogs())
             |> logSet_.Disposables.Add
 
-            return (logSet_ :> IDisposable)
+            return logSet_
         }
 
     let initializeLogWriterOnDemandAsync(systems:DsSystem seq, connString:string) =
@@ -259,7 +288,7 @@ module internal DBLoggerImpl =
             interval.Subscribe(fun counter -> dequeAndWriteDBAsync().Wait())
             |> logSet_.Disposables.Add
 
-            return (logSet_ :> IDisposable)
+            return logSet_
         }
 
 

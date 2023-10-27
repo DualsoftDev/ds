@@ -19,13 +19,13 @@ module internal DBLoggerQueryImpl =
             0
 
 
+    let isOn (log:Log) = toBool(log.Value)
+    let isOff = isOn >> not
     type Summary with
         // logs: id 순
         member x.Build(FList(logs:Log list)) =
             let mutable count = 0
             let mutable sum = 0.0
-            let isOn (log:Log) = toBool(log.Value)
-            let isOff = isOn >> not
 
             let rec inspectLog (logs:Log list) =
                 match logs with
@@ -54,14 +54,20 @@ module internal DBLoggerQueryImpl =
             ()
 
         member x.BuildIncremental(FList(newLogs:Log list)) =
-            let lastLog = newLogs |> Seq.tryLast
-            match x.LastLog, lastLog with
-            | Some l, Some last ->
-                if l.Value = last.Value then
-                    failwithlogf $"ERROR.  duplicated consecutive values detected."
-            | _  -> ()
+            let helper (last:Log) =
+                if x.LastLog.IsNone then
+                    if isOff(last) then
+                        failwithlogf $"ERROR.  Invalid value starts: OFF(false)."
+                else
+                    let prev = x.LastLog.Value
+                    if isOn(prev) = isOn(last) then
+                        failwithlogf $"ERROR.  duplicated consecutive values detected."
+                    if isOff(last) then
+                        x.Count <- x.Count + 1
+                        x.Sum <- x.Sum + (last.At - prev.At).TotalSeconds
+                x.LastLog <- Some last
 
-            x.LastLog <- lastLog
+            newLogs |> iter helper
 
     type LogSet with
         member x.BuildIncremental(newLogs:Log seq) =

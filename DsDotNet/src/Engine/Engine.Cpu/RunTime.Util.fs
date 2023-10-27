@@ -62,7 +62,7 @@ module RunTimeUtil =
                             w.Value.TagKind = (int)SystemTag.auto
                             ||   w.Value.TagKind = (int)SystemTag.drive
                             ||   w.Value.TagKind = (int)SystemTag.ready
-                            || ( w.Value.TagKind = (int)SystemTag.sim && mode = RuntimePackage.Simulation)
+                            || ( w.Value.TagKind = (int)SystemTag.sim && mode.IsPackageSIM())
                     )
         autoStartTags.Iter(fun t -> t.Value.BoxedValue <-  on)
 
@@ -71,7 +71,7 @@ module RunTimeUtil =
     let cpuModeToggle(sys:DsSystem, mode:RuntimePackage) =
         sys.TagManager.Storages
             .Where(fun w->  w.Value.TagKind = (int)SystemTag.sim)
-            .Iter(fun t -> t.Value.BoxedValue <- (mode = RuntimePackage.Simulation))
+            .Iter(fun t -> t.Value.BoxedValue <- (mode.IsPackageSIM()))
   
    
     ///HMI Reset

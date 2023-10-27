@@ -59,13 +59,13 @@ module DBLoggerTestModule =
             let cyl2Error = createStorage "cyl2.trxErr" (int ApiItemTag.trxErr)
             let cyl2Error = createStorage "cyl2.trxErr" (int ApiItemTag.trxErr)
 
-            2 === DBLogger.CountLog(fqdn, kind, logSet)
+            2 === DBLogger.Count(fqdn, kind, logSet)
             false === DBLogger.GetLastValue(fqdn, kind, logSet)
 
-            let onsTimeSpans = DBLogger.CollectONDurations(fqdn, kind, logSet)
+            let onsTimeSpans = DBLogger.Sum(fqdn, kind, logSet)
             onsTimeSpans === 2.0 + 1.0
 
-            let avgONs = DBLogger.GetAverageONDuration(fqdn, kind, logSet)
+            let avgONs = DBLogger.Average(fqdn, kind, logSet)
             avgONs === 1.5
 
 
@@ -74,13 +74,13 @@ module DBLoggerTestModule =
             let mutable logs = logs @ [lastOn]
             let logSet = createTestLoggerInfoSetForReader(querySet, storages, logs)
 
-            2 === DBLogger.CountLog(fqdn, kind, logSet)
+            2 === DBLogger.Count(fqdn, kind, logSet)
             true === DBLogger.GetLastValue(fqdn, kind, logSet)
 
-            let onsTimeSpans = DBLogger.CollectONDurations(fqdn, kind, logSet)
+            let onsTimeSpans = DBLogger.Sum(fqdn, kind, logSet)
             onsTimeSpans === 2.0 + 1.0
 
-            let avgONs = DBLogger.GetAverageONDuration(fqdn, kind, logSet)
+            let avgONs = DBLogger.Average(fqdn, kind, logSet)
             avgONs === 1.5
 
 
@@ -89,13 +89,13 @@ module DBLoggerTestModule =
             logs <- logs @ [lastOn]
             let logSet = createTestLoggerInfoSetForReader(querySet, storages, logs)
 
-            3 === DBLogger.CountLog(fqdn, kind, logSet)
+            3 === DBLogger.Count(fqdn, kind, logSet)
             false === DBLogger.GetLastValue(fqdn, kind, logSet)
 
-            let onsTimeSpans = DBLogger.CollectONDurations(fqdn, kind, logSet)
+            let onsTimeSpans = DBLogger.Sum(fqdn, kind, logSet)
             onsTimeSpans === 2.0 + 1.0 + 1.0
 
-            let avgONs = DBLogger.GetAverageONDuration(fqdn, kind, logSet)
+            let avgONs = DBLogger.Average(fqdn, kind, logSet)
             avgONs === 4.0 / 3.0
 
             ()

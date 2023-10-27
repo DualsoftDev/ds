@@ -290,7 +290,7 @@ module internal DBLoggerImpl =
     //        $"""SELECT COUNT(*) FROM [{Vn.Log}]
     //            WHERE fqdn=@Fqdn AND tagKind=@TagKind AND value=@Value;""", {|Fqdn=fqdn; TagKind=tagKind; Value=value|})
 
-    let countLog(logSet:LogSet, fqdns:string seq, tagKinds:int seq, value:bool) =
+    let count(logSet:LogSet, fqdns:string seq, tagKinds:int seq, value:bool) =
         let mutable count = 0
         for fqdn in fqdns do
             for tagKind in tagKinds do

@@ -5,8 +5,6 @@ open Engine.Core
 open Dual.Common.Core.FS
 open System.Collections.Generic
 open System.Reactive.Disposables
-open System.Diagnostics.CodeAnalysis
-open System.Runtime.CompilerServices
 
 
 [<AutoOpen>]
@@ -39,12 +37,6 @@ CREATE TABLE [{Tn.Log}] (
     , FOREIGN KEY(storageId) REFERENCES {Tn.Storage}(id)
 );
 
--- CREATE TABLE [{Tn.Error}] (
---     [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
---     , [logId]       INTEGER NOT NULL
---     , [message]     NVARCHAR(1024) NOT NULL CHECK(LENGTH(message) <= 1024)
---     , FOREIGN KEY(logId) REFERENCES {Tn.Log}(id)
--- );
 
 CREATE TABLE [{Tn.TagKind}] (
     [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
@@ -67,12 +59,7 @@ CREATE VIEW [{Vn.Log}] AS
     JOIN [{Tn.TagKind}] tagKind
     ON [stg].[tagKind] = [tagKind].[id]
     ;
-
-INSERT INTO [{Tn.Storage}]
-    (id, name, fqdn, tagKind, dataType)
-    VALUES (0, 'system-power', 'System.Power', -1, "Boolean")
-    ;
-    """
+"""
 
     /// DB logging query 기준
     [<AllowNullLiteral>]
@@ -139,11 +126,8 @@ INSERT INTO [{Tn.Storage}]
         member x.Summaries = summaryDic
         member x.Storages = storageDic
         member val StoragesById:Dictionary<int, Storage> = null with get, set
-        ///// head 에 최신(最新) 정보가, last 에 최고(最古) 정보 수록
-        //member val Logs:Log list = [] with get, set
         member val LastLog:Log option = None with get, set
         member x.IsLogReader = isReader
-        member val LastLogId = -1 with get, set
         member x.Disposables = disposables
         member x.GetSummary(summaryKey:StorageKey) = summaryDic[summaryKey]
 

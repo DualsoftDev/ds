@@ -137,9 +137,8 @@ module ModelAnswers =
     let answerLayoutValid = """
 [sys] L = {
     [flow] F = {
-        Am > Main2;	     
-        Ap > Main;		
-	                    
+        Ap > Main;		// Ap(CallDev)> Main(Real);
+        Am > Main2;		// Am(CallDev)> Main2(Real);
         Main = {
             Ap > Am;		// Ap(CallDev)> Am(CallDev);
         }
@@ -148,25 +147,26 @@ module ModelAnswers =
         }
     }
     [jobs] = {
-        Am = { A.""-""(%I2, %Q2); }
-        Ap = { A.""+""(%I1, %Q1); }
+        Am = { A."-"(%I2, %Q2); }
+        Ap = { A."+"(%I1, %Q1); }
+        Bm = { B."-"(%I4, %Q4); }
+        Bp = { B."+"(%I3, %Q3); }
     }
     [prop] = {
-        [layout] = {
+        [layouts] = {
             A = (945, 123, 45, 67);
-            B.""+"" = (1244, 254, 56, 54)
+            B."+" = (1244, 254, 56, 54);
         }
     }
-    [device file=""cylinder.ds""] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
-    [device file=""cylinder.ds""] B; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+    [device file="cylinder.ds"] A; // E:\projects\dualsoft\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+    [device file="cylinder.ds"] B; // E:\projects\dualsoft\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
 }
 """
     let answerFinishValid = """
 [sys] L = {
     [flow] F = {
-        Am > Main2;	     
-        Ap > Main;		
-	                    
+        Ap > Main;		// Ap(CallDev)> Main(Real);
+        Am > Main2;		// Am(CallDev)> Main2(Real);
         Main = {
             Ap > Am;		// Ap(CallDev)> Am(CallDev);
         }
@@ -175,19 +175,19 @@ module ModelAnswers =
         }
     }
     [jobs] = {
-        Am = { A.""-""(%I2, %Q2); }
-        Ap = { A.""+""(%I1, %Q1); }
+        Am = { A."-"(%I2, %Q2); }
+        Ap = { A."+"(%I1, %Q1); }
     }
     [prop] = {
         [finish] = {
-            F.Main2;
             F.Main;
+            F.Main2;
         }
     }
-    [device file="cylinder.ds"] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+    [device file="cylinder.ds"] A; // E:\projects\dualsoft\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
 }
 """
-    let answerDiableValid = """
+    let answerDisableValid = """
 [sys] L = {
     [flow] F = {
         Ap > Main;		
@@ -205,7 +205,7 @@ module ModelAnswers =
         Ap = { A."+"(%I1, %Q1); }
     }
     [prop] = {
-        [disalbe] = {
+        [disable] = {
             F.Main.Am;
             F.Main2.Am;
         }

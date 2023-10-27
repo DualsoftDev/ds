@@ -334,12 +334,16 @@ module internal ToDsTextModule =
                 |> Seq.where(fun device -> device.Xywh <> null)
                 |> Seq.toList
             let deviceApisWithLayouts = 
-                system.Devices
-                |> Seq.map(fun device -> 
-                    device.ReferenceSystem.ApiItems
-                    |> Seq.where(fun api -> api.Xywh <> null)
-                ) 
+                system.Jobs
+                |> Seq.map(fun job -> job.DeviceDefs) 
                 |> Seq.flatten
+                |> Seq.where(fun dev -> dev.ApiItem.Xywh <> null)
+                |> Seq.toList
+            let exSystemApisWithLayouts = 
+                system.Jobs
+                |> Seq.map(fun job -> job.LinkDefs) 
+                |> Seq.flatten
+                |> Seq.where(fun dev -> dev.ApiItem.Xywh <> null)
                 |> Seq.toList
             let layouts =
                 let makeList (name:string) (xywh:Xywh) =
@@ -350,12 +354,14 @@ module internal ToDsTextModule =
                             $"({xywh.X}, {xywh.Y});"
                     $"{tab3}{name} = {posi}"
                 [
-                    if devicesWithLayouts.Any() || deviceApisWithLayouts.Any() then
+                    if devicesWithLayouts.Any() || deviceApisWithLayouts.Any() || exSystemApisWithLayouts.Any() then
                         yield $"{tab2}[layouts] = {lb}"
                         for device in devicesWithLayouts do
                             yield makeList device.Name device.Xywh
                         for deviceApi in deviceApisWithLayouts do
-                            yield makeList deviceApi.QualifiedName deviceApi.Xywh
+                            yield makeList deviceApi.QualifiedName deviceApi.ApiItem.Xywh
+                        for exSystemApi in exSystemApisWithLayouts do
+                            yield makeList exSystemApi.QualifiedName exSystemApi.ApiItem.Xywh
                         yield $"{tab2}{rb}"
                 ] |> combineLines
             let finishedReals =

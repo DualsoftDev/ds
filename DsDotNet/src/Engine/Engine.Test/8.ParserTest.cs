@@ -48,9 +48,11 @@ namespace Engine
     [jobs] = {
         Am = { A.""-""(%I2, %Q2); }
         Ap = { A.""+""(%I1, %Q1); }
+        Bm = { B.""-""(%I4, %Q4); }
+        Bp = { B.""+""(%I3, %Q3); }
     }
     [prop] = {
-        [layout] = {
+        [layouts] = {
             A = (945, 123, 45, 67);
             B.""+"" = (1244, 254, 56, 54)
         }
@@ -87,7 +89,7 @@ namespace Engine
 }
 
 ";
-        public static string DiableValid = @"
+        public static string DisableValid = @"
 [sys] L = {
     [flow] F = {
         Am > Main2;	     
@@ -105,7 +107,7 @@ namespace Engine
         Ap = { A.""+""(%I1, %Q1); }
     }
     [prop] = {
-        [disalbe] = {
+        [disable] = {
             F.Main.Am;
             F.Main2.Am;
         }

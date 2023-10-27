@@ -100,15 +100,15 @@ module ModelTests1 =
 
         [<Test>]
         member __.``Model component [LayoutValid] test`` () =
-            compare ParserTest.SafetyValid answerSafetyValid
+            compare ParserTest.LayoutValid answerLayoutValid
 
         [<Test>]
         member __.``Model component [FinishValid] test`` () =
-            compare ParserTest.SafetyValid answerSafetyValid
+            compare ParserTest.FinishValid answerFinishValid
 
         [<Test>]
         member __.``Model component [DisableValid] test`` () =
-            compare ParserTest.SafetyValid answerSafetyValid
+            compare ParserTest.DisableValid answerDisableValid
 
         [<Test>]
         member __.``Model component [StrongCausal] test`` () =

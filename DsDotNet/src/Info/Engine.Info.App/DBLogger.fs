@@ -8,16 +8,16 @@ open DBLoggerImpl
 type DBLogger() =
     static let querySet = QuerySet((DateTime.MinValue, DateTime.MaxValue))
 
-    static member EnqueLogForInsert(log:DsLog) = DBLoggerImpl.enqueLogForInsert(log:DsLog)
-    static member EnqueLogsForInsert(logs:DsLog seq) = DBLoggerImpl.enqueLogsForInsert(logs:DsLog seq)
+    static member EnqueLogForInsert(log:DsLog) = DBLoggerImpl.Writer.enqueLogForInsert(log:DsLog)
+    static member EnqueLogsForInsert(logs:DsLog seq) = DBLoggerImpl.Writer.enqueLogsForInsert(logs:DsLog seq)
     static member InitializeLogWriterOnDemandAsync(systems:DsSystem seq, connectionString:string, modelCompileInfo:ModelCompileInfo) =
         task {
-            let! logSet = DBLoggerImpl.initializeLogWriterOnDemandAsync(systems, connectionString, modelCompileInfo)
+            let! logSet = DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync(systems, connectionString, modelCompileInfo)
             return logSet :> IDisposable
         }
     static member InitializeLogReaderOnDemandAsync(systems:DsSystem seq, connectionString:string) =
         task {
-            let! logSet = DBLoggerImpl.initializeLogReaderOnDemandAsync(querySet, systems, connectionString)
+            let! logSet = DBLoggerImpl.Reader.initializeLogReaderOnDemandAsync(querySet, systems, connectionString)
             return logSet :> IDisposable
         }
 

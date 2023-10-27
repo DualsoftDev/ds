@@ -56,37 +56,6 @@ module internal DBLoggerImpl =
                 failwithlogf $"Database can't be sync'ed for {connectionString}"
         }
 
-    let createLoggerDBSchemaAsync(connStr:string, modelCompileInfo:ModelCompileInfo) =
-        task {
-            let pptPath, config = modelCompileInfo.PptPath, modelCompileInfo.ConfigPath
-            connectionString <- connStr
-
-            use conn = createConnection()
-            use! tr = conn.BeginTransactionAsync()
-
-            let! exists = conn.IsTableExistsAsync(Tn.Storage)
-            if not exists then
-                // schema 새로 생성
-                let! _ = conn.ExecuteAsync(sqlCreateSchema, tr)
-                ()
-
-            let! _ = conn.ExecuteAsync($"""INSERT OR REPLACE INTO [{Tn.Property}]
-                                      (name, value)
-                                      VALUES(@Name, @Value);"""
-                                      , {|Name="ppt"; Value=pptPath|}, tr)
-            let! _ = conn.ExecuteAsync($"""INSERT OR REPLACE INTO [{Tn.Property}]
-                                      (name, value)
-                                      VALUES(@Name, @Value);"""
-                                      , {|Name="ds"; Value=config|}, tr)
-
-            let! newTagKindInfos = getNewTagKindInfosAsync(conn, tr)
-            for (id, name) in newTagKindInfos do
-                let query = $"INSERT INTO [{Tn.TagKind}] (id, name) VALUES (@Id, @Name);"
-                let! _ = conn.ExecuteAsync(query, {|Id=id; Name=name|}, tr)
-                ()
-
-            do! tr.CommitAsync()
-        }
 
 
 
@@ -115,6 +84,7 @@ module internal DBLoggerImpl =
             if logs.any() then
                 x.LastLog <- logs |> Seq.tryLast
 
+    let interval = System.Reactive.Linq.Observable.Interval(TimeSpan.FromSeconds(1))
 
     let mutable logSet = getNull<LogSet>()
     
@@ -163,143 +133,186 @@ module internal DBLoggerImpl =
             return new LogSet(querySet, existingStorages @ newStorages, isReader)
         }
 
-    /// 주기적으로 DB -> memory 로 log 를 read
-    let fetchNewLogs() =
-        use conn = createConnection()
-        let lastLogId =
-            match logSet.LastLog with
-            | Some l -> l.Id
-            | _ -> -1
-        let newLogs = conn.Query<ORMLog>($"SELECT * FROM [{Tn.Log}] WHERE id > {lastLogId} ORDER BY id DESC;")            
-        if newLogs.any() then
-            let newLogs = newLogs |> map (ormLog2Log logSet) |> toList
-            logDebug $"Feteched {newLogs.length()} new logs."
-            logSet.BuildIncremental newLogs
 
-    /// 주기적으로 memory -> DB 로 log 를 write
-    let queue = ConcurrentQueue<ORMLog>()
+    [<AutoOpen>]
+    module Writer =
+        let queue = ConcurrentQueue<ORMLog>()
 
-    // 큐를 배열로 바꾸고 비우는 함수
-    let drainQueueToArray (queue: ConcurrentQueue<'T>) : 'T[] =
-        // 결과를 저장할 리스트
-        let results = new ResizeArray<'T>()
+        /// 주기적으로 memory -> DB 로 log 를 write
+        let dequeAndWriteDBAsync(nPeriod:int64) =
+            verify(not logSet.IsLogReader)
 
-        // 큐가 빌 때까지 반복해서 항목을 Dequeue
-        let rec drainQueue () =
-            match queue.TryDequeue() with
-            | true, item ->
-                results.Add(item)
-                drainQueue ()
-            | false, _ -> 
-                () // 큐가 비었으므로 종료
+            // 큐를 배열로 바꾸고 비우는 함수
+            let drainQueueToArray (queue: ConcurrentQueue<'T>) : 'T seq =
+                let results = new ResizeArray<'T>()
+
+                // 큐가 빌 때까지 반복해서 항목을 Dequeue
+                let rec drainQueue () =
+                    match queue.TryDequeue() with
+                    | true, item ->
+                        results.Add(item)
+                        drainQueue ()
+                    | false, _ -> 
+                        () // 큐가 비었으므로 종료
     
-        // 큐 드레이닝 시작
-        drainQueue ()
+                // 큐 드레이닝 시작
+                drainQueue ()
 
-        // 리스트를 배열로 변환하여 반환
-        results.ToArray()
+                results
 
-    let dequeAndWriteDBAsync() =
-        verify(not logSet.IsLogReader)
-        task {
-            let newLogs = drainQueueToArray(queue)
-            if newLogs.any() then
-                logDebug $"Writing {newLogs.length()} new logs."
+            task {
+                let newLogs = drainQueueToArray(queue)
+                if newLogs.any() then
+                    logDebug $"Writing {newLogs.length()} new logs."
+                    use conn = createConnection()
+                    use! tr = conn.BeginTransactionAsync()
+                    for l in newLogs do
+                        let query =
+                            $"""INSERT INTO [{Tn.Log}]
+                                (at, storageId, value)
+                                VALUES (@At, @StorageId, @Value)
+                            """
+                        let! _ = conn.ExecuteAsync(query, {| At=l.At; StorageId=l.StorageId; Value=l.Value |})
+                        ()
+                    do! tr.CommitAsync()
+            }
+        let writePeriodicAsync = dequeAndWriteDBAsync
+
+        let enqueLogsForInsert(xs:DsLog seq) =
+            let toDecimal (value:obj) =
+                match toBool value with
+                | Bool b -> (if b then 1 else 0) |> decimal
+                | UInt64 d -> decimal d
+                | _ -> failwith "ERROR"
+
+
+            verify(not logSet.IsLogReader)
+            for x in xs do
+                match  x.Storage.Target with
+                | Some t ->
+                    let key = x.Storage.TagKind, t.QualifiedName
+                    let storageId = logSet.Storages[key].Id
+                    if storageId = 0 then
+                        noop()
+                    let value = toDecimal x.Storage.BoxedValue
+                    ORMLog(-1, storageId, x.Time, value) |> queue.Enqueue
+                | None ->
+                    failwith "NOT yet!!"
+
+        let enqueLogForInsert(x:DsLog) = enqueLogsForInsert([x])
+
+
+        let createLogInfoSetForWriterAsync(systems:DsSystem seq) : Task<LogSet> =
+            task {
                 use conn = createConnection()
                 use! tr = conn.BeginTransactionAsync()
-                for l in newLogs do
-                    let query =
-                        $"""INSERT INTO [{Tn.Log}]
-                            (at, storageId, value)
-                            VALUES (@At, @StorageId, @Value)
-                        """
-                    let! _ = conn.ExecuteAsync(query, {| At=l.At; StorageId=l.StorageId; Value=l.Value |})
-                    ()
+                let isReader = false
+                let! logSet = createLogInfoSetCommonAsync(null, systems, conn, tr, isReader)
                 do! tr.CommitAsync()
-        }
 
-    let private toDecimal (value:obj) =
-        match toBool value with
-        | Bool b -> (if b then 1 else 0) |> decimal
-        | UInt64 d -> decimal d
-        | _ -> failwith "ERROR"
+                return logSet
+            }
 
+        let createLoggerDBSchemaAsync(connStr:string, modelCompileInfo:ModelCompileInfo) =
+            task {
+                let pptPath, config = modelCompileInfo.PptPath, modelCompileInfo.ConfigPath
+                connectionString <- connStr
 
-    let enqueLogsForInsert(xs:DsLog seq) =
-        verify(not logSet.IsLogReader)
-        for x in xs do
-            match  x.Storage.Target with
-            | Some t ->
-                let key = x.Storage.TagKind, t.QualifiedName
-                let storageId = logSet.Storages[key].Id
-                if storageId = 0 then
-                    noop()
-                let value = toDecimal x.Storage.BoxedValue
-                ORMLog(-1, storageId, x.Time, value) |> queue.Enqueue
-            | None ->
-                failwith "NOT yet!!"
+                use conn = createConnection()
+                use! tr = conn.BeginTransactionAsync()
 
-    let enqueLogForInsert(x:DsLog) = enqueLogsForInsert([x])
+                let! exists = conn.IsTableExistsAsync(Tn.Storage)
+                if not exists then
+                    // schema 새로 생성
+                    let! _ = conn.ExecuteAsync(sqlCreateSchema, tr)
+                    ()
 
-    let createLoggerInfoSetForReaderAsync(querySet:QuerySet, systems:DsSystem seq) : Task<LogSet> =
-        task {
-            use conn = createConnection()
-            use! tr = conn.BeginTransactionAsync()
+                let! _ = conn.ExecuteAsync($"""INSERT OR REPLACE INTO [{Tn.Property}]
+                                          (name, value)
+                                          VALUES(@Name, @Value);"""
+                                          , {|Name="ppt"; Value=pptPath|}, tr)
+                let! _ = conn.ExecuteAsync($"""INSERT OR REPLACE INTO [{Tn.Property}]
+                                          (name, value)
+                                          VALUES(@Name, @Value);"""
+                                          , {|Name="ds"; Value=config|}, tr)
 
-            let! logSet = createLogInfoSetCommonAsync(querySet, systems, conn, tr, true)
+                let! newTagKindInfos = getNewTagKindInfosAsync(conn, tr)
+                for (id, name) in newTagKindInfos do
+                    let query = $"INSERT INTO [{Tn.TagKind}] (id, name) VALUES (@Id, @Name);"
+                    let! _ = conn.ExecuteAsync(query, {|Id=id; Name=name|}, tr)
+                    ()
 
-            let! existingLogs =
-                conn.QueryAsync<ORMLog>(
-                    $"SELECT * FROM [{Tn.Log}] WHERE at BETWEEN @START AND @END ORDER BY id;",
-                    {|START=querySet.StartTime; END=querySet.EndTime|})
-
-            do! checkDbForReaderAsync(conn, tr)
-
-            do! tr.CommitAsync()
-
-            logSet.InitializeForReader(existingLogs)
-            return logSet
-        }
+                do! tr.CommitAsync()
+            }
 
 
-    let createLogInfoSetForWriterAsync(systems:DsSystem seq) : Task<LogSet> =
-        task {
-            use conn = createConnection()
-            use! tr = conn.BeginTransactionAsync()
-            let isReader = false
-            let! logSet = createLogInfoSetCommonAsync(null, systems, conn, tr, isReader)
-            do! tr.CommitAsync()
+        let initializeLogWriterOnDemandAsync(systems:DsSystem seq, connString:string, modelCompileInfo:ModelCompileInfo) =
+            task {
+                connectionString <- connString
+                do! createLoggerDBSchemaAsync(connString, modelCompileInfo)
+                let! logSet_ = createLogInfoSetForWriterAsync(systems)
+                logSet <- logSet_
 
-            return logSet
-        }
+                interval.Subscribe(fun counter -> writePeriodicAsync(counter).Wait())
+                |> logSet_.Disposables.Add
 
-    let interval = System.Reactive.Linq.Observable.Interval(TimeSpan.FromSeconds(1))
+                return logSet_
+            }
 
-    let initializeLogReaderOnDemandAsync(querySet:QuerySet, systems:DsSystem seq, connString:string) =
+    [<AutoOpen>]
+    module Reader =
+        /// 주기적으로 DB -> memory 로 log 를 read
+        let readPeriodicAsync(nPeriod:int64) =
+            task {
+                use conn = createConnection()
+                let lastLogId =
+                    match logSet.LastLog with
+                    | Some l -> l.Id
+                    | _ -> -1
+                let! newLogs = conn.QueryAsync<ORMLog>($"SELECT * FROM [{Tn.Log}] WHERE id > {lastLogId} ORDER BY id DESC;")            
+                if newLogs.any() then
+                    let newLogs = newLogs |> map (ormLog2Log logSet) |> toList
+                    logDebug $"Feteched {newLogs.length()} new logs."
+                    logSet.BuildIncremental newLogs
+            }
 
-        task {
-            connectionString <- connString
-            let! logSet_ = createLoggerInfoSetForReaderAsync(querySet, systems)
-            logSet <- logSet_
 
-            interval.Subscribe(fun counter -> fetchNewLogs())
-            |> logSet_.Disposables.Add
+        let createLoggerInfoSetForReaderAsync(querySet:QuerySet, systems:DsSystem seq) : Task<LogSet> =
+            task {
+                use conn = createConnection()
+                use! tr = conn.BeginTransactionAsync()
 
-            return logSet_
-        }
+                let! logSet = createLogInfoSetCommonAsync(querySet, systems, conn, tr, true)
 
-    let initializeLogWriterOnDemandAsync(systems:DsSystem seq, connString:string, modelCompileInfo:ModelCompileInfo) =
-        task {
-            connectionString <- connString
-            do! createLoggerDBSchemaAsync(connString, modelCompileInfo)
-            let! logSet_ = createLogInfoSetForWriterAsync(systems)
-            logSet <- logSet_
+                let! existingLogs =
+                    conn.QueryAsync<ORMLog>(
+                        $"SELECT * FROM [{Tn.Log}] WHERE at BETWEEN @START AND @END ORDER BY id;",
+                        {|START=querySet.StartTime; END=querySet.EndTime|})
 
-            interval.Subscribe(fun counter -> dequeAndWriteDBAsync().Wait())
-            |> logSet_.Disposables.Add
+                do! checkDbForReaderAsync(conn, tr)
 
-            return logSet_
-        }
+                do! tr.CommitAsync()
+
+                logSet.InitializeForReader(existingLogs)
+                return logSet
+            }
+
+
+
+
+        let initializeLogReaderOnDemandAsync(querySet:QuerySet, systems:DsSystem seq, connString:string) =
+
+            task {
+                connectionString <- connString
+                let! logSet_ = createLoggerInfoSetForReaderAsync(querySet, systems)
+                logSet <- logSet_
+
+                interval.Subscribe(fun counter -> readPeriodicAsync(counter).Wait())
+                |> logSet_.Disposables.Add
+
+                return logSet_
+            }
+
 
 
     let count(logSet:LogSet, fqdns:string seq, tagKinds:int seq, value:bool) =

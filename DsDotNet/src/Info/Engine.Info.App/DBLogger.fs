@@ -3,7 +3,7 @@ namespace Engine.Info
 open Engine.Core
 open Dual.Common.Core.FS
 open System
-open DBLoggerImpl
+
 
 type DBLogger() =
     static let querySet = QuerySet()
@@ -15,13 +15,25 @@ type DBLogger() =
         task {
             Log4NetWrapper.logWithTrace <- true
             let! logSet = DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync(systems, connectionString, modelCompileInfo)
-            return logSet :> IDisposable
+            return logSet :> ILogSet
         }
     static member InitializeLogReaderOnDemandAsync(systems:DsSystem seq, connectionString:string) =
         task {
             Log4NetWrapper.logWithTrace <- true
             let! logSet = DBLoggerImpl.Reader.initializeLogReaderOnDemandAsync(querySet, systems, connectionString)
-            return logSet :> IDisposable
+            return logSet :> ILogSet
+        }
+
+    /// 조회 기간 변경 (reader)
+    /// call site 에서는 기존 인자로 주어진 logSet 은 자동 dispose 되며, 새로 return 되는 logSet 을 이용하여야 한다.
+    [<Obsolete("Not yet implemented")>]
+    static member ChangeQueryDurationAsync(logSet:ILogSet, startAt:Nullable<DateTime>, endAt:Nullable<DateTime>) =
+        task {
+            let logSet = logSet :?> LogSet
+            let querySet = QuerySet(startAt, endAt)
+            let! newLogSet = DBLoggerImpl.Reader.changeQueryDurationAsync(logSet, querySet)
+            dispose (logSet :> IDisposable)
+            return newLogSet :> ILogSet
         }
 
     // { unit test 등의 debugging 용

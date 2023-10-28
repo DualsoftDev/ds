@@ -139,7 +139,7 @@ module internal DBLoggerImpl =
                             """, {|Name=s.Name; Fqdn=s.Fqdn; TagKind=s.TagKind; DataType=s.DataType|})
                         s.Id <- id
 
-            return new LogSet(querySet, existingStorages @ newStorages, isReader)
+            return new LogSet(querySet, systems, existingStorages @ newStorages, isReader)
         }
 
     [<AutoOpen>]
@@ -276,7 +276,11 @@ module internal DBLoggerImpl =
                     match logSet.LastLog with
                     | Some l -> l.Id
                     | _ -> -1
-                let! newLogs = conn.QueryAsync<ORMLog>($"SELECT * FROM [{Tn.Log}] WHERE id > {lastLogId} ORDER BY id DESC;")            
+                let! newLogs =
+                    conn.QueryAsync<ORMLog>(
+                        $"""SELECT * FROM [{Tn.Log}] 
+                            WHERE id > {lastLogId} ORDER BY id DESC;""")
+                        // TODO: logSet.QuerySet.StartTime, logSet.QuerySet.EndTime 구간 내의 것만 필터
                 if newLogs.any() then
                     let newLogs = newLogs |> map (ormLog2Log logSet) |> toList
                     logDebug $"Feteched {newLogs.length()} new logs."
@@ -320,6 +324,11 @@ module internal DBLoggerImpl =
 
                 return logSet_
             }
+
+        let changeQueryDurationAsync(logSet:LogSet, querySet:QuerySet) =
+            initializeLogReaderOnDemandAsync(querySet, logSet.Systems, connectionString)
+
+
 
 
 

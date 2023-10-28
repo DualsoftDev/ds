@@ -10,6 +10,24 @@ open Dapper
 open Dual.Common.Db
 
 
+type ILogSet = inherit IDisposable
+
+/// DB logging query 기준
+/// StartTime: 조회 시작 기간.
+/// Null 이면 사전 지정된 start time 을 사용.  (사전 지정된 값이 없을 경우, DateTime.MinValue 와 동일)
+/// 모든 데이터 조회하려면 DateTime.MinValue 를 사용
+[<AllowNullLiteral>]
+type QuerySet(startAt:DateTime option, endAt:DateTime option) =
+    new() = QuerySet(None, None)
+    new(startAt:Nullable<DateTime>, endAt:Nullable<DateTime>) = QuerySet(startAt |> Option.ofNullable, endAt |> Option.ofNullable)
+    /// 사용자 지정: 조회 start time
+    member x.TargetStart = startAt
+    /// 사용자 지정: 조회 end time
+    member x.TargetEnd   = endAt
+    member val StartTime = startAt |? DateTime.MinValue with get, set
+    member val EndTime   = endAt   |? DateTime.MaxValue with get, set
+
+
 [<AutoOpen>]
 module internal DBLoggerORM =
     // database table names
@@ -80,21 +98,6 @@ CREATE VIEW [{Vn.Log}] AS
     ;
 """
 
-    /// DB logging query 기준
-    /// StartTime: 조회 시작 기간.
-    /// Null 이면 사전 지정된 start time 을 사용.  (사전 지정된 값이 없을 경우, DateTime.MinValue 와 동일)
-    /// 모든 데이터 조회하려면 DateTime.MinValue 를 사용
-    [<AllowNullLiteral>]
-    type QuerySet(startAt:DateTime option, endAt:DateTime option) =
-        new() = QuerySet(None, None)
-        new(startAt:Nullable<DateTime>, endAt:Nullable<DateTime>) = QuerySet(startAt |> Option.ofNullable, endAt |> Option.ofNullable)
-        /// 사용자 지정: 조회 start time
-        member x.TargetStart = startAt
-        /// 사용자 지정: 조회 end time
-        member x.TargetEnd   = endAt
-        member val StartTime = startAt |? DateTime.MinValue with get, set
-        member val EndTime   = endAt   |? DateTime.MaxValue with get, set
-
     type Storage(id:int, tagKind:int, fqdn:string, dataTypeName:string, name:string) =
         new() = Storage(-1, -1, null, null, null)
         new(iStorage:IStorage) = Storage(-1, iStorage.TagKind, iStorage.Target.Value.QualifiedName, iStorage.DataType.Name, iStorage.Name)
@@ -138,8 +141,8 @@ CREATE VIEW [{Vn.Log}] AS
         member x.LogSet = logSet
         member x.StorageKey = storageKey
         member val LastLog:Log option = None with get, set
-
-    and LogSet(querySet:QuerySet, storages:Storage seq, isReader:bool) as this =
+    
+    and LogSet(querySet:QuerySet, systems:DsSystem seq, storages:Storage seq, isReader:bool) as this =
         let storageDic =
             storages
             |> map (fun s -> getStorageKey s, s)
@@ -153,10 +156,12 @@ CREATE VIEW [{Vn.Log}] AS
             |> Tuple.toDictionary
 
         let storageByIdDic = Dictionary<int, Storage>()
+        let systems = systems |> toArray
 
         let disposables = new CompositeDisposable()
 
-        member x.QuerySet = querySet
+        member x.Systems = systems
+        member val QuerySet = querySet with get, set
         member x.Summaries = summaryDic
         member x.Storages = storageDic
         member x.StoragesById = storageByIdDic
@@ -165,7 +170,7 @@ CREATE VIEW [{Vn.Log}] AS
         member x.Disposables = disposables
         member x.GetSummary(summaryKey:StorageKey) = summaryDic[summaryKey]
 
-        interface IDisposable with
+        interface ILogSet with
             override x.Dispose() = x.Disposables.Dispose()
 
 

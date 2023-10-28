@@ -138,6 +138,10 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Engine.Custom", "src\Engine
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Custom.Sample", "src\UnitTest\Engine.Custom.Sample\Engine.Custom.Sample.csproj", "{A34C6E20-8C66-4565-9C58-66C69BC08679}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PowerPointAddInHelper", "Apps\OfficeAddOn\PowerPointAddInHelper\PowerPointAddInHelper.csproj", "{CEA5051B-7B53-4ED2-AAEA-5D2D72668BE6}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PowerPointAddInSetup", "Apps\OfficeAddOn\PowerPointAddInSetup\PowerPointAddInSetup.vdproj", "{560E54C9-7FFF-4396-9047-A308283677F5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -308,6 +312,13 @@ Global
 		{A34C6E20-8C66-4565-9C58-66C69BC08679}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A34C6E20-8C66-4565-9C58-66C69BC08679}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A34C6E20-8C66-4565-9C58-66C69BC08679}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEA5051B-7B53-4ED2-AAEA-5D2D72668BE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEA5051B-7B53-4ED2-AAEA-5D2D72668BE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEA5051B-7B53-4ED2-AAEA-5D2D72668BE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEA5051B-7B53-4ED2-AAEA-5D2D72668BE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{560E54C9-7FFF-4396-9047-A308283677F5}.Debug|Any CPU.ActiveCfg = Debug
+		{560E54C9-7FFF-4396-9047-A308283677F5}.Release|Any CPU.ActiveCfg = Release
+		{560E54C9-7FFF-4396-9047-A308283677F5}.Release|Any CPU.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -366,6 +377,8 @@ Global
 		{8EF1D260-910C-465A-8493-6D2382FD850A} = {CEEDD688-9B1F-4BEA-B9DE-E69EDF816A8E}
 		{514AE1E0-512F-49A7-83DA-3E047FF21890} = {BF60BC93-E09B-4E5F-9D85-95A519479D54}
 		{A34C6E20-8C66-4565-9C58-66C69BC08679} = {BCF8AC63-491C-4D8E-81EC-88032ED4CF05}
+		{CEA5051B-7B53-4ED2-AAEA-5D2D72668BE6} = {08D4417E-7482-4FDB-88F0-73A36732375C}
+		{560E54C9-7FFF-4396-9047-A308283677F5} = {08D4417E-7482-4FDB-88F0-73A36732375C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B36D7B1-CD69-44C5-8E57-DE46AC18C1F7}

@@ -207,7 +207,6 @@ module ImportViewModule =
 
                         UpdateApiItems(flow.System, page, doc.DicNodes.Values.Where(fun f->f.NodeType.IsIF), flowNode)
 
-                        flowNode.Page <- page; //flowNode.Flow <- Some(flow)
                         flowNode)
 
                 let viewNodes =  getFlowNodes(mySys.Flows)

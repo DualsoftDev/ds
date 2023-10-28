@@ -55,8 +55,7 @@ module rec ViewModule =
         member val ViewType = viewType with get, set
         [<Browsable(false)>]
         member val Flow:Flow option = None with get, set
-        [<ReadOnly(true)>]
-        member val Page = 0 with get, set
+    
         
         member x.IsVertex = 
             viewType = ViewType.VREAL

@@ -5,6 +5,9 @@ open Engine.Core
 open Dual.Common.Core.FS
 open System.Collections.Generic
 open System.Reactive.Disposables
+open System.Data
+open Dapper
+open Dual.Common.Db
 
 
 [<AutoOpen>]
@@ -19,6 +22,14 @@ module internal DBLoggerORM =
     // database view names
     module Vn =
         let Log = "vwLog"
+
+    // property table 사전 정의 row name
+    module PropName =
+        let PptPath = "ppt"
+        let ConfigPath = "ds"
+        let Start = "start"
+        let End = "end"
+
 
     let sqlCreateSchema = $"""
 CREATE TABLE [{Tn.Storage}] (
@@ -70,11 +81,19 @@ CREATE VIEW [{Vn.Log}] AS
 """
 
     /// DB logging query 기준
+    /// StartTime: 조회 시작 기간.
+    /// Null 이면 사전 지정된 start time 을 사용.  (사전 지정된 값이 없을 경우, DateTime.MinValue 와 동일)
+    /// 모든 데이터 조회하려면 DateTime.MinValue 를 사용
     [<AllowNullLiteral>]
-    type QuerySet(interval:DateTime*DateTime) =
-        new() = QuerySet((DateTime.MinValue, DateTime.MaxValue))
-        member x.StartTime = fst interval
-        member x.EndTime = snd interval
+    type QuerySet(startAt:DateTime option, endAt:DateTime option) =
+        new() = QuerySet(None, None)
+        new(startAt:Nullable<DateTime>, endAt:Nullable<DateTime>) = QuerySet(startAt |> Option.ofNullable, endAt |> Option.ofNullable)
+        /// 사용자 지정: 조회 start time
+        member x.TargetStart = startAt
+        /// 사용자 지정: 조회 end time
+        member x.TargetEnd   = endAt
+        member val StartTime = startAt |? DateTime.MinValue with get, set
+        member val EndTime   = endAt   |? DateTime.MaxValue with get, set
 
     type Storage(id:int, tagKind:int, fqdn:string, dataTypeName:string, name:string) =
         new() = Storage(-1, -1, null, null, null)
@@ -133,12 +152,14 @@ CREATE VIEW [{Vn.Log}] AS
                 key, Summary(this, key, 0, 0.))
             |> Tuple.toDictionary
 
+        let storageByIdDic = Dictionary<int, Storage>()
+
         let disposables = new CompositeDisposable()
 
         member x.QuerySet = querySet
         member x.Summaries = summaryDic
         member x.Storages = storageDic
-        member val StoragesById:Dictionary<int, Storage> = null with get, set
+        member x.StoragesById = storageByIdDic
         member val LastLog:Log option = None with get, set
         member x.IsLogReader = isReader
         member x.Disposables = disposables
@@ -147,3 +168,36 @@ CREATE VIEW [{Vn.Log}] AS
         interface IDisposable with
             override x.Dispose() = x.Disposables.Dispose()
 
+
+
+    let queryPropertyAsync(propertyName:string, conn:IDbConnection, tr:IDbTransaction) =
+        conn.QueryFirstOrDefaultAsync<string>($"SELECT value FROM [{Tn.Property}] WHERE name = @Name", {|Name=propertyName|}, tr)
+    let updatePropertyAsync(propertyName:string, value:string, conn:IDbConnection, tr:IDbTransaction) =
+        conn.ExecuteSilentlyAsync($"""INSERT OR REPLACE INTO [{Tn.Property}]
+                                    (name, value)
+                                    VALUES(@Name, @Value);"""
+                                    , {|Name=propertyName; Value=value|}, tr)
+
+
+    type QuerySet with
+        member x.SetQueryRangeAsync(conn:IDbConnection, tr:IDbTransaction) =
+            task {
+                match x.TargetStart with
+                | Some s ->
+                    do! updatePropertyAsync(PropName.Start, s.ToString(), conn, tr)
+                    x.StartTime <- s
+                | _ ->
+                    let! str = queryPropertyAsync(PropName.Start, conn, tr)
+                    x.StartTime <- if isNull(str) then DateTime.MinValue else DateTime.Parse(str)
+
+
+                match x.TargetEnd with
+                | Some e ->
+                    do! updatePropertyAsync(PropName.End, e.ToString(), conn, tr)
+                    x.EndTime <- e
+                | _ ->
+                    let! str = queryPropertyAsync(PropName.End, conn, tr)
+                    x.EndTime <- if isNull(str) then DateTime.MaxValue else DateTime.Parse(str)
+
+                logInfo $"Query range set: [{x.StartTime} ~ {x.EndTime}]"
+            }

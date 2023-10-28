@@ -16,8 +16,11 @@ open DBLoggerORM
 [<AutoOpen>]
 module internal DBLoggerImpl =
     let mutable connectionString = "";
-    let createConnection() =
-        new SqliteConnection(connectionString) |> tee (fun conn -> conn.Open())
+
+    let createConnectionWith(connStr) =
+        new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
+
+    let createConnection() = createConnectionWith connectionString
 
     type TagKindTuple = TagKind*string
     type EnumEx() =
@@ -66,10 +69,9 @@ module internal DBLoggerImpl =
     type LogSet with
         // ormLogs: id 순(시간 순) 정렬
         member x.InitializeForReader(ormLogs:ORMLog seq) =
-            x.StoragesById <-
-                x.Storages.Values
-                |> map (fun s -> s.Id, s)
-                |> Tuple.toDictionary
+            x.StoragesById.Clear()                        
+            for s in x.Storages.Values do
+                x.StoragesById.Add(s.Id, s)
 
             let logs =
                 ormLogs
@@ -79,7 +81,15 @@ module internal DBLoggerImpl =
             let groups =
                 logs |> Seq.groupBy(fun l -> getStorageKey x.StoragesById[l.StorageId] )
             for (key, group) in groups do
-                x.Summaries[key].Build(group)
+                // 사용자가 시작 기간을 지정한 경우에는, 최초 log 를 ON 이 되도록 정렬
+                let logsWithStartON =
+                    let userSpecifiedStart = x.QuerySet.TargetStart.IsSome
+                    if userSpecifiedStart then
+                        group |> Seq.skipWhile isOff
+                    else
+                        group
+
+                x.Summaries[key].Build(logsWithStartON)
 
             if logs.any() then
                 x.LastLog <- logs |> Seq.tryLast
@@ -89,7 +99,6 @@ module internal DBLoggerImpl =
     let mutable logSet = getNull<LogSet>()
     
     let private createLogInfoSetCommonAsync(querySet:QuerySet, systems:DsSystem seq, conn:IDbConnection, tr:IDbTransaction, isReader:bool) : Task<LogSet> =
-        Log4NetWrapper.logWithTrace <- true
         task {
             let systemStorages: Storage array =
                 systems
@@ -133,7 +142,6 @@ module internal DBLoggerImpl =
             return new LogSet(querySet, existingStorages @ newStorages, isReader)
         }
 
-
     [<AutoOpen>]
     module Writer =
         let queue = ConcurrentQueue<ORMLog>()
@@ -172,7 +180,7 @@ module internal DBLoggerImpl =
                                 (at, storageId, value)
                                 VALUES (@At, @StorageId, @Value)
                             """
-                        let! _ = conn.ExecuteAsync(query, {| At=l.At; StorageId=l.StorageId; Value=l.Value |})
+                        do! conn.ExecuteSilentlyAsync(query, {| At=l.At; StorageId=l.StorageId; Value=l.Value |})
                         ()
                     do! tr.CommitAsync()
             }
@@ -224,23 +232,22 @@ module internal DBLoggerImpl =
                 let! exists = conn.IsTableExistsAsync(Tn.Storage)
                 if not exists then
                     // schema 새로 생성
-                    let! _ = conn.ExecuteAsync(sqlCreateSchema, tr)
+                    do! conn.ExecuteSilentlyAsync(sqlCreateSchema, tr)
                     ()
 
-                let! _ = conn.ExecuteAsync($"""INSERT OR REPLACE INTO [{Tn.Property}]
+                do! conn.ExecuteSilentlyAsync($"""INSERT OR REPLACE INTO [{Tn.Property}]
                                           (name, value)
                                           VALUES(@Name, @Value);"""
-                                          , {|Name="ppt"; Value=pptPath|}, tr)
-                let! _ = conn.ExecuteAsync($"""INSERT OR REPLACE INTO [{Tn.Property}]
+                                          , {|Name=PropName.PptPath; Value=pptPath|}, tr)
+                do! conn.ExecuteSilentlyAsync($"""INSERT OR REPLACE INTO [{Tn.Property}]
                                           (name, value)
                                           VALUES(@Name, @Value);"""
-                                          , {|Name="ds"; Value=config|}, tr)
+                                          , {|Name=PropName.ConfigPath; Value=config|}, tr)
 
                 let! newTagKindInfos = getNewTagKindInfosAsync(conn, tr)
                 for (id, name) in newTagKindInfos do
                     let query = $"INSERT INTO [{Tn.TagKind}] (id, name) VALUES (@Id, @Name);"
-                    let! _ = conn.ExecuteAsync(query, {|Id=id; Name=name|}, tr)
-                    ()
+                    do! conn.ExecuteSilentlyAsync(query, {|Id=id; Name=name|}, tr)
 
                 do! tr.CommitAsync()
             }
@@ -282,6 +289,7 @@ module internal DBLoggerImpl =
                 use conn = createConnection()
                 use! tr = conn.BeginTransactionAsync()
 
+                do! querySet.SetQueryRangeAsync(conn, tr)
                 let! logSet = createLogInfoSetCommonAsync(querySet, systems, conn, tr, true)
 
                 let! existingLogs =
@@ -330,8 +338,8 @@ module internal DBLoggerImpl =
             return lastLog.Value |> toBool
         }
 
-    let getDsFilePath (connectionString:string) =
-        use conn = new SqliteConnection(connectionString) |> tee (fun conn -> conn.Open())
-        conn.QueryFirstOrDefault<string>($"SELECT value FROM [{Tn.Property}] WHERE name = @Name", {|Name="ds"|})
+    let queryPropertyDsConfigJsonPathWithConnectionStringAsync (connectionString:string) =
+        use conn = createConnectionWith(connectionString)
+        queryPropertyAsync(PropName.ConfigPath, conn, null)
 
 

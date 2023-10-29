@@ -62,11 +62,11 @@ module internal DBLoggerQueryImpl =
             let helper (last:Log) =
                 if x.LastLog.IsNone then
                     if isOff(last) then
-                        failwithlogf $"ERROR.  Invalid value starts: OFF(false)."
+                        pseudoFail $"ERROR.  Invalid value starts: OFF(false)."
                 else
                     let prev = x.LastLog.Value
                     if isOn(prev) = isOn(last) then
-                        failwithlogf $"ERROR.  duplicated consecutive values detected."
+                        pseudoFail $"ERROR.  duplicated consecutive values detected."
                     if isOff(last) then
                         x.Count <- x.Count + 1
                         x.Sum <- x.Sum + (last.At - prev.At).TotalSeconds

@@ -94,7 +94,7 @@ module internal DBLoggerImpl =
             if logs.any() then
                 x.LastLog <- logs |> Seq.tryLast
 
-    let interval = System.Reactive.Linq.Observable.Interval(TimeSpan.FromSeconds(1))
+    let mutable interval = System.Reactive.Linq.Observable.Interval(TimeSpan.FromSeconds(1))
 
     let mutable logSet = getNull<LogSet>()
     
@@ -253,9 +253,11 @@ module internal DBLoggerImpl =
             }
 
 
-        let initializeLogWriterOnDemandAsync(systems:DsSystem seq, connString:string, modelCompileInfo:ModelCompileInfo) =
+        let initializeLogWriterOnDemandAsync(systems:DsSystem seq, commonAppSetting:DSCommonAppSettings, modelCompileInfo:ModelCompileInfo) =
             task {
+                let connString = commonAppSetting.LogDBConnectionString
                 connectionString <- connString
+                interval <- System.Reactive.Linq.Observable.Interval(TimeSpan.FromSeconds(commonAppSetting.LogDBSyncIntervalSeconds))
                 do! createLoggerDBSchemaAsync(connString, modelCompileInfo)
                 let! logSet_ = createLogInfoSetForWriterAsync(systems)
                 logSet <- logSet_
@@ -312,10 +314,11 @@ module internal DBLoggerImpl =
 
 
 
-        let initializeLogReaderOnDemandAsync(querySet:QuerySet, systems:DsSystem seq, connString:string) =
+        let initializeLogReaderOnDemandAsync(querySet:QuerySet, systems:DsSystem seq) =
 
             task {
-                connectionString <- connString
+                connectionString <- querySet.CommonAppSettings.LogDBConnectionString
+                interval <- System.Reactive.Linq.Observable.Interval(TimeSpan.FromSeconds(querySet.CommonAppSettings.LogDBSyncIntervalSeconds))
                 let! logSet_ = createLoggerInfoSetForReaderAsync(querySet, systems)
                 logSet <- logSet_
 
@@ -326,7 +329,7 @@ module internal DBLoggerImpl =
             }
 
         let changeQueryDurationAsync(logSet:LogSet, querySet:QuerySet) =
-            initializeLogReaderOnDemandAsync(querySet, logSet.Systems, connectionString)
+            initializeLogReaderOnDemandAsync(querySet, logSet.Systems)
 
 
 

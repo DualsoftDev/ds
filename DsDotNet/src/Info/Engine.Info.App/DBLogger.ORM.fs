@@ -26,6 +26,7 @@ type QuerySet(startAt:DateTime option, endAt:DateTime option) =
     member x.TargetEnd   = endAt
     member val StartTime = startAt |? DateTime.MinValue with get, set
     member val EndTime   = endAt   |? DateTime.MaxValue with get, set
+    member val CommonAppSettings:DSCommonAppSettings = getNull<DSCommonAppSettings>() with get, set
 
 
 [<AutoOpen>]

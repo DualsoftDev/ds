@@ -11,16 +11,16 @@ type DBLogger() =
 
     static member EnqueLogForInsert(log:DsLog) = DBLoggerImpl.Writer.enqueLogForInsert(log:DsLog)
     static member EnqueLogsForInsert(logs:DsLog seq) = DBLoggerImpl.Writer.enqueLogsForInsert(logs:DsLog seq)
-    static member InitializeLogWriterOnDemandAsync(systems:DsSystem seq, connectionString:string, modelCompileInfo:ModelCompileInfo) =
+    static member InitializeLogWriterOnDemandAsync(systems:DsSystem seq, commonAppSetting:DSCommonAppSettings, modelCompileInfo:ModelCompileInfo) =
         task {
             Log4NetWrapper.logWithTrace <- true
-            let! logSet = DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync(systems, connectionString, modelCompileInfo)
+            let! logSet = DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync(systems, commonAppSetting, modelCompileInfo)
             return logSet :> ILogSet
         }
-    static member InitializeLogReaderOnDemandAsync(systems:DsSystem seq, connectionString:string) =
+    static member InitializeLogReaderOnDemandAsync(querySet:QuerySet, systems:DsSystem seq) =
         task {
             Log4NetWrapper.logWithTrace <- true
-            let! logSet = DBLoggerImpl.Reader.initializeLogReaderOnDemandAsync(querySet, systems, connectionString)
+            let! logSet = DBLoggerImpl.Reader.initializeLogReaderOnDemandAsync(querySet, systems)
             return logSet :> ILogSet
         }
 

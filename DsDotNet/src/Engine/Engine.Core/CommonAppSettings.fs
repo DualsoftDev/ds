@@ -4,6 +4,7 @@ open System.IO
 open Newtonsoft.Json
 type DSCommonAppSettings() =
     member val LogDBConnectionString = "" with get, set
+    member val LogDBSyncIntervalSeconds = 1.0 with get, set
     member val HmiWebServer = "" with get, set
     static member Load(jsonPath:string) =
         jsonPath

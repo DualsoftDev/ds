@@ -6,6 +6,7 @@ clean: dotnet-restore
 	@find . -type d \( -name "bin" -o -name "obj" -o -name ".vs" \) -exec rm -rf {} +
 
 clean-nuget: dotnet-restore
+	echo $(shell cygpath $(USERPROFILE))
 	@rm -rf $(shell cygpath $(USERPROFILE))/.nuget/packages/dualsoft-*
 	@rm -rf ./packages/dualsoft-*
 

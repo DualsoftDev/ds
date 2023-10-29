@@ -18,6 +18,11 @@ module internal DBLoggerQueryImpl =
         else
             0
 
+    [<Obsolete("failwithlogf 로 대체 되어야 함")>]
+    let pseudoFail msg =
+        //failwithlogf msg
+        logWarn msg
+        ()
 
     let isOn (log:Log) = toBool(log.Value)
     let isOff = isOn >> not
@@ -42,9 +47,9 @@ module internal DBLoggerQueryImpl =
                         sum <- sum + duration                    
                         inspectLog tails
                     | _ when b1 = b2 ->
-                        failwithlogf $"ERROR.  duplicated consecutive values detected."
+                        pseudoFail $"ERROR.  duplicated consecutive values detected."
                     | _ ->
-                        failwithlogf $"ERROR.  Expect (rising, falling)."
+                        pseudoFail $"ERROR.  Expect (rising, falling)."
             
             logs |> inspectLog
 
@@ -57,11 +62,11 @@ module internal DBLoggerQueryImpl =
             let helper (last:Log) =
                 if x.LastLog.IsNone then
                     if isOff(last) then
-                        failwithlogf $"ERROR.  Invalid value starts: OFF(false)."
+                        pseudoFail $"ERROR.  Invalid value starts: OFF(false)."
                 else
                     let prev = x.LastLog.Value
                     if isOn(prev) = isOn(last) then
-                        failwithlogf $"ERROR.  duplicated consecutive values detected."
+                        pseudoFail $"ERROR.  duplicated consecutive values detected."
                     if isOff(last) then
                         x.Count <- x.Count + 1
                         x.Sum <- x.Sum + (last.At - prev.At).TotalSeconds

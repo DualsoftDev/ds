@@ -12,6 +12,7 @@
 
 
 	<ItemGroup>
+		<Compile Include="CommonAppSettings.fs" />
 		<Compile Include="Constants.fs" />
 		<Compile Include="Interface.fs" />
 		<Compile Include="DsType.fs" />

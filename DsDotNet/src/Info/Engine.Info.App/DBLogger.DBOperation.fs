@@ -12,9 +12,10 @@ open System.Collections.Generic
 open System.Collections.Concurrent
 open DBLoggerORM
 
-
 [<AutoOpen>]
 module internal DBLoggerImpl =
+    type private Observable = System.Reactive.Linq.Observable
+
     let mutable connectionString = "";
 
     let createConnectionWith(connStr) =
@@ -94,7 +95,7 @@ module internal DBLoggerImpl =
             if logs.any() then
                 x.LastLog <- logs |> Seq.tryLast
 
-    let mutable interval = System.Reactive.Linq.Observable.Interval(TimeSpan.FromSeconds(1))
+    let mutable interval = Observable.Interval(TimeSpan.FromSeconds(3))
 
     let mutable logSet = getNull<LogSet>()
     
@@ -255,9 +256,10 @@ module internal DBLoggerImpl =
 
         let initializeLogWriterOnDemandAsync(systems:DsSystem seq, commonAppSetting:DSCommonAppSettings, modelCompileInfo:ModelCompileInfo) =
             task {
-                let connString = commonAppSetting.LogDBConnectionString
+                let loggerDBSettings = commonAppSetting.LoggerDBSettings
+                let connString = loggerDBSettings.ConnectionString
                 connectionString <- connString
-                interval <- System.Reactive.Linq.Observable.Interval(TimeSpan.FromSeconds(commonAppSetting.LogDBSyncIntervalSeconds))
+                interval <- Observable.Interval(TimeSpan.FromSeconds(loggerDBSettings.SyncIntervalSeconds))
                 do! createLoggerDBSchemaAsync(connString, modelCompileInfo)
                 let! logSet_ = createLogInfoSetForWriterAsync(systems)
                 logSet <- logSet_
@@ -317,8 +319,9 @@ module internal DBLoggerImpl =
         let initializeLogReaderOnDemandAsync(querySet:QuerySet, systems:DsSystem seq) =
 
             task {
-                connectionString <- querySet.CommonAppSettings.LogDBConnectionString
-                interval <- System.Reactive.Linq.Observable.Interval(TimeSpan.FromSeconds(querySet.CommonAppSettings.LogDBSyncIntervalSeconds))
+                let loggerDBSettings = querySet.CommonAppSettings.LoggerDBSettings
+                connectionString <- loggerDBSettings.ConnectionString
+                interval <- Observable.Interval(TimeSpan.FromSeconds(loggerDBSettings.SyncIntervalSeconds))
                 let! logSet_ = createLoggerInfoSetForReaderAsync(querySet, systems)
                 logSet <- logSet_
 

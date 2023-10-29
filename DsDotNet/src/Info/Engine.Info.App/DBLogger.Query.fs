@@ -20,8 +20,8 @@ module internal DBLoggerQueryImpl =
 
     [<Obsolete("failwithlogf 로 대체 되어야 함")>]
     let pseudoFail msg =
-        //failwithlogf msg
-        logWarn msg
+        failwithlogf msg
+        //logWarn msg
         ()
 
     let isOn (log:Log) = toBool(log.Value)

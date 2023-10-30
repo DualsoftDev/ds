@@ -7,7 +7,8 @@ open NetMQ.Sockets
 open Dual.Common.Core.FS
 
 module ZmqClientModule =
-    type ErrorMessage = string
+    /// command line request: "read ..", "write ..."
+    type CLIRequestResult = Result<string, ErrorMessage>
     /// serverAddress: "tcp://localhost:5555" or "tcp://*:5555"
     type Client(serverAddress:string) =
         let reqSocket = new RequestSocket()
@@ -16,8 +17,10 @@ module ZmqClientModule =
                 
         let verifyReceiveOK(reqSocket:RequestSocket) : ErrorMessage =
             let result = reqSocket.ReceiveFrameString()
+            let detail = reqSocket.ReceiveFrameString()
             match result with
             | "OK" -> null
+            | "ERR" -> null
             | _ -> $"Error: {result}"
 
         let buildCommandAndName(reqSocket:RequestSocket, command:string, name:string) : IOutgoingSocket =
@@ -39,9 +42,16 @@ module ZmqClientModule =
                 reqSocket.Close()
 
 
-        member x.SendRequest(request:string) : string =
+        member x.SendRequest(request:string) : CLIRequestResult =
             reqSocket.SendFrame(request)
-            reqSocket.ReceiveFrameString()
+            let result = reqSocket.ReceiveFrameString()
+            let detail = reqSocket.ReceiveFrameString()
+            match result with
+            | "OK" -> Ok detail
+            | "ERR" -> Error detail
+            | _ ->
+                logError($"Error: {result}")
+                Error result
 
         member x.Read(tag:string) : obj * ErrorMessage =
             reqSocket.SendFrame($"r {tag}")
@@ -50,20 +60,26 @@ module ZmqClientModule =
             | "OK" ->
                 let buffer = reqSocket.ReceiveFrameBytes()
                 buffer, null
+            | "ERR" ->
+                let errMsg = reqSocket.ReceiveFrameString()
+                null, errMsg
             | _ ->
                 logError($"Error: {result}")
                 null, result
             
-        member x.ReadBytes(name:string, offsets:int[]) : byte[] * ErrorMessage =
+        member x.ReadBytes(name:string, offsets:int[]) : TypedIOResult<byte[]> =
             sendReadRequest(reqSocket, "rb", name, offsets)
             let result = reqSocket.ReceiveFrameString()
             match result with
             | "OK" ->
                 let buffer = reqSocket.ReceiveFrameBytes()
-                buffer, null
+                Ok buffer
+            | "ERR" ->
+                let errMsg = reqSocket.ReceiveFrameString()
+                Error errMsg
             | _ ->
-                logError($"Error: {result}")
-                null, result
+                logError($"UNKNOWN Error: {result}")
+                Error result
 
 
         // command: "rw", "rd", "rl"
@@ -77,8 +93,12 @@ module ZmqClientModule =
                 let buffer = reqSocket.ReceiveFrameBytes()
                 let arr = ByteConverter.BytesToTypeArray<'T>(buffer) // 바이트 배열을 uint16 배열로 변환
                 arr, null
+            | "ERR" ->
+                let errMsg = reqSocket.ReceiveFrameString()
+                logError($"Error: {errMsg}")
+                null, errMsg
             | _ ->
-                logError($"Error: {result}")
+                logError($"UNKNOWN Error: {result}")
                 null, result
 
         member x.ReadUInt16s(name:string, offsets:int[]) : uint16[] * ErrorMessage =

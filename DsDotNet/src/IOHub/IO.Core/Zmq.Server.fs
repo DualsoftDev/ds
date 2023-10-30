@@ -188,6 +188,7 @@ module ZmqServerModule =
                 let args = tokens[1..] |> map(fun s -> s.ToLower())
                 match command with
                 | "read" ->
+                    noop()
                     let result =
                         args |> map (fun a -> $"{a}={readAddress(a)}")
                         |> joinWith " "
@@ -321,21 +322,24 @@ module ZmqServerModule =
                         let response = x.handleRequest respSocket
                         match response with
                         | Ok obj ->
+                            if obj = null || obj :? WriteOK then
+                                noop()
+                            else
+                                noop()
                             match obj with
                             | null
                             | :? NoMoreInputOK ->
                                 // 현재, request 가 없는 경우
                                 // Async.Sleep(???)
                                 ()
-                            | :? WriteOK as ok ->
-                                respSocket.SendFrame("OK")
-
-                            | :? string as ok ->
-                                respSocket.SendFrame(ok)
 
                             | _ ->
                                 let more = respSocket.SendMoreFrame("OK")
                                 match obj with
+                                | :? WriteOK as ok ->
+                                    more.SendFrame("OK")
+                                | :? string as ok ->
+                                    more.SendFrame(ok)
                                 | :? byte as ok ->
                                     more.SendFrame([|ok|])
                                 | :? uint16 as ok ->
@@ -361,10 +365,10 @@ module ZmqServerModule =
                                         failwithlogf "ERROR"
 
                         | Error errMsg ->
-                            respSocket.SendFrame(errMsg)
+                            respSocket.SendMoreFrame("ERR").SendFrame(errMsg)
                     with ex ->
                         logError $"Error occured while handling request: {ex.Message}"
-                        respSocket.SendFrame(ex.Message)
+                        respSocket.SendMoreFrame("ERR").SendFrame(ex.Message)
 
                 logInfo("Cancellation request detected!")
                 (x :> IDisposable).Dispose()

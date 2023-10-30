@@ -41,7 +41,11 @@ module ZmqTestMain =
         // ---- third party ----
         // wb
         let wr2 = client.WriteBytes("p/o", [|0; 1; 2; 3|], [|99uy; 98uy; 97uy; 96uy|])
-        let (bytes:byte[], err_) = client.ReadBytes("p/o", [|0; 1; 2; 3|])
+        match client.ReadBytes("p/o", [|0; 1; 2; 3|]) with
+        | Ok bytes ->
+            ()
+        | _ ->
+            failwith "ERROR"
 
      
         let mutable key = ""
@@ -52,8 +56,12 @@ module ZmqTestMain =
                 | "q" | "Q" -> key <- null
                 | "" -> ()
                 | _ ->
-                    let result = client.SendRequest(key)
-                    Console.WriteLine(result)
+                    match client.SendRequest(key) with
+                    | Ok value ->
+                        Console.WriteLine($"OK: {value}")
+                    | Error err ->
+                        Console.WriteLine($"ERR: {err}")
+
                 ()
 
         while(not server.IsTerminated) do

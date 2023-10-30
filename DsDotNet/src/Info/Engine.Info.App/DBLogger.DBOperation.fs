@@ -143,6 +143,7 @@ module internal DBLoggerImpl =
             return new LogSet(querySet, systems, existingStorages @ newStorages, isReader)
         }
 
+    /// DB log writer.  Runtime engine
     [<AutoOpen>]
     module Writer =
         let queue = ConcurrentQueue<ORMLog>()
@@ -270,12 +271,19 @@ module internal DBLoggerImpl =
                 return logSet_
             }
 
+
+    /// DB log reader.  Dashboard 및 CCTV 등
     [<AutoOpen>]
     module Reader =
         /// 주기적으로 DB -> memory 로 log 를 read
-        let readPeriodicAsync(nPeriod:int64) =
+        let readPeriodicAsync(nPeriod:int64, querySet:QuerySet) =
             task {
                 use conn = createConnection()
+                if nPeriod % 10L = 0L then
+                    let! dbDsConfigJsonPath = queryPropertyAsync(PropName.ConfigPath, conn, null)
+                    if dbDsConfigJsonPath <> querySet.DsConfigJsonPath then
+                        failwithlogf $"DS Source file change detected:\r\n\t{dbDsConfigJsonPath} <> {querySet.DsConfigJsonPath}"
+
                 let lastLogId =
                     match logSet.LastLog with
                     | Some l -> l.Id
@@ -296,6 +304,9 @@ module internal DBLoggerImpl =
             task {
                 use conn = createConnection()
                 use! tr = conn.BeginTransactionAsync()
+
+                let! dsConfigJson = queryPropertyAsync(PropName.ConfigPath, conn, tr)
+                querySet.DsConfigJsonPath <- dsConfigJson
 
                 do! querySet.SetQueryRangeAsync(conn, tr)
                 let! logSet = createLogInfoSetCommonAsync(querySet, systems, conn, tr, true)
@@ -325,7 +336,7 @@ module internal DBLoggerImpl =
                 let! logSet_ = createLoggerInfoSetForReaderAsync(querySet, systems)
                 logSet <- logSet_
 
-                interval.Subscribe(fun counter -> readPeriodicAsync(counter).Wait())
+                interval.Subscribe(fun counter -> readPeriodicAsync(counter, querySet).Wait())
                 |> logSet_.Disposables.Add
 
                 return logSet_
@@ -346,13 +357,15 @@ module internal DBLoggerImpl =
                 count <- count + summary.Count
         count
                 
-    // 지정된 조건에 따라 마지막 'Value'를 반환하는 함수
+    /// 지정된 조건에 따라 마지막 'Value'를 반환
     let getLastValue (logSet:LogSet, fqdn: string, tagKind: int) : bool option =
         option {
             let! lastLog = logSet.GetSummary(tagKind, fqdn).LastLog
             return lastLog.Value |> toBool
         }
 
+    /// LogSet 설정 이전에, connection string 기준으로 database 조회해서 현재 db 에 저장된
+    /// DS json config file 의 경로를 반환
     let queryPropertyDsConfigJsonPathWithConnectionStringAsync (connectionString:string) =
         use conn = createConnectionWith(connectionString)
         queryPropertyAsync(PropName.ConfigPath, conn, null)

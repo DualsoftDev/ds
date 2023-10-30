@@ -322,10 +322,12 @@ module ZmqServerModule =
                         let response = x.handleRequest respSocket
                         match response with
                         | Ok obj ->
-                            if obj = null || obj :? WriteOK then
-                                noop()
-                            else
-                                noop()
+
+                            //if obj = null || obj :? WriteOK then
+                            //    noop()
+                            //else
+                            //    noop()
+
                             match obj with
                             | null
                             | :? NoMoreInputOK ->

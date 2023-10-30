@@ -29,6 +29,12 @@ module rec ZmqSpec =
         interface IIOResultOK
         member val Results = results
 
+    type ReadResultSingle<'T>(result:'T) =
+        inherit ReadResult(null)
+        interface IIOResultOK
+        member val Result = result
+
+
     type ReadResultString(result:string) =
         inherit ReadResult(null)
         interface IIOResultOK
@@ -140,3 +146,9 @@ module rec ZmqSpec =
         | 32 -> PLCMemoryBitSize.DWord
         | 64 -> PLCMemoryBitSize.LWord
         | _ -> failwithf($"Invalid bit size: {bitSize}")
+
+    type IOFileSpec with
+        member x.GetPath() =
+            match x.Vendor.Location with
+            | "" -> x.Name
+            | _ as l -> $"{l}/{x.Name}"

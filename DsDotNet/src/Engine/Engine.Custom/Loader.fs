@@ -12,7 +12,7 @@ module Loader =
             let assembly = Assembly.LoadFrom(dllPath)
             assembly.FindImplementingTypes(typeof<IEngineExtension>) |> Array.exactlyOne
         let dsApi =
-            let reader = Func<string, obj>(fun (tag:string) -> Trace.WriteLine($"Reading {tag}"); 1)
+            let reader = Func<string, obj>(fun (tag:string) -> Trace.WriteLine($"Reading {tag}"); true)
             let writer = Action<string, obj>(fun (tag:string) (value:obj) -> Trace.WriteLine($"Writing {tag}={value}")) 
             DsApi(reader, writer)
 

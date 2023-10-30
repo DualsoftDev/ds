@@ -7,52 +7,57 @@ open Newtonsoft.Json
 
 [<AutoOpen>]
 module rec ZmqSpec =
-    [<AllowNullLiteral>]
-    type IIOResult = interface end
-    type IIOResultOK = inherit IIOResult
-    type IIOResultNG =
-        inherit IIOResult
-        abstract member Error:string
+    type NoMoreInputOK() = class end
+    type WriteOK() = class end
 
-    [<AbstractClass>]
-    type IOResult(error:string) =
-        member x.Error = error
-        member x.IsOK = String.IsNullOrEmpty(error)
-        interface IIOResult
+    type IOResult = Result<obj, string>
 
-    [<AbstractClass>]
-    type ReadResult(error:string) =
-        inherit IOResult(error)
+    //[<AllowNullLiteral>]
+    //type IIOResult = interface end
+    //type IIOResultOK = inherit IIOResult
+    //type IIOResultNG =
+    //    inherit IIOResult
+    //    abstract member Error:string
 
-    type ReadResultArray<'T>(results:'T[]) =
-        inherit ReadResult(null)
-        interface IIOResultOK
-        member val Results = results
+    //[<AbstractClass>]
+    //type IOResult(error:string) =
+    //    member x.Error = error
+    //    member x.IsOK = String.IsNullOrEmpty(error)
+    //    interface IIOResult
 
-    type ReadResultSingle<'T>(result:'T) =
-        inherit ReadResult(null)
-        interface IIOResultOK
-        member val Result = result
+    //[<AbstractClass>]
+    //type ReadResult(error:string) =
+    //    inherit IOResult(error)
+
+    //type ReadResultArray<'T>(results:'T[]) =
+    //    inherit ReadResult(null)
+    //    interface IIOResultOK
+    //    member val Results = results
+
+    //type ReadResultSingle<'T>(result:'T) =
+    //    inherit ReadResult(null)
+    //    interface IIOResultOK
+    //    member val Result = result
 
 
-    type ReadResultString(result:string) =
-        inherit ReadResult(null)
-        interface IIOResultOK
-        member val Result = result
+    //type ReadResultString(result:string) =
+    //    inherit ReadResult(null)
+    //    interface IIOResultOK
+    //    member val Result = result
 
-    type ReadResultError(error:string) =
-        inherit ReadResult(error)
-        interface IIOResultNG with
-            member x.Error = error
+    //type ReadResultError(error:string) =
+    //    inherit ReadResult(error)
+    //    interface IIOResultNG with
+    //        member x.Error = error
 
-    type WriteResultOK() =
-        inherit IOResult(null)
-        interface IIOResultOK
+    //type WriteResultOK() =
+    //    inherit IOResult(null)
+    //    interface IIOResultOK
 
-    type WriteResultError(error:string) =
-        inherit IOResult(error)
-        interface IIOResultNG with
-            member x.Error = error
+    //type WriteResultError(error:string) =
+    //    inherit IOResult(error)
+    //    interface IIOResultNG with
+    //        member x.Error = error
 
 
     type PLCMemoryBitSize =

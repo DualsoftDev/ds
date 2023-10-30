@@ -113,10 +113,10 @@ module ZmqServerModule =
         let mutable terminated = false
         member x.IsTerminated with get() = terminated
 
-        member private x.handleRequest (respSocket:ResponseSocket) : IIOResult =
+        member private x.handleRequest (respSocket:ResponseSocket) : IOResult =
             let mutable request = ""
             if not <| respSocket.TryReceiveFrameString(&request) then
-                null
+                Ok null
             else
                 logDebug $"Handling request: {request}"
                 let tokens = request.Split(' ', StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
@@ -191,50 +191,54 @@ module ZmqServerModule =
                     let result =
                         args |> map (fun a -> $"{a}={readAddress(a)}")
                         |> joinWith " "
-                    ReadResultString(result)
+                    Ok result
                 | "r" ->
                     let result = readAddress(tokens[1])
                     match result with
-                    | :? bool   as n -> ReadResultSingle<bool>(n)
-                    | :? byte   as n -> ReadResultSingle<byte>(n)
-                    | :? uint16 as n -> ReadResultSingle<uint16>(n)
-                    | :? uint32 as n -> ReadResultSingle<uint32>(n)
-                    | :? uint64 as n -> ReadResultSingle<uint64>(n)
-                    | _ -> failwithf $"Unknown type {tokens[1]}"
+                    | :? bool   
+                    | :? byte   
+                    | :? uint16 
+                    | :? uint32 
+                    | :? uint64 ->
+                        Ok result
+                    | _ ->
+                        let errMsg = $"Unknown type {tokens[1]}"
+                        logError "%s" errMsg
+                        Error errMsg
 
 
                 | "write" ->
                     args |> iter (fun a -> writeAddressWithValue(a))
-                    WriteResultOK()
+                    Ok (WriteOK())
 
                 | "rx" ->
                     let bm, indices = fetchForReadBit respSocket
                     bm.VerifyIndices(indices |> map (fun n -> n / 8))
                     let result = indices |> map (bm.readBit)
-                    ReadResultArray<bool>(result)
+                    Ok result
                 | "rb" ->
                     let bm, indices = fetchForRead respSocket
                     bm.VerifyIndices(indices)
                     let result = indices |> map (bm.readU8)
-                    ReadResultArray<byte>(result)
+                    Ok result
 
                 | "rw" ->
                     let bm, indices = fetchForRead respSocket
                     bm.VerifyIndices(indices |> map (fun n -> n * 2))
                     let result = indices |> map (bm.readU16)
-                    ReadResultArray<uint16>(result)
+                    Ok result
 
                 | "rd" ->
                     let bm, indices = fetchForRead respSocket
                     bm.VerifyIndices(indices |> map (fun n -> n * 4))
                     let result = indices |> map (bm.readU32)
-                    ReadResultArray<uint32>(result)
+                    Ok result
 
                 | "rl" ->
                     let bm, indices = fetchForRead respSocket
                     bm.VerifyIndices(indices |> map (fun n -> n * 8))
                     let result = indices |> map (bm.readU64)
-                    ReadResultArray<uint64>(result)
+                    Ok result
 
                 | "wx" ->
                     let bm, indices, values = fetchForWrite respSocket
@@ -251,7 +255,7 @@ module ZmqServerModule =
                         bm.writeBit(indices[i], value)
 
                     bm.Flush()
-                    WriteResultOK()
+                    Ok (WriteOK())
                 | "wb" ->
                     let bm, indices, values = fetchForWrite respSocket
                     bm.VerifyIndices(indices)
@@ -260,7 +264,7 @@ module ZmqServerModule =
 
                     Array.zip indices values |> iter ( fun (index, value) -> bm.writeU8(index, value))
                     bm.Flush()
-                    WriteResultOK()
+                    Ok (WriteOK())
 
                 | "ww" ->
                     let bm, indices, values = fetchForWrite respSocket
@@ -270,7 +274,7 @@ module ZmqServerModule =
 
                     Array.zip indices (ByteConverter.BytesToTypeArray<uint16>(values)) |> iter ( fun (index, value) -> bm.writeU16(index, value))
                     bm.Flush()
-                    WriteResultOK()
+                    Ok (WriteOK())
 
                 | "wd" ->
                     let bm, indices, values = fetchForWrite respSocket
@@ -281,7 +285,7 @@ module ZmqServerModule =
                     let xxx = Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) 
                     Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) |> iter ( fun (index, value) -> bm.writeU32(index, value))
                     bm.Flush()
-                    WriteResultOK()
+                    Ok (WriteOK())
 
                 | "wl" ->
                     let bm, indices, values = fetchForWrite respSocket
@@ -291,16 +295,16 @@ module ZmqServerModule =
 
                     Array.zip indices (ByteConverter.BytesToTypeArray<uint64>(values)) |> iter ( fun (index, value) -> bm.writeU64(index, value))
                     bm.Flush()
-                    WriteResultOK()
+                    Ok (WriteOK())
 
                 | "cl" ->
                     let name = respSocket.ReceiveFrameString().ToLower()
                     let bm = bufferManagers[name]
                     bm.clear()
                     bm.Flush()
-                    WriteResultOK()
+                    Ok (WriteOK())
                 | _ ->
-                    ReadResultError $"Unknown request: {request}"
+                    Error $"Unknown request: {request}"
 
 
 
@@ -316,41 +320,48 @@ module ZmqServerModule =
                     try
                         let response = x.handleRequest respSocket
                         match response with
-                        | null ->
-                            // 현재, request 가 없는 경우
-                            // Async.Sleep(???)
-                            ()
-                        | :? ReadResultString as ok ->
-                            respSocket.SendFrame(ok.Result)
-                        | :? WriteResultOK as ok ->
-                            respSocket.SendFrame("OK")
+                        | Ok obj ->
+                            match obj with
+                            | null
+                            | :? NoMoreInputOK ->
+                                // 현재, request 가 없는 경우
+                                // Async.Sleep(???)
+                                ()
+                            | :? WriteOK as ok ->
+                                respSocket.SendFrame("OK")
 
-                        | :? ReadResultSingle<byte> as ok ->
-                            respSocket.SendMoreFrame("OK").SendFrame([|ok.Result|])
-                        | :? ReadResultSingle<uint16> as ok ->
-                            respSocket.SendMoreFrame("OK").SendFrame(BitConverter.GetBytes(ok.Result))
-                        | :? ReadResultSingle<uint32> as ok ->
-                            respSocket.SendMoreFrame("OK").SendFrame(BitConverter.GetBytes(ok.Result))
-                        | :? ReadResultSingle<uint64> as ok ->
-                            respSocket.SendMoreFrame("OK").SendFrame(BitConverter.GetBytes(ok.Result))
+                            | :? string as ok ->
+                                respSocket.SendFrame(ok)
 
+                            | _ ->
+                                let more = respSocket.SendMoreFrame("OK")
+                                match obj with
+                                | :? byte as ok ->
+                                    more.SendFrame([|ok|])
+                                | :? uint16 as ok ->
+                                    more.SendFrame(BitConverter.GetBytes(ok))
+                                | :? uint32 as ok ->
+                                    more.SendFrame(BitConverter.GetBytes(ok))
+                                | :? uint64 as ok ->
+                                    more.SendFrame(BitConverter.GetBytes(ok))
+                                | _ ->
+                                    let t = obj.GetType()
+                                    let isArray = t.IsArray
+                                    let objType = t.GetElementType()
+                                    verify isArray
+                                    if objType = typeof<byte> then
+                                        more.SendFrame(obj :?> byte[])
+                                    elif objType = typeof<uint16> then
+                                        more.SendFrame(ByteConverter.ToBytes<uint16>(obj :?> uint16[]))
+                                    elif objType = typeof<uint32> then
+                                        more.SendFrame(ByteConverter.ToBytes<uint32>(obj :?> uint32[]))
+                                    elif objType = typeof<uint64> then
+                                        more.SendFrame(ByteConverter.ToBytes<uint64>(obj :?> uint64[]))
+                                    else
+                                        failwithlogf "ERROR"
 
-                        | :? ReadResultArray<byte> as ok ->
-                            respSocket.SendMoreFrame("OK").SendFrame(ok.Results)
-                        | :? ReadResultArray<uint16> as ok ->
-                            respSocket.SendMoreFrame("OK").SendFrame(ByteConverter.ToBytes<uint16>(ok.Results))
-                        | :? ReadResultArray<uint32> as ok ->
-                            respSocket.SendMoreFrame("OK").SendFrame(ByteConverter.ToBytes<uint32>(ok.Results))
-                        | :? ReadResultArray<uint64> as ok ->
-                            respSocket.SendMoreFrame("OK").SendFrame(ByteConverter.ToBytes<uint64>(ok.Results))
-
-
-
-
-                        | :? IIOResultNG as ng ->
-                            respSocket.SendFrame(ng.Error)
-                        | _ ->
-                            failwithf($"Unknown response type: {response.GetType()}")
+                        | Error errMsg ->
+                            respSocket.SendFrame(errMsg)
                     with ex ->
                         logError $"Error occured while handling request: {ex.Message}"
                         respSocket.SendFrame(ex.Message)

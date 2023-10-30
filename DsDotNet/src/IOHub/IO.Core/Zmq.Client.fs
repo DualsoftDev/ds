@@ -15,13 +15,13 @@ module ZmqClientModule =
         do
             reqSocket.Connect(serverAddress)
                 
-        let verifyReceiveOK(reqSocket:RequestSocket) : ErrorMessage =
+        let verifyReceiveOK(reqSocket:RequestSocket) : CLIRequestResult =
             let result = reqSocket.ReceiveFrameString()
             let detail = reqSocket.ReceiveFrameString()
             match result with
-            | "OK" -> null
-            | "ERR" -> null
-            | _ -> $"Error: {result}"
+            | "OK" -> Ok detail
+            | "ERR" -> Error detail
+            | _ -> Error $"Error: {result}"
 
         let buildCommandAndName(reqSocket:RequestSocket, command:string, name:string) : IOutgoingSocket =
             reqSocket
@@ -83,7 +83,7 @@ module ZmqClientModule =
 
 
         // command: "rw", "rd", "rl"
-        member private x.ReadTypes<'T>(command:string, name:string, offsets:int[]) : 'T[] * ErrorMessage =
+        member private x.ReadTypes<'T>(command:string, name:string, offsets:int[]) : TypedIOResult<'T[]> =
             sendReadRequest(reqSocket, command, name, offsets)
 
             // 서버로부터 응답 수신
@@ -92,20 +92,20 @@ module ZmqClientModule =
             | "OK" ->
                 let buffer = reqSocket.ReceiveFrameBytes()
                 let arr = ByteConverter.BytesToTypeArray<'T>(buffer) // 바이트 배열을 uint16 배열로 변환
-                arr, null
+                Ok arr
             | "ERR" ->
                 let errMsg = reqSocket.ReceiveFrameString()
                 logError($"Error: {errMsg}")
-                null, errMsg
+                Error errMsg
             | _ ->
                 logError($"UNKNOWN Error: {result}")
-                null, result
+                Error result
 
-        member x.ReadUInt16s(name:string, offsets:int[]) : uint16[] * ErrorMessage =
+        member x.ReadUInt16s(name:string, offsets:int[]) : TypedIOResult<uint16[]> =
             x.ReadTypes<uint16>("rw", name, offsets)
-        member x.ReadUInt32s(name:string, offsets:int[]) : uint32[] * ErrorMessage=
+        member x.ReadUInt32s(name:string, offsets:int[]) : TypedIOResult<uint32[]> =
             x.ReadTypes<uint32>("rd", name, offsets)
-        member x.ReadUInt64s(name:string, offsets:int[]) : uint64[] * ErrorMessage=
+        member x.ReadUInt64s(name:string, offsets:int[]) : TypedIOResult<uint64[]> =
             x.ReadTypes<uint64>("rl", name, offsets)
 
         //member x.ReadUInt16s(name:string, offsets:int[]) : uint16[] =

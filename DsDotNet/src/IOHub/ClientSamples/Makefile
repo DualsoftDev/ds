@@ -2,6 +2,9 @@ server:
 	dotnet build
 	ln -s bin/Debug/net7.0/ZeroMQ.exe
 
+# apt-get update
+# apt-get install build-essential gdb
+# apt install libzmq3-dev
 cpp-client:CppClient.cpp
 	g++ CppClient.cpp -o cppClient -lzmq
 

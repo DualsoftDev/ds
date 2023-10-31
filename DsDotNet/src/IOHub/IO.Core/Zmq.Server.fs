@@ -156,7 +156,7 @@ module ZmqServerModule =
 
                         match ap.DataType with
                         | PLCMemoryBitSize.Bit   -> bufferManager.writeBit(byteOffset, ap.OffsetBit, parseBool(value))
-                        | PLCMemoryBitSize.Byte  -> bufferManager.writeU8(byteOffset,  Byte.Parse(value))
+                        | PLCMemoryBitSize.Byte  -> bufferManager.writeU8s([byteOffset, Byte.Parse(value)])
                         | PLCMemoryBitSize.Word  -> bufferManager.writeU16(byteOffset, UInt16.Parse(value))
                         | PLCMemoryBitSize.DWord -> bufferManager.writeU32(byteOffset, UInt32.Parse(value))
                         | PLCMemoryBitSize.LWord -> bufferManager.writeU64(byteOffset, UInt64.Parse(value))
@@ -259,41 +259,33 @@ module ZmqServerModule =
                 | "wb" ->
                     let bm, indices, values = fetchForWrite respSocket
                     bm.Verify(indices, values.Length / 1)
-
-                    Array.zip indices values |> iter ( fun (index, value) -> bm.writeU8(index, value))
-                    bm.Flush()
+                    Array.zip indices values |> bm.writeU8s
                     Ok (WriteOK())
 
                 | "ww" ->
                     let bm, indices, values = fetchForWrite respSocket
                     bm.Verify(indices |> map (fun n -> n * 2), values.Length / 2)
 
-                    Array.zip indices (ByteConverter.BytesToTypeArray<uint16>(values)) |> iter ( fun (index, value) -> bm.writeU16(index, value))
-                    bm.Flush()
+                    Array.zip indices (ByteConverter.BytesToTypeArray<uint16>(values)) |> bm.writeU16s
                     Ok (WriteOK())
 
                 | "wd" ->
                     let bm, indices, values = fetchForWrite respSocket
                     bm.Verify(indices |> map (fun n -> n * 4), values.Length / 4)
-
-                    let xxx = Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) 
-                    Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) |> iter ( fun (index, value) -> bm.writeU32(index, value))
-                    bm.Flush()
+                    Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) |> bm.writeU32s
                     Ok (WriteOK())
 
                 | "wl" ->
                     let bm, indices, values = fetchForWrite respSocket
                     bm.Verify(indices |> map (fun n -> n * 8), values.Length / 8)
 
-                    Array.zip indices (ByteConverter.BytesToTypeArray<uint64>(values)) |> iter ( fun (index, value) -> bm.writeU64(index, value))
-                    bm.Flush()
+                    Array.zip indices (ByteConverter.BytesToTypeArray<uint64>(values)) |> bm.writeU64s
                     Ok (WriteOK())
 
                 | "cl" ->
                     let name = respSocket.ReceiveFrameString().ToLower()
                     let bm = bufferManagers[name]
                     bm.clear()
-                    bm.Flush()
                     Ok (WriteOK())
                 | _ ->
                     Error $"Unknown request: {request}"

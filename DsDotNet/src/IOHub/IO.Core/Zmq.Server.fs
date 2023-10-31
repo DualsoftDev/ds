@@ -140,6 +140,7 @@ module ZmqServerModule =
                     | _ ->
                         failwithf($"Unknown address pattern : {address}")
 
+                /// "write p/ob1=1 p/ix2=0" : 비효율성 인정한 version.  buffer manager 및 dataType 의 다양성 공존
                 let writeAddressWithValue(addressWithAssignValue:string) =
                     let parseBool (s:string) =
                         match s.ToLower() with
@@ -243,9 +244,7 @@ module ZmqServerModule =
 
                 | "wx" ->
                     let bm, indices, values = fetchForWrite respSocket
-                    bm.VerifyIndices(indices |> map (fun n -> n / 8))
-                    if indices.Length <> values.Length then
-                        failwithf($"The number of indices and values should be the same.")
+                    bm.Verify(indices |> map (fun n -> n / 8), values.Length)
 
                     for i in [0..indices.Length-1] do
                         let value =
@@ -259,9 +258,7 @@ module ZmqServerModule =
                     Ok (WriteOK())
                 | "wb" ->
                     let bm, indices, values = fetchForWrite respSocket
-                    bm.VerifyIndices(indices)
-                    if indices.Length <> values.Length then
-                        failwithf($"The number of indices and values should be the same.")
+                    bm.Verify(indices, values.Length / 1)
 
                     Array.zip indices values |> iter ( fun (index, value) -> bm.writeU8(index, value))
                     bm.Flush()
@@ -269,9 +266,7 @@ module ZmqServerModule =
 
                 | "ww" ->
                     let bm, indices, values = fetchForWrite respSocket
-                    bm.VerifyIndices(indices |> map (fun n -> n * 2))
-                    if indices.Length <> values.Length / 2 then
-                        failwithf($"The number of indices and values should be the same.")
+                    bm.Verify(indices |> map (fun n -> n * 2), values.Length / 2)
 
                     Array.zip indices (ByteConverter.BytesToTypeArray<uint16>(values)) |> iter ( fun (index, value) -> bm.writeU16(index, value))
                     bm.Flush()
@@ -279,9 +274,7 @@ module ZmqServerModule =
 
                 | "wd" ->
                     let bm, indices, values = fetchForWrite respSocket
-                    bm.VerifyIndices(indices |> map (fun n -> n * 4))
-                    if indices.Length <> values.Length / 4 then
-                        failwithf($"The number of indices and values should be the same.")
+                    bm.Verify(indices |> map (fun n -> n * 4), values.Length / 4)
 
                     let xxx = Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) 
                     Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) |> iter ( fun (index, value) -> bm.writeU32(index, value))
@@ -290,9 +283,7 @@ module ZmqServerModule =
 
                 | "wl" ->
                     let bm, indices, values = fetchForWrite respSocket
-                    bm.VerifyIndices(indices |> map (fun n -> n * 8))
-                    if indices.Length <> values.Length / 8 then
-                        failwithf($"The number of indices and values should be the same.")
+                    bm.Verify(indices |> map (fun n -> n * 8), values.Length / 8)
 
                     Array.zip indices (ByteConverter.BytesToTypeArray<uint64>(values)) |> iter ( fun (index, value) -> bm.writeU64(index, value))
                     bm.Flush()

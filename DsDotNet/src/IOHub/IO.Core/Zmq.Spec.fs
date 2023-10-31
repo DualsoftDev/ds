@@ -14,53 +14,6 @@ module rec ZmqSpec =
     type IOResult = Result<obj, ErrorMessage>
     type TypedIOResult<'T> = Result<'T, ErrorMessage>
 
-    //[<AllowNullLiteral>]
-    //type IIOResult = interface end
-    //type IIOResultOK = inherit IIOResult
-    //type IIOResultNG =
-    //    inherit IIOResult
-    //    abstract member Error:string
-
-    //[<AbstractClass>]
-    //type IOResult(error:string) =
-    //    member x.Error = error
-    //    member x.IsOK = String.IsNullOrEmpty(error)
-    //    interface IIOResult
-
-    //[<AbstractClass>]
-    //type ReadResult(error:string) =
-    //    inherit IOResult(error)
-
-    //type ReadResultArray<'T>(results:'T[]) =
-    //    inherit ReadResult(null)
-    //    interface IIOResultOK
-    //    member val Results = results
-
-    //type ReadResultSingle<'T>(result:'T) =
-    //    inherit ReadResult(null)
-    //    interface IIOResultOK
-    //    member val Result = result
-
-
-    //type ReadResultString(result:string) =
-    //    inherit ReadResult(null)
-    //    interface IIOResultOK
-    //    member val Result = result
-
-    //type ReadResultError(error:string) =
-    //    inherit ReadResult(error)
-    //    interface IIOResultNG with
-    //        member x.Error = error
-
-    //type WriteResultOK() =
-    //    inherit IOResult(null)
-    //    interface IIOResultOK
-
-    //type WriteResultError(error:string) =
-    //    inherit IOResult(error)
-    //    interface IIOResultNG with
-    //        member x.Error = error
-
 
     type PLCMemoryBitSize =
         | Bit = 1

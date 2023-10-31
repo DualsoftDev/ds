@@ -6,6 +6,13 @@ open IO.Spec
 
 [<AutoOpen>]
 module ZmqBufferManager =
+    let lockedExe (locker:obj) f =
+        if isNull(locker) then
+            f()
+        else
+            lock locker f
+
+
     type BufferManager(fileSpec:IOFileSpec) as this =
         let stream:FileStream = fileSpec.FileStream
         let locker = obj()  // 객체를 lock용으로 사용
@@ -161,3 +168,8 @@ module ZmqBufferManagerExtension =
         member x.VerifyIndices(offsets:int[]) =
             offsets |> iter (fun offset -> x.VerifyIndices(offset))
 
+        member x.Verify(indices:int[], numValues:int) =
+            x.VerifyIndices indices
+            if indices.Length <> numValues then
+                failwithf($"The number of indices and values should be the same.")
+            

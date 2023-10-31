@@ -77,5 +77,19 @@ namespace ThirdParty.AddressInfo.Provider
 
             return false;
         }
+
+        public string GetTagName(string memoryType, int byteOffset, int bitOffset, int contentBitLength)
+        {
+            return contentBitLength switch
+            {
+                1 => $"{memoryType}x{byteOffset * 8 + bitOffset}",
+                8 => $"{memoryType}b{byteOffset}",
+                16 => $"{memoryType}w{byteOffset / 2}",
+                32 => $"{memoryType}dw{byteOffset / 4}",
+                64 => $"{memoryType}lw{byteOffset / 8}",
+                _ => throw new Exception($"Unknown content bit size: {contentBitLength}"),
+            };
+        }
+
     }
 }

@@ -1,13 +1,22 @@
 namespace IO.Core
 open System
+open System.Diagnostics
 open System.Threading
 open Dual.Common.Core.FS
+open System.Runtime.InteropServices
 
 module ZmqTestMain =
     [<EntryPoint>]
     let main _ = 
         let zmqInfo = Zmq.Initialize "zmqsettings.json"
         let server, client, cts = zmqInfo.Server, zmqInfo.Client, zmqInfo.CancellationTokenSource
+
+        use subs =
+            server.IOChangedObservable.Subscribe(fun change ->
+                let value = change.Value
+                let tag = change.GetTagName()
+                logDebug $"Change Detected on {tag}: {value}"
+                ())
 
         let handleCancelKey (args: ConsoleCancelEventArgs) =
             logDebug("Ctrl+C pressed!")

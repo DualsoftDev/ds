@@ -3,6 +3,8 @@ open System
 open System.IO
 open Dual.Common.Core.FS
 open IO.Spec
+open System.Reactive.Subjects
+open System.Runtime.InteropServices
 
 [<AutoOpen>]
 module ZmqStreamManager =
@@ -30,10 +32,19 @@ module ZmqStreamManager =
         stream.Seek(int64 byteOffset, SeekOrigin.Begin) |> ignore
         stream.Write(buffer, 0, size)
 
+    type IOChangeInfo(fileSpec:IOFileSpec, offset:int, value:obj) =
+        member val IOFileSpec = fileSpec
+        /// 값이 변경된 offset.  value 의 type 에 따라 다르게 해석
+        /// bool: 전체의 bit offset.  byte offset = Offset / 8
+        /// uint64: uint64 기준의 offset.   byte offset = Offset * 8
+        /// ....
+        member val Offset = offset
+        member val Value = value
 
     type StreamManager(fileSpec:IOFileSpec) as this =
         let stream:FileStream = fileSpec.FileStream
         let locker = obj()  // 객체를 lock용으로 사용
+        let ioChangedSubject = new Subject<IOChangeInfo>()
 
         do
             fileSpec.StreamManager <- this
@@ -110,6 +121,8 @@ module ZmqStreamManager =
 
                     // 수정된 바이트를 해당 위치에 쓰기
                     writeTBytes<byte> stream byteIndex updatedByte
+                    let offset = byteIndex * 8 + bitIndex
+                    ioChangedSubject.OnNext(IOChangeInfo(fileSpec, offset, value))
                 x.Flush()                
             )
 
@@ -117,6 +130,7 @@ module ZmqStreamManager =
             lock locker (fun () ->
                 for (offset:int, value:byte) in writeArg do
                     writeTBytes<byte> stream offset value
+                    ioChangedSubject.OnNext(IOChangeInfo(fileSpec, offset, value))
                 x.Flush()
             )
 
@@ -126,6 +140,7 @@ module ZmqStreamManager =
             lock locker (fun () ->
                 for (offset:int, value:uint16) in writeArg do
                     writeTBytes<uint16> stream offset value
+                    ioChangedSubject.OnNext(IOChangeInfo(fileSpec, offset, value))
                 x.Flush()
             )
 
@@ -134,6 +149,7 @@ module ZmqStreamManager =
             lock locker (fun () ->
                 for (offset:int, value:uint32) in writeArg do
                     writeTBytes<uint32> stream offset value
+                    ioChangedSubject.OnNext(IOChangeInfo(fileSpec, offset, value))
                 x.Flush()
             )
 
@@ -142,6 +158,7 @@ module ZmqStreamManager =
             lock locker (fun () ->
                 for (offset:int, value:uint64) in writeArg do
                     writeTBytes<uint64> stream offset value
+                    ioChangedSubject.OnNext(IOChangeInfo(fileSpec, offset, value))
                 x.Flush()
             )
 
@@ -152,6 +169,8 @@ module ZmqStreamManager =
                     stream.WriteByte(0uy)
                 x.Flush()
             )
+
+        member x.IOChangedSubject = ioChangedSubject
 
 [<AutoOpen>]
 module ZmqBufferManagerExtension =
@@ -193,3 +212,17 @@ module ZmqBufferManagerExtension =
             if indices.Length <> numValues then
                 failwithf($"The number of indices and values should be the same.")
             
+    type IOChangeInfo with
+        member x.GetTagName() =
+            let x = x
+            let fs, offset, value = x.IOFileSpec, x.Offset, x.Value
+            let addrResolver = fs.Vendor.AddressResolver
+            let tag =
+                let byteSize = Marshal.SizeOf(value)
+                let byteOffset, bitOffset, contentBitLength = 
+                    match value with
+                    | :? bool -> offset / 8, offset % 8, 1
+                    | _ -> offset / byteSize, 0, (byteSize * 8)
+
+                addrResolver.GetTagName(fs.GetPath(), byteOffset, bitOffset, contentBitLength)
+            tag

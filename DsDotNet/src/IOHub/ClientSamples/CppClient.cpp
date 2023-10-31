@@ -25,9 +25,11 @@ int main()
         socket.send(request, zmq::send_flags::none);
 
         zmq::message_t reply;
-        auto _ = socket.recv(reply, zmq::recv_flags::none);
-        std::string reply_str(static_cast<char*>(reply.data()), reply.size());
-        std::cout << "Received: " << reply_str << std::endl;
+        auto result = socket.recv(reply, zmq::recv_flags::none);
+        std::string result_str(static_cast<char*>(reply.data()), reply.size());
+        auto detail = socket.recv(reply, zmq::recv_flags::none);
+        std::string detail_str(static_cast<char*>(reply.data()), reply.size());
+        std::cout << "Received: " << result_str << ", Detail: " << detail_str << std::endl;
     }
 
     return 0;

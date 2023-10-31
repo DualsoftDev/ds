@@ -11,6 +11,7 @@ open System.Collections.Generic
 open System.IO
 open System.Runtime.Remoting
 open System.Reactive.Subjects
+open System.Reactive.Linq
 open IO.Spec
 
 module ZmqServerModule =
@@ -18,12 +19,10 @@ module ZmqServerModule =
         let port = ioSpec.ServicePort
 
         /// e.g {"p/o", <Paix Output Buffer manager>}
-        let bufferManagers = new Dictionary<string, StreamManager>()
+        let streamManagers = new Dictionary<string, StreamManager>()
 
         /// tag 별 address 정보를 저장하는 dictionary
         let tagDic = new Dictionary<string, AddressSpec>()
-
-        //let tagChangedSubject = Subject<>
 
         //let showSamples (vendorSpec:VendorSpec) (addressExtractor:IAddressInfoProvider) =
         //    let v = vendorSpec
@@ -57,6 +56,8 @@ module ZmqServerModule =
         //    | _ ->
         //        ()
 
+        let mutable ioChangedObservable:IObservable<IOChangeInfo> = null
+
         do
             for v in ioSpec.Vendors do
                 v.AddressResolver <-
@@ -72,9 +73,14 @@ module ZmqServerModule =
                         | "" | null -> ioSpec.TopLevelLocation, f.Name
                         | _ -> Path.Combine(ioSpec.TopLevelLocation, v.Location), $"{v.Location}/{f.Name}"
                     f.InitiaizeFile(dir)
-                    let bufferManager = new StreamManager(f)
+                    let streamManager = new StreamManager(f)
                     let key = if v.Location.NonNullAny() then $"{v.Location}/{f.Name}" else f.Name
-                    bufferManagers.Add(key, bufferManager)
+                    streamManagers.Add(key, streamManager)
+
+            ioChangedObservable <-
+                streamManagers.Values 
+                |> map (fun sm -> sm.IOChangedSubject :> IObservable<IOChangeInfo>)
+                |> Observable.Merge
 
         let getVendor (addr:string) : (VendorSpec * string) =
             match addr with
@@ -116,6 +122,8 @@ module ZmqServerModule =
         let mutable terminated = false
 
         member x.IsTerminated with get() = terminated
+
+        member x.IOChangedObservable = ioChangedObservable
 
         member private x.handleRequest (respSocket:ResponseSocket) : IOResult =
             let mutable request = ""
@@ -173,7 +181,7 @@ module ZmqServerModule =
                 let fetchBufferManagerAndIndices (isBitIndex:bool) (respSocket:ResponseSocket) =
                     let bufferManager =
                         let name = respSocket.ReceiveFrameString().ToLower()
-                        bufferManagers[name]
+                        streamManagers[name]
                     let indices =
                         let address = respSocket.ReceiveFrameBytes()
                         ByteConverter.BytesToTypeArray<int>(address)
@@ -288,7 +296,7 @@ module ZmqServerModule =
 
                 | "cl" ->
                     let name = respSocket.ReceiveFrameString().ToLower()
-                    let bm = bufferManagers[name]
+                    let bm = streamManagers[name]
                     bm.clear()
                     Ok (WriteOK())
                 | _ ->
@@ -370,4 +378,4 @@ module ZmqServerModule =
         interface IDisposable with
             member x.Dispose() =
                 logDebug "Disposing server..."
-                bufferManagers.Values |> iter (fun stream -> stream.FileStream.Dispose())
+                streamManagers.Values |> iter (fun stream -> stream.FileStream.Dispose())

@@ -50,8 +50,8 @@ module ImportPPTModule =
             SameFlowName(doc)
  
             doc.GetCopyPathNName()
-            |> Seq.iter(fun (userPath, loadedName, node) ->
-
+            |> Seq.iter(fun (userPathTemp, loadedName, node) ->
+                let userPath = PathManager.getRelativePath paras.AbsoluteFilePath userPathTemp
                 let paras = getParams(doc.DirectoryName, userPath
                             , loadedName, theSys, None,  node.NodeType.GetLoadingType(), sRepo)
                 let hostIp = if paras.HostIp.IsSome then paras.HostIp.Value else ""

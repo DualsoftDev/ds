@@ -27,7 +27,7 @@ module ErrID =
     let _10 = "Interlock edge는  점선만 가능합니다"
     let _11 = "인터페이스 인과는 약 리셋이 불가능 합니다."
     let _12 = "제목 슬라이드가 없습니다. 제목 슬라이드를 생성하여 시스템 이름을 정하세요"
-    let _13 = "도형의 이름이 없습니다."
+    let _13 = "해당도형에 이름을 입력해야합니다."
     let _14 = "edge 연결가능도형 아님"
     let _15 = "edge not connected 시작 화살표 연결필요"
     let _16 = "edge not connected 끝   화살표 연결필요"
@@ -59,7 +59,7 @@ module ErrID =
     let _42 = "Api TXs~Rxs 이름이 소속된 Flow가 없습니다."
 
     let _43 = "Api 지시/관찰 구성은 '~' 으로 구분합니다. ex) ApiName[TXs ~ RXs]"
-    let _44 = "파일 경로는 '/' 사용만 가능합니다. \\ 사용불가"
+    let _44 = "파일 경로오류 위반문자('*', '?', '\"', '<' , '>', '|')"
     let _45 = "System 인터페이스 순환관계가 존재합니다."
     let _46 = "ActionDev 이름은 '.' 으로 구분되어야 합니다.(ex: systemA.Inferface3)"
     let _47 = "호출 Interface에 해당하는 대상 시스템이 없습니다."

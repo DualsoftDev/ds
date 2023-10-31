@@ -13,6 +13,7 @@ module Util =
         member x.TryAdd(item: 'T) = x.TryAdd(item, item)
 
     let trimSpace (text: string) = text.Trim()
+    let trimNewLine (text: string) = text.Trim('\n').Trim('\r')
 
     let GetSquareBrackets (name: string, bHead: bool) =
         let pattern = "(?<=\[).*?(?=\])"  // 대괄호 안에 내용은 무조건 가져온다

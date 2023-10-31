@@ -70,31 +70,34 @@ module ModelLoader =
         Path.Combine(newDirectory, sprintf "%s%s" fileNamePost fileExtension)
 
     let exportLoadedSystem (s: LoadedSystem) (dirNew: string) =
-        let mutable commonDir = ""
-        let fileNew = FileInfo(dirNew).FullName.ToLower().Replace("\\", "/")
-        let fileAbs = FileInfo(s.AbsoluteFilePath).FullName.ToLower().Replace("\\", "/")
+        //let mutable commonDir = ""
+        //let fileNew = FileInfo(dirNew).FullName.ToLower().Replace("\\", "/")
+        //let fileAbs = FileInfo(s.AbsoluteFilePath).FullName.ToLower().Replace("\\", "/")
         
-        let lib = fileNew.Split('/')
-        let abs = fileAbs.Split('/')
-        let di = DirectoryInfo(dirNew)
-        let mutable shouldBreak = false
+        //let lib = fileNew.Split('/')
+        //let abs = fileAbs.Split('/')
+        //let di = DirectoryInfo(dirNew)
+        //let mutable shouldBreak = false
 
-        for i in 0 .. abs.Length - 1 do
-            if not shouldBreak then
-                if i >= lib.Length || abs.[i] <> lib.[i] then
-                    if i <> lib.Length - 2 then   //abs/s_autogen/date/...    2 레벨 하위에 생성
-                        failwithf  $"{s.AbsoluteFilePath}.pptx \r\nSystem Library호출은 {di.Parent.FullName} 동일/하위 폴더야 합니다." 
-                    shouldBreak <- true
-                else
-                    commonDir <- commonDir + abs.[i] + "/"
+        //for i in 0 .. abs.Length - 1 do
+        //    if not shouldBreak then
+        //        if i >= lib.Length || abs.[i] <> lib.[i] then
+        //            if i <> lib.Length - 2 then   //abs/s_autogen/date/...    2 레벨 하위에 생성
+        //                failwithf  $"{s.AbsoluteFilePath}.pptx \r\nSystem Library호출은 {di.Parent.FullName} 동일/하위 폴더야 합니다." 
+        //            shouldBreak <- true
+        //        else
+        //            commonDir <- commonDir + abs.[i] + "/"
 
-        let relativePath = fileAbs.Replace(commonDir.ToLower(), "")
-        let absPath = sprintf "%s/%s.ds" dirNew relativePath
+
+
+       
+        let relativePath =  PathManager.getRelativePath dirNew s.AbsoluteFilePath 
+        let absPath =  PathManager.changeExtension s.AbsoluteFilePath  "ds"
 
         if not (File.Exists(absPath)) then
-            Directory.CreateDirectory(Path.GetDirectoryName(absPath)) |> ignore
+            Directory.CreateDirectory(PathManager.getDirectoryName(absPath)) |> ignore
             let refName = s.ReferenceSystem.Name
-            let libName = Path.GetFileNameWithoutExtension(absPath)
+            let libName = PathManager.getFileNameWithoutExtension(absPath)
 
             s.ReferenceSystem.Name <- libName
             File.WriteAllText(absPath, s.ReferenceSystem.ToDsText(false))
@@ -105,6 +108,32 @@ module ModelLoader =
         
 [<Extension>]
 type ModelLoaderExt =
+
+
+    [<Extension>] 
+    static member pptxToExportDS (sys:DsSystem, pptPath:string) = 
+
+        let directory = PathManager.getDirectoryName(pptPath)
+
+        let dsFile = PathManager.changeExtension pptPath ".ds" 
+        let jsFile = PathManager.changeExtension pptPath ".json"
+
+        let mutable dsCpuSys = [dsFile.Replace(Path.GetDirectoryName(dsFile) + "/", "")]
+
+        for s in sys.GetRecursiveLoadeds() do
+            match s with
+            | :? Device -> ignore(exportLoadedSystem s directory)
+            | :? ExternalSystem ->
+                let path = exportLoadedSystem s  directory 
+                if path <> "" then
+                    dsCpuSys <- path :: dsCpuSys
+            | _ -> ()
+
+        File.WriteAllText(dsFile, sys.ToDsText(false))
+        ModelLoader.SaveConfigWithPath jsFile  dsCpuSys 
+
+        dsFile
+
     [<Extension>] 
     static member PPTToDSExport (sys:DsSystem, pptPath:string) = 
 
@@ -129,7 +158,6 @@ type ModelLoaderExt =
         ModelLoader.SaveConfigWithPath confFile  dsCpuSys 
 
         dsFile
-
 
 module private TestLoadConfig =
     let testme() =

@@ -33,7 +33,5 @@ Grammar/CsParser/bin/
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/**/*.json
 /.vs
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/demo/ppt/kit_DS_autogen/*
-/DsDotNet/Apps/OfficeAddOn/PowerPointAddInSetup/Application Files/*
-/DsDotNet/Apps/OfficeAddOn/PowerPointAddInSetup/PowerPointAddInForDS.vsto
-/DsDotNet/Apps/OfficeAddOn/PowerPointAddInSetup/PowerPointAddInSetup.vdproj
-/DsDotNet/Apps/OfficeAddOn/PowerPointAddInSetup/setup.exe
+
+/DsDotNet/Apps/OfficeAddOn/PowerPointAddInSetup/PowerPointAddIn

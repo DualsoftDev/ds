@@ -10,19 +10,24 @@ let directorySeparatorChar: char = '/'
 // 경로를 Unix/Linux 스타일로 변환
 let toDsPath (path:string) = path.Replace("\\", "/")
 let invalidChars = [| '*' ; '?' ; '"' ; '<' ; '>' ; '|' |]
-
-// 경로와 파일 이름에 허용되지 않는 특수 문자를 검사하여 FileInfo 예외를 체크
-let getValidPath (path: string) =
+let isValidPath (path: string) =
     if (path = null) then
         raise (new ArgumentNullException($"Invalid characters in {path}"))
     if (path = "") then
         raise (new ArgumentException($"Invalid empty string"))
     if (path.ToCharArray() |> Array.exists (fun c -> invalidChars.Contains c))   then
         raise (new ArgumentException($"Invalid characters in {path}"))
- 
-    FileInfo(path) |> ignore
-    path |> toDsPath
+    true
 
+// 경로와 파일 이름에 허용되지 않는 특수 문자를 검사하여 FileInfo 예외를 체크
+let getValidPath (path: string) =
+    if isValidPath path
+    then
+        FileInfo(path) |> ignore
+        path |> toDsPath
+    else 
+        raise (new ArgumentException($"Invalid path in {path}"))
+        
 // 함수를 사용하여 경로 변환을 수행하는 도우미
 let doPathFunc (path: string) (func: string -> string): string =
     path |> getValidPath |> func |> toDsPath
@@ -96,7 +101,10 @@ let getRelativePath (directory: string) (otherPath: string): string =
         raise (new ArgumentException($"Invalid GetRelativePath between {d} : {o}"))
     
     let relativePath = Path.GetRelativePath(d, o) |> toDsPath
-    relativePath
+    if not (relativePath.StartsWith("../")) then
+        raise (new ArgumentException($"Invalid GetRelativePath between {d} : {o}"))
+    else 
+        relativePath.[3..] //첫 경로는 무의미 삭제
 
 // 랜덤 파일 이름 생성
 let getRandomFileName (): string =

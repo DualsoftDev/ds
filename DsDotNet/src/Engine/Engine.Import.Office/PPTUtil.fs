@@ -304,7 +304,7 @@ module PPTUtil =
                         |> Seq.map(fun (shape, tilte) -> shape.InnerText)
 
                 if(tilteTexts.Any())
-                then tilteTexts |>Seq.head
+                then tilteTexts |>Seq.head |> trimSpace |> trimNewLine
                 else ""
 
         [<Extension>]

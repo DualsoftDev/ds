@@ -66,21 +66,6 @@ module ZmqClientModule =
             | _ ->
                 logError($"Error: {result}")
                 null, result
-            
-        member x.ReadBytes(name:string, offsets:int[]) : TypedIOResult<byte[]> =
-            sendReadRequest(reqSocket, "rb", name, offsets)
-            let result = reqSocket.ReceiveFrameString()
-            match result with
-            | "OK" ->
-                let buffer = reqSocket.ReceiveFrameBytes()
-                Ok buffer
-            | "ERR" ->
-                let errMsg = reqSocket.ReceiveFrameString()
-                Error errMsg
-            | _ ->
-                logError($"UNKNOWN Error: {result}")
-                Error result
-
 
         // command: "rw", "rd", "rl"
         member private x.ReadTypes<'T>(command:string, name:string, offsets:int[]) : TypedIOResult<'T[]> =
@@ -101,6 +86,8 @@ module ZmqClientModule =
                 logError($"UNKNOWN Error: {result}")
                 Error result
 
+        member x.ReadBytes(name:string, offsets:int[]) : TypedIOResult<byte[]> =
+            x.ReadTypes<byte>("rb", name, offsets)
         member x.ReadUInt16s(name:string, offsets:int[]) : TypedIOResult<uint16[]> =
             x.ReadTypes<uint16>("rw", name, offsets)
         member x.ReadUInt32s(name:string, offsets:int[]) : TypedIOResult<uint32[]> =

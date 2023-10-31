@@ -37,6 +37,18 @@ module JSONSettingTestModule =
                     // Paix(=>"p") 의 o 파일
                     let p = venders |> Array.find (fun (v:VendorSpec) -> v.Location = "p")
                     let po = p.Files |> Array.find (fun (v:IOFileSpec) -> v.Name = "o")
+
+                    let check_po_bits() =
+                        ()
+                        //let indices = [|0..po.Length * 8 - 1|]
+                        //let values = indices |> Array.map (fun i -> i % 2 = 0)
+
+                        //client.ClearAll("p/o") |> checkOk
+                        //client.WriteBits("p/o", indices, values) |> checkOk
+                        //match client.ReadBits("p/o", indices) with
+                        //| Ok obs -> SeqEq obs values
+                        //| _ -> failwith "ERROR"
+
                     let check_po_bytes() =
                         let indices = [|0..po.Length-1|]
                         let values = indices |> Array.map (fun i -> i |> uint8 |> byte)
@@ -77,6 +89,7 @@ module JSONSettingTestModule =
                         | Ok ows -> SeqEq ows values
                         | _ -> failwith "ERROR"
 
+                    check_po_bits()
                     check_po_words()
                     check_po_dwords()
                     check_po_lwords()

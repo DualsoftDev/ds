@@ -12,6 +12,14 @@ module ZmqBufferManager =
         else
             lock locker f
 
+    /// stream 의 주어진 offset 에서 type 'T 만큼의 byte 를 읽어서 반환
+    let readTBytes<'T> (stream:FileStream) (tOffset:int): byte[] =
+        let size = sizeof<'T>
+        let byteOffset = tOffset * size
+        let buffer = Array.zeroCreate<byte> (size)
+        stream.Seek(int64 byteOffset, SeekOrigin.Begin) |> ignore
+        stream.Read(buffer, 0, size) |> ignore
+        buffer
 
     type BufferManager(fileSpec:IOFileSpec) as this =
         let stream:FileStream = fileSpec.FileStream
@@ -24,6 +32,8 @@ module ZmqBufferManager =
 
         member x.FileStream = stream
         member x.Flush() = stream.Flush()
+
+        [<Obsolete>]
         member x.readBits (bitOffset: int, count: int) : bool[] =
             let startByte = bitOffset / 8
             let endByte = startByte + count / 8
@@ -40,14 +50,56 @@ module ZmqBufferManager =
                    |> Array.take count
                    |> Array.ofSeq
             bits
+        member x.readBits (bitOffsets: int[]) : bool[] =
+            lock locker (fun () ->
+                [|  for tOffset in bitOffsets do
+                        let byteOffset = tOffset / 8
+                        let byte = x.readU8 byteOffset
+                        let bit = byte &&& (1uy >>> (tOffset % 8))
+                        yield bit = 1uy
+                |]
+            );
 
         //member x.readBit(byteOffset:int, bitOffset:int) = x.readBits(byteOffset * 8 + bitOffset, 1)[0]
-        member x.readBit(bitOffset:int) = x.readBits(bitOffset, 1)[0]
-        member x.readU8 (byteOffset:int) = x.readU8s(byteOffset, 1)[0]
-        member x.readU16(byteOffset:int) = x.readU16s(byteOffset, 1)[0]
-        member x.readU32(byteOffset:int) = x.readU32s(byteOffset, 1)[0]
-        member x.readU64(byteOffset:int) = x.readU64s(byteOffset, 1)[0]
+        member x.readBit(bitOffset:int) = x.readBits([|bitOffset|])  |> Seq.exactlyOne
+        member x.readU8 (byteOffset:int) = x.readU8s([|byteOffset|]) |> Seq.exactlyOne
+        member x.readU16(wordOffset:int) = x.readU16s([|wordOffset|]) |> Seq.exactlyOne
+        member x.readU32(dwordOffset:int) = x.readU32s([|dwordOffset|]) |> Seq.exactlyOne
+        member x.readU64(lwordOffset:int) = x.readU64s([|lwordOffset|]) |> Seq.exactlyOne
 
+        member x.readU8s (byteOffsets: int[]) : byte[] =
+            lock locker (fun () ->
+                [|  for tOffset in byteOffsets do
+                        let bytes = readTBytes<byte> stream tOffset
+                        assert(bytes.Length = 1)
+                        yield bytes[0]
+                |]
+            );
+        member x.readU16s (wordOffsets: int[]) : uint16[] =
+            lock locker (fun () ->
+                [|  for tOffset in wordOffsets do
+                        let bytes = readTBytes<uint16> stream tOffset
+                        assert(bytes.Length = 2)
+                        yield System.BitConverter.ToUInt16(bytes, 0)
+                |]
+            )
+        member x.readU32s (dwordOffsets: int[]) : uint32[] =
+            lock locker (fun () ->
+                [|  for tOffset in dwordOffsets do
+                        let bytes = readTBytes<uint32> stream tOffset
+                        assert(bytes.Length = 4)
+                        yield System.BitConverter.ToUInt32(bytes, 0)
+                |]
+            )
+        member x.readU64s (lwordOffsets: int[]) : uint64[] =
+            lock locker (fun () ->
+                [|  for tOffset in lwordOffsets do
+                        let bytes = readTBytes<uint64> stream tOffset
+                        assert(bytes.Length = 8)
+                        yield System.BitConverter.ToUInt64(bytes, 0)
+                |]
+            )
+        [<Obsolete>]
         member x.readU8s (byteOffset: int, count: int) : byte[] =
             lock locker (fun () ->
                 let offset = byteOffset
@@ -56,6 +108,7 @@ module ZmqBufferManager =
                 stream.Read(buffer, 0, count) |> ignore
                 buffer
             );
+        [<Obsolete>]
         member x.readU16s (wordOffset: int, count: int) : uint16[] =
             lock locker (fun () ->
                 let offset = wordOffset * 2
@@ -64,6 +117,7 @@ module ZmqBufferManager =
                 stream.Read(buffer, 0, count * 2) |> ignore
                 Array.init count (fun i -> System.BitConverter.ToUInt16(buffer, i * 2))
             )
+        [<Obsolete>]
         member x.readU32s (dwordOffset: int, count: int) : uint32[] =
             lock locker (fun () ->
                 let offset = dwordOffset * 4
@@ -72,6 +126,7 @@ module ZmqBufferManager =
                 stream.Read(buffer, 0, count * 4) |> ignore
                 Array.init count (fun i -> System.BitConverter.ToUInt32(buffer, i * 4))
             )
+        [<Obsolete>]
         member x.readU64s (lwordOffset: int, count: int) : uint64[] =
             lock locker (fun () ->
                 let offset = lwordOffset * 8

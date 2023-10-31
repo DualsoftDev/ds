@@ -7,6 +7,7 @@ open System.Diagnostics
 open IO.Core
 open Xunit
 open Dual.Common.Core.FS
+open System.IO
 
 [<AutoOpen>]
 module TestLockModule =
@@ -18,6 +19,20 @@ module TestLockModule =
         else
             Trace.WriteLine("Unocked")
             lock locker f
+
+    let testSizeof<'T> () = 
+        sizeof<'T>
+        
+
+    let readTBytes<'T> (tOffset:int): byte[] =
+        let size = sizeof<'T>
+        let stream:FileStream = null
+        let byteOffset = tOffset * size
+        let buffer = Array.zeroCreate<byte> (size)
+        stream.Seek(int64 byteOffset, SeekOrigin.Begin) |> ignore
+        stream.Read(buffer, 0, size) |> ignore
+        buffer
+
 
     [<Collection("ZmqTesting")>]
     [<TestFixture>]
@@ -34,3 +49,8 @@ module TestLockModule =
         member x.LockedActionTest() =
             let a1 = lockedExe x.Locker (fun () -> Trace.WriteLine("A"))
             Trace.WriteLine($"Unit Result={a1}")
+
+        [<Test>]
+        member x.SizeOf() =
+            testSizeof<byte>() === 1
+            testSizeof<uint16>() === 2

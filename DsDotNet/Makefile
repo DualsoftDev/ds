@@ -5,6 +5,8 @@ clean: dotnet-restore
 	@echo "Removing all subdriectory named [bin] or [obj] or [.vs] on [`pwd`].."
 	-@find . -type d \( -name "bin" -o -name "obj" -o -name ".vs" \) -exec rm -rf {} +
 
+e:
+	echo $(shell cygpath $(USERPROFILE))
 clean-nuget: dotnet-restore
 	echo $(shell cygpath $(USERPROFILE))
 	@rm -rf $(shell cygpath $(USERPROFILE))/.nuget/packages/dualsoft-*

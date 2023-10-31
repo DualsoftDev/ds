@@ -8,28 +8,25 @@ open System.Reactive.Linq
 open System.Collections.Generic
 
 [<AutoOpen>]
-module RunTimeUtil =
+module internal RunTimeUtil =
 
 
     
-    let notifyPreExcute ( x:IStorage) = 
-            match  x.GetTagInfo() with
-            |Some t -> t.OnChanged()
-            |_ -> ()
+    let notifyPreExcute ( x:IStorage) =
+        x.GetTagInfo() |> Option.iter(fun t -> t.OnChanged())
         
     let  notifyPostExcute ( x:IStorage) =
-            match x.GetTagInfo() with
-            |Some t -> 
+        x.GetTagInfo() |> Option.iter(fun t -> 
                 match t with
-                |EventVertex (tag,_,kind) ->
+                | EventVertex (tag,_,kind) ->
                         match kind with
                         | VertexTag.forceOn
                         | VertexTag.forceOff 
                         | VertexTag.forceStart 
                         | VertexTag.forceReset -> tag.BoxedValue <- false 
                         | _-> ()
-                |_ -> ()
-            |None -> ()
+                | _ -> ())
+        
 
 
     let getTotalTags(statements:Statement seq) =
@@ -56,7 +53,7 @@ module RunTimeUtil =
         
     ///사용자 autoStartTags HMI 대신 눌러주기
     let preAction(sys:DsSystem, mode:RuntimePackage, on:bool) =
-        let autoStartTags =
+        let autoStartStorageKeyValues =
             sys.TagManager.Storages
                 .Where(fun w->
                             w.Value.TagKind = (int)SystemTag.auto
@@ -64,7 +61,7 @@ module RunTimeUtil =
                             ||   w.Value.TagKind = (int)SystemTag.ready
                             || ( w.Value.TagKind = (int)SystemTag.sim && mode.IsPackageSIM())
                     )
-        autoStartTags.Iter(fun t -> t.Value.BoxedValue <-  on)
+        autoStartStorageKeyValues.Iter(fun t -> t.Value.BoxedValue <-  on)
 
 
     ///시뮬레이션 비트 토글
@@ -80,8 +77,7 @@ module RunTimeUtil =
         let systemOn =  stgs.First(fun w-> w.Value.TagKind = (int)SystemTag.on).Value
         let stgs =  stgs.Where(fun w-> w.Value <> systemOn)
 
-        if activeSys
-        then
+        if activeSys then
             for tag in stgs do
                 let stg = tag.Value
                 match stg with

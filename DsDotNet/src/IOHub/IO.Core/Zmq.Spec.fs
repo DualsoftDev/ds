@@ -50,7 +50,7 @@ module rec ZmqSpec =
     *)
 
     [<AllowNullLiteral>] 
-    type IBufferManager = interface end
+    type IStreamManager = interface end
     and IOFileSpec() =
         member val Name = ""  with get, set
         member val Length = 0 with get, set
@@ -58,7 +58,7 @@ module rec ZmqSpec =
         // reference to parent
         member val Vendor:VendorSpec = null with get, set
         member val FileStream:FileStream = null with get, set
-        member val BufferManager:IBufferManager = null with get, set
+        member val StreamManager:IStreamManager = null with get, set
     
     // Activator.CreateInstanceFrom(v.Dll, v.ClassName) 를 이용
     [<AllowNullLiteral>] 

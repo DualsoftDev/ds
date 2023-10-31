@@ -5,7 +5,7 @@ open Dual.Common.Core.FS
 open IO.Spec
 
 [<AutoOpen>]
-module ZmqBufferManager =
+module ZmqStreamManager =
     let lockedExe (locker:obj) f =
         if isNull(locker) then
             f()
@@ -31,14 +31,14 @@ module ZmqBufferManager =
         stream.Write(buffer, 0, size)
 
 
-    type BufferManager(fileSpec:IOFileSpec) as this =
+    type StreamManager(fileSpec:IOFileSpec) as this =
         let stream:FileStream = fileSpec.FileStream
         let locker = obj()  // 객체를 lock용으로 사용
 
         do
-            fileSpec.BufferManager <- this
+            fileSpec.StreamManager <- this
 
-        interface IBufferManager
+        interface IStreamManager
 
         member x.FileStream = stream
         member x.Flush() = stream.Flush()
@@ -54,9 +54,9 @@ module ZmqBufferManager =
                 |]
             );
 
-        member x.readBit(bitOffset:int) = x.readBits([|bitOffset|])  |> Seq.exactlyOne
-        member x.readU8 (byteOffset:int) = x.readU8s([|byteOffset|]) |> Seq.exactlyOne
-        member x.readU16(wordOffset:int) = x.readU16s([|wordOffset|]) |> Seq.exactlyOne
+        member x.readBit(bitOffset:int)   = x.readBits([|bitOffset|])   |> Seq.exactlyOne
+        member x.readU8 (byteOffset:int)  = x.readU8s ([|byteOffset|])  |> Seq.exactlyOne
+        member x.readU16(wordOffset:int)  = x.readU16s([|wordOffset|])  |> Seq.exactlyOne
         member x.readU32(dwordOffset:int) = x.readU32s([|dwordOffset|]) |> Seq.exactlyOne
         member x.readU64(lwordOffset:int) = x.readU64s([|lwordOffset|]) |> Seq.exactlyOne
 
@@ -109,13 +109,9 @@ module ZmqBufferManager =
                             currentByte &&& (~~~(1uy <<< bitIndex))  // AND 연산과 NOT 연산을 사용하여 비트 클리어
 
                     // 수정된 바이트를 해당 위치에 쓰기
-                    x.writeU8Unlocked(byteIndex, updatedByte)
+                    writeTBytes<byte> stream byteIndex updatedByte
                 x.Flush()                
             )
-
-
-        member x.writeU8Unlocked (offset:int, value:byte) =
-            writeTBytes<byte> stream offset value
 
         member x.writeU8s (writeArg:(int*byte) seq) =
             lock locker (fun () ->
@@ -181,7 +177,7 @@ module ZmqBufferManagerExtension =
                 fs.Flush()
             x.FileStream <- fs
 
-    type BufferManager with
+    type StreamManager with
         member x.VerifyIndices(offset:int) =
             let offset = int64 offset
             let length = x.FileStream.Length

@@ -10,6 +10,7 @@ open Dual.Common.Core.FS
 open System.Collections.Generic
 open System.IO
 open System.Runtime.Remoting
+open System.Reactive.Subjects
 open IO.Spec
 
 module ZmqServerModule =
@@ -17,10 +18,12 @@ module ZmqServerModule =
         let port = ioSpec.ServicePort
 
         /// e.g {"p/o", <Paix Output Buffer manager>}
-        let bufferManagers = new Dictionary<string, BufferManager>()
+        let bufferManagers = new Dictionary<string, StreamManager>()
 
         /// tag 별 address 정보를 저장하는 dictionary
         let tagDic = new Dictionary<string, AddressSpec>()
+
+        //let tagChangedSubject = Subject<>
 
         //let showSamples (vendorSpec:VendorSpec) (addressExtractor:IAddressInfoProvider) =
         //    let v = vendorSpec
@@ -69,7 +72,7 @@ module ZmqServerModule =
                         | "" | null -> ioSpec.TopLevelLocation, f.Name
                         | _ -> Path.Combine(ioSpec.TopLevelLocation, v.Location), $"{v.Location}/{f.Name}"
                     f.InitiaizeFile(dir)
-                    let bufferManager = new BufferManager(f)
+                    let bufferManager = new StreamManager(f)
                     let key = if v.Location.NonNullAny() then $"{v.Location}/{f.Name}" else f.Name
                     bufferManagers.Add(key, bufferManager)
 
@@ -111,6 +114,7 @@ module ZmqServerModule =
             
 
         let mutable terminated = false
+
         member x.IsTerminated with get() = terminated
 
         member private x.handleRequest (respSocket:ResponseSocket) : IOResult =
@@ -126,7 +130,7 @@ module ZmqServerModule =
                     match address with
                     | AddressPattern ap ->
                         let byteOffset = ap.OffsetByte
-                        let bufferManager = ap.IOFileSpec.BufferManager :?> BufferManager
+                        let bufferManager = ap.IOFileSpec.StreamManager :?> StreamManager
                         bufferManager.VerifyIndices([|byteOffset|])
 
                         match ap.DataType with
@@ -151,7 +155,7 @@ module ZmqServerModule =
                     | AddressAssignPattern (addressPattern, value) ->
                         let ap = addressPattern
                         let byteOffset = ap.OffsetByte
-                        let bufferManager = ap.IOFileSpec.BufferManager :?> BufferManager
+                        let bufferManager = ap.IOFileSpec.StreamManager :?> StreamManager
                         bufferManager.VerifyIndices([|byteOffset|])
 
                         match ap.DataType with

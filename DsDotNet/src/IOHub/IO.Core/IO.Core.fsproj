@@ -11,7 +11,7 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Compile Include="Zmq.Spec.fs" />
-		<Compile Include="Zmq.BufferManager.fs" />
+		<Compile Include="Zmq.StreamManager.fs" />
 		<Compile Include="Zmq.Server.fs" />
 		<Compile Include="Zmq.Client.fs" />
 		<Compile Include="Zmq.Module.fs" />

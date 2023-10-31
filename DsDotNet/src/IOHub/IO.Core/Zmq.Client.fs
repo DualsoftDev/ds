@@ -67,6 +67,25 @@ module ZmqClientModule =
                 logError($"Error: {result}")
                 null, result
 
+        member x.ReadBits(name:string, offsets:int[]) : TypedIOResult<bool[]> =
+            sendReadRequest(reqSocket, "rx", name, offsets)
+
+            // 서버로부터 응답 수신
+            let result = reqSocket.ReceiveFrameString()
+            match result with
+            | "OK" ->
+                let buffer = reqSocket.ReceiveFrameBytes()
+                let arr = buffer |> map ( (=) 1uy)
+                Ok arr
+            | "ERR" ->
+                let errMsg = reqSocket.ReceiveFrameString()
+                logError($"Error: {errMsg}")
+                Error errMsg
+            | _ ->
+                logError($"UNKNOWN Error: {result}")
+                Error result
+
+
         // command: "rw", "rd", "rl"
         member private x.ReadTypes<'T>(command:string, name:string, offsets:int[]) : TypedIOResult<'T[]> =
             sendReadRequest(reqSocket, command, name, offsets)
@@ -94,18 +113,6 @@ module ZmqClientModule =
             x.ReadTypes<uint32>("rd", name, offsets)
         member x.ReadUInt64s(name:string, offsets:int[]) : TypedIOResult<uint64[]> =
             x.ReadTypes<uint64>("rl", name, offsets)
-
-        //member x.ReadUInt16s(name:string, offsets:int[]) : uint16[] =
-        //    sendReadRequest(reqSocket, "rw", name, offsets)
-
-        //    // 서버로부터 응답 수신
-        //    let result = reqSocket.ReceiveFrameString()
-        //    match result with
-        //    | "OK" ->
-        //        let buffer = reqSocket.ReceiveFrameBytes()
-        //        ByteConverter.BytesToTypeArray<uint16>(buffer) // 바이트 배열을 uint16 배열로 변환
-        //    | _ ->
-        //        failwithf($"Error: {result}")
 
 
         member x.WriteBits(name:string, offsets:int[], values:bool[]) =

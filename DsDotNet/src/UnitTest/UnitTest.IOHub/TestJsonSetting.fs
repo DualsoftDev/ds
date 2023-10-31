@@ -40,14 +40,17 @@ module JSONSettingTestModule =
 
                     let check_po_bits() =
                         ()
-                        //let indices = [|0..po.Length * 8 - 1|]
-                        //let values = indices |> Array.map (fun i -> i % 2 = 0)
+                        let indices = [|0.. po.Length|]
+                        let values = indices |> Array.map (fun i -> i % 2 = 0)
 
-                        //client.ClearAll("p/o") |> checkOk
-                        //client.WriteBits("p/o", indices, values) |> checkOk
-                        //match client.ReadBits("p/o", indices) with
-                        //| Ok obs -> SeqEq obs values
-                        //| _ -> failwith "ERROR"
+                        client.ClearAll("p/o") |> checkOk
+                        client.WriteBits("p/o", indices, values) |> checkOk
+                        match client.ReadBits("p/o", indices) with
+                        | Ok bits ->
+                            for (i, b) in bits |> Array.indexed do
+                                (i % 2 = 0) === b
+                        | _ ->
+                            failwith "ERROR"
 
                     let check_po_bytes() =
                         let indices = [|0..po.Length-1|]

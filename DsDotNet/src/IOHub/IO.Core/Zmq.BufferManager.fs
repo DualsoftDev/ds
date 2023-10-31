@@ -54,9 +54,10 @@ module ZmqBufferManager =
             lock locker (fun () ->
                 [|  for tOffset in bitOffsets do
                         let byteOffset = tOffset / 8
-                        let byte = x.readU8 byteOffset
-                        let bit = byte &&& (1uy >>> (tOffset % 8))
-                        yield bit = 1uy
+                        let byte_ = x.readU8 byteOffset
+                        let shift = 1uy <<< (tOffset % 8)
+                        let bit = byte_ &&& shift
+                        yield bit <> 0uy
                 |]
             );
 

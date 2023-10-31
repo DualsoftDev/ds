@@ -216,30 +216,30 @@ module ZmqServerModule =
                 | "rx" ->
                     let bm, indices = fetchForReadBit respSocket
                     bm.VerifyIndices(indices |> map (fun n -> n / 8))
-                    let result = indices |> map (bm.readBit)
+                    let result = bm.readBits indices
                     Ok result
                 | "rb" ->
                     let bm, indices = fetchForRead respSocket
                     bm.VerifyIndices(indices)
-                    let result = indices |> map (bm.readU8)
+                    let result = bm.readU8s indices
                     Ok result
 
                 | "rw" ->
                     let bm, indices = fetchForRead respSocket
                     bm.VerifyIndices(indices |> map (fun n -> n * 2))
-                    let result = indices |> map (bm.readU16)
+                    let result = bm.readU16s indices
                     Ok result
 
                 | "rd" ->
                     let bm, indices = fetchForRead respSocket
                     bm.VerifyIndices(indices |> map (fun n -> n * 4))
-                    let result = indices |> map (bm.readU32)
+                    let result = bm.readU32s indices
                     Ok result
 
                 | "rl" ->
                     let bm, indices = fetchForRead respSocket
                     bm.VerifyIndices(indices |> map (fun n -> n * 8))
-                    let result = indices |> map (bm.readU64)
+                    let result = bm.readU64s indices
                     Ok result
 
                 | "wx" ->
@@ -346,7 +346,9 @@ module ZmqServerModule =
                                     let isArray = t.IsArray
                                     let objType = t.GetElementType()
                                     verify isArray
-                                    if objType = typeof<byte> then
+                                    if objType = typeof<bool> then
+                                        more.SendFrame(obj :?> bool[] |> map (fun b -> if b then 1uy else 0uy))
+                                    elif objType = typeof<byte> then
                                         more.SendFrame(obj :?> byte[])
                                     elif objType = typeof<uint16> then
                                         more.SendFrame(ByteConverter.ToBytes<uint16>(obj :?> uint16[]))

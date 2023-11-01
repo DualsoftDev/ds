@@ -106,7 +106,7 @@ type ModelLoaderExt =
 
         let dsFile = PathManager.changeExtension (pptPath.ToFile()) ".ds" 
         let jsFile = PathManager.changeExtension (pptPath.ToFile()) ".json"
-        let myDsFile = $"./{(PathManager.getFileNameWithoutExtension (pptPath.ToFile()))}.ds"   // 상대경로로 기본 저장
+        let myDsFile = PathManager.getRelativePath (jsFile.ToFile()) (dsFile.ToFile())//   // 상대경로로 기본 저장
 
         for s in sys.GetRecursiveLoadeds() do
             match s with

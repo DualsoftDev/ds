@@ -1,12 +1,13 @@
-[sys ip = localhost] Sensor = {
-    [flow] Page1 = {
-    }
+[sys] Sensor = {
     [flow] Flow = {
-        PositionRET <||> PositionADV;		// PositionRET(Real)<||> PositionADV(Real);
+        PositionRET <||> PositionADV ||> PartOFF;
+        PositionRET ||> PartON;
+        PositionRET > PartOFF;
+        PositionADV > PartON;
     }
     [interfaces] = {
-        OFF = { _ ~ Flow.PositionRET }
-        ON = { _ ~ Flow.PositionADV }
-        OFF <||> ON;
+        MOVE = { _ ~ Flow.PartON }
+        REMOVE = { Flow.PartOFF ~ _ }
+        REMOVE <||> MOVE;
     }
 }

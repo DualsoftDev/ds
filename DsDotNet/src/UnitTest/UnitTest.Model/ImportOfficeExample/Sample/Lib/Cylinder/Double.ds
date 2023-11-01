@@ -1,16 +1,10 @@
-[sys ip = localhost] Double = {
-    [flow] Page1 = {
-    }
+[sys] Double = {
     [flow] Flow = {
-        ValveRET ||> PositionADV;		// ValveRET(Real)||> PositionADV(Real);
-        ValveADV ||> PositionRET;		// ValveADV(Real)||> PositionRET(Real);
-        PistonRET <||> PistonADV;		// PistonRET(Real)<||> PistonADV(Real);
-        ValveRET > PistonRET > PositionRET;		// ValveRET(Real)> PistonRET(Real) > PositionRET(Real);
-        ValveRET <||> ValveADV > PistonADV > PositionADV;		// ValveRET(Real)<||> ValveADV(Real) > PistonADV(Real) > PositionADV(Real);
+        RET <||> ADV;
     }
     [interfaces] = {
-        RET = { Flow.ValveRET ~ Flow.PositionRET }
-        ADV = { Flow.ValveADV ~ Flow.PositionADV }
+        ADV = { Flow.ADV ~ Flow.ADV }
+        RET = { Flow.RET ~ Flow.RET }
         RET <||> ADV;
     }
 }

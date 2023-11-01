@@ -1,15 +1,13 @@
-[sys ip = localhost] Handling = {
-    [flow] Page1 = {
-    }
+[sys] Handling = {
     [flow] Flow = {
-            R2; // island
-            R1; // island
-            R3; // island
+            R1; 
+            R2; 
+            R3; 
     }
     [interfaces] = {
-        UNLOAD = { Flow.R3 ~ _ }
-        LOAD = { Flow.R2 ~ _ }
         HOME = { Flow.R1 ~ _ }
+        LOAD = { Flow.R2 ~ _ }
+        UNLOAD = { Flow.R3 ~ _ }
         LOAD <||> HOME;
         LOAD <||> UNLOAD;
         HOME <||> UNLOAD;

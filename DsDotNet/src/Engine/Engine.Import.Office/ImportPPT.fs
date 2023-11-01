@@ -86,7 +86,8 @@ module ImportPPTModule =
                         then 
                             ExternalSystem (sRepo[key], paras) :> LoadedSystem 
                         else
-                            let newSys = DsSystem(paras.LoadedName, hostIp)
+                            let newSys = DsSystem(paras.LoadedName, hostIp)  
+                            //let newSys = DsSystem(paras.LoadedName, "localhost")  ///test ahn :  ExternalSystem parser에서"ip" 없어도 열때 까지 임시로 "localhost"
                             addNewLoadedSys (newSys, true, node.NodeType = OPEN_EXSYS_LINK) 
 
                     theSys.AddLoadedSystem(exSys)

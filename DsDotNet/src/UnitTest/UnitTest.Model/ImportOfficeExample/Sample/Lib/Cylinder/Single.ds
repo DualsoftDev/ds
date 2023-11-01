@@ -1,16 +1,10 @@
-[sys ip = localhost] Single = {
-    [flow] Page1 = {
-    }
+[sys] Single = {
     [flow] Flow = {
-        SpringPower ||> PositionADV;		// SpringPower(Real)||> PositionADV(Real);
-        Valve ||> PositionRET;		// Valve(Real)||> PositionRET(Real);
-        PistonRET <||> PistonADV;		// PistonRET(Real)<||> PistonADV(Real);
-        SpringPower > PistonRET > PositionRET;		// SpringPower(Real)> PistonRET(Real) > PositionRET(Real);
-        SpringPower <||> Valve > PistonADV > PositionADV;		// SpringPower(Real)<||> Valve(Real) > PistonADV(Real) > PositionADV(Real);
+        SpringPower <||> ValveADV;
     }
     [interfaces] = {
-        RET = { Flow.SpringPower ~ Flow.PositionRET }
-        ADV = { Flow.Valve ~ Flow.PositionADV }
+        ADV = { Flow.ValveADV ~ Flow.ValveADV }
+        RET = { Flow.SpringPower ~ Flow.SpringPower }
         RET <||> ADV;
     }
 }

@@ -132,7 +132,13 @@ module PathManager =
         if isPathRooted relativePath then
             raise (new ArgumentException($"Invalid GetRelativePath between {re} : {my}"))
         else
-            relativePath.ToValidPath().[3..]
+            let validPath = relativePath.ToValidPath().[3..]  //의미 없는 ../ 항상 붙어서 제거
+            if validPath.StartsWith("../") then
+                validPath //상위 폴더면 그대로 
+            else
+                $"./{validPath}" // 현재 폴더면 ./ 자동삽입
+
+            
 
     // Get the full path from a relativeFilePath relative to an absoluteDirectory
     let getFullPath (relativeFilePath: DsPath) (absoluteDirectory: DsPath): string =

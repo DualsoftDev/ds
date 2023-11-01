@@ -213,7 +213,7 @@ loadDeviceBlock: '[' 'device' fileSpec ']' deviceName SEIMCOLON;
         filePath: etcName1;
 
 //[external file="c:\my.ds"] B;
-loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ipSpec ']' externalSystemName SEIMCOLON;
+loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ']' externalSystemName SEIMCOLON;
     externalSystemName:identifier1;
 
 

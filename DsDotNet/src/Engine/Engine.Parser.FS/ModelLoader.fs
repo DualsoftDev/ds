@@ -64,17 +64,18 @@ module ModelLoader =
 
     let exportLoadedSystem (s: LoadedSystem) =
        
-        let absPath =  PathManager.changeExtension (s.AbsoluteFilePath.ToFile())  "ds"
-        ensureDirectoryExists absPath
+        let absFilePath =  PathManager.changeExtension (s.AbsoluteFilePath.ToFile())  "ds"
+        let dsFile = absFilePath.ToFile()
+        createDirectory dsFile
 
         let refName = s.ReferenceSystem.Name
-        let libName = PathManager.getFileNameWithoutExtension(absPath.ToFile())
+        let libName = PathManager.getFileNameWithoutExtension(dsFile)
 
         s.ReferenceSystem.Name <- libName
-        FileManager.fileWriteAllText(absPath, s.ReferenceSystem.ToDsText(false))
+        FileManager.fileWriteAllText(absFilePath, s.ReferenceSystem.ToDsText(false))
         s.ReferenceSystem.Name <- refName
 
-        absPath
+        absFilePath
 
         
 
@@ -86,7 +87,7 @@ module private TestLoadConfig =
                     @"D:\Git\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Libraries\station.ds" ] }
 
         let fp = @"D:\tmp\a.tmp"
-        ensureDirectoryExists fp
+        createDirectory (fp.ToFile())
         ModelLoader.SaveConfig fp cfg
 
         let cfg2 = ModelLoader.LoadConfig fp

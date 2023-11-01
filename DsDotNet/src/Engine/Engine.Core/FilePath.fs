@@ -136,9 +136,18 @@ module PathManager =
 
     // Get the full path from a relativeFilePath relative to an absoluteDirectory
     let getFullPath (relativeFilePath: DsPath) (absoluteDirectory: DsPath): string =
+
+        match relativeFilePath with
+        |DsFile _ -> ()
+        |DsDirectory _ ->raise (new ArgumentException($"({relativeFilePath}) is not a file path"))
+        match absoluteDirectory with
+        |DsFile _ -> raise (new ArgumentException($"({absoluteDirectory}) is not a directory"))
+        |DsDirectory _ -> ()
+
+
         if isPathRooted relativeFilePath || not (hasExtension relativeFilePath) then
             raise (new ArgumentException($"relativeFilePath error in {relativeFilePath}"))
-        if not (isPathRooted absoluteDirectory) || hasExtension absoluteDirectory then
+        if not (isPathRooted absoluteDirectory) then
             raise (new ArgumentException($"absoluteDirectory error in {absoluteDirectory}"))
 
         Path.GetFullPath(relativeFilePath.ToString(), absoluteDirectory.ToString()) |> getValidFile
@@ -160,9 +169,15 @@ module FileManager =
         File.WriteAllText(path, fileContent)
 
     // Ensure that the directory of the specified path exists; create it if not
-    let ensureDirectoryExists (path: string) =
-        let path = path |> getValidFile
-        let directoryPath = Path.GetDirectoryName(path)
+    let createDirectory (path: DsPath) =
+        if not(isPathRooted path) then 
+            raise (new ArgumentException($"createDirectory path must be an absolute path: {path}"))
+
+        let directoryPath = 
+            match path with
+            |DsFile f-> Path.GetDirectoryName(f)
+            |DsDirectory d-> d
+            
         if not (Directory.Exists(directoryPath)) then
             Directory.CreateDirectory(directoryPath) |> ignore
 

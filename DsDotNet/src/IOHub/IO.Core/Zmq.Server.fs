@@ -14,51 +14,171 @@ open System.Reactive.Subjects
 open System.Reactive.Linq
 open IO.Spec
 
+[<AutoOpen>]
+module private ZmqServerImplModule =
+    type ClientIdentifier = byte[]
+    let mutable ioSpec = getNull<IOSpec>()
+    /// e.g {"p/o", <Paix Output Buffer manager>}
+    let streamManagers = new Dictionary<string, StreamManager>()
+
+    /// tag 별 address 정보를 저장하는 dictionary
+    let tagDic = new Dictionary<string, AddressSpec>()
+    let clients = ResizeArray<ClientIdentifier>()
+
+    let getVendor (addr:string) : (VendorSpec * string) =
+        match addr with
+        | RegexPattern "^([^/]+)/([^/]+)$" [vendor; address] ->
+            let v =
+                ioSpec.Vendors
+                |> Seq.find (fun v -> v.Location = vendor)
+            v, address
+        | _ ->
+            let v =
+                ioSpec.Vendors
+                |> Seq.find (fun v -> v.Location = "")
+            v, addr
+
+    // e.g "p/ob1"
+    let (|AddressPattern|_|) (str: string) =
+        if tagDic.ContainsKey(str) then
+            Some(tagDic.[str])
+        else
+            option {
+                let (vendor, address) = getVendor str
+                match vendor.AddressResolver.GetAddressInfo(address) with
+                | true, memType, byteOffset, bitOffset, contentBitLength ->
+                    let! f = vendor.Files |> Seq.tryFind(fun f -> f.Name = memType)
+                    let addressSpec = AddressSpec(f, bitSizeToEnum(contentBitLength), byteOffset, bitOffset)
+                    tagDic.Add(str, addressSpec)
+                    return addressSpec
+                | _ ->
+                    return! None
+            }
+
+    let (|AddressAssignPattern|_|) (str: string) =
+        match str with
+        | RegexPattern "([^=]+)=(\w+)" [AddressPattern addr; value] ->
+            Some(addr, value)
+        | _ -> None
+
+    let readAddress(address:string) : obj =
+        match address with
+        | AddressPattern ap ->
+            let byteOffset = ap.OffsetByte
+            let bufferManager = ap.IOFileSpec.StreamManager :?> StreamManager
+            bufferManager.VerifyIndices([|byteOffset|])
+
+            match ap.DataType with
+            | PLCMemoryBitSize.Bit   -> bufferManager.readBit(byteOffset * 8 + ap.OffsetBit) :> obj
+            | PLCMemoryBitSize.Byte  -> bufferManager.readU8(byteOffset)
+            | PLCMemoryBitSize.Word  -> bufferManager.readU16(byteOffset)
+            | PLCMemoryBitSize.DWord -> bufferManager.readU32(byteOffset)
+            | PLCMemoryBitSize.LWord -> bufferManager.readU64(byteOffset)
+            | _ ->
+                failwithf($"Unknown data type : {ap.DataType}")
+        | _ ->
+            failwithf($"Unknown address pattern : {address}")
+
+    /// "write p/ob1=1 p/ix2=0" : 비효율성 인정한 version.  buffer manager 및 dataType 의 다양성 공존
+    let writeAddressWithValue(addressWithAssignValue:string) =
+        let parseBool (s:string) =
+            match s.ToLower() with
+            | "1" | "true" -> true
+            | "0" | "false" -> false
+            | _ -> failwithf($"Invalid boolean value: {s}")
+        match addressWithAssignValue with
+        | AddressAssignPattern (addressPattern, value) ->
+            let ap = addressPattern
+            let byteOffset = ap.OffsetByte
+            let bufferManager = ap.IOFileSpec.StreamManager :?> StreamManager
+            bufferManager.VerifyIndices([|byteOffset|])
+
+            match ap.DataType with
+            | PLCMemoryBitSize.Bit   -> bufferManager.writeBit(byteOffset, ap.OffsetBit, parseBool(value))
+            | PLCMemoryBitSize.Byte  -> bufferManager.writeU8s([byteOffset, Byte.Parse(value)])
+            | PLCMemoryBitSize.Word  -> bufferManager.writeU16(byteOffset, UInt16.Parse(value))
+            | PLCMemoryBitSize.DWord -> bufferManager.writeU32(byteOffset, UInt32.Parse(value))
+            | PLCMemoryBitSize.LWord -> bufferManager.writeU64(byteOffset, UInt64.Parse(value))
+            | _ -> failwithf($"Unknown data type : {ap.DataType}")
+
+            bufferManager.Flush()
+
+        | _ -> failwithf($"Unknown address with assignment pattern : {addressWithAssignValue}")
+
+
+    let MultiMessageClientId = 0
+    let MultiMessageCommand = 1
+    let MultiMessageTagKindName = 2
+    let MultiMessageOffsets = 3
+    let MultiMessageValues = 4
+
+    let fetchBufferManagerAndIndices (isBitIndex:bool) (multiMessages:NetMQFrame[]) =
+        let bufferManager =
+            let name = multiMessages[MultiMessageTagKindName].ConvertToString().ToLower()
+            streamManagers[name]
+        let indices = ByteConverter.BytesToTypeArray<int>(multiMessages[MultiMessageOffsets].Buffer)
+        for byteIndex in indices |> map (fun n -> if isBitIndex then n / 8 else n) do
+            if bufferManager.FileStream.Length < byteIndex then
+                failwithf($"Invalid address: {byteIndex}")
+        bufferManager, indices
+
+    let fetchForRead = fetchBufferManagerAndIndices false
+    let fetchForReadBit = fetchBufferManagerAndIndices true
+
+    let fetchForWrite (multiMessages:NetMQFrame[]) =
+        let bm, indices = fetchForRead multiMessages
+        let values = multiMessages[MultiMessageValues].Buffer
+        bm, indices, values
+
+    /// NetMQ 의 ConvertToString() bug 대응 용 코드.  문자열의 맨 마지막에 '\0' 이 붙는 경우 강제 제거.
+    let removeTrailingNullChar (str:string) =
+        if str[str.Length-1] = '\000' then
+            str.Substring(0, str.Length - 1)
+        else
+            str
+
+    //let showSamples (vendorSpec:VendorSpec) (addressExtractor:IAddressInfoProvider) =
+    //    let v = vendorSpec
+    //    match v.Name with
+    //    | "Paix" ->
+    //        match addressExtractor.GetAddressInfo("ox12.1") with
+    //        | true, memoryType, byteOffset, bitOffset, contentBitLength ->
+    //            assert (memoryType = "o")
+    //            assert (bitOffset = 1)
+    //            assert (byteOffset = 12)
+    //            assert (contentBitLength = 1)
+    //        | _ ->
+    //            failwithf($"Invalid address format: {v.Name}, {v.Dll}, {v.ClassName}")
+    //        match addressExtractor.GetAddressInfo("ob12") with
+    //        | true, memoryType, byteOffset, bitOffset, contentBitLength ->
+    //            assert (memoryType = "o")
+    //            assert (bitOffset = 0)
+    //            assert (byteOffset = 12)
+    //            assert (contentBitLength = 8)
+    //        | _ ->
+    //            failwithf($"Invalid address format: {v.Name}, {v.Dll}, {v.ClassName}")
+    //    | "LsXGI" ->
+    //        match addressExtractor.GetAddressInfo("%IX30.3") with
+    //        | true, memoryType, byteOffset, bitOffset, contentBitLength ->
+    //            assert (memoryType = "i")
+    //            assert (bitOffset = 3)
+    //            assert (byteOffset = 30)
+    //            assert (contentBitLength = 1)
+    //        | _ ->
+    //            failwithf($"Invalid address format: {v.Name}, {v.Dll}, {v.ClassName}")
+    //    | _ ->
+    //        ()
+
+
 module ZmqServerModule =
-    type Server(ioSpec:IOSpec, cancellationToken:CancellationToken) =
-        let port = ioSpec.ServicePort
-
-        /// e.g {"p/o", <Paix Output Buffer manager>}
-        let streamManagers = new Dictionary<string, StreamManager>()
-
-        /// tag 별 address 정보를 저장하는 dictionary
-        let tagDic = new Dictionary<string, AddressSpec>()
-
-        //let showSamples (vendorSpec:VendorSpec) (addressExtractor:IAddressInfoProvider) =
-        //    let v = vendorSpec
-        //    match v.Name with
-        //    | "Paix" ->
-        //        match addressExtractor.GetAddressInfo("ox12.1") with
-        //        | true, memoryType, byteOffset, bitOffset, contentBitLength ->
-        //            assert (memoryType = "o")
-        //            assert (bitOffset = 1)
-        //            assert (byteOffset = 12)
-        //            assert (contentBitLength = 1)
-        //        | _ ->
-        //            failwithf($"Invalid address format: {v.Name}, {v.Dll}, {v.ClassName}")
-        //        match addressExtractor.GetAddressInfo("ob12") with
-        //        | true, memoryType, byteOffset, bitOffset, contentBitLength ->
-        //            assert (memoryType = "o")
-        //            assert (bitOffset = 0)
-        //            assert (byteOffset = 12)
-        //            assert (contentBitLength = 8)
-        //        | _ ->
-        //            failwithf($"Invalid address format: {v.Name}, {v.Dll}, {v.ClassName}")
-        //    | "LsXGI" ->
-        //        match addressExtractor.GetAddressInfo("%IX30.3") with
-        //        | true, memoryType, byteOffset, bitOffset, contentBitLength ->
-        //            assert (memoryType = "i")
-        //            assert (bitOffset = 3)
-        //            assert (byteOffset = 30)
-        //            assert (contentBitLength = 1)
-        //        | _ ->
-        //            failwithf($"Invalid address format: {v.Name}, {v.Dll}, {v.ClassName}")
-        //    | _ ->
-        //        ()
+    type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
+        
+        let port = ioSpec_.ServicePort
 
         let mutable ioChangedObservable:IObservable<IOChangeInfo> = null
 
         do
+            ioSpec <- ioSpec_
             for v in ioSpec.Vendors do
                 v.AddressResolver <-
                     let oh:ObjectHandle = Activator.CreateInstanceFrom(v.Dll, v.ClassName)
@@ -81,240 +201,154 @@ module ZmqServerModule =
                 streamManagers.Values 
                 |> map (fun sm -> sm.IOChangedSubject :> IObservable<IOChangeInfo>)
                 |> Observable.Merge
-
-        let getVendor (addr:string) : (VendorSpec * string) =
-            match addr with
-            | RegexPattern "^([^/]+)/([^/]+)$" [vendor; address] ->
-                let v =
-                    ioSpec.Vendors
-                    |> Seq.find (fun v -> v.Location = vendor)
-                v, address
-            | _ ->
-                let v =
-                    ioSpec.Vendors
-                    |> Seq.find (fun v -> v.Location = "")
-                v, addr
-
-        // e.g "p/ob1"
-        let (|AddressPattern|_|) (str: string) =
-            if tagDic.ContainsKey(str) then
-                Some(tagDic.[str])
-            else
-                option {
-                    let (vendor, address) = getVendor str
-                    match vendor.AddressResolver.GetAddressInfo(address) with
-                    | true, memType, byteOffset, bitOffset, contentBitLength ->
-                        let! f = vendor.Files |> Seq.tryFind(fun f -> f.Name = memType)
-                        let addressSpec = AddressSpec(f, bitSizeToEnum(contentBitLength), byteOffset, bitOffset)
-                        tagDic.Add(str, addressSpec)
-                        return addressSpec
-                    | _ ->
-                        return! None
-                }
-
-        let (|AddressAssignPattern|_|) (str: string) =
-            match str with
-            | RegexPattern "([^=]+)=(\w+)" [AddressPattern addr; value] ->
-                Some(addr, value)
-            | _ -> None
             
-
         let mutable terminated = false
 
         member x.IsTerminated with get() = terminated
 
         member x.IOChangedObservable = ioChangedObservable
+        member x.Clients = clients
 
-        member private x.handleRequest (respSocket:ResponseSocket) : IOResult =
-            let mutable request = ""
-            if not <| respSocket.TryReceiveFrameString(&request) then
-                Ok null
+        member private x.handleRequest (server:RouterSocket) : ClientIdentifier * IOResult =
+            let mutable mqMessage:NetMQMessage = null
+            if not <| server.TryReceiveMultipartMessage(&mqMessage) then
+                null, Ok null
             else
-                logDebug $"Handling request: {request}"
-                let tokens = request.Split(' ', StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
-                let command = tokens[0]
+                let client = mqMessage[MultiMessageClientId].Buffer;  // byte[]로 받음
+                let ioResult =
+                    let mms = mqMessage |> toArray
+                    let command = mqMessage[MultiMessageCommand].ConvertToString() |> removeTrailingNullChar;
+                    logDebug $"Handling request: {command}"
 
-                let readAddress(address:string) : obj =
-                    match address with
-                    | AddressPattern ap ->
-                        let byteOffset = ap.OffsetByte
-                        let bufferManager = ap.IOFileSpec.StreamManager :?> StreamManager
-                        bufferManager.VerifyIndices([|byteOffset|])
+                    let getArgs() =
+                        let tokens = command.Split(' ', StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
+                        tokens[1..] |> map(fun s -> s.ToLower())
 
-                        match ap.DataType with
-                        | PLCMemoryBitSize.Bit   -> bufferManager.readBit(byteOffset * 8 + ap.OffsetBit) :> obj
-                        | PLCMemoryBitSize.Byte  -> bufferManager.readU8(byteOffset)
-                        | PLCMemoryBitSize.Word  -> bufferManager.readU16(byteOffset)
-                        | PLCMemoryBitSize.DWord -> bufferManager.readU32(byteOffset)
-                        | PLCMemoryBitSize.LWord -> bufferManager.readU64(byteOffset)
+                    // client 에서 오는 모든 메시지는 client ID frame 과 command 를 기본 포함하므로, 
+                    // 이 2개의 frame 을 제외한 frame 의 갯수에 따라 message 를 처리한다.
+                    match mms.length() - 2 with
+                    | 0 ->
+                        match command with
+                        | "REGISTER" ->
+                            clients.Add client
+                            Ok null
+                        | "UNREGISTER" ->
+                            clients.Remove client |> ignore
+                            Ok null
+                        | StartsWith "read" ->      // e.g read p/ob1 p/ow1 p/olw3
+                            noop()
+                            let result =
+                                getArgs() |> map (fun a -> $"{a}={readAddress(a)}")
+                                |> joinWith " "
+                            Ok (box result)
+                        | StartsWith "write" ->
+                            getArgs() |> iter (fun a -> writeAddressWithValue(a))
+                            Ok (WriteOK())
                         | _ ->
-                            failwithf($"Unknown data type : {ap.DataType}")
+                            failwithlogf $"ERROR: {command}"
+                    | 1 ->
+                        match command with
+                        | "cl" ->
+                            let name = server.ReceiveFrameString().ToLower()
+                            let bm = streamManagers[name]
+                            bm.clear()
+                            Ok (box (WriteOK()))
+                        | _ ->
+                            failwithlogf $"ERROR: {command}"
+                    | 2 ->
+                        match command with
+                        | "rx" ->
+                            let bm, indices = fetchForReadBit mms
+                            bm.VerifyIndices(indices |> map (fun n -> n / 8))
+                            let result = bm.readBits indices
+                            Ok (box result)
+                        | "rb" ->
+                            let bm, indices = fetchForRead mms
+                            bm.VerifyIndices(indices)
+                            let result = bm.readU8s indices
+                            Ok result
+
+                        | "rw" ->
+                            let bm, indices = fetchForRead mms
+                            bm.VerifyIndices(indices |> map (fun n -> n * 2))
+                            let result = bm.readU16s indices
+                            Ok result
+
+                        | "rd" ->
+                            let bm, indices = fetchForRead mms
+                            bm.VerifyIndices(indices |> map (fun n -> n * 4))
+                            let result = bm.readU32s indices
+                            Ok result
+
+                        | "rl" ->
+                            let bm, indices = fetchForRead mms
+                            bm.VerifyIndices(indices |> map (fun n -> n * 8))
+                            let result = bm.readU64s indices
+                            Ok result
+                        | _ ->
+                            failwithlogf $"ERROR: {command}"
+                    | 3 ->
+                        let writeOK = Ok (box (WriteOK()))
+                        match command with
+                        | "wx" ->
+                            let bm, indices, values = fetchForWrite mms
+                            bm.Verify(indices |> map (fun n -> n / 8), values.Length)
+
+                            for i in [0..indices.Length-1] do
+                                let value =
+                                    match values.[i] with
+                                    | 1uy -> true
+                                    | 0uy -> false
+                                    | _ -> failwithf($"Invalid value: {values.[i]}")
+                                bm.writeBit(indices[i], value)
+
+                            bm.Flush()
+                            writeOK
+                        | "wb" ->
+                            let bm, indices, values = fetchForWrite mms
+                            bm.Verify(indices, values.Length / 1)
+                            Array.zip indices values |> bm.writeU8s
+                            writeOK
+
+                        | "ww" ->
+                            let bm, indices, values = fetchForWrite mms
+                            bm.Verify(indices |> map (fun n -> n * 2), values.Length / 2)
+
+                            Array.zip indices (ByteConverter.BytesToTypeArray<uint16>(values)) |> bm.writeU16s
+                            writeOK
+
+                        | "wd" ->
+                            let bm, indices, values = fetchForWrite mms
+                            bm.Verify(indices |> map (fun n -> n * 4), values.Length / 4)
+                            Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) |> bm.writeU32s
+                            writeOK
+
+                        | "wl" ->
+                            let bm, indices, values = fetchForWrite mms
+                            bm.Verify(indices |> map (fun n -> n * 8), values.Length / 8)
+
+                            Array.zip indices (ByteConverter.BytesToTypeArray<uint64>(values)) |> bm.writeU64s
+                            writeOK
+                        | _ ->
+                            failwithlogf $"ERROR: {command}"
+
                     | _ ->
-                        failwithf($"Unknown address pattern : {address}")
-
-                /// "write p/ob1=1 p/ix2=0" : 비효율성 인정한 version.  buffer manager 및 dataType 의 다양성 공존
-                let writeAddressWithValue(addressWithAssignValue:string) =
-                    let parseBool (s:string) =
-                        match s.ToLower() with
-                        | "1" | "true" -> true
-                        | "0" | "false" -> false
-                        | _ -> failwithf($"Invalid boolean value: {s}")
-                    match addressWithAssignValue with
-                    | AddressAssignPattern (addressPattern, value) ->
-                        let ap = addressPattern
-                        let byteOffset = ap.OffsetByte
-                        let bufferManager = ap.IOFileSpec.StreamManager :?> StreamManager
-                        bufferManager.VerifyIndices([|byteOffset|])
-
-                        match ap.DataType with
-                        | PLCMemoryBitSize.Bit   -> bufferManager.writeBit(byteOffset, ap.OffsetBit, parseBool(value))
-                        | PLCMemoryBitSize.Byte  -> bufferManager.writeU8s([byteOffset, Byte.Parse(value)])
-                        | PLCMemoryBitSize.Word  -> bufferManager.writeU16(byteOffset, UInt16.Parse(value))
-                        | PLCMemoryBitSize.DWord -> bufferManager.writeU32(byteOffset, UInt32.Parse(value))
-                        | PLCMemoryBitSize.LWord -> bufferManager.writeU64(byteOffset, UInt64.Parse(value))
-                        | _ -> failwithf($"Unknown data type : {ap.DataType}")
-
-                        bufferManager.Flush()
-
-                    | _ -> failwithf($"Unknown address with assignment pattern : {addressWithAssignValue}")
-
-                let fetchBufferManagerAndIndices (isBitIndex:bool) (respSocket:ResponseSocket) =
-                    let bufferManager =
-                        let name = respSocket.ReceiveFrameString().ToLower()
-                        streamManagers[name]
-                    let indices =
-                        let address = respSocket.ReceiveFrameBytes()
-                        ByteConverter.BytesToTypeArray<int>(address)
-                    for byteIndex in indices |> map (fun n -> if isBitIndex then n / 8 else n) do
-                        if bufferManager.FileStream.Length < byteIndex then
-                            failwithf($"Invalid address: {byteIndex}")
-                    bufferManager, indices
-
-                let fetchForRead = fetchBufferManagerAndIndices false
-                let fetchForReadBit = fetchBufferManagerAndIndices true
-
-                let fetchForWrite (respSocket:ResponseSocket) =
-                    let bm, indices = fetchForRead respSocket
-                    let values = respSocket.ReceiveFrameBytes()
-                    bm, indices, values
-
-                let args = tokens[1..] |> map(fun s -> s.ToLower())
-                match command with
-                | "read" ->
-                    noop()
-                    let result =
-                        args |> map (fun a -> $"{a}={readAddress(a)}")
-                        |> joinWith " "
-                    Ok result
-                | "r" ->
-                    let result = readAddress(tokens[1])
-                    match result with
-                    | :? bool   
-                    | :? byte   
-                    | :? uint16 
-                    | :? uint32 
-                    | :? uint64 ->
-                        Ok result
-                    | _ ->
-                        let errMsg = $"Unknown type {tokens[1]}"
-                        logError "%s" errMsg
-                        Error errMsg
-
-
-                | "write" ->
-                    args |> iter (fun a -> writeAddressWithValue(a))
-                    Ok (WriteOK())
-
-                | "rx" ->
-                    let bm, indices = fetchForReadBit respSocket
-                    bm.VerifyIndices(indices |> map (fun n -> n / 8))
-                    let result = bm.readBits indices
-                    Ok result
-                | "rb" ->
-                    let bm, indices = fetchForRead respSocket
-                    bm.VerifyIndices(indices)
-                    let result = bm.readU8s indices
-                    Ok result
-
-                | "rw" ->
-                    let bm, indices = fetchForRead respSocket
-                    bm.VerifyIndices(indices |> map (fun n -> n * 2))
-                    let result = bm.readU16s indices
-                    Ok result
-
-                | "rd" ->
-                    let bm, indices = fetchForRead respSocket
-                    bm.VerifyIndices(indices |> map (fun n -> n * 4))
-                    let result = bm.readU32s indices
-                    Ok result
-
-                | "rl" ->
-                    let bm, indices = fetchForRead respSocket
-                    bm.VerifyIndices(indices |> map (fun n -> n * 8))
-                    let result = bm.readU64s indices
-                    Ok result
-
-                | "wx" ->
-                    let bm, indices, values = fetchForWrite respSocket
-                    bm.Verify(indices |> map (fun n -> n / 8), values.Length)
-
-                    for i in [0..indices.Length-1] do
-                        let value =
-                            match values.[i] with
-                            | 1uy -> true
-                            | 0uy -> false
-                            | _ -> failwithf($"Invalid value: {values.[i]}")
-                        bm.writeBit(indices[i], value)
-
-                    bm.Flush()
-                    Ok (WriteOK())
-                | "wb" ->
-                    let bm, indices, values = fetchForWrite respSocket
-                    bm.Verify(indices, values.Length / 1)
-                    Array.zip indices values |> bm.writeU8s
-                    Ok (WriteOK())
-
-                | "ww" ->
-                    let bm, indices, values = fetchForWrite respSocket
-                    bm.Verify(indices |> map (fun n -> n * 2), values.Length / 2)
-
-                    Array.zip indices (ByteConverter.BytesToTypeArray<uint16>(values)) |> bm.writeU16s
-                    Ok (WriteOK())
-
-                | "wd" ->
-                    let bm, indices, values = fetchForWrite respSocket
-                    bm.Verify(indices |> map (fun n -> n * 4), values.Length / 4)
-                    Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) |> bm.writeU32s
-                    Ok (WriteOK())
-
-                | "wl" ->
-                    let bm, indices, values = fetchForWrite respSocket
-                    bm.Verify(indices |> map (fun n -> n * 8), values.Length / 8)
-
-                    Array.zip indices (ByteConverter.BytesToTypeArray<uint64>(values)) |> bm.writeU64s
-                    Ok (WriteOK())
-
-                | "cl" ->
-                    let name = respSocket.ReceiveFrameString().ToLower()
-                    let bm = streamManagers[name]
-                    bm.clear()
-                    Ok (WriteOK())
-                | _ ->
-                    Error $"Unknown request: {request}"
-
-
+                        failwithlogf $"ERROR: {command}"
+                client, ioResult
 
 
         member x.Run() =
             // start a separate thread to run the server
             let f() =
                 logInfo $"Starting server on port {port}..."
-                use respSocket = new ResponseSocket()
-                respSocket.Bind($"tcp://*:{port}")
+                use server = new RouterSocket()
+                server.Bind($"tcp://*:{port}")
                 
                 while not cancellationToken.IsCancellationRequested do
+                    let mutable client:ClientIdentifier = null
                     try
-                        let response = x.handleRequest respSocket
+                        let client_, response = x.handleRequest server
+                        client <- client_
                         match response with
                         | Ok obj ->
 
@@ -331,7 +365,7 @@ module ZmqServerModule =
                                 ()
 
                             | _ ->
-                                let more = respSocket.SendMoreFrame("OK")
+                                let more = server.SendMoreFrame(client).SendMoreFrame("OK")
                                 match obj with
                                 | :? WriteOK as ok ->
                                     more.SendFrame("OK")
@@ -364,10 +398,10 @@ module ZmqServerModule =
                                         failwithlogf "ERROR"
 
                         | Error errMsg ->
-                            respSocket.SendMoreFrame("ERR").SendFrame(errMsg)
+                            server.SendMoreFrame(client).SendMoreFrame("ERR").SendFrame(errMsg)
                     with ex ->
                         logError $"Error occured while handling request: {ex.Message}"
-                        respSocket.SendMoreFrame("ERR").SendFrame(ex.Message)
+                        server.SendMoreFrame(client).SendMoreFrame("ERR").SendFrame(ex.Message)
 
                 logInfo("Cancellation request detected!")
                 (x :> IDisposable).Dispose()

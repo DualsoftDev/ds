@@ -11,41 +11,43 @@ module ZmqClientModule =
     type CLIRequestResult = Result<string, ErrorMessage>
     /// serverAddress: "tcp://localhost:5555" or "tcp://*:5555"
     type Client(serverAddress:string) =
-        let reqSocket = new RequestSocket()
+        let client = new DealerSocket()
         do
-            reqSocket.Connect(serverAddress)
+            client.Options.Identity <- Guid.NewGuid().ToByteArray() // 각 클라이언트에 대한 고유 식별자 설정
+            client.Connect(serverAddress)
+            client.SendFrame("REGISTER")
                 
-        let verifyReceiveOK(reqSocket:RequestSocket) : CLIRequestResult =
-            let result = reqSocket.ReceiveFrameString()
-            let detail = reqSocket.ReceiveFrameString()
+        let verifyReceiveOK(client:DealerSocket) : CLIRequestResult =
+            let result = client.ReceiveFrameString()
+            let detail = client.ReceiveFrameString()
             match result with
             | "OK" -> Ok detail
             | "ERR" -> Error detail
             | _ -> Error $"Error: {result}"
 
-        let buildCommandAndName(reqSocket:RequestSocket, command:string, name:string) : IOutgoingSocket =
-            reqSocket
+        let buildCommandAndName(client:DealerSocket, command:string, name:string) : IOutgoingSocket =
+            client
                 .SendMoreFrame(command)
                 .SendMoreFrame(name)
 
-        let buildPartial(reqSocket:RequestSocket, command:string, name:string, offsets:int[]) : IOutgoingSocket =
-            buildCommandAndName(reqSocket, command, name)
+        let buildPartial(client:DealerSocket, command:string, name:string, offsets:int[]) : IOutgoingSocket =
+            buildCommandAndName(client, command, name)
                 .SendMoreFrame(ByteConverter.ToBytes<int>(offsets))
 
-        let sendReadRequest(reqSocket:RequestSocket, command:string, name:string, offsets:int[]) : unit =
-            buildCommandAndName(reqSocket, command, name)
+        let sendReadRequest(client:DealerSocket, command:string, name:string, offsets:int[]) : unit =
+            buildCommandAndName(client, command, name)
                 .SendFrame(ByteConverter.ToBytes<int>(offsets))
 
 
         interface IDisposable with
             member x.Dispose() =
-                reqSocket.Close()
+                client.Close()
 
 
         member x.SendRequest(request:string) : CLIRequestResult =
-            reqSocket.SendFrame(request)
-            let result = reqSocket.ReceiveFrameString()
-            let detail = reqSocket.ReceiveFrameString()
+            client.SendFrame(request)
+            let result = client.ReceiveFrameString()
+            let detail = client.ReceiveFrameString()
             match result with
             | "OK" -> Ok detail
             | "ERR" -> Error detail
@@ -54,31 +56,31 @@ module ZmqClientModule =
                 Error result
 
         member x.Read(tag:string) : obj * ErrorMessage =
-            reqSocket.SendFrame($"r {tag}")
-            let result = reqSocket.ReceiveFrameString()
+            client.SendFrame($"r {tag}")
+            let result = client.ReceiveFrameString()
             match result with
             | "OK" ->
-                let buffer = reqSocket.ReceiveFrameBytes()
+                let buffer = client.ReceiveFrameBytes()
                 buffer, null
             | "ERR" ->
-                let errMsg = reqSocket.ReceiveFrameString()
+                let errMsg = client.ReceiveFrameString()
                 null, errMsg
             | _ ->
                 logError($"Error: {result}")
                 null, result
 
         member x.ReadBits(name:string, offsets:int[]) : TypedIOResult<bool[]> =
-            sendReadRequest(reqSocket, "rx", name, offsets)
+            sendReadRequest(client, "rx", name, offsets)
 
             // 서버로부터 응답 수신
-            let result = reqSocket.ReceiveFrameString()
+            let result = client.ReceiveFrameString()
             match result with
             | "OK" ->
-                let buffer = reqSocket.ReceiveFrameBytes()
+                let buffer = client.ReceiveFrameBytes()
                 let arr = buffer |> map ( (=) 1uy)
                 Ok arr
             | "ERR" ->
-                let errMsg = reqSocket.ReceiveFrameString()
+                let errMsg = client.ReceiveFrameString()
                 logError($"Error: {errMsg}")
                 Error errMsg
             | _ ->
@@ -88,17 +90,17 @@ module ZmqClientModule =
 
         // command: "rw", "rd", "rl"
         member private x.ReadTypes<'T>(command:string, name:string, offsets:int[]) : TypedIOResult<'T[]> =
-            sendReadRequest(reqSocket, command, name, offsets)
+            sendReadRequest(client, command, name, offsets)
 
             // 서버로부터 응답 수신
-            let result = reqSocket.ReceiveFrameString()
+            let result = client.ReceiveFrameString()
             match result with
             | "OK" ->
-                let buffer = reqSocket.ReceiveFrameBytes()
-                let arr = ByteConverter.BytesToTypeArray<'T>(buffer) // 바이트 배열을 uint16 배열로 변환
+                let buffer = client.ReceiveFrameBytes()
+                let arr = ByteConverter.BytesToTypeArray<'T>(buffer) // 바이트 배열을 'T 배열로 변환
                 Ok arr
             | "ERR" ->
-                let errMsg = reqSocket.ReceiveFrameString()
+                let errMsg = client.ReceiveFrameString()
                 logError($"Error: {errMsg}")
                 Error errMsg
             | _ ->
@@ -117,39 +119,39 @@ module ZmqClientModule =
 
         member x.WriteBits(name:string, offsets:int[], values:bool[]) =
             let byteValues = values |> map (fun v -> if v then 1uy else 0uy)
-            buildPartial(reqSocket, "wx", name, offsets)
+            buildPartial(client, "wx", name, offsets)
                 .SendFrame(byteValues)
 
-            verifyReceiveOK reqSocket
+            verifyReceiveOK client
 
         member x.WriteBytes(name:string, offsets:int[], values:byte[]) =
-            buildPartial(reqSocket, "wb", name, offsets)
+            buildPartial(client, "wb", name, offsets)
                 .SendFrame(values)
 
-            verifyReceiveOK reqSocket
+            verifyReceiveOK client
 
 
         member x.WriteUInt16s(name:string, offsets:int[], values:uint16[]) =
-            buildPartial(reqSocket, "ww", name, offsets)
+            buildPartial(client, "ww", name, offsets)
                 .SendFrame(ByteConverter.ToBytes<uint16>(values))
 
-            verifyReceiveOK reqSocket
+            verifyReceiveOK client
 
         member x.WriteUInt32s(name:string, offsets:int[], values:uint32[]) =
-            buildPartial(reqSocket, "wd", name, offsets)
+            buildPartial(client, "wd", name, offsets)
                 .SendFrame(ByteConverter.ToBytes<uint32>(values))
 
-            verifyReceiveOK reqSocket
+            verifyReceiveOK client
 
         member x.WriteUInt64s(name:string, offsets:int[], values:uint64[]) =
-            buildPartial(reqSocket, "wl", name, offsets)
+            buildPartial(client, "wl", name, offsets)
                 .SendFrame(ByteConverter.ToBytes<uint64>(values))
 
-            verifyReceiveOK reqSocket
+            verifyReceiveOK client
 
         member x.ClearAll(name:string) =
-            reqSocket
+            client
                 .SendMoreFrame("cl")
                 .SendFrame(name)
 
-            verifyReceiveOK reqSocket
+            verifyReceiveOK client

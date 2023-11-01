@@ -35,7 +35,7 @@ module CoreModule =
         ContainerSystem: DsSystem
         AbsoluteFilePath: string
         /// 로딩을 위해 사용자가 지정한 파일 경로. 직렬화 시에는 절대 경로를 사용하지 않기 위한 용도로 사용됩니다.
-        UserSpecifiedFilePath: string
+        RelativeFilePath: string
         /// *.ds 파일에서 정의된 이름과 로딩할 때의 이름이 다를 수 있습니다.
         LoadedName: string
         ShareableSystemRepository: ShareableSystemRepository
@@ -47,7 +47,14 @@ module CoreModule =
     type LoadedSystem (loadedSystem: DsSystem, param: DeviceLoadParameters) =
         inherit FqdnObject(param.LoadedName, param.ContainerSystem)
         let mutable loadedName = param.LoadedName // 로딩 주체에 따라 런타임에 변경
+        //do  //test ahn
+            //if param.AbsoluteFilePath |> PathManager.isPathRooted
+            //then raise (new ArgumentException($"The AbsoluteFilePath must be PathRooted ({param.AbsoluteFilePath})"))
+            //if not(param.RelativeFilePath |> PathManager.isPathRooted)
+            //then raise (new ArgumentException($"The RelativeFilePath must be not PathRooted ({param.AbsoluteFilePath})"))
+
         interface ISystem 
+     
         member _.LoadedName with get() = loadedName and set(value) = loadedName <- value
 
         /////////////확장 객체로 추후 위치 수정 test ahn
@@ -62,7 +69,7 @@ module CoreModule =
         /// 다른 장치를 로딩하려는 시스템에서 로딩된 시스템을 참조합니다.
         member _.ReferenceSystem = loadedSystem
         member _.ContainerSystem = param.ContainerSystem
-        member _.UserSpecifiedFilePath:string = param.UserSpecifiedFilePath
+        member _.RelativeFilePath:string = param.RelativeFilePath
         member _.AbsoluteFilePath:string = param.AbsoluteFilePath
         member _.LoadingType: ParserLoadingType = param.LoadingType
 

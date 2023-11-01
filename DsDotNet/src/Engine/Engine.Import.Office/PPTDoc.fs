@@ -20,9 +20,8 @@ open System.Runtime.CompilerServices
 [<AutoOpen>]
 module PPTDocModule =
 
-    let getSystemDirectoryName(path:string) = FileInfo(path).DirectoryName
     let getSystemName(name:string) =
-        let fileName = Path.GetFileNameWithoutExtension(name)
+        let fileName = PathManager.getFileNameWithoutExtension(name.ToFile())
         if fileName.Contains(" ")            
         then Office.ErrorPPT(ErrorCase.Name, ErrID._57, $"{fileName}", 0)
         if fileName.IsQuotationRequired()
@@ -237,7 +236,7 @@ module PPTDocModule =
 
         member val Name = headPages.Keys.First().PageTitle(true)
         member val Path = path
-        member val DirectoryName =  getSystemDirectoryName path
+        member val DirectoryName =  PathManager.getDirectoryName (path.ToFile())
 
         member val DicFlow = Dictionary<int, Flow>() // page , flow
         member val DicVertex = Dictionary<string, Vertex>()
@@ -252,9 +251,12 @@ type PPTDocExt =
             |> Seq.filter(fun node -> node.NodeType.IsLoadSys)
             |> Seq.collect(fun node ->
             node.CopySys.Select(fun copy ->
-                let path = Path.GetFullPath(Path.Combine(doc.DirectoryName, copy.Value))+".pptx"
-                if File.Exists(path) |> not
-                then node.Shape.ErrorPath(ErrID._29, node.PageNum, path)
+                let fullPath = PathManager.getFullPath ( (copy.Value+".pptx").ToFile()) (doc.DirectoryName|>DsDirectory)
 
-                copy.Value , copy.Key, node)
+                if File.Exists(fullPath) |> not
+                then
+                    node.Shape.ErrorPath(ErrID._29, node.PageNum, fullPath)
+                else 
+                    fullPath , copy.Key, node 
+                    )
         )

@@ -11,7 +11,7 @@ module ConvertCPU =
     let private IsSpec (v:Vertex, vaild:ConvertType, alias:ConvertAlias)=
         let aliasSpec    = alias = AliasTure  || alias = AliasNotCare
         let aliasNoSpec  = alias = AliasFalse || alias = AliasNotCare
-        let isVaildVertex =
+        let isValidVertex =
             match v with
             | :? Real            -> aliasNoSpec && vaild.HasFlag(RealInFlow)
             | :? RealExF         -> aliasNoSpec && vaild.HasFlag(RealExFlow)
@@ -37,7 +37,7 @@ module ConvertCPU =
                      | DuAliasTargetCall _         -> aliasSpec &&  vaild.HasFlag(CallInReal)
             |_ -> failwithlog $"Error {getFuncName()}"
 
-        isVaildVertex
+        isValidVertex
 
     ///Vertex 타입이 Spec에 해당하면 적용
     let private applyVertexSpec(v:Vertex) =

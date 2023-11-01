@@ -410,7 +410,7 @@ module internal ToDsTextModule =
                 yield $"{tab}{rb}"
             let commentDevice(d:Device) = if pCooment then  $"// {d.AbsoluteFilePath}" else "";
             for d in system.Devices do
-                yield $"{tab}[device file={quote d.UserSpecifiedFilePath}] {d.Name.QuoteOnDemand()}; {commentDevice d}"
+                yield $"{tab}[device file={quote d.RelativeFilePath}] {d.Name.QuoteOnDemand()}; {commentDevice d}"
             
             let commentSystem(es:ExternalSystem) = if pCooment then  $"// {es.AbsoluteFilePath}" else "";
             for es in system.ExternalSystems do
@@ -418,7 +418,7 @@ module internal ToDsTextModule =
                     match es.HostIp with
                     | Some host -> $" ip={quote host}"
                     | _ -> ""
-                yield $"{tab}[external file={quote es.UserSpecifiedFilePath}{ip}] {es.Name}; {commentSystem es}"
+                yield $"{tab}[external file={quote es.RelativeFilePath}{ip}] {es.Name}; {commentSystem es}"
 
             //Commands/Observes는 JobDef에 저장 (Variables는 OriginalCodeBlocks ?? System.Variables ??)
             yield codeBlockToDs system

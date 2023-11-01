@@ -157,10 +157,9 @@ module PPTObjectModule =
                          if GetSquareBrackets(name, false).length() = 0
                          then  shape.ErrorName(ErrID._7, iPage)
                          try
-                            GetBracketsReplaceName(name) |> PathManager.isValidPath |> ignore
+                            GetBracketsReplaceName(name)+".pptx" |> PathManager.getValidFile |> ignore
                          with
-                         | ex -> shape.ErrorName(ErrID._44, iPage)
-
+                         | ex -> shape.ErrorName(ex.Message, iPage)
 
         | IF_DEVICE
         | IF_LINK

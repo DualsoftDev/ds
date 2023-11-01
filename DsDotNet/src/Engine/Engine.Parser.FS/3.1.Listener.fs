@@ -151,18 +151,23 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
                 ApiResetInfo.Create(x.TheSystem, opnd1, op.ToModelEdge(), opnd2) |> ignore
 
     member private x.GetFilePath(fileSpecCtx:FileSpecContext) =
-        let simpleFilePath = fileSpecCtx.TryFindFirstChild<FilePathContext>().Value.GetText().DeQuoteOnDemand()
-        let envPaths = collectEnvironmentVariablePaths()
-        let targetPath(directory:string) = [
-            simpleFilePath
-            $"{directory}/{simpleFilePath}"
-            for path in envPaths do
-                $"{path}/{simpleFilePath}" ] |> fileExistChecker
+        let relativeFilePath = fileSpecCtx.TryFindFirstChild<FilePathContext>().Value.GetText().DeQuoteOnDemand()
+                               |> PathManager.getValidFile
+        //let envPaths = collectEnvironmentVariablePaths()
+        //let targetPath(directory:string) = 
+        //    [
+        //        PathManager.getFullPath relativeFilePath directory
+        //        for path in envPaths do
+        //            PathManager.getFullPath relativeFilePath path   
+        //    ] |> fileExistChecker
 
         let absoluteFilePath =
-            let dir = x.ParserOptions.ReferencePath
-            targetPath dir
-        absoluteFilePath, simpleFilePath
+            let fullPath = PathManager.getFullPath (relativeFilePath.ToFile()) (x.ParserOptions.ReferencePath.ToDirectory())
+            fullPath |> FileManager.fileExistChecker
+
+        absoluteFilePath, relativeFilePath
+
+
 
     override x.EnterLoadDeviceBlock(ctx:LoadDeviceBlockContext) =
         let fileSpecCtx = ctx.TryFindFirstChild<FileSpecContext>().Value
@@ -597,12 +602,12 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
 module ParserLoadApiModule =
     (* 외부에서 구조적으로 system 을 build 할 때에 사용되는 API *)
     type DsSystem with
-        member x.LoadDeviceAs (systemRepo:ShareableSystemRepository, loadedName:string, absoluteFilePath:string, userSpecifiedFilePath:string) =
+        member x.LoadDeviceAs (systemRepo:ShareableSystemRepository, loadedName:string, absoluteFilePath:string, relativeFilePath:string) =
             let device =
                 fwdLoadDevice <| {
                     ContainerSystem = x
                     AbsoluteFilePath = absoluteFilePath
-                    UserSpecifiedFilePath = userSpecifiedFilePath
+                    RelativeFilePath = relativeFilePath
                     LoadedName = loadedName
                     ShareableSystemRepository = systemRepo
                     HostIp = None
@@ -613,14 +618,14 @@ module ParserLoadApiModule =
 
         member x.LoadExternalSystemAs (
             systemRepo:ShareableSystemRepository, loadedName:string
-            , absoluteFilePath:string, userSpecifiedFilePath:string
+            , absoluteFilePath:string, relativeFilePath:string
             , ipSpec:string option
         ) =
             let external =
                 let param = {
                     ContainerSystem = x
                     AbsoluteFilePath = absoluteFilePath
-                    UserSpecifiedFilePath = userSpecifiedFilePath
+                    RelativeFilePath = relativeFilePath
                     LoadedName = loadedName
                     ShareableSystemRepository = systemRepo
                     HostIp = ipSpec

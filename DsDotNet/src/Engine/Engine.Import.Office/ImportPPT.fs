@@ -10,6 +10,7 @@ open System.IO
 open System.Runtime.CompilerServices
 open DocumentFormat.OpenXml.Packaging
 open System
+open PathManager
 
 [<AutoOpen>]
 module ImportPPTModule =
@@ -33,9 +34,7 @@ module ImportPPTModule =
         let rec loadSystem(pptReop:Dictionary<DsSystem, pptDoc>, theSys:DsSystem, paras:DeviceLoadParameters) =
             pathStack.Push(paras.AbsoluteFilePath)
 
-            let pathPPT = paras.AbsoluteFilePath+".pptx"
-          
-
+            let pathPPT = paras.AbsoluteFilePath
             let doc =
                 match dicPptDoc.TryGetValue pathPPT with
                 | true, existingDoc -> pptDoc(pathPPT, paras, existingDoc)
@@ -50,9 +49,10 @@ module ImportPPTModule =
             SameFlowName(doc)
  
             doc.GetCopyPathNName()
-            |> Seq.iter(fun (userPathTemp, loadedName, node) ->
-                let userPath = PathManager.getRelativePath paras.AbsoluteFilePath userPathTemp
-                let paras = getParams(doc.DirectoryName, userPath
+            |> Seq.iter(fun (loadFilePath, loadedName, node) ->
+
+                let loadRelativePath = PathManager.getRelativePath (paras.AbsoluteFilePath.ToFile()) (loadFilePath.ToFile())
+                let paras = getParams(doc.DirectoryName, loadRelativePath
                             , loadedName, theSys, None,  node.NodeType.GetLoadingType(), sRepo)
                 let hostIp = if paras.HostIp.IsSome then paras.HostIp.Value else ""
 
@@ -123,12 +123,15 @@ module ImportPPTModule =
             pptReop.Add (theSys, doc)
             theSys, doc
 
-        member internal x.GetImportModel( pptReop:Dictionary<DsSystem, pptDoc>, path:string) =
+        member internal x.GetImportModel( pptReop:Dictionary<DsSystem, pptDoc>, filePath:string) =
                 //active는 시스템이름으로 ppt 파일 이름을 사용
-                let mySys = DsSystem(getSystemName path, "localhost")
+                let fileName = PathManager.getFileName (filePath.ToFile())
+                let fileDirectory = PathManager.getDirectoryName  (filePath.ToFile())
+                let sysName = getSystemName fileName
+                let mySys = DsSystem(sysName, "localhost")
                 let paras = getParams(
-                              getSystemDirectoryName path
-                            , getSystemName path
+                              fileDirectory
+                            , sysName+".pptx"
                             , mySys.Name
                             , mySys
                             , Some mySys.HostIp
@@ -214,7 +217,7 @@ module ImportPPTModule =
                          .Select(fun dic ->
                             let system = dic.Key
                             let param = dic.Value.Parameter
-                            let relative  = param.UserSpecifiedFilePath
+                            let relative  = param.RelativeFilePath
                             let absolute  = param.AbsoluteFilePath
                             let removeTarget = relative.Replace("ds", "")
                             let rootDirectroy = absolute.Substring(0, absolute.length() - removeTarget.length())

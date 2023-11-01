@@ -15,12 +15,12 @@ open System.IO
 [<AutoOpen>]
 module ImportU =
     let getParams(directoryName:string
-                    , userPath:string, loadedName:string, containerSystem:DsSystem
+                    , relativeFilePath:string, loadedName:string, containerSystem:DsSystem
                     , hostIp:string option, loadingType, sRepo) =
             {
                 ContainerSystem = containerSystem
-                AbsoluteFilePath = Path.GetFullPath(Path.Combine(directoryName, userPath))
-                UserSpecifiedFilePath = userPath + ".ds"
+                AbsoluteFilePath = PathManager.getFullPath (relativeFilePath.ToFile()) (directoryName|>DsDirectory)
+                RelativeFilePath = PathManager.changeExtension (relativeFilePath.ToFile()) ".ds"  //pptx로 부터 .ds로 생성
                 LoadedName = loadedName
                 ShareableSystemRepository =  sRepo
 
@@ -32,18 +32,18 @@ module ImportU =
             let refSystem = sys.TryFindLoadedSystem(refSys).Value.ReferenceSystem
             refSystem.TryFindExportApiItem([|refSystem.Name;apiName|]).Value
 
-    let private createDsCommonLibCall(devName:string, ifName:string)  =
-        let newSys = DsSystem(devName, "")
-        let paras = getParams(
-                              getSystemDirectoryName ""
-                            , getSystemName ""
-                            , newSys.Name
-                            , newSys
-                            , Some newSys.HostIp
-                            , DuNone
-                            , ShareableSystemRepository()  
-                            )
-        Device(newSys, paras) :> LoadedSystem 
+    //let private createDsCommonLibCall(devName:string, ifName:string)  =
+    //    let newSys = DsSystem(devName, "")
+    //    let paras = getParams(
+    //                          getSystemDirectoryName ""
+    //                        , getSystemName ""
+    //                        , newSys.Name
+    //                        , newSys
+    //                        , Some newSys.HostIp
+    //                        , DuNone
+    //                        , ShareableSystemRepository()  
+    //                        )
+    //    Device(newSys, paras) :> LoadedSystem 
     //    let devs =
     //        let api = getApiItems()
     //        jobSet.Value

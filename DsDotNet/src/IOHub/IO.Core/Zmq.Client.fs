@@ -9,6 +9,7 @@ open Dual.Common.Core.FS
 open IO.Core
 open System.Collections.Concurrent
 open System.Threading
+open System.Reactive.Subjects
 open System.Threading.Tasks
 
 [<AutoOpen>]
@@ -35,6 +36,14 @@ module ZmqClient =
     type NetMQMessage with
         member x.CheckRequestId(id:int) = verify(id = x[ServerMultiMessage.RequestId].ConvertToInt32())
 
+    /// server 로부터 공지 받은 Tag 변경 정보
+    type TagChangedInfo(path:string, contentBitLength:int, offsets:int[], values:obj) =
+        member x.Path = path
+        member x.ContentBitLength = contentBitLength
+        member x.Offsets = offsets
+        member x.Values = values
+
+
     /// serverAddress: "tcp://localhost:5555" or "tcp://*:5555"
     [<AllowNullLiteral>]
     type Client(serverAddress:string) =
@@ -56,19 +65,37 @@ module ZmqClient =
                 failwithf $"Request/Reply id mismatch: {reqId} <> {reqIdBack}"
             mq
 
+        /// server 로부터 공지 받은 변경 사항
+        let tagChangedSubject = new Subject<TagChangedInfo>()
+
+
         let loop() =
             while not cancellationTokenSource.IsCancellationRequested do
-                let mutable mqMessage:NetMQMessage = null
-                while mqMessage = null && not cancellationTokenSource.IsCancellationRequested do
-                    if client.TryReceiveMultipartMessage(&mqMessage) then
+                let mutable mq:NetMQMessage = null
+                while mq = null && not cancellationTokenSource.IsCancellationRequested do
+                    if client.TryReceiveMultipartMessage(&mq) then
                         Thread.Sleep(100)  // got it
 
-                let reqIdBack = mqMessage[RequestId].ConvertToInt32()
+                let reqIdBack = mq[RequestId].ConvertToInt32()
                 if reqIdBack >= 0 then
-                    queue.Enqueue(mqMessage)
+                    // normal request 에 대한 reply: queue 에 삽입
+                    queue.Enqueue(mq)
                 else
-                    //TODO: NotifyTagChangeEvent()
-                    ()
+                    // 서버로부터 받은 변경 내용을 client app 에 공지
+                    let contentBitLength = mq[ContentBitLength].Buffer |> BitConverter.ToInt32  // e.g 1, 8, 16, 32, 64
+                    let offsets   = mq[Offsets].Buffer |> ByteConverter.BytesToTypeArray<int>       // bitoffset or byteoffset
+                    let path      = mq[Name].ConvertToString()  // e.g "p/o"
+                    let values:obj =
+                        match ContentBitLength with
+                        |  1 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<bool>  |> box
+                        |  8 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<byte>  |> box
+                        | 16 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<uint16>|> box
+                        | 32 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<uint32>|> box
+                        | 64 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<uint64>|> box
+                        |  _ -> failwith "ERROR"
+                    TagChangedInfo(path, contentBitLength, offsets, values)
+                    |> tagChangedSubject.OnNext
+
 
         do
             client.Options.Identity <- Guid.NewGuid().ToByteArray() // 각 클라이언트에 대한 고유 식별자 설정

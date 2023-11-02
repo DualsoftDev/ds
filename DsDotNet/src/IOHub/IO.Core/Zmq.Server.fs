@@ -226,7 +226,8 @@ module ZmqServerModule =
             else
                 let clientId = mqMessage[ClientMultiMessage.ClientId].Buffer;  // byte[]로 받음
                 let reqId = mqMessage[ClientMultiMessage.RequestId].Buffer |> BitConverter.ToInt32
-                let clientRequstInfo:ClientRequestInfo = {ClientId = clientId; RequestId=reqId}
+                /// Client Request Info : clientId, requestId
+                let cri:ClientRequestInfo = {ClientId = clientId; RequestId=reqId}
                 let ioResult =
                     let mms = mqMessage |> toArray
                     let command = mqMessage[ClientMultiMessage.Command].ConvertToString() |> removeTrailingNullChar;
@@ -250,11 +251,11 @@ module ZmqServerModule =
                         | StartsWith "read" ->      // e.g read p/ob1 p/ow1 p/olw3
                             noop()
                             let result =
-                                getArgs() |> map (fun a -> $"{a}={readAddress(clientRequstInfo, a)}")
+                                getArgs() |> map (fun a -> $"{a}={readAddress(cri, a)}")
                                 |> joinWith " "
                             Ok (box result)
                         | StartsWith "write" ->
-                            getArgs() |> iter (fun a -> writeAddressWithValue(clientRequstInfo, a))
+                            getArgs() |> iter (fun a -> writeAddressWithValue(cri, a))
                             Ok (WriteOK())
                         | StartsWith "cl" ->
                             let name = getArgs() |> Seq.exactlyOne
@@ -267,30 +268,30 @@ module ZmqServerModule =
                         match command with
                         | "rx" ->
                             let bm, indices = fetchForReadBit mms
-                            bm.VerifyIndices(clientRequstInfo, indices |> map (fun n -> n / 8))
+                            bm.VerifyIndices(cri, indices |> map (fun n -> n / 8))
                             let result = bm.readBits indices
                             Ok (box result)
                         | "rb" ->
                             let bm, indices = fetchForRead mms
-                            bm.VerifyIndices(clientRequstInfo, indices)
+                            bm.VerifyIndices(cri, indices)
                             let result = bm.readU8s indices
                             Ok result
 
                         | "rw" ->
                             let bm, indices = fetchForRead mms
-                            bm.VerifyIndices(clientRequstInfo, indices |> map (fun n -> n * 2))
+                            bm.VerifyIndices(cri, indices |> map (fun n -> n * 2))
                             let result = bm.readU16s indices
                             Ok result
 
                         | "rd" ->
                             let bm, indices = fetchForRead mms
-                            bm.VerifyIndices(clientRequstInfo, indices |> map (fun n -> n * 4))
+                            bm.VerifyIndices(cri, indices |> map (fun n -> n * 4))
                             let result = bm.readU32s indices
                             Ok result
 
                         | "rl" ->
                             let bm, indices = fetchForRead mms
-                            bm.VerifyIndices(clientRequstInfo, indices |> map (fun n -> n * 8))
+                            bm.VerifyIndices(cri, indices |> map (fun n -> n * 8))
                             let result = bm.readU64s indices
                             Ok result
                         | _ ->
@@ -300,7 +301,7 @@ module ZmqServerModule =
                         match command with
                         | "wx" ->
                             let bm, indices, values = fetchForWrite mms
-                            bm.Verify(clientRequstInfo, indices |> map (fun n -> n / 8), values.Length)
+                            bm.Verify(cri, indices |> map (fun n -> n / 8), values.Length)
 
                             for i in [0..indices.Length-1] do
                                 let value =
@@ -314,26 +315,26 @@ module ZmqServerModule =
                             writeOK
                         | "wb" ->
                             let bm, indices, values = fetchForWrite mms
-                            bm.Verify(clientRequstInfo, indices, values.Length / 1)
+                            bm.Verify(cri, indices, values.Length / 1)
                             Array.zip indices values |> bm.writeU8s
                             writeOK
 
                         | "ww" ->
                             let bm, indices, values = fetchForWrite mms
-                            bm.Verify(clientRequstInfo, indices |> map (fun n -> n * 2), values.Length / 2)
+                            bm.Verify(cri, indices |> map (fun n -> n * 2), values.Length / 2)
 
                             Array.zip indices (ByteConverter.BytesToTypeArray<uint16>(values)) |> bm.writeU16s
                             writeOK
 
                         | "wd" ->
                             let bm, indices, values = fetchForWrite mms
-                            bm.Verify(clientRequstInfo, indices |> map (fun n -> n * 4), values.Length / 4)
+                            bm.Verify(cri, indices |> map (fun n -> n * 4), values.Length / 4)
                             Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) |> bm.writeU32s
                             writeOK
 
                         | "wl" ->
                             let bm, indices, values = fetchForWrite mms
-                            bm.Verify(clientRequstInfo, indices |> map (fun n -> n * 8), values.Length / 8)
+                            bm.Verify(cri, indices |> map (fun n -> n * 8), values.Length / 8)
 
                             Array.zip indices (ByteConverter.BytesToTypeArray<uint64>(values)) |> bm.writeU64s
                             writeOK

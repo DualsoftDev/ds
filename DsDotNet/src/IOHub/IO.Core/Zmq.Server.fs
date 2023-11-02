@@ -62,12 +62,12 @@ module private ZmqServerImplModule =
             Some(addr, value)
         | _ -> None
 
-    let readAddress(clientId:ClientIdentifier, address:string) : obj =
+    let readAddress(clientRequstInfo:ClientRequestInfo, address:string) : obj =
         match address with
         | AddressPattern ap ->
             let byteOffset = ap.OffsetByte
             let bufferManager = ap.IOFileSpec.StreamManager :?> StreamManager
-            bufferManager.VerifyIndices(clientId, [|byteOffset|])
+            bufferManager.VerifyIndices(clientRequstInfo, [|byteOffset|])
 
             match ap.DataType with
             | PLCMemoryBitSize.Bit   -> bufferManager.readBit(byteOffset * 8 + ap.OffsetBit) :> obj
@@ -81,7 +81,7 @@ module private ZmqServerImplModule =
             failwithf($"Unknown address pattern : {address}")
 
     /// "write p/ob1=1 p/ix2=0" : 비효율성 인정한 version.  buffer manager 및 dataType 의 다양성 공존
-    let writeAddressWithValue(clientId:ClientIdentifier, addressWithAssignValue:string) =
+    let writeAddressWithValue(clientRequstInfo:ClientRequestInfo, addressWithAssignValue:string) =
         let parseBool (s:string) =
             match s.ToLower() with
             | "1" | "true" -> true
@@ -92,7 +92,7 @@ module private ZmqServerImplModule =
             let ap = addressPattern
             let byteOffset = ap.OffsetByte
             let bufferManager = ap.IOFileSpec.StreamManager :?> StreamManager
-            bufferManager.VerifyIndices(clientId, [|byteOffset|])
+            bufferManager.VerifyIndices(clientRequstInfo, [|byteOffset|])
 
             match ap.DataType with
             | PLCMemoryBitSize.Bit   -> bufferManager.writeBit(byteOffset, ap.OffsetBit, parseBool(value))
@@ -226,6 +226,7 @@ module ZmqServerModule =
             else
                 let clientId = mqMessage[ClientMultiMessage.ClientId].Buffer;  // byte[]로 받음
                 let reqId = mqMessage[ClientMultiMessage.RequestId].Buffer |> BitConverter.ToInt32
+                let clientRequstInfo:ClientRequestInfo = {ClientId = clientId; RequestId=reqId}
                 let ioResult =
                     let mms = mqMessage |> toArray
                     let command = mqMessage[ClientMultiMessage.Command].ConvertToString() |> removeTrailingNullChar;
@@ -249,11 +250,11 @@ module ZmqServerModule =
                         | StartsWith "read" ->      // e.g read p/ob1 p/ow1 p/olw3
                             noop()
                             let result =
-                                getArgs() |> map (fun a -> $"{a}={readAddress(clientId, a)}")
+                                getArgs() |> map (fun a -> $"{a}={readAddress(clientRequstInfo, a)}")
                                 |> joinWith " "
                             Ok (box result)
                         | StartsWith "write" ->
-                            getArgs() |> iter (fun a -> writeAddressWithValue(clientId, a))
+                            getArgs() |> iter (fun a -> writeAddressWithValue(clientRequstInfo, a))
                             Ok (WriteOK())
                         | StartsWith "cl" ->
                             let name = getArgs() |> Seq.exactlyOne
@@ -266,30 +267,30 @@ module ZmqServerModule =
                         match command with
                         | "rx" ->
                             let bm, indices = fetchForReadBit mms
-                            bm.VerifyIndices(clientId, indices |> map (fun n -> n / 8))
+                            bm.VerifyIndices(clientRequstInfo, indices |> map (fun n -> n / 8))
                             let result = bm.readBits indices
                             Ok (box result)
                         | "rb" ->
                             let bm, indices = fetchForRead mms
-                            bm.VerifyIndices(clientId, indices)
+                            bm.VerifyIndices(clientRequstInfo, indices)
                             let result = bm.readU8s indices
                             Ok result
 
                         | "rw" ->
                             let bm, indices = fetchForRead mms
-                            bm.VerifyIndices(clientId, indices |> map (fun n -> n * 2))
+                            bm.VerifyIndices(clientRequstInfo, indices |> map (fun n -> n * 2))
                             let result = bm.readU16s indices
                             Ok result
 
                         | "rd" ->
                             let bm, indices = fetchForRead mms
-                            bm.VerifyIndices(clientId, indices |> map (fun n -> n * 4))
+                            bm.VerifyIndices(clientRequstInfo, indices |> map (fun n -> n * 4))
                             let result = bm.readU32s indices
                             Ok result
 
                         | "rl" ->
                             let bm, indices = fetchForRead mms
-                            bm.VerifyIndices(clientId, indices |> map (fun n -> n * 8))
+                            bm.VerifyIndices(clientRequstInfo, indices |> map (fun n -> n * 8))
                             let result = bm.readU64s indices
                             Ok result
                         | _ ->
@@ -299,7 +300,7 @@ module ZmqServerModule =
                         match command with
                         | "wx" ->
                             let bm, indices, values = fetchForWrite mms
-                            bm.Verify(clientId, indices |> map (fun n -> n / 8), values.Length)
+                            bm.Verify(clientRequstInfo, indices |> map (fun n -> n / 8), values.Length)
 
                             for i in [0..indices.Length-1] do
                                 let value =
@@ -313,26 +314,26 @@ module ZmqServerModule =
                             writeOK
                         | "wb" ->
                             let bm, indices, values = fetchForWrite mms
-                            bm.Verify(clientId, indices, values.Length / 1)
+                            bm.Verify(clientRequstInfo, indices, values.Length / 1)
                             Array.zip indices values |> bm.writeU8s
                             writeOK
 
                         | "ww" ->
                             let bm, indices, values = fetchForWrite mms
-                            bm.Verify(clientId, indices |> map (fun n -> n * 2), values.Length / 2)
+                            bm.Verify(clientRequstInfo, indices |> map (fun n -> n * 2), values.Length / 2)
 
                             Array.zip indices (ByteConverter.BytesToTypeArray<uint16>(values)) |> bm.writeU16s
                             writeOK
 
                         | "wd" ->
                             let bm, indices, values = fetchForWrite mms
-                            bm.Verify(clientId, indices |> map (fun n -> n * 4), values.Length / 4)
+                            bm.Verify(clientRequstInfo, indices |> map (fun n -> n * 4), values.Length / 4)
                             Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) |> bm.writeU32s
                             writeOK
 
                         | "wl" ->
                             let bm, indices, values = fetchForWrite mms
-                            bm.Verify(clientId, indices |> map (fun n -> n * 8), values.Length / 8)
+                            bm.Verify(clientRequstInfo, indices |> map (fun n -> n * 8), values.Length / 8)
 
                             Array.zip indices (ByteConverter.BytesToTypeArray<uint64>(values)) |> bm.writeU64s
                             writeOK
@@ -352,10 +353,8 @@ module ZmqServerModule =
                 server.Bind($"tcp://*:{port}")
                 
                 while not cancellationToken.IsCancellationRequested do
-                    let mutable requestId = 0
                     try
                         let clientId, reqId, response = x.handleRequest server
-                        requestId <- reqId
                         match response with
                         | Ok obj ->
 
@@ -419,7 +418,7 @@ module ZmqServerModule =
                         logError $"Error occured while handling request: {ex.Message}"
                         server
                             .SendMoreFrame(ex.ClientId)
-                            .SendMoreFrame(requestId |> ByteConverter.ToBytes)
+                            .SendMoreFrame(ex.RequestId |> ByteConverter.ToBytes)
                             .SendMoreFrame("ERR")
                             .SendFrame(ex.Message)
                     | ex ->

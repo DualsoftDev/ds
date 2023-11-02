@@ -3,11 +3,8 @@ open System
 open System.IO
 open Dual.Common.Core.FS
 open NetMQ
-open NetMQ.Sockets
-open IO.Spec
 open System.Reactive.Subjects
 open System.Runtime.InteropServices
-open System.ComponentModel
 
 [<AutoOpen>]
 module ZmqStreamManager =
@@ -17,13 +14,19 @@ module ZmqStreamManager =
 
     type ClientIdentifier = byte[]
 
-    type ExcetionWithClient(clientId:ClientIdentifier, errMsg:ErrorMessage) =
+    type ClientRequestInfo = {
+        ClientId:ClientIdentifier
+        RequestId:int
+    }
+
+    type ExcetionWithClient(clientRequstInfo:ClientRequestInfo, errMsg:ErrorMessage) =
         inherit Exception(errMsg)
-        member x.ClientId = clientId
+        member x.ClientId = clientRequstInfo.ClientId
+        member x.RequestId = clientRequstInfo.RequestId
 
     /// 발생한 exception 이 요청 client 에 전달 되도록 clientId 를 갖는 예외 raise
-    let raiseWithClientId (clientId:ClientIdentifier) (errMsg:ErrorMessage) =
-        ExcetionWithClient(clientId, errMsg) |> raisewithlog
+    let raiseWithClientId (clientRequstInfo:ClientRequestInfo) (errMsg:ErrorMessage) =
+        ExcetionWithClient(clientRequstInfo, errMsg) |> raisewithlog
 
 
     let lockedExe (locker:obj) f =
@@ -217,20 +220,20 @@ module ZmqBufferManagerExtension =
             x.FileStream <- fs
 
     type StreamManager with
-        member x.VerifyIndices(clientId:ClientIdentifier, offset:int) =
+        member x.VerifyIndices(clientRequstInfo:ClientRequestInfo, offset:int) =
             let offset = int64 offset
             let length = x.FileStream.Length
             if offset < 0 then
-                raiseWithClientId clientId ($"Invalid offset.  non-negative value required : {offset}")
+                raiseWithClientId clientRequstInfo ($"Invalid offset.  non-negative value required : {offset}")
             if offset >= length then
-                raiseWithClientId clientId ($"Invalid offset: {offset}.  Exceed length limit {length})")
-        member x.VerifyIndices(clientId:ClientIdentifier, offsets:int[]) =
-            offsets |> iter (fun offset -> x.VerifyIndices(clientId, offset))
+                raiseWithClientId clientRequstInfo ($"Invalid offset: {offset}.  Exceed length limit {length})")
+        member x.VerifyIndices(clientRequstInfo:ClientRequestInfo, offsets:int[]) =
+            offsets |> iter (fun offset -> x.VerifyIndices(clientRequstInfo, offset))
 
-        member x.Verify(clientId:ClientIdentifier, indices:int[], numValues:int) =
-            x.VerifyIndices (clientId, indices)
+        member x.Verify(clientRequstInfo:ClientRequestInfo, indices:int[], numValues:int) =
+            x.VerifyIndices (clientRequstInfo, indices)
             if indices.Length <> numValues then
-                raiseWithClientId clientId $"The number of indices and values should be the same."
+                raiseWithClientId clientRequstInfo $"The number of indices and values should be the same."
             
     type IOChangeInfo with
         member x.GetTagName() =

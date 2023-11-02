@@ -10,15 +10,23 @@ open IO.Core
 
 [<AutoOpen>]
 module ZmqClient =
+    type DealerSocket with
+        member x.SendMoreFrameWithRequestId(id:int) = id |> ByteConverter.ToBytes |> x.SendMoreFrame
+
     /// command line request: "read ..", "write ..."
     type CLIRequestResult = Result<string, ErrorMessage>
+
     /// serverAddress: "tcp://localhost:5555" or "tcp://*:5555"
+    [<AllowNullLiteral>]
     type Client(serverAddress:string) =
         let client = new DealerSocket()
+        let reqIdGenerator = counterGenerator 1
         do
             client.Options.Identity <- Guid.NewGuid().ToByteArray() // 각 클라이언트에 대한 고유 식별자 설정
             client.Connect(serverAddress)
-            client.SendFrame("REGISTER")
+            client
+                .SendMoreFrameWithRequestId(reqIdGenerator())
+                .SendFrame("REGISTER")
                 
         let verifyReceiveOK(client:DealerSocket) : CLIRequestResult =
             let result = client.ReceiveFrameString()
@@ -28,31 +36,38 @@ module ZmqClient =
             | "ERR" -> Error detail
             | _ -> Error $"Error: {result}"
 
-        let buildCommandAndName(client:DealerSocket, command:string, name:string) : IOutgoingSocket =
+        let buildCommandAndName(client:DealerSocket, reqId:int, command:string, name:string) : IOutgoingSocket =
             client
+                .SendMoreFrameWithRequestId(reqId)
                 .SendMoreFrame(command)
                 .SendMoreFrame(name)
 
-        let buildPartial(client:DealerSocket, command:string, name:string, offsets:int[]) : IOutgoingSocket =
-            buildCommandAndName(client, command, name)
+        let buildPartial(client:DealerSocket, reqId:int, command:string, name:string, offsets:int[]) : IOutgoingSocket =
+            buildCommandAndName(client, reqId, command, name)
                 .SendMoreFrame(ByteConverter.ToBytes<int>(offsets))
 
-        let sendReadRequest(client:DealerSocket, command:string, name:string, offsets:int[]) : unit =
-            buildCommandAndName(client, command, name)
+        let sendReadRequest(client:DealerSocket, reqId:int, command:string, name:string, offsets:int[]) : unit =
+            buildCommandAndName(client, reqId, command, name)
                 .SendFrame(ByteConverter.ToBytes<int>(offsets))
 
 
         interface IDisposable with
             member x.Dispose() =
-                client.SendFrame("UNREGISTER")
+                client
+                    .SendMoreFrameWithRequestId(reqIdGenerator())
+                    .SendFrame("UNREGISTER")
                 client.Close()
 
 
         /// 직접 socket 접근해서 사용하기 위한 용도로 Zmq DealerSocket 반환.  비추
         [<Obsolete("가급적 API 이용")>]
         member x.Socket = client
+
         member x.SendRequest(request:string) : CLIRequestResult =
-            client.SendFrame(request)
+            let reqId = reqIdGenerator()
+            client
+                .SendMoreFrameWithRequestId(reqId)
+                .SendFrame(request)
             let result = client.ReceiveFrameString()
             let detail = client.ReceiveFrameString()
             match result with
@@ -63,7 +78,8 @@ module ZmqClient =
                 Error result
 
         member x.ReadBits(name:string, offsets:int[]) : TypedIOResult<bool[]> =
-            sendReadRequest(client, "rx", name, offsets)
+            let reqId = reqIdGenerator()
+            sendReadRequest(client, reqId, "rx", name, offsets)
 
             // 서버로부터 응답 수신
             let result = client.ReceiveFrameString()
@@ -83,7 +99,8 @@ module ZmqClient =
 
         // command: "rw", "rd", "rl"
         member private x.ReadTypes<'T>(command:string, name:string, offsets:int[]) : TypedIOResult<'T[]> =
-            sendReadRequest(client, command, name, offsets)
+            let reqId = reqIdGenerator()
+            sendReadRequest(client, reqId, command, name, offsets)
 
             // 서버로부터 응답 수신
             let result = client.ReceiveFrameString()
@@ -111,39 +128,47 @@ module ZmqClient =
 
 
         member x.WriteBits(name:string, offsets:int[], values:bool[]) =
+            let reqId = reqIdGenerator()
             let byteValues = values |> map (fun v -> if v then 1uy else 0uy)
-            buildPartial(client, "wx", name, offsets)
+            buildPartial(client, reqId, "wx", name, offsets)
                 .SendFrame(byteValues)
 
             verifyReceiveOK client
 
         member x.WriteBytes(name:string, offsets:int[], values:byte[]) =
-            buildPartial(client, "wb", name, offsets)
+            let reqId = reqIdGenerator()
+            buildPartial(client, reqId, "wb", name, offsets)
                 .SendFrame(values)
 
             verifyReceiveOK client
 
 
         member x.WriteUInt16s(name:string, offsets:int[], values:uint16[]) =
-            buildPartial(client, "ww", name, offsets)
+            let reqId = reqIdGenerator()
+            buildPartial(client, reqId, "ww", name, offsets)
                 .SendFrame(ByteConverter.ToBytes<uint16>(values))
 
             verifyReceiveOK client
 
         member x.WriteUInt32s(name:string, offsets:int[], values:uint32[]) =
-            buildPartial(client, "wd", name, offsets)
+            let reqId = reqIdGenerator()
+            buildPartial(client, reqId, "wd", name, offsets)
                 .SendFrame(ByteConverter.ToBytes<uint32>(values))
 
             verifyReceiveOK client
 
         member x.WriteUInt64s(name:string, offsets:int[], values:uint64[]) =
-            buildPartial(client, "wl", name, offsets)
+            let reqId = reqIdGenerator()
+            buildPartial(client, reqId, "wl", name, offsets)
                 .SendFrame(ByteConverter.ToBytes<uint64>(values))
 
             verifyReceiveOK client
 
         member x.ClearAll(name:string) =
-            client.SendFrame($"cl {name}")
+            let reqId = reqIdGenerator()
+            client
+                .SendMoreFrameWithRequestId(reqId)
+                .SendFrame($"cl {name}")
             verifyReceiveOK client
 
 

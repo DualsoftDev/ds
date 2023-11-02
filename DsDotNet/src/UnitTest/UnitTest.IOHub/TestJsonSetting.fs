@@ -5,6 +5,7 @@ open NUnit.Framework
 open System
 open IO.Core
 open Xunit
+open Dual.Common.Core.FS.Prelude
 
 [<AutoOpen>]
 module JSONSettingTestModule =
@@ -176,7 +177,9 @@ module JSONSettingTestModule =
                 | _ -> ()
 
                 zmqInfo.CancellationTokenSource.Cancel()
-                System.Threading.Thread.Sleep(200)
+                dispose client
+                dispose server
+                System.Threading.Thread.Sleep(500)
 
                 ()
             )

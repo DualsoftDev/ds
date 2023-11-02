@@ -107,11 +107,12 @@ module private ZmqServerImplModule =
         | _ -> failwithf($"Unknown address with assignment pattern : {addressWithAssignValue}")
 
 
-    let MultiMessageClientId = 0
-    let MultiMessageCommand = 1
-    let MultiMessageArgGroup1 = 2
-    let MultiMessageArgGroup2 = 3
-    let MultiMessageArgGroup3 = 4
+    let MultiMessageClientId  = 0
+    let MultiMessageRequestId = 1
+    let MultiMessageCommand   = 2
+    let MultiMessageArgGroup1 = 3
+    let MultiMessageArgGroup2 = 4
+    let MultiMessageArgGroup3 = 5
 
     let MultiMessageTagKindName = MultiMessageArgGroup1
     let MultiMessageOffsets = MultiMessageArgGroup2
@@ -177,6 +178,7 @@ module private ZmqServerImplModule =
 
 
 module ZmqServerModule =
+    [<AllowNullLiteral>]
     type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
         
         let port = ioSpec_.ServicePort
@@ -230,9 +232,9 @@ module ZmqServerModule =
                         let tokens = command.Split(' ', StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
                         tokens[1..] |> map(fun s -> s.ToLower())
 
-                    // client 에서 오는 모든 메시지는 client ID frame 과 command 를 기본 포함하므로, 
-                    // 이 2개의 frame 을 제외한 frame 의 갯수에 따라 message 를 처리한다.
-                    match mms.length() - 2 with
+                    // client 에서 오는 모든 메시지는 client ID, requestId 와 command frame 을 기본 포함하므로, 
+                    // 이 3개의 frame 을 제외한 frame 의 갯수에 따라 message 를 처리한다.
+                    match mms.length() - 3 with
                     | 0 ->
                         match command with
                         | "REGISTER" ->
@@ -416,3 +418,4 @@ module ZmqServerModule =
             member x.Dispose() =
                 logDebug "Disposing server..."
                 streamManagers.Values |> iter (fun stream -> stream.FileStream.Dispose())
+                streamManagers.Clear()

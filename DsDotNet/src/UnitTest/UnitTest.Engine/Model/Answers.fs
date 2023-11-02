@@ -84,7 +84,7 @@ module ModelAnswers =
     }
     [device file="cylinder.ds"] A; // D:/Git/ds-Master/DsDotNet/src/UnitTest/UnitTest.Model/cylinder.ds
     [device file="cylinder.ds"] B; // D:/Git/ds-Master/DsDotNet/src/UnitTest/UnitTest.Model/cylinder.ds
-    [external file="station.ds" ip="192.168.0.2"] C; // D:/Git/ds-Master/DsDotNet/src/UnitTest/UnitTest.Model/station.ds
+    [external file="station.ds"] C; // D:/Git/ds-Master/DsDotNet/src/UnitTest/UnitTest.Model/station.ds
 }
 """
 
@@ -404,8 +404,8 @@ module ModelComponentAnswers =
         G <||> R;
     }
     [device file="cylinder.ds"] A;
-    [external file="systemRH.ds" ip="localhost"] sysR;
-    [external file="systemLH.ds" ip="localhost"] sysL;
+    [external file="systemRH.ds"] sysR;
+    [external file="systemLH.ds"] sysL;
 }
 """
 
@@ -434,7 +434,7 @@ module ModelComponentAnswers =
         C2 = { A."-"(_, %Q3); B."-"(%I1, _); }
     }
     [device file="cylinder.ds"] B;
-    [external file="cylinder.ds" ip="192.168.0.1"] A;
+    [external file="cylinder.ds"] A;
     // [device file=c:/my.a.b.c.d.e.ds] C;      //<-- illegal: file path without quote!!
 }
 """
@@ -452,8 +452,8 @@ module ModelComponentAnswers =
         RunR = { sysR.RUN(%I1, %Q1); }
         RunL = { sysL.RUN(%I2, %Q2); }
     }
-    [external file="systemRH.ds" ip="localhost"] sysR;
-    [external file="systemLH.ds" ip="localhost"] sysL;
+    [external file="systemRH.ds"] sysR;
+    [external file="systemLH.ds"] sysL;
 }
 """
 
@@ -482,8 +482,8 @@ module ModelComponentAnswers =
 		FWD = Mt.fwd;
 		BWD = Mt.bwd;
 	}
-    [external file=""HmiCodeGenExample/test_sample/device/MovingLifter1.ds"" ip=""localhost""] M1;
-    [external file=""HmiCodeGenExample/test_sample/device/MovingLifter2.ds"" ip=""localhost""] M2;
-	[external file=""HmiCodeGenExample/test_sample/device/motor.ds"" ip=""localhost""] Mt;
+    [external file=""HmiCodeGenExample/test_sample/device/MovingLifter1.ds""] M1;
+    [external file=""HmiCodeGenExample/test_sample/device/MovingLifter2.ds""] M2;
+	[external file=""HmiCodeGenExample/test_sample/device/motor.ds""] Mt;
 }
 """

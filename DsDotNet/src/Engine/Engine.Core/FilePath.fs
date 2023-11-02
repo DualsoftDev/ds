@@ -53,8 +53,6 @@ module PathManager =
                     // Validate directory path
                     if String.IsNullOrWhiteSpace directoryPath then
                         raise (new ArgumentException($"Invalid characters in {directoryPath}"))
-                    if Path.HasExtension directoryPath then
-                        raise (new ArgumentException($"directory has an extension in {directoryPath}"))
 
                     if (directoryPath.ToCharArray() |> Array.exists (fun c -> Path.GetInvalidPathChars().Contains c)) then
                         raise (new ArgumentException($"Invalid DirectoryName in {directoryPath}"))

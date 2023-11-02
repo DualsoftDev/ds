@@ -119,7 +119,7 @@ C4 > C5;
 
     [device file="cylinder.ds"] A;
     [device file="cylinder.ds"] B;
-    [external file="station.ds" ip="192.168.0.2"] C;
+    [external file="station.ds"] C;
 }
 """
     let CpuTestText = """
@@ -211,7 +211,7 @@ C4 > C5;
 
     [device file="cylinder.ds"] A;
     [device file="cylinder.ds"] B;
-    [external file="station.ds" ip="192.168.0.2"] C;
+    [external file="station.ds"] C;
 }
 """
     let CodeElementsText = """

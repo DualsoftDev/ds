@@ -501,8 +501,8 @@ namespace Engine
         RunR = { sysR.RUN(%I1, %Q1); }
         RunL = { sysL.RUN(%I2, %Q2); }
     }
-    [external file=""systemRH.ds"" ip=""localhost""] sysR;
-    [external file=""systemLH.ds"" ip=""localhost""] sysL;
+    [external file=""systemRH.ds""] sysR;
+    [external file=""systemLH.ds""] sysL;
 }
 ";
 
@@ -530,7 +530,7 @@ namespace Engine
         }
         C2 = { A.""-""(_, %Q3); B.""-""(%I1, _); }
     }
-    [external file=""cylinder.ds"" ip=""192.168.0.1""] A;
+    [external file=""cylinder.ds""] A;
     [device file=""cylinder.ds""] B;
     // [device file=c:/my.a.b.c.d.e.ds] C;      //<-- illegal: file path without quote!!
 }
@@ -557,8 +557,8 @@ namespace Engine
         G <||> R;
     }
     [device file=""cylinder.ds""] A; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
-    [external file=""systemRH.ds"" ip=""localhost""] sysR; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/systemRH.ds
-    [external file=""systemLH.ds"" ip=""localhost""] sysL; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/systemLH.ds
+    [external file=""systemRH.ds""] sysR; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/systemRH.ds
+    [external file=""systemLH.ds""] sysL; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/systemLH.ds
 }";
 
 
@@ -657,9 +657,9 @@ namespace Engine
         R = { F.Reset ~ F.Reset }
         G <||> R;
     }
-    [external file=""HmiCodeGenExample/test_sample/device/MovingLifter1.ds"" ip=""localhost""] M1; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/HmiCodeGenExample/test_sample/device/MovingLifter1.ds
-    [external file=""HmiCodeGenExample/test_sample/device/MovingLifter2.ds"" ip=""localhost""] M2; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/HmiCodeGenExample/test_sample/device/MovingLifter2.ds
-    [external file=""HmiCodeGenExample/test_sample/device/motor.ds"" ip=""localhost""] Mt; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/HmiCodeGenExample/test_sample/device/motor.ds
+    [external file=""HmiCodeGenExample/test_sample/device/MovingLifter1.ds""] M1; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/HmiCodeGenExample/test_sample/device/MovingLifter1.ds
+    [external file=""HmiCodeGenExample/test_sample/device/MovingLifter2.ds""] M2; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/HmiCodeGenExample/test_sample/device/MovingLifter2.ds
+    [external file=""HmiCodeGenExample/test_sample/device/motor.ds""] Mt; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/HmiCodeGenExample/test_sample/device/motor.ds
 }
 
 ";

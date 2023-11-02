@@ -12,7 +12,7 @@ module LoadConfigTestModule =
         inherit EngineTestBaseClass()
 
         let libdir = System.IO.Path.GetFullPath @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model"
-        let configFile = @"test-model-config.json"
+        let configFile = PathManager.getFullPath  ( @"test-model-config.json"|>DsFile) (libdir.ToDirectory())
 
         let loadConfigTest() =
             let cfg =
@@ -27,6 +27,7 @@ module LoadConfigTestModule =
         [<Test>]
         member __.``LoadModelFromConfigTest`` () =
             let config = loadConfigTest()
+
             let model = ModelLoader.LoadFromConfig configFile
             model.Systems.Length === 2
             model.Systems.Select(fun s -> s.Name) |> SeqEq ["Cylinder"; "Station"]
@@ -38,8 +39,8 @@ module LoadConfigTestModule =
 
             let mySysText = """
 [sys] L = {
-    [external file="station.ds" ip="localhost"] A;
-    [external file="station.ds" ip="localhost"] B;
+    [external file="station.ds"] A;
+    [external file="station.ds"] B;
 }
 """
 

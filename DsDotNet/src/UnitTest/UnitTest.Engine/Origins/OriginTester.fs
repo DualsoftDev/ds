@@ -5,6 +5,7 @@ open Engine.Core
 open Engine.Parser.FS
 open NUnit.Framework
 open System.Collections.Generic
+open System.IO
 
 [<AutoOpen>]
 module OriginTestModule =
@@ -12,7 +13,8 @@ module OriginTestModule =
         inherit EngineTestBaseClass()
 
         let libdir = @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model"
-        let configFile = @"test-origin-config.json"
+            
+        let configFile = PathManager.getFullPath  (@"test-origin-config.json"|>DsFile) (libdir.ToDirectory())
         let genConfig (filePath:string) =
             let cfg = {
                     DsFilePaths = [

@@ -20,5 +20,5 @@
         Am = { LH.RET(%I2, %Q2); }
     }
   
-    [external file="systemLH.ds" ip="localhost"] LH;
+    [external file="systemLH.ds"] LH;
 }

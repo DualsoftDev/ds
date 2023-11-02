@@ -10,4 +10,5 @@ module ModelLoaderModule =
     type Model = {
         Config: ModelConfig
         Systems : DsSystem list
+        LoadingPaths : string list
     }

@@ -4,6 +4,7 @@ open System.IO
 open Newtonsoft.Json
 open Dual.Common.Core.FS
 open Engine.Parser.FS
+open System.Linq
 open System.Collections.Generic
 open System.Runtime.CompilerServices
 open PathManager
@@ -56,7 +57,12 @@ module ModelLoader =
                 ]
             paths |> List.map (loadSystemFromDsFile systemRepo)
 
-        { Config = cfg; Systems = systems}
+
+        let loadings = systems.Collect(fun f-> f.GetRecursiveLoadeds())
+                              .Map(fun s-> s.AbsoluteFilePath)
+                              .Distinct().ToFSharpList()
+
+        { Config = cfg; Systems = systems; LoadingPaths = loadings}
 
     let exportLoadedSystem (s: LoadedSystem) =
        

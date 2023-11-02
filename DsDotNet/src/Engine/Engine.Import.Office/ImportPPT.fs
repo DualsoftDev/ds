@@ -188,7 +188,7 @@ module ImportPPTModule =
 
                 let systems =  results.Select(fun (sys, view) -> sys) |> Seq.toList
                 let views   =  results |> dict
-                { Config = cfg; Systems = systems}, views, pptRepo
+                { Config = cfg; Systems = systems; LoadingPaths = []}, views, pptRepo
       
             with ex ->  
                 failwithf  @$"{ex.Message} [ErrPath:{if pathStack.any() then pathStack.First() else      paths.First() }]" //첫페이지 아니면 stack에 존재

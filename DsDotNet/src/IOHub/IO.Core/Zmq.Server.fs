@@ -2,6 +2,7 @@
 
 namespace IO.Core
 open System
+open System.Linq
 open System.Threading
 open System.Threading.Tasks
 open NetMQ
@@ -82,6 +83,7 @@ module private ZmqServerImplModule =
 
     /// "write p/ob1=1 p/ix2=0" : 비효율성 인정한 version.  buffer manager 및 dataType 의 다양성 공존
     let writeAddressWithValue(clientRequstInfo:ClientRequestInfo, addressWithAssignValue:string) =
+        let cri = clientRequstInfo
         let parseBool (s:string) =
             match s.ToLower() with
             | "1" | "true" -> true
@@ -92,14 +94,14 @@ module private ZmqServerImplModule =
             let ap = addressPattern
             let byteOffset = ap.OffsetByte
             let bufferManager = ap.IOFileSpec.StreamManager :?> StreamManager
-            bufferManager.VerifyIndices(clientRequstInfo, [|byteOffset|])
+            bufferManager.VerifyIndices(cri, [|byteOffset|])
 
             match ap.DataType with
-            | PLCMemoryBitSize.Bit   -> bufferManager.writeBit(byteOffset, ap.OffsetBit, parseBool(value))
-            | PLCMemoryBitSize.Byte  -> bufferManager.writeU8s([byteOffset, Byte.Parse(value)])
-            | PLCMemoryBitSize.Word  -> bufferManager.writeU16(byteOffset, UInt16.Parse(value))
-            | PLCMemoryBitSize.DWord -> bufferManager.writeU32(byteOffset, UInt32.Parse(value))
-            | PLCMemoryBitSize.LWord -> bufferManager.writeU64(byteOffset, UInt64.Parse(value))
+            | PLCMemoryBitSize.Bit   -> bufferManager.writeBit (cri, byteOffset, ap.OffsetBit, parseBool(value))
+            | PLCMemoryBitSize.Byte  -> bufferManager.writeU8s cri ([byteOffset, Byte.Parse(value)])
+            | PLCMemoryBitSize.Word  -> bufferManager.writeU16 cri (byteOffset, UInt16.Parse(value))
+            | PLCMemoryBitSize.DWord -> bufferManager.writeU32 cri (byteOffset, UInt32.Parse(value))
+            | PLCMemoryBitSize.LWord -> bufferManager.writeU64 cri (byteOffset, UInt64.Parse(value))
             | _ -> failwithf($"Unknown data type : {ap.DataType}")
 
             bufferManager.Flush()
@@ -186,7 +188,7 @@ module ZmqServerModule =
         let port = ioSpec_.ServicePort
 
         let mutable ioChangedObservable:IObservable<IOChangeInfo> = null
-
+        let mutable serverSocket:RouterSocket = null
         do
             ioSpec <- ioSpec_
             for v in ioSpec.Vendors do
@@ -211,6 +213,34 @@ module ZmqServerModule =
                 streamManagers.Values 
                 |> map (fun sm -> sm.IOChangedSubject :> IObservable<IOChangeInfo>)
                 |> Observable.Merge
+
+            // TODO
+            ioChangedObservable.Subscribe(fun (ioChange:IOChangeInfo) ->
+                let notiTargetClients =
+                    clients
+                    |> filter (fun c -> not <| Enumerable.SequenceEqual(c, ioChange.ClientRequestInfo.ClientId))
+                    |> toArray
+                let notifyToClients() =
+                    let bm = ioChange.IOFileSpec
+                    let contenetBitLength = int ioChange.DataType
+                    let clientId = ioChange.ClientRequestInfo.ClientId
+                    let bytes = ioChange.GetValueBytes()
+                    let path = ioChange.IOFileSpec.GetPath()
+                    let offsets = ioChange.Offsets |> ByteConverter.ToBytes<int>
+                    for client in notiTargetClients do
+                        Console.WriteLine($"Notifying change to client {clientIdentifierToString client}");
+                        serverSocket
+                            .SendMoreFrame(clientId)
+                            .SendMoreFrame(-1 |> ByteConverter.ToBytes)
+                            .SendMoreFrame("NOTIFY")
+                            .SendMoreFrame(bytes) // value
+                            .SendMoreFrame(path)  // name
+                            .SendMoreFrame(contenetBitLength |> ByteConverter.ToBytes)  // contentBitLength
+                            .SendFrame(offsets) // offsets
+
+                notifyToClients()
+
+            ) |> ignore
             
         let mutable terminated = false
 
@@ -244,9 +274,11 @@ module ZmqServerModule =
                         match command with
                         | "REGISTER" ->
                             clients.Add clientId
+                            logDebug $"Client {clientIdentifierToString clientId} registered"
                             Ok null
                         | "UNREGISTER" ->
                             clients.Remove clientId |> ignore
+                            logDebug $"Client {clientIdentifierToString clientId} unregistered"
                             Ok null
                         | StartsWith "read" ->      // e.g read p/ob1 p/ow1 p/olw3
                             noop()
@@ -309,34 +341,34 @@ module ZmqServerModule =
                                     | 1uy -> true
                                     | 0uy -> false
                                     | _ -> failwithf($"Invalid value: {values.[i]}")
-                                bm.writeBit(indices[i], value)
+                                bm.writeBit (cri, indices[i], value)
 
                             bm.Flush()
                             writeOK
                         | "wb" ->
                             let bm, indices, values = fetchForWrite mms
                             bm.Verify(cri, indices, values.Length / 1)
-                            Array.zip indices values |> bm.writeU8s
+                            Array.zip indices values |> bm.writeU8s cri
                             writeOK
 
                         | "ww" ->
                             let bm, indices, values = fetchForWrite mms
                             bm.Verify(cri, indices |> map (fun n -> n * 2), values.Length / 2)
 
-                            Array.zip indices (ByteConverter.BytesToTypeArray<uint16>(values)) |> bm.writeU16s
+                            Array.zip indices (ByteConverter.BytesToTypeArray<uint16>(values)) |> bm.writeU16s cri
                             writeOK
 
                         | "wd" ->
                             let bm, indices, values = fetchForWrite mms
                             bm.Verify(cri, indices |> map (fun n -> n * 4), values.Length / 4)
-                            Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) |> bm.writeU32s
+                            Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) |> bm.writeU32s cri
                             writeOK
 
                         | "wl" ->
                             let bm, indices, values = fetchForWrite mms
                             bm.Verify(cri, indices |> map (fun n -> n * 8), values.Length / 8)
 
-                            Array.zip indices (ByteConverter.BytesToTypeArray<uint64>(values)) |> bm.writeU64s
+                            Array.zip indices (ByteConverter.BytesToTypeArray<uint64>(values)) |> bm.writeU64s cri
                             writeOK
                         | _ ->
                             failwithlogf $"ERROR: {command}"
@@ -351,6 +383,8 @@ module ZmqServerModule =
             let f() =
                 logInfo $"Starting server on port {port}..."
                 use server = new RouterSocket()
+                serverSocket <- server
+                
                 server.Bind($"tcp://*:{port}")
                 
                 while not cancellationToken.IsCancellationRequested do

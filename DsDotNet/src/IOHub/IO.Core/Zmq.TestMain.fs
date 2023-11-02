@@ -1,9 +1,8 @@
 namespace IO.Core
+
 open System
-open System.Diagnostics
 open System.Threading
 open Dual.Common.Core.FS
-open System.Runtime.InteropServices
 
 module ZmqTestMain =
     [<EntryPoint>]
@@ -13,9 +12,8 @@ module ZmqTestMain =
 
         use subs =
             server.IOChangedObservable.Subscribe(fun change ->
-                let value = change.Value
-                let tag = change.GetTagName()
-                logDebug $"Change Detected on {tag}: {value}"
+                for (tag, value) in change.GetTagNameAndValues() do
+                    logDebug $"Tag change detected on server side for {tag}: {value}"
                 ())
 
         let handleCancelKey (args: ConsoleCancelEventArgs) =

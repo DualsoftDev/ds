@@ -67,13 +67,15 @@ module ZmqClient =
 
         /// server 로부터 공지 받은 변경 사항
         let tagChangedSubject = new Subject<TagChangedInfo>()
+        let clientGuid = Guid.NewGuid().ToByteArray()
+        let clientId = clientIdentifierToString clientGuid
 
 
         let loop() =
             while not cancellationTokenSource.IsCancellationRequested do
                 let mutable mq:NetMQMessage = null
                 while mq = null && not cancellationTokenSource.IsCancellationRequested do
-                    if client.TryReceiveMultipartMessage(&mq) then
+                    if not <| client.TryReceiveMultipartMessage(&mq) then
                         Thread.Sleep(100)  // got it
 
                 let reqIdBack = mq[RequestId].ConvertToInt32()
@@ -81,24 +83,27 @@ module ZmqClient =
                     // normal request 에 대한 reply: queue 에 삽입
                     queue.Enqueue(mq)
                 else
+                    logDebug $"Got tag changed notification from server on client {clientId}..."
                     // 서버로부터 받은 변경 내용을 client app 에 공지
                     let contentBitLength = mq[ContentBitLength].Buffer |> BitConverter.ToInt32  // e.g 1, 8, 16, 32, 64
                     let offsets   = mq[Offsets].Buffer |> ByteConverter.BytesToTypeArray<int>       // bitoffset or byteoffset
                     let path      = mq[Name].ConvertToString()  // e.g "p/o"
                     let values:obj =
-                        match ContentBitLength with
-                        |  1 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<bool>  |> box
+                        match contentBitLength with
+                        |  1 -> mq[Values].Buffer |> box
                         |  8 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<byte>  |> box
                         | 16 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<uint16>|> box
                         | 32 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<uint32>|> box
                         | 64 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<uint64>|> box
                         |  _ -> failwith "ERROR"
+
                     TagChangedInfo(path, contentBitLength, offsets, values)
                     |> tagChangedSubject.OnNext
 
 
         do
-            client.Options.Identity <- Guid.NewGuid().ToByteArray() // 각 클라이언트에 대한 고유 식별자 설정
+            client.Options.Identity <- clientGuid // 각 클라이언트에 대한 고유 식별자 설정
+            logDebug $"Client identity: {clientId}"
             client.Connect(serverAddress)
             client
                 .SendMoreFrameWithRequestId(reqIdGenerator())
@@ -141,6 +146,8 @@ module ZmqClient =
         /// 직접 socket 접근해서 사용하기 위한 용도로 Zmq DealerSocket 반환.  비추
         [<Obsolete("가급적 API 이용")>]
         member x.Socket = client
+
+        member x.TagChangedSubject = tagChangedSubject
 
         member x.SendRequest(request:string) : CLIRequestResult =
             let reqId = reqIdGenerator()

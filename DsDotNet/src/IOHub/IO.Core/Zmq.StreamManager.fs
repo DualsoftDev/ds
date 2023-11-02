@@ -5,6 +5,7 @@ open Dual.Common.Core.FS
 open NetMQ
 open System.Reactive.Subjects
 open System.Runtime.InteropServices
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module ZmqStreamManager =
@@ -13,6 +14,7 @@ module ZmqStreamManager =
             id |> ByteConverter.ToBytes |> x.SendMoreFrame
 
     type ClientIdentifier = byte[]
+    let clientIdentifierToString (clientId:ClientIdentifier) = clientId |> map string |> String.concat "-"
 
     type ClientRequestInfo = {
         ClientId:ClientIdentifier
@@ -55,14 +57,16 @@ module ZmqStreamManager =
 
 
 
-    type IOChangeInfo(fileSpec:IOFileSpec, offset:int, value:obj) =
-        member val IOFileSpec = fileSpec
+    type IOChangeInfo(clientRequestInfo:ClientRequestInfo, fileSpec:IOFileSpec, dataType:PLCMemoryBitSize, offsets:int seq, value:obj) =
+        member x.ClientRequestInfo = clientRequestInfo
+        member x.IOFileSpec = fileSpec
         /// 값이 변경된 offset.  value 의 type 에 따라 다르게 해석
         /// bool: 전체의 bit offset.  byte offset = Offset / 8
         /// uint64: uint64 기준의 offset.   byte offset = Offset * 8
         /// ....
-        member val Offset = offset
-        member val Value = value
+        member val Offsets = offsets |> toArray
+        member x.Value = value
+        member x.DataType = dataType
 
     type StreamManager(fileSpec:IOFileSpec) as this =
         let stream:FileStream = fileSpec.FileStream
@@ -127,11 +131,13 @@ module ZmqStreamManager =
                 |]
             )
 
-        member x.writeBit(bitIndex:int, value:bool) = x.writeBit(bitIndex / 8, bitIndex % 8, value)
-        member x.writeBit(byteIndex:int, bitIndex:int, value:bool) = x.writeBits( [|(byteIndex, bitIndex, value)|] )
+        member x.writeBit (cri:ClientRequestInfo, bitIndex:int, value:bool) = x.writeBit(cri , bitIndex / 8, bitIndex % 8, value)
+        member x.writeBit (cri:ClientRequestInfo, byteIndex:int, bitIndex:int, value:bool) = x.writeBits cri ( [|(byteIndex, bitIndex, value)|] )
 
-        member x.writeBits(writeBitArgs:(int*int*bool) seq) = // (byteIndex:int, bitIndex:int, value:bool) array) =
+        member x.writeBits (cri:ClientRequestInfo) (writeBitArgs:(int*int*bool) seq) = // (byteIndex:int, bitIndex:int, value:bool) array) =
             lock locker (fun () ->
+                let offsets = ResizeArray<int>()
+                let values = ResizeArray<bool>()
                 for (byteIndex, bitIndex, value) in writeBitArgs do
                     let currentByte = x.readU8(byteIndex)
 
@@ -144,44 +150,54 @@ module ZmqStreamManager =
 
                     // 수정된 바이트를 해당 위치에 쓰기
                     writeTBytes<byte> stream byteIndex updatedByte
-                    let offset = byteIndex * 8 + bitIndex
-                    ioChangedSubject.OnNext(IOChangeInfo(fileSpec, offset, value))
+                    offsets.Add (byteIndex * 8 + bitIndex)
+                    values.Add value
+
+                ioChangedSubject.OnNext(IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.Bit, offsets.ToArray(), values.ToArray()))
                 x.Flush()                
             )
 
-        member x.writeU8s (writeArg:(int*byte) seq) =
+        member x.writeU8s (cri:ClientRequestInfo)  (writeArg:(int*byte) seq) =
             lock locker (fun () ->
                 for (offset:int, value:byte) in writeArg do
                     writeTBytes<byte> stream offset value
-                    ioChangedSubject.OnNext(IOChangeInfo(fileSpec, offset, value))
+                let offsets = writeArg |> map fst |> toArray
+                let values  = writeArg |> map snd |> toArray
+                ioChangedSubject.OnNext(IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.Byte, offsets, values))
                 x.Flush()
             )
 
 
-        member x.writeU16(wordOffset:int, value:uint16) = x.writeU16s ([|wordOffset, value|])
-        member x.writeU16s (writeArg:(int*uint16) seq) =
+        member x.writeU16 (cri:ClientRequestInfo) (wordOffset:int, value:uint16) = x.writeU16s cri ([|wordOffset, value|])
+        member x.writeU16s (cri:ClientRequestInfo) (writeArg:(int*uint16) seq) =
             lock locker (fun () ->
                 for (offset:int, value:uint16) in writeArg do
                     writeTBytes<uint16> stream offset value
-                    ioChangedSubject.OnNext(IOChangeInfo(fileSpec, offset, value))
+                let offsets = writeArg |> map fst |> toArray
+                let values  = writeArg |> map snd |> toArray
+                ioChangedSubject.OnNext(IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.Word, offsets, values))
                 x.Flush()
             )
 
-        member x.writeU32(wordOffset:int, value:uint32) = x.writeU32s ([|wordOffset, value|])
-        member x.writeU32s (writeArg:(int*uint32) seq) =
+        member x.writeU32 (cri:ClientRequestInfo) (wordOffset:int, value:uint32) = x.writeU32s cri ([|wordOffset, value|])
+        member x.writeU32s (cri:ClientRequestInfo) (writeArg:(int*uint32) seq) =
             lock locker (fun () ->
                 for (offset:int, value:uint32) in writeArg do
                     writeTBytes<uint32> stream offset value
-                    ioChangedSubject.OnNext(IOChangeInfo(fileSpec, offset, value))
+                let offsets = writeArg |> map fst |> toArray
+                let values  = writeArg |> map snd |> toArray
+                ioChangedSubject.OnNext(IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.DWord, offsets, values))
                 x.Flush()
             )
 
-        member x.writeU64(wordOffset:int, value:uint64) = x.writeU64s ([|wordOffset, value|])
-        member x.writeU64s (writeArg:(int*uint64) seq) =
+        member x.writeU64 (cri:ClientRequestInfo) (wordOffset:int, value:uint64) = x.writeU64s cri ([|wordOffset, value|])
+        member x.writeU64s (cri:ClientRequestInfo) (writeArg:(int*uint64) seq) =
             lock locker (fun () ->
                 for (offset:int, value:uint64) in writeArg do
                     writeTBytes<uint64> stream offset value
-                    ioChangedSubject.OnNext(IOChangeInfo(fileSpec, offset, value))
+                let offsets = writeArg |> map fst |> toArray
+                let values  = writeArg |> map snd |> toArray
+                ioChangedSubject.OnNext(IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.LWord, offsets, values))
                 x.Flush()
             )
 
@@ -236,16 +252,34 @@ module ZmqBufferManagerExtension =
                 raiseWithClientId clientRequstInfo $"The number of indices and values should be the same."
             
     type IOChangeInfo with
-        member x.GetTagName() =
-            let x = x
-            let fs, offset, value = x.IOFileSpec, x.Offset, x.Value
+        member x.GetTagNameAndValues() =
+            let fs, dataType, offsets, objValues = x.IOFileSpec, x.DataType, x.Offsets, x.Value
+            let path = fs.GetPath()
             let addrResolver = fs.Vendor.AddressResolver
-            let tag =
-                let byteSize = Marshal.SizeOf(value)
-                let byteOffset, bitOffset, contentBitLength = 
-                    match value with
-                    | :? bool -> offset / 8, offset % 8, 1
-                    | _ -> offset / byteSize, 0, (byteSize * 8)
+            [
+                for offset in offsets do
+                    let contentBitLength = int dataType
+                    let byteOffset, bitOffset, value = 
+                        match dataType with
+                        | PLCMemoryBitSize.Bit   -> offset / 8,  offset % 8, (objValues :?> bool[])[0]   |> box
+                        | PLCMemoryBitSize.Byte  -> offset,      0         , (objValues :?> byte[])[0]   |> box
+                        | PLCMemoryBitSize.Word  -> offset * 16, 0         , (objValues :?> uint16[])[0] |> box
+                        | PLCMemoryBitSize.DWord -> offset * 32, 0         , (objValues :?> uint32[])[0] |> box
+                        | PLCMemoryBitSize.LWord -> offset * 64, 0         , (objValues :?> uint64[])[0] |> box
+                        | _ -> failwithf($"Invalid data type: {dataType}")
 
-                addrResolver.GetTagName(fs.GetPath(), byteOffset, bitOffset, contentBitLength)
-            tag
+                    let tag = addrResolver.GetTagName(path, byteOffset, bitOffset, contentBitLength)
+                    yield tag, value
+            ]
+
+        /// x.Value 를 byte[] 로 변환
+        member x.GetValueBytes(): byte[] =
+            let objValues = x.Value
+            match x.DataType with
+            | PLCMemoryBitSize.Bit   -> (objValues :?> bool[])   |> map (fun b -> if b then 1uy else 0uy)
+            | PLCMemoryBitSize.Byte  -> (objValues :?> byte[])
+            | PLCMemoryBitSize.Word  -> (objValues :?> uint16[]) |> ByteConverter.ToBytes<uint16>
+            | PLCMemoryBitSize.DWord -> (objValues :?> uint32[]) |> ByteConverter.ToBytes<uint32>
+            | PLCMemoryBitSize.LWord -> (objValues :?> uint64[]) |> ByteConverter.ToBytes<uint64>
+            | _ -> failwithf($"Invalid data type: {x.DataType}")
+

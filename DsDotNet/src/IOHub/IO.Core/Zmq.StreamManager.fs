@@ -9,11 +9,6 @@ open System.ComponentModel
 
 [<AutoOpen>]
 module ZmqStreamManager =
-    [<Obsolete("Use DualCommon nuget 0.1.15 of DualSoft-Common-Core-FS")>]
-    let raisewithlog (ex:Exception): unit =
-        logError $"{ex}"
-        raise ex
-
     type ClientIdentifier = byte[]
 
     type ExcetionWithClient(clientId:ClientIdentifier, errMsg:ErrorMessage) =

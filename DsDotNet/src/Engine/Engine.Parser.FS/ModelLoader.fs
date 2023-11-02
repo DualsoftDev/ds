@@ -42,7 +42,6 @@ module ModelLoader =
 
     let LoadFromConfig(config: FilePath) =
         let systemRepo = ShareableSystemRepository()
-        //let envPaths = collectEnvironmentVariablePaths()
         let cfg = LoadConfig config
         let dir = PathManager.getDirectoryName (config.ToFile())
         let systems =
@@ -54,9 +53,6 @@ module ModelLoader =
                                 yield dsFile |> FileManager.fileExistChecker
                             else
                                 yield PathManager.getFullPath (dsFile.ToFile()) (dir|>DsDirectory) |> FileManager.fileExistChecker
-
-                //  for path in envPaths do
-                // PathManager.getFullPath dsFile path   
                 ]
             paths |> List.map (loadSystemFromDsFile systemRepo)
 

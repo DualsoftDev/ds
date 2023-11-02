@@ -153,13 +153,6 @@ type DsParserListener(parser:dsParser, options:ParserOptions) =
     member private x.GetFilePath(fileSpecCtx:FileSpecContext) =
         let relativeFilePath = fileSpecCtx.TryFindFirstChild<FilePathContext>().Value.GetText().DeQuoteOnDemand()
                                |> PathManager.getValidFile
-        //let envPaths = collectEnvironmentVariablePaths()
-        //let targetPath(directory:string) = 
-        //    [
-        //        PathManager.getFullPath relativeFilePath directory
-        //        for path in envPaths do
-        //            PathManager.getFullPath relativeFilePath path   
-        //    ] |> fileExistChecker
 
         let absoluteFilePath =
             let fullPath = PathManager.getFullPath (relativeFilePath.ToFile()) (x.ParserOptions.ReferencePath.ToDirectory())

@@ -26,15 +26,26 @@ module ImportPPTModule =
                                 .Append(path)
                 )
 
+    let pathPPTWithEnvironmentVariablePaths loadFilePath parasAbsoluteFilePath : string = 
+        let loadFile = loadFilePath |> DsFile
+        let baseDirectory = parasAbsoluteFilePath |> DsFile |> PathManager.getDirectoryName 
+
+        let environmentuserPaths = collectEnvironmentVariablePaths()
+
+        let fullPathSelector path =
+            PathManager.getFullPath loadFile (path |> DsDirectory)
+
+        let allPaths = [baseDirectory] @ environmentuserPaths
+        allPaths |> List.map fullPathSelector |> fileExistFirstSelector
+
     type internal ImportPowerPoint() =
         let sRepo = ShareableSystemRepository()  
         
         
-         
         let rec loadSystem(pptReop:Dictionary<DsSystem, pptDoc>, theSys:DsSystem, paras:DeviceLoadParameters) =
             pathStack.Push(paras.AbsoluteFilePath)
-
-            let pathPPT = paras.AbsoluteFilePath
+            
+            let pathPPT =  paras.AbsoluteFilePath
             let doc =
                 match dicPptDoc.TryGetValue pathPPT with
                 | true, existingDoc -> pptDoc(pathPPT, paras, existingDoc)
@@ -51,7 +62,9 @@ module ImportPPTModule =
             doc.GetCopyPathNName()
             |> Seq.iter(fun (loadFilePath, loadedName, node) ->
 
-                let loadRelativePath = PathManager.getRelativePath (paras.AbsoluteFilePath.ToFile()) (loadFilePath.ToFile())
+                let pathPPT = pathPPTWithEnvironmentVariablePaths loadFilePath paras.AbsoluteFilePath
+                let loadRelativePath = PathManager.getRelativePath (paras.AbsoluteFilePath.ToFile()) (pathPPT.ToFile())
+
                 let paras = getParams(doc.DirectoryName, loadRelativePath
                             , loadedName, theSys, None,  node.NodeType.GetLoadingType(), sRepo)
                 let hostIp = if paras.HostIp.IsSome then paras.HostIp.Value else ""

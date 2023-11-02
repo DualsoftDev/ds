@@ -121,16 +121,19 @@ module PathManager =
     let getRelativePath (relativeToFilePath: DsPath) (myFilePath: DsPath): string =
         let re = relativeToFilePath
         let my = myFilePath
+        
+        if re.ToValidPath() = my.ToValidPath() then 
+            raise (new ArgumentException($"Invalid GetRelativePath same path \n{re}\n{my}"))
 
         if not(re |> isPathRooted) || not(my |> isPathRooted) then 
-            raise (new ArgumentException($"Invalid GetRelativePath between {re} : {my}"))
+            raise (new ArgumentException($"Invalid GetRelativePath not root \n{re}\n{my}"))
 
         if getPathRoot(re.ToString()) <> getPathRoot(my.ToString()) then
-            raise (new ArgumentException($"Invalid GetRelativePath between {re} : {my}"))
+            raise (new ArgumentException($"Invalid GetRelativePath not same root \n{re}\n{my}"))
 
         let relativePath = Path.GetRelativePath(re.ToString(), my.ToString()) |> DsFile
         if isPathRooted relativePath then
-            raise (new ArgumentException($"Invalid GetRelativePath between {re} : {my}"))
+            raise (new ArgumentException($"Invalid GetRelativePath between \n{re}\n{my}"))
         else
             let validPath = relativePath.ToValidPath().[3..]  //의미 없는 ../ 항상 붙어서 제거
             if validPath.StartsWith("../") then
@@ -169,6 +172,15 @@ module FileManager =
         else
             raise (new FileNotFoundException($"File not found at path: {path}"))
 
+    let fileExistFirstSelector (paths:string list) =
+        let path = paths.FirstOrDefault(fun f -> File.Exists(f|> getValidFile))
+        if path = null
+        then 
+            let errorMsg1 = $"loading path : {paths.Head}\n"
+            let errorMsg2 = $"user environment path : {paths.Tail}"
+            raise (new FileNotFoundException($"File not found at paths: \n{errorMsg1+errorMsg2}"))
+        else path
+
     // Write the provided file content to the specified path
     let fileWriteAllText (path: string, fileContent: string) =
         let path = path |> getValidFile
@@ -186,6 +198,21 @@ module FileManager =
             
         if not (Directory.Exists(directoryPath)) then
             Directory.CreateDirectory(directoryPath) |> ignore
+
+    ///Powerpoint 에서만 구동됨 : runtime *.ds에서는 예외(다른PC, 이중관리, ..)상황을 고려해서 추후 구현
+    ///PC에 초기 환경 변수 설정시 재부팅 필요
+    ///사용자 DS_PATH만 적용가능 (시스템 환경변수는 관리자 권한 이슈 및 이중정의 이슈)
+    ///모델 경로가 항상우선 찾고 다음 사용자 변수 Path 찾기
+    let private environmentVariable = "DS_PATH"
+
+    let collectEnvironmentVariablePaths(): string list =
+        let userEnv = System.Environment.GetEnvironmentVariable(environmentVariable, EnvironmentVariableTarget.User)
+        match userEnv with
+        | null -> []
+        | envVar ->
+            envVar.Split(';', StringSplitOptions.RemoveEmptyEntries)
+            |> Array.map(fun path -> path.Trim())
+            |> List.ofArray
 
 
 [<Extension>]

@@ -20,6 +20,7 @@ class ServerProgram
                 {
                     while (true)
                     {
+                        server.TryReceiveMultipartMessage
                         var message = server.ReceiveMultipartMessage();
                         var clientAddress = message[0].Buffer;  // byte[]로 받음
                         var clientMessage = message[1].ConvertToString();

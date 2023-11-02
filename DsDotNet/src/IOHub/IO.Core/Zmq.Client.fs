@@ -2,11 +2,14 @@
 
 namespace IO.Core
 open System
+open System.Runtime.CompilerServices
 open NetMQ
 open NetMQ.Sockets
 open Dual.Common.Core.FS
+open IO.Core
 
-module ZmqClientModule =
+[<AutoOpen>]
+module ZmqClient =
     /// command line request: "read ..", "write ..."
     type CLIRequestResult = Result<string, ErrorMessage>
     /// serverAddress: "tcp://localhost:5555" or "tcp://*:5555"
@@ -41,9 +44,13 @@ module ZmqClientModule =
 
         interface IDisposable with
             member x.Dispose() =
+                client.SendFrame("UNREGISTER")
                 client.Close()
 
 
+        /// 직접 socket 접근해서 사용하기 위한 용도로 Zmq DealerSocket 반환.  비추
+        [<Obsolete("가급적 API 이용")>]
+        member x.Socket = client
         member x.SendRequest(request:string) : CLIRequestResult =
             client.SendFrame(request)
             let result = client.ReceiveFrameString()
@@ -54,20 +61,6 @@ module ZmqClientModule =
             | _ ->
                 logError($"Error: {result}")
                 Error result
-
-        member x.Read(tag:string) : obj * ErrorMessage =
-            client.SendFrame($"r {tag}")
-            let result = client.ReceiveFrameString()
-            match result with
-            | "OK" ->
-                let buffer = client.ReceiveFrameBytes()
-                buffer, null
-            | "ERR" ->
-                let errMsg = client.ReceiveFrameString()
-                null, errMsg
-            | _ ->
-                logError($"Error: {result}")
-                null, result
 
         member x.ReadBits(name:string, offsets:int[]) : TypedIOResult<bool[]> =
             sendReadRequest(client, "rx", name, offsets)
@@ -150,8 +143,24 @@ module ZmqClientModule =
             verifyReceiveOK client
 
         member x.ClearAll(name:string) =
-            client
-                .SendMoreFrame("cl")
-                .SendFrame(name)
-
+            client.SendFrame($"cl {name}")
             verifyReceiveOK client
+
+
+    type CsResult<'T> = Dual.Common.Core.Result<'T, ErrorMessage>
+    let toResultCs (fsResult:TypedIOResult<'T>) =
+        match fsResult with
+        | Ok r -> Dual.Common.Core.Result.Ok r
+        | Error e -> Dual.Common.Core.Result.Err e
+
+// { C# 에서 소화하기 쉬운 형태로 변환.  C# Result<'T, string> 형태로..
+[<Extension>]
+type ZmqClientExt =
+    [<Extension>] static member CsSendRequest(client:Client, request:string) : CsResult<string>               = toResultCs <| client.SendRequest(request)
+    [<Extension>] static member CsReadBits   (client:Client, name:string, offsets:int[]) : CsResult<bool[]>   = toResultCs <| client.ReadBits(name, offsets)
+    [<Extension>] static member CsReadBytes  (client:Client, name:string, offsets:int[]) : CsResult<byte[]>   = toResultCs <| client.ReadBytes(name, offsets)
+    [<Extension>] static member CsReadUInt16s(client:Client, name:string, offsets:int[]) : CsResult<uint16[]> = toResultCs <| client.ReadUInt16s(name, offsets)
+    [<Extension>] static member CsReadUInt32s(client:Client, name:string, offsets:int[]) : CsResult<uint32[]> = toResultCs <| client.ReadUInt32s(name, offsets)
+    [<Extension>] static member CsReadUInt64s(client:Client, name:string, offsets:int[]) : CsResult<uint64[]> = toResultCs <| client.ReadUInt64s(name, offsets)
+// }
+

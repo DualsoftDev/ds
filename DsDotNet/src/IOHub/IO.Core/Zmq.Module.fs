@@ -2,8 +2,9 @@ namespace IO.Core
 
 open System.Threading
 open ZmqServerModule
-open ZmqClientModule
+open IO.Core.ZmqClient
 open Dual.Common.Core.FS
+
 
 [<AutoOpen>]
 module Zmq =

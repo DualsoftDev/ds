@@ -5,9 +5,26 @@ open Dual.Common.Core.FS
 open IO.Spec
 open System.Reactive.Subjects
 open System.Runtime.InteropServices
+open System.ComponentModel
 
 [<AutoOpen>]
 module ZmqStreamManager =
+    [<Obsolete("Use DualCommon nuget 0.1.15 of DualSoft-Common-Core-FS")>]
+    let raisewithlog (ex:Exception): unit =
+        logError $"{ex}"
+        raise ex
+
+    type ClientIdentifier = byte[]
+
+    type ExcetionWithClient(clientId:ClientIdentifier, errMsg:ErrorMessage) =
+        inherit Exception(errMsg)
+        member x.ClientId = clientId
+
+    /// 발생한 exception 이 요청 client 에 전달 되도록 clientId 를 갖는 예외 raise
+    let raiseWithClientId (clientId:ClientIdentifier) (errMsg:ErrorMessage) =
+        ExcetionWithClient(clientId, errMsg) |> raisewithlog
+
+
     let lockedExe (locker:obj) f =
         if isNull(locker) then
             f()
@@ -31,6 +48,8 @@ module ZmqStreamManager =
         assert(buffer.Length = size)
         stream.Seek(int64 byteOffset, SeekOrigin.Begin) |> ignore
         stream.Write(buffer, 0, size)
+
+
 
     type IOChangeInfo(fileSpec:IOFileSpec, offset:int, value:obj) =
         member val IOFileSpec = fileSpec
@@ -197,20 +216,20 @@ module ZmqBufferManagerExtension =
             x.FileStream <- fs
 
     type StreamManager with
-        member x.VerifyIndices(offset:int) =
+        member x.VerifyIndices(clientId:ClientIdentifier, offset:int) =
             let offset = int64 offset
             let length = x.FileStream.Length
             if offset < 0 then
-                failwithlogf($"Invalid offset.  non-negative value required : {offset}")
+                raiseWithClientId clientId ($"Invalid offset.  non-negative value required : {offset}")
             if offset >= length then
-                failwithlogf($"Invalid offset: {offset}.  Exceed length limit {length})")
-        member x.VerifyIndices(offsets:int[]) =
-            offsets |> iter (fun offset -> x.VerifyIndices(offset))
+                raiseWithClientId clientId ($"Invalid offset: {offset}.  Exceed length limit {length})")
+        member x.VerifyIndices(clientId:ClientIdentifier, offsets:int[]) =
+            offsets |> iter (fun offset -> x.VerifyIndices(clientId, offset))
 
-        member x.Verify(indices:int[], numValues:int) =
-            x.VerifyIndices indices
+        member x.Verify(clientId:ClientIdentifier, indices:int[], numValues:int) =
+            x.VerifyIndices (clientId, indices)
             if indices.Length <> numValues then
-                failwithf($"The number of indices and values should be the same.")
+                raiseWithClientId clientId $"The number of indices and values should be the same."
             
     type IOChangeInfo with
         member x.GetTagName() =

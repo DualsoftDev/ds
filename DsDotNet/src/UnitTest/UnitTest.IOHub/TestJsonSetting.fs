@@ -172,7 +172,8 @@ module JSONSettingTestModule =
 
 
                 let length = po.Length
-                let v, err = client.Read("p/%ob255")
+                match client.ReadBytes("p/o", [|255|]) with
+                | _ -> ()
 
                 zmqInfo.CancellationTokenSource.Cancel()
                 System.Threading.Thread.Sleep(200)

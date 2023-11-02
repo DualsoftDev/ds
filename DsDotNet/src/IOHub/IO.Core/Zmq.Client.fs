@@ -7,30 +7,82 @@ open NetMQ
 open NetMQ.Sockets
 open Dual.Common.Core.FS
 open IO.Core
+open System.Collections.Concurrent
+open System.Threading
+open System.Threading.Tasks
 
 [<AutoOpen>]
 module ZmqClient =
-    type DealerSocket with
-        member x.SendMoreFrameWithRequestId(id:int) = id |> ByteConverter.ToBytes |> x.SendMoreFrame
-
     /// command line request: "read ..", "write ..."
     type CLIRequestResult = Result<string, ErrorMessage>
+
+    /// Server 로부터 받은 multi-message format
+    [<AutoOpen>]
+    module private ServerMultiMessage =
+        let RequestId = 0       // int.  음수이면 notify, else 자신이 보낸 request id 의 echo
+        let OkNg      = 1
+
+        let Detail    = 2
+
+        // - read request 에 대한 reply 및, 
+        // - server tag changed notify 
+        // 에 대한 format
+        let Values    = 2       // encoded byte array
+        let Name      = 3       // e.g "p/o"
+        let ContentBitLength = 4// e.g 1, 8, 16, 32, 64
+        let Offsets   = 5       // bitoffset or byteoffset
+
+    type NetMQMessage with
+        member x.CheckRequestId(id:int) = verify(id = x[ServerMultiMessage.RequestId].ConvertToInt32())
 
     /// serverAddress: "tcp://localhost:5555" or "tcp://*:5555"
     [<AllowNullLiteral>]
     type Client(serverAddress:string) =
+        let cancellationTokenSource = new CancellationTokenSource() 
         let client = new DealerSocket()
         let reqIdGenerator = counterGenerator 1
+        let queue = ConcurrentQueue<NetMQMessage>()
+        let deque (reqId:int) =
+            let rec helper() =
+                match queue.TryDequeue() with
+                | true, item -> Some item
+                | false, _ ->
+                    // 큐가 비었음
+                    Thread.Sleep(100)
+                    helper()
+            let mq = helper().Value
+            let reqIdBack = mq[ServerMultiMessage.RequestId].Buffer |> BitConverter.ToInt32
+            if reqId <> reqIdBack then
+                failwithf $"Request/Reply id mismatch: {reqId} <> {reqIdBack}"
+            mq
+
+        let loop() =
+            while not cancellationTokenSource.IsCancellationRequested do
+                let mutable mqMessage:NetMQMessage = null
+                while mqMessage = null && not cancellationTokenSource.IsCancellationRequested do
+                    if client.TryReceiveMultipartMessage(&mqMessage) then
+                        Thread.Sleep(100)  // got it
+
+                let reqIdBack = mqMessage[RequestId].ConvertToInt32()
+                if reqIdBack >= 0 then
+                    queue.Enqueue(mqMessage)
+                else
+                    //TODO: NotifyTagChangeEvent()
+                    ()
+
         do
             client.Options.Identity <- Guid.NewGuid().ToByteArray() // 각 클라이언트에 대한 고유 식별자 설정
             client.Connect(serverAddress)
             client
                 .SendMoreFrameWithRequestId(reqIdGenerator())
                 .SendFrame("REGISTER")
+            Task.Factory.StartNew(loop, TaskCreationOptions.LongRunning) |> ignore
                 
-        let verifyReceiveOK(client:DealerSocket) : CLIRequestResult =
-            let result = client.ReceiveFrameString()
-            let detail = client.ReceiveFrameString()
+        let verifyReceiveOK(client:DealerSocket) (reqId:int) : CLIRequestResult =
+            let mqMessage = deque reqId
+
+            let result = mqMessage[OkNg].ConvertToString()
+            let detail = mqMessage[Detail].ConvertToString()
             match result with
             | "OK" -> Ok detail
             | "ERR" -> Error detail
@@ -68,8 +120,11 @@ module ZmqClient =
             client
                 .SendMoreFrameWithRequestId(reqId)
                 .SendFrame(request)
-            let result = client.ReceiveFrameString()
-            let detail = client.ReceiveFrameString()
+
+            let mqMessage = deque reqId
+            let result = mqMessage[OkNg].ConvertToString()
+            let detail = mqMessage[Detail].ConvertToString()
+
             match result with
             | "OK" -> Ok detail
             | "ERR" -> Error detail
@@ -82,14 +137,15 @@ module ZmqClient =
             sendReadRequest(client, reqId, "rx", name, offsets)
 
             // 서버로부터 응답 수신
-            let result = client.ReceiveFrameString()
+            let mqMessage = deque reqId
+            let result = mqMessage[OkNg].ConvertToString()
             match result with
             | "OK" ->
-                let buffer = client.ReceiveFrameBytes()
+                let buffer = mqMessage[Values].Buffer
                 let arr = buffer |> map ( (=) 1uy)
                 Ok arr
             | "ERR" ->
-                let errMsg = client.ReceiveFrameString()
+                let errMsg = mqMessage[Detail].ConvertToString()
                 logError($"Error: {errMsg}")
                 Error errMsg
             | _ ->
@@ -103,14 +159,15 @@ module ZmqClient =
             sendReadRequest(client, reqId, command, name, offsets)
 
             // 서버로부터 응답 수신
-            let result = client.ReceiveFrameString()
+            let mqMessage = deque reqId
+            let result = mqMessage[OkNg].ConvertToString()
             match result with
             | "OK" ->
-                let buffer = client.ReceiveFrameBytes()
+                let buffer = mqMessage[Values].Buffer
                 let arr = ByteConverter.BytesToTypeArray<'T>(buffer) // 바이트 배열을 'T 배열로 변환
                 Ok arr
             | "ERR" ->
-                let errMsg = client.ReceiveFrameString()
+                let errMsg = mqMessage[Detail].ConvertToString()
                 logError($"Error: {errMsg}")
                 Error errMsg
             | _ ->
@@ -133,14 +190,14 @@ module ZmqClient =
             buildPartial(client, reqId, "wx", name, offsets)
                 .SendFrame(byteValues)
 
-            verifyReceiveOK client
+            verifyReceiveOK client reqId
 
         member x.WriteBytes(name:string, offsets:int[], values:byte[]) =
             let reqId = reqIdGenerator()
             buildPartial(client, reqId, "wb", name, offsets)
                 .SendFrame(values)
 
-            verifyReceiveOK client
+            verifyReceiveOK client reqId
 
 
         member x.WriteUInt16s(name:string, offsets:int[], values:uint16[]) =
@@ -148,28 +205,28 @@ module ZmqClient =
             buildPartial(client, reqId, "ww", name, offsets)
                 .SendFrame(ByteConverter.ToBytes<uint16>(values))
 
-            verifyReceiveOK client
+            verifyReceiveOK client reqId
 
         member x.WriteUInt32s(name:string, offsets:int[], values:uint32[]) =
             let reqId = reqIdGenerator()
             buildPartial(client, reqId, "wd", name, offsets)
                 .SendFrame(ByteConverter.ToBytes<uint32>(values))
 
-            verifyReceiveOK client
+            verifyReceiveOK client reqId
 
         member x.WriteUInt64s(name:string, offsets:int[], values:uint64[]) =
             let reqId = reqIdGenerator()
             buildPartial(client, reqId, "wl", name, offsets)
                 .SendFrame(ByteConverter.ToBytes<uint64>(values))
 
-            verifyReceiveOK client
+            verifyReceiveOK client reqId
 
         member x.ClearAll(name:string) =
             let reqId = reqIdGenerator()
             client
                 .SendMoreFrameWithRequestId(reqId)
                 .SendFrame($"cl {name}")
-            verifyReceiveOK client
+            verifyReceiveOK client reqId
 
 
     type CsResult<'T> = Dual.Common.Core.Result<'T, ErrorMessage>

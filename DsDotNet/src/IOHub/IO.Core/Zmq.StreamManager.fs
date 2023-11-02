@@ -2,6 +2,8 @@ namespace IO.Core
 open System
 open System.IO
 open Dual.Common.Core.FS
+open NetMQ
+open NetMQ.Sockets
 open IO.Spec
 open System.Reactive.Subjects
 open System.Runtime.InteropServices
@@ -9,6 +11,10 @@ open System.ComponentModel
 
 [<AutoOpen>]
 module ZmqStreamManager =
+    type NetMQSocket with
+        member x.SendMoreFrameWithRequestId(id:int) =
+            id |> ByteConverter.ToBytes |> x.SendMoreFrame
+
     type ClientIdentifier = byte[]
 
     type ExcetionWithClient(clientId:ClientIdentifier, errMsg:ErrorMessage) =

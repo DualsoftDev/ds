@@ -106,24 +106,26 @@ module private ZmqServerImplModule =
 
         | _ -> failwithf($"Unknown address with assignment pattern : {addressWithAssignValue}")
 
+    /// Client 로부터 받은 multi-message format
+    [<AutoOpen>]
+    module internal ClientMultiMessage =
+        let ClientId  = 0
+        let RequestId = 1
+        let Command   = 2
+        let ArgGroup1 = 3
+        let ArgGroup2 = 4
+        let ArgGroup3 = 5
 
-    let MultiMessageClientId  = 0
-    let MultiMessageRequestId = 1
-    let MultiMessageCommand   = 2
-    let MultiMessageArgGroup1 = 3
-    let MultiMessageArgGroup2 = 4
-    let MultiMessageArgGroup3 = 5
-
-    let MultiMessageTagKindName = MultiMessageArgGroup1
-    let MultiMessageOffsets = MultiMessageArgGroup2
-    let MultiMessageValues = MultiMessageArgGroup3
+        let TagKindName = ArgGroup1
+        let Offsets     = ArgGroup2
+        let Values      = ArgGroup3
 
 
     let fetchBufferManagerAndIndices (isBitIndex:bool) (multiMessages:NetMQFrame[]) =
         let bufferManager =
-            let name = multiMessages[MultiMessageTagKindName].ConvertToString().ToLower()
+            let name = multiMessages[TagKindName].ConvertToString().ToLower()
             streamManagers[name]
-        let indices = ByteConverter.BytesToTypeArray<int>(multiMessages[MultiMessageOffsets].Buffer)
+        let indices = ByteConverter.BytesToTypeArray<int>(multiMessages[Offsets].Buffer)
         for byteIndex in indices |> map (fun n -> if isBitIndex then n / 8 else n) do
             if bufferManager.FileStream.Length < byteIndex then
                 failwithf($"Invalid address: {byteIndex}")
@@ -134,7 +136,7 @@ module private ZmqServerImplModule =
 
     let fetchForWrite (multiMessages:NetMQFrame[]) =
         let bm, indices = fetchForRead multiMessages
-        let values = multiMessages[MultiMessageValues].Buffer
+        let values = multiMessages[Values].Buffer
         bm, indices, values
 
     /// NetMQ 의 ConvertToString() bug 대응 용 코드.  문자열의 맨 마지막에 '\0' 이 붙는 경우 강제 제거.
@@ -217,15 +219,16 @@ module ZmqServerModule =
         member x.IOChangedObservable = ioChangedObservable
         member x.Clients = clients
 
-        member private x.handleRequest (server:RouterSocket) : ClientIdentifier * IOResult =
+        member private x.handleRequest (server:RouterSocket) : ClientIdentifier * int * IOResult =
             let mutable mqMessage:NetMQMessage = null
             if not <| server.TryReceiveMultipartMessage(&mqMessage) then
-                null, Ok null
+                null, -1, Ok null
             else
-                let clientId = mqMessage[MultiMessageClientId].Buffer;  // byte[]로 받음
+                let clientId = mqMessage[ClientMultiMessage.ClientId].Buffer;  // byte[]로 받음
+                let reqId = mqMessage[ClientMultiMessage.RequestId].Buffer |> BitConverter.ToInt32
                 let ioResult =
                     let mms = mqMessage |> toArray
-                    let command = mqMessage[MultiMessageCommand].ConvertToString() |> removeTrailingNullChar;
+                    let command = mqMessage[ClientMultiMessage.Command].ConvertToString() |> removeTrailingNullChar;
                     logDebug $"Handling request: {command}"
 
                     let getArgs() =
@@ -338,7 +341,7 @@ module ZmqServerModule =
 
                     | _ ->
                         failwithlogf $"ERROR: {command}"
-                clientId, ioResult
+                clientId, reqId, ioResult
 
 
         member x.Run() =
@@ -349,15 +352,17 @@ module ZmqServerModule =
                 server.Bind($"tcp://*:{port}")
                 
                 while not cancellationToken.IsCancellationRequested do
+                    let mutable requestId = 0
                     try
-                        let clientId, response = x.handleRequest server
+                        let clientId, reqId, response = x.handleRequest server
+                        requestId <- reqId
                         match response with
                         | Ok obj ->
 
-                            //if obj = null || obj :? WriteOK then
-                            //    noop()
-                            //else
-                            //    noop()
+                            if obj = null || obj :? WriteOK then
+                                noop()
+                            else
+                                noop()
 
                             match obj with
                             | null
@@ -367,7 +372,11 @@ module ZmqServerModule =
                                 ()
 
                             | _ ->
-                                let more = server.SendMoreFrame(clientId).SendMoreFrame("OK")
+                                let more =
+                                    server
+                                        .SendMoreFrame(clientId)
+                                        .SendMoreFrame(reqId |> ByteConverter.ToBytes)  //.SendMoreFrameWithRequestId(reqId)
+                                        .SendMoreFrame("OK")
                                 match obj with
                                 | :? WriteOK as ok ->
                                     more.SendFrame("OK")
@@ -400,11 +409,19 @@ module ZmqServerModule =
                                         failwithlogf "ERROR"
 
                         | Error errMsg ->
-                            server.SendMoreFrame(clientId).SendMoreFrame("ERR").SendFrame(errMsg)
+                            server
+                                .SendMoreFrame(clientId)
+                                .SendMoreFrame(reqId |> ByteConverter.ToBytes)
+                                .SendMoreFrame("ERR")
+                                .SendFrame(errMsg)
                     with 
                     | :? ExcetionWithClient as ex ->
                         logError $"Error occured while handling request: {ex.Message}"
-                        server.SendMoreFrame(ex.ClientId).SendMoreFrame("ERR").SendFrame(ex.Message)
+                        server
+                            .SendMoreFrame(ex.ClientId)
+                            .SendMoreFrame(requestId |> ByteConverter.ToBytes)
+                            .SendMoreFrame("ERR")
+                            .SendFrame(ex.Message)
                     | ex ->
                         logError $"Error occured while handling request: {ex.Message}"
 

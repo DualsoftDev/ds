@@ -4,6 +4,7 @@ open System
 open System.IO
 open System.Linq
 open System.Runtime.CompilerServices
+open System.IO.Compression
 
 [<AutoOpen>]
 module PathManager = 
@@ -154,7 +155,7 @@ module PathManager =
         |DsDirectory _ -> ()
 
 
-        if isPathRooted relativeFilePath || not (hasExtension relativeFilePath) then
+        if not (hasExtension relativeFilePath) then
             raise (new ArgumentException($"relativeFilePath error in {relativeFilePath}"))
         if not (isPathRooted absoluteDirectory) then
             raise (new ArgumentException($"absoluteDirectory error in {absoluteDirectory}"))
@@ -213,6 +214,45 @@ module FileManager =
             envVar.Split(';', StringSplitOptions.RemoveEmptyEntries)
             |> Array.map(fun path -> path.Trim())
             |> List.ofArray
+
+            
+    let rec addFolderToZip(zip: ZipArchive, folderPath: string, baseFolderPath: string) =
+        let di = DirectoryInfo(folderPath)
+        for fileInfo in di.GetFiles().Where(fun w->w.Extension = ".ds") do
+            let relativePath =
+                if String.IsNullOrEmpty(baseFolderPath) then fileInfo.Name
+                else Path.Combine(baseFolderPath, fileInfo.Name)
+            let entry = zip.CreateEntry(relativePath)
+            use fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read)
+            use entryStream = entry.Open()
+            fileStream.CopyTo(entryStream)
+        
+        for subDirectoryInfo in di.GetDirectories() do
+            let subDirectoryBasePath =
+                if String.IsNullOrEmpty(baseFolderPath) then subDirectoryInfo.Name
+                else Path.Combine(baseFolderPath, subDirectoryInfo.Name)
+            addFolderToZip(zip, subDirectoryInfo.FullName, subDirectoryBasePath)
+
+    let zipFolderToByteArray(exportDirectoy:string) =
+        use memoryStream = new MemoryStream()
+        use zip = new ZipArchive(memoryStream, ZipArchiveMode.Create, true)
+        let folderPath = Path.GetDirectoryName(exportDirectoy)
+        addFolderToZip(zip, folderPath, "")
+        memoryStream.ToArray()
+
+    ///exportFilePath 절대경로 *.Zip 형태 
+    ///modelRootDir   모델 최상댄 절대경로 Directory
+    let saveZip(exportFilePath:string, modelRootDir:string) =
+        let exportFile   = exportFilePath |>getValidFile
+        let modelRootDir = modelRootDir |>getValidDirectory
+
+        use memoryStream = new MemoryStream()
+        use zip = new ZipArchive(memoryStream, ZipArchiveMode.Create, true)
+        addFolderToZip(zip, modelRootDir, "")
+
+
+        use fileStream = new FileStream(exportFile, FileMode.Create)
+        memoryStream.WriteTo(fileStream)
 
 
 [<Extension>]

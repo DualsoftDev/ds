@@ -103,29 +103,31 @@ module FileManager =
             )  (Some (List.head filePaths)) (List.tail filePaths)
            
         // Extract the top-level directory from the common prefix
-        match commonPrefix with
-        | Some prefix -> Some(prefix |> Path.GetDirectoryName)
-        | None -> None
+        commonPrefix
+        //match commonPrefix with
+        //| Some prefix -> Some(prefix |> Path.GetDirectoryName)
+        //| None -> None
 
 
     let createZipFile(zipFilePath: string, filePaths: string seq) =
         try
+            let topLevel = getTopLevelDirectory (filePaths |> Seq.toList)
+
             // Create a ZIP archive
             use fileStream = new FileStream(zipFilePath, FileMode.Create)
             use zip = new ZipArchive(fileStream, ZipArchiveMode.Create, true)
 
-            let topLevel = getTopLevelDirectory (filePaths |> Seq.toList)
 
             for filePath in filePaths do
                 if File.Exists(filePath) then
-                    let fileInfo = new FileInfo(filePath)
+                    let fileDir  = PathManager.getDirectoryName (filePath|>DsFile)
                     let relativePath =
                         if topLevel.IsSome then
-                            fileInfo.DirectoryName.Substring(topLevel.Value.Length)
+                            fileDir.Substring(topLevel.Value.Length)
                         else
-                            fileInfo.DirectoryName // No common top-level directory
+                            fileDir // No common top-level directory
 
-                    let entry = zip.CreateEntry(relativePath.Replace("\\", "/") + "/" + fileInfo.Name)
+                    let entry = zip.CreateEntry(relativePath.Replace("\\", "/") + "/" + 6786 filePath)
                     use fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read)
                     use entryStream = entry.Open()
                     fileStream.CopyTo(entryStream)
@@ -146,23 +148,4 @@ module FileManager =
         createZipFile(exportFilePath, modelRootPaths)
       
 
-    ///exportFilePath 절대경로 *.Zip 형태 
-    ///modelRootDir   모델 최상댄 절대경로 Directory
-    let saveZip2(exportFilePath:string, modelRootDir:string) =
-        try
-            let exportFile = exportFilePath |> getValidFile
-            let modelRootDir = modelRootDir |> getValidDirectory
-
-            // Create a ZIP archive and add the contents of the modelRootDir and its subdirectories to it
-            use fileStream = new FileStream(exportFile, FileMode.OpenOrCreate)
-            use zip = new ZipArchive(fileStream, ZipArchiveMode.Create, true)
-            addFolderToZip(zip, modelRootDir, "")
-
-            Console.WriteLine($"ZIP archive saved to: {exportFile}")
-
-        with
-        | :? InvalidDataException as ex ->
-            Console.WriteLine($"Error: InvalidDataException - The file could not be saved due to data corruption. {ex.Message}")
-        | ex ->
-            Console.WriteLine($"An unexpected error occurred: {ex.Message}")
 

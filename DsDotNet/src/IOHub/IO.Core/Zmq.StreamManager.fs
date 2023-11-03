@@ -9,7 +9,8 @@ open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module ZmqStreamManager =
-    type NetMQSocket with
+    //type NetMQSocket with
+    type IOutgoingSocket with
         member x.SendMoreFrameWithRequestId(id:int) =
             id |> ByteConverter.ToBytes |> x.SendMoreFrame
 

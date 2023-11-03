@@ -213,8 +213,7 @@ module ZmqServerModule =
                 use server = new RouterSocket()
                 serverSocket <- server
                 
-                //server.Bind($"tcp://*:{port}")
-                server.Bind($"tcp://localhost:{port}")
+                server.Bind($"tcp://*:{port}")
                 
                 //periodicPingClients()
 
@@ -232,7 +231,7 @@ module ZmqServerModule =
                             let reqId = cri.RequestId
                             server
                                 .SendMoreFrame(clientId)
-                                .SendMoreFrame(reqId |> ByteConverter.ToBytes)
+                                .SendMoreFrameWithRequestId(reqId)
                                 .SendMoreFrame("ERR")
                                 .SendFrame(r.Message)
 
@@ -242,7 +241,7 @@ module ZmqServerModule =
                             let more =
                                 server
                                     .SendMoreFrame(clientId)
-                                    .SendMoreFrame(reqId |> ByteConverter.ToBytes)  //.SendMoreFrameWithRequestId(reqId)
+                                    .SendMoreFrameWithRequestId(reqId)
                                     .SendMoreFrame("OK")
                             match r with
                             | :? StringResponse as r ->

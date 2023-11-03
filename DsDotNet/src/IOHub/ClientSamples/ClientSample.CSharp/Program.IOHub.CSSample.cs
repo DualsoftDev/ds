@@ -1,8 +1,7 @@
 using IO.Core;
-using Newtonsoft.Json.Linq;
 
+using NetMQ.Sockets;
 using static IO.Core.ZmqClient;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 var port = 5555;
 using var client = new Client($"tcp://localhost:{port}");
@@ -56,3 +55,9 @@ while ( key != null && ! cts.IsCancellationRequested )
 //Thread.Sleep(Timeout.Infinite);
 Console.ReadLine();
 Console.WriteLine();
+
+
+void DoNothign()
+{
+    var serverSocket = new RouterSocket();
+}

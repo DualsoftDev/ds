@@ -44,7 +44,7 @@ module ZmqClient =
         member x.Values = values
 
 
-    /// serverAddress: "tcp://localhost:5555" or "tcp://*:5555"
+    /// serverAddress: "tcp://192.168.0.2:5555" or "tcp://*:5555"
     [<AllowNullLiteral>]
     type Client(serverAddress:string) =
         let cancellationTokenSource = new CancellationTokenSource() 
@@ -67,7 +67,8 @@ module ZmqClient =
 
         /// server 로부터 공지 받은 변경 사항
         let tagChangedSubject = new Subject<TagChangedInfo>()
-        let clientGuid = Guid.NewGuid().ToByteArray()
+        //let clientGuid = Guid.NewGuid().ToByteArray()
+        let clientGuid = System.Random().Next(0, 65535) |> uint16 |> ByteConverter.ToBytes<uint16>
         let clientId = clientIdentifierToString clientGuid
 
 
@@ -83,22 +84,31 @@ module ZmqClient =
                     // normal request 에 대한 reply: queue 에 삽입
                     queue.Enqueue(mq)
                 else
-                    logDebug $"Got tag changed notification from server on client {clientId}..."
                     // 서버로부터 받은 변경 내용을 client app 에 공지
-                    let contentBitLength = mq[ContentBitLength].Buffer |> BitConverter.ToInt32  // e.g 1, 8, 16, 32, 64
-                    let offsets   = mq[Offsets].Buffer |> ByteConverter.BytesToTypeArray<int>       // bitoffset or byteoffset
-                    let path      = mq[Name].ConvertToString()  // e.g "p/o"
-                    let values:obj =
-                        match contentBitLength with
-                        |  1 -> mq[Values].Buffer |> box
-                        |  8 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<byte>  |> box
-                        | 16 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<uint16>|> box
-                        | 32 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<uint32>|> box
-                        | 64 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<uint64>|> box
-                        |  _ -> failwith "ERROR"
+                    let command = mq[OkNg].ConvertToString()  // e.g "NOTIFY", "PING"
+                    logDebug $"Got notification {command} from server on client {clientId}..."
+                    match command with
+                    | "PING" ->
+                        client
+                            .SendMoreFrame(-1 |> ByteConverter.ToBytes)
+                            .SendFrame("PONG")
+                    | "NOTIFY" ->
+                        let contentBitLength = mq[ContentBitLength].Buffer |> BitConverter.ToInt32  // e.g 1, 8, 16, 32, 64
+                        let offsets   = mq[Offsets].Buffer |> ByteConverter.BytesToTypeArray<int>       // bitoffset or byteoffset
+                        let path      = mq[Name].ConvertToString()  // e.g "p/o"
+                        let values:obj =
+                            match contentBitLength with
+                            |  1 -> mq[Values].Buffer |> box
+                            |  8 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<byte>  |> box
+                            | 16 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<uint16>|> box
+                            | 32 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<uint32>|> box
+                            | 64 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<uint64>|> box
+                            |  _ -> failwith "ERROR"
 
-                    TagChangedInfo(path, contentBitLength, offsets, values)
-                    |> tagChangedSubject.OnNext
+                        TagChangedInfo(path, contentBitLength, offsets, values)
+                        |> tagChangedSubject.OnNext
+                    | _ ->
+                        failwithlogf $"Unknown command: {command}"
 
 
         do

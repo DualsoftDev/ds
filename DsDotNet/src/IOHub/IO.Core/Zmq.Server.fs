@@ -26,6 +26,7 @@ module private ZmqServerImplModule =
     /// tag 별 address 정보를 저장하는 dictionary
     let tagDic = new Dictionary<string, AddressSpec>()
     let clients = ResizeArray<ClientIdentifier>()
+    let mutable serverSocket:RouterSocket = null
 
     let getVendor (addr:string) : (VendorSpec * string) =
         match addr with
@@ -148,6 +149,17 @@ module private ZmqServerImplModule =
         else
             str
 
+    let periodicPingClients() =
+        Observable.Interval(TimeSpan.FromSeconds(3)).Subscribe(fun n -> 
+            for client in clients do
+                serverSocket
+                    .SendMoreFrame(client)
+                    .SendMoreFrame(-1 |> ByteConverter.ToBytes)
+                    .SendFrame("PING")
+            ()
+        )
+
+
     //let showSamples (vendorSpec:VendorSpec) (addressExtractor:IAddressInfoProvider) =
     //    let v = vendorSpec
     //    match v.Name with
@@ -188,7 +200,6 @@ module ZmqServerModule =
         let port = ioSpec_.ServicePort
 
         let mutable ioChangedObservable:IObservable<IOChangeInfo> = null
-        let mutable serverSocket:RouterSocket = null
         do
             ioSpec <- ioSpec_
             for v in ioSpec.Vendors do
@@ -216,6 +227,7 @@ module ZmqServerModule =
 
             // TODO
             ioChangedObservable.Subscribe(fun (ioChange:IOChangeInfo) ->
+                Console.WriteLine($"change by client {clientIdentifierToString ioChange.ClientRequestInfo.ClientId}");
                 let notiTargetClients =
                     clients
                     |> filter (fun c -> not <| Enumerable.SequenceEqual(c, ioChange.ClientRequestInfo.ClientId))
@@ -279,6 +291,9 @@ module ZmqServerModule =
                         | "UNREGISTER" ->
                             clients.Remove clientId |> ignore
                             logDebug $"Client {clientIdentifierToString clientId} unregistered"
+                            Ok null
+                        | "PONG" ->
+                            logDebug $"Got pong from client {clientIdentifierToString clientId}"
                             Ok null
                         | StartsWith "read" ->      // e.g read p/ob1 p/ow1 p/olw3
                             noop()
@@ -385,8 +400,11 @@ module ZmqServerModule =
                 use server = new RouterSocket()
                 serverSocket <- server
                 
-                server.Bind($"tcp://*:{port}")
+                //server.Bind($"tcp://*:{port}")
+                server.Bind($"tcp://localhost:{port}")
                 
+                periodicPingClients()
+
                 while not cancellationToken.IsCancellationRequested do
                     try
                         let clientId, reqId, response = x.handleRequest server

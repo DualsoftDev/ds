@@ -19,7 +19,7 @@ int main()
     std::string identity = std::to_string(rand());
     client.set(zmq::sockopt::routing_id, identity);
     // WSL host 에서 서버가 구동 중이라면, WSL host 의 ip address 를 적어야 한다.
-    client.connect("tcp://192.168.9.2:5555");
+    client.connect("tcp://localhost:5555");
 
     int id = 0;
     // 서버에 등록

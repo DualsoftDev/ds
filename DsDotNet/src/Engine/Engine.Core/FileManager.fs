@@ -59,32 +59,6 @@ module FileManager =
             |> Array.map(fun path -> path.Trim())
             |> List.ofArray
 
-            
-    let rec addFolderToZip(zip: ZipArchive, folderPath: string, baseFolderPath: string) =
-        let di = DirectoryInfo(folderPath)
-        for fileInfo in di.GetFiles().Where(fun w->w.Extension = ".ds") do
-            let relativePath =
-                if String.IsNullOrEmpty(baseFolderPath) then fileInfo.Name
-                else Path.Combine(baseFolderPath, fileInfo.Name)
-            let entry = zip.CreateEntry(relativePath)
-            use fileStream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read)
-            use entryStream = entry.Open()
-            fileStream.CopyTo(entryStream)
-        
-        for subDirectoryInfo in di.GetDirectories() do
-            let subDirectoryBasePath =
-                if String.IsNullOrEmpty(baseFolderPath) then subDirectoryInfo.Name
-                else Path.Combine(baseFolderPath, subDirectoryInfo.Name)
-            addFolderToZip(zip, subDirectoryInfo.FullName, subDirectoryBasePath)
-
-
-    let zipFolderToByteArray(exportDirectoy:string) =
-        use memoryStream = new MemoryStream()
-        use zip = new ZipArchive(memoryStream, ZipArchiveMode.Create, true)
-        let folderPath = Path.GetDirectoryName(exportDirectoy)
-        addFolderToZip(zip, folderPath, "")
-        memoryStream.ToArray()
-
 
     let getTopLevelDirectory (filePaths: string list) : string =
         if List.isEmpty filePaths then
@@ -115,12 +89,12 @@ module FileManager =
     let saveZip(filePaths: string seq) =
         let topLevel = getTopLevelDirectory (filePaths |> Seq.toList)
         let zipFilePath =topLevel+".zip"
-        
+         // Create a ZIP archive
+        use fileStream = new FileStream(zipFilePath, FileMode.Create)
+        use zip = new ZipArchive(fileStream, ZipArchiveMode.Create, true)
+            
         try
-            // Create a ZIP archive
-            use fileStream = new FileStream(zipFilePath, FileMode.Create)
-            use zip = new ZipArchive(fileStream, ZipArchiveMode.Create, true)
-
+           
             for filePath in filePaths do
                 if File.Exists(filePath) then
                     let fileDir  = PathManager.getDirectoryName (filePath|>DsFile)
@@ -141,9 +115,17 @@ module FileManager =
         | ex ->
             printfn "An unexpected error occurred: %s" ex.Message
 
-        topLevel
+          // Create a MemoryStream and copy the contents of the FileStream into it
+        let memoryStream = new MemoryStream()
+        fileStream.Seek(0L, SeekOrigin.Begin) |> ignore// Move the fileStream cursor to the beginning
+        fileStream.CopyTo(memoryStream)
+        zipFilePath, memoryStream
 
-
-
-
-
+        
+[<Extension>]
+type FileHelper =
+    [<Extension>] static member ToZip(filePaths: string seq)  = 
+                        saveZip filePaths |> fun (zipFilePath, _) -> zipFilePath
+    [<Extension>] static member ToZipStream(filePaths: string seq)  = 
+                        saveZip filePaths |> fun (_, memoryStram) -> memoryStram.ToArray()    
+   

@@ -11,9 +11,15 @@ open System.Runtime.CompilerServices
 open DocumentFormat.OpenXml.Packaging
 open System
 open PathManager
+open Engine.Parser.FS
 
 [<AutoOpen>]
 module ImportPPTModule =
+    type DSFromPPT = {
+        Systems : DsSystem seq
+        ActivePaths : string seq
+        LoadingPaths : string seq
+    }
 
     let dicPptDoc = Dictionary<string, PresentationDocument>()
     let pathStack = Stack<string>()     //파일 오픈시 예외 로그 path PPT Stack
@@ -237,3 +243,26 @@ module ImportPPTModule =
                             let rootDirectroy = absolute.Substring(0, absolute.length() - removeTarget.length())
 
                             system.ToDsText(true), rootDirectroy, relative)
+
+
+        [<Extension>]
+        static member GetDSFromPPT (fullName: string) =
+                let pptResults = ImportPPT.GetModel [| fullName |]
+                let loadedPaths = HashSet<string>()
+
+                let sys = pptResults.Systems.[0]
+
+                let exportPath = sys.pptxToExportDS fullName
+                let confFile = PathManager.changeExtension (exportPath.ToFile()) ".json"
+
+                let ret = ParserLoader.LoadFromConfig confFile
+
+                loadedPaths.AddRange ret.LoadingPaths |> ignore
+
+
+                {
+                    Systems =   ret.Systems
+                    ActivePaths = [exportPath]
+                    LoadingPaths = loadedPaths
+                }
+            

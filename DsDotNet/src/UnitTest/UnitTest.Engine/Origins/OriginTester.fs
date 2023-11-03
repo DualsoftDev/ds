@@ -27,7 +27,7 @@ module OriginTestModule =
                 (filePath:string)
                 (answer:seq<KeyValuePair<string, InitialType>>) =
             genConfig(filePath)
-            let model = ModelLoader.LoadFromConfig(configFile)
+            let model = ParserLoader.LoadFromConfig(configFile)
             let originChecker =
                 [
                     for sys in model.Systems do

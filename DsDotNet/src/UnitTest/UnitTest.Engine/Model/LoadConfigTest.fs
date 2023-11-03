@@ -4,6 +4,7 @@ open Dual.UnitTest.Common.FS
 open System.Linq
 open Engine.Core
 open NUnit.Framework
+open Engine.Parser.FS
 
 
 [<AutoOpen>]
@@ -28,7 +29,7 @@ module LoadConfigTestModule =
         member __.``LoadModelFromConfigTest`` () =
             let config = loadConfigTest()
 
-            let model = ModelLoader.LoadFromConfig configFile
+            let model = ParserLoader.LoadFromConfig configFile
             model.Systems.Length === 2
             model.Systems.Select(fun s -> s.Name) |> SeqEq ["Cylinder"; "Station"]
 

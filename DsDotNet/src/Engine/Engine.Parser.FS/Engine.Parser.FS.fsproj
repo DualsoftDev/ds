@@ -26,7 +26,7 @@
 		<Compile Include="3.2.Listener.Epilog.fs" />
 		<Compile Include="5.ModelParser.fs" />
 		<Compile Include="SystemBuilder.fs" />
-		<Compile Include="ModelLoader.fs" />
+		<Compile Include="ParserLoader.fs" />
 		<Compile Include="AssemblyInfo.fs" />
 		<Compile Include="Program.fs" />
 		<Compile Include="EntryPoint.fs" />

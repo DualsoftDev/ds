@@ -3,11 +3,9 @@ namespace rec Engine.Core
 open System.IO
 open Newtonsoft.Json
 open Dual.Common.Core.FS
-open Engine.Parser.FS
 open System.Linq
 open System.Collections.Generic
 open System.Runtime.CompilerServices
-open PathManager
 
 
 
@@ -34,36 +32,6 @@ module ModelLoader =
             }
         SaveConfig path cfg 
 
-    let private loadSystemFromDsFile (systemRepo:ShareableSystemRepository) (dsFilePath) =
-        let text = File.ReadAllText(dsFilePath)
-        let dir = Path.GetDirectoryName(dsFilePath)
-        let option = ParserOptions.Create4Runtime(systemRepo, dir, "ActiveCpuName", Some dsFilePath, DuNone)
-        let system = ModelParser.ParseFromString(text, option)
-        system
-
-    let LoadFromConfig(config: FilePath) =
-        let systemRepo = ShareableSystemRepository()
-        let cfg = LoadConfig config
-        let dir = PathManager.getDirectoryName (config.ToFile())
-        let systems =
-            let paths = 
-                [
-                    for dsFile in cfg.DsFilePaths do 
-                            if PathManager.isPathRooted (dsFile.ToFile())
-                            then 
-                                yield dsFile |> FileManager.fileExistChecker
-                            else
-                                yield PathManager.getFullPath (dsFile.ToFile()) (dir|>DsDirectory) |> FileManager.fileExistChecker
-                ]
-            paths |> List.map (loadSystemFromDsFile systemRepo)
-
-
-        let loadings = systems.Collect(fun f-> f.GetRecursiveLoadeds())
-                              .Map(fun s-> s.AbsoluteFilePath)
-                              .Distinct().ToFSharpList()
-
-        { Config = cfg; Systems = systems; LoadingPaths = loadings}
-
     let exportLoadedSystem (s: LoadedSystem) =
        
         let absFilePath =  PathManager.changeExtension (s.AbsoluteFilePath.ToFile())  "ds"
@@ -79,23 +47,6 @@ module ModelLoader =
 
         absFilePath
 
-        
-
-module private TestLoadConfig =
-    let testme() =
-        let cfg =
-            {   DsFilePaths = [
-                    @"D:\Git\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Libraries\cylinder.ds"
-                    @"D:\Git\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Libraries\station.ds" ] }
-
-        let fp = @"D:\tmp\a.tmp"
-        createDirectory (fp.ToFile())
-        ModelLoader.SaveConfig fp cfg
-
-        let cfg2 = ModelLoader.LoadConfig fp
-
-        verify (cfg = cfg2)
-
 
 [<Extension>]
 type ModelLoaderExt =
@@ -103,8 +54,6 @@ type ModelLoaderExt =
 
     [<Extension>] 
     static member pptxToExportDS (sys:DsSystem, pptPath:string) = 
-       // TestLoadConfig.testme()
-
 
         let dsFile = PathManager.changeExtension (pptPath.ToFile()) ".ds" 
         let jsFile = PathManager.changeExtension (pptPath.ToFile()) ".json"

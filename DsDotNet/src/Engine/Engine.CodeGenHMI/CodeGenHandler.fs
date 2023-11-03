@@ -2,6 +2,7 @@ namespace Engine.CodeGenHMI
 
 open Engine.Core
 open Newtonsoft.Json;
+open Engine.Parser.FS
 
 [<AutoOpen>]
 module CodeGenHandler =
@@ -12,7 +13,7 @@ module CodeGenHandler =
         );
         JsonConvert.SerializeObject(result, jsonSettings)
     type ParseModel(modelConfig:string) =
-        let model = ModelLoader.LoadFromConfig(modelConfig)
+        let model = ParserLoader.LoadFromConfig(modelConfig)
         let SelectGet target =
             match target with
             //| "ds-pilot" -> JsonWrapping(GenPilotCode(model))

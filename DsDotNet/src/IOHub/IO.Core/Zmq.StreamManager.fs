@@ -4,12 +4,19 @@ open System.IO
 open Dual.Common.Core.FS
 open NetMQ
 open System.Reactive.Subjects
-open System.Runtime.InteropServices
-open Dual.Common.Core.FS
+
+type IClientRequestInfo = interface end
+type IIOChangeInfo =
+    abstract member ClientRequestInfo : IClientRequestInfo
+    abstract member IOFileSpec : IOFileSpec
+    abstract member Offsets : int[]
+    abstract member Value : obj
+    abstract member DataType : PLCMemoryBitSize
+
+
 
 [<AutoOpen>]
-module ZmqStreamManager =
-    //type NetMQSocket with
+module internal ZmqStreamManager =
     type IOutgoingSocket with
         member x.SendMoreFrameWithRequestId(id:int) =
             id |> ByteConverter.ToBytes |> x.SendMoreFrame
@@ -18,6 +25,7 @@ module ZmqStreamManager =
     let clientIdentifierToString (clientId:ClientIdentifier) = clientId |> map string |> String.concat "-"
 
     type ClientRequestInfo(clientId:ClientIdentifier, requestId:int) = 
+        interface IClientRequestInfo
         member x.ClientId = clientId
         member x.RequestId = requestId
 
@@ -58,8 +66,13 @@ module ZmqStreamManager =
 
 
     type IOChangeInfo(clientRequestInfo:ClientRequestInfo, fileSpec:IOFileSpec, dataType:PLCMemoryBitSize, offsets:int seq, value:obj) =
-        do
-            noop()
+        interface IIOChangeInfo with
+            member x.ClientRequestInfo = x.ClientRequestInfo :> IClientRequestInfo
+            member x.IOFileSpec = fileSpec
+            member x.Offsets = x.Offsets
+            member x.Value = value
+            member x.DataType = dataType
+            
         member x.ClientRequestInfo = clientRequestInfo
         member x.IOFileSpec = fileSpec
 
@@ -214,7 +227,7 @@ module ZmqStreamManager =
         member x.IOChangedSubject = ioChangedSubject
 
 [<AutoOpen>]
-module ZmqBufferManagerExtension =
+module internal ZmqBufferManagerExtension =
     type IOFileSpec with
         member x.InitiaizeFile(dir:string) =
             let path = Path.Combine(dir, x.Name)
@@ -253,7 +266,7 @@ module ZmqBufferManagerExtension =
             if indices.Length <> numValues then
                 raiseWithClientId clientRequstInfo $"The number of indices and values should be the same."
             
-    type IOChangeInfo with
+    type IIOChangeInfo with
         member x.GetTagNameAndValues() =
             let fs, dataType, offsets, objValues = x.IOFileSpec, x.DataType, x.Offsets, x.Value
             let path = fs.GetPath()

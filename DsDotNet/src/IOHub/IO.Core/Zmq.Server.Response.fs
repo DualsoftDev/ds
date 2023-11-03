@@ -1,7 +1,6 @@
 (* IO.Core using Zero MQ *)
 
 namespace IO.Core
-open System
 open Dual.Common.Core.FS
 
 

@@ -51,7 +51,7 @@ module rec ZmqSpec =
 
     [<AllowNullLiteral>] 
     type IStreamManager = interface end
-    and IOFileSpec() =
+    type IOFileSpec() =
         member val Name = ""  with get, set
         member val Length = 0 with get, set
 

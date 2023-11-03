@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-using static IO.Core.ZmqServerModule;
+using IO.Core;
 using static IO.Core.ZmqSpec;
 
 namespace IO.WebServer.Demons

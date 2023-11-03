@@ -61,6 +61,7 @@ module ZmqTestModule =
         logDebug("Exiting...")
         Thread.Sleep(1000)
 
+    /// server 와 client 를 동시에 실행
     let runServerAndClient() =
         let zmqInfo = Zmq.Initialize "zmqsettings.json"
         let server, client, cts = zmqInfo.Server, zmqInfo.Client, zmqInfo.CancellationTokenSource
@@ -120,4 +121,5 @@ module ZmqTestModule =
 
     [<EntryPoint>]
     let main _ =
+        // test 로 server 와 client 를 동시에 실행
         runServerAndClient()

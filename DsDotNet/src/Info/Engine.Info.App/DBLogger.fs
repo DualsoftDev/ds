@@ -4,20 +4,36 @@ open Engine.Core
 open Dual.Common.Core.FS
 open System
 
-type DBLogger() =
-    static let querySet = QuerySet((DateTime.MinValue, DateTime.MaxValue))
 
-    static member EnqueLogForInsert(log:DsLog) = DBLoggerImpl.enqueLogForInsert(log:DsLog)
-    static member EnqueLogsForInsert(logs:DsLog seq) = DBLoggerImpl.enqueLogsForInsert(logs:DsLog seq)
-    static member InitializeLogWriterOnDemandAsync(systems:DsSystem seq, connectionString:string) =
+type DBLogger() =
+    static let querySet = QuerySet()
+    //static let querySet = QuerySet(Nullable<DateTime>(DateTime(2023, 10, 28, 10, 46, 0)), Nullable<DateTime>())
+
+    static member EnqueLogForInsert(log:DsLog) = DBLoggerImpl.Writer.enqueLogForInsert(log:DsLog)
+    static member EnqueLogsForInsert(logs:DsLog seq) = DBLoggerImpl.Writer.enqueLogsForInsert(logs:DsLog seq)
+    static member InitializeLogWriterOnDemandAsync(systems:DsSystem seq, commonAppSetting:DSCommonAppSettings, modelCompileInfo:ModelCompileInfo) =
         task {
-            let! logSet = DBLoggerImpl.initializeLogWriterOnDemandAsync(systems, connectionString)
-            return logSet :> IDisposable
+            Log4NetWrapper.logWithTrace <- true
+            let! logSet = DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync(systems, commonAppSetting, modelCompileInfo)
+            return logSet :> ILogSet
         }
-    static member InitializeLogReaderOnDemandAsync(systems:DsSystem seq, connectionString:string) =
+    static member InitializeLogReaderOnDemandAsync(querySet:QuerySet, systems:DsSystem seq) =
         task {
-            let! logSet = DBLoggerImpl.initializeLogReaderOnDemandAsync(querySet, systems, connectionString)
-            return logSet :> IDisposable
+            Log4NetWrapper.logWithTrace <- true
+            let! logSet = DBLoggerImpl.Reader.initializeLogReaderOnDemandAsync(querySet, systems)
+            return logSet :> ILogSet
+        }
+
+    /// 조회 기간 변경 (reader)
+    /// call site 에서는 기존 인자로 주어진 logSet 은 자동 dispose 되며, 새로 return 되는 logSet 을 이용하여야 한다.
+    [<Obsolete("Not yet implemented")>]
+    static member ChangeQueryDurationAsync(logSet:ILogSet, startAt:Nullable<DateTime>, endAt:Nullable<DateTime>) =
+        task {
+            let logSet = logSet :?> LogSet
+            let querySet = QuerySet(startAt, endAt)
+            let! newLogSet = DBLoggerImpl.Reader.changeQueryDurationAsync(logSet, querySet)
+            dispose (logSet :> IDisposable)
+            return newLogSet :> ILogSet
         }
 
     // { unit test 등의 debugging 용
@@ -35,4 +51,6 @@ type DBLogger() =
 
     static member Sum     (fqdn, tagKind) = DBLoggerQueryImpl.sum(DBLoggerImpl.logSet, fqdn, tagKind)
     static member Average (fqdn, tagKind) = DBLoggerQueryImpl.average(DBLoggerImpl.logSet, fqdn, tagKind)
+
+    static member GetDsFilePath (connectionString:string) = DBLoggerImpl.queryPropertyDsConfigJsonPathWithConnectionStringAsync(connectionString).Result
 

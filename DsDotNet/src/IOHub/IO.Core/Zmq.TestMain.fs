@@ -1,4 +1,5 @@
 namespace IO.Core
+
 open System
 open System.Threading
 open Dual.Common.Core.FS
@@ -8,6 +9,12 @@ module ZmqTestMain =
     let main _ = 
         let zmqInfo = Zmq.Initialize "zmqsettings.json"
         let server, client, cts = zmqInfo.Server, zmqInfo.Client, zmqInfo.CancellationTokenSource
+
+        use subs =
+            server.IOChangedObservable.Subscribe(fun change ->
+                for (tag, value) in change.GetTagNameAndValues() do
+                    logDebug $"Tag change detected on server side for {tag}: {value}"
+                ())
 
         let handleCancelKey (args: ConsoleCancelEventArgs) =
             logDebug("Ctrl+C pressed!")
@@ -41,7 +48,11 @@ module ZmqTestMain =
         // ---- third party ----
         // wb
         let wr2 = client.WriteBytes("p/o", [|0; 1; 2; 3|], [|99uy; 98uy; 97uy; 96uy|])
-        let (bytes:byte[], err_) = client.ReadBytes("p/o", [|0; 1; 2; 3|])
+        match client.ReadBytes("p/o", [|0; 1; 2; 3|]) with
+        | Ok bytes ->
+            ()
+        | _ ->
+            failwith "ERROR"
 
      
         let mutable key = ""
@@ -52,8 +63,12 @@ module ZmqTestMain =
                 | "q" | "Q" -> key <- null
                 | "" -> ()
                 | _ ->
-                    let result = client.SendRequest(key)
-                    Console.WriteLine(result)
+                    match client.SendRequest(key) with
+                    | Ok value ->
+                        Console.WriteLine($"OK: {value}")
+                    | Error err ->
+                        Console.WriteLine($"ERR: {err}")
+
                 ()
 
         while(not server.IsTerminated) do

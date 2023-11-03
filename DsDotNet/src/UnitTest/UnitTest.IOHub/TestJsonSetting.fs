@@ -4,13 +4,21 @@ open Dual.UnitTest.Common.FS
 open NUnit.Framework
 open System
 open IO.Core
+open Xunit
+open Dual.Common.Core.FS.Prelude
 
 [<AutoOpen>]
 module JSONSettingTestModule =
     
+    [<Collection("ZmqTesting")>]
     [<TestFixture>]
     type JSONSettingTest() =
         inherit TestBaseClass("IOHubLogger")
+
+        let checkOk x =
+            match x with
+            | Ok _ -> ()
+            | _ -> failwith "ERROR"
 
         [<Test>]
         member _.Endian() =
@@ -20,138 +28,218 @@ module JSONSettingTestModule =
             n === n2
 
         [<Test>]
-        member _.ReadWriteWholeFiles() =
-            let zmqInfo = Zmq.Initialize (__SOURCE_DIRECTORY__ + @"/../../IOHub/IO.Core/zmqsettings.json")
-            let server, client, cts = zmqInfo.Server, zmqInfo.Client, zmqInfo.CancellationTokenSource
-            let venders = zmqInfo.IOSpec.Vendors
+        member x.ReadWriteWholeFiles() =
+            lock x.Locker (fun () ->
+                let zmqInfo = Zmq.Initialize (__SOURCE_DIRECTORY__ + @"/../../IOHub/IO.Core/zmqsettings.json")
+                let server, client, cts = zmqInfo.Server, zmqInfo.Client, zmqInfo.CancellationTokenSource
+                let venders = zmqInfo.IOSpec.Vendors
 
-            let checkSubFile() =
-                // Paix(=>"p") 의 o 파일
-                let p = venders |> Array.find (fun (v:VendorSpec) -> v.Location = "p")
-                let po = p.Files |> Array.find (fun (v:IOFileSpec) -> v.Name = "o")
-                let check_po_bytes() =
-                    let indices = [|0..po.Length-1|]
-                    let values = indices |> Array.map (fun i -> i |> uint8 |> byte)
+                let checkSubFile() =
+                    // Paix(=>"p") 의 o 파일
+                    let p = venders |> Array.find (fun (v:VendorSpec) -> v.Location = "p")
+                    let po = p.Files |> Array.find (fun (v:IOFileSpec) -> v.Name = "o")
 
-                    client.ClearAll("p/o") === null
-                    client.WriteBytes("p/o", indices, values) === null
-                    let (obs:byte[], err_) = client.ReadBytes("p/o", indices)
-                    SeqEq obs values
+                    let check_po_bits() =
+                        ()
+                        let indices = [|0.. po.Length|]
+                        let values = indices |> Array.map (fun i -> i % 2 = 0)
 
-                let check_po_words() =
-                    let indices = [|0..(po.Length / 2)-1|]
-                    let values = indices |> Array.map (fun i -> uint16 i)
+                        client.ClearAll("p/o") |> checkOk
+                        client.WriteBits("p/o", indices, values) |> checkOk
+                        match client.ReadBits("p/o", indices) with
+                        | Ok bits ->
+                            for (i, b) in bits |> Array.indexed do
+                                (i % 2 = 0) === b
+                        | _ ->
+                            failwith "ERROR"
 
-                    client.ClearAll("p/o") === null
-                    client.WriteUInt16s("p/o", indices, values) === null
-                    let (ows:uint16[], err_) = client.ReadUInt16s("p/o", indices)
-                    SeqEq ows values
+                    let check_po_bytes() =
+                        let indices = [|0..po.Length-1|]
+                        let values = indices |> Array.map (fun i -> i |> uint8 |> byte)
 
-                let check_po_dwords() =
-                    let indices = [|0..(po.Length / 4)-1|]
-                    let values = indices |> Array.map (fun i -> uint32 i)
+                        client.ClearAll("p/o") |> checkOk
+                        client.WriteBytes("p/o", indices, values) |> checkOk
+                        match client.ReadBytes("p/o", indices) with
+                        | Ok obs -> SeqEq obs values
+                        | _ -> failwith "ERROR"
 
-                    client.ClearAll("p/o") === null
-                    client.WriteUInt32s("p/o", indices, values) === null
-                    let (ows:uint32[], err_) = client.ReadUInt32s("p/o", indices)
-                    SeqEq ows values
+                    let check_po_words() =
+                        let indices = [|0..(po.Length / 2)-1|]
+                        let values = indices |> Array.map (fun i -> uint16 i)
 
-                let check_po_lwords() =
-                    let indices = [|0..(po.Length / 8)-1|]
-                    let values = indices |> Array.map (fun i -> uint64 i)
+                        client.ClearAll("p/o") |> checkOk
+                        client.WriteUInt16s("p/o", indices, values) |> checkOk
+                        match client.ReadUInt16s("p/o", indices) with
+                        | Ok ows -> SeqEq ows values
+                        | _ -> failwith "ERROR"
 
-                    client.ClearAll("p/o") === null
-                    client.WriteUInt64s("p/o", indices, values) === null
-                    let (ows:uint64[], err_) = client.ReadUInt64s("p/o", indices)
-                    SeqEq ows values
+                    let check_po_dwords() =
+                        let indices = [|0..(po.Length / 4)-1|]
+                        let values = indices |> Array.map (fun i -> uint32 i)
 
-                check_po_bytes()
-                check_po_words()
-                check_po_dwords()
-                check_po_lwords()
+                        client.ClearAll("p/o") |> checkOk
+                        client.WriteUInt32s("p/o", indices, values) |> checkOk
+                        match client.ReadUInt32s("p/o", indices) with
+                        | Ok ows -> SeqEq ows values
+                        | _ -> failwith "ERROR"
 
-            let checkTopLevel() =
-                // LsXgi(=>"") 의 q 파일
-                let ls = venders |> Array.find (fun (v:VendorSpec) -> v.Location = "")
-                let lsq = ls.Files |> Array.find (fun (v:IOFileSpec) -> v.Name = "q")
-                let checkBytes() =
-                    let indices = [|0..lsq.Length-1|]
-                    let values = indices |> Array.map (fun i -> i |> uint8 |> byte)
+                    let check_po_lwords() =
+                        let indices = [|0..(po.Length / 8)-1|]
+                        let values = indices |> Array.map (fun i -> uint64 i)
 
-                    client.ClearAll("q") === null
-                    client.WriteBytes("q", indices, values) === null
-                    let (obs:byte[], err_) = client.ReadBytes("q", indices)
-                    SeqEq obs values
+                        client.ClearAll("p/o") |> checkOk
+                        client.WriteUInt64s("p/o", indices, values) |> checkOk
+                        match client.ReadUInt64s("p/o", indices) with
+                        | Ok ows -> SeqEq ows values
+                        | _ -> failwith "ERROR"
 
-                let checkWords() =
-                    let indices = [|0..(lsq.Length / 2)-1|]
-                    let values = indices |> Array.map (fun i -> uint16 i)
+                    check_po_bits()
+                    check_po_words()
+                    check_po_dwords()
+                    check_po_lwords()
+                    check_po_bytes()
 
-                    client.ClearAll("q") === null
-                    client.WriteUInt16s("q", indices, values) === null
-                    let (ows:uint16[], err_) = client.ReadUInt16s("q", indices)
-                    SeqEq ows values
+                let checkTopLevel() =
+                    // LsXgi(=>"") 의 q 파일
+                    let ls = venders |> Array.find (fun (v:VendorSpec) -> v.Location = "")
+                    let lsq = ls.Files |> Array.find (fun (v:IOFileSpec) -> v.Name = "q")
+                    let checkBytes() =
+                        let indices = [|0..lsq.Length-1|]
+                        let values = indices |> Array.map (fun i -> i |> uint8 |> byte)
 
-                let checkDwords() =
-                    let indices = [|0..(lsq.Length / 4)-1|]
-                    let values = indices |> Array.map (fun i -> uint32 i)
+                        client.ClearAll("q") |> checkOk
+                        client.WriteBytes("q", indices, values) |> checkOk
+                        match client.ReadBytes("q", indices) with
+                        | Ok obs -> SeqEq obs values
+                        | _ -> failwith "ERROR"
 
-                    client.ClearAll("q") === null
-                    client.WriteUInt32s("q", indices, values) === null
-                    let (ows:uint32[], err_) = client.ReadUInt32s("q", indices)
-                    SeqEq ows values
+                    let checkWords() =
+                        let indices = [|0..(lsq.Length / 2)-1|]
+                        let values = indices |> Array.map (fun i -> uint16 i)
 
-                let checkLwords() =
-                    let indices = [|0..(lsq.Length / 8)-1|]
-                    let values = indices |> Array.map (fun i -> uint64 i)
+                        client.ClearAll("q") |> checkOk
+                        client.WriteUInt16s("q", indices, values) |> checkOk
+                        match client.ReadUInt16s("q", indices) with
+                        | Ok ows -> SeqEq ows values
+                        | _ -> failwith "ERROR"
 
-                    client.ClearAll("q") === null
-                    client.WriteUInt64s("q", indices, values) === null
-                    let (ows:uint64[], err_) = client.ReadUInt64s("q", indices)
-                    SeqEq ows values
+                    let checkDwords() =
+                        let indices = [|0..(lsq.Length / 4)-1|]
+                        let values = indices |> Array.map (fun i -> uint32 i)
+
+                        client.ClearAll("q") |> checkOk
+                        client.WriteUInt32s("q", indices, values) |> checkOk
+                        match client.ReadUInt32s("q", indices) with
+                        | Ok ows -> SeqEq ows values
+                        | _ -> failwith "ERROR"
+
+                    let checkLwords() =
+                        let indices = [|0..(lsq.Length / 8)-1|]
+                        let values = indices |> Array.map (fun i -> uint64 i)
+
+                        client.ClearAll("q") |> checkOk
+                        client.WriteUInt64s("q", indices, values) |> checkOk
+                        match client.ReadUInt64s("q", indices) with
+                        | Ok ows -> SeqEq ows values
+                        | _ -> failwith "ERROR"
 
 
-                checkBytes()
-                checkWords()
-                checkDwords()
-                checkLwords()
+
+                    checkBytes()
+                    checkWords()
+                    checkDwords()
+                    checkLwords()
 
 
-            checkTopLevel()
-            checkSubFile()
+                checkTopLevel()
+                checkSubFile()
+
+                zmqInfo.CancellationTokenSource.Cancel()
+            )
 
 
         [<Test>]
-        member _.TestLimits() =
-            let zmqInfo = Zmq.Initialize (__SOURCE_DIRECTORY__ + @"/../../IOHub/IO.Core/zmqsettings.json")
-            let server, client, cts = zmqInfo.Server, zmqInfo.Client, zmqInfo.CancellationTokenSource
-            let venders = zmqInfo.IOSpec.Vendors
+        member x.ReadWritePoints() =
+            lock x.Locker (fun () ->
+                let zmqInfo = Zmq.Initialize (__SOURCE_DIRECTORY__ + @"/../../IOHub/IO.Core/zmqsettings.json")
+                let server, client, cts = zmqInfo.Server, zmqInfo.Client, zmqInfo.CancellationTokenSource
+                let venders = zmqInfo.IOSpec.Vendors
+                let p = venders |> Array.find (fun (v:VendorSpec) -> v.Location = "p")
+                let po = p.Files |> Array.find (fun (v:IOFileSpec) -> v.Name = "o")
+                po.GetPath() === "p/o"
+                let l = venders |> Array.find (fun (v:VendorSpec) -> v.Location = "")
+                let lq = l.Files |> Array.find (fun (v:IOFileSpec) -> v.Name = "q")
+                lq.GetPath() === "q"
 
-            let p = venders |> Array.find (fun (v:VendorSpec) -> v.Location = "p")
-            let po = p.Files |> Array.find (fun (v:IOFileSpec) -> v.Name = "o")
-            let length = po.Length
 
-            // 일단, LWord 단위로 파일 layout 가정
-            length % 8 === 0
+                let length = po.Length
+                match client.ReadBytes("p/o", [|255|]) with
+                | _ -> ()
 
-            client.WriteBytes("p/o", [|length - 1|], [|255uy|]) === null
-            let b0, err = client.ReadBytes("p/o", [|length - 1|])
-            SeqEq b0 [|255uy|]
+                zmqInfo.CancellationTokenSource.Cancel()
+                dispose client
+                dispose server
+                System.Threading.Thread.Sleep(500)
 
-            let writeErrorneous = client.WriteBytes("p/o", [|length|], [|255uy|])
-            writeErrorneous =!= null
-            writeErrorneous.Contains("Invalid offset") === true
+                ()
+            )
 
-            client.WriteUInt16s("p/o", [|length/2 - 1|], [|0xFFFFus|]) === null
-            let ws, err = client.ReadUInt16s("p/o", [|length/2 - 1|])
-            SeqEq ws [|0xFFFFus|]
 
-            client.WriteUInt32s("p/o", [|length/4 - 1|], [|0xFFFF_FFFFu|]) === null
-            let dws, err = client.ReadUInt32s("p/o", [|length/4 - 1|])
-            SeqEq dws [|0xFFFFFFFFu|]
+        [<Test>]
+        member x.TestLimits() =
+            lock x.Locker (fun () ->
+                let zmqInfo = Zmq.Initialize (__SOURCE_DIRECTORY__ + @"/../../IOHub/IO.Core/zmqsettings.json")
+                let server, client, cts = zmqInfo.Server, zmqInfo.Client, zmqInfo.CancellationTokenSource
+                let venders = zmqInfo.IOSpec.Vendors
 
-            client.WriteUInt64s("p/o", [|length/8 - 1|], [|0xFFFF_FFFF_FFFF_FFFFUL|]) === null
-            let lws, err = client.ReadUInt64s("p/o", [|length/8 - 1|])
-            SeqEq lws [|0xFFFF_FFFF_FFFF_FFFFUL|]
+                let p = venders |> Array.find (fun (v:VendorSpec) -> v.Location = "p")
+                let po = p.Files |> Array.find (fun (v:IOFileSpec) -> v.Name = "o")
+                let length = po.Length
 
+                // 일단, LWord 단위로 파일 layout 가정
+                length % 8 === 0
+
+                match client.WriteBytes("p/o", [|length - 1|], [|255uy|]) with
+                | Ok _ ->
+                    match client.ReadBytes("p/o", [|length - 1|]) with
+                    | Ok bs -> SeqEq bs [|255uy|]
+                    | _ -> failwith "ERROR"
+                | Error _ ->
+                    failwith "ERROR"
+
+                let writeErrorneous = client.WriteBytes("p/o", [|length|], [|255uy|])
+                match writeErrorneous with
+                | Error err -> err.Contains("Invalid offset") === true
+                | Ok _ -> failwith "Should have been failed."
+            
+
+                match client.WriteUInt16s("p/o", [|length/2 - 1|], [|0xFFFFus|]) with
+                | Ok _ ->
+                    match client.ReadUInt16s("p/o", [|length/2 - 1|]) with
+                    | Ok ws -> SeqEq ws [|0xFFFFus|]
+                    | _ -> failwith "ERROR"
+                | Error _ ->
+                    failwith "ERROR"
+
+
+
+                match client.WriteUInt32s("p/o", [|length/4 - 1|], [|0xFFFF_FFFFu|]) with
+                | Ok _ ->
+                    match client.ReadUInt32s("p/o", [|length/4 - 1|]) with
+                    | Ok dws -> SeqEq dws [|0xFFFFFFFFu|]
+                    | _ -> failwith "ERROR"
+                | Error _ ->
+                    failwith "ERROR"
+
+
+                match client.WriteUInt64s("p/o", [|length/8 - 1|], [|0xFFFF_FFFF_FFFF_FFFFUL|]) with
+                | Ok _ ->
+                    match client.ReadUInt64s("p/o", [|length/8 - 1|]) with
+                    | Ok lws -> SeqEq lws [|0xFFFF_FFFF_FFFF_FFFFUL|]
+                    | _ -> failwith "ERROR"
+                | Error _ ->
+                    failwith "ERROR"
+
+                zmqInfo.CancellationTokenSource.Cancel()
+            )
 

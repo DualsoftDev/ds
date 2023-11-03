@@ -148,6 +148,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DsPowerPointAddInSetupUtil", "Apps\OfficeAddOn\PowerPointAddInSetup\PowerPointAddInSetupUtil\DsPowerPointAddInSetupUtil.csproj", "{AB1B66BC-924C-4DAC-B903-35CA798D51D7}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "UnitTest.Core", "src\UnitTest\UnitTest.Core\UnitTest.Core\UnitTest.Core.fsproj", "{71D5B8F9-E6EB-4B0A-AF14-8503242D3BA9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientSample.CSharp", "src\IOHub\ClientSamples\ClientSample.CSharp\ClientSample.CSharp.csproj", "{55A4E23A-D5D7-4FE2-97D6-46C917D6F40E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -515,6 +516,10 @@ Global
 		{71D5B8F9-E6EB-4B0A-AF14-8503242D3BA9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{71D5B8F9-E6EB-4B0A-AF14-8503242D3BA9}.Release|x86.ActiveCfg = Release|Any CPU
 		{71D5B8F9-E6EB-4B0A-AF14-8503242D3BA9}.Release|x86.Build.0 = Release|Any CPU
+		{55A4E23A-D5D7-4FE2-97D6-46C917D6F40E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55A4E23A-D5D7-4FE2-97D6-46C917D6F40E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55A4E23A-D5D7-4FE2-97D6-46C917D6F40E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55A4E23A-D5D7-4FE2-97D6-46C917D6F40E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -578,6 +583,7 @@ Global
 		{4A05B32E-9334-4AA4-8B00-ABFBCBE8E70F} = {08D4417E-7482-4FDB-88F0-73A36732375C}
 		{AB1B66BC-924C-4DAC-B903-35CA798D51D7} = {4A05B32E-9334-4AA4-8B00-ABFBCBE8E70F}
 		{71D5B8F9-E6EB-4B0A-AF14-8503242D3BA9} = {BCF8AC63-491C-4D8E-81EC-88032ED4CF05}
+		{55A4E23A-D5D7-4FE2-97D6-46C917D6F40E} = {1ABCD66C-D3ED-44E9-9D5C-BDB4CB852D33}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B36D7B1-CD69-44C5-8E57-DE46AC18C1F7}

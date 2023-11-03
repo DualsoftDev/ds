@@ -7,46 +7,11 @@ open Newtonsoft.Json
 
 [<AutoOpen>]
 module rec ZmqSpec =
-    [<AllowNullLiteral>]
-    type IIOResult = interface end
-    type IIOResultOK = inherit IIOResult
-    type IIOResultNG =
-        inherit IIOResult
-        abstract member Error:string
+    type ErrorMessage = string
+    type NoMoreInputOK() = class end
 
-    [<AbstractClass>]
-    type IOResult(error:string) =
-        member x.Error = error
-        member x.IsOK = String.IsNullOrEmpty(error)
-        interface IIOResult
-
-    [<AbstractClass>]
-    type ReadResult(error:string) =
-        inherit IOResult(error)
-
-    type ReadResultArray<'T>(results:'T[]) =
-        inherit ReadResult(null)
-        interface IIOResultOK
-        member val Results = results
-
-    type ReadResultString(result:string) =
-        inherit ReadResult(null)
-        interface IIOResultOK
-        member val Result = result
-
-    type ReadResultError(error:string) =
-        inherit ReadResult(error)
-        interface IIOResultNG with
-            member x.Error = error
-
-    type WriteResultOK() =
-        inherit IOResult(null)
-        interface IIOResultOK
-
-    type WriteResultError(error:string) =
-        inherit IOResult(error)
-        interface IIOResultNG with
-            member x.Error = error
+    type IOResult = Result<obj, ErrorMessage>
+    type TypedIOResult<'T> = Result<'T, ErrorMessage>
 
 
     type PLCMemoryBitSize =
@@ -84,7 +49,7 @@ module rec ZmqSpec =
     *)
 
     [<AllowNullLiteral>] 
-    type IBufferManager = interface end
+    type IStreamManager = interface end
     and IOFileSpec() =
         member val Name = ""  with get, set
         member val Length = 0 with get, set
@@ -92,7 +57,7 @@ module rec ZmqSpec =
         // reference to parent
         member val Vendor:VendorSpec = null with get, set
         member val FileStream:FileStream = null with get, set
-        member val BufferManager:IBufferManager = null with get, set
+        member val StreamManager:IStreamManager = null with get, set
     
     // Activator.CreateInstanceFrom(v.Dll, v.ClassName) 를 이용
     [<AllowNullLiteral>] 
@@ -140,3 +105,9 @@ module rec ZmqSpec =
         | 32 -> PLCMemoryBitSize.DWord
         | 64 -> PLCMemoryBitSize.LWord
         | _ -> failwithf($"Invalid bit size: {bitSize}")
+
+    type IOFileSpec with
+        member x.GetPath() =
+            match x.Vendor.Location with
+            | "" -> x.Name
+            | _ as l -> $"{l}/{x.Name}"

@@ -99,7 +99,7 @@ module PathManager =
         if isRuntimeLinux then
             dsPath.ToValidPath().StartsWith("/")
         else
-            Path.IsPathRooted(dsPath.ToString())
+            Path.IsPathFullyQualified(dsPath.ToString())
 
     // Change the extension of a DsPath
     let changeExtension (filePath: DsPath) (extension: string): string =
@@ -147,21 +147,28 @@ module PathManager =
 
     // Get the full path from a relativeFilePath relative to an absoluteDirectory
     let getFullPath (relativeFilePath: DsPath) (absoluteDirectory: DsPath): string =
+        let rel = relativeFilePath
+        let abs = absoluteDirectory
 
-        match relativeFilePath with
+        match rel with
         |DsFile _ -> ()
-        |DsDirectory _ ->raise (new ArgumentException($"({relativeFilePath}) is not a file path"))
-        match absoluteDirectory with
-        |DsFile _ -> raise (new ArgumentException($"({absoluteDirectory}) is not a directory"))
+        |DsDirectory _ ->raise (new ArgumentException($"({rel}) is not a file path"))
+        match abs with
+        |DsFile _ -> raise (new ArgumentException($"({abs}) is not a directory"))
         |DsDirectory _ -> ()
 
 
-        if not (hasExtension relativeFilePath) then
-            raise (new ArgumentException($"relativeFilePath error in {relativeFilePath}"))
-        if not (isPathRooted absoluteDirectory) then
-            raise (new ArgumentException($"absoluteDirectory error in {absoluteDirectory}"))
+        if not (hasExtension rel) ||  rel.ToString().StartsWith('/') then
+            raise (new ArgumentException($"relativeFilePath error in {rel}"))
+        if not (isPathRooted abs) then
+            raise (new ArgumentException($"absoluteDirectory error in {abs}"))
 
-        Path.GetFullPath(relativeFilePath.ToString(), absoluteDirectory.ToString()) |> getValidFile
+        Path.GetFullPath(rel.ToString(), abs.ToString()) |> getValidFile
+
+    let combineFullPathFile (xs: string  array) =
+        Path.Combine(xs) |> Path.GetFullPath |> getValidFile
+    let combineFullPathDirectory (xs: string  array) =
+        Path.Combine(xs) |> Path.GetFullPath |> getValidDirectory  
 
 [<Extension>]
 type PathHelper =

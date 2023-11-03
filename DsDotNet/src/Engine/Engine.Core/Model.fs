@@ -3,9 +3,8 @@ namespace Engine.Core
 
 [<AutoOpen>]
 module ModelLoaderModule =
-    type FilePath = string
     type ModelConfig = {
-        DsFilePaths: FilePath list
+        DsFilePaths: string list
     }
     type Model = {
         Config: ModelConfig

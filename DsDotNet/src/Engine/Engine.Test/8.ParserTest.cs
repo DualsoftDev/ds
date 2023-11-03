@@ -633,33 +633,25 @@ namespace Engine
 }
 ";
         public static string LinkAndLinkAliases = @"
-[sys] Control = {
+[sys] my = {
     [flow] F = {
-        FWD > BWD > Main <||> Reset;		// FWD(CallSys)> BWD(CallSys) > Main(Real) <||> Reset(Real);
         Main = {
-            mv1up, mv2dn > mv1dn, mv2up;		// mv1up(CallDev), mv2dn(CallDev)> mv1dn(CallDev), mv2up(CallDev);
+            // AVp1 |> Am1;
+            // 정보로서의 CallDev 상호 리셋
+            //Ap1 <||> Am1;
+            Ap > Am; 
         }
         [aliases] = {
-            FWD = { FWD2; }
-            BWD = { BWD2; }
+            Main.Ap = { Ap1; Ap2; Ap3; }
+            Main.Am = { Am1; Am2; Am3; }    // system name optional
+            //Vp = {AVp1;}  // invalid: 자신 시스템에 정의된 것만 alias
         }
     }
     [jobs] = {
-        mv1up = { M1.Up(%I300, %Q300); }
-        mv1dn = { M1.Dn(%I301, %Q301); }
-        mv2up = { M2.Up(%I302, %Q302); }
-        mv2dn = { M2.Dn(%I303, %Q303); }
-        FWD = Mt.fwd;
-        BWD = Mt.bwd;
+        Ap = { A.""+""(%I1, %Q1); }
+        Am = { A.""-""(%I2, %Q2); }
     }
-    [interfaces] = {
-        G = { F.Main ~ F.Main }
-        R = { F.Reset ~ F.Reset }
-        G <||> R;
-    }
-    [external file=""HmiCodeGenExample/test_sample/device/MovingLifter1.ds""] M1; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/HmiCodeGenExample/test_sample/device/MovingLifter1.ds
-    [external file=""HmiCodeGenExample/test_sample/device/MovingLifter2.ds""] M2; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/HmiCodeGenExample/test_sample/device/MovingLifter2.ds
-    [external file=""HmiCodeGenExample/test_sample/device/motor.ds""] Mt; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/HmiCodeGenExample/test_sample/device/motor.ds
+    [device file=""cylinder.ds""] A;
 }
 
 ";

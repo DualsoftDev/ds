@@ -16,7 +16,9 @@ module ModelBuildupTests1 =
         inherit EngineTestBaseClass()
 
         let systemRepo = ShareableSystemRepository()
-        let libdir = @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model"
+        let dsFileDir = PathManager.combineFullPathDirectory ([|@$"{__SOURCE_DIRECTORY__}"; "../../UnitTest.Model/UnitTestExample/dsFolder"|])
+        let libdir = $@"{dsFileDir}lib"
+
         let compare = compare systemRepo libdir
         let compareExact x = compare x x
 
@@ -26,11 +28,11 @@ module ModelBuildupTests1 =
             let system = DsSystem("My", "localhost")
             let flow = Flow.Create("F", system)
             let real = Real.Create("Main", flow)
-            let dev = system.LoadDeviceAs(systemRepo, "A", @$"{libdir}/cylinder.ds", "cylinder.ds")
+            let dev = system.LoadDeviceAs(systemRepo, "A", @$"{libdir}/cylinder/double.ds", "./cylinder/double.ds")
 
             let apis = system.ApiUsages
-            let apiP = apis.First(fun ai -> ai.Name = "+")
-            let apiM = apis.First(fun ai -> ai.Name = "-")
+            let apiP = apis.First(fun ai -> ai.Name = "ADV")
+            let apiM = apis.First(fun ai -> ai.Name = "RET")
             let callAp =
                 let apiItem = TaskDev(apiP, "%I1", "%Q1",  dev.Name)
                 Job("Ap", [apiItem])
@@ -53,14 +55,14 @@ module ModelBuildupTests1 =
 [sys ip = localhost] My = {
     [flow] F = {
         Main = {
-            Ap < Am;
+            Ap < Am;		
         }
     }
     [jobs] = {
-        Ap = { A."+"(%I1, %Q1); }
-        Am = { A."-"(%I2, %Q2); }
+        Ap = { A.ADV(%I1, %Q1); }
+        Am = { A.RET(%I2, %Q2); }
     }
-    [device file="cylinder.ds"] A;
+    [device file="./cylinder/double.ds"] A; 
 }
 """
             logDebug $"{generated}"
@@ -98,10 +100,10 @@ module ModelBuildupTests1 =
 
     }
     [jobs] = {
-        Ap = { A."+"(%I1, %Q1); }
-        Am = { A."-"(%I2, %Q2); }
+        Ap = { A.ADV(%I1, %Q1); }
+        Am = { A.RET(%I2, %Q2); }
     }
-    [device file="cylinder.ds"] A;
+    [device file="./cylinder/double.ds"] A; 
 }
 """
             logDebug $"{generated}"
@@ -128,10 +130,10 @@ module ModelBuildupTests1 =
         F.Main > R3;		// F.Main(RealOtherFlow)> R3(Real);
     }
     [jobs] = {
-        Ap = { A."+"(%I1, %Q1); }
-        Am = { A."-"(%I2, %Q2); }
+        Ap = { A.ADV(%I1, %Q1); }
+        Am = { A.RET(%I2, %Q2); }
     }
-    [device file="cylinder.ds"] A;
+    [device file="./cylinder/double.ds"] A; 
 }
 """
             logDebug $"{generated}"
@@ -157,15 +159,15 @@ module ModelBuildupTests1 =
             Main2; // island
     }
     [jobs] = {
-        Ap = { A."+"(%I1, %Q1); }
-        Am = { A."-"(%I2, %Q2); }
+        Ap = { A.ADV(%I1, %Q1); }
+        Am = { A.RET(%I2, %Q2); }
     }
     [interfaces] = {
         Adv = { F.Main ~ F.Main }
         Ret = { F.Main2 ~ F.Main2 }
         Adv <||> Ret;
     }
-    [device file="cylinder.ds"] A;
+    [device file="./cylinder/double.ds"] A; 
 }
 """
             logDebug $"{generated}"
@@ -193,8 +195,8 @@ module ModelBuildupTests1 =
     [flow] F2 = {
     }
     [jobs] = {
-        Ap = { A."+"(%I1, %Q1); }
-        Am = { A."-"(%I2, %Q2); }
+        Ap = { A.ADV(%I1, %Q1); }
+        Am = { A.RET(%I2, %Q2); }
     }
     [buttons] = {
         [d] = {
@@ -206,7 +208,7 @@ module ModelBuildupTests1 =
             STOP2(%I1, %Q1) = { F2; }
         }
     }
-    [device file="cylinder.ds"] A; // D:/Git/ds-Master/DsDotNet/src/UnitTest/UnitTest.Model/cylinder.ds
+    [device file="./cylinder/double.ds"] A; 
 }
 """
             logDebug $"{generated}"
@@ -264,8 +266,8 @@ module ModelBuildupTests1 =
 //            Main; // island
 //    }
 //    [jobs] = {
-//        Ap = { A1."+"(%I1, %Q1); A2."+"(%I1, %Q1); A3."+"(%I1, %Q1); }
-//        Am = { A."-"(%I2, %Q2); }
+//        Ap = { A1.ADV(%I1, %Q1); A2.ADV(%I1, %Q1); A3.ADV(%I1, %Q1); }
+//        Am = { A.RET(%I2, %Q2); }
 //    }
 //    [device file="cylinder.ds"] A;
 //    [variables] = {

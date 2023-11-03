@@ -12,14 +12,14 @@ module LoadConfigTestModule =
     type LoadConfigTest() =
         inherit EngineTestBaseClass()
 
-        let libdir = System.IO.Path.GetFullPath @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model"
-        let configFile = PathManager.getFullPath  ( @"test-model-config.json"|>DsFile) (libdir.ToDirectory())
-
+        let dsFileDir = PathManager.combineFullPathDirectory ([|@$"{__SOURCE_DIRECTORY__}"; "../../UnitTest.Model/UnitTestExample"|])
+        let configFile = PathManager.getFullPath  ( @"test-model-config.json"|>DsFile) (dsFileDir.ToDirectory())
+        
         let loadConfigTest() =
             let cfg =
                 {   DsFilePaths = [
-                        $@"{libdir}/cylinder.ds"
-                        $@"{libdir}/station.ds" ] }
+                        $@"{dsFileDir}dsFolder/lib/Cylinder/Double.ds"
+                        $@"{dsFileDir}dsFolder/sub/sub/station.ds" ] }
             ModelLoader.SaveConfig configFile cfg
             let cfg2 = ModelLoader.LoadConfig configFile
             cfg === cfg2
@@ -31,7 +31,18 @@ module LoadConfigTestModule =
 
             let model = ParserLoader.LoadFromConfig configFile
             model.Systems.Length === 2
-            model.Systems.Select(fun s -> s.Name) |> SeqEq ["Cylinder"; "Station"]
+            model.Systems.Select(fun s -> s.Name) |> SeqEq ["Double"; "Station"]
+
+
+        [<Test>]
+        member __.``LoadFolderModelFromConfigTest`` () =
+            let configPath = PathManager.getFullPath ( @"dsFolder.json"|>DsFile) (dsFileDir.ToDirectory())
+
+            let model = ParserLoader.LoadFromConfig configPath
+            model.Systems.Length === 1
+            model.LoadingPaths.Length === 9
+            model.Systems.Select(fun s -> s.Name) |> SeqEq ["Factory"]
+
 
         [<Test>]
         member __.``LoadSharedDevices Singleton Test`` () =
@@ -40,8 +51,8 @@ module LoadConfigTestModule =
 
             let mySysText = """
 [sys] L = {
-    [external file="station.ds"] A;
-    [external file="station.ds"] B;
+    [external file="dsFolder/sub/sub/sub/RH.ds"] A;
+    [external file="dsFolder/sub/sub/sub/RH.ds"] B;
 }
 """
 
@@ -52,7 +63,7 @@ module LoadConfigTestModule =
     //    Vm > Pm > Sm;
     //} ....
 
-            let system = parseText systemRepo libdir mySysText
+            let system = parseText systemRepo dsFileDir mySysText
             validateGraphOfSystem system
 
             systemRepo.Count === 1
@@ -62,13 +73,13 @@ module LoadConfigTestModule =
             exs[0] === exs[1]
             exs.Distinct().Count() === 1
             system.LoadedSystems.Select(fun d -> d.Name) |> Seq.sort |> SeqEq ["A"; "B"]
-            exs[0].Name === "Station"
+            exs[0].Name === "RH"
 
 
             let findFromLoaded = tryFindLoadedSystem system  "A" |> Option.get
-            let findReferenceSystem = tryFindReferenceSystem system  "Station" |> Option.get
+            let findReferenceSystem = tryFindReferenceSystem system  "RH" |> Option.get
             findFromLoaded.Name =!= findReferenceSystem.Name
 
             let generated = system.ToDsText(true);
-            compare systemRepo libdir mySysText generated
+            compare systemRepo dsFileDir mySysText generated
             ()

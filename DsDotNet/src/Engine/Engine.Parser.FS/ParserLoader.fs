@@ -21,19 +21,17 @@ module ParserLoader =
         let system = ModelParser.ParseFromString(text, option)
         system
 
-    let LoadFromConfig(config: FilePath) =
+    let loadingDS(loadingConfigDir:string) (activePaths: string seq) =
         let systemRepo = ShareableSystemRepository()
-        let cfg = LoadConfig config
-        let dir = PathManager.getDirectoryName (config.ToFile())
         let systems =
             let paths = 
                 [
-                    for dsFile in cfg.DsFilePaths do 
+                    for dsFile in activePaths do 
                             if PathManager.isPathRooted (dsFile.ToFile())
                             then 
                                 yield dsFile |> FileManager.fileExistChecker
                             else
-                                yield PathManager.getFullPath (dsFile.ToFile()) (dir|>DsDirectory) |> FileManager.fileExistChecker
+                                yield PathManager.getFullPath (dsFile.ToFile()) (loadingConfigDir|>DsDirectory) |> FileManager.fileExistChecker
                 ]
             paths |> List.map (loadSystemFromDsFile systemRepo)
 
@@ -41,7 +39,16 @@ module ParserLoader =
         let loadings = systems.Collect(fun f-> f.GetRecursiveLoadeds())
                               .Map(fun s-> s.AbsoluteFilePath)
                               .Distinct().ToFSharpList()
+        systems , loadings
 
+
+    let LoadFromConfig(configPath: string) =
+        let cfg = LoadConfig configPath
+        let dir = PathManager.getDirectoryName (configPath.ToFile())
+        let systems, loadings = loadingDS dir cfg.DsFilePaths
         { Config = cfg; Systems = systems; LoadingPaths = loadings}
 
-    
+
+    let LoadFromActivePath(activePath: string) =
+        let dir = PathManager.getDirectoryName (activePath.ToFile())
+        loadingDS dir [activePath]

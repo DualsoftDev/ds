@@ -1,0 +1,10 @@
+[sys] Double = {
+    [flow] Flow = {
+        RET <||> ADV;
+    }
+    [interfaces] = {
+        ADV = { Flow.ADV ~ Flow.ADV }
+        RET = { Flow.RET ~ Flow.RET }
+        RET <||> ADV;
+    }
+}

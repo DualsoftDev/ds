@@ -248,21 +248,14 @@ module ImportPPTModule =
         [<Extension>]
         static member GetDSFromPPT (fullName: string) =
                 let pptResults = ImportPPT.GetModel [| fullName |]
-                let loadedPaths = HashSet<string>()
 
                 let sys = pptResults.Systems.[0]
 
                 let exportPath = sys.pptxToExportDS fullName
-                let confFile = PathManager.changeExtension (exportPath.ToFile()) ".json"
-
-                let ret = ParserLoader.LoadFromConfig confFile
-
-                loadedPaths.AddRange ret.LoadingPaths |> ignore
-
-
+                let systems, loadingPaths = ParserLoader.LoadFromActivePath exportPath
                 {
-                    Systems =   ret.Systems
+                    Systems =  systems
                     ActivePaths = [exportPath]
-                    LoadingPaths = loadedPaths
+                    LoadingPaths = loadingPaths
                 }
             

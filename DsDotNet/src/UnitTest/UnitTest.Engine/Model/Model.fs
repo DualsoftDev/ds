@@ -29,7 +29,7 @@ module ModelTests1 =
         inherit EngineTestBaseClass()
 
         let systemRepo = ShareableSystemRepository()
-        let compare = compare systemRepo @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model"
+        let compare = compare systemRepo @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
         let compareExact x = compare x x
         [<Test>]
         member __.``0 Any temporary test`` () =

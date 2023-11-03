@@ -14,15 +14,15 @@ open System.Runtime.CompilerServices
 module ModelLoader =
     let private jsonSettings = JsonSerializerSettings()
 
-    let LoadConfig (path: FilePath) =
+    let LoadConfig (path: string) =
         let json = File.ReadAllText(path)
         JsonConvert.DeserializeObject<ModelConfig>(json, jsonSettings)
 
-    let SaveConfig (path: FilePath) (modelConfig:ModelConfig) =
+    let SaveConfig (path: string) (modelConfig:ModelConfig) =
         let json = JsonConvert.SerializeObject(modelConfig, jsonSettings)
         File.WriteAllText(path, json)
 
-    let SaveConfigWithPath (path: FilePath) (sysRunPaths: string seq) =
+    let SaveConfigWithPath (path: string) (sysRunPaths: string seq) =
         let cfg =
             {
                 DsFilePaths = 
@@ -55,17 +55,14 @@ type ModelLoaderExt =
     [<Extension>] 
     static member pptxToExportDS (sys:DsSystem, pptPath:string) = 
 
-        let dsFile = PathManager.changeExtension (pptPath.ToFile()) ".ds" 
-        let jsFile = PathManager.changeExtension (pptPath.ToFile()) ".json"
-        let myDsFile = PathManager.getRelativePath (jsFile.ToFile()) (dsFile.ToFile())//   // 상대경로로 기본 저장
-
+        let dsFilePath = PathManager.changeExtension (pptPath.ToFile()) ".ds" 
+        
         for s in sys.GetRecursiveLoadeds() do
             match s with
             | :? Device -> exportLoadedSystem s |> ignore
             | :? ExternalSystem -> exportLoadedSystem s |> ignore
             | _ -> ()
 
-        FileManager.fileWriteAllText(dsFile, sys.ToDsText(false))
-        ModelLoader.SaveConfigWithPath jsFile [ myDsFile ]
+        FileManager.fileWriteAllText(dsFilePath, sys.ToDsText(false))
 
-        dsFile
+        dsFilePath

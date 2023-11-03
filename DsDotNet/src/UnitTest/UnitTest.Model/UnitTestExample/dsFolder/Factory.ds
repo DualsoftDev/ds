@@ -1,0 +1,22 @@
+[sys ip = localhost] Factory = {
+    [flow] FactoryFlow = {
+        Line1_Work > Line2_Work;
+        Line1_Work = {
+                FactoryFlow_Line1_Func1; 
+        }
+        Line2_Work = {
+                FactoryFlow_Line2_Func1; 
+        }
+        Line1_RESET = {
+                FactoryFlow_Line1_Func2; 
+        }
+    }
+    [jobs] = {
+        FactoryFlow_Line1_Func1 = { FactoryFlow_Line1.Func1(_, _); }
+        FactoryFlow_Line1_Func2 = { FactoryFlow_Line1.Func2(_, _); }
+        FactoryFlow_Line2_Func1 = { FactoryFlow_Line2.Func1(_, _); }
+        FactoryFlow_Line2_Func2 = { FactoryFlow_Line2.Func2(_, _); }
+    }
+    [device file="./Sub/Line.ds"] FactoryFlow_Line1; 
+    [device file="./Sub/Line.ds"] FactoryFlow_Line2; 
+}

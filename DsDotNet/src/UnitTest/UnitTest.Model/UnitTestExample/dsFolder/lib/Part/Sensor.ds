@@ -1,0 +1,13 @@
+[sys] Sensor = {
+    [flow] Flow = {
+        PositionRET <||> PositionADV ||> PartOFF;
+        PositionRET ||> PartON;
+        PositionRET > PartOFF;
+        PositionADV > PartON;
+    }
+    [interfaces] = {
+        MOVE = { _ ~ Flow.PartON }
+        REMOVE = { Flow.PartOFF ~ _ }
+        REMOVE <||> MOVE;
+    }
+}

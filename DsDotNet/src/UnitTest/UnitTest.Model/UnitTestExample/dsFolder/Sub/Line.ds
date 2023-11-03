@@ -1,0 +1,24 @@
+[sys] Line = {
+    [flow] LineFlow = {
+        BC, RESET => Unloading => RESET;
+        START => RUN > "SIDE LH";
+        "SIDE LH" |> RUN > FLOOR;
+        RUN > MOVING;
+        RUN > "SIDE RH";
+        BR => "DOOR LH";
+        MOVING, BR, "DOOR LH", "DOOR RH" => BC;
+        "SIDE RH", "SIDE LH", FLOOR => BB => BR => "DOOR RH";
+        FLOOR = {
+            LineFlow_Station_Func1 > LineFlow_Station_Func2;
+        }
+    }
+    [jobs] = {
+        LineFlow_Station_Func2 = { LineFlow_Station.Func2(_, _); }
+        LineFlow_Station_Func1 = { LineFlow_Station.Func1(_, _); }
+    }
+    [interfaces] = {
+        Func1 = { LineFlow.START ~ LineFlow.BC }
+        Func2 = { LineFlow.RESET ~ LineFlow.RESET }
+    }
+    [device file="./Sub/Station.ds"] LineFlow_Station; 
+}

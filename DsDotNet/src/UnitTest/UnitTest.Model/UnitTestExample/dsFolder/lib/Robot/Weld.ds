@@ -1,0 +1,15 @@
+[sys] Weld = {
+    [flow] Flow = {
+            R1; 
+            R2; 
+            R3; 
+    }
+    [interfaces] = {
+        HOME = { Flow.R1 ~ _ }
+        RESET = { Flow.R2 ~ _ }
+        WELD = { Flow.R3 ~ _ }
+        RESET <||> HOME;
+        RESET <||> WELD;
+        HOME <||> WELD;
+    }
+}

@@ -133,3 +133,26 @@ let ``Given_valid_relative_directory_path_and_absolute_directory_when_getting_fu
     
     // Act
     Assert.Throws<ArgumentException>(fun () -> getFullPath(relativeDirectoryPath.ToDirectory()) (absoluteDirectory.ToDirectory())|>ignore)
+
+//[<Fact>]
+//let ``saveZip should create a ZIP archive and return the zip file path and memory stream`` () =
+//    // Arrange
+//    let filePaths = [ "path/to/file1.txt"; "path/to/file2.txt" ]
+
+//    // Act
+//    let zipFilePath =  filePaths |> FileHelper.ToZip
+
+//    // Assert
+//    Assert.True(File.Exists(zipFilePath)) // Check if the ZIP archive file exists
+
+//[<Fact>]
+//let ``ToZipStream should return a byte array of the ZIP archive`` () =
+//    // Arrange
+//    let filePaths = [ "path/to/file1.txt"; "path/to/file2.txt" ]
+
+//    // Act
+//    let zipStream = filePaths |> FileHelper.ToZipStream
+
+//    // Assert
+//    Assert.NotNull(zipStream) // Check if the zipStream is not null
+//    Assert.True(zipStream.Length > 0) // Check if the zipStream contains data

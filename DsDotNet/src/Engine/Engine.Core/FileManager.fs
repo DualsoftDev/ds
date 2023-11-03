@@ -86,48 +86,47 @@ module FileManager =
         memoryStream.ToArray()
 
 
-    let getTopLevelDirectory (filePaths: string list) =
-        if filePaths.IsEmpty then raise (new ArgumentException($"getTopLevelDirectory empty paths")) 
+    let getTopLevelDirectory (filePaths: string list) : string =
+        if List.isEmpty filePaths then
+            raise (new ArgumentException("getTopLevelDirectory: empty paths"))
+        let filePaths = filePaths
+                        |> List.map (fun filePath -> Path.GetDirectoryName(filePath) |> getValidDirectory)
 
-        // Find the common prefix among the file paths
-        let commonPrefix = 
-            List.fold (fun prefix filePath ->
-                match prefix with
-                | Some prefix' ->
-                    let minLen = min (String.length prefix') (String.length filePath)
-                    let mutable commonLen = 0
-                    while commonLen < minLen && prefix'.[commonLen] = filePath.[commonLen] do
-                        commonLen <- commonLen + 1
-                    Some (prefix'.Substring(0, commonLen))
-                | None -> None
-            )  (Some (List.head filePaths)) (List.tail filePaths)
-           
-        // Extract the top-level directory from the common prefix
-        commonPrefix
-        //match commonPrefix with
-        //| Some prefix -> Some(prefix |> Path.GetDirectoryName)
-        //| None -> None
+        let commonPrefix =
+            filePaths
+            |> List.map (fun filePath -> Path.GetDirectoryName(filePath) |> getValidDirectory)
+            |> List.reduce (fun prefix dirPath ->
+                let commonLen =
+                    Seq.zip prefix dirPath
+                    |> Seq.takeWhile (fun (c1, c2) -> c1 = c2)
+                    |> Seq.length
+                prefix[..commonLen-1]
+            )
 
+        let splitChar = PathManager.directorySeparatorDS
+        let topLevelDirSplit = 
+            let a =
+                commonPrefix.Split(splitChar)
+            a |> Array.rev |> Array.skip 1 |> Array.rev
 
-    let createZipFile(zipFilePath: string, filePaths: string seq) =
+        String.Join(splitChar, topLevelDirSplit)
+
+    //모델 최상단 폴더에 Zip형태로 생성
+    let saveZip(filePaths: string seq) =
+        let topLevel = getTopLevelDirectory (filePaths |> Seq.toList)
+        let zipFilePath =topLevel+".zip"
+        
         try
-            let topLevel = getTopLevelDirectory (filePaths |> Seq.toList)
-
             // Create a ZIP archive
             use fileStream = new FileStream(zipFilePath, FileMode.Create)
             use zip = new ZipArchive(fileStream, ZipArchiveMode.Create, true)
 
-
             for filePath in filePaths do
                 if File.Exists(filePath) then
                     let fileDir  = PathManager.getDirectoryName (filePath|>DsFile)
-                    let relativePath =
-                        if topLevel.IsSome then
-                            fileDir.Substring(topLevel.Value.Length)
-                        else
-                            fileDir // No common top-level directory
-
-                    let entry = zip.CreateEntry(relativePath.Replace("\\", "/") + "/" + 6786 filePath)
+                    let relativePath = fileDir.Substring(topLevel.Length)
+                    let name =filePath |> DsFile |> getFileName
+                    let entry = zip.CreateEntry(relativePath.Replace("\\", "/") + "/" + name)
                     use fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read)
                     use entryStream = entry.Open()
                     fileStream.CopyTo(entryStream)
@@ -142,10 +141,9 @@ module FileManager =
         | ex ->
             printfn "An unexpected error occurred: %s" ex.Message
 
+        topLevel
 
 
-    let saveZip(exportFilePath:string, modelRootPaths:string seq) = 
-        createZipFile(exportFilePath, modelRootPaths)
-      
+
 
 

@@ -12,7 +12,7 @@ let ``getValidFile should return a valid DsFile path`` () =
 
 [<Fact>]
 let ``getValidDirectory should return a valid DsDirectory path`` () =
-    let path = "/path/to/directory"
+    let path = "/path/to/directory/"
     let validPath = getValidDirectory path
     Assert.Equal(path, validPath.ToString())
 
@@ -22,7 +22,7 @@ let ``getFileName should return the file name from a DsFile path`` () =
     let fileName = getFileName(filePath)
     Assert.Equal("file.txt", fileName)
 
-[<Fact>]
+[<Fact>] 
 let ``getFileName should raise an exception for a DsDirectory path`` () =
     let directoryPath = DsDirectory "/path/to/directory"
     Assert.Throws<ArgumentException>(fun () -> getFileName(directoryPath)|>ignore)
@@ -31,7 +31,7 @@ let ``getFileName should raise an exception for a DsDirectory path`` () =
 let ``getDirectoryName should return the directory name from a DsFile path`` () =
     let filePath = DsFile "/path/to/file.txt"
     let directoryName = getDirectoryName(filePath)
-    Assert.Equal("/path/to", directoryName)
+    Assert.Equal("/path/to/", directoryName)
 
 [<Fact>]
 let ``getDirectoryName should raise an exception for a DsDirectory path`` () =

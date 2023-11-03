@@ -57,7 +57,10 @@ module PathManager =
                     if (directoryPath.ToCharArray() |> Array.exists (fun c -> Path.GetInvalidPathChars().Contains c)) then
                         raise (new ArgumentException($"Invalid DirectoryName in {directoryPath}"))
 
-                    directoryPath + "/"
+                    if directoryPath.EndsWith('/')
+                    then  directoryPath
+                    else  directoryPath + "/"
+                     
 
             FileInfo(path) |> ignore
             path.Replace("\\", directorySeparatorDS.ToString())

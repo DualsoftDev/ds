@@ -1,10 +1,9 @@
 using IO.Core;
 
 using NetMQ.Sockets;
-using static IO.Core.ZmqClient;
 
 var port = 5555;
-using var client = new Client($"tcp://localhost:{port}");
+using var client = new CSharpClient($"tcp://localhost:{port}");
 
 var cts = new CancellationTokenSource();
 client.TagChangedSubject.Subscribe(tag =>
@@ -29,7 +28,7 @@ while ( key != null && ! cts.IsCancellationRequested )
     Console.WriteLine($"Got key [{key}].");
     if (key == "q" || key == "Q")
         break;
-    var result = client.CsSendRequest(key);
+    var result = client.SendRequest(key);
     result.Match(
         value => { Console.WriteLine($"OK: {value}"); return true; },
         err => { Console.WriteLine($"ERR: {err}"); return false; }

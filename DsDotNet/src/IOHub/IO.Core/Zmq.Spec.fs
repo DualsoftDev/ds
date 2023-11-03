@@ -63,11 +63,11 @@ module rec ZmqSpec =
     // Activator.CreateInstanceFrom(v.Dll, v.ClassName) 를 이용
     [<AllowNullLiteral>] 
     type  VendorSpec() =
-        member val Name = "" with get, set
-        member val Location = "" with get, set
-        member val Dll = "" with get, set
+        member val Name      = "" with get, set
+        member val Location  = "" with get, set
+        member val Dll       = "" with get, set
         member val ClassName = "" with get, set
-        member val Accepts = "" with get, set
+        member val Accepts   = "" with get, set
         member val Files:IOFileSpec[] = [||] with get, set
         member val AddressResolver:IAddressInfoProvider = null with get, set
 

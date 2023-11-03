@@ -3,10 +3,65 @@ namespace IO.Core
 open System
 open System.Threading
 open Dual.Common.Core.FS
+open System.Reactive.Disposables
 
-module ZmqTestMain =
-    [<EntryPoint>]
-    let main _ = 
+module ZmqTestModule =
+    let clientKeyboardLoop (client:Client) (ct:CancellationToken) =
+        let mutable key = ""
+        while ( key <> null && not ct.IsCancellationRequested ) do
+            key <- Console.ReadLine()
+            if key <> null then
+                match key with
+                | "q" | "Q" -> key <- null
+                | "tr" ->   // test read
+                    match client.ReadBytes("p/o", [|0..3|]) with
+                    | Ok bytes ->
+                        let str = bytes |> map toString |> joinWith ", "
+                        Console.WriteLine($"OK: {str}")
+                    | _ ->
+                        failwith "ERROR"
+                | "tw" ->   // test write
+                    match client.WriteBytes("p/o", [|0..3|], [|0uy..3uy|]) with
+                    | Ok msg ->
+                        Console.WriteLine($"WriteResult: {msg}")
+                    | _ ->
+                        failwith "ERROR"
+
+                | "" -> ()
+                | _ ->
+                    match client.SendRequest(key) with
+                    | Ok value ->
+                        Console.WriteLine($"OK: {value}")
+                    | Error err ->
+                        Console.WriteLine($"ERR: {err}")
+
+                ()
+    let registerCancelKey (cts:CancellationTokenSource) (disposable:IDisposable) =
+        let handleCancelKey (args: ConsoleCancelEventArgs) =
+            logDebug("Ctrl+C pressed!")
+            cts.Cancel()
+            dispose disposable
+            args.Cancel <- true // 프로그램을 종료하지 않도록 설정 (선택 사항)
+        Console.CancelKeyPress.Add(handleCancelKey)
+
+    let runServer() =
+        let zmqInfo = Zmq.InitializeServer "zmqsettings.json"
+        let server, cts = zmqInfo.Server, zmqInfo.CancellationTokenSource
+
+        use subs =
+            server.IOChangedObservable.Subscribe(fun change ->
+                for (tag, value) in change.GetTagNameAndValues() do
+                    logDebug $"Tag change detected on server side for {tag}: {value}"
+                ())
+
+        registerCancelKey cts server
+        while(not server.IsTerminated) do
+            Thread.Sleep(1000)
+        
+        logDebug("Exiting...")
+        Thread.Sleep(1000)
+
+    let runServerAndClient() =
         let zmqInfo = Zmq.Initialize "zmqsettings.json"
         let server, client, cts = zmqInfo.Server, zmqInfo.Client, zmqInfo.CancellationTokenSource
 
@@ -16,12 +71,10 @@ module ZmqTestMain =
                     logDebug $"Tag change detected on server side for {tag}: {value}"
                 ())
 
-        let handleCancelKey (args: ConsoleCancelEventArgs) =
-            logDebug("Ctrl+C pressed!")
-            cts.Cancel()
-            args.Cancel <- true // 프로그램을 종료하지 않도록 설정 (선택 사항)
-        Console.CancelKeyPress.Add(handleCancelKey)
-
+        let disposables = new CompositeDisposable()
+        disposables.Add(client)
+        disposables.Add(server)
+        registerCancelKey cts disposables
 
         //let rr0 = client.SendRequest("read Mw100 Mx30 Md12")
         //let result = client.SendRequest("read Mw100 Mx30")
@@ -54,22 +107,8 @@ module ZmqTestMain =
         | _ ->
             failwith "ERROR"
 
-     
-        let mutable key = ""
-        while ( key <> null && not cts.IsCancellationRequested ) do
-            key <- Console.ReadLine()
-            if key <> null then
-                match key with
-                | "q" | "Q" -> key <- null
-                | "" -> ()
-                | _ ->
-                    match client.SendRequest(key) with
-                    | Ok value ->
-                        Console.WriteLine($"OK: {value}")
-                    | Error err ->
-                        Console.WriteLine($"ERR: {err}")
-
-                ()
+ 
+        clientKeyboardLoop client cts.Token
 
         while(not server.IsTerminated) do
             logDebug("Waiting server terminated...")
@@ -78,3 +117,7 @@ module ZmqTestMain =
         logDebug("Exiting...")
         Thread.Sleep(1000)
         0
+
+    [<EntryPoint>]
+    let main _ =
+        runServerAndClient()

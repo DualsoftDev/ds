@@ -258,15 +258,15 @@ module ZmqBufferManagerExtension =
             let path = fs.GetPath()
             let addrResolver = fs.Vendor.AddressResolver
             [
-                for offset in offsets do
+                for (i, offset) in offsets |> indexed do
                     let contentBitLength = int dataType
                     let byteOffset, bitOffset, value = 
                         match dataType with
-                        | PLCMemoryBitSize.Bit   -> offset / 8,  offset % 8, (objValues :?> bool[])[0]   |> box
-                        | PLCMemoryBitSize.Byte  -> offset,      0         , (objValues :?> byte[])[0]   |> box
-                        | PLCMemoryBitSize.Word  -> offset * 16, 0         , (objValues :?> uint16[])[0] |> box
-                        | PLCMemoryBitSize.DWord -> offset * 32, 0         , (objValues :?> uint32[])[0] |> box
-                        | PLCMemoryBitSize.LWord -> offset * 64, 0         , (objValues :?> uint64[])[0] |> box
+                        | PLCMemoryBitSize.Bit   -> offset / 8,  offset % 8, (objValues :?> bool[])[i]   |> box
+                        | PLCMemoryBitSize.Byte  -> offset,      0         , (objValues :?> byte[])[i]   |> box
+                        | PLCMemoryBitSize.Word  -> offset * 16, 0         , (objValues :?> uint16[])[i] |> box
+                        | PLCMemoryBitSize.DWord -> offset * 32, 0         , (objValues :?> uint32[])[i] |> box
+                        | PLCMemoryBitSize.LWord -> offset * 64, 0         , (objValues :?> uint64[])[i] |> box
                         | _ -> failwithf($"Invalid data type: {dataType}")
 
                     let tag = addrResolver.GetTagName(path, byteOffset, bitOffset, contentBitLength)

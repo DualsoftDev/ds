@@ -46,7 +46,10 @@ namespace Diagram.View.MSAGL
             var nodes = flowViews
                 .SelectMany(view => view.UsedViewNodes.Where(node => node.CoreVertex != null));
 
-            var dicViewNodes = nodes.ToDictionary(
+            var dicViewNodes = nodes
+                    .GroupBy(d => d.CoreVertex.Value) // 중복된 항목을 그룹화
+                    .Select(g => g.First()) // 각 그룹에서 첫 번째 항목 선택
+                    .ToDictionary(
                 node => node.CoreVertex.Value,
                 node => nodes.Where(w => w.PureVertex.Value == node.CoreVertex.Value
                                       || w.CoreVertex.Value == node.CoreVertex.Value)

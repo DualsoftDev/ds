@@ -23,9 +23,9 @@ module PPTDocModule =
     let getSystemName(name:string) =
         let fileName = PathManager.getFileNameWithoutExtension(name.ToFile())
         if fileName.Contains(" ")            
-        then Office.ErrorPPT(ErrorCase.Name, ErrID._57, $"{fileName}", 0)
+        then Office.ErrorPPT(ErrorCase.Name, ErrID._57, $"{fileName}", 0 , 0u)
         if fileName.IsQuotationRequired()
-        then Office.ErrorPPT(ErrorCase.Name, ErrID._58, $"{fileName}", 0)
+        then Office.ErrorPPT(ErrorCase.Name, ErrID._58, $"{fileName}", 0 , 0u)
         fileName
 
     let updateAliasPPT (
@@ -137,9 +137,10 @@ module PPTDocModule =
             sildeMasters |> Seq.iter (fun slideMaster -> masterPages.Add(masterPages.Count+1, slideMaster) |>ignore )
             
             sildesAll    
+                |> Seq.filter(fun (slidePart, show, page) -> not( slidePart.IsSlideLayoutBlanckType()))
                 |> Seq.iter  (fun (slidePart, show, page) ->
                         if (slidePart.PageTitle(false) = "" && slidePart.PageTitle(true) = "")
-                        then Office.ErrorPPT(Page, ErrID._59 , "Title Err" , page))
+                        then Office.ErrorPPT(Page, ErrID._59 , "Title Error" , page, 0u))
 
 
             sildesAll    
@@ -159,7 +160,7 @@ module PPTDocModule =
                         dicShape.[page].Add(shape, isDash) |> ignore
             )
             if(headPages.IsEmpty())
-            then Office.ErrorPPT(Page, ErrID._12 , "Title Slide" , 0)
+            then Office.ErrorPPT(Page, ErrID._12 , "Title Slide" , 0, 0u)
 
             let name = headPages.Keys.First().PageTitle(true)
             shapes
@@ -187,7 +188,7 @@ module PPTDocModule =
                         if(dicParentCheck.TryAdd(pptGroup.RealKey, pptGroup.PageNum)) then
                             parents.Add(parent, pptGroup.Children)
                         else
-                            Office.ErrorPPT(Group, ErrID._17, $"{dicParentCheck.[pptGroup.RealKey]}-{parent.Name}", pptGroup.PageNum)
+                            Office.ErrorPPT(Group, ErrID._17, $"{dicParentCheck.[pptGroup.RealKey]}-{parent.Name}", pptGroup.PageNum, parent.Shape.ShapeID())
                 )
             )
 

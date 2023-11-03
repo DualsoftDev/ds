@@ -36,14 +36,14 @@ module ImportIOTable =
                 then getFunctions(name, funcText)
                         |> Seq.iter(fun (name, parms) ->
                             if (not<|isJob) && name <> "n"
-                            then Office.ErrorPPT(ErrorCase.Name, ErrID._1005, $"{name}", 0)
+                            then Office.ErrorPPT(ErrorCase.Name, ErrID._1005, $"{name}", 0, 0u)
                             funcs.Add(Func(name, parms)) |>ignore )
             
             let dicJob = sys.Jobs |> Seq.collect(fun f-> f.DeviceDefs) |> Seq.map(fun j->j.ApiName, j) |> dict
             let updateDev(row:Data.DataRow, tableIO:Data.DataTable) =
                 let devName  = $"{row.[(int)IOColumn.Name]}"
                 if not <| dicJob.ContainsKey(devName)
-                then Office.ErrorPPT(ErrorCase.Name, ErrID._1006, $"{devName}.", 0)
+                then Office.ErrorPPT(ErrorCase.Name, ErrID._1006, $"{devName}.", 0, 0u)
                 let dev = dicJob.[devName]
                 dev.InAddress  <- $"{row.[(int)IOColumn.Input]}" |> autoFillAddress
                 dev.OutAddress <- $"{row.[(int)IOColumn.Output]}"|> autoFillAddress
@@ -57,7 +57,7 @@ module ImportIOTable =
                             functionUpdate (job.Name, func, funcs, tableIO, true)
                             job.SetFuncs funcs
                 | None -> if "↑" <> jobName //이름이 위와 같지 않은 경우
-                            then Office.ErrorPPT(ErrorCase.Name, ErrID._1004, $"오류 이름 {jobName}.", 0)
+                            then Office.ErrorPPT(ErrorCase.Name, ErrID._1004, $"오류 이름 {jobName}.", 0, 0u)
 
             let updateVar(row:Data.DataRow, tableIO:Data.DataTable) =
                 let name      = $"{row.[(int)IOColumn.Name]}"
@@ -77,7 +77,7 @@ module ImportIOTable =
                 | Some btn -> btn.InAddress <- input
                               btn.OutAddress <- output
                               functionUpdate (btn.Name, func, btn.Funcs, tableIO, false)
-                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{name}", 0)
+                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{name}", 0, 0u)
 
             let updateLamp(row:Data.DataRow, lampType:LampType, tableIO:Data.DataTable) =
                 let name  = $"{row.[(int)IOColumn.Name]}"
@@ -88,7 +88,7 @@ module ImportIOTable =
                 match lamps.TryFind(fun f -> f.Name = name) with
                 | Some lamp -> lamp.OutAddress <- output
                                functionUpdate (lamp.Name, func, lamp.Funcs, tableIO, false)
-                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", 0)
+                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", 0, 0u)
 
             let updateCondition (row:Data.DataRow, cType:ConditionType, tableIO:Data.DataTable) =
                 let name  = $"{row.[(int)IOColumn.Name]}"
@@ -99,7 +99,7 @@ module ImportIOTable =
                 match conds.TryFind(fun f -> f.Name = name) with
                 | Some cond -> cond.InAddress <- output
                                functionUpdate (cond.Name, func, cond.Funcs, tableIO, false)
-                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", 0)
+                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", 0, 0u)
 
           
             let tableIO = dt

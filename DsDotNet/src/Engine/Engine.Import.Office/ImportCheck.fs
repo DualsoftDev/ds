@@ -89,6 +89,6 @@ module ImportCheck =
                                     .SelectMany(fun f->f.Skip(1));
 
             duplicatePages.Iter  (fun page-> 
-                 Office.ErrorPPT(ErrorCase.Name, ErrID._2, $"중복이름 : {page.Title}",page.PageNum, $"중복페이지") 
+                 Office.ErrorPPT(ErrorCase.Name, ErrID._2, $"중복이름 : {page.Title}",page.PageNum, 0u, $"중복페이지") 
             )
             

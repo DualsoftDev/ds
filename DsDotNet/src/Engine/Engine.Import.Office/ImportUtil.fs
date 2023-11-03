@@ -284,9 +284,9 @@ module ImportU =
                 let pageNum  = page.PageNum
                 let sysName, flowName = GetSysNFlow(doc.Name, page.Title, page.PageNum)
                 if flowName.Contains(".")
-                then Office.ErrorPPT(ErrorCase.Name, ErrID._19, page.Title, page.PageNum, "")
+                then Office.ErrorPPT(ErrorCase.Name, ErrID._19, page.Title, page.PageNum, 0u, "")
                 if checkName.Add(flowName) |> not
-                then Office.ErrorPPT(ErrorCase.Name, ErrID._25, page.Title, page.PageNum, "")
+                then Office.ErrorPPT(ErrorCase.Name, ErrID._25, page.Title, page.PageNum, 0u, "")
 
                 dicFlow.Add(pageNum,  Flow.Create(flowName, sys) ) |> ignore
                 )
@@ -563,10 +563,10 @@ module ImportU =
                                     else flow.Name, trxName
 
                                 if dicFlow.Values.Where(fun w->w.Name = flowName).IsEmpty()
-                                then Office.ErrorPPT(Name, ErrID._42, $"원인이름{flowName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
+                                then Office.ErrorPPT(Name, ErrID._42, $"원인이름{flowName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum, node.Shape.ShapeID())
                                 let vertex = sys.TryFindRealVertex(flowName, realName)
                                 if vertex.IsNone
-                                then Office.ErrorPPT(Name, ErrID._41, $"원인이름{realName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum)
+                                then Office.ErrorPPT(Name, ErrID._41, $"원인이름{realName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]", node.PageNum, node.Shape.ShapeID())
                                 //match vertex.Value with
                                 //| :? Real as r -> r
                                 //| _ -> failwithlog "Error "

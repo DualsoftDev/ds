@@ -103,15 +103,18 @@ module MessgePPTError =
             |Path  -> "경로오류"
 
   
+      ///page(Item1), objID(Item2), msg(Item3)
+    let ErrorPPTNotify = new Event<int*uint*string>() 
     [<Extension>]
     type Office =
 
         [<Extension>]
-        static member ErrorPPT(case:ErrorCase, msg:string,  objName:string, page:int, ?userMsg:string) =
+        static member ErrorPPT(case:ErrorCase, msg:string,  objName:string, page:int, objID:uint, ?userMsg:string) =
               
-           
             let itemName =  if(userMsg.IsSome && (userMsg.Value = ""|>not))
                             then $"[Page{page}:{objName} ({userMsg.Value})"
                             else $"[Page{page}:{objName}"
+
+            ErrorPPTNotify.Trigger (page, objID, itemName)
             failwithf  $"[{case.ToText()}] {msg} \t{itemName}"
 

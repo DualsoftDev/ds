@@ -31,33 +31,27 @@ module PPTUtil =
     type SlideId = Presentation.SlideId
     type GroupShape = Presentation.GroupShape
 
-      ///page(Item1), objID(Item2), msg(Item3)
-    let ErrorPPTNotify = new Event<int*uint*string>() 
     [<Extension>]
     type Office =
         [<Extension>]
         static member ErrorName(shape:Shape, errMsg:string,  page:int) =
-               ErrorPPTNotify.Trigger (page, Office.ShapeID(shape), errMsg)
-               Office.ErrorPPT(ErrorCase.Name, errMsg, Office.ShapeName(shape), page, shape.InnerText)
+               Office.ErrorPPT(ErrorCase.Name, errMsg, Office.ShapeName(shape), page, Office.ShapeID(shape)  , shape.InnerText)
 
         [<Extension>]
         static member ErrorPath(shape:Shape, errMsg:string,  page:int, path:string) =
-               ErrorPPTNotify.Trigger (page, Office.ShapeID(shape), errMsg)
-               Office.ErrorPPT(ErrorCase.Page, errMsg, Office.ShapeName(shape), page, path)
+               Office.ErrorPPT(ErrorCase.Page, errMsg, Office.ShapeName(shape), page, Office.ShapeID(shape)  , path)
 
         [<Extension>]
         static member ErrorShape(shape:Shape, errMsg:string,  page:int) =
-               ErrorPPTNotify.Trigger (page, Office.ShapeID(shape), errMsg)
-               Office.ErrorPPT(ErrorCase.Shape, errMsg, Office.ShapeName(shape), page, shape.InnerText)
+               Office.ErrorPPT(ErrorCase.Shape, errMsg, Office.ShapeName(shape), page, Office.ShapeID(shape)  ,shape.InnerText)
 
         [<Extension>]
         static member ErrorConnect(conn:#ConnectionShape, errMsg:string, text:string,  page:int) =
                ErrorPPTNotify.Trigger (page, Office.ConnectionShapeID(conn), errMsg)
-               Office.ErrorPPT(ErrorCase.Conn, errMsg, $"{Office.EdgeName(conn)}[{text}]", page, conn.InnerText)
+               Office.ErrorPPT(ErrorCase.Conn, errMsg, $"{Office.EdgeName(conn)}[{text}]", page, Office.ConnectionShapeID(conn), conn.InnerText)
 
         [<Extension>]
         static member ErrorConnect(conn:#ConnectionShape, errMsg:string, src:string, tgt:string,  page:int) =
-               ErrorPPTNotify.Trigger (page, Office.ConnectionShapeID(conn), errMsg)
                Office.ErrorConnect(conn, errMsg, $"{Office.EdgeName(conn)}[{src}~{tgt}]", page)
 
         ///power point 문서를 Openxml로 열기 (*.pptx 형식만 지원)
@@ -288,6 +282,14 @@ module PPTUtil =
                     elif (shape.Descendants<ApplicationNonVisualDrawingProperties>().First().Descendants<PlaceholderShape>().Any() |> not ) then false
                     else true
 
+        
+                        
+        [<Extension>]
+        static member IsSlideLayoutBlanckType(slidePart:#SlidePart) =
+                    let slideLayoutType = slidePart.SlideLayoutPart.SlideLayout.Type
+                    if slideLayoutType = null then true
+                    else slideLayoutType.InnerText  = "blank"
+                
 
         [<Extension>]
         static member PageTitle(slidePart:#SlidePart, headTitle:bool) =

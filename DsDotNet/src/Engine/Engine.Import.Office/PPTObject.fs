@@ -369,7 +369,7 @@ module PPTObjectModule =
             let calls  = nodes.Where(fun w -> w.NodeType.IsCall)
 
             if(reals.Count() > 1)
-            then  Office.ErrorPPT(Group, ErrID._23, $"Reals:{reals|>nodeNames}", iPage)
+            then  Office.ErrorPPT(Group, ErrID._23, $"Reals:{reals|>nodeNames}", iPage, Office.ShapeID(reals.First().Shape))
 
             parent <-
                 if(reals.Any()|>not) then None

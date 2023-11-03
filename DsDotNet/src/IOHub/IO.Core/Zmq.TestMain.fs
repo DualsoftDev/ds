@@ -10,12 +10,11 @@ module ZmqTestMain =
         let zmqInfo = Zmq.Initialize "zmqsettings.json"
         let server, client, cts = zmqInfo.Server, zmqInfo.Client, zmqInfo.CancellationTokenSource
 
-        // TODO: uncomment this line to test with third party
-        //use subs =
-        //    server.IOChangedObservable.Subscribe(fun change ->
-        //        for (tag, value) in change.GetTagNameAndValues() do
-        //            logDebug $"Tag change detected on server side for {tag}: {value}"
-        //        ())
+        use subs =
+            server.IOChangedObservable.Subscribe(fun change ->
+                for (tag, value) in change.GetTagNameAndValues() do
+                    logDebug $"Tag change detected on server side for {tag}: {value}"
+                ())
 
         let handleCancelKey (args: ConsoleCancelEventArgs) =
             logDebug("Ctrl+C pressed!")

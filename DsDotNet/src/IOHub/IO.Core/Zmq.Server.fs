@@ -92,117 +92,119 @@ module ZmqServerModule =
                     let tokens = command.Split(' ', StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
                     tokens[1..] |> map(fun s -> s.ToLower())
 
-                // client 에서 오는 모든 메시지는 client ID, requestId 와 command frame 을 기본 포함하므로, 
-                // 이 3개의 frame 을 제외한 frame 의 갯수에 따라 message 를 처리한다.
-                match mms.length() - 3 with
-                | 0 ->
-                    match command with
-                    | "REGISTER" ->
-                        clients.Add clientId
-                        logDebug $"Client {clientIdentifierToString clientId} registered"
-                        StringResponseOK(cri, "OK")
-                    | "UNREGISTER" ->
-                        clients.Remove clientId |> ignore
-                        logDebug $"Client {clientIdentifierToString clientId} unregistered"
-                        StringResponseOK(cri, "OK")
-                    | "PONG" ->
-                        logDebug $"Got pong from client {clientIdentifierToString clientId}"
-                        ResponseOK()
-                    | StartsWith "read" ->      // e.g read p/ob1 p/ow1 p/olw3
-                        noop()
-                        let result =
-                            getArgs() |> map (fun a -> $"{a}={readAddress(cri, a)}")
-                            |> joinWith " "
-                        ReadResponseOK(cri, PLCMemoryBitSize.Undefined, result)
-                    | StartsWith "write" ->
-                        let changes = getArgs() |> map (fun a -> writeAddressWithValue(cri, a))
-                        WriteHeterogeniousResponseOK(cri, changes)
-                    | StartsWith "cl" ->
-                        let name = getArgs() |> Seq.exactlyOne
-                        let bm = streamManagers[name]
-                        bm.clear()
-                        StringResponseOK(cri, "OK")
+                try
+                    // client 에서 오는 모든 메시지는 client ID, requestId 와 command frame 을 기본 포함하므로, 
+                    // 이 3개의 frame 을 제외한 frame 의 갯수에 따라 message 를 처리한다.
+                    match mms.length() - 3 with
+                    | 0 ->
+                        match command with
+                        | "REGISTER" ->
+                            clients.Add clientId
+                            logDebug $"Client {clientIdentifierToString clientId} registered"
+                            StringResponseOK(cri, "OK")
+                        | "UNREGISTER" ->
+                            clients.Remove clientId |> ignore
+                            logDebug $"Client {clientIdentifierToString clientId} unregistered"
+                            StringResponseOK(cri, "OK")
+                        | "PONG" ->
+                            logDebug $"Got pong from client {clientIdentifierToString clientId}"
+                            ResponseOK()
+                        | StartsWith "read" ->      // e.g read p/ob1 p/ow1 p/olw3
+                            noop()
+                            let result =
+                                getArgs() |> map (fun a -> $"{a}={readAddress(cri, a)}")
+                                |> joinWith " "
+                            ReadResponseOK(cri, PLCMemoryBitSize.Undefined, result)
+                        | StartsWith "write" ->
+                            let changes = getArgs() |> map (fun a -> writeAddressWithValue(cri, a))
+                            WriteHeterogeniousResponseOK(cri, changes)
+                        | StartsWith "cl" ->
+                            let name = getArgs() |> Seq.exactlyOne
+                            let bm = streamManagers[name]
+                            bm.clear()
+                            StringResponseOK(cri, "OK")
+                        | _ ->
+                            StringResponseNG(cri, $"ERROR: {command}")
+                    | 2 ->
+                        match command with
+                        | "rx" ->
+                            let bm, indices = fetchForReadBit mms
+                            bm.VerifyIndices(cri, indices |> map (fun n -> n / 8))
+                            let result = bm.readBits indices
+                            ReadResponseOK(cri, PLCMemoryBitSize.Bit, result)
+                        | "rb" ->
+                            let bm, indices = fetchForRead mms
+                            bm.VerifyIndices(cri, indices)
+                            let result = bm.readU8s indices
+                            ReadResponseOK(cri, PLCMemoryBitSize.Byte, result)
+
+                        | "rw" ->
+                            let bm, indices = fetchForRead mms
+                            bm.VerifyIndices(cri, indices |> map (fun n -> n * 2))
+                            let result = bm.readU16s indices
+                            ReadResponseOK(cri, PLCMemoryBitSize.Word, result)
+
+                        | "rd" ->
+                            let bm, indices = fetchForRead mms
+                            bm.VerifyIndices(cri, indices |> map (fun n -> n * 4))
+                            let result = bm.readU32s indices
+                            ReadResponseOK(cri, PLCMemoryBitSize.DWord, result)
+
+                        | "rl" ->
+                            let bm, indices = fetchForRead mms
+                            bm.VerifyIndices(cri, indices |> map (fun n -> n * 8))
+                            let result = bm.readU64s indices
+                            ReadResponseOK(cri, PLCMemoryBitSize.LWord, result)
+                        | _ ->
+                            StringResponseNG(cri, $"ERROR: {command}")
+                    | 3 ->
+                        match command with
+                        | "wx" ->
+                            let bm, indices, values = fetchForWrite mms
+                            bm.Verify(cri, indices |> map (fun n -> n / 8), values.Length)
+
+                            for i in [0..indices.Length-1] do
+                                let value =
+                                    match values.[i] with
+                                    | 1uy -> true
+                                    | 0uy -> false
+                                    | _ -> failwithf($"Invalid value: {values.[i]}")
+                                bm.writeBit (cri, indices[i], value)
+
+                            bm.Flush()
+                            WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, PLCMemoryBitSize.Bit, indices, values))
+                        | "wb" ->
+                            let bm, indices, values = fetchForWrite mms
+                            bm.Verify(cri, indices, values.Length / 1)
+                            Array.zip indices values |> bm.writeU8s cri
+                            WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, PLCMemoryBitSize.Byte, indices, values))
+
+                        | "ww" ->
+                            let bm, indices, values = fetchForWrite mms
+                            bm.Verify(cri, indices |> map (fun n -> n * 2), values.Length / 2)
+
+                            Array.zip indices (ByteConverter.BytesToTypeArray<uint16>(values)) |> bm.writeU16s cri
+                            WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, PLCMemoryBitSize.Byte, indices, values))
+
+                        | "wd" ->
+                            let bm, indices, values = fetchForWrite mms
+                            bm.Verify(cri, indices |> map (fun n -> n * 4), values.Length / 4)
+                            Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) |> bm.writeU32s cri
+                            WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, PLCMemoryBitSize.Byte, indices, values))
+
+                        | "wl" ->
+                            let bm, indices, values = fetchForWrite mms
+                            bm.Verify(cri, indices |> map (fun n -> n * 8), values.Length / 8)
+
+                            Array.zip indices (ByteConverter.BytesToTypeArray<uint64>(values)) |> bm.writeU64s cri
+                            WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, PLCMemoryBitSize.Byte, indices, values))
+                        | _ ->
+                            StringResponseNG(cri, $"ERROR: {command}")
+
                     | _ ->
-                        failwithlogf $"ERROR: {command}"
-                | 2 ->
-                    match command with
-                    | "rx" ->
-                        let bm, indices = fetchForReadBit mms
-                        bm.VerifyIndices(cri, indices |> map (fun n -> n / 8))
-                        let result = bm.readBits indices
-                        ReadResponseOK(cri, PLCMemoryBitSize.Bit, result)
-                    | "rb" ->
-                        let bm, indices = fetchForRead mms
-                        bm.VerifyIndices(cri, indices)
-                        let result = bm.readU8s indices
-                        ReadResponseOK(cri, PLCMemoryBitSize.Byte, result)
-
-                    | "rw" ->
-                        let bm, indices = fetchForRead mms
-                        bm.VerifyIndices(cri, indices |> map (fun n -> n * 2))
-                        let result = bm.readU16s indices
-                        ReadResponseOK(cri, PLCMemoryBitSize.Word, result)
-
-                    | "rd" ->
-                        let bm, indices = fetchForRead mms
-                        bm.VerifyIndices(cri, indices |> map (fun n -> n * 4))
-                        let result = bm.readU32s indices
-                        ReadResponseOK(cri, PLCMemoryBitSize.DWord, result)
-
-                    | "rl" ->
-                        let bm, indices = fetchForRead mms
-                        bm.VerifyIndices(cri, indices |> map (fun n -> n * 8))
-                        let result = bm.readU64s indices
-                        ReadResponseOK(cri, PLCMemoryBitSize.LWord, result)
-                    | _ ->
-                        failwithlogf $"ERROR: {command}"
-                | 3 ->
-                    match command with
-                    | "wx" ->
-                        let bm, indices, values = fetchForWrite mms
-                        bm.Verify(cri, indices |> map (fun n -> n / 8), values.Length)
-
-                        for i in [0..indices.Length-1] do
-                            let value =
-                                match values.[i] with
-                                | 1uy -> true
-                                | 0uy -> false
-                                | _ -> failwithf($"Invalid value: {values.[i]}")
-                            bm.writeBit (cri, indices[i], value)
-
-                        bm.Flush()
-                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, PLCMemoryBitSize.Bit, indices, values))
-                    | "wb" ->
-                        let bm, indices, values = fetchForWrite mms
-                        bm.Verify(cri, indices, values.Length / 1)
-                        Array.zip indices values |> bm.writeU8s cri
-                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, PLCMemoryBitSize.Byte, indices, values))
-
-                    | "ww" ->
-                        let bm, indices, values = fetchForWrite mms
-                        bm.Verify(cri, indices |> map (fun n -> n * 2), values.Length / 2)
-
-                        Array.zip indices (ByteConverter.BytesToTypeArray<uint16>(values)) |> bm.writeU16s cri
-                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, PLCMemoryBitSize.Byte, indices, values))
-
-                    | "wd" ->
-                        let bm, indices, values = fetchForWrite mms
-                        bm.Verify(cri, indices |> map (fun n -> n * 4), values.Length / 4)
-                        Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) |> bm.writeU32s cri
-                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, PLCMemoryBitSize.Byte, indices, values))
-
-                    | "wl" ->
-                        let bm, indices, values = fetchForWrite mms
-                        bm.Verify(cri, indices |> map (fun n -> n * 8), values.Length / 8)
-
-                        Array.zip indices (ByteConverter.BytesToTypeArray<uint64>(values)) |> bm.writeU64s cri
-                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, PLCMemoryBitSize.Byte, indices, values))
-                    | _ ->
-                        failwithlogf $"ERROR: {command}"
-
-                | _ ->
-                    failwithlogf $"ERROR: {command}"
-
+                        StringResponseNG(cri, $"ERROR: {command}")
+                with ex ->
+                    StringResponseNG(cri, ex.Message)
 
         member x.Run() =
             // start a separate thread to run the server

@@ -79,8 +79,9 @@ module ZmqClient =
                     if not <| client.TryReceiveMultipartMessage(&mq) then
                         Thread.Sleep(100)  // got it
 
-                let reqIdBack = mq[RequestId].ConvertToInt32()
+                let reqIdBack = mq[RequestId].Buffer |> System.BitConverter.ToInt32
                 if reqIdBack >= 0 then
+                    verify (reqIdBack < 1000)
                     // normal request 에 대한 reply: queue 에 삽입
                     queue.Enqueue(mq)
                 else
@@ -115,10 +116,16 @@ module ZmqClient =
             client.Options.Identity <- clientGuid // 각 클라이언트에 대한 고유 식별자 설정
             logDebug $"Client identity: {clientId}"
             client.Connect(serverAddress)
-            client
-                .SendMoreFrameWithRequestId(reqIdGenerator())
-                .SendFrame("REGISTER")
+
             Task.Factory.StartNew(loop, TaskCreationOptions.LongRunning) |> ignore
+
+            let reqId = reqIdGenerator()
+            client
+                .SendMoreFrameWithRequestId(reqId)
+                .SendFrame("REGISTER")
+            let mqMessage = deque reqId
+            noop()
+            logDebug "Got client registered response."
                 
         let verifyReceiveOK(client:DealerSocket) (reqId:int) : CLIRequestResult =
             let mqMessage = deque reqId

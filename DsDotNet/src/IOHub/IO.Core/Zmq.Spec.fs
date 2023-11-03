@@ -15,6 +15,7 @@ module rec ZmqSpec =
 
 
     type PLCMemoryBitSize =
+        | Undefined = 0
         | Bit = 1
         | Byte = 8
         | Word = 16

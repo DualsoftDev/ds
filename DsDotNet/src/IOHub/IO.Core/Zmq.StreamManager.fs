@@ -16,10 +16,9 @@ module ZmqStreamManager =
     type ClientIdentifier = byte[]
     let clientIdentifierToString (clientId:ClientIdentifier) = clientId |> map string |> String.concat "-"
 
-    type ClientRequestInfo = {
-        ClientId:ClientIdentifier
-        RequestId:int
-    }
+    type ClientRequestInfo(clientId:ClientIdentifier, requestId:int) = 
+        member x.ClientId = clientId
+        member x.RequestId = requestId
 
     type ExcetionWithClient(clientRequstInfo:ClientRequestInfo, errMsg:ErrorMessage) =
         inherit Exception(errMsg)
@@ -58,8 +57,11 @@ module ZmqStreamManager =
 
 
     type IOChangeInfo(clientRequestInfo:ClientRequestInfo, fileSpec:IOFileSpec, dataType:PLCMemoryBitSize, offsets:int seq, value:obj) =
+        do
+            noop()
         member x.ClientRequestInfo = clientRequestInfo
         member x.IOFileSpec = fileSpec
+
         /// 값이 변경된 offset.  value 의 type 에 따라 다르게 해석
         /// bool: 전체의 bit offset.  byte offset = Offset / 8
         /// uint64: uint64 기준의 offset.   byte offset = Offset * 8
@@ -81,6 +83,7 @@ module ZmqStreamManager =
 
         interface IStreamManager
 
+        member x.FileSpec = fileSpec
         member x.FileStream = stream
         member x.Flush() = stream.Flush()
 
@@ -157,7 +160,6 @@ module ZmqStreamManager =
                     values.Add value
 
                 x.Flush()
-                IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.Bit, offsets.ToArray(), values.ToArray())
             )
 
         member x.writeU8s (cri:ClientRequestInfo)  (writeArg:(int*byte) seq) =
@@ -167,7 +169,6 @@ module ZmqStreamManager =
                 let offsets = writeArg |> map fst |> toArray
                 let values  = writeArg |> map snd |> toArray
                 x.Flush()
-                IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.Byte, offsets, values)
             )
 
 
@@ -179,7 +180,6 @@ module ZmqStreamManager =
                 let offsets = writeArg |> map fst |> toArray
                 let values  = writeArg |> map snd |> toArray
                 x.Flush()
-                IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.Word, offsets, values)
             )
 
         member x.writeU32 (cri:ClientRequestInfo) (wordOffset:int, value:uint32) = x.writeU32s cri ([|wordOffset, value|])
@@ -190,7 +190,6 @@ module ZmqStreamManager =
                 let offsets = writeArg |> map fst |> toArray
                 let values  = writeArg |> map snd |> toArray
                 x.Flush()
-                IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.DWord, offsets, values)
             )
 
         member x.writeU64 (cri:ClientRequestInfo) (wordOffset:int, value:uint64) = x.writeU64s cri ([|wordOffset, value|])
@@ -201,7 +200,6 @@ module ZmqStreamManager =
                 let offsets = writeArg |> map fst |> toArray
                 let values  = writeArg |> map snd |> toArray
                 x.Flush()
-                IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.LWord, offsets, values)
             )
 
         member x.clear() =

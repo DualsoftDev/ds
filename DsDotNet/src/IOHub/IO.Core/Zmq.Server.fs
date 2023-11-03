@@ -19,6 +19,60 @@ open IO.Spec
 
 [<AutoOpen>]
 module private ZmqServerImplModule =
+    /// 서버에서 socket message 를 처리후, client 에게 socket 으로 보내기 전에 갖는 result type
+    type IResponse = interface end
+    type IResponseOK = inherit IResponse
+    /// Request 문법 오류
+    type IResponseNG = inherit IResponse
+    type IResponseNoMoreInput = inherit IResponseOK
+    type IResponseWithClientRquestInfo = 
+        inherit IResponse
+        abstract ClientRequestInfo : ClientRequestInfo
+    [<AbstractClass>]
+    type Response(cri:ClientRequestInfo) =
+        interface IResponseWithClientRquestInfo with
+            member x.ClientRequestInfo = cri
+        member x.ClientRequestInfo = cri
+
+    [<AbstractClass>]
+    type StringResponse(cri:ClientRequestInfo, message:string) =
+        inherit Response(cri)
+        member x.Message = message
+
+    type ResponseNoMoreInput() =
+        interface IResponseNoMoreInput
+    type ResponseOK() =
+        interface IResponseOK
+
+    type StringResponseOK(cri:ClientRequestInfo, message:string) =
+        inherit StringResponse(cri, message)
+        interface IResponseOK
+    type StringResponseNG(cri:ClientRequestInfo, message:string) =
+        inherit StringResponse(cri, message)
+        interface IResponseNG
+
+    type WriteResponseOK(cri:ClientRequestInfo, ioFIleSpec:IOFileSpec, contentBitSize:PLCMemoryBitSize, offsets:int[], changedValues:obj) =
+        inherit Response(cri)
+        interface IResponseOK
+        member x.ChangedValues = changedValues
+        member x.ContentBitSize = contentBitSize
+        member x.Offsets = offsets
+        member x.FIleSpec = ioFIleSpec
+
+    type SingleValueChange = IOFileSpec * PLCMemoryBitSize * int array * obj   // dataType, offset, value
+    type WriteHeterogeniousResponseOK(cri:ClientRequestInfo, spotChanges:SingleValueChange seq) =
+        inherit Response(cri)
+        interface IResponseOK
+        member val SpotChanges = spotChanges |> toArray
+
+
+    type ReadResponseOK(cri:ClientRequestInfo, dataType:PLCMemoryBitSize, values:obj) =
+        inherit Response(cri)
+        interface IResponseOK
+        member x.Values = values
+        member x.DataType = dataType
+
+
     let mutable ioSpec = getNull<IOSpec>()
     /// e.g {"p/o", <Paix Output Buffer manager>}
     let streamManagers = new Dictionary<string, StreamManager>()
@@ -83,7 +137,7 @@ module private ZmqServerImplModule =
             failwithf($"Unknown address pattern : {address}")
 
     /// "write p/ob1=1 p/ix2=0" : 비효율성 인정한 version.  buffer manager 및 dataType 의 다양성 공존
-    let writeAddressWithValue(clientRequstInfo:ClientRequestInfo, addressWithAssignValue:string) =
+    let writeAddressWithValue(clientRequstInfo:ClientRequestInfo, addressWithAssignValue:string) : SingleValueChange =
         let cri = clientRequstInfo
         let parseBool (s:string) =
             match s.ToLower() with
@@ -97,13 +151,18 @@ module private ZmqServerImplModule =
             let bufferManager = ap.IOFileSpec.StreamManager :?> StreamManager
             bufferManager.VerifyIndices(cri, [|byteOffset|])
 
+            let mutable offset = byteOffset
+            let mutable objValue:obj = null
             match ap.DataType with
-            | PLCMemoryBitSize.Bit   -> bufferManager.writeBit (cri, byteOffset, ap.OffsetBit, parseBool(value))
-            | PLCMemoryBitSize.Byte  -> bufferManager.writeU8s cri ([byteOffset, Byte.Parse(value)])
-            | PLCMemoryBitSize.Word  -> bufferManager.writeU16 cri (byteOffset, UInt16.Parse(value))
-            | PLCMemoryBitSize.DWord -> bufferManager.writeU32 cri (byteOffset, UInt32.Parse(value))
-            | PLCMemoryBitSize.LWord -> bufferManager.writeU64 cri (byteOffset, UInt64.Parse(value))
+            | PLCMemoryBitSize.Bit   -> objValue <- [|parseBool(value)|];    bufferManager.writeBit (cri, byteOffset, ap.OffsetBit, parseBool(value)); offset <- byteOffset * 8 + ap.OffsetBit
+            | PLCMemoryBitSize.Byte  -> objValue <- [|Byte.Parse(value)|];   bufferManager.writeU8s cri ([byteOffset, Byte.Parse(value)])
+            | PLCMemoryBitSize.Word  -> objValue <- [|UInt16.Parse(value)|]; bufferManager.writeU16 cri (byteOffset, UInt16.Parse(value))
+            | PLCMemoryBitSize.DWord -> objValue <- [|UInt32.Parse(value)|]; bufferManager.writeU32 cri (byteOffset, UInt32.Parse(value))
+            | PLCMemoryBitSize.LWord -> objValue <- [|UInt64.Parse(value)|]; bufferManager.writeU64 cri (byteOffset, UInt64.Parse(value))
             | _ -> failwithf($"Unknown data type : {ap.DataType}")
+
+            let fs = bufferManager.FileSpec
+            fs, ap.DataType, [|offset|], objValue
 
         | _ -> failwithf($"Unknown address with assignment pattern : {addressWithAssignValue}")
 
@@ -199,6 +258,33 @@ module ZmqServerModule =
 
         let ioChangedSubject = new Subject<IOChangeInfo>()
         //let mutable ioChangedObservable:IObservable<IOChangeInfo> = null
+
+        let notifyIoChange(ioChange:IOChangeInfo) =
+                Console.WriteLine($"change by client {clientIdentifierToString ioChange.ClientRequestInfo.ClientId}");
+                let notiTargetClients =
+                    clients
+                    |> filter (fun c -> not <| Enumerable.SequenceEqual(c, ioChange.ClientRequestInfo.ClientId))
+                    |> toArray
+                let notifyToClients() =
+                    let bm = ioChange.IOFileSpec
+                    let contenetBitLength = int ioChange.DataType
+                    let criminalClientId = ioChange.ClientRequestInfo.ClientId
+                    let bytes = ioChange.GetValueBytes()
+                    let path = ioChange.IOFileSpec.GetPath()
+                    let offsets = ioChange.Offsets |> ByteConverter.ToBytes<int>
+                    for client in notiTargetClients do
+                        Console.WriteLine($"Notifying change to client {clientIdentifierToString client}");
+                        serverSocket
+                            .SendMoreFrame(client)
+                            .SendMoreFrame(-1 |> ByteConverter.ToBytes)
+                            .SendMoreFrame("NOTIFY")
+                            .SendMoreFrame(bytes) // value
+                            .SendMoreFrame(path)  // name
+                            .SendMoreFrame(contenetBitLength |> ByteConverter.ToBytes)  // contentBitLength
+                            .SendFrame(offsets) // offsets
+
+                notifyToClients()
+
         do
             ioSpec <- ioSpec_
             for v in ioSpec.Vendors do
@@ -226,172 +312,145 @@ module ZmqServerModule =
 
             // TODO
             //ioChangedObservable.Subscribe(fun (ioChange:IOChangeInfo) ->
-            ioChangedSubject.Subscribe(fun (ioChange:IOChangeInfo) ->
-                Console.WriteLine($"change by client {clientIdentifierToString ioChange.ClientRequestInfo.ClientId}");
-                let notiTargetClients =
-                    clients
-                    |> filter (fun c -> not <| Enumerable.SequenceEqual(c, ioChange.ClientRequestInfo.ClientId))
-                    |> toArray
-                let notifyToClients() =
-                    let bm = ioChange.IOFileSpec
-                    let contenetBitLength = int ioChange.DataType
-                    let criminalClientId = ioChange.ClientRequestInfo.ClientId
-                    let bytes = ioChange.GetValueBytes()
-                    let path = ioChange.IOFileSpec.GetPath()
-                    let offsets = ioChange.Offsets |> ByteConverter.ToBytes<int>
-                    for client in notiTargetClients do
-                        Console.WriteLine($"Notifying change to client {clientIdentifierToString client}");
-                        serverSocket
-                            .SendMoreFrame(client)
-                            .SendMoreFrame(-1 |> ByteConverter.ToBytes)
-                            .SendMoreFrame("NOTIFY")
-                            .SendMoreFrame(bytes) // value
-                            .SendMoreFrame(path)  // name
-                            .SendMoreFrame(contenetBitLength |> ByteConverter.ToBytes)  // contentBitLength
-                            .SendFrame(offsets) // offsets
+            //ioChangedSubject.Subscribe(fun (ioChange:IOChangeInfo) ->
 
-                notifyToClients()
-
-            ) |> ignore
+            //) |> ignore
             
         let mutable terminated = false
 
         member x.IsTerminated with get() = terminated
 
-        member x.IOChangedObservable = ioChangedSubject
+        //member x.IOChangedObservable = ioChangedSubject
         member x.Clients = clients
 
-        member private x.handleRequest (server:RouterSocket) : ClientIdentifier * int * IOResult =
+        member private x.handleRequest (server:RouterSocket) : IResponse =    // ClientIdentifier * int * IOResult =
             let mutable mqMessage:NetMQMessage = null
             if not <| server.TryReceiveMultipartMessage(&mqMessage) then
-                null, -1, Ok null
+                ResponseNoMoreInput()
             else
                 let clientId = mqMessage[ClientMultiMessage.ClientId].Buffer;  // byte[]로 받음
                 let reqId = mqMessage[ClientMultiMessage.RequestId].Buffer |> BitConverter.ToInt32
                 /// Client Request Info : clientId, requestId
-                let cri:ClientRequestInfo = {ClientId = clientId; RequestId=reqId}
-                let ioResult =
-                    let mms = mqMessage |> toArray
-                    let command = mqMessage[ClientMultiMessage.Command].ConvertToString() |> removeTrailingNullChar;
-                    logDebug $"Handling request: {command}"
+                let cri = ClientRequestInfo(clientId, reqId)
 
-                    let getArgs() =
-                        let tokens = command.Split(' ', StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
-                        tokens[1..] |> map(fun s -> s.ToLower())
+                let mms = mqMessage |> toArray
+                let command = mqMessage[ClientMultiMessage.Command].ConvertToString() |> removeTrailingNullChar;
+                logDebug $"Handling request: {command}"
 
-                    // client 에서 오는 모든 메시지는 client ID, requestId 와 command frame 을 기본 포함하므로, 
-                    // 이 3개의 frame 을 제외한 frame 의 갯수에 따라 message 를 처리한다.
-                    match mms.length() - 3 with
-                    | 0 ->
-                        match command with
-                        | "REGISTER" ->
-                            clients.Add clientId
-                            logDebug $"Client {clientIdentifierToString clientId} registered"
-                            Ok null
-                        | "UNREGISTER" ->
-                            clients.Remove clientId |> ignore
-                            logDebug $"Client {clientIdentifierToString clientId} unregistered"
-                            Ok null
-                        | "PONG" ->
-                            logDebug $"Got pong from client {clientIdentifierToString clientId}"
-                            Ok null
-                        | StartsWith "read" ->      // e.g read p/ob1 p/ow1 p/olw3
-                            noop()
-                            let result =
-                                getArgs() |> map (fun a -> $"{a}={readAddress(cri, a)}")
-                                |> joinWith " "
-                            Ok (box result)
-                        | StartsWith "write" ->
-                            let changes = getArgs() |> map (fun a -> writeAddressWithValue(cri, a))
-                            Ok (WriteOK(changes))
-                        | StartsWith "cl" ->
-                            let name = getArgs() |> Seq.exactlyOne
-                            let bm = streamManagers[name]
-                            bm.clear()
-                            Ok (box (WriteOK([])))
-                        | _ ->
-                            failwithlogf $"ERROR: {command}"
-                    | 2 ->
-                        match command with
-                        | "rx" ->
-                            let bm, indices = fetchForReadBit mms
-                            bm.VerifyIndices(cri, indices |> map (fun n -> n / 8))
-                            let result = bm.readBits indices
-                            Ok (box result)
-                        | "rb" ->
-                            let bm, indices = fetchForRead mms
-                            bm.VerifyIndices(cri, indices)
-                            let result = bm.readU8s indices
-                            Ok result
+                let getArgs() =
+                    let tokens = command.Split(' ', StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
+                    tokens[1..] |> map(fun s -> s.ToLower())
 
-                        | "rw" ->
-                            let bm, indices = fetchForRead mms
-                            bm.VerifyIndices(cri, indices |> map (fun n -> n * 2))
-                            let result = bm.readU16s indices
-                            Ok result
-
-                        | "rd" ->
-                            let bm, indices = fetchForRead mms
-                            bm.VerifyIndices(cri, indices |> map (fun n -> n * 4))
-                            let result = bm.readU32s indices
-                            Ok result
-
-                        | "rl" ->
-                            let bm, indices = fetchForRead mms
-                            bm.VerifyIndices(cri, indices |> map (fun n -> n * 8))
-                            let result = bm.readU64s indices
-                            Ok result
-                        | _ ->
-                            failwithlogf $"ERROR: {command}"
-                    | 3 ->
-                        match command with
-                        | "wx" ->
-                            let bm, indices, values = fetchForWrite mms
-                            bm.Verify(cri, indices |> map (fun n -> n / 8), values.Length)
-
-                            let changes = [
-                                for i in [0..indices.Length-1] do
-                                    let value =
-                                        match values.[i] with
-                                        | 1uy -> true
-                                        | 0uy -> false
-                                        | _ -> failwithf($"Invalid value: {values.[i]}")
-                                    bm.writeBit (cri, indices[i], value)
-                            ]
-
-                            bm.Flush()
-                            Ok (box (WriteOK(changes)))
-                        | "wb" ->
-                            let bm, indices, values = fetchForWrite mms
-                            bm.Verify(cri, indices, values.Length / 1)
-                            let change = Array.zip indices values |> bm.writeU8s cri
-                            Ok (box (WriteOK([change])))
-
-                        | "ww" ->
-                            let bm, indices, values = fetchForWrite mms
-                            bm.Verify(cri, indices |> map (fun n -> n * 2), values.Length / 2)
-
-                            let change = Array.zip indices (ByteConverter.BytesToTypeArray<uint16>(values)) |> bm.writeU16s cri
-                            Ok (box (WriteOK([change])))
-
-                        | "wd" ->
-                            let bm, indices, values = fetchForWrite mms
-                            bm.Verify(cri, indices |> map (fun n -> n * 4), values.Length / 4)
-                            let change = Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) |> bm.writeU32s cri
-                            Ok (box (WriteOK([change])))
-
-                        | "wl" ->
-                            let bm, indices, values = fetchForWrite mms
-                            bm.Verify(cri, indices |> map (fun n -> n * 8), values.Length / 8)
-
-                            let change = Array.zip indices (ByteConverter.BytesToTypeArray<uint64>(values)) |> bm.writeU64s cri
-                            Ok (box (WriteOK([change])))
-                        | _ ->
-                            failwithlogf $"ERROR: {command}"
-
+                // client 에서 오는 모든 메시지는 client ID, requestId 와 command frame 을 기본 포함하므로, 
+                // 이 3개의 frame 을 제외한 frame 의 갯수에 따라 message 를 처리한다.
+                match mms.length() - 3 with
+                | 0 ->
+                    match command with
+                    | "REGISTER" ->
+                        clients.Add clientId
+                        logDebug $"Client {clientIdentifierToString clientId} registered"
+                        StringResponseOK(cri, "OK")
+                    | "UNREGISTER" ->
+                        clients.Remove clientId |> ignore
+                        logDebug $"Client {clientIdentifierToString clientId} unregistered"
+                        StringResponseOK(cri, "OK")
+                    | "PONG" ->
+                        logDebug $"Got pong from client {clientIdentifierToString clientId}"
+                        ResponseOK()
+                    | StartsWith "read" ->      // e.g read p/ob1 p/ow1 p/olw3
+                        noop()
+                        let result =
+                            getArgs() |> map (fun a -> $"{a}={readAddress(cri, a)}")
+                            |> joinWith " "
+                        ReadResponseOK(cri, PLCMemoryBitSize.Undefined, result)
+                    | StartsWith "write" ->
+                        let changes = getArgs() |> map (fun a -> writeAddressWithValue(cri, a))
+                        WriteHeterogeniousResponseOK(cri, changes)
+                    | StartsWith "cl" ->
+                        let name = getArgs() |> Seq.exactlyOne
+                        let bm = streamManagers[name]
+                        bm.clear()
+                        StringResponseOK(cri, "OK")
                     | _ ->
                         failwithlogf $"ERROR: {command}"
-                clientId, reqId, ioResult
+                | 2 ->
+                    match command with
+                    | "rx" ->
+                        let bm, indices = fetchForReadBit mms
+                        bm.VerifyIndices(cri, indices |> map (fun n -> n / 8))
+                        let result = bm.readBits indices
+                        ReadResponseOK(cri, PLCMemoryBitSize.Bit, result)
+                    | "rb" ->
+                        let bm, indices = fetchForRead mms
+                        bm.VerifyIndices(cri, indices)
+                        let result = bm.readU8s indices
+                        ReadResponseOK(cri, PLCMemoryBitSize.Byte, result)
+
+                    | "rw" ->
+                        let bm, indices = fetchForRead mms
+                        bm.VerifyIndices(cri, indices |> map (fun n -> n * 2))
+                        let result = bm.readU16s indices
+                        ReadResponseOK(cri, PLCMemoryBitSize.Word, result)
+
+                    | "rd" ->
+                        let bm, indices = fetchForRead mms
+                        bm.VerifyIndices(cri, indices |> map (fun n -> n * 4))
+                        let result = bm.readU32s indices
+                        ReadResponseOK(cri, PLCMemoryBitSize.DWord, result)
+
+                    | "rl" ->
+                        let bm, indices = fetchForRead mms
+                        bm.VerifyIndices(cri, indices |> map (fun n -> n * 8))
+                        let result = bm.readU64s indices
+                        ReadResponseOK(cri, PLCMemoryBitSize.LWord, result)
+                    | _ ->
+                        failwithlogf $"ERROR: {command}"
+                | 3 ->
+                    match command with
+                    | "wx" ->
+                        let bm, indices, values = fetchForWrite mms
+                        bm.Verify(cri, indices |> map (fun n -> n / 8), values.Length)
+
+                        for i in [0..indices.Length-1] do
+                            let value =
+                                match values.[i] with
+                                | 1uy -> true
+                                | 0uy -> false
+                                | _ -> failwithf($"Invalid value: {values.[i]}")
+                            bm.writeBit (cri, indices[i], value)
+
+                        bm.Flush()
+                        WriteResponseOK(cri, bm.FileSpec, PLCMemoryBitSize.Bit, indices, values)
+                    | "wb" ->
+                        let bm, indices, values = fetchForWrite mms
+                        bm.Verify(cri, indices, values.Length / 1)
+                        Array.zip indices values |> bm.writeU8s cri
+                        WriteResponseOK(cri, bm.FileSpec, PLCMemoryBitSize.Byte, indices, values)
+
+                    | "ww" ->
+                        let bm, indices, values = fetchForWrite mms
+                        bm.Verify(cri, indices |> map (fun n -> n * 2), values.Length / 2)
+
+                        Array.zip indices (ByteConverter.BytesToTypeArray<uint16>(values)) |> bm.writeU16s cri
+                        WriteResponseOK(cri, bm.FileSpec, PLCMemoryBitSize.Byte, indices, values)
+
+                    | "wd" ->
+                        let bm, indices, values = fetchForWrite mms
+                        bm.Verify(cri, indices |> map (fun n -> n * 4), values.Length / 4)
+                        Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) |> bm.writeU32s cri
+                        WriteResponseOK(cri, bm.FileSpec, PLCMemoryBitSize.Byte, indices, values)
+
+                    | "wl" ->
+                        let bm, indices, values = fetchForWrite mms
+                        bm.Verify(cri, indices |> map (fun n -> n * 8), values.Length / 8)
+
+                        Array.zip indices (ByteConverter.BytesToTypeArray<uint64>(values)) |> bm.writeU64s cri
+                        WriteResponseOK(cri, bm.FileSpec, PLCMemoryBitSize.Byte, indices, values)
+                    | _ ->
+                        failwithlogf $"ERROR: {command}"
+
+                | _ ->
+                    failwithlogf $"ERROR: {command}"
 
 
         member x.Run() =
@@ -408,70 +467,66 @@ module ZmqServerModule =
 
                 while not cancellationToken.IsCancellationRequested do
                     try
-                        let clientId, reqId, response = x.handleRequest server
+                        let response = x.handleRequest server
                         match response with
-                        | Ok obj ->
-
-                            if obj = null || obj :? WriteOK then
-                                noop()
-                            else
-                                noop()
-
-                            match obj with
-                            | null
-                            | :? NoMoreInputOK ->
-                                // 현재, request 가 없는 경우
-                                // Async.Sleep(???)
-                                ()
-
-                            | _ ->
-                                let more =
-                                    server
-                                        .SendMoreFrame(clientId)
-                                        .SendMoreFrame(reqId |> ByteConverter.ToBytes)  //.SendMoreFrameWithRequestId(reqId)
-                                        .SendMoreFrame("OK")
-                                match obj with
-                                | :? WriteOK as ok ->
-                                    more.SendFrame("OK")
-                                | :? string as ok ->
-                                    more.SendFrame(ok)
-                                | :? byte as ok ->
-                                    more.SendFrame([|ok|])
-                                | :? uint16 as ok ->
-                                    more.SendFrame(BitConverter.GetBytes(ok))
-                                | :? uint32 as ok ->
-                                    more.SendFrame(BitConverter.GetBytes(ok))
-                                | :? uint64 as ok ->
-                                    more.SendFrame(BitConverter.GetBytes(ok))
-                                | _ ->
-                                    let t = obj.GetType()
-                                    let isArray = t.IsArray
-                                    let objType = t.GetElementType()
-                                    verify isArray
-                                    if objType = typeof<bool> then
-                                        more.SendFrame(obj :?> bool[] |> map (fun b -> if b then 1uy else 0uy))
-                                    elif objType = typeof<byte> then
-                                        more.SendFrame(obj :?> byte[])
-                                    elif objType = typeof<uint16> then
-                                        more.SendFrame(ByteConverter.ToBytes<uint16>(obj :?> uint16[]))
-                                    elif objType = typeof<uint32> then
-                                        more.SendFrame(ByteConverter.ToBytes<uint32>(obj :?> uint32[]))
-                                    elif objType = typeof<uint64> then
-                                        more.SendFrame(ByteConverter.ToBytes<uint64>(obj :?> uint64[]))
-                                    else
-                                        failwithlogf "ERROR"
-
-                            if obj :? WriteOK then
-                                let wok = obj :?> WriteOK
-                                wok.Changes |> iter ioChangedSubject.OnNext
-                                ()
-
-                        | Error errMsg ->
+                        | :? ResponseNoMoreInput ->
+                            // 현재, request 가 없는 경우
+                            // Async.Sleep(???)
+                            ()
+                        | :? StringResponseNG as r ->
+                            let cri:ClientRequestInfo = r.ClientRequestInfo
+                            let clientId = cri.ClientId
+                            let reqId = cri.RequestId
                             server
                                 .SendMoreFrame(clientId)
                                 .SendMoreFrame(reqId |> ByteConverter.ToBytes)
                                 .SendMoreFrame("ERR")
-                                .SendFrame(errMsg)
+                                .SendFrame(r.Message)
+
+                        | :? IResponseWithClientRquestInfo as r ->
+                            let clientId = r.ClientRequestInfo.ClientId
+                            let reqId = r.ClientRequestInfo.RequestId
+                            let more =
+                                server
+                                    .SendMoreFrame(clientId)
+                                    .SendMoreFrame(reqId |> ByteConverter.ToBytes)  //.SendMoreFrameWithRequestId(reqId)
+                                    .SendMoreFrame("OK")
+                            match r with
+                            | :? StringResponse as r ->
+                                more.SendFrame(r.Message)
+                            | :? ReadResponseOK as r ->
+                                let values, dataType = r.Values, r.DataType
+
+                                if dataType = PLCMemoryBitSize.Undefined then
+                                    more.SendFrame(r.Values :?> string)
+                                else
+                                    verify (values.GetType().IsArray)
+                                    let moreBytes =
+                                        match dataType with
+                                        | PLCMemoryBitSize.Bit   -> values :?> bool[] |> map (fun b -> if b then 1uy else 0uy)
+                                        | PLCMemoryBitSize.Byte  -> values :?> byte[]
+                                        | PLCMemoryBitSize.Word  -> values :?> uint16[] |> ByteConverter.ToBytes<uint16>
+                                        | PLCMemoryBitSize.DWord -> values :?> uint32[] |> ByteConverter.ToBytes<uint32>
+                                        | PLCMemoryBitSize.LWord -> values :?> uint64[] |> ByteConverter.ToBytes<uint64>
+                                        | _ -> failwithlogf "ERROR"
+
+                                    more.SendFrame(moreBytes)
+
+                            | :? WriteResponseOK as r ->
+                                more.SendFrame("OK")
+                                // TODO : uncomment
+                                IOChangeInfo(r.ClientRequestInfo, r.FIleSpec, r.ContentBitSize,  r.Offsets, r.ChangedValues) |> notifyIoChange
+                            | :? WriteHeterogeniousResponseOK as r ->
+                                more.SendFrame("OK")
+                                for ch in r.SpotChanges do
+                                    let fs, dataType, offsets, value = ch
+                                    let xxx = r.ClientRequestInfo
+                                    IOChangeInfo(r.ClientRequestInfo, fs, dataType, offsets, value) |> notifyIoChange
+                            | _ ->
+                                failwith "Not Yet!!"
+
+                        | _ ->
+                            failwith "Not Yet!!"
                     with 
                     | :? ExcetionWithClient as ex ->
                         logError $"Error occured while handling request: {ex.Message}"

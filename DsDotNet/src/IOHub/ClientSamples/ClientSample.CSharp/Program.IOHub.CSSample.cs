@@ -27,7 +27,7 @@ while ( key != null && ! cts.IsCancellationRequested )
     key = Console.ReadLine();
     if (key == null)
         continue;
-
+    Console.WriteLine($"Got key [{key}].");
     if (key == "q" || key == "Q")
         break;
     var result = client.CsSendRequest(key);
@@ -53,6 +53,6 @@ while ( key != null && ! cts.IsCancellationRequested )
 //    }, TaskCreationOptions.LongRunning);
 
 
-Thread.Sleep(Timeout.Infinite);
+//Thread.Sleep(Timeout.Infinite);
 Console.ReadLine();
 Console.WriteLine();

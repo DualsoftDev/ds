@@ -9,7 +9,6 @@ open Newtonsoft.Json
 module rec ZmqSpec =
     type ErrorMessage = string
     type NoMoreInputOK() = class end
-    type WriteOK() = class end
 
     type IOResult = Result<obj, ErrorMessage>
     type TypedIOResult<'T> = Result<'T, ErrorMessage>

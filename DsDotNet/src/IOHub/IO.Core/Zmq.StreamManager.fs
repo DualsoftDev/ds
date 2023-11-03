@@ -68,6 +68,9 @@ module ZmqStreamManager =
         member x.Value = value
         member x.DataType = dataType
 
+    type WriteOK(changes:IOChangeInfo seq) =
+        member val Changes = changes |> toArray
+
     type StreamManager(fileSpec:IOFileSpec) as this =
         let stream:FileStream = fileSpec.FileStream
         let locker = obj()  // 객체를 lock용으로 사용
@@ -153,8 +156,8 @@ module ZmqStreamManager =
                     offsets.Add (byteIndex * 8 + bitIndex)
                     values.Add value
 
-                ioChangedSubject.OnNext(IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.Bit, offsets.ToArray(), values.ToArray()))
-                x.Flush()                
+                x.Flush()
+                IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.Bit, offsets.ToArray(), values.ToArray())
             )
 
         member x.writeU8s (cri:ClientRequestInfo)  (writeArg:(int*byte) seq) =
@@ -163,8 +166,8 @@ module ZmqStreamManager =
                     writeTBytes<byte> stream offset value
                 let offsets = writeArg |> map fst |> toArray
                 let values  = writeArg |> map snd |> toArray
-                ioChangedSubject.OnNext(IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.Byte, offsets, values))
                 x.Flush()
+                IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.Byte, offsets, values)
             )
 
 
@@ -175,8 +178,8 @@ module ZmqStreamManager =
                     writeTBytes<uint16> stream offset value
                 let offsets = writeArg |> map fst |> toArray
                 let values  = writeArg |> map snd |> toArray
-                ioChangedSubject.OnNext(IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.Word, offsets, values))
                 x.Flush()
+                IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.Word, offsets, values)
             )
 
         member x.writeU32 (cri:ClientRequestInfo) (wordOffset:int, value:uint32) = x.writeU32s cri ([|wordOffset, value|])
@@ -186,8 +189,8 @@ module ZmqStreamManager =
                     writeTBytes<uint32> stream offset value
                 let offsets = writeArg |> map fst |> toArray
                 let values  = writeArg |> map snd |> toArray
-                ioChangedSubject.OnNext(IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.DWord, offsets, values))
                 x.Flush()
+                IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.DWord, offsets, values)
             )
 
         member x.writeU64 (cri:ClientRequestInfo) (wordOffset:int, value:uint64) = x.writeU64s cri ([|wordOffset, value|])
@@ -197,8 +200,8 @@ module ZmqStreamManager =
                     writeTBytes<uint64> stream offset value
                 let offsets = writeArg |> map fst |> toArray
                 let values  = writeArg |> map snd |> toArray
-                ioChangedSubject.OnNext(IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.LWord, offsets, values))
                 x.Flush()
+                IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.LWord, offsets, values)
             )
 
         member x.clear() =

@@ -105,8 +105,6 @@ module private ZmqServerImplModule =
             | PLCMemoryBitSize.LWord -> bufferManager.writeU64 cri (byteOffset, UInt64.Parse(value))
             | _ -> failwithf($"Unknown data type : {ap.DataType}")
 
-            bufferManager.Flush()
-
         | _ -> failwithf($"Unknown address with assignment pattern : {addressWithAssignValue}")
 
     /// Client 로부터 받은 multi-message format
@@ -199,7 +197,8 @@ module ZmqServerModule =
         
         let port = ioSpec_.ServicePort
 
-        let mutable ioChangedObservable:IObservable<IOChangeInfo> = null
+        let ioChangedSubject = new Subject<IOChangeInfo>()
+        //let mutable ioChangedObservable:IObservable<IOChangeInfo> = null
         do
             ioSpec <- ioSpec_
             for v in ioSpec.Vendors do
@@ -220,13 +219,14 @@ module ZmqServerModule =
                     let key = if v.Location.NonNullAny() then $"{v.Location}/{f.Name}" else f.Name
                     streamManagers.Add(key, streamManager)
 
-            ioChangedObservable <-
-                streamManagers.Values 
-                |> map (fun sm -> sm.IOChangedSubject :> IObservable<IOChangeInfo>)
-                |> Observable.Merge
+            //ioChangedObservable <-
+            //    streamManagers.Values 
+            //    |> map (fun sm -> sm.IOChangedSubject :> IObservable<IOChangeInfo>)
+            //    |> Observable.Merge
 
             // TODO
-            ioChangedObservable.Subscribe(fun (ioChange:IOChangeInfo) ->
+            //ioChangedObservable.Subscribe(fun (ioChange:IOChangeInfo) ->
+            ioChangedSubject.Subscribe(fun (ioChange:IOChangeInfo) ->
                 Console.WriteLine($"change by client {clientIdentifierToString ioChange.ClientRequestInfo.ClientId}");
                 let notiTargetClients =
                     clients
@@ -235,14 +235,14 @@ module ZmqServerModule =
                 let notifyToClients() =
                     let bm = ioChange.IOFileSpec
                     let contenetBitLength = int ioChange.DataType
-                    let clientId = ioChange.ClientRequestInfo.ClientId
+                    let criminalClientId = ioChange.ClientRequestInfo.ClientId
                     let bytes = ioChange.GetValueBytes()
                     let path = ioChange.IOFileSpec.GetPath()
                     let offsets = ioChange.Offsets |> ByteConverter.ToBytes<int>
                     for client in notiTargetClients do
                         Console.WriteLine($"Notifying change to client {clientIdentifierToString client}");
                         serverSocket
-                            .SendMoreFrame(clientId)
+                            .SendMoreFrame(client)
                             .SendMoreFrame(-1 |> ByteConverter.ToBytes)
                             .SendMoreFrame("NOTIFY")
                             .SendMoreFrame(bytes) // value
@@ -258,7 +258,7 @@ module ZmqServerModule =
 
         member x.IsTerminated with get() = terminated
 
-        member x.IOChangedObservable = ioChangedObservable
+        member x.IOChangedObservable = ioChangedSubject
         member x.Clients = clients
 
         member private x.handleRequest (server:RouterSocket) : ClientIdentifier * int * IOResult =
@@ -302,13 +302,13 @@ module ZmqServerModule =
                                 |> joinWith " "
                             Ok (box result)
                         | StartsWith "write" ->
-                            getArgs() |> iter (fun a -> writeAddressWithValue(cri, a))
-                            Ok (WriteOK())
+                            let changes = getArgs() |> map (fun a -> writeAddressWithValue(cri, a))
+                            Ok (WriteOK(changes))
                         | StartsWith "cl" ->
                             let name = getArgs() |> Seq.exactlyOne
                             let bm = streamManagers[name]
                             bm.clear()
-                            Ok (box (WriteOK()))
+                            Ok (box (WriteOK([])))
                         | _ ->
                             failwithlogf $"ERROR: {command}"
                     | 2 ->
@@ -344,47 +344,48 @@ module ZmqServerModule =
                         | _ ->
                             failwithlogf $"ERROR: {command}"
                     | 3 ->
-                        let writeOK = Ok (box (WriteOK()))
                         match command with
                         | "wx" ->
                             let bm, indices, values = fetchForWrite mms
                             bm.Verify(cri, indices |> map (fun n -> n / 8), values.Length)
 
-                            for i in [0..indices.Length-1] do
-                                let value =
-                                    match values.[i] with
-                                    | 1uy -> true
-                                    | 0uy -> false
-                                    | _ -> failwithf($"Invalid value: {values.[i]}")
-                                bm.writeBit (cri, indices[i], value)
+                            let changes = [
+                                for i in [0..indices.Length-1] do
+                                    let value =
+                                        match values.[i] with
+                                        | 1uy -> true
+                                        | 0uy -> false
+                                        | _ -> failwithf($"Invalid value: {values.[i]}")
+                                    bm.writeBit (cri, indices[i], value)
+                            ]
 
                             bm.Flush()
-                            writeOK
+                            Ok (box (WriteOK(changes)))
                         | "wb" ->
                             let bm, indices, values = fetchForWrite mms
                             bm.Verify(cri, indices, values.Length / 1)
-                            Array.zip indices values |> bm.writeU8s cri
-                            writeOK
+                            let change = Array.zip indices values |> bm.writeU8s cri
+                            Ok (box (WriteOK([change])))
 
                         | "ww" ->
                             let bm, indices, values = fetchForWrite mms
                             bm.Verify(cri, indices |> map (fun n -> n * 2), values.Length / 2)
 
-                            Array.zip indices (ByteConverter.BytesToTypeArray<uint16>(values)) |> bm.writeU16s cri
-                            writeOK
+                            let change = Array.zip indices (ByteConverter.BytesToTypeArray<uint16>(values)) |> bm.writeU16s cri
+                            Ok (box (WriteOK([change])))
 
                         | "wd" ->
                             let bm, indices, values = fetchForWrite mms
                             bm.Verify(cri, indices |> map (fun n -> n * 4), values.Length / 4)
-                            Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) |> bm.writeU32s cri
-                            writeOK
+                            let change = Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) |> bm.writeU32s cri
+                            Ok (box (WriteOK([change])))
 
                         | "wl" ->
                             let bm, indices, values = fetchForWrite mms
                             bm.Verify(cri, indices |> map (fun n -> n * 8), values.Length / 8)
 
-                            Array.zip indices (ByteConverter.BytesToTypeArray<uint64>(values)) |> bm.writeU64s cri
-                            writeOK
+                            let change = Array.zip indices (ByteConverter.BytesToTypeArray<uint64>(values)) |> bm.writeU64s cri
+                            Ok (box (WriteOK([change])))
                         | _ ->
                             failwithlogf $"ERROR: {command}"
 
@@ -403,7 +404,7 @@ module ZmqServerModule =
                 //server.Bind($"tcp://*:{port}")
                 server.Bind($"tcp://localhost:{port}")
                 
-                periodicPingClients()
+                //periodicPingClients()
 
                 while not cancellationToken.IsCancellationRequested do
                     try
@@ -459,6 +460,11 @@ module ZmqServerModule =
                                         more.SendFrame(ByteConverter.ToBytes<uint64>(obj :?> uint64[]))
                                     else
                                         failwithlogf "ERROR"
+
+                            if obj :? WriteOK then
+                                let wok = obj :?> WriteOK
+                                wok.Changes |> iter ioChangedSubject.OnNext
+                                ()
 
                         | Error errMsg ->
                             server

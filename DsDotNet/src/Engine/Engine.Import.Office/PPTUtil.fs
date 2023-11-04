@@ -48,11 +48,13 @@ module PPTUtil =
         [<Extension>]
         static member ErrorConnect(conn:#ConnectionShape, errMsg:string, text:string,  page:int) =
                ErrorPPTNotify.Trigger (page, Office.ConnectionShapeID(conn), errMsg)
-               Office.ErrorPPT(ErrorCase.Conn, errMsg, $"{Office.EdgeName(conn)}[{text}]", page, Office.ConnectionShapeID(conn), conn.InnerText)
+               //Office.ErrorPPT(ErrorCase.Conn, errMsg, $"{Office.EdgeName(conn)}[{text}]", page, Office.ConnectionShapeID(conn), conn.InnerText)
+               Office.ErrorPPT(ErrorCase.Conn, errMsg, $"{text}", page, Office.ConnectionShapeID(conn), conn.InnerText)
 
         [<Extension>]
         static member ErrorConnect(conn:#ConnectionShape, errMsg:string, src:string, tgt:string,  page:int) =
-               Office.ErrorConnect(conn, errMsg, $"{Office.EdgeName(conn)}[{src}~{tgt}]", page)
+               //Office.ErrorConnect(conn, errMsg, $"{Office.EdgeName(conn)}[{src}~{tgt}]", page)
+               Office.ErrorConnect(conn, errMsg, $"[{src}~{tgt}]", page)
 
         ///power point 문서를 Openxml로 열기 (*.pptx 형식만 지원)
         [<Extension>]

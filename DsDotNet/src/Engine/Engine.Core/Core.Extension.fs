@@ -106,13 +106,13 @@ module CoreExtensionModule =
 
         member x.GetMutualResetApis(src:ApiItem) =
             let getMutual(apiInfo:ApiResetInfo) =
-                match src.Name = apiInfo.Operand1, src.Name = apiInfo.Operand2 with
+                match src.Name.QuoteOnDemand() = apiInfo.Operand1, src.Name.QuoteOnDemand() = apiInfo.Operand2 with
                 |true, false -> Some apiInfo.Operand2
                 |false, true -> Some apiInfo.Operand1
                 |_ -> None
 
             x.ApiResetInfos.Select(getMutual).Where(fun w-> w.IsSome)
-                .Select(fun s->x.ApiItems.Find(fun f->f.Name = s.Value))
+                .Select(fun s->x.ApiItems.Find(fun f->f.QualifiedName = $"{x.Name}.{s.Value}"))
 
         member x.DeviceDefs = x.Jobs |> Seq.collect(fun s->s.DeviceDefs)
 

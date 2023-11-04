@@ -491,12 +491,12 @@ module ImportU =
                                 if(dummys.IsMember(edge.EndNode))
                                     then dummys.GetMembers(edge.EndNode)   |> getVertexs
                                     else [dicVertex.[edge.EndNode.Key]]
-
-                            convertEdge(edge, flow, srcs, tgts) |> ignore
+                            try
+                                convertEdge(edge, flow, srcs, tgts) |> ignore
+                            with
+                            | ex ->
+                                edge.ConnectionShape.ErrorConnect(ex.Message, "", edge.PageNum)
                         )
-
-
-
                 )
 
 

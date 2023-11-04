@@ -203,11 +203,17 @@ module ImportPPTModule =
                      .Iter(fun  f->f.Value.Close())
             dicPptDoc.Clear()
 
+    let getLibModel() = 
+        let runDir = System.Reflection.Assembly.GetEntryAssembly().Location|>DsFile |> PathManager.getDirectoryName
+        let libFilePath =  PathManager.getFullPath ("DS_Library.pptx"|>DsFile) (runDir|>DsDirectory)
+        fromPPTs [| libFilePath |] |> fun (model, views, pptRepo) -> model
+
     type PptResult = {
         System: DsSystem
         Views : ViewNode seq
         IsActive : bool
     }
+
 
     [<Extension>]
     type ImportPPT =
@@ -227,7 +233,7 @@ module ImportPPTModule =
                     -> model, pptRepo
                         |> Seq.map(fun f->
                             {   System= f.Key
-                                Views = f.Value.GetGraphView(f.Key)
+                                Views = f.Key.GetViewNodes()
                                 IsActive = model.Systems.Contains(f.Key)}  )
         [<Extension>]
         static member GetDsFilesWithLib (paths:string seq) =
@@ -248,7 +254,9 @@ module ImportPPTModule =
         [<Extension>]
         static member GetDSFromPPT (fullName: string) =
                 let pptResults = ImportPPT.GetModel [| fullName |]
+                let libResults = getLibModel()
 
+                
                 let sys = pptResults.Systems.[0]
 
                 let exportPath = sys.pptxToExportDS fullName

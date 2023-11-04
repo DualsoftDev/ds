@@ -391,7 +391,7 @@ namespace Diagram.View.MSAGL
                 {
                     if (viewNode.IsChildExist)
                     {
-                        nNode.Attr.FillColor = Color.DarkGray;
+                        nNode.Attr.FillColor = Color.DimGray;
                         nNode.Attr.Shape = Shape.Box;
                     }
                     else

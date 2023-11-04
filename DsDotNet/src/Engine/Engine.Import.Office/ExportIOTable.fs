@@ -111,23 +111,20 @@ module ExportIOTable =
 
     let ToDataSet(system:DsSystem) = ToTable system
     let ToDataCSV (system:DsSystem) =
-        let dataTable  = ToTable system
+        let dataTable = ToTable system
         let csvContent = new StringBuilder()
-
-        // 컬럼 헤더 추가
+            // 컬럼 헤더 추가
         let columnNames = dataTable.Columns |> Seq.cast<DataColumn> |> Seq.map (fun col -> col.ColumnName)
-        csvContent.AppendLine(String.Join(",", columnNames |> Seq.toArray)) |> ignore
+        csvContent.AppendLine(String.Join("\t", columnNames |> Seq.toArray)) |> ignore
 
-        // 각 행의 데이터 추가
+            // 각 행의 데이터 추가
         dataTable.Rows |> Seq.cast<DataRow> |> Seq.iter (fun row ->
             let fieldValues = row.ItemArray |> Seq.map (fun obj ->
                 let field = obj.ToString()
-                field.Replace("\"", "\"\"") // 이중 인용부호 처리
-                     .Replace("\r\n", " ") // 새 줄 문자 처리
-                     .Replace("\n", " ") // 새 줄 문자 처리
-                     .Replace(",", ";") // 콤마 처리
+        
+                field.Replace("\t", "\\t") // 새 줄 문자 처리
             )
-            csvContent.AppendLine(String.Join(",", fieldValues |> Seq.toArray))|>ignore
+            csvContent.AppendLine(String.Join("\t", fieldValues |> Seq.toArray)) |> ignore
         )
 
         // 임시 파일 경로를 생성

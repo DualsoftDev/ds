@@ -35,3 +35,5 @@ Grammar/CsParser/bin/
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/demo/ppt/kit_DS_autogen/*
 
 /DsDotNet/Apps/OfficeAddOn/PowerPointAddInSetup/PowerPointAddIn
+/DsDotNet/src/UnitTest/UnitTest.Model/test-origin-config.json
+/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/test-model-config.json

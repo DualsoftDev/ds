@@ -159,11 +159,31 @@ module ImportViewModule =
     let UpdateApi(system:DsSystem,  node:ViewNode)  =
 
         let newNode = ViewNode("Interface", VIF)
+        let flowApis = 
+            system.ApiItems 
+            |> Seq.where(fun api -> (api.TXs @ api.RXs) |> Seq.head |> fun f->f.Flow = node.Flow.Value)
 
-        system.ApiItems
-        |> Seq.iter(fun api ->newNode.AddSingles(ViewNode(api.Name, VIF)) |>ignore
+        let flowApiNodes = flowApis.Map(fun f-> ViewNode(f.Name, VIF)) 
+                                   .ToDictionary(fun f-> f.Name)
+
+        flowApis |> Seq.iter(fun api -> newNode.AddSingles(flowApiNodes[api.Name]))
+
+
+        let resetAddings = HashSet<string>()
+        flowApis |> Seq.iter(fun api ->
+   
+            if not(resetAddings.Contains api.Name)
+            then 
+                let mts = system.GetMutualResetApis(api)
+                mts.Iter(fun f-> 
+                    if not(resetAddings.Contains f.Name)
+                    then
+                        resetAddings.Add(f.Name) |> ignore
+                        newNode.AddEdge(ModelingEdgeInfo<ViewNode>(flowApiNodes[api.Name], TextInterlock, flowApiNodes[f.Name])) |>ignore
+                    )
+                resetAddings.Add(api.Name) |> ignore
             )
-
+            
         if newNode.GetSingles().Count() > 0
         then node.AddSingles(newNode) |> ignore
 
@@ -189,50 +209,50 @@ module ImportViewModule =
     [<Extension>]
     type ImportViewUtil =
                     
-        [<Extension>]
-        static member GetGraphView (doc:pptDoc, mySys:DsSystem) =
-                let dicVertex = doc.DicVertex
-                let dicFlow = doc.DicFlow
+        //[<Extension>]
+        //static member GetGraphView (doc:pptDoc, mySys:DsSystem) =
+        //        let dicVertex = doc.DicVertex
+        //        let dicFlow = doc.DicFlow
 
-                doc.Dummys |> Seq.iter(fun dummy -> dummy.Update(dicVertex))
-                let getFlowNodes(flows:Flow seq) =
-                    flows |>Seq.map(fun flow ->
-                        let page =  dicFlow.Where(fun w-> w.Value = flow).First().Key
-                        let dummys = doc.Dummys.Where(fun f->f.Page = page)
-                        let flowNode = ConvertFlow(flow, dummys)
+        //        doc.Dummys |> Seq.iter(fun dummy -> dummy.Update(dicVertex))
+        //        let getFlowNodes(flows:Flow seq) =
+        //            flows |>Seq.map(fun flow ->
+        //                let page =  dicFlow.Where(fun w-> w.Value = flow).First().Key
+        //                let dummys = doc.Dummys.Where(fun f->f.Page = page)
+        //                let flowNode = ConvertFlow(flow, dummys)
 
-                        UpdateLampNodes(flow.System, flow, flowNode)
-                        UpdateBtnNodes(flow.System, flow, flowNode)
-                        UpdateConditionNodes(flow.System, flow, flowNode)
+        //                UpdateLampNodes(flow.System, flow, flowNode)
+        //                UpdateBtnNodes(flow.System, flow, flowNode)
+        //                UpdateConditionNodes(flow.System, flow, flowNode)
 
-                        UpdateApiItems(flow.System, page, doc.DicNodes.Values.Where(fun f->f.NodeType.IsIF), flowNode)
+        //                UpdateApiItems(flow.System, page, doc.DicNodes.Values.Where(fun f->f.NodeType.IsIF), flowNode)
 
-                        flowNode)
+        //                flowNode)
 
-                let viewNodes =  getFlowNodes(mySys.Flows)
+        //        let viewNodes =  getFlowNodes(mySys.Flows)
 
-                viewNodes
+        //        viewNodes
 
         [<Extension>]
         static member GetViewNodes (mySys:DsSystem) =
-                let getFlowNodes(flows:Flow seq) =
-                    flows |>Seq.map(fun flow ->
-                        let flowNode = ConvertFlow(flow, [])
+            let getFlowNodes(flows:Flow seq) =
+                flows |>Seq.map(fun flow ->
+                    let flowNode = ConvertFlow(flow, [])
 
-                        UpdateLampNodes(flow.System, flow, flowNode)
-                        UpdateBtnNodes(flow.System, flow, flowNode)
-                        UpdateConditionNodes(flow.System, flow, flowNode)
+                    UpdateLampNodes(flow.System, flow, flowNode)
+                    UpdateBtnNodes(flow.System, flow, flowNode)
+                    UpdateConditionNodes(flow.System, flow, flowNode)
 
-                        UpdateApi(flow.System,  flowNode)
+                    UpdateApi(flow.System,  flowNode)
 
-                        flowNode)
+                    flowNode)
 
-                let viewNodes =  getFlowNodes(mySys.Flows)
+            let viewNodes =  getFlowNodes(mySys.Flows)
 
-                viewNodes
+            viewNodes
 
         [<Extension>]
         static member GetViewNodesLoadingsNThis (mySys:DsSystem) =
-                let loads = mySys.GetRecursiveLoadedSystems()
-                                 .SelectMany(fun s->s.GetViewNodes())
-                mySys.GetViewNodes() @ loads
+            let loads = mySys.GetRecursiveLoadedSystems()
+                                .SelectMany(fun s->s.GetViewNodes())
+            mySys.GetViewNodes() @ loads

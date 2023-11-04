@@ -116,7 +116,7 @@ module PPTDocModule =
 
             SubGroup(page, childGroup, dicUsedSub)
             )
-    type pptDoc(path:string, parameter:DeviceLoadParameters, doc:PresentationDocument)  =
+    type pptDoc(path:string, parameter:DeviceLoadParameters option, doc:PresentationDocument)  =
 
         let headPages =  Dictionary<SlidePart, int>()
         let pages =  Dictionary<SlidePart, pptPage>()
@@ -242,8 +242,8 @@ module PPTDocModule =
         member val DicFlow = Dictionary<int, Flow>() // page , flow
         member val DicVertex = Dictionary<string, Vertex>()
         member val IsBuilded = false with get, set
-        member val Parameter:DeviceLoadParameters = parameter
-
+        member x.Parameter:DeviceLoadParameters = parameter.Value
+        member x.Doc = doc
 [<Extension>]
 type PPTDocExt =
         [<Extension>]

@@ -314,7 +314,9 @@ module PPTObjectModule =
         member x.IfRXs   = ifRXs
         member x.NodeType = nodeType
         member x.PageTitle    = pageTitle
-        member x.IsLibCall    =  nodeType = CALL && name.Contains '.' 
+        //member x.IsLibCall    =  nodeType = CALL && name.Contains '.' 
+        member x.CallDevName = $"{pageTitle}_{name.Split('.')[0]}"
+        member x.CallApiName = $"{name.Split('.')[1]}"
 
         member val Id =  shape.GetId()
         member val Key =  Objkey(iPage, shape.GetId())

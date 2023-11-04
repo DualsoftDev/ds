@@ -111,7 +111,7 @@ module ConvertCoreExt =
                 |> iter (fun t -> b.OutTag  <- t)
 
         member private x.GenerationTaskDevIO() =
-            let taskDevices = x.Jobs |> Seq.collect(fun j -> j.DeviceDefs)
+            let taskDevices = x.Jobs |> Seq.collect(fun j -> j.DeviceDefs) |> Seq.sortBy(fun d-> d.QualifiedName) 
             for b in taskDevices do
                 if b.ApiItem.RXs.length() = 0 && b.ApiItem.TXs.length() = 0
                 then failwith $"Error {getFuncName()}"
@@ -326,13 +326,6 @@ module ConvertCoreExt =
         member c.PSs          = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PS )
         member c.PEs          = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PE )
         
-        //member c.MutualResetDevsByCall(x:DsSystem, td:TaskDev) =
-        //           let myMutualDevs = c.CallTargetJob.DeviceDefs
-        //                               .SelectMany(fun d->d.MutualResetDevs(x))
-        //                               .Where(fun d->d = td)
-                               
-        //           let ins = myMutualDevs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionINFunc)
-        //           if ins.any() then ins.ToAnd() else x._on.Expr
 
         //개별 부정의 AND  <안전하게 전부 확인>
         member c.INsFuns  = let ins = c.CallTargetJob.DeviceDefs

@@ -10,55 +10,17 @@ open Dual.Common.Core.FS
 open Engine.Import.Office
 open Engine.Core
 open System.Runtime.CompilerServices
+open System
 
 [<AutoOpen>]
 module ImportU =
-    let sLibs = Dictionary<string, DsSystem>()
-    let mutable activeSysDir = ""
 
-    let getParams(directoryName:string
-                    , relativeFilePath:string, loadedName:string, containerSystem:DsSystem
-                    , hostIp:string option, loadingType, sRepo) =
-            {
-                ContainerSystem = containerSystem
-                AbsoluteFilePath = PathManager.getFullPath (relativeFilePath.ToFile()) (directoryName|>DsDirectory)
-                RelativeFilePath = PathManager.changeExtension (relativeFilePath.ToFile()) ".ds"  //pptx로 부터 .ds로 생성
-                LoadedName = loadedName
-                ShareableSystemRepository =  sRepo
 
-                HostIp = hostIp
-                LoadingType = loadingType
-            }
+
 
     let private getApiItems(sys:DsSystem, refSys:string, apiName:string) =
             let refSystem = sys.TryFindLoadedSystem(refSys).Value.ReferenceSystem
             refSystem.TryFindExportApiItem([|refSystem.Name;apiName|]).Value
-
- 
-    let private addLoadedLibSystemNApi(loadedName, apiName, mySys:DsSystem, parentF:Flow option, parentR:Real option)=
-        let libSys = sLibs[apiName]
-       
-        let dev =
-            let loadedSys = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = loadedName)
-            if loadedSys.IsNull() 
-            then 
-                let paras = getParams(activeSysDir, "DS_Library.ds"
-                    , loadedName, mySys, None, DuDevice, ShareableSystemRepository())
-        
-                let loadingSys = Device(libSys, paras) :> LoadedSystem 
-                mySys.AddLoadedSystem(loadingSys) 
-                loadingSys
-            else 
-                loadedSys
-
-        let api = libSys.ApiItems.First(fun f-> f.Name = apiName)
-        let dev = TaskDev(api, "", "", loadedName) :> DsTask
-        let job = Job(loadedName+"_"+apiName,[dev])
-        mySys.Jobs.Add(job)
-
-        if(parentR.IsSome)
-        then  CallDev.Create(job, DuParentReal (parentR.Value))
-        else  CallDev.Create(job, DuParentFlow (parentF.Value))
 
 
     let private createCallVertex(mySys:DsSystem, node:pptNode
@@ -72,17 +34,17 @@ module ImportU =
         let call =
             let jobName = sysName+"_"+apiName
 
-            if not (jobCallNames.Contains(sysName) || node.IsLibCall)
-            then 
-                node.Shape.ErrorName(ErrID._48, node.PageNum)
+            //if not (jobCallNames.Contains(sysName)(* || node.IsLibCall*))
+            //then 
+            //    node.Shape.ErrorName(ErrID._48, node.PageNum)
 
             match mySys.Jobs.TryFind(fun job -> job.Name = jobName) with
             |Some job ->
                 if job.DeviceDefs.any()
                 then
                     if(parentReal.IsSome)
-                    then  CallDev.Create(job, DuParentReal (parentReal.Value))
-                    else  CallDev.Create(job, DuParentFlow (parentFlow.Value))
+                    then  CallDev.Create(job, DuParentReal (parentReal.Value)) 
+                    else  CallDev.Create(job, DuParentFlow (parentFlow.Value)) 
                 else
                     node.Shape.ErrorName(ErrID._52, node.PageNum)
 
@@ -90,18 +52,19 @@ module ImportU =
                 let ifName = node.Name.Split('.');
                 if  ifName.Length = 2
                 then 
-                    if sLibs.ContainsKey ifName[1]
-                    then 
-                        let apiName = ifName[1]
-                        let loadedName =ifName[0]
-                        addLoadedLibSystemNApi(loadedName, apiName, mySys, parentFlow, parentReal)
-                    else 
-                        node.Shape.ErrorName(ErrID._49, node.PageNum)
+                    let apiName = ifName[1]
+                    let loadedName = 
+                        if(parentReal.IsSome)
+                        then  $"{parentReal.Value.Flow.Name}_{ifName[0]}"
+                        else  $"{parentFlow.Value.Name}_{ifName[0]}"
+                         
+                    addLoadedLibSystemNCall(loadedName, apiName, mySys, parentFlow, parentReal, node)
                 else 
                     node.Shape.ErrorName(ErrID._49, node.PageNum)
 
         dicSeg.Add(node.Key, call)
 
+   
     let private createExSystemReal(mySys:DsSystem, node:pptNode, parentFlow:Flow) =
         let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
 
@@ -152,39 +115,6 @@ module ImportU =
 
             doc.Nodes
             |> Seq.filter(fun node -> node.NodeType.IsLoadSys)
-            |> Seq.iter(fun node ->
-                node.JobInfos
-                |> Seq.iter(fun jobSet ->
-                    let jobBase = jobSet.Key
-                    let JobTargetSystem = jobSet.Value.First()
-                    //ppt에서는 동일한 디바이스만 동시 Job구성 가능하여  아무시스템이나 찾아도 API는 같음
-                    let refSystem = mySys.TryFindLoadedSystem(JobTargetSystem).Value.ReferenceSystem
-
-                    refSystem.ApiItems.ForEach(fun api->
-                        let devs =
-                            jobSet.Value
-                             .Select(fun tgt -> getApiItems(mySys, tgt, api.Name), tgt)
-                             .Select(fun (api, tgt)->
-                                match node.NodeType with
-                                | OPEN_EXSYS_LINK             -> TaskSys(api, tgt)         :> DsTask
-                                | OPEN_EXSYS_CALL  | COPY_DEV -> TaskDev(api, "", "", tgt) :> DsTask
-                                | _-> failwithlog "Error MakeJobs"
-                                )
-
-
-                        let job = Job(jobBase+"_"+api.Name, devs |> Seq.toList)
-                        if dicJobName.ContainsKey(job.Name)
-                        then Office.ErrorName(node.Shape, ErrID._33, node.PageNum)
-                        else dicJobName.Add(job.Name, job)
-
-                        mySys.Jobs.Add(job)
-                    )
-                )
-            )
-
-
-            doc.Nodes
-            |> Seq.filter(fun node -> node.IsLibCall)
             |> Seq.iter(fun node ->
                 node.JobInfos
                 |> Seq.iter(fun jobSet ->
@@ -442,7 +372,10 @@ module ImportU =
 
                     match getParent(edge, parents, dicVertex) with
                     |Some(real) -> (real:?>Real).CreateEdge(mei)
-                    |None ->       flow.CreateEdge(mei)
+                    |None       ->       
+                                    if(tgts.OfType<Call>().any())
+                                    then edge.ConnectionShape.ErrorConnect(ErrID._44, srcs.First().Name, tgts.First().Name, edge.PageNum)
+                                    flow.CreateEdge(mei)
 
                 let edges    = pptEdges
                                |> Seq.filter(fun edge -> not <| edge.IsInterfaceEdge)
@@ -498,7 +431,9 @@ module ImportU =
                                 convertEdge(edge, flow, srcs, tgts) |> ignore
                             with
                             | ex ->
-                                edge.ConnectionShape.ErrorConnect(ex.Message, "", edge.PageNum)
+                                if(ex.Source = "Dual.Common.Core.FS") //관리되는 예외 failwithf 사용 : 추후 예외 타입 작성
+                                then raise ex
+                                else edge.ConnectionShape.ErrorConnect(ex.Message, srcs.First().Name, tgts.First().Name, edge.PageNum)
                         )
                 )
 
@@ -584,9 +519,37 @@ module ImportU =
         static member UpdateActionIO (doc:pptDoc, sys:DsSystem) =
             let table = doc.GetTable  (System.Enum.GetValues(typedefof<IOColumn>).Length)
             ApplyIO (sys, table)
+
+        [<Extension>]
+        static member GetLoadNodes (doc:pptDoc) =
+            let calls = doc.Nodes.Where(fun n -> n.NodeType.IsCall &&  n.Alias.IsNone  )
+            let loads = doc.Nodes.Where(fun n -> n.NodeType.IsLoadSys)|>Seq.collect(fun s->s.CopySys.Keys)
+
+            calls.Where(fun call -> not(loads.Contains(call.CallDevName)))
+                 .Select(fun call ->{DevName = call.CallDevName; ApiName= call.CallApiName})
+        
+        
+        [<Extension>]
+        static member GetlibApisNSys (systems:DsSystem seq) =
+            let libApisNSys= Dictionary<string, DsSystem>()  //다중 lib 로딩시 시스템간 중복 에러 체크 및 libDevOrgSys 시스템 할당
+            systems.Iter(fun sys -> 
+                sys.ApiItems.Iter(fun api->  
+                    try
+                        libApisNSys.Add(api.Name, sys)
+                    with
+                    | ex-> 
+                        let errSystems =  systems.Where(fun w-> w.ApiItems.Select(fun s-> s.Name = api.Name).any())
+                        let errText = (String.Join(", ", errSystems.Select(fun s->s.Name)))
+                        failwithf $"{api.Name} exists on the same system. [{errText}]"
+                    )
+            )
+            libApisNSys
+
             
+
         [<Extension>]
         static member BuildSystem (doc:pptDoc, sys:DsSystem) =
+            
             doc.MakeJobs(sys)
             doc.MakeFlows(sys) |> ignore
             //EMG & Start & Auto 리스트 만들기

@@ -112,7 +112,7 @@ module CoreExtensionModule =
                 |_ -> None
 
             x.ApiResetInfos.Select(getMutual).Where(fun w-> w.IsSome)
-                .Select(fun s->x.ApiItems.Find(fun f->f.QualifiedName = $"{x.Name}.{s.Value}"))
+                .Select(fun s->x.ApiItems.Find(fun f->f.QualifiedName = $"{x.Name.QuoteOnDemand()}.{s.Value}"))
 
         member x.DeviceDefs = x.Jobs |> Seq.collect(fun s->s.DeviceDefs)
 

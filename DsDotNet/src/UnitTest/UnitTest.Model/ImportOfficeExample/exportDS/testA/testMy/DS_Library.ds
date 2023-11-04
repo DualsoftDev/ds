@@ -18,7 +18,9 @@
         DN = { RepeatFlow.backwardwork ~ RepeatFlow.backwardwork }
         "+" = { RepeatFlow.forwardwork ~ RepeatFlow.forwardwork }
         "-" = { RepeatFlow.backwardwork ~ RepeatFlow.backwardwork }
-        RUN = { MovingFlow.movework ~ MovingFlow.clearwork }
+        AD = { RepeatFlow.forwardwork ~ RepeatFlow.forwardwork }
+        RT = { RepeatFlow.backwardwork ~ RepeatFlow.backwardwork }
+        DO = { MovingFlow.movework ~ MovingFlow.clearwork }
         "FWD[P]" = { SingleActingFlow.forwardwork ~ SingleActingFlow.forwardwork }
         BWDS = { SingleActingFlow.backwardwork ~ SingleActingFlow.backwardwork }
         FWDS = { SingleActingFlow.forwardwork ~ SingleActingFlow.forwardwork }
@@ -27,6 +29,7 @@
         ADV <||> RET;
         UP <||> DN;
         "+" <||> "-";
+        AD <||> RT;
         "FWD[P]" <||> BWDS;
         FWDS <||> "BWD[P]";
     }

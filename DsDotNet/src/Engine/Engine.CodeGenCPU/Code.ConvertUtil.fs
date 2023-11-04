@@ -197,15 +197,6 @@ module CodeConvertUtil =
                 ).Distinct()
    
 
-        //[<Extension>]
-        //static member GetResetTargetReady(xs:Vertex seq) =
-        //        xs.Select(fun f ->
-        //            match f with
-        //            | :? Real    as r  -> r.V.R
-        //            | :? RealExF as rf -> rf.Real.V.R
-        //            | :? Alias   as a  -> a.V.R
-        //            | _ -> failwithlog $"Error {getFuncName()}"
-        //        ).Distinct()
 
         [<Extension>]
         static member GetWeakStartRootAndCausals  (v:VertexManager) =
@@ -231,13 +222,3 @@ module CodeConvertUtil =
         static member GetStrongResetRootAndCausals  (v:VertexManager) =
             let tags = getResetStrongEdgeSources(v).GetResetCausals()
             tags.ToAndElseOff(v.System)
-
-        //[<Extension>]
-        //static member GetStrongResetRootAndReadys  (v:VertexManager) =
-        //    let tags = getResetStrongEdgeSources(v).GetResetTargetReady()
-        //    tags.ToOrElseOn(v.System)
-
-        //[<Extension>]
-        //static member GetWeakResetRootAndReadys  (v:VertexManager) =
-        //    let tags = getResetWeakEdgeSources(v).GetResetTargetReady()
-        //    tags.ToOrElseOn(v.System)

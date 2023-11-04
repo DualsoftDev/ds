@@ -59,7 +59,7 @@ module ErrID =
     let _42 = "Api TXs~Rxs 이름이 소속된 Flow가 없습니다."
 
     let _43 = "Api 지시/관찰 구성은 '~' 으로 구분합니다. ex) ApiName[TXs ~ RXs]"
-    let _44 = "Spare"
+    let _44 = "Action은 Work안에서 시작 가능합니다. Work내 그룹화 필요합니다."
     let _45 = "System 인터페이스 순환관계가 존재합니다."
     let _46 = "ActionDev 이름은 '.' 으로 구분되어야 합니다.(ex: systemA.Inferface3)"
     let _47 = "호출 Interface에 해당하는 대상 시스템이 없습니다."
@@ -112,9 +112,9 @@ module MessgePPTError =
         static member ErrorPPT(case:ErrorCase, msg:string,  objName:string, page:int, objID:uint, ?userMsg:string) =
               
             let itemName =  if(userMsg.IsSome && (userMsg.Value = ""|>not))
-                            then $"[Page{page}:{objName} ({userMsg.Value})"
-                            else $"[Page{page}:{objName}"
+                            then $"◆페이지{page} {objName}({userMsg.Value})"
+                            else $"◆페이지{page} {objName}"
 
             ErrorPPTNotify.Trigger (page, objID, itemName)
-            failwithf  $"[{case.ToText()}] {msg} \t{itemName}"
+            failwithf  $"[{case.ToText()}] {msg} \t\t{itemName}"
 

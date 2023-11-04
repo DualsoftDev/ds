@@ -44,7 +44,9 @@ module ImportPPTModule =
         let allPaths = [baseDirectory] @ environmentuserPaths
         allPaths |> List.map fullPathSelector |> fileExistFirstSelector
 
-    type internal ImportPowerPoint() =
+   
+
+    type ImportPowerPoint() =
         let sRepo = ShareableSystemRepository()  
         
           
@@ -54,11 +56,14 @@ module ImportPPTModule =
             let pathPPT =  paras.AbsoluteFilePath
             let doc =
                 match dicPptDoc.TryGetValue pathPPT with
-                | true, existingDoc -> pptDoc(pathPPT, paras, existingDoc)
+                | true, existingDoc -> pptDoc(pathPPT, paras|>Some, existingDoc)
                 | false, _ ->
                     let newDoc = Office.Open(pathPPT)
                     dicPptDoc.Add(pathPPT, newDoc)
-                    pptDoc(pathPPT, paras, newDoc)
+                    pptDoc(pathPPT, paras|>Some, newDoc)
+
+
+
 
 
             //시스템 로딩시 중복이름을 부를 수 없다.
@@ -122,9 +127,6 @@ module ImportPPTModule =
                 |_ ->   failwithlog "error"
             )
 
-            
-      
-
             theSys.ExternalSystems.Iter(fun f-> f.LoadedName <- dicLoaded[f])
 
             //ExternalSystem 위하여 인터페이스는 공통으로 시스템 생성시 만들어 줌
@@ -166,13 +168,10 @@ module ImportPPTModule =
                 loadedParentStack.Push mySys
                 loadSystem(pptReop, mySys, paras)
               
-         
-    let private loadingfromPPTs(paths:string seq) =
+    let pptRepo    = Dictionary<DsSystem, pptDoc>()
+    let loadingfromPPTs(paths:string seq) =
         try
             try
-
-                let pptRepo    = Dictionary<DsSystem, pptDoc>()
-
                 let cfg = {DsFilePaths = paths |> Seq.toList}
                 let results =
                     [
@@ -192,41 +191,21 @@ module ImportPPTModule =
                         pathStack.Pop() |> ignore
                         )
 
-                //사용한 ppt doc 일괄 닫기 (열린문서 재 사용이 있어서 사용후 전체 한번에 닫기)
-                //dicPptDoc.Iter(fun f->f.Value.Close())
 
                 let systems =  results.Select(fun (sys, view) -> sys) |> Seq.toList
                 let views   =  results |> dict
                 { Config = cfg; Systems = systems; LoadingPaths = []}, views, pptRepo
       
             with ex ->  
-                failwithf  @$"{ex.Message} [ErrPath:{if pathStack.any() then pathStack.First() else      paths.First() }]" //첫페이지 아니면 stack에 존재
+                 //첫페이지 아니면 stack에 존재
+                failwithf   $"{ex.Message} \t◆파일명 {(if pathStack.any() then pathStack.First() else paths.First())}"
         finally 
             dicPptDoc.Where(fun f->f.Value.IsNonNull())
                      .Iter(fun  f->f.Value.Close())
             dicPptDoc.Clear()
 
      
-    let loadingLibray() = 
-        let getLibModel() = 
-            let runDir = System.Reflection.Assembly.GetEntryAssembly().Location|>DsFile |> PathManager.getDirectoryName
-            let libFilePath =  PathManager.getFullPath ("DS_Library.pptx"|>DsFile) (runDir|>DsDirectory)
-            loadingfromPPTs ([| libFilePath |])|> fun (model, views, pptRepo) -> model
-
-        sLibs.Clear()
-        let libs = getLibModel().Systems
-        libs.Iter(fun libSys -> 
-            libSys.ApiItems.Iter(fun api->  
-                try
-                    sLibs.Add(api.Name, libSys)
-                with
-                | ex-> 
-                    let errSystems = libs.Where(fun w-> w.ApiItems.Select(fun s-> s.Name = api.Name).any())
-                    let errText = (String.Join(", ", errSystems.Select(fun s->s.Name)))
-                    failwithf $"{api.Name} exists on the same system. [{errText}]"
-                )
-        )
-
+    
     type PptResult = {
         System: DsSystem
         Views : ViewNode seq
@@ -239,40 +218,31 @@ module ImportPPTModule =
 
         [<Extension>]
         static member GetModel      (paths:string seq) =
+            pptRepo.Clear()
             loadingfromPPTs (paths) |> fun (model, views, pptRepo) -> model
+
         [<Extension>]
         static member GetLoadingAllSystem (paths:string seq) =
-             loadingfromPPTs (paths)
-             |> fun (model, views, pptRepo)
-                    -> model, pptRepo
-                        |> Seq.map(fun f->
-                            {   System= f.Key
-                                Views = f.Key.GetViewNodes()
-                                IsActive = model.Systems.Contains(f.Key)}  )
+            pptRepo.Clear()
+            loadingfromPPTs (paths)
+            |> fun (model, views, pptRepo)
+                -> model, pptRepo
+                    |> Seq.map(fun f->
+                        {   System= f.Key
+                            Views = f.Key.GetViewNodes()
+                            IsActive = model.Systems.Contains(f.Key)}  )
+
         [<Extension>]
         static member GetDSFromPPT (fullName: string) =
-                let pptResults = ImportPPT.GetModel [| fullName |]
-                let sys = pptResults.Systems.[0]
+            pptRepo.Clear()
+            let pptResults =  loadingfromPPTs ([fullName]) |> fun (model, views, pptRepo) -> model
+            let sys = pptResults.Systems.[0]
 
-                let exportPath = sys.pptxToExportDS fullName
-                let systems, loadingPaths = ParserLoader.LoadFromActivePath exportPath
-                {
-                    Systems =  systems
-                    ActivePaths = [exportPath]
-                    LoadingPaths = loadingPaths
-                }
-        [<Extension>]
-        static member GetDSFromPPTWithLib (fullName: string) =
-                loadingLibray()
-
-                let pptResults = loadingfromPPTs ([fullName]) |> fun (model, views, pptRepo) -> model
-                let sys = pptResults.Systems.[0]
-
-                let exportPath = sys.pptxToExportDS fullName
-                let systems, loadingPaths = ParserLoader.LoadFromActivePath exportPath
-                {
-                    Systems =  systems
-                    ActivePaths = [exportPath]
-                    LoadingPaths = loadingPaths
-                }
-            
+            let exportPath = sys.pptxToExportDS fullName
+            let systems, loadingPaths = ParserLoader.LoadFromActivePath exportPath
+            {
+                Systems =  systems
+                ActivePaths = [exportPath]
+                LoadingPaths = loadingPaths
+            }
+      

@@ -2,13 +2,58 @@ using IO.Core;
 
 using NetMQ.Sockets;
 
+using Newtonsoft.Json.Linq;
+using System.IO;
+
 var port = 5555;
 using var client = new CSharpClient($"tcp://localhost:{port}");
 
 var cts = new CancellationTokenSource();
-client.TagChangedSubject.Subscribe(tag =>
+client.TagChangedSubject.Subscribe(change =>
 {
-    Console.WriteLine($"Total {tag.Offsets.Length} tag changed on {tag.Path}");
+    Console.WriteLine($"Total {change.Offsets.Length} tag changed on {change.Path} with bitLength={change.ContentBitLength}");
+    //foreach (var (offset, value) in change.Offsets.Zip(change.Values))
+    var offsets = change.Offsets;
+    switch (change.ContentBitLength)
+    {
+        case 1:
+            {
+                var values = change.Values as bool[];
+                foreach (var (offset, value) in change.Offsets.Zip(values))
+                    Console.WriteLine($"  {offset}: {value}");
+                break;
+            }
+        case 8:
+            {
+                var values = change.Values as byte[];
+                foreach (var (offset, value) in change.Offsets.Zip(values))
+                    Console.WriteLine($"  {offset}: {value}");
+                break;
+            }
+        case 16:
+            {
+                var values = change.Values as ushort[];
+                foreach (var (offset, value) in change.Offsets.Zip(values))
+                    Console.WriteLine($"  {offset}: {value}");
+                break;
+            }
+        case 32:
+            {
+                var values = change.Values as uint[];
+                foreach (var (offset, value) in change.Offsets.Zip(values))
+                    Console.WriteLine($"  {offset}: {value}");
+                break;
+            }
+        case 64:
+            {
+                var values = change.Values as ulong[];
+                foreach (var (offset, value) in change.Offsets.Zip(values))
+                    Console.WriteLine($"  {offset}: {value}");
+                break;
+            }
+        default:
+            throw new InvalidDataException($"Invalid bit length: {change.ContentBitLength}");
+    }
 });
 
 

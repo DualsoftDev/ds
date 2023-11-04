@@ -98,8 +98,8 @@ type Client(serverAddress:string) =
                     let path      = mq[Name].ConvertToString()  // e.g "p/o"
                     let values:obj =
                         match contentBitLength with
-                        |  1 -> mq[Values].Buffer |> box
-                        |  8 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<byte>  |> box
+                        |  1 -> mq[Values].Buffer |> map (fun b -> b = 0uy) |> box
+                        |  8 -> mq[Values].Buffer |> box
                         | 16 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<uint16>|> box
                         | 32 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<uint32>|> box
                         | 64 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<uint64>|> box

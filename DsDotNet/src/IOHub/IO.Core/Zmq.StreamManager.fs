@@ -276,11 +276,11 @@ module internal ZmqBufferManagerExtension =
                     let contentBitLength = int dataType
                     let byteOffset, bitOffset, value = 
                         match dataType with
-                        | MemoryType.Bit   -> offset / 8,  offset % 8, (objValues :?> bool[])[i]   |> box
-                        | MemoryType.Byte  -> offset,      0         , (objValues :?> byte[])[i]   |> box
-                        | MemoryType.Word  -> offset * 16, 0         , (objValues :?> uint16[])[i] |> box
-                        | MemoryType.DWord -> offset * 32, 0         , (objValues :?> uint32[])[i] |> box
-                        | MemoryType.LWord -> offset * 64, 0         , (objValues :?> uint64[])[i] |> box
+                        | MemoryType.Bit   -> offset / 8, offset % 8, (objValues :?> bool[]  )[i] |> box
+                        | MemoryType.Byte  -> offset * 1, 0         , (objValues :?> byte[]  )[i] |> box
+                        | MemoryType.Word  -> offset * 2, 0         , (objValues :?> uint16[])[i] |> box
+                        | MemoryType.DWord -> offset * 4, 0         , (objValues :?> uint32[])[i] |> box
+                        | MemoryType.LWord -> offset * 8, 0         , (objValues :?> uint64[])[i] |> box
                         | _ -> failwithf($"Invalid data type: {dataType}")
 
                     let tag = addrResolver.GetTagName(path, byteOffset, bitOffset, contentBitLength)

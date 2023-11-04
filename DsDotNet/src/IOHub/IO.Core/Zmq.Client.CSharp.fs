@@ -22,3 +22,10 @@ type CSharpClient(serverAddress:string) =
     member x.ReadUInt32s(name:string, offsets:int[]) : CsResult<uint32[]> = toResultCs <| base.ReadUInt32s(name, offsets)
     member x.ReadUInt64s(name:string, offsets:int[]) : CsResult<uint64[]> = toResultCs <| base.ReadUInt64s(name, offsets)
 
+
+open System.Runtime.CompilerServices
+// C# 에서 소화하기 쉬운 형태로 변환
+[<Extension>]
+type ZmqClientExt =
+    [<Extension>] static member CsGetTagNameAndValues(change:IIOChangeInfo) = change.GetTagNameAndValues()
+

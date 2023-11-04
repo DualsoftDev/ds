@@ -7,54 +7,40 @@ open Dual.Common.Core.FS
 open ZmqTestModule
 
 module ZmqTestClient =
+    let onTagChanged (change:TagChangedInfo) =
+        Console.WriteLine($"Total {change.Offsets.Length} tag changed on {change.Path} with bitLength={change.ContentBitLength}");
+        match change.ContentBitLength with
+        | 1 ->
+            let values = change.Values :?> bool[]
+            for (i, offset) in change.Offsets |> indexed do
+                Console.WriteLine($"  {offset}: {values[i]}");
+        | 8 ->
+            let values = change.Values :?> byte[]
+            for (i, offset) in change.Offsets |> indexed do
+                Console.WriteLine($"  {offset}: {values[i]}");
+        | 16 ->
+            let values = change.Values :?> uint16[]
+            for (i, offset) in change.Offsets |> indexed do
+                Console.WriteLine($"  {offset}: {values[i]}");
+        | 32 ->
+            let values = change.Values :?> uint32[]
+            for (i, offset) in change.Offsets |> indexed do
+                Console.WriteLine($"  {offset}: {values[i]}");
+        | 64 ->
+            let values = change.Values :?> uint64[]
+            for (i, offset) in change.Offsets |> indexed do
+                Console.WriteLine($"  {offset}: {values[i]}");
+        | _ ->
+            failwith "Not supported"
+
     [<EntryPoint>]
     let main _ = 
         let cts = new CancellationTokenSource()
         let port = 5555
         let client = new Client($"tcp://localhost:{port}")
+        client.TagChangedSubject.Subscribe(onTagChanged) |> ignore
 
         registerCancelKey cts client
         clientKeyboardLoop client cts.Token
 
-        //let zmqInfo = Zmq.InitializeServer "zmqsettings.json"
-
-        //let handleCancelKey (args: ConsoleCancelEventArgs) =
-        //    logDebug("Ctrl+C pressed!")
-        //    cts.Cancel()
-        //    args.Cancel <- true // 프로그램을 종료하지 않도록 설정 (선택 사항)
-        //Console.CancelKeyPress.Add(handleCancelKey)
-
-
-
-        //// ---- third party ----
-        //// wb
-        //let wr2 = client.WriteBytes("p/o", [|0; 1; 2; 3|], [|99uy; 98uy; 97uy; 96uy|])
-        //match client.ReadBytes("p/o", [|0; 1; 2; 3|]) with
-        //| Ok bytes ->
-        //    ()
-        //| _ ->
-        //    failwith "ERROR"
-
-     
-        //let mutable key = ""
-        //while ( key <> null && not cts.IsCancellationRequested ) do
-        //    key <- Console.ReadLine()
-        //    if key <> null then
-        //        logDebug($"Got request [{key}]...")
-        //        match key with
-        //        | "q" | "Q" ->
-        //            logDebug("Got quit request...")
-        //            key <- null
-        //        | "" -> ()
-        //        | _ ->
-        //            match client.SendRequest(key) with
-        //            | Ok value ->
-        //                Console.WriteLine($"OK: {value}")
-        //            | Error err ->
-        //                Console.WriteLine($"ERR: {err}")
-
-        //        ()
-
-        //logDebug("Exiting...")
-        //Thread.Sleep(1000)
         0

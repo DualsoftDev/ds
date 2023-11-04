@@ -28,7 +28,9 @@ namespace ThirdParty.AddressInfo.Provider
                         }
                         else
                         {
-                            byteOffset = int.Parse(addr);
+                            var n = int.Parse(addr);
+                            byteOffset = n / 8;
+                            bitOffset = n % 8;
                         }
                         return (byteOffset, bitOffset);
                     }

@@ -100,11 +100,11 @@ module internal ZmqServerImplModule =
             let mutable offset = byteOffset
             let mutable objValue:obj = null
             match ap.MemoryType with
-            | MemoryType.Bit   -> objValue <- [|parseBool(value)|];    bufferManager.writeBit (cri, byteOffset, ap.OffsetBit, parseBool(value)); offset <- byteOffset * 8 + ap.OffsetBit
+            | MemoryType.Bit   -> objValue <- [|parseBool(value)|];    bufferManager.writeBit (cri, ap.OffsetByte, ap.OffsetBit, parseBool(value)); offset <- byteOffset * 8 + ap.OffsetBit
             | MemoryType.Byte  -> objValue <- [|Byte.Parse(value)|];   bufferManager.writeU8s cri ([byteOffset, Byte.Parse(value)])
-            | MemoryType.Word  -> objValue <- [|UInt16.Parse(value)|]; bufferManager.writeU16 cri (byteOffset, UInt16.Parse(value))
-            | MemoryType.DWord -> objValue <- [|UInt32.Parse(value)|]; bufferManager.writeU32 cri (byteOffset, UInt32.Parse(value))
-            | MemoryType.LWord -> objValue <- [|UInt64.Parse(value)|]; bufferManager.writeU64 cri (byteOffset, UInt64.Parse(value))
+            | MemoryType.Word  -> objValue <- [|UInt16.Parse(value)|]; bufferManager.writeU16 cri (byteOffset, UInt16.Parse(value)); offset <- byteOffset / 2
+            | MemoryType.DWord -> objValue <- [|UInt32.Parse(value)|]; bufferManager.writeU32 cri (byteOffset, UInt32.Parse(value)); offset <- byteOffset / 4
+            | MemoryType.LWord -> objValue <- [|UInt64.Parse(value)|]; bufferManager.writeU64 cri (byteOffset, UInt64.Parse(value)); offset <- byteOffset / 8
             | _ -> failwithf($"Unknown data type : {ap.MemoryType}")
 
             let fs = bufferManager.FileSpec

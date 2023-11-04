@@ -7,7 +7,11 @@ open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module internal ZmqServerResponseImplModule =
-    type ValuesChangeInfo = IOFileSpec * MemoryType * int array * obj   // dataType, offset, value
+    /// bit, byte, word, dword, qword 의 offset.
+    /// - bit offset 은 byteOffset * 8 + bitOffset 의 값
+    /// - word offset 은 byteOffset / 2 의 값
+    type Offset = int
+    type ValuesChangeInfo = IOFileSpec * MemoryType * Offset array * obj   // dataType, offset, value
     type SingleValueChange = ValuesChangeInfo
 
     /// 서버에서 socket message 를 처리후, client 에게 socket 으로 보내기 전에 갖는 result type

@@ -8,24 +8,70 @@ open System.Reactive.Disposables
 module ZmqTestModule =
     let clientKeyboardLoop (client:Client) (ct:CancellationToken) =
         let mutable key = ""
+        let testReadOffsets = [|0..3|]
+        let testWriteValues = testReadOffsets |> map (( *) 3)
         while ( key <> null && not ct.IsCancellationRequested ) do
             key <- Console.ReadLine()
             if key <> null then
                 match key with
                 | "q" | "Q" -> key <- null
-                | "tr" ->   // test read
-                    match client.ReadBytes("p/o", [|0..3|]) with
+                | "trx" ->   // test read bits
+                    match client.ReadBits("p/x", testReadOffsets) with
                     | Ok bytes ->
                         let str = bytes |> map toString |> joinWith ", "
                         Console.WriteLine($"OK: {str}")
-                    | _ ->
-                        failwith "ERROR"
-                | "tw" ->   // test write
-                    match client.WriteBytes("p/o", [|0..3|], [|0uy..3uy|]) with
-                    | Ok msg ->
-                        Console.WriteLine($"WriteResult: {msg}")
-                    | _ ->
-                        failwith "ERROR"
+                    | Error msg -> failwith $"ERROR: {msg}"
+                | "trb" ->   // test read bytes
+                    match client.ReadBytes("p/o", testReadOffsets) with
+                    | Ok bytes ->
+                        let str = bytes |> map toString |> joinWith ", "
+                        Console.WriteLine($"OK: {str}")
+                    | Error msg -> failwith $"ERROR: {msg}"
+                | "trw" ->   // test read bytes
+                    match client.ReadUInt16s("p/o", testReadOffsets) with
+                    | Ok words ->
+                        let str = words |> map toString |> joinWith ", "
+                        Console.WriteLine($"OK: {str}")
+                    | Error msg -> failwith $"ERROR: {msg}"
+                | "trdw" ->   // test read bytes
+                    match client.ReadUInt32s("p/o", testReadOffsets) with
+                    | Ok dwords ->
+                        let str = dwords |> map toString |> joinWith ", "
+                        Console.WriteLine($"OK: {str}")
+                    | Error msg -> failwith $"ERROR: {msg}"
+                | "trlw" ->   // test read bytes
+                    match client.ReadUInt64s("p/o", testReadOffsets) with
+                    | Ok lwords ->
+                        let str = lwords |> map toString |> joinWith ", "
+                        Console.WriteLine($"OK: {str}")
+                    | Error msg -> failwith $"ERROR: {msg}"
+
+
+
+
+                | "twx" ->   // test write bits
+                    match client.WriteBits("p/o", testReadOffsets, testWriteValues |> map (fun x -> x <> 0)) with
+                    | Ok msg -> Console.WriteLine($"WriteResult: {msg}")
+                    | Error msg -> failwith $"ERROR: {msg}"
+                | "twb" ->   // test write bytes
+                    match client.WriteBytes("p/o", testReadOffsets, testWriteValues |> map byte) with
+                    | Ok msg -> Console.WriteLine($"WriteResult: {msg}")
+                    | Error msg -> failwith $"ERROR: {msg}"
+
+                | "tww" ->   // test write words
+                    match client.WriteUInt16s("p/o", testReadOffsets, testWriteValues |> map uint16) with
+                    | Ok msg -> Console.WriteLine($"WriteResult: {msg}")
+                    | Error msg -> failwith $"ERROR: {msg}"
+                | "twdw" ->   // test write dwords
+                    match client.WriteUInt32s("p/o", testReadOffsets, testWriteValues |> map uint32) with
+                    | Ok msg -> Console.WriteLine($"WriteResult: {msg}")
+                    | Error msg -> failwith $"ERROR: {msg}"
+                | "twlw" ->   // test write lwords
+                    match client.WriteUInt64s("p/o", testReadOffsets, testWriteValues |> map uint64) with
+                    | Ok msg -> Console.WriteLine($"WriteResult: {msg}")
+                    | Error msg -> failwith $"ERROR: {msg}"
+
+
 
                 | "" -> ()
                 | _ ->

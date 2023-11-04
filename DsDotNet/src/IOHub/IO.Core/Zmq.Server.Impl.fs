@@ -49,9 +49,9 @@ module internal ZmqServerImplModule =
             option {
                 let (vendor, address) = getVendor str
                 match vendor.AddressResolver.GetAddressInfo(address) with
-                | true, memType, byteOffset, bitOffset, contentBitLength ->
+                | true, memType, offset, contentBitLength ->
                     let! f = vendor.Files |> Seq.tryFind(fun f -> f.Name = memType)
-                    let addressSpec = AddressSpec(f, bitSizeToEnum(contentBitLength), byteOffset, bitOffset)
+                    let addressSpec = AddressSpec(f, bitSizeToEnum(contentBitLength), offset)
                     tagDic.Add(str, addressSpec)
                     return addressSpec
                 | _ ->
@@ -67,16 +67,16 @@ module internal ZmqServerImplModule =
     let readAddress(clientRequstInfo:ClientRequestInfo, address:string) : obj =
         match address with
         | AddressPattern ap ->
-            let byteOffset = ap.OffsetByte
+            let offset = ap.Offset
             let bufferManager = ap.IOFileSpec.StreamManager :?> StreamManager
-            bufferManager.VerifyIndices(clientRequstInfo, [|byteOffset|])
+            bufferManager.VerifyIndices(clientRequstInfo, ap.MemoryType, [|offset|])
 
             match ap.MemoryType with
-            | MemoryType.Bit   -> bufferManager.readBit(byteOffset * 8 + ap.OffsetBit) :> obj
-            | MemoryType.Byte  -> bufferManager.readU8(byteOffset)
-            | MemoryType.Word  -> bufferManager.readU16(byteOffset)
-            | MemoryType.DWord -> bufferManager.readU32(byteOffset)
-            | MemoryType.LWord -> bufferManager.readU64(byteOffset)
+            | MemoryType.Bit   -> bufferManager.readBit(offset) :> obj
+            | MemoryType.Byte  -> bufferManager.readU8(offset)
+            | MemoryType.Word  -> bufferManager.readU16(offset)
+            | MemoryType.DWord -> bufferManager.readU32(offset)
+            | MemoryType.LWord -> bufferManager.readU64(offset)
             | _ ->
                 failwithf($"Unknown data type : {ap.MemoryType}")
         | _ ->
@@ -93,18 +93,17 @@ module internal ZmqServerImplModule =
         match addressWithAssignValue with
         | AddressAssignPattern (addressPattern, value) ->
             let ap = addressPattern
-            let byteOffset = ap.OffsetByte
+            let offset = ap.Offset
             let bufferManager = ap.IOFileSpec.StreamManager :?> StreamManager
-            bufferManager.VerifyIndices(cri, [|byteOffset|])
+            bufferManager.VerifyIndices(cri, ap.MemoryType, [|offset|])
 
-            let mutable offset = byteOffset
             let mutable objValue:obj = null
             match ap.MemoryType with
-            | MemoryType.Bit   -> objValue <- [|parseBool(value)|];    bufferManager.writeBit (cri, ap.OffsetByte, ap.OffsetBit, parseBool(value)); offset <- byteOffset * 8 + ap.OffsetBit
-            | MemoryType.Byte  -> objValue <- [|Byte.Parse(value)|];   bufferManager.writeU8s cri ([byteOffset, Byte.Parse(value)])
-            | MemoryType.Word  -> objValue <- [|UInt16.Parse(value)|]; bufferManager.writeU16 cri (byteOffset, UInt16.Parse(value)); offset <- byteOffset / 2
-            | MemoryType.DWord -> objValue <- [|UInt32.Parse(value)|]; bufferManager.writeU32 cri (byteOffset, UInt32.Parse(value)); offset <- byteOffset / 4
-            | MemoryType.LWord -> objValue <- [|UInt64.Parse(value)|]; bufferManager.writeU64 cri (byteOffset, UInt64.Parse(value)); offset <- byteOffset / 8
+            | MemoryType.Bit   -> objValue <- [|parseBool(value)|];    bufferManager.writeBit (cri, offset, parseBool(value))
+            | MemoryType.Byte  -> objValue <- [|Byte.Parse(value)|];   bufferManager.writeU8s cri ([offset, Byte.Parse(value)])
+            | MemoryType.Word  -> objValue <- [|UInt16.Parse(value)|]; bufferManager.writeU16 cri (offset, UInt16.Parse(value))
+            | MemoryType.DWord -> objValue <- [|UInt32.Parse(value)|]; bufferManager.writeU32 cri (offset, UInt32.Parse(value))
+            | MemoryType.LWord -> objValue <- [|UInt64.Parse(value)|]; bufferManager.writeU64 cri (offset, UInt64.Parse(value))
             | _ -> failwithf($"Unknown data type : {ap.MemoryType}")
 
             let fs = bufferManager.FileSpec

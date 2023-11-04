@@ -251,18 +251,24 @@ module internal ZmqBufferManagerExtension =
             x.FileStream <- fs
 
     type StreamManager with
-        member x.VerifyIndices(clientRequstInfo:ClientRequestInfo, offset:int) =
-            let offset = int64 offset
-            let length = x.FileStream.Length
-            if offset < 0 then
-                raiseWithClientId clientRequstInfo ($"Invalid offset.  non-negative value required : {offset}")
-            if offset >= length then
-                raiseWithClientId clientRequstInfo ($"Invalid offset: {offset}.  Exceed length limit {length})")
-        member x.VerifyIndices(clientRequstInfo:ClientRequestInfo, offsets:int[]) =
-            offsets |> iter (fun offset -> x.VerifyIndices(clientRequstInfo, offset))
+        member x.VerifyIndices(clientRequstInfo:ClientRequestInfo, memoryType:MemoryType, offset:int) =
+            let byteOffset = 
+                match memoryType with
+                | MemoryType.Bit   -> offset / 8
+                | (MemoryType.Byte | MemoryType.Word | MemoryType.DWord | MemoryType.LWord) -> offset * (int memoryType)/8
+                | _ -> failwithf($"Invalid data type: {memoryType}")
+                |> int64
 
-        member x.Verify(clientRequstInfo:ClientRequestInfo, indices:int[], numValues:int) =
-            x.VerifyIndices (clientRequstInfo, indices)
+            let length = x.FileStream.Length
+            if byteOffset < 0 then
+                raiseWithClientId clientRequstInfo ($"Invalid offset.  non-negative value required : {byteOffset}")
+            if byteOffset >= length then
+                raiseWithClientId clientRequstInfo ($"Invalid offset: {byteOffset}.  Exceed length limit {length})")
+        member x.VerifyIndices(clientRequstInfo:ClientRequestInfo, memoryType:MemoryType, offsets:int[]) =
+            offsets |> iter (fun offset -> x.VerifyIndices(clientRequstInfo, memoryType, offset))
+
+        member x.Verify(clientRequstInfo:ClientRequestInfo, memoryType:MemoryType, indices:int[], numValues:int) =
+            x.VerifyIndices (clientRequstInfo, memoryType, indices)
             if indices.Length <> numValues then
                 raiseWithClientId clientRequstInfo $"The number of indices and values should be the same."
             
@@ -274,16 +280,16 @@ module internal ZmqBufferManagerExtension =
             [
                 for (i, offset) in offsets |> indexed do
                     let contentBitLength = int dataType
-                    let byteOffset, bitOffset, value = 
+                    let value = 
                         match dataType with
-                        | MemoryType.Bit   -> offset / 8, offset % 8, (objValues :?> bool[]  )[i] |> box
-                        | MemoryType.Byte  -> offset * 1, 0         , (objValues :?> byte[]  )[i] |> box
-                        | MemoryType.Word  -> offset * 2, 0         , (objValues :?> uint16[])[i] |> box
-                        | MemoryType.DWord -> offset * 4, 0         , (objValues :?> uint32[])[i] |> box
-                        | MemoryType.LWord -> offset * 8, 0         , (objValues :?> uint64[])[i] |> box
+                        | MemoryType.Bit   -> (objValues :?> bool[]  )[i] |> box
+                        | MemoryType.Byte  -> (objValues :?> byte[]  )[i] |> box
+                        | MemoryType.Word  -> (objValues :?> uint16[])[i] |> box
+                        | MemoryType.DWord -> (objValues :?> uint32[])[i] |> box
+                        | MemoryType.LWord -> (objValues :?> uint64[])[i] |> box
                         | _ -> failwithf($"Invalid data type: {dataType}")
 
-                    let tag = addrResolver.GetTagName(path, byteOffset, bitOffset, contentBitLength)
+                    let tag = addrResolver.GetTagName(path, offset, contentBitLength)
                     yield tag, value
             ]
 

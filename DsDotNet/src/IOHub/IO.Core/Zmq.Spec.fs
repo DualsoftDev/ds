@@ -24,11 +24,10 @@ module rec ZmqSpec =
         | LWord = 64
 
     /// MW100 : name='M', type='W', offset=100.  (MX30, MD1234, ML1234, ..)
-    type AddressSpec(fileSpec:IOFileSpec, memoryType:MemoryType, offsetByte:int, offsetBit:int) =
+    type AddressSpec(fileSpec:IOFileSpec, memoryType:MemoryType, offset:int) =
         member val IOFileSpec = fileSpec
         member val MemoryType = memoryType
-        member val OffsetByte = offsetByte
-        member val OffsetBit = offsetBit
+        member val Offset = offset
 
 
     (*

@@ -28,7 +28,7 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                 |> toArray
             let notifyToClients() =
                 let bm = ioChange.IOFileSpec
-                let contenetBitLength = int ioChange.DataType
+                let contenetBitLength = int ioChange.MemoryType
                 let criminalClientId = ioChange.ClientRequestInfo.ClientId
                 let bytes = ioChange.GetValueBytes()
                 let path = ioChange.IOFileSpec.GetPath()
@@ -113,7 +113,7 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                         let result =
                             getArgs() |> map (fun a -> $"{a}={readAddress(cri, a)}")
                             |> joinWith " "
-                        ReadResponseOK(cri, PLCMemoryBitSize.Undefined, result)
+                        ReadResponseOK(cri, MemoryType.Undefined, result)
                     | StartsWith "write" ->
                         let changes = getArgs() |> map (fun a -> writeAddressWithValue(cri, a))
                         WriteHeterogeniousResponseOK(cri, changes)
@@ -130,30 +130,30 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                         let bm, indices = fetchForReadBit mms
                         bm.VerifyIndices(cri, indices |> map (fun n -> n / 8))
                         let result = bm.readBits indices
-                        ReadResponseOK(cri, PLCMemoryBitSize.Bit, result)
+                        ReadResponseOK(cri, MemoryType.Bit, result)
                     | "rb" ->
                         let bm, indices = fetchForRead mms
                         bm.VerifyIndices(cri, indices)
                         let result = bm.readU8s indices
-                        ReadResponseOK(cri, PLCMemoryBitSize.Byte, result)
+                        ReadResponseOK(cri, MemoryType.Byte, result)
 
                     | "rw" ->
                         let bm, indices = fetchForRead mms
                         bm.VerifyIndices(cri, indices |> map (fun n -> n * 2))
                         let result = bm.readU16s indices
-                        ReadResponseOK(cri, PLCMemoryBitSize.Word, result)
+                        ReadResponseOK(cri, MemoryType.Word, result)
 
                     | "rd" ->
                         let bm, indices = fetchForRead mms
                         bm.VerifyIndices(cri, indices |> map (fun n -> n * 4))
                         let result = bm.readU32s indices
-                        ReadResponseOK(cri, PLCMemoryBitSize.DWord, result)
+                        ReadResponseOK(cri, MemoryType.DWord, result)
 
                     | "rl" ->
                         let bm, indices = fetchForRead mms
                         bm.VerifyIndices(cri, indices |> map (fun n -> n * 8))
                         let result = bm.readU64s indices
-                        ReadResponseOK(cri, PLCMemoryBitSize.LWord, result)
+                        ReadResponseOK(cri, MemoryType.LWord, result)
                     | _ ->
                         StringResponseNG(cri, $"ERROR: {command}")
                 | 3 ->
@@ -171,32 +171,32 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                             bm.writeBit (cri, indices[i], value)
 
                         bm.Flush()
-                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, PLCMemoryBitSize.Bit, indices, values))
+                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, MemoryType.Bit, indices, values))
                     | "wb" ->
                         let bm, indices, values = fetchForWrite mms
                         bm.Verify(cri, indices, values.Length / 1)
                         Array.zip indices values |> bm.writeU8s cri
-                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, PLCMemoryBitSize.Byte, indices, values))
+                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, MemoryType.Byte, indices, values))
 
                     | "ww" ->
                         let bm, indices, values = fetchForWrite mms
                         bm.Verify(cri, indices |> map (fun n -> n * 2), values.Length / 2)
 
                         Array.zip indices (ByteConverter.BytesToTypeArray<uint16>(values)) |> bm.writeU16s cri
-                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, PLCMemoryBitSize.Byte, indices, values))
+                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, MemoryType.Byte, indices, values))
 
                     | "wd" ->
                         let bm, indices, values = fetchForWrite mms
                         bm.Verify(cri, indices |> map (fun n -> n * 4), values.Length / 4)
                         Array.zip indices (ByteConverter.BytesToTypeArray<uint32>(values)) |> bm.writeU32s cri
-                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, PLCMemoryBitSize.Byte, indices, values))
+                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, MemoryType.Byte, indices, values))
 
                     | "wl" ->
                         let bm, indices, values = fetchForWrite mms
                         bm.Verify(cri, indices |> map (fun n -> n * 8), values.Length / 8)
 
                         Array.zip indices (ByteConverter.BytesToTypeArray<uint64>(values)) |> bm.writeU64s cri
-                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, PLCMemoryBitSize.Byte, indices, values))
+                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, MemoryType.Byte, indices, values))
                     | _ ->
                         StringResponseNG(cri, $"ERROR: {command}")
 
@@ -246,19 +246,19 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                         | :? StringResponse as r ->
                             more.SendFrame(r.Message)
                         | :? ReadResponseOK as r ->
-                            let values, dataType = r.Values, r.DataType
+                            let values, dataType = r.Values, r.MemoryType
 
-                            if dataType = PLCMemoryBitSize.Undefined then
+                            if dataType = MemoryType.Undefined then
                                 more.SendFrame(r.Values :?> string)
                             else
                                 verify (values.GetType().IsArray)
                                 let moreBytes =
                                     match dataType with
-                                    | PLCMemoryBitSize.Bit   -> values :?> bool[] |> map (fun b -> if b then 1uy else 0uy)
-                                    | PLCMemoryBitSize.Byte  -> values :?> byte[]
-                                    | PLCMemoryBitSize.Word  -> values :?> uint16[] |> ByteConverter.ToBytes<uint16>
-                                    | PLCMemoryBitSize.DWord -> values :?> uint32[] |> ByteConverter.ToBytes<uint32>
-                                    | PLCMemoryBitSize.LWord -> values :?> uint64[] |> ByteConverter.ToBytes<uint64>
+                                    | MemoryType.Bit   -> values :?> bool[] |> map (fun b -> if b then 1uy else 0uy)
+                                    | MemoryType.Byte  -> values :?> byte[]
+                                    | MemoryType.Word  -> values :?> uint16[] |> ByteConverter.ToBytes<uint16>
+                                    | MemoryType.DWord -> values :?> uint32[] |> ByteConverter.ToBytes<uint32>
+                                    | MemoryType.LWord -> values :?> uint64[] |> ByteConverter.ToBytes<uint64>
                                     | _ -> failwithlogf "ERROR"
 
                                 more.SendFrame(moreBytes)

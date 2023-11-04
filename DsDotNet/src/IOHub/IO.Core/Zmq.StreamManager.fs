@@ -11,7 +11,7 @@ type IIOChangeInfo =
     abstract member IOFileSpec : IOFileSpec
     abstract member Offsets : int[]
     abstract member Value : obj
-    abstract member DataType : PLCMemoryBitSize
+    abstract member MemoryType : MemoryType
 
 
 
@@ -65,13 +65,13 @@ module internal ZmqStreamManager =
 
 
 
-    type IOChangeInfo(clientRequestInfo:ClientRequestInfo, fileSpec:IOFileSpec, dataType:PLCMemoryBitSize, offsets:int seq, value:obj) =
+    type IOChangeInfo(clientRequestInfo:ClientRequestInfo, fileSpec:IOFileSpec, memoryType:MemoryType, offsets:int seq, value:obj) =
         interface IIOChangeInfo with
             member x.ClientRequestInfo = x.ClientRequestInfo :> IClientRequestInfo
             member x.IOFileSpec = fileSpec
             member x.Offsets = x.Offsets
             member x.Value = value
-            member x.DataType = dataType
+            member x.MemoryType = memoryType
             
         member x.ClientRequestInfo = clientRequestInfo
         member x.IOFileSpec = fileSpec
@@ -82,7 +82,7 @@ module internal ZmqStreamManager =
         /// ....
         member val Offsets = offsets |> toArray
         member x.Value = value
-        member x.DataType = dataType
+        member x.MemoryType = memoryType
 
     type WriteOK(changes:IOChangeInfo seq) =
         member val Changes = changes |> toArray
@@ -268,7 +268,7 @@ module internal ZmqBufferManagerExtension =
             
     type IIOChangeInfo with
         member x.GetTagNameAndValues() =
-            let fs, dataType, offsets, objValues = x.IOFileSpec, x.DataType, x.Offsets, x.Value
+            let fs, dataType, offsets, objValues = x.IOFileSpec, x.MemoryType, x.Offsets, x.Value
             let path = fs.GetPath()
             let addrResolver = fs.Vendor.AddressResolver
             [
@@ -276,11 +276,11 @@ module internal ZmqBufferManagerExtension =
                     let contentBitLength = int dataType
                     let byteOffset, bitOffset, value = 
                         match dataType with
-                        | PLCMemoryBitSize.Bit   -> offset / 8,  offset % 8, (objValues :?> bool[])[i]   |> box
-                        | PLCMemoryBitSize.Byte  -> offset,      0         , (objValues :?> byte[])[i]   |> box
-                        | PLCMemoryBitSize.Word  -> offset * 16, 0         , (objValues :?> uint16[])[i] |> box
-                        | PLCMemoryBitSize.DWord -> offset * 32, 0         , (objValues :?> uint32[])[i] |> box
-                        | PLCMemoryBitSize.LWord -> offset * 64, 0         , (objValues :?> uint64[])[i] |> box
+                        | MemoryType.Bit   -> offset / 8,  offset % 8, (objValues :?> bool[])[i]   |> box
+                        | MemoryType.Byte  -> offset,      0         , (objValues :?> byte[])[i]   |> box
+                        | MemoryType.Word  -> offset * 16, 0         , (objValues :?> uint16[])[i] |> box
+                        | MemoryType.DWord -> offset * 32, 0         , (objValues :?> uint32[])[i] |> box
+                        | MemoryType.LWord -> offset * 64, 0         , (objValues :?> uint64[])[i] |> box
                         | _ -> failwithf($"Invalid data type: {dataType}")
 
                     let tag = addrResolver.GetTagName(path, byteOffset, bitOffset, contentBitLength)
@@ -290,11 +290,11 @@ module internal ZmqBufferManagerExtension =
         /// x.Value 를 byte[] 로 변환
         member x.GetValueBytes(): byte[] =
             let objValues = x.Value
-            match x.DataType with
-            | PLCMemoryBitSize.Bit   -> (objValues :?> bool[])   |> map (fun b -> if b then 1uy else 0uy)
-            | PLCMemoryBitSize.Byte  -> (objValues :?> byte[])
-            | PLCMemoryBitSize.Word  -> (objValues :?> uint16[]) |> ByteConverter.ToBytes<uint16>
-            | PLCMemoryBitSize.DWord -> (objValues :?> uint32[]) |> ByteConverter.ToBytes<uint32>
-            | PLCMemoryBitSize.LWord -> (objValues :?> uint64[]) |> ByteConverter.ToBytes<uint64>
-            | _ -> failwithf($"Invalid data type: {x.DataType}")
+            match x.MemoryType with
+            | MemoryType.Bit   -> (objValues :?> bool[])   |> map (fun b -> if b then 1uy else 0uy)
+            | MemoryType.Byte  -> (objValues :?> byte[])
+            | MemoryType.Word  -> (objValues :?> uint16[]) |> ByteConverter.ToBytes<uint16>
+            | MemoryType.DWord -> (objValues :?> uint32[]) |> ByteConverter.ToBytes<uint32>
+            | MemoryType.LWord -> (objValues :?> uint64[]) |> ByteConverter.ToBytes<uint64>
+            | _ -> failwithf($"Invalid data type: {x.MemoryType}")
 

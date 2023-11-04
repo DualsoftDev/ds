@@ -7,7 +7,7 @@ open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module internal ZmqServerResponseImplModule =
-    type ValuesChangeInfo = IOFileSpec * PLCMemoryBitSize * int array * obj   // dataType, offset, value
+    type ValuesChangeInfo = IOFileSpec * MemoryType * int array * obj   // dataType, offset, value
     type SingleValueChange = ValuesChangeInfo
 
     /// 서버에서 socket message 를 처리후, client 에게 socket 으로 보내기 전에 갖는 result type
@@ -57,11 +57,11 @@ module internal ZmqServerResponseImplModule =
         member val SpotChanges = spotChanges |> toArray
 
 
-    type ReadResponseOK(cri:ClientRequestInfo, dataType:PLCMemoryBitSize, values:obj) =
+    type ReadResponseOK(cri:ClientRequestInfo, memoryType:MemoryType, values:obj) =
         inherit Response(cri)
         interface IResponseOK
         member x.Values = values
-        member x.DataType = dataType
+        member x.MemoryType = memoryType
 
 
 

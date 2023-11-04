@@ -71,14 +71,14 @@ module internal ZmqServerImplModule =
             let bufferManager = ap.IOFileSpec.StreamManager :?> StreamManager
             bufferManager.VerifyIndices(clientRequstInfo, [|byteOffset|])
 
-            match ap.DataType with
-            | PLCMemoryBitSize.Bit   -> bufferManager.readBit(byteOffset * 8 + ap.OffsetBit) :> obj
-            | PLCMemoryBitSize.Byte  -> bufferManager.readU8(byteOffset)
-            | PLCMemoryBitSize.Word  -> bufferManager.readU16(byteOffset)
-            | PLCMemoryBitSize.DWord -> bufferManager.readU32(byteOffset)
-            | PLCMemoryBitSize.LWord -> bufferManager.readU64(byteOffset)
+            match ap.MemoryType with
+            | MemoryType.Bit   -> bufferManager.readBit(byteOffset * 8 + ap.OffsetBit) :> obj
+            | MemoryType.Byte  -> bufferManager.readU8(byteOffset)
+            | MemoryType.Word  -> bufferManager.readU16(byteOffset)
+            | MemoryType.DWord -> bufferManager.readU32(byteOffset)
+            | MemoryType.LWord -> bufferManager.readU64(byteOffset)
             | _ ->
-                failwithf($"Unknown data type : {ap.DataType}")
+                failwithf($"Unknown data type : {ap.MemoryType}")
         | _ ->
             failwithf($"Unknown address pattern : {address}")
 
@@ -99,16 +99,16 @@ module internal ZmqServerImplModule =
 
             let mutable offset = byteOffset
             let mutable objValue:obj = null
-            match ap.DataType with
-            | PLCMemoryBitSize.Bit   -> objValue <- [|parseBool(value)|];    bufferManager.writeBit (cri, byteOffset, ap.OffsetBit, parseBool(value)); offset <- byteOffset * 8 + ap.OffsetBit
-            | PLCMemoryBitSize.Byte  -> objValue <- [|Byte.Parse(value)|];   bufferManager.writeU8s cri ([byteOffset, Byte.Parse(value)])
-            | PLCMemoryBitSize.Word  -> objValue <- [|UInt16.Parse(value)|]; bufferManager.writeU16 cri (byteOffset, UInt16.Parse(value))
-            | PLCMemoryBitSize.DWord -> objValue <- [|UInt32.Parse(value)|]; bufferManager.writeU32 cri (byteOffset, UInt32.Parse(value))
-            | PLCMemoryBitSize.LWord -> objValue <- [|UInt64.Parse(value)|]; bufferManager.writeU64 cri (byteOffset, UInt64.Parse(value))
-            | _ -> failwithf($"Unknown data type : {ap.DataType}")
+            match ap.MemoryType with
+            | MemoryType.Bit   -> objValue <- [|parseBool(value)|];    bufferManager.writeBit (cri, byteOffset, ap.OffsetBit, parseBool(value)); offset <- byteOffset * 8 + ap.OffsetBit
+            | MemoryType.Byte  -> objValue <- [|Byte.Parse(value)|];   bufferManager.writeU8s cri ([byteOffset, Byte.Parse(value)])
+            | MemoryType.Word  -> objValue <- [|UInt16.Parse(value)|]; bufferManager.writeU16 cri (byteOffset, UInt16.Parse(value))
+            | MemoryType.DWord -> objValue <- [|UInt32.Parse(value)|]; bufferManager.writeU32 cri (byteOffset, UInt32.Parse(value))
+            | MemoryType.LWord -> objValue <- [|UInt64.Parse(value)|]; bufferManager.writeU64 cri (byteOffset, UInt64.Parse(value))
+            | _ -> failwithf($"Unknown data type : {ap.MemoryType}")
 
             let fs = bufferManager.FileSpec
-            fs, ap.DataType, [|offset|], objValue
+            fs, ap.MemoryType, [|offset|], objValue
 
         | _ -> failwithf($"Unknown address with assignment pattern : {addressWithAssignValue}")
 

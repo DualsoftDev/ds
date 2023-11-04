@@ -10,10 +10,12 @@ open Dual.Common.Core.FS
 open Engine.Import.Office
 open Engine.Core
 open System.Runtime.CompilerServices
-open System.IO
 
 [<AutoOpen>]
 module ImportU =
+    let sLibs = Dictionary<string, DsSystem>()
+    let mutable activeSysDir = ""
+
     let getParams(directoryName:string
                     , relativeFilePath:string, loadedName:string, containerSystem:DsSystem
                     , hostIp:string option, loadingType, sRepo) =
@@ -32,36 +34,33 @@ module ImportU =
             let refSystem = sys.TryFindLoadedSystem(refSys).Value.ReferenceSystem
             refSystem.TryFindExportApiItem([|refSystem.Name;apiName|]).Value
 
-    //let private createDsCommonLibCall(devName:string, ifName:string)  =
-    //    let newSys = DsSystem(devName, "")
-    //    let paras = getParams(
-    //                          getSystemDirectoryName ""
-    //                        , getSystemName ""
-    //                        , newSys.Name
-    //                        , newSys
-    //                        , Some newSys.HostIp
-    //                        , DuNone
-    //                        , ShareableSystemRepository()  
-    //                        )
-    //    Device(newSys, paras) :> LoadedSystem 
-    //    let devs =
-    //        let api = getApiItems()
-    //        jobSet.Value
-    //            .Select(fun tgt -> getApiItems(mySys, tgt, api.Name), tgt)
-    //            .Select(fun (api, tgt)->
-    //            match node.NodeType with
-    //            | OPEN_EXSYS_LINK             -> TaskSys(api, tgt)         :> DsTask
-    //            | OPEN_EXSYS_CALL  | COPY_DEV -> TaskDev(api, "", "", tgt) :> DsTask
-    //            | _-> failwithlog "Error MakeJobs"
-    //            )
-    //    let job = Job(jobBase+"_"+api.Name, devs |> Seq.toList)
-    //    if dicJobName.ContainsKey(job.Name)
-    //    then Office.ErrorName(node.Shape, ErrID._33, node.PageNum)
-    //    else dicJobName.Add(job.Name, job)
+ 
+    let private addLoadedLibSystemNApi(loadedName, apiName, mySys:DsSystem, parentF:Flow option, parentR:Real option)=
+        let libSys = sLibs[apiName]
+       
+        let dev =
+            let loadedSys = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = loadedName)
+            if loadedSys.IsNull() 
+            then 
+                let paras = getParams(activeSysDir, "DS_Library.ds"
+                    , loadedName, mySys, None, DuDevice, ShareableSystemRepository())
+        
+                let loadingSys = Device(libSys, paras) :> LoadedSystem 
+                mySys.AddLoadedSystem(loadingSys) 
+                loadingSys
+            else 
+                loadedSys
 
-    //    mySys.Jobs.Add(job)
-    //    CallDev.Create(job, DuParentReal (parentReal.Value))
-      
+        let api = libSys.ApiItems.First(fun f-> f.Name = apiName)
+        let dev = TaskDev(api, "", "", loadedName) :> DsTask
+        let job = Job(loadedName+"_"+apiName,[dev])
+        mySys.Jobs.Add(job)
+
+        if(parentR.IsSome)
+        then  CallDev.Create(job, DuParentReal (parentR.Value))
+        else  CallDev.Create(job, DuParentFlow (parentF.Value))
+
+
     let private createCallVertex(mySys:DsSystem, node:pptNode
             , parentReal:Real Option
             , parentFlow:Flow Option
@@ -89,11 +88,15 @@ module ImportU =
 
             |None ->
                 let ifName = node.Name.Split('.');
-                if  ifName.Length = 2 && isDsCommonLib(ifName[1])
+                if  ifName.Length = 2
                 then 
-                    //createDsCommonLibCall(ifName[0], ifName[1])
-                    node.Shape.ErrorName(ErrID._49, node.PageNum)
-                   
+                    if sLibs.ContainsKey ifName[1]
+                    then 
+                        let apiName = ifName[1]
+                        let loadedName =ifName[0]
+                        addLoadedLibSystemNApi(loadedName, apiName, mySys, parentFlow, parentReal)
+                    else 
+                        node.Shape.ErrorName(ErrID._49, node.PageNum)
                 else 
                     node.Shape.ErrorName(ErrID._49, node.PageNum)
 
@@ -135,9 +138,9 @@ module ImportU =
                 |Some flow ->
                     match flow.Graph.Vertices.TryFind(fun f->f.Name = nodeName) with
                     |Some real -> real
-                    |None ->  nodeEx.Shape.ErrorName(ErrID._27, nodeEx.PageNum)
+                    |None ->  nodeEx.Shape.ErrorName($"{ErrID._27} Error Name : [{nodeName}]", nodeEx.PageNum)
                 |None ->
-                    nodeEx.Shape.ErrorName(ErrID._26, nodeEx.PageNum)
+                    nodeEx.Shape.ErrorName($"{ErrID._26} Error Name : [{flowName}]", nodeEx.PageNum)
 
 
     [<Extension>]

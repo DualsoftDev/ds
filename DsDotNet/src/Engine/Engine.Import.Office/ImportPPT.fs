@@ -47,7 +47,7 @@ module ImportPPTModule =
     type internal ImportPowerPoint() =
         let sRepo = ShareableSystemRepository()  
         
-        
+          
         let rec loadSystem(pptReop:Dictionary<DsSystem, pptDoc>, theSys:DsSystem, paras:DeviceLoadParameters) =
             pathStack.Push(paras.AbsoluteFilePath)
             
@@ -158,19 +158,22 @@ module ImportPPTModule =
                             , DuNone
                             , sRepo
                             )
+
+                activeSysDir <- fileDirectory
+
                 dicLoaded.Clear() 
                 loadedParentStack.Clear()
                 loadedParentStack.Push mySys
                 loadSystem(pptReop, mySys, paras)
               
          
-    let private fromPPTs(paths:string seq) =
+    let private loadingfromPPTs(paths:string seq) =
         try
             try
-                let pptRepo    = Dictionary<DsSystem, pptDoc>()
-                ()
-                let cfg = {DsFilePaths = paths |> Seq.toList}
 
+                let pptRepo    = Dictionary<DsSystem, pptDoc>()
+
+                let cfg = {DsFilePaths = paths |> Seq.toList}
                 let results =
                     [
                         for dsFile in cfg.DsFilePaths do
@@ -203,10 +206,26 @@ module ImportPPTModule =
                      .Iter(fun  f->f.Value.Close())
             dicPptDoc.Clear()
 
-    let getLibModel() = 
-        let runDir = System.Reflection.Assembly.GetEntryAssembly().Location|>DsFile |> PathManager.getDirectoryName
-        let libFilePath =  PathManager.getFullPath ("DS_Library.pptx"|>DsFile) (runDir|>DsDirectory)
-        fromPPTs [| libFilePath |] |> fun (model, views, pptRepo) -> model
+     
+    let loadingLibray() = 
+        let getLibModel() = 
+            let runDir = System.Reflection.Assembly.GetEntryAssembly().Location|>DsFile |> PathManager.getDirectoryName
+            let libFilePath =  PathManager.getFullPath ("DS_Library.pptx"|>DsFile) (runDir|>DsDirectory)
+            loadingfromPPTs ([| libFilePath |])|> fun (model, views, pptRepo) -> model
+
+        sLibs.Clear()
+        let libs = getLibModel().Systems
+        libs.Iter(fun libSys -> 
+            libSys.ApiItems.Iter(fun api->  
+                try
+                    sLibs.Add(api.Name, libSys)
+                with
+                | ex-> 
+                    let errSystems = libs.Where(fun w-> w.ApiItems.Select(fun s-> s.Name = api.Name).any())
+                    let errText = (String.Join(", ", errSystems.Select(fun s->s.Name)))
+                    failwithf $"{api.Name} exists on the same system. [{errText}]"
+                )
+        )
 
     type PptResult = {
         System: DsSystem
@@ -220,15 +239,10 @@ module ImportPPTModule =
 
         [<Extension>]
         static member GetModel      (paths:string seq) =
-            fromPPTs paths |> fun (model, views, pptRepo) -> model
-
-        [<Extension>]
-        static member GetModelNView (paths:string seq) =
-            fromPPTs paths |> fun (model, views, pptRepo) -> model, views
-
+            loadingfromPPTs (paths) |> fun (model, views, pptRepo) -> model
         [<Extension>]
         static member GetLoadingAllSystem (paths:string seq) =
-             fromPPTs paths
+             loadingfromPPTs (paths)
              |> fun (model, views, pptRepo)
                     -> model, pptRepo
                         |> Seq.map(fun f->
@@ -236,27 +250,22 @@ module ImportPPTModule =
                                 Views = f.Key.GetViewNodes()
                                 IsActive = model.Systems.Contains(f.Key)}  )
         [<Extension>]
-        static member GetDsFilesWithLib (paths:string seq) =
-                fromPPTs paths
-                |> fun (model, views, pptRepo)
-                    -> pptRepo
-                         .Select(fun dic ->
-                            let system = dic.Key
-                            let param = dic.Value.Parameter
-                            let relative  = param.RelativeFilePath
-                            let absolute  = param.AbsoluteFilePath
-                            let removeTarget = relative.Replace("ds", "")
-                            let rootDirectroy = absolute.Substring(0, absolute.length() - removeTarget.length())
-
-                            system.ToDsText(true), rootDirectroy, relative)
-
-
-        [<Extension>]
         static member GetDSFromPPT (fullName: string) =
                 let pptResults = ImportPPT.GetModel [| fullName |]
-                let libResults = getLibModel()
+                let sys = pptResults.Systems.[0]
 
-                
+                let exportPath = sys.pptxToExportDS fullName
+                let systems, loadingPaths = ParserLoader.LoadFromActivePath exportPath
+                {
+                    Systems =  systems
+                    ActivePaths = [exportPath]
+                    LoadingPaths = loadingPaths
+                }
+        [<Extension>]
+        static member GetDSFromPPTWithLib (fullName: string) =
+                loadingLibray()
+
+                let pptResults = loadingfromPPTs ([fullName]) |> fun (model, views, pptRepo) -> model
                 let sys = pptResults.Systems.[0]
 
                 let exportPath = sys.pptxToExportDS fullName

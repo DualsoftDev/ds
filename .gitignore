@@ -30,10 +30,10 @@ Grammar/CsParser/bin/
 *.xgwx
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/**/*.zip
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/**/*.ds
-/DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/**/*.json
 /.vs
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/demo/ppt/kit_DS_autogen/*
 
 /DsDotNet/Apps/OfficeAddOn/PowerPointAddInSetup/PowerPointAddIn
 /DsDotNet/src/UnitTest/UnitTest.Model/test-origin-config.json
 /DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/test-model-config.json
+/DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/**/*.json

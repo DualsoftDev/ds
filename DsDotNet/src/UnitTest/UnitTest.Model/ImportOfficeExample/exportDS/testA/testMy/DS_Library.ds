@@ -1,0 +1,33 @@
+[sys ip = localhost] DS_Library = {
+    [flow] RepeatFlow = {
+        forwardwork <||> backwardwork;
+    }
+    [flow] MovingFlow = {
+        movework <||> clearwork;
+        movework > clearwork;
+    }
+    [flow] SingleActingFlow = {
+        forwardwork <||> backwardwork;
+    }
+    [interfaces] = {
+        FWD = { RepeatFlow.forwardwork ~ RepeatFlow.forwardwork }
+        BWD = { RepeatFlow.backwardwork ~ RepeatFlow.backwardwork }
+        ADV = { RepeatFlow.forwardwork ~ RepeatFlow.forwardwork }
+        RET = { RepeatFlow.backwardwork ~ RepeatFlow.backwardwork }
+        UP = { RepeatFlow.forwardwork ~ RepeatFlow.forwardwork }
+        DN = { RepeatFlow.backwardwork ~ RepeatFlow.backwardwork }
+        "+" = { RepeatFlow.forwardwork ~ RepeatFlow.forwardwork }
+        "-" = { RepeatFlow.backwardwork ~ RepeatFlow.backwardwork }
+        RUN = { MovingFlow.movework ~ MovingFlow.clearwork }
+        "FWD[P]" = { SingleActingFlow.forwardwork ~ SingleActingFlow.forwardwork }
+        BWDS = { SingleActingFlow.backwardwork ~ SingleActingFlow.backwardwork }
+        FWDS = { SingleActingFlow.forwardwork ~ SingleActingFlow.forwardwork }
+        "BWD[P]" = { SingleActingFlow.backwardwork ~ SingleActingFlow.backwardwork }
+        FWD <||> BWD;
+        ADV <||> RET;
+        UP <||> DN;
+        "+" <||> "-";
+        "FWD[P]" <||> BWDS;
+        FWDS <||> "BWD[P]";
+    }
+}

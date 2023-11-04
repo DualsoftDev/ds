@@ -2,12 +2,12 @@
     [flow] STN01 = {
         WORK2 => WORK3 => WORK1 => WORK2;
         WORK1 = {
-            "STN01_Pin_+" > "STN01_Pin_-";
+            "Pin_+" > "Pin_-";
         }
     }
     [jobs] = {
-        "STN01_Pin_+" = { STN01_Pin."+"(_, _); }
-        "STN01_Pin_-" = { STN01_Pin."-"(_, _); }
+        "Pin_+" = { Pin."+"(_, _); }
+        "Pin_-" = { Pin."-"(_, _); }
     }
-    [device file="../lib/dev.ds"] STN01_Pin; 
+    [device file="DS_Library.ds"] Pin; 
 }

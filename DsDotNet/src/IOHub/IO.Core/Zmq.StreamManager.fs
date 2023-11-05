@@ -151,14 +151,12 @@ module internal ZmqStreamManager =
                 |]
             )
 
-        member x.writeBit (cri:ClientRequestInfo, bitIndex:int, value:bool) = x.writeBit(cri , bitIndex / 8, bitIndex % 8, value)
-        member x.writeBit (cri:ClientRequestInfo, byteIndex:int, bitIndex:int, value:bool) = x.writeBits cri ( [|(byteIndex, bitIndex, value)|] )
+        member x.writeBit (cri:ClientRequestInfo, offset:int, value:bool) = x.writeBits cri [|(offset, value)|]
 
-        member x.writeBits (cri:ClientRequestInfo) (writeBitArgs:(int*int*bool) seq) = // (byteIndex:int, bitIndex:int, value:bool) array) =
+        member x.writeBits (cri:ClientRequestInfo) (writeBitArgs:(int*bool) seq) =
             lock locker (fun () ->
-                let offsets = ResizeArray<int>()
-                let values = ResizeArray<bool>()
-                for (byteIndex, bitIndex, value) in writeBitArgs do
+                for (offset, value) in writeBitArgs do
+                    let byteIndex, bitIndex = offset / 8, offset % 8
                     let currentByte = x.readU8(byteIndex)
 
                     // 비트를 설정하거나 클리어
@@ -170,8 +168,6 @@ module internal ZmqStreamManager =
 
                     // 수정된 바이트를 해당 위치에 쓰기
                     writeTBytes<byte> stream byteIndex updatedByte
-                    offsets.Add (byteIndex * 8 + bitIndex)
-                    values.Add value
 
                 x.Flush()
             )

@@ -8,7 +8,7 @@ open Dual.Common.Core.FS
 module ZmqTestServer =
     [<EntryPoint>]
     let main _ = 
-        ZmqTestModule.runServer()
+        ZmqTestModule.runServer true
         //let zmqInfo = Zmq.InitializeServer "zmqsettings.json"
         //let server, cts = zmqInfo.Server, zmqInfo.CancellationTokenSource
 

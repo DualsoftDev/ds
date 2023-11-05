@@ -4,6 +4,7 @@ open System
 open System.Threading
 open Dual.Common.Core.FS
 open System.Reactive.Disposables
+open System
 
 module ZmqTestModule =
     let clientKeyboardLoop (client:Client) (ct:CancellationToken) =
@@ -16,7 +17,7 @@ module ZmqTestModule =
                 match key with
                 | "q" | "Q" -> key <- null
                 | "trx" ->   // test read bits
-                    match client.ReadBits("p/x", testReadOffsets) with
+                    match client.ReadBits("p/o", testReadOffsets) with
                     | Ok bytes ->
                         let str = bytes |> map toString |> joinWith ", "
                         Console.WriteLine($"OK: {str}")
@@ -72,16 +73,60 @@ module ZmqTestModule =
                     | Error msg -> failwith $"ERROR: {msg}"
 
 
-
-                | "" -> ()
-                | _ ->
+                | (StartsWith "rx" | StartsWith "rb" | StartsWith "rw" | StartsWith "rdw" | StartsWith "rlw")
+                | (StartsWith "wx" | StartsWith "wb" | StartsWith "ww" | StartsWith "wdw" | StartsWith "wlw") ->
                     match client.SendRequest(key) with
                     | Ok value ->
                         Console.WriteLine($"OK: {value}")
                     | Error err ->
                         Console.WriteLine($"ERR: {err}")
-
+                | _ ->
+                    Console.WriteLine($"Unknown command: {key}")
                 ()
+
+    let serverKeyboardLoop (server:ServerDirectAccess) (ct:CancellationToken) =
+        let mutable key = ""
+        let testReadOffsets = [|0..3|]
+        let testWriteValues = testReadOffsets |> map (( *) 3)
+
+        while ( key <> null && not ct.IsCancellationRequested ) do
+            key <- Console.ReadLine()
+            if key <> null then
+                let getArgs() =
+                    let tokens = key.Split(' ', StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
+                    tokens[1..] |> map(fun s -> s.ToLower())
+                match key with
+                | "q" | "Q" -> key <- null
+
+                | StartsWith "read" ->
+                    for tag in getArgs() do
+                        let value = server.Read tag
+                        Console.WriteLine($"{tag}={value}")
+
+                | StartsWith "write" ->
+                    for addressWithAssignValue in getArgs() do
+                        match addressWithAssignValue with
+                        | RegexPattern "([^=]+)=(\w+)" [tag; strValue] ->
+                            let uint64Value = UInt64.Parse(strValue)
+                            let value =
+                                match tag with
+                                | AddressPattern ap ->
+                                    match ap.MemoryType with
+                                    | MemoryType.Bit   -> uint64Value <> 0UL |> box
+                                    | MemoryType.Byte  -> byte uint64Value |> box
+                                    | MemoryType.Word  -> uint16 uint64Value |> box
+                                    | MemoryType.DWord -> uint32 uint64Value |> box
+                                    | MemoryType.LWord -> uint64Value |> box
+                                    | _ -> failwithf($"Unknown data type : {ap.MemoryType}")
+
+                            server.Write(tag, value)
+                        | _ ->
+                            Console.WriteLine($"Illegal argments: {addressWithAssignValue}")
+                            
+                | _ ->
+                    Console.WriteLine($"Unknown command: {key}")
+                ()
+
     let registerCancelKey (cts:CancellationTokenSource) (disposable:IDisposable) =
         let handleCancelKey (args: ConsoleCancelEventArgs) =
             logDebug("Ctrl+C pressed!")
@@ -90,7 +135,7 @@ module ZmqTestModule =
             args.Cancel <- true // 프로그램을 종료하지 않도록 설정 (선택 사항)
         Console.CancelKeyPress.Add(handleCancelKey)
 
-    let runServer() =
+    let runServer withServerKeyboardLoop =
         let zmqInfo = Zmq.InitializeServer "zmqsettings.json"
         let server, cts = zmqInfo.Server, zmqInfo.CancellationTokenSource
 
@@ -101,6 +146,9 @@ module ZmqTestModule =
                 ())
 
         registerCancelKey cts server
+        if withServerKeyboardLoop then
+            serverKeyboardLoop server cts.Token
+
         while(not server.IsTerminated) do
             Thread.Sleep(1000)
         

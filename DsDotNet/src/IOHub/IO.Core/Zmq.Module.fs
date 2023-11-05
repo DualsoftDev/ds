@@ -8,7 +8,7 @@ open Dual.Common.Core.FS
 module Zmq =
     type ZmqInfo = {
         IOSpec:IOSpec
-        Server:Server
+        Server:ServerDirectAccess
         Client:Client
         CancellationTokenSource:CancellationTokenSource
     }
@@ -18,7 +18,7 @@ module Zmq =
         let port = ioSpec.ServicePort
         let cts = new CancellationTokenSource()
 
-        let server = new Server(ioSpec, cts.Token) |> tee (fun x -> x.Run())
+        let server = new ServerDirectAccess(ioSpec, cts.Token) |> tee (fun x -> x.Run())
         let client = if withClient then new Client($"tcp://localhost:{port}") else null
         { IOSpec = ioSpec; Server = server; Client = client; CancellationTokenSource = cts }
 

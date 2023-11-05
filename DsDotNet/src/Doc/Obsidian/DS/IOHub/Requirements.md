@@ -1,0 +1,15 @@
+- Independances
+	- Platform (Windows/Linux/Mac/..)
+	- Process (Client 구동 process 와 Server 구동 process 는 독립)
+	- Language (C#/F#/C++/...)
+	- 1 server, n clients (n >= 0)
+- Locking mechanism
+	- 다중 client 가 write request 시, 순서에 따른 lock mechanism 제공
+- Efficiency
+	- 변경 tag 감지를 위한 file scan 허용 안함
+		- Push 기반 변경 notification
+	- Server 생성 process 는 socket 을 통하지 않고 직접 read/write
+- Openess to third party vendor
+	- 임의의 third party vendor 의 IO read/write 기능 제공
+- Change notification
+- 

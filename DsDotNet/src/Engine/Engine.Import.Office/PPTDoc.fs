@@ -225,7 +225,7 @@ module PPTDocModule =
             //           failwithf  $"{ex.Message}"
 
 
-        member x.GetTable(colCnt:int) = doc.GetTable colCnt     
+        member x.GetTables(colCnt:int) = doc.GetTablesWithPageNumbers colCnt     
         member x.GetPage(pageNum:int) = pages.Values |> Seq.filter(fun p -> p.PageNum = pageNum) |> Seq.head
         member val Pages = pages.Values.OrderBy(fun p -> p.PageNum)
         member val Nodes = nodes.Values.OrderBy(fun p -> p.PageNum)

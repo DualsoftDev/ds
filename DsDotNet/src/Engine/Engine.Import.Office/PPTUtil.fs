@@ -7,6 +7,11 @@ open System
 open System.Linq
 open DocumentFormat.OpenXml
 open DocumentFormat.OpenXml.Drawing
+open System.Data
+open DocumentFormat.OpenXml
+open DocumentFormat.OpenXml.Packaging
+open DocumentFormat.OpenXml.Spreadsheet
+open System.Data
 
 [<AutoOpen>]
 module PPTUtil =
@@ -384,28 +389,92 @@ module PPTUtil =
                         let Cy = doc.PresentationPart.Presentation.SlideSize.Cy
                         Cx |> int, Cy |> int
 
+
         [<Extension>]
-        static member GetTable(doc:PresentationDocument, colCnt:int) =
-                    let dt = new System.Data.DataTable();
-                    for i in 0..colCnt-1 do dt.Columns.Add $"col{i}"|>ignore
-                    
-                    Office.SildesSkipHide(doc)
-                    |> Seq.iter (fun slidePart ->
-                        let gfs = slidePart.Slide.CommonSlideData.ShapeTree.Descendants<DocumentFormat.OpenXml.Presentation.GraphicFrame>()
-                        let tables = gfs.SelectMany(fun s -> s.Descendants<DocumentFormat.OpenXml.Drawing.Graphic>())
-                                        .SelectMany(fun s -> s.Descendants<DocumentFormat.OpenXml.Drawing.GraphicData>())
-                                        .SelectMany(fun s -> s.Descendants<DocumentFormat.OpenXml.Drawing.Table>())
-                        
-                        let rows = tables.SelectMany(fun s -> s.Descendants<DocumentFormat.OpenXml.Drawing.TableRow>())
-                        rows |> Seq.iter (fun row ->
-                                let cells = row.Descendants<DocumentFormat.OpenXml.Drawing.TableCell>()
-                                if cells.Count() = colCnt
-                                then 
-                                    let rowTemp = dt.NewRow()
-                                    rowTemp.ItemArray <- (cells.Select(fun c -> c.InnerText)|> Seq.cast<obj>|> Seq.toArray)
-                                    rowTemp |> dt.Rows.Add |>ignore
-                      )
-                    )
-                    dt
+        static member ExportDataTableToExcel (dataTables: DataTable seq) (filePath: string) =
+            // Create a new spreadsheet document
+            use spreadsheetDocument = SpreadsheetDocument.Create(filePath, SpreadsheetDocumentType.Workbook)
+
+            // Create the workbook
+            let workbookPart = spreadsheetDocument.AddWorkbookPart()
+            let workbook = new Workbook()
+
+            // Create sheets collection
+            let sheets = new Sheets()
+
+            for (index, dataTable) in Seq.indexed dataTables do
+                // Create a worksheet for each DataTable
+                let worksheetPart = workbookPart.AddNewPart<WorksheetPart>()
+                let worksheet = new Worksheet()
+
+                // Create the sheet data
+                let sheetData = new SheetData()
+
+                // Add column headers to the sheet data
+                let headerRow = new Row()
+                for colIndex in 0 .. dataTable.Columns.Count - 1 do
+                    let cell = new Cell()
+                    cell.DataType <- CellValues.String
+                    cell.CellValue <- new CellValue(dataTable.Columns.[colIndex].ColumnName)
+                    headerRow.AppendChild(cell)|>ignore
+
+                sheetData.AppendChild(headerRow)|>ignore
+
+                // Populate the sheet data with data from the DataTable
+                for rowIndex in 0 .. dataTable.Rows.Count - 1 do
+                    let dataRow = new Row()
+                    for colIndex in 0 .. dataTable.Columns.Count - 1 do
+                        let cell = new Cell()
+                        cell.DataType <- CellValues.String
+                        cell.CellValue <- new CellValue(dataTable.Rows.[rowIndex].[colIndex].ToString())
+                        dataRow.AppendChild(cell)|>ignore
+
+                    sheetData.AppendChild(dataRow)|>ignore
+
+                worksheet.AppendChild(sheetData)|>ignore
+
+                worksheetPart.Worksheet <- worksheet
+
+                // Create a sheet with a unique name
+                let sheet = new Sheet(Name =  $"Sheet{(index + 1)}", Id = workbookPart.GetIdOfPart(worksheetPart))
+                sheets.AppendChild(sheet)|>ignore
+
+            workbook.AppendChild(sheets)|>ignore
+
+            // Save the workbook
+            workbookPart.Workbook <- workbook
+            spreadsheetDocument.Save()
+
+
+
+
+        [<Extension>]
+        static member GetTablesWithPageNumbers(doc: PresentationDocument, colCnt: int) =
+            let tablesWithPageNumbers =
+                Office.SildesSkipHide(doc)
+                |> Seq.mapi (fun pageIndex slidePart ->
+                    let dt = new System.Data.DataTable()
+                    for i in 0 .. colCnt - 1 do
+                        dt.Columns.Add($"col{i}") |> ignore
+
+                    let gfs = slidePart.Slide.CommonSlideData.ShapeTree.Descendants<DocumentFormat.OpenXml.Presentation.GraphicFrame>()
+                    let tables = gfs.SelectMany(fun s -> s.Descendants<DocumentFormat.OpenXml.Drawing.Graphic>())
+                                    .SelectMany(fun s -> s.Descendants<DocumentFormat.OpenXml.Drawing.GraphicData>())
+                                    .SelectMany(fun s -> s.Descendants<DocumentFormat.OpenXml.Drawing.Table>())
+
+                    let rows = tables.SelectMany(fun s -> s.Descendants<DocumentFormat.OpenXml.Drawing.TableRow>())
+                    rows
+                    |> Seq.iter (fun row ->
+                        let cells = row.Descendants<DocumentFormat.OpenXml.Drawing.TableCell>()
+                        if cells.Count() = colCnt then
+                            let rowTemp = dt.NewRow()
+                            rowTemp.ItemArray <- cells.Select(fun c -> c.InnerText) |> Seq.cast<obj> |> Seq.toArray
+                            rowTemp |> dt.Rows.Add |> ignore
+                        )
+                    pageIndex+1, dt
+                )
+            tablesWithPageNumbers
+
+
      
 

@@ -53,14 +53,20 @@ type VertexMCoin with
 
     member coin.C2_CallActionOut(): CommentedStatement list =
         let call = coin.Vertex :?> CallDev
-        let rsts = coin._off.Expr
+        let rstNormal = coin._off.Expr
         [
             for td in call.CallTargetJob.DeviceDefs do
                 if td.ApiItem.TXs.any()
                 then 
                     let sets = td.ApiItem.PE.Expr <&&> td.ApiItem.PS.Expr 
                            <&&> coin.Flow.dop.Expr
-                    yield (sets, rsts) --| (td.ActionOut, getFuncName())
+
+                    if td.ApiItem.ActionType = ApiActionType.Push 
+                    then 
+                         let rstPush = td.MutualResetExpr(call.System)
+                        
+                         yield (sets, rstPush  ) ==| (td.ActionOut, getFuncName())
+                    else yield (sets, rstNormal) --| (td.ActionOut, getFuncName())
         ]
 
   

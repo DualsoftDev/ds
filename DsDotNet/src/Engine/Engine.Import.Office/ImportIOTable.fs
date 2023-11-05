@@ -20,7 +20,7 @@ module ImportIOTable =
     | Job       = 5
     | Func      = 6
 
-    let ApplyIO(sys:DsSystem, dt:Data.DataTable) =
+    let ApplyIO(sys:DsSystem, dts:(int*Data.DataTable) seq) =
 
         try
             let autoFillAddress(x:string) =
@@ -30,20 +30,20 @@ module ImportIOTable =
                     |XGI -> if  not <| x.StartsWith("%")   then "%"+x else x
                     |_ ->   x
 
-            let functionUpdate(name, funcText, funcs:HashSet<Func>, tableIO:Data.DataTable, isJob:bool) =
+            let functionUpdate(name, funcText, funcs:HashSet<Func>, tableIO:Data.DataTable, isJob:bool, page) =
                 funcs.Clear()
                 if not <| ((trimSpace funcText) = "" || funcText = "-" ||  funcText = "↑")
                 then getFunctions(name, funcText)
                         |> Seq.iter(fun (name, parms) ->
                             if (not<|isJob) && name <> "n"
-                            then Office.ErrorPPT(ErrorCase.Name, ErrID._1005, $"{name}", 0, 0u)
+                            then Office.ErrorPPT(ErrorCase.Name, ErrID._1005, $"{name}", page, 0u)
                             funcs.Add(Func(name, parms)) |>ignore )
             
             let dicJob = sys.Jobs |> Seq.collect(fun f-> f.DeviceDefs) |> Seq.map(fun j->j.ApiName, j) |> dict
-            let updateDev(row:Data.DataRow, tableIO:Data.DataTable) =
+            let updateDev(row:Data.DataRow, tableIO:Data.DataTable, page) =
                 let devName  = $"{row.[(int)IOColumn.Name]}"
                 if not <| dicJob.ContainsKey(devName)
-                then Office.ErrorPPT(ErrorCase.Name, ErrID._1006, $"{devName}.", 0, 0u)
+                then Office.ErrorPPT(ErrorCase.Name, ErrID._1006, $"{devName}", page, 0u)
                 let dev = dicJob.[devName]
                 dev.InAddress  <- $"{row.[(int)IOColumn.Input]}" |> autoFillAddress
                 dev.OutAddress <- $"{row.[(int)IOColumn.Output]}"|> autoFillAddress
@@ -54,19 +54,19 @@ module ImportIOTable =
                 match sys.Jobs.TryFind(fun f-> f.Name = jobName) with
                 | Some job -> 
                             let funcs = new HashSet<Func>()
-                            functionUpdate (job.Name, func, funcs, tableIO, true)
+                            functionUpdate (job.Name, func, funcs, tableIO, true, page)
                             job.SetFuncs funcs
                 | None -> if "↑" <> jobName //이름이 위와 같지 않은 경우
-                            then Office.ErrorPPT(ErrorCase.Name, ErrID._1004, $"오류 이름 {jobName}.", 0, 0u)
+                            then Office.ErrorPPT(ErrorCase.Name, ErrID._1004, $"오류 이름 {jobName}.", page, 0u)
 
-            let updateVar(row:Data.DataRow, tableIO:Data.DataTable) =
+            let updateVar(row:Data.DataRow, tableIO:Data.DataTable, page) =
                 let name      = $"{row.[(int)IOColumn.Name]}"
                 let dataType  = $"{row.[(int)IOColumn.DataType]}" |> textToDataType
                 let initValue = $"{row.[(int)IOColumn.Output]}"
                 let variableData = VariableData(name, dataType, initValue)
                 sys.Variables.Add(variableData)
 
-            let updateBtn(row:Data.DataRow, btntype:BtnType, tableIO:Data.DataTable) =
+            let updateBtn(row:Data.DataRow, btntype:BtnType, tableIO:Data.DataTable, page) =
                 let name  = $"{row.[(int)IOColumn.Name]}"
                 let input = $"{row.[(int)IOColumn.Input]}"  |> autoFillAddress
                 let output= $"{row.[(int)IOColumn.Output]}" |> autoFillAddress
@@ -76,10 +76,10 @@ module ImportIOTable =
                 match btns.TryFind(fun f -> f.Name = name) with
                 | Some btn -> btn.InAddress <- input
                               btn.OutAddress <- output
-                              functionUpdate (btn.Name, func, btn.Funcs, tableIO, false)
-                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{name}", 0, 0u)
+                              functionUpdate (btn.Name, func, btn.Funcs, tableIO, false, page)
+                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{name}", page, 0u)
 
-            let updateLamp(row:Data.DataRow, lampType:LampType, tableIO:Data.DataTable) =
+            let updateLamp(row:Data.DataRow, lampType:LampType, tableIO:Data.DataTable, page) =
                 let name  = $"{row.[(int)IOColumn.Name]}"
                 let output= $"{row.[(int)IOColumn.Output]}" |> autoFillAddress
                 let func  = $"{row.[(int)IOColumn.Func]}"
@@ -87,10 +87,10 @@ module ImportIOTable =
                 let lamps = sys.SystemLamps.Where(fun w->w.LampType = lampType)
                 match lamps.TryFind(fun f -> f.Name = name) with
                 | Some lamp -> lamp.OutAddress <- output
-                               functionUpdate (lamp.Name, func, lamp.Funcs, tableIO, false)
-                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", 0, 0u)
+                               functionUpdate (lamp.Name, func, lamp.Funcs, tableIO, false, page)
+                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", page, 0u)
 
-            let updateCondition (row:Data.DataRow, cType:ConditionType, tableIO:Data.DataTable) =
+            let updateCondition (row:Data.DataRow, cType:ConditionType, tableIO:Data.DataTable, page) =
                 let name  = $"{row.[(int)IOColumn.Name]}"
                 let output= $"{row.[(int)IOColumn.Input]}" |> autoFillAddress
                 let func  = $"{row.[(int)IOColumn.Func]}"
@@ -98,42 +98,44 @@ module ImportIOTable =
                 let conds = sys.SystemConditions.Where(fun w->w.ConditionType = cType)
                 match conds.TryFind(fun f -> f.Name = name) with
                 | Some cond -> cond.InAddress <- output
-                               functionUpdate (cond.Name, func, cond.Funcs, tableIO, false)
-                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", 0, 0u)
+                               functionUpdate (cond.Name, func, cond.Funcs, tableIO, false, page)
+                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", page, 0u)
 
-          
-            let tableIO = dt
-            for row in tableIO.Rows do
-                let case = $"{row.[(int)IOColumn.Case]}"
-                if(trimSpace $"{row.[(int)IOColumn.Name]}" <> ""//name 존재시만
-                && case <> $"{IOColumn.Case}") //header 스킵
-                then
-                    match TextToXlsType(case) with
-                    | XlsAddress        -> updateDev(row, tableIO)
-                    | XlsVariable       -> updateVar(row, tableIO)
+            dts |>Seq.iter(fun (page, dt) ->
+                let tableIO = dt
+                for row in tableIO.Rows do
+                    let case = $"{row.[(int)IOColumn.Case]}"
+                    if(trimSpace $"{row.[(int)IOColumn.Name]}" <> ""//name 존재시만
+                    && case <> $"{IOColumn.Case}") //header 스킵
+                    then
+                        match TextToXlsType(case) with
+                        | XlsAddress        -> updateDev(row, tableIO, page)
+                        | XlsVariable       -> updateVar(row, tableIO, page)
 
-                    | XlsAutoBTN        -> updateBtn  (row, BtnType.DuAutoBTN             , tableIO)
-                    | XlsManualBTN      -> updateBtn  (row, BtnType.DuManualBTN           , tableIO)
-                    | XlsDriveBTN       -> updateBtn  (row, BtnType.DuDriveBTN            , tableIO)
-                    | XlsStopBTN        -> updateBtn  (row, BtnType.DuStopBTN             , tableIO)
-                    | XlsEmergencyBTN   -> updateBtn  (row, BtnType.DuEmergencyBTN        , tableIO)
-                    | XlsTestBTN        -> updateBtn  (row, BtnType.DuTestBTN             , tableIO)
-                    | XlsReadyBTN       -> updateBtn  (row, BtnType.DuReadyBTN            , tableIO)
-                    | XlsClearBTN       -> updateBtn  (row, BtnType.DuClearBTN            , tableIO)
-                    | XlsHomeBTN        -> updateBtn  (row, BtnType.DuHomeBTN             , tableIO)
+                        | XlsAutoBTN        -> updateBtn  (row, BtnType.DuAutoBTN             , tableIO, page)
+                        | XlsManualBTN      -> updateBtn  (row, BtnType.DuManualBTN           , tableIO, page)
+                        | XlsDriveBTN       -> updateBtn  (row, BtnType.DuDriveBTN            , tableIO, page)
+                        | XlsStopBTN        -> updateBtn  (row, BtnType.DuStopBTN             , tableIO, page)
+                        | XlsEmergencyBTN   -> updateBtn  (row, BtnType.DuEmergencyBTN        , tableIO, page)
+                        | XlsTestBTN        -> updateBtn  (row, BtnType.DuTestBTN             , tableIO, page)
+                        | XlsReadyBTN       -> updateBtn  (row, BtnType.DuReadyBTN            , tableIO, page)
+                        | XlsClearBTN       -> updateBtn  (row, BtnType.DuClearBTN            , tableIO, page)
+                        | XlsHomeBTN        -> updateBtn  (row, BtnType.DuHomeBTN             , tableIO, page)
 
-                    | XlsAutoLamp       -> updateLamp (row, LampType.DuAutoLamp       , tableIO)
-                    | XlsManualLamp     -> updateLamp (row, LampType.DuManualLamp     , tableIO)
-                    | XlsDriveLamp      -> updateLamp (row, LampType.DuDriveLamp      , tableIO)
-                    | XlsStopLamp       -> updateLamp (row, LampType.DuStopLamp       , tableIO)
-                    | XlsEmergencyLamp  -> updateLamp (row, LampType.DuEmergencyLamp  , tableIO)
-                    | XlsTestLamp       -> updateLamp (row, LampType.DuTestDriveLamp  , tableIO)
-                    | XlsReadyLamp      -> updateLamp (row, LampType.DuReadyLamp      , tableIO)
-                    | XlsIdleLamp       -> updateLamp (row, LampType.DuIdleLamp       , tableIO)
+                        | XlsAutoLamp       -> updateLamp (row, LampType.DuAutoLamp       , tableIO, page)
+                        | XlsManualLamp     -> updateLamp (row, LampType.DuManualLamp     , tableIO, page)
+                        | XlsDriveLamp      -> updateLamp (row, LampType.DuDriveLamp      , tableIO, page)
+                        | XlsStopLamp       -> updateLamp (row, LampType.DuStopLamp       , tableIO, page)
+                        | XlsEmergencyLamp  -> updateLamp (row, LampType.DuEmergencyLamp  , tableIO, page)
+                        | XlsTestLamp       -> updateLamp (row, LampType.DuTestDriveLamp  , tableIO, page)
+                        | XlsReadyLamp      -> updateLamp (row, LampType.DuReadyLamp      , tableIO, page)
+                        | XlsIdleLamp       -> updateLamp (row, LampType.DuIdleLamp       , tableIO, page)
 
-                    | XlsConditionReady -> updateCondition (row, ConditionType.DuReadyState , tableIO)
-                    | XlsConditionDrive -> updateCondition (row, ConditionType.DuDriveState , tableIO)
+                        | XlsConditionReady -> updateCondition (row, ConditionType.DuReadyState , tableIO, page)
+                        | XlsConditionDrive -> updateCondition (row, ConditionType.DuDriveState , tableIO, page)
        
+            )
+            
         with ex ->  failwithf  $"{ex.Message}"
 
 

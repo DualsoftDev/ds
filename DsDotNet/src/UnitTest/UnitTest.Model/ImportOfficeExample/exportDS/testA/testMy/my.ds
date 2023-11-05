@@ -1,51 +1,17 @@
 [sys ip = localhost] my = {
-    [flow] STN01 = {
-        WORK2 => WORK3 => WORK1 => WORK2;
-        WORK1 = {
-            "STN01_Pin_+" > "STN01_Pin_-";
-        }
-    }
     [flow] STN01_UsingLIB = {
         WORK1 = {
             "STN01_UsingLIB_1_-", "STN01_UsingLIB_2_+" > "STN01_UsingLIB_2_-";
-            "STN01_UsingLIB_1_+" > "STN01_UsingLIB_2_+";
-            "STN01_UsingLIB_1_+" > "STN01_UsingLIB_1_-";
-        }
-    }
-    [flow] STN01_UsingLIB2 = {
-        WORK2 => WORK1 => WORK2;
-        WORK1 = {
-            "STN01_UsingLIB2_1_-", "STN01_UsingLIB2_2_+" > "STN01_UsingLIB2_2_-";
-            "STN01_UsingLIB2_1_+" > "STN01_UsingLIB2_2_+";
-            "STN01_UsingLIB2_1_+" > "STN01_UsingLIB2_1_-";
-        }
-        WORK2 = {
-            "STN01_UsingLIB2_4_+", "STN01_UsingLIB2_3_-" > "STN01_UsingLIB2_4_-";
-            "STN01_UsingLIB2_3_+" > "STN01_UsingLIB2_3_-";
-            "STN01_UsingLIB2_3_+" > "STN01_UsingLIB2_4_+";
+            "STN01_UsingLIB_1_FWD[P]" > "STN01_UsingLIB_2_+";
+            "STN01_UsingLIB_1_FWD[P]" > "STN01_UsingLIB_1_-";
         }
     }
     [jobs] = {
-        "STN01_Pin_+" = { STN01_Pin."+"(I625.1, O625.1); }
-        "STN01_Pin_-" = { STN01_Pin."-"(I625.2, O625.2); }
-        "STN01_UsingLIB_1_+" = { STN01_UsingLIB_1."+"(I625.11, O625.11); }
-        "STN01_UsingLIB_1_-" = { STN01_UsingLIB_1."-"(I625.12, O625.12); }
-        "STN01_UsingLIB_2_+" = { STN01_UsingLIB_2."+"(I625.13, O625.13); }
-        "STN01_UsingLIB_2_-" = { STN01_UsingLIB_2."-"(I625.14, O625.14); }
-        "STN01_UsingLIB2_1_+" = { STN01_UsingLIB2_1."+"(I625.3, O625.3); }
-        "STN01_UsingLIB2_1_-" = { STN01_UsingLIB2_1."-"(I625.4, O625.4); }
-        "STN01_UsingLIB2_2_+" = { STN01_UsingLIB2_2."+"(I625.5, O625.5); }
-        "STN01_UsingLIB2_2_-" = { STN01_UsingLIB2_2."-"(I625.6, O625.6); }
-        "STN01_UsingLIB2_3_+" = { STN01_UsingLIB2_3."+"(I625.7, O625.7); }
-        "STN01_UsingLIB2_4_+" = { STN01_UsingLIB2_4."+"(I625.9, O625.9); }
-        "STN01_UsingLIB2_3_-" = { STN01_UsingLIB2_3."-"(I625.8, O625.8); }
-        "STN01_UsingLIB2_4_-" = { STN01_UsingLIB2_4."-"(I625.10, O625.10); }
+        "STN01_UsingLIB_1_FWD[P]" = { STN01_UsingLIB_1."FWD[P]"(_, _); }
+        "STN01_UsingLIB_1_-" = { STN01_UsingLIB_1."-"(_, _); }
+        "STN01_UsingLIB_2_+" = { STN01_UsingLIB_2."+"(_, _); }
+        "STN01_UsingLIB_2_-" = { STN01_UsingLIB_2."-"(_, _); }
     }
-    [device file="../lib/dev.ds"] STN01_Pin; 
     [device file="./DS_Library.ds"] STN01_UsingLIB_1; 
     [device file="./DS_Library.ds"] STN01_UsingLIB_2; 
-    [device file="./DS_Library.ds"] STN01_UsingLIB2_1; 
-    [device file="./DS_Library.ds"] STN01_UsingLIB2_2; 
-    [device file="./DS_Library.ds"] STN01_UsingLIB2_3; 
-    [device file="./DS_Library.ds"] STN01_UsingLIB2_4; 
 }

@@ -11,6 +11,7 @@ open Engine.Import.Office
 open Engine.Core
 open System.Runtime.CompilerServices
 open System
+open System.Data
 
 [<AutoOpen>]
 module ImportU =
@@ -517,8 +518,24 @@ module ImportU =
                             )
         [<Extension>]
         static member UpdateActionIO (doc:pptDoc, sys:DsSystem) =
-            let table = doc.GetTable  (System.Enum.GetValues(typedefof<IOColumn>).Length)
-            ApplyIO (sys, table)
+            let pageTables = doc.GetTables (System.Enum.GetValues(typedefof<IOColumn>).Length)
+
+            pageTables
+            |> Seq.collect (fun (pageIndex, table) ->
+                table.Rows.Cast<DataRow>().ToArray().Where(fun r-> r.ItemArray[(int)IOColumn.Case] <> $"{IOColumn.Case}")// head row 제외
+                |> Seq.map (fun row -> pageIndex, row)
+            )
+            |> Seq.groupBy (fun (_, row) ->
+                row.ItemArray.[(int)IOColumn.Name].ToString()
+            )
+            |> Seq.iter (fun (name, rows) ->
+                let rowsWithIndexes = rows |> Seq.toArray
+                if rowsWithIndexes.Length > 1 && name <> "" then
+                    // Handle the exception for duplicate names here
+                    failwithf "Duplicate name: %s" name
+            )
+
+            ApplyIO (sys, pageTables)
 
         [<Extension>]
         static member GetLoadNodes (doc:pptDoc) =

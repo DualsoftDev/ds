@@ -47,11 +47,11 @@ module CoreModule =
     type LoadedSystem (loadedSystem: DsSystem, param: DeviceLoadParameters) =
         inherit FqdnObject(param.LoadedName, param.ContainerSystem)
         let mutable loadedName = param.LoadedName // 로딩 주체에 따라 런타임에 변경
-        //do  //test ahn
-            //if param.AbsoluteFilePath |> PathManager.isPathRooted
-            //then raise (new ArgumentException($"The AbsoluteFilePath must be PathRooted ({param.AbsoluteFilePath})"))
-            //if not(param.RelativeFilePath |> PathManager.isPathRooted)
-            //then raise (new ArgumentException($"The RelativeFilePath must be not PathRooted ({param.AbsoluteFilePath})"))
+        do  
+            if not(param.AbsoluteFilePath |> DsFile |> PathManager.isPathRooted)
+            then raise (new ArgumentException($"The AbsoluteFilePath must be PathRooted ({param.AbsoluteFilePath})"))
+            if param.RelativeFilePath  |> DsFile |> PathManager.isPathRooted
+            then raise (new ArgumentException($"The RelativeFilePath must be not PathRooted ({param.RelativeFilePath})"))
 
         interface ISystem 
      
@@ -272,7 +272,6 @@ module CoreModule =
         //CPU 생성시 할당됨 OutTag
         member val OutTag = getNull<ITag>() with get, set
 
-
     /// 자신을 export 하는 관점에서 본 api's.  Interface 정의.   [interfaces] = { "+" = { F.Vp ~ F.Sp } }
     and ApiItem private (name:string, system:DsSystem) =
         (* createFqdnObject : system 이 다른 system 에 포함되더라도, name component 를 더 이상 확장하지 않도록 cut *)
@@ -281,6 +280,7 @@ module CoreModule =
 
         member _.Name = name
         member _.System = system
+        member _.ActionType:ApiActionType = getApiActionType name
         member val TXs = createQualifiedNamedHashSet<Real>()
         member val RXs = createQualifiedNamedHashSet<Real>()
         member val Xywh:Xywh = null with get, set

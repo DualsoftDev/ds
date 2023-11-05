@@ -253,7 +253,6 @@ module PPTObjectModule =
             |> Seq.map(fun f->  GetBracketsReplaceName("["+f), GetSquareBrackets("["+f, true))
 
         do
-            name <-  GetBracketsReplaceName(shape.InnerText)  |> trimSpace
 
             nodeType <-
                 if(shape.CheckRectangle())
@@ -277,6 +276,10 @@ module PPTObjectModule =
                 elif(shape.CheckBevelShapeRound())   then BUTTON
                 elif(shape.CheckCondition())         then CONDITION
                 else  shape.ErrorName(ErrID._1, iPage)
+            
+            if nodeType = CALL
+            then name <-  GetHeadBracketRemoveName(shape.InnerText)  |> trimSpace
+            else name <-  GetBracketsReplaceName(shape.InnerText)  |> trimSpace
 
             nameCheck (shape, nodeType, iPage)
 

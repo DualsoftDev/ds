@@ -7,7 +7,7 @@
 		<LangVersion>7.0</LangVersion>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
-        <AssemblyVersion>1.0.8</AssemblyVersion>
+        <AssemblyVersion>1.0.11</AssemblyVersion>
       
     </PropertyGroup>
 

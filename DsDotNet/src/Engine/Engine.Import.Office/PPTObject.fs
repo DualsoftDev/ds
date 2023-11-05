@@ -259,8 +259,8 @@ module PPTObjectModule =
             nodeType <-
                 if(shape.CheckRectangle())
                 then
-                    if   name.Contains(".") then REALExF
-                    elif name.Contains("$") then REALExS
+                    if   shape.InnerText.Contains(".") then REALExF
+                    elif shape.InnerText.Contains("$") then REALExS
                     else REAL
                 elif(shape.CheckHomePlate())
                 then
@@ -268,10 +268,10 @@ module PPTObjectModule =
                     then IF_DEVICE else IF_LINK
 
                 elif(shape.CheckFoldedCornerPlate())
-                then
-                    if name.Contains("/")
-                    then OPEN_EXSYS_CALL
-                    else OPEN_EXSYS_LINK
+                then OPEN_EXSYS_CALL
+                    //if shape.InnerText.Contains("/")
+                    //then OPEN_EXSYS_CALL
+                    //else OPEN_EXSYS_LINK //test ahn link 통신 처리 대응
                 elif(shape.CheckFoldedCornerRound()) then COPY_DEV
                 elif(shape.CheckEllipse())           then CALL
                 elif(shape.CheckBevelShapePlate())   then LAMP

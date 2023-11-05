@@ -37,3 +37,6 @@ Grammar/CsParser/bin/
 /DsDotNet/src/UnitTest/UnitTest.Model/test-origin-config.json
 /DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/test-model-config.json
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/**/*.json
+/DsDotNet/Apps/OfficeAddOn/PowerPointAddIn For Dualsoft Setup/PowerPointAddIn For Dualsoft Setup.msi
+/DsDotNet/Apps/OfficeAddOn/PowerPointAddIn For Dualsoft Setup/PowerPointAddInSetup.vdproj
+/DsDotNet/Apps/OfficeAddOn/PowerPointAddIn For Dualsoft Setup/PowerPointAddIn/*

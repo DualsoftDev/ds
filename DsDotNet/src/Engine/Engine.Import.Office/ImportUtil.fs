@@ -216,9 +216,10 @@ module ImportU =
             |> Seq.filter(fun page -> page.IsUsing)
             |> Seq.iter  (fun page ->
                 let pageNum  = page.PageNum
+                
                 let sysName, flowName = GetSysNFlow(doc.Name, page.Title, page.PageNum)
                 if flowName.Contains(".")
-                then Office.ErrorPPT(ErrorCase.Name, ErrID._19, page.Title, page.PageNum, 0u, "")
+                then Office.ErrorPPT(ErrorCase.Name, ErrID._20, page.Title, page.PageNum, 0u, "")
                 if checkName.Add(flowName) |> not
                 then Office.ErrorPPT(ErrorCase.Name, ErrID._25, page.Title, page.PageNum, 0u, "")
 
@@ -447,25 +448,15 @@ module ImportU =
             doc.Nodes
             |> Seq.iter(fun node ->
                     let flow = dicFlow.[node.PageNum]
-                    let dicQualifiedNameSegs  = dicVertex.Values.Select(fun seg -> seg.QualifiedName, seg) |> dict
-                    let getJobName(flowName:string, safety:string) =
-                        $"{flowName}_{TrimSpace (safety.Split('$').[0])}_{TrimSpace(safety.Split('$').[1])}"
-
+                    let dicQualifiedNameSegs  = dicVertex.Values.OfType<CallDev>().Select(fun call -> call.CallTargetJob.Name, call) |> dict
+                    
                     let safeName(safety:string) =
-                        if safety.Contains("$") //call
-                        then //call은 ppt 상에서는 같은 부모끼리만 가능
-                            match dicVertex.[node.Key].Parent with
-                            | DuParentFlow f -> sprintf "%s.%s.%s"    mySys.Name f.Name (getJobName(f.Name, safety))
-                            | DuParentReal r -> sprintf "%s.%s.%s.%s" mySys.Name flow.Name r.Name (getJobName(flow.Name, safety))
-
-                        elif safety.Contains(".") //RealEx
-                        then sprintf "%s.%s" mySys.Name safety
-                        else sprintf "%s.%s.%s" mySys.Name flow.Name safety //Real
+                         $"{flow.Name}_{safety.Split('.')[0]}_{ safety.Split('.')[1]}" 
 
                     node.Safeties   //세이프티 입력 미등록 이름오류 체크
                     |> Seq.map(fun safe ->  safeName(safe))
                     |> Seq.iter(fun safeFullName ->
-                            if(dicQualifiedNameSegs.ContainsKey safeFullName|>not)
+                            if not(mySys.Jobs.Select(fun f->f.Name).Contains safeFullName)
                             then Office.ErrorName(node.Shape, ErrID._28, node.PageNum))
 
                     node.Safeties
@@ -475,9 +466,9 @@ module ImportU =
                             match  dicVertex.[node.Key] |> box with
                             | :? ISafetyConditoinHolder as holder ->
                                     match safeCondV with
-                                    | :? Real as r -> holder.SafetyConditions.Add( DuSafetyConditionReal (r)) |>ignore
-                                    | :? RealExF as ex -> holder.SafetyConditions.Add(DuSafetyConditionRealExFlow (ex))  |>ignore
-                                    | :? CallSys as ex -> holder.SafetyConditions.Add(DuSafetyConditionRealExSystem (ex))  |>ignore
+                                    //| :? Real as r -> holder.SafetyConditions.Add( DuSafetyConditionReal (r)) |>ignore
+                                    //| :? RealExF as ex -> holder.SafetyConditions.Add(DuSafetyConditionRealExFlow (ex))  |>ignore
+                                    //| :? CallSys as ex -> holder.SafetyConditions.Add(DuSafetyConditionRealExSystem (ex))  |>ignore
                                     | :? CallDev as c -> holder.SafetyConditions.Add(DuSafetyConditionCall (c)) |>ignore
                                     | _ -> failwithlog "Error"
                             | _ -> failwithlog "Error"

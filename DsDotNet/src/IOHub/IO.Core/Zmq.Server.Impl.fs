@@ -69,7 +69,7 @@ module internal ZmqServerImplModule =
         | AddressPattern ap ->
             let offset = ap.Offset
             let bufferManager = ap.IOFileSpec.StreamManager :?> StreamManager
-            bufferManager.VerifyIndices(clientRequstInfo, ap.MemoryType, [|offset|])
+            bufferManager.VerifyOffsets(clientRequstInfo, ap.MemoryType, [|offset|])
 
             match ap.MemoryType with
             | MemoryType.Bit   -> bufferManager.readBit(offset) :> obj
@@ -95,7 +95,7 @@ module internal ZmqServerImplModule =
             let ap = addressPattern
             let offset = ap.Offset
             let bufferManager = ap.IOFileSpec.StreamManager :?> StreamManager
-            bufferManager.VerifyIndices(cri, ap.MemoryType, [|offset|])
+            bufferManager.VerifyOffsets(cri, ap.MemoryType, [|offset|])
 
             let mutable objValue:obj = null
             match ap.MemoryType with
@@ -126,23 +126,23 @@ module internal ZmqServerImplModule =
         let Values      = ArgGroup3
 
 
-    let fetchBufferManagerAndIndices (isBitIndex:bool) (multiMessages:NetMQFrame[]) =
+    let fetchBufferManagerAndOffsets (isBitIndex:bool) (multiMessages:NetMQFrame[]) =
         let bufferManager =
             let name = multiMessages[TagKindName].ConvertToString().ToLower()
             streamManagers[name]
-        let indices = ByteConverter.BytesToTypeArray<int>(multiMessages[Offsets].Buffer)
-        for byteIndex in indices |> map (fun n -> if isBitIndex then n / 8 else n) do
+        let offsets = ByteConverter.BytesToTypeArray<int>(multiMessages[Offsets].Buffer)
+        for byteIndex in offsets |> map (fun n -> if isBitIndex then n / 8 else n) do
             if bufferManager.FileStream.Length < byteIndex then
                 failwithf($"Invalid address: {byteIndex}")
-        bufferManager, indices
+        bufferManager, offsets
 
-    let fetchForRead = fetchBufferManagerAndIndices false
-    let fetchForReadBit = fetchBufferManagerAndIndices true
+    let fetchForRead = fetchBufferManagerAndOffsets false
+    let fetchForReadBit = fetchBufferManagerAndOffsets true
 
     let fetchForWrite (multiMessages:NetMQFrame[]) =
-        let bm, indices = fetchForRead multiMessages
+        let bm, offsets = fetchForRead multiMessages
         let values = multiMessages[Values].Buffer
-        bm, indices, values
+        bm, offsets, values
 
     /// NetMQ 의 ConvertToString() bug 대응 용 코드.  문자열의 맨 마지막에 '\0' 이 붙는 경우 강제 제거.
     let removeTrailingNullChar (str:string) =

@@ -260,11 +260,11 @@ module internal ZmqBufferManagerExtension =
                 raiseWithClientId clientRequstInfo ($"Invalid offset.  non-negative value required : {byteOffset}")
             if byteOffset >= length then
                 raiseWithClientId clientRequstInfo ($"Invalid offset: {byteOffset}.  Exceed length limit {length})")
-        member x.VerifyIndices(clientRequstInfo:ClientRequestInfo, memoryType:MemoryType, offsets:int[]) =
+        member x.VerifyOffsets(clientRequstInfo:ClientRequestInfo, memoryType:MemoryType, offsets:int[]) =
             offsets |> iter (fun offset -> x.VerifyIndices(clientRequstInfo, memoryType, offset))
 
         member x.Verify(clientRequstInfo:ClientRequestInfo, memoryType:MemoryType, indices:int[], numValues:int) =
-            x.VerifyIndices (clientRequstInfo, memoryType, indices)
+            x.VerifyOffsets (clientRequstInfo, memoryType, indices)
             if indices.Length <> numValues then
                 raiseWithClientId clientRequstInfo $"The number of indices and values should be the same."
             

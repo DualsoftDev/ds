@@ -127,75 +127,75 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                 | 2 ->
                     match command with
                     | "rx" ->
-                        let bm, indices = fetchForReadBit mms
-                        bm.VerifyIndices(cri, MemoryType.Bit, indices |> map (fun n -> n / 8))
-                        let result = bm.readBits indices
+                        let bm, offsets = fetchForReadBit mms
+                        bm.VerifyOffsets(cri, MemoryType.Bit, offsets)
+                        let result = bm.readBits offsets
                         ReadResponseOK(cri, MemoryType.Bit, result)
                     | "rb" ->
-                        let bm, indices = fetchForRead mms
-                        bm.VerifyIndices(cri, MemoryType.Byte, indices)
-                        let result = bm.readU8s indices
+                        let bm, offsets = fetchForRead mms
+                        bm.VerifyOffsets(cri, MemoryType.Byte, offsets)
+                        let result = bm.readU8s offsets
                         ReadResponseOK(cri, MemoryType.Byte, result)
 
                     | "rw" ->
-                        let bm, indices = fetchForRead mms
-                        bm.VerifyIndices(cri, MemoryType.Word, indices |> map (fun n -> n * 2))
-                        let result = bm.readU16s indices
+                        let bm, offsets = fetchForRead mms
+                        bm.VerifyOffsets(cri, MemoryType.Word, offsets)
+                        let result = bm.readU16s offsets
                         ReadResponseOK(cri, MemoryType.Word, result)
 
                     | "rd" ->
-                        let bm, indices = fetchForRead mms
-                        bm.VerifyIndices(cri, MemoryType.DWord, indices |> map (fun n -> n * 4))
-                        let result = bm.readU32s indices
+                        let bm, offsets = fetchForRead mms
+                        bm.VerifyOffsets(cri, MemoryType.DWord, offsets)
+                        let result = bm.readU32s offsets
                         ReadResponseOK(cri, MemoryType.DWord, result)
 
                     | "rl" ->
-                        let bm, indices = fetchForRead mms
-                        bm.VerifyIndices(cri, MemoryType.LWord, indices |> map (fun n -> n * 8))
-                        let result = bm.readU64s indices
+                        let bm, offsets = fetchForRead mms
+                        bm.VerifyOffsets(cri, MemoryType.LWord, offsets)
+                        let result = bm.readU64s offsets
                         ReadResponseOK(cri, MemoryType.LWord, result)
                     | _ ->
                         StringResponseNG(cri, $"ERROR: {command}")
                 | 3 ->
                     match command with
                     | "wx" ->
-                        let bm, indices, byteValues = fetchForWrite mms
+                        let bm, offsets, byteValues = fetchForWrite mms
                         let values = byteValues |> map (fun b -> b <> 0uy)
-                        bm.Verify(cri, MemoryType.Bit, indices |> map (fun n -> n / 8), values.Length)
+                        bm.Verify(cri, MemoryType.Bit, offsets, values.Length)
 
-                        for i in [0..indices.Length-1] do
-                            bm.writeBit (cri, indices[i], values[i])
+                        for i in [0..offsets.Length-1] do
+                            bm.writeBit (cri, offsets[i], values[i])
 
                         bm.Flush()
-                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, MemoryType.Bit, indices, values))
+                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, MemoryType.Bit, offsets, values))
                     | "wb" ->
-                        let bm, indices, byteValues = fetchForWrite mms
-                        bm.Verify(cri, MemoryType.Byte, indices, byteValues.Length / 1)
-                        Array.zip indices byteValues |> bm.writeU8s cri
-                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, MemoryType.Byte, indices, byteValues))
+                        let bm, offsets, byteValues = fetchForWrite mms
+                        bm.Verify(cri, MemoryType.Byte, offsets, byteValues.Length)
+                        Array.zip offsets byteValues |> bm.writeU8s cri
+                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, MemoryType.Byte, offsets, byteValues))
 
                     | "ww" ->
-                        let bm, indices, byteValues = fetchForWrite mms
+                        let bm, offsets, byteValues = fetchForWrite mms
                         let values = ByteConverter.BytesToTypeArray<uint16>(byteValues)
-                        bm.Verify(cri, MemoryType.Word, indices |> map (fun n -> n * 2), values.Length)
+                        bm.Verify(cri, MemoryType.Word, offsets, values.Length)
 
-                        Array.zip indices values |> bm.writeU16s cri
-                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, MemoryType.Word, indices, values))
+                        Array.zip offsets values |> bm.writeU16s cri
+                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, MemoryType.Word, offsets, values))
 
                     | "wd" ->
-                        let bm, indices, byteValues = fetchForWrite mms
+                        let bm, offsets, byteValues = fetchForWrite mms
                         let values = ByteConverter.BytesToTypeArray<uint32>(byteValues)
-                        bm.Verify(cri, MemoryType.DWord, indices |> map (fun n -> n * 4), values.Length)
-                        Array.zip indices values |> bm.writeU32s cri
-                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, MemoryType.DWord, indices, values))
+                        bm.Verify(cri, MemoryType.DWord, offsets, values.Length)
+                        Array.zip offsets values |> bm.writeU32s cri
+                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, MemoryType.DWord, offsets, values))
 
                     | "wl" ->
-                        let bm, indices, byteValues = fetchForWrite mms
+                        let bm, offsets, byteValues = fetchForWrite mms
                         let values = ByteConverter.BytesToTypeArray<uint64>(byteValues)
-                        bm.Verify(cri, MemoryType.LWord, indices |> map (fun n -> n * 8), values.Length)
+                        bm.Verify(cri, MemoryType.LWord, offsets, values.Length)
 
-                        Array.zip indices values |> bm.writeU64s cri
-                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, MemoryType.LWord, indices, values))
+                        Array.zip offsets values |> bm.writeU64s cri
+                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, MemoryType.LWord, offsets, values))
                     | _ ->
                         StringResponseNG(cri, $"ERROR: {command}")
 

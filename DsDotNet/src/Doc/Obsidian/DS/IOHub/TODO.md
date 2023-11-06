@@ -1,0 +1,3 @@
+- Counter / Timer 에 대한 persistency
+- x64/x86 을 제외한 나머지에 대한 endian 고려 (Arm architecture) 
+- 

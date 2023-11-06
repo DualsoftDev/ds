@@ -1,0 +1,2 @@
+- [[IO Spec]]에 정의된 [[IO File]] 들을 관리
+- IO 주체의 read/write request 에 대응

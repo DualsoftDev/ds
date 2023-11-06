@@ -4,19 +4,43 @@
     "type": "split",
     "children": [
       {
-        "id": "901f8b03715ad92b",
+        "id": "8d6120bd15656bb5",
         "type": "tabs",
         "children": [
           {
-            "id": "290ff587bc6d000e",
+            "id": "10c6c79731282a1b",
             "type": "leaf",
             "state": {
-              "type": "empty",
+              "type": "mindmap",
               "state": {}
             }
           },
           {
-            "id": "a4c14c86b787d344",
+            "id": "c79b8507443fb391",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "IOHub/IO Spec/IO Spec.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "de65a5fbc438676c",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "IOHub/IO Spec/IO Spec.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "b4ee18f6ca588f8a",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -28,7 +52,7 @@
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -155,11 +179,25 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "a4c14c86b787d344",
+  "active": "b4ee18f6ca588f8a",
   "lastOpenFiles": [
-    "Untitled.canvas",
-    "2023-11-06.md",
+    "IOHub/PLC, Field IO.md",
+    "IOHub/Architecture.canvas",
+    "IOHub/Client.md",
+    "IOHub/Notification.md",
+    "IOHub/DS runtime.md",
+    "IOHub/Server.md",
     "IOHub/Requirements.md",
+    "IOHub/0. Index.md",
+    "IOHub/IO Spec/IO settings json.md",
+    "IOHub/IO Spec/IO Spec.md",
+    "IOHub/TODO.md",
+    "IOHub/IO Spec",
+    "IOHub/ZMQ socket.md",
+    "PLC/Field IO.md",
+    "PLC",
+    "clients.md",
+    "2023-11-06.md",
     "IOHub"
   ]
 }

@@ -3,16 +3,16 @@
 	- Process (Client 구동 process 와 Server 구동 process 는 독립)
 	- Network (clients 및 server 는 서로 다른 ip 상에서 구동 가능)
 	- Language (C#/F#/C++/...)
-	- 1 server, n clients (n >= 0)
+	- 1 [[Server]], n [[client]]s (n >= 0)
 - Locking mechanism
-	- 다중 client 가 write request 시, 순서에 따른 lock mechanism 제공
+	- 다중 [[Client]] 가 write request 시, 순서에 따른 lock mechanism 제공
 - Persistency
 	- File 에 write 되어 system crash 에 대응해야 한다.
 - Efficiency
 	- 변경 tag 감지를 위한 file scan 허용 안함
-		- Push 기반 변경 notification
+		- Push 기반 변경 [[Notification]]
 	- Server 생성 process 는 socket 을 통하지 않고 직접 read/write
 - Openess to third party vendor
 	- 임의의 third party vendor 의 IO read/write 기능 제공
 - Change notification
-	- 변경 주체 (client or server) 가 변경한 내용은, 변경 주체를 제외한 나머지 주체에게 notification 으로 제공되어야 한다.
+	- 변경 주체 (client or server) 가 변경한 내용은, 변경 주체를 제외한 나머지 주체에게 [[Notification]] 으로 제공되어야 한다.

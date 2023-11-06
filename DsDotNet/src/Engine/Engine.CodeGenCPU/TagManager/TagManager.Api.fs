@@ -7,20 +7,17 @@ open System
 [<AutoOpen>]
 module ApiTagManagerModule =
     /// ApiItem Manager Manager : ApiItem Tag  를 관리하는 컨테이어
-    type ApiItemManager (apiItem:ApiItem, activeSys:DsSystem)  =
+    type ApiItemManager (apiItem:ApiItem)  =
         let stg = apiItem.System.TagManager.Storages
 
-        let cpv2 (sys:DsSystem) (apiItemTag:ApiItemTag) =
+        let cpv (apiItemTag:ApiItemTag) =
             let n = Enum.GetName(typeof<ApiItemTag>, apiItemTag)
-            let name = $"{sys.Name}_{apiItem.Name}_{n}"
-            let pv:IStorage = createPlanVar stg name DuBOOL true apiItem (int apiItemTag) sys 
+            let name = $"{apiItem.System.Name}_{apiItem.Name}_{n}"
+            let pv:IStorage = createPlanVar stg name DuBOOL true apiItem (int apiItemTag) apiItem.System 
             pv :?> PlanVar<bool>
-        /// create plan var
-        let cpv = cpv2 apiItem.System
 
         let ps = cpv ApiItemTag.planSet
-        let pr = cpv ApiItemTag.planRst
-        let pe = cpv2 activeSys ApiItemTag.planEnd
+        let pe = cpv ApiItemTag.planEnd
 
         let txerrtrendout     = cpv ApiItemTag.txErrTrendOut  
         let txerrovertime     = cpv ApiItemTag.txErrTimeOver  
@@ -57,7 +54,6 @@ module ApiTagManagerModule =
         ///Timer time out
         member _.TOUT   = timerTimeOutBit
         member _.PS   = ps
-        member _.PR   = pr
         member _.PE   = pe
 
         member _.TXErrTrendOut    = txerrtrendout

@@ -110,7 +110,7 @@ module TagKindModule =
     /// 12000 ~ 12999
     type ApiItemTag =
     |planSet                   = 12000
-    |planRst                   = 12001
+    //|planRst                   = 12001  //not use
     |planEnd                   = 12002
     |txErrTrendOut             = 12003
     |txErrTimeOver             = 12004

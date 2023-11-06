@@ -45,7 +45,6 @@ module ConvertCoreExt =
 
     type ApiItem with
         member a.PS     = getAM(a).PS
-        member a.PR     = getAM(a).PR
         member a.PE     = getAM(a).PE
         member a.TOUT   = getAM(a).TOUT   
         member a.TXErrTrendOut   = getAM(a).TXErrTrendOut
@@ -146,10 +145,7 @@ module ConvertCoreExt =
         member x.GetPSs(r:Real) =
             x.ApiItems.Where(fun api-> api.TXs.Contains(r))
                       .Select(fun api -> api.PS)
-        //자신이 사용된 API Plan Rst Send
-        member x.GetPRs(r:Real) =
-            x.ApiItems.Where(fun api-> api.TXs.Contains(r))
-                      .Select(fun api -> api.PR)
+    
 
         member x.GetReadAbleTags() =
             SystemTag.GetValues(typeof<SystemTag>)

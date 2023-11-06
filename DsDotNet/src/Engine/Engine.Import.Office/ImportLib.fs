@@ -13,6 +13,7 @@ open Engine.Parser.FS
 module ImportLib =
 
     let loadingLibray(pathPPT:string)=
+        libDevOrgSys.Clear()
         let doc = pptDoc(pathPPT, None, Office.Open(pathPPT))
         let loadNodes = doc.GetLoadNodes()
         let loadingDeviceFromLib(devInfo:DevInfo seq)  = 

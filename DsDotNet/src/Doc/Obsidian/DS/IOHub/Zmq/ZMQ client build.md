@@ -9,4 +9,6 @@
 # apt install libzmq3-dev
 # g++ CppClient.cpp -o cppClient -lzmq
 ```
-- 
+### VC++ build
+- vcpkg 를 이용
+- cppzmq 설치

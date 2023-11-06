@@ -18,7 +18,7 @@ module internal ZmqServerImplModule =
 
     /// tag 별 address 정보를 저장하는 dictionary
     let tagDic = new Dictionary<string, AddressSpec>()
-    let clients = ResizeArray<ClientIdentifier>()
+    let mutable clients:ClientIdentifier list = []
     let mutable serverSocket:RouterSocket = null
 
     let getVendor (addr:string) : (VendorSpec * string) =

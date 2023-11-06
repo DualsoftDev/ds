@@ -15,7 +15,9 @@ module ZmqTestModule =
             key <- Console.ReadLine()
             if key <> null then
                 match key with
-                | "q" | "Q" -> key <- null
+                | "q" | "Q" ->
+                    dispose client
+                    key <- null
                 | "trx" ->   // test read bits
                     match client.ReadBits("p/o", testReadOffsets) with
                     | Ok bytes ->

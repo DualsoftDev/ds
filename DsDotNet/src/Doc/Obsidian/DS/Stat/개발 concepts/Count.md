@@ -1,0 +1,2 @@
+- 발생 횟수
+- Rising edge 기준

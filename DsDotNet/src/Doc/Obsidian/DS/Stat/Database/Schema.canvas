@@ -1,0 +1,12 @@
+{
+	"nodes":[
+		{"id":"ca4fa6fc75c028d7","x":-880,"y":-300,"width":660,"height":300,"type":"file","file":"Stat/Database/Tables/Storage.md"},
+		{"id":"98b2d898533b265b","x":-40,"y":-300,"width":580,"height":260,"type":"file","file":"Stat/Database/Tables/Log.md"},
+		{"id":"e91fc87aed67721a","x":-40,"y":29,"width":580,"height":271,"type":"file","file":"Stat/Database/Tables/Property.md"},
+		{"id":"fa6fe62c711df343","x":-890,"y":80,"width":680,"height":251,"type":"file","file":"Stat/Database/Tables/TagKind.md"}
+	],
+	"edges":[
+		{"id":"7d3d52d481519d17","fromNode":"ca4fa6fc75c028d7","fromSide":"bottom","toNode":"fa6fe62c711df343","toSide":"top"},
+		{"id":"4a1af4b5e55be22e","fromNode":"98b2d898533b265b","fromSide":"left","toNode":"ca4fa6fc75c028d7","toSide":"right"}
+	]
+}

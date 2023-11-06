@@ -1,0 +1,2 @@
+- Database 에 존재하는 모든 Log 항목은 Fqdn 기준으로 Rising 에서 시작해서, Falling, rising 이 계속 교차하여 저장되어야 한다.
+- 

@@ -98,11 +98,11 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                 | 0 ->
                     match command with
                     | "REGISTER" ->
-                        clients.Add clientId
+                        clients <- clientId::clients
                         logDebug $"Client {clientIdentifierToString clientId} registered"
                         StringResponseOK(cri, "OK")
                     | "UNREGISTER" ->
-                        clients.Remove clientId |> ignore
+                        clients <- clients |> List.except [clientId]
                         logDebug $"Client {clientIdentifierToString clientId} unregistered"
                         StringResponseOK(cri, "OK")
                     | "PONG" ->

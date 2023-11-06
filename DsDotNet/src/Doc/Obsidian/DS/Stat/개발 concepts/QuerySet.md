@@ -1,0 +1,7 @@
+- Database 를 query 하기 위해 필요한 정보의 set
+- 시작 날짜, 종료 날짜 : 조회 시작/종료 시각 지정
+	- 각기 none 값을 지정할 수 있다.
+		- None 값이면
+			- 이전에 지정되었던 값을 그대로 사용하라는 의미.
+			- 시작 날짜가 None 이고, 이전 지정 값이 없으면 DateTime.MinValue
+			- 종료 날짜가 None 이고, 이전 지정 값이 없으면 DateTime.MaxValue

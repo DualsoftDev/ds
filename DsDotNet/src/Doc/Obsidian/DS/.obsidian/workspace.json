@@ -4,130 +4,22 @@
     "type": "split",
     "children": [
       {
-        "id": "8d6120bd15656bb5",
+        "id": "ce09c1c7d140c4e2",
         "type": "tabs",
         "children": [
           {
-            "id": "10c6c79731282a1b",
-            "type": "leaf",
-            "state": {
-              "type": "mindmap",
-              "state": {}
-            }
-          },
-          {
-            "id": "c79b8507443fb391",
+            "id": "f118e42fbfe406e6",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "IOHub/IO Spec/IO Spec.md",
+                "file": "IOHub/Requirements.md",
                 "mode": "source",
                 "source": false
-              }
-            }
-          },
-          {
-            "id": "de65a5fbc438676c",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "IOHub/IO Spec/IO Spec.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "b4ee18f6ca588f8a",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "IOHub/Zmq/ZMQ client build.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "c53129b887550ee3",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "IOHub/Zmq/ZMQ client build.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "28245ed3a4cfbdac",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "IOHub/Zmq/ZMQ client build.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "ae0b01b5f5ae1ae0",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "IOHub/Zmq/ZMQ packet.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "36b3ab3aa000f4c2",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "IOHub/TODO.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "4d362da589832f74",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "IOHub/Server.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "82a17b6de72d9a03",
-            "type": "leaf",
-            "state": {
-              "type": "canvas",
-              "state": {
-                "file": "IOHub/Architecture.canvas",
-                "viewState": {
-                  "x": -87.5,
-                  "y": 110,
-                  "zoom": 0
-                }
               }
             }
           }
-        ],
-        "currentTab": 9
+        ]
       }
     ],
     "direction": "vertical"
@@ -177,7 +69,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 201.5
   },
   "right": {
     "id": "e7aa00dae9662fc9",
@@ -193,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "IOHub/Architecture.canvas",
+                "file": "IOHub/Requirements.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -210,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "IOHub/Architecture.canvas",
+                "file": "IOHub/Requirements.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -233,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "IOHub/Architecture.canvas"
+                "file": "IOHub/Requirements.md"
               }
             }
           }
@@ -254,31 +146,46 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "82a17b6de72d9a03",
+  "active": "f118e42fbfe406e6",
   "lastOpenFiles": [
+    "IOHub/Endian.md",
+    "IOHub/Zmq/ZMQ client build.md",
+    "IOHub/Client.md",
+    "IOHub/Requirements.md",
+    "IOHub/0. Index.md",
+    "0. TOC.md",
+    "Stat/Info viewer.md",
+    "2023-11-06.md",
+    "Untitled.canvas",
+    "Stat/0. Index.md",
+    "Stat/Database/Tables/Storage.md",
+    "Stat/Database/Schema.canvas",
+    "Stat/Architecture.canvas",
+    "Stat/개발 concepts/Restrictions.md",
+    "Stat/개발 concepts/Sum.md",
+    "Stat/개발 concepts/Summary.md",
+    "Stat/개발 concepts/Count.md",
+    "Stat/개발 concepts/LogSet.md",
+    "Stat/Database/Schema.md",
+    "Stat/Database/Database.md",
+    "Stat/개발 concepts/QuerySet.md",
+    "QuerySet",
+    "Stat/개발 concepts",
+    "Stat/Database/Tables/TagKind.md",
+    "Stat/Database/Tables/Log.md",
+    "Stat/Database/Tables/Property.md",
+    "Stat/Database/Tables",
+    "Stat/Database",
+    "IOHub/Architecture.canvas",
+    "Stat",
     "IOHub/DS runtime.md",
     "IOHub/IO Spec/IO settings json.md",
     "IOHub/IO Spec/IO Spec.md",
     "IOHub/PLC, Field IO.md",
     "IOHub/TODO.md",
-    "IOHub/0. Index.md",
-    "IOHub/Requirements.md",
-    "IOHub/Architecture.canvas",
-    "IOHub/Server.md",
-    "IOHub/Client.md",
-    "IOHub/Endian.md",
-    "IOHub/Zmq/ZMQ packet.md",
-    "Untitled.canvas",
-    "2023-11-06.md",
-    "IOHub/Zmq/ZMQ client build.md",
-    "IOHub/Zmq/ZMQ.md",
-    "IOHub/Zmq/ZMQ Client socket.md",
     "IOHub/Zmq",
-    "IOHub/Notification.md",
     "IOHub/IO Spec",
-    "PLC/Field IO.md",
     "PLC",
-    "clients.md",
     "IOHub"
   ]
 }

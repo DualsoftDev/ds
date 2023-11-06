@@ -21,6 +21,7 @@
         AD = { RepeatFlow.forwardwork ~ RepeatFlow.forwardwork }
         RT = { RepeatFlow.backwardwork ~ RepeatFlow.backwardwork }
         DO = { MovingFlow.movework ~ MovingFlow.clearwork }
+        "DO[P]" = { MovingFlow.movework ~ MovingFlow.clearwork }
         "FWD[P]" = { SingleActingFlow.forwardwork ~ SingleActingFlow.forwardwork }
         BWDS = { SingleActingFlow.backwardwork ~ SingleActingFlow.backwardwork }
         FWDS = { SingleActingFlow.forwardwork ~ SingleActingFlow.forwardwork }
@@ -32,5 +33,12 @@
         AD <||> RT;
         "FWD[P]" <||> BWDS;
         FWDS <||> "BWD[P]";
+    }
+    [prop] = {
+        [finish] = {
+            RepeatFlow.backwardwork;
+            MovingFlow.clearwork;
+            SingleActingFlow.backwardwork;
+        }
     }
 }

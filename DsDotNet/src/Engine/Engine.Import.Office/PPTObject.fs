@@ -320,11 +320,11 @@ module PPTObjectModule =
         member x.NodeType = nodeType
         member x.PageTitle    = pageTitle
         //member x.IsLibCall    =  nodeType = CALL && name.Contains '.' 
-        member x.CallDevName = $"{pageTitle}_{name.Split('.')[0]}"
+        member x.CallDevName = $"{pageTitle}_{name.Split('.')[0]|>trimSpace}"
         member x.CallApiName = 
                     if name.Contains '$'
                     then failwithf $"not support '$' replace '.' {name}"
-                    else $"{name.Split('.')[1]}"
+                    else $"{name.Split('.')[1]|>trimSpace}"
 
         member val Id =  shape.GetId()
         member val Key =  Objkey(iPage, shape.GetId())

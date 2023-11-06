@@ -209,30 +209,6 @@ module ImportViewModule =
     [<Extension>]
     type ImportViewUtil =
                     
-        //[<Extension>]
-        //static member GetGraphView (doc:pptDoc, mySys:DsSystem) =
-        //        let dicVertex = doc.DicVertex
-        //        let dicFlow = doc.DicFlow
-
-        //        doc.Dummys |> Seq.iter(fun dummy -> dummy.Update(dicVertex))
-        //        let getFlowNodes(flows:Flow seq) =
-        //            flows |>Seq.map(fun flow ->
-        //                let page =  dicFlow.Where(fun w-> w.Value = flow).First().Key
-        //                let dummys = doc.Dummys.Where(fun f->f.Page = page)
-        //                let flowNode = ConvertFlow(flow, dummys)
-
-        //                UpdateLampNodes(flow.System, flow, flowNode)
-        //                UpdateBtnNodes(flow.System, flow, flowNode)
-        //                UpdateConditionNodes(flow.System, flow, flowNode)
-
-        //                UpdateApiItems(flow.System, page, doc.DicNodes.Values.Where(fun f->f.NodeType.IsIF), flowNode)
-
-        //                flowNode)
-
-        //        let viewNodes =  getFlowNodes(mySys.Flows)
-
-        //        viewNodes
-
         [<Extension>]
         static member GetViewNodes (mySys:DsSystem) =
             let getFlowNodes(flows:Flow seq) =

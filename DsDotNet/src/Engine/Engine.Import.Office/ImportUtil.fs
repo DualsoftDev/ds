@@ -50,14 +50,14 @@ module ImportU =
                     node.Shape.ErrorName(ErrID._52, node.PageNum)
 
             |None ->
-                let ifName = node.Name.Split('.');
-                if  ifName.Length = 2
+                if  node.Name.Split('.').Length = 2
                 then 
-                    let apiName = ifName[1]
-                    let loadedName = 
-                        if(parentReal.IsSome)
-                        then  $"{parentReal.Value.Flow.Name}_{ifName[0]}"
-                        else  $"{parentFlow.Value.Name}_{ifName[0]}"
+                    let apiName = node.CallApiName
+                    let devName = node.CallDevName
+                    let loadedName =  devName
+                        //if(parentReal.IsSome)
+                        //then  $"{parentReal.Value.Flow.Name}_{devName}"
+                        //else  $"{parentFlow.Value.Name}_{devName}"
                          
                     addLoadedLibSystemNCall(loadedName, apiName, mySys, parentFlow, parentReal, node)
                 else 

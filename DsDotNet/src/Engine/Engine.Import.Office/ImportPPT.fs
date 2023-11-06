@@ -232,17 +232,17 @@ module ImportPPTModule =
                             Views = f.Key.GetViewNodes()
                             IsActive = model.Systems.Contains(f.Key)}  )
 
-        [<Extension>]
-        static member GetDSFromPPT (fullName: string) =
-            pptRepo.Clear()
-            let pptResults =  loadingfromPPTs ([fullName]) |> fun (model, views, pptRepo) -> model
-            let sys = pptResults.Systems.[0]
+        //[<Extension>]
+        //static member GetDSFromPPT (fullName: string) =
+        //    pptRepo.Clear()
+        //    let pptResults =  loadingfromPPTs ([fullName]) |> fun (model, views, pptRepo) -> model
+        //    let sys = pptResults.Systems.[0]
 
-            let exportPath = sys.pptxToExportDS fullName
-            let systems, loadingPaths = ParserLoader.LoadFromActivePath exportPath
-            {
-                Systems =  systems
-                ActivePaths = [exportPath]
-                LoadingPaths = loadingPaths
-            }
+        //    let exportPath = sys.pptxToExportDS fullName
+        //    let systems, loadingPaths = ParserLoader.LoadFromActivePath exportPath
+        //    {
+        //        Systems =  systems
+        //        ActivePaths = [exportPath]
+        //        LoadingPaths = loadingPaths
+        //    }
       

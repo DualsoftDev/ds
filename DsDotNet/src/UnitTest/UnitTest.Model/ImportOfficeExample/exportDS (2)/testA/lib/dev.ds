@@ -1,0 +1,17 @@
+[sys] dev = {
+    [flow] F2 = {
+        ADV <||> RET;
+        RET = {
+            "F2_CLP_+" > "F2_CLP_-";
+        }
+    }
+    [jobs] = {
+        "F2_CLP_+" = { F2_CLP."+"(_, _); }
+        "F2_CLP_-" = { F2_CLP."-"(_, _); }
+    }
+    [interfaces] = {
+        "+" = { F2.ADV ~ F2.ADV }
+        "-" = { F2.RET ~ F2.RET }
+    }
+    [device file="../../testB/B1/B2/B3/clp.ds"] F2_CLP; 
+}

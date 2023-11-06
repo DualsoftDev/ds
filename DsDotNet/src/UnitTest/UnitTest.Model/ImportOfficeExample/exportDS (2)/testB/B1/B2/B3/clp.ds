@@ -1,0 +1,9 @@
+[sys] clp = {
+    [flow] F2 = {
+        ADV <||> RET;
+    }
+    [interfaces] = {
+        "+" = { F2.ADV ~ F2.ADV }
+        "-" = { F2.RET ~ F2.RET }
+    }
+}

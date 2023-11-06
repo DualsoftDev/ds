@@ -50,18 +50,12 @@ module ImportU =
                     node.Shape.ErrorName(ErrID._52, node.PageNum)
 
             |None ->
-                if  node.Name.Split('.').Length = 2
-                then 
                     let apiName = node.CallApiName
                     let devName = node.CallDevName
                     let loadedName =  devName
-                        //if(parentReal.IsSome)
-                        //then  $"{parentReal.Value.Flow.Name}_{devName}"
-                        //else  $"{parentFlow.Value.Name}_{devName}"
                          
                     addLoadedLibSystemNCall(loadedName, apiName, mySys, parentFlow, parentReal, node)
-                else 
-                    node.Shape.ErrorName(ErrID._49, node.PageNum)
+           
 
         dicSeg.Add(node.Key, call)
 

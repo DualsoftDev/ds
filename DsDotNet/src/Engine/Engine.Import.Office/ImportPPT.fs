@@ -82,8 +82,9 @@ module ImportPPTModule =
                     |ex-> Office.ErrorPPT(ErrorCase.Path, ErrID._29, node.Name, node.PageNum, node.Id)
 
                 let loadRelativePath = PathManager.getRelativePath (paras.AbsoluteFilePath.ToFile()) (pathPPT.ToFile())
+                let loadAbsolutePath = pathPPT
 
-                let paras = getParams(doc.DirectoryName, loadRelativePath
+                let paras = getParams(loadAbsolutePath, loadRelativePath
                             , loadedName, theSys, None,  node.NodeType.GetLoadingType(), sRepo)
                 let hostIp = if paras.HostIp.IsSome then paras.HostIp.Value else ""
 
@@ -91,6 +92,7 @@ module ImportPPTModule =
                    
                     loadedParentStack.Push(newSys)
                     loadSystem(pptReop, newSys, paras) |> ignore
+                    currentFileName <- pathStack.Peek()
 
                     let parents = loadedParentStack.ToHashSet().Skip(1).Reverse()  //자신 제외
                     let newLoad = 
@@ -159,7 +161,7 @@ module ImportPPTModule =
                 let sysName = getSystemName fileName
                 let mySys = DsSystem(sysName, "localhost")
                 let paras = getParams(
-                              fileDirectory
+                              filePath
                             , sysName+".pptx"
                             , mySys.Name
                             , mySys

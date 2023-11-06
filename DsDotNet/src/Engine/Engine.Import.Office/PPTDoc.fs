@@ -183,13 +183,14 @@ module PPTDocModule =
                     if groupAllNodes.any()
                     then
                         let pptGroup = pptRealGroup(page, groupAllNodes)
-
-                        let parent = pptGroup.Parent.Value;
-                        if(dicParentCheck.TryAdd(pptGroup.RealKey, pptGroup.PageNum)) then
-                            parents.Add(parent, pptGroup.Children)
-                        else
-                            Office.ErrorPPT(Group, ErrID._17, $"{dicParentCheck.[pptGroup.RealKey]}-{parent.Name}", pptGroup.PageNum, parent.Shape.ShapeID())
-                )
+                        match pptGroup.Parent with
+                        |Some parent -> 
+                            if(dicParentCheck.TryAdd(pptGroup.RealKey, pptGroup.PageNum)) then
+                                parents.Add(parent, pptGroup.Children)
+                            else
+                                Office.ErrorPPT(Group, ErrID._17, $"{dicParentCheck.[pptGroup.RealKey]}-{parent.Name}", pptGroup.PageNum, parent.Shape.ShapeID())
+                        |None  -> ()
+                    )
             )
 
             

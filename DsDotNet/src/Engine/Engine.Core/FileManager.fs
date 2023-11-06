@@ -59,6 +59,16 @@ module FileManager =
             |> Array.map(fun path -> path.Trim())
             |> List.ofArray
 
+    let getValidZipFileName(topDir:string): string  =
+        if isRuntimeLinux
+        then 
+            if topDir.Split('/').Length = 2 //root
+            then $"{topDir}/[{topDir.Split('/').[1]}]"// /home  => /home/[home]
+            else topDir
+        else 
+            if topDir.Split(':').[1].Split('/').[1] = "" //root
+            then $"{topDir}[{topDir.Split(':').[0]}]" //E:/  => E:/[E]
+            else topDir
 
     let getTopLevelDirectory (filePaths: string list) : string =
         if List.isEmpty filePaths then
@@ -88,7 +98,7 @@ module FileManager =
     //모델 최상단 폴더에 Zip형태로 생성
     let saveZip(filePaths: string seq) =
         let topLevel = getTopLevelDirectory (filePaths |> Seq.toList)
-        let zipFilePath =topLevel+".zip"
+        let zipFilePath =(topLevel|>getValidZipFileName )+".zip" 
          // Create a ZIP archive
         use fileStream = new FileStream(zipFilePath, FileMode.Create)
         use zip = new ZipArchive(fileStream, ZipArchiveMode.Create, true)

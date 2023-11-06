@@ -7,6 +7,7 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module DsText =
+    let [<Literal>] TextLibrary = "DS_Library"
     //edge
     let [<Literal>] TextStartEdge         = ">"
     let [<Literal>] TextStartPush         = ">>"

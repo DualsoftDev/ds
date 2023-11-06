@@ -6,6 +6,7 @@ open Engine.Core
 open DocumentFormat.OpenXml.Packaging
 open System.Linq
 open Dual.Common.Core.FS
+open Engine.Parser.FS
 
 [<AutoOpen>]
 module ImportUtilForLib =
@@ -16,7 +17,6 @@ module ImportUtilForLib =
         DevName: string
         ApiName: string
     }
-    let libDevOrgSys = Dictionary<string, DsSystem>()
     let getParams(directoryName:string , relativeFilePath:string, loadedName:string
                     , containerSystem:DsSystem
                     , hostIp:string option
@@ -34,7 +34,7 @@ module ImportUtilForLib =
             }
 
     let addLoadedLibSystemNCall(loadedName, apiName, mySys:DsSystem, parentF:Flow option, parentR:Real option, node:pptNode)=
-        let paras = getParams(activeSysDir, "./DS_Library.ds"
+        let paras = getParams(activeSysDir, $"./{TextLibrary}.ds"
                     , loadedName, mySys, None, DuDevice, ShareableSystemRepository())
         
         let parent =
@@ -43,8 +43,9 @@ module ImportUtilForLib =
             else  DuParentFlow (parentF.Value)
 
       
-        let devOrg = libDevOrgSys[loadedName]
-
+        let libFilePath =  PathManager.getFullPath  ($"./{TextLibrary}.ds"|>DsFile ) (activeSysDir|>DsDirectory)
+        let systems, loadingPaths = ParserLoader.LoadFromActivePath libFilePath
+        let devOrg =  systems |> Seq.head
         if not(mySys.LoadedSystems.Select(fun f->f.Name).Contains(loadedName))
         then 
             mySys.AddLoadedSystem(Device(devOrg, paras))

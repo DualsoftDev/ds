@@ -78,13 +78,13 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
         if not <| server.TryReceiveMultipartMessage(&mqMessage) then
             ResponseNoMoreInput()
         else
-            let clientId = mqMessage[ClientMultiMessage.ClientId].Buffer;  // byte[]로 받음
-            let reqId = mqMessage[ClientMultiMessage.RequestId].Buffer |> BitConverter.ToInt32
+            let mms = mqMessage |> toArray
+            let clientId = mms[MultiMessageFromClient.ClientId].Buffer;  // byte[]로 받음
+            let reqId = mms[MultiMessageFromClient.RequestId].Buffer |> BitConverter.ToInt32
             /// Client Request Info : clientId, requestId
             let cri = ClientRequestInfo(clientId, reqId)
 
-            let mms = mqMessage |> toArray
-            let command = mqMessage[ClientMultiMessage.Command].ConvertToString() |> removeTrailingNullChar;
+            let command = mms[MultiMessageFromClient.Command].ConvertToString() |> removeTrailingNullChar;
             logDebug $"Handling request: {command}"
 
             let getArgs() =

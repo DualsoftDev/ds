@@ -18,7 +18,7 @@ module internal ZmqClient =
 
     /// Server 로부터 받은 multi-message format
     [<AutoOpen>]
-    module ServerMultiMessage =
+    module MultiMessageFromServer =
         let RequestId = 0       // int.  음수이면 notify, else 자신이 보낸 request id 의 echo
         let OkNg      = 1
 
@@ -33,7 +33,7 @@ module internal ZmqClient =
         let Offsets   = 5       // bitoffset or byteoffset
 
     type NetMQMessage with
-        member x.CheckRequestId(id:int) = verify(id = x[ServerMultiMessage.RequestId].ConvertToInt32())
+        member x.CheckRequestId(id:int) = verify(id = x[MultiMessageFromServer.RequestId].ConvertToInt32())
 
 /// server 로부터 공지 받은 Tag 변경 정보
 type TagChangedInfo(path:string, contentBitLength:int, offsets:int[], values:obj) =
@@ -59,7 +59,7 @@ type Client(serverAddress:string) =
                 Thread.Sleep(100)
                 helper()
         let mq = helper().Value
-        let reqIdBack = mq[ServerMultiMessage.RequestId].Buffer |> BitConverter.ToInt32
+        let reqIdBack = mq[MultiMessageFromServer.RequestId].Buffer |> BitConverter.ToInt32
         if reqId <> reqIdBack then
             failwithf $"Request/Reply id mismatch: {reqId} <> {reqIdBack}"
         mq

@@ -113,7 +113,7 @@ module internal ZmqServerImplModule =
 
     /// Client 로부터 받은 multi-message format
     [<AutoOpen>]
-    module internal ClientMultiMessage =
+    module internal MultiMessageFromClient =
         let ClientId  = 0
         let RequestId = 1
         let Command   = 2

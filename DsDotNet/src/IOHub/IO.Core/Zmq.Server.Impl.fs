@@ -2,18 +2,11 @@
 
 namespace IO.Core
 open System
-open System.Linq
-open System.Threading
-open System.Threading.Tasks
 open NetMQ
 open NetMQ.Sockets
 open Dual.Common.Core.FS
 open System.Collections.Generic
-open System.IO
-open System.Runtime.Remoting
-open System.Reactive.Subjects
 open System.Reactive.Linq
-open IO.Spec
 
 
 
@@ -115,8 +108,8 @@ module internal ZmqServerImplModule =
     [<AutoOpen>]
     module internal MultiMessageFromClient =
         let ClientId  = 0
-        let RequestId = 1
-        let Command   = 2
+        let Command   = 1
+        let RequestId = 2
         let ArgGroup1 = 3
         let ArgGroup2 = 4
         let ArgGroup3 = 5

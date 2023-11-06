@@ -120,8 +120,8 @@ type Client(serverAddress:string) =
 
         let reqId = reqIdGenerator()
         client
-            .SendMoreFrameWithRequestId(reqId)
-            .SendFrame("REGISTER")
+            .SendMoreFrame("REGISTER")
+            .SendFrameWithRequestId(reqId)
         let mqMessage = deque reqId
         noop()
         logDebug "Got client registered response."
@@ -138,8 +138,8 @@ type Client(serverAddress:string) =
 
     let buildCommandAndName(client:DealerSocket, reqId:int, command:string, name:string) : IOutgoingSocket =
         client
-            .SendMoreFrameWithRequestId(reqId)
             .SendMoreFrame(command)
+            .SendMoreFrameWithRequestId(reqId)
             .SendMoreFrame(name)
 
     let buildPartial(client:DealerSocket, reqId:int, command:string, name:string, offsets:int[]) : IOutgoingSocket =
@@ -154,8 +154,8 @@ type Client(serverAddress:string) =
     interface IDisposable with
         member x.Dispose() =
             client
-                .SendMoreFrameWithRequestId(reqIdGenerator())
-                .SendFrame("UNREGISTER")
+                .SendMoreFrame("UNREGISTER")
+                .SendFrameWithRequestId(reqIdGenerator())
             client.Close()
 
 
@@ -168,8 +168,8 @@ type Client(serverAddress:string) =
     member x.SendRequest(request:string) : CLIRequestResult =
         let reqId = reqIdGenerator()
         client
-            .SendMoreFrameWithRequestId(reqId)
-            .SendFrame(request)
+            .SendMoreFrame(request)
+            .SendFrameWithRequestId(reqId)
 
         let mqMessage = deque reqId
         let result = mqMessage[OkNg].ConvertToString()
@@ -274,7 +274,7 @@ type Client(serverAddress:string) =
     member x.ClearAll(name:string) =
         let reqId = reqIdGenerator()
         client
-            .SendMoreFrameWithRequestId(reqId)
-            .SendFrame($"cl {name}")
+            .SendMoreFrame($"cl {name}")
+            .SendFrameWithRequestId(reqId)
         verifyReceiveOK client reqId
 

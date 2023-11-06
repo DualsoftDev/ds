@@ -1,5 +1,6 @@
 - Independances
-	- Platform (Windows/Linux/Mac/..)
+	- OS (Windows/Linux/Mac/..)
+	- Platform (x64/x86, ARM)
 	- Process (Client 구동 process 와 Server 구동 process 는 독립)
 	- Network (clients 및 server 는 서로 다른 ip 상에서 구동 가능)
 	- Language (C#/F#/C++/...)

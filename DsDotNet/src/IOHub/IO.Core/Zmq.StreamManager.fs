@@ -18,6 +18,8 @@ type IIOChangeInfo =
 [<AutoOpen>]
 module internal ZmqStreamManager =
     type IOutgoingSocket with
+        member x.SendFrameWithRequestId(id:int) =
+            id |> ByteConverter.ToBytes |> x.SendFrame
         member x.SendMoreFrameWithRequestId(id:int) =
             id |> ByteConverter.ToBytes |> x.SendMoreFrame
 

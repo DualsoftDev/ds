@@ -45,7 +45,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "IOHub/Zmq/ZMQ socket.md",
+                "file": "IOHub/Zmq/ZMQ client build.md",
                 "mode": "source",
                 "source": false
               }
@@ -57,14 +57,38 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "IOHub/Zmq/ZMQ Client socket.md",
+                "file": "IOHub/Zmq/ZMQ client build.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "28245ed3a4cfbdac",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "IOHub/Zmq/ZMQ client build.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "ae0b01b5f5ae1ae0",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "IOHub/Zmq/ZMQ packet.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 6
       }
     ],
     "direction": "vertical"
@@ -130,7 +154,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "IOHub/Zmq/ZMQ Client socket.md",
+                "file": "IOHub/Zmq/ZMQ packet.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -147,7 +171,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "IOHub/Zmq/ZMQ Client socket.md",
+                "file": "IOHub/Zmq/ZMQ packet.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -170,7 +194,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "IOHub/Zmq/ZMQ Client socket.md"
+                "file": "IOHub/Zmq/ZMQ packet.md"
               }
             }
           }
@@ -191,14 +215,16 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "c53129b887550ee3",
+  "active": "ae0b01b5f5ae1ae0",
   "lastOpenFiles": [
-    "IOHub/Client.md",
-    "IOHub/Zmq/ZMQ Client socket.md",
-    "IOHub/Zmq/ZMQ socket.md",
-    "IOHub/Zmq",
-    "IOHub/Architecture.canvas",
+    "IOHub/Zmq/ZMQ client build.md",
+    "IOHub/Zmq/ZMQ.md",
+    "IOHub/Zmq/ZMQ packet.md",
     "IOHub/Requirements.md",
+    "IOHub/Architecture.canvas",
+    "IOHub/Zmq/ZMQ Client socket.md",
+    "IOHub/Client.md",
+    "IOHub/Zmq",
     "IOHub/PLC, Field IO.md",
     "IOHub/Notification.md",
     "IOHub/DS runtime.md",

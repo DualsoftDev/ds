@@ -74,7 +74,8 @@ module ZmqTestModule =
 
 
                 | (StartsWith "rx" | StartsWith "rb" | StartsWith "rw" | StartsWith "rdw" | StartsWith "rlw")
-                | (StartsWith "wx" | StartsWith "wb" | StartsWith "ww" | StartsWith "wdw" | StartsWith "wlw") ->
+                | (StartsWith "wx" | StartsWith "wb" | StartsWith "ww" | StartsWith "wdw" | StartsWith "wlw")
+                | (StartsWith "write" | StartsWith "read" ) ->
                     match client.SendRequest(key) with
                     | Ok value ->
                         Console.WriteLine($"OK: {value}")

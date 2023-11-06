@@ -80,11 +80,11 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
         else
             let mms = mqMessage |> toArray
             let clientId = mms[MultiMessageFromClient.ClientId].Buffer;  // byte[]로 받음
+            let command = mms[MultiMessageFromClient.Command].ConvertToString() |> removeTrailingNullChar;
             let reqId = mms[MultiMessageFromClient.RequestId].Buffer |> BitConverter.ToInt32
             /// Client Request Info : clientId, requestId
             let cri = ClientRequestInfo(clientId, reqId)
 
-            let command = mms[MultiMessageFromClient.Command].ConvertToString() |> removeTrailingNullChar;
             logDebug $"Handling request: {command}"
 
             let getArgs() =

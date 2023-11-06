@@ -176,8 +176,6 @@ module internal ZmqStreamManager =
             lock locker (fun () ->
                 for (offset:int, value:byte) in writeArg do
                     writeTBytes<byte> stream offset value
-                let offsets = writeArg |> map fst |> toArray
-                let values  = writeArg |> map snd |> toArray
                 x.Flush()
             )
 
@@ -187,8 +185,6 @@ module internal ZmqStreamManager =
             lock locker (fun () ->
                 for (offset:int, value:uint16) in writeArg do
                     writeTBytes<uint16> stream offset value
-                let offsets = writeArg |> map fst |> toArray
-                let values  = writeArg |> map snd |> toArray
                 x.Flush()
             )
 
@@ -197,8 +193,6 @@ module internal ZmqStreamManager =
             lock locker (fun () ->
                 for (offset:int, value:uint32) in writeArg do
                     writeTBytes<uint32> stream offset value
-                let offsets = writeArg |> map fst |> toArray
-                let values  = writeArg |> map snd |> toArray
                 x.Flush()
             )
 
@@ -207,8 +201,6 @@ module internal ZmqStreamManager =
             lock locker (fun () ->
                 for (offset:int, value:uint64) in writeArg do
                     writeTBytes<uint64> stream offset value
-                let offsets = writeArg |> map fst |> toArray
-                let values  = writeArg |> map snd |> toArray
                 x.Flush()
             )
 

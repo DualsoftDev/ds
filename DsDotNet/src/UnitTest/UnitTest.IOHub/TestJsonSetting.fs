@@ -22,10 +22,21 @@ module JSONSettingTestModule =
 
         [<Test>]
         member _.Endian() =
-            let n = 1234567890UL
-            let bytes = BitConverter.GetBytes(n)
-            let n2 = BitConverter.ToUInt64(bytes, 0)
-            n === n2
+            BitConverter.IsLittleEndian === true    // for intel architecture
+
+            let n8 = 0x07_06_05_04_03_02_01_00UL
+            let bytes = BitConverter.GetBytes(n8)
+            n8 === BitConverter.ToUInt64(bytes, 0)
+            bytes[0] === 0x00uy
+            bytes[1] === 0x01uy
+            bytes[2] === 0x02uy
+            bytes[3] === 0x03uy
+            bytes[4] === 0x04uy
+            bytes[5] === 0x05uy
+            bytes[6] === 0x06uy
+            bytes[7] === 0x07uy
+
+            noop()
 
         [<Test>]
         member x.ReadWriteWholeFiles() =
@@ -145,10 +156,36 @@ module JSONSettingTestModule =
 
 
 
+                    let checkEndian() =
+                        let n8 = 0x07_06_05_04_03_02_01_00UL
+                        let bytes = BitConverter.GetBytes(n8)
+                        client.WriteUInt64s("q", [|0|], [|n8|]) |> checkOk
+                        match client.ReadBytes("q", [|0..7|]) with
+                        | Ok bytes ->
+                            bytes[0] === 0x00uy
+                            bytes[1] === 0x01uy
+                            bytes[2] === 0x02uy
+                            bytes[3] === 0x03uy
+                            bytes[4] === 0x04uy
+                            bytes[5] === 0x05uy
+                            bytes[6] === 0x06uy
+                            bytes[7] === 0x07uy
+                        | _ -> failwith "ERROR"
+
+                        client.ClearAll("q") |> checkOk
+                        client.WriteBytes("q", [|0..7|], bytes) |> checkOk
+                        match client.ReadUInt64s("q", [|0|]) with
+                        | Ok lws -> lws.[0] === n8
+                        | _ -> failwith "ERROR"
+
+
+
                     checkBytes()
                     checkWords()
                     checkDwords()
                     checkLwords()
+
+                    checkEndian()
 
 
                 checkTopLevel()

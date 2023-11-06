@@ -1,0 +1,8 @@
+- IOHub 의 data 저장 기준은 intel architecture 기준의 little endian 이다.
+- Big endian system 의 고려 사항
+	- e.g ARM CPU architecture 등에서 client 를 작성할 때
+	- [[Client]] 에서 [[Server]]로 data 를 전송할 때에 int, word, double word, long word 등에 대해서 little [[Endian]] 을 적용하여 bytes array 로 변환하여야 전송하여야 한다.
+	- Server 에서 받은 data 를 해석할 때도 little endian 으로 전송되므로 big endian 으로 변환하여 해석하여야 한다.
+- Intel CPU 기반은 little endian 이므로 byte 의 순서를 뒤집을 필요가 없이 그냥 사용
+	- Dotnet 의 경우, BitConverter 등을 이용하면 됨.
+- 

@@ -18,7 +18,8 @@
 			1. `x` 나 `b` 이면 byte array 를
 			2. `w` 이면 `uint16` array 를 byte array 로 변환한 array 를
 			3. `dw` 이면 `uint32` array 를 byte array 로 변환한 array 를
-			3. `lw` 이면 `uint64` array 를 byte array 로 변환한 array 를			
+			3. `lw` 이면 `uint64` array 를 byte array 로 변환한 array 를
+		5. byte 변환 시, little [[endian]] 기준으로 변환하여야 한다.
 2. RequestId
 	1. 서버로 메시지를 보낼 때마다 1 씩 증가하는 uniq 한 `int32` type request id 를 생성해서 byte array 로 변환.   1부터 시작해서 양수만 사용한다.
 3. 예제

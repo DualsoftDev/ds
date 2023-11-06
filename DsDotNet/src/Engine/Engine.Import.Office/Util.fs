@@ -15,6 +15,8 @@ module Util =
     let trimSpace (text: string) = text.Trim()
     let trimNewLine (text: string) = text.Trim('\n').Trim('\r')
 
+    let mutable activeSysDir = ""
+    let mutable currentFileName = ""
     
 
     let GetTailNumber (name: string) =

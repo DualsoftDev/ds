@@ -67,7 +67,7 @@ module DsType =
         if endContents <> ""
         then 
             match endContents with
-            |"N"-> ApiActionType.Normal
+            |"N"|"_"-> ApiActionType.Normal
             |"I"-> ApiActionType.Inverse
             |"P"-> ApiActionType.Push
             |"R"-> ApiActionType.Rising  

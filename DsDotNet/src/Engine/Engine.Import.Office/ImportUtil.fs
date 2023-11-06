@@ -540,7 +540,7 @@ module ImportU =
         
         [<Extension>]
         static member GetlibApisNSys (systems:DsSystem seq) =
-            let libApisNSys= Dictionary<string, DsSystem>()  //다중 lib 로딩시 시스템간 중복 에러 체크 및 libDevOrgSys 시스템 할당
+            let libApisNSys= Dictionary<string, DsSystem>()  //다중 lib 로딩시 시스템간 중복 에러 체크 및 libApisNSys 시스템 할당
             systems.Iter(fun sys -> 
                 sys.ApiItems.Iter(fun api->  
                     try

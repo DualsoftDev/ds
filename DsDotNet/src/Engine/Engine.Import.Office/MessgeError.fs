@@ -103,8 +103,9 @@ module MessgePPTError =
             |Path  -> "경로오류"
 
   
-      ///page(Item1), objID(Item2), msg(Item3)
-    let ErrorPPTNotify = new Event<int*uint*string>() 
+      ///file(Item1), page(Item2), objID(Item3), msg(Item4)
+    let ErrorPPTNotify = new Event<string*int*uint*string>() 
+    let ErrorNotify = "Notify"
     [<Extension>]
     type Office =
 
@@ -115,6 +116,6 @@ module MessgePPTError =
                             then $"◆페이지{page} {objName}({userMsg.Value})"
                             else $"◆페이지{page} {objName}"
 
-            ErrorPPTNotify.Trigger (page, objID, itemName)
-            failwithf  $"[{case.ToText()}] {msg} \t\t{itemName}"
+            ErrorPPTNotify.Trigger (currentFileName, page, objID, itemName)
+            failwithf  $"[{case.ToText()}] {msg} \t\t{itemName} {ErrorNotify}"
 

@@ -52,6 +52,7 @@ module ImportPPTModule =
           
         let rec loadSystem(pptReop:Dictionary<DsSystem, pptDoc>, theSys:DsSystem, paras:DeviceLoadParameters) =
             pathStack.Push(paras.AbsoluteFilePath)
+            currentFileName <- paras.AbsoluteFilePath
             
             let pathPPT =  paras.AbsoluteFilePath
             let doc =
@@ -162,7 +163,7 @@ module ImportPPTModule =
                             )
 
                 activeSysDir <- fileDirectory
-
+                currentFileName <- fileName
                 dicLoaded.Clear() 
                 loadedParentStack.Clear()
                 loadedParentStack.Push mySys
@@ -197,8 +198,13 @@ module ImportPPTModule =
                 { Config = cfg; Systems = systems; LoadingPaths = []}, views, pptRepo
       
             with ex ->  
+                let errFileName = if pathStack.any() then pathStack.First() else paths.First()
+                if not(ex.Message.EndsWith(ErrorNotify))
+                then 
+                    ErrorPPTNotify.Trigger (errFileName, 0, 0u, "")
+                    
                  //첫페이지 아니면 stack에 존재
-                failwithf   $"{ex.Message} \t◆파일명 {(if pathStack.any() then pathStack.First() else paths.First())}"
+                failwithf   $"{ex.Message} \t◆파일명 {errFileName}"
         finally 
             dicPptDoc.Where(fun f->f.Value.IsNonNull())
                      .Iter(fun  f->f.Value.Close())

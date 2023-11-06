@@ -48,12 +48,10 @@ module CodeElements =
         |> Seq.tail
         |> Seq.map(fun line ->
             let line = line.Split(';')[0]  //줄바꿈 제거
-            if (not <| line.Contains " " && line <> "n")  //$n 부정은 공백없음
-            then failwith $"{name} Function parameters require a space ' '. ex)$t 1000"
             //function Name
-            line.Split(' ')    |> Seq.head
+            line.Substring(0,1)
             //function Parameters
-            , (line.Split(' ') |> Seq.tail |> Seq.toArray )
+            , (line.Substring(1,line.Length-1).Trim().Split(' ') |> Seq.toArray )
             )
 
     type Parameters = string[]

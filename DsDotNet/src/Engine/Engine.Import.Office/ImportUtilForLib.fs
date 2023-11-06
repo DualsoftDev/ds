@@ -33,7 +33,6 @@ module ImportUtilForLib =
                 LoadingType = loadingType
             }
 
-    let mutable activeSysDir = ""
     let addLoadedLibSystemNCall(loadedName, apiName, mySys:DsSystem, parentF:Flow option, parentR:Real option, node:pptNode)=
         let paras = getParams(activeSysDir, "./DS_Library.ds"
                     , loadedName, mySys, None, DuDevice, ShareableSystemRepository())

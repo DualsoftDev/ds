@@ -35,6 +35,9 @@ module PPTUtil =
     type ShapeStyle = Presentation.ShapeStyle
     type SlideId = Presentation.SlideId
     type GroupShape = Presentation.GroupShape
+    type TextBody = Presentation.TextBody
+    
+    
 
     [<Extension>]
     type Office =
@@ -118,6 +121,17 @@ module PPTUtil =
                         let shapeProperties = shape.Descendants<NonVisualShapeProperties>().FirstOrDefault();
                         let prop = shapeProperties.Descendants<NonVisualDrawingProperties>().FirstOrDefault();
                         prop.Name.Value
+
+        [<Extension>]
+        static member IsUnderlined(shape: Shape) =
+                        shape.Descendants<TextBody>()
+                        |> Seq.collect (fun textBody -> textBody.Descendants<Paragraph>())
+                        |> Seq.collect (fun paragraph -> paragraph.Descendants<DocumentFormat.OpenXml.Drawing.Run>())
+                        |> Seq.exists (fun run ->
+                            match run.RunProperties with
+                            | null -> false
+                            | runProps -> runProps.Underline <> null && runProps.Underline.InnerText = "sng"  //DocumentFormat.OpenXml.Drawing.TextUnderlineValues.Single
+                        )
 
         [<Extension>]
         static member ShapeID(shape:Shape) =

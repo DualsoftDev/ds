@@ -301,9 +301,9 @@ module ImportU =
                             dicVertex.Add(node.Key, realExS)
                         | _ ->
                             let real = Real.Create(node.Name, dicFlow.[node.PageNum])
+                            real.Finished <- node.RealFinished
                             dicVertex.Add(node.Key, real)
                         )
-
 
                 let calls  =
                      pptNodes

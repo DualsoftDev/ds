@@ -312,6 +312,7 @@ module PPTObjectModule =
         member x.CopySys  = copySystems
         member x.JobInfos  = jobInfos
         member x.JobCallNames  = jobInfos.Keys
+        member x.RealFinished  = shape.IsUnderlined()
         
         member x.Safeties = safeties
         member x.IfName  = ifName

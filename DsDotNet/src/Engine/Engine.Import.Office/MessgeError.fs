@@ -105,7 +105,7 @@ module MessgePPTError =
   
       ///file(Item1), page(Item2), objID(Item3), msg(Item4)
     let ErrorPPTNotify = new Event<string*int*uint*string>() 
-    let ErrorNotify = "Notify"
+    let ErrorNotify = "ERROR "
     [<Extension>]
     type Office =
 
@@ -115,7 +115,7 @@ module MessgePPTError =
             let itemName =  if(userMsg.IsSome && (userMsg.Value = ""|>not))
                             then $"◆페이지{page} {objName}({userMsg.Value})"
                             else $"◆페이지{page} {objName}"
-
+           
             ErrorPPTNotify.Trigger (currentFileName, page, objID, itemName)
             failwithf  $"[{case.ToText()}] {msg} \t\t{itemName} {ErrorNotify}"
 

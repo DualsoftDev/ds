@@ -34,7 +34,9 @@ module ImportUtilForLib =
             }
 
     let addLoadedLibSystemNCall(loadedName, apiName, mySys:DsSystem, parentF:Flow option, parentR:Real option, node:pptNode)=
-        let paras = getParams(activeSysDir, $"./{TextLibrary}.ds"
+        let libFilePath =  PathManager.getFullPath  ($"./{TextLibrary}.ds"|>DsFile ) (activeSysDir|>DsDirectory)
+        let libRelPath    =   PathManager.getRelativePath (currentFileName |> DsFile) (libFilePath |> DsFile);
+        let paras = getParams(activeSysDir, libRelPath
                     , loadedName, mySys, None, DuDevice, ShareableSystemRepository())
         
         let parent =
@@ -42,8 +44,6 @@ module ImportUtilForLib =
             then  DuParentReal (parentR.Value)
             else  DuParentFlow (parentF.Value)
 
-      
-        let libFilePath =  PathManager.getFullPath  ($"./{TextLibrary}.ds"|>DsFile ) (activeSysDir|>DsDirectory)
         let systems, loadingPaths = ParserLoader.LoadFromActivePath libFilePath
         let devOrg =  systems |> Seq.head
         if not(mySys.LoadedSystems.Select(fun f->f.Name).Contains(loadedName))

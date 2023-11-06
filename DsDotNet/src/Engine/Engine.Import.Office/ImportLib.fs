@@ -21,7 +21,12 @@ module ImportLib =
                 pptRepo.Clear()
                 let runDir = System.Reflection.Assembly.GetEntryAssembly().Location|>DsFile |> PathManager.getDirectoryName
                 let libFilePath =  PathManager.getFullPath ($"{TextLibrary}.pptx"|>DsFile) (runDir|>DsDirectory)
-                ImportPPTModule.loadingfromPPTs ([| libFilePath |])|>  ignore // 파일 loadingfromPPTs 시 DS_Library.ds 만드는 용도
+                
+                // 파일 loadingfromPPTs 시 DS_Library.ds 만드는 용도
+                let libSys = loadingfromPPTs ([| libFilePath |]) |> fun(m,_,_) -> m.Systems.Head    
+                let loadedlibFilePath = PathManager.getFullPath  ($"{TextLibrary}.pptx"|>DsFile) (PathManager.getDirectoryName(fullName|>DsFile)|>DsDirectory)
+                libSys.pptxToExportDS (loadedlibFilePath) |> ignore
+                
         
              
                 let pptResults = loadingfromPPTs ([fullName]) |> fun (model, views, pptRepo) -> model

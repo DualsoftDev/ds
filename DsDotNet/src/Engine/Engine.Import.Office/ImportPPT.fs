@@ -52,7 +52,7 @@ module ImportPPTModule =
           
         let rec loadSystem(pptReop:Dictionary<DsSystem, pptDoc>, theSys:DsSystem, paras:DeviceLoadParameters) =
             pathStack.Push(paras.AbsoluteFilePath)
-            currentFileName <- paras.AbsoluteFilePath
+            currentFileName <- pathStack.Peek()
             
             let pathPPT =  paras.AbsoluteFilePath
             let doc =
@@ -70,11 +70,17 @@ module ImportPPTModule =
             //시스템 로딩시 중복이름을 부를 수 없다.
             CheckSameCopy(doc)
             SameFlowName(doc)
+
  
             doc.GetCopyPathNName()
             |> Seq.iter(fun (loadFilePath, loadedName, node) ->
+                currentFileName <- pathStack.Peek()
+                let pathPPT =
+                    try
+                        pathPPTWithEnvironmentVariablePaths loadFilePath paras.AbsoluteFilePath
+                    with
+                    |ex-> Office.ErrorPPT(ErrorCase.Path, ErrID._29, node.Name, node.PageNum, node.Id)
 
-                let pathPPT = pathPPTWithEnvironmentVariablePaths loadFilePath paras.AbsoluteFilePath
                 let loadRelativePath = PathManager.getRelativePath (paras.AbsoluteFilePath.ToFile()) (pathPPT.ToFile())
 
                 let paras = getParams(doc.DirectoryName, loadRelativePath
@@ -238,17 +244,4 @@ module ImportPPTModule =
                             Views = f.Key.GetViewNodes()
                             IsActive = model.Systems.Contains(f.Key)}  )
 
-        //[<Extension>]
-        //static member GetDSFromPPT (fullName: string) =
-        //    pptRepo.Clear()
-        //    let pptResults =  loadingfromPPTs ([fullName]) |> fun (model, views, pptRepo) -> model
-        //    let sys = pptResults.Systems.[0]
-
-        //    let exportPath = sys.pptxToExportDS fullName
-        //    let systems, loadingPaths = ParserLoader.LoadFromActivePath exportPath
-        //    {
-        //        Systems =  systems
-        //        ActivePaths = [exportPath]
-        //        LoadingPaths = loadingPaths
-        //    }
       

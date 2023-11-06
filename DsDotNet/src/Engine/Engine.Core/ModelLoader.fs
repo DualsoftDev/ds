@@ -42,7 +42,8 @@ module ModelLoader =
         let libName = PathManager.getFileNameWithoutExtension(dsFile)
 
         s.ReferenceSystem.Name <- libName
-        FileManager.fileWriteAllText(absFilePath, s.ReferenceSystem.ToDsText(false))
+        let txt =s.ReferenceSystem.ToDsText(false)
+        FileManager.fileWriteAllText(absFilePath, txt)
         s.ReferenceSystem.Name <- refName
 
         absFilePath

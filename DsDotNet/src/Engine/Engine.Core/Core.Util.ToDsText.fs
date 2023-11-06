@@ -158,7 +158,7 @@ module internal ToDsTextModule =
                         let ais = c.LinkDefs.Select(printLink).JoinWith("; ") + ";"
                         yield $"{tab2}{c.Name.QuoteOnDemand()} = {ais}"
                     if c.Funcs.any() then
-                        for funcString in printFuncions c.Name c.Funcs do
+                        for funcString in printFuncions (c.Name.QuoteOnDemand()) c.Funcs do
                             yield funcString
                 yield $"{tab}{rb}"
 

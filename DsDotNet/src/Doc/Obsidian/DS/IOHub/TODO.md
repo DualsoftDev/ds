@@ -1,4 +1,0 @@
-- [ ] Counter / Timer 에 대한 persistency
-- [x] x64/x86 을 제외한 나머지에 대한 [[Endian]] 고려 (Arm architecture) 
-- [ ] Major programming language (C++, python, javascript) 에 대한 client class 작성
-- 

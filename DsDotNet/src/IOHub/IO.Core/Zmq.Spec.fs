@@ -14,21 +14,20 @@ module rec ZmqSpec =
     type TypedIOResult<'T> = Result<'T, ErrorMessage>
 
 
-    type PLCMemoryBitSize =
+    /// (PLC 등의) 메모리 타입.  int 환산 enumeration 값은 bit length 기준
+    type MemoryType =
+        | Undefined = 0
         | Bit = 1
         | Byte = 8
         | Word = 16
         | DWord = 32
         | LWord = 64
 
-
-
     /// MW100 : name='M', type='W', offset=100.  (MX30, MD1234, ML1234, ..)
-    type AddressSpec(fileSpec:IOFileSpec, dataType:PLCMemoryBitSize, offsetByte:int, offsetBit:int) =
+    type AddressSpec(fileSpec:IOFileSpec, memoryType:MemoryType, offset:int) =
         member val IOFileSpec = fileSpec
-        member val DataType = dataType
-        member val OffsetByte = offsetByte
-        member val OffsetBit = offsetBit
+        member val MemoryType = memoryType
+        member val Offset = offset
 
 
     (*
@@ -50,7 +49,7 @@ module rec ZmqSpec =
 
     [<AllowNullLiteral>] 
     type IStreamManager = interface end
-    and IOFileSpec() =
+    type IOFileSpec() =
         member val Name = ""  with get, set
         member val Length = 0 with get, set
 
@@ -62,11 +61,11 @@ module rec ZmqSpec =
     // Activator.CreateInstanceFrom(v.Dll, v.ClassName) 를 이용
     [<AllowNullLiteral>] 
     type  VendorSpec() =
-        member val Name = "" with get, set
-        member val Location = "" with get, set
-        member val Dll = "" with get, set
+        member val Name      = "" with get, set
+        member val Location  = "" with get, set
+        member val Dll       = "" with get, set
         member val ClassName = "" with get, set
-        member val Accepts = "" with get, set
+        member val Accepts   = "" with get, set
         member val Files:IOFileSpec[] = [||] with get, set
         member val AddressResolver:IAddressInfoProvider = null with get, set
 
@@ -99,11 +98,11 @@ module rec ZmqSpec =
 
     let bitSizeToEnum(bitSize:int) =
         match bitSize with
-        | 1 -> PLCMemoryBitSize.Bit
-        | 8 -> PLCMemoryBitSize.Byte
-        | 16 -> PLCMemoryBitSize.Word
-        | 32 -> PLCMemoryBitSize.DWord
-        | 64 -> PLCMemoryBitSize.LWord
+        | 1 -> MemoryType.Bit
+        | 8 -> MemoryType.Byte
+        | 16 -> MemoryType.Word
+        | 32 -> MemoryType.DWord
+        | 64 -> MemoryType.LWord
         | _ -> failwithf($"Invalid bit size: {bitSize}")
 
     type IOFileSpec with

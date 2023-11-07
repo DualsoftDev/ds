@@ -1,0 +1,18 @@
+{
+	"nodes":[
+		{"id":"9df4c06f2fd17467","type":"file","file":"IOHub/Server.md","x":-320,"y":-180,"width":400,"height":160},
+		{"id":"fdd785794771af09","type":"text","text":"[[File stream]]","x":140,"y":-100,"width":140,"height":60},
+		{"id":"64356b6e4d141957","type":"file","file":"IOHub/DS runtime.md","x":-700,"y":-180,"width":260,"height":140},
+		{"id":"fdea327287e08d91","type":"file","file":"IOHub/Client.md","x":-320,"y":100,"width":220,"height":150},
+		{"id":"ccf4de3f6a9cb53a","type":"text","text":"통상적인 DS runtime 구현\n- [[DS runtime]] 과 [[Server]], [[Client]] 가 하나의 process 로 구현.\n- Client 는 Field IO 와의 interface 만 수행\n- runtime 은 직접 Server 를 통해 값 read/write","x":-695,"y":100,"width":250,"height":300},
+		{"id":"3dfa743e0e563807","type":"text","text":"H/W (Actuator, Sensors)","x":280,"y":287,"width":245,"height":60},
+		{"id":"0d13fbf9b4387140","type":"file","file":"IOHub/PLC, Field IO.md","x":140,"y":116,"width":235,"height":59}
+	],
+	"edges":[
+		{"id":"a3ead548c29ca8bf","fromNode":"fdea327287e08d91","fromSide":"top","toNode":"9df4c06f2fd17467","toSide":"bottom","fromEnd":"arrow","label":"ZMQ Socket"},
+		{"id":"824d7f6d91c1ccf2","fromNode":"64356b6e4d141957","fromSide":"right","toNode":"9df4c06f2fd17467","toSide":"left","fromEnd":"arrow","label":"API/Rx"},
+		{"id":"4481e019bbfc13e1","fromNode":"9df4c06f2fd17467","fromSide":"right","toNode":"fdd785794771af09","toSide":"left","toEnd":"none"},
+		{"id":"aaa71b8e26ccfe57","fromNode":"fdea327287e08d91","fromSide":"right","toNode":"0d13fbf9b4387140","toSide":"left","fromEnd":"arrow","label":"Read:polling\nWrite:push"},
+		{"id":"6f9353a7ec32b9a3","fromNode":"0d13fbf9b4387140","fromSide":"right","toNode":"3dfa743e0e563807","toSide":"left","label":"배선"}
+	]
+}

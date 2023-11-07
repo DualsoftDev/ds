@@ -4,9 +4,9 @@ namespace ThirdParty.AddressInfo.Provider
 {
     public class AddressInfoProviderLsXGI : IAddressInfoProvider
     {
-        public bool GetAddressInfo(string address, out string memoryType, out int byteOffset, out int bitOffset, out int contentBitLength)
+        public bool GetAddressInfo(string address, out string memoryType, out int offset, out int contentBitLength)
         {
-            bitOffset = byteOffset = contentBitLength = 0;
+            offset = contentBitLength = 0;
             memoryType = string.Empty;
 
             try
@@ -15,58 +15,17 @@ namespace ThirdParty.AddressInfo.Provider
                 if (address[0] == 'i' || address[0] == 'q' || address[0] == 'm')
                 {
                     memoryType = address[0].ToString();
-                    int read1(string addr) => int.Parse(addr);
-                    (int, int) read2(string addr)
-                    {
-                        int byteOffset = 0;
-                        int bitOffset = 0;
-                        if (addr.Contains('.'))
-                        {
-                            var addrSplit = addr.Split('.');
-                            byteOffset = int.Parse(addrSplit[0]);
-                            bitOffset = int.Parse(addrSplit[1]);
-                        }
-                        else
-                        {
-                            byteOffset = int.Parse(addr);
-                        }
-                        return (byteOffset, bitOffset);
-                    }
-
                     string addr = address[2..];
-                    switch (address[1])
+                    offset = int.Parse(addr);
+                    contentBitLength = address[1] switch
                     {
-                        case 'x':
-                            contentBitLength = 1;
-                            (byteOffset, bitOffset) = read2(addr);
-                            break;
-                        case 'b':
-                            contentBitLength = 8;
-                            byteOffset = read1(addr);
-                            break;
-                        case 'w':
-                            contentBitLength = 16;
-                            byteOffset = read1(addr) * 2;
-                            break;
-                        case 'd':
-                            contentBitLength = 32;
-                            byteOffset = read1(addr) * 4;
-                            break;
-                        case 'l':
-                            contentBitLength = 64;
-                            byteOffset = read1(addr) * 8;
-                            break;
-                    }
-
-                    //contentBitLength = address[1] switch
-                    //{
-                    //    'x' => 1,
-                    //    'b' => 8,
-                    //    'w' => 16,
-                    //    'd' => 32,
-                    //    'l' => 64,
-                    //    _ => throw new NotImplementedException(),
-                    //};
+                        'x' => 1,
+                        'b' => 8,
+                        'w' => 16,
+                        'd' => 32,
+                        'l' => 64,
+                        _ => throw new Exception($"Unknown content bit size: {address[1]}"),
+                    };
 
                     return true;
                 }
@@ -78,17 +37,19 @@ namespace ThirdParty.AddressInfo.Provider
             return false;
         }
 
-        public string GetTagName(string memoryType, int byteOffset, int bitOffset, int contentBitLength)
+        public string GetTagName(string memoryType, int offset, int contentBitLength)
         {
-            return contentBitLength switch
+            var dataType = contentBitLength switch
             {
-                1 => $"{memoryType}x{byteOffset * 8 + bitOffset}",
-                8 => $"{memoryType}b{byteOffset}",
-                16 => $"{memoryType}w{byteOffset / 2}",
-                32 => $"{memoryType}dw{byteOffset / 4}",
-                64 => $"{memoryType}lw{byteOffset / 8}",
+                1 => "x",
+                8 => "b",
+                16 => "w",
+                32 => "dw",
+                64 => "lw",
                 _ => throw new Exception($"Unknown content bit size: {contentBitLength}"),
             };
+
+            return $"{memoryType}{dataType}{offset}";
         }
 
     }

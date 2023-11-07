@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		    <Compile Include="Program.	Client.FSharp.fs" />
+	  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="log4net" Version="2.0.15" />
+		<PackageReference Include="NetMQ" Version="4.0.1.13" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.15" />
+		<PackageReference Include="DualSoft-Common-Core" Version="0.1.17" />
+	</ItemGroup>
+
+</Project>

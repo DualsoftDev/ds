@@ -150,6 +150,11 @@ EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PowerPointAddInSetup", "Apps\OfficeAddOn\PowerPointAddIn For Dualsoft Setup\PowerPointAddInSetup.vdproj", "{B9D27286-4103-4020-9E4B-33665694FCDB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerPointAddInSetupUtil", "Apps\OfficeAddOn\PowerPointAddIn For Dualsoft Setup\PowerPointAddInSetupUtil\PowerPointAddInSetupUtil.csproj", "{AB1B66BC-924C-4DAC-B903-35CA798D51D7}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FSharpSamples", "FSharpSamples", "{F9AE7FF8-F83D-4C7F-B32D-86D5FBA2EFFF}"
+EndProject
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "server", "src\IOHub\ClientSamples\ClientSample.FSharp\server\server.fsproj", "{0EF10D89-6377-450E-952D-977BEF60CFC1}"
+EndProject
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "client", "src\IOHub\ClientSamples\ClientSample.FSharp\client\client.fsproj", "{DC547141-9239-4AD9-9ED1-0133AAD70DCE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -525,6 +530,14 @@ Global
 		{AB1B66BC-924C-4DAC-B903-35CA798D51D7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AB1B66BC-924C-4DAC-B903-35CA798D51D7}.Release|x86.ActiveCfg = Release|Any CPU
 		{AB1B66BC-924C-4DAC-B903-35CA798D51D7}.Release|x86.Build.0 = Release|Any CPU
+		{0EF10D89-6377-450E-952D-977BEF60CFC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EF10D89-6377-450E-952D-977BEF60CFC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EF10D89-6377-450E-952D-977BEF60CFC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EF10D89-6377-450E-952D-977BEF60CFC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC547141-9239-4AD9-9ED1-0133AAD70DCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC547141-9239-4AD9-9ED1-0133AAD70DCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC547141-9239-4AD9-9ED1-0133AAD70DCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC547141-9239-4AD9-9ED1-0133AAD70DCE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -589,6 +602,9 @@ Global
 		{55A4E23A-D5D7-4FE2-97D6-46C917D6F40E} = {1ABCD66C-D3ED-44E9-9D5C-BDB4CB852D33}
 		{B9D27286-4103-4020-9E4B-33665694FCDB} = {08D4417E-7482-4FDB-88F0-73A36732375C}
 		{AB1B66BC-924C-4DAC-B903-35CA798D51D7} = {4A05B32E-9334-4AA4-8B00-ABFBCBE8E70F}
+		{F9AE7FF8-F83D-4C7F-B32D-86D5FBA2EFFF} = {1ABCD66C-D3ED-44E9-9D5C-BDB4CB852D33}
+		{0EF10D89-6377-450E-952D-977BEF60CFC1} = {F9AE7FF8-F83D-4C7F-B32D-86D5FBA2EFFF}
+		{DC547141-9239-4AD9-9ED1-0133AAD70DCE} = {F9AE7FF8-F83D-4C7F-B32D-86D5FBA2EFFF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B36D7B1-CD69-44C5-8E57-DE46AC18C1F7}

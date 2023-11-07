@@ -1,0 +1,3 @@
+- [[Server]]와 [[Client]]를 모두 포함한다.
+- runtime engine 에서는 [[server]] 를 통해서만 값을 read/write 한다.
+- [[Server]]와 [[PLC, Field IO]]  의 sync 는 [[Client]]에서 수행한다.

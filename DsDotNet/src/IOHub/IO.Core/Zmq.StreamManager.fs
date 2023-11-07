@@ -4,22 +4,32 @@ open System.IO
 open Dual.Common.Core.FS
 open NetMQ
 open System.Reactive.Subjects
-open System.Runtime.InteropServices
-open Dual.Common.Core.FS
+
+type IClientRequestInfo = interface end
+type IIOChangeInfo =
+    abstract member ClientRequestInfo : IClientRequestInfo
+    abstract member IOFileSpec : IOFileSpec
+    abstract member Offsets : int[]
+    abstract member Value : obj
+    abstract member MemoryType : MemoryType
+
+
 
 [<AutoOpen>]
-module ZmqStreamManager =
-    type NetMQSocket with
+module internal ZmqStreamManager =
+    type IOutgoingSocket with
+        member x.SendFrameWithRequestId(id:int) =
+            id |> ByteConverter.ToBytes |> x.SendFrame
         member x.SendMoreFrameWithRequestId(id:int) =
             id |> ByteConverter.ToBytes |> x.SendMoreFrame
 
     type ClientIdentifier = byte[]
     let clientIdentifierToString (clientId:ClientIdentifier) = clientId |> map string |> String.concat "-"
 
-    type ClientRequestInfo = {
-        ClientId:ClientIdentifier
-        RequestId:int
-    }
+    type ClientRequestInfo(clientId:ClientIdentifier, requestId:int) = 
+        interface IClientRequestInfo
+        member x.ClientId = clientId
+        member x.RequestId = requestId
 
     type ExcetionWithClient(clientRequstInfo:ClientRequestInfo, errMsg:ErrorMessage) =
         inherit Exception(errMsg)
@@ -57,16 +67,24 @@ module ZmqStreamManager =
 
 
 
-    type IOChangeInfo(clientRequestInfo:ClientRequestInfo, fileSpec:IOFileSpec, dataType:PLCMemoryBitSize, offsets:int seq, value:obj) =
+    type IOChangeInfo(clientRequestInfo:ClientRequestInfo, fileSpec:IOFileSpec, memoryType:MemoryType, offsets:int seq, value:obj) =
+        interface IIOChangeInfo with
+            member x.ClientRequestInfo = x.ClientRequestInfo :> IClientRequestInfo
+            member x.IOFileSpec = fileSpec
+            member x.Offsets = x.Offsets
+            member x.Value = value
+            member x.MemoryType = memoryType
+            
         member x.ClientRequestInfo = clientRequestInfo
         member x.IOFileSpec = fileSpec
+
         /// 값이 변경된 offset.  value 의 type 에 따라 다르게 해석
         /// bool: 전체의 bit offset.  byte offset = Offset / 8
         /// uint64: uint64 기준의 offset.   byte offset = Offset * 8
         /// ....
         member val Offsets = offsets |> toArray
         member x.Value = value
-        member x.DataType = dataType
+        member x.MemoryType = memoryType
 
     type WriteOK(changes:IOChangeInfo seq) =
         member val Changes = changes |> toArray
@@ -81,6 +99,7 @@ module ZmqStreamManager =
 
         interface IStreamManager
 
+        member x.FileSpec = fileSpec
         member x.FileStream = stream
         member x.Flush() = stream.Flush()
 
@@ -134,14 +153,12 @@ module ZmqStreamManager =
                 |]
             )
 
-        member x.writeBit (cri:ClientRequestInfo, bitIndex:int, value:bool) = x.writeBit(cri , bitIndex / 8, bitIndex % 8, value)
-        member x.writeBit (cri:ClientRequestInfo, byteIndex:int, bitIndex:int, value:bool) = x.writeBits cri ( [|(byteIndex, bitIndex, value)|] )
+        member x.writeBit (cri:ClientRequestInfo, offset:int, value:bool) = x.writeBits cri [|(offset, value)|]
 
-        member x.writeBits (cri:ClientRequestInfo) (writeBitArgs:(int*int*bool) seq) = // (byteIndex:int, bitIndex:int, value:bool) array) =
+        member x.writeBits (cri:ClientRequestInfo) (writeBitArgs:(int*bool) seq) =
             lock locker (fun () ->
-                let offsets = ResizeArray<int>()
-                let values = ResizeArray<bool>()
-                for (byteIndex, bitIndex, value) in writeBitArgs do
+                for (offset, value) in writeBitArgs do
+                    let byteIndex, bitIndex = offset / 8, offset % 8
                     let currentByte = x.readU8(byteIndex)
 
                     // 비트를 설정하거나 클리어
@@ -153,21 +170,15 @@ module ZmqStreamManager =
 
                     // 수정된 바이트를 해당 위치에 쓰기
                     writeTBytes<byte> stream byteIndex updatedByte
-                    offsets.Add (byteIndex * 8 + bitIndex)
-                    values.Add value
 
                 x.Flush()
-                IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.Bit, offsets.ToArray(), values.ToArray())
             )
 
         member x.writeU8s (cri:ClientRequestInfo)  (writeArg:(int*byte) seq) =
             lock locker (fun () ->
                 for (offset:int, value:byte) in writeArg do
                     writeTBytes<byte> stream offset value
-                let offsets = writeArg |> map fst |> toArray
-                let values  = writeArg |> map snd |> toArray
                 x.Flush()
-                IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.Byte, offsets, values)
             )
 
 
@@ -176,10 +187,7 @@ module ZmqStreamManager =
             lock locker (fun () ->
                 for (offset:int, value:uint16) in writeArg do
                     writeTBytes<uint16> stream offset value
-                let offsets = writeArg |> map fst |> toArray
-                let values  = writeArg |> map snd |> toArray
                 x.Flush()
-                IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.Word, offsets, values)
             )
 
         member x.writeU32 (cri:ClientRequestInfo) (wordOffset:int, value:uint32) = x.writeU32s cri ([|wordOffset, value|])
@@ -187,10 +195,7 @@ module ZmqStreamManager =
             lock locker (fun () ->
                 for (offset:int, value:uint32) in writeArg do
                     writeTBytes<uint32> stream offset value
-                let offsets = writeArg |> map fst |> toArray
-                let values  = writeArg |> map snd |> toArray
                 x.Flush()
-                IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.DWord, offsets, values)
             )
 
         member x.writeU64 (cri:ClientRequestInfo) (wordOffset:int, value:uint64) = x.writeU64s cri ([|wordOffset, value|])
@@ -198,10 +203,7 @@ module ZmqStreamManager =
             lock locker (fun () ->
                 for (offset:int, value:uint64) in writeArg do
                     writeTBytes<uint64> stream offset value
-                let offsets = writeArg |> map fst |> toArray
-                let values  = writeArg |> map snd |> toArray
                 x.Flush()
-                IOChangeInfo(cri, fileSpec, PLCMemoryBitSize.LWord, offsets, values)
             )
 
         member x.clear() =
@@ -215,7 +217,7 @@ module ZmqStreamManager =
         member x.IOChangedSubject = ioChangedSubject
 
 [<AutoOpen>]
-module ZmqBufferManagerExtension =
+module internal ZmqBufferManagerExtension =
     type IOFileSpec with
         member x.InitiaizeFile(dir:string) =
             let path = Path.Combine(dir, x.Name)
@@ -239,50 +241,56 @@ module ZmqBufferManagerExtension =
             x.FileStream <- fs
 
     type StreamManager with
-        member x.VerifyIndices(clientRequstInfo:ClientRequestInfo, offset:int) =
-            let offset = int64 offset
-            let length = x.FileStream.Length
-            if offset < 0 then
-                raiseWithClientId clientRequstInfo ($"Invalid offset.  non-negative value required : {offset}")
-            if offset >= length then
-                raiseWithClientId clientRequstInfo ($"Invalid offset: {offset}.  Exceed length limit {length})")
-        member x.VerifyIndices(clientRequstInfo:ClientRequestInfo, offsets:int[]) =
-            offsets |> iter (fun offset -> x.VerifyIndices(clientRequstInfo, offset))
+        member x.VerifyIndices(clientRequstInfo:ClientRequestInfo, memoryType:MemoryType, offset:int) =
+            let byteOffset = 
+                match memoryType with
+                | MemoryType.Bit   -> offset / 8
+                | (MemoryType.Byte | MemoryType.Word | MemoryType.DWord | MemoryType.LWord) -> offset * (int memoryType)/8
+                | _ -> failwithf($"Invalid data type: {memoryType}")
+                |> int64
 
-        member x.Verify(clientRequstInfo:ClientRequestInfo, indices:int[], numValues:int) =
-            x.VerifyIndices (clientRequstInfo, indices)
+            let length = x.FileStream.Length
+            if byteOffset < 0 then
+                raiseWithClientId clientRequstInfo ($"Invalid offset.  non-negative value required : {byteOffset}")
+            if byteOffset >= length then
+                raiseWithClientId clientRequstInfo ($"Invalid offset: {byteOffset}.  Exceed length limit {length})")
+        member x.VerifyOffsets(clientRequstInfo:ClientRequestInfo, memoryType:MemoryType, offsets:int[]) =
+            offsets |> iter (fun offset -> x.VerifyIndices(clientRequstInfo, memoryType, offset))
+
+        member x.Verify(clientRequstInfo:ClientRequestInfo, memoryType:MemoryType, indices:int[], numValues:int) =
+            x.VerifyOffsets (clientRequstInfo, memoryType, indices)
             if indices.Length <> numValues then
                 raiseWithClientId clientRequstInfo $"The number of indices and values should be the same."
             
-    type IOChangeInfo with
+    type IIOChangeInfo with
         member x.GetTagNameAndValues() =
-            let fs, dataType, offsets, objValues = x.IOFileSpec, x.DataType, x.Offsets, x.Value
+            let fs, dataType, offsets, objValues = x.IOFileSpec, x.MemoryType, x.Offsets, x.Value
             let path = fs.GetPath()
             let addrResolver = fs.Vendor.AddressResolver
             [
-                for offset in offsets do
+                for (i, offset) in offsets |> indexed do
                     let contentBitLength = int dataType
-                    let byteOffset, bitOffset, value = 
+                    let value = 
                         match dataType with
-                        | PLCMemoryBitSize.Bit   -> offset / 8,  offset % 8, (objValues :?> bool[])[0]   |> box
-                        | PLCMemoryBitSize.Byte  -> offset,      0         , (objValues :?> byte[])[0]   |> box
-                        | PLCMemoryBitSize.Word  -> offset * 16, 0         , (objValues :?> uint16[])[0] |> box
-                        | PLCMemoryBitSize.DWord -> offset * 32, 0         , (objValues :?> uint32[])[0] |> box
-                        | PLCMemoryBitSize.LWord -> offset * 64, 0         , (objValues :?> uint64[])[0] |> box
+                        | MemoryType.Bit   -> (objValues :?> bool[]  )[i] |> box
+                        | MemoryType.Byte  -> (objValues :?> byte[]  )[i] |> box
+                        | MemoryType.Word  -> (objValues :?> uint16[])[i] |> box
+                        | MemoryType.DWord -> (objValues :?> uint32[])[i] |> box
+                        | MemoryType.LWord -> (objValues :?> uint64[])[i] |> box
                         | _ -> failwithf($"Invalid data type: {dataType}")
 
-                    let tag = addrResolver.GetTagName(path, byteOffset, bitOffset, contentBitLength)
+                    let tag = addrResolver.GetTagName(path, offset, contentBitLength)
                     yield tag, value
             ]
 
         /// x.Value 를 byte[] 로 변환
         member x.GetValueBytes(): byte[] =
             let objValues = x.Value
-            match x.DataType with
-            | PLCMemoryBitSize.Bit   -> (objValues :?> bool[])   |> map (fun b -> if b then 1uy else 0uy)
-            | PLCMemoryBitSize.Byte  -> (objValues :?> byte[])
-            | PLCMemoryBitSize.Word  -> (objValues :?> uint16[]) |> ByteConverter.ToBytes<uint16>
-            | PLCMemoryBitSize.DWord -> (objValues :?> uint32[]) |> ByteConverter.ToBytes<uint32>
-            | PLCMemoryBitSize.LWord -> (objValues :?> uint64[]) |> ByteConverter.ToBytes<uint64>
-            | _ -> failwithf($"Invalid data type: {x.DataType}")
+            match x.MemoryType with
+            | MemoryType.Bit   -> (objValues :?> bool[])   |> map (fun b -> if b then 1uy else 0uy)
+            | MemoryType.Byte  -> (objValues :?> byte[])
+            | MemoryType.Word  -> (objValues :?> uint16[]) |> ByteConverter.ToBytes<uint16>
+            | MemoryType.DWord -> (objValues :?> uint32[]) |> ByteConverter.ToBytes<uint32>
+            | MemoryType.LWord -> (objValues :?> uint64[]) |> ByteConverter.ToBytes<uint64>
+            | _ -> failwithf($"Invalid data type: {x.MemoryType}")
 

@@ -1,0 +1,1 @@
+- 특정 [[Storage Key]] 에 대한 [[Count]] 와 [[Sum]] 값을 log 가 갱신 됨에 따라 계속 update

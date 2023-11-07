@@ -1,0 +1,11 @@
+{
+	"nodes":[
+		{"id":"65c22986cca158bd","x":-648,"y":-94,"width":208,"height":54,"type":"file","file":"Stat/Database/Database.md"},
+		{"id":"7719147b8e5d5345","type":"file","file":"Stat/Info viewer.md","x":-1000,"y":-268,"width":220,"height":80},
+		{"id":"4270a9af6e39ec21","type":"file","file":"IOHub/DS runtime.md","x":-320,"y":-256,"width":220,"height":68}
+	],
+	"edges":[
+		{"id":"50de64dd13615c69","fromNode":"65c22986cca158bd","fromSide":"left","toNode":"7719147b8e5d5345","toSide":"right","label":"Polling"},
+		{"id":"fe9ee11412a5bf46","fromNode":"4270a9af6e39ec21","fromSide":"bottom","toNode":"65c22986cca158bd","toSide":"right","label":"Push new logs"}
+	]
+}

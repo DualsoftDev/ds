@@ -1,16 +1,59 @@
 using IO.Core;
-using Newtonsoft.Json.Linq;
 
-using static IO.Core.ZmqClient;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using NetMQ.Sockets;
+
+using Newtonsoft.Json.Linq;
+using System.IO;
 
 var port = 5555;
-using var client = new Client($"tcp://localhost:{port}");
+using var client = new CSharpClient($"tcp://localhost:{port}");
 
 var cts = new CancellationTokenSource();
-client.TagChangedSubject.Subscribe(tag =>
+client.TagChangedSubject.Subscribe(change =>
 {
-    Console.WriteLine($"Total {tag.Offsets.Length} tag changed on {tag.Path}");
+    Console.WriteLine($"Total {change.Offsets.Length} tag changed on {change.Path} with bitLength={change.ContentBitLength}");
+    //foreach (var (offset, value) in change.Offsets.Zip(change.Values))
+    var offsets = change.Offsets;
+    switch (change.ContentBitLength)
+    {
+        case 1:
+            {
+                var values = change.Values as bool[];
+                foreach (var (offset, value) in change.Offsets.Zip(values))
+                    Console.WriteLine($"  {offset}: {value}");
+                break;
+            }
+        case 8:
+            {
+                var values = change.Values as byte[];
+                foreach (var (offset, value) in change.Offsets.Zip(values))
+                    Console.WriteLine($"  {offset}: {value}");
+                break;
+            }
+        case 16:
+            {
+                var values = change.Values as ushort[];
+                foreach (var (offset, value) in change.Offsets.Zip(values))
+                    Console.WriteLine($"  {offset}: {value}");
+                break;
+            }
+        case 32:
+            {
+                var values = change.Values as uint[];
+                foreach (var (offset, value) in change.Offsets.Zip(values))
+                    Console.WriteLine($"  {offset}: {value}");
+                break;
+            }
+        case 64:
+            {
+                var values = change.Values as ulong[];
+                foreach (var (offset, value) in change.Offsets.Zip(values))
+                    Console.WriteLine($"  {offset}: {value}");
+                break;
+            }
+        default:
+            throw new InvalidDataException($"Invalid bit length: {change.ContentBitLength}");
+    }
 });
 
 
@@ -30,7 +73,7 @@ while ( key != null && ! cts.IsCancellationRequested )
     Console.WriteLine($"Got key [{key}].");
     if (key == "q" || key == "Q")
         break;
-    var result = client.CsSendRequest(key);
+    var result = client.SendRequest(key);
     result.Match(
         value => { Console.WriteLine($"OK: {value}"); return true; },
         err => { Console.WriteLine($"ERR: {err}"); return false; }
@@ -56,3 +99,9 @@ while ( key != null && ! cts.IsCancellationRequested )
 //Thread.Sleep(Timeout.Infinite);
 Console.ReadLine();
 Console.WriteLine();
+
+
+void DoNothign()
+{
+    var serverSocket = new RouterSocket();
+}

@@ -1,0 +1,191 @@
+{
+  "main": {
+    "id": "8126705a69b02ac7",
+    "type": "split",
+    "children": [
+      {
+        "id": "ce09c1c7d140c4e2",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f118e42fbfe406e6",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "IOHub/Requirements.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "dd3f4c5d450c5f3d",
+    "type": "split",
+    "children": [
+      {
+        "id": "68318f316cad6e67",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "80a060ffd7fb1ac9",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "fcaec59d94bdba5e",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "715c55a067077e8e",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 201.5
+  },
+  "right": {
+    "id": "e7aa00dae9662fc9",
+    "type": "split",
+    "children": [
+      {
+        "id": "c47bd8d6970ea9c1",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "a116fe5264d11f1f",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "IOHub/Requirements.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "ff6bfb8cb9f959c9",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "IOHub/Requirements.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "08396d527f8412c8",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "ce4f30dd2ee3498e",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "IOHub/Requirements.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "f118e42fbfe406e6",
+  "lastOpenFiles": [
+    "IOHub/Endian.md",
+    "IOHub/Zmq/ZMQ client build.md",
+    "IOHub/Client.md",
+    "IOHub/Requirements.md",
+    "IOHub/0. Index.md",
+    "0. TOC.md",
+    "Stat/Info viewer.md",
+    "2023-11-06.md",
+    "Untitled.canvas",
+    "Stat/0. Index.md",
+    "Stat/Database/Tables/Storage.md",
+    "Stat/Database/Schema.canvas",
+    "Stat/Architecture.canvas",
+    "Stat/개발 concepts/Restrictions.md",
+    "Stat/개발 concepts/Sum.md",
+    "Stat/개발 concepts/Summary.md",
+    "Stat/개발 concepts/Count.md",
+    "Stat/개발 concepts/LogSet.md",
+    "Stat/Database/Schema.md",
+    "Stat/Database/Database.md",
+    "Stat/개발 concepts/QuerySet.md",
+    "QuerySet",
+    "Stat/개발 concepts",
+    "Stat/Database/Tables/TagKind.md",
+    "Stat/Database/Tables/Log.md",
+    "Stat/Database/Tables/Property.md",
+    "Stat/Database/Tables",
+    "Stat/Database",
+    "IOHub/Architecture.canvas",
+    "Stat",
+    "IOHub/DS runtime.md",
+    "IOHub/IO Spec/IO settings json.md",
+    "IOHub/IO Spec/IO Spec.md",
+    "IOHub/PLC, Field IO.md",
+    "IOHub/TODO.md",
+    "IOHub/Zmq",
+    "IOHub/IO Spec",
+    "PLC",
+    "IOHub"
+  ]
+}

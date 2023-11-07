@@ -12,8 +12,12 @@
 		</Content>
 		<Compile Include="Zmq.Spec.fs" />
 		<Compile Include="Zmq.StreamManager.fs" />
+		<Compile Include="Zmq.Server.Response.fs" />
+		<Compile Include="Zmq.Server.Impl.fs" />
 		<Compile Include="Zmq.Server.fs" />
+		<Compile Include="Zmq.Server.DirectClient.fs" />
 		<Compile Include="Zmq.Client.fs" />
+		<Compile Include="Zmq.Client.CSharp.fs" />
 		<Compile Include="Zmq.Module.fs" />
 		<Compile Include="Zmq.TestMain.fs" />
 	</ItemGroup>

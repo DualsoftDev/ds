@@ -1,0 +1,2 @@
+- database 에 저장된 log 의 set
+- 사용자가 지정한 [[QuerySet]] 이 변경되면, 무효화 되고 새로운 logSet 을 만들어야 한다.

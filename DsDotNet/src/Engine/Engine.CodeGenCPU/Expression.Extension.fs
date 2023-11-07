@@ -12,18 +12,27 @@ module ExpressionExtension =
     let inline binaryOp f left right = f [left; right]
     let inline unaryOp  f exp = f [exp]
     
+    /// logical AND for expression 
     let (<&&>) left right = binaryOp fLogicalAnd left right
+    /// logical OR for expression 
     let (<||>) left right = binaryOp fLogicalOr left right
+    /// logical NOT for expression 
     let (!!) exp = unaryOp fLogicalNot exp
+    /// storage 에 expression assign 하는 statement 생성
     let (<==) storage exp  = DuAssign(exp, storage)
+    /// storage 에 expression rising 값을 assign 하는 statement 생성
     let (<=^) rising exp   = DuAssign(exp, rising)
+    /// storage 에 expression falling 값을 assign 하는 statement 생성
     let (<=!^) falling exp = DuAssign(exp, falling)
   
+    /// set 조건, reset 조건을 op 에 의해서 coil 에 assign 하는 CommentedStatement 생성
     let inline coilOp op sets rsts (coil, comment) = 
         (op sets rsts coil) |> withExpressionComment comment
         
-    let (--|) (sets_rsts, coil_comment) = coilOp (fun sets rsts coil -> coil <== (sets <&&> (!! rsts))) sets_rsts coil_comment
-    let (==|) (sets_rsts, coil_comment) = coilOp (fun sets rsts coil -> coil <== ((sets <||> var2expr coil) <&&> (!! rsts))) sets_rsts coil_comment
+    /// set 조건, reset 조건을 받아서 --> 추가적으로 coil 과 comment 를 받아서 CommentedStatement 생성하는 함수를 반환하는 curried function
+    let (--|) (sets, rsts) = coilOp (fun s r c -> c <== (s <&&> (!! r))) sets rsts
+    /// set 조건, 조건을 받아서 --> 추가적으로 자기 유지되는 reset coil 과 comment 를 받아서 CommentedStatement 생성하는 함수를 반환하는 curried function
+    let (==|) (sets, rsts) = coilOp (fun s r c -> c <== ((s <||> var2expr c) <&&> (!! r))) sets rsts
 
     /// Create One Scan Relay Coils Statement
     let (--^) (sets: Expression<bool>, rsts: Expression<bool>) (rising: TypedValueStorage<bool>, risingRelay: TypedValueStorage<bool>, risingTemp : TypedValueStorage<bool>, comment:string) =

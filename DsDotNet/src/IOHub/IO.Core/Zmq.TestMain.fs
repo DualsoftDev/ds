@@ -121,6 +121,7 @@ module ZmqTestModule =
                                     | MemoryType.DWord -> uint32 uint64Value |> box
                                     | MemoryType.LWord -> uint64Value |> box
                                     | _ -> failwithf($"Unknown data type : {ap.MemoryType}")
+                                | _ -> failwithf($"Invalid tag: {tag}")
 
                             server.Write(tag, value)
                         | _ ->

@@ -38,6 +38,7 @@ module ZmqTestClient =
         let cts = new CancellationTokenSource()
         let port = 5555
         let client = new Client($"tcp://localhost:{port}")
+        let meta = client.GetMeta()
         client.TagChangedSubject.Subscribe(onTagChanged) |> ignore
 
         registerCancelKey cts client

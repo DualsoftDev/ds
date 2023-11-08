@@ -12,6 +12,7 @@ open System.IO
 open System.Runtime.Remoting
 open System.Reactive.Subjects
 open IO.Spec
+open Newtonsoft.Json
 
 [<AllowNullLiteral>]
 type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
@@ -101,11 +102,14 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                         clients <- clientId::clients
                         logDebug $"Client {clientIdentifierToString clientId} registered"
                         let endian = if BitConverter.IsLittleEndian then "LittleEndian" else "BigEndian";
-                        StringResponseOK(cri, $"OK:{endian}")
+                        StringResponseOK(cri, endian)
                     | "UNREGISTER" ->
                         clients <- clients |> List.except [clientId]
                         logDebug $"Client {clientIdentifierToString clientId} unregistered"
                         StringResponseOK(cri, "OK")
+                    | "META" ->
+                        let meta = JsonConvert.SerializeObject(ioSpec)
+                        StringResponseOK(cri, meta)
                     | "PONG" ->
                         logDebug $"Got pong from client {clientIdentifierToString clientId}"
                         ResponseOK()

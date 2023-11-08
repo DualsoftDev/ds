@@ -55,8 +55,11 @@ module rec ZmqSpec =
         member val Length = 0 with get, set
 
         // reference to parent
+        [<JsonIgnore>]
         member val Vendor:VendorSpec = null with get, set
+        [<JsonIgnore>]
         member val FileStream:FileStream = null with get, set
+        [<JsonIgnore>]
         member val StreamManager:IStreamManager = null with get, set
     
     // Activator.CreateInstanceFrom(v.Dll, v.ClassName) 를 이용
@@ -68,6 +71,7 @@ module rec ZmqSpec =
         member val ClassName = "" with get, set
         member val Accepts   = "" with get, set
         member val Files:IOFileSpec[] = [||] with get, set
+        [<JsonIgnore>]
         member val AddressResolver:IAddressInfoProvider = null with get, set
 
     type IOSpec() =

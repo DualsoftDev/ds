@@ -10,6 +10,8 @@ open System.Collections.Concurrent
 open System.Threading
 open System.Reactive.Subjects
 open System.Threading.Tasks
+open System.Text.Json.Serialization
+open Newtonsoft.Json
 
 [<AutoOpen>]
 module internal ZmqClient =
@@ -130,7 +132,6 @@ type Client(serverAddress:string) =
         let result = mqMessage[OkNg].ConvertToString()
         let detail = mqMessage[Detail].ConvertToString().ToLower()
         needEndianFix <- detail.Contains("little") <> BitConverter.IsLittleEndian
-        noop()
         logDebug "Got client registered response."
                 
     let verifyReceiveOK(client:DealerSocket) (reqId:int) : CLIRequestResult =
@@ -188,6 +189,12 @@ type Client(serverAddress:string) =
         | _ ->
             logError($"Error: {result}")
             Error result
+
+    /// 서버에 설정된 모든 IO 정보(IOSpec)를 가져온다.
+    member x.GetMeta(): IOSpec =
+        match x.SendRequest("META") with
+        | Ok jsonMeta -> JsonConvert.DeserializeObject<IOSpec>(jsonMeta)
+        | Error errMsg -> failwithf($"Error: {errMsg}")
 
     member x.ReadBits(name:string, offsets:int[]) : TypedIOResult<bool[]> =
         let reqId = reqIdGenerator()

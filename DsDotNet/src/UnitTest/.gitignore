@@ -1,1 +1,1 @@
-UnitTest.Model/ImportOfficeExample/exportDS/
+UnitTest.Model/ImportOfficeExample/**/*.ds

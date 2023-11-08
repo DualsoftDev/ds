@@ -5,28 +5,4 @@ namespace IO.Spec
         bool GetAddressInfo(string address, out string memoryType, out int offset, out int contentBitLength);
         string GetTagName(string memoryType, int offset, int contentBitLength);
     }
-    public abstract class AddressInfoProviderBase : IAddressInfoProvider
-    {
-        public abstract bool GetAddressInfo(string address, out string memoryType, out int offset, out int contentBitLength);
-        public abstract string GetTagName(string memoryType, int offset, int contentBitLength);
-    }
-
-    public class AddressInfoProviderLsXGI : IAddressInfoProvider
-    {
-        public bool GetAddressInfo(string address, out string memoryType, out int offset, out int contentBitLength)
-        {
-            throw new NotImplementedException();
-        }
-        public string GetTagName(string memoryType, int offset, int contentBitLength) { throw new NotImplementedException(); }
-    }
-
-    public class AddressInfoProviderPaix : IAddressInfoProvider
-    {
-        public bool GetAddressInfo(string address, out string memoryType, out int offset, out int contentBitLength)
-        {
-            throw new NotImplementedException();
-        }
-        public string GetTagName(string memoryType, int offset, int contentBitLength) { throw new NotImplementedException(); }
-    }
-
 }

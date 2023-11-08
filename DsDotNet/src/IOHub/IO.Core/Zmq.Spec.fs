@@ -38,7 +38,6 @@ module rec ZmqSpec =
       "Location": "/tmp/iomaps",
       "Dll": "F:\\Git\\ds\\DsDotNet\\src\\IOHub\\ThirdParty.AddressInfo.Provider\\bin\\Debug\\net7.0\\ThirdParty.AddressInfo.Provider.dll",
       "ClassName": "ThirdParty.AddressInfo.Provider.AddressInfoProviderLsXGI",
-      "Accepts": "%[IQM]*",
       "Files": [
         {
           "Name": "I",
@@ -69,7 +68,6 @@ module rec ZmqSpec =
         member val Location  = "" with get, set
         member val Dll       = "" with get, set
         member val ClassName = "" with get, set
-        member val Accepts   = "" with get, set
         member val Files:IOFileSpec[] = [||] with get, set
         [<JsonIgnore>]
         member val AddressResolver:IAddressInfoProvider = null with get, set
@@ -93,7 +91,6 @@ module rec ZmqSpec =
         for v in x.Vendors do
             v.Location <- regulateDir v.Location
             v.Dll <- regulateDir v.Dll
-            v.Accepts <- v.Accepts.ToLower()
             for f in v.Files do
                 f.Vendor <- v
                 f.Name <- f.Name.ToLower()

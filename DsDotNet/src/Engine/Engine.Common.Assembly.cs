@@ -8,6 +8,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCopyright("Copyright © Dual INC. 2016")]
 [assembly: AssemblyCulture("")]
 [assembly: AssemblyTrademark("")]
+[assembly: AssemblyTitle("Dualsoft Engine packages")]
+[assembly: AssemblyProduct("DS Engine")]
 
 
 #if DEBUG

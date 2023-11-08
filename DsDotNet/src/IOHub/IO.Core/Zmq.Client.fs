@@ -48,6 +48,9 @@ type TagChangedInfo(path:string, contentBitLength:int, offsets:int[], values:obj
 type Client(serverAddress:string) =
     let cancellationTokenSource = new CancellationTokenSource() 
     let client = new DealerSocket()
+    /// 서버와의 endian 이 같은지 여부.  서버와 다른 endian 이면, 서버로부터 받은 데이터를 변환해야 한다.
+    let mutable isNeedEndianCorrection = false
+
     let reqIdGenerator = counterGenerator 1
     let queue = ConcurrentQueue<NetMQMessage>()
     let deque (reqId:int) =
@@ -59,7 +62,7 @@ type Client(serverAddress:string) =
                 Thread.Sleep(100)
                 helper()
         let mq = helper().Value
-        let reqIdBack = mq[MultiMessageFromServer.RequestId].Buffer |> BitConverter.ToInt32
+        let reqIdBack = mq[MultiMessageFromServer.RequestId].GetInt32(isNeedEndianCorrection)
         if reqId <> reqIdBack then
             failwithf $"Request/Reply id mismatch: {reqId} <> {reqIdBack}"
         mq
@@ -71,6 +74,7 @@ type Client(serverAddress:string) =
     let clientId = clientIdentifierToString clientGuid
 
 
+
     let loop() =
         while not cancellationTokenSource.IsCancellationRequested do
             let mutable mq:NetMQMessage = null
@@ -78,7 +82,7 @@ type Client(serverAddress:string) =
                 if not <| client.TryReceiveMultipartMessage(&mq) then
                     Thread.Sleep(100)  // got it
 
-            let reqIdBack = mq[RequestId].Buffer |> System.BitConverter.ToInt32
+            let reqIdBack = mq[RequestId].GetInt32(isNeedEndianCorrection)
             if reqIdBack >= 0 then
                 verify (reqIdBack < 1000)
                 // normal request 에 대한 reply: queue 에 삽입
@@ -90,19 +94,19 @@ type Client(serverAddress:string) =
                 match command with
                 | "PING" ->
                     client
-                        .SendMoreFrame(-1 |> ByteConverter.ToBytes)
+                        .SendMoreFrame(ByteConverter.ToBytes(-1, isNeedEndianCorrection))
                         .SendFrame("PONG")
                 | "NOTIFY" ->
-                    let contentBitLength = mq[ContentBitLength].Buffer |> BitConverter.ToInt32  // e.g 1, 8, 16, 32, 64
-                    let offsets   = mq[Offsets].Buffer |> ByteConverter.BytesToTypeArray<int>       // bitoffset or byteoffset
+                    let contentBitLength = mq[ContentBitLength].GetInt32(isNeedEndianCorrection) // e.g 1, 8, 16, 32, 64
+                    let offsets   = mq[Offsets].GetArray<int>(isNeedEndianCorrection)       // bitoffset or byteoffset
                     let path      = mq[Name].ConvertToString()  // e.g "p/o"
                     let values:obj =
                         match contentBitLength with
                         |  1 -> mq[Values].Buffer |> map (fun b -> b = 0uy) |> box
                         |  8 -> mq[Values].Buffer |> box
-                        | 16 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<uint16>|> box
-                        | 32 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<uint32>|> box
-                        | 64 -> mq[Values].Buffer |> ByteConverter.BytesToTypeArray<uint64>|> box
+                        | 16 -> mq[Values].GetArray<uint16>(isNeedEndianCorrection) |> box
+                        | 32 -> mq[Values].GetArray<uint32>(isNeedEndianCorrection) |> box
+                        | 64 -> mq[Values].GetArray<uint64>(isNeedEndianCorrection) |> box
                         |  _ -> failwith "ERROR"
 
                     TagChangedInfo(path, contentBitLength, offsets, values)
@@ -118,11 +122,14 @@ type Client(serverAddress:string) =
 
         Task.Factory.StartNew(loop, TaskCreationOptions.LongRunning) |> ignore
 
-        let reqId = reqIdGenerator()
+        let reqId = 0   // "REGISTER" 인 경우 항상 reqId 를 0 으로 설정한다.
         client
             .SendMoreFrame("REGISTER")
-            .SendFrameWithRequestId(reqId)
+            .SendFrameWithRequestIdAndEndian(reqId, isNeedEndianCorrection)
         let mqMessage = deque reqId
+        let result = mqMessage[OkNg].ConvertToString()
+        let detail = mqMessage[Detail].ConvertToString().ToLower()
+        isNeedEndianCorrection <- detail.Contains("little") <> BitConverter.IsLittleEndian
         noop()
         logDebug "Got client registered response."
                 
@@ -139,23 +146,23 @@ type Client(serverAddress:string) =
     let buildCommandAndName(client:DealerSocket, reqId:int, command:string, name:string) : IOutgoingSocket =
         client
             .SendMoreFrame(command)
-            .SendMoreFrameWithRequestId(reqId)
+            .SendMoreFrameWithRequestIdAndEndian(reqId, isNeedEndianCorrection)
             .SendMoreFrame(name)
 
     let buildPartial(client:DealerSocket, reqId:int, command:string, name:string, offsets:int[]) : IOutgoingSocket =
         buildCommandAndName(client, reqId, command, name)
-            .SendMoreFrame(ByteConverter.ToBytes<int>(offsets))
+            .SendMoreFrame(ByteConverter.ToBytes<int>(offsets, isNeedEndianCorrection))
 
     let sendReadRequest(client:DealerSocket, reqId:int, command:string, name:string, offsets:int[]) : unit =
         buildCommandAndName(client, reqId, command, name)
-            .SendFrame(ByteConverter.ToBytes<int>(offsets))
+            .SendFrame(ByteConverter.ToBytes<int>(offsets, isNeedEndianCorrection))
 
 
     interface IDisposable with
         member x.Dispose() =
             client
                 .SendMoreFrame("UNREGISTER")
-                .SendFrameWithRequestId(reqIdGenerator())
+                .SendFrameWithRequestIdAndEndian(reqIdGenerator(), isNeedEndianCorrection)
             client.Close()
 
 
@@ -169,7 +176,7 @@ type Client(serverAddress:string) =
         let reqId = reqIdGenerator()
         client
             .SendMoreFrame(request)
-            .SendFrameWithRequestId(reqId)
+            .SendFrameWithRequestIdAndEndian(reqId, isNeedEndianCorrection)
 
         let mqMessage = deque reqId
         let result = mqMessage[OkNg].ConvertToString()
@@ -213,8 +220,7 @@ type Client(serverAddress:string) =
         let result = mqMessage[OkNg].ConvertToString()
         match result with
         | "OK" ->
-            let buffer = mqMessage[Values].Buffer
-            let arr = ByteConverter.BytesToTypeArray<'T>(buffer) // 바이트 배열을 'T 배열로 변환
+            let arr = mqMessage[Values].GetArray<'T>(isNeedEndianCorrection) // 바이트 배열을 'T 배열로 변환
             Ok arr
         | "ERR" ->
             let errMsg = mqMessage[Detail].ConvertToString()
@@ -253,21 +259,21 @@ type Client(serverAddress:string) =
     member x.WriteUInt16s(name:string, offsets:int[], values:uint16[]) =
         let reqId = reqIdGenerator()
         buildPartial(client, reqId, "ww", name, offsets)
-            .SendFrame(ByteConverter.ToBytes<uint16>(values))
+            .SendFrame(ByteConverter.ToBytes<uint16>(values, isNeedEndianCorrection))
 
         verifyReceiveOK client reqId
 
     member x.WriteUInt32s(name:string, offsets:int[], values:uint32[]) =
         let reqId = reqIdGenerator()
         buildPartial(client, reqId, "wd", name, offsets)
-            .SendFrame(ByteConverter.ToBytes<uint32>(values))
+            .SendFrame(ByteConverter.ToBytes<uint32>(values, isNeedEndianCorrection))
 
         verifyReceiveOK client reqId
 
     member x.WriteUInt64s(name:string, offsets:int[], values:uint64[]) =
         let reqId = reqIdGenerator()
         buildPartial(client, reqId, "wl", name, offsets)
-            .SendFrame(ByteConverter.ToBytes<uint64>(values))
+            .SendFrame(ByteConverter.ToBytes<uint64>(values, isNeedEndianCorrection))
 
         verifyReceiveOK client reqId
 
@@ -275,6 +281,6 @@ type Client(serverAddress:string) =
         let reqId = reqIdGenerator()
         client
             .SendMoreFrame($"cl {name}")
-            .SendFrameWithRequestId(reqId)
+            .SendFrameWithRequestIdAndEndian(reqId, isNeedEndianCorrection)
         verifyReceiveOK client reqId
 

@@ -23,6 +23,16 @@ module internal ZmqStreamManager =
         member x.SendMoreFrameWithRequestId(id:int) =
             id |> ByteConverter.ToBytes |> x.SendMoreFrame
 
+        member x.SendFrameWithRequestIdAndEndian(id:int, isDifferentEndian:bool) =
+            id |> ByteConverter.ToBytes |> reverseBytesOnDemand isDifferentEndian |> x.SendFrame
+        member x.SendMoreFrameWithRequestIdAndEndian(id:int, isDifferentEndian:bool) =
+            id |> ByteConverter.ToBytes |> reverseBytesOnDemand isDifferentEndian |> x.SendMoreFrame
+
+    type NetMQFrame with
+        member x.GetInt32(reverse:bool) = x.Buffer |> reverseBytesOnDemand reverse |> BitConverter.ToInt32
+        member x.GetArray<'T>(reverse:bool) = ByteConverter.BytesToTypeArray<'T>(x.Buffer, reverse)
+
+
     type ClientIdentifier = byte[]
     let clientIdentifierToString (clientId:ClientIdentifier) = clientId |> map string |> String.concat "-"
 
@@ -283,7 +293,7 @@ module internal ZmqBufferManagerExtension =
                     yield tag, value
             ]
 
-        /// x.Value 를 byte[] 로 변환
+        /// x.Value 를 byte[] 로 변환.  서버 모듈에서만 호출되어야 한다.
         member x.GetValueBytes(): byte[] =
             let objValues = x.Value
             match x.MemoryType with

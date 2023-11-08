@@ -100,7 +100,8 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                     | "REGISTER" ->
                         clients <- clientId::clients
                         logDebug $"Client {clientIdentifierToString clientId} registered"
-                        StringResponseOK(cri, "OK")
+                        let endian = if BitConverter.IsLittleEndian then "LittleEndian" else "BigEndian";
+                        StringResponseOK(cri, $"OK:{endian}")
                     | "UNREGISTER" ->
                         clients <- clients |> List.except [clientId]
                         logDebug $"Client {clientIdentifierToString clientId} unregistered"

@@ -6,9 +6,11 @@
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 		<OutputType>Library</OutputType>
 		<OtherFlags>--warnon:1182</OtherFlags>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
 		<Compile Include="ExportModule.fs" />
 		<Compile Include="EntryPoint.fs" />
 		<Content Include="FodyWeavers.xml" />

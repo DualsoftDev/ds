@@ -1,13 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\IO.Spec\IO.Spec.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Include="..\..\Engine\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\IO.Spec\IO.Spec.csproj" />
+	</ItemGroup>
 
 </Project>

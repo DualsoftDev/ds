@@ -7,11 +7,13 @@
 		<LangVersion>7.0</LangVersion>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
-    </PropertyGroup>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	</PropertyGroup>
 
 
 
 	<ItemGroup>
+		<Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
 		<Compile Include="CommonAppSettings.fs" />
 		<Compile Include="Constants.fs" />
 		<Compile Include="Interface.fs" />

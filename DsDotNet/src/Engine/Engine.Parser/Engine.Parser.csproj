@@ -21,6 +21,7 @@
 		<LangVersion>11.0</LangVersion>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 	</PropertyGroup>
 	<ItemGroup>
 		<!--<Antlr4 Include="..\..\..\..\Grammar\g4s\dsLexer.g4" Link="g4s\dsLexer.g4" />-->
@@ -48,6 +49,10 @@
 		<AssemblyAttribute Include="System.CLSCompliantAttribute">
 			<_Parameter1>true</_Parameter1>
 		</AssemblyAttribute>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Include="..\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
 	</ItemGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

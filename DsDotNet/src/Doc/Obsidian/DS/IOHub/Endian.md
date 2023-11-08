@@ -6,6 +6,14 @@
 - Intel CPU 기반은 little endian 이므로 byte 의 순서를 뒤집을 필요가 없이 그냥 사용
 	- Dotnet 의 경우, BitConverter 등을 이용하면 됨.
 
+- [ ] x64/x86 을 제외한 나머지에 대한 [[Endian]] 고려 (Arm architecture)
+
+
+
+
+
+
+
 - 파일에 바이트 순서가 b0, b1, b2, b3으로 저장되어 있을 때, 이를 `int` 값으로 읽는 경우는 시스템의 endian 방식에 따라 다음과 같이 다르게 해석됩니다.   파일에서 읽은 바이트를 b0이 가장 낮은 바이트(0번지), b3이 가장 높은 바이트라고 가정할 때:
 
 - **Little Endian 시스템에서**:

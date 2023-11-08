@@ -10,10 +10,14 @@
         <AssemblyVersion>1.0.16</AssemblyVersion>
       
     </PropertyGroup>
+        <AssemblyVersion>1.0.15</AssemblyVersion>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	</PropertyGroup>
 
 
 
 	<ItemGroup>
+		<Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
 		<Compile Include="CommonAppSettings.fs" />
 		<Compile Include="Constants.fs" />
 		<Compile Include="Interface.fs" />

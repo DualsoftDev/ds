@@ -6,6 +6,7 @@
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<OtherFlags>--warnon:1182</OtherFlags>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Include="DeviceSizeInfo.csv" />
@@ -14,6 +15,8 @@
 		<None Include="Documents\(PC)XGT_FEnet+Protocol.pdf" />
 		<None Include="Documents\PLC_XGT_상담기준서_Ethernet 전용 프로토콜 PC와 통신 방법 _KO_V1_공개.pdf" />
 		<None Include="Documents\User's Manual_XGT FEnet_V2.30.pdf" />
+
+		<Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
 		<Content Include="Documents\Performance.txt" />
 		<Content Include="Documents\LS protocol.txt" />
 		<Content Include="Documents\ToDo.txt" />

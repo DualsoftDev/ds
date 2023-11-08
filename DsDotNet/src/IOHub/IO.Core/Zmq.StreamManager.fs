@@ -29,13 +29,16 @@ module internal ZmqStreamManager =
             id |> ByteConverter.ToBytes |> reverseBytesOnDemand isDifferentEndian |> x.SendMoreFrame
 
     type NetMQFrame with
+        /// NetMQFrame 의 Buffer 로부터 int 값을 읽어서 반환
         member x.GetInt32(reverse:bool) = x.Buffer |> reverseBytesOnDemand reverse |> BitConverter.ToInt32
+        /// NetMQFrame 의 Buffer 로부터 type 'T 의 값들을 읽어서 array 로 반환
         member x.GetArray<'T>(reverse:bool) = ByteConverter.BytesToTypeArray<'T>(x.Buffer, reverse)
 
-
+    /// Client 고유 id 구분자 type.  byte[]
     type ClientIdentifier = byte[]
     let clientIdentifierToString (clientId:ClientIdentifier) = clientId |> map string |> String.concat "-"
 
+    /// client 가 server 에 요청할 때의 정보 관리.  client id 및 request id.
     type ClientRequestInfo(clientId:ClientIdentifier, requestId:int) = 
         interface IClientRequestInfo
         member x.ClientId = clientId

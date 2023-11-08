@@ -172,7 +172,8 @@ module EdgeModule =
                     match getPure v with 
                     | :? Real    -> ()
                     | :? RealExF -> ()
-                    | _ -> failwithlog $"Reset Edge  {edge.Source.Name} |> {edge.Target.Name} [reset edge using Real or RealEx]"
+                    | _ -> failwithlog $"Reset 연결은 Work 타입에만 연결가능합니다. \t[{edge.Source.Name} |> {edge.Target.Name}]"
+                    //| _ -> failwithlog $"ResetEdge can only be used on Type Work \t[{edge.Source.Name} |> {edge.Target.Name}]"
             ))
 
         if bRoot  
@@ -184,7 +185,8 @@ module EdgeModule =
                     | :? Real    -> ()
                     | :? RealExF -> ()
                     | :? CallSys -> ()
-                    | _ -> failwithlog $"Start Edge {edge.Source.Name} |> {edge.Target.Name} [start target can't not use Call[Action-Work그룹설정확인]]"
+                    | _ -> failwithlog $"Action 시작 연결은 Work 내에서만 가능합니다. Work-Action 그룹작업이 필요합니다. [{edge.Source.Name} > {edge.Target.Name}]"
+                    //| _ -> failwithlog $"The 'Action' start command must occur within the 'Work'. ((Work-Action Group work is required.))[{edge.Source.Name} > {edge.Target.Name}]"
                 )
 
     let validateSystemEdge(system:DsSystem) =

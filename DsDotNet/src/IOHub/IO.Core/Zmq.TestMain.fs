@@ -206,7 +206,11 @@ module ZmqTestModule =
             failwith "ERROR"
 
  
-        clientKeyboardLoop client cts.Token
+        // 서버 직접 접근 API test
+        serverKeyboardLoop server cts.Token
+
+        // Client 경유 API test
+        //clientKeyboardLoop client cts.Token
 
         while(not server.IsTerminated) do
             logDebug("Waiting server terminated...")

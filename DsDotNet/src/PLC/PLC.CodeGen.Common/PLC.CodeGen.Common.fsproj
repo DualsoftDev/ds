@@ -8,9 +8,11 @@
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
         <OtherFlags>--warnon:1182</OtherFlags>
-    </PropertyGroup>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
 		<Compile Include="Prelude\FakeTypes.fs" />
 		<Compile Include="Prelude\Constants.fs" />
 		<Compile Include="Prelude\PLCStorageManager.fs" />

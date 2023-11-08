@@ -8,9 +8,6 @@
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
         <AssemblyVersion>1.0.16</AssemblyVersion>
-      
-    </PropertyGroup>
-        <AssemblyVersion>1.0.15</AssemblyVersion>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 	</PropertyGroup>
 

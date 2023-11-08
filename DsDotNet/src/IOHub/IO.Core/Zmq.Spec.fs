@@ -1,5 +1,6 @@
 namespace IO.Core
 open System
+open NetMQ
 open System.IO
 open Dual.Common.Core.FS
 open IO.Spec
@@ -110,3 +111,32 @@ module rec ZmqSpec =
             match x.Vendor.Location with
             | "" -> x.Name
             | _ as l -> $"{l}/{x.Name}"
+
+    type IOutgoingSocket with
+        member x.SendFrameWithRequestId(id:int) =
+            id |> ByteConverter.ToBytes |> x.SendFrame
+        member x.SendMoreFrameWithRequestId(id:int) =
+            id |> ByteConverter.ToBytes |> x.SendMoreFrame
+
+        member x.SendFrameWithRequestIdAndEndian(id:int, isDifferentEndian:bool) =
+            id |> ByteConverter.ToBytes |> reverseBytesOnDemand isDifferentEndian |> x.SendFrame
+        member x.SendMoreFrameWithRequestIdAndEndian(id:int, isDifferentEndian:bool) =
+            id |> ByteConverter.ToBytes |> reverseBytesOnDemand isDifferentEndian |> x.SendMoreFrame
+
+    type NetMQFrame with
+        /// NetMQFrame 의 Buffer 로부터 int 값을 읽어서 반환
+        member x.GetInt32(reverse:bool) = x.Buffer |> reverseBytesOnDemand reverse |> BitConverter.ToInt32
+        /// NetMQFrame 의 Buffer 로부터 type 'T 의 값들을 읽어서 array 로 반환
+        member x.GetArray<'T>(reverse:bool) = ByteConverter.BytesToTypeArray<'T>(x.Buffer, reverse)
+
+
+type IClientRequestInfo = interface end
+type IIOChangeInfo =
+    abstract member ClientRequestInfo : IClientRequestInfo
+    abstract member IOFileSpec : IOFileSpec
+    abstract member Offsets : int[]
+    abstract member Value : obj
+    abstract member MemoryType : MemoryType
+
+
+

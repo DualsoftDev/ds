@@ -2,38 +2,10 @@ namespace IO.Core
 open System
 open System.IO
 open Dual.Common.Core.FS
-open NetMQ
 open System.Reactive.Subjects
-
-type IClientRequestInfo = interface end
-type IIOChangeInfo =
-    abstract member ClientRequestInfo : IClientRequestInfo
-    abstract member IOFileSpec : IOFileSpec
-    abstract member Offsets : int[]
-    abstract member Value : obj
-    abstract member MemoryType : MemoryType
-
-
 
 [<AutoOpen>]
 module internal ZmqStreamManager =
-    type IOutgoingSocket with
-        member x.SendFrameWithRequestId(id:int) =
-            id |> ByteConverter.ToBytes |> x.SendFrame
-        member x.SendMoreFrameWithRequestId(id:int) =
-            id |> ByteConverter.ToBytes |> x.SendMoreFrame
-
-        member x.SendFrameWithRequestIdAndEndian(id:int, isDifferentEndian:bool) =
-            id |> ByteConverter.ToBytes |> reverseBytesOnDemand isDifferentEndian |> x.SendFrame
-        member x.SendMoreFrameWithRequestIdAndEndian(id:int, isDifferentEndian:bool) =
-            id |> ByteConverter.ToBytes |> reverseBytesOnDemand isDifferentEndian |> x.SendMoreFrame
-
-    type NetMQFrame with
-        /// NetMQFrame 의 Buffer 로부터 int 값을 읽어서 반환
-        member x.GetInt32(reverse:bool) = x.Buffer |> reverseBytesOnDemand reverse |> BitConverter.ToInt32
-        /// NetMQFrame 의 Buffer 로부터 type 'T 의 값들을 읽어서 array 로 반환
-        member x.GetArray<'T>(reverse:bool) = ByteConverter.BytesToTypeArray<'T>(x.Buffer, reverse)
-
     /// Client 고유 id 구분자 type.  byte[]
     type ClientIdentifier = byte[]
     let clientIdentifierToString (clientId:ClientIdentifier) = clientId |> map string |> String.concat "-"
@@ -232,8 +204,8 @@ module internal ZmqStreamManager =
 [<AutoOpen>]
 module internal ZmqBufferManagerExtension =
     type IOFileSpec with
-        member x.InitiaizeFile(dir:string) =
-            let path = Path.Combine(dir, x.Name)
+        member x.InitiaizeFile(baseDir:string) =
+            let path = Path.Combine(baseDir, x.Name)
             let mutable fs:FileStream = null
             if (File.Exists path) then
                 // ensure that the file has the correct length

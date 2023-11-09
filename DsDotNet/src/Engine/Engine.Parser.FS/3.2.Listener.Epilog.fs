@@ -229,6 +229,15 @@ module EtcListenerModule =
                     safetyConditions.Iter(fun sc -> holder.SafetyConditions.Add(sc) |> verifyM $"Duplicated safety condition[{ (sc.Core :?> INamed).Name}]")
                 } |> ignore
 
+
+        //DsSystem.Variable 여기에 저장 및 불러오기로 이동
+        member x.ProcessVariableDef(context:VariableDefContext) =
+            let varName = context.TryFindFirstChild<VarNameContext>().Value.GetText()
+            let varType = context.TryFindFirstChild<VarTypeContext>().Value.GetText()
+            let init    = context.TryFindFirstChild<ArgumentContext>().Value.GetText()
+            x.TheSystem.Variables.Add(new VariableData(varName, varType|>textToDataType, init))
+
+
         //member private x.CreateFunctionApplication(context:FunApplicationContext):FunctionApplication =
         //    let funName = context.TryFindFirstChild<FunNameContext>().Value.GetText()
         //    let argGroups =
@@ -241,12 +250,7 @@ module EtcListenerModule =
 
         //    FunctionApplication(funName, argGroups)
 
-        //DsSystem.OriginalCodeBlocks 여기에 저장 및 불러오기로 이동
-        //member x.ProcessVariableDef(context:VariableDefContext) =
-        //    let varName = context.TryFindFirstChild<VarNameContext>().Value.GetText()
-        //    let varType = context.TryFindFirstChild<VarTypeContext>().Value.GetText()
-        //    let init    = context.TryFindFirstChild<ArgumentContext>().Value.GetText()
-        //    x.TheSystem.Variables.Add(new VariableData(varName, varType, init))
+
 
         //TaskDev 여기에 저장 및 불러오기로 이동
         //member x.ProcessCommandDef(context:CommandDefContext) =

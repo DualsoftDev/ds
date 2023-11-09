@@ -139,7 +139,7 @@ module PPTObjectModule =
             }
 
     let nameCheck(shape:Shape, nodeType:NodeType, iPage:int) =
-        let name = GetBracketsReplaceName(shape.InnerText) |> trimSpace
+        let name = GetBracketsRemoveName(shape.InnerText) |> trimSpace
         if name.Contains(";")
             then shape.ErrorName(ErrID._18, iPage)
 
@@ -156,10 +156,10 @@ module PPTObjectModule =
         | OPEN_EXSYS_CALL
         | OPEN_EXSYS_LINK
         | COPY_DEV  ->   let name, number = GetTailNumber(shape.InnerText)
-                         if GetSquareBrackets(name, false).length() = 0
+                         if GetSquareBrackets(name, false).IsNone
                          then  shape.ErrorName(ErrID._7, iPage)
                          try
-                            GetBracketsReplaceName(name)+".pptx" |> PathManager.getValidFile |> ignore
+                            GetBracketsRemoveName(name)+".pptx" |> PathManager.getValidFile |> ignore
                          with
                          | ex -> shape.ErrorName(ex.Message, iPage)
 
@@ -226,10 +226,9 @@ module PPTObjectModule =
                     jobInfos.Add(copy, [copy]|>HashSet))
 
         let updateDeviceIF(text:string)      =
-            ifName <- GetBracketsReplaceName(text) |> trimSpace
-            let txrx = GetSquareBrackets(shape.InnerText, false)
-            if(txrx.length() > 0)
-            then
+            ifName <- GetBracketsRemoveName(text) |> trimSpace
+            match GetSquareBrackets(shape.InnerText, false)  with
+            |Some txrx ->
                 if(txrx.Contains('~'))
                 then
                     let txs = (txrx.Split('~')[0])
@@ -238,21 +237,25 @@ module PPTObjectModule =
                     ifRXs  <- rxs.Split(';').Where(fun f->f=""|>not) |> trimStartEndSeq |> Seq.filter(fun f->f="_"|>not) |> HashSet
                 else
                     shape.ErrorName(ErrID._43, iPage)
-            else
-                shape.ErrorName(ErrID._53, iPage)
+            |None ->
+                    shape.ErrorName(ErrID._53, iPage)
 
         let updateLinkIF(text:string)      =
-            ifName <- GetBracketsReplaceName(text) |> trimSpace
+            ifName <- GetBracketsRemoveName(text) |> trimSpace
             let txrx = GetSquareBrackets(shape.InnerText, false)
-            if(txrx.length() > 0)
+            if(txrx.IsSome)
             then
-                ifTXs  <- txrx.Split(';').Where(fun f->f=""|>not) |> trimStartEndSeq |> Seq.filter(fun f->f="_"|>not) |> HashSet
+                ifTXs  <- txrx.Value.Split(';').Where(fun f->f=""|>not) |> trimStartEndSeq |> Seq.filter(fun f->f="_"|>not) |> HashSet
             else
                 shape.ErrorName(ErrID._53, iPage)
 
         let getBracketItems (name:string) =
             name.Split('[').Where(fun w->w <> "")
-            |> Seq.map(fun f->  GetBracketsReplaceName("["+f), GetSquareBrackets("["+f, true))
+            |> Seq.map(fun f-> 
+                    match   GetSquareBrackets("["+f, true) with
+                    |Some item -> GetBracketsRemoveName("["+f), item
+                    |None ->      GetBracketsRemoveName("["+f), ""
+                            )
 
         do
 
@@ -264,8 +267,10 @@ module PPTObjectModule =
                     else REAL
                 elif(shape.CheckHomePlate())
                 then
-                    if GetSquareBrackets(shape.InnerText, false).Contains("~")
-                    then IF_DEVICE else IF_LINK
+                    match GetSquareBrackets(shape.InnerText, false) with
+                    |Some text -> if text.Contains("~") then IF_DEVICE else IF_LINK
+                    |None ->IF_LINK
+                   
 
                 elif(shape.CheckFoldedCornerPlate())
                 then OPEN_EXSYS_CALL
@@ -281,24 +286,26 @@ module PPTObjectModule =
             
             if nodeType = CALL
             then name <-  GetHeadBracketRemoveName(shape.InnerText)  |> trimSpace
-            else name <-  GetBracketsReplaceName(shape.InnerText)  |> trimSpace
+            else name <-  GetBracketsRemoveName(shape.InnerText)  |> trimSpace
 
             nameCheck (shape, nodeType, iPage)
 
 
             match nodeType with
             |CALL|REAL ->
-                     GetSquareBrackets(shape.InnerText, true )
-                     |> fun text -> if text = ""|>not then updateSafety text
+                     match GetSquareBrackets(shape.InnerText, true) with
+                     | Some text ->updateSafety text
+                     | None -> ()
             |IF_DEVICE ->   updateDeviceIF  shape.InnerText
             |IF_LINK   ->   updateLinkIF    shape.InnerText
             |OPEN_EXSYS_CALL
             |OPEN_EXSYS_LINK
             |COPY_DEV ->
                      let name, number = GetTailNumber(shape.InnerText)
-                     GetSquareBrackets(name, false)
-                        |> fun text ->
-                            updateCopySys  (text ,(GetBracketsReplaceName(name) |> trimSpace), number)
+                     match GetSquareBrackets(name, false) with
+                     | Some text -> updateCopySys  (text ,(GetBracketsRemoveName(name) |> trimSpace), number)
+                     | None -> ()
+                           
 
             |BUTTON ->    getBracketItems(shape.InnerText).ForEach(fun (n, t) -> btnDefs.Add(n|>TrimSpace, t|> getBtnType))
             |LAMP   ->    getBracketItems(shape.InnerText).ForEach(fun (n, t) -> lampDefs.Add(n|>TrimSpace, t|> getLampType))
@@ -320,12 +327,19 @@ module PPTObjectModule =
         member x.IfRXs   = ifRXs
         member x.NodeType = nodeType
         member x.PageTitle    = pageTitle
-        //member x.IsLibCall    =  nodeType = CALL && name.Contains '.' 
         member x.CallDevName = $"{pageTitle}_{name.Split('.')[0]|>trimSpace}"
         member x.CallApiName = 
                     if name.Contains '$'
                     then failwithf $"not support '$' replace '.' {name}"
-                    else $"{name.Split('.')[1]|>trimSpace}"
+                    else 
+                         let apiName = name.Split('.')[1]|>trimSpace
+                         match GetSquareBrackets(apiName, false) with
+                         |Some apiType ->
+                            match apiType with
+                            |""|"_"|"N" -> GetLastBracketRelaceName(apiName, "-")
+                            | _-> apiName
+                         |None -> 
+                            apiName
 
         member val Id =  shape.GetId()
         member val Key =  Objkey(iPage, shape.GetId())

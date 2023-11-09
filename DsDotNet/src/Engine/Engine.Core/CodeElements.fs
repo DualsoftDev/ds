@@ -18,7 +18,7 @@ module CodeElements =
         member _.InitValue = initValue
         member _.ToDsText() =
             let genTargetText name (varType:DataType) value =
-                $"{varType.ToText()} {name} = {value};"
+                $"{name} = ({varType.ToText()} , {value})"
 
             if initValue = "-" then
                 let forcedValue =
@@ -40,7 +40,7 @@ module CodeElements =
             else
                 genTargetText name varType initValue
 
-    let getFunctions (name, text:string) =
+    let getFunctions (text:string) =
         let text = text.Trim().ToLower()
         if not <| text.StartsWith "$"
         then failwith "function text start keyword is '$' ex)$m 100 R100"

@@ -51,23 +51,23 @@ module DsType =
         | Rising  ///구현대기 : TXs(ActionOut) Rising Pulse
 
 
-    let GetSquareBrackets (name: string, bHead: bool) =
+    let GetSquareBrackets (name: string, bHead: bool): string option =
         let pattern = "(?<=\[).*?(?=\])"  // 대괄호 안에 내용은 무조건 가져온다
         let matches = System.Text.RegularExpressions.Regex.Matches(name, pattern)
         if bHead then
-            if name.StartsWith("[") && name.Contains("]") then matches.[0].Value else ""
+            if name.StartsWith("[") && name.Contains("]") then Some matches.[0].Value else None
         else
-            if name.EndsWith("]") && name.Contains("[") then matches.[matches.Count - 1].Value else ""
+            if name.EndsWith("]") && name.Contains("[") then Some matches.[matches.Count - 1].Value else None
 
     
    
 
     let getApiActionType(name :string) =
         let endContents = GetSquareBrackets(name, false)
-        if endContents <> ""
+        if endContents.IsSome
         then 
-            match endContents with
-            |"N"|"_"-> ApiActionType.Normal
+            match endContents.Value with
+            |"-"-> ApiActionType.Normal
             |"I"-> ApiActionType.Inverse
             |"P"-> ApiActionType.Push
             |"R"-> ApiActionType.Rising  

@@ -33,7 +33,7 @@ module ImportIOTable =
             let functionUpdate(name, funcText, funcs:HashSet<Func>, tableIO:Data.DataTable, isJob:bool, page) =
                 funcs.Clear()
                 if not <| ((trimSpace funcText) = "" || funcText = "-" ||  funcText = "↑")
-                then getFunctions(name, funcText)
+                then getFunctions(funcText)
                         |> Seq.iter(fun (name, parms) ->
                             if (not<|isJob) && name <> "n"
                             then Office.ErrorPPT(ErrorCase.Name, ErrID._1005, $"{name}", page, 0u)
@@ -62,8 +62,7 @@ module ImportIOTable =
             let updateVar(row:Data.DataRow, tableIO:Data.DataTable, page) =
                 let name      = $"{row.[(int)IOColumn.Name]}"
                 let dataType  = $"{row.[(int)IOColumn.DataType]}" |> textToDataType
-                let initValue = $"{row.[(int)IOColumn.Output]}"
-                let variableData = VariableData(name, dataType, initValue)
+                let variableData = VariableData(name, dataType, "-")
                 sys.Variables.Add(variableData)
 
             let updateBtn(row:Data.DataRow, btntype:BtnType, tableIO:Data.DataTable, page) =

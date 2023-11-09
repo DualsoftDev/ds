@@ -34,8 +34,8 @@ module ModelParser =
             listener.ProcessSafetyBlock(ctx)
             
         //DsSystem.OriginalCodeBlocks 여기에 저장 및 불러오기로 이동
-        //for ctx in sysctx.Descendants<VariableDefContext>() do
-        //    listener.ProcessVariableDef(ctx)
+        for ctx in sysctx.Descendants<VariableDefContext>() do
+            listener.ProcessVariableDef(ctx)
 
         //for ctx in sysctx.Descendants<CommandDefContext>() do
         //    listener.ProcessCommandDef(ctx)

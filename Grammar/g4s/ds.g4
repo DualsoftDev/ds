@@ -279,7 +279,7 @@ variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';
     varIdentifier: IDENTIFIER1;
     intValue: INTEGER;
     floatValue:FLOAT;
-    varType: 'int' | 'word' | 'float' | 'dword';
+    varType: 'Boolean' | 'Char' | 'Single' | 'Double'| 'Int16' | 'Int32' | 'Int64' | 'SByte'| 'String'| 'UInt16'| 'UInt32'| 'UInt64'| 'Byte';
 
 jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|linkListing|funcSet)* RBRACE;
     callListing:

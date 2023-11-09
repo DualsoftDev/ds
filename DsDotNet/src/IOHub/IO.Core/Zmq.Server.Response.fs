@@ -7,13 +7,6 @@ open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module internal ZmqServerResponseImplModule =
-    /// bit, byte, word, dword, qword 의 offset.
-    /// - bit offset 은 byteOffset * 8 + bitOffset 의 값
-    /// - word offset 은 byteOffset / 2 의 값
-    type Offset = int
-    type ValuesChangeInfo = IOFileSpec * MemoryType * Offset array * obj   // dataType, offset, value
-    type SingleValueChange = ValuesChangeInfo
-
     /// 서버에서 socket message 를 처리후, client 에게 socket 으로 보내기 전에 갖는 result type
     type IResponse = interface end
     type IResponseOK = inherit IResponse
@@ -46,16 +39,12 @@ module internal ZmqServerResponseImplModule =
         inherit StringResponse(cri, message)
         interface IResponseNG
 
-    type WriteResponseOK(cri:ClientRequestInfo, valuesChangeInfo:ValuesChangeInfo) =
+    type WriteResponseOK(cri:ClientRequestInfo, memoryChangeInfo:IMemoryChangeInfo) =
         inherit Response(cri)
-        let ioFIleSpec, contentBitSize, offsets, changedValues = valuesChangeInfo
         interface IResponseOK
-        member x.ChangedValues = changedValues
-        member x.ContentBitSize = contentBitSize
-        member x.Offsets = offsets
-        member x.FIleSpec = ioFIleSpec
+        member x.MemoryChangeInfo = memoryChangeInfo
 
-    type WriteHeterogeniousResponseOK(cri:ClientRequestInfo, spotChanges:SingleValueChange seq) =
+    type WriteHeterogeniousResponseOK(cri:ClientRequestInfo, spotChanges:IMemoryChangeInfo seq) =
         inherit Response(cri)
         interface IResponseOK
         member val SpotChanges = spotChanges |> toArray

@@ -144,9 +144,16 @@ module ZmqTestModule =
         let server, cts = zmqInfo.Server, zmqInfo.CancellationTokenSource
 
         use subs =
-            server.IOChangedObservable.Subscribe(fun change ->
-                for (tag, value) in change.GetTagNameAndValues() do
-                    logDebug $"Tag change detected on server side for {tag}: {value}"
+            server.MemoryChangedObservable.Subscribe(fun change ->
+                match change with
+                | :? IOChangeInfo as change ->
+                    for (tag, value) in change.GetTagNameAndValues() do
+                        logDebug $"Tag change detected on server side for {tag}: {value}"
+                | :? StringChangeInfo as change ->
+                    for (key, value) in change.GetKeysAndValues() do
+                        logDebug $"Tag change detected on server side for {key}: {value}"
+                | _ ->
+                    failwith "ERROR"
                 ())
 
         registerCancelKey cts server
@@ -165,9 +172,16 @@ module ZmqTestModule =
         let server, client, cts = zmqInfo.Server, zmqInfo.Client, zmqInfo.CancellationTokenSource
 
         use subs =
-            server.IOChangedObservable.Subscribe(fun change ->
-                for (tag, value) in change.GetTagNameAndValues() do
-                    logDebug $"Tag change detected on server side for {tag}: {value}"
+            server.MemoryChangedObservable.Subscribe(fun change ->
+                match change with
+                | :? IOChangeInfo as change ->
+                    for (tag, value) in change.GetTagNameAndValues() do
+                        logDebug $"Tag change detected on server side for {tag}: {value}"
+                | :? StringChangeInfo as change ->
+                    for (key, value) in change.GetKeysAndValues() do
+                        logDebug $"Tag change detected on server side for {key}: {value}"
+                | _ ->
+                    failwith "ERROR"
                 ())
 
         let disposables = new CompositeDisposable()

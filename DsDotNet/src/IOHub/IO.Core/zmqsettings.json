@@ -7,7 +7,6 @@
       "Location": "",
       "Dll": "F:\\Git\\ds\\DsDotNet\\src\\IOHub\\ThirdParty.AddressInfo.Provider\\bin\\Debug\\net7.0\\ThirdParty.AddressInfo.Provider.dll",
       "ClassName": "ThirdParty.AddressInfo.Provider.AddressInfoProviderLsXGI",
-      "Accepts": "%[IQM]*",
       "Files": [
         {
           "Name": "I",
@@ -28,7 +27,6 @@
       "Location": "p",
       "Dll": "F:\\Git\\ds\\DsDotNet\\src\\IOHub\\ThirdParty.AddressInfo.Provider\\bin\\Debug\\net7.0\\ThirdParty.AddressInfo.Provider.dll",
       "ClassName": "ThirdParty.AddressInfo.Provider.AddressInfoProviderPaix",
-      "Accepts": "p/[IOio]*",
       "Files": [
         {
           "Name": "I",
@@ -37,6 +35,10 @@
         {
           "Name": "O",
           "Length": 1024
+        },
+        {
+          "Name": "S",
+          "IsStringStorage": true
         }
       ]
     }

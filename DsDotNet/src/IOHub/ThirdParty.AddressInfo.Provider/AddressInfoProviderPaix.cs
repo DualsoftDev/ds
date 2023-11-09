@@ -12,9 +12,9 @@ namespace ThirdParty.AddressInfo.Provider
             try
             {
                 address = address.ToLower().TrimStart('%');
+                memoryType = address[0].ToString();     // "i" or "o"
                 if (address[0] == 'i' || address[0] == 'o')
                 {
-                    memoryType = address[0].ToString();
 
                     string addr = address[2..];
                     offset = int.Parse(addr);
@@ -28,6 +28,11 @@ namespace ThirdParty.AddressInfo.Provider
                         _ => throw new Exception($"Unknown content bit size: {address[1]}"),
                     };
 
+                    return true;
+                }
+                else if (address[0] == 's')
+                {
+                    contentBitLength = 1000;    // 1000 == MemoryType.String
                     return true;
                 }
             }

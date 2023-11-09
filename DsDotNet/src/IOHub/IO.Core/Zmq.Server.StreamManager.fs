@@ -4,6 +4,16 @@ open System.IO
 open Dual.Common.Core.FS
 open System.Reactive.Subjects
 
+open Dapper
+open Microsoft.Data.Sqlite
+open Dual.Common.Core.FS
+open Dual.Common.Db
+open System.Data
+open System.Threading.Tasks
+open System.Collections.Generic
+open System.Collections.Concurrent
+open Microsoft.Data.Sqlite
+
 [<AutoOpen>]
 module internal ZmqStreamManager =
     /// Client 고유 id 구분자 type.  byte[]
@@ -70,6 +80,19 @@ module internal ZmqStreamManager =
         member val Offsets = offsets |> toArray
         member x.Value = value
         member x.MemoryType = memoryType
+
+    type StringChangeInfo(clientRequestInfo:ClientRequestInfo, fileSpec:IOFileSpec, keys:string seq, value:obj) =
+        interface IStringChangeInfo with
+            member x.ClientRequestInfo = x.ClientRequestInfo :> IClientRequestInfo
+            member x.IOFileSpec = fileSpec
+            member x.Keys = x.Keys
+            member x.Value = value
+            
+        member x.ClientRequestInfo = clientRequestInfo
+        member x.IOFileSpec = fileSpec
+
+        member val Keys = keys |> toArray
+        member x.Value = value
 
     type WriteOK(changes:IOChangeInfo seq) =
         member val Changes = changes |> toArray
@@ -203,27 +226,55 @@ module internal ZmqStreamManager =
 
 [<AutoOpen>]
 module internal ZmqBufferManagerExtension =
+    let createConnection(connStr) =
+        new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
+
     type IOFileSpec with
         member x.InitiaizeFile(baseDir:string) =
-            let path = Path.Combine(baseDir, x.Name)
-            let mutable fs:FileStream = null
-            if (File.Exists path) then
-                // ensure that the file has the correct length
-                fs <- new FileStream(path, FileMode.Open, FileAccess.ReadWrite)
-                if (fs.Length <> x.Length) then
-                    failwithf($"File [{path}] length mismatch : {fs.Length} <> {x.Length}")
+            if x.IsStringStorage then
+                // database table 초기화
+                let path = Path.Combine(baseDir, $"{x.Name}.sqlite3") |> Path.GetFullPath
+                x.ConnectionString <- $"Data Source={path}"
+                use conn = createConnection(x.ConnectionString)
+                let sqlCreateSchema = """
+                    CREATE TABLE IF NOT EXISTS [string] (
+                        [key] TEXT PRIMARY KEY,
+                        [value] TEXT
+                    );
+                """
+                conn.Execute sqlCreateSchema |> ignore
+                noop()
             else
-                logInfo($"Creating new file : {path}")
-                Directory.CreateDirectory(Path.GetDirectoryName(path)) |> ignore
-                // create zero-filled file with length = x.Length
-                fs <- new FileStream(path, FileMode.Create, FileAccess.ReadWrite)
-                let buffer = Array.zeroCreate<byte> x.Length
-                fs.Write(buffer, 0, x.Length)
-                fs.Seek(0, SeekOrigin.Begin) |> ignore
-                fs.SetLength(x.Length)
-                Console.WriteLine($"File length : {fs.Length}")
-                fs.Flush()
-            x.FileStream <- fs
+                let path = Path.Combine(baseDir, x.Name)
+                let mutable fs:FileStream = null
+                if (File.Exists path) then
+                    // ensure that the file has the correct length
+                    fs <- new FileStream(path, FileMode.Open, FileAccess.ReadWrite)
+                    if (fs.Length <> x.Length) then
+                        failwithf($"File [{path}] length mismatch : {fs.Length} <> {x.Length}")
+                else
+                    logInfo($"Creating new file : {path}")
+                    Directory.CreateDirectory(Path.GetDirectoryName(path)) |> ignore
+                    // create zero-filled file with length = x.Length
+                    fs <- new FileStream(path, FileMode.Create, FileAccess.ReadWrite)
+                    let buffer = Array.zeroCreate<byte> x.Length
+                    fs.Write(buffer, 0, x.Length)
+                    fs.Seek(0, SeekOrigin.Begin) |> ignore
+                    fs.SetLength(x.Length)
+                    Console.WriteLine($"File length : {fs.Length}")
+                    fs.Flush()
+                x.FileStream <- fs
+        member x.ReadString(key:string) =
+            use conn = createConnection(x.ConnectionString)
+            let values = conn.Query<string>("SELECT [value] FROM [string] WHERE key = @Key", {| Key = key |}) |> toArray
+            if values.Length = 0 then
+                failwithf $"String tag not found: {key}"
+            values[0]
+
+        member x.WriteString(key:string, value:string) =
+            use conn = createConnection(x.ConnectionString)
+            let sqlUpdate = "INSERT OR REPLACE INTO [string] ([key], [value]) VALUES (@Key, @Value)"
+            conn.Execute(sqlUpdate, {| Key = key; Value = value |}) |> ignore
 
     type StreamManager with
         member x.VerifyIndices(clientRequstInfo:ClientRequestInfo, memoryType:MemoryType, offset:int) =
@@ -247,6 +298,10 @@ module internal ZmqBufferManagerExtension =
             if indices.Length <> numValues then
                 raiseWithClientId clientRequstInfo $"The number of indices and values should be the same."
             
+    type IStringChangeInfo with
+        member x.GetKeysAndValues() =
+            Array.zip x.Keys (x.Value :?> string array)
+
     type IIOChangeInfo with
         member x.GetTagNameAndValues() =
             let fs, dataType, offsets, objValues = x.IOFileSpec, x.MemoryType, x.Offsets, x.Value

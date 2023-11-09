@@ -60,23 +60,30 @@ module internal ZmqServerImplModule =
     let readAddress(clientRequstInfo:ClientRequestInfo, address:string) : obj =
         match address with
         | AddressPattern ap ->
-            let offset = ap.Offset
-            let bufferManager = ap.IOFileSpec.StreamManager :?> StreamManager
-            bufferManager.VerifyOffsets(clientRequstInfo, ap.MemoryType, [|offset|])
+            let fs = ap.IOFileSpec
+            if ap.MemoryType = MemoryType.String then
+                // address: e.g "p/shello" ==> 'p' vendor 의 's' file 의 'hello' 문자열
+                let keyPrefix = fs.GetPath()   // e.g "p/s
+                let key = address.Substring(keyPrefix.Length) // e.g "hello"
+                fs.ReadString key
+            else
+                let offset = ap.Offset
+                let bufferManager = fs.StreamManager :?> StreamManager
+                bufferManager.VerifyOffsets(clientRequstInfo, ap.MemoryType, [|offset|])
 
-            match ap.MemoryType with
-            | MemoryType.Bit   -> bufferManager.readBit(offset) :> obj
-            | MemoryType.Byte  -> bufferManager.readU8(offset)
-            | MemoryType.Word  -> bufferManager.readU16(offset)
-            | MemoryType.DWord -> bufferManager.readU32(offset)
-            | MemoryType.LWord -> bufferManager.readU64(offset)
-            | _ ->
-                failwithf($"Unknown data type : {ap.MemoryType}")
+                match ap.MemoryType with
+                | MemoryType.Bit   -> bufferManager.readBit(offset) :> obj
+                | MemoryType.Byte  -> bufferManager.readU8(offset)
+                | MemoryType.Word  -> bufferManager.readU16(offset)
+                | MemoryType.DWord -> bufferManager.readU32(offset)
+                | MemoryType.LWord -> bufferManager.readU64(offset)
+                | _ ->
+                    failwithf($"Unknown data type : {ap.MemoryType}")
         | _ ->
             failwithf($"Unknown address pattern : {address}")
 
     /// "write p/ob1=1 p/ix2=0" : 비효율성 인정한 version.  buffer manager 및 dataType 의 다양성 공존
-    let writeAddressWithValue(clientRequstInfo:ClientRequestInfo, addressWithAssignValue:string) : SingleValueChange =
+    let writeAddressWithValue(clientRequstInfo:ClientRequestInfo, addressWithAssignValue:string) : IMemoryChangeInfo =
         let cri = clientRequstInfo
         let parseBool (s:string) =
             match s.ToLower() with
@@ -87,20 +94,32 @@ module internal ZmqServerImplModule =
         | AddressAssignPattern (addressPattern, value) ->
             let ap = addressPattern
             let offset = ap.Offset
-            let bufferManager = ap.IOFileSpec.StreamManager :?> StreamManager
-            bufferManager.VerifyOffsets(cri, ap.MemoryType, [|offset|])
+            let fs = ap.IOFileSpec
+            if ap.MemoryType = MemoryType.String then
+                // addressPattern: e.g "p/shello=world" ==> 'p' vendor 의 's' file 의 'hello' 문자열 key에 'world' 문자열을 쓰기
+                let keyPrefix = fs.GetPath()   // e.g "p/s
+                let key =
+                    match addressWithAssignValue with
+                    | RegexPattern "([^=]+)=(\w+)" [keyPart; value] ->
+                        keyPart.Substring(keyPrefix.Length) // e.g "hello"
+                    | _ -> failwith $"Invalid format: {addressWithAssignValue}"
+                fs.WriteString(key, value)
+                StringChangeInfo(cri, fs, [|key|], [|value|])
+            else
+                let bufferManager = fs.StreamManager :?> StreamManager
+                bufferManager.VerifyOffsets(cri, ap.MemoryType, [|offset|])
 
-            let mutable objValue:obj = null
-            match ap.MemoryType with
-            | MemoryType.Bit   -> objValue <- [|parseBool(value)|];    bufferManager.writeBit (cri, offset, parseBool(value))
-            | MemoryType.Byte  -> objValue <- [|Byte.Parse(value)|];   bufferManager.writeU8s cri ([offset, Byte.Parse(value)])
-            | MemoryType.Word  -> objValue <- [|UInt16.Parse(value)|]; bufferManager.writeU16 cri (offset, UInt16.Parse(value))
-            | MemoryType.DWord -> objValue <- [|UInt32.Parse(value)|]; bufferManager.writeU32 cri (offset, UInt32.Parse(value))
-            | MemoryType.LWord -> objValue <- [|UInt64.Parse(value)|]; bufferManager.writeU64 cri (offset, UInt64.Parse(value))
-            | _ -> failwithf($"Unknown data type : {ap.MemoryType}")
+                let mutable objValue:obj = null
+                match ap.MemoryType with
+                | MemoryType.Bit   -> objValue <- [|parseBool(value)|];    bufferManager.writeBit (cri, offset, parseBool(value))
+                | MemoryType.Byte  -> objValue <- [|Byte.Parse(value)|];   bufferManager.writeU8s cri ([offset, Byte.Parse(value)])
+                | MemoryType.Word  -> objValue <- [|UInt16.Parse(value)|]; bufferManager.writeU16 cri (offset, UInt16.Parse(value))
+                | MemoryType.DWord -> objValue <- [|UInt32.Parse(value)|]; bufferManager.writeU32 cri (offset, UInt32.Parse(value))
+                | MemoryType.LWord -> objValue <- [|UInt64.Parse(value)|]; bufferManager.writeU64 cri (offset, UInt64.Parse(value))
+                | _ -> failwithf($"Unknown data type : {ap.MemoryType}")
 
-            let fs = bufferManager.FileSpec
-            fs, ap.MemoryType, [|offset|], objValue
+                let fs = bufferManager.FileSpec
+                IOChangeInfo(cri, fs, ap.MemoryType, [|offset|], objValue)
 
         | _ -> failwithf($"Unknown address with assignment pattern : {addressWithAssignValue}")
 

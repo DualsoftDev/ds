@@ -3,35 +3,46 @@ namespace Client
 open IO.Core
 open System
 open System.Threading
-open Dual.Common.Core.FS
 open ZmqTestModule
 
 module ZmqTestClient =
     let onTagChanged (change:TagChangedInfo) =
-        Console.WriteLine($"Total {change.Offsets.Length} tag changed on {change.Path} with bitLength={change.ContentBitLength}");
-        match change.ContentBitLength with
-        | 1 ->
-            let values = change.Values :?> bool[]
-            for (i, offset) in change.Offsets |> indexed do
-                Console.WriteLine($"  {offset}: {values[i]}");
-        | 8 ->
-            let values = change.Values :?> byte[]
-            for (i, offset) in change.Offsets |> indexed do
-                Console.WriteLine($"  {offset}: {values[i]}");
-        | 16 ->
-            let values = change.Values :?> uint16[]
-            for (i, offset) in change.Offsets |> indexed do
-                Console.WriteLine($"  {offset}: {values[i]}");
-        | 32 ->
-            let values = change.Values :?> uint32[]
-            for (i, offset) in change.Offsets |> indexed do
-                Console.WriteLine($"  {offset}: {values[i]}");
-        | 64 ->
-            let values = change.Values :?> uint64[]
-            for (i, offset) in change.Offsets |> indexed do
-                Console.WriteLine($"  {offset}: {values[i]}");
+        match change with
+        | :? IOTagChangedInfo as change ->
+            let n = change.Offsets.Length
+            let offsets = change.Offsets
+            let values = change.Values
+            Console.WriteLine($"Total {n} tag changed on {change.Path} with bitLength={change.ContentBitLength}");
+            match change.ContentBitLength with
+            | 1 ->
+                let values = values :?> bool[]
+                for i = 0 to n - 1 do
+                    Console.WriteLine($"  {offsets[i]}: {values[i]}");
+            | 8 ->
+                let values = values :?> byte[]
+                for i = 0 to n - 1 do
+                    Console.WriteLine($"  {offsets[i]}: {values[i]}");
+            | 16 ->
+                let values = values :?> uint16[]
+                for i = 0 to n - 1 do
+                    Console.WriteLine($"  {offsets[i]}: {values[i]}");
+            | 32 ->
+                let values = values :?> uint32[]
+                for i = 0 to n - 1 do
+                    Console.WriteLine($"  {offsets[i]}: {values[i]}");
+            | 64 ->
+                let values = values :?> uint64[]
+                for i = 0 to n - 1 do
+                    Console.WriteLine($"  {offsets[i]}: {values[i]}");
+            | _ ->
+                failwith "Not supported"
+        | :? StringTagChangedInfo as change ->
+            let n = change.Keys.Length
+            Console.WriteLine($"Total {n} string tag changed on {change.Path}");
+            for i = 0 to n - 1 do
+                Console.WriteLine($"  {change.Keys[i]}: {change.Values[i]}")
         | _ ->
-            failwith "Not supported"
+            failwith "ERROR"
 
     [<EntryPoint>]
     let main _ = 

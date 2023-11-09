@@ -38,10 +38,19 @@ module internal ZmqClient =
         member x.CheckRequestId(id:int) = verify(id = x[MultiMessageFromServer.RequestId].ConvertToInt32())
 
 /// server 로부터 공지 받은 Tag 변경 정보
-type TagChangedInfo(path:string, contentBitLength:int, offsets:int[], values:obj) =
+[<AbstractClass>]
+type TagChangedInfo(path:string, contentBitLength:int, values:obj) =
     member x.Path = path
     member x.ContentBitLength = contentBitLength
+
+type IOTagChangedInfo(path:string, contentBitLength:int, offsets:int[], values:obj) =
+    inherit TagChangedInfo(path, contentBitLength, values)
     member x.Offsets = offsets
+    member x.Values = values
+
+type StringTagChangedInfo(path:string, contentBitLength:int, keys:string[], values:string[]) =
+    inherit TagChangedInfo(path, contentBitLength, values)
+    member x.Keys = keys
     member x.Values = values
 
 /// FSharp 버젼 Client
@@ -100,19 +109,27 @@ type Client(serverAddress:string) =
                         .SendFrame("PONG")
                 | "NOTIFY" ->
                     let contentBitLength = mq[ContentBitLength].GetInt32(needEndianFix) // e.g 1, 8, 16, 32, 64
-                    let offsets   = mq[Offsets].GetArray<int>(needEndianFix)       // bitoffset or byteoffset
-                    let path      = mq[Name].ConvertToString()  // e.g "p/o"
-                    let values:obj =
-                        match contentBitLength with
-                        |  1 -> mq[Values].Buffer |> map (fun b -> b = 0uy) |> box
-                        |  8 -> mq[Values].Buffer |> box
-                        | 16 -> mq[Values].GetArray<uint16>(needEndianFix) |> box
-                        | 32 -> mq[Values].GetArray<uint32>(needEndianFix) |> box
-                        | 64 -> mq[Values].GetArray<uint64>(needEndianFix) |> box
-                        |  _ -> failwith "ERROR"
+                    let path = mq[Name].ConvertToString()  // e.g "p/o"
+                    if contentBitLength = int MemoryType.String then
+                        let key = mq[Offsets].ConvertToString()
+                        let value = mq[Values].ConvertToString()
+                        logDebug $"Got tag changed notification: {path} = {value}"
 
-                    TagChangedInfo(path, contentBitLength, offsets, values)
-                    |> tagChangedSubject.OnNext
+                        StringTagChangedInfo(path, contentBitLength, [|key|], [|value|])
+                        |> tagChangedSubject.OnNext
+                    else
+                        let offsets   = mq[Offsets].GetArray<int>(needEndianFix)       // bitoffset or byteoffset
+                        let values:obj =
+                            match contentBitLength with
+                            |  1 -> mq[Values].Buffer |> map (fun b -> b = 0uy) |> box
+                            |  8 -> mq[Values].Buffer |> box
+                            | 16 -> mq[Values].GetArray<uint16>(needEndianFix) |> box
+                            | 32 -> mq[Values].GetArray<uint32>(needEndianFix) |> box
+                            | 64 -> mq[Values].GetArray<uint64>(needEndianFix) |> box
+                            |  _ -> failwith "ERROR"
+
+                        IOTagChangedInfo(path, contentBitLength, offsets, values)
+                        |> tagChangedSubject.OnNext
                 | _ ->
                     failwithlogf $"Unknown command: {command}"
 

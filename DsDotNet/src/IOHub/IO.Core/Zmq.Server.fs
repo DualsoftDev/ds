@@ -19,20 +19,35 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
         
     let port = ioSpec_.ServicePort
 
-    let ioChangedSubject = new Subject<IIOChangeInfo>()
+    let memoryChangedSubject = new Subject<IMemoryChangeInfo>()
 
-    let notifyIoChange(ioChange:IOChangeInfo) =
-            Console.WriteLine($"change by client {clientIdentifierToString ioChange.ClientRequestInfo.ClientId}");
-            let notiTargetClients =
-                clients
-                |> filter (fun c -> not <| Enumerable.SequenceEqual(c, ioChange.ClientRequestInfo.ClientId))
-                |> toArray
-            let notifyToClients() =
-                let bm = ioChange.IOFileSpec
+    let notifyIoChange(memChange:IMemoryChangeInfo) =
+        let cri = memChange.ClientRequestInfo :?> ClientRequestInfo
+        Console.WriteLine($"change by client {clientIdentifierToString cri.ClientId}");
+        let notiTargetClients =
+            clients
+            |> filter (fun c -> not <| Enumerable.SequenceEqual(c, cri.ClientId))
+            |> toArray
+        let notifyToClients() =
+            let path = memChange.IOFileSpec.GetPath()
+            match memChange with
+            | :? StringChangeInfo as strChange ->
+                for client in notiTargetClients do
+                    Console.WriteLine($"Notifying change to client {clientIdentifierToString client}");
+                    let key = strChange.Keys[0]
+                    let value = (strChange.Value :?> string array)[0]
+                    
+                    serverSocket
+                        .SendMoreFrame(client)
+                        .SendMoreFrame(-1 |> ByteConverter.ToBytes)
+                        .SendMoreFrame("NOTIFY")
+                        .SendMoreFrame(value) // value
+                        .SendMoreFrame(path)  // name
+                        .SendMoreFrame(int MemoryType.String |> ByteConverter.ToBytes)  // contentBitLength
+                        .SendFrame(key) // offsets
+            | :? IOChangeInfo as ioChange ->
                 let contenetBitLength = int ioChange.MemoryType
-                let criminalClientId = ioChange.ClientRequestInfo.ClientId
                 let bytes = ioChange.GetValueBytes()
-                let path = ioChange.IOFileSpec.GetPath()
                 let offsets = ioChange.Offsets |> ByteConverter.ToBytes<int>
                 for client in notiTargetClients do
                     Console.WriteLine($"Notifying change to client {clientIdentifierToString client}");
@@ -44,9 +59,11 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                         .SendMoreFrame(path)  // name
                         .SendMoreFrame(contenetBitLength |> ByteConverter.ToBytes)  // contentBitLength
                         .SendFrame(offsets) // offsets
+            | _ ->
+                failwith "ERROR"
 
-            notifyToClients()
-            ioChangedSubject.OnNext ioChange
+        notifyToClients()
+        memoryChangedSubject.OnNext memChange
     do
         ioSpec <- ioSpec_
         for v in ioSpec.Vendors do
@@ -71,7 +88,7 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
 
     member x.IsTerminated with get() = terminated
 
-    member x.IOChangedObservable = ioChangedSubject
+    member x.MemoryChangedObservable = memoryChangedSubject
     member x.Clients = clients
 
     member private x.handleRequest (server:RouterSocket) : IResponse =    // ClientIdentifier * int * IOResult =
@@ -114,11 +131,13 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                         logDebug $"Got pong from client {clientIdentifierToString clientId}"
                         ResponseOK()
                     | StartsWith "read" ->      // e.g read p/ob1 p/ow1 p/olw3
-                        noop()
-                        let result =
-                            getArgs() |> map (fun a -> $"{a}={readAddress(cri, a)}")
-                            |> joinWith " "
-                        ReadResponseOK(cri, MemoryType.Undefined, result)
+                        try
+                            let result =
+                                getArgs() |> map (fun a -> $"{a}={readAddress(cri, a)}")
+                                |> joinWith " "
+                            ReadResponseOK(cri, MemoryType.Undefined, result)
+                        with ex ->
+                            StringResponseNG(cri, ex.Message)
                     | StartsWith "write" ->
                         let changes = getArgs() |> map (fun a -> writeAddressWithValue(cri, a))
                         WriteHeterogeniousResponseOK(cri, changes)
@@ -172,12 +191,12 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                             bm.writeBit (cri, offsets[i], values[i])
 
                         bm.Flush()
-                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, MemoryType.Bit, offsets, values))
+                        WriteResponseOK(cri, IOChangeInfo(cri, bm.FileSpec, MemoryType.Bit, offsets, values))
                     | "wb" ->
                         let bm, offsets, byteValues = fetchForWrite mms
                         bm.Verify(cri, MemoryType.Byte, offsets, byteValues.Length)
                         Array.zip offsets byteValues |> bm.writeU8s cri
-                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, MemoryType.Byte, offsets, byteValues))
+                        WriteResponseOK(cri, IOChangeInfo(cri, bm.FileSpec, MemoryType.Byte, offsets, byteValues))
 
                     | "ww" ->
                         let bm, offsets, byteValues = fetchForWrite mms
@@ -185,14 +204,14 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                         bm.Verify(cri, MemoryType.Word, offsets, values.Length)
 
                         Array.zip offsets values |> bm.writeU16s cri
-                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, MemoryType.Word, offsets, values))
+                        WriteResponseOK(cri, IOChangeInfo(cri, bm.FileSpec, MemoryType.Word, offsets, values))
 
                     | "wd" ->
                         let bm, offsets, byteValues = fetchForWrite mms
                         let values = ByteConverter.BytesToTypeArray<uint32>(byteValues)
                         bm.Verify(cri, MemoryType.DWord, offsets, values.Length)
                         Array.zip offsets values |> bm.writeU32s cri
-                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, MemoryType.DWord, offsets, values))
+                        WriteResponseOK(cri, IOChangeInfo(cri, bm.FileSpec, MemoryType.DWord, offsets, values))
 
                     | "wl" ->
                         let bm, offsets, byteValues = fetchForWrite mms
@@ -200,7 +219,7 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                         bm.Verify(cri, MemoryType.LWord, offsets, values.Length)
 
                         Array.zip offsets values |> bm.writeU64s cri
-                        WriteResponseOK(cri, ValuesChangeInfo(bm.FileSpec, MemoryType.LWord, offsets, values))
+                        WriteResponseOK(cri, IOChangeInfo(cri, bm.FileSpec, MemoryType.LWord, offsets, values))
                     | _ ->
                         StringResponseNG(cri, $"ERROR: {command}")
 
@@ -269,12 +288,10 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
 
                         | :? WriteResponseOK as r ->
                             more.SendFrame("OK")
-                            IOChangeInfo(r.ClientRequestInfo, r.FIleSpec, r.ContentBitSize,  r.Offsets, r.ChangedValues) |> notifyIoChange
+                            r.MemoryChangeInfo |> notifyIoChange
                         | :? WriteHeterogeniousResponseOK as r ->
                             more.SendFrame("OK")
-                            for ch in r.SpotChanges do
-                                let fs, dataType, offsets, value = ch
-                                IOChangeInfo(r.ClientRequestInfo, fs, dataType, offsets, value) |> notifyIoChange
+                            r.SpotChanges |> iter notifyIoChange
                         | _ ->
                             failwith "Not Yet!!"
 

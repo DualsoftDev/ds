@@ -158,6 +158,8 @@ module ImportPPTModule =
                 //active는 시스템이름으로 ppt 파일 이름을 사용
                 let fileName = PathManager.getFileName (filePath.ToFile())
                 let fileDirectory = PathManager.getDirectoryName  (filePath.ToFile())
+                activeSysDir <- fileDirectory
+                currentFileName <- fileName
                 let sysName = getSystemName fileName
                 let mySys = DsSystem(sysName, "localhost")
                 let paras = getParams(
@@ -170,8 +172,6 @@ module ImportPPTModule =
                             , sRepo
                             )
 
-                activeSysDir <- fileDirectory
-                currentFileName <- fileName
                 dicLoaded.Clear() 
                 loadedParentStack.Clear()
                 loadedParentStack.Push mySys

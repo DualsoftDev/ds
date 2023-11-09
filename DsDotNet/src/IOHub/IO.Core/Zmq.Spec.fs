@@ -23,6 +23,7 @@ module rec ZmqSpec =
         | Word = 16
         | DWord = 32
         | LWord = 64
+        | String = 1000
 
     /// MW100 : name='M', type='W', offset=100.  (MX30, MD1234, ML1234, ..)
     type AddressSpec(fileSpec:IOFileSpec, memoryType:MemoryType, offset:int) =
@@ -53,6 +54,9 @@ module rec ZmqSpec =
         member val Name = ""  with get, set
         member val Length = 0 with get, set
 
+        member val IsStringStorage = false with get, set
+        member val ConnectionString = "" with get, set
+
         // reference to parent
         [<JsonIgnore>]
         member val Vendor:VendorSpec = null with get, set
@@ -63,7 +67,7 @@ module rec ZmqSpec =
     
     // Activator.CreateInstanceFrom(v.Dll, v.ClassName) 를 이용
     [<AllowNullLiteral>] 
-    type  VendorSpec() =
+    type VendorSpec() =
         member val Name      = "" with get, set
         member val Location  = "" with get, set
         member val Dll       = "" with get, set
@@ -94,7 +98,7 @@ module rec ZmqSpec =
             for f in v.Files do
                 f.Vendor <- v
                 f.Name <- f.Name.ToLower()
-                if f.Length <= 0 then
+                if f.Length <= 0 && not f.IsStringStorage then
                     failwithlogf $"Invalid file length {f.Length} on file {f.Name}"
 
 
@@ -105,6 +109,7 @@ module rec ZmqSpec =
         | 16 -> MemoryType.Word
         | 32 -> MemoryType.DWord
         | 64 -> MemoryType.LWord
+        | 1000 -> MemoryType.String
         | _ -> failwithf($"Invalid bit size: {bitSize}")
 
     type IOFileSpec with

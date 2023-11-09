@@ -35,6 +35,10 @@
         {
           "Name": "O",
           "Length": 1024
+        },
+        {
+          "Name": "S",
+          "IsStringStorage": true
         }
       ]
     }

@@ -114,11 +114,13 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                         logDebug $"Got pong from client {clientIdentifierToString clientId}"
                         ResponseOK()
                     | StartsWith "read" ->      // e.g read p/ob1 p/ow1 p/olw3
-                        noop()
-                        let result =
-                            getArgs() |> map (fun a -> $"{a}={readAddress(cri, a)}")
-                            |> joinWith " "
-                        ReadResponseOK(cri, MemoryType.Undefined, result)
+                        try
+                            let result =
+                                getArgs() |> map (fun a -> $"{a}={readAddress(cri, a)}")
+                                |> joinWith " "
+                            ReadResponseOK(cri, MemoryType.Undefined, result)
+                        with ex ->
+                            StringResponseNG(cri, ex.Message)
                     | StartsWith "write" ->
                         let changes = getArgs() |> map (fun a -> writeAddressWithValue(cri, a))
                         WriteHeterogeniousResponseOK(cri, changes)

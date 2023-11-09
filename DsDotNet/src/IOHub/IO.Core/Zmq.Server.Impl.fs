@@ -83,7 +83,7 @@ module internal ZmqServerImplModule =
             failwithf($"Unknown address pattern : {address}")
 
     /// "write p/ob1=1 p/ix2=0" : 비효율성 인정한 version.  buffer manager 및 dataType 의 다양성 공존
-    let writeAddressWithValue(clientRequstInfo:ClientRequestInfo, addressWithAssignValue:string) : SingleValueChange =
+    let writeAddressWithValue(clientRequstInfo:ClientRequestInfo, addressWithAssignValue:string) : IMemoryChangeInfo =
         let cri = clientRequstInfo
         let parseBool (s:string) =
             match s.ToLower() with
@@ -104,12 +104,8 @@ module internal ZmqServerImplModule =
                         keyPart.Substring(keyPrefix.Length) // e.g "hello"
                     | _ -> failwith $"Invalid format: {addressWithAssignValue}"
                 fs.WriteString(key, value)
-                fs, ap.MemoryType, [||], value
-                //let key = addressPattern.Substring(keyPrefix.Length) // e.g "hello"
-                //fs.ReadString key
+                StringChangeInfo(cri, fs, [|key|], [|value|])
             else
-
-
                 let bufferManager = fs.StreamManager :?> StreamManager
                 bufferManager.VerifyOffsets(cri, ap.MemoryType, [|offset|])
 
@@ -123,7 +119,7 @@ module internal ZmqServerImplModule =
                 | _ -> failwithf($"Unknown data type : {ap.MemoryType}")
 
                 let fs = bufferManager.FileSpec
-                fs, ap.MemoryType, [|offset|], objValue
+                IOChangeInfo(cri, fs, ap.MemoryType, [|offset|], objValue)
 
         | _ -> failwithf($"Unknown address with assignment pattern : {addressWithAssignValue}")
 

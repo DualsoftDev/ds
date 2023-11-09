@@ -137,12 +137,19 @@ module rec ZmqSpec =
 
 
 type IClientRequestInfo = interface end
-type IIOChangeInfo =
+type IMemoryChangeInfo =
     abstract member ClientRequestInfo : IClientRequestInfo
     abstract member IOFileSpec : IOFileSpec
-    abstract member Offsets : int[]
     abstract member Value : obj
+
+type IIOChangeInfo =
+    inherit IMemoryChangeInfo
+    abstract member Offsets : int[]
     abstract member MemoryType : MemoryType
+
+type IStringChangeInfo =
+    inherit IMemoryChangeInfo
+    abstract member Keys : string[]
 
 
 

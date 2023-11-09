@@ -81,6 +81,19 @@ module internal ZmqStreamManager =
         member x.Value = value
         member x.MemoryType = memoryType
 
+    type StringChangeInfo(clientRequestInfo:ClientRequestInfo, fileSpec:IOFileSpec, keys:string seq, value:obj) =
+        interface IStringChangeInfo with
+            member x.ClientRequestInfo = x.ClientRequestInfo :> IClientRequestInfo
+            member x.IOFileSpec = fileSpec
+            member x.Keys = x.Keys
+            member x.Value = value
+            
+        member x.ClientRequestInfo = clientRequestInfo
+        member x.IOFileSpec = fileSpec
+
+        member val Keys = keys |> toArray
+        member x.Value = value
+
     type WriteOK(changes:IOChangeInfo seq) =
         member val Changes = changes |> toArray
 
@@ -285,6 +298,10 @@ module internal ZmqBufferManagerExtension =
             if indices.Length <> numValues then
                 raiseWithClientId clientRequstInfo $"The number of indices and values should be the same."
             
+    type IStringChangeInfo with
+        member x.GetKeysAndValues() =
+            Array.zip x.Keys (x.Value :?> string array)
+
     type IIOChangeInfo with
         member x.GetTagNameAndValues() =
             let fs, dataType, offsets, objValues = x.IOFileSpec, x.MemoryType, x.Offsets, x.Value

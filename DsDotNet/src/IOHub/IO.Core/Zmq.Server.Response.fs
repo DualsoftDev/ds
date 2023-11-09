@@ -56,5 +56,10 @@ module internal ZmqServerResponseImplModule =
         member x.Values = values
         member x.MemoryType = memoryType
 
+    type ReadStringsResponseOK(cri:ClientRequestInfo, keys:string[], values:string[]) =
+        inherit Response(cri)
+        interface IResponseOK
+        member x.Values = values
+        member x.Keys = keys
 
 

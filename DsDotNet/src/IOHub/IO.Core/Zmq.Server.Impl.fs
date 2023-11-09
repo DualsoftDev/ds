@@ -65,7 +65,7 @@ module internal ZmqServerImplModule =
                 // address: e.g "p/shello" ==> 'p' vendor 의 's' file 의 'hello' 문자열
                 let keyPrefix = fs.GetPath()   // e.g "p/s
                 let key = address.Substring(keyPrefix.Length) // e.g "hello"
-                fs.ReadString key
+                fs.ReadStrings [|key|]
             else
                 let offset = ap.Offset
                 let bufferManager = fs.StreamManager :?> StreamManager

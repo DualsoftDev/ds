@@ -7,6 +7,14 @@ open System.Reactive.Disposables
 open System
 
 module ZmqTestModule =
+    let helpText = """
+tr[x,b,w,dw,lw] : test read first 4 [bits, bytes, words, dwords, lwords]
+tw[x,b,w,dw,lw] : test write first 4 [bits, bytes, words, dwords, lwords]
+trs : test read all p/o strings
+ws p/s key=value : write string with key in p/s file
+rs p/s key: read string with key in p/s file
+rs p/s: read all strings in p/s file
+"""
     let clientKeyboardLoop (client:Client) (ct:CancellationToken) =
         let mutable key = ""
         let testReadOffsets = [|0..3|]
@@ -15,6 +23,7 @@ module ZmqTestModule =
             key <- Console.ReadLine()
             if key <> null then
                 match key with
+                | "h" -> Console.WriteLine helpText
                 | "q" | "Q" ->
                     dispose client
                     key <- null
@@ -48,6 +57,12 @@ module ZmqTestModule =
                         let str = lwords |> map toString |> joinWith ", "
                         Console.WriteLine($"OK: {str}")
                     | Error msg -> failwith $"ERROR: {msg}"
+                | "trs" ->   // test read strings
+                    match client.ReadStrings("p/s", [||]) with
+                    | Ok kvs ->
+                        let str = kvs |> map (fun (k, v) -> $"{k}={v}") |> joinWith ", "
+                        Console.WriteLine($"OK: {str}")
+                    | Error msg -> failwith $"ERROR: {msg}"
 
 
 
@@ -74,6 +89,32 @@ module ZmqTestModule =
                     | Ok msg -> Console.WriteLine($"WriteResult: {msg}")
                     | Error msg -> failwith $"ERROR: {msg}"
 
+                // e.g "rs p/s hello"
+                | (StartsWith "rs"| StartsWith "ws") ->
+                    let tokens =
+                        key.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                        |> map(fun s -> s.ToLower())
+                        |> Array.ofSeq
+                    let name, keys = tokens[1], tokens[2..]
+                    match key with
+                    | StartsWith "rs" ->
+                        match client.ReadStrings(name, keys) with
+                        | Ok kvs ->
+                            let str = kvs |> map (fun (k, v) -> $"{k}={v}") |> joinWith ", "
+                            Console.WriteLine($"OK: {str}")
+                        | _ ->
+                            failwith "ERROR"
+                    //| StartsWith "ws" ->                        
+                    //    match client.WriteStrings(name, tokens[2..]) with
+                    //    | Ok kvs ->
+                    //        let str = kvs |> map (fun (k, v) -> $"{k}={v}") |> joinWith ", "
+                    //        Console.WriteLine($"OK: {str}")
+                    //    | _ ->
+                    //        failwith "ERROR"
+                    | _ ->
+                        failwith "ERROR"
+
+                    
 
                 | (StartsWith "rx" | StartsWith "rb" | StartsWith "rw" | StartsWith "rdw" | StartsWith "rlw")
                 | (StartsWith "wx" | StartsWith "wb" | StartsWith "ww" | StartsWith "wdw" | StartsWith "wlw")

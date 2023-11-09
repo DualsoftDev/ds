@@ -30,6 +30,7 @@ module internal ZmqClient =
         // - server tag changed notify 
         // 에 대한 format
         let Values    = 2       // encoded byte array
+        let Keys      = 3       // string keys
         let Name      = 3       // e.g "p/o"
         let ContentBitLength = 4// e.g 1, 8, 16, 32, 64
         let Offsets   = 5       // bitoffset or byteoffset
@@ -175,6 +176,11 @@ type Client(serverAddress:string) =
         buildCommandAndName(client, reqId, command, name)
             .SendFrame(ByteConverter.ToBytes<int>(offsets, needEndianFix))
 
+    let sendStringReadRequest(client:DealerSocket, reqId:int, name:string, keys:string[]) : unit =
+        let jsonKeys = JsonConvert.SerializeObject(keys)
+        buildCommandAndName(client, reqId, "rs", name)
+            .SendFrame(jsonKeys)
+
 
     interface IDisposable with
         member x.Dispose() =
@@ -232,6 +238,33 @@ type Client(serverAddress:string) =
         | _ ->
             logError($"UNKNOWN Error: {result}")
             Error result
+
+    member x.ReadStrings(name:string, keys:string[]) : TypedIOResult<(string*string)[]> =
+        let reqId = reqIdGenerator()
+        sendStringReadRequest(client, reqId, name, keys)
+
+        // 서버로부터 응답 수신
+        let mqMessage = deque reqId
+        let result = mqMessage[OkNg].ConvertToString()
+        match result with
+        | "OK" ->
+            let jsonValues = mqMessage[Values].ConvertToString()
+            let values = JsonConvert.DeserializeObject<string[]>(jsonValues)
+            let keys =
+                if keys.isEmpty() then
+                    let jsonKeys = mqMessage[Keys].ConvertToString()
+                    JsonConvert.DeserializeObject<string[]>(jsonKeys)
+                else
+                    keys
+            Ok (Array.zip keys values)
+        | "ERR" ->
+            let errMsg = mqMessage[Detail].ConvertToString()
+            logError($"Error: {errMsg}")
+            Error errMsg
+        | _ ->
+            logError($"UNKNOWN Error: {result}")
+            Error result
+
 
 
     // command: "rw", "rd", "rl"

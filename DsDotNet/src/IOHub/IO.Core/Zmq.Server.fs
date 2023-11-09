@@ -178,6 +178,20 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                         bm.VerifyOffsets(cri, MemoryType.LWord, offsets)
                         let result = bm.readU64s offsets
                         ReadResponseOK(cri, MemoryType.LWord, result)
+                    | "rs" ->
+                        let name = mms[TagKindName].ConvertToString().ToLower()
+                        let fs =
+                            seq {
+                                for v in ioSpec.Vendors do
+                                    for fs in v.Files do
+                                        if (fs.GetPath().ToLower() = name) then
+                                            yield fs
+                            } |> Seq.exactlyOne
+
+                        let jsonKeys = mms[MultiMessageFromClient.Offsets].ConvertToString()
+                        let keys = JsonConvert.DeserializeObject<string[]>(jsonKeys)
+                        let keys, values = fs.ReadStrings keys
+                        ReadStringsResponseOK(cri, keys, values)
                     | _ ->
                         StringResponseNG(cri, $"ERROR: {command}")
                 | 3 ->
@@ -292,6 +306,13 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                         | :? WriteHeterogeniousResponseOK as r ->
                             more.SendFrame("OK")
                             r.SpotChanges |> iter notifyIoChange
+                        | :? ReadStringsResponseOK as r ->
+                            let keys, values = r.Keys, r.Values
+                            let jsonKeys = JsonConvert.SerializeObject(keys)
+                            let jsonValues = JsonConvert.SerializeObject(values)
+                            more
+                                .SendMoreFrame(jsonValues)
+                                .SendFrame(jsonKeys)
                         | _ ->
                             failwith "Not Yet!!"
 

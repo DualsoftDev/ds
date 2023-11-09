@@ -6,13 +6,6 @@ open System.Reactive.Subjects
 
 open Dapper
 open Microsoft.Data.Sqlite
-open Dual.Common.Core.FS
-open Dual.Common.Db
-open System.Data
-open System.Threading.Tasks
-open System.Collections.Generic
-open System.Collections.Concurrent
-open Microsoft.Data.Sqlite
 
 [<AutoOpen>]
 module internal ZmqStreamManager =
@@ -226,6 +219,9 @@ module internal ZmqStreamManager =
 
 [<AutoOpen>]
 module internal ZmqBufferManagerExtension =
+    type KeyValueRow() =
+        member val Key = "" with get, set
+        member val Value = "" with get, set
     let createConnection(connStr) =
         new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
 
@@ -264,12 +260,27 @@ module internal ZmqBufferManagerExtension =
                     Console.WriteLine($"File length : {fs.Length}")
                     fs.Flush()
                 x.FileStream <- fs
-        member x.ReadString(key:string) =
+        member x.ReadStrings(keys:string[]) =
             use conn = createConnection(x.ConnectionString)
-            let values = conn.Query<string>("SELECT [value] FROM [string] WHERE key = @Key", {| Key = key |}) |> toArray
-            if values.Length = 0 then
-                failwithf $"String tag not found: {key}"
-            values[0]
+            if keys.Length = 0 then
+                let kvs =
+                    conn.Query<KeyValueRow>("SELECT [key], [value] FROM [string]")
+                    //|> map (fun (kv:KeyValuePair) -> kv.Key, kv.Value) |> toArray
+                    |> map (fun kv -> kv.Key, kv.Value) |> toArray
+                let keys, values = Array.unzip kvs
+                keys, values
+            else
+                let values =
+                    [| for key in keys do
+                        let values = conn.Query<string>("SELECT [value] FROM [string] WHERE key = @Key", {| Key = key |}) |> toArray
+
+                        if values.Length = 0 then
+                            null
+                            //failwithf $"String tag not found: {key}"
+                        else 
+                            values[0]
+                    |]
+                keys, values
 
         member x.WriteString(key:string, value:string) =
             use conn = createConnection(x.ConnectionString)

@@ -9,6 +9,10 @@ open Newtonsoft.Json
 [<AutoOpen>]
 module rec ZmqSpec =
     type ErrorMessage = string
+    /// e.g "i", "o", "m", "p/o", "p/i", ..
+    type MemoryName = string
+    /// string type 의 key, value pair : string * string
+    type StringKeyValue = string * string
     type NoMoreInputOK() = class end
 
     type IOResult = Result<obj, ErrorMessage>
@@ -51,7 +55,7 @@ module rec ZmqSpec =
     [<AllowNullLiteral>] 
     type IStreamManager = interface end
     type IOFileSpec() =
-        member val Name = ""  with get, set
+        member val Name:MemoryName = ""  with get, set
         member val Length = 0 with get, set
 
         member val IsStringStorage = false with get, set

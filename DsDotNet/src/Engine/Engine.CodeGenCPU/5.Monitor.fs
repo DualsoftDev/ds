@@ -55,7 +55,10 @@ type VertexManager with
                 yield running --@ (api.TOUT, v.System._tout.Value, getFuncName())
                 if(RuntimeDS.Package = RuntimePackage.SimulationDubug)
                 then 
-                    yield (api.TOUT.DN.Expr <||> (real.V.RF.Expr  <&&> v._sim.Expr), rst) ==| (api.TXErrOverTime , getFuncName())
+                    yield (api.TOUT.DN.Expr <||> (real.V.RF.Expr <&&> v._sim.Expr), rst) ==| (api.TXErrOverTime , getFuncName())
+                elif(RuntimeDS.Package = RuntimePackage.Simulation)
+                then 
+                    yield (call._off.Expr, rst) ==| (api.TXErrOverTime , getFuncName())
                 else 
                     yield (api.TOUT.DN.Expr, rst) ==| (api.TXErrOverTime , getFuncName())
 
@@ -88,7 +91,14 @@ type VertexManager with
                 yield (dop <&&> offRising.Expr <&&> rxs.Select(fun f -> f.F).ToAnd() , rst<||>v._sim.Expr) ==| (offErr,  getFuncName())
 
             let sets = tds |> Seq.collect(fun s->[s.ApiItem.RXErrOpen;s.ApiItem.RXErrShort])
-            yield (sets.ToOrElseOff(v.System), v._off.Expr) --| (v.E2, getFuncName())
+
+            if(RuntimeDS.Package = RuntimePackage.Simulation)
+            then 
+                yield (v._off.Expr, v._off.Expr) --| (v.E2, getFuncName())
+            else 
+                yield (sets.ToOrElseOff(v.System), v._off.Expr) --| (v.E2, getFuncName())
+
+
         ]
         
 

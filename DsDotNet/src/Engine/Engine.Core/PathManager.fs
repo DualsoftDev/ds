@@ -84,6 +84,12 @@ module PathManager =
         | DsFile _ -> filePath.ToValidPath() |> Path.GetDirectoryName |> getValidDirectory
         | DsDirectory directory -> raise (new ArgumentException($"({directory}) is not a file path"))
 
+    let getFolderOfPath (filePath: string): DsPath =
+        if File.Exists filePath then
+            (filePath |> DsFile).ToValidPath() |> Path.GetDirectoryName |> getValidDirectory |> DsDirectory
+        else
+            failwith $"({filePath}) is not a valid file path.  (not exists or is a directory)"
+
     // Get the file name without an extension from a DsPath
     let getFileNameWithoutExtension (filePath: DsPath): string =
         match filePath with

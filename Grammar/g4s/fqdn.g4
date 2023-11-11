@@ -8,7 +8,7 @@ fqdn: nameComponent ('.' | nameComponent)*;
 
 Identifier: ValidIdStart ValidIdChar*;
    // lexical rule for hangul characters
-    fragment HangulChar: [\uAC00-\uD7A3]+;
+    fragment HangulChar: [\u3131-\u314E\u314F-\u3163|\uAC00-\uD7A3]+;
 
     fragment ValidIdStart
     : ('a' .. 'z') | ('A' .. 'Z') | '_' | HangulChar

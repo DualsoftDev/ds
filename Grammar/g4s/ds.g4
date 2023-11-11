@@ -73,7 +73,7 @@ CODE_BLOCK: CODE_BLOCK_START (BLOCK_COMMENT|LINE_COMMENT|CODE_BLOCK|.)*? CODE_BL
 
 fragment Identifier: ValidIdStart ValidIdChar*;
    // lexical rule for hangul characters
-    fragment HangulChar: [\u3131-\u3163|\uAC00-\uD7A3]+;
+    fragment HangulChar: [\u3131-\u314E\u314F-\u3163|\uAC00-\uD7A3]+;
 
     fragment ValidIdStart
     : ('a' .. 'z') | ('A' .. 'Z') | '_' | HangulChar
@@ -97,7 +97,7 @@ IPV4: [1-9][0-9]*'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*);
 
 TAG_ADDRESS: ValidTagStart ValidTagChar*;
    fragment ValidTagStart
-      : '%' | ('a' .. 'z') | ('A' .. 'Z') // '%' | '_' | HANGUL_CHAR
+      : '%' | ('a' .. 'z') | ('A' .. 'Z') // '%' | '_' | HangulChar
       ;
    fragment ValidTagChar
       : ('a' .. 'z') | ('A' .. 'Z') | ('a' .. 'z')('a' .. 'z') | ('A' .. 'Z')('A' .. 'Z') | 

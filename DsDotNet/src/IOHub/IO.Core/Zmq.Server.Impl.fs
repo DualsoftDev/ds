@@ -57,7 +57,7 @@ module internal ZmqServerImplModule =
             Some(addr, value)
         | _ -> None
 
-    let readAddress(clientRequstInfo:ClientRequestInfo, address:string) : obj =
+    let readAddress(clientRequestInfo:ClientRequestInfo, address:string) : obj =
         match address with
         | AddressPattern ap ->
             let fs = ap.IOFileSpec
@@ -69,7 +69,7 @@ module internal ZmqServerImplModule =
             else
                 let offset = ap.Offset
                 let bufferManager = fs.StreamManager :?> StreamManager
-                bufferManager.VerifyOffsets(clientRequstInfo, ap.MemoryType, [|offset|])
+                bufferManager.VerifyOffsets(clientRequestInfo, ap.MemoryType, [|offset|])
 
                 match ap.MemoryType with
                 | MemoryType.Bit   -> bufferManager.readBit(offset) :> obj
@@ -83,8 +83,8 @@ module internal ZmqServerImplModule =
             failwithf($"Unknown address pattern : {address}")
 
     /// "write p/ob1=1 p/ix2=0" : 비효율성 인정한 version.  buffer manager 및 dataType 의 다양성 공존
-    let writeAddressWithValue(clientRequstInfo:ClientRequestInfo, addressWithAssignValue:string) : IMemoryChangeInfo =
-        let cri = clientRequstInfo
+    let writeAddressWithValue(clientRequestInfo:ClientRequestInfo, addressWithAssignValue:string) : IMemoryChangeInfo =
+        let cri = clientRequestInfo
         let parseBool (s:string) =
             match s.ToLower() with
             | "1" | "true" -> true

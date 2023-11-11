@@ -338,5 +338,5 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
     interface IDisposable with
         member x.Dispose() =
             logDebug "Disposing server..."
-            streamManagers.Values |> iter (fun stream -> stream.FileStream.Dispose())
+            streamManagers.Values |> iter (fun stream -> dispose stream.FileStream)
             streamManagers.Clear()

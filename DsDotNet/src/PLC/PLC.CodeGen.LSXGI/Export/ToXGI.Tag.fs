@@ -126,7 +126,7 @@ module XGITag = //IEC61131Tag =
                 yield $"\t<Symbol {x.GetXmlArgs()}>"
                 // 사용되지 않지만, 필요한 XML children element 생성
                 yield! ["Addresses"; "Retains"; "InitValues"; "Comments"]
-                    |> Seq.map (fun k -> sprintf "\t\t<Member%s/>" k)
+                    |> Seq.map (sprintf "\t\t<Member%s/>")
                 yield "\t</Symbol>"
             ] |> String.concat "\r\n"
 

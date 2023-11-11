@@ -13,27 +13,28 @@ namespace ThirdParty.AddressInfo.Provider
             {
                 address = address.ToLower().TrimStart('%');
                 memoryType = address[0].ToString();     // "i" or "o"
-                if (address[0] == 'i' || address[0] == 'o')
+                switch (address[0])
                 {
-
-                    string addr = address[2..];
-                    offset = int.Parse(addr);
-                    contentBitLength = address[1] switch
+                    case 'i':
+                    case 'o':
                     {
-                        'x' => 1,
-                        'b' => 8,
-                        'w' => 16,
-                        'd' => 32,
-                        'l' => 64,
-                        _ => throw new Exception($"Unknown content bit size: {address[1]}"),
-                    };
+                        string addr = address[2..];
+                        offset = int.Parse(addr);
+                        contentBitLength = address[1] switch
+                        {
+                            'x' => 1,
+                            'b' => 8,
+                            'w' => 16,
+                            'd' => 32,
+                            'l' => 64,
+                            _ => throw new Exception($"Unknown content bit size: {address[1]}"),
+                        };
 
-                    return true;
-                }
-                else if (address[0] == 's')
-                {
-                    contentBitLength = 1000;    // 1000 == MemoryType.String
-                    return true;
+                        return true;
+                    }
+                    case 's':
+                        contentBitLength = 1000;    // 1000 == MemoryType.String
+                        return true;
                 }
             }
             catch (Exception ex)

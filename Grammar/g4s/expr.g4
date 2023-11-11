@@ -105,7 +105,7 @@ expr: functionName '(' arguments? ')'                 # FunctionCallExpr    // f
     |   expr binaryOperatorEquality expr              #BinaryExprEquality
 
     | terminal                                        #TerminalExpr
-    | '(' expr ')'                                    #ParenthesysExpr
+    | '(' expr ')'                                    #ParenthesisExpr
     ;
 
     arguments: exprList;

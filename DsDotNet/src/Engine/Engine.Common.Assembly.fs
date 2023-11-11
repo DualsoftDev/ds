@@ -1,8 +1,6 @@
 namespace CommonAsssemblyInfo
 
 open System.Reflection
-open System.Runtime.CompilerServices
-open System.Runtime.InteropServices
 
 [<assembly: AssemblyCompany("Dual INC.")>]
 [<assembly: AssemblyCopyright("Copyright © Dual INC. 2016")>]

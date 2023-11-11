@@ -1,8 +1,6 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Engine.Core
 
-open System.Linq
-open System.Runtime.CompilerServices
 open Dual.Common.Core.FS
 
 [<AutoOpen>]

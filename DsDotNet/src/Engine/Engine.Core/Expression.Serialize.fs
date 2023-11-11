@@ -49,11 +49,11 @@ module rec ExpressionSerializeModule =
         fun (name:string) -> hash.Contains (name)
 
 
-    let serializeFunctionNameAndBoxedArguments (name:string) (args:Args) (withParenthesys:bool) =
+    let serializeFunctionNameAndBoxedArguments (name:string) (args:Args) (withParenthesis:bool) =
         let isBinary = isBinaryOperator name
         if isBinary && args.Length = 2 then
             (* 2 + (3 * 4) => sea:'+', island:'*' *)
-            let needParenthesys (seaName:string) (island:Arg) =
+            let needParenthesis (seaName:string) (island:Arg) =
                 option {
                     let! islandName = island.FunctionName
                     if operatorPrecedenceMap.ContainsKey(seaName) && operatorPrecedenceMap.ContainsKey(islandName) then
@@ -63,17 +63,17 @@ module rec ExpressionSerializeModule =
                         return needParen
                 } |> Option.defaultValue false
 
-            let lWithParnethesys = needParenthesys name args[0]
-            let rWithParnethesys = needParenthesys name args[1]
+            let lWithParnethesys = needParenthesis name args[0]
+            let rWithParnethesys = needParenthesis name args[1]
             let l = args[0].ToText(lWithParnethesys)
             let r = args[1].ToText(rWithParnethesys)
             let text = $"{l} {name} {r}"
-            if withParenthesys then $"({text})" else text
+            if withParenthesis then $"({text})" else text
         else
             let args =
                 [   for a in args do
-                    let withParenthesys = args.Length >= 2
-                    a.ToText(withParenthesys)
+                    let withParenthesis = args.Length >= 2
+                    a.ToText(withParenthesis)
                 ] |> String.concat ", "
             $"{name}({args})"
 

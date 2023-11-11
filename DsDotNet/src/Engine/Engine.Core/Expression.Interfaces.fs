@@ -1,7 +1,5 @@
 namespace Engine.Core
 
-open System.Collections.Generic
-
 [<AutoOpen>]
 module ExpressionForwardDeclModule =
 
@@ -40,7 +38,7 @@ module ExpressionForwardDeclModule =
         abstract DataType : System.Type
         abstract BoxedEvaluatedValue : obj
         abstract GetBoxedRawObject: unit -> obj
-        abstract ToText : withParenthesys: bool -> string
+        abstract ToText : withParenthesis: bool -> string
         /// Function expression 인 경우 function name 반환.  terminal 이면 none
         abstract FunctionName: string option
         /// Function expression 인 경우 function args 반환.  terminal 이거나 argument 없으면 empty list 반환

@@ -63,8 +63,8 @@ module PPTDocModule =
                                 |> Seq.map(fun flowNodes ->
                                             flowNodes.Value |> Seq.filter(fun node -> node.NodeType.IsReal))
             let callInRealSet = realSet
-                                    |> Seq.collect(fun reals -> reals)
-                                    |> Seq.filter(fun real -> parents.ContainsKey(real))
+                                    |> Seq.collect id
+                                    |> Seq.filter parents.ContainsKey
                                     |> Seq.map(fun real ->
                                                 dicFlowNodes.[real.PageNum]
                                                 |> Seq.filter(fun node -> node.NodeType.IsCall)

@@ -176,11 +176,11 @@ module ImportU =
                 let mei = ApiResetInfo.Create(sys, src, Interlock ,tgt )
                 sys.ApiResetInfos.Add(mei)|>ignore
 
-            resets.ForEach(fun rst ->  updateILInfo rst)
+            resets.ForEach updateILInfo 
             dicIL.ForEach(fun dic->
                 dic.Value
                 |> Seq.pairwiseWindingFull  //2개식 조합
-                |> Seq.iter(fun (src, tgt) -> createInterlockInfos (src, tgt)))
+                |> Seq.iter createInterlockInfos)
 
         //Interface 만들기
         [<Extension>]
@@ -494,8 +494,8 @@ module ImportU =
                                 //| _ -> failwithlog "Error "
                                 vertex.Value
 
-                            let txs = node.IfTXs |> Seq.map(fun f-> findReal(f))
-                            let rxs = node.IfRXs |> Seq.map(fun f-> findReal(f))
+                            let txs = node.IfTXs |> map findReal
+                            let rxs = node.IfRXs |> map findReal
                             api.AddTXs(txs)|>ignore
                             api.AddRXs(rxs)|>ignore
                             )

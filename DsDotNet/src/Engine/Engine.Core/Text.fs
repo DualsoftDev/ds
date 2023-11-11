@@ -5,7 +5,6 @@ open System
 open System.Linq
 open System.Globalization
 open System.Text.RegularExpressions
-open System.ComponentModel
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
 

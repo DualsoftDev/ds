@@ -127,8 +127,8 @@ module rec ExpressionParser =
                     tracefn $"ArrayReference: {text}"
                     failwithlog "Not yet"
 
-                | :? ParenthesysExprContext as exp ->
-                    tracefn $"Parenthesys: {text}"
+                | :? ParenthesisExprContext as exp ->
+                    tracefn $"Parenthesis: {text}"
                     let exp = exp.TryFindFirstChild<ExprContext>().Value
                     helper exp
 

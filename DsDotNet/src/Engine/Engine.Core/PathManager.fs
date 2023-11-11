@@ -143,8 +143,7 @@ module PathManager =
             else
                 $"./{validPath}" // 현재 폴더면 ./ 자동삽입
 
-            
-
+    
     // Get the full path from a relativeFilePath relative to an absoluteDirectory
     let getFullPath (relativeFilePath: DsPath) (absoluteDirectory: DsPath): string =
         let rel = relativeFilePath
@@ -169,6 +168,12 @@ module PathManager =
         Path.Combine(xs) |> Path.GetFullPath |> getValidFile
     let combineFullPathDirectory (xs: string  array) =
         Path.Combine(xs) |> Path.GetFullPath |> getValidDirectory  
+
+
+    let getTempPath() : string =
+        Path.GetTempPath() |> getValidDirectory
+    let getTempPathFile(fileName:string) : string =
+        getFullPath (fileName|>DsFile) (getTempPath()|>DsDirectory)
 
 [<Extension>]
 type PathHelper =

@@ -162,21 +162,21 @@ type Client(serverAddress:string) =
         | "ERR" -> Error detail
         | _ -> Error $"Error: {result}"
 
-    let buildCommandAndName(client:DealerSocket, reqId:int, command:string, name:string) : IOutgoingSocket =
+    let buildCommandAndName(client:DealerSocket, reqId:int, command:string, name:MemoryName) : IOutgoingSocket =
         client
             .SendMoreFrame(command)
             .SendMoreFrameWithRequestIdAndEndian(reqId, needEndianFix)
             .SendMoreFrame(name)
 
-    let buildPartial(client:DealerSocket, reqId:int, command:string, name:string, offsets:int[]) : IOutgoingSocket =
+    let buildPartial(client:DealerSocket, reqId:int, command:string, name:MemoryName, offsets:int[]) : IOutgoingSocket =
         buildCommandAndName(client, reqId, command, name)
             .SendMoreFrame(ByteConverter.ToBytes<int>(offsets, needEndianFix))
 
-    let sendReadRequest(client:DealerSocket, reqId:int, command:string, name:string, offsets:int[]) : unit =
+    let sendReadRequest(client:DealerSocket, reqId:int, command:string, name:MemoryName, offsets:int[]) : unit =
         buildCommandAndName(client, reqId, command, name)
             .SendFrame(ByteConverter.ToBytes<int>(offsets, needEndianFix))
 
-    let sendStringReadRequest(client:DealerSocket, reqId:int, name:string, keys:string[]) : unit =
+    let sendStringReadRequest(client:DealerSocket, reqId:int, name:MemoryName, keys:string[]) : unit =
         let jsonKeys = JsonConvert.SerializeObject(keys)
         buildCommandAndName(client, reqId, "rs", name)
             .SendFrame(jsonKeys)
@@ -219,7 +219,7 @@ type Client(serverAddress:string) =
         | Ok jsonMeta -> JsonConvert.DeserializeObject<IOSpec>(jsonMeta)
         | Error errMsg -> failwithf($"Error: {errMsg}")
 
-    member x.ReadBits(name:string, offsets:int[]) : TypedIOResult<bool[]> =
+    member x.ReadBits(name:MemoryName, offsets:int[]) : TypedIOResult<bool[]> =
         let reqId = reqIdGenerator()
         sendReadRequest(client, reqId, "rx", name, offsets)
 
@@ -239,7 +239,7 @@ type Client(serverAddress:string) =
             logError($"UNKNOWN Error: {result}")
             Error result
 
-    member x.ReadStrings(name:string, keys:string[]) : TypedIOResult<(string*string)[]> =
+    member x.ReadStrings(name:MemoryName, keys:string[]) : TypedIOResult<StringKeyValue[]> =
         let reqId = reqIdGenerator()
         sendStringReadRequest(client, reqId, name, keys)
 
@@ -264,11 +264,12 @@ type Client(serverAddress:string) =
         | _ ->
             logError($"UNKNOWN Error: {result}")
             Error result
+    member x.ReadAllStrings(name:MemoryName) = x.ReadStrings(name, [||])
 
 
 
     // command: "rw", "rd", "rl"
-    member private x.ReadTypes<'T>(command:string, name:string, offsets:int[]) : TypedIOResult<'T[]> =
+    member private x.ReadTypes<'T>(command:string, name:MemoryName, offsets:int[]) : TypedIOResult<'T[]> =
         let reqId = reqIdGenerator()
         sendReadRequest(client, reqId, command, name, offsets)
 
@@ -287,17 +288,17 @@ type Client(serverAddress:string) =
             logError($"UNKNOWN Error: {result}")
             Error result
 
-    member x.ReadBytes(name:string, offsets:int[]) : TypedIOResult<byte[]> =
+    member x.ReadBytes(name:MemoryName, offsets:int[]) : TypedIOResult<byte[]> =
         x.ReadTypes<byte>("rb", name, offsets)
-    member x.ReadUInt16s(name:string, offsets:int[]) : TypedIOResult<uint16[]> =
+    member x.ReadUInt16s(name:MemoryName, offsets:int[]) : TypedIOResult<uint16[]> =
         x.ReadTypes<uint16>("rw", name, offsets)
-    member x.ReadUInt32s(name:string, offsets:int[]) : TypedIOResult<uint32[]> =
+    member x.ReadUInt32s(name:MemoryName, offsets:int[]) : TypedIOResult<uint32[]> =
         x.ReadTypes<uint32>("rd", name, offsets)
-    member x.ReadUInt64s(name:string, offsets:int[]) : TypedIOResult<uint64[]> =
+    member x.ReadUInt64s(name:MemoryName, offsets:int[]) : TypedIOResult<uint64[]> =
         x.ReadTypes<uint64>("rl", name, offsets)
 
 
-    member x.WriteBits(name:string, offsets:int[], values:bool[]) =
+    member x.WriteBits(name:MemoryName, offsets:int[], values:bool[]) =
         let reqId = reqIdGenerator()
         let byteValues = values |> map (fun v -> if v then 1uy else 0uy)
         buildPartial(client, reqId, "wx", name, offsets)
@@ -305,7 +306,7 @@ type Client(serverAddress:string) =
 
         verifyReceiveOK client reqId
 
-    member x.WriteBytes(name:string, offsets:int[], values:byte[]) =
+    member x.WriteBytes(name:MemoryName, offsets:int[], values:byte[]) =
         let reqId = reqIdGenerator()
         buildPartial(client, reqId, "wb", name, offsets)
             .SendFrame(values)
@@ -313,28 +314,28 @@ type Client(serverAddress:string) =
         verifyReceiveOK client reqId
 
 
-    member x.WriteUInt16s(name:string, offsets:int[], values:uint16[]) =
+    member x.WriteUInt16s(name:MemoryName, offsets:int[], values:uint16[]) =
         let reqId = reqIdGenerator()
         buildPartial(client, reqId, "ww", name, offsets)
             .SendFrame(ByteConverter.ToBytes<uint16>(values, needEndianFix))
 
         verifyReceiveOK client reqId
 
-    member x.WriteUInt32s(name:string, offsets:int[], values:uint32[]) =
+    member x.WriteUInt32s(name:MemoryName, offsets:int[], values:uint32[]) =
         let reqId = reqIdGenerator()
         buildPartial(client, reqId, "wd", name, offsets)
             .SendFrame(ByteConverter.ToBytes<uint32>(values, needEndianFix))
 
         verifyReceiveOK client reqId
 
-    member x.WriteUInt64s(name:string, offsets:int[], values:uint64[]) =
+    member x.WriteUInt64s(name:MemoryName, offsets:int[], values:uint64[]) =
         let reqId = reqIdGenerator()
         buildPartial(client, reqId, "wl", name, offsets)
             .SendFrame(ByteConverter.ToBytes<uint64>(values, needEndianFix))
 
         verifyReceiveOK client reqId
 
-    member x.ClearAll(name:string) =
+    member x.ClearAll(name:MemoryName) =
         let reqId = reqIdGenerator()
         client
             .SendMoreFrame($"cl {name}")

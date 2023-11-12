@@ -40,9 +40,9 @@ module ImportUtilForLib =
                     , loadedName, mySys, None, DuDevice, ShareableSystemRepository())
         
         let parent =
-            if(parentR.IsSome)
-            then  DuParentReal (parentR.Value)
-            else  DuParentFlow (parentF.Value)
+            match parentR with
+            | Some parentR -> DuParentReal parentR
+            | None         -> DuParentFlow (parentF.Value)
 
         let systems, loadingPaths = ParserLoader.LoadFromActivePath libFilePath
         let devOrg =  systems |> Seq.head

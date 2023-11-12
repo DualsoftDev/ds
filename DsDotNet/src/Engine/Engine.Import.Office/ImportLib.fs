@@ -1,13 +1,10 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Engine.Import.Office
 
-open System.Linq
-open System.Collections.Generic
-open Dual.Common.Core.FS
 open Engine.Core
 open System.Runtime.CompilerServices
-open System
 open Engine.Parser.FS
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module ImportLib =
@@ -19,20 +16,29 @@ module ImportLib =
         [<Extension>]
         static member GetDSFromPPTWithLib (fullName: string) =
                 pptRepo.Clear()
-                let runDir = System.Reflection.Assembly.GetEntryAssembly().Location|>DsFile |> PathManager.getDirectoryName
-                let libFilePath =  PathManager.getFullPath ($"{TextLibrary}.pptx"|>DsFile) (runDir|>DsDirectory)
-                
-                // 파일 loadingfromPPTs 시 DS_Library.ds 만드는 용도
-                let libSys = loadingfromPPTs ([| libFilePath |]) |> fun(m,_,_) -> m.Systems.Head    
-                let loadedlibFilePath = PathManager.getFullPath  ($"{TextLibrary}.pptx"|>DsFile) (PathManager.getDirectoryName(fullName|>DsFile)|>DsDirectory)
-                libSys.pptxToExportDS (loadedlibFilePath) |> ignore
-                
-        
-             
-                let pptResults = loadingfromPPTs ([fullName]) |> fun (model, views, pptRepo) -> model
-                let sys = pptResults.Systems.[0]
+                do
+                    // library 파일을 먼저 로딩해서 DS 파일로 변환한다.
 
-                let exportPath = sys.pptxToExportDS fullName
+                    let textLibPptx = $"{TextLibrary}.pptx" |> DsFile
+                    // 파일 loadingfromPPTs 시 DS_Library.ds 만드는 용도
+                    let libSys =
+                        let libFilePath =
+                            let runDir: DsPath =
+                                System.Reflection.Assembly.GetEntryAssembly().Location
+                                |> getFolderOfPath
+                            PathManager.getFullPath textLibPptx runDir
+                        let libModel:Model = loadingfromPPTs [libFilePath] |> Tuple.tuple1st
+                        libModel.Systems.Head    
+                    let loadedlibFilePath = PathManager.getFullPath  textLibPptx (PathManager.getFolderOfPath(fullName))
+                    libSys.pptxToExportDS loadedlibFilePath |> ignore
+                        
+             
+
+                let exportPath =
+                    let sys =
+                        let model:Model = loadingfromPPTs [fullName] |> Tuple.tuple1st
+                        model.Systems.[0]
+                    sys.pptxToExportDS fullName
                 let systems, loadingPaths = ParserLoader.LoadFromActivePath exportPath
                 {
                     Systems =  systems

@@ -253,13 +253,7 @@ type PPTDocExt =
             |> Seq.filter(fun node -> node.NodeType.IsLoadSys)
             |> Seq.collect(fun node ->
             node.CopySys.Select(fun copy ->
-                //let fullPath = PathManager.getFullPath ( (copy.Value+".pptx").ToFile()) (doc.DirectoryName|>DsDirectory)
-
-                //if File.Exists(fullPath) |> not  //환경변수까지 고려해서 체크
-                //then
-                //    node.Shape.ErrorPath(ErrID._29, node.PageNum, fullPath)
-                //else 
                 let loadFilePath =  if copy.Value.EndsWith(".pptx") then copy.Value else copy.Value+".pptx"
-                loadFilePath , copy.Key, node 
+                loadFilePath , copy.Key.Trim(), node 
                     )
         )

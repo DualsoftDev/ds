@@ -87,39 +87,39 @@
         KIT_Cv_FrtOUT_MOVE = { KIT_Cv_FrtOUT.MOVE(%IX0.0.52, %MX6); }
         KIT_Cv_FrtOUT_REMOVE = { KIT_Cv_FrtOUT.REMOVE(_, %QW625.4); }
             KIT_Cv_FrtOUT_REMOVE.func = {
-                $n;
+                $n ;
             }
         KIT_Cv_RR_MOVE = { KIT_Cv_RR.MOVE(%IX0.0.0, %QX0.1.28); }
         KIT_Cv_RR_REMOVE = { KIT_Cv_RR.REMOVE(%IX0.0.0, %QW625.3); }
             KIT_Cv_RR_REMOVE.func = {
-                $n;
+                $n ;
             }
         KIT_Out_ADV = { KIT_Out.ADV(%IX0.0.23, %QX0.1.19); }
         KIT_Out_RET = { KIT_Out.RET(%IX0.0.22, %QX0.1.18); }
         KIT_Part_MOVE = { KIT_Part.MOVE(%IX0.0.53, %QW625.1); }
         KIT_Part_REMOVE = { KIT_Part.REMOVE(%IX0.0.53, %QW625.2); }
             KIT_Part_REMOVE.func = {
-                $n;
+                $n ;
             }
         KIT_Frt_Part_MOVE = { KIT_Frt_Part.MOVE(%IX0.0.1, %QW625.1); }
         KIT_Frt_Part_REMOVE = { KIT_Frt_Part.REMOVE(%IX0.0.1, %QW625.2); }
             KIT_Frt_Part_REMOVE.func = {
-                $n;
+                $n ;
             }
     }
-    [device file="lib/Conveyor/CVRemove.ds"] KIT_Cv_Frt; 
-    [device file="lib/Cylinder/Double.ds"] KIT_stp1; 
-    [device file="lib/Cylinder/Double.ds"] KIT_stp2; 
-    [device file="lib/Cylinder/Double.ds"] KIT_stp3; 
-    [device file="lib/Cylinder/Double.ds"] KIT_stp4; 
-    [device file="lib/Cylinder/Double.ds"] KIT_1st_usb; 
-    [device file="lib/Cylinder/Double.ds"] KIT_2nd_usb; 
-    [device file="lib/Cylinder/Double.ds"] KIT_3rd_usb; 
-    [device file="lib/Cylinder/Double.ds"] KIT_4th_usb; 
-    [device file="lib/Cylinder/Double.ds"] KIT_In; 
-    [device file="lib/Conveyor/CV.ds"] KIT_Cv_FrtOUT; 
-    [device file="lib/Conveyor/CV.ds"] KIT_Cv_RR; 
-    [device file="lib/Cylinder/Double.ds"] KIT_Out; 
-    [device file="lib/Conveyor/CVRemove.ds"] KIT_Part; 
-    [device file="lib/Conveyor/CVRemove.ds"] KIT_Frt_Part; 
+    [device file="./lib/Conveyor/CVRemove.ds"] KIT_Cv_Frt; 
+    [device file="./lib/Cylinder/Double.ds"] KIT_stp1; 
+    [device file="./lib/Cylinder/Double.ds"] KIT_stp2; 
+    [device file="./lib/Cylinder/Double.ds"] KIT_stp3; 
+    [device file="./lib/Cylinder/Double.ds"] KIT_stp4; 
+    [device file="./lib/Cylinder/Double.ds"] KIT_1st_usb; 
+    [device file="./lib/Cylinder/Double.ds"] KIT_2nd_usb; 
+    [device file="./lib/Cylinder/Double.ds"] KIT_3rd_usb; 
+    [device file="./lib/Cylinder/Double.ds"] KIT_4th_usb; 
+    [device file="./lib/Cylinder/Double.ds"] KIT_In; 
+    [device file="./lib/Conveyor/CV.ds"] KIT_Cv_FrtOUT; 
+    [device file="./lib/Conveyor/CV.ds"] KIT_Cv_RR; 
+    [device file="./lib/Cylinder/Double.ds"] KIT_Out; 
+    [device file="./lib/Conveyor/CVRemove.ds"] KIT_Part; 
+    [device file="./lib/Conveyor/CVRemove.ds"] KIT_Frt_Part; 
 }

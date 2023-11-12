@@ -1,0 +1,10 @@
+[sys ip = localhost] tester = {
+    [flow] Page1 = {
+    }
+    [flow] Flow = {
+    }
+    [interfaces] = {
+        Func2 = { _ ~ _ }
+        Func1 = { _ ~ _ }
+    }
+}

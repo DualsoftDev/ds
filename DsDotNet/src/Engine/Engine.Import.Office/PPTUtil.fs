@@ -152,11 +152,11 @@ module PPTUtil =
 
         //shape Position 구하기
         [<Extension>]
-        static member GetPosition(shape:Shape, sildeSize:int*int) =
+        static member GetPosition(shape:Shape, slideSize:int*int) =
                 let transform2D = shape.Descendants<ShapeProperties>().FirstOrDefault().Descendants<Drawing.Transform2D>().FirstOrDefault()
                 let xy = transform2D.Descendants<Drawing.Offset>().FirstOrDefault()  //좌상단 x,y
                 let wh = transform2D.Descendants<Drawing.Extents>().FirstOrDefault()
-                let cx, cy  = sildeSize
+                let cx, cy  = slideSize
                 let fullHDx = 1920f
                 let fullHDy = 1080f
                 let centerX = Convert.ToSingle(xy.X.Value)+(Convert.ToSingle(wh.Cx.Value)/2f)
@@ -333,7 +333,7 @@ module PPTUtil =
 
         ///슬라이드 모든 페이지를 반환(슬라이드 숨기기 속성 포함)
         [<Extension>]
-        static member SildesAll(doc:PresentationDocument) =
+        static member SlidesAll(doc:PresentationDocument) =
                         doc.PresentationPart.SlideParts
                         |> Seq.map (fun slidePart ->
                                 let show = slidePart.Slide.Show = null || slidePart.Slide.Show.InnerText = "1"
@@ -343,17 +343,18 @@ module PPTUtil =
 
         ///슬라이드 Master 페이지를 반환
         [<Extension>]
-        static member SildesMasterAll(doc:PresentationDocument) =
+        static member SlidesMasterAll(doc:PresentationDocument) =
                         doc.PresentationPart.SlideMasterParts
                         |> Seq.collect (fun slideMasterPart ->
                                 slideMasterPart.SlideLayoutParts |> Seq.map(fun slidePart -> slidePart.SlideMasterPart.SlideMaster))
 
 
         [<Extension>]
-        static member SildesSkipHide(doc:PresentationDocument) =
-                        Office.SildesAll(doc)
+        static member SlidesSkipHide(doc:PresentationDocument) =
+                        Office.SlidesAll(doc)
                         |> Seq.filter(fun (slide, show, page) -> show)
                         |> Seq.map (fun (slide, show, page) ->  slide)
+
 
         ///전체 사용된 도형 반환 (Text box 제외)
         [<Extension>]
@@ -391,14 +392,14 @@ module PPTUtil =
         ///전체 사용된 도형 반환 (Text box 제외)
         [<Extension>]
         static member PageShapes(doc:PresentationDocument) =
-                        Office.SildesSkipHide(doc)
+                        Office.SlidesSkipHide(doc)
                         |> Seq.collect (fun slidePart ->
                                 let page = slidePart |> Office.GetPage
                                 Office.Shapes (page, slidePart.Slide.CommonSlideData))
 
 
         [<Extension>]
-        static member SildeSize(doc:PresentationDocument) =
+        static member SlideSize(doc:PresentationDocument) =
                         let Cx = doc.PresentationPart.Presentation.SlideSize.Cx
                         let Cy = doc.PresentationPart.Presentation.SlideSize.Cy
                         Cx |> int, Cy |> int
@@ -465,7 +466,7 @@ module PPTUtil =
         [<Extension>]
         static member GetTablesWithPageNumbers(doc: PresentationDocument, colCnt: int) =
             let tablesWithPageNumbers =
-                Office.SildesSkipHide(doc)
+                Office.SlidesSkipHide(doc)
                 |> Seq.mapi (fun pageIndex slidePart ->
                     let dt = new System.Data.DataTable()
                     for i in 0 .. colCnt - 1 do

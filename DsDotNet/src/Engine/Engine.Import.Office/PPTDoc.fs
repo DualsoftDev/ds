@@ -14,6 +14,7 @@ open Engine.Import.Office
 open System.Collections.Generic
 open Engine.Core
 open System.Runtime.CompilerServices
+open DocumentFormat.OpenXml.Presentation
 
 
 
@@ -127,23 +128,23 @@ module PPTDocModule =
         let edges =   HashSet<pptEdge>()
 
         do
-            let sildesAll = Office.SildesAll(doc)
+            let SlidesAll = Office.SlidesAll(doc)
             let shapes = Office.PageShapes(doc)
             let connections = Connections(doc)
             let allGroups =  Groups(doc) |> Seq.map(fun (slide, groupSet) -> pages.[slide].PageNum, groupSet)
-            let sildeSize = Office.SildeSize(doc)
-            let sildeMasters = Office.SildesMasterAll(doc)
+            let slideSize = Office.SlideSize(doc)
+            let SlideMasters = Office.SlidesMasterAll(doc)
 
-            sildeMasters |> Seq.iter (fun slideMaster -> masterPages.Add(masterPages.Count+1, slideMaster) |>ignore )
+            SlideMasters |> Seq.iter (fun slideMaster -> masterPages.Add(masterPages.Count+1, slideMaster) |>ignore )
             
-            sildesAll    
+            SlidesAll    
                 |> Seq.filter(fun (slidePart, show, page) -> not( slidePart.IsSlideLayoutBlanckType()))
                 |> Seq.iter  (fun (slidePart, show, page) ->
                         if (slidePart.PageTitle(false) = "" && slidePart.PageTitle(true) = "")
                         then Office.ErrorPPT(Page, ErrID._59 , "Title Error" , page, 0u))
 
 
-            sildesAll    
+            SlidesAll    
                 |> Seq.iter  (fun (slidePart, show, page) ->
                         if (slidePart.PageTitle(false) <> "")
                             then pages.Add(slidePart, pptPage(slidePart, page, show)) |>ignore 
@@ -170,7 +171,7 @@ module PPTDocModule =
                         let pagePPT = pages.Values.Filter(fun w->w.PageNum = page).First()
                         let sysName, flowName = GetSysNFlow(name, pagePPT.Title, pagePPT.PageNum)
 
-                        let node = pptNode(shape, page, flowName)
+                        let node = pptNode(shape, page, flowName, slideSize)
                         if(node.Name ="") then shape.ErrorName(ErrID._13, page)
                         nodes.Add(node.Key, node)  |>ignore )
 
@@ -243,6 +244,8 @@ module PPTDocModule =
         member val DicFlow = Dictionary<int, Flow>() // page , flow
         member val DicVertex = Dictionary<string, Vertex>()
         member val IsBuilded = false with get, set
+       
+
         member x.Parameter:DeviceLoadParameters = parameter.Value
         member x.Doc = doc
 [<Extension>]

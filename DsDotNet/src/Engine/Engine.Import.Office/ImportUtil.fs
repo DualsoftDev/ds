@@ -34,18 +34,16 @@ module ImportU =
 
         let call =
             let jobName = sysName+"_"+apiName
-
-            //if not (jobCallNames.Contains(sysName)(* || node.IsLibCall*))
-            //then 
-            //    node.Shape.ErrorName(ErrID._48, node.PageNum)
-
             match mySys.Jobs.TryFind(fun job -> job.Name = jobName) with
             |Some job ->
                 if job.DeviceDefs.any()
                 then
-                    if(parentReal.IsSome)
-                    then  CallDev.Create(job, DuParentReal (parentReal.Value)) 
-                    else  CallDev.Create(job, DuParentFlow (parentFlow.Value)) 
+                    let call = 
+                        if(parentReal.IsSome)
+                        then  CallDev.Create(job, DuParentReal (parentReal.Value)) 
+                        else  CallDev.Create(job, DuParentFlow (parentFlow.Value)) 
+                    call.CallTargetJob.DeviceDefs.OfType<TaskDev>().Iter(fun a-> a.ApiItem.Xywh <- node.CallPosition)
+                    call
                 else
                     node.Shape.ErrorName(ErrID._52, node.PageNum)
 

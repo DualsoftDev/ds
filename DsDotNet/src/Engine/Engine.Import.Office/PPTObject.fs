@@ -42,7 +42,7 @@ module PPTObjectModule =
             else                        fileName, TrimSpace(name)
     ///전체 사용된 화살표 반환 (앞뒤연결 필수)
     let Connections(doc:PresentationDocument) =
-                    Office.SildesSkipHide(doc)
+                    Office.SlidesSkipHide(doc)
                     |> Seq.map (fun slide ->  slide, slide.Slide.CommonSlideData.ShapeTree.Descendants<ConnectionShape>())
                     |> Seq.map(fun (slide, connects) ->
                         slide, connects |> Seq.map(fun conn ->
@@ -56,7 +56,7 @@ module PPTObjectModule =
                             conn, Id, connStartId, connEndId))
     ///전체 사용된 도형간 그룹지정 정보
     let Groups(doc:PresentationDocument) =
-                    Office.SildesSkipHide(doc)
+                    Office.SlidesSkipHide(doc)
                     |> Seq.filter (fun slide ->  slide.Slide.CommonSlideData.ShapeTree.Descendants<GroupShape>().Any())
                     |> Seq.map (fun slide ->  slide, slide.Slide.CommonSlideData.ShapeTree.Descendants<GroupShape>() |> Seq.toList )
 
@@ -182,7 +182,7 @@ module PPTObjectModule =
         member x.IsUsing = bShow
         member x.Title = slidePart.PageTitle(false)
 
-    type pptNode(shape:Presentation.Shape, iPage:int, pageTitle:string)  =
+    type pptNode(shape:Presentation.Shape, iPage:int, pageTitle:string, slieSize:int*int)  =
         let copySystems = Dictionary<string, string>() //copyName, orgiName
         let safeties    = HashSet<string>()
         let jobInfos = Dictionary<string, HashSet<string>>()  // jobBase, api SystemNames
@@ -328,6 +328,9 @@ module PPTObjectModule =
         member x.IfRXs   = ifRXs
         member x.NodeType = nodeType
         member x.PageTitle    = pageTitle
+        member x.CallPosition = 
+                    let rect =  shape.GetPosition(slieSize)
+                    Xywh(rect.X, rect.Y, rect.Width, rect.Height)
         member x.CallDevName = $"{pageTitle}_{name.Split('.')[0]|>trimSpace}"
         member x.CallApiName = 
                     if name.Contains '$'
@@ -354,7 +357,7 @@ module PPTObjectModule =
         member val LampDefs   = lampDefs
         member val CondiDefs   = condiDefs
 
-        member x.GetRectangle (sildeSize:int*int) =  shape.GetPosition(sildeSize)
+        member x.GetRectangle (slideSize:int*int) =  shape.GetPosition(slideSize)
 
     and
         pptEdge(conn:Presentation.ConnectionShape,  iEdge:UInt32Value, iPage:int ,sNode:pptNode, eNode:pptNode) =

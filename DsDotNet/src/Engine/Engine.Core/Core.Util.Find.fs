@@ -92,7 +92,7 @@ module internal ModelFindModule =
     //    |None -> None
     let tryFindReal (system:DsSystem) (path:string list) =
         match path with
-        | f::xs1 when system.Flows.Any(nameEq f) ->
+        | f::_ when system.Flows.Any(nameEq f) ->
             let flow = tryFindFlow system f |> Option.get
             match flow.Graph.TryFindVertex(path.Last()) with
             |Some(v) -> if v:? Real then Some(v :?> Real) else None

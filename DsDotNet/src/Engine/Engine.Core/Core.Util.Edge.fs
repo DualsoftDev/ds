@@ -8,9 +8,9 @@ open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module EdgeModule =
-    let private createEdge (graph:DsGraph) (modeingEdgeInfo:ModelingEdgeInfo<'v>) =
+    let private createEdge (graph:DsGraph) (modelingEdgeInfo:ModelingEdgeInfo<'v>) =
          [|
-            for src, op, tgt in expandModelingEdge modeingEdgeInfo do
+            for src, op, tgt in expandModelingEdge modelingEdgeInfo do
                 let edge = Edge.Create(graph, src, tgt, op)
                 yield edge
          |]
@@ -29,19 +29,19 @@ module EdgeModule =
 
         if invalidEdge.any() then failwith $"Vertex {invalidEdge.First().Name} children type error"
 
-    let createFlowEdge(flow:Flow) (modeingEdgeInfo:ModelingEdgeInfo<Vertex>) =
-        let mei = modeingEdgeInfo
+    let createFlowEdge(flow:Flow) (modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
+        let mei = modelingEdgeInfo
         validateParentOfEdgeVertices mei flow
         flow.ModelingEdges.Add(mei) |> verifyM $"Duplicated edge {mei.Sources[0].Name}{mei.EdgeSymbol}{mei.Targets[0].Name}"
         createEdge flow.Graph mei
 
-    let createChildEdge(segment:Real) (modeingEdgeInfo:ModelingEdgeInfo<Vertex>) =
-        let mei = modeingEdgeInfo
+    let createChildEdge(segment:Real) (modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
+        let mei = modelingEdgeInfo
         validateParentOfEdgeVertices mei segment
         segment.ModelingEdges.Add(mei) |> verifyM $"Duplicated edge {mei.Sources[0].Name}{mei.EdgeSymbol}{mei.Targets[0].Name}"
         validateChildrenVertexType mei
 
-        createEdge segment.Graph modeingEdgeInfo
+        createEdge segment.Graph modelingEdgeInfo
 
     let toText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (e:'E) = $"{e.Source.Name.QuoteOnDemand()} {e.EdgeType.ToText()} {e.Target.Name.QuoteOnDemand()}"
 

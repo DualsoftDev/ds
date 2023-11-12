@@ -1,4 +1,4 @@
-namespace CommonAsssemblyInfo
+namespace CommonAssemblyInfo
 
 open System.Reflection
 

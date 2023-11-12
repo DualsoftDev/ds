@@ -140,7 +140,7 @@ module ExpressionModule =
         member _.DN = counterStruct.DN
         /// Preset
         member _.PRE = counterStruct.PRE
-        /// Accumuated
+        /// Accumulated
         member _.ACC = counterStruct.ACC
         /// Reset
         member _.RES = counterStruct.RES

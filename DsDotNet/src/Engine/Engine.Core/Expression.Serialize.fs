@@ -63,10 +63,10 @@ module rec ExpressionSerializeModule =
                         return needParen
                 } |> Option.defaultValue false
 
-            let lWithParnethesys = needParenthesis name args[0]
-            let rWithParnethesys = needParenthesis name args[1]
-            let l = args[0].ToText(lWithParnethesys)
-            let r = args[1].ToText(rWithParnethesys)
+            let lWithParenthesis = needParenthesis name args[0]
+            let rWithParenthesis = needParenthesis name args[1]
+            let l = args[0].ToText(lWithParenthesis)
+            let r = args[1].ToText(rWithParenthesis)
             let text = $"{l} {name} {r}"
             if withParenthesis then $"({text})" else text
         else

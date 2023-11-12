@@ -196,6 +196,7 @@ module PPTObjectModule =
         let mutable ifRXs    = HashSet<string>()
         let mutable nodeType:NodeType = NodeType.REAL
 
+        let trimNewLine(text:string) =   text.Replace("\n", "")
         let trimSpace(text:string) =   text.TrimStart(' ').TrimEnd(' ')
         let trimStartEndSeq(texts:string seq) =  texts  |> Seq.map(fun name -> trimSpace name)
         let updateSafety(barckets:string)  = barckets.Split(';') |> Seq.iter(fun f-> safeties.Add (f) |> ignore )
@@ -226,7 +227,7 @@ module PPTObjectModule =
                     jobInfos.Add(copy, [copy]|>HashSet))
 
         let updateDeviceIF(text:string)      =
-            ifName <- GetBracketsRemoveName(text) |> trimSpace
+            ifName <- GetBracketsRemoveName(text) |> trimSpace |> trimNewLine
             match GetSquareBrackets(shape.InnerText, false)  with
             |Some txrx ->
                 if(txrx.Contains('~'))
@@ -241,7 +242,7 @@ module PPTObjectModule =
                     shape.ErrorName(ErrID._53, iPage)
 
         let updateLinkIF(text:string)      =
-            ifName <- GetBracketsRemoveName(text) |> trimSpace
+            ifName <- GetBracketsRemoveName(text) |> trimSpace |> trimNewLine
             let txrx = GetSquareBrackets(shape.InnerText, false)
             if(txrx.IsSome)
             then
@@ -285,8 +286,8 @@ module PPTObjectModule =
                 else  shape.ErrorName(ErrID._1, iPage)
             
             if nodeType = CALL
-            then name <-  GetHeadBracketRemoveName(shape.InnerText)  |> trimSpace
-            else name <-  GetBracketsRemoveName(shape.InnerText)  |> trimSpace
+            then name <-  GetHeadBracketRemoveName(shape.InnerText) |> trimSpace |>trimNewLine
+            else name <-  GetBracketsRemoveName(shape.InnerText)    |> trimSpace |>trimNewLine
 
             nameCheck (shape, nodeType, iPage)
 

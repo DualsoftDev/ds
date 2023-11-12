@@ -201,7 +201,7 @@ module ImportPPTModule =
                         )
 
 
-                let systems =  results.Select(fun (sys, view) -> sys) |> Seq.toList
+                let systems =  results |> map fst
                 let views   =  results |> dict
                 { Config = cfg; Systems = systems; LoadingPaths = []}, views, pptRepo
       

@@ -440,23 +440,22 @@ module ImportU =
             let dicVertex = doc.DicVertex
             let dicFlow = doc.DicFlow
             doc.Nodes
-            |> Seq.iter(fun node ->
+            |> iter(fun node ->
                     let flow = dicFlow.[node.PageNum]
                     let dicQualifiedNameSegs  = dicVertex.Values.OfType<CallDev>().Select(fun call -> call.CallTargetJob.Name, call) |> dict
                     
                     let safeName(safety:string) =
                          $"{flow.Name}_{safety.Split('.')[0]}_{ safety.Split('.')[1]}" 
 
-                    node.Safeties   //세이프티 입력 미등록 이름오류 체크
-                    |> Seq.map(fun safe ->  safeName(safe))
-                    |> Seq.iter(fun safeFullName ->
+                    let safeties = node.Safeties |> map safeName |> toArray
+                    safeties   //세이프티 입력 미등록 이름오류 체크
+                    |> iter(fun safeFullName ->
                             if not(mySys.Jobs.Select(fun f->f.Name).Contains safeFullName)
                             then Office.ErrorName(node.Shape, ErrID._28, node.PageNum))
 
-                    node.Safeties
-                    |> Seq.map(fun safe ->  safeName(safe))
-                    |> Seq.map(fun safeFullName ->  dicQualifiedNameSegs.[safeFullName])
-                    |> Seq.iter(fun safeCondV ->
+                    safeties
+                    |> map(fun safeFullName ->  dicQualifiedNameSegs.[safeFullName])
+                    |> iter(fun safeCondV ->
                             match  dicVertex.[node.Key] |> box with
                             | :? ISafetyConditoinHolder as holder ->
                                     match safeCondV with

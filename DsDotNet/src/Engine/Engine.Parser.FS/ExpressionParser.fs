@@ -194,11 +194,11 @@ module rec ExpressionParser =
                 match typ, functionName, args with
                 | CTU, ("createWinCTU" | "createXgiCTU"), _ :: _ :: [ (BoolExp resetCondition) ] ->
                     CounterStatement.CreateCTU(tcParams, resetCondition)
-                | CTU, "createAbCTU", _ :: [_] -> CounterStatement.CreateAbCTU(tcParams)
+                | CTU, "createAbCTU", _ :: [ _ ] -> CounterStatement.CreateAbCTU(tcParams)
 
                 | CTD, ("createWinCTD" | "createXgiCTD"), _ :: _ :: [ (BoolExp resetCondition) ] ->
                     CounterStatement.CreateXgiCTD(tcParams, resetCondition)
-                | CTD, "createAbCTD", _ :: [_] -> CounterStatement.CreateAbCTD(tcParams)
+                | CTD, "createAbCTD", _ :: [ _ ] -> CounterStatement.CreateAbCTD(tcParams)
 
                 | CTUD,
                   ("createWinCTUD" | "createXgiCTUD"),

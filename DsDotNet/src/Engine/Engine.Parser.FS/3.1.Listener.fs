@@ -242,7 +242,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     member x.GetObjectContextInformation(system: DsSystem, parserRuleContext: ParserRuleContext) =
         let ci = x.GetContextInformation(parserRuleContext)
         assert (system.Name = ci.System.Value)
-        let flow = ci.Flow.Bind system.TryFindFlow 
+        let flow = ci.Flow.Bind system.TryFindFlow
 
         let parenting =
             option {

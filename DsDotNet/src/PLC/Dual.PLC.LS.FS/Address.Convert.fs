@@ -172,8 +172,8 @@ let (|LsTagPatternFEnet|_|) ((modelId: int option), (tag: string)) =
     match tag with
     // XGI IEC 61131 : bit
     // XGK "Z" "D"
-    | RegexPattern @"^%([IQU])X(\d+)\.(\d+)\.(\d+)$" [  //%IX127.15.63(O),    %IX10.20.63(X) => (중간 word 단위)
-                                                       DevicePattern device
+    // %IX127.15.63(O),    %IX10.20.63(X) => (중간 word 단위)                                                       
+    | RegexPattern @"^%([IQU])X(\d+)\.(\d+)\.(\d+)$" [ DevicePattern device
                                                        Int32Pattern file
                                                        WordSubBitPattern element
                                                        LWordSubBitPattern bit ] ->
@@ -211,7 +211,10 @@ let (|LsTagPatternFEnet|_|) ((modelId: int option), (tag: string)) =
     | RegexPattern @"^%([PMLKFNRAWIQUZD])X([\d]+)$" [ DevicePattern device; Int32Pattern bitOffset ] ->
         createTagInfo (tag, device, DataType.Bit, bitOffset, modelId)
 
-    | RegexPattern @"^%([PMLKFNRAWIQUZD])([BWDL])(\d+)\.(\d+)$" [ DevicePattern device; DataTypePattern dataType;  Int32Pattern offset; LWordSubBitPattern bit ] ->
+    | RegexPattern @"^%([PMLKFNRAWIQUZD])([BWDL])(\d+)\.(\d+)$" [ DevicePattern device
+                                                                  DataTypePattern dataType
+                                                                  Int32Pattern offset
+                                                                  LWordSubBitPattern bit ] ->
         match dataType with
         | DataType.Byte ->
             createTagInfo (tag, device, DataType.Bit, offset * DataType.Byte.GetBitLength() + bit, modelId)

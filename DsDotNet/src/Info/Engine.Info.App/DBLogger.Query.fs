@@ -48,11 +48,9 @@ module internal DBLoggerQueryImpl =
                         assert (duration >= 0)
                         sum <- sum + duration
                         inspectLog tails
-                    | _ when b1 = b2 ->
-                        failwithlogf $"ERROR.  duplicated consecutive values detected."
-                    | _ ->
-                        failwithlogf $"ERROR.  Expect (rising, falling)."
-            
+                    | _ when b1 = b2 -> failwithlogf $"ERROR.  duplicated consecutive values detected."
+                    | _ -> failwithlogf $"ERROR.  Expect (rising, falling)."
+
             logs |> inspectLog
 
             x.Count <- count
@@ -63,13 +61,15 @@ module internal DBLoggerQueryImpl =
         member x.BuildIncremental(FList(newLogs: Log list)) =
             let helper (last: Log) =
                 if x.LastLog.IsNone then
-                    if isOff(last) then
+                    if isOff (last) then
                         failwithlogf $"ERROR.  Invalid value starts: OFF(false)."
                 else
                     let prev = x.LastLog.Value
-                    if isOn(prev) = isOn(last) then
+
+                    if isOn (prev) = isOn (last) then
                         failwithlogf $"ERROR.  duplicated consecutive values detected."
-                    if isOff(last) then
+
+                    if isOff (last) then
                         x.Count <- x.Count + 1
                         x.Sum <- x.Sum + (last.At - prev.At).TotalSeconds
 

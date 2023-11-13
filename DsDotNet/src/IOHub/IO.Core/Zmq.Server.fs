@@ -1,6 +1,7 @@
 (* IO.Core using Zero MQ *)
 
 namespace IO.Core
+
 open System
 open System.Linq
 open System.Threading
@@ -15,61 +16,67 @@ open IO.Spec
 open Newtonsoft.Json
 
 [<AllowNullLiteral>]
-type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
-        
+type Server(ioSpec_: IOSpec, cancellationToken: CancellationToken) =
+
     let port = ioSpec_.ServicePort
 
     let memoryChangedSubject = new Subject<IMemoryChangeInfo>()
 
-    let notifyIoChange(memChange:IMemoryChangeInfo) =
+    let notifyIoChange (memChange: IMemoryChangeInfo) =
         let cri = memChange.ClientRequestInfo :?> ClientRequestInfo
-        Console.WriteLine($"change by client {clientIdentifierToString cri.ClientId}");
+        Console.WriteLine($"change by client {clientIdentifierToString cri.ClientId}")
+
         let notiTargetClients =
             clients
             |> filter (fun c -> not <| Enumerable.SequenceEqual(c, cri.ClientId))
             |> toArray
-        let notifyToClients() =
+
+        let notifyToClients () =
             let path = memChange.IOFileSpec.GetPath()
+
             match memChange with
             | :? StringChangeInfo as strChange ->
                 for client in notiTargetClients do
-                    Console.WriteLine($"Notifying change to client {clientIdentifierToString client}");
+                    Console.WriteLine($"Notifying change to client {clientIdentifierToString client}")
                     let key = strChange.Keys[0]
                     let value = (strChange.Value :?> string array)[0]
-                    
+
                     serverSocket
                         .SendMoreFrame(client)
                         .SendMoreFrame(-1 |> ByteConverter.ToBytes)
                         .SendMoreFrame("NOTIFY")
                         .SendMoreFrame(value) // value
-                        .SendMoreFrame(path)  // name
-                        .SendMoreFrame(int MemoryType.String |> ByteConverter.ToBytes)  // contentBitLength
+                        .SendMoreFrame(path) // name
+                        .SendMoreFrame(int MemoryType.String |> ByteConverter.ToBytes) // contentBitLength
                         .SendFrame(key) // offsets
             | :? IOChangeInfo as ioChange ->
                 let contenetBitLength = int ioChange.MemoryType
                 let bytes = ioChange.GetValueBytes()
                 let offsets = ioChange.Offsets |> ByteConverter.ToBytes<int>
+
                 for client in notiTargetClients do
-                    Console.WriteLine($"Notifying change to client {clientIdentifierToString client}");
+                    Console.WriteLine($"Notifying change to client {clientIdentifierToString client}")
+
                     serverSocket
                         .SendMoreFrame(client)
                         .SendMoreFrame(-1 |> ByteConverter.ToBytes)
                         .SendMoreFrame("NOTIFY")
                         .SendMoreFrame(bytes) // value
-                        .SendMoreFrame(path)  // name
-                        .SendMoreFrame(contenetBitLength |> ByteConverter.ToBytes)  // contentBitLength
+                        .SendMoreFrame(path) // name
+                        .SendMoreFrame(contenetBitLength |> ByteConverter.ToBytes) // contentBitLength
                         .SendFrame(offsets) // offsets
-            | _ ->
-                failwith "ERROR"
+            | _ -> failwith "ERROR"
 
-        notifyToClients()
+        notifyToClients ()
         memoryChangedSubject.OnNext memChange
+
     do
         ioSpec <- ioSpec_
+
         for v in ioSpec.Vendors do
             v.AddressResolver <-
-                let oh:ObjectHandle = Activator.CreateInstanceFrom(v.Dll, v.ClassName)
-                let obj:obj = oh.Unwrap()
+                let oh: ObjectHandle = Activator.CreateInstanceFrom(v.Dll, v.ClassName)
+                let obj: obj = oh.Unwrap()
                 obj :?> IAddressInfoProvider
 
             //showSamples v v.AddressResolver
@@ -77,51 +84,70 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
             for f in v.Files do
                 let dir, key =
                     match v.Location with
-                    | "" | null -> ioSpec.TopLevelLocation, f.Name
+                    | ""
+                    | null -> ioSpec.TopLevelLocation, f.Name
                     | _ -> Path.Combine(ioSpec.TopLevelLocation, v.Location), $"{v.Location}/{f.Name}"
+
                 f.InitiaizeFile(dir)
                 let streamManager = new StreamManager(f)
-                let key = if v.Location.NonNullAny() then $"{v.Location}/{f.Name}" else f.Name
+
+                let key =
+                    if v.Location.NonNullAny() then
+                        $"{v.Location}/{f.Name}"
+                    else
+                        f.Name
+
                 streamManagers.Add(key, streamManager)
-            
+
     let mutable terminated = false
 
-    member x.IsTerminated with get() = terminated
+    member x.IsTerminated = terminated
 
     member x.MemoryChangedObservable = memoryChangedSubject
     member x.Clients = clients
 
-    member private x.handleRequest (server:RouterSocket) : IResponse =    // ClientIdentifier * int * IOResult =
-        let mutable mqMessage:NetMQMessage = null
+    member private x.handleRequest(server: RouterSocket) : IResponse = // ClientIdentifier * int * IOResult =
+        let mutable mqMessage: NetMQMessage = null
+
         if not <| server.TryReceiveMultipartMessage(&mqMessage) then
             ResponseNoMoreInput()
         else
             let mms = mqMessage |> toArray
-            let clientId = mms[MultiMessageFromClient.ClientId].Buffer;  // byte[]로 받음
-            let command = mms[MultiMessageFromClient.Command].ConvertToString() |> removeTrailingNullChar;
+            let clientId = mms[MultiMessageFromClient.ClientId].Buffer // byte[]로 받음
+
+            let command = mms[MultiMessageFromClient.Command].ConvertToString() |> removeTrailingNullChar
+
             let reqId = mms[MultiMessageFromClient.RequestId].Buffer |> BitConverter.ToInt32
             /// Client Request Info : clientId, requestId
             let cri = ClientRequestInfo(clientId, reqId)
 
             logDebug $"Handling request: {command}"
 
-            let getArgs() =
-                let tokens = command.Split(' ', StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
-                tokens[1..] |> map(fun s -> s.ToLower())
+            let getArgs () =
+                let tokens =
+                    command.Split(' ', StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
+
+                tokens[1..] |> map (fun s -> s.ToLower())
 
             try
-                // client 에서 오는 모든 메시지는 client ID, requestId 와 command frame 을 기본 포함하므로, 
+                // client 에서 오는 모든 메시지는 client ID, requestId 와 command frame 을 기본 포함하므로,
                 // 이 3개의 frame 을 제외한 frame 의 갯수에 따라 message 를 처리한다.
-                match mms.length() - 3 with
+                match mms.length () - 3 with
                 | 0 ->
                     match command with
                     | "REGISTER" ->
-                        clients <- clientId::clients
+                        clients <- clientId :: clients
                         logDebug $"Client {clientIdentifierToString clientId} registered"
-                        let endian = if BitConverter.IsLittleEndian then "LittleEndian" else "BigEndian";
+
+                        let endian =
+                            if BitConverter.IsLittleEndian then
+                                "LittleEndian"
+                            else
+                                "BigEndian"
+
                         StringResponseOK(cri, endian)
                     | "UNREGISTER" ->
-                        clients <- clients |> List.except [clientId]
+                        clients <- clients |> List.except [ clientId ]
                         logDebug $"Client {clientIdentifierToString clientId} unregistered"
                         StringResponseOK(cri, "OK")
                     | "META" ->
@@ -130,24 +156,23 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                     | "PONG" ->
                         logDebug $"Got pong from client {clientIdentifierToString clientId}"
                         ResponseOK()
-                    | StartsWith "read" ->      // e.g read p/ob1 p/ow1 p/olw3
+                    | StartsWith "read" -> // e.g read p/ob1 p/ow1 p/olw3
                         try
                             let result =
-                                getArgs() |> map (fun a -> $"{a}={readAddress(cri, a)}")
-                                |> joinWith " "
+                                getArgs () |> map (fun a -> $"{a}={readAddress (cri, a)}") |> joinWith " "
+
                             ReadResponseOK(cri, MemoryType.Undefined, result)
                         with ex ->
                             StringResponseNG(cri, ex.Message)
                     | StartsWith "write" ->
-                        let changes = getArgs() |> map (fun a -> writeAddressWithValue(cri, a))
+                        let changes = getArgs () |> map (fun a -> writeAddressWithValue (cri, a))
                         WriteHeterogeniousResponseOK(cri, changes)
                     | StartsWith "cl" ->
-                        let name = getArgs() |> Seq.exactlyOne
+                        let name = getArgs () |> Seq.exactlyOne
                         let bm = streamManagers[name]
-                        bm.clear()
+                        bm.clear ()
                         StringResponseOK(cri, "OK")
-                    | _ ->
-                        StringResponseNG(cri, $"ERROR: {command}")
+                    | _ -> StringResponseNG(cri, $"ERROR: {command}")
                 | 2 ->
                     match command with
                     | "rx" ->
@@ -180,6 +205,7 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                         ReadResponseOK(cri, MemoryType.LWord, result)
                     | "rs" ->
                         let name = mms[TagKindName].ConvertToString().ToLower()
+
                         let fs =
                             seq {
                                 for v in ioSpec.Vendors do
@@ -192,8 +218,7 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                         let keys = JsonConvert.DeserializeObject<string[]>(jsonKeys)
                         let keys, values = fs.ReadStrings keys
                         ReadStringsResponseOK(cri, keys, values)
-                    | _ ->
-                        StringResponseNG(cri, $"ERROR: {command}")
+                    | _ -> StringResponseNG(cri, $"ERROR: {command}")
                 | 3 ->
                     match command with
                     | "wx" ->
@@ -201,7 +226,7 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                         let values = byteValues |> map (fun b -> b <> 0uy)
                         bm.Verify(cri, MemoryType.Bit, offsets, values.Length)
 
-                        for i in [0..offsets.Length-1] do
+                        for i in [ 0 .. offsets.Length - 1 ] do
                             bm.writeBit (cri, offsets[i], values[i])
 
                         bm.Flush()
@@ -234,37 +259,37 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
 
                         Array.zip offsets values |> bm.writeU64s cri
                         WriteResponseOK(cri, IOChangeInfo(cri, bm.FileSpec, MemoryType.LWord, offsets, values))
-                    | _ ->
-                        StringResponseNG(cri, $"ERROR: {command}")
+                    | _ -> StringResponseNG(cri, $"ERROR: {command}")
 
-                | _ ->
-                    StringResponseNG(cri, $"ERROR: {command}")
+                | _ -> StringResponseNG(cri, $"ERROR: {command}")
             with ex ->
                 StringResponseNG(cri, ex.Message)
 
     member x.Run() =
         // start a separate thread to run the server
-        let f() =
+        let f () =
             logInfo $"Starting server on port {port}..."
             use server = new RouterSocket()
             serverSocket <- server
-                
+
             server.Bind($"tcp://*:{port}")
-                
+
             //periodicPingClients()
 
             while not cancellationToken.IsCancellationRequested do
                 try
                     let response = x.handleRequest server
+
                     match response with
                     | :? ResponseNoMoreInput ->
                         // 현재, request 가 없는 경우
                         // Async.Sleep(???)
                         ()
                     | :? StringResponseNG as r ->
-                        let cri:ClientRequestInfo = r.ClientRequestInfo
+                        let cri: ClientRequestInfo = r.ClientRequestInfo
                         let clientId = cri.ClientId
                         let reqId = cri.RequestId
+
                         server
                             .SendMoreFrame(clientId)
                             .SendMoreFrameWithRequestId(reqId)
@@ -274,14 +299,15 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                     | :? IResponseWithClientRquestInfo as r ->
                         let clientId = r.ClientRequestInfo.ClientId
                         let reqId = r.ClientRequestInfo.RequestId
+
                         let more =
                             server
                                 .SendMoreFrame(clientId)
                                 .SendMoreFrameWithRequestId(reqId)
                                 .SendMoreFrame("OK")
+
                         match r with
-                        | :? StringResponse as r ->
-                            more.SendFrame(r.Message)
+                        | :? StringResponse as r -> more.SendFrame(r.Message)
                         | :? ReadResponseOK as r ->
                             let values, dataType = r.Values, r.MemoryType
 
@@ -289,6 +315,7 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                                 more.SendFrame(r.Values :?> string)
                             else
                                 verify (values.GetType().IsArray)
+
                                 let moreBytes =
                                     match dataType with
                                     | MemoryType.Bit   -> values :?> bool[] |> map (fun b -> if b then 1uy else 0uy)
@@ -313,23 +340,21 @@ type Server(ioSpec_:IOSpec, cancellationToken:CancellationToken) =
                             more
                                 .SendMoreFrame(jsonValues)
                                 .SendFrame(jsonKeys)
-                        | _ ->
-                            failwith "Not Yet!!"
+                        | _ -> failwith "Not Yet!!"
 
-                    | _ ->
-                        failwith "Not Yet!!"
-                with 
+                    | _ -> failwith "Not Yet!!"
+                with
                 | :? ExcetionWithClient as ex ->
                     logError $"Error occured while handling request: {ex.Message}"
+
                     server
                         .SendMoreFrame(ex.ClientId)
                         .SendMoreFrame(ex.RequestId |> ByteConverter.ToBytes)
                         .SendMoreFrame("ERR")
                         .SendFrame(ex.Message)
-                | ex ->
-                    logError $"Error occured while handling request: {ex.Message}"
+                | ex -> logError $"Error occured while handling request: {ex.Message}"
 
-            logInfo("Cancellation request detected!")
+            logInfo ("Cancellation request detected!")
             (x :> IDisposable).Dispose()
             terminated <- true
 

@@ -12,4 +12,3 @@ using System.Reflection;
 [assembly: AssemblyTitle("Dualsoft Engine packages")]
 [assembly: AssemblyProduct("DS Engine")]
 [assembly: AssemblyVersion("0.9.2.1")]
-

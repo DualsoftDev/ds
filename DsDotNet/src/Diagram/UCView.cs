@@ -19,536 +19,519 @@ using Style = Microsoft.Msagl.Drawing.Style;
 using Vertex = Engine.Core.CoreModule.Vertex;
 
 
-namespace Diagram.View.MSAGL
-{
+namespace Diagram.View.MSAGL;
 
-    public partial class UcView : UserControl
+public partial class UcView : UserControl
+{
+    private readonly GViewer viewer = new();
+
+    public Flow Flow { get; set; }
+    public ViewNode MasterNode { get; set; }
+
+    public UcView()
     {
-        private readonly GViewer viewer = new();
+        InitializeComponent();
 
-        public Flow Flow { get; set; }
-        public ViewNode MasterNode { get; set; }
-        public UcView()
+        viewer.Dock = DockStyle.Fill;
+        viewer.PanButtonPressed = true;
+        viewer.ToolBarIsVisible = false;
+
+        Controls.Add(viewer);
+    }
+
+    int node_attr_linewidthH = 8;
+    int node_attr_linewidthL = 3;
+    int edge_attr_linewidthWeek = 1;
+    int edge_attr_linewidthStrong = 2;
+    int nnode_label_fontsize = 6;
+
+    private readonly Dictionary<string, Node> _dicDrawing = new();
+
+    private bool IsDummyMember(List<pptDummy> lstDummy, Vertex vertex)
+    {
+        return lstDummy.Where(w => w.Members.Contains(vertex)).Count() > 0;
+    }
+
+    public void SetGraph(ViewNode viewNode, Flow flow, bool bSmallGap)
+    {
+        Flow = flow;
+        MasterNode = viewNode;
+        //sub 그래프 불가
+        //viewer.Graph.LayoutAlgorithmSettings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings();
+        //viewer.Graph.LayoutAlgorithmSettings = new RankingLayoutSettings();
+        //sub 그래프 가능
+        viewer.Graph = new Graph();
+        Microsoft.Msagl.Layout.Layered.SugiyamaLayoutSettings layoutSetting = new();
+        //var layoutSetting = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings(); 
+
+        if (bSmallGap)
         {
-            InitializeComponent();
-
-            viewer.Dock = DockStyle.Fill;
-            viewer.PanButtonPressed = true;
-            viewer.ToolBarIsVisible = false;
-
-            Controls.Add(viewer);
+            layoutSetting.PackingMethod = Microsoft.Msagl.Core.Layout.PackingMethod.Compact;
+            layoutSetting.NodeSeparation = 2;
+            layoutSetting.ClusterMargin = 2;
+            layoutSetting.LiftCrossEdges = false;
+            layoutSetting.PackingAspectRatio = 2;
+        }
+        else
+        {
+            layoutSetting.PackingMethod = Microsoft.Msagl.Core.Layout.PackingMethod.Columns;
+            layoutSetting.LayerSeparation = 20;
+            layoutSetting.NodeSeparation = 40;
+            layoutSetting.ClusterMargin = 10;
         }
 
-        int node_attr_linewidthH = 8;
-        int node_attr_linewidthL = 3;
-        int edge_attr_linewidthWeek = 1;
-        int edge_attr_linewidthStrong = 2;
-        int nnode_label_fontsize = 6;
-        
-        private readonly Dictionary<string, Node> _dicDrawing = new();
+        viewer.Graph.LayoutAlgorithmSettings = layoutSetting;
 
-        private bool IsDummyMember(List<pptDummy> lstDummy, Vertex vertex)
+        SetBackColor(System.Drawing.Color.FromArgb(33, 33, 33));
+
+        viewNode.GetSingles().ForEach(f => DrawSeg(viewer.Graph.RootSubgraph, f));
+        viewNode.GetEdges().ForEach(f => DrawMEdge(viewer.Graph.RootSubgraph, f));
+
+        viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
+    }
+
+    private void UpdateLabelText(Node nNode)
+    {
+        nNode.LabelText = nNode.LabelText.Split(';')[0];
+        nNode.Label.FontColor = Color.White;
+        nNode.Attr.Color = Color.Black;
+        nNode.Label.FontSize = nnode_label_fontsize;
+    }
+
+    private void DrawMEdge(Subgraph subgraph, ModelingEdgeInfo<ViewNode> edge)
+    {
+        bool bDrawSubSrc = edge.Sources[0].IsChildExist;
+        bool bDrawSubTgt = edge.Targets[0].IsChildExist;
+
+        ViewNode mEdgeSrc = edge.Sources[0];
+        ViewNode mEdgeTgt = edge.Targets[0];
+        Subgraph subGSrc = new(mEdgeSrc.UIKey);
+        Subgraph subGTgt = new(mEdgeTgt.UIKey);
+
+        if (bDrawSubSrc)
         {
-            return lstDummy.Where(w => w.Members.Contains(vertex)).Count() > 0;
+            subgraph.AddSubgraph(subGSrc);
         }
 
-        public void SetGraph(ViewNode viewNode, Flow flow, bool bSmallGap)
+        if (bDrawSubTgt)
         {
-            Flow = flow;
-            MasterNode = viewNode;
-            //sub 그래프 불가
-            //viewer.Graph.LayoutAlgorithmSettings = new Microsoft.Msagl.Layout.MDS.MdsLayoutSettings();
-            //viewer.Graph.LayoutAlgorithmSettings = new RankingLayoutSettings();
-            //sub 그래프 가능
-            viewer.Graph = new Graph() { };
-            Microsoft.Msagl.Layout.Layered.SugiyamaLayoutSettings layoutSetting = new();
-            //var layoutSetting = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings(); 
-
-            if (bSmallGap)
-            {
-                layoutSetting.PackingMethod = Microsoft.Msagl.Core.Layout.PackingMethod.Compact;
-                layoutSetting.NodeSeparation = 2;
-                layoutSetting.ClusterMargin = 2;
-                layoutSetting.LiftCrossEdges = false;
-                layoutSetting.PackingAspectRatio = 2;
-
-            }
-            else
-            {
-                layoutSetting.PackingMethod = Microsoft.Msagl.Core.Layout.PackingMethod.Columns;
-                layoutSetting.LayerSeparation = 20;
-                layoutSetting.NodeSeparation = 40;
-                layoutSetting.ClusterMargin = 10;
-            }
-
-            viewer.Graph.LayoutAlgorithmSettings = layoutSetting;
-
-            SetBackColor(System.Drawing.Color.FromArgb(33, 33, 33));
-
-            viewNode.GetSingles().ForEach(f => DrawSeg(viewer.Graph.RootSubgraph, f));
-            viewNode.GetEdges().ForEach(f => DrawMEdge(viewer.Graph.RootSubgraph, f));
-
-            viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
+            subgraph.AddSubgraph(subGTgt);
         }
 
-        private void UpdateLabelText(Node nNode)
-        {
-            nNode.LabelText = nNode.LabelText.Split(';')[0];
-            nNode.Label.FontColor = Color.White;
-            nNode.Attr.Color = Color.Black;
-            nNode.Label.FontSize = nnode_label_fontsize;
+        Edge gEdge = viewer.Graph.AddEdge(subGSrc.Id, "", subGTgt.Id);
+        DrawEdgeStyle(gEdge, edge, true);
+        DrawSub(subgraph, mEdgeSrc, subGSrc, gEdge.SourceNode, bDrawSubSrc);
+        DrawSub(subgraph, mEdgeTgt, subGTgt, gEdge.TargetNode, bDrawSubTgt);
+    }
 
+    private Subgraph DrawSeg(Subgraph parentGraph, ViewNode viewNode)
+    {
+        Subgraph subGraph = new(viewNode.UIKey);
+
+        if (viewNode.IsChildExist)
+        {
+            parentGraph.AddSubgraph(subGraph);
         }
 
-        private void DrawMEdge(Subgraph subgraph, ModelingEdgeInfo<ViewNode> edge)
+        Edge gEdge = viewer.Graph.AddEdge(subGraph.Id, "", subGraph.Id);
+        UpdateLabelText(gEdge.SourceNode);
+        UpdateNodeView(gEdge.SourceNode, viewNode);
+        gEdge.IsVisible = false;
+
+        DrawSub(parentGraph, viewNode, subGraph, gEdge.SourceNode, viewNode.IsChildExist);
+
+        return subGraph;
+    }
+
+    private void DrawSub(Subgraph parentGraph, ViewNode viewNode, Subgraph subG, Node gNode, bool bDrawSub)
+    {
+        if (_dicDrawing.ContainsKey(gNode.Id))
         {
-
-            bool bDrawSubSrc = edge.Sources[0].IsChildExist;
-            bool bDrawSubTgt = edge.Targets[0].IsChildExist;
-
-            ViewNode mEdgeSrc = edge.Sources[0];
-            ViewNode mEdgeTgt = edge.Targets[0];
-            Subgraph subGSrc = new(mEdgeSrc.UIKey);
-            Subgraph subGTgt = new(mEdgeTgt.UIKey);
-
-            if (bDrawSubSrc)
-            {
-                subgraph.AddSubgraph(subGSrc);
-            }
-
-            if (bDrawSubTgt)
-            {
-                subgraph.AddSubgraph(subGTgt);
-            }
-
-            Edge gEdge = viewer.Graph.AddEdge(subGSrc.Id, "", subGTgt.Id);
-            DrawEdgeStyle(gEdge, edge, true);
-            DrawSub(subgraph, mEdgeSrc, subGSrc, gEdge.SourceNode, bDrawSubSrc);
-            DrawSub(subgraph, mEdgeTgt, subGTgt, gEdge.TargetNode, bDrawSubTgt);
-
+            return;
         }
 
-        private Subgraph DrawSeg(Subgraph parentGraph, ViewNode viewNode)
+        _dicDrawing.Add(gNode.Id, gNode);
+
+        if (bDrawSub)
         {
+            viewNode.GetEdges().ForEach(f => { DrawMEdge(subG, f); });
 
-            Subgraph subGraph = new(viewNode.UIKey);
+            viewNode.GetSingles().ForEach(subSeg => DrawSeg(subG, subSeg));
+        }
+        else
+        {
+            parentGraph.AddNode(gNode);
+        }
+    }
 
-            if (viewNode.IsChildExist)
-            {
-                parentGraph.AddSubgraph(subGraph);
-            }
 
-            Edge gEdge = viewer.Graph.AddEdge(subGraph.Id, "", subGraph.Id);
-            UpdateLabelText(gEdge.SourceNode);
-            UpdateNodeView(gEdge.SourceNode, viewNode);
-            gEdge.IsVisible = false;
+    private void DrawEdgeStyle(Edge gEdge, ModelingEdgeInfo<ViewNode> edge, bool model = false)
+    {
+        //gEdge.Attr.Color = Color.Black;
+        //gEdge.Label.FontColor = Color.White;
+        gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Generalization;
 
-            DrawSub(parentGraph, viewNode, subGraph, gEdge.SourceNode, viewNode.IsChildExist);
-
-            return subGraph;
+        gEdge.Attr.Color = Color.DarkGray;
+        ModelingEdgeType et = edge.EdgeSymbol.ToModelEdge();
+        if (et == ModelingEdgeType.StartEdge)
+        {
+            gEdge.Attr.AddStyle(Style.Solid);
+            gEdge.Attr.LineWidth = edge_attr_linewidthWeek;
+        }
+        else if (et == ModelingEdgeType.StartPush)
+        {
+            gEdge.Attr.AddStyle(Style.Solid);
+            gEdge.Attr.LineWidth = edge_attr_linewidthStrong;
+            gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
+        }
+        else if (et == ModelingEdgeType.ResetEdge)
+        {
+            gEdge.Attr.AddStyle(Style.Dashed);
+            gEdge.Attr.LineWidth = edge_attr_linewidthWeek;
+        }
+        else if (et == ModelingEdgeType.ResetPush)
+        {
+            gEdge.Attr.AddStyle(Style.Dashed);
+            gEdge.Attr.LineWidth = edge_attr_linewidthStrong;
+            gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
         }
 
-        private void DrawSub(Subgraph parentGraph, ViewNode viewNode, Subgraph subG, Node gNode, bool bDrawSub)
+        else if (et == ModelingEdgeType.Interlock)
         {
-            if (_dicDrawing.ContainsKey(gNode.Id))
-            {
-                return;
-            }
-            else
-            {
-                _dicDrawing.Add(gNode.Id, gNode);
-            }
+            gEdge.Attr.AddStyle(Style.Dashed);
+            gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
+            gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
+        }
+        else if (et == ModelingEdgeType.StartReset)
+        {
+            gEdge.Attr.AddStyle(Style.Solid);
+            gEdge.Attr.ArrowheadAtSource = ArrowStyle.Tee;
+        }
 
-            if (bDrawSub)
+        UpdateLabelText(gEdge.SourceNode);
+        UpdateLabelText(gEdge.TargetNode);
+
+        if (model)
+        {
+            ViewNode src = edge.Sources[0];
+            ViewNode tgt = edge.Targets[0];
+
+            UpdateNodeView(gEdge.SourceNode, src);
+            UpdateNodeView(gEdge.TargetNode, tgt);
+        }
+    }
+
+    private void UpdateNodeView(Node nNode, ViewNode viewNode)
+    {
+        {
+            //nNode.Attr.Color = Color.DarkGoldenrod;
+            nNode.Attr.LineWidth = node_attr_linewidthL;
+
+
+            if (viewNode.ViewType == ViewType.VBUTTON)
             {
-                viewNode.GetEdges().ForEach(f =>
+                if (viewNode.IsChildExist)
                 {
-                    DrawMEdge(subG, f);
-                });
-
-                viewNode.GetSingles().ForEach(subSeg => DrawSeg(subG, subSeg));
-
-
-            }
-            else
-            {
-                parentGraph.AddNode(gNode);
-            }
-        }
-
-
-        private void DrawEdgeStyle(Edge gEdge, ModelingEdgeInfo<ViewNode> edge, bool model = false)
-        {
-            //gEdge.Attr.Color = Color.Black;
-            //gEdge.Label.FontColor = Color.White;
-            gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Generalization;
-
-            gEdge.Attr.Color = Color.DarkGray;
-            ModelingEdgeType et = edge.EdgeSymbol.ToModelEdge();
-            if (et == ModelingEdgeType.StartEdge)
-            {
-                gEdge.Attr.AddStyle(Style.Solid);
-                gEdge.Attr.LineWidth = edge_attr_linewidthWeek;
-            }
-            else if (et == ModelingEdgeType.StartPush)
-            {
-                gEdge.Attr.AddStyle(Style.Solid);
-                gEdge.Attr.LineWidth = edge_attr_linewidthStrong;
-                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
-            }
-            else if (et == ModelingEdgeType.ResetEdge)
-            {
-                gEdge.Attr.AddStyle(Style.Dashed);
-                gEdge.Attr.LineWidth = edge_attr_linewidthWeek;
-            }
-            else if (et == ModelingEdgeType.ResetPush)
-            {
-                gEdge.Attr.AddStyle(Style.Dashed);
-                gEdge.Attr.LineWidth = edge_attr_linewidthStrong;
-                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
-            }
-
-            else if (et == ModelingEdgeType.Interlock)
-            {
-                gEdge.Attr.AddStyle(Style.Dashed);
-                gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
-                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
-            }
-            else if (et == ModelingEdgeType.StartReset)
-            {
-                gEdge.Attr.AddStyle(Style.Solid);
-                gEdge.Attr.ArrowheadAtSource = ArrowStyle.Tee;
-            }
-
-            UpdateLabelText(gEdge.SourceNode);
-            UpdateLabelText(gEdge.TargetNode);
-
-            if (model)
-            {
-
-                ViewNode src = edge.Sources[0];
-                ViewNode tgt = edge.Targets[0];
-
-                UpdateNodeView(gEdge.SourceNode, src);
-                UpdateNodeView(gEdge.TargetNode, tgt);
-
-            }
-        }
-        private void UpdateNodeView(Node nNode, ViewNode viewNode)
-        {
-            {
-                //nNode.Attr.Color = Color.DarkGoldenrod;
-                nNode.Attr.LineWidth = node_attr_linewidthL;
-
-
-                if (viewNode.ViewType == ViewType.VBUTTON)
-                {
-                    if (viewNode.IsChildExist)
-                    {
-                        nNode.Attr.FillColor = Color.DarkGray;
-                        nNode.Attr.Shape = Shape.Box;
-                    }
-                    else
-                    {
-                        nNode.Attr.Shape = Shape.Ellipse;
-                        if (viewNode.BtnType.Value == BtnType.DuAutoBTN)
-                        {
-                            nNode.Attr.FillColor = Color.DodgerBlue;
-                        }
-
-                        if (viewNode.BtnType.Value == BtnType.DuManualBTN)
-                        {
-                            nNode.Attr.FillColor = Color.DarkSlateBlue;
-                        }
-
-                        if (viewNode.BtnType.Value == BtnType.DuDriveBTN)
-                        {
-                            nNode.Attr.FillColor = Color.DarkGoldenrod;
-                        }
-
-                        if (viewNode.BtnType.Value == BtnType.DuStopBTN)
-                        {
-                            nNode.Attr.FillColor = Color.Firebrick;
-                        }
-
-                        if (viewNode.BtnType.Value == BtnType.DuEmergencyBTN)
-                        {
-                            nNode.Attr.FillColor = Color.MediumVioletRed;
-                        }
-
-                        if (viewNode.BtnType.Value == BtnType.DuTestBTN)
-                        {
-                            nNode.Attr.FillColor = Color.CadetBlue;
-                        }
-
-                        if (viewNode.BtnType.Value == BtnType.DuReadyBTN)
-                        {
-                            nNode.Attr.FillColor = Color.Green;
-                        }
-
-                        if (viewNode.BtnType.Value == BtnType.DuHomeBTN)
-                        {
-                            nNode.Attr.FillColor = Color.DarkGray;
-                        }
-
-                        if (viewNode.BtnType.Value == BtnType.DuClearBTN)
-                        {
-                            nNode.Attr.FillColor = Color.DarkOliveGreen;
-                        }
-                    }
-                }
-                if (viewNode.ViewType == ViewType.VLAMP)
-                {
-                    if (viewNode.IsChildExist)
-                    {
-                        nNode.Attr.FillColor = Color.DarkGray;
-                        nNode.Attr.Shape = Shape.Box;
-                    }
-                    else
-                    {
-
-                        nNode.Attr.Shape = Shape.Box;
-                        if (viewNode.LampType.Value == LampType.DuAutoLamp)
-                        {
-                            nNode.Attr.FillColor = Color.DodgerBlue;
-                        }
-
-                        if (viewNode.LampType.Value == LampType.DuManualLamp)
-                        {
-                            nNode.Attr.FillColor = Color.DarkSlateBlue;
-                        }
-
-                        if (viewNode.LampType.Value == LampType.DuDriveLamp)
-                        {
-                            nNode.Attr.FillColor = Color.DarkGoldenrod;
-                        }
-
-                        if (viewNode.LampType.Value == LampType.DuStopLamp)
-                        {
-                            nNode.Attr.FillColor = Color.Firebrick;
-                        }
-
-                        if (viewNode.LampType.Value == LampType.DuEmergencyLamp)
-                        {
-                            nNode.Attr.FillColor = Color.MediumVioletRed;
-                        }
-
-                        if (viewNode.LampType.Value == LampType.DuTestDriveLamp)
-                        {
-                            nNode.Attr.FillColor = Color.CadetBlue;
-                        }
-
-                        if (viewNode.LampType.Value == LampType.DuReadyLamp)
-                        {
-                            nNode.Attr.FillColor = Color.Green;
-                        }
-
-                        if (viewNode.LampType.Value == LampType.DuIdleLamp)
-                        {
-                            nNode.Attr.FillColor = Color.DarkGray;
-                        }
-                    }
-                }
-
-                if (viewNode.ViewType == ViewType.VCONDITION)
-                {
-                    if (viewNode.IsChildExist)
-                    {
-                        nNode.Attr.FillColor = Color.DarkGray;
-                        nNode.Attr.Shape = Shape.Box;
-                    }
-                    else
-                    {
-                        nNode.Attr.Shape = Shape.Box;
-                        if (viewNode.ConditionType.Value == ConditionType.DuReadyState)
-                        {
-                            nNode.Attr.FillColor = Color.DodgerBlue;
-                        }
-
-                        if (viewNode.ConditionType.Value == ConditionType.DuDriveState)
-                        {
-                            nNode.Attr.FillColor = Color.DarkSlateBlue;
-                        }
-                    }
-                }
-
-                if (viewNode.ViewType == ViewType.VREAL)
-                {
+                    nNode.Attr.FillColor = Color.DarkGray;
                     nNode.Attr.Shape = Shape.Box;
                 }
-
-                if (viewNode.ViewType == ViewType.VDUMMY)
+                else
                 {
-                    nNode.Attr.Shape = Shape.Box;
-                    nNode.Attr.FillColor = GetDrawColor(System.Drawing.Color.FromArgb(25, 25, 25));
-                }
-                if (viewNode.ViewType == ViewType.VCALL)
-                {
-                    nNode.Attr.Shape = Shape.Box;
-                }
-
-                if (viewNode.ViewType == ViewType.VIF)
-                {
-                    if (viewNode.IsChildExist)
+                    nNode.Attr.Shape = Shape.Ellipse;
+                    if (viewNode.BtnType.Value == BtnType.DuAutoBTN)
                     {
-                        nNode.Attr.FillColor = Color.DimGray;
-                        nNode.Attr.Shape = Shape.Box;
-                    }
-                    else
-                    {
-                        nNode.Attr.Shape = Shape.InvHouse;
-                        nNode.Attr.FillColor = Color.BlueViolet;
+                        nNode.Attr.FillColor = Color.DodgerBlue;
                     }
 
+                    if (viewNode.BtnType.Value == BtnType.DuManualBTN)
+                    {
+                        nNode.Attr.FillColor = Color.DarkSlateBlue;
+                    }
+
+                    if (viewNode.BtnType.Value == BtnType.DuDriveBTN)
+                    {
+                        nNode.Attr.FillColor = Color.DarkGoldenrod;
+                    }
+
+                    if (viewNode.BtnType.Value == BtnType.DuStopBTN)
+                    {
+                        nNode.Attr.FillColor = Color.Firebrick;
+                    }
+
+                    if (viewNode.BtnType.Value == BtnType.DuEmergencyBTN)
+                    {
+                        nNode.Attr.FillColor = Color.MediumVioletRed;
+                    }
+
+                    if (viewNode.BtnType.Value == BtnType.DuTestBTN)
+                    {
+                        nNode.Attr.FillColor = Color.CadetBlue;
+                    }
+
+                    if (viewNode.BtnType.Value == BtnType.DuReadyBTN)
+                    {
+                        nNode.Attr.FillColor = Color.Green;
+                    }
+
+                    if (viewNode.BtnType.Value == BtnType.DuHomeBTN)
+                    {
+                        nNode.Attr.FillColor = Color.DarkGray;
+                    }
+
+                    if (viewNode.BtnType.Value == BtnType.DuClearBTN)
+                    {
+                        nNode.Attr.FillColor = Color.DarkOliveGreen;
+                    }
                 }
-                //if (viewNode.NodeType == ViewType.VCOPY_SYS)
-                //    nNode.Attr.Shape = Shape.Octagon;
             }
-        }
 
-        public void RefreshGraph()
-        {
-            viewer.Do(viewer.Refresh);
-        }
-        private Node findNode(ViewNode viewNode)
-        {
-            Node node = viewer.Graph.FindNode(viewNode.UIKey);
-            return node == null
-                ? viewer.Graph.SubgraphMap.ContainsKey(viewNode.UIKey) ? viewer.Graph.SubgraphMap[viewNode.UIKey] : (Node)null
-                : node;
-        }
-
-        private IEnumerable<Edge> findEdgeTargetSame(Node node)
-        {
-            var edges = viewer.Graph.Edges.Where(w => w.TargetNode == node);
-            return edges;
-        }
-
-        public void UpdateInValue(ViewNode viewNode, object item2, bool vRefresh = true)
-        {
-            Node node = findNode(viewNode);
-            if (node != null)
+            if (viewNode.ViewType == ViewType.VLAMP)
             {
-                bool dataExist = Convert.ToDouble(item2) != 0;
-                UpdateFillColor(dataExist, node);
-                if (vRefresh) RefreshGraph();
+                if (viewNode.IsChildExist)
+                {
+                    nNode.Attr.FillColor = Color.DarkGray;
+                    nNode.Attr.Shape = Shape.Box;
+                }
+                else
+                {
+                    nNode.Attr.Shape = Shape.Box;
+                    if (viewNode.LampType.Value == LampType.DuAutoLamp)
+                    {
+                        nNode.Attr.FillColor = Color.DodgerBlue;
+                    }
+
+                    if (viewNode.LampType.Value == LampType.DuManualLamp)
+                    {
+                        nNode.Attr.FillColor = Color.DarkSlateBlue;
+                    }
+
+                    if (viewNode.LampType.Value == LampType.DuDriveLamp)
+                    {
+                        nNode.Attr.FillColor = Color.DarkGoldenrod;
+                    }
+
+                    if (viewNode.LampType.Value == LampType.DuStopLamp)
+                    {
+                        nNode.Attr.FillColor = Color.Firebrick;
+                    }
+
+                    if (viewNode.LampType.Value == LampType.DuEmergencyLamp)
+                    {
+                        nNode.Attr.FillColor = Color.MediumVioletRed;
+                    }
+
+                    if (viewNode.LampType.Value == LampType.DuTestDriveLamp)
+                    {
+                        nNode.Attr.FillColor = Color.CadetBlue;
+                    }
+
+                    if (viewNode.LampType.Value == LampType.DuReadyLamp)
+                    {
+                        nNode.Attr.FillColor = Color.Green;
+                    }
+
+                    if (viewNode.LampType.Value == LampType.DuIdleLamp)
+                    {
+                        nNode.Attr.FillColor = Color.DarkGray;
+                    }
+                }
             }
-        }
-        public void UpdateOutValue(ViewNode viewNode, object item2, bool vRefresh = true)
-        {
-            Node node = findNode(viewNode);
-            if (node != null)
+
+            if (viewNode.ViewType == ViewType.VCONDITION)
             {
-                bool dataExist = Convert.ToDouble(item2) != 0;
-                UpdateLineWidth(dataExist, node);
-             if(vRefresh) RefreshGraph();
+                if (viewNode.IsChildExist)
+                {
+                    nNode.Attr.FillColor = Color.DarkGray;
+                    nNode.Attr.Shape = Shape.Box;
+                }
+                else
+                {
+                    nNode.Attr.Shape = Shape.Box;
+                    if (viewNode.ConditionType.Value == ConditionType.DuReadyState)
+                    {
+                        nNode.Attr.FillColor = Color.DodgerBlue;
+                    }
+
+                    if (viewNode.ConditionType.Value == ConditionType.DuDriveState)
+                    {
+                        nNode.Attr.FillColor = Color.DarkSlateBlue;
+                    }
+                }
             }
-        }
 
-        public void UpdateViewNode(ViewNode viewNode, ViewVertex vv, bool vRefresh = true)
-        {
-            UpdateStatus(viewNode, vRefresh);
-            UpdateInValue(viewNode, vv.LampInput, vRefresh);
-            UpdateOutValue(viewNode, vv.LampOutput, vRefresh);
-            UpdateError(viewNode, vv.IsError, vv.ErrorText, vRefresh);
-        }
-
-
-        public void UpdateStatus(ViewNode viewNode, bool vRefresh = true)
-        {
-            Node node = findNode(viewNode);
-            if (node != null)
+            if (viewNode.ViewType == ViewType.VREAL)
             {
-                UpdateLineColor(viewNode.Status4, node);
-        if (vRefresh) RefreshGraph();
+                nNode.Attr.Shape = Shape.Box;
             }
-        }
 
-        public void UpdateError(ViewNode viewNode, bool isError, string errorText, bool vRefresh = true)
-{
-
-            Node node = findNode(viewNode);
-            if (node != null)
+            if (viewNode.ViewType == ViewType.VDUMMY)
             {
-                UpdateFontColor(isError, errorText,  node, viewNode.ViewType);
-                if(vRefresh) RefreshGraph();
-
+                nNode.Attr.Shape = Shape.Box;
+                nNode.Attr.FillColor = GetDrawColor(System.Drawing.Color.FromArgb(25, 25, 25));
             }
-        }
 
-       
-
-        private void UpdateFontColor(bool err, string errText, Node node, ViewType viewType)
-        {
-            var org = node.Label.Text.Split('\n')[0];
-            if (err)
+            if (viewNode.ViewType == ViewType.VCALL)
             {
-                node.Label.FontColor = Color.Red;
-                if(viewType != ViewType.VREAL)
-                    node.Label.Text = $"{org}\n{errText}";
+                nNode.Attr.Shape = Shape.Box;
             }
-            else
+
+            if (viewNode.ViewType == ViewType.VIF)
             {
-                node.Label.FontColor = Color.White;
-                if(viewType != ViewType.VREAL)
-                    node.Label.Text = org;
+                if (viewNode.IsChildExist)
+                {
+                    nNode.Attr.FillColor = Color.DimGray;
+                    nNode.Attr.Shape = Shape.Box;
+                }
+                else
+                {
+                    nNode.Attr.Shape = Shape.InvHouse;
+                    nNode.Attr.FillColor = Color.BlueViolet;
+                }
             }
-
+            //if (viewNode.NodeType == ViewType.VCOPY_SYS)
+            //    nNode.Attr.Shape = Shape.Octagon;
         }
+    }
 
-        private void UpdateLineColor(Status4 newStatus, Node node)
+    public void RefreshGraph()
+    {
+        viewer.Do(viewer.Refresh);
+    }
+
+    private Node findNode(ViewNode viewNode)
+    {
+        Node node = viewer.Graph.FindNode(viewNode.UIKey);
+        return node == null
+            ? viewer.Graph.SubgraphMap.ContainsKey(viewNode.UIKey)
+                ? viewer.Graph.SubgraphMap[viewNode.UIKey]
+                : (Node)null
+            : node;
+    }
+
+    private IEnumerable<Edge> findEdgeTargetSame(Node node)
+    {
+        var edges = viewer.Graph.Edges.Where(w => w.TargetNode == node);
+        return edges;
+    }
+
+    public void UpdateInValue(ViewNode viewNode, object item2, bool vRefresh = true)
+    {
+        Node node = findNode(viewNode);
+        if (node != null)
         {
-            if (newStatus == Status4.Ready)
-            {
-                node.Attr.FillColor = Color.DarkGreen;
-            }
-            else if (newStatus == Status4.Going)
-            {
-                node.Attr.FillColor = Color.DarkGoldenrod;
-            }
-            else if (newStatus == Status4.Finish)
-            {
-                node.Attr.FillColor = Color.RoyalBlue;
-            }
-            else if (newStatus == Status4.Homing)
-            {
-                node.Attr.FillColor = Color.DimGray;
-            }
+            bool dataExist = Convert.ToDouble(item2) != 0;
+            UpdateFillColor(dataExist, node);
+            if (vRefresh) RefreshGraph();
         }
+    }
 
-
-
-        private void UpdateFillColor(bool dataExist, Node node)
+    public void UpdateOutValue(ViewNode viewNode, object item2, bool vRefresh = true)
+    {
+        Node node = findNode(viewNode);
+        if (node != null)
         {
-            node.Attr.Color = dataExist ? Color.PeachPuff : Color.Black;
+            bool dataExist = Convert.ToDouble(item2) != 0;
+            UpdateLineWidth(dataExist, node);
+            if (vRefresh) RefreshGraph();
         }
-        private void UpdateLineWidth(bool dataExist, Node node)
+    }
+
+    public void UpdateViewNode(ViewNode viewNode, ViewVertex vv, bool vRefresh = true)
+    {
+        UpdateStatus(viewNode, vRefresh);
+        UpdateInValue(viewNode, vv.LampInput, vRefresh);
+        UpdateOutValue(viewNode, vv.LampOutput, vRefresh);
+        UpdateError(viewNode, vv.IsError, vv.ErrorText, vRefresh);
+    }
+
+
+    public void UpdateStatus(ViewNode viewNode, bool vRefresh = true)
+    {
+        Node node = findNode(viewNode);
+        if (node != null)
         {
-            node.Attr.LineWidth = dataExist ? node_attr_linewidthH : node_attr_linewidthL;
+            UpdateLineColor(viewNode.Status4, node);
+            if (vRefresh) RefreshGraph();
         }
+    }
 
-        private void UpdateEdgeColor(bool dataExist, Edge edge)
+    public void UpdateError(ViewNode viewNode, bool isError, string errorText, bool vRefresh = true)
+    {
+        Node node = findNode(viewNode);
+        if (node != null)
         {
-            edge.Attr.Color = dataExist ? Color.PeachPuff : Color.DarkGray;
+            UpdateFontColor(isError, errorText, node, viewNode.ViewType);
+            if (vRefresh) RefreshGraph();
         }
-     
+    }
 
 
-
-        public void SetBackColor(System.Drawing.Color color)
+    private void UpdateFontColor(bool err, string errText, Node node, ViewType viewType)
+    {
+        var org = node.Label.Text.Split('\n')[0];
+        if (err)
         {
-            viewer.Graph.Attr.BackgroundColor = GetDrawColor(color);
+            node.Label.FontColor = Color.Red;
+            if (viewType != ViewType.VREAL)
+                node.Label.Text = $"{org}\n{errText}";
         }
-        public Color GetDrawColor(System.Drawing.Color color)
+        else
         {
-            Color gColor = Color.Red;
-            gColor.R = color.R;
-            gColor.G = color.G;
-            gColor.B = color.B;
-
-            return gColor;
+            node.Label.FontColor = Color.White;
+            if (viewType != ViewType.VREAL)
+                node.Label.Text = org;
         }
+    }
 
-     
+    private void UpdateLineColor(Status4 newStatus, Node node)
+    {
+        if (newStatus == Status4.Ready)
+        {
+            node.Attr.FillColor = Color.DarkGreen;
+        }
+        else if (newStatus == Status4.Going)
+        {
+            node.Attr.FillColor = Color.DarkGoldenrod;
+        }
+        else if (newStatus == Status4.Finish)
+        {
+            node.Attr.FillColor = Color.RoyalBlue;
+        }
+        else if (newStatus == Status4.Homing)
+        {
+            node.Attr.FillColor = Color.DimGray;
+        }
+    }
+
+
+    private void UpdateFillColor(bool dataExist, Node node)
+    {
+        node.Attr.Color = dataExist ? Color.PeachPuff : Color.Black;
+    }
+
+    private void UpdateLineWidth(bool dataExist, Node node)
+    {
+        node.Attr.LineWidth = dataExist ? node_attr_linewidthH : node_attr_linewidthL;
+    }
+
+    private void UpdateEdgeColor(bool dataExist, Edge edge)
+    {
+        edge.Attr.Color = dataExist ? Color.PeachPuff : Color.DarkGray;
+    }
+
+
+    public void SetBackColor(System.Drawing.Color color)
+    {
+        viewer.Graph.Attr.BackgroundColor = GetDrawColor(color);
+    }
+
+    public Color GetDrawColor(System.Drawing.Color color)
+    {
+        Color gColor = Color.Red;
+        gColor.R = color.R;
+        gColor.G = color.G;
+        gColor.B = color.B;
+
+        return gColor;
     }
 }

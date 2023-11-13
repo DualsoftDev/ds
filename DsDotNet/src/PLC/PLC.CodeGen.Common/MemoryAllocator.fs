@@ -1,4 +1,5 @@
 namespace PLC.CodeGen.Common
+
 open System.Collections.Generic
 open Engine.Core
 open Dual.Common.Core.FS
@@ -8,13 +9,12 @@ module MemoryAllocator =
     /// Unit -> address string 을 반환하는 함수 type
     type PLCMemoryAllocatorType = unit -> string
 
-    type PLCMemoryAllocator = {
-        BitAllocator  : PLCMemoryAllocatorType
-        ByteAllocator : PLCMemoryAllocatorType
-        WordAllocator : PLCMemoryAllocatorType
-        DWordAllocator: PLCMemoryAllocatorType
-        LWordAllocator: PLCMemoryAllocatorType
-    }
+    type PLCMemoryAllocator =
+        { BitAllocator: PLCMemoryAllocatorType
+          ByteAllocator: PLCMemoryAllocatorType
+          WordAllocator: PLCMemoryAllocatorType
+          DWordAllocator: PLCMemoryAllocatorType
+          LWordAllocator: PLCMemoryAllocatorType }
 
     type IntRange = int * int
 
@@ -35,38 +35,45 @@ module MemoryAllocator =
     /// typ: {"M", "I", "Q"} 등이 가능하나 주로 "M"
     /// availableByteRange: 할당 가능한 [시작, 끝] byte 의 range (reservedBytes 에 포함된 부분은 제외됨)
     /// reservedBytes: 회피 영역
-    let createMemoryAllocator (typ:string) (availableByteRange:IntRange) (reservedBytes:int list) : PLCMemoryAllocator =
+    let createMemoryAllocator
+        (typ: string)
+        (availableByteRange: IntRange)
+        (reservedBytes: int list)
+        : PLCMemoryAllocator =
         let startByte, endByte = availableByteRange
         /// optional fragmented bit position
-        let mutable ofBit:int option = None  // Some (startByte * 8)
+        let mutable ofBit: int option = None // Some (startByte * 8)
         /// optional framented byte [start, end) position
-        let mutable ofByteRange:IntRange option = None
+        let mutable ofByteRange: IntRange option = None
         let mutable byteCursor = startByte
 
-        let rec getAddress (reqMemType:string) : string =
+        let rec getAddress (reqMemType: string) : string =
             match reqMemType with
             | "X" ->
                 let bitIndex =
                     match ofBit, ofByteRange with
-                    | Some bit, _ when bit % 8 = 7 ->   // 마지막 fragment bit 을 쓰는 상황
+                    | Some bit, _ when bit % 8 = 7 -> // 마지막 fragment bit 을 쓰는 상황
                         ofBit <- None
                         bit
-                    | Some bit, _ ->                    // 마지막이 아닌 여유 fragment bit 을 쓰는 상황
-                        ofBit <- Some (bit + 1)
+                    | Some bit, _ -> // 마지막이 아닌 여유 fragment bit 을 쓰는 상황
+                        ofBit <- Some(bit + 1)
                         bit
-                    | None, Some (s, e) ->
+                    | None, Some(s, e) ->
                         let bit = s * 8
-                        ofBit <- Some (bit + 1)
-                        ofByteRange <- if s+1 = e then None else Some(s+1, e)
+                        ofBit <- Some(bit + 1)
+                        ofByteRange <- if s + 1 = e then None else Some(s + 1, e)
                         bit
                     | None, None ->
                         let bit = byteCursor * 8
-                        ofBit <- Some (bit + 1)
+                        ofBit <- Some(bit + 1)
                         byteCursor <- byteCursor + 1
                         bit
+
                 let byteIndex = bitIndex / 8
+
                 if byteIndex > endByte then
                     failwith "ERROR: Limit exceeded."
+
                 if reservedBytes |> List.contains byteIndex then
                     getAddress reqMemType
                 else
@@ -77,15 +84,16 @@ module MemoryAllocator =
 
             | ("B" | "W" | "D" | "L") ->
                 let byteSize = getByteSizeFromPrefix reqMemType
+
                 let byteIndex =
                     match ofByteRange with
-                    | Some (fs, fe) when (fe - fs) > byteSize ->     // fragmented bytes 로 해결하고도 남는 상황
-                        ofByteRange <- Some (fs + byteSize, fe)
+                    | Some(fs, fe) when (fe - fs) > byteSize -> // fragmented bytes 로 해결하고도 남는 상황
+                        ofByteRange <- Some(fs + byteSize, fe)
                         fs
-                    | Some (fs, fe) when (fe - fs) = byteSize ->     // fragmented bytes 를 전부 써서 해결 가능한 상황
+                    | Some(fs, fe) when (fe - fs) = byteSize -> // fragmented bytes 를 전부 써서 해결 가능한 상황
                         ofByteRange <- None
                         fs
-                    | _ ->                                           // fragmented bytes 로 부족한 상황.  fragment 는 건드리지 않고 새로운 영역에서 할당
+                    | _ -> // fragmented bytes 로 부족한 상황.  fragment 는 건드리지 않고 새로운 영역에서 할당
                         let byte =
                             if byteCursor % byteSize = 0 then
                                 let byte = byteCursor
@@ -93,60 +101,61 @@ module MemoryAllocator =
                                 byte
                             else
                                 let newPosition = (byteCursor + byteSize) / byteSize * byteSize
-                                ofByteRange <- Some (byteCursor, newPosition)
+                                ofByteRange <- Some(byteCursor, newPosition)
                                 byteCursor <- newPosition + byteSize
                                 newPosition
                         //ofByte <- Some (byte + byteSize)
                         byte
+
                 if byteIndex + byteSize > endByte then
                     failwith "ERROR: Limit exceeded."
 
-                let requiredByteIndices = [byteIndex..(byteIndex + byteSize - 1)]
+                let requiredByteIndices = [ byteIndex .. (byteIndex + byteSize - 1) ]
                 let x = Seq.intersect requiredByteIndices reservedBytes |> Seq.any
+
                 if x then
                     getAddress reqMemType
                 else
                     //if reservedBytes |> List.contains byteIndex then
                     //    getAddress reqMemType
                     //else
-                    let address = $"%%{typ}{reqMemType}{byteIndex/byteSize}"
+                    let address = $"%%{typ}{reqMemType}{byteIndex / byteSize}"
                     logDebug "Address %s allocated" address
                     address
-            | _ ->
-                failwith "ERROR"
+            | _ -> failwith "ERROR"
 
 
-        {
-            BitAllocator  = fun () -> getAddress "X"
-            ByteAllocator = fun () -> getAddress "B"
-            WordAllocator = fun () -> getAddress "W"
-            DWordAllocator= fun () -> getAddress "D"
-            LWordAllocator= fun () -> getAddress "L"
-        }
+        { BitAllocator = fun () -> getAddress "X"
+          ByteAllocator = fun () -> getAddress "B"
+          WordAllocator = fun () -> getAddress "W"
+          DWordAllocator = fun () -> getAddress "D"
+          LWordAllocator = fun () -> getAddress "L" }
 
 
     type System.Type with
+
         member x.GetBitSize() =
             match x.Name with
-            | BOOL    -> 1
-            | CHAR    -> 8
+            | BOOL -> 1
+            | CHAR -> 8
             | FLOAT32 -> 32
             | FLOAT64 -> 64
-            | INT16   -> 16
-            | INT32   -> 32
-            | INT64   -> 64
-            | INT8    -> 8
-            | STRING  -> failwith "ERROR"
-            | UINT16  -> 16
-            | UINT32  -> 32
-            | UINT64  -> 64
-            | UINT8   -> 8
-            | _  -> failwith "ERROR"
+            | INT16 -> 16
+            | INT32 -> 32
+            | INT64 -> 64
+            | INT8 -> 8
+            | STRING -> failwith "ERROR"
+            | UINT16 -> 16
+            | UINT32 -> 32
+            | UINT64 -> 64
+            | UINT8 -> 8
+            | _ -> failwith "ERROR"
 
         member x.GetByteSize() =
             match x.Name with
-            | BOOL  -> failwith "ERROR"
-            | _  -> max 1 (x.GetBitSize() / 8)
+            | BOOL -> failwith "ERROR"
+            | _ -> max 1 (x.GetBitSize() / 8)
+
         member x.GetMemorySizePrefix() =
             if x = typedefof<bool> then
                 "X"
@@ -165,11 +174,11 @@ module IECAddressModule =
     open System.Text.RegularExpressions
 
     /// IEC address 를 표준화한다.  e.g "%i3" => "%IX3"
-    let standardizeAddress (address:string) =
+    let standardizeAddress (address: string) =
         let addr = address.ToUpper()
-        match addr with
-        | RegexPattern @"^%([IQMLKFWUR])(\d+)$" [m; _]
-        | RegexPattern @"^%([IQMLKFWUR])(\d+\.\d+)$" [m; _]
-        | RegexPattern @"^%([IQMLKFWUR])(\d+\.\d+\.\d+)$" [m; _] -> Regex.Replace(addr, m, m+"X")
-        | _ -> addr
 
+        match addr with
+        | RegexPattern @"^%([IQMLKFWUR])(\d+)$" [ m; _ ]
+        | RegexPattern @"^%([IQMLKFWUR])(\d+\.\d+)$" [ m; _ ]
+        | RegexPattern @"^%([IQMLKFWUR])(\d+\.\d+\.\d+)$" [ m; _ ] -> Regex.Replace(addr, m, m + "X")
+        | _ -> addr

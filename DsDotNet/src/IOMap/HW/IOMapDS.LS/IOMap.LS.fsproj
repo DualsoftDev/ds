@@ -1,33 +1,33 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<OutputType>Exe</OutputType>
-		<TargetFrameworks>net7.0;net7.0-windows</TargetFrameworks>
-		<OutputPath>$(SolutionDir)\bin</OutputPath>
-	</PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFrameworks>net7.0;net7.0-windows</TargetFrameworks>
+        <OutputPath>$(SolutionDir)\bin</OutputPath>
+    </PropertyGroup>
 
 
-	<ItemGroup>
-		<Compile Include="Connect.fs" />
-		<Compile Include="ScanIO.fs" />
-		<Compile Include="Program.fs" />
-	</ItemGroup>
+    <ItemGroup>
+        <Compile Include="Connect.fs"/>
+        <Compile Include="ScanIO.fs"/>
+        <Compile Include="Program.fs"/>
+    </ItemGroup>
 
-	<ItemGroup>
-	  <ProjectReference Include="..\..\..\PLC\Dual.PLC.LS.FS\PLC.LS.FS.fsproj" />
-	  <ProjectReference Include="..\..\IOMapApi\IOMapApi.fsproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\PLC\Dual.PLC.LS.FS\PLC.LS.FS.fsproj"/>
+        <ProjectReference Include="..\..\IOMapApi\IOMapApi.fsproj"/>
+    </ItemGroup>
 
 
-	<ItemGroup>
-	  <Reference Include="Interop.XGCommLib">
-	    <HintPath>..\..\..\..\exLib\Interop.XGCommLib.dll</HintPath>
-	  </Reference>
-	</ItemGroup>
+    <ItemGroup>
+        <Reference Include="Interop.XGCommLib">
+            <HintPath>..\..\..\..\exLib\Interop.XGCommLib.dll</HintPath>
+        </Reference>
+    </ItemGroup>
 
-	<!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="echo ProjectDir: $(ProjectDir)" />
-		<Exec Command="echo OutputPath: $(OutputPath)" />
-	</Target>-->
+    <!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="echo ProjectDir: $(ProjectDir)" />
+        <Exec Command="echo OutputPath: $(OutputPath)" />
+    </Target>-->
 
 </Project>

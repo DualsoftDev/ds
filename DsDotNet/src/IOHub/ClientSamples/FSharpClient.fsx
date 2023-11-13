@@ -14,4 +14,3 @@ let result2 = client.SendRequest("read Mw100 Mb70 Mx30 Md50 Ml50")
 //let result3 = client.SendRequest("read [Mw100..Mw30]")
 let wr = client.SendRequest("write Mw100=1 Mx30=false Md1234=1234")
 let rr = client.SendRequest("read Mw100 Mx30 Md1234")
-        

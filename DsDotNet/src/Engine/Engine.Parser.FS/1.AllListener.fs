@@ -16,10 +16,11 @@ type AllListener() =
     member val r = new ParserResult()
 
     // ParseTreeListener<> method
-    override x.VisitTerminal(node:ITerminalNode) = x.r.terminals.Add(node)
-    override x.VisitErrorNode(node:IErrorNode) =
+    override x.VisitTerminal(node: ITerminalNode) = x.r.terminals.Add(node)
+
+    override x.VisitErrorNode(node: IErrorNode) =
         x.r.errors.Add(node)
         ParserException("ERROR while parsing", node) |> raise
 
-    override x.EnterEveryRule(ctx:ParserRuleContext) = x.r.rules.Add(ctx)
-    override x.ExitEveryRule(_ctx:ParserRuleContext) = ()
+    override x.EnterEveryRule(ctx: ParserRuleContext) = x.r.rules.Add(ctx)
+    override x.ExitEveryRule(_ctx: ParserRuleContext) = ()

@@ -3,7 +3,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 
-
 [assembly: AssemblyCompany("Dual INC.")]
 [assembly: AssemblyCopyright("Copyright © Dual INC. 2016")]
 [assembly: AssemblyCulture("")]
@@ -19,8 +18,6 @@ using System.Runtime.InteropServices;
 #endif
 
 
-
-
 // Version information for an assembly consists of the following four values:
 //
 //      Major Version
@@ -34,4 +31,3 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyInformationalVersion("0.9.1.0")]
 [assembly: AssemblyVersion("0.9.1.0")]
 //[assembly: AssemblyFileVersion("0.9.1.0")]
-

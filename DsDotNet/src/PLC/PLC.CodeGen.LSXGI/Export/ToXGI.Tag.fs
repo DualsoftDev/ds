@@ -23,6 +23,7 @@ module XGITag = //IEC61131Tag =
     type FE(f, e) =
         member x.File = f
         member x.Element = e
+
     type FEB(f, e, b) =
         inherit FE(f, e)
         member x.Bit = b
@@ -87,62 +88,73 @@ module XGITag = //IEC61131Tag =
 
 
     /// name, comment, plcType, kind 를 받아서 SymbolInfo 를 생성한다.
-    let createSymbolInfo name comment plcType kind (initValue:BoxedObjectHolder) =
-        { defaultSymbolInfo with Name=name; Comment=escapeXml comment; Type=plcType; Kind=kind; InitValue=initValue.Object}
+    let createSymbolInfo name comment plcType kind (initValue: BoxedObjectHolder) =
+        { defaultSymbolInfo with
+            Name = name
+            Comment = escapeXml comment
+            Type = plcType
+            Kind = kind
+            InitValue = initValue.Object }
 
-    let copyLocal2GlobalSymbol (s:SymbolInfo) =
-        { s with Kind = int Variable.Kind.VAR_GLOBAL; State=0; }
+    let copyLocal2GlobalSymbol (s: SymbolInfo) =
+        { s with
+            Kind = int Variable.Kind.VAR_GLOBAL
+            State = 0 }
 
 
     type SymbolInfo with
-        member private x.ToXgiLiteral()  =
+
+        member private x.ToXgiLiteral() =
             match x.Type with
             | "BOOL" ->
                 match x.InitValue :?> bool with
                 | true -> "true"
                 | false -> "false"
             | _ -> $"{x.InitValue}"
+
         /// Symbol 관련 XML tag attributes 생성
         member private x.GetXmlArgs() =
-            [
-                $"Name=\"{x.Name}\""
-                $"Kind=\"{x.Kind}\""
-                if x.Kind <> int Variable.Kind.VAR_EXTERNAL then
-                    $"Type=\"{x.Type}\""
-                    if x.InitValue <> null then
-                        $"InitValue=\"{x.ToXgiLiteral()}\""
-                    $"Address=\"{x.Address}\""
-                $"Comment=\"{x.Comment}\""
-                $"Device=\"{x.Device}\""
-                $"State=\"{x.State}\""
-            ] |> String.concat " "
+            [ $"Name=\"{x.Name}\""
+              $"Kind=\"{x.Kind}\""
+              if x.Kind <> int Variable.Kind.VAR_EXTERNAL then
+                  $"Type=\"{x.Type}\""
+
+                  if x.InitValue <> null then
+                      $"InitValue=\"{x.ToXgiLiteral()}\""
+
+                  $"Address=\"{x.Address}\""
+              $"Comment=\"{x.Comment}\""
+              $"Device=\"{x.Device}\""
+              $"State=\"{x.State}\"" ]
+            |> String.concat " "
 
         /// Symbol 관련 XML tag 생성
         member x.ToText() = $"<Symbol {x.GetXmlArgs()}/>"
-                //Address="" Trigger="" InitValue="" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="0" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+        //Address="" Trigger="" InitValue="" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="0" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
 
         member x.GenerateXml() =
-            [
-                yield $"\t<Symbol {x.GetXmlArgs()}>"
-                // 사용되지 않지만, 필요한 XML children element 생성
-                yield! ["Addresses"; "Retains"; "InitValues"; "Comments"]
-                    |> Seq.map (sprintf "\t\t<Member%s/>")
-                yield "\t</Symbol>"
-            ] |> String.concat "\r\n"
+            [ yield $"\t<Symbol {x.GetXmlArgs()}>"
+              // 사용되지 않지만, 필요한 XML children element 생성
+              yield!
+                  [ "Addresses"; "Retains"; "InitValues"; "Comments" ]
+                  |> Seq.map (sprintf "\t\t<Member%s/>")
+              yield "\t</Symbol>" ]
+            |> String.concat "\r\n"
 
     /// Symbol variable 정의 구역 xml 의 string 을 생성
-    let private generateSymbolVarDefinitionXml (varType:string) (FList(symbols:SymbolInfo list)) =
+    let private generateSymbolVarDefinitionXml (varType: string) (FList(symbols: SymbolInfo list)) =
         let symbols = symbols |> List.sortBy (fun s -> s.Name)
-        [
-            yield $"<{varType} Version=\"Ver 1.0\" Count={dq}{symbols.length()}{dq}>"
-            yield "<Symbols>"
-            yield! symbols |> map (fun s -> s.GenerateXml())
-            yield "</Symbols>"
-            yield "<TempVar Count=\"0\"></TempVar>"
-            yield $"</{varType}>"
-        ] |> String.concat "\r\n"
 
-    let generateLocalSymbolsXml  symbols = generateSymbolVarDefinitionXml "LocalVar" symbols
-    let generateGlobalSymbolsXml symbols = generateSymbolVarDefinitionXml "GlobalVariable" symbols
+        [ yield $"<{varType} Version=\"Ver 1.0\" Count={dq}{symbols.length ()}{dq}>"
+          yield "<Symbols>"
+          yield! symbols |> map (fun s -> s.GenerateXml())
+          yield "</Symbols>"
+          yield "<TempVar Count=\"0\"></TempVar>"
+          yield $"</{varType}>" ]
+        |> String.concat "\r\n"
 
+    let generateLocalSymbolsXml symbols =
+        generateSymbolVarDefinitionXml "LocalVar" symbols
 
+    let generateGlobalSymbolsXml symbols =
+        generateSymbolVarDefinitionXml "GlobalVariable" symbols

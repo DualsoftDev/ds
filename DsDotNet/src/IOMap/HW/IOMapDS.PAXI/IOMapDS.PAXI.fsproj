@@ -1,27 +1,27 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
-		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
-		<LangVersion>7.0</LangVersion>
-		<OutputType>Exe</OutputType>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-		<OutputPath>$(SolutionDir)\bin\</OutputPath>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+        <LangVersion>7.0</LangVersion>
+        <OutputType>Exe</OutputType>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <OutputPath>$(SolutionDir)\bin\</OutputPath>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<Compile Include="Connect.fs" />
-		<Compile Include="ScanIO.fs" />
-		<Compile Include="Program.fs" />
-	</ItemGroup>
+    <ItemGroup>
+        <Compile Include="Connect.fs"/>
+        <Compile Include="ScanIO.fs"/>
+        <Compile Include="Program.fs"/>
+    </ItemGroup>
 
-	<ItemGroup>
-	  <ProjectReference Include="..\..\IOMapApi\IOMapApi.fsproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\IOMapApi\IOMapApi.fsproj"/>
+    </ItemGroup>
 
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="echo ProjectDir: $(ProjectDir)" />
-		<Exec Command="echo OutputPath: $(OutputPath)" />
-	</Target>
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="echo ProjectDir: $(ProjectDir)"/>
+        <Exec Command="echo OutputPath: $(OutputPath)"/>
+    </Target>
 
 </Project>

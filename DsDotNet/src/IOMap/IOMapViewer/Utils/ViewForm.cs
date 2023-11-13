@@ -1,26 +1,23 @@
-﻿
-using static IOMapApi.MemoryIOApi;
+﻿using static IOMapApi.MemoryIOApi;
 
-namespace IOMapViewer
+namespace IOMapViewer;
+
+public partial class ViewForm : XtraForm
 {
-    public partial class ViewForm : DevExpress.XtraEditors.XtraForm
+    public ViewForm()
     {
-        public ViewForm()
-        {
-            InitializeComponent();
-        }
-        private void ViewForm_Load(object sender, EventArgs e)
-        {
-            //MemoryIOManager.Delete("M");
-            //MemoryIOManager.Create("M", 1024 );
+        InitializeComponent();
+    }
 
-            MemoryIO m = new("M");
+    private void ViewForm_Load(object sender, EventArgs e)
+    {
+        //MemoryIOManager.Delete("M");
+        //MemoryIOManager.Create("M", 1024 );
 
-            var data2 = m.GetMemoryAsDataTable();
+        MemoryIO m = new("M");
 
-            gridControl1.DataSource = data2;
-       
+        var data2 = m.GetMemoryAsDataTable();
 
-        }
+        gridControl1.DataSource = data2;
     }
 }

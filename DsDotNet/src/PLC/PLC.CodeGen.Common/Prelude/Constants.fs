@@ -6,51 +6,67 @@ module K =
     /// "ActionType"
     [<Literal>]
     let ActionType = "ActionType"
+
     /// "FullName Rule"
     [<Literal>]
     let FullNameRule = "FullName Rule"
+
     /// "SelfHold"
     [<Literal>]
     let SelfHold = "SelfHold"
+
     /// "Address"
     [<Literal>]
     let Address = "Address"
+
     /// "Address Prefix"
     [<Literal>]
     let AddrPrefix = "Address Prefix"
+
     /// "Tag Type"
     [<Literal>]
     let TagType = "Tag Type"
+
     /// "Work Type"
     [<Literal>]
     let ProcessType = "Work Type"
+
     /// "Name"
     [<Literal>]
     let Name = "Name"
+
     /// "InstanceId"
     [<Literal>]
     let InstanceId = "Instance Id"
+
     /// "LibraryId"
     [<Literal>]
     let LibraryId = "Library Id"
+
     /// "Device count"
     [<Literal>]
     let DeviceCount = "Device Count"
+
     /// "Device Type"
     [<Literal>]
     let DeviceType = "Device Type"
+
     /// "Job Bound Type"
     [<Literal>]
     let BoundType = "Bound Type"
+
     /// "Job Memory Type"
     [<Literal>]
     let MemoryType = "Memory Type"
+
     /// "Delay"
     [<Literal>]
     let Delay = "Delay"
+
     /// "FBInstance"
     [<Literal>]
     let FBInstance = "FBInstance"
+
     /// "Size"
     [<Literal>]
     let Size = "Size"
@@ -93,4 +109,3 @@ module K =
     let ErrNoAddressAssigned = "No address assigned."
     let ErrNameIsNullOrEmpty = "Name is null or empty."
     let ErrAddressIsNullOrEmpty = "Address is null or empty."
-

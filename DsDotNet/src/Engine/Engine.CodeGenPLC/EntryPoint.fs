@@ -2,5 +2,5 @@ namespace Engine.CodeGenCPU
 
 
 module ModuleInitializer =
-    let Initialize() =
+    let Initialize () =
         printfn "Module is being initialized..."

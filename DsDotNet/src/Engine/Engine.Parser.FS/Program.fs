@@ -8,7 +8,8 @@ open Engine.Core
 open type Engine.Parser.dsParser
 
 module Program =
-    let CylinderText = """
+    let CylinderText =
+        """
 [sys] Cylinder = {
     [flow] F = {
         Vp > Pp > Sp;
@@ -25,7 +26,9 @@ module Program =
     }
 }
 """
-    let EveryScenarioText = """
+
+    let EveryScenarioText =
+        """
 [sys ip = 192.168.0.1] My = {
     [flow] MyFlow = {
         Seg1 > Seg2;
@@ -122,7 +125,9 @@ C4 > C5;
     [external file="station.ds"] C;
 }
 """
-    let CpuTestText = """
+
+    let CpuTestText =
+        """
 [sys ip = 192.168.0.1] My = {
     [flow] MyFlow = {
         Ap > Seg1 > Seg2 > F.R3;
@@ -214,7 +219,9 @@ C4 > C5;
     [external file="station.ds"] C;
 }
 """
-    let CodeElementsText = """
+
+    let CodeElementsText =
+        """
 [sys] My = {
     [flow] F = {
         Seg1;
@@ -232,7 +239,9 @@ C4 > C5;
 }
 
 """
-    let DuplicatedEdgesText = """
+
+    let DuplicatedEdgesText =
+        """
 [sys] B = {
     [flow] F = {
         Vp > Pp;
@@ -241,7 +250,8 @@ C4 > C5;
 }
 """
 
-    let DuplicatedCallsText = """
+    let DuplicatedCallsText =
+        """
 [sys] My = {
     [flow] F = {
         main = {
@@ -258,7 +268,9 @@ C4 > C5;
 }
 
 """
-    let CausalsText = """
+
+    let CausalsText =
+        """
 [sys] L = {
     [flow] F = {
         //Ap > Am;
@@ -290,7 +302,8 @@ C4 > C5;
 }
 """
 
-    let AdoptoedValidText = """
+    let AdoptoedValidText =
+        """
 [sys] My = {
     [flow] F = {
         Seg1 > Seg2;
@@ -313,7 +326,9 @@ C4 > C5;
 }
 
 """
-    let SimpleLoadedDeviceText = """
+
+    let SimpleLoadedDeviceText =
+        """
 [sys] My = {
     [flow] F = {
         Seg1 > Seg2;
@@ -335,7 +350,9 @@ C4 > C5;
 }
 
 """
-    let SplittedMRIEdgesText = """
+
+    let SplittedMRIEdgesText =
+        """
 [sys] A = {
     [flow] F = {
         //a1 <||> a2 <||> a3 <||> a4;
@@ -356,7 +373,8 @@ C4 > C5;
 }
 """
 
-    let PptGeneratedText = """
+    let PptGeneratedText =
+        """
 [sys] SIDE_QTR_Handling = {
     [flow] exflow = {
         "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <||> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
@@ -820,7 +838,8 @@ C4 > C5;
 }
 """
 
-    let RecursiveSystemText = """
+    let RecursiveSystemText =
+        """
 [sys] P = {
     [sys] P1 = {
         [flow] F = {
@@ -836,7 +855,8 @@ C4 > C5;
 }
 """
 
-    let Ppt20221213Text = """
+    let Ppt20221213Text =
+        """
 [sys ip = localhost] FactoryIO = {
     [flow] API = {
     }
@@ -904,20 +924,25 @@ C4 > C5;
 """
 
 
-    let ParseNormal(text:string) =
+    let ParseNormal (text: string) =
         let systemRepo = ShareableSystemRepository()
-        ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, ".", "ActiveCpuName", None, DuNone))
+
+        ModelParser.ParseFromString2(
+            text,
+            ParserOptions.Create4Simulation(systemRepo, ".", "ActiveCpuName", None, DuNone)
+        )
         |> ignore
+
         tracefn "Done"
 
 
-    let Main(_args:string[]) =
+    let Main (_args: string[]) =
         //ParseNormal(SplittedMRIEdgesText)
         //ParseNormal(DuplicatedEdgesText)
         //ParseNormal(AdoptoedValidText)
         //ParseNormal(AdoptoedAmbiguousText)
         //ParseNormal(CodeElementsText)
         ParseNormal(EveryScenarioText)
-        //ParseNormal(PptGeneratedText)
+    //ParseNormal(PptGeneratedText)
 
-    let ReadAllInput(fn:string) = System.IO.File.ReadAllText(fn)
+    let ReadAllInput (fn: string) = System.IO.File.ReadAllText(fn)

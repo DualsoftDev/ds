@@ -34,42 +34,41 @@ module rec Command =
 
     ///CoilOutput은 단일 출력을 내보내는 형식
     type CoilOutputMode =
-        | COMCoil       of INamedExpressionizableTerminal
-        | COMPulseCoil  of INamedExpressionizableTerminal
+        | COMCoil of INamedExpressionizableTerminal
+        | COMPulseCoil of INamedExpressionizableTerminal
         | COMNPulseCoil of INamedExpressionizableTerminal
         | COMClosedCoil of INamedExpressionizableTerminal
-        | COMSetCoil    of INamedExpressionizableTerminal
-        | COMResetCoil  of INamedExpressionizableTerminal
-    with
+        | COMSetCoil of INamedExpressionizableTerminal
+        | COMResetCoil of INamedExpressionizableTerminal
+
         interface IFunctionCommand with
             member this.TerminalEndTag: INamedExpressionizableTerminal =
                 match this with
-                | COMCoil      (endTag) -> endTag
-                | COMPulseCoil (endTag) -> endTag
+                | COMCoil(endTag) -> endTag
+                | COMPulseCoil(endTag) -> endTag
                 | COMNPulseCoil(endTag) -> endTag
                 | COMClosedCoil(endTag) -> endTag
-                | COMSetCoil   (endTag) -> endTag
-                | COMResetCoil (endTag) -> endTag
+                | COMSetCoil(endTag) -> endTag
+                | COMResetCoil(endTag) -> endTag
 
     /// bool type 을 반환하는 pure function.   (instance 불필요)
     type Predicate =
-        | Compare of name:string * output:INamedExpressionizableTerminal * arguments:IExpression list //endTag * FunctionName * Tag list
-    with
+        | Compare of name: string * output: INamedExpressionizableTerminal * arguments: IExpression list //endTag * FunctionName * Tag list
+
         interface IFunctionCommand with
             member this.TerminalEndTag: INamedExpressionizableTerminal =
                 match this with
-                | Compare (_, endTag, _) -> endTag
+                | Compare(_, endTag, _) -> endTag
 
     /// non-boolean 값을 반환하는 pure function.  (instance 불필요)
     type Function =
         //| CopyMode  of INamedExpressionizableTerminal *  (CommandTag * CommandTag) //endTag * (fromA, toB)
-        | Arithmatic of name:string * output:INamedExpressionizableTerminal * arguments:IExpression list //endTag * FunctionName * Tag list
-    with
+        | Arithmatic of name: string * output: INamedExpressionizableTerminal * arguments: IExpression list //endTag * FunctionName * Tag list
+
         interface IFunctionCommand with
             member this.TerminalEndTag: INamedExpressionizableTerminal =
                 match this with
                 //| CopyMode  (endTag, _) -> endTag
-                | Arithmatic (_, endTag, _) -> endTag
+                | Arithmatic(_, endTag, _) -> endTag
 
-    type PLCAction =
-        | Move of condition:IExpression<bool> * source:IExpression * target:IStorage
+    type PLCAction = Move of condition: IExpression<bool> * source: IExpression * target: IStorage

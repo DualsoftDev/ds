@@ -8,7 +8,8 @@ open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
 
 [<AutoOpen>]
 module internal XgiFile =
-    let [<Literal>] XGIMaxX = 28
+    [<Literal>]
+    let XGIMaxX = 28
 
     /// text comment 를 xml wrapping 해서 반환
     let getCommentRungXml y cmt =
@@ -19,11 +20,17 @@ module internal XgiFile =
     /// Program 마지막 부분에 END 추가
     let generateEndXml y =
         let yy = y * 1024 + 1
-        sprintf """
+
+        sprintf
+            """
             <Rung BlockMask="0">
                 <Element ElementType="%d" Coordinate="%d" Param="90"></Element>
 			    <Element ElementType="%d" Coordinate="%d" Param="END">END</Element>
-			</Rung>""" (int ElementType.MultiHorzLineMode) yy (int ElementType.FBMode) (yy+93)
+			</Rung>"""
+            (int ElementType.MultiHorzLineMode)
+            yy
+            (int ElementType.FBMode)
+            (yy + 93)
 
 
     /// Template XGI XML 문자열을 반환
@@ -33,11 +40,10 @@ module internal XgiFile =
         EmbeddedResource.readFile assembly filename
 
     /// Template XGI XML 문자열을 반환
-    let getTemplateXgiXml() =
+    let getTemplateXgiXml () =
         match getTemplateXgiXmlWithVersion "4.5.2" with
         | Some(xml) -> xml
-        | None ->
-            failwithlogf "INTERNAL ERROR: failed to read resource template"
+        | None -> failwithlogf "INTERNAL ERROR: failed to read resource template"
 
     /// Template XGI XML 문서 (XDocument) 반환
     let getTemplateXgiXmlDoc = getTemplateXgiXml >> XmlDocument.fromString
@@ -49,13 +55,13 @@ module internal XgiFile =
          symbolsLocal =        "<LocalVar Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </LocalVar>
          symbolsGlobal = "<GlobalVariable Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </GlobalVariable>
     *)
-    let wrapWithXml (rungs:XmlOutput) symbolsLocal symbolsGlobal (existingLSISprj:string option) =
+    let wrapWithXml (rungs: XmlOutput) symbolsLocal symbolsGlobal (existingLSISprj: string option) =
         let xdoc =
-            existingLSISprj
-            |> Option.map XmlDocument.loadFromFile
-            |? getTemplateXgiXmlDoc()
+            existingLSISprj |> Option.map XmlDocument.loadFromFile
+            |? getTemplateXgiXmlDoc ()
 
         let pouName = "DsLogic"
+
         if null <> xdoc.SelectSingleNode(sprintf "//POU/Programs/Program/%s" pouName) then
             failwithlogf "POU name %s already exists.  Can't overwrite." pouName
 
@@ -73,7 +79,8 @@ module internal XgiFile =
 
         /// POU/Programs/Program
         let programTemplate =
-            sprintf """
+            sprintf
+                """
 			    <Program Task="%s" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" FindProgram="1" FindVar="1" Encrytption="">%s
                     <Body>
 					    <LDRoutine>
@@ -82,12 +89,14 @@ module internal XgiFile =
 					    </LDRoutine>
 				    </Body>
 				    <RungTable></RungTable>
-			    </Program>""" taskName pouName
+			    </Program>"""
+                taskName
+                pouName
             |> XmlNode.ofString
 
 
 
-        let programTemplate = programs.AdoptChild  programTemplate
+        let programTemplate = programs.AdoptChild programTemplate
 
         (* xn = Xml Node *)
         /// LDRoutine 위치 : Rung 삽입 위치
@@ -98,6 +107,7 @@ module internal XgiFile =
          * Rung 삽입
          *)
         let rungsXml = $"<Rungs>{rungs}</Rungs>" |> XmlNode.ofString
+
         for r in rungsXml.GetChildrenNodes() do
             onlineUploadData.InsertBefore r |> ignore
 
@@ -111,8 +121,12 @@ module internal XgiFile =
         (*
          * Global variables 삽입
          *)
-        let xnGlobalVar = xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
-        let countExistingGlobal = xnGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
+        let xnGlobalVar =
+            xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
+
+        let countExistingGlobal =
+            xnGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
+
         let _globalSymbolXmls =
             // symbolsGlobal = "<GlobalVariable Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol>
             let neoGlobals = symbolsGlobal |> XmlNode.ofString
@@ -125,5 +139,3 @@ module internal XgiFile =
             |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)
 
         xdoc.ToText()
-
-

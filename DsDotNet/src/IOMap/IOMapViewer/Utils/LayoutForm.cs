@@ -1,10 +1,10 @@
 using DevExpress.XtraBars.Docking;
 
 namespace IOMapViewer.Utils;
+
 [SupportedOSPlatform("windows")]
 public static class LayoutForm
 {
-
     internal static void LoadLayout(DockManager docM)
     {
         if (!Directory.Exists(Global.DefaultAppSettingFolder))
@@ -26,12 +26,10 @@ public static class LayoutForm
     {
         docM.SaveLayoutToXml($"{Global.DefaultAppSettingFolder}\\layout.xml");
     }
+
     internal static void RestoreLayoutFromXml(DockManager docM)
     {
         docM.RestoreLayoutFromXml($"{Global.DefaultAppSettingFolder}\\default_layout.xml");
         docM.ForceInitialize();
     }
-
 }
-
-

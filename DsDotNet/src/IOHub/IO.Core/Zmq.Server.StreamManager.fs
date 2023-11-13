@@ -19,14 +19,14 @@ module internal ZmqStreamManager =
         member x.ClientId = clientId
         member x.RequestId = requestId
 
-    type ExcetionWithClient(clientRequstInfo:ClientRequestInfo, errMsg:ErrorMessage) =
+    type ExcetionWithClient(clientRequestInfo:ClientRequestInfo, errMsg:ErrorMessage) =
         inherit Exception(errMsg)
-        member x.ClientId = clientRequstInfo.ClientId
-        member x.RequestId = clientRequstInfo.RequestId
+        member x.ClientId = clientRequestInfo.ClientId
+        member x.RequestId = clientRequestInfo.RequestId
 
     /// 발생한 exception 이 요청 client 에 전달 되도록 clientId 를 갖는 예외 raise
-    let raiseWithClientId (clientRequstInfo:ClientRequestInfo) (errMsg:ErrorMessage) =
-        ExcetionWithClient(clientRequstInfo, errMsg) |> raisewithlog
+    let raiseWithClientId (clientRequestInfo:ClientRequestInfo) (errMsg:ErrorMessage) =
+        ExcetionWithClient(clientRequestInfo, errMsg) |> raisewithlog
 
 
     let lockedExe (locker:obj) f =
@@ -288,7 +288,7 @@ module internal ZmqBufferManagerExtension =
             conn.Execute(sqlUpdate, {| Key = key; Value = value |}) |> ignore
 
     type StreamManager with
-        member x.VerifyIndices(clientRequstInfo:ClientRequestInfo, memoryType:MemoryType, offset:int) =
+        member x.VerifyIndices(clientRequestInfo:ClientRequestInfo, memoryType:MemoryType, offset:int) =
             let byteOffset = 
                 match memoryType with
                 | MemoryType.Bit   -> offset / 8
@@ -298,16 +298,16 @@ module internal ZmqBufferManagerExtension =
 
             let length = x.FileStream.Length
             if byteOffset < 0 then
-                raiseWithClientId clientRequstInfo ($"Invalid offset.  non-negative value required : {byteOffset}")
+                raiseWithClientId clientRequestInfo ($"Invalid offset.  non-negative value required : {byteOffset}")
             if byteOffset >= length then
-                raiseWithClientId clientRequstInfo ($"Invalid offset: {byteOffset}.  Exceed length limit {length})")
-        member x.VerifyOffsets(clientRequstInfo:ClientRequestInfo, memoryType:MemoryType, offsets:int[]) =
-            offsets |> iter (fun offset -> x.VerifyIndices(clientRequstInfo, memoryType, offset))
+                raiseWithClientId clientRequestInfo ($"Invalid offset: {byteOffset}.  Exceed length limit {length})")
+        member x.VerifyOffsets(clientRequestInfo:ClientRequestInfo, memoryType:MemoryType, offsets:int[]) =
+            offsets |> iter (fun offset -> x.VerifyIndices(clientRequestInfo, memoryType, offset))
 
-        member x.Verify(clientRequstInfo:ClientRequestInfo, memoryType:MemoryType, indices:int[], numValues:int) =
-            x.VerifyOffsets (clientRequstInfo, memoryType, indices)
+        member x.Verify(clientRequestInfo:ClientRequestInfo, memoryType:MemoryType, indices:int[], numValues:int) =
+            x.VerifyOffsets (clientRequestInfo, memoryType, indices)
             if indices.Length <> numValues then
-                raiseWithClientId clientRequstInfo $"The number of indices and values should be the same."
+                raiseWithClientId clientRequestInfo "The number of indices and values should be the same."
             
     type IStringChangeInfo with
         member x.GetKeysAndValues() =

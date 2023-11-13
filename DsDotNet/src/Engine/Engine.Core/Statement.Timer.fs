@@ -17,7 +17,7 @@ module TimerStatementModule =
     let private generateTimerStatement (ts :TimerStruct, tParams:TimerCreateParams) =
 
         if ts.PRE.Value < MinTickInterval then
-            failwith <| sprintf "Timer Resolution Error: Preset value should be larger than %A" MinTickInterval
+            failwith <| $"Timer Resolution Error: Preset value should be larger than %A{MinTickInterval}"
 
         let timer = new Timer(ts.Type, ts)
         let statements = ResizeArray<Statement>()

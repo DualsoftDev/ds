@@ -135,7 +135,7 @@ module FileManager =
 [<Extension>]
 type FileHelper =
     [<Extension>] static member ToZip(filePaths: string seq)  = 
-                        saveZip filePaths |> fun (zipFilePath, _) -> zipFilePath
+                        saveZip filePaths |> fst
     [<Extension>] static member ToZipStream(filePaths: string seq)  = 
                         saveZip filePaths |> fun (_, memoryStram) -> memoryStram.ToArray()    
    

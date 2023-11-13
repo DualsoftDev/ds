@@ -1,55 +1,55 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
 
-		<RootNamespace>T</RootNamespace>
-		<IsPackable>false</IsPackable>
-		<GenerateProgramFile>false</GenerateProgramFile>
-	</PropertyGroup>
+        <RootNamespace>T</RootNamespace>
+        <IsPackable>false</IsPackable>
+        <GenerateProgramFile>false</GenerateProgramFile>
+    </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-	  <NoWarn>NU1702</NoWarn>
-	</PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <NoWarn>NU1702</NoWarn>
+    </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-	  <NoWarn>NU1702</NoWarn>
-	</PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <NoWarn>NU1702</NoWarn>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.17" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
-		<PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
-		<PackageReference Include="FsUnit" Version="5.0.4" />
-		<PackageReference Include="FsUnit.xUnit" Version="5.0.4" />
-		<PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-		<PackageReference Include="xunit" Version="2.4.2" />
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.17"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0"/>
+        <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0"/>
+        <PackageReference Include="FsUnit" Version="5.0.4"/>
+        <PackageReference Include="FsUnit.xUnit" Version="5.0.4"/>
+        <PackageReference Include="NUnit3TestAdapter" Version="3.17.0"/>
+        <PackageReference Include="xunit" Version="2.4.2"/>
+    </ItemGroup>
 
-	<ItemGroup>
-		<Compile Include="TestFixture.Expression.fs" />
-		<Compile Include="ExpressionTest.fs" />
-		<Compile Include="ComparisonTest.fs" />
-		<Compile Include="CustomFunctionTest.fs" />
-		<Compile Include="CodeTest.fs" />
-		<Compile Include="CpuTest.fsx" />
-		<Compile Include="TimerTest.fs" />
-		<Compile Include="CounterTest.fs" />
-		<Compile Include="StatementTest.fs" />
-		<Compile Include="DeclarationTest.fs" />
-		<None Include="App.config" />
-		<Compile Include="Main.fs" />
-	</ItemGroup>
+    <ItemGroup>
+        <Compile Include="TestFixture.Expression.fs"/>
+        <Compile Include="ExpressionTest.fs"/>
+        <Compile Include="ComparisonTest.fs"/>
+        <Compile Include="CustomFunctionTest.fs"/>
+        <Compile Include="CodeTest.fs"/>
+        <Compile Include="CpuTest.fsx"/>
+        <Compile Include="TimerTest.fs"/>
+        <Compile Include="CounterTest.fs"/>
+        <Compile Include="StatementTest.fs"/>
+        <Compile Include="DeclarationTest.fs"/>
+        <None Include="App.config"/>
+        <Compile Include="Main.fs"/>
+    </ItemGroup>
 
-	<ItemGroup>
+    <ItemGroup>
 
-		<ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
+        <ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj"/>
 
-		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
-		<ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
-		<ProjectReference Include="..\..\PLC\PLC.CodeGen.LSXGI\PLC.CodeGen.LSXGI.fsproj" />
+        <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj"/>
+        <ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj"/>
+        <ProjectReference Include="..\..\PLC\PLC.CodeGen.LSXGI\PLC.CodeGen.LSXGI.fsproj"/>
 
-		<ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
-	</ItemGroup>
+        <ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj"/>
+    </ItemGroup>
 
 </Project>

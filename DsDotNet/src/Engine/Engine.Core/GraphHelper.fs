@@ -5,7 +5,6 @@ open System.Runtime.CompilerServices
 open System.Collections.Generic
 open System.Linq
 open Dual.Common.Core.FS
-open System
 
 
 [<AutoOpen>]
@@ -22,7 +21,7 @@ module internal GraphHelperModule =
             ] |> String.concat "\r\n"
 
         if text.Any() then
-            logDebug "%s" text
+            logDebug $"%s{text}"
 
         text
 
@@ -85,7 +84,7 @@ module internal GraphHelperModule =
                         |] |> sccs.Add
                 else
                     visited.Add(v) |> ignore
-                    stack.Push(v) |> ignore
+                    stack.Push(v)
 
                     let oges = g.GetOutgoingEdges(v).Where(fun e -> edges.Contains(e))
                     let ogvs = oges.Select(fun e -> e.Target).ToArray()

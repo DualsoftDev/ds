@@ -5,8 +5,8 @@ open Dual.Common.Core.FS
 open Engine.Core
 
 module FqdnParser =
-    let parseFqdn(text:string) =
-        let createParser(text:string) =
+    let parseFqdn (text: string) =
+        let createParser (text: string) =
             let inputStream = new AntlrInputStream(text)
             let lexer = fqdnLexer (inputStream)
             let tokenStream = CommonTokenStream(lexer)
@@ -20,14 +20,11 @@ module FqdnParser =
 
         try
             let parser = createParser (text)
-            let ctx = parser.fqdn()
+            let ctx = parser.fqdn ()
             let ncs = ctx.Descendants<fqdnParser.NameComponentContext>()
             [ for nc in ncs -> nc.GetText().DeQuoteOnDemand() ]
         with
-            | :? ParserException ->
-                logWarn $"Failed to parse FQDN: {text}" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"
-                [ text ]
-            | exn ->
-                failwith $"ERROR: {exn}"
-
-
+        | :? ParserException ->
+            logWarn $"Failed to parse FQDN: {text}" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"
+            [ text ]
+        | exn -> failwith $"ERROR: {exn}"

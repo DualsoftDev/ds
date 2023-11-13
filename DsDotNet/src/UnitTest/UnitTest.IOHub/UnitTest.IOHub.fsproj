@@ -1,36 +1,36 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
 
-		<IsPackable>false</IsPackable>
-		<GenerateProgramFile>false</GenerateProgramFile>
-		<IsTestProject>true</IsTestProject>
-	</PropertyGroup>
+        <IsPackable>false</IsPackable>
+        <GenerateProgramFile>false</GenerateProgramFile>
+        <IsTestProject>true</IsTestProject>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<Compile Include="TestJsonSetting.fs" />
-		<Compile Include="TestLock.fs" />
-		<Compile Include="UnitTest1.fs" />
-		<Compile Include="Program.fs" />
-	</ItemGroup>
+    <ItemGroup>
+        <Compile Include="TestJsonSetting.fs"/>
+        <Compile Include="TestLock.fs"/>
+        <Compile Include="UnitTest1.fs"/>
+        <Compile Include="Program.fs"/>
+    </ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.1" />
-		<PackageReference Include="NUnit" Version="3.13.3" />
-		<PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
-		<PackageReference Include="NUnit.Analyzers" Version="3.6.1" />
-		<PackageReference Include="coverlet.collector" Version="3.2.0" />
-		<PackageReference Include="log4net" Version="2.0.15" />
-		<PackageReference Include="NetMQ" Version="4.0.1.13" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.17" />
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.1"/>
+        <PackageReference Include="NUnit" Version="3.13.3"/>
+        <PackageReference Include="NUnit3TestAdapter" Version="4.4.2"/>
+        <PackageReference Include="NUnit.Analyzers" Version="3.6.1"/>
+        <PackageReference Include="coverlet.collector" Version="3.2.0"/>
+        <PackageReference Include="log4net" Version="2.0.15"/>
+        <PackageReference Include="NetMQ" Version="4.0.1.13"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.17"/>
+    </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\..\IOHub\IO.Core\IO.Core.fsproj" />
-		<ProjectReference Include="..\..\IOHub\IO.Spec\IO.Spec.csproj" />
-		<ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\IOHub\IO.Core\IO.Core.fsproj"/>
+        <ProjectReference Include="..\..\IOHub\IO.Spec\IO.Spec.csproj"/>
+        <ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj"/>
+    </ItemGroup>
 
 </Project>

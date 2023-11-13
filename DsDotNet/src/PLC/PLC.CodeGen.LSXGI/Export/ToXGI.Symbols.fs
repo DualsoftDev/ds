@@ -1,4 +1,5 @@
 namespace PLC.CodeGen.LSXGI
+
 open System
 
 open System.Linq
@@ -13,46 +14,43 @@ open PLC.CodeGen.LSXGI
 [<AutoOpen>]
 module internal XgiSymbolsModule =
     type XgiSymbol =
-        | DuXgiVar  of IXgiVar
-        | DuTimer   of TimerStruct
+        | DuXgiVar of IXgiVar
+        | DuTimer of TimerStruct
         | DuCounter of CounterBaseStruct
         | DuStorage of IStorage
 
 
-    let storagesToXgiSymbol(storages:IStorage seq) : (IStorage*XgiSymbol) list =
+    let storagesToXgiSymbol (storages: IStorage seq) : (IStorage * XgiSymbol) list =
         let timerOrCountersNames =
-            storages.Filter(fun s -> s :? TimerCounterBaseStruct)
+            storages
+                .Filter(fun s -> s :? TimerCounterBaseStruct)
                 .Select(fun struc -> struc.Name)
-                |> HashSet
-                ;
+            |> HashSet
 
-        [
-            for s in storages do
-                match s with
-                | :? IXgiVar as xgi ->
-                    Some (s, XgiSymbol.DuXgiVar xgi)
-                | :? TimerStruct as ts ->
-                    Some (s, XgiSymbol.DuTimer ts)
-                | :? CounterBaseStruct as cs ->
-                    Some (s, XgiSymbol.DuCounter cs)
-                | _ ->
-                    let name = (s :> INamed).Name
-                    if timerOrCountersNames.Contains(name.Split(".")[0]) then
-                        // skip timer/counter structure member : timer 나 counter 명 + "." + field name
-                        None
-                    else
-                        Some (s, XgiSymbol.DuStorage s)
-        ] |> List.choose id
+        [ for s in storages do
+              match s with
+              | :? IXgiVar as xgi -> Some(s, XgiSymbol.DuXgiVar xgi)
+              | :? TimerStruct as ts -> Some(s, XgiSymbol.DuTimer ts)
+              | :? CounterBaseStruct as cs -> Some(s, XgiSymbol.DuCounter cs)
+              | _ ->
+                  let name = (s :> INamed).Name
 
-    let xgiSymbolToSymbolInfo (prjParams:XgiProjectParams) (kindVar:int) (xgiSymbol:XgiSymbol) : SymbolInfo =
+                  if timerOrCountersNames.Contains(name.Split(".")[0]) then
+                      // skip timer/counter structure member : timer 나 counter 명 + "." + field name
+                      None
+                  else
+                      Some(s, XgiSymbol.DuStorage s) ]
+        |> List.choose id
+
+    let xgiSymbolToSymbolInfo (prjParams: XgiProjectParams) (kindVar: int) (xgiSymbol: XgiSymbol) : SymbolInfo =
         match xgiSymbol with
-        | DuStorage (:? ITag as t) ->
+        | DuStorage(:? ITag as t) ->
             let name, addr = t.Name, t.Address
 
             let device, memSize =
                 match addr with
-                | RegexPattern @"^%([IQM])([XBWL]).*$" [iqm; mem] -> iqm, mem
-                | RegexPattern @"^%([IQM]).*$" [iqm; ] -> iqm, "X"   // `%I1` 이런거 허용하나?
+                | RegexPattern @"^%([IQM])([XBWL]).*$" [ iqm; mem ] -> iqm, mem
+                | RegexPattern @"^%([IQM]).*$" [ iqm ] -> iqm, "X" // `%I1` 이런거 허용하나?
                 | _ -> failwith $"Invalid tag address {addr} for {name}"
 
             let plcType =
@@ -62,10 +60,19 @@ module internal XgiSymbolsModule =
                 | "W" -> "WORD"
                 | "L" -> "DWORD"
                 | _ -> failwithlog "ERROR"
+
             let comment = "FAKECOMMENT"
 
             let initValue = null // PLCTag 는 값을 초기화 할 수 없다.
-            { defaultSymbolInfo with Name=name; Comment=comment; Type=plcType; Address=addr; InitValue=initValue; Device=device; Kind=kindVar; }
+
+            { defaultSymbolInfo with
+                Name = name
+                Comment = comment
+                Type = plcType
+                Address = addr
+                InitValue = initValue
+                Device = device
+                Kind = kindVar }
 
         // address 가 지정되지 않은 tag : e.g Timer, Counter 의 내부 멤버 변수들 EN, DN, CU, CD, ...
         | DuStorage t ->
@@ -81,13 +88,13 @@ module internal XgiSymbolsModule =
                         | RangeSpec _ -> failwith "ERROR.  Should have already been converted to allocator functions."
                         | AllocatorFunctions functions -> functions
 
-                    let {
-                        BitAllocator   = x
-                        ByteAllocator  = b
-                        WordAllocator  = w
-                        DWordAllocator = d
-                        LWordAllocator = l
-                    } = allocatorFunctions
+                    let { BitAllocator = x
+                          ByteAllocator = b
+                          WordAllocator = w
+                          DWordAllocator = d
+                          LWordAllocator = l } =
+                        allocatorFunctions
+
                     let allocator =
                         match t.BoxedValue.GetType().GetMemorySizePrefix() with
                         | "X" -> x
@@ -99,59 +106,95 @@ module internal XgiSymbolsModule =
 
                     if t.Name.StartsWith("_") then
                         logWarn $"Something fish: trying to generate auto M address for {t.Name}"
-                    t.Address <- allocator()
 
-                { defaultSymbolInfo with Name=t.Name; Comment=comment; Type=plcType; Address=t.Address; InitValue=t.BoxedValue; Kind=kindVar; }
+                    t.Address <- allocator ()
+
+                { defaultSymbolInfo with
+                    Name = t.Name
+                    Comment = comment
+                    Type = plcType
+                    Address = t.Address
+                    InitValue = t.BoxedValue
+                    Kind = kindVar }
 
             symbolInfo
 
         | DuXgiVar xgi ->
             if kindVar = int Variable.Kind.VAR_GLOBAL then
                 // Global 변수도 일단, XgiLocalVar type 으로 생성되므로, PLC 생성 시에만 global 로 override 해서 생성한다.
-                { xgi.SymbolInfo with Kind = kindVar; Address=xgi.Address }
+                { xgi.SymbolInfo with
+                    Kind = kindVar
+                    Address = xgi.Address }
             else
                 xgi.SymbolInfo
         | DuTimer timer ->
             let device, addr = "", ""
+
             let plcType =
                 match timer.Type with
-                | TON | TOF | TMR -> timer.Type.ToString()
+                | TON
+                | TOF
+                | TMR -> timer.Type.ToString()
 
             let name, comment = timer.Name, $"TIMER {timer.Name}"
-            { defaultSymbolInfo with Name=name; Comment=comment; Type=plcType; Address=addr; Device=device; Kind=kindVar; }
+
+            { defaultSymbolInfo with
+                Name = name
+                Comment = comment
+                Type = plcType
+                Address = addr
+                Device = device
+                Kind = kindVar }
         | DuCounter counter ->
             let device, addr = "", ""
+
             let plcType =
                 match counter.Type with
-                | CTU | CTD | CTUD -> $"{counter.Type}_INT"       // todo: CTU_{INT, UINT, .... } 등의 종류가 있음...
+                | CTU
+                | CTD
+                | CTUD -> $"{counter.Type}_INT" // todo: CTU_{INT, UINT, .... } 등의 종류가 있음...
                 | CTR -> $"{counter.Type}"
 
             let name, comment = counter.Name, $"COUNTER {counter.Name}"
-            { defaultSymbolInfo with Name=name; Comment=comment; Type=plcType; Address=addr; Device=device; Kind=kindVar; }
 
-    let private xgiSymbolsToSymbolInfos (prjParams:XgiProjectParams) (kindVar:int) (xgiSymbols:XgiSymbol seq) : SymbolInfo list =
+            { defaultSymbolInfo with
+                Name = name
+                Comment = comment
+                Type = plcType
+                Address = addr
+                Device = device
+                Kind = kindVar }
+
+    let private xgiSymbolsToSymbolInfos
+        (prjParams: XgiProjectParams)
+        (kindVar: int)
+        (xgiSymbols: XgiSymbol seq)
+        : SymbolInfo list =
         xgiSymbols |> map (xgiSymbolToSymbolInfo prjParams kindVar) |> List.ofSeq
 
 
-    let private storagesToSymbolInfos (prjParams:XgiProjectParams) (kindVar:int) : (IStorage seq -> SymbolInfo list) =
-        storagesToXgiSymbol
-        >> map snd
-        >> xgiSymbolsToSymbolInfos prjParams kindVar
+    let private storagesToSymbolInfos (prjParams: XgiProjectParams) (kindVar: int) : (IStorage seq -> SymbolInfo list) =
+        storagesToXgiSymbol >> map snd >> xgiSymbolsToSymbolInfos prjParams kindVar
 
     /// <LocalVariable .../> 문자열 반환
     /// 내부 변환: Storages => [XgiSymbol] => [SymbolInfo] => Xml string
-    let storagesToLocalXml (prjParams:XgiProjectParams) (localStorages:IStorage seq) (globalStoragesRefereces:IStorage seq) =
-        let symbolInfos = [
-            yield! storagesToSymbolInfos prjParams (int Variable.Kind.VAR) localStorages
-            yield! storagesToSymbolInfos prjParams (int Variable.Kind.VAR_EXTERNAL) globalStoragesRefereces
-        ]
+    let storagesToLocalXml
+        (prjParams: XgiProjectParams)
+        (localStorages: IStorage seq)
+        (globalStoragesRefereces: IStorage seq)
+        =
+        let symbolInfos =
+            [ yield! storagesToSymbolInfos prjParams (int Variable.Kind.VAR) localStorages
+              yield! storagesToSymbolInfos prjParams (int Variable.Kind.VAR_EXTERNAL) globalStoragesRefereces ]
+
         XGITag.generateLocalSymbolsXml symbolInfos
 
     /// <GlobalVariable .../> 문자열 반환
     /// 내부 변환: Storages => [XgiSymbol] => [SymbolInfo] => Xml string
-    let storagesToGlobalXml (prjParams:XgiProjectParams) (globalStorages:IStorage seq) =
+    let storagesToGlobalXml (prjParams: XgiProjectParams) (globalStorages: IStorage seq) =
         //storagesToXml false globalStorages
-        let symbolInfos = storagesToSymbolInfos prjParams (int Variable.Kind.VAR_GLOBAL) globalStorages
+        let symbolInfos =
+            storagesToSymbolInfos prjParams (int Variable.Kind.VAR_GLOBAL) globalStorages
 
         (* check any error *)
         do
@@ -160,9 +203,9 @@ module internal XgiSymbolsModule =
                 |> map (fun si -> si.Validate())
                 |> filter Result.isError
                 |> Seq.tryHead
+
             match optError with
-            | Some (Error err) -> failwith err
+            | Some(Error err) -> failwith err
             | _ -> ()
 
         XGITag.generateGlobalSymbolsXml symbolInfos
-

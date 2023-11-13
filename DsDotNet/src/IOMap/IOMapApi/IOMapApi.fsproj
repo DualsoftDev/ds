@@ -1,16 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net7.0;net7.0-windows</TargetFrameworks>
-    <OutputType>Library</OutputType>
-    <OutputPath>$(SolutionDir)\bin</OutputPath>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFrameworks>net7.0;net7.0-windows</TargetFrameworks>
+        <OutputType>Library</OutputType>
+        <OutputPath>$(SolutionDir)\bin</OutputPath>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="MemoryUtil.fs" />
-    <Compile Include="MemoryIO.fs" />
-    <Compile Include="MemoryIOEvent.fs" />
-    <Compile Include="MemoryIOManager.fs" />
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Include="MemoryUtil.fs"/>
+        <Compile Include="MemoryIO.fs"/>
+        <Compile Include="MemoryIOEvent.fs"/>
+        <Compile Include="MemoryIOManager.fs"/>
+    </ItemGroup>
 
 </Project>

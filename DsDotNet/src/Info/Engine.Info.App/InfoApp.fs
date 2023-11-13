@@ -19,12 +19,12 @@ namespace Engine.Info.Func
 //        0.0
 //        (*
 //        // 주어진 조건에 맞는 로그만 필터링합니다.
-//        let filteredLogs = 
-//            logs 
-//            |> Seq.filter (fun log -> 
-//                    log.Storage.TagKind = tagKind 
-//                    && log.Storage.Target.IsSome 
-//                    && log.Storage.Target.Value.QualifiedName = fqdn 
+//        let filteredLogs =
+//            logs
+//            |> Seq.filter (fun log ->
+//                    log.Storage.TagKind = tagKind
+//                    && log.Storage.Target.IsSome
+//                    && log.Storage.Target.Value.QualifiedName = fqdn
 //                    && log.Storage.BoxedValue :? bool) // 'bool' 타입인지 확인합니다.
 //            |> Seq.toList
 
@@ -32,7 +32,7 @@ namespace Engine.Info.Func
 //        let rec calculateDurations (logs: DsLog list) (acc: TimeSpan list) =
 //            match logs with
 //            | [] | [_] -> List.rev acc // 리스트를 뒤집어 원래의 순서로 복원합니다.
-//            | first :: second :: rest -> 
+//            | first :: second :: rest ->
 //                let firstValue = first.Value:?> bool
 //                let secondValue = second.Value:?> bool
 
@@ -48,8 +48,8 @@ namespace Engine.Info.Func
 //        // 계산된 지속 시간의 평균을 구합니다.
 //        match durations with
 //        | [] -> 0.0 // 계산된 지속 시간이 없는 경우
-//        | _ -> 
-//            durations 
+//        | _ ->
+//            durations
 //            |> List.sumBy (fun duration -> duration.TotalSeconds) // 모든 지속 시간의 합계를 구합니다.
 //            |> fun sumDuration -> sumDuration / float(List.length durations) // 평균 지속 시간을 반환합니다.
 

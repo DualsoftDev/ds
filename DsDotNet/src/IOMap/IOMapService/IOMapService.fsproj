@@ -1,25 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-	  <TargetFrameworks>net7.0;net7.0-windows</TargetFrameworks>
-    <OutputPath>$(SolutionDir)\bin</OutputPath>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFrameworks>net7.0;net7.0-windows</TargetFrameworks>
+        <OutputPath>$(SolutionDir)\bin</OutputPath>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="Security.fs" />
-    <Compile Include="Service.fs" />
-    <Compile Include="Program.fs" />
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Include="Security.fs"/>
+        <Compile Include="Service.fs"/>
+        <Compile Include="Program.fs"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Reactive" Version="6.0.0" />
-    <PackageReference Include="System.ServiceProcess.ServiceController" Version="7.0.1" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="System.Reactive" Version="6.0.0"/>
+        <PackageReference Include="System.ServiceProcess.ServiceController" Version="7.0.1"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\IOMapApi\IOMapApi.fsproj" />
-  </ItemGroup>
-	
+    <ItemGroup>
+        <ProjectReference Include="..\IOMapApi\IOMapApi.fsproj"/>
+    </ItemGroup>
+
 
 </Project>

@@ -71,7 +71,10 @@ module ErrID =
     let _53 = "Api TXs~Rxs 이름을 정의 해야합니다. ex) ApiName[tx1;tx2~rx1]"
     let _54 = "다른 Flow의 Work 정의는 '.' 기호로 나타냅니다. ex) Flow2.Work3"
     let _55 = "외부 시스템(CPU)은  호출은 '$' 기호로 나타냅니다. ex) System(CPU)$SystemApiName"
-    let _56 = "외부 시스템(Device) 호출은 '$'  또는 '.' 기호로 나타냅니다. ex) System(Device).DeviceApiName"
+
+    let _56 =
+        "외부 시스템(Device) 호출은 '$'  또는 '.' 기호로 나타냅니다. ex) System(Device).DeviceApiName"
+
     let _57 = "PPT 파일이름 공백발견, 다른이름저장이 필요합니다."
     let _58 = "System 이름 시작은 특수문자 및 숫자는 불가능합니다."
     let _59 = "페이지에 제목 이름이 없습니다."
@@ -84,38 +87,54 @@ module ErrID =
     let _1005 = "시스템 램프 or 버튼 or 조건은 Not($n) 함수만 사용가능합니다."
     let _1006 = "Device가 해당 시스템에 없습니다."
 
-    //todo
-       // "리얼 행위의 자식은 한곳에만 정의가능합니다.(alias, exFlow 정의불가)"
-    //
+//todo
+// "리얼 행위의 자식은 한곳에만 정의가능합니다.(alias, exFlow 정의불가)"
+//
 
 [<AutoOpen>]
 module MessgePPTError =
 
-    type ErrorCase  = Shape | Conn | Page | Group | Name | Path
-        with
+    type ErrorCase =
+        | Shape
+        | Conn
+        | Page
+        | Group
+        | Name
+        | Path
+
         member x.ToText() =
             match x with
-            |Shape -> "도형오류"
-            |Conn  -> "연결오류"
-            |Page  -> "장표오류"
-            |Group -> "그룹오류"
-            |Name  -> "이름오류"
-            |Path  -> "경로오류"
+            | Shape -> "도형오류"
+            | Conn -> "연결오류"
+            | Page -> "장표오류"
+            | Group -> "그룹오류"
+            | Name -> "이름오류"
+            | Path -> "경로오류"
 
-  
-      ///file(Item1), page(Item2), objID(Item3), msg(Item4)
-    let ErrorPPTNotify = new Event<string*int*uint*string>() 
+
+    ///file(Item1), page(Item2), objID(Item3), msg(Item4)
+    let ErrorPPTNotify = new Event<string * int * uint * string>()
     let ErrorNotify = "ERROR "
+
     [<Extension>]
     type Office =
 
         [<Extension>]
-        static member ErrorPPT(case:ErrorCase, msg:string,  objName:string, page:int, objID:uint, ?userMsg:string) =
-              
-            let itemName =  if(userMsg.IsSome && (userMsg.Value = ""|>not))
-                            then $"◆페이지{page} {objName}({userMsg.Value})"
-                            else $"◆페이지{page} {objName}"
-           
-            ErrorPPTNotify.Trigger (currentFileName, page, objID, itemName)
-            failwithf  $"[{case.ToText()}] {msg} \t\t{itemName} {ErrorNotify}"
+        static member ErrorPPT
+            (
+                case: ErrorCase,
+                msg: string,
+                objName: string,
+                page: int,
+                objID: uint,
+                ?userMsg: string
+            ) =
 
+            let itemName =
+                if (userMsg.IsSome && (userMsg.Value = "" |> not)) then
+                    $"◆페이지{page} {objName}({userMsg.Value})"
+                else
+                    $"◆페이지{page} {objName}"
+
+            ErrorPPTNotify.Trigger(currentFileName, page, objID, itemName)
+            failwithf $"[{case.ToText()}] {msg} \t\t{itemName} {ErrorNotify}"

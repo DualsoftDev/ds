@@ -51,8 +51,8 @@ module DsText =
         member val EdgeSymbol = edgeSymbol
 
     /// source 와 target 을 edge operator 에 따라서 확장 생성
-    let expandModelingEdge (modeingEdgeInfo:ModelingEdgeInfo<'v>) : ('v * EdgeType * 'v) list =
-        let mi = modeingEdgeInfo
+    let expandModelingEdge (modelingEdgeInfo:ModelingEdgeInfo<'v>) : ('v * EdgeType * 'v) list =
+        let mi = modelingEdgeInfo
         let ss, edgeSymbol, ts = mi.Sources, mi.EdgeSymbol, mi.Targets
         [
             for s in ss do

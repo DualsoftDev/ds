@@ -1,10 +1,8 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Engine.Core
 
-open System
 open System.Linq
 open System.Collections.Generic
-open System.Text.RegularExpressions
 open System.ComponentModel
 open System.Runtime.CompilerServices
 open System.Diagnostics

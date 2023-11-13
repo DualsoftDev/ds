@@ -59,7 +59,7 @@ type VertexManager with
                   
                 (action <||> v._sim.Expr)
             | _ ->
-                failwithlog $"Error"
+                failwithlog "Error"
 
         let rsts = v._off.Expr
         (sets, rsts) --| (v.ET, getFuncName())

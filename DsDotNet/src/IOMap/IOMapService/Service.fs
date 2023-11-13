@@ -62,7 +62,7 @@ module ServiceImpl =
         let loaded = new Dictionary<string, IntPtr>()
         let loadFiles xs  =
             xs |> Array.map (fun f-> f, load f)
-               |> Array.iter(fun (f,m) -> loaded.Add(f,m))
+               |> Array.iter loaded.Add 
 
         let checkFunction  =
             async {

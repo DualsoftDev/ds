@@ -27,12 +27,12 @@ module ScanImpl =
                 |> Seq.toArray
 
             createResults 
-            |> Seq.filter(fun (f, b) -> b)
+            |> Seq.filter snd
             |> Seq.iter(fun (f, b) -> 
                    Debug.WriteLine $"new memory set created : {f}" )
                   
 
-            if createResults |> Seq.exists(fun (f, b)-> b)
+            if createResults |> Seq.exists snd
             then                    // new memory set created 되면 1초 대기
                 Thread.Sleep(1000)  // IOMapService  로딩 대기 1초 간격으로 신규파일 자동로딩
 

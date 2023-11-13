@@ -1,44 +1,44 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net7.0-windows</TargetFramework>
-    <UseWindowsForms>true</UseWindowsForms>
-    <OutputPath>$(SolutionDir)\bin\</OutputPath>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net7.0-windows</TargetFramework>
+        <UseWindowsForms>true</UseWindowsForms>
+        <OutputPath>$(SolutionDir)\bin\</OutputPath>
+    </PropertyGroup>
 
-  <ItemGroup>
-	  <PackageReference Include="DevExpress.Win.Design" Version="23.1.*-*" />
-	  <PackageReference Include="devexpress.win.grid" Version="23.1.*-*" />
-    <PackageReference Include="devexpress.win.navigation" Version="23.1.*-*" />
-    <PackageReference Include="DualSoft-Common-Core" Version="0.1.18" />
-    <PackageReference Include="DualSoft-Common-Winform" Version="0.1.4" />
-    <PackageReference Include="log4net" Version="2.0.15" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="DevExpress.Win.Design" Version="23.1.*-*"/>
+        <PackageReference Include="devexpress.win.grid" Version="23.1.*-*"/>
+        <PackageReference Include="devexpress.win.navigation" Version="23.1.*-*"/>
+        <PackageReference Include="DualSoft-Common-Core" Version="0.1.18"/>
+        <PackageReference Include="DualSoft-Common-Winform" Version="0.1.4"/>
+        <PackageReference Include="log4net" Version="2.0.15"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\HW\IOMapDS.LS\IOMap.LS.fsproj" />
-    <ProjectReference Include="..\IOMapForModeler\IOMapForModeler.fsproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\HW\IOMapDS.LS\IOMap.LS.fsproj"/>
+        <ProjectReference Include="..\IOMapForModeler\IOMapForModeler.fsproj"/>
+    </ItemGroup>
 
 
-  <ItemGroup>
-    <Compile Update="FormMain.cs" />
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Update="Utils\Log\UcLog.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Update="FormMain.cs"/>
+        <Compile Update="Properties\Resources.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>Resources.resx</DependentUpon>
+        </Compile>
+        <Compile Update="Utils\Log\UcLog.cs">
+            <SubType>UserControl</SubType>
+        </Compile>
+    </ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Update="Properties\Resources.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+    </ItemGroup>
 
 </Project>

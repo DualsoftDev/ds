@@ -1,8 +1,6 @@
-namespace CommonAsssemblyInfo
+namespace CommonAssemblyInfo
 
 open System.Reflection
-open System.Runtime.CompilerServices
-open System.Runtime.InteropServices
 
 #if DEBUG
 [<assembly: AssemblyConfiguration("Debug")>]
@@ -20,5 +18,4 @@ open System.Runtime.InteropServices
 [<assembly: AssemblyVersion($"0.9.2.0")>]
 
 
-do
-    ()
+do ()

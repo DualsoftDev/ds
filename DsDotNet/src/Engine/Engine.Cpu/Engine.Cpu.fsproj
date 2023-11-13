@@ -1,25 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFrameworks>net7.0</TargetFrameworks>
-		<RootNamespace>Engine.Cpu</RootNamespace>
-		<LangVersion>7.0</LangVersion>
-		<OutputType>Library</OutputType>
-		<OutputPath>$(SolutionDir)\bin\</OutputPath>
-		<OtherFlags>--warnon:1182</OtherFlags>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFrameworks>net7.0</TargetFrameworks>
+        <RootNamespace>Engine.Cpu</RootNamespace>
+        <LangVersion>7.0</LangVersion>
+        <OutputType>Library</OutputType>
+        <OutputPath>$(SolutionDir)\bin\</OutputPath>
+        <OtherFlags>--warnon:1182</OtherFlags>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
-		<Compile Include="Core.Extension.fs" />
-		<Compile Include="RunTime.Util.fs" />
-		<Compile Include="RunTime.fs" />
-		<Compile Include="Program.fs" />
-	</ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs"/>
+        <Compile Include="Core.Extension.fs"/>
+        <Compile Include="RunTime.Util.fs"/>
+        <Compile Include="RunTime.fs"/>
+        <Compile Include="Program.fs"/>
+    </ItemGroup>
 
-	<ItemGroup>
-	  <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj"/>
+    </ItemGroup>
 
 </Project>

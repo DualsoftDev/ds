@@ -3,6 +3,7 @@
 **/yarn-error.log
 **/.vscode
 **/.antlr
+**/.idea
 DsEnginePython/antlr4_parser/src/
 DsDotNet/packages/
 DsDotNet/bin/

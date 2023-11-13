@@ -10,7 +10,6 @@ global using DevExpress.XtraGrid.Views.Grid;
 global using DevExpress.XtraPrinting;
 global using DevExpress.XtraSplashScreen;
 global using DevExpress.XtraVerticalGrid;
-
 global using System;
 global using System.Collections.Generic;
 global using System.Configuration;

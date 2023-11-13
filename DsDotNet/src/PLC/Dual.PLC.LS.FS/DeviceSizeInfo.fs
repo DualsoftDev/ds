@@ -7,31 +7,28 @@ open System.Collections.Generic
 open PLCHwModelImpl.PLCHwModel
 
 
-type DeviceCPUInfo = {
-    nID: int
-    nPLCID: int
-    strDevice: string
-    nSizeWord: int
-}
+type DeviceCPUInfo =
+    { nID: int
+      nPLCID: int
+      strDevice: string
+      nSizeWord: int }
 
-type PLCType = {
-    nPLCID: int
-    nAPPID: int
-    strPLCType: string
-    strCPUType: string
-    nShowPLC: bool
-}
+type PLCType =
+    { nPLCID: int
+      nAPPID: int
+      strPLCType: string
+      strCPUType: string
+      nShowPLC: bool }
 
-type ModelInfo = {
-        Name:string
-        Id: int
-        Type: CpuType
-        IsIEC: bool
-    }
-    
-    
+type ModelInfo =
+    { Name: string
+      Id: int
+      Type: CpuType
+      IsIEC: bool }
+
+
 //let FindModel(cpuId:int) = PLCHwModel.Models |> Array.tryFind(fun (x:PLCHwModel.ModelInfo) -> x.Id = cpuId)
-let GetModelName(cpuId:int) =
+let GetModelName (cpuId: int) =
     //match FindModel(cpuId) with
     //| Some model -> model.Name
     //| _ -> failwith "ERROR"
@@ -39,12 +36,16 @@ let GetModelName(cpuId:int) =
 
 
 
-let pathDevice = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "DeviceSizeInfo.csv")
-let pathCpu    = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "PLCTypeList.csv")
+let pathDevice =
+    Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "DeviceSizeInfo.csv")
+
+let pathCpu =
+    Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "PLCTypeList.csv")
 //let pathDevice = Path.Combine(__SOURCE_DIRECTORY__, "DeviceSizeInfo.csv")
 //let pathCpu    = Path.Combine(__SOURCE_DIRECTORY__, "PLCTypeList.csv")
-let folderNfile m d = @$"LS Electric\{m.strPLCType.Split('-')[0]}\{d.strDevice}"
-    
+let folderNfile m d =
+    @$"LS Electric\{m.strPLCType.Split('-')[0]}\{d.strDevice}"
+
 let parseCSV filePath =
     File.ReadAllLines(filePath)
     |> Array.skip 1
@@ -55,77 +56,80 @@ let parseCSV filePath =
 //0,1,XGK-CPUH,0xA001,1
 //1,1,XGK-CPUS,0xA002,1
 //2,2,XGB-XBMS,0xB001,1
-let modelPLCs = parseCSV pathCpu |> Seq.map (fun f ->
-        {
-            nPLCID= int f.[0]
-            nAPPID= int f.[1]
-            strPLCType=  f.[2]
-            strCPUType=  f.[3]
-            nShowPLC=  if f.[4] = "1" then true else false
-        })
+let modelPLCs =
+    parseCSV pathCpu
+    |> Seq.map (fun f ->
+        { nPLCID = int f.[0]
+          nAPPID = int f.[1]
+          strPLCType = f.[2]
+          strCPUType = f.[3]
+          nShowPLC = f.[4] = "1" })
 //nID,nPLCID,strDevice,nSize
 //1,0,P,2048
 //3,0,K,2048
 //5,0,T,128
-let dataDevice = parseCSV pathDevice |> Seq.map (fun f ->
-        {
-            nID = int f.[0]
-            nPLCID = int f.[1]
-            strDevice = f.[2]
-            nSizeWord = int f.[3]
-        })
+let dataDevice =
+    parseCSV pathDevice
+    |> Seq.map (fun f ->
+        { nID = int f.[0]
+          nPLCID = int f.[1]
+          strDevice = f.[2]
+          nSizeWord = int f.[3] })
 
 
 let models =
-    modelPLCs 
-    |> Seq.map(fun m ->
+    modelPLCs
+    |> Seq.map (fun m ->
 
-        let plcType = 
+        let plcType =
             match m.strPLCType.Split('-')[0] with
-            |"XGI" -> CpuType.Xgi 
-            |"XGK" -> CpuType.Xgk 
-            |"XGB" -> 
+            | "XGI" -> CpuType.Xgi
+            | "XGK" -> CpuType.Xgk
+            | "XGB" ->
                 match m.strPLCType with
-                |"XGB-KL" 
-                |"XGB-KL"   
-                |"XGB-GIPAM"
-                |"XGB-XECS" 
-                |"XGB-XECE" 
-                |"XGB-XECH" 
-                |"XGB-XECU" 
-                |"XGB-XEMHP"
-                |"XGB-XEMH2"  ->    CpuType.XgbIEC 
-                |_ -> CpuType.XgbMk 
-            |_ -> CpuType.Unknown 
+                | "XGB-KL"
+                | "XGB-KL"
+                | "XGB-GIPAM"
+                | "XGB-XECS"
+                | "XGB-XECE"
+                | "XGB-XECH"
+                | "XGB-XECU"
+                | "XGB-XEMHP"
+                | "XGB-XEMH2" -> CpuType.XgbIEC
+                | _ -> CpuType.XgbMk
+            | _ -> CpuType.Unknown
 
-        let IsIec = 
+        let IsIec =
             match plcType with
-            |CpuType.Xgi| CpuType.XgbIEC  -> true
-            |_ -> false    
+            | CpuType.Xgi
+            | CpuType.XgbIEC -> true
+            | _ -> false
 
-        { Name = m.strPLCType; Id = m.nPLCID; Type = plcType ; IsIEC = IsIec}
-        )
+        { Name = m.strPLCType
+          Id = m.nPLCID
+          Type = plcType
+          IsIEC = IsIec })
 
 
-let getModelByID nPLCID = 
-    modelPLCs |> Seq.filter(fun m -> m.nPLCID = nPLCID) 
-let getModelByName cpuName = 
-    modelPLCs |> Seq.filter(fun m -> m.strPLCType = cpuName) |> Seq.head
-          
+let getModelByID nPLCID =
+    modelPLCs |> Seq.filter (fun m -> m.nPLCID = nPLCID)
+
+let getModelByName cpuName =
+    modelPLCs |> Seq.filter (fun m -> m.strPLCType = cpuName) |> Seq.head
+
 let cpuDeviceMap =
 
-    let dicModelDevice = 
+    let dicModelDevice =
         modelPLCs |> Seq.map (fun m -> m, HashSet<DeviceCPUInfo>()) |> dict
-        
+
     dataDevice
-    |> Seq.iter (fun f -> 
+    |> Seq.iter (fun f ->
         let m = getModelByID f.nPLCID |> Seq.toList
         assert (m.Length <= 1)
-        if m.Length = 0
-        then 
+
+        if m.Length = 0 then
             Console.WriteLine $"Device {f.strDevice} nPLCID: {f.nPLCID} cannot be found in the PLC list."
-        else 
-            dicModelDevice.[m[0]].Add f |> ignore
-        )
+        else
+            dicModelDevice.[m[0]].Add f |> ignore)
 
     dicModelDevice

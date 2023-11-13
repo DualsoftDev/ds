@@ -7,41 +7,46 @@ open System.Collections.Generic
 open PLCHwModelImpl.PLCHwModel
 
 
-type LsTagInfo = {
-    /// Original Tag name
-    Tag:string
-    Device:DeviceType
-    DataType:DataType
-    BitOffset:int
-} with
-    member x.ByteLength = (max 8 x.BitLength) / 8
-    member x.BitLength  = x.DataType.GetBitLength()
-    member x.ByteOffset = x.BitOffset / 8
-    member x.OffsetByDataType = 
-        match x.DataType with
-        | Bit    -> x.BitOffset
-        | Byte   -> x.BitOffset/8
-        | Word   -> x.BitOffset/16
-        | DWord  -> x.BitOffset/32
-        | LWord  -> x.BitOffset/64
-        | Continuous 
-              ->  failwithf $"error Continuous tag :{x.Tag}"
-        
-    static member Create(tag:string, (device: DeviceType), dataType, bitOffset:int, modelId:int option) =
-        if modelId.IsSome   //None 이면 체크 생략
-        then 
-            match HwModelManager.GetCPUInfosByID(modelId.Value) with
-            |Some(devs) ->
-                let sizeWord = devs
-                                |> Seq.find(fun r->r.strDevice = device.ToText())
-                                |> fun f-> f.nSizeWord
+type LsTagInfo =
+    {
+        /// Original Tag name
+        Tag: string
+        Device: DeviceType
+        DataType: DataType
+        BitOffset: int
+    }
 
-                if bitOffset/16 > sizeWord
-                then 
+    member x.ByteLength = (max 8 x.BitLength) / 8
+    member x.BitLength = x.DataType.GetBitLength()
+    member x.ByteOffset = x.BitOffset / 8
+
+    member x.OffsetByDataType =
+        match x.DataType with
+        | Bit -> x.BitOffset
+        | Byte -> x.BitOffset / 8
+        | Word -> x.BitOffset / 16
+        | DWord -> x.BitOffset / 32
+        | LWord -> x.BitOffset / 64
+        | Continuous -> failwithf $"error Continuous tag :{x.Tag}"
+
+    static member Create(tag: string, (device: DeviceType), dataType, bitOffset: int, modelId: int option) =
+        if
+            modelId.IsSome //None 이면 체크 생략
+        then
+            match HwModelManager.GetCPUInfosByID(modelId.Value) with
+            | Some(devs) ->
+                let sizeWord =
+                    devs
+                    |> Seq.find (fun r -> r.strDevice = device.ToText())
+                    |> fun f -> f.nSizeWord
+
+                if bitOffset / 16 > sizeWord then
                     failwithf $"size over tag:{tag}, device:{device}{bitOffset}, dataType{dataType}"
 
-            |None -> ()
-                   
+            | None -> ()
 
-        {Tag = tag; Device=device; DataType=dataType; BitOffset=bitOffset;}
-  
+
+        { Tag = tag
+          Device = device
+          DataType = dataType
+          BitOffset = bitOffset }

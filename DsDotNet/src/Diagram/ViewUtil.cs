@@ -40,13 +40,14 @@ public static class ViewUtil
         return nodes;
     }
 
-    public static void ViewInit(DsSystem system, IEnumerable<ViewNode> flowViews)
+    public static void ViewInit(DsSystem system, IEnumerable<ViewNode> flowViews_)
     {
         DicNode.Clear();
         DicActionTag.Clear();
 
+        var flowViews = flowViews_.ToArray();
         var nodes = flowViews
-            .SelectMany(view => view.UsedViewNodes.Where(node => node.CoreVertex != null));
+            .SelectMany(view => view.UsedViewNodes.Where(node => node.CoreVertex != null)).ToArray();
 
         var dicViewNodes = nodes
             .GroupBy(d => d.CoreVertex.Value) // 중복된 항목을 그룹화

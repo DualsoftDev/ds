@@ -32,7 +32,7 @@ public static class DocContr
 
     private static BaseDocument GetDoc(TabbedView tab, string docKey)
     {
-        return tab.Documents.Where(w => w.Control.Name == docKey).FirstOrDefault();
+        return tab.Documents.FirstOrDefault(w => w.Control.Name == docKey);
     }
 
 

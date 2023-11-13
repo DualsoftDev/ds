@@ -17,7 +17,7 @@ open System.Runtime.InteropServices
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyTitle("Dualsoft Engine packages")>]
 [<assembly: AssemblyProduct("DS Engine")>]
-[<assembly: AssemblyVersion($"0.9.2.0")>]
+[<assembly: AssemblyVersion($"0.9.2.1")>]
 
 
 do

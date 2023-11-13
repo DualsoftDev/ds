@@ -1,4 +1,4 @@
-[sys ip = localhost] double = {
+[sys] Double = {
     [flow] Flow = {
         RET <||> ADV;
     }
@@ -8,3 +8,4 @@
         RET <||> ADV;
     }
 }
+//DS Language Version = [0.9.1.0]

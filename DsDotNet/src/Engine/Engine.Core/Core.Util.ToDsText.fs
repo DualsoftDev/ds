@@ -4,6 +4,7 @@ open System.Linq
 open Dual.Common.Core.FS
 open System.Collections.Generic
 open System.Runtime.CompilerServices
+open System.Reflection     
 
 [<AutoOpen>]
 module internal ToDsTextModule =
@@ -428,6 +429,8 @@ module internal ToDsTextModule =
                 yield code
 
             yield rb
+            yield $"//DS Language Version = [{Assembly.GetExecutingAssembly().GetName().Version}]"
+
         ] |> combineLines
 
     type DsSystem with

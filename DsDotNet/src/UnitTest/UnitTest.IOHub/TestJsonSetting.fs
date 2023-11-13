@@ -6,6 +6,7 @@ open System
 open IO.Core
 open Xunit
 open Dual.Common.Core.FS.Prelude
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module JSONSettingTestModule =
@@ -53,7 +54,7 @@ module JSONSettingTestModule =
                     let check_po_bits() =
                         ()
                         let indices = [|0.. po.Length|]
-                        let values = indices |> Array.map (fun i -> i % 2 = 0)
+                        let values = indices |> map (fun i -> i % 2 = 0)
 
                         client.ClearAll("p/o") |> checkOk
                         client.WriteBits("p/o", indices, values) |> checkOk
@@ -66,7 +67,7 @@ module JSONSettingTestModule =
 
                     let check_po_bytes() =
                         let indices = [|0..po.Length-1|]
-                        let values = indices |> Array.map (fun i -> i |> uint8 |> byte)
+                        let values = indices |> map (uint8 >> byte)
 
                         client.ClearAll("p/o") |> checkOk
                         client.WriteBytes("p/o", indices, values) |> checkOk
@@ -76,7 +77,7 @@ module JSONSettingTestModule =
 
                     let check_po_words() =
                         let indices = [|0..(po.Length / 2)-1|]
-                        let values = indices |> Array.map (fun i -> uint16 i)
+                        let values = indices |> map uint16
 
                         client.ClearAll("p/o") |> checkOk
                         client.WriteUInt16s("p/o", indices, values) |> checkOk
@@ -86,7 +87,7 @@ module JSONSettingTestModule =
 
                     let check_po_dwords() =
                         let indices = [|0..(po.Length / 4)-1|]
-                        let values = indices |> Array.map (fun i -> uint32 i)
+                        let values = indices |> map uint32
 
                         client.ClearAll("p/o") |> checkOk
                         client.WriteUInt32s("p/o", indices, values) |> checkOk
@@ -96,7 +97,7 @@ module JSONSettingTestModule =
 
                     let check_po_lwords() =
                         let indices = [|0..(po.Length / 8)-1|]
-                        let values = indices |> Array.map (fun i -> uint64 i)
+                        let values = indices |> map uint64
 
                         client.ClearAll("p/o") |> checkOk
                         client.WriteUInt64s("p/o", indices, values) |> checkOk
@@ -116,7 +117,7 @@ module JSONSettingTestModule =
                     let lsq = ls.Files |> Array.find (fun (v:IOFileSpec) -> v.Name = "q")
                     let checkBytes() =
                         let indices = [|0..lsq.Length-1|]
-                        let values = indices |> Array.map (fun i -> i |> uint8 |> byte)
+                        let values = indices |> map (uint8 >> byte)
 
                         client.ClearAll("q") |> checkOk
                         client.WriteBytes("q", indices, values) |> checkOk
@@ -126,7 +127,7 @@ module JSONSettingTestModule =
 
                     let checkWords() =
                         let indices = [|0..(lsq.Length / 2)-1|]
-                        let values = indices |> Array.map (fun i -> uint16 i)
+                        let values = indices |> map uint16
 
                         client.ClearAll("q") |> checkOk
                         client.WriteUInt16s("q", indices, values) |> checkOk
@@ -136,7 +137,7 @@ module JSONSettingTestModule =
 
                     let checkDwords() =
                         let indices = [|0..(lsq.Length / 4)-1|]
-                        let values = indices |> Array.map (fun i -> uint32 i)
+                        let values = indices |> map uint32
 
                         client.ClearAll("q") |> checkOk
                         client.WriteUInt32s("q", indices, values) |> checkOk
@@ -146,7 +147,7 @@ module JSONSettingTestModule =
 
                     let checkLwords() =
                         let indices = [|0..(lsq.Length / 8)-1|]
-                        let values = indices |> Array.map (fun i -> uint64 i)
+                        let values = indices |> map uint64
 
                         client.ClearAll("q") |> checkOk
                         client.WriteUInt64s("q", indices, values) |> checkOk

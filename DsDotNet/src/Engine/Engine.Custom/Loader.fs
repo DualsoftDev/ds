@@ -7,14 +7,23 @@ open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module Loader =
-    let LoadFromDll(dllPath:string) =
+    let LoadFromDll (dllPath: string) =
         let typ =
             let assembly = Assembly.LoadFrom(dllPath)
             assembly.FindImplementingTypes(typeof<IEngineExtension>) |> Array.exactlyOne
+
         let dsApi =
-            let reader = Func<string, obj>(fun (tag:string) -> Trace.WriteLine($"Reading {tag}"); true)
-            let writer = Action<string, obj>(fun (tag:string) (value:obj) -> Trace.WriteLine($"Writing {tag}={value}")) 
+            let reader =
+                Func<string, obj>(fun (tag: string) ->
+                    Trace.WriteLine($"Reading {tag}")
+                    true)
+
+            let writer =
+                Action<string, obj>(fun (tag: string) (value: obj) -> Trace.WriteLine($"Writing {tag}={value}"))
+
             DsApi(reader, writer)
 
-        let ext = Activator.CreateInstanceFrom(dllPath, typ.FullName).Unwrap() :?> IEngineExtension
+        let ext =
+            Activator.CreateInstanceFrom(dllPath, typ.FullName).Unwrap() :?> IEngineExtension
+
         ext.Initialize(dsApi)

@@ -132,7 +132,7 @@ module internal ToDsTextModule =
                             String.concat "" [
                                 for param in func.Parameters do
                                     $" {param}";
-                                $";";
+                                ";";
                             ];
                         ]
                     String.concat "" funcDefs

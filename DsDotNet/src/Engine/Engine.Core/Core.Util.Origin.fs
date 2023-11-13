@@ -232,7 +232,7 @@ module OriginModule =
             let candidate =
                 let tgt = target |> Seq.distinct
                 match sort with
-                | true -> tgt |> Seq.sortBy(fun r -> r) |> List.ofSeq
+                | true -> tgt |> Seq.sortBy id |> List.ofSeq
                 | _ -> tgt |> List.ofSeq
             if not (result.Contains(candidate)) then
                 result.Add(candidate)
@@ -448,7 +448,7 @@ module OriginModule =
             |> getAllJobDefRoutes
             |> removeDuplicates
             |> List.ofSeq
-            |> List.map(fun r -> List.distinct r)
+            |> List.map(List.distinct) 
             
         let detectedChains = allRoutes |> getDetectedResetChains resetChains
         //
@@ -473,7 +473,7 @@ module OriginModule =
             |> List.map(List.map(fun v -> v, detectedChainHeads.Contains(v)))
             |> List.map(List.filter(fun v -> snd v = true))
             |> List.filter(fun c -> c.Count() = 1)
-            |> List.collect(List.map(fun v -> fst v))
+            |> List.collect(List.map(fst) )
         let allJobs =
             graph.Vertices
             |> List.ofSeq

@@ -2,8 +2,6 @@
 namespace Engine.Core
 
 open System.Collections.Generic
-open Dual.Common.Core.FS
-open System.Reactive.Subjects
 open System
 
 [<AutoOpen>]

@@ -1,41 +1,41 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
 
-		<RootNamespace>T.IOMap</RootNamespace>
-		<IsPackable>false</IsPackable>
-		<GenerateProgramFile>false</GenerateProgramFile>
-		<NoWarn>NU1702</NoWarn>
-		<RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
-	</PropertyGroup>
+        <RootNamespace>T.IOMap</RootNamespace>
+        <IsPackable>false</IsPackable>
+        <GenerateProgramFile>false</GenerateProgramFile>
+        <NoWarn>NU1702</NoWarn>
+        <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.17" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
-		<PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
-		<PackageReference Include="FsUnit" Version="5.0.4" />
-		<PackageReference Include="FsUnit.xUnit" Version="5.0.4" />
-		<PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-		<PackageReference Include="xunit" Version="2.4.2" />
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.17"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0"/>
+        <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0"/>
+        <PackageReference Include="FsUnit" Version="5.0.4"/>
+        <PackageReference Include="FsUnit.xUnit" Version="5.0.4"/>
+        <PackageReference Include="NUnit3TestAdapter" Version="3.17.0"/>
+        <PackageReference Include="xunit" Version="2.4.2"/>
+    </ItemGroup>
 
-	<ItemGroup>
-		<Compile Include="TestFixture.Engine.fs" />
-		<Compile Include="IOMapBasic.fs" />
-		<Compile Include="IOMapAdvance.fs" />
-		<None Include="App.config" />
-		<Compile Include="Main.fs" />
-	</ItemGroup>
+    <ItemGroup>
+        <Compile Include="TestFixture.Engine.fs"/>
+        <Compile Include="IOMapBasic.fs"/>
+        <Compile Include="IOMapAdvance.fs"/>
+        <None Include="App.config"/>
+        <Compile Include="Main.fs"/>
+    </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\..\IOMap\IOMapApi\IOMapApi.fsproj" />
-		<ProjectReference Include="..\..\IOMap\IOMapForModeler\IOMapForModeler.fsproj" />
-		<ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\IOMap\IOMapApi\IOMapApi.fsproj"/>
+        <ProjectReference Include="..\..\IOMap\IOMapForModeler\IOMapForModeler.fsproj"/>
+        <ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj"/>
+    </ItemGroup>
 
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="copy $(SolutionDir)bin\net7.0\IOMapService_delete.bat $(TargetDir)IOMapService_delete.bat" />
-	</Target>
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="copy $(SolutionDir)bin\net7.0\IOMapService_delete.bat $(TargetDir)IOMapService_delete.bat"/>
+    </Target>
 
 </Project>

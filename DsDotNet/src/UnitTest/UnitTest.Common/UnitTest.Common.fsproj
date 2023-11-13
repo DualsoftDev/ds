@@ -1,44 +1,44 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
 
-		<RootNamespace>UnitTest.Common</RootNamespace>
-		<!--<IsPackable>false</IsPackable>
-		<GenerateProgramFile>false</GenerateProgramFile>-->
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<NoWarn>NU1702</NoWarn>
-	</PropertyGroup>
+        <RootNamespace>UnitTest.Common</RootNamespace>
+        <!--<IsPackable>false</IsPackable>
+        <GenerateProgramFile>false</GenerateProgramFile>-->
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <NoWarn>NU1702</NoWarn>
+    </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<NoWarn>NU1702</NoWarn>
-	</PropertyGroup>
-	<ItemGroup>
-		<PackageReference Include="DualSoft-Common-Core" Version="0.1.18" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.17" />
-		<PackageReference Include="DualSoft-UnitTest-Common-FS" Version="0.1.2" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
-		<PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
-		<PackageReference Include="FsUnit" Version="5.0.4" />
-		<PackageReference Include="FsUnit.xUnit" Version="5.0.4" />
-		<PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-		<PackageReference Include="xunit" Version="2.4.2" />
-	</ItemGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <NoWarn>NU1702</NoWarn>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="DualSoft-Common-Core" Version="0.1.18"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.17"/>
+        <PackageReference Include="DualSoft-UnitTest-Common-FS" Version="0.1.2"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0"/>
+        <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0"/>
+        <PackageReference Include="FsUnit" Version="5.0.4"/>
+        <PackageReference Include="FsUnit.xUnit" Version="5.0.4"/>
+        <PackageReference Include="NUnit3TestAdapter" Version="3.17.0"/>
+        <PackageReference Include="xunit" Version="2.4.2"/>
+    </ItemGroup>
 
-	<ItemGroup>
-		<Compile Include="CommonTest\DiscriminatedUnionTest.fs" />
-		<Compile Include="TestFixture.fs" />
-		<Compile Include="ObjectHolderTest.fs" />
-		<Compile Include="CpuTestCommon.fs" />
-	</ItemGroup>
+    <ItemGroup>
+        <Compile Include="CommonTest\DiscriminatedUnionTest.fs"/>
+        <Compile Include="TestFixture.fs"/>
+        <Compile Include="ObjectHolderTest.fs"/>
+        <Compile Include="CpuTestCommon.fs"/>
+    </ItemGroup>
 
-	<ItemGroup>
-	  <ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
-	  <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
-	  <ProjectReference Include="..\..\Engine\Engine.Cpu\Engine.Cpu.fsproj" />
-	  <ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj"/>
+        <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj"/>
+        <ProjectReference Include="..\..\Engine\Engine.Cpu\Engine.Cpu.fsproj"/>
+        <ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj"/>
+    </ItemGroup>
 
 </Project>

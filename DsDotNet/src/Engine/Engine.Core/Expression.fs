@@ -63,7 +63,7 @@ module ExpressionModule =
             member x.EvaluatedValue = x.Evaluate()
             member x.BoxedEvaluatedValue = x.Evaluate() |> box
             member x.GetBoxedRawObject() = x.GetBoxedRawObject()
-            member x.ToText(withParenthesys) = x.ToText(withParenthesys)
+            member x.ToText(withParenthesis) = x.ToText(withParenthesis)
             member x.CollectStorages() = x.CollectStorages()
             member x.Flatten() = fwdFlattenExpression x
             member x.IsEqual y = x.IsEqual y
@@ -140,7 +140,7 @@ module ExpressionModule =
         member _.DN = counterStruct.DN
         /// Preset
         member _.PRE = counterStruct.PRE
-        /// Accumuated
+        /// Accumulated
         member _.ACC = counterStruct.ACC
         /// Reset
         member _.RES = counterStruct.RES
@@ -399,12 +399,12 @@ module ExpressionModule =
             | DuFunction fs -> fs.Arguments
             | DuTerminal _ -> []
 
-        member x.ToText(?withParenthesys:bool) =
-            let withParenthesys = withParenthesys |? false
+        member x.ToText(?withParenthesis:bool) =
+            let withParenthesis = withParenthesis |? false
             match x with
             | DuTerminal b -> b.ToText()
             | DuFunction fs ->
-                let text = fwdSerializeFunctionNameAndBoxedArguments fs.Name fs.Arguments withParenthesys
+                let text = fwdSerializeFunctionNameAndBoxedArguments fs.Name fs.Arguments withParenthesis
                 text
 
         member x.CollectStorages() : IStorage list =

@@ -1,39 +1,38 @@
 using DevExpress.LookAndFeel;
 
-namespace IOMapViewer.Utils
+namespace IOMapViewer.Utils;
+
+[SupportedOSPlatform("windows")]
+public static class EditorSkin
 {
-    [SupportedOSPlatform("windows")]
-    public static class EditorSkin
+    public static void SetSkin(string name)
     {
-        public static void SetSkin(string name)
+        DSRegistry.SetValue(RegKey.RegSkin, name);
+    }
+
+    public static string GetSkin()
+    {
+        return DSRegistry.GetValue(RegKey.RegSkin).ToString();
+    }
+
+    internal static void InitSetting(string skinName, string skinPalette)
+    {
+        UserLookAndFeel.Default.StyleChanged += (s, e) =>
         {
-            DSRegistry.SetValue(RegKey.RegSkin, name);
+            UserLookAndFeel skin = s as UserLookAndFeel;
+            SetSkin($"{skin.ActiveSkinName};{skin.ActiveSvgPaletteName}");
+        };
+
+        if (DSRegistry.GetValue(RegKey.RegSkin) == null)
+        {
+            UserLookAndFeel.Default.SetSkinStyle(skinName, skinPalette);
         }
-
-        public static string GetSkin()
+        else
         {
-            return DSRegistry.GetValue(RegKey.RegSkin).ToString();
-        }
-
-        internal static void InitSetting(string skinName, string skinPalette)
-        {
-            UserLookAndFeel.Default.StyleChanged += (s, e) =>
-            {
-                UserLookAndFeel skin = s as UserLookAndFeel;
-                SetSkin($"{skin.ActiveSkinName};{skin.ActiveSvgPaletteName}");
-            };
-
-            if (DSRegistry.GetValue(RegKey.RegSkin) == null)
-            {
-                UserLookAndFeel.Default.SetSkinStyle(skinName, skinPalette);
-            }
-            else
-            {
-                string skin = GetSkin();
-                string sn = skin.Split(';')[0];
-                string sp = skin.Split(';')[1];
-                UserLookAndFeel.Default.SetSkinStyle(sn, sp);
-            }
+            string skin = GetSkin();
+            string sn = skin.Split(';')[0];
+            string sp = skin.Split(';')[1];
+            UserLookAndFeel.Default.SetSkinStyle(sn, sp);
         }
     }
 }

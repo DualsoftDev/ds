@@ -1,57 +1,57 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
 
-		<RootNamespace>T</RootNamespace>
-		<IsPackable>false</IsPackable>
-		<GenerateProgramFile>false</GenerateProgramFile>
-		<NoWarn>NU1702</NoWarn>
-	</PropertyGroup>
+        <RootNamespace>T</RootNamespace>
+        <IsPackable>false</IsPackable>
+        <GenerateProgramFile>false</GenerateProgramFile>
+        <NoWarn>NU1702</NoWarn>
+    </PropertyGroup>
 
 
-	<ItemGroup>
-		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.17" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
-		<PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
-		<PackageReference Include="FsUnit" Version="5.0.4" />
-		<PackageReference Include="FsUnit.xUnit" Version="5.0.4" />
-		<PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-		<PackageReference Include="xunit" Version="2.4.2" />
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.17"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0"/>
+        <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0"/>
+        <PackageReference Include="FsUnit" Version="5.0.4"/>
+        <PackageReference Include="FsUnit.xUnit" Version="5.0.4"/>
+        <PackageReference Include="NUnit3TestAdapter" Version="3.17.0"/>
+        <PackageReference Include="xunit" Version="2.4.2"/>
+    </ItemGroup>
 
-	<ItemGroup>
-		<Compile Include="TestFixture.Xgi.fs" />
-		<Compile Include="XgiLadderElementsTest.fs" />
-		<Compile Include="XgiTestCommon.fs" />
-		<Compile Include="XgiDrawing.fs" />
-		<Compile Include="XgiRungBasics.fs" />
-		<Compile Include="XgiGenTest.fs" />
-		<Compile Include="XgiTimerTest.fs" />
-		<Compile Include="XgiCounterTest.fs" />
-		<Compile Include="XgiExpressionEqualityTest.fs" />
-		<Compile Include="XgiPOU.Test.fs" />
-		<Compile Include="XgiExistingXmlProjectAnalTest.fs" />
-		<Compile Include="RisingFallingTest.fs" />
-		<Compile Include="AddressAllocatorTest.fs" />
-		<Compile Include="XgiIQMapperTest.fs" />
-		<Compile Include="XgiAutoMemoryAllocTest.fs" />
-		<Compile Include="NameAddressValidatorTest.fs" />
-		<None Include="App.config" />
-		<Compile Include="Main.fs" />
-	</ItemGroup>
+    <ItemGroup>
+        <Compile Include="TestFixture.Xgi.fs"/>
+        <Compile Include="XgiLadderElementsTest.fs"/>
+        <Compile Include="XgiTestCommon.fs"/>
+        <Compile Include="XgiDrawing.fs"/>
+        <Compile Include="XgiRungBasics.fs"/>
+        <Compile Include="XgiGenTest.fs"/>
+        <Compile Include="XgiTimerTest.fs"/>
+        <Compile Include="XgiCounterTest.fs"/>
+        <Compile Include="XgiExpressionEqualityTest.fs"/>
+        <Compile Include="XgiPOU.Test.fs"/>
+        <Compile Include="XgiExistingXmlProjectAnalTest.fs"/>
+        <Compile Include="RisingFallingTest.fs"/>
+        <Compile Include="AddressAllocatorTest.fs"/>
+        <Compile Include="XgiIQMapperTest.fs"/>
+        <Compile Include="XgiAutoMemoryAllocTest.fs"/>
+        <Compile Include="NameAddressValidatorTest.fs"/>
+        <None Include="App.config"/>
+        <Compile Include="Main.fs"/>
+    </ItemGroup>
 
-	<ItemGroup>
+    <ItemGroup>
 
-		<ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
+        <ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj"/>
 
-		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
-		<ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
+        <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj"/>
+        <ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj"/>
 
-		<ProjectReference Include="..\..\PLC\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
-		<ProjectReference Include="..\..\PLC\PLC.CodeGen.LSXGI\PLC.CodeGen.LSXGI.fsproj" />
+        <ProjectReference Include="..\..\PLC\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj"/>
+        <ProjectReference Include="..\..\PLC\PLC.CodeGen.LSXGI\PLC.CodeGen.LSXGI.fsproj"/>
 
-		<ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
-	</ItemGroup>
-	
+        <ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj"/>
+    </ItemGroup>
+
 </Project>

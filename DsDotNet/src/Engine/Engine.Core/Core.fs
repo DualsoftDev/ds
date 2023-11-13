@@ -260,7 +260,7 @@ module CoreModule =
     type TaskSys (api:ApiItem, systemName:string) =
         inherit DsTask(api, systemName)
 
-    /// Main system 에서 loading 된 다른 devcie 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
+    /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
     ///
     /// Old name : JobDef
     type TaskDev (api:ApiItem, inAddress:TagAddress, outAddress:TagAddress, deviceName:string) =

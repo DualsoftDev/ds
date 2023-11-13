@@ -1,41 +1,41 @@
 <Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<TargetFrameworks>net7.0;net7.0-windows</TargetFrameworks>
-		<RootNamespace>PLC.LS.FS</RootNamespace>
-		<LangVersion>7.0</LangVersion>
-		<OutputPath>$(SolutionDir)\bin\</OutputPath>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<OtherFlags>--warnon:1182</OtherFlags>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-	</PropertyGroup>
-	<ItemGroup>
-		<None Include="DeviceSizeInfo.csv" />
-		<None Include="PLCTypeList.csv" />
-		<None Include="Documents\사용설명서_XGT FEnet_국문_V2.1.pdf" />
-		<None Include="Documents\(PC)XGT_FEnet+Protocol.pdf" />
-		<None Include="Documents\PLC_XGT_상담기준서_Ethernet 전용 프로토콜 PC와 통신 방법 _KO_V1_공개.pdf" />
-		<None Include="Documents\User's Manual_XGT FEnet_V2.30.pdf" />
+    <PropertyGroup>
+        <TargetFrameworks>net7.0;net7.0-windows</TargetFrameworks>
+        <RootNamespace>PLC.LS.FS</RootNamespace>
+        <LangVersion>7.0</LangVersion>
+        <OutputPath>$(SolutionDir)\bin\</OutputPath>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <OtherFlags>--warnon:1182</OtherFlags>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    </PropertyGroup>
+    <ItemGroup>
+        <None Include="DeviceSizeInfo.csv"/>
+        <None Include="PLCTypeList.csv"/>
+        <None Include="Documents\사용설명서_XGT FEnet_국문_V2.1.pdf"/>
+        <None Include="Documents\(PC)XGT_FEnet+Protocol.pdf"/>
+        <None Include="Documents\PLC_XGT_상담기준서_Ethernet 전용 프로토콜 PC와 통신 방법 _KO_V1_공개.pdf"/>
+        <None Include="Documents\User's Manual_XGT FEnet_V2.30.pdf"/>
 
-		<Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
-		<Content Include="Documents\Performance.txt" />
-		<Content Include="Documents\LS protocol.txt" />
-		<Content Include="Documents\ToDo.txt" />
-		<Compile Include="HwModel.fs" />
-		<Compile Include="DeviceSizeInfo.fs" />
-		<Compile Include="HwModelManager.fs" />
-		<Compile Include="LsFEnetTagInfo.fs" />
-		<Compile Include="Address.Convert.fs" />
-	</ItemGroup>
+        <Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs"/>
+        <Content Include="Documents\Performance.txt"/>
+        <Content Include="Documents\LS protocol.txt"/>
+        <Content Include="Documents\ToDo.txt"/>
+        <Compile Include="HwModel.fs"/>
+        <Compile Include="DeviceSizeInfo.fs"/>
+        <Compile Include="HwModelManager.fs"/>
+        <Compile Include="LsFEnetTagInfo.fs"/>
+        <Compile Include="Address.Convert.fs"/>
+    </ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Update="FSharp.Core" Version="7.0.0" />
-	</ItemGroup>
-	<ItemGroup>
-		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.17" />
-		<PackageReference Include="log4net" Version="2.0.15" />
-	</ItemGroup>
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="copy $(ProjectDir)DeviceSizeInfo.csv $(TargetDir)DeviceSizeInfo.csv" />
-		<Exec Command="copy $(ProjectDir)PLCTypeList.csv $(TargetDir)PLCTypeList.csv" />
-	</Target>
+    <ItemGroup>
+        <PackageReference Update="FSharp.Core" Version="7.0.0"/>
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.17"/>
+        <PackageReference Include="log4net" Version="2.0.15"/>
+    </ItemGroup>
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="copy $(ProjectDir)DeviceSizeInfo.csv $(TargetDir)DeviceSizeInfo.csv"/>
+        <Exec Command="copy $(ProjectDir)PLCTypeList.csv $(TargetDir)PLCTypeList.csv"/>
+    </Target>
 </Project>

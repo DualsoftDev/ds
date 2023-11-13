@@ -1,21 +1,23 @@
 using SplashScreen = DevExpress.XtraSplashScreen.SplashScreen;
 
 namespace IOMapViewer.Utils;
+
 [SupportedOSPlatform("windows")]
 public partial class SplashScreenDS : SplashScreen
 {
-    private int curDll = 0;
+    private int curDll;
+
     public SplashScreenDS()
     {
         InitializeComponent();
         timer1.Tick += Timer1_Tick;
         timer1.Interval = 150;
         timer1.Start();
-        Assembly asm = System.Reflection.Assembly.GetEntryAssembly();
+        Assembly asm = Assembly.GetEntryAssembly();
         AssemblyName asmName = asm.GetName();
         string version = $"{asmName.Version.Major}.{asmName.Version.Minor}.{asmName.Version.Build}";
         labelControl_Ver.Text = string.Format(" v{0} ({1})", version
-            , System.IO.File.GetLastWriteTime(Assembly.GetExecutingAssembly().Location).ToShortDateString());
+            , File.GetLastWriteTime(Assembly.GetExecutingAssembly().Location).ToShortDateString());
         //DsSW.version = asmName.Version.ToString();
     }
 
@@ -37,6 +39,4 @@ public partial class SplashScreenDS : SplashScreen
     }
 
     #endregion
-
-
 }

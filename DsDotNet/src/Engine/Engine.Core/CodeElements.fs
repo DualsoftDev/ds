@@ -91,7 +91,7 @@ module CodeElements =
                         | "s" | "sec" -> let presetMsec = ((preset |> Convert.ToInt32) * 1000)
                                          presetMsec.ToString() |> CountUnitType.Parse
 
-                        | _-> failwith "timer foramt Error"
+                        | _-> failwith "timer format Error"
 
 
         [<Extension>] static member GetRingCount (x:Func) =

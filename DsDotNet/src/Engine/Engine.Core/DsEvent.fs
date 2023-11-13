@@ -1,7 +1,6 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Engine.Core
 
-open System
 open System.Reactive.Subjects
 
 [<AutoOpen>]

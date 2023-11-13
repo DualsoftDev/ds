@@ -22,14 +22,20 @@ open IEC61131
 //let (===) x y = y |> should equal x
 
 
-let alreadyAllocatedAddresses:Set<string> = Set.empty
+let alreadyAllocatedAddresses: Set<string> = Set.empty
 
 
-let gen = XGITag.AddressGenerator "I" (0, 4096) (256, 512) (512, 1024) alreadyAllocatedAddresses
-[ for i in [1..1000] do gen() ]
+let gen =
+    XGITag.AddressGenerator "I" (0, 4096) (256, 512) (512, 1024) alreadyAllocatedAddresses
 
-let gen2 = XGITag.AddressGenerator "IW" (0, 4096) (256, 512) (512, 1024) alreadyAllocatedAddresses
-[ for i in [1..1000] do gen2() ]
+[ for i in [ 1..1000 ] do
+      gen () ]
+
+let gen2 =
+    XGITag.AddressGenerator "IW" (0, 4096) (256, 512) (512, 1024) alreadyAllocatedAddresses
+
+[ for i in [ 1..1000 ] do
+      gen2 () ]
 
 
 let manager =
@@ -42,27 +48,27 @@ let manager =
     let lv1 = 1
     let mxMax = 4
 
-    let input  = PLCStorage3(I, StorageRange(lv2, [0..lv2-1]), StorageRange(lv1, [0..lv1-1])) :> IPLCStorageSection
-    let output = PLCStorage3(Q, StorageRange(lv2, [0..lv2-1]), StorageRange(lv1, [0..lv1-1])) :> IPLCStorageSection
+    let input =
+        PLCStorage3(I, StorageRange(lv2, [ 0 .. lv2 - 1 ]), StorageRange(lv1, [ 0 .. lv1 - 1 ])) :> IPLCStorageSection
+
+    let output =
+        PLCStorage3(Q, StorageRange(lv2, [ 0 .. lv2 - 1 ]), StorageRange(lv1, [ 0 .. lv1 - 1 ])) :> IPLCStorageSection
+
     let memory = PLCStorage1(M, mxMax) :> IPLCStorageSection
-    let storages = [input; output; memory]
+    let storages = [ input; output; memory ]
 
 
     let manager = PLCStorageManager(storages)
-    
-    
+
+
 
 
     let descendants = storages |> Seq.collect (fun sp -> sp.Children)
     /// (type, size) 별로 sub manager 를 검색하기위한 사전
-    let dic =
-        descendants
-        |> Seq.map (fun sp -> (sp.StorageType, sp.Size), sp) |> dict
+    let dic = descendants |> Seq.map (fun sp -> (sp.StorageType, sp.Size), sp) |> dict
 
     /// AddressPrefix (type+size 의 문자열. e.g "IX") 별로 sub manager 를 검색하기위한 사전
-    let dicStr =
-        descendants
-        |> Seq.map (fun sp -> sp.AddressPrefix, sp) |> dict
+    let dicStr = descendants |> Seq.map (fun sp -> sp.AddressPrefix, sp) |> dict
 
     let ix = dic.[StorageType.I, Size.Bit]
     let flat = ix.GetAddressFromFlatIndex(100)

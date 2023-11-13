@@ -28,7 +28,7 @@ module HwServiceManagerImpl =
         if File.Exists(batFilePath) then
             match getServiceStatus(serviceName) with
             | Some(service) when service.Status <> ServiceControllerStatus.Running -> waitForServiceWithBat(batFilePath)
-            | Some(_) -> Console.WriteLine($"IOMapService is already running.")
+            | Some(_) -> Console.WriteLine("IOMapService is already running.")
             | None -> 
                 Console.WriteLine($"{serviceName} not found. Attempting to start using BAT file.")
                 waitForServiceWithBat(batFilePath)

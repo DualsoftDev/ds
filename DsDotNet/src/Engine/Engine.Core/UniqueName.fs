@@ -2,7 +2,6 @@
 namespace rec Engine.Core
 
 open System
-open System.Linq
 open System.Collections.Generic
 open System.Text.RegularExpressions
 open Dual.Common.Core.FS

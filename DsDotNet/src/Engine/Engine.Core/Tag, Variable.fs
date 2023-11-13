@@ -1,7 +1,6 @@
 namespace Engine.Core
 
 open System.Diagnostics
-open System.Collections.Generic
 open Dual.Common.Core.FS
 
 [<AutoOpen>]
@@ -17,7 +16,7 @@ module TagVariableModule =
         IsGlobal: bool
     }
 
-    let defaultStorageCreationParams(value) = {
+    let defaultStorageCreationParams value = {
         Name = ""
         Value = value
         Address = None
@@ -119,7 +118,7 @@ module ExpressionPrologModule =
     type Args      = Arguments
 
     let mutable internal fwdSerializeFunctionNameAndBoxedArguments =
-        let dummy (_functionName:string) (_args:Args) (_withParenthesys:bool): string =
+        let dummy (_functionName:string) (_args:Args) (_withParenthesis:bool): string =
             failwithlog "Should be reimplemented."
         dummy
 

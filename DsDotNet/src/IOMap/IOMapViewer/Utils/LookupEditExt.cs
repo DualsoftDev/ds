@@ -1,4 +1,5 @@
 namespace IOMapViewer.Utils;
+
 [SupportedOSPlatform("windows")]
 public static class LookupEditExt
 {

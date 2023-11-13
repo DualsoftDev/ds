@@ -12,40 +12,46 @@ open type DsParser
 [<AutoOpen>]
 module ContextInformationModule =
     [<DebuggerDisplay("{FullName}({ContextType.Name})")>]
-    type NamedContextInformation = {
-        System   : string option
-        Flow     : string option
-        Parenting: string option
-        Names    : string list
-        ContextType:System.Type
-    }
+    type NamedContextInformation =
+        { System: string option
+          Flow: string option
+          Parenting: string option
+          Names: string list
+          ContextType: System.Type }
 
-    type ObjectContextInformation = {
-        System   : DsSystem
-        Flow     : Flow option
-        Parenting: Real option
-        NamedContextInformation: NamedContextInformation
-    }
+    type ObjectContextInformation =
+        { System: DsSystem
+          Flow: Flow option
+          Parenting: Real option
+          NamedContextInformation: NamedContextInformation }
 
     type NamedContextInformation with
         // 단일 이름인 경우, Combine() 을 수행하면 특수 기호 포함된 경우, quotation 부호가 강제로 붙어서 향후의 처리에 문제가 되어서 따로 처리
         member x.GetRawName() = getRawName x.Names false
         member x.Tuples = x.System, x.Flow, x.Parenting, x.Names
-        member x.NameComponents = [
-            if x.System.IsSome    then yield x.System.Value
-            if x.Flow.IsSome      then yield x.Flow.Value
-            if x.Parenting.IsSome then yield x.Parenting.Value
-            if x.ContextType.IsOneOf(
-                  typedefof<SystemContext>
-                , typedefof<FlowBlockContext>
-                , typedefof<ParentingBlockContext>) then
-                    ()
-            else
-                yield! x.Names
-        ]
+
+        member x.NameComponents =
+            [ if x.System.IsSome then
+                  yield x.System.Value
+              if x.Flow.IsSome then
+                  yield x.Flow.Value
+              if x.Parenting.IsSome then
+                  yield x.Parenting.Value
+              if
+                  x.ContextType.IsOneOf(
+                      typedefof<SystemContext>,
+                      typedefof<FlowBlockContext>,
+                      typedefof<ParentingBlockContext>
+                  )
+              then
+                  ()
+              else
+                  yield! x.Names ]
+
         member x.FullName = x.NameComponents.ToArray().Combine()
 
     type ObjectContextInformation with
+
         member x.Tuples = x.Flow, x.Parenting, x.NamedContextInformation.Names
 
 
@@ -53,16 +59,17 @@ module ContextInformationModule =
 [<AutoOpen>]
 module DsParserHelperModule =
     type DsSystem with
-        member x.TryFindParentWrapper(ci:NamedContextInformation) =
+
+        member x.TryFindParentWrapper(ci: NamedContextInformation) =
             option {
                 let! flowName = ci.Flow
+
                 match ci.Tuples with
                 | Some _sys, Some flow, Some parenting, _ ->
-                    let! real = tryFindReal x [flow; parenting]
+                    let! real = tryFindReal x [ flow; parenting ]
                     return DuParentReal real
                 | Some _sys, Some _flow, None, _ ->
                     let! f = tryFindFlow x flowName
                     return DuParentFlow f
                 | _ -> failwithlog "ERROR"
             }
-

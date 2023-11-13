@@ -1,31 +1,31 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<OutputType>Library</OutputType>
-		<TargetFramework>net7.0</TargetFramework>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-	</PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <TargetFramework>net7.0</TargetFramework>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<None Include="SQL.md" />
-		<Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
-		<Compile Include="DBLogger.ORM.fs" />
-		<Compile Include="DBLogger.Query.fs" />
-		<Compile Include="DBLogger.DBOperation.fs" />
-		<Compile Include="DBLogger.fs" />
-		<Compile Include="DBLogger.Test.fs" />
-		<Compile Include="InfoApp.fs" />
-		<Compile Include="AssemblyInfo.fs" />
-	</ItemGroup>
+    <ItemGroup>
+        <None Include="SQL.md"/>
+        <Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs"/>
+        <Compile Include="DBLogger.ORM.fs"/>
+        <Compile Include="DBLogger.Query.fs"/>
+        <Compile Include="DBLogger.DBOperation.fs"/>
+        <Compile Include="DBLogger.fs"/>
+        <Compile Include="DBLogger.Test.fs"/>
+        <Compile Include="InfoApp.fs"/>
+        <Compile Include="AssemblyInfo.fs"/>
+    </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj"/>
+    </ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="DualSoft-Common-Db" Version="0.1.6" />
-		<PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.9" />
-		<PackageReference Include="Dapper" Version="2.0.143" />
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="DualSoft-Common-Db" Version="0.1.6"/>
+        <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.9"/>
+        <PackageReference Include="Dapper" Version="2.0.143"/>
+    </ItemGroup>
 
 </Project>

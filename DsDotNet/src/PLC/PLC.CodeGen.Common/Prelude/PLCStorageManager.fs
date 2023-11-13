@@ -547,9 +547,9 @@ module IEC61131 =   // from Dual.Core.FS/Prelude/PLCStorageManager.fs
                 match arr.[i] with
                 /// 초기화가 아니면서 금지된 영역을 접근하는 경우
                 | MAS.Forbidden ->
-                    failwithlogf "Invalid operation: 금지된 PLC 메모리 영역(%s)을 사용하려 했습니다." (addr.Force())
+                    failwithlogf $"Invalid operation: 금지된 PLC 메모리 영역({addr.Force()})을 사용하려 했습니다."
                 | MAS.Allocated ->
-                    failwithlogf "Invalid operation: 이미 할당된 PLC 메모리 영역(%s)을 재사용하려 했습니다." (addr.Force())
+                    failwithlogf $"Invalid operation: 이미 할당된 PLC 메모리 영역({addr.Force()})을 재사용하려 했습니다."
                 | _ ->
                     ()
             arr.[i] <- v
@@ -813,7 +813,7 @@ module IEC61131 =   // from Dual.Core.FS/Prelude/PLCStorageManager.fs
                     | RegexPattern @"%[IQ][XBWDL](\d+)$" [d0] ->
                         storage3.[0, 0, int d0] <- allocated
                     | _ ->
-                        failwithlogf "Unknown tag format : %s" t
+                        failwithlogf $"Unknown tag format : {t}"
                 // M 영역 주소
                 | RegexPattern @"%M([XBWDL])(\d+)$" [size; d0] ->
                     let storage1 = dicStr.["M" + size] :?> PLCSubStorage1

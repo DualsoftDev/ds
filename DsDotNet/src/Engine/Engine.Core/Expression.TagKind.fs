@@ -48,8 +48,8 @@ module TagKindModule =
     ///simulation
     | sim                      = 9999
 
-    [<Flags>]
     /// 10000 ~ 10999
+    [<Flags>]
     type FlowTag    =
     |ready_op                  = 10000
     |auto_op                   = 10001
@@ -73,8 +73,8 @@ module TagKindModule =
     | flowError                = 10020
     | flowPause                = 10021
 
-    [<Flags>]
     /// 11000 ~ 11999
+    [<Flags>]
     type VertexTag  =
     |startTag                  = 11000
     |resetTag                  = 11001
@@ -106,8 +106,8 @@ module TagKindModule =
     |goingRealy                = 11025
 
 
-    [<Flags>]
     /// 12000 ~ 12999
+    [<Flags>]
     type ApiItemTag =
     |planSet                   = 12000
     //|planRst                   = 12001  //not use
@@ -126,14 +126,14 @@ module TagKindModule =
 
     
 
-    [<Flags>]
     /// 13000 ~ 13999
+    [<Flags>]
     type LinkTag    =
     |LinkStart                 = 13000
     |LintReset                 = 13001
 
-    [<Flags>]
     /// 14000 ~ 14999
+    [<Flags>]
     type ActionTag    =
     |ActionIn                 = 14000
     |ActionOut                = 14001
@@ -272,8 +272,8 @@ type TagKindExt =
                                                     , FlowTag.flowError)
 
         |EventVertex (_, _, kind) ->  kind.IsOneOf(
-                                        //VertexTag.ready
-                                        , VertexTag.going       
+                                        //VertexTag.ready,
+                                        VertexTag.going       
                                         //, VertexTag.finish       
                                         //, VertexTag.homing       
                                         , VertexTag.errorRx       

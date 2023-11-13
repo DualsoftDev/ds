@@ -23,7 +23,7 @@ module ExportModule =
                   /// POU container task name
                   TaskName = taskName
                   /// POU ladder 최상단의 comment
-                  Comment = $"DsLogic Automatically generate"
+                  Comment = "DsLogic Automatically generate"
                   LocalStorages = localStorages
                   GlobalStorages = globalStorages
                   CommentedStatements = pouGens.Collect(fun p -> p.CommentedStatements()) |> Seq.toList }

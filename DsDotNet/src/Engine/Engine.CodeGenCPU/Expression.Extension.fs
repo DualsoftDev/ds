@@ -56,7 +56,7 @@ module ExpressionExtension =
     let private tryTags2LogicalAndOrExpr (fLogical: IExpression list -> Expression<bool>) (FList(ts:#TypedValueStorage<bool> list)) : Expression<bool> option =
         match ts with
         | [] -> None    //failwithlog "tags2AndExpr: Empty list"
-        | t :: [] -> Some (var2expr t)
+        | [t] -> Some (var2expr t)
         | _ -> ts.Select(var2expr)
                 |> List.cast<IExpression>
                 |> fLogical

@@ -22,8 +22,8 @@ module CodeConvertUtil =
     let private getOriginTasks(vr:VertexMReal, initialType:InitialType) =
         let origins = vr.OriginInfo.Tasks
         origins
-            .Where(fun (_, init) -> init = initialType)
-            .Select(fun (task, _) -> task)
+            |> filter (fun (_, init) -> init = initialType)
+            |> map fst
 
     let getOriginIOExprs(vr:VertexMReal, initialType:InitialType) =
         let vs = getOriginTasks(vr, initialType)
@@ -120,7 +120,7 @@ module CodeConvertUtil =
                     for rs in resetChains do
                         [
                             for r in rs do
-                                apiNameToInTagMap.TryFind(r).Map(fun intag -> intag)
+                                apiNameToInTagMap.TryFind(r)//.Map(fun intag -> intag)
                         ] |> List.choose id
             ] |> List.filter List.any
 

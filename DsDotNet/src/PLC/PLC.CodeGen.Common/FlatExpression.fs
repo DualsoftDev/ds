@@ -62,11 +62,11 @@ module FlatExpressionModule =
         member x.Negate() =
             match x with
             | FlatTerminal(value, pulse, neg) -> FlatTerminal(value, pulse, not neg)
-            | FlatNary(op, FlatTerminal(t, p, n) :: []) when op = Neg || op = OpUnit ->
+            | FlatNary(op, [ FlatTerminal(t, p, n) ]) when op = Neg || op = OpUnit ->
                 let negated = if op = Neg then n else not n
                 FlatTerminal(t, p, negated)
 
-            | FlatNary(_op, FlatTerminal(_t, _p, _n) :: []) -> failwithlog "ERROR"
+            | FlatNary(_op, [ FlatTerminal(_t, _p, _n) ]) -> failwithlog "ERROR"
 
             | FlatNary(op, terms) ->
                 let opNeg = op.Negate()
@@ -86,7 +86,7 @@ module FlatExpressionModule =
                 Terminal<'T>.Evaluate() 가 bool type 으로 제한됨 )
              *)
             | DuFunction { Name = n
-                           Arguments = (:? Expression<bool> as arg) :: [] } when
+                           Arguments = [ (:? Expression<bool> as arg) ] } when
                 n = FunctionNameRising || n = FunctionNameFalling
                 ->
                 match arg with
@@ -141,7 +141,7 @@ module FlatExpressionModule =
                 let spanX = spanXYs |> map fst |> List.max
                 let spanY = spanXYs |> map snd |> List.sum
                 spanX, spanY
-            | FlatNary(Neg, neg :: []) -> helper neg
+            | FlatNary(Neg, [ neg ]) -> helper neg
             | _ -> failwithlog "ERROR"
 
         helper expr

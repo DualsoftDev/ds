@@ -36,7 +36,7 @@ module internal DBLoggerQueryImpl =
 
             let rec inspectLog (logs: Log list) =
                 match logs with
-                | ([] | _ :: []) -> ()
+                | ([] | [ _ ]) -> ()
 
                 | log1 :: log2 :: tails ->
                     let b1, b2 = isOn (log1), isOn (log2)
@@ -48,8 +48,8 @@ module internal DBLoggerQueryImpl =
                         assert (duration >= 0)
                         sum <- sum + duration
                         inspectLog tails
-                    | _ when b1 = b2 -> pseudoFail $"ERROR.  duplicated consecutive values detected."
-                    | _ -> pseudoFail $"ERROR.  Expect (rising, falling)."
+                    | _ when b1 = b2 -> pseudoFail "ERROR.  duplicated consecutive values detected."
+                    | _ -> pseudoFail "ERROR.  Expect (rising, falling)."
 
             logs |> inspectLog
 
@@ -62,12 +62,12 @@ module internal DBLoggerQueryImpl =
             let helper (last: Log) =
                 if x.LastLog.IsNone then
                     if isOff (last) then
-                        pseudoFail $"ERROR.  Invalid value starts: OFF(false)."
+                        pseudoFail "ERROR.  Invalid value starts: OFF(false)."
                 else
                     let prev = x.LastLog.Value
 
                     if isOn (prev) = isOn (last) then
-                        pseudoFail $"ERROR.  duplicated consecutive values detected."
+                        pseudoFail "ERROR.  duplicated consecutive values detected."
 
                     if isOff (last) then
                         x.Count <- x.Count + 1

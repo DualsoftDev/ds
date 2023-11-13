@@ -22,7 +22,7 @@ module ScanImpl =
                 |> List.toArray
 
             createResults 
-            |> Seq.filter(fun (f, b) -> b)
+            |> Seq.filter snd
             |> Seq.iter(fun (f, b) -> 
                    Debug.WriteLine $"new memory set created : {f}"
                    )

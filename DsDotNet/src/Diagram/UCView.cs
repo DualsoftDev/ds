@@ -49,7 +49,7 @@ public partial class UcView : UserControl
 
     private bool IsDummyMember(List<pptDummy> lstDummy, Vertex vertex)
     {
-        return lstDummy.Where(w => w.Members.Contains(vertex)).Count() > 0;
+        return lstDummy.Any(w => w.Members.Contains(vertex));
     }
 
     public void SetGraph(ViewNode viewNode, Flow flow, bool bSmallGap)
@@ -401,11 +401,9 @@ public partial class UcView : UserControl
     private Node findNode(ViewNode viewNode)
     {
         Node node = viewer.Graph.FindNode(viewNode.UIKey);
-        return node == null
-            ? viewer.Graph.SubgraphMap.ContainsKey(viewNode.UIKey)
-                ? viewer.Graph.SubgraphMap[viewNode.UIKey]
-                : (Node)null
-            : node;
+        return node ?? (viewer.Graph.SubgraphMap.TryGetValue(viewNode.UIKey, out var value)
+            ? value
+            : (Node)null);
     }
 
     private IEnumerable<Edge> findEdgeTargetSame(Node node)

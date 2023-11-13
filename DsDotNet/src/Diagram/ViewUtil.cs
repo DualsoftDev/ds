@@ -111,25 +111,17 @@ public static class ViewUtil
 
                 if (rx.IsStatusTag())
                 {
-                    Status4 status = Status4.Homing;
-                    switch (ev.TagKind)
+                    Status4 status = ev.TagKind switch
                     {
-                        case VertexTag.ready:
-                            status = Status4.Ready;
-                            break;
-                        case VertexTag.going:
-                            status = Status4.Going;
-                            break;
-                        case VertexTag.finish:
-                            status = Status4.Finish;
-                            break;
-                        case VertexTag.homing:
-                            status = Status4.Homing;
-                            break;
-                    }
+                        VertexTag.ready => Status4.Ready,
+                        VertexTag.going => Status4.Going,
+                        VertexTag.finish => Status4.Finish,
+                        VertexTag.homing => Status4.Homing,
+                        _ => Status4.Homing
+                    };
 
                     var vv = DicNode[ev.Target];
-                    var ucView = UcViews.Where(w => w.MasterNode == vv.FlowNode).FirstOrDefault();
+                    var ucView = UcViews.FirstOrDefault(w => w.MasterNode == vv.FlowNode);
                     vv.DisplayNodes.Iter(node =>
                     {
                         node.Status4 = status;
@@ -143,7 +135,7 @@ public static class ViewUtil
                     vv.IsError = (bool)ev.Tag.BoxedValue;
                     vv.ErrorText = string.Join("\n", ConvertCoreExt.errTexts(call));
 
-                    var ucView = UcViews.Where(w => w.MasterNode == vv.FlowNode).FirstOrDefault();
+                    var ucView = UcViews.FirstOrDefault(w => w.MasterNode == vv.FlowNode);
                     if (ucView != null)
                     {
                         vv.DisplayNodes.Iter(node => { ucView.UpdateError(node, vv.IsError, vv.ErrorText); });
@@ -157,27 +149,32 @@ public static class ViewUtil
                 if (!DicActionTag.ContainsKey(ea.Tag)) return;
 
                 var viewNodes = DicActionTag[ea.Tag];
-                var ucView = UcViews.Where(w => viewNodes.Select(n => n.FlowNode).Contains(w.MasterNode))
-                    .FirstOrDefault();
+                var ucView = UcViews
+                    .FirstOrDefault(w => viewNodes.Select(n => n.FlowNode).Contains(w.MasterNode));
                 viewNodes.Iter(n =>
                 {
                     n.DisplayNodes.Iter(node =>
                     {
                         var tags = n.DsTasks.Cast<TaskDev>();
 
-                        if (ea.Tag.TagKind == (int)ActionTag.ActionIn)
+                        switch (ea.Tag.TagKind)
                         {
-                            var off = tags.Select(s => Convert.ToUInt64(s.InTag.BoxedValue))
-                                .Where(w => w == 0).Any();
-                            n.LampInput = !off;
-                            if (ucView != null) ucView.UpdateInValue(node, !off);
-                        }
-                        else if (ea.Tag.TagKind == (int)ActionTag.ActionOut)
-                        {
-                            var on = tags.Select(s => Convert.ToUInt64(s.OutTag.BoxedValue))
-                                .Where(w => w != 0).Any();
-                            n.LampOutput = on;
-                            if (ucView != null) ucView.UpdateOutValue(node, on);
+                            case (int)ActionTag.ActionIn:
+                            {
+                                var off = tags
+                                    .Select(s => Convert.ToUInt64(s.InTag.BoxedValue)).Any(w => w == 0);
+                                n.LampInput = !off;
+                                ucView?.UpdateInValue(node, !off);
+                                break;
+                            }
+                            case (int)ActionTag.ActionOut:
+                            {
+                                var on = tags
+                                    .Select(s => Convert.ToUInt64(s.OutTag.BoxedValue)).Any(w => w != 0);
+                                n.LampOutput = on;
+                                ucView?.UpdateOutValue(node, on);
+                                break;
+                            }
                         }
                     });
                 });

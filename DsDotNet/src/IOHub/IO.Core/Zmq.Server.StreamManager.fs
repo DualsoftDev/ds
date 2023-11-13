@@ -307,7 +307,7 @@ module internal ZmqBufferManagerExtension =
         member x.Verify(clientRequestInfo:ClientRequestInfo, memoryType:MemoryType, indices:int[], numValues:int) =
             x.VerifyOffsets (clientRequestInfo, memoryType, indices)
             if indices.Length <> numValues then
-                raiseWithClientId clientRequestInfo $"The number of indices and values should be the same."
+                raiseWithClientId clientRequestInfo "The number of indices and values should be the same."
             
     type IStringChangeInfo with
         member x.GetKeysAndValues() =

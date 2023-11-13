@@ -253,7 +253,7 @@ let (|LsTagPatternFEnet|_|) ((modelId: int option), (tag: string)) =
         //logInfo "bitSet = %d  elementSet = %d fileSet = %d offset = %d" bitSet elementSet fileSet offset;
         createTagInfo (tag, device, dataType, offset, modelId)
     | _ ->
-        logWarn "Failed to parse tag : %s" tag
+        logWarn $"Failed to parse tag : {tag}"
         None
 
 /// LS PLC 통신 규약인 FEnet 규격을 따르는 tag 정보를 parsing.   규격 미충족 tag 는 Option.None 반환

@@ -545,19 +545,14 @@ module PPTUtil =
         ///전체 사용된 도형 반환 (Text box 제외)
         [<Extension>]
         static member IsAbleShape(shape: Shape) =
-            if
-                (shape.CheckRectangle() //real
-                 || shape.CheckEllipse() //call
-                 || shape.CheckBevelShapeRound() //btn
-                 || shape.CheckBevelShapePlate() //lamp
-                 || shape.CheckFoldedCornerRound() //COPY_DEV
-                 || shape.CheckFoldedCornerPlate() //OPEN_EXSYS_LINK
-                 || shape.CheckHomePlate() //interface
-                 || shape.CheckCondition()) // system condition
-            then
-                true
-            else
-                false
+            (shape.CheckRectangle() //real
+             || shape.CheckEllipse() //call
+             || shape.CheckBevelShapeRound() //btn
+             || shape.CheckBevelShapePlate() //lamp
+             || shape.CheckFoldedCornerRound() //COPY_DEV
+             || shape.CheckFoldedCornerPlate() //OPEN_EXSYS_LINK
+             || shape.CheckHomePlate() //interface
+             || shape.CheckCondition())
 
         [<Extension>]
         static member Shapes(page: int, commonSlideData: CommonSlideData) =

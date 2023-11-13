@@ -63,7 +63,7 @@ let modelPLCs =
           nAPPID = int f.[1]
           strPLCType = f.[2]
           strCPUType = f.[3]
-          nShowPLC = if f.[4] = "1" then true else false })
+          nShowPLC = f.[4] = "1" })
 //nID,nPLCID,strDevice,nSize
 //1,0,P,2048
 //3,0,K,2048

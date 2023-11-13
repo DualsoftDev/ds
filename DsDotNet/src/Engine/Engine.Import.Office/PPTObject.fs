@@ -266,7 +266,7 @@ module PPTObjectModule =
         let trimSpace (text: string) = text.TrimStart(' ').TrimEnd(' ')
 
         let trimStartEndSeq (texts: string seq) =
-            texts |> Seq.map (fun name -> trimSpace name)
+            texts |> Seq.map trimSpace
 
         let updateSafety (barckets: string) =
             barckets.Split(';') |> Seq.iter (fun f -> safeties.Add(f) |> ignore)

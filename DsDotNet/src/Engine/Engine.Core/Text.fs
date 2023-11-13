@@ -48,7 +48,7 @@ module TextImpl =
         |> List.ofSeq 
         |> function
            | [] -> failwith "ERROR"
-           | n::[] -> n
+           | [ n ] -> n
            | ns -> ns |> Seq.map quoteOnDemand |> String.concat separator
 
 // Extension methods for string manipulation

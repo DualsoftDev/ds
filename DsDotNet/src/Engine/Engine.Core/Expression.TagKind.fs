@@ -272,8 +272,8 @@ type TagKindExt =
                                                     , FlowTag.flowError)
 
         |EventVertex (_, _, kind) ->  kind.IsOneOf(
-                                        //VertexTag.ready
-                                        , VertexTag.going       
+                                        //VertexTag.ready,
+                                        VertexTag.going       
                                         //, VertexTag.finish       
                                         //, VertexTag.homing       
                                         , VertexTag.errorRx       

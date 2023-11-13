@@ -41,10 +41,10 @@ module PathManager =
                     let file = Path.GetFileName filePath
                     let dirc = Path.GetDirectoryName filePath
 
-                    if (dirc.ToCharArray() |> Array.exists (fun c -> Path.GetInvalidPathChars().Contains c)) then
+                    if (dirc.ToCharArray() |> Array.exists (Path.GetInvalidPathChars().Contains)) then
                         raise (new ArgumentException($"Invalid DirectoryName in {filePath}"))
 
-                    if (file.ToCharArray() |> Array.exists (fun c -> Path.GetInvalidFileNameChars().Contains c)) then
+                    if (file.ToCharArray() |> Array.exists (Path.GetInvalidFileNameChars().Contains)) then
                         raise (new ArgumentException($"Invalid FileName in {filePath}"))
 
                     filePath
@@ -54,7 +54,7 @@ module PathManager =
                     if String.IsNullOrWhiteSpace directoryPath then
                         raise (new ArgumentException($"Invalid characters in {directoryPath}"))
 
-                    if (directoryPath.ToCharArray() |> Array.exists (fun c -> Path.GetInvalidPathChars().Contains c)) then
+                    if (directoryPath.ToCharArray() |> Array.exists (Path.GetInvalidPathChars().Contains)) then
                         raise (new ArgumentException($"Invalid DirectoryName in {directoryPath}"))
 
                     if directoryPath.EndsWith('/')

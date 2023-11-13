@@ -242,7 +242,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     member x.GetObjectContextInformation(system: DsSystem, parserRuleContext: ParserRuleContext) =
         let ci = x.GetContextInformation(parserRuleContext)
         assert (system.Name = ci.System.Value)
-        let flow = ci.Flow.Bind(fun fn -> system.TryFindFlow(fn))
+        let flow = ci.Flow.Bind system.TryFindFlow 
 
         let parenting =
             option {
@@ -265,9 +265,9 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let graph = parentWrapper.GetGraph()
 
             match ci.Names with
-            | _ofn :: _ofrn :: [] -> // of(r)n: other flow (real) name
+            | _ofn :: [ _ofrn ] -> // of(r)n: other flow (real) name
                 return! graph.TryFindVertex(ci.Names.Combine())
-            | callOrAlias :: [] -> return! graph.TryFindVertex(callOrAlias)
+            | [ callOrAlias ] -> return! graph.TryFindVertex(callOrAlias)
             | _ -> failwithlog "ERROR"
         }
 
@@ -361,13 +361,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     | Some v -> tracefn $"{v.Name} already exists.  Skip creating it."
                     | None ->
                         match cycle, ctxInfo.Names with
-                        | 0, r :: [] when not <| (isJobOrAlias (parent, ctxInfo.Names)) ->
+                        | 0, [ r ] when not <| (isJobOrAlias (parent, ctxInfo.Names)) ->
                             let flow = parent.GetCore() :?> Flow
 
                             if not <| isCallName (parent, ctxInfo.Names) then
                                 Real.Create(r, flow) |> ignore
 
-                        | 1, c :: [] when not <| (isAliasMnemonic (parent, ctxInfo.Names.CombineQuoteOnDemand())) ->
+                        | 1, [ c ] when not <| (isAliasMnemonic (parent, ctxInfo.Names.CombineQuoteOnDemand())) ->
                             let job = tryFindJob system c |> Option.get
 
                             if job.DeviceDefs.any () then
@@ -376,20 +376,20 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             if job.LinkDefs.any () then
                                 CallSys.Create(job, parent) |> ignore
 
-                        | 1, realorFlow :: cr :: [] when
+                        | 1, realorFlow :: [ cr ] when
                             not <| isAliasMnemonic (parent, ctxInfo.Names.CombineQuoteOnDemand())
                             ->
                             let otherFlowReal = tryFindReal system [ realorFlow; cr ] |> Option.get
                             RealOtherFlow.Create(otherFlowReal, parent) |> ignore
                             tracefn $"{realorFlow}.{cr} should already have been created."
 
-                        | 2, q :: [] when isAliasMnemonic (parent, ctxInfo.Names.CombineQuoteOnDemand()) ->
+                        | 2, [ q ] when isAliasMnemonic (parent, ctxInfo.Names.CombineQuoteOnDemand()) ->
                             let flow = parent.GetFlow()
                             let aliasDef = tryFindAliasDefWithMnemonic flow (q.QuoteOnDemand()) |> Option.get
                             Alias.Create(q, aliasDef.AliasTarget.Value, parent) |> ignore
 
-                        | _, _q :: [] -> ()
-                        | _, _ofn :: _ofrn :: [] -> ()
+                        | _, [ _q ] -> ()
+                        | _, _ofn :: [ _ofrn ] -> ()
                         | _ -> failwithlog "ERROR"
 
             loop
@@ -469,7 +469,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                           let apiPath = apiDefCtx.CollectNameComponents() |> List.ofSeq // e.g ["A"; "+"]
 
                           match apiPath with
-                          | device :: api :: [] ->
+                          | device :: [ api ] ->
                               let apiItem =
                                   option {
                                       let! apiPoint = tryFindCallingApiItem system device api
@@ -508,7 +508,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
                 let linkInfo =
                     match apiLinkPath with
-                    | exSys :: api :: [] ->
+                    | exSys :: [ api ] ->
                         let apiItem = tryFindCallingApiItem system exSys api
 
                         match apiItem with
@@ -532,7 +532,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     let ns = aliasKeys.ToFSharpList()
 
                     match ns with
-                    | rc :: [] -> //Flow.R or Flow.C
+                    | [ rc ] -> //Flow.R or Flow.C
                         match flow.System.TryFindReal [ flow.Name; rc ] with
                         | Some r -> r |> DuAliasTargetReal
                         | None ->
@@ -549,7 +549,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     //else
                     //    call |> Option.get |> DuAliasTargetCall
 
-                    | flowOrReal :: rc :: [] -> //FlowEx.R or Real.C
+                    | flowOrReal :: [ rc ] -> //FlowEx.R or Real.C
                         match tryFindFlow system flowOrReal with
                         | Some f -> f.Graph.TryFindVertex<Real>(rc) |> Option.get |> DuAliasTargetReal
                         | None ->

@@ -227,7 +227,7 @@ module EtcListenerModule =
             let tryFindRealOrCall (ns: Fqdn) =
                 option {
                     match ns.ToFSharpList() with
-                    | flowOrReal :: realOrCall :: [] ->
+                    | flowOrReal :: [ realOrCall ] ->
                         match curSystem.TryFindFlow(flowOrReal) with
                         | Some(flow) ->
                             let! vertex = flow.Graph.TryFindVertex(realOrCall)
@@ -247,7 +247,7 @@ module EtcListenerModule =
                             | :? CallDev as c -> return DuSafetyConditionCall c
                             | _ -> failwithlog "ERROR"
 
-                    | _f :: _r :: _c :: [] ->
+                    | _f :: _r :: [ _c ] ->
                         let! vertex = curSystem.TryFindCall(ns)
 
                         match vertex with

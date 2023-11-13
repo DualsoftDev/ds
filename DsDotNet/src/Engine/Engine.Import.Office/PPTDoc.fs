@@ -113,7 +113,7 @@ module PPTDocModule =
         let groupSubs =
             groupShapes
             |> Seq.map (fun group -> getGroups (group, HashSet<string>()))
-            |> Seq.collect (fun groups -> groups)
+            |> Seq.collect id
 
         groupShapes |> Seq.filter (fun f -> groupSubs.Contains(f.GroupName()) |> not)
 

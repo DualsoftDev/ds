@@ -26,9 +26,7 @@ module ParserUtilityModule =
                 ?includeMe: bool,
                 ?predicate: ParseTreePredicate,
                 ?exclude: ParseTreePredicate
-            ) : ResizeArray // ResizeArray<'T>
-                <'T>
-            =
+            ) : ResizeArray<'T> =
 
             let includeMe = includeMe |? false
             let predicate = predicate |? (isType<'T>)

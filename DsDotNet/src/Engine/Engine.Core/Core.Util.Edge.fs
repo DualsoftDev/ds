@@ -142,13 +142,13 @@ module EdgeModule =
         match v with
         | :? Real   as r  -> r
         | :? RealExF as rf -> rf.Real
-        | :? CallSys as _  -> failwithlog $"Error"
+        | :? CallSys as _  -> failwithlog "Error"
         | :? Alias  as a  ->
             match a.TargetWrapper.GetTarget() with
             | :? Real as real -> real
             | :? RealExF as rf -> rf.Real
-            | _ -> failwithlog $"Error"
-        |_ -> failwithlog $"Error"
+            | _ -> failwithlog "Error"
+        |_ -> failwithlog "Error"
 
     let getPure(v:Vertex) : Vertex =
         match v with
@@ -161,8 +161,8 @@ module EdgeModule =
             | :? Real as real -> real:> Vertex 
             | :? RealExF as rf -> rf.Real:> Vertex 
             | :? CallDev as call -> call :> Vertex 
-            | _ -> failwithlog $"Error"
-        |_ -> failwithlog $"Error"
+            | _ -> failwithlog "Error"
+        |_ -> failwithlog "Error"
             
     let private validateEdge(graph:Graph<Vertex, Edge>, bRoot:bool) =
         graph.Edges
@@ -208,7 +208,7 @@ module EdgeModule =
     let guardedValidateSystem(system:DsSystem) =
             try validateGraphOfSystem system
             with exn ->
-                logWarn "%A" exn
+                logWarn $"%A{exn}"
 
     let getVerticesOfSystem(system:DsSystem) =
         let realVertices = system.Flows.SelectMany(fun f ->

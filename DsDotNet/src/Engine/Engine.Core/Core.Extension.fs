@@ -78,9 +78,9 @@ module CoreExtensionModule =
                       |> verifyM $"Duplicated ConditionDef [{condiName}]"
 
 
-        member x.SystemConditions   = x.Conditions |> Seq.map(fun con  -> con) //read only
-        member x.SystemButtons      = x.Buttons |> Seq.map(fun btn  -> btn) //read only
-        member x.SystemLamps        = x.Lamps   |> Seq.map(fun lamp -> lamp)//read only
+        member x.SystemConditions   = x.Conditions :> seq<_>
+        member x.SystemButtons      = x.Buttons :> seq<_>
+        member x.SystemLamps        = x.Lamps   :> seq<_>
 
         member x.AutoButtons        = getButtons(x, DuAutoBTN)
         member x.ManualButtons      = getButtons(x, DuManualBTN)

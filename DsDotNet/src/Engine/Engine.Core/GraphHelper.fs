@@ -21,7 +21,7 @@ module internal GraphHelperModule =
             ] |> String.concat "\r\n"
 
         if text.Any() then
-            logDebug "%s" text
+            logDebug $"%s{text}"
 
         text
 

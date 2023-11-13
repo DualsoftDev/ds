@@ -146,38 +146,13 @@ module PPTUtil =
 
         [<Extension>]
         static member CheckShape(shape: Shape) =
-            //도형이 아니면 필터  NonVisualShapeDrawingProperties
-            let outline =
-                shape
-                    .Descendants<ShapeProperties>()
-                    .First()
-                    .Descendants<Drawing.Outline>()
-                    .FirstOrDefault()
+            let shapeProperties = shape.Descendants<ShapeProperties>().FirstOrDefault()
 
-            if (outline = null && shape.Descendants<ShapeStyle>().Any() |> not) then
-                false
-            else if (shape.Descendants<ShapeProperties>().Any() |> not) then
-                false
-            else if
-                (shape
-                    .Descendants<ShapeProperties>()
-                    .FirstOrDefault()
-                    .Descendants<Drawing.Transform2D>()
-                    .Any()
-                 |> not)
-            then
-                false
-            else if
-                (shape
-                    .Descendants<ShapeProperties>()
-                    .FirstOrDefault()
-                    .Descendants<Drawing.PresetGeometry>()
-                    .Any()
-                 |> not)
-            then
-                false
-            else
-                true
+            shapeProperties <> null
+            && (shapeProperties.Descendants<Drawing.Outline>().FirstOrDefault() <> null
+                || shape.Descendants<ShapeStyle>().Any())
+            && (shapeProperties.Descendants<Drawing.Transform2D>().Any()
+                || shapeProperties.Descendants<Drawing.PresetGeometry>().Any())
 
         [<Extension>]
         static member ShapeName(shape: Shape) =

@@ -54,7 +54,7 @@ module rec ExpressionParser =
                     tracefn $"Binary: {text}"
 
                     match ctx.children.ToFSharpList() with
-                    | left :: op :: right :: [] ->
+                    | left :: op :: [ right ] ->
                         let expL = helper (left :?> ExprContext)
                         let expR = helper (right :?> ExprContext)
                         let op = op.GetText()
@@ -66,7 +66,7 @@ module rec ExpressionParser =
                     tracefn $"Unary: {text}"
 
                     match exp.children.ToFSharpList() with
-                    | op :: opnd :: [] ->
+                    | op :: [ opnd ] ->
                         let exp = helper (opnd :?> ExprContext)
                         let op = op.GetText()
                         createUnaryExpression op exp
@@ -192,22 +192,22 @@ module rec ExpressionParser =
                    args[1] 이후부터 XGI 명령 입력 순서대로...
                 *)
                 match typ, functionName, args with
-                | CTU, ("createWinCTU" | "createXgiCTU"), _ :: _ :: (BoolExp resetCondition) :: [] ->
+                | CTU, ("createWinCTU" | "createXgiCTU"), _ :: _ :: [ (BoolExp resetCondition) ] ->
                     CounterStatement.CreateCTU(tcParams, resetCondition)
-                | CTU, "createAbCTU", _ :: _ :: [] -> CounterStatement.CreateAbCTU(tcParams)
+                | CTU, "createAbCTU", _ :: [_] -> CounterStatement.CreateAbCTU(tcParams)
 
-                | CTD, ("createWinCTD" | "createXgiCTD"), _ :: _ :: (BoolExp resetCondition) :: [] ->
+                | CTD, ("createWinCTD" | "createXgiCTD"), _ :: _ :: [ (BoolExp resetCondition) ] ->
                     CounterStatement.CreateXgiCTD(tcParams, resetCondition)
-                | CTD, "createAbCTD", _ :: _ :: [] -> CounterStatement.CreateAbCTD(tcParams)
+                | CTD, "createAbCTD", _ :: [_] -> CounterStatement.CreateAbCTD(tcParams)
 
                 | CTUD,
                   ("createWinCTUD" | "createXgiCTUD"),
-                  _ :: _ :: (BoolExp countDownCondition) :: (BoolExp resetCondition) :: (BoolExp ldCondition) :: [] ->
+                  _ :: _ :: (BoolExp countDownCondition) :: (BoolExp resetCondition) :: [ (BoolExp ldCondition) ] ->
                     CounterStatement.CreateCTUD(tcParams, countDownCondition, resetCondition, ldCondition)
-                | CTUD, "createAbCTUD", _ :: _ :: (BoolExp countDownCondition) :: (BoolExp resetCondition) :: [] ->
+                | CTUD, "createAbCTUD", _ :: _ :: (BoolExp countDownCondition) :: [ (BoolExp resetCondition) ] ->
                     CounterStatement.CreateAbCTUD(tcParams, countDownCondition, resetCondition)
 
-                | CTR, ("createWinCTR" | "createXgiCTR"), _ :: _ :: (BoolExp resetCondition) :: [] ->
+                | CTR, ("createWinCTR" | "createXgiCTR"), _ :: _ :: [ (BoolExp resetCondition) ] ->
                     CounterStatement.CreateXgiCTR(tcParams, resetCondition)
                 | CTR, _, _ -> failwithlog "ERROR: CTR only supported for WINDOWS and XGI platform"
 
@@ -246,12 +246,12 @@ module rec ExpressionParser =
                       FunctionName = functionName }
 
                 match typ, functionName, args with
-                | TON, ("createWinTON" | "createXgiTON" | "createAbTON"), _ :: _ :: [] ->
+                | TON, ("createWinTON" | "createXgiTON" | "createAbTON"), _ :: [ _ ] ->
                     TimerStatement.CreateTON(tcParams)
-                | TOF, ("createWinTOF" | "createXgiTOF" | "createAbTOF"), _ :: _ :: [] ->
+                | TOF, ("createWinTOF" | "createXgiTOF" | "createAbTOF"), _ :: [ _ ] ->
                     TimerStatement.CreateTOF(tcParams)
-                | TMR, ("createAbRTO"), _ :: _ :: [] -> TimerStatement.CreateAbRTO(tcParams)
-                | TMR, ("createXgiTMR" | "createWinTMR"), _ :: _ :: (BoolExp resetCondition) :: [] ->
+                | TMR, ("createAbRTO"), _ :: [ _ ] -> TimerStatement.CreateAbRTO(tcParams)
+                | TMR, ("createXgiTMR" | "createWinTMR"), _ :: _ :: [ (BoolExp resetCondition) ] ->
                     TimerStatement.CreateTMR(tcParams, resetCondition)
                 | _ -> fail ()
             | _ -> fail ()
@@ -276,7 +276,7 @@ module rec ExpressionParser =
                 match exp.FunctionName with
                 | Some functionName when functionName = "createTag" ->
                     match exp.FunctionArguments with
-                    | tagAddress :: tagValue :: [] ->
+                    | tagAddress :: [ tagValue ] ->
                         if tagValue.DataType <> declType then
                             failwith $"ERROR: Type mismatch in {varDeclCtx.GetOriginalText()}"
 
@@ -304,21 +304,21 @@ module rec ExpressionParser =
                     createExpression storages (getFirstChildExpressionContext ctx)
 
                 match assignCtx.children.ToFSharpList() with
-                | (:? RisingAssignContext as ctx) :: [] ->
+                | [ (:? RisingAssignContext as ctx) ] ->
                     let risingCoil: RisingCoil =
                         { Storage = storage
                           HistoryFlag = HistoryFlag()
                           System = RuntimeDS.System }
 
                     Some <| DuAssign(createExp ctx, risingCoil)
-                | (:? FallingAssignContext as ctx) :: [] ->
+                | [ (:? FallingAssignContext as ctx) ] ->
                     let fallingCoil: FallingCoil =
                         { Storage = storage
                           HistoryFlag = HistoryFlag()
                           System = RuntimeDS.System }
 
                     Some <| DuAssign(createExp ctx, fallingCoil)
-                | (:? NormalAssignContext as ctx) :: [] -> Some <| DuAssign(createExp ctx, storage)
+                | [ (:? NormalAssignContext as ctx) ] -> Some <| DuAssign(createExp ctx, storage)
                 | _ -> failwithlog "ERROR"
 
             | :? CounterDeclContext as counterDeclCtx -> Some <| parseCounterStatement storages counterDeclCtx

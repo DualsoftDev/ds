@@ -96,9 +96,9 @@ module FileManager =
         String.Join(splitChar, topLevelDirSplit)
 
     //모델 최상단 폴더에 Zip형태로 생성
-    let saveZip(filePaths: string seq) =
+    let saveZip(filePaths: string seq, extenstion:string) =
         let topLevel = getTopLevelDirectory (filePaths |> Seq.toList)
-        let zipFilePath =(topLevel|>getValidZipFileName )+".zip" 
+        let zipFilePath =(topLevel|>getValidZipFileName )+extenstion 
          // Create a ZIP archive
         use fileStream = new FileStream(zipFilePath, FileMode.Create)
         use zip = new ZipArchive(fileStream, ZipArchiveMode.Create, true)
@@ -131,11 +131,40 @@ module FileManager =
         fileStream.CopyTo(memoryStream)
         zipFilePath, memoryStream
 
+    
+    let addFilesToExistingZipAndDeleteFiles (existingZipPath:string) (additionalFilePaths:string seq) =
+        if not (File.Exists existingZipPath) then
+            printfn "The specified ZIP file doesn't exist."
+        else
+            try
+                use zipToOpen = new FileStream(existingZipPath, FileMode.Open, FileAccess.ReadWrite)
+                use archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update)
+
+                for filePath in additionalFilePaths do
+                    if File.Exists filePath then
+                        let fileName = Path.GetFileName filePath
+                        let newEntry = archive.CreateEntry fileName
+
+                        use fileStream = new FileStream(filePath, FileMode.Open)
+                        use entryStream = newEntry.Open()
+                        fileStream.CopyTo(entryStream)
+                        fileStream.Close()        
+                        // Delete the file after adding it to the ZIP archive
+                        File.Delete(filePath)
+                    else
+                        printfn "File not found: %s" filePath
+
+                printfn "Files added to the existing ZIP archive and deleted successfully."
+            with
+            |  ex ->
+                printfn $"An error occurred: {ex.Message}"
         
 [<Extension>]
 type FileHelper =
     [<Extension>] static member ToZip(filePaths: string seq)  = 
-                        saveZip filePaths |> fst
+                        saveZip (filePaths, ".Zip")|> fst
+    [<Extension>] static member ToZipPPT(filePaths: string seq)  = 
+                        saveZip (filePaths, ".7z")|> fst  //".Zip" 형태지만 구분위해 확장자 다르게
     [<Extension>] static member ToZipStream(filePaths: string seq)  = 
-                        saveZip filePaths |> fun (_, memoryStram) -> memoryStram.ToArray()    
+                        saveZip (filePaths, ".Zip") |> fun (_, memoryStram) -> memoryStram.ToArray()    
    

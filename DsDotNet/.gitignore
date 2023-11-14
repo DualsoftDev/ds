@@ -186,3 +186,7 @@ docsrc/tools/FSharp.Formatting.svclog
 
 src/Engine/Engine.Parser/g4s
 Ds.linux.sln
+
+Apps/DSModeler/App.config
+Apps/HMI/AppHMI/App.config
+Apps/INFO/AppINFO/App.config

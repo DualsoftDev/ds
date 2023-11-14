@@ -122,10 +122,10 @@ public static class ViewUtil
                     };
 
                     var vv = DicNode[ev.Target];
-                    var ucView = UcViews.FirstOrDefault(w => w.MasterNode == vv.FlowNode);
-                    vv.DisplayNodes.Iter(node =>
+                    vv.Nodes.Iter(node =>
                     {
                         node.Status4 = status;
+                        var ucView = UcViews.FirstOrDefault(w => w.MasterNode == DicNode[node.CoreVertex.Value].FlowNode);
                         if (ucView != null) ucView.UpdateStatus(node);
                     });
                 }

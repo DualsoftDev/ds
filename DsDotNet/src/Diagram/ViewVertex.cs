@@ -16,7 +16,7 @@ public class ViewVertex
     public IEnumerable<ViewNode> DisplayNodes =>
         _nodes.Where(w => w.CoreVertex.Value is not Alias
                           || w.CoreVertex.Value == Vertex);
-
+    public IEnumerable<ViewNode> Nodes => _nodes;
     public ViewNode FlowNode { get; set; } //UcViewNode
     public Status4 Status { get; set; }
     public List<DsTask> DsTasks { get; set; }

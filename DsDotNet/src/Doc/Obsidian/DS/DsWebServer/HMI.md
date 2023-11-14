@@ -1,0 +1,1 @@
+- client 에서 접속 할 때, client 는 HMI 로 동작

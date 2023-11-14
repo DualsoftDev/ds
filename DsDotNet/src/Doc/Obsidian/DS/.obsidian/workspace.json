@@ -13,10 +13,10 @@
             "state": {
               "type": "canvas",
               "state": {
-                "file": "IOHub/Architecture.canvas",
+                "file": "DsWebServer/DsWebServer.canvas",
                 "viewState": {
-                  "x": -87.5,
-                  "y": 110,
+                  "x": 0,
+                  "y": 0,
                   "zoom": 0
                 }
               }
@@ -100,7 +100,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "IOHub/Architecture.canvas",
+                "file": "DsWebServer/DsWebServer.canvas",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -117,7 +117,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "IOHub/Architecture.canvas",
+                "file": "DsWebServer/DsWebServer.canvas",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -140,7 +140,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "IOHub/Architecture.canvas"
+                "file": "DsWebServer/DsWebServer.canvas"
               }
             }
           }
@@ -163,6 +163,11 @@
   },
   "active": "f118e42fbfe406e6",
   "lastOpenFiles": [
+    "DsWebServer/HMI.md",
+    "DsWebServer/DsWebServer.canvas",
+    "DsWebServer/Controller.md",
+    "IOHub/Architecture.canvas",
+    "DsWebServer",
     "IOHub/Server.md",
     "TODO's.md",
     "IOHub/Endian.md",
@@ -170,7 +175,6 @@
     "IOHub/DS runtime.md",
     "IOHub/Requirements.md",
     "IOHub/0. Index.md",
-    "IOHub/Architecture.canvas",
     "IOHub/IOHub TODO.md",
     "IOHub/Client.md",
     "IOHub/PLC, Field IO.md",
@@ -192,8 +196,6 @@
     "Stat/개발 concepts/QuerySet.md",
     "QuerySet",
     "Stat/개발 concepts",
-    "Stat/Database/Tables/TagKind.md",
-    "Stat/Database/Tables/Log.md",
     "Stat/Database/Tables",
     "Stat/Database",
     "Stat",

@@ -65,3 +65,17 @@ type ModelLoaderExt =
         FileManager.fileWriteAllText(dsFilePath, sys.ToDsText(false))
 
         dsFilePath
+
+    [<Extension>] 
+    static member saveModelZip (files:string seq, activePath:string) = 
+        let zipPath = files.ToZip(activePath)
+        zipPath
+
+
+        //var jsFilePath = PathManager.changeExtension(GlobalHelper.LastExportZipPath.ToFile(), ".json");
+        //var myDsFile = PathManager.getRelativePath(jsFilePath.ToFile(), GlobalHelper.LastExportPath.ToFile());//   // 상대경로로 기본 저장
+
+        //ModelLoader.SaveConfigWithPath(jsFilePath, new List<string>() { myDsFile });
+
+
+   

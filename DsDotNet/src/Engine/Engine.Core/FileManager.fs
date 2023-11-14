@@ -96,9 +96,9 @@ module FileManager =
         String.Join(splitChar, topLevelDirSplit)
 
     //모델 최상단 폴더에 Zip형태로 생성
-    let saveZip(filePaths: string seq) activeDsPath =
+    let saveZip(filePaths: string seq, extenstion:string) =
         let topLevel = getTopLevelDirectory (filePaths |> Seq.toList)
-        let zipFilePath =(topLevel|>getValidZipFileName )+".zip" 
+        let zipFilePath =(topLevel|>getValidZipFileName )+extenstion 
          // Create a ZIP archive
         use fileStream = new FileStream(zipFilePath, FileMode.Create)
         use zip = new ZipArchive(fileStream, ZipArchiveMode.Create, true)
@@ -110,19 +110,10 @@ module FileManager =
                     let fileDir  = PathManager.getDirectoryName (filePath|>DsFile)
                     let relativePath = fileDir.Substring(topLevel.Length)
                     let name =filePath |> DsFile |> getFileName
-                    let dsFilePath = relativePath.Replace("\\", "/") + "/" + name
-                    let pptFilePath = PathManager.changeExtension (dsFilePath.ToFile()) ".pptx"
-                    let entryDS = zip.CreateEntry(dsFilePath)
+                    let entry = zip.CreateEntry(relativePath.Replace("\\", "/") + "/" + name)
                     use fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read)
-                    use entryStreamDS = entryDS.Open()
-                    fileStream.CopyTo(entryStreamDS)
-                   
-                    if File.Exists(pptFilePath) then  //ppt가 있으면 같이 백업 (library_DS는 없다)
-                        let entryPPT = zip.CreateEntry(pptFilePath)
-                        use entryStreamPPT = entryPPT.Open()
-                        fileStream.CopyTo(entryStreamPPT)  //CopyTo  확인 
-                    else 
-                        printfn "Powerpoint File not found: %s" pptFilePath
+                    use entryStream = entry.Open()
+                    fileStream.CopyTo(entryStream)
                 else
                     printfn "File not found: %s" filePath
 
@@ -140,11 +131,40 @@ module FileManager =
         fileStream.CopyTo(memoryStream)
         zipFilePath, memoryStream
 
+    
+    let addFilesToExistingZipAndDeleteFiles (existingZipPath:string) (additionalFilePaths:string seq) =
+        if not (File.Exists existingZipPath) then
+            printfn "The specified ZIP file doesn't exist."
+        else
+            try
+                use zipToOpen = new FileStream(existingZipPath, FileMode.Open, FileAccess.ReadWrite)
+                use archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update)
+
+                for filePath in additionalFilePaths do
+                    if File.Exists filePath then
+                        let fileName = Path.GetFileName filePath
+                        let newEntry = archive.CreateEntry fileName
+
+                        use fileStream = new FileStream(filePath, FileMode.Open)
+                        use entryStream = newEntry.Open()
+                        fileStream.CopyTo(entryStream)
+                        fileStream.Close()        
+                        // Delete the file after adding it to the ZIP archive
+                        File.Delete(filePath)
+                    else
+                        printfn "File not found: %s" filePath
+
+                printfn "Files added to the existing ZIP archive and deleted successfully."
+            with
+            |  ex ->
+                printfn $"An error occurred: {ex.Message}"
         
 [<Extension>]
 type FileHelper =
-    [<Extension>] static member ToZip(filePaths: string seq, activeDsPath:string)  = 
-                        saveZip filePaths activeDsPath |> fst
-    [<Extension>] static member ToZipStream(filePaths: string seq , activeDsPath:string)  = 
-                        saveZip filePaths activeDsPath |> fun (_, memoryStram) -> memoryStram.ToArray()    
+    [<Extension>] static member ToZip(filePaths: string seq)  = 
+                        saveZip (filePaths, ".Zip")|> fst
+    [<Extension>] static member ToZipPPT(filePaths: string seq)  = 
+                        saveZip (filePaths, ".7z")|> fst  //".Zip" 형태지만 구분위해 확장자 다르게
+    [<Extension>] static member ToZipStream(filePaths: string seq)  = 
+                        saveZip (filePaths, ".Zip") |> fun (_, memoryStram) -> memoryStram.ToArray()    
    

@@ -1,6 +1,7 @@
 namespace rec Engine.Core
 
 open System.IO
+open System.Linq
 open Newtonsoft.Json
 open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
@@ -29,6 +30,7 @@ module ModelLoader =
                     |> Seq.toList
             }
         SaveConfig path cfg 
+        path
 
     let exportLoadedSystem (s: LoadedSystem) =
        
@@ -47,6 +49,7 @@ module ModelLoader =
         absFilePath
 
 
+[<AutoOpen>]
 [<Extension>]
 type ModelLoaderExt =
 
@@ -67,15 +70,22 @@ type ModelLoaderExt =
         dsFilePath
 
     [<Extension>] 
-    static member saveModelZip (files:string seq, activePath:string) = 
-        let zipPath = files.ToZip(activePath)
-        zipPath
+    static member saveModelZip (files:string seq, activeFilePath:string) = 
+
+        let zipPathDS = files.ToZip()
+        let zipPathPPT = files.Where(fun f-> f <> $"{TextLibrary}.ds")
+                              .Select(fun f-> changeExtension (f|> DsFile)  ".pptx")
+                              .ToZipPPT()
+        
+        let jsFilePath = changeExtension (zipPathDS|> DsFile)  ".json"
+        let activeRelaPath = getRelativePath(jsFilePath|>DsFile) (activeFilePath|>DsFile);//   // 상대경로로 기본 저장
+        let config = SaveConfigWithPath jsFilePath [|activeRelaPath|]
+
+        addFilesToExistingZipAndDeleteFiles zipPathDS [zipPathPPT;config]
+
+        zipPathDS
 
 
-        //var jsFilePath = PathManager.changeExtension(GlobalHelper.LastExportZipPath.ToFile(), ".json");
-        //var myDsFile = PathManager.getRelativePath(jsFilePath.ToFile(), GlobalHelper.LastExportPath.ToFile());//   // 상대경로로 기본 저장
-
-        //ModelLoader.SaveConfigWithPath(jsFilePath, new List<string>() { myDsFile });
 
 
    

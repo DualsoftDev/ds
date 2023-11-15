@@ -1,15 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
-  <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="DevExpress.Blazor" Version="23.1.5" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.0" PrivateAssets="all" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\DsWebApp.Shared\DsWebApp.Shared.csproj" />
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="DevExpress.Blazor" Version="23.1.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.0" PrivateAssets="all" />
+
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.11" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.0" />
+		<!--<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.0" PrivateAssets="all" />-->
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.10" />
+		<PackageReference Include="Blazor.Extensions.Canvas" Version="1.1.1" />
+		<PackageReference Include="Blazored.SessionStorage" Version="2.4.0" />
+
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\DsWebApp.Shared\DsWebApp.Shared.csproj" />
+	</ItemGroup>
 </Project>

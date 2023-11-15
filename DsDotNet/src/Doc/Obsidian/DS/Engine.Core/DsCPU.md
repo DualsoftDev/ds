@@ -1,0 +1,4 @@
+- `FormMain.ImportPowerPointWrapper(string lastFile)`
+- ` CreateRunCpuSingle(Dictionary<DsSystem, PouGen> DicPou)-> DsCPU` 
+-  `PPT.ImportPowerPoint`
+- 

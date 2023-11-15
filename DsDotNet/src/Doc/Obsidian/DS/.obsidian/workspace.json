@@ -13,8 +13,20 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "DsWebServer/Controller.md",
-                "mode": "preview",
+                "file": "Engine.Core/DsCPU.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "d96ae9ea8943286a",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Engine.Core/DsCPU.md",
+                "mode": "source",
                 "source": false
               }
             }
@@ -31,7 +43,8 @@
               }
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -97,7 +110,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "DsWebServer/Controller.md",
+                "file": "Engine.Core/DsCPU.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -114,7 +127,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "DsWebServer/Controller.md",
+                "file": "Engine.Core/DsCPU.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -137,7 +150,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "DsWebServer/Controller.md"
+                "file": "Engine.Core/DsCPU.md"
               }
             }
           }
@@ -158,11 +171,15 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "f118e42fbfe406e6",
+  "active": "d96ae9ea8943286a",
   "lastOpenFiles": [
+    "DsWebServer/Controller.md",
+    "Dll hierarchy.canvas",
+    "Dll hierarchy.md",
+    "Engine.Core/DsCPU.md",
+    "Engine.Core",
     "TODO's.md",
     "0. TOC.md",
-    "DsWebServer/Controller.md",
     "IOHub/IOHub.md",
     "IOHub/Endian.md",
     "IOHub/0. Index.md",
@@ -179,7 +196,6 @@
     "IOHub/Zmq/ZMQ client build.md",
     "Stat/Info viewer.md",
     "2023-11-06.md",
-    "Untitled.canvas",
     "Stat/0. Index.md",
     "Stat/Database/Tables/Storage.md",
     "Stat/Database/Schema.canvas",
@@ -189,9 +205,6 @@
     "Stat/개발 concepts/Summary.md",
     "Stat/개발 concepts/Count.md",
     "Stat/개발 concepts/LogSet.md",
-    "Stat/Database/Schema.md",
-    "Stat/Database/Database.md",
-    "Stat/개발 concepts/QuerySet.md",
     "QuerySet",
     "Stat/개발 concepts",
     "Stat/Database/Tables",
@@ -199,7 +212,6 @@
     "Stat",
     "IOHub/Zmq",
     "IOHub/IO Spec",
-    "PLC",
-    "IOHub"
+    "PLC"
   ]
 }

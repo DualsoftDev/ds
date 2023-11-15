@@ -50,11 +50,11 @@ module ImportPPTModule =
 
 
 
-    type ImportPowerPoint() =
-        let sRepo = ShareableSystemRepository()
+    module PowerPointImportor =
+        let private sRepo = ShareableSystemRepository()
 
 
-        let rec loadSystem (pptReop: Dictionary<DsSystem, pptDoc>, theSys: DsSystem, paras: DeviceLoadParameters) =
+        let rec private loadSystem (pptReop: Dictionary<DsSystem, pptDoc>, theSys: DsSystem, paras: DeviceLoadParameters) =
             pathStack.Push(paras.AbsoluteFilePath)
             currentFileName <- pathStack.Peek()
 
@@ -168,7 +168,7 @@ module ImportPPTModule =
             pptReop.Add(theSys, doc)
             theSys, doc
 
-        member internal x.GetImportModel(pptReop: Dictionary<DsSystem, pptDoc>, filePath: string) =
+        let internal GetImportModel(pptReop: Dictionary<DsSystem, pptDoc>, filePath: string) =
             //active는 시스템이름으로 ppt 파일 이름을 사용
             let fileName = PathManager.getFileName (filePath.ToFile())
             let fileDirectory = PathManager.getDirectoryName (filePath.ToFile())
@@ -194,8 +194,7 @@ module ImportPPTModule =
 
                 let results =
                     [ for dsFile in cfg.DsFilePaths do
-                          let ppt = new ImportPowerPoint()
-                          ppt.GetImportModel(pptRepo, dsFile) ]
+                          PowerPointImportor.GetImportModel(pptRepo, dsFile) ]
 
                 //ExternalSystem 순환참조때문에 완성못한 시스템 BuildSystem 마무리하기
                 pptRepo

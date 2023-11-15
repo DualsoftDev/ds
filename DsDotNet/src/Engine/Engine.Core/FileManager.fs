@@ -158,6 +158,30 @@ module FileManager =
             with
             |  ex ->
                 printfn $"An error occurred: {ex.Message}"
+
+
+    let unZip  zipDsPath =
+        let extractName = PathManager.getFileNameWithoutExtension(zipDsPath|>DsFile)
+        let extractPath = PathManager.combineFullPathDirectory([|PathManager.getTempPath();$"DsUnzippedFiles/{extractName}"|])
+        // Ensure the temporary folder exists
+        Directory.CreateDirectory(extractPath) |> ignore
+
+        // Open the zip file for reading
+        use archive = ZipFile.OpenRead(zipDsPath)
+
+        // Extract each entry to the subfolder
+        for entry in archive.Entries do
+            let entryPath = PathManager.getFullPath (entry.FullName.TrimStart('/')|>DsFile) (extractPath|>DsDirectory)
+            let entryDir = PathManager.getDirectoryName(entryPath|>DsFile)
+
+            // Ensure the directory for the entry exists
+            Directory.CreateDirectory(entryDir) |>ignore
+
+            // Extract the entry to the subfolder
+            entry.ExtractToFile(entryPath, true)
+
+        // Return the path where the files are extracted
+        PathManager.getFullPath ($"{extractName}.json"|>DsFile)(extractPath|>DsDirectory)
         
 [<Extension>]
 type FileHelper =
@@ -167,4 +191,5 @@ type FileHelper =
                         saveZip (filePaths, ".7z")|> fst  //".Zip" 형태지만 구분위해 확장자 다르게
     [<Extension>] static member ToZipStream(filePaths: string seq)  = 
                         saveZip (filePaths, ".Zip") |> fun (_, memoryStram) -> memoryStram.ToArray()    
-   
+    [<Extension>] static member ToUnZip(zipDsPath:string)  = 
+                        unZip zipDsPath

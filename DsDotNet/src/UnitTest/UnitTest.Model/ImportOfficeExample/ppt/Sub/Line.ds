@@ -1,13 +1,11 @@
-[sys] Master_Line = {
-    [flow] Page1 = {
-    }
+[sys] Line = {
     [flow] Flow = {
-            R1; // island
-            R2; // island
+            R1; 
+            R2; 
     }
     [interfaces] = {
         Func2 = { _ ~ Flow.R2 }
         Func1 = { Flow.R1 ~ Flow.R2 }
     }
 }
-
+//DS Language Version = [0.9.2.2]

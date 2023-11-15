@@ -98,4 +98,10 @@
         <ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
     </ItemGroup>
 
+    <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+      <Exec Command="copy $(SolutionDir)Apps\OfficeAddOn\PowerPointAddInHelper\DS_Library.pptx $(TargetDir)DS_Library.pptx" />
+    </Target>
+
+  
+	
 </Project>

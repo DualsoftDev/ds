@@ -12,7 +12,7 @@ type DsSystem with
 
     member s.T1_DelayCall(): CommentedStatement list =
         let allVertices = s.GetVertices()
-        let calls = allVertices.OfType<CallDev>()
+        let calls = allVertices.OfType<Call>()
                           .Where(fun f->f.UsingTon)
         let aliasCalls = allVertices.GetAliasTypeCalls()
                           .Where(fun f -> f.TargetWrapper.CallTarget().Value.UsingTon)

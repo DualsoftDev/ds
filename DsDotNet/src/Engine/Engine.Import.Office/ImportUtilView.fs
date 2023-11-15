@@ -23,7 +23,7 @@ module ImportViewModule =
             |> Seq.filter (fun vertex -> dummyMembers.Contains(vertex) |> not)
             |> Seq.iter (fun vertex ->
                 match vertex with
-                | :? CallDev
+                | :? Call
                 | :? Alias -> newNode.AddSingles(dicV.[vertex]) |> ignore
                 | _ -> failwithf "vertex type ERROR")
 
@@ -62,7 +62,7 @@ module ImportViewModule =
         let convertReal (vertex: Vertex) =
             match vertex with
             | :? Real as r -> ConvertReal(r, dicV.[vertex], dummys)
-            | :? CallDev
+            | :? Call
             | :? Alias -> ()
             | _ -> failwithf "vertex type ERROR"
 
@@ -239,7 +239,7 @@ module ImportViewModule =
     //    let convertReal(vertex:Vertex) =
     //        match vertex  with
     //            | :? Real as r ->  newNode.Singles.Add(ConvertRuntimeEdge(r.Graph)) |>ignore
-    //            | :? CallDev | :? Alias-> newNode.Singles.Add(dicV.[vertex]) |>ignore
+    //            | :? Call | :? Alias-> newNode.Singles.Add(dicV.[vertex]) |>ignore
     //            | _ -> failwithf "vertex type ERROR"
 
     //    graph.Islands |>Seq.iter(fun vertex -> convertReal(vertex))

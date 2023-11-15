@@ -127,13 +127,13 @@ module EdgeModule =
         for f in system.Flows do
             createMRIEdgesTransitiveClosure f
 
-      ///CallDev 자신이거나 Alias Target CallDev
-    let getPureCall(v:Vertex) : CallDev option=
+      ///Call 자신이거나 Alias Target Call
+    let getPureCall(v:Vertex) : Call option=
         match v with
-        | :? CallDev  as c  ->  Some (c)
+        | :? Call  as c  ->  Some (c)
         | :? Alias as a  ->
             match a.TargetWrapper.GetTarget() with
-            | :? CallDev as call -> Some call
+            | :? Call as call -> Some call
             | _ -> None
         |_ -> None
 
@@ -142,7 +142,6 @@ module EdgeModule =
         match v with
         | :? Real   as r  -> r
         | :? RealExF as rf -> rf.Real
-        | :? CallSys as _  -> failwithlog "Error"
         | :? Alias  as a  ->
             match a.TargetWrapper.GetTarget() with
             | :? Real as real -> real
@@ -154,13 +153,12 @@ module EdgeModule =
         match v with
         | :? Real   as r  -> r:> Vertex 
         | :? RealExF as rf -> rf.Real:> Vertex 
-        | :? CallDev  as c  -> c :> Vertex 
-        | :? CallSys as s  ->  s :> Vertex 
+        | :? Call  as c  -> c :> Vertex 
         | :? Alias  as a  ->
             match a.TargetWrapper.GetTarget() with
             | :? Real as real -> real:> Vertex 
             | :? RealExF as rf -> rf.Real:> Vertex 
-            | :? CallDev as call -> call :> Vertex 
+            | :? Call as call -> call :> Vertex 
             | _ -> failwithlog "Error"
         |_ -> failwithlog "Error"
             
@@ -184,7 +182,6 @@ module EdgeModule =
                     match getPure edge.Target with 
                     | :? Real    -> ()
                     | :? RealExF -> ()
-                    | :? CallSys -> ()
                     | _ -> failwithlog $"Action 시작 연결은 Work 내에서만 가능합니다. Work-Action 그룹작업이 필요합니다. [{edge.Source.Name} > {edge.Target.Name}]"
                     //| _ -> failwithlog $"The 'Action' start command must occur within the 'Work'. ((Work-Action Group work is required.))[{edge.Source.Name} > {edge.Target.Name}]"
                 )

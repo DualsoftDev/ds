@@ -43,9 +43,9 @@ module ImportU =
                 if job.DeviceDefs.any () then
                     let call =
                         if (parentReal.IsSome) then
-                            CallDev.Create(job, DuParentReal(parentReal.Value))
+                            Call.Create(job, DuParentReal(parentReal.Value))
                         else
-                            CallDev.Create(job, DuParentFlow(parentFlow.Value))
+                            Call.Create(job, DuParentFlow(parentFlow.Value))
 
                     call.CallTargetJob.DeviceDefs
                         .OfType<TaskDev>()
@@ -57,7 +57,7 @@ module ImportU =
 
             | None ->
                 let apiName = node.CallApiName
-                let devName = node.CallDevName
+                let devName = node.CallName
                 let loadedName = devName
 
                 addLoadedLibSystemNCall (loadedName, apiName, mySys, parentFlow, parentReal, node)
@@ -66,22 +66,22 @@ module ImportU =
         dicSeg.Add(node.Key, call)
 
 
-    let private createExSystemReal (mySys: DsSystem, node: pptNode, parentFlow: Flow) =
-        let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
+    //let private createExSystemReal (mySys: DsSystem, node: pptNode, parentFlow: Flow) =
+    //    let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
 
-        if mySys.TryFindExternalSystem(sysName).IsNone then
-            node.Shape.ErrorName(ErrID._50, node.PageNum)
+    //    if mySys.TryFindExternalSystem(sysName).IsNone then
+    //        node.Shape.ErrorName(ErrID._50, node.PageNum)
 
-        let realExS =
-            match mySys.Jobs.TryFind(fun job -> job.Name = sysName + "_" + apiName) with
-            | Some job ->
-                if job.LinkDefs.any () then
-                    CallSys.Create(job, DuParentFlow(parentFlow))
-                else
-                    node.Shape.ErrorName(ErrID._51, node.PageNum)
-            | None -> node.Shape.ErrorName(ErrID._49, node.PageNum)
+    //    let realExS =
+    //        match mySys.Jobs.TryFind(fun job -> job.Name = sysName + "_" + apiName) with
+    //        | Some job ->
+    //            if job.LinkDefs.any () then
+    //                CallSys.Create(job, DuParentFlow(parentFlow))
+    //            else
+    //                node.Shape.ErrorName(ErrID._51, node.PageNum)
+    //        | None -> node.Shape.ErrorName(ErrID._49, node.PageNum)
 
-        realExS
+    //    realExS
 
     let private getParent
         (
@@ -307,9 +307,9 @@ module ImportU =
                     | REALExF ->
                         let real = getOtherFlowReal (dicFlow.Values, node) :?> Real
                         dicVertex.Add(node.Key, RealExF.Create(real, DuParentFlow dicFlow.[node.PageNum]))
-                    | REALExS ->
-                        let realExS = createExSystemReal (mySys, node, dicFlow.[node.PageNum])
-                        dicVertex.Add(node.Key, realExS)
+                    //| REALExS ->
+                    //    let realExS = createExSystemReal (mySys, node, dicFlow.[node.PageNum])
+                    //    dicVertex.Add(node.Key, realExS)
                     | _ ->
                         let real = Real.Create(node.Name, dicFlow.[node.PageNum])
                         real.Finished <- node.RealFinished
@@ -352,11 +352,11 @@ module ImportU =
                     let alias =
                         if dicChildParent.ContainsKey(node) then
                             let real = dicVertex.[dicChildParent.[node].Key] :?> Real
-                            let call = dicVertex.[node.Alias.Value.Key] :?> CallDev
+                            let call = dicVertex.[node.Alias.Value.Key] :?> Call
 
                             Alias.Create(
                                 $"{call.Name}_{node.AliasNumber}",
-                                DuAliasTargetCall(segOrg :?> CallDev),
+                                DuAliasTargetCall(segOrg :?> Call),
                                 DuParentReal(real)
                             )
                         else
@@ -369,19 +369,13 @@ module ImportU =
                                     DuAliasTargetRealExFlow(ex),
                                     DuParentFlow(flow)
                                 )
-                            | :? CallSys as ex ->
-                                Alias.Create(
-                                    $"{ex.Name}_{node.AliasNumber}",
-                                    DuAliasTargetRealExSystem(ex),
-                                    DuParentFlow(flow)
-                                )
                             | :? Real as rt ->
                                 Alias.Create(
                                     $"{rt.Name}_{node.AliasNumber}",
                                     DuAliasTargetReal(rt),
                                     DuParentFlow(flow)
                                 )
-                            | :? CallDev as ct ->
+                            | :? Call as ct ->
                                 Alias.Create(
                                     $"{ct.Name}_{node.AliasNumber}",
                                     DuAliasTargetCall(ct),
@@ -393,7 +387,7 @@ module ImportU =
 
             //Real 부터
             createReal ()
-            //CallDev 처리
+            //Call 처리
             createCall ()
             //Alias Node 처리 마감
             createAlias ()
@@ -508,7 +502,7 @@ module ImportU =
 
                 let dicQualifiedNameSegs =
                     dicVertex.Values
-                        .OfType<CallDev>()
+                        .OfType<Call>()
                         .Select(fun call -> call.CallTargetJob.Name, call)
                     |> dict
 
@@ -532,7 +526,7 @@ module ImportU =
                         //| :? RealExF as ex -> holder.SafetyConditions.Add(DuSafetyConditionRealExFlow (ex))  |>ignore
                         //| :? CallSys as ex -> holder.SafetyConditions.Add(DuSafetyConditionRealExSystem (ex))  |>ignore
                         //test ahn ISafetyConditoinHolder주체 확정 필요
-                        | :? CallDev as c -> holder.SafetyConditions.Add(DuSafetyConditionCall(c)) |> ignore
+                        | :? Call as c -> holder.SafetyConditions.Add(DuSafetyConditionCall(c)) |> ignore
                         | _ -> failwithlog "Error"
                     | _ -> failwithlog "Error"))
 
@@ -613,9 +607,9 @@ module ImportU =
                 |> Seq.collect (fun s -> s.CopySys.Keys)
 
             calls
-                .Where(fun call -> not (loads.Contains(call.CallDevName)))
+                .Where(fun call -> not (loads.Contains(call.CallName)))
                 .Select(fun call ->
-                    { DevName = call.CallDevName
+                    { DevName = call.CallName
                       ApiName = call.CallApiName })
 
 

@@ -137,7 +137,7 @@ module TagManagerModule =
         let counterBit    = counter  s "CTR"  sys
         let timerOnDelayBit = timer  s "TON"  sys 
 
-        /////CallDev Done Relay
+        /////Call Done Relay
         //member _.CR     = relayCallBit
 
         ///Ring Counter

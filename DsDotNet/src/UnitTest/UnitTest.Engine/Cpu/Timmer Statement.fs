@@ -14,5 +14,5 @@ type Spec09_TimmerStatement() =
 
     let t = CpuTestSample()
     [<Test>]
-    member __.``T1 Delay CallDev`` () =
+    member __.``T1 Delay Call`` () =
         t.Sys.T1_DelayCall() |> doChecks

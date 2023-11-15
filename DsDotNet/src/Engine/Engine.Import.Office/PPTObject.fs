@@ -428,7 +428,7 @@ module PPTObjectModule =
             let rect = shape.GetPosition(slieSize)
             Xywh(rect.X, rect.Y, rect.Width, rect.Height)
 
-        member x.CallDevName = $"{pageTitle}_{name.Split('.')[0] |> trimSpace}"
+        member x.CallName = $"{pageTitle}_{name.Split('.')[0] |> trimSpace}"
 
         member x.CallApiName =
             if name.Contains '$' then

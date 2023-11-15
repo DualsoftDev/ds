@@ -355,11 +355,9 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             let job = tryFindJob system c |> Option.get
 
                             if job.DeviceDefs.any () then
-                                CallDev.Create(job, parent) |> ignore
+                                Call.Create(job, parent) |> ignore
 
-                            if job.LinkDefs.any () then
-                                CallSys.Create(job, parent) |> ignore
-
+                            
                         | 1, realorFlow :: [ cr ] when
                             not <| isAliasMnemonic (parent, ctxInfo.Names.CombineQuoteOnDemand())
                             ->
@@ -523,8 +521,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             let vertex = flow.System.TryFindCall([ flow.Name; rc ].ToArray()) |> Option.get
 
                             match vertex with
-                            | :? CallSys as rs -> DuAliasTargetRealExSystem rs
-                            | :? CallDev as c -> DuAliasTargetCall c
+                            | :? Call as c -> DuAliasTargetCall c
                             | _ -> failwithlog "ERROR"
 
                     //if call.IsNone then
@@ -541,8 +538,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             let vertex = tryFindCall system ([ flow.Name ] @ ns) |> Option.get
 
                             match vertex with
-                            | :? CallSys as rs -> DuAliasTargetRealExSystem rs
-                            | :? CallDev as c -> DuAliasTargetCall c
+                            | :? Call as c -> DuAliasTargetCall c
                             | _ -> failwithlog "ERROR"
                     | _ -> failwithlog "ERROR"
 

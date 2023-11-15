@@ -12,10 +12,10 @@ namespace Engine
         Ap > Main;		
 	                    
         Main = {
-            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+            Ap > Am;		// Ap(Call)> Am(Call);
         }
         Main2 = {
-            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+            Ap > Am;		// Ap(Call)> Am(Call);
         }
     }
     [jobs] = {
@@ -39,10 +39,10 @@ namespace Engine
         Ap > Main;		
 	                    
         Main = {
-            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+            Ap > Am;		// Ap(Call)> Am(Call);
         }
         Main2 = {
-            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+            Ap > Am;		// Ap(Call)> Am(Call);
         }
     }
     [jobs] = {
@@ -69,10 +69,10 @@ namespace Engine
         Ap > Main;		
 	                    
         Main = {
-            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+            Ap > Am;		// Ap(Call)> Am(Call);
         }
         Main2 = {
-            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+            Ap > Am;		// Ap(Call)> Am(Call);
         }
     }
     [jobs] = {
@@ -96,10 +96,10 @@ namespace Engine
         Ap > Main;		
 	                    
         Main = {
-            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+            Ap > Am;		// Ap(Call)> Am(Call);
         }
         Main2 = {
-            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+            Ap > Am;		// Ap(Call)> Am(Call);
         }
     }
     [jobs] = {
@@ -542,14 +542,12 @@ namespace Engine
     [flow] F = {
         FWD > BWD > Main <||> Reset;		// FWD(CallSys)> BWD(CallSys) > Main(Real) <||> Reset(Real);
         Main = {
-            mv1up > mv1dn;		// mv1up(CallDev)> mv1dn(CallDev);
+            mv1up > mv1dn;		// mv1up(Call)> mv1dn(Call);
         }
     }
     [jobs] = {
         mv1up = { A.""+""(%I300, %Q300); }
         mv1dn = { A.""-""(%I301, %Q301); }
-        FWD = sysR.RUN;
-        BWD = sysR.RUN;
     }
     [interfaces] = {
         G = { F.Main ~ F.Main }
@@ -615,7 +613,7 @@ namespace Engine
     [flow] F = {
         Main = {
             // AVp1 |> Am1;
-            // 정보로서의 CallDev 상호 리셋
+            // 정보로서의 Call 상호 리셋
             //Ap1 <||> Am1;
             Ap > Am; 
         }
@@ -637,7 +635,7 @@ namespace Engine
     [flow] F = {
         Main = {
             // AVp1 |> Am1;
-            // 정보로서의 CallDev 상호 리셋
+            // 정보로서의 Call 상호 리셋
             //Ap1 <||> Am1;
             Ap > Am; 
         }
@@ -660,7 +658,7 @@ namespace Engine
 [sys] L = {
     [flow] F = {
         Main = {
-            // 정보로서의 CallDev 상호 리셋
+            // 정보로서의 Call 상호 리셋
             Ap <||> Am;
             Bp <||> Bm;
             Ap > Am, Bp > Bm > Ap1 > Am1, Bp1 > Bm1;

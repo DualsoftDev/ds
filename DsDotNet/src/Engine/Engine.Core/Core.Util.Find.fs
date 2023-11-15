@@ -22,8 +22,7 @@ module internal ModelFindModule =
             | [] -> Some flow
             | r::xs2 ->
                 match flow.Graph.FindVertex(r) |> box with
-                | :? CallDev as call-> Some call
-                | :? CallSys as call-> Some call
+                | :? Call as call-> Some call
                 | :? Real as real->
                     match xs2 with
                     | [] -> Some real
@@ -79,8 +78,7 @@ module internal ModelFindModule =
         then match tryFindGraphVertex system callPath with
              |Some(v) ->
                 match v with
-                | :? CallDev -> Some(v)
-                | :? CallSys -> Some(v)
+                | :? Call -> Some(v)
                 | _ -> None
              |None -> None
         else None
@@ -128,7 +126,7 @@ module internal ModelFindModule =
 
         sharedAlias @ sharedRealExFlow
 
-    let getVertexSharedCall(call:CallDev) =
+    let getVertexSharedCall(call:Call) =
         let sharedAlias =
             call.Parent.GetFlow().GetVerticesOfFlow()
               .GetAliasTypeCalls()
@@ -162,7 +160,7 @@ type FindExtension =
     [<Extension>] static member TryFindGraphVertex<'V when 'V :> IVertex>(x:DsSystem, Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn
     [<Extension>] static member TryFindRealVertex (x:DsSystem, flowName, realName) =  tryFindReal x [ flowName; realName ]
     [<Extension>] static member GetVertexSharedReal (x:Real) = getVertexSharedReal x
-    [<Extension>] static member GetVertexSharedCall (x:CallDev) = getVertexSharedCall x
+    [<Extension>] static member GetVertexSharedCall (x:Call) = getVertexSharedCall x
     [<Extension>] static member GetPure (x:Vertex) = getPure x
                                  
 

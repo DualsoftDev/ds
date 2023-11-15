@@ -12,9 +12,9 @@ module CodeConvertUtil =
     let getSharedReal(v:VertexManager) : Vertex seq =
             (v.Vertex :?> Real).GetVertexSharedReal()
 
-        ///CallDev 자신을 공용으로 사용하는 Vertex들
+        ///Call 자신을 공용으로 사용하는 Vertex들
     let getSharedCall(v:VertexManager) : Vertex seq =
-            (v.Vertex :?> CallDev).GetVertexSharedCall()
+            (v.Vertex :?> Call).GetVertexSharedCall()
 
       
 
@@ -179,8 +179,7 @@ module CodeConvertUtil =
                 match f with
                 | :? Real    as r  -> r.V.F
                 | :? RealExF as rf -> rf.Real.V.F
-                | :? CallSys as rs -> rs.V.F
-                | :? CallDev as c  -> c.V.F
+                | :? Call as c  -> c.V.F
                 | :? Alias   as a  -> if usingRoot then getPure(a.V.Vertex).V.F else a.V.F
                 | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()

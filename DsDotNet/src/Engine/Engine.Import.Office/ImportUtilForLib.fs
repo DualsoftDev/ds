@@ -68,7 +68,7 @@ module ImportUtilForLib =
         let devTask = TaskDev(api, "", "", loadedName) :> DsTask
         let job = Job(loadedName + "_" + apiName, [ devTask ])
         mySys.Jobs.Add(job)
-        let call = CallDev.Create(job, parent)
+        let call = Call.Create(job, parent)
 
         call.CallTargetJob.DeviceDefs
             .OfType<TaskDev>()

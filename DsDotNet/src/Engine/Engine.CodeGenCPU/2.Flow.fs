@@ -50,8 +50,7 @@ type VertexManager with
             match v.Vertex  with
             | :? Alias   as rf -> rf.V.GetPure().V.ET.Expr
             | :? RealExF as rf -> rf.V.GetPure().V.ET.Expr
-            | :? CallSys as cs -> cs.V.ET.Expr
-            | :? CallDev as call ->
+            | :? Call as call ->
                 let action =
                     if call.UsingTon
                             then call.V.TDON.DN.Expr   //On Delay

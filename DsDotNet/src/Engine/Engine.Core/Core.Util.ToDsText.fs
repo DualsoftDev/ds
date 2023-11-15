@@ -95,7 +95,6 @@ module internal ToDsTextModule =
                         | Some(DuAliasTargetReal real) -> real.GetAliasTargetToDs(flow) |> getName
                         | Some(DuAliasTargetCall call) -> call.GetAliasTargetToDs() |> getName
                         | Some(DuAliasTargetRealExFlow rf) -> rf.Real.GetAliasTargetToDs(flow) |> getName
-                        | Some(DuAliasTargetRealExSystem rs) -> rs.GetAliasTargetToDs() |> getName
                         | None -> failwithlog "ERROR"
 
                     yield $"{tab}{aliasKey} = {lb} {mnemonics} {rb}"
@@ -301,7 +300,7 @@ module internal ToDsTextModule =
 
             let withSafeties = safetyHolders.Where(fun h -> h.SafetyConditions.Any())
             let safeties =
-                let getCallName (call:CallDev) =
+                let getCallName (call:Call) =
                     match call.Parent with
                     | DuParentReal r-> $"{r.Flow.Name}.{call.ParentNPureNames.Combine()}"
                     | DuParentFlow _ -> call.ParentNPureNames.Combine()
@@ -311,13 +310,11 @@ module internal ToDsTextModule =
                     | DuSafetyConditionReal real       -> real.ParentNPureNames.Combine()
                     | DuSafetyConditionCall call       -> getCallName call
                     | DuSafetyConditionRealExFlow rf   -> rf.ParentNPureNames.Combine()
-                    | DuSafetyConditionRealExSystem rs -> rs.Name
                 let safetyConditionHolderName(sch:ISafetyConditoinHolder) =
                     match sch with
                     | :? Real as real -> real.ParentNPureNames.Combine()
-                    | :? CallDev as call -> getCallName call
+                    | :? Call as call -> getCallName call
                     | :? RealOtherFlow as realExF -> realExF.ParentNPureNames.Combine()
-                    | :? CallSys as realExS -> realExS.ParentNPureNames.Combine()
                     | _ -> failwithlog "ERROR"
 
                 [

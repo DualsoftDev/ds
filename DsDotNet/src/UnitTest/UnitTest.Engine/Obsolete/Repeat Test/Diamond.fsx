@@ -39,7 +39,7 @@ type Diamond(output1:ITestOutputHelper) =
     }
     [flow] F = {
         Main = {
-            // 정보로서의 CallDev 상호 리셋
+            // 정보로서의 Call 상호 리셋
             T.Ap <||> T.Am;
             T.Bp <||> T.Bm;
             T.Ap > T.Am, T.Bp > T.Bm;

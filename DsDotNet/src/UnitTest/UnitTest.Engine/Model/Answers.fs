@@ -23,13 +23,13 @@ module ModelAnswers =
     [flow] MyFlow = {
         Seg1 > Seg2; 		// Seg1(Real)> Seg2(Real)
         Seg1 = {
-            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+            Ap > Am;		// Ap(Call)> Am(Call);
         }
     }
     [flow] "Flow.Complex" = {
         "#Seg.Complex#" => Seg;		// "#Seg.Complex#"(Real)=> Seg(Real);
         "#Seg.Complex#" = {
-            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+            Ap > Am;		// Ap(Call)> Am(Call);
         }
     }
     [flow] F = {
@@ -39,7 +39,7 @@ module ModelAnswers =
         C3 > C5 > C6;		// C3(Real)> C5(Real) > C6(Real);
         C1, C2 > C3, C4 |> C5;		// C1(Real), C2(Real)> C3(Real), C4(Real) |> C5(Real);
         Main = {
-            Bm2 > Ap > Am > Bp > Bm;		// Bm2(Alias)> Ap(CallDev) > Am(CallDev) > Bp(CallDev) > Bm(CallDev);
+            Bm2 > Ap > Am > Bp > Bm;		// Bm2(Alias)> Ap(Call) > Am(Call) > Bp(Call) > Bm(Call);
             Ap2 > Bp2 > Bm2;		// Ap2(Alias)> Bp2(Alias) > Bm2(Alias);
             Ap1 > Bp1 > Bm1 > Ap2 > Am2 > Bm2;		// Ap1(Alias)> Bp1(Alias) > Bm1(Alias) > Ap2(Alias) > Am2(Alias) > Bm2(Alias);
             Ap1 > Am1 > Bm1;		// Ap1(Alias)> Am1(Alias) > Bm1(Alias);
@@ -115,10 +115,10 @@ module ModelAnswers =
         Am > Main2;	     
 	                    
         Main = {
-            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+            Ap > Am;		// Ap(Call)> Am(Call);
         }
         Main2 = {
-            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+            Ap > Am;		// Ap(Call)> Am(Call);
         }
     }
     [jobs] = {
@@ -137,13 +137,13 @@ module ModelAnswers =
     let answerLayoutValid = """
 [sys] L = {
     [flow] F = {
-        Ap > Main;		// Ap(CallDev)> Main(Real);
-        Am > Main2;		// Am(CallDev)> Main2(Real);
+        Ap > Main;		// Ap(Call)> Main(Real);
+        Am > Main2;		// Am(Call)> Main2(Real);
         Main = {
-            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+            Ap > Am;		// Ap(Call)> Am(Call);
         }
         Main2 = {
-            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+            Ap > Am;		// Ap(Call)> Am(Call);
         }
     }
     [jobs] = {
@@ -165,13 +165,13 @@ module ModelAnswers =
     let answerFinishValid = """
 [sys] L = {
     [flow] F = {
-        Ap > Main;		// Ap(CallDev)> Main(Real);
-        Am > Main2;		// Am(CallDev)> Main2(Real);
+        Ap > Main;		// Ap(Call)> Main(Real);
+        Am > Main2;		// Am(Call)> Main2(Real);
         Main = {
-            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+            Ap > Am;		// Ap(Call)> Am(Call);
         }
         Main2 = {
-            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+            Ap > Am;		// Ap(Call)> Am(Call);
         }
     }
     [jobs] = {
@@ -194,10 +194,10 @@ module ModelAnswers =
         Am > Main2;	     
 	                    
         Main = {
-            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+            Ap > Am;		// Ap(Call)> Am(Call);
         }
         Main2 = {
-            Ap > Am;		// Ap(CallDev)> Am(CallDev);
+            Ap > Am;		// Ap(Call)> Am(Call);
         }
     }
     [jobs] = {

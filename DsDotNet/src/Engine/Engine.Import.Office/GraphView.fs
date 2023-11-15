@@ -48,7 +48,6 @@ module rec ViewModule =
                     | DuAliasTargetReal r -> r.Name, VREAL
                     | DuAliasTargetCall c -> c.Name, VCALL
                     | DuAliasTargetRealExFlow rf -> rf.Name, VREALEx
-                    | DuAliasTargetRealExSystem rs -> rs.Name, VREALEx
                 | :? Call as c -> c.Name, VCALL
                 | :? Real as c -> c.Name, VREAL
                 | :? RealExF as c -> c.Name, VREALEx

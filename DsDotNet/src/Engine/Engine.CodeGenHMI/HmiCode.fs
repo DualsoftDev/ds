@@ -153,24 +153,21 @@ module HmiGenModule =
                     if not <| hmiInfos[nowVertex].used_in.Contains(target) then
                         hmiInfos[nowVertex].used_in.Add(target)
 
-                let jobName (call: CallDev) =
+                let jobName (call: Call) =
                     $"{system.Name}.{call.CallTargetJob.Name}"
 
-                let nameRealExS (system: DsSystem) name = $"{system.Name}.{name}"
 
                 let aliasName (alias: Alias) =
                     match alias.TargetWrapper with
                     | DuAliasTargetCall c -> jobName c
                     | DuAliasTargetReal r -> r.QualifiedName
                     | DuAliasTargetRealExFlow f -> f.QualifiedName
-                    | DuAliasTargetRealExSystem s -> nameRealExS system s.Name
 
                 let vertName =
                     match vertex with
-                    | :? CallDev as c -> jobName c
+                    | :? Call as c -> jobName c
                     | :? Real as r -> r.QualifiedName
                     | :? RealOtherFlow as f -> f.QualifiedName
-                    | :? CallSys as s -> nameRealExS system s.Name
                     | :? Alias as a -> aliasName a
                     | _ -> null
 

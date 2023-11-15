@@ -130,7 +130,7 @@ public static class ViewUtil
                     });
                 }
 
-                if (rx.IsVertexErrTag() && ev.Target is CallDev call)
+                if (rx.IsVertexErrTag() && ev.Target is Call call)
                 {
                     var vv = DicNode[ev.Target];
                     vv.IsError = (bool)ev.Tag.BoxedValue;

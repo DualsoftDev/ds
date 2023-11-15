@@ -234,25 +234,22 @@ module EtcListenerModule =
 
                             match vertex with
                             | :? Real as r -> return DuSafetyConditionReal r
-                            | :? CallDev as c -> return DuSafetyConditionCall c
+                            | :? Call as c -> return DuSafetyConditionCall c
                             | :? RealOtherFlow as o -> return DuSafetyConditionRealExFlow o
-                            | :? CallSys as o -> return DuSafetyConditionRealExSystem o
                             | _ -> failwithlog "Error"
 
                         | None ->
                             let! vertex = curSystem.TryFindCall(ns)
 
                             match vertex with
-                            | :? CallSys as rs -> return DuSafetyConditionRealExSystem rs
-                            | :? CallDev as c -> return DuSafetyConditionCall c
+                            | :? Call as c -> return DuSafetyConditionCall c
                             | _ -> failwithlog "ERROR"
 
                     | _f :: _r :: [ _c ] ->
                         let! vertex = curSystem.TryFindCall(ns)
 
                         match vertex with
-                        | :? CallSys as rs -> return DuSafetyConditionRealExSystem rs
-                        | :? CallDev as c -> return DuSafetyConditionCall c
+                        | :? Call as c -> return DuSafetyConditionCall c
                         | _ -> failwithlog "ERROR"
 
                     | _ -> failwithlog "ERROR"
@@ -333,11 +330,11 @@ module EtcListenerModule =
 //        match xywh.x().GetText(), xywh.y().GetText(), xywh.w().GetText(), xywh.h().GetText() with
 //        | Int32Pattern x, Int32Pattern y, Int32Pattern w, Int32Pattern h ->
 //            match call with
-//            | :? CallDev -> (call:?>CallDev).Xywh <- new Xywh(x, y, w, h)
+//            | :? Call -> (call:?>Call).Xywh <- new Xywh(x, y, w, h)
 //            | _ -> ()
 //        | Int32Pattern x, Int32Pattern y, null, null ->
 //            match call with
-//            | :? CallDev -> (call:?>CallDev).Xywh <- new Xywh(x, y, Nullable(), Nullable())
+//            | :? Call -> (call:?>Call).Xywh <- new Xywh(x, y, Nullable(), Nullable())
 //            | _ -> ()
 //        | _ ->
 //            failwithlog "ERROR"

@@ -24,7 +24,7 @@ module ConvertCoreExt =
 
 
 
-    let errTexts (x:CallDev)  = 
+    let errTexts (x:Call)  = 
         x.CallTargetJob.DeviceDefs
                         .Select(fun s -> s.ApiItem.TagManager)
                         .Cast<ApiItemManager>()
@@ -32,7 +32,7 @@ module ConvertCoreExt =
                         .Select(fun s -> s.ErrorText)
 
 
-    let errTextByDevice (x:CallDev)  = 
+    let errTextByDevice (x:Call)  = 
         x.CallTargetJob.DeviceDefs
                         .Select(fun s ->s.ApiName, (s.ApiItem.TagManager :?> ApiItemManager).ErrorText)
 
@@ -298,7 +298,7 @@ module ConvertCoreExt =
             let myMutualDevs =  td.MutualReset(x).Where(fun d->d.ExistIn).Select(fun d->d.ActionINFunc)
             if myMutualDevs.any() then myMutualDevs.ToAnd() else x._on.Expr
 
-    type CallDev with
+    type Call with
        
                                     
         member c.UsingTon  = c.CallTargetJob.Funcs |> hasTime

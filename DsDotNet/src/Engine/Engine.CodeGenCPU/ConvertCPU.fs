@@ -15,8 +15,7 @@ module ConvertCPU =
             match v with
             | :? Real            -> aliasNoSpec && vaild.HasFlag(RealInFlow)
             | :? RealExF         -> aliasNoSpec && vaild.HasFlag(RealExFlow)
-            | :? CallSys         -> aliasNoSpec && vaild.HasFlag(RealExSystem)
-            | :? CallDev as c  ->
+            | :? Call as c  ->
                 match c.Parent with
                 | DuParentFlow _ -> aliasNoSpec && vaild.HasFlag(CallInFlow)
                 | DuParentReal _ -> aliasNoSpec && vaild.HasFlag(CallInReal)
@@ -27,13 +26,11 @@ module ConvertCPU =
                      match a.TargetWrapper with
                      |  DuAliasTargetReal _         -> aliasSpec && vaild.HasFlag(RealInFlow)
                      |  DuAliasTargetRealExFlow _   -> aliasSpec && vaild.HasFlag(RealExFlow)
-                     |  DuAliasTargetRealExSystem _ -> aliasSpec && vaild.HasFlag(RealExSystem)
                      |  DuAliasTargetCall _         -> aliasSpec && vaild.HasFlag(CallInFlow)
                  | DuParentReal _ ->
                      match a.TargetWrapper with
                      | DuAliasTargetReal _         -> failwithlog $"Error {getFuncName()}"
                      | DuAliasTargetRealExFlow _   -> failwithlog $"Error {getFuncName()}"
-                     | DuAliasTargetRealExSystem _ -> failwithlog $"Error {getFuncName()}"
                      | DuAliasTargetCall _         -> aliasSpec &&  vaild.HasFlag(CallInReal)
             |_ -> failwithlog $"Error {getFuncName()}"
 

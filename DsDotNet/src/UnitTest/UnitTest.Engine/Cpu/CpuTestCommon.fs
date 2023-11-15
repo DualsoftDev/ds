@@ -32,15 +32,15 @@ module CpuTestUtil =
         let flow              = sys.Flows.Find(fun f->f.Name = "MyFlow")
         let realInFlow        = flow.Graph.Vertices.First(fun f->f.Name = "Seg1") :?> Real
         let realExFlow        = flow.Graph.Vertices.First(fun f->f.Name = "F.R3") :?> RealExF
-        //let callInFlow        = flow.Graph.Vertices.First(fun f->f.Name = "Ap") :?> CallDev
-        let callInReal        = realInFlow.Graph.Vertices.First(fun f->f.Name = "Am") :?> CallDev
+        //let callInFlow        = flow.Graph.Vertices.First(fun f->f.Name = "Ap") :?> Call
+        let callInReal        = realInFlow.Graph.Vertices.First(fun f->f.Name = "Am") :?> Call
 
         let aliasCallInReal   = realInFlow.Graph.Vertices.First(fun f->f.Name = "aliasCallInReal") :?> Alias
         //let aliasCallInFlow   = flow.Graph.Vertices.First(fun f->f.Name = "aliasCallInFlow") :?> Alias
         let aliasRealInFlow   = flow.Graph.Vertices.First(fun f->f.Name = "aliasRealInFlow") :?> Alias
         let aliasRealExInFlow = flow.Graph.Vertices.First(fun f->f.Name = "aliasRealExInFlow") :?> Alias
 
-        let callTypeAll       = vertices.OfType<CallDev>().Cast<Vertex>()
+        let callTypeAll       = vertices.OfType<Call>().Cast<Vertex>()
         let coinTypeAll       = vertices.Except(vertices.OfType<Real>().Cast<Vertex>()).Where(fun f->f.Parent.GetCore() :? Real)
         let realTypeAll       = vertices.OfType<Real>()
         let vertexAll         = vertices

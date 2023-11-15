@@ -13,7 +13,7 @@ type DsSystem with
 
     member s.C1_FinishRingCounter(): CommentedStatement list  =
         let allVertices = s.GetVertices()
-        let calls = allVertices.OfType<CallDev>()
+        let calls = allVertices.OfType<Call>()
                           .Where(fun f->f.UsingCtr)
         let aliasCalls = allVertices.GetAliasTypeCalls()
                           .Where(fun f -> f.TargetWrapper.CallTarget().Value.UsingCtr)

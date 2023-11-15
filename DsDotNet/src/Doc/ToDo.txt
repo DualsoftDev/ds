@@ -1,4 +1,4 @@
-- CallDev status
+- Call status
 
 	---------------------------------------------
 			지시(TX)				관찰(RX)
@@ -14,12 +14,12 @@
   G or H 이면서 자식 중 Ready 와 Finish 섞여 있으면 Paused
 
 - Real 은 RGFH 상태 동적 계산
-- CallDev 은 RGFH 상태 저장
+- Call 은 RGFH 상태 저장
 
-- CallDev 별 TXs, RXs 모든 call 에 대해서 새로운 tag 생성
+- Call 별 TXs, RXs 모든 call 에 대해서 새로운 tag 생성
   - e.g 동일 C1 call 을 여러 군데 사용하였을 경우, C1 의 TX 및 RX tag 는 매 call instance 마다 별도로 생성
 
-- CallDev 의 TXs 및 RXs 모두 복수개 지원
+- Call 의 TXs 및 RXs 모두 복수개 지원
 
 
 - reset 까지 포함한 DAG, reset 도 순서 부여. reset 완료 후, 다음 작업 지정 가능
@@ -28,7 +28,7 @@
 	- Child flow 에서 Call1 <||> Call2 --> DAG 아니지만, 정보로만 사용되는 것이므로 허용한다.
 	** Root flow 에서는 항상 <||> 를 허용한다.
 
-- CallDev 의 reset 은 정보로만 사용한다. (실제 runtime 에서는 무효)
+- Call 의 reset 은 정보로만 사용한다. (실제 runtime 에서는 무효)
   * 원위치 정보 추출용으로 사용
   * Target system 의 Graph 탐색해서 call 의 상호 reset 정보를 추출하는 일은 하지 않는다.
 

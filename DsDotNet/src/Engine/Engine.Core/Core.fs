@@ -168,7 +168,7 @@ module CoreModule =
         member val Mnemonics = mnemonics |> ResizeArray
 
     /// leaf or stem(parenting)
-    /// Graph 상의 vertex 를 점유하는 named object : Real, Alias, CallDev
+    /// Graph 상의 vertex 를 점유하는 named object : Real, Alias, Call
     [<AbstractClass>]
     type Vertex (names:Fqdn, parent:ParentWrapper)  =
         inherit FqdnObject(names.Combine(), parent.GetCore())
@@ -181,11 +181,11 @@ module CoreModule =
         member _.ParentNPureNames = ([parent.GetCore().Name] @ names).ToArray()
         override x.GetRelativeName(_referencePath:Fqdn) = x.PureNames.Combine()
 
-    // Subclasses = {CallDev | Real | RealOtherFlow}
+    // Subclasses = {Call | Real | RealOtherFlow}
     type ISafetyConditoinHolder =
         abstract member SafetyConditions: HashSet<SafetyCondition>
 
-    /// Indirect to CallDev/Alias/RealOtherFlow/CallSys
+    /// Indirect to Call/Alias/RealOtherFlow/CallSys
     [<AbstractClass>]
     type Indirect (names:string seq, parent:ParentWrapper) =
         inherit Vertex(names |> Array.ofSeq, parent)
@@ -214,7 +214,6 @@ module CoreModule =
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
-    [<AbstractClass>]
     type Call (target:Job, parent) =
         inherit Indirect(target.Name, parent)
         member _.CallTargetJob = target
@@ -222,17 +221,15 @@ module CoreModule =
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
-    and CallSys private (target:Job, parent) =
-        inherit Call(target, parent)
+   
+    //and Call private (target:Job, parent) =
+    //    inherit Call(target, parent)
 
-    and CallDev private (target:Job, parent) =
-        inherit Call(target, parent)
-
-    and Alias private (name:string, target:AliasTargetWrapper, parent) = // target : Real or CallDev or OtherFlowReal
+    and Alias private (name:string, target:AliasTargetWrapper, parent) = // target : Real or Call or OtherFlowReal
         inherit Indirect(name, parent)
         member _.TargetWrapper = target
 
-    /// Job 정의: CallDev 이 호출하는 Job 항목
+    /// Job 정의: Call 이 호출하는 Job 항목
     type Job (name:string, tasks:DsTask list) =
         inherit Named(name)
         let mutable funcs = HashSet<Func>()
@@ -314,28 +311,24 @@ module CoreModule =
 
     and AliasTargetWrapper =
         | DuAliasTargetReal of Real
-        | DuAliasTargetCall of CallDev
+        | DuAliasTargetCall of Call
         | DuAliasTargetRealExFlow of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
-        | DuAliasTargetRealExSystem of CallSys
         member x.RealTarget() =
             match x with | DuAliasTargetReal   r -> Some r |_ -> None
         member x.CallTarget() =
             match x with | DuAliasTargetCall   c -> Some c |_ -> None
         member x.RealExFlowTarget() =
             match x with | DuAliasTargetRealExFlow rx -> Some rx |_ -> None
-        member x.RealExSystemTarget() =
-            match x with | DuAliasTargetRealExSystem  rx -> Some rx |_ -> None
-
+   
     and SafetyCondition =
         | DuSafetyConditionReal of Real
-        | DuSafetyConditionCall of CallDev
+        | DuSafetyConditionCall of Call
         | DuSafetyConditionRealExFlow of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
-        | DuSafetyConditionRealExSystem of CallSys    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
 
           ///Vertex의 부모의 타입을 구분한다.
     type ParentWrapper =
-        | DuParentFlow of Flow //Real/CallDev/Alias 의 부모
-        | DuParentReal of Real //CallDev/Alias      의 부모
+        | DuParentFlow of Flow //Real/Call/Alias 의 부모
+        | DuParentReal of Real //Call/Alias      의 부모
 
     type ParentWrapper with
         member x.GetCore() =
@@ -365,7 +358,6 @@ module CoreModule =
             | DuSafetyConditionReal real -> real
             | DuSafetyConditionCall call -> call
             | DuSafetyConditionRealExFlow  realOtherFlow -> realOtherFlow
-            | DuSafetyConditionRealExSystem  realOtherSystem -> realOtherSystem
 
     type AliasTargetWrapper with
         member x.GetTarget() : Vertex =
@@ -373,7 +365,6 @@ module CoreModule =
             | DuAliasTargetReal real -> real
             | DuAliasTargetCall call -> call
             | DuAliasTargetRealExFlow otherFlowReal -> otherFlowReal
-            | DuAliasTargetRealExSystem otherSystemReal -> otherSystemReal
 
     type Real with
         static member Create(name: string, flow) =
@@ -402,22 +393,10 @@ module CoreModule =
 
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 
-    type CallSys with
+    
+    type Call with
         static member Create(target:Job, parent:ParentWrapper) =
-            let exSysReal = CallSys(target, parent)
-            parent.GetGraph().AddVertex(exSysReal) |> verifyM $"Duplicated other flow real call [{exSysReal}]"
-            exSysReal
-
-        member x.GetAliasTargetToDs() =
-            match x.Parent.GetCore() with
-                | :? Flow -> [x.Name].ToArray()
-                | :? Real -> x.ParentNPureNames
-                | _->failwithlog "Error"
-        member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
-
-    type CallDev with
-        static member Create(target:Job, parent:ParentWrapper) =
-            let call = CallDev(target, parent)
+            let call = Call(target, parent)
             parent.GetGraph().AddVertex(call) |> verifyM $"Duplicated call name [{target.Name}]"
             call
 
@@ -441,7 +420,6 @@ module CoreModule =
                     | DuAliasTargetReal r -> r.GetAliasTargetToDs(flow)
                     | DuAliasTargetCall c -> c.GetAliasTargetToDs()
                     | DuAliasTargetRealExFlow rf -> rf.Real.GetAliasTargetToDs(flow)
-                    | DuAliasTargetRealExSystem rs -> rs.GetAliasTargetToDs() // 고쳐야 함
                 let ads = flow.AliasDefs
                 match ads.TryFind(aliasKey) with
                 | Some ad -> ad.Mnemonics.AddIfNotContains(name) |> ignore

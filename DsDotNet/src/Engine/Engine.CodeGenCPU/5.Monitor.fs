@@ -41,7 +41,7 @@ type VertexManager with
 
     member v.M3_CallErrorTXMonitor(): CommentedStatement list =
         let v= v :?> VertexMCoin
-        let call= v.Vertex.GetPure() :?> CallDev
+        let call= v.Vertex.GetPure() :?> Call
         let real= call.Parent.GetCore() :?> Real
         let dop = call.V.Flow.dop.Expr
         let rst = v.Flow.clear.Expr
@@ -67,7 +67,7 @@ type VertexManager with
         ]
 
     member v.M4_CallErrorRXMonitor(): CommentedStatement list =
-        let call= v.Vertex.GetPure() :?> CallDev
+        let call= v.Vertex.GetPure() :?> Call
         let dop = call.V.Flow.dop.Expr
         let rst = v.Flow.clear.Expr
         let tds = call.CallTargetJob.DeviceDefs.Where(fun f->f.ApiItem.RXs.any())
@@ -120,7 +120,7 @@ type VertexManager with
   
     member v.M7_CallErrorTRXMonitor(): CommentedStatement list =
         let v= v :?> VertexMCoin
-        let call= v.Vertex.GetPure() :?> CallDev
+        let call= v.Vertex.GetPure() :?> Call
         let tds = call.CallTargetJob.DeviceDefs
         [
             for td in tds do

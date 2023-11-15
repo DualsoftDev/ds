@@ -51,7 +51,7 @@ module OriginModule =
     /// Get vertex target
     let getVertexTarget (vertex:Vertex) =
         match vertex with
-        | :? CallDev as c -> c
+        | :? Call as c -> c
         | :? Alias as a ->
             match a.TargetWrapper with
             | DuAliasTargetCall ct -> ct
@@ -71,7 +71,7 @@ module OriginModule =
             let tgt = $"{system}.{info.Operand2}"
             { Source=src; Operator=info.Operator.ToText(); Target=tgt}
 
-        let getDeviceDefs (call:CallDev) =
+        let getDeviceDefs (call:Call) =
             call.CallTargetJob.DeviceDefs
 
         let getResetInfo (jd:TaskDev) =

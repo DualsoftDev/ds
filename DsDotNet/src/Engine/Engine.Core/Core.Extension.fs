@@ -116,7 +116,7 @@ module CoreExtensionModule =
 
         member x.DeviceDefs = x.Jobs |> Seq.collect(fun s->s.DeviceDefs)
 
-    type CallDev with
+    type Call with
         member x.System = x.Parent.GetSystem()
 
 

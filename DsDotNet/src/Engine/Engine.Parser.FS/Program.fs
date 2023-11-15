@@ -56,19 +56,19 @@ C4 > C5;
             Ap1 > Bp1 > Bm1;
 
             // diamond 2nd
-            Bm1 >               // GVT.{ Child | CallDev | Aliased }
+            Bm1 >               // GVT.{ Child | Call | Aliased }
             Ap2 > Am2 > Bm2;
             Ap2 > Bp2 > Bm2;
 
             Ap>Am>Bp>Bm;
             Bm2
-            > Ap             // GVT.{ Child | CallDev }
+            > Ap             // GVT.{ Child | Call }
             ;
         }
         R1              // define my local terminal real segment    // GVT.{ Segment }
-            //> C."+"     // direct interface call wrapper segment    // GVT.{ CallDev }
+            //> C."+"     // direct interface call wrapper segment    // GVT.{ Call }
             > Main2     // aliased to my real segment               // GVT.{ Segment | Aliased }
-                        // aliased to interface                     // GVT.{ Segment | Aliased | CallDev }
+                        // aliased to interface                     // GVT.{ Segment | Aliased | Call }
             ;
         R2;
 
@@ -101,7 +101,7 @@ C4 > C5;
     }
 
     [prop] = {
-        // safety : Real|CallDev = { (Real|CallDev)* }
+        // safety : Real|Call = { (Real|Call)* }
         [safety] = {
             F.Main = { F.Main.Ap; }
             F.Main.Am = { F.Main; }
@@ -159,19 +159,19 @@ C4 > C5;
             Ap1 > Bp1 > Bm1;
 
             // diamond 2nd
-            Bm1 >               // GVT.{ Child | CallDev | Aliased }
+            Bm1 >               // GVT.{ Child | Call | Aliased }
             Ap2 > Am2 > Bm2;
             Ap2 > Bp2 > Bm2;
 
             Ap>Am>Bp>Bm;
             Bm2
-            > Ap             // GVT.{ Child | CallDev }
+            > Ap             // GVT.{ Child | Call }
             ;
         }
         R1              // define my local terminal real segment    // GVT.{ Segment }
-            //> C."+"     // direct interface call wrapper segment    // GVT.{ CallDev }
+            //> C."+"     // direct interface call wrapper segment    // GVT.{ Call }
             > Main2     // aliased to my real segment               // GVT.{ Segment | Aliased }
-            //> Ap1       // aliased to interface                     // GVT.{ Segment | Aliased | CallDev }
+            //> Ap1       // aliased to interface                     // GVT.{ Segment | Aliased | Call }
             ;
         R2;
 
@@ -204,7 +204,7 @@ C4 > C5;
     }
 
     [prop] = {
-        // safety : Real|CallDev = { (Real|CallDev)* }
+        // safety : Real|Call = { (Real|Call)* }
         [safety] = {
             F.Main = { F.Main.Ap; }
             F.Main.Am = { F.Main; }
@@ -862,29 +862,29 @@ C4 > C5;
     }
     [flow] Line = {
         Clear |> Clear |> Copy1_Assy반출 |> Green공급및고정;		// Clear(Real)|> Clear(Real) |> Copy1_Assy반출(Alias) |> Green공급및고정(Real);
-        "Line_Robot_X+" > 로봇조립Sub;		// "Line_Robot_X+"(CallDev)> 로봇조립Sub(Real);
-        "Line_Robot_X-" > 로봇조립Main;		// "Line_Robot_X-"(CallDev)> 로봇조립Main(Real);
+        "Line_Robot_X+" > 로봇조립Sub;		// "Line_Robot_X+"(Call)> 로봇조립Sub(Real);
+        "Line_Robot_X-" > 로봇조립Main;		// "Line_Robot_X-"(Call)> 로봇조립Main(Real);
         Blue공급및고정 => 로봇조립Sub => Assy반출;		// Blue공급및고정(Real)=> 로봇조립Sub(Real) => Assy반출(Real);
         GoSub => Blue공급및고정 => Assy반출;		// GoSub(Real)=> Blue공급및고정(Real) => Assy반출(Real);
         GoMain => Green공급및고정 => 로봇조립Main => 로봇조립Sub;		// GoMain(Real)=> Green공급및고정(Real) => 로봇조립Main(Real) => 로봇조립Sub(Real);
         Assy반출 = {
-            "Line_Assy_Upper+" > Line_Sub_PartOff;		// "Line_Assy_Upper+"(CallDev)> Line_Sub_PartOff(CallDev);
-            "Line_Assy_Upper+" > "Line_Assy_UpConv+" > "Line_Assy_Upper-" > "Line_Assy_DownConv+";		// "Line_Assy_Upper+"(CallDev)> "Line_Assy_UpConv+"(CallDev) > "Line_Assy_Upper-"(CallDev) > "Line_Assy_DownConv+"(CallDev);
+            "Line_Assy_Upper+" > Line_Sub_PartOff;		// "Line_Assy_Upper+"(Call)> Line_Sub_PartOff(Call);
+            "Line_Assy_Upper+" > "Line_Assy_UpConv+" > "Line_Assy_Upper-" > "Line_Assy_DownConv+";		// "Line_Assy_Upper+"(Call)> "Line_Assy_UpConv+"(Call) > "Line_Assy_Upper-"(Call) > "Line_Assy_DownConv+"(Call);
         }
         Green공급및고정 = {
-            "Line_Main_Conv+" > "Line_Main_Clamp+" > "Line_Main_Clamp-";		// "Line_Main_Conv+"(CallDev)> "Line_Main_Clamp+"(CallDev) > "Line_Main_Clamp-"(CallDev);
+            "Line_Main_Conv+" > "Line_Main_Clamp+" > "Line_Main_Clamp-";		// "Line_Main_Conv+"(Call)> "Line_Main_Clamp+"(Call) > "Line_Main_Clamp-"(Call);
         }
         Blue공급및고정 = {
-            "Line_Sub_Conv+" > "Line_Sub_Clamp+" > "Line_Sub_Clamp-";		// "Line_Sub_Conv+"(CallDev)> "Line_Sub_Clamp+"(CallDev) > "Line_Sub_Clamp-"(CallDev);
+            "Line_Sub_Conv+" > "Line_Sub_Clamp+" > "Line_Sub_Clamp-";		// "Line_Sub_Conv+"(Call)> "Line_Sub_Clamp+"(Call) > "Line_Sub_Clamp-"(Call);
         }
         로봇조립Sub = {
-            "Line_Robot_Grab-" > "Line_Robot_Z-";		// "Line_Robot_Grab-"(CallDev)> "Line_Robot_Z-"(CallDev);
-            "Line_Robot_Z+" > "Line_Robot_Grab-" > "Line_Robot_X-";		// "Line_Robot_Z+"(CallDev)> "Line_Robot_Grab-"(CallDev) > "Line_Robot_X-"(CallDev);
+            "Line_Robot_Grab-" > "Line_Robot_Z-";		// "Line_Robot_Grab-"(Call)> "Line_Robot_Z-"(Call);
+            "Line_Robot_Z+" > "Line_Robot_Grab-" > "Line_Robot_X-";		// "Line_Robot_Z+"(Call)> "Line_Robot_Grab-"(Call) > "Line_Robot_X-"(Call);
         }
         로봇조립Main = {
-            "Line_Robot_Grab+" > Line_Main_PartOff;		// "Line_Robot_Grab+"(CallDev)> Line_Main_PartOff(CallDev);
-            "Line_Robot_Grab+" > "Line_Robot_X+";		// "Line_Robot_Grab+"(CallDev)> "Line_Robot_X+"(CallDev);
-            "Line_Robot_Z+" > "Line_Robot_Grab+" > "Line_Robot_Z-";		// "Line_Robot_Z+"(CallDev)> "Line_Robot_Grab+"(CallDev) > "Line_Robot_Z-"(CallDev);
+            "Line_Robot_Grab+" > Line_Main_PartOff;		// "Line_Robot_Grab+"(Call)> Line_Main_PartOff(Call);
+            "Line_Robot_Grab+" > "Line_Robot_X+";		// "Line_Robot_Grab+"(Call)> "Line_Robot_X+"(Call);
+            "Line_Robot_Z+" > "Line_Robot_Grab+" > "Line_Robot_Z-";		// "Line_Robot_Z+"(Call)> "Line_Robot_Grab+"(Call) > "Line_Robot_Z-"(Call);
         }
         [aliases] = {
             Assy반출 = { Copy1_Assy반출; }

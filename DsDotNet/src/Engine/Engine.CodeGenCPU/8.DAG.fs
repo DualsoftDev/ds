@@ -38,7 +38,7 @@ type VertexManager with
         [
             for child in children do
                 let coin = child :?> VertexMCoin
-                let call = coin.GetPure().V.Vertex :?> CallDev
+                let call = coin.GetPure().V.Vertex :?> Call
                 let setEnd =
                     let action =
                         if call.UsingTon

@@ -15,8 +15,7 @@ type CompiledModel(zipDsPath:FilePath) =
 
 type RuntimeModel(zipDsPath:FilePath) =
     let compiledModel = CompiledModel(zipDsPath)
-    //let mutable zmqInfo = Zmq.InitializeServer "zmqsettings.json" |> Some
-    let mutable zmqInfo: ZmqInfo option = None
+    let mutable zmqInfo = Zmq.InitializeServer "zmqsettings.json" |> Some
     let mutable dsCPU : DsCPU option = None
 
     do
@@ -37,6 +36,7 @@ type RuntimeModel(zipDsPath:FilePath) =
     member x.IoServer = zmqInfo |> map (fun x -> x.Server) |> Option.toObj
     //member x.IoHubClient = zmqInfo |> map (fun x -> x.Client) |> Option.toObj
     member x.IoSpec = zmqInfo |> map (fun x -> x.IOSpec) |> Option.toObj
+
     member x.CpuRun() = dsCPU.Value.Run()  
     member x.CpuStep()= dsCPU.Value.Step()  
     member x.CpuReset()= dsCPU.Value.Reset()  

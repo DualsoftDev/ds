@@ -192,11 +192,13 @@ public static class CustomServerExtension
         CompositeDisposable modelChangeDisposables = new();
         serverGlobal.PropertyChanged += (s, e) =>
         {
-            if (e.PropertyName == nameof(serverGlobal.RuntimeModel))
+            if (e.PropertyName == nameof(serverGlobal.DsZipPath))
             {
                 modelChangeDisposables.Dispose();
-                var model = serverGlobal.RuntimeModel;
-                logger.Info($"Model change detected: {model}");
+                K.Noop();
+
+                ///serverGlobal.RuntimeModel = ....;
+                logger.Info($"Model change detected: {serverGlobal.DsZipPath}");
                 // todo : 모델 변경에 따른 작업 수행
                 // 1. DBLogger storage table 변경
                 //

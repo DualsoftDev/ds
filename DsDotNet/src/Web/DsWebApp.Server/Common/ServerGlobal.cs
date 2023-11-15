@@ -11,7 +11,12 @@ namespace DsWebApp.Server.Common
         public event PropertyChangedEventHandler PropertyChanged;
 
         public ServerSettings ServerSettings { get; set; }
-        public RuntimeModel RuntimeModel { get; set; }
+
+        public string DsZipPath { get; set; }
+        /// <summary>
+        /// DsZipPath 에 따른 compile 된 Runtime model
+        /// </summary>
+        public RuntimeModel RuntimeModel { get; private set; }
 
         public DSCommonAppSettings DsCommonAppSettings { get; set; }
         internal DBLoggerORM.LogSet LogSet { get; set; }

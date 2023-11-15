@@ -1,5 +1,8 @@
 @page "/controllers/uploadmodel"
 @using DsWebApp.Shared;
+@using Dual.Common.Core
+@using System.Reactive.Disposables
+@using System.IO.Compression
 @inject FilesManager FilesManager
 
 <h3>Upload File</h3>
@@ -87,6 +90,7 @@
 
         // Disable the file input field
         _uploadingFile = true;
+        using var cleanup = Disposable.Create(() => _uploadingFile = false);
         await InvokeAsync(StateHasChanged);
 
         // calculate the chunks we have to send
@@ -96,54 +100,86 @@
         long numChunks = _totalBytes / chunkSize;
         long remainder = _totalBytes % chunkSize;
 
-        //// get new filename with a bit of entropy
-        //string justFileName = Path.GetFileNameWithoutExtension(args.File.Name);
-        //var extension = Path.GetExtension(args.File.Name);
-        //string fileNameWithoutPath = $"{justFileName}-{DateTime.Now.Ticks.ToString()}{extension}";
-
         string filePath = args.File.Name;
 
-        bool firstChunk = true;
-        // Open the input and output file streams
-        using (var inStream = args.File.OpenReadStream(long.MaxValue))
+        // todo: upload 하려는 파일이 유효한 ds zip 파일인지 확인
+        // - file format 이 zip 인지 확인
+        // - 내부에 json 파일이 있는지 확인
+        bool isValidDsZipFile()
         {
-            while (_uploadedBytes < _totalBytes)
+            if (!Path.GetExtension(filePath).ToLower().IsOneOf(".zds", ".zip", ".7z") 
+                || args.File.ContentType != "application/x-zip-compressed")
+                return false;
+
+            /* Browser 환경에서는 stream 으로 args.File.OpenReadStream 로 읽을 수 밖에 없다.*/
+            // try
+            // {
+            //     using var zip = ZipFile.OpenRead(filePath);
+            //     // return zip.Entries.Any(entry => entry.FullName.ToLower().Contains("exportds.json"));
+            //     return zip.Entries.Any(entry =>
+            //     {
+            //         var xxx = entry.FullName;
+
+            //         return entry.FullName.ToLower().Contains("exportds.json");
+            //     });
+            // }
+            // catch (Exception)
+            // {
+            //     return false;
+            // }
+            return true;
+        }
+
+        if (! isValidDsZipFile())
+        {
+            await JsDual.Alert($"Not a valid ds zip file: {filePath}");
+            // HandleDragLeave();
+            _uploadMessage = $"Failed to Upload {filePath}.";
+            return;
+        }
+
+        bool isFirstChunk = true;
+        bool isLastChunk = false;
+        // Open the input and output file streams
+        using var inStream = args.File.OpenReadStream(long.MaxValue);
+        while (_uploadedBytes < _totalBytes)
+        {
+            var whatsLeft = _totalBytes - _uploadedBytes;
+            if (whatsLeft <= chunkSize)
             {
-                var whatsLeft = _totalBytes - _uploadedBytes;
-                if (whatsLeft < chunkSize)
-                    chunkSize = remainder;
-                // Read the next chunk
-                var bytes = new byte[chunkSize];
-                var buffer = new Memory<byte>(bytes);
-                var read = await inStream.ReadAsync(buffer);
-
-                // create the fileChunk object
-                var chunk = new FileChunk
-                    {
-                        Data = bytes,
-                        Path = filePath,
-                        Offset = _uploadedBytes,
-                        FirstChunk = firstChunk
-                    };
-
-                // upload this chunk
-                await FilesManager.UploadFileChunk(chunk);
-
-                firstChunk = false; // no longer the first chunk
-
-                // Update our progress data and UI
-                _uploadedBytes += read;
-                percent = _uploadedBytes * 100 / _totalBytes;
-                // Report progress with a string
-                _uploadMessage = $"Uploading {args.File.Name} {percent}%";
-                await InvokeAsync(StateHasChanged);
+                chunkSize = remainder;
+                isLastChunk = true;
             }
+            // Read the next chunk
+            var bytes = new byte[chunkSize];
+            var buffer = new Memory<byte>(bytes);
+            var read = await inStream.ReadAsync(buffer);
+
+            // create the fileChunk object
+            var chunk = new FileChunk
+                {
+                    Data = bytes,
+                    Path = filePath,
+                    Offset = _uploadedBytes,
+                    IsFirstChunk = isFirstChunk,
+                    IsLastChunk = isLastChunk
+                };
+
+            // upload this chunk
+            await FilesManager.UploadFileChunk(chunk);
+
+            isFirstChunk = false; // no longer the first chunk
+
+            // Update our progress data and UI
+            _uploadedBytes += read;
+            percent = _uploadedBytes * 100 / _totalBytes;
+            // Report progress with a string
+            _uploadMessage = $"Uploading {args.File.Name} {percent}%";
+            await InvokeAsync(StateHasChanged);
         }
 
         _uploadMessage = "Upload Complete.";
         await listFiles();
-
-        _uploadingFile = false;
     }
 
     async Task listFiles()

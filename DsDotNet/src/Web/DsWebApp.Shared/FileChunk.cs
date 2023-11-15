@@ -5,7 +5,8 @@ namespace DsWebApp.Shared
         public string Path { get; set; } = "";
         public long Offset { get; set; }
         public byte[] Data { get; set; }
-        public bool FirstChunk = false;
+        public bool IsFirstChunk { get; set; }
+        public bool IsLastChunk { get; set; }
     }
 }
 

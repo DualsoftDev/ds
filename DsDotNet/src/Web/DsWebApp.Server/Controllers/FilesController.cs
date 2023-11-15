@@ -11,9 +11,11 @@ namespace DsWebApp.Server.Controllers;
 public class FilesController : ControllerBaseWithLogger
 {
     string _serviceFolder;
+    ServerGlobal _global;
     public FilesController(ServerGlobal global)
         : base(global.Logger)
     {
+        _global = global;
         _serviceFolder = global.ServerSettings.ModelStorageFolder;
     }
     [HttpGet("{fileName}/delete")]
@@ -68,16 +70,25 @@ public class FilesController : ControllerBaseWithLogger
             _logger.Debug($"UploadFileChunk: {fileName}");
 
             // delete the file if necessary
-            if (fileChunk.FirstChunk && System.IO.File.Exists(fileName))
+            if (fileChunk.IsFirstChunk && System.IO.File.Exists(fileName))
             {
                 System.IO.File.Delete(fileName);
             }
 
             // open for writing
-            using var stream = System.IO.File.OpenWrite(fileName);
-            Trace.WriteLine($"Uploading {fileName}: {fileChunk.Offset} ~+ {fileChunk.Data.Length}");
-            stream.Seek(fileChunk.Offset, SeekOrigin.Begin);
-            stream.Write(fileChunk.Data, 0, fileChunk.Data.Length);
+            using (var stream = System.IO.File.OpenWrite(fileName))
+            {
+                Trace.WriteLine($"Uploading {fileName}: {fileChunk.Offset} ~+ {fileChunk.Data.Length}");
+                stream.Seek(fileChunk.Offset, SeekOrigin.Begin);
+                stream.Write(fileChunk.Data, 0, fileChunk.Data.Length);
+            }
+
+            if (fileChunk.IsLastChunk)
+            {
+                // todo: dszip 파일 신규 upload 에 대한 처리
+                _global.DsZipPath = Path.Combine(_serviceFolder, fileName);
+                K.Noop();
+            }
 
             return true;
         }

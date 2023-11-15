@@ -135,7 +135,7 @@ namespace DsWebApp.Shared
                             Data = bytes,
                             Path = Path.GetFileName(filePath),
                             Offset = uploadedBytes,
-                            FirstChunk = firstChunk
+                            IsFirstChunk = firstChunk
                         };
 
                         // upload this chunk

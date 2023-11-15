@@ -47,7 +47,7 @@ module PathManager =
                     if (file.ToCharArray() |> Array.exists (Path.GetInvalidFileNameChars().Contains)) then
                         raise (new ArgumentException($"Invalid FileName in {filePath}"))
 
-                    filePath
+                    filePath.Replace("\\", directorySeparatorDS.ToString())
 
                 | DsDirectory directoryPath ->
                     // Validate directory path
@@ -57,13 +57,14 @@ module PathManager =
                     if (directoryPath.ToCharArray() |> Array.exists (Path.GetInvalidPathChars().Contains)) then
                         raise (new ArgumentException($"Invalid DirectoryName in {directoryPath}"))
 
+                    let directoryPath = directoryPath.Replace("\\", directorySeparatorDS.ToString())
                     if directoryPath.EndsWith('/')
                     then  directoryPath
                     else  directoryPath + "/"
                      
 
             FileInfo(path) |> ignore
-            path.Replace("\\", directorySeparatorDS.ToString())
+            path
 
     // Get a valid DsPath from a given string
     let getValidFile (path: string) =

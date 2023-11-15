@@ -103,7 +103,7 @@ module RunTime =
     type DsCpuExt  =
         //Job 만들기
         [<Extension>]
-        static member GetDsCPU (dsSys : DsSystem, runtimePackage:RuntimePackage) : DsCPU =
+        static member GetDsCPU (dsSys:DsSystem, runtimePackage:RuntimePackage) : DsCPU =
             let lstSys = [dsSys] @ dsSys.GetRecursiveLoadedSystems()
 
             // Initialize storages and load CPU statements

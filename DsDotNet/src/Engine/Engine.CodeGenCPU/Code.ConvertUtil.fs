@@ -52,7 +52,7 @@ module CodeConvertUtil =
         let srcsStrong = edges |> filter(fun e -> e.EdgeType = (mask ||| EdgeType.Strong))
 
         match srcsWeek.Any(), srcsStrong.Any() with
-        | true, true -> failwithlog "Error Week and Strong can't connenct same node target"
+        | true, true -> failwithlog "인터락 리셋과 후행리셋은 동시에 연결불가능 합니다."
         | true, false -> srcsWeek   |> map (fun e->e.Source) |> DuEssWeak
         | false, true -> srcsStrong |> map (fun e->e.Source) |> DuEssStrong
         | false, false -> DuEssNone

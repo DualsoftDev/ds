@@ -73,8 +73,11 @@ type ModelLoaderExt =
         let zipPathPPT = files.Where(fun f-> f <> $"{TextLibrary}.ds")
                               .Select(fun f-> changeExtension (f|> DsFile)  ".pptx")
                               .ToZipPPT()
-        
-        let jsFilePath = changeExtension (zipPathDS|> DsFile)  ".json"
+
+        let zipDir = PathManager.getDirectoryName (zipPathDS|>DsFile)   
+        let zipName = PathManager.getFileNameWithoutExtension (zipPathDS|>DsFile)   
+        let jsFilePath = PathManager.getFullPath ($"{zipName}/{zipName}.json"|>DsFile) (zipDir|>DsDirectory)
+
         let activeRelaPath = getRelativePath(jsFilePath|>DsFile) (activeFilePath|>DsFile);//   // 상대경로로 기본 저장
         let config = SaveConfigWithPath jsFilePath activeRelaPath
 

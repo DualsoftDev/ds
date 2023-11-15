@@ -14,30 +14,29 @@
 
 
     <ItemGroup>
-        <Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs"/>
-        <Compile Include="Types.fs"/>
-        <Compile Include="Util.fs"/>
-        <Compile Include="MessgeError.fs"/>
-        <Compile Include="PPTUtil.fs"/>
-        <Compile Include="PPTObject.fs"/>
-        <Compile Include="PPTDummy.fs"/>
-        <Compile Include="PPTDoc.fs"/>
-        <Compile Include="GraphView.fs"/>
-        <Compile Include="ImportCheck.fs"/>
-        <Compile Include="ImportUtilView.fs"/>
-        <Compile Include="ImportIOTable.fs"/>
-        <Compile Include="ExportIOTable.fs"/>
-        <Compile Include="ImportUtilForLib.fs"/>
-        <Compile Include="ImportUtil.fs"/>
-        <Compile Include="ImportPPT.fs"/>
-        <Compile Include="ImportLib.fs"/>
+        <Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
+        <Compile Include="Types.fs" />
+        <Compile Include="Util.fs" />
+        <Compile Include="MessgeError.fs" />
+        <Compile Include="PPTUtil.fs" />
+        <Compile Include="PPTObject.fs" />
+        <Compile Include="PPTDummy.fs" />
+        <Compile Include="PPTDoc.fs" />
+        <Compile Include="GraphView.fs" />
+        <Compile Include="ImportCheck.fs" />
+        <Compile Include="ImportUtilView.fs" />
+        <Compile Include="ImportIOTable.fs" />
+        <Compile Include="ExportIOTable.fs" />
+        <Compile Include="ImportUtilForLib.fs" />
+        <Compile Include="ImportUtil.fs" />
+        <Compile Include="ImportPPT.fs" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="DocumentFormat.OpenXml" Version="2.18.0"/>
-        <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj"/>
-        <ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj"/>
-        <ProjectReference Include="..\Engine.Parser\Engine.Parser.csproj"/>
+        <PackageReference Include="DocumentFormat.OpenXml" Version="2.18.0" />
+        <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
+        <ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
+        <ProjectReference Include="..\Engine.Parser\Engine.Parser.csproj" />
     </ItemGroup>
 
 

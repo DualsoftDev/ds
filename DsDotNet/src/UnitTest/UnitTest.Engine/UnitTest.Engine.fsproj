@@ -32,7 +32,6 @@
 
     <ItemGroup>
         <Compile Include="TestFixture.Engine.fs" />
-        <Compile Include="ImportOffice\xlsTest.fs" />
         <Compile Include="ImportOffice\pptTest.fs" />
         <Compile Include="Miscs\MiscTests.fs" />
         <Compile Include="Model\Answers.fs" />

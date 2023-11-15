@@ -1,3 +1,4 @@
+using System.Reactive.Disposables;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting.WindowsServices;
 
@@ -72,8 +73,8 @@ services.AddCors(options =>
                 .AllowAnyHeader()
                 ;
 
-        var urls = new[] {  "http://localhost:*", "http://192.168.0.118:*",
-                            "https://localhost:*", "https://192.168.0.118:*"};
+        var urls = new[] {  "http://localhost:*", "http://192.168.9.118:*",
+                            "https://localhost:*", "https://192.168.9.118:*"};
         foreach (var url in urls)
         {
             policy.WithOrigins(url)
@@ -181,16 +182,30 @@ public static class CustomServerExtension
     public static async Task<IServiceCollection> InitializeUnsafeServicesAsync(this IServiceCollection services, ServerGlobal serverGlobal, ILog logger)
     {
         var commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));
-        var connectionString = commonAppSettings.LoggerDBSettings.ConnectionString;
-
-        CoreModule.DsSystem[] systems = null;
-        ModelCompileInfo modelCompileInfo = null;
-        var xxx = await DBLogger.InitializeLogWriterOnDemandAsync(systems, commonAppSettings, modelCompileInfo);
-        var dsFileJson = DBLogger.GetDsFilePath(connectionString);
+        await DBLogger.InitializeLogDbOnDemandAsync(commonAppSettings);
+        //var connectionString = commonAppSettings.LoggerDBSettings.ConnectionString;
+        //var dsFileJson = DBLogger.GetDsFilePath(connectionString);
 
 
         serverGlobal.DsCommonAppSettings = commonAppSettings;
-        
+
+        CompositeDisposable modelChangeDisposables = new();
+        serverGlobal.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(serverGlobal.RuntimeModel))
+            {
+                modelChangeDisposables.Dispose();
+                var model = serverGlobal.RuntimeModel;
+                logger.Info($"Model change detected: {model}");
+                // todo : 모델 변경에 따른 작업 수행
+                // 1. DBLogger storage table 변경
+                //
+
+                modelChangeDisposables = new();
+            }
+        };
+
+
         return services;
     }
 }

@@ -252,11 +252,8 @@ module internal DBLoggerImpl =
                 return logSet
             }
 
-        let createLoggerDBSchemaAsync (connStr: string, modelCompileInfo: ModelCompileInfo) =
+        let createLoggerDBSchemaAsync () =
             task {
-                let pptPath, config = modelCompileInfo.PptPath, modelCompileInfo.ConfigPath
-                connectionString <- connStr
-
                 use conn = createConnection ()
                 use! tr = conn.BeginTransactionAsync()
 
@@ -266,26 +263,6 @@ module internal DBLoggerImpl =
                     // schema 새로 생성
                     do! conn.ExecuteSilentlyAsync(sqlCreateSchema, tr)
                     ()
-
-                do!
-                    conn.ExecuteSilentlyAsync(
-                        $"""INSERT OR REPLACE INTO [{Tn.Property}]
-                                          (name, value)
-                                          VALUES(@Name, @Value);""",
-                        {| Name = PropName.PptPath
-                           Value = pptPath |},
-                        tr
-                    )
-
-                do!
-                    conn.ExecuteSilentlyAsync(
-                        $"""INSERT OR REPLACE INTO [{Tn.Property}]
-                                          (name, value)
-                                          VALUES(@Name, @Value);""",
-                        {| Name = PropName.ConfigPath
-                           Value = config |},
-                        tr
-                    )
 
                 let! newTagKindInfos = getNewTagKindInfosAsync (conn, tr)
 
@@ -297,18 +274,49 @@ module internal DBLoggerImpl =
             }
 
 
-        let initializeLogWriterOnDemandAsync
-            (
-                systems: DsSystem seq,
-                commonAppSetting: DSCommonAppSettings,
-                modelCompileInfo: ModelCompileInfo
-            ) =
+        let fillLoggerDBSchemaAsync (modelCompileInfo: ModelCompileInfo) =
+            task {
+                let pptPath, config = modelCompileInfo.PptPath, modelCompileInfo.ConfigPath
+
+                use conn = createConnection ()
+
+                do!
+                    conn.ExecuteSilentlyAsync(
+                        $"""INSERT OR REPLACE INTO [{Tn.Property}]
+                                          (name, value)
+                                          VALUES(@Name, @Value);""",
+                        {| Name = PropName.PptPath
+                           Value = pptPath |} )
+
+                do!
+                    conn.ExecuteSilentlyAsync(
+                        $"""INSERT OR REPLACE INTO [{Tn.Property}]
+                                          (name, value)
+                                          VALUES(@Name, @Value);""",
+                        {| Name = PropName.ConfigPath
+                           Value = config |} )
+            }
+
+
+        let initializeLogDbOnDemandAsync (commonAppSetting: DSCommonAppSettings) =
             task {
                 let loggerDBSettings = commonAppSetting.LoggerDBSettings
                 let connString = loggerDBSettings.ConnectionString
                 connectionString <- connString
                 interval <- Observable.Interval(TimeSpan.FromSeconds(loggerDBSettings.SyncIntervalSeconds))
-                do! createLoggerDBSchemaAsync (connString, modelCompileInfo)
+                do! createLoggerDBSchemaAsync ()
+            }
+
+
+        let initializeLogWriterOnDemandAsync
+            (
+                commonAppSetting: DSCommonAppSettings,
+                systems: DsSystem seq,
+                modelCompileInfo: ModelCompileInfo
+            ) =
+            task {
+                do! initializeLogDbOnDemandAsync commonAppSetting
+                do! fillLoggerDBSchemaAsync modelCompileInfo
                 let! logSet_ = createLogInfoSetForWriterAsync (systems)
                 logSet <- logSet_
 

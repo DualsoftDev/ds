@@ -17,18 +17,23 @@ type DBLogger() =
 
     static member InitializeLogWriterOnDemandAsync
         (
-            systems: DsSystem seq,
             commonAppSetting: DSCommonAppSettings,
+            systems: DsSystem seq,
             modelCompileInfo: ModelCompileInfo
         ) =
         task {
             Log4NetWrapper.logWithTrace <- true
 
             let! logSet =
-                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (systems, commonAppSetting, modelCompileInfo)
+                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (commonAppSetting, systems, modelCompileInfo)
 
             return logSet :> ILogSet
         }
+
+    /// model 정보 없이, database schema 만 생성
+    static member InitializeLogDbOnDemandAsync (commonAppSetting: DSCommonAppSettings) = DBLoggerImpl.Writer.initializeLogDbOnDemandAsync commonAppSetting
+
+        
 
     static member InitializeLogReaderOnDemandAsync(querySet: QuerySet, systems: DsSystem seq) =
         task {

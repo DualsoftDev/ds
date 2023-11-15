@@ -15,5 +15,7 @@ namespace DsWebApp.Server.Common
 
         public DSCommonAppSettings DsCommonAppSettings { get; set; }
         internal DBLoggerORM.LogSet LogSet { get; set; }
+
+        public ILog Logger { get; set; }
     }
 }

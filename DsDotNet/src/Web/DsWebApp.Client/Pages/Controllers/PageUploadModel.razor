@@ -1,0 +1,160 @@
+@page "/controllers/uploadmodel"
+@using DsWebApp.Shared;
+@inject FilesManager FilesManager
+
+<h3>Upload File</h3>
+
+<div class="dropArea @_dropClass">
+    @if (_uploadingFile)
+    {
+        <p> Upload progressing... </p>
+    }
+    else
+    {
+        <p> Drag and drop ds zip file(*.dsz) here, or click to select. </p>
+    }
+
+    <InputFile disabled="@_uploadingFile"
+               OnChange="onFileInputFileChange"
+               @ondragenter="HandleDragEnter"
+               @ondragleave="HandleDragLeave" />
+</div>
+
+<br/>
+<div>@_uploadMessage</div>
+
+@if (_uploadingFile)
+{
+    <progress style="height:50px;width:100%;" value="@_uploadedBytes" max="@_totalBytes"></progress>
+}
+<br />
+<h3>Files</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Download</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var url in _fileUrls)
+        {
+            <tr>
+                <td><a href="files/@url" target="_blank">@url</a></td>
+                <td><a href="api/files/@url/get" class="btn btn-primary">download</a></td>
+                <td>
+                    <button class="btn btn-outline-danger"
+                    @onclick="
+                        async e => {
+                            await FilesManager.DeleteFileOnServer(url);
+                            _fileUrls.Remove(url);
+                            await InvokeAsync(StateHasChanged);
+                        }
+                    ">delete</button></td>
+            </tr>
+        }
+    </tbody>
+</table>
+@code
+{
+    bool _uploadingFile = false;
+    string _uploadMessage = "";
+    long _uploadedBytes;
+    long _totalBytes;
+    List<string> _fileUrls = new List<string>();
+
+    // support for drag/drop
+    string _dropClass = string.Empty;
+    void HandleDragEnter()
+    {
+        _dropClass = "dropAreaDrug";
+    }
+    void HandleDragLeave()
+    {
+        _dropClass = string.Empty;
+    }
+
+    /// <summary>
+    /// Occurs when a file is selected or dropped
+    /// </summary>
+    /// <param name="args"></param>
+    /// <returns></returns>
+    async Task onFileInputFileChange(InputFileChangeEventArgs args)
+    {
+        _uploadedBytes = 0;
+
+        // Disable the file input field
+        _uploadingFile = true;
+        await InvokeAsync(StateHasChanged);
+
+        // calculate the chunks we have to send
+        _totalBytes = args.File.Size;
+        long percent = 0;
+        long chunkSize = 400000;
+        long numChunks = _totalBytes / chunkSize;
+        long remainder = _totalBytes % chunkSize;
+
+        //// get new filename with a bit of entropy
+        //string justFileName = Path.GetFileNameWithoutExtension(args.File.Name);
+        //var extension = Path.GetExtension(args.File.Name);
+        //string fileNameWithoutPath = $"{justFileName}-{DateTime.Now.Ticks.ToString()}{extension}";
+
+        string filePath = args.File.Name;
+
+        bool firstChunk = true;
+        // Open the input and output file streams
+        using (var inStream = args.File.OpenReadStream(long.MaxValue))
+        {
+            while (_uploadedBytes < _totalBytes)
+            {
+                var whatsLeft = _totalBytes - _uploadedBytes;
+                if (whatsLeft < chunkSize)
+                    chunkSize = remainder;
+                // Read the next chunk
+                var bytes = new byte[chunkSize];
+                var buffer = new Memory<byte>(bytes);
+                var read = await inStream.ReadAsync(buffer);
+
+                // create the fileChunk object
+                var chunk = new FileChunk
+                    {
+                        Data = bytes,
+                        Path = filePath,
+                        Offset = _uploadedBytes,
+                        FirstChunk = firstChunk
+                    };
+
+                // upload this chunk
+                await FilesManager.UploadFileChunk(chunk);
+
+                firstChunk = false; // no longer the first chunk
+
+                // Update our progress data and UI
+                _uploadedBytes += read;
+                percent = _uploadedBytes * 100 / _totalBytes;
+                // Report progress with a string
+                _uploadMessage = $"Uploading {args.File.Name} {percent}%";
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+
+        _uploadMessage = "Upload Complete.";
+        await listFiles();
+
+        _uploadingFile = false;
+    }
+
+    async Task listFiles()
+    {
+        _fileUrls = await FilesManager.GetFileNames();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await listFiles();
+    }
+
+}

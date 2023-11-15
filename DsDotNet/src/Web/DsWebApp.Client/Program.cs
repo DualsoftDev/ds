@@ -1,5 +1,6 @@
 using DsWebApp.Client;
 using Blazored.SessionStorage;
+using DsWebApp.Shared;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -15,6 +16,7 @@ services.AddDevExpressBlazor(options => {
 services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 services.AddScoped<DualWebBlazorJsInterop>();
 services.AddScoped<CanvasJsInterop>();
+services.AddScoped<FilesManager>();
 services.AddBlazoredSessionStorage();
 //services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 services.AddAuthorizationCore();

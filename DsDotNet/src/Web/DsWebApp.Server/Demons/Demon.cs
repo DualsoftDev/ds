@@ -1,27 +1,28 @@
-using Dual.Common.Core;
-using Dual.Common.Db;
-
-//using DsWebApp.Server.Common;
-using DsWebApp.Server.Controllers;
+using DsWebApp.Server.Hubs;
+using Engine.Runtime;
 
 namespace DsWebApp.Server.Demons;
 
 public partial class Demon : BackgroundService
 {
     readonly ILog _logger;
+
+    private ServerGlobal _serverGlobal;
     //DbRepository _repository;
-    //readonly IHubContext<VanillaHub> _hubContext;
+    readonly IHubContext<FieldIoHub> _hubContext;
     //UnsafeServices _unsafeServices;
     public Demon(
-        ILog logger
+        ServerGlobal serverGlobal
+        //ILog logger
         //, DbRepository repository
-        //, IHubContext<VanillaHub> hubContext
+        , IHubContext<FieldIoHub> hubContext
         //, UnsafeServices unsafeServices
         )
     {
-        _logger = logger;
+        _logger = serverGlobal.Logger;
+        _serverGlobal = serverGlobal;
         //_repository = repository;
-        //_hubContext = hubContext;
+        _hubContext = hubContext;
         //_unsafeServices = unsafeServices;
     }
 
@@ -39,6 +40,9 @@ public partial class Demon : BackgroundService
     async Task executeAsyncHelper(CancellationToken ct)
     {
         //await DbCacheController.InitializeAsync(_logger, _repository);
+
+        CompositeDisposable compositeDisposable = new();
+        ct.Register(() => compositeDisposable.Dispose());
 
         IDisposable subscription =
             Observable.Interval(TimeSpan.FromSeconds(1))
@@ -61,8 +65,20 @@ public partial class Demon : BackgroundService
                         _logger.Error($"Error on Background Service:\r\n{ex}");
                     }
                 });
-
-        ct.Register(() => subscription.Dispose());
+        compositeDisposable.Add(subscription);
+        var xx = _serverGlobal.IoHubServer.MemoryChangedObservable;
+        subscription = _serverGlobal.IoHubServer.MemoryChangedObservable.Subscribe(change =>
+        {
+            try
+            {
+                _hubContext.Clients.All.SendAsync("IoMemoryChanged", change);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Error on MemoryChanged:\r\n{ex}");
+            }
+        });
+        compositeDisposable.Add(subscription);
     }
 
 

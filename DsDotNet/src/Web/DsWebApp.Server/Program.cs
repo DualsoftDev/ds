@@ -155,6 +155,7 @@ app.MapRazorPages();
 app.MapControllers();
 app.MapHub<VanillaHub>("/hub/vanilla")
     .RequireCors(_corsPolicyName);
+app.MapHub<FieldIoHub>("/hub/io");
 
 app.MapFallbackToFile("index.html");
 

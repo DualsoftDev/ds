@@ -1,0 +1,26 @@
+@page "/demo/testio"
+
+@using Dual.Web.Blazor.ServerSide
+<h3>PageTestIo</h3>
+
+@code {
+    HubConnection hubConnection;
+    IDisposable subscription;
+
+    protected override async Task OnInitializedAsync()
+    {
+        /* Firefox browser 의 경우, hubConnection 을 통한 정보 얻기 실패함.
+         * Firefox can’t establish a connection to the server at wss://localhost:44397/BlazorSurveys.Server/. aspnetcore-browser-refresh.js:234:24
+         * MOZILLA_PKIX_ERROR_SELF_SIGNED_CERT : browser 의 security tab
+         */
+        hubConnection = await HubExtension.StartHubAsync(NavigationManager.ToAbsoluteUri("/hub/io"));
+        StateHasChanged();
+        subscription =
+            hubConnection.On<Object>("IoMemoryChanged", (changeInfo) =>
+            {
+                JsDual.Debug($"IoMemoryChanged: {changeInfo.GetType().FullName}");
+                StateHasChanged();
+            });
+    }
+
+}

@@ -27,7 +27,7 @@ namespace DsWebApp.Server.Common
         public ILog Logger { get; set; }
 
         static IoHub _ioHub;
-        public static ServerDirectAccess Server => _ioHub?.Server;
+        public ServerDirectAccess IoHubServer => _ioHub?.Server;
 
         public static void ReStartIoHub(string zmqSettingsJson)
         {

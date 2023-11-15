@@ -1,6 +1,6 @@
 // accepting
 [sys ip=192.168.0.1] A = {}
-[sys ip = 192.168.0.1] A = {}
+[sys] A = {}
 [sys ip = 999.168.0.1] A = {}
 [sys host = dualsoft.co.kr] A = {}
 [sys host = dualsoft.com] A = {}

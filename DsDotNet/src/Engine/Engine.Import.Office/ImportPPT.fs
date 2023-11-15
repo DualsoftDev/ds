@@ -98,12 +98,10 @@ module ImportPPTModule =
                         loadRelativePath,
                         loadedName,
                         theSys,
-                        None,
                         node.NodeType.GetLoadingType(),
                         sRepo
                     )
 
-                let hostIp = if paras.HostIp.IsSome then paras.HostIp.Value else ""
 
                 let addNewLoadedSys (newSys: DsSystem, bExtSys: bool, bOPEN_EXSYS_LINK: bool) =
 
@@ -136,7 +134,7 @@ module ImportPPTModule =
                         if sRepo.ContainsKey(key) then
                             ExternalSystem(sRepo[key], paras) :> LoadedSystem
                         else
-                            let newSys = DsSystem(paras.LoadedName, hostIp)
+                            let newSys = DsSystem(paras.LoadedName)
                             //let newSys = DsSystem(paras.LoadedName, "localhost")  ///test ahn :  ExternalSystem parser에서"ip" 없어도 열때 까지 임시로 "localhost"
                             addNewLoadedSys (newSys, true, node.NodeType = OPEN_EXSYS_LINK)
 
@@ -147,7 +145,7 @@ module ImportPPTModule =
                 | OPEN_EXSYS_CALL -> addNewExtSysLoaded 0
                 | OPEN_EXSYS_LINK -> addNewExtSysLoaded 1 //LINK 이면 형제 관계
                 | COPY_DEV ->
-                    let device = addNewLoadedSys (DsSystem(paras.LoadedName, hostIp), false, false)
+                    let device = addNewLoadedSys (DsSystem(paras.LoadedName), false, false)
                     theSys.AddLoadedSystem(device)
 
                 | _ -> failwithlog "error")
@@ -175,10 +173,10 @@ module ImportPPTModule =
             activeSysDir <- fileDirectory
             currentFileName <- fileName
             let sysName = getSystemName fileName
-            let mySys = DsSystem(sysName, "localhost")
+            let mySys = DsSystem(sysName)
 
             let paras =
-                getParams (filePath, sysName + ".pptx", mySys.Name, mySys, Some mySys.HostIp, DuNone, sRepo)
+                getParams (filePath, sysName + ".pptx", mySys.Name, mySys, DuNone, sRepo)
 
             dicLoaded.Clear()
             loadedParentStack.Clear()

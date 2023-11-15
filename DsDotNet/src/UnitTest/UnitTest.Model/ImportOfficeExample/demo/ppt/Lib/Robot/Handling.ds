@@ -1,4 +1,4 @@
-[sys ip = localhost] Handling = {
+[sys] Handling = {
     [flow] Page1 = {
     }
     [flow] Flow = {

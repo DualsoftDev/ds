@@ -1,4 +1,4 @@
-[sys ip = localhost] kit = {
+[sys] kit = {
     [flow] IO_9 = {
     }
     [flow] KIT = {

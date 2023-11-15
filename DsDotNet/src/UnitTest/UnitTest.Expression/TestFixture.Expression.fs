@@ -6,7 +6,7 @@ open Engine.Core
 
 [<AutoOpen>]
 module ExpressionFixtures =
-    let sys = DsSystem("testSys", "localhost")
+    let sys = DsSystem("testSys")
     let setRuntimeTarget(runtimeTarget:RuntimeTargetType) =
         let runtimeTargetBackup = RuntimeDS.Target
         RuntimeDS.Target <- runtimeTarget

@@ -100,7 +100,7 @@ public class Tester
     public static string DoSampleTestAddressesAndLayouts()
     {
         var text = @"
-[sys ip = localhost] KIT = {
+[sys] KIT = {
     [flow] IO_9 = {
     }
     [flow] KIT = {

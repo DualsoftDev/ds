@@ -21,7 +21,6 @@ module ImportUtilForLib =
             relativeFilePath: string,
             loadedName: string,
             containerSystem: DsSystem,
-            hostIp: string option,
             loadingType,
             sRepo
         ) =
@@ -31,7 +30,6 @@ module ImportUtilForLib =
           LoadedName = loadedName
           ShareableSystemRepository = sRepo
 
-          HostIp = hostIp
           LoadingType = loadingType }
 
     let addLoadedLibSystemNCall
@@ -50,7 +48,7 @@ module ImportUtilForLib =
             PathManager.getRelativePath (currentFileName |> DsFile) (libFilePath |> DsFile)
 
         let paras =
-            getParams (libFilePath, libRelPath, loadedName, mySys, None, DuDevice, ShareableSystemRepository())
+            getParams (libFilePath, libRelPath, loadedName, mySys, DuDevice, ShareableSystemRepository())
 
         let parent =
             match parentR with

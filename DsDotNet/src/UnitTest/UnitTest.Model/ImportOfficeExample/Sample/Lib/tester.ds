@@ -1,4 +1,4 @@
-[sys ip = localhost] tester = {
+[sys] tester = {
     [flow] Page1 = {
     }
     [flow] Flow = {

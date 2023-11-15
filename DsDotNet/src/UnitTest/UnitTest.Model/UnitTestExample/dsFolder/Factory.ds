@@ -1,4 +1,4 @@
-[sys ip = localhost] Factory = {
+[sys] Factory = {
     [flow] FactoryFlow = {
         Line1_Work > Line2_Work;
         Line1_Work = {

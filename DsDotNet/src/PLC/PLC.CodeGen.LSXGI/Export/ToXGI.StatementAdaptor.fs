@@ -158,7 +158,7 @@ module rec TypeConvertorModule =
         | UINT8 -> XgiVar<uint8>(createParam ())
         | _ -> failwithlog "ERROR"
 
-    let sys = DsSystem("", "")
+    let sys = DsSystem("")
 
     let createTypedXgiAutoVariable (nameHint: string) (initValue: obj) comment : IXgiVar =
         autoVariableCounter <- autoVariableCounter + 1

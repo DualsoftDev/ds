@@ -87,17 +87,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let name =
                 options.LoadedSystemName |? (ctx.systemName().GetText().DeQuoteOnDemand())
 
-            let hostIp =
-                let hostSpec =
-                    option {
-                        let! sysHeader = ctx.TryFindFirstChild<SysHeaderContext>()
-                        let! hostCtx = sysHeader.TryFindFirstChild<HostContext>()
-                        return hostCtx.GetText()
-                    }
-
-                match hostSpec with
-                | Some name -> name
-                | None -> null
+            
 
             let repo = options.ShareableSystemRepository
 
@@ -110,10 +100,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     | _ -> ()
 
                 x.TheSystem <-
-                    let exSys = DsSystem(name, hostIp)
+                    let exSys = DsSystem(name)
                     registerSystem exSys
                     exSys
-            | _ -> x.TheSystem <- DsSystem(name, hostIp)
+            | _ -> x.TheSystem <- DsSystem(name)
 
             tracefn ($"System: {name}")
         | None -> failwithlog "ERROR"
@@ -188,19 +178,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
         let loadedName = ctx.CollectNameComponents().Combine()
 
-        let optIpSpec =
-            option {
-                let! ipSpecCtx = ctx.TryFindFirstChild<IpSpecContext>()
-                let! host = ipSpecCtx.TryFindFirstChild<HostContext>()
-                return deQuote <| host.GetText()
-            }
+       
 
         x.TheSystem.LoadExternalSystemAs(
             options.ShareableSystemRepository,
             loadedName,
             absoluteFilePath,
-            simpleFilePath,
-            optIpSpec
+            simpleFilePath
         )
         |> ignore
 
@@ -706,7 +690,6 @@ module ParserLoadApiModule =
                      RelativeFilePath = relativeFilePath
                      LoadedName = loadedName
                      ShareableSystemRepository = systemRepo
-                     HostIp = None
                      LoadingType = DuDevice }
 
             x.AddLoadedSystem(device) |> ignore
@@ -717,8 +700,7 @@ module ParserLoadApiModule =
                 systemRepo: ShareableSystemRepository,
                 loadedName: string,
                 absoluteFilePath: string,
-                relativeFilePath: string,
-                ipSpec: string option
+                relativeFilePath: string
             ) =
             let external =
                 let param =
@@ -727,7 +709,6 @@ module ParserLoadApiModule =
                       RelativeFilePath = relativeFilePath
                       LoadedName = loadedName
                       ShareableSystemRepository = systemRepo
-                      HostIp = ipSpec
                       LoadingType = DuExternal }
 
                 match systemRepo.TryFind(absoluteFilePath) with

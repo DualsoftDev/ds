@@ -20,7 +20,7 @@ module XgiFixtures =
             autoVariableCounter <- 0
 
         let mutable runtimeTarget = RuntimeDS.Target
-        let sys = DsSystem("testSys", "localhost")
+        let sys = DsSystem("testSys")
         [<SetUp>]
         member x.Setup () =
             RuntimeDS.Target <- x.GetCurrentRuntimeTarget()

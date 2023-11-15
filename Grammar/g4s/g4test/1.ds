@@ -1,4 +1,4 @@
-[sys ip = localhost] T6_Alias = {
+[sys] T6_Alias = {
     [flow] Page1 = {
     }
     [flow] AndFlow = {

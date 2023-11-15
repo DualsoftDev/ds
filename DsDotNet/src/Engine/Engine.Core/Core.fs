@@ -39,7 +39,6 @@ module CoreModule =
         /// *.ds 파일에서 정의된 이름과 로딩할 때의 이름이 다를 수 있습니다.
         LoadedName: string
         ShareableSystemRepository: ShareableSystemRepository
-        HostIp: string option
         LoadingType: ParserLoadingType
     }
 
@@ -80,9 +79,8 @@ module CoreModule =
     /// 공유 인스턴스. *.ds 파일의 절대 경로를 기준으로 하나의 인스턴스만 생성하고 이를 참조하는 개념입니다.
     and ExternalSystem (loadedSystem: DsSystem, param: DeviceLoadParameters) =
         inherit LoadedSystem(loadedSystem, param)
-        member _.HostIp = param.HostIp
 
-    type DsSystem (name: string, hostIp: string) =
+    type DsSystem (name: string) =
         inherit FqdnObject(name, createFqdnObject([||]))
         let loadedSystems = createNamedHashSet<LoadedSystem>()
         let apiUsages = ResizeArray<ApiItem>()
@@ -99,7 +97,6 @@ module CoreModule =
         member _.Devices = loadedSystems.OfType<Device>() |> Seq.toArray 
         member _.ExternalSystems = loadedSystems.OfType<ExternalSystem>() |> Seq.toArray
         member _.ApiUsages = apiUsages |> seq
-        member _.HostIp = hostIp
         member val Jobs = ResizeArray<Job>()
         member val Flows = createNamedHashSet<Flow>()
         member val OriginalCodeBlocks = ResizeArray<string>()

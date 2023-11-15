@@ -1,4 +1,4 @@
-[sys ip = localhost] Weld = {
+[sys] Weld = {
     [flow] Page1 = {
     }
     [flow] Flow = {

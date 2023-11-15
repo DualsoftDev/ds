@@ -190,8 +190,7 @@ funAddress: IDENTIFIER1;
 // model: (system|)* EOF;        // importStatement|cpus
 comment: BLOCK_COMMENT | LINE_COMMENT;
 
-system: '[' sysHeader ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
-    sysHeader: SYS ipSpec?;
+system: '[' SYS ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
     sysBlock
         : LBRACE (  flowBlock | jobBlock | loadDeviceBlock | loadExternalSystemBlock
                     | interfaceBlock | buttonBlock | lampBlock | conditionBlock | propsBlock
@@ -200,10 +199,6 @@ system: '[' sysHeader ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
           ;
     systemName:identifier1;
 
-ipSpec: ('ip'|'host') '=' host;
-    host: ipv4 | etcName;
-    etcName: IDENTIFIER1 | IDENTIFIER2 | IDENTIFIER3 | IDENTIFIER4;  // identifier1234;
-    ipv4: IPV4;
 
 //[device file="c:\my.ds"] B;
 loadDeviceBlock: '[' 'device' fileSpec ']' deviceName SEIMCOLON;

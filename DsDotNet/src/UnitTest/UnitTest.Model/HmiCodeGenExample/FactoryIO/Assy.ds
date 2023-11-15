@@ -1,4 +1,4 @@
-[sys ip = localhost] Assy = {
+[sys] Assy = {
     [flow] Assy = {
         "work end" |> "work end" |> PartOut;		// "work end"(Real)|> "work end"(Real) |> PartOut(Real);
         "m+" <||> 중력 |> "us+";		// "m+"(Real)<||> 중력(Real) |> "us+"(Real);

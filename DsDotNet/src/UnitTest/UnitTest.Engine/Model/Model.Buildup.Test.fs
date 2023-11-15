@@ -25,7 +25,7 @@ module ModelBuildupTests1 =
         let systemRepo = ShareableSystemRepository()
 
         let createSimpleSystem() =
-            let system = DsSystem("My", "localhost")
+            let system = DsSystem("My")
             let flow = Flow.Create("F", system)
             let real = Real.Create("Main", flow)
             let dev = system.LoadDeviceAs(systemRepo, "A", @$"{libdir}/cylinder/double.ds", "./cylinder/double.ds")
@@ -52,7 +52,7 @@ module ModelBuildupTests1 =
 
             let generated = system.ToDsText(true)
             let answer = """
-[sys ip = localhost] My = {
+[sys] My = {
     [flow] F = {
         Main = {
             Ap < Am;		
@@ -90,7 +90,7 @@ module ModelBuildupTests1 =
             flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, "<", call2)) |> ignore
             let generated = system.ToDsText(true)
             let answer = """
-[sys ip = localhost] My = {
+[sys] My = {
     [flow] F = {
         Main2 < Ap;		// Main2(Alias)< Ap(CallDev);
         Main; // island
@@ -122,7 +122,7 @@ module ModelBuildupTests1 =
             flow2.CreateEdge(ModelingEdgeInfo<Vertex>(real2, ">", real3)) |> ignore
             let generated = system.ToDsText(true)
             let answer = """
-[sys ip = localhost] My = {
+[sys] My = {
     [flow] F = {
             Main; // island
     }
@@ -153,7 +153,7 @@ module ModelBuildupTests1 =
 
             let generated = system.ToDsText(true)
             let answer = """
-[sys ip = localhost] My = {
+[sys] My = {
     [flow] F = {
             Main; // island
             Main2; // island
@@ -188,7 +188,7 @@ module ModelBuildupTests1 =
 
             let generated = system.ToDsText(true)
             let answer = """
-[sys ip = localhost] My = {
+[sys] My = {
     [flow] F = {
             Main; // island
     }
@@ -261,7 +261,7 @@ module ModelBuildupTests1 =
 
 //            let generated = system.ToDsText(true)
 //            let answer = """
-//[sys ip = localhost] My = {
+//[sys] My = {
 //    [flow] F = {
 //            Main; // island
 //    }

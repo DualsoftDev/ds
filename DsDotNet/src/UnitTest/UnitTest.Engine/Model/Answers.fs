@@ -19,7 +19,7 @@ module ModelAnswers =
 """
  
     let answerEveryScenarioText = """
-[sys ip = 192.168.0.1] My = {
+[sys] My = {
     [flow] MyFlow = {
         Seg1 > Seg2; 		// Seg1(Real)> Seg2(Real)
         Seg1 = {
@@ -410,7 +410,7 @@ module ModelComponentAnswers =
 """
 
     let answerT6Alias = """
-[sys ip = localhost] T6_Alias = {
+[sys] T6_Alias = {
     [flow] Page1 = {
         AndFlow.R2 > OrFlow.R1;
     }

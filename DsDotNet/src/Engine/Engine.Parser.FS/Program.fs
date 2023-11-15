@@ -29,7 +29,7 @@ module Program =
 
     let EveryScenarioText =
         """
-[sys ip = 192.168.0.1] My = {
+[sys] My = {
     [flow] MyFlow = {
         Seg1 > Seg2;
         Seg1 = {
@@ -128,7 +128,7 @@ C4 > C5;
 
     let CpuTestText =
         """
-[sys ip = 192.168.0.1] My = {
+[sys] My = {
     [flow] MyFlow = {
         Ap > Seg1 > Seg2 > F.R3;
         Seg2 > aliasRealInFlow > aliasRealExInFlow;
@@ -857,7 +857,7 @@ C4 > C5;
 
     let Ppt20221213Text =
         """
-[sys ip = localhost] FactoryIO = {
+[sys] FactoryIO = {
     [flow] API = {
     }
     [flow] Line = {

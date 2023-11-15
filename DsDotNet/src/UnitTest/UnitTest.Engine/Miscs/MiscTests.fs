@@ -100,7 +100,7 @@ module MiscTestModule =
 
         [<Test>]
         member __.``Generic test`` () =
-            let sys = DsSystem("testSys", "localhost")
+            let sys = DsSystem("testSys")
             RuntimeDS.Target <- XGI
             RuntimeDS.System <- sys
 

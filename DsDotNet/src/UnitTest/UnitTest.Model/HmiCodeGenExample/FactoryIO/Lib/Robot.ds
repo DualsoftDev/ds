@@ -1,4 +1,4 @@
-[sys ip = localhost] Robot = {
+[sys] Robot = {
     [flow] Robot = {
         "gm+" <||> "gm-" |> "gs+";		// "gm+"(Real)<||> "gm-"(Real) |> "gs+"(Real);
         "gm+" |> "gs-";		// "gm+"(Real)|> "gs-"(Real);

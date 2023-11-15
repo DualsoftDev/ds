@@ -1,4 +1,4 @@
-[sys ip = localhost] T7_CopySystem = {
+[sys] T7_CopySystem = {
     [flow] Page1 = {
     }
     [flow] S101 = {

@@ -1,4 +1,4 @@
-[sys ip = localhost] FactoryIO = {
+[sys] FactoryIO = {
     [flow] API = {
     }
     [flow] Line = {

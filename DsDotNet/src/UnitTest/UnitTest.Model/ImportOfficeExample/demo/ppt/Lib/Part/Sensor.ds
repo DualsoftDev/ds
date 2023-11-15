@@ -1,4 +1,4 @@
-[sys ip = localhost] Sensor = {
+[sys] Sensor = {
     [flow] Page1 = {
     }
     [flow] Flow = {

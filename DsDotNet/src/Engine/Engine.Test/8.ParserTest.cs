@@ -507,7 +507,7 @@ namespace Engine
 ";
 
         public static string T6Alias =@"
-[sys ip = localhost] T6_Alias = {
+[sys] T6_Alias = {
     [flow] Page1 = {
         AndFlow.R2 > OrFlow.R1;
     }

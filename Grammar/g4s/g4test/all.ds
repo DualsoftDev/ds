@@ -1,4 +1,4 @@
-[sys ip = 192.168.0.1] My = {
+[sys] My = {
     [flow] F = {        // GraphVertexType.Flow
         Main        // GraphVertexType.{ Segment | Parenting }
         > R3        // GraphVertexType.{ Segment }

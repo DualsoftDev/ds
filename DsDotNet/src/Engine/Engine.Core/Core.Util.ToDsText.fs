@@ -140,8 +140,7 @@ module internal ToDsTextModule =
             ]
 
         [
-            let ip = if system.HostIp.IsNullOrEmpty() then "" else $" ip = {system.HostIp}"
-            yield $"[sys{ip}] {system.Name.QuoteOnDemand()} = {lb}"
+            yield $"[sys] {system.Name.QuoteOnDemand()} = {lb}"
 
             for f in system.Flows do
                 yield flowToDs f indent
@@ -415,11 +414,7 @@ module internal ToDsTextModule =
             
             let commentSystem(es:ExternalSystem) = if pCooment then  $"// {es.AbsoluteFilePath}" else "";
             for es in system.ExternalSystems do
-                let ip =
-                    match es.HostIp with
-                    | Some host -> $" ip={quote host}"
-                    | _ -> ""
-                yield $"{tab}[external file={quote es.RelativeFilePath}{ip}] {es.Name}; {commentSystem es}"
+                yield $"{tab}[external file={quote es.RelativeFilePath}] {es.Name}; {commentSystem es}"
 
             //Commands/Observes는 JobDef에 저장 (Variables는 OriginalCodeBlocks ?? System.Variables ??)
             yield codeBlockToDs system

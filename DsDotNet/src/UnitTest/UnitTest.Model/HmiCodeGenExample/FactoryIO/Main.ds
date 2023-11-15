@@ -1,4 +1,4 @@
-[sys ip = localhost] Main = {
+[sys] Main = {
     [flow] Main = {
         "Part Remove" |> "Part Remove" |> Part;		// "Part Remove"(Real)|> "Part Remove"(Real) |> Part(Real);
         "v+" <||> "v-" |> "s+";		// "v+"(Real)<||> "v-"(Real) |> "s+"(Real);

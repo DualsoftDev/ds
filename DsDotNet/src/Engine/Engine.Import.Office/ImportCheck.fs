@@ -14,7 +14,7 @@ open Engine.Core
 module ImportCheck =
 
     let GetDemoModel (sysName: string) =
-        let sys = DsSystem(sysName, "top")
+        let sys = DsSystem(sysName)
         let flow = Flow.Create("P0", sys)
         let vertexs = HashSet<Real>()
         let find (name: string) = vertexs.First(fun f -> f.Name = name)

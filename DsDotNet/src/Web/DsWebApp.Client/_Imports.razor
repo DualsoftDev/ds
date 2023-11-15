@@ -1,4 +1,4 @@
-﻿@using System.Net.Http
+@using System.Net.Http
 @using System.Net.Http.Json
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
@@ -11,3 +11,13 @@
 @using DsWebApp.Shared
 
 @using DevExpress.Blazor
+@using Dual.Web.Blazor.Client.Canvas2d
+@using Dual.Web.Blazor.Client.Components
+
+
+@inject NavigationManager NavigationManager
+@inject IConfiguration Configuration
+@inject HttpClient Http
+@inject DualWebBlazorJsInterop JsDual
+@inject CanvasJsInterop JsCanvas
+@inject IJSRuntime JsRuntime

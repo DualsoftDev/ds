@@ -76,7 +76,9 @@ services.AddCors(options =>
                 ;
 
         var urls = new[] {  "http://localhost:*", "http://192.168.9.118:*",
-                            "https://localhost:*", "https://192.168.9.118:*"};
+                            "https://localhost:*", "https://192.168.9.118:*",
+                            "tcp://localhost:*", "tcp://"
+        };
         foreach (var url in urls)
         {
             policy.WithOrigins(url)

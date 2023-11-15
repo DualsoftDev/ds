@@ -48,8 +48,6 @@ module CodeConvertUtil =
         let edges = graph.GetIncomingEdges(target) |> List.ofSeq
         let mask  = if bStartEdge then EdgeType.Start else EdgeType.Reset
 
-
-
         let srcsWeek   = edges |> filter(fun e -> e.EdgeType = mask )
         let srcsStrong = edges |> filter(fun e -> e.EdgeType = (mask ||| EdgeType.Strong))
 

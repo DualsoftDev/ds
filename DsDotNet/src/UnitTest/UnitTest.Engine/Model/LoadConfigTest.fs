@@ -17,9 +17,7 @@ module LoadConfigTestModule =
         
         let loadConfigTest() =
             let cfg =
-                {   DsFilePaths = [
-                        $@"{dsFileDir}dsFolder/lib/Cylinder/Double.ds"
-                        $@"{dsFileDir}dsFolder/sub/sub/station.ds" ] }
+                {   DsFilePath =  $@"{dsFileDir}dsFolder/lib/Cylinder/Double.ds" }
             ModelLoader.SaveConfig configFile cfg
             let cfg2 = ModelLoader.LoadConfig configFile
             cfg === cfg2
@@ -30,8 +28,7 @@ module LoadConfigTestModule =
             let config = loadConfigTest()
 
             let model = ParserLoader.LoadFromConfig configFile
-            model.Systems.Length === 2
-            model.Systems.Select(fun s -> s.Name) |> SeqEq ["Double"; "Station"]
+            model.System.Name === "Double"
 
 
         [<Test>]
@@ -39,9 +36,8 @@ module LoadConfigTestModule =
             let configPath = PathManager.getFullPath ( @"dsFolder.json"|>DsFile) (dsFileDir.ToDirectory())
 
             let model = ParserLoader.LoadFromConfig configPath
-            model.Systems.Length === 1
             model.LoadingPaths.Length === 9
-            model.Systems.Select(fun s -> s.Name) |> SeqEq ["Factory"]
+            model.System.Name === "Factory"
 
 
         [<Test>]

@@ -21,13 +21,10 @@ module ModelLoader =
         let json = JsonConvert.SerializeObject(modelConfig, jsonSettings)
         File.WriteAllText(path, json)
 
-    let SaveConfigWithPath (path: string) (sysRunPaths: string seq) =
+    let SaveConfigWithPath (path: string) (sysRunPaths: string) =
         let cfg =
             {
-                DsFilePaths = 
-                    sysRunPaths
-                    |> Seq.map(fun path -> path.Replace("\\", "/"))
-                    |> Seq.toList
+                DsFilePath =  sysRunPaths.Replace("\\", "/")
             }
         SaveConfig path cfg 
         path
@@ -79,7 +76,7 @@ type ModelLoaderExt =
         
         let jsFilePath = changeExtension (zipPathDS|> DsFile)  ".json"
         let activeRelaPath = getRelativePath(jsFilePath|>DsFile) (activeFilePath|>DsFile);//   // 상대경로로 기본 저장
-        let config = SaveConfigWithPath jsFilePath [|activeRelaPath|]
+        let config = SaveConfigWithPath jsFilePath activeRelaPath
 
         addFilesToExistingZipAndDeleteFiles zipPathDS [zipPathPPT;config]
 

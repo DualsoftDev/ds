@@ -103,27 +103,27 @@ module HmiGenModule =
                     let btnName = $"{name}of__{flowName}"
                     addFlowButton btnName system.Name [ flowName ] btnType
 
-            for sys in model.Systems do
-                addSystemFlowReal sys
-                let groupBtnCombiner = addGroupButtons sys
-                groupBtnCombiner sys.AutoButtons ButtonType.Auto
-                groupBtnCombiner sys.ManualButtons ButtonType.Manual
-                groupBtnCombiner sys.DriveButtons ButtonType.Drive
-                groupBtnCombiner sys.StopButtons ButtonType.Stop
-                groupBtnCombiner sys.ClearButtons ButtonType.Clear
-                groupBtnCombiner sys.EmergencyButtons ButtonType.Emergency
-                groupBtnCombiner sys.TestButtons ButtonType.Test
-                groupBtnCombiner sys.HomeButtons ButtonType.Home
-                groupBtnCombiner sys.ReadyButtons ButtonType.Ready
+            let sys  = model.System
+            addSystemFlowReal sys
+            let groupBtnCombiner = addGroupButtons sys
+            groupBtnCombiner sys.AutoButtons ButtonType.Auto
+            groupBtnCombiner sys.ManualButtons ButtonType.Manual
+            groupBtnCombiner sys.DriveButtons ButtonType.Drive
+            groupBtnCombiner sys.StopButtons ButtonType.Stop
+            groupBtnCombiner sys.ClearButtons ButtonType.Clear
+            groupBtnCombiner sys.EmergencyButtons ButtonType.Emergency
+            groupBtnCombiner sys.TestButtons ButtonType.Test
+            groupBtnCombiner sys.HomeButtons ButtonType.Home
+            groupBtnCombiner sys.ReadyButtons ButtonType.Ready
 
-                for flow in sys.Flows do
-                    addSystemFlowReal flow
-                    addUnionButtons sys flow
+            for flow in sys.Flows do
+                addSystemFlowReal flow
+                addUnionButtons sys flow
 
-                    for rootSeg in flow.Graph.Vertices do
-                        match rootSeg with
-                        | :? Real -> addSystemFlowReal rootSeg
-                        | _ -> ()
+                for rootSeg in flow.Graph.Vertices do
+                    match rootSeg with
+                    | :? Real -> addSystemFlowReal rootSeg
+                    | _ -> ()
 
             hmiInfos
 
@@ -138,8 +138,7 @@ module HmiGenModule =
 
                 match btnType with
                 | (ButtonType.Test | ButtonType.Drive) ->
-                    for sys in model.Systems do
-                        for sp in sys.StartPoints do
+                        for sp in model.System.StartPoints do
                             hmiInfos[button].targets.Add(sp.QualifiedName)
                 | (ButtonType.Auto | ButtonType.Manual | ButtonType.Emergency | ButtonType.Stop | ButtonType.Clear | ButtonType.Home | ButtonType.Ready) ->
                     for flow in flowNames do
@@ -207,19 +206,19 @@ module HmiGenModule =
 
                     addInterface api jobName
 
-            for sys in model.Systems do
-                for job in sys.Jobs do
-                    addApiGroup sys job
+            let sys  = model.System 
+            for job in sys.Jobs do
+                addApiGroup sys job
 
-                for flow in sys.Flows do
-                    for rootSeg in flow.Graph.Vertices do
-                        match rootSeg with
-                        | :? Real as r ->
-                            addUses sys flow r
+            for flow in sys.Flows do
+                for rootSeg in flow.Graph.Vertices do
+                    match rootSeg with
+                    | :? Real as r ->
+                        addUses sys flow r
 
-                            for vertex in r.Graph.Vertices do
-                                addUses sys flow vertex
-                        | _ -> addUses sys flow rootSeg
+                        for vertex in r.Graph.Vertices do
+                            addUses sys flow vertex
+                    | _ -> addUses sys flow rootSeg
 
             hmiInfos
 

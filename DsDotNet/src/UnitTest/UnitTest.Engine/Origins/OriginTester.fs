@@ -17,9 +17,7 @@ module OriginTestModule =
         let configFile = PathManager.getFullPath  (@"test-origin-config.json"|>DsFile) (libdir.ToDirectory())
         let genConfig (filePath:string) =
             let cfg = {
-                    DsFilePaths = [
-                        $@"{libdir}/MultipleJobdefCallExample/{filePath}"
-                    ]
+                    DsFilePath = $@"{libdir}/MultipleJobdefCallExample/{filePath}"
                 }
             ModelLoader.SaveConfig configFile cfg
 
@@ -30,8 +28,7 @@ module OriginTestModule =
             let model = ParserLoader.LoadFromConfig(configFile)
             let originChecker =
                 [
-                    for sys in model.Systems do
-                        for f in sys.Flows do
+                        for f in model.System.Flows do
                             for v in f.Graph.Vertices do
                                 match v with
                                 | :? Real as r -> OriginHelper.GetOrigins r.Graph

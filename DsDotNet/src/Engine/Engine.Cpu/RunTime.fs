@@ -8,6 +8,8 @@ open System.Collections.Generic
 open System.Threading.Tasks
 open System.Threading
 open Engine.Core.TagKindModule
+open System.Runtime.CompilerServices
+open Engine.CodeGenCPU
 
 [<AutoOpen>]
 module RunTime =
@@ -91,4 +93,30 @@ module RunTime =
             doStop()
             syncReset(systems, false)
             scanOnce()
+
+
+            
+
+                
+
+    [<Extension>]
+    type DsCpuExt  =
+        //Job 만들기
+        [<Extension>]
+        static member GetDsCPU (dsSys : DsSystem, runtimePackage:RuntimePackage) : DsCPU =
+            let lstSys = [dsSys] @ dsSys.GetRecursiveLoadedSystems()
+
+            // Initialize storages and load CPU statements
+            let storages = Storages()
+            let pous = CpuLoaderExt.LoadStatements(dsSys, storages) |> Seq.toList
+
+            // Create a list to hold commented statements
+            let mutable css = []
+
+            // Add commented statements from each CPU
+            for cpu in pous do
+                css <- css @ cpu.CommentedStatements() |> List.ofSeq
+
+            // Create and return a DsCPU object
+            DsCPU(css, lstSys, runtimePackage)
 

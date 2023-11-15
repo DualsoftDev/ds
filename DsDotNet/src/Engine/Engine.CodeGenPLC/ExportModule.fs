@@ -106,7 +106,7 @@ module ExportModule =
         RuntimeDS.Target <- XGI
         let globalStorage = new Storages()
         let localStorage = new Storages()
-        let result = Cpu.LoadStatements(system, globalStorage)
+        let result = CpuLoaderExt.LoadStatements(system, globalStorage)
         let xml = generateXmlXGI system globalStorage localStorage result existingLSISprj
         let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
         File.WriteAllText(path, crlfXml)

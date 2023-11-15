@@ -24,42 +24,36 @@ module ParserLoader =
         let system = ModelParser.ParseFromString(text, option)
         system
 
-    let loadingDS (loadingConfigDir: string) (activePaths: string seq) =
+    let loadingDS (loadingConfigDir: string) (dsFile: string ) =
         let systemRepo = ShareableSystemRepository()
 
-        let systems =
-            let paths =
-                [ for dsFile in activePaths do
-                      if PathManager.isPathRooted (dsFile.ToFile()) then
-                          yield dsFile |> FileManager.fileExistChecker
-                      else
-                          yield
-                              PathManager.getFullPath (dsFile.ToFile()) (loadingConfigDir |> DsDirectory)
-                              |> FileManager.fileExistChecker ]
+        let sysPath =
+            if PathManager.isPathRooted (dsFile.ToFile()) then
+                dsFile |> FileManager.fileExistChecker
+            else
+                PathManager.getFullPath (dsFile.ToFile()) (loadingConfigDir |> DsDirectory)
+                |> FileManager.fileExistChecker 
 
-            paths |> List.map (loadSystemFromDsFile systemRepo)
-
+        let system = loadSystemFromDsFile  systemRepo sysPath
 
         let loadings =
-            systems
-                .Collect(fun f -> f.GetRecursiveLoadeds())
-                .Map(fun s -> s.AbsoluteFilePath)
-                .Distinct()
-                .ToFSharpList()
+                system.GetRecursiveLoadeds().Map(fun s -> s.AbsoluteFilePath)
+                                            .Distinct()
+                                            .ToFSharpList()
 
-        systems, loadings
+        system, loadings
 
 
     let LoadFromConfig (configPath: string) =
         let cfg = LoadConfig configPath
         let dir = PathManager.getDirectoryName (configPath.ToFile())
-        let systems, loadings = loadingDS dir cfg.DsFilePaths
+        let system, loadings = loadingDS dir cfg.DsFilePath
 
         { Config = cfg
-          Systems = systems
+          System = system
           LoadingPaths = loadings }
 
 
     let LoadFromActivePath (activePath: string) =
         let dir = PathManager.getDirectoryName (activePath.ToFile())
-        loadingDS dir [ activePath ]
+        loadingDS dir   activePath 

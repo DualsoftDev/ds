@@ -4,10 +4,10 @@ namespace Engine.Core
 [<AutoOpen>]
 module ModelLoaderModule =
     type ModelConfig = {
-        DsFilePaths: string list
+        DsFilePath: string 
     }
     type Model = {
         Config: ModelConfig
-        Systems : DsSystem list
+        System : DsSystem 
         LoadingPaths : string list
     }

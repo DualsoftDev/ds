@@ -57,8 +57,8 @@ module ImportUtilForLib =
             | Some parentR -> DuParentReal parentR
             | None -> DuParentFlow(parentF.Value)
 
-        let systems, loadingPaths = ParserLoader.LoadFromActivePath libFilePath
-        let devOrg = systems |> Seq.head
+        let system, loadingPaths = ParserLoader.LoadFromActivePath libFilePath
+        let devOrg = system
 
         if not (devOrg.ApiItems.any (fun f -> f.Name = apiName)) then
             node.Shape.ErrorName(ErrID._49, node.PageNum)

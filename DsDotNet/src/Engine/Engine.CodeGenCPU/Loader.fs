@@ -94,7 +94,7 @@ module CpuLoader =
 
 
     [<Extension>]
-    type Cpu =
+    type CpuLoaderExt =
         [<Extension>]
         static member LoadStatements (system:DsSystem, storages:Storages) =
             UniqueName.resetAll()

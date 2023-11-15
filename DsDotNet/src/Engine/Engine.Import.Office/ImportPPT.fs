@@ -16,7 +16,7 @@ open Engine.Parser.FS
 [<AutoOpen>]
 module ImportPPTModule =
     type DSFromPPT =
-        { Systems: DsSystem seq
+        { System: DsSystem 
           ActivePaths: string seq
           LoadingPaths: string seq }
 
@@ -187,14 +187,13 @@ module ImportPPTModule =
 
     let pptRepo = Dictionary<DsSystem, pptDoc>()
 
-    let loadingfromPPTs (paths: string seq) =
+    let loadingfromPPTs (path: string ) =
         try
             try
-                let cfg = { DsFilePaths = paths |> Seq.toList }
+                let cfg = { DsFilePath = path }
 
-                let results =
-                    [ for dsFile in cfg.DsFilePaths do
-                          PowerPointImportor.GetImportModel(pptRepo, dsFile) ]
+                let sys, doc = PowerPointImportor.GetImportModel(pptRepo, path)
+                        
 
                 //ExternalSystem 순환참조때문에 완성못한 시스템 BuildSystem 마무리하기
                 pptRepo
@@ -207,13 +206,10 @@ module ImportPPTModule =
                         pathStack.Pop() |> ignore)
 
 
-                let systems = results |> map fst
-                let views = results |> dict
 
                 { Config = cfg
-                  Systems = systems
+                  System = sys
                   LoadingPaths = [] },
-                views,
                 pptRepo
 
             with ex ->
@@ -221,7 +217,7 @@ module ImportPPTModule =
                     if pathStack.any () then
                         pathStack.First()
                     else
-                        paths.First()
+                        path
 
                 if not (ex.Message.EndsWith(ErrorNotify)) then
                     ErrorPPTNotify.Trigger(errFileName, 0, 0u, "")
@@ -237,26 +233,26 @@ module ImportPPTModule =
     type PptResult =
         { System: DsSystem
           Views: ViewNode seq
-          IsActive: bool }
+         }
 
 
     [<Extension>]
     type ImportPPT =
 
         [<Extension>]
-        static member GetModel(paths: string seq) =
+        static member GetModel(path: string ) =
             pptRepo.Clear()
-            loadingfromPPTs (paths) |> fun (model, views, pptRepo) -> model
+            loadingfromPPTs (path) |> fun (model,  pptRepo) -> model
 
         [<Extension>]
-        static member GetLoadingAllSystem(paths: string seq) =
+        static member GetLoadingAllSystem(path: string ) =
             pptRepo.Clear()
 
-            loadingfromPPTs (paths)
-            |> fun (model, views, pptRepo) ->
+            loadingfromPPTs (path)
+            |> fun (model,  pptRepo) ->
                 model,
                 pptRepo
                 |> Seq.map (fun f ->
                     { System = f.Key
                       Views = f.Key.GetViewNodes()
-                      IsActive = model.Systems.Contains(f.Key) })
+                      })

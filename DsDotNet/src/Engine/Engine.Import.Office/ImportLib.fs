@@ -29,8 +29,8 @@ module ImportLib =
 
                         PathManager.getFullPath textLibPptx runDir
 
-                    let libModel: Model = loadingfromPPTs [ libFilePath ] |> Tuple.first
-                    libModel.Systems.Head
+                    let libModel: Model = loadingfromPPTs  libFilePath  |> Tuple.first
+                    libModel.System
 
                 let loadedlibFilePath =
                     PathManager.getFullPath textLibPptx (PathManager.getFolderOfPath (fullName))
@@ -41,13 +41,13 @@ module ImportLib =
 
             let exportPath =
                 let sys =
-                    let model: Model = loadingfromPPTs [ fullName ] |> Tuple.first
-                    model.Systems.[0]
+                    let model: Model = loadingfromPPTs  fullName  |> Tuple.first
+                    model.System
 
                 sys.pptxToExportDS fullName
 
-            let systems, loadingPaths = ParserLoader.LoadFromActivePath exportPath
+            let system, loadingPaths = ParserLoader.LoadFromActivePath exportPath
 
-            { Systems = systems
+            { System = system
               ActivePaths = [ exportPath ]
               LoadingPaths = loadingPaths }

@@ -13,6 +13,10 @@ type RuntimeModel(zipDsPath:FilePath) =
     let mutable zmqInfo = Zmq.InitializeServer "zmqsettings.json" |> Some
 
     do
+
+
+
+
         // todo: compiledModel <- ....
         ()
 

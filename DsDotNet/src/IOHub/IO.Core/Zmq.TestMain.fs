@@ -204,7 +204,7 @@ rs p/s: read all strings in p/s file
 
                 ())
 
-        registerCancelKey cts server
+        registerCancelKey cts zmqInfo
 
         if withServerKeyboardLoop then
             serverKeyboardLoop server cts.Token
@@ -235,10 +235,7 @@ rs p/s: read all strings in p/s file
 
                 ())
 
-        let disposables = new CompositeDisposable()
-        disposables.Add(client)
-        disposables.Add(server)
-        registerCancelKey cts disposables
+        registerCancelKey cts zmqInfo
 
         //let rr0 = client.SendRequest("read Mw100 Mx30 Md12")
         //let result = client.SendRequest("read Mw100 Mx30")

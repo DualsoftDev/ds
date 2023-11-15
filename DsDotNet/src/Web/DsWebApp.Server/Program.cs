@@ -11,6 +11,8 @@ using Newtonsoft.Json;
 using DsWebApp.Server;
 using System.Reflection;
 using DsWebApp.Server.Hubs;
+using Engine.Core;
+using Engine.Info;
 
 //using DsWebApp.Server.Authentication;
 
@@ -100,10 +102,15 @@ services.AddDevExpressBlazor(options =>
     options.SizeMode = DevExpress.Blazor.SizeMode.Medium;
 });
 
-var serverSettings = conf.GetSection("ServerSettings").Get<ServerSettings>();
-serverSettings.Initialize();
-services.AddSingleton(serverSettings);
-services.AddUnsafeServices(logger);
+var serverSettings =
+    conf.GetSection("ServerSettings").Get<ServerSettings>()
+        .Tee(ss => ss.Initialize());
+var serverGlobals = new ServerGlobal() { ServerSettings = serverSettings };
+
+services.AddSingleton(serverGlobals);
+
+
+await services.InitializeUnsafeServicesAsync(serverGlobals, logger);
 
 
 builder.WebHost.UseStaticWebAssets();
@@ -169,10 +176,21 @@ static void PresetAppSettings(bool isWinService)
         Environment.SetEnvironmentVariable("ASPNETCORE_URLS", config["PRESET_ASPNETCORE_URLS"]);
 }
 
-public static class CustomStaticFileExtension
+public static class CustomServerExtension
 {
-    public static IServiceCollection AddUnsafeServices(this IServiceCollection services, ILog logger)
+    public static async Task<IServiceCollection> InitializeUnsafeServicesAsync(this IServiceCollection services, ServerGlobal serverGlobal, ILog logger)
     {
+        var commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));
+        var connectionString = commonAppSettings.LoggerDBSettings.ConnectionString;
+
+        CoreModule.DsSystem[] systems = null;
+        ModelCompileInfo modelCompileInfo = null;
+        var xxx = await DBLogger.InitializeLogWriterOnDemandAsync(systems, commonAppSettings, modelCompileInfo);
+        var dsFileJson = DBLogger.GetDsFilePath(connectionString);
+
+
+        serverGlobal.DsCommonAppSettings = commonAppSettings;
+        
         return services;
     }
 }

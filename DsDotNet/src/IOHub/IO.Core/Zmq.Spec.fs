@@ -86,6 +86,7 @@ module rec ZmqSpec =
         [<JsonIgnore>]
         member val AddressResolver: IAddressInfoProvider = null with get, set
 
+    [<AllowNullLiteral>]
     type IOSpec() =
         member val ServicePort = 0 with get, set
         member val TopLevelLocation = "" with get, set

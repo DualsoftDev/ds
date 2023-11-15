@@ -23,11 +23,14 @@
             "id": "d96ae9ea8943286a",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "canvas",
               "state": {
-                "file": "Engine.Core/DsCPU.md",
-                "mode": "source",
-                "source": false
+                "file": "Dll hierarchy.canvas",
+                "viewState": {
+                  "x": -404.62181174073237,
+                  "y": 498.6556464200895,
+                  "zoom": -0.16666666666666674
+                }
               }
             }
           },
@@ -110,7 +113,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Engine.Core/DsCPU.md",
+                "file": "Dll hierarchy.canvas",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -127,7 +130,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Engine.Core/DsCPU.md",
+                "file": "Dll hierarchy.canvas",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -150,7 +153,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Engine.Core/DsCPU.md"
+                "file": "Dll hierarchy.canvas"
               }
             }
           }
@@ -173,10 +176,10 @@
   },
   "active": "d96ae9ea8943286a",
   "lastOpenFiles": [
+    "Engine.Core/DsCPU.md",
     "DsWebServer/Controller.md",
     "Dll hierarchy.canvas",
     "Dll hierarchy.md",
-    "Engine.Core/DsCPU.md",
     "Engine.Core",
     "TODO's.md",
     "0. TOC.md",

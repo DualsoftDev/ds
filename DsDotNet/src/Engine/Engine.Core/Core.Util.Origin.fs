@@ -511,7 +511,7 @@ module OriginModule =
         /// Get origin status of child nodes
         [<Extension>]
         static member GetOrigins (graph:DsGraph) =
-            getOrigins graph |> Tuple.tuple1st
+            getOrigins graph |> Tuple.first
 
         [<Extension>]
         static member GetOriginsWithDeviceDefs (graph:DsGraph) =

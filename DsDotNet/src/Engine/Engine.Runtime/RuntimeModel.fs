@@ -4,27 +4,32 @@ open Dual.Common.Core.FS
 open IO.Core
 
 type FilePath = string
-type ModelSource =
-    | PptAndIoSetting of (FilePath * FilePath)
-    | ZipDs of FilePath
 
-type CompiledModel() =
-    class end
+type CompiledModel(zipDsPath:FilePath) =
+    member x.SourceDsZipPath = zipDsPath
 
-type RuntimeModel(modelSource:ModelSource) =
-    let mutable compiledModel:CompiledModel option = None
-    let mutable zmqInfo:ZmqInfo option = None
+type RuntimeModel(zipDsPath:FilePath) =
+    let compiledModel = CompiledModel(zipDsPath)
+    let mutable zmqInfo = Zmq.InitializeServer "zmqsettings.json" |> Some
+
     do
-        match modelSource with
-        | PptAndIoSetting (ppt,zmqSetting) -> ()
-        | ZipDs zipDs -> ()
-
         // todo: compiledModel <- ....
+        ()
 
     interface IDisposable with
-        member x.Dispose() = ()
-    member x.ModelSource = modelSource
+        member x.Dispose() = x.Dispose()
+    member x.ModelSource = zipDsPath
 
-    member x.CompiledModel = compiledModel.Value
-    member x.IoHubInfo = zmqInfo.Value
+    member x.CompiledModel = compiledModel
+    //member x.IoHubInfo = zmqInfo
 
+    member x.IoServer = zmqInfo |> map (fun x -> x.Server) |> Option.toObj
+    //member x.IoHubClient = zmqInfo |> map (fun x -> x.Client) |> Option.toObj
+    member x.IoSpec      = zmqInfo |> map (fun x -> x.IOSpec) |> Option.toObj
+
+    member x.Dispose() =
+        match zmqInfo with
+        | Some info ->
+            info.Dispose()
+            zmqInfo <- None
+        | None -> failwith "IoHubInfo is already disposed"

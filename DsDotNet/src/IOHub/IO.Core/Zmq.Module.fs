@@ -2,15 +2,38 @@ namespace IO.Core
 
 open System.Threading
 open Dual.Common.Core.FS
+open System
 
 
 [<AutoOpen>]
 module Zmq =
-    type ZmqInfo =
-        { IOSpec: IOSpec
-          Server: ServerDirectAccess
-          Client: Client
-          CancellationTokenSource: CancellationTokenSource }
+    //type ZmqInfo =
+    //    { IOSpec: IOSpec
+    //      Server: ServerDirectAccess
+    //      Client: Client
+    //      CancellationTokenSource: CancellationTokenSource }
+
+
+    type ZmqInfo(iospec: IOSpec, server: ServerDirectAccess, client: Client, cts: CancellationTokenSource) =
+        // 필드 정의
+        member x.IOSpec = iospec
+        member x.Server = server
+        member x.Client = client
+        member val CancellationTokenSource = cts with get, set
+
+        // IDisposable 구현
+        interface IDisposable with
+            member x.Dispose() = x.Dispose()
+
+        member x.Dispose() =
+            if isNull x.CancellationTokenSource then
+                failwith "ZmqInfo is already disposed"
+
+            x.CancellationTokenSource.Cancel()
+            dispose server
+            dispose client
+            x.CancellationTokenSource <- null
+
 
     let private initialize (withClient: bool) (settingJsonPath: string) : ZmqInfo =
         let ioSpec = IOSpec.FromJsonFile settingJsonPath
@@ -25,10 +48,7 @@ module Zmq =
             else
                 null
 
-        { IOSpec = ioSpec
-          Server = server
-          Client = client
-          CancellationTokenSource = cts }
+        new ZmqInfo(ioSpec, server, client, cts)
 
     let Initialize (settingJsonPath: string) : ZmqInfo = initialize true settingJsonPath
     let InitializeServer (settingJsonPath: string) : ZmqInfo = initialize false settingJsonPath

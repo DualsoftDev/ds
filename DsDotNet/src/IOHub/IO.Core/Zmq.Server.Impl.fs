@@ -13,7 +13,7 @@ open System.Reactive.Linq
 
 [<AutoOpen>]
 module internal ZmqServerImplModule =
-    let mutable ioSpec = getNull<IOSpec> ()
+    let mutable ioSpec:IOSpec = null
     /// e.g {"p/o", <Paix Output Buffer manager>}
     let streamManagers = new Dictionary<string, StreamManager>()
 

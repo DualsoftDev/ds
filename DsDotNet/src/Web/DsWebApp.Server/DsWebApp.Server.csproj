@@ -4,6 +4,11 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
 	<ItemGroup>
+	  <Content Include="..\..\..\Apps\CommonAppSettings.json" Link="CommonAppSettings.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="6.1.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.1" />
@@ -11,6 +16,9 @@
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 	</ItemGroup>
 	<ItemGroup>
+		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
+		<ProjectReference Include="..\..\Engine\Engine.Info\Engine.Info.fsproj" />
+		<ProjectReference Include="..\..\Engine\Engine.Runtime\Engine.Runtime.fsproj" />
 		<ProjectReference Include="..\DsWebApp.Client\DsWebApp.Client.csproj" />
 		<ProjectReference Include="..\DsWebApp.Shared\DsWebApp.Shared.csproj" />
 	</ItemGroup>

@@ -73,43 +73,15 @@ module TagManagerUtil =
 
 
     type BridgeType = | Device | Button | Lamp | Condition
-    let mutable inCnt = -1;
-    let mutable outCnt = -1;
-    let mutable memCnt = -1;
-    let resetSimDevCnt() = inCnt<- 10000;outCnt<- 10000;memCnt<- 10000;
-    let createBridgeTag(stg:Storages, name, addr:string, inOut:ActionTag, bridge:BridgeType, sys, task:IQualifiedNamed option): ITag option=
-        let address =           //todo test ahn 자동 주소 경고 띄우기 
-            if addr <> ""  
-            then
-                let addr = addr.ToUpper()
-                match bridge with
-                | Device    -> if addr <> "" then Some addr else failwithlog $"Error Device {name} 주소가 없습니다."
-                | Button    -> if addr <> "" then Some addr else None
-                | Lamp      -> if addr <> "" then Some addr else failwithlog $"Error Lamp {name}  주소가 없습니다."
-                | Condition -> if addr <> "" then Some addr else failwithlog $"Error Condition {name} 주소가 없습니다."
+   
 
-            else
-                match inOut with
-                | ActionTag.ActionIn  -> inCnt<-inCnt+1
-                                         if RuntimeDS.Package.IsPackagePLC() || RuntimeDS.Package.IsPackagePC()
-                                         then
-                                             Some($"%%IW{inCnt/16}.{inCnt%16}") //일단 LS 규격으로
-                                         else 
-                                             Some($"I{inCnt/16}.{inCnt%16}") 
+    let createBridgeTag(stg:Storages, name, address:string, inOut:ActionTag, bridge:BridgeType, sys, task:IQualifiedNamed option): ITag option=
+        //error check
+        //if address = "" then  failwithlog $"Error {bridge} {name}  주소가 없습니다."
 
-                | ActionTag.ActionOut -> outCnt<-outCnt+1
-                                         if RuntimeDS.Package.IsPackagePLC() || RuntimeDS.Package.IsPackagePC()
-                                         then
-                                             Some($"%%QW{outCnt/16}.{outCnt%16}") //일단 LS 규격으로
-                                         else 
-                                             Some($"O{outCnt/16}.{outCnt%16}")
-
-                | ActionTag.ActionMemory -> failwithlog "error: Memory not supported "
-                | _ -> failwithlog "error: ActionTag create "
-       
-
-        if address.IsSome
-        then
+        if address = "-" || address = "" 
+        then None
+        else
             let name =
                 match inOut with
                 | ActionTag.ActionIn    -> $"{name}_I"
@@ -119,9 +91,8 @@ module TagManagerUtil =
 
             let plcName = getPlcTagAbleName name stg
             let t =
-                let param = {defaultStorageCreationParams(false) with Name=plcName; Address=address; System=sys; TagKind = (int)inOut; Target = task}
+                let param = {defaultStorageCreationParams(false) with Name=plcName; Address= Some address; System=sys; TagKind = (int)inOut; Target = task}
                 (Tag(param) :> ITag)
             stg.Add(t.Name, t)
             Some t
-        else None
 

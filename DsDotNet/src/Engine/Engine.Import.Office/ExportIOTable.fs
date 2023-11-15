@@ -15,6 +15,7 @@ open System.Data
 [<AutoOpen>]
 module ExportIOTable =
 
+
     let ToTable (sys: DsSystem) =
 
         let dt = new System.Data.DataTable($"{sys.Name}")
@@ -39,8 +40,8 @@ module ExportIOTable =
             [ TextXlsAddress
               dev.ApiName
               "bool"
-              dev.InAddress
-              dev.OutAddress
+              getValidDevAddress (dev.ApiItem, dev.ApiName, dev.InAddress , true)
+              getValidDevAddress (dev.ApiItem, dev.ApiName, dev.OutAddress , false)
               jobName
               funcs ]
 

@@ -115,21 +115,20 @@ module ConvertCoreExt =
                 if b.ApiItem.RXs.length() = 0 && b.ApiItem.TXs.length() = 0
                 then failwith $"Error {getFuncName()}"
 
-                if b.ApiItem.RXs.any() then
-                    createBridgeTag(x.Storages, b.ApiName, b.InAddress, ActionTag.ActionIn ,BridgeType.Device, x , Some(b))
-                    |> iter (fun t -> 
-                            b.InTag <- t
-                            b.InAddress <- t.Address
-                            )
-                if b.ApiItem.TXs.any() then
-                    createBridgeTag(x.Storages, b.ApiName, b.OutAddress, ActionTag.ActionOut ,BridgeType.Device, x, Some(b))
-                    |> iter (fun t -> 
-                            b.OutTag <- t
-                            b.OutAddress <- t.Address
-                            )
+                //if b.ApiItem.RXs.any() then
+                createBridgeTag(x.Storages, b.ApiName, b.InAddress, ActionTag.ActionIn ,BridgeType.Device, x , Some(b))
+                |> iter (fun t -> 
+                        b.InTag <- t
+                        b.InAddress <- t.Address
+                        )
+                //if b.ApiItem.TXs.any() then
+                createBridgeTag(x.Storages, b.ApiName, b.OutAddress, ActionTag.ActionOut ,BridgeType.Device, x, Some(b))
+                |> iter (fun t -> 
+                        b.OutTag <- t
+                        b.OutAddress <- t.Address
+                        )
 
         member x.GenerationIO() =
-            TagManagerUtil.resetSimDevCnt() 
 
             x.GenerationTaskDevIO()
             x.GenerationButtonIO()

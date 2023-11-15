@@ -122,6 +122,17 @@ module ConvertCPU =
         //DsSystem 물리 IO 생성
         sys.GenerationIO()
 
+        let nullTagJobs = sys.Jobs
+                             .Where(fun j-> j.DeviceDefs.Where(fun f-> 
+                                            f.InTag.IsNull() && f.ApiItem.RXs.any()
+                                            ||f.OutTag.IsNull() && f.ApiItem.TXs.any()
+                                            ).any())
+        if nullTagJobs.any()
+        then 
+            let errJobs = StringExt.JoinWith(nullTagJobs.Select(fun j -> j.Name), "\n")
+            failwithf $"Device 주소가 없습니다. \n{errJobs}"
+
+
         if isActive //직접 제어하는 대상만 정렬(원위치) 정보 추출
         then sys.GenerationOrigins()
 

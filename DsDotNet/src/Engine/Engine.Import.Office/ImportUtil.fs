@@ -524,7 +524,6 @@ module ImportU =
                         match safeCondV with
                         //| :? Real as r -> holder.SafetyConditions.Add( DuSafetyConditionReal (r)) |>ignore
                         //| :? RealExF as ex -> holder.SafetyConditions.Add(DuSafetyConditionRealExFlow (ex))  |>ignore
-                        //| :? CallSys as ex -> holder.SafetyConditions.Add(DuSafetyConditionRealExSystem (ex))  |>ignore
                         //test ahn ISafetyConditoinHolder주체 확정 필요
                         | :? Call as c -> holder.SafetyConditions.Add(DuSafetyConditionCall(c)) |> ignore
                         | _ -> failwithlog "Error"

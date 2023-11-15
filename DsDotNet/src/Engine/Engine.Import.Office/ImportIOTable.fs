@@ -20,17 +20,52 @@ module ImportIOTable =
         | Job = 5
         | Func = 6
 
+  
+
+
+    let mutable inCnt = -1;
+    let mutable outCnt = 63;
+    let mutable memCnt = -1;
+    
+    let autoFillAddress(bInput:bool) =
+        if bInput
+        then 
+            inCnt<-inCnt+1
+            if RuntimeDS.Package.IsPackagePC() 
+            then    ($"I{inCnt/16}.{inCnt%16}") 
+            else    ($"%%IX0.{inCnt/64}.{inCnt%64}") //일단 LS 규격으로
+
+        else 
+            outCnt<-outCnt+1
+            if RuntimeDS.Package.IsPackagePC() 
+            then    ($"O{outCnt/16}.{outCnt%16}") 
+            else    ($"%%QX0.{outCnt/64}.{outCnt%64}") //일단 LS 규격으로
+
+    let errCheckTRX(trxCnt:int, name:string, addr:string)  =
+        if   trxCnt=0  && addr <>"-"  then failwithf $"{name} 인터페이스 대상이 없으면 대쉬('-') 기입필요." //0 이면 명시적으로 '-' 표기
+        elif trxCnt<>0 && addr = "-"  then failwithf $"{name} 인터페이스 대상이 있으면 대쉬('-') 대신 실주소 기입필요."
+       
+    let getValidDevAddress(apiItem:ApiItem, name:string,  addr:string, bInput:bool) =  
+        let errCheckNRetenAddress(trxCnt:int, addr:string) =
+            let addrNew = 
+                if trxCnt=0 && addr.IsNullOrEmpty() 
+                then "-" //"처음 자동할당은 인터페이스 대상이 없으면 대쉬('-') 자동 기입" 
+                else addr  
+            errCheckTRX  (trxCnt, name , addrNew)
+            let address  = 
+                if addrNew = "" && addrNew <> "-"
+                then autoFillAddress bInput 
+                else addrNew
+            address.ToUpper()
+
+        if bInput
+        then errCheckNRetenAddress (apiItem.RXs.Count, addr)
+        else errCheckNRetenAddress (apiItem.TXs.Count, addr)
+
+
     let ApplyIO (sys: DsSystem, dts: (int * Data.DataTable) seq) =
 
         try
-            let autoFillAddress (x: string) =
-                if x.Trim() = "" then
-                    ""
-                else
-                    match RuntimeDS.Target with
-                    | XGI -> if not <| x.StartsWith("%") then "%" + x else x
-                    | _ -> x
-
             let functionUpdate (name, funcText, funcs: HashSet<Func>, tableIO: Data.DataTable, isJob: bool, page) =
                 funcs.Clear()
 
@@ -48,15 +83,33 @@ module ImportIOTable =
                 |> Seq.map (fun j -> j.ApiName, j)
                 |> dict
 
+            let autoFillAddress (address:string)  =
+                let addr = 
+                        if address.Trim() = "" || address.Trim() = "-" then
+                            ""
+                        else
+                            match RuntimeDS.Target with
+                            | XGI -> if not <| address.StartsWith("%") then "%" + address else address
+                            | _ -> address
+                addr
+
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
+               
+
                 let devName = $"{row.[(int) IOColumn.Name]}"
 
                 if not <| dicJob.ContainsKey(devName) then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1006, $"{devName}", page, 0u)
 
                 let dev = dicJob.[devName]
-                dev.InAddress <- $"{row.[(int) IOColumn.Input]}" |> autoFillAddress
-                dev.OutAddress <- $"{row.[(int) IOColumn.Output]}" |> autoFillAddress
+                let inAdd =    $"{row.[(int) IOColumn.Input]}".Trim()
+                let outAdd =   $"{row.[(int) IOColumn.Output]}".Trim()
+
+                errCheckTRX(dev.ApiItem.RXs.Count, devName, inAdd)
+                errCheckTRX(dev.ApiItem.TXs.Count, devName, outAdd)
+
+                dev.InAddress <- autoFillAddress inAdd
+                dev.OutAddress <- autoFillAddress outAdd
 
                 let jobName = $"{row.[(int) IOColumn.Job]}"
                 let func = $"{row.[(int) IOColumn.Func]}"

@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using DsWebApp.Server;
 using System.Reflection;
 using DsWebApp.Server.Hubs;
+using Dual.Common.Core.FS;      // for F# common logger setting
 using Engine.Core;
 using Engine.Info;
 
@@ -37,6 +38,7 @@ ILog logger = services.AddLog4net("DsWebAppServerLogger");
 services.AddTraceLogAppender("DsWebAppServerLogger");
 logger.Info($"======================= DsWebApp started.");
 logger.Info($"Debugger.IsAttached = {Debugger.IsAttached}");
+Log4NetWrapper.SetLogger(logger);
 
 // Add services to the container.
 services.AddSignalR();
@@ -186,6 +188,7 @@ public static class CustomServerExtension
         //var connectionString = commonAppSettings.LoggerDBSettings.ConnectionString;
         //var dsFileJson = DBLogger.GetDsFilePath(connectionString);
 
+        ServerGlobal.ReStartIoHub(Path.Combine(AppContext.BaseDirectory, "zmqsettings.json"));
 
         serverGlobal.DsCommonAppSettings = commonAppSettings;
 

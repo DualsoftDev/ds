@@ -220,7 +220,7 @@ module internal DBLoggerImpl =
                 match toBool value with
                 | Bool b -> (if b then 1 else 0) |> decimal
                 | UInt64 d -> decimal d
-                | _ -> failwith "ERROR"
+                | _ -> failwithlog "ERROR"
 
 
             verify (not logSet.IsLogReader)
@@ -236,7 +236,7 @@ module internal DBLoggerImpl =
 
                     let value = toDecimal x.Storage.BoxedValue
                     ORMLog(-1, storageId, x.Time, value) |> queue.Enqueue
-                | None -> failwith "NOT yet!!"
+                | None -> failwithlog "NOT yet!!"
 
         let enqueLogForInsert (x: DsLog) = enqueLogsForInsert ([ x ])
 

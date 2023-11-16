@@ -86,7 +86,7 @@ module EtcListenerModule =
                                   if flows.Count > 0 then
                                       return targetBtnType, btnName, addrIn, addrOut, flows, funcSet
                                   else
-                                      failwith "There are no flows in button"
+                                      failwithlog "There are no flows in button"
                               } ]
 
                     flowBtnInfo

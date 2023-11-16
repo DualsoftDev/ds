@@ -20,7 +20,7 @@ module Zmq =
 
         member x.Dispose() =
             if isNull x.CancellationTokenSource then
-                failwith "ZmqInfo is already disposed"
+                failwithlog "ZmqInfo is already disposed"
 
             logInfo "Disposing IO hub service."
 

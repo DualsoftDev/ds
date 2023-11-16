@@ -7,6 +7,7 @@ open System.Globalization
 open System.Text.RegularExpressions
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
+open Dual.Common.Core.FS
 
 // Module for text manipulation functions
 [<AutoOpen>]
@@ -47,7 +48,7 @@ module TextImpl =
         nameComponents 
         |> List.ofSeq 
         |> function
-           | [] -> failwith "ERROR"
+           | [] -> failwithlog "ERROR"
            | [ n ] -> n
            | ns -> ns |> Seq.map quoteOnDemand |> String.concat separator
 

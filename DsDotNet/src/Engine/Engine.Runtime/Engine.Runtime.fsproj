@@ -5,7 +5,7 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 
 		<RootNamespace>Engine.Runtime</RootNamespace>
-		<OutputType>Library</OutputType>
+		<OutputType>Exe</OutputType>
 		<LangVersion>7.0</LangVersion>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 		<OtherFlags>--warnon:1182</OtherFlags>

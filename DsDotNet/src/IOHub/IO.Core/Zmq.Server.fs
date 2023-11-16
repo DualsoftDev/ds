@@ -35,11 +35,11 @@ type Server(ioSpec_: IOSpec, cancellationToken: CancellationToken) =
             let path = memChange.IOFileSpec.GetPath()
 
             match memChange with
-            | :? StringChangeInfo as strChange ->
+            | :? SingleStringChangeInfo as strChange ->
                 for client in notiTargetClients do
                     Console.WriteLine($"Notifying change to client {clientIdentifierToString client}")
                     let key = strChange.Keys[0]
-                    let value = (strChange.Value :?> string array)[0]
+                    let value = strChange.Value[0]
 
                     serverSocket
                         .SendMoreFrame(client)

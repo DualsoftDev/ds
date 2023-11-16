@@ -6,6 +6,7 @@ open System.IO
 open Dual.Common.Core.FS
 open IO.Spec
 open Newtonsoft.Json
+open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module rec ZmqSpec =
@@ -167,16 +168,23 @@ module rec ZmqSpec =
 
 type IClientRequestInfo = interface end
 
+/// string, bit, byte, word, dword, lword type 의 I/O 값 변경에 관한 base 정보
 type IMemoryChangeInfo =
     abstract member ClientRequestInfo: IClientRequestInfo
     abstract member IOFileSpec: IOFileSpec
     abstract member Value: obj
 
-type IIOChangeInfo =
+
+type IIOChangeInfo = interface end
+
+/// string 을 제외한 bit, byte, word, dword, lword type 의 I/O 값 변경 정보
+type INumericIOChangeInfo =
     inherit IMemoryChangeInfo
+    inherit IIOChangeInfo
     abstract member Offsets: int[]
     abstract member MemoryType: MemoryType
 
-type IStringChangeInfo =
+type IStringIOChangeInfo =
     inherit IMemoryChangeInfo
+    inherit IIOChangeInfo
     abstract member Keys: string[]

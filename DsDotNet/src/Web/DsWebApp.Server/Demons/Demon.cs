@@ -1,6 +1,9 @@
 using DsWebApp.Server.Hubs;
 using Engine.Runtime;
 
+using IO.Core;
+using K = DsWebApp.Shared.K;
+
 namespace DsWebApp.Server.Demons;
 
 public partial class Demon : BackgroundService
@@ -71,7 +74,21 @@ public partial class Demon : BackgroundService
         {
             try
             {
-                _hubContext.Clients.All.SendAsync("IoMemoryChanged", change);
+                if (FieldIoHub.ConnectedClients.Any())
+                {
+                    var simple = change.ToSimple();
+                    switch (simple)
+                    {
+                        case SimpleNumericIOChangeInfo c:
+                            _hubContext.Clients.All.SendAsync(K.S2CNNIOChanged, c);
+                            break;
+                        case SimpleSingleStringChangeInfo c:
+                            _hubContext.Clients.All.SendAsync(K.S2CNSIOChanged, c);
+                            break;
+                        default:
+                            throw new Exception($"Unknown IoMemoryChanged type: {change.GetType().Name}");
+                    }
+                }
             }
             catch (Exception ex)
             {

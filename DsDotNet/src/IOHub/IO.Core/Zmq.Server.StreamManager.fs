@@ -7,6 +7,7 @@ open System.Reactive.Subjects
 
 open Dapper
 open Microsoft.Data.Sqlite
+open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module internal ZmqStreamManager =
@@ -36,7 +37,7 @@ module internal ZmqStreamManager =
         if isNull (locker) then f () else lock locker f
 
     /// stream 의 주어진 offset 에서 type 'T 만큼의 byte 를 읽어서 반환
-    let readTBytes<'T> (stream: FileStream) (tOffset: int) : byte[] =
+    let private readTBytes<'T> (stream: FileStream) (tOffset: int) : byte[] =
         let size = sizeof<'T>
         let byteOffset = tOffset * size
         let buffer = Array.zeroCreate<byte> (size)
@@ -45,15 +46,13 @@ module internal ZmqStreamManager =
         buffer
 
     /// stream 의 주어진 offset 에서 type 'T 의 value 를 bytes 로 변환해서 write
-    let writeTBytes<'T> (stream: FileStream) (tOffset: int) (value: 'T) =
+    let private writeTBytes<'T> (stream: FileStream) (tOffset: int) (value: 'T) =
         let size = sizeof<'T>
         let byteOffset = tOffset * size
         let buffer = ByteConverter.ToBytes(value)
         assert (buffer.Length = size)
         stream.Seek(int64 byteOffset, SeekOrigin.Begin) |> ignore
         stream.Write(buffer, 0, size)
-
-
 
     type IOChangeInfo
         (
@@ -63,7 +62,7 @@ module internal ZmqStreamManager =
             offsets: int seq,
             value: obj
         ) =
-        interface IIOChangeInfo with
+        interface INumericIOChangeInfo with
             member x.ClientRequestInfo = x.ClientRequestInfo :> IClientRequestInfo
             member x.IOFileSpec = fileSpec
             member x.Offsets = x.Offsets
@@ -81,8 +80,8 @@ module internal ZmqStreamManager =
         member x.Value = value
         member x.MemoryType = memoryType
 
-    type StringChangeInfo(clientRequestInfo: ClientRequestInfo, fileSpec: IOFileSpec, keys: string seq, value: obj) =
-        interface IStringChangeInfo with
+    type SingleStringChangeInfo(clientRequestInfo: ClientRequestInfo, fileSpec: IOFileSpec, key: string, value: string) =
+        interface IStringIOChangeInfo with
             member x.ClientRequestInfo = x.ClientRequestInfo :> IClientRequestInfo
             member x.IOFileSpec = fileSpec
             member x.Keys = x.Keys
@@ -91,8 +90,9 @@ module internal ZmqStreamManager =
         member x.ClientRequestInfo = clientRequestInfo
         member x.IOFileSpec = fileSpec
 
-        member val Keys = keys |> toArray
-        member x.Value = value
+        member val Keys = [|key|]
+        member val Value = [|value|]
+
 
     type WriteOK(changes: IOChangeInfo seq) =
         member val Changes = changes |> toArray
@@ -338,12 +338,12 @@ module internal ZmqBufferManagerExtension =
             if indices.Length <> numValues then
                 raiseWithClientId clientRequestInfo "The number of indices and values should be the same."
 
-    type IStringChangeInfo with
+    type IStringIOChangeInfo with
 
         member x.GetKeysAndValues() =
             Array.zip x.Keys (x.Value :?> string array)
 
-    type IIOChangeInfo with
+    type INumericIOChangeInfo with
 
         member x.GetTagNameAndValues() =
             let fs, dataType, offsets, objValues =
@@ -378,3 +378,40 @@ module internal ZmqBufferManagerExtension =
             | MemoryType.DWord -> (objValues :?> uint32[]) |> ByteConverter.ToBytes<uint32>
             | MemoryType.LWord -> (objValues :?> uint64[]) |> ByteConverter.ToBytes<uint64>
             | _ -> failwithf ($"Invalid data type: {x.MemoryType}")
+
+
+
+/// REST api client 를 위한 IO change info
+type SimpleNumericIOChangeInfo(memoryName: MemoryName, contentBitLength:int, offsets: int[], values: byte[]) =
+    new() = SimpleNumericIOChangeInfo("", 0, [||], [||])
+    interface IIOChangeInfo
+    member val ContentBitLength = contentBitLength with get, set
+    member val MemoryName = memoryName with get, set
+    member val Offsets = offsets with get, set
+    member val Values = values with get, set
+
+/// REST api client 를 위한 IO change info
+type SimpleSingleStringChangeInfo(tag: string, value: string) =
+    new() = SimpleSingleStringChangeInfo("", "")
+    interface IIOChangeInfo
+    member val Tag = tag with get, set
+    member val Value = value with get, set
+
+
+
+[<Extension>]
+type SimpleChangeInfoExt =
+    [<Extension>]
+    static member ToSimple (x:IMemoryChangeInfo) : IIOChangeInfo =
+        match x with
+        | :? IOChangeInfo as c ->
+            let memoryName = c.IOFileSpec.GetPath()
+            let contentBitLength = int c.MemoryType
+            let offsets = c.Offsets
+            let values = c.GetValueBytes()
+            SimpleNumericIOChangeInfo(memoryName, contentBitLength, offsets, values)
+        | :? SingleStringChangeInfo as c ->
+            let tag = c.Keys.[0]
+            let value = c.Value.[0]
+            SimpleSingleStringChangeInfo(tag, value)
+        | _ -> failwithf ($"Invalid type: {x.GetType()}")

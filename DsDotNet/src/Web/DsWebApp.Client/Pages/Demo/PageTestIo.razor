@@ -1,11 +1,14 @@
 @page "/demo/testio"
 
 @using Dual.Web.Blazor.ServerSide
+@using IO.Core
+
+
 <h3>PageTestIo</h3>
 
 @code {
     HubConnection hubConnection;
-    IDisposable subscription;
+    CompositeDisposable disposables = new CompositeDisposable();
 
     protected override async Task OnInitializedAsync()
     {
@@ -15,12 +18,23 @@
          */
         hubConnection = await HubExtension.StartHubAsync(NavigationManager.ToAbsoluteUri("/hub/io"));
         StateHasChanged();
-        subscription =
-            hubConnection.On<Object>("IoMemoryChanged", (changeInfo) =>
+        IDisposable subscription =
+            hubConnection.On<SimpleNumericIOChangeInfo>(K.S2CNNIOChanged, (changeInfo) =>
             {
-                JsDual.Debug($"IoMemoryChanged: {changeInfo.GetType().FullName}");
+                var numItems = changeInfo.Offsets.Length;
+                JsDual.Debug($"IoMemoryChanged: {changeInfo.MemoryName}, ContentBitLength={changeInfo.ContentBitLength}, Num changed items: {numItems}");
                 StateHasChanged();
             });
+        disposables.Add(subscription);
+
+        subscription =
+            hubConnection.On<SimpleSingleStringChangeInfo>(K.S2CNSIOChanged, (changeInfo) =>
+            {
+                JsDual.Debug($"{K.S2CNSIOChanged}: {changeInfo.Tag} = {changeInfo.Value}");
+                StateHasChanged();
+            });
+        disposables.Add(subscription);
+
     }
 
 }

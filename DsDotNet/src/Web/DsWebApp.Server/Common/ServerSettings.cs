@@ -1,3 +1,5 @@
+using DsWebApp.Shared;
+
 namespace DsWebApp.Server.Common
 {
     public class ServerSettings

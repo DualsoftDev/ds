@@ -35,11 +35,11 @@ type Server(ioSpec_: IOSpec, cancellationToken: CancellationToken) =
             let path = memChange.IOFileSpec.GetPath()
 
             match memChange with
-            | :? StringChangeInfo as strChange ->
+            | :? SingleStringChangeInfo as strChange ->
                 for client in notiTargetClients do
                     Console.WriteLine($"Notifying change to client {clientIdentifierToString client}")
                     let key = strChange.Keys[0]
-                    let value = (strChange.Value :?> string array)[0]
+                    let value = strChange.Value[0]
 
                     serverSocket
                         .SendMoreFrame(client)
@@ -268,7 +268,7 @@ type Server(ioSpec_: IOSpec, cancellationToken: CancellationToken) =
     member x.Run() =
         // start a separate thread to run the server
         let f () =
-            logInfo $"Starting server on port {port}..."
+            logInfo $"Starting IO server on port {port}..."
             use server = new RouterSocket()
             serverSocket <- server
 
@@ -362,6 +362,6 @@ type Server(ioSpec_: IOSpec, cancellationToken: CancellationToken) =
 
     interface IDisposable with
         member x.Dispose() =
-            logDebug "Disposing server..."
+            logDebug "Disposing hub IO server..."
             streamManagers.Values |> iter (fun stream -> dispose stream.FileStream)
             streamManagers.Clear()

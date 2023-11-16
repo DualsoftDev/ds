@@ -197,7 +197,7 @@ rs p/s: read all strings in p/s file
                 | :? IOChangeInfo as change ->
                     for (tag, value) in change.GetTagNameAndValues() do
                         logDebug $"Tag change detected on server side for {tag}: {value}"
-                | :? StringChangeInfo as change ->
+                | :? SingleStringChangeInfo as change ->
                     for (key, value) in change.GetKeysAndValues() do
                         logDebug $"Tag change detected on server side for {key}: {value}"
                 | _ -> failwith "ERROR"
@@ -228,7 +228,7 @@ rs p/s: read all strings in p/s file
                 | :? IOChangeInfo as change ->
                     for (tag, value) in change.GetTagNameAndValues() do
                         logDebug $"Tag change detected on server side for {tag}: {value}"
-                | :? StringChangeInfo as change ->
+                | :? SingleStringChangeInfo as change ->
                     for (key, value) in change.GetKeysAndValues() do
                         logDebug $"Tag change detected on server side for {key}: {value}"
                 | _ -> failwith "ERROR"

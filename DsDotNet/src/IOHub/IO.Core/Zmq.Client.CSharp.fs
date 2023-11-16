@@ -29,5 +29,5 @@ open System.Runtime.CompilerServices
 // C# 에서 소화하기 쉬운 형태로 변환
 [<Extension>]
 type ZmqClientExt =
-    [<Extension>] static member CsGetTagNameAndValues(change:IIOChangeInfo) = change.GetTagNameAndValues()
+    [<Extension>] static member CsGetTagNameAndValues(change:INumericIOChangeInfo) = change.GetTagNameAndValues()
 

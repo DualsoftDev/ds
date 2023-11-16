@@ -1,27 +1,31 @@
-using Dual.Common.Core;
-using Dual.Common.Db;
+using DsWebApp.Server.Hubs;
+using Engine.Runtime;
 
-//using DsWebApp.Server.Common;
-using DsWebApp.Server.Controllers;
+using IO.Core;
+using K = DsWebApp.Shared.K;
 
 namespace DsWebApp.Server.Demons;
 
 public partial class Demon : BackgroundService
 {
     readonly ILog _logger;
+
+    private ServerGlobal _serverGlobal;
     //DbRepository _repository;
-    //readonly IHubContext<VanillaHub> _hubContext;
+    readonly IHubContext<FieldIoHub> _hubContext;
     //UnsafeServices _unsafeServices;
     public Demon(
-        ILog logger
+        ServerGlobal serverGlobal
+        //ILog logger
         //, DbRepository repository
-        //, IHubContext<VanillaHub> hubContext
+        , IHubContext<FieldIoHub> hubContext
         //, UnsafeServices unsafeServices
         )
     {
-        _logger = logger;
+        _logger = serverGlobal.Logger;
+        _serverGlobal = serverGlobal;
         //_repository = repository;
-        //_hubContext = hubContext;
+        _hubContext = hubContext;
         //_unsafeServices = unsafeServices;
     }
 
@@ -39,6 +43,9 @@ public partial class Demon : BackgroundService
     async Task executeAsyncHelper(CancellationToken ct)
     {
         //await DbCacheController.InitializeAsync(_logger, _repository);
+
+        CompositeDisposable compositeDisposable = new();
+        ct.Register(() => compositeDisposable.Dispose());
 
         IDisposable subscription =
             Observable.Interval(TimeSpan.FromSeconds(1))
@@ -61,8 +68,34 @@ public partial class Demon : BackgroundService
                         _logger.Error($"Error on Background Service:\r\n{ex}");
                     }
                 });
-
-        ct.Register(() => subscription.Dispose());
+        compositeDisposable.Add(subscription);
+        var xx = _serverGlobal.IoHubServer.MemoryChangedObservable;
+        subscription = _serverGlobal.IoHubServer.MemoryChangedObservable.Subscribe(change =>
+        {
+            try
+            {
+                if (FieldIoHub.ConnectedClients.Any())
+                {
+                    var simple = change.ToSimple();
+                    switch (simple)
+                    {
+                        case SimpleNumericIOChangeInfo c:
+                            _hubContext.Clients.All.SendAsync(K.S2CNNIOChanged, c);
+                            break;
+                        case SimpleSingleStringChangeInfo c:
+                            _hubContext.Clients.All.SendAsync(K.S2CNSIOChanged, c);
+                            break;
+                        default:
+                            throw new Exception($"Unknown IoMemoryChanged type: {change.GetType().Name}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Error on MemoryChanged:\r\n{ex}");
+            }
+        });
+        compositeDisposable.Add(subscription);
     }
 
 

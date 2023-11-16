@@ -7,13 +7,6 @@ open System
 
 [<AutoOpen>]
 module Zmq =
-    //type ZmqInfo =
-    //    { IOSpec: IOSpec
-    //      Server: ServerDirectAccess
-    //      Client: Client
-    //      CancellationTokenSource: CancellationTokenSource }
-
-
     type ZmqInfo(iospec: IOSpec, server: ServerDirectAccess, client: Client, cts: CancellationTokenSource) =
         // 필드 정의
         member x.IOSpec = iospec
@@ -29,6 +22,8 @@ module Zmq =
             if isNull x.CancellationTokenSource then
                 failwith "ZmqInfo is already disposed"
 
+            logInfo "Disposing IO hub service."
+
             x.CancellationTokenSource.Cancel()
             dispose server
             dispose client
@@ -40,6 +35,7 @@ module Zmq =
         let port = ioSpec.ServicePort
         let cts = new CancellationTokenSource()
 
+        logInfo $"Starting IO hub service: port={port}"
         let server = new ServerDirectAccess(ioSpec, cts.Token) |> tee (fun x -> x.Run())
 
         let client =

@@ -1,11 +1,13 @@
 @using System.Net.Http
 @using System.Net.Http.Json
+@using System.Reactive.Disposables
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.AspNetCore.Components.Web.Virtualization
 @using Microsoft.AspNetCore.Components.WebAssembly.Http
 @using Microsoft.JSInterop
+@using Microsoft.AspNetCore.SignalR.Client
 @using DsWebApp.Client
 @using DsWebApp.Client.Shared
 @using DsWebApp.Shared
@@ -20,4 +22,5 @@
 @inject HttpClient Http
 @inject DualWebBlazorJsInterop JsDual
 @inject CanvasJsInterop JsCanvas
+@inject ClientGlobal ClientGlobal
 @inject IJSRuntime JsRuntime

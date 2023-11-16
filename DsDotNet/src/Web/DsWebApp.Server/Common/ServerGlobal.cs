@@ -2,6 +2,8 @@ using Engine.Core;
 using Engine.Info;
 using Engine.Runtime;
 
+using IO.Core;
+
 using System.ComponentModel;
 
 namespace DsWebApp.Server.Common
@@ -18,9 +20,19 @@ namespace DsWebApp.Server.Common
         /// </summary>
         public RuntimeModel RuntimeModel { get; private set; }
 
+
         public DSCommonAppSettings DsCommonAppSettings { get; set; }
         internal DBLoggerORM.LogSet LogSet { get; set; }
 
         public ILog Logger { get; set; }
+
+        static IoHub _ioHub;
+        public ServerDirectAccess IoHubServer => _ioHub?.Server;
+
+        public static void ReStartIoHub(string zmqSettingsJson)
+        {
+            _ioHub?.Dispose();
+            _ioHub = new IoHub(zmqSettingsJson);
+        }
     }
 }

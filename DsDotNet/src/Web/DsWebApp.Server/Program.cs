@@ -1,17 +1,9 @@
-using System.Reactive.Disposables;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting.WindowsServices;
 
 using Dual.Web.Blazor.ServerSide;
-
-using DsWebApp.Server.Common;
 using DsWebApp.Server.Demons;
-using Dual.Common.Core;
-using Microsoft.AspNetCore.Diagnostics;
-using Newtonsoft.Json;
-using DsWebApp.Server;
-using System.Reflection;
 using DsWebApp.Server.Hubs;
+using Dual.Common.Core.FS;      // for F# common logger setting
 using Engine.Core;
 using Engine.Info;
 
@@ -37,6 +29,7 @@ ILog logger = services.AddLog4net("DsWebAppServerLogger");
 services.AddTraceLogAppender("DsWebAppServerLogger");
 logger.Info($"======================= DsWebApp started.");
 logger.Info($"Debugger.IsAttached = {Debugger.IsAttached}");
+Log4NetWrapper.SetLogger(logger);
 
 // Add services to the container.
 services.AddSignalR();
@@ -74,7 +67,9 @@ services.AddCors(options =>
                 ;
 
         var urls = new[] {  "http://localhost:*", "http://192.168.9.118:*",
-                            "https://localhost:*", "https://192.168.9.118:*"};
+                            "https://localhost:*", "https://192.168.9.118:*",
+                            "tcp://localhost:*", "tcp://"
+        };
         foreach (var url in urls)
         {
             policy.WithOrigins(url)
@@ -151,6 +146,7 @@ app.MapRazorPages();
 app.MapControllers();
 app.MapHub<VanillaHub>("/hub/vanilla")
     .RequireCors(_corsPolicyName);
+app.MapHub<FieldIoHub>("/hub/io");
 
 app.MapFallbackToFile("index.html");
 
@@ -186,6 +182,7 @@ public static class CustomServerExtension
         //var connectionString = commonAppSettings.LoggerDBSettings.ConnectionString;
         //var dsFileJson = DBLogger.GetDsFilePath(connectionString);
 
+        ServerGlobal.ReStartIoHub(Path.Combine(AppContext.BaseDirectory, "zmqsettings.json"));
 
         serverGlobal.DsCommonAppSettings = commonAppSettings;
 

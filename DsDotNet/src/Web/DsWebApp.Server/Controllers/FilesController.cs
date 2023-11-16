@@ -3,6 +3,7 @@
 
 using System.Net.Http.Headers;
 using DsWebApp.Server.Common;
+using DsWebApp.Shared;
 
 namespace DsWebApp.Server.Controllers;
 
@@ -25,7 +26,7 @@ public class FilesController : ControllerBaseWithLogger
         fileName = Path.Combine(_serviceFolder, fileName);
         if (!System.IO.File.Exists(fileName))
         {
-            _logger.Warn($"Failed to DELETE file: {fileName}");
+            _logger.Warn($"Failed try to DELETE non-existing file: {fileName}");
             return true; // not there = deleted
         }
 
@@ -70,10 +71,8 @@ public class FilesController : ControllerBaseWithLogger
             _logger.Debug($"UploadFileChunk: {fileName}");
 
             // delete the file if necessary
-            if (fileChunk.IsFirstChunk && System.IO.File.Exists(fileName))
-            {
+            if (fileChunk.IsFirstChunk)
                 System.IO.File.Delete(fileName);
-            }
 
             // open for writing
             using (var stream = System.IO.File.OpenWrite(fileName))
@@ -87,7 +86,7 @@ public class FilesController : ControllerBaseWithLogger
             {
                 // todo: dszip 파일 신규 upload 에 대한 처리
                 _global.DsZipPath = Path.Combine(_serviceFolder, fileName);
-                K.Noop();
+                Console.Write("");
             }
 
             return true;
@@ -114,10 +113,7 @@ public class FilesController : ControllerBaseWithLogger
             string filePath = Path.Combine(_serviceFolder, fileName);
             _logger.Debug($"PostFile: {filePath}");
             // delete the file if necessary
-            if (System.IO.File.Exists(filePath))
-            {
-                System.IO.File.Delete(filePath);
-            }
+            System.IO.File.Delete(filePath);
             // open for writing
             using var stream = System.IO.File.OpenWrite(filePath);
             stream.Write(data, 0, data.Length);

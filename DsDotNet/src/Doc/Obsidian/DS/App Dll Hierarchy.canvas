@@ -1,0 +1,10 @@
+{
+	"nodes":[
+		{"id":"b62618db78a97800","type":"text","text":"DsWebClient","x":-400,"y":-160,"width":158,"height":60,"color":"2"},
+		{"id":"9467b7dedbfcc909","type":"text","text":"DsWebServer","x":-58,"y":-160,"width":158,"height":60,"color":"2"},
+		{"id":"1b81f8a2e2240f56","x":-41,"y":-40,"width":125,"height":60,"type":"text","text":"IOHub"}
+	],
+	"edges":[
+		{"id":"fced10f805873266","fromNode":"b62618db78a97800","fromSide":"bottom","toNode":"1b81f8a2e2240f56","toSide":"left","toEnd":"none","color":"1","label":"socket 연결 불가!!\nSignalR 필요"}
+	]
+}

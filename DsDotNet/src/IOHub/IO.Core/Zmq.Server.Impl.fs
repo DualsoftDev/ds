@@ -107,7 +107,7 @@ module internal ZmqServerImplModule =
                     | _ -> failwith $"Invalid format: {addressWithAssignValue}"
 
                 fs.WriteString(key, value)
-                StringChangeInfo(cri, fs, [| key |], [| value |])
+                SingleStringChangeInfo(cri, fs, key, value)
             else
                 let bufferManager = fs.StreamManager :?> StreamManager
                 bufferManager.VerifyOffsets(cri, ap.MemoryType, [| offset |])

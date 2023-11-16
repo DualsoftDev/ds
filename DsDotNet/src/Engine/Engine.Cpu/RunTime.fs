@@ -70,6 +70,8 @@ module RunTime =
         do 
             ()
 
+        interface IDisposable with
+            member x.Dispose() = x.Dispose()
         member x.Systems = systems
         member x.IsRunning = run
         member x.CommentedStatements = css

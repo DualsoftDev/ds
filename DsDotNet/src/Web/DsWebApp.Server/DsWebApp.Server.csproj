@@ -7,6 +7,9 @@
 	  <Content Include="..\..\..\Apps\CommonAppSettings.json" Link="CommonAppSettings.json">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="..\..\IOHub\IO.Core\zmqsettings.json" Link="zmqsettings.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.0" />
@@ -16,6 +19,11 @@
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.2" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.18"/>
+	</ItemGroup>
+
 	<ItemGroup>
 		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Info\Engine.Info.fsproj" />

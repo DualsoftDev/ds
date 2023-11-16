@@ -17,6 +17,7 @@ services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvi
 services.AddScoped<DualWebBlazorJsInterop>();
 services.AddScoped<CanvasJsInterop>();
 services.AddScoped<FilesManager>();
+services.AddScoped<ClientGlobal>();
 services.AddBlazoredSessionStorage();
 //services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 services.AddAuthorizationCore();

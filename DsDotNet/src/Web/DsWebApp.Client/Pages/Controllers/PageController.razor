@@ -1,12 +1,67 @@
 @page "/controllers/controller"
+@using System.Collections.ObjectModel
+@using System.Text.Json
+@using Dual.Web.Blazor.ServerSide
 
 <h3>PageController</h3>
 
-counter: @ClientGlobal.Counter
+@* counter: @ClientGlobal.Counter *@
+
+@if (_loading)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    @if (_modelDto == null)
+    {
+        <ul>No model on server.</ul>
+    }
+    else
+    {
+        <ul>SourceDsZipPath: @_modelDto.SourceDsZipPath</ul>
+        <ul>Cpu Running: @_modelDto.IsCpuRunning</ul>
+    }
+}
+
+
+
+
 
 @code {
-    // protected override async Task OnInitializedAsync()
-    // {
-    // }
+    bool _loading { get; set; } = true;
+    RuntimeModelDto _modelDto;
+    HubConnection _hubConnection;
+    IDisposable _subscription;
 
+    protected override async Task OnInitializedAsync()
+    {
+        // _modelDto = await Http.GetFromJsonAsync<RuntimeModelDto>($"api/model");
+
+        var response = await Http.GetAsync($"api/model");
+        if (response.IsSuccessStatusCode)
+        {
+            _modelDto = await response.Content.ReadFromJsonAsync<RuntimeModelDto>();
+            await JsDual.Debug($"Got path={_modelDto.SourceDsZipPath}, isCpuRunning={_modelDto.IsCpuRunning}");
+        }
+        else
+        {
+            // 실패한 응답 코드에 대한 처리
+            // 예: 사용자에게 에러 메시지 표시, 로깅 등
+        }
+        _loading = false;
+
+
+        _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/model").StartHubAsync();
+        _subscription =
+            _hubConnection.On<RuntimeModelDto>("ModelChanged", async (RuntimeModelDto newModel) =>
+            {
+                _modelDto = newModel;
+                await Task.Delay(200);
+                StateHasChanged();
+            });
+
+        StateHasChanged();
+        await base.OnInitializedAsync();
+    }
 }

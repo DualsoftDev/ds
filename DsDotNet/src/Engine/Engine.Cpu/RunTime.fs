@@ -76,6 +76,10 @@ module RunTime =
         member x.IsRunning = run
         member x.CommentedStatements = css
         
+        member x.GetWebTags() =
+              mapRungs.Keys.Choose(fun f-> f.GetTagInfo())
+                           .Select(fun f->f.GetWebTag())
+
         member x.Dispose() = doStop()
         member x.Run()  = doRun()
         member x.AutoDriveSetting()  =          

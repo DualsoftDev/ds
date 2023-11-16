@@ -6,5 +6,5 @@ module testMain =
     let main _ = 
         let testFile = @$"{__SOURCE_DIRECTORY__}../../../UnitTest/UnitTest.Model/ImportOfficeExample/exportDS.Zip"
         let testRuntimeModel = new RuntimeModel(testFile)
-        
+        let webTags = testRuntimeModel.WebTags
         0

@@ -26,7 +26,7 @@ module FqdnImpl =
         | [n] when quoteOnSingle -> quoteOnDemand n
         | [n] -> n
         | [_p; _q] -> combine "." fqdnList
-        | _ -> failwith "ERROR"
+        | _ -> failwithlog "ERROR"
 
     let internal getRelativeNames(referencePath:Fqdn) (fqdn:Fqdn) =
         let rec countSameStartElements xs ys =

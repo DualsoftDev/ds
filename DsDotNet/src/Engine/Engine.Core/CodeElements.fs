@@ -3,6 +3,7 @@ namespace Engine.Core
 open System
 open System.Runtime.CompilerServices
 open System.Text.RegularExpressions
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module CodeElements =
@@ -43,7 +44,7 @@ module CodeElements =
     let getFunctions (text:string) =
         let text = text.Trim().ToLower()
         if not <| text.StartsWith "$"
-        then failwith "function text start keyword is '$' ex)$m 100 R100"
+        then failwithlog "function text start keyword is '$' ex)$m 100 R100"
         text.Split('$')
         |> Seq.tail
         |> Seq.map(fun line ->
@@ -91,7 +92,7 @@ module CodeElements =
                         | "s" | "sec" -> let presetMsec = ((preset |> Convert.ToInt32) * 1000)
                                          presetMsec.ToString() |> CountUnitType.Parse
 
-                        | _-> failwith "timer format Error"
+                        | _-> failwithlog "timer format Error"
 
 
         [<Extension>] static member GetRingCount (x:Func) =

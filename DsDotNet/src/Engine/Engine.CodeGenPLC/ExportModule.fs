@@ -41,7 +41,7 @@ module ExportModule =
                       let s = l * off2
                       yield! [ s .. s + l ]
                   | RegexPattern @"^%MX(\d+)$" [ Int32Pattern bitoffset ] -> yield bitoffset / 8
-                  | _ -> failwith "ERROR" ]
+                  | _ -> failwithlog "ERROR" ]
 
             let usedAddresses =
                 system.TagManager.Storages.Values

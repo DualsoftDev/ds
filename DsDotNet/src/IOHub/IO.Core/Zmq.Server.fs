@@ -65,7 +65,7 @@ type Server(ioSpec_: IOSpec, cancellationToken: CancellationToken) =
                         .SendMoreFrame(path) // name
                         .SendMoreFrame(contenetBitLength |> ByteConverter.ToBytes) // contentBitLength
                         .SendFrame(offsets) // offsets
-            | _ -> failwith "ERROR"
+            | _ -> failwithlog "ERROR"
 
         notifyToClients ()
         memoryChangedSubject.OnNext memChange
@@ -340,9 +340,9 @@ type Server(ioSpec_: IOSpec, cancellationToken: CancellationToken) =
                             more
                                 .SendMoreFrame(jsonValues)
                                 .SendFrame(jsonKeys)
-                        | _ -> failwith "Not Yet!!"
+                        | _ -> failwithlog "Not Yet!!"
 
-                    | _ -> failwith "Not Yet!!"
+                    | _ -> failwithlog "Not Yet!!"
                 with
                 | :? ExcetionWithClient as ex ->
                     logError $"Error occured while handling request: {ex.Message}"

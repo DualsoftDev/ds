@@ -85,7 +85,7 @@ module internal XgiSymbolsModule =
                 if t.Address = "" (*&& not (t :? IVariable)*) then
                     let allocatorFunctions =
                         match prjParams.MemoryAllocatorSpec with
-                        | RangeSpec _ -> failwith "ERROR.  Should have already been converted to allocator functions."
+                        | RangeSpec _ -> failwithlog "ERROR.  Should have already been converted to allocator functions."
                         | AllocatorFunctions functions -> functions
 
                     let { BitAllocator = x
@@ -102,7 +102,7 @@ module internal XgiSymbolsModule =
                         | "W" -> w
                         | "D" -> d
                         | "L" -> l
-                        | _ -> failwith "ERROR"
+                        | _ -> failwithlog "ERROR"
 
                     if t.Name.StartsWith("_") then
                         logWarn $"Something fish: trying to generate auto M address for {t.Name}"

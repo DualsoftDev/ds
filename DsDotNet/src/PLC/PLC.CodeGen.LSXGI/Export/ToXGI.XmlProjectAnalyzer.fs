@@ -29,8 +29,8 @@ module XgiXmlProjectAnalyzerModule =
                       let s = index * byteSize
                       let e = s + byteSize - 1
                       yield! [ s..e ]
-                  | _ -> failwith "ERROR"
-              | _ -> failwith "ERROR" ]
+                  | _ -> failwithlog "ERROR"
+              | _ -> failwithlog "ERROR" ]
         |> sort
         |> distinct
 

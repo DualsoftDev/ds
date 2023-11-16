@@ -23,7 +23,7 @@ type ServerDirectAccess(ioSpec:IOSpec, cancellationToken:CancellationToken) =
             | MemoryType.DWord -> bufferManager.readU32(offset)
             | MemoryType.LWord -> bufferManager.readU64(offset)
             | _ -> failwithf($"Unknown data type : {ap.MemoryType}")
-        | _ -> failwith "ERROR"
+        | _ -> failwithlog "ERROR"
 
     member x.Write(tag:string, value:obj) =
         match tag with
@@ -41,7 +41,7 @@ type ServerDirectAccess(ioSpec:IOSpec, cancellationToken:CancellationToken) =
 
             // TODO: 서버를 통한 직접 변경 내용을 client 에게 공지
             //notifyIoChange()
-        | _ -> failwith "ERROR"
+        | _ -> failwithlog "ERROR"
 
 
 

@@ -19,7 +19,7 @@ module JSONSettingTestModule =
         let checkOk x =
             match x with
             | Ok _ -> ()
-            | _ -> failwith "ERROR"
+            | _ -> failwithlog "ERROR"
 
         [<Test>]
         member _.Endian() =
@@ -63,7 +63,7 @@ module JSONSettingTestModule =
                             for (i, b) in bits |> Array.indexed do
                                 (i % 2 = 0) === b
                         | _ ->
-                            failwith "ERROR"
+                            failwithlog "ERROR"
 
                     let check_po_bytes() =
                         let indices = [|0..po.Length-1|]
@@ -73,7 +73,7 @@ module JSONSettingTestModule =
                         client.WriteBytes("p/o", indices, values) |> checkOk
                         match client.ReadBytes("p/o", indices) with
                         | Ok obs -> SeqEq obs values
-                        | _ -> failwith "ERROR"
+                        | _ -> failwithlog "ERROR"
 
                     let check_po_words() =
                         let indices = [|0..(po.Length / 2)-1|]
@@ -83,7 +83,7 @@ module JSONSettingTestModule =
                         client.WriteUInt16s("p/o", indices, values) |> checkOk
                         match client.ReadUInt16s("p/o", indices) with
                         | Ok ows -> SeqEq ows values
-                        | _ -> failwith "ERROR"
+                        | _ -> failwithlog "ERROR"
 
                     let check_po_dwords() =
                         let indices = [|0..(po.Length / 4)-1|]
@@ -93,7 +93,7 @@ module JSONSettingTestModule =
                         client.WriteUInt32s("p/o", indices, values) |> checkOk
                         match client.ReadUInt32s("p/o", indices) with
                         | Ok ows -> SeqEq ows values
-                        | _ -> failwith "ERROR"
+                        | _ -> failwithlog "ERROR"
 
                     let check_po_lwords() =
                         let indices = [|0..(po.Length / 8)-1|]
@@ -103,7 +103,7 @@ module JSONSettingTestModule =
                         client.WriteUInt64s("p/o", indices, values) |> checkOk
                         match client.ReadUInt64s("p/o", indices) with
                         | Ok ows -> SeqEq ows values
-                        | _ -> failwith "ERROR"
+                        | _ -> failwithlog "ERROR"
 
                     check_po_bits()
                     check_po_words()
@@ -123,7 +123,7 @@ module JSONSettingTestModule =
                         client.WriteBytes("q", indices, values) |> checkOk
                         match client.ReadBytes("q", indices) with
                         | Ok obs -> SeqEq obs values
-                        | _ -> failwith "ERROR"
+                        | _ -> failwithlog "ERROR"
 
                     let checkWords() =
                         let indices = [|0..(lsq.Length / 2)-1|]
@@ -133,7 +133,7 @@ module JSONSettingTestModule =
                         client.WriteUInt16s("q", indices, values) |> checkOk
                         match client.ReadUInt16s("q", indices) with
                         | Ok ows -> SeqEq ows values
-                        | _ -> failwith "ERROR"
+                        | _ -> failwithlog "ERROR"
 
                     let checkDwords() =
                         let indices = [|0..(lsq.Length / 4)-1|]
@@ -143,7 +143,7 @@ module JSONSettingTestModule =
                         client.WriteUInt32s("q", indices, values) |> checkOk
                         match client.ReadUInt32s("q", indices) with
                         | Ok ows -> SeqEq ows values
-                        | _ -> failwith "ERROR"
+                        | _ -> failwithlog "ERROR"
 
                     let checkLwords() =
                         let indices = [|0..(lsq.Length / 8)-1|]
@@ -153,7 +153,7 @@ module JSONSettingTestModule =
                         client.WriteUInt64s("q", indices, values) |> checkOk
                         match client.ReadUInt64s("q", indices) with
                         | Ok ows -> SeqEq ows values
-                        | _ -> failwith "ERROR"
+                        | _ -> failwithlog "ERROR"
 
 
 
@@ -171,13 +171,13 @@ module JSONSettingTestModule =
                             bytes[5] === 0x05uy
                             bytes[6] === 0x06uy
                             bytes[7] === 0x07uy
-                        | _ -> failwith "ERROR"
+                        | _ -> failwithlog "ERROR"
 
                         client.ClearAll("q") |> checkOk
                         client.WriteBytes("q", [|0..7|], bytes) |> checkOk
                         match client.ReadUInt64s("q", [|0|]) with
                         | Ok lws -> lws.[0] === n8
-                        | _ -> failwith "ERROR"
+                        | _ -> failwithlog "ERROR"
 
 
 
@@ -241,23 +241,23 @@ module JSONSettingTestModule =
                 | Ok _ ->
                     match client.ReadBytes("p/o", [|length - 1|]) with
                     | Ok bs -> SeqEq bs [|255uy|]
-                    | _ -> failwith "ERROR"
+                    | _ -> failwithlog "ERROR"
                 | Error _ ->
-                    failwith "ERROR"
+                    failwithlog "ERROR"
 
                 let writeErrorneous = client.WriteBytes("p/o", [|length|], [|255uy|])
                 match writeErrorneous with
                 | Error err -> err.Contains("Invalid offset") === true
-                | Ok _ -> failwith "Should have been failed."
+                | Ok _ -> failwithlog "Should have been failed."
             
 
                 match client.WriteUInt16s("p/o", [|length/2 - 1|], [|0xFFFFus|]) with
                 | Ok _ ->
                     match client.ReadUInt16s("p/o", [|length/2 - 1|]) with
                     | Ok ws -> SeqEq ws [|0xFFFFus|]
-                    | _ -> failwith "ERROR"
+                    | _ -> failwithlog "ERROR"
                 | Error _ ->
-                    failwith "ERROR"
+                    failwithlog "ERROR"
 
 
 
@@ -265,18 +265,18 @@ module JSONSettingTestModule =
                 | Ok _ ->
                     match client.ReadUInt32s("p/o", [|length/4 - 1|]) with
                     | Ok dws -> SeqEq dws [|0xFFFFFFFFu|]
-                    | _ -> failwith "ERROR"
+                    | _ -> failwithlog "ERROR"
                 | Error _ ->
-                    failwith "ERROR"
+                    failwithlog "ERROR"
 
 
                 match client.WriteUInt64s("p/o", [|length/8 - 1|], [|0xFFFF_FFFF_FFFF_FFFFUL|]) with
                 | Ok _ ->
                     match client.ReadUInt64s("p/o", [|length/8 - 1|]) with
                     | Ok lws -> SeqEq lws [|0xFFFF_FFFF_FFFF_FFFFUL|]
-                    | _ -> failwith "ERROR"
+                    | _ -> failwithlog "ERROR"
                 | Error _ ->
-                    failwith "ERROR"
+                    failwithlog "ERROR"
 
                 zmqInfo.CancellationTokenSource.Cancel()
             )

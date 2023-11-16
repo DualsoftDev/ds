@@ -4,6 +4,7 @@ open IO.Core
 open System
 open System.Threading
 open ZmqTestModule
+open Dual.Common.Core.FS
 
 module ZmqTestClient =
     let onTagChanged (change:TagChangedInfo) =
@@ -35,14 +36,14 @@ module ZmqTestClient =
                 for i = 0 to n - 1 do
                     Console.WriteLine($"  {offsets[i]}: {values[i]}");
             | _ ->
-                failwith "Not supported"
+                failwithlog "Not supported"
         | :? StringTagChangedInfo as change ->
             let n = change.Keys.Length
             Console.WriteLine($"Total {n} string tag changed on {change.Path}");
             for i = 0 to n - 1 do
                 Console.WriteLine($"  {change.Keys[i]}: {change.Values[i]}")
         | _ ->
-            failwith "ERROR"
+            failwithlog "ERROR"
 
     [<EntryPoint>]
     let main _ = 

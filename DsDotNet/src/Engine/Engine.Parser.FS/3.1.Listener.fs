@@ -566,7 +566,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 if Int32.TryParse(text, &value) then
                     value
                 else
-                    failwith "Conversion failed : xywh need to write into integer value"
+                    failwithlog "Conversion failed : xywh need to write into integer value"
 
             let genXywh (xywh: dsParser.XywhContext) =
                 new Xywh(
@@ -603,7 +603,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                         |> iter (fun job ->
                             job.DeviceDefs.ToList() |> iterTasks nameCompo xywh
                             job.LinkDefs.ToList() |> iterTasks nameCompo xywh)
-                    | _ -> failwith "invalid name component"
+                    | _ -> failwithlog "invalid name component"
 
         let fillFinished (system: DsSystem) (listFinishedCtx: List<dsParser.FinishBlockContext>) =
             for finishedCtx in listFinishedCtx do

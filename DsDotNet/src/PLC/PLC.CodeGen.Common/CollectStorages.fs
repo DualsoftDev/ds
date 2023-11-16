@@ -56,7 +56,7 @@ module CollectStoragesModule =
               | DuCounter stmt -> yield! stmt.CollectStorages()
               | DuAction stmt -> yield! stmt.CollectStorages()
 
-              | DuAugmentedPLCFunction _functionParameters -> failwith "ERROR" ]
+              | DuAugmentedPLCFunction _functionParameters -> failwithlog "ERROR" ]
 
     type CommentedStatement with
 

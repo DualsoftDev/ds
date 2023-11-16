@@ -31,7 +31,7 @@ type ModelInfo =
 let GetModelName (cpuId: int) =
     //match FindModel(cpuId) with
     //| Some model -> model.Name
-    //| _ -> failwith "ERROR"
+    //| _ -> failwithlog "ERROR"
     $"CpuID: {cpuId}"
 
 

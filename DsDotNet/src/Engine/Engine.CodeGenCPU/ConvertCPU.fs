@@ -130,7 +130,7 @@ module ConvertCPU =
         if nullTagJobs.any()
         then 
             let errJobs = StringExt.JoinWith(nullTagJobs.Select(fun j -> j.Name), "\n")
-            failwithf $"Device 주소가 없습니다. \n{errJobs}"
+            failwithlogf $"Device 주소가 없습니다. \n{errJobs}"
 
 
         if isActive //직접 제어하는 대상만 정렬(원위치) 정보 추출

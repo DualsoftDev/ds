@@ -166,7 +166,12 @@
                 };
 
             // upload this chunk
-            await FilesManager.UploadFileChunk(chunk);
+            bool succeeded = await FilesManager.UploadFileChunk(chunk);
+            if (!succeeded)
+            {
+                _uploadMessage = "Failed to upload.";
+                await JsDual.Alert(_uploadMessage);
+            }
 
             isFirstChunk = false; // no longer the first chunk
 

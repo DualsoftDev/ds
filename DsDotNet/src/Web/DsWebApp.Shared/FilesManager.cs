@@ -96,6 +96,7 @@ namespace DsWebApp.Shared
          * - FilesManager 의 routing 정보를 이용한다.  (api/files)
          * - Server 에서 정의된 ServiceFolder 위치에 파일을 drop 한다.
          */
+        [Obsolete("사용 중인가??  vs onFileInputFileChange() @ PageUploadModel.razor")]
         /// <summary>
         /// Console application 을 이용하여 Web Server 의 Post Rest-API 를 이용해서 file 을 upload 하기 위한 용도.
         /// </summary>
@@ -139,7 +140,9 @@ namespace DsWebApp.Shared
                         };
 
                         // upload this chunk
-                        await filesManager.UploadFileChunk(chunk);
+                        bool succeeded = await filesManager.UploadFileChunk(chunk);
+                        if (!succeeded)
+                            throw new Exception("ERROR");
 
                         firstChunk = false; // no longer the first chunk
 

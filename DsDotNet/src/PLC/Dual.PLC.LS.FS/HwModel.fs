@@ -43,7 +43,7 @@ module PLCHwModel =
             | Xgr -> 0xA8uy
             | XgbMk -> 0xB0uy
             | XgbIEC -> 0xB4uy
-            | _ -> failwith "ERROR"
+            | _ -> failwithlog "ERROR"
 
         member x.ToText() =
             match x with
@@ -52,7 +52,7 @@ module PLCHwModel =
             | Xgr -> "XGR"
             | XgbMk -> "XGBMK"
             | XgbIEC -> "XGBIEC"
-            | _ -> failwith "ERROR"
+            | _ -> failwithlog "ERROR"
 
         member x.IsIEC() =
             match x with
@@ -61,7 +61,7 @@ module PLCHwModel =
             | Xgr -> false
             | XgbMk -> false
             | XgbIEC -> true
-            | _ -> failwith "ERROR"
+            | _ -> failwithlog "ERROR"
 
         static member FromByte(by: byte) =
             match by with
@@ -70,12 +70,12 @@ module PLCHwModel =
             | 0xA8uy -> CpuType.Xgr
             | 0xB0uy -> CpuType.XgbMk
             | 0xB4uy -> CpuType.XgbIEC
-            | _ -> failwith "ERROR"
+            | _ -> failwithlog "ERROR"
 
     //static member FromID(cpuId:int) =
     //    match PLCHwModel.FindModel(cpuId) with
     //    | Some model -> model.Type
-    //    | _ -> failwith "ERROR"
+    //    | _ -> failwithlog "ERROR"
 
     /// LS H/W PLC 통신을 위한 data type
     type DataType =
@@ -103,7 +103,7 @@ module PLCHwModel =
             | Word -> 16
             | DWord -> 32
             | LWord -> 64
-            | Continuous -> failwith "ERROR"
+            | Continuous -> failwithlog "ERROR"
 
         member x.GetByteLength() =
             match x with
@@ -117,7 +117,7 @@ module PLCHwModel =
             | Word -> TagType.I2
             | DWord -> TagType.I4
             | LWord -> TagType.I8
-            | Continuous -> failwith "ERROR"
+            | Continuous -> failwithlog "ERROR"
 
         member x.ToDataLengthType() =
             match x with
@@ -126,7 +126,7 @@ module PLCHwModel =
             | Word -> DataLengthType.Word
             | DWord -> DataLengthType.DWord
             | LWord -> DataLengthType.LWord
-            | Continuous -> failwith "ERROR"
+            | Continuous -> failwithlog "ERROR"
 
         member x.ToMnemonic() =
             match x with
@@ -135,7 +135,7 @@ module PLCHwModel =
             | Word -> "W"
             | DWord -> "D"
             | LWord -> "L"
-            | Continuous -> failwith "ERROR"
+            | Continuous -> failwithlog "ERROR"
 
         member x.TotextXGK() =
             match x with
@@ -144,7 +144,7 @@ module PLCHwModel =
             | Word -> "WORD"
             | DWord -> "DWORD"
             | LWord -> "LWORD"
-            | Continuous -> failwith "ERROR"
+            | Continuous -> failwithlog "ERROR"
 
         member x.TotextXGI() =
             match x with
@@ -153,7 +153,7 @@ module PLCHwModel =
             | Word -> "WORD"
             | DWord -> "DWORD"
             | LWord -> "LWORD"
-            | Continuous -> failwith "ERROR"
+            | Continuous -> failwithlog "ERROR"
 
         /// uint64 를 data type 에 맞게 boxing 해서 반환
         member x.BoxUI8(v: uint64) =
@@ -163,7 +163,7 @@ module PLCHwModel =
             | Word -> uint16 v |> box
             | DWord -> uint32 v |> box
             | LWord -> uint64 v |> box
-            | Continuous -> failwith "ERROR"
+            | Continuous -> failwithlog "ERROR"
 
         /// Boxing 된 값 v 를 uint64 로 unboxing 해서 반환
         member x.Unbox2UI8(v: obj) =
@@ -176,7 +176,7 @@ module PLCHwModel =
             | (:? uint64 as l, _) ->
                 logWarn "Mismatched type: %A(%A)" x v
                 l
-            | _ -> failwith "ERROR"
+            | _ -> failwithlog "ERROR"
 
         static member FromDeviceMnemonic =
             function
@@ -185,7 +185,7 @@ module PLCHwModel =
             | "W" -> Word
             | "D" -> DWord
             | "L" -> LWord
-            | _ -> failwith "ERROR"
+            | _ -> failwithlog "ERROR"
 
 
 

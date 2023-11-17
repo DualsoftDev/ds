@@ -107,7 +107,7 @@ module TagVariableModule =
             interface ILiteralHolder with
                 member x.ToTextWithoutTypeSuffix() = $"{x.Value}"
             interface IValue<'T> with
-                member x.Value with get() = x.Value and set(_v) = failwith "ERROR: unsupported."
+                member x.Value with get() = x.Value and set(_v) = failwithlog "ERROR: unsupported."
                 member x.ObjValue = box x.Value
 
 

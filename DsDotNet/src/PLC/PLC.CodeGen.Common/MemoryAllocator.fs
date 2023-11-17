@@ -28,7 +28,7 @@ module MemoryAllocator =
         | "W" -> 2
         | "D" -> 4
         | "L" -> 8
-        | _ -> failwith "ERROR"
+        | _ -> failwithlog "ERROR"
 
 
     /// 주어진 memory type 에서 주소를 할당하 하는 함수 제공
@@ -72,7 +72,7 @@ module MemoryAllocator =
                 let byteIndex = bitIndex / 8
 
                 if byteIndex > endByte then
-                    failwith "ERROR: Limit exceeded."
+                    failwithlog "ERROR: Limit exceeded."
 
                 if reservedBytes |> List.contains byteIndex then
                     getAddress reqMemType
@@ -108,7 +108,7 @@ module MemoryAllocator =
                         byte
 
                 if byteIndex + byteSize > endByte then
-                    failwith "ERROR: Limit exceeded."
+                    failwithlog "ERROR: Limit exceeded."
 
                 let requiredByteIndices = [ byteIndex .. (byteIndex + byteSize - 1) ]
                 let x = Seq.intersect requiredByteIndices reservedBytes |> Seq.any
@@ -122,7 +122,7 @@ module MemoryAllocator =
                     let address = $"%%{typ}{reqMemType}{byteIndex / byteSize}"
                     logDebug "Address %s allocated" address
                     address
-            | _ -> failwith "ERROR"
+            | _ -> failwithlog "ERROR"
 
 
         { BitAllocator = fun () -> getAddress "X"
@@ -144,16 +144,16 @@ module MemoryAllocator =
             | INT32 -> 32
             | INT64 -> 64
             | INT8 -> 8
-            | STRING -> failwith "ERROR"
+            | STRING -> failwithlog "ERROR"
             | UINT16 -> 16
             | UINT32 -> 32
             | UINT64 -> 64
             | UINT8 -> 8
-            | _ -> failwith "ERROR"
+            | _ -> failwithlog "ERROR"
 
         member x.GetByteSize() =
             match x.Name with
-            | BOOL -> failwith "ERROR"
+            | BOOL -> failwithlog "ERROR"
             | _ -> max 1 (x.GetBitSize() / 8)
 
         member x.GetMemorySizePrefix() =
@@ -165,7 +165,7 @@ module MemoryAllocator =
                 | 2 -> "W"
                 | 4 -> "D"
                 | 8 -> "L"
-                | _ -> failwith "ERROR"
+                | _ -> failwithlog "ERROR"
 
 
 [<AutoOpen>]

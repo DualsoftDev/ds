@@ -109,15 +109,15 @@ rs p/s: read all strings in p/s file
                         | Ok kvs ->
                             let str = kvs |> map (fun (k, v) -> $"{k}={v}") |> joinWith ", "
                             Console.WriteLine($"OK: {str}")
-                        | _ -> failwith "ERROR"
+                        | _ -> failwithlog "ERROR"
                     //| StartsWith "ws" ->
                     //    match client.WriteStrings(name, tokens[2..]) with
                     //    | Ok kvs ->
                     //        let str = kvs |> map (fun (k, v) -> $"{k}={v}") |> joinWith ", "
                     //        Console.WriteLine($"OK: {str}")
                     //    | _ ->
-                    //        failwith "ERROR"
-                    | _ -> failwith "ERROR"
+                    //        failwithlog "ERROR"
+                    | _ -> failwithlog "ERROR"
 
 
 
@@ -200,7 +200,7 @@ rs p/s: read all strings in p/s file
                 | :? SingleStringChangeInfo as change ->
                     for (key, value) in change.GetKeysAndValues() do
                         logDebug $"Tag change detected on server side for {key}: {value}"
-                | _ -> failwith "ERROR"
+                | _ -> failwithlog "ERROR"
 
                 ())
 
@@ -231,7 +231,7 @@ rs p/s: read all strings in p/s file
                 | :? SingleStringChangeInfo as change ->
                     for (key, value) in change.GetKeysAndValues() do
                         logDebug $"Tag change detected on server side for {key}: {value}"
-                | _ -> failwith "ERROR"
+                | _ -> failwithlog "ERROR"
 
                 ())
 
@@ -265,7 +265,7 @@ rs p/s: read all strings in p/s file
 
         match client.ReadBytes("p/o", [| 0; 1; 2; 3 |]) with
         | Ok bytes -> ()
-        | _ -> failwith "ERROR"
+        | _ -> failwithlog "ERROR"
 
 
         // 서버 직접 접근 API test

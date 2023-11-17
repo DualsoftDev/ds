@@ -185,26 +185,6 @@ public static class CustomServerExtension
         ServerGlobal.ReStartIoHub(Path.Combine(AppContext.BaseDirectory, "zmqsettings.json"));
 
         serverGlobal.DsCommonAppSettings = commonAppSettings;
-
-        CompositeDisposable modelChangeDisposables = new();
-        serverGlobal.PropertyChanged += (s, e) =>
-        {
-            if (e.PropertyName == nameof(serverGlobal.DsZipPath))
-            {
-                modelChangeDisposables.Dispose();
-                K.Noop();
-
-                ///serverGlobal.RuntimeModel = ....;
-                logger.Info($"Model change detected: {serverGlobal.DsZipPath}");
-                // todo : 모델 변경에 따른 작업 수행
-                // 1. DBLogger storage table 변경
-                //
-
-                modelChangeDisposables = new();
-            }
-        };
-
-
         return services;
     }
 }

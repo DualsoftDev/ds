@@ -137,7 +137,7 @@ module MiscTestModule =
 
             match v.GetType() with
             | GenericType <@ typedefof<Variable<_>> @> [|t|] -> $"Variable<{t.Name}>"//addChildListUntyped(t,o)
-            | _ -> failwith "ERROR"
+            | _ -> failwithlog "ERROR"
             === "Variable<Boolean>"
 
             (* IValue<'T> 를 TypedValueStorage<obj> 가 아닌, TypedValueStorage<'T> 로 변환 할 수 있나? *)

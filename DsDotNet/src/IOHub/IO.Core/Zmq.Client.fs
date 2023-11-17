@@ -138,7 +138,7 @@ type Client(serverAddress: string) =
                             | 16 -> mq[Values].GetArray<uint16>(needEndianFix) |> box
                             | 32 -> mq[Values].GetArray<uint32>(needEndianFix) |> box
                             | 64 -> mq[Values].GetArray<uint64>(needEndianFix) |> box
-                            | _ -> failwith "ERROR"
+                            | _ -> failwithlog "ERROR"
 
                         IOTagChangedInfo(path, contentBitLength, offsets, values)
                         |> tagChangedSubject.OnNext

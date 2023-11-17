@@ -29,6 +29,20 @@ namespace DsWebApp.Server.Common
         static IoHub _ioHub;
         public ServerDirectAccess IoHubServer => _ioHub?.Server;
 
+        public ServerGlobal()
+        {
+            PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(DsZipPath))
+                {
+                    Logger.Info($"Model change detected: {DsZipPath}");
+                    RuntimeModel?.Dispose();
+                    RuntimeModel = new RuntimeModel(DsZipPath);
+                }
+            };
+        }
+
+
         public static void ReStartIoHub(string zmqSettingsJson)
         {
             _ioHub?.Dispose();

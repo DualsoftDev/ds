@@ -2,7 +2,7 @@ namespace DsWebApp.Server.Hubs
 {
     public class ModelHub : Hub
     {
-        public static HashSet<string> ConnectedClients = new HashSet<string>();
+        public static HashSet<string> ConnectedClients { get; } = new HashSet<string>();
         public ModelHub(IConfiguration configuration)
         {
             //GlobalCounter.TheGlobalCounter ??= configuration.GetSection("GlobalCounter").Get<GlobalCounter>();

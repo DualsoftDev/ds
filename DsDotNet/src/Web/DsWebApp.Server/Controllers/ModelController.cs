@@ -1,8 +1,6 @@
 using DsWebApp.Shared;
 
-using Engine.Core;
 using Engine.Runtime;
-using Microsoft.AspNetCore.Mvc;
 
 using static Engine.Core.TagKindModule;
 
@@ -13,16 +11,9 @@ namespace DsWebApp.Server.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class ModelController : ControllerBaseWithLogger
+public class ModelController(ServerGlobal global) : ControllerBaseWithLogger(global.Logger)
 {
-    ServerGlobal _global;
-    RuntimeModel _model;
-    public ModelController(ServerGlobal global)
-        : base(global.Logger)
-    {
-        _global = global;
-        _model = global.RuntimeModel;
-    }
+    RuntimeModel _model => global.RuntimeModel;
 
     /*
        {

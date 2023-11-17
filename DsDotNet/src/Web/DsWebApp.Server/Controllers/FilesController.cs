@@ -9,16 +9,10 @@ namespace DsWebApp.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class FilesController : ControllerBaseWithLogger
+public class FilesController(ServerGlobal global) : ControllerBaseWithLogger(global.Logger)
 {
-    string _serviceFolder;
-    ServerGlobal _global;
-    public FilesController(ServerGlobal global)
-        : base(global.Logger)
-    {
-        _global = global;
-        _serviceFolder = global.ServerSettings.ModelStorageFolder;
-    }
+    string _serviceFolder => global.ServerSettings.ModelStorageFolder;
+
     [HttpGet("{fileName}/delete")]
     public bool DeleteLocalFile(string fileName)
     {
@@ -85,7 +79,7 @@ public class FilesController : ControllerBaseWithLogger
             if (fileChunk.IsLastChunk)
             {
                 // todo: dszip 파일 신규 upload 에 대한 처리
-                _global.DsZipPath = Path.Combine(_serviceFolder, fileName);
+                global.DsZipPath = Path.Combine(_serviceFolder, fileName);
                 Console.Write("");
             }
 

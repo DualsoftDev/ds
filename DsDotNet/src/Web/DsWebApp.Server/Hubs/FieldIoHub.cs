@@ -5,13 +5,9 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace DsWebApp.Server.Hubs
 {
-    public class FieldIoHub : Hub
+    public class FieldIoHub(IConfiguration configuration) : Hub
     {
         public static HashSet<string> ConnectedClients = new HashSet<string>();
-        public FieldIoHub(IConfiguration configuration)
-        {
-            //GlobalCounter.TheGlobalCounter ??= configuration.GetSection("GlobalCounter").Get<GlobalCounter>();
-        }
 
         public override Task OnConnectedAsync()
         {

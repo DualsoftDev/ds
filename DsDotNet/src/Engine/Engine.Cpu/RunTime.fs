@@ -45,6 +45,7 @@ module RunTime =
             }
 
         let doRun() = 
+            logInfo "--- Running CPU.."
             systems.Iter(fun sys-> cpuModeToggle(sys, cpuMode))
             
             
@@ -53,6 +54,7 @@ module RunTime =
                 Async.StartImmediate(asyncStart, cts.Token) |> ignore
 
         let doStop() = 
+            logInfo "--- Stopping CPU.."
             cts.Cancel()
             cts <- new CancellationTokenSource() 
             run <- false;

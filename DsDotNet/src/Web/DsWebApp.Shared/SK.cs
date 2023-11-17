@@ -19,4 +19,9 @@ public class SK
     /// </summary>
     public const string S2CNModelChanged = "S2CNotifyModelChanged";
 
+    /// <summary>
+    /// Server 2 Client Notify TagWeb Changed
+    /// </summary>
+    public const string S2CNTagWebChanged = "S2CNotifyTagWebChanged";
+
 }

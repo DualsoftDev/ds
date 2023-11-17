@@ -6,9 +6,9 @@
 
 
 
-<EditForm OnValidSubmit="@HandleSubmit">
-    <InputText @bind-Value="@_name" />
-    <InputNumber @bind-Value="@_kind" />
+<EditForm Model="@_tagWeb" OnValidSubmit="@HandleSubmit">
+    <InputText @bind-Value="@_tagWeb.Name" />
+    <InputNumber @bind-Value="@_tagWeb.Kind" />
     <InputCheckbox @bind-Value="@_flag" />
     <button type="submit">제출</button>
 </EditForm>
@@ -18,17 +18,36 @@
 <h3>Hmi Tag Test</h3>
 
 @code {
-    string _name;
-    int _kind;
+    // string _name;
+    // int _kind;
     bool _flag;
+    TagWeb _tagWeb = new("", false, 0);
 
-    // todo : TagWeb
     private async Task HandleSubmit()
     {
-        // TagWeb tagWeb = new(_name, _kind, _flag);
-        // Console.WriteLine($"TagWeb: Name={_tagWeb.Name}, Kind={_tagWeb.Kind}");
-        // await Http.PostAsJsonAsync("api/model/tag", _tagWeb);
+        TagWeb tagWeb = new(_tagWeb.Name, _flag, _tagWeb.Kind);
+        Console.WriteLine($"TagWeb: Name={tagWeb.Name}, Kind={tagWeb.Kind}");
+        var response = await Http.PostAsJsonAsync("api/model/tag", tagWeb);
+        response.EnsureSuccessStatusCode();
+        string responseBody = await response.Content.ReadAsStringAsync();
+        bool result = Convert.ToBoolean(responseBody);
+        Console.WriteLine($"Submit result: {result}");
     }
 
+    HubConnection _hubConnection;
+    IDisposable _subscription;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/hmitag").StartHubAsync();
+        _subscription =
+            _hubConnection.On<TagWeb>(SK.S2CNTagWebChanged, async (TagWeb change) =>
+            {
+                // todo : NOT working!!
+                Console.WriteLine($"TagWeb change notification received with {change.Name}/{change.Kind}={change.Value}.");
+            });
+
+        await base.OnInitializedAsync();
+    }
 
 }

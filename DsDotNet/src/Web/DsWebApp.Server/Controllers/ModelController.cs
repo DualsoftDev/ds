@@ -1,3 +1,4 @@
+using DsWebApp.Server.Hubs;
 using DsWebApp.Shared;
 using Engine.Runtime;
 
@@ -10,9 +11,25 @@ namespace DsWebApp.Server.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class ModelController(ServerGlobal global) : ControllerBaseWithLogger(global.Logger)
+public class ModelController : ControllerBaseWithLogger
 {
-    RuntimeModel _model => global.RuntimeModel;
+    RuntimeModel _model;
+
+    public ModelController(ServerGlobal global, IHubContext<ModelHub> hubContextModel)
+        : base(global.Logger)
+    {
+        global.Logger.Debug("ModelController 생성자 호출 됨");
+
+        _model = global.RuntimeModel;
+
+        //global.RuntimeModel?.Cpu.TagWebChangedSubject.Subscribe(tagWeb =>
+        //{
+        //    global.Logger.Debug("Server: Notifying TagWeb change to all clients");
+
+        //    // "hub/hmitag"
+        //    hubContextModel.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
+        //});
+    }
 
     /*
        {
@@ -48,20 +65,16 @@ public class ModelController(ServerGlobal global) : ControllerBaseWithLogger(glo
 
 
     /// <summary>
-    /// "api/model/tag/{fqdn}/{tagKind}" : 지정된 HMI 태그 정보 update
+    /// "api/model/tag : POST 로 지정된 HMI 태그 정보 update
     /// </summary>
-    [HttpPost("tag/{tagWeb}")]
+    [HttpPost("tag")]
     public bool SetHmiTag([FromBody] TagWeb tagWeb)
     {
         var cpu = _model?.Cpu;
         if (cpu == null)
             return false;
 
-        // serializedObject : e.g "{\"RawValue\":false,\"Type\":1}"
-        var obj = Dual.Common.Core.FS.ObjectHolder.Deserialize(tagWeb._SerializedObject);
-        // todo: implement
-        //cpu.SetTag(fqdn, obj);
-        return true;
+        return cpu.UpdateTagWeb(tagWeb);
     }
     /// <summary>
     /// "api/model/tag/{fqdn}/{tagKind}" : 지정된 HMI 태그 정보 update

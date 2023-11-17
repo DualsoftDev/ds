@@ -10,6 +10,7 @@ open System.Threading
 open Engine.Core.TagKindModule
 open System.Runtime.CompilerServices
 open Engine.CodeGenCPU
+open System.Reactive.Subjects
 
 [<AutoOpen>]
 module RunTime =
@@ -22,6 +23,8 @@ module RunTime =
      
         let mutable cts = new CancellationTokenSource()
         let mutable run:bool = false
+
+        let tagWebChangedSubject = new Subject<TagWeb>()
 
         let scanOnce() = 
             //나머지 수식은 Changed Event가 있는것만 수행해줌
@@ -101,8 +104,14 @@ module RunTime =
             syncReset(systems, false)
             scanOnce()
 
+        // todo: 함수 작성.  실패시 false 반환
+        member x.UpdateTagWeb(tagWeb:TagWeb): bool =
+            logDebug "Server Updating TagWeb"
+            tagWebChangedSubject.OnNext(tagWeb)
+            true
 
-            
+        // todo: TagWeb 변경시 이벤트 발생
+        member x.TagWebChangedSubject = tagWebChangedSubject
 
                 
 

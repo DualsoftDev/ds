@@ -6,6 +6,7 @@ using DsWebApp.Server.Hubs;
 using Dual.Common.Core.FS;      // for F# common logger setting
 using Engine.Core;
 using Engine.Info;
+using DsWebApp.Shared;
 
 //using DsWebApp.Server.Authentication;
 

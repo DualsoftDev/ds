@@ -1,14 +1,13 @@
-namespace DsWebApp.Shared
+namespace DsWebApp.Shared;
+
+public class K
 {
-    public class K
-    {
-        /// <summary>
-        /// Server 2 Client Notify Numeric IO Changed
-        /// </summary>
-        public const string S2CNNIOChanged = "S2CNotifyIoMemoryChanged";
-        /// <summary>
-        /// Server 2 Client Notify String IO Changed
-        /// </summary>
-        public const string S2CNSIOChanged = "S2CNotifyIoMemoryChanged";
-    }
+    /// <summary>
+    /// Server 2 Client Notify Numeric IO Changed
+    /// </summary>
+    public const string S2CNNIOChanged = "S2CNotifyIoMemoryChanged";
+    /// <summary>
+    /// Server 2 Client Notify String IO Changed
+    /// </summary>
+    public const string S2CNSIOChanged = "S2CNotifyIoMemoryChanged";
 }

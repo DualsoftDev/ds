@@ -43,35 +43,19 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        // _modelDto = await Http.GetFromJsonAsync<RuntimeModelDto>($"api/model");
+        _modelDto = await ClientGlobal.GetModelDtoAsync(Http);
 
-        var response = await Http.GetAsync($"api/model");
-        if (response.IsSuccessStatusCode)
-        {
-            _modelDto = await response.Content.ReadFromJsonAsync<RuntimeModelDto>();
-            await JsDual.Debug($"Got path={_modelDto.SourceDsZipPath}, isCpuRunning={_isRunning}");
-        }
-        else
-        {
-            // 실패한 응답 코드에 대한 처리
-            // 예: 사용자에게 에러 메시지 표시, 로깅 등
-        }
         _loading = false;
 
-
         _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/model").StartHubAsync();
-        IDisposable subscription =
-            _hubConnection.On<RuntimeModelDto>("ModelChanged", async (RuntimeModelDto newModel) =>
-            {
-                _modelDto = newModel;
-                await Task.Delay(200);
-                StateHasChanged();
-            });
+        var action = new Action<RuntimeModelDto>(modelDto => { _modelDto = modelDto; StateHasChanged(); });
+        IDisposable subscription = await ClientGlobal.MonitorModelChangeAsync(NavigationManager, action);
         _disposables.Add(subscription);
 
         StateHasChanged();
         await base.OnInitializedAsync();
     }
+    public void Dispose() => _disposables.Dispose();
 
     async Task executeRestApi(string api, string defaultOkMessage)
     {

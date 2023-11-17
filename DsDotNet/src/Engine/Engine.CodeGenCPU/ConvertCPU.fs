@@ -115,13 +115,7 @@ module ConvertCPU =
         ]
 
 
-
-
-    let convertSystem(sys:DsSystem, isActive:bool) =
-        RuntimeDS.System <- sys
-        //DsSystem 물리 IO 생성
-        sys.GenerationIO()
-
+    let checkNullAddressErr(sys:DsSystem) = 
         let nullTagJobs = sys.Jobs
                              .Where(fun j-> j.DeviceDefs.Where(fun f-> 
                                             f.InTag.IsNull() && f.ApiItem.RXs.any()
@@ -132,6 +126,14 @@ module ConvertCPU =
             let errJobs = StringExt.JoinWith(nullTagJobs.Select(fun j -> j.Name), "\n")
             failwithf $"Device 주소가 없습니다. \n{errJobs}"
 
+
+    let convertSystem(sys:DsSystem, isActive:bool) =
+        RuntimeDS.System <- sys
+        //DsSystem 물리 IO 생성
+        sys.GenerationIO()
+        
+        if not (RuntimeDS.Package.IsPackageSIM())
+        then checkNullAddressErr(sys:DsSystem)
 
         if isActive //직접 제어하는 대상만 정렬(원위치) 정보 추출
         then sys.GenerationOrigins()

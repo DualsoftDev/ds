@@ -82,6 +82,7 @@ module RunTime =
 
         member x.Dispose() = doStop()
         member x.Run()  = doRun()
+        member x.RunInBackground()  = async { doRun() } |> Async.Start
         member x.AutoDriveSetting()  =          
             systems.Iter(fun sys-> preAction(sys, cpuMode, true))
 

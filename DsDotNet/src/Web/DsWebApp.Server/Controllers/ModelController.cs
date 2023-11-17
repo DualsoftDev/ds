@@ -63,10 +63,7 @@ public static class RuntimeModelDtoExtensions
 {
     public static RuntimeModelDto ToDto(this RuntimeModel model)
     {
-        return new RuntimeModelDto
-        {
-            SourceDsZipPath = model.SourceDsZipPath,
-            IsCpuRunning = model.Cpu?.IsRunning ?? false,
-        };
+        bool isCpuRunning = model.Cpu?.IsRunning ?? false;
+        return new RuntimeModelDto(model.SourceDsZipPath, isCpuRunning);
     }
 }

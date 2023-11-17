@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace DsWebApp.Shared;
-public class RuntimeModelDto
+public class RuntimeModelDto(string sourceDsZipPath, bool isCpuRunning)
 {
-    public string SourceDsZipPath { get; set; }
-    public bool IsCpuRunning { get; set; }
+    public string SourceDsZipPath => sourceDsZipPath;
+    public bool IsCpuRunning => isCpuRunning;
 }
 

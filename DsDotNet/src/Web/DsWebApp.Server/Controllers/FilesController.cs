@@ -3,13 +3,14 @@
 
 using System.Net.Http.Headers;
 using DsWebApp.Server.Common;
+using DsWebApp.Server.Hubs;
 using DsWebApp.Shared;
 
 namespace DsWebApp.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class FilesController(ServerGlobal global) : ControllerBaseWithLogger(global.Logger)
+public class FilesController(ServerGlobal global, IHubContext<ModelHub> hubContextModel) : ControllerBaseWithLogger(global.Logger)
 {
     string _runtimeModelDsZipPath => global.ServerSettings.RuntimeModelDsZipPath;
     string _serviceFolder => Path.GetDirectoryName(_runtimeModelDsZipPath);
@@ -82,6 +83,7 @@ public class FilesController(ServerGlobal global) : ControllerBaseWithLogger(glo
                 // dszip 파일 신규 upload 에 대한 처리
                 System.IO.File.Move(fileName, _runtimeModelDsZipPath);
                 global.ReloadRuntimeModel();
+                hubContextModel.Clients.All.SendAsync("ModelChanged", new RuntimeModelDto(_runtimeModelDsZipPath, false));
             }
 
             return true;

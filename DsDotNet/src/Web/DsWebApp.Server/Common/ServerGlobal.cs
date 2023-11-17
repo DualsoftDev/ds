@@ -32,10 +32,17 @@ namespace DsWebApp.Server.Common
         {
             ServerSettings = serverSettings;
             Logger = logger;
-            RuntimeModel = ReloadRuntimeModel();
-            if (serverSettings.AutoStartOnSystemPowerUp)
-                Task.Factory.StartNew(() => RuntimeModel?.Cpu.Run());
-                //RuntimeModel?.Cpu.Run();
+            try
+            {
+                RuntimeModel = ReloadRuntimeModel();
+                //if (serverSettings.AutoStartOnSystemPowerUp)
+                //    Task.Factory.StartNew(() => RuntimeModel?.Cpu.Run());
+                RuntimeModel?.Cpu.RunInBackground();
+            }
+            catch (Exception ex)
+            {
+                logger.Warn($"Failed to load runtime model: {serverSettings.RuntimeModelDsZipPath}\r\n{ex.Message}");
+            }
         }
 
         public RuntimeModel ReloadRuntimeModel()

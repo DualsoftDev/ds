@@ -28,9 +28,10 @@ namespace DsWebApp.Server.Common
         static IoHub _ioHub;
         public ServerDirectAccess IoHubServer => _ioHub?.Server;
 
-        public ServerGlobal(ServerSettings serverSettings, ILog logger)
+        public ServerGlobal(ServerSettings serverSettings, DSCommonAppSettings commonAppSettings, ILog logger)
         {
             ServerSettings = serverSettings;
+            DsCommonAppSettings = commonAppSettings;
             Logger = logger;
             try
             {

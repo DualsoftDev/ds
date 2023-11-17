@@ -33,39 +33,41 @@ module ExportModule =
         let usedByteIndices =
             let getBytes addr =
                 [ match addr with
-                  | RegexPattern @"^%M([BWDL])(\d+)\.\d+$" [ AddressConvert.DataTypePattern dataType; Int32Pattern off2 ] ->
+                  | RegexPattern @"^%M([BWDL])(\d+)\.\d+$" [ AddressPattern.DataTypePattern dataType; Int32Pattern off2 ] ->
                       let l = dataType.GetByteLength()
                       yield l * off2 + 1
-                  | RegexPattern @"^%M([BWDL])(\d+)$" [ AddressConvert.DataTypePattern dataType; Int32Pattern off2 ] ->
+                  | RegexPattern @"^%M([BWDL])(\d+)$" [ AddressPattern.DataTypePattern dataType; Int32Pattern off2 ] ->
                       let l = dataType.GetByteLength()
                       let s = l * off2
                       yield! [ s .. s + l ]
                   | RegexPattern @"^%MX(\d+)$" [ Int32Pattern bitoffset ] -> yield bitoffset / 8
                   | _ -> failwithlog "ERROR" ]
-
-            let usedAddresses =
-                system.TagManager.Storages.Values
-                |> Seq.filter (fun f -> not <| (f :? TimerCounterBaseStruct))
-                |> Seq.filter (fun f -> f.Address <> null && f.Address <> "")
-                |> Array.ofSeq
+            
+            
+            //주소 중복체크 안함
+            //let usedAddresses =
+            //    system.TagManager.Storages.Values
+            //    |> Seq.filter (fun f -> not <| (f :? TimerCounterBaseStruct))
+            //    |> Seq.filter (fun f -> f.Address <> null && f.Address <> "")
+            //    |> Array.ofSeq
 
             // check if there is any duplicated address
-            let duplicatedAddresses =
-                usedAddresses
-                |> Array.groupBy (fun f -> f.Address)
-                |> Array.filter (fun (_, vs) -> vs.Length > 1)
+            //let duplicatedAddresses =
+            //    usedAddresses
+            //    |> Array.groupBy (fun f -> f.Address)
+            //    |> Array.filter (fun (_, vs) -> vs.Length > 1)
 
-            // prints duplications
-            if duplicatedAddresses.Length > 0 then
-                let dupItems =
-                    duplicatedAddresses
-                    |> map (fun (address, vs) ->
-                        let names = vs |> map (fun var -> var.Name) |> String.concat ", "
-                        $"  {address}: {names}")
-                    |> String.concat Environment.NewLine
+            //// prints duplications
+            //if duplicatedAddresses.Length > 0 then
+            //    let dupItems =
+            //        duplicatedAddresses
+            //        |> map (fun (address, vs) ->
+            //            let names = vs |> map (fun var -> var.Name) |> String.concat ", "
+            //            $"  {address}: {names}")
+            //        |> String.concat Environment.NewLine
 
-                failwithlog
-                    $"Total {duplicatedAddresses.Length} Duplicated address items:{Environment.NewLine}{dupItems}"
+            //    failwithlog
+            //        $"Total {duplicatedAddresses.Length} Duplicated address items:{Environment.NewLine}{dupItems}"
 
             let autoMemoryAllocationTags =
                 system.TagManager.Storages.Values
@@ -118,7 +120,7 @@ module ExportModule =
     type ExportModuleExt =
         [<Extension>]
         static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml) =
-            exportXMLforXGI (system, path, tempLSISxml)
+            exportXMLforXGI (system, path, if tempLSISxml <> null then Some(tempLSISxml) else None)
 
         [<Extension>]
         static member ExportXMLforPC(system: DsSystem, path: string) =

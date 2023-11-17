@@ -8,14 +8,14 @@
 
 
     <ItemGroup>
-        <Compile Include="Connect.fs"/>
-        <Compile Include="ScanIO.fs"/>
-        <Compile Include="Program.fs"/>
+        <Compile Include="Connect.fs" />
+        <Compile Include="ScanIO.fs" />
+        <Compile Include="Program.fs" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\..\PLC\Dual.PLC.LS.FS\PLC.LS.FS.fsproj"/>
-        <ProjectReference Include="..\..\IOMapApi\IOMapApi.fsproj"/>
+        <ProjectReference Include="..\..\..\PLC\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
+        <ProjectReference Include="..\..\IOMapApi\IOMapApi.fsproj" />
     </ItemGroup>
 
 

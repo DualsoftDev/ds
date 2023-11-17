@@ -1,5 +1,6 @@
 @page "/hmis/tags"
 @using System.Collections.ObjectModel
+@using static Engine.Core.TagWebModule
 @using static Engine.Core.TagKindModule
 
 <h3>PageHmiTags</h3>
@@ -41,9 +42,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var allTagWebs = await Http.GetFromJsonAsync<TagWeb[]>($"api/model/tag");
-        TagWebORM[] allTags = allTagWebs.Select(tw => new TagWebORM(tw)).ToArray();
-        _items = new ObservableCollection<TagWebORM>(allTags);
+        var hmiTags = await Http.GetFromJsonAsync<HmiTagPackage>($"api/model/tag");
+        // TagWebORM[] allTags = allTagWebs.Select(tw => new TagWebORM(tw)).ToArray();
+        // _items = new ObservableCollection<TagWebORM>(allTags);
 
         // _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/vanilla").StartHubAsync();
         // _subscription =

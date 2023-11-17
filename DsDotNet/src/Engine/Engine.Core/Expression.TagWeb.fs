@@ -1,10 +1,7 @@
 namespace Engine.Core
 
 open Dual.Common.Core.FS
-open System
-open System.Linq
 open System.Runtime.CompilerServices
-open System.Reactive.Subjects
 
 [<AutoOpen>]
 module TagWebModule =
@@ -18,6 +15,38 @@ module TagWebModule =
     }
     type TagWeb with
         member x.Value:obj = ObjectHolder.Deserialize(x._SerializedObject).GetValue()
+
+    type HMIPush = TagWeb
+    type HMILamp = TagWeb
+    type HMIFlickerLamp = TagWeb
+    type HMIButton = HMIPush*HMIFlickerLamp
+    type HMIDevice = (HMIPush option)*(HMILamp option)  //input, output
+
+
+    type HmiTagPackage = {
+        AutoButtons      : HMIButton array 
+        ManualButtons    : HMIButton array 
+        DriveButtons     : HMIButton array 
+        StopButtons      : HMIButton array 
+        ClearButtons     : HMIButton array 
+        EmergencyButtons : HMIButton array 
+        TestButtons      : HMIButton array 
+        HomeButtons      : HMIButton array 
+        ReadyButtons     : HMIButton array 
+        
+        DriveLamps       : HMILamp array 
+        AutoLamps        : HMILamp array 
+        ManualLamps      : HMILamp array 
+        StopLamps        : HMILamp array 
+        EmergencyLamps   : HMILamp array 
+        TestLamps        : HMILamp array 
+        ReadyLamps       : HMILamp array 
+        IdleLamps        : HMILamp array 
+
+        RealBtns         : HMIPush array 
+        DeviceBtns       : HMIDevice array 
+        //JobBtns          : HMIPush array  나중에
+    }
 
 
 [<AutoOpen>]

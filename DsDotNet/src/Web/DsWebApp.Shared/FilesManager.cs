@@ -16,7 +16,7 @@ namespace DsWebApp.Shared
                 string responseBody = await result.Content.ReadAsStringAsync();
                 return JsonSerializer.Deserialize<List<string>>(responseBody);
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return new List<string>();
             }
@@ -31,7 +31,7 @@ namespace DsWebApp.Shared
                 string responseBody = await result.Content.ReadAsStringAsync();
                 return JsonSerializer.Deserialize<List<string>>(responseBody);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return null;
             }
@@ -77,7 +77,7 @@ namespace DsWebApp.Shared
                 string responseBody = await result.Content.ReadAsStringAsync();
                 return Convert.ToBoolean(responseBody);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }

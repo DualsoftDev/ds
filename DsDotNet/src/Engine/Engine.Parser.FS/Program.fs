@@ -197,7 +197,7 @@ C4 > C5;
 
     [buttons] = {
         [e] = {
-            EMGBTN(_,_) = { F; }
+            EMGBTN(%IX0.0.4,%QX0.1.3) = { F; }
             //EmptyButton = {}
             //NonExistingFlowButton = { F1; }
         }

@@ -11,4 +11,5 @@ global using Dual.Web.Blazor.Client.Components.BlazorComponents;
 
 //global using Rectangle = Dual.Web.Blazor.Client.Canvas2d.Model.Rectangle;
 //global using TwmsK = Twm.Common.K;
+global using ErrorMessage = string;
 

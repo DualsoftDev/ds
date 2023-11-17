@@ -1,33 +1,14 @@
 using DsWebApp.Server.Hubs;
-using Engine.Runtime;
 
 using IO.Core;
+
 using K = DsWebApp.Shared.K;
 
 namespace DsWebApp.Server.Demons;
 
-public partial class Demon : BackgroundService
+public partial class Demon(ServerGlobal serverGlobal, IHubContext<FieldIoHub> hubContext) : BackgroundService
 {
-    readonly ILog _logger;
-
-    private ServerGlobal _serverGlobal;
-    //DbRepository _repository;
-    readonly IHubContext<FieldIoHub> _hubContext;
-    //UnsafeServices _unsafeServices;
-    public Demon(
-        ServerGlobal serverGlobal
-        //ILog logger
-        //, DbRepository repository
-        , IHubContext<FieldIoHub> hubContext
-        //, UnsafeServices unsafeServices
-        )
-    {
-        _logger = serverGlobal.Logger;
-        _serverGlobal = serverGlobal;
-        //_repository = repository;
-        _hubContext = hubContext;
-        //_unsafeServices = unsafeServices;
-    }
+    ILog _logger => serverGlobal.Logger;
 
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
@@ -40,6 +21,7 @@ public partial class Demon : BackgroundService
             _logger.Error($"Error on Demon background service:\r\n{ex}");
         }
     }
+
     async Task executeAsyncHelper(CancellationToken ct)
     {
         //await DbCacheController.InitializeAsync(_logger, _repository);
@@ -69,8 +51,8 @@ public partial class Demon : BackgroundService
                     }
                 });
         compositeDisposable.Add(subscription);
-        var xx = _serverGlobal.IoHubServer.MemoryChangedObservable;
-        subscription = _serverGlobal.IoHubServer.MemoryChangedObservable.Subscribe(change =>
+        var xx = serverGlobal.IoHubServer.MemoryChangedObservable;
+        subscription = serverGlobal.IoHubServer.MemoryChangedObservable.Subscribe(change =>
         {
             try
             {
@@ -80,10 +62,10 @@ public partial class Demon : BackgroundService
                     switch (simple)
                     {
                         case SimpleNumericIOChangeInfo c:
-                            _hubContext.Clients.All.SendAsync(K.S2CNNIOChanged, c);
+                            hubContext.Clients.All.SendAsync(K.S2CNNIOChanged, c);
                             break;
                         case SimpleSingleStringChangeInfo c:
-                            _hubContext.Clients.All.SendAsync(K.S2CNSIOChanged, c);
+                            hubContext.Clients.All.SendAsync(K.S2CNSIOChanged, c);
                             break;
                         default:
                             throw new Exception($"Unknown IoMemoryChanged type: {change.GetType().Name}");

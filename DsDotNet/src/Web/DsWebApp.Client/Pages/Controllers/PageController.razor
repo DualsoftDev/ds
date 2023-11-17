@@ -1,12 +1,109 @@
 @page "/controllers/controller"
+@using System.Collections.ObjectModel
+@using System.Text.Json
+@using Dual.Common.Core
+@using Dual.Web.Blazor.ServerSide
 
 <h3>PageController</h3>
 
-counter: @ClientGlobal.Counter
+@* counter: @ClientGlobal.Counter *@
+
+@if (_loading)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    @if (_modelDto == null)
+    {
+        <ul>No model on server.</ul>
+    }
+    else
+    {
+        <ul>SourceDsZipPath: @_modelDto.SourceDsZipPath</ul>
+        <ul>Cpu Running: @_isRunning</ul>
+
+        <button class="btn btn-primary" @onclick="Run" disabled="@_isRunning">Run</button>
+        <button class="btn btn-primary" @onclick="Stop" disabled="@(!_isRunning)">Stop</button>
+        <button class="btn btn-primary" @onclick="Step" disabled="@(!_isRunning)">Step</button>
+        <button class="btn btn-primary" @onclick="Reset" disabled="@(!_isRunning)">Reset</button>
+    }
+}
+
+
+
+
 
 @code {
-    // protected override async Task OnInitializedAsync()
-    // {
-    // }
+    bool _loading { get; set; } = true;
+    bool _isRunning => _modelDto?.IsCpuRunning ?? false;
+    RuntimeModelDto _modelDto;
+    HubConnection _hubConnection;
+    CompositeDisposable _disposables = new();
 
+    protected override async Task OnInitializedAsync()
+    {
+        // _modelDto = await Http.GetFromJsonAsync<RuntimeModelDto>($"api/model");
+
+        var response = await Http.GetAsync($"api/model");
+        if (response.IsSuccessStatusCode)
+        {
+            _modelDto = await response.Content.ReadFromJsonAsync<RuntimeModelDto>();
+            await JsDual.Debug($"Got path={_modelDto.SourceDsZipPath}, isCpuRunning={_isRunning}");
+        }
+        else
+        {
+            // 실패한 응답 코드에 대한 처리
+            // 예: 사용자에게 에러 메시지 표시, 로깅 등
+        }
+        _loading = false;
+
+
+        _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/model").StartHubAsync();
+        IDisposable subscription =
+            _hubConnection.On<RuntimeModelDto>("ModelChanged", async (RuntimeModelDto newModel) =>
+            {
+                _modelDto = newModel;
+                await Task.Delay(200);
+                StateHasChanged();
+            });
+        _disposables.Add(subscription);
+
+        StateHasChanged();
+        await base.OnInitializedAsync();
+    }
+
+    async Task executeRestApi(string api, string defaultOkMessage)
+    {
+        var response = await Http.GetAsync(api);
+        if (response.IsSuccessStatusCode)
+        {
+            ErrorMessage errMsg = await response.Content.ReadAsStringAsync();
+            await JsDual.Alert(errMsg.NonNullAny() ? errMsg : defaultOkMessage);
+        }
+        else
+        {
+            await JsDual.Alert($"Failed to call [{api}].\r\nStatus code:{response.StatusCode}");
+        }
+    }
+
+
+    async Task Run()
+    {
+        await executeRestApi($"api/cpu/command/run", "Cpu running.");
+    }
+    async Task Stop()
+    {
+        await executeRestApi($"api/cpu/command/stop", "Cpu stopped.");
+    }
+
+    async Task Step()
+    {
+        await executeRestApi($"api/cpu/command/step", "Cpu step'ed.");
+    }
+
+    async Task Reset()
+    {
+        await executeRestApi($"api/cpu/command/reset", "Cpu reset'ed.");
+    }
 }

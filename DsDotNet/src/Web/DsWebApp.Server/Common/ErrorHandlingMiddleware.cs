@@ -5,26 +5,17 @@ using Microsoft.AspNetCore.Diagnostics;
 
 namespace DsWebApp.Server.Common
 {
-    public class ErrorHandlingMiddleware
+    public class ErrorHandlingMiddleware(RequestDelegate next, ILog logger)
     {
-        readonly RequestDelegate _next;
-        readonly ILog _logger;
-
-        public ErrorHandlingMiddleware(RequestDelegate next, ILog logger)
-        {
-            _next = next;
-            _logger = logger;
-        }
-
         public async Task Invoke(HttpContext context, IWebHostEnvironment env)
         {
             try
             {
-                await _next(context);
+                await next(context);
             }
             catch (Exception ex)
             {
-                _logger.Error(ex);
+                logger.Error(ex);
                 await HandleExceptionAsync(context, env, ex);
             }
         }

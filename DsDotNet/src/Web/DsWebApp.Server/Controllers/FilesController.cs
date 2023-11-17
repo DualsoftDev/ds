@@ -3,22 +3,18 @@
 
 using System.Net.Http.Headers;
 using DsWebApp.Server.Common;
+using DsWebApp.Server.Hubs;
 using DsWebApp.Shared;
 
 namespace DsWebApp.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class FilesController : ControllerBaseWithLogger
+public class FilesController(ServerGlobal global, IHubContext<ModelHub> hubContextModel) : ControllerBaseWithLogger(global.Logger)
 {
-    string _serviceFolder;
-    ServerGlobal _global;
-    public FilesController(ServerGlobal global)
-        : base(global.Logger)
-    {
-        _global = global;
-        _serviceFolder = global.ServerSettings.ModelStorageFolder;
-    }
+    string _runtimeModelDsZipPath => global.ServerSettings.RuntimeModelDsZipPath;
+    string _serviceFolder => Path.GetDirectoryName(_runtimeModelDsZipPath);
+
     [HttpGet("{fileName}/delete")]
     public bool DeleteLocalFile(string fileName)
     {
@@ -84,9 +80,10 @@ public class FilesController : ControllerBaseWithLogger
 
             if (fileChunk.IsLastChunk)
             {
-                // todo: dszip 파일 신규 upload 에 대한 처리
-                _global.DsZipPath = Path.Combine(_serviceFolder, fileName);
-                Console.Write("");
+                // dszip 파일 신규 upload 에 대한 처리
+                System.IO.File.Move(fileName, _runtimeModelDsZipPath);
+                global.ReloadRuntimeModel();
+                hubContextModel.Clients.All.SendAsync("ModelChanged", new RuntimeModelDto(_runtimeModelDsZipPath, false));
             }
 
             return true;

@@ -8,7 +8,7 @@ global using Microsoft.AspNetCore.Mvc;
 global using log4net;
 
 
-//global using DsWebApp.Shared;
+global using DsWebApp.Shared;
 global using DsWebApp.Server.Common;
 global using DsWebApp.Server.Controllers;
 global using Dual.Common.Core;

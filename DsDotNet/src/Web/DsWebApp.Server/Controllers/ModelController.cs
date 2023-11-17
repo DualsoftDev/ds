@@ -46,6 +46,23 @@ public class ModelController(ServerGlobal global) : ControllerBaseWithLogger(glo
     //    //return _model?.HMITagPackage.FirstOrDefault(wt => wt.Name == fqdn);
     //}
 
+
+    /// <summary>
+    /// "api/model/tag/{fqdn}/{tagKind}" : 지정된 HMI 태그 정보 update
+    /// </summary>
+    [HttpPost("tag/{tagWeb}")]
+    public bool SetHmiTag([FromBody] TagWeb tagWeb)
+    {
+        var cpu = _model?.Cpu;
+        if (cpu == null)
+            return false;
+
+        // serializedObject : e.g "{\"RawValue\":false,\"Type\":1}"
+        var obj = Dual.Common.Core.FS.ObjectHolder.Deserialize(tagWeb._SerializedObject);
+        // todo: implement
+        //cpu.SetTag(fqdn, obj);
+        return true;
+    }
     /// <summary>
     /// "api/model/tag/{fqdn}/{tagKind}" : 지정된 HMI 태그 정보 update
     /// </summary>

@@ -1,6 +1,6 @@
 namespace DsWebApp.Server.Common
 {
-    public class K : DsWebApp.Shared.K
+    public class K : SK
     {
         public static void Noop() {}
     }

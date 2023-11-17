@@ -31,7 +31,7 @@ public class CpuController(ServerGlobal global, IHubContext<ModelHub> hubContext
             return "Already running";
 
         _cpu.RunInBackground();
-        hubContextModel.Clients.All.SendAsync("ModelChanged", modelDto(true));
+        hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, modelDto(true));
         return "";
     }
 
@@ -44,7 +44,7 @@ public class CpuController(ServerGlobal global, IHubContext<ModelHub> hubContext
             return "Already stopped";
 
         _cpu.Stop();
-        hubContextModel.Clients.All.SendAsync("ModelChanged", modelDto(false));
+        hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, modelDto(false));
 
         return "";
     }

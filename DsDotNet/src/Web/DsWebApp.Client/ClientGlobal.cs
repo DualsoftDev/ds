@@ -50,7 +50,7 @@ namespace DsWebApp.Client
         {
             HubConnection hubConnection = await navigationManager.ToAbsoluteUri("/hub/model").StartHubAsync();
             IDisposable subscription =
-                hubConnection.On<RuntimeModelDto>("ModelChanged", async (RuntimeModelDto newModel) =>
+                hubConnection.On<RuntimeModelDto>(SK.S2CNModelChanged, (RuntimeModelDto newModel) =>
                 {
                     _modelDto = newModel;
                     onModelChanged(newModel);   // e.g StateHasChanged();

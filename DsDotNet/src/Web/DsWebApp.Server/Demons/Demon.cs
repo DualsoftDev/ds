@@ -2,7 +2,7 @@ using DsWebApp.Server.Hubs;
 
 using IO.Core;
 
-using K = DsWebApp.Shared.K;
+using SK = DsWebApp.Shared.SK;
 
 namespace DsWebApp.Server.Demons;
 

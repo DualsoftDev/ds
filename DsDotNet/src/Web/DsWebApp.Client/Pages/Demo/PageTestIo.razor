@@ -19,7 +19,7 @@
         hubConnection = await HubExtension.StartHubAsync(NavigationManager.ToAbsoluteUri("/hub/io"));
         StateHasChanged();
         IDisposable subscription =
-            hubConnection.On<SimpleNumericIOChangeInfo>(K.S2CNNIOChanged, (changeInfo) =>
+            hubConnection.On<SimpleNumericIOChangeInfo>(SK.S2CNNIOChanged, (changeInfo) =>
             {
                 var numItems = changeInfo.Offsets.Length;
                 JsDual.Debug($"IoMemoryChanged: {changeInfo.MemoryName}, ContentBitLength={changeInfo.ContentBitLength}, Num changed items: {numItems}");
@@ -28,9 +28,9 @@
         disposables.Add(subscription);
 
         subscription =
-            hubConnection.On<SimpleSingleStringChangeInfo>(K.S2CNSIOChanged, (changeInfo) =>
+            hubConnection.On<SimpleSingleStringChangeInfo>(SK.S2CNSIOChanged, (changeInfo) =>
             {
-                JsDual.Debug($"{K.S2CNSIOChanged}: {changeInfo.Tag} = {changeInfo.Value}");
+                JsDual.Debug($"{SK.S2CNSIOChanged}: {changeInfo.Tag} = {changeInfo.Value}");
                 StateHasChanged();
             });
         disposables.Add(subscription);

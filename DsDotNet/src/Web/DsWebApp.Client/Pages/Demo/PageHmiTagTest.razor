@@ -1,0 +1,34 @@
+@page "/demo/testhmitag"
+
+@using Dual.Web.Blazor.ServerSide
+@using IO.Core
+@using DevExpress.DirectX.Common.Direct2D
+
+
+
+<EditForm OnValidSubmit="@HandleSubmit">
+    <InputText @bind-Value="@_name" />
+    <InputNumber @bind-Value="@_kind" />
+    <InputCheckbox @bind-Value="@_flag" />
+    <button type="submit">제출</button>
+</EditForm>
+
+
+
+<h3>Hmi Tag Test</h3>
+
+@code {
+    string _name;
+    int _kind;
+    bool _flag;
+
+    // todo : TagWeb
+    private async Task HandleSubmit()
+    {
+        // TagWeb tagWeb = new(_name, _kind, _flag);
+        // Console.WriteLine($"TagWeb: Name={_tagWeb.Name}, Kind={_tagWeb.Kind}");
+        // await Http.PostAsJsonAsync("api/model/tag", _tagWeb);
+    }
+
+
+}

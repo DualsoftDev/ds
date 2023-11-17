@@ -3,12 +3,23 @@
     <Nodes>
         <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="./" Text="Overview" IconCssClass="oi oi-home"></DxTreeViewNode>
 
-        <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="/controllers/controller" Text="제어" IconCssClass="oi oi-bolt"></DxTreeViewNode>
-        <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="/controllers/uploadmodel" Text="Upload" IconCssClass="oi oi-data-transfer-upload"></DxTreeViewNode>
-        <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="/hmis/hmi" Text="HMI" IconCssClass="oi oi-info"></DxTreeViewNode>
-        <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="/hmis/tags" Text="HMI Tags"></DxTreeViewNode>
+        <DxTreeViewNode Text="제어">
+            <Nodes>
+                <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="/controllers/controller" Text="제어반" IconCssClass="oi oi-bolt"></DxTreeViewNode>
+                <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="/controllers/uploadmodel" Text="Upload" IconCssClass="oi oi-data-transfer-upload"></DxTreeViewNode>
+            </Nodes>
+        </DxTreeViewNode>
+
+        
+        <DxTreeViewNode Text="HMI's'">
+            <Nodes>
+                <DxTreeViewNode NavigateUrl="/hmis/hmi" Text="HMI" IconCssClass="oi oi-info"></DxTreeViewNode>
+                <DxTreeViewNode NavigateUrl="/hmis/tags" Text="HMI Tags"></DxTreeViewNode>
+                <DxTreeViewNode NavigateUrl="/demo/testio" Text="Test IO" IconCssClass="oi oi-puzzle-piece"></DxTreeViewNode>
+            </Nodes>
+        </DxTreeViewNode>
+
         <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="/dashboards/dashboard" Text="Dashboard" IconCssClass="oi grid-four-up"></DxTreeViewNode>
-        <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="/demo/testio" Text="Test IO" IconCssClass="oi oi-puzzle-piece"></DxTreeViewNode>
 
         <DxTreeViewNode CssClass="@rootNodeCssClass" Click="@onClickSwaggerUI" Text="Swagger" IconCssClass="oi oi-beaker"></DxTreeViewNode>
 

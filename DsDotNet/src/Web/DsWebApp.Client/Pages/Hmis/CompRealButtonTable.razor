@@ -1,0 +1,35 @@
+@using static Engine.Core.TagWebModule
+
+@using TagWeb = Engine.Core.TagWebModule.TagWeb
+
+
+<h4>@TableName</h4>
+
+<DxGrid Data="_items">
+    <Columns>
+        <DxGridDataColumn FieldName="Name" />
+        <DxGridDataColumn FieldName="Value" />
+        <DxGridDataColumn FieldName="Kind" />
+    </Columns>
+</DxGrid>
+
+@code {
+    [Parameter] public TagWeb[] RealButtons { get; set; }
+    [Parameter] public string TableName { get; set; }
+
+    class RealButtonRow(TagWeb real)
+    {
+        public string Name => real.Name;
+        public object Value => real.Value;
+        public int Kind => real.Kind;
+        // public string PushButtonMessage { get; set; }
+    }
+    RealButtonRow[] _items;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Yield();
+        _items = RealButtons.Select(hb => new RealButtonRow(hb)).ToArray();
+    }
+
+}

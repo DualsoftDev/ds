@@ -16,8 +16,8 @@ type TagHMIExt =
         let getButtonsForTaskDev(xs:TaskDev seq) =
             xs
             |> map(fun s-> 
-                let intag = if s.InTag.IsNull() then None else  Some (s.InTag.GetWebTag())
-                let outtag = if s.OutTag.IsNull() then None else  Some (s.OutTag.GetWebTag())
+                let intag = if s.InTag.IsNull() then null else s.InTag.GetWebTag()
+                let outtag = if s.OutTag.IsNull() then null else s.OutTag.GetWebTag()
                 intag, outtag )
             |> toArray
 

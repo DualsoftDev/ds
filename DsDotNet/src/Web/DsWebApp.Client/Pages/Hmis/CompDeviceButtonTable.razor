@@ -1,7 +1,9 @@
 @using static Engine.Core.TagWebModule
 
 @using TagWeb = Engine.Core.TagWebModule.TagWeb
-@using HMIButton = Tuple<Engine.Core.TagWebModule.TagWeb, Engine.Core.TagWebModule.TagWeb>  @* HMIPush * HMIFlickerLamp *@
+
+@* HMIPush * HMILamp  //input, output *@
+@using HMIDevice = Tuple<Engine.Core.TagWebModule.TagWeb, Engine.Core.TagWebModule.TagWeb>
 
 <h4>@TableName</h4>
 
@@ -11,40 +13,40 @@
         <DxGridDataColumn FieldName="PushButtonValue" />
         <DxGridDataColumn FieldName="PushButtonKind" />
         @* <DxGridDataColumn FieldName="Message" /> *@
-        <DxGridDataColumn FieldName="FlickerLampName" />
-        <DxGridDataColumn FieldName="FlickerLampValue" />
-        <DxGridDataColumn FieldName="FlickerLampKind" />
+        <DxGridDataColumn FieldName="LampName" />
+        <DxGridDataColumn FieldName="LampValue" />
+        <DxGridDataColumn FieldName="LampKind" />
     </Columns>
 </DxGrid>
 
 @code {
-    [Parameter] public HMIButton[] HMIButtons { get; set; }
+    [Parameter] public HMIDevice[] HMIDevices { get; set; }
     [Parameter] public string TableName { get; set; }
 
-    class HmiButtonRow
+    class HmiDeviceRow
     {
         TagWeb pb;  // pushbutton
-        TagWeb fl;  // flicker lamp
+        TagWeb lp;  // lamp
         public string PushButtonName => pb.Name;
         public object PushButtonValue => pb.Value;
         public int PushButtonKind => pb.Kind;
         // public string PushButtonMessage { get; set; }
 
-        public string FlickerLampName => fl.Name;
-        public object FlickerLampValue => fl.Value;
-        public int FlickerLampKind => fl.Kind;
+        public string LampName => lp.Name;
+        public object LampValue => lp.Value;
+        public int LampKind => lp.Kind;
 
-        public HmiButtonRow(HMIButton hmiButton)
+        public HmiDeviceRow(HMIDevice hmiDevice)
         {
-            (pb, fl) = hmiButton;
+            (pb, lp) = hmiDevice;
         }
     }
-    HmiButtonRow[] _items;
+    HmiDeviceRow[] _items;
 
     protected override async Task OnInitializedAsync()
     {
         await Task.Yield();
-        _items = HMIButtons.Select(hb => new HmiButtonRow(hb)).ToArray();
+        _items = HMIDevices.Select(hb => new HmiDeviceRow(hb)).ToArray();
     }
 
 }

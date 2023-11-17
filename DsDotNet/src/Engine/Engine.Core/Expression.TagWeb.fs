@@ -6,13 +6,15 @@ open System.Runtime.CompilerServices
 [<AutoOpen>]
 module TagWebModule =
 
-   
-    type TagWeb = {
-        Name  : string //FQDN 고유이름
-        _SerializedObject : string
-        Kind  : int    //Tag 종류 ex) going = 11007
-        Message : string //에러 내용 및 기타 전달 Message 
-    }
+    // C# interop 을 위해서 record type 대신 class type 으로..
+    [<AllowNullLiteral>]
+    type TagWeb(name:string, serializedObject:string, kind:int, message:string) =
+        new() = TagWeb("", "", 0, "")
+        member val Name = name with get, set    //FQDN 고유이름
+        member val _SerializedObject = serializedObject with get, set
+        member val Kind = kind with get, set //Tag 종류 ex) going = 11007
+        member val Message = message with get, set //에러 내용 및 기타 전달 Message 
+
     type TagWeb with
         member x.Value:obj = ObjectHolder.Deserialize(x._SerializedObject).GetValue()
 
@@ -20,7 +22,7 @@ module TagWebModule =
     type HMILamp = TagWeb
     type HMIFlickerLamp = TagWeb
     type HMIButton = HMIPush*HMIFlickerLamp
-    type HMIDevice = (HMIPush option)*(HMILamp option)  //input, output
+    type HMIDevice = HMIPush*HMILamp  //input, output
 
 
     type HmiTagPackage = {
@@ -53,14 +55,14 @@ module TagWebModule =
 [<Extension>]
 type TagWebExt =
     [<Extension>] static member GetValue (x:TagWeb) : obj = x.Value
-    [<Extension>] static member SetMessage(x:TagWeb, messsage) : TagWeb = {x with Message=messsage}
     [<Extension>]
     static member GetWebTag(x:IStorage) : TagWeb =
         let createTagWeb (tag:IStorage) (qualifiedName:string) =
-            { Name = qualifiedName; _SerializedObject = ObjectHolder.Create(tag.BoxedValue).Serialize(); Kind = tag.TagKind; Message = ""}
+            let serializedObject = ObjectHolder.Create(tag.BoxedValue).Serialize()
+            TagWeb(qualifiedName, serializedObject, tag.TagKind, "")
         
         match x.GetTagInfo() with
-        |Some dsTag ->
+        | Some dsTag ->
             match dsTag with
             | EventSystem (tag, obj, _) -> createTagWeb tag obj.QualifiedName
             | EventFlow   (tag, obj, _) -> createTagWeb tag obj.QualifiedName
@@ -68,4 +70,4 @@ type TagWebExt =
             | EventApiItem(tag, obj, _) -> createTagWeb tag obj.QualifiedName
             | EventAction (tag, obj, _) -> createTagWeb tag obj.QualifiedName
 
-        |None ->  createTagWeb x x.Name
+        | None ->  createTagWeb x x.Name

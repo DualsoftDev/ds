@@ -19,6 +19,6 @@
 
 @code {
     const string rootNodeCssClass = "root-item";
-    [Parameter] public string? StateCssClass { get; set; }
+    [Parameter] public string StateCssClass { get; set; }
     async Task onClickSwaggerUI() => await JsDual.OpenNewWindow("swagger");
 }

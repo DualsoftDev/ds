@@ -24,6 +24,7 @@ public partial class Demon(ServerGlobal serverGlobal, IHubContext<FieldIoHub> hu
 
     async Task executeAsyncHelper(CancellationToken ct)
     {
+        await Task.Yield();
         //await DbCacheController.InitializeAsync(_logger, _repository);
 
         CompositeDisposable compositeDisposable = new();

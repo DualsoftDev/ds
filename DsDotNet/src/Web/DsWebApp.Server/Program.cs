@@ -101,7 +101,7 @@ services.AddDevExpressBlazor(options =>
 var serverSettings =
     conf.GetSection("ServerSettings").Get<ServerSettings>()
         .Tee(ss => ss.Initialize());
-var serverGlobals = new ServerGlobal() { ServerSettings = serverSettings, Logger = logger };
+var serverGlobals = new ServerGlobal(serverSettings, logger);
 
 services.AddSingleton(serverGlobals);
 

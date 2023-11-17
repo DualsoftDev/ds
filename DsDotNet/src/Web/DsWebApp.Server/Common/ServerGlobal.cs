@@ -14,7 +14,6 @@ namespace DsWebApp.Server.Common
 
         public ServerSettings ServerSettings { get; set; }
 
-        public string DsZipPath { get; set; }
         /// <summary>
         /// DsZipPath 에 따른 compile 된 Runtime model
         /// </summary>
@@ -29,17 +28,31 @@ namespace DsWebApp.Server.Common
         static IoHub _ioHub;
         public ServerDirectAccess IoHubServer => _ioHub?.Server;
 
-        public ServerGlobal()
+        public ServerGlobal(ServerSettings serverSettings, ILog logger)
         {
-            PropertyChanged += (s, e) =>
+            ServerSettings = serverSettings;
+            Logger = logger;
+            RuntimeModel = ReloadRuntimeModel();
+            if (serverSettings.AutoStartOnSystemPowerUp)
+                Task.Factory.StartNew(() => RuntimeModel?.Cpu.Run());
+                //RuntimeModel?.Cpu.Run();
+        }
+
+        public RuntimeModel ReloadRuntimeModel()
+        {
+            var dsZipPath = ServerSettings.RuntimeModelDsZipPath;
+            try
             {
-                if (e.PropertyName == nameof(DsZipPath))
-                {
-                    Logger.Info($"Model change detected: {DsZipPath}");
-                    RuntimeModel?.Dispose();
-                    RuntimeModel = new RuntimeModel(DsZipPath);
-                }
-            };
+                Logger.Info($"Model change detected: {dsZipPath}");
+                RuntimeModel?.Dispose();
+                RuntimeModel = new RuntimeModel(dsZipPath);
+                return RuntimeModel;
+            }
+            catch (Exception)
+            {
+                Logger.Error($"Failed to load model: {dsZipPath}");
+                return null;
+            }
         }
 
 

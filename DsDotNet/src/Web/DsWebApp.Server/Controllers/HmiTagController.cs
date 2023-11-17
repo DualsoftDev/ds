@@ -15,11 +15,11 @@ public class HmiTagController : ControllerBaseWithLogger
     }
 
     [HttpGet]
-    public TagKindModule.TagWeb[] GetAllHmiTags()
+    public TagWebModule.TagWeb[] GetAllHmiTags()
     {
         // todo: implement using dsCpu.GetWebTags()
         //return _global.RuntimeModel.Cpu.GetWebTags();
 
-        return Array.Empty<TagKindModule.TagWeb>();
+        return Array.Empty<TagWebModule.TagWeb>();
     }
 }

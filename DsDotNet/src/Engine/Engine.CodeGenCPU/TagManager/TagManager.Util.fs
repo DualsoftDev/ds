@@ -75,9 +75,7 @@ module TagManagerUtil =
     type BridgeType = | Device | Button | Lamp | Condition
    
 
-    let createBridgeTag(stg:Storages, name, address:string, inOut:ActionTag, bridge:BridgeType, sys, task:IQualifiedNamed option): ITag option=
-        //error check
-        //if address = "" then  failwithlog $"Error {bridge} {name}  주소가 없습니다."
+    let createBridgeTag(stg:Storages, name, address:string, inOut:ActionTag, sys, task:IQualifiedNamed option): ITag option=
 
         if address = "-" || address = "" 
         then None

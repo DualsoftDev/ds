@@ -21,6 +21,7 @@
         <Compile Include="Core.Extensions.fs" />
         <Compile Include="Code.SpecUtil.fs" />
         <Compile Include="Code.ConvertUtil.fs" />
+        <Compile Include="TagHMI.fs" />
         <Compile Include="1.ButtonLamp.fs" />
         <Compile Include="2.Flow.fs" />
         <Compile Include="3.Status.fs" />

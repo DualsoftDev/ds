@@ -149,15 +149,6 @@ module TagKindModule =
 
     let TagDSSubject = new Subject<TagDS>()
 
-    type TagWeb = {
-        Name  : string //FQDN 고유이름
-        _SerializedObject : string
-        Kind  : int    //Tag 종류 ex) going = 11007
-        Message : string //에러 내용 및 기타 전달 Message 
-    }
-    type TagWeb with
-        member x.Value:obj = ObjectHolder.Deserialize(x._SerializedObject).GetValue()
-
 [<AutoOpen>]
 [<Extension>]
 type TagKindExt =
@@ -167,7 +158,6 @@ type TagKindExt =
     [<Extension>] static member GetVertexTagKind (x:IStorage) = DU.tryGetEnumValue<VertexTag>(x.TagKind)
     [<Extension>] static member GetApiTagKind    (x:IStorage) = DU.tryGetEnumValue<ApiItemTag>(x.TagKind)
     [<Extension>] static member GetActionTagKind (x:IStorage) = DU.tryGetEnumValue<ActionTag>(x.TagKind)
-    [<Extension>] static member GetValue (x:TagWeb) : obj = x.Value
 
     [<Extension>]
     static member GetTagInfo (x:IStorage) =
@@ -214,18 +204,7 @@ type TagKindExt =
         |EventApiItem(tag, obj, kind) -> getText tag obj kind
         |EventAction (tag, obj, kind) -> getText tag obj kind
         
-    [<Extension>]
-    static member GetWebTag(x:TagDS) : TagWeb =
-        let createTagWeb (tag:IStorage) (obj:IQualifiedNamed) =
-            { Name = obj.QualifiedName; _SerializedObject = ObjectHolder.Create(tag.BoxedValue).Serialize(); Kind = tag.TagKind; Message = ""}
-        match x with
-        | EventSystem (tag, obj, _) -> createTagWeb tag obj
-        | EventFlow   (tag, obj, _) -> createTagWeb tag obj
-        | EventVertex (tag, obj, _) -> createTagWeb tag obj
-        | EventApiItem(tag, obj, _) -> createTagWeb tag obj
-        | EventAction (tag, obj, _) -> createTagWeb tag obj
-
-    [<Extension>] static member SetMessage(x:TagWeb, messsage) : TagWeb = {x with Message=messsage}
+    
 
     [<Extension>]
     static member GetSystem(x:TagDS) =

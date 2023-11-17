@@ -13,56 +13,57 @@
 
 
     <ItemGroup>
-        <Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs"/>
-        <Compile Include="CommonAppSettings.fs"/>
-        <Compile Include="Constants.fs"/>
-        <Compile Include="Interface.fs"/>
-        <Compile Include="DsType.fs"/>
-        <Compile Include="DsEvent.fs"/>
-        <Compile Include="DsLog.fs"/>
-        <Compile Include="Prolog.fs"/>
-        <Compile Include="PathManager.fs"/>
-        <Compile Include="FileManager.fs"/>
-        <Compile Include="Text.fs"/>
-        <Compile Include="Fqdn.fs"/>
-        <Compile Include="UniqueName.fs"/>
-        <Compile Include="Graph.fs"/>
-        <Compile Include="GraphHelper.fs"/>
-        <Compile Include="RuntimeGenerator.fs"/>
-        <Compile Include="TypeConversion.fs"/>
-        <Compile Include="Expression.Interfaces.fs"/>
-        <Compile Include="Tag, Variable.fs"/>
-        <Content Include="Timer.txt"/>
-        <Content Include="Timer.pptx"/>
-        <Compile Include="Timer.fs"/>
-        <Compile Include="Counter.fs"/>
-        <Compile Include="Expression.fs"/>
-        <Compile Include="Expression.Serialize.fs"/>
-        <Compile Include="Expression.Function.fs"/>
-        <Compile Include="Statement.Timer.fs"/>
-        <Compile Include="Statement.Counter.fs"/>
-        <Compile Include="CodeElements.fs"/>
-        <Compile Include="Core.fs"/>
-        <Compile Include="Core.Extension.fs"/>
-        <Compile Include="Core.Util.Edge.fs"/>
-        <Compile Include="Core.Util.Find.fs"/>
-        <Compile Include="Core.Util.Origin.fs"/>
-        <Compile Include="Core.Util.ToDsText.fs"/>
-        <Compile Include="Expression.TagKind.fs"/>
-        <Compile Include="Expression.Tag.fs"/>
-        <Compile Include="EntryPoint.fs"/>
-        <Compile Include="Model.fs"/>
-        <Compile Include="ModelLoader.fs"/>
-        <Compile Include="AssemblyInfo.fs"/>
-        <Content Include="ValidSyntax.txt"/>
-        <Content Include="ProgramCodeSyntax.txt"/>
+        <Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
+        <Compile Include="CommonAppSettings.fs" />
+        <Compile Include="Constants.fs" />
+        <Compile Include="Interface.fs" />
+        <Compile Include="DsType.fs" />
+        <Compile Include="DsEvent.fs" />
+        <Compile Include="DsLog.fs" />
+        <Compile Include="Prolog.fs" />
+        <Compile Include="PathManager.fs" />
+        <Compile Include="FileManager.fs" />
+        <Compile Include="Text.fs" />
+        <Compile Include="Fqdn.fs" />
+        <Compile Include="UniqueName.fs" />
+        <Compile Include="Graph.fs" />
+        <Compile Include="GraphHelper.fs" />
+        <Compile Include="RuntimeGenerator.fs" />
+        <Compile Include="TypeConversion.fs" />
+        <Compile Include="Expression.Interfaces.fs" />
+        <Compile Include="Tag, Variable.fs" />
+        <Content Include="Timer.txt" />
+        <Content Include="Timer.pptx" />
+        <Compile Include="Timer.fs" />
+        <Compile Include="Counter.fs" />
+        <Compile Include="Expression.fs" />
+        <Compile Include="Expression.Serialize.fs" />
+        <Compile Include="Expression.Function.fs" />
+        <Compile Include="Statement.Timer.fs" />
+        <Compile Include="Statement.Counter.fs" />
+        <Compile Include="CodeElements.fs" />
+        <Compile Include="Core.fs" />
+        <Compile Include="Core.Extension.fs" />
+        <Compile Include="Core.Util.Edge.fs" />
+        <Compile Include="Core.Util.Find.fs" />
+        <Compile Include="Core.Util.Origin.fs" />
+        <Compile Include="Core.Util.ToDsText.fs" />
+        <Compile Include="Expression.TagKind.fs" />
+        <Compile Include="Expression.TagWeb.fs" />
+        <Compile Include="Expression.Tag.fs" />
+        <Compile Include="EntryPoint.fs" />
+        <Compile Include="Model.fs" />
+        <Compile Include="ModelLoader.fs" />
+        <Compile Include="AssemblyInfo.fs" />
+        <Content Include="ValidSyntax.txt" />
+        <Content Include="ProgramCodeSyntax.txt" />
         <!--<Compile Include="Program.fs" />-->
     </ItemGroup>
 
 
     <ItemGroup>
-        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.18"/>
-        <PackageReference Include="System.Reactive" Version="6.0.0"/>
+        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.18" />
+        <PackageReference Include="System.Reactive" Version="6.0.0" />
         <PackageReference Include="Fody" Version="6.6.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

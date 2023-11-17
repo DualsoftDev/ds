@@ -9,15 +9,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AutomaticGraphLayout.GraphViewerGDI" Version="1.1.12"/>
-        <PackageReference Include="DualSoft-Common-Core" Version="0.1.18"/>
-        <PackageReference Include="DualSoft-Common-Winform" Version="0.1.4"/>
+        <PackageReference Include="AutomaticGraphLayout.GraphViewerGDI" Version="1.1.12" />
+        <PackageReference Include="DualSoft-Common-Core" Version="0.1.18" />
+        <PackageReference Include="DualSoft-Common-Winform" Version="0.1.4" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj"/>
-        <ProjectReference Include="..\Engine\Engine.Core\Engine.Core.fsproj"/>
-        <ProjectReference Include="..\Engine\Engine.Import.Office\Engine.Import.Office.fsproj"/>
+        <ProjectReference Include="..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
+        <ProjectReference Include="..\Engine\Engine.Core\Engine.Core.fsproj" />
+        <ProjectReference Include="..\Engine\Engine.Import.Office\Engine.Import.Office.fsproj" />
     </ItemGroup>
 
     <ItemGroup>

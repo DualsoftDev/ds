@@ -72,21 +72,21 @@ module ExportIOTable =
             for btn in btns do
                 let func = btn.Funcs |> funcToText
 
-                dt.Rows.Add(xlsCase.ToText(), btn.Name, "bool", btn.InAddress, btn.OutAddress, "", func)
+                dt.Rows.Add(xlsCase.ToText(), btn.Name, "bool", getValidBtnAddress(btn, true), getValidBtnAddress(btn, false), "", func)
                 |> ignore
 
         let toLampText (lamps: LampDef seq, xlsCase: ExcelCase) =
             for lamp in lamps do
                 let func = lamp.Funcs |> funcToText
 
-                dt.Rows.Add(xlsCase.ToText(), lamp.Name, "bool", "", lamp.OutAddress, "", func)
+                dt.Rows.Add(xlsCase.ToText(), lamp.Name, "bool", "", getValidLampAddress(lamp), "", func)
                 |> ignore
 
         let toCondiText (conds: ConditionDef seq, xlsCase: ExcelCase) =
             for cond in conds do
                 let func = cond.Funcs |> funcToText
 
-                dt.Rows.Add(xlsCase.ToText(), cond.Name, "bool", cond.InAddress, "", "", func)
+                dt.Rows.Add(xlsCase.ToText(), cond.Name, "bool", getValidCondiAddress(cond), "", "", func)
                 |> ignore
 
         emptyLine ()

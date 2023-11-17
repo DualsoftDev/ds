@@ -121,11 +121,25 @@ module ConvertCPU =
                                             f.InTag.IsNull() && f.ApiItem.RXs.any()
                                             ||f.OutTag.IsNull() && f.ApiItem.TXs.any()
                                             ).any())
+                      
         if nullTagJobs.any()
         then 
             let errJobs = StringExt.JoinWith(nullTagJobs.Select(fun j -> j.Name), "\n")
             failwithlogf $"Device 주소가 없습니다. \n{errJobs}"
     
+
+        let nullBtns = sys.Buttons.Where(fun b-> b.InTag.IsNull() ||b.OutTag.IsNull())
+        if nullBtns.any()
+        then 
+            let errBtns = StringExt.JoinWith(nullBtns.Select(fun j -> j.Name), "\n")
+            failwithlogf $"버튼 주소가 없습니다. \n{errBtns}"
+                                      
+        let nullLamps = sys.Lamps.Where(fun b-> b.OutTag.IsNull())
+        if nullLamps.any()
+        then 
+            let errLamps= StringExt.JoinWith(nullLamps.Select(fun j -> j.Name), "\n")
+            failwithlogf $"램프 주소가 없습니다. \n{errLamps}"
+             
     let setSimulationAddress(sys:DsSystem) = 
         sys.Jobs
            .ForEach(fun j-> j.DeviceDefs

@@ -520,13 +520,7 @@ module ImportU =
                 |> map (fun safeFullName -> dicQualifiedNameSegs.[safeFullName])
                 |> iter (fun safeCondV ->
                     match dicVertex.[node.Key] |> box with
-                    | :? ISafetyConditoinHolder as holder ->
-                        match safeCondV with
-                        //| :? Real as r -> holder.SafetyConditions.Add( DuSafetyConditionReal (r)) |>ignore
-                        //| :? RealExF as ex -> holder.SafetyConditions.Add(DuSafetyConditionRealExFlow (ex))  |>ignore
-                        //test ahn ISafetyConditoinHolder주체 확정 필요
-                        | :? Call as c -> holder.SafetyConditions.Add(DuSafetyConditionCall(c)) |> ignore
-                        | _ -> failwithlog "Error"
+                    | :? ISafetyConditoinHolder as holder -> holder.SafetyConditions.Add(DuSafetyConditionCall(safeCondV)) |> ignore
                     | _ -> failwithlog "Error"))
 
         [<Extension>]

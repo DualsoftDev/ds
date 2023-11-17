@@ -125,5 +125,5 @@ module RunTime =
                 css <- css @ cpu.CommentedStatements() |> List.ofSeq
 
             // Create and return a DsCPU object
-            DsCPU(css, lstSys, runtimePackage)
+            new DsCPU(css, lstSys, runtimePackage)
 

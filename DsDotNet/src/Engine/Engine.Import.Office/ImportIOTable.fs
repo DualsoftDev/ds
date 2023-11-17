@@ -45,23 +45,31 @@ module ImportIOTable =
         if   trxCnt=0  && addr <>"-"  then failwithf $"{name} 인터페이스 대상이 없으면 대쉬('-') 기입필요." //0 이면 명시적으로 '-' 표기
         elif trxCnt<>0 && addr = "-"  then failwithf $"{name} 인터페이스 대상이 있으면 대쉬('-') 대신 실주소 기입필요."
        
-    let getValidDevAddress(apiItem:ApiItem, name:string,  addr:string, bInput:bool) =  
-        let errCheckNRetenAddress(trxCnt:int, addr:string) =
+
+    let errCheckNRetenAddress(trxCnt:int, addr:string, name,  bInput) =
             let addrNew = 
                 if trxCnt=0 && addr.IsNullOrEmpty() 
                 then "-" //"처음 자동할당은 인터페이스 대상이 없으면 대쉬('-') 자동 기입" 
                 else addr  
             errCheckTRX  (trxCnt, name , addrNew)
             let address  = 
-                if addrNew = "" && addrNew <> "-"
+                if addrNew.IsNullOrEmpty()  && addrNew <> "-"
                 then autoFillAddress bInput 
                 else addrNew
             address.ToUpper()
 
-        if bInput
-        then errCheckNRetenAddress (apiItem.RXs.Count, addr)
-        else errCheckNRetenAddress (apiItem.TXs.Count, addr)
 
+    let getValidBtnAddress(btn:ButtonDef, bInput) =  
+        if bInput
+        then errCheckNRetenAddress (1, btn.InAddress, btn.Name, true)
+        else errCheckNRetenAddress (1, btn.OutAddress, btn.Name, false)
+    let getValidDevAddress(apiItem:ApiItem, name:string,  addr:string, bInput:bool) =  
+        if bInput
+        then errCheckNRetenAddress (apiItem.RXs.Count, addr, name, true)
+        else errCheckNRetenAddress (apiItem.TXs.Count, addr, name, false)
+
+    let getValidLampAddress(lamp:LampDef) =   errCheckNRetenAddress (1, lamp.OutAddress, lamp.Name, false)
+    let getValidCondiAddress(cond:ConditionDef) =  errCheckNRetenAddress (1, cond.InAddress, cond.Name, true)
 
     let ApplyIO (sys: DsSystem, dts: (int * Data.DataTable) seq) =
 

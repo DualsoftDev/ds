@@ -1,0 +1,25 @@
+@using static Engine.Core.TagWebModule
+@* 
+@using TagWeb = Engine.Core.TagWebModule.TagWeb
+@using HMIPush = Engine.Core.TagWebModule.TagWeb
+@using HMILamp = Engine.Core.TagWebModule.TagWeb
+@using HMIFlickerLamp = Engine.Core.TagWebModule.TagWeb
+@using HMIButton = Tuple<Engine.Core.TagWebModule.TagWeb, Engine.Core.TagWebModule.TagWeb>
+@using HMIDevice = (HMIPush option)*(HMILamp option)  //input, output
+
+<h3>CompHmiButtonTable</h3>
+
+<DxGrid Data="_items">
+    <Columns>
+        <DxGridDataColumn FieldName="Name" />
+        <DxGridDataColumn FieldName="Value" />
+        <DxGridDataColumn FieldName="Kind" />
+        <DxGridDataColumn FieldName="Message" />
+    </Columns>
+</DxGrid>
+
+@code {
+    [Parameter] public HMIButton[] HMIButtons { get; set; }
+
+}
+ *@

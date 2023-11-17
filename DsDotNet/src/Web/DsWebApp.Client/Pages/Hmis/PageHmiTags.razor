@@ -36,13 +36,14 @@
     };
 
     bool _loading { get; set; } = true;
+    HmiTagPackage _hmiTagPackage;
     ObservableCollection<TagWebORM> _items;
     HubConnection _hubConnection;
     IDisposable _subscription;
 
     protected override async Task OnInitializedAsync()
     {
-        var hmiTags = await Http.GetFromJsonAsync<HmiTagPackage>($"api/model/tag");
+        _hmiTagPackage = await Http.GetFromJsonAsync<HmiTagPackage>($"api/model/tag");
         // TagWebORM[] allTags = allTagWebs.Select(tw => new TagWebORM(tw)).ToArray();
         // _items = new ObservableCollection<TagWebORM>(allTags);
 

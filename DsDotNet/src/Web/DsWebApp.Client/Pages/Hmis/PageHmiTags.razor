@@ -3,10 +3,15 @@
 @using static Engine.Core.TagWebModule
 @using HMIButton = Tuple<Engine.Core.TagWebModule.TagWeb, Engine.Core.TagWebModule.TagWeb>  @* HMIPush * HMIFlickerLamp *@
 
+@inject ClientGlobal ClientGlobal
 
 <h3>PageHmiTags</h3>
 
-@if (!_loading)
+@if (_loading)
+{
+    <p><em>Loading...</em></p>
+}
+else
 {
     @if (_hmiTagPackage.AutoButtons.Any())
     {
@@ -53,9 +58,6 @@
         <CompHmiButtonTable TableName="Ready Buttons" HMIButtons=_hmiTagPackage.ReadyButtons />
     }
 
-
-
-
     @if (_hmiTagPackage.DeviceBtns.Any())
     {
         <CompDeviceButtonTable TableName="Device Buttons" HMIDevices=_hmiTagPackage.DeviceBtns />
@@ -65,49 +67,21 @@
     {
         <CompRealButtonTable TableName="Real Buttons" RealButtons=_hmiTagPackage.RealBtns />
     }
-
-
-
-
 }
 
-<DxLoadingPanel @bind-Visible=_loading
-                IsContentBlocked="true"
-                CssClass="w-100"
-                ApplyBackgroundShading="true">
-
-    <DxGrid Data="_items">
-        <Columns>
-            <DxGridDataColumn FieldName="Name" />
-            <DxGridDataColumn FieldName="Value" />
-            <DxGridDataColumn FieldName="Kind" />
-            <DxGridDataColumn FieldName="Message" />
-        </Columns>
-    </DxGrid>
-</DxLoadingPanel>
 
 @code {
-    class TagWebORM(string name, object value, int kind, string message)
-    {
-        public string Name => name;
-        public string Message => message;
-        public object Value => value;
-        public int Kind => kind;
-
-        public TagWebORM(TagWeb tagWeb) : this(tagWeb.Name, tagWeb.Value, tagWeb.Kind, tagWeb.Message)
-        {            
-        }
-    };
-
     bool _loading { get; set; } = true;
     HmiTagPackage _hmiTagPackage;
-    ObservableCollection<TagWebORM> _items;
     HubConnection _hubConnection;
     IDisposable _subscription;
 
     protected override async Task OnInitializedAsync()
     {
-        _hmiTagPackage = await Http.GetFromJsonAsync<HmiTagPackage>($"api/model/tag");
+        _hmiTagPackage = ClientGlobal.HmiTagPackage;
+        if (_hmiTagPackage == null)
+            ClientGlobal.HmiTagPackage = _hmiTagPackage = await Http.GetFromJsonAsync<HmiTagPackage>($"api/model/tag");
+
         // TagWebORM[] allTags = allTagWebs.Select(tw => new TagWebORM(tw)).ToArray();
         // _items = new ObservableCollection<TagWebORM>(allTags);
 
@@ -130,7 +104,6 @@
         //         StateHasChanged();
         //     });
 
-        // await getAllItemsAsync();
         _loading = false;
         await base.OnInitializedAsync();
     }

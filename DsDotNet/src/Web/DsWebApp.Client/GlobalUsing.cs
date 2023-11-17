@@ -9,7 +9,12 @@ global using Dual.Web.Blazor.Client.Canvas2d;
 global using Dual.Web.Blazor.Client.Canvas2d.Model;
 global using Dual.Web.Blazor.Client.Components.BlazorComponents;
 
+global using static Engine.Core.TagWebModule;
+
 //global using Rectangle = Dual.Web.Blazor.Client.Canvas2d.Model.Rectangle;
 //global using TwmsK = Twm.Common.K;
-global using ErrorMessage = string;
 
+/*
+ * Global type alias for Client
+ */
+global using ErrorMessage = string;

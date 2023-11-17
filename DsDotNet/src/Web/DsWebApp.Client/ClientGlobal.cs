@@ -1,10 +1,10 @@
-using Dual.Common.Core;
 //using IoHubClient = IO.Core.Client;
 
 namespace DsWebApp.Client
 {
     public class ClientGlobal
     {
+        public HmiTagPackage HmiTagPackage { get; set; }
         public static int Counter { get; private set; } = 0;
 
         /* 직접 client 연결 불가.  browser 에서는 socket 지원 안됨 */

@@ -98,10 +98,11 @@ services.AddDevExpressBlazor(options =>
     options.SizeMode = DevExpress.Blazor.SizeMode.Medium;
 });
 
+var commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));
 var serverSettings =
     conf.GetSection("ServerSettings").Get<ServerSettings>()
         .Tee(ss => ss.Initialize());
-var serverGlobals = new ServerGlobal(serverSettings, logger);
+var serverGlobals = new ServerGlobal(serverSettings, commonAppSettings, logger);
 
 services.AddSingleton(serverGlobals);
 
@@ -178,14 +179,11 @@ public static class CustomServerExtension
 {
     public static async Task<IServiceCollection> InitializeUnsafeServicesAsync(this IServiceCollection services, ServerGlobal serverGlobal, ILog logger)
     {
-        var commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));
-        await DBLogger.InitializeLogDbOnDemandAsync(commonAppSettings);
+        await DBLogger.InitializeLogDbOnDemandAsync(serverGlobal.DsCommonAppSettings);
         //var connectionString = commonAppSettings.LoggerDBSettings.ConnectionString;
         //var dsFileJson = DBLogger.GetDsFilePath(connectionString);
 
         ServerGlobal.ReStartIoHub(Path.Combine(AppContext.BaseDirectory, "zmqsettings.json"));
-
-        serverGlobal.DsCommonAppSettings = commonAppSettings;
         return services;
     }
 }

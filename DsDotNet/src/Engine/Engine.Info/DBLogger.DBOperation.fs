@@ -12,6 +12,8 @@ open System.Collections.Generic
 open System.Collections.Concurrent
 open DBLoggerORM
 
+type TagKindTuple = TagKind * string
+
 [<AutoOpen>]
 module internal DBLoggerImpl =
     type private Observable = System.Reactive.Linq.Observable
@@ -23,7 +25,6 @@ module internal DBLoggerImpl =
 
     let createConnection () = createConnectionWith connectionString
 
-    type TagKindTuple = TagKind * string
 
     type EnumEx() =
         static member Extract<'T when 'T: struct>() : TagKindTuple array =

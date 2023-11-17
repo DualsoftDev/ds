@@ -5,20 +5,13 @@ using System.Diagnostics;
 
 namespace DsWebApp.Shared
 {
-    public class FilesManager
+    public class FilesManager(HttpClient http)
     {
-        HttpClient _http;
-
-        public FilesManager(HttpClient http)
-        {
-            _http = http;
-        }
-
         public async Task<List<string>> GetFileNames()
         {
             try
             {
-                var result = await _http.GetAsync("api/files");
+                var result = await http.GetAsync("api/files");
                 result.EnsureSuccessStatusCode();
                 string responseBody = await result.Content.ReadAsStringAsync();
                 return JsonSerializer.Deserialize<List<string>>(responseBody);
@@ -33,7 +26,7 @@ namespace DsWebApp.Shared
         {
             try
             {
-                var result = await _http.GetAsync($"api/files/{containerName}/blobs");
+                var result = await http.GetAsync($"api/files/{containerName}/blobs");
                 result.EnsureSuccessStatusCode();
                 string responseBody = await result.Content.ReadAsStringAsync();
                 return JsonSerializer.Deserialize<List<string>>(responseBody);
@@ -48,7 +41,7 @@ namespace DsWebApp.Shared
         {
             try
             {
-                var result = await _http.GetAsync($"api/files/{filePath}/delete");
+                var result = await http.GetAsync($"api/files/{filePath}/delete");
                 result.EnsureSuccessStatusCode();
                 string responseBody = await result.Content.ReadAsStringAsync();
                 return Convert.ToBoolean(responseBody);
@@ -64,7 +57,7 @@ namespace DsWebApp.Shared
         {
             try
             {
-                var result = await _http.GetAsync($"api/files/{filePath}/{containerName}/copy");
+                var result = await http.GetAsync($"api/files/{filePath}/{containerName}/copy");
                 result.EnsureSuccessStatusCode();
                 return await result.Content.ReadAsStringAsync();
             }
@@ -79,7 +72,7 @@ namespace DsWebApp.Shared
         {
             try
             {
-                var result = await _http.PostAsJsonAsync("api/files", fileChunk);
+                var result = await http.PostAsJsonAsync("api/files", fileChunk);
                 result.EnsureSuccessStatusCode();
                 string responseBody = await result.Content.ReadAsStringAsync();
                 return Convert.ToBoolean(responseBody);
@@ -161,9 +154,6 @@ namespace DsWebApp.Shared
                 return ex;
             }
         }
-
-
     }
-
 }
 

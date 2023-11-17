@@ -5,5 +5,40 @@
       "Microsoft.AspNetCore": "Warning"
     }
   },
-  "AllowedHosts": "*"
+  "AllowedHosts": "*",
+  "ServerSettings": {
+    "UseHttpsRedirection": true,
+    "RuntimeModelDsZipPath": "C:\\ProgramData\\Dualsoft\\DsModel\\exportDS.zip",
+    "AutoStartOnSystemPowerUp": false,
+    "DexaSettings": {
+      "DatabaseType": "sqlserver",
+      "ConnectionString": "Server=.;Database=lpb;User Id=sa;Password=dual@123;MultipleActiveResultSets=True;",
+      "Storage": "C:\\ProgramData\\LS\\DEXA\\Storage"
+    },
+    "ClientEnvironment": {
+      "IsEnableDebug": "true",
+      "IsShowDemo": "true",
+      "IsShowManagement": "true",
+      "MediaInfos": [
+        {
+          "Name": "MJPEG",
+          "Url": "https://dev.dualsoft.co.kr:4430/mjpeg",
+          "W": 600,
+          "H": 337
+        },
+        {
+          "Name": "Sample.NoGroup",
+          "Url": "images/Sample.NoGroup.png",
+          "W": 767,
+          "H": 431
+        },
+        {
+          "Name": "_UnusedWebCamera",
+          "Url": "http://192.168.0.2:8888/video.ogg",
+          "W": 640,
+          "H": 480
+        }
+      ]
+    }
+  }
 }

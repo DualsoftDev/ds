@@ -101,7 +101,7 @@ services.AddDevExpressBlazor(options =>
 var serverSettings =
     conf.GetSection("ServerSettings").Get<ServerSettings>()
         .Tee(ss => ss.Initialize());
-var serverGlobals = new ServerGlobal() { ServerSettings = serverSettings, Logger = logger };
+var serverGlobals = new ServerGlobal(serverSettings, logger);
 
 services.AddSingleton(serverGlobals);
 
@@ -147,6 +147,7 @@ app.MapControllers();
 app.MapHub<VanillaHub>("/hub/vanilla")
     .RequireCors(_corsPolicyName);
 app.MapHub<FieldIoHub>("/hub/io");
+app.MapHub<ModelHub>("/hub/model");
 
 app.MapFallbackToFile("index.html");
 

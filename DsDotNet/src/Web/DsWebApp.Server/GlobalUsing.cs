@@ -13,3 +13,8 @@ global using DsWebApp.Server.Common;
 global using DsWebApp.Server.Controllers;
 global using Dual.Common.Core;
 global using Dual.Common.Db;
+global using Dual.Web.Server;
+
+
+
+global using ErrorMessage = string;

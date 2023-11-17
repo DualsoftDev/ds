@@ -59,46 +59,54 @@ module FileManager =
             |> Array.map(fun path -> path.Trim())
             |> List.ofArray
 
-    let getValidZipFileName(topDir:string): string  =
-        if isRuntimeLinux
-        then 
-            if topDir.Split('/').Length = 2 //root
-            then $"{topDir}/[{topDir.Split('/').[1]}]"// /home  => /home/[home]
-            else topDir
-        else 
-            if topDir.Split(':').[1].Split('/').[1] = "" //root
-            then $"{topDir}[{topDir.Split(':').[0]}]" //E:/  => E:/[E]
-            else topDir
+    let getValidZipFileName(topDir:string, extenstion:string): string  =
+        let dir = topDir|>getValidDirectory
+        let zipName = 
+            if isRuntimeLinux
+            then 
+                if dir.Split('/').Length = 2 //root
+                then $"{dir}/[{dir.Split('/').[1]}]"// /home  => /home/[home]
+                else dir.TrimEnd('/')
+            else 
+                if dir.Split(':').[1].Split('/').[1] = "" //root
+                then $"{dir}[{dir.Split(':').[0]}]" //E:/  => E:/[E]
+                else dir.TrimEnd('/')
+
+        zipName+extenstion
 
     let getTopLevelDirectory (filePaths: string list) : string =
         if List.isEmpty filePaths then
             raise (new ArgumentException("getTopLevelDirectory: empty paths"))
-        let filePaths = filePaths
-                        |> List.map (fun filePath -> Path.GetDirectoryName(filePath) |> getValidDirectory)
 
-        let commonPrefix =
-            filePaths
-            |> List.map (fun filePath -> Path.GetDirectoryName(filePath) |> getValidDirectory)
-            |> List.reduce (fun prefix dirPath ->
-                let commonLen =
-                    Seq.zip prefix dirPath
-                    |> Seq.takeWhile (fun (c1, c2) -> c1 = c2)
-                    |> Seq.length
-                prefix[..commonLen-1]
-            )
+        let splitPaths = filePaths |> List.map (fun path -> path.Split([|'\\'; '/'|]))
+        let minLength = splitPaths |> List.map Array.length |> List.min
 
-        let splitChar = PathManager.directorySeparatorDS
-        let topLevelDirSplit = 
-            let a =
-                commonPrefix.Split(splitChar)
-            a |> Array.rev |> Array.skip 1 |> Array.rev
+        let commonParts = 
+            [0 .. minLength - 1]
+            |> List.map (fun i -> 
+                let part = splitPaths.[0].[i]
+                if splitPaths |> List.forall (fun sp -> sp.[i] = part) then
+                    Some(part)
+                else
+                    None)
 
-        String.Join(splitChar, topLevelDirSplit)
+        let commonPrefix = 
+            match List.choose id commonParts with
+            | [] -> raise (new ArgumentException("getTopLevelDirectory: error paths"))
+            | cp -> String.Join(Path.DirectorySeparatorChar.ToString(), cp) |> getValidDirectory
+
+        if PathManager.isPathRooted (commonPrefix|>DsDirectory)
+        then commonPrefix
+        else 
+            let topLevelDirSplit = 
+                commonPrefix.Split(directorySeparatorDS) |> Array.rev |> Array.skip 1 |> Array.rev
+            String.Join(directorySeparatorDS, topLevelDirSplit)
+        
 
     //모델 최상단 폴더에 Zip형태로 생성
     let saveZip(filePaths: string seq, extenstion:string) =
         let topLevel = getTopLevelDirectory (filePaths |> Seq.toList)
-        let zipFilePath =(topLevel|>getValidZipFileName )+extenstion 
+        let zipFilePath = getValidZipFileName (topLevel, extenstion )
          // Create a ZIP archive
         use fileStream = new FileStream(zipFilePath, FileMode.Create)
         use zip = new ZipArchive(fileStream, ZipArchiveMode.Create, true)

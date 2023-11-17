@@ -278,11 +278,16 @@ module ConvertCoreExt =
     type TaskDev with
         member td.ExistIn  = td.ApiItem.RXs.any()
         member td.ActionINFunc  = 
+                            if(td.InTag.IsNull()) then failwithf $"{td.QualifiedName} Input 주소 할당이 없습니다."
+
                             if hasNot td.Funcs 
                             then !!(td.InTag  :?> Tag<bool>).Expr 
                             else (td.InTag  :?> Tag<bool>).Expr
 
-        member td.ActionOut = td.OutTag :?> Tag<bool>
+        member td.ActionOut = 
+                            if(td.OutTag.IsNull()) then failwithf $"{td.QualifiedName} Output 주소 할당이 없습니다."
+                            td.OutTag :?> Tag<bool>
+
         member td.RXTags       = td.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.ET)
         member td.TXTags       = td.ApiItem.TXs |> Seq.map getVMReal |> Seq.map(fun f->f.ST)
 

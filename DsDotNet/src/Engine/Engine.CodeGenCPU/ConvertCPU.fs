@@ -125,15 +125,25 @@ module ConvertCPU =
         then 
             let errJobs = StringExt.JoinWith(nullTagJobs.Select(fun j -> j.Name), "\n")
             failwithlogf $"Device 주소가 없습니다. \n{errJobs}"
-
+    
+    let setSimulationAddress(sys:DsSystem) = 
+        sys.Jobs
+           .ForEach(fun j-> j.DeviceDefs
+                             .ForEach(fun f-> 
+                                if f.InTag.IsNull() && f.ApiItem.RXs.any()then f.InAddress <- "SIMTAG"
+                                if f.OutTag.IsNull() && f.ApiItem.TXs.any()then f.OutAddress <- "SIMTAG"
+                            ))
 
     let convertSystem(sys:DsSystem, isActive:bool) =
         RuntimeDS.System <- sys
+          //시뮬레이션 주소 자동할당
+        if RuntimeDS.Package.IsPackageSIM()
+        then setSimulationAddress(sys)
+
         //DsSystem 물리 IO 생성
         sys.GenerationIO()
-        
-        if not (RuntimeDS.Package.IsPackageSIM())
-        then checkNullAddressErr(sys:DsSystem)
+
+        checkNullAddressErr(sys)
 
         if isActive //직접 제어하는 대상만 정렬(원위치) 정보 추출
         then sys.GenerationOrigins()

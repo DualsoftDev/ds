@@ -75,8 +75,7 @@ type ModelLoaderExt =
                               .ToZipPPT()
 
         let zipDir = PathManager.getDirectoryName (zipPathDS|>DsFile)   
-        let zipName = PathManager.getFileNameWithoutExtension (zipPathDS|>DsFile)   
-        let jsFilePath = PathManager.getFullPath ($"{zipName}/{zipName}.json"|>DsFile) (zipDir|>DsDirectory)
+        let jsFilePath = $"{zipDir}/dualsoft.json" |> getValidFile
 
         let activeRelaPath = getRelativePath(jsFilePath|>DsFile) (activeFilePath|>DsFile);//   // 상대경로로 기본 저장
         let config = SaveConfigWithPath jsFilePath activeRelaPath

@@ -1,8 +1,8 @@
 using DsWebApp.Shared;
-
 using Engine.Runtime;
 
-using static Engine.Core.TagKindModule;
+using static Engine.CodeGenCPU.TagHMIModule;
+using static Engine.Core.TagWebModule;
 
 namespace DsWebApp.Server.Controllers;
 
@@ -31,17 +31,21 @@ public class ModelController(ServerGlobal global) : ControllerBaseWithLogger(glo
         return _model.ToDto();
     }
 
+    /// <summary>
+    /// "api/model/tag" : 모든 HMI 태그 정보를 반환
+    /// </summary>
     [HttpGet("tag")]
-    public TagWeb[] GetAllHmiTags()
+    public HmiTagPackage GetAllHmiTags()
     {
-        return _model?.Cpu?.GetWebTags().ToArray() ?? Array.Empty<TagWeb>();
+        return _model?.HMITagPackage;
     }
 
-    [HttpGet("tag/{fqdn}/get")]
-    public TagWeb GetHmiTag(string fqdn)
-    {
-        return _model?.Cpu?.GetWebTags().FirstOrDefault(wt => wt.Name == fqdn);
-    }
+    //[HttpGet("tag/{fqdn}/get")]
+    //public TagWeb GetHmiTag(string fqdn)
+    //{
+    //    return _model?.Cpu?.GetWebTags().FirstOrDefault(wt => wt.Name == fqdn);
+    //    //return _model?.HMITagPackage.FirstOrDefault(wt => wt.Name == fqdn);
+    //}
 
     [HttpPost("tag/{fqdn}")]
     public bool SetHmiTag(string fqdn, [FromBody] string serializedObject)

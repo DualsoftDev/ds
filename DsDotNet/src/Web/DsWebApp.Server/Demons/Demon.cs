@@ -2,6 +2,8 @@ using DsWebApp.Server.Hubs;
 
 using IO.Core;
 
+using static Engine.Core.TagWebModule;
+
 using SK = DsWebApp.Shared.SK;
 
 namespace DsWebApp.Server.Demons;
@@ -10,19 +12,21 @@ public partial class Demon : BackgroundService
 {
     ServerGlobal _serverGlobal;
     IHubContext<FieldIoHub> _hubContextFieldIo;
+    IHubContext<HmiTagHub> _hubContextHmiTag;
     ILog _logger => _serverGlobal.Logger;
 
-    public Demon(ServerGlobal serverGlobal, IHubContext<FieldIoHub> hubContextFieldIo, IHubContext<ModelHub> hubContextModel)
+    public Demon(ServerGlobal serverGlobal, IHubContext<FieldIoHub> hubContextFieldIo, IHubContext<HmiTagHub> hubContextHmiTag)
     {
         _serverGlobal = serverGlobal;
         _hubContextFieldIo = hubContextFieldIo;
+        _hubContextHmiTag = hubContextHmiTag;
 
         serverGlobal.RuntimeModel?.Cpu.TagWebChangedSubject.Subscribe(tagWeb =>
         {
             _logger.Debug("Server: Notifying TagWeb change to all clients");
 
             // "hub/hmitag"
-            hubContextModel.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
+            hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
         });
     }
     protected override async Task ExecuteAsync(CancellationToken ct)
@@ -55,7 +59,10 @@ public partial class Demon : BackgroundService
                             _logger.Debug($"{n / 60}: Background Service is working..");
 
                         //if (n % 2 == 0)
-                        //    Task.Run(async () => { await monitorDatabaseAsync(n); }).FireAndForget();
+                        //    Task.Run(async () =>
+                        //    {
+                        //        await _hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, new TagWeb("Test", true, 999));
+                        //    }).FireAndForget();
 
                         //if (n % 10 == 0)
                         //    Task.Run(async () => { await checkAssetHealthAsync(n); }).FireAndForget();

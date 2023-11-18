@@ -14,6 +14,11 @@
 </EditForm>
 
 
+<button class="navbar-toggler bg-primary d-block" title="send any" @onclick="onTestSignalR">
+    <span class="navbar-toggler-icon"></span>
+    Send Any
+</button>
+
 
 <h3>Hmi Tag Test</h3>
 
@@ -35,19 +40,28 @@
     }
 
     HubConnection _hubConnection;
-    IDisposable _subscription;
+    CompositeDisposable _disposables = new();
 
     protected override async Task OnInitializedAsync()
     {
         _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/hmitag").StartHubAsync();
-        _subscription =
-            _hubConnection.On<TagWeb>(SK.S2CNTagWebChanged, async (TagWeb change) =>
+        IDisposable subscription =
+            _hubConnection.On<TagWeb>(SK.S2CNTagWebChanged, (TagWeb change) =>
             {
                 // todo : NOT working!!
                 Console.WriteLine($"TagWeb change notification received with {change.Name}/{change.Kind}={change.Value}.");
             });
+        _disposables.Add(subscription);
 
+        Console.WriteLine($"Hub initialized on PageHmiTagTest.razor");
         await base.OnInitializedAsync();
+    }
+
+    async Task onTestSignalR()
+    {
+        var serializedObject = "{\"RawValue\":false,\"Type\":1}";
+        var response = await Http.PostAsJsonAsync($"api/model/tag/Hello/9999", serializedObject);
+
     }
 
 }

@@ -14,13 +14,16 @@ namespace DsWebApp.Server.Controllers;
 public class ModelController : ControllerBaseWithLogger
 {
     RuntimeModel _model;
-
-    public ModelController(ServerGlobal global, IHubContext<ModelHub> hubContextModel)
+    IHubContext<ModelHub> _hubContextModel;
+    IHubContext<HmiTagHub> _hubContextHmiTag;
+    public ModelController(ServerGlobal global, IHubContext<ModelHub> hubContextModel, IHubContext<HmiTagHub> hubContextHmiTag)
         : base(global.Logger)
     {
         global.Logger.Debug("ModelController 생성자 호출 됨");
 
         _model = global.RuntimeModel;
+        _hubContextModel = hubContextModel;
+        _hubContextHmiTag = hubContextHmiTag;
 
         //global.RuntimeModel?.Cpu.TagWebChangedSubject.Subscribe(tagWeb =>
         //{
@@ -68,19 +71,21 @@ public class ModelController : ControllerBaseWithLogger
     /// "api/model/tag : POST 로 지정된 HMI 태그 정보 update
     /// </summary>
     [HttpPost("tag")]
-    public bool SetHmiTag([FromBody] TagWeb tagWeb)
+    public async Task<bool> SetHmiTag([FromBody] TagWeb tagWeb)
     {
         var cpu = _model?.Cpu;
         if (cpu == null)
             return false;
 
-        return cpu.UpdateTagWeb(tagWeb);
+        await _hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
+        //return cpu.UpdateTagWeb(tagWeb);
+        return true;
     }
     /// <summary>
     /// "api/model/tag/{fqdn}/{tagKind}" : 지정된 HMI 태그 정보 update
     /// </summary>
     [HttpPost("tag/{fqdn}/{tagKind}")]
-    public bool SetHmiTag(string fqdn, int tagKind, [FromBody] string serializedObject)
+    public async Task<bool> SetHmiTag(string fqdn, int tagKind, [FromBody] string serializedObject)
     {
         var cpu = _model?.Cpu;
         if (cpu == null)
@@ -90,6 +95,8 @@ public class ModelController : ControllerBaseWithLogger
         var obj = Dual.Common.Core.FS.ObjectHolder.Deserialize(serializedObject);
         // todo: implement
         //cpu.SetTag(fqdn, obj);
+        await _hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, new TagWeb(fqdn, obj, tagKind));
+
         return true;
     }
 }

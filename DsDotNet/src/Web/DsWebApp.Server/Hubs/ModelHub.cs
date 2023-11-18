@@ -7,8 +7,5 @@ namespace DsWebApp.Server.Hubs
         {
             //GlobalCounter.TheGlobalCounter ??= configuration.GetSection("GlobalCounter").Get<GlobalCounter>();
         }
-
-
     }
-
 }

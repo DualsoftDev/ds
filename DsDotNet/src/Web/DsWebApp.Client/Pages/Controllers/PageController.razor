@@ -38,7 +38,6 @@ else
     bool _loading { get; set; } = true;
     bool _isRunning => _modelDto?.IsCpuRunning ?? false;
     RuntimeModelDto _modelDto;
-    HubConnection _hubConnection;
     CompositeDisposable _disposables = new();
 
     protected override async Task OnInitializedAsync()
@@ -47,7 +46,6 @@ else
 
         _loading = false;
 
-        _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/model").StartHubAsync();
         var action = new Action<RuntimeModelDto>(modelDto => { _modelDto = modelDto; StateHasChanged(); });
         IDisposable subscription = await ClientGlobal.MonitorModelChangeAsync(NavigationManager, action);
         _disposables.Add(subscription);

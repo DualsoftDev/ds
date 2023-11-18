@@ -27,6 +27,7 @@ namespace DsWebApp.Client
         }
 
         RuntimeModelDto _modelDto;
+        HubConnection _hubConnectionModel;
         public async Task<RuntimeModelDto> GetModelDtoAsync(HttpClient http)
         {
             if (_modelDto == null)
@@ -48,10 +49,13 @@ namespace DsWebApp.Client
         }
         public async Task<IDisposable> MonitorModelChangeAsync(NavigationManager navigationManager, Action<RuntimeModelDto> onModelChanged)
         {
-            HubConnection hubConnection = await navigationManager.ToAbsoluteUri("/hub/model").StartHubAsync();
+            if (_hubConnectionModel == null)
+                _hubConnectionModel = await navigationManager.ToAbsoluteUri("/hub/model").StartHubAsync();
+
             IDisposable subscription =
-                hubConnection.On<RuntimeModelDto>(SK.S2CNModelChanged, (RuntimeModelDto newModel) =>
+                _hubConnectionModel.On<RuntimeModelDto>(SK.S2CNModelChanged, (RuntimeModelDto newModel) =>
                 {
+                    Console.WriteLine($"Model change detected on signalR: {newModel.SourceDsZipPath}, {newModel.IsCpuRunning}");
                     _modelDto = newModel;
                     onModelChanged(newModel);   // e.g StateHasChanged();
                 });

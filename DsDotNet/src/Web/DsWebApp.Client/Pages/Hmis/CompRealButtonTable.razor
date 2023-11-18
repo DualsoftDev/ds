@@ -1,6 +1,8 @@
 @using static Engine.Core.TagWebModule
 
+@using Dual.Web.Blazor.ServerSide
 @using TagWeb = Engine.Core.TagWebModule.TagWeb
+@implements IAsyncDisposable
 
 
 <h4>@TableName</h4>
@@ -20,16 +22,48 @@
     class RealButtonRow(TagWeb real)
     {
         public string Name => real.Name;
-        public object Value => real.Value;
+        public object Value { get; set; } = real.Value;
         public int Kind => real.Kind;
         // public string PushButtonMessage { get; set; }
     }
     RealButtonRow[] _items;
 
+    HubConnection _hubConnection;
+    CompositeDisposable _disposables = new();
+
     protected override async Task OnInitializedAsync()
     {
         await Task.Yield();
         _items = RealButtons.Select(hb => new RealButtonRow(hb)).ToArray();
+
+        _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/hmitag").StartHubAsync();
+        IDisposable subscription =
+            _hubConnection.On<TagWeb>(SK.S2CNTagWebChanged, (TagWeb change) =>
+            {
+                Console.WriteLine($"TagWeb change notification received with {change.Name}/{change.Kind}={change.Value}.");
+                RealButtonRow match = _items.FirstOrDefault(item => item.Name == change.Name && item.Kind == change.Kind);
+                if (match != null)
+                {
+                    Console.WriteLine($"Updating RealButton {change.Name}/{change.Kind}={change.Value}");
+                    match.Value = change.Value;
+                    StateHasChanged();
+                }
+            });
+
+        _disposables.Add(subscription);
+
+        Console.WriteLine($"Hub initialized on CompRealButtonTable.razor");
+        await base.OnInitializedAsync();
     }
+
+    public async ValueTask DisposeAsync()
+    {
+        Console.WriteLine("CompRealButtonTable.razor disposed!");
+        await _hubConnection.StopAsync();
+        _disposables.Dispose();
+    }
+
+
+
 
 }

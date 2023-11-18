@@ -2,7 +2,7 @@
 
 @using Dual.Web.Blazor.ServerSide
 @using IO.Core
-@implements IDisposable
+@implements IAsyncDisposable
 
 <h3>PageTestIo</h3>
 
@@ -36,9 +36,9 @@
         _disposables.Add(subscription);
 
     }
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
+        await _hubConnection.StopAsync();
         _disposables.Dispose();
-        _hubConnection.StopAsync();
     }
 }

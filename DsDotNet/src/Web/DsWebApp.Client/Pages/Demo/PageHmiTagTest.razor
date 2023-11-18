@@ -3,7 +3,7 @@
 @using Dual.Web.Blazor.ServerSide
 @using IO.Core
 @using DevExpress.DirectX.Common.Direct2D
-@implements IDisposable
+@implements IAsyncDisposable
 
 
 <EditForm Model="@_tagWeb" OnValidSubmit="@HandleSubmit">
@@ -26,7 +26,7 @@
     // string _name;
     // int _kind;
     bool _flag;
-    TagWeb _tagWeb = new("", false, 0);
+    TagWeb _tagWeb = new("my.STN01.WORK1", false, 11018);
 
     private async Task HandleSubmit()
     {
@@ -48,7 +48,6 @@
         IDisposable subscription =
             _hubConnection.On<TagWeb>(SK.S2CNTagWebChanged, (TagWeb change) =>
             {
-                // todo : NOT working!!
                 Console.WriteLine($"TagWeb change notification received with {change.Name}/{change.Kind}={change.Value}.");
             });
 
@@ -57,10 +56,10 @@
         Console.WriteLine($"Hub initialized on PageHmiTagTest.razor");
         await base.OnInitializedAsync();
     }
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         Console.WriteLine("PageHmiTagTest.razor disposed!");
-        _hubConnection.StopAsync();
+        await _hubConnection.StopAsync();
         _disposables.Dispose();
     }
 

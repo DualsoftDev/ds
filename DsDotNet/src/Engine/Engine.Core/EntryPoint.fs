@@ -2,7 +2,7 @@ namespace Engine.Core
 
 module ModuleInitializer =
     let Initialize() =
-        printfn "Module is being initialized..."
+        printfn "Engine.Core Module is being initialized..."
         fwdSerializeFunctionNameAndBoxedArguments <- serializeFunctionNameAndBoxedArguments
 
         fwdCreateBoolMemberVariable <-

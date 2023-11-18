@@ -5,7 +5,7 @@ open Engine.Core
 
 module ModuleInitializer =
     let Initialize() =
-        printfn "Module is being initialized..."
+        printfn "PLC.CodeGen.LSXGI Module is being initialized..."
 
         fwdCreateSymbolInfo <- XGITag.createSymbolInfo
 

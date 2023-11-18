@@ -104,11 +104,11 @@ module RunTime =
             syncReset(systems, false)
             scanOnce()
 
-        // todo: 함수 작성.  실패시 false 반환
-        member x.UpdateTagWeb(tagWeb:TagWeb): bool =
+        // todo: 함수 작성.  실패시 실패 이유 반환, 성공시 null 문자열 반환
+        member x.UpdateTagWeb(tagWeb:TagWeb): ErrorMessage =
             logDebug "Server Updating TagWeb"
             tagWebChangedSubject.OnNext(tagWeb)
-            true
+            null
 
         // todo: TagWeb 변경시 이벤트 발생
         member x.TagWebChangedSubject = tagWebChangedSubject

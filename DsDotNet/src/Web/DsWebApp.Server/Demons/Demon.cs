@@ -61,7 +61,13 @@ public partial class Demon : BackgroundService
                         //if (n % 2 == 0)
                         //    Task.Run(async () =>
                         //    {
-                        //        await _hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, new TagWeb("Test", true, 999));
+                        //        if (HmiTagHub.ConnectedClients.TryGetValue("HmiTagHub", out var clients) && clients.Any())
+                        //        {
+                        //            Console.WriteLine($"HmiTagHub has {clients.Count} connected clients.");
+                        //            await _hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, new TagWeb("Test", true, 999));
+                        //        }
+                        //        else
+                        //            _logger.Debug("No HmiTagHub clients connected");
                         //    }).FireAndForget();
 
                         //if (n % 10 == 0)

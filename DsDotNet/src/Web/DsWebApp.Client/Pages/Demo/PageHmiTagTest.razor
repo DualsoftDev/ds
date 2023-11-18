@@ -3,7 +3,7 @@
 @using Dual.Web.Blazor.ServerSide
 @using IO.Core
 @using DevExpress.DirectX.Common.Direct2D
-
+@implements IDisposable
 
 
 <EditForm Model="@_tagWeb" OnValidSubmit="@HandleSubmit">
@@ -51,10 +51,17 @@
                 // todo : NOT working!!
                 Console.WriteLine($"TagWeb change notification received with {change.Name}/{change.Kind}={change.Value}.");
             });
+
         _disposables.Add(subscription);
 
         Console.WriteLine($"Hub initialized on PageHmiTagTest.razor");
         await base.OnInitializedAsync();
+    }
+    public void Dispose()
+    {
+        Console.WriteLine("PageHmiTagTest.razor disposed!");
+        _hubConnection.StopAsync();
+        _disposables.Dispose();
     }
 
     async Task onTestSignalR()

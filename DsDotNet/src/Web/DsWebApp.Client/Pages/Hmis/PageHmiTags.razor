@@ -73,8 +73,6 @@ else
 @code {
     bool _loading { get; set; } = true;
     HmiTagPackage _hmiTagPackage;
-    HubConnection _hubConnection;
-    IDisposable _subscription;
 
     protected override async Task OnInitializedAsync()
     {
@@ -82,43 +80,11 @@ else
         if (_hmiTagPackage == null)
             ClientGlobal.HmiTagPackage = _hmiTagPackage = await Http.GetFromJsonAsync<HmiTagPackage>($"api/model/tag");
 
-        // TagWebORM[] allTags = allTagWebs.Select(tw => new TagWebORM(tw)).ToArray();
-        // _items = new ObservableCollection<TagWebORM>(allTags);
-
-        // _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/vanilla").StartHubAsync();
-        // _subscription =
-        //     _hubConnection.On<TableHistory>("TableRowChanged", async (TableHistory change) =>
-        //     {
-        //         Console.WriteLine($"TableRowsAdded notification received with {change.Name}/{change.Operation}.  waiting for {_tableName}");
-        //         if (!change.Name.EqualsIgnoringCase(_tableName))
-        //         {
-        //             Console.WriteLine($"Ignoring notification for {change.Name} != {_tableName}");
-        //             return;
-        //         }
-
-        //         await getAllItemsAsync();
-
-        //         // Page 다시 로딩 되기 이전에, 약간의 delay 를 주어서 getItemAsync() 결과를 받을 수 있도록 보장???
-        //         // `The connection to ws://localhost:50294/TwmApp.Server/ was interrupted while the page was loading.`
-        //         await Task.Delay(200);
-        //         StateHasChanged();
-        //     });
-
         _loading = false;
         await base.OnInitializedAsync();
     }
-
-    // async Task backupOnceAsync(object oAssetId)
-    // {
-    //     int assetId = (int)oAssetId;
-    //     Console.WriteLine($"Requesting backup once for assetId: {assetId}");
-
-    //     _loading = true;
-    //     var reply = await Http.GetFromJsonAsync<AmDxbS2CReplyBackupOnce>($"api/DexaProxy/backupOnce/{assetId}");
-    //     _loading = false;
-    //     if (reply.Succeeded)
-    //         await JsDual.Confirm($"Got OK backup result.\r\nCheck details");
-    //     else
-    //         await JsDual.Alert($"Got NG backup result.\r\n{reply.ErrorMessage}");
-    // }
+    public void Dispose() 
+    {
+        Console.WriteLine($"Disposing PageHmiTags.razor");
+    }
 }

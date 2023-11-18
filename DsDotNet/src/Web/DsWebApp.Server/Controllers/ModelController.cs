@@ -6,33 +6,26 @@ using static Engine.Core.TagWebModule;
 
 namespace DsWebApp.Server.Controllers;
 
+public class ModelControllerConstructor : ControllerBaseWithLogger
+{
+    public ModelControllerConstructor(ILog logger) : base(logger)
+    {
+        logger.Debug("ModelController 생성자 호출 됨");
+    }
+}
+
 /// <summary>
 /// DS Model controller
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class ModelController : ControllerBaseWithLogger
+public class ModelController(
+        ServerGlobal global
+        , IHubContext<ModelHub> hubContextModel
+        , IHubContext<HmiTagHub> hubContextHmiTag
+    ) : ModelControllerConstructor(global.Logger)
 {
-    RuntimeModel _model;
-    IHubContext<ModelHub> _hubContextModel;
-    IHubContext<HmiTagHub> _hubContextHmiTag;
-    public ModelController(ServerGlobal global, IHubContext<ModelHub> hubContextModel, IHubContext<HmiTagHub> hubContextHmiTag)
-        : base(global.Logger)
-    {
-        global.Logger.Debug("ModelController 생성자 호출 됨");
-
-        _model = global.RuntimeModel;
-        _hubContextModel = hubContextModel;
-        _hubContextHmiTag = hubContextHmiTag;
-
-        //global.RuntimeModel?.Cpu.TagWebChangedSubject.Subscribe(tagWeb =>
-        //{
-        //    global.Logger.Debug("Server: Notifying TagWeb change to all clients");
-
-        //    // "hub/hmitag"
-        //    hubContextModel.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
-        //});
-    }
+    RuntimeModel _model => global.RuntimeModel;
 
     /*
        {
@@ -77,9 +70,9 @@ public class ModelController : ControllerBaseWithLogger
         if (cpu == null)
             return false;
 
-        await _hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
-        //return cpu.UpdateTagWeb(tagWeb);
-        return true;
+        ErrorMessage errMsg = cpu.UpdateTagWeb(tagWeb);
+        await hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
+        return errMsg.IsNullOrEmpty();
     }
     /// <summary>
     /// "api/model/tag/{fqdn}/{tagKind}" : 지정된 HMI 태그 정보 update
@@ -92,12 +85,12 @@ public class ModelController : ControllerBaseWithLogger
             return false;
 
         // serializedObject : e.g "{\"RawValue\":false,\"Type\":1}"
-        var obj = Dual.Common.Core.FS.ObjectHolder.Deserialize(serializedObject);
-        // todo: implement
-        //cpu.SetTag(fqdn, obj);
-        await _hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, new TagWeb(fqdn, obj, tagKind));
+        var objHolder = Dual.Common.Core.FS.ObjectHolder.Deserialize(serializedObject);
+        var tagWeb = new TagWeb(fqdn, objHolder.RawValue, tagKind);
+        ErrorMessage errMsg = cpu.UpdateTagWeb(tagWeb);
+        await hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
 
-        return true;
+        return errMsg.IsNullOrEmpty();
     }
 }
 

@@ -1,6 +1,6 @@
 namespace DsWebApp.Server.Hubs
 {
-    public class HmiTagHub(IConfiguration configuration) : ConnectionManagedHub
+    public class HmiTagHub(IConfiguration configuration) : ConnectionManagedHub("HmiTagHub")
     {
     }
 }

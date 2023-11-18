@@ -1,6 +1,5 @@
-namespace DsWebApp.Server.Hubs
+namespace DsWebApp.Server.Hubs;
+
+public class FieldIoHub() : ConnectionManagedHub("FiledIoHub")
 {
-    public class FieldIoHub(IConfiguration configuration) : ConnectionManagedHub("FiledIoHub")
-    {
-    }
 }

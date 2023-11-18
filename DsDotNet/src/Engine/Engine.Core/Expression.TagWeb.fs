@@ -8,8 +8,8 @@ module TagWebModule =
 
     // C# interop 을 위해서 record type 대신 class type 으로..
     [<AllowNullLiteral>]
-    type TagWeb(name:string, object:obj, kind:int, message:string) =
-        let serializedObject = ObjectHolder.Create(object).Serialize()
+    type TagWeb(name:string, value:obj, kind:int, message:string) =
+        let serializedObject = ObjectHolder.Create(value).Serialize()
 
         new() = TagWeb("", "", 0, "")
         new(name, object, kind) = TagWeb(name, object, kind, "")
@@ -75,3 +75,5 @@ type TagWebExt =
             | EventAction (tag, obj, _) -> createTagWeb tag obj.QualifiedName
 
         | None ->  createTagWeb x x.Name
+    [<Extension>]
+    static member SetValue(x:TagWeb, value:obj) = x._SerializedObject <- ObjectHolder.Create(value).Serialize()

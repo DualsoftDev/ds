@@ -2,8 +2,8 @@
 
 @using Dual.Web.Blazor.ServerSide
 @using TagWeb = Engine.Core.TagWebModule.TagWeb
-@implements IAsyncDisposable
 
+@inherits CompHmiTagContainer
 
 <h4>@TableName</h4>
 
@@ -19,51 +19,15 @@
     [Parameter] public TagWeb[] RealButtons { get; set; }
     [Parameter] public string TableName { get; set; }
 
-    class RealButtonRow(TagWeb real)
-    {
-        public string Name => real.Name;
-        public object Value { get; set; } = real.Value;
-        public int Kind => real.Kind;
-        // public string PushButtonMessage { get; set; }
-    }
-    RealButtonRow[] _items;
-
-    HubConnection _hubConnection;
-    CompositeDisposable _disposables = new();
+    TagWebORM[] _items;
 
     protected override async Task OnInitializedAsync()
     {
         await Task.Yield();
-        _items = RealButtons.Select(hb => new RealButtonRow(hb)).ToArray();
-
-        _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/hmitag").StartHubAsync();
-        IDisposable subscription =
-            _hubConnection.On<TagWeb>(SK.S2CNTagWebChanged, (TagWeb change) =>
-            {
-                Console.WriteLine($"TagWeb change notification received with {change.Name}/{change.Kind}={change.Value}.");
-                RealButtonRow match = _items.FirstOrDefault(item => item.Name == change.Name && item.Kind == change.Kind);
-                if (match != null)
-                {
-                    Console.WriteLine($"Updating RealButton {change.Name}/{change.Kind}={change.Value}");
-                    match.Value = change.Value;
-                    StateHasChanged();
-                }
-            });
-
-        _disposables.Add(subscription);
-
+        _items = RealButtons.Select(hb => new TagWebORM(hb)).ToArray();
+        await InitializeMapAsync(_items);
         Console.WriteLine($"Hub initialized on CompRealButtonTable.razor");
         await base.OnInitializedAsync();
     }
-
-    public async ValueTask DisposeAsync()
-    {
-        Console.WriteLine("CompRealButtonTable.razor disposed!");
-        await _hubConnection.StopAsync();
-        _disposables.Dispose();
-    }
-
-
-
-
+    public override void UpdateStateHasChanged() => StateHasChanged();
 }

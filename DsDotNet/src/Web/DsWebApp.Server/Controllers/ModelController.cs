@@ -1,7 +1,5 @@
 using DsWebApp.Server.Hubs;
-using DsWebApp.Shared;
 using Engine.Runtime;
-
 using static Engine.Core.TagWebModule;
 
 namespace DsWebApp.Server.Controllers;
@@ -21,7 +19,6 @@ public class ModelControllerConstructor : ControllerBaseWithLogger
 [Route("api/[controller]")]
 public class ModelController(
         ServerGlobal global
-        , IHubContext<ModelHub> hubContextModel
         , IHubContext<HmiTagHub> hubContextHmiTag
     ) : ModelControllerConstructor(global.Logger)
 {

@@ -1,6 +1,5 @@
-namespace DsWebApp.Server.Hubs
+namespace DsWebApp.Server.Hubs;
+
+public class ModelHub() : ConnectionManagedHub("ModelHub")
 {
-    public class ModelHub(IConfiguration configuration) : ConnectionManagedHub("ModelHub")
-    {
-    }
 }

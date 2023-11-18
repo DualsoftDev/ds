@@ -4,6 +4,7 @@
 
 @* HMIPush * HMILamp  //input, output *@
 @using HMIDevice = Tuple<Engine.Core.TagWebModule.TagWeb, Engine.Core.TagWebModule.TagWeb>
+@inherits CompHmiTagContainer
 
 <h4>@TableName</h4>
 
@@ -12,7 +13,6 @@
         <DxGridDataColumn FieldName="PushButtonName" />
         <DxGridDataColumn FieldName="PushButtonValue" />
         <DxGridDataColumn FieldName="PushButtonKind" />
-        @* <DxGridDataColumn FieldName="Message" /> *@
         <DxGridDataColumn FieldName="LampName" />
         <DxGridDataColumn FieldName="LampValue" />
         <DxGridDataColumn FieldName="LampKind" />
@@ -25,12 +25,11 @@
 
     class HmiDeviceRow
     {
-        TagWeb pb;  // pushbutton
-        TagWeb lp;  // lamp
+        public TagWebORM pb;  // pushbutton
+        public TagWebORM lp;  // lamp
         public string PushButtonName => pb.Name;
         public object PushButtonValue => pb.Value;
         public int PushButtonKind => pb.Kind;
-        // public string PushButtonMessage { get; set; }
 
         public string LampName => lp.Name;
         public object LampValue => lp.Value;
@@ -38,7 +37,9 @@
 
         public HmiDeviceRow(HMIDevice hmiDevice)
         {
-            (pb, lp) = hmiDevice;
+            var (p, l) = hmiDevice;
+            pb = new TagWebORM(p);
+            lp = new TagWebORM(l);
         }
     }
     HmiDeviceRow[] _items;
@@ -47,6 +48,10 @@
     {
         await Task.Yield();
         _items = HMIDevices.Select(hb => new HmiDeviceRow(hb)).ToArray();
+
+        TagWebORM[] tagWebs = _items.SelectMany(x => new[] { x.pb, x.lp }).ToArray();
+        await InitializeMapAsync(tagWebs);
     }
+    public override void UpdateStateHasChanged() => StateHasChanged();
 
 }

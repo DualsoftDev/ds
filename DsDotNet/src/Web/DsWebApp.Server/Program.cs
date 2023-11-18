@@ -146,8 +146,7 @@ app.UseCors(_corsPolicyName);
 
 app.MapRazorPages();
 app.MapControllers();
-app.MapHub<VanillaHub>("/hub/vanilla")
-    .RequireCors(_corsPolicyName);
+
 app.MapHub<FieldIoHub>("/hub/io");
 app.MapHub<ModelHub>("/hub/model");
 app.MapHub<HmiTagHub>("/hub/hmitag")

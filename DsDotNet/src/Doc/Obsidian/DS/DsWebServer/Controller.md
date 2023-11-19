@@ -1,10 +1,10 @@
 - Runtime 제어기 역할
 
 
-- [ ] Run/Pause/Stop
+- [x] Run/Pause/Stop ✅ 2023-11-18
 	- [ ] [[IOHub]] 연동
-	- [ ] [[DsCPU]]  연동
-- [ ] 모델 Reload
+	- [x] [[DsCPU]]  연동 ✅ 2023-11-18
+- [x] 모델 Reload ✅ 2023-11-18
 	-  `*.pptx`, `*.json` 파일 drag & drop 으로 새로운 모델 수용
 	-  `*.pptx`, `*.json` 파일 rest api 로 새로운 모델 수용
 

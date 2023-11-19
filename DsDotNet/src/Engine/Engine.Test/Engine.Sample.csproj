@@ -12,7 +12,7 @@
 
     <ItemGroup>
         <PackageReference Include="DualSoft-Common-Core" Version="0.1.18"/>
-        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.18"/>
+        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.19"/>
     </ItemGroup>
 
     <ItemGroup>

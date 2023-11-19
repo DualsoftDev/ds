@@ -4,6 +4,8 @@
 @using System.Reactive.Disposables
 @using System.IO.Compression
 @inject FilesManager FilesManager
+@implements IDisposable
+
 
 <h3>Upload File</h3>
 
@@ -48,7 +50,7 @@
                 <td><a href="files/@url" target="_blank">@url</a></td>
                 <td><a href="api/files/@url/get" class="btn btn-primary">download</a></td>
                 <td>
-                    <button class="btn btn-outline-danger"
+                    <button class="btn btn-outline-danger" disabled="@(!isDeletable(url))"
                     @onclick="
                         async e => {
                             await FilesManager.DeleteFileOnServer(url);
@@ -68,6 +70,21 @@
     long _totalBytes;
     List<string> _fileUrls = new List<string>();
 
+    CompositeDisposable _disposables = new();
+    ServerSettings _serverSettings;
+    RuntimeModelDto _modelDto;
+    protected override async Task OnInitializedAsync()
+    {
+        _serverSettings = await ClientGlobal.GetServerSettingsAsync(Http);
+        _modelDto = await ClientGlobal.GetModelDtoAsync(Http);
+        var action = new Action<RuntimeModelDto>(modelDto => { _modelDto = modelDto; StateHasChanged(); });
+        IDisposable subscription = await ClientGlobal.MonitorModelChangeAsync(NavigationManager, action);
+        _disposables.Add(subscription);
+
+        await listFiles();
+    }
+    public void Dispose() => _disposables.Dispose();
+
     // support for drag/drop
     string _dropClass = string.Empty;
     void HandleDragEnter()
@@ -77,6 +94,23 @@
     void HandleDragLeave()
     {
         _dropClass = string.Empty;
+    }
+
+    bool isDeletable(string url)
+    {
+        if (!_modelDto.IsCpuRunning)
+            return true;
+
+        var runtime = getFileName(_serverSettings.RuntimeModelDsZipPath).ToLower();   // exportDS.Zip
+        var file = getFileName(url).ToLower();
+        return runtime != file;
+
+        // System.IO.Path.GetFileName() 이 Browser 환경에서 제대로 동작하지 않음..
+        string getFileName(string path)
+        {
+            int lastIndex = path.LastIndexOf('\\');
+            return lastIndex == -1 ? path : path.Substring(lastIndex + 1);
+        }
     }
 
     /// <summary>
@@ -192,10 +226,4 @@
         _fileUrls = await FilesManager.GetFileNames();
         await InvokeAsync(StateHasChanged);
     }
-
-    protected override async Task OnInitializedAsync()
-    {
-        await listFiles();
-    }
-
 }

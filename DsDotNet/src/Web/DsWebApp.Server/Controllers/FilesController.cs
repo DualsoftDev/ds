@@ -2,9 +2,7 @@
 // https://blazorroadshow.azurewebsites.net/blazortrainfiles/FileHandlingRemix.zip
 
 using System.Net.Http.Headers;
-using DsWebApp.Server.Common;
 using DsWebApp.Server.Hubs;
-using DsWebApp.Shared;
 
 namespace DsWebApp.Server.Controllers;
 
@@ -83,7 +81,7 @@ public class FilesController(ServerGlobal global, IHubContext<ModelHub> hubConte
                 // dszip 파일 신규 upload 에 대한 처리
                 System.IO.File.Move(fileName, _runtimeModelDsZipPath);
                 global.ReloadRuntimeModel();
-                hubContextModel.Clients.All.SendAsync("ModelChanged", new RuntimeModelDto(_runtimeModelDsZipPath, false));
+                hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, new RuntimeModelDto(_runtimeModelDsZipPath, false));
             }
 
             return true;

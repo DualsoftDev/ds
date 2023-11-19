@@ -2,14 +2,33 @@ using DsWebApp.Server.Hubs;
 
 using IO.Core;
 
-using K = DsWebApp.Shared.K;
+using static Engine.Core.TagWebModule;
+
+using SK = DsWebApp.Shared.SK;
 
 namespace DsWebApp.Server.Demons;
 
-public partial class Demon(ServerGlobal serverGlobal, IHubContext<FieldIoHub> hubContext) : BackgroundService
+public partial class Demon : BackgroundService
 {
-    ILog _logger => serverGlobal.Logger;
+    ServerGlobal _serverGlobal;
+    IHubContext<FieldIoHub> _hubContextFieldIo;
+    IHubContext<HmiTagHub> _hubContextHmiTag;
+    ILog _logger => _serverGlobal.Logger;
 
+    public Demon(ServerGlobal serverGlobal, IHubContext<FieldIoHub> hubContextFieldIo, IHubContext<HmiTagHub> hubContextHmiTag)
+    {
+        _serverGlobal = serverGlobal;
+        _hubContextFieldIo = hubContextFieldIo;
+        _hubContextHmiTag = hubContextHmiTag;
+
+        serverGlobal.RuntimeModel?.Cpu.TagWebChangedSubject.Subscribe(tagWeb =>
+        {
+            _logger.Debug("Server: Notifying TagWeb change to all clients");
+
+            // "hub/hmitag"
+            hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
+        });
+    }
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
         try
@@ -40,7 +59,16 @@ public partial class Demon(ServerGlobal serverGlobal, IHubContext<FieldIoHub> hu
                             _logger.Debug($"{n / 60}: Background Service is working..");
 
                         //if (n % 2 == 0)
-                        //    Task.Run(async () => { await monitorDatabaseAsync(n); }).FireAndForget();
+                        //    Task.Run(async () =>
+                        //    {
+                        //        if (HmiTagHub.ConnectedClients.TryGetValue("HmiTagHub", out var clients) && clients.Any())
+                        //        {
+                        //            Console.WriteLine($"HmiTagHub has {clients.Count} connected clients.");
+                        //            await _hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, new TagWeb("Test", true, 999));
+                        //        }
+                        //        else
+                        //            _logger.Debug("No HmiTagHub clients connected");
+                        //    }).FireAndForget();
 
                         //if (n % 10 == 0)
                         //    Task.Run(async () => { await checkAssetHealthAsync(n); }).FireAndForget();
@@ -52,8 +80,8 @@ public partial class Demon(ServerGlobal serverGlobal, IHubContext<FieldIoHub> hu
                     }
                 });
         compositeDisposable.Add(subscription);
-        var xx = serverGlobal.IoHubServer.MemoryChangedObservable;
-        subscription = serverGlobal.IoHubServer.MemoryChangedObservable.Subscribe(change =>
+        var xx = _serverGlobal.IoHubServer.MemoryChangedObservable;
+        subscription = _serverGlobal.IoHubServer.MemoryChangedObservable.Subscribe(change =>
         {
             try
             {
@@ -63,10 +91,10 @@ public partial class Demon(ServerGlobal serverGlobal, IHubContext<FieldIoHub> hu
                     switch (simple)
                     {
                         case SimpleNumericIOChangeInfo c:
-                            hubContext.Clients.All.SendAsync(K.S2CNNIOChanged, c);
+                            _hubContextFieldIo.Clients.All.SendAsync(K.S2CNNIOChanged, c);
                             break;
                         case SimpleSingleStringChangeInfo c:
-                            hubContext.Clients.All.SendAsync(K.S2CNSIOChanged, c);
+                            _hubContextFieldIo.Clients.All.SendAsync(K.S2CNSIOChanged, c);
                             break;
                         default:
                             throw new Exception($"Unknown IoMemoryChanged type: {change.GetType().Name}");

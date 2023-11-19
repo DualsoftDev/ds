@@ -1,0 +1,73 @@
+@page "/demo/testhmitag"
+
+@using Dual.Web.Blazor.ServerSide
+@using IO.Core
+@using DevExpress.DirectX.Common.Direct2D
+@implements IAsyncDisposable
+
+
+<EditForm Model="@_tagWeb" OnValidSubmit="@HandleSubmit">
+    <InputText @bind-Value="@_tagWeb.Name" />
+    <InputNumber @bind-Value="@_tagWeb.Kind" />
+    <InputCheckbox @bind-Value="@_flag" />
+    <button type="submit">제출</button>
+</EditForm>
+
+
+<button class="navbar-toggler bg-primary d-block" title="send any" @onclick="onTestSignalR">
+    <span class="navbar-toggler-icon"></span>
+    Send Any
+</button>
+
+
+<h3>Hmi Tag Test</h3>
+
+@code {
+    // string _name;
+    // int _kind;
+    bool _flag;
+    TagWeb _tagWeb = new("my.STN01.WORK1", false, 11018);
+
+    private async Task HandleSubmit()
+    {
+        TagWeb tagWeb = new(_tagWeb.Name, _flag, _tagWeb.Kind);
+        Console.WriteLine($"TagWeb: Name={tagWeb.Name}, Kind={tagWeb.Kind}");
+        var response = await Http.PostAsJsonAsync("api/model/tag", tagWeb);
+        response.EnsureSuccessStatusCode();
+        string responseBody = await response.Content.ReadAsStringAsync();
+        bool result = Convert.ToBoolean(responseBody);
+        Console.WriteLine($"Submit result: {result}");
+    }
+
+    HubConnection _hubConnection;
+    CompositeDisposable _disposables = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/hmitag").StartHubAsync();
+        IDisposable subscription =
+            _hubConnection.On<TagWeb>(SK.S2CNTagWebChanged, (TagWeb change) =>
+            {
+                Console.WriteLine($"TagWeb change notification received with {change.Name}/{change.Kind}={change.Value}.");
+            });
+
+        _disposables.Add(subscription);
+
+        Console.WriteLine($"Hub initialized on PageHmiTagTest.razor");
+        await base.OnInitializedAsync();
+    }
+    public async ValueTask DisposeAsync()
+    {
+        Console.WriteLine("PageHmiTagTest.razor disposed!");
+        await _hubConnection.StopAsync();
+        _disposables.Dispose();
+    }
+
+    async Task onTestSignalR()
+    {
+        var serializedObject = "{\"RawValue\":false,\"Type\":1}";
+        var response = await Http.PostAsJsonAsync($"api/model/tag/Hello/9999", serializedObject);
+
+    }
+
+}

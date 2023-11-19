@@ -2,6 +2,7 @@
 
 @using TagWeb = Engine.Core.TagWebModule.TagWeb
 @using HMIButton = Tuple<Engine.Core.TagWebModule.TagWeb, Engine.Core.TagWebModule.TagWeb>  @* HMIPush * HMIFlickerLamp *@
+@inherits CompHmiTagContainer
 
 <h4>@TableName</h4>
 
@@ -10,7 +11,6 @@
         <DxGridDataColumn FieldName="PushButtonName" />
         <DxGridDataColumn FieldName="PushButtonValue" />
         <DxGridDataColumn FieldName="PushButtonKind" />
-        @* <DxGridDataColumn FieldName="Message" /> *@
         <DxGridDataColumn FieldName="FlickerLampName" />
         <DxGridDataColumn FieldName="FlickerLampValue" />
         <DxGridDataColumn FieldName="FlickerLampKind" />
@@ -23,12 +23,11 @@
 
     class HmiButtonRow
     {
-        TagWeb pb;  // pushbutton
-        TagWeb fl;  // flicker lamp
+        public TagWebORM pb;  // pushbutton
+        public TagWebORM fl;  // flicker lamp
         public string PushButtonName => pb.Name;
         public object PushButtonValue => pb.Value;
         public int PushButtonKind => pb.Kind;
-        // public string PushButtonMessage { get; set; }
 
         public string FlickerLampName => fl.Name;
         public object FlickerLampValue => fl.Value;
@@ -36,7 +35,9 @@
 
         public HmiButtonRow(HMIButton hmiButton)
         {
-            (pb, fl) = hmiButton;
+            var (p, f) = hmiButton;
+            pb = new TagWebORM(p);
+            fl = new TagWebORM(f);
         }
     }
     HmiButtonRow[] _items;
@@ -45,6 +46,10 @@
     {
         await Task.Yield();
         _items = HMIButtons.Select(hb => new HmiButtonRow(hb)).ToArray();
+
+        TagWebORM[] tagWebs = _items.SelectMany(x => new[] { x.pb, x.fl }).ToArray();
+        await InitializeMapAsync(tagWebs);
     }
+    public override void UpdateStateHasChanged() => StateHasChanged();
 
 }

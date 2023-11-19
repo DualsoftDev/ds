@@ -1,9 +1,5 @@
 using DsWebApp.Server.Hubs;
-using DsWebApp.Shared;
-using Engine.Runtime;
-
 using Microsoft.AspNetCore.SignalR.Client;
-
 using static Engine.Cpu.RunTime;
 
 namespace DsWebApp.Server.Controllers;
@@ -31,7 +27,7 @@ public class CpuController(ServerGlobal global, IHubContext<ModelHub> hubContext
             return "Already running";
 
         _cpu.RunInBackground();
-        hubContextModel.Clients.All.SendAsync("ModelChanged", modelDto(true));
+        hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, modelDto(true));
         return "";
     }
 
@@ -44,7 +40,7 @@ public class CpuController(ServerGlobal global, IHubContext<ModelHub> hubContext
             return "Already stopped";
 
         _cpu.Stop();
-        hubContextModel.Clients.All.SendAsync("ModelChanged", modelDto(false));
+        hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, modelDto(false));
 
         return "";
     }

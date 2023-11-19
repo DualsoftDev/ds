@@ -19,7 +19,7 @@ module ModuleInitializer =
         if $"{engineParserFS}" <> $"{engineParserCS}" then
             failwithf $"Engine Version Error : F# ver {engineParserFS} <> C# ver {engineParserCS}"
 
-        printfn "Module is being initialized..."
+        printfn "Engine.Parser.FS Module is being initialized..."
         ModelParser.Initialize()
 
         ()

@@ -1,12 +1,5 @@
-using DsWebApp.Server.Controllers;
-using DsWebApp.Shared;
+namespace DsWebApp.Server.Hubs;
 
-
-using Microsoft.AspNetCore.SignalR;
-
-namespace DsWebApp.Server.Hubs
+public class FieldIoHub() : ConnectionManagedHub("FiledIoHub")
 {
-    public class FieldIoHub(IConfiguration configuration) : ConnectionManagedHub
-    {
-    }
 }

@@ -1,9 +1,8 @@
 @page "/hmis/hmi"
+@implements IDisposable
 
 <h3>PageHmi</h3>
 
-counter: @ClientGlobal.Counter
-
 @code {
-
+    public void Dispose() { Console.WriteLine($"Disposing PageHmi.razor"); }
 }

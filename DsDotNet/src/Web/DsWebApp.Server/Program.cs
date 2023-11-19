@@ -6,6 +6,7 @@ using DsWebApp.Server.Hubs;
 using Dual.Common.Core.FS;      // for F# common logger setting
 using Engine.Core;
 using Engine.Info;
+using DsWebApp.Shared;
 
 //using DsWebApp.Server.Authentication;
 
@@ -145,10 +146,11 @@ app.UseCors(_corsPolicyName);
 
 app.MapRazorPages();
 app.MapControllers();
-app.MapHub<VanillaHub>("/hub/vanilla")
-    .RequireCors(_corsPolicyName);
+
 app.MapHub<FieldIoHub>("/hub/io");
 app.MapHub<ModelHub>("/hub/model");
+app.MapHub<HmiTagHub>("/hub/hmitag")
+    .RequireCors(_corsPolicyName);
 
 app.MapFallbackToFile("index.html");
 

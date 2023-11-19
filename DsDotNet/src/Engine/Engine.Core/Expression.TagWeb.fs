@@ -8,9 +8,14 @@ module TagWebModule =
 
     // C# interop 을 위해서 record type 대신 class type 으로..
     [<AllowNullLiteral>]
-    type TagWeb(name:string, serializedObject:string, kind:int, message:string) =
+    type TagWeb(name:string, value:obj, kind:int, message:string) =
+        let serializedObject = ObjectHolder.Create(value).Serialize()
+
         new() = TagWeb("", "", 0, "")
+        new(name, object, kind) = TagWeb(name, object, kind, "")
+
         member val Name = name with get, set    //FQDN 고유이름
+        /// serializedObject 예: "{\"RawValue\":false,\"Type\":1}"
         member val _SerializedObject = serializedObject with get, set
         member val Kind = kind with get, set //Tag 종류 ex) going = 11007
         member val Message = message with get, set //에러 내용 및 기타 전달 Message 
@@ -58,8 +63,7 @@ type TagWebExt =
     [<Extension>]
     static member GetWebTag(x:IStorage) : TagWeb =
         let createTagWeb (tag:IStorage) (qualifiedName:string) =
-            let serializedObject = ObjectHolder.Create(tag.BoxedValue).Serialize()
-            TagWeb(qualifiedName, serializedObject, tag.TagKind, "")
+            TagWeb(qualifiedName, tag.BoxedValue, tag.TagKind, "")
         
         match x.GetTagInfo() with
         | Some dsTag ->
@@ -71,3 +75,5 @@ type TagWebExt =
             | EventAction (tag, obj, _) -> createTagWeb tag obj.QualifiedName
 
         | None ->  createTagWeb x x.Name
+    [<Extension>]
+    static member SetValue(x:TagWeb, value:obj) = x._SerializedObject <- ObjectHolder.Create(value).Serialize()

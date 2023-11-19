@@ -1,16 +1,26 @@
-using DsWebApp.Shared;
+using DsWebApp.Server.Hubs;
 using Engine.Runtime;
-
 using static Engine.Core.TagWebModule;
 
 namespace DsWebApp.Server.Controllers;
+
+public class ModelControllerConstructor : ControllerBaseWithLogger
+{
+    public ModelControllerConstructor(ILog logger) : base(logger)
+    {
+        logger.Debug("ModelController 생성자 호출 됨");
+    }
+}
 
 /// <summary>
 /// DS Model controller
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class ModelController(ServerGlobal global) : ControllerBaseWithLogger(global.Logger)
+public class ModelController(
+        ServerGlobal global
+        , IHubContext<HmiTagHub> hubContextHmiTag
+    ) : ModelControllerConstructor(global.Logger)
 {
     RuntimeModel _model => global.RuntimeModel;
 
@@ -46,18 +56,38 @@ public class ModelController(ServerGlobal global) : ControllerBaseWithLogger(glo
     //    //return _model?.HMITagPackage.FirstOrDefault(wt => wt.Name == fqdn);
     //}
 
-    [HttpPost("tag/{fqdn}")]
-    public bool SetHmiTag(string fqdn, [FromBody] string serializedObject)
+
+    /// <summary>
+    /// "api/model/tag : POST 로 지정된 HMI 태그 정보 update
+    /// </summary>
+    [HttpPost("tag")]
+    public async Task<bool> SetHmiTag([FromBody] TagWeb tagWeb)
     {
-        // serializedObject : e.g "{\"RawValue\":false,\"Type\":1}"
         var cpu = _model?.Cpu;
         if (cpu == null)
             return false;
 
-        var obj = Dual.Common.Core.FS.ObjectHolder.Deserialize(serializedObject);
-        // todo: implement
-        //cpu.SetTag(fqdn, obj);
-        return true;
+        ErrorMessage errMsg = cpu.UpdateTagWeb(tagWeb);
+        await hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
+        return errMsg.IsNullOrEmpty();
+    }
+    /// <summary>
+    /// "api/model/tag/{fqdn}/{tagKind}" : 지정된 HMI 태그 정보 update
+    /// </summary>
+    [HttpPost("tag/{fqdn}/{tagKind}")]
+    public async Task<bool> SetHmiTag(string fqdn, int tagKind, [FromBody] string serializedObject)
+    {
+        var cpu = _model?.Cpu;
+        if (cpu == null)
+            return false;
+
+        // serializedObject : e.g "{\"RawValue\":false,\"Type\":1}"
+        var objHolder = Dual.Common.Core.FS.ObjectHolder.Deserialize(serializedObject);
+        var tagWeb = new TagWeb(fqdn, objHolder.RawValue, tagKind);
+        ErrorMessage errMsg = cpu.UpdateTagWeb(tagWeb);
+        await hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
+
+        return errMsg.IsNullOrEmpty();
     }
 }
 

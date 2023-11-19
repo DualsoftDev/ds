@@ -1,17 +1,13 @@
 using Engine.Core;
 using Engine.Info;
 using Engine.Runtime;
-
 using IO.Core;
 
-using System.ComponentModel;
 
 namespace DsWebApp.Server.Common
 {
-    public class ServerGlobal : INotifyPropertyChanged
+    public class ServerGlobal
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public ServerSettings ServerSettings { get; set; }
 
         /// <summary>
@@ -36,9 +32,11 @@ namespace DsWebApp.Server.Common
             try
             {
                 RuntimeModel = ReloadRuntimeModel();
-                //if (serverSettings.AutoStartOnSystemPowerUp)
-                //    Task.Factory.StartNew(() => RuntimeModel?.Cpu.Run());
-                RuntimeModel?.Cpu.RunInBackground();
+                if (serverSettings.AutoStartOnSystemPowerUp)
+                {
+                    // Task.Factory.StartNew(() => RuntimeModel?.Cpu.Run());
+                    RuntimeModel?.Cpu.RunInBackground();
+                }
             }
             catch (Exception ex)
             {

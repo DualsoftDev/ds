@@ -2,39 +2,43 @@
 
 @using Dual.Web.Blazor.ServerSide
 @using IO.Core
-
+@implements IAsyncDisposable
 
 <h3>PageTestIo</h3>
 
 @code {
-    HubConnection hubConnection;
-    CompositeDisposable disposables = new CompositeDisposable();
+    HubConnection _hubConnection;
+    CompositeDisposable _disposables = new CompositeDisposable();
 
     protected override async Task OnInitializedAsync()
     {
         /* Firefox browser 의 경우, hubConnection 을 통한 정보 얻기 실패함.
          * Firefox can’t establish a connection to the server at wss://localhost:44397/BlazorSurveys.Server/. aspnetcore-browser-refresh.js:234:24
          * MOZILLA_PKIX_ERROR_SELF_SIGNED_CERT : browser 의 security tab
-         */
-        hubConnection = await HubExtension.StartHubAsync(NavigationManager.ToAbsoluteUri("/hub/io"));
+        */
+        _hubConnection = await HubExtension.StartHubAsync(NavigationManager.ToAbsoluteUri("/hub/io"));
         StateHasChanged();
         IDisposable subscription =
-            hubConnection.On<SimpleNumericIOChangeInfo>(K.S2CNNIOChanged, (changeInfo) =>
+            _hubConnection.On<SimpleNumericIOChangeInfo>(SK.S2CNNIOChanged, (changeInfo) =>
             {
                 var numItems = changeInfo.Offsets.Length;
                 JsDual.Debug($"IoMemoryChanged: {changeInfo.MemoryName}, ContentBitLength={changeInfo.ContentBitLength}, Num changed items: {numItems}");
                 StateHasChanged();
             });
-        disposables.Add(subscription);
+        _disposables.Add(subscription);
 
         subscription =
-            hubConnection.On<SimpleSingleStringChangeInfo>(K.S2CNSIOChanged, (changeInfo) =>
+            _hubConnection.On<SimpleSingleStringChangeInfo>(SK.S2CNSIOChanged, (changeInfo) =>
             {
-                JsDual.Debug($"{K.S2CNSIOChanged}: {changeInfo.Tag} = {changeInfo.Value}");
+                JsDual.Debug($"{SK.S2CNSIOChanged}: {changeInfo.Tag} = {changeInfo.Value}");
                 StateHasChanged();
             });
-        disposables.Add(subscription);
+        _disposables.Add(subscription);
 
     }
-
+    public async ValueTask DisposeAsync()
+    {
+        await _hubConnection.StopAsync();
+        _disposables.Dispose();
+    }
 }

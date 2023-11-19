@@ -15,7 +15,6 @@ open System.Reactive.Subjects
 [<AutoOpen>]
 module RunTime =
 
-
     type DsCPU(css:CommentedStatement seq, systems:DsSystem seq, cpuMode:RuntimePackage) =
         let statements = css |> Seq.map(fun f -> f.Statement)
         let mapRungs = getRungMap(statements)
@@ -105,7 +104,8 @@ module RunTime =
             scanOnce()
 
         // todo: 함수 작성.  실패시 실패 이유 반환, 성공시 null 문자열 반환
-        member x.UpdateTagWeb(tagWeb:TagWeb): ErrorMessage =
+        //member x.UpdateTagWeb(tagWeb:TagWeb): ErrorMessage =  //ErrorMessage 찾을수 없음
+        member x.UpdateTagWeb(tagWeb:TagWeb): string =
             logDebug "Server Updating TagWeb"
             tagWebChangedSubject.OnNext(tagWeb)
             null

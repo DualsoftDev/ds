@@ -11,7 +11,7 @@ open System.Collections.Generic
 open Engine.Core
 
 [<AutoOpen>]
-module ImportCheck =
+module ImportDocCheck =
 
     let GetDemoModel (sysName: string) =
         let sys = DsSystem(sysName)

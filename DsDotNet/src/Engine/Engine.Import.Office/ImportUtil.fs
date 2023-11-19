@@ -89,7 +89,7 @@ module ImportU =
             parents: Dictionary<pptNode, seq<pptNode>>,
             dicSeg: Dictionary<string, Vertex>
         ) =
-        ImportCheck.SameParent(parents, edge)
+        ImportDocCheck.SameParent(parents, edge)
 
         let newParents =
             parents

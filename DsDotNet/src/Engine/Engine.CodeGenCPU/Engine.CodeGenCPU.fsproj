@@ -36,6 +36,7 @@
         <Compile Include="12.System.fs" />
         <Compile Include="13.Extension.fs" />
         <Compile Include="14.FlowMonitor.fs" />
+        <Compile Include="ConvertErrorCheck.fs" />
         <Compile Include="ConvertCPU.fs" />
         <Compile Include="Loader.fs" />
         <Compile Include="EntryPoint.fs" />

@@ -67,7 +67,20 @@ module Util =
         | "R" -> BtnType.DuReadyBTN
         | "H" -> BtnType.DuHomeBTN
         | "C" -> BtnType.DuClearBTN
-        | _ -> failwith $"{key} is Error Type"
+        | _ -> if key = ""
+                then failwith $"버튼은 [타입]이름 형식으로 작성해야 합니다.\nEx)[S]stopStation1"
+                else failwith $"{key}은 버튼 타입이 아님니다. 가능타입 리스트
+                        \n[A]AutoBTN
+                        \n[M]ManualBTN
+                        \n[D]DriveBTN
+                        \n[S]StopBTN
+                        \n[E]EmergencyBTN
+                        \n[T]TestBTN
+                        \n[R]ReadyBTN
+                        \n[H]HomeBTN
+                        \n[C]ClearBTN"
+        
+                
 
     let getLampType (key: string) =
         match key.Trim().ToUpper() with
@@ -79,7 +92,17 @@ module Util =
         | "T" -> LampType.DuTestDriveLamp
         | "R" -> LampType.DuReadyLamp
         | "I" -> LampType.DuIdleLamp
-        | _ -> failwith $"{key} is Error Type"
+        | _ -> if key = ""
+                then failwith $"램프는 '[타입]이름' 형식으로 작성해야 합니다.\nEx)[S]stopStation1~3"
+                else failwith $"{key}은 램프 타입이 아님니다. 가능타입 리스트
+                        \n[A]AutoLamp
+                        \n[M]ManualLamp
+                        \n[D]DriveLamp
+                        \n[S]StopLamp
+                        \n[E]EmergencyLamp
+                        \n[T]TestDriveLamp
+                        \n[R]ReadyLamp
+                        \n[I]IdleLamp"
 
     let getConditionType (key: string) =
         match key.Trim().ToUpper() with

@@ -113,47 +113,25 @@ module ConvertCPU =
         [
             yield! s.T1_DelayCall()
         ]
-
-
-    let checkNullAddressErr(sys:DsSystem) = 
-        let nullTagJobs = sys.Jobs
-                             .Where(fun j-> j.DeviceDefs.Where(fun f-> 
-                                            f.InTag.IsNull() && f.ApiItem.RXs.any()
-                                            ||f.OutTag.IsNull() && f.ApiItem.TXs.any()
-                                            ).any())
-                      
-        if nullTagJobs.any()
-        then 
-            let errJobs = StringExt.JoinWith(nullTagJobs.Select(fun j -> j.Name), "\n")
-            failwithlogf $"Device 주소가 없습니다. \n{errJobs}"
-    
-
-        let nullBtns = sys.Buttons.Where(fun b-> b.InTag.IsNull() ||b.OutTag.IsNull())
-        if nullBtns.any()
-        then 
-            let errBtns = StringExt.JoinWith(nullBtns.Select(fun j -> j.Name), "\n")
-            failwithlogf $"버튼 주소가 없습니다. \n{errBtns}"
-                                      
-        let nullLamps = sys.Lamps.Where(fun b-> b.OutTag.IsNull())
-        if nullLamps.any()
-        then 
-            let errLamps= StringExt.JoinWith(nullLamps.Select(fun j -> j.Name), "\n")
-            failwithlogf $"램프 주소가 없습니다. \n{errLamps}"
-             
+     
     let setSimulationAddress(sys:DsSystem) = 
-        sys.Jobs
-           .ForEach(fun j-> j.DeviceDefs
-                             .ForEach(fun f-> 
-                                if f.InTag.IsNull() && f.ApiItem.RXs.any()then f.InAddress <- "SIMTAG"
-                                if f.OutTag.IsNull() && f.ApiItem.TXs.any()then f.OutAddress <- "SIMTAG"
-                            ))
+        sys.Jobs.ForEach(fun j->
+            j.DeviceDefs.ForEach(fun d-> 
+                        if d.InAddress.IsNullOrEmpty() then  d.InAddress <- TextEmpty
+                        if d.OutAddress.IsNullOrEmpty() then d.OutAddress <- TextEmpty)
+            )
+        sys.Lamps.ForEach(fun l -> 
+                        if l.OutAddress.IsNullOrEmpty() then  l.OutAddress <- TextEmpty)
+        sys.Buttons.ForEach(fun b->                                         
+                         if b.InAddress.IsNullOrEmpty() then   b.InAddress <- TextEmpty
+                         if b.OutAddress.IsNullOrEmpty() then  b.OutAddress <-TextEmpty
+                        )
 
     let convertSystem(sys:DsSystem, isActive:bool) =
         RuntimeDS.System <- sys
-          //시뮬레이션 주소 자동할당
-        if RuntimeDS.Package.IsPackageSIM()
-        then setSimulationAddress(sys)
 
+        //시뮬레이션 주소 자동할당
+        //if RuntimeDS.Package.IsPackageSIM()  then setSimulationAddress(sys)
         //DsSystem 물리 IO 생성
         sys.GenerationIO()
 

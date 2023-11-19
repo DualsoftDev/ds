@@ -8,6 +8,8 @@ open System.Runtime.CompilerServices
 [<AutoOpen>]
 module DsText =
     let [<Literal>] TextLibrary = "DS_Library"
+    let [<Literal>] TextSkip  = "-"  //주소 스킵
+    let [<Literal>] TextEmpty = "_"  //
     //edge
     let [<Literal>] TextStartEdge         = ">"
     let [<Literal>] TextStartPush         = ">>"
@@ -21,6 +23,7 @@ module DsText =
     let [<Literal>] TextResetEdgeRev      = "<|"
     let [<Literal>] TextResetPushRev      = "<||"
     let [<Literal>] TextStartResetRev     = "<="
+
 
     /// 사용자 모델링한 edge type (단 reverse 는 반대로 뒤집어서)
     type ModelingEdgeType =

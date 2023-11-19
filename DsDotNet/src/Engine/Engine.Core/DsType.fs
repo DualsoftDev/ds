@@ -13,17 +13,21 @@ module DsType =
         | Finish
         | Homing
 
-    /// Represents different button types
     type BtnType =
-        | DuAutoBTN      // Automatic Select button
-        | DuManualBTN    // Manual Select button
-        | DuDriveBTN     // Drive Push button
-        | DuTestBTN      // Test Drive Start Push button
-        | DuStopBTN      // Stop Push button
-        | DuEmergencyBTN // Emergency Push button
-        | DuClearBTN     // Clear Push button
-        | DuHomeBTN      // Home (Original position) Push button
-        | DuReadyBTN     // Drive Ready Push button
+    | DuAutoBTN | DuManualBTN | DuDriveBTN | DuTestBTN | DuStopBTN
+    | DuEmergencyBTN | DuClearBTN | DuHomeBTN | DuReadyBTN
+        override x.ToString() =
+            match x with
+            | DuAutoBTN      -> "Auto"
+            | DuManualBTN    -> "Manual"
+            | DuDriveBTN     -> "Drive"
+            | DuTestBTN      -> "Test"
+            | DuStopBTN      -> "Stop"
+            | DuEmergencyBTN -> "Emergency"
+            | DuClearBTN     -> "Clear"
+            | DuHomeBTN      -> "Home"
+            | DuReadyBTN     -> "Ready"
+
 
     /// Represents different lamp types
     type LampType =

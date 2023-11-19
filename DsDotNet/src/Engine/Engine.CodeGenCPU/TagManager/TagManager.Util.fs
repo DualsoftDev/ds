@@ -77,14 +77,14 @@ module TagManagerUtil =
 
     let createBridgeTag(stg:Storages, name, address:string, inOut:ActionTag, sys, task:IQualifiedNamed option): ITag option=
 
-        if address = "-" || address = "" 
+        if address = TextSkip || address = "" 
         then None
         else
             let name =
                 match inOut with
-                | ActionTag.ActionIn    -> $"{name}_I"
-                | ActionTag.ActionOut   -> $"{name}_O"
-                | ActionTag.ActionMemory   -> failwithlog "error: Memory not supported "
+                | ActionTag.ActionIn     -> $"{name}_I"
+                | ActionTag.ActionOut    -> $"{name}_O"
+                | ActionTag.ActionMemory -> failwithlog "error: Memory not supported "
                 | _ -> failwithlog "error: ActionTag create "
 
             let plcName = getPlcTagAbleName name stg

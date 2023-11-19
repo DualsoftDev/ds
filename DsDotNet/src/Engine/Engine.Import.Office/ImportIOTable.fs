@@ -20,64 +20,13 @@ module ImportIOTable =
         | Job = 5
         | Func = 6
 
-  
-
-
-    let mutable inCnt = -1;
-    let mutable outCnt = 63;
-    let mutable memCnt = -1;
-    
-    let autoFillAddress(bInput:bool) =
-        if bInput
-        then 
-            inCnt<-inCnt+1
-            if RuntimeDS.Package.IsPackagePC() 
-            then    ($"I{inCnt/16}.{inCnt%16}") 
-            else    ($"%%IX0.{inCnt/64}.{inCnt%64}") //일단 LS 규격으로
-
-        else 
-            outCnt<-outCnt+1
-            if RuntimeDS.Package.IsPackagePC() 
-            then    ($"O{outCnt/16}.{outCnt%16}") 
-            else    ($"%%QX0.{outCnt/64}.{outCnt%64}") //일단 LS 규격으로
-
-    let errCheckTRX(trxCnt:int, name:string, addr:string)  =
-        if   trxCnt=0  && addr <>"-"  then failwithf $"{name} 인터페이스 대상이 없으면 대쉬('-') 기입필요." //0 이면 명시적으로 '-' 표기
-        elif trxCnt<>0 && addr = "-"  then failwithf $"{name} 인터페이스 대상이 있으면 대쉬('-') 대신 실주소 기입필요."
-       
-
-    let errCheckNRetenAddress(trxCnt:int, addr:string, name,  bInput) =
-            let addrNew = 
-                if trxCnt=0 && addr.IsNullOrEmpty() 
-                then "-" //"처음 자동할당은 인터페이스 대상이 없으면 대쉬('-') 자동 기입" 
-                else addr  
-            errCheckTRX  (trxCnt, name , addrNew)
-            let address  = 
-                if addrNew.IsNullOrEmpty()  && addrNew <> "-"
-                then autoFillAddress bInput 
-                else addrNew
-            address.ToUpper()
-
-
-    let getValidBtnAddress(btn:ButtonDef, bInput) =  
-        if bInput
-        then errCheckNRetenAddress (1, btn.InAddress, btn.Name, true)
-        else errCheckNRetenAddress (1, btn.OutAddress, btn.Name, false)
-    let getValidDevAddress(apiItem:ApiItem, name:string,  addr:string, bInput:bool) =  
-        if bInput
-        then errCheckNRetenAddress (apiItem.RXs.Count, addr, name, true)
-        else errCheckNRetenAddress (apiItem.TXs.Count, addr, name, false)
-
-    let getValidLampAddress(lamp:LampDef) =   errCheckNRetenAddress (1, lamp.OutAddress, lamp.Name, false)
-    let getValidCondiAddress(cond:ConditionDef) =  errCheckNRetenAddress (1, cond.InAddress, cond.Name, true)
-
     let ApplyIO (sys: DsSystem, dts: (int * Data.DataTable) seq) =
 
         try
             let functionUpdate (name, funcText, funcs: HashSet<Func>, tableIO: Data.DataTable, isJob: bool, page) =
                 funcs.Clear()
 
-                if not <| ((trimSpace funcText) = "" || funcText = "-" || funcText = "↑") then
+                if not <| ((trimSpace funcText) = "" || funcText = TextSkip || funcText = "↑") then
                     getFunctions (funcText)
                     |> Seq.iter (fun (name, parms) ->
                         if (not <| isJob) && name <> "n" then
@@ -91,19 +40,14 @@ module ImportIOTable =
                 |> Seq.map (fun j -> j.ApiName, j)
                 |> dict
 
-            let autoFillAddress (address:string)  =
-                let addr = 
-                        if address.Trim() = "" || address.Trim() = "-" then
-                            ""
-                        else
-                            match RuntimeDS.Target with
-                            | XGI -> if not <| address.StartsWith("%") then "%" + address else address
-                            | _ -> address
-                addr
+            let changeValidAddress (address:string)  =
+                let address = address.Trim() 
+                let address = if address = TextSkip then TextEmpty else address
+                match RuntimeDS.Target with
+                | XGI -> if not <| address.StartsWith("%") then "%" + address else address
+                | _ -> address
 
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
-               
-
                 let devName = $"{row.[(int) IOColumn.Name]}"
 
                 if not <| dicJob.ContainsKey(devName) then
@@ -113,11 +57,11 @@ module ImportIOTable =
                 let inAdd =    $"{row.[(int) IOColumn.Input]}".Trim()
                 let outAdd =   $"{row.[(int) IOColumn.Output]}".Trim()
 
-                errCheckTRX(dev.ApiItem.RXs.Count, devName, inAdd)
-                errCheckTRX(dev.ApiItem.TXs.Count, devName, outAdd)
+                //errCheckAddress(dev.ApiItem.RXs.Count=0, devName, inAdd)
+                //errCheckAddress(dev.ApiItem.TXs.Count=0, devName, outAdd)
 
-                dev.InAddress <- autoFillAddress inAdd
-                dev.OutAddress <- autoFillAddress outAdd
+                dev.InAddress <- changeValidAddress inAdd
+                dev.OutAddress <- changeValidAddress outAdd
 
                 let jobName = $"{row.[(int) IOColumn.Job]}"
                 let func = $"{row.[(int) IOColumn.Func]}"
@@ -136,27 +80,36 @@ module ImportIOTable =
             let updateVar (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let name = $"{row.[(int) IOColumn.Name]}"
                 let dataType = $"{row.[(int) IOColumn.DataType]}" |> textToDataType
-                let variableData = VariableData(name, dataType, "-")
+                let variableData = VariableData(name, dataType, TextEmpty)
                 sys.Variables.Add(variableData)
 
             let updateBtn (row: Data.DataRow, btntype: BtnType, tableIO: Data.DataTable, page) =
-                let name = $"{row.[(int) IOColumn.Name]}"
-                let input = $"{row.[(int) IOColumn.Input]}" |> autoFillAddress
-                let output = $"{row.[(int) IOColumn.Output]}" |> autoFillAddress
-                let func = $"{row.[(int) IOColumn.Func]}"
-
-                let btns = sys.SystemButtons.Where(fun w -> w.ButtonType = btntype)
-
-                match btns.TryFind(fun f -> f.Name = name) with
+                let btnName = $"{row.[(int) IOColumn.Name]}"
+                match sys.SystemButtons.Where(fun w -> w.ButtonType = btntype).TryFind(fun f -> f.Name = btnName) with
                 | Some btn ->
-                    btn.InAddress <- input
-                    btn.OutAddress <- output
-                    functionUpdate (btn.Name, func, btn.Funcs, tableIO, false, page)
-                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{name}", page, 0u)
+                    btn.InAddress  <- getValidBtnAddress (btn,$"{row.[(int) IOColumn.Input]}" , true)
+                    btn.OutAddress <- getValidBtnAddress (btn,$"{row.[(int) IOColumn.Output]}" ,  false)
+                    functionUpdate (btn.Name, $"{row.[(int) IOColumn.Func]}", btn.Funcs, tableIO, false, page)
+                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{btnName}", page, 0u)
+
+                
+                //let name = $"{row.[(int) IOColumn.Name]}"
+                //let input = $"{row.[(int) IOColumn.Input]}"   |> changeValidAddress
+                //let output = $"{row.[(int) IOColumn.Output]}" |> changeValidAddress
+                //let func = $"{row.[(int) IOColumn.Func]}"
+
+                //let btns = sys.SystemButtons.Where(fun w -> w.ButtonType = btntype)
+                 
+                //match btns.TryFind(fun f -> f.Name = name) with
+                //| Some btn ->
+                //    btn.InAddress <- input
+                //    btn.OutAddress <- output
+                //    functionUpdate (btn.Name, func, btn.Funcs, tableIO, false, page)
+                //| None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{name}", page, 0u)
 
             let updateLamp (row: Data.DataRow, lampType: LampType, tableIO: Data.DataTable, page) =
                 let name = $"{row.[(int) IOColumn.Name]}"
-                let output = $"{row.[(int) IOColumn.Output]}" |> autoFillAddress
+                let output = $"{row.[(int) IOColumn.Output]}" |> changeValidAddress
                 let func = $"{row.[(int) IOColumn.Func]}"
 
                 let lamps = sys.SystemLamps.Where(fun w -> w.LampType = lampType)
@@ -169,7 +122,7 @@ module ImportIOTable =
 
             let updateCondition (row: Data.DataRow, cType: ConditionType, tableIO: Data.DataTable, page) =
                 let name = $"{row.[(int) IOColumn.Name]}"
-                let output = $"{row.[(int) IOColumn.Input]}" |> autoFillAddress
+                let output = $"{row.[(int) IOColumn.Input]}" |> changeValidAddress
                 let func = $"{row.[(int) IOColumn.Func]}"
 
                 let conds = sys.SystemConditions.Where(fun w -> w.ConditionType = cType)

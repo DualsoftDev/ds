@@ -40,8 +40,8 @@ module ExportIOTable =
             [ TextXlsAddress
               dev.ApiName
               "bool"
-              getValidDevAddress (dev.ApiItem, dev.ApiName, dev.InAddress , true)
-              getValidDevAddress (dev.ApiItem, dev.ApiName, dev.OutAddress , false)
+              getValidDevAddress (dev, true)
+              getValidDevAddress (dev,  false)
               jobName
               funcs ]
 
@@ -72,7 +72,7 @@ module ExportIOTable =
             for btn in btns do
                 let func = btn.Funcs |> funcToText
 
-                dt.Rows.Add(xlsCase.ToText(), btn.Name, "bool", getValidBtnAddress(btn, true), getValidBtnAddress(btn, false), "", func)
+                dt.Rows.Add(xlsCase.ToText(), btn.Name, "bool", getValidBtnAddress(btn, btn.InAddress, true), getValidBtnAddress(btn, btn.OutAddress, false), "", func)
                 |> ignore
 
         let toLampText (lamps: LampDef seq, xlsCase: ExcelCase) =

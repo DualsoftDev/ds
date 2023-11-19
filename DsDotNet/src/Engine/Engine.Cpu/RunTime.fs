@@ -104,8 +104,7 @@ module RunTime =
             scanOnce()
 
         // todo: 함수 작성.  실패시 실패 이유 반환, 성공시 null 문자열 반환
-        //member x.UpdateTagWeb(tagWeb:TagWeb): ErrorMessage =  //ErrorMessage 찾을수 없음
-        member x.UpdateTagWeb(tagWeb:TagWeb): string =
+        member x.UpdateTagWeb(tagWeb:TagWeb): ErrorMessage =
             logDebug "Server Updating TagWeb"
             tagWebChangedSubject.OnNext(tagWeb)
             null

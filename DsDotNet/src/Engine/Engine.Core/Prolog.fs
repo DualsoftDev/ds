@@ -17,14 +17,16 @@ module PrologModule =
 
 [<AllowNullLiteral>]
 type Xywh(x: int, y: int, w: Nullable<int>, h: Nullable<int>) =
-    /// X coordinate
-    member z.X = x
-    /// Y coordinate
-    member z.Y = y
-    /// Width
-    member z.W = w
-    /// Height
-    member z.H = h
+    do 
+        if x < 0 || y < 0 then failwithf $"Xywh position x, y can't have negative values [x:{x}, y:{y}]"
+        if w.HasValue && w.Value <= 0 then failwithf $"Xywh Width w must be a positive value [Width:{w}]"
+        if h.HasValue && h.Value <= 0 then failwithf $"Xywh Height h must be a positive value [Height:{h}]"
+
+    member z.X = x 
+    member z.Y = y 
+    member z.W = w 
+    member z.H = h 
+
 
 [<AllowNullLiteral>]
 type Addresses(inAddress: string, outAddress: string) =

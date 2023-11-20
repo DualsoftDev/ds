@@ -95,7 +95,7 @@ module PPTDocModule =
 
             subG.Descendants<Presentation.GroupShape>()
             |> Seq.iter (fun childGroup -> getGroupMembers (childGroup, shapeIds) |> ignore)
-
+        
         let shapeIds = HashSet<uint32>()
         getGroupMembers (subG, shapeIds)
         let groupNodes = shapeIds |> Seq.map (fun id -> nodes.[Objkey(page, id)])

@@ -147,15 +147,14 @@ module internal ToDsTextModule =
             if system.Jobs.Any() then
                 let addressPrint (addr:string) = if isNullOrEmpty addr || addr = "　" then "_" else addr
                 let printDev (ai:TaskDev) = $"{ai.ApiName}({addressPrint ai.InAddress}, {addressPrint ai.OutAddress})"
-                let printLink (ai:TaskSys) = $"{ai.ApiName}"
                 yield $"{tab}[jobs] = {lb}"
                 for c in system.Jobs do
                     if c.DeviceDefs.any() then
                         let ais = c.DeviceDefs.Select(printDev).JoinWith("; ") + ";"
                         yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {ais} {rb}"
-                    if c.LinkDefs.any() then
-                        let ais = c.LinkDefs.Select(printLink).JoinWith("; ") + ";"
-                        yield $"{tab2}{c.Name.QuoteOnDemand()} = {ais}"
+                    //if c.LinkDefs.any() then
+                    //    let ais = c.LinkDefs.Select(printLink).JoinWith("; ") + ";"
+                    //    yield $"{tab2}{c.Name.QuoteOnDemand()} = {ais}"
                     if c.Funcs.any() then
                         for funcString in printFuncions (c.Name.QuoteOnDemand()) c.Funcs do
                             yield funcString
@@ -339,8 +338,6 @@ module internal ToDsTextModule =
                 system.Devices |> getFiltered (fun device -> device.Xywh <> null)
             let deviceApisWithLayouts = 
                 system.Jobs |> getSelectedAndFiltered(fun job -> job.DeviceDefs) (fun dev -> dev.ApiItem.Xywh <> null)
-            let exSystemApisWithLayouts = 
-                system.Jobs |> getSelectedAndFiltered(fun job -> job.LinkDefs) (fun dev -> dev.ApiItem.Xywh <> null)
             let layouts =
                 let makeList (name:string) (xywh:Xywh) =
                     let posi =
@@ -350,14 +347,12 @@ module internal ToDsTextModule =
                             $"({xywh.X}, {xywh.Y});"
                     $"{tab3}{name} = {posi}"
                 [
-                    if devicesWithLayouts.Any() || deviceApisWithLayouts.Any() || exSystemApisWithLayouts.Any() then
+                    if devicesWithLayouts.Any() || deviceApisWithLayouts.Any() then
                         yield $"{tab2}[layouts] = {lb}"
                         for device in devicesWithLayouts do
                             yield makeList device.Name device.Xywh
                         for deviceApi in deviceApisWithLayouts do
                             yield makeList deviceApi.QualifiedName deviceApi.ApiItem.Xywh
-                        for exSystemApi in exSystemApisWithLayouts do
-                            yield makeList exSystemApi.QualifiedName exSystemApi.ApiItem.Xywh
                         yield $"{tab2}{rb}"
                 ] |> combineLines
             let finishedReals =

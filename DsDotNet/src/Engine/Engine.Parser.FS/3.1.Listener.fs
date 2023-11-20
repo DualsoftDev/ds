@@ -477,30 +477,6 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 job.SetFuncs(funcSet)
                 job |> system.Jobs.Add
 
-        let createTaskLink (system: DsSystem) (ctx: JobBlockContext) =
-            let linkListings = ctx.Descendants<LinkListingContext>().ToArray()
-
-            for linkDef in linkListings do
-                let getRawLinkName = linkDef.TryFindFirstChild<EtcName1Context>().Value
-                let linkName = getRawLinkName.GetText().DeQuoteOnDemand()
-
-                let apiLinkPath =
-                    linkDef.TryFindFirstChild<Identifier12Context>().Value.CollectNameComponents()
-                    |> List.ofSeq
-
-                let linkInfo =
-                    match apiLinkPath with
-                    | exSys :: [ api ] ->
-                        let apiItem = tryFindCallingApiItem system exSys api
-
-                        match apiItem with
-                        | Some apiItem -> apiItem, exSys
-                        | _ -> failwithlog "ERROR"
-                    | _ -> failwithlog "ERROR"
-
-                let linkDef = TaskSys linkInfo
-                let job = Job(linkName, [ linkDef ])
-                job |> system.Jobs.Add
 
         let fillTargetOfAliasDef (x: DsParserListener) (ctx: AliasListingContext) =
             let system = x.TheSystem
@@ -601,8 +577,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     | 2 ->
                         system.Jobs
                         |> iter (fun job ->
-                            job.DeviceDefs.ToList() |> iterTasks nameCompo xywh
-                            job.LinkDefs.ToList() |> iterTasks nameCompo xywh)
+                            job.DeviceDefs.ToList() |> iterTasks nameCompo xywh)
                     | _ -> failwithlog "invalid name component"
 
         let fillFinished (system: DsSystem) (listFinishedCtx: List<dsParser.FinishBlockContext>) =
@@ -642,7 +617,6 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
         for ctx in sysctx.Descendants<JobBlockContext>() do
             createTaskDevice x.TheSystem ctx
-            createTaskLink x.TheSystem ctx
 
         for ctx in sysctx.Descendants<AliasListingContext>() do
             createAliasDef x ctx |> ignore

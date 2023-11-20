@@ -234,7 +234,7 @@ module CoreModule =
         inherit Named(name)
         let mutable funcs = HashSet<Func>()
         member x.DeviceDefs = tasks.OfType<TaskDev>()
-        member x.LinkDefs   = tasks.OfType<TaskSys>()
+        //member x.LinkDefs   = tasks.OfType<TaskSys>()
         member x.SetFuncs(func) = 
                     tasks.Iter(fun t->t.Funcs <- func) 
                     funcs <- func
@@ -250,9 +250,9 @@ module CoreModule =
         member val ApiName = this.QualifiedName
         member val Funcs  = HashSet<Func>() with get, set
 
-    /// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { FWD = Mt.fwd; }
-    type TaskSys (api:ApiItem, systemName:string) =
-        inherit DsTask(api, systemName)
+    ///// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { FWD = Mt.fwd; }
+    //type TaskSys (api:ApiItem, systemName:string) =
+    //    inherit DsTask(api, systemName)
 
     /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
     ///

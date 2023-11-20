@@ -15,6 +15,7 @@ open System.Data
 [<AutoOpen>]
 module ExportIOTable =
 
+    let applyIfBtnLampSkip addr:string  = if addr = TextEmpty then TextSkip else addr
 
     let ToTable (sys: DsSystem) =
 
@@ -71,22 +72,23 @@ module ExportIOTable =
         let toBtnText (btns: ButtonDef seq, xlsCase: ExcelCase) =
             for btn in btns do
                 let func = btn.Funcs |> funcToText
-
-                dt.Rows.Add(xlsCase.ToText(), btn.Name, "bool", getValidBtnAddress(btn, btn.InAddress, true), getValidBtnAddress(btn, btn.OutAddress, false), "", func)
+                let inAddr = getValidBtnAddress(btn, btn.InAddress, true) |> applyIfBtnLampSkip
+                let outAddr = getValidBtnAddress(btn, btn.OutAddress, false)|> applyIfBtnLampSkip
+                dt.Rows.Add(xlsCase.ToText(), btn.Name, "bool", inAddr, outAddr, "", func)
                 |> ignore
 
         let toLampText (lamps: LampDef seq, xlsCase: ExcelCase) =
             for lamp in lamps do
                 let func = lamp.Funcs |> funcToText
 
-                dt.Rows.Add(xlsCase.ToText(), lamp.Name, "bool", "", getValidLampAddress(lamp), "", func)
+                dt.Rows.Add(xlsCase.ToText(), lamp.Name, "bool", "", getValidLampAddress(lamp)|> applyIfBtnLampSkip, "", func)
                 |> ignore
 
         let toCondiText (conds: ConditionDef seq, xlsCase: ExcelCase) =
             for cond in conds do
                 let func = cond.Funcs |> funcToText
 
-                dt.Rows.Add(xlsCase.ToText(), cond.Name, "bool", getValidCondiAddress(cond), "", "", func)
+                dt.Rows.Add(xlsCase.ToText(), cond.Name, "bool", getValidCondiAddress(cond)|> applyIfBtnLampSkip, "", "", func)
                 |> ignore
 
         emptyLine ()

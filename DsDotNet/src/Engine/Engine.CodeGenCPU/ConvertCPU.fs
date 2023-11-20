@@ -131,7 +131,7 @@ module ConvertCPU =
         RuntimeDS.System <- sys
 
         //시뮬레이션 주소 자동할당
-        //if RuntimeDS.Package.IsPackageSIM()  then setSimulationAddress(sys)
+        if RuntimeDS.Package.IsPackageSIM()  then setSimulationAddress(sys)
         //DsSystem 물리 IO 생성
         sys.GenerationIO()
 

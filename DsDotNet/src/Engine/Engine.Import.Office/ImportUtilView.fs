@@ -171,10 +171,10 @@ module ImportViewModule =
     let UpdateConditionNodes (system: DsSystem, flow: Flow, node: ViewNode) =
         let newNode = ViewNode("Condition", VCONDITION)
 
-        system.AutoButtons.Where(fun w -> w.SettingFlows.Contains(flow))
+        system.ReadyConditions.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuReadyState)) |> ignore)
 
-        system.ManualButtons.Where(fun w -> w.SettingFlows.Contains(flow))
+        system.DriveConditions.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuDriveState)) |> ignore)
 
         if newNode.GetSingles().Count() > 0 then
@@ -233,24 +233,6 @@ module ImportViewModule =
         if newNode.GetSingles().Count() > 0 then
             node.AddSingles(newNode) |> ignore
 
-    //let rec ConvertRuntimeEdge(graph:Graph<Vertex, Edge>)  =
-    //    let newNode = ViewNode()
-    //    let dicV = graph.Vertices.Select(fun v-> v, ViewNode(v)) |> dict
-    //    let convertReal(vertex:Vertex) =
-    //        match vertex  with
-    //            | :? Real as r ->  newNode.Singles.Add(ConvertRuntimeEdge(r.Graph)) |>ignore
-    //            | :? Call | :? Alias-> newNode.Singles.Add(dicV.[vertex]) |>ignore
-    //            | _ -> failwithf "vertex type ERROR"
-
-    //    graph.Islands |>Seq.iter(fun vertex -> convertReal(vertex))
-    //    graph.Edges
-    //    |>Seq.iter(fun edge ->
-    //        convertReal(edge.Source)
-    //        convertReal(edge.Target)
-    //        let viewEdge = ModelingEdgeInfo(dicV.[edge.Source], edge.EdgeType.ToText(), dicV.[edge.Target])
-    //        newNode.Edges.Add(viewEdge) |>ignore)
-
-    //    newNode
 
     [<Extension>]
     type ImportViewUtil =

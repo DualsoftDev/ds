@@ -237,7 +237,7 @@ public partial class UcView : UserControl
                 }
                 else
                 {
-                    nNode.Attr.Shape = Shape.Ellipse;
+                    nNode.Attr.Shape = Shape.Box;
                     if (viewNode.BtnType.Value == BtnType.DuAutoBTN)
                     {
                         nNode.Attr.FillColor = Color.DodgerBlue;

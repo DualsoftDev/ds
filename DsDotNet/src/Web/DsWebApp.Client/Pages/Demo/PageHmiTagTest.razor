@@ -23,6 +23,8 @@
 <h3>Hmi Tag Test</h3>
 
 @code {
+    HubConnectionManager _hubConnectionManager;
+
     // string _name;
     // int _kind;
     bool _flag;
@@ -39,35 +41,32 @@
         Console.WriteLine($"Submit result: {result}");
     }
 
-    HubConnection _hubConnection;
-    CompositeDisposable _disposables = new();
-
     protected override async Task OnInitializedAsync()
     {
-        _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/hmitag").StartHubAsync();
-        IDisposable subscription =
-            _hubConnection.On<TagWeb>(SK.S2CNTagWebChanged, (TagWeb change) =>
-            {
-                Console.WriteLine($"TagWeb change notification received with {change.Name}/{change.Kind}={change.Value}.");
-            });
-
-        _disposables.Add(subscription);
+        HubConnection hubConnection = await NavigationManager.ToAbsoluteUri("/hub/hmitag").StartHubAsync();
+        _hubConnectionManager = new HubConnectionManager(hubConnection, registerHubConnection);
 
         Console.WriteLine($"Hub initialized on PageHmiTagTest.razor");
         await base.OnInitializedAsync();
+
+        IDisposable registerHubConnection(HubConnection hubConnection)
+        {
+            return hubConnection.On<TagWeb>(SK.S2CNTagWebChanged, (TagWeb change) =>
+            {
+                Console.WriteLine($"TagWeb change notification received with {change.Name}/{change.Kind}={change.Value}.");
+            });
+        }
     }
+
     public async ValueTask DisposeAsync()
     {
+        await _hubConnectionManager.DisposeAsync();
         Console.WriteLine("PageHmiTagTest.razor disposed!");
-        await _hubConnection.StopAsync();
-        _disposables.Dispose();
     }
 
     async Task onTestSignalR()
     {
         var serializedObject = "{\"RawValue\":false,\"Type\":1}";
         var response = await Http.PostAsJsonAsync($"api/model/tag/Hello/9999", serializedObject);
-
     }
-
 }

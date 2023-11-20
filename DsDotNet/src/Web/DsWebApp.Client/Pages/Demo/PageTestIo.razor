@@ -7,38 +7,42 @@
 <h3>PageTestIo</h3>
 
 @code {
-    HubConnection _hubConnection;
-    CompositeDisposable _disposables = new CompositeDisposable();
-
+    HubConnectionManager _hubConnectionManager;
     protected override async Task OnInitializedAsync()
     {
-        /* Firefox browser 의 경우, hubConnection 을 통한 정보 얻기 실패함.
-         * Firefox can’t establish a connection to the server at wss://localhost:44397/BlazorSurveys.Server/. aspnetcore-browser-refresh.js:234:24
-         * MOZILLA_PKIX_ERROR_SELF_SIGNED_CERT : browser 의 security tab
-        */
-        _hubConnection = await HubExtension.StartHubAsync(NavigationManager.ToAbsoluteUri("/hub/io"));
-        StateHasChanged();
-        IDisposable subscription =
-            _hubConnection.On<SimpleNumericIOChangeInfo>(SK.S2CNNIOChanged, (changeInfo) =>
-            {
-                var numItems = changeInfo.Offsets.Length;
-                JsDual.Debug($"IoMemoryChanged: {changeInfo.MemoryName}, ContentBitLength={changeInfo.ContentBitLength}, Num changed items: {numItems}");
-                StateHasChanged();
-            });
-        _disposables.Add(subscription);
+        HubConnection hubConnection = await NavigationManager.ToAbsoluteUri("/hub/io").StartHubAsync();
+        _hubConnectionManager = new HubConnectionManager(hubConnection, registerHubConnection);
 
-        subscription =
-            _hubConnection.On<SimpleSingleStringChangeInfo>(SK.S2CNSIOChanged, (changeInfo) =>
-            {
-                JsDual.Debug($"{SK.S2CNSIOChanged}: {changeInfo.Tag} = {changeInfo.Value}");
-                StateHasChanged();
-            });
-        _disposables.Add(subscription);
+        Console.WriteLine($"Hub initialized on PageHmiTagTest.razor");
+        await base.OnInitializedAsync();
 
+        IDisposable registerHubConnection(HubConnection hubConnection)
+        {
+            CompositeDisposable disposables = new();
+            IDisposable subscription =
+                hubConnection.On<SimpleNumericIOChangeInfo>(SK.S2CNNIOChanged, (changeInfo) =>
+                {
+                    var numItems = changeInfo.Offsets.Length;
+                    JsDual.Debug($"IoMemoryChanged: {changeInfo.MemoryName}, ContentBitLength={changeInfo.ContentBitLength}, Num changed items: {numItems}");
+                    StateHasChanged();
+                });
+            disposables.Add(subscription);
+
+            subscription =
+                hubConnection.On<SimpleSingleStringChangeInfo>(SK.S2CNSIOChanged, (changeInfo) =>
+                {
+                    JsDual.Debug($"{SK.S2CNSIOChanged}: {changeInfo.Tag} = {changeInfo.Value}");
+                    StateHasChanged();
+                });
+            disposables.Add(subscription);
+
+            return disposables;
+        }
     }
+
     public async ValueTask DisposeAsync()
     {
-        await _hubConnection.StopAsync();
-        _disposables.Dispose();
+        await _hubConnectionManager.DisposeAsync();
+        Console.WriteLine("PageTestIo.razor disposed!");
     }
 }

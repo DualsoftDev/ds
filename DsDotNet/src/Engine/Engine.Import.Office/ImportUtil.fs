@@ -140,7 +140,6 @@ module ImportU =
                                 .Select(fun tgt -> getApiItems (mySys, tgt, api.Name), tgt)
                                 .Select(fun (api, tgt) ->
                                     match node.NodeType with
-                                    | OPEN_EXSYS_LINK -> TaskSys(api, tgt) :> DsTask
                                     | OPEN_EXSYS_CALL
                                     | COPY_DEV -> TaskDev(api, "", "", tgt) :> DsTask
                                     | _ -> failwithlog "Error MakeJobs")

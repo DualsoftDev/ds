@@ -76,7 +76,7 @@ else
     {
         _hmiTagPackage = ClientGlobal.HmiTagPackage;
         if (_hmiTagPackage == null)
-            ClientGlobal.HmiTagPackage = _hmiTagPackage = await Http.GetFromJsonAsync<HmiTagPackage>($"api/model/tag");
+            ClientGlobal.HmiTagPackage = _hmiTagPackage = await Http.GetFromJsonAsync<HmiTagPackage>($"api/hmitag");
 
         _loading = false;
         await base.OnInitializedAsync();

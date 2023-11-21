@@ -34,7 +34,7 @@
     {
         TagWeb tagWeb = new(_tagWeb.Name, _flag, _tagWeb.Kind);
         Console.WriteLine($"TagWeb: Name={tagWeb.Name}, Kind={tagWeb.Kind}");
-        var response = await Http.PostAsJsonAsync("api/model/tag", tagWeb);
+        var response = await Http.PostAsJsonAsync("api/hmitag", tagWeb);
         response.EnsureSuccessStatusCode();
         string responseBody = await response.Content.ReadAsStringAsync();
         bool result = Convert.ToBoolean(responseBody);
@@ -67,6 +67,6 @@
     async Task onTestSignalR()
     {
         var serializedObject = "{\"RawValue\":false,\"Type\":1}";
-        var response = await Http.PostAsJsonAsync($"api/model/tag/Hello/9999", serializedObject);
+        var response = await Http.PostAsJsonAsync($"api/hmitag/Hello/9999", serializedObject);
     }
 }

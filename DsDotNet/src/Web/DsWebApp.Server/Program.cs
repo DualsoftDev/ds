@@ -36,6 +36,9 @@ Log4NetWrapper.SetLogger(logger);
 services.AddSignalR();
 conf.AddEnvironmentVariables();
 
+var env = conf["ASPNETCORE_ENVIRONMENT"];
+logger.Info($"ASPNETCORE_ENVIRONMENT = {env}");
+
 var urls = conf["ASPNETCORE_URLS"];
 logger.Info($"ASPNETCORE_URLS = {urls}");
 

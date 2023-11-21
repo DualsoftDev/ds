@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net7.0;net7.0-windows</TargetFrameworks>
+        <RootNamespace>Engine.Base</RootNamespace>
+        <LangVersion>7.0</LangVersion>
+        <OutputPath>$(SolutionDir)\bin\</OutputPath>
+        <OtherFlags>--warnon:1182</OtherFlags>
+    </PropertyGroup>
+    <ItemGroup>
+
+        <Compile Include="IHwTag.fs" />
+        <Compile Include="HwTagWrite.fs" />
+        <Compile Include="HwTag.fs" />
+        <Compile Include="HwTagEvent.fs" />
+        <Compile Include="HwServiceManager.fs" />
+    </ItemGroup>
+    <ItemGroup />
+
+    <ItemGroup>
+        <PackageReference Include="System.Reactive" Version="6.0.0" />
+        <PackageReference Include="System.ServiceProcess.ServiceController" Version="7.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
+    </ItemGroup>
+
+   
+</Project>

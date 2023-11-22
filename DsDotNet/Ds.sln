@@ -141,6 +141,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebHMI.Shared", "Apps\HMI.O
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "IOMapForModeler", "src\IOMap.Obsolete\IOMapForModeler\IOMapForModeler.fsproj", "{F16E0171-6C54-4285-A269-038DCA6930AC}"
 EndProject
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "PowerPointAddInShared", "Apps\OfficeAddOn\PowerPointAddInShared\PowerPointAddInShared.fsproj", "{D7A33DE0-0B4E-4E13-95D0-5E1BD384C0FA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -507,6 +509,14 @@ Global
 		{F16E0171-6C54-4285-A269-038DCA6930AC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F16E0171-6C54-4285-A269-038DCA6930AC}.Release|x86.ActiveCfg = Release|Any CPU
 		{F16E0171-6C54-4285-A269-038DCA6930AC}.Release|x86.Build.0 = Release|Any CPU
+		{D7A33DE0-0B4E-4E13-95D0-5E1BD384C0FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7A33DE0-0B4E-4E13-95D0-5E1BD384C0FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7A33DE0-0B4E-4E13-95D0-5E1BD384C0FA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D7A33DE0-0B4E-4E13-95D0-5E1BD384C0FA}.Debug|x86.Build.0 = Debug|Any CPU
+		{D7A33DE0-0B4E-4E13-95D0-5E1BD384C0FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7A33DE0-0B4E-4E13-95D0-5E1BD384C0FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7A33DE0-0B4E-4E13-95D0-5E1BD384C0FA}.Release|x86.ActiveCfg = Release|Any CPU
+		{D7A33DE0-0B4E-4E13-95D0-5E1BD384C0FA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -568,6 +578,7 @@ Global
 		{F74A5AEC-B421-41A9-AAA8-F808DC80997A} = {8CDC9E12-34CD-4585-A710-FB373449F98F}
 		{717716EF-FFFE-4128-92BB-9D1A0D0F3A36} = {8CDC9E12-34CD-4585-A710-FB373449F98F}
 		{F16E0171-6C54-4285-A269-038DCA6930AC} = {47F783C7-DCB1-4773-872D-38E041A182D9}
+		{D7A33DE0-0B4E-4E13-95D0-5E1BD384C0FA} = {08D4417E-7482-4FDB-88F0-73A36732375C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B36D7B1-CD69-44C5-8E57-DE46AC18C1F7}

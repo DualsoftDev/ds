@@ -3,7 +3,8 @@
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <TargetFramework>net7.0</TargetFramework>
-        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<LangVersion>8.0</LangVersion>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     </PropertyGroup>
 
     <ItemGroup>

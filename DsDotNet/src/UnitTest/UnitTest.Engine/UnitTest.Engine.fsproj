@@ -1,107 +1,112 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<LangVersion>8.0</LangVersion>
 
-        <RootNamespace>T</RootNamespace>
-        <IsPackable>false</IsPackable>
-        <GenerateProgramFile>false</GenerateProgramFile>
-    </PropertyGroup>
+		<RootNamespace>T</RootNamespace>
+		<IsPackable>false</IsPackable>
+		<GenerateProgramFile>false</GenerateProgramFile>
+	</PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <NoWarn>NU1702</NoWarn>
-    </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<NoWarn>NU1702</NoWarn>
+	</PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-        <NoWarn>NU1702</NoWarn>
-    </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<NoWarn>NU1702</NoWarn>
+	</PropertyGroup>
 
-    <ItemGroup>
-        <EmbeddedResource Remove="Libraries\**" />
-    </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Remove="Libraries\**" />
+	</ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.19" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
-        <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
-        <PackageReference Include="FsUnit" Version="5.0.4" />
-        <PackageReference Include="FsUnit.xUnit" Version="5.0.4" />
-        <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-        <PackageReference Include="xunit" Version="2.4.2" />
-    </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.21" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
+		<PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
+		<PackageReference Include="FsUnit" Version="5.0.4" />
+		<PackageReference Include="FsUnit.xUnit" Version="5.0.4" />
+		<PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
+		<PackageReference Include="xunit" Version="2.4.2" />
+	</ItemGroup>
 
-    <ItemGroup>
-        <Compile Include="TestFixture.Engine.fs" />
-        <Compile Include="ImportOffice\pptTest.fs" />
-        <Compile Include="Miscs\MiscTests.fs" />
-        <Compile Include="Model\Answers.fs" />
-        <Compile Include="Model\Model.fs" />
-        <Compile Include="Model\Model.Buildup.Test.fs" />
-        <Compile Include="Model\ModelGraph.fs" />
-        <Compile Include="Model\ModelGraphGenGPT.fs" />
-        <Compile Include="Model\FqdnParseTest.fs" />
-        <Compile Include="Model\SystemBuilderTest.fs" />
-        <Compile Include="Model\LoadConfigTest.fs" />
-        <None Include="Obsolete\0.ModelTest_Common.fsx" />
-        <None Include="Obsolete\1.ModelExtension.fsx" />
-        <None Include="Obsolete\ModelTest1.fsx" />
-        <None Include="Obsolete\ModelTest2.fsx" />
-        <None Include="Obsolete\EdgeTest.fsx" />
-        <None Include="Obsolete\Tag,Expression,Latch,Bits\Latch, Rising Test.fsx" />
-        <None Include="Obsolete\Tag,Expression,Latch,Bits\PortTag Test.fsx" />
-        <None Include="Obsolete\Tag,Expression,Latch,Bits\Expression Test.fsx" />
-        <None Include="Obsolete\Common test\QueueTest.fsx" />
-        <None Include="Obsolete\Repeat Test\Diamond.fsx" />
-        <None Include="Obsolete\Parser\ParserTest.fsx" />
-        <None Include="Obsolete\Parser\Parse.Duplicated.Test.fsx" />
-        <None Include="Obsolete\Parser\Parse.OK.fsx" />
-        <None Include="Obsolete\test.ipynb" />
-        <Compile Include="Origins\OriginTester.fs" />
-        <Compile Include="Cpu\CpuTestCommon.fs" />
-        <Compile Include="Cpu\Test All Case.fs" />
-        <Compile Include="Cpu\Port Statement.fs" />
-        <Compile Include="Cpu\Flow Statement.fs" />
-        <Compile Include="Cpu\Status Statement.fs" />
-        <Compile Include="Cpu\Operation Mode Statement.fs" />
-        <Compile Include="Cpu\Monitor Statement.fs" />
-        <Compile Include="Cpu\Real Statement.fs" />
-        <Compile Include="Cpu\Call Statement.fs" />
-        <Compile Include="Cpu\DAG Statement.fs" />
-        <Compile Include="Cpu\Timmer Statement.fs" />
-        <Compile Include="Cpu\Counter Statement.fs" />
-        <Compile Include="Cpu\Link Statement.fs" />
-        <Compile Include="Cpu\System Statement.fs" />
-        <Compile Include="Cpu\ButtonLamp Statement.fs" />
-        <Compile Include="Cpu\Extension Statement.fs" />
-        <Compile Include="HmiCodeGen\HmiCodeGenTester.fs" />
-        <Compile Include="CustomEngineTest.fs" />
-        <Compile Include="DBLoggerTest.fs" />
-        <None Include="ScratchPad.fsx" />
-        <None Include="App.config" />
-        <Compile Include="Main.fs" />
-    </ItemGroup>
+	<ItemGroup>
+		<Compile Include="TestFixture.Engine.fs" />
+		<Compile Include="ImportOffice\pptTest.fs" />
+		<Compile Include="Miscs\MiscTests.fs" />
+		<Compile Include="Model\Answers.fs" />
+		<Compile Include="Model\Model.fs" />
+		<Compile Include="Model\Model.Buildup.Test.fs" />
+		<Compile Include="Model\ModelGraph.fs" />
+		<Compile Include="Model\ModelGraphGenGPT.fs" />
+		<Compile Include="Model\FqdnParseTest.fs" />
+		<Compile Include="Model\SystemBuilderTest.fs" />
+		<Compile Include="Model\LoadConfigTest.fs" />
+		<None Include="Obsolete\0.ModelTest_Common.fsx" />
+		<None Include="Obsolete\1.ModelExtension.fsx" />
+		<None Include="Obsolete\ModelTest1.fsx" />
+		<None Include="Obsolete\ModelTest2.fsx" />
+		<None Include="Obsolete\EdgeTest.fsx" />
+		<None Include="Obsolete\Tag,Expression,Latch,Bits\Latch, Rising Test.fsx" />
+		<None Include="Obsolete\Tag,Expression,Latch,Bits\PortTag Test.fsx" />
+		<None Include="Obsolete\Tag,Expression,Latch,Bits\Expression Test.fsx" />
+		<None Include="Obsolete\Common test\QueueTest.fsx" />
+		<None Include="Obsolete\Repeat Test\Diamond.fsx" />
+		<None Include="Obsolete\Parser\ParserTest.fsx" />
+		<None Include="Obsolete\Parser\Parse.Duplicated.Test.fsx" />
+		<None Include="Obsolete\Parser\Parse.OK.fsx" />
+		<None Include="Obsolete\test.ipynb" />
+		<Compile Include="Origins\OriginTester.fs" />
+		<Compile Include="Cpu\CpuTestCommon.fs" />
+		<Compile Include="Cpu\Test All Case.fs" />
+		<Compile Include="Cpu\Port Statement.fs" />
+		<Compile Include="Cpu\Flow Statement.fs" />
+		<Compile Include="Cpu\Status Statement.fs" />
+		<Compile Include="Cpu\Operation Mode Statement.fs" />
+		<Compile Include="Cpu\Monitor Statement.fs" />
+		<Compile Include="Cpu\Real Statement.fs" />
+		<Compile Include="Cpu\Call Statement.fs" />
+		<Compile Include="Cpu\DAG Statement.fs" />
+		<Compile Include="Cpu\Timmer Statement.fs" />
+		<Compile Include="Cpu\Counter Statement.fs" />
+		<Compile Include="Cpu\Link Statement.fs" />
+		<Compile Include="Cpu\System Statement.fs" />
+		<Compile Include="Cpu\ButtonLamp Statement.fs" />
+		<Compile Include="Cpu\Extension Statement.fs" />
+		<Compile Include="HmiCodeGen\HmiCodeGenTester.fs" />
+		<Compile Include="CustomEngineTest.fs" />
+		<Compile Include="DBLoggerTest.fs" />
+		<None Include="ScratchPad.fsx" />
+		<None Include="App.config" />
+		<Compile Include="Main.fs" />
+	</ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
-        <ProjectReference Include="..\..\Engine\Engine.CodeGenHMI\Engine.CodeGenHMI.fsproj" />
-        <ProjectReference Include="..\..\Engine\Engine.CodeGenPLC\Engine.CodeGenPLC.fsproj" />
-        <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
-        <ProjectReference Include="..\..\Engine\Engine.Cpu\Engine.Cpu.fsproj" />
-        <ProjectReference Include="..\..\Engine\Engine.Custom\Engine.Custom.fsproj" />
-        <ProjectReference Include="..\..\Engine\Engine.Import.Office\Engine.Import.Office.fsproj" />
-        <ProjectReference Include="..\..\Engine\Engine.Info\Engine.Info.fsproj" />
-        <ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
-        <ProjectReference Include="..\..\Engine\Engine.Test\Engine.Sample.csproj" />
+	<ItemGroup>
+		<ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
+		<ProjectReference Include="..\..\Engine\Engine.CodeGenHMI\Engine.CodeGenHMI.fsproj" />
+		<ProjectReference Include="..\..\Engine\Engine.CodeGenPLC\Engine.CodeGenPLC.fsproj" />
+		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
+		<ProjectReference Include="..\..\Engine\Engine.Cpu\Engine.Cpu.fsproj" />
+		<ProjectReference Include="..\..\Engine\Engine.Custom\Engine.Custom.fsproj" />
+		<ProjectReference Include="..\..\Engine\Engine.Import.Office\Engine.Import.Office.fsproj" />
+		<ProjectReference Include="..\..\Engine\Engine.Info\Engine.Info.fsproj" />
+		<ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
+		<ProjectReference Include="..\..\Engine\Engine.Test\Engine.Sample.csproj" />
 
-        <ProjectReference Include="..\..\PLC\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
-        <ProjectReference Include="..\..\PLC\PLC.CodeGen.LSXGI\PLC.CodeGen.LSXGI.fsproj" />
-        <ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
-    </ItemGroup>
+		<ProjectReference Include="..\..\PLC\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
+		<ProjectReference Include="..\..\PLC\PLC.CodeGen.LSXGI\PLC.CodeGen.LSXGI.fsproj" />
+		<ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
+	</ItemGroup>
 
-    <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-      <Exec Command="copy $(SolutionDir)Apps\OfficeAddOn\PowerPointAddInHelper\DS_Library.pptx $(TargetDir)DS_Library.pptx" />
-    </Target>
+	<ItemGroup>
+	  <PackageReference Update="FSharp.Core" Version="8.0.100" />
+	</ItemGroup>
 
-  
-	
+	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+		<Exec Command="copy $(SolutionDir)Apps\OfficeAddOn\PowerPointAddInHelper\DS_Library.pptx $(TargetDir)DS_Library.pptx" />
+	</Target>
+
+
+
 </Project>

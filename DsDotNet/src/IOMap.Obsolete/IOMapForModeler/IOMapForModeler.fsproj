@@ -3,8 +3,8 @@
     <PropertyGroup>
         <TargetFrameworks>net7.0;net7.0-windows</TargetFrameworks>
         <RootNamespace>Engine.Base</RootNamespace>
-        <LangVersion>7.0</LangVersion>
-        <OutputPath>$(SolutionDir)\bin\</OutputPath>
+		<LangVersion>8.0</LangVersion>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
     </PropertyGroup>
     <ItemGroup>

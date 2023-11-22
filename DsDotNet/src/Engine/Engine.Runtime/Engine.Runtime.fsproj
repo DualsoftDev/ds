@@ -6,7 +6,7 @@
 
 		<RootNamespace>Engine.Runtime</RootNamespace>
 		<OutputType>Exe</OutputType>
-		<LangVersion>7.0</LangVersion>
+		<LangVersion>8.0</LangVersion>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 		<OtherFlags>--warnon:1182</OtherFlags>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>

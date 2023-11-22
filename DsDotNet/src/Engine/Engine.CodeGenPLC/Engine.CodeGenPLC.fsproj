@@ -2,7 +2,7 @@
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
         <RootNamespace>Engine.CodeGenPLC</RootNamespace>
-        <LangVersion>7.0</LangVersion>
+        <LangVersion>8.0</LangVersion>
         <OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OutputType>Library</OutputType>
         <OtherFlags>--warnon:1182</OtherFlags>

@@ -39,6 +39,7 @@
 		<Compile Include="Model\Model.fs" />
 		<Compile Include="Model\Model.Buildup.Test.fs" />
 		<Compile Include="Model\ModelGraph.fs" />
+		<Compile Include="Model\ModelGraphSort.fs" />
 		<Compile Include="Model\ModelGraphGenGPT.fs" />
 		<Compile Include="Model\FqdnParseTest.fs" />
 		<Compile Include="Model\SystemBuilderTest.fs" />

@@ -97,20 +97,6 @@ module OriginModule =
         |]
         |> Array.distinct
 
-    /// Get ordered routes from start to end
-    let visitFromSourceToTarget (now:Vertex) (target:Vertex) (graph:DsGraph) =
-        let rec searchNodes
-            (now:Vertex) (target:Vertex)
-            (graph:DsGraph) (path:Vertex list)
-          = [
-                let nowPath = path.Append(now) |> List.ofSeq
-                if now <> target then
-                    for node in graph.GetOutgoingVertices(now) do
-                        yield! searchNodes node target graph nowPath
-                else
-                    yield nowPath
-            ]
-        searchNodes now target graph []
 
     /// Get ordered taskDevice routes
     let visitFromSourceToTargetInList
@@ -438,7 +424,7 @@ module OriginModule =
                     for goalSet  in resetChain do
                     for s in startSet do
                     for g in goalSet  do
-                        visitFromSourceToTarget s g graph
+                        GraphUtilImpl.visitFromSourceToTarget s g graph
                 ]
                 |> List.filter(fun l -> l.Length > 0)
                 |> List.collect id
@@ -535,7 +521,3 @@ module OriginModule =
         [<Extension>]
         static member GetThetaTargets (graph:DsGraph) = getThetaTargets graph
 
-
-        [<Extension>]
-        static member ExistPathSourceToTarget (source:Vertex) (target:Vertex) (graph:DsGraph)
-                        = visitFromSourceToTarget source target graph |> Seq.any

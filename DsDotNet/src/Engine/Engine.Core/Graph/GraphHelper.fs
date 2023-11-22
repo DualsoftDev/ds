@@ -128,4 +128,6 @@ type GraphHelper =
     [<Extension>] static member GetVertices(edge:IEdge<'V>) = [edge.Source; edge.Target]
     [<Extension>] static member ValidateCylce(graph:Graph<'V, 'E>, allowCyclicGraph:bool) = validateCylce(graph, allowCyclicGraph)
     [<Extension>] static member TopologicalSort(graph:Graph<_, _>) = GraphSortImpl.topologicalSort graph
-
+    [<Extension>] static member TopologicalGroupSort(graph:Graph<_, _>) = GraphSortImpl.topologicalGroupSort graph
+    [<Extension>] static member ExistPathSourceToTarget (source:'V) (target:'V) (graph:Graph<_, _>) 
+                                    = GraphUtilImpl.visitFromSourceToTarget source target graph |> Seq.any

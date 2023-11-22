@@ -20,7 +20,6 @@ open DocumentFormat.OpenXml.Presentation
 
 [<AutoOpen>]
 module PPTDocModule =
-
     let getSystemName (name: string) =
         let fileName = PathManager.getFileNameWithoutExtension (name.ToFile())
 
@@ -138,38 +137,44 @@ module PPTDocModule =
         let edges = HashSet<pptEdge>()
 
         do
-            let SlidesAll = Office.SlidesAll(doc)
-            let shapes = Office.PageShapes(doc)
-            let connections = Connections(doc)
-
-            let allGroups =
-                Groups(doc)
-                |> Seq.map (fun (slide, groupSet) -> pages.[slide].PageNum, groupSet)
-
+            let slidesAll = Office.SlidesAll(doc)
+          
             let slideSize = Office.SlideSize(doc)
             let SlideMasters = Office.SlidesMasterAll(doc)
 
             SlideMasters
             |> Seq.iter (fun slideMaster -> masterPages.Add(masterPages.Count + 1, slideMaster) |> ignore)
 
-            SlidesAll
+            slidesAll
             |> Seq.filter (fun (slidePart, show, page) -> not (slidePart.IsSlideLayoutBlanckType()))
             |> Seq.iter (fun (slidePart, show, page) ->
-                if (slidePart.PageTitle(false) = "" && slidePart.PageTitle(true) = "") then
-                    Office.ErrorPPT(Page, ErrID._59, "Title Error", page, 0u))
+                    if (slidePart.PageTitle(false) = "" && slidePart.PageTitle(true) = "")
+                    then
+                        Office.ErrorPPT(Page, ErrID._59, "Title Error", page, 0u)
+                    elif (slidePart.PageTitle(false) <> "") then
+                        pages.Add(slidePart, pptPage (slidePart, page, show)) |> ignore
+                    elif (slidePart.PageTitle(true) <> "") then
+                        headPages.Add(slidePart, page) |> ignore
+                    )
 
+                      
+            let allGroups =
+                Groups(doc)
+                |> Seq.filter (fun (slide, _) -> pages.ContainsKey(slide))
+                |> Seq.map (fun (slide, groupSet) -> pages.[slide].PageNum, groupSet)
 
-            SlidesAll
-            |> Seq.iter (fun (slidePart, show, page) ->
-                if (slidePart.PageTitle(false) <> "") then
-                    pages.Add(slidePart, pptPage (slidePart, page, show)) |> ignore
-                else if (slidePart.PageTitle(true) <> "") then
-                    headPages.Add(slidePart, page) |> ignore)
-
+            let shapes = Office.PageShapes(doc)
+                            |> Seq.filter (fun (_, page, _, _) -> pages.Values.Select(fun f->f.PageNum).Contains(page))
+                            |> Seq.filter (fun (_, page, _, _) -> not (headPages.Values.Contains(page)))
+            
+            let connections = Connections(doc)
+                            |> Seq.filter (fun (slide, _) -> not (headPages.ContainsKey(slide)))
+                            |> Seq.filter (fun (slide, _) -> pages.ContainsKey(slide))
+            
             let dicShape = Dictionary<int, HashSet<Tuple<Shape, bool>>>()
 
-            shapes
-            |> Seq.where (fun (shape, page, geometry, isDash) -> not (headPages.Values.Contains(page)))
+               
+            shapes 
             |> Seq.iter (fun (shape, page, geometry, isDash) ->
                 if (dicShape.ContainsKey(page) |> not) then
                     dicShape.Add(page, HashSet<Tuple<Shape, bool>>()) |> ignore

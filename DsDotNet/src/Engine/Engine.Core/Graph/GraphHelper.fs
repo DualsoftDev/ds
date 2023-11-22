@@ -127,4 +127,5 @@ type GraphHelper =
     [<Extension>] static member Dump(graph:Graph<_, _>) = dumpGraph(graph)
     [<Extension>] static member GetVertices(edge:IEdge<'V>) = [edge.Source; edge.Target]
     [<Extension>] static member ValidateCylce(graph:Graph<'V, 'E>, allowCyclicGraph:bool) = validateCylce(graph, allowCyclicGraph)
+    [<Extension>] static member TopologicalSort(graph:Graph<_, _>) = GraphSortImpl.topologicalSort graph
 

@@ -1,10 +1,11 @@
 dotnet-restore:
 	@dotnet restore
 
-clean: dotnet-restore
+clean:
 	@echo "Removing all subdriectory named [bin] or [obj] or [.vs] on [`pwd`].."
 	-@find . -type d \( -name "bin" -o -name "obj" \) -exec rm -rf {} +
 	-@find . -type d \( -name ".vs" -o -name '*.idea' \) -exec rm -rf {} +
+	make dotnet-restore
 
 e:
 	echo $(shell cygpath $(USERPROFILE))

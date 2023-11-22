@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFrameworks>net7.0</TargetFrameworks>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<LangVersion>8.0</LangVersion>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
         <RootNamespace>Engine.Import.Office</RootNamespace>
         <OutputType>Library</OutputType>
         <OutputPath>$(SolutionDir)\bin\</OutputPath>

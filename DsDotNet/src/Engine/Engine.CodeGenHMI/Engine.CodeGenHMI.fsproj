@@ -3,7 +3,7 @@
         <!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
         <TargetFramework>net7.0</TargetFramework>
         <RootNamespace>Engine.CodeGenHMI</RootNamespace>
-        <LangVersion>7.0</LangVersion>
+        <LangVersion>8.0</LangVersion>
         <OutputType>Library</OutputType>
         <OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>

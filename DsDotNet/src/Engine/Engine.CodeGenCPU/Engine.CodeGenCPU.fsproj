@@ -2,8 +2,8 @@
     <PropertyGroup>
         <TargetFrameworks>net7.0</TargetFrameworks>
         <RootNamespace>Engine.CodeGenCPU</RootNamespace>
-        <LangVersion>7.0</LangVersion>
-        <OutputType>Library</OutputType>
+		<LangVersion>8.0</LangVersion>
+		<OutputType>Library</OutputType>
         <OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>

@@ -17,7 +17,7 @@
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0"/>
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.0"/>
         <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="6.1.0"/>
-        <PackageReference Include="DualSoft-Web-Blazor-Server" Version="0.1.1"/>
+        <PackageReference Include="DualSoft-Web-Blazor-Server" Version="0.1.2"/>
     </ItemGroup>
 
     <ItemGroup>

@@ -4,7 +4,7 @@
         <TargetFrameworks>net7.0</TargetFrameworks>
         <RootNamespace>Engine.Core</RootNamespace>
         <OutputType>Library</OutputType>
-        <LangVersion>7.0</LangVersion>
+        <LangVersion>8.0</LangVersion>
         <OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
         <AssemblyVersion>1.0.18</AssemblyVersion>
@@ -26,8 +26,9 @@
         <Compile Include="Text.fs" />
         <Compile Include="Fqdn.fs" />
         <Compile Include="UniqueName.fs" />
-        <Compile Include="Graph.fs" />
-        <Compile Include="GraphHelper.fs" />
+        <Compile Include="Graph/Graph.fs" />
+        <Compile Include="Graph\Graph.Sort.Topological.fs" />
+        <Compile Include="Graph/GraphHelper.fs" />
         <Compile Include="RuntimeGenerator.fs" />
         <Compile Include="TypeConversion.fs" />
         <Compile Include="Expression.Interfaces.fs" />
@@ -62,7 +63,7 @@
 
 
     <ItemGroup>
-        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.19" />
+        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.21" />
         <PackageReference Include="System.Reactive" Version="6.0.0" />
         <PackageReference Include="Fody" Version="6.6.4">
             <PrivateAssets>all</PrivateAssets>

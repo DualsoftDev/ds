@@ -534,3 +534,8 @@ module OriginModule =
         /// child segments to be 'ON' in progress(Theta)
         [<Extension>]
         static member GetThetaTargets (graph:DsGraph) = getThetaTargets graph
+
+
+        [<Extension>]
+        static member ExistPathSourceToTarget (source:Vertex) (target:Vertex) (graph:DsGraph)
+                        = visitFromSourceToTarget source target graph |> Seq.any

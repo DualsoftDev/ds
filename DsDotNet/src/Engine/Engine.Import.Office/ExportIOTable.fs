@@ -166,8 +166,7 @@ module ExportIOTable =
         File.WriteAllText(tempFilePath, csvContent.ToString())
         tempFilePath
 
-
-        
+                
     [<Extension>]
     type OfficeExcelExt =
         [<Extension>]
@@ -177,57 +176,79 @@ module ExportIOTable =
             use spreadsheetDocument =
                 SpreadsheetDocument.Create(filePath, SpreadsheetDocumentType.Workbook)
 
-            // Create the workbook
+                        // Add a WorkbookPart to the document.
             let workbookPart = spreadsheetDocument.AddWorkbookPart()
-            let workbook = new Workbook()
+            workbookPart.Workbook <- new Workbook()
+            // Add a WorksheetPart to the WorkbookPart.
+            let worksheetPart = workbookPart.AddNewPart<WorksheetPart>()
+            worksheetPart.Worksheet <- new Worksheet(new SheetData())
+            let sheets = workbookPart.Workbook.AppendChild(new Sheets())
+            let sheet =
+                new Sheet(SheetId = 1u, Name = "Test Sheet", Id = workbookPart.GetIdOfPart(worksheetPart))
 
-            // Create sheets collection
-            let sheets = new Sheets()
+            sheets.Append(sheet);
+            workbookPart.Workbook.Save()
 
-            for (index, dataTable) in Seq.indexed dataTables do
-                // Create a worksheet for each DataTable
-                let worksheetPart = workbookPart.AddNewPart<WorksheetPart>()
-                let worksheet = new Worksheet()
+    //[<Extension>]
+    //type OfficeExcelExt =
+    //    [<Extension>]
+    //    static member ExportDataTableToExcel (system: DsSystem) (filePath: string) =
+    //        let dataTables = [ToDataSet (system)]
+    //        // Create a new spreadsheet document
+    //        use spreadsheetDocument =
+    //            SpreadsheetDocument.Create(filePath, SpreadsheetDocumentType.Workbook)
 
-                // Create the sheet data
-                let sheetData = new SheetData()
+    //        // Create the workbook
+    //        let workbookPart = spreadsheetDocument.AddWorkbookPart()
+    //        let workbook = new Workbook()
 
-                // Add column headers to the sheet data
-                let headerRow = new Row()
+    //        // Create sheets collection
+    //        let sheets = new Sheets()
 
-                for colIndex in 0 .. dataTable.Columns.Count - 1 do
-                    let cell = new Cell()
-                    cell.DataType <- CellValues.String
-                    cell.CellValue <- new CellValue(dataTable.Columns.[colIndex].ColumnName)
-                    headerRow.AppendChild(cell) |> ignore
+    //        for (index, dataTable) in Seq.indexed dataTables do
+    //            // Create a worksheet for each DataTable
+    //            let worksheetPart = workbookPart.AddNewPart<WorksheetPart>()
+    //            let worksheet = new Worksheet()
 
-                sheetData.AppendChild(headerRow) |> ignore
+    //            // Create the sheet data
+    //            let sheetData = new SheetData()
 
-                // Populate the sheet data with data from the DataTable
-                for rowIndex in 0 .. dataTable.Rows.Count - 1 do
-                    let dataRow = new Row()
+    //            // Add column headers to the sheet data
+    //            let headerRow = new Row()
 
-                    for colIndex in 0 .. dataTable.Columns.Count - 1 do
-                        let cell = new Cell()
-                        cell.DataType <- CellValues.String
-                        cell.CellValue <- new CellValue(dataTable.Rows.[rowIndex].[colIndex].ToString())
-                        dataRow.AppendChild(cell) |> ignore
+    //            for colIndex in 0 .. dataTable.Columns.Count - 1 do
+    //                let cell = new Cell()
+    //                cell.DataType <- CellValues.String
+    //                cell.CellValue <- new CellValue(dataTable.Columns.[colIndex].ColumnName)
+    //                headerRow.AppendChild(cell) |> ignore
 
-                    sheetData.AppendChild(dataRow) |> ignore
+    //            sheetData.AppendChild(headerRow) |> ignore
 
-                worksheet.AppendChild(sheetData) |> ignore
+    //            // Populate the sheet data with data from the DataTable
+    //            for rowIndex in 0 .. dataTable.Rows.Count - 1 do
+    //                let dataRow = new Row()
 
-                worksheetPart.Worksheet <- worksheet
+    //                for colIndex in 0 .. dataTable.Columns.Count - 1 do
+    //                    let cell = new Cell()
+    //                    cell.DataType <- CellValues.String
+    //                    cell.CellValue <- new CellValue(dataTable.Rows.[rowIndex].[colIndex].ToString())
+    //                    dataRow.AppendChild(cell) |> ignore
 
-                // Create a sheet with a unique name
-                let sheet =
-                    new Sheet(Name = $"Sheet{(index + 1)}", Id = workbookPart.GetIdOfPart(worksheetPart))
+    //                sheetData.AppendChild(dataRow) |> ignore
 
-                sheets.AppendChild(sheet) |> ignore
+    //            worksheet.AppendChild(sheetData) |> ignore
 
-            workbook.AppendChild(sheets) |> ignore
+    //            worksheetPart.Worksheet <- worksheet
 
-            // Save the workbook
-            workbookPart.Workbook <- workbook
-            spreadsheetDocument.Save()
+    //            // Create a sheet with a unique name
+    //            let sheet =
+    //                new Sheet(Name = $"Sheet{(index + 1)}", Id = workbookPart.GetIdOfPart(worksheetPart))
+
+    //            sheets.AppendChild(sheet) |> ignore
+
+    //        workbook.AppendChild(sheets) |> ignore
+
+    //        // Save the workbook
+    //        workbookPart.Workbook <- workbook
+    //        spreadsheetDocument.Save()
 

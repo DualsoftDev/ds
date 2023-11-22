@@ -222,7 +222,7 @@ module ImportPPTModule =
                 //첫페이지 아니면 stack에 존재
                 failwithf $"{ex.Message} \t◆파일명 {errFileName}"
         finally
-            dicPptDoc.Where(fun f -> f.Value.IsNonNull()).Iter(fun f -> f.Value.Close())
+            dicPptDoc.Where(fun f -> f.Value.IsNonNull()).Iter(fun f -> f.Value.Dispose())
             dicPptDoc.Clear()
 
 

@@ -1,1 +1,3 @@
 - client 에서 접속 할 때, client 는 HMI 로 동작
+- `DsDotNet\src\Doc\HMI 시안.pptx`
+- 

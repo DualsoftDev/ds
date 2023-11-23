@@ -124,3 +124,8 @@ html, body, #app {
 .dropAreaDrug {
     background-color: darkgray;
 }
+
+
+.table-title {
+    color: yellow;
+}

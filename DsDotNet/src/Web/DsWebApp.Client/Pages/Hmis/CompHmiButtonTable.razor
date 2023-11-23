@@ -4,8 +4,7 @@
 @using HMIButton = Tuple<Engine.Core.TagWebModule.TagWeb, Engine.Core.TagWebModule.TagWeb>  @* HMIPush * HMIFlickerLamp *@
 @inherits CompHmiTagContainer
 
-<h4>@TableName</h4>
-
+<h4 class="table-title">@TableName</h4>
 <DxGrid Data="_items">
     <Columns>
         <DxGridDataColumn FieldName="PushButtonName" />

@@ -29,6 +29,7 @@
         <Compile Include="Graph/Graph.fs" />
         <Compile Include="Graph\Graph.Util.fs" />
         <Compile Include="Graph\Graph.Sort.Topological.fs" />
+        <Compile Include="Graph\Graph.PairwiseOrder.fs" />
         <Compile Include="Graph/GraphHelper.fs" />
         <Compile Include="RuntimeGenerator.fs" />
         <Compile Include="TypeConversion.fs" />

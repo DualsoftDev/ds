@@ -129,3 +129,5 @@ type GraphHelper =
     [<Extension>] static member ValidateCylce(graph:Graph<'V, 'E>, allowCyclicGraph:bool) = validateCylce(graph, allowCyclicGraph)
     [<Extension>] static member TopologicalSort(graph:Graph<_, _>) = GraphSortImpl.topologicalSort graph
     [<Extension>] static member TopologicalGroupSort(graph:Graph<_, _>) = GraphSortImpl.topologicalGroupSort graph
+    /// DAG graph 상의 임의의 두 vertex 가 ancestor-descendant 관계인지 검사하는 함수를 반환
+    [<Extension>] static member BuildPairwiseComparer(graph:Graph<_, _>) = GraphPairwiseOrderImpl.isAncestorDescendant graph

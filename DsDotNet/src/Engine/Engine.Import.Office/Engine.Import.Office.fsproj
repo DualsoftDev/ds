@@ -7,10 +7,7 @@
         <OutputType>Library</OutputType>
         <OutputPath>$(SolutionDir)\bin\</OutputPath>
         <AssemblyName>Engine.Import.Office</AssemblyName>
-        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <OutputPath></OutputPath>
+		<ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
 
@@ -28,6 +25,7 @@
         <Compile Include="ImportUtilView.fs" />
         <Compile Include="ImportIOUtil.fs" />
         <Compile Include="ImportIOTable.fs" />
+        <Compile Include="ExportExcel.fs" />
         <Compile Include="ExportIOTable.fs" />
         <Compile Include="ImportUtilForLib.fs" />
         <Compile Include="ImportUtil.fs" />

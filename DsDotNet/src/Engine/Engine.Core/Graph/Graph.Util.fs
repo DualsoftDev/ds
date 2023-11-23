@@ -22,8 +22,12 @@ module internal GraphUtilImpl =
             ]
         searchNodes now target graph []
 
-    let forwardExist (source:'V) (target:'V) (graph:Graph<_, _>) =
-        visitFromSourceToTarget source target graph |> Seq.any
 
-    let backwardExist (source:'V) (target:'V) (graph:Graph<_, _>) =
-        visitFromSourceToTarget target source graph |> Seq.any
+    let forwardExist (source:'V) (target:'V) (graphOrder:'V->'V->bool option) =
+        (graphOrder source target) |> fun f-> f.IsSome && f.Value
+
+    let backwardExist (source:'V) (target:'V) (graphOrder:'V->'V->bool option) =
+        (graphOrder source target) |> fun f-> f.IsSome && not(f.Value)
+
+    let directionNotExist (source:'V) (target:'V) (graphOrder:'V->'V->bool option) =
+        (graphOrder source target) |> fun f-> f.IsNone

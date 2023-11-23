@@ -43,6 +43,9 @@ module internal GraphSortImpl =
     let topologicalGroupSort (graph:Graph<_, _>) =
         let vertices = topologicalSort graph
 
+        let graphOrder = GraphPairwiseOrderImpl.isAncestorDescendant graph
+         
+
         let dicVs = Dictionary<int, ResizeArray<IVertex>>()
         let addedV = ResizeArray<IVertex>()
         //하나 항목 추가
@@ -64,7 +67,7 @@ module internal GraphSortImpl =
                 let validoutgoingVs = 
                     outgoingVs |> Seq.filter (fun o -> 
                                 not <| notAddeds.Except([o])
-                                                .any(fun notAdded -> backwardExist o notAdded graph)
+                                                .any(fun notAdded -> backwardExist o notAdded graphOrder)
                                 ) //자신 o  뒤에 notAdded하나라도 존재하면 Skip
 
                 validoutgoingVs
@@ -73,9 +76,9 @@ module internal GraphSortImpl =
                     if targetIncomes.length() = 1 
                     then true
                     else 
-                        targetIncomes 
+                        targetIncomes //currV 조건 앞에 income 있으면 추가 불가
                         |> Seq.filter (fun income -> income <> currV)
-                        |> Seq.exists (fun income -> forwardExist currV income graph )//currV 조건 앞에 income 있으면 추가 불가
+                        |> Seq.exists (fun income -> forwardExist currV income graphOrder)
                         |> not
                 )
         

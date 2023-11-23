@@ -3,7 +3,6 @@ namespace Engine.Core
 open System.Collections.Generic
 open Dual.Common.Core.FS
 open System.Linq
-open GraphUtilImpl
 
 module internal GraphPairwiseOrderImpl =
     let isAncestorDescendant (graph:Graph<'V, 'E>) =

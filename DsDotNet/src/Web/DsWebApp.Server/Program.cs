@@ -7,6 +7,9 @@ using Dual.Common.Core.FS;      // for F# common logger setting
 using Engine.Core;
 using Engine.Info;
 using DsWebApp.Shared;
+using Dual.Web.Server.Auth;
+using Microsoft.Data.Sqlite;
+using DsWebApp.Shared.Auth;
 
 //using DsWebApp.Server.Authentication;
 
@@ -111,7 +114,8 @@ var serverGlobals = new ServerGlobal(serverSettings, commonAppSettings, logger);
 services.AddSingleton(serverGlobals);
 
 
-await services.InitializeUnsafeServicesAsync(serverGlobals, logger);
+await services.AddUnsafeServicesAsync(serverGlobals, logger);
+services.AddAuth(conf, commonAppSettings.LoggerDBSettings.ConnectionString);
 
 
 builder.WebHost.UseStaticWebAssets();
@@ -182,13 +186,35 @@ static void PresetAppSettings(bool isWinService)
 
 public static class CustomServerExtension
 {
-    public static async Task<IServiceCollection> InitializeUnsafeServicesAsync(this IServiceCollection services, ServerGlobal serverGlobal, ILog logger)
+    public static async Task<IServiceCollection> AddUnsafeServicesAsync(this IServiceCollection services, ServerGlobal serverGlobal, ILog logger)
     {
         await DBLogger.InitializeLogDbOnDemandAsync(serverGlobal.DsCommonAppSettings);
         //var connectionString = commonAppSettings.LoggerDBSettings.ConnectionString;
         //var dsFileJson = DBLogger.GetDsFilePath(connectionString);
 
         ServerGlobal.ReStartIoHub(Path.Combine(AppContext.BaseDirectory, "zmqsettings.json"));
+        return services;
+    }
+
+    public static IServiceCollection AddAuth(this IServiceCollection services, ConfigurationManager conf, string connectionString)
+    {
+        Func<string, UserAccount> userInfoExtractor = (string userName) =>
+        {
+            using var conn = new SqliteConnection(connectionString);
+            conn.Open();
+            var user = conn.QueryFirstOrDefault<UserAuthInfo>("SELECT [password], [isAdmin] FROM [user] WHERE [username] = @UserName;", new { UserName = userName });
+            if (user is null)
+                return null;
+            var userAccount = new UserAccount() { UserName = userName, Role = user.IsAdmin ? "Administrator" : "User" };
+            if (user.Password is null)
+                return userAccount;
+            userAccount.Password = Dual.Common.Utils.Crypto.Decrypt(user.Password, K.CryptKey);
+            return userAccount;
+        };
+
+        UserAccountService svc = new(userInfoExtractor);
+        services.AddAuth();
+        services.AddSingleton((IUserAccountService)svc);
         return services;
     }
 }

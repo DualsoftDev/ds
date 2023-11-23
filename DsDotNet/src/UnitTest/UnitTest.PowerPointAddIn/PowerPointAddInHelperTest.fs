@@ -4,6 +4,7 @@ open System
 open Xunit
 open PowerPointAddInHelper.MSG
 open PowerPointAddInHelper
+open PowerPointAddInShared
 
 module MSG_TEST = 
     let testPath = @$"{__SOURCE_DIRECTORY__}/sample/SamplePowerPointAddIn.pptx"

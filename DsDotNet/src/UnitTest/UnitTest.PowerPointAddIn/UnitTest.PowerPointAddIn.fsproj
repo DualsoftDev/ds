@@ -28,6 +28,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\Apps\OfficeAddOn\PowerPointAddInHelper\PowerPointAddInHelper.csproj" />
+      <ProjectReference Include="..\..\..\Apps\OfficeAddOn\PowerPointAddInShared\PowerPointAddInShared.fsproj" />
     </ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">

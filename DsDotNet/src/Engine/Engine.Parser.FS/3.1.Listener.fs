@@ -142,10 +142,14 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                    des.GetText() |]
 
         // I1 <||> I2 와 I2 <||> I3 에 대해서 해석
-        for triple in (terms |> Array.windowed2 3 2) do
-            if triple.Length = 3 then
-                let opnd1, op, opnd2 = triple[0], triple[1], triple[2]
-                ApiResetInfo.Create(x.TheSystem, opnd1, op.ToModelEdge(), opnd2) |> ignore
+        let apis = terms.Where(fun f->f <> "<||>")
+        let resets = apis.AllPairs(apis)
+                         .Where(fun (l, r)-> l <> r) 
+                         .DistinctBy(fun (l, r)->  [l;r].Order().JoinWith(";")) 
+        for tuple in resets do
+            let left, right = tuple
+            let opnd1, op, opnd2 = left, "<||>", right
+            ApiResetInfo.Create(x.TheSystem, opnd1, op.ToModelEdge(), opnd2) |> ignore
 
     member private x.GetFilePath(fileSpecCtx: FileSpecContext) =
         let relativeFilePath =

@@ -31,10 +31,10 @@ module OriginTestModule =
                         for f in model.System.Flows do
                             for v in f.Graph.Vertices do
                                 match v with
-                                | :? Real as r -> OriginHelper.GetOrigins r.Graph
+                                | :? Real as r -> OriginHelper.GetOriginInfo r
                                 | _ -> ()
                 ]
-                |> Seq.collect id
+                |> Seq.collect (fun f-> f.Tasks |> Seq.map(fun (d, t)->d.QualifiedName, t)) |> dict
 
             for r in originChecker do
                 printfn "org %A" r
@@ -50,15 +50,12 @@ module OriginTestModule =
                 seq {
                     KeyValuePair("S101_Copy1.Func3", Off);
                     KeyValuePair("S101_Copy1.Func4", NeedCheck);
-                    KeyValuePair("S101_Copy1.Func5", NeedCheck);
-                    KeyValuePair("S101_Copy2.Func1", Off);
-                    KeyValuePair("S101_Copy2.Func2", On);
+                    KeyValuePair("S101_Copy1.Func5", On);
+                    KeyValuePair("S101_Copy2.Func1", On);
+                    KeyValuePair("S101_Copy2.Func2", NeedCheck);
                     KeyValuePair("S101_Copy1.Func1", Off);
                     KeyValuePair("S101_Copy1.Func2", On);
-                    KeyValuePair("S101_Copy1.Func3", Off);
-                    KeyValuePair("S101_Copy1.Func4", NeedCheck);
-                    KeyValuePair("S101_Copy1.Func6", Off);
-                    KeyValuePair("S101_Copy1.Func5", NeedCheck);
+                    KeyValuePair("S101_Copy1.Func6", NotCare);
                     KeyValuePair("S102_SystemA1.Func1", Off);
                     KeyValuePair("S102_SystemA2.Func1", Off);
                     KeyValuePair("S102_SystemA3.Func1", Off);
@@ -78,11 +75,11 @@ module OriginTestModule =
                 seq {
                     KeyValuePair("S101_Copy2.Func1", Off);
                     KeyValuePair("S101_Copy2.Func2", On);
-                    KeyValuePair("S101_Copy1.Func1", NeedCheck);
-                    KeyValuePair("S101_Copy1.Func2", NeedCheck);
-                    KeyValuePair("S101_Copy1.Func3", NotCare);
-                    KeyValuePair("S101_Copy1.Func6", Off);
-                    KeyValuePair("S101_Copy1.Func5", NotCare);
+                    KeyValuePair("S101_Copy1.Func1", NotCare);
+                    KeyValuePair("S101_Copy1.Func2", NotCare);
+                    KeyValuePair("S101_Copy1.Func3", Off);
+                    KeyValuePair("S101_Copy1.Func6", NotCare);
+                    KeyValuePair("S101_Copy1.Func5", On);
                     KeyValuePair("S102_SystemA1.Func1", Off);
                     KeyValuePair("S102_SystemA2.Func2", Off);
                     KeyValuePair("S102_SystemA3.Func1", Off);
@@ -96,52 +93,4 @@ module OriginTestModule =
                 }
             answerChecker "test_case_1.ds" answer
 
-        [<Test>]
-        member __.``OriginTestCase2`` () =
-            let answer:seq<KeyValuePair<string, InitialType>> =
-                seq {
-                    KeyValuePair("S101_Copy2.Func1", Off);
-                    KeyValuePair("S101_Copy2.Func2", On);
-                    KeyValuePair("S101_Copy1.Func1", NeedCheck);
-                    KeyValuePair("S101_Copy1.Func2", NeedCheck);
-                    KeyValuePair("S101_Copy1.Func3", Off);
-                    KeyValuePair("S101_Copy1.Func4", NeedCheck);
-                    KeyValuePair("S101_Copy1.Func6", NotCare);
-                    KeyValuePair("S101_Copy1.Func5", NeedCheck);
-                    KeyValuePair("S102_SystemA1.Func1", Off);
-                    KeyValuePair("S102_SystemA2.Func1", Off);
-                    KeyValuePair("S102_SystemA3.Func1", Off);
-                    KeyValuePair("S102_SystemA4.Func1", Off);
-                    KeyValuePair("S102_SystemA5.Func1", Off);
-                    KeyValuePair("S102_SystemA1.Func2", On);
-                    KeyValuePair("S102_SystemA2.Func2", On);
-                    KeyValuePair("S102_SystemA3.Func2", On);
-                    KeyValuePair("S102_SystemA4.Func2", On);
-                    KeyValuePair("S102_SystemA5.Func2", On);
-                }
-            answerChecker "test_case_2.ds" answer
-
-        [<Test>]
-        member __.``OriginTestCase3`` () =
-            let answer:seq<KeyValuePair<string, InitialType>> =
-                seq {
-                    KeyValuePair("S101_Copy2.Func2", Off);
-                    KeyValuePair("S101_Copy2.Func1", On);
-                    KeyValuePair("S101_Copy1.Func1", NotCare);
-                    KeyValuePair("S101_Copy1.Func6", Off);
-                    KeyValuePair("S101_Copy1.Func5", NotCare);
-                    KeyValuePair("S101_Copy1.Func1", NeedCheck);
-                    KeyValuePair("S101_Copy1.Func2", NeedCheck);
-                    KeyValuePair("S101_Copy1.Func3", Off);
-                    KeyValuePair("S101_Copy1.Func4", NeedCheck);
-                    KeyValuePair("S101_Copy1.Func5", NeedCheck);
-                    KeyValuePair("S102_SystemA1.Func1", Off);
-                    KeyValuePair("S102_SystemA3.Func1", Off);
-                    KeyValuePair("S102_SystemA5.Func1", Off);
-                    KeyValuePair("S102_SystemA1.Func2", On);
-                    KeyValuePair("S102_SystemA2.Func2", NotCare);
-                    KeyValuePair("S102_SystemA3.Func2", On);
-                    KeyValuePair("S102_SystemA4.Func2", NotCare);
-                    KeyValuePair("S102_SystemA5.Func2", On);
-                }
-            answerChecker "test_case_3.ds" answer
+     

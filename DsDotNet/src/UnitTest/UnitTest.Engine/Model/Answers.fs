@@ -102,8 +102,11 @@ module ModelAnswers =
         I2 = { F.a2 ~ F.a3 }
         I3 = { F.a3 ~ F.a1 }
         I1 <||> I2;
+        I1 <||> I3;
+        I1 <||> I4;
         I2 <||> I3;
-        I3 ||> I4;
+        I2 <||> I4;
+        I3 <||> I4;
     }
 }
 """

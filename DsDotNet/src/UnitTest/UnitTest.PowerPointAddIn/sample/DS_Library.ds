@@ -1,0 +1,85 @@
+[sys] DS_Library = {
+    [flow] RepeatFlow = {
+        forwardwork <||> backwardwork;
+    }
+    [flow] SingleActingFlow = {
+        forwardwork <||> backwardwork;
+    }
+    [flow] OnOffFlow = {
+        on <||> off;
+    }
+    [flow] MovingFlow = {
+        movework <||> clearwork;
+        movework > clearwork;
+    }
+    [flow] RunFlow = {
+        run <||> home;
+    }
+    [interfaces] = {
+        FWD = { RepeatFlow.forwardwork ~ RepeatFlow.forwardwork }
+        BWD = { RepeatFlow.backwardwork ~ RepeatFlow.backwardwork }
+        ADV = { RepeatFlow.forwardwork ~ RepeatFlow.forwardwork }
+        RET = { RepeatFlow.backwardwork ~ RepeatFlow.backwardwork }
+        UP = { RepeatFlow.forwardwork ~ RepeatFlow.forwardwork }
+        DN = { RepeatFlow.backwardwork ~ RepeatFlow.backwardwork }
+        "+" = { RepeatFlow.forwardwork ~ RepeatFlow.forwardwork }
+        "-" = { RepeatFlow.backwardwork ~ RepeatFlow.backwardwork }
+        AD = { RepeatFlow.forwardwork ~ RepeatFlow.forwardwork }
+        RT = { RepeatFlow.backwardwork ~ RepeatFlow.backwardwork }
+        "FWD[P]" = { SingleActingFlow.forwardwork ~ SingleActingFlow.forwardwork }
+        "BWD[-]" = { SingleActingFlow.backwardwork ~ SingleActingFlow.backwardwork }
+        "ADV[P]" = { SingleActingFlow.forwardwork ~ SingleActingFlow.forwardwork }
+        "RET[-]" = { SingleActingFlow.backwardwork ~ SingleActingFlow.backwardwork }
+        "UP[P]" = { SingleActingFlow.forwardwork ~ SingleActingFlow.forwardwork }
+        "DN[-]" = { SingleActingFlow.backwardwork ~ SingleActingFlow.backwardwork }
+        "+[P]" = { SingleActingFlow.forwardwork ~ SingleActingFlow.forwardwork }
+        "-[-]" = { SingleActingFlow.backwardwork ~ SingleActingFlow.backwardwork }
+        "AD[P]" = { SingleActingFlow.forwardwork ~ SingleActingFlow.forwardwork }
+        "RT[-]" = { SingleActingFlow.backwardwork ~ SingleActingFlow.backwardwork }
+        "UP[-]" = { SingleActingFlow.forwardwork ~ SingleActingFlow.forwardwork }
+        "DN[P]" = { SingleActingFlow.backwardwork ~ SingleActingFlow.backwardwork }
+        "+[-]" = { SingleActingFlow.forwardwork ~ SingleActingFlow.forwardwork }
+        "-[P]" = { SingleActingFlow.backwardwork ~ SingleActingFlow.backwardwork }
+        "FWD[-]" = { SingleActingFlow.forwardwork ~ SingleActingFlow.forwardwork }
+        "BWD[P]" = { SingleActingFlow.backwardwork ~ SingleActingFlow.backwardwork }
+        "ADV[-]" = { SingleActingFlow.forwardwork ~ SingleActingFlow.forwardwork }
+        "RET[P]" = { SingleActingFlow.backwardwork ~ SingleActingFlow.backwardwork }
+        "AD[-]" = { SingleActingFlow.forwardwork ~ SingleActingFlow.forwardwork }
+        "RT[P]" = { SingleActingFlow.backwardwork ~ SingleActingFlow.backwardwork }
+        "ON[P]" = { OnOffFlow.on ~ OnOffFlow.on }
+        "OFF[-]" = { OnOffFlow.off ~ OnOffFlow.off }
+        ON = { OnOffFlow.on ~ OnOffFlow.on }
+        OFF = { OnOffFlow.off ~ OnOffFlow.off }
+        GO = { MovingFlow.movework ~ MovingFlow.clearwork }
+        RUN = { RunFlow.run ~ RunFlow.run }
+        HOME = { RunFlow.home ~ RunFlow.home }
+        FWD <||> BWD;
+        ADV <||> RET;
+        UP <||> DN;
+        "+" <||> "-";
+        AD <||> RT;
+        "FWD[P]" <||> "BWD[-]";
+        "ADV[P]" <||> "RET[-]";
+        "UP[P]" <||> "DN[-]";
+        "+[P]" <||> "-[-]";
+        "AD[P]" <||> "RT[-]";
+        "UP[-]" <||> "DN[P]";
+        "+[-]" <||> "-[P]";
+        "FWD[-]" <||> "BWD[P]";
+        "ADV[-]" <||> "RET[P]";
+        "AD[-]" <||> "RT[P]";
+        "ON[P]" <||> "OFF[-]";
+        ON <||> OFF;
+        RUN <||> HOME;
+    }
+    [prop] = {
+        [finish] = {
+            RepeatFlow.backwardwork;
+            SingleActingFlow.backwardwork;
+            OnOffFlow.off;
+            MovingFlow.clearwork;
+            RunFlow.home;
+        }
+    }
+}
+//DS Language Version = [0.9.2.5]

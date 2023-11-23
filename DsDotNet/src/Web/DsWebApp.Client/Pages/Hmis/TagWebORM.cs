@@ -13,4 +13,5 @@ public class TagWebORM(TagWeb tagWeb)
         set => tagWeb.SetValue(value);
     }
     public int Kind => tagWeb.Kind;
+    public string KindDescription => tagWeb.KindDescription;
 }

@@ -10,12 +10,14 @@
 
 <DxGrid Data="_items">
     <Columns>
-        <DxGridDataColumn FieldName="PushButtonName" />
-        <DxGridDataColumn FieldName="PushButtonValue" />
-        <DxGridDataColumn FieldName="PushButtonKind" />
+        <DxGridDataColumn FieldName="PushButtonName" Caption="PB Name" />
+        <DxGridDataColumn FieldName="PushButtonValue" Caption="PB Value" />
+        <DxGridDataColumn FieldName="PushButtonKind" Caption="PB Kind" />
+        <DxGridDataColumn FieldName="PushButtonKindDescription" Caption="PB Kind Desc" />
         <DxGridDataColumn FieldName="LampName" />
         <DxGridDataColumn FieldName="LampValue" />
         <DxGridDataColumn FieldName="LampKind" />
+        <DxGridDataColumn FieldName="LampKindDescription" />
     </Columns>
 </DxGrid>
 
@@ -30,10 +32,12 @@
         public string PushButtonName => pb.Name;
         public object PushButtonValue => pb.Value;
         public int PushButtonKind => pb.Kind;
+        public string PushButtonKindDescription => pb.KindDescription;
 
         public string LampName => lp.Name;
         public object LampValue => lp.Value;
         public int LampKind => lp.Kind;
+        public string LampKindDescription => lp.KindDescription;
 
         public HmiDeviceRow(HMIDevice hmiDevice)
         {

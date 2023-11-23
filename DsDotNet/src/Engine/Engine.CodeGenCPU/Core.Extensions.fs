@@ -36,12 +36,7 @@ module ConvertCoreExt =
         x.CallTargetJob.DeviceDefs
                         .Select(fun s ->s.ApiName, (s.ApiItem.TagManager :?> ApiItemManager).ErrorText)
 
-    let getOriginInfos(sys:DsSystem) =
-        let reals = sys.GetVertices().OfType<Real>()
-        reals.Select(fun r->
-               let t, rs = OriginHelper.GetOriginsWithDeviceDefs r.Graph
-               r, {Real = r; Tasks = t; ResetChains = rs})
-               |> Tuple.toDictionary
+
 
     type ApiItem with
         member a.PS     = getAM(a).PS
@@ -136,6 +131,12 @@ module ConvertCoreExt =
             x.GenerationCondition()
 
         member x.GenerationOrigins() =
+            let getOriginInfos(sys:DsSystem) =
+                let reals = sys.GetVertices().OfType<Real>()
+                reals.Select(fun r->
+                       let info = OriginHelper.GetOriginInfo r
+                       r, info)
+                       |> Tuple.toDictionary
             let origins = getOriginInfos x
             for (rv: VertexMReal) in x.GetVertices().OfType<Real>().Select(fun f->f.V) do
                 rv.OriginInfo <- origins[rv.Vertex :?> Real]

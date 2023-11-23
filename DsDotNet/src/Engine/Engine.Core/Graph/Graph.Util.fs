@@ -31,3 +31,4 @@ module internal GraphUtilImpl =
 
     let directionNotExist (source:'V) (target:'V) (graphOrder:'V->'V->bool option) =
         (graphOrder source target) |> fun f-> f.IsNone
+

@@ -491,6 +491,81 @@ module OriginModule =
         Tasks = [||]
         ResetChains = [||]
     }
+    let getMutualInfo (sys:DsSystem, xs:Vertex seq) =
+        let coinNapi =
+            xs.Select(fun x-> 
+                match x.GetPure() with
+                | :? Call as c -> 
+                    let devs = c.CallTargetJob.DeviceDefs
+                    if devs.GroupBy(fun d->d.ApiItem.System).length() > 1
+                    then 
+                        failwithf $"{c.Name} not same loaded system"
+                    else
+                        x, devs.First().ApiItem
+                |_-> 
+                    failwithf "Coin pure must be call type" ) 
+            |> dict
+
+        let findCoins api = 
+            coinNapi.Where(fun dic -> dic.Value = api)
+                    .Select(fun dic -> dic.Key)
+
+        xs.Select(fun x-> 
+            let call = x.GetPure() :?>  Call
+            let mutualCoins = sys.GetMutualResetApis(coinNapi[call])
+                                 .SelectMany(findCoins)
+            x, mutualCoins
+         ) |> dict
+         
+         
+    
+
+    let getOriginInfo (real:Real) = 
+        let graphOrder = GraphPairwiseOrderImpl.isAncestorDescendant (real.Graph)
+        let getInitialType (source:Vertex) (targets:Vertex seq) = 
+            let getTypeForSingleTarget (v:bool option)= 
+                match v with 
+                | Some  fwd -> if fwd 
+                                then InitialType.Off 
+                                else  InitialType.On
+                | None -> InitialType.NotCare
+
+            let getTypeForMuiltTarget (vs:bool option seq)= 
+                if vs.any(fun d-> d.IsNone)  //하나라도 순서없으면
+                then InitialType.NeedCheck
+                else
+                    if vs.Choose(id).AllEqual(true)
+                    then InitialType.Off 
+                    elif vs.Choose(id).AllEqual(false)
+                    then InitialType.On
+                    else InitialType.NeedCheck
+
+            match targets.length() with
+            |0 -> InitialType.NotCare
+            |1 -> graphOrder source (targets.First())
+                  |> getTypeForSingleTarget
+            |_ -> targets |> Seq.map(fun t-> graphOrder source t) 
+                  |> getTypeForMuiltTarget
+            
+
+
+        let vs = real.Graph.Vertices
+        let mutualInfo = getMutualInfo (real.Flow.System, vs)
+        let tasks = vs.SelectMany(fun v -> 
+                    let InitialType = getInitialType v  mutualInfo[v]
+                 
+
+                    let call = v.GetPure() :?>  Call
+                    let devs = call.CallTargetJob.DeviceDefs
+                    devs.Select(fun d->d, InitialType)
+                    )
+        {
+            Real  = real
+            Tasks = tasks
+            ResetChains = [||]
+        }
+        
+
 
     [<Extension>]
     type OriginHelper =
@@ -499,25 +574,14 @@ module OriginModule =
         static member GetOrigins (graph:DsGraph) =
             getOrigins graph |> Tuple.first
 
+        //[<Extension>]
+        //static member GetOriginsWithDeviceDefs (graph:DsGraph) =
+        //    let originMap, allJobs, resetChains = getOrigins graph
+        //    let getjobDef name =
+        //        allJobs.First(fun j -> j.ApiName = name)
+        //    let orgs = originMap |> Seq.map(fun node -> getjobDef node.Key, node.Value)
+        //    orgs, resetChains
+
         [<Extension>]
-        static member GetOriginsWithDeviceDefs (graph:DsGraph) =
-            let originMap, allJobs, resetChains = getOrigins graph
-            let getjobDef name =
-                allJobs.First(fun j -> j.ApiName = name)
-            let orgs = originMap |> Seq.map(fun node -> getjobDef node.Key, node.Value)
-            orgs, resetChains
-
-
-        /// Get node index map(key:name, value:idx)
-        [<Extension>]
-        static member GetIndexedMap (graph:DsGraph) = getIndexedMap graph
-
-        /// Get reset informations from graph
-        [<Extension>]
-        static member GetAllResets (graph:DsGraph) = getAllResets graph
-
-        /// Get pre-calculated targets that
-        /// child segments to be 'ON' in progress(Theta)
-        [<Extension>]
-        static member GetThetaTargets (graph:DsGraph) = getThetaTargets graph
-
+        static member GetOriginInfo (real :Real) = getOriginInfo real
+          

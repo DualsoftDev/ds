@@ -1,0 +1,91 @@
+// Copyright (c) Dual Inc.  All Rights Reserved.
+namespace Engine.Import.Office
+
+open System.Data
+open DocumentFormat.OpenXml
+open DocumentFormat.OpenXml.Packaging
+open DocumentFormat.OpenXml.Spreadsheet
+
+[<AutoOpen>]
+module ExportExcelModule =
+
+    ///https://www.fssnip.net/54/title/Create-Open-XML-Spreadsheet
+    let private createDataSheets(dts: seq<DataTable>) = 
+        dts |> Seq.map(fun dt ->
+            let sheetData = new SheetData()
+
+            // Add a header row
+            let headerRow = new Row()
+            for col in dt.Columns do
+                let cell = new Cell()
+                cell.DataType <- CellValues.String
+                cell.CellValue <- new CellValue(col.ColumnName)
+                headerRow.AppendChild(cell :> OpenXmlElement) |> ignore
+            sheetData.AppendChild(headerRow :> OpenXmlElement) |> ignore
+
+            // Populate the sheet data with data from the DataTable
+            for rowIndex in 0 .. dt.Rows.Count - 1 do
+                let dataRow = new Row()
+                for colIndex in 0 .. dt.Columns.Count - 1 do
+                    let cell = new Cell()
+                    let value = dt.Rows.[rowIndex].[colIndex]
+                    match value with
+                    | :? string as strValue ->
+                        cell.DataType <- CellValues.String
+                        cell.CellValue <- new CellValue(strValue)
+                    | :? System.IConvertible as convValue ->
+                        cell.DataType <- CellValues.Number
+                        cell.CellValue <- new CellValue(convValue.ToString(System.Globalization.CultureInfo.InvariantCulture))
+                    | _ ->
+                        // Handle other types or throw an exception
+                        ()
+                    cell.CellReference <- new StringValue(sprintf "%c%d" (char (65 + colIndex)) (rowIndex + 2)) // A1, B1, etc.
+                    dataRow.AppendChild(cell :> OpenXmlElement) |> ignore
+
+                sheetData.AppendChild(dataRow :> OpenXmlElement) |> ignore
+
+            dt.TableName, sheetData
+        )
+
+
+
+    let createSpreadsheet (filepath:string) (tables:DataTable seq) =
+        let seenNames = System.Collections.Generic.HashSet<string>()
+        for dt in tables do
+            if not (seenNames.Add dt.TableName) then
+                failwithf "Duplicate table name found: %s" dt.TableName
+
+        let sheetDataSeq = createDataSheets tables
+        // Create a spreadsheet document by supplying the filepath.
+        // By default, AutoSave = true, Editable = true, and Type = xlsx.
+        use spreadsheetDocument = SpreadsheetDocument.Create(filepath, SpreadsheetDocumentType.Workbook)
+
+        // Add a WorkbookPart to the document.
+        let workbookPart = spreadsheetDocument.AddWorkbookPart()
+        workbookPart.Workbook <- new Workbook()
+
+        // Add Sheets to the Workbook.
+        let sheets = workbookPart.Workbook.AppendChild<Sheets>(new Sheets())
+
+        // Counter for assigning unique SheetId
+        let mutable sheetId = 1u
+
+        // Function to add a worksheet for each SheetData item
+        sheetDataSeq
+        |> Seq.iter (fun (sheetName, sheetData) ->
+            let worksheetPart = workbookPart.AddNewPart<WorksheetPart>()
+            worksheetPart.Worksheet <- new Worksheet(sheetData :> OpenXmlElement)
+
+            // Append a new worksheet and associate it with the workbook.
+            let sheet = new Sheet(Id = StringValue(workbookPart.GetIdOfPart(worksheetPart)),
+                                  SheetId = UInt32Value(sheetId),
+                                  Name = StringValue(sheetName))
+            sheets.Append(sheet :> OpenXmlElement) |> ignore
+
+            // Increment the sheetId for the next sheet
+            sheetId <- sheetId + 1u
+        )
+
+        // Save the changes to the workbook
+        workbookPart.Workbook.Save()
+

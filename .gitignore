@@ -42,3 +42,4 @@ Grammar/CsParser/bin/
 /DsDotNet/Apps/OfficeAddOn/PowerPointAddIn For Dualsoft Setup/PowerPointAddInSetup.vdproj
 /DsDotNet/Apps/OfficeAddOn/PowerPointAddIn For Dualsoft Setup/PowerPointAddIn/*
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/exportDS/**/*.ds
+/DsDotNet/src/UnitTest/UnitTest.PowerPointAddIn/sample/*.xlsx

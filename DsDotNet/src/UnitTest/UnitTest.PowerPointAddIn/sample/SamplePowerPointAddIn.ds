@@ -1,0 +1,63 @@
+[sys] SamplePowerPointAddIn = {
+    [flow] STN111 = {
+        Work1 = {
+            STN111_RBT1_RUN_1, STN111_PIN_DN_1 > STN111_JIG1_ADV_1;
+            STN111_PIN_UP > STN111_CV_GO_1 > STN111_RBT1_RUN_1 > STN111_PIN_DN_1;
+            STN111_RBT2_HOME, STN111_RBT1_HOME > STN111_PIN_UP;
+            STN111_JIG1_RET, STN111_JIG2_RET, STN111_JIG3_RET, STN111_JIG4_RET > STN111_RBT2_HOME;
+            STN111_RBT1_RUN, STN111_PIN_DN > STN111_JIG1_ADV, STN111_JIG2_ADV, STN111_JIG3_ADV, STN111_JIG4_ADV > STN111_RBT2_RUN > STN111_JIG1_RET, STN111_JIG2_RET, STN111_JIG3_RET, STN111_JIG4_RET > STN111_RBT1_HOME;
+            STN111_CV_GO > STN111_RBT1_RUN > STN111_PIN_DN;
+        }
+        [aliases] = {
+            Work1.STN111_RBT1_RUN = { STN111_RBT1_RUN_1; }
+            Work1.STN111_PIN_DN = { STN111_PIN_DN_1; }
+            Work1.STN111_JIG1_ADV = { STN111_JIG1_ADV_1; }
+            Work1.STN111_CV_GO = { STN111_CV_GO_1; }
+        }
+    }
+    [jobs] = {
+        STN111_RBT1_RUN = { STN111_RBT1.RUN(%IX0.12, %QX1.12); }
+        STN111_PIN_DN = { STN111_PIN.DN(%IX0.9, %QX1.9); }
+        STN111_PIN_UP = { STN111_PIN.UP(%IX0.10, %QX1.10); }
+        STN111_RBT2_HOME = { STN111_RBT2.HOME(%IX0.13, %QX1.13); }
+        STN111_RBT1_HOME = { STN111_RBT1.HOME(%IX0.11, %QX1.11); }
+        STN111_RBT2_RUN = { STN111_RBT2.RUN(%IX0.14, %QX1.14); }
+        STN111_JIG1_ADV = { STN111_JIG1.ADV(%IX0.1, %QX1.1); }
+        STN111_JIG2_ADV = { STN111_JIG2.ADV(%IX0.3, %QX1.3); }
+        STN111_JIG3_ADV = { STN111_JIG3.ADV(%IX0.5, %QX1.5); }
+        STN111_JIG4_ADV = { STN111_JIG4.ADV(%IX0.7, %QX1.7); }
+        STN111_JIG1_RET = { STN111_JIG1.RET(%IX0.2, %QX1.2); }
+        STN111_JIG2_RET = { STN111_JIG2.RET(%IX0.4, %QX1.4); }
+        STN111_JIG3_RET = { STN111_JIG3.RET(%IX0.6, %QX1.6); }
+        STN111_JIG4_RET = { STN111_JIG4.RET(%IX0.8, %QX1.8); }
+        STN111_CV_GO = { STN111_CV.GO(%IX0.0, %QX1.0); }
+    }
+    [prop] = {
+        [layouts] = {
+            STN111_RBT1.RUN = (866, 237, 131, 25);
+            STN111_PIN.DN = (768, 263, 131, 25);
+            STN111_PIN.UP = (1057, 478, 131, 25);
+            STN111_RBT2.HOME = (1190, 432, 131, 25);
+            STN111_RBT1.HOME = (865, 426, 131, 25);
+            STN111_RBT2.RUN = (973, 349, 131, 25);
+            STN111_JIG1.ADV = (829, 312, 131, 25);
+            STN111_JIG2.ADV = (973, 312, 131, 25);
+            STN111_JIG3.ADV = (1122, 312, 131, 25);
+            STN111_JIG4.ADV = (1272, 312, 131, 25);
+            STN111_JIG1.RET = (829, 383, 131, 25);
+            STN111_JIG2.RET = (973, 383, 131, 25);
+            STN111_JIG3.RET = (1123, 383, 131, 25);
+            STN111_JIG4.RET = (1272, 383, 131, 25);
+            STN111_CV.GO = (1028, 277, 455, 25);
+        }
+    }
+    [device file="./DS_Library.ds"] STN111_RBT1; 
+    [device file="./DS_Library.ds"] STN111_PIN; 
+    [device file="./DS_Library.ds"] STN111_RBT2; 
+    [device file="./DS_Library.ds"] STN111_JIG1; 
+    [device file="./DS_Library.ds"] STN111_JIG2; 
+    [device file="./DS_Library.ds"] STN111_JIG3; 
+    [device file="./DS_Library.ds"] STN111_JIG4; 
+    [device file="./DS_Library.ds"] STN111_CV; 
+}
+//DS Language Version = [0.9.2.5]

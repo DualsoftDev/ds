@@ -61,7 +61,7 @@ type VertexMCoin with
                     let sets = td.ApiItem.PE.Expr <&&> td.ApiItem.PS.Expr 
                            <&&> coin.Flow.dop.Expr
 
-                    if td.ApiItem.ActionType = ApiActionType.Push 
+                    if call.CallTargetJob.ActionType = JobActionType.Push 
                     then 
                          let rstPush = td.MutualResetExpr(call.System)
                         

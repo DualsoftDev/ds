@@ -233,6 +233,7 @@ module CoreModule =
     type Job (name:string, tasks:DsTask list) =
         inherit Named(name)
         let mutable funcs = HashSet<Func>()
+        member x.ActionType:JobActionType = getJobActionType name
         member x.DeviceDefs = tasks.OfType<TaskDev>()
         //member x.LinkDefs   = tasks.OfType<TaskSys>()
         member x.SetFuncs(func) = 
@@ -274,7 +275,6 @@ module CoreModule =
 
         member _.Name = name
         member _.System = system
-        member _.ActionType:ApiActionType = getApiActionType name
         member val TXs = createQualifiedNamedHashSet<Real>()
         member val RXs = createQualifiedNamedHashSet<Real>()
         member val Xywh:Xywh = null with get, set

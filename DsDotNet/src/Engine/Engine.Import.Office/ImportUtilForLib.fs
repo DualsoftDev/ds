@@ -47,7 +47,7 @@ module ImportUtilForLib =
         let libRelPath =
             PathManager.getRelativePath (currentFileName |> DsFile) (libFilePath |> DsFile)
 
-        let paras =
+        let paras loadedName =
             getParams (libFilePath, libRelPath, loadedName, mySys, DuDevice, ShareableSystemRepository())
 
         let parent =
@@ -57,14 +57,24 @@ module ImportUtilForLib =
 
         let system, loadingPaths = ParserLoader.LoadFromActivePath libFilePath
         let devOrg = system
-
-        if not (devOrg.ApiItems.any (fun f -> f.Name = apiName)) then
+        let apiPureName = GetBracketsRemoveName(apiName)
+        if not (devOrg.ApiItems.any (fun f -> f.Name = apiPureName)) then
             node.Shape.ErrorName(ErrID._49, node.PageNum)
 
-        if not (mySys.LoadedSystems.Select(fun f -> f.Name).Contains(loadedName)) then
-            mySys.AddLoadedSystem(Device(devOrg, paras))
+     
+        let jobType = getJobActionType apiName
+        match jobType with
+        | MultiAction cnt ->  
+            for i in [1..cnt] do
+                let mutiName = $"{node.CallApiName}{i}"
+                if not (mySys.LoadedSystems.Select(fun f -> f.Name).Contains(mutiName)) then
+                    mySys.AddLoadedSystem(Device(devOrg, paras mutiName))
+        | _->
+            if not (mySys.LoadedSystems.Select(fun f -> f.Name).Contains(loadedName)) then
+                mySys.AddLoadedSystem(Device(devOrg, paras loadedName))
 
-        let api = devOrg.ApiItems.First(fun f -> f.Name = apiName)
+
+        let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
         let devTask = TaskDev(api, "", "", loadedName) :> DsTask
         let job = Job(loadedName + "_" + apiName, [ devTask ])
         mySys.Jobs.Add(job)

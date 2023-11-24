@@ -89,3 +89,45 @@ module GraphPairwiseOrderTest =
             isAncestor vs["C"] vs["A"] === None
             isAncestor vs["B"] vs["C"] === None
 
+        [<Test>]
+        member __.``PairwiseOrderingTest3`` () =
+            let vs = [0..39] |> List.map (fun n -> V $"{n}") |> indexed |> Tuple.toDictionary
+            let es =
+                [|  for i in 0..2 do
+                        for j in 0..9 do
+                            let v1 = vs.[i*10 + j]
+                            let nextLine = (i+1)*10
+                            for k in 0..9 do
+                                let v2 = vs.[nextLine + k]
+                                yield E(v1, v2)
+                |]
+
+            let g = Graph<V, E>(vs.Values, es)
+            let isAncestor = g.BuildPairwiseComparer()
+
+            // 순방향 direct edge 검사
+            for i in 0..2 do
+                for j in 0..9 do
+                    let v1 = vs.[i*10 + j]
+                    for n = i+1 to 3 do
+                        for k in 0..9 do
+                            let v2 = vs.[n*10 + k]
+                            isAncestor v1 v2 === Some true
+
+            // 역방향 direct edge 검사
+            for i in 0..2 do
+                for j in 0..9 do
+                    let v1 = vs.[i*10 + j]
+                    for n = i+1 to 3 do
+                        for k in 0..9 do
+                            let v2 = vs.[n*10 + k]
+                            isAncestor v2 v1 === Some false
+
+            // 동일 레벨 검사
+            for i in 0..2 do
+                for j in 0..9 do
+                    let v1 = vs.[i*10 + j]
+                    for k in 0..9 do
+                        let v2 = vs.[i*10 + k]
+                        isAncestor v1 v2 === None
+                        isAncestor v2 v1 === None

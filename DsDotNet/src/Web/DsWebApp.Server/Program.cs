@@ -112,10 +112,10 @@ var serverSettings =
 var serverGlobals = new ServerGlobal(serverSettings, commonAppSettings, logger);
 
 services.AddSingleton(serverGlobals);
+services.AddDsAuth(conf, commonAppSettings.LoggerDBSettings.ConnectionString);
 
 
 await services.AddUnsafeServicesAsync(serverGlobals, logger);
-services.AddAuth(conf, commonAppSettings.LoggerDBSettings.ConnectionString);
 
 
 builder.WebHost.UseStaticWebAssets();
@@ -149,6 +149,9 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseCors(_corsPolicyName);
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 
 app.MapRazorPages();
@@ -196,7 +199,7 @@ public static class CustomServerExtension
         return services;
     }
 
-    public static IServiceCollection AddAuth(this IServiceCollection services, ConfigurationManager conf, string connectionString)
+    public static IServiceCollection AddDsAuth(this IServiceCollection services, ConfigurationManager conf, string connectionString)
     {
         Func<string, UserAccount> userInfoExtractor = (string userName) =>
         {

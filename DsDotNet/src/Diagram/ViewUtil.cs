@@ -35,8 +35,18 @@ public static class ViewUtil
             Status = Status4.Homing,
             DsTasks = tasks
         };
-        ;
-        nodes.SetViewNodes(viewNodes.ToList());
+       
+
+        if(v.GetPure() is Call)
+        {
+            if(v.Parent.IsDuParentFlow)
+                nodes.SetViewNodes(viewNodes);
+            else 
+                nodes.SetViewNodes(viewNodes.Where(w=> w.CoreVertex.Value == v));
+        }
+        else
+            nodes.SetViewNodes(viewNodes);
+
         return nodes;
     }
 

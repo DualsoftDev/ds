@@ -11,7 +11,7 @@ public class ViewVertex
 {
     private List<ViewNode> _nodes;
     public Vertex Vertex { get; set; }
-    public void SetViewNodes(List<ViewNode> nodes) => _nodes = nodes;
+    public void SetViewNodes(IEnumerable<ViewNode> nodes) => _nodes = nodes.ToList();
 
     public IEnumerable<ViewNode> DisplayNodes =>
         _nodes.Where(w => w.CoreVertex.Value is not Alias

@@ -63,8 +63,14 @@ module ImportUtilForLib =
                 mySys.GetLoadedSys(loadedName).Value.ReferenceSystem
 
 
-        let devOrg, _ = ParserLoader.LoadFromActivePath libFilePath
         let apiPureName = GetBracketsRemoveName(apiName)
+
+        let getLoadedTasks (loadedSys:DsSystem) (newloadedName:string)  =
+            let devOrg= addOrGetExistSystem loadedSys newloadedName
+            let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
+            TaskDev(api, "", "", newloadedName) :> DsTask
+
+        let devOrg, _ = ParserLoader.LoadFromActivePath libFilePath
         if not (devOrg.ApiItems.any (fun f -> f.Name = apiPureName)) then
             node.Shape.ErrorName(ErrID._49, node.PageNum)
 
@@ -76,15 +82,10 @@ module ImportUtilForLib =
                 let devOrg = if i = 1 then devOrg
                              else ParserLoader.LoadFromActivePath libFilePath |> fst
 
-                let mutiName = $"{loadedName}[{cnt}]{i}"
-                let devOrg= addOrGetExistSystem devOrg mutiName
-                let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
-                tasks.Add (TaskDev(api, "", "", mutiName) :> DsTask)  |>ignore
-
+                let mutiName = $"{loadedName}_G{i}"
+                tasks.Add(getLoadedTasks devOrg mutiName)|>ignore
         | _->
-            let devOrg= addOrGetExistSystem devOrg loadedName
-            let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
-            tasks.Add (TaskDev(api, "", "", loadedName) :> DsTask)  |>ignore
+            tasks.Add(getLoadedTasks devOrg loadedName)|>ignore
 
 
         let job = Job(loadedName + "_" + apiName, tasks |> Seq.toList)

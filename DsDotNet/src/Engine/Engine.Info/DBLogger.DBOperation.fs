@@ -298,7 +298,7 @@ module internal DBLoggerImpl =
                            Value = config |} )
             }
 
-
+        /// Log DB schema 생성
         let initializeLogDbOnDemandAsync (commonAppSetting: DSCommonAppSettings) =
             task {
                 let loggerDBSettings = commonAppSetting.LoggerDBSettings

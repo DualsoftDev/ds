@@ -8,6 +8,7 @@ open Engine.Parser.FS
 open System.Collections.Generic
 open Dual.Common.Core.FS
 open Engine.CodeGenCPU
+open Engine.Info
 
 type FilePath = string
 
@@ -15,12 +16,14 @@ type FilePath = string
 type RuntimeModel(zipDsPath:FilePath) =
     let model:Model = ParserLoader.LoadFromConfig (unZip zipDsPath) 
     let dsCPU:DsCPU = DsCpuExt.GetDsCPU(model.System, RuntimePackage.StandardPC)
-    let hmiTagPackage= TagHMIExt.GetHmiTagPackage(model.System)
+    let kindDescriptions = DBLoggerApi.GetAllTagKinds() |> Tuple.toDictionary
+    let hmiTagPackage:HmiTagPackage = TagHMIExt.GetHmiTagPackage(model.System, kindDescriptions)
     interface IDisposable with
         member x.Dispose() = x.Dispose()
 
     member x.HMITagPackage = hmiTagPackage
     member x.SourceDsZipPath = zipDsPath
+    member x.TagKindDescriptions = kindDescriptions
 
     /// DsCPU: call Run, Step, Reset, Stop method on DsCPU
     member x.Cpu = dsCPU

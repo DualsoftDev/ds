@@ -10,9 +10,11 @@
         <DxGridDataColumn FieldName="PushButtonName" />
         <DxGridDataColumn FieldName="PushButtonValue" />
         <DxGridDataColumn FieldName="PushButtonKind" />
+        <DxGridDataColumn FieldName="PushButtonKindDescription" Caption="PB Kind Desc" />
         <DxGridDataColumn FieldName="FlickerLampName" />
         <DxGridDataColumn FieldName="FlickerLampValue" />
         <DxGridDataColumn FieldName="FlickerLampKind" />
+        <DxGridDataColumn FieldName="FlickerLampKindDescription" Caption="FL Desc"/>
     </Columns>
 </DxGrid>
 
@@ -27,10 +29,12 @@
         public string PushButtonName => pb.Name;
         public object PushButtonValue => pb.Value;
         public int PushButtonKind => pb.Kind;
+        public string PushButtonKindDescription => pb.KindDescription;
 
         public string FlickerLampName => fl.Name;
         public object FlickerLampValue => fl.Value;
         public int FlickerLampKind => fl.Kind;
+        public string FlickerLampKindDescription => fl.KindDescription;
 
         public HmiButtonRow(HMIButton hmiButton)
         {

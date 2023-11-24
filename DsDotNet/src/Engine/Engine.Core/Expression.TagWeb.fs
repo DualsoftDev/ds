@@ -2,22 +2,25 @@ namespace Engine.Core
 
 open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
+open System.Collections
+open System.Collections.Generic
 
 [<AutoOpen>]
 module TagWebModule =
 
     // C# interop 을 위해서 record type 대신 class type 으로..
     [<AllowNullLiteral>]
-    type TagWeb(name:string, value:obj, kind:int, message:string) =
+    type TagWeb(name:Name, value:obj, kind:int, kindDescription:string, message:string) =
         let serializedObject = ObjectHolder.Create(value).Serialize()
 
-        new() = TagWeb("", "", 0, "")
-        new(name, object, kind) = TagWeb(name, object, kind, "")
+        new() = TagWeb("", "", 0, "", "")
+        new(name, object, kind, kindDescription) = TagWeb(name, object, kind, kindDescription, "")
 
         member val Name = name with get, set    //FQDN 고유이름
         /// serializedObject 예: "{\"RawValue\":false,\"Type\":1}"
         member val _SerializedObject = serializedObject with get, set
         member val Kind = kind with get, set //Tag 종류 ex) going = 11007
+        member val KindDescription = kindDescription with get, set
         member val Message = message with get, set //에러 내용 및 기타 전달 Message 
 
     type TagWeb with
@@ -61,9 +64,9 @@ module TagWebModule =
 type TagWebExt =
     [<Extension>] static member GetValue (x:TagWeb) : obj = x.Value
     [<Extension>]
-    static member GetWebTag(x:IStorage) : TagWeb =
+    static member GetWebTag(x:IStorage, kindDescription:Dictionary<int, string>) : TagWeb =
         let createTagWeb (tag:IStorage) (qualifiedName:string) =
-            TagWeb(qualifiedName, tag.BoxedValue, tag.TagKind, "")
+            TagWeb(qualifiedName, tag.BoxedValue, tag.TagKind, kindDescription[tag.TagKind], "")
         
         match x.GetTagInfo() with
         | Some dsTag ->

@@ -145,7 +145,7 @@ module CoreModule =
         member x.LampType = lampType
         /// 램프 작동을 위한 외부 IO 출력 주소
         member val OutAddress = outAddress  with get, set
-        /// CPU 생성 시 할당됨 OutTag
+        /// CPU 생성 시 할당됨 물리 OutTag
         member val OutTag = getNull<ITag>() with get, set
         /// 단일 플로우 단위로 램프 상태 출력
         member val SettingFlow = flow with get, set

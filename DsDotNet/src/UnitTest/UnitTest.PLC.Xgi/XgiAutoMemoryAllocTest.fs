@@ -27,7 +27,7 @@ type AutoMemoryAllocTest() =
 
             let statements = parseCode globalStorages code |> map withNoComment
             for t in globalStorages.Values do
-                t.Address <- ""
+                t.Address <- TextAddrEmpty
 
             {
                 TaskName = "Scan Program"

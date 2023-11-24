@@ -15,12 +15,12 @@ module ImportIOUtil =
 
     let getValidAddress (addr: string, name: string, isSkip: bool, bInput: bool) =
 
-        let addr = if addr = null 
-                    then "" 
+        let addr = if addr.IsNullOrEmpty()
+                    then failwithf $"Empty address {name}"
                     else addr.Trim().ToUpper()
 
         let newAddr =
-            match addr.IsNullOrEmpty(), isSkip with
+            match addr = TextAddrEmpty, isSkip with
             | true, true -> TextSkip
             | true, false -> 
                 let cnt = if bInput
@@ -40,7 +40,7 @@ module ImportIOUtil =
                 | _ -> addr
         
             //parsing을 위헤서 '-' -> '_' 변경 
-        if newAddr = TextSkip then TextEmpty else newAddr
+        if newAddr = TextSkip then TextAddrEmpty else newAddr
       
 
     let getValidDevAddress (taskDev: TaskDev, bInput: bool) =
@@ -48,12 +48,11 @@ module ImportIOUtil =
         let address =  if bInput then taskDev.InAddress else taskDev.OutAddress
         getValidAddress(address, taskDev.QualifiedName, isSkip, bInput)
 
-    let getValidBtnAddress (btn: ButtonDef, addr:string,  bInput) =
-        let isSkip  = (addr = TextSkip || addr = "")
-      //  let inout   = if bInput then "입력" else "출력"
-        //if addr = "" 
-        //then failwithf $"{inout} 부분 {btn.Name} 물리배선 없는 경우 대쉬('-') 기입 필요."
-        getValidAddress(addr, btn.Name, isSkip, bInput)
+    let getValidBtnAddress (btn: ButtonDef, bInput:bool) =
+        if bInput then
+            getValidAddress(btn.InAddress, btn.Name, false, bInput)
+        else 
+            getValidAddress(btn.OutAddress, btn.Name, btn.OutAddress = TextSkip, bInput)
 
     let getValidLampAddress (lamp: LampDef) =
         getValidAddress(lamp.OutAddress, lamp.Name, false, false)

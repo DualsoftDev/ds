@@ -43,9 +43,10 @@ module internal XgiSymbolsModule =
         |> List.choose id
 
     let autoAdress (t:IStorage) (prjParams: XgiProjectParams) = 
-        // address 가 "" 인 symbol 에 한해서 자동으로 address 를 할당.
+        // address 가 "_" 인 symbol 에 한해서 자동으로 address 를 할당.
         // null 또는 다른 값이 지정되어 있으면, 그대로 사용한다.
-        if t.Address = "" || t.Address = TextEmpty then
+        if t.Address = "" then  failwithlog $"ERROR. {t.Name} address empty."
+        if t.Address = TextAddrEmpty then
             let allocatorFunctions =
                 match prjParams.MemoryAllocatorSpec with
                 | RangeSpec _ -> failwithlog "ERROR.  Should have already been converted to allocator functions."
@@ -83,7 +84,7 @@ module internal XgiSymbolsModule =
                 | RegexPattern @"^%([IQM])([XBWL]).*$" [ iqm; mem ] -> iqm, mem
                 | RegexPattern @"^%([IQM]).*$" [ iqm ] -> iqm, "X" // `%I1` 이런거 허용하나?
                 | _ -> 
-                    if t.Address = TextEmpty 
+                    if t.Address = TextAddrEmpty 
                     then  failwith $"empty tag address for {name}"
                     else  failwith $"Invalid tag address {t.Address} for {name}"
                        

@@ -156,7 +156,7 @@ type XgiPOUTest() =
         let f = getFuncName()
         parseCode globalStorages code |> ignore
         for n in ["xm0"; "xm1"; "xm2"; "xm3"; "y0"; "y1"; "y2"; "y3"; "nm0"; "nm1"; "nm2"; "nm3"] do
-            globalStorages[n].Address <- ""       // force to allocate Memory
+            globalStorages[n].Address <- TextAddrEmpty       // force to allocate Memory
 
         let projectParams = {
             createProjectParams(f) with
@@ -167,7 +167,7 @@ type XgiPOUTest() =
         let xml = projectParams.GenerateXmlString()
 
         globalStorages["gg1"].Address === null
-        globalStorages["xm0"].Address === "%MX320"
+        globalStorages["xm0"].Address === "%MX24"
 
         saveTestResult f xml
 

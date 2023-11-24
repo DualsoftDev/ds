@@ -117,14 +117,14 @@ module ConvertCPU =
     let setSimulationAddress(sys:DsSystem) = 
         sys.Jobs.ForEach(fun j->
             j.DeviceDefs.ForEach(fun d-> 
-                        if d.InAddress.IsNullOrEmpty() then  d.InAddress <- TextEmpty
-                        if d.OutAddress.IsNullOrEmpty() then d.OutAddress <- TextEmpty)
+                        if d.InAddress.IsNullOrEmpty() then  d.InAddress <- TextAddrEmpty
+                        if d.OutAddress.IsNullOrEmpty() then d.OutAddress <- TextAddrEmpty)
             )
         sys.Lamps.ForEach(fun l -> 
-                        if l.OutAddress.IsNullOrEmpty() then  l.OutAddress <- TextEmpty)
+                        if l.OutAddress.IsNullOrEmpty() then  l.OutAddress <- TextAddrEmpty)
         sys.Buttons.ForEach(fun b->                                         
-                         if b.InAddress.IsNullOrEmpty() then   b.InAddress <- TextEmpty
-                         if b.OutAddress.IsNullOrEmpty() then  b.OutAddress <-TextEmpty
+                         if b.InAddress.IsNullOrEmpty() then   b.InAddress <- TextAddrEmpty
+                         if b.OutAddress.IsNullOrEmpty() then  b.OutAddress <-TextAddrEmpty
                         )
 
     let convertSystem(sys:DsSystem, isActive:bool) =
@@ -141,13 +141,14 @@ module ConvertCPU =
         then sys.GenerationOrigins()
 
         [
-            //시스템 적용
-            yield! applySystemSpec sys
-
-            //Flow 적용
-            for f in sys.Flows do
-                yield! applyOperationModeSpec f
-                yield! applyFlowMonitorSpec f
+            //Active 시스템 적용
+            if isActive
+            then 
+                yield! applySystemSpec sys
+                //Flow 적용
+                for f in sys.Flows do
+                    yield! applyOperationModeSpec f
+                    yield! applyFlowMonitorSpec f
 
 
             //Vertex 적용

@@ -89,13 +89,13 @@ module ConvertCoreExt =
             for lamp in x.SystemLamps do
                 match createBridgeTag(x.Storages, lamp.Name, lamp.OutAddress,  ActionTag.ActionOut  ,x , None) with
                 | Some t ->  lamp.OutTag  <- t
-                | None -> ()
+                | None -> failwithf "empty address error"
 
         member private x.GenerationCondition() =
             for sc in x.SystemConditions do
                 match createBridgeTag(x.Storages, sc.Name, sc.InAddress, ActionTag.ActionIn , x, None) with
                 | Some t ->  sc.InTag  <- t
-                | None -> ()
+                | None -> failwithf "empty address error"
 
         member private x.GenerationButtonIO() =
             for b in x.SystemButtons do

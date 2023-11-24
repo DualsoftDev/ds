@@ -42,7 +42,6 @@ module ImportIOTable =
 
             let changeValidAddress (address:string)  =
                 let address = address.Trim() 
-                let address = if address = TextSkip then TextEmpty else address
                 match RuntimeDS.Target with
                 | XGI -> if not <| address.StartsWith("%") then "%" + address else address
                 | _ -> address
@@ -60,8 +59,10 @@ module ImportIOTable =
                 //errCheckAddress(dev.ApiItem.RXs.Count=0, devName, inAdd)
                 //errCheckAddress(dev.ApiItem.TXs.Count=0, devName, outAdd)
 
-                dev.InAddress <- changeValidAddress inAdd
+                dev.InAddress <-  changeValidAddress inAdd
                 dev.OutAddress <- changeValidAddress outAdd
+                dev.InAddress <-  getValidDevAddress (dev, true)
+                dev.OutAddress <- getValidDevAddress (dev, false)
 
                 let jobName = $"{row.[(int) IOColumn.Job]}"
                 let func = $"{row.[(int) IOColumn.Func]}"
@@ -80,15 +81,18 @@ module ImportIOTable =
             let updateVar (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let name = $"{row.[(int) IOColumn.Name]}"
                 let dataType = $"{row.[(int) IOColumn.DataType]}" |> textToDataType
-                let variableData = VariableData(name, dataType, TextEmpty)
+                let variableData = VariableData(name, dataType, TextAddrEmpty)
                 sys.Variables.Add(variableData)
 
             let updateBtn (row: Data.DataRow, btntype: BtnType, tableIO: Data.DataTable, page) =
                 let btnName = $"{row.[(int) IOColumn.Name]}"
                 match sys.SystemButtons.Where(fun w -> w.ButtonType = btntype).TryFind(fun f -> f.Name = btnName) with
                 | Some btn ->
-                    btn.InAddress  <- getValidBtnAddress (btn,$"{row.[(int) IOColumn.Input]}" , true)
-                    btn.OutAddress <- getValidBtnAddress (btn,$"{row.[(int) IOColumn.Output]}" ,  false)
+                    btn.InAddress  <- $"{row.[(int) IOColumn.Input]}"
+                    btn.OutAddress <- $"{row.[(int) IOColumn.Output]}"
+                    //ValidBtnAddress
+                    btn.InAddress  <- getValidBtnAddress (btn , true)
+                    btn.OutAddress <- getValidBtnAddress (btn , false)
                     functionUpdate (btn.Name, $"{row.[(int) IOColumn.Func]}", btn.Funcs, tableIO, false, page)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{btnName}", page, 0u)
 

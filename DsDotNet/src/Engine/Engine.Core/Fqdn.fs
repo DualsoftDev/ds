@@ -16,9 +16,6 @@ module FqdnImpl =
     type Fqdn = string[]
     let (|Fqdn|) xs = Array.ofSeq xs
 
-    /// Helper Functions
-    let internal replaceSkipAddress(addr:string) =
-        if addr = "_" then "" else addr
 
     let internal getRawName (fqdn:string seq) (quoteOnSingle:bool) =
         let fqdnList = fqdn |> List.ofSeq

@@ -21,7 +21,7 @@ module CodeElements =
             let genTargetText name (varType:DataType) value =
                 $"{name} = ({varType.ToText()} , {value})"
 
-            if initValue = TextEmpty then
+            if initValue = TextAddrEmpty then
                 let forcedValue =
                     match varType with
                     | DuFLOAT32 -> "0.0f"

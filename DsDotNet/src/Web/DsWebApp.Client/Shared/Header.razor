@@ -1,5 +1,5 @@
-@using DsWebApp.Client.Components
 @using Dual.Common.Core
+@using Dual.Web.Blazor.Client.Components.Auth
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject ClientGlobal ClientGlobal
 
@@ -32,8 +32,8 @@
         {
             var name = ClientGlobal?.AuthenticationState?.User?.Identity?.Name;
             if (name.NonNullAny())
-                name = $"({name}";
-            <a @onclick="Logout" href="javascript:void(0)">Logout(@name)</a>
+                name = $"({name})";
+            <a @onclick="Logout" href="javascript:void(0)">Logout @name</a>
         }
 
     </div>

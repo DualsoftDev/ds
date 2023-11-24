@@ -18,6 +18,7 @@
 @using Dual.Web.Blazor.Client.Canvas2d
 @using Dual.Web.Blazor.Client.Components
 @using Dual.Web.Blazor.Client.Auth
+@using Blazored.LocalStorage
 
 @using TagFqdn = string
 
@@ -30,5 +31,6 @@
 @inject CanvasJsInterop JsCanvas
 @inject ClientGlobal ClientGlobal
 @inject IJSRuntime JsRuntime
+@inject ILocalStorageService LocalStorage;
 
 

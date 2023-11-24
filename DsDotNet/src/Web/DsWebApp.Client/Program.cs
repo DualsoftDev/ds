@@ -1,3 +1,4 @@
+using Blazored.LocalStorage;
 using Blazored.SessionStorage;
 using DsWebApp.Shared;
 using Dual.Web.Blazor.Client.Auth;
@@ -16,6 +17,8 @@ services.AddScoped<DualWebBlazorJsInterop>();
 services.AddScoped<CanvasJsInterop>();
 services.AddScoped<FilesManager>();
 services.AddScoped<ClientGlobal>();
+
+services.AddBlazoredLocalStorage();
 services.AddBlazoredSessionStorage();
 services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 services.AddAuthorizationCore();

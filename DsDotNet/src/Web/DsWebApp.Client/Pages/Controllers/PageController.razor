@@ -1,13 +1,20 @@
 @page "/controllers/controller"
+
 @using System.Collections.ObjectModel
 @using System.Text.Json
 @using Dual.Common.Core
 @using Dual.Web.Blazor.ServerSide
+
+
+@attribute [Authorize(Roles = "Administrator")]
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
 @implements IDisposable
 
 <h3>PageController</h3>
 
-@* counter: @ClientGlobal.Counter *@
 
 @if (_loading)
 {
@@ -73,11 +80,17 @@ else
 
     async Task Run()
     {
-        await executeRestApi($"api/cpu/command/run", "Cpu running.");
+        if (await AuthenticationStateProvider.SetAuthHeaderAsync(Http))
+            NavigationManager.NavigateTo("/toplevel/login");
+        else
+            await executeRestApi($"api/cpu/command/run", "Cpu running.");
     }
     async Task Stop()
     {
-        await executeRestApi($"api/cpu/command/stop", "Cpu stopped.");
+        if (await AuthenticationStateProvider.SetAuthHeaderAsync(Http))
+            await executeRestApi($"api/cpu/command/stop", "Cpu stopped.");
+        else
+            NavigationManager.NavigateTo("/toplevel/login");
     }
 
     async Task Step()

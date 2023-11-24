@@ -42,6 +42,7 @@ module internal DBLoggerORM =
         let Error = "error"
         let TagKind = "tagKind"
         let Property = "property"
+        let User = "user"
     // database view names
     module Vn =
         let Log = "vwLog"
@@ -85,6 +86,19 @@ CREATE TABLE [{Tn.Property}] (
     , [name]        NVARCHAR(64) UNIQUE NOT NULL CHECK(LENGTH(name) <= 64)
     , [value]       NVARCHAR(64) NOT NULL CHECK(LENGTH(name) <= 64)
 );
+
+
+CREATE TABLE [{Tn.User}] (
+    [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+    , [username]    NVARCHAR(64) NOT NULL       CHECK(LENGTH(username) <= 64)
+    , [password]    NVARCHAR(512)               CHECK(LENGTH(password) <= 512) -- NOT NULL
+    , [isAdmin]     TINYINT NOT NULL DEFAULT 0
+    , CONSTRAINT user_name_uniq UNIQUE (username)
+);
+
+INSERT INTO [{Tn.User}]
+    (username, password, isAdmin)
+    VALUES ('admin', null, 1);
 
 
 CREATE VIEW [{Vn.Log}] AS

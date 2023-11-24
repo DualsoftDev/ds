@@ -1,0 +1,3 @@
+- 설치본 제거
+- `PowerpointAddInForDS` project 를 rebuild 후 실행
+- 

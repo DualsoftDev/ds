@@ -49,9 +49,11 @@ public class HmiTagController(
         if (cpu == null)
             return false;
 
+        var kindDescriptions = _model?.TagKindDescriptions;
+
         // serializedObject : e.g "{\"RawValue\":false,\"Type\":1}"
         var objHolder = Dual.Common.Core.FS.ObjectHolder.Deserialize(serializedObject);
-        var tagWeb = new TagWeb(fqdn, objHolder.RawValue, tagKind);
+        var tagWeb = new TagWeb(fqdn, objHolder.RawValue, tagKind, kindDescriptions[tagKind]);
         ErrorMessage errMsg = cpu.UpdateTagWeb(tagWeb);
         await hubContext.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
 

@@ -9,6 +9,7 @@ namespace DsWebApp.Server.Common
     public class ServerGlobal
     {
         public ServerSettings ServerSettings { get; set; }
+        public DSCommonAppSettings DsCommonAppSettings { get; set; }
 
         /// <summary>
         /// DsZipPath 에 따른 compile 된 Runtime model
@@ -16,7 +17,6 @@ namespace DsWebApp.Server.Common
         public RuntimeModel RuntimeModel { get; private set; }
 
 
-        public DSCommonAppSettings DsCommonAppSettings { get; set; }
         internal DBLoggerORM.LogSet LogSet { get; set; }
 
         public ILog Logger { get; set; }

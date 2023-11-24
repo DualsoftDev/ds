@@ -1,8 +1,6 @@
-using DsWebApp.Client;
 using Blazored.SessionStorage;
 using DsWebApp.Shared;
-using Microsoft.AspNetCore.Components.Web;
-using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Dual.Web.Blazor.Client.Auth;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -19,7 +17,7 @@ services.AddScoped<CanvasJsInterop>();
 services.AddScoped<FilesManager>();
 services.AddScoped<ClientGlobal>();
 services.AddBlazoredSessionStorage();
-//services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 services.AddAuthorizationCore();
 
 await builder.Build().RunAsync();

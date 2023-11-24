@@ -28,11 +28,11 @@
     // string _name;
     // int _kind;
     bool _flag;
-    TagWeb _tagWeb = new("my.STN01.WORK1", false, 11018);
+    TagWeb _tagWeb = new("my.STN01.WORK1", false, 11018, "");
 
     private async Task HandleSubmit()
     {
-        TagWeb tagWeb = new(_tagWeb.Name, _flag, _tagWeb.Kind);
+        TagWeb tagWeb = new(_tagWeb.Name, _flag, _tagWeb.Kind, _tagWeb.KindDescription);
         Console.WriteLine($"TagWeb: Name={tagWeb.Name}, Kind={tagWeb.Kind}");
         var response = await Http.PostAsJsonAsync("api/hmitag", tagWeb);
         response.EnsureSuccessStatusCode();

@@ -1,5 +1,9 @@
+@using DsWebApp.Client.Components
+@using Dual.Common.Core
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ClientGlobal ClientGlobal
 
+<CompSessionLogin/>
 
 <nav class="navbar header-navbar p-0">
     <button class="navbar-toggler bg-primary d-block" @onclick="OnToggleClick">
@@ -8,15 +12,30 @@
     <div class="ms-3 fw-bold title pe-4">듀얼소프트 웹</div>
 
     <div class="justify-content-end">
+@*
         <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
         <AuthorizeView>
-            <Authorized>
+        <Authorized>
                 <a @onclick="Logout" href="javascript:void(0)">Logout</a> &nbsp;(@context.User.Identity.Name)
             </Authorized>
             <NotAuthorized>
                 <a href="/toplevel/login">Login</a>
             </NotAuthorized>
         </AuthorizeView>
+ *@
+
+        @if (ClientGlobal.UserSession == null)
+        {
+            <a href="/toplevel/login">Login</a>
+        }
+        else
+        {
+            var name = ClientGlobal?.AuthenticationState?.User?.Identity?.Name;
+            if (name.NonNullAny())
+                name = $"({name}";
+            <a @onclick="Logout" href="javascript:void(0)">Logout(@name)</a>
+        }
+
     </div>
 
 </nav>
@@ -41,4 +60,27 @@
         await customAuthStateProvider.UpdateAuthenticationState(null);
         NavigationManager.NavigateTo("/", true);
     }
+    protected override async Task OnInitializedAsync()
+    {
+        AuthenticationStateProvider.AuthenticationStateChanged += async authStateTask =>
+            {
+                Console.Write("AuthenticationStateChanged: ");
+                AuthenticationState authState = await authStateTask;
+                // if (authState.User.Identities.Any(identity => identity.IsAuthenticated))
+                if (authState.User.Identity.IsAuthenticated)
+                    Console.WriteLine($"인증 OK");
+                else
+                    Console.WriteLine($"인증 안됨");
+
+
+                StateHasChanged();
+                // var user = authState.User;
+                // if (user.Identity.IsAuthenticated)
+                // {
+                //     var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthenticationStateProvider;
+                //     await customAuthStateProvider.UpdateAuthenticationState(user);
+                // }
+            };
+    }
+
 }

@@ -2,6 +2,7 @@
 
 using DsWebApp.Shared;
 
+using Dual.Web.Blazor.Auth;
 using Dual.Web.Blazor.ServerSide;
 
 using Microsoft.AspNetCore.Components;
@@ -15,6 +16,8 @@ namespace DsWebApp.Client
 {
     public class ClientGlobal
     {
+        public UserSession UserSession { get; set; }
+        public AuthenticationState AuthenticationState { get; set; }
         public HmiTagPackage HmiTagPackage { get; set; }
 
         ServerSettings _serverSettings;

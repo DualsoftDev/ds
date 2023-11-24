@@ -1,0 +1,25 @@
+@using Blazored.SessionStorage
+@using Dual.Web.Blazor.Auth
+
+@inject ISessionStorageService sessionStorage
+@inject ILocalStorageService localStorage
+@inject ClientGlobal ClientGlobal
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthenticationStateProvider;
+
+        ClientGlobal.UserSession = await sessionStorage.ReadEncryptedItemAsync<UserSession>("UserSession");
+        ClientGlobal.UserSession ??= await localStorage.ReadEncryptedItemAsync<UserSession>("UserSession");
+        var userSession = ClientGlobal.UserSession;
+        if (userSession != null)
+        {
+            Console.WriteLine($"Trying to login with {userSession}");
+            await customAuthStateProvider.UpdateAuthenticationState(userSession);
+        }
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        ClientGlobal.AuthenticationState = authState;
+    }
+}

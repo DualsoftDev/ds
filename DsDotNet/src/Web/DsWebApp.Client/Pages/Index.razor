@@ -1,12 +1,8 @@
 @page "/"
-@using Blazored.SessionStorage
 @using Dual.Common.Core
 @using Dual.Web.Blazor.Auth
 @using System.Text
 @using System.Text.Json
-
-@inject ISessionStorageService sessionStorage
-@inject ILocalStorageService localStorage
 
 <h2 class="pb-2">Dualsoft</h2>
 <p class="pb-2 mw-1100">
@@ -34,15 +30,3 @@
 
 </ul>
 
-
-@code {
-    protected override async Task OnInitializedAsync()
-    {
-        var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthenticationStateProvider;
-
-        var userSession = await sessionStorage.ReadEncryptedItemAsync<UserSession>("UserSession");
-        userSession ??= await localStorage.ReadEncryptedItemAsync<UserSession>("UserSession");
-        if (userSession != null)
-            await customAuthStateProvider.UpdateAuthenticationState(userSession);
-    }
-}

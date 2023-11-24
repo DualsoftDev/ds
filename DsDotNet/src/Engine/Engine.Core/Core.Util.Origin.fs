@@ -77,7 +77,7 @@ module OriginModule =
 
     // Origin 정보를 얻습니다.
     let getOriginInfo (real: Real) =
-        let graphOrder = GraphPairwiseOrderImpl.isAncestorDescendant real.Graph
+        let graphOrder = real.Graph.BuildPairwiseComparer()
         let pureGroupAlias =
             real.Graph.Vertices.OfType<Alias>()
             |> Seq.groupBy (fun f -> f.GetPure())

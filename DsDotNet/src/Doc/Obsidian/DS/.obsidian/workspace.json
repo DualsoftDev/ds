@@ -25,7 +25,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "DsWebServer/IOHub Web 연동.md",
+                "file": "Others/Powerpoint Addin's.md",
                 "mode": "source",
                 "source": false
               }
@@ -110,7 +110,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "DsWebServer/IOHub Web 연동.md",
+                "file": "Others/Powerpoint Addin's.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -127,7 +127,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "DsWebServer/IOHub Web 연동.md",
+                "file": "Others/Powerpoint Addin's.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -150,7 +150,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "DsWebServer/IOHub Web 연동.md"
+                "file": "Others/Powerpoint Addin's.md"
               }
             }
           }
@@ -173,12 +173,14 @@
   },
   "active": "d96ae9ea8943286a",
   "lastOpenFiles": [
+    "DsWebServer/IOHub Web 연동.md",
+    "Others/Powerpoint Addin's.md",
+    "Others",
     "DsWebServer/HMI/TagWeb.md",
     "DsWebServer/HMI/HMI.md",
     "TODO's.md",
     "App Dll Hierarchy.canvas",
     "Core Dll hierarchy.canvas",
-    "DsWebServer/IOHub Web 연동.md",
     "0. TOC.md",
     "DsWebServer/Controller.md",
     "DsWebServer/DsWebServer.canvas",
@@ -212,7 +214,6 @@
     "Stat/Database",
     "Stat",
     "IOHub/Zmq",
-    "IOHub/IO Spec",
-    "PLC"
+    "IOHub/IO Spec"
   ]
 }

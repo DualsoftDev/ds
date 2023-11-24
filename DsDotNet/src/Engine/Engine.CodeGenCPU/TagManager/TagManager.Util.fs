@@ -16,8 +16,8 @@ module TagManagerUtil =
             |> Seq.map (fun c ->
                 match c with
                 | _ when Char.IsNumber(c) 
-                        || c.IsValidIdentifier() 
-                        || ['['; ']'].ToResizeArray().Contains(c) -> c.ToString()
+                        || c.IsValidIdentifier() -> c.ToString()
+                        //|| ['['; ']'].ToResizeArray().Contains(c)   //arrayType 오인
                 | _ -> "_")
             |> String.concat ""
 
@@ -87,9 +87,9 @@ module TagManagerUtil =
                 | ActionTag.ActionMemory -> failwithlog "error: Memory not supported "
                 | _ -> failwithlog "error: ActionTag create "
 
-            let plcName = getPlcTagAbleName name stg
+            let plcAddrName = getPlcTagAbleName name stg
             let t =
-                let param = {defaultStorageCreationParams(false) with Name=plcName; Address= Some address; System=sys; TagKind = (int)inOut; Target = task}
+                let param = {defaultStorageCreationParams(false) with Name=plcAddrName; Address= Some address; System=sys; TagKind = (int)inOut; Target = task}
                 (Tag(param) :> ITag)
             stg.Add(t.Name, t)
             Some t

@@ -22,8 +22,8 @@ module ConvertErrorCheck =
             failwithlogf $"Device 주소가 없습니다. \n{errJobs}"
     
         let nullBtns = sys.Buttons.Where(fun b-> 
-                                    b.InTag.IsNull() && b.InAddress <> TextSkip
-                                    ||b.OutTag.IsNull()&& b.OutAddress <> TextSkip )
+                                    b.InTag.IsNull()   && not(b.InAddress  = TextSkip || b.InAddress  = TextEmpty)
+                                    ||b.OutTag.IsNull()&& not(b.OutAddress = TextSkip || b.OutAddress = TextEmpty))
         if nullBtns.any()
         then 
             let errBtns = StringExt.JoinWith(
@@ -33,7 +33,7 @@ module ConvertErrorCheck =
 
             failwithlogf $"버튼 주소가 없습니다. \n{errBtns}"
                                       
-        let nullLamps = sys.Lamps.Where(fun b-> b.OutTag.IsNull() && b.OutAddress <> TextSkip)
+        let nullLamps = sys.Lamps.Where(fun b-> b.OutTag.IsNull() && not(b.OutAddress = TextSkip || b.OutAddress = TextEmpty))
         if nullLamps.any()
         then 
             let errLamps= StringExt.JoinWith(nullLamps.Select(fun j -> j.Name), "\n")

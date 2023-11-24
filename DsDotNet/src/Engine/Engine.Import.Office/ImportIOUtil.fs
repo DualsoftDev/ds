@@ -29,7 +29,7 @@ module ImportIOUtil =
 
                 let prefix = if RuntimeDS.Package.IsPackagePC() 
                              then if bInput then "I" else "O"
-                             elif bInput then "%IX" else "%QX"
+                             elif bInput then "%IX0." else "%QX0."
 
                 $"{prefix}{cnt / 64}.{cnt % 64}"
 

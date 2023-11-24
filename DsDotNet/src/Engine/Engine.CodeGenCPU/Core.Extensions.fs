@@ -173,7 +173,6 @@ module ConvertCoreExt =
 
     let private getButtonExpr(flow:Flow, btns:ButtonDef seq) : Expression<bool> seq =
         btns.Where(fun b -> b.SettingFlows.Contains(flow))
-            .Where(fun b -> b.InAddress <> "")
             .Select(fun b ->
                 let inTag = (b.InTag :?> Tag<bool>).Expr
                 if hasNot(b.Funcs)then !!inTag else inTag    )

@@ -1,10 +1,6 @@
 @page "/toplevel/login"
 @using System.Net
 @using Dual.Web.Blazor.Auth;
-@inject HttpClient httpClient
-@inject IJSRuntime js
-@inject AuthenticationStateProvider authStateProvider
-@inject NavigationManager navManager
 
 <div class="row">
     <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
@@ -30,15 +26,15 @@
 
     private async Task Authenticate()
     {
-        var loginResponse = await httpClient.PostAsJsonAsync<LoginRequest>("/api/auth/login", _loginRequest);
+        var loginResponse = await Http.PostAsJsonAsync<LoginRequest>("/api/auth/login", _loginRequest);
         Console.WriteLine($"Requesting Login: {_loginRequest.UserName}/{_loginRequest.Password} : {loginResponse.IsSuccessStatusCode}");
 
         if (loginResponse.IsSuccessStatusCode)
         {
             var userSession = await loginResponse.Content.ReadFromJsonAsync<UserSession>();
-            var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
+            var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthenticationStateProvider;
             await customAuthStateProvider.UpdateAuthenticationState(userSession);
-            navManager.NavigateTo("/", true);
+            NavigationManager.NavigateTo("/", true);
         }
         else if (loginResponse.StatusCode == HttpStatusCode.Unauthorized)
         {

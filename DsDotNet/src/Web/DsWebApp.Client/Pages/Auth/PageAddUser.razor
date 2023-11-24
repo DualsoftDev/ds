@@ -2,10 +2,6 @@
 @using System.Net
 @using Dual.Web.Blazor.Auth;
 @using DsWebApp.Shared.Auth
-@inject HttpClient httpClient
-@inject IJSRuntime js
-@inject AuthenticationStateProvider authStateProvider
-@inject NavigationManager navManager
 
 <div class="row">
     <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
@@ -35,9 +31,9 @@
 
     private async Task AddUser()
     {
-        if (await authStateProvider.SetAuthHeaderAsync(Http))
+        if (await AuthenticationStateProvider.SetAuthHeaderAsync(Http))
         {
-            var response = await httpClient.PostAsJsonAsync<UserAuthInfo>("/api/auth/adduser", _userInfo);
+            var response = await Http.PostAsJsonAsync<UserAuthInfo>("/api/auth/adduser", _userInfo);
             Console.WriteLine($"Requesting Login: {_userInfo.UserName}/{_userInfo.Password} : {response.IsSuccessStatusCode}");
 
             if (response.IsSuccessStatusCode)

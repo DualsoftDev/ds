@@ -54,7 +54,7 @@ module OriginModule =
     // 초기 유형을 얻습니다.
     let getInitialType (source: Vertex) (targets: Vertex seq) graphOrder =
         let getTypeForSingleTarget (v: bool option) =
-            match v with
+            match v with//뒤에서 리셋이오면 항상온 
             | Some fwd -> if fwd then InitialType.Off else InitialType.On
             | None -> InitialType.NotCare
 
@@ -88,6 +88,7 @@ module OriginModule =
                 let pureAlias = real.Graph.Vertices |> Seq.filter (fun v -> v.GetPure() = f)
                 findHeadVertex pureAlias graphOrder)
 
+        //Alias 관련 Vertex는 일괄 걸러낸후 addAlias 로 다시 더함
         let verticesToCalculateOrigin = 
             real.Graph.Vertices.Where(fun w-> not <| pureGroupAlias.Select(fun (f, _)->f).Contains(w.GetPure()))
                                .Concat addAlias

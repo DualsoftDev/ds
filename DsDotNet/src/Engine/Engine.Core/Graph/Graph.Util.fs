@@ -6,21 +6,21 @@ open System.Linq
 
 module internal GraphUtilImpl =
     
-    /// Get ordered routes from start to end
+    /// Get ordered routes from start to end  //origin 신규 함수 완전 적용 후 추후 삭제 
     /// source = target 같을 경우 유효 판단
-    let visitFromSourceToTarget (now:'V) (target:'V) (graph:Graph<_, _>) =
-        let rec searchNodes
-            (now:'V) (target:'V)
-            (graph:Graph<_, _>) (path:'V list)
-          = [
-                let nowPath = path.Append(now) |> List.ofSeq
-                if now <> target then
-                    for node in graph.GetOutgoingVertices(now) do
-                        yield! searchNodes node target graph nowPath
-                else
-                    yield nowPath
-            ]
-        searchNodes now target graph []
+    //let visitFromSourceToTarget (now:'V) (target:'V) (graph:Graph<_, _>) =
+    //    let rec searchNodes
+    //        (now:'V) (target:'V)
+    //        (graph:Graph<_, _>) (path:'V list)
+    //      = [
+    //            let nowPath = path.Append(now) |> List.ofSeq
+    //            if now <> target then
+    //                for node in graph.GetOutgoingVertices(now) do
+    //                    yield! searchNodes node target graph nowPath
+    //            else
+    //                yield nowPath
+    //        ]
+    //    searchNodes now target graph []
 
 
     let forwardExist (source:'V) (target:'V) (graphOrder:'V->'V->bool option) =

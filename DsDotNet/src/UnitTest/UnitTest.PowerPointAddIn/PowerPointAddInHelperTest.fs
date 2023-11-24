@@ -5,31 +5,34 @@ open Xunit
 open PowerPointAddInHelper.MSG
 open PowerPointAddInHelper
 open PowerPointAddInShared
+open System.Reflection
+open System.IO
 
 module MSG_TEST = 
-    let testPath = @$"{__SOURCE_DIRECTORY__}/sample/SamplePowerPointAddIn.pptx"
-    [<Fact>]
-    let ``MSG_ANIMATION`` () =
-        MSG_ANIMATION.Do(testPath,"")
+    let directoryPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+    let testPath = @$"{directoryPath}/HelloDS.pptx"
+    
     [<Fact>]
     let ``MSG_CHECK`` () =
-        MSG_CHECK.Do(testPath, false)
+        MSG_CHECK.Do(testPath, false) |> Assert.True
     [<Fact>]
     let ``MSG_EXPORT`` () =
-        MSG_EXPORT.Do(testPath, false)
+        MSG_EXPORT.Do(testPath, false)|> Assert.True
     [<Fact>]
     let ``MSG_GENIOLIST`` () =
-        MSG_GENIOLIST.Do(testPath, false)
+        MSG_GENIOLIST.Do(testPath, false)|> Assert.True
     [<Fact>]
     let ``MSG_GENLSPLC`` () =
-        MSG_GENLSPLC.Do(testPath, false)
+        MSG_GENLSPLC.Do(testPath, false)|> Assert.True
     [<Fact>]
     let ``MSG_GENWINPC`` () =
-        MSG_GENWINPC.Do(testPath, false)
+        MSG_GENWINPC.Do(testPath, false)|> Assert.True
     [<Fact>]
     let ``MSG_IOCSV`` () =
-        MSG_IOCSV.Do(testPath)
+        MSG_IOCSV.Do(testPath)|> Assert.True
     [<Fact>]
     let ``MSG_SIMULATION`` () =
-        MSG_SIMULATION.Do(testPath, "", false)
-        
+        MSG_SIMULATION.Do(testPath, "", false)|> Assert.True
+    [<Fact>]
+    let ``MSG_ANIMATION`` () =
+        MSG_ANIMATION.Do(testPath,"")|> Assert.True

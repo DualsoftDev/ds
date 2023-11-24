@@ -13,7 +13,7 @@
 		<PackageReference Include="DualSoft-Common-Db" Version="0.1.6" />
 		<PackageReference Include="DualSoft-Web-Blazor" Version="0.1.6" />
 		<PackageReference Include="DualSoft-Web-Blazor-Client-Canvas2d" Version="0.1.3" />
-		<PackageReference Include="DualSoft-Web-Blazor-Client-Components" Version="0.1.6" />
+		<PackageReference Include="DualSoft-Web-Blazor-Client-Components" Version="0.1.7" />
 		<PackageReference Include="DualSoft-Web-Blazor-Server" Version="0.1.2" />
 		<PackageReference Include="Dapper" Version="2.0.143" />
 	</ItemGroup>

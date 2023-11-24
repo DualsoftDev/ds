@@ -6,7 +6,7 @@
 @using Dual.Web.Blazor.ServerSide
 
 
-@attribute [Authorize(Roles = "Administrator")]
+@attribute [Authorize(Roles = "Administrator,User")]
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager

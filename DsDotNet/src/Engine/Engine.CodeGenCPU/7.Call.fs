@@ -26,7 +26,7 @@ type VertexMCoin with
                 call._off.Expr
 
         [
-            for td in call.CallTargetJob.DeviceDefs do
+            for td in call.TargetJob.DeviceDefs do
                 let sets = 
                     ((dop <&&> startTags <||> getStartPointExpr (call, td)) <||> (mop <&&> forceStarts))
                 <&&>
@@ -55,13 +55,13 @@ type VertexMCoin with
         let call = coin.Vertex :?> Call
         let rstNormal = coin._off.Expr
         [
-            for td in call.CallTargetJob.DeviceDefs do
+            for td in call.TargetJob.DeviceDefs do
                 if td.ApiItem.TXs.any()
                 then 
                     let sets = td.ApiItem.PE.Expr <&&> td.ApiItem.PS.Expr 
                            <&&> coin.Flow.dop.Expr
 
-                    if call.CallTargetJob.ActionType = JobActionType.Push 
+                    if call.TargetJob.ActionType = JobActionType.Push 
                     then 
                          let rstPush = td.MutualResetExpr(call.System)
                         
@@ -73,7 +73,7 @@ type VertexMCoin with
     member coin.C3_CallPlanReceive(): CommentedStatement list =
         let call = coin.Vertex :?> Call
         [
-            for td in call.CallTargetJob.DeviceDefs do
+            for td in call.TargetJob.DeviceDefs do
 
                 let sets =  td.RXTags.ToAndElseOn(coin.System) 
 

@@ -47,7 +47,7 @@ module ImportU =
                         else
                             Call.Create(job, DuParentFlow(parentFlow.Value))
 
-                    call.CallTargetJob.DeviceDefs
+                    call.TargetJob.DeviceDefs
                         .OfType<TaskDev>()
                         .Iter(fun a -> a.ApiItem.Xywh <- node.CallPosition)
 
@@ -57,8 +57,7 @@ module ImportU =
 
             | None ->
                 let apiName = node.CallApiName
-                let devName = node.CallName
-                let loadedName = devName
+                let loadedName = node.CallName
 
                 addLoadedLibSystemNCall (loadedName, apiName, mySys, parentFlow, parentReal, node)
 
@@ -502,7 +501,7 @@ module ImportU =
                 let dicQualifiedNameSegs =
                     dicVertex.Values
                         .OfType<Call>()
-                        .Select(fun call -> call.CallTargetJob.Name, call)
+                        .Select(fun call -> call.TargetJob.Name, call)
                     |> dict
 
                 let safeName (safety: string) =

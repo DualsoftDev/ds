@@ -63,7 +63,7 @@ public static class ViewUtil
             foreach (Vertex v in fv.Flow.Value.GetVerticesOfFlow())
             {
                 var tasks = (v.GetPure() is Call c)
-                    ? c.CallTargetJob.DeviceDefs.Cast<DsTask>().ToList()
+                    ? c.TargetJob.DeviceDefs.Cast<DsTask>().ToList()
                     : new List<DsTask>();
                 var viewVertex = CreateViewVertex(fv, v, dicViewNodes[v], tasks);
                 DicNode[v] = viewVertex;

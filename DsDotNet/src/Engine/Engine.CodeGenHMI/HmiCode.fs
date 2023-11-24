@@ -154,7 +154,7 @@ module HmiGenModule =
                         hmiInfos[nowVertex].used_in.Add(target)
 
                 let jobName (call: Call) =
-                    $"{system.Name}.{call.CallTargetJob.Name}"
+                    $"{system.Name}.{call.TargetJob.Name}"
 
 
                 let aliasName (alias: Alias) =

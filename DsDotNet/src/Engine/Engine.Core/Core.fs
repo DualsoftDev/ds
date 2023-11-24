@@ -216,14 +216,10 @@ module CoreModule =
 
     type Call (target:Job, parent) =
         inherit Indirect(target.Name, parent)
-        member _.CallTargetJob = target
+        member _.TargetJob = target
         member val Disabled:bool = false with get, set
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
-
-   
-    //and Call private (target:Job, parent) =
-    //    inherit Call(target, parent)
 
     and Alias private (name:string, target:AliasTargetWrapper, parent) = // target : Real or Call or OtherFlowReal
         inherit Indirect(name, parent)
@@ -235,7 +231,6 @@ module CoreModule =
         let mutable funcs = HashSet<Func>()
         member x.ActionType:JobActionType = getJobActionType name
         member x.DeviceDefs = tasks.OfType<TaskDev>()
-        //member x.LinkDefs   = tasks.OfType<TaskSys>()
         member x.SetFuncs(func) = 
                     tasks.Iter(fun t->t.Funcs <- func) 
                     funcs <- func
@@ -251,9 +246,6 @@ module CoreModule =
         member val ApiName = this.QualifiedName
         member val Funcs  = HashSet<Func>() with get, set
 
-    ///// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { FWD = Mt.fwd; }
-    //type TaskSys (api:ApiItem, systemName:string) =
-    //    inherit DsTask(api, systemName)
 
     /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
     ///

@@ -76,7 +76,7 @@ module ImportUtilForLib =
                 let devOrg = if i = 1 then devOrg
                              else ParserLoader.LoadFromActivePath libFilePath |> fst
 
-                let mutiName = $"{loadedName}[{cnt}]{i}"
+                let mutiName = $"{loadedName}[G]{i}"
                 let devOrg= addOrGetExistSystem devOrg mutiName
                 let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
                 tasks.Add (TaskDev(api, "", "", mutiName) :> DsTask)  |>ignore

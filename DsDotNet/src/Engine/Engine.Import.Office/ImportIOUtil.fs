@@ -36,7 +36,7 @@ module ImportIOUtil =
             | false, _ -> 
                 match addr, isSkip with
                 | _, true   when addr <> TextSkip -> failwithf $"{name} 인터페이스 대상이 없으면 대쉬('-') 기입 필요."
-                | _, false  when addr =  TextSkip -> failwithf $"{name} 인터페이스 대상이 있으면 대쉬('-') 대신 실주소 기입 필요."
+                //| _, false  when addr =  TextSkip -> failwithf $"{name} 인터페이스 대상이 있으면 대쉬('-') 대신 실주소 기입 필요."
                 | _ -> addr
         
             //parsing을 위헤서 '-' -> '_' 변경 

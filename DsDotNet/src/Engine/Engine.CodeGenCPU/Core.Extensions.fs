@@ -7,7 +7,7 @@ open System.Runtime.CompilerServices
 open System
 
 [<AutoOpen>]
-module ConvertCoreExt =
+module ConvertCodeCoreExt =
     
     let hasTime (xs:Func seq) = xs.Any(fun f->f.Name = TextOnDelayTimer)
     let hasCount(xs:Func seq) = xs.Any(fun f->f.Name = TextRingCounter)

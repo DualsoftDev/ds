@@ -7,7 +7,7 @@ global using Dual.Web.Blazor.Client;
 global using Dual.Web.Blazor;
 global using Dual.Web.Blazor.Client.Canvas2d;
 global using Dual.Web.Blazor.Client.Canvas2d.Model;
-global using Dual.Web.Blazor.Client.BlazorComponents;
+global using Dual.Web.Blazor.Client.Components;
 
 global using static Engine.Core.TagWebModule;
 

@@ -2,6 +2,7 @@ using Blazored.LocalStorage;
 using Blazored.SessionStorage;
 using DsWebApp.Shared;
 using Dual.Web.Blazor.Client.Auth;
+using Dual.Web.Blazor.Shared;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");

@@ -29,6 +29,7 @@ public class ModelController(
            "isCpuRunning": false
        }
     */
+    // api/model
     [HttpGet]
     public ActionResult<RuntimeModelDto> GetModelInfo()
     {

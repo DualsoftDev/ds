@@ -28,16 +28,21 @@ public class ClientGlobal : ClientGlobalBase
     HubConnection _hubConnectionModel;
     public async Task<RuntimeModelDto> GetModelDtoAsync(HttpClient http)
     {
+        await Console.Out.WriteLineAsync("[1]");
         if (_modelDto == null)
         {
+            await Console.Out.WriteLineAsync("[2]");
             var response = await http.GetAsync($"api/model");
+            await Console.Out.WriteLineAsync($"[3] : http={http}");
             if (response.IsSuccessStatusCode)
             {
+                await Console.Out.WriteLineAsync("[4]");
                 _modelDto = await response.Content.ReadFromJsonAsync<RuntimeModelDto>();
                 Console.WriteLine($"Got path={_modelDto.SourceDsZipPath}, isCpuRunning={_modelDto.IsCpuRunning}");
             }
             else
             {
+                Console.WriteLine($"Failed to get model {_modelDto.SourceDsZipPath}.  Code={response.StatusCode}");
                 // 실패한 응답 코드에 대한 처리
                 // 예: 사용자에게 에러 메시지 표시, 로깅 등
             }

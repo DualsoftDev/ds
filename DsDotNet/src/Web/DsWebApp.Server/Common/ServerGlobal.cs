@@ -54,9 +54,9 @@ public class ServerGlobal
             RuntimeModel = new RuntimeModel(dsZipPath);
             return RuntimeModel;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            Logger.Error($"Failed to load model: {dsZipPath}");
+            Logger.Error($"Failed to load model: {dsZipPath}\r\n{ex.Message}");
             return null;
         }
     }

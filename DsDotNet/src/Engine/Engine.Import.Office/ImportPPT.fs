@@ -188,7 +188,9 @@ module ImportPPTModule =
     let loadingfromPPTs (path: string ) =
         try
             try
-                let cfg = { DsFilePath = path }
+                let cfg = { DsFilePath = path
+                            HWIP =  RuntimeDS.IP
+                    }
 
                 let sys, doc = PowerPointImportor.GetImportModel(pptRepo, path)
                         

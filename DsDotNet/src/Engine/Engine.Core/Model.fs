@@ -5,6 +5,7 @@ namespace Engine.Core
 module ModelLoaderModule =
     type ModelConfig = {
         DsFilePath: string 
+        HWIP: string 
     }
     type Model = {
         Config: ModelConfig

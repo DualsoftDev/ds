@@ -25,6 +25,7 @@ module ModelLoader =
         let cfg =
             {
                 DsFilePath =  sysRunPaths.Replace("\\", "/")
+                HWIP =  RuntimeDS.IP
             }
         SaveConfig path cfg 
         path

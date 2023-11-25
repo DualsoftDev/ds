@@ -10,8 +10,8 @@ open System.Collections.Generic
 [<AutoOpen>]
 module ImportIOUtil =
 
-    let mutable inCnt = -1
-    let mutable outCnt = 63
+    let mutable inCnt = RuntimeDS.HwStartInDINT * 64 - 1
+    let mutable outCnt = RuntimeDS.HwStartOutDINT * 64 - 1
 
     let getValidAddress (addr: string, name: string, isSkip: bool, bInput: bool) =
 

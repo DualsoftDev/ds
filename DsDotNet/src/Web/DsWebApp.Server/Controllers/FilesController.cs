@@ -2,8 +2,6 @@
 // https://blazorroadshow.azurewebsites.net/blazortrainfiles/FileHandlingRemix.zip
 
 using System.Net.Http.Headers;
-using DsWebApp.Server.Hubs;
-
 namespace DsWebApp.Server.Controllers;
 
 [ApiController]

@@ -110,10 +110,8 @@ var serverSettings =
     conf.GetSection("ServerSettings").Get<ServerSettings>()
         .Tee(ss => ss.Initialize());
 var serverGlobals = new ServerGlobal(serverSettings, commonAppSettings, logger);
-
 services.AddSingleton(serverGlobals);
 services.AddDsAuth(conf, commonAppSettings.LoggerDBSettings.ConnectionString);
-
 
 await services.AddUnsafeServicesAsync(serverGlobals, logger);
 

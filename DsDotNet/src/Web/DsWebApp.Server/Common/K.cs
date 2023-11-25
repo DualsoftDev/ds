@@ -1,8 +1,7 @@
-namespace DsWebApp.Server.Common
+namespace DsWebApp.Server.Common;
+
+public class K : SK
 {
-    public class K : SK
-    {
-        public const string CryptKey = "dualsoft";
-        public static void Noop() {}
-    }
+    public const string CryptKey = "dualsoft";
+    public static void Noop() {}
 }

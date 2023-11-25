@@ -46,11 +46,12 @@ module DsType =
         | DuDriveState
 
     
-    type ApiActionType = 
+    type JobActionType = 
         | Normal  ///RXs(ActionIn) 인터페이스가 관찰될때까지 ON
         | Inverse ///구현대기 : 항시ON RXs(ActionIn) 인터페이스가 관찰될때까지 OFF
         | Push    // reset 인터페이스(Plan Out) 관찰될때까지 ON 
         | Rising  ///구현대기 : TXs(ActionOut) Rising Pulse
+        | MultiAction  of  int // 동시동작 개수 받기
 
 
     let GetSquareBrackets (name: string, bHead: bool): string option =
@@ -61,17 +62,17 @@ module DsType =
         else
             if name.EndsWith("]") && name.Contains("[") then Some matches.[matches.Count - 1].Value else None
 
-    
-   
 
-    let getApiActionType(name :string) =
+    let getJobActionType (name: string) =
         let endContents = GetSquareBrackets(name, false)
-        if endContents.IsSome
-        then 
-            match endContents.Value with
-            |"-"-> ApiActionType.Normal
-            |"I"-> ApiActionType.Inverse
-            |"P"-> ApiActionType.Push
-            |"R"-> ApiActionType.Rising  
-            |_ as t -> failwithf "Unknown ApiActionType: %s" t
-        else ApiActionType.Normal
+        let isStringDigit (str: string) = str |> Seq.forall System.Char.IsDigit
+
+        match endContents with
+        | Some "-" -> JobActionType.Normal
+        | Some "I" -> JobActionType.Inverse
+        | Some "P" -> JobActionType.Push
+        | Some "R" -> JobActionType.Rising
+        | Some s when isStringDigit s -> JobActionType.MultiAction (int s)  // 숫자일 경우 MultiAction으로 변환
+        | Some t -> failwithf "Unknown ApiActionType: %s" t
+        | None -> JobActionType.Normal
+

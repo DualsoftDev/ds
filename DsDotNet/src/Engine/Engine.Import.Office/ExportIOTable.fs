@@ -17,7 +17,7 @@ open DocumentFormat.OpenXml.Spreadsheet
 [<AutoOpen>]
 module ExportIOTable =
 
-    let applyIfBtnLampSkip addr:string  = if addr = TextEmpty then TextSkip else addr
+    let applyIfBtnLampSkip addr:string  = if addr = TextAddrEmpty then TextSkip else addr
 
     let ToTable (sys: DsSystem) =
 
@@ -44,7 +44,7 @@ module ExportIOTable =
               dev.ApiName
               "bool"
               getValidDevAddress (dev, true)
-              getValidDevAddress (dev,  false)
+              getValidDevAddress (dev, false)
               jobName
               funcs ]
 
@@ -74,8 +74,8 @@ module ExportIOTable =
         let toBtnText (btns: ButtonDef seq, xlsCase: ExcelCase) =
             for btn in btns do
                 let func = btn.Funcs |> funcToText
-                let inAddr = getValidBtnAddress(btn, btn.InAddress, true) |> applyIfBtnLampSkip
-                let outAddr = getValidBtnAddress(btn, btn.OutAddress, false)|> applyIfBtnLampSkip
+                let inAddr = getValidBtnAddress(btn, true) |> applyIfBtnLampSkip
+                let outAddr = getValidBtnAddress(btn, false)|> applyIfBtnLampSkip
                 dt.Rows.Add(xlsCase.ToText(), btn.Name, "bool", inAddr, outAddr, "", func)
                 |> ignore
 

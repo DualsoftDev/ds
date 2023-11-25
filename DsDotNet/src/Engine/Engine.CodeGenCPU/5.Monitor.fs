@@ -45,7 +45,7 @@ type VertexManager with
         let real= call.Parent.GetCore() :?> Real
         let dop = call.V.Flow.dop.Expr
         let rst = v.Flow.clear.Expr
-        let tds = call.CallTargetJob.DeviceDefs
+        let tds = call.TargetJob.DeviceDefs
                           .Where(fun f->f.ApiItem.TXs.any() && f.ApiItem.RXs.any())
         [
           
@@ -70,7 +70,7 @@ type VertexManager with
         let call= v.Vertex.GetPure() :?> Call
         let dop = call.V.Flow.dop.Expr
         let rst = v.Flow.clear.Expr
-        let tds = call.CallTargetJob.DeviceDefs.Where(fun f->f.ApiItem.RXs.any())
+        let tds = call.TargetJob.DeviceDefs.Where(fun f->f.ApiItem.RXs.any())
         [
             for td in tds do
                 let input, rxs = td.ActionINFunc, td.ApiItem.RXs.Select(getVM)
@@ -121,7 +121,7 @@ type VertexManager with
     member v.M7_CallErrorTRXMonitor(): CommentedStatement list =
         let v= v :?> VertexMCoin
         let call= v.Vertex.GetPure() :?> Call
-        let tds = call.CallTargetJob.DeviceDefs
+        let tds = call.TargetJob.DeviceDefs
         [
             for td in tds do
                 let errs = 

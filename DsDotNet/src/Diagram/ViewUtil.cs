@@ -35,8 +35,18 @@ public static class ViewUtil
             Status = Status4.Homing,
             DsTasks = tasks
         };
-        ;
-        nodes.SetViewNodes(viewNodes.ToList());
+       
+
+        if(v.GetPure() is Call)
+        {
+            if(v.Parent.IsDuParentFlow)
+                nodes.SetViewNodes(viewNodes);
+            else 
+                nodes.SetViewNodes(viewNodes.Where(w=> w.CoreVertex.Value == v));
+        }
+        else
+            nodes.SetViewNodes(viewNodes);
+
         return nodes;
     }
 
@@ -63,7 +73,7 @@ public static class ViewUtil
             foreach (Vertex v in fv.Flow.Value.GetVerticesOfFlow())
             {
                 var tasks = (v.GetPure() is Call c)
-                    ? c.CallTargetJob.DeviceDefs.Cast<DsTask>().ToList()
+                    ? c.TargetJob.DeviceDefs.Cast<DsTask>().ToList()
                     : new List<DsTask>();
                 var viewVertex = CreateViewVertex(fv, v, dicViewNodes[v], tasks);
                 DicNode[v] = viewVertex;

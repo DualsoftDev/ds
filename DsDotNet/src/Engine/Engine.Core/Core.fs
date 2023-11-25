@@ -145,7 +145,7 @@ module CoreModule =
         member x.LampType = lampType
         /// 램프 작동을 위한 외부 IO 출력 주소
         member val OutAddress = outAddress  with get, set
-        /// CPU 생성 시 할당됨 OutTag
+        /// CPU 생성 시 할당됨 물리 OutTag
         member val OutTag = getNull<ITag>() with get, set
         /// 단일 플로우 단위로 램프 상태 출력
         member val SettingFlow = flow with get, set
@@ -216,14 +216,10 @@ module CoreModule =
 
     type Call (target:Job, parent) =
         inherit Indirect(target.Name, parent)
-        member _.CallTargetJob = target
+        member _.TargetJob = target
         member val Disabled:bool = false with get, set
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
-
-   
-    //and Call private (target:Job, parent) =
-    //    inherit Call(target, parent)
 
     and Alias private (name:string, target:AliasTargetWrapper, parent) = // target : Real or Call or OtherFlowReal
         inherit Indirect(name, parent)
@@ -233,8 +229,8 @@ module CoreModule =
     type Job (name:string, tasks:DsTask list) =
         inherit Named(name)
         let mutable funcs = HashSet<Func>()
+        member x.ActionType:JobActionType = getJobActionType name
         member x.DeviceDefs = tasks.OfType<TaskDev>()
-        //member x.LinkDefs   = tasks.OfType<TaskSys>()
         member x.SetFuncs(func) = 
                     tasks.Iter(fun t->t.Funcs <- func) 
                     funcs <- func
@@ -250,9 +246,6 @@ module CoreModule =
         member val ApiName = this.QualifiedName
         member val Funcs  = HashSet<Func>() with get, set
 
-    ///// Main system 에서 loading 된 다른 system 의 API 를 바라보는 관점.  [jobs] = { FWD = Mt.fwd; }
-    //type TaskSys (api:ApiItem, systemName:string) =
-    //    inherit DsTask(api, systemName)
 
     /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
     ///
@@ -274,7 +267,6 @@ module CoreModule =
 
         member _.Name = name
         member _.System = system
-        member _.ActionType:ApiActionType = getApiActionType name
         member val TXs = createQualifiedNamedHashSet<Real>()
         member val RXs = createQualifiedNamedHashSet<Real>()
         member val Xywh:Xywh = null with get, set

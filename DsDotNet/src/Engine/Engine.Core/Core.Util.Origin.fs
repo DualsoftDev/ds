@@ -31,7 +31,7 @@ module OriginModule =
             |> Seq.choose (fun x ->
                 match x.GetPure() with
                 | :? Call as c ->
-                    let devs = c.CallTargetJob.DeviceDefs
+                    let devs = c.TargetJob.DeviceDefs
                     Some (x, devs.First().ApiItem)
                 |_ -> None)
             |> dict
@@ -99,7 +99,7 @@ module OriginModule =
             |> Seq.collect (fun v ->
                 let initialType = getInitialType v (mutualInfo.[v]) graphOrder
                 let call = v.GetPure() :?> Call
-                let devs = call.CallTargetJob.DeviceDefs
+                let devs = call.TargetJob.DeviceDefs
                 devs |> Seq.map (fun d -> d, initialType))
 
         { Real = real; Tasks = tasks; ResetChains = [||] }

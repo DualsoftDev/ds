@@ -47,7 +47,7 @@ module ImportUtilForLib =
         let libRelPath =
             PathManager.getRelativePath (currentFileName |> DsFile) (libFilePath |> DsFile)
 
-        let paras =
+        let paras loadedName =
             getParams (libFilePath, libRelPath, loadedName, mySys, DuDevice, ShareableSystemRepository())
 
         let parent =
@@ -55,22 +55,44 @@ module ImportUtilForLib =
             | Some parentR -> DuParentReal parentR
             | None -> DuParentFlow(parentF.Value)
 
-        let system, loadingPaths = ParserLoader.LoadFromActivePath libFilePath
-        let devOrg = system
+        let addOrGetExistSystem loadedSys loadedName = 
+            if not (mySys.LoadedSysExist(loadedName)) then
+                mySys.AddLoadedSystem(Device(loadedSys, paras loadedName))
+                loadedSys
+            else 
+                mySys.GetLoadedSys(loadedName).Value.ReferenceSystem
 
-        if not (devOrg.ApiItems.any (fun f -> f.Name = apiName)) then
+
+        let apiPureName = GetBracketsRemoveName(apiName)
+
+        let getLoadedTasks (loadedSys:DsSystem) (newloadedName:string)  =
+            let devOrg= addOrGetExistSystem loadedSys newloadedName
+            let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
+            TaskDev(api, "", "", newloadedName) :> DsTask
+
+        let devOrg, _ = ParserLoader.LoadFromActivePath libFilePath
+        if not (devOrg.ApiItems.any (fun f -> f.Name = apiPureName)) then
             node.Shape.ErrorName(ErrID._49, node.PageNum)
 
-        if not (mySys.LoadedSystems.Select(fun f -> f.Name).Contains(loadedName)) then
-            mySys.AddLoadedSystem(Device(devOrg, paras))
+        let tasks = HashSet<DsTask>()
+        let jobType = getJobActionType apiName
+        match jobType with
+        | MultiAction cnt ->  
+            for i in [1..cnt] do
+                let devOrg = if i = 1 then devOrg
+                             else ParserLoader.LoadFromActivePath libFilePath |> fst
 
-        let api = devOrg.ApiItems.First(fun f -> f.Name = apiName)
-        let devTask = TaskDev(api, "", "", loadedName) :> DsTask
-        let job = Job(loadedName + "_" + apiName, [ devTask ])
+                let mutiName = $"{loadedName}_G{i}"
+                tasks.Add(getLoadedTasks devOrg mutiName)|>ignore
+        | _->
+            tasks.Add(getLoadedTasks devOrg loadedName)|>ignore
+
+
+        let job = Job(loadedName + "_" + apiName, tasks |> Seq.toList)
         mySys.Jobs.Add(job)
-        let call = Call.Create(job, parent)
 
-        call.CallTargetJob.DeviceDefs
+        let call = Call.Create(job, parent)
+        call.TargetJob.DeviceDefs
             .OfType<TaskDev>()
             .Iter(fun a -> a.ApiItem.Xywh <- node.CallPosition)
 

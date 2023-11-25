@@ -25,7 +25,7 @@ module ConvertCoreExt =
 
 
     let errTexts (x:Call)  = 
-        x.CallTargetJob.DeviceDefs
+        x.TargetJob.DeviceDefs
                         .Select(fun s -> s.ApiItem.TagManager)
                         .Cast<ApiItemManager>()
                         .Where(fun w ->not(w.ErrorText.IsNullOrEmpty()))
@@ -33,7 +33,7 @@ module ConvertCoreExt =
 
 
     let errTextByDevice (x:Call)  = 
-        x.CallTargetJob.DeviceDefs
+        x.TargetJob.DeviceDefs
                         .Select(fun s ->s.ApiName, (s.ApiItem.TagManager :?> ApiItemManager).ErrorText)
 
 
@@ -89,13 +89,13 @@ module ConvertCoreExt =
             for lamp in x.SystemLamps do
                 match createBridgeTag(x.Storages, lamp.Name, lamp.OutAddress,  ActionTag.ActionOut  ,x , None) with
                 | Some t ->  lamp.OutTag  <- t
-                | None -> ()
+                | None -> failwithf "empty address error"
 
         member private x.GenerationCondition() =
             for sc in x.SystemConditions do
                 match createBridgeTag(x.Storages, sc.Name, sc.InAddress, ActionTag.ActionIn , x, None) with
                 | Some t ->  sc.InTag  <- t
-                | None -> ()
+                | None -> failwithf "empty address error"
 
         member private x.GenerationButtonIO() =
             for b in x.SystemButtons do
@@ -173,7 +173,6 @@ module ConvertCoreExt =
 
     let private getButtonExpr(flow:Flow, btns:ButtonDef seq) : Expression<bool> seq =
         btns.Where(fun b -> b.SettingFlows.Contains(flow))
-            .Where(fun b -> b.InAddress <> "")
             .Select(fun b ->
                 let inTag = (b.InTag :?> Tag<bool>).Expr
                 if hasNot(b.Funcs)then !!inTag else inTag    )
@@ -306,36 +305,36 @@ module ConvertCoreExt =
     type Call with
        
                                     
-        member c.UsingTon  = c.CallTargetJob.Funcs |> hasTime
-        member c.UsingCtr  = c.CallTargetJob.Funcs |> hasCount
-        member c.UsingNot  = c.CallTargetJob.Funcs |> hasNot
-        member c.UsingMove = c.CallTargetJob.Funcs |> hasMove
+        member c.UsingTon  = c.TargetJob.Funcs |> hasTime
+        member c.UsingCtr  = c.TargetJob.Funcs |> hasCount
+        member c.UsingNot  = c.TargetJob.Funcs |> hasNot
+        member c.UsingMove = c.TargetJob.Funcs |> hasMove
         member c._on     = c.System._on
         member c._off     = c.System._off
     
         
         member c.PresetTime =   if c.UsingTon
-                                then c.CallTargetJob.Funcs.First(fun f->f.Name = TextOnDelayTimer).GetDelayTime()
+                                then c.TargetJob.Funcs.First(fun f->f.Name = TextOnDelayTimer).GetDelayTime()
                                 else failwith $"{c.Name} not use timer" 
 
         member c.PresetCounter = if c.UsingCtr
-                                 then c.CallTargetJob.Funcs.First(fun f->f.Name = TextRingCounter).GetRingCount()
+                                 then c.TargetJob.Funcs.First(fun f->f.Name = TextRingCounter).GetRingCount()
                                  else failwith $"{c.Name} not use counter"
                                  //LinkDefs todo 구현 필요
-        //member c.INs           = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionIN)
+        //member c.INs           = c.TargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionIN)
         
-        member c.PSs          = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PS )
-        member c.PEs          = c.CallTargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PE )
+        member c.PSs          = c.TargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PS )
+        member c.PEs          = c.TargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PE )
         
 
         //개별 부정의 AND  <안전하게 전부 확인>
-        member c.INsFuns  = let ins = c.CallTargetJob.DeviceDefs
+        member c.INsFuns  = let ins = c.TargetJob.DeviceDefs
                                         .Where(fun j -> j.ApiItem.RXs.any())
                                         .Select(fun j -> j.ActionINFunc)
                             if ins.any() then ins.ToAnd() else c._on.Expr
                          
         member c.MutualResets =
-            c.CallTargetJob.DeviceDefs
+            c.TargetJob.DeviceDefs
                 .SelectMany(fun j -> j.ApiItem.System.GetMutualResetApis(j.ApiItem))
                 .SelectMany(fun a -> c.System.DeviceDefs.Where(fun w-> w.ApiItem = a))
 

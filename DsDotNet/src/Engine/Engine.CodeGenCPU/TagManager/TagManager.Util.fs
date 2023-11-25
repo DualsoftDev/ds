@@ -16,8 +16,8 @@ module TagManagerUtil =
             |> Seq.map (fun c ->
                 match c with
                 | _ when Char.IsNumber(c) 
-                        || c.IsValidIdentifier() 
-                        || ['['; ']'].ToResizeArray().Contains(c) -> c.ToString()
+                        || c.IsValidIdentifier() -> c.ToString()
+                        //|| ['['; ']'].ToResizeArray().Contains(c)   //arrayType 오인
                 | _ -> "_")
             |> String.concat ""
 
@@ -34,7 +34,7 @@ module TagManagerUtil =
     /// fillAutoAddress : PLC 에 내릴 때, 자동으로 주소를 할당할 지의 여부
     let private createPlanVarHelper(stg:Storages, name:string, dataType:DataType, fillAutoAddress:bool, target:IQualifiedNamed, tagIndex:int,  system:ISystem) : IStorage =
         let v = dataType.DefaultValue()
-        let address = if fillAutoAddress then Some "" else None
+        let address = if fillAutoAddress then Some TextAddrEmpty else None
         let createParam () = {defaultStorageCreationParams(unbox v) with Name=name; IsGlobal=true; Address=address; Target= Some target; TagKind = tagIndex;System= system}
         let t:IStorage =
             match dataType with
@@ -76,7 +76,7 @@ module TagManagerUtil =
    
 
     let createBridgeTag(stg:Storages, name, address:string, inOut:ActionTag, sys, task:IQualifiedNamed option): ITag option=
-
+        
         if address = TextSkip || address = "" 
         then None
         else
@@ -87,9 +87,9 @@ module TagManagerUtil =
                 | ActionTag.ActionMemory -> failwithlog "error: Memory not supported "
                 | _ -> failwithlog "error: ActionTag create "
 
-            let plcName = getPlcTagAbleName name stg
+            let plcAddrName = getPlcTagAbleName name stg
             let t =
-                let param = {defaultStorageCreationParams(false) with Name=plcName; Address= Some address; System=sys; TagKind = (int)inOut; Target = task}
+                let param = {defaultStorageCreationParams(false) with Name=plcAddrName; Address= Some address; System=sys; TagKind = (int)inOut; Target = task}
                 (Tag(param) :> ITag)
             stg.Add(t.Name, t)
             Some t

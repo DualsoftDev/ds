@@ -64,8 +64,8 @@ module EtcListenerModule =
                                               let! outCtx = inOutCtx.TryFindFirstChild<OutAddrContext>()
 
                                               return
-                                                  inCtx.GetText() |> replaceSkipAddress,
-                                                  outCtx.GetText() |> replaceSkipAddress
+                                                  inCtx.GetText() ,
+                                                  outCtx.GetText()
                                           }
                                           |> Option.get
                                       | _ -> null, null
@@ -132,7 +132,7 @@ module EtcListenerModule =
 
                                   let address =
                                       match addrCtx with
-                                      | Some addr -> addr.GetText() |> replaceSkipAddress
+                                      | Some addr -> addr.GetText()
                                       | None -> null
 
                                   let funcSet = commonFunctionSetter lmpName lampFuncs
@@ -167,7 +167,7 @@ module EtcListenerModule =
 
                                   let address =
                                       match addrCtx with
-                                      | Some addr -> addr.GetText() |> replaceSkipAddress
+                                      | Some addr -> addr.GetText()
                                       | None -> null
 
                                   let funcSet = commonFunctionSetter cndName conditionFuncs

@@ -31,7 +31,7 @@ module PPTObjectModule =
         if name.Contains '$' then
             failwithf $"not support '$' replace '.' {name}"
 
-        $"{flowName}_{TrimSpace(name.Split('.').[0])}", TrimSpace(name.Split('.').[1])
+        $"{flowName}_{TrimSpace(name.Split('.').[0])}",   GetBracketsRemoveName(TrimSpace(name.Split('.').[1]))
 
     let GetSysNFlow (fileName: string, name: string, pageNum: int) =
         if (name.StartsWith("$")) then
@@ -272,17 +272,19 @@ module PPTObjectModule =
 
         let updateCopySys (barckets: string, orgiSysName: string, groupJob: int) =
             if (groupJob > 0) then
-                let jobBaseName = $"{pageTitle}_{barckets}" //jobBaseName + apiName = JobName
-                jobInfos.Add(jobBaseName, HashSet<string>())
+                shape.ErrorName(ErrID._19, iPage)
+                //job action 으로 기능 대체
+                //let jobBaseName = $"{pageTitle}_{barckets}" //jobBaseName + apiName = JobName
+                //jobInfos.Add(jobBaseName, HashSet<string>())
 
-                let copys =
-                    [ for i in [ 1..groupJob ] do
-                          yield sprintf "%s%d" jobBaseName i ]
+                //let copys =
+                //    [ for i in [ 1..groupJob ] do
+                //          yield sprintf "%s%d" jobBaseName i ]
 
-                copys
-                |> Seq.iter (fun copy ->
-                    copySystems.Add(copy, orgiSysName)
-                    jobInfos[jobBaseName].Add(copy) |> ignore)
+                //copys
+                //|> Seq.iter (fun copy ->
+                //    copySystems.Add(copy, orgiSysName)
+                //    jobInfos[jobBaseName].Add(copy) |> ignore)
 
             else
                 let copyRows = barckets.Split(';').Select(fun s -> s.Trim())

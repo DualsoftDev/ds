@@ -8,7 +8,7 @@ open Dual.Common.Core.FS
 type DsSystem with
     member s.B1_ButtonOutput(): CommentedStatement list = [
         for btn in s.SystemButtons do
-            if btn.OutAddress <> ""  //OutAddress 주소가 있어야 IN-OUT btn 연결
+            if btn.OutTag.IsNonNull()  //OutAddress 주소가 있어야 IN-OUT btn 연결
             then
                 let set = btn.InTag :?> Tag<bool>
                 let out = btn.OutTag :?> Tag<bool>
@@ -17,7 +17,7 @@ type DsSystem with
 
     member s.B2_ModeLamp(): CommentedStatement list = [
         for lamp in s.SystemLamps do
-            if lamp.OutAddress <> ""  //OutAddress 주소가 ModeLamp 연결
+            if lamp.OutTag.IsNonNull() //OutAddress 주소가 ModeLamp 연결
                 then
                 let sets =
                     let f = lamp.SettingFlow

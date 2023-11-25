@@ -42,16 +42,52 @@ module internal XgiSymbolsModule =
                       Some(s, XgiSymbol.DuStorage s) ]
         |> List.choose id
 
+    let autoAdress (t:IStorage) (prjParams: XgiProjectParams) = 
+        // address 가 "_" 인 symbol 에 한해서 자동으로 address 를 할당.
+        // null 또는 다른 값이 지정되어 있으면, 그대로 사용한다.
+        if t.Address = "" then  failwithlog $"ERROR. {t.Name} address empty."
+        if t.Address = TextAddrEmpty then
+            let allocatorFunctions =
+                match prjParams.MemoryAllocatorSpec with
+                | RangeSpec _ -> failwithlog "ERROR.  Should have already been converted to allocator functions."
+                | AllocatorFunctions functions -> functions
+
+            let {   BitAllocator = x
+                    ByteAllocator = b
+                    WordAllocator = w
+                    DWordAllocator = d
+                    LWordAllocator = l } =
+                allocatorFunctions
+
+            let allocator =
+                match t.BoxedValue.GetType().GetMemorySizePrefix() with
+                | "X" -> x
+                | "B" -> b
+                | "W" -> w
+                | "D" -> d
+                | "L" -> l
+                | _ -> failwithlog "ERROR"
+
+            if t.Name.StartsWith("_") then
+                logWarn $"Something fish: trying to generate auto M address for {t.Name}"
+
+            t.Address <- allocator ()
+
+
     let xgiSymbolToSymbolInfo (prjParams: XgiProjectParams) (kindVar: int) (xgiSymbol: XgiSymbol) : SymbolInfo =
         match xgiSymbol with
         | DuStorage(:? ITag as t) ->
-            let name, addr = t.Name, t.Address
-
+            let name = t.Name
+            autoAdress t prjParams
             let device, memSize =
-                match addr with
+                match t.Address with
                 | RegexPattern @"^%([IQM])([XBWL]).*$" [ iqm; mem ] -> iqm, mem
                 | RegexPattern @"^%([IQM]).*$" [ iqm ] -> iqm, "X" // `%I1` 이런거 허용하나?
-                | _ -> failwith $"Invalid tag address {addr} for {name}"
+                | _ -> 
+                    if t.Address = TextAddrEmpty 
+                    then  failwith $"empty tag address for {name}"
+                    else  failwith $"Invalid tag address {t.Address} for {name}"
+                       
 
             let plcType =
                 match memSize with
@@ -69,7 +105,7 @@ module internal XgiSymbolsModule =
                 Name = name
                 Comment = comment
                 Type = plcType
-                Address = addr
+                Address = t.Address
                 InitValue = initValue
                 Device = device
                 Kind = kindVar }
@@ -80,34 +116,7 @@ module internal XgiSymbolsModule =
                 let plcType = systemTypeToXgiTypeName t.DataType
                 let comment = SecurityElement.Escape t.Comment
 
-                // address 가 "" 인 symbol 에 한해서 자동으로 address 를 할당.
-                // null 또는 다른 값이 지정되어 있으면, 그대로 사용한다.
-                if t.Address = "" (*&& not (t :? IVariable)*) then
-                    let allocatorFunctions =
-                        match prjParams.MemoryAllocatorSpec with
-                        | RangeSpec _ -> failwithlog "ERROR.  Should have already been converted to allocator functions."
-                        | AllocatorFunctions functions -> functions
-
-                    let { BitAllocator = x
-                          ByteAllocator = b
-                          WordAllocator = w
-                          DWordAllocator = d
-                          LWordAllocator = l } =
-                        allocatorFunctions
-
-                    let allocator =
-                        match t.BoxedValue.GetType().GetMemorySizePrefix() with
-                        | "X" -> x
-                        | "B" -> b
-                        | "W" -> w
-                        | "D" -> d
-                        | "L" -> l
-                        | _ -> failwithlog "ERROR"
-
-                    if t.Name.StartsWith("_") then
-                        logWarn $"Something fish: trying to generate auto M address for {t.Name}"
-
-                    t.Address <- allocator ()
+                autoAdress t prjParams
 
                 { defaultSymbolInfo with
                     Name = t.Name

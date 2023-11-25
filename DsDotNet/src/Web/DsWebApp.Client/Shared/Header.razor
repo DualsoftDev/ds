@@ -60,27 +60,4 @@
         await customAuthStateProvider.UpdateAuthenticationState(null);
         NavigationManager.NavigateTo("/", true);
     }
-    protected override async Task OnInitializedAsync()
-    {
-        AuthenticationStateProvider.AuthenticationStateChanged += async authStateTask =>
-            {
-                Console.Write("AuthenticationStateChanged: ");
-                AuthenticationState authState = await authStateTask;
-                // if (authState.User.Identities.Any(identity => identity.IsAuthenticated))
-                if (authState.User.Identity.IsAuthenticated)
-                    Console.WriteLine($"인증 OK");
-                else
-                    Console.WriteLine($"인증 안됨");
-
-
-                StateHasChanged();
-                // var user = authState.User;
-                // if (user.Identity.IsAuthenticated)
-                // {
-                //     var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthenticationStateProvider;
-                //     await customAuthStateProvider.UpdateAuthenticationState(user);
-                // }
-            };
-    }
-
 }

@@ -16,12 +16,14 @@
 
 @using DevExpress.Blazor
 @using Dual.Web.Blazor.Client.Canvas2d
-@using Dual.Web.Blazor.Client.Components
+@using Dual.Web.Blazor.Client
 @using Dual.Web.Blazor.Client.Auth
+@using Blazored.LocalStorage
 
 @using TagFqdn = string
 
 
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject IConfiguration Configuration
 @inject HttpClient Http
@@ -29,5 +31,7 @@
 @inject CanvasJsInterop JsCanvas
 @inject ClientGlobal ClientGlobal
 @inject IJSRuntime JsRuntime
+@inject ILocalStorageService LocalStorage;
+@using Dual.Web.Blazor.Client.Pages.Auth
 
 

@@ -1,6 +1,8 @@
+using Blazored.LocalStorage;
 using Blazored.SessionStorage;
 using DsWebApp.Shared;
 using Dual.Web.Blazor.Client.Auth;
+using Dual.Web.Blazor.Shared;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -15,7 +17,12 @@ services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvi
 services.AddScoped<DualWebBlazorJsInterop>();
 services.AddScoped<CanvasJsInterop>();
 services.AddScoped<FilesManager>();
-services.AddScoped<ClientGlobal>();
+
+var clinetGlobal = new ClientGlobal();
+services.AddSingleton<ClientGlobal>(clinetGlobal);
+services.AddSingleton<ClientGlobalBase>(clinetGlobal);
+
+services.AddBlazoredLocalStorage();
 services.AddBlazoredSessionStorage();
 services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 services.AddAuthorizationCore();

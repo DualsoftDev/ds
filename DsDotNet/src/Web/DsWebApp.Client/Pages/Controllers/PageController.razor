@@ -6,10 +6,7 @@
 @using Dual.Web.Blazor.ServerSide
 
 
-@attribute [Authorize(Roles = "Administrator")]
-
-@inject AuthenticationStateProvider AuthenticationStateProvider
-@inject NavigationManager NavigationManager
+@attribute [Authorize(Roles = "Administrator,User")]
 
 @implements IDisposable
 

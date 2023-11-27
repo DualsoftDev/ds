@@ -14,7 +14,7 @@ module OriginTestModule =
 
         let libdir = @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model"
             
-        let configFile = PathManager.getFullPath  (@"test-origin-config.json"|>DsFile) (libdir.ToDirectory())
+        let configFile = PathManager.getFullPath  (@"dualsoft.json"|>DsFile) (libdir.ToDirectory())
         let genConfig (filePath:string) =
             let cfg = {
                     DsFilePath = $@"{libdir}/MultipleJobdefCallExample/{filePath}"

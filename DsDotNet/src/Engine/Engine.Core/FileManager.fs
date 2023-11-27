@@ -189,7 +189,7 @@ module FileManager =
             entry.ExtractToFile(entryPath, true)
 
         // Return the path where the files are extracted
-        PathManager.getFullPath ($"{extractName}.json"|>DsFile)(extractPath|>DsDirectory)
+        PathManager.getFullPath ($"{TextDSJson}"|>DsFile)(extractPath|>DsDirectory)
         
 [<Extension>]
 type FileHelper =

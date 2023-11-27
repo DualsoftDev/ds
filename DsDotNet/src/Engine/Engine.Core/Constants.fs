@@ -7,9 +7,9 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module DsText =
-    let [<Literal>] TextLibrary = "DS_Library"
-    let [<Literal>] TextDSJson = "dualsoft.json"
-    let [<Literal>] TextSkip  = "-"  //주소 스킵 처리
+    let [<Literal>] TextLibrary   = "DS_Library"
+    let [<Literal>] TextDSJson    = "dualsoft.json"
+    let [<Literal>] TextSkip      = "-"  //주소 스킵 처리
     let [<Literal>] TextAddrEmpty = "_"  //주소 없음 Error 대상
     //edge
     let [<Literal>] TextStartEdge         = ">"

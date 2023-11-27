@@ -13,7 +13,7 @@ module LoadConfigTestModule =
         inherit EngineTestBaseClass()
 
         let dsFileDir = PathManager.combineFullPathDirectory ([|@$"{__SOURCE_DIRECTORY__}"; "../../UnitTest.Model/UnitTestExample"|])
-        let configFile = PathManager.getFullPath  ( @"test-model-config.json"|>DsFile) (dsFileDir.ToDirectory())
+        let configFile = PathManager.getFullPath  ( @"dualsoft.json"|>DsFile) (dsFileDir.ToDirectory())
         
         let loadConfigTest() =
             let cfg =
@@ -35,7 +35,7 @@ module LoadConfigTestModule =
 
         [<Test>]
         member __.``LoadFolderModelFromConfigTest`` () =
-            let configPath = PathManager.getFullPath ( @"dsFolder.json"|>DsFile) (dsFileDir.ToDirectory())
+            let configPath = PathManager.getFullPath ( @"dualsoft.json"|>DsFile) (dsFileDir.ToDirectory())
 
             let model = ParserLoader.LoadFromConfig configPath
             model.LoadingPaths.Length === 9

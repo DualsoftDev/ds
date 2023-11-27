@@ -45,6 +45,10 @@ module ParserLoader =
 
 
     let LoadFromConfig (configPath: string) =
+        let jsonFileName =PathManager.getFileName (configPath.ToFile())
+        if jsonFileName  <> TextDSJson
+        then failwithf $"LoadFromConfig FileName must be {TextDSJson}: now {jsonFileName}"
+
         let configPath = $"{PathManager.getDirectoryName (configPath.ToFile())}{TextDSJson}"
         let cfg = LoadConfig configPath
         let dir = PathManager.getDirectoryName (configPath.ToFile())
@@ -53,7 +57,6 @@ module ParserLoader =
         { Config = cfg
           System = system
           LoadingPaths = loadings }
-
 
     let LoadFromActivePath (activePath: string) =
         let dir = PathManager.getDirectoryName (activePath.ToFile())

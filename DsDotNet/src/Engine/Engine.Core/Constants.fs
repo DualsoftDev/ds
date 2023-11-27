@@ -195,6 +195,13 @@ module DsDataType =
 
 
         member x.ToTextLower() = x.ToText().ToLower()
+        member x.ToBlockSizeNText() = 
+            match x with
+            | DuUINT16  -> 16, "W"
+            | DuUINT32  -> 32, "D"
+            | DuUINT64  -> 64, "L"
+            | DuUINT8   -> 8 , "B"
+            | _ -> failwithf $"'{x}' not support ToBlockSize"
         member x.ToType() =
             match x with
             | DuBOOL    -> typedefof<bool>
@@ -213,6 +220,13 @@ module DsDataType =
 
         member x.DefaultValue() = typeDefaultValue (x.ToType())
 
+    let getBlockType(blockBit:int) =
+        match blockBit with
+        | 8  -> DuUINT8
+        | 16 -> DuUINT16
+        | 32 -> DuUINT32
+        | 64 -> DuUINT64
+        | _ -> failwithf $"'size bit {blockBit}' not support getBlockType"
 
     let textToDataType(typeName:string) =
         match typeName.ToLower() with

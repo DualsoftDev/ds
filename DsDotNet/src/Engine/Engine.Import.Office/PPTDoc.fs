@@ -151,9 +151,10 @@ module PPTDocModule =
                     if (slidePart.PageTitle(false) = "" && slidePart.PageTitle(true) = "")
                     then
                         Office.ErrorPPT(Page, ErrID._59, "Title Error", page, 0u)
-                    elif (slidePart.PageTitle(false) <> "") then
+                    else 
                         pages.Add(slidePart, pptPage (slidePart, page, show)) |> ignore
-                    elif (slidePart.PageTitle(true) <> "") then
+                    
+                    if (slidePart.PageTitle(true) <> "") then
                         headPages.Add(slidePart, page) |> ignore
                     )
 
@@ -164,9 +165,6 @@ module PPTDocModule =
                 |> Seq.map (fun (slide, groupSet) -> pages.[slide].PageNum, groupSet)
 
             let shapes = Office.PageShapes(doc)
-                            |> Seq.filter (fun (_, page, _, _) -> pages.Values.Select(fun f->f.PageNum).Contains(page))
-                            |> Seq.filter (fun (_, page, _, _) -> not (headPages.Values.Contains(page)))
-            
             let connections = Connections(doc)
                             |> Seq.filter (fun (slide, _) -> not (headPages.ContainsKey(slide)))
                             |> Seq.filter (fun (slide, _) -> pages.ContainsKey(slide))
@@ -184,16 +182,14 @@ module PPTDocModule =
             if (headPages.IsEmpty()) then
                 Office.ErrorPPT(Page, ErrID._12, "Title Slide", 0, 0u)
 
-            let name = headPages.Keys.First().PageTitle(true)
 
             shapes
-            |> Seq.where (fun (shape, page, geometry, isDash) -> not (headPages.Values.Contains(page)))
             |> Seq.iter (fun (shape, page, geometry, isDash) ->
-
                 let pagePPT = pages.Values.Filter(fun w -> w.PageNum = page).First()
-                let sysName, flowName = GetSysNFlow(name, pagePPT.Title, pagePPT.PageNum)
-
-                let node = pptNode (shape, page, flowName, slideSize)
+                let headPageName = headPages.Keys.First().PageTitle(true)
+                let sysName, flowName = GetSysNFlow(headPageName, pagePPT.Title, pagePPT.PageNum)
+                let headPage =  headPages.Values.Contains(page)
+                let node = pptNode (shape, page, flowName, slideSize, headPage)
 
                 if (node.Name = "") then
                     shape.ErrorName(ErrID._13, page)

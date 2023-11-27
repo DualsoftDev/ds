@@ -233,7 +233,6 @@ module PPTObjectModule =
         | REAL
         | DUMMY
         | BUTTON
-        | CONDITION
         | LAMP -> checkDotErr ()
 
 
@@ -248,11 +247,13 @@ module PPTObjectModule =
         member x.IsUsing = bShow
         member x.Title = slidePart.PageTitle(false)
 
-    type pptNode(shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int) =
+    type pptNode(shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int,  isHeadPage:bool) =
         let copySystems = Dictionary<string, string>() //copyName, orgiName
         let safeties = HashSet<string>()
         let jobInfos = Dictionary<string, HashSet<string>>() // jobBase, api SystemNames
+        let btnHeadPageDefs = Dictionary<string, BtnType>()
         let btnDefs = Dictionary<string, BtnType>()
+        let lampHeadPageDefs = Dictionary<string, LampType>()
         let lampDefs = Dictionary<string, LampType>()
         let condiDefs = Dictionary<string, ConditionType>()
 
@@ -368,8 +369,8 @@ module PPTObjectModule =
                     LAMP
                 elif (shape.CheckBevelShapeRound()) then
                     BUTTON
-                elif (shape.CheckCondition()) then
-                    CONDITION
+                //elif (shape.CheckCondition()) then
+                //    CONDITION
                 else
                     shape.ErrorName(ErrID._1, iPage)
 
@@ -400,14 +401,15 @@ module PPTObjectModule =
 
 
             | BUTTON ->
+                let addDic = if isHeadPage then btnHeadPageDefs else btnDefs
                 getBracketItems(shape.InnerText)
-                    .ForEach(fun (n, t) -> btnDefs.Add(n |> TrimSpace, t |> getBtnType))
+                    .ForEach(fun (n, t) -> addDic.Add(n |> TrimSpace, t |> getBtnType))
             | LAMP ->
+                let addDic = if isHeadPage then lampHeadPageDefs else lampDefs
                 getBracketItems(shape.InnerText)
-                    .ForEach(fun (n, t) -> lampDefs.Add(n |> TrimSpace, t |> getLampType))
-            | CONDITION ->
-                getBracketItems(shape.InnerText)
-                    .ForEach(fun (n, t) -> condiDefs.Add(n |> TrimSpace, t |> getConditionType))
+                    .ForEach(fun (n, t) -> addDic.Add(n |> TrimSpace, t |> getLampType))
+
+
             | REALExF
             | REALExS
             | DUMMY -> ()
@@ -455,9 +457,10 @@ module PPTObjectModule =
         member val Alias: pptNode option = None with get, set
         member val AliasNumber: int = 0 with get, set
 
+        member val ButtonHeadPageDefs = btnHeadPageDefs
         member val ButtonDefs = btnDefs
+        member val LampHeadPageDefs = lampHeadPageDefs
         member val LampDefs = lampDefs
-        member val CondiDefs = condiDefs
 
         member x.GetRectangle(slideSize: int * int) = shape.GetPosition(slideSize)
 

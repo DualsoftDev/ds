@@ -22,7 +22,6 @@ module InterfaceClass =
         | OPEN_EXSYS_CALL //시스템참조 Active sytem (초기 로딩과 다른 경로 ExSystem 이면 Passive)
         | DUMMY //그룹더미
         | BUTTON //버튼 emg,start, ...
-        | CONDITION //system Condition ready/drive 정의 블록
         | LAMP //램프 runmode,stopmode, ...
 
         member x.IsReal = x = REAL || x = REALExF || x = REALExS

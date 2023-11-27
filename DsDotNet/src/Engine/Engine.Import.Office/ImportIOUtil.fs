@@ -9,15 +9,19 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module ImportIOUtil =
+    
 
-    let mutable inCnt = RuntimeDS.HwStartInDINT * 64 - 1
-    let mutable outCnt = RuntimeDS.HwStartOutDINT * 64 - 1
+    let blockInSize, blockInText = RuntimeDS.HwBlockSizeIn.ToBlockSizeNText()
+    let blockOutSize, blockOutText = RuntimeDS.HwBlockSizeOut.ToBlockSizeNText()
+    let mutable inCnt = RuntimeDS.HwStartInDINT * blockInSize - 1
+    let mutable outCnt = RuntimeDS.HwStartOutDINT * blockOutSize - 1
 
     let getValidAddress (addr: string, name: string, isSkip: bool, bInput: bool) =
 
         let addr = if addr.IsNullOrEmpty()
                     then failwithf $"Empty address {name}"
                     else addr.Trim().ToUpper()
+
 
         let newAddr =
             match addr = TextAddrEmpty, isSkip with
@@ -27,11 +31,25 @@ module ImportIOUtil =
                             then inCnt <- inCnt + 1; inCnt
                             else outCnt <- outCnt + 1; outCnt
 
-                let prefix = if RuntimeDS.Package.IsPackagePC() 
-                             then if bInput then "I" else "O"
-                             elif bInput then "%IX0." else "%QX0."
+                if RuntimeDS.Package.IsPackagePC() 
+                then
+                    if bInput 
+                    then  $"I{blockInText}{cnt / blockInSize}.{cnt % blockInSize}" 
+                    else  $"O{blockOutText}{cnt / blockOutSize}.{cnt % blockOutSize}" 
 
-                $"{prefix}{cnt / 64}.{cnt % 64}"
+                elif RuntimeDS.Package.IsPackagePLC()  
+                then
+                    if bInput 
+                    then
+                        if RuntimeDS.HwBlockSizeIn = DuUINT64
+                        then $"%%IX0.{cnt / 64}.{cnt % 64}" 
+                        else $"%%I{blockInText}{cnt / blockInSize}.{cnt % blockInSize}" 
+                    else
+                        if RuntimeDS.HwBlockSizeIn = DuUINT64
+                        then $"%%QX0.{cnt / 64}.{cnt % 64}" 
+                        else $"%%Q{blockOutText}{cnt / blockOutSize}.{cnt % blockOutSize}" 
+
+                else TextAddrEmpty
 
             | false, _ -> 
                 match addr, isSkip with

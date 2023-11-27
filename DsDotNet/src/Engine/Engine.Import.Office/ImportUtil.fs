@@ -254,6 +254,13 @@ module ImportU =
                 let flow = dicFlow.[node.PageNum]
                 node.ButtonDefs.ForEach(fun b -> mySys.AddButton(b.Value, b.Key, "", "", flow, new HashSet<Func>())))
 
+            doc.Nodes
+            |> Seq.filter (fun node -> node.ButtonHeadPageDefs.any())
+            |> Seq.iter (fun node ->
+                dicFlow.Iter(fun flow ->
+                    node.ButtonHeadPageDefs.ForEach(fun b -> mySys.AddButton(b.Value, b.Key, "", "", flow.Value, new HashSet<Func>())))
+                )        
+                
         //EMG & Start & Auto 리스트 만들기
         [<Extension>]
         static member MakeLamps(doc: pptDoc, mySys: DsSystem) =
@@ -264,20 +271,14 @@ module ImportU =
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
                 node.LampDefs.ForEach(fun l -> mySys.AddLamp(l.Value, l.Key, "", flow, new HashSet<Func>())))
-
-        //시스템 조건 만들기 준비/운전
-        [<Extension>]
-        static member MakeConditions(doc: pptDoc, mySys: DsSystem) =
-            let dicFlow = doc.DicFlow
-
+            
             doc.Nodes
-            |> Seq.filter (fun node -> node.CondiDefs.any ())
+            |> Seq.filter (fun node -> node.LampHeadPageDefs.any())
             |> Seq.iter (fun node ->
-                let flow = dicFlow.[node.PageNum]
-                node.CondiDefs.ForEach(fun l -> mySys.AddCondtion(l.Value, l.Key, "", flow, new HashSet<Func>())))
-
-
-
+                dicFlow.Iter(fun flow ->
+                    node.LampDefs.ForEach(fun l -> mySys.AddLamp(l.Value, l.Key, "", flow.Value, new HashSet<Func>())))
+                )      
+     
 
         //real call alias  만들기
         [<Extension>]
@@ -632,8 +633,6 @@ module ImportU =
             doc.MakeButtons(sys)
             //run / stop mode  램프 리스트 만들기
             doc.MakeLamps(sys)
-            //시스템 조건 만들기 준비/운전
-            doc.MakeConditions(sys)
             //segment 리스트 만들기
             doc.MakeSegment(sys)
             //Edge  만들기

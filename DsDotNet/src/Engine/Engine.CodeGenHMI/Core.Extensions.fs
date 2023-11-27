@@ -1,4 +1,4 @@
-namespace rec Engine.CodeGenCPU
+namespace Engine.CodeGenHMI
 
 open System.Linq
 open Engine.Core
@@ -8,6 +8,8 @@ open System
 open System.Collections.Generic
 open System.Reflection
 open Engine.Info
+open Engine.CodeGenCPU
+open Engine.Cpu
 [<AutoOpen>]
 module ConvertHMI =
       
@@ -32,7 +34,7 @@ module ConvertHMI =
 
 
     type ApiItem with
-        member x.GetHMI()   =
+        member private x.GetHMI()   =
             let tm = x.TagManager :?> ApiItemManager
             {
                 Name = x.Name
@@ -44,14 +46,14 @@ module ConvertHMI =
             }
 
     type Device with
-        member x.GetHMI()   =
+        member private x.GetHMI()   =
             {
                 Name        = x.Name
                 ApiItems    = x.ReferenceSystem.ApiItems.Select(fun s->s.GetHMI()).ToArray()
             }
 
     type Job with
-        member x.GetHMI()   =
+        member private x.GetHMI()   =
             let actionInTags  = x.DeviceDefs.Select(fun d->d.InTag)      
             let apiTagManager = x.DeviceDefs.First().ApiItem.TagManager :?> ApiItemManager
             {
@@ -60,7 +62,7 @@ module ConvertHMI =
             }
 
     type Real with
-        member x.GetHMI()   =
+        member private x.GetHMI()   =
             let tm = x.TagManager :?> VertexManager
             {
                 Name = x.Name
@@ -81,7 +83,7 @@ module ConvertHMI =
             }
 
     type Flow with
-        member x.GetHMI()   =
+        member private x.GetHMI()   =
             let tm = x.TagManager :?> FlowManager
             {
                 Name = x.Name
@@ -108,7 +110,7 @@ module ConvertHMI =
 
 
     type DsSystem with
-        member x.GetHMI()   =
+        member private x.GetHMI()   =
             let tm = x.TagManager :?> SystemManager
             {
                 Name  = x.Name
@@ -128,10 +130,10 @@ module ConvertHMI =
     [<Extension>]
     type ConvertHMIExt =
         [<Extension>]
-        static member GetHMIPackage (sys:DsSystem) : HMIPackage = 
+        static member GetHMIPackage (dsCpu:DsCPU) : HMIPackage = 
             {
                 IP          = RuntimeDS.IP
                 VersionDS   = Assembly.GetExecutingAssembly().GetName().Version.ToString()
-                System      = sys.GetHMI()
-                Devices     = sys.Devices.Select(fun d -> d.GetHMI()).ToArray()
+                System      = dsCpu.MySystem.GetHMI()
+                Devices     = dsCpu.MySystem.Devices.Select(fun d -> d.GetHMI()).ToArray()
             }

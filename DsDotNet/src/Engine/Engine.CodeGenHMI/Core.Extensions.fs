@@ -12,6 +12,7 @@ open Engine.Info
 module ConvertHMI =
       
     let kindDescriptions = DBLoggerApi.GetAllTagKinds() |> Tuple.toDictionary
+
     let getWebTag (tm:ITagManager) (kind:int) =
         let tag = 
             match tm with
@@ -20,14 +21,15 @@ module ConvertHMI =
             | :? VertexManager  as m -> m.GetVertexTag (DU.tryGetEnumValue<VertexTag>(kind).Value)
             | :? ApiItemManager as m -> m.GetApiTag    (DU.tryGetEnumValue<ApiItemTag>(kind).Value)
             | _ -> failwithf "getPushWebTag error"
+
         TagWebExt.GetWebTag(tag, kindDescriptions) 
         
     let getPush          (tm:ITagManager) (kind:int) = getWebTag tm kind
     let getLamp          (tm:ITagManager) (kind:int) = getWebTag tm kind
-    let getPushMultiLamp (tm:ITagManager) (pushKind:int) (lampTags:ITag seq) = (getWebTag tm pushKind), lampTags.Select(fun f-> TagWebExt.GetWebTag(f, kindDescriptions))
     let getSelect        (tm:ITagManager) (kindA:int) (kindB:int) = (getWebTag tm  kindA), (getWebTag tm kindB)
+    let getPushMultiLamp (tm:ITagManager) (pushKind:int) (lampTags:ITag seq) =
+        getWebTag tm pushKind, lampTags.Select(fun f-> TagWebExt.GetWebTag(f, kindDescriptions))
 
-   
 
     type ApiItem with
         member x.GetHMI()   =
@@ -126,11 +128,10 @@ module ConvertHMI =
     [<Extension>]
     type ConvertHMIExt =
         [<Extension>]
-            static member GetHMIPackage(sys:DsSystem) = 
-                {
-                    IP          = RuntimeDS.IP
-                    VersionDS   = Assembly.GetExecutingAssembly().GetName().Version.ToString()
-                    System      = sys.GetHMI()
-                    Devices     = sys.Devices.Select(fun d->d.GetHMI()).ToArray()
-                }
-        
+        static member GetHMIPackage (sys:DsSystem) : HMIPackage = 
+            {
+                IP          = RuntimeDS.IP
+                VersionDS   = Assembly.GetExecutingAssembly().GetName().Version.ToString()
+                System      = sys.GetHMI()
+                Devices     = sys.Devices.Select(fun d -> d.GetHMI()).ToArray()
+            }

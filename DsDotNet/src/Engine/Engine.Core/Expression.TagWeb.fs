@@ -4,6 +4,7 @@ open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
 open System.Collections
 open System.Collections.Generic
+open System
 
 [<AutoOpen>]
 module TagWebModule =
@@ -35,7 +36,7 @@ module TagWebModule =
 
     type HMIPushMultiLamp = HMIPush*(HMILamp seq) // output inputs
 
-
+    [<Obsolete("type HmiPackage 대신 사용 (Engine.CodeGenHMI에서 생성함)")>]
     type HmiTagPackage = {
         AutoButtons      : HMIButton array 
         ManualButtons    : HMIButton array 

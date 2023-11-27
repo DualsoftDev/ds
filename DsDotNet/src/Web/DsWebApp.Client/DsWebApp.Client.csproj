@@ -6,10 +6,7 @@
 	</PropertyGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="DualSoft-Web-Blazor" Version="0.1.6" />
-	</ItemGroup>
-	
-	<ItemGroup>
+		<PackageReference Include="DualSoft-Web-Blazor" Version="0.1.7" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.0" />
 		<PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
 	</ItemGroup>

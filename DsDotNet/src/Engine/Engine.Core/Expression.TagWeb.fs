@@ -33,7 +33,7 @@ module TagWebModule =
     type HMIButton = HMIPush*HMIFlickerLamp
     type HMIDevice = HMIPush*HMILamp  //input, output
 
-    type HMIPushLamp = HMIPush*HMILamp  //input, output
+    type HMIPushMultiLamp = HMIPush*(HMILamp seq) // output inputs
 
 
     type HmiTagPackage = {

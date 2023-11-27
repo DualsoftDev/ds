@@ -22,20 +22,18 @@ module ConvertHMI =
             | _ -> failwithf "getPushWebTag error"
         TagWebExt.GetWebTag(tag, kindDescriptions) 
         
-    let getPush     (tm:ITagManager) (kind:int) = getWebTag tm kind
-    let getLamp     (tm:ITagManager) (kind:int) = getWebTag tm kind
-    let getPushLamp (tm:ITagManager) (pushKind:int) (lampTag:ITag) = (getWebTag tm pushKind), TagWebExt.GetWebTag(lampTag, kindDescriptions) 
-    let getSelect   (tm:ITagManager) (kindA:int) (kindB:int) = (getWebTag tm  kindA), (getWebTag tm kindB)
+    let getPush          (tm:ITagManager) (kind:int) = getWebTag tm kind
+    let getLamp          (tm:ITagManager) (kind:int) = getWebTag tm kind
+    let getPushMultiLamp (tm:ITagManager) (pushKind:int) (lampTags:ITag seq) = (getWebTag tm pushKind), lampTags.Select(fun f-> TagWebExt.GetWebTag(f, kindDescriptions))
+    let getSelect        (tm:ITagManager) (kindA:int) (kindB:int) = (getWebTag tm  kindA), (getWebTag tm kindB)
 
    
 
     type ApiItem with
-        member x.GetHMI(containerSys:DsSystem)   =
-            let getDevTask = containerSys.DeviceDefs.First(fun w->w.ApiItem = x)
+        member x.GetHMI()   =
             let tm = x.TagManager :?> ApiItemManager
             {
                 Name = x.Name
-                ApiPushLamp        = getPushLamp  tm (ApiItemTag.planSet |>int) (getDevTask.InTag)
                 TrendOutErrorLamp  = getLamp      tm (ApiItemTag.txErrTrendOut |>int)
                 TimeOverErrorLamp  = getLamp      tm (ApiItemTag.txErrTimeOver |>int)
                 ShortErrorLamp     = getLamp      tm (ApiItemTag.rxErrShort |>int)
@@ -47,37 +45,66 @@ module ConvertHMI =
         member x.GetHMI()   =
             {
                 Name        = x.Name
-                ApiItems    = x.ReferenceSystem.ApiItems.Select(fun s->s.GetHMI(x.ContainerSystem)).ToArray()
-            }
-    //작업중
-    type Call with
-        member x.GetHMI()   =
-            {
-                Name = x.Name
-                JobPush        = null
-                SensorLamps         = null
+                ApiItems    = x.ReferenceSystem.ApiItems.Select(fun s->s.GetHMI()).ToArray()
             }
 
-    //작업중
+    type Job with
+        member x.GetHMI()   =
+            let actionInTags  = x.DeviceDefs.Select(fun d->d.InTag)      
+            let apiTagManager = x.DeviceDefs.First().ApiItem.TagManager :?> ApiItemManager
+            {
+                Name = x.Name
+                JobPushMutiLamp = getPushMultiLamp  apiTagManager (ApiItemTag.planSet |>int) (actionInTags)
+            }
+
     type Real with
         member x.GetHMI()   =
+            let tm = x.TagManager :?> VertexManager
             {
                 Name = x.Name
-                JobPush        = null
-                SensorLamps         = null
+                StartPush        = getPush     tm (VertexTag.startTag |>int)   
+                ResetPush        = getPush     tm (VertexTag.resetTag |>int)  
+                ONPush           = getPush     tm (VertexTag.forceOn |>int)  
+                OFFPush          = getPush     tm (VertexTag.forceOff |>int)  
+                ReadyLamp        = getPush     tm (VertexTag.ready |>int)  
+                GoingLamp        = getPush     tm (VertexTag.going |>int)  
+                FinishLamp       = getPush     tm (VertexTag.finish |>int)  
+                HomingLamp       = getPush     tm (VertexTag.homing |>int)  
+                OriginLamp       = getPush     tm (VertexTag.origin |>int)  
+                PauseLamp        = getPush     tm (VertexTag.pause |>int)  
+                ErrorTxLamp      = getPush     tm (VertexTag.errorRx |>int)  
+                ErrorRxLamp      = getPush     tm (VertexTag.errorTx |>int)  
+                
+                Jobs             = x.Graph.Vertices.OfType<Call>().Select(fun c->c.TargetJob.GetHMI()).ToArray()
             }
 
-    //작업중
     type Flow with
         member x.GetHMI()   =
+            let tm = x.TagManager :?> FlowManager
             {
                 Name = x.Name
-                JobPush        = null
-                SensorLamps         = null
+                AutoManualSelect = getSelect   tm (FlowTag.auto_bit  |>int) (FlowTag.manual_bit |>int)
+                DrivePush        = getPush     tm (FlowTag.drive_bit |>int)
+                StopPush         = getPush     tm (FlowTag.stop_bit  |>int)
+                ClearPush        = getPush     tm (FlowTag.clear_bit |>int)
+                EmergencyPush    = getPush     tm (FlowTag.emg_bit   |>int)
+                TestPush         = getPush     tm (FlowTag.test_bit  |>int)
+                HomePush         = getPush     tm (FlowTag.home_bit  |>int)
+                ReadyPush        = getPush     tm (FlowTag.ready_bit |>int)
+        
+                DriveLamp        = getLamp     tm (FlowTag.drive_op   |>int)
+                AutoLamp         = getLamp     tm (FlowTag.auto_op    |>int)
+                ManualLamp       = getLamp     tm (FlowTag.manual_op  |>int)
+                StopLamp         = getLamp     tm (FlowTag.stop_op    |>int)
+                EmergencyLamp    = getLamp     tm (FlowTag.emergency_op  |>int)
+                TestLamp         = getLamp     tm (FlowTag.test_op    |>int)
+                ReadyLamp        = getLamp     tm (FlowTag.ready_op   |>int)
+                IdleLamp         = getLamp     tm (FlowTag.idle_op    |>int)
+
+                Reals            = x.Graph.Vertices.OfType<Real>().Select(fun r->r.GetHMI()).ToArray()
             }
 
 
-    //작업중
     type DsSystem with
         member x.GetHMI()   =
             let tm = x.TagManager :?> SystemManager
@@ -92,7 +119,7 @@ module ConvertHMI =
                 HomePush         =  getPush     tm (SystemTag.home  |>int)
                 ReadyPush        =  getPush     tm (SystemTag.ready |>int)
 
-                Flows         = [].ToArray()
+                Flows         = x.Flows.Select(fun f->f.GetHMI()).ToArray()
             }
 
     [<AutoOpen>]

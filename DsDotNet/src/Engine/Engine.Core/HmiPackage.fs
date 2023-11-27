@@ -4,14 +4,15 @@ namespace Engine.Core
 [<AutoOpen>]
 module HmiPackageModule =
 
-
+    ///수동 동작의 단위 jobA = { Dev1.ADV, Dev2.ADV, ... }
+    ///하나의 명령으로 복수의 디바이스 행위  
+    ///Push & MultiLamp ex) 실린더1차 전진 Push, 실린더1차_Dev1,실린더1차_Dev2,실린더1차_Dev3 전진 램프들
     type HMIJob = {
         Name : string
-
-        JobPush          : HMIPush 
-        SensorLamps      : HMILamp array
+        JobPushMutiLamp  : HMIPushMultiLamp 
     }
 
+    ///작업 단위 FlowA = { Real1, Real2, ... }
     type HMIReal = {
         Name : string
 
@@ -32,6 +33,7 @@ module HmiPackageModule =
         Jobs             : HMIJob array      
     }
 
+    ///공정흐름 단위 SystemA = { Flow1, Flow2, ... }
     type HMIFlow = {
         Name             : string
         AutoManualSelect : HMISelect      
@@ -71,9 +73,9 @@ module HmiPackageModule =
         Flows             : HMIFlow array
     }
 
+    //디바이스 소속된 행위 Api
     type HMIApiItem = {
         Name : string
-        ApiPushLamp       : HMIPushLamp   
         
         TrendOutErrorLamp : HMILamp        
         TimeOverErrorLamp : HMILamp        
@@ -83,6 +85,7 @@ module HmiPackageModule =
     }
 
 
+    //모니터링 전용 (명령은 소속Job 통해서)
     type HMIDevice = {
         Name : string
         ApiItems   : HMIApiItem array  

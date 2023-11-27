@@ -11,11 +11,13 @@ using Microsoft.AspNetCore.SignalR.Client;
 
 using System.Net.Http.Json;
 
+using static Engine.Core.HmiPackageModule;
+
 namespace DsWebApp.Client;
 
 public class ClientGlobal : ClientGlobalBase
 {
-    public HmiTagPackage HmiTagPackage { get; set; }
+    public HMIPackage HmiPackage { get; set; }
 
     ServerSettings _serverSettings;
     public async Task<ServerSettings> GetServerSettingsAsync(HttpClient http)

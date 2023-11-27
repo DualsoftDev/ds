@@ -6,11 +6,13 @@ open System.Runtime.CompilerServices
 open System.Collections.Generic
 open Engine.Core
 open Engine.Info
+open System
 
 [<AutoOpen>]
 [<Extension>]
 type TagHMIExt =
 
+    [<Obsolete("Use GetHMIPackage")>]
     [<Extension>]
     static member GetHmiTagPackage(sys:DsSystem, kindDescriptions:Dictionary<int, string>) =
         let getButtonsForReal(xs:Real seq) =

@@ -1,5 +1,7 @@
 using DsWebApp.Server.Hubs;
 using Engine.Runtime;
+
+using static Engine.Core.HmiPackageModule;
 using static Engine.Core.TagWebModule;
 
 namespace DsWebApp.Server.Controllers;
@@ -20,7 +22,7 @@ public class HmiTagController(
     /// "api/hmitag" : 모든 HMI 태그 정보를 반환
     /// </summary>
     [HttpGet]
-    public HmiTagPackage GetAllHmiTags()
+    public HMIPackage GetAllHmiTags()
     {
         return _model?.HMITagPackage;
     }

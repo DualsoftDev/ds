@@ -1,9 +1,66 @@
 @page "/hmis/hmi"
+
+@using System.Collections.ObjectModel
+@using static Engine.Core.TagWebModule
+@using HMIButton = Tuple<Engine.Core.TagWebModule.TagWeb, Engine.Core.TagWebModule.TagWeb>  @* HMIPush * HMIFlickerLamp *@
+@using static Engine.Core.HmiPackageModule
 @implements IDisposable
+
 @attribute [Authorize(Roles = "Administrator")]
 
-<h3>PageHmi</h3>
+<h3>PageHmiTags</h3>
+
+@if (_loading)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p>@_hmiSystem.Name</p>
+    <p>
+        <button class="btn btn-primary" @onclick="@(() => navigateTo("/hmis/auto"))">자동 조작</button>
+        <button class="btn btn-primary" @onclick="@(() => navigateTo("/hmis/manual"))">수동 조작</button>
+        <button class="btn btn-primary" @onclick="@(() => navigateTo("/hmis/flow"))">Flow 모니터</button>
+        <button class="btn btn-primary" @onclick="@(() => navigateTo("/hmis/alarm"))">알람 리스트</button>
+    </p>
+
+    @*
+    @if (_hmiPackage.AutoButtons.Any())
+    {
+        <CompHmiButtonTable TableName="Auto Buttons" HMIButtons=_hmiPackage.AutoButtons />
+    }
+
+    @if (_hmiPackage.DeviceBtns.Any())
+    {
+        <CompDeviceButtonTable TableName="Device Buttons" HMIDevices=_hmiPackage.DeviceBtns />
+    }
+
+    @if (_hmiPackage.RealBtns.Any())
+    {
+        <CompRealButtonTable TableName="Real Buttons" RealButtons=_hmiPackage.RealBtns />
+    }
+ *@
+}
+
 
 @code {
-    public void Dispose() { Console.WriteLine($"Disposing PageHmi.razor"); }
+    bool _loading { get; set; } = true;
+    HMIPackage _hmiPackage;
+    HMISystem _hmiSystem => _hmiPackage.System;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _hmiPackage = ClientGlobal.HmiPackage;
+        if (_hmiPackage == null)
+            ClientGlobal.HmiPackage = _hmiPackage = await Http.GetFromJsonAsync<HMIPackage>($"api/hmitag");
+
+        _loading = false;
+        await base.OnInitializedAsync();
+    }
+    public void Dispose()
+    {
+        Console.WriteLine($"Disposing PageHmiTags.razor");
+    }
+
+    void navigateTo(string url) => NavigationManager.NavigateTo(url);
 }

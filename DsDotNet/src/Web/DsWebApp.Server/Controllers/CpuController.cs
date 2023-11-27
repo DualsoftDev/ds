@@ -1,7 +1,7 @@
-using DsWebApp.Server.Hubs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR.Client;
 using static Engine.Cpu.RunTime;
-
+using SimpleResult = Dual.Common.Core.ResultSerializable<string, string>;
 namespace DsWebApp.Server.Controllers;
 
 /// <summary>
@@ -18,32 +18,37 @@ public class CpuController(ServerGlobal global, IHubContext<ModelHub> hubContext
 
     RuntimeModelDto modelDto(bool newIsCpuRunning) =>
         new RuntimeModelDto(global.ServerSettings.RuntimeModelDsZipPath, newIsCpuRunning);
+
+
+    // api/cpu/command/run
+    [Authorize(Roles = "Administrator")]
     [HttpGet("command/run")]
-    public ActionResult<ErrorMessage> Run()
+    public SimpleResult Run()
     {
         if (_cpu == null)
-            return "No model loaded";
+            return SimpleResult.Err("No model loaded");
         if (_cpu.IsRunning)
-            return "Already running";
+            return SimpleResult.Err("Already running");
 
         _cpu.RunInBackground();
         hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, modelDto(true));
-        return "";
+        return SimpleResult.Ok("Ok");
     }
 
+    // api/cpu/command/stop
+    [Authorize(Roles = "Administrator")]
     [HttpGet("command/stop")]
-    public ActionResult<ErrorMessage> Stop()
+    public SimpleResult Stop()
     {
         if (_cpu == null)
-            return "No model loaded";
+            return SimpleResult.Err("No model loaded");
         if (! _cpu.IsRunning)
-            return "Already stopped";
+            return SimpleResult.Err("Already stopped");
 
         _cpu.Stop();
         hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, modelDto(false));
 
-        return "";
+        return SimpleResult.Ok("Ok");
     }
-
 }
 

@@ -2,12 +2,9 @@
 
 @using System.Collections.ObjectModel
 @using System.Text.Json
-@using Dual.Common.Core
-@using Dual.Web.Blazor.ServerSide
 
 
 @attribute [Authorize(Roles = "Administrator,User")]
-
 @implements IDisposable
 
 <h3>PageController</h3>
@@ -62,32 +59,29 @@ else
 
     async Task executeRestApi(string api, string defaultOkMessage)
     {
-        var response = await Http.GetAsync(api);
-        if (response.IsSuccessStatusCode)
+        if (await AuthenticationStateProvider.SetAuthHeaderAsync(Http))
         {
-            ErrorMessage errMsg = await response.Content.ReadAsStringAsync();
-            await JsDual.Alert(errMsg.NonNullAny() ? errMsg : defaultOkMessage);
+            ResultSerializable<string, ErrorMessage> result = await Http.GetResultSimpleAsync<string>(api);
+            Console.WriteLine($"Result={result}, IsOK={result.IsOk}, Ok={result.Value}, Err={result.Error}");
+            string message = 
+                result.Match(
+                    (ok) => $"OK: {ok}\r\n{defaultOkMessage}",
+                    (err) => $"Failed to call [{api}].\r\n{err}"
+                );
+            await JsDual.Alert(message);
         }
         else
-        {
-            await JsDual.Alert($"Failed to call [{api}].\r\nStatus code:{response.StatusCode}");
-        }
+            NavigationManager.NavigateTo("/toplevel/login");
     }
 
 
     async Task Run()
     {
-        if (await AuthenticationStateProvider.SetAuthHeaderAsync(Http))
-            NavigationManager.NavigateTo("/toplevel/login");
-        else
-            await executeRestApi($"api/cpu/command/run", "Cpu running.");
+        await executeRestApi($"api/cpu/command/run", "Cpu running.");
     }
     async Task Stop()
     {
-        if (await AuthenticationStateProvider.SetAuthHeaderAsync(Http))
-            await executeRestApi($"api/cpu/command/stop", "Cpu stopped.");
-        else
-            NavigationManager.NavigateTo("/toplevel/login");
+        await executeRestApi($"api/cpu/command/stop", "Cpu stopped.");
     }
 
     async Task Step()

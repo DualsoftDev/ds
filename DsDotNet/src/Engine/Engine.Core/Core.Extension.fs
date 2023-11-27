@@ -41,12 +41,11 @@ module CoreExtensionModule =
     type DsSystem with
         member x.AddButton(btnType:BtnType, btnName:string, inAddress:TagAddress, outAddress:TagAddress, flow:Flow, funcs:HashSet<Func>) =
             checkSystem(x, flow, btnName)
-            if btnType = DuAutoBTN || btnType = DuManualBTN
-            then
-                let flows = x.HWButtons.Where(fun f->f.ButtonType = btnType)
-                            |> Seq.collect(fun b -> b.SettingFlows)
-                flows.Contains(flow) |> not
-                |> verifyM $"{btnType} {btnName} is assigned to a single flow :  flow name [{flow.Name}]"
+          
+            let flows = x.HWButtons.Where(fun f->f.ButtonType = btnType)
+                        |> Seq.collect(fun b -> b.SettingFlows)
+            flows.Contains(flow) |> not
+            |> verifyM $"버튼타입[{btnType}]{btnName}이 중복 정의 되었습니다.  위치:[{flow.Name}]"
 
             match x.HWButtons.TryFind(fun f -> f.Name = btnName) with
             | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
@@ -57,7 +56,7 @@ module CoreExtensionModule =
             checkSystem(x, flow, lmpName)
 
             x.HWLamps.Select(fun f->f.Name).Contains(lmpName) |> not
-            |> verifyM $"{lmpType} {lmpName} is assigned to a single flow :  flow name [{flow.Name}]"
+            |> verifyM $"램프타입[{lmpType}]{lmpName}이 중복 정의 되었습니다.  위치:[{flow.Name}]"
 
             match x.HWLamps.TryFind(fun f -> f.Name = lmpName) with
             | Some lmp -> lmp.SettingFlow <- flow

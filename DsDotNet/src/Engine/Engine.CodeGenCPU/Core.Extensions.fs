@@ -57,7 +57,10 @@ module ConvertCodeCoreExt =
         member a.TRxErr = getAM(a).TRxErr
 
 
-        
+    type ButtonDef with
+        member b.ActionINFunc = 
+                let inTag = (b.InTag :?> Tag<bool>).Expr
+                if hasNot(b.Funcs)then !!inTag else inTag  
 
     type DsSystem with
         member private s.GetPv<'T when 'T:equality >(st:SystemTag) =
@@ -173,9 +176,7 @@ module ConvertCodeCoreExt =
 
     let private getButtonExpr(flow:Flow, btns:ButtonDef seq) : Expression<bool> seq =
         btns.Where(fun b -> b.SettingFlows.Contains(flow))
-            .Select(fun b ->
-                let inTag = (b.InTag :?> Tag<bool>).Expr
-                if hasNot(b.Funcs)then !!inTag else inTag    )
+            .Select(fun b ->b.ActionINFunc)
 
     let private getButtonExprWrtRuntimePackage(f:Flow, btns:ButtonDef seq) : Expression<bool> =
         match RuntimeDS.Package with

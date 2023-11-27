@@ -364,8 +364,8 @@ module ModelComponentAnswers =
             ClearBTN(_, _) = { F1;F2;F3;F5; }
         }
         [e] = {
-            EMGBTN3(_, _) = { F3;F5; }
-            EMGBTN(_, _) = { F1;F2;F3;F5; }
+            EMGBTN3(_, _) = { F3; }
+            EMGBTN(_, _) = { F1;F2;F4;F5; }
         }
         [t] = {
             StartTestBTN(_, _) = { F5; }

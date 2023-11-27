@@ -157,8 +157,8 @@ namespace Engine
             ManualBTN(_, _) = { F1;F5; }
         }
         [e] = {
-            EMGBTN3(_, _) = { F3;F5; }
-            EMGBTN(_, _) = { F1;F2;F3;F5; }
+            EMGBTN3(_, _) = { F3 }
+            EMGBTN(_, _) = { F1;F2;F4;F5; }
         }
         [s] = {
             StopBTN(_, _) = { F1;F2;F5; }

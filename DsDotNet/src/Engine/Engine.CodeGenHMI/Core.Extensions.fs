@@ -38,11 +38,11 @@ module ConvertHMI =
             let tm = x.TagManager :?> ApiItemManager
             {
                 Name = x.Name
-                TrendOutErrorLamp  = getLamp      tm (ApiItemTag.txErrTrendOut |>int)
-                TimeOverErrorLamp  = getLamp      tm (ApiItemTag.txErrTimeOver |>int)
-                ShortErrorLamp     = getLamp      tm (ApiItemTag.rxErrShort |>int)
-                OpenErrorLamp      = getLamp      tm (ApiItemTag.rxErrOpen |>int)
-                ErrorTotalLamp     = getLamp      tm (ApiItemTag.trxErr |>int)
+                TrendOutErrorLamp  = getLamp  tm (ApiItemTag.txErrTrendOut |>int)
+                TimeOverErrorLamp  = getLamp  tm (ApiItemTag.txErrTimeOver |>int)
+                ShortErrorLamp     = getLamp  tm (ApiItemTag.rxErrShort |>int)
+                OpenErrorLamp      = getLamp  tm (ApiItemTag.rxErrOpen |>int)
+                ErrorTotalLamp     = getLamp  tm (ApiItemTag.trxErr |>int)
             }
 
     type Device with
@@ -66,18 +66,18 @@ module ConvertHMI =
             let tm = x.TagManager :?> VertexManager
             {
                 Name = x.Name
-                StartPush        = getPush     tm (VertexTag.startTag |>int)   
-                ResetPush        = getPush     tm (VertexTag.resetTag |>int)  
-                ONPush           = getPush     tm (VertexTag.forceOn |>int)  
-                OFFPush          = getPush     tm (VertexTag.forceOff |>int)  
-                ReadyLamp        = getPush     tm (VertexTag.ready |>int)  
-                GoingLamp        = getPush     tm (VertexTag.going |>int)  
-                FinishLamp       = getPush     tm (VertexTag.finish |>int)  
-                HomingLamp       = getPush     tm (VertexTag.homing |>int)  
-                OriginLamp       = getPush     tm (VertexTag.origin |>int)  
-                PauseLamp        = getPush     tm (VertexTag.pause |>int)  
-                ErrorTxLamp      = getPush     tm (VertexTag.errorRx |>int)  
-                ErrorRxLamp      = getPush     tm (VertexTag.errorTx |>int)  
+                StartPush        = getPush tm (VertexTag.startTag |>int)   
+                ResetPush        = getPush tm (VertexTag.resetTag |>int)  
+                ONPush           = getPush tm (VertexTag.forceOn |>int)  
+                OFFPush          = getPush tm (VertexTag.forceOff |>int)  
+                ReadyLamp        = getPush tm (VertexTag.ready |>int)  
+                GoingLamp        = getPush tm (VertexTag.going |>int)  
+                FinishLamp       = getPush tm (VertexTag.finish |>int)  
+                HomingLamp       = getPush tm (VertexTag.homing |>int)  
+                OriginLamp       = getPush tm (VertexTag.origin |>int)  
+                PauseLamp        = getPush tm (VertexTag.pause |>int)  
+                ErrorTxLamp      = getPush tm (VertexTag.errorRx |>int)  
+                ErrorRxLamp      = getPush tm (VertexTag.errorTx |>int)  
                 
                 Jobs             = x.Graph.Vertices.OfType<Call>().Select(fun c->c.TargetJob.GetHMI()).ToArray()
             }
@@ -87,23 +87,23 @@ module ConvertHMI =
             let tm = x.TagManager :?> FlowManager
             {
                 Name = x.Name
-                AutoManualSelect = getSelect   tm (FlowTag.auto_bit  |>int) (FlowTag.manual_bit |>int)
-                DrivePush        = getPush     tm (FlowTag.drive_bit |>int)
-                StopPush         = getPush     tm (FlowTag.stop_bit  |>int)
-                ClearPush        = getPush     tm (FlowTag.clear_bit |>int)
-                EmergencyPush    = getPush     tm (FlowTag.emg_bit   |>int)
-                TestPush         = getPush     tm (FlowTag.test_bit  |>int)
-                HomePush         = getPush     tm (FlowTag.home_bit  |>int)
-                ReadyPush        = getPush     tm (FlowTag.ready_bit |>int)
-        
-                DriveLamp        = getLamp     tm (FlowTag.drive_op   |>int)
-                AutoLamp         = getLamp     tm (FlowTag.auto_op    |>int)
-                ManualLamp       = getLamp     tm (FlowTag.manual_op  |>int)
-                StopLamp         = getLamp     tm (FlowTag.stop_op    |>int)
-                EmergencyLamp    = getLamp     tm (FlowTag.emergency_op  |>int)
-                TestLamp         = getLamp     tm (FlowTag.test_op    |>int)
-                ReadyLamp        = getLamp     tm (FlowTag.ready_op   |>int)
-                IdleLamp         = getLamp     tm (FlowTag.idle_op    |>int)
+                AutoManualSelect = getSelect tm (FlowTag.auto_bit  |>int) (FlowTag.manual_bit |>int)
+                DrivePush        = getPush   tm (FlowTag.drive_bit |>int)
+                StopPush         = getPush   tm (FlowTag.stop_bit  |>int)
+                ClearPush        = getPush   tm (FlowTag.clear_bit |>int)
+                EmergencyPush    = getPush   tm (FlowTag.emg_bit   |>int)
+                TestPush         = getPush   tm (FlowTag.test_bit  |>int)
+                HomePush         = getPush   tm (FlowTag.home_bit  |>int)
+                ReadyPush        = getPush   tm (FlowTag.ready_bit |>int)
+                                             
+                DriveLamp        = getLamp   tm (FlowTag.drive_op   |>int)
+                AutoLamp         = getLamp   tm (FlowTag.auto_op    |>int)
+                ManualLamp       = getLamp   tm (FlowTag.manual_op  |>int)
+                StopLamp         = getLamp   tm (FlowTag.stop_op    |>int)
+                EmergencyLamp    = getLamp   tm (FlowTag.emergency_op  |>int)
+                TestLamp         = getLamp   tm (FlowTag.test_op    |>int)
+                ReadyLamp        = getLamp   tm (FlowTag.ready_op   |>int)
+                IdleLamp         = getLamp   tm (FlowTag.idle_op    |>int)
 
                 Reals            = x.Graph.Vertices.OfType<Real>().Select(fun r->r.GetHMI()).ToArray()
             }
@@ -114,14 +114,14 @@ module ConvertHMI =
             let tm = x.TagManager :?> SystemManager
             {
                 Name  = x.Name
-                AutoManualSelect =  getSelect   tm (SystemTag.auto  |>int) (SystemTag.manual |>int)
-                DrivePush        =  getPush     tm (SystemTag.drive |>int)
-                StopPush         =  getPush     tm (SystemTag.stop  |>int)
-                ClearPush        =  getPush     tm (SystemTag.clear |>int)
-                EmergencyPush    =  getPush     tm (SystemTag.emg   |>int)
-                TestPush         =  getPush     tm (SystemTag.test  |>int)
-                HomePush         =  getPush     tm (SystemTag.home  |>int)
-                ReadyPush        =  getPush     tm (SystemTag.ready |>int)
+                AutoManualSelect =  getSelect tm (SystemTag.auto  |>int) (SystemTag.manual |>int)
+                DrivePush        =  getPush   tm (SystemTag.drive |>int)
+                StopPush         =  getPush   tm (SystemTag.stop  |>int)
+                ClearPush        =  getPush   tm (SystemTag.clear |>int)
+                EmergencyPush    =  getPush   tm (SystemTag.emg   |>int)
+                TestPush         =  getPush   tm (SystemTag.test  |>int)
+                HomePush         =  getPush   tm (SystemTag.home  |>int)
+                ReadyPush        =  getPush   tm (SystemTag.ready |>int)
 
                 Flows         = x.Flows.Select(fun f->f.GetHMI()).ToArray()
             }

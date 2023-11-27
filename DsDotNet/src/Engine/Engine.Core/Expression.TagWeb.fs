@@ -35,8 +35,10 @@ module TagWebModule =
     type HMIFlickerLamp = TagWeb
     [<Obsolete("HMIButton => HMIPush, HMISelect, HMIPushMultiLamp 로 구분")>]
     type HMIButton = HMIPush*HMIFlickerLamp
-
+    [<Obsolete("HMIPushMultiLamp 로 사용")>]
     type HMIDevice = HMIPush*HMILamp  //input, output
+
+
     type HMIPushMultiLamp = HMIPush*(HMILamp seq) // output inputs
 
     [<Obsolete("type HmiPackage 대신 사용 (Engine.CodeGenHMI에서 생성함)")>]

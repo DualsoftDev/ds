@@ -9,8 +9,7 @@ open System.Reflection
 open System.IO
 
 module MSG_TEST = 
-    let directoryPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
-    let testPath = @$"{directoryPath}/HelloDS.pptx"
+    let testPath = @$"{__SOURCE_DIRECTORY__}../../../../Apps/OfficeAddIn/PowerPointAddInHelper/HelloDS.pptx"
     
     [<Fact>]
     let ``MSG_CHECK`` () =

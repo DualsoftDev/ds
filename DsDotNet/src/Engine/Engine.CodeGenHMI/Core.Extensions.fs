@@ -45,7 +45,7 @@ module ConvertHMI =
                 ErrorTotalLamp     = getLamp  tm (ApiItemTag.trxErr |>int)
             }
 
-    type Device with
+    type LoadedSystem with
         member private x.GetHMI()   =
             {
                 Name        = x.Name
@@ -63,6 +63,8 @@ module ConvertHMI =
 
     type Real with
         member private x.GetHMI()   =
+
+            let getLoadedSystem (api:ApiItem) = x.Parent.GetSystem().GetLoadedSys(api.System.Name).Value 
             let tm = x.TagManager :?> VertexManager
             {
                 Name = x.Name
@@ -79,6 +81,11 @@ module ConvertHMI =
                 ErrorTxLamp      = getPush tm (VertexTag.errorRx |>int)  
                 ErrorRxLamp      = getPush tm (VertexTag.errorTx |>int)  
                 
+                Devices          = x.Graph.Vertices.OfType<Call>()
+                                    .SelectMany(fun c->c.TargetJob.DeviceDefs
+                                                        .Select(fun d->  getLoadedSystem  d.ApiItem)
+                                                        .Select(fun d-> d.GetHMI())
+                                                        ).ToArray()
                 Jobs             = x.Graph.Vertices.OfType<Call>().Select(fun c->c.TargetJob.GetHMI()).ToArray()
             }
 

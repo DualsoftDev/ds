@@ -86,7 +86,7 @@ module ImportIOTable =
 
             let updateBtn (row: Data.DataRow, btntype: BtnType, tableIO: Data.DataTable, page) =
                 let btnName = $"{row.[(int) IOColumn.Name]}"
-                match sys.SystemButtons.Where(fun w -> w.ButtonType = btntype).TryFind(fun f -> f.Name = btnName) with
+                match sys.HWButtons.Where(fun w -> w.ButtonType = btntype).TryFind(fun f -> f.Name = btnName) with
                 | Some btn ->
                     btn.InAddress  <- $"{row.[(int) IOColumn.Input]}"
                     btn.OutAddress <- $"{row.[(int) IOColumn.Output]}"
@@ -116,7 +116,7 @@ module ImportIOTable =
                 let output = $"{row.[(int) IOColumn.Output]}" |> changeValidAddress
                 let func = $"{row.[(int) IOColumn.Func]}"
 
-                let lamps = sys.SystemLamps.Where(fun w -> w.LampType = lampType)
+                let lamps = sys.HWLamps.Where(fun w -> w.LampType = lampType)
 
                 match lamps.TryFind(fun f -> f.Name = name) with
                 | Some lamp ->

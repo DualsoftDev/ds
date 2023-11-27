@@ -125,7 +125,7 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "IOMapForModeler", "src\IOMa
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "UnitTest.PowerPointAddIn", "src\UnitTest\UnitTest.PowerPointAddIn\UnitTest.PowerPointAddIn.fsproj", "{089CE4EE-6E45-4151-9244-3897B6477889}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PowerPointAddInSetup", "Apps\OfficeAddIn\PowerPointAddIn For Dualsoft Setup\PowerPointAddInSetup.vdproj", "{2FD15DA8-B6DD-4E01-BA0A-568F08F1945F}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PowerPointAddIn For Dualsoft Setup", "Apps\OfficeAddIn\PowerPointAddIn For Dualsoft Setup\PowerPointAddInSetup.vdproj", "{2FD15DA8-B6DD-4E01-BA0A-568F08F1945F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerPointAddInForDualsoft", "Apps\OfficeAddIn\PowerPointAddInForDualsoft\PowerPointAddInForDualsoft.csproj", "{F64CA27D-5085-4C78-B580-9FA32A32CC31}"
 EndProject
@@ -138,6 +138,8 @@ EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "UnitTest.HMI", "src\UnitTest\UnitTest.HMI\UnitTest.HMI.fsproj", "{8BC62A5E-49F6-4136-A06A-E032A8238B2E}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "UnitTest.Core", "src\UnitTest\UnitTest.Core\UnitTest.Core.fsproj", "{BD7E7A86-E70C-4D80-A721-D0873A418F4F}"
+EndProject
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "UnitTest.Runtime", "src\UnitTest\UnitTest.Runtime\UnitTest.Runtime.fsproj", "{479DA175-4675-49A7-B13E-BF8445BAC503}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -497,6 +499,14 @@ Global
 		{BD7E7A86-E70C-4D80-A721-D0873A418F4F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BD7E7A86-E70C-4D80-A721-D0873A418F4F}.Release|x86.ActiveCfg = Release|Any CPU
 		{BD7E7A86-E70C-4D80-A721-D0873A418F4F}.Release|x86.Build.0 = Release|Any CPU
+		{479DA175-4675-49A7-B13E-BF8445BAC503}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{479DA175-4675-49A7-B13E-BF8445BAC503}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{479DA175-4675-49A7-B13E-BF8445BAC503}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{479DA175-4675-49A7-B13E-BF8445BAC503}.Debug|x86.Build.0 = Debug|Any CPU
+		{479DA175-4675-49A7-B13E-BF8445BAC503}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{479DA175-4675-49A7-B13E-BF8445BAC503}.Release|Any CPU.Build.0 = Release|Any CPU
+		{479DA175-4675-49A7-B13E-BF8445BAC503}.Release|x86.ActiveCfg = Release|Any CPU
+		{479DA175-4675-49A7-B13E-BF8445BAC503}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -557,6 +567,7 @@ Global
 		{AB1B66BC-924C-4DAC-B903-35CA798D51D7} = {08D4417E-7482-4FDB-88F0-73A36732375C}
 		{8BC62A5E-49F6-4136-A06A-E032A8238B2E} = {BCF8AC63-491C-4D8E-81EC-88032ED4CF05}
 		{BD7E7A86-E70C-4D80-A721-D0873A418F4F} = {BCF8AC63-491C-4D8E-81EC-88032ED4CF05}
+		{479DA175-4675-49A7-B13E-BF8445BAC503} = {BCF8AC63-491C-4D8E-81EC-88032ED4CF05}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B36D7B1-CD69-44C5-8E57-DE46AC18C1F7}

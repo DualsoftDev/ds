@@ -73,16 +73,16 @@ module ConvertCPU =
             if IsSpec (v, VertexAll, AliasNotCare) then
                 yield vm.M2_PauseMonitor()
                 yield! vm.S1_RGFH()
-            //test ahn
-            if IsSpec (v, RealExSystem, AliasNotCare) then
-                yield! vm.L1_LinkStart()
+       
 
         ]
 
     let private applySystemSpec(s:DsSystem) =
         [
-            yield! s.B1_ButtonOutput()
-            yield! s.B2_ModeLamp()
+            yield! s.B1_HWButtonOutput()
+            yield! s.B2_HWLamp()
+            yield! s.B3_HWBtnConnetToSW()
+            
             yield! s.Y1_SystemBitSetFlow()
             yield s.Y2_SystemError()
             yield s.Y3_SystemPause()
@@ -120,9 +120,9 @@ module ConvertCPU =
                         if d.InAddress.IsNullOrEmpty() then  d.InAddress <- TextAddrEmpty
                         if d.OutAddress.IsNullOrEmpty() then d.OutAddress <- TextAddrEmpty)
             )
-        sys.Lamps.ForEach(fun l -> 
+        sys.HWLamps.ForEach(fun l -> 
                         if l.OutAddress.IsNullOrEmpty() then  l.OutAddress <- TextAddrEmpty)
-        sys.Buttons.ForEach(fun b->                                         
+        sys.HWButtons.ForEach(fun b->                                         
                          if b.InAddress.IsNullOrEmpty() then   b.InAddress <- TextAddrEmpty
                          if b.OutAddress.IsNullOrEmpty() then  b.OutAddress <-TextAddrEmpty
                         )

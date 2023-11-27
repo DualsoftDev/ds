@@ -31,11 +31,11 @@ type TestAllCase() =
                 if dev.ApiItem.TXs.any() then
                     dev.OutAddress <- addr()
 
-        for b in sys.Buttons do
+        for b in sys.HWButtons do
             b.InAddress <- addr()
             b.OutAddress <- addr()
 
-        for l in sys.Lamps do
+        for l in sys.HWLamps do
             l.OutAddress <-  addr()
 
         for c in sys.Conditions do

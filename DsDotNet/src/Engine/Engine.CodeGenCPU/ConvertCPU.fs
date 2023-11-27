@@ -120,9 +120,9 @@ module ConvertCPU =
                         if d.InAddress.IsNullOrEmpty() then  d.InAddress <- TextAddrEmpty
                         if d.OutAddress.IsNullOrEmpty() then d.OutAddress <- TextAddrEmpty)
             )
-        sys.Lamps.ForEach(fun l -> 
+        sys.HWLamps.ForEach(fun l -> 
                         if l.OutAddress.IsNullOrEmpty() then  l.OutAddress <- TextAddrEmpty)
-        sys.Buttons.ForEach(fun b->                                         
+        sys.HWButtons.ForEach(fun b->                                         
                          if b.InAddress.IsNullOrEmpty() then   b.InAddress <- TextAddrEmpty
                          if b.OutAddress.IsNullOrEmpty() then  b.OutAddress <-TextAddrEmpty
                         )

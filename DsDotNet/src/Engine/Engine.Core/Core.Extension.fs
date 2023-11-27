@@ -33,8 +33,8 @@ module CoreExtensionModule =
                 if system <> targetFlow.System
                 then failwithf $"add item [{itemName}] in flow ({targetFlow.System.Name} != {system.Name}) is not same system"
 
-    let getButtons (sys:DsSystem, btnType:BtnType) = sys.Buttons.Where(fun f->f.ButtonType = btnType)
-    let getLamps (sys:DsSystem, lampType:LampType) = sys.Lamps.Where(fun f->f.LampType = lampType)
+    let getButtons (sys:DsSystem, btnType:BtnType) = sys.HWButtons.Where(fun f->f.ButtonType = btnType)
+    let getLamps (sys:DsSystem, lampType:LampType) = sys.HWLamps.Where(fun f->f.LampType = lampType)
     let getConditions (sys:DsSystem, cType:ConditionType) = sys.Conditions.Where(fun f->f.ConditionType = cType)
 
 
@@ -43,25 +43,25 @@ module CoreExtensionModule =
             checkSystem(x, flow, btnName)
             if btnType = DuAutoBTN || btnType = DuManualBTN
             then
-                let flows = x.Buttons.Where(fun f->f.ButtonType = btnType)
+                let flows = x.HWButtons.Where(fun f->f.ButtonType = btnType)
                             |> Seq.collect(fun b -> b.SettingFlows)
                 flows.Contains(flow) |> not
                 |> verifyM $"{btnType} {btnName} is assigned to a single flow :  flow name [{flow.Name}]"
 
-            match x.Buttons.TryFind(fun f -> f.Name = btnName) with
+            match x.HWButtons.TryFind(fun f -> f.Name = btnName) with
             | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
-            | None -> x.Buttons.Add(ButtonDef(btnName, btnType, inAddress, outAddress, HashSet[|flow|], funcs))
+            | None -> x.HWButtons.Add(ButtonDef(btnName, btnType, inAddress, outAddress, HashSet[|flow|], funcs))
                       |> verifyM $"Duplicated ButtonDef [{btnName}]"
 
         member x.AddLamp(lmpType:LampType, lmpName: string, addr:string, flow:Flow, funcs:HashSet<Func>) =
             checkSystem(x, flow, lmpName)
 
-            x.Lamps.Select(fun f->f.Name).Contains(lmpName) |> not
+            x.HWLamps.Select(fun f->f.Name).Contains(lmpName) |> not
             |> verifyM $"{lmpType} {lmpName} is assigned to a single flow :  flow name [{flow.Name}]"
 
-            match x.Lamps.TryFind(fun f -> f.Name = lmpName) with
+            match x.HWLamps.TryFind(fun f -> f.Name = lmpName) with
             | Some lmp -> lmp.SettingFlow <- flow
-            | None -> x.Lamps.Add(LampDef(lmpName, lmpType, addr, flow, funcs))
+            | None -> x.HWLamps.Add(LampDef(lmpName, lmpType, addr, flow, funcs))
                       |> verifyM $"Duplicated LampDef [{lmpName}]"
 
         member x.AddCondtion(condiType:ConditionType, condiName: string, inAddr:string, flow:Flow, funcs:HashSet<Func>) =
@@ -73,28 +73,28 @@ module CoreExtensionModule =
                       |> verifyM $"Duplicated ConditionDef [{condiName}]"
 
 
-        member x.SystemConditions   = x.Conditions :> seq<_>
-        member x.SystemButtons      = x.Buttons :> seq<_>
-        member x.SystemLamps        = x.Lamps   :> seq<_>
+        member x.SystemConditions     = x.Conditions :> seq<_>
+        member x.HWButtons            = x.HWButtons :> seq<_>
+        member x.HWLamps              = x.HWLamps   :> seq<_>
 
-        member x.AutoButtons        = getButtons(x, DuAutoBTN)
-        member x.ManualButtons      = getButtons(x, DuManualBTN)
-        member x.DriveButtons       = getButtons(x, DuDriveBTN)
-        member x.StopButtons        = getButtons(x, DuStopBTN)
-        member x.ClearButtons       = getButtons(x, DuClearBTN)
-        member x.EmergencyButtons   = getButtons(x, DuEmergencyBTN)
-        member x.TestButtons        = getButtons(x, DuTestBTN)
-        member x.HomeButtons        = getButtons(x, DuHomeBTN)
-        member x.ReadyButtons       = getButtons(x, DuReadyBTN)
+        member x.AutoHWButtons        = getButtons(x, DuAutoBTN)
+        member x.ManualHWButtons      = getButtons(x, DuManualBTN)
+        member x.DriveHWButtons       = getButtons(x, DuDriveBTN)
+        member x.StopHWButtons        = getButtons(x, DuStopBTN)
+        member x.ClearHWButtons       = getButtons(x, DuClearBTN)
+        member x.EmergencyHWButtons   = getButtons(x, DuEmergencyBTN)
+        member x.TestHWButtons        = getButtons(x, DuTestBTN)
+        member x.HomeHWButtons        = getButtons(x, DuHomeBTN)
+        member x.ReadyHWButtons       = getButtons(x, DuReadyBTN)
 
-        member x.DriveLamps     = getLamps(x, DuDriveLamp)
-        member x.AutoLamps      = getLamps(x, DuAutoLamp)
-        member x.ManualLamps    = getLamps(x, DuManualLamp)
-        member x.StopLamps      = getLamps(x, DuStopLamp)
-        member x.EmergencyLamps = getLamps(x, DuEmergencyLamp)
-        member x.TestLamps      = getLamps(x, DuTestDriveLamp)
-        member x.ReadyLamps     = getLamps(x, DuReadyLamp)
-        member x.IdleLamps      = getLamps(x, DuIdleLamp)
+        member x.DriveHWLamps         = getLamps(x, DuDriveLamp)
+        member x.AutoHWLamps          = getLamps(x, DuAutoLamp)
+        member x.ManualHWLamps        = getLamps(x, DuManualLamp)
+        member x.StopHWLamps          = getLamps(x, DuStopLamp)
+        member x.EmergencyHWLamps     = getLamps(x, DuEmergencyLamp)
+        member x.TestHWLamps          = getLamps(x, DuTestDriveLamp)
+        member x.ReadyHWLamps         = getLamps(x, DuReadyLamp)
+        member x.IdleHWLamps          = getLamps(x, DuIdleLamp)
 
         member x.ReadyConditions     = getConditions(x, DuReadyState)
         member x.DriveConditions     = getConditions(x, DuDriveState)

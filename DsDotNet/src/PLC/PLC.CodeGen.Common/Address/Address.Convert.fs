@@ -32,15 +32,18 @@ let (|LsTagPatternFEnet|_|) ((modelId: int option), (tag: string)) =
         let byteOffset = offset * dataType.GetByteLength()
         let totalBitOffset = byteOffset * 8
         createTagInfo (tag, device, dataType, totalBitOffset, modelId)
-    | RegexPattern @"^%([IQU])([BWDL])(\d+)\.(\d+)\.(\d+)$" [ DevicePattern device; DataTypePattern dataType; Int32Pattern file; Int32Pattern element; Int32Pattern bit ] ->
+    | RegexPattern @"^%([PMLKFNRAWIQUSTCZD])(X)(\d+)$" [ DevicePattern device; DataTypePattern dataType; Int32Pattern offset ] ->
+        let byteOffset = offset * dataType.GetByteLength()
+        let totalBitOffset = byteOffset * 8
+        createTagInfo (tag, device, dataType, totalBitOffset, modelId)
+    | RegexPattern @"^%([PMLKFNRAWIQUSTCZD])([BWDL])(\d+)\.(\d+)$" [ DevicePattern device; DataTypePattern dataType;Int32Pattern element; Int32Pattern bit ] ->
         let uMemStep = if device.Equals(DeviceType.U) then 8 else 1
         let bitStandard = 8 * uMemStep / dataType.GetByteLength()
 
         let bitSet = (bit % bitStandard) * dataType.GetByteLength() * 8
         let elementSet = (element % 16 + bit / bitStandard) * 8 * 8 * uMemStep
-        let fileSet = (file + element / 16) * 8 * 8 * 16 * uMemStep
 
-        let offset = bitSet + elementSet + fileSet
+        let offset = bitSet + elementSet 
         createTagInfo (tag, device, dataType, offset, modelId)
     | _ -> logWarn $"Failed to parse tag : {tag}"; None
 

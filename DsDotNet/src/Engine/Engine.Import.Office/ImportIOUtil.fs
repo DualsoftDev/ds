@@ -37,7 +37,7 @@ module ImportIOUtil =
                     then  $"I{blockInText}{cnt / blockInSize}.{cnt % blockInSize}" 
                     else  $"O{blockOutText}{cnt / blockOutSize}.{cnt % blockOutSize}" 
 
-                elif RuntimeDS.Package.IsPackagePLC()  
+                elif RuntimeDS.Package.IsPackagePLC()  || RuntimeDS.Package.IsPackageSIM()    //시뮬레이션도 PLC 주소규격으로 일단
                 then
                     if bInput 
                     then

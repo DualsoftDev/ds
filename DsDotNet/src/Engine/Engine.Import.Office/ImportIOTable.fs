@@ -41,10 +41,12 @@ module ImportIOTable =
                 |> dict
 
             let changeValidAddress (address:string)  =
-                let address = address.Trim() 
-                match RuntimeDS.Target with
-                | XGI -> if not <| address.StartsWith("%") then "%" + address else address
-                | _ -> address
+                if  address <> TextSkip ||  address <> TextAddrEmpty then address
+                else
+                    let address = address.Trim() 
+                    match RuntimeDS.Target with
+                    | XGI -> if not <| address.StartsWith("%")  then "%" + address else address
+                    | _ -> address
 
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let devName = $"{row.[(int) IOColumn.Name]}"
@@ -55,9 +57,6 @@ module ImportIOTable =
                 let dev = dicJob.[devName]
                 let inAdd =    $"{row.[(int) IOColumn.Input]}".Trim()
                 let outAdd =   $"{row.[(int) IOColumn.Output]}".Trim()
-
-                //errCheckAddress(dev.ApiItem.RXs.Count=0, devName, inAdd)
-                //errCheckAddress(dev.ApiItem.TXs.Count=0, devName, outAdd)
 
                 dev.InAddress <-  changeValidAddress inAdd
                 dev.OutAddress <- changeValidAddress outAdd
@@ -96,20 +95,6 @@ module ImportIOTable =
                     functionUpdate (btn.Name, $"{row.[(int) IOColumn.Func]}", btn.Funcs, tableIO, false, page)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{btnName}", page, 0u)
 
-                
-                //let name = $"{row.[(int) IOColumn.Name]}"
-                //let input = $"{row.[(int) IOColumn.Input]}"   |> changeValidAddress
-                //let output = $"{row.[(int) IOColumn.Output]}" |> changeValidAddress
-                //let func = $"{row.[(int) IOColumn.Func]}"
-
-                //let btns = sys.SystemButtons.Where(fun w -> w.ButtonType = btntype)
-                 
-                //match btns.TryFind(fun f -> f.Name = name) with
-                //| Some btn ->
-                //    btn.InAddress <- input
-                //    btn.OutAddress <- output
-                //    functionUpdate (btn.Name, func, btn.Funcs, tableIO, false, page)
-                //| None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{name}", page, 0u)
 
             let updateLamp (row: Data.DataRow, lampType: LampType, tableIO: Data.DataTable, page) =
                 let name = $"{row.[(int) IOColumn.Name]}"

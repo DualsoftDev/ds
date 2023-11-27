@@ -79,10 +79,9 @@ module internal XgiSymbolsModule =
         | DuStorage(:? ITag as t) ->
             let name = t.Name
             autoAdress t prjParams
-            let device, memSize =
-                match t.Address with
-                | RegexPattern @"^%([IQM])([XBWL]).*$" [ iqm; mem ] -> iqm, mem
-                | RegexPattern @"^%([IQM]).*$" [ iqm ] -> iqm, "X" // `%I1` 이런거 허용하나?
+            let device, dataType =
+                match tryParseTag t.Address with
+                | Some t -> t.Device, t.DataType
                 | _ -> 
                     if t.Address = TextAddrEmpty 
                     then  failwith $"empty tag address for {name}"
@@ -90,11 +89,12 @@ module internal XgiSymbolsModule =
                        
 
             let plcType =
-                match memSize with
-                | "X" -> "BOOL"
-                | "B" -> "BYTE"
-                | "W" -> "WORD"
-                | "L" -> "DWORD"
+                match dataType with
+                | PLCHwModel.DataType.Bit -> "BOOL"
+                | PLCHwModel.DataType.Byte -> "BYTE"
+                | PLCHwModel.DataType.Word -> "WORD"
+                | PLCHwModel.DataType.DWord -> "DWORD"
+                | PLCHwModel.DataType.LWord -> "LWORD"
                 | _ -> failwithlog "ERROR"
 
             let comment = "FAKECOMMENT"
@@ -107,7 +107,7 @@ module internal XgiSymbolsModule =
                 Type = plcType
                 Address = t.Address
                 InitValue = initValue
-                Device = device
+                Device = device.ToString()
                 Kind = kindVar }
 
         // address 가 지정되지 않은 tag : e.g Timer, Counter 의 내부 멤버 변수들 EN, DN, CU, CD, ...

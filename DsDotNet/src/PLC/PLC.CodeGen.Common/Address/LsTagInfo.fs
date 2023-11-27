@@ -11,7 +11,7 @@ type LsTagInfo =
         /// Original Tag name
         Tag: string
         Device: DeviceType
-        DataType: DataType
+        DataType: PLCHwModel.DataType
         BitOffset: int
     }
 

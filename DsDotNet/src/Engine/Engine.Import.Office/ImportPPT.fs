@@ -18,7 +18,7 @@ open System.Text.RegularExpressions
 module ImportPPTModule =
     type DSFromPPT =
         { System: DsSystem 
-          ActivePaths: string seq
+          ActivePath: string 
           LoadingPaths: string seq }
 
     let dicPptDoc = Dictionary<string, PresentationDocument>()
@@ -284,5 +284,15 @@ module ImportPPTModule =
             let system, loadingPaths = ParserLoader.LoadFromActivePath exportPath
 
             { System = system
-              ActivePaths = [ exportPath ]
+              ActivePath =  exportPath 
               LoadingPaths = loadingPaths }
+
+
+        [<Extension>]
+        static member GetRuntimeZipFromPPT(fullName: string)=
+                let ret = ImportPPT.GetDSFromPPTWithLib(fullName)
+
+                RuntimeDS.Package <- RuntimePackage.StandardPC
+                
+                ModelLoaderExt.saveModelZip(ret.LoadingPaths , ret.ActivePath)
+

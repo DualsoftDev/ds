@@ -68,10 +68,10 @@ type ModelLoaderExt =
         dsFilePath
 
     [<Extension>] 
-    static member saveModelZip (files:string seq, activeFilePath:string) = 
+    static member saveModelZip (loadingPaths:string seq, activeFilePath:string) = 
 
-        let zipPathDS = files.ToZip()
-        let zipPathPPT = files.Where(fun f-> f <> $"{TextLibrary}.ds")
+        let zipPathDS  = loadingPaths.ToZip()
+        let zipPathPPT = loadingPaths.Where(fun f-> f <> $"{TextLibrary}.ds")
                               .Select(fun f-> changeExtension (f|> DsFile)  ".pptx")
                               .ToZipPPT()
 

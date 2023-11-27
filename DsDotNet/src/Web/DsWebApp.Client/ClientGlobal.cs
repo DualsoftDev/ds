@@ -2,6 +2,8 @@
 
 using DsWebApp.Shared;
 
+using Dual.Common.Core;
+using Dual.Web.Blazor.ClientSide;
 using Dual.Web.Blazor.ServerSide;
 
 using Microsoft.AspNetCore.Components;
@@ -26,29 +28,16 @@ public class ClientGlobal : ClientGlobalBase
 
     RuntimeModelDto _modelDto;
     HubConnection _hubConnectionModel;
-    public async Task<RuntimeModelDto> GetModelDtoAsync(HttpClient http)
+    public async Task<ResultSerializable<RuntimeModelDto, ErrorMessage>> GetModelDtoAsync(HttpClient http)
     {
         await Console.Out.WriteLineAsync("[1]");
         if (_modelDto == null)
         {
             await Console.Out.WriteLineAsync("[2]");
-            var response = await http.GetAsync($"api/model");
-            await Console.Out.WriteLineAsync($"[3] : http={http}");
-            if (response.IsSuccessStatusCode)
-            {
-                await Console.Out.WriteLineAsync("[4]");
-                _modelDto = await response.Content.ReadFromJsonAsync<RuntimeModelDto>();
-                Console.WriteLine($"Got path={_modelDto.SourceDsZipPath}, isCpuRunning={_modelDto.IsCpuRunning}");
-            }
-            else
-            {
-                Console.WriteLine($"Failed to get model {_modelDto.SourceDsZipPath}.  Code={response.StatusCode}");
-                // 실패한 응답 코드에 대한 처리
-                // 예: 사용자에게 에러 메시지 표시, 로깅 등
-            }
+            return await http.GetResultSimpleAsync<RuntimeModelDto>($"api/model");
         }
 
-        return _modelDto;
+        return ResultSerializable<RuntimeModelDto, ErrorMessage>.Ok(_modelDto);
     }
     public async Task<IDisposable> MonitorModelChangeAsync(NavigationManager navigationManager, Action<RuntimeModelDto> onModelChanged)
     {

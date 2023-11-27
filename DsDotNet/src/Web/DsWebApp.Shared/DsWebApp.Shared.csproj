@@ -9,7 +9,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DualSoft-Common-Core" Version="0.1.20" />
+		<PackageReference Include="DualSoft-Common-Core" Version="0.1.21" />
 		<PackageReference Include="DualSoft-Common-Db" Version="0.1.6" />
 		<PackageReference Include="DualSoft-Web-Blazor" Version="0.1.9" />
 		<PackageReference Include="DualSoft-Web-Blazor-Client" Version="0.1.4" />

@@ -33,7 +33,7 @@ module FileManager =
 
     // Ensure that the directory of the specified path exists; create it if not
     let createDirectory (path: DsPath) =
-        if not(isPathRooted path) then 
+        if not(isPathRooted (path.ToString())) then 
             raise (new ArgumentException($"createDirectory path must be an absolute path: {path}"))
 
         let directoryPath = 
@@ -95,7 +95,7 @@ module FileManager =
             | [] -> raise (new ArgumentException("getTopLevelDirectory: error paths"))
             | cp -> String.Join(Path.DirectorySeparatorChar.ToString(), cp) |> getValidDirectory
 
-        if PathManager.isPathRooted (commonPrefix|>DsDirectory)
+        if PathManager.isPathRooted (commonPrefix)
         then commonPrefix
         else 
             let topLevelDirSplit = 
@@ -105,6 +105,8 @@ module FileManager =
 
     //모델 최상단 폴더에 Zip형태로 생성
     let saveZip(filePaths: string seq, extenstion:string) =
+
+        //let filePaths = filePaths.Select(convertValidFile)
         let topLevel = getTopLevelDirectory (filePaths |> Seq.toList)
         let zipFilePath = getValidZipFileName (topLevel, extenstion )
          // Create a ZIP archive

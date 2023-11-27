@@ -54,7 +54,6 @@ type ModelLoaderExt =
 
     [<Extension>] 
     static member pptxToExportDS (sys:DsSystem, pptPath:string) = 
-
         let dsFilePath = PathManager.changeExtension (pptPath.ToFile()) ".ds" 
         
         for s in sys.GetRecursiveLoadeds() do
@@ -69,9 +68,9 @@ type ModelLoaderExt =
 
     [<Extension>] 
     static member saveModelZip (loadingPaths:string seq, activeFilePath:string) = 
-
-        let zipPathDS  = (loadingPaths @ [activeFilePath]).ToZip()
-        let zipPathPPT = loadingPaths.Where(fun f-> f <> $"{TextLibrary}.ds")
+        let targetPaths = (loadingPaths @ [activeFilePath])
+        let zipPathDS  = targetPaths.ToZip()
+        let zipPathPPT = targetPaths.Where(fun f-> f <> $"{TextLibrary}.ds")
                               .Select(fun f-> changeExtension (f|> DsFile)  ".pptx")
                               .ToZipPPT()
 

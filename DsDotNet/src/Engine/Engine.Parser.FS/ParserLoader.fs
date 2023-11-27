@@ -28,7 +28,7 @@ module ParserLoader =
         let systemRepo = ShareableSystemRepository()
 
         let sysPath =
-            if PathManager.isPathRooted (dsFile.ToFile()) then
+            if PathManager.isPathRooted (dsFile) then
                 dsFile |> FileManager.fileExistChecker
             else
                 PathManager.getFullPath (dsFile.ToFile()) (loadingConfigDir |> DsDirectory)

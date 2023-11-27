@@ -47,9 +47,9 @@ module CoreModule =
         inherit FqdnObject(param.LoadedName, param.ContainerSystem)
         let mutable loadedName = param.LoadedName // 로딩 주체에 따라 런타임에 변경
         do  
-            if not(param.AbsoluteFilePath |> DsFile |> PathManager.isPathRooted)
+            if not(param.AbsoluteFilePath  |> PathManager.isPathRooted)
             then raise (new ArgumentException($"The AbsoluteFilePath must be PathRooted ({param.AbsoluteFilePath})"))
-            if param.RelativeFilePath  |> DsFile |> PathManager.isPathRooted
+            if param.RelativeFilePath |> PathManager.isPathRooted
             then raise (new ArgumentException($"The RelativeFilePath must be not PathRooted ({param.RelativeFilePath})"))
 
         interface ISystem 

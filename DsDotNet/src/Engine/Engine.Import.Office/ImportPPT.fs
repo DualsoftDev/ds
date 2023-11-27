@@ -168,11 +168,10 @@ module ImportPPTModule =
 
         let internal GetImportModel(pptReop: Dictionary<DsSystem, pptDoc>, filePath: string) =
             //active는 시스템이름으로 ppt 파일 이름을 사용
-            let fileName = PathManager.getFileName (filePath.ToFile())
-            let fileDirectory = PathManager.getDirectoryName (filePath.ToFile())
+            let fileDirectory = PathManager.getDirectoryName (filePath|>DsFile)
             activeSysDir <- fileDirectory
-            currentFileName <- fileName
-            let sysName = getSystemName fileName
+            currentFileName <- filePath
+            let sysName = getSystemName filePath
             let mySys = DsSystem(sysName)
 
             let paras =
@@ -268,6 +267,7 @@ module ImportPPTModule =
                     libModel.System
 
                 let loadedlibFilePath =
+                    //let validPath  = PathManager.convertValidFile (fullName)
                     PathManager.getFullPath textLibPptx (PathManager.getFolderOfPath (fullName))
 
                 libSys.pptxToExportDS loadedlibFilePath |> ignore

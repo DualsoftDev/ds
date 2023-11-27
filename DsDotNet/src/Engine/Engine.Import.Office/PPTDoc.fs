@@ -282,7 +282,7 @@ module PPTDocModule =
 
         member val Name = headPages.Keys.First().PageTitle(true)
         member val Path = path
-        member val DirectoryName = PathManager.getDirectoryName (path.ToFile())
+        member val DirectoryName = PathManager.getDirectoryName (path|>DsFile)
 
         member val DicFlow = Dictionary<int, Flow>() // page , flow
         member val DicVertex = Dictionary<string, Vertex>()

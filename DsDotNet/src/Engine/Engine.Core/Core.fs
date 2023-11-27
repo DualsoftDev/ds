@@ -105,8 +105,8 @@ module CoreModule =
         member val ApiItems = createNamedHashSet<ApiItem>()
         member val ApiResetInfos = HashSet<ApiResetInfo>()
         member val StartPoints = createQualifiedNamedHashSet<Real>()
-        member val internal Buttons = HashSet<ButtonDef>()
-        member val internal Lamps = HashSet<LampDef>()
+        member val internal HWButtons = HashSet<ButtonDef>()
+        member val internal HWLamps = HashSet<LampDef>()
         member val internal Conditions = HashSet<ConditionDef>()
 
     type Flow private (name: string, system: DsSystem) =

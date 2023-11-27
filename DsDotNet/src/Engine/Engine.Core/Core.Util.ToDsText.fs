@@ -180,14 +180,14 @@ module internal ToDsTextModule =
 
             let btns =
                 let allBtns = [
-                    system.AutoButtons;
-                    system.ManualButtons;
-                    system.DriveButtons;
-                    system.StopButtons;
-                    system.ClearButtons;
-                    system.EmergencyButtons;
-                    system.TestButtons;
-                    system.HomeButtons;
+                    system.AutoHWButtons;
+                    system.ManualHWButtons;
+                    system.DriveHWButtons;
+                    system.StopHWButtons;
+                    system.ClearHWButtons;
+                    system.EmergencyHWButtons;
+                    system.TestHWButtons;
+                    system.HomeHWButtons;
                 ]
                 allBtns
                 |> List.map(fun b -> b |> List.ofSeq)
@@ -214,18 +214,18 @@ module internal ToDsTextModule =
                                         yield funcString
                             yield $"{tab2}{rb}"
                     ] |> combineLines
-                yield buttonsToDs("a", system.AutoButtons)
-                yield buttonsToDs("m", system.ManualButtons)
-                yield buttonsToDs("d", system.DriveButtons)
-                yield buttonsToDs("s", system.StopButtons)
-                yield buttonsToDs("c", system.ClearButtons)
-                yield buttonsToDs("e", system.EmergencyButtons)
-                yield buttonsToDs("t", system.TestButtons)
-                yield buttonsToDs("h", system.HomeButtons)
+                yield buttonsToDs("a", system.AutoHWButtons)
+                yield buttonsToDs("m", system.ManualHWButtons)
+                yield buttonsToDs("d", system.DriveHWButtons)
+                yield buttonsToDs("s", system.StopHWButtons)
+                yield buttonsToDs("c", system.ClearHWButtons)
+                yield buttonsToDs("e", system.EmergencyHWButtons)
+                yield buttonsToDs("t", system.TestHWButtons)
+                yield buttonsToDs("h", system.HomeHWButtons)
                 yield $"{tab}{rb}"
 
 
-            if system.Lamps.Any() then
+            if system.HWLamps.Any() then
                 yield $"{tab}[lamps] = {lb}"
                 let lampsToDs(category:string, lamps:LampDef seq) =
                     [
@@ -244,14 +244,14 @@ module internal ToDsTextModule =
                                         yield funcString
                             yield $"{tab2}{rb}"
                     ] |> combineLines
-                yield lampsToDs("a", system.AutoLamps)
-                yield lampsToDs("m", system.ManualLamps)
-                yield lampsToDs("d", system.DriveLamps)
-                yield lampsToDs("s", system.StopLamps)
-                yield lampsToDs("e", system.EmergencyLamps)
-                yield lampsToDs("t", system.TestLamps)
-                yield lampsToDs("r", system.ReadyLamps)
-                yield lampsToDs("i", system.IdleLamps)
+                yield lampsToDs("a", system.AutoHWLamps)
+                yield lampsToDs("m", system.ManualHWLamps)
+                yield lampsToDs("d", system.DriveHWLamps)
+                yield lampsToDs("s", system.StopHWLamps)
+                yield lampsToDs("e", system.EmergencyHWLamps)
+                yield lampsToDs("t", system.TestHWLamps)
+                yield lampsToDs("r", system.ReadyHWLamps)
+                yield lampsToDs("i", system.IdleHWLamps)
                 yield $"{tab}{rb}"
 
             let cnds = system.Conditions

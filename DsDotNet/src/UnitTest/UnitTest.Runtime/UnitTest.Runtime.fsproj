@@ -11,7 +11,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="HMIPackageTEST.fs" />
+        <Compile Include="RuntimeTest.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 
@@ -29,12 +29,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Engine\Engine.CodeGenHMI\Engine.CodeGenHMI.fsproj" />
       <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
       <ProjectReference Include="..\..\Engine\Engine.Import.Office\Engine.Import.Office.fsproj" />
+      <ProjectReference Include="..\..\Engine\Engine.Runtime\Engine.Runtime.fsproj" />
     </ItemGroup>
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="copy $(ProjectDir)..\..\..\Apps\OfficeAddIn\PowerPointAddInHelper\DS_Library.pptx $(TargetDir)DS_Library.pptx" />
-		<Exec Command="copy $(ProjectDir)..\..\..\Apps\OfficeAddIn\PowerPointAddInHelper\HelloDS.pptx $(TargetDir)HelloDS.pptx" />
-	</Target>
+
 </Project>

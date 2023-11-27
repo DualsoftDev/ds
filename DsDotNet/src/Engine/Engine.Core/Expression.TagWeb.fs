@@ -29,10 +29,15 @@ module TagWebModule =
 
     type HMIPush   = TagWeb
     type HMISelect = TagWeb*TagWeb //selectA/selectB  ex)Auto/Manu   
-    type HMILamp = TagWeb
+    type HMILamp   = TagWeb
+
+    [<Obsolete("HMIFlickerLamp TagWeb 없음 직접 Lamp반응")>]
     type HMIFlickerLamp = TagWeb
+    [<Obsolete("HMIButton => HMIPush, HMISelect, HMIPushMultiLamp 로 구분")>]
     type HMIButton = HMIPush*HMIFlickerLamp
+    [<Obsolete("HMIPushMultiLamp 로 사용")>]
     type HMIDevice = HMIPush*HMILamp  //input, output
+
 
     type HMIPushMultiLamp = HMIPush*(HMILamp seq) // output inputs
 

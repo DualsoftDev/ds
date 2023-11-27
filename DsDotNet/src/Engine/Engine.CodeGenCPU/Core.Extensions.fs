@@ -86,7 +86,7 @@ module ConvertCodeCoreExt =
         member x.Storages = x.TagManager.Storages
 
         member private x.GenerationLampIO() =
-            for lamp in x.SystemLamps do
+            for lamp in x.HWLamps do
                 match createBridgeTag(x.Storages, lamp.Name, lamp.OutAddress,  ActionTag.ActionOut  ,x , None) with
                 | Some t ->  lamp.OutTag  <- t
                 | None -> failwithf "empty address error"
@@ -98,7 +98,7 @@ module ConvertCodeCoreExt =
                 | None -> failwithf "empty address error"
 
         member private x.GenerationButtonIO() =
-            for b in x.SystemButtons do
+            for b in x.HWButtons do
                 createBridgeTag(x.Storages, b.Name, b.InAddress, ActionTag.ActionIn , x, None)
                 |> iter (fun t -> b.InTag   <- t)
                 createBridgeTag(x.Storages, b.Name, b.OutAddress, ActionTag.ActionOut ,x, None)
@@ -232,17 +232,17 @@ module ConvertCodeCoreExt =
         member f._off    = f.System._off
 
         //select 버튼은 없을경우 항상 _on
-        member f.SelectAutoExpr   = getSelectBtnExpr(f, f.System.AutoButtons  )
-        member f.SelectManualExpr = getSelectBtnExpr(f, f.System.ManualButtons)
+        member f.SelectAutoExpr   = getSelectBtnExpr(f, f.System.AutoHWButtons  )
+        member f.SelectManualExpr = getSelectBtnExpr(f, f.System.ManualHWButtons)
 
         //push 버튼은 없을경우 항상 _off
-        member f.BtnDriveExpr = getButtonExprWrtRuntimePackage(f, f.System.DriveButtons    )
-        member f.BtnStopExpr  = getButtonExprWrtRuntimePackage(f, f.System.StopButtons     )
-        member f.BtnEmgExpr   = getButtonExprWrtRuntimePackage(f, f.System.EmergencyButtons)
-        member f.BtnTestExpr  = getButtonExprWrtRuntimePackage(f, f.System.TestButtons     )
-        member f.BtnReadyExpr = getButtonExprWrtRuntimePackage(f, f.System.ReadyButtons    )
-        member f.BtnClearExpr = getButtonExprWrtRuntimePackage(f, f.System.ClearButtons    )
-        member f.BtnHomeExpr  = getButtonExprWrtRuntimePackage(f, f.System.HomeButtons     )
+        member f.BtnDriveExpr = getButtonExprWrtRuntimePackage(f, f.System.DriveHWButtons    )
+        member f.BtnStopExpr  = getButtonExprWrtRuntimePackage(f, f.System.StopHWButtons     )
+        member f.BtnEmgExpr   = getButtonExprWrtRuntimePackage(f, f.System.EmergencyHWButtons)
+        member f.BtnTestExpr  = getButtonExprWrtRuntimePackage(f, f.System.TestHWButtons     )
+        member f.BtnReadyExpr = getButtonExprWrtRuntimePackage(f, f.System.ReadyHWButtons    )
+        member f.BtnClearExpr = getButtonExprWrtRuntimePackage(f, f.System.ClearHWButtons    )
+        member f.BtnHomeExpr  = getButtonExprWrtRuntimePackage(f, f.System.HomeHWButtons     )
 
         member f.ModeAutoHwExpr =
             let auto = if f.SelectAutoExpr.any()   then f.SelectAutoExpr.ToAnd()    else f.System._auto.Expr

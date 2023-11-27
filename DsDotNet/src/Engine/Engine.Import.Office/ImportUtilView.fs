@@ -107,28 +107,28 @@ module ImportViewModule =
     let UpdateLampNodes (system: DsSystem, flow: Flow, node: ViewNode) =
         let newNode = ViewNode("Lamps", VLAMP)
 
-        system.AutoLamps.Where(fun w -> w.SettingFlow = flow)
+        system.AutoHWLamps.Where(fun w -> w.SettingFlow = flow)
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuAutoLamp)) |> ignore)
 
-        system.ManualLamps.Where(fun w -> w.SettingFlow = flow)
+        system.ManualHWLamps.Where(fun w -> w.SettingFlow = flow)
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuManualLamp)) |> ignore)
 
-        system.DriveLamps.Where(fun w -> w.SettingFlow = flow)
+        system.DriveHWLamps.Where(fun w -> w.SettingFlow = flow)
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuDriveLamp)) |> ignore)
 
-        system.StopLamps.Where(fun w -> w.SettingFlow = flow)
+        system.StopHWLamps.Where(fun w -> w.SettingFlow = flow)
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuStopLamp)) |> ignore)
 
-        system.EmergencyLamps.Where(fun w -> w.SettingFlow = flow)
+        system.EmergencyHWLamps.Where(fun w -> w.SettingFlow = flow)
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuEmergencyLamp)) |> ignore)
 
-        system.TestLamps.Where(fun w -> w.SettingFlow = flow)
+        system.TestHWLamps.Where(fun w -> w.SettingFlow = flow)
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuTestDriveLamp)) |> ignore)
 
-        system.ReadyLamps.Where(fun w -> w.SettingFlow = flow)
+        system.ReadyHWLamps.Where(fun w -> w.SettingFlow = flow)
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuReadyLamp)) |> ignore)
 
-        system.IdleLamps.Where(fun w -> w.SettingFlow = flow)
+        system.IdleHWLamps.Where(fun w -> w.SettingFlow = flow)
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuIdleLamp)) |> ignore)
 
         if newNode.GetSingles().Count() > 0 then
@@ -138,31 +138,31 @@ module ImportViewModule =
 
         let newNode = ViewNode("Buttons", VBUTTON)
 
-        system.AutoButtons.Where(fun w -> w.SettingFlows.Contains(flow))
+        system.AutoHWButtons.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuAutoBTN)) |> ignore)
 
-        system.ManualButtons.Where(fun w -> w.SettingFlows.Contains(flow))
+        system.ManualHWButtons.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuManualBTN)) |> ignore)
 
-        system.DriveButtons.Where(fun w -> w.SettingFlows.Contains(flow))
+        system.DriveHWButtons.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuDriveBTN)) |> ignore)
 
-        system.StopButtons.Where(fun w -> w.SettingFlows.Contains(flow))
+        system.StopHWButtons.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuStopBTN)) |> ignore)
 
-        system.ClearButtons.Where(fun w -> w.SettingFlows.Contains(flow))
+        system.ClearHWButtons.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuClearBTN)) |> ignore)
 
-        system.EmergencyButtons.Where(fun w -> w.SettingFlows.Contains(flow))
+        system.EmergencyHWButtons.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuEmergencyBTN)) |> ignore)
 
-        system.TestButtons.Where(fun w -> w.SettingFlows.Contains(flow))
+        system.TestHWButtons.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuTestBTN)) |> ignore)
 
-        system.HomeButtons.Where(fun w -> w.SettingFlows.Contains(flow))
+        system.HomeHWButtons.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuHomeBTN)) |> ignore)
 
-        system.ReadyButtons.Where(fun w -> w.SettingFlows.Contains(flow))
+        system.ReadyHWButtons.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuReadyBTN)) |> ignore)
 
         if newNode.GetSingles().Count() > 0 then

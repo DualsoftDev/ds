@@ -15,11 +15,11 @@ open System.Reactive.Subjects
 [<AutoOpen>]
 module RunTime =
 
-    type DsCPU(css:CommentedStatement seq, systems:DsSystem seq, cpuMode:RuntimePackage) =
+    type DsCPU(css:CommentedStatement seq, mySystem:DsSystem, loadedSystems:DsSystem seq, cpuMode:RuntimePackage) =
         let statements = css |> Seq.map(fun f -> f.Statement)
         let mapRungs = getRungMap(statements)
         let cpuStorages = mapRungs.Keys
-     
+        let systems = [mySystem] @ loadedSystems
         let mutable cts = new CancellationTokenSource()
         let mutable run:bool = false
 
@@ -76,7 +76,11 @@ module RunTime =
 
         interface IDisposable with
             member x.Dispose() = x.Dispose()
-        member x.Systems = systems
+
+        ///MySystem + LoadedSystems
+        member x.Systems = [x.MySystem] @ loadedSystems
+        member x.MySystem = mySystem
+        member x.LoadedSystems = loadedSystems
         member x.IsRunning = run
         member x.CommentedStatements = css
         
@@ -119,7 +123,7 @@ module RunTime =
         //Job 만들기
         [<Extension>]
         static member GetDsCPU (dsSys:DsSystem, runtimePackage:RuntimePackage) : DsCPU =
-            let lstSys = [dsSys] @ dsSys.GetRecursiveLoadedSystems()
+            let loadedSystems = dsSys.GetRecursiveLoadedSystems()
 
             // Initialize storages and load CPU statements
             let storages = Storages()
@@ -133,5 +137,5 @@ module RunTime =
                 css <- css @ cpu.CommentedStatements() |> List.ofSeq
 
             // Create and return a DsCPU object
-            new DsCPU(css, lstSys, runtimePackage)
+            new DsCPU(css, dsSys, loadedSystems, runtimePackage)
 

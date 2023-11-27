@@ -31,13 +31,14 @@ public class ModelController(
     */
     // api/model
     [HttpGet]
-    public ActionResult<RuntimeModelDto> GetModelInfo()
+    public ResultSerializable<RuntimeModelDto, ErrorMessage> GetModelInfo()
     {
         if (_model == null)
-            return NotFound(); // 404 Not Found 반환
+            return ResultSerializable<RuntimeModelDto, ErrorMessage>.Err("No model"); // 404 Not Found 반환
 
         bool isCpuRunning = _model.Cpu?.IsRunning ?? false;
-        return new RuntimeModelDto(_model.SourceDsZipPath, isCpuRunning);
+        var model = new RuntimeModelDto(_model.SourceDsZipPath, isCpuRunning);
+        return ResultSerializable<RuntimeModelDto, ErrorMessage>.Ok(model);
     }
 }
 

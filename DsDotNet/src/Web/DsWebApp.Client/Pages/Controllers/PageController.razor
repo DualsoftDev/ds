@@ -44,7 +44,11 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _modelDto = await ClientGlobal.GetModelDtoAsync(Http);
+        var result = await ClientGlobal.GetModelDtoAsync(Http);
+        result.Iter(
+            ok => _modelDto = ok,
+            err => Console.WriteLine($"Failed to get model. {err}")
+        );
 
         _loading = false;
 

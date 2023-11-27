@@ -77,7 +77,12 @@
     protected override async Task OnInitializedAsync()
     {
         _serverSettings = await ClientGlobal.GetServerSettingsAsync(Http);
-        _modelDto = await ClientGlobal.GetModelDtoAsync(Http);
+        var result = await ClientGlobal.GetModelDtoAsync(Http);
+        result.Iter(
+            ok => _modelDto = ok,
+            err => Console.WriteLine($"Failed to get model. {err}")
+        );
+
         var action = new Action<RuntimeModelDto>(modelDto => { _modelDto = modelDto; StateHasChanged(); });
         IDisposable subscription = await ClientGlobal.MonitorModelChangeAsync(NavigationManager, action);
         _disposables.Add(subscription);

@@ -75,10 +75,17 @@ type ModelLoaderExt =
                               .Select(fun f-> changeExtension (f|> DsFile)  ".pptx")
                               .ToZipPPT()
 
-        let zipDir = PathManager.getDirectoryName (zipPathDS|>DsFile)   
-        let jsFilePath = $"{zipDir}/{TextDSJson}" |> getValidFile
+        let zipDir    = PathManager.getDirectoryName (zipPathDS|>DsFile)   
+        let zipFile   = PathManager.getFileNameWithoutExtension (zipPathDS|>DsFile)   
 
-        let activeRelaPath = getRelativePath(jsFilePath|>DsFile) (activeFilePath|>DsFile);//   // 상대경로로 기본 저장
+        let jsFilePath = $"{zipDir}{TextDSJson}" |> getValidFile
+
+
+        let baseTempFilePath = $"{zipDir}{zipFile}/base.ext"  //상대 경로 구하기 위한 임시경로
+        let activeRelaPath = getRelativePath(baseTempFilePath|>DsFile) (activeFilePath|>DsFile);//   // 상대경로로 기본 저장
+
+
+
         let config = SaveConfigWithPath jsFilePath activeRelaPath
 
         addFilesToExistingZipAndDeleteFiles zipPathDS [zipPathPPT;config]

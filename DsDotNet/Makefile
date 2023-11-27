@@ -8,6 +8,27 @@ clean:
 	-@find . -type d \( -name ".vs" -o -name '*.idea' \) -exec rm -rf {} +
 	make dotnet-restore
 
+# copy-template if not exists:
+TEMPLATES := ./Apps/DSModeler/App.config.template \
+             ./Apps/HMI.Obsolete/AppHMI/App.config.template \
+             ./Apps/INFO/AppINFO/App.config.template \
+             ./Apps/OfficeAddIn/PowerPointAddInHelper/App.config.template \
+             ./src/IOHub/IO.Core/zmqsettings.json.template \
+             ./src/Web/DsWebApp.Server/appsettings.json.template
+
+TARGETS := $(TEMPLATES:.template=)
+
+copy-template: $(TARGETS)
+
+$(TARGETS): % : %.template
+	@if [ ! -f $@ ]; then \
+		cp $< $@; \
+		echo "Copied $< to $@"; \
+	fi
+
+
+
+
 aa:
 	rm -rf /c/Users/kwak/.nuget/packages/dual*
 

@@ -190,3 +190,11 @@ Ds.linux.sln
 Apps/DSModeler/App.config
 Apps/HMI/AppHMI/App.config
 Apps/INFO/AppINFO/App.config
+
+
+Apps/DSModeler/App.config
+Apps/HMI.Obsolete/AppHMI/App.config
+Apps/INFO/AppINFO/App.config
+Apps/OfficeAddIn/PowerPointAddInHelper/App.config
+src/IOHub/IO.Core/zmqsettings.json
+src/Web/DsWebApp.Server/appsettings.json

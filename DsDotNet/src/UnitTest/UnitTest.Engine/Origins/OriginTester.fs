@@ -18,6 +18,7 @@ module OriginTestModule =
         let genConfig (filePath:string) =
             let cfg = {
                     DsFilePath = $@"{libdir}/MultipleJobdefCallExample/{filePath}"
+                    HWIP =  RuntimeDS.IP
                 }
             ModelLoader.SaveConfig configFile cfg
 

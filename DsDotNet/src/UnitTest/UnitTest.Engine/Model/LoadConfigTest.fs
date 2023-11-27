@@ -17,7 +17,9 @@ module LoadConfigTestModule =
         
         let loadConfigTest() =
             let cfg =
-                {   DsFilePath =  $@"{dsFileDir}dsFolder/lib/Cylinder/Double.ds" }
+                {   DsFilePath =  $@"{dsFileDir}dsFolder/lib/Cylinder/Double.ds" 
+                    HWIP =  RuntimeDS.IP
+                    }
             ModelLoader.SaveConfig configFile cfg
             let cfg2 = ModelLoader.LoadConfig configFile
             cfg === cfg2

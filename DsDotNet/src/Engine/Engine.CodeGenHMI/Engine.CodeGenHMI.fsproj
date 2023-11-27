@@ -11,20 +11,21 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs"/>
-        <Compile Include="CodeControlServer.fs"/>
-        <Compile Include="CodeGen.Common.fs"/>
-        <Compile Include="HmiCode.fs"/>
-        <Compile Include="PilotCode.fs"/>
+        <Compile Include="Core.Extensions.fs" />
+        <Compile Include="CodeControlServer.fs" />
+        <Compile Include="CodeGen.Common.fs" />
+        <Compile Include="HmiCode.fs" />
+        <Compile Include="PilotCode.fs" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj"/>
-        <ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj"/>
-        <ProjectReference Include="..\Engine.Parser\Engine.Parser.csproj"/>
-        <Compile Include="DummyInitializer.fs"/>
-        <Compile Include="CodeGenHandler.fs"/>
-        <Content Include="FodyWeavers.xml"/>
+        <ProjectReference Include="..\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
+        <ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
+        <ProjectReference Include="..\Engine.Parser\Engine.Parser.csproj" />
+        <Compile Include="DummyInitializer.fs" />
+        <Compile Include="CodeGenHandler.fs" />
+        <Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
+        <Content Include="FodyWeavers.xml" />
     </ItemGroup>
 
 

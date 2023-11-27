@@ -4,6 +4,7 @@ open System.Diagnostics
 open Engine.Core
 open System.Collections.Generic
 open System
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module TagManagerModule =
@@ -48,7 +49,7 @@ module TagManagerModule =
         let forceStartBit = createTag "SF"   VertexTag.forceStart
         let forceResetBit = createTag "RF"   VertexTag.forceReset
         let forceOnBit    = createTag "ON"   VertexTag.forceOn
-        let forceOffBit   = createTag "OFF"   VertexTag.forceOff
+        let forceOffBit   = createTag "OFF"  VertexTag.forceOff
 
 
         interface ITagManager with
@@ -105,8 +106,37 @@ module TagManagerModule =
 
         member _.CreateTag(name) = createTag name
 
+        member _.GetVertexTag (vt:VertexTag) :IStorage =
+            match vt with 
+            | VertexTag.startTag            -> startTagBit           :> IStorage
+            | VertexTag.resetTag            -> resetTagBit           :> IStorage
+            | VertexTag.endTag              -> endTagBit             :> IStorage
+            | VertexTag.ready               -> readyBit              :> IStorage
+            | VertexTag.going               -> goingBit              :> IStorage
+            | VertexTag.finish              -> finishBit             :> IStorage
+            | VertexTag.homing              -> homingBit             :> IStorage
+            | VertexTag.origin              -> originBit             :> IStorage
+            | VertexTag.pause               -> pauseBit              :> IStorage
+            | VertexTag.errorTx             -> errorTxBit            :> IStorage
+            | VertexTag.errorRx             -> errorRxBit            :> IStorage
+                                                                   
+            | VertexTag.forceStart            -> forceStartBit       :> IStorage
+            | VertexTag.forceReset            -> forceResetBit       :> IStorage
+            | VertexTag.forceOn               -> forceOnBit          :> IStorage
+            | VertexTag.forceOff              -> forceOffBit         :> IStorage
+              
 
-    type VertexMReal(v:Vertex) as this =
+            | VertexTag.realOriginAction    -> (v.TagManager:?> VertexMReal).RO    :> IStorage
+            | VertexTag.relayReal           -> (v.TagManager:?> VertexMReal).RR    :> IStorage
+            | VertexTag.goingRealy          -> (v.TagManager:?> VertexMReal).GG    :> IStorage
+
+            | VertexTag.counter             
+            | VertexTag.timerOnDelay        -> failwithlog $"Error : Time Counter Type {vt} not support!!"
+
+            | _ -> failwithlog $"Error : GetVertexTag {vt} type not support!!"
+         
+
+    and VertexMReal(v:Vertex) as this =
         inherit VertexManager(v)
         let mutable originInfo:OriginInfo = defaultOriginInfo (v:?> Real)
         let createTag name = this.CreateTag name
@@ -128,7 +158,7 @@ module TagManagerModule =
      
 
 
-    type VertexMCoin(v:Vertex)as this =
+    and VertexMCoin(v:Vertex)as this =
         inherit VertexManager(v)
         let s    = this.Storages
         let createTag name = this.CreateTag name
@@ -141,7 +171,7 @@ module TagManagerModule =
         //member _.CR     = relayCallBit
 
         ///Ring Counter
-        member _.CTR    = counterBit
+        member _.CTR     = counterBit
         ///Timer on delay
         member _.TDON    = timerOnDelayBit
 

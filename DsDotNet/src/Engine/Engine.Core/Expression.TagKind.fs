@@ -100,7 +100,6 @@ module TagKindModule =
     |forceOn                   = 11020
     |forceOff                  = 11021
 
-    |relayCall                 = 11022
     |counter                   = 11023
     |timerOnDelay              = 11024
     |goingRealy                = 11025

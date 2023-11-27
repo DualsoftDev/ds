@@ -23,16 +23,19 @@ module MSG_TEST =
         MSG_GENIOLIST.Do(testPath, false)|> Assert.True
     [<Fact>]
     let ``MSG_GENLSPLC`` () =
-        MSG_GENLSPLC.Do(testPath, false)|> Assert.True
+        MSG_GENLSPLC.Do(testPath, "", false)|> Assert.True
     [<Fact>]
     let ``MSG_GENWINPC`` () =
-        MSG_GENWINPC.Do(testPath, false)|> Assert.True
+        MSG_GENWINPC.Do(testPath,"",  false)|> Assert.True
     [<Fact>]
     let ``MSG_IOCSV`` () =
-        MSG_IOCSV.Do(testPath)|> Assert.True
+        MSG_IOCSV.Do(testPath, false)|> Assert.True
+    [<Fact>]
+    let ``MSG_HWSETTING`` () =
+        MSG_HWSETTING.Do("192.168.9.100", false)|> Assert.True
     [<Fact>]
     let ``MSG_SIMULATION`` () =
         MSG_SIMULATION.Do(testPath, "", false)|> Assert.True
     [<Fact>]
     let ``MSG_ANIMATION`` () =
-        MSG_ANIMATION.Do(testPath,"")|> Assert.True
+        MSG_ANIMATION.Do(testPath,"", false)|> Assert.True

@@ -128,7 +128,11 @@ module ExportIOTable =
         emptyLine ()
         dt
 
-    let ToDataSet (system: DsSystem) = ToTable system
+    let ToIOListDataSet (system: DsSystem) = 
+        let table = ToTable system
+        table.Columns.Remove($"{IOColumn.Job}")
+        table.Columns.Remove($"{IOColumn.Func}")
+        table
 
     let ToDataCSV (system: DsSystem) =
         let dataTable = ToTable system
@@ -160,11 +164,10 @@ module ExportIOTable =
         tempFilePath
 
 
-
     [<Extension>]
     type OfficeExcelExt =
         [<Extension>]
         static member ExportDataTableToExcel (system: DsSystem) (filePath: string) =
-            let dataTables = [|ToDataSet (system)|]
+            let dataTables = [|ToIOListDataSet (system)|]
             createSpreadsheet filePath dataTables
           

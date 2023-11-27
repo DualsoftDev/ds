@@ -26,11 +26,14 @@ module TagWebModule =
     type TagWeb with
         member x.Value:obj = ObjectHolder.Deserialize(x._SerializedObject).GetValue()
 
-    type HMIPush = TagWeb
+    type HMIPush   = TagWeb
+    type HMISelect = TagWeb*TagWeb //selectA/selectB  ex)Auto/Manu   
     type HMILamp = TagWeb
     type HMIFlickerLamp = TagWeb
     type HMIButton = HMIPush*HMIFlickerLamp
     type HMIDevice = HMIPush*HMILamp  //input, output
+
+    type HMIPushLamp = HMIPush*HMILamp  //input, output
 
 
     type HmiTagPackage = {

@@ -27,13 +27,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\Apps\OfficeAddOn\PowerPointAddInHelper\PowerPointAddInHelper.csproj" />
-      <ProjectReference Include="..\..\..\Apps\OfficeAddOn\PowerPointAddInShared\PowerPointAddInShared.fsproj" />
+      <ProjectReference Include="..\..\..\Apps\OfficeAddIn\PowerPointAddInHelper\PowerPointAddInHelper.csproj" />
+      <ProjectReference Include="..\..\..\Apps\OfficeAddIn\PowerPointAddInShared\PowerPointAddInShared.fsproj" />
     </ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="copy $(ProjectDir)..\..\..\Apps\OfficeAddOn\PowerPointAddInHelper\DS_Library.pptx $(TargetDir)DS_Library.pptx" />
-		<Exec Command="copy $(ProjectDir)..\..\..\Apps\OfficeAddOn\PowerPointAddInHelper\HelloDS.pptx $(TargetDir)HelloDS.pptx" />
+		<Exec Command="copy $(ProjectDir)..\..\..\Apps\OfficeAddIn\PowerPointAddInHelper\DS_Library.pptx $(TargetDir)DS_Library.pptx" />
+		<Exec Command="copy $(ProjectDir)..\..\..\Apps\OfficeAddIn\PowerPointAddInHelper\HelloDS.pptx $(TargetDir)HelloDS.pptx" />
 	</Target>
 	
 </Project>

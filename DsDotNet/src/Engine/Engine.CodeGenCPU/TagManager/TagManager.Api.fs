@@ -38,6 +38,24 @@ module ApiTagManagerModule =
             member _.Storages = stg
 
 
+        member _.GetApiTag (vt:ApiItemTag) :IStorage =
+            match vt with 
+            | ApiItemTag.planSet            -> ps  :> IStorage
+            | ApiItemTag.planEnd            -> pe  :> IStorage
+            | ApiItemTag.txErrTrendOut      -> txerrtrendout    :> IStorage
+            | ApiItemTag.txErrTimeOver      -> txerrovertime    :> IStorage
+            | ApiItemTag.rxErrShort         -> rxerrShort       :> IStorage
+            | ApiItemTag.rxErrShortOn       -> rxErrShortOn     :> IStorage
+            | ApiItemTag.rxErrShortRising   -> rxErrShortRising :> IStorage
+            | ApiItemTag.rxErrShortTemp     -> rxErrShortTemp   :> IStorage
+            | ApiItemTag.rxErrOpen          -> rxerrOpen        :> IStorage
+            | ApiItemTag.rxErrOpenOff       -> rxErrOpenOff     :> IStorage
+            | ApiItemTag.rxErrOpenRising    -> rxErrOpenRising  :> IStorage
+            | ApiItemTag.rxErrOpenTemp      -> rxErrOpenTemp    :> IStorage
+            | ApiItemTag.trxErr             -> trxErr           :> IStorage
+            | _ -> failwithlog $"Error : GetVertexTag {vt} type not support!!"
+         
+
         member _.ErrorText   = 
             let err1 = if txerrtrendout.Value   then "동작편차" else ""
             let err2 = if txerrovertime.Value   then "동작시간" else ""

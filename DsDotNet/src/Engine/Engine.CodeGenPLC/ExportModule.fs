@@ -122,7 +122,3 @@ module ExportModule =
         static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml) =
             exportXMLforXGI (system, path, if tempLSISxml <> null then Some(tempLSISxml) else None)
 
-        [<Extension>]
-        static member ExportXMLforPC(system: DsSystem, path: string) =
-            if system.Name = path then
-                () //test ahn

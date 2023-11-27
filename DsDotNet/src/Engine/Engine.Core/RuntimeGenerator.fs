@@ -62,6 +62,10 @@ module RuntimeGeneratorModule =
                 runtimeTarget <- v
                 targetChangedSubject.OnNext(v)
 
+        static member val HwStartInDINT = 0 with get, set
+        static member val HwStartOutDINT = 1 with get, set
+        static member val IP = "192.168.9.100" with get, set
+
         static member TimeoutCall = callTimeout
         static member TargetChangedSubject = targetChangedSubject
 

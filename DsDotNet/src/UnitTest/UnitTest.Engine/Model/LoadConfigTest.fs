@@ -17,7 +17,7 @@ module LoadConfigTestModule =
         
         let loadConfigTest() =
             let cfg =
-                {   DsFilePath =  $@"{dsFileDir}dsFolder/lib/Cylinder/Double.ds" 
+                {   DsFilePath =  $@"{dsFileDir}dsFolder/Factory.ds" 
                     HWIP =  RuntimeDS.IP
                     }
             ModelLoader.SaveConfig configFile cfg
@@ -30,7 +30,7 @@ module LoadConfigTestModule =
             let config = loadConfigTest()
 
             let model = ParserLoader.LoadFromConfig configFile
-            model.System.Name === "Double"
+            model.System.Name === "Factory"
 
 
         [<Test>]

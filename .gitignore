@@ -29,28 +29,29 @@ Grammar/CsParser/bin/
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/**/*.xlsx
 *.zip
 *.xgwx
-/DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/**/*.zip
-/DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/**/*.ds
+
 /.vs
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/demo/ppt/kit_DS_autogen/*
 
 /DsDotNet/Apps/OfficeAddOn/PowerPointAddInSetup/PowerPointAddIn
 /DsDotNet/src/UnitTest/UnitTest.Model/test-origin-config.json
 /DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/test-model-config.json
-/DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/**/*.json
-/DsDotNet/Apps/OfficeAddOn/PowerPointAddIn For Dualsoft Setup/PowerPointAddIn For Dualsoft Setup.msi
-/DsDotNet/Apps/OfficeAddOn/PowerPointAddIn For Dualsoft Setup/PowerPointAddInSetup.vdproj
 
-/DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/exportDS/**/*.ds
-/DsDotNet/src/UnitTest/UnitTest.PowerPointAddIn/sample/*.xlsx
-/DsDotNet/src/UnitTest/UnitTest.PowerPointAddIn/sample/*.xml
+
+
+
+
 /DsDotNet/Apps/OfficeAddIn/PowerPointAddIn For Dualsoft Setup/PowerPointAddIn/*.vsto
 /DsDotNet/Apps/OfficeAddIn/PowerPointAddIn For Dualsoft Setup/PowerPointAddIn/Application Files/**/*.*
 /DsDotNet/Apps/OfficeAddIn/PowerPointAddIn For Dualsoft Setup/PowerPointAddIn/Application Files/*.*
 
 /DsDotNet/Apps/OfficeAddIn/PowerPointAddIn For Dualsoft Setup/SetupRelease/PowerPointAddIn For Dualsoft Setup.msi
-/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/HelloDS.xml
-/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/HelloDS.xlsx
-/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/HelloDS.ds
+/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/*.xml
+/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/*.xlsx
+/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/*.ds
+/DsDotNet/src/UnitTest/UnitTest.PowerPointAddIn/**/*.xlsx
+/DsDotNet/src/UnitTest/UnitTest.PowerPointAddIn/**/*.xml
 
-/DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/exportDS.Zip
+/DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/**/*.zip
+/DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/**/*.ds
+/DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/**/*.json

@@ -6,6 +6,7 @@ public class ServerSettings
     public bool AutoStartOnSystemPowerUp { get; set; }
     public ClientEnvironment ClientEnvironment { get; set; }
     public string RuntimeModelDsZipPath { get; set; }
+    public double JwtTokenValidityMinutes { get; set; }
 }
 
 public static class ServerSettingsExtensions

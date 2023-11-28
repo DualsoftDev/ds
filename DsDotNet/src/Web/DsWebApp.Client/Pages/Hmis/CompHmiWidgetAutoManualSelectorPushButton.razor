@@ -1,8 +1,8 @@
 @using Engine.Core
 @using System.Reactive.Subjects
 
-<DxButton Click="@onAutoClick" Text="Auto" Enabled="@_autoEnabled" />
-<DxButton Click="@onManualClick" Text="Manual" Enabled="@_manualEnabled" />
+<DxButton Click="@onAutoClick" Text="@_autoText" Enabled="@_autoEnabled" />
+<DxButton Click="@onManualClick" Text="@_manualText" Enabled="@_manualEnabled" />
 
 @code {
 
@@ -12,6 +12,8 @@
     [Parameter] public TagWeb TagManual { get; set; }
     [Parameter] public Subject<TagWeb> TagChangedObservable { get; set; }
 
+    string _autoText = "Auto";
+    string _manualText = "Manual";
     bool _autoEnabled = false;
     bool _manualEnabled = false;
     protected override async Task OnInitializedAsync()
@@ -34,8 +36,11 @@
 
         void evaluateEnabled()
         {
-            _autoEnabled = (bool)TagAuto.Value == false;
-            _manualEnabled = (bool)TagManual.Value == false;
+            var (a, m) = ((bool)TagAuto.Value, (bool)TagManual.Value);
+            _autoEnabled = a == false;
+            _manualEnabled = m == false;
+            _autoText = (a ? "✓ " : "") + "Auto";
+            _manualText = (m ? "✓ " : "") + "Manual";
         }
 
     }

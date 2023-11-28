@@ -202,6 +202,7 @@ module DsDataType =
             | DuUINT64  -> 64, "LWord"
             | DuUINT8   -> 8 , "Byte"
             | _ -> failwithf $"'{x}' not support ToBlockSize"
+
         member x.ToType() =
             match x with
             | DuBOOL    -> typedefof<bool>
@@ -228,13 +229,6 @@ module DsDataType =
         | "lword" -> DuUINT64
         | _ -> failwithf $"'size bit {blockSlottype}' not support getBlockType"
 
-    let getBlockBitSize(blockSlottype:string) =
-        match blockSlottype.ToLower() with
-        | "byte"  -> DuUINT8
-        | "word"  -> DuUINT16
-        | "dword" -> DuUINT32
-        | "lword" -> DuUINT64
-        | _ -> failwithf $"'size bit {blockSlottype}' not support getBlockType"
 
     let textToDataType(typeName:string) =
         match typeName.ToLower() with

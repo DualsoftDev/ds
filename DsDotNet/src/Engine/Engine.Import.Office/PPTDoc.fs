@@ -165,6 +165,7 @@ module PPTDocModule =
                 |> Seq.map (fun (slide, groupSet) -> pages.[slide].PageNum, groupSet)
 
             let shapes = Office.PageShapes(doc)
+                            |> Seq.filter (fun (_, page, _, _) -> pages.Values.Select(fun w -> w.PageNum).Contains(page))
             let connections = Connections(doc)
                             |> Seq.filter (fun (slide, _) -> not (headPages.ContainsKey(slide)))
                             |> Seq.filter (fun (slide, _) -> pages.ContainsKey(slide))

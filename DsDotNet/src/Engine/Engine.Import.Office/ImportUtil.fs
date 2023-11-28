@@ -234,7 +234,7 @@ module ImportU =
                 let pageNum = page.PageNum
 
                 let sysName, flowName = GetSysNFlow(doc.Name, page.Title, page.PageNum)
-
+                let flowName = if page.PageNum = 1 then $"{sysName}_Page1" else flowName
                 if flowName.Contains(".") then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._20, page.Title, page.PageNum, 0u, "")
 

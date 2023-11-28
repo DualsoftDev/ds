@@ -253,8 +253,12 @@ module PPTUtil =
                         .Descendants<Drawing.PresetGeometry>()
                         .FirstOrDefault()
 
-                let round = geometry.CheckRound()
-                geometry.Preset.Value = Drawing.ShapeTypeValues.Bevel && round
+                if geometry = null 
+                then false
+                else 
+                    let round =  geometry.CheckRound() 
+
+                    geometry.Preset.Value = Drawing.ShapeTypeValues.Bevel && round
 
         [<Extension>]
         static member CheckBevelShapePlate(shape: Shape) =
@@ -268,8 +272,11 @@ module PPTUtil =
                         .Descendants<Drawing.PresetGeometry>()
                         .FirstOrDefault()
 
-                let notRound = geometry.CheckRound() |> not
-                geometry.Preset.Value = Drawing.ShapeTypeValues.Bevel && notRound
+                if geometry = null 
+                then false
+                else 
+                    let round =  geometry.CheckRound() 
+                    geometry.Preset.Value = Drawing.ShapeTypeValues.Bevel && (round|>not)
 
         [<Extension>]
         static member CheckDonutShape(shape: Shape) =
@@ -299,13 +306,16 @@ module PPTUtil =
                         .First()
                         .Descendants<Drawing.PresetGeometry>()
                         .FirstOrDefault()
+                if geometry = null 
+                then false
+                else 
+                    let round =  geometry.CheckRound() 
 
-                let round = geometry.CheckRound()
 
-                (geometry.Preset.Value = Drawing.ShapeTypeValues.Ellipse
-                 || (geometry.Preset.Value = Drawing.ShapeTypeValues.RoundRectangle && round)
-                 || geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartAlternateProcess
-                 || geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartConnector)
+                    (geometry.Preset.Value = Drawing.ShapeTypeValues.Ellipse
+                     || (geometry.Preset.Value = Drawing.ShapeTypeValues.RoundRectangle && round)
+                     || geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartAlternateProcess
+                     || geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartConnector)
 
 
 
@@ -320,15 +330,17 @@ module PPTUtil =
                         .First()
                         .Descendants<Drawing.PresetGeometry>()
                         .FirstOrDefault()
+                if geometry = null 
+                then false
+                else 
+                    let round =  geometry.CheckRound() 
+                    (geometry.Preset.Value = Drawing.ShapeTypeValues.Rectangle
+                        || geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartProcess
+                        || (geometry.Preset.Value = Drawing.ShapeTypeValues.RoundRectangle && round|> not)
+                        || (geometry.Preset.Value = Drawing.ShapeTypeValues.HomePlate && round|> not)
+                        )
 
-                let round = geometry.CheckRound()
-
-                (geometry.Preset.Value = Drawing.ShapeTypeValues.Rectangle
-                 || (geometry.Preset.Value = Drawing.ShapeTypeValues.RoundRectangle && round |> not)
-                 || (geometry.Preset.Value = Drawing.ShapeTypeValues.HomePlate && round |> not)
-                 || geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartProcess)
-
-        [<Extension>]
+        [<Extension>] 
         static member CheckFoldedCornerPlate(shape: Shape) =
             if (Office.CheckShape(shape) |> not) then
                 false
@@ -340,8 +352,11 @@ module PPTUtil =
                         .Descendants<Drawing.PresetGeometry>()
                         .FirstOrDefault()
 
-                let round = geometry.CheckRound()
-                (geometry.Preset.Value = Drawing.ShapeTypeValues.FoldedCorner && not <| round)
+                if geometry = null 
+                then false
+                else 
+                    let round =  geometry.CheckRound() 
+                    (geometry.Preset.Value = Drawing.ShapeTypeValues.FoldedCorner && not <| round)
 
         [<Extension>]
         static member CheckFoldedCornerRound(shape: Shape) =
@@ -355,8 +370,11 @@ module PPTUtil =
                         .Descendants<Drawing.PresetGeometry>()
                         .FirstOrDefault()
 
-                let round = geometry.CheckRound()
-                (geometry.Preset.Value = Drawing.ShapeTypeValues.FoldedCorner && round)
+                if geometry = null 
+                then false
+                else 
+                    let round =  geometry.CheckRound() 
+                    (geometry.Preset.Value = Drawing.ShapeTypeValues.FoldedCorner && round)
 
         [<Extension>]
         static member CheckHomePlate(shape: Shape) =
@@ -370,10 +388,13 @@ module PPTUtil =
                         .Descendants<Drawing.PresetGeometry>()
                         .FirstOrDefault()
 
-                let round = geometry.CheckRound()
+                if geometry = null 
+                then false
+                else 
+                    let round =  geometry.CheckRound() 
 
-                (geometry.Preset.Value = Drawing.ShapeTypeValues.HomePlate && round
-                 || geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartOffpageConnector)
+                    (geometry.Preset.Value = Drawing.ShapeTypeValues.HomePlate && round
+                     || geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartOffpageConnector)
 
         [<Extension>]
         static member CheckNoSmoking(shape: Shape) =
@@ -417,8 +438,10 @@ module PPTUtil =
                         .First()
                         .Descendants<Drawing.PresetGeometry>()
                         .FirstOrDefault()
-
-                geometry.Preset.Value = Drawing.ShapeTypeValues.Frame
+                if geometry = null 
+                then false
+                else 
+                    geometry.Preset.Value = Drawing.ShapeTypeValues.Frame
 
         [<Extension>]
         static member IsDashShape(shape: Shape) =
@@ -486,13 +509,13 @@ module PPTUtil =
             let slideLayoutType = slidePart.SlideLayoutPart.SlideLayout.Type
 
             if slideLayoutType = null then
-                true
+                false
             else
                 slideLayoutType.InnerText = "blank"
 
 
         [<Extension>]
-        static member PageTitle(slidePart: #SlidePart, headTitle: bool) =
+        static member PageTitle(slidePart: #SlidePart) =
             let tilteTexts =
                 slidePart.Slide.CommonSlideData.ShapeTree.Descendants<Shape>()
                 |> Seq.filter (fun shape -> shape.Descendants<ApplicationNonVisualDrawingProperties>().Any())
@@ -500,10 +523,9 @@ module PPTUtil =
                 |> Seq.filter (fun (shape, tilte) -> tilte.Descendants<PlaceholderShape>().Any())
                 |> Seq.filter (fun (shape, tilte) -> tilte.Descendants<PlaceholderShape>().First().Type <> null)
                 |> Seq.filter (fun (shape, tilte) ->
-                    (not (headTitle)
-                     && tilte.Descendants<PlaceholderShape>().First().Type.Value = Presentation.PlaceholderValues.Title)
-                    || (headTitle
-                        && tilte.Descendants<PlaceholderShape>().First().Type.Value = Presentation.PlaceholderValues.CenteredTitle))
+                        let titleType = tilte.Descendants<PlaceholderShape>().First().Type.InnerText.ToLower()
+                        titleType.Contains "title"
+                        )
                 |> Seq.map (fun (shape, tilte) -> shape.InnerText)
 
             if (tilteTexts.Any()) then
@@ -539,7 +561,7 @@ module PPTUtil =
         static member SlidesSkipHide(doc: PresentationDocument) =
             Office.SlidesAll(doc)
             |> Seq.filter (fun (slide, show, page) -> show)
-            |> Seq.map (fun (slide, show, page) -> slide)
+            |> Seq.map (fun (slide, show, page) -> slide, page)
 
 
         ///전체 사용된 도형 반환 (Text box 제외)
@@ -558,31 +580,36 @@ module PPTUtil =
         static member Shapes(page: int, commonSlideData: CommonSlideData) =
             let shapes = commonSlideData.ShapeTree.Descendants<Shape>()
 
-            let ableShapes =
-                shapes
-                |> Seq.filter (fun shape -> shape.IsAbleShape())
-                |> Seq.map (fun shape ->
-                    let geometry =
-                        shape.Descendants<Drawing.PresetGeometry>().FirstOrDefault().Preset.Value
-
-                    shape, page, geometry, shape.IsDashShape())
-
             shapes
-            |> Seq.except (ableShapes |> Seq.map (fun (shape, page, geometry, isDash) -> shape))
-            |> Seq.filter (fun f -> f.IsTitleBox() |> not)
+            |> Seq.filter (fun shape -> shape.IsAbleShape())
             |> Seq.filter (fun f -> f.ShapeName().StartsWith("TextBox") |> not)
-            |> Seq.iter (fun f -> f.ErrorShape(ErrID._39, page))
+            |> Seq.map (fun shape ->
+                let geometry =
+                    shape.Descendants<Drawing.PresetGeometry>().FirstOrDefault().Preset.Value
 
-            ableShapes
+                shape, page, geometry, shape.IsDashShape())
+
+      
 
 
         ///전체 사용된 도형 반환 (Text box 제외)
         [<Extension>]
         static member PageShapes(doc: PresentationDocument) =
             Office.SlidesSkipHide(doc)
-            |> Seq.collect (fun slidePart ->
+            |> Seq.collect (fun (slidePart,_) ->
                 let page = slidePart |> Office.GetPage
                 Office.Shapes(page, slidePart.Slide.CommonSlideData))
+       
+       ///전체 사용된 에러 체크 반환 (Text box 제외)
+        [<Extension>]
+        static member CheckValidShapes(slidePart:SlidePart, page :int, ableShapes :Shape seq) =
+
+            let allShapes = slidePart.Slide.CommonSlideData.ShapeTree.Descendants<Shape>()
+            allShapes
+                |> Seq.filter (fun f -> f.IsTitleBox() |> not)
+                |> Seq.filter (fun f -> f.ShapeName().StartsWith("TextBox") |> not)
+                |> Seq.except (ableShapes)
+                |> Seq.iter   (fun f -> f.ErrorShape(ErrID._39, page))
 
 
         [<Extension>]
@@ -598,7 +625,7 @@ module PPTUtil =
         static member GetTablesWithPageNumbers(doc: PresentationDocument, colCnt: int) =
             let tablesWithPageNumbers =
                 Office.SlidesSkipHide(doc)
-                |> Seq.mapi (fun pageIndex slidePart ->
+                |> Seq.map (fun (slidePart ,pageIndex)  ->
                     let dt = new System.Data.DataTable()
 
                     for i in 0 .. colCnt - 1 do

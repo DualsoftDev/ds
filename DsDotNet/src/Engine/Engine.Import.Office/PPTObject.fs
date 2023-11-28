@@ -48,7 +48,7 @@ module PPTObjectModule =
     ///전체 사용된 화살표 반환 (앞뒤연결 필수)
     let Connections (doc: PresentationDocument) =
         Office.SlidesSkipHide(doc)
-        |> Seq.map (fun slide -> slide, slide.Slide.CommonSlideData.ShapeTree.Descendants<ConnectionShape>())
+        |> Seq.map (fun (slide,_) -> slide, slide.Slide.CommonSlideData.ShapeTree.Descendants<ConnectionShape>())
         |> Seq.map (fun (slide, connects) ->
             slide,
             connects
@@ -77,8 +77,8 @@ module PPTObjectModule =
     ///전체 사용된 도형간 그룹지정 정보
     let Groups (doc: PresentationDocument) =
         Office.SlidesSkipHide(doc)
-        |> Seq.filter (fun slide -> slide.Slide.CommonSlideData.ShapeTree.Descendants<GroupShape>().Any())
-        |> Seq.map (fun slide -> slide, slide.Slide.CommonSlideData.ShapeTree.Descendants<GroupShape>() |> Seq.toList)
+        |> Seq.filter (fun (slide,_) -> slide.Slide.CommonSlideData.ShapeTree.Descendants<GroupShape>().Any())
+        |> Seq.map (fun (slide,_) -> slide, slide.Slide.CommonSlideData.ShapeTree.Descendants<GroupShape>() |> Seq.toList)
 
     let GetCausal (conn: ConnectionShape, iPage, startName, endName) =
         let shapeProperties = conn.Descendants<ShapeProperties>().FirstOrDefault()
@@ -245,7 +245,7 @@ module PPTObjectModule =
         member x.PageNum = iPage
         member x.SlidePart = slidePart
         member x.IsUsing = bShow
-        member x.Title = slidePart.PageTitle(false)
+        member x.Title = slidePart.PageTitle()
 
     type pptNode(shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int,  isHeadPage:bool) =
         let copySystems = Dictionary<string, string>() //copyName, orgiName

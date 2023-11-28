@@ -128,7 +128,6 @@ module PPTDocModule =
 
     type pptDoc(path: string, parameter: DeviceLoadParameters option, doc: PresentationDocument) =
 
-        let headPages = Dictionary<SlidePart, int>()
         let pages = Dictionary<SlidePart, pptPage>()
         let masterPages = Dictionary<int, DocumentFormat.OpenXml.Presentation.SlideMaster>()
         let nodes = Dictionary<string, pptNode>()
@@ -137,27 +136,30 @@ module PPTDocModule =
         let edges = HashSet<pptEdge>()
 
         do
-            let slidesAll = Office.SlidesAll(doc)
-          
             let slideSize = Office.SlideSize(doc)
             let SlideMasters = Office.SlidesMasterAll(doc)
 
             SlideMasters
             |> Seq.iter (fun slideMaster -> masterPages.Add(masterPages.Count + 1, slideMaster) |> ignore)
+            let t = Office.SlidesSkipHide(doc);
 
-            slidesAll
-            |> Seq.filter (fun (slidePart, show, page) -> not (slidePart.IsSlideLayoutBlanckType()))
-            |> Seq.iter (fun (slidePart, show, page) ->
-                    if (slidePart.PageTitle(false) = "" && slidePart.PageTitle(true) = "")
-                    then
-                        Office.ErrorPPT(Page, ErrID._59, "Title Error", page, 0u)
-                    else 
-                        pages.Add(slidePart, pptPage (slidePart, page, show)) |> ignore
-                    
-                    if (slidePart.PageTitle(true) <> "") then
-                        headPages.Add(slidePart, page) |> ignore
-                    )
+            let validSlidesAll =  
+                Office.SlidesSkipHide(doc)
+                |> Seq.filter (fun (s, _) -> not (s.IsSlideLayoutBlanckType()))
+            
 
+            if (validSlidesAll.Where(fun  (slidePart, page) -> page = 1).IsEmpty()) then
+                Office.ErrorPPT(Page, ErrID._12, "Title Slide", 0, 0u)
+            let headSlide = validSlidesAll.First(fun  (slidePart,  page) -> page = 1) |> fun (slide,_) -> slide
+
+            validSlidesAll 
+            |> Seq.iter(fun (slidePart, page) ->
+                            if (slidePart.PageTitle() = "")
+                            then
+                                Office.ErrorPPT(Page, ErrID._59, "Title Error", page, 0u)
+                            else 
+                                pages.Add(slidePart, pptPage (slidePart, page, true)) |> ignore
+                            )
                       
             let allGroups =
                 Groups(doc)
@@ -165,9 +167,20 @@ module PPTDocModule =
                 |> Seq.map (fun (slide, groupSet) -> pages.[slide].PageNum, groupSet)
 
             let shapes = Office.PageShapes(doc)
-                            |> Seq.filter (fun (_, page, _, _) -> pages.Values.Select(fun w -> w.PageNum).Contains(page))
+                            |> Seq.filter (fun (shape, page, _, _) -> 
+                                        page <> 1 && pages.Values.Select(fun w -> w.PageNum).Contains(page)
+                                        || page = 1 && (shape.CheckBevelShapeRound() ||shape.CheckBevelShapePlate())
+                                        )
+            
+            
+            pages.Values.Iter(fun pptPage -> 
+                            let ableShapes = shapes.Where(fun (shape, page, _, _) -> pptPage.PageNum = page)
+                                                   .Select(fun (shape, _, _, _) -> shape)
+                            pptPage.SlidePart.CheckValidShapes(pptPage.PageNum, ableShapes))
+               
+
             let connections = Connections(doc)
-                            |> Seq.filter (fun (slide, _) -> not (headPages.ContainsKey(slide)))
+                            |> Seq.filter (fun (slide, _) -> slide.GetPage() <> 1)
                             |> Seq.filter (fun (slide, _) -> pages.ContainsKey(slide))
             
             let dicShape = Dictionary<int, HashSet<Tuple<Shape, bool>>>()
@@ -180,16 +193,14 @@ module PPTDocModule =
 
                 dicShape.[page].Add(shape, isDash) |> ignore)
 
-            if (headPages.IsEmpty()) then
-                Office.ErrorPPT(Page, ErrID._12, "Title Slide", 0, 0u)
-
+           
 
             shapes
             |> Seq.iter (fun (shape, page, geometry, isDash) ->
                 let pagePPT = pages.Values.Filter(fun w -> w.PageNum = page).First()
-                let headPageName = headPages.Keys.First().PageTitle(true)
+                let headPageName = headSlide.PageTitle()
                 let sysName, flowName = GetSysNFlow(headPageName, pagePPT.Title, pagePPT.PageNum)
-                let headPage =  headPages.Values.Contains(page)
+                let headPage =  page = 1
                 let node = pptNode (shape, page, flowName, slideSize, headPage)
 
                 if (node.Name = "") then
@@ -225,7 +236,7 @@ module PPTDocModule =
 
 
             connections
-            |> Seq.where (fun (slide, conns) -> not (headPages.ContainsKey(slide)))
+            |> Seq.filter (fun (slide, _) -> slide.GetPage() <> 1)
             |> Seq.iter (fun (slide, conns) ->
                 conns
                 |> Seq.iter (fun (conn, Id, startId, endId) ->
@@ -277,7 +288,7 @@ module PPTDocModule =
         member val Parents = parents
         member val Dummys = dummys
 
-        member val Name = headPages.Keys.First().PageTitle(true)
+        member val Name = pages.Keys.First(fun f->f.GetPage() = 1).PageTitle()    
         member val Path = path
         member val DirectoryName = PathManager.getDirectoryName (path|>DsFile)
 

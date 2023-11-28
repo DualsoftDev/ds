@@ -1,0 +1,145 @@
+@using Engine.Core
+@*             
+            *@
+
+
+@if (_loading)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <DxGrid Data="Flows" @ref="MyGrid">
+        <Columns>
+            <DxGridDataColumn FieldName="Name" Caption="Flow"></DxGridDataColumn>
+            <DxGridCommandColumn Caption="Auto/Manual">
+                <HeaderTemplate>
+                    Auto/Manual
+                </HeaderTemplate>
+                <CellDisplayTemplate>
+                    @{
+                        <DxButton Click="() => onAuto(context.DataItem)" Text="Auto" />
+                        <DxButton Click="() => onManual(context.DataItem)" Text="Manual" />
+                    }
+                </CellDisplayTemplate>
+            </DxGridCommandColumn>
+            <CompHmiButtonColumn Caption="Drive" OnClick="@onDrive" />
+            <CompHmiButtonColumn Caption="Stop" OnClick="@onStop" />
+            <CompHmiButtonColumn Caption="Clear" OnClick="@onClear" />
+            <CompHmiButtonColumn Caption="Em. Stop" OnClick="@onEmStop" ForceWidth=100 />
+            <CompHmiButtonColumn Caption="Test" OnClick="@onTest" />
+            <CompHmiButtonColumn Caption="Home" OnClick="@onHome" />
+            <CompHmiButtonColumn Caption="Ready" OnClick="@onReady" />
+
+        </Columns>
+    </DxGrid>
+}
+
+@code {
+    // class FlowRow
+    // {
+    //     public HMIFlow Flow { get; private set; }
+    //     public TagWebORM _btnAuto, _btnManual, _btnDrive, _btnStop, _btnClear, _btnEmStop, _btnTest, _btnHome, _btnReady;
+    //     public FlowRow(HMIFlow flow)
+    //     {
+    //         _btnAuto = new TagWebORM(flow.GetAuto());
+    //         _btnManual = new TagWebORM(flow.GetManual());
+    //         _btnDrive = new TagWebORM(flow.DrivePush);
+    //         Flow = flow;
+    //     }
+    //     public int MyProperty { get; set; }
+    // }
+
+    IGrid MyGrid { get; set; }
+    bool _loading { get; set; } = true;
+    [Parameter] public HMIFlow[] Flows { get; set; }
+
+    // FlowRow[] _flowRows;
+    protected override async Task OnInitializedAsync()
+    {
+        // _flowRows = Flows.Select(f => new FlowRow(f)).ToArray();
+        _loading = false;
+    }
+
+    async Task onAuto(object dataItem)
+    {
+        var flow = (HMIFlow)dataItem;
+        var btn = new TagWebORM(flow.GetAuto());
+        await JsDual.Alert($"Auto on flow {flow.Name}");
+        btn.Value = true;
+        // todo : send to server
+    }
+
+    async Task onManual(object dataItem)
+    {
+        var flow = (HMIFlow)dataItem;
+        var btn = new TagWebORM(flow.GetAuto());
+        await JsDual.Alert($"Manual on flow {flow.Name}");
+        btn.Value = true;
+        // todo : send to server
+    }
+
+
+    async Task onDrive(object dataItem)
+    {
+        var flow = (HMIFlow)dataItem;
+        var btn = new TagWebORM(flow.DrivePush);
+        await JsDual.Alert($"Drive on flow {flow.Name}");
+        btn.Value = true;
+        // todo : send to server
+    }
+
+    async Task onStop(object dataItem)
+    {
+        var flow = (HMIFlow)dataItem;
+        var btn = new TagWebORM(flow.StopPush);
+        await JsDual.Alert($"Stop on flow {flow.Name}");
+        btn.Value = true;
+        // todo : send to server
+    }
+
+
+    async Task onClear(object dataItem)
+    {
+        var flow = (HMIFlow)dataItem;
+        var btn = new TagWebORM(flow.ClearPush);
+        await JsDual.Alert($"Clear on flow {flow.Name}");
+        btn.Value = true;
+        // todo : send to server
+    }
+    async Task onEmStop(object dataItem)
+    {
+        var flow = (HMIFlow)dataItem;
+        var btn = new TagWebORM(flow.EmergencyPush);
+        await JsDual.Alert($"EmStop on flow {flow.Name}");
+        btn.Value = true;
+        // todo : send to server
+    }
+    async Task onTest(object dataItem)
+    {
+        var flow = (HMIFlow)dataItem;
+        var btn = new TagWebORM(flow.TestPush);
+        await JsDual.Alert($"Test on flow {flow.Name}");
+        btn.Value = true;
+        // todo : send to server
+    }
+    async Task onHome(object dataItem)
+    {
+        var flow = (HMIFlow)dataItem;
+        var btn = new TagWebORM(flow.HomePush);
+        await JsDual.Alert($"Home on flow {flow.Name}");
+        btn.Value = true;
+        // todo : send to server
+    }
+    async Task onReady(object dataItem)
+    {
+        var flow = (HMIFlow)dataItem;
+        var btn = new TagWebORM(flow.ReadyPush);
+        await JsDual.Alert($"Ready on flow {flow.Name}");
+        btn.Value = true;
+        // todo : send to server
+    }
+}
+
+
+

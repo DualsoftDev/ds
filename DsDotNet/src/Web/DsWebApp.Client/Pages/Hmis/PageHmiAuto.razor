@@ -4,7 +4,6 @@
 @using System.Collections.ObjectModel
 @using static Engine.Core.TagWebModule
 @using HMIButton = Tuple<Engine.Core.TagWebModule.TagWeb, Engine.Core.TagWebModule.TagWeb>  @* HMIPush * HMIFlickerLamp *@
-@using static Engine.Core.HmiPackageModule
 @inherits CompHmiLoader
 @implements IDisposable
 @attribute [Authorize(Roles = "Administrator")]
@@ -28,22 +27,15 @@ else
         <button class="btn btn-primary" @onclick="@onTest">Test</button>
     </p>
 
-    @foreach (var flow in _system.Flows)
-    {
-        <p>@flow.Name</p>
-    }
+    <CompHmiFlowTable Flows="@_system.Flows"/>
 }
 
 
 @code {
-    bool _loading { get; set; } = true;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-        _system.Flows.Select(x => x.Name).ToList().ForEach(x => Console.WriteLine($"Flow: {x}"));
-        _loading = false;
-    }
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     await base.OnInitializedAsync();
+    // }
     public void Dispose()
     {
         Console.WriteLine($"Disposing PageHmiTags.razor");

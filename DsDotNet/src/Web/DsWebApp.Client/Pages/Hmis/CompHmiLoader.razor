@@ -1,0 +1,16 @@
+@code {
+    protected HMIPackage _hmiPackage;
+    protected HMISystem _system => _hmiPackage.System;
+    protected HMIDevice[] _devices => _hmiPackage.Devices;
+    protected bool _loading { get; set; } = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _hmiPackage = ClientGlobal.HmiPackage;
+        if (_hmiPackage == null)
+            ClientGlobal.HmiPackage = _hmiPackage = await Http.GetFromJsonAsync<HMIPackage>($"api/hmitag");
+
+        await base.OnInitializedAsync();
+        _loading = false;
+    }
+}

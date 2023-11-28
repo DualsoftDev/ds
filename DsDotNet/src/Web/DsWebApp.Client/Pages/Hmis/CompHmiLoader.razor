@@ -8,7 +8,12 @@
     {
         _hmiPackage = ClientGlobal.HmiPackage;
         if (_hmiPackage == null)
-            ClientGlobal.HmiPackage = _hmiPackage = await Http.GetFromJsonAsync<HMIPackage>($"api/hmitag");
+        {
+            var result = await Http.GetResultSimpleAsync<HMIPackage>($"api/hmi/package");
+            result.Iter(
+                ok => ClientGlobal.HmiPackage = _hmiPackage = ok,
+                async err => await JsDual.Alert(err));            
+        }
 
         await base.OnInitializedAsync();
         _loading = false;

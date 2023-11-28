@@ -9,12 +9,12 @@ using static Engine.Core.TagWebModule;
 namespace DsWebApp.Server.Controllers;
 
 /// <summary>
-/// HmiTag controller
+/// HmiTag controller.  api/hmi
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Administrator")]
-public class HmiTagController(
+//[Authorize(Roles = "Administrator")]
+public class HmiController(
         ServerGlobal global
         , IHubContext<HmiTagHub> hubContext
     ) : ControllerBaseWithLogger(global.Logger)
@@ -22,21 +22,22 @@ public class HmiTagController(
     RuntimeModel _model => global.RuntimeModel;
 
     /// <summary>
-    /// "api/hmitag" : 모든 HMI 태그 정보를 반환
+    /// "api/hmi/package" : 모든 HMI 태그 정보를 반환
     /// </summary>
-    [HttpGet]
-    public HMIPackage GetAllHmiTags()
+    [HttpGet("package")]
+    public ResultSerializable<HMIPackage, ErrorMessage> GetAllHmiTags()
     {
-        return _model?.HMITagPackage;
+        return _model?.HMIPackage;
     }
 
     /// <summary>
-    /// "api/hmitag : POST 로 지정된 HMI 태그 정보 update
+    /// "api/hmi/tag : POST 로 지정된 HMI 태그 정보 update
     /// </summary>
     [Authorize(Roles = "Administrator")]
-    [HttpPost]
+    [HttpPost("tag")]
     public async Task<string> SetHmiTag([FromBody] TagWeb tagWeb)
     {
+        await Console.Out.WriteLineAsync($"About to change {tagWeb.Name}={tagWeb.Value}");
         var cpu = _model?.Cpu;
         if (cpu == null)
             return "No Loaded Model";
@@ -47,9 +48,10 @@ public class HmiTagController(
     }
 
     /// <summary>
-    /// "api/hmitag/{fqdn}/{tagKind}" : 지정된 HMI 태그 정보 update
+    /// "api/hmi/tag/{fqdn}/{tagKind}" : 지정된 HMI 태그 정보 update
     /// </summary>
-    [HttpPost("{fqdn}/{tagKind}")]
+    [Authorize(Roles = "Administrator")]
+    [HttpPost("tag/{fqdn}/{tagKind}")]
     public async Task<string> SetHmiTag(string fqdn, int tagKind, [FromBody] string serializedObject)
     {
         var cpu = _model?.Cpu;

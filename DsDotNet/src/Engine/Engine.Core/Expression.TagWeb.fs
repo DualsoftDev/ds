@@ -90,3 +90,5 @@ type TagWebExt =
         | None ->  createTagWeb x x.Name
     [<Extension>]
     static member SetValue(x:TagWeb, value:obj) = x._SerializedObject <- ObjectHolder.Create(value).Serialize()
+    [<Extension>]
+    static member IsEqual(x:TagWeb, y:TagWeb) = x.Name = y.Name && x.Kind = y.Kind

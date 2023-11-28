@@ -23,23 +23,6 @@ else
         <button class="btn btn-primary" @onclick="@(() => navigateTo("/hmis/flow"))">Flow 모니터</button>
         <button class="btn btn-primary" @onclick="@(() => navigateTo("/hmis/alarm"))">알람 리스트</button>
     </p>
-
-    @*
-    @if (_hmiPackage.AutoButtons.Any())
-    {
-        <CompHmiButtonTable TableName="Auto Buttons" HMIButtons=_hmiPackage.AutoButtons />
-    }
-
-    @if (_hmiPackage.DeviceBtns.Any())
-    {
-        <CompDeviceButtonTable TableName="Device Buttons" HMIDevices=_hmiPackage.DeviceBtns />
-    }
-
-    @if (_hmiPackage.RealBtns.Any())
-    {
-        <CompRealButtonTable TableName="Real Buttons" RealButtons=_hmiPackage.RealBtns />
-    }
- *@
 }
 
 

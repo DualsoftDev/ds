@@ -37,7 +37,7 @@
         if (await AuthenticationStateProvider.SetAuthHeaderAsync(Http))
         {
             TagWeb tagWeb = new(_tagWeb.Name, _flag, _tagWeb.Kind, _tagWeb.KindDescription);
-            var anyError = await Http.PostAsJsonResultSimpleAsync("api/hmitag", tagWeb);
+            var anyError = await Http.PostAsJsonResultSimpleAsync("api/hmi/tag", tagWeb);
             var result = anyError.IsNullOrEmpty() ? "OK" : anyError;
             Console.WriteLine($"Submit result: {result}");
         }
@@ -59,6 +59,7 @@
             return hubConnection.On<TagWeb>(SK.S2CNTagWebChanged, (TagWeb change) =>
             {
                 Console.WriteLine($"TagWeb change notification received with {change.Name}/{change.Kind}={change.Value}.");
+                StateHasChanged();
             });
         }
     }
@@ -74,7 +75,7 @@
         if (await AuthenticationStateProvider.SetAuthHeaderAsync(Http))
         {
             var serializedObject = "{\"RawValue\":false,\"Type\":1}";
-            var anyError = await Http.PostAsJsonResultSimpleAsync($"api/hmitag/Hello/9999", serializedObject);
+            var anyError = await Http.PostAsJsonResultSimpleAsync($"api/hmi/tag/Hello/9999", serializedObject);
             var result = anyError.IsNullOrEmpty() ? "OK" : anyError;
             Console.WriteLine($"SendAny result: {result}");
         }

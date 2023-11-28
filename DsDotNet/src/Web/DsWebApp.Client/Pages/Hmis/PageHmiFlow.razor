@@ -1,6 +1,25 @@
-@page "/hmis/flow"
-<h3>PageHmiFlow</h3>
+@page "/hmis/flow/{FlowName}"
+@inherits CompHmiLoader
+
+@if (_loading)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <h3>Flow @FlowName</h3>
+    <CompHmiRealTable Reals="@_reals" />
+}
 
 @code {
+    [Parameter] public string FlowName { get; set; }
+    HMIFlow _flow;
+    HMIReal[] _reals;
 
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        _flow = _system.Flows.FirstOrDefault(f => f.Name == FlowName);
+        _reals = _flow.Reals;
+    }
 }

@@ -12,6 +12,16 @@ else
     <DxGrid Data="Flows" @ref="MyGrid">
         <Columns>
             <DxGridDataColumn FieldName="Name" Caption="Flow"></DxGridDataColumn>
+            <DxGridCommandColumn Caption="Flow">
+                <HeaderTemplate>Flow</HeaderTemplate>
+                <CellDisplayTemplate>
+                    <DxButton
+                        Click="() => onFlow(context.DataItem)"
+                        Text="@(((HMIFlow)context.DataItem).Name)"
+                        RenderStyle="ButtonRenderStyle.Info"
+                        />
+                </CellDisplayTemplate>
+            </DxGridCommandColumn>
             <DxGridCommandColumn Caption="Auto/Manual">
                 <HeaderTemplate>
                     Auto/Manual
@@ -36,20 +46,6 @@ else
 }
 
 @code {
-    // class FlowRow
-    // {
-    //     public HMIFlow Flow { get; private set; }
-    //     public TagWebORM _btnAuto, _btnManual, _btnDrive, _btnStop, _btnClear, _btnEmStop, _btnTest, _btnHome, _btnReady;
-    //     public FlowRow(HMIFlow flow)
-    //     {
-    //         _btnAuto = new TagWebORM(flow.GetAuto());
-    //         _btnManual = new TagWebORM(flow.GetManual());
-    //         _btnDrive = new TagWebORM(flow.DrivePush);
-    //         Flow = flow;
-    //     }
-    //     public int MyProperty { get; set; }
-    // }
-
     IGrid MyGrid { get; set; }
     bool _loading { get; set; } = true;
     [Parameter] public HMIFlow[] Flows { get; set; }
@@ -60,6 +56,16 @@ else
         // _flowRows = Flows.Select(f => new FlowRow(f)).ToArray();
         _loading = false;
     }
+
+    async Task onFlow(object dataItem)
+    {
+        var flow = (HMIFlow)dataItem;
+        var name = flow.Name;
+        await JsDual.Alert($"flow {name}");
+        NavigationManager.NavigateTo($"hmis/flow/{name}");
+        // todo : switch to flow view
+    }
+
 
     async Task onAuto(object dataItem)
     {

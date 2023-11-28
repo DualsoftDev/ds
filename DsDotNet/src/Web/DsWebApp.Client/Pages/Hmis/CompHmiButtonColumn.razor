@@ -17,7 +17,7 @@ https://supportcenter.devexpress.com/ticket/details/t1135370/grid-for-blazor-how
     protected override void OnInitialized() {
         base.OnInitialized();
         Width = (ForceWidth == null) ? "80px" : $"{ForceWidth}px";
-        HeaderTemplate = context => @<DxTextBox Text="@Caption"></DxTextBox>;
+        HeaderTemplate = context => @<span>@Caption</span>;
         CellDisplayTemplate = context =>
             @<DxButton Text="@Caption" RenderStyle="ButtonRenderStyle.Primary" Click=@(() => OnClick.InvokeSafeAsync(context.DataItem)) />;
     }

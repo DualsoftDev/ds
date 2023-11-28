@@ -23,6 +23,7 @@ module TagWebModule =
         member val Kind = kind with get, set //Tag 종류 ex) going = 11007
         member val KindDescription = kindDescription with get, set
         member val Message = message with get, set //에러 내용 및 기타 전달 Message 
+        member val WritableValue = value with get, set //Cpu로 부터 쓰여진 값 
 
     type TagWeb with
         member x.Value:obj = ObjectHolder.Deserialize(x._SerializedObject).GetValue()
@@ -72,20 +73,30 @@ module TagWebModule =
 [<Extension>]
 type TagWebExt =
     [<Extension>] static member GetValue (x:TagWeb) : obj = x.Value
+
+
+    //HMITagPackage 사용안함 대신 HMIPackage 사용
+    //HMIPackage에서 Core 구조체 넘겨서 이제  obj.QualifiedName 필요 없음 
+    //[<Extension>]
+    //static member GetWebTag(x:IStorage, kindDescription:Dictionary<int, string>) : TagWeb =
+    //    let createTagWeb (tag:IStorage) (qualifiedName:string) =
+    //        TagWeb(qualifiedName, tag.BoxedValue, tag.TagKind, kindDescription[tag.TagKind], "")
+        
+    //    match x.GetTagInfo() with
+    //    | Some dsTag ->
+    //        match dsTag with
+    //        | EventSystem (tag, obj, _) -> createTagWeb tag obj.QualifiedName
+    //        | EventFlow   (tag, obj, _) -> createTagWeb tag obj.QualifiedName
+    //        | EventVertex (tag, obj, _) -> createTagWeb tag obj.QualifiedName
+    //        | EventApiItem(tag, obj, _) -> createTagWeb tag obj.QualifiedName
+    //        | EventAction (tag, obj, _) -> createTagWeb tag obj.QualifiedName
+
+    //    | None ->  createTagWeb x x.Name
+
+
     [<Extension>]
     static member GetWebTag(x:IStorage, kindDescription:Dictionary<int, string>) : TagWeb =
-        let createTagWeb (tag:IStorage) (qualifiedName:string) =
-            TagWeb(qualifiedName, tag.BoxedValue, tag.TagKind, kindDescription[tag.TagKind], "")
+            TagWeb(x.Name, x.BoxedValue, x.TagKind, kindDescription[x.TagKind], "")
         
-        match x.GetTagInfo() with
-        | Some dsTag ->
-            match dsTag with
-            | EventSystem (tag, obj, _) -> createTagWeb tag obj.QualifiedName
-            | EventFlow   (tag, obj, _) -> createTagWeb tag obj.QualifiedName
-            | EventVertex (tag, obj, _) -> createTagWeb tag obj.QualifiedName
-            | EventApiItem(tag, obj, _) -> createTagWeb tag obj.QualifiedName
-            | EventAction (tag, obj, _) -> createTagWeb tag obj.QualifiedName
-
-        | None ->  createTagWeb x x.Name
     [<Extension>]
     static member SetValue(x:TagWeb, value:obj) = x._SerializedObject <- ObjectHolder.Create(value).Serialize()

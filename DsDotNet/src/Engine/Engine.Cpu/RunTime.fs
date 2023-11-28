@@ -19,6 +19,7 @@ module RunTime =
         let statements = css |> Seq.map(fun f -> f.Statement)
         let mapRungs = getRungMap(statements)
         let cpuStorages = mapRungs.Keys
+        let tagStorages = mySystem.TagManager.Storages
         let systems = [mySystem] @ loadedSystems
         let mutable cts = new CancellationTokenSource()
         let mutable run:bool = false
@@ -108,15 +109,32 @@ module RunTime =
             scanOnce()
 
         // todo: 함수 작성.  실패시 실패 이유 반환, 성공시 null 문자열 반환
-        member x.UpdateTagWeb(tagWeb:TagWeb): ErrorMessage =
+        member x.UpdateTagWeb(tagWeb: TagWeb): ErrorMessage =
             logDebug "Server Updating TagWeb"
-            tagWebChangedSubject.OnNext(tagWeb)
-            null
+            try
+                tagWeb.WritableValue <- tagStorages.[tagWeb.Name].BoxedValue
+                tagWebChangedSubject.OnNext(tagWeb)
+                null // 성공 시 null 반환
+            with 
+            | exn -> // 실패 시 예외를 잡고 해당 실패 이유를 반환
+                $"Failed to update TagWeb: {exn.Message}"
+
+        // todo: 이게 맞나 확인 필요. 
+        //CPU로 부터 WebTag 쓰기 UpdateTagWeb 
+        //WebTag로 부터 CPU 쓰기 UpdateTagCPU 
+        member x.UpdateTagCPU(tagWeb: TagWeb): ErrorMessage =
+            logDebug "Server Updating TagCPU"
+            try
+                tagStorages.[tagWeb.Name].BoxedValue <- tagWeb.Value
+                //tagWebChangedSubject.OnNext(tagWeb) // CPU는 TypedValueStorage 여기서 OnNext
+                null 
+            with 
+            | exn -> 
+                $"Failed to update TagCPU: {exn.Message}"     
+       
 
         // todo: TagWeb 변경시 이벤트 발생
         member x.TagWebChangedSubject = tagWebChangedSubject
-
-                
 
     [<Extension>]
     type DsCpuExt  =

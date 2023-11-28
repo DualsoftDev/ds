@@ -197,10 +197,10 @@ module DsDataType =
         member x.ToTextLower() = x.ToText().ToLower()
         member x.ToBlockSizeNText() = 
             match x with
-            | DuUINT16  -> 16, "W"
-            | DuUINT32  -> 32, "D"
-            | DuUINT64  -> 64, "L"
-            | DuUINT8   -> 8 , "B"
+            | DuUINT16  -> 16, "Word"
+            | DuUINT32  -> 32, "DWord"
+            | DuUINT64  -> 64, "LWord"
+            | DuUINT8   -> 8 , "Byte"
             | _ -> failwithf $"'{x}' not support ToBlockSize"
         member x.ToType() =
             match x with
@@ -220,13 +220,21 @@ module DsDataType =
 
         member x.DefaultValue() = typeDefaultValue (x.ToType())
 
-    let getBlockType(blockBit:int) =
-        match blockBit with
-        | 8  -> DuUINT8
-        | 16 -> DuUINT16
-        | 32 -> DuUINT32
-        | 64 -> DuUINT64
-        | _ -> failwithf $"'size bit {blockBit}' not support getBlockType"
+    let getBlockType(blockSlottype:string) =
+        match blockSlottype.ToLower() with
+        | "byte"  -> DuUINT8
+        | "word"  -> DuUINT16
+        | "dword" -> DuUINT32
+        | "lword" -> DuUINT64
+        | _ -> failwithf $"'size bit {blockSlottype}' not support getBlockType"
+
+    let getBlockBitSize(blockSlottype:string) =
+        match blockSlottype.ToLower() with
+        | "byte"  -> DuUINT8
+        | "word"  -> DuUINT16
+        | "dword" -> DuUINT32
+        | "lword" -> DuUINT64
+        | _ -> failwithf $"'size bit {blockSlottype}' not support getBlockType"
 
     let textToDataType(typeName:string) =
         match typeName.ToLower() with

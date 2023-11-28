@@ -13,6 +13,8 @@ module ImportIOUtil =
 
     let blockInSize, blockInText = RuntimeDS.HwBlockSizeIn.ToBlockSizeNText()
     let blockOutSize, blockOutText = RuntimeDS.HwBlockSizeOut.ToBlockSizeNText()
+    let blockInHead = blockInText.Substring(0, 1);
+    let blockOutHead = blockOutText.Substring(0, 1);
     let mutable inCnt = RuntimeDS.HwStartInDINT * blockInSize - 1
     let mutable outCnt = RuntimeDS.HwStartOutDINT * blockOutSize - 1
 
@@ -34,8 +36,8 @@ module ImportIOUtil =
                 if RuntimeDS.Package.IsPackagePC() 
                 then
                     if bInput 
-                    then  $"I{blockInText}{cnt / blockInSize}.{cnt % blockInSize}" 
-                    else  $"O{blockOutText}{cnt / blockOutSize}.{cnt % blockOutSize}" 
+                    then  $"I{blockInHead}{cnt / blockInSize}.{cnt % blockInSize}" 
+                    else  $"O{blockOutHead}{cnt / blockOutSize}.{cnt % blockOutSize}" 
 
                 elif RuntimeDS.Package.IsPackagePLC()  || RuntimeDS.Package.IsPackageSIM()    //시뮬레이션도 PLC 주소규격으로 일단
                 then
@@ -43,11 +45,11 @@ module ImportIOUtil =
                     then
                         if RuntimeDS.HwBlockSizeIn = DuUINT64
                         then $"%%IX0.{cnt / 64}.{cnt % 64}" 
-                        else $"%%I{blockInText}{cnt / blockInSize}.{cnt % blockInSize}" 
+                        else $"%%I{blockInHead}{cnt / blockInSize}.{cnt % blockInSize}" 
                     else
                         if RuntimeDS.HwBlockSizeIn = DuUINT64
                         then $"%%QX0.{cnt / 64}.{cnt % 64}" 
-                        else $"%%Q{blockOutText}{cnt / blockOutSize}.{cnt % blockOutSize}" 
+                        else $"%%Q{blockOutHead}{cnt / blockOutSize}.{cnt % blockOutSize}" 
 
                 else TextAddrEmpty
 

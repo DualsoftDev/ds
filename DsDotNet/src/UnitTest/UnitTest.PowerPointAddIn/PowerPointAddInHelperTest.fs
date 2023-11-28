@@ -28,7 +28,7 @@ module MSG_TEST =
         MSG_GENWINPC.Do(testPath,"",  false)|> Assert.True
     [<Fact>]
     let ``MSG_IOCSV`` () =
-        MSG_IOCSV.Do(testPath, false)|> Assert.True
+        MSG_IOCSV.Do(testPath, "", false)|> Assert.True
     [<Fact>]
     let ``MSG_HWSETTING`` () =
         MSG_HWSETTING.Do("192.168.9.100", false)|> Assert.True

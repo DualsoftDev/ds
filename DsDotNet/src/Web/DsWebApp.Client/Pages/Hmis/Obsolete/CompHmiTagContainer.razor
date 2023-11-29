@@ -16,7 +16,7 @@
                     group => group.ToArray() // 각 그룹의 TagWeb 개체를 배열로 변환
                 );
 
-        _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/hmitag").StartHubAsync();
+        _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/hmi/tag").StartHubAsync();
         IDisposable subscription =
             _hubConnection.On<TagWeb>(SK.S2CNTagWebChanged, (TagWeb change) => UpdateOnMatch(change));
 

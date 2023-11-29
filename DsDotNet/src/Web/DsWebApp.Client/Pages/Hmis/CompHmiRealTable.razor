@@ -1,6 +1,8 @@
 @using Engine.Core
-@*             
-            *@
+@using System.Reactive.Subjects
+
+@inherits CompHmiTagPoster
+@implements IAsyncDisposable
 
 
 @if (_loading)
@@ -28,48 +30,40 @@ else
     bool _loading { get; set; } = true;
     [Parameter] public HMIReal[] Reals { get; set; }
 
-    // FlowRow[] _flowRows;
+    HubConnectionManager _hubConnectionManager;
+    Subject<TagWeb> _tagWebChanged = new Subject<TagWeb>();
+
     protected override async Task OnInitializedAsync()
     {
-        await Task.Yield();
-        // _flowRows = Flows.Select(f => new FlowRow(f)).ToArray();
+        HubConnection hubConnection = await NavigationManager.ToAbsoluteUri("/hub/hmi/tag").StartHubAsync();
+        _hubConnectionManager = new HubConnectionManager(hubConnection, registerHubConnection);
+
+        Console.WriteLine($"Hub initialized on PageHmiTagTest.razor");
+        await base.OnInitializedAsync();
+
+        IDisposable registerHubConnection(HubConnection hubConnection)
+        {
+            return hubConnection.On<TagWeb>(SK.S2CNTagWebChanged, (TagWeb change) =>
+            {
+                Console.WriteLine($"TagWeb change notification received with {change.Name}/{change.Kind}={change.Value}.");
+                ToastService.ShowInfo($"TagWeb change: {change.Name}/{change.Kind}={change.Value}.");
+                _tagWebChanged.OnNext(change);
+            });
+        }
+
         _loading = false;
     }
-
-
-    async Task onAutoStart(object dataItem)
+    public async ValueTask DisposeAsync()
     {
-        var real = (HMIReal)dataItem;
-        var btn = new TagWebORM(real.StartPush);
-        await JsDual.Alert($"AutoStart on real {real.Name}");
-        btn.Value = true;
-        // todo : send to server
+        await _hubConnectionManager.DisposeAsync();
+        Console.WriteLine("CompHmiRealTable.razor disposed!");
     }
 
-    async Task onAutoHome(object dataItem)
-    {
-        var real = (HMIReal)dataItem;
-        var btn = new TagWebORM(real.ResetPush);
-        await JsDual.Alert($"Reset on real {real.Name}");
-        btn.Value = true;
-        // todo : send to server
-    }
 
-    async Task onCompleteSet(object dataItem)
-    {
-        var real = (HMIReal)dataItem;
-        var btn = new TagWebORM(real.ONPush);
-        await JsDual.Alert($"Set on real {real.Name}");
-        btn.Value = true;
-    }
-
-    async Task onCompleteReset(object dataItem)
-    {
-        var real = (HMIReal)dataItem;
-        var btn = new TagWebORM(real.OFFPush);
-        await JsDual.Alert($"Reset on real {real.Name}");
-        btn.Value = true;
-    }
+    async Task onAutoStart    (object dataItem) => await PostTag(((HMIReal)dataItem).StartPush);
+    async Task onAutoHome     (object dataItem) => await PostTag(((HMIReal)dataItem).ResetPush);
+    async Task onCompleteSet  (object dataItem) => await PostTag(((HMIReal)dataItem).ONPush);
+    async Task onCompleteReset(object dataItem) => await PostTag(((HMIReal)dataItem).OFFPush);
 
 }
 

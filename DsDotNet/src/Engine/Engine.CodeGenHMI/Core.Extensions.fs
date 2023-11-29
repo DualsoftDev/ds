@@ -142,4 +142,4 @@ module ConvertHMI =
             let versionDS = Assembly.GetExecutingAssembly().GetName().Version.ToString()
             let system    = dsCpu.MySystem.GetHMI()
             let devices   = dsCpu.MySystem.Devices.Select(fun d -> d.GetHMI()).ToArray()
-            HMIPackage(ip, versionDS, system, devices)
+            HMIPackage(ip, versionDS, system, devices) |> tee (fun x-> x.BuildTagMap())

@@ -31,11 +31,16 @@ public class HmiController(
     }
 
 
-    async Task<string> notifyTagWebToClientsAsync(DsCPU cpu, TagWeb tagWeb)
+    async Task<string> onTagWebChangedByClientBrowserAsync(TagWeb tagWeb)
     {
         try
         {
+            var cpu = _model?.Cpu;
+            if (cpu == null)
+                return "No Loaded Model";
+
             await Console.Out.WriteLineAsync($"HmiTagHub has {HmiTagHub.ConnectedClients.Count} connections");
+            _model.HMIPackage.UpdateTag(tagWeb);
             cpu.TagWebChangedSubject.OnNext(tagWeb);
             //await hubContext.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);     <-- cpu.TagWebChangedSubject.OnNext 에서 수행 됨..
             return null;
@@ -53,11 +58,7 @@ public class HmiController(
     public async Task<string> SetHmiTag([FromBody] TagWeb tagWeb)
     {
         await Console.Out.WriteLineAsync($"About to change {tagWeb.Name}={tagWeb.Value}");
-        var cpu = _model?.Cpu;
-        if (cpu == null)
-            return "No Loaded Model";
-
-        return await notifyTagWebToClientsAsync(cpu, tagWeb);
+        return await onTagWebChangedByClientBrowserAsync(tagWeb);
     }
 
     /// <summary>
@@ -67,17 +68,16 @@ public class HmiController(
     [HttpPost("tag/{fqdn}/{tagKind}")]
     public async Task<string> SetHmiTag(string fqdn, int tagKind, [FromBody] string serializedObject)
     {
-        var cpu = _model?.Cpu;
-        if (cpu == null)
+        if (_model == null)
             return "No Loaded Model";
 
-        var kindDescriptions = _model?.TagKindDescriptions;
+        var kindDescriptions = _model.TagKindDescriptions;
 
         // serializedObject : e.g "{\"RawValue\":false,\"Type\":1}"
         var objHolder = Dual.Common.Core.FS.ObjectHolder.Deserialize(serializedObject);
         var tagWeb = new TagWeb(fqdn, objHolder.RawValue, tagKind, kindDescriptions[tagKind]);
 
-        return await notifyTagWebToClientsAsync(cpu, tagWeb);
+        return await onTagWebChangedByClientBrowserAsync(tagWeb);
     }
 }
 

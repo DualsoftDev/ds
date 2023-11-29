@@ -2,6 +2,7 @@ namespace Engine.Core
 
 open System.Runtime.CompilerServices
 open System.Collections.Generic
+open Dual.Common.Core.FS
 
 
 [<AutoOpen>]
@@ -16,14 +17,23 @@ module HmiPackageModule =
         ShortErrorLamp    : HMILamp        
         OpenErrorLamp     : HMILamp        
         ErrorTotalLamp    : HMILamp        
-    }
+    } with
+        member x.CollectTags () =
+            seq {
+                yield x.TrendOutErrorLamp        
+                yield x.TimeOverErrorLamp        
+                yield x.ShortErrorLamp           
+                yield x.OpenErrorLamp          
+                yield x.ErrorTotalLamp   
+            }
 
 
     //모니터링 전용 (명령은 소속Job 통해서)
     type HMIDevice = {
         Name : string
         ApiItems   : HMIApiItem array  
-    }
+    } with
+        member x.CollectTags () = x.ApiItems |> Seq.collect (fun ai -> ai.CollectTags())
 
     ///수동 동작의 단위 jobA = { Dev1.ADV, Dev2.ADV, ... }
     ///하나의 명령으로 복수의 디바이스 행위  
@@ -31,16 +41,22 @@ module HmiPackageModule =
     type HMIJob = {
         Name : string
         JobPushMutiLamp  : HMIPushMultiLamp 
-    }
+    } with
+        member x.CollectTags () =
+            let push, lamps = x.JobPushMutiLamp
+            seq {
+                yield push
+                yield! lamps
+            }
 
     ///작업 단위 FlowA = { Real1, Real2, ... }
     type HMIReal = {
         Name : string
 
-        StartPush        : HMIPush      
-        ResetPush        : HMIPush      
-        ONPush           : HMIPush      
-        OFFPush          : HMIPush      
+        StartPush        : HMIPush
+        ResetPush        : HMIPush
+        ONPush           : HMIPush
+        OFFPush          : HMIPush
                          
         ReadyLamp        : HMILamp 
         GoingLamp        : HMILamp 
@@ -69,6 +85,8 @@ module HmiPackageModule =
                 yield x.PauseLamp   
                 yield x.ErrorTxLamp 
                 yield x.ErrorRxLamp
+                yield! x.Devices |> Seq.collect (fun d -> d.CollectTags())
+                yield! x.Jobs |> Seq.collect (fun j -> j.CollectTags())
             }
 
 
@@ -156,13 +174,6 @@ module HmiPackageModule =
     //   |- Ver             |- Jobs
     //   |- Devices
     //        |- ApiItems
-    //type HMIPackage = {
-    //    IP                : string
-    //    VersionDS         : string
-    //    System            : HMISystem       //my     system
-    //    Devices           : HMIDevice array //loaded system
-    //}
-
     type HMIPackage(ip: string, versionDS: string, system: HMISystem, devices: HMIDevice array) =
         let tagMap = Dictionary<(string*int), TagWeb>()     // FQDN, Kind -> TagWeb
         member val IP = ip with get, set
@@ -170,27 +181,24 @@ module HmiPackageModule =
         member val System = system  with get, set
         member val Devices = devices  with get, set
 
-        // 이하는 serialize 에서 제외함
-        member x.TagMap = tagMap
         member x.BuildTagMap () =
             printfn "--------- Building TagMap"
             tagMap.Clear()
-            let mutable i = 0
-            x.System.CollectTags()
-            |> Seq.iter (fun t -> 
-                //if t.Value = true then
-                //    printfn $"--------- Found true tag: {t.Name}:{t.Kind}"
-                //else
-                //    printf "."
+            seq {
+                yield! x.System.CollectTags()
+                yield! x.Devices |> Seq.collect (fun d->d.CollectTags())
+            } |> iter (fun t ->
+                let key = (t.Name, t.Kind)
+                match tagMap.TryGetValue(key) with
+                | true, tag ->
+                    // todo : fix me
+                    verifyM "Duplicate Tag" (tag = t) 
+                | _ -> tagMap.Add(key, t))         //cache.[key] <- getItem()
 
-                //i <- i + 1
-                //if i % 2 = 0 then
-                //    t.SetValue(true)
-                tagMap.Add((t.Name, t.Kind), t)
-                )
         member x.UpdateTag(name:string, kind:int, newValue:obj) =
             printfn $"--------- Updating Tag: {name}:{kind}={newValue}"
             tagMap[(name, kind)].SetValue(newValue)
+
         member x.UpdateTag(newTag:TagWeb) =
             x.UpdateTag(newTag.Name, newTag.Kind, newTag.Value)
 

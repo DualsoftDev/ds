@@ -43,13 +43,14 @@ else
 
                 </CellDisplayTemplate>
             </DxGridCommandColumn>
-            <CompHmiButtonColumn Caption="Drive" OnClick="@onDrive" />
-            <CompHmiButtonColumn Caption="Stop" OnClick="@onStop" />
-            <CompHmiButtonColumn Caption="Clear" OnClick="@onClear" />
-            <CompHmiButtonColumn Caption="Em. Stop" OnClick="@onEmStop" ForceWidth=100 />
-            <CompHmiButtonColumn Caption="Test" OnClick="@onTest" />
-            <CompHmiButtonColumn Caption="Home" OnClick="@onHome" />
-            <CompHmiButtonColumn Caption="Ready" OnClick="@onReady" />
+
+            <CompHmiButtonColumn Caption="Drive"    TagChangedObservable="@_tagWebChanged" TagGetter="@((dataItem) =>((HMIFlow)dataItem).DrivePush)" />
+            <CompHmiButtonColumn Caption="Stop"     TagChangedObservable="@_tagWebChanged" TagGetter="@((dataItem) =>((HMIFlow)dataItem).StopPush)" />
+            <CompHmiButtonColumn Caption="Clear"    TagChangedObservable="@_tagWebChanged" TagGetter="@((dataItem) =>((HMIFlow)dataItem).ClearPush)" />
+            <CompHmiButtonColumn Caption="Em. Stop" TagChangedObservable="@_tagWebChanged" TagGetter="@((dataItem) =>((HMIFlow)dataItem).EmergencyPush)" ForceWidth=100 />
+            <CompHmiButtonColumn Caption="Test"     TagChangedObservable="@_tagWebChanged" TagGetter="@((dataItem) =>((HMIFlow)dataItem).TestPush)" />
+            <CompHmiButtonColumn Caption="Home"     TagChangedObservable="@_tagWebChanged" TagGetter="@((dataItem) =>((HMIFlow)dataItem).HomePush)" />
+            <CompHmiButtonColumn Caption="Ready"    TagChangedObservable="@_tagWebChanged" TagGetter="@((dataItem) =>((HMIFlow)dataItem).ReadyPush)" />
 
         </Columns>
     </DxGrid>
@@ -89,15 +90,6 @@ else
         var flow = (HMIFlow)dataItem;
         await PostTag(flow.GetManual(), true);
     }
-
-
-    async Task onDrive (object dataItem) => await PostTag(((HMIFlow)dataItem).DrivePush);
-    async Task onStop  (object dataItem) => await PostTag(((HMIFlow)dataItem).StopPush);
-    async Task onClear (object dataItem) => await PostTag(((HMIFlow)dataItem).ClearPush);
-    async Task onEmStop(object dataItem) => await PostTag(((HMIFlow)dataItem).EmergencyPush);
-    async Task onTest  (object dataItem) => await PostTag(((HMIFlow)dataItem).TestPush);
-    async Task onHome  (object dataItem) => await PostTag(((HMIFlow)dataItem).HomePush);
-    async Task onReady (object dataItem) => await PostTag(((HMIFlow)dataItem).ReadyPush);
 }
 
 

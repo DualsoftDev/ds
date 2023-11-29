@@ -1,3 +1,4 @@
+@using System.Reactive.Subjects
 @*
 https://supportcenter.devexpress.com/ticket/details/t1135370/grid-for-blazor-how-to-create-reusable-dxgridcommandcolumn
 *@
@@ -9,8 +10,12 @@ https://supportcenter.devexpress.com/ticket/details/t1135370/grid-for-blazor-how
 
 @code {
     [CascadingParameter] public IGrid MyGrid { get; set; }
-    [Parameter] public EventCallback<object> OnClick { get; set; }
+    // [Parameter] public EventCallback<object> OnClick { get; set; }
     [Parameter] public Nullable<int> ForceWidth { get; set; }
+
+    [Parameter] public Func<object, TagWeb> TagGetter { get; set; }
+    [Parameter] public Subject<TagWeb> TagChangedObservable { get; set; }
+
 
     protected override bool ShouldRender() => false;
 
@@ -19,6 +24,10 @@ https://supportcenter.devexpress.com/ticket/details/t1135370/grid-for-blazor-how
         Width = (ForceWidth == null) ? "80px" : $"{ForceWidth}px";
         HeaderTemplate = context => @<span>@Caption</span>;
         CellDisplayTemplate = context =>
-            @<DxButton Text="@Caption" RenderStyle="ButtonRenderStyle.Primary" Click=@(() => OnClick.InvokeSafeAsync(context.DataItem)) />;
+        {
+            object row = context.DataItem;
+            // return @<DxButton Text="@Caption" RenderStyle="ButtonRenderStyle.Primary" Click=@(() => OnClick.InvokeSafeAsync(context.DataItem)) />;
+            return@<CompHmiWidgetPushButton Text="@Caption" DataItem="@row" TagGetter="@TagGetter" TagChangedObservable="@TagChangedObservable" />    ;
+        };
     }
 }

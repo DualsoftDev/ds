@@ -1,6 +1,7 @@
 namespace Engine.Core
 
 open System.Runtime.CompilerServices
+open System.Collections.Generic
 
 
 [<AutoOpen>]
@@ -52,7 +53,24 @@ module HmiPackageModule =
         
         Devices          : HMIDevice array //loaded system
         Jobs             : HMIJob array      
-    }
+    } with
+        member x.CollectTags () =
+            seq {
+                yield x.StartPush        
+                yield x.ResetPush        
+                yield x.ONPush           
+                yield x.OFFPush          
+
+                yield x.ReadyLamp   
+                yield x.GoingLamp   
+                yield x.FinishLamp  
+                yield x.HomingLamp  
+                yield x.OriginLamp  
+                yield x.PauseLamp   
+                yield x.ErrorTxLamp 
+                yield x.ErrorRxLamp
+            }
+
 
     ///공정흐름 단위 SystemA = { Flow1, Flow2, ... }
     type HMIFlow = {
@@ -76,7 +94,30 @@ module HmiPackageModule =
         IdleLamp         : HMILamp 
 
         Reals            : HMIReal array      
-    }
+    } with
+        member x.CollectTags () =
+            seq {
+                yield fst x.AutoManualSelect
+                yield snd x.AutoManualSelect
+                yield x.DrivePush
+                yield x.StopPush
+                yield x.ClearPush
+                yield x.EmergencyPush
+                yield x.TestPush
+                yield x.HomePush
+                yield x.ReadyPush
+
+                yield x.DriveLamp        
+                yield x.AutoLamp         
+                yield x.ManualLamp       
+                yield x.StopLamp         
+                yield x.EmergencyLamp    
+                yield x.TestLamp         
+                yield x.ReadyLamp        
+                yield x.IdleLamp         
+
+                yield! x.Reals |> Seq.collect (fun r->r.CollectTags())
+            }
 
     
     //명령 전용 (모니터링은 개별Flow 통해서)
@@ -92,7 +133,20 @@ module HmiPackageModule =
         ReadyPush         : HMIPush 
 
         Flows             : HMIFlow array
-    }
+    } with
+        member x.CollectTags () =
+            seq {
+                yield fst x.AutoManualSelect
+                yield snd x.AutoManualSelect
+                yield x.DrivePush
+                yield x.StopPush
+                yield x.ClearPush
+                yield x.EmergencyPush
+                yield x.TestPush
+                yield x.HomePush
+                yield x.ReadyPush
+                yield! x.Flows |> Seq.collect (fun f->f.CollectTags())
+            }
 
   
 
@@ -102,12 +156,43 @@ module HmiPackageModule =
     //   |- Ver             |- Jobs
     //   |- Devices
     //        |- ApiItems
-    type HMIPackage = {
-        IP                : string
-        VersionDS         : string
-        System            : HMISystem       //my     system
-        Devices           : HMIDevice array //loaded system
-    }
+    //type HMIPackage = {
+    //    IP                : string
+    //    VersionDS         : string
+    //    System            : HMISystem       //my     system
+    //    Devices           : HMIDevice array //loaded system
+    //}
+
+    type HMIPackage(ip: string, versionDS: string, system: HMISystem, devices: HMIDevice array) =
+        let tagMap = Dictionary<(string*int), TagWeb>()     // FQDN, Kind -> TagWeb
+        member val IP = ip with get, set
+        member val VersionDS = versionDS  with get, set
+        member val System = system  with get, set
+        member val Devices = devices  with get, set
+
+        // 이하는 serialize 에서 제외함
+        member x.TagMap = tagMap
+        member x.BuildTagMap () =
+            printfn "--------- Building TagMap"
+            tagMap.Clear()
+            let mutable i = 0
+            x.System.CollectTags()
+            |> Seq.iter (fun t -> 
+                //if t.Value = true then
+                //    printfn $"--------- Found true tag: {t.Name}:{t.Kind}"
+                //else
+                //    printf "."
+
+                //i <- i + 1
+                //if i % 2 = 0 then
+                //    t.SetValue(true)
+                tagMap.Add((t.Name, t.Kind), t)
+                )
+        member x.UpdateTag(name:string, kind:int, newValue:obj) =
+            printfn $"--------- Updating Tag: {name}:{kind}={newValue}"
+            tagMap[(name, kind)].SetValue(newValue)
+        member x.UpdateTag(newTag:TagWeb) =
+            x.UpdateTag(newTag.Name, newTag.Kind, newTag.Value)
 
 
 [<Extension>]

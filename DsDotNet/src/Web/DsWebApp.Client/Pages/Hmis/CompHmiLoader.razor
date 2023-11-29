@@ -9,10 +9,11 @@
         _hmiPackage = ClientGlobal.HmiPackage;
         if (_hmiPackage == null)
         {
+            Console.WriteLine("----- Loading HmiPackage from server..");
             var result = await Http.GetResultSimpleAsync<HMIPackage>($"api/hmi/package");
             result.Iter(
-                ok => ClientGlobal.HmiPackage = _hmiPackage = ok,
-                async err => await JsDual.Alert(err));            
+                okPackage => ClientGlobal.HmiPackage = _hmiPackage = okPackage.Tee(pkg => pkg.BuildTagMap()),
+                async err => await JsDual.Alert(err));
         }
 
         await base.OnInitializedAsync();

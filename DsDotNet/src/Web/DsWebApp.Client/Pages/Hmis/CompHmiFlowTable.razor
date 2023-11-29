@@ -30,7 +30,6 @@ else
                     <CompHmiWidgetAutoManualSelectorPushButton
                         TagAuto="(((HMIFlow)context.DataItem).GetAuto())"
                         TagManual="(((HMIFlow)context.DataItem).GetManual())"
-                        TagChangedObservable="@_tagWebChanged"
                         FlowName="@(((HMIFlow)context.DataItem).Name)"
                         />
 
@@ -44,13 +43,13 @@ else
                 </CellDisplayTemplate>
             </DxGridCommandColumn>
 
-            <CompHmiButtonColumn Caption="Drive"    TagChangedObservable="@_tagWebChanged" TagGetter="@((dataItem) =>((HMIFlow)dataItem).DrivePush)" />
-            <CompHmiButtonColumn Caption="Stop"     TagChangedObservable="@_tagWebChanged" TagGetter="@((dataItem) =>((HMIFlow)dataItem).StopPush)" />
-            <CompHmiButtonColumn Caption="Clear"    TagChangedObservable="@_tagWebChanged" TagGetter="@((dataItem) =>((HMIFlow)dataItem).ClearPush)" />
-            <CompHmiButtonColumn Caption="Em. Stop" TagChangedObservable="@_tagWebChanged" TagGetter="@((dataItem) =>((HMIFlow)dataItem).EmergencyPush)" ForceWidth=100 />
-            <CompHmiButtonColumn Caption="Test"     TagChangedObservable="@_tagWebChanged" TagGetter="@((dataItem) =>((HMIFlow)dataItem).TestPush)" />
-            <CompHmiButtonColumn Caption="Home"     TagChangedObservable="@_tagWebChanged" TagGetter="@((dataItem) =>((HMIFlow)dataItem).HomePush)" />
-            <CompHmiButtonColumn Caption="Ready"    TagChangedObservable="@_tagWebChanged" TagGetter="@((dataItem) =>((HMIFlow)dataItem).ReadyPush)" />
+            <CompHmiButtonColumn Caption="Drive"    TagGetter="@((dataItem) =>((HMIFlow)dataItem).DrivePush)" />
+            <CompHmiButtonColumn Caption="Stop"     TagGetter="@((dataItem) =>((HMIFlow)dataItem).StopPush)" />
+            <CompHmiButtonColumn Caption="Clear"    TagGetter="@((dataItem) =>((HMIFlow)dataItem).ClearPush)" />
+            <CompHmiButtonColumn Caption="Em. Stop" TagGetter="@((dataItem) =>((HMIFlow)dataItem).EmergencyPush)" ForceWidth=100 />
+            <CompHmiButtonColumn Caption="Test"     TagGetter="@((dataItem) =>((HMIFlow)dataItem).TestPush)" />
+            <CompHmiButtonColumn Caption="Home"     TagGetter="@((dataItem) =>((HMIFlow)dataItem).HomePush)" />
+            <CompHmiButtonColumn Caption="Ready"    TagGetter="@((dataItem) =>((HMIFlow)dataItem).ReadyPush)" />
 
         </Columns>
     </DxGrid>

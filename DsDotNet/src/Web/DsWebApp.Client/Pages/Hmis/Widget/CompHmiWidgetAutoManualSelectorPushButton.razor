@@ -12,7 +12,6 @@
     [Parameter] public string FlowName { get; set; }
     [Parameter] public TagWeb TagAuto { get; set; }
     [Parameter] public TagWeb TagManual { get; set; }
-    [Parameter] public Subject<TagWeb> TagChangedObservable { get; set; }
 
     // https://demos.devexpress.com/blazor/Button
     ButtonRenderStyleMode _autoStyle = ButtonRenderStyleMode.Contained;
@@ -26,7 +25,7 @@
 
         evaluateEnabled();
         IDisposable subscription =
-            TagChangedObservable.Subscribe(tag =>
+            ClientGlobal.TagChangedSubject.Subscribe(tag =>
             {
                 if (tag.IsEqual(TagAuto) || tag.IsEqual(TagManual))
                 {

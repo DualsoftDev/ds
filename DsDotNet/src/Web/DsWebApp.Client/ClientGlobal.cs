@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 
 using System.Net.Http.Json;
+using System.Reactive.Subjects;
 
 using static Engine.Core.HmiPackageModule;
 
@@ -18,6 +19,7 @@ namespace DsWebApp.Client;
 public class ClientGlobal : ClientGlobalBase
 {
     public HMIPackage HmiPackage { get; set; }
+    public Subject<TagWeb> TagChangedSubject = new Subject<TagWeb>();
 
     ServerSettings _serverSettings;
     public async Task<ServerSettings> GetServerSettingsAsync(HttpClient http)
@@ -67,6 +69,13 @@ public class ClientGlobal : ClientGlobalBase
         if (_counter != 0)
             throw new InvalidOperationException("ClientGlobal must be singleton");
         _counter++;
+
+        // todo:
+        TagChangedSubject.Subscribe(tag =>
+        {
+            Console.WriteLine("--- In ClientGlobal.TagChangedSubject...");
+            HmiPackage?.UpdateTag(tag);
+        });
 
         //Client = new (() =>
         //{

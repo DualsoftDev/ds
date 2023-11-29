@@ -2,16 +2,25 @@
 @using System.Reactive.Subjects
 @implements IAsyncDisposable
 
-@* <DxButton Click="@Click" Text="@Text" Enabled="@_enabled" /> *@
-<DxButton Click="@onClick" Text="@_text" Enabled="@_enabled" RenderStyleMode="@_style" RenderStyle="ButtonRenderStyle.Primary" />
+@if (_loading)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    @* <DxButton Click="@Click" Text="@Text" Enabled="@_enabled" /> *@
+    <DxButton Click="@onClick" Text="@_text" Enabled="@_enabled" RenderStyleMode="@_style" RenderStyle="ButtonRenderStyle.Primary" />
+}
+
+
 @code {
+    bool _loading { get; set; } = true;
 
     // [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
     [Parameter] public Func<object, TagWeb> TagGetter { get; set; }
     // [Parameter] public TagWeb Tag { get; set; }
     [Parameter] public string Text { get; set; }
     [Parameter] public object DataItem { get; set; }
-    [Parameter] public Subject<TagWeb> TagChangedObservable { get; set; }
 
     bool _enabled = false;
     TagWeb _tag;
@@ -24,11 +33,13 @@
         await Task.Yield();
         _tag = TagGetter.Invoke(DataItem);
         _enabled = (bool)_tag.Value == false;
+        if (isOn())
+            Console.WriteLine($"Found On symbol: {_tag.Name}");
         _text = Text;
         evaluateEnabled();
 
         IDisposable subscription =
-            TagChangedObservable.Subscribe(tag =>
+            ClientGlobal.TagChangedSubject.Subscribe(tag =>
             {
                 if (tag.IsEqual(_tag))
                 {
@@ -39,10 +50,12 @@
             });
 
         _disposables.Add(subscription);
+        _loading = false;
 
+        bool isOn() => (bool)_tag.Value;
         void evaluateEnabled()
         {
-            var b = (bool)_tag.Value;
+            var b = isOn();
             _style = (b ? ButtonRenderStyleMode.Outline : ButtonRenderStyleMode.Contained);
             _text = (b ? "✓ " : "") + Text;
         }

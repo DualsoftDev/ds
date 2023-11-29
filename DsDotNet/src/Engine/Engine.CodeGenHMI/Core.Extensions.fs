@@ -138,9 +138,8 @@ module ConvertHMI =
     type ConvertHMIExt =
         [<Extension>]
         static member GetHMIPackage (dsCpu:DsCPU) : HMIPackage = 
-            {
-                IP          = RuntimeDS.IP
-                VersionDS   = Assembly.GetExecutingAssembly().GetName().Version.ToString()
-                System      = dsCpu.MySystem.GetHMI()
-                Devices     = dsCpu.MySystem.Devices.Select(fun d -> d.GetHMI()).ToArray()
-            }
+            let ip        = RuntimeDS.IP
+            let versionDS = Assembly.GetExecutingAssembly().GetName().Version.ToString()
+            let system    = dsCpu.MySystem.GetHMI()
+            let devices   = dsCpu.MySystem.Devices.Select(fun d -> d.GetHMI()).ToArray()
+            HMIPackage(ip, versionDS, system, devices)

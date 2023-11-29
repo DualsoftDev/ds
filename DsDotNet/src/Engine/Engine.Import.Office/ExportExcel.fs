@@ -49,7 +49,7 @@ module ExportExcelModule =
 
 
 
-    let createSpreadsheet (filepath:string) (tables:DataTable seq) =
+    let createSpreadsheet (filepath:string) (tables:DataTable seq) (colWidth:float) =
         let seenNames = System.Collections.Generic.HashSet<string>()
         for dt in tables do
             if not (seenNames.Add dt.TableName) then
@@ -76,6 +76,12 @@ module ExportExcelModule =
             let worksheetPart = workbookPart.AddNewPart<WorksheetPart>()
             worksheetPart.Worksheet <- new Worksheet(sheetData :> OpenXmlElement)
 
+            // Set the column width to 140
+            let columns = new Columns()
+            let column = new Column(Min = 1u, Max = 16384u, Width = colWidth, CustomWidth = true)
+            columns.Append(column:> OpenXmlElement)
+            worksheetPart.Worksheet.InsertAt(columns :> OpenXmlElement, 0) |> ignore
+
             // Append a new worksheet and associate it with the workbook.
             let sheet = new Sheet(Id = StringValue(workbookPart.GetIdOfPart(worksheetPart)),
                                   SheetId = UInt32Value(sheetId),
@@ -88,4 +94,3 @@ module ExportExcelModule =
 
         // Save the changes to the workbook
         workbookPart.Workbook.Save()
-

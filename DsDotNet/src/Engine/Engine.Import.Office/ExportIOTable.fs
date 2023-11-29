@@ -137,6 +137,7 @@ module ExportIOTable =
 
     let ToIOListDataSet (system: DsSystem)  = 
         let table = ToTable system system.Flows true
+        table.Columns.Remove($"{IOColumn.Case}")
         table.Columns.Remove($"{IOColumn.Job}")
         table.Columns.Remove($"{IOColumn.Func}")
         table
@@ -178,5 +179,5 @@ module ExportIOTable =
         [<Extension>]
         static member ExportDataTableToExcel (system: DsSystem) (filePath: string) =
             let dataTables = [|ToIOListDataSet system|]
-            createSpreadsheet filePath dataTables
+            createSpreadsheet filePath dataTables 40.0
           

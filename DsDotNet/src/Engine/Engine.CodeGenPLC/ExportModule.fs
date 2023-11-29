@@ -31,20 +31,19 @@ module ExportModule =
             pouParams
 
         let usedByteIndices =
-            let getBytes addr =
-                [ match addr with
-                  | RegexPattern @"^%M([BWDL])(\d+)\.\d+$" [ AddressPattern.DataTypePattern dataType; Int32Pattern off2 ] ->
-                      let l = dataType.GetByteLength()
-                      yield l * off2 + 1
-                  | RegexPattern @"^%M([BWDL])(\d+)$" [ AddressPattern.DataTypePattern dataType; Int32Pattern off2 ] ->
-                      let l = dataType.GetByteLength()
-                      let s = l * off2
-                      yield! [ s .. s + l ]
-                  | RegexPattern @"^%MX(\d+)$" [ Int32Pattern bitoffset ] -> yield bitoffset / 8
-                  | _ -> failwithlog "ERROR" ]
+            let getBytes addr = 
+                [  
+                    match tryParseXGITag addr with
+                    |Some tag -> 
+                        if tag.DataType = PLCHwModel.DataType.Bit 
+                        then 
+                            yield tag.ByteOffset
+                        else 
+                            yield! [tag.ByteOffset..tag.DataType.GetByteLength()]
+                    |None ->  failwithlog "ERROR"
+                ]
             
-            
-            ///주소 중복체크 안함
+           
             let usedAddresses =
                 system.TagManager.Storages.Values
                 |> Seq.filter (fun f -> not <| (f :? TimerCounterBaseStruct))

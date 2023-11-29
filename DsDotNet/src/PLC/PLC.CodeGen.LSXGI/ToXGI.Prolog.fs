@@ -18,22 +18,11 @@ module XgiPrologModule =
         | _ ->
             Ok true
 
-    let validateAddress (address:string) =
-        if address.IsNullOrEmpty() then
+    let validateAddress (address:string) = 
+        if address.IsXGIAddress() then
             Ok true
         else
-            match address.ToUpper() with
-            (* matches %I3, %I3.2, %I3.2.1, %IX3, %IX3.2, %IX3.2.1, ... *)
-            | RegexPattern @"^%([IQMR][XBWDL]?)(\d+)$"  _
-            |   RegexPattern @"^%([IQ][XBWDL]?)(\d+)\.(\d+)$"  _
-            |   RegexPattern @"^%([IQ][XBWDL]?)(\d+)\.(\d+)\.(\d+)$" _ -> Ok true
-            |   RegexPattern @"^%M([BWDL])(\d+)\.(\d+)$" [size; Int32Pattern _; Int32Pattern n2; ] when
-                    (size="B" && 0 <= n2 && n2 < 8 )
-                    || (size="W" && 0 <= n2 && n2 < 16 )
-                    || (size="D" && 0 <= n2 && n2 < 32 )
-                    || (size="L" && 0 <= n2 && n2 < 64 ) ->
-                  Ok true
-            | _ -> Error $"Invalid address: '{address}'"
+            Error $"Invalid address: '{address}'"
 
     /// Xml Symbol tag 가 가지는 속성
     type SymbolInfo = {
@@ -52,13 +41,11 @@ module XgiPrologModule =
         AddressIEC : string //XGK 일경우 IEC 주소로 변환해서 가지고 있음
     } with
         member x.Validate() =
-            (* Symbol name validataion : 규칙을 찾을 수가 없네요~~
-                - OK: n, m, p, nn0, p1, mb, mw, rx, ix0, ib0
-                - Fail: n0, m0, mb0, mx0, mw0, r0, rx0, N0, M0,
-             *)
             result {
                 let! _ = validateVariableName x.Name
-                let! _ = validateAddress x.Address
+                let! _ = if  x.Address.IsNullOrEmpty() && x.Device = ""  //빈주소 자동 변수로 허용
+                         then Ok true 
+                         else  validateAddress x.Address
                 return! Ok()
             }
 

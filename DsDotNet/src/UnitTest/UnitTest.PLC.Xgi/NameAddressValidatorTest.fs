@@ -29,11 +29,11 @@ type NameAddressValidatorTest() =
 
 
     [<Test>]
-    member __.``Validation= Variable address test`` () =
+    member __.``Validation= XGI Variable address test`` () =
         let validAddresses = [
-            "%I0"; "%i0"; "%IX0"; "%ix0"
-            "%IX0.1"; "%IX9.1"; "%IX1.1.1"; "%I0.1.2"
-            "%M0"; "%m0"; "%MX0"; "%mx0"; "%MX1"
+            "%IX0"; "%ix0"
+            "%IB0.1"; "%IL9.1"; "%IX1.1.1"; "%IX0.1.2"
+            "%MX0"; "%mx0"; "%MX1"
             "%MW2.1"
         ]
         for addr in validAddresses do

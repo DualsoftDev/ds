@@ -80,7 +80,7 @@ module internal XgiSymbolsModule =
             let name = t.Name
             autoAdress t prjParams
             let device, dataType =
-                match tryParseTag t.Address with
+                match tryParseXGITag t.Address with
                 | Some t -> t.Device, t.DataType
                 | _ -> 
                     if t.Address = TextAddrEmpty 
@@ -98,7 +98,6 @@ module internal XgiSymbolsModule =
                 | _ -> failwithlog "ERROR"
 
             let comment = "FAKECOMMENT"
-
             let initValue = null // PLCTag 는 값을 초기화 할 수 없다.
 
             { defaultSymbolInfo with
@@ -113,6 +112,7 @@ module internal XgiSymbolsModule =
         // address 가 지정되지 않은 tag : e.g Timer, Counter 의 내부 멤버 변수들 EN, DN, CU, CD, ...
         | DuStorage t ->
             let symbolInfo =
+             
                 let plcType = systemTypeToXgiTypeName t.DataType
                 let comment = SecurityElement.Escape t.Comment
 

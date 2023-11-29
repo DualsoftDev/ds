@@ -9,7 +9,7 @@ open System.Collections.Generic
 open Dual.Common.Core.FS
 open Engine.CodeGenCPU
 open Engine.Info
-
+open Engine.CodeGenHMI.ConvertHMI
 type FilePath = string
 
 
@@ -17,11 +17,11 @@ type RuntimeModel(zipDsPath:FilePath) =
     let model:Model = ParserLoader.LoadFromConfig (unZip zipDsPath) 
     let dsCPU:DsCPU = DsCpuExt.GetDsCPU(model.System, RuntimePackage.StandardPC)
     let kindDescriptions = DBLoggerApi.GetAllTagKinds() |> Tuple.toDictionary
-    let hmiTagPackage:HmiTagPackage = TagHMIExt.GetHmiTagPackage(model.System, kindDescriptions)
+    let hmiPackage:HMIPackage = dsCPU.GetHMIPackage()
     interface IDisposable with
         member x.Dispose() = x.Dispose()
 
-    member x.HMITagPackage = hmiTagPackage
+    member x.HMIPackage = hmiPackage
     member x.SourceDsZipPath = zipDsPath
     member x.TagKindDescriptions = kindDescriptions
 

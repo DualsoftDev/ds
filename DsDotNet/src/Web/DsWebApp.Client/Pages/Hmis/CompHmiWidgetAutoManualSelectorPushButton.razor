@@ -1,0 +1,81 @@
+@using Engine.Core
+@using System.Reactive.Subjects
+
+<DxButton Click="@onAutoClick" Text="@_autoText" Enabled="@_autoEnabled" />
+<DxButton Click="@onManualClick" Text="@_manualText" Enabled="@_manualEnabled" />
+
+@code {
+
+    // [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
+    [Parameter] public string FlowName { get; set; }
+    [Parameter] public TagWeb TagAuto { get; set; }
+    [Parameter] public TagWeb TagManual { get; set; }
+    [Parameter] public Subject<TagWeb> TagChangedObservable { get; set; }
+
+    string _autoText = "Auto";
+    string _manualText = "Manual";
+    bool _autoEnabled = false;
+    bool _manualEnabled = false;
+    protected override async Task OnInitializedAsync()
+    {
+        evaluateEnabled();
+        TagChangedObservable.Subscribe(tag =>
+        {
+            if (tag.IsEqual(TagAuto) || tag.IsEqual(TagManual))
+            {
+                Console.WriteLine($"Auto/Manual change detected on flow: {FlowName}");
+                if (tag.IsEqual(TagAuto))
+                    TagAuto.SetValue(tag.Value);
+                if (tag.IsEqual(TagManual))
+                    TagManual.SetValue(tag.Value);
+
+                evaluateEnabled();
+                StateHasChanged();
+            }
+        });
+
+        void evaluateEnabled()
+        {
+            var (a, m) = ((bool)TagAuto.Value, (bool)TagManual.Value);
+            _autoEnabled = a == false;
+            _manualEnabled = m == false;
+            _autoText = (a ? "✓ " : "") + "Auto";
+            _manualText = (m ? "✓ " : "") + "Manual";
+        }
+
+    }
+
+    async Task postBoth()
+    {
+        string anyError1=null, anyError2=null;
+        if (await AuthenticationStateProvider.SetAuthHeaderAsync(Http))
+        {
+            anyError1 = await Http.PostAsJsonResultSimpleAsync("api/hmi/tag", TagAuto);
+
+            await AuthenticationStateProvider.SetAuthHeaderAsync(Http);
+            anyError2 = await Http.PostAsJsonResultSimpleAsync("api/hmi/tag", TagManual);
+        }
+        else
+            NavigationManager.NavigateTo("/toplevel/login");
+
+        if (anyError1.NonNullAny() || anyError2.NonNullAny())
+            await JsDual.Alert($"Error posting change: {anyError1} | {anyError2}");
+    }
+
+    async Task onAutoClick()
+    {
+        TagAuto.SetValue(true);
+        TagManual.SetValue(false);
+        await postBoth();
+    }
+
+    async Task onManualClick()
+    {
+        TagAuto.SetValue(false);
+        TagManual.SetValue(true);
+        var anyError1 = await Http.PostAsJsonResultSimpleAsync("api/hmi/tag", TagAuto);
+        var anyError2 = await Http.PostAsJsonResultSimpleAsync("api/hmi/tag", TagManual);
+        if (anyError1.NonNullAny() || anyError2.NonNullAny())
+            await JsDual.Alert($"Error posting change: {anyError1} | {anyError2}");
+    }
+}

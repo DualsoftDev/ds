@@ -1,0 +1,76 @@
+@using Engine.Core
+@*             
+            *@
+
+
+@if (_loading)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    // todo : Lamp 표시 (R/G/F/H)
+    <DxGrid Data="Reals" @ref="MyGrid">
+        <Columns>
+            <DxGridDataColumn FieldName="Name" Caption="Real"></DxGridDataColumn>
+
+            <CompHmiButtonColumn ForceWidth=120 Caption="자동시작" OnClick="@onAutoStart" />
+            <CompHmiButtonColumn ForceWidth=120 Caption="자동복귀" OnClick="@onAutoHome" />
+            <CompHmiButtonColumn ForceWidth=160 Caption="작업완료SET" OnClick="@onCompleteSet" />
+            <CompHmiButtonColumn ForceWidth=160 Caption="작업완료RST" OnClick="@onCompleteReset" />
+
+        </Columns>
+    </DxGrid>
+}
+
+@code {
+    IGrid MyGrid { get; set; }
+    bool _loading { get; set; } = true;
+    [Parameter] public HMIReal[] Reals { get; set; }
+
+    // FlowRow[] _flowRows;
+    protected override async Task OnInitializedAsync()
+    {
+        // _flowRows = Flows.Select(f => new FlowRow(f)).ToArray();
+        _loading = false;
+    }
+
+
+    async Task onAutoStart(object dataItem)
+    {
+        var real = (HMIReal)dataItem;
+        var btn = new TagWebORM(real.StartPush);
+        await JsDual.Alert($"AutoStart on real {real.Name}");
+        btn.Value = true;
+        // todo : send to server
+    }
+
+    async Task onAutoHome(object dataItem)
+    {
+        var real = (HMIReal)dataItem;
+        var btn = new TagWebORM(real.ResetPush);
+        await JsDual.Alert($"Reset on real {real.Name}");
+        btn.Value = true;
+        // todo : send to server
+    }
+
+    async Task onCompleteSet(object dataItem)
+    {
+        var real = (HMIReal)dataItem;
+        var btn = new TagWebORM(real.ONPush);
+        await JsDual.Alert($"Set on real {real.Name}");
+        btn.Value = true;
+    }
+
+    async Task onCompleteReset(object dataItem)
+    {
+        var real = (HMIReal)dataItem;
+        var btn = new TagWebORM(real.OFFPush);
+        await JsDual.Alert($"Reset on real {real.Name}");
+        btn.Value = true;
+    }
+
+}
+
+
+

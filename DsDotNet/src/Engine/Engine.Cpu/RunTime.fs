@@ -11,6 +11,7 @@ open Engine.Core.TagKindModule
 open System.Runtime.CompilerServices
 open Engine.CodeGenCPU
 open System.Reactive.Subjects
+open System.Reactive.Disposables
 
 [<AutoOpen>]
 module RunTime =
@@ -23,6 +24,7 @@ module RunTime =
         let systems = [mySystem] @ loadedSystems
         let mutable cts = new CancellationTokenSource()
         let mutable run:bool = false
+        let disposables = new CompositeDisposable()
 
         let tagWebChangedSubject = new Subject<TagWeb>()
 
@@ -72,7 +74,14 @@ module RunTime =
                                              .Where(fun f->f.IsStatusTag()).any()
             }
 
-        do 
+        let subscription = 
+            tagWebChangedSubject.Subscribe(fun tagWeb->
+                logDebug $"Server Updating TagWeb: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
+                tagStorages.[tagWeb.Name].BoxedValue <-tagWeb.Value
+            )
+
+        do
+            disposables.Add subscription
             ()
 
         interface IDisposable with
@@ -87,7 +96,10 @@ module RunTime =
         
         
 
-        member x.Dispose() = doStop()
+        member x.Dispose() =
+            doStop()
+            disposables.Dispose()
+
         member x.Run()  = doRun()
         member x.RunInBackground()  = async { doRun() } |> Async.Start
         member x.AutoDriveSetting()  =          
@@ -108,32 +120,11 @@ module RunTime =
             syncReset(systems, false)
             scanOnce()
 
-        // todo: 함수 작성.  실패시 실패 이유 반환, 성공시 null 문자열 반환
-        member x.UpdateTagWeb(tagWeb: TagWeb): ErrorMessage =
-            logDebug "Server Updating TagWeb"
-            try
-                tagWeb.WritableValue <- tagStorages.[tagWeb.Name].BoxedValue
-                tagWebChangedSubject.OnNext(tagWeb)
-                null // 성공 시 null 반환
-            with 
-            | exn -> // 실패 시 예외를 잡고 해당 실패 이유를 반환
-                $"Failed to update TagWeb: {exn.Message}"
 
         // todo: 이게 맞나 확인 필요. 
-        //CPU로 부터 WebTag 쓰기 UpdateTagWeb 
-        //WebTag로 부터 CPU 쓰기 UpdateTagCPU 
-        member x.UpdateTagCPU(tagWeb: TagWeb): ErrorMessage =
-            logDebug "Server Updating TagCPU"
-            try
-                tagStorages.[tagWeb.Name].BoxedValue <- tagWeb.Value
-                //tagWebChangedSubject.OnNext(tagWeb) // CPU는 TypedValueStorage 여기서 OnNext
-                null 
-            with 
-            | exn -> 
-                $"Failed to update TagCPU: {exn.Message}"     
-       
+        // - CPU로 부터 WebTag 쓰기: cpu tag 객체 정보를 바탕으로 TagWeb 객체 생성해서 tagWebChangedSubject.OnNext 호출
+        // - WebTag로 부터 CPU 쓰기: tagWebChangedSubject 에 대한 subscription.  Done!
 
-        // todo: TagWeb 변경시 이벤트 발생
         member x.TagWebChangedSubject = tagWebChangedSubject
 
     [<Extension>]

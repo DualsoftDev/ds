@@ -1,0 +1,13 @@
+<DxButton Click="@Click" Text="@Text" Enabled="@_enabled" />
+@code {
+
+    [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
+    [Parameter] public TagWeb Tag { get; set; }
+    [Parameter] public string Text { get; set; }
+
+    bool _enabled = false;
+    protected override async Task OnInitializedAsync()
+    {
+        _enabled = (bool)Tag.Value == false;
+    }
+}

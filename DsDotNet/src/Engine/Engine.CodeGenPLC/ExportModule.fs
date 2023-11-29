@@ -44,30 +44,31 @@ module ExportModule =
                   | _ -> failwithlog "ERROR" ]
             
             
-            //주소 중복체크 안함
-            //let usedAddresses =
-            //    system.TagManager.Storages.Values
-            //    |> Seq.filter (fun f -> not <| (f :? TimerCounterBaseStruct))
-            //    |> Seq.filter (fun f -> f.Address <> null && f.Address <> "")
-            //    |> Array.ofSeq
+            ///주소 중복체크 안함
+            let usedAddresses =
+                system.TagManager.Storages.Values
+                |> Seq.filter (fun f -> not <| (f :? TimerCounterBaseStruct))
+                |> Seq.filter (fun f -> f.Address <> null && f.Address <> "")
+                |> Array.ofSeq
 
-            // check if there is any duplicated address
-            //let duplicatedAddresses =
-            //    usedAddresses
-            //    |> Array.groupBy (fun f -> f.Address)
-            //    |> Array.filter (fun (_, vs) -> vs.Length > 1)
+            //check if there is any duplicated address
+            let duplicatedAddresses =
+                usedAddresses
+                |> Array.filter (fun f -> f.Address <> TextAddrEmpty)
+                |> Array.groupBy (fun f -> f.Address)
+                |> Array.filter (fun (_, vs) -> vs.Length > 1)
 
-            //// prints duplications
-            //if duplicatedAddresses.Length > 0 then
-            //    let dupItems =
-            //        duplicatedAddresses
-            //        |> map (fun (address, vs) ->
-            //            let names = vs |> map (fun var -> var.Name) |> String.concat ", "
-            //            $"  {address}: {names}")
-            //        |> String.concat Environment.NewLine
+            // prints duplications
+            if duplicatedAddresses.Length > 0 then
+                let dupItems =
+                    duplicatedAddresses
+                    |> map (fun (address, vs) ->
+                        let names = vs |> map (fun var -> var.Name) |> String.concat ", "
+                        $"  {address}: {names}")
+                    |> String.concat Environment.NewLine
 
-            //    failwithlog
-            //        $"Total {duplicatedAddresses.Length} Duplicated address items:{Environment.NewLine}{dupItems}"
+                failwithlog
+                    $"Total {duplicatedAddresses.Length} Duplicated address items:{Environment.NewLine}{dupItems}"
 
             let autoMemoryAllocationTags =
                 system.TagManager.Storages.Values

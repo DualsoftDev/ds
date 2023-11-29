@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 
 using static Engine.Core.HmiPackageModule;
 using static Engine.Core.TagWebModule;
+using static Engine.Cpu.RunTime;
 
 namespace DsWebApp.Server.Controllers;
 
@@ -30,6 +31,20 @@ public class HmiController(
         return _model?.HMIPackage;
     }
 
+
+    async Task<string> notifyTagWebToClientsAsync(DsCPU cpu, TagWeb tagWeb)
+    {
+        try
+        {
+            cpu.TagWebChangedSubject.OnNext(tagWeb);
+            await hubContext.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            return ex.Message;
+        }
+    }
     /// <summary>
     /// "api/hmi/tag : POST 로 지정된 HMI 태그 정보 update
     /// </summary>
@@ -42,9 +57,7 @@ public class HmiController(
         if (cpu == null)
             return "No Loaded Model";
 
-        ErrorMessage errMsg = cpu.UpdateTagWeb(tagWeb);
-        await hubContext.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
-        return errMsg.IsNullOrEmpty() ? null : errMsg;
+        return await notifyTagWebToClientsAsync(cpu, tagWeb);
     }
 
     /// <summary>
@@ -63,10 +76,8 @@ public class HmiController(
         // serializedObject : e.g "{\"RawValue\":false,\"Type\":1}"
         var objHolder = Dual.Common.Core.FS.ObjectHolder.Deserialize(serializedObject);
         var tagWeb = new TagWeb(fqdn, objHolder.RawValue, tagKind, kindDescriptions[tagKind]);
-        ErrorMessage errMsg = cpu.UpdateTagWeb(tagWeb);
-        await hubContext.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
 
-        return errMsg.IsNullOrEmpty() ? null : errMsg;
+        return await notifyTagWebToClientsAsync(cpu, tagWeb);
     }
 }
 

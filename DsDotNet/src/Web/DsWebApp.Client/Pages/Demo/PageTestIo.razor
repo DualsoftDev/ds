@@ -13,7 +13,7 @@
         HubConnection hubConnection = await NavigationManager.ToAbsoluteUri("/hub/io").StartHubAsync();
         _hubConnectionManager = new HubConnectionManager(hubConnection, registerHubConnection);
 
-        Console.WriteLine($"Hub initialized on PageHmiTagTest.razor");
+        Console.WriteLine($"Hub initialized on PageTestIo.razor");
         await base.OnInitializedAsync();
 
         IDisposable registerHubConnection(HubConnection hubConnection)

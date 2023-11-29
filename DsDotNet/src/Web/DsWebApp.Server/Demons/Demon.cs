@@ -1,4 +1,8 @@
+using DevExpress.XtraPrinting.Native.Lines;
+
 using DsWebApp.Server.Hubs;
+
+using Engine.Runtime;
 
 using IO.Core;
 
@@ -15,19 +19,35 @@ public partial class Demon : BackgroundService
     IHubContext<HmiTagHub> _hubContextHmiTag;
     ILog _logger => _serverGlobal.Logger;
 
-    public Demon(ServerGlobal serverGlobal, IHubContext<FieldIoHub> hubContextFieldIo, IHubContext<HmiTagHub> hubContextHmiTag)
+    public Demon(ServerGlobal serverGlobal, IHubContext<ModelHub> hubContextModel, IHubContext<FieldIoHub> hubContextFieldIo, IHubContext<HmiTagHub> hubContextHmiTag)
     {
         _serverGlobal = serverGlobal;
         _hubContextFieldIo = hubContextFieldIo;
         _hubContextHmiTag = hubContextHmiTag;
 
-        serverGlobal.RuntimeModel?.Cpu.TagWebChangedSubject.Subscribe(tagWeb =>
-        {
-            _logger.Debug("Server: Notifying TagWeb change to all clients");
+        IDisposable innerSubscription = null;
+        if (serverGlobal.RuntimeModel != null)
+            innerSubscription = subscribeTagChange(serverGlobal.RuntimeModel);
 
-            // "hub/hmitag"
-            hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
+        serverGlobal.RuntimeModelChangedSubject.Subscribe(runtimeModel =>
+        {
+            innerSubscription?.Dispose();
+            innerSubscription = subscribeTagChange(runtimeModel);
+
+            // todo : notify model change
+            bool isCpuRunning = false;
+            var modelDto = new RuntimeModelDto(serverGlobal.ServerSettings.RuntimeModelDsZipPath, isCpuRunning);
+            hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, modelDto);
         });
+
+        IDisposable subscribeTagChange(RuntimeModel runtimeModel)
+        {
+            return runtimeModel.Cpu.TagWebChangedSubject.Subscribe(tagWeb =>
+            {
+                _logger.Debug("Server: Notifying TagWeb change to all clients");
+                hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
+            });
+        }
     }
     protected override async Task ExecuteAsync(CancellationToken ct)
     {

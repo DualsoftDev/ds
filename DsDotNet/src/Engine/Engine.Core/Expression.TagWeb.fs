@@ -43,6 +43,9 @@ type TagWebExt =
             TagWeb(x.Name, x.BoxedValue, x.TagKind, kindDescription[x.TagKind], "")
         
     [<Extension>]
-    static member SetValue(x:TagWeb, value:obj) = x._SerializedObject <- ObjectHolder.Create(value).Serialize()
+    static member SetValue(x:TagWeb, value:obj) =
+        if value = true then
+            printfn $"------- Found true set value for {x.Name}"
+        x._SerializedObject <- ObjectHolder.Create(value).Serialize()
     [<Extension>]
     static member IsEqual(x:TagWeb, y:TagWeb) = x.Name = y.Name && x.Kind = y.Kind

@@ -1,6 +1,9 @@
+@using DsWebApp.Client.Pages.Hmis.Widget
 @using Engine.Core
 @using System.Reactive.Subjects
 
+@inherits CompHmiTagManager
+@implements IAsyncDisposable
 
 @if (_loading)
 {
@@ -27,7 +30,6 @@ else
                     <CompHmiWidgetAutoManualSelectorPushButton
                         TagAuto="(((HMIFlow)context.DataItem).GetAuto())"
                         TagManual="(((HMIFlow)context.DataItem).GetManual())"
-                        TagChangedObservable="@_tagWebChanged"
                         FlowName="@(((HMIFlow)context.DataItem).Name)"
                         />
 
@@ -40,13 +42,14 @@ else
 
                 </CellDisplayTemplate>
             </DxGridCommandColumn>
-            <CompHmiButtonColumn Caption="Drive" OnClick="@onDrive" />
-            <CompHmiButtonColumn Caption="Stop" OnClick="@onStop" />
-            <CompHmiButtonColumn Caption="Clear" OnClick="@onClear" />
-            <CompHmiButtonColumn Caption="Em. Stop" OnClick="@onEmStop" ForceWidth=100 />
-            <CompHmiButtonColumn Caption="Test" OnClick="@onTest" />
-            <CompHmiButtonColumn Caption="Home" OnClick="@onHome" />
-            <CompHmiButtonColumn Caption="Ready" OnClick="@onReady" />
+
+            <CompHmiButtonColumn Caption="Drive"    TagGetter="@((dataItem) =>((HMIFlow)dataItem).DrivePush)" />
+            <CompHmiButtonColumn Caption="Stop"     TagGetter="@((dataItem) =>((HMIFlow)dataItem).StopPush)" />
+            <CompHmiButtonColumn Caption="Clear"    TagGetter="@((dataItem) =>((HMIFlow)dataItem).ClearPush)" />
+            <CompHmiButtonColumn Caption="Em. Stop" TagGetter="@((dataItem) =>((HMIFlow)dataItem).EmergencyPush)" ForceWidth=100 />
+            <CompHmiButtonColumn Caption="Test"     TagGetter="@((dataItem) =>((HMIFlow)dataItem).TestPush)" />
+            <CompHmiButtonColumn Caption="Home"     TagGetter="@((dataItem) =>((HMIFlow)dataItem).HomePush)" />
+            <CompHmiButtonColumn Caption="Ready"    TagGetter="@((dataItem) =>((HMIFlow)dataItem).ReadyPush)" />
 
         </Columns>
     </DxGrid>
@@ -58,74 +61,34 @@ else
     [Parameter] public HMIFlow[] Flows { get; set; }
 
 
-    HubConnectionManager _hubConnectionManager;
-    Subject<TagWeb> _tagWebChanged = new Subject<TagWeb>();
 
     protected override async Task OnInitializedAsync()
     {
-        HubConnection hubConnection = await NavigationManager.ToAbsoluteUri("/hub/hmitag").StartHubAsync();
-        _hubConnectionManager = new HubConnectionManager(hubConnection, registerHubConnection);
-
-        Console.WriteLine($"Hub initialized on PageHmiTagTest.razor");
+        base.ComponentName = "CompHmiFlowTable.razor";
         await base.OnInitializedAsync();
-
-        IDisposable registerHubConnection(HubConnection hubConnection)
-        {
-            return hubConnection.On<TagWeb>(SK.S2CNTagWebChanged, (TagWeb change) =>
-            {
-                Console.WriteLine($"TagWeb change notification received with {change.Name}/{change.Kind}={change.Value}.");
-                ToastService.ShowInfo($"TagWeb change: {change.Name}/{change.Kind}={change.Value}.");
-                _tagWebChanged.OnNext(change);
-            });
-        }
-
         _loading = false;
     }
 
-    public async ValueTask DisposeAsync()
-    {
-        await _hubConnectionManager.DisposeAsync();
-        Console.WriteLine("CompHmiFlowTable.razor disposed!");
-    }
 
-
-    async Task onFlow(object dataItem)
+    void onFlow(object dataItem)
     {
         var flow = (HMIFlow)dataItem;
         var name = flow.Name;
-        await JsDual.Alert($"flow {name}");
         NavigationManager.NavigateTo($"hmis/flow/{name}");
-        // todo : switch to flow view
     }
 
-    async Task postTag(TagWeb tag, bool value = true)
-    {
-        tag.SetValue(value);
-        var anyError = await Http.PostTagAsync(tag, AuthenticationStateProvider, NavigationManager);
-        if (anyError.NonNullAny())
-            await JsDual.Alert($"Error while posting tag({tag.Name}) change: {anyError}");
-    }
 
     async Task onAuto(object dataItem)
     {
         var flow = (HMIFlow)dataItem;
-        await postTag(flow.GetAuto(), true);
+        await PostTag(flow.GetAuto(), true);
     }
 
     async Task onManual(object dataItem)
     {
         var flow = (HMIFlow)dataItem;
-        await postTag(flow.GetManual(), true);
+        await PostTag(flow.GetManual(), true);
     }
-
-
-    async Task onDrive(object dataItem) => await postTag(((HMIFlow)dataItem).DrivePush);
-    async Task onStop(object dataItem) => await postTag(((HMIFlow)dataItem).StopPush);
-    async Task onClear(object dataItem) => await postTag(((HMIFlow)dataItem).ClearPush);
-    async Task onEmStop(object dataItem) => await postTag(((HMIFlow)dataItem).EmergencyPush);
-    async Task onTest(object dataItem) => await postTag(((HMIFlow)dataItem).TestPush);
-    async Task onHome(object dataItem) => await postTag(((HMIFlow)dataItem).HomePush);
-    async Task onReady(object dataItem) => await postTag(((HMIFlow)dataItem).ReadyPush);
 }
 
 

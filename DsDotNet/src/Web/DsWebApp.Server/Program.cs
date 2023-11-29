@@ -155,7 +155,7 @@ app.MapControllers();
 
 app.MapHub<FieldIoHub>("/hub/io");
 app.MapHub<ModelHub>("/hub/model");
-app.MapHub<HmiTagHub>("/hub/hmitag")
+app.MapHub<HmiTagHub>("/hub/hmi/tag")
     .RequireCors(_corsPolicyName);
 
 app.MapFallbackToFile("index.html");

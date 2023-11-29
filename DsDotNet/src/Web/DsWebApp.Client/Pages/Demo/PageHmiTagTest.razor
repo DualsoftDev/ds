@@ -48,7 +48,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        HubConnection hubConnection = await NavigationManager.ToAbsoluteUri("/hub/hmitag").StartHubAsync();
+        HubConnection hubConnection = await NavigationManager.ToAbsoluteUri("/hub/hmi/tag").StartHubAsync();
         _hubConnectionManager = new HubConnectionManager(hubConnection, registerHubConnection);
 
         Console.WriteLine($"Hub initialized on PageHmiTagTest.razor");

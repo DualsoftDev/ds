@@ -1,7 +1,7 @@
 @using Engine.Core
 @using System.Reactive.Subjects
 
-@inherits CompHmiTagPoster
+@inherits CompHmiTagManager
 @implements IAsyncDisposable
 
 @if (_loading)
@@ -60,34 +60,12 @@ else
     [Parameter] public HMIFlow[] Flows { get; set; }
 
 
-    HubConnectionManager _hubConnectionManager;
-    Subject<TagWeb> _tagWebChanged = new Subject<TagWeb>();
 
     protected override async Task OnInitializedAsync()
     {
-        HubConnection hubConnection = await NavigationManager.ToAbsoluteUri("/hub/hmi/tag").StartHubAsync();
-        _hubConnectionManager = new HubConnectionManager(hubConnection, registerHubConnection);
-
-        Console.WriteLine($"Hub initialized on PageHmiTagTest.razor");
+        base.ComponentName = "CompHmiFlowTable.razor";
         await base.OnInitializedAsync();
-
-        IDisposable registerHubConnection(HubConnection hubConnection)
-        {
-            return hubConnection.On<TagWeb>(SK.S2CNTagWebChanged, (TagWeb change) =>
-            {
-                Console.WriteLine($"TagWeb change notification received with {change.Name}/{change.Kind}={change.Value}.");
-                ToastService.ShowInfo($"TagWeb change: {change.Name}/{change.Kind}={change.Value}.");
-                _tagWebChanged.OnNext(change);
-            });
-        }
-
         _loading = false;
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await _hubConnectionManager.DisposeAsync();
-        Console.WriteLine("CompHmiFlowTable.razor disposed!");
     }
 
 

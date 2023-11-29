@@ -1,0 +1,46 @@
+@using Engine.Core
+@using System.Reactive.Subjects
+
+@implements IAsyncDisposable
+
+@code {
+    bool _loading { get; set; } = true;
+    protected HubConnectionManager _hubConnectionManager;
+    protected Subject<TagWeb> _tagWebChanged = new Subject<TagWeb>();
+    protected string ComponentName { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        HubConnection hubConnection = await NavigationManager.ToAbsoluteUri("/hub/hmi/tag").StartHubAsync();
+        _hubConnectionManager = new HubConnectionManager(hubConnection, registerHubConnection);
+
+        Console.WriteLine($"Hub initialized on PageHmiTagTest.razor");
+        await base.OnInitializedAsync();
+
+        IDisposable registerHubConnection(HubConnection hubConnection)
+        {
+            return hubConnection.On<TagWeb>(SK.S2CNTagWebChanged, (TagWeb change) =>
+            {
+                Console.WriteLine($"TagWeb change notification received with {change.Name}/{change.Kind}={change.Value}.");
+                ToastService.ShowInfo($"TagWeb change: {change.Name}/{change.Kind}={change.Value}.");
+                _tagWebChanged.OnNext(change);
+            });
+        }
+
+        _loading = false;
+    }
+    public async ValueTask DisposeAsync()
+    {
+        await _hubConnectionManager.DisposeAsync();
+        Console.WriteLine($"{ComponentName} disposed!");
+    }
+
+
+    protected async Task PostTag(TagWeb tag, bool value = true)
+    {
+        tag.SetValue(value);
+        var anyError = await Http.PostTagAsync(tag, AuthenticationStateProvider, NavigationManager);
+        if (anyError.NonNullAny())
+            await JsDual.Alert($"Error while posting tag({tag.Name}) change: {anyError}");
+    }
+}

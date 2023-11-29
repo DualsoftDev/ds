@@ -1,4 +1,3 @@
-using DsWebApp.Server.Hubs;
 using Engine.Runtime;
 
 using Microsoft.AspNetCore.Authorization;
@@ -36,8 +35,9 @@ public class HmiController(
     {
         try
         {
+            await Console.Out.WriteLineAsync($"HmiTagHub has {HmiTagHub.ConnectedClients.Count} connections");
             cpu.TagWebChangedSubject.OnNext(tagWeb);
-            await hubContext.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
+            //await hubContext.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);     <-- cpu.TagWebChangedSubject.OnNext 에서 수행 됨..
             return null;
         }
         catch (Exception ex)

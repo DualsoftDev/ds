@@ -1,11 +1,13 @@
 @using Engine.Core
 @using System.Reactive.Subjects
+@implements IAsyncDisposable
+
 
 <DxButton Click="@onAutoClick" Text="@_autoText" Enabled="@_autoEnabled" />
 <DxButton Click="@onManualClick" Text="@_manualText" Enabled="@_manualEnabled" />
 
 @code {
-
+    CompositeDisposable _disposables = new ();
     // [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
     [Parameter] public string FlowName { get; set; }
     [Parameter] public TagWeb TagAuto { get; set; }
@@ -18,21 +20,26 @@
     bool _manualEnabled = false;
     protected override async Task OnInitializedAsync()
     {
-        evaluateEnabled();
-        TagChangedObservable.Subscribe(tag =>
-        {
-            if (tag.IsEqual(TagAuto) || tag.IsEqual(TagManual))
-            {
-                Console.WriteLine($"Auto/Manual change detected on flow: {FlowName}");
-                if (tag.IsEqual(TagAuto))
-                    TagAuto.SetValue(tag.Value);
-                if (tag.IsEqual(TagManual))
-                    TagManual.SetValue(tag.Value);
+        await Task.Yield();
 
-                evaluateEnabled();
-                StateHasChanged();
-            }
-        });
+        evaluateEnabled();
+        IDisposable subscription =
+            TagChangedObservable.Subscribe(tag =>
+            {
+                if (tag.IsEqual(TagAuto) || tag.IsEqual(TagManual))
+                {
+                    Console.WriteLine($"Auto/Manual change detected on flow: {FlowName}");
+                    if (tag.IsEqual(TagAuto))
+                        TagAuto.SetValue(tag.Value);
+                    if (tag.IsEqual(TagManual))
+                        TagManual.SetValue(tag.Value);
+
+                    evaluateEnabled();
+                    StateHasChanged();
+                }
+            });
+
+        _disposables.Add(subscription);
 
         void evaluateEnabled()
         {
@@ -42,8 +49,15 @@
             _autoText = (a ? "✓ " : "") + "Auto";
             _manualText = (m ? "✓ " : "") + "Manual";
         }
-
     }
+
+    public async ValueTask DisposeAsync()
+    {
+        await Task.Yield();
+        _disposables.Dispose();
+        Console.WriteLine("CompHmiWidgetAutoManualSelectorPushButton.razor disposed!");
+    }
+
 
     async Task postBoth()
     {

@@ -8,7 +8,7 @@
 
 @attribute [Authorize(Roles = "Administrator")]
 
-<h3>PageHmiTags</h3>
+<h3>HMI</h3>
 
 @if (_loading)
 {
@@ -33,7 +33,7 @@ else
     // }
     public void Dispose()
     {
-        Console.WriteLine($"Disposing PageHmiTags.razor");
+        Console.WriteLine($"Disposing PageHmi.razor");
     }
 
     void navigateTo(string url) => NavigationManager.NavigateTo(url);

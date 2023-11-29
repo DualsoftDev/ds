@@ -31,6 +31,7 @@ else
     // FlowRow[] _flowRows;
     protected override async Task OnInitializedAsync()
     {
+        await Task.Yield();
         // _flowRows = Flows.Select(f => new FlowRow(f)).ToArray();
         _loading = false;
     }

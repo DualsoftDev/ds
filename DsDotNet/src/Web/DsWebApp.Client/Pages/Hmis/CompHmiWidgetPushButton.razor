@@ -8,6 +8,7 @@
     bool _enabled = false;
     protected override async Task OnInitializedAsync()
     {
+        await Task.Yield();
         _enabled = (bool)Tag.Value == false;
     }
 }

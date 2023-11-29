@@ -13,6 +13,9 @@
 
 @using DevExpress.Blazor
 @using Blazored.LocalStorage
+@using Blazored.Toast
+@using Blazored.Toast.Services
+
 
 @using Dual.Common.Core
 @using Dual.Web.Blazor.Client.Canvas2d
@@ -39,6 +42,7 @@
 @inject ClientGlobal ClientGlobal
 @inject IJSRuntime JsRuntime
 @inject ILocalStorageService LocalStorage;
+@inject IToastService ToastService
 @using Dual.Web.Blazor.Client.Pages.Auth
 
 

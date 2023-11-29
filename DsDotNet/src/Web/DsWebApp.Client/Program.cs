@@ -1,5 +1,7 @@
 using Blazored.LocalStorage;
 using Blazored.SessionStorage;
+using Blazored.Toast;
+
 using DsWebApp.Shared;
 using Dual.Web.Blazor.Client.Auth;
 using Dual.Web.Blazor.Shared;
@@ -26,5 +28,8 @@ services.AddBlazoredLocalStorage();
 services.AddBlazoredSessionStorage();
 services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 services.AddAuthorizationCore();
+
+services.AddBlazoredToast();
+
 
 await builder.Build().RunAsync();

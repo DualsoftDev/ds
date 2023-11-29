@@ -11,6 +11,12 @@ namespace TwmApp.Server.Controllers;
 [ApiController]
 public class AuthController(IUserAccountService userAccountService, ServerGlobal global) : AuthControllerBase(userAccountService)
 {
+    // api/auth/check
+    [HttpGet("check")]
+    [Authorize(Roles = "Administrator,User")]
+    public bool CheckToken() => true;
+
+
     //[HttpPost]
     //[Route("xlogin")]
     //[AllowAnonymous]
@@ -27,9 +33,7 @@ public class AuthController(IUserAccountService userAccountService, ServerGlobal
 
     // api/auth/adduser
     [HttpPost]
-    [Route("adduser")]
-    
-    // todo: Role 적용
+    [Route("adduser")]    
     [Authorize(Roles = "Administrator")]
     
     public ErrorMessage AddUser([FromBody] UserAuthInfo loginRequest)

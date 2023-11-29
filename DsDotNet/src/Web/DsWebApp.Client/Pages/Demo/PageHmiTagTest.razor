@@ -14,6 +14,8 @@
 </EditForm>
 
 
+<br />
+<br />
 <button class="navbar-toggler bg-primary d-block" title="send any" @onclick="onTestSignalR">
     <span class="navbar-toggler-icon"></span>
     Send Any
@@ -32,14 +34,17 @@
 
     private async Task HandleSubmit()
     {
-        TagWeb tagWeb = new(_tagWeb.Name, _flag, _tagWeb.Kind, _tagWeb.KindDescription);
-        Console.WriteLine($"TagWeb: Name={tagWeb.Name}, Kind={tagWeb.Kind}");
-        var response = await Http.PostAsJsonAsync("api/hmitag", tagWeb);
-        response.EnsureSuccessStatusCode();
-        string responseBody = await response.Content.ReadAsStringAsync();
-        bool result = Convert.ToBoolean(responseBody);
-        Console.WriteLine($"Submit result: {result}");
+        if (await AuthenticationStateProvider.SetAuthHeaderAsync(Http))
+        {
+            TagWeb tagWeb = new(_tagWeb.Name, _flag, _tagWeb.Kind, _tagWeb.KindDescription);
+            var anyError = await Http.PostAsJsonResultSimpleAsync("api/hmi/tag", tagWeb);
+            var result = anyError.IsNullOrEmpty() ? "OK" : anyError;
+            Console.WriteLine($"Submit result: {result}");
+        }
+        else
+            NavigationManager.NavigateTo("/toplevel/login");
     }
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -54,6 +59,7 @@
             return hubConnection.On<TagWeb>(SK.S2CNTagWebChanged, (TagWeb change) =>
             {
                 Console.WriteLine($"TagWeb change notification received with {change.Name}/{change.Kind}={change.Value}.");
+                StateHasChanged();
             });
         }
     }
@@ -66,7 +72,14 @@
 
     async Task onTestSignalR()
     {
-        var serializedObject = "{\"RawValue\":false,\"Type\":1}";
-        var response = await Http.PostAsJsonAsync($"api/hmitag/Hello/9999", serializedObject);
+        if (await AuthenticationStateProvider.SetAuthHeaderAsync(Http))
+        {
+            var serializedObject = "{\"RawValue\":false,\"Type\":1}";
+            var anyError = await Http.PostAsJsonResultSimpleAsync($"api/hmi/tag/Hello/9999", serializedObject);
+            var result = anyError.IsNullOrEmpty() ? "OK" : anyError;
+            Console.WriteLine($"SendAny result: {result}");
+        }
+        else
+            NavigationManager.NavigateTo("/toplevel/login");
     }
 }

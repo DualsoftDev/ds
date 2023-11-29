@@ -31,42 +31,43 @@ module TagWebModule =
     type HMIPush   = TagWeb
     type HMISelect = TagWeb*TagWeb //selectA/selectB  ex)Auto/Manu   
     type HMILamp   = TagWeb
-
-    [<Obsolete("HMIFlickerLamp TagWeb 없음 직접 Lamp반응")>]
-    type HMIFlickerLamp = TagWeb
-    [<Obsolete("HMIButton => HMIPush, HMISelect, HMIPushMultiLamp 로 구분")>]
-    type HMIButton = HMIPush*HMIFlickerLamp
-    [<Obsolete("HMIPushMultiLamp 로 사용")>]
-    type HMIDevice = HMIPush*HMILamp  //input, output
-
-
     type HMIPushMultiLamp = HMIPush*(HMILamp seq) // output inputs
 
-    [<Obsolete("type HmiPackage 대신 사용 (Engine.CodeGenHMI에서 생성함)")>]
-    type HmiTagPackage = {
-        AutoButtons      : HMIButton array 
-        ManualButtons    : HMIButton array 
-        DriveButtons     : HMIButton array 
-        StopButtons      : HMIButton array 
-        ClearButtons     : HMIButton array 
-        EmergencyButtons : HMIButton array 
-        TestButtons      : HMIButton array 
-        HomeButtons      : HMIButton array 
-        ReadyButtons     : HMIButton array 
-        
-        DriveLamps       : HMILamp array 
-        AutoLamps        : HMILamp array 
-        ManualLamps      : HMILamp array 
-        StopLamps        : HMILamp array 
-        EmergencyLamps   : HMILamp array 
-        TestLamps        : HMILamp array 
-        ReadyLamps       : HMILamp array 
-        IdleLamps        : HMILamp array 
+    // todo : remove me
+    
+    //[<Obsolete("HMIPushMultiLamp 로 사용")>]
+    //type HMIDevice = HMIPush*HMILamp  //input, output
 
-        RealBtns         : HMIPush array 
-        DeviceBtns       : HMIDevice array 
-        //JobBtns          : HMIPush array  나중에
-    }
+    //[<Obsolete("HMIFlickerLamp TagWeb 없음 직접 Lamp반응")>]
+    //type HMIFlickerLamp = TagWeb
+    //[<Obsolete("HMIButton => HMIPush, HMISelect, HMIPushMultiLamp 로 구분")>]
+    //type HMIButton = HMIPush*HMIFlickerLamp
+
+    //[<Obsolete("type HmiPackage 대신 사용 (Engine.CodeGenHMI에서 생성함)")>]
+    //type HmiTagPackage = {
+    //    AutoButtons      : HMIButton array 
+    //    ManualButtons    : HMIButton array 
+    //    DriveButtons     : HMIButton array 
+    //    StopButtons      : HMIButton array 
+    //    ClearButtons     : HMIButton array 
+    //    EmergencyButtons : HMIButton array 
+    //    TestButtons      : HMIButton array 
+    //    HomeButtons      : HMIButton array 
+    //    ReadyButtons     : HMIButton array 
+        
+    //    DriveLamps       : HMILamp array 
+    //    AutoLamps        : HMILamp array 
+    //    ManualLamps      : HMILamp array 
+    //    StopLamps        : HMILamp array 
+    //    EmergencyLamps   : HMILamp array 
+    //    TestLamps        : HMILamp array 
+    //    ReadyLamps       : HMILamp array 
+    //    IdleLamps        : HMILamp array 
+
+    //    RealBtns         : HMIPush array 
+    //    DeviceBtns       : HMIDevice array 
+    //    //JobBtns          : HMIPush array  나중에
+    //}
 
 
 [<AutoOpen>]
@@ -100,3 +101,5 @@ type TagWebExt =
         
     [<Extension>]
     static member SetValue(x:TagWeb, value:obj) = x._SerializedObject <- ObjectHolder.Create(value).Serialize()
+    [<Extension>]
+    static member IsEqual(x:TagWeb, y:TagWeb) = x.Name = y.Name && x.Kind = y.Kind

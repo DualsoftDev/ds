@@ -109,7 +109,7 @@ var serverSettings =
         .Tee(ss => ss.Initialize());
 var serverGlobals = new ServerGlobal(serverSettings, commonAppSettings, logger);
 services.AddSingleton(serverGlobals);
-services.AddDsAuth(conf, commonAppSettings.LoggerDBSettings.ConnectionString);
+services.AddDsAuth(serverSettings, conf, commonAppSettings.LoggerDBSettings.ConnectionString);
 
 await services.AddUnsafeServicesAsync(serverGlobals, logger);
 
@@ -195,7 +195,7 @@ public static class CustomServerExtension
         return services;
     }
 
-    public static IServiceCollection AddDsAuth(this IServiceCollection services, ConfigurationManager conf, string connectionString)
+    public static IServiceCollection AddDsAuth(this IServiceCollection services, ServerSettings serverSettings, ConfigurationManager conf, string connectionString)
     {
         Func<string, UserAccount> userInfoExtractor = (string userName) =>
         {
@@ -212,6 +212,7 @@ public static class CustomServerExtension
         };
 
         UserAccountService svc = new(userInfoExtractor);
+        svc.JwtTokenValidityMinutes = serverSettings.JwtTokenValidityMinutes;
         services.AddAuth();
         services.AddSingleton((IUserAccountService)svc);
         return services;

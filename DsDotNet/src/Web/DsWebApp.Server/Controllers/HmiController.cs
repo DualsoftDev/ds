@@ -1,15 +1,20 @@
 using DsWebApp.Server.Hubs;
 using Engine.Runtime;
+
+using Microsoft.AspNetCore.Authorization;
+
+using static Engine.Core.HmiPackageModule;
 using static Engine.Core.TagWebModule;
 
 namespace DsWebApp.Server.Controllers;
 
 /// <summary>
-/// HmiTag controller
+/// HmiTag controller.  api/hmi
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class HmiTagController(
+//[Authorize(Roles = "Administrator")]
+public class HmiController(
         ServerGlobal global
         , IHubContext<HmiTagHub> hubContext
     ) : ControllerBaseWithLogger(global.Logger)
@@ -17,37 +22,41 @@ public class HmiTagController(
     RuntimeModel _model => global.RuntimeModel;
 
     /// <summary>
-    /// "api/hmitag" : 모든 HMI 태그 정보를 반환
+    /// "api/hmi/package" : 모든 HMI 태그 정보를 반환
     /// </summary>
-    [HttpGet]
-    public HmiTagPackage GetAllHmiTags()
+    [HttpGet("package")]
+    public ResultSerializable<HMIPackage, ErrorMessage> GetAllHmiTags()
     {
-        return _model?.HMITagPackage;
+        return _model?.HMIPackage;
     }
 
     /// <summary>
-    /// "api/hmitag : POST 로 지정된 HMI 태그 정보 update
+    /// "api/hmi/tag : POST 로 지정된 HMI 태그 정보 update
     /// </summary>
-    [HttpPost]
-    public async Task<bool> SetHmiTag([FromBody] TagWeb tagWeb)
+    [Authorize(Roles = "Administrator")]
+    [HttpPost("tag")]
+    public async Task<string> SetHmiTag([FromBody] TagWeb tagWeb)
     {
+        await Console.Out.WriteLineAsync($"About to change {tagWeb.Name}={tagWeb.Value}");
         var cpu = _model?.Cpu;
         if (cpu == null)
-            return false;
+            return "No Loaded Model";
 
         ErrorMessage errMsg = cpu.UpdateTagWeb(tagWeb);
         await hubContext.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
-        return errMsg.IsNullOrEmpty();
+        return errMsg.IsNullOrEmpty() ? null : errMsg;
     }
+
     /// <summary>
-    /// "api/hmitag/{fqdn}/{tagKind}" : 지정된 HMI 태그 정보 update
+    /// "api/hmi/tag/{fqdn}/{tagKind}" : 지정된 HMI 태그 정보 update
     /// </summary>
-    [HttpPost("{fqdn}/{tagKind}")]
-    public async Task<bool> SetHmiTag(string fqdn, int tagKind, [FromBody] string serializedObject)
+    [Authorize(Roles = "Administrator")]
+    [HttpPost("tag/{fqdn}/{tagKind}")]
+    public async Task<string> SetHmiTag(string fqdn, int tagKind, [FromBody] string serializedObject)
     {
         var cpu = _model?.Cpu;
         if (cpu == null)
-            return false;
+            return "No Loaded Model";
 
         var kindDescriptions = _model?.TagKindDescriptions;
 
@@ -57,7 +66,7 @@ public class HmiTagController(
         ErrorMessage errMsg = cpu.UpdateTagWeb(tagWeb);
         await hubContext.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
 
-        return errMsg.IsNullOrEmpty();
+        return errMsg.IsNullOrEmpty() ? null : errMsg;
     }
 }
 

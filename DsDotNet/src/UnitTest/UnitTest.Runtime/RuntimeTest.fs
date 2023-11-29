@@ -19,5 +19,6 @@ module RuntimeTest =
         let zipPath = ImportPPT.GetRuntimeZipFromPPT testPPT
         let testRuntimeModel = new RuntimeModel(zipPath)
 
-        testRuntimeModel.HMITagPackage.RealBtns.Length > 0   |> Assert.True
+        testRuntimeModel.HMIPackage.Devices.Length > 0   |> Assert.True
+        ()
   

@@ -1,5 +1,7 @@
 namespace Engine.Core
 
+open System.Runtime.CompilerServices
+
 
 [<AutoOpen>]
 module HmiPackageModule =
@@ -107,3 +109,11 @@ module HmiPackageModule =
         Devices           : HMIDevice array //loaded system
     }
 
+
+[<Extension>]
+type HmiPackageModuleExt =
+    [<Extension>] static member GetAuto (x:HMIFlow) : HMIPush = fst x.AutoManualSelect
+    [<Extension>] static member GetManual (x:HMIFlow) : HMIPush = snd x.AutoManualSelect
+
+    [<Extension>] static member GetAuto (x:HMISystem) : HMIPush = fst x.AutoManualSelect
+    [<Extension>] static member GetManual (x:HMISystem) : HMIPush = snd x.AutoManualSelect

@@ -24,16 +24,23 @@
         </AuthorizeView>
  *@
 
-        @if (ClientGlobal.UserSession == null)
+        @if (_loading)
         {
-            <a href="/toplevel/login">Login</a>
+            <p><em>Loading...</em></p>
         }
         else
         {
-            var name = ClientGlobal?.AuthenticationState?.User?.Identity?.Name;
-            if (name.NonNullAny())
-                name = $"({name})";
-            <a @onclick="Logout" href="javascript:void(0)">Logout @name</a>
+            @if (ClientGlobal.UserSession == null || !_authenticated)
+            {
+                <a href="/toplevel/login">Login</a>
+            }
+            else
+            {
+                var name = ClientGlobal?.AuthenticationState?.User?.Identity?.Name;
+                if (name.NonNullAny())
+                    name = $"({name})";
+                <a @onclick="Logout" href="javascript:void(0)">Logout @name</a>
+            }
         }
 
     </div>
@@ -59,5 +66,21 @@
         var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthenticationStateProvider;
         await customAuthStateProvider.UpdateAuthenticationState(null);
         NavigationManager.NavigateTo("/", true);
+    }
+
+    bool _loading = true;
+    bool _authenticated = false;
+    protected override async Task OnInitializedAsync()
+    {
+        if (await AuthenticationStateProvider.SetAuthHeaderAsync(Http))
+        {
+            ResultSerializable<bool, ErrorMessage> result = await Http.GetResultSimpleAsync<bool>("api/auth/check");
+            Console.WriteLine($"Result={result}, IsOK={result.IsOk}, Ok={result.Value}, Err={result.Error}");
+            result.Iter(
+                ok => _authenticated = ok,
+                err => {});
+            _loading = false;
+        }
+
     }
 }

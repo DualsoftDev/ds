@@ -54,6 +54,14 @@ public class ServerGlobal
         {
             Logger.Info($"Model change detected: {dsZipPath}");
             RuntimeModel?.Dispose();
+            RuntimeModel = null;
+
+            if (!File.Exists(dsZipPath))
+            {
+                Logger.Warn($"Model file not found: {dsZipPath}");
+                return null;
+            }
+
             RuntimeModel = new RuntimeModel(dsZipPath);
             RuntimeModelChangedSubject.OnNext(RuntimeModel);
             return RuntimeModel;

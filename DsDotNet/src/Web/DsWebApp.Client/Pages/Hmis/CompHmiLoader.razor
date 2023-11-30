@@ -1,7 +1,7 @@
 @code {
     protected HMIPackage _hmiPackage;
-    protected HMISystem _system => _hmiPackage.System;
-    protected HMIDevice[] _devices => _hmiPackage.Devices;
+    protected HMISystem _system => _hmiPackage?.System;
+    protected HMIDevice[] _devices => _hmiPackage?.Devices;
     protected bool _loading { get; set; } = true;
 
     protected override async Task OnInitializedAsync()
@@ -12,7 +12,15 @@
             Console.WriteLine("----- Loading HmiPackage from server..");
             var result = await Http.GetResultSimpleAsync<HMIPackage>($"api/hmi/package");
             result.Iter(
-                okPackage => ClientGlobal.HmiPackage = _hmiPackage = okPackage.Tee(pkg => pkg.BuildTagMap()),
+                okPackage => {
+                    if (okPackage == null)
+                    {
+                        JsDual.Alert("Check model loaded on server.  HmiPackage is null.");
+                        return;
+                    }
+
+                    ClientGlobal.HmiPackage = _hmiPackage = okPackage.Tee(pkg => pkg.BuildTagMap());
+                },
                 async err => await JsDual.Alert(err));
         }
 

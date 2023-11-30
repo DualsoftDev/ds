@@ -16,13 +16,23 @@
 }
 else
 {
-    <p>@_system.Name</p>
-    <p>
-        <button class="btn btn-primary" @onclick="@(() => navigateTo("/hmis/auto"))">자동 조작</button>
-        <button class="btn btn-primary" @onclick="@(() => navigateTo("/hmis/manual"))">수동 조작</button>
-        <button class="btn btn-primary" @onclick="@(() => navigateTo("/hmis/flow"))">Flow 모니터</button>
-        <button class="btn btn-primary" @onclick="@(() => navigateTo("/hmis/alarm"))">알람 리스트</button>
-    </p>
+    if (_system == null)
+    {
+        <p><em>No loaded system?  (System is null)</em></p>
+        <br/>
+        <br/>
+        <button class="btn btn-primary" @onclick="@(() => navigateTo("/controllers/uploadmodel"))">Upload model</button>
+    }
+    else
+    {
+        <p>@_system.Name</p>
+        <p>
+            <button class="btn btn-primary" @onclick="@(() => navigateTo("/hmis/auto"))">자동 조작</button>
+            <button class="btn btn-primary" @onclick="@(() => navigateTo("/hmis/manual"))">수동 조작</button>
+            <button class="btn btn-primary" @onclick="@(() => navigateTo("/hmis/flow"))">Flow 모니터</button>
+            <button class="btn btn-primary" @onclick="@(() => navigateTo("/hmis/alarm"))">알람 리스트</button>
+        </p>
+    }
 }
 
 

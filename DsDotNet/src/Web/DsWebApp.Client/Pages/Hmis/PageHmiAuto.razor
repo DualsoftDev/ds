@@ -1,7 +1,10 @@
+@* PageHmiAuto *@
+
 @page "/hmis/auto"
 <h3>자동 조작</h3>
 
 @using System.Collections.ObjectModel
+@using Engine.Core
 @using static Engine.Core.TagWebModule
 @using HMIButton = Tuple<Engine.Core.TagWebModule.TagWeb, Engine.Core.TagWebModule.TagWeb>  @* HMIPush * HMIFlickerLamp *@
 @inherits CompHmiLoader
@@ -16,15 +19,16 @@
 else
 {
     <p>
-        <button class="btn btn-primary" @onclick="@onAuto">Auto</button>
-        <button class="btn btn-primary" @onclick="@onManual">Manual</button>
-        <button class="btn btn-primary" @onclick="@onReady">Ready</button>
-        <button class="btn btn-primary" @onclick="@onDrive">Drive</button>
-        <button class="btn btn-primary" @onclick="@onHome">Home</button>
-        <button class="btn btn-primary" @onclick="@onClear">Clear</button>
-        <button class="btn btn-primary" @onclick="@onStop">Stop</button>
-        <button class="btn btn-primary" @onclick="@onEmStop">Em Stop</button>
-        <button class="btn btn-primary" @onclick="@onTest">Test</button>
+        <CompHmiWidgetPushButton Text="Auto"     DataItem="@(_system.GetAuto())"     TagGetter="@_tagGetter" />
+        <CompHmiWidgetPushButton Text="Manual"   DataItem="@(_system.GetManual())"   TagGetter="@_tagGetter" />
+
+        <CompHmiWidgetPushButton Text="Ready"    DataItem="@(_system.ReadyPush)"     TagGetter="@_tagGetter" />
+        <CompHmiWidgetPushButton Text="Drive"    DataItem="@(_system.DrivePush)"     TagGetter="@_tagGetter" />
+        <CompHmiWidgetPushButton Text="Home"     DataItem="@(_system.HomePush)"      TagGetter="@_tagGetter" />
+        <CompHmiWidgetPushButton Text="Clear"    DataItem="@(_system.ClearPush)"     TagGetter="@_tagGetter" />
+        <CompHmiWidgetPushButton Text="Stop"     DataItem="@(_system.StopPush)"      TagGetter="@_tagGetter" />
+        <CompHmiWidgetPushButton Text="Em Stop"  DataItem="@(_system.EmergencyPush)" TagGetter="@_tagGetter" />
+        <CompHmiWidgetPushButton Text="Test"     DataItem="@(_system.TestPush)"      TagGetter="@_tagGetter" />
     </p>
 
     <CompHmiFlowTable Flows="@_system.Flows"/>
@@ -32,6 +36,7 @@ else
 
 
 @code {
+    TagWeb _tagGetter(object dataItem) => (TagWeb)dataItem;
     // protected override async Task OnInitializedAsync()
     // {
     //     await base.OnInitializedAsync();
@@ -40,16 +45,4 @@ else
     {
         Console.WriteLine($"Disposing PageHmiAuto.razor");
     }
-
-    async Task onAuto() { await JsDual.Alert("Auto"); }
-    async Task onManual() { await JsDual.Alert("Auto"); }
-
-
-    async Task onReady() { await JsDual.Alert("onReady"); }
-    async Task onDrive() { await JsDual.Alert("onDrive"); }
-    async Task onHome() { await JsDual.Alert("onHome"); }
-    async Task onClear() { await JsDual.Alert("onClear"); }
-    async Task onStop() { await JsDual.Alert("onStop"); }
-    async Task onEmStop() { await JsDual.Alert("onEmStop"); }
-    async Task onTest() { await JsDual.Alert("onTest"); }
 }

@@ -374,8 +374,10 @@ module PPTObjectModule =
                 else
                     shape.ErrorName(ErrID._1, iPage)
 
-            if nodeType = CALL then
-                name <- GetHeadBracketRemoveName(shape.InnerText) |> trimSpace |> trimNewLine
+            if nodeType = CALL 
+            then
+                let callName =  GetHeadBracketRemoveName(shape.InnerText)
+                name <- String.Join('.', callName.Split('.').Select(trimSpace)) |> trimNewLine
             else
                 name <- GetBracketsRemoveName(shape.InnerText) |> trimSpace |> trimNewLine
 

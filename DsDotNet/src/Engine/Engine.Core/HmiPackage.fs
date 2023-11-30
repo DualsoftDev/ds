@@ -52,6 +52,7 @@ module HmiPackageModule =
     ///작업 단위 FlowA = { Real1, Real2, ... }
     type HMIReal = {
         Name : string
+        Devices          : string array //loaded system
 
         StartPush        : HMIPush
         ResetPush        : HMIPush
@@ -67,7 +68,6 @@ module HmiPackageModule =
         ErrorTxLamp      : HMILamp 
         ErrorRxLamp      : HMILamp
         
-        Devices          : HMIDevice array //loaded system
         Jobs             : HMIJob array      
     } with
         member x.CollectTags () =
@@ -85,7 +85,7 @@ module HmiPackageModule =
                 yield x.PauseLamp   
                 yield x.ErrorTxLamp 
                 yield x.ErrorRxLamp
-                yield! x.Devices |> Seq.collect (fun d -> d.CollectTags())
+                        //yield! x.Devices |> Seq.collect (fun d -> d.CollectTags())  필요시 HMIPackage Devices : string array 이름으로 별도로 찾아야함 
                 yield! x.Jobs |> Seq.collect (fun j -> j.CollectTags())
             }
 
@@ -185,13 +185,14 @@ module HmiPackageModule =
             printfn "--------- Building TagMap"
             tagMap.Clear()
             seq {
-                yield! x.System.CollectTags()
-                yield! x.Devices |> Seq.collect (fun d->d.CollectTags())
+                yield! x.System.CollectTags()   
+                    // x.System > HMIReal > HMIDevice 내부에 Devices 있어서   HMIPackage.Devices  중복을 피하기 위해 
+                    // x.System > HMIReal > HMIDevice -> string 으로 변경 
+                yield! x.Devices |> Seq.collect (fun d->d.CollectTags()) 
             } |> iter (fun t ->
                 let key = (t.Name, t.Kind)
                 match tagMap.TryGetValue(key) with
                 | true, tag ->
-                    // todo : fix me
                     verifyM "Duplicate Tag" (tag = t) 
                 | _ -> tagMap.Add(key, t))         //cache.[key] <- getItem()
 

@@ -36,26 +36,32 @@ module ImportU =
         let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
 
         let call =
-            let jobName = sysName + "_" + apiName
+            if jobCallNames.Contains sysName
+            then 
 
-            match mySys.Jobs.TryFind(fun job -> job.Name = jobName) with
-            | Some job ->
-                if job.DeviceDefs.any () then
-                    let call =
-                        if (parentReal.IsSome) then
-                            Call.Create(job, DuParentReal(parentReal.Value))
-                        else
-                            Call.Create(job, DuParentFlow(parentFlow.Value))
+            
+                let jobName = sysName + "_" + apiName
+            
+                match mySys.Jobs.TryFind(fun job -> job.Name = jobName) with
+                | Some job ->
+                    if job.DeviceDefs.any () then
+                        let call =
+                            if (parentReal.IsSome) then
+                                Call.Create(job, DuParentReal(parentReal.Value))
+                            else
+                                Call.Create(job, DuParentFlow(parentFlow.Value))
 
-                    call.TargetJob.DeviceDefs
-                        .OfType<TaskDev>()
-                        .Iter(fun a -> a.ApiItem.Xywh <- node.CallPosition)
+                        call.TargetJob.DeviceDefs
+                            .OfType<TaskDev>()
+                            .Iter(fun a -> a.ApiItem.Xywh <- node.CallPosition)
 
-                    call
-                else
-                    node.Shape.ErrorName(ErrID._52, node.PageNum)
+                        call
+                    else
+                        node.Shape.ErrorName(ErrID._52, node.PageNum)
+                | None ->
+                        node.Shape.ErrorName(ErrID._48, node.PageNum)
 
-            | None ->
+            else
                 let apiName = node.CallApiName
                 let loadedName = node.CallName
 
@@ -319,12 +325,11 @@ module ImportU =
                 |> Seq.filter (fun node -> node.Alias.IsNone)
                 |> Seq.filter (fun node -> node.NodeType.IsCall)
 
-            let createCall () =
-
-                let jobCallNames =
+            let jobCallNames =
                     pptNodes.Where(fun node -> node.NodeType.IsLoadSys)
                     |> Seq.collect (fun node -> node.JobCallNames)
-
+                    
+            let createCall () =
                 calls
                 |> Seq.iter (fun node ->
                     let parentReal =

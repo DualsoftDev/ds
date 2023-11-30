@@ -1,0 +1,79 @@
+@using Engine.Core
+@using System.Reactive.Subjects
+@implements IAsyncDisposable
+
+@if (_loading)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    @* <DxButton Click="@Click" Text="@Text" Enabled="@_enabled" /> *@
+    <DxButton Click="@onClick" Text="@_text" Enabled="@_enabled" RenderStyleMode="@_style" RenderStyle="ButtonRenderStyle.Primary" />
+}
+
+
+@code {
+    bool _loading { get; set; } = true;
+
+    // [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
+    [Parameter] public Func<object, TagWeb> TagGetter { get; set; }
+    // [Parameter] public TagWeb Tag { get; set; }
+    [Parameter] public string Text { get; set; }
+    [Parameter] public object DataItem { get; set; }
+
+    bool _enabled = false;
+    TagWeb _tag;
+    string _text;
+    ButtonRenderStyleMode _style = ButtonRenderStyleMode.Contained;
+    CompositeDisposable _disposables = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Yield();
+        _tag = TagGetter.Invoke(DataItem);
+        _enabled = (bool)_tag.Value == false;
+        if (isOn())
+            Console.WriteLine($"Found On symbol: {_tag.Name}");
+        _text = Text;
+        evaluateEnabled();
+
+        IDisposable subscription =
+            ClientGlobal.TagChangedSubject.Subscribe(tag =>
+            {
+                if (tag.IsEqual(_tag))
+                {
+                    Console.WriteLine($"Auto/Manual change detected");
+                    evaluateEnabled();
+                    StateHasChanged();
+                }
+            });
+
+        _disposables.Add(subscription);
+        _loading = false;
+
+        bool isOn() => (bool)_tag.Value;
+        void evaluateEnabled()
+        {
+            var b = isOn();
+            _style = (b ? ButtonRenderStyleMode.Outline : ButtonRenderStyleMode.Contained);
+            _text = (b ? "✓ " : "") + Text;
+        }
+
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await Task.Yield();
+        _disposables.Dispose();
+        Console.WriteLine("xxx.razor disposed!");
+    }
+
+    async Task onClick()
+    {
+        _tag.SetValue(true);
+        var anyError = await Http.PostTagAsync(_tag, AuthenticationStateProvider, NavigationManager);
+        if (anyError.NonNullAny())
+            await JsDual.Alert($"Error while posting tag({_tag.Name}) change: {anyError}");
+    }
+}

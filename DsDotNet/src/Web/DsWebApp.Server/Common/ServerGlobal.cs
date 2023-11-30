@@ -3,6 +3,8 @@ using Engine.Info;
 using Engine.Runtime;
 using IO.Core;
 
+using System.Reactive.Subjects;
+
 
 namespace DsWebApp.Server.Common;
 
@@ -15,6 +17,7 @@ public class ServerGlobal
     /// DsZipPath 에 따른 compile 된 Runtime model
     /// </summary>
     public RuntimeModel RuntimeModel { get; private set; }
+    public Subject<RuntimeModel> RuntimeModelChangedSubject { get; } = new();
 
 
     internal DBLoggerORM.LogSet LogSet { get; set; }
@@ -51,7 +54,16 @@ public class ServerGlobal
         {
             Logger.Info($"Model change detected: {dsZipPath}");
             RuntimeModel?.Dispose();
+            RuntimeModel = null;
+
+            if (!File.Exists(dsZipPath))
+            {
+                Logger.Warn($"Model file not found: {dsZipPath}");
+                return null;
+            }
+
             RuntimeModel = new RuntimeModel(dsZipPath);
+            RuntimeModelChangedSubject.OnNext(RuntimeModel);
             return RuntimeModel;
         }
         catch (Exception ex)

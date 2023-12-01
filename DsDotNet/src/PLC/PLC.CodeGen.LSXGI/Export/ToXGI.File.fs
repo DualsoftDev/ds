@@ -41,7 +41,7 @@ module internal XgiFile =
 
     /// Template XGI XML 문자열을 반환
     let getTemplateXgiXml () =
-        match getTemplateXgiXmlWithVersion "4.5.2" with
+        match getTemplateXgiXmlWithVersion "4.7.4" with
         | Some(xml) -> xml
         | None -> failwithlogf "INTERNAL ERROR: failed to read resource template"
 

@@ -1,0 +1,9 @@
+@page "/demo/widget"
+<h3>Widget Test</h3>
+
+<DxButton Text="Hello" Click="@(() => { ToastService.ShowInfo("Clicked");})" />
+<CompWgtPbWithLamp Text="ToggleMe Lamp" IsOn="@true" Click="@(() => { ToastService.ShowInfo("Clicked");})" />
+
+@code {
+
+}

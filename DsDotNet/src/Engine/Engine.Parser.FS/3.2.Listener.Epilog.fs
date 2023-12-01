@@ -13,8 +13,31 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module EtcListenerModule =
+    let getHwSysItem (hwItem:HwSysItemDefContext)= 
+        let nameAddr = hwItem.TryFindFirstChild<HwSysItemNameAddrContext>().Value
+        let nameCtx = nameAddr.TryFindFirstChild<HwSysItemNameContext>().Value
+        let name = nameCtx.GetText()
+
+        let addrIn, addrOut =
+            match nameAddr.ChildCount with
+            | 2 ->
+                option {
+                    let! inOutCtx = nameAddr.TryFindFirstChild<AddressInOutContext>()
+                    let! inCtx = inOutCtx.TryFindFirstChild<InAddrContext>()
+                    let! outCtx = inOutCtx.TryFindFirstChild<OutAddrContext>()
+
+                    return
+                        inCtx.GetText() ,
+                        outCtx.GetText()
+                }
+                |> Option.get
+            | _ -> null, null
+
+        name, addrIn, addrOut 
+
     (* 모든 vertex 가 생성 된 이후, edge 연결 작업 수행 *)
     type DsParserListener with
+
 
         member x.ProcessButtonBlock(ctx: ButtonBlockContext) =
             for ctxChild in ctx.children do
@@ -45,31 +68,13 @@ module EtcListenerModule =
                     else
                         x.ButtonCategories.Add(key) |> ignore
 
-                    let buttonDefs = first.Descendants<ButtonDefContext>().ToArray()
+                    let buttonDefs = first.Descendants<HwSysItemDefContext>().ToArray()
                     let buttonFuncs = commonFunctionExtractor first
 
                     let flowBtnInfo =
                         [ for bd in buttonDefs do
                               option {
-                                  let! btnNameAddr = bd.TryFindFirstChild<BtnNameAddrContext>()
-                                  let! btnNameCtx = btnNameAddr.TryFindFirstChild<ButtonNameContext>()
-                                  let btnName = btnNameCtx.GetText()
-
-                                  let addrIn, addrOut =
-                                      match btnNameAddr.ChildCount with
-                                      | 2 ->
-                                          option {
-                                              let! inOutCtx = btnNameAddr.TryFindFirstChild<AddressInOutContext>()
-                                              let! inCtx = inOutCtx.TryFindFirstChild<InAddrContext>()
-                                              let! outCtx = inOutCtx.TryFindFirstChild<OutAddrContext>()
-
-                                              return
-                                                  inCtx.GetText() ,
-                                                  outCtx.GetText()
-                                          }
-                                          |> Option.get
-                                      | _ -> null, null
-
+                                  let btnName, addrIn, addrOut = getHwSysItem bd
                                   let flows =
                                       bd
                                           .Descendants<FlowNameContext>()
@@ -118,25 +123,18 @@ module EtcListenerModule =
                         | :? IdleBlockContext -> DuIdleLamp
                         | _ -> failwith $"lamp type error {fstType}"
 
-                    let lampDefs = first.Descendants<LampDefContext>().ToArray()
+                    let lampDefs = first.Descendants<HwSysItemDefContext>().ToArray()
                     let lampFuncs = commonFunctionExtractor first
 
                     let flowLampInfo =
                         [ for ld in lampDefs do
                               option {
-                                  let! lampNameCtx = ld.TryFindFirstChild<LampNameContext>()
                                   let! flowNameCtx = ld.TryFindFirstChild<FlowNameContext>()
-                                  let addrCtx = ld.TryFindFirstChild<AddressItemContext>()
+                                  let lmpName, addrIn, addrOut = getHwSysItem ld
+
                                   let! flow = flowNameCtx.GetText() |> system.TryFindFlow
-                                  let lmpName = lampNameCtx.GetText()
-
-                                  let address =
-                                      match addrCtx with
-                                      | Some addr -> addr.GetText()
-                                      | None -> null
-
                                   let funcSet = commonFunctionSetter lmpName lampFuncs
-                                  return targetLmpType, lmpName, address,address, flow, funcSet //test
+                                  return targetLmpType, lmpName, addrIn, addrOut, flow, funcSet //test
                               } ]
 
                     flowLampInfo |> List.choose id |> List.iter (system.AddLamp)
@@ -155,23 +153,15 @@ module EtcListenerModule =
                         | :? ReadyBlockContext -> DuReadyState
                         | _ -> failwith $"condition type error {fstType}"
 
-                    let conditionDefs = first.Descendants<LampDefContext>().ToArray()
+                    let conditionDefs = first.Descendants<HwSysItemDefContext>().ToArray()
                     let conditionFuncs = commonFunctionExtractor first
 
                     let flowConditionInfo =
                         [ for cd in conditionDefs do
                               option {
-                                  let! cndNameCtx = cd.TryFindFirstChild<LampNameContext>()
-                                  let addrCtx = cd.TryFindFirstChild<AddressItemContext>()
-                                  let cndName = cndNameCtx.GetText()
 
-                                  let address =
-                                      match addrCtx with
-                                      | Some addr -> addr.GetText()
-                                      | None -> null
-
+                                  let cndName, addrIn, addrOut = getHwSysItem cd
                                   let funcSet = commonFunctionSetter cndName conditionFuncs
-
                                   let flows =
                                       cd
                                           .Descendants<FlowNameContext>()
@@ -183,7 +173,7 @@ module EtcListenerModule =
                                           .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName))
                                           .ToHashSet()
 
-                                  return targetCndType, cndName, address,address, flows, funcSet  //test
+                                  return targetCndType, cndName, addrIn, addrOut, flows, funcSet  //test
                               } ]
 
                     flowConditionInfo

@@ -317,16 +317,11 @@ categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|stopBlock|emergencyBl
     readyBlock     :'[' ('r_in'|'r') ']' EQ categoryBlock;
     idleBlock      :'[' ('i_in'|'i') ']' EQ categoryBlock;
 
-    categoryBlock: LBRACE (() | (buttonDef|lampDef|funcSet)*) RBRACE;
+    categoryBlock: LBRACE (() | (hwSysItemDef|funcSet)*) RBRACE;
 
-    buttonDef: btnNameAddr EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
-    btnNameAddr: buttonName addressInOut;
-
-    buttonName: identifier12;
-
-    lampDef: (lampName|lampName addrDef) EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
-    addrDef: LPARENTHESIS addressItem? RPARENTHESIS;
-    lampName: identifier12;
+    hwSysItemDef: hwSysItemNameAddr EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
+    hwSysItemNameAddr: hwSysItemName addressInOut;
+    hwSysItemName: identifier12;
 
     flowName: identifier1;
 

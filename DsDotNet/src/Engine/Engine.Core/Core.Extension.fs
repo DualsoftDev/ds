@@ -56,12 +56,9 @@ module CoreExtensionModule =
         member x.AddLamp(lmpType:LampType, lmpName: string, inAddr:string, outAddr:string, flow:Flow, funcs:HashSet<Func>) =
             checkSystem(x, flow, lmpName)
 
-            x.HWLamps.Select(fun f->f.Name).Contains(lmpName) |> not
-            |> verifyM $"램프타입[{lmpType}]{lmpName}이 중복 정의 되었습니다.  위치:[{flow.Name}]"
-
             match x.HWLamps.TryFind(fun f -> f.Name = lmpName) with
-            | Some lmp -> lmp.SettingFlow <- flow
-            | None -> x.HWLamps.Add(LampDef(lmpName, x,lmpType, inAddr, outAddr, flow, funcs))
+            | Some lmp -> failwithf $"램프타입[{lmpType}]{lmpName}이 다른 Flow에 중복 정의 되었습니다.  위치:[{lmp.SettingFlows.First().Name}]"
+            | None -> x.HWLamps.Add(LampDef(lmpName, x,lmpType, inAddr, outAddr, HashSet[flow], funcs))
                       |> verifyM $"Duplicated LampDef [{lmpName}]"
                       HwSystemItem.CreateHWApi(lmpName, x) |> ignore
 

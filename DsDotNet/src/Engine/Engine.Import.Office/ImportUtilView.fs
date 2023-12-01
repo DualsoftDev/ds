@@ -107,28 +107,28 @@ module ImportViewModule =
     let UpdateLampNodes (system: DsSystem, flow: Flow, node: ViewNode) =
         let newNode = ViewNode("Lamps", VLAMP)
 
-        system.AutoHWLamps.Where(fun w -> w.SettingFlow = flow)
+        system.AutoHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuAutoLamp)) |> ignore)
 
-        system.ManualHWLamps.Where(fun w -> w.SettingFlow = flow)
+        system.ManualHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuManualLamp)) |> ignore)
 
-        system.DriveHWLamps.Where(fun w -> w.SettingFlow = flow)
+        system.DriveHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuDriveLamp)) |> ignore)
 
-        system.StopHWLamps.Where(fun w -> w.SettingFlow = flow)
+        system.StopHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuStopLamp)) |> ignore)
 
-        system.EmergencyHWLamps.Where(fun w -> w.SettingFlow = flow)
+        system.EmergencyHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuEmergencyLamp)) |> ignore)
 
-        system.TestHWLamps.Where(fun w -> w.SettingFlow = flow)
+        system.TestHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuTestDriveLamp)) |> ignore)
 
-        system.ReadyHWLamps.Where(fun w -> w.SettingFlow = flow)
+        system.ReadyHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuReadyLamp)) |> ignore)
 
-        system.IdleHWLamps.Where(fun w -> w.SettingFlow = flow)
+        system.IdleHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuIdleLamp)) |> ignore)
 
         if newNode.GetSingles().Count() > 0 then

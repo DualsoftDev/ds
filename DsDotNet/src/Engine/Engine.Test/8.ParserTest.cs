@@ -204,32 +204,32 @@ namespace Engine
     [lamps] = 
     {
         [a] = {
-            AutoMode(%Q1) = { F1 }
+            AutoMode(_,%Q1) = { F1 }
         }
         [m] = {
-            ManualMode(%Q1) = { F2 }
+            ManualMode(_,%Q1) = { F2 }
         }
         [d] = {
-            RunMode(%Q1) = { F3  }
+            RunMode(_,%Q1) = { F3  }
         }
         [s] = {
-            StopMode(%Q1) = { F3 }
+            StopMode(_,%Q1) = { F3 }
         }
         [e] = {
-            EmgMode(%Q1) = { F3 }
+            EmgMode(_,%Q1) = { F3 }
         }
         [t] = {
-            TestMode = { F5 }
+            TestMode(_,%Q1) = { F5 }
         }
         [r] = {
-            ReadyMode = { F4 }
+            ReadyMode(_,%Q1) = { F4 }
             ReadyMode.func = {
                 $t 2000;
                 $c 5;
             }
         }
         [i] = {
-            IdleLamp = { F5 }
+            IdleLamp(_,%Q1) = { F5 }
         }
     }
 }
@@ -255,11 +255,11 @@ namespace Engine
     [conditions] = 
     {
         [d] = {
-            AirOn1(%I1) = { F1;F2; }
-            AirOn2(%I2) = { F1; }
+            AirOn1(%I1,_) = { F1;F2; }
+            AirOn2(%I2,_) = { F1; }
         }
         [r] = {
-            LeakErr(%I3) = { F2; }
+            LeakErr(%I3,_) = { F2; }
             LeakErr.func = {
                 $t 2000;
                 $c 5;

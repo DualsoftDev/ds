@@ -131,9 +131,10 @@ module CoreModule =
 
 
     [<AbstractClass>]
-    type HwSystemDef (name: string, system:DsSystem, inAddress: TagAddress, outAddress: TagAddress, funcs: HashSet<Func>)=
+    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, inAddress: TagAddress, outAddress: TagAddress, funcs: HashSet<Func>)=
         inherit FqdnObject(name, system)
         member x.Name = name
+        member val SettingFlows = flows with get, set
         ///  작동을 위한 외부 IO 입력 주소
         member val InAddress = inAddress with get, set
         ///  작동을 위한 외부 IO 출력 주소
@@ -146,20 +147,16 @@ module CoreModule =
 
 
     and ButtonDef (name: string, system:DsSystem, btnType: BtnType, inAddress: TagAddress, outAddress: TagAddress, flows: HashSet<Flow>, funcs: HashSet<Func>) =
-        inherit HwSystemDef(name, system, inAddress, outAddress, funcs)
+        inherit HwSystemDef(name, system,flows, inAddress, outAddress, funcs)
         member x.ButtonType = btnType
-        member val SettingFlows = flows with get, set
 
-    and LampDef (name: string, system:DsSystem,lampType: LampType, inAddress: TagAddress,  outAddress: TagAddress, flow: Flow, funcs: HashSet<Func>) =
-        inherit HwSystemDef(name, system,  inAddress, outAddress, funcs) //inAddress lamp check bit
-        member x.Name = name
+    and LampDef (name: string, system:DsSystem,lampType: LampType, inAddress: TagAddress,  outAddress: TagAddress,  flows: HashSet<Flow>, funcs: HashSet<Func>) =
+        inherit HwSystemDef(name, system, flows, inAddress, outAddress, funcs) //inAddress lamp check bit
         member x.LampType = lampType
-        member val SettingFlow = flow with get, set
 
     and ConditionDef (name: string, system:DsSystem, conditionType: ConditionType, inAddress: TagAddress, outAddress:TagAddress,  flows: HashSet<Flow>, funcs: HashSet<Func>) =
-        inherit HwSystemDef(name,  system, inAddress, outAddress, funcs) // outAddress condition check bit
+        inherit HwSystemDef(name,  system,flows, inAddress, outAddress, funcs) // outAddress condition check bit
         member x.ConditionType = conditionType
-        member val SettingFlows = flows with get, set
 
 
     and AliasDef(aliasKey: Fqdn, target: AliasTargetWrapper option, mnemonics: string []) =

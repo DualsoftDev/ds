@@ -193,65 +193,52 @@ module internal ToDsTextModule =
                 |> List.map(fun b -> b |> List.ofSeq)
                 |> List.collect id
 
-            if btns.Any() then
-                yield $"{tab}[buttons] = {lb}"
-                let buttonsToDs(category:string, btns:ButtonDef seq) =
+
+            let HwSystemToDs(category:string, hws:HwSystemDef seq) =
                     [
-                        if btns.length() > 0 then
+                        if hws.length() > 0 then
                             yield $"{tab2}[{category}] = {lb}"
-                            for btn in btns do
-                                let flows = (btn.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine()) |> String.concat ";")
+                            for hw in hws do
+                                let flows = (hw.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine()) |> String.concat ";")
                                 let flowTexts =
                                     if flows.Count() > 0 then
                                         flows + ";"
                                     else
                                         ""
-                                let inAddr =  if isNullOrEmpty  btn.InAddress  then "_" else btn.InAddress
-                                let outAddr = if isNullOrEmpty  btn.OutAddress then "_" else btn.OutAddress
-                                yield $"{tab3}{btn.Name}({inAddr}, {outAddr}) = {lb} {flowTexts} {rb}"
-                                if btn.Funcs.any() then
-                                    for funcString in printFuncions btn.Name btn.Funcs do
+                                let inAddr =  if isNullOrEmpty  hw.InAddress  then "_" else hw.InAddress
+                                let outAddr = if isNullOrEmpty  hw.OutAddress then "_" else hw.OutAddress
+                                yield $"{tab3}{hw.Name}({inAddr}, {outAddr}) = {lb} {flowTexts} {rb}"
+                                if hw.Funcs.any() then
+                                    for funcString in printFuncions hw.Name hw.Funcs do
                                         yield funcString
                             yield $"{tab2}{rb}"
                     ] |> combineLines
-                yield buttonsToDs("a", system.AutoHWButtons)
-                yield buttonsToDs("m", system.ManualHWButtons)
-                yield buttonsToDs("d", system.DriveHWButtons)
-                yield buttonsToDs("s", system.StopHWButtons)
-                yield buttonsToDs("c", system.ClearHWButtons)
-                yield buttonsToDs("e", system.EmergencyHWButtons)
-                yield buttonsToDs("t", system.TestHWButtons)
-                yield buttonsToDs("h", system.HomeHWButtons)
+
+
+            if btns.Any() then
+                yield $"{tab}[buttons] = {lb}"
+                
+                yield HwSystemToDs("a", system.AutoHWButtons.Cast<HwSystemDef>())
+                yield HwSystemToDs("m", system.ManualHWButtons.Cast<HwSystemDef>())
+                yield HwSystemToDs("d", system.DriveHWButtons.Cast<HwSystemDef>())
+                yield HwSystemToDs("s", system.StopHWButtons.Cast<HwSystemDef>())
+                yield HwSystemToDs("c", system.ClearHWButtons.Cast<HwSystemDef>())
+                yield HwSystemToDs("e", system.EmergencyHWButtons.Cast<HwSystemDef>())
+                yield HwSystemToDs("t", system.TestHWButtons.Cast<HwSystemDef>())
+                yield HwSystemToDs("h", system.HomeHWButtons.Cast<HwSystemDef>())
                 yield $"{tab}{rb}"
 
 
             if system.HWLamps.Any() then
                 yield $"{tab}[lamps] = {lb}"
-                let lampsToDs(category:string, lamps:LampDef seq) =
-                    [
-                        if lamps.length() > 0 then
-                            yield $"{tab2}[{category}] = {lb}"
-                            for lamp in lamps do
-                                let addr =
-                                    if lamp.OutAddress <> null then
-                                        $"({lamp.OutAddress})"
-                                    else
-                                        ""
-
-                                yield $"{tab3}{lamp.Name}{addr} = {lb} {lamp.SettingFlow.Name} {rb}"
-                                if lamp.Funcs.any() then
-                                    for funcString in printFuncions lamp.Name lamp.Funcs do
-                                        yield funcString
-                            yield $"{tab2}{rb}"
-                    ] |> combineLines
-                yield lampsToDs("a", system.AutoHWLamps)
-                yield lampsToDs("m", system.ManualHWLamps)
-                yield lampsToDs("d", system.DriveHWLamps)
-                yield lampsToDs("s", system.StopHWLamps)
-                yield lampsToDs("e", system.EmergencyHWLamps)
-                yield lampsToDs("t", system.TestHWLamps)
-                yield lampsToDs("r", system.ReadyHWLamps)
-                yield lampsToDs("i", system.IdleHWLamps)
+                yield HwSystemToDs("a", system.AutoHWLamps.Cast<HwSystemDef>())
+                yield HwSystemToDs("m", system.ManualHWLamps.Cast<HwSystemDef>())
+                yield HwSystemToDs("d", system.DriveHWLamps.Cast<HwSystemDef>())
+                yield HwSystemToDs("s", system.StopHWLamps.Cast<HwSystemDef>())
+                yield HwSystemToDs("e", system.EmergencyHWLamps.Cast<HwSystemDef>())
+                yield HwSystemToDs("t", system.TestHWLamps.Cast<HwSystemDef>())
+                yield HwSystemToDs("r", system.ReadyHWLamps.Cast<HwSystemDef>())
+                yield HwSystemToDs("i", system.IdleHWLamps.Cast<HwSystemDef>())
                 yield $"{tab}{rb}"
 
             let cnds = system.Conditions
@@ -261,29 +248,8 @@ module internal ToDsTextModule =
                 let driveCnds = getTargetCnds DuDriveState
                 let readyCnds = getTargetCnds DuReadyState
                 yield $"{tab}[conditions] = {lb}"
-                let conditionsToDs(category:string, conditions:ConditionDef seq) =
-                    [
-                        yield $"{tab2}[{category}] = {lb}"
-                        for cnd in conditions do
-                            let addr =
-                                if cnd.InAddress <> null then
-                                    $"({cnd.InAddress})"
-                                else
-                                    ""
-                            let flows = (cnd.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine()) |> String.concat ";")
-                            let flowTexts =
-                                if flows.Count() > 0 then
-                                    flows + ";"
-                                else
-                                    ""
-                            yield $"{tab3}{cnd.Name}{addr} = {lb} {flowTexts} {rb}"
-                            if cnd.Funcs.any() then
-                                for funcString in printFuncions cnd.Name cnd.Funcs do
-                                    yield funcString
-                        yield $"{tab2}{rb}"
-                    ] |> combineLines
-                yield conditionsToDs("d", driveCnds)
-                yield conditionsToDs("r", readyCnds)
+                yield HwSystemToDs("d", driveCnds.Cast<HwSystemDef>())
+                yield HwSystemToDs("r", readyCnds.Cast<HwSystemDef>())
                 yield $"{tab}{rb}"
 
             (* prop

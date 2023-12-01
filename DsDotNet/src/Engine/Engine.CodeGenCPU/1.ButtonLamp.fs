@@ -20,7 +20,7 @@ type DsSystem with
             if lamp.OutTag.IsNonNull() //OutAddress 주소가 ModeLamp 연결
                 then
                 let sets =
-                    let f = lamp.SettingFlow
+                    let f = lamp.SettingFlows.Head()          
                     match lamp.LampType with
                     | DuAutoLamp      -> f.aop.Expr
                     | DuManualLamp    -> f.mop.Expr

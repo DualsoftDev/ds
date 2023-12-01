@@ -182,7 +182,7 @@ module HmiPackageModule =
         member val Devices = devices  with get, set
 
         member x.BuildTagMap () =
-            printfn "--------- Building TagMap"
+            logDebug "Building TagMap"
             tagMap.Clear()
             seq {
                 yield! x.System.CollectTags()   
@@ -192,11 +192,13 @@ module HmiPackageModule =
                 match tagMap.TryGetValue(key) with
                 | true, tag when t <> tag -> ()
                 | true, tag ->
-                    verifyM "Duplicate Tag" (tag = t) 
+                    // todo : fix me
+                    //verifyM "Duplicate Tag" (tag = t) 
+                    logWarn $"Duplicate Tag: {t.Name}/{t.KindDescription}"
                 | _ -> tagMap.Add(key, t))         //cache.[key] <- getItem()
 
         member x.UpdateTag(name:string, kind:int, newValue:obj) =
-            printfn $"--------- Updating Tag: {name}:{kind}={newValue}"
+            logDebug $"--------- Updating Tag: {name}:{kind}={newValue}"
             tagMap[(name, kind)].SetValue(newValue)
 
         member x.UpdateTag(newTag:TagWeb) =

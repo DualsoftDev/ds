@@ -1,4 +1,5 @@
-@using DsWebApp.Client.Pages.Hmis.Widget
+@* CompHmiFlowTable *@
+
 @using Engine.Core
 @using System.Reactive.Subjects
 
@@ -32,14 +33,6 @@ else
                         TagManual="(((HMIFlow)context.DataItem).GetManual())"
                         FlowName="@(((HMIFlow)context.DataItem).Name)"
                         />
-
-                    @*                     @{
-                <DxButton Click="() => onAuto(context.DataItem)" Text="Auto" IconCssClass="" />
-                // <DxButton Click="() => onManual(context.DataItem)" Text="Manual" IconCssClass="oi oi-check" />
-                <CompHmiWidgetPushButton Tag="(((HMIFlow)context.DataItem).GetManual())" Click="() => onManual(context.DataItem)" Text="Manual" />
-                }
-                *@
-
                 </CellDisplayTemplate>
             </DxGridCommandColumn>
 

@@ -1,3 +1,5 @@
+@* CompHmiLoader *@
+
 @code {
     protected HMIPackage _hmiPackage;
     protected HMISystem _system => _hmiPackage?.System;
@@ -9,7 +11,7 @@
         _hmiPackage = ClientGlobal.HmiPackage;
         if (_hmiPackage == null)
         {
-            Console.WriteLine("----- Loading HmiPackage from server..");
+            Console.WriteLine("Loading HmiPackage from server..");
             var result = await Http.GetResultSimpleAsync<HMIPackage>($"api/hmi/package");
             result.Iter(
                 okPackage => {

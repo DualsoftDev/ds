@@ -8,6 +8,7 @@ using Engine.Info;
 using Dual.Web.Server.Auth;
 using Microsoft.Data.Sqlite;
 using Dual.Web.Blazor.ClientSide;
+using Microsoft.AspNetCore.StaticFiles;
 
 //using DsWebApp.Server.Authentication;
 
@@ -140,7 +141,20 @@ if (serverSettings.UseHttpsRedirection)
     app.UseHttpsRedirection();
 
 app.UseBlazorFrameworkFiles();
+// Remove This
+// app.UseStaticFiles();
+
+// Add This
+var provider = new FileExtensionContentTypeProvider();
+provider.Mappings.Remove(".data");
+provider.Mappings[".data"] = "application/octet-stream";
+provider.Mappings.Remove(".wasm");
+provider.Mappings[".wasm"] = "application/wasm";
+provider.Mappings.Remove(".symbols.json");
+provider.Mappings[".symbols.json"] = "application/octet-stream";
+app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = provider });
 app.UseStaticFiles();
+//--------------
 
 app.UseRouting();
 

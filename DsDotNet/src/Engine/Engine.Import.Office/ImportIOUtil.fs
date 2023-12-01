@@ -63,8 +63,8 @@ module ImportIOUtil =
             else addr
         
             //parsing을 위헤서 '-' -> '_' 변경 
-        if newAddr = TextSkip then TextAddrEmpty else newAddr
-      
+       // if newAddr = TextSkip then TextAddrEmpty else newAddr
+        newAddr
 
     let getValidDevAddress (taskDev: TaskDev, bInput: bool) =
         let isSkip = if bInput then taskDev.ApiItem.RXs.Count = 0 else taskDev.ApiItem.TXs.Count = 0
@@ -76,6 +76,6 @@ module ImportIOUtil =
         let outAddr = getValidAddress(hwItem.OutAddress, hwItem.Name, skipOut, false)
         inAddr, outAddr
 
-    let getValidBtnAddress (btn: ButtonDef) = getValidBtnHwItem btn false true
-    let getValidLampAddress (lamp: LampDef) = getValidBtnHwItem lamp true false 
+    let getValidBtnAddress (btn: ButtonDef)       = getValidBtnHwItem btn  false true
+    let getValidLampAddress (lamp: LampDef)       = getValidBtnHwItem lamp true false 
     let getValidCondiAddress (cond: ConditionDef) = getValidBtnHwItem cond false true 

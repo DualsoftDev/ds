@@ -42,10 +42,11 @@ module CoreExtensionModule =
         member x.AddButton(btnType:BtnType, btnName:string, inAddress:TagAddress, outAddress:TagAddress, flow:Flow, funcs:HashSet<Func>) =
             checkSystem(x, flow, btnName)
           
-            let flows = x.HWButtons.Where(fun f->f.ButtonType = btnType)
-                        |> Seq.collect(fun b -> b.SettingFlows)
-            flows.Contains(flow) |> not
-            |> verifyM $"버튼타입[{btnType}]{btnName}이 중복 정의 되었습니다.  위치:[{flow.Name}]"
+            let existBtns = x.HWButtons.Where(fun f->f.ButtonType = btnType)
+                            |>Seq.filter(fun b -> b.SettingFlows.Contains(flow))
+
+            if existBtns.Where(fun w->w.Name = btnName).any()
+            then failwithf $"버튼타입[{btnType}]{btnName}이 중복 정의 되었습니다.  위치:[{flow.Name}]"
 
             match x.HWButtons.TryFind(fun f -> f.Name = btnName) with
             | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
@@ -98,6 +99,10 @@ module CoreExtensionModule =
         member x.ReadyConditions     = getConditions(x, DuReadyState)
         member x.DriveConditions     = getConditions(x, DuDriveState)
 
+        member x.HWSystemDefs = x.HWButtons.OfType<HwSystemDef>() 
+                                @ x.HWLamps.OfType<HwSystemDef>() 
+                                @ x.HWConditions.OfType<HwSystemDef>()
+
         member x.GetMutualResetApis(src:ApiItem) =
             let getMutual(apiInfo:ApiResetInfo) =
                 match src.Name.QuoteOnDemand() = apiInfo.Operand1, src.Name.QuoteOnDemand() = apiInfo.Operand2 with
@@ -116,8 +121,30 @@ module CoreExtensionModule =
     type Call with
         member x.System = x.Parent.GetSystem()
 
+    let inValidActionTags (x:DsSystem) = 
+                    x.Jobs |> Seq.collect(fun j-> j.DeviceDefs)
+                           |> Seq.collect(fun d-> 
+                                  [  
+                                     if d.ApiItem.RXs.any()
+                                     then yield d, "IN",d.InAddress
+                                     if d.ApiItem.TXs.any()
+                                     then yield d, "OUT",d.OutAddress
+                                  ])
+                           |> Seq.filter(fun (_, _, addr) -> addr = TextAddrEmpty) 
+                           |> Seq.map(fun (d, inout, _) -> $"{d.QualifiedName}_{inout}") 
 
-
+    let inValidHwSystemTag (x:DsSystem) = 
+                    x.HWSystemDefs 
+                           |> Seq.collect(fun h -> 
+                                [
+                                    match h with
+                                    | :? ButtonDef
+                                    | :? ConditionDef -> yield h, "IN", h.InAddress
+                                    | :? LampDef      -> yield h, "OUT", h.OutAddress
+                                    | _  -> failwith $"inValidHwSystemTag error {h.Name}"
+                                ])
+                           |> Seq.filter(fun (_, _, addr) -> addr = TextAddrEmpty) 
+                           |> Seq.map(fun (h, inout, _) -> $"{h.Name}_{inout}") 
 [<Extension>]
 type SystemExt =
     [<Extension>]
@@ -128,3 +155,16 @@ type SystemExt =
     static member GetButtons (x:DsSystem, btnType:BtnType) :IEnumerable<ButtonDef> = getButtons(x, btnType)
     [<Extension>]
     static member GetLamps (x:DsSystem, lampType:LampType) :IEnumerable<LampDef> = getLamps(x, lampType)
+    [<Extension>]
+    static member ValidActionTag(x:DsSystem) = x |> inValidActionTags |> Seq.any
+    [<Extension>]
+    static member ValidHwSystemTag(x:DsSystem) = x |> inValidHwSystemTag |> Seq.any
+    [<Extension>]
+    static member CheckValidInterfaceTags(x:DsSystem) =
+                let inValidActionTags = inValidActionTags(x);
+                let inValidHwSystemTag = inValidHwSystemTag(x);
+                if inValidActionTags.Any() then
+                    failwithf $"Device IO Table을 작성하세요 \n{String.Join('\n', inValidActionTags)}"
+                if inValidHwSystemTag.Any() then
+                    failwithf $"HW 조작 IO Table을 작성하세요 \n{String.Join('\n', inValidHwSystemTag)}"
+

@@ -40,13 +40,16 @@ module ImportIOTable =
                 |> Seq.map (fun j -> j.ApiName, j)
                 |> dict
 
+            let chageParserText newAddr = if newAddr= TextSkip then TextAddrEmpty else newAddr
             let changeValidAddress (address:string)  =
-                if  address <> TextSkip ||  address <> TextAddrEmpty then address
-                else
-                    let address = address.Trim() 
-                    match RuntimeDS.Target with
-                    | XGI -> if not <| address.StartsWith("%")  then "%" + address else address
-                    | _ -> address
+                //if  address <> TextSkip ||  address <> TextAddrEmpty then address
+                //else
+                    let address =
+                        match RuntimeDS.Target with
+                        | XGI -> if not <| address.Trim().StartsWith("%")  then "%" + address else address
+                        | _ -> address.Trim() 
+           
+                    address |> chageParserText
 
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let devName = $"{row.[(int) IOColumn.Name]}"
@@ -60,8 +63,8 @@ module ImportIOTable =
 
                 dev.InAddress <-  changeValidAddress inAdd
                 dev.OutAddress <- changeValidAddress outAdd
-                dev.InAddress <-  getValidDevAddress (dev, true)
-                dev.OutAddress <- getValidDevAddress (dev, false)
+                dev.InAddress <-  getValidDevAddress (dev, true) |> changeValidAddress
+                dev.OutAddress <- getValidDevAddress (dev, false)|> changeValidAddress
 
                 let jobName = $"{row.[(int) IOColumn.Job]}"
                 let func = $"{row.[(int) IOColumn.Func]}"
@@ -87,49 +90,47 @@ module ImportIOTable =
                 let btnName = $"{row.[(int) IOColumn.Name]}"
                 match sys.HWButtons.Where(fun w -> w.ButtonType = btntype).TryFind(fun f -> f.Name = btnName) with
                 | Some btn ->
-                    btn.InAddress  <- $"{row.[(int) IOColumn.Input]}" |> changeValidAddress
-                    btn.OutAddress <- $"{row.[(int) IOColumn.Output]}"|> changeValidAddress
+                    btn.InAddress  <- $"{row.[(int) IOColumn.Input]}" 
+                    btn.OutAddress <- $"{row.[(int) IOColumn.Output]}"
                     //ValidBtnAddress
                     let inaddr, outaddr =  getValidBtnAddress (btn)
-                    btn.InAddress  <-inaddr
-                    btn.OutAddress <-outaddr
+                    btn.InAddress  <-inaddr |> changeValidAddress
+                    btn.OutAddress <-outaddr|> changeValidAddress
                     functionUpdate (btn.Name, $"{row.[(int) IOColumn.Func]}", btn.Funcs, tableIO, false, page)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{btnName}", page, 0u)
 
 
             let updateLamp (row: Data.DataRow, lampType: LampType, tableIO: Data.DataTable, page) =
                 let name = $"{row.[(int) IOColumn.Name]}"
-                let output = $"{row.[(int) IOColumn.Output]}" |> changeValidAddress
                 let func = $"{row.[(int) IOColumn.Func]}"
 
                 let lamps = sys.HWLamps.Where(fun w -> w.LampType = lampType)
 
                 match lamps.TryFind(fun f -> f.Name = name) with
                 | Some lamp ->
-                    lamp.InAddress  <- $"{row.[(int) IOColumn.Input]}" |> changeValidAddress
-                    lamp.OutAddress <- $"{row.[(int) IOColumn.Output]}"|> changeValidAddress
+                    lamp.InAddress  <- $"{row.[(int) IOColumn.Input]}" 
+                    lamp.OutAddress <- $"{row.[(int) IOColumn.Output]}"
                     //ValidBtnAddress
                     let inaddr, outaddr =  getValidLampAddress (lamp)
-                    lamp.InAddress  <-inaddr
-                    lamp.OutAddress <-outaddr
+                    lamp.InAddress  <-inaddr|> changeValidAddress
+                    lamp.OutAddress <-outaddr|> changeValidAddress
                     functionUpdate (lamp.Name, func, lamp.Funcs, tableIO, false, page)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", page, 0u)
 
             let updateCondition (row: Data.DataRow, cType: ConditionType, tableIO: Data.DataTable, page) =
                 let name = $"{row.[(int) IOColumn.Name]}"
-                let output = $"{row.[(int) IOColumn.Input]}" |> changeValidAddress
                 let func = $"{row.[(int) IOColumn.Func]}"
 
                 let conds = sys.HWSystemConditions.Where(fun w -> w.ConditionType = cType)
 
                 match conds.TryFind(fun f -> f.Name = name) with
                 | Some cond ->
-                    cond.InAddress  <- $"{row.[(int) IOColumn.Input]}" |> changeValidAddress
-                    cond.OutAddress <- $"{row.[(int) IOColumn.Output]}"|> changeValidAddress
+                    cond.InAddress  <- $"{row.[(int) IOColumn.Input]}" 
+                    cond.OutAddress <- $"{row.[(int) IOColumn.Output]}"
                     //ValidBtnAddress
                     let inaddr, outaddr =  getValidCondiAddress (cond)
-                    cond.InAddress  <-inaddr
-                    cond.OutAddress <-outaddr     
+                    cond.InAddress  <-inaddr |> changeValidAddress
+                    cond.OutAddress <-outaddr  |> changeValidAddress    
                     functionUpdate (cond.Name, func, cond.Funcs, tableIO, false, page)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", page, 0u)
 

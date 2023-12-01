@@ -77,30 +77,32 @@ module FileManager =
     let getTopLevelDirectory (filePaths: string list) : string =
         if List.isEmpty filePaths then
             raise (new ArgumentException("getTopLevelDirectory: empty paths"))
+        if filePaths.Length = 1 then 
+            getDirectoryName (filePaths.First().ToFile())
+        else
+            let splitPaths = filePaths |> List.map (fun path -> path.Split([|'\\'; '/'|]))
+            let minLength = splitPaths |> List.map Array.length |> List.min
 
-        let splitPaths = filePaths |> List.map (fun path -> path.Split([|'\\'; '/'|]))
-        let minLength = splitPaths |> List.map Array.length |> List.min
+            let commonParts = 
+                [0 .. minLength - 1]
+                |> List.map (fun i -> 
+                    let part = splitPaths.[0].[i]
+                    if splitPaths |> List.forall (fun sp -> sp.[i] = part) then
+                        Some(part)
+                    else
+                        None)
 
-        let commonParts = 
-            [0 .. minLength - 1]
-            |> List.map (fun i -> 
-                let part = splitPaths.[0].[i]
-                if splitPaths |> List.forall (fun sp -> sp.[i] = part) then
-                    Some(part)
-                else
-                    None)
+            let commonPrefix = 
+                match List.choose id commonParts with
+                | [] -> raise (new ArgumentException("getTopLevelDirectory: error paths"))
+                | cp -> String.Join(Path.DirectorySeparatorChar.ToString(), cp) |> getValidDirectory
 
-        let commonPrefix = 
-            match List.choose id commonParts with
-            | [] -> raise (new ArgumentException("getTopLevelDirectory: error paths"))
-            | cp -> String.Join(Path.DirectorySeparatorChar.ToString(), cp) |> getValidDirectory
-
-        if PathManager.isPathRooted (commonPrefix)
-        then commonPrefix
-        else 
-            let topLevelDirSplit = 
-                commonPrefix.Split(directorySeparatorDS) |> Array.rev |> Array.skip 1 |> Array.rev
-            String.Join(directorySeparatorDS, topLevelDirSplit)
+            if PathManager.isPathRooted (commonPrefix)
+            then commonPrefix
+            else 
+                let topLevelDirSplit = 
+                    commonPrefix.Split(directorySeparatorDS) |> Array.rev |> Array.skip 1 |> Array.rev
+                String.Join(directorySeparatorDS, topLevelDirSplit)
         
 
     //모델 최상단 폴더에 Zip형태로 생성

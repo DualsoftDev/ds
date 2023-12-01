@@ -463,6 +463,7 @@ module PPTObjectModule =
         member val ButtonDefs = btnDefs
         member val LampHeadPageDefs = lampHeadPageDefs
         member val LampDefs = lampDefs
+        
 
         member x.GetRectangle(slideSize: int * int) = shape.GetPosition(slideSize)
 

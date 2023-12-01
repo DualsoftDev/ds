@@ -71,14 +71,12 @@ module ErrID =
     let _53 = "Api TXs~Rxs 이름을 정의 해야합니다. ex) ApiName[tx1;tx2~rx1]"
     let _54 = "다른 Flow의 Work 정의는 '.' 기호로 나타냅니다. ex) Flow2.Work3"
     let _55 = "외부 시스템(CPU)은  호출은 '$' 기호로 나타냅니다. ex) System(CPU)$SystemApiName"
-
-    let _56 =
-        "외부 시스템(Device) 호출은 '$'  또는 '.' 기호로 나타냅니다. ex) System(Device).DeviceApiName"
-
+    let _56 = "외부 시스템(Device) 호출은 '$'  또는 '.' 기호로 나타냅니다. ex) System(Device).DeviceApiName"
     let _57 = "PPT 파일이름 공백발견, 다른이름저장이 필요합니다."
     let _58 = "System 이름 시작은 특수문자 및 숫자는 불가능합니다."
     let _59 = "페이지에 제목 이름이 없습니다."
-
+    let _60 = "적용시킬 Flow가 없습니다. Flow장표를 추가하세요"
+    
     // IO Mapping Error (1001 ~ )
     let _1001 = "시스템에 버튼 이름이 없습니다."
     let _1002 = "시스템에 램프 이름이 없습니다."

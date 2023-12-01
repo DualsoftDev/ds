@@ -264,8 +264,11 @@ module ImportU =
             doc.NodesHeadPage
             |> Seq.filter (fun node -> node.ButtonHeadPageDefs.any())
             |> Seq.iter (fun node ->
-                dicFlow.Iter(fun flow ->
-                    node.ButtonHeadPageDefs.ForEach(fun b -> mySys.AddButton(b.Value, b.Key, "", "", flow.Value, new HashSet<Func>())))
+                        
+                if dicFlow.length() = 0 then Office.ErrorShape(node.Shape, ErrID._60, node.PageNum)
+                else 
+                    dicFlow.Iter(fun flow ->
+                        node.ButtonHeadPageDefs.ForEach(fun b -> mySys.AddButton(b.Value, b.Key, "", "", flow.Value, new HashSet<Func>())))
                 )        
                 
         //EMG & Start & Auto 리스트 만들기
@@ -283,9 +286,30 @@ module ImportU =
             |> Seq.filter (fun node -> node.LampHeadPageDefs.any())
             |> Seq.iter (fun node ->
                 dicFlow.Iter(fun flow ->
-                    node.LampHeadPageDefs.ForEach(fun l -> mySys.AddLamp(l.Value, $"{l.Key}_{flow.Value.Name}", "", "", flow.Value, new HashSet<Func>())))
+                    if dicFlow.length() = 0 then Office.ErrorShape(node.Shape, ErrID._60, node.PageNum)
+                    else 
+                        node.LampHeadPageDefs.ForEach(fun l -> mySys.AddLamp(l.Value, $"{l.Key}_{flow.Value.Name}", "", "", flow.Value, new HashSet<Func>())))
                 )      
       
+        //Condition 조건 적용
+        [<Extension>]
+        static member MakeCondition(doc: pptDoc, mySys: DsSystem) = () ///작성 필요
+            //let dicFlow = doc.DicFlow
+
+            //doc.Nodes
+            //|> Seq.filter (fun node -> node.LampDefs.any ())
+            //|> Seq.iter (fun node ->
+            //    let flow = dicFlow.[node.PageNum]
+            //    node.LampDefs.ForEach(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", flow, new HashSet<Func>())))
+            
+            //doc.NodesHeadPage
+            //|> Seq.filter (fun node -> node.LampHeadPageDefs.any())
+            //|> Seq.iter (fun node ->
+            //    dicFlow.Iter(fun flow ->
+            //        if dicFlow.length() = 0 then Office.ErrorShape(node.Shape, ErrID._60, node.PageNum)
+            //        else 
+            //            node.LampHeadPageDefs.ForEach(fun l -> mySys.AddLamp(l.Value, $"{l.Key}_{flow.Value.Name}", "", "", flow.Value, new HashSet<Func>())))
+            //    )
      
         //real call alias  만들기
         [<Extension>]

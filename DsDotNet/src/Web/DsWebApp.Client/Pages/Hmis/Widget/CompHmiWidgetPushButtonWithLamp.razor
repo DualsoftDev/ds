@@ -1,15 +1,15 @@
-@* CompHmiWidgetPushButtonWithLamp *@
+@* CompWgtPbWithLamp *@
 
 <div class="container">
     <DxButton Click="@_toggleLamp">
-        <CompEmbeddedLamp @ref="_lampRef" />
+        <CompWgtEmbeddedLamp @ref="_lampRef" />
         @Text
     </DxButton>
 </div>
 
 @code {
     bool _isLampOn = false;
-    CompEmbeddedLamp _lampRef;
+    CompWgtEmbeddedLamp _lampRef;
     [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
     [Parameter] public string Text { get; set; }
 

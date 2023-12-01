@@ -1,16 +1,21 @@
-@* CompHmiWidgetLampRGFH *@
+@* CompWgtPbWithLamp *@
 
 <DxButton Click="@_toggleLamp">
-    <CompEmbeddedLamp IsOn=IsOn @ref="_lampRef" />
+    <CompWgtEmbeddedLamp IsOn=IsOn @ref="_lampRef" />
     @Text
 </DxButton>
 
 @code {
-    bool _isOn = false;
-    CompEmbeddedLamp _lampRef;
+    CompWgtEmbeddedLamp _lampRef;
     [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
     [Parameter] public string Text { get; set; }
+
+    bool _isOn = false; // IsOn 과 별개로 상태 저장 필요
     [Parameter] public bool IsOn { get; set; }
+    protected override void OnInitialized()
+    {
+        _isOn = IsOn;
+    }
 
 
     void _toggleLamp()

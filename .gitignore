@@ -56,3 +56,4 @@ Grammar/CsParser/bin/
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/**/*.ds
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/**/*.json
 *.xgdb
+/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/*.json

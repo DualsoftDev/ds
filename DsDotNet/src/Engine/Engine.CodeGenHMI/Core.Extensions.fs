@@ -67,7 +67,7 @@ module ConvertHMI =
     type Real with
         member private x.GetHMI()   =
 
-            let getLoadedName (api:ApiItem) = x.Parent.GetSystem().GetLoadedSys(api.System.Name).Value.Name
+            let getLoadedName (api:ApiItem) = x.Parent.GetSystem().GetLoadedSys(api.System.Name).Value
             let calls = x.Graph.Vertices.OfType<Call>()
             let tm = x.TagManager :?> VertexManager
             {
@@ -86,8 +86,8 @@ module ConvertHMI =
                 ErrorRxLamp  = getPush tm (VertexTag.errorTx |>int)  
                 
                 Devices      = calls.SelectMany(fun c->
-                                      c.TargetJob.DeviceDefs.Select(fun d-> getLoadedName d.ApiItem)
-                                                            .Distinct()  
+                                      c.TargetJob.DeviceDefs.Select(fun d-> getLoadedName d.ApiItem).Distinct()
+                                                            .Select(fun d->d.GetHMI())
                                        ).ToArray()
                                
                 Jobs         = calls.Select(fun c->c.TargetJob.GetHMI()).ToArray()

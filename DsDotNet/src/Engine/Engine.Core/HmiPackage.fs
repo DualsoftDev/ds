@@ -52,7 +52,6 @@ module HmiPackageModule =
     ///작업 단위 FlowA = { Real1, Real2, ... }
     type HMIReal = {
         Name : string
-        Devices          : string array //loaded system
 
         StartPush        : HMIPush
         ResetPush        : HMIPush
@@ -67,7 +66,8 @@ module HmiPackageModule =
         PauseLamp        : HMILamp 
         ErrorTxLamp      : HMILamp 
         ErrorRxLamp      : HMILamp
-        
+
+        Devices          : HMIDevice array //loaded system
         Jobs             : HMIJob array      
     } with
         member x.CollectTags () =
@@ -186,12 +186,11 @@ module HmiPackageModule =
             tagMap.Clear()
             seq {
                 yield! x.System.CollectTags()   
-                    // x.System > HMIReal > HMIDevice 내부에 Devices 있어서   HMIPackage.Devices  중복을 피하기 위해 
-                    // x.System > HMIReal > HMIDevice -> string 으로 변경 
                 yield! x.Devices |> Seq.collect (fun d->d.CollectTags()) 
             } |> iter (fun t ->
                 let key = (t.Name, t.Kind)
                 match tagMap.TryGetValue(key) with
+                | true, tag when t <> tag -> ()
                 | true, tag ->
                     verifyM "Duplicate Tag" (tag = t) 
                 | _ -> tagMap.Add(key, t))         //cache.[key] <- getItem()

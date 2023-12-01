@@ -73,7 +73,7 @@ public class ClientGlobal : ClientGlobalBase
         // todo:
         TagChangedSubject.Subscribe(tag =>
         {
-            Console.WriteLine("--- In ClientGlobal.TagChangedSubject...");
+            Console.WriteLine("In ClientGlobal.TagChangedSubject...");
             HmiPackage?.UpdateTag(tag);
         });
 

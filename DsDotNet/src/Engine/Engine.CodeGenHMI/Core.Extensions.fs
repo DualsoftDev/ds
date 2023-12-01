@@ -47,14 +47,17 @@ module ConvertHMI =
 
     type LoadedSystem with
         member private x.GetHMI()   =
+            let containerSysApis = x.ContainerSystem.ApiUsages
             {
                 Name        = x.Name
-                ApiItems    = x.ReferenceSystem.ApiItems.Select(fun s->s.GetHMI()).ToArray()
+                ApiItems    = x.ReferenceSystem
+                               .ApiItems.Where(fun a->containerSysApis.Contains(a))
+                                        .Select(fun s->s.GetHMI()).ToArray()
             }
 
     type Job with
         member private x.GetHMI()   =
-            let actionInTags  = x.DeviceDefs.Select(fun d->d.InTag)      
+            let actionInTags  = x.DeviceDefs.Select(fun d->d.InTag) //todo  ActionINFunc func $not 적용 검토     
             let apiTagManager = x.DeviceDefs.First().ApiItem.TagManager :?> ApiItemManager
             {
                 Name = x.Name
@@ -64,29 +67,30 @@ module ConvertHMI =
     type Real with
         member private x.GetHMI()   =
 
-            let getLoadedSystem (api:ApiItem) = x.Parent.GetSystem().GetLoadedSys(api.System.Name).Value 
+            let getLoadedName (api:ApiItem) = x.Parent.GetSystem().GetLoadedSys(api.System.Name).Value.Name
+            let calls = x.Graph.Vertices.OfType<Call>()
             let tm = x.TagManager :?> VertexManager
             {
                 Name = x.Name
-                StartPush        = getPush tm (VertexTag.startTag |>int)   
-                ResetPush        = getPush tm (VertexTag.resetTag |>int)  
-                ONPush           = getPush tm (VertexTag.forceOn |>int)  
-                OFFPush          = getPush tm (VertexTag.forceOff |>int)  
-                ReadyLamp        = getPush tm (VertexTag.ready |>int)  
-                GoingLamp        = getPush tm (VertexTag.going |>int)  
-                FinishLamp       = getPush tm (VertexTag.finish |>int)  
-                HomingLamp       = getPush tm (VertexTag.homing |>int)  
-                OriginLamp       = getPush tm (VertexTag.origin |>int)  
-                PauseLamp        = getPush tm (VertexTag.pause |>int)  
-                ErrorTxLamp      = getPush tm (VertexTag.errorRx |>int)  
-                ErrorRxLamp      = getPush tm (VertexTag.errorTx |>int)  
+                StartPush    = getPush tm (VertexTag.startTag |>int)   
+                ResetPush    = getPush tm (VertexTag.resetTag |>int)  
+                ONPush       = getPush tm (VertexTag.forceOn |>int)  
+                OFFPush      = getPush tm (VertexTag.forceOff |>int)  
+                ReadyLamp    = getPush tm (VertexTag.ready |>int)  
+                GoingLamp    = getPush tm (VertexTag.going |>int)  
+                FinishLamp   = getPush tm (VertexTag.finish |>int)  
+                HomingLamp   = getPush tm (VertexTag.homing |>int)  
+                OriginLamp   = getPush tm (VertexTag.origin |>int)  
+                PauseLamp    = getPush tm (VertexTag.pause |>int)  
+                ErrorTxLamp  = getPush tm (VertexTag.errorRx |>int)  
+                ErrorRxLamp  = getPush tm (VertexTag.errorTx |>int)  
                 
-                Devices          = x.Graph.Vertices.OfType<Call>()
-                                    .SelectMany(fun c->c.TargetJob.DeviceDefs
-                                                        .Select(fun d->  getLoadedSystem  d.ApiItem)
-                                                        .Select(fun d-> d.GetHMI())
-                                                        ).ToArray()
-                Jobs             = x.Graph.Vertices.OfType<Call>().Select(fun c->c.TargetJob.GetHMI()).ToArray()
+                Devices      = calls.SelectMany(fun c->
+                                      c.TargetJob.DeviceDefs.Select(fun d-> getLoadedName d.ApiItem)
+                                                            .Distinct()  
+                                       ).ToArray()
+                               
+                Jobs         = calls.Select(fun c->c.TargetJob.GetHMI()).ToArray()
             }
 
     type Flow with

@@ -55,3 +55,4 @@ Grammar/CsParser/bin/
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/**/*.zip
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/**/*.ds
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/**/*.json
+*.xgdb

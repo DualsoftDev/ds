@@ -49,8 +49,8 @@ module PPTDocModule =
         let settingAlias (nodes: pptNode seq) =
             let nodes = nodes.OrderByDescending(fun o -> parents.ContainsKey(o)) //부모지정
             let names = nodes |> Seq.map (fun f -> f.Name)
-
-            (nodes, GetAliasNumber(names))
+            let nameNums= GetAliasNumber(names)
+            (nodes, nameNums)
             ||> Seq.map2 (fun node nameSet -> node, nameSet)
             |> Seq.iter (fun (node, (name, aliasNumber)) ->
                 if (aliasNumber > 0) then

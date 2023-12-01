@@ -3,12 +3,14 @@ namespace Engine.Core
 open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
 open System.Collections.Generic
+open System.Diagnostics
 
 [<AutoOpen>]
 module TagWebModule =
 
     // C# interop 을 위해서 record type 대신 class type 으로..
     [<AllowNullLiteral>]
+    [<DebuggerDisplay("{Name}")>]
     type TagWeb(name:Name, value:obj, kind:int, kindDescription:string, message:string) =
         let serializedObject = ObjectHolder.Create(value).Serialize()
 
@@ -45,7 +47,7 @@ type TagWebExt =
     [<Extension>]
     static member SetValue(x:TagWeb, value:obj) =
         if value = true then
-            printfn $"------- Found true set value for {x.Name}"
+            logDebug $"Found true set value for {x.Name}"
         x._SerializedObject <- ObjectHolder.Create(value).Serialize()
     [<Extension>]
     static member IsEqual(x:TagWeb, y:TagWeb) = x.Name = y.Name && x.Kind = y.Kind

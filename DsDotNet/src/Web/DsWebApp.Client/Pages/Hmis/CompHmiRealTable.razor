@@ -1,4 +1,5 @@
-@using DsWebApp.Client.Pages.Hmis.Widget
+@* CompHmiRealTable *@
+
 @using Engine.Core
 @using System.Reactive.Subjects
 
@@ -17,10 +18,10 @@ else
         <Columns>
             <DxGridDataColumn FieldName="Name" Caption="Real"></DxGridDataColumn>
 
-            <CompHmiButtonColumn ForceWidth=120 Caption="자동시작" OnClick="@onAutoStart" />
-            <CompHmiButtonColumn ForceWidth=120 Caption="자동복귀" OnClick="@onAutoHome" />
-            <CompHmiButtonColumn ForceWidth=160 Caption="작업완료SET" OnClick="@onCompleteSet" />
-            <CompHmiButtonColumn ForceWidth=160 Caption="작업완료RST" OnClick="@onCompleteReset" />
+            <CompHmiButtonColumn ForceWidth=120 Caption="자동시작" TagGetter="@((dataItem) =>((HMIReal)dataItem).StartPush)" />
+            <CompHmiButtonColumn ForceWidth=120 Caption="자동복귀" TagGetter="@((dataItem) =>((HMIReal)dataItem).ResetPush)" />
+            <CompHmiButtonColumn ForceWidth=160 Caption="작업완료SET" TagGetter="@((dataItem) =>((HMIReal)dataItem).ONPush)" />
+            <CompHmiButtonColumn ForceWidth=160 Caption="작업완료RST" TagGetter="@((dataItem) =>((HMIReal)dataItem).OFFPush)" />
 
         </Columns>
     </DxGrid>
@@ -38,13 +39,6 @@ else
         await base.OnInitializedAsync();
         _loading = false;
     }
-
-
-    async Task onAutoStart    (object dataItem) => await PostTag(((HMIReal)dataItem).StartPush);
-    async Task onAutoHome     (object dataItem) => await PostTag(((HMIReal)dataItem).ResetPush);
-    async Task onCompleteSet  (object dataItem) => await PostTag(((HMIReal)dataItem).ONPush);
-    async Task onCompleteReset(object dataItem) => await PostTag(((HMIReal)dataItem).OFFPush);
-
 }
 
 

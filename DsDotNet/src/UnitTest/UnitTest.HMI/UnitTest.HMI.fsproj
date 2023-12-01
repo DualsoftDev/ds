@@ -35,5 +35,7 @@
     </ItemGroup>
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="copy $(ProjectDir)..\..\..\Apps\OfficeAddIn\PowerPointAddInHelper\DS_Library.pptx $(TargetDir)DS_Library.pptx" />
+		<Exec Command="copy $(ProjectDir)..\..\..\Apps\OfficeAddIn\PowerPointAddInHelper\HelloDS_DevTestDev.pptx $(TargetDir)HelloDS_DevTestDev.pptx" />
+		<Exec Command="copy $(ProjectDir)..\..\..\Apps\OfficeAddIn\PowerPointAddInHelper\HelloDS_DevTest.pptx $(TargetDir)HelloDS_DevTest.pptx" />
 	</Target>
 </Project>

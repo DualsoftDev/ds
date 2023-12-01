@@ -110,7 +110,7 @@ module CoreModule =
         member val StartPoints = createQualifiedNamedHashSet<Real>()
         member val internal HWButtons = HashSet<ButtonDef>()
         member val internal HWLamps = HashSet<LampDef>()
-        member val internal Conditions = HashSet<ConditionDef>()
+        member val internal HWConditions = HashSet<ConditionDef>()
 
     type Flow private (name: string, system: DsSystem) =
         inherit FqdnObject(name, system)

@@ -20,6 +20,7 @@ open DocumentFormat.OpenXml.Presentation
 
 [<AutoOpen>]
 module PPTDocModule =
+    let pptHeadPage = 1
     let getSystemName (name: string) =
         let fileName = PathManager.getFileNameWithoutExtension (name.ToFile())
 
@@ -148,9 +149,9 @@ module PPTDocModule =
                 |> Seq.filter (fun (s, _) -> not (s.IsSlideLayoutBlanckType()))
             
 
-            if (validSlidesAll.Where(fun  (slidePart, page) -> page = 1).IsEmpty()) then
+            if (validSlidesAll.Where(fun  (slidePart, page) -> page = pptHeadPage).IsEmpty()) then
                 Office.ErrorPPT(Page, ErrID._12, "Title Slide", 0, 0u)
-            let headSlide = validSlidesAll.First(fun  (slidePart,  page) -> page = 1) |> fun (slide,_) -> slide
+            let headSlide = validSlidesAll.First(fun  (slidePart,  page) -> page = pptHeadPage) |> fun (slide,_) -> slide
 
             validSlidesAll 
             |> Seq.iter(fun (slidePart, page) ->
@@ -168,8 +169,8 @@ module PPTDocModule =
 
             let shapes = Office.PageShapes(doc)
                             |> Seq.filter (fun (shape, page, _, _) -> 
-                                        page <> 1 && pages.Values.Select(fun w -> w.PageNum).Contains(page)
-                                        || page = 1 && (shape.CheckBevelShapeRound() ||shape.CheckBevelShapePlate())
+                                        page <> pptHeadPage && pages.Values.Select(fun w -> w.PageNum).Contains(page)
+                                        || page = pptHeadPage && (shape.CheckBevelShapeRound() ||shape.CheckBevelShapePlate())
                                         )
             
             
@@ -180,7 +181,7 @@ module PPTDocModule =
                
 
             let connections = Connections(doc)
-                            |> Seq.filter (fun (slide, _) -> slide.GetPage() <> 1)
+                            |> Seq.filter (fun (slide, _) -> slide.GetPage() <> pptHeadPage)
                             |> Seq.filter (fun (slide, _) -> pages.ContainsKey(slide))
             
             let dicShape = Dictionary<int, HashSet<Tuple<Shape, bool>>>()
@@ -200,7 +201,7 @@ module PPTDocModule =
                 let pagePPT = pages.Values.Filter(fun w -> w.PageNum = page).First()
                 let headPageName = headSlide.PageTitle()
                 let sysName, flowName = GetSysNFlow(headPageName, pagePPT.Title, pagePPT.PageNum)
-                let headPage =  page = 1
+                let headPage =  page = pptHeadPage
                 let node = pptNode (shape, page, flowName, slideSize, headPage)
 
                 if (node.Name = "") then
@@ -236,7 +237,7 @@ module PPTDocModule =
 
 
             connections
-            |> Seq.filter (fun (slide, _) -> slide.GetPage() <> 1)
+            |> Seq.filter (fun (slide, _) -> slide.GetPage() <> pptHeadPage)
             |> Seq.iter (fun (slide, conns) ->
                 conns
                 |> Seq.iter (fun (conn, Id, startId, endId) ->
@@ -281,15 +282,15 @@ module PPTDocModule =
             pages.Values |> Seq.filter (fun p -> p.PageNum = pageNum) |> Seq.head
 
         member val Pages = pages.Values.OrderBy(fun p -> p.PageNum)
-        member val NodesHeadPage = nodes.Values.Where(fun p -> p.PageNum = 1)
-        member val Nodes = nodes.Values.Filter(fun p -> p.PageNum <> 1).OrderBy(fun p -> p.PageNum)
+        member val NodesHeadPage = nodes.Values.Where(fun p -> p.PageNum = pptHeadPage)
+        member val Nodes = nodes.Values.Filter(fun p -> p.PageNum <> pptHeadPage).OrderBy(fun p -> p.PageNum)
         member val Edges = edges.OrderBy(fun p -> p.PageNum)
 
         member val DicNodes = nodes
         member val Parents = parents
         member val Dummys = dummys
 
-        member val Name = pages.Keys.First(fun f->f.GetPage() = 1).PageTitle()    
+        member val Name = pages.Keys.First(fun f->f.GetPage() = pptHeadPage).PageTitle()    
         member val Path = path
         member val DirectoryName = PathManager.getDirectoryName (path|>DsFile)
 

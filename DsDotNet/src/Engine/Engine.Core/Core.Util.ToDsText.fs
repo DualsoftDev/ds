@@ -241,7 +241,7 @@ module internal ToDsTextModule =
                 yield HwSystemToDs("i", system.IdleHWLamps.Cast<HwSystemDef>())
                 yield $"{tab}{rb}"
 
-            let cnds = system.Conditions
+            let cnds = system.HWConditions
             if cnds.Any() then
                 let getTargetCnds (target:ConditionType) =
                     cnds |> Seq.filter(fun c -> c.ConditionType = target)

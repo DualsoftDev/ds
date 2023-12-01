@@ -38,7 +38,7 @@ type TestAllCase() =
         for l in sys.HWLamps do
             l.OutAddress <-  addr()
 
-        for c in sys.Conditions do
+        for c in sys.HWConditions do
             c.InAddress <-  addr()
 
 

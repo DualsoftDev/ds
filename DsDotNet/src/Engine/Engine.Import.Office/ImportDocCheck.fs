@@ -107,9 +107,10 @@ module ImportDocCheck =
     let SameFlowName (doc: pptDoc) =
         let duplicatePages =
             doc.Pages
-                .Where(fun f -> f.IsUsing && not <| f.Title.IsNullOrEmpty())
+                .Where(fun f -> f.PageNum <> pptHeadPage && f.IsUsing && not <| f.Title.IsNullOrEmpty())
                 .GroupBy(fun f -> f.Title)
                 .SelectMany(fun f -> f.Skip(1))
 
         duplicatePages.Iter(fun page ->
             Office.ErrorPPT(ErrorCase.Name, ErrID._2, $"중복이름 : {page.Title}", page.PageNum, 0u, $"중복페이지"))
+             

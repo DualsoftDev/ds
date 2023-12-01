@@ -235,13 +235,13 @@ module ImportU =
             let dicFlow = doc.DicFlow
 
             doc.Pages
-            |> Seq.filter (fun page -> page.PageNum <> 1)
+            |> Seq.filter (fun page -> page.PageNum <> pptHeadPage)
             |> Seq.filter (fun page -> page.IsUsing)
             |> Seq.iter (fun page ->
                 let pageNum = page.PageNum
 
                 let sysName, flowName = GetSysNFlow(doc.Name, page.Title, page.PageNum)
-                let flowName = if page.PageNum = 1 then $"{sysName}_Page1" else flowName
+                let flowName = if page.PageNum = pptHeadPage then $"{sysName}_Page1" else flowName
                 if flowName.Contains(".") then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._20, page.Title, page.PageNum, 0u, "")
 

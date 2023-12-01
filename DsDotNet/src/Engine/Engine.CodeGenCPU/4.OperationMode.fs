@@ -10,20 +10,20 @@ open Dual.Common.Core.FS
 type Flow with
 
     member f.O1_ReadyOperationState(): CommentedStatement =
-        let set = f.ready.Expr <||> f.BtnReadyExpr
+        let set = f.ready.Expr <||> f.BtnReadyExpr 
         let rst = f.eop.Expr <||> f.sop.Expr
 
         (set, rst) ==| (f.rop, getFuncName())
 
     member f.O2_AutoOperationState(): CommentedStatement =
-        let set = f.ModeAutoHwExpr// <&&> f.ModeAutoSwHMIExpr  //test ahn lightPLC 모드 준비중
-        let rst = !!f.rop.Expr <||> f.ModeManualHwExpr
+        let set = f.AutoExpr 
+        let rst = !!f.rop.Expr <||> f.ModeManualHwHMIExpr
 
         (set, rst) ==| (f.aop, getFuncName())
 
     member f.O3_ManualOperationState (): CommentedStatement =
-        let set = f.ModeManualHwExpr// <||> f.ModeManualSwHMIExpr
-        let rst = !!f.rop.Expr <||> f.ModeAutoHwExpr
+        let set = f.ManuExpr
+        let rst = !!f.rop.Expr <||> f.ModeAutoHwHMIExpr
 
         (set, rst) ==| (f.mop, getFuncName())
 
@@ -43,7 +43,7 @@ type Flow with
         (set <||> setErrs.ToOrElseOff(f.System), rst) ==| (f.sop, getFuncName())
 
     member f.O6_DriveOperationMode (): CommentedStatement =
-        let set = f.drive.Expr <||> f.BtnDriveExpr
+        let set = f.drive.Expr <||> f.BtnDriveExpr 
         let rst = !!f.aop.Expr <||>  f.top.Expr
 
         (set, rst) ==| (f.dop, getFuncName())

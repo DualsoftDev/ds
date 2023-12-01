@@ -35,7 +35,7 @@ module CoreExtensionModule =
 
     let getButtons (sys:DsSystem, btnType:BtnType) = sys.HWButtons.Where(fun f->f.ButtonType = btnType)
     let getLamps (sys:DsSystem, lampType:LampType) = sys.HWLamps.Where(fun f->f.LampType = lampType)
-    let getConditions (sys:DsSystem, cType:ConditionType) = sys.Conditions.Where(fun f->f.ConditionType = cType)
+    let getConditions (sys:DsSystem, cType:ConditionType) = sys.HWConditions.Where(fun f->f.ConditionType = cType)
 
 
     type DsSystem with
@@ -65,14 +65,14 @@ module CoreExtensionModule =
         member x.AddCondtion(condiType:ConditionType, condiName: string, inAddr:string, outAddr:string, flow:Flow, funcs:HashSet<Func>) =
             checkSystem(x, flow, condiName)
 
-            match x.Conditions.TryFind(fun f -> f.Name = condiName) with
+            match x.HWConditions.TryFind(fun f -> f.Name = condiName) with
             | Some condi -> condi.SettingFlows.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
-            | None -> x.Conditions.Add(ConditionDef(condiName,x, condiType, inAddr, outAddr, HashSet[|flow|], funcs))
+            | None -> x.HWConditions.Add(ConditionDef(condiName,x, condiType, inAddr, outAddr, HashSet[|flow|], funcs))
                       |> verifyM $"Duplicated ConditionDef [{condiName}]"
                       HwSystemItem.CreateHWApi(condiName, x) |> ignore
 
 
-        member x.SystemConditions     = x.Conditions :> seq<_>
+        member x.HWSystemConditions     = x.HWConditions :> seq<_>
         member x.HWButtons            = x.HWButtons :> seq<_>
         member x.HWLamps              = x.HWLamps   :> seq<_>
 

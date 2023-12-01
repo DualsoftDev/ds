@@ -17,7 +17,7 @@ open DocumentFormat.OpenXml.Spreadsheet
 [<AutoOpen>]
 module ExportIOTable =
 
-    let applyIfBtnLampSkip addr:string  = if addr = TextAddrEmpty then TextSkip else addr
+    //let applyIfBtnLampSkip addr:string  = if addr = TextAddrEmpty then TextSkip else addr
 
     let ToTable (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) : DataTable =
 
@@ -79,9 +79,8 @@ module ExportIOTable =
             for btn in btns do
                 if containSys then
                     let func = btn.Funcs |> funcToText
-                    let inAddr = getValidBtnAddress(btn, true) |> applyIfBtnLampSkip
-                    let outAddr = getValidBtnAddress(btn, false)|> applyIfBtnLampSkip
-                    dt.Rows.Add(xlsCase.ToText(), btn.Name, "bool", inAddr, outAddr, "", func)
+                    let i, o = getValidBtnAddress(btn)
+                    dt.Rows.Add(xlsCase.ToText(), btn.Name, "bool",  i, o , "", func)
                     |> ignore
 
         let toLampText (lamps: LampDef seq, xlsCase: ExcelCase) =
@@ -89,15 +88,16 @@ module ExportIOTable =
                 if containSys then
                     let func = lamp.Funcs |> funcToText
 
-                    dt.Rows.Add(xlsCase.ToText(), lamp.Name, "bool", "", getValidLampAddress(lamp)|> applyIfBtnLampSkip, "", func)
+                    let i, o = getValidLampAddress(lamp)
+                    dt.Rows.Add(xlsCase.ToText(), lamp.Name, "bool",   i, o, "", func)
                     |> ignore
 
         let toCondiText (conds: ConditionDef seq, xlsCase: ExcelCase) =
             for cond in conds do
                 if containSys then
                     let func = cond.Funcs |> funcToText
-
-                    dt.Rows.Add(xlsCase.ToText(), cond.Name, "bool", getValidCondiAddress(cond)|> applyIfBtnLampSkip, "", "", func)
+                    let i, o = getValidCondiAddress(cond)
+                    dt.Rows.Add(xlsCase.ToText(), cond.Name, "bool",i, o  ,  "", func)
                     |> ignore
 
         emptyLine ()

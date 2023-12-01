@@ -18,17 +18,21 @@ module ImportIOUtil =
     let mutable inCnt = RuntimeDS.HwStartInDINT * blockInSize - 1
     let mutable outCnt = RuntimeDS.HwStartOutDINT * blockOutSize - 1
 
+    let emptyToSkipAddress address = if address = TextAddrEmpty then TextSkip else address.Trim().ToUpper()
     let getValidAddress (addr: string, name: string, isSkip: bool, bInput: bool) =
 
         let addr = if addr.IsNullOrEmpty()
                     then failwithf $"Empty address {name}"
-                    else addr.Trim().ToUpper()
+                    else
+                        if isSkip then 
+                            emptyToSkipAddress  addr
+                        else 
+                            addr
 
-
+        let addr =  addr.Trim().ToUpper()
         let newAddr =
-            match addr = TextAddrEmpty, isSkip with
-            | true, true -> TextSkip
-            | true, false -> 
+            if addr = TextAddrEmpty && not(isSkip)
+            then
                 let cnt = if bInput
                             then inCnt <- inCnt + 1; inCnt
                             else outCnt <- outCnt + 1; outCnt
@@ -53,11 +57,10 @@ module ImportIOUtil =
 
                 else TextAddrEmpty
 
-            | false, _ -> 
-                match addr, isSkip with
-                | _, true   when addr <> TextSkip -> failwithf $"{name} 인터페이스 대상이 없으면 대쉬('-') 기입 필요."
+            elif addr <> TextSkip && isSkip then
+                 failwithf $"{name} 인터페이스 대상이 없으면 대쉬('-') 기입 필요."
                 //| _, false  when addr =  TextSkip -> failwithf $"{name} 인터페이스 대상이 있으면 대쉬('-') 대신 실주소 기입 필요."
-                | _ -> addr
+            else addr
         
             //parsing을 위헤서 '-' -> '_' 변경 
         if newAddr = TextSkip then TextAddrEmpty else newAddr
@@ -68,14 +71,11 @@ module ImportIOUtil =
         let address =  if bInput then taskDev.InAddress else taskDev.OutAddress
         getValidAddress(address, taskDev.QualifiedName, isSkip, bInput)
 
-    let getValidBtnAddress (btn: ButtonDef, bInput:bool) =
-        if bInput then
-            getValidAddress(btn.InAddress, btn.Name, false, bInput)
-        else 
-            getValidAddress(btn.OutAddress, btn.Name, btn.OutAddress = TextSkip, bInput)
+    let private getValidBtnHwItem (hwItem:HwSystemDef) (skipIn:bool) (skipOut:bool) =
+        let inAddr = getValidAddress(hwItem.InAddress, hwItem.Name, skipIn, true)
+        let outAddr = getValidAddress(hwItem.OutAddress, hwItem.Name, skipOut, false)
+        inAddr, outAddr
 
-    let getValidLampAddress (lamp: LampDef) =
-        getValidAddress(lamp.OutAddress, lamp.Name, false, false)
-
-    let getValidCondiAddress (cond: ConditionDef) =
-        getValidAddress(cond.InAddress, cond.Name, false, true)
+    let getValidBtnAddress (btn: ButtonDef) = getValidBtnHwItem btn false true
+    let getValidLampAddress (lamp: LampDef) = getValidBtnHwItem lamp true false 
+    let getValidCondiAddress (cond: ConditionDef) = getValidBtnHwItem cond false true 

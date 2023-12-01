@@ -71,16 +71,17 @@ module ConvertCodeCoreExt =
         member a.TRxErr = getAM(a).TRxErr
 
 
-    type ButtonDef with
-        member b.ActionINFunc = 
-                let inTag = (b.InTag :?> Tag<bool>).Expr
-                if hasNot(b.Funcs)then !!inTag else inTag  
+    type HwSystemDef with
+        member s.ActionINFunc = 
+                let inTag = (s.InTag :?> Tag<bool>).Expr
+                if hasNot(s.Funcs)then !!inTag else inTag  
 
     type DsSystem with
         member private s.GetPv<'T when 'T:equality >(st:SystemTag) =
             getSM(s).GetSystemTag(st) :?> PlanVar<'T>
         member s._on       = s.GetPv<bool>(SystemTag.on)
         member s._off      = s.GetPv<bool>(SystemTag.off)
+        member s._sim      = s.GetPv<bool>(SystemTag.sim)
         member s._auto     = s.GetPv<bool>(SystemTag.auto)
         member s._manual   = s.GetPv<bool>(SystemTag.manual)
         member s._drive    = s.GetPv<bool>(SystemTag.drive)
@@ -104,7 +105,7 @@ module ConvertCodeCoreExt =
 
         member private x.GenerationButtonIO()   = x.HWButtons.Iter(fun f-> createHwApiBridgeTag(f, x))   
         member private x.GenerationLampIO()     = x.HWLamps.Iter(fun f-> createHwApiBridgeTag(f, x))   
-        member private x.GenerationCondition()  = x.SystemConditions.Iter(fun f-> createHwApiBridgeTag(f, x))   
+        member private x.GenerationCondition()  = x.HWSystemConditions.Iter(fun f-> createHwApiBridgeTag(f, x))   
        
 
         member private x.GenerationTaskDevIO() =
@@ -173,23 +174,11 @@ module ConvertCodeCoreExt =
             SystemTag.GetValues(typeof<SystemTag>).Cast<SystemTag>()
                      .Where(fun typ -> writeAble.Contains(typ))
                      .Select(sm.GetSystemTag)
-
-    let private getButtonExpr(flow:Flow, btns:ButtonDef seq) : Expression<bool> seq =
-        btns.Where(fun b -> b.SettingFlows.Contains(flow))
-            .Select(fun b ->b.ActionINFunc)
-
-    let private getButtonExprWrtRuntimePackage(f:Flow, btns:ButtonDef seq) : Expression<bool> =
-        match RuntimeDS.Package with
-        | (StandardPC | StandardPLC | Simulation| SimulationDubug) ->
-            let exprs = getButtonExpr(f, btns)
-            if exprs.any() then exprs.ToOr() else f.System._off.Expr
-
-        | (LightPC | LightPLC) ->
-            f.System._off.Expr
-
-
-    let private getSelectBtnExpr(f:Flow, btns:ButtonDef seq) : Expression<bool> seq =
-        getButtonExpr(f, btns)
+    
+    let private getButtonExpr(flow:Flow, btns:ButtonDef seq) : Expression<bool>  =
+        let tags = btns.Where(fun b -> b.SettingFlows.Contains(flow))
+                       .Select(fun b ->b.ActionINFunc)
+        if tags.any() then tags.ToOr() else flow.System._off.Expr
 
     let getConditionInputs(flow:Flow, condis:ConditionDef seq) : Tag<bool> seq =
         condis
@@ -231,32 +220,38 @@ module ConvertCodeCoreExt =
         member f.F = f |> getFM
         member f._on     = f.System._on
         member f._off    = f.System._off
-
+        member f._sim    = f.System._sim
         //select 버튼은 없을경우 항상 _on
-        member f.SelectAutoExpr   = getSelectBtnExpr(f, f.System.AutoHWButtons  )
-        member f.SelectManualExpr = getSelectBtnExpr(f, f.System.ManualHWButtons)
+        member f.HwAutoSelects =  f.System.AutoHWButtons.Where(fun b->b.SettingFlows.Contains(f))
+        member f.HwManuSelects =  f.System.ManualHWButtons.Where(fun b->b.SettingFlows.Contains(f))
+        member f.HwAutoExpr   = getButtonExpr(f, f.System.AutoHWButtons  )
+        member f.HwManuExpr = getButtonExpr(f, f.System.ManualHWButtons)
 
         //push 버튼은 없을경우 항상 _off
-        member f.BtnDriveExpr = getButtonExprWrtRuntimePackage(f, f.System.DriveHWButtons    )
-        member f.BtnStopExpr  = getButtonExprWrtRuntimePackage(f, f.System.StopHWButtons     )
-        member f.BtnEmgExpr   = getButtonExprWrtRuntimePackage(f, f.System.EmergencyHWButtons)
-        member f.BtnTestExpr  = getButtonExprWrtRuntimePackage(f, f.System.TestHWButtons     )
-        member f.BtnReadyExpr = getButtonExprWrtRuntimePackage(f, f.System.ReadyHWButtons    )
-        member f.BtnClearExpr = getButtonExprWrtRuntimePackage(f, f.System.ClearHWButtons    )
-        member f.BtnHomeExpr  = getButtonExprWrtRuntimePackage(f, f.System.HomeHWButtons     )
+        member f.BtnDriveExpr = getButtonExpr(f, f.System.DriveHWButtons    ) <||> f._sim.Expr
+        member f.BtnStopExpr  = getButtonExpr(f, f.System.StopHWButtons     )
+        member f.BtnEmgExpr   = getButtonExpr(f, f.System.EmergencyHWButtons)
+        member f.BtnTestExpr  = getButtonExpr(f, f.System.TestHWButtons     )
+        member f.BtnReadyExpr = getButtonExpr(f, f.System.ReadyHWButtons    ) <||> f._sim.Expr
+        member f.BtnClearExpr = getButtonExpr(f, f.System.ClearHWButtons    )
+        member f.BtnHomeExpr  = getButtonExpr(f, f.System.HomeHWButtons     )
 
-        member f.ModeAutoHwExpr =
-            let auto = if f.SelectAutoExpr.any()   then f.SelectAutoExpr.ToAnd()    else f.System._auto.Expr
-          //  let ableAuto = if f.SelectManualExpr.any() then !!f.SelectManualExpr.ToOr() else f._on.Expr
-            auto// <&&> ableAuto  반대조건 봐야하나 ?
-
-        member f.ModeManualHwExpr =
-            let manual = if f.SelectManualExpr.any() then f.SelectManualExpr.ToAnd() else f.System._manual.Expr
-          //  let ableManual = if f.SelectAutoExpr.any()   then !!f.SelectAutoExpr.ToOr()  else f._on.Expr
-            manual// <&&> ableManual 반대조건 봐야하나 ?
-
+        member f.ModeAutoHwHMIExpr   =    f.HwAutoExpr <&&> !!f.HwManuExpr <||> f._sim.Expr
+        member f.ModeManualHwHMIExpr =  !!f.HwManuExpr <&&>   f.HwAutoExpr
         member f.ModeAutoSwHMIExpr   =    f.auto.Expr <&&> !!f.manual.Expr
         member f.ModeManualSwHMIExpr =  !!f.auto.Expr <&&>   f.manual.Expr
+
+        member f.AutoExpr   =  
+                if f.HwAutoSelects.any()
+                then f.ModeAutoHwHMIExpr
+                     <||> !!f.ModeAutoHwHMIExpr <&&> !!f.ModeManualHwHMIExpr <&&> (f.ModeAutoSwHMIExpr)
+                else f.ModeAutoSwHMIExpr
+
+        member f.ManuExpr   =  
+                if f.HwManuSelects.any()
+                then f.ModeManualHwHMIExpr
+                     <||> !!f.ModeAutoHwHMIExpr <&&> !!f.ModeManualHwHMIExpr <&&> (f.ModeManualSwHMIExpr)
+                else f.ModeManualSwHMIExpr
 
         member f.GetReadAbleTags() =
             FlowTag.GetValues(typeof<FlowTag>).Cast<FlowTag>()

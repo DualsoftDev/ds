@@ -87,11 +87,12 @@ module ImportIOTable =
                 let btnName = $"{row.[(int) IOColumn.Name]}"
                 match sys.HWButtons.Where(fun w -> w.ButtonType = btntype).TryFind(fun f -> f.Name = btnName) with
                 | Some btn ->
-                    btn.InAddress  <- $"{row.[(int) IOColumn.Input]}"
-                    btn.OutAddress <- $"{row.[(int) IOColumn.Output]}"
+                    btn.InAddress  <- $"{row.[(int) IOColumn.Input]}" |> changeValidAddress
+                    btn.OutAddress <- $"{row.[(int) IOColumn.Output]}"|> changeValidAddress
                     //ValidBtnAddress
-                    btn.InAddress  <- getValidBtnAddress (btn , true)
-                    btn.OutAddress <- getValidBtnAddress (btn , false)
+                    let inaddr, outaddr =  getValidBtnAddress (btn)
+                    btn.InAddress  <-inaddr
+                    btn.OutAddress <-outaddr
                     functionUpdate (btn.Name, $"{row.[(int) IOColumn.Func]}", btn.Funcs, tableIO, false, page)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{btnName}", page, 0u)
 
@@ -105,7 +106,12 @@ module ImportIOTable =
 
                 match lamps.TryFind(fun f -> f.Name = name) with
                 | Some lamp ->
-                    lamp.OutAddress <- output
+                    lamp.InAddress  <- $"{row.[(int) IOColumn.Input]}" |> changeValidAddress
+                    lamp.OutAddress <- $"{row.[(int) IOColumn.Output]}"|> changeValidAddress
+                    //ValidBtnAddress
+                    let inaddr, outaddr =  getValidLampAddress (lamp)
+                    lamp.InAddress  <-inaddr
+                    lamp.OutAddress <-outaddr
                     functionUpdate (lamp.Name, func, lamp.Funcs, tableIO, false, page)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", page, 0u)
 
@@ -114,11 +120,16 @@ module ImportIOTable =
                 let output = $"{row.[(int) IOColumn.Input]}" |> changeValidAddress
                 let func = $"{row.[(int) IOColumn.Func]}"
 
-                let conds = sys.SystemConditions.Where(fun w -> w.ConditionType = cType)
+                let conds = sys.HWSystemConditions.Where(fun w -> w.ConditionType = cType)
 
                 match conds.TryFind(fun f -> f.Name = name) with
                 | Some cond ->
-                    cond.InAddress <- output
+                    cond.InAddress  <- $"{row.[(int) IOColumn.Input]}" |> changeValidAddress
+                    cond.OutAddress <- $"{row.[(int) IOColumn.Output]}"|> changeValidAddress
+                    //ValidBtnAddress
+                    let inaddr, outaddr =  getValidCondiAddress (cond)
+                    cond.InAddress  <-inaddr
+                    cond.OutAddress <-outaddr     
                     functionUpdate (cond.Name, func, cond.Funcs, tableIO, false, page)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", page, 0u)
 

@@ -1,11 +1,11 @@
-<div class="embedded-lamp @(_isOn ? "on" : "off")"></div>
+<div class="embedded-lamp @(IsOn ? "on" : "off")"></div>
 
 @code {
-    bool _isOn = false;
+    [Parameter] public bool IsOn { get; set; }
 
     public void SetLampState(bool isOn)
     {
-        _isOn = isOn;
+        IsOn = isOn;
         StateHasChanged();
     }
 }

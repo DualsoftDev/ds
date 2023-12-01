@@ -1,40 +1,24 @@
 @* CompHmiWidgetLampRGFH *@
 
-<div class="container">
-    <DxButton Click="@_toggleLamp">
-        <CompEmbeddedLamp @ref="_lampRef" />
-        Toggle Lamp
-    </DxButton>
-</div>
+<DxButton Click="@_toggleLamp">
+    <CompEmbeddedLamp IsOn=IsOn @ref="_lampRef" />
+    @Text
+</DxButton>
 
 @code {
-    bool _isLampOn = false;
+    bool _isOn = false;
     CompEmbeddedLamp _lampRef;
     [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
+    [Parameter] public string Text { get; set; }
+    [Parameter] public bool IsOn { get; set; }
 
 
     void _toggleLamp()
     {
-        _isLampOn = !_isLampOn;
-        _lampRef.SetLampState(_isLampOn);
+        _isOn = !_isOn;
+        Console.WriteLine($"New lamp state: {_isOn}");
+        _lampRef.SetLampState(_isOn);
         Click.InvokeAsync();
     }
 }
 
-<style>
-    /*.container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    */
-    button {
-        display: flex;
-        align-items: center;
-    }
-
-    .lamp-container {
-        margin-left: 10px;
-        램프와 버튼 사이의 간격을 조절합니다.
-    }
-</style>

@@ -136,7 +136,7 @@ module EtcListenerModule =
                                       | None -> null
 
                                   let funcSet = commonFunctionSetter lmpName lampFuncs
-                                  return targetLmpType, lmpName, address, flow, funcSet
+                                  return targetLmpType, lmpName, address,address, flow, funcSet //test
                               } ]
 
                     flowLampInfo |> List.choose id |> List.iter (system.AddLamp)
@@ -183,16 +183,16 @@ module EtcListenerModule =
                                           .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName))
                                           .ToHashSet()
 
-                                  return targetCndType, cndName, address, flows, funcSet
+                                  return targetCndType, cndName, address,address, flows, funcSet  //test
                               } ]
 
                     flowConditionInfo
                     |> List.choose id
                     |> List.iter (fun ps ->
-                        let targetCndType, cndName, address, flows, funcSet = ps
+                        let targetCndType, cndName, inAddr, outAddr, flows, funcSet = ps
 
                         flows
-                        |> Seq.iter (fun flow -> system.AddCondtion(targetCndType, cndName, address, flow, funcSet)))
+                        |> Seq.iter (fun flow -> system.AddCondtion(targetCndType, cndName, inAddr, outAddr, flow, funcSet)))
 
         member x.ProcessSafetyBlock(ctx: SafetyBlockContext) =
             let safetyDefs = ctx.Descendants<SafetyDefContext>()

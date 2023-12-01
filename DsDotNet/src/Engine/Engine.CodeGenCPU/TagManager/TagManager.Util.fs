@@ -73,23 +73,27 @@ module TagManagerUtil =
 
 
     type BridgeType = | Device | Button | Lamp | Condition
-   
-
-    let createBridgeTag(stg:Storages, name, address:string, inOut:ActionTag, sys, task:IQualifiedNamed option): ITag option=
-        
+    let createBridgeTag(stg:Storages, name, address:string, tagKind:int, bridgeType:BridgeType, sys, fqdn:IQualifiedNamed): ITag option=
         if address = TextSkip || address = "" 
         then None
         else
             let name =
-                match inOut with
-                | ActionTag.ActionIn     -> $"{name}_I"
-                | ActionTag.ActionOut    -> $"{name}_O"
-                | ActionTag.ActionMemory -> failwithlog "error: Memory not supported "
-                | _ -> failwithlog "error: ActionTag create "
+                match bridgeType with
+                | Device ->   match DU.tryGetEnumValue<ActionTag>(tagKind).Value with
+                              | ActionTag.ActionIn     -> $"{name}_I"
+                              | ActionTag.ActionOut    -> $"{name}_O"
+                              | ActionTag.ActionMemory -> failwithlog "error: Memory not supported "
+                              | _ -> failwithlog "error: ActionTag create "
 
+                | Button | Lamp | Condition
+                    ->   match DU.tryGetEnumValue<HwSysTag>(tagKind).Value with
+                              | HwSysTag.HwSysIn      -> $"{name}_IN"
+                              | HwSysTag.HwSysOut     -> $"{name}_OUT"
+                              | _ -> failwithlog "error: HwSysTag create "
+       
             let plcAddrName = getPlcTagAbleName name stg
             let t =
-                let param = {defaultStorageCreationParams(false) with Name=plcAddrName; Address= Some address; System=sys; TagKind = (int)inOut; Target = task}
+                let param = {defaultStorageCreationParams(false) with Name=plcAddrName; Address= Some address; System=sys; TagKind = tagKind; Target = Some fqdn}
                 (Tag(param) :> ITag)
             stg.Add(t.Name, t)
             Some t

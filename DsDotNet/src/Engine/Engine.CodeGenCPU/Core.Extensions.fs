@@ -36,6 +36,20 @@ module ConvertCodeCoreExt =
         x.TargetJob.DeviceDefs
                         .Select(fun s ->s.ApiName, (s.ApiItem.TagManager :?> ApiItemManager).ErrorText)
 
+    let createHwApiBridgeTag (x:HwSystemDef, sys:DsSystem)  = 
+        let hwApi =   sys.HWSystemItems.First(fun f->f.Name = x.Name)
+        let bridgeType = 
+            match x with
+            | :? ButtonDef -> BridgeType.Button
+            | :? LampDef -> BridgeType.Lamp
+            | :? ConditionDef -> BridgeType.Condition
+            | _ -> 
+                failwithf "bridgeType err"
+
+        createBridgeTag(sys.Storages, x.Name, x.InAddress, (int)HwSysTag.HwSysIn, bridgeType , sys, hwApi)
+        |> iter (fun t -> x.InTag   <- t)
+        createBridgeTag(sys.Storages, x.Name, x.OutAddress,(int)HwSysTag.HwSysOut ,bridgeType ,sys, hwApi)
+        |> iter (fun t -> x.OutTag  <- t)
 
 
     type ApiItem with
@@ -88,24 +102,10 @@ module ConvertCodeCoreExt =
         member x.S = x |> getSM
         member x.Storages = x.TagManager.Storages
 
-        member private x.GenerationLampIO() =
-            for lamp in x.HWLamps do
-                match createBridgeTag(x.Storages, lamp.Name, lamp.OutAddress,  ActionTag.ActionOut  ,x , None) with
-                | Some t ->  lamp.OutTag  <- t
-                | None -> failwithf "empty address error"
-
-        member private x.GenerationCondition() =
-            for sc in x.SystemConditions do
-                match createBridgeTag(x.Storages, sc.Name, sc.InAddress, ActionTag.ActionIn , x, None) with
-                | Some t ->  sc.InTag  <- t
-                | None -> failwithf "empty address error"
-
-        member private x.GenerationButtonIO() =
-            for b in x.HWButtons do
-                createBridgeTag(x.Storages, b.Name, b.InAddress, ActionTag.ActionIn , x, None)
-                |> iter (fun t -> b.InTag   <- t)
-                createBridgeTag(x.Storages, b.Name, b.OutAddress, ActionTag.ActionOut ,x, None)
-                |> iter (fun t -> b.OutTag  <- t)
+        member private x.GenerationButtonIO()   = x.HWButtons.Iter(fun f-> createHwApiBridgeTag(f, x))   
+        member private x.GenerationLampIO()     = x.HWLamps.Iter(fun f-> createHwApiBridgeTag(f, x))   
+        member private x.GenerationCondition()  = x.SystemConditions.Iter(fun f-> createHwApiBridgeTag(f, x))   
+       
 
         member private x.GenerationTaskDevIO() =
             let taskDevices = x.Jobs |> Seq.collect(fun j -> j.DeviceDefs) |> Seq.sortBy(fun d-> d.QualifiedName) 
@@ -114,13 +114,13 @@ module ConvertCodeCoreExt =
                 then failwith $"Error {getFuncName()}"
 
                 //if b.ApiItem.RXs.any() then
-                createBridgeTag(x.Storages, b.ApiName, b.InAddress, ActionTag.ActionIn , x , Some(b))
+                createBridgeTag(x.Storages, b.ApiName, b.InAddress, (int)ActionTag.ActionIn , BridgeType.Device, x , b)
                 |> iter (fun t -> 
                         b.InTag <- t
                         b.InAddress <- t.Address
                         )
                 //if b.ApiItem.TXs.any() then
-                createBridgeTag(x.Storages, b.ApiName, b.OutAddress, ActionTag.ActionOut ,x, Some(b))
+                createBridgeTag(x.Storages, b.ApiName, b.OutAddress, (int)ActionTag.ActionOut , BridgeType.Device, x , b)
                 |> iter (fun t -> 
                         b.OutTag <- t
                         b.OutAddress <- t.Address

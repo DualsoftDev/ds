@@ -49,10 +49,11 @@ module CoreExtensionModule =
 
             match x.HWButtons.TryFind(fun f -> f.Name = btnName) with
             | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
-            | None -> x.HWButtons.Add(ButtonDef(btnName, btnType, inAddress, outAddress, HashSet[|flow|], funcs))
+            | None -> x.HWButtons.Add(ButtonDef(btnName,x, btnType, inAddress, outAddress, HashSet[|flow|], funcs))
                       |> verifyM $"Duplicated ButtonDef [{btnName}]"
+                      HwSystemItem.CreateHWApi(btnName, x) |> ignore
 
-        member x.AddLamp(lmpType:LampType, lmpName: string, addr:string, flow:Flow, funcs:HashSet<Func>) =
+        member x.AddLamp(lmpType:LampType, lmpName: string, inAddr:string, outAddr:string, flow:Flow, funcs:HashSet<Func>) =
             checkSystem(x, flow, lmpName)
 
             x.HWLamps.Select(fun f->f.Name).Contains(lmpName) |> not
@@ -60,16 +61,18 @@ module CoreExtensionModule =
 
             match x.HWLamps.TryFind(fun f -> f.Name = lmpName) with
             | Some lmp -> lmp.SettingFlow <- flow
-            | None -> x.HWLamps.Add(LampDef(lmpName, lmpType, addr, flow, funcs))
+            | None -> x.HWLamps.Add(LampDef(lmpName, x,lmpType, inAddr, outAddr, flow, funcs))
                       |> verifyM $"Duplicated LampDef [{lmpName}]"
+                      HwSystemItem.CreateHWApi(lmpName, x) |> ignore
 
-        member x.AddCondtion(condiType:ConditionType, condiName: string, inAddr:string, flow:Flow, funcs:HashSet<Func>) =
+        member x.AddCondtion(condiType:ConditionType, condiName: string, inAddr:string, outAddr:string, flow:Flow, funcs:HashSet<Func>) =
             checkSystem(x, flow, condiName)
 
             match x.Conditions.TryFind(fun f -> f.Name = condiName) with
             | Some condi -> condi.SettingFlows.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
-            | None -> x.Conditions.Add(ConditionDef(condiName, condiType, inAddr, HashSet[|flow|], funcs))
+            | None -> x.Conditions.Add(ConditionDef(condiName,x, condiType, inAddr, outAddr, HashSet[|flow|], funcs))
                       |> verifyM $"Duplicated ConditionDef [{condiName}]"
+                      HwSystemItem.CreateHWApi(condiName, x) |> ignore
 
 
         member x.SystemConditions     = x.Conditions :> seq<_>

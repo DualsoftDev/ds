@@ -123,6 +123,7 @@ CREATE VIEW [{Vn.Log}] AS
         new() = Storage(-1, -1, null, null, null)
 
         new(iStorage: IStorage) =
+            if iStorage.Target.IsNone then failwithf $"Storage Target is not exist {iStorage.Name}"
             Storage(-1, iStorage.TagKind, iStorage.Target.Value.QualifiedName, iStorage.DataType.Name, iStorage.Name)
 
         member val Id: int = id with get, set

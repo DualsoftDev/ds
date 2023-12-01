@@ -8,11 +8,14 @@ open System.Reactive.Subjects
 [<AutoOpen>]
 module TagKindModule =
 
-    let [<Literal>] TagStartSystem  = 0
-    let [<Literal>] TagStartFlow    = 10000
-    let [<Literal>] TagStartVertex  = 11000
-    let [<Literal>] TagStartApi     = 12000
-    let [<Literal>] TagStartAction  = 14000
+    let [<Literal>] TagStartSystem       = 0
+    let [<Literal>] TagStartFlow         = 10000
+    let [<Literal>] TagStartVertex       = 11000
+    let [<Literal>] TagStartApi          = 12000
+    let [<Literal>] TagStartAction       = 14000
+    let [<Literal>] TagStartActionHwTag  = 15000
+
+    
     let InnerTag = -1
 
     [<Flags>]
@@ -138,12 +141,20 @@ module TagKindModule =
     |ActionOut                = 14001
     |ActionMemory             = 14002
 
+    /// 15000 ~ 14999
+    [<Flags>]
+    type HwSysTag    =
+    |HwSysIn                     = 15000
+    |HwSysOut                    = 15001
+
+
     type TagDS =
-        | EventSystem  of Tag: IStorage * Target: DsSystem * TagKind: SystemTag
-        | EventFlow    of Tag: IStorage * Target: Flow     * TagKind: FlowTag
-        | EventVertex  of Tag: IStorage * Target: Vertex   * TagKind: VertexTag
-        | EventApiItem of Tag: IStorage * Target: ApiItem  * TagKind: ApiItemTag
-        | EventAction  of Tag: IStorage * Target: DsTask   * TagKind: ActionTag
+        | EventSystem   of Tag: IStorage * Target: DsSystem     * TagKind: SystemTag
+        | EventFlow     of Tag: IStorage * Target: Flow         * TagKind: FlowTag
+        | EventVertex   of Tag: IStorage * Target: Vertex       * TagKind: VertexTag
+        | EventApiItem  of Tag: IStorage * Target: ApiItem      * TagKind: ApiItemTag
+        | EventAction   of Tag: IStorage * Target: DsTask       * TagKind: ActionTag
+        | EventHwSys    of Tag: IStorage * Target: HwSystemItem * TagKind: HwSysTag
 
 
     let TagDSSubject = new Subject<TagDS>()
@@ -152,22 +163,24 @@ module TagKindModule =
 [<Extension>]
 type TagKindExt =
     [<Extension>] static member OnChanged (tagDS:TagDS) = TagDSSubject.OnNext(tagDS)
-    [<Extension>] static member GetSystemTagKind (x:IStorage) = DU.tryGetEnumValue<SystemTag>(x.TagKind)
-    [<Extension>] static member GetFlowTagKind   (x:IStorage) = DU.tryGetEnumValue<FlowTag>(x.TagKind)
-    [<Extension>] static member GetVertexTagKind (x:IStorage) = DU.tryGetEnumValue<VertexTag>(x.TagKind)
-    [<Extension>] static member GetApiTagKind    (x:IStorage) = DU.tryGetEnumValue<ApiItemTag>(x.TagKind)
-    [<Extension>] static member GetActionTagKind (x:IStorage) = DU.tryGetEnumValue<ActionTag>(x.TagKind)
+    [<Extension>] static member GetSystemTagKind   (x:IStorage) = DU.tryGetEnumValue<SystemTag>(x.TagKind)
+    [<Extension>] static member GetFlowTagKind     (x:IStorage) = DU.tryGetEnumValue<FlowTag>(x.TagKind)
+    [<Extension>] static member GetVertexTagKind   (x:IStorage) = DU.tryGetEnumValue<VertexTag>(x.TagKind)
+    [<Extension>] static member GetApiTagKind      (x:IStorage) = DU.tryGetEnumValue<ApiItemTag>(x.TagKind)
+    [<Extension>] static member GetActionTagKind   (x:IStorage) = DU.tryGetEnumValue<ActionTag>(x.TagKind)
+    [<Extension>] static member GetHwSysTagTagKind (x:IStorage) = DU.tryGetEnumValue<HwSysTag>(x.TagKind)
 
     [<Extension>]
     static member GetTagInfo (x:IStorage) =
         match x.Target with
         |Some obj ->
             match obj with
-            | :? DsSystem as s ->Some( EventSystem  (x, s, x.GetSystemTagKind().Value))
-            | :? Flow as f     ->Some( EventFlow    (x, f, x.GetFlowTagKind().Value))
-            | :? Vertex as v   ->Some( EventVertex  (x, v, x.GetVertexTagKind().Value))
-            | :? ApiItem as a  ->Some( EventApiItem (x, a, x.GetApiTagKind().Value))
-            | :? DsTask  as d  ->Some( EventAction  (x, d, x.GetActionTagKind().Value))
+            | :? DsSystem as s     ->Some( EventSystem  (x, s, x.GetSystemTagKind().Value))
+            | :? Flow as f         ->Some( EventFlow    (x, f, x.GetFlowTagKind().Value))
+            | :? Vertex as v       ->Some( EventVertex  (x, v, x.GetVertexTagKind().Value))
+            | :? ApiItem as a      ->Some( EventApiItem (x, a, x.GetApiTagKind().Value))
+            | :? DsTask  as d      ->Some( EventAction  (x, d, x.GetActionTagKind().Value))
+            | :? HwSystemItem as h ->Some( EventHwSys   (x, h, x.GetHwSysTagTagKind().Value))
             |_ -> None
         |None -> None
    
@@ -179,6 +192,7 @@ type TagKindExt =
         |EventVertex (i, _, _) -> i       
         |EventApiItem(i, _, _) -> i
         |EventAction (i, _, _) -> i
+        |EventHwSys  (i, _, _) -> i
 
 
 
@@ -191,6 +205,7 @@ type TagKindExt =
         |EventVertex ( _, target, _) -> target |> box
         |EventApiItem( _, target, _) -> target |> box
         |EventAction ( _, target, _) -> target |> box
+        |EventHwSys  ( _, target, _) -> target |> box
 
       
     [<Extension>]
@@ -202,6 +217,7 @@ type TagKindExt =
         |EventVertex (tag, obj, kind) -> getText tag obj kind
         |EventApiItem(tag, obj, kind) -> getText tag obj kind
         |EventAction (tag, obj, kind) -> getText tag obj kind
+        |EventHwSys  (tag, obj, kind) -> getText tag obj kind
         
     
 
@@ -213,6 +229,7 @@ type TagKindExt =
         |EventVertex (_, obj, _) -> obj.Parent.GetSystem()       
         |EventApiItem(_, obj, _) -> obj.System
         |EventAction (_, obj, _) -> obj.ApiItem.System
+        |EventHwSys  (_, obj, _) -> obj.System
         
     [<Extension>]
     static member IsStatusTag(x:TagDS) =
@@ -234,7 +251,7 @@ type TagKindExt =
     [<Extension>]
     static member IsStatusTag(x:IStorage) =
         x.TagKind.IsOneOf(
-                int VertexTag.ready
+              int VertexTag.ready
             , int VertexTag.going
             , int VertexTag.finish
             , int VertexTag.homing)
@@ -263,3 +280,4 @@ type TagKindExt =
                                         || kind = ApiItemTag.txErrTimeOver  
                                         || kind = ApiItemTag.txErrTrendOut  
         |EventAction (_, _, _) -> false
+        |EventHwSys  (_, _, _) -> false

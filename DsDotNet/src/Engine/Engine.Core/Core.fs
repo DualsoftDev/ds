@@ -102,7 +102,10 @@ module CoreModule =
         member val OriginalCodeBlocks = ResizeArray<string>()
         member val Statements = ResizeArray<Statement>()
         member val Variables = ResizeArray<VariableData>()
+        ///사용자 정의 API 
         member val ApiItems = createNamedHashSet<ApiItem>()
+        ///HW HMI 전용 API (물리 ButtonDef LampDef ConditionDef 정의에 따른 API)
+        member val HWSystemItems = createNamedHashSet<HwSystemItem>()
         member val ApiResetInfos = HashSet<ApiResetInfo>()
         member val StartPoints = createQualifiedNamedHashSet<Real>()
         member val internal HWButtons = HashSet<ButtonDef>()
@@ -126,41 +129,38 @@ module CoreModule =
             system.Flows.Add(flow) |> verifyM $"중복된 플로우 이름 [{name}]"
             flow
 
-    and ButtonDef (name: string, btnType: BtnType, inAddress: TagAddress, outAddress: TagAddress, flows: HashSet<Flow>, funcs: HashSet<Func>) =
+
+    [<AbstractClass>]
+    type HwSystemDef (name: string, system:DsSystem, inAddress: TagAddress, outAddress: TagAddress, funcs: HashSet<Func>)=
+        inherit FqdnObject(name, system)
         member x.Name = name
-        member x.ButtonType = btnType
-        /// 버튼 작동을 위한 외부 IO 입력 주소
+        ///  작동을 위한 외부 IO 입력 주소
         member val InAddress = inAddress with get, set
-        /// 버튼 작동을 위한 외부 IO 출력 주소
+        ///  작동을 위한 외부 IO 출력 주소
         member val OutAddress = outAddress  with get, set
         /// CPU 생성 시 할당됨 InTag
         member val InTag = getNull<ITag>() with get, set
         /// CPU 생성 시 할당됨 OutTag
         member val OutTag = getNull<ITag>() with get, set
-        member val SettingFlows = flows with get, set
         member val Funcs = funcs with get, set
 
-    and LampDef (name: string, lampType: LampType, outAddress: TagAddress, flow: Flow, funcs: HashSet<Func>) =
+
+    and ButtonDef (name: string, system:DsSystem, btnType: BtnType, inAddress: TagAddress, outAddress: TagAddress, flows: HashSet<Flow>, funcs: HashSet<Func>) =
+        inherit HwSystemDef(name, system, inAddress, outAddress, funcs)
+        member x.ButtonType = btnType
+        member val SettingFlows = flows with get, set
+
+    and LampDef (name: string, system:DsSystem,lampType: LampType, inAddress: TagAddress,  outAddress: TagAddress, flow: Flow, funcs: HashSet<Func>) =
+        inherit HwSystemDef(name, system,  inAddress, outAddress, funcs) //inAddress lamp check bit
         member x.Name = name
         member x.LampType = lampType
-        /// 램프 작동을 위한 외부 IO 출력 주소
-        member val OutAddress = outAddress  with get, set
-        /// CPU 생성 시 할당됨 물리 OutTag
-        member val OutTag = getNull<ITag>() with get, set
-        /// 단일 플로우 단위로 램프 상태 출력
         member val SettingFlow = flow with get, set
-        member val Funcs = funcs with get, set
 
-    and ConditionDef (name: string, conditionType: ConditionType, inAddress: TagAddress, flows: HashSet<Flow>, funcs: HashSet<Func>) =
-        member x.Name = name
+    and ConditionDef (name: string, system:DsSystem, conditionType: ConditionType, inAddress: TagAddress, outAddress:TagAddress,  flows: HashSet<Flow>, funcs: HashSet<Func>) =
+        inherit HwSystemDef(name,  system, inAddress, outAddress, funcs) // outAddress condition check bit
         member x.ConditionType = conditionType
-        /// 조건을 위한 외부 IO 출력 주소
-        member val InAddress = inAddress  with get, set
-        /// CPU 생성 시 할당됨 InTag
-        member val InTag = getNull<ITag>() with get, set
-        /// 단일 플로우 단위로 조건 상태 출력
         member val SettingFlows = flows with get, set
-        member val Funcs = funcs with get, set
+
 
     and AliasDef(aliasKey: Fqdn, target: AliasTargetWrapper option, mnemonics: string []) =
         member _.AliasKey = aliasKey
@@ -258,6 +258,15 @@ module CoreModule =
         member val InTag = getNull<ITag>() with get, set
         //CPU 생성시 할당됨 OutTag
         member val OutTag = getNull<ITag>() with get, set
+
+
+    /// 자신을 외부에서 물리적으로 조작하거나 조건을 나타날때 ex) system auto 물리버튼
+    and HwSystemItem private (name:string, system:DsSystem) =
+        inherit FqdnObject(name, createFqdnObject([|system.Name|]))
+        interface INamedVertex
+        member _.Name = name
+        member _.System = system
+        member val Xywh:Xywh = null with get, set //제어반 버튼위치
 
     /// 자신을 export 하는 관점에서 본 api's.  Interface 정의.   [interfaces] = { "+" = { F.Vp ~ F.Sp } }
     and ApiItem private (name:string, system:DsSystem) =
@@ -439,3 +448,10 @@ module CoreModule =
             ai4e.AddTXs txs |> ignore
             ai4e.AddRXs rxs |> ignore
             ai4e
+
+    type HwSystemItem with
+        static member CreateHWApi(name, system) =
+            let cp = HwSystemItem(name, system)
+            system.HWSystemItems.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
+            cp
+     

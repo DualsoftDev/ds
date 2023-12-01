@@ -46,8 +46,4 @@
         <ProjectReference Include="..\Engine.Info\Engine.Info.fsproj" />
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="TagManager\" />
-    </ItemGroup>
-
 </Project>

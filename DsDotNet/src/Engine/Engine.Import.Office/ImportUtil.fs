@@ -235,6 +235,7 @@ module ImportU =
             let dicFlow = doc.DicFlow
 
             doc.Pages
+            |> Seq.filter (fun page -> page.PageNum <> 1)
             |> Seq.filter (fun page -> page.IsUsing)
             |> Seq.iter (fun page ->
                 let pageNum = page.PageNum
@@ -260,7 +261,7 @@ module ImportU =
                 let flow = dicFlow.[node.PageNum]
                 node.ButtonDefs.ForEach(fun b -> mySys.AddButton(b.Value, b.Key, "", "", flow, new HashSet<Func>())))
 
-            doc.Nodes
+            doc.NodesHeadPage
             |> Seq.filter (fun node -> node.ButtonHeadPageDefs.any())
             |> Seq.iter (fun node ->
                 dicFlow.Iter(fun flow ->
@@ -276,16 +277,16 @@ module ImportU =
             |> Seq.filter (fun node -> node.LampDefs.any ())
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.LampDefs.ForEach(fun l -> mySys.AddLamp(l.Value, l.Key, "", flow, new HashSet<Func>())))
+                node.LampDefs.ForEach(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", flow, new HashSet<Func>())))
             
-            doc.Nodes
+            doc.NodesHeadPage
             |> Seq.filter (fun node -> node.LampHeadPageDefs.any())
             |> Seq.iter (fun node ->
                 dicFlow.Iter(fun flow ->
-                    node.LampDefs.ForEach(fun l -> mySys.AddLamp(l.Value, l.Key, "", flow.Value, new HashSet<Func>())))
+                    node.LampHeadPageDefs.ForEach(fun l -> mySys.AddLamp(l.Value, $"{l.Key}_{flow.Value.Name}", "", "", flow.Value, new HashSet<Func>())))
                 )      
+      
      
-
         //real call alias  만들기
         [<Extension>]
         static member MakeSegment(doc: pptDoc, mySys: DsSystem) =
@@ -501,7 +502,7 @@ module ImportU =
             let dicFlow = doc.DicFlow
 
             doc.Nodes
-            |> iter (fun node ->
+            |> Seq.iter   (fun node ->
                 let flow = dicFlow.[node.PageNum]
 
                 let dicQualifiedNameSegs =

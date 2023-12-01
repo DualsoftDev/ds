@@ -281,7 +281,8 @@ module PPTDocModule =
             pages.Values |> Seq.filter (fun p -> p.PageNum = pageNum) |> Seq.head
 
         member val Pages = pages.Values.OrderBy(fun p -> p.PageNum)
-        member val Nodes = nodes.Values.OrderBy(fun p -> p.PageNum)
+        member val NodesHeadPage = nodes.Values.Where(fun p -> p.PageNum = 1)
+        member val Nodes = nodes.Values.Filter(fun p -> p.PageNum <> 1).OrderBy(fun p -> p.PageNum)
         member val Edges = edges.OrderBy(fun p -> p.PageNum)
 
         member val DicNodes = nodes

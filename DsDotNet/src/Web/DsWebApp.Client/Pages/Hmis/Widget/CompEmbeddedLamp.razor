@@ -1,0 +1,24 @@
+<div class="embedded-lamp @(_isOn ? "on" : "off")"></div>
+
+@code {
+    bool _isOn = false;
+
+    public void SetLampState(bool isOn)
+    {
+        _isOn = isOn;
+        StateHasChanged();
+    }
+}
+
+<style>
+    .embedded-lamp {
+        width: 10px;
+        height: 20px;
+        border-radius: 10%;
+        background-color: red;  /* erroneous */
+        margin-right: 10px;
+        display: inline-block;
+    }
+        .embedded-lamp.off { background-color: darkslategray; }
+        .embedded-lamp.on { background-color: darkorange; }
+</style>

@@ -1,9 +1,9 @@
-@* CompHmiWidgetLampRGFH *@
+@* CompHmiWidgetPushButtonWithLamp *@
 
 <div class="container">
     <DxButton Click="@_toggleLamp">
         <CompEmbeddedLamp @ref="_lampRef" />
-        Toggle Lamp
+        @Text
     </DxButton>
 </div>
 
@@ -11,6 +11,7 @@
     bool _isLampOn = false;
     CompEmbeddedLamp _lampRef;
     [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
+    [Parameter] public string Text { get; set; }
 
 
     void _toggleLamp()
@@ -35,6 +36,5 @@
 
     .lamp-container {
         margin-left: 10px;
-        램프와 버튼 사이의 간격을 조절합니다.
     }
 </style>

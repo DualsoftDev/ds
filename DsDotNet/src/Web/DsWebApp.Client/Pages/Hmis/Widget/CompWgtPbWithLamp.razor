@@ -1,0 +1,35 @@
+@* CompWgtPbWithLamp *@
+
+<DxButton Click="@_toggleLamp" RenderStyleMode=ButtonRenderStyleMode.Outline>
+    <CompWgtEmbeddedLamp IsOn=IsOn @ref="_lampRef" />
+    @Text
+</DxButton>
+
+@code {
+    CompWgtEmbeddedLamp _lampRef;
+    [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
+    [Parameter] public string Text { get; set; }
+
+    bool _isOn = false; // IsOn 과 별개로 상태 저장 필요
+    [Parameter] public bool IsOn { get; set; }
+    protected override void OnInitialized()
+    {
+        _isOn = IsOn;
+    }
+
+
+    void _toggleLamp()
+    {
+        _isOn = !_isOn;
+        Console.WriteLine($"New lamp state: {_isOn}");
+        _lampRef.SetLampState(_isOn);
+        Click.InvokeAsync();
+    }
+
+    public void SetState(bool isOn)
+    {
+        _isOn = isOn;
+        _lampRef.SetLampState(_isOn);
+    }
+}
+

@@ -1,0 +1,26 @@
+@* CompWgtEmbeddedLamp *@
+
+<div class="embedded-lamp @(IsOn ? "on" : "off")"></div>
+
+@code {
+    [Parameter] public bool IsOn { get; set; }
+
+    public void SetLampState(bool isOn)
+    {
+        IsOn = isOn;
+        StateHasChanged();
+    }
+}
+
+<style>
+    .embedded-lamp {
+        width: 10px;
+        height: 20px;
+        border-radius: 10%;
+        background-color: red;  /* erroneous */
+        margin-right: 10px;
+        display: inline-block;
+    }
+        .embedded-lamp.off { background-color: darkslategray; }
+        .embedded-lamp.on { background-color: darkorange; }
+</style>

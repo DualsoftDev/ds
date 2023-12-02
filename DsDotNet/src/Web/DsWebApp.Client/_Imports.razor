@@ -23,6 +23,7 @@
 @using Dual.Web.Blazor.Client.Auth
 @using Dual.Web.Blazor.ClientSide
 @using Dual.Web.Blazor.ServerSide
+@using Dual.Web.Blazor.Client.Pages.Auth
 @using static Engine.Core.HmiPackageModule
 
 @using DsWebApp.Client
@@ -32,6 +33,7 @@
 @using DsWebApp.Shared
 
 @using TagFqdn = string
+@using Status4 = Engine.Core.DsType.Status4
 
 
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -44,6 +46,5 @@
 @inject IJSRuntime JsRuntime
 @inject ILocalStorageService LocalStorage;
 @inject IToastService ToastService
-@using Dual.Web.Blazor.Client.Pages.Auth
 
 

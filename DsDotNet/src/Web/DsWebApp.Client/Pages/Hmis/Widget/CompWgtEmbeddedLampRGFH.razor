@@ -1,19 +1,35 @@
 @* CompWgtEmbeddedLampRGFH *@
-
-<div class="embedded-lamp @(IsOn ? "on" : "off")"></div>
+@if (!_loading)
+{
+    <div class="@_class" id="@_guid"></div>
+}
 
 @code {
-    [Parameter] public bool IsOn { get; set; }
+    [Parameter] public Status4 Status4 { get; set; }
+    string _guid;
+    string _class;
+    bool _loading { get; set; } = true;
 
-    public void SetLampState(bool isOn)
+    protected override async Task OnInitializedAsync()
     {
-        IsOn = isOn;
-        StateHasChanged();
+        await base.OnInitializedAsync();
+        _guid = Guid.NewGuid().ToString();
+        _class = $"embedded-lamp4 {Status4}";
+        _loading = false;
     }
+
+    public async Task SetLampStateAsync(Status4 rgfh)
+    {
+        Console.WriteLine($"-------- Re-rendering {rgfh}.");
+        _class = $"embedded-lamp4 {rgfh}";
+        await JsDual.SetAttribute(_guid, "class", _class);
+    }
+
+
 }
 
 <style>
-    .embedded-lamp {
+    .embedded-lamp4 {
         width: 10px;
         height: 20px;
         border-radius: 10%;
@@ -21,6 +37,8 @@
         margin-right: 10px;
         display: inline-block;
     }
-        .embedded-lamp.off { background-color: darkslategray; }
-        .embedded-lamp.on { background-color: darkorange; }
+        .embedded-lamp4.Ready { background-color: green; }
+        .embedded-lamp4.Going { background-color: darkorange; }
+        .embedded-lamp4.Finish { background-color: blue; }
+        .embedded-lamp4.Homing { background-color: gray; }
 </style>

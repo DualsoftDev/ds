@@ -1,0 +1,29 @@
+@* ComWgtLampRGFH *@
+
+<DxButton>
+    <CompWgtEmbeddedLampRGFH Status4=Status4 @ref="_lampRef" />
+    @Text
+</DxButton>
+
+@code {
+    CompWgtEmbeddedLampRGFH _lampRef;
+    [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
+    [Parameter] public string Text { get; set; }
+
+    Status4 _status4;
+    [Parameter] public Status4 Status4 { get; set; }
+    protected override void OnInitialized()
+    {
+        _status4 = Status4;
+    }
+
+
+    public async Task SetStatus4Async(Status4 status4)
+    {
+        Console.WriteLine($"New lamp state: {status4}");
+        _status4 = status4;
+        await _lampRef.SetLampStateAsync(_status4);
+        // Click.InvokeAsync();
+    }
+}
+

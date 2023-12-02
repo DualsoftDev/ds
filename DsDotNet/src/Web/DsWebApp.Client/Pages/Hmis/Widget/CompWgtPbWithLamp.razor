@@ -25,5 +25,11 @@
         _lampRef.SetLampState(_isOn);
         Click.InvokeAsync();
     }
+
+    public void SetState(bool isOn)
+    {
+        _isOn = isOn;
+        _lampRef.SetLampState(_isOn);
+    }
 }
 

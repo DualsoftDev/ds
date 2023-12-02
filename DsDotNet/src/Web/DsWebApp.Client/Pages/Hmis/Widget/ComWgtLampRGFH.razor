@@ -1,6 +1,6 @@
 @* ComWgtLampRGFH *@
 
-<DxButton>
+<DxButton Id="xxxx" Click="@Click">
     <CompWgtEmbeddedLampRGFH Status4=Status4 @ref="_lampRef" />
     @Text
 </DxButton>
@@ -22,8 +22,14 @@
     {
         Console.WriteLine($"New lamp state: {status4}");
         _status4 = status4;
+
+        // todo: not working!
+        Text = status4.ToString();
+        // await JsDual.SetAttribute("xxxx", "class", _class);
+
         await _lampRef.SetLampStateAsync(_status4);
-        // Click.InvokeAsync();
+        // await Click.InvokeAsync();
+        // StateHasChanged();
     }
 }
 

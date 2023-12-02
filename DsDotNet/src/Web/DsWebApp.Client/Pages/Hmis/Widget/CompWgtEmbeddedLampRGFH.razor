@@ -8,7 +8,7 @@
     [Parameter] public Status4 Status4 { get; set; }
     string _guid;
     string _class;
-    bool _loading { get; set; } = true;
+    bool _loading = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -20,12 +20,10 @@
 
     public async Task SetLampStateAsync(Status4 rgfh)
     {
-        Console.WriteLine($"-------- Re-rendering {rgfh}.");
+        // Console.WriteLine($"-------- Re-rendering {rgfh}.");
         _class = $"embedded-lamp4 {rgfh}";
         await JsDual.SetAttribute(_guid, "class", _class);
     }
-
-
 }
 
 <style>

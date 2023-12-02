@@ -1,21 +1,49 @@
 @* ComWgtLampRGFH *@
+@if (!_loading)
+{
+    <DxButton Click="@Click" RenderStyleMode=ButtonRenderStyleMode.Outline>
+        <CompWgtEmbeddedLampRGFH Status4=Status4 @ref="_lampRef" />
+        <div id="@_guid">@_text</div>
+    </DxButton>
+}
 
-<DxButton Id="xxxx" Click="@Click">
-    <CompWgtEmbeddedLampRGFH Status4=Status4 @ref="_lampRef" />
-    @Text
-</DxButton>
+
+
+<script>
+    window.setInnerTextById = function (elementId, newText) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.innerText = newText;
+        } else {
+            console.error(`Element with ID ${elementId} not found.`);
+        }
+    };
+
+    function SetInnerText(elementId, newText) {
+        // HTML 엘리먼트의 ID를 사용하여 inner text 변경
+        window.setInnerTextById(elementId, newText);
+    }
+</script>
 
 @code {
     CompWgtEmbeddedLampRGFH _lampRef;
     [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
-    [Parameter] public string Text { get; set; }
 
     Status4 _status4;
     [Parameter] public Status4 Status4 { get; set; }
-    protected override void OnInitialized()
+
+    string _guid;
+    string _text;
+    bool _loading = true;
+    protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
+        _guid = Guid.NewGuid().ToString();
         _status4 = Status4;
+        _text = Status4.ToString();
+        _loading = false;
     }
+
 
 
     public async Task SetStatus4Async(Status4 status4)
@@ -23,13 +51,9 @@
         Console.WriteLine($"New lamp state: {status4}");
         _status4 = status4;
 
-        // todo: not working!
-        Text = status4.ToString();
-        // await JsDual.SetAttribute("xxxx", "class", _class);
-
         await _lampRef.SetLampStateAsync(_status4);
-        // await Click.InvokeAsync();
-        // StateHasChanged();
+
+        await JsRuntime.InvokeVoidAsync("SetInnerText", new object[] { _guid, status4.ToString() });
     }
 }
 

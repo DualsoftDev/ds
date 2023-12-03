@@ -8,23 +8,6 @@
 }
 
 
-
-<script>
-    window.setInnerTextById = function (elementId, newText) {
-        const element = document.getElementById(elementId);
-        if (element) {
-            element.innerText = newText;
-        } else {
-            console.error(`Element with ID ${elementId} not found.`);
-        }
-    };
-
-    function SetInnerText(elementId, newText) {
-        // HTML 엘리먼트의 ID를 사용하여 inner text 변경
-        window.setInnerTextById(elementId, newText);
-    }
-</script>
-
 @code {
     CompWgtEmbeddedLampRGFH _lampRef;
     [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
@@ -53,7 +36,7 @@
 
         await _lampRef.SetLampStateAsync(_status4);
 
-        await JsRuntime.InvokeVoidAsync("SetInnerText", new object[] { _guid, status4.ToString() });
+        await JsDual.SetInnerText(_guid, status4.ToString());
     }
 }
 

@@ -1,0 +1,17 @@
+{
+	"nodes":[
+		{"id":"43bb158ae1ab1e78","type":"text","text":"PageHmi","x":-120,"y":40,"width":145,"height":60},
+		{"id":"a42846076e324d4f","type":"text","text":"CompHmiFlowTable","x":-230,"y":-100,"width":220,"height":60},
+		{"id":"7c728ccd1bd2a56a","type":"text","text":"CompHmiRealTable","x":5,"y":-200,"width":220,"height":60},
+		{"id":"e7c8b50461fd4942","type":"text","text":"CompWgtPbDynWithTagLamp","x":-262,"y":-440,"width":285,"height":60},
+		{"id":"201c1f152fbd4f09","type":"text","text":"[[CompHmiButtonColumn]]","x":-245,"y":-340,"width":250,"height":60},
+		{"id":"e60def4fda3617b1","type":"text","text":"[[CompHmiButtonColumn]]","x":-245,"y":-340,"width":250,"height":60}
+	],
+	"edges":[
+		{"id":"d9f11c742538ab85","fromNode":"43bb158ae1ab1e78","fromSide":"top","toNode":"a42846076e324d4f","toSide":"bottom"},
+		{"id":"25de7a91c9217903","fromNode":"a42846076e324d4f","fromSide":"top","toNode":"7c728ccd1bd2a56a","toSide":"bottom"},
+		{"id":"56a628b4cfe9229d","fromNode":"7c728ccd1bd2a56a","fromSide":"top","toNode":"201c1f152fbd4f09","toSide":"bottom"},
+		{"id":"796fb7f3768a7ac8","fromNode":"201c1f152fbd4f09","fromSide":"top","toNode":"e7c8b50461fd4942","toSide":"bottom"},
+		{"id":"70e8048b4ae91bc5","fromNode":"a42846076e324d4f","fromSide":"top","toNode":"201c1f152fbd4f09","toSide":"bottom"}
+	]
+}

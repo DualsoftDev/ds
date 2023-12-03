@@ -11,31 +11,14 @@
             "id": "f118e42fbfe406e6",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {}
-            }
-          },
-          {
-            "id": "d96ae9ea8943286a",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
+              "type": "canvas",
               "state": {
-                "file": "DsWebServer/HMI/TagWeb.md",
-                "mode": "source",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "40f89751162e08c7",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "IOHub/Endian.md",
-                "mode": "source",
-                "source": false
+                "file": "DsWebServer/HMI/Browser UI/0. PageHmi.canvas",
+                "viewState": {
+                  "x": -18.5,
+                  "y": -170,
+                  "zoom": 0
+                }
               }
             }
           }
@@ -105,6 +88,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "DsWebServer/HMI/Browser UI/0. PageHmi.canvas",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -121,6 +105,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "DsWebServer/HMI/Browser UI/0. PageHmi.canvas",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -142,7 +127,9 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {}
+              "state": {
+                "file": "DsWebServer/HMI/Browser UI/0. PageHmi.canvas"
+              }
             }
           }
         ]
@@ -164,9 +151,12 @@
   },
   "active": "80a060ffd7fb1ac9",
   "lastOpenFiles": [
-    "Engine.Core/DsCPU.md",
-    "DsWebServer/HMI/TagWeb.md",
+    "DsWebServer/HMI/Browser UI/CompHmiButtonColumn.md",
+    "DsWebServer/HMI/Browser UI/0. PageHmi.canvas",
     "DsWebServer/HMI/HMI.md",
+    "DsWebServer/HMI/TagWeb.md",
+    "DsWebServer/HMI/Browser UI",
+    "Engine.Core/DsCPU.md",
     "Others/Powerpoint Addin's.md",
     "DsWebServer/IOHub Web 연동.md",
     "Others",
@@ -195,8 +185,6 @@
     "IOHub/IOHub TODO.md",
     "IOHub/Zmq/ZMQ client build.md",
     "Stat/Info viewer.md",
-    "2023-11-06.md",
-    "Stat/0. Index.md",
     "Stat/Database/Schema.canvas",
     "Stat/Architecture.canvas",
     "QuerySet",
@@ -204,7 +192,6 @@
     "Stat/Database/Tables",
     "Stat/Database",
     "Stat",
-    "IOHub/Zmq",
-    "IOHub/IO Spec"
+    "IOHub/Zmq"
   ]
 }

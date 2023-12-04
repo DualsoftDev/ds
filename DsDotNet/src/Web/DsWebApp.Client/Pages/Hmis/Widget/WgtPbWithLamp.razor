@@ -1,12 +1,21 @@
-@* CompWgtPbWithLamp *@
-
+@* WgtPbWithLamp *@
+@* 
 <DxButton Click="@_toggleLamp" RenderStyleMode=ButtonRenderStyleMode.Outline>
-    <CompWgtEmbeddedLamp IsOn=IsOn @ref="_lampRef" />
+    <WgtEmbeddedLamp IsOn=IsOn @ref="_lampRef" />
     @Text
 </DxButton>
+ *@
+
+@* <button class="btn btn-outline-primary" onclick="@Click"> *@
+<button class="btn btn-outline-primary" onclick="@(() => _toggleLamp())">
+    <div style="display: flex; align-items: center;">
+            <WgtEmbeddedLamp IsOn=IsOn @ref="_lampRef" />
+            @Text
+    </div>
+</button>
 
 @code {
-    CompWgtEmbeddedLamp _lampRef;
+    WgtEmbeddedLamp _lampRef;
     [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
     [Parameter] public string Text { get; set; }
 

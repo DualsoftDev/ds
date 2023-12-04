@@ -19,16 +19,19 @@
 else
 {
     <p>
-        <CompWgtPb Text="Auto"     DataItem="@(_system.GetAuto())"     TagGetter="@_tagGetter" />
-        <CompWgtPb Text="Manual"   DataItem="@(_system.GetManual())"   TagGetter="@_tagGetter" />
+@*         <WgtPb Text="Auto"     DataItem="@(_system.GetAuto())"         TagGetter="@_tagGetter" />
+        <WgtPb Text="Manual"   DataItem="@(_system.GetManual())"       TagGetter="@_tagGetter" />
+ *@
+        <WgtGridPbLamp Text="Auto"     DataItem="@(_system.AutoManualSelectLamp.Item1)" ButtonLampGetter="@_buttonLampGetter" />
+        <WgtGridPbLamp Text="Manual"   DataItem="@(_system.AutoManualSelectLamp.Item2)" ButtonLampGetter="@_buttonLampGetter" />
 
-        <CompWgtPb Text="Ready"    DataItem="@(_system.ReadyPushLamp)"     TagGetter="@_tagGetter" />
-        <CompWgtPb Text="Drive" DataItem="@(_system.DrivePushLamp)" TagGetter="@_tagGetter" />
-        <CompWgtPb Text="Home" DataItem="@(_system.HomePushLamp)" TagGetter="@_tagGetter" />
-        <CompWgtPb Text="Clear" DataItem="@(_system.ClearPushLamp)" TagGetter="@_tagGetter" />
-        <CompWgtPb Text="Stop" DataItem="@(_system.StopPushLamp)" TagGetter="@_tagGetter" />
-        <CompWgtPb Text="Em Stop" DataItem="@(_system.EmergencyPushLamp)" TagGetter="@_tagGetter" />
-        <CompWgtPb Text="Test" DataItem="@(_system.TestPushLamp)" TagGetter="@_tagGetter" />
+        <WgtGridPbLamp Text="Ready"    DataItem="@(_system.ReadyPushLamp)"     ButtonLampGetter="@_buttonLampGetter" />
+        <WgtGridPbLamp Text="Drive"    DataItem="@(_system.DrivePushLamp)"     ButtonLampGetter="@_buttonLampGetter" />
+        <WgtGridPbLamp Text="Home"     DataItem="@(_system.HomePushLamp)"      ButtonLampGetter="@_buttonLampGetter" />
+        <WgtGridPbLamp Text="Clear"    DataItem="@(_system.ClearPushLamp)"     ButtonLampGetter="@_buttonLampGetter" />
+        <WgtGridPbLamp Text="Stop"     DataItem="@(_system.StopPushLamp)"      ButtonLampGetter="@_buttonLampGetter" />
+        <WgtGridPbLamp Text="Em Stop"  DataItem="@(_system.EmergencyPushLamp)" ButtonLampGetter="@_buttonLampGetter" />
+        <WgtGridPbLamp Text="Test"     DataItem="@(_system.TestPushLamp)"      ButtonLampGetter="@_buttonLampGetter" />
     </p>
 
     <CompHmiFlowTable Flows="@_system.Flows"/>
@@ -36,7 +39,8 @@ else
 
 
 @code {
-    TagWeb _tagGetter(object dataItem) => (TagWeb)dataItem;
+    HMIPushLamp _buttonLampGetter(object dataItem) => (HMIPushLamp)dataItem;
+
     // protected override async Task OnInitializedAsync()
     // {
     //     await base.OnInitializedAsync();

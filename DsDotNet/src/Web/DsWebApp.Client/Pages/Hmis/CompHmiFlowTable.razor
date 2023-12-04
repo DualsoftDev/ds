@@ -28,7 +28,7 @@ else
                     Auto/Manual
                 </HeaderTemplate>
                 <CellDisplayTemplate>
-                    <CompWgtAutoManualSelectorPb
+                    <WgtAutoManualSelectorPb
                         TagAuto="(((HMIFlow)context.DataItem).GetAuto())"
                         TagManual="(((HMIFlow)context.DataItem).GetManual())"
                         FlowName="@(((HMIFlow)context.DataItem).Name)"
@@ -36,13 +36,13 @@ else
                 </CellDisplayTemplate>
             </DxGridCommandColumn>
 
-            <CompHmiButtonColumn Caption="Drive"    TagGetter="@((dataItem) =>((HMIFlow)dataItem).DrivePushLampMode.GetButton())" />
-            <CompHmiButtonColumn Caption="Stop" TagGetter="@((dataItem) =>((HMIFlow)dataItem).StopPushLampMode.GetButton())" />
-            <CompHmiButtonColumn Caption="Clear" TagGetter="@((dataItem) =>((HMIFlow)dataItem).ClearPushLamp.GetButton())" />
-            <CompHmiButtonColumn Caption="Em. Stop" TagGetter="@((dataItem) =>((HMIFlow)dataItem).EmergencyPushLampMode.GetButton())" ForceWidth=100 />
-            <CompHmiButtonColumn Caption="Test" TagGetter="@((dataItem) =>((HMIFlow)dataItem).TestPushLampMode.GetButton())" />
-            <CompHmiButtonColumn Caption="Home" TagGetter="@((dataItem) =>((HMIFlow)dataItem).HomePushLamp.GetButton())" />
-            <CompHmiButtonColumn Caption="Ready" TagGetter="@((dataItem) =>((HMIFlow)dataItem).ReadyPushLampMode.GetButton())" />
+            <CompHmiButtonLampModeColumn Caption="Drive"    ButtonLampModeGetter="@((dataItem) =>((HMIFlow)dataItem).DrivePushLampMode)" />
+            <CompHmiButtonLampModeColumn Caption="Stop" ButtonLampModeGetter="@((dataItem) =>((HMIFlow)dataItem).StopPushLampMode)" />
+            <CompHmiButtonLampColumn Caption="Clear"    ButtonLampGetter="@((dataItem) =>((HMIFlow)dataItem).ClearPushLamp)" />
+            <CompHmiButtonLampModeColumn Caption="Em. Stop" ButtonLampModeGetter="@((dataItem) =>((HMIFlow)dataItem).EmergencyPushLampMode)" ForceWidth=100 />
+            <CompHmiButtonLampModeColumn Caption="Test" ButtonLampModeGetter="@((dataItem) =>((HMIFlow)dataItem).TestPushLampMode)" />
+            <CompHmiButtonLampColumn Caption="Home"     ButtonLampGetter="@((dataItem) =>((HMIFlow)dataItem).HomePushLamp)" />
+            <CompHmiButtonLampModeColumn Caption="Ready" ButtonLampModeGetter="@((dataItem) =>((HMIFlow)dataItem).ReadyPushLampMode)" />
 
         </Columns>
     </DxGrid>

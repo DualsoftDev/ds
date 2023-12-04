@@ -15,7 +15,7 @@ https://supportcenter.devexpress.com/ticket/details/t1135370/grid-for-blazor-how
     // [Parameter] public EventCallback<object> OnClick { get; set; }
     [Parameter] public Nullable<int> ForceWidth { get; set; }
 
-    [Parameter] public Func<object, TagWeb> TagGetter { get; set; }
+    [Parameter] public Func<object, HMIPushLamp> ButtonLampGetter { get; set; }
 
 
     protected override bool ShouldRender() => false;
@@ -28,7 +28,7 @@ https://supportcenter.devexpress.com/ticket/details/t1135370/grid-for-blazor-how
         {
             object row = context.DataItem;
             // return @<DxButton Text="@Caption" RenderStyle="ButtonRenderStyle.Primary" Click=@(() => OnClick.InvokeSafeAsync(context.DataItem)) />;
-            return@<WgtPb Text="@Caption" DataItem="@row" TagGetter="@TagGetter" />    ;
+            return@<WgtGridPbLamp Text="@Caption" DataItem="@row" ButtonLampGetter="@ButtonLampGetter" />    ;
         };
     }
 }

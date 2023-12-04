@@ -41,7 +41,7 @@
         <Compile Include="Address.Convert.fs"/>
         <Compile Include="ToXGI.Spec.FBText.fs"/>
         <Compile Include="ToXGI.Spec.fs"/>
-        <EmbeddedResource Include="XgI-4.7.4.template.xml"/>
+        <EmbeddedResource Include="XgI-4.5.2.template.xml"/>
         <Compile Include="ToXGI.Prolog.fs"/>
         <None Include="Import\XGConfigReader.fsx"/>
         <None Include="Import\XGLDRoutineReader.fsx"/>

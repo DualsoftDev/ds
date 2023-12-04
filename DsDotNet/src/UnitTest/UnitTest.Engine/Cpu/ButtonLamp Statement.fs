@@ -14,13 +14,16 @@ type Spec12_ButtonLampStatement() =
 
     let t = CpuTestSample()
     [<Test>]
-    member __.``B1 Button Output`` () =
+    member __.``B1 HW Button Output`` () =
         t.Sys.B1_HWButtonOutput() |> doChecks
+    [<Test>]
+    member __.``B2 SW Button Output`` () =
+        t.Sys.B2_SWButtonOutput() |> doChecks
 
     [<Test>]
-    member __.``B2 Mode Lamp`` () =
-        t.Sys.B2_HWLamp() |> doChecks
+    member __.``B3 Mode Lamp`` () =
+        t.Sys.B3_HWLamp() |> doChecks
     [<Test>]
-    member __.``B3 HWBtnConnetToSW`` () =
-        t.Sys.B3_HWBtnConnetToSW() |> doChecks
+    member __.``B4 HWBtnConnetToSW`` () =
+        t.Sys.B4_HWBtnConnetToSW() |> doChecks
         

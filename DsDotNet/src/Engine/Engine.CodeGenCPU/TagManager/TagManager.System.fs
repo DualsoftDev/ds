@@ -28,16 +28,30 @@ module SystemManagerModule =
                      onBit.Value <- true  //항상 ON
                      onBit
 
-        let off      = dsSysBit   "_off"          false sys  SystemTag.off
-        let auto     = dsSysBit   "sysauto"       true  sys  SystemTag.auto
-        let manual   = dsSysBit   "sysmanual"     true  sys  SystemTag.manual
-        let drive    = dsSysBit   "sysdrive"      true  sys  SystemTag.drive
-        let stop     = dsSysBit   "sysstop"       true  sys  SystemTag.stop
-        let emg      = dsSysBit   "sysemg"        true  sys  SystemTag.emg
-        let test     = dsSysBit   "systest"       true  sys  SystemTag.test
-        let ready    = dsSysBit   "sysready"      true  sys  SystemTag.ready
-        let clear    = dsSysBit   "sysclear"      true  sys  SystemTag.clear
-        let home     = dsSysBit   "syshome"       true  sys  SystemTag.home
+        let off          = dsSysBit   "_off"          false sys  SystemTag.off
+        let auto_btn     = dsSysBit   "sysauto_btn"       true  sys  SystemTag.auto_btn
+        let manual_btn   = dsSysBit   "sysmanual_btn"     true  sys  SystemTag.manual_btn
+        let drive_btn    = dsSysBit   "sysdrive_btn"      true  sys  SystemTag.drive_btn
+        let stop_btn     = dsSysBit   "sysstop_btn"       true  sys  SystemTag.stop_btn
+        let emg_btn      = dsSysBit   "sysemg_btn"        true  sys  SystemTag.emg_btn
+        let test_btn     = dsSysBit   "systest_btn"       true  sys  SystemTag.test_btn
+        let ready_btn    = dsSysBit   "sysready_btn"      true  sys  SystemTag.ready_btn
+        let clear_btn    = dsSysBit   "sysclear_btn"      true  sys  SystemTag.clear_btn
+        let home_btn     = dsSysBit   "syshome_btn"       true  sys  SystemTag.home_btn
+
+        let auto_lamp     = dsSysBit   "sysauto_lamp"       true  sys  SystemTag.auto_lamp
+        let manual_lamp   = dsSysBit   "sysmanual_lamp"     true  sys  SystemTag.manual_lamp
+        let drive_lamp    = dsSysBit   "sysdrive_lamp"      true  sys  SystemTag.drive_lamp
+        let stop_lamp     = dsSysBit   "sysstop_lamp"       true  sys  SystemTag.stop_lamp
+        let emg_lamp      = dsSysBit   "sysemg_lamp"        true  sys  SystemTag.emg_lamp
+        let test_lamp     = dsSysBit   "systest_lamp"       true  sys  SystemTag.test_lamp
+        let ready_lamp    = dsSysBit   "sysready_lamp"      true  sys  SystemTag.ready_lamp
+        let clear_lamp    = dsSysBit   "sysclear_lamp"      true  sys  SystemTag.clear_lamp
+        let home_lamp     = dsSysBit   "syshome_lamp"       true  sys  SystemTag.home_lamp
+
+
+        
+
         let dtimeyy  = dsSysUint8 "_RTC_TIME[0]"  false sys  SystemTag.datet_yy         //ls xgi 현재시각[년도]
         let dtimemm  = dsSysUint8 "_RTC_TIME[1]"  false sys  SystemTag.datet_mm         //ls xgi 현재시각[월]
         let dtimedd  = dsSysUint8 "_RTC_TIME[2]"  false sys  SystemTag.datet_dd         //ls xgi 현재시각[일]
@@ -65,15 +79,28 @@ module SystemManagerModule =
             match st with
             | SystemTag.on         ->    on
             | SystemTag.off        ->    off
-            | SystemTag.auto       ->    auto
-            | SystemTag.manual     ->    manual
-            | SystemTag.drive      ->    drive
-            | SystemTag.stop       ->    stop
-            | SystemTag.emg        ->    emg
-            | SystemTag.test       ->    test
-            | SystemTag.ready      ->    ready
-            | SystemTag.clear      ->    clear
-            | SystemTag.home       ->    home
+            | SystemTag.auto_btn   ->    auto_btn
+            | SystemTag.manual_btn ->    manual_btn
+            | SystemTag.drive_btn  ->    drive_btn
+            | SystemTag.stop_btn   ->    stop_btn
+            | SystemTag.emg_btn    ->    emg_btn
+            | SystemTag.test_btn   ->    test_btn
+            | SystemTag.ready_btn  ->    ready_btn
+            | SystemTag.clear_btn  ->    clear_btn
+            | SystemTag.home_btn   ->    home_btn
+
+
+            | SystemTag.auto_lamp   ->    auto_lamp
+            | SystemTag.manual_lamp ->    manual_lamp
+            | SystemTag.drive_lamp  ->    drive_lamp
+            | SystemTag.stop_lamp   ->    stop_lamp
+            | SystemTag.emg_lamp    ->    emg_lamp
+            | SystemTag.test_lamp   ->    test_lamp
+            | SystemTag.ready_lamp  ->    ready_lamp
+            | SystemTag.clear_lamp  ->    clear_lamp
+            | SystemTag.home_lamp   ->    home_lamp
+
+
             | SystemTag.datet_yy   ->    dtimeyy
             | SystemTag.datet_mm   ->    dtimemm
             | SystemTag.datet_dd   ->    dtimedd

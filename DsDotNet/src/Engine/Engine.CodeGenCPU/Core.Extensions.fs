@@ -79,27 +79,39 @@ module ConvertCodeCoreExt =
     type DsSystem with
         member private s.GetPv<'T when 'T:equality >(st:SystemTag) =
             getSM(s).GetSystemTag(st) :?> PlanVar<'T>
-        member s._on       = s.GetPv<bool>(SystemTag.on)
-        member s._off      = s.GetPv<bool>(SystemTag.off)
-        member s._sim      = s.GetPv<bool>(SystemTag.sim)
-        member s._auto     = s.GetPv<bool>(SystemTag.auto)
-        member s._manual   = s.GetPv<bool>(SystemTag.manual)
-        member s._drive    = s.GetPv<bool>(SystemTag.drive)
-        member s._stop     = s.GetPv<bool>(SystemTag.stop)
-        member s._emg      = s.GetPv<bool>(SystemTag.emg)
-        member s._test     = s.GetPv<bool>(SystemTag.test )
-        member s._ready    = s.GetPv<bool>(SystemTag.ready)
-        member s._clear    = s.GetPv<bool>(SystemTag.clear)
-        member s._home     = s.GetPv<bool>(SystemTag.home)
-        member s._dtimeyy  = s.GetPv<uint8>(SystemTag.datet_yy)
-        member s._dtimemm  = s.GetPv<uint8>(SystemTag.datet_mm)
-        member s._dtimedd  = s.GetPv<uint8>(SystemTag.datet_dd)
-        member s._dtimeh   = s.GetPv<uint8>(SystemTag.datet_h )
-        member s._dtimem   = s.GetPv<uint8>(SystemTag.datet_m )
-        member s._dtimes   = s.GetPv<uint8>(SystemTag.datet_s )
-        member s._pause    = s.GetPv<bool>(SystemTag.sysPause)
-        member s._err      = s.GetPv<bool>(SystemTag.sysError)
-        member s._tout     = s.GetPv<uint16>(SystemTag.timeout)
+        member s._on          = s.GetPv<bool>(SystemTag.on)
+        member s._off         = s.GetPv<bool>(SystemTag.off)
+        member s._sim         = s.GetPv<bool>(SystemTag.sim)
+        member s._auto_btn    = s.GetPv<bool>(SystemTag.auto_btn)
+        member s._manual_btn  = s.GetPv<bool>(SystemTag.manual_btn)
+        member s._drive_btn   = s.GetPv<bool>(SystemTag.drive_btn)
+        member s._stop_btn    = s.GetPv<bool>(SystemTag.stop_btn)
+        member s._emg_btn     = s.GetPv<bool>(SystemTag.emg_btn)
+        member s._test_btn    = s.GetPv<bool>(SystemTag.test_btn )
+        member s._ready_btn   = s.GetPv<bool>(SystemTag.ready_btn)
+        member s._clear_btn   = s.GetPv<bool>(SystemTag.clear_btn)
+        member s._home_btn    = s.GetPv<bool>(SystemTag.home_btn)
+
+        member s._auto_lamp    = s.GetPv<bool>(SystemTag.auto_lamp)
+        member s._manual_lamp  = s.GetPv<bool>(SystemTag.manual_lamp)
+        member s._drive_lamp   = s.GetPv<bool>(SystemTag.drive_lamp)
+        member s._stop_lamp    = s.GetPv<bool>(SystemTag.stop_lamp)
+        member s._emg_lamp     = s.GetPv<bool>(SystemTag.emg_lamp)
+        member s._test_lamp    = s.GetPv<bool>(SystemTag.test_lamp )
+        member s._ready_lamp   = s.GetPv<bool>(SystemTag.ready_lamp)
+        member s._clear_lamp   = s.GetPv<bool>(SystemTag.clear_lamp)
+        member s._home_lamp    = s.GetPv<bool>(SystemTag.home_lamp)
+
+
+        member s._dtimeyy     = s.GetPv<uint8>(SystemTag.datet_yy)
+        member s._dtimemm     = s.GetPv<uint8>(SystemTag.datet_mm)
+        member s._dtimedd     = s.GetPv<uint8>(SystemTag.datet_dd)
+        member s._dtimeh      = s.GetPv<uint8>(SystemTag.datet_h )
+        member s._dtimem      = s.GetPv<uint8>(SystemTag.datet_m )
+        member s._dtimes      = s.GetPv<uint8>(SystemTag.datet_s )
+        member s._pause       = s.GetPv<bool>(SystemTag.sysPause)
+        member s._err         = s.GetPv<bool>(SystemTag.sysError)
+        member s._tout        = s.GetPv<uint16>(SystemTag.timeout)
         member x.S = x |> getSM
         member x.Storages = x.TagManager.Storages
 
@@ -160,15 +172,15 @@ module ConvertCodeCoreExt =
         member x.GetWriteAbleTags() =
             let writeAble =
                 [
-                    SystemTag.auto
-                    SystemTag.manual
-                    SystemTag.drive
-                    SystemTag.stop
-                    SystemTag.emg
-                    SystemTag.test
-                    SystemTag.ready
-                    SystemTag.clear
-                    SystemTag.home
+                    SystemTag.auto_btn
+                    SystemTag.manual_btn
+                    SystemTag.drive_btn
+                    SystemTag.stop_btn
+                    SystemTag.emg_btn
+                    SystemTag.test_btn
+                    SystemTag.ready_btn
+                    SystemTag.clear_btn
+                    SystemTag.home_btn
                 ]
             let sm = getSM(x)
             SystemTag.GetValues(typeof<SystemTag>).Cast<SystemTag>()
@@ -191,30 +203,30 @@ module ConvertCodeCoreExt =
     type Flow with
 
         /// READY operation mode
-        member f.rop    = getFM(f).GetFlowTag(FlowTag.ready_op    )
+        member f.rop    = getFM(f).GetFlowTag(FlowTag.ready_mode    )
         /// AUTO operation mode
-        member f.aop    = getFM(f).GetFlowTag(FlowTag.auto_op     )
+        member f.aop    = getFM(f).GetFlowTag(FlowTag.auto_mode     )
         /// MANUAL operation mode
-        member f.mop    = getFM(f).GetFlowTag(FlowTag.manual_op   )
+        member f.mop    = getFM(f).GetFlowTag(FlowTag.manual_mode   )
         /// DRIVE operation mode
-        member f.dop    = getFM(f).GetFlowTag(FlowTag.drive_op    )
+        member f.dop    = getFM(f).GetFlowTag(FlowTag.drive_mode    )
         /// TEST  operation mode (시운전)
-        member f.top    = getFM(f).GetFlowTag(FlowTag.test_op     )
+        member f.top    = getFM(f).GetFlowTag(FlowTag.test_mode     )
         /// STOP state
-        member f.sop    = getFM(f).GetFlowTag(FlowTag.stop_op     )
+        member f.sop    = getFM(f).GetFlowTag(FlowTag.stop_mode     )
         /// EMERGENCY State
-        member f.eop    = getFM(f).GetFlowTag(FlowTag.emergency_op)
+        member f.eop    = getFM(f).GetFlowTag(FlowTag.emg_mode)
         /// IDLE state
-        member f.iop    = getFM(f).GetFlowTag(FlowTag.idle_op)
-        member f.auto   = getFM(f).GetFlowTag(FlowTag.auto_bit    )
-        member f.manual = getFM(f).GetFlowTag(FlowTag.manual_bit  )
-        member f.drive  = getFM(f).GetFlowTag(FlowTag.drive_bit   )
-        member f.stop   = getFM(f).GetFlowTag(FlowTag.stop_bit    )
-        member f.ready  = getFM(f).GetFlowTag(FlowTag.ready_bit   )
-        member f.clear  = getFM(f).GetFlowTag(FlowTag.clear_bit   )
-        member f.emg    = getFM(f).GetFlowTag(FlowTag.emg_bit     )
-        member f.test   = getFM(f).GetFlowTag(FlowTag.test_bit    )
-        member f.home   = getFM(f).GetFlowTag(FlowTag.home_bit    )
+        member f.iop    = getFM(f).GetFlowTag(FlowTag.idle_mode)
+        member f.auto_btn   = getFM(f).GetFlowTag(FlowTag.auto_btn    )
+        member f.manual_btn = getFM(f).GetFlowTag(FlowTag.manual_btn  )
+        member f.drive_btn  = getFM(f).GetFlowTag(FlowTag.drive_btn   )
+        member f.stop_btn   = getFM(f).GetFlowTag(FlowTag.stop_btn    )
+        member f.ready_btn  = getFM(f).GetFlowTag(FlowTag.ready_btn   )
+        member f.clear_btn  = getFM(f).GetFlowTag(FlowTag.clear_btn   )
+        member f.emg_btn    = getFM(f).GetFlowTag(FlowTag.emg_btn     )
+        member f.test_btn   = getFM(f).GetFlowTag(FlowTag.test_btn    )
+        member f.home_btn   = getFM(f).GetFlowTag(FlowTag.home_btn    )
         member f.error  = getFM(f).GetFlowTag(FlowTag.flowError    )
         member f.pause    = getFM(f).GetFlowTag(FlowTag.flowPause    )
         member f.F = f |> getFM
@@ -238,8 +250,8 @@ module ConvertCodeCoreExt =
 
         member f.ModeAutoHwHMIExpr   =    f.HwAutoExpr <&&> !!f.HwManuExpr <||> f._sim.Expr
         member f.ModeManualHwHMIExpr =  !!f.HwManuExpr <&&>   f.HwAutoExpr
-        member f.ModeAutoSwHMIExpr   =    f.auto.Expr <&&> !!f.manual.Expr
-        member f.ModeManualSwHMIExpr =  !!f.auto.Expr <&&>   f.manual.Expr
+        member f.ModeAutoSwHMIExpr   =    f.auto_btn.Expr <&&> !!f.manual_btn.Expr
+        member f.ModeManualSwHMIExpr =  !!f.auto_btn.Expr <&&>   f.manual_btn.Expr
 
         member f.AutoExpr   =  
                 if f.HwAutoSelects.any()
@@ -259,15 +271,15 @@ module ConvertCodeCoreExt =
 
         member f.GetWriteAbleTags() =
             let writeAble =
-                [   FlowTag.auto_bit
-                    FlowTag.manual_bit
-                    FlowTag.drive_bit
-                    FlowTag.stop_bit
-                    FlowTag.ready_bit
-                    FlowTag.clear_bit
-                    FlowTag.emg_bit
-                    FlowTag.test_bit
-                    FlowTag.home_bit
+                [   FlowTag.auto_btn
+                    FlowTag.manual_btn
+                    FlowTag.drive_btn
+                    FlowTag.stop_btn
+                    FlowTag.ready_btn
+                    FlowTag.clear_btn
+                    FlowTag.emg_btn
+                    FlowTag.test_btn
+                    FlowTag.home_btn
                 ]
             writeAble |> map (getFM(f).GetFlowTag)
 

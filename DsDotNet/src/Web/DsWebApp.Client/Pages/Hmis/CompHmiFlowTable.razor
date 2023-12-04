@@ -36,13 +36,13 @@ else
                 </CellDisplayTemplate>
             </DxGridCommandColumn>
 
-            <CompHmiButtonColumn Caption="Drive"    TagGetter="@((dataItem) =>((HMIFlow)dataItem).DrivePush)" />
-            <CompHmiButtonColumn Caption="Stop"     TagGetter="@((dataItem) =>((HMIFlow)dataItem).StopPush)" />
-            <CompHmiButtonColumn Caption="Clear"    TagGetter="@((dataItem) =>((HMIFlow)dataItem).ClearPush)" />
-            <CompHmiButtonColumn Caption="Em. Stop" TagGetter="@((dataItem) =>((HMIFlow)dataItem).EmergencyPush)" ForceWidth=100 />
-            <CompHmiButtonColumn Caption="Test"     TagGetter="@((dataItem) =>((HMIFlow)dataItem).TestPush)" />
-            <CompHmiButtonColumn Caption="Home"     TagGetter="@((dataItem) =>((HMIFlow)dataItem).HomePush)" />
-            <CompHmiButtonColumn Caption="Ready"    TagGetter="@((dataItem) =>((HMIFlow)dataItem).ReadyPush)" />
+            <CompHmiButtonColumn Caption="Drive"    TagGetter="@((dataItem) =>((HMIFlow)dataItem).DrivePushLampMode.GetButton())" />
+            <CompHmiButtonColumn Caption="Stop" TagGetter="@((dataItem) =>((HMIFlow)dataItem).StopPushLampMode.GetButton())" />
+            <CompHmiButtonColumn Caption="Clear" TagGetter="@((dataItem) =>((HMIFlow)dataItem).ClearPushLamp.GetButton())" />
+            <CompHmiButtonColumn Caption="Em. Stop" TagGetter="@((dataItem) =>((HMIFlow)dataItem).EmergencyPushLampMode.GetButton())" ForceWidth=100 />
+            <CompHmiButtonColumn Caption="Test" TagGetter="@((dataItem) =>((HMIFlow)dataItem).TestPushLampMode.GetButton())" />
+            <CompHmiButtonColumn Caption="Home" TagGetter="@((dataItem) =>((HMIFlow)dataItem).HomePushLamp.GetButton())" />
+            <CompHmiButtonColumn Caption="Ready" TagGetter="@((dataItem) =>((HMIFlow)dataItem).ReadyPushLampMode.GetButton())" />
 
         </Columns>
     </DxGrid>

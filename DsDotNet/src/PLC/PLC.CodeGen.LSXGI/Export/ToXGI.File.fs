@@ -38,10 +38,11 @@ module internal XgiFile =
         let assembly = Assembly.GetExecutingAssembly()
         let filename = sprintf "xgi-%s.template.xml" version
         EmbeddedResource.readFile assembly filename
-
+    //  static member CPUs      = [|"XGI-CPUE"; "XGI-CPUH"; "XGI-CPUS"; "XGI-CPUS/P"; "XGI-CPUU"; "XGI-CPUU/D"; "XGI-CPUUN" |]
+    //static member CPUsID    = [|"106"     ; "102"     ; "104"     ; "110"       ; "100"     ; "107"       ; "111"       |]
     /// Template XGI XML 문자열을 반환
     let getTemplateXgiXml () =
-        match getTemplateXgiXmlWithVersion "4.7.4" with
+        match getTemplateXgiXmlWithVersion "4.5.2" with
         | Some(xml) -> xml
         | None -> failwithlogf "INTERNAL ERROR: failed to read resource template"
 

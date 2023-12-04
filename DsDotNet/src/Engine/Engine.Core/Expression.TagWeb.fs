@@ -30,9 +30,17 @@ module TagWebModule =
     type TagWeb with
         member x.Value:obj = ObjectHolder.Deserialize(x._SerializedObject).GetValue()
 
-    type HMIPush   = TagWeb
-    type HMISelect = TagWeb*TagWeb //selectA/selectB  ex)Auto/Manu   
-    type HMILamp   = TagWeb
+    type HMIPush              = TagWeb
+    type HMILamp              = TagWeb
+    ///btn/lamp            ex)drive_btn/drive_lamp 
+    type HMIPushLamp          = TagWeb*TagWeb 
+    ///HMIPushLamp/mode    ex)drive_btn/drive_lamp/drive_mode
+    type HMIPushLampMode      = HMIPushLamp*TagWeb 
+    ///HMIPushLampA/HMIPushLampB  ex)Sys_Auto/Sys_Manu 
+    type HMISelectLamp        = HMIPushLamp*HMIPushLamp 
+    ///HMIPushLampModeA/HMIPushLampModeB  ex)Flow_Auto/Flow_Manu   
+    type HMISelectLampMode    = HMIPushLampMode*HMIPushLampMode 
+
     type HMIPushMultiLamp = HMIPush*(HMILamp seq) // output inputs
 
 [<AutoOpen>]

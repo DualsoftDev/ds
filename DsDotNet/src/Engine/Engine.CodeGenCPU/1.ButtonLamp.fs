@@ -15,7 +15,21 @@ type DsSystem with
                 yield (sets, s._off.Expr) --| (out, getFuncName())
     ]
 
-    member s.B2_HWLamp(): CommentedStatement list = [
+
+    member s.B2_SWButtonOutput(): CommentedStatement list = [
+                yield (s._auto_btn.Expr  , s._off.Expr) --| (s._auto_lamp  , getFuncName())
+                yield (s._manual_btn.Expr, s._off.Expr) --| (s._manual_lamp, getFuncName())
+                yield (s._drive_btn.Expr , s._off.Expr) --| (s._drive_lamp , getFuncName())
+                yield (s._stop_btn.Expr  , s._off.Expr) --| (s._stop_lamp  , getFuncName())
+                yield (s._emg_btn.Expr   , s._off.Expr) --| (s._emg_lamp   , getFuncName())
+                yield (s._test_btn.Expr  , s._off.Expr) --| (s._test_lamp  , getFuncName())
+                yield (s._clear_btn.Expr , s._off.Expr) --| (s._clear_lamp , getFuncName())
+                yield (s._home_btn.Expr  , s._off.Expr) --| (s._home_lamp  , getFuncName())
+                yield (s._ready_btn.Expr , s._off.Expr) --| (s._ready_lamp , getFuncName())
+        ]
+        
+
+    member s.B3_HWLamp(): CommentedStatement list = [
         for lamp in s.HWLamps do
             let modeBit =
                 let f = lamp.SettingFlows.Head()          
@@ -37,7 +51,7 @@ type DsSystem with
             yield (sets, s._off.Expr) --| (out, getFuncName())
     ]
 
-    member s.B3_HWBtnConnetToSW(): CommentedStatement list =  [
+    member s.B4_HWBtnConnetToSW(): CommentedStatement list =  [
         for cond in s.HWConditions do
             if cond.OutTag.IsNonNull()  //OutAddress 주소가 있어야 IN-OUT cond Check Lamp 연결
             then

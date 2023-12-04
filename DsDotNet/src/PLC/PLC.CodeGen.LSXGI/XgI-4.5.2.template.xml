@@ -6,7 +6,7 @@
         </NetworkList>
     </NetworkConfiguration>
     <Configurations>
-        <Configuration Version="259" Attribute="272119649" Kind="1" Type="106" FindGlobal="1" FindSymbol="1"
+        <Configuration Version="259" Attribute="272119649" Kind="1" Type="111" FindGlobal="1" FindSymbol="1"
                        WriteSignature="773e53b3-4446-4204-b905-4558a1d0de61" UploadProhibit="75" SD_UploadProhibit="74">
             NewPLC
             <Parameters>

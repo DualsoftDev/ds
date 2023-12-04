@@ -22,13 +22,13 @@ else
         <CompWgtPb Text="Auto"     DataItem="@(_system.GetAuto())"     TagGetter="@_tagGetter" />
         <CompWgtPb Text="Manual"   DataItem="@(_system.GetManual())"   TagGetter="@_tagGetter" />
 
-        <CompWgtPb Text="Ready"    DataItem="@(_system.ReadyPush)"     TagGetter="@_tagGetter" />
-        <CompWgtPb Text="Drive"    DataItem="@(_system.DrivePush)"     TagGetter="@_tagGetter" />
-        <CompWgtPb Text="Home"     DataItem="@(_system.HomePush)"      TagGetter="@_tagGetter" />
-        <CompWgtPb Text="Clear"    DataItem="@(_system.ClearPush)"     TagGetter="@_tagGetter" />
-        <CompWgtPb Text="Stop"     DataItem="@(_system.StopPush)"      TagGetter="@_tagGetter" />
-        <CompWgtPb Text="Em Stop"  DataItem="@(_system.EmergencyPush)" TagGetter="@_tagGetter" />
-        <CompWgtPb Text="Test"     DataItem="@(_system.TestPush)"      TagGetter="@_tagGetter" />
+        <CompWgtPb Text="Ready"    DataItem="@(_system.ReadyPushLamp)"     TagGetter="@_tagGetter" />
+        <CompWgtPb Text="Drive" DataItem="@(_system.DrivePushLamp)" TagGetter="@_tagGetter" />
+        <CompWgtPb Text="Home" DataItem="@(_system.HomePushLamp)" TagGetter="@_tagGetter" />
+        <CompWgtPb Text="Clear" DataItem="@(_system.ClearPushLamp)" TagGetter="@_tagGetter" />
+        <CompWgtPb Text="Stop" DataItem="@(_system.StopPushLamp)" TagGetter="@_tagGetter" />
+        <CompWgtPb Text="Em Stop" DataItem="@(_system.EmergencyPushLamp)" TagGetter="@_tagGetter" />
+        <CompWgtPb Text="Test" DataItem="@(_system.TestPushLamp)" TagGetter="@_tagGetter" />
     </p>
 
     <CompHmiFlowTable Flows="@_system.Flows"/>

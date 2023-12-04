@@ -8,6 +8,9 @@ open Dual.Common.Core.FS
 [<AutoOpen>]
 module HmiPackageModule =
 
+    let getPushLampTags     (x:HMIPushLamp)     = seq {yield fst x; yield snd x}
+    let getPushLampModeTags (x:HMIPushLampMode) = seq {yield! getPushLampTags(fst x); yield snd x; }
+    
     //디바이스 소속된 행위 Api
     type HMIApiItem = {
         Name : string
@@ -92,47 +95,34 @@ module HmiPackageModule =
 
     ///공정흐름 단위 SystemA = { Flow1, Flow2, ... }
     type HMIFlow = {
-        Name             : string
-        AutoManualSelect : HMISelect      
-        DrivePush        : HMIPush     
-        StopPush         : HMIPush      
-        ClearPush        : HMIPush     
-        EmergencyPush    : HMIPush 
-        TestPush         : HMIPush      
-        HomePush         : HMIPush      
-        ReadyPush        : HMIPush   
+        Name    : string
+        AutoManualSelectLampMode : HMISelectLampMode      
+        DrivePushLampMode        : HMIPushLampMode     
+        StopPushLampMode         : HMIPushLampMode      
+        EmergencyPushLampMode    : HMIPushLampMode 
+        TestPushLampMode         : HMIPushLampMode      
+        ReadyPushLampMode        : HMIPushLampMode  
+
+        ClearPushLamp            : HMIPushLamp     
+        HomePushLamp             : HMIPushLamp    
         
-        DriveLamp        : HMILamp 
-        AutoLamp         : HMILamp 
-        ManualLamp       : HMILamp 
-        StopLamp         : HMILamp 
-        EmergencyLamp    : HMILamp 
-        TestLamp         : HMILamp 
-        ReadyLamp        : HMILamp 
-        IdleLamp         : HMILamp 
+        IdleLamp                 : HMILamp 
 
         Reals            : HMIReal array      
     } with
         member x.CollectTags () =
             seq {
-                yield fst x.AutoManualSelect
-                yield snd x.AutoManualSelect
-                yield x.DrivePush
-                yield x.StopPush
-                yield x.ClearPush
-                yield x.EmergencyPush
-                yield x.TestPush
-                yield x.HomePush
-                yield x.ReadyPush
-
-                yield x.DriveLamp        
-                yield x.AutoLamp         
-                yield x.ManualLamp       
-                yield x.StopLamp         
-                yield x.EmergencyLamp    
-                yield x.TestLamp         
-                yield x.ReadyLamp        
-                yield x.IdleLamp         
+                yield! getPushLampModeTags (fst x.AutoManualSelectLampMode)
+                yield! getPushLampModeTags (snd x.AutoManualSelectLampMode)
+                yield! getPushLampModeTags x.DrivePushLampMode
+                yield! getPushLampModeTags x.StopPushLampMode
+                yield! getPushLampModeTags x.EmergencyPushLampMode
+                yield! getPushLampModeTags x.TestPushLampMode
+                yield! getPushLampModeTags x.ReadyPushLampMode
+                yield! getPushLampTags x.ClearPushLamp
+                yield! getPushLampTags x.HomePushLamp
+                yield x.IdleLamp
+   
 
                 yield! x.Reals |> Seq.collect (fun r->r.CollectTags())
             }
@@ -141,28 +131,28 @@ module HmiPackageModule =
     //명령 전용 (모니터링은 개별Flow 통해서)
     type HMISystem = {
         Name : string
-        AutoManualSelect  : HMISelect      
-        DrivePush         : HMIPush     
-        StopPush          : HMIPush      
-        ClearPush         : HMIPush     
-        EmergencyPush     : HMIPush 
-        TestPush          : HMIPush      
-        HomePush          : HMIPush      
-        ReadyPush         : HMIPush 
+        AutoManualSelectLamp  : HMISelectLamp      
+        DrivePushLamp         : HMIPushLamp     
+        StopPushLamp          : HMIPushLamp      
+        ClearPushLamp         : HMIPushLamp     
+        EmergencyPushLamp     : HMIPushLamp 
+        TestPushLamp          : HMIPushLamp      
+        HomePushLamp          : HMIPushLamp      
+        ReadyPushLamp         : HMIPushLamp 
 
-        Flows             : HMIFlow array
+        Flows                 : HMIFlow array
     } with
         member x.CollectTags () =
             seq {
-                yield fst x.AutoManualSelect
-                yield snd x.AutoManualSelect
-                yield x.DrivePush
-                yield x.StopPush
-                yield x.ClearPush
-                yield x.EmergencyPush
-                yield x.TestPush
-                yield x.HomePush
-                yield x.ReadyPush
+                yield! getPushLampTags (fst x.AutoManualSelectLamp)
+                yield! getPushLampTags (snd x.AutoManualSelectLamp)
+                yield! getPushLampTags x.DrivePushLamp
+                yield! getPushLampTags x.StopPushLamp
+                yield! getPushLampTags x.ClearPushLamp
+                yield! getPushLampTags x.EmergencyPushLamp
+                yield! getPushLampTags x.TestPushLamp
+                yield! getPushLampTags x.HomePushLamp
+                yield! getPushLampTags x.ReadyPushLamp
                 yield! x.Flows |> Seq.collect (fun f->f.CollectTags())
             }
 
@@ -207,8 +197,13 @@ module HmiPackageModule =
 
 [<Extension>]
 type HmiPackageModuleExt =
-    [<Extension>] static member GetAuto (x:HMIFlow) : HMIPush = fst x.AutoManualSelect
-    [<Extension>] static member GetManual (x:HMIFlow) : HMIPush = snd x.AutoManualSelect
+    ///HMIPushLampMode*HMIPushLampMode //ex)  selectPushLampA*selectModeA/selectPushLampB*selectModeB 
+    [<Extension>] static member GetAuto (x:HMIFlow) : TagWeb = fst x.AutoManualSelectLampMode |> fst |> fst
+    [<Extension>] static member GetManual (x:HMIFlow) : TagWeb = snd x.AutoManualSelectLampMode |> fst |> fst
 
-    [<Extension>] static member GetAuto (x:HMISystem) : HMIPush = fst x.AutoManualSelect
-    [<Extension>] static member GetManual (x:HMISystem) : HMIPush = snd x.AutoManualSelect
+    [<Extension>] static member GetAuto (x:HMISystem) : TagWeb = fst x.AutoManualSelectLamp |> fst
+    [<Extension>] static member GetManual (x:HMISystem) : TagWeb = snd x.AutoManualSelectLamp |> fst
+    
+    
+    [<Extension>] static member GetButton (x:HMIPushLampMode) : TagWeb = fst x |> fst
+    [<Extension>] static member GetButton (x:HMIPushLamp) : TagWeb = fst x 

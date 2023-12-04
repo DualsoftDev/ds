@@ -28,10 +28,17 @@ module ConvertHMI =
         
     let getPush          (tm:ITagManager) (kind:int) = getWebTag tm kind
     let getLamp          (tm:ITagManager) (kind:int) = getWebTag tm kind
-    let getSelect        (tm:ITagManager) (kindA:int) (kindB:int) = (getWebTag tm  kindA), (getWebTag tm kindB)
+    let getSelectLamp    (tm:ITagManager) (kindPushA:int)  (kindLampA:int) (kindPushB:int)  (kindLampB:int) = 
+                         ((getWebTag tm  kindPushA), (getWebTag tm kindLampA)), ((getWebTag tm  kindPushB), (getWebTag tm kindLampB))
+    let getPushLampMode  (tm:ITagManager) (kindPush :int) (kindLamp :int) (kindMode:int) = ((getWebTag tm  kindPush), (getWebTag tm kindLamp)), (getWebTag tm kindMode)
+    let getSelectLampMode(tm:ITagManager) (kindPushA:int)  (kindLampA:int) (kindModeA:int) (kindPushB:int)  (kindLampB:int) (kindModeB:int) = 
+                         (getPushLampMode tm  kindPushA  kindLampA kindModeA),(getPushLampMode tm  kindPushB  kindLampB kindModeB)
+
+    let getPushLamp      (tm:ITagManager) (kindPush :int) (kindLamp :int) = (getWebTag tm  kindPush), (getWebTag tm kindLamp)
+
     let getPushMultiLamp (tm:ITagManager) (pushKind:int) (lampTags:ITag seq) =
         getWebTag tm pushKind, lampTags.Select(fun f-> TagWebExt.GetWebTag(f, kindDescriptions))
-
+        
 
     type ApiItem with
         member private x.GetHMI()   =
@@ -98,23 +105,17 @@ module ConvertHMI =
             let tm = x.TagManager :?> FlowManager
             {
                 Name = x.Name
-                AutoManualSelect = getSelect tm (FlowTag.auto_bit  |>int) (FlowTag.manual_bit |>int)
-                DrivePush        = getPush   tm (FlowTag.drive_bit |>int)
-                StopPush         = getPush   tm (FlowTag.stop_bit  |>int)
-                ClearPush        = getPush   tm (FlowTag.clear_bit |>int)
-                EmergencyPush    = getPush   tm (FlowTag.emg_bit   |>int)
-                TestPush         = getPush   tm (FlowTag.test_bit  |>int)
-                HomePush         = getPush   tm (FlowTag.home_bit  |>int)
-                ReadyPush        = getPush   tm (FlowTag.ready_bit |>int)
+                AutoManualSelectLampMode = getSelectLampMode tm (FlowTag.auto_btn  |>int) (FlowTag.auto_lamp  |>int)  (FlowTag.auto_mode  |>int) (FlowTag.manual_btn |>int) (FlowTag.manual_lamp |>int) (FlowTag.manual_mode |>int)
+                DrivePushLampMode        = getPushLampMode   tm (FlowTag.drive_btn |>int) (FlowTag.drive_lamp |>int)  (FlowTag.drive_mode |>int)
+                StopPushLampMode         = getPushLampMode   tm (FlowTag.stop_btn  |>int) (FlowTag.stop_lamp  |>int)  (FlowTag.stop_mode  |>int)
+                EmergencyPushLampMode    = getPushLampMode   tm (FlowTag.emg_btn   |>int) (FlowTag.emg_lamp   |>int)  (FlowTag.emg_mode   |>int)
+                TestPushLampMode         = getPushLampMode   tm (FlowTag.test_btn  |>int) (FlowTag.test_lamp  |>int)  (FlowTag.test_mode  |>int)
+                ReadyPushLampMode        = getPushLampMode   tm (FlowTag.ready_btn |>int) (FlowTag.ready_lamp |>int)  (FlowTag.ready_mode |>int)
+                ClearPushLamp            = getPushLamp       tm (FlowTag.clear_btn |>int) (FlowTag.clear_lamp |>int)
+                HomePushLamp             = getPushLamp       tm (FlowTag.home_btn  |>int) (FlowTag.home_lamp  |>int)
                                              
-                DriveLamp        = getLamp   tm (FlowTag.drive_op   |>int)
-                AutoLamp         = getLamp   tm (FlowTag.auto_op    |>int)
-                ManualLamp       = getLamp   tm (FlowTag.manual_op  |>int)
-                StopLamp         = getLamp   tm (FlowTag.stop_op    |>int)
-                EmergencyLamp    = getLamp   tm (FlowTag.emergency_op  |>int)
-                TestLamp         = getLamp   tm (FlowTag.test_op    |>int)
-                ReadyLamp        = getLamp   tm (FlowTag.ready_op   |>int)
-                IdleLamp         = getLamp   tm (FlowTag.idle_op    |>int)
+          
+                IdleLamp         = getLamp   tm (FlowTag.idle_mode    |>int)
 
                 Reals            = x.Graph.Vertices.OfType<Real>().Select(fun r->r.GetHMI()).ToArray()
             }
@@ -125,14 +126,14 @@ module ConvertHMI =
             let tm = x.TagManager :?> SystemManager
             {
                 Name  = x.Name
-                AutoManualSelect =  getSelect tm (SystemTag.auto  |>int) (SystemTag.manual |>int)
-                DrivePush        =  getPush   tm (SystemTag.drive |>int)
-                StopPush         =  getPush   tm (SystemTag.stop  |>int)
-                ClearPush        =  getPush   tm (SystemTag.clear |>int)
-                EmergencyPush    =  getPush   tm (SystemTag.emg   |>int)
-                TestPush         =  getPush   tm (SystemTag.test  |>int)
-                HomePush         =  getPush   tm (SystemTag.home  |>int)
-                ReadyPush        =  getPush   tm (SystemTag.ready |>int)
+                AutoManualSelectLamp =  getSelectLamp tm (SystemTag.auto_btn  |>int)(SystemTag.auto_lamp  |>int) (SystemTag.manual_btn|>int) (SystemTag.manual_lamp|>int)
+                DrivePushLamp        =  getPushLamp   tm (SystemTag.drive_btn |>int) (SystemTag.drive_lamp |>int)
+                StopPushLamp         =  getPushLamp   tm (SystemTag.stop_btn  |>int) (SystemTag.stop_lamp  |>int)
+                ClearPushLamp        =  getPushLamp   tm (SystemTag.clear_btn |>int) (SystemTag.clear_lamp |>int)
+                EmergencyPushLamp    =  getPushLamp   tm (SystemTag.emg_btn   |>int) (SystemTag.emg_lamp   |>int)
+                TestPushLamp         =  getPushLamp   tm (SystemTag.test_btn  |>int) (SystemTag.test_lamp  |>int)
+                HomePushLamp         =  getPushLamp   tm (SystemTag.home_btn  |>int) (SystemTag.home_lamp  |>int)
+                ReadyPushLamp        =  getPushLamp   tm (SystemTag.ready_btn |>int) (SystemTag.ready_lamp |>int)
 
                 Flows         = x.Flows.Select(fun f->f.GetHMI()).ToArray()
             }

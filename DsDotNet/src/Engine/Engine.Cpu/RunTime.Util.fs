@@ -56,9 +56,9 @@ module internal RunTimeUtil =
         let autoStartStorageKeyValues =
             sys.TagManager.Storages
                 .Where(fun w->
-                            w.Value.TagKind = (int)SystemTag.auto
-                            ||   w.Value.TagKind = (int)SystemTag.drive
-                            ||   w.Value.TagKind = (int)SystemTag.ready
+                            w.Value.TagKind = (int)SystemTag.auto_btn
+                            ||   w.Value.TagKind = (int)SystemTag.drive_btn
+                            ||   w.Value.TagKind = (int)SystemTag.ready_btn
                             || ( w.Value.TagKind = (int)SystemTag.sim && mode.IsPackageSIM())
                     )
         autoStartStorageKeyValues.Iter(fun t -> t.Value.BoxedValue <-  on)

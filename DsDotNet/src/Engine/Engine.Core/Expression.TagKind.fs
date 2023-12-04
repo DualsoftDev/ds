@@ -23,28 +23,38 @@ module TagKindModule =
     type SystemTag  =
     | on                       = 0000
     | off                      = 0001
-    | auto                     = 0002
-    | manual                   = 0003
-    | drive                    = 0004
-    | stop                     = 0005
-    | emg                      = 0006
-    | test                     = 0007
-    | ready                    = 0008
-    | clear                    = 0009
-    | home                     = 0010
+    | auto_btn                 = 0002
+    | manual_btn               = 0003
+    | drive_btn                = 0004
+    | stop_btn                 = 0005
+    | emg_btn                  = 0006
+    | test_btn                 = 0007
+    | ready_btn                = 0008
+    | clear_btn                = 0009
+    | home_btn                 = 0010
+
+    | auto_lamp                = 0012
+    | manual_lamp              = 0013
+    | drive_lamp               = 0014
+    | stop_lamp                = 0015
+    | emg_lamp                 = 0016
+    | test_lamp                = 0017
+    | ready_lamp               = 0018
+    | clear_lamp               = 0019
+    | home_lamp                = 0020
     ///sysdatatimetag
-    | datet_yy                 = 0011
-    | datet_mm                 = 0012
-    | datet_dd                 = 0013
-    | datet_h                  = 0014
-    | datet_m                  = 0015
-    | datet_s                  = 0016
-    ///systxErrTimetag
-    | timeout                  = 0017
+    | datet_yy                 = 0021
+    | datet_mm                 = 0022
+    | datet_dd                 = 0023
+    | datet_h                  = 0024
+    | datet_m                  = 0025
+    | datet_s                  = 0026
+    ///systxErrTimetag             
+    | timeout                  = 0027
     ///stopType
-    | sysError                 = 0020
-    | sysPause                 = 0021
-    | sysDrive                 = 0022
+    | sysError                 = 0030
+    | sysPause                 = 0031
+    | sysDrive                 = 0032
 
     
 
@@ -53,28 +63,39 @@ module TagKindModule =
 
     /// 10000 ~ 10999
     [<Flags>]
-    type FlowTag    =
-    |ready_op                  = 10000
-    |auto_op                   = 10001
-    |manual_op                 = 10002
-    |drive_op                  = 10003
-    |test_op                   = 10004
-    |stop_op                   = 10005
-    |emergency_op              = 10006
-    |idle_op                   = 10007
-    |auto_bit                  = 10008
-    |manual_bit                = 10009
-    |drive_bit                 = 10010
-    |stop_bit                  = 10011
-    |ready_bit                 = 10012
-    |clear_bit                 = 10013
-    |emg_bit                   = 10014
-    |test_bit                  = 10015
-    |home_bit                  = 10016
+    type FlowTag    =        
+    |ready_mode                = 10000
+    |auto_mode                 = 10001
+    |manual_mode               = 10002
+    |drive_mode                = 10003
+    |test_mode                 = 10004
+    |stop_mode                 = 10005
+    |emg_mode                  = 10006
+    |idle_mode                 = 10007
+
+    |auto_btn                  = 10011
+    |manual_btn                = 10012
+    |drive_btn                 = 10013
+    |stop_btn                  = 10014
+    |ready_btn                 = 10015
+    |clear_btn                 = 10016
+    |emg_btn                   = 10017
+    |test_btn                  = 10018
+    |home_btn                  = 10019
+
+    |auto_lamp                 = 10021
+    |manual_lamp               = 10022
+    |drive_lamp                = 10023
+    |stop_lamp                 = 10024
+    |ready_lamp                = 10025
+    |clear_lamp                = 10026
+    |emg_lamp                  = 10027
+    |test_lamp                 = 10028
+    |home_lamp                 = 10029
     
     ///stopType
-    | flowError                = 10020
-    | flowPause                = 10021
+    | flowError                = 10030
+    | flowPause                = 10031
 
     /// 11000 ~ 11999
     [<Flags>]
@@ -261,9 +282,9 @@ type TagKindExt =
         match x with
         |EventSystem (_, _, kind) ->  kind.IsOneOf(  SystemTag.sysDrive  
                                                     , SystemTag.sysError
-                                                    , SystemTag.clear)
+                                                    , SystemTag.clear_btn)
 
-        |EventFlow   (_, _, kind) ->  kind.IsOneOf(  FlowTag.drive_op
+        |EventFlow   (_, _, kind) ->  kind.IsOneOf(  FlowTag.drive_mode
                                                     , FlowTag.flowError)
 
         |EventVertex (_, _, kind) ->  kind.IsOneOf(

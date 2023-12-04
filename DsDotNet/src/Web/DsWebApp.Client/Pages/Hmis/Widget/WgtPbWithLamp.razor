@@ -1,9 +1,17 @@
 @* WgtPbWithLamp *@
-
+@* 
 <DxButton Click="@_toggleLamp" RenderStyleMode=ButtonRenderStyleMode.Outline>
     <WgtEmbeddedLamp IsOn=IsOn @ref="_lampRef" />
     @Text
 </DxButton>
+ *@
+
+<button class="btn btn-outline-primary" onclick="@Click">
+    <div style="display: flex; align-items: center;">
+            <WgtEmbeddedLamp IsOn=IsOn @ref="_lampRef" />
+            @Text
+    </div>
+</button>
 
 @code {
     WgtEmbeddedLamp _lampRef;

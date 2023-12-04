@@ -1,10 +1,18 @@
 @* WgtLampRGFH *@
 @if (!_loading)
 {
+@* 
     <DxButton Click="@Click" RenderStyleMode=ButtonRenderStyleMode.Outline>
         <WgtEmbeddedLampRGFH Status4=Status4 @ref="_lampRef" />
         <div id="@_guid">@_text</div>
     </DxButton>
+ *@
+    <button class="btn btn-outline-primary" onclick="@Click">
+        <div style="display: flex; align-items: center;">
+            <WgtEmbeddedLampRGFH Status4=Status4 @ref="_lampRef" />
+            <div id="@_guid">@_text</div>
+        </div>
+    </button>
 }
 
 

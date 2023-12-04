@@ -22,7 +22,7 @@ https://supportcenter.devexpress.com/ticket/details/t1135370/grid-for-blazor-how
 
     protected override void OnInitialized() {
         base.OnInitialized();
-        Width = (ForceWidth == null) ? "80px" : $"{ForceWidth}px";
+        Width = (ForceWidth == null) ? "100px" : $"{ForceWidth}px";
         HeaderTemplate = context => @<span>@Caption</span>;
         CellDisplayTemplate = context =>
         {

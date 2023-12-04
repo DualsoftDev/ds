@@ -6,7 +6,8 @@
 </DxButton>
  *@
 
-<button class="btn btn-outline-primary" onclick="@Click">
+@* <button class="btn btn-outline-primary" onclick="@Click"> *@
+<button class="btn btn-outline-primary" onclick="@(() => _toggleLamp())">
     <div style="display: flex; align-items: center;">
             <WgtEmbeddedLamp IsOn=IsOn @ref="_lampRef" />
             @Text

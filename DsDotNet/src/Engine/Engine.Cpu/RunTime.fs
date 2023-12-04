@@ -12,11 +12,15 @@ open System.Runtime.CompilerServices
 open Engine.CodeGenCPU
 open System.Reactive.Subjects
 open System.Reactive.Disposables
+open System.Reactive.Linq
+open Engine.CodeGenHMI
 
 [<AutoOpen>]
 module RunTime =
 
-    type DsCPU(css:CommentedStatement seq, mySystem:DsSystem, loadedSystems:DsSystem seq, cpuMode:RuntimePackage) =
+    type DsCPU(css:CommentedStatement seq, mySystem:DsSystem, loadedSystems:DsSystem seq
+             , cpuMode:RuntimePackage, hmiTags:IDictionary<string, TagWeb>) =
+
         let statements = css |> Seq.map(fun f -> f.Statement)
         let mapRungs = getRungMap(statements)
         let cpuStorages = mapRungs.Keys
@@ -27,6 +31,18 @@ module RunTime =
         let disposables = new CompositeDisposable()
 
         let tagWebChangedSubject = new Subject<TagWeb>()
+
+        do
+            let subscription =
+                CpusEvent.ValueSubject.Subscribe(fun (_, stg, _) ->
+                    //TagWeb 전송 대상만 이벤트 처리
+                    if hmiTags.ContainsKey stg.Name   
+                    then 
+                        let tagWeb = hmiTags[stg.Name]
+                        tagWeb.WritableValue <- stg.BoxedValue  //값변경 할당 맞나?
+                        tagWebChangedSubject.OnNext(tagWeb)
+                )
+            disposables.Add subscription
 
         let scanOnce() = 
             //나머지 수식은 Changed Event가 있는것만 수행해줌
@@ -75,9 +91,12 @@ module RunTime =
             }
 
         let subscription = 
-            tagWebChangedSubject.Subscribe(fun tagWeb->
-                logDebug $"Server Updating TagWeb: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
-                tagStorages.[tagWeb.Name].BoxedValue <-tagWeb.Value
+            tagWebChangedSubject.Where(fun tagWeb -> tagWeb.WritableValue.IsNull()) //이렇게 안하면 tagWebChangedSubject 핑퐁
+                                .Subscribe(fun tagWeb-> 
+
+                    logDebug $"Server Updating TagWeb: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
+                    let cpuTag = tagStorages.[tagWeb.Name]
+                    cpuTag.BoxedValue <-tagWeb.Value
             )
 
         do
@@ -131,7 +150,7 @@ module RunTime =
     type DsCpuExt  =
         //Job 만들기
         [<Extension>]
-        static member GetDsCPU (dsSys:DsSystem, runtimePackage:RuntimePackage) : DsCPU =
+        static member GetDsCPU (dsSys:DsSystem, runtimePackage:RuntimePackage) : DsCPU*HMIPackage =
             let loadedSystems = dsSys.GetRecursiveLoadedSystems()
 
             // Initialize storages and load CPU statements
@@ -144,7 +163,8 @@ module RunTime =
             // Add commented statements from each CPU
             for cpu in pous do
                 css <- css @ cpu.CommentedStatements() |> List.ofSeq
-
+            let hmiPackage = ConvertHMIExt.GetHMIPackage(dsSys)   
+            let hmiPackageTags = ConvertHMIExt.GetHMIPackageTags(hmiPackage)   
             // Create and return a DsCPU object
-            new DsCPU(css, dsSys, loadedSystems, runtimePackage)
+            new DsCPU(css, dsSys, loadedSystems, runtimePackage, hmiPackageTags), hmiPackage
 

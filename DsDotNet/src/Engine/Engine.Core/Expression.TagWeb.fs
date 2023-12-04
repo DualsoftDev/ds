@@ -26,6 +26,7 @@ module TagWebModule =
         member val Kind = kind with get, set //Tag 종류 ex) going = 11007
         member val KindDescription = kindDescription with get, set
         member val Message = message with get, set //에러 내용 및 기타 전달 Message 
+        member val WritableValue = value with get, set //Cpu로 부터 쓰여진 값 
 
     type TagWeb with
         member x.Value:obj = ObjectHolder.Deserialize(x._SerializedObject).GetValue()

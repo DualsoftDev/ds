@@ -31,6 +31,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\Engine\Engine.CodeGenHMI\Engine.CodeGenHMI.fsproj" />
       <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
+      <ProjectReference Include="..\..\Engine\Engine.Cpu\Engine.Cpu.fsproj" />
       <ProjectReference Include="..\..\Engine\Engine.Import.Office\Engine.Import.Office.fsproj" />
     </ItemGroup>
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">

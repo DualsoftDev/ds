@@ -227,6 +227,17 @@ module ConvertCodeCoreExt =
         member f.emg_btn    = getFM(f).GetFlowTag(FlowTag.emg_btn     )
         member f.test_btn   = getFM(f).GetFlowTag(FlowTag.test_btn    )
         member f.home_btn   = getFM(f).GetFlowTag(FlowTag.home_btn    )
+
+        member f.auto_lamp   = getFM(f).GetFlowTag(FlowTag.auto_lamp    )
+        member f.manual_lamp = getFM(f).GetFlowTag(FlowTag.manual_lamp  )
+        member f.drive_lamp  = getFM(f).GetFlowTag(FlowTag.drive_lamp   )
+        member f.stop_lamp   = getFM(f).GetFlowTag(FlowTag.stop_lamp    )
+        member f.ready_lamp  = getFM(f).GetFlowTag(FlowTag.ready_lamp   )
+        member f.clear_lamp  = getFM(f).GetFlowTag(FlowTag.clear_lamp   )
+        member f.emg_lamp    = getFM(f).GetFlowTag(FlowTag.emg_lamp     )
+        member f.test_lamp   = getFM(f).GetFlowTag(FlowTag.test_lamp    )
+        member f.home_lamp   = getFM(f).GetFlowTag(FlowTag.home_lamp    )
+
         member f.error  = getFM(f).GetFlowTag(FlowTag.flowError    )
         member f.pause    = getFM(f).GetFlowTag(FlowTag.flowPause    )
         member f.F = f |> getFM

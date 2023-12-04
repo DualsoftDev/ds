@@ -29,7 +29,7 @@ type DsSystem with
         ]
         
 
-    member s.B3_HWLamp(): CommentedStatement list = [
+    member s.B3_HWModeLamp(): CommentedStatement list = [
         for lamp in s.HWLamps do
             let modeBit =
                 let f = lamp.SettingFlows.Head()          
@@ -49,6 +49,19 @@ type DsSystem with
 
             let out = lamp.OutTag :?> Tag<bool>
             yield (sets, s._off.Expr) --| (out, getFuncName())
+    ]
+
+    member s.B4_SWModeLamp(): CommentedStatement list = [
+        for f in s.Flows do
+            yield (f.auto_btn.Expr  , s._off.Expr) --| (f.auto_lamp  , getFuncName())
+            yield (f.manual_btn.Expr, s._off.Expr) --| (f.manual_lamp, getFuncName())
+            yield (f.drive_btn.Expr , s._off.Expr) --| (f.drive_lamp , getFuncName())
+            yield (f.stop_btn.Expr  , s._off.Expr) --| (f.stop_lamp  , getFuncName())
+            yield (f.emg_btn.Expr   , s._off.Expr) --| (f.emg_lamp   , getFuncName())
+            yield (f.test_btn.Expr  , s._off.Expr) --| (f.test_lamp  , getFuncName())
+            yield (f.clear_btn.Expr , s._off.Expr) --| (f.clear_lamp , getFuncName())
+            yield (f.home_btn.Expr  , s._off.Expr) --| (f.home_lamp  , getFuncName())
+            yield (f.ready_btn.Expr , s._off.Expr) --| (f.ready_lamp , getFuncName())
     ]
 
     member s.B4_HWBtnConnetToSW(): CommentedStatement list =  [

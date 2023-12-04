@@ -82,7 +82,10 @@ module ConvertCPU =
             yield! s.B1_HWButtonOutput()
             yield! s.B2_SWButtonOutput()
             
-            yield! s.B3_HWLamp()
+            yield! s.B3_HWModeLamp()
+            yield! s.B4_SWModeLamp()
+
+
             yield! s.B4_HWBtnConnetToSW()
             
             yield! s.Y1_SystemBitSetFlow()

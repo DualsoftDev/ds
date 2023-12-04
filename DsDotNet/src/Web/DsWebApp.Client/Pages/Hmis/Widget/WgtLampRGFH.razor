@@ -1,15 +1,15 @@
-@* ComWgtLampRGFH *@
+@* WgtLampRGFH *@
 @if (!_loading)
 {
     <DxButton Click="@Click" RenderStyleMode=ButtonRenderStyleMode.Outline>
-        <CompWgtEmbeddedLampRGFH Status4=Status4 @ref="_lampRef" />
+        <WgtEmbeddedLampRGFH Status4=Status4 @ref="_lampRef" />
         <div id="@_guid">@_text</div>
     </DxButton>
 }
 
 
 @code {
-    CompWgtEmbeddedLampRGFH _lampRef;
+    WgtEmbeddedLampRGFH _lampRef;
     [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
 
     Status4 _status4;

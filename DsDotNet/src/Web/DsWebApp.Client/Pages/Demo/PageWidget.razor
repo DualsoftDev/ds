@@ -1,20 +1,20 @@
 @page "/demo/widget"
 <h3>Widget Test</h3>
 
-<CompWgtPbWithLamp Text="ToggleMe Lamp" IsOn="@true" Click="@(() => { ToastService.ShowInfo("Clicked");})" @ref="_toggleRef"/>
+<WgtPbWithLamp Text="ToggleMe Lamp" IsOn="@true" Click="@(() => { ToastService.ShowInfo("Clicked");})" @ref="_toggleRef"/>
 <span></span>
 <DxButton Text="ON" Click="@(() => {_toggleRef.SetState(true);})" />
 <DxButton Text="OFF" Click="@(() => {_toggleRef.SetState(false);})" />
 
 <br/><br/>
 <h4>RGFH lamp</h4>
-<ComWgtLampRGFH Status4="@Status4.Ready" @ref="_rgfhRef" Click="@(() => { ToastService.ShowInfo("Clicked");})"/>
+<WgtLampRGFH Status4="@Status4.Ready" @ref="_rgfhRef" Click="@(() => { ToastService.ShowInfo("Clicked");})"/>
 <DxButton Text="Ready" Click="@(async () => { await _rgfhRef.SetStatus4Async(Status4.Ready);})" />
 <DxButton Text="Going" Click="@(async () => { await _rgfhRef.SetStatus4Async(Status4.Going);})" />
 <DxButton Text="Finish" Click="@(async () => { await _rgfhRef.SetStatus4Async(Status4.Finish);})" />
 <DxButton Text="Homing" Click="@(async () => { await _rgfhRef.SetStatus4Async(Status4.Homing);})" />
 
 @code {
-    ComWgtLampRGFH _rgfhRef;
-    CompWgtPbWithLamp _toggleRef;
+    WgtLampRGFH _rgfhRef;
+    WgtPbWithLamp _toggleRef;
 }

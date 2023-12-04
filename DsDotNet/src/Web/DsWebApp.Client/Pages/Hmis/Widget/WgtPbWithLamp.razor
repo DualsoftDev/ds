@@ -1,12 +1,12 @@
-@* CompWgtPbWithLamp *@
+@* WgtPbWithLamp *@
 
 <DxButton Click="@_toggleLamp" RenderStyleMode=ButtonRenderStyleMode.Outline>
-    <CompWgtEmbeddedLamp IsOn=IsOn @ref="_lampRef" />
+    <WgtEmbeddedLamp IsOn=IsOn @ref="_lampRef" />
     @Text
 </DxButton>
 
 @code {
-    CompWgtEmbeddedLamp _lampRef;
+    WgtEmbeddedLamp _lampRef;
     [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
     [Parameter] public string Text { get; set; }
 

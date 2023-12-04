@@ -1,0 +1,34 @@
+@* CompHmiButtonColumn *@
+
+@using System.Reactive.Subjects
+@*
+https://supportcenter.devexpress.com/ticket/details/t1135370/grid-for-blazor-how-to-create-reusable-dxgridcommandcolumn
+*@
+
+
+@inherits DxGridCommandColumn
+@base.BuildRenderTree
+
+
+@code {
+    [CascadingParameter] public IGrid MyGrid { get; set; }
+    // [Parameter] public EventCallback<object> OnClick { get; set; }
+    [Parameter] public Nullable<int> ForceWidth { get; set; }
+
+    [Parameter] public Func<object, HMIPushLampMode> ButtonLampModeGetter { get; set; }
+
+
+    protected override bool ShouldRender() => false;
+
+    protected override void OnInitialized() {
+        base.OnInitialized();
+        Width = (ForceWidth == null) ? "80px" : $"{ForceWidth}px";
+        HeaderTemplate = context => @<span>@Caption</span>;
+        CellDisplayTemplate = context =>
+        {
+            object row = context.DataItem;
+            // return @<DxButton Text="@Caption" RenderStyle="ButtonRenderStyle.Primary" Click=@(() => OnClick.InvokeSafeAsync(context.DataItem)) />;
+            return@<WgtGridPbLampMode Text="@Caption" DataItem="@row" ButtonLampModeGetter="@ButtonLampModeGetter" />    ;
+        };
+    }
+}

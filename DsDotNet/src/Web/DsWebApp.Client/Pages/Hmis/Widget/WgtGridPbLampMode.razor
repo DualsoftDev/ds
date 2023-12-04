@@ -1,0 +1,88 @@
+@* WgtGridPbLamp *@
+
+@using Engine.Core
+@using System.Reactive.Subjects
+@implements IAsyncDisposable
+
+@if (_loading)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <button class="@getClass()" onclick="@(() => onClick())" id="@_guid">
+        <div style="display: flex; align-items: center;">
+            <WgtEmbeddedTagLamp TagLamp=_tagLamp />     @* @ref="_lampRef" *@
+            @Text
+        </div>
+    </button>
+}
+
+
+@code {
+    string _guid;
+    string _class;
+    bool _loading { get; set; } = true;
+
+    [Parameter] public Func<object, HMIPushLampMode> ButtonLampModeGetter { get; set; }
+    [Parameter] public string Text { get; set; }
+    [Parameter] public object DataItem { get; set; }
+
+    bool _enabled = false;
+    TagWeb _tagButton, _tagLamp, _tagMode;
+    string _text;
+    ButtonRenderStyleMode _style = ButtonRenderStyleMode.Contained;
+    CompositeDisposable _disposables = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Yield();
+        _guid = Guid.NewGuid().ToString();
+        ((_tagButton, _tagLamp), _tagMode) = ButtonLampModeGetter.Invoke(DataItem);
+        _text = Text;
+
+        IDisposable subscription =
+            ClientGlobal.TagChangedSubject.Subscribe(async tag =>
+            {
+                if (tag.IsEqual(_tagLamp))
+                {
+                    Console.WriteLine($"Lamp change detected for {tag.Name}");
+                    StateHasChanged();
+                }
+                else if (tag.IsEqual(_tagButton))
+                {
+                    Console.WriteLine($"Button status change detected for {tag.Name}/{tag.Kind}/{tag.KindDescription} = {tag.Value}");
+                }
+                else if (tag.IsEqual(_tagMode))
+                {
+                    Console.WriteLine($"Mode change detected for {tag.Name}/{tag.Kind}/{tag.KindDescription} = {tag.Value}");
+                    await JsDual.SetAttribute(_guid, "class", getClass());
+                    StateHasChanged();
+                }
+            });
+
+        _disposables.Add(subscription);
+        _loading = false;
+    }
+    string getClass()
+    {
+        var on = (bool)_tagMode.Value ? "outline-" : "";
+        return $"btn btn-{on}primary";
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await Task.Yield();
+        _disposables.Dispose();
+        Console.WriteLine("xxx.razor disposed!");
+    }
+
+    async Task onClick()
+    {
+        _tagButton.SetValue(true);
+        Console.WriteLine($"Sending true({_tagButton.Name}).");
+        var anyError = await Http.PostTagAsync(_tagButton, AuthenticationStateProvider, NavigationManager);
+        if (anyError.NonNullAny())
+            await JsDual.Alert($"Error while posting tag({_tagButton.Name}) change: {anyError}");
+    }
+}

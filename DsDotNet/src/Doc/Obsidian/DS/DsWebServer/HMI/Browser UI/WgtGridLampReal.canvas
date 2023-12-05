@@ -1,0 +1,15 @@
+{
+	"nodes":[
+		{"id":"f4fb390ec8d4390d","type":"text","text":"WgtGridLampReal","x":-140,"y":-180,"width":225,"height":60},
+		{"id":"a7db050c8a43c2b0","x":-160,"y":-40,"width":265,"height":60,"type":"text","text":"CompHmiRealLampColumn"},
+		{"id":"6e2aae1bfa327f76","type":"text","text":"WgtEmbeddedLampReal","x":-152,"y":-300,"width":250,"height":60},
+		{"id":"4728a80177f75753","x":-152,"y":80,"width":250,"height":60,"type":"text","text":"CompHmiRealTable"},
+		{"id":"3f637f5a77df0b64","x":-152,"y":220,"width":250,"height":60,"type":"text","text":"PageHmiFlow"}
+	],
+	"edges":[
+		{"id":"da06f36edb08b1af","fromNode":"f4fb390ec8d4390d","fromSide":"top","toNode":"6e2aae1bfa327f76","toSide":"bottom"},
+		{"id":"50ab56772b2e5bc5","fromNode":"a7db050c8a43c2b0","fromSide":"top","toNode":"f4fb390ec8d4390d","toSide":"bottom"},
+		{"id":"6f2bcc7c17402e1f","fromNode":"3f637f5a77df0b64","fromSide":"top","toNode":"4728a80177f75753","toSide":"bottom"},
+		{"id":"55872181029f9432","fromNode":"4728a80177f75753","fromSide":"top","toNode":"a7db050c8a43c2b0","toSide":"bottom"}
+	]
+}

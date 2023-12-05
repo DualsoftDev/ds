@@ -13,7 +13,7 @@
             "state": {
               "type": "canvas",
               "state": {
-                "file": "DsWebServer/HMI/Browser UI/WidgetLampRGFH.canvas",
+                "file": "DsWebServer/HMI/Browser UI/WgtGridLampReal.canvas",
                 "viewState": {
                   "x": 0,
                   "y": 0,
@@ -88,7 +88,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "DsWebServer/HMI/Browser UI/WidgetLampRGFH.canvas",
+                "file": "DsWebServer/HMI/Browser UI/WgtGridLampReal.canvas",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -105,7 +105,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "DsWebServer/HMI/Browser UI/WidgetLampRGFH.canvas",
+                "file": "DsWebServer/HMI/Browser UI/WgtGridLampReal.canvas",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -128,7 +128,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "DsWebServer/HMI/Browser UI/WidgetLampRGFH.canvas"
+                "file": "DsWebServer/HMI/Browser UI/WgtGridLampReal.canvas"
               }
             }
           }
@@ -151,8 +151,9 @@
   },
   "active": "f118e42fbfe406e6",
   "lastOpenFiles": [
+    "DsWebServer/HMI/Browser UI/WgtLampRGFH.canvas",
+    "DsWebServer/HMI/Browser UI/WgtGridLampReal.canvas",
     "DsWebServer/HMI/Browser UI/0. PageHmi.canvas",
-    "DsWebServer/HMI/Browser UI/WidgetLampRGFH.canvas",
     "DsWebServer/HMI/Browser UI/CompHmiButtonColumn.md",
     "DsWebServer/HMI/HMI.md",
     "DsWebServer/HMI/TagWeb.md",

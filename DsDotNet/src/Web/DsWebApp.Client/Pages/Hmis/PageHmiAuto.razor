@@ -4,6 +4,7 @@
 <h3>자동 조작</h3>
 
 @using System.Collections.ObjectModel
+@using Dual.Web.Blazor.Client.Components
 @using Engine.Core
 @using static Engine.Core.TagWebModule
 @using HMIButton = Tuple<Engine.Core.TagWebModule.TagWeb, Engine.Core.TagWebModule.TagWeb>  @* HMIPush * HMIFlickerLamp *@
@@ -11,6 +12,8 @@
 @implements IDisposable
 @attribute [Authorize(Roles = "Administrator")]
 
+@* https://supportcenter.devexpress.com/ticket/details/t1017286/datagrid-for-blazor-how-to-set-the-100-height *@
+<CompFullScreenManager FullScreenElementId="auto" />      @* FullScreenStateChanged="@onFullScreenStateChanged" *@ 
 
 @if (_loading)
 {
@@ -18,10 +21,8 @@
 }
 else
 {
-    <p>
-@*         <WgtPb Text="Auto"     DataItem="@(_system.GetAuto())"         TagGetter="@_tagGetter" />
-        <WgtPb Text="Manual"   DataItem="@(_system.GetManual())"       TagGetter="@_tagGetter" />
- *@
+    <div id="auto">
+        <p>
         <WgtGridPbLamp Text="Auto"     DataItem="@(_system.AutoManualSelectLamp.Item1)" ButtonLampGetter="@_buttonLampGetter" />
         <WgtGridPbLamp Text="Manual"   DataItem="@(_system.AutoManualSelectLamp.Item2)" ButtonLampGetter="@_buttonLampGetter" />
 
@@ -32,9 +33,10 @@ else
         <WgtGridPbLamp Text="Stop"     DataItem="@(_system.StopPushLamp)"      ButtonLampGetter="@_buttonLampGetter" />
         <WgtGridPbLamp Text="Em Stop"  DataItem="@(_system.EmergencyPushLamp)" ButtonLampGetter="@_buttonLampGetter" />
         <WgtGridPbLamp Text="Test"     DataItem="@(_system.TestPushLamp)"      ButtonLampGetter="@_buttonLampGetter" />
-    </p>
+        </p>
 
     <CompHmiFlowTable Flows="@_system.Flows"/>
+    </div>
 }
 
 

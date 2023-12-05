@@ -1,0 +1,92 @@
+@page "/demo/tall-widget"
+
+
+<h3>Tall Widget Test</h3>
+
+<h4>Tall button</h4>
+<DxButton Text="+" Click="@increase" />
+<DxButton Text="-" Click="@decrease" />
+<br/><br/><br/><br/>
+
+
+<DxButton Text="Button1" CssClass="tall-button" />
+<DxButton Text="Button2" CssClass="tall-button" />
+<style>
+    .tall-button {
+        height: 60px;
+        width: 100px;
+    }
+</style>
+
+<script>
+    function changeButtonStyles(w, h) {
+        var buttonElements = document.querySelectorAll(".tall-button");
+
+        // 모든 버튼에 스타일을 변경합니다.
+        buttonElements.forEach(function (buttonElement) {
+            buttonElement.style.height = h + "px";
+            buttonElement.style.width = w + "px";
+        });
+    }
+</script>
+
+
+@code {
+    int buttonHeight = 60;
+    int buttonWidth = 100;
+
+    async Task increase() => await JsRuntime.InvokeVoidAsync("changeButtonStyles", new object[] { buttonWidth, buttonHeight += 10 });
+    async Task decrease() => await JsRuntime.InvokeVoidAsync("changeButtonStyles", new object[] { buttonWidth, buttonHeight -= 10 });
+}
+
+
+<h4>Tall Grid test</h4>
+<DxGrid Data="@WeatherForecastService.GetForecast()">
+    <Columns>
+        <DxGridCommandColumn>
+            <HeaderTemplate>
+                <span>다운로드</span>
+            </HeaderTemplate>
+            <CellDisplayTemplate>
+                <DxButton Text="다운로드" RenderStyle="ButtonRenderStyle.Primary" CssClass="tall-button" />
+            </CellDisplayTemplate>
+        </DxGridCommandColumn>
+        <DxGridDataColumn FieldName="@nameof(WeatherForecast.Date)" Caption="Date" Width="150px" />
+        <DxGridDataColumn FieldName="@nameof(WeatherForecast.TemperatureC)" Caption="Temp. (C)" Width="100px" />
+        <DxGridDataColumn FieldName="@nameof(WeatherForecast.TemperatureF)" Caption="Temp. (F)" Width="100px" />
+        <DxGridDataColumn FieldName="@nameof(WeatherForecast.Summary)" Caption="Summary" />
+    </Columns>
+
+</DxGrid>
+
+
+
+@code {
+    public class WeatherForecast
+    {
+        public DateTime Date { get; set; }
+        public int TemperatureC { get; set; }
+        public string Summary { get; set; }
+
+        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    }
+
+    public class WeatherForecastService
+    {
+        private static readonly string[] Summaries = new[]
+        {
+        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+        };
+
+        public static WeatherForecast[] GetForecast()
+        {
+            var rng = new Random();
+            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+                {
+                    Date = DateTime.Now.AddDays(index),
+                    TemperatureC = rng.Next(-20, 55),
+                    Summary = Summaries[rng.Next(Summaries.Length)]
+                }).ToArray();
+        }
+    }
+}

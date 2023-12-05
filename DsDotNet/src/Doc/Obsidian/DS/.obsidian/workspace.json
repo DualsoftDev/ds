@@ -13,10 +13,10 @@
             "state": {
               "type": "canvas",
               "state": {
-                "file": "DsWebServer/HMI/Browser UI/0. PageHmi.canvas",
+                "file": "DsWebServer/HMI/Browser UI/WidgetLampRGFH.canvas",
                 "viewState": {
-                  "x": -18.5,
-                  "y": -170,
+                  "x": 0,
+                  "y": 0,
                   "zoom": 0
                 }
               }
@@ -72,7 +72,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 201.5
+    "width": 316.49999618530273
   },
   "right": {
     "id": "e7aa00dae9662fc9",
@@ -88,7 +88,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "DsWebServer/HMI/Browser UI/0. PageHmi.canvas",
+                "file": "DsWebServer/HMI/Browser UI/WidgetLampRGFH.canvas",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -105,7 +105,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "DsWebServer/HMI/Browser UI/0. PageHmi.canvas",
+                "file": "DsWebServer/HMI/Browser UI/WidgetLampRGFH.canvas",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -128,7 +128,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "DsWebServer/HMI/Browser UI/0. PageHmi.canvas"
+                "file": "DsWebServer/HMI/Browser UI/WidgetLampRGFH.canvas"
               }
             }
           }
@@ -149,10 +149,11 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "80a060ffd7fb1ac9",
+  "active": "f118e42fbfe406e6",
   "lastOpenFiles": [
-    "DsWebServer/HMI/Browser UI/CompHmiButtonColumn.md",
     "DsWebServer/HMI/Browser UI/0. PageHmi.canvas",
+    "DsWebServer/HMI/Browser UI/WidgetLampRGFH.canvas",
+    "DsWebServer/HMI/Browser UI/CompHmiButtonColumn.md",
     "DsWebServer/HMI/HMI.md",
     "DsWebServer/HMI/TagWeb.md",
     "DsWebServer/HMI/Browser UI",

@@ -1,0 +1,9 @@
+{
+	"nodes":[
+		{"id":"b222a58cfeddec92","x":-180,"y":-240,"width":250,"height":60,"type":"text","text":"WgtEmbeddedLampRGFH"},
+		{"id":"8cea7675e7b1e45f","x":-180,"y":-100,"width":185,"height":60,"type":"text","text":"WgtLampRGFH"}
+	],
+	"edges":[
+		{"id":"2912a8b9de02e447","fromNode":"8cea7675e7b1e45f","fromSide":"top","toNode":"b222a58cfeddec92","toSide":"bottom"}
+	]
+}

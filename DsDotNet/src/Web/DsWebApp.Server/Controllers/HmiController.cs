@@ -41,7 +41,7 @@ public class HmiController(
 
             await Console.Out.WriteLineAsync($"HmiTagHub has {HmiTagHub.ConnectedClients.Count} connections");
             _model.HMIPackage.UpdateTag(tagWeb);
-            cpu.TagWebChangedSubject.OnNext(tagWeb);
+            cpu.TagWebChangedFromWebSubject.OnNext(tagWeb);
             //await hubContext.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);     <-- cpu.TagWebChangedSubject.OnNext 에서 수행 됨..
             return null;
         }

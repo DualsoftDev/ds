@@ -25,14 +25,19 @@ public partial class Demon : BackgroundService
         _hubContextFieldIo = hubContextFieldIo;
         _hubContextHmiTag = hubContextHmiTag;
 
-        IDisposable innerSubscription = null;
+        IDisposable innerSubscriptionFromWeb = null;
+        IDisposable innerSubscriptionFromCpu = null;
         if (serverGlobal.RuntimeModel != null)
-            innerSubscription = subscribeTagChange(serverGlobal.RuntimeModel);
-
+        {
+            innerSubscriptionFromWeb = subscribeTagChangeWeb(serverGlobal.RuntimeModel);
+            innerSubscriptionFromCpu = subscribeTagChangeCpu(serverGlobal.RuntimeModel);
+        }
         serverGlobal.RuntimeModelChangedSubject.Subscribe(runtimeModel =>
         {
-            innerSubscription?.Dispose();
-            innerSubscription = subscribeTagChange(runtimeModel);
+            innerSubscriptionFromWeb?.Dispose();
+            innerSubscriptionFromWeb = subscribeTagChangeWeb(runtimeModel);
+            innerSubscriptionFromCpu?.Dispose();
+            innerSubscriptionFromCpu = subscribeTagChangeCpu(runtimeModel);
 
             // todo : notify model change
             bool isCpuRunning = false;
@@ -40,11 +45,19 @@ public partial class Demon : BackgroundService
             hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, modelDto);
         });
 
-        IDisposable subscribeTagChange(RuntimeModel runtimeModel)
+        IDisposable subscribeTagChangeWeb(RuntimeModel runtimeModel)
         {
-            return runtimeModel.Cpu.TagWebChangedSubject.Subscribe(tagWeb =>
+            return runtimeModel.Cpu.TagWebChangedFromWebSubject.Subscribe(tagWeb =>
             {
                 _logger.Debug("Server: Notifying TagWeb change to all clients");
+                hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
+            });
+        }
+        IDisposable subscribeTagChangeCpu(RuntimeModel runtimeModel)
+        {
+            return runtimeModel.Cpu.TagWebChangedFromWebSubject.Subscribe(tagWeb =>
+            {
+                _logger.Debug("Server: Notifying TagWeb change to cpu");
                 hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
             });
         }

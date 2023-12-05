@@ -30,7 +30,8 @@ module RunTime =
         let mutable run:bool = false
         let disposables = new CompositeDisposable()
 
-        let tagWebChangedSubject = new Subject<TagWeb>()
+        let tagWebChangedFromCpuSubject = new Subject<TagWeb>()
+        let tagWebChangedFromWebSubject = new Subject<TagWeb>()
 
         do
             let subscription =
@@ -39,8 +40,9 @@ module RunTime =
                     if hmiTags.ContainsKey stg.Name   
                     then 
                         let tagWeb = hmiTags[stg.Name]
-                        tagWeb.WritableValue <- stg.BoxedValue  //값변경 할당 맞나?
-                        tagWebChangedSubject.OnNext(tagWeb)
+                        logDebug $"Server Updating TagWeb from CPU: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
+                        tagWeb.SetValue(stg.BoxedValue)
+                        tagWebChangedFromCpuSubject.OnNext(tagWeb)
                 )
             disposables.Add subscription
 
@@ -91,10 +93,8 @@ module RunTime =
             }
 
         let subscription = 
-            tagWebChangedSubject.Where(fun tagWeb -> tagWeb.WritableValue.IsNull()) //이렇게 안하면 tagWebChangedSubject 핑퐁
-                                .Subscribe(fun tagWeb-> 
-
-                    logDebug $"Server Updating TagWeb: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
+            tagWebChangedFromWebSubject.Subscribe(fun tagWeb-> 
+                    logDebug $"Server Updating TagWeb from Web: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
                     let cpuTag = tagStorages.[tagWeb.Name]
                     cpuTag.BoxedValue <-tagWeb.Value
             )
@@ -140,11 +140,8 @@ module RunTime =
             scanOnce()
 
 
-        // todo: 이게 맞나 확인 필요. 
-        // - CPU로 부터 WebTag 쓰기: cpu tag 객체 정보를 바탕으로 TagWeb 객체 생성해서 tagWebChangedSubject.OnNext 호출
-        // - WebTag로 부터 CPU 쓰기: tagWebChangedSubject 에 대한 subscription.  Done!
-
-        member x.TagWebChangedSubject = tagWebChangedSubject
+        member x.TagWebChangedFromWebSubject = tagWebChangedFromWebSubject
+        member x.TagWebChangedFromCpuSubject = tagWebChangedFromCpuSubject
 
     [<Extension>]
     type DsCpuExt  =

@@ -12,7 +12,7 @@
 }
 else
 {
-    <DxGrid Data="Flows" @ref="MyGrid" CustomizeElement="customizeElement">
+    <DxGrid Data="Flows" @ref="MyGrid">
         <Columns>
             @* <DxGridDataColumn FieldName="Name" Caption="Flow"></DxGridDataColumn> *@
             <DxGridCommandColumn Caption="Flow">
@@ -52,12 +52,6 @@ else
     </DxGrid>
 }
 
-<style>
-    .tall-row {
-        height: 100px;
-    }
-</style>
-
 @code {
     IGrid MyGrid { get; set; }
     bool _loading { get; set; } = true;
@@ -91,13 +85,6 @@ else
     {
         var flow = (HMIFlow)dataItem;
         await PostTag(flow.GetManual(), true);
-    }
-
-    // https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid.CustomizeElement?utm_source=SupportCenter&utm_medium=website&utm_campaign=docs-feedback&utm_content=T1059635
-    void customizeElement(GridCustomizeElementEventArgs e)
-    {
-        if (e.ElementType == GridElementType.DataRow)
-            e.CssClass = "tall-row";
     }
 }
 

@@ -41,7 +41,7 @@
 
 
 <h4>Tall Grid test</h4>
-<DxGrid Data="@WeatherForecastService.GetForecast()">
+<DxGrid Data="@WeatherForecastService.GetForecast()" CustomizeElement="customizeElement">
     <Columns>
         <DxGridCommandColumn>
             <HeaderTemplate>
@@ -81,7 +81,7 @@
         public static WeatherForecast[] GetForecast()
         {
             var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            return Enumerable.Range(1, 50).Select(index => new WeatherForecast
                 {
                     Date = DateTime.Now.AddDays(index),
                     TemperatureC = rng.Next(-20, 55),
@@ -89,4 +89,11 @@
                 }).ToArray();
         }
     }
+    // https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid.CustomizeElement?utm_source=SupportCenter&utm_medium=website&utm_campaign=docs-feedback&utm_content=T1059635
+    void customizeElement(GridCustomizeElementEventArgs e)
+    {
+        if (e.ElementType == GridElementType.DataRow)
+            e.CssClass = "tall-button";
+    }
+
 }

@@ -49,15 +49,15 @@ public partial class Demon : BackgroundService
         {
             return runtimeModel.Cpu.TagWebChangedFromWebSubject.Subscribe(tagWeb =>
             {
-                _logger.Debug("Server: Notifying TagWeb change to all clients");
+                _logger.Debug($"Server: Notifying TagWeb({tagWeb.Name}) change from Web to all clients");
                 hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
             });
         }
         IDisposable subscribeTagChangeCpu(RuntimeModel runtimeModel)
         {
-            return runtimeModel.Cpu.TagWebChangedFromWebSubject.Subscribe(tagWeb =>
+            return runtimeModel.Cpu.TagWebChangedFromCpuSubject.Subscribe(tagWeb =>
             {
-                _logger.Debug("Server: Notifying TagWeb change to cpu");
+                _logger.Debug($"Server: Notifying TagWeb({tagWeb.Name}) change from CPU to all clients");
                 hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
             });
         }

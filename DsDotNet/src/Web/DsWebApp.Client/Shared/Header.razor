@@ -1,7 +1,9 @@
 @using Dual.Common.Core
 @using Dual.Web.Blazor.Client.Auth
+@using Dual.Web.Blazor.Client.Theme
 
 <CompSessionLogin/>
+<CompThemeSwitcher Theme="@(Theme.BootstrapLumen)" />
 
 <nav class="navbar header-navbar p-0">
     <button class="navbar-toggler bg-primary d-block" @onclick="OnToggleClick">

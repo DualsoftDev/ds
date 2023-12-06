@@ -9,40 +9,20 @@
     </button>
     <div class="ms-3 fw-bold title pe-4">듀얼소프트 웹</div>
 
-    <div class="justify-content-end">
-@*
-        <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        <AuthorizeView>
-        <Authorized>
-                <a @onclick="Logout" href="javascript:void(0)">Logout</a> &nbsp;(@context.User.Identity.Name)
-            </Authorized>
-            <NotAuthorized>
-                <a href="/toplevel/login">Login</a>
-            </NotAuthorized>
-        </AuthorizeView>
- *@
-
-        @if (_loading)
+    <div class="ms-auto">
+        @if (ClientGlobal.UserSession == null || !_authenticated)
         {
-            <p><em>Loading...</em></p>
+            <a href="/toplevel/login">Login</a>
         }
         else
         {
-            @if (ClientGlobal.UserSession == null || !_authenticated)
-            {
-                <a href="/toplevel/login">Login</a>
-            }
-            else
-            {
-                var name = ClientGlobal?.AuthenticationState?.User?.Identity?.Name;
-                if (name.NonNullAny())
-                    name = $"({name})";
-                <a @onclick="Logout" href="javascript:void(0)">Logout @name</a>
-            }
+            var name = ClientGlobal?.AuthenticationState?.User?.Identity?.Name;
+            if (name.NonNullAny())
+                name = $"({name})";
+            <a @onclick="logout" href="javascript:void(0)">Logout @name</a>
         }
-
+        &nbsp;&nbsp;
     </div>
-
 </nav>
 
 @code {
@@ -59,14 +39,13 @@
         }
     }
 
-    private async Task Logout()
+    async Task logout()
     {
         var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthenticationStateProvider;
         await customAuthStateProvider.UpdateAuthenticationState(null);
         NavigationManager.NavigateTo("/", true);
     }
 
-    bool _loading = true;
     bool _authenticated = false;
     protected override async Task OnInitializedAsync()
     {
@@ -78,6 +57,5 @@
                 ok => _authenticated = ok,
                 err => {});
         }
-        _loading = false;
     }
 }

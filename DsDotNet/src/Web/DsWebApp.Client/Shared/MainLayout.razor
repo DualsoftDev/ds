@@ -13,19 +13,6 @@
                     @bind-IsActive="@IsMobileLayout" />
 
 <div class="page">
-@*
-    <div class="top-row px-4">
-        <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        <AuthorizeView>
-            <Authorized>
-            <a @onclick="Logout" href="javascript:void(0)">Logout </a> &nbsp;(@context.User.Identity.Name)
-            </Authorized>
-            <NotAuthorized>
-                <a href="/toplevel/login">Login</a>
-            </NotAuthorized>
-        </AuthorizeView>
-    </div>
- *@
     <DxGridLayout CssClass="page-layout">
         <Rows>
             @if(IsMobileLayout) {
@@ -99,12 +86,4 @@
     public void Dispose() {
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
-
-    // private async Task Logout()
-    // {
-    //     var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
-    //     await customAuthStateProvider.UpdateAuthenticationState(null);
-    //     NavigationManager.NavigateTo("/", true);
-    // }
-
 }

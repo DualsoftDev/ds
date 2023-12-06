@@ -1,0 +1,29 @@
+@page "/demo/theme-switcher"
+
+<h3>PageThemeTest</h3>
+
+<script>
+    function changeTheme(themeName) {
+        // 먼저 현재 테마를 제거합니다.
+        const existingThemeLink = document.getElementById('theme-style');
+        if (existingThemeLink) {
+            existingThemeLink.remove();
+        }
+
+        // 선택한 테마를 로드합니다.
+        const newThemeLink = document.createElement('link');
+        newThemeLink.id = 'theme-style';
+        newThemeLink.href = `_content/DevExpress.Blazor.Themes/${themeName}.bs5.css`;
+        newThemeLink.rel = 'stylesheet';
+        document.head.appendChild(newThemeLink);
+    }
+</script>
+
+<button @onclick="@(() => changeTheme("blazing-dark"))">Dark Theme</button>
+<button @onclick="@(() => changeTheme("blazing-berry"))">Berry Theme</button>
+<button @onclick="@(() => changeTheme("purple"))">Purple</button>
+<button @onclick="@(() => changeTheme("office-white"))">Light Theme</button>
+
+@code {
+    async Task changeTheme(string theme) => await JsRuntime.InvokeVoidAsync("changeTheme", theme);
+}

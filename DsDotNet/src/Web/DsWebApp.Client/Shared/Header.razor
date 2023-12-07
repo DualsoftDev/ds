@@ -41,6 +41,11 @@
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    function closeModal(modalSelector) {
+        $(modalSelector).modal('hide');
+    }
+</script>
 <style>
     .link-with-underline {
         text-decoration: underline;
@@ -57,16 +62,7 @@
     <div class="ms-auto">
         @if (ClientGlobal.UserSession == null || !_authenticated)
         {
-            @* <button type="button" class="btn btn-primary" onclick="@Authenticate" data-toggle="modal"  data-target="#loginModal">Login</button> *@
-            @* <a href="#" data-toggle="modal" data-target="#loginModal">Login</a> *@
-
             <a class="link-with-underline" data-toggle="modal" data-target="#loginModal">Login</a>
-
-
-            @* <a @onclick="Authenticate">Login</a> *@
-            @* <a href="#" @onclick="Authenticate">Login</a> *@
-@*             <a href="#" data-toggle="modal" data-target="#loginModal">Login</a>       @ * class="btn btn-primary"  * @
- *@            @* <a href="/toplevel/login">Login</a> *@
         }
         else
         {
@@ -121,11 +117,12 @@
 
         if (loginResponse.IsSuccessStatusCode)
         {
+            _authenticated = true;
             var userSession = await loginResponse.Content.ReadFromJsonAsync<UserSession>();
             var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthenticationStateProvider;
             await customAuthStateProvider.UpdateAuthenticationState(userSession);
-            //NavigationManager.NavigateTo("/", true);
-            StateHasChanged();
+            await JsRuntime.InvokeVoidAsync("closeModal", "#loginModal");
+            await JsRuntime.InvokeVoidAsync("location.reload");     // 우측 Login/Logout update 를 위해서 강제로 페이지 refresh
         }
         else if (loginResponse.StatusCode == HttpStatusCode.Unauthorized)
         {

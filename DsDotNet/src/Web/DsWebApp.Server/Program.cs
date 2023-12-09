@@ -209,16 +209,23 @@ public static class CustomServerExtension
         return services;
     }
 
+    class User : UserAuthInfo
+    {
+        public string Roles { get; set; }
+    }
     public static IServiceCollection AddDsAuth(this IServiceCollection services, ServerSettings serverSettings, ConfigurationManager conf, string connectionString)
     {
         Func<string, UserAccount> userInfoExtractor = (string userName) =>
         {
             using var conn = new SqliteConnection(connectionString);
             conn.Open();
-            var user = conn.QueryFirstOrDefault<UserAuthInfo>("SELECT [password], [isAdmin] FROM [user] WHERE [username] = @UserName;", new { UserName = userName });
+            var user = conn.QueryFirstOrDefault<User>("SELECT * FROM [user] WHERE [username] = @UserName;", new { UserName = userName });
             if (user is null)
                 return null;
-            var userAccount = new UserAccount() { UserName = userName, Role = user.IsAdmin ? "Administrator" : "User" };
+            var roles = user.IsAdmin ? "Administrator" : "User";
+            if (user.Roles.NonNullAny())
+                roles += "," + user.Roles;
+            var userAccount = new UserAccount() { UserName = userName, Roles = roles };
             if (user.Password is null)
                 return userAccount;
             userAccount.Password = Dual.Common.Utils.Crypto.Decrypt(user.Password, K.CryptKey);

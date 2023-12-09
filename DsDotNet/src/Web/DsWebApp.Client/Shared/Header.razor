@@ -11,10 +11,29 @@
         }
         else
         {
-            var name = ClientGlobal?.AuthenticationState?.User?.Identity?.Name;
-            if (name.NonNullAny())
-                name = $"({name})";
-            <a @onclick="logout" href="javascript:void(0)">Logout @name</a>
+            var user = ClientGlobal?.AuthenticationState?.User;
+            if (user != null)
+            {
+                var name = user.Identity?.Name;
+                if (name.NonNullAny())
+                    name = $"({name})";
+
+                <a @onclick="logout" href="javascript:void(0)">Logout @name</a>
+                <sapn>&nbsp;</sapn>
+
+                var isAdmin = user.Claims?.Where(c => c.Value == "Administrator").Any();//.Select(c => c.Value).Join(", ");
+                if (isAdmin.HasValue && isAdmin.Value)
+                {
+                    <a @onclick="@onClickBell" @onclick:preventDefault href="#">
+                        <span class="oi oi-bell" />
+                    </a>
+                    <sapn>&nbsp;</sapn>
+                }
+
+                <a @onclick="@onClickSetting" @onclick:preventDefault href="#">
+                    <span class="oi oi-cog" />
+                </a>
+            }
         }
         &nbsp;&nbsp;
     </div>
@@ -53,7 +72,10 @@
 @using System.Net
 
 <CompSessionLogin />
-<CompThemeSwitcher Theme="@(Theme.DevExpressDark)" />
+@if (_theme != Theme.Undefined)
+{
+    <CompThemeSwitcher Theme="@_theme" />
+}
 
 <!-- Login Modal -->
 <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
@@ -108,6 +130,7 @@
         NavigationManager.NavigateTo("/", true);
     }
 
+    Theme _theme;
     protected bool _authenticated = false;
     protected override async Task OnInitializedAsync()
     {
@@ -119,6 +142,7 @@
                 ok => _authenticated = ok,
                 err => { });
         }
+        _theme = await LocalStorage.GetItemAsync<Theme>("Theme");
     }
     protected LoginRequest _loginRequest = new();
     protected async Task authenticate()
@@ -142,6 +166,13 @@
             return;
         }
     }
+
+    void onClickBell()
+    {
+        ToastService.ShowInfo("onClickBell");
+        NavigationManager.NavigateTo("/etc/augmentdatabase");
+    }
+    void onClickSetting() => NavigationManager.NavigateTo("/etc/pageclientsettings");
 }
 @*
  * ------------------------------------------------------------

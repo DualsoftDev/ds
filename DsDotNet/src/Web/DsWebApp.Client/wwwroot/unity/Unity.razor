@@ -7,15 +7,15 @@
 <h2 class="pb-2">유니티 webGl 테스트</h2>
 
 <body>
-    <div id="unity-container2" class="unity-desktop2">
-            <img id="img" class="background-div"  src="https://dev.dualsoft.co.kr:4430/mjpeg">
+    <div id="unity-container" class="unity-desktop">
+        <div class="background-div">
+            <img id="img" src="https://dev.dualsoft.co.kr:4430/mjpeg">
             <canvas class="overlay-div" id="unity-canvas" tabindex="-1" style="background: transparent;"></canvas>
-            
-        
-      <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
+        </div>
+        <div id="unity-loading-bar">
+            <div id="unity-logo"></div>
+            <div id="unity-progress-bar-empty">
+                <div id="unity-progress-bar-full"></div>
         </div>
       </div>
     </div>
@@ -38,22 +38,15 @@
       function unityShowBanner(msg, type) {
         var div = document.createElement('div');
         div.innerHTML = msg;
-        if (type == 'error') div.style = 'background: red; padding: 10px;';
-        else {
-          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(function() {
-            updateBannerVisibility();
-          }, 5000);
         }
-        updateBannerVisibility();
-      }
+      
 
       var buildUrl = "unity/Build";
       var loaderUrl = buildUrl + "/out.loader.js";
       var config = {
-        dataUrl: buildUrl + "/out.data",
-        frameworkUrl: buildUrl + "/out.framework.js",
-        codeUrl: buildUrl + "/out.wasm",
+            dataUrl: buildUrl + "/out.data",
+            frameworkUrl: buildUrl + "/out.framework.js",
+            codeUrl: buildUrl + "/out.wasm",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "DsPilotOverlayWeb",
@@ -90,10 +83,10 @@
           img.style.height = "680px";
           
           canvas.style.position = "absolute";
-          canvas.style.top = "0";
-          canvas.style.left = "0";
-          canvas.style.bottom = "0";
-          canvas.style.right = "0";
+          // canvas.style.top = "0";
+          // canvas.style.left = "0";
+          // canvas.style.bottom = "0";
+          // canvas.style.right = "0";
           canvas.style.background = "transparent";
           canvas.style.indexOf = "10";
           canvas.style.width = "960px";

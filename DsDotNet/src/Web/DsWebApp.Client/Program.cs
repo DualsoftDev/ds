@@ -1,7 +1,7 @@
 using Blazored.LocalStorage;
 using Blazored.SessionStorage;
 using Blazored.Toast;
-
+using DsWebApp.Client.Data;
 using DsWebApp.Shared;
 using Dual.Web.Blazor.Client.Auth;
 using Dual.Web.Blazor.Shared;
@@ -19,6 +19,7 @@ services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvi
 services.AddScoped<DualWebBlazorJsInterop>();
 services.AddScoped<CanvasJsInterop>();
 services.AddScoped<FilesManager>();
+services.AddScoped<Sales>();
 
 var clinetGlobal = new ClientGlobal();
 services.AddSingleton<ClientGlobal>(clinetGlobal);

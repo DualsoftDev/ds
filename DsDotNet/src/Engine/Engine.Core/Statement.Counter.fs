@@ -122,7 +122,7 @@ module CounterStatementModule =
 
         static member CreateCTUD(tcParams:TCConstructionParams, countDownCondition, reset, ldCondition) =
             let {Storages=storages; Name=name; Preset=preset; RungInCondition=countUpCondition; FunctionName=functionName} = tcParams
-            { defaultCounterCreateParam with
+            { //defaultCounterCreateParam with
                 Type=CTUD; Name=name; Preset=preset; FunctionName=functionName
                 CountUpCondition   = Some countUpCondition
                 CountDownCondition = Some countDownCondition

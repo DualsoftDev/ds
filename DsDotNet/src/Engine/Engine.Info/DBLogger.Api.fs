@@ -1,6 +1,6 @@
 namespace Engine.Info
 
-module DBLoggerApi =
+module DBLoggerApi = ()
 
-    let GetAllTagKinds() : TagKindTuple array = getAllTagKinds()
+    //let GetAllTagKinds() : TagKindTuple array = GetAllTagKinds()
 

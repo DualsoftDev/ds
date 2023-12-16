@@ -179,6 +179,17 @@ module TagKindModule =
 
 
     let TagDSSubject = new Subject<TagDS>()
+    type TagKind = int
+    type TagKindTuple = TagKind * string
+    
+    type EnumEx() =
+        static member Extract<'T when 'T: struct>() : TagKindTuple array =
+            let typ = typeof<'T>
+            let values = Enum.GetValues(typ) :?> 'T[] |> Seq.cast<int> |> toArray
+
+            let names = Enum.GetNames(typ) |> map (fun n -> $"{typ.Name}.{n}")
+            Array.zip values names
+
 
 [<AutoOpen>]
 [<Extension>]
@@ -190,6 +201,12 @@ type TagKindExt =
     [<Extension>] static member GetApiTagKind      (x:IStorage) = DU.tryGetEnumValue<ApiItemTag>(x.TagKind)
     [<Extension>] static member GetActionTagKind   (x:IStorage) = DU.tryGetEnumValue<ActionTag>(x.TagKind)
     [<Extension>] static member GetHwSysTagTagKind (x:IStorage) = DU.tryGetEnumValue<HwSysTag>(x.TagKind)
+    [<Extension>] static member GetAllTagKinds () : TagKindTuple array =
+                    EnumEx.Extract<SystemTag>()
+                    @ EnumEx.Extract<FlowTag>()
+                    @ EnumEx.Extract<VertexTag>()
+                    @ EnumEx.Extract<ApiItemTag>()
+                    @ EnumEx.Extract<ActionTag>()
 
     [<Extension>]
     static member GetTagInfo (x:IStorage) =

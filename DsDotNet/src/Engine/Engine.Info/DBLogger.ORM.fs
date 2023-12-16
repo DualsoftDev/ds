@@ -153,7 +153,6 @@ CREATE VIEW [{Vn.Log}] AS
         member val At = at with get, set
         member val Value: obj = value with get, set
 
-    type TagKind = int
     type Fqdn = string
     type StorageKey = TagKind * Fqdn
 

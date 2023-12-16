@@ -7,12 +7,13 @@ open System.Runtime.CompilerServices
 open System
 open System.Collections.Generic
 open System.Reflection
-open Engine.Info
 open Engine.CodeGenCPU
+
+
 [<AutoOpen>]
 module ConvertHMI =
       
-    let kindDescriptions = DBLoggerApi.GetAllTagKinds() |> Tuple.toDictionary
+    let kindDescriptions = TagKindExt.GetAllTagKinds() |> Tuple.toDictionary
 
     let getWebTag (tm:ITagManager) (kind:int) =
         let tag = 

@@ -53,7 +53,7 @@ module ImportU =
 
                         call.TargetJob.DeviceDefs
                             .OfType<TaskDev>()
-                            .Iter(fun a -> a.ApiItem.Xywh <- node.CallPosition)
+                            .Iter(fun a -> a.ApiItem.Xywh <- node.Position)
 
                         call
                     else
@@ -290,7 +290,19 @@ module ImportU =
                     else 
                         node.LampHeadPageDefs.ForEach(fun l -> mySys.AddLamp(l.Value, $"{l.Key}_{flow.Value.Name}", "", "", flow.Value, new HashSet<Func>())))
                 )      
-      
+        //MakeLayout 만들기
+        [<Extension>]
+        static member MakeLayout(doc: pptDoc, mySys: DsSystem) =
+            doc.Nodes
+            |> Seq.filter (fun node -> node.NodeType = LAYOUT)
+            |> Seq.iter (fun node ->
+                let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = node.Name)
+                if dev.IsNull() 
+                then node.Shape.ErrorName(ErrID._61, node.PageNum)
+                else dev.Xywh <- Xywh(node.Position.X, node.Position.Y
+                                   , node.Position.W, node.Position.H) 
+                                   )
+
         //Condition 조건 적용
         [<Extension>]
         static member MakeCondition(doc: pptDoc, mySys: DsSystem) = () ///작성 필요
@@ -671,5 +683,6 @@ module ImportU =
             doc.MakeSafeties(sys)
             //ApiTxRx  만들기
             doc.MakeApiTxRx()
-
+            //Layout  만들기
+            doc.MakeLayout(sys)
             doc.IsBuilded <- true

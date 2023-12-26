@@ -114,7 +114,6 @@ module RunTime =
         member x.CommentedStatements = css
         
         member x.Dispose() =
-            x.Stop() //신호 이벤트 없을때까지 처리후 종료 필요
             x.Reset()
             disposables.Dispose()
 
@@ -125,8 +124,7 @@ module RunTime =
             systems.Iter(fun sys-> preAction(sys, cpuMode, true))
 
         member x.Stop() =
-            stopBtn.BoxedValue <- true
-            scanOnce() |>ignore
+            doScanStop()
 
         member x.Step() =
             doScanStop()

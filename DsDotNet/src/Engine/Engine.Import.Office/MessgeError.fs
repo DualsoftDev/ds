@@ -76,6 +76,7 @@ module ErrID =
     let _58 = "System 이름 시작은 특수문자 및 숫자는 불가능합니다."
     let _59 = "페이지에 제목 이름이 없습니다."
     let _60 = "적용시킬 Flow가 없습니다. Flow장표를 추가하세요"
+    let _61 = "Layout 이름에 해당 디바이스가 없습니다."
     
     // IO Mapping Error (1001 ~ )
     let _1001 = "시스템에 버튼 이름이 없습니다."

@@ -233,6 +233,7 @@ module PPTObjectModule =
         | REAL
         | DUMMY
         | BUTTON
+        | LAYOUT
         | LAMP -> checkDotErr ()
 
 
@@ -369,8 +370,8 @@ module PPTObjectModule =
                     LAMP
                 elif (shape.CheckBevelShapeRound()) then
                     BUTTON
-                //elif (shape.CheckCondition()) then
-                //    CONDITION
+                elif (shape.CheckCondition()) then
+                    LAYOUT
                 else
                     shape.ErrorName(ErrID._1, iPage)
 
@@ -414,6 +415,7 @@ module PPTObjectModule =
 
             | REALExF
             | REALExS
+            | LAYOUT
             | DUMMY -> ()
 
         member x.PageNum = iPage
@@ -430,7 +432,7 @@ module PPTObjectModule =
         member x.NodeType = nodeType
         member x.PageTitle = pageTitle
 
-        member x.CallPosition =
+        member x.Position =
             let rect = shape.GetPosition(slieSize)
             Xywh(rect.X, rect.Y, rect.Width, rect.Height)
 

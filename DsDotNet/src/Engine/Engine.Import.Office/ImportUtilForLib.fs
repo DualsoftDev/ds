@@ -95,6 +95,6 @@ module ImportUtilForLib =
         let call = Call.Create(job, parent)
         call.TargetJob.DeviceDefs
             .OfType<TaskDev>()
-            .Iter(fun a -> a.ApiItem.Xywh <- node.CallPosition)
+            .Iter(fun a -> a.ApiItem.Xywh <- node.Position)
 
         call

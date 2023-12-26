@@ -38,3 +38,9 @@ module MSG_TEST =
     [<Fact>]
     let ``MSG_ANIMATION`` () =
         MSG_ANIMATION.Do(testPath, false)|> Assert.True
+    [<Fact>]
+    let ``MSG_TIMECHART`` () =
+        MSG_TIMECHART.Do(testPath, false)|> Assert.True
+    [<Fact>]
+    let ``MSG_LAYOUT`` () =
+        MSG_LAYOUT.Do(testPath, false)|> Assert.True

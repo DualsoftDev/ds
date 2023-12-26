@@ -21,10 +21,17 @@ type DsSystem with
         ]
         
     member s.Y2_SystemError(): CommentedStatement  =
-        let sets =  s.Flows.Select(fun f->f.error).ToOrElseOff(s)
-        (sets, s._off.Expr) --| (s._err, getFuncName())
+        let sets =  s.Flows.Select(fun f->f.stopError).ToOrElseOff(s)
+        (sets, s._off.Expr) --| (s._stopErr, getFuncName())
+
 
     member s.Y3_SystemPause(): CommentedStatement  =
-        let sets =  s.Flows.Select(fun f->f.pause).ToOrElseOff(s)
-        (sets, s._off.Expr) --| (s._pause, getFuncName())
+        let sets =  s.Flows.Select(fun f->f.stopPause).ToOrElseOff(s)
+        (sets, s._off.Expr) --| (s._stopPause, getFuncName())
+
+
+    member s.Y4_SystemDrive(): CommentedStatement  =
+        let sets =  s.Flows.Select(fun f->f.dop).ToAndElseOff(s)
+        (sets, s._off.Expr) --| (s._drive, getFuncName())
+
     

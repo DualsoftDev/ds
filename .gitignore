@@ -59,3 +59,4 @@ Grammar/CsParser/bin/
 /DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/*.json
 /DsDotNet/src/UnitTest/UnitTest.Model/dualsoft.json
 /DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dualsoft.json
+/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/Utils/*.xlsx

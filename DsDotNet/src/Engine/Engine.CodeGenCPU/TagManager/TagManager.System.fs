@@ -67,8 +67,10 @@ module SystemManagerModule =
             tout.Value <- 10000us
             tout
 
-        let sysError    = dsSysBit "sysError"   true  sys   SystemTag.sysError
-        let sysPause    = dsSysBit "sysPause"   true  sys   SystemTag.sysPause
+        let sysStopError    = dsSysBit "sysStopError"   true  sys   SystemTag.sysStopError
+        let sysStopPause    = dsSysBit "sysStopPause"   true  sys   SystemTag.sysStopPause
+        let sysDrive    = dsSysBit "sysDrive"   true  sys   SystemTag.sysDrive
+        
         let sim    = dsSysBit "syssim"   true  sys   SystemTag.sim
 
         interface ITagManager with
@@ -101,14 +103,15 @@ module SystemManagerModule =
             | SystemTag.home_lamp   ->    home_lamp
 
 
-            | SystemTag.datet_yy   ->    dtimeyy
-            | SystemTag.datet_mm   ->    dtimemm
-            | SystemTag.datet_dd   ->    dtimedd
-            | SystemTag.datet_h    ->    dtimeh
-            | SystemTag.datet_m    ->    dtimem
-            | SystemTag.datet_s    ->    dtimes
-            | SystemTag.timeout    ->    tout
-            | SystemTag.sysError   ->    sysError
-            | SystemTag.sysPause   ->    sysPause
-            | SystemTag.sim        ->    sim
+            | SystemTag.datet_yy        ->    dtimeyy
+            | SystemTag.datet_mm        ->    dtimemm
+            | SystemTag.datet_dd        ->    dtimedd
+            | SystemTag.datet_h         ->    dtimeh
+            | SystemTag.datet_m         ->    dtimem
+            | SystemTag.datet_s         ->    dtimes
+            | SystemTag.timeout         ->    tout
+            | SystemTag.sysStopError    ->    sysStopError
+            | SystemTag.sysStopPause    ->    sysStopPause
+            | SystemTag.sysDrive        ->    sysDrive
+            | SystemTag.sim             ->    sim
             | _ -> failwithlog $"Error : GetSystemTag {st} type not support!!"

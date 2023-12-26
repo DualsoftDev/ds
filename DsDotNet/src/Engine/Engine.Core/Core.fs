@@ -59,10 +59,8 @@ module CoreModule =
         member val Xywh:Xywh = null with get, set
         ///CCTV 경로 및 배경 이미지 경로 복수의 경로에 배치가능
         member val Channels = HashSet<string>()
-        member val ErrorMsg:string = "" with get, set
-        member val GoingCount:int = 0 with get, set
-        member val ErrorCount:int = 0 with get, set
-        member val ErrorAvgTime:float = 0.0 with get, set
+
+
 
         /// 다른 장치를 로딩하려는 시스템에서 로딩된 시스템을 참조합니다.
         member _.ReferenceSystem = loadedSystem

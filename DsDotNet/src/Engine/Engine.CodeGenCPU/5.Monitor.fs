@@ -132,4 +132,13 @@ type VertexManager with
                         td.ApiItem.TXErrTrendOut
                     ]
                 yield (errs.ToOrElseOff(v.System) , v._off.Expr) --| (td.ApiItem.TRxErr,   getFuncName())
+
+
+            yield (tds.Select(fun d-> d.ApiItem.TRxErr).ToOrElseOff(v.System) , v._off.Expr) --| (v.ErrTRX,   getFuncName())
         ]
+
+    member v.M8_RealErrorTRXMonitor(): CommentedStatement  =
+        let real = v.Vertex :?> Real
+        let txs = real.ErrorRXs.ToOrElseOff v.System
+        let rxs = real.ErrorRXs.ToOrElseOff v.System
+        (txs <||> rxs, v._off.Expr) --| (v.ErrTRX, getFuncName())

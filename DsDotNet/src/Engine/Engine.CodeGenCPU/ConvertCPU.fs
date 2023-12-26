@@ -45,6 +45,7 @@ module ConvertCPU =
                 yield vm.M1_OriginMonitor()
                 yield vm.M5_RealErrorTXMonitor()
                 yield vm.M6_RealErrorRXMonitor()
+                yield vm.M8_RealErrorTRXMonitor() 
 
                 yield vm.R1_RealInitialStart()
                 yield! vm.R2_RealJobComplete()
@@ -91,6 +92,8 @@ module ConvertCPU =
             yield! s.Y1_SystemBitSetFlow()
             yield s.Y2_SystemError()
             yield s.Y3_SystemPause()
+            yield s.Y4_SystemDrive()
+
         ]
 
 

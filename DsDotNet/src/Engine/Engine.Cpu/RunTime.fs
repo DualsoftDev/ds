@@ -25,6 +25,7 @@ module RunTime =
         let mapRungs = getRungMap(statements)
         let cpuStorages = mapRungs.Keys
         let tagStorages = mySystem.TagManager.Storages
+        let stopBtn = (mySystem.TagManager :?> SystemManager).GetSystemTag(SystemTag.stop_btn)
         let systems = [mySystem] @ loadedSystems
         let mutable cts = new CancellationTokenSource()
         let mutable run:bool = false
@@ -71,12 +72,11 @@ module RunTime =
             logInfo "--- Running CPU.."
             systems.Iter(fun sys-> cpuModeToggle(sys, cpuMode))
             
-            
             if not run then 
                 run <- true
                 Async.StartImmediate(asyncStart, cts.Token) |> ignore
 
-        let doStop() = 
+        let doScanStop() = 
             logInfo "--- Stopping CPU.."
             cts.Cancel()
             cts <- new CancellationTokenSource() 
@@ -113,32 +113,33 @@ module RunTime =
         member x.IsRunning = run
         member x.CommentedStatements = css
         
-        
-
         member x.Dispose() =
-            doStop()
+            x.Stop() //신호 이벤트 없을때까지 처리후 종료 필요
+            x.Reset()
             disposables.Dispose()
 
         member x.Run()  = doRun()
         member x.RunInBackground()  = async { doRun() } |> Async.Start
         member x.AutoDriveSetting()  =          
+            stopBtn.BoxedValue <- false
             systems.Iter(fun sys-> preAction(sys, cpuMode, true))
 
-        member x.Stop() = doStop()
+        member x.Stop() =
+            stopBtn.BoxedValue <- true
+            scanOnce() |>ignore
 
         member x.Step() =
-            doStop()
-            scanOnce()
+            doScanStop()
+            scanOnce() |> ignore
 
         member x.StepByStatusAsync(activeSys:DsSystem) = 
-            doStop()
+            doScanStop()
             doStepByStatusAsync(activeSys)
 
         member x.Reset() =
-            doStop()
-            syncReset(systems, false)
-            scanOnce()
-
+            doScanStop()
+            syncReset(mySystem)
+            scanOnce() |> ignore
 
         member x.TagWebChangedFromWebSubject = tagWebChangedFromWebSubject
         member x.TagWebChangedFromCpuSubject = tagWebChangedFromCpuSubject

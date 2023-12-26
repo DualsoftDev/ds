@@ -43,8 +43,8 @@ module FlowManagerModule =
         let f_home_lamp      = cpv $"home_lamp_{fn}"    FlowTag.home_lamp
 
 
-        let f_error      = cpv $"error_{fn}"   FlowTag.flowError
-        let f_pause      = cpv $"pause_{fn}"   FlowTag.flowPause
+        let f_stop_error      = cpv $"error_{fn}"   FlowTag.flowStopError
+        let f_stop_pause      = cpv $"pause_{fn}"   FlowTag.flowStopPause
        
         interface ITagManager with
             member x.Target = f
@@ -81,7 +81,7 @@ module FlowManagerModule =
                 | FlowTag.test_lamp        -> f_test_lamp
                 | FlowTag.home_lamp        -> f_home_lamp
 
-                | FlowTag.flowError       -> f_error
-                | FlowTag.flowPause       -> f_pause
+                | FlowTag.flowStopError    -> f_stop_error
+                | FlowTag.flowStopPause    -> f_stop_pause
                 | _ -> failwithlog $"Error : GetFlowTag {ft} type not support!!"
             t :?> PlanVar<bool>

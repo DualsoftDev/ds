@@ -52,8 +52,8 @@ module TagKindModule =
     ///systxErrTimetag             
     | timeout                  = 0027
     ///stopType
-    | sysError                 = 0030
-    | sysPause                 = 0031
+    | sysStopError             = 0030
+    | sysStopPause             = 0031
     | sysDrive                 = 0032
 
     
@@ -94,8 +94,8 @@ module TagKindModule =
     |home_lamp                 = 10029
     
     ///stopType
-    | flowError                = 10030
-    | flowPause                = 10031
+    | flowStopError                = 10030
+    | flowStopPause                = 10031
 
     /// 11000 ~ 11999
     [<Flags>]
@@ -116,6 +116,7 @@ module TagKindModule =
     |pause                     = 11011
     |errorTx                   = 11012
     |errorRx                   = 11013
+    |errorTRx                  = 11014
     |realOriginAction          = 11016
     |relayReal                 = 11017
 
@@ -298,17 +299,22 @@ type TagKindExt =
     static member IsNeedSaveDBLog(x:TagDS) =
         match x with
         |EventSystem (_, _, kind) ->  kind.IsOneOf(  SystemTag.sysDrive  
-                                                    , SystemTag.sysError
+                                                    , SystemTag.sysStopPause
+                                                    , SystemTag.sysStopError
                                                     , SystemTag.clear_btn)
 
         |EventFlow   (_, _, kind) ->  kind.IsOneOf(  FlowTag.drive_mode
-                                                    , FlowTag.flowError)
+                                                    , FlowTag.flowStopPause
+                                                    , FlowTag.flowStopError
+                                                    )
 
         |EventVertex (_, _, kind) ->  kind.IsOneOf(
                                         //VertexTag.ready,
                                         VertexTag.going       
                                         //, VertexTag.finish       
                                         //, VertexTag.homing       
+                                        , VertexTag.pause       
+                                        , VertexTag.errorTRx       
                                         , VertexTag.errorRx       
                                         , VertexTag.errorTx)
                                           

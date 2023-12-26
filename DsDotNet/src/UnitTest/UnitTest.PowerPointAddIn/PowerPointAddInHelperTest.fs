@@ -9,7 +9,7 @@ open System.Reflection
 open System.IO
 
 module MSG_TEST = 
-    let testPath = @$"{__SOURCE_DIRECTORY__}../../../../Apps/OfficeAddIn/PowerPointAddInHelper/HelloDS.pptx"
+    let testPath = @$"{__SOURCE_DIRECTORY__}../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils/HelloDS.pptx"
     
     [<Fact>]
     let ``MSG_CHECK`` () =

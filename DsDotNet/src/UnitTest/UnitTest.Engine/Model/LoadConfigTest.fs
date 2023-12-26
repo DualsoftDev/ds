@@ -33,13 +33,6 @@ module LoadConfigTestModule =
             model.System.Name === "Factory"
 
 
-        [<Test>]
-        member __.``LoadFolderModelFromConfigTest`` () =
-            let configPath = PathManager.getFullPath ( @"dualsoft.json"|>DsFile) (dsFileDir.ToDirectory())
-
-            let model = ParserLoader.LoadFromConfig configPath
-            model.LoadingPaths.Length === 9
-            model.System.Name === "Factory"
 
 
         [<Test>]

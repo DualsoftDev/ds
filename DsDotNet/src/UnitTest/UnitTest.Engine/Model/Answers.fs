@@ -69,10 +69,16 @@ module ModelAnswers =
         F.Main = { F.Main.Ap; }
         F.Main.Am = { F.Main; }
         }
-        [layouts] = {
+        [layouts file="C:/Windows/Web/Wallpaper/Windows/img0.jpg"] = {
             A = (1309, 405, 205, 83);
+            C = (1600, 500, 300, 300);
             B."+" = (1400, 300, 300, 300);
+        }
+        [layouts file="C:/Windows/Web/Screen/img100.jpg"] = {
             B."-" = (1600, 500, 300, 300);
+        }
+        [layouts] = {
+            C = (1600, 500, 300, 300);
         }
         [finish] = {
             F.R2;

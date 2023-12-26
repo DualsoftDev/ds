@@ -36,7 +36,7 @@
 [sys] EX_Bm_Bp = {
 	[flow] F = { Bm  <||>  Bp; }
 }
-[layouts] = {
+[layouts file=""] = {
 	LS_Demo.IO.Ap = (1237,437,144,144)
 	LS_Demo.IO.Bp = (1244,653,144,144)
 	LS_Demo.IO.Am = (1381,299,144,144)

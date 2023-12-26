@@ -301,9 +301,15 @@ module internal ToDsTextModule =
                 |> Seq.flatten
                 |> getFiltered filter
             let devicesWithLayouts = 
-                system.Devices |> getFiltered (fun device -> device.Xywh <> null)
+                system.LoadedSystems |> getFiltered (fun device -> device.Xywh <> null)
             let deviceApisWithLayouts = 
                 system.Jobs |> getSelectedAndFiltered(fun job -> job.DeviceDefs) (fun dev -> dev.ApiItem.Xywh <> null)
+
+            let layoutList = devicesWithLayouts|> Seq.collect (fun f->f.Channels) 
+                             |> Seq.append (deviceApisWithLayouts |> Seq.collect(fun f-> f.ApiItem.Channels))
+                             |> Seq.distinct
+                               
+                            
             let layouts =
                 let makeList (name:string) (xywh:Xywh) =
                     let posi =
@@ -313,14 +319,20 @@ module internal ToDsTextModule =
                             $"({xywh.X}, {xywh.Y});"
                     $"{tab3}{name} = {posi}"
                 [
-                    if devicesWithLayouts.Any() || deviceApisWithLayouts.Any() then
-                        yield $"{tab2}[layouts] = {lb}"
-                        for device in devicesWithLayouts do
+                    for file in layoutList do
+                        if file = "" 
+                        then yield $"{tab2}[layouts] = {lb}"
+                        else yield $"{tab2}[layouts file={quote file}] = {lb}"
+                        
+                        for device in devicesWithLayouts.Where(fun f->f.Channels.Contains file) do
                             yield makeList device.Name device.Xywh
-                        for deviceApi in deviceApisWithLayouts do
+                        for deviceApi in deviceApisWithLayouts.Where(fun f->f.ApiItem.Channels.Contains file)  do
                             yield makeList deviceApi.QualifiedName deviceApi.ApiItem.Xywh
                         yield $"{tab2}{rb}"
                 ] |> combineLines
+
+
+
             let finishedReals =
                 [
                     for flow in system.Flows do

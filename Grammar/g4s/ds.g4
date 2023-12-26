@@ -222,13 +222,13 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ']' externalSystemName SEI
     }
  */
 propsBlock: '[' 'prop' ']' EQ LBRACE (safetyBlock|layoutBlock|finishBlock|disableBlock)* RBRACE;
-    safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;
+    safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;    
         safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
             // Real|Call = { ((Real|Call);)* }
             safetyKey: identifier23;
             safetyValues: identifier23 (SEIMCOLON identifier23)* (SEIMCOLON)?;
 
-    layoutBlock: '[' 'layouts' ']' '=' LBRACE (positionDef)* RBRACE;
+    layoutBlock: '[' 'layouts' fileSpec? ']' '=' LBRACE (positionDef)* RBRACE;
         positionDef: deviceOrApiName '=' xywh;
             deviceOrApiName: identifier12;
             xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEIMCOLON)?;

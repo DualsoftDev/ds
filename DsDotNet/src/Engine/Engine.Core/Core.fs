@@ -57,6 +57,8 @@ module CoreModule =
         member _.LoadedName with get() = loadedName and set(value) = loadedName <- value
 
         member val Xywh:Xywh = null with get, set
+        ///CCTV 경로 및 배경 이미지 경로 복수의 경로에 배치가능
+        member val Channels = HashSet<string>()
         member val ErrorMsg:string = "" with get, set
         member val GoingCount:int = 0 with get, set
         member val ErrorCount:int = 0 with get, set
@@ -273,6 +275,8 @@ module CoreModule =
         member val TXs = createQualifiedNamedHashSet<Real>()
         member val RXs = createQualifiedNamedHashSet<Real>()
         member val Xywh:Xywh = null with get, set
+        ///CCTV 경로 및 배경 이미지 경로 복수의 경로에 배치가능
+        member val Channels = HashSet<string>()
 
 
     /// API 의 reset 정보:  "+" <||> "-";

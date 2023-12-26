@@ -225,7 +225,7 @@ public class Tester
     [device file=""lib/Conveyor/CVRemove.ds""] KIT_Part;
     [device file=""lib/Conveyor/CVRemove.ds""] KIT_Frt_Part; 
     [prop] = {
-        [layouts] = {
+        [layouts channel=""asdsadas""] = {
 	        KIT_stp1.ADV = (1237,437,144,144);
 	        KIT_stp2.ADV = (1244,653,144,144);
 	        KIT_1st_usb = (1381,299,144,144);

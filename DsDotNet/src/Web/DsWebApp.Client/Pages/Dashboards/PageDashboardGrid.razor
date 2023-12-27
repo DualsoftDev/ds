@@ -12,10 +12,92 @@
 
 @attribute [Authorize(Roles = "Administrator")]
 
+<h3>System</h3>
+<DxGrid Data="_infoSystems">
+    <Columns>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Name)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.DriveSpan)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.DriveAverage)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorSpan)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorAverage)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorCount)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Efficiency)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.PauseCount)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoSystem.LeadTime)"></DxGridDataColumn>
+    </Columns>
+</DxGrid>
+
+<br/>
+<h3>Flows</h3>
+<DxGrid Data="_infoFlows">
+    <Columns>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Name)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.DriveSpan)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.DriveAverage)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorSpan)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorAverage)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorCount)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Efficiency)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.PauseCount)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoSystem.LeadTime)"></DxGridDataColumn>
+    </Columns>
+</DxGrid>
+
+<br />
+<h3>Reals</h3>
+<DxGrid Data="_infoReals">
+    <Columns>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Name)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.DriveSpan)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.DriveAverage)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorSpan)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorAverage)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorCount)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Efficiency)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.PauseCount)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoReal.GoingCount)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoReal.WaitTime)"></DxGridDataColumn>
+    </Columns>
+</DxGrid>
 
 
+<br />
+<h3>Calls</h3>
+<DxGrid Data="_infoCalls">
+    <Columns>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Name)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.DriveSpan)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.DriveAverage)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorSpan)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorAverage)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorCount)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Efficiency)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.PauseCount)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoCall.GoingCount)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoCall.GoingDeviation)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoCall.WaitTime)"></DxGridDataColumn>
+    </Columns>
+</DxGrid>
+
+
+
+<br />
+<h3>Devices</h3>
+<DxGrid Data="_infoDevices">
+    <Columns>
+        <DxGridDataColumn FieldName="@nameof(InfoDevice.Name)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoDevice.GoingCount)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoDevice.ErrorCount)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoDevice.RepairAverage)"></DxGridDataColumn>
+    </Columns>
+</DxGrid>
 @code {
     bool _loading = true;
+    InfoSystem[] _infoSystems;
+    InfoFlow[] _infoFlows;
+    InfoReal[] _infoReals;
+    InfoCall[] _infoCalls;
+    InfoDevice[] _infoDevices;
     protected HubConnectionManager _hubConnectionManager;
     protected override async Task OnInitializedAsync()
     {
@@ -28,8 +110,19 @@
 
         IDisposable registerHubConnection(HubConnection hubConnection)
         {
-            return hubConnection.On<InfoSystem>(SK.S2CNInfoChanged, (InfoSystem info) =>
+            int debugCounter = 0;
+            return hubConnection.On<string>(SK.S2CNInfoChanged, (string infoSystemStr) =>
             {
+                InfoSystem info = Newtonsoft.Json.JsonConvert.DeserializeObject<InfoSystem>(infoSystemStr);
+                info.PauseCount = ++debugCounter;
+                _infoSystems = [info];
+
+                _infoFlows = info.InfoFlows.ToArray();
+                _infoReals = _infoFlows.SelectMany(f => f.InfoReals).ToArray();
+                _infoCalls = _infoReals.SelectMany(r => r.InfoCalls).ToArray();
+                _infoDevices = _infoCalls.SelectMany(c => c.InfoDevices).ToArray();
+
+                StateHasChanged();
                 Console.WriteLine($"Info change notification received with {info.Name}.");
                 ToastService.ShowInfo($"Info change: {info.Name}.");
                 //ClientGlobal.TagChangedSubject.OnNext(info);

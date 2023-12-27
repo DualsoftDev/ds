@@ -20,7 +20,8 @@ module DBLoggerApi =
         x.ErrorAverage <- DBLogger.Average(fqdn, kindDrive)
         x.ErrorCount <- DBLogger.Count(fqdn, kindError)
         x.PauseCount <- DBLogger.Count(fqdn, kindPause)
-        x.Efficiency <- x.DriveSpan / (x.DriveSpan + x.ErrorSpan) 
+        if (x.DriveSpan + x.ErrorSpan > 0.0) then
+            x.Efficiency <- x.DriveSpan / (x.DriveSpan + x.ErrorSpan) 
 
     let getInfoDevices (xs:Device seq) : InfoDevice seq = 
         if xs.isEmpty()

@@ -21,7 +21,7 @@
 	<ItemGroup>
 		<PackageReference Include="DualSoft-Common-Utils" Version="0.1.2" />
 		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.22" />
-		<PackageReference Include="DualSoft-Web-Server" Version="0.1.12" />
+		<PackageReference Include="DualSoft-Web-Server" Version="0.1.11" />
 	</ItemGroup>
 
 	<ItemGroup>

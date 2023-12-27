@@ -167,10 +167,10 @@ app.UseAuthorization();
 app.MapRazorPages();
 app.MapControllers();
 
-app.MapHub<FieldIoHub>("/hub/io");
-app.MapHub<InfoHub>("/hub/info");
-app.MapHub<ModelHub>("/hub/model");
-app.MapHub<HmiTagHub>("/hub/hmi/tag")
+app.MapHub<FieldIoHub>(FieldIoHub.HubPath);
+app.MapHub<InfoHub>(InfoHub.HubPath);
+app.MapHub<ModelHub>(ModelHub.HubPath);
+app.MapHub<HmiTagHub>(HmiTagHub.HubPath)
     .RequireCors(_corsPolicyName);
 
 app.MapFallbackToFile("index.html");

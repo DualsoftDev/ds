@@ -40,8 +40,8 @@
     protected async Task PostTag(TagWeb tag, bool value = true)
     {
         tag.SetValue(value);
-        var anyError = await Http.PostTagAsync(tag, AuthenticationStateProvider, NavigationManager);
-        if (anyError.NonNullAny())
-            await JsDual.Alert($"Error while posting tag({tag.Name}) change: {anyError}");
+        var result = await Http.PostTagAsync(tag, AuthenticationStateProvider, NavigationManager);
+        if (result.IsError)
+            await JsDual.Alert($"Error while posting tag({tag.Name}) change: {result.Error}");
     }
 }

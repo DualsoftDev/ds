@@ -77,8 +77,8 @@ else
     {
         _tagButton.SetValue(true);
         Console.WriteLine($"Sending true({_tagButton.Name}).");
-        var anyError = await Http.PostTagAsync(_tagButton, AuthenticationStateProvider, NavigationManager);
-        if (anyError.NonNullAny())
-            await JsDual.Alert($"Error while posting tag({_tagButton.Name}) change: {anyError}");
+        var result = await Http.PostTagAsync(_tagButton, AuthenticationStateProvider, NavigationManager);
+        if (result.IsError)
+            await JsDual.Alert($"Error while posting tag({_tagButton.Name}) change: {result.Error}");
     }
 }

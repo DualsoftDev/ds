@@ -74,8 +74,13 @@ else
     async Task onClick()
     {
         _tag.SetValue(true);
-        var anyError = await Http.PostTagAsync(_tag, AuthenticationStateProvider, NavigationManager);
-        if (anyError.NonNullAny())
-            await JsDual.Alert($"Error while posting tag({_tag.Name}) change: {anyError}");
+        var result = await Http.PostTagAsync(_tag, AuthenticationStateProvider, NavigationManager);
+        result.Iter(
+            ok => { },
+            async err =>
+            {
+                await JsDual.Alert($"Error while posting tag({_tag.Name}) change: {err}");
+            }
+        );
     }
 }

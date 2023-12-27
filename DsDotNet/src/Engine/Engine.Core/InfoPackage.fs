@@ -1,7 +1,7 @@
 namespace Engine.Core
 
 open System.Collections.Generic
-
+open System
 
 [<AutoOpen>]
 module InfoPackageModule =
@@ -21,7 +21,7 @@ module InfoPackageModule =
         ///총발생한 에러 메시지
         member val ErrorMessages = ResizeArray<string>() with get, set
         ///총 효율 %
-        member val Efficiency = 0.0 with get, set
+        member val Efficiency = Nullable<double>() with get, set
         ///총멈춤 횟수
         member val PauseCount = 0 with get, set
 

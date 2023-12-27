@@ -26,7 +26,11 @@
                 </Nodes>
             </DxTreeViewNode>
 
-            <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="/dashboards/dashboard" Text="Dashboard" IconCssClass="oi grid-four-up"></DxTreeViewNode>
+            <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="/dashboards/dashboard" Text="Dashboard" IconCssClass="oi oi-grid-four-up">
+                <Nodes>
+                    <DxTreeViewNode NavigateUrl="/dashboards/grid" Text="Grid view" IconCssClass="oi oi-puzzle-piece"></DxTreeViewNode>
+                </Nodes>
+            </DxTreeViewNode>
 
             <DxTreeViewNode CssClass="@rootNodeCssClass" Click="@onClickSwaggerUI" Text="Swagger" IconCssClass="oi oi-beaker"></DxTreeViewNode>
 

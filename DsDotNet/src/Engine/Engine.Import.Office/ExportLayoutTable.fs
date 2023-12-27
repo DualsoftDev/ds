@@ -49,11 +49,11 @@ module ExportLayoutTable =
                                 c.TargetJob.DeviceDefs.Select(fun d-> rowItem (d.DeviceName,f,d.ApiItem.Xywh))
                         ))
         rows
+        |> Seq.distinctBy (fun row -> row.First())      //디바이스 이름기준으로 중복 제거
         |> Seq.iter (fun row ->
             let rowTemp = dt.NewRow()
             rowTemp.ItemArray <- (row |> Seq.cast<obj> |> Seq.toArray)
             dt.Rows.Add(rowTemp) |> ignore)
-
         dt
 
     

@@ -25,6 +25,7 @@ type RuntimeModel(zipDsPath:FilePath) =
 
     /// DsCPU: call Run, Step, Reset, Stop method on DsCPU
     member x.Cpu = dsCPU
+    member x.System = model.System
     member x.Dispose() = dsCPU.Dispose()
 
 type IoHub(zmqSettingsJson:FilePath) =

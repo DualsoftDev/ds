@@ -238,6 +238,7 @@ module CoreModule =
         member _.ApiItem = api
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
         member val ApiName = this.QualifiedName
+        member val DeviceName = loadedName
         member val Funcs  = HashSet<Func>() with get, set
 
 

@@ -91,7 +91,7 @@ module ErrID =
 //
 
 [<AutoOpen>]
-module MessgePPTError =
+module MessgePPT =
 
     type ErrorCase =
         | Shape
@@ -113,6 +113,7 @@ module MessgePPTError =
 
     ///file(Item1), page(Item2), objID(Item3), msg(Item4)
     let ErrorPPTNotify = new Event<string * int * uint * string>()
+    let LoadingPPTNotify = new Event<string>()
     let ErrorNotify = "ERROR "
 
     [<Extension>]

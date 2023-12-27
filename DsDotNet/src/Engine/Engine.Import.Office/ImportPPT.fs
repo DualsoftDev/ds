@@ -57,6 +57,8 @@ module ImportPPTModule =
 
         let rec private loadSystem (pptReop: Dictionary<DsSystem, pptDoc>, theSys: DsSystem, paras: DeviceLoadParameters) =
             pathStack.Push(paras.AbsoluteFilePath)
+            LoadingPPTNotify.Trigger(paras.AbsoluteFilePath)
+            
             currentFileName <- pathStack.Peek()
 
             let pathPPT = paras.AbsoluteFilePath

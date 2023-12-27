@@ -300,6 +300,9 @@ module internal ToDsTextModule =
                 |> Seq.map selecter
                 |> Seq.flatten
                 |> getFiltered filter
+
+
+
             let devicesWithLayouts = 
                 system.LoadedSystems |> getFiltered (fun device -> device.Xywh <> null)
             let deviceApisWithLayouts = 
@@ -307,8 +310,11 @@ module internal ToDsTextModule =
 
             let layoutList = devicesWithLayouts|> Seq.collect (fun f->f.Channels) 
                              |> Seq.append (deviceApisWithLayouts |> Seq.collect(fun f-> f.ApiItem.Channels))
+                             |> Seq.filter(fun f->f <> TextEmtpyChannel)
                              |> Seq.distinct
-                               
+
+            let noChannelDev = devicesWithLayouts.Where(fun f->f.Channels.Contains(TextEmtpyChannel))
+            let noChannelApi = deviceApisWithLayouts.Where(fun f->f.ApiItem.Channels.Contains(TextEmtpyChannel))
                             
             let layouts =
                 let makeList (name:string) (xywh:Xywh) =
@@ -319,16 +325,24 @@ module internal ToDsTextModule =
                             $"({xywh.X}, {xywh.Y});"
                     $"{tab3}{name} = {posi}"
                 [
+                    if (noChannelDev.Any() || noChannelApi.Any())
+                    then
+                        yield $"{tab2}[layouts] = {lb}"
+                        for device in noChannelDev do
+                            yield makeList device.Name device.Xywh
+                        for deviceApi in noChannelApi do
+                            yield makeList deviceApi.QualifiedName deviceApi.ApiItem.Xywh
+                        yield $"{tab2}{rb}"
+
                     for file in layoutList do
-                        if file = "" 
-                        then yield $"{tab2}[layouts] = {lb}"
-                        else yield $"{tab2}[layouts file={quote file}] = {lb}"
-                        
+                        yield $"{tab2}[layouts file={quote file}] = {lb}"
                         for device in devicesWithLayouts.Where(fun f->f.Channels.Contains file) do
                             yield makeList device.Name device.Xywh
                         for deviceApi in deviceApisWithLayouts.Where(fun f->f.ApiItem.Channels.Contains file)  do
                             yield makeList deviceApi.QualifiedName deviceApi.ApiItem.Xywh
                         yield $"{tab2}{rb}"
+
+                  
                 ] |> combineLines
 
 

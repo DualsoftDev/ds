@@ -26,6 +26,7 @@
         <Compile Include="ImportIOUtil.fs" />
         <Compile Include="ImportIOTable.fs" />
         <Compile Include="ExportExcel.fs" />
+        <Compile Include="ExportLayoutTable.fs" />
         <Compile Include="ExportIOTable.fs" />
         <Compile Include="ImportUtilForLib.fs" />
         <Compile Include="ImportUtil.fs" />

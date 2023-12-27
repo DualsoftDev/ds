@@ -10,9 +10,6 @@ open System.Text
 open System.Data
 open System.Runtime.CompilerServices
 
-open DocumentFormat.OpenXml
-open DocumentFormat.OpenXml.Packaging
-open DocumentFormat.OpenXml.Spreadsheet
 
 [<AutoOpen>]
 module ExportIOTable =
@@ -142,9 +139,8 @@ module ExportIOTable =
         table.Columns.Remove($"{IOColumn.Func}")
         table
 
-    let ToDataCSVFlows  (system: DsSystem) (flowNames:string seq) (conatinSys:bool)  =
-        
-        let dataTable = ToTable system (system.Flows.Where(fun f->flowNames.Contains(f.Name))) conatinSys
+
+    let ToDataTableToCSV  (dataTable: DataTable)   =
         let csvContent = new StringBuilder()
         // 컬럼 헤더 추가
         let columnNames =
@@ -172,6 +168,8 @@ module ExportIOTable =
         File.WriteAllText(tempFilePath, csvContent.ToString())
         tempFilePath
 
+
+
    
 
     [<Extension>]
@@ -180,4 +178,12 @@ module ExportIOTable =
         static member ExportDataTableToExcel (system: DsSystem) (filePath: string) =
             let dataTables = [|ToIOListDataSet system|]
             createSpreadsheet filePath dataTables 40.0
-          
+        [<Extension>]
+        static member ToDataCSVFlows  (system: DsSystem) (flowNames:string seq) (conatinSys:bool)  =
+            let dataTable = ToTable system (system.Flows.Where(fun f->flowNames.Contains(f.Name))) conatinSys
+            ToDataTableToCSV dataTable
+        [<Extension>]
+        static member ToDataCSVLayouts (xs: Flow seq) =
+            let dataTable = ToLayoutTable xs
+            ToDataTableToCSV dataTable
+      

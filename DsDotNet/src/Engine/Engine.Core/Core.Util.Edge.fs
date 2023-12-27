@@ -223,6 +223,12 @@ module EdgeModule =
         let flowVertices =  flow.Graph.Vertices.Cast<Vertex>()
         realVertices @ flowVertices
 
+    let getDevicesOfFlow(flow:Flow) =
+        let devNames = getVerticesOfFlow(flow).OfType<Call>()   
+                             .SelectMany(fun c->c.TargetJob.DeviceDefs.Select(fun d->d.DeviceName))
+
+        flow.System.Devices.Where(fun d -> devNames.Contains d.Name)
+
     type DsSystem with
         member x.CreateMRIEdgesTransitiveClosure() = createMRIEdgesTransitiveClosure4System x
         member x.ValidateGraph() = validateGraphOfSystem x
@@ -241,6 +247,7 @@ type EdgeExt =
     [<Extension>] static member GetVertices(edges:IEdge<'V> seq) = edges.Collect(fun e -> e.GetVertices())
     [<Extension>] static member GetVertices(x:DsSystem) =  getVerticesOfSystem x
     [<Extension>] static member GetVerticesOfFlow(x:Flow) =  getVerticesOfFlow x
+    [<Extension>] static member GetDevicesOfFlow(x:Flow) =  getDevicesOfFlow x
     [<Extension>] static member GetAliasTypeReals(xs:Vertex seq)   = ofAliasForRealVertex xs
     [<Extension>] static member GetAliasTypeRealExs(xs:Vertex seq) = ofAliasForRealExVertex xs
     [<Extension>] static member GetAliasTypeCalls(xs:Vertex seq)   = ofAliasForCallVertex xs

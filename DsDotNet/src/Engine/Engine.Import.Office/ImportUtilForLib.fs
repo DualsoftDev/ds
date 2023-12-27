@@ -31,6 +31,14 @@ module ImportUtilForLib =
           ShareableSystemRepository = sRepo
 
           LoadingType = loadingType }
+          
+    let updateCallLayout (call:Call, xyhw:Xywh) =
+        call.TargetJob.DeviceDefs
+            .OfType<TaskDev>()
+            .Iter(fun a ->
+                    a.ApiItem.Xywh <- xyhw
+                    a.ApiItem.Channels.Add(TextEmtpyChannel) |>ignore
+                    )
 
     let addLoadedLibSystemNCall
         (
@@ -93,8 +101,6 @@ module ImportUtilForLib =
         mySys.Jobs.Add(job)
 
         let call = Call.Create(job, parent)
-        call.TargetJob.DeviceDefs
-            .OfType<TaskDev>()
-            .Iter(fun a -> a.ApiItem.Xywh <- node.Position)
+        updateCallLayout(call, node.Position)
 
         call

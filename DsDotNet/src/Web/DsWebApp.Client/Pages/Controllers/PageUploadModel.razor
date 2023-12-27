@@ -108,7 +108,7 @@
 
     bool isDeletable(string url)
     {
-        if (!_modelDto.IsCpuRunning)
+        if (_modelDto == null || !_modelDto.IsCpuRunning)
             return true;
 
         var runtime = getFileName(_serverSettings.RuntimeModelDsZipPath).ToLower();   // exportDS.Zip

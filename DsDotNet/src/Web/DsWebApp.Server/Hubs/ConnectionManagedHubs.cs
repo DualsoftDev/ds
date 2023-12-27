@@ -18,3 +18,7 @@ public class HmiTagHub() : ConnectionManagedHub("HmiTagHub")
 {
     public static HashSet<ClientId> ConnectedClients => ConnectionManagedHub.ConnectedClientMap["HmiTagHub"];
 }
+public class InfoHub() : ConnectionManagedHub("InfoHub")
+{
+    public static HashSet<ClientId> ConnectedClients => ConnectionManagedHub.ConnectedClientMap["InfoHub"];
+}

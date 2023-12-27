@@ -168,6 +168,7 @@ app.MapRazorPages();
 app.MapControllers();
 
 app.MapHub<FieldIoHub>("/hub/io");
+app.MapHub<InfoHub>("/hub/info");
 app.MapHub<ModelHub>("/hub/model");
 app.MapHub<HmiTagHub>("/hub/hmi/tag")
     .RequireCors(_corsPolicyName);

@@ -1,10 +1,4 @@
-namespace Engine.Info
-
-open System.Runtime.CompilerServices
-open System.Collections.Generic
-open System
-open Dual.Common.Core.FS
-open Engine.Core
+namespace Engine.Core
 
 
 [<AutoOpen>]

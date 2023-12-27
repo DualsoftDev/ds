@@ -2,6 +2,7 @@
 
 @using Engine.Core
 @using System.Reactive.Subjects
+@using SimpleResult = Dual.Common.Core.ResultSerializable<string, string>;
 @implements IAsyncDisposable
 
 
@@ -66,19 +67,19 @@
 
     async Task postBoth()
     {
-        string anyError1=null, anyError2=null;
+        SimpleResult result1 = null, result2 = null;
         if (await AuthenticationStateProvider.SetAuthHeaderAsync(Http))
         {
-            anyError1 = await Http.PostAsJsonResultSimpleAsync("api/hmi/tag", TagAuto);
+            result1 = await Http.PostAsJsonResultSimpleAsync("api/hmi/tag", TagAuto);
 
             await AuthenticationStateProvider.SetAuthHeaderAsync(Http);
-            anyError2 = await Http.PostAsJsonResultSimpleAsync("api/hmi/tag", TagManual);
+            result2 = await Http.PostAsJsonResultSimpleAsync("api/hmi/tag", TagManual);
         }
         else
             NavigationManager.NavigateTo("/toplevel/login");
 
-        if (anyError1.NonNullAny() || anyError2.NonNullAny())
-            await JsDual.Alert($"Error posting change: {anyError1} | {anyError2}");
+        if (result1.IsError || result2.IsError)
+            await JsDual.Alert($"Error posting change: {result1.Error} | {result2.Error}");
     }
 
     async Task onAutoClick()
@@ -92,9 +93,9 @@
     {
         TagAuto.SetValue(false);
         TagManual.SetValue(true);
-        var anyError1 = await Http.PostAsJsonResultSimpleAsync("api/hmi/tag", TagAuto);
-        var anyError2 = await Http.PostAsJsonResultSimpleAsync("api/hmi/tag", TagManual);
-        if (anyError1.NonNullAny() || anyError2.NonNullAny())
-            await JsDual.Alert($"Error posting change: {anyError1} | {anyError2}");
+        var result1 = await Http.PostAsJsonResultSimpleAsync("api/hmi/tag", TagAuto);
+        var result2 = await Http.PostAsJsonResultSimpleAsync("api/hmi/tag", TagManual);
+        if (result1.IsError || result2.IsError)
+            await JsDual.Alert($"Error posting change: {result1.Error} | {result2.Error}");
     }
 }

@@ -93,6 +93,7 @@ CREATE TABLE [{Tn.User}] (
     , [username]    NVARCHAR(64) NOT NULL       CHECK(LENGTH(username) <= 64)
     , [password]    NVARCHAR(512)               CHECK(LENGTH(password) <= 512) -- NOT NULL
     , [isAdmin]     TINYINT NOT NULL DEFAULT 0
+    , [roles]       NVARCHAR(512)                -- "Administrator" role 은 여기에 포함되지 않음.
     , CONSTRAINT user_name_uniq UNIQUE (username)
 );
 

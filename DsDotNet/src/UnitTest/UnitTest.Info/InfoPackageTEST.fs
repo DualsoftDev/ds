@@ -58,4 +58,6 @@ module InfoPackageTEST =
             let info =  d.GetInfo()
             info.Name = d.Name |> Assert.True
             )     
-     
+    [<Fact>]
+    let ``Test Multi Devices GetInfo  `` () = 
+        sys.Devices.GetInfos().First().Name = sys.Devices.First().Name |> Assert.True

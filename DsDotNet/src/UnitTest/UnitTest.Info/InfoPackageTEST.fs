@@ -10,6 +10,8 @@ open Engine.Cpu
 open Engine.Core
 open Engine.CodeGenCPU
 open Engine.Info
+open System.Text.Json
+open System.Text.Json.Serialization
 
 module InfoPackageTEST = 
     let directoryPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
@@ -25,7 +27,14 @@ module InfoPackageTEST =
     
     [<Fact>]
     let ``Test System GetInfo`` () = 
+
         let info =  sys.GetInfo()
+
+        let options = JsonSerializerOptions()
+        options.NumberHandling <- JsonNumberHandling.AllowNamedFloatingPointLiterals
+        let json = JsonSerializer.Serialize(info, options)
+        let data = JsonSerializer.Deserialize(json, options)      
+
         info.Name = sys.Name |> Assert.True
 
     [<Fact>]

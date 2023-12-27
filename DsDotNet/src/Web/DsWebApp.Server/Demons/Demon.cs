@@ -14,6 +14,9 @@ using static Engine.Core.CoreModule;
 using Engine.Info;
 using Engine.Core;
 using static Engine.Core.Interface;
+using Microsoft.Extensions.Options;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace DsWebApp.Server.Demons;
 
@@ -120,7 +123,9 @@ public partial class Demon : BackgroundService
                                 {
                                     Console.WriteLine($"HmiTagHub has {InfoHub.ConnectedClients.Count} connected clients.");
                                     InfoSystem infoSystem = InfoPackageModuleExt.GetInfo(_dsSystem);
-                                    var json = System.Text.Json.JsonSerializer.Serialize(infoSystem);
+                                    var options = new JsonSerializerOptions() { NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals };
+
+                                    var json = System.Text.Json.JsonSerializer.Serialize(infoSystem, options);
                                     await _hubContextInfo.Clients.All.SendAsync(SK.S2CNInfoChanged, infoSystem);
                                 }
                                 else

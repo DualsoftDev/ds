@@ -162,8 +162,8 @@ module ImportPPTModule =
                 doc.BuildSystem(theSys)
 
             doc.UpdateActionIO(theSys)
-
-
+            doc.UpdateLayouts(theSys)
+            
             pathStack.Pop() |> ignore
             pptReop.Add(theSys, doc)
             theSys, doc

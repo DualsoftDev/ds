@@ -370,8 +370,8 @@ module PPTObjectModule =
                     LAMP
                 elif (shape.CheckBevelShapeRound()) then
                     BUTTON
-                elif (shape.CheckCondition()) then
-                    LAYOUT
+                elif (shape.CheckLayout()) then
+                    shape.ErrorName(ErrID._62, iPage)
                 else
                     shape.ErrorName(ErrID._1, iPage)
 

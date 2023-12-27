@@ -631,6 +631,16 @@ module ImportU =
             ApplyIO(sys, pageTables)
 
         [<Extension>]
+        static member UpdateLayouts(doc: pptDoc, sys: DsSystem) =
+            let layouts = doc.GetLayouts()
+            layouts.Iter(fun (path, dev, rect)->
+                let device = sys.Devices.First(fun f-> f.Name = dev)
+                device.Xywh <- Xywh(rect.X, rect.Y, rect.Width, rect.Height)
+                device.Channels.Add(path.Trim()) |> ignore
+            )        
+
+
+        [<Extension>]
         static member GetLoadNodes(doc: pptDoc) =
             let calls = doc.Nodes.Where(fun n -> n.NodeType.IsCall && n.Alias.IsNone)
 

@@ -426,9 +426,9 @@ module PPTUtil =
 
 
 
-        //system Condition  정의 블록
+        // Layout  정의 블록
         [<Extension>]
-        static member CheckCondition(shape: Shape) =
+        static member CheckLayout(shape: Shape) =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
@@ -574,7 +574,7 @@ module PPTUtil =
              || shape.CheckFoldedCornerRound() //COPY_DEV
              || shape.CheckFoldedCornerPlate() //OPEN_EXSYS_LINK
              || shape.CheckHomePlate() //interface
-             || shape.CheckCondition())
+             || shape.CheckLayout())
 
         [<Extension>]
         static member Shapes(page: int, commonSlideData: CommonSlideData) =
@@ -655,3 +655,21 @@ module PPTUtil =
                     pageIndex + 1, dt)
 
             tablesWithPageNumbers
+
+        [<Extension>]
+        static member GetLayouts(doc: PresentationDocument) =
+            let getShapes (slidePart:SlidePart) = slidePart.Slide.CommonSlideData.ShapeTree.Descendants<Shape>()
+            let layouts =
+                Office.SlidesSkipHide(doc)
+                |> Seq.filter (fun (slidePart ,_) -> getShapes(slidePart).Where(fun s->s.CheckLayout()).Any())
+                |> Seq.collect (fun (slidePart ,pageIndex) ->
+                    let shapes = getShapes(slidePart)
+                    let paths = shapes.Where(fun f->f.ShapeName().StartsWith("TextBox") && f.InnerText.StartsWith("[Path]"))
+                    if paths.Any()
+                    then
+                        shapes.Where(fun s-> s.CheckLayout())        
+                              .Select(fun s-> paths.First().InnerText.Split(']').Last(), s.InnerText, s.GetPosition(doc.SlideSize()))
+                    else
+                        Office.ErrorPPT(ErrorCase.Page, ErrID._63, "Layouts page Error", pageIndex, 0u)
+                  )
+            layouts

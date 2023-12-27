@@ -7,6 +7,7 @@ using Engine.Runtime;
 using IO.Core;
 
 using static Engine.Core.TagWebModule;
+using static Engine.Core.InfoPackageModule;
 
 using SK = DsWebApp.Shared.SK;
 
@@ -16,14 +17,21 @@ public partial class Demon : BackgroundService
 {
     ServerGlobal _serverGlobal;
     IHubContext<FieldIoHub> _hubContextFieldIo;
+    IHubContext<InfoHub> _hubContextInfo;
     IHubContext<HmiTagHub> _hubContextHmiTag;
     ILog _logger => _serverGlobal.Logger;
 
-    public Demon(ServerGlobal serverGlobal, IHubContext<ModelHub> hubContextModel, IHubContext<FieldIoHub> hubContextFieldIo, IHubContext<HmiTagHub> hubContextHmiTag)
+    public Demon(
+        ServerGlobal serverGlobal
+        , IHubContext<ModelHub> hubContextModel
+        , IHubContext<FieldIoHub> hubContextFieldIo
+        , IHubContext<InfoHub> hubContextInfo
+        , IHubContext<HmiTagHub> hubContextHmiTag)
     {
         _serverGlobal = serverGlobal;
         _hubContextFieldIo = hubContextFieldIo;
         _hubContextHmiTag = hubContextHmiTag;
+        _hubContextInfo = hubContextInfo;
 
         IDisposable innerSubscriptionFromWeb = null;
         IDisposable innerSubscriptionFromCpu = null;
@@ -90,6 +98,19 @@ public partial class Demon : BackgroundService
                     {
                         if (n % 60 == 0)
                             _logger.Debug($"{n / 60}: Background Service is working..");
+
+                        if (n % 3 == 0)
+                            Task.Run(async () =>
+                            {
+                                if (InfoHub.ConnectedClients.Any())
+                                {
+                                    Console.WriteLine($"HmiTagHub has {InfoHub.ConnectedClients.Count} connected clients.");
+                                    InfoSystem infoSystem = new("aaa");
+                                    await _hubContextInfo.Clients.All.SendAsync(SK.S2CNInfoChanged, infoSystem);
+                                }
+                                else
+                                    _logger.Debug("No InfoHub clients connected");
+                            }).FireAndForget();
 
                         //if (n % 2 == 0)
                         //    Task.Run(async () =>

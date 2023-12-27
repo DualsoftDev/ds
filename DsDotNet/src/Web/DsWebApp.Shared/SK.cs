@@ -24,4 +24,10 @@ public class SK
     /// </summary>
     public const string S2CNTagWebChanged = "S2CNotifyTagWebChanged";
 
+
+    /// <summary>
+    /// Server 2 Client Notify Info Changed
+    /// </summary>
+    public const string S2CNInfoChanged = "S2CNotifyInfoChanged";
+
 }

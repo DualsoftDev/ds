@@ -59,6 +59,7 @@
         <Compile Include="Model.fs" />
         <Compile Include="ModelLoader.fs" />
         <Compile Include="AssemblyInfo.fs" />
+        <Compile Include="InfoPackage.fs" />
         <Content Include="ValidSyntax.txt" />
         <Content Include="ProgramCodeSyntax.txt" />
         <!--<Compile Include="Program.fs" />-->

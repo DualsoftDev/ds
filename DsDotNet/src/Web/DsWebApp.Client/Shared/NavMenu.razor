@@ -2,17 +2,15 @@
     <DxTreeView AllowSelectNodes="true" CssClass="app-sidebar">
         <Nodes>
             <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="./" Text="Overview" IconCssClass="oi oi-home"></DxTreeViewNode>
-            <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="/hmis/hmi" Text="HMI" IconCssClass="oi oi-info"></DxTreeViewNode>
 
-            <DxTreeViewNode Text="제어">
+            <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="/controllers/controller" Text="제어" IconCssClass="oi oi-bolt">
                 <Nodes>
-                    <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="/controllers/controller" Text="제어반" IconCssClass="oi oi-bolt"></DxTreeViewNode>
                     <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="/controllers/uploadmodel" Text="Upload" IconCssClass="oi oi-data-transfer-upload"></DxTreeViewNode>
                 </Nodes>
             </DxTreeViewNode>
 
 
-            <DxTreeViewNode Text="HMI's'">
+            <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="/hmis/hmi" Text="HMI" IconCssClass="oi oi-info">
                 <Nodes>
                     <DxTreeViewNode NavigateUrl="/hmis/auto" Text="Auto" IconCssClass="oi oi-puzzle-piece"></DxTreeViewNode>
                 </Nodes>

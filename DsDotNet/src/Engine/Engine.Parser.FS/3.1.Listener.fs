@@ -10,6 +10,7 @@ open Antlr4.Runtime
 open Dual.Common.Core.FS
 open Engine.Parser
 open Engine.Core
+open Engine.Core.DsText
 open type Engine.Parser.dsParser
 open type DsParser
 open System.Collections.Generic
@@ -580,7 +581,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 let filePath = 
                     match fileSpecCtx with
                     |Some s ->  x.GetLayoutPath(s)
-                    |None -> ""
+                    |None -> $"{TextEmtpyChannel}"
 
                 let listPositionDefCtx = layoutCtx.Descendants<PositionDefContext>().ToList()
 

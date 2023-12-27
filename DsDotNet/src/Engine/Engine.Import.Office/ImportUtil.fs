@@ -24,6 +24,7 @@ module ImportU =
         refSystem.TryFindExportApiItem([| refSystem.Name; apiName |]).Value
 
 
+
     let private createCallVertex
         (
             mySys: DsSystem,
@@ -50,11 +51,8 @@ module ImportU =
                                 Call.Create(job, DuParentReal(parentReal.Value))
                             else
                                 Call.Create(job, DuParentFlow(parentFlow.Value))
-
-                        call.TargetJob.DeviceDefs
-                            .OfType<TaskDev>()
-                            .Iter(fun a -> a.ApiItem.Xywh <- node.Position)
-
+                        updateCallLayout (call, node.Position)
+                        
                         call
                     else
                         node.Shape.ErrorName(ErrID._52, node.PageNum)
@@ -668,7 +666,7 @@ module ImportU =
 
         [<Extension>]
         static member BuildSystem(doc: pptDoc, sys: DsSystem) =
-
+            
             doc.MakeJobs(sys)
             doc.MakeFlows(sys) |> ignore
             //EMG & Start & Auto 리스트 만들기

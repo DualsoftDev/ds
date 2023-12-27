@@ -114,7 +114,7 @@ C4 > C5;
         [layouts file="C:/Windows/Web/Screen/img100.jpg"] = {
             B."-" = (1600, 500, 300, 300);
         }
-        [layouts file=""] = {
+        [layouts] = {
             C = (1600, 500, 300, 300);
         }
         [finish] = {

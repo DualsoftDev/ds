@@ -43,54 +43,63 @@ module DBLoggerApi =
         updateInfoBase (info, x.QualifiedName, VertexTag.going|>int,  VertexTag.errorTRx|>int, VertexTag.pause|>int)
         info
 
-
-    let getInfoDevice (x:Device) : InfoDevice = 
-        let info = InfoDevice(x.Name)
-        let sys  = (x:>LoadedSystem).ContainerSystem
-        let apis = sys.Jobs.SelectMany(fun j -> j.DeviceDefs) 
-                    |> Seq.filter (fun s -> s.ApiItem.System = x.ReferenceSystem)
-                    |> Seq.map (fun d -> d.ApiItem)
+    let getInfoDevices (xs:Device seq) : InfoDevice seq = 
+        if xs.isEmpty()
+        then Enumerable.Empty<InfoDevice>()
+        else 
+            let sys  = (xs.First():>LoadedSystem).ContainerSystem
+            let jobs = sys.Jobs.SelectMany(fun j -> j.DeviceDefs) 
+            xs.Select(fun x->
+                let info = InfoDevice(x.Name)
+                let apis = jobs
+                            |> Seq.filter (fun s -> s.ApiItem.System = x.ReferenceSystem)
+                            |> Seq.map (fun d -> d.ApiItem)
         
        
-        apis |> Seq.iter (fun api ->
-            let rxErrOpen = DBLogger.GetLastValue(api.QualifiedName, int ApiItemTag.rxErrOpen)
-            let rxErrShort = DBLogger.GetLastValue(api.QualifiedName, int ApiItemTag.rxErrShort)
-            let txErrTimeOver = DBLogger.GetLastValue(api.QualifiedName, int ApiItemTag.txErrTimeOver)
-            let txErrTrendOut = DBLogger.GetLastValue(api.QualifiedName, int ApiItemTag.txErrTrendOut)
+                apis |> Seq.iter (fun api ->
+                    let rxErrOpen = DBLogger.GetLastValue(api.QualifiedName, int ApiItemTag.rxErrOpen)
+                    let rxErrShort = DBLogger.GetLastValue(api.QualifiedName, int ApiItemTag.rxErrShort)
+                    let txErrTimeOver = DBLogger.GetLastValue(api.QualifiedName, int ApiItemTag.txErrTimeOver)
+                    let txErrTrendOut = DBLogger.GetLastValue(api.QualifiedName, int ApiItemTag.txErrTrendOut)
         
-            let err1 = if rxErrOpen.HasValue && rxErrOpen.Value         then $"{api.Name} 동작편차 이상" else ""
-            let err2 = if rxErrShort.HasValue && rxErrShort.Value       then $"{api.Name} 동작시간 이상" else ""
-            let err3 = if txErrTimeOver.HasValue && txErrTimeOver.Value then $"{api.Name} 센서감지 이상" else ""
-            let err4 = if txErrTrendOut.HasValue && txErrTrendOut.Value then $"{api.Name} 센서오프 이상" else ""
-            let errs =[err1;err2;err3;err4]|> Seq.where(fun f->f <> "")
+                    let err1 = if rxErrOpen.HasValue && rxErrOpen.Value         then $"{api.Name} 동작편차 이상" else ""
+                    let err2 = if rxErrShort.HasValue && rxErrShort.Value       then $"{api.Name} 동작시간 이상" else ""
+                    let err3 = if txErrTimeOver.HasValue && txErrTimeOver.Value then $"{api.Name} 센서감지 이상" else ""
+                    let err4 = if txErrTrendOut.HasValue && txErrTrendOut.Value then $"{api.Name} 센서오프 이상" else ""
+                    let errs =[err1;err2;err3;err4]|> Seq.where(fun f->f <> "")
 
-            info.ErrorMessages.AddRange errs
+                    info.ErrorMessages.AddRange errs
+                    )
+
+                let errInfos =
+                    apis
+                    |> Seq.map (fun s ->
+                        let count = DBLogger.Count(s.QualifiedName, int ApiItemTag.trxErr)
+                        let duration = DBLogger.Average(s.QualifiedName, int ApiItemTag.trxErr)
+                        (count, duration))
+                    |> Seq.toArray
+
+                    //해당 디바이스가 전체 시스템에서 사용된 횟수를 구한다
+                let fqdns = sys.Flows.SelectMany(fun f -> f.GetVerticesOfFlow().OfType<Call>()) 
+                                    |> Seq.filter (fun w -> w.TargetJob.DeviceDefs |> Seq.exists (fun c -> c.ApiItem.System = x.ReferenceSystem))
+                                    |> Seq.map (fun call -> call.QualifiedName)
+
+                info.GoingCount <-  DBLogger.Count(fqdns, [| int VertexTag.going |])
+                info.ErrorCount <- errInfos |> Seq.sumBy (fun s -> fst s)
+                info.RepairAverage <- (errInfos |> Seq.sumBy (fun s -> (fst s|>float) * snd s)) / Convert.ToDouble(info.ErrorCount)
+                info
             )
+            
 
-        let errInfos =
-            apis
-            |> Seq.map (fun s ->
-                let count = DBLogger.Count(s.QualifiedName, int ApiItemTag.trxErr)
-                let duration = DBLogger.Average(s.QualifiedName, int ApiItemTag.trxErr)
-                (count, duration))
-            |> Seq.toArray
-
-            //해당 디바이스가 전체 시스템에서 사용된 횟수를 구한다
-        let fqdns = sys.Flows.SelectMany(fun f -> f.GetVerticesOfFlow().OfType<Call>()) 
-                            |> Seq.filter (fun w -> w.TargetJob.DeviceDefs |> Seq.exists (fun c -> c.ApiItem.System = x.ReferenceSystem))
-                            |> Seq.map (fun call -> call.QualifiedName)
-
-        info.GoingCount <-  DBLogger.Count(fqdns, [| int VertexTag.going |])
-        info.ErrorCount <- errInfos |> Seq.sumBy (fun s -> fst s)
-        info.RepairAverage <- (errInfos |> Seq.sumBy (fun s -> (fst s|>float) * snd s)) / Convert.ToDouble(info.ErrorCount)
-        info
+    let getInfoDevice (x:Device) : InfoDevice =  getInfoDevices([x]) |> Seq.head
 
 
 [<Extension>]
 type InfoPackageModuleExt = 
-    [<Extension>] static member GetInfo (x:DsSystem)  : InfoSystem = getInfoSystem x    
-    [<Extension>] static member GetInfo (x:Flow)  : InfoFlow = getInfoFlow x    
-    [<Extension>] static member GetInfo (x:Real)  : InfoReal = getInfoReal x    
-    [<Extension>] static member GetInfo (x:Call)  : InfoCall = getInfoCall x    
+    [<Extension>] static member GetInfo (x:DsSystem): InfoSystem = getInfoSystem x    
+    [<Extension>] static member GetInfo (x:Flow)    : InfoFlow = getInfoFlow x    
+    [<Extension>] static member GetInfo (x:Real)    : InfoReal = getInfoReal x    
+    [<Extension>] static member GetInfo (x:Call)    : InfoCall = getInfoCall x    
     [<Extension>] static member GetInfo (x:Device)  : InfoDevice = getInfoDevice x    
+    [<Extension>] static member GetInfos (xs:Device seq)  : InfoDevice seq = getInfoDevices xs    
 

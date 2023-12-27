@@ -22,27 +22,6 @@ module DBLoggerApi =
         x.PauseCount <- DBLogger.Count(fqdn, kindPause)
         x.Efficiency <- x.DriveSpan / (x.DriveSpan + x.ErrorSpan) 
 
-
-    let getInfoSystem (x:DsSystem) : InfoSystem = 
-        let info = InfoSystem(x.Name)
-        updateInfoBase (info, x.QualifiedName, SystemTag.sysDrive|>int,  SystemTag.sysStopError|>int, SystemTag.sysStopPause|>int)
-        info
-
-    let getInfoFlow (x:Flow) : InfoFlow = 
-        let info = InfoFlow(x.Name)
-        updateInfoBase (info, x.QualifiedName, FlowTag.drive_mode|>int,  FlowTag.flowStopError|>int, FlowTag.flowStopPause|>int)
-        info
-
-    let getInfoReal (x:Real) : InfoReal = 
-        let info = InfoReal(x.Name)
-        updateInfoBase (info, x.QualifiedName, VertexTag.going|>int,  VertexTag.errorTRx|>int, VertexTag.pause|>int)
-        info
-
-    let getInfoCall (x:Call) : InfoCall = 
-        let info = InfoCall(x.Name)
-        updateInfoBase (info, x.QualifiedName, VertexTag.going|>int,  VertexTag.errorTRx|>int, VertexTag.pause|>int)
-        info
-
     let getInfoDevices (xs:Device seq) : InfoDevice seq = 
         if xs.isEmpty()
         then Enumerable.Empty<InfoDevice>()
@@ -79,8 +58,8 @@ module DBLoggerApi =
                         (count, duration))
                     |> Seq.toArray
 
-                    //해당 디바이스가 전체 시스템에서 사용된 횟수를 구한다
-                let fqdns = sys.Flows.SelectMany(fun f -> f.GetVerticesOfFlow().OfType<Call>()) 
+                    //해당 디바이스가 전체 시스템에서 going된 횟수를 구한다
+                let fqdns = sys.Flows.SelectMany(fun f -> f.GetVerticesOfFlow().OfType<Call>())
                                     |> Seq.filter (fun w -> w.TargetJob.DeviceDefs |> Seq.exists (fun c -> c.ApiItem.System = x.ReferenceSystem))
                                     |> Seq.map (fun call -> call.QualifiedName)
 
@@ -89,17 +68,42 @@ module DBLoggerApi =
                 info.RepairAverage <- (errInfos |> Seq.sumBy (fun s -> (fst s|>float) * snd s)) / Convert.ToDouble(info.ErrorCount)
                 info
             )
-            
 
     let getInfoDevice (x:Device) : InfoDevice =  getInfoDevices([x]) |> Seq.head
+    
+    let getInfoCall (x:Call) : InfoCall = 
+        let info = InfoCall(x.Name)
+        let loadedDevices = x.Parent.GetSystem().Devices
+        updateInfoBase (info, x.QualifiedName, VertexTag.going|>int,  VertexTag.errorTRx|>int, VertexTag.pause|>int)
+        let infoDevices = x.TargetJob.DeviceDefs.Select(fun d->loadedDevices.First(fun f->f.Name = d.DeviceName))
+        info.InfoDevices.AddRange(getInfoDevices(infoDevices)) |>ignore
+        info
+
+    let getInfoReal (x:Real) : InfoReal = 
+        let info = InfoReal(x.Name)
+        updateInfoBase (info, x.QualifiedName, VertexTag.going|>int,  VertexTag.errorTRx|>int, VertexTag.pause|>int)
+        let infoCalls = x.Graph.Vertices.OfType<Call>().Select(getInfoCall)
+        info.InfoCalls.AddRange(infoCalls) |>ignore
+        info
+
+    let getInfoFlow (x:Flow) : InfoFlow = 
+        let info = InfoFlow(x.Name)
+        updateInfoBase (info, x.QualifiedName, FlowTag.drive_mode|>int,  FlowTag.flowStopError|>int, FlowTag.flowStopPause|>int)
+        let infoReals = x.GetVerticesOfFlow().OfType<Real>().Select(getInfoReal)
+        info.InfoReals.AddRange(infoReals) |>ignore
+        info
+
+    let getInfoSystem (x:DsSystem) : InfoSystem = 
+        let infoSys = InfoSystem(x.Name)
+        updateInfoBase (infoSys, x.QualifiedName, SystemTag.sysDrive|>int,  SystemTag.sysStopError|>int, SystemTag.sysStopPause|>int)
+        let infoFlows = x.Flows.Select(getInfoFlow)
+        infoSys.InfoFlows.AddRange(infoFlows) |>ignore
+        infoSys
+
 
 
 [<Extension>]
 type InfoPackageModuleExt = 
     [<Extension>] static member GetInfo (x:DsSystem): InfoSystem = getInfoSystem x    
-    [<Extension>] static member GetInfo (x:Flow)    : InfoFlow = getInfoFlow x    
-    [<Extension>] static member GetInfo (x:Real)    : InfoReal = getInfoReal x    
-    [<Extension>] static member GetInfo (x:Call)    : InfoCall = getInfoCall x    
-    [<Extension>] static member GetInfo (x:Device)  : InfoDevice = getInfoDevice x    
     [<Extension>] static member GetInfos (xs:Device seq)  : InfoDevice seq = getInfoDevices xs    
 

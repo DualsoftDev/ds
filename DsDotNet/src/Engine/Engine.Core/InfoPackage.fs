@@ -1,5 +1,7 @@
 namespace Engine.Core
 
+open System.Collections.Generic
+
 
 [<AutoOpen>]
 module InfoPackageModule =
@@ -23,24 +25,27 @@ module InfoPackageModule =
         ///총멈춤 횟수
         member val PauseCount = 0 with get, set
 
-    type InfoSystem(name) = 
+    and InfoSystem(name) = 
         inherit InfoBase(name)
         ///제품 1개 시스템 처리시간 추후 계산 (알고리즘 필요)
         member val LeadTime = 0.0  with get, set
+        member val InfoFlows = HashSet<InfoFlow>()  with get, set
     
-    type InfoFlow(name) = 
+    and InfoFlow(name) = 
         inherit InfoBase(name)
         ///제품 1개 플로우 처리시간 추후 계산 (알고리즘 필요)
         member val LeadTime = 0.0  with get, set
+        member val InfoReals = HashSet<InfoReal>()  with get, set
         
-    type InfoReal(name) = 
+    and InfoReal(name) = 
         inherit InfoBase(name)
         ///동작 횟수
         member val GoingCount = 0 with get, set
         ///대기 시간
         member val WaitTime = 0.0  with get, set
+        member val InfoCalls = HashSet<InfoCall>()  with get, set
 
-    type InfoCall(name) = 
+    and InfoCall(name) = 
         inherit InfoBase(name)
         ///동작 횟수
         member val GoingCount = 0 with get, set
@@ -48,8 +53,9 @@ module InfoPackageModule =
         member val GoingDeviation = 0.0 with get, set
         ///대기 시간
         member val WaitTime = 0.0  with get, set
+        member val InfoDevices = HashSet<InfoDevice>()  with get, set
 
-    type InfoDevice(name) = 
+    and InfoDevice(name) = 
         member x.Name : string = name
         ///동작 횟수
         member val GoingCount = 0 with get, set

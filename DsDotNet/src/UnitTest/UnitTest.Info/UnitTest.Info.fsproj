@@ -35,8 +35,8 @@
       <ProjectReference Include="..\..\Engine\Engine.Info\Engine.Info.fsproj" />
     </ItemGroup>
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="copy $(ProjectDir)..\..\..\Apps\OfficeAddIn\PowerPointAddInHelper\Utils\DS_Library.pptx $(TargetDir)DS_Library.pptx" />
-		<Exec Command="copy $(ProjectDir)..\..\..\Apps\OfficeAddIn\PowerPointAddInHelper\Utils\HelloDS.pptx $(TargetDir)HelloDS.pptx" />
-		<Exec Command="copy $(ProjectDir)Logger.sqlite3 $(TargetDir)Logger.sqlite3" />
+		<Exec Command="copy $(ProjectDir)..\UnitTest.Model\UnitTestExample\dsInfo\DS_Library.pptx $(TargetDir)DS_Library.pptx" />
+		<Exec Command="copy $(ProjectDir)..\UnitTest.Model\UnitTestExample\dsInfo\HelloDS.pptx $(TargetDir)HelloDS.pptx" />
+		<Exec Command="copy $(ProjectDir)..\UnitTest.Model\UnitTestExample\dsInfo\Logger.sqlite3 $(TargetDir)Logger.sqlite3" />
 	</Target>
 </Project>

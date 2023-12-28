@@ -9,7 +9,6 @@ open Dual.Common.Core.FS
 
 
 type DsSystem with
-    //머리가슴배
-    member s.E1_AlwaysOnOff(): CommentedStatement =
 
+    member s.E1_AlwaysOnOff(): CommentedStatement =
         (!!s._off.Expr, s._off.Expr) --| (s._on, getFuncName())

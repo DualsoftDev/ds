@@ -93,6 +93,7 @@ module CoreModule =
         member _.LoadedSystems = loadedSystems |> seq
         member _.Devices = loadedSystems.OfType<Device>() |> Seq.toArray 
         member _.ExternalSystems = loadedSystems.OfType<ExternalSystem>() |> Seq.toArray
+        member _.LayoutChannels = loadedSystems |> Seq.collect(fun s->s.Channels) |> distinct
         member _.ApiUsages = apiUsages |> seq
         member val Jobs = ResizeArray<Job>()
         member val Flows = createNamedHashSet<Flow>()

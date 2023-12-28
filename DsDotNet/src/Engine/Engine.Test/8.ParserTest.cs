@@ -156,16 +156,16 @@ namespace Engine
         [m] = {
             ManualBTN(_, _) = { F1;F5; }
         }
-        [e] = {
-            EMGBTN3(_, _) = { F3 }
-            EMGBTN(_, _) = { F1;F2;F4;F5; }
+        [d] = {
+            StartBTN_FF(_, _) = { F2; }
+            StartBTN1(_, _) = { F1; }
         }
         [s] = {
             StopBTN(_, _) = { F1;F2;F5; }
         }
-        [d] = {
-            StartBTN_FF(_, _) = { F2; }
-            StartBTN1(_, _) = { F1; }
+        [e] = {
+            EMGBTN3(_, _) = { F3; }
+            EMGBTN(_, _) = { F1;F2;F4;F5; }
         }
         [t] = {
             StartTestBTN(_, _) = { F5; }
@@ -182,6 +182,7 @@ namespace Engine
         }
     }
 }
+//DS Language Version = [0.9.2.16]
 ";
 
         public static string Lamps = @"

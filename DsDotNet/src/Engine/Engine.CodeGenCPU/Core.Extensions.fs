@@ -248,33 +248,35 @@ module ConvertCodeCoreExt =
         //select 버튼은 없을경우 항상 _on
         member f.HwAutoSelects =  f.System.AutoHWButtons.Where(fun b->b.SettingFlows.Contains(f))
         member f.HwManuSelects =  f.System.ManualHWButtons.Where(fun b->b.SettingFlows.Contains(f))
-        member f.HwAutoExpr   = getButtonExpr(f, f.System.AutoHWButtons  )
+        member f.HwAutoExpr = getButtonExpr(f, f.System.AutoHWButtons  )
         member f.HwManuExpr = getButtonExpr(f, f.System.ManualHWButtons)
 
         //push 버튼은 없을경우 항상 _off
-        member f.BtnDriveExpr = getButtonExpr(f, f.System.DriveHWButtons    ) <||> f._sim.Expr
-        member f.BtnStopExpr  = getButtonExpr(f, f.System.StopHWButtons     )
-        member f.BtnEmgExpr   = getButtonExpr(f, f.System.EmergencyHWButtons)
-        member f.BtnTestExpr  = getButtonExpr(f, f.System.TestHWButtons     )
-        member f.BtnReadyExpr = getButtonExpr(f, f.System.ReadyHWButtons    ) <||> f._sim.Expr
-        member f.BtnClearExpr = getButtonExpr(f, f.System.ClearHWButtons    )
-        member f.BtnHomeExpr  = getButtonExpr(f, f.System.HomeHWButtons     )
+        member f.HWBtnDriveExpr = getButtonExpr(f, f.System.DriveHWButtons    ) <||> f._sim.Expr
+        member f.HWBtnStopExpr  = getButtonExpr(f, f.System.StopHWButtons     )
+        member f.HWBtnEmgExpr   = getButtonExpr(f, f.System.EmergencyHWButtons)
+        member f.HWBtnTestExpr  = getButtonExpr(f, f.System.TestHWButtons     )
+        member f.HWBtnReadyExpr = getButtonExpr(f, f.System.ReadyHWButtons    ) <||> f._sim.Expr
+        member f.HWBtnClearExpr = getButtonExpr(f, f.System.ClearHWButtons    )
+        member f.HWBtnHomeExpr  = getButtonExpr(f, f.System.HomeHWButtons     )
 
-        member f.ModeAutoHwHMIExpr   =    f.HwAutoExpr <&&> !!f.HwManuExpr <||> f._sim.Expr
-        member f.ModeManualHwHMIExpr =  !!f.HwManuExpr <&&>   f.HwAutoExpr
+        member f.ModeAutoHwHMIExpr   =  if f.HwManuSelects.any() 
+                                        then f.HwAutoExpr <&&> !!f.HwManuExpr <||> f._sim.Expr
+                                        else f.HwAutoExpr <&&> !!f._off.Expr  <||> f._sim.Expr
+        member f.ModeManualHwHMIExpr =  if f.HwManuSelects.any() 
+                                        then f.HwManuExpr <&&> !!f.HwAutoExpr 
+                                        else f.HwManuExpr <&&> !!f._off.Expr  
         member f.ModeAutoSwHMIExpr   =    f.auto_btn.Expr <&&> !!f.manual_btn.Expr
         member f.ModeManualSwHMIExpr =  !!f.auto_btn.Expr <&&>   f.manual_btn.Expr
 
         member f.AutoExpr   =  
-                if f.HwAutoSelects.any()
+                if f.HwAutoSelects.any() //hw 있으면 hw만 보는것으로
                 then f.ModeAutoHwHMIExpr
-                     <||> !!f.ModeAutoHwHMIExpr <&&> !!f.ModeManualHwHMIExpr <&&> (f.ModeAutoSwHMIExpr)
                 else f.ModeAutoSwHMIExpr
 
         member f.ManuExpr   =  
-                if f.HwManuSelects.any()
+                if f.HwManuSelects.any() //hw 있으면 hw만 보는것으로
                 then f.ModeManualHwHMIExpr
-                     <||> !!f.ModeAutoHwHMIExpr <&&> !!f.ModeManualHwHMIExpr <&&> (f.ModeManualSwHMIExpr)
                 else f.ModeManualSwHMIExpr
 
         member f.GetReadAbleTags() =

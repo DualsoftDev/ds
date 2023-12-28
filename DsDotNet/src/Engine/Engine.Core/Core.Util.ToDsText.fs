@@ -222,9 +222,10 @@ module internal ToDsTextModule =
                 yield HwSystemToDs("m", system.ManualHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("d", system.DriveHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("s", system.StopHWButtons.Cast<HwSystemDef>())
-                yield HwSystemToDs("c", system.ClearHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("e", system.EmergencyHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("t", system.TestHWButtons.Cast<HwSystemDef>())
+                yield HwSystemToDs("r", system.ReadyHWButtons.Cast<HwSystemDef>())
+                yield HwSystemToDs("c", system.ClearHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("h", system.HomeHWButtons.Cast<HwSystemDef>())
                 yield $"{tab}{rb}"
 

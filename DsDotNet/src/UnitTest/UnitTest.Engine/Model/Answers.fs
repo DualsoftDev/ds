@@ -367,15 +367,15 @@ module ModelComponentAnswers =
         [s] = {
             StopBTN(_, _) = { F1;F2;F5; }
         }
-        [c] = {
-            ClearBTN(_, _) = { F1;F2;F3;F5; }
-        }
         [e] = {
             EMGBTN3(_, _) = { F3; }
             EMGBTN(_, _) = { F1;F2;F4;F5; }
         }
         [t] = {
             StartTestBTN(_, _) = { F5; }
+        }
+        [c] = {
+            ClearBTN(_, _) = { F1;F2;F3;F5; }
         }
         [h] = {
             HomeBTN(_, _) = { F1;F2;F3;F5; }
@@ -386,6 +386,7 @@ module ModelComponentAnswers =
         }
     }
 }
+//DS Language Version = [0.9.2.16]
 """
 
     let answerTaskLinkorDevice = """

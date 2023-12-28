@@ -134,6 +134,11 @@
     protected bool _authenticated = false;
     protected override async Task OnInitializedAsync()
     {
+        _theme = await LocalStorage.GetItemAsync<Theme>("Theme");
+        await ClientGlobal.InitializeAsync(Http, LocalStorage);
+        if (ClientGlobal.ServerSettings == null)
+            Console.Error.WriteLine("Error: ServerSettings is null.");
+
         if (await AuthenticationStateProvider.SetAuthHeaderAsync(Http))
         {
             ResultSerializable<bool, ErrorMessage> result = await Http.GetResultSimpleAsync<bool>("api/auth/check");
@@ -142,7 +147,6 @@
                 ok => _authenticated = ok,
                 err => { });
         }
-        _theme = await LocalStorage.GetItemAsync<Theme>("Theme");
     }
     protected LoginRequest _loginRequest = new();
     protected async Task authenticate()

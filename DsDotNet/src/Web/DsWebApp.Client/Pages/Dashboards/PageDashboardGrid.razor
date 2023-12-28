@@ -13,9 +13,9 @@
 @attribute [Authorize(Roles = "Administrator")]
 
 <h3>System</h3>
-<DxGrid Data="_infoSystems">
+<DsGrid Data="_infoSystems">
     <Columns>
-        <DxGridDataColumn FieldName="@nameof(InfoBase.Name)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Fqdn)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoBase.DriveSpan)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoBase.DriveAverage)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorSpan)"></DxGridDataColumn>
@@ -25,13 +25,13 @@
         <DxGridDataColumn FieldName="@nameof(InfoBase.PauseCount)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoSystem.LeadTime)"></DxGridDataColumn>
     </Columns>
-</DxGrid>
+</DsGrid>
 
 <br/>
 <h3>Flows</h3>
-<DxGrid Data="_infoFlows">
+<DsGrid Data="_infoFlows">
     <Columns>
-        <DxGridDataColumn FieldName="@nameof(InfoBase.Name)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Fqdn)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoBase.DriveSpan)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoBase.DriveAverage)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorSpan)"></DxGridDataColumn>
@@ -41,13 +41,13 @@
         <DxGridDataColumn FieldName="@nameof(InfoBase.PauseCount)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoSystem.LeadTime)"></DxGridDataColumn>
     </Columns>
-</DxGrid>
+</DsGrid>
 
 <br />
 <h3>Reals</h3>
-<DxGrid Data="_infoReals">
+<DsGrid Data="_infoReals">
     <Columns>
-        <DxGridDataColumn FieldName="@nameof(InfoBase.Name)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Fqdn)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoBase.DriveSpan)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoBase.DriveAverage)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorSpan)"></DxGridDataColumn>
@@ -58,14 +58,14 @@
         <DxGridDataColumn FieldName="@nameof(InfoReal.GoingCount)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoReal.WaitTime)"></DxGridDataColumn>
     </Columns>
-</DxGrid>
+</DsGrid>
 
 
 <br />
 <h3>Calls</h3>
-<DxGrid Data="_infoCalls">
+<DsGrid Data="_infoCalls">
     <Columns>
-        <DxGridDataColumn FieldName="@nameof(InfoBase.Name)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Fqdn)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoBase.DriveSpan)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoBase.DriveAverage)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorSpan)"></DxGridDataColumn>
@@ -77,20 +77,20 @@
         <DxGridDataColumn FieldName="@nameof(InfoCall.GoingDeviation)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoCall.WaitTime)"></DxGridDataColumn>
     </Columns>
-</DxGrid>
+</DsGrid>
 
 
 
 <br />
 <h3>Devices</h3>
-<DxGrid Data="_infoDevices">
+<DsGrid Data="_infoDevices">
     <Columns>
-        <DxGridDataColumn FieldName="@nameof(InfoDevice.Name)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(InfoDevice.Fqdn)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoDevice.GoingCount)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoDevice.ErrorCount)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoDevice.RepairAverage)"></DxGridDataColumn>
     </Columns>
-</DxGrid>
+</DsGrid>
 @code {
     bool _loading = true;
     InfoSystem[] _infoSystems;
@@ -123,8 +123,8 @@
                 _infoDevices = _infoCalls.SelectMany(c => c.InfoDevices).ToArray();
 
                 StateHasChanged();
-                Console.WriteLine($"Info change notification received with {info.Name}.");
-                ToastService.ShowInfo($"Info change: {info.Name}.");
+                Console.WriteLine($"Info change notification received with {info.Fqdn}.");
+                ToastService.ShowInfo($"Info change: {info.Fqdn}.");
                 //ClientGlobal.TagChangedSubject.OnNext(info);
             });
         }

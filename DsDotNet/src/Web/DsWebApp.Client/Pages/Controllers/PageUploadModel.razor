@@ -80,7 +80,8 @@
     RuntimeModelDto _modelDto;
     protected override async Task OnInitializedAsync()
     {
-        _serverSettings = await ClientGlobal.GetServerSettingsAsync(Http);
+        await ClientGlobal.InitializeAsync(Http, LocalStorage);
+        _serverSettings = ClientGlobal.ServerSettings;
         var result = await ClientGlobal.GetModelDtoAsync(Http);
         result.Iter(
             ok => _modelDto = ok,

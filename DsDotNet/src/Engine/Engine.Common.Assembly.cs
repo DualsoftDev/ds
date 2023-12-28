@@ -11,4 +11,4 @@ using System.Reflection;
 [assembly: AssemblyCopyright("Copyright © Dual INC. 2016")]
 [assembly: AssemblyTitle("Dualsoft Engine packages")]
 [assembly: AssemblyProduct("DS Engine")]
-[assembly: AssemblyVersion("0.9.2.18")]
+[assembly: AssemblyVersion("0.9.2.19")]

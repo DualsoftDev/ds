@@ -634,9 +634,12 @@ module ImportU =
         static member UpdateLayouts(doc: pptDoc, sys: DsSystem) =
             let layouts = doc.GetLayouts()
             layouts.Iter(fun (path, dev, rect)->
-                let device = sys.Devices.First(fun f-> f.Name = dev)
-                device.Xywh <- Xywh(rect.X, rect.Y, rect.Width, rect.Height)
-                device.Channels.Add(path.Trim()) |> ignore
+                let device = sys.Devices.FirstOrDefault(fun f-> f.Name = dev)
+                if(device.IsNonNull()) 
+                then device.Xywh <- Xywh(rect.X, rect.Y, rect.Width, rect.Height)
+                     device.Channels.Add(path.Trim()) |> ignore
+                else Office.ErrorPPT(ErrorCase.Name, ErrID._61, $"layout {dev}", 0, 0u)
+
             )        
 
 

@@ -27,14 +27,15 @@ XckU4UJCOYh5CA==</OnlineUploadData>
             pouName
 
     /// Task 부분 Xml string 반환: <Task Version=..>taskNameName
-    let createXmlStringTask taskName kind priority index =
+    let createXmlStringTask taskName kind priority index device=
         sprintf
             """
             <Task Version="257" Type="0" Attribute="2" Kind="%d" Priority="%d" TaskIndex="%d"
-                Device="" DeviceType="0" WordValue="0" WordCondition="0" BitCondition="0">%s</Task>"""
+                Device="%d" DeviceType="0" WordValue="0" WordCondition="0" BitCondition="0">%s</Task>"""
             kind
             priority
             index
+            device
             taskName
 
 
@@ -327,8 +328,8 @@ module XgiExportModule =
                     let index = if i <= 1 then 0 else i - 1
                     let kind = if i = 0 then 0 else 2
                     let priority = kind
-
-                    createXmlStringTask pou.TaskName kind priority index
+                    let device = if kind =0 then 0 else 10  //정주기 10msec 디바이스항목으로 저장
+                    createXmlStringTask pou.TaskName kind priority index device
                     |> XmlNode.ofString
                     |> xnTasks.AdoptChild
                     |> ignore

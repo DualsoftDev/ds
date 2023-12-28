@@ -94,6 +94,9 @@ module ConvertCPU =
             yield s.Y3_SystemPause()
             yield s.Y4_SystemDrive()
             yield s.E1_AlwaysOnOff()
+
+            if RuntimeDS.Package = RuntimePackage.LightPLC then
+                yield! s.E2_LightPLCOnly()
         ]
 
 

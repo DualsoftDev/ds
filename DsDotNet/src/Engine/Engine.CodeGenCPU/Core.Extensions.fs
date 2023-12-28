@@ -116,6 +116,13 @@ module ConvertCodeCoreExt =
         member x.S = x |> getSM
         member x.Storages = x.TagManager.Storages
 
+        member s._homeHW  =  
+                    let homes = s.HomeHWButtons.Where(fun s-> s.InTag.IsNonNull())
+                    if homes.any()
+                            then homes.Select(fun s->s.ActionINFunc).ToOr()
+                            else s._off.Expr    
+
+
         member private x.GenerationButtonIO()   = x.HWButtons.Iter(fun f-> createHwApiBridgeTag(f, x))   
         member private x.GenerationLampIO()     = x.HWLamps.Iter(fun f-> createHwApiBridgeTag(f, x))   
         member private x.GenerationCondition()  = x.HWSystemConditions.Iter(fun f-> createHwApiBridgeTag(f, x))   
@@ -278,6 +285,8 @@ module ConvertCodeCoreExt =
                 if f.HwManuSelects.any() //hw 있으면 hw만 보는것으로
                 then f.ModeManualHwHMIExpr
                 else f.ModeManualSwHMIExpr
+
+                    
 
         member f.GetReadAbleTags() =
             FlowTag.GetValues(typeof<FlowTag>).Cast<FlowTag>()

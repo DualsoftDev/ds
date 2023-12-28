@@ -3,6 +3,7 @@ namespace Engine.CodeGenCPU
 open System.Diagnostics
 open Engine.Core
 open System.Collections.Generic
+open System.Linq
 open System
 open Dual.Common.Core.FS
 
@@ -64,9 +65,9 @@ module TagManagerModule =
         member _.System = v.Parent.GetFlow().System
         member _.Storages = s
 
-        member _._on  = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.on)    :?> PlanVar<bool>
-        member _._off  = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.off)  :?> PlanVar<bool>
-        member _._sim  = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.sim)  :?> PlanVar<bool>
+        member _._on    = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.on)   :?> PlanVar<bool>
+        member _._off   = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.off)  :?> PlanVar<bool>
+        member _._sim   = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.sim)  :?> PlanVar<bool>
 
         ///Segment Start Tag
         member _.ST         = startTagBit

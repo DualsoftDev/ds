@@ -46,6 +46,7 @@ module RunTime =
                         tagWebChangedFromCpuSubject.OnNext(tagWeb)
                 )
             disposables.Add subscription
+            systems.Iter(fun sys-> cpuModeToggle(sys, cpuMode))
 
         let scanOnce() = 
             //나머지 수식은 Changed Event가 있는것만 수행해줌
@@ -70,8 +71,6 @@ module RunTime =
 
         let doRun() = 
             logInfo "--- Running CPU.."
-            systems.Iter(fun sys-> cpuModeToggle(sys, cpuMode))
-            
             if not run then 
                 run <- true
                 Async.StartImmediate(asyncStart, cts.Token) |> ignore
@@ -83,6 +82,7 @@ module RunTime =
             run <- false;
 
         let doStepByStatusAsync(activeSys) =
+            for s in statements do s.Do() 
             task {
                 let mutable endStepByStatus = false
                 while not(endStepByStatus) do

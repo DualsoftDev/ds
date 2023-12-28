@@ -6,6 +6,7 @@ open System
 open System.Linq
 open System.Reactive.Linq
 open System.Collections.Generic
+open Engine.CodeGenCPU
 
 [<AutoOpen>]
 module internal RunTimeUtil =
@@ -66,10 +67,8 @@ module internal RunTimeUtil =
 
     ///시뮬레이션 비트 토글
     let cpuModeToggle(sys:DsSystem, mode:RuntimePackage) =
-        sys.TagManager.Storages
-            .Where(fun w->  w.Value.TagKind = (int)SystemTag.sim)
-            .Iter(fun t -> t.Value.BoxedValue <- (mode.IsPackageSIM()))
-  
+        let simTag = (sys.TagManager :?> SystemManager).GetSystemTag(SystemTag.sim) 
+        simTag.BoxedValue <- (mode.IsPackageSIM())
    
     ///HMI Reset
     let syncReset(system:DsSystem ) =

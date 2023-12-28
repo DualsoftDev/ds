@@ -36,12 +36,12 @@ type VertexMCoin with
 
                 let rsts =
                     let action =
-                        if td.ExistIn
-                        then
+                        //if td.ExistIn
+                        //then
                             if call.UsingTon
                                 then call.V.TDON.DN.Expr   //On Delay
                                 else td.ActionINFunc
-                        else call._off.Expr
+                        //else call._off.Expr
 
                     (action <||> coin._sim.Expr)
                     <&&> td.ApiItem.PE.Expr

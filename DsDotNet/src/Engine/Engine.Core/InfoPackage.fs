@@ -6,8 +6,9 @@ open System
 [<AutoOpen>]
 module InfoPackageModule =
 
-    type InfoBase(name) = 
-        member x.Name : string = name
+    type InfoBase() = 
+        member val Name = "" with get, set
+        member val Fqdn = "" with get, set
         ///총가동 시간
         member val DriveSpan = 0.0 with get, set
         ///총가동 평균
@@ -25,28 +26,28 @@ module InfoPackageModule =
         ///총멈춤 횟수
         member val PauseCount = 0 with get, set
 
-    and InfoSystem(name) = 
-        inherit InfoBase(name)
+    and InfoSystem() = 
+        inherit InfoBase()
         ///제품 1개 시스템 처리시간 추후 계산 (알고리즘 필요)
         member val LeadTime = 0.0  with get, set
         member val InfoFlows = HashSet<InfoFlow>()  with get, set
     
-    and InfoFlow(name) = 
-        inherit InfoBase(name)
+    and InfoFlow() = 
+        inherit InfoBase()
         ///제품 1개 플로우 처리시간 추후 계산 (알고리즘 필요)
         member val LeadTime = 0.0  with get, set
         member val InfoReals = HashSet<InfoReal>()  with get, set
         
-    and InfoReal(name) = 
-        inherit InfoBase(name)
+    and InfoReal() = 
+        inherit InfoBase()
         ///동작 횟수
         member val GoingCount = 0 with get, set
         ///대기 시간
         member val WaitTime = 0.0  with get, set
         member val InfoCalls = HashSet<InfoCall>()  with get, set
 
-    and InfoCall(name) = 
-        inherit InfoBase(name)
+    and InfoCall() = 
+        inherit InfoBase()
         ///동작 횟수
         member val GoingCount = 0 with get, set
         ///동작 편차
@@ -55,8 +56,9 @@ module InfoPackageModule =
         member val WaitTime = 0.0  with get, set
         member val InfoDevices = HashSet<InfoDevice>()  with get, set
 
-    and InfoDevice(name) = 
-        member x.Name : string = name
+    and InfoDevice() = 
+        member val Name = "" with get, set
+        member val Fqdn = "" with get, set
         ///동작 횟수
         member val GoingCount = 0 with get, set
         ///고장 횟수

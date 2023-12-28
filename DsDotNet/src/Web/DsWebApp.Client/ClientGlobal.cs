@@ -1,5 +1,7 @@
 //using IoHubClient = IO.Core.Client;
 
+using Blazored.LocalStorage;
+
 using DsWebApp.Shared;
 
 using Dual.Common.Core;
@@ -21,13 +23,17 @@ public class ClientGlobal : ClientGlobalBase
     public HMIPackage HmiPackage { get; set; }
     public Subject<TagWeb> TagChangedSubject = new Subject<TagWeb>();
 
-    ServerSettings _serverSettings;
-    public async Task<ServerSettings> GetServerSettingsAsync(HttpClient http)
+    public ServerSettings ServerSettings { get; private set; }
+    public ClientSettings ClientSettings { get; private set; }
+    public async Task InitializeAsync(HttpClient http, ILocalStorageService localStorage)
     {
-        if (_serverSettings == null)
-            _serverSettings = await http.GetFromJsonAsync<ServerSettings>("api/serversettings");
+        if (ServerSettings == null)
+            ServerSettings = await http.GetFromJsonAsync<ServerSettings>("api/serversettings");
 
-        return _serverSettings;
+        if (ServerSettings == null)
+            Console.Error.WriteLine("Error: ServerSettings is null.");
+
+        ClientSettings = await ClientSettings.ReadAsync(localStorage);
     }
 
     RuntimeModelDto _modelDto;

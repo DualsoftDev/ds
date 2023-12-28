@@ -1,73 +1,137 @@
-﻿@* PageClientSettings *@
+@* PageClientSettings *@
 @page "/etc/pageclientsettings"
+@using Dual.Web.Blazor.Client.Components
+@using Dual.Web.Blazor.Client.Components.Widgets
 <h3>Settings</h3>
 
-<DxButton Text="Theme" Click="@(() => NavigationManager.NavigateTo("/demo/theme-switcher"))"></DxButton>
 
-<br/><br/><br/><br/>
-@* 아래는 샘플 *@
+<DxButton Text="테마 변경" Click="@(() => NavigationManager.NavigateTo("/demo/theme-switcher"))"></DxButton>
+<br/><br/>
+<DxButton Text="비밀번호 변경" Click="@(() => _modalDialog.Open())"></DxButton>
 
-<div class="survey-wrapper">
-    <fieldset>
-        @* <legend class="@GetLegendCssClass(Params.SizeMode)"> *@
-        <legend>Are you developing Blazor WebAssembly apps?</legend>
-        <div class="@GetGroupClass()" role="radiogroup">
-            @foreach (var option in GeneralAnswerOptions)
-            {
-                <DxRadio GroupName="general-radio-group"
-                         @bind-GroupValue="@GeneralAnswer"
-                         Value="@option"
-                         CssClass="dx-demo-radio">
-                    @option
-                </DxRadio>
-            }
-        </div>
-    </fieldset>
-    @if (AOTGroupVisible)
-    {
-        <fieldset>
-            <legend >Do you expect to enable AOT in your Blazor WebAssembly apps?</legend>
-            <div class="dx-demo-radio-group" role="radiogroup">
-                @foreach (var option in AOTAnswerOptions)
-                {
-                    <DxRadio GroupName="aot-radio-group"
-                             @bind-GroupValue="@AOTAnswer"
-                             Value="@option"
-                             CssClass="dx-demo-radio">
-                        @option
-                    </DxRadio>
-                }
+<ModalDialog @ref="@_modalDialog" Title="비밀번호 변경">
+    <div class="row">
+        <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
+            <div class="mb-3 text-center">
+                <h3>비밀번호 변경</h3>
             </div>
-        </fieldset>
-    }
-</div>
+            <div class="mb-3">
+                <label>Password 확인</label>
+                <input @bind="_oldPassword" type="password" class="form-control" placeholder="Password" />
+            </div>
+            <div class="mb-3">
+                <label>New Password</label>
+                <input @bind="_newPassword" type="password" class="form-control" placeholder="Password" />
+            </div>
+            <div class="mb-3">
+                <label>Confirm Password</label>
+                <input @bind="_passwordConfirm" type="password" class="form-control" placeholder="Password" />
+            </div>
+
+            <div class="mb-3 d-flex justify-content-center">
+                <button @onclick="change" class="btn btn-primary mx-2">Change</button>
+                <button @onclick="onCancel" class="btn btn-secondary mx-2">Cancel</button>
+            </div>
+        </div>
+    </div>
+</ModalDialog>
+
+<br/><br/>
+<CompBoxedBlock Title="테이블 보기 설정"> @* BoxForegroundColor="@(Color.Firebrick)" BoxBackgroundColor="@(Color.LightGoldenrodYellow)" TextColor="@(Color.Black)" BorderWidth="1"> *@
+    <DxCheckBox @bind-Checked="@_cs.ShowGroupPanel">Show group panel</DxCheckBox>
+    <DxCheckBox @bind-Checked="@_cs.ShowFilterRow">Show filter row</DxCheckBox>
+    <DxCheckBox @bind-Checked="@_cs.PageSizeSelectorVisible">Show page size selector</DxCheckBox>
+    <DxCheckBox @bind-Checked="@_cs.TextWrapEnabled">Enable text wrap</DxCheckBox>
+
+@* <HxDropdownButtonGroup>
+    <HxDropdownToggleButton Color="ThemeColor.Secondary">Column resize mode (@_cs.ColumnResizeMode)</HxDropdownToggleButton>
+    <HxDropdownMenu>
+        <HxDropdownItem OnClick="@(() => _cs.ColumnResizeMode = GridColumnResizeMode.Disabled )">Disabled</HxDropdownItem>
+        <HxDropdownItem OnClick="@(() => _cs.ColumnResizeMode = GridColumnResizeMode.NextColumn )">Next column</HxDropdownItem>
+        <HxDropdownItem OnClick="@(() => _cs.ColumnResizeMode = GridColumnResizeMode.ColumnsContainer )">Columns container</HxDropdownItem>
+    </HxDropdownMenu>
+</HxDropdownButtonGroup>
+ *@
+</CompBoxedBlock>
+
 
 @code {
-    string GeneralAnswer { get; set; }
-    string AOTAnswer { get; set; }
-    bool AOTGroupVisible => !string.IsNullOrEmpty(GeneralAnswer) && GeneralAnswer != GeneralAnswerOptions.Last();
-    IEnumerable<string> GeneralAnswerOptions = new[] {
-        "Yes.",
-        "No, but I plan to develop a WebAssembly app in the near future.",
-        "No."
-    };
-    IEnumerable<string> AOTAnswerOptions = new[] {
-        "Yes, I already enabled it.",
-        "Yes, I plan to enable it AOT in my WebAssembly app.",
-        "No."
-    };
-    string GetGroupClass()
+    ModalDialog _modalDialog;
+    string _oldPassword, _newPassword, _passwordConfirm;
+    ClientSettings _cs;
+
+    // User _me;
+
+    protected override async Task OnInitializedAsync()
     {
-        var result = "dx-demo-radio-group";
-        if (AOTGroupVisible)
-            result += " dx-demo-radio-group-indented";
-        return result;
+        await base.OnInitializedAsync();
+
+        _cs = ClientGlobal.ClientSettings;
+        // var userName = ClientGlobal?.UserSession?.UserName;
+        // var users = await Http.GetFromJsonAsync<User[]>(xxx$"api/dbcache/r/{DexiK.TnUser}");
+        // _me = users.FirstOrDefault(u => u.UserName == userName);
+        // Console.WriteLine($"current user : {userName}, me={_me}");
+
+        NavigationManager.LocationChanged += OnLocationChanged;
     }
-    string GetLegendCssClass(SizeMode sizeMode)
+    async void OnLocationChanged(object sender, LocationChangedEventArgs args)
     {
-        var result = "dx-demo-radio-group-label";
-        if (sizeMode != SizeMode.Medium)
-            result += sizeMode == SizeMode.Large ? " dx-demo-large" : " dx-demo-small";
-        return result;
+        await _cs.SaveAsync(LocalStorage);
     }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+
+    async Task change()
+    {
+    //     if (_me == null)
+    //     {
+    //         await JsDual.Alert($"사용자 {ClientGlobal?.UserSession?.UserName} 에 대한 정보를 서버에서 확인할 수 없습니다!");
+    //         return;
+    //     }
+    //     if (_oldPassword != _me.Password)
+    //     {
+    //         await JsDual.Alert("Incorrect password!");
+    //         return;
+    //     }
+    //     if (_newPassword != _passwordConfirm)
+    //     {
+    //         await JsDual.Alert("Mismatch two passwords!");
+    //         return;
+    //     }
+
+    //     var option = await Http.GetFromJsonAsync<OptionSerializable<string>>($"api/auth/encrypt-password/{_newPassword}");
+    //     option.Iter(
+    //         async some =>
+    //         {
+    //             _me.Password = some;
+    //             var result = await Http.PostAsJsonResultSimpleAsync($"api/db/c/{DexiK.TnUser}", _me);
+    //             result.Iter(
+    //                 ok => {
+    //                     ToastService.ShowInfo("Succeeded to change password.");
+    //                     _modalDialog.Close();
+    //                 },
+    //                 async err =>
+    //                 {
+    //                     var message = $"Failed to change password:\r\n{err}";
+    //                     await JsDual.Alert(message);
+    //                 }
+    //             );
+    //         },
+    //         async () =>
+    //         {
+    //             await JsDual.Alert("Failed to get password from server!");
+    //             return;
+    //         }
+    //     );
+    }
+
+    void onCancel()
+    {
+        _modalDialog.Close();
+    }
+
 }

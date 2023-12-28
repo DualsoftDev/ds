@@ -30,7 +30,7 @@ module DBLoggerApi =
             let sys  = (xs.First():>LoadedSystem).ContainerSystem
             let jobs = sys.Jobs.SelectMany(fun j -> j.DeviceDefs) 
             xs.Select(fun x->
-                let info = InfoDevice(x.Name)
+                let info = InfoDevice(Name=x.Name, Fqdn = x.QualifiedName)
                 let apis = jobs
                             |> Seq.filter (fun s -> s.ApiItem.System = x.ReferenceSystem)
                             |> Seq.map (fun d -> d.ApiItem)
@@ -73,7 +73,7 @@ module DBLoggerApi =
     let getInfoDevice (x:Device) : InfoDevice =  getInfoDevices([x]) |> Seq.head
     
     let getInfoCall (x:Call) : InfoCall = 
-        let info = InfoCall(x.Name)
+        let info = InfoCall(Name=x.Name, Fqdn = x.QualifiedName)
         let loadedDevices = x.Parent.GetSystem().Devices
         updateInfoBase (info, x.QualifiedName, VertexTag.going|>int,  VertexTag.errorTRx|>int, VertexTag.pause|>int)
         let infoDevices = x.TargetJob.DeviceDefs.Select(fun d->loadedDevices.First(fun f->f.Name = d.DeviceName))
@@ -81,21 +81,21 @@ module DBLoggerApi =
         info
 
     let getInfoReal (x:Real) : InfoReal = 
-        let info = InfoReal(x.Name)
+        let info = InfoReal(Name=x.Name, Fqdn = x.QualifiedName)
         updateInfoBase (info, x.QualifiedName, VertexTag.going|>int,  VertexTag.errorTRx|>int, VertexTag.pause|>int)
         let infoCalls = x.Graph.Vertices.OfType<Call>().Select(getInfoCall)
         info.InfoCalls.AddRange(infoCalls) |>ignore
         info
 
     let getInfoFlow (x:Flow) : InfoFlow = 
-        let info = InfoFlow(x.Name)
+        let info = InfoFlow(Name=x.Name, Fqdn = x.QualifiedName)
         updateInfoBase (info, x.QualifiedName, FlowTag.drive_mode|>int,  FlowTag.flowStopError|>int, FlowTag.flowStopPause|>int)
         let infoReals = x.GetVerticesOfFlow().OfType<Real>().Select(getInfoReal)
         info.InfoReals.AddRange(infoReals) |>ignore
         info
 
     let getInfoSystem (x:DsSystem) : InfoSystem = 
-        let infoSys = InfoSystem(x.Name)
+        let infoSys = InfoSystem(Name=x.Name, Fqdn = x.QualifiedName)
         updateInfoBase (infoSys, x.QualifiedName, SystemTag.sysDrive|>int,  SystemTag.sysStopError|>int, SystemTag.sysStopPause|>int)
         let infoFlows = x.Flows.Select(getInfoFlow)
         infoSys.InfoFlows.AddRange(infoFlows) |>ignore

@@ -66,7 +66,8 @@ module DBLoggerApi =
 
                 info.GoingCount <-  DBLogger.Count(fqdns, [| int VertexTag.going |])
                 info.ErrorCount <- errInfos |> Seq.sumBy (fun s -> fst s)
-                info.RepairAverage <- (errInfos |> Seq.sumBy (fun s -> (fst s|>float) * snd s)) / Convert.ToDouble(info.ErrorCount)
+                if info.ErrorCount > 0 then
+                    info.RepairAverage <- (errInfos |> Seq.sumBy (fun s -> (fst s|>float) * snd s)) / Convert.ToDouble(info.ErrorCount)
                 info
             )
 

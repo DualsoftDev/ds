@@ -117,9 +117,13 @@
             ColumnResizeMode = cs.ColumnResizeMode;
         }
 
+        _loading = false;
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
         if (Data is System.Collections.IEnumerable items)
             _count = items.Cast<object>().Count();
-
-        _loading = false;
     }
 }

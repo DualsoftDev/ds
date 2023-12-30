@@ -16,7 +16,7 @@
         <NoWarn>NU1702</NoWarn>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="DualSoft-Common-Core" Version="0.1.26" />
+        <PackageReference Include="DualSoft-Common-Core" Version="0.1.27" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.22" />
         <PackageReference Include="DualSoft-UnitTest-Common-FS" Version="0.1.4" />

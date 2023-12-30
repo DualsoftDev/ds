@@ -1,0 +1,91 @@
+.cw-100 { width: 100px; }
+.cw-150 { width: 150px; }
+.cw-200 { width: 200px; }
+.ds-bordered {
+    border: 1px solid var(--bs-primary);
+    padding: 3px;
+    border-radius: 5px;
+}
+
+.ds-filled {
+    background-color: var(--bs-primary);
+    color: white;
+    padding: 3px;
+}
+
+.ds-bordered-3 {
+    border: 3px solid var(--bs-primary);
+    padding: 3px;
+    border-radius: 5px;
+}
+.ds-bordered-red-3 {
+    border: 3px solid red;
+    padding: 3px;
+    border-radius: 5px;
+}
+
+
+
+.ds-small { font-size: 12px; }
+.ds-medium { font-size: 20px; }
+.ds-big { font-size: 32px; }
+.ds-huge { font-size: 40px; }
+
+.ds-blue { color: skyblue; }
+.ds-red { color: red; }
+.ds-yellow { color: darkgoldenrod; }
+.ds-color-primary { color: var(--bs-primary); }
+
+
+.ds-center { text-align: center;}
+.ds-right {
+    text-align: right;
+    margin-left: auto;
+}
+.ds-left { text-align: left;}
+
+.ds-padl-50 { padding-left: 50px;}
+.ds-padr-50 { padding-right: 50px;}
+.ds-pad-lr-20 { padding-left: 20px; padding-right: 20px;}
+.ds-pad-lr-30 { padding-left: 30px; padding-right: 30px;}
+.ds-pad-lr-50 { padding-left: 50px; padding-right: 50px;}
+
+.ds-padl-20 { padding-left: 20px;}
+.ds-padr-20 { padding-right: 20px;}
+.ds-padl-10 { padding-left: 10px;}
+.ds-padr-10 { padding-right: 10px;}
+
+.ds-marginl-20 { margin-left: 20px;}
+.ds-marginr-20 { margin-right: 20px;}
+.ds-margin-lr-20 { margin-left: 20px; margin-right: 20px;}
+.ds-margin-lr-30 { margin-left: 30px; margin-right: 30px;}
+.ds-margin-lr-50 { margin-left: 50px; margin-right: 50px;}
+
+
+.ds-normal-color {
+    color: var(--bs-light);
+    background-color: var(--bs-dark)
+}
+
+.ds-reversed-color {
+    color: var(--bs-dark);
+    background-color: var(--bs-light)
+}
+
+
+.ds-gridrow-highlighted-item:hover, .ds-gridrow-highlighted-item:hover > td {
+    color: var(--bs-light);
+    background-color: var(--bs-primary)
+}
+
+.ds-absolute-centered {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
+
+.ds-no-line-break {
+    white-space: nowrap;
+}

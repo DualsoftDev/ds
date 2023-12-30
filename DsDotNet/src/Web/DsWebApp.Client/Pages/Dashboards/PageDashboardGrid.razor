@@ -13,7 +13,7 @@
 @attribute [Authorize(Roles = "Administrator")]
 
 <h3>System</h3>
-<DsGrid Data="_infoSystems">
+<DxxGrid Data="_infoSystems">
     <Columns>
         <DxGridDataColumn FieldName="@nameof(InfoBase.Fqdn)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoBase.DriveSpan)"></DxGridDataColumn>
@@ -25,11 +25,11 @@
         <DxGridDataColumn FieldName="@nameof(InfoBase.PauseCount)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoSystem.LeadTime)"></DxGridDataColumn>
     </Columns>
-</DsGrid>
+</DxxGrid>
 
 <br/>
 <h3>Flows</h3>
-<DsGrid Data="_infoFlows">
+<DxxGrid Data="_infoFlows">
     <Columns>
         <DxGridDataColumn FieldName="@nameof(InfoBase.Fqdn)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoBase.DriveSpan)"></DxGridDataColumn>
@@ -41,11 +41,11 @@
         <DxGridDataColumn FieldName="@nameof(InfoBase.PauseCount)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoSystem.LeadTime)"></DxGridDataColumn>
     </Columns>
-</DsGrid>
+</DxxGrid>
 
 <br />
 <h3>Reals</h3>
-<DsGrid Data="_infoReals">
+<DxxGrid Data="_infoReals">
     <Columns>
         <DxGridDataColumn FieldName="@nameof(InfoBase.Fqdn)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoBase.DriveSpan)"></DxGridDataColumn>
@@ -58,12 +58,12 @@
         <DxGridDataColumn FieldName="@nameof(InfoReal.GoingCount)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoReal.WaitTime)"></DxGridDataColumn>
     </Columns>
-</DsGrid>
+</DxxGrid>
 
 
 <br />
 <h3>Calls</h3>
-<DsGrid Data="_infoCalls">
+<DxxGrid Data="_infoCalls">
     <Columns>
         <DxGridDataColumn FieldName="@nameof(InfoBase.Fqdn)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoBase.DriveSpan)"></DxGridDataColumn>
@@ -77,22 +77,21 @@
         <DxGridDataColumn FieldName="@nameof(InfoCall.GoingDeviation)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoCall.WaitTime)"></DxGridDataColumn>
     </Columns>
-</DsGrid>
+</DxxGrid>
 
 
 
 <br />
 <h3>Devices</h3>
-<DsGrid Data="_infoDevices">
+<DxxGrid Data="_infoDevices">
     <Columns>
         <DxGridDataColumn FieldName="@nameof(InfoDevice.Fqdn)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoDevice.GoingCount)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoDevice.ErrorCount)"></DxGridDataColumn>
         <DxGridDataColumn FieldName="@nameof(InfoDevice.RepairAverage)"></DxGridDataColumn>
     </Columns>
-</DsGrid>
+</DxxGrid>
 @code {
-    bool _loading = true;
     InfoSystem[] _infoSystems;
     InfoFlow[] _infoFlows;
     InfoReal[] _infoReals;
@@ -128,9 +127,8 @@
                 //ClientGlobal.TagChangedSubject.OnNext(info);
             });
         }
-
-        _loading = false;
     }
+
     public async ValueTask DisposeAsync()
     {
         await _hubConnectionManager.DisposeAsync();

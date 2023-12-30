@@ -14,10 +14,7 @@ namespace DsWebApp.Server.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 //[Authorize(Roles = "Administrator")]
-public class HmiController(
-        ServerGlobal global
-        , IHubContext<HmiTagHub> hubContext
-    ) : ControllerBaseWithLogger(global.Logger)
+public class HmiController(ServerGlobal global) : ControllerBaseWithLogger(global.Logger)
 {
     RuntimeModel _model => global.RuntimeModel;
 

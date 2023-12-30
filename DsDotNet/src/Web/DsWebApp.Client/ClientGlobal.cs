@@ -24,7 +24,7 @@ public class ClientGlobal : ClientGlobalBase
     public Subject<TagWeb> TagChangedSubject = new Subject<TagWeb>();
 
     public ServerSettings ServerSettings { get; private set; }
-    public ClientSettings ClientSettings { get; private set; }
+    public DsClientSettings DsClientSettings => (DsClientSettings)base.ClientSettings;
     public async Task InitializeAsync(HttpClient http, ILocalStorageService localStorage)
     {
         if (ServerSettings == null)
@@ -33,7 +33,7 @@ public class ClientGlobal : ClientGlobalBase
         if (ServerSettings == null)
             Console.Error.WriteLine("Error: ServerSettings is null.");
 
-        ClientSettings = await ClientSettings.ReadAsync(localStorage);
+        base.ClientSettings = await DsClientSettings.ReadAsync(localStorage);
     }
 
     RuntimeModelDto _modelDto;

@@ -18,6 +18,7 @@
 		<PackageReference Include="DualSoft-Web-Blazor-Client" Version="0.1.19" />
 		<PackageReference Include="DualSoft-Web-Blazor-Client-Canvas2d" Version="0.1.6" />
 		<PackageReference Include="PropertyChanged.Fody" Version="4.1.0" PrivateAssets='All'/>
+		<PackageReference Include="Radzen.Blazor" Version="4.23.4" />
 	</ItemGroup>
 	
 	<ItemGroup>

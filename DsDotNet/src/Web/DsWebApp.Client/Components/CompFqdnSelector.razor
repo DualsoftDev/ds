@@ -1,0 +1,83 @@
+@* CompFqdnSelector *@
+
+@using static Engine.Core.InfoPackageModule
+
+@if (Systems != null)
+{
+    <RadzenTree Expand=@OnExpand Collapse=@OnCollapse Change=@OnChange SingleExpand="false">        @* Style="width: 100%; height: 300px; " *@
+        @foreach (var system in Systems)
+        {
+            <RadzenTreeItem Expanded="true" Text="@(system.Name)" Value="system">
+                <ChildContent>
+                    @foreach (var flow in system.InfoFlows)
+                    {
+                        <RadzenTreeItem Expanded="true" Text="@("🏭 " + flow.Name)" Value="flow">
+                            <ChildContent>
+                                @foreach (var real in flow.InfoReals)
+                                {
+                                    <RadzenTreeItem Expanded="true" Text="@("✨ " + real.Name)" Value="real" />
+                                    @foreach (var call in real.InfoCalls)
+                                    {
+                                        <RadzenTreeItem Expanded="true" Text="@("✨ " + call.Name)" Value="call" />
+                                        @foreach (var device in call.InfoDevices)
+                                        {
+                                            <RadzenTreeItem Text="@("✨ " + device.Name)" Value="device" />
+                                        }
+                                    }
+                                }
+                            </ChildContent>
+                        </RadzenTreeItem>
+                    }
+                </ChildContent>
+                <Template>
+                    <img alt="System" src="images/kia_log_circle_red.svg" style="width: 60px;" />
+                    <b>@context.Text</b>
+                </Template>
+            </RadzenTreeItem>
+        }
+    </RadzenTree>
+}
+
+@code {
+    [Parameter] public InfoSystem[] Systems { get; set; }
+
+    [Parameter] public Action<IInfoBase> OnItemSelected { get; set; }      // obj = {InfoBase, InfoDevice}
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     await base.OnInitializedAsync();
+    //     var option = await Http.GetFromJsonAsync<OptionSerializable<LayoutInfo>>("api/dbcache/r/layoutinfo");
+    //     option.Iter(
+    //         layoutInfo => Systems = layoutInfo.ToLayoutTreeItems(),
+    //         async () => await JsDual.Alert("LayoutInfo is null"));
+    // }
+
+    void Log(string eventName, string value)
+    {
+        Console.WriteLine($"{eventName}: {value}");
+    }
+
+    void OnChange(TreeEventArgs args)
+    {
+        InfoBase info = (InfoBase)args.Value;
+        Log("Change", $"Item Text: {args.Text}, Value:{info}");
+        OnItemSelected?.Invoke(info);
+        // LayoutTreeItem treeItem = (LayoutTreeItem)args.Value;
+
+        // var name = treeItem.Name;
+        // LayoutTreeItemType type = treeItem.ItemType;
+        // var url = $"layout/{type}/{name}";
+        // NavigationManager.NavigateTo(url);
+    }
+
+    void OnExpand(TreeExpandEventArgs args)
+    {
+        Log("Expand", $"Text: {args.Text}");
+    }
+
+    void OnCollapse(TreeEventArgs args)
+    {
+        Log("Collapse", $"Text: {args.Text}");
+    }
+}
+

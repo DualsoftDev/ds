@@ -8,6 +8,11 @@
     <base href="/" />
     <link id="theme-style" href="_content/DevExpress.Blazor.Themes/blazing-dark.bs5.css" rel="stylesheet" asp-append-version="true" />
 
+    <!-- { For Radzen Blazor Components:-->
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/material-base.css">
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css">
+    <!-- } For Radzen Blazor Components:-->
+
     <link href="DsWebApp.Client.styles.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
     <link href="css/dual.common.css" rel="stylesheet" />
@@ -48,7 +53,7 @@
 <body>
     <div id="app">
         <script type="text/javascript">
-            if(/MSIE \d|Trident.*rv:|Edge\//.test(window.navigator.userAgent))
+            if (/MSIE \d|Trident.*rv:|Edge\//.test(window.navigator.userAgent))
                 window.location.href = "browserNotSupported.html";
         </script>
         <div class="splash-screen">
@@ -64,6 +69,9 @@
         <a class="dismiss">X</a>
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
+
+    <!-- For Radzen Blazor Components:-->
+    <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
 </body>
 
 </html>

@@ -5,8 +5,14 @@ open System
 
 [<AutoOpen>]
 module InfoPackageModule =
+    type IInfoBase =
+        inherit INamed
+        abstract member Fqdn : string with get, set
 
-    type InfoBase() = 
+    type InfoBase() =
+        interface IInfoBase with
+            member x.Name with get() = x.Name and set(v) = x.Name <- v
+            member x.Fqdn with get() = x.Fqdn and set(v) = x.Fqdn <- v
         member val Name = "" with get, set
         member val Fqdn = "" with get, set
         ///총가동 시간
@@ -27,6 +33,9 @@ module InfoPackageModule =
         member val PauseCount = 0 with get, set
         
     type InfoDevice() = 
+        interface IInfoBase with
+            member x.Name with get() = x.Name and set(v) = x.Name <- v
+            member x.Fqdn with get() = x.Fqdn and set(v) = x.Fqdn <- v
         member val Name = "" with get, set
         member val Fqdn = "" with get, set
         ///동작 횟수

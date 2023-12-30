@@ -1,10 +1,10 @@
 using Blazored.LocalStorage;
 using Blazored.SessionStorage;
 using Blazored.Toast;
-using DsWebApp.Client.Data;
-using DsWebApp.Shared;
 using Dual.Web.Blazor.Client.Auth;
 using Dual.Web.Blazor.Shared;
+
+using Radzen;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -31,6 +31,7 @@ services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvide
 services.AddAuthorizationCore();
 
 services.AddBlazoredToast();
+services.AddRadzenComponents();
 
 
 await builder.Build().RunAsync();

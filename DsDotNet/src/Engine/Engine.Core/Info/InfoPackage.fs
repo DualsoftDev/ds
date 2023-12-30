@@ -37,6 +37,9 @@ module InfoPackageModule =
         member val RepairAverage = Nullable<double>() with get, set
         ///총발생한 에러 메시지
         member val ErrorMessages = ResizeArray<string>() with get, set
+        static member Create(x:Device) =
+            let info = new InfoDevice(Name=x.Name, Fqdn = x.QualifiedName)
+            info
 
     type InfoCall() = 
         inherit InfoBase()
@@ -47,6 +50,15 @@ module InfoPackageModule =
         ///대기 시간
         member val WaitTime = 0.0  with get, set
         member val InfoDevices = HashSet<InfoDevice>()  with get, set
+        member val SystemName = "" with get, set
+        member val FlowName = "" with get, set
+        member val RealName = "" with get, set
+        static member Create(x:Call) =
+            let info = new InfoCall(Name=x.Name, Fqdn = x.QualifiedName)
+            info.SystemName <- x.NameComponents[0]
+            info.FlowName <- x.NameComponents[1]
+            info.RealName <- x.NameComponents[2]
+            info
 
     type InfoReal() = 
         inherit InfoBase()
@@ -55,16 +67,29 @@ module InfoPackageModule =
         ///대기 시간
         member val WaitTime = 0.0  with get, set
         member val InfoCalls = HashSet<InfoCall>()  with get, set
+        member val SystemName = "" with get, set
+        member val FlowName = "" with get, set
+        static member Create(x:Real) =
+            let info = new InfoReal(Name=x.Name, Fqdn = x.QualifiedName)
+            info.SystemName <- x.NameComponents[0]
+            info.FlowName <- x.NameComponents[1]
+            info
 
     type InfoFlow() = 
         inherit InfoBase()
         ///제품 1개 플로우 처리시간 추후 계산 (알고리즘 필요)
         member val LeadTime = 0.0  with get, set
         member val InfoReals = HashSet<InfoReal>()  with get, set
-
+        member val SystemName = "" with get, set
+        static member Create(x:Flow) =
+            let info = new InfoFlow(Name=x.Name, Fqdn = x.QualifiedName)
+            info.SystemName <- x.NameComponents[0]
+            info
     type InfoSystem() = 
         inherit InfoBase()
         ///제품 1개 시스템 처리시간 추후 계산 (알고리즘 필요)
         member val LeadTime = 0.0  with get, set
         member val InfoFlows = HashSet<InfoFlow>()  with get, set
-    
+        static member Create(x:DsSystem) =
+            let info = new InfoSystem(Name=x.Name, Fqdn = x.QualifiedName)
+            info

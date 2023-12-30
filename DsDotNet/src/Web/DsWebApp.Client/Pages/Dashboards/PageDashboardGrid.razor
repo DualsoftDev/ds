@@ -29,7 +29,7 @@
 
 <br/>
 <h3>Flows</h3>
-<DxxGrid Data="_infoFlows">
+<DxxGrid Data="_infoFlows" ClientSettings="ClientGlobal.DsClientSettings">
     <Columns>
         <DxGridDataColumn FieldName="@nameof(InfoBase.Fqdn)"/>
         <DxGridDataColumn FieldName="@nameof(InfoFlow.SystemName)"/>
@@ -47,7 +47,7 @@
 
 <br />
 <h3>Reals</h3>
-<DxxGrid Data="_infoReals">
+<DxxGrid Data="_infoReals" ClientSettings="ClientGlobal.DsClientSettings">
     <Columns>
         <DxGridDataColumn FieldName="@nameof(InfoBase.Fqdn)"/>
         <DxGridDataColumn FieldName="@nameof(InfoReal.SystemName)"/>
@@ -68,7 +68,7 @@
 
 <br />
 <h3>Calls</h3>
-<DxxGrid Data="_infoCalls">
+<DxxGrid Data="_infoCalls" ClientSettings="ClientGlobal.DsClientSettings">
     <Columns>
         <DxGridDataColumn FieldName="@nameof(InfoBase.Fqdn)"/>
         <DxGridDataColumn FieldName="@nameof(InfoCall.SystemName)"/>
@@ -92,7 +92,7 @@
 
 <br />
 <h3>Devices</h3>
-<DxxGrid Data="_infoDevices">
+<DxxGrid Data="_infoDevices" ClientSettings="ClientGlobal.DsClientSettings">
     <Columns>
         <DxGridDataColumn FieldName="@nameof(InfoDevice.Fqdn)"/>
         <DxGridDataColumn FieldName="@nameof(InfoBase.Name)"/>

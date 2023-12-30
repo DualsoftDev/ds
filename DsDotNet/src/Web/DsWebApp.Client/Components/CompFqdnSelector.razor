@@ -15,15 +15,17 @@
                             <ChildContent>
                                 @foreach (var real in flow.InfoReals)
                                 {
-                                    <RadzenTreeItem Expanded="true" Text="@("✨ " + real.Name)" Value="real" />
+                                    <RadzenTreeItem Expanded="true" Text="@("✨ " + real.Name)" Value="real">
                                     @foreach (var call in real.InfoCalls)
                                     {
-                                        <RadzenTreeItem Expanded="true" Text="@("✨ " + call.Name)" Value="call" />
+                                        <RadzenTreeItem Expanded="true" Text="@("📞" + call.Name)" Value="call">
                                         @foreach (var device in call.InfoDevices)
                                         {
-                                            <RadzenTreeItem Text="@("✨ " + device.Name)" Value="device" />
+                                            <RadzenTreeItem Text="@("🖥️ " + device.Name)" Value="device" />
                                         }
+                                        </RadzenTreeItem>
                                     }
+                                    </RadzenTreeItem>
                                 }
                             </ChildContent>
                         </RadzenTreeItem>

@@ -37,6 +37,7 @@ else
 {
     <div class="container">
         <div class="non-sticky">
+            <p>(Firefox) Tree 에서 선택이 안될 경우, F5 를 통한 refresh 후 시도 바랍니다.</p>
             <CompFqdnSelector Systems="_infoSystems" OnItemSelected="@(new Action<IInfoBase>(act => onItemSelected(act)))" />
         </div>
 
@@ -65,9 +66,7 @@ else
 
                     </RadzenDonutSeries>
                 </RadzenChart>
-
             </div>
-
         }
     </div>
 }
@@ -173,8 +172,6 @@ else
                 break;
         }
 
-
         StateHasChanged();
     }
-
 }

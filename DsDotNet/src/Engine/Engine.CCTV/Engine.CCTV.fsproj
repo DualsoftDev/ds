@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+		<OutputType>Exe</OutputType>
+		<LangVersion>8.0</LangVersion>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
+        <Compile Include="AssemblyInfo.fs" />
+        <Compile Include="DsLayoutLoader.fs" />
+        <Compile Include="OpenCVUtils.fs" />
+        <Compile Include="OxyChart.fs" />
+        <Compile Include="DsStreaming.fs" />
+        <Compile Include="Program.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+		<PackageReference Include="Emgu.CV" Version="4.8.1.5350" />
+		<PackageReference Include="Emgu.CV.Bitmap" Version="4.8.1.5350" />
+		<PackageReference Include="Emgu.CV.runtime.windows" Version="4.8.1.5350" />
+		<PackageReference Include="OxyPlot.SkiaSharp" Version="2.1.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Engine.Info\Engine.Info.fsproj" />
+      <ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
+      <ProjectReference Include="..\Engine.Parser\Engine.Parser.csproj" />
+    </ItemGroup>
+
+</Project>

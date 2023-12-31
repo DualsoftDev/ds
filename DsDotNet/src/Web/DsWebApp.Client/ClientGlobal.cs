@@ -25,6 +25,7 @@ public class ClientGlobal : ClientGlobalBase
 
     public ServerSettings ServerSettings { get; private set; }
     public DsClientSettings DsClientSettings => (DsClientSettings)base.ClientSettings;
+
     public async Task InitializeAsync(HttpClient http, ILocalStorageService localStorage)
     {
         if (ServerSettings == null)
@@ -40,12 +41,8 @@ public class ClientGlobal : ClientGlobalBase
     HubConnection _hubConnectionModel;
     public async Task<ResultSerializable<RuntimeModelDto, ErrorMessage>> GetModelDtoAsync(HttpClient http)
     {
-        await Console.Out.WriteLineAsync("[1]");
         if (_modelDto == null)
-        {
-            await Console.Out.WriteLineAsync("[2]");
             return await http.GetResultSimpleAsync<RuntimeModelDto>($"api/model");
-        }
 
         return ResultSerializable<RuntimeModelDto, ErrorMessage>.Ok(_modelDto);
     }

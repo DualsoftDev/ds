@@ -1,4 +1,4 @@
-﻿namespace TwmApp.Client.Common;
+namespace DsWebApp.Client.Components;
 
 /// <summary>
 /// 데브 확장 그리드: DevExpress eXtension Grid

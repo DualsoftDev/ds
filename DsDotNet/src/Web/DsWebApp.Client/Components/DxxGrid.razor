@@ -4,25 +4,27 @@
 {
     <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
         <span class="ds-left message">Σ Total @_count items</span>
-        <CompShowHide CssClass="ds-absolute-centered" @ref="_refCompShowHide">
-            <div class="ds-reversed-color ds-bordered" style="padding: 20px">
-                <DxxGridOptionSelector DxGrid="Grid"/>
-                <br/>
-                <br/>
-                <br/>
-                <div style="display: flex; justify-content: center; align-items: center;">
-                    <DxButton 
-                        RenderStyle="ButtonRenderStyle.Secondary"
-                        Click="@(() => _refCompShowHide.Hide())">
-                        <span class="bi-x-square">&nbsp;&nbsp;</span>
-                        Close
-                    </DxButton>
+        @if (Grid != null)
+        {
+            <CompShowHide CssClass="ds-absolute-centered" @ref="_refCompShowHide">
+                <div class="ds-reversed-color ds-bordered" style="padding: 20px">
+                    <DxxGridOptionSelector DxGrid="Grid" />
+                    <br />
+                    <br />
+                    <br />
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                        <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                                  Click="@(() => _refCompShowHide.Hide())">
+                            <span class="bi-x-square">&nbsp;&nbsp;</span>
+                            Close
+                        </DxButton>
+                    </div>
                 </div>
-            </div>
-        </CompShowHide>
-        <a @onclick="@(() => _refCompShowHide.Show())" @onclick:preventDefault href="#">
-            <span class="oi oi-cog" />
-        </a>        
+            </CompShowHide>
+            <a @onclick="@(() => _refCompShowHide.Show())" @onclick:preventDefault href="#">
+                <span class="oi oi-cog" />
+            </a>
+        }
     </div>
 
 
@@ -85,7 +87,7 @@
     [Parameter] public bool AutoExpandAllGroupRows { get; set; }
     [Parameter] public GridDetailRowDisplayMode DetailRowDisplayMode { get; set; }
 
-    [Parameter] public ClientSettings ClientSettings { get; set; }
+    // [Parameter] public ClientSettings ClientSettings { get; set; }
 
     [Parameter] public string KeyFieldName { get; set; }
 
@@ -105,18 +107,16 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        if (ClientSettings != null)
-        {
-            var cs = ClientSettings;
-            FooterDisplayMode = GridFooterDisplayMode.Always;
-            ShowAllRows = cs.ShowAllRows;
-            ShowGroupPanel = cs.ShowGroupPanel;
-            ShowFilterRow = cs.ShowFilterRow;
+        Console.WriteLine($"------------ Reloading grid");
+        var cs = ClientGlobal.DsClientSettings;
+        FooterDisplayMode = cs.FooterDisplayMode;
+        ShowAllRows = cs.ShowAllRows;
+        ShowGroupPanel = cs.ShowGroupPanel;
+        ShowFilterRow = cs.ShowFilterRow;
 
-            TextWrapEnabled = cs.TextWrapEnabled;
-            PageSizeSelectorVisible = cs.PageSizeSelectorVisible;
-            ColumnResizeMode = cs.ColumnResizeMode;
-        }
+        TextWrapEnabled = cs.TextWrapEnabled;
+        PageSizeSelectorVisible = cs.PageSizeSelectorVisible;
+        ColumnResizeMode = cs.ColumnResizeMode;
 
         _loading = false;
     }

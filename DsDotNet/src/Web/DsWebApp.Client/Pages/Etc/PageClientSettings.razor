@@ -35,24 +35,13 @@
 </ModalDialog>
 
 <br/><br/>
-<CompBoxedBlock Title="테이블 보기 설정"> @* BoxForegroundColor="@(Color.Firebrick)" BoxBackgroundColor="@(Color.LightGoldenrodYellow)" TextColor="@(Color.Black)" BorderWidth="1"> *@
-    <DxCheckBox @bind-Checked="@_cs.ShowGroupPanel">Show group panel</DxCheckBox>
-    <DxCheckBox @bind-Checked="@_cs.ShowFilterRow">Show filter row</DxCheckBox>
-    <DxCheckBox @bind-Checked="@_cs.PageSizeSelectorVisible">Show page size selector</DxCheckBox>
-    <DxCheckBox @bind-Checked="@_cs.TextWrapEnabled">Enable text wrap</DxCheckBox>
-    <CompEnumSelector Title="Column resize mode: " TEnum="GridColumnResizeMode" @bind-Value="_cs.ColumnResizeMode" /><br />
-    <CompEnumSelector Title="Footer: " TEnum="GridFooterDisplayMode" @bind-Value="_cs.FooterDisplayMode" /><br />
+@if (_cs != null)
+{
+    <CompBoxedBlock Title="테이블 보기 설정">
+        <CompClientSettingsSelector ClientSettings="_cs" ClientSettingsChanged="onClientSettingsChanged" />
+    </CompBoxedBlock>
 
-@* <HxDropdownButtonGroup>
-    <HxDropdownToggleButton Color="ThemeColor.Secondary">Column resize mode (@_cs.ColumnResizeMode)</HxDropdownToggleButton>
-    <HxDropdownMenu>
-        <HxDropdownItem OnClick="@(() => _cs.ColumnResizeMode = GridColumnResizeMode.Disabled )">Disabled</HxDropdownItem>
-        <HxDropdownItem OnClick="@(() => _cs.ColumnResizeMode = GridColumnResizeMode.NextColumn )">Next column</HxDropdownItem>
-        <HxDropdownItem OnClick="@(() => _cs.ColumnResizeMode = GridColumnResizeMode.ColumnsContainer )">Columns container</HxDropdownItem>
-    </HxDropdownMenu>
-</HxDropdownButtonGroup>
- *@
-</CompBoxedBlock>
+}
 
 
 @code {
@@ -65,23 +54,21 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-
-        _cs = ClientGlobal.DsClientSettings;
-        // var userName = ClientGlobal?.UserSession?.UserName;
-        // var users = await Http.GetFromJsonAsync<User[]>(xxx$"api/dbcache/r/{DexiK.TnUser}");
-        // _me = users.FirstOrDefault(u => u.UserName == userName);
-        // Console.WriteLine($"current user : {userName}, me={_me}");
-
-        NavigationManager.LocationChanged += OnLocationChanged;
-    }
-    async void OnLocationChanged(object sender, LocationChangedEventArgs args)
-    {
-        await _cs.SaveAsync(LocalStorage);
+        _cs = await DsClientSettings.ReadAsync(LocalStorage);
     }
 
-    public void Dispose()
+    async Task onClientSettingsChanged(ClientSettings cs)
     {
-        NavigationManager.LocationChanged -= OnLocationChanged;
+        await cs.SaveAsync(LocalStorage);
+        var dscs = ClientGlobal.DsClientSettings;
+        dscs.ShowAllRows = cs.ShowAllRows;
+        dscs.ShowGroupPanel = cs.ShowGroupPanel;
+        dscs.ShowFilterRow = cs.ShowFilterRow;
+        dscs.TextWrapEnabled = cs.TextWrapEnabled;
+        dscs.PageSizeSelectorVisible = cs.PageSizeSelectorVisible;
+        dscs.ColumnResizeMode = cs.ColumnResizeMode;
+        dscs.FooterDisplayMode = cs.FooterDisplayMode;
+
     }
 
 

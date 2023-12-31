@@ -38,7 +38,7 @@
 @if (_cs != null)
 {
     <CompBoxedBlock Title="테이블 보기 설정">
-        <CompClientSettingsSelector ClientSettings="_cs" ClientSettingsChanged="onClientSettingsChanged" />
+        <CompClientSettingsSelector ClientSettings="_cs"/>
     </CompBoxedBlock>
 
 }
@@ -47,30 +47,15 @@
 @code {
     ModalDialog _modalDialog;
     string _oldPassword, _newPassword, _passwordConfirm;
-    ClientSettings _cs;
+    DsClientSettings _cs;
 
     // User _me;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        _cs = await DsClientSettings.ReadAsync(LocalStorage);
+        _cs = ClientGlobal.DsClientSettings;
     }
-
-    async Task onClientSettingsChanged(ClientSettings cs)
-    {
-        await cs.SaveAsync(LocalStorage);
-        var dscs = ClientGlobal.DsClientSettings;
-        dscs.ShowAllRows = cs.ShowAllRows;
-        dscs.ShowGroupPanel = cs.ShowGroupPanel;
-        dscs.ShowFilterRow = cs.ShowFilterRow;
-        dscs.TextWrapEnabled = cs.TextWrapEnabled;
-        dscs.PageSizeSelectorVisible = cs.PageSizeSelectorVisible;
-        dscs.ColumnResizeMode = cs.ColumnResizeMode;
-        dscs.FooterDisplayMode = cs.FooterDisplayMode;
-
-    }
-
 
     async Task change()
     {

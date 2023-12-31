@@ -87,8 +87,6 @@
     [Parameter] public bool AutoExpandAllGroupRows { get; set; }
     [Parameter] public GridDetailRowDisplayMode DetailRowDisplayMode { get; set; }
 
-    // [Parameter] public ClientSettings ClientSettings { get; set; }
-
     [Parameter] public string KeyFieldName { get; set; }
 
     [Parameter] public bool ShowGroupPanel { get; set; }
@@ -107,7 +105,6 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        Console.WriteLine($"------------ Reloading grid");
         var cs = ClientGlobal.DsClientSettings;
         FooterDisplayMode = cs.FooterDisplayMode;
         ShowAllRows = cs.ShowAllRows;

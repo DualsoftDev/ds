@@ -3,7 +3,7 @@
 @if (!_loading)
 {
     <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
-        <span class="total-num-rows message">Σ Total @_count items</span>
+        <span class="ds-left message">Σ Total @_count items</span>
         <CompShowHide CssClass="ds-absolute-centered" @ref="_refCompShowHide">
             <div class="ds-reversed-color ds-bordered" style="padding: 20px">
                 <DxxGridOptionSelector DxGrid="Grid"/>
@@ -37,6 +37,7 @@
             DetailRowTemplate="DetailRowTemplate"
             EditMode="EditMode"
             EditModelSaving="EditModelSaving"
+            FooterDisplayMode="FooterDisplayMode"
             KeyFieldName="@KeyFieldName"
             PageSizeSelectorVisible="PageSizeSelectorVisible "
             PageSize="PageSize "
@@ -95,6 +96,7 @@
     [Parameter] public GridColumnResizeMode ColumnResizeMode { get; set; } = GridColumnResizeMode.NextColumn;
 
     [Parameter] public GridEditMode EditMode { get; set; }
+    [Parameter] public GridFooterDisplayMode FooterDisplayMode { get; set; }
     [Parameter] public EventCallback<GridEditModelSavingEventArgs> EditModelSaving { get; set; }
     [Parameter] public EventCallback<GridDataItemDeletingEventArgs> DataItemDeleting { get; set; }
 
@@ -106,7 +108,7 @@
         if (ClientSettings != null)
         {
             var cs = ClientSettings;
-
+            FooterDisplayMode = GridFooterDisplayMode.Always;
             ShowAllRows = cs.ShowAllRows;
             ShowGroupPanel = cs.ShowGroupPanel;
             ShowFilterRow = cs.ShowFilterRow;

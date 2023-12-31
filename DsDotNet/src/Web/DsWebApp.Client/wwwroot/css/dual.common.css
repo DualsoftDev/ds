@@ -43,6 +43,11 @@
     margin-left: auto;
 }
 .ds-left { text-align: left;}
+.ds-flex-center {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
 .ds-padl-50 { padding-left: 50px;}
 .ds-padr-50 { padding-right: 50px;}

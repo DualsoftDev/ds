@@ -1,4 +1,4 @@
-﻿@using System.ComponentModel
+@using System.ComponentModel
 @* DxxGridOption *@
 @implements INotifyPropertyChanged
 
@@ -7,6 +7,8 @@
 <DxCheckBox @bind-Checked="@PageSizeSelectorVisible">Show page size selector</DxCheckBox>
 <DxCheckBox @bind-Checked="@TextWrapEnabled">Enable text wrap</DxCheckBox>
 <DxCheckBox @bind-Checked="@ShowAllRows">Show all rows in one page</DxCheckBox>
+<CompEnumSelector Title="Column resize mode: " TEnum="GridColumnResizeMode" @bind-Value="ColumnResizeMode" /><br/>
+<CompEnumSelector Title="Footer: " TEnum="GridFooterDisplayMode" @bind-Value="FooterDisplayMode" /><br/>
 <DxButton Text="Column chooser" Click="@(() => DxGrid.ShowColumnChooser())"/>
 @code {
     [Parameter] public IGrid DxGrid { get; set; }
@@ -19,6 +21,7 @@
 
     int PageSize { get; set; }
     GridColumnResizeMode ColumnResizeMode { get; set; }
+    GridFooterDisplayMode FooterDisplayMode { get; set; }
 
 
 #pragma warning disable 0067       // warning CS0067: The event 'PageDashboardMain.PropertyChanged' is never used                                                                                      
@@ -61,6 +64,9 @@
                     break;
                 case nameof(ColumnResizeMode):
                     DxGrid.ColumnResizeMode = ColumnResizeMode;
+                    break;
+                case nameof(FooterDisplayMode):
+                    DxGrid.FooterDisplayMode = FooterDisplayMode;
                     break;
             };
 

@@ -40,6 +40,8 @@
     <DxCheckBox @bind-Checked="@_cs.ShowFilterRow">Show filter row</DxCheckBox>
     <DxCheckBox @bind-Checked="@_cs.PageSizeSelectorVisible">Show page size selector</DxCheckBox>
     <DxCheckBox @bind-Checked="@_cs.TextWrapEnabled">Enable text wrap</DxCheckBox>
+    <CompEnumSelector Title="Column resize mode: " TEnum="GridColumnResizeMode" @bind-Value="_cs.ColumnResizeMode" /><br />
+    <CompEnumSelector Title="Footer: " TEnum="GridFooterDisplayMode" @bind-Value="_cs.FooterDisplayMode" /><br />
 
 @* <HxDropdownButtonGroup>
     <HxDropdownToggleButton Color="ThemeColor.Secondary">Column resize mode (@_cs.ColumnResizeMode)</HxDropdownToggleButton>

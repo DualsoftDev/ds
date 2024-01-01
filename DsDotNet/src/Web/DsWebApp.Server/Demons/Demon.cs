@@ -122,11 +122,6 @@ public partial class Demon : BackgroundService
                                 if (_dsSystem != null && InfoHub.ConnectedClients.Any())
                                 {
                                     Console.WriteLine($"HmiTagHub has {InfoHub.ConnectedClients.Count} connected clients.");
-                                    Nullable<double> dnull = null;
-                                    var nullJson = System.Text.Json.JsonSerializer.Serialize(dnull);
-                                    Nullable<double> dnull2 = 1.0;
-                                    var nullJson2 = System.Text.Json.JsonSerializer.Serialize(dnull2);
-
                                     InfoSystem infoSystem = InfoPackageModuleExt.GetInfo(_dsSystem);
                                     // System.Text.Json.JsonSerializer.Serialize 는 동작 안함.
                                     var newtonJson = Newtonsoft.Json.JsonConvert.SerializeObject(infoSystem);

@@ -110,6 +110,7 @@ else
         {
             return hubConnection.On<string>(SK.S2CNInfoChanged, async (string infoSystemStr) =>
             {
+                bool initial = _infoSystems == null;
                 InfoSystem info = Newtonsoft.Json.JsonConvert.DeserializeObject<InfoSystem>(infoSystemStr);
                 _infoSystems = [info];
 
@@ -118,10 +119,59 @@ else
                 _infoCalls = _infoReals.SelectMany(r => r.InfoCalls).ToArray();
                 _infoDevices = _infoCalls.SelectMany(c => c.InfoDevices).DistinctBy(d => d.Fqdn).ToArray();
 
-                StateHasChanged();
-                Console.WriteLine($"Info change notification received with {info.Fqdn}.");
-                ToastService.ShowInfo($"Info change: {info.Fqdn}.");
-                await DisposeAsync();
+                bool changed = false;
+                switch (_selected)
+                {
+                    case null:
+                        break;
+                    case InfoSystem selSys:
+                        if (!info.IsEqual(selSys))
+                        {
+                            onItemSelected(info);
+                            changed = true;
+                        }
+                        break;
+                    case InfoFlow selFlow:
+                        var flow = _infoFlows.First(f => f.Fqdn == selFlow.Fqdn);
+                        if (!flow.IsEqual(selFlow))
+                        {
+                            onItemSelected(flow);
+                            changed = true;
+                        }
+                        break;
+                    case InfoReal selReal:
+                        var real = _infoReals.First(r => r.Fqdn == selReal.Fqdn);
+                        if (!real.IsEqual(selReal))
+                        {
+                            onItemSelected(real);
+                            changed = true;
+                        }
+                        break;
+
+                    case InfoCall selCall:
+                        var call = _infoCalls.First(c => c.Fqdn == selCall.Fqdn);
+                        if (!call.IsEqual(selCall))
+                        {
+                            onItemSelected(call);
+                            changed = true;
+                        }
+                        break;
+                    case InfoDevice selDevice:
+                        var dev = _infoDevices.First(f => f.Fqdn == selDevice.Fqdn);
+                        if (!dev.IsEqual(selDevice))
+                        {
+                            onItemSelected(dev);
+                            changed = true;
+                        }
+                        break;
+                }
+
+                if (changed || initial)
+                {
+                    StateHasChanged();
+                    Console.WriteLine($"Info change notification received with {info.Fqdn}.");
+                    //ToastService.ShowInfo($"Info change: {info.Fqdn}.");
+                }
             });
         }
     }
@@ -152,11 +202,11 @@ else
         switch (info)
         {
             case InfoBase infoBase:
-                가동.Ratio = _random.Next(10, 90);
-                에러.Ratio = 100 - 가동.Ratio;
-                // todo: fix ratio
-                // 가동.Ratio = infoBase.DriveAverage;
-                // 에러.Ratio = infoBase.ErrorAverage;
+                // 가동.Ratio = _random.Next(10, 90);
+                // 에러.Ratio = 100 - 가동.Ratio;
+                // // todo: fix ratio
+                가동.Ratio = infoBase.DriveAverage;
+                에러.Ratio = infoBase.ErrorAverage;
                 switch (info)
                 {
                     case InfoReal real:

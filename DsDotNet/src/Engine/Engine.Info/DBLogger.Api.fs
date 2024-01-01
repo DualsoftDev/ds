@@ -8,7 +8,8 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module DBLoggerApi =
-
+    let private random = Random()
+    [<Obsolete("Remove random test data....")>]
     let private updateInfoBase (x:InfoBase, fqdn:string, kindDrive:int,  kindError:int,  kindPause:int) = 
 
         if DBLoggerImpl.logSet.IsNull()
@@ -21,7 +22,16 @@ module DBLoggerApi =
         x.ErrorCount <- DBLogger.Count(fqdn, kindError)
         x.PauseCount <- DBLogger.Count(fqdn, kindPause)
         if (x.DriveSpan + x.ErrorSpan > 0.0) then
-            x.Efficiency <- x.DriveSpan / (x.DriveSpan + x.ErrorSpan) 
+            x.Efficiency <- x.DriveSpan / (x.DriveSpan + x.ErrorSpan)
+
+        // todo: remove random test data
+        x.DriveSpan    <- random.Next(0, 1000)
+        x.DriveAverage <- random.Next(0, 1000)
+        x.ErrorSpan    <- random.Next(0, 1000)
+        x.ErrorAverage <- random.Next(0, 1000)
+        x.ErrorCount   <- random.Next(0, 1000)
+        x.PauseCount   <- random.Next(0, 1000)
+        x.Efficiency   <- random.Next(0, 1000)
 
     let getInfoDevices (xs:Device seq) : InfoDevice seq = 
         if xs.isEmpty()

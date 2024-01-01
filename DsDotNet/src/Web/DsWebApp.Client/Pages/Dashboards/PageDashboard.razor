@@ -36,16 +36,21 @@
 }
 else
 {
+    <DxButton Click="@(() => _refCompShowHide.Toggle())" IconCssClass="oi oi-cog" Text="@_showOrHide" />
+
     <div class="container">
-        <div class="non-sticky">
-            <CompFqdnSelector Systems="_infoSystems" OnItemSelected="@(new Action<IInfoBase>(act => onItemSelected(act)))" />
-        </div>
+        <CompShowHide @ref="_refCompShowHide" ShowOnInit="true">
+            <div class="non-sticky">
+                <CompFqdnSelector Systems="_infoSystems" OnItemSelected="@(new Action<IInfoBase>(act => onItemSelected(act)))" />
+            </div>
+        </CompShowHide>
+
 
         @if (_pops != null)
         {
-            <div class="sticky">
+            <div class="@(_refCompShowHide.IsVisible ? "sticky" : "")">
                 <DsChartEfficiency PopData="_pops" InnerTitle="@_selected.Name" />
-                <DsInfoGridSingle Info="_selected" ClientSettings="@ClientGlobal.ClientSettings"/>
+                <DsInfoGridSingle Info="_selected" ClientSettings="@ClientGlobal.ClientSettings" />
             </div>
         }
     </div>
@@ -53,7 +58,8 @@ else
 
 
 @code {
-
+    CompShowHide _refCompShowHide;
+    string _showOrHide => (_refCompShowHide != null && _refCompShowHide.IsVisible) ? "Hide" : "Show";
     IInfoBase _selected;
     CategoryItem[] _pops;
 

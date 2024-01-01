@@ -1,0 +1,47 @@
+@* DsChartEfficiency *@
+<RadzenChart>
+    <RadzenDonutSeries Data="@PopData"
+                       CategoryProperty="@nameof(CategoryItem.CategoryString)"
+                       ValueProperty="@nameof(CategoryItem.Ratio)"
+                       Fills="@_fillColors">
+        <TitleTemplate>
+            <div class="rz-donut-content">
+                @InnerTitle
+            </div>
+        </TitleTemplate>
+        <TooltipTemplate Context="data">
+            <div>
+                <span>@data.Category</span>:
+                <strong>@data.Ratio</strong>
+                <div class="text-black">
+                    <a class="link-with-underline">Show details</a>     @* onclick="@(() => DetailClicked?.Invoke(this, @data.Category))" *@
+                </div>
+            </div>
+        </TooltipTemplate>
+
+    </RadzenDonutSeries>
+</RadzenChart>
+@code {
+
+    public enum PieceOfPizzaType
+    {
+        가동,
+        비가동,
+        에러
+    }
+    string[] _fillColors = [
+        "green",
+        "darkgoldenrod",
+        "red"
+    ];
+    public class CategoryItem
+    {
+        public PieceOfPizzaType Category { get; set; }
+        public string CategoryString => Category.ToString();
+        public double Ratio { get; set; }
+    }
+
+    [Parameter] public CategoryItem[] PopData { get; set; }
+    [Parameter] public string InnerTitle { get; set; }
+
+}

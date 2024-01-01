@@ -1,0 +1,31 @@
+@* DsInfoGridSingle *@
+@using System.ComponentModel
+@using static Engine.Core.InfoPackageModule
+
+@switch(Info)
+{
+    case InfoSystem infoSystem:
+        <CompInstanceTable TItem="InfoSystem" Instance="infoSystem" />
+        break;
+    case InfoFlow infoFlow:
+        <CompInstanceTable TItem="InfoFlow" Instance="infoFlow" />
+        break;
+    case InfoReal infoReal:
+        <CompInstanceTable TItem="InfoReal" Instance="infoReal" />
+        break;    
+    case InfoCall infoCall:
+        <CompInstanceTable TItem="InfoCall" Instance="infoCall" />
+        break;
+    case InfoDevice infoDevice:
+        <CompInstanceTable TItem="InfoDevice" Instance="infoDevice" />
+        break;
+}
+
+
+@code {
+    [Parameter] public IInfoBase Info { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+}

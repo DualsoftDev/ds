@@ -56,6 +56,7 @@ module InfoPackageModule =
             member x.IsEqual(y:IInfoBase) = x.IsEqual(y)
         member val Name = "" with get, set
         member val Fqdn = "" with get, set
+        member val Id = -1 with get, set
         ///동작 횟수
         member val GoingCount = 0 with get, set
         ///고장 횟수
@@ -73,7 +74,7 @@ module InfoPackageModule =
             && x.RepairAverage.Value = o.RepairAverage.Value
             && x.ErrorMessages.SequenceEqual(o.ErrorMessages)
         static member Create(x:Device) =
-            let info = new InfoDevice(Name=x.Name, Fqdn = x.QualifiedName)
+            let info = new InfoDevice(Name=x.Name, Fqdn = x.QualifiedName, Id=x.Id)
             info
 
     type InfoCall() = 

@@ -117,7 +117,7 @@ else
                 _infoFlows = info.InfoFlows.ToArray();
                 _infoReals = _infoFlows.SelectMany(f => f.InfoReals).ToArray();
                 _infoCalls = _infoReals.SelectMany(r => r.InfoCalls).ToArray();
-                _infoDevices = _infoCalls.SelectMany(c => c.InfoDevices).DistinctBy(d => d.Fqdn).ToArray();
+                _infoDevices = _infoCalls.SelectMany(c => c.InfoDevices).DistinctBy(d => d.Id).ToArray();
 
                 bool changed = false;
                 switch (_selected)

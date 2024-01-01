@@ -45,7 +45,7 @@ else
         {
             <div class="sticky">
                 <DsChartEfficiency PopData="_pops" InnerTitle="@_selected.Name" />
-                <DsInfoGridSingle Info="_selected"/>
+                <DsInfoGridSingle Info="_selected" ClientSettings="@ClientGlobal.ClientSettings"/>
             </div>
         }
     </div>
@@ -76,6 +76,7 @@ else
         {
             return hubConnection.On<string>(SK.S2CNInfoChanged, async (string infoSystemStr) =>
             {
+                await Task.Yield();
                 bool initial = _infoSystems == null;
                 InfoSystem info = Newtonsoft.Json.JsonConvert.DeserializeObject<InfoSystem>(infoSystemStr);
                 _infoSystems = [info];

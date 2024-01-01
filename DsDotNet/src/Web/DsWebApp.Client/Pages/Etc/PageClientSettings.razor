@@ -38,7 +38,7 @@
 @if (_cs != null)
 {
     <CompBoxedBlock Title="테이블 보기 설정">
-        <CompClientSettingsSelector ClientSettings="_cs"/>
+        <CompClientSettingsSelector ClientSettings="_cs" ClientSettingsChanged="onSettingsChanged"/>
     </CompBoxedBlock>
 
 }
@@ -55,6 +55,11 @@
     {
         await base.OnInitializedAsync();
         _cs = ClientGlobal.DsClientSettings;
+    }
+
+    async Task onSettingsChanged(ClientSettings cs)
+    {
+        await ((DsClientSettings)cs).SaveAsync(LocalStorage);
     }
 
     async Task change()

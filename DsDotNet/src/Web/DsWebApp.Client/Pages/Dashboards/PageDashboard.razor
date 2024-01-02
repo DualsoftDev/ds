@@ -1,9 +1,207 @@
 @page "/dashboards/dashboard"
-@implements IDisposable
+@using static DsWebApp.Client.Pages.Dashboards.DsChartEfficiency
+@using static Engine.Core.InfoPackageModule
 
-<h3>PageDashboard</h3>
+@implements IAsyncDisposable
+
+<CompTitle Icon="oi oi-puzzle-piece" Title="Dashboard" />
+
+<style>
+    .container {
+        display: flex;
+        width: 100%;
+        height: 100vh; /* 뷰포트 높이에 맞게 조절 */
+        overflow: auto; /* 필요한 경우 스크롤 표시 */
+    }
+
+    .sticky {
+        position: sticky;
+        left: 0; /* 왼쪽에 고정 */
+        top: 0; /* 위쪽에 고정 */
+        z-index: 1; /* 다른 콘텐츠 위에 표시 */
+        padding: 10px; /* 원하는 여백 설정 */
+        width: 50%;
+    }
+
+    .non-sticky {
+        flex-grow: 1; /* 남은 공간을 모두 채우도록 함 */
+        padding: 10px; /* 원하는 여백 설정 */
+    }
+</style>
+
+
+@if (_infoSystems == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <DxButton Click="@(() => _refCompShowHide.Toggle())" IconCssClass="oi oi-cog" Text="@_showOrHide" />
+
+    <div class="container">
+        <CompShowHide @ref="_refCompShowHide" ShowOnInit="true">
+            <div class="non-sticky">
+                <CompFqdnSelector Systems="_infoSystems" OnItemSelected="@(new Action<IInfoBase>(act => onItemSelected(act)))" />
+            </div>
+        </CompShowHide>
+
+
+        @if (_pops != null)
+        {
+            <div class="@(_refCompShowHide.IsVisible ? "sticky" : "")">
+                <DsChartEfficiency PopData="_pops" InnerTitle="@_selected.Name" />
+                <DsMultiBarChartEfficiency InfoParent="Selected" />
+                <DsInfoGridSingle Info="_selected" ClientSettings="@ClientGlobal.ClientSettings" />
+            </div>
+        }
+    </div>
+}
+
 
 @code {
-    public void Dispose() { }
+    CompShowHide _refCompShowHide;
+    string _showOrHide => (_refCompShowHide == null || _refCompShowHide.IsVisible) ? "Hide" : "Show";
+    IInfoBase _selected;
+    InfoBase Selected { get; set; }
+    EfficiencyCategoryItem[] _pops;
 
+    InfoSystem[] _infoSystems;
+    InfoFlow[] _infoFlows;
+    InfoReal[] _infoReals;
+    InfoCall[] _infoCalls;
+    InfoDevice[] _infoDevices;
+    protected HubConnectionManager _hubConnectionManager;
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        HubConnection hubConnection = await NavigationManager.ToAbsoluteUri("/hub/info").StartHubAsync();
+        _hubConnectionManager = new HubConnectionManager(hubConnection, registerHubConnection);
+        Console.WriteLine($"Hub initialized on PageDashboardGrid.razor");
+
+
+        IDisposable registerHubConnection(HubConnection hubConnection)
+        {
+            return hubConnection.On<string>(SK.S2CNInfoChanged, async (string infoSystemStr) =>
+            {
+                await Task.Yield();
+                bool initial = _infoSystems == null;
+                InfoSystem info = Newtonsoft.Json.JsonConvert.DeserializeObject<InfoSystem>(infoSystemStr);
+                _infoSystems = [info];
+
+                _infoFlows = info.InfoFlows.ToArray();
+                _infoReals = _infoFlows.SelectMany(f => f.InfoReals).ToArray();
+                _infoCalls = _infoReals.SelectMany(r => r.InfoCalls).ToArray();
+                _infoDevices = _infoCalls.SelectMany(c => c.InfoDevices).DistinctBy(d => d.Id).ToArray();
+
+                bool changed = false;
+                switch (_selected)
+                {
+                    case null:
+                        break;
+                    case InfoSystem selSys:
+                        if (!info.IsEqual(selSys))
+                        {
+                            onItemSelected(info);
+                            changed = true;
+                        }
+                        break;
+                    case InfoFlow selFlow:
+                        var flow = _infoFlows.First(f => f.Fqdn == selFlow.Fqdn);
+                        if (!flow.IsEqual(selFlow))
+                        {
+                            onItemSelected(flow);
+                            changed = true;
+                        }
+                        break;
+                    case InfoReal selReal:
+                        var real = _infoReals.First(r => r.Fqdn == selReal.Fqdn);
+                        if (!real.IsEqual(selReal))
+                        {
+                            onItemSelected(real);
+                            changed = true;
+                        }
+                        break;
+
+                    case InfoCall selCall:
+                        var call = _infoCalls.First(c => c.Fqdn == selCall.Fqdn);
+                        if (!call.IsEqual(selCall))
+                        {
+                            onItemSelected(call);
+                            changed = true;
+                        }
+                        break;
+                    case InfoDevice selDevice:
+                        var dev = _infoDevices.First(f => f.Fqdn == selDevice.Fqdn);
+                        if (!dev.IsEqual(selDevice))
+                        {
+                            onItemSelected(dev);
+                            changed = true;
+                        }
+                        break;
+                }
+
+                if (changed || initial)
+                {
+                    StateHasChanged();
+                    Console.WriteLine($"Info change notification received with {info.Fqdn}.");
+                    //ToastService.ShowInfo($"Info change: {info.Fqdn}.");
+                }
+            });
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnectionManager != null)
+        {
+            await _hubConnectionManager.DisposeAsync();
+            _hubConnectionManager = null;
+        }
+    }
+
+    Random _random = new Random();
+    void onItemSelected(IInfoBase info)
+    {
+        _selected = info;
+        _pops = [
+            new EfficiencyCategoryItem() { Category = EfficiencyPopType.가동 },
+            new EfficiencyCategoryItem() { Category = EfficiencyPopType.비가동 },
+            new EfficiencyCategoryItem() { Category = EfficiencyPopType.에러 },
+        ];
+        var (가동, 비가동, 에러) = (
+                _pops[(int)EfficiencyPopType.가동],
+                _pops[(int)EfficiencyPopType.비가동],
+                _pops[(int)EfficiencyPopType.에러]);
+
+        switch (info)
+        {
+            case InfoBase infoBase:
+                var w = 0.0;
+                switch (info)
+                {
+                    case InfoReal real:
+                        w = real.WaitTime;
+                        break;
+                    case InfoCall call:
+                        break;
+                }
+                var (d, e) = (infoBase.DriveAverage, infoBase.ErrorAverage);
+                var a = d + e + w;
+                가동.Value = 100 * d / a;
+                에러.Value = 100 * e / a;
+                비가동.Value = 100 * w / a;
+                break;
+
+            case InfoDevice device:
+                break;
+
+            default:
+                Console.Error.WriteLine($"Unknown InfoBase type: {info.GetType().Name}");
+                break;
+        }
+
+        Selected = _selected as InfoBase;
+        StateHasChanged();
+    }
 }

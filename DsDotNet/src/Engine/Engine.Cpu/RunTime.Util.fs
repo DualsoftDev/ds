@@ -53,22 +53,21 @@ module internal RunTimeUtil =
 
         
     ///사용자 autoStartTags HMI 대신 눌러주기
-    let preAction(sys:DsSystem, mode:RuntimePackage, on:bool) =
+    let preAction(sys:DsSystem, on:bool) =
         let autoStartStorageKeyValues =
             sys.TagManager.Storages
                 .Where(fun w->
                             w.Value.TagKind = (int)SystemTag.auto_btn
                             ||   w.Value.TagKind = (int)SystemTag.drive_btn
                             ||   w.Value.TagKind = (int)SystemTag.ready_btn
-                            || ( w.Value.TagKind = (int)SystemTag.sim && mode.IsPackageSIM())
                     )
         autoStartStorageKeyValues.Iter(fun t -> t.Value.BoxedValue <-  on)
 
 
-    ///시뮬레이션 비트 토글
-    let cpuModeToggle(sys:DsSystem, mode:RuntimePackage) =
+    ///시뮬레이션 비트 ON
+    let cpuSimOn(sys:DsSystem) =
         let simTag = (sys.TagManager :?> SystemManager).GetSystemTag(SystemTag.sim) 
-        simTag.BoxedValue <- (mode.IsPackageSIM())
+        simTag.BoxedValue <- true
    
     ///HMI Reset
     let syncReset(system:DsSystem ) =

@@ -16,10 +16,7 @@ public class ModelControllerConstructor : ControllerBaseWithLogger
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class ModelController(
-        ServerGlobal global
-        , IHubContext<HmiTagHub> hubContextHmiTag
-    ) : ModelControllerConstructor(global.Logger)
+public class ModelController(ServerGlobal global) : ModelControllerConstructor(global.Logger)
 {
     RuntimeModel _model => global.RuntimeModel;
 

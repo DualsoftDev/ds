@@ -72,6 +72,10 @@ module CoreModule =
     /// *.ds 파일을 읽어 새로운 인스턴스를 만들어 삽입하는 구조입니다.
     and Device (loadedDevice: DsSystem, param: DeviceLoadParameters) =
         inherit LoadedSystem(loadedDevice, param)
+        static let mutable id = 0
+        do
+            id <- id + 1
+        member val Id = id with get
 
     /// 공유 인스턴스. *.ds 파일의 절대 경로를 기준으로 하나의 인스턴스만 생성하고 이를 참조하는 개념입니다.
     and ExternalSystem (loadedSystem: DsSystem, param: DeviceLoadParameters) =

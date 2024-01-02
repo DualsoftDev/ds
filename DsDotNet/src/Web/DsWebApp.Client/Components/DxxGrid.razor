@@ -1,0 +1,9 @@
+@* DxxGrid *@
+@inherits DxxGridBase
+@_renderBase()
+
+@code {
+    RenderFragment _renderBase() => builder => base.BuildRenderTree(builder);
+    protected override async Task<ClientSettings> GetClientSettings() =>
+        (ClientSettings)(await DsClientSettings.ReadAsync(LocalStorage));
+}

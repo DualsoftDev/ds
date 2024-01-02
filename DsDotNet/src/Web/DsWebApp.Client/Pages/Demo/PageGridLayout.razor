@@ -1,0 +1,166 @@
+@* PageGridLayout *@
+@page "/demo/pagegridlayout"
+<h3>PageGridLayout</h3>
+<DxGridLayout CssClass="w-100 ch-480">
+    <Rows>
+        <DxGridLayoutRow Height="100px" />
+        @for (int i = 0; i < _rowCount; i++)
+        {
+            <DxGridLayoutRow />
+        }
+
+        <DxGridLayoutRow Height="auto" />
+    </Rows>
+    <Columns>
+        <DxGridLayoutColumn Width="2fr" />
+        <DxGridLayoutColumn Width="60%" />
+        <DxGridLayoutColumn />
+    </Columns>
+    <Items>
+        <DxGridLayoutItem Row="0" Column="0" ColumnSpan="3">
+            <Template>
+                <div class="gridlayout-header gridlayout-item">
+                    Header
+                </div>
+            </Template>
+        </DxGridLayoutItem>
+        @for (int i = 1; i <= _rowCount; i++)
+        {
+            <DxGridLayoutItem Row="i" Column="1">
+                <Template>
+                    <div class="gridlayout-content gridlayout-item">
+                        @*                         <DxChart T="SampleSessionInfo"
+                    Rotated="true"
+                    Data="@ChartsData"
+                    Width="100%">
+                    <DxChartFullStackedBarSeries Name="0-14 years"
+                    T="SampleSessionInfo"
+                    TArgument="string"
+                    TValue="int"
+                    ArgumentField="pasi => pasi.Country"
+                    ValueField="pasi => pasi.Total"
+                    SummaryMethod="Enumerable.Sum" />
+                    <DxChartFullStackedBarSeries Name="15-64 years"
+                    T="SampleSessionInfo"
+                    TArgument="string"
+                    TValue="int"
+                    ArgumentField="pasi => pasi.Country"
+                    ValueField="pasi => pasi.Total"
+                    SummaryMethod="Enumerable.Sum" />
+                    <DxChartFullStackedBarSeries Name="65 years and older"
+                    T="SampleSessionInfo"
+                    TArgument="string"
+                    TValue="int"
+                    ArgumentField="pasi => pasi.Country"
+                    ValueField="pasi => pasi.Total"
+                    SummaryMethod="Enumerable.Sum" />
+
+                    </DxChart>
+                    *@
+                        <RadzenChart style="height: 400px">
+                            <RadzenStackedBarSeries Data="@revenue2020" CategoryProperty="Quarter" LineType="LineType.Dashed" ValueProperty="Revenue">
+                                <RadzenSeriesDataLabels Visible="@showDataLabels" />
+                            </RadzenStackedBarSeries>
+                            <RadzenStackedBarSeries Data="@revenue2019" CategoryProperty="Quarter" ValueProperty="Revenue">
+                                <RadzenSeriesDataLabels Visible="@showDataLabels" />
+                            </RadzenStackedBarSeries>
+                            @*                             <RadzenValueAxis Formatter="@FormatAsUSD" Min="0" Max="800000" Step="100000">
+                        <RadzenGridLines Visible="true" />
+                        <RadzenAxisTitle Text="Revenue in USD" />
+                        </RadzenValueAxis>
+                        *@
+                            <RadzenBarOptions Radius="5" />
+                        </RadzenChart>
+                    </div>
+                </Template>
+            </DxGridLayoutItem>
+            <DxGridLayoutItem Row="i" Column="0">
+                <Template>
+                    <div class="gridlayout-left-side-bar gridlayout-item">
+                    </div>
+
+
+                </Template>
+            </DxGridLayoutItem>
+            <DxGridLayoutItem Row="i" Column="2">
+                <Template>
+                    <div class="gridlayout-right-side-bar gridlayout-item">
+                        Right Bar
+                    </div>
+                </Template>
+            </DxGridLayoutItem>
+        }
+
+        <DxGridLayoutItem Row="@(_rowCount+2)" Column="0" ColumnSpan="3">
+            <Template>
+                <div class="gridlayout-footer gridlayout-item">
+                    Footer
+                </div>
+            </Template>
+        </DxGridLayoutItem>
+    </Items>
+</DxGridLayout>
+
+@code {
+    int _rowCount = 10;
+
+    SampleSessionInfo[] ChartsData;
+    protected override async Task OnInitializedAsync()
+    {
+        ChartsData = SampleSessionInfo.GetSamples().Take(2).ToArray();
+    }
+
+    class DataItem
+    {
+        public string Quarter { get; set; }
+        public double Revenue { get; set; }
+    }
+    bool showDataLabels;
+    DataItem[] revenue2019 = new DataItem[]
+    {
+        new DataItem
+        {
+            Quarter = "Q1",
+            Revenue = 234000
+        },
+        new DataItem
+        {
+            Quarter = "Q2",
+            Revenue = 284000
+        },
+        // new DataItem
+        // {
+        //     Quarter = "Q3",
+        //     Revenue = 274000
+        // },
+        // new DataItem
+        // {
+        //     Quarter = "Q4",
+        //     Revenue = 294000
+        // },
+    };
+
+    DataItem[] revenue2020 = new DataItem[] {
+        new DataItem
+        {
+        Quarter = "Q1",
+        Revenue = 254000
+        },
+        new DataItem
+        {
+        Quarter = "Q2",
+        Revenue = 324000
+        },
+        // new DataItem
+        // {
+        // Quarter = "Q3",
+        // Revenue = 354000
+        // },
+        // new DataItem
+        // {
+        // Quarter = "Q4",
+        // Revenue = 394000
+        // },
+
+    };
+}

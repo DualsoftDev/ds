@@ -8,7 +8,8 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module DBLoggerApi =
-
+    let private random = Random()
+    [<Obsolete("Remove random test data....")>]
     let private updateInfoBase (x:InfoBase, fqdn:string, kindDrive:int,  kindError:int,  kindPause:int) = 
 
         if DBLoggerImpl.logSet.IsNull()
@@ -21,7 +22,16 @@ module DBLoggerApi =
         x.ErrorCount <- DBLogger.Count(fqdn, kindError)
         x.PauseCount <- DBLogger.Count(fqdn, kindPause)
         if (x.DriveSpan + x.ErrorSpan > 0.0) then
-            x.Efficiency <- x.DriveSpan / (x.DriveSpan + x.ErrorSpan) 
+            x.Efficiency <- x.DriveSpan / (x.DriveSpan + x.ErrorSpan)
+
+        // todo: remove random test data
+        x.DriveSpan    <- random.Next(0, 1000)
+        x.DriveAverage <- random.Next(0, 1000)
+        x.ErrorSpan    <- random.Next(0, 1000)
+        x.ErrorAverage <- random.Next(0, 1000)
+        x.ErrorCount   <- random.Next(0, 1000)
+        x.PauseCount   <- random.Next(0, 1000)
+        x.Efficiency   <- random.Next(0, 1000)
 
     let getInfoDevices (xs:Device seq) : InfoDevice seq = 
         if xs.isEmpty()
@@ -30,7 +40,7 @@ module DBLoggerApi =
             let sys  = (xs.First():>LoadedSystem).ContainerSystem
             let jobs = sys.Jobs.SelectMany(fun j -> j.DeviceDefs) 
             xs.Select(fun x->
-                let info = InfoDevice(Name=x.Name, Fqdn = x.QualifiedName)
+                let info = InfoDevice.Create(x)
                 let apis = jobs
                             |> Seq.filter (fun s -> s.ApiItem.System = x.ReferenceSystem)
                             |> Seq.map (fun d -> d.ApiItem)
@@ -74,7 +84,7 @@ module DBLoggerApi =
     let getInfoDevice (x:Device) : InfoDevice =  getInfoDevices([x]) |> Seq.head
     
     let getInfoCall (x:Call) : InfoCall = 
-        let info = InfoCall(Name=x.Name, Fqdn = x.QualifiedName)
+        let info = InfoCall.Create(x)
         let loadedDevices = x.Parent.GetSystem().Devices
         updateInfoBase (info, x.QualifiedName, VertexTag.going|>int,  VertexTag.errorTRx|>int, VertexTag.pause|>int)
         let infoDevices = x.TargetJob.DeviceDefs.Select(fun d->loadedDevices.First(fun f->f.Name = d.DeviceName))
@@ -82,21 +92,21 @@ module DBLoggerApi =
         info
 
     let getInfoReal (x:Real) : InfoReal = 
-        let info = InfoReal(Name=x.Name, Fqdn = x.QualifiedName)
+        let info = InfoReal.Create(x)
         updateInfoBase (info, x.QualifiedName, VertexTag.going|>int,  VertexTag.errorTRx|>int, VertexTag.pause|>int)
         let infoCalls = x.Graph.Vertices.OfType<Call>().Select(getInfoCall)
         info.InfoCalls.AddRange(infoCalls) |>ignore
         info
 
     let getInfoFlow (x:Flow) : InfoFlow = 
-        let info = InfoFlow(Name=x.Name, Fqdn = x.QualifiedName)
+        let info = InfoFlow.Create(x)
         updateInfoBase (info, x.QualifiedName, FlowTag.drive_mode|>int,  FlowTag.flowStopError|>int, FlowTag.flowStopPause|>int)
         let infoReals = x.GetVerticesOfFlow().OfType<Real>().Select(getInfoReal)
         info.InfoReals.AddRange(infoReals) |>ignore
         info
 
     let getInfoSystem (x:DsSystem) : InfoSystem = 
-        let infoSys = InfoSystem(Name=x.Name, Fqdn = x.QualifiedName)
+        let infoSys = InfoSystem.Create(x)
         updateInfoBase (infoSys, x.QualifiedName, SystemTag.sysDrive|>int,  SystemTag.sysStopError|>int, SystemTag.sysStopPause|>int)
         let infoFlows = x.Flows.Select(getInfoFlow)
         infoSys.InfoFlows.AddRange(infoFlows) |>ignore

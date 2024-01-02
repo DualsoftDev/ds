@@ -19,7 +19,7 @@ open Engine.CodeGenHMI
 module RunTime =
 
     type DsCPU(css:CommentedStatement seq, mySystem:DsSystem, loadedSystems:DsSystem seq
-             , cpuMode:RuntimePackage, hmiTags:IDictionary<string, TagWeb>) =
+             , hmiTags:IDictionary<string, TagWeb>) =
 
         let statements = css |> Seq.map(fun f -> f.Statement)
         let mapRungs = getRungMap(statements)
@@ -46,7 +46,11 @@ module RunTime =
                         tagWebChangedFromCpuSubject.OnNext(tagWeb)
                 )
             disposables.Add subscription
-            systems.Iter(fun sys-> cpuModeToggle(sys, cpuMode))
+
+            if RuntimeDS.Package.IsPackageSIM()
+            then stopBtn.BoxedValue <- false
+                 systems.Iter(fun sys-> cpuSimOn(sys))
+                 systems.Iter(fun sys-> preAction(sys, true))
 
         let scanOnce() = 
             //나머지 수식은 Changed Event가 있는것만 수행해줌
@@ -119,10 +123,7 @@ module RunTime =
 
         member x.Run()  = doRun()
         member x.RunInBackground()  = async { doRun() } |> Async.Start
-        member x.AutoDriveSetting()  =          
-            stopBtn.BoxedValue <- false
-            systems.Iter(fun sys-> preAction(sys, cpuMode, true))
-
+    
         member x.Stop() =
             doScanStop()
 
@@ -146,7 +147,7 @@ module RunTime =
     type DsCpuExt  =
         //Job 만들기
         [<Extension>]
-        static member GetDsCPU (dsSys:DsSystem, runtimePackage:RuntimePackage) : DsCPU*HMIPackage =
+        static member GetDsCPU (dsSys:DsSystem) : DsCPU*HMIPackage =
             let loadedSystems = dsSys.GetRecursiveLoadedSystems()
 
             // Initialize storages and load CPU statements
@@ -162,5 +163,5 @@ module RunTime =
             let hmiPackage = ConvertHMIExt.GetHMIPackage(dsSys)   
             let hmiPackageTags = ConvertHMIExt.GetHMIPackageTags(hmiPackage)   
             // Create and return a DsCPU object
-            new DsCPU(css, dsSys, loadedSystems, runtimePackage, hmiPackageTags), hmiPackage
+            new DsCPU(css, dsSys, loadedSystems, hmiPackageTags), hmiPackage
 

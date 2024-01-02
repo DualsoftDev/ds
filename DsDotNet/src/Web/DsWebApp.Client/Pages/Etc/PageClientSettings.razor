@@ -1,7 +1,5 @@
 @* PageClientSettings *@
 @page "/etc/pageclientsettings"
-@using Dual.Web.Blazor.Client.Components
-@using Dual.Web.Blazor.Client.Components.Widgets
 <h3>Settings</h3>
 
 
@@ -37,57 +35,37 @@
 </ModalDialog>
 
 <br/><br/>
-<CompBoxedBlock Title="테이블 보기 설정"> @* BoxForegroundColor="@(Color.Firebrick)" BoxBackgroundColor="@(Color.LightGoldenrodYellow)" TextColor="@(Color.Black)" BorderWidth="1"> *@
-    <DxCheckBox @bind-Checked="@_cs.ShowGroupPanel">Show group panel</DxCheckBox>
-    <DxCheckBox @bind-Checked="@_cs.ShowFilterRow">Show filter row</DxCheckBox>
-    <DxCheckBox @bind-Checked="@_cs.PageSizeSelectorVisible">Show page size selector</DxCheckBox>
-    <DxCheckBox @bind-Checked="@_cs.TextWrapEnabled">Enable text wrap</DxCheckBox>
+@if (_cs != null)
+{
+    <CompBoxedBlock Title="테이블 보기 설정">
+        <CompClientSettingsSelector ClientSettings="_cs" ClientSettingsChanged="onSettingsChanged"/>
+    </CompBoxedBlock>
 
-@* <HxDropdownButtonGroup>
-    <HxDropdownToggleButton Color="ThemeColor.Secondary">Column resize mode (@_cs.ColumnResizeMode)</HxDropdownToggleButton>
-    <HxDropdownMenu>
-        <HxDropdownItem OnClick="@(() => _cs.ColumnResizeMode = GridColumnResizeMode.Disabled )">Disabled</HxDropdownItem>
-        <HxDropdownItem OnClick="@(() => _cs.ColumnResizeMode = GridColumnResizeMode.NextColumn )">Next column</HxDropdownItem>
-        <HxDropdownItem OnClick="@(() => _cs.ColumnResizeMode = GridColumnResizeMode.ColumnsContainer )">Columns container</HxDropdownItem>
-    </HxDropdownMenu>
-</HxDropdownButtonGroup>
- *@
-</CompBoxedBlock>
+}
 
 
 @code {
     ModalDialog _modalDialog;
     string _oldPassword, _newPassword, _passwordConfirm;
-    ClientSettings _cs;
+    DsClientSettings _cs;
 
     // User _me;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-
-        _cs = ClientGlobal.ClientSettings;
-        // var userName = ClientGlobal?.UserSession?.UserName;
-        // var users = await Http.GetFromJsonAsync<User[]>(xxx$"api/dbcache/r/{DexiK.TnUser}");
-        // _me = users.FirstOrDefault(u => u.UserName == userName);
-        // Console.WriteLine($"current user : {userName}, me={_me}");
-
-        NavigationManager.LocationChanged += OnLocationChanged;
+        _cs = ClientGlobal.DsClientSettings;
     }
-    async void OnLocationChanged(object sender, LocationChangedEventArgs args)
+
+    async Task onSettingsChanged(ClientSettings cs)
     {
-        await _cs.SaveAsync(LocalStorage);
+        await ((DsClientSettings)cs).SaveAsync(LocalStorage);
     }
-
-    public void Dispose()
-    {
-        NavigationManager.LocationChanged -= OnLocationChanged;
-    }
-
 
     async Task change()
     {
-    //     if (_me == null)
+        await Task.Yield();
+        //     if (_me == null)
     //     {
     //         await JsDual.Alert($"사용자 {ClientGlobal?.UserSession?.UserName} 에 대한 정보를 서버에서 확인할 수 없습니다!");
     //         return;

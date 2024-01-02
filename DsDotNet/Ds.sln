@@ -147,7 +147,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DsCamServer_NetCore", "Apps
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DsCamImage_NetCore", "Apps\INFO\DXCamImage_NetCore\DsCamImage_NetCore.csproj", "{00416C29-F85B-490A-A15E-4D2ADC2C52B8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DsWebApp.Simulatior", "src\Web\DsWebApp.Simulatior\DsWebApp.Simulatior.csproj", "{51EE2067-7836-4991-A4FA-F79FDE23D875}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DsWebApp.Simulator", "src\Web\DsWebApp.Simulatior\DsWebApp.Simulator.csproj", "{51EE2067-7836-4991-A4FA-F79FDE23D875}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

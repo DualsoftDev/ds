@@ -1,34 +1,30 @@
-using Diagram.View.MSAGL;
 using Dual.Common.Core;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
+using static Engine.CodeGenCPU.FlowManagerModule;
+using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.Core.CoreModule;
 using static Engine.Cpu.RunTime;
 using static Engine.Import.Office.ImportViewModule;
 using static Engine.Import.Office.ViewModule;
 
-namespace DsWebApp.Simulatior
+namespace DsWebApp.Simulator
 {
     public static class DsSimulator
     {
         public static bool Do(DsSystem dsSys, DsCPU dsCpu)
         {
-            List<ViewNode> nodeFlows = ImportViewUtil.GetViewNodesLoadingsNThis(dsSys).ToList();
-            FormDocViewSim simView = new(dsSys, dsCpu);
-            ViewUtil.ViewChangeSubject();
-            ViewUtil.ViewInit(dsSys, nodeFlows);
-
-            Dictionary<ViewNode, UcView> dicView = new();
-            nodeFlows.Iter(f =>
+            dsCpu.MySystem.Flows.Iter(f =>
             {
-                dicView[f] = new UcView();
-                dicView[f].SetGraph(f, f.Flow.Value, false);
+                var reals = f.Graph.Vertices.OfType<Real>();
+                if (reals.Any())
+                    ((VertexManager)reals.First().TagManager).SF.Value = true;
             });
 
-            ViewUtil.UcViews = dicView.Values.ToList();
-            simView.ShowGraph(dsSys, dicView, dsSys.Flows.First().Name);
-            _ = simView.ShowDialog();
+            dsCpu.Run();
+           
 
             return true;
         }

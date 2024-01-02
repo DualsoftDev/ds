@@ -55,6 +55,7 @@ module RunTime =
         let scanOnce() = 
             //나머지 수식은 Changed Event가 있는것만 수행해줌
             let chTags = cpuStorages.ChangedTags()
+            
             let exeStates = chTags.ExecutableStatements(mapRungs) 
             chTags.ChangedTagsClear(systems)
 

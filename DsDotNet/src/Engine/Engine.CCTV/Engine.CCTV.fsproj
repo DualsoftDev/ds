@@ -18,6 +18,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Content Include="..\..\..\Apps\CommonAppSettings.json" Link="CommonAppSettings.json" >
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+    </ItemGroup>
+
+    <ItemGroup>
 		<PackageReference Include="Emgu.CV" Version="4.8.1.5350" />
 		<PackageReference Include="Emgu.CV.Bitmap" Version="4.8.1.5350" />
 		<PackageReference Include="Emgu.CV.runtime.windows" Version="4.8.1.5350" />

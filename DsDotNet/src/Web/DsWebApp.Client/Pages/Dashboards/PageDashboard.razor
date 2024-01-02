@@ -14,31 +14,18 @@
 }
 else
 {
-    <DxButton Click="@(() => _refCompShowHide.Toggle())" IconCssClass="oi oi-cog" Text="@_showOrHide" />
-
-    <div class="ds-sticky-container">
-        <CompShowHide @ref="_refCompShowHide" ShowOnInit="true">
-            <div class="ds-non-sticky">
-                <CompFqdnSelector Systems="_infoSystems" OnItemSelected="@(new Action<IInfoBase>(act => onItemSelected(act)))" />
-            </div>
-        </CompShowHide>
-
-
+    <CompFqdnSelectorOverlay Systems="_infoSystems" OnItemSelected="@(infoItem => onItemSelected(infoItem))">
         @if (_pops != null)
         {
-            <div class="@(_refCompShowHide.IsVisible ? "ds-sticky" : "")">
-                <DsChartEfficiency PopData="_pops" InnerTitle="@_selected.Name" />
-                <DsMultiBarChartEfficiency InfoParent="Selected" />
-                <DsInfoGridSingle Info="_selected" ClientSettings="@ClientGlobal.ClientSettings" />
-            </div>
+            <DsChartEfficiency PopData="_pops" InnerTitle="@_selected.Name" />
+            <DsMultiBarChartEfficiency InfoParent="Selected" />
+            <DsInfoGridSingle Info="_selected" ClientSettings="@ClientGlobal.ClientSettings" />
         }
-    </div>
+    </CompFqdnSelectorOverlay>
 }
 
 
 @code {
-    CompShowHide _refCompShowHide;
-    string _showOrHide => (_refCompShowHide == null || _refCompShowHide.IsVisible) ? "Hide" : "Show";
     IInfoBase _selected;
     InfoBase Selected { get; set; }
     EfficiencyCategoryItem[] _pops;

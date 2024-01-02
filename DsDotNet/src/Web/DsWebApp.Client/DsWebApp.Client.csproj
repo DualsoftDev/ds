@@ -10,6 +10,9 @@
 	  <EmbeddedResource Remove="Pages\Hmis\Obsolete\**" />
 	  <None Remove="Pages\Hmis\Obsolete\**" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Compile Remove="Components\CompFqdnSelector.razor.cs" />
+	</ItemGroup>
 	
 	<ItemGroup>
 		<PackageReference Include="Blazored.Toast" Version="4.1.0" />
@@ -17,7 +20,7 @@
 		<PackageReference Include="DualSoft-Web-Blazor" Version="0.1.13" />
 		<PackageReference Include="DualSoft-Web-Blazor-Client" Version="0.1.24" />
 		<PackageReference Include="DualSoft-Web-Blazor-Client-Canvas2d" Version="0.1.6" />
-		<PackageReference Include="PropertyChanged.Fody" Version="4.1.0" PrivateAssets='All'/>
+		<PackageReference Include="PropertyChanged.Fody" Version="4.1.0" PrivateAssets="All" />
 		<PackageReference Include="Radzen.Blazor" Version="4.23.4" />
 	</ItemGroup>
 	
@@ -30,5 +33,9 @@
 	
 	<ItemGroup>
 	  <Folder Include="Test\" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <None Include="Components\CompFqdnSelector.razor.cs" />
 	</ItemGroup>
 </Project>

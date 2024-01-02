@@ -165,14 +165,14 @@ else
     {
         _selected = info;
         _pops = [
-            new CategoryItem() { Category = PieceOfPizzaType.가동 },
-            new CategoryItem() { Category = PieceOfPizzaType.비가동 },
-            new CategoryItem() { Category = PieceOfPizzaType.에러 },
+            new CategoryItem() { Category = EfficiencyPopType.가동 },
+            new CategoryItem() { Category = EfficiencyPopType.비가동 },
+            new CategoryItem() { Category = EfficiencyPopType.에러 },
         ];
         var (가동, 비가동, 에러) = (
-                _pops[(int)PieceOfPizzaType.가동],
-                _pops[(int)PieceOfPizzaType.비가동],
-                _pops[(int)PieceOfPizzaType.에러]);
+                _pops[(int)EfficiencyPopType.가동],
+                _pops[(int)EfficiencyPopType.비가동],
+                _pops[(int)EfficiencyPopType.에러]);
 
         switch (info)
         {
@@ -180,12 +180,12 @@ else
                 // 가동.Ratio = _random.Next(10, 90);
                 // 에러.Ratio = 100 - 가동.Ratio;
                 // // todo: fix ratio
-                가동.Ratio = infoBase.DriveAverage;
-                에러.Ratio = infoBase.ErrorAverage;
+                가동.Value = infoBase.DriveAverage;
+                에러.Value = infoBase.ErrorAverage;
                 switch (info)
                 {
                     case InfoReal real:
-                        비가동.Ratio = real.WaitTime;
+                        비가동.Value = real.WaitTime;
                         break;
                     case InfoCall call:
                         break;

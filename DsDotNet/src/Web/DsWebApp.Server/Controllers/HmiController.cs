@@ -6,6 +6,8 @@ using static Engine.Core.HmiPackageModule;
 using static Engine.Core.TagWebModule;
 using static Engine.Cpu.RunTime;
 
+using SimpleResult = Dual.Common.Core.ResultSerializable<string, string>;
+
 namespace DsWebApp.Server.Controllers;
 
 /// <summary>
@@ -28,23 +30,23 @@ public class HmiController(ServerGlobal global) : ControllerBaseWithLogger(globa
     }
 
 
-    async Task<string> onTagWebChangedByClientBrowserAsync(TagWeb tagWeb)
+    async Task<SimpleResult> onTagWebChangedByClientBrowserAsync(TagWeb tagWeb)
     {
         try
         {
             var cpu = _model?.Cpu;
             if (cpu == null)
-                return "No Loaded Model";
+                return SimpleResult.Err("No Loaded Model");
 
             await Console.Out.WriteLineAsync($"HmiTagHub has {HmiTagHub.ConnectedClients.Count} connections");
             _model.HMIPackage.UpdateTag(tagWeb);
             cpu.TagWebChangedFromWebSubject.OnNext(tagWeb);
             //await hubContext.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);     <-- cpu.TagWebChangedSubject.OnNext 에서 수행 됨..
-            return null;
+            return SimpleResult.Ok("OK");
         }
         catch (Exception ex)
         {
-            return ex.Message;
+            return SimpleResult.Err(ex.Message);
         }
     }
     /// <summary>
@@ -52,7 +54,7 @@ public class HmiController(ServerGlobal global) : ControllerBaseWithLogger(globa
     /// </summary>
     [Authorize(Roles = "Administrator")]
     [HttpPost("tag")]
-    public async Task<string> SetHmiTag([FromBody] TagWeb tagWeb)
+    public async Task<SimpleResult> SetHmiTag([FromBody] TagWeb tagWeb)
     {
         await Console.Out.WriteLineAsync($"About to change {tagWeb.Name}={tagWeb.Value}");
         return await onTagWebChangedByClientBrowserAsync(tagWeb);
@@ -63,10 +65,10 @@ public class HmiController(ServerGlobal global) : ControllerBaseWithLogger(globa
     /// </summary>
     [Authorize(Roles = "Administrator")]
     [HttpPost("tag/{fqdn}/{tagKind}")]
-    public async Task<string> SetHmiTag(string fqdn, int tagKind, [FromBody] string serializedObject)
+    public async Task<SimpleResult> SetHmiTag(string fqdn, int tagKind, [FromBody] string serializedObject)
     {
         if (_model == null)
-            return "No Loaded Model";
+            return SimpleResult.Err("No Loaded Model");
 
         var kindDescriptions = _model.TagKindDescriptions;
 

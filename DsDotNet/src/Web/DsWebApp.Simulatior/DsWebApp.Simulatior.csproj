@@ -1,0 +1,69 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net7.0-windows</TargetFramework>
+        <UseWindowsForms>true</UseWindowsForms>
+        <EnableComHosting>true</EnableComHosting>
+        <OutputPath>$(SolutionDir)\bin\</OutputPath>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <None Remove="App.config.template" />
+      <None Remove="DS_Library.ds" />
+      <None Remove="HelloDS.ds" />
+      <None Remove="HelloDS.xgwx" />
+      <None Remove="HelloDS.xlsx" />
+      <None Remove="HelloDS.xml" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="..\..\..\src\Engine\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\..\..\Apps\CommonAppSettings.json" Link="CommonAppSettings.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+
+        <PackageReference Include="DualSoft-Common-Winform" Version="0.1.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\src\Diagram\Diagram.View.MSAGL.csproj" />
+        <ProjectReference Include="..\..\..\src\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
+        <ProjectReference Include="..\..\..\src\Engine\Engine.CodeGenPLC\Engine.CodeGenPLC.fsproj" />
+        <ProjectReference Include="..\..\..\src\Engine\Engine.Core\Engine.Core.fsproj" />
+        <ProjectReference Include="..\..\..\src\Engine\Engine.Cpu\Engine.Cpu.fsproj" />
+        <ProjectReference Include="..\..\..\src\Engine\Engine.Import.Office\Engine.Import.Office.fsproj" />
+        <ProjectReference Include="..\..\..\src\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
+        <ProjectReference Include="..\..\..\src\Engine\Engine.Parser\Engine.Parser.csproj" />
+        <ProjectReference Include="..\..\Engine\Engine.Info\Engine.Info.fsproj" />
+        <ProjectReference Include="..\..\Engine\Engine.Runtime\Engine.Runtime.fsproj" />
+    </ItemGroup>
+
+   
+
+
+
+    <ItemGroup>
+        <Compile Update="Properties\Settings.Designer.cs">
+            <DesignTimeSharedInput>True</DesignTimeSharedInput>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>Settings.settings</DependentUpon>
+        </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Properties\Settings.settings">
+            <Generator>SettingsSingleFileGenerator</Generator>
+            <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+        </None>
+    </ItemGroup>
+
+
+
+</Project>

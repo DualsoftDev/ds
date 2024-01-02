@@ -152,14 +152,14 @@ module ConvertCPU =
         then sys.GenerationOrigins()
 
         [
-            //Active 시스템 적용
-            if isActive
-            then 
-                yield! applySystemSpec sys
-                //Flow 적용
-                for f in sys.Flows do
-                    yield! applyOperationModeSpec f
-                    yield! applyFlowMonitorSpec f
+            //Active 시스템 적용  //test ahn loaded는 제외 성능 고려해서 다시 구현
+            //if isActive
+            //then 
+            yield! applySystemSpec sys
+            //Flow 적용
+            for f in sys.Flows do
+                yield! applyOperationModeSpec f
+                yield! applyFlowMonitorSpec f
 
 
             //Vertex 적용

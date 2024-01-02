@@ -4,6 +4,7 @@ using Engine.Runtime;
 using IO.Core;
 
 using System.Reactive.Subjects;
+using static Engine.Core.RuntimeGeneratorModule;
 
 
 namespace DsWebApp.Server.Common;
@@ -61,7 +62,7 @@ public class ServerGlobal
                 Logger.Warn($"Model file not found: {dsZipPath}");
                 return null;
             }
-
+            RuntimeDS.Package = RuntimePackage.StandardPC;
             RuntimeModel = new RuntimeModel(dsZipPath);
             RuntimeModelChangedSubject.OnNext(RuntimeModel);
             return RuntimeModel;

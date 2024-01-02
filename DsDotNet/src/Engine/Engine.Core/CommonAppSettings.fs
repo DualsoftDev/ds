@@ -14,7 +14,6 @@ type LoggerDBSettings() =
 /// "CommonAppSettings.json" 파일
 type DSCommonAppSettings() =
     member val HmiWebServer = "" with get, set
-    member val UrlCCTV = "" with get, set
     member val LoggerDBSettings = getNull<LoggerDBSettings>() with get, set
     static member Load(jsonPath:string) =
         jsonPath

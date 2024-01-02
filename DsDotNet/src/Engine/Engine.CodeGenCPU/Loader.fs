@@ -100,7 +100,8 @@ module CpuLoader =
           
             let result =
                 //자신(Acitve)이 Loading 한 system을 재귀적으로 한번에 가져와 CPU 변환
-                system.GetRecursiveLoadeds() 
+                let systems = system.GetRecursiveLoadeds() 
+                systems
                 |> Seq.distinctBy(fun f->f.ReferenceSystem)
                 |> Seq.map(fun s ->
                     match s with

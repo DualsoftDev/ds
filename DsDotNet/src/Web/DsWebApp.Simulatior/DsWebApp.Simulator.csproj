@@ -2,9 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net7.0-windows</TargetFramework>
-        <UseWindowsForms>true</UseWindowsForms>
-        <EnableComHosting>true</EnableComHosting>
+        <TargetFramework>net7.0</TargetFramework>
         <OutputPath>$(SolutionDir)\bin\</OutputPath>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
         <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
@@ -28,12 +26,6 @@
     </ItemGroup>
 
     <ItemGroup>
-
-        <PackageReference Include="DualSoft-Common-Winform" Version="0.1.4" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\..\..\src\Diagram\Diagram.View.MSAGL.csproj" />
         <ProjectReference Include="..\..\..\src\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
         <ProjectReference Include="..\..\..\src\Engine\Engine.CodeGenPLC\Engine.CodeGenPLC.fsproj" />
         <ProjectReference Include="..\..\..\src\Engine\Engine.Core\Engine.Core.fsproj" />

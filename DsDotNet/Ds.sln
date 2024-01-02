@@ -155,6 +155,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DsWebCam.Server", "Apps\INF
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DsWebCam.Shared", "Apps\INFO\DsWebCam\Shared\DsWebCam.Shared.csproj", "{0DB87A3D-5DBB-4400-B9BF-2F04EBCA8366}"
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DsWebApp.Simulatior", "src\Web\DsWebApp.Simulatior\DsWebApp.Simulatior.csproj", "{51EE2067-7836-4991-A4FA-F79FDE23D875}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DsWebApp.Simulator", "src\Web\DsWebApp.Simulatior\DsWebApp.Simulator.csproj", "{51EE2067-7836-4991-A4FA-F79FDE23D875}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

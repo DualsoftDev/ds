@@ -6,28 +6,6 @@
 
 <CompTitle Icon="oi oi-puzzle-piece" Title="Dashboard" />
 
-<style>
-    .container {
-        display: flex;
-        width: 100%;
-        height: 100vh; /* 뷰포트 높이에 맞게 조절 */
-        overflow: auto; /* 필요한 경우 스크롤 표시 */
-    }
-
-    .sticky {
-        position: sticky;
-        left: 0; /* 왼쪽에 고정 */
-        top: 0; /* 위쪽에 고정 */
-        z-index: 1; /* 다른 콘텐츠 위에 표시 */
-        padding: 10px; /* 원하는 여백 설정 */
-        width: 50%;
-    }
-
-    .non-sticky {
-        flex-grow: 1; /* 남은 공간을 모두 채우도록 함 */
-        padding: 10px; /* 원하는 여백 설정 */
-    }
-</style>
 
 
 @if (_infoSystems == null)
@@ -38,9 +16,9 @@ else
 {
     <DxButton Click="@(() => _refCompShowHide.Toggle())" IconCssClass="oi oi-cog" Text="@_showOrHide" />
 
-    <div class="container">
+    <div class="ds-sticky-container">
         <CompShowHide @ref="_refCompShowHide" ShowOnInit="true">
-            <div class="non-sticky">
+            <div class="ds-non-sticky">
                 <CompFqdnSelector Systems="_infoSystems" OnItemSelected="@(new Action<IInfoBase>(act => onItemSelected(act)))" />
             </div>
         </CompShowHide>
@@ -48,7 +26,7 @@ else
 
         @if (_pops != null)
         {
-            <div class="@(_refCompShowHide.IsVisible ? "sticky" : "")">
+            <div class="@(_refCompShowHide.IsVisible ? "ds-sticky" : "")">
                 <DsChartEfficiency PopData="_pops" InnerTitle="@_selected.Name" />
                 <DsMultiBarChartEfficiency InfoParent="Selected" />
                 <DsInfoGridSingle Info="_selected" ClientSettings="@ClientGlobal.ClientSettings" />

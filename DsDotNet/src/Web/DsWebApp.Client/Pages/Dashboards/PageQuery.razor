@@ -1,0 +1,37 @@
+@* PageQuery *@
+@page "/dashboards/query"
+
+<CompTitle Icon="oi oi-zoom-out" Title="Query" />
+
+
+<sapn class="ds-bordered">
+    <DxCheckBox @bind-Checked="_showTime">Show Time</DxCheckBox>
+</sapn>
+
+<label for="startDate" class="demo-text cw-320 mb-1">
+    &nbsp;시작:&nbsp;
+</label>
+<DxDateEdit @bind-Date="@StartDate"
+            TimeSectionVisible="@_showTime"
+            CssClass="@(_showTime ? "cw-200": "cw-150")"
+            InputId="startDate" />
+
+<span>&nbsp; ~ &nbsp;</span>
+
+<label for="finishDate" class="demo-text cw-320 mb-1">
+    종료:&nbsp;
+</label>
+<DxDateEdit @bind-Date="@EndDate"
+            TimeSectionVisible="@_showTime"
+            CssClass="@(_showTime ? "cw-200": "cw-150")"
+            InputId="finishDate" />
+<span>&nbsp;&nbsp;&nbsp;</span>
+
+
+
+@code {
+    bool _showTime = false;
+    DateTime StartDate { get; set; } = DateTime.Now.Date.AddDays(-1);
+    DateTime EndDate { get; set; } = DateTime.Now.Date;
+
+}

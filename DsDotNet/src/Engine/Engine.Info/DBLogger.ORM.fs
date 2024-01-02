@@ -161,10 +161,18 @@ CREATE VIEW [{Vn.Log}] AS
 
     /// StorageKey(-> TagKind*Fqdn) 로 주어진 항목에 대한 summary (-> Count, Sum)
     type Summary(logSet: LogSet, storageKey: StorageKey, count: int, sum: double) =
+        let mutable count = count
+        let mutable sum = sum
         /// Number rising
-        member val Count = count with get, set
+        member x.Count
+            with get() = count
+            // todo: 여기서 notify info
+            and set(v) = count <- v
         /// Duration sum (sec 단위)
-        member val Sum = sum with get, set
+        member x.Sum
+            with get() = sum
+            // todo: 여기서 notify info
+            and set(v) = sum <- v
         /// Container reference
         member x.LogSet = logSet
         member x.StorageKey = storageKey

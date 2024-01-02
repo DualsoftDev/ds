@@ -22,19 +22,19 @@ else
 {
     <div id="auto">
         <p>
-        <WgtGridPbLamp Text="Auto"     DataItem="@(_system.AutoManualSelectLamp.Item1)" ButtonLampGetter="@_buttonLampGetter" />
-        <WgtGridPbLamp Text="Manual"   DataItem="@(_system.AutoManualSelectLamp.Item2)" ButtonLampGetter="@_buttonLampGetter" />
+            <WgtGridPbLamp Text="Auto"     DataItem="@(_system.AutoManualSelectLamp.Item1)" ButtonLampGetter="@_buttonLampGetter" />
+            <WgtGridPbLamp Text="Manual"   DataItem="@(_system.AutoManualSelectLamp.Item2)" ButtonLampGetter="@_buttonLampGetter" />
 
-        <WgtGridPbLamp Text="Ready"    DataItem="@(_system.ReadyPushLamp)"     ButtonLampGetter="@_buttonLampGetter" />
-        <WgtGridPbLamp Text="Drive"    DataItem="@(_system.DrivePushLamp)"     ButtonLampGetter="@_buttonLampGetter" />
-        <WgtGridPbLamp Text="Home"     DataItem="@(_system.HomePushLamp)"      ButtonLampGetter="@_buttonLampGetter" />
-        <WgtGridPbLamp Text="Clear"    DataItem="@(_system.ClearPushLamp)"     ButtonLampGetter="@_buttonLampGetter" />
-        <WgtGridPbLamp Text="Stop"     DataItem="@(_system.StopPushLamp)"      ButtonLampGetter="@_buttonLampGetter" />
-        <WgtGridPbLamp Text="Em Stop"  DataItem="@(_system.EmergencyPushLamp)" ButtonLampGetter="@_buttonLampGetter" />
-        <WgtGridPbLamp Text="Test"     DataItem="@(_system.TestPushLamp)"      ButtonLampGetter="@_buttonLampGetter" />
+            <WgtGridPbLamp Text="Ready"    DataItem="@(_system.ReadyPushLamp)"     ButtonLampGetter="@_buttonLampGetter" />
+            <WgtGridPbLamp Text="Drive"    DataItem="@(_system.DrivePushLamp)"     ButtonLampGetter="@_buttonLampGetter" />
+            <WgtGridPbLamp Text="Home"     DataItem="@(_system.HomePushLamp)"      ButtonLampGetter="@_buttonLampGetter" />
+            <WgtGridPbLamp Text="Clear"    DataItem="@(_system.ClearPushLamp)"     ButtonLampGetter="@_buttonLampGetter" />
+            <WgtGridPbLamp Text="Stop"     DataItem="@(_system.StopPushLamp)"      ButtonLampGetter="@_buttonLampGetter" />
+            <WgtGridPbLamp Text="Em Stop"  DataItem="@(_system.EmergencyPushLamp)" ButtonLampGetter="@_buttonLampGetter" />
+            <WgtGridPbLamp Text="Test"     DataItem="@(_system.TestPushLamp)"      ButtonLampGetter="@_buttonLampGetter" />
         </p>
 
-    <CompHmiFlowTable Flows="@_system.Flows"/>
+        <CompHmiFlowTable Flows="@_system.Flows"/>
     </div>
 }
 

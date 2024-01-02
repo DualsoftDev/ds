@@ -17,7 +17,7 @@
         EX.TX                                  = (, )
         EX.RX                                  = (, )
     }
-    [layouts] = {   // System.{Interface 명} = (x, y, w, h)
+    [layouts file=""] = {   // System.{Interface 명} = (x, y, w, h)
         A."+" = (1309,405,205,83)
     }
 }

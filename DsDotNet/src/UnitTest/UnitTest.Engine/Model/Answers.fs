@@ -21,7 +21,7 @@ module ModelAnswers =
     let answerEveryScenarioText = """
 [sys] My = {
     [flow] MyFlow = {
-        Seg1 > Seg2; 		// Seg1(Real)> Seg2(Real)
+        Seg1 > Seg2;		// Seg1(Real)> Seg2(Real);
         Seg1 = {
             Ap > Am;		// Ap(Call)> Am(Call);
         }
@@ -33,7 +33,7 @@ module ModelAnswers =
         }
     }
     [flow] F = {
-        R1 > Main2;		// R1(Real)> Main2(Alias) > Ap1(Alias);
+        R1 > Main2;		// R1(Real)> Main2(Alias);
         Main > R3;		// Main(Real)> R3(Real);
         C4 > C5;		// C4(Real)> C5(Real);
         C3 > C5 > C6;		// C3(Real)> C5(Real) > C6(Real);
@@ -66,12 +66,18 @@ module ModelAnswers =
     }
     [prop] = {
         [safety] = {
-        F.Main = { F.Main.Ap; }
-        F.Main.Am = { F.Main; }
+            F.Main = { F.Main.Ap; }
+            F.Main.Am = { F.Main; }
         }
         [layouts] = {
+            C = (1600, 500, 300, 300);
+        }
+        [layouts file="C:/Windows/Web/Wallpaper/Windows/img0.jpg"] = {
             A = (1309, 405, 205, 83);
+            C = (1600, 500, 300, 300);
             B."+" = (1400, 300, 300, 300);
+        }
+        [layouts file="C:/Windows/Web/Screen/img100.jpg"] = {
             B."-" = (1600, 500, 300, 300);
         }
         [finish] = {
@@ -82,9 +88,9 @@ module ModelAnswers =
             F.Main.Ap;
         }
     }
-    [device file="cylinder.ds"] A; // D:/Git/ds-Master/DsDotNet/src/UnitTest/UnitTest.Model/cylinder.ds
-    [device file="cylinder.ds"] B; // D:/Git/ds-Master/DsDotNet/src/UnitTest/UnitTest.Model/cylinder.ds
-    [external file="station.ds"] C; // D:/Git/ds-Master/DsDotNet/src/UnitTest/UnitTest.Model/station.ds
+    [device file="cylinder.ds"] A; // D:/ds/dsA/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
+    [device file="cylinder.ds"] B; // D:/ds/dsA/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
+    [external file="station.ds"] C; // D:/ds/dsA/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/station.ds
 }
 """
 
@@ -361,15 +367,15 @@ module ModelComponentAnswers =
         [s] = {
             StopBTN(_, _) = { F1;F2;F5; }
         }
-        [c] = {
-            ClearBTN(_, _) = { F1;F2;F3;F5; }
-        }
         [e] = {
             EMGBTN3(_, _) = { F3; }
             EMGBTN(_, _) = { F1;F2;F4;F5; }
         }
         [t] = {
             StartTestBTN(_, _) = { F5; }
+        }
+        [c] = {
+            ClearBTN(_, _) = { F1;F2;F3;F5; }
         }
         [h] = {
             HomeBTN(_, _) = { F1;F2;F3;F5; }
@@ -380,6 +386,7 @@ module ModelComponentAnswers =
         }
     }
 }
+//DS Language Version = [0.9.2.16]
 """
 
     let answerTaskLinkorDevice = """

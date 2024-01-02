@@ -222,9 +222,10 @@ module internal ToDsTextModule =
                 yield HwSystemToDs("m", system.ManualHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("d", system.DriveHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("s", system.StopHWButtons.Cast<HwSystemDef>())
-                yield HwSystemToDs("c", system.ClearHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("e", system.EmergencyHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("t", system.TestHWButtons.Cast<HwSystemDef>())
+                yield HwSystemToDs("r", system.ReadyHWButtons.Cast<HwSystemDef>())
+                yield HwSystemToDs("c", system.ClearHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("h", system.HomeHWButtons.Cast<HwSystemDef>())
                 yield $"{tab}{rb}"
 
@@ -300,10 +301,22 @@ module internal ToDsTextModule =
                 |> Seq.map selecter
                 |> Seq.flatten
                 |> getFiltered filter
+
+
+
             let devicesWithLayouts = 
-                system.Devices |> getFiltered (fun device -> device.Xywh <> null)
+                system.LoadedSystems |> getFiltered (fun device -> device.Xywh <> null)
             let deviceApisWithLayouts = 
                 system.Jobs |> getSelectedAndFiltered(fun job -> job.DeviceDefs) (fun dev -> dev.ApiItem.Xywh <> null)
+
+            let layoutList = devicesWithLayouts|> Seq.collect (fun f->f.Channels) 
+                             |> Seq.append (deviceApisWithLayouts |> Seq.collect(fun f-> f.ApiItem.Channels))
+                             |> Seq.filter(fun f->f <> TextEmtpyChannel)
+                             |> Seq.distinct
+
+            let noChannelDev = devicesWithLayouts.Where(fun f->f.Channels.Contains(TextEmtpyChannel))
+            let noChannelApi = deviceApisWithLayouts.Where(fun f->f.ApiItem.Channels.Contains(TextEmtpyChannel))
+                            
             let layouts =
                 let makeList (name:string) (xywh:Xywh) =
                     let posi =
@@ -313,14 +326,28 @@ module internal ToDsTextModule =
                             $"({xywh.X}, {xywh.Y});"
                     $"{tab3}{name} = {posi}"
                 [
-                    if devicesWithLayouts.Any() || deviceApisWithLayouts.Any() then
+                    if (noChannelDev.Any() || noChannelApi.Any())
+                    then
                         yield $"{tab2}[layouts] = {lb}"
-                        for device in devicesWithLayouts do
+                        for device in noChannelDev do
                             yield makeList device.Name device.Xywh
-                        for deviceApi in deviceApisWithLayouts do
+                        for deviceApi in noChannelApi do
                             yield makeList deviceApi.QualifiedName deviceApi.ApiItem.Xywh
                         yield $"{tab2}{rb}"
+
+                    for file in layoutList do
+                        yield $"{tab2}[layouts file={quote file}] = {lb}"
+                        for device in devicesWithLayouts.Where(fun f->f.Channels.Contains file) do
+                            yield makeList device.Name device.Xywh
+                        for deviceApi in deviceApisWithLayouts.Where(fun f->f.ApiItem.Channels.Contains file)  do
+                            yield makeList deviceApi.QualifiedName deviceApi.ApiItem.Xywh
+                        yield $"{tab2}{rb}"
+
+                  
                 ] |> combineLines
+
+
+
             let finishedReals =
                 [
                     for flow in system.Flows do

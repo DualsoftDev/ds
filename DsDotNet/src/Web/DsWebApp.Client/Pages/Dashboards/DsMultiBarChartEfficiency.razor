@@ -1,0 +1,56 @@
+@using static DsWebApp.Client.Pages.Dashboards.DsChartEfficiency
+@using static Engine.Core.InfoPackageModule
+
+@if (! _loading)
+{
+    <DxCheckBox @bind-Checked="ShowPercentage">Show Percentage</DxCheckBox>
+    // https://blazor.radzen.com/stacked-bar-chart
+    <RadzenChart style="height: 400px">
+        <RadzenStackedBarSeries Data="@_drives" Title="가동" Fill="@(EfficiencyPopType.가동.ToColor())" CategoryProperty="Category" ValueProperty="Value" LineType="LineType.Dashed" />
+        <RadzenStackedBarSeries Data="@_errors" Title="에러" Fill="@(EfficiencyPopType.에러.ToColor())" CategoryProperty="Category" ValueProperty="Value" LineType="LineType.Dashed" />
+        <RadzenBarOptions Radius="5" />
+    </RadzenChart>
+}
+
+@code {
+    bool _loading = true;
+    CategoryItem[][] _popData;
+    CategoryItem[] _drives, _errors;
+    [Parameter] public InfoBase InfoParent { get; set; }
+    [Parameter] public bool ShowPercentage { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        InfoBase[] children = null;
+        switch (InfoParent)
+        {
+            case InfoSystem sys:
+                children = sys.InfoFlows.ToArray();
+                break;
+            case InfoFlow flow:
+                children = flow.InfoReals.ToArray();
+                break;
+            case InfoReal real:
+                children = real.InfoCalls.ToArray();
+                break;
+                // case InfoCall call:
+                //     children = call.InfoDevices.ToArray();
+                //     break;
+        }
+
+        _drives = children.Select(ch => new CategoryItem() { Category = ch.Name, Value = getDriveValue(ch) }).ToArray();
+        _errors = children.Select(ch => new CategoryItem() { Category = ch.Name, Value = getErrorValue(ch) }).ToArray();
+
+        _loading = false;
+
+
+        double getDriveValue(InfoBase ib) => ShowPercentage ? 100 * ib.DriveAverage / (ib.DriveAverage + ib.ErrorAverage) : ib.DriveAverage;
+        double getErrorValue(InfoBase ib) => ShowPercentage ? 100 * ib.ErrorAverage / (ib.DriveAverage + ib.ErrorAverage) : ib.ErrorAverage;
+    }
+}

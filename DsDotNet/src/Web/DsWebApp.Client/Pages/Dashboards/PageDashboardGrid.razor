@@ -1,0 +1,149 @@
+@* PageDashboardGrid *@
+<h3>PageDashboardGrid</h3>
+
+@page "/dashboards/grid"
+
+@using System.Collections.ObjectModel
+@using DsWebApp.Client.Pages.Hmis
+@using static Engine.Core.InfoPackageModule
+
+@inherits CompHmiLoader
+@implements IAsyncDisposable
+
+@attribute [Authorize(Roles = "Administrator")]
+
+<h3>System</h3>
+<DxxGrid Data="_infoSystems" >
+    <Columns>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Name)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.DriveSpan)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.DriveAverage)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorSpan)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorAverage)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorCount)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Efficiency)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.PauseCount)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoSystem.LeadTime)"/>
+    </Columns>
+</DxxGrid>
+
+<br/>
+<h3>Flows</h3>
+<DxxGrid Data="_infoFlows">
+    <Columns>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Fqdn)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoFlow.SystemName)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Name)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.DriveSpan)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.DriveAverage)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorSpan)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorAverage)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorCount)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Efficiency)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.PauseCount)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoFlow.LeadTime)"/>
+    </Columns>
+</DxxGrid>
+
+<br />
+<h3>Reals</h3>
+<DxxGrid Data="_infoReals">
+    <Columns>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Fqdn)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoReal.SystemName)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoReal.FlowName)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Name)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.DriveSpan)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.DriveAverage)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorSpan)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorAverage)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorCount)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Efficiency)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.PauseCount)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoReal.GoingCount)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoReal.WaitTime)"/>
+    </Columns>
+</DxxGrid>
+
+
+<br />
+<h3>Calls</h3>
+<DxxGrid Data="_infoCalls">
+    <Columns>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Fqdn)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoCall.SystemName)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoCall.FlowName)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoCall.RealName)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Name)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.DriveSpan)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.DriveAverage)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorSpan)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorAverage)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.ErrorCount)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Efficiency)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.PauseCount)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoCall.GoingCount)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoCall.GoingDeviation)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoCall.WaitTime)"/>
+    </Columns>
+</DxxGrid>
+
+
+
+<br />
+<h3>Devices</h3>
+<DxxGrid Data="_infoDevices">
+    <Columns>
+        <DxGridDataColumn FieldName="@nameof(InfoDevice.Fqdn)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoBase.Name)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoDevice.GoingCount)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoDevice.ErrorCount)"/>
+        <DxGridDataColumn FieldName="@nameof(InfoDevice.RepairAverage)"/>
+    </Columns>
+</DxxGrid>
+@code {
+    InfoSystem[] _infoSystems;
+    InfoFlow[] _infoFlows;
+    InfoReal[] _infoReals;
+    InfoCall[] _infoCalls;
+    InfoDevice[] _infoDevices;
+    protected HubConnectionManager _hubConnectionManager;
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        HubConnection hubConnection = await NavigationManager.ToAbsoluteUri("/hub/info").StartHubAsync();
+        _hubConnectionManager = new HubConnectionManager(hubConnection, registerHubConnection);
+        Console.WriteLine($"Hub initialized on PageDashboardGrid.razor");
+
+
+        IDisposable registerHubConnection(HubConnection hubConnection)
+        {
+            int debugCounter = 0;
+            return hubConnection.On<string>(SK.S2CNInfoChanged, (string infoSystemStr) =>
+            {
+                InfoSystem info = Newtonsoft.Json.JsonConvert.DeserializeObject<InfoSystem>(infoSystemStr);
+                info.PauseCount = ++debugCounter;
+                _infoSystems = [info];
+
+                _infoFlows = info.InfoFlows.ToArray();
+                _infoReals = _infoFlows.SelectMany(f => f.InfoReals).ToArray();
+                _infoCalls = _infoReals.SelectMany(r => r.InfoCalls).ToArray();
+                _infoDevices = _infoCalls.SelectMany(c => c.InfoDevices).DistinctBy(d => d.Fqdn).ToArray();
+
+                StateHasChanged();
+                Console.WriteLine($"Info change notification received with {info.Fqdn}.");
+                ToastService.ShowInfo($"Info change: {info.Fqdn}.");
+                //ClientGlobal.TagChangedSubject.OnNext(info);
+            });
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _hubConnectionManager.DisposeAsync();
+    }
+
+
+
+}

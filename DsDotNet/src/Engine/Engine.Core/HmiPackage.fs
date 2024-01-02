@@ -181,11 +181,9 @@ module HmiPackageModule =
                 let key = (t.Name, t.Kind)
                 match tagMap.TryGetValue(key) with
                 | true, tag when t <> tag -> ()
-                | true, tag ->
-                    // todo : fix me
-                    //verifyM "Duplicate Tag" (tag = t) 
+                | true, _ ->
                     logWarn $"Duplicate Tag: {t.Name}/{t.KindDescription}"
-                | _ -> tagMap.Add(key, t))         //cache.[key] <- getItem()
+                | _ -> tagMap.Add(key, t))         
 
         member x.UpdateTag(name:string, kind:int, newValue:obj) =
             logDebug $"--------- Updating Tag: {name}:{kind}={newValue}"

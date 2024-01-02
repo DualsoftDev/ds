@@ -109,11 +109,19 @@ module ConvertCodeCoreExt =
         member s._dtimeh      = s.GetPv<uint8>(SystemTag.datet_h )
         member s._dtimem      = s.GetPv<uint8>(SystemTag.datet_m )
         member s._dtimes      = s.GetPv<uint8>(SystemTag.datet_s )
-        member s._pause       = s.GetPv<bool>(SystemTag.sysPause)
-        member s._err         = s.GetPv<bool>(SystemTag.sysError)
+        member s._stopPause   = s.GetPv<bool>(SystemTag.sysStopPause)
+        member s._stopErr     = s.GetPv<bool>(SystemTag.sysStopError)
+        member s._drive       = s.GetPv<bool>(SystemTag.sysDrive)
         member s._tout        = s.GetPv<uint16>(SystemTag.timeout)
         member x.S = x |> getSM
         member x.Storages = x.TagManager.Storages
+
+        member s._homeHW  =  
+                    let homes = s.HomeHWButtons.Where(fun s-> s.InTag.IsNonNull())
+                    if homes.any()
+                            then homes.Select(fun s->s.ActionINFunc).ToOr()
+                            else s._off.Expr    
+
 
         member private x.GenerationButtonIO()   = x.HWButtons.Iter(fun f-> createHwApiBridgeTag(f, x))   
         member private x.GenerationLampIO()     = x.HWLamps.Iter(fun f-> createHwApiBridgeTag(f, x))   
@@ -238,8 +246,8 @@ module ConvertCodeCoreExt =
         member f.test_lamp   = getFM(f).GetFlowTag(FlowTag.test_lamp    )
         member f.home_lamp   = getFM(f).GetFlowTag(FlowTag.home_lamp    )
 
-        member f.error  = getFM(f).GetFlowTag(FlowTag.flowError    )
-        member f.pause    = getFM(f).GetFlowTag(FlowTag.flowPause    )
+        member f.stopError  = getFM(f).GetFlowTag(FlowTag.flowStopError    )
+        member f.stopPause    = getFM(f).GetFlowTag(FlowTag.flowStopPause    )
         member f.F = f |> getFM
         member f._on     = f.System._on
         member f._off    = f.System._off
@@ -247,34 +255,38 @@ module ConvertCodeCoreExt =
         //select 버튼은 없을경우 항상 _on
         member f.HwAutoSelects =  f.System.AutoHWButtons.Where(fun b->b.SettingFlows.Contains(f))
         member f.HwManuSelects =  f.System.ManualHWButtons.Where(fun b->b.SettingFlows.Contains(f))
-        member f.HwAutoExpr   = getButtonExpr(f, f.System.AutoHWButtons  )
+        member f.HwAutoExpr = getButtonExpr(f, f.System.AutoHWButtons  )
         member f.HwManuExpr = getButtonExpr(f, f.System.ManualHWButtons)
 
         //push 버튼은 없을경우 항상 _off
-        member f.BtnDriveExpr = getButtonExpr(f, f.System.DriveHWButtons    ) <||> f._sim.Expr
-        member f.BtnStopExpr  = getButtonExpr(f, f.System.StopHWButtons     )
-        member f.BtnEmgExpr   = getButtonExpr(f, f.System.EmergencyHWButtons)
-        member f.BtnTestExpr  = getButtonExpr(f, f.System.TestHWButtons     )
-        member f.BtnReadyExpr = getButtonExpr(f, f.System.ReadyHWButtons    ) <||> f._sim.Expr
-        member f.BtnClearExpr = getButtonExpr(f, f.System.ClearHWButtons    )
-        member f.BtnHomeExpr  = getButtonExpr(f, f.System.HomeHWButtons     )
+        member f.HWBtnDriveExpr = getButtonExpr(f, f.System.DriveHWButtons    ) <||> f._sim.Expr
+        member f.HWBtnStopExpr  = getButtonExpr(f, f.System.StopHWButtons     )
+        member f.HWBtnEmgExpr   = getButtonExpr(f, f.System.EmergencyHWButtons)
+        member f.HWBtnTestExpr  = getButtonExpr(f, f.System.TestHWButtons     )
+        member f.HWBtnReadyExpr = getButtonExpr(f, f.System.ReadyHWButtons    ) <||> f._sim.Expr
+        member f.HWBtnClearExpr = getButtonExpr(f, f.System.ClearHWButtons    )
+        member f.HWBtnHomeExpr  = getButtonExpr(f, f.System.HomeHWButtons     )
 
-        member f.ModeAutoHwHMIExpr   =    f.HwAutoExpr <&&> !!f.HwManuExpr <||> f._sim.Expr
-        member f.ModeManualHwHMIExpr =  !!f.HwManuExpr <&&>   f.HwAutoExpr
+        member f.ModeAutoHwHMIExpr   =  if f.HwManuSelects.any() 
+                                        then f.HwAutoExpr <&&> !!f.HwManuExpr <||> f._sim.Expr
+                                        else f.HwAutoExpr <&&> !!f._off.Expr  <||> f._sim.Expr
+        member f.ModeManualHwHMIExpr =  if f.HwManuSelects.any() 
+                                        then f.HwManuExpr <&&> !!f.HwAutoExpr 
+                                        else f.HwManuExpr <&&> !!f._off.Expr  
         member f.ModeAutoSwHMIExpr   =    f.auto_btn.Expr <&&> !!f.manual_btn.Expr
         member f.ModeManualSwHMIExpr =  !!f.auto_btn.Expr <&&>   f.manual_btn.Expr
 
         member f.AutoExpr   =  
-                if f.HwAutoSelects.any()
+                if f.HwAutoSelects.any() //hw 있으면 hw만 보는것으로
                 then f.ModeAutoHwHMIExpr
-                     <||> !!f.ModeAutoHwHMIExpr <&&> !!f.ModeManualHwHMIExpr <&&> (f.ModeAutoSwHMIExpr)
                 else f.ModeAutoSwHMIExpr
 
         member f.ManuExpr   =  
-                if f.HwManuSelects.any()
+                if f.HwManuSelects.any() //hw 있으면 hw만 보는것으로
                 then f.ModeManualHwHMIExpr
-                     <||> !!f.ModeAutoHwHMIExpr <&&> !!f.ModeManualHwHMIExpr <&&> (f.ModeManualSwHMIExpr)
                 else f.ModeManualSwHMIExpr
+
+                    
 
         member f.GetReadAbleTags() =
             FlowTag.GetValues(typeof<FlowTag>).Cast<FlowTag>()

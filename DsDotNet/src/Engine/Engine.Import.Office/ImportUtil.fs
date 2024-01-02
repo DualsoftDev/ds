@@ -24,6 +24,7 @@ module ImportU =
         refSystem.TryFindExportApiItem([| refSystem.Name; apiName |]).Value
 
 
+
     let private createCallVertex
         (
             mySys: DsSystem,
@@ -50,11 +51,8 @@ module ImportU =
                                 Call.Create(job, DuParentReal(parentReal.Value))
                             else
                                 Call.Create(job, DuParentFlow(parentFlow.Value))
-
-                        call.TargetJob.DeviceDefs
-                            .OfType<TaskDev>()
-                            .Iter(fun a -> a.ApiItem.Xywh <- node.CallPosition)
-
+                        updateCallLayout (call, node.Position)
+                        
                         call
                     else
                         node.Shape.ErrorName(ErrID._52, node.PageNum)
@@ -290,7 +288,19 @@ module ImportU =
                     else 
                         node.LampHeadPageDefs.ForEach(fun l -> mySys.AddLamp(l.Value, $"{l.Key}_{flow.Value.Name}", "", "", flow.Value, new HashSet<Func>())))
                 )      
-      
+        //MakeLayout 만들기
+        [<Extension>]
+        static member MakeLayout(doc: pptDoc, mySys: DsSystem) =
+            doc.Nodes
+            |> Seq.filter (fun node -> node.NodeType = LAYOUT)
+            |> Seq.iter (fun node ->
+                let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = node.Name)
+                if dev.IsNull() 
+                then node.Shape.ErrorName(ErrID._61, node.PageNum)
+                else dev.Xywh <- Xywh(node.Position.X, node.Position.Y
+                                   , node.Position.W, node.Position.H) 
+                                   )
+
         //Condition 조건 적용
         [<Extension>]
         static member MakeCondition(doc: pptDoc, mySys: DsSystem) = () ///작성 필요
@@ -621,6 +631,19 @@ module ImportU =
             ApplyIO(sys, pageTables)
 
         [<Extension>]
+        static member UpdateLayouts(doc: pptDoc, sys: DsSystem) =
+            let layouts = doc.GetLayouts()
+            layouts.Iter(fun (path, dev, rect)->
+                let device = sys.Devices.FirstOrDefault(fun f-> f.Name = dev)
+                if(device.IsNonNull()) 
+                then device.Xywh <- Xywh(rect.X, rect.Y, rect.Width, rect.Height)
+                     device.Channels.Add(path.Trim()) |> ignore
+                else Office.ErrorPPT(ErrorCase.Name, ErrID._61, $"layout {dev}", 0, 0u)
+
+            )        
+
+
+        [<Extension>]
         static member GetLoadNodes(doc: pptDoc) =
             let calls = doc.Nodes.Where(fun n -> n.NodeType.IsCall && n.Alias.IsNone)
 
@@ -656,7 +679,7 @@ module ImportU =
 
         [<Extension>]
         static member BuildSystem(doc: pptDoc, sys: DsSystem) =
-
+            
             doc.MakeJobs(sys)
             doc.MakeFlows(sys) |> ignore
             //EMG & Start & Auto 리스트 만들기
@@ -671,5 +694,6 @@ module ImportU =
             doc.MakeSafeties(sys)
             //ApiTxRx  만들기
             doc.MakeApiTxRx()
-
+            //Layout  만들기
+            doc.MakeLayout(sys)
             doc.IsBuilded <- true

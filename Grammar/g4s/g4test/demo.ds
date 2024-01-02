@@ -93,7 +93,7 @@
 	EX.S711_AD_AutoRun.TX                    	= (, , )
 	EX.S711_AD_AutoRun.RX                    	= (, ,)
 }
-[layouts] = {
+[layouts file=""] = {
 	DS.S711_AD.RobotUnload_‘G = (888,526,156,53)
 	DS.S711_AD.PinUP = (595,631,156,53)
 	DS.S711_AD.AutoRun = (569,956,364,105)

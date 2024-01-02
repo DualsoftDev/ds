@@ -9,6 +9,7 @@ open System.Runtime.CompilerServices
 module DsText =
     let [<Literal>] TextLibrary   = "DS_Library"
     let [<Literal>] TextDSJson    = "dualsoft.json"
+    let [<Literal>] TextEmtpyChannel = "EmtpyChannel" //channel 정보 없는 대상 Dev및 API 
     let [<Literal>] TextSkip      = "-"  //주소 스킵 처리
     let [<Literal>] TextAddrEmpty = "_"  //주소 없음 Error 대상
     //edge
@@ -255,15 +256,15 @@ module DsTextExport =
     let [<Literal>] TextXlsAddress           = "외부주소"
     let [<Literal>] TextXlsVariable          = "내부변수"
 
-    let [<Literal>] TextXlsAutoBTN           = "자동선택"
-    let [<Literal>] TextXlsManualBTN         = "수동선택"
-    let [<Literal>] TextXlsDriveBTN          = "운전푸쉬"
-    let [<Literal>] TextXlsStopBTN           = "정지푸쉬"
-    let [<Literal>] TextXlsClearBTN          = "해지푸쉬"
-    let [<Literal>] TextXlsEmergencyBTN      = "비상푸쉬"
-    let [<Literal>] TextXlsTestBTN           = "시운전푸쉬"
-    let [<Literal>] TextXlsHomeBTN           = "복귀푸쉬"
-    let [<Literal>] TextXlsReadyBTN          = "준비푸쉬"
+    let [<Literal>] TextXlsAutoBTN           = "자동셀렉트"
+    let [<Literal>] TextXlsManualBTN         = "수동셀렉트"
+    let [<Literal>] TextXlsDriveBTN          = "운전푸쉬버튼"
+    let [<Literal>] TextXlsStopBTN           = "정지푸쉬버튼"
+    let [<Literal>] TextXlsClearBTN          = "해지푸쉬버튼"
+    let [<Literal>] TextXlsEmergencyBTN      = "비상푸쉬버튼"
+    let [<Literal>] TextXlsTestBTN           = "시운전푸쉬버튼"
+    let [<Literal>] TextXlsHomeBTN           = "복귀푸쉬버튼"
+    let [<Literal>] TextXlsReadyBTN          = "준비푸쉬버튼"
 
     let [<Literal>] TextXlsAutoLamp          = "자동램프"
     let [<Literal>] TextXlsManualLamp        = "수동램프"

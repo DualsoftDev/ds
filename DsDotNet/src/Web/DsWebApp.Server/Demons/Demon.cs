@@ -7,8 +7,16 @@ using Engine.Runtime;
 using IO.Core;
 
 using static Engine.Core.TagWebModule;
+using static Engine.Core.InfoPackageModule;
 
 using SK = DsWebApp.Shared.SK;
+using static Engine.Core.CoreModule;
+using Engine.Info;
+using Engine.Core;
+using static Engine.Core.Interface;
+using Microsoft.Extensions.Options;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace DsWebApp.Server.Demons;
 
@@ -16,34 +24,51 @@ public partial class Demon : BackgroundService
 {
     ServerGlobal _serverGlobal;
     IHubContext<FieldIoHub> _hubContextFieldIo;
+    IHubContext<InfoHub> _hubContextInfo;
     IHubContext<HmiTagHub> _hubContextHmiTag;
     ILog _logger => _serverGlobal.Logger;
+    DsSystem _dsSystem => _serverGlobal.RuntimeModel?.System;
 
-    public Demon(ServerGlobal serverGlobal, IHubContext<ModelHub> hubContextModel, IHubContext<FieldIoHub> hubContextFieldIo, IHubContext<HmiTagHub> hubContextHmiTag)
+    public Demon(
+        ServerGlobal serverGlobal
+        , IHubContext<ModelHub> hubContextModel
+        , IHubContext<FieldIoHub> hubContextFieldIo
+        , IHubContext<InfoHub> hubContextInfo
+        , IHubContext<HmiTagHub> hubContextHmiTag)
     {
         _serverGlobal = serverGlobal;
         _hubContextFieldIo = hubContextFieldIo;
         _hubContextHmiTag = hubContextHmiTag;
+        _hubContextInfo = hubContextInfo;
 
         IDisposable innerSubscriptionFromWeb = null;
         IDisposable innerSubscriptionFromCpu = null;
         if (serverGlobal.RuntimeModel != null)
         {
-            innerSubscriptionFromWeb = subscribeTagChangeWeb(serverGlobal.RuntimeModel);
-            innerSubscriptionFromCpu = subscribeTagChangeCpu(serverGlobal.RuntimeModel);
+            onRuntimeModelReady(serverGlobal.RuntimeModel);
         }
         serverGlobal.RuntimeModelChangedSubject.Subscribe(runtimeModel =>
         {
-            innerSubscriptionFromWeb?.Dispose();
-            innerSubscriptionFromWeb = subscribeTagChangeWeb(runtimeModel);
-            innerSubscriptionFromCpu?.Dispose();
-            innerSubscriptionFromCpu = subscribeTagChangeCpu(runtimeModel);
+            onRuntimeModelReady(runtimeModel);
 
             // todo : notify model change
             bool isCpuRunning = false;
             var modelDto = new RuntimeModelDto(serverGlobal.ServerSettings.RuntimeModelDsZipPath, isCpuRunning);
             hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, modelDto);
         });
+
+        void onRuntimeModelReady(RuntimeModel runtimeModel)
+        {
+            innerSubscriptionFromWeb?.Dispose();
+            innerSubscriptionFromWeb = subscribeTagChangeWeb(runtimeModel);
+            innerSubscriptionFromCpu?.Dispose();
+            innerSubscriptionFromCpu = subscribeTagChangeCpu(runtimeModel);
+
+
+            DsSystem[] systems = [ runtimeModel.System ];
+            ModelCompileInfo mci = new(runtimeModel.SourceDsZipPath, runtimeModel.SourceDsZipPath);
+            DBLogger.InitializeLogWriterOnDemandAsync(_serverGlobal.DsCommonAppSettings,  systems, mci);
+        }
 
         IDisposable subscribeTagChangeWeb(RuntimeModel runtimeModel)
         {
@@ -90,6 +115,21 @@ public partial class Demon : BackgroundService
                     {
                         if (n % 60 == 0)
                             _logger.Debug($"{n / 60}: Background Service is working..");
+
+                        if (n % 3 == 0)
+                            Task.Run(async () =>
+                            {
+                                if (_dsSystem != null && InfoHub.ConnectedClients.Any())
+                                {
+                                    Console.WriteLine($"HmiTagHub has {InfoHub.ConnectedClients.Count} connected clients.");
+                                    InfoSystem infoSystem = InfoPackageModuleExt.GetInfo(_dsSystem);
+                                    // System.Text.Json.JsonSerializer.Serialize 는 동작 안함.
+                                    var newtonJson = Newtonsoft.Json.JsonConvert.SerializeObject(infoSystem);
+                                    await _hubContextInfo.Clients.All.SendAsync(SK.S2CNInfoChanged, newtonJson);
+                                }
+                                else
+                                    _logger.Debug("No InfoHub clients connected");
+                            }).FireAndForget();
 
                         //if (n % 2 == 0)
                         //    Task.Run(async () =>

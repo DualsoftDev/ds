@@ -10,6 +10,7 @@ open Antlr4.Runtime
 open Dual.Common.Core.FS
 open Engine.Parser
 open Engine.Core
+open Engine.Core.DsText
 open type Engine.Parser.dsParser
 open type DsParser
 open System.Collections.Generic
@@ -168,6 +169,11 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         absoluteFilePath, relativeFilePath
 
 
+    member private x.GetLayoutPath(fileSpecCtx: FileSpecContext) =
+        fileSpecCtx
+            .TryFindFirstChild<FilePathContext>()
+            .Value.GetText()
+            .DeQuoteOnDemand()
 
     override x.EnterLoadDeviceBlock(ctx: LoadDeviceBlockContext) =
         let fileSpecCtx = ctx.TryFindFirstChild<FileSpecContext>().Value
@@ -556,16 +562,27 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     tryParseAndReturn (getText (xywh.h ()))
                 )
 
-            let putXywh (task: DsTask) (xywh: Xywh) = task.ApiItem.Xywh <- xywh
+            let putXywh (task: DsTask) (xywh: Xywh)  (channel: string) =
+                task.ApiItem.Channels.Add channel |>ignore
+                task.ApiItem.Xywh <- xywh
 
-            let iterTasks (nameCompo: Fqdn) (xywh: Xywh) (tasks: List<'T>) =
+            let iterTasks (nameCompo: Fqdn) (xywh: Xywh)  (channel: string) (tasks: List<'T>) =
                 if tasks.Any() then
                     let task = tasks.TryFindWithNameComponents(nameCompo)
 
                     if task.IsSome then
-                        putXywh task.Value xywh
+                        putXywh task.Value xywh channel
+
+      
 
             for layoutCtx in listLayoutCtx do
+                
+                let fileSpecCtx = layoutCtx.TryFindFirstChild<FileSpecContext>();
+                let filePath = 
+                    match fileSpecCtx with
+                    |Some s ->  x.GetLayoutPath(s)
+                    |None -> $"{TextEmtpyChannel}"
+
                 let listPositionDefCtx = layoutCtx.Descendants<PositionDefContext>().ToList()
 
                 for positionDef in listPositionDefCtx do
@@ -578,10 +595,11 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     | 1 ->
                         let device = FindExtension.TryFindLoadedSystem(system, name) |> Option.get
                         device.Xywh <- xywh
+                        device.Channels.Add filePath |>ignore
                     | 2 ->
                         system.Jobs
                         |> iter (fun job ->
-                            job.DeviceDefs.ToList() |> iterTasks nameCompo xywh)
+                            job.DeviceDefs.ToList() |> iterTasks nameCompo xywh filePath)
                     | _ -> failwithlog "invalid name component"
 
         let fillFinished (system: DsSystem) (listFinishedCtx: List<dsParser.FinishBlockContext>) =

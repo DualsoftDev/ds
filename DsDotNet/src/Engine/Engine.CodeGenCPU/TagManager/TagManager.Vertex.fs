@@ -3,6 +3,7 @@ namespace Engine.CodeGenCPU
 open System.Diagnostics
 open Engine.Core
 open System.Collections.Generic
+open System.Linq
 open System
 open Dual.Common.Core.FS
 
@@ -37,19 +38,20 @@ module TagManagerModule =
             if v :? Real && (v :?> Real).Finished
             then et.Value <- true           
             et
-        let originBit     = createTag "OG"   VertexTag.origin
-        let pauseBit      = createTag "PA"   VertexTag.pause
-        let errorTxBit    = createTag "E1"   VertexTag.errorTx
-        let errorRxBit    = createTag "E2"   VertexTag.errorRx
-        let readyBit      = createTag "R"    VertexTag.ready
-        let goingBit      = createTag "G"    VertexTag.going
-        let finishBit     = createTag "F"    VertexTag.finish
-        let homingBit     = createTag "H"    VertexTag.homing
-
-        let forceStartBit = createTag "SF"   VertexTag.forceStart
-        let forceResetBit = createTag "RF"   VertexTag.forceReset
-        let forceOnBit    = createTag "ON"   VertexTag.forceOn
-        let forceOffBit   = createTag "OFF"  VertexTag.forceOff
+        let originBit      = createTag "OG"   VertexTag.origin
+        let pauseBit       = createTag "PA"   VertexTag.pause
+        let errorTxBit     = createTag "E1"   VertexTag.errorTx
+        let errorRxBit     = createTag "E2"   VertexTag.errorRx
+        let errorErrTRXBit = createTag "ErrTRX"   VertexTag.errorTRx
+        let readyBit       = createTag "R"    VertexTag.ready
+        let goingBit       = createTag "G"    VertexTag.going
+        let finishBit      = createTag "F"    VertexTag.finish
+        let homingBit      = createTag "H"    VertexTag.homing
+                           
+        let forceStartBit  = createTag "SF"   VertexTag.forceStart
+        let forceResetBit  = createTag "RF"   VertexTag.forceReset
+        let forceOnBit     = createTag "ON"   VertexTag.forceOn
+        let forceOffBit    = createTag "OFF"  VertexTag.forceOff
 
 
         interface ITagManager with
@@ -63,9 +65,9 @@ module TagManagerModule =
         member _.System = v.Parent.GetFlow().System
         member _.Storages = s
 
-        member _._on  = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.on)    :?> PlanVar<bool>
-        member _._off  = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.off)  :?> PlanVar<bool>
-        member _._sim  = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.sim)  :?> PlanVar<bool>
+        member _._on    = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.on)   :?> PlanVar<bool>
+        member _._off   = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.off)  :?> PlanVar<bool>
+        member _._sim   = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.sim)  :?> PlanVar<bool>
 
         ///Segment Start Tag
         member _.ST         = startTagBit
@@ -103,6 +105,8 @@ module TagManagerModule =
         member _.E1         =  errorTxBit
         ///Error Rx Monitor
         member _.E2         =  errorRxBit
+        ///Error TRx Monitor
+        member _.ErrTRX         =  errorErrTRXBit
 
         member _.CreateTag(name) = createTag name
 
@@ -119,7 +123,8 @@ module TagManagerModule =
             | VertexTag.pause               -> pauseBit              :> IStorage
             | VertexTag.errorTx             -> errorTxBit            :> IStorage
             | VertexTag.errorRx             -> errorRxBit            :> IStorage
-                                                                   
+            | VertexTag.errorTRx            -> errorErrTRXBit        :> IStorage
+                                                                  
             | VertexTag.forceStart            -> forceStartBit       :> IStorage
             | VertexTag.forceReset            -> forceResetBit       :> IStorage
             | VertexTag.forceOn               -> forceOnBit          :> IStorage

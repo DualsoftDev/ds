@@ -18,17 +18,23 @@ type VertexMCoin with
             match coin.Parent.GetCore() with
             | :? Real as r ->
                 let tasks = r.V.OriginInfo.Tasks
+                let hwHome = call.Parent.GetFlow().sop.Expr <&&> call.Parent.GetSystem()._homeHW
                 if tasks.Where(fun (_,ty) -> ty = InitialType.On) //NeedCheck 처리 필요 test ahn
                         .Select(fun (t,_)->t).Contains(td)
-                    then r.V.RO.Expr <&&> if td.ExistIn then !!td.ActionINFunc else call._on.Expr
-                    else r.V.RO.Expr <&&> call._off.Expr
+                    then hwHome <||> r.V.RO.Expr <&&> if td.ExistIn then !!td.ActionINFunc else call._on.Expr
+                    else hwHome <||> r.V.RO.Expr <&&> call._off.Expr
             | _ -> 
                 call._off.Expr
 
         [
             for td in call.TargetJob.DeviceDefs do
                 let sets = 
-                    ((dop <&&> startTags <||> getStartPointExpr (call, td)) <||> (mop <&&> forceStarts))
+                    ((dop <&&> startTags 
+                    <||> getStartPointExpr (call, td)) 
+                    <||> (mop <&&> forceStarts)
+                    
+                    
+                    )
                 <&&>
                     !!td.MutualReset(coin.System)
                         .Select(fun f -> f.ApiItem.PS)
@@ -36,16 +42,15 @@ type VertexMCoin with
 
                 let rsts =
                     let action =
-                        if td.ExistIn
-                        then
+                        //if td.ExistIn
+                        //then
                             if call.UsingTon
                                 then call.V.TDON.DN.Expr   //On Delay
                                 else td.ActionINFunc
-                        else call._off.Expr
+                        //else call._off.Expr
 
                     (action <||> coin._sim.Expr)
                     <&&> td.ApiItem.PE.Expr
-                    <||> !!dop
 
                 yield (sets, rsts) ==| (td.ApiItem.PS, getFuncName())
         ]
@@ -59,7 +64,7 @@ type VertexMCoin with
                 if td.ApiItem.TXs.any()
                 then 
                     let sets = td.ApiItem.PE.Expr <&&> td.ApiItem.PS.Expr 
-                           <&&> coin.Flow.dop.Expr
+                           //<&&> coin.Flow.dop.Expr
 
                     if call.TargetJob.ActionType = JobActionType.Push 
                     then 

@@ -21,17 +21,14 @@ else
 
 @code {
     string _guid;
-    string _class;
-    bool _loading { get; set; } = true;
+    bool _loading = true;
 
     [Parameter] public Func<object, HMIPushLampMode> ButtonLampModeGetter { get; set; }
     [Parameter] public string Text { get; set; }
     [Parameter] public object DataItem { get; set; }
 
-    bool _enabled = false;
     TagWeb _tagButton, _tagLamp, _tagMode;
     string _text;
-    ButtonRenderStyleMode _style = ButtonRenderStyleMode.Contained;
     CompositeDisposable _disposables = new();
 
     protected override async Task OnInitializedAsync()
@@ -81,8 +78,8 @@ else
     {
         _tagButton.SetValue(true);
         Console.WriteLine($"Sending true({_tagButton.Name}).");
-        var anyError = await Http.PostTagAsync(_tagButton, AuthenticationStateProvider, NavigationManager);
-        if (anyError.NonNullAny())
-            await JsDual.Alert($"Error while posting tag({_tagButton.Name}) change: {anyError}");
+        var result = await Http.PostTagAsync(_tagButton, AuthenticationStateProvider, NavigationManager);
+        if (result.IsError)
+            await JsDual.Alert($"Error while posting tag({_tagButton.Name}) change: {result.Error}");
     }
 }

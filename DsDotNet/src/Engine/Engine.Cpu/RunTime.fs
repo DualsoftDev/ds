@@ -25,6 +25,7 @@ module RunTime =
         let mapRungs = getRungMap(statements)
         let cpuStorages = mapRungs.Keys
         let tagStorages = mySystem.TagManager.Storages
+        let stopBtn = (mySystem.TagManager :?> SystemManager).GetSystemTag(SystemTag.stop_btn)
         let systems = [mySystem] @ loadedSystems
         let mutable cts = new CancellationTokenSource()
         let mutable run:bool = false
@@ -45,6 +46,7 @@ module RunTime =
                         tagWebChangedFromCpuSubject.OnNext(tagWeb)
                 )
             disposables.Add subscription
+            systems.Iter(fun sys-> cpuModeToggle(sys, cpuMode))
 
         let scanOnce() = 
             //나머지 수식은 Changed Event가 있는것만 수행해줌
@@ -69,20 +71,18 @@ module RunTime =
 
         let doRun() = 
             logInfo "--- Running CPU.."
-            systems.Iter(fun sys-> cpuModeToggle(sys, cpuMode))
-            
-            
             if not run then 
                 run <- true
                 Async.StartImmediate(asyncStart, cts.Token) |> ignore
 
-        let doStop() = 
+        let doScanStop() = 
             logInfo "--- Stopping CPU.."
             cts.Cancel()
             cts <- new CancellationTokenSource() 
             run <- false;
 
         let doStepByStatusAsync(activeSys) =
+            for s in statements do s.Do() 
             task {
                 let mutable endStepByStatus = false
                 while not(endStepByStatus) do
@@ -113,32 +113,31 @@ module RunTime =
         member x.IsRunning = run
         member x.CommentedStatements = css
         
-        
-
         member x.Dispose() =
-            doStop()
+            x.Reset()
             disposables.Dispose()
 
         member x.Run()  = doRun()
         member x.RunInBackground()  = async { doRun() } |> Async.Start
         member x.AutoDriveSetting()  =          
+            stopBtn.BoxedValue <- false
             systems.Iter(fun sys-> preAction(sys, cpuMode, true))
 
-        member x.Stop() = doStop()
+        member x.Stop() =
+            doScanStop()
 
         member x.Step() =
-            doStop()
-            scanOnce()
+            doScanStop()
+            scanOnce() |> ignore
 
         member x.StepByStatusAsync(activeSys:DsSystem) = 
-            doStop()
+            doScanStop()
             doStepByStatusAsync(activeSys)
 
         member x.Reset() =
-            doStop()
-            syncReset(systems, false)
-            scanOnce()
-
+            doScanStop()
+            syncReset(mySystem)
+            scanOnce() |> ignore
 
         member x.TagWebChangedFromWebSubject = tagWebChangedFromWebSubject
         member x.TagWebChangedFromCpuSubject = tagWebChangedFromCpuSubject

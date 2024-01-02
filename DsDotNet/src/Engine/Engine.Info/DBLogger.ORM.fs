@@ -93,6 +93,7 @@ CREATE TABLE [{Tn.User}] (
     , [username]    NVARCHAR(64) NOT NULL       CHECK(LENGTH(username) <= 64)
     , [password]    NVARCHAR(512)               CHECK(LENGTH(password) <= 512) -- NOT NULL
     , [isAdmin]     TINYINT NOT NULL DEFAULT 0
+    , [roles]       NVARCHAR(512)                -- "Administrator" role 은 여기에 포함되지 않음.
     , CONSTRAINT user_name_uniq UNIQUE (username)
 );
 
@@ -153,7 +154,6 @@ CREATE VIEW [{Vn.Log}] AS
         member val At = at with get, set
         member val Value: obj = value with get, set
 
-    type TagKind = int
     type Fqdn = string
     type StorageKey = TagKind * Fqdn
 
@@ -161,10 +161,18 @@ CREATE VIEW [{Vn.Log}] AS
 
     /// StorageKey(-> TagKind*Fqdn) 로 주어진 항목에 대한 summary (-> Count, Sum)
     type Summary(logSet: LogSet, storageKey: StorageKey, count: int, sum: double) =
+        let mutable count = count
+        let mutable sum = sum
         /// Number rising
-        member val Count = count with get, set
+        member x.Count
+            with get() = count
+            // todo: 여기서 notify info
+            and set(v) = count <- v
         /// Duration sum (sec 단위)
-        member val Sum = sum with get, set
+        member x.Sum
+            with get() = sum
+            // todo: 여기서 notify info
+            and set(v) = sum <- v
         /// Container reference
         member x.LogSet = logSet
         member x.StorageKey = storageKey

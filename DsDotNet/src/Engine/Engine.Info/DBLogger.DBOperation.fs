@@ -12,7 +12,6 @@ open System.Collections.Generic
 open System.Collections.Concurrent
 open DBLoggerORM
 
-type TagKindTuple = TagKind * string
 
 [<AutoOpen>]
 module internal DBLoggerImpl =
@@ -25,25 +24,8 @@ module internal DBLoggerImpl =
 
     let createConnection () = createConnectionWith connectionString
 
-
-    type EnumEx() =
-        static member Extract<'T when 'T: struct>() : TagKindTuple array =
-            let typ = typeof<'T>
-            let values = Enum.GetValues(typ) :?> 'T[] |> Seq.cast<int> |> toArray
-
-            let names = Enum.GetNames(typ) |> map (fun n -> $"{typ.Name}.{n}")
-            Array.zip values names
-
-    let getAllTagKinds () : TagKindTuple array =
-        EnumEx.Extract<SystemTag>()
-        @ EnumEx.Extract<FlowTag>()
-        @ EnumEx.Extract<VertexTag>()
-        @ EnumEx.Extract<ApiItemTag>()
-        @ EnumEx.Extract<ActionTag>()
-
-
     let getNewTagKindInfosAsync (conn: IDbConnection, tr: IDbTransaction) =
-        let tagKindInfos = getAllTagKinds ()
+        let tagKindInfos = GetAllTagKinds ()
 
         task {
             let! existingTagKindMap = conn.QueryAsync<ORMTagKind>($"SELECT * FROM [{Tn.TagKind}];", null, tr)

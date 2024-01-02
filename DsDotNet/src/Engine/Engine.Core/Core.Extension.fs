@@ -164,7 +164,7 @@ type SystemExt =
                 let inValidActionTags = inValidActionTags(x);
                 let inValidHwSystemTag = inValidHwSystemTag(x);
                 if inValidActionTags.Any() then
-                    failwithf $"Device IO Table을 작성하세요 \n{String.Join('\n', inValidActionTags)}"
+                    failwithf $"Add I/O Table을 수행하세요 \n\n{String.Join('\n', inValidActionTags)}"
                 if inValidHwSystemTag.Any() then
-                    failwithf $"HW 조작 IO Table을 작성하세요 \n{String.Join('\n', inValidHwSystemTag)}"
+                    failwithf $"HW 조작 IO Table을 작성하세요 \n\n{String.Join('\n', inValidHwSystemTag)}"
 

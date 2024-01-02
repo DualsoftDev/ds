@@ -1,5 +1,7 @@
 //using IoHubClient = IO.Core.Client;
 
+using Blazored.LocalStorage;
+
 using DsWebApp.Shared;
 
 using Dual.Common.Core;
@@ -21,25 +23,26 @@ public class ClientGlobal : ClientGlobalBase
     public HMIPackage HmiPackage { get; set; }
     public Subject<TagWeb> TagChangedSubject = new Subject<TagWeb>();
 
-    ServerSettings _serverSettings;
-    public async Task<ServerSettings> GetServerSettingsAsync(HttpClient http)
-    {
-        if (_serverSettings == null)
-            _serverSettings = await http.GetFromJsonAsync<ServerSettings>("api/serversettings");
+    public ServerSettings ServerSettings { get; private set; }
+    public DsClientSettings DsClientSettings => (DsClientSettings)base.ClientSettings;
 
-        return _serverSettings;
+    public async Task InitializeAsync(HttpClient http, ILocalStorageService localStorage)
+    {
+        if (ServerSettings == null)
+            ServerSettings = await http.GetFromJsonAsync<ServerSettings>("api/serversettings");
+
+        if (ServerSettings == null)
+            Console.Error.WriteLine("Error: ServerSettings is null.");
+
+        base.ClientSettings = await DsClientSettings.ReadAsync(localStorage);
     }
 
     RuntimeModelDto _modelDto;
     HubConnection _hubConnectionModel;
     public async Task<ResultSerializable<RuntimeModelDto, ErrorMessage>> GetModelDtoAsync(HttpClient http)
     {
-        await Console.Out.WriteLineAsync("[1]");
         if (_modelDto == null)
-        {
-            await Console.Out.WriteLineAsync("[2]");
             return await http.GetResultSimpleAsync<RuntimeModelDto>($"api/model");
-        }
 
         return ResultSerializable<RuntimeModelDto, ErrorMessage>.Ok(_modelDto);
     }

@@ -1,0 +1,115 @@
+@* PageClientSettings *@
+@page "/etc/pageclientsettings"
+<h3>Settings</h3>
+
+
+<DxButton Text="테마 변경" Click="@(() => NavigationManager.NavigateTo("/demo/theme-switcher"))"></DxButton>
+<br/><br/>
+<DxButton Text="비밀번호 변경" Click="@(() => _modalDialog.Open())"></DxButton>
+
+<ModalDialog @ref="@_modalDialog" Title="비밀번호 변경">
+    <div class="row">
+        <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
+            <div class="mb-3 text-center">
+                <h3>비밀번호 변경</h3>
+            </div>
+            <div class="mb-3">
+                <label>Password 확인</label>
+                <input @bind="_oldPassword" type="password" class="form-control" placeholder="Password" />
+            </div>
+            <div class="mb-3">
+                <label>New Password</label>
+                <input @bind="_newPassword" type="password" class="form-control" placeholder="Password" />
+            </div>
+            <div class="mb-3">
+                <label>Confirm Password</label>
+                <input @bind="_passwordConfirm" type="password" class="form-control" placeholder="Password" />
+            </div>
+
+            <div class="mb-3 d-flex justify-content-center">
+                <button @onclick="change" class="btn btn-primary mx-2">Change</button>
+                <button @onclick="onCancel" class="btn btn-secondary mx-2">Cancel</button>
+            </div>
+        </div>
+    </div>
+</ModalDialog>
+
+<br/><br/>
+@if (_cs != null)
+{
+    <CompBoxedBlock Title="테이블 보기 설정">
+        <CompClientSettingsSelector ClientSettings="_cs" ClientSettingsChanged="onSettingsChanged"/>
+    </CompBoxedBlock>
+
+}
+
+
+@code {
+    ModalDialog _modalDialog;
+    string _oldPassword, _newPassword, _passwordConfirm;
+    DsClientSettings _cs;
+
+    // User _me;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        _cs = ClientGlobal.DsClientSettings;
+    }
+
+    async Task onSettingsChanged(ClientSettings cs)
+    {
+        await ((DsClientSettings)cs).SaveAsync(LocalStorage);
+    }
+
+    async Task change()
+    {
+        await Task.Yield();
+        //     if (_me == null)
+    //     {
+    //         await JsDual.Alert($"사용자 {ClientGlobal?.UserSession?.UserName} 에 대한 정보를 서버에서 확인할 수 없습니다!");
+    //         return;
+    //     }
+    //     if (_oldPassword != _me.Password)
+    //     {
+    //         await JsDual.Alert("Incorrect password!");
+    //         return;
+    //     }
+    //     if (_newPassword != _passwordConfirm)
+    //     {
+    //         await JsDual.Alert("Mismatch two passwords!");
+    //         return;
+    //     }
+
+    //     var option = await Http.GetFromJsonAsync<OptionSerializable<string>>($"api/auth/encrypt-password/{_newPassword}");
+    //     option.Iter(
+    //         async some =>
+    //         {
+    //             _me.Password = some;
+    //             var result = await Http.PostAsJsonResultSimpleAsync($"api/db/c/{DexiK.TnUser}", _me);
+    //             result.Iter(
+    //                 ok => {
+    //                     ToastService.ShowInfo("Succeeded to change password.");
+    //                     _modalDialog.Close();
+    //                 },
+    //                 async err =>
+    //                 {
+    //                     var message = $"Failed to change password:\r\n{err}";
+    //                     await JsDual.Alert(message);
+    //                 }
+    //             );
+    //         },
+    //         async () =>
+    //         {
+    //             await JsDual.Alert("Failed to get password from server!");
+    //             return;
+    //         }
+    //     );
+    }
+
+    void onCancel()
+    {
+        _modalDialog.Close();
+    }
+
+}

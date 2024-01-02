@@ -40,7 +40,7 @@ module PathManager =
                  
                     // Validate file path
                     if String.IsNullOrWhiteSpace filePath then
-                        raise (new ArgumentException($"Invalid characters in {filePath}"))
+                        raise (new ArgumentException($"Invalid path String.IsNullOrWhiteSpace"))
                     if not (Path.HasExtension filePath) then
                         raise (new ArgumentException($"file has no extension in {filePath}"))
                     

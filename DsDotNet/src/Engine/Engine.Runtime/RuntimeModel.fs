@@ -8,7 +8,6 @@ open Engine.Parser.FS
 open System.Collections.Generic
 open Dual.Common.Core.FS
 open Engine.CodeGenCPU
-open Engine.Info
 open Engine.CodeGenHMI.ConvertHMI
 type FilePath = string
 
@@ -16,7 +15,7 @@ type FilePath = string
 type RuntimeModel(zipDsPath:FilePath) =
     let model:Model = ParserLoader.LoadFromConfig (unZip zipDsPath) 
     let dsCPU, hmiPackage = DsCpuExt.GetDsCPU(model.System, RuntimePackage.StandardPC)
-    let kindDescriptions = DBLoggerApi.GetAllTagKinds() |> Tuple.toDictionary
+    let kindDescriptions = GetAllTagKinds() |> Tuple.toDictionary
     interface IDisposable with
         member x.Dispose() = x.Dispose()
 
@@ -26,6 +25,7 @@ type RuntimeModel(zipDsPath:FilePath) =
 
     /// DsCPU: call Run, Step, Reset, Stop method on DsCPU
     member x.Cpu = dsCPU
+    member x.System = model.System
     member x.Dispose() = dsCPU.Dispose()
 
 type IoHub(zmqSettingsJson:FilePath) =

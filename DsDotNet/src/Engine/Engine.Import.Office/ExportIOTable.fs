@@ -10,9 +10,6 @@ open System.Text
 open System.Data
 open System.Runtime.CompilerServices
 
-open DocumentFormat.OpenXml
-open DocumentFormat.OpenXml.Packaging
-open DocumentFormat.OpenXml.Spreadsheet
 
 [<AutoOpen>]
 module ExportIOTable =
@@ -116,14 +113,14 @@ module ExportIOTable =
         emptyLine ()
         emptyLine ()
 
-        toLampText (sys.DriveHWLamps, ExcelCase.XlsDriveLamp)
         toLampText (sys.AutoHWLamps, ExcelCase.XlsAutoLamp)
         toLampText (sys.ManualHWLamps, ExcelCase.XlsManualLamp)
-        toLampText (sys.TestHWLamps, ExcelCase.XlsTestLamp)
+        toLampText (sys.DriveHWLamps, ExcelCase.XlsDriveLamp)
         toLampText (sys.StopHWLamps, ExcelCase.XlsStopLamp)
+        toLampText (sys.EmergencyHWLamps, ExcelCase.XlsEmergencyLamp)
+        toLampText (sys.TestHWLamps, ExcelCase.XlsTestLamp)
         toLampText (sys.ReadyHWLamps, ExcelCase.XlsReadyLamp)
         toLampText (sys.IdleHWLamps, ExcelCase.XlsIdleLamp)
-        toLampText (sys.EmergencyHWLamps, ExcelCase.XlsEmergencyLamp)
 
         emptyLine ()
         emptyLine ()
@@ -142,9 +139,8 @@ module ExportIOTable =
         table.Columns.Remove($"{IOColumn.Func}")
         table
 
-    let ToDataCSVFlows  (system: DsSystem) (flowNames:string seq) (conatinSys:bool)  =
-        
-        let dataTable = ToTable system (system.Flows.Where(fun f->flowNames.Contains(f.Name))) conatinSys
+
+    let ToDataTableToCSV  (dataTable: DataTable) (fileName:string)  =
         let csvContent = new StringBuilder()
         // 컬럼 헤더 추가
         let columnNames =
@@ -167,10 +163,12 @@ module ExportIOTable =
             csvContent.AppendLine(String.Join("\t", fieldValues |> Seq.toArray)) |> ignore)
 
         // 임시 파일 경로를 생성
-        let tempFilePath = Path.Combine(Path.GetTempPath(), "DSExportedIO.csv")
+        let tempFilePath = Path.Combine(Path.GetTempPath(), $"{fileName}.csv")
         // CSV 내용을 파일에 씀
         File.WriteAllText(tempFilePath, csvContent.ToString())
         tempFilePath
+
+
 
    
 
@@ -180,4 +178,12 @@ module ExportIOTable =
         static member ExportDataTableToExcel (system: DsSystem) (filePath: string) =
             let dataTables = [|ToIOListDataSet system|]
             createSpreadsheet filePath dataTables 40.0
-          
+        [<Extension>]
+        static member ToDataCSVFlows  (system: DsSystem) (flowNames:string seq) (conatinSys:bool)  =
+            let dataTable = ToTable system (system.Flows.Where(fun f->flowNames.Contains(f.Name))) conatinSys
+            ToDataTableToCSV dataTable "IOTABLE"
+        [<Extension>]
+        static member ToDataCSVLayouts (xs: Flow seq) =
+            let dataTable = ToLayoutTable xs 
+            ToDataTableToCSV dataTable "LAYOUT"
+      

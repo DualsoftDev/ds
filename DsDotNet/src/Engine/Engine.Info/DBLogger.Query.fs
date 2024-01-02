@@ -48,8 +48,8 @@ module internal DBLoggerQueryImpl =
                         assert (duration >= 0)
                         sum <- sum + duration
                         inspectLog tails
-                    | _ when b1 = b2 -> failwithlogf $"ERROR.  duplicated consecutive values detected."
-                    | _ -> failwithlogf $"ERROR.  Expect (rising, falling)."
+                    | _ when b1 = b2 -> failwithlogf $"ERROR.  duplicated consecutive values detected. ({log1.Storage.Name}:{b1}, {log2.Storage.Name}:{b2})"
+                    | _ -> failwithlogf $"ERROR.  Expect ({log1.Storage.Name}:rising, {log2.Storage.Name}:falling)."
 
             logs |> inspectLog
 

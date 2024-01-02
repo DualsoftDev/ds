@@ -56,13 +56,10 @@ module CoreModule =
      
         member _.LoadedName with get() = loadedName and set(value) = loadedName <- value
 
-        /////////////확장 객체로 추후 위치 수정 test ahn
         member val Xywh:Xywh = null with get, set
-        member val ErrorMsg:string = "" with get, set
-        member val GoingCount:int = 0 with get, set
-        member val ErrorCount:int = 0 with get, set
-        member val ErrorAvgTime:float = 0.0 with get, set
-        ////////////확장 객체로 추후 위치 수정 test ahn
+        ///CCTV 경로 및 배경 이미지 경로 복수의 경로에 배치가능
+        member val Channels = HashSet<string>()
+
 
 
         /// 다른 장치를 로딩하려는 시스템에서 로딩된 시스템을 참조합니다.
@@ -75,6 +72,10 @@ module CoreModule =
     /// *.ds 파일을 읽어 새로운 인스턴스를 만들어 삽입하는 구조입니다.
     and Device (loadedDevice: DsSystem, param: DeviceLoadParameters) =
         inherit LoadedSystem(loadedDevice, param)
+        static let mutable id = 0
+        do
+            id <- id + 1
+        member val Id = id with get
 
     /// 공유 인스턴스. *.ds 파일의 절대 경로를 기준으로 하나의 인스턴스만 생성하고 이를 참조하는 개념입니다.
     and ExternalSystem (loadedSystem: DsSystem, param: DeviceLoadParameters) =
@@ -96,6 +97,7 @@ module CoreModule =
         member _.LoadedSystems = loadedSystems |> seq
         member _.Devices = loadedSystems.OfType<Device>() |> Seq.toArray 
         member _.ExternalSystems = loadedSystems.OfType<ExternalSystem>() |> Seq.toArray
+        member _.LayoutChannels = loadedSystems |> Seq.collect(fun s->s.Channels) |> distinct
         member _.ApiUsages = apiUsages |> seq
         member val Jobs = ResizeArray<Job>()
         member val Flows = createNamedHashSet<Flow>()
@@ -241,6 +243,7 @@ module CoreModule =
         member _.ApiItem = api
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
         member val ApiName = this.QualifiedName
+        member val DeviceName = loadedName
         member val Funcs  = HashSet<Func>() with get, set
 
 
@@ -276,6 +279,8 @@ module CoreModule =
         member val TXs = createQualifiedNamedHashSet<Real>()
         member val RXs = createQualifiedNamedHashSet<Real>()
         member val Xywh:Xywh = null with get, set
+        ///CCTV 경로 및 배경 이미지 경로 복수의 경로에 배치가능
+        member val Channels = HashSet<string>()
 
 
     /// API 의 reset 정보:  "+" <||> "-";

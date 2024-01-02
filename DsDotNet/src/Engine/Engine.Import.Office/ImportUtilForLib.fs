@@ -31,6 +31,14 @@ module ImportUtilForLib =
           ShareableSystemRepository = sRepo
 
           LoadingType = loadingType }
+          
+    let updateCallLayout (call:Call, xyhw:Xywh) =
+        call.TargetJob.DeviceDefs
+            .OfType<TaskDev>()
+            .Iter(fun a ->
+                    a.ApiItem.Xywh <- xyhw
+                    a.ApiItem.Channels.Add(TextEmtpyChannel) |>ignore
+                    )
 
     let addLoadedLibSystemNCall
         (
@@ -74,26 +82,25 @@ module ImportUtilForLib =
         if not (devOrg.ApiItems.any (fun f -> f.Name = apiPureName)) then
             node.Shape.ErrorName(ErrID._49, node.PageNum)
 
-        let tasks = HashSet<DsTask>()
-        let jobType = getJobActionType apiName
-        match jobType with
-        | MultiAction cnt ->  
-            for i in [1..cnt] do
-                let devOrg = if i = 1 then devOrg
-                             else ParserLoader.LoadFromActivePath libFilePath |> fst
 
-                let mutiName = $"{loadedName}_G{i}"
-                tasks.Add(getLoadedTasks devOrg mutiName)|>ignore
-        | _->
-            tasks.Add(getLoadedTasks devOrg loadedName)|>ignore
+        let job =
+            let tasks = HashSet<DsTask>()
+            match getJobActionType apiName with
+            | MultiAction cnt ->  
+                for i in [1..cnt] do
+                    let devOrg = if i = 1 then devOrg
+                                    else ParserLoader.LoadFromActivePath libFilePath |> fst
+
+                    let mutiName = $"{loadedName}_G{i}"
+                    tasks.Add(getLoadedTasks devOrg mutiName)|>ignore
+            | _->
+                tasks.Add(getLoadedTasks devOrg loadedName)|>ignore
+            Job(loadedName + "_" + apiName, tasks |> Seq.toList)
 
 
-        let job = Job(loadedName + "_" + apiName, tasks |> Seq.toList)
         mySys.Jobs.Add(job)
 
         let call = Call.Create(job, parent)
-        call.TargetJob.DeviceDefs
-            .OfType<TaskDev>()
-            .Iter(fun a -> a.ApiItem.Xywh <- node.CallPosition)
+        updateCallLayout(call, node.Position)
 
         call

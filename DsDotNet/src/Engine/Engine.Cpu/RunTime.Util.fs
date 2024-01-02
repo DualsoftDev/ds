@@ -6,6 +6,7 @@ open System
 open System.Linq
 open System.Reactive.Linq
 open System.Collections.Generic
+open Engine.CodeGenCPU
 
 [<AutoOpen>]
 module internal RunTimeUtil =
@@ -66,23 +67,19 @@ module internal RunTimeUtil =
 
     ///시뮬레이션 비트 토글
     let cpuModeToggle(sys:DsSystem, mode:RuntimePackage) =
-        sys.TagManager.Storages
-            .Where(fun w->  w.Value.TagKind = (int)SystemTag.sim)
-            .Iter(fun t -> t.Value.BoxedValue <- (mode.IsPackageSIM()))
-  
+        let simTag = (sys.TagManager :?> SystemManager).GetSystemTag(SystemTag.sim) 
+        simTag.BoxedValue <- (mode.IsPackageSIM())
    
     ///HMI Reset
-    let syncReset((*statements:Statement seq,*) systems:DsSystem seq, activeSys:bool) =
-        let stgs = systems.First().TagManager.Storages
-        let systemOn =  stgs.First(fun w-> w.Value.TagKind = (int)SystemTag.on).Value
-        let stgs =  stgs.Where(fun w-> w.Value <> systemOn)
+    let syncReset(system:DsSystem ) =
+        let stgs = system.TagManager.Storages
+        let stgs = stgs.Where(fun w-> w.Value.TagKind <> (int)SystemTag.on)
 
-        if activeSys then
-            for tag in stgs do
-                let stg = tag.Value
-                match stg with
-                | :? TimerCounterBaseStruct as tc ->
-                    tc.ResetStruct()  // 타이머 카운터 리셋
-                | _ ->
-                    stg.BoxedValue <- textToDataType(stg.DataType.Name).DefaultValue()
+        for tag in stgs do
+            let stg = tag.Value
+            match stg with
+            | :? TimerCounterBaseStruct as tc ->
+                tc.ResetStruct()  // 타이머 카운터 리셋
+            | _ ->
+                stg.BoxedValue <- textToDataType(stg.DataType.Name).DefaultValue()
 

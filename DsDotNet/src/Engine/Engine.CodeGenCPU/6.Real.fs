@@ -25,7 +25,7 @@ type VertexMReal with
 
     member v.R3_RealStartPoint(): CommentedStatement  =
         let set = (v.G.Expr <&&> !!v.RR.Expr) <||>
-                  (v.H.Expr <&&> !!v.OG.Expr)
+                  (v.H.Expr <&&> !!v.OG.Expr) 
         let rst = v._off.Expr
 
         (set, rst) --| (v.RO, getFuncName())

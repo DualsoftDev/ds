@@ -9,7 +9,7 @@ open System.Reflection
 open System.IO
 
 module MSG_TEST = 
-    let testPath = @$"{__SOURCE_DIRECTORY__}../../../../Apps/OfficeAddIn/PowerPointAddInHelper/HelloDS.pptx"
+    let testPath = @$"{__SOURCE_DIRECTORY__}../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils/HelloDS.pptx"
     
     [<Fact>]
     let ``MSG_CHECK`` () =
@@ -34,7 +34,13 @@ module MSG_TEST =
         MSG_HWSETTING.Do("192.168.9.100", false)|> Assert.True
     [<Fact>]
     let ``MSG_SIMULATION`` () =
-        MSG_SIMULATION.Do(testPath, "", false)|> Assert.True
+        MSG_SIMULATION.Do(testPath, false)|> Assert.True
     [<Fact>]
     let ``MSG_ANIMATION`` () =
-        MSG_ANIMATION.Do(testPath,"", false)|> Assert.True
+        MSG_ANIMATION.Do(testPath, false)|> Assert.True
+    [<Fact>]
+    let ``MSG_TIMECHART`` () =
+        MSG_TIMECHART.Do(testPath, false)|> Assert.True
+    [<Fact>]
+    let ``MSG_LAYOUT`` () =
+        MSG_LAYOUT.Do(testPath, false)|> Assert.True

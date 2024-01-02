@@ -18,6 +18,6 @@
         it.F;
     }
 }
-[layouts] = {
+[layouts file=""] = {
 	P.F.Vp = (30, 50)
 }

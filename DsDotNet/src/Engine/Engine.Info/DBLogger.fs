@@ -3,6 +3,7 @@ namespace Engine.Info
 open Engine.Core
 open Dual.Common.Core.FS
 open System
+open System.IO
 
 
 type DBLogger() =
@@ -89,6 +90,14 @@ type DBLogger() =
         DBLoggerQueryImpl.average (DBLoggerImpl.logSet, fqdn, tagKind)
 
     static member GetDsFilePath(connectionString: string) =
+        let filePathOption = connectionString.Split('=').TryLast()
+        match filePathOption with
+        | Some filePath ->
+            if not <| File.Exists filePath then
+                failwithf $"{filePath} does not exist."
+        | None ->
+            failwithf $"{connectionString} is in the wrong format. Expected format: Data Source=Path..."
+
         DBLoggerImpl
             .queryPropertyDsConfigJsonPathWithConnectionStringAsync(connectionString)
             .Result

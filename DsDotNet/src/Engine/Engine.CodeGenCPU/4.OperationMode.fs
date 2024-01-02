@@ -10,7 +10,7 @@ open Dual.Common.Core.FS
 type Flow with
 
     member f.O1_ReadyOperationState(): CommentedStatement =
-        let set = f.ready_btn.Expr <||> f.BtnReadyExpr 
+        let set = f.ready_btn.Expr <||> f.HWBtnReadyExpr 
         let rst = f.eop.Expr <||> f.sop.Expr
 
         (set, rst) ==| (f.rop, getFuncName())
@@ -29,13 +29,13 @@ type Flow with
 
 
     member f.O4_EmergencyOperationState(): CommentedStatement =
-        let set = f.emg_btn.Expr <||> f.BtnEmgExpr
+        let set = f.emg_btn.Expr <||> f.HWBtnEmgExpr
         let rst = f._off.Expr
 
         (set, rst) --| (f.eop, getFuncName())
 
     member f.O5_StopOperationState(): CommentedStatement =
-        let set = (f.stop_btn.Expr <||> f.BtnStopExpr <||> f.sop.Expr) <&&> !!f.BtnClearExpr
+        let set = (f.stop_btn.Expr <||> f.HWBtnStopExpr <||> f.sop.Expr) <&&> !!f.HWBtnClearExpr
         let setErrs = f.Graph.Vertices.OfType<Real>().Select(getVM) 
                         |> Seq.collect(fun r-> [|r.E1; r.E2|])
         let rst = f.clear_btn.Expr //test ahn lightPLC 모드 준비중
@@ -43,13 +43,13 @@ type Flow with
         (set <||> setErrs.ToOrElseOff(f.System), rst) ==| (f.sop, getFuncName())
 
     member f.O6_DriveOperationMode (): CommentedStatement =
-        let set = f.drive_btn.Expr <||> f.BtnDriveExpr 
+        let set = f.drive_btn.Expr <||> f.HWBtnDriveExpr 
         let rst = !!f.aop.Expr <||>  f.top.Expr
 
         (set, rst) ==| (f.dop, getFuncName())
 
     member f.O7_TestOperationMode (): CommentedStatement =
-        let set = f.test_btn.Expr <||> f.BtnTestExpr
+        let set = f.test_btn.Expr <||> f.HWBtnTestExpr
         let rst = !!f.aop.Expr <||> f.dop.Expr
 
         (set, rst) ==| (f.top, getFuncName())

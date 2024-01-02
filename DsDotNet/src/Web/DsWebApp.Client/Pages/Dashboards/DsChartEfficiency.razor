@@ -1,0 +1,35 @@
+@* DsChartEfficiency *@
+<RadzenChart>
+    <RadzenDonutSeries Data="@PopData"
+                       CategoryProperty="@nameof(EfficiencyCategoryItem.CategoryName)"
+                       ValueProperty="@nameof(EfficiencyCategoryItem.Value)"
+                       Fills="@EfficiencyPop.FillColors">
+        <TitleTemplate>
+            <div class="rz-donut-content">
+                @InnerTitle
+            </div>
+        </TitleTemplate>
+        <TooltipTemplate Context="data">
+            <div>
+                <span>@data.Category</span>:
+                <strong>@data.Value</strong>
+                <div class="text-black">
+                    <a class="link-with-underline">Show details</a>     @* onclick="@(() => DetailClicked?.Invoke(this, @data.Category))" *@
+                </div>
+            </div>
+        </TooltipTemplate>
+
+    </RadzenDonutSeries>
+</RadzenChart>
+@code {
+    [Parameter] public EfficiencyCategoryItem[] PopData { get; set; }
+    [Parameter] public string InnerTitle { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var xxx = PopData.Select(p => $"{p.Category}={p.Value}").JoinString(", ");
+        Console.WriteLine($"DsChartEfficiency.OnInitializedAsync: {xxx}");
+    }
+
+}

@@ -277,7 +277,8 @@ module PPTDocModule =
 
 
         member x.GetTables(colCnt: int) = doc.GetTablesWithPageNumbers colCnt
-
+        member x.GetLayouts() = doc.GetLayouts()
+        
         member x.GetPage(pageNum: int) =
             pages.Values |> Seq.filter (fun p -> p.PageNum = pageNum) |> Seq.head
 

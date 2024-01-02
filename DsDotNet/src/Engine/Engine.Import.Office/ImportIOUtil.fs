@@ -76,6 +76,6 @@ module ImportIOUtil =
         let outAddr = getValidAddress(hwItem.OutAddress, hwItem.Name, skipOut, false)
         inAddr, outAddr
 
-    let getValidBtnAddress (btn: ButtonDef)       = getValidBtnHwItem btn  false true
+    let getValidBtnAddress (btn: ButtonDef)       = getValidBtnHwItem btn  false false
     let getValidLampAddress (lamp: LampDef)       = getValidBtnHwItem lamp true false 
     let getValidCondiAddress (cond: ConditionDef) = getValidBtnHwItem cond false true 

@@ -15,7 +15,7 @@ open System.Reflection
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyTitle("Dualsoft Engine packages")>]
 [<assembly: AssemblyProduct("DS Engine")>]
-[<assembly: AssemblyVersion($"0.9.2.19")>]
+[<assembly: AssemblyVersion($"0.9.2.20")>]
 
 
 do ()

@@ -1,5 +1,18 @@
 namespace DsWebApp.Client.Pages.Dashboards;
 
+public class CategoryItem
+{
+    public string Category { get; set; }
+    public double Value { get; set; }
+}
+
+public class CategoryItemT<T>
+{
+    public T Category { get; set; }
+    public string CategoryName => Category.ToString();
+    public double Value { get; set; }
+}
+
 /// Efficiency Piece Of Pizza Type
 public enum EfficiencyPopType
 {
@@ -21,9 +34,8 @@ public static class EfficiencyPop
         "red"
     ];
 }
-public class CategoryItem
+
+
+public class EfficiencyCategoryItem : CategoryItemT<EfficiencyPopType>
 {
-    public EfficiencyPopType Category { get; set; }
-    public string CategoryName => Category.ToString();
-    public double Value { get; set; }
 }

@@ -1,33 +1,23 @@
 @using static DsWebApp.Client.Pages.Dashboards.DsChartEfficiency
 @using static Engine.Core.InfoPackageModule
-<h3>DsMultiBarChartEfficiency</h3>
 
 @if (! _loading)
 {
+    <DxCheckBox @bind-Checked="ShowPercentage">Show Percentage</DxCheckBox>
     // https://blazor.radzen.com/stacked-bar-chart
     <RadzenChart style="height: 400px">
-        <RadzenStackedBarSeries Data="@_drives" Title="가동" Fill="@_fillColors[0]" CategoryProperty="Category" ValueProperty="Value"  LineType="LineType.Dashed" />
-        <RadzenStackedBarSeries Data="@_errors" Title="에러" Fill="@_fillColors[2]" CategoryProperty="Category" ValueProperty="Value" LineType="LineType.Dashed" />
+        <RadzenStackedBarSeries Data="@_drives" Title="가동" Fill="@(EfficiencyPopType.가동.ToColor())" CategoryProperty="Category" ValueProperty="Value" LineType="LineType.Dashed" />
+        <RadzenStackedBarSeries Data="@_errors" Title="에러" Fill="@(EfficiencyPopType.에러.ToColor())" CategoryProperty="Category" ValueProperty="Value" LineType="LineType.Dashed" />
         <RadzenBarOptions Radius="5" />
     </RadzenChart>
 }
 
 @code {
-    [Parameter] public InfoBase InfoParent { get; set; }
-    BarItem[][] _popData;
-    BarItem[] _drives, _errors;
     bool _loading = true;
-    string[] _fillColors = [
-        "green",
-        "darkgoldenrod",
-        "red"
-    ];
-
-    internal class BarItem
-    {
-        public string Category { get; set; }
-        public double Value { get; set; }
-    }
+    CategoryItem[][] _popData;
+    CategoryItem[] _drives, _errors;
+    [Parameter] public InfoBase InfoParent { get; set; }
+    [Parameter] public bool ShowPercentage { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -54,9 +44,13 @@
                 //     break;
         }
 
-        _drives = children.Select(ch => new BarItem() { Category = ch.Name, Value = ch.DriveAverage }).ToArray();
-        _errors = children.Select(ch => new BarItem() { Category = ch.Name, Value = ch.ErrorAverage }).ToArray();
+        _drives = children.Select(ch => new CategoryItem() { Category = ch.Name, Value = getDriveValue(ch) }).ToArray();
+        _errors = children.Select(ch => new CategoryItem() { Category = ch.Name, Value = getErrorValue(ch) }).ToArray();
 
         _loading = false;
+
+
+        double getDriveValue(InfoBase ib) => ShowPercentage ? 100 * ib.DriveAverage / (ib.DriveAverage + ib.ErrorAverage) : ib.DriveAverage;
+        double getErrorValue(InfoBase ib) => ShowPercentage ? 100 * ib.ErrorAverage / (ib.DriveAverage + ib.ErrorAverage) : ib.ErrorAverage;
     }
 }

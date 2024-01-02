@@ -63,7 +63,7 @@ else
     string _showOrHide => (_refCompShowHide == null || _refCompShowHide.IsVisible) ? "Hide" : "Show";
     IInfoBase _selected;
     InfoBase Selected { get; set; }
-    CategoryItem[] _pops;
+    EfficiencyCategoryItem[] _pops;
 
     InfoSystem[] _infoSystems;
     InfoFlow[] _infoFlows;
@@ -165,9 +165,9 @@ else
     {
         _selected = info;
         _pops = [
-            new CategoryItem() { Category = EfficiencyPopType.가동 },
-            new CategoryItem() { Category = EfficiencyPopType.비가동 },
-            new CategoryItem() { Category = EfficiencyPopType.에러 },
+            new EfficiencyCategoryItem() { Category = EfficiencyPopType.가동 },
+            new EfficiencyCategoryItem() { Category = EfficiencyPopType.비가동 },
+            new EfficiencyCategoryItem() { Category = EfficiencyPopType.에러 },
         ];
         var (가동, 비가동, 에러) = (
                 _pops[(int)EfficiencyPopType.가동],
@@ -177,19 +177,20 @@ else
         switch (info)
         {
             case InfoBase infoBase:
-                // 가동.Ratio = _random.Next(10, 90);
-                // 에러.Ratio = 100 - 가동.Ratio;
-                // // todo: fix ratio
-                가동.Value = infoBase.DriveAverage;
-                에러.Value = infoBase.ErrorAverage;
+                var w = 0.0;
                 switch (info)
                 {
                     case InfoReal real:
-                        비가동.Value = real.WaitTime;
+                        w = real.WaitTime;
                         break;
                     case InfoCall call:
                         break;
                 }
+                var (d, e) = (infoBase.DriveAverage, infoBase.ErrorAverage);
+                var a = d + e + w;
+                가동.Value = 100 * d / a;
+                에러.Value = 100 * e / a;
+                비가동.Value = 100 * w / a;
                 break;
 
             case InfoDevice device:

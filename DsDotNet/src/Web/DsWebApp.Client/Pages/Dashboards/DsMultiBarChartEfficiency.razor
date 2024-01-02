@@ -1,0 +1,62 @@
+@using static DsWebApp.Client.Pages.Dashboards.DsChartEfficiency
+@using static Engine.Core.InfoPackageModule
+<h3>DsMultiBarChartEfficiency</h3>
+
+@if (! _loading)
+{
+    // https://blazor.radzen.com/stacked-bar-chart
+    <RadzenChart style="height: 400px">
+        <RadzenStackedBarSeries Data="@_drives" Title="가동" Fill="@_fillColors[0]" CategoryProperty="Category" ValueProperty="Value"  LineType="LineType.Dashed" />
+        <RadzenStackedBarSeries Data="@_errors" Title="에러" Fill="@_fillColors[2]" CategoryProperty="Category" ValueProperty="Value" LineType="LineType.Dashed" />
+        <RadzenBarOptions Radius="5" />
+    </RadzenChart>
+}
+
+@code {
+    [Parameter] public InfoBase InfoParent { get; set; }
+    BarItem[][] _popData;
+    BarItem[] _drives, _errors;
+    bool _loading = true;
+    string[] _fillColors = [
+        "green",
+        "darkgoldenrod",
+        "red"
+    ];
+
+    internal class BarItem
+    {
+        public string Category { get; set; }
+        public double Value { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        InfoBase[] children = null;
+        switch (InfoParent)
+        {
+            case InfoSystem sys:
+                children = sys.InfoFlows.ToArray();
+                break;
+            case InfoFlow flow:
+                children = flow.InfoReals.ToArray();
+                break;
+            case InfoReal real:
+                children = real.InfoCalls.ToArray();
+                break;
+                // case InfoCall call:
+                //     children = call.InfoDevices.ToArray();
+                //     break;
+        }
+
+        _drives = children.Select(ch => new BarItem() { Category = ch.Name, Value = ch.DriveAverage }).ToArray();
+        _errors = children.Select(ch => new BarItem() { Category = ch.Name, Value = ch.ErrorAverage }).ToArray();
+
+        _loading = false;
+    }
+}

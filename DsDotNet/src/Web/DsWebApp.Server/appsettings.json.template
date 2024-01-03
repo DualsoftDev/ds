@@ -9,8 +9,9 @@
   "ServerSettings": {
     "UseHttpsRedirection": true,
     "RuntimeModelDsZipPath": "C:\\ProgramData\\Dualsoft\\DsModel\\exportDS.zip",
-    "AutoStartOnSystemPowerUp": false,
+    "AutoStartOnSystemPowerUp": true,
     "JwtTokenValidityMinutes": 1440,
+    "RuntimePackageCs": "StandardPC",
     "DexaSettings": {
       "DatabaseType": "sqlserver",
       "ConnectionString": "Server=.;Database=lpb;User Id=sa;Password=dual@123;MultipleActiveResultSets=True;",

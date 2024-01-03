@@ -43,7 +43,7 @@
 @code {
     [Parameter] public InfoSystem[] Systems { get; set; }
 
-    [Parameter] public Action<IInfoBase> OnItemSelected { get; set; }      // obj = {InfoBase, InfoDevice}
+    [Parameter] public EventCallback<IInfoBase> OnItemSelected { get; set; }      // obj = {InfoBase, InfoDevice}
 
     // protected override async Task OnInitializedAsync()
     // {
@@ -63,7 +63,7 @@
     {
         InfoBase info = (InfoBase)args.Value;
         Log("Change", $"Item Text: {args.Text}, Value:{info}");
-        OnItemSelected?.Invoke(info);
+        OnItemSelected.InvokeAsync(info);
         // LayoutTreeItem treeItem = (LayoutTreeItem)args.Value;
 
         // var name = treeItem.Name;

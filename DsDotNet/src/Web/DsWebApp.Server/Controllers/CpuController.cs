@@ -20,34 +20,49 @@ public class CpuController(ServerGlobal global, IHubContext<ModelHub> hubContext
         new RuntimeModelDto(global.ServerSettings.RuntimeModelDsZipPath, newIsCpuRunning);
 
 
-    // api/cpu/command/run
-    [Authorize(Roles = "Administrator")]
-    [HttpGet("command/run")]
-    public SimpleResult Run()
+    SimpleResult isRunningOK(bool? currentRunningStatus)
     {
         if (_cpu == null)
             return SimpleResult.Err("No model loaded");
-        if (_cpu.IsRunning)
+        if (currentRunningStatus != null && currentRunningStatus != _cpu.IsRunning)
             return SimpleResult.Err("Already running");
 
-        _cpu.RunInBackground();
-        hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, modelDto(true));
         return SimpleResult.Ok("Ok");
     }
+
+    // api/cpu/command/run
+    [Authorize(Roles = "Administrator")]
+    [HttpGet("command/run")]
+    public SimpleResult Run() =>
+        isRunningOK(currentRunningStatus:false).Match(
+            ok => {
+                _cpu.RunInBackground();
+                hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, modelDto(true));
+                return SimpleResult.Ok("Ok");
+            },
+            err => SimpleResult.Err(err)
+        );
 
     // api/cpu/command/stop
     [Authorize(Roles = "Administrator")]
     [HttpGet("command/stop")]
-    public SimpleResult Stop()
+    public SimpleResult Stop() =>
+        isRunningOK(currentRunningStatus: true).Match(
+            ok => {
+                _cpu.Stop();
+                hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, modelDto(false));
+                return SimpleResult.Ok("Ok");
+            },
+            err => SimpleResult.Err(err)
+        );
+
+    // api/cpu/command/reload-model
+    [Authorize(Roles = "Administrator")]
+    [HttpGet("command/reload-model")]
+    public SimpleResult ReloadModel()
     {
-        if (_cpu == null)
-            return SimpleResult.Err("No model loaded");
-        if (! _cpu.IsRunning)
-            return SimpleResult.Err("Already stopped");
-
-        _cpu.Stop();
+        global.ReloadRuntimeModel(global.ServerSettings);
         hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, modelDto(false));
-
         return SimpleResult.Ok("Ok");
     }
 }

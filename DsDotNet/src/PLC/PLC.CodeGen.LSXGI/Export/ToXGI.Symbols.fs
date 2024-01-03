@@ -46,6 +46,16 @@ module internal XgiSymbolsModule =
         // address 가 "_" 인 symbol 에 한해서 자동으로 address 를 할당.
         // null 또는 다른 값이 지정되어 있으면, 그대로 사용한다.
         if t.Address = "" then  failwithlog $"ERROR. {t.Name} address empty."
+
+        
+        if RuntimeDS.Target = XGI 
+        && t.Address.IsNonNull() 
+        && t.Address <>  TextAddrEmpty 
+        && t.Address <>  TextSkip
+        && not(t.Address.StartsWith("%"))
+        then t.Address <- $"%%{t.Address}"
+
+
         if t.Address = TextAddrEmpty then
             let allocatorFunctions =
                 match prjParams.MemoryAllocatorSpec with

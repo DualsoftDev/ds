@@ -16,12 +16,12 @@ namespace DsWebApp.Simulator
     {
         public static bool Do(DsSystem dsSys, DsCPU dsCpu)
         {
-            //dsCpu.MySystem.Flows.Iter(f =>
-            //{
-            //    var reals = f.Graph.Vertices.OfType<Real>();
-            //    if (reals.Any())
-            //        ((VertexManager)reals.First().TagManager).SF.Value = true;
-            //});
+            dsCpu.MySystem.Flows.Iter(f =>
+            {
+                var reals = f.Graph.Vertices.OfType<Real>();
+                if (reals.Any())
+                    ((VertexManager)reals.First().TagManager).SF.Value = true;
+            });
 
             dsCpu.Run();
            

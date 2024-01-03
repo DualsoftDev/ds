@@ -58,9 +58,14 @@ module TagKindModule =
 
     
 
+ 
+    ///flicker
+    | flicker200ms              = 0100
+    | flicker1s                 = 0101
+    | flicker2s                 = 0102
+
     ///simulation
     | sim                      = 9999
-
     /// 10000 ~ 10999
     [<Flags>]
     type FlowTag    =        

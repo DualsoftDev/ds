@@ -72,6 +72,13 @@ module SystemManagerModule =
         let sysDrive    = dsSysBit "sysDrive"   true  sys   SystemTag.sysDrive
         
         let sim    = dsSysBit "syssim"   true  sys   SystemTag.sim
+        let flicker200msec  = dsSysBit "flicker200Sec" true  sys   SystemTag.flicker200ms
+        let flicker1sec    = dsSysBit "flicker1Sec"   true  sys   SystemTag.flicker1s
+        let flicker2sec    = dsSysBit "flicker2Sec"   true  sys   SystemTag.flicker2s
+        do 
+            flicker200msec.Address <- "%FX146"
+            flicker1sec.Address <- "%FX147"
+            flicker2sec.Address <- "%FX148"
 
         interface ITagManager with
             member x.Target = sys
@@ -113,5 +120,8 @@ module SystemManagerModule =
             | SystemTag.sysStopError    ->    sysStopError
             | SystemTag.sysStopPause    ->    sysStopPause
             | SystemTag.sysDrive        ->    sysDrive
+            | SystemTag.flicker200ms    -> flicker200msec
+            | SystemTag.flicker1s       -> flicker1sec
+            | SystemTag.flicker2s       -> flicker2sec
             | SystemTag.sim             ->    sim
             | _ -> failwithlog $"Error : GetSystemTag {st} type not support!!"

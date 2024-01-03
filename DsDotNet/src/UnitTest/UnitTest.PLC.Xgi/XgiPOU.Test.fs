@@ -80,7 +80,7 @@ type XgiPOUTest() =
     [<Test>]
     member __.``POU1 test`` () =
         let dummyPrjParams = createProjectParams "dummy"
-        let xml = pou11.Value.GenerateXmlString(dummyPrjParams)
+        let xml = pou11.Value.GenerateXmlString(dummyPrjParams, None)
         saveTestResult (getFuncName()) xml
 
     [<Test>]

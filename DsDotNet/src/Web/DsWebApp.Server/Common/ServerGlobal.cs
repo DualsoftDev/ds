@@ -5,6 +5,8 @@ using IO.Core;
 
 using System.Reactive.Subjects;
 
+using static Engine.Core.RuntimeGeneratorModule;
+
 
 namespace DsWebApp.Server.Common;
 
@@ -34,7 +36,7 @@ public class ServerGlobal
         Logger = logger;
         try
         {
-            RuntimeModel = ReloadRuntimeModel();
+            RuntimeModel = ReloadRuntimeModel(serverSettings);
             if (serverSettings.AutoStartOnSystemPowerUp)
             {
                 // Task.Factory.StartNew(() => RuntimeModel?.Cpu.Run());
@@ -47,7 +49,7 @@ public class ServerGlobal
         }
     }
 
-    public RuntimeModel ReloadRuntimeModel()
+    public RuntimeModel ReloadRuntimeModel(ServerSettings serverSettings)
     {
         var dsZipPath = ServerSettings.RuntimeModelDsZipPath;
         try
@@ -62,7 +64,10 @@ public class ServerGlobal
                 return null;
             }
 
+            RuntimeDS.Package = serverSettings.GetRuntimePackage();
+
             RuntimeModel = new RuntimeModel(dsZipPath);
+
             RuntimeModelChangedSubject.OnNext(RuntimeModel);
             return RuntimeModel;
         }

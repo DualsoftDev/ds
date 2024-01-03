@@ -37,7 +37,7 @@ type DsSystem with
                     else (s.GetTempTag(revDev)  :?> Tag<bool>).Expr 
                     
             for revDev in reverseInputs do
-                yield (!!orgInTag(revDev), rsts) --| (revDev.InTag, getFuncName())
+                yield (orgInTag(revDev), rsts) --| (revDev.InTag, getFuncName()) //그대로 복사
                 revDev.InTag.Address <- TextAddrEmpty
                 
         ]

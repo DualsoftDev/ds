@@ -87,7 +87,7 @@ module SystemManagerModule =
         member s.GetTempBoolTag(name:string, address:string, fqdn:IQualifiedNamed) : IStorage=
                 if stg.ContainsKey(name) then stg[name]
                 else
-                    createBridgeTag(stg, name, address, SystemTag.temp|>int, BridgeType.Device, sys, fqdn).Value
+                    createBridgeTag(stg, name, address, SystemTag.temp|>int, BridgeType.DummyTemp, sys, fqdn).Value
             
         member s.GetSystemTag(st:SystemTag) : IStorage=
             match st with

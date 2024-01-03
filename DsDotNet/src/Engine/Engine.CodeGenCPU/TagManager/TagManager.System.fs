@@ -79,6 +79,8 @@ module SystemManagerModule =
             flicker200msec.Address <- "%FX146"
             flicker1sec.Address <- "%FX147"
             flicker2sec.Address <- "%FX148"
+            on.Value <- true
+            off.Value <- false
 
         interface ITagManager with
             member x.Target = sys

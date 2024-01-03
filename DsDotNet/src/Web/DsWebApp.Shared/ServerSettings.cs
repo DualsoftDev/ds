@@ -9,6 +9,9 @@ public class ServerSettings
 {
     public bool UseHttpsRedirection { get; set; }
     public bool AutoStartOnSystemPowerUp { get; set; }
+    //client 로 부터 받아야 하나 임시 테스트로 사용
+    public bool SimulationMode { get; set; }
+    
     public ClientEnvironment ClientEnvironment { get; set; }
     public string RuntimeModelDsZipPath { get; set; }
     public double JwtTokenValidityMinutes { get; set; }
@@ -16,23 +19,21 @@ public class ServerSettings
     public RuntimePackageCs RuntimePackageCs { get; set; }
 
     public RuntimePackage GetRuntimePackage() =>
-        RuntimePackageCs switch
-        {
-            RuntimePackageCs.SimulationDubug => RuntimePackage.SimulationDubug,
-            RuntimePackageCs.Simulation => RuntimePackage.Simulation,
-            RuntimePackageCs.StandardPC => RuntimePackage.StandardPC,
-            RuntimePackageCs.StandardPLC => RuntimePackage.StandardPLC,
-            RuntimePackageCs.LightPC => RuntimePackage.LightPC,
-            RuntimePackageCs.LightPLC => RuntimePackage.LightPLC,
-            _ => RuntimePackage.StandardPC,
-        };
+        SimulationMode ? RuntimePackage.Simulation
+        : RuntimePackageCs switch
+            {
+                RuntimePackageCs.StandardPC => RuntimePackage.StandardPC,
+                RuntimePackageCs.StandardPLC => RuntimePackage.StandardPLC,
+                RuntimePackageCs.LightPC => RuntimePackage.LightPC,
+                RuntimePackageCs.LightPLC => RuntimePackage.LightPLC,
+                RuntimePackageCs.Simulation => RuntimePackage.Simulation,
+                RuntimePackageCs.SimulationDubug => RuntimePackage.SimulationDubug,
+                _ => RuntimePackage.StandardPC,
+            };
+
     public void SetRuntimePackage(RuntimePackage value)
     {
-        if (value == RuntimePackage.SimulationDubug)
-            RuntimePackageCs = RuntimePackageCs.SimulationDubug;
-        else if (value == RuntimePackage.Simulation)
-            RuntimePackageCs = RuntimePackageCs.Simulation;
-        else if (value == RuntimePackage.StandardPC)
+        if (value == RuntimePackage.StandardPC)
             RuntimePackageCs = RuntimePackageCs.StandardPC;
         else if (value == RuntimePackage.StandardPLC)
             RuntimePackageCs = RuntimePackageCs.StandardPLC;
@@ -40,6 +41,10 @@ public class ServerSettings
             RuntimePackageCs = RuntimePackageCs.LightPC;
         else if (value == RuntimePackage.LightPLC)
             RuntimePackageCs = RuntimePackageCs.LightPLC;
+        else if (value == RuntimePackage.Simulation)
+            RuntimePackageCs = RuntimePackageCs.Simulation;
+        else if (value == RuntimePackage.SimulationDubug)
+            RuntimePackageCs = RuntimePackageCs.Simulation;
         else
             throw new NotImplementedException();
     }
@@ -50,12 +55,12 @@ public class ServerSettings
 /// </summary>
 public enum RuntimePackageCs
 {
-    SimulationDubug,
-    Simulation,
     StandardPC,
     StandardPLC,
     LightPC,
     LightPLC,
+    Simulation,
+    SimulationDubug,
 }
 
 

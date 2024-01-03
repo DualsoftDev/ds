@@ -53,6 +53,14 @@ module RunTime =
                  systems.Iter(fun sys-> cpuSimOn(sys))
                  systems.Iter(fun sys-> preAction(sys, true))
 
+
+        let subscription = 
+            tagWebChangedFromWebSubject.Subscribe(fun tagWeb-> 
+                    logDebug $"Server Updating TagWeb from Web: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
+                    let cpuTag = tagStorages.[tagWeb.Name]
+                    cpuTag.BoxedValue <-tagWeb.Value
+            )
+
         let scanOnce() = 
             //나머지 수식은 Changed Event가 있는것만 수행해줌
             let chTags = cpuStorages.ChangedTags()
@@ -111,12 +119,7 @@ module RunTime =
                                              .Where(fun f->f.IsStatusTag()).any()
             }
 
-        let subscription = 
-            tagWebChangedFromWebSubject.Subscribe(fun tagWeb-> 
-                    logDebug $"Server Updating TagWeb from Web: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
-                    let cpuTag = tagStorages.[tagWeb.Name]
-                    cpuTag.BoxedValue <-tagWeb.Value
-            )
+        
 
         do
             disposables.Add subscription
@@ -153,6 +156,10 @@ module RunTime =
         member x.Reset() =
             doScanStop()
             syncReset(mySystem)
+            scanOnce() |> ignore
+
+        member x.QuickDriveReady() =
+            systems.Iter(fun sys-> preAction(sys, true))
             scanOnce() |> ignore
 
         member x.TagWebChangedFromWebSubject = tagWebChangedFromWebSubject

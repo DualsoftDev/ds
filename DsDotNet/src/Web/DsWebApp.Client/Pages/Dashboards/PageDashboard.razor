@@ -14,7 +14,7 @@
 }
 else
 {
-    <CompFqdnSelectorOverlay Systems="_infoSystems" OnItemSelected="@(infoItem => onItemSelected(infoItem))">
+    <CompFqdnSelectorOverlay Systems="_infoSystems" OnItemSelected="onItemSelected">
         @if (_pops != null)
         {
             <DsChartEfficiency PopData="_pops" InnerTitle="@_selected.Name" />
@@ -31,15 +31,21 @@ else
     EfficiencyCategoryItem[] _pops;
 
     InfoSystem[] _infoSystems;
-    InfoFlow[] _infoFlows;
-    InfoReal[] _infoReals;
-    InfoCall[] _infoCalls;
-    InfoDevice[] _infoDevices;
     protected HubConnectionManager _hubConnectionManager;
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
+        var result = await Http.GetResultSimpleAsync<string>("/api/info");
+        result.Iter(
+            ok =>
+            {
+                InfoSystem info = Newtonsoft.Json.JsonConvert.DeserializeObject<InfoSystem>(ok);
+                _infoSystems = [info];
+            },
+            err => JsDual.Alert($"Failed to fetch info for dashboard.  {err}")
+        );
+        
         HubConnection hubConnection = await NavigationManager.ToAbsoluteUri("/hub/info").StartHubAsync();
         _hubConnectionManager = new HubConnectionManager(hubConnection, registerHubConnection);
         Console.WriteLine($"Hub initialized on PageDashboardGrid.razor");
@@ -54,47 +60,17 @@ else
                 InfoSystem info = Newtonsoft.Json.JsonConvert.DeserializeObject<InfoSystem>(infoSystemStr);
                 _infoSystems = [info];
 
-                _infoFlows = info.InfoFlows.ToArray();
-                _infoReals = _infoFlows.SelectMany(f => f.InfoReals).ToArray();
-                _infoCalls = _infoReals.SelectMany(r => r.InfoCalls).ToArray();
-                _infoDevices = _infoCalls.SelectMany(c => c.InfoDevices).DistinctBy(d => d.Id).ToArray();
 
-                switch (_selected)
+                if (_selected == null)
                 {
-                    case null:
-                        break;
-                    case InfoSystem selSys:
-                        if (!info.IsEqual(selSys))
-                            onItemSelected(info);
-                        break;
-                    case InfoFlow selFlow:
-                        var flow = _infoFlows.First(f => f.Fqdn == selFlow.Fqdn);
-                        if (!flow.IsEqual(selFlow))
-                            onItemSelected(flow);
-                        break;
-                    case InfoReal selReal:
-                        var real = _infoReals.First(r => r.Fqdn == selReal.Fqdn);
-                        if (!real.IsEqual(selReal))
-                            onItemSelected(real);
-                        break;
-
-                    case InfoCall selCall:
-                        var call = _infoCalls.First(c => c.Fqdn == selCall.Fqdn);
-                        if (!call.IsEqual(selCall))
-                            onItemSelected(call);
-                        break;
-                    case InfoDevice selDevice:
-                        var dev = _infoDevices.First(f => f.Fqdn == selDevice.Fqdn);
-                        if (!dev.IsEqual(selDevice))
-                            onItemSelected(dev);
-                        break;
+                    if (initial)
+                        StateHasChanged();
                 }
-
-                if (initial)
+                else
                 {
-                    StateHasChanged();
-                    Console.WriteLine($"Info change notification received with {info.Fqdn}.");
-                    //ToastService.ShowInfo($"Info change: {info.Fqdn}.");
+                    IInfoBase newInfo = info.FindInfo(_selected.Fqdn).Value;
+                    if (! newInfo.IsEqual(_selected))
+                        onItemSelected(info);
                 }
             });
         }

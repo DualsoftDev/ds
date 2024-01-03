@@ -70,15 +70,21 @@ module RunTime =
             async { 
                 //시스템 ON 및 값변경이 없는 조건 수식은  관련 수식은 Changed Event가 없어서한번 수행해줌
                 for s in statements do s.Do()
-                
-                let mutable hasChanged = true
-                use _ = CpusEvent.ValueSubject.Subscribe(fun _ -> hasChanged <- true)
-                while run do
-                    if hasChanged then
-                        scanOnce() |> ignore
-                        hasChanged <- false
-                    else
-                        do! Async.Sleep(_ScanDelay)
+
+                (*확인 필요*)
+                //let mutable hasChanged = true
+                //use _ = CpusEvent.ValueSubject.Subscribe(fun _ -> hasChanged <- true)
+                //while run do
+                //    if hasChanged then
+                //        scanOnce() |> ignore // 내부에서 CpusEvent.ValueSubject 발생해서 
+                //        hasChanged <- false  // 여기서 false 되서 동작 한번만되고 있네요
+                //    else
+                //        do! Async.Sleep(_ScanDelay)
+
+
+                while run do   
+                    if scanOnce().isEmpty() && _ScanDelay > 0
+                    then do! Async.Sleep(_ScanDelay)
                     
             }
 

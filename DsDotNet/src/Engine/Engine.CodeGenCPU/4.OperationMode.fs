@@ -41,9 +41,9 @@ type Flow with
         let set =
             if RuntimeDS.Package = LightPLC
             then
-                setPause <||> setError
-            else 
                 setPause <||> (setError <&&> f.System._flicker1sec.Expr)
+            else 
+                setPause <||> setError
 
         let rst = f.clear_btn.Expr
         (set, rst) ==| (f.sop, getFuncName())

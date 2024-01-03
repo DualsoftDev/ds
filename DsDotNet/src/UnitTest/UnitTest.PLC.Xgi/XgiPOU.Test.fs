@@ -166,8 +166,8 @@ type XgiPOUTest() =
         }
         let xml = projectParams.GenerateXmlString()
 
-        globalStorages["gg1"].Address === null
-        globalStorages["xm0"].Address === "%MX24"
+        globalStorages["gg1"].Address === "%MX24"
+        globalStorages["xm0"].Address === "%MX25"
 
         saveTestResult f xml
 

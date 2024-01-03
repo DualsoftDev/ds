@@ -47,12 +47,10 @@ module internal XgiSymbolsModule =
         // null 또는 다른 값이 지정되어 있으면, 그대로 사용한다.
         if t.Address = "" then  failwithlog $"ERROR. {t.Name} address empty."
 
-        
         if RuntimeDS.Target = XGI 
-        && t.Address.IsNonNull() 
-        && t.Address <>  TextAddrEmpty 
-        && t.Address <>  TextSkip
-        && not(t.Address.StartsWith("%"))
+            && t.Address.IsNonNull() 
+            && t.Address <> TextAddrEmpty 
+            && not(t.Address.StartsWith("%"))
         then t.Address <- $"%%{t.Address}"
 
 
@@ -214,6 +212,7 @@ module internal XgiSymbolsModule =
         //storagesToXml false globalStorages
         let symbolInfos =
             storagesToSymbolInfos prjParams (int Variable.Kind.VAR_GLOBAL) globalStorages
+            |> filter (fun f-> not(f.Address.StartsWith("%F")))  //시스템 Address는 생성안함  ex) _OFF %FX154
 
         (* check any error *)
         do

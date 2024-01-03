@@ -7,6 +7,7 @@ open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine.ElementType
 open System.Security
 open Engine.Core
 open Engine.Parser.FS
+open Dual.UnitTest.Common.FS
 
 type XgiLadderElementTest() =
     inherit XgiTestBaseClass()
@@ -65,12 +66,23 @@ type XgiLadderElementTest() =
             uint32  myuint32 = 32u;
             int64   myint64  = 64L;
             uint64  myuint64 = 64UL;
-            string  mystring = "hello";     // not working for string
 """
         let statements = parseCode storages code
         let f = getFuncName()
         let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
+
+    [<Test>]
+    member __.``Local var with init string err test`` () =
+        let storages = Storages()
+        let code = """
+            string  mystring = "hello";     // not working for string
+"""
+        let statements = parseCode storages code
+        let f = getFuncName()
+        (fun () ->  XgiFixtures.generateXmlForTest f storages (map withNoComment statements) |> ignore) |> ShouldFail
+
+
 
     [<Test>]
     member __.``Local var with comment and init test`` () =

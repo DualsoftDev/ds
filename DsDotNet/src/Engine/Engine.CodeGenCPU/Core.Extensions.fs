@@ -116,6 +116,9 @@ module ConvertCodeCoreExt =
         member s._flicker200msec = s.GetPv<bool>(SystemTag.flicker200ms)
         member s._flicker1sec = s.GetPv<bool>(SystemTag.flicker1s)
         member s._flicker2sec = s.GetPv<bool>(SystemTag.flicker2s)
+        member s.GetTempTag(x:TaskDev) = 
+            let name = x.InAddress.Replace("%", "_").Replace(".", "_")
+            getSM(s).GetTempBoolTag(name, x.InAddress, x)
 
         member x.S = x |> getSM
         member x.Storages = x.TagManager.Storages

@@ -21,6 +21,7 @@ module RunTime =
     type DsCPU(css:CommentedStatement seq, mySystem:DsSystem, loadedSystems:DsSystem seq
              , hmiTags:IDictionary<string, TagWeb>) =
 
+        let _ScanDelay = 10
         let statements = css |> Seq.map(fun f -> f.Statement)
         let mapRungs = getRungMap(statements)
         let cpuStorages = mapRungs.Keys
@@ -70,7 +71,9 @@ module RunTime =
                 //시스템 ON 및 값변경이 없는 조건 수식은  관련 수식은 Changed Event가 없어서한번 수행해줌
                 for s in statements do s.Do() 
                 while run do   
-                    scanOnce() |> ignore
+                    if scanOnce().isEmpty() && _ScanDelay > 0
+                    then do! Async.Sleep(_ScanDelay)
+                    
             }
 
         let doRun() = 

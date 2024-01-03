@@ -3,6 +3,7 @@ namespace Engine.Core
 open System.Collections.Generic
 open System
 open System.Linq
+open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module InfoPackageModule =
@@ -152,3 +153,34 @@ module InfoPackageModule =
         static member Create(x:DsSystem) =
             let info = new InfoSystem(Name=x.Name, Fqdn = x.QualifiedName)
             info
+
+[<Extension>]
+type InfoExt =
+    [<Extension>]
+    static member FindInfo (info:InfoSystem, fqdn:string): IInfoBase option =
+        // 각 구조를 순회하면서 fqdn 이 동일한 항목을 찾아서 반환
+        if info.Fqdn = fqdn then
+            info :> IInfoBase |> Some
+        else
+            info.InfoFlows |> Seq.tryPick(fun f ->
+                if f.Fqdn = fqdn then
+                    Some (f :> IInfoBase)
+                else
+                    f.InfoReals |> Seq.tryPick(fun r -> 
+                        if r.Fqdn = fqdn then
+                            r :> IInfoBase |> Some
+                        else
+                            r.InfoCalls  |> Seq.tryPick(fun c -> 
+                                if c.Fqdn = fqdn then
+                                    c :> IInfoBase |> Some
+                                else
+                                    c.InfoDevices |> Seq.tryPick(fun d -> 
+                                        if d.Fqdn = fqdn then
+                                            d :> IInfoBase |> Some
+                                        else
+                                            None
+                                    )
+                            )
+                    )
+            )
+

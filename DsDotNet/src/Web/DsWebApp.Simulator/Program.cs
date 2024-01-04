@@ -27,7 +27,7 @@ namespace DsWebApp.Simulator
 
             ModelCompileInfo mci = new(runModel.JsonPath, runModel.JsonPath);
             _ = DBLogger.InitializeLogWriterOnDemandAsync(commonAppSettings, systems, mci);
-            _ = DsSimulator.Do(runModel.System, runModel.Cpu);
+            _ = DsSimulator.Do(runModel.Cpu);
             Console.ReadKey();  
         }
     }

@@ -16,6 +16,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Content Include="..\..\..\Apps\CommonAppSettings.json" Link="CommonAppSettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
         <PackageReference Include="xunit" Version="2.4.2" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
@@ -30,10 +36,9 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
-      <ProjectReference Include="..\..\Engine\Engine.Import.Office\Engine.Import.Office.fsproj" />
+      <ProjectReference Include="..\..\Engine\Engine.Info\Engine.Info.fsproj" />
       <ProjectReference Include="..\..\Engine\Engine.Runtime\Engine.Runtime.fsproj" />
+      <ProjectReference Include="..\..\Web\DsWebApp.Simulator\DsWebApp.Simulator.csproj" />
     </ItemGroup>
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="copy $(ProjectDir)..\..\..\Apps\OfficeAddIn\PowerPointAddInHelper\Utils\DS_Library.pptx $(TargetDir)DS_Library.pptx" />
-	</Target>
+
 </Project>

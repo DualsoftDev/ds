@@ -14,7 +14,7 @@ namespace DsWebApp.Simulator
 {
     public static class DsSimulator
     {
-        public static bool Do(DsSystem dsSys, DsCPU dsCpu)
+        public static bool Do(DsCPU dsCpu)
         {
 
             dsCpu.QuickDriveReady();

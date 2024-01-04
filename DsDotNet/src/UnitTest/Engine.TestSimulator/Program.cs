@@ -20,7 +20,7 @@ namespace Engine.TestSimulator
 
 
             //Web test 시에 RuntimePackage.StandardPC 설정 (flow auto drive ready web에서 시작조건 켜야함)
-            RuntimeDS.Package = RuntimePackage.StandardPC;
+            RuntimeDS.Package = RuntimePackage.Simulation;
             //RuntimeDS.Package = RuntimePackage.StandardPC; 
             RuntimeModel runModel = new(testFile);
 

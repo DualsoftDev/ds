@@ -4,9 +4,6 @@
 
 <CompTitle Icon="oi oi-zoom-out" Title="Query" />
 
-<CompPeriodSelector ShowTime="_showTime" @bind-StartDate="StartDate" @bind-EndDate="EndDate" />
-
-
 <CompDashboardInfoFetcher OnInfoSystemUpdated="onInfoSystemUpdated" @ref="_compDashboardInfoFetcher" />
 
 @if (_compDashboardInfoFetcher == null)
@@ -16,7 +13,12 @@
 else
 {
     <CompFqdnSelectorOverlay System="_compDashboardInfoFetcher.InfoSystem" OnItemSelected="onItemSelected">
-        <DsInfoGridSingle Info="_selected" ClientSettings="@ClientGlobal.ClientSettings" />
+        <HeaderContent>
+            <CompPeriodSelector ShowTime="_showTime" @bind-StartDate="StartDate" @bind-EndDate="EndDate" />
+        </HeaderContent>
+        <ChildContent>
+            <DsInfoGridSingle Info="_selected" ClientSettings="@ClientGlobal.ClientSettings" />
+        </ChildContent>
     </CompFqdnSelectorOverlay>
 }
 

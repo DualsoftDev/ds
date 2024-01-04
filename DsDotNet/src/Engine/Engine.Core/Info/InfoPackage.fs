@@ -32,7 +32,7 @@ module InfoPackageModule =
         ///총발생한 에러 메시지
         member val ErrorMessages = ResizeArray<string>() with get, set
         ///총 효율 %
-        member val Efficiency = Nullable<double>() with get, set
+        member val Efficiency = 0.0 with get, set
         ///총멈춤 횟수
         member val PauseCount = 0 with get, set
 
@@ -63,7 +63,7 @@ module InfoPackageModule =
         ///고장 횟수
         member val ErrorCount = 0 with get, set
         ///평균 고장 시간
-        member val RepairAverage = Nullable<double>() with get, set
+        member val RepairAverage = 0.0 with get, set
         ///총발생한 에러 메시지
         member val ErrorMessages = ResizeArray<string>() with get, set
         member x.IsEqual (y:IInfoBase) =
@@ -72,7 +72,7 @@ module InfoPackageModule =
             && x.Fqdn = o.Fqdn
             && x.GoingCount = o.GoingCount
             && x.ErrorCount = o.ErrorCount
-            && x.RepairAverage.Value = o.RepairAverage.Value
+            && x.RepairAverage = o.RepairAverage
             && x.ErrorMessages.SequenceEqual(o.ErrorMessages)
         static member Create(x:Device) =
             let info = new InfoDevice(Name=x.Name, Fqdn = x.QualifiedName, Id=x.Id)

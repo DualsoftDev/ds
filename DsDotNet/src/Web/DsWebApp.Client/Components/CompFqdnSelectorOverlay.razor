@@ -13,7 +13,9 @@ else
     <div class="ds-sticky-container">
         <CompShowHide @ref="_refCompShowHide" ShowOnInit="true">
             <div class="ds-non-sticky">
+                @HeaderContent
                 <CompFqdnSelector System="System" OnItemSelected="OnItemSelected" />
+                @FooterContent
             </div>
         </CompShowHide>
 
@@ -34,4 +36,6 @@ else
 
     [Parameter] public EventCallback<IInfoBase> OnItemSelected { get; set; }      // obj = {InfoBase, InfoDevice}
     [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public RenderFragment HeaderContent { get; set; }
+    [Parameter] public RenderFragment FooterContent { get; set; }
 }

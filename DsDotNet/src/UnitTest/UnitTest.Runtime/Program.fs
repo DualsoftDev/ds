@@ -16,7 +16,6 @@ module testMain =
         //test me dualsoft.json 
         let testFile = @"C:\Users\안승훈\videos\dualsoft.json"
         let model = ParserLoader.LoadFromConfig testFile
-
-
+     
 
         0

@@ -16,14 +16,14 @@ module TagVariableModule =
         IsGlobal: bool
     }
 
-    let defaultStorageCreationParams value = {
+    let defaultStorageCreationParams value tagKind= {
         Name = ""
         Value = value
         Address = None
         Comment = None
         System = RuntimeDS.System
-        Target = None
-        TagKind = -1
+        Target = if tagKind > -1 then Some(RuntimeDS.System:?>IQualifiedNamed) else None
+        TagKind = tagKind
         IsGlobal = false
     }
 
@@ -123,8 +123,8 @@ module ExpressionPrologModule =
             failwithlog "Should be reimplemented."
         dummy
 
-    let mutable fwdCreateBoolMemberVariable   = let dummy (_tagName:string) (_initValue:bool)   : VariableBase<bool>   = failwithlog "Should be reimplemented." in dummy
-    let mutable fwdCreateUShortMemberVariable = let dummy (_tagName:string) (_initValue:uint16) : VariableBase<uint16> = failwithlog "Should be reimplemented." in dummy
+    let mutable fwdCreateBoolMemberVariable   = let dummy (_tagName:string) (_initValue:bool)  (_tagKind:int)  : VariableBase<bool>   = failwithlog "Should be reimplemented." in dummy
+    let mutable fwdCreateUShortMemberVariable = let dummy (_tagName:string) (_initValue:uint16) (_tagKind:int) : VariableBase<uint16> = failwithlog "Should be reimplemented." in dummy
     let mutable fwdFlattenExpression          = let dummy (_expr:IExpression)                   : IFlatExpression      = failwithlog "Should be reimplemented." in dummy
 
     let clearVarBoolsOnDemand(varbools:VariableBase<bool> seq) =

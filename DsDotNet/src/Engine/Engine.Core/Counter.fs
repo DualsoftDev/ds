@@ -58,76 +58,77 @@ module rec CounterModule =
         let mutable acc = getNull<VariableBase<CountUnitType>>()
         let mutable res = nullB
         let add = addTagsToStorages storages
+        
         match RuntimeDS.Target, typ with
         | (WINDOWS | XGI), CTU ->
-            cu  <- fwdCreateBoolMemberVariable     $"{name}.CU" false  // Count up enable bit
-            res <- fwdCreateBoolMemberVariable     $"{name}.R" false
-            pre <- fwdCreateUShortMemberVariable   $"{name}.PV" preset
-            dn  <- fwdCreateBoolMemberVariable     $"{name}.Q" false   // Done
-            acc <- fwdCreateUShortMemberVariable   $"{name}.CV" accum
+            cu  <- createBool     $"{name}.CU" false  // Count up enable bit
+            res <- createBool     $"{name}.R" false
+            pre <- createUShort   $"{name}.PV" preset
+            dn  <- createBoolWithTagKind     $"{name}.Q" false  (VariableTag.PcSysVariable|>int) // Done
+            acc <- createUShort   $"{name}.CV" accum
             add [cu; res; pre; dn; acc]
 
         | (WINDOWS | XGI), CTD ->
-            cd  <- fwdCreateBoolMemberVariable     $"{name}.CD" false   // Count down enable bit
-            ld  <- fwdCreateBoolMemberVariable     $"{name}.LD" false   // Load
-            pre <- fwdCreateUShortMemberVariable   $"{name}.PV" preset
-            dn  <- fwdCreateBoolMemberVariable     $"{name}.Q" false   // Done
-            acc <- fwdCreateUShortMemberVariable   $"{name}.CV" accum
+            cd  <- createBool     $"{name}.CD" false   // Count down enable bit
+            ld  <- createBool     $"{name}.LD" false   // Load
+            pre <- createUShort   $"{name}.PV" preset
+            dn  <- createBoolWithTagKind     $"{name}.Q" false  (VariableTag.PcSysVariable|>int) // Done
+            acc <- createUShort   $"{name}.CV" accum
             add [cd; res; ld; pre; dn; acc]
 
         | (WINDOWS | XGI), CTUD ->
-            cu  <- fwdCreateBoolMemberVariable     $"{name}.CU" false  // Count up enable bit
-            cd  <- fwdCreateBoolMemberVariable     $"{name}.CD" false  // Count down enable bit
-            res <- fwdCreateBoolMemberVariable     $"{name}.R" false
-            ld  <- fwdCreateBoolMemberVariable     $"{name}.LD" false  // Load
-            pre <- fwdCreateUShortMemberVariable   $"{name}.PV" preset
-            dn  <- fwdCreateBoolMemberVariable     $"{name}.QU" false  // Done
-            dnDown  <- fwdCreateBoolMemberVariable $"{name}.QD" false  // Done
-            acc <- fwdCreateUShortMemberVariable   $"{name}.CV" accum
+            cu  <- createBool     $"{name}.CU" false  // Count up enable bit
+            cd  <- createBool     $"{name}.CD" false  // Count down enable bit
+            res <- createBool     $"{name}.R" false
+            ld  <- createBool     $"{name}.LD" false  // Load
+            pre <- createUShort   $"{name}.PV" preset
+            dn  <- createBoolWithTagKind     $"{name}.QU" false   (VariableTag.PcSysVariable|>int) // Done
+            dnDown  <- createBoolWithTagKind $"{name}.QD" false   (VariableTag.PcSysVariable|>int) // Done
+            acc <- createUShort   $"{name}.CV" accum
             add [cu; cd; res; ld; pre; dn; dnDown; acc]
 
         | (WINDOWS | XGI), CTR ->
-            cd  <- fwdCreateBoolMemberVariable     $"{name}.CD" false   // Count down enable bit
-            pre <- fwdCreateUShortMemberVariable   $"{name}.PV" preset
-            res <- fwdCreateBoolMemberVariable     $"{name}.RST" false
-            dn  <- fwdCreateBoolMemberVariable     $"{name}.Q" false   // Done
-            acc <- fwdCreateUShortMemberVariable   $"{name}.CV" accum
+            cd  <- createBool     $"{name}.CD" false   // Count down enable bit
+            pre <- createUShort   $"{name}.PV" preset
+            res <- createBool     $"{name}.RST" false
+            dn  <- createBoolWithTagKind     $"{name}.Q" false    (VariableTag.PcSysVariable|>int) // Done
+            acc <- createUShort   $"{name}.CV" accum
             add [cd; pre; res; dn; acc]
 
         | _ ->
             match typ with
             | CTU ->
-                cu  <- fwdCreateBoolMemberVariable     $"{name}.CU" false  // Count up enable bit
+                cu  <- createBool     $"{name}.CU" false  // Count up enable bit
                 add [cu]
             | CTR | CTD ->
-                cd  <- fwdCreateBoolMemberVariable     $"{name}.CD" false  // Count down enable bit
+                cd  <- createBool     $"{name}.CD" false  // Count down enable bit
                 add [cd]
             | CTUD ->
-                cu  <- fwdCreateBoolMemberVariable     $"{name}.CU" false // Count up enable bit
-                cd  <- fwdCreateBoolMemberVariable     $"{name}.CD" false // Count down enable bit
+                cu  <- createBool     $"{name}.CU" false // Count up enable bit
+                cd  <- createBool     $"{name}.CD" false // Count down enable bit
                 add [cu; cd]
 
 
-            ov  <- fwdCreateBoolMemberVariable     $"{name}.OV" false   // Overflow
-            un  <- fwdCreateBoolMemberVariable     $"{name}.UN" false   // Underflow
-            ld  <- fwdCreateBoolMemberVariable     $"{name}.LD" false   // XGI: Load
-            dn  <- fwdCreateBoolMemberVariable     $"{name}.DN" false   // Done
-            pre <- fwdCreateUShortMemberVariable   $"{name}.PRE" preset
-            acc <- fwdCreateUShortMemberVariable   $"{name}.ACC" accum
-            res <- fwdCreateBoolMemberVariable     $"{name}.RES" false
+            ov  <- createBool     $"{name}.OV" false   // Overflow
+            un  <- createBool     $"{name}.UN" false   // Underflow
+            ld  <- createBool     $"{name}.LD" false   // XGI: Load
+            dn  <- createBoolWithTagKind     $"{name}.DN" false  (VariableTag.PcSysVariable|>int) // Done
+            pre <- createUShort   $"{name}.PRE" preset
+            acc <- createUShort   $"{name}.ACC" accum
+            res <- createBool     $"{name}.RES" false
             add [ov; un; dn; pre; acc; res;]
 
         (* 내부 structure 가 AB 기반이므로, 메모리 자체는 생성하되, storage 에 등록하지는 않는다. *)
         if isItNull(ov) then
-            ov  <- fwdCreateBoolMemberVariable     $"{name}.OV" false
+            ov  <- createBool     $"{name}.OV" false
         if isItNull(un) then
-            un  <- fwdCreateBoolMemberVariable     $"{name}.UN" false
+            un  <- createBool     $"{name}.UN" false
         if isItNull(cu) then
-            cu  <- fwdCreateBoolMemberVariable     $"{name}.CU" false
+            cu  <- createBool     $"{name}.CU" false
         if isItNull(cd) then
-            cd  <- fwdCreateBoolMemberVariable     $"{name}.CD" false
+            cd  <- createBool     $"{name}.CD" false
         if isItNull(cd) then
-            res  <- fwdCreateBoolMemberVariable     $"{name}.RES" false
+            res  <- createBool     $"{name}.RES" false
 
         {
             Type        = typ

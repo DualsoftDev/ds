@@ -21,7 +21,6 @@ module RunTime =
     type DsCPU(css:CommentedStatement seq, mySystem:DsSystem, loadedSystems:DsSystem seq
              , hmiTags:IDictionary<string, TagWeb>) =
 
-        let _ScanDelay = 10
         let statements = css |> Seq.map(fun f -> f.Statement)
         let mapRungs = getRungMap(statements)
         let cpuStorages = mapRungs.Keys
@@ -74,28 +73,24 @@ module RunTime =
             chTags.Iter(notifyPostExcute)  // HMI Forceoff 처리
             chTags
 
+
+        let mutable ctsScan = new CancellationTokenSource()
         let asyncStart = 
             async { 
-                //시스템 ON 및 값변경이 없는 조건 수식은  관련 수식은 Changed Event가 없어서한번 수행해줌
+                // 시스템 ON 및 값 변경이 없는 조건 수식은 관련 수식은 Changed Event가 없어서 한 번 수행해줌
                 for s in statements do s.Do()
-
-                (*확인 필요*)
-                //let mutable hasChanged = true
-                //use _ = CpusEvent.ValueSubject.Subscribe(fun _ -> hasChanged <- true)
-                //while run do
-                //    if hasChanged then
-                //        scanOnce() |> ignore // 내부에서 CpusEvent.ValueSubject 발생해서 
-                //        hasChanged <- false  // 여기서 false 되서 동작 한번만되고 있네요
-                //    else
-                //        do! Async.Sleep(_ScanDelay)
-
-
-                while run do   
-                    if scanOnce().isEmpty() && _ScanDelay > 0
-                    then do! Async.Sleep(_ScanDelay)
-                    
+                use _ = CpusEvent.ValueSubject
+                                 .Where(fun (_, stg, _) -> stg.TagKind <> skipValueChangedForTagKind) //timer, counter 제외 timer.DN, ctn.UP, ctn.DN 은 TagKind 부여해서 동작
+                                 .Subscribe(fun (_, stg, _) -> if not(ctsScan.IsCancellationRequested) then ctsScan.Cancel())
+                
+                while run do
+                    scanOnce() |> ignore 
+                    try
+                        do! Async.AwaitTask(Task.Delay(10000, ctsScan.Token)) //10초 딜레이 크게 의미없음 CpusEvent.ValueSubject 되면 빠져나옴
+                    with
+                    | :? TaskCanceledException -> ctsScan <- new CancellationTokenSource()
             }
-
+                    
         let doRun() = 
             logInfo "--- Running CPU.."
             if not run then 

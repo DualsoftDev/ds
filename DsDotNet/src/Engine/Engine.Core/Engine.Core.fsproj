@@ -35,6 +35,7 @@
         <Compile Include="TypeConversion.fs" />
         <Compile Include="Expression.Interfaces.fs" />
         <Compile Include="Tag, Variable.fs" />
+        <Compile Include="TagKind.fs" />
         <Content Include="Timer.txt" />
         <Content Include="Timer.pptx" />
         <Compile Include="Timer.fs" />

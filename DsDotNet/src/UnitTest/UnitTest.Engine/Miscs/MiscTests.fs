@@ -120,7 +120,7 @@ module MiscTestModule =
                 else
                     $"Something Else: {vType.Name}"
 
-            let param = defaultStorageCreationParams(false)
+            let param = defaultStorageCreationParams(false) (VariableTag.PcUserVariable|>int)
             let v = new Variable<bool> {param with Name="test var"; }
             anal(v) === "Variable<Boolean>"
 

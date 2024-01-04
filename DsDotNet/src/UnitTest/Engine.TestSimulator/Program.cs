@@ -1,7 +1,9 @@
 using Engine.Core;
 using Engine.Info;
 using Engine.Runtime;
+using Engine.TestSimulator;
 using System;
+using System.Drawing;
 using System.IO;
 using static Engine.Core.CoreModule;
 using static Engine.Core.RuntimeGeneratorModule;
@@ -18,7 +20,7 @@ namespace Engine.TestSimulator
 
 
             //Web test 시에 RuntimePackage.StandardPC 설정 (flow auto drive ready web에서 시작조건 켜야함)
-            RuntimeDS.Package = RuntimePackage.Simulation;
+            RuntimeDS.Package = RuntimePackage.StandardPC;
             //RuntimeDS.Package = RuntimePackage.StandardPC; 
             RuntimeModel runModel = new(testFile);
 

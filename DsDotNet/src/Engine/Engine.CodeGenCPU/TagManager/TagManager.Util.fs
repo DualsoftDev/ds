@@ -35,7 +35,7 @@ module TagManagerUtil =
     let private createPlanVarHelper(stg:Storages, name:string, dataType:DataType, fillAutoAddress:bool, target:IQualifiedNamed, tagIndex:int,  system:ISystem) : IStorage =
         let v = dataType.DefaultValue()
         let address = if fillAutoAddress then Some TextAddrEmpty else None
-        let createParam () = {defaultStorageCreationParams(unbox v) with Name=name; IsGlobal=true; Address=address; Target= Some target; TagKind = tagIndex;System= system}
+        let createParam () = {defaultStorageCreationParams(unbox v) tagIndex with Name=name; IsGlobal=true; Address=address; Target= Some target; TagKind = tagIndex;System= system}
         let t:IStorage =
             match dataType with
             | DuINT8    -> PlanVar<int8>  (createParam())
@@ -94,7 +94,7 @@ module TagManagerUtil =
        
             let plcAddrName = getPlcTagAbleName name stg
             let t =
-                let param = {defaultStorageCreationParams(false) with Name=plcAddrName; Address= Some address; System=sys; TagKind = tagKind; Target = Some fqdn}
+                let param = {defaultStorageCreationParams(false) tagKind with Name=plcAddrName; Address= Some address; System=sys; TagKind = tagKind; Target = Some fqdn}
                 (Tag(param) :> ITag)
             stg.Add(t.Name, t)
             Some t

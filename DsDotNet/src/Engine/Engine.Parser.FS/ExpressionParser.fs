@@ -387,7 +387,7 @@ module rec ExpressionParser =
 
         member x.CreateBridgeTag(name: string, address: string, boxedValue: obj) : ITag =
             let createParam () =
-                { defaultStorageCreationParams (unbox boxedValue) with
+                { defaultStorageCreationParams (unbox boxedValue) skipValueChangedForTagKind with//test ahn 확인 skipValueChangedForTagKind
                     Name = name
                     Address = Some address }
 

@@ -1,8 +1,18 @@
 @* PageHmiAuto *@
 
 @page "/hmis/auto"
-<h3>자동 조작</h3>
-<p> Clear > Ready 후, Auto 나 Manual 누르면 선택 확인</p>
+
+<CompTooltipInlineHidden>
+    <NormalContent>
+        <CompTitle Icon="oi oi-bolt" Title="자동 조작" />
+    </NormalContent>
+    <TooltipContent>
+        <RadzenAlert AlertStyle="AlertStyle.Info" Variant="Variant.Flat" Icon="auto_awesome" Shade="Shade.Lighter">
+            <RadzenText TextStyle="TextStyle.H6" style="color: var(--rz-on-info-lighter);">자동 조작</RadzenText>
+            <p> Clear > Ready 후, Auto 나 Manual 누르면 선택 확인</p>
+        </RadzenAlert>
+    </TooltipContent>
+</CompTooltipInlineHidden>
 
 @using System.Collections.ObjectModel
 @using Engine.Core

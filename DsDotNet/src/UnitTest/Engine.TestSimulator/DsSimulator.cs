@@ -41,7 +41,7 @@ namespace Engine.TestSimulator
             List<string> changedNames = new();
 
             var subscription = dsCpu.TagWebChangedFromCpuSubject.Subscribe(s => changedNames.Add(s.Name));
-            await Task.Delay(1500);
+            await Task.Delay(2000);
             subscription.Dispose();
 
             var groupedNames = changedNames.GroupBy(name => name);

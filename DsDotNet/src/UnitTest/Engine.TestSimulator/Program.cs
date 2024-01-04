@@ -6,7 +6,7 @@ using System.IO;
 using static Engine.Core.CoreModule;
 using static Engine.Core.RuntimeGeneratorModule;
 
-namespace DsWebApp.Simulator
+namespace Engine.TestSimulator
 {
     internal class Program
     {

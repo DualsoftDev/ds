@@ -9,7 +9,7 @@ open Engine.Core
 open Engine.Runtime
 open Engine.Import.Office
 open Engine.Info
-open DsWebApp.Simulator
+open Engine.TestSimulator
 
 module RuntimeTest = 
     let testPPT =  @$"{__SOURCE_DIRECTORY__}../../../UnitTest/UnitTest.Model/ImportOfficeExample/exportDS/testA/testMy/my.pptx"

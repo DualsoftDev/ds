@@ -10,7 +10,7 @@ using static Engine.Cpu.RunTime;
 using static Engine.Import.Office.ImportViewModule;
 using static Engine.Import.Office.ViewModule;
 
-namespace DsWebApp.Simulator
+namespace Engine.TestSimulator
 {
     public static class DsSimulator
     {

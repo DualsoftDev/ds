@@ -38,7 +38,7 @@
       <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
       <ProjectReference Include="..\..\Engine\Engine.Info\Engine.Info.fsproj" />
       <ProjectReference Include="..\..\Engine\Engine.Runtime\Engine.Runtime.fsproj" />
-      <ProjectReference Include="..\..\Web\DsWebApp.Simulator\DsWebApp.Simulator.csproj" />
+      <ProjectReference Include="..\Engine.TestSimulator\Engine.TestSimulator.csproj" />
     </ItemGroup>
 
 </Project>

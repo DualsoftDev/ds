@@ -76,4 +76,4 @@
     [device file="./DS_Library.ds"] Flow2_JIG2; 
     [device file="./DS_Library.ds"] Flow2_PIN; 
 }
-//DS Language Version = [0.9.2.21]
+//DS Language Version = [0.9.2.22]

@@ -137,6 +137,8 @@ module CoreModule =
         inherit FqdnObject(name, system)
         member x.Name = name
         member val SettingFlows = flows with get, set
+        //SettingFlows 없으면 전역 시스템 설정
+        member val IsGlobalSystemHw = flows.IsEmpty()
         ///  작동을 위한 외부 IO 입력 주소
         member val InAddress = inAddress with get, set
         ///  작동을 위한 외부 IO 출력 주소

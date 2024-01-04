@@ -30,22 +30,44 @@ type DsSystem with
         
 
     member s.B3_HWModeLamp(): CommentedStatement list = [
-        for lamp in s.HWLamps do
+
+        for sysLamp in s.HWLamps.Filter(fun f-> not(f.IsGlobalSystemHw)) do
             let modeBit =
-                let f = lamp.SettingFlows.Head()          
+                match sysLamp.LampType with
+                | DuAutoLamp      -> s._autoState.Expr   
+                | DuManualLamp    -> s._manualState.Expr 
+                | DuDriveLamp     -> s._driveState.Expr  
+                | DuStopLamp      -> s._stopPause.Expr <||> (s._stopErr.Expr <&&> s._flicker1sec.Expr)
+                | DuEmergencyLamp -> s._emgState.Expr   
+                | DuTestDriveLamp -> s._testState.Expr   
+                | DuReadyLamp     -> s._readyState.Expr 
+                | DuIdleLamp      -> s._idleState.Expr 
+
+            let sets = if sysLamp.InTag.IsNull()
+                       then modeBit  
+                       else modeBit <||> sysLamp.ActionINFunc //강제 체크 비트
+
+            let out = sysLamp.OutTag :?> Tag<bool>
+            yield (sets, s._off.Expr) --| (out, getFuncName())
+
+
+
+        for lamp in s.HWLamps.Filter(fun f-> not(f.IsGlobalSystemHw)) do
+            let modeBit =
+                let f = lamp.SettingFlows.Head()   //램프는 하나의 Flow에 타입별로 하나씩   Engine.Parser.FS 예외체크중   
                 match lamp.LampType with
-                | DuAutoLamp      -> f.aop.Expr
-                | DuManualLamp    -> f.mop.Expr
-                | DuDriveLamp     -> f.dop.Expr
-                | DuStopLamp      -> f.sop.Expr
-                | DuEmergencyLamp -> f.eop.Expr
-                | DuTestDriveLamp -> f.top.Expr
-                | DuReadyLamp     -> f.rop.Expr
-                | DuIdleLamp      -> f.iop.Expr
+                | DuAutoLamp      -> f.aop
+                | DuManualLamp    -> f.mop
+                | DuDriveLamp     -> f.dop
+                | DuStopLamp      -> f.sop
+                | DuEmergencyLamp -> f.eop
+                | DuTestDriveLamp -> f.top
+                | DuReadyLamp     -> f.rop
+                | DuIdleLamp      -> f.iop
 
             let sets = if lamp.InTag.IsNull()
-                       then modeBit 
-                       else modeBit <||>  lamp.ActionINFunc
+                       then modeBit.Expr 
+                       else modeBit.Expr <||>  lamp.ActionINFunc //강제 체크 비트
 
             let out = lamp.OutTag :?> Tag<bool>
             yield (sets, s._off.Expr) --| (out, getFuncName())

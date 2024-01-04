@@ -54,8 +54,15 @@ module TagKindModule =
     ///stopType
     | sysStopError             = 0030
     | sysStopPause             = 0031
-    | sysDrive                 = 0032
 
+    | autoState                = 0032
+    | manualState              = 0033
+    | driveState               = 0034
+    | stopState                = 0035
+    | emgState                 = 0036
+    | testState                = 0037
+    | readyState               = 0038
+    | idleState                = 0039
     
 
  
@@ -305,7 +312,14 @@ type TagKindExt =
     [<Extension>]
     static member IsNeedSaveDBLog(x:TagDS) =
         match x with
-        |EventSystem (_, _, kind) ->  kind.IsOneOf(  SystemTag.sysDrive  
+        |EventSystem (_, _, kind) ->  kind.IsOneOf(  
+                                                      SystemTag.autoState     
+                                                    , SystemTag.manualState   
+                                                    , SystemTag.driveState    
+                                                    , SystemTag.stopState     
+                                                    , SystemTag.emgState      
+                                                    , SystemTag.testState     
+                                                    , SystemTag.readyState    
                                                     , SystemTag.sysStopPause
                                                     , SystemTag.sysStopError
                                                     , SystemTag.clear_btn)

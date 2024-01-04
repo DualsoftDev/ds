@@ -109,9 +109,20 @@ module ConvertCodeCoreExt =
         member s._dtimeh      = s.GetPv<uint8>(SystemTag.datet_h )
         member s._dtimem      = s.GetPv<uint8>(SystemTag.datet_m )
         member s._dtimes      = s.GetPv<uint8>(SystemTag.datet_s )
+
+
         member s._stopPause   = s.GetPv<bool>(SystemTag.sysStopPause)
         member s._stopErr     = s.GetPv<bool>(SystemTag.sysStopError)
-        member s._drive       = s.GetPv<bool>(SystemTag.sysDrive)
+        member s._autoState   = s.GetPv<bool>(SystemTag.autoState   )
+        member s._manualState = s.GetPv<bool>(SystemTag.manualState )
+        member s._driveState  = s.GetPv<bool>(SystemTag.driveState  )
+        member s._stopState   = s.GetPv<bool>(SystemTag.stopState   )
+        member s._emgState    = s.GetPv<bool>(SystemTag.emgState    )
+        member s._testState   = s.GetPv<bool>(SystemTag.testState   )
+        member s._readyState  = s.GetPv<bool>(SystemTag.readyState  )
+        member s._idleState   = s.GetPv<bool>(SystemTag.idleState  )
+
+
         member s._tout        = s.GetPv<uint16>(SystemTag.timeout)
         member s._flicker200msec = s.GetPv<bool>(SystemTag.flicker200ms)
         member s._flicker1sec = s.GetPv<bool>(SystemTag.flicker1s)

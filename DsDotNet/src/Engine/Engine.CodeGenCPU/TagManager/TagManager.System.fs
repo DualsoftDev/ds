@@ -69,7 +69,15 @@ module SystemManagerModule =
 
         let sysStopError    = dsSysBit "sysStopError"   true  sys   SystemTag.sysStopError
         let sysStopPause    = dsSysBit "sysStopPause"   true  sys   SystemTag.sysStopPause
-        let sysDrive    = dsSysBit "sysDrive"   true  sys   SystemTag.sysDrive
+
+        let sysAutoState    = dsSysBit "sysAutoState"   true  sys   SystemTag.autoState   
+        let sysManualState  = dsSysBit "sysManualState" true  sys   SystemTag.manualState 
+        let sysDriveState   = dsSysBit "sysDriveState"  true  sys   SystemTag.driveState  
+        let sysStopState    = dsSysBit "sysStopState"   true  sys   SystemTag.stopState   
+        let sysEmgState     = dsSysBit "sysEmgState"    true  sys   SystemTag.emgState    
+        let sysTestState    = dsSysBit "sysTestState"   true  sys   SystemTag.testState   
+        let sysReadyState   = dsSysBit "sysReadyState"  true  sys   SystemTag.readyState  
+        let sysIdleState    = dsSysBit "sysIdleState"   true  sys   SystemTag.idleState  
         
         let sim    = dsSysBit "syssim"   true  sys   SystemTag.sim
         let flicker200msec  = dsSysBit "_T200MS" true  sys   SystemTag.flicker200ms
@@ -126,7 +134,17 @@ module SystemManagerModule =
             | SystemTag.timeout         ->    tout
             | SystemTag.sysStopError    ->    sysStopError
             | SystemTag.sysStopPause    ->    sysStopPause
-            | SystemTag.sysDrive        ->    sysDrive
+            
+            | SystemTag.autoState          ->    sysAutoState   
+            | SystemTag.manualState        ->    sysManualState 
+            | SystemTag.driveState         ->    sysDriveState  
+            | SystemTag.stopState          ->    sysStopState   
+            | SystemTag.emgState           ->    sysEmgState    
+            | SystemTag.testState          ->    sysTestState   
+            | SystemTag.readyState         ->    sysReadyState  
+            | SystemTag.idleState         ->     sysIdleState
+
+
             | SystemTag.flicker200ms    -> flicker200msec
             | SystemTag.flicker1s       -> flicker1sec
             | SystemTag.flicker2s       -> flicker2sec

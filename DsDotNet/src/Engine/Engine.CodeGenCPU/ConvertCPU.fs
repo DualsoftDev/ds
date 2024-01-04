@@ -92,7 +92,7 @@ module ConvertCPU =
             yield! s.Y1_SystemBitSetFlow()
             yield s.Y2_SystemError()
             yield s.Y3_SystemPause()
-            yield s.Y4_SystemDrive()
+            yield! s.Y4_SystemState()
 
             if RuntimeDS.Package = RuntimePackage.StandardPLC then
                 yield! s.E1_StandardPLCOnly()

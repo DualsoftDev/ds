@@ -39,13 +39,16 @@
             case InfoReal real:
                 children = real.InfoCalls.ToArray();
                 break;
-                // case InfoCall call:
-                //     children = call.InfoDevices.ToArray();
-                //     break;
+            case InfoCall call:
+                JsDual.Alert("Call does not supported for children statistics for now!");
+                // children = call.InfoDevices.ToArray();
+                break;
+            default:
+                throw new Exception($"ERROR on {nameof(DsMultiBarChartEfficiency)}");
         }
 
-        _drives = children.Select(ch => new CategoryItem() { Category = ch.Name, Value = getDriveValue(ch) }).ToArray();
-        _errors = children.Select(ch => new CategoryItem() { Category = ch.Name, Value = getErrorValue(ch) }).ToArray();
+        _drives = children?.Select(ch => new CategoryItem() { Category = ch.Name, Value = getDriveValue(ch) }).ToArray() ?? [];
+        _errors = children?.Select(ch => new CategoryItem() { Category = ch.Name, Value = getErrorValue(ch) }).ToArray() ?? [];
 
         _loading = false;
 

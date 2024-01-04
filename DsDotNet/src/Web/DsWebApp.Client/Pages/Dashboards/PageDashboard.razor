@@ -74,9 +74,14 @@ else
                 }
                 var (d, e) = (infoBase.DriveAverage, infoBase.ErrorAverage);
                 var a = d + e + w;
-                가동.Value = 100 * d / a;
-                에러.Value = 100 * e / a;
-                비가동.Value = 100 * w / a;
+                if (a == 0)
+                    (가동.Value, 비가동.Value, 에러.Value) = (0, 0, 0);
+                else
+                {
+                    가동.Value = 100 * d / a;
+                    에러.Value = 100 * e / a;
+                    비가동.Value = 100 * w / a;
+                }
                 break;
 
             case InfoDevice device:

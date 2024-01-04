@@ -77,16 +77,18 @@ module RunTime =
         let mutable ctsScan = new CancellationTokenSource()
         let asyncStart = 
             async { 
-                // 시스템 ON 및 값 변경이 없는 조건 수식은 관련 수식은 Changed Event가 없어서 한 번 수행해줌
+                        // 시스템 ON 및 값 변경이 없는 조건 수식은 관련 수식은 Changed Event가 없어서 한 번 수행해줌
                 for s in statements do s.Do()
+                        //timer, counter 제외 timer.DN, ctn.UP, ctn.DN 은 TagKind 부여해서 동작
                 use _ = CpusEvent.ValueSubject
-                                 .Where(fun (_, stg, _) -> stg.TagKind <> skipValueChangedForTagKind) //timer, counter 제외 timer.DN, ctn.UP, ctn.DN 은 TagKind 부여해서 동작
+                                 .Where(fun (_, stg, _) -> stg.TagKind <> skipValueChangedForTagKind) 
                                  .Subscribe(fun _ -> if not(ctsScan.IsCancellationRequested) then ctsScan.Cancel())
                 
                 while run do
                     scanOnce() |> ignore 
                     try
-                        do! Async.AwaitTask(Task.Delay(10000, ctsScan.Token)) //10초 딜레이 크게 의미없음 CpusEvent.ValueSubject 되면 빠져나옴
+                                    //10초 딜레이 크게 의미없음 CpusEvent.ValueSubject 되면 빠져나옴
+                        do! Async.AwaitTask(Task.Delay(10000, ctsScan.Token))
                     with
                     | :? TaskCanceledException -> ctsScan <- new CancellationTokenSource()
             }

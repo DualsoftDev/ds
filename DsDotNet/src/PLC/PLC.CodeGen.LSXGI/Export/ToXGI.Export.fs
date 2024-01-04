@@ -11,7 +11,7 @@ open PLC.CodeGen.Common
 [<AutoOpen>]
 module XgiXmlGeneratorModule =
     /// Program 부분 Xml string 반환: <Program Task="taskName" ..>pouName
-    let createXmlStringProgram taskName pouName =
+    let createXmlStringProgram taskName pouName (mainScan:string option) =
         sprintf
             """
 			<Program Task="%s" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" FindProgram="1" FindVar="1" Encrytption="">%s
@@ -23,7 +23,7 @@ XckU4UJCOYh5CA==</OnlineUploadData>
 				</Body>
 				<RungTable></RungTable>
 			</Program>"""
-            taskName
+            (if mainScan.IsSome then mainScan.Value else taskName)
             pouName
 
     /// Task 부분 Xml string 반환: <Task Version=..>taskNameName
@@ -186,9 +186,9 @@ module XgiExportModule =
 
     type XgiPOUParams with
 
-        member x.GenerateXmlString(prjParam: XgiProjectParams) = x.GenerateXmlNode(prjParam).OuterXml
+        member x.GenerateXmlString(prjParam: XgiProjectParams, scanName:string option) = x.GenerateXmlNode(prjParam, scanName).OuterXml
 
-        member x.GenerateXmlNode(prjParam: XgiProjectParams) : XmlNode =
+        member x.GenerateXmlNode(prjParam: XgiProjectParams, scanName:string option) : XmlNode =
             let { TaskName = taskName
                   POUName = pouName
                   Comment = comment
@@ -240,7 +240,7 @@ module XgiExportModule =
             let rungsXml = generateRungs comment commentedXgiStatements
 
             /// POU/Programs/Program
-            let programTemplate = createXmlStringProgram taskName pouName |> XmlNode.ofString
+            let programTemplate = createXmlStringProgram taskName pouName scanName |> XmlNode.ofString
 
             //let programTemplate = DsXml.adoptChild programs programTemplate
 
@@ -287,16 +287,16 @@ module XgiExportModule =
 
             EnableXmlComment <- enableXmlComment
             let xdoc = x.GetTemplateXmlDoc()
-            (* validation : POU 중복 이름 체크 *)
-            do
-                let programs = xdoc.SelectNodes("//POU/Programs/Program")
+            let programs = xdoc.SelectNodes("//POU/Programs/Program")
 
-                let existingTaskPous =
+            let existingTaskPous =
                     [ for p in programs do
                           let taskName = p.GetAttribute("Task")
                           let pouName = p.FirstChild.OuterXml
                           taskName, pouName ]
 
+            (* validation : POU 중복 이름 체크 *)
+            do
                 let newTaskPous = [ for p in pous -> p.TaskName, p.POUName ]
 
                 let duplicated =
@@ -321,18 +321,20 @@ module XgiExportModule =
             (* Tasks/Task 삽입 *)
             do
                 let xnTasks = xdoc.SelectSingleNode("//Configurations/Configuration/Tasks")
-                xnTasks.RemoveChildren() |> ignore
                 let pous = pous |> List.distinctBy (fun pou -> pou.TaskName)
 
                 for i, pou in pous.Indexed() do
                     let index = if i <= 1 then 0 else i - 1
-                    let kind = if i = 0 then 0 else 2
+                    let kind = if i = 0 then 0 else 2 //0:스캔프로그램Task 2:user Task
                     let priority = kind
                     let device = if kind =0 then 0 else 10  //정주기 10msec 디바이스항목으로 저장
-                    createXmlStringTask pou.TaskName kind priority index device
-                    |> XmlNode.ofString
-                    |> xnTasks.AdoptChild
-                    |> ignore
+                    if kind = 2 //user task 만 삽입 (스캔프로그램Task는 template에 항상 있음)
+                    then
+                        createXmlStringTask pou.TaskName kind priority index device
+                        |> XmlNode.ofString
+                        |> xnTasks.AdoptChild
+                        |> ignore
+             
 
             (* Global variables 삽입 *)
             do
@@ -406,9 +408,14 @@ module XgiExportModule =
             (* POU program 삽입 *)
             do
                 let xnPrograms = xdoc.SelectSingleNode("//POU/Programs")
-                xnPrograms.RemoveChildren() |> ignore
+                let mainScanName = if existingTaskPous.any()
+                                   then existingTaskPous.First() |> fst |> Some
+                                   else None 
 
-                for pou in pous do
-                    pou.GenerateXmlNode(x) |> xnPrograms.AdoptChild |> ignore
+                for i, pou in pous.Indexed() do //i = 0 은 메인 스캔 프로그램
+                    let mainScan = 
+                        if i = 0 && mainScanName.IsSome
+                        then mainScanName else None
+                    pou.GenerateXmlNode(x, mainScan) |> xnPrograms.AdoptChild |> ignore
 
             xdoc

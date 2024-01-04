@@ -80,7 +80,7 @@ type XgiPOUTest() =
     [<Test>]
     member __.``POU1 test`` () =
         let dummyPrjParams = createProjectParams "dummy"
-        let xml = pou11.Value.GenerateXmlString(dummyPrjParams)
+        let xml = pou11.Value.GenerateXmlString(dummyPrjParams, None)
         saveTestResult (getFuncName()) xml
 
     [<Test>]
@@ -166,8 +166,8 @@ type XgiPOUTest() =
         }
         let xml = projectParams.GenerateXmlString()
 
-        globalStorages["gg1"].Address === null
-        globalStorages["xm0"].Address === "%MX24"
+        globalStorages["gg1"].Address === "%MX24"
+        globalStorages["xm0"].Address === "%MX25"
 
         saveTestResult f xml
 

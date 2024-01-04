@@ -42,13 +42,9 @@ module ImportIOTable =
 
             let chageParserText newAddr = if newAddr= TextSkip then TextAddrEmpty else newAddr
             let changeValidAddress (address:string)  =
-                //if  address <> TextSkip ||  address <> TextAddrEmpty then address
-                //else
-                    let address =
-                        match RuntimeDS.Target with
-                        | XGI -> if not <| address.Trim().StartsWith("%")  then "%" + address else address
-                        | _ -> address.Trim() 
-           
+    
+                    let address = address.Trim() 
+                    
                     address |> chageParserText
 
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
@@ -60,6 +56,8 @@ module ImportIOTable =
                 let dev = dicJob.[devName]
                 let inAdd =    $"{row.[(int) IOColumn.Input]}".Trim()
                 let outAdd =   $"{row.[(int) IOColumn.Output]}".Trim()
+
+                if devName.ToUpper().Contains("SW") then ()
 
                 dev.InAddress <-  changeValidAddress inAdd
                 dev.OutAddress <- changeValidAddress outAdd

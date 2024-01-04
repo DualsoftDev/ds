@@ -161,8 +161,9 @@ module ImportPPTModule =
             if paras.LoadingType = DuNone || paras.LoadingType = DuDevice then //External system 은 Interfaces만 만들고 나중에 buildSystem 수행
                 doc.BuildSystem(theSys)
 
-            doc.UpdateActionIO(theSys)
-            doc.UpdateLayouts(theSys)
+            if paras.LoadingType = DuNone then
+                doc.UpdateActionIO(theSys)
+                doc.UpdateLayouts(theSys)
             
             pathStack.Pop() |> ignore
             pptReop.Add(theSys, doc)

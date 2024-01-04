@@ -72,12 +72,26 @@ module SystemManagerModule =
         let sysDrive    = dsSysBit "sysDrive"   true  sys   SystemTag.sysDrive
         
         let sim    = dsSysBit "syssim"   true  sys   SystemTag.sim
+        let flicker200msec  = dsSysBit "_T200MS" true  sys   SystemTag.flicker200ms
+        let flicker1sec    = dsSysBit "_T1S"   true  sys   SystemTag.flicker1s
+        let flicker2sec    = dsSysBit "_T2S"   true  sys   SystemTag.flicker2s
+        do 
+            flicker200msec.Address <- "%FX146"
+            flicker1sec.Address <- "%FX147"
+            flicker2sec.Address <- "%FX148"
+            on.Value <- true
+            off.Value <- false
 
         interface ITagManager with
             member x.Target = sys
             member x.Storages = stg
 
-        member f.GetSystemTag(st:SystemTag) : IStorage=
+        member s.GetTempBoolTag(name:string, address:string, fqdn:IQualifiedNamed) : IStorage=
+                if stg.ContainsKey(name) then stg[name]
+                else
+                    createBridgeTag(stg, name, address, SystemTag.temp|>int, BridgeType.DummyTemp, sys, fqdn).Value
+            
+        member s.GetSystemTag(st:SystemTag) : IStorage=
             match st with
             | SystemTag.on         ->    on
             | SystemTag.off        ->    off
@@ -113,5 +127,8 @@ module SystemManagerModule =
             | SystemTag.sysStopError    ->    sysStopError
             | SystemTag.sysStopPause    ->    sysStopPause
             | SystemTag.sysDrive        ->    sysDrive
+            | SystemTag.flicker200ms    -> flicker200msec
+            | SystemTag.flicker1s       -> flicker1sec
+            | SystemTag.flicker2s       -> flicker2sec
             | SystemTag.sim             ->    sim
             | _ -> failwithlog $"Error : GetSystemTag {st} type not support!!"

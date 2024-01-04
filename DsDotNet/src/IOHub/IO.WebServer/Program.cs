@@ -1,16 +1,10 @@
 using IO.WebServer.Data;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting.WindowsServices;
-using Microsoft.AspNetCore.Diagnostics;
-using System.Reflection;
 using Dual.Web.Blazor.ServerSide;
 using Dual.Common.Core;
 //using Newtonsoft.Json;
 using log4net;
 using IO.WebServer.Demons;
-
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 
 using System.Diagnostics;
 using Log4NetLogger = Dual.Common.Core.Log4NetLogger;

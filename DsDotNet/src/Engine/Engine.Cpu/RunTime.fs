@@ -21,6 +21,7 @@ module RunTime =
     type DsCPU(css:CommentedStatement seq, mySystem:DsSystem, loadedSystems:DsSystem seq
              , hmiTags:IDictionary<string, TagWeb>) =
 
+        let _ScanDelay = 10
         let statements = css |> Seq.map(fun f -> f.Statement)
         let mapRungs = getRungMap(statements)
         let cpuStorages = mapRungs.Keys
@@ -52,6 +53,14 @@ module RunTime =
                  systems.Iter(fun sys-> cpuSimOn(sys))
                  systems.Iter(fun sys-> preAction(sys, true))
 
+
+        let subscription = 
+            tagWebChangedFromWebSubject.Subscribe(fun tagWeb-> 
+                    logDebug $"Server Updating TagWeb from Web: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
+                    let cpuTag = tagStorages.[tagWeb.Name]
+                    cpuTag.BoxedValue <-tagWeb.Value
+            )
+
         let scanOnce() = 
             //나머지 수식은 Changed Event가 있는것만 수행해줌
             let chTags = cpuStorages.ChangedTags()
@@ -69,9 +78,23 @@ module RunTime =
         let asyncStart = 
             async { 
                 //시스템 ON 및 값변경이 없는 조건 수식은  관련 수식은 Changed Event가 없어서한번 수행해줌
-                for s in statements do s.Do() 
+                for s in statements do s.Do()
+
+                (*확인 필요*)
+                //let mutable hasChanged = true
+                //use _ = CpusEvent.ValueSubject.Subscribe(fun _ -> hasChanged <- true)
+                //while run do
+                //    if hasChanged then
+                //        scanOnce() |> ignore // 내부에서 CpusEvent.ValueSubject 발생해서 
+                //        hasChanged <- false  // 여기서 false 되서 동작 한번만되고 있네요
+                //    else
+                //        do! Async.Sleep(_ScanDelay)
+
+
                 while run do   
-                    scanOnce() |> ignore
+                    if scanOnce().isEmpty() && _ScanDelay > 0
+                    then do! Async.Sleep(_ScanDelay)
+                    
             }
 
         let doRun() = 
@@ -97,12 +120,7 @@ module RunTime =
                                              .Where(fun f->f.IsStatusTag()).any()
             }
 
-        let subscription = 
-            tagWebChangedFromWebSubject.Subscribe(fun tagWeb-> 
-                    logDebug $"Server Updating TagWeb from Web: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
-                    let cpuTag = tagStorages.[tagWeb.Name]
-                    cpuTag.BoxedValue <-tagWeb.Value
-            )
+        
 
         do
             disposables.Add subscription
@@ -139,6 +157,10 @@ module RunTime =
         member x.Reset() =
             doScanStop()
             syncReset(mySystem)
+            scanOnce() |> ignore
+
+        member x.QuickDriveReady() =
+            systems.Iter(fun sys-> preAction(sys, true))
             scanOnce() |> ignore
 
         member x.TagWebChangedFromWebSubject = tagWebChangedFromWebSubject

@@ -34,13 +34,19 @@ type Flow with
 
         (set, rst) --| (f.eop, getFuncName())
 
-    member f.O5_StopOperationState(): CommentedStatement =
-        let set = (f.stop_btn.Expr <||> f.HWBtnStopExpr <||> f.sop.Expr) <&&> !!f.HWBtnClearExpr
-        let setErrs = f.Graph.Vertices.OfType<Real>().Select(getVM) 
-                        |> Seq.collect(fun r-> [|r.E1; r.E2|])
-        let rst = f.clear_btn.Expr //test ahn lightPLC 모드 준비중
+    member f.O5_StopOperationState(): CommentedStatement  =
+        let setPause = (f.stop_btn.Expr <||> f.HWBtnStopExpr <||> f.sop.Expr) <&&> !!f.HWBtnClearExpr
+        let setError = (f.Graph.Vertices.OfType<Real>().Select(getVM) 
+                        |> Seq.collect(fun r-> [|r.E1; r.E2|])).ToOrElseOff(f.System)
+        let set =
+            if RuntimeDS.Package = LightPLC
+            then
+                setPause <||> (setError <&&> f.System._flicker1sec.Expr)
+            else 
+                setPause <||> setError
 
-        (set <||> setErrs.ToOrElseOff(f.System), rst) ==| (f.sop, getFuncName())
+        let rst = f.clear_btn.Expr
+        (set, rst) ==| (f.sop, getFuncName())
 
     member f.O6_DriveOperationMode (): CommentedStatement =
         let set = f.drive_btn.Expr <||> f.HWBtnDriveExpr 

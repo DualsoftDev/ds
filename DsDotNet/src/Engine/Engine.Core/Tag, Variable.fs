@@ -31,7 +31,8 @@ module TagVariableModule =
     [<AbstractClass>]
     [<DebuggerDisplay("{Name}")>]
     type TypedValueStorage<'T when 'T:equality>(param:StorageCreationParams<'T>) =
-        let {Name=name; Value=initValue; Comment=comment; IsGlobal=isGlobal } = param
+        let {Name=name; Value=initValue; Address=address; Comment=comment; IsGlobal=isGlobal } = param
+        let mutable address = if address.IsSome then address.Value else TextAddrEmpty
         let mutable value = initValue
         let mutable tagChanged = false
         let comment = comment |? ""
@@ -48,7 +49,7 @@ module TagVariableModule =
                  //기존 시스템 단위로
                  //   (x:>  IStorage).DsSystem.ValueChangeSubject.OnNext(x :> IStorage, v)
         member val Comment: string = comment with get, set
-        member val Address = param.Address.ToObj() with get, set
+        member val Address = address with get, set
 
         interface IStorage with
             member x.DsSystem = param.System

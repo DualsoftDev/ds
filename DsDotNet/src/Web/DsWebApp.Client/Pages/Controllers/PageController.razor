@@ -1,3 +1,4 @@
+@* PageController *@
 @page "/controllers/controller"
 
 @using System.Collections.ObjectModel
@@ -7,7 +8,7 @@
 @attribute [Authorize(Roles = "Administrator,User")]
 @implements IDisposable
 
-<h3>PageController</h3>
+<CompTitle Icon="oi oi-puzzle-piece" Title="제어" />
 
 
 @if (_loading)
@@ -29,6 +30,9 @@ else
         <button class="btn btn-primary" @onclick="Stop" disabled="@(!_isRunning)">Stop</button>
         <button class="btn btn-primary" @onclick="Step" disabled="@(!_isRunning)">Step</button>
         <button class="btn btn-primary" @onclick="Reset" disabled="@(!_isRunning)">Reset</button>
+
+        <br/>
+        <CompEnumSelector Title="Runtime Package: " TEnum="RuntimePackageCs" @bind-Value="RuntimePackage" />
     }
 }
 
@@ -42,6 +46,15 @@ else
     RuntimeModelDto _modelDto;
     CompositeDisposable _disposables = new();
 
+    RuntimePackageCs RuntimePackage {
+        get => ClientGlobal.ServerSettings.RuntimePackageCs;
+        set
+        {
+            ClientGlobal.ServerSettings.RuntimePackageCs = value;
+            // todo: api 를 통해 ServerGlobal.ReloadRuntimeModel() 호출되도록
+            reloadModel().Wait();
+        }
+    }
     protected override async Task OnInitializedAsync()
     {
         var result = await ClientGlobal.GetModelDtoAsync(Http);
@@ -97,4 +110,10 @@ else
     {
         await executeRestApi($"api/cpu/command/reset", "Cpu reset'ed.");
     }
+
+    async Task reloadModel()
+    {
+        await executeRestApi($"api/cpu/command/reload-model", "Model reloaded.");
+    }
+
 }

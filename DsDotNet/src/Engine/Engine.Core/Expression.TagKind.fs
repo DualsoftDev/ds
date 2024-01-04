@@ -58,9 +58,16 @@ module TagKindModule =
 
     
 
+ 
+    ///flicker
+    | flicker200ms              = 0100
+    | flicker1s                 = 0101
+    | flicker2s                 = 0102
+
+    ///temp (not logic 정의를 위한 plc 임시변수)
+    | temp                     = 9998
     ///simulation
     | sim                      = 9999
-
     /// 10000 ~ 10999
     [<Flags>]
     type FlowTag    =        

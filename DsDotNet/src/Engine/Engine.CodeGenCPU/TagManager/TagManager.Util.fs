@@ -72,13 +72,14 @@ module TagManagerUtil =
         t
 
 
-    type BridgeType = | Device | Button | Lamp | Condition
+    type BridgeType = | Device | Button | Lamp | Condition | DummyTemp
     let createBridgeTag(stg:Storages, name, address:string, tagKind:int, bridgeType:BridgeType, sys, fqdn:IQualifiedNamed): ITag option=
         if address = TextSkip || address = "" 
         then None
         else
             let name =
                 match bridgeType with
+                | DummyTemp -> name  //plc b접 처리를 위한 임시 물리주소 변수
                 | Device ->   match DU.tryGetEnumValue<ActionTag>(tagKind).Value with
                               | ActionTag.ActionIn     -> $"{name}_I"
                               | ActionTag.ActionOut    -> $"{name}_O"

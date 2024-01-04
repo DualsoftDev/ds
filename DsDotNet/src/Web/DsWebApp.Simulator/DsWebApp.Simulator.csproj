@@ -9,21 +9,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <None Remove="App.config.template" />
-      <None Remove="DS_Library.ds" />
-      <None Remove="HelloDS.ds" />
-      <None Remove="HelloDS.xgwx" />
-      <None Remove="HelloDS.xlsx" />
-      <None Remove="HelloDS.xml" />
-    </ItemGroup>
+		<Content Include="..\..\..\src\Engine\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
+		<Content Include="..\..\..\Apps\CommonAppSettings.json" Link="CommonAppSettings.json" >
+		    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
 
-    <ItemGroup>
-        <Compile Include="..\..\..\src\Engine\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Content Include="..\..\..\Apps\CommonAppSettings.json" Link="CommonAppSettings.json" />
-    </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\..\src\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />

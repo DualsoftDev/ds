@@ -16,6 +16,8 @@ namespace DsWebApp.Simulator
     {
         public static bool Do(DsSystem dsSys, DsCPU dsCpu)
         {
+
+            dsCpu.QuickDriveReady();
             dsCpu.MySystem.Flows.Iter(f =>
             {
                 var reals = f.Graph.Vertices.OfType<Real>();

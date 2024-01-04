@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 using static Engine.Core.RuntimeGeneratorModule;
 
 namespace DsWebApp.Shared;
@@ -8,10 +6,7 @@ namespace DsWebApp.Shared;
 public class ServerSettings
 {
     public bool UseHttpsRedirection { get; set; }
-    public bool AutoStartOnSystemPowerUp { get; set; }
-    //client 로 부터 받아야 하나 임시 테스트로 사용
-    public bool SimulationMode { get; set; }
-    
+    public bool AutoStartOnSystemPowerUp { get; set; }    
     public ClientEnvironment ClientEnvironment { get; set; }
     public string RuntimeModelDsZipPath { get; set; }
     public double JwtTokenValidityMinutes { get; set; }
@@ -19,8 +14,7 @@ public class ServerSettings
     public RuntimePackageCs RuntimePackageCs { get; set; }
 
     public RuntimePackage GetRuntimePackage() =>
-        SimulationMode ? RuntimePackage.Simulation
-        : RuntimePackageCs switch
+        RuntimePackageCs switch
             {
                 RuntimePackageCs.StandardPC => RuntimePackage.StandardPC,
                 RuntimePackageCs.StandardPLC => RuntimePackage.StandardPLC,

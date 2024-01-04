@@ -1,4 +1,4 @@
-@* CompHmiButtonColumn *@
+@* CompHmiButtonLampColumn *@
 
 @using System.Reactive.Subjects
 @*
@@ -15,7 +15,7 @@ https://supportcenter.devexpress.com/ticket/details/t1135370/grid-for-blazor-how
     // [Parameter] public EventCallback<object> OnClick { get; set; }
     [Parameter] public Nullable<int> ForceWidth { get; set; }
 
-    [Parameter] public Func<object, HMIPushLamp> ButtonLampGetter { get; set; }
+    [Parameter] public Func<object, CsHMIPushLamp> ButtonLampGetter { get; set; }
 
 
     protected override bool ShouldRender() => false;

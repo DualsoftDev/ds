@@ -23,7 +23,7 @@ else
     string _guid;
     bool _loading { get; set; } = true;
 
-    [Parameter] public Func<object, HMIPushLamp> ButtonLampGetter { get; set; }
+    [Parameter] public Func<object, CsHMIPushLamp> ButtonLampGetter { get; set; }
     [Parameter] public string Text { get; set; }
     [Parameter] public object DataItem { get; set; }
 

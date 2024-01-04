@@ -11,10 +11,6 @@ open OpenCVUtils
 open System.Drawing
 
 
-type ViewType =
-    | Chart
-    | Table
-    
 let getViewType (viewtype:string) =
     match viewtype with
     | "Chart" -> ViewType.Chart
@@ -92,9 +88,6 @@ type DsStreaming() =
         |> ignore
 
 
-
-
-
     member x.GetFrontImage(viewType) =
         let r = Random()
         let dt = OpenCVUtils.GetSampleDataTable(r.Next(10, 30))
@@ -104,7 +97,7 @@ type DsStreaming() =
             | ViewType.Table -> OxyChart.visualizeImage().ToArray()
                //camTable.ConvertToImage([dt]) |> Seq.head
             | ViewType.Chart -> OxyChart.visualizeImage().ToArray()
-               //camChart.ConvertToImage([dt], viewType) |> Seq.head
+            | _ -> failwithf $"GetFrontImage {viewType}: error Type"
         img
 
     member x.StreamingFrontFrame() =

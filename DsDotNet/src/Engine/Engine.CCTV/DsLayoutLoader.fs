@@ -14,6 +14,11 @@ type ScreenInfo() =
     member val Id = 0 with get, set
     member val URL = "" with get, set
 
+[<Flags>]    
+type ViewType =
+    | Chart = 0
+    | Table  = 1
+    
 [<AutoOpen>]
 type DsLayoutLoader() =
     let mutable _dsSystem:DsSystem option = None
@@ -43,3 +48,6 @@ type DsLayoutLoader() =
     member x.GetScreen(id:string) =
         let find = Convert.ToInt32(id)
         x.GetScreens().FirstOrDefault(fun x -> x.Id = find)
+
+    member x.GetViewTypeList() = 
+        Enum.GetNames(typeof<ViewType>) 

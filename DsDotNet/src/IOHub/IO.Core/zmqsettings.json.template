@@ -5,7 +5,7 @@
     {
       "Name": "LsXGI",
       "Location": "",
-      "Dll": "C:\\ds\\DsDotNet\\src\\IOHub\\ThirdParty.AddressInfo.Provider\\bin\\Debug\\net7.0\\ThirdParty.AddressInfo.Provider.dll",
+      "Dll": "F:\\Git\\ds\\DsDotNet\\src\\IOHub\\ThirdParty.AddressInfo.Provider\\bin\\Debug\\net7.0\\ThirdParty.AddressInfo.Provider.dll",
       "ClassName": "ThirdParty.AddressInfo.Provider.AddressInfoProviderLsXGI",
       "Files": [
         {
@@ -25,7 +25,7 @@
     {
       "Name": "Paix",
       "Location": "p",
-      "Dll": "C:\\ds\\DsDotNet\\src\\IOHub\\ThirdParty.AddressInfo.Provider\\bin\\Debug\\net7.0\\ThirdParty.AddressInfo.Provider.dll",
+      "Dll": "F:\\Git\\ds\\DsDotNet\\src\\IOHub\\ThirdParty.AddressInfo.Provider\\bin\\Debug\\net7.0\\ThirdParty.AddressInfo.Provider.dll",
       "ClassName": "ThirdParty.AddressInfo.Provider.AddressInfoProviderPaix",
       "Files": [
         {

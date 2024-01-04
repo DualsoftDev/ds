@@ -42,6 +42,13 @@ module CoreModule =
         LoadingType: ParserLoadingType
     }
 
+    // 장치 LayoutInfo  정의
+    type DeviceLayoutInfo = {
+        DeviceName: string
+        Path: string
+        Xywh: Xywh
+    }
+
     [<AbstractClass>]
     type LoadedSystem (loadedSystem: DsSystem, param: DeviceLoadParameters) =
         inherit FqdnObject(param.LoadedName, param.ContainerSystem)
@@ -98,6 +105,9 @@ module CoreModule =
         member _.Devices = loadedSystems.OfType<Device>() |> Seq.toArray 
         member _.ExternalSystems = loadedSystems.OfType<ExternalSystem>() |> Seq.toArray
         member _.LayoutChannels = loadedSystems |> Seq.collect(fun s->s.Channels) |> distinct
+        member _.LayoutInfos = loadedSystems 
+                               |> Seq.collect(fun s-> 
+                                s.Channels.Select(fun path-> { DeviceName = s.LoadedName; Path= path; Xywh = s.Xywh})) 
         member _.ApiUsages = apiUsages |> seq
         member val Jobs = ResizeArray<Job>()
         member val Flows = createNamedHashSet<Flow>()

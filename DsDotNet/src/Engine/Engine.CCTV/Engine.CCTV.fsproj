@@ -4,21 +4,24 @@
         <TargetFramework>net7.0</TargetFramework>
 		<OutputType>Exe</OutputType>
 		<LangVersion>8.0</LangVersion>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     </PropertyGroup>
 
     <ItemGroup>
         <Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
         <Compile Include="AssemblyInfo.fs" />
-        <Compile Include="DsLayoutLoader.fs" />
         <Compile Include="OpenCVUtils.fs" />
-        <Compile Include="OxyChart.fs" />
+        <Compile Include="OxyImgUtils.fs" />
+        <Compile Include="DsLayoutLoader.fs" />
+        <Compile Include="DsStreaming.Frontframe.fs" />
+        <Compile Include="DsStreaming.Backframe.fs" />
         <Compile Include="DsStreaming.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="..\..\..\Apps\CommonAppSettings.json" Link="CommonAppSettings.json" >
+      <Content Include="..\..\..\Apps\CommonAppSettings.json" Link="CommonAppSettings.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
     </ItemGroup>

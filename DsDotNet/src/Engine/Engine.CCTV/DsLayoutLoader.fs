@@ -16,10 +16,9 @@ type ScreenInfo() =
 
 [<Flags>]    
 type ViewType =
-    | Chart = 0
-    | Table  = 1
+    | Normal = 0
+    | Error  = 1
     
-[<AutoOpen>]
 type DsLayoutLoader() =
     let mutable _dsSystem:DsSystem option = None
 
@@ -35,10 +34,10 @@ type DsLayoutLoader() =
         DBLogger.InitializeLogReaderOnDemandAsync(querySet, [model.System] |> List).Result |> ignore
 
     member x.DsSystem = _dsSystem.Value
+    member x.LayoutInfos = _dsSystem.Value.LayoutInfos
 
     member x.GetScreens() =
         let screens = HashSet<ScreenInfo>()
-
         let chs = x.DsSystem.LayoutChannels.ToList()
         for i = 0 to chs.Count - 1 do
             screens.Add(ScreenInfo(Id = i + 1, URL = $"{chs.[i]}")) |> ignore

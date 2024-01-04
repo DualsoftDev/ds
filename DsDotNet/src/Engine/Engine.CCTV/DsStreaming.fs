@@ -2,6 +2,7 @@ module DsStreamingModule
 
 open System.Collections.Generic
 open System
+open System.Linq
 open System.Net.WebSockets
 open System.Threading
 open Emgu.CV
@@ -9,34 +10,20 @@ open Emgu.CV.CvEnum
 open DsLayoutLoaderModule
 open OpenCVUtils
 open System.Drawing
+open Engine.Info
+open Engine.Core
+open DsStreamingFrontModule
+open DsStreamingBackModule
 
 
-let getViewType (viewtype:string) =
-    match viewtype with
-    | "Chart" -> ViewType.Chart
-    | "Table" -> ViewType.Table
-    | _ -> ViewType.Table
 
 
 [<AutoOpen>]
 type DsStreaming() =
     let _delayFps = 1000 / 60
-    let _delayCCTV = 1000 / 100
     let _webViewTypes = Dictionary<string, ViewType>()
     let _webStreamSet = Dictionary<string, byte[]>()
-    let _backFrame = Dictionary<string, Mat>()
-    let _dsLayoutLoader = DsLayoutLoader()
-
-   
-  
-    let _lockBackFrame = obj()
-    let getBackFrameOrNotNullUpdate(url:string, frame:Mat option)  =
-        lock _lockBackFrame (fun () ->
-            if frame.IsSome then
-                _backFrame.[url] <- frame.Value
-        
-            _backFrame.[url]
-        )
+    let _dsl = new DsLayoutLoader()
 
     let _lockWebViewTypes = obj()
     let updateOrGetWebViewTypes (url:string option, viewType:ViewType option)  =
@@ -45,14 +32,63 @@ type DsStreaming() =
                 _webViewTypes.[url.Value] <- viewType.Value
             Seq.toList _webViewTypes
         )
-       
+
+    let layoutDic =
+        _dsl.LayoutInfos
+        |> Seq.groupBy (fun f -> f.Path)
+        |> Seq.map (fun (g, values) -> g, values)
+        |> dict
+
+    let getImageInfos (url:string) =
+        let showDevs  = 
+            layoutDic[url]
+                .Select(fun f-> _dsl.DsSystem.Devices.First(fun d->d.LoadedName = f.DeviceName))
+        let infos = InfoPackageModuleExt.GetInfos(showDevs)
+        showDevs.Select(fun d-> infos.First(fun i->i.Name = d.Name), d.Xywh)
 
 
+    let streamingFrontFrame() =
+        let cts = new CancellationTokenSource()
+
+        let streamingTask = async {
+            let frontFrame = new Mat()
+            let mixFrame = new Mat()
+            while not cts.Token.IsCancellationRequested do
+                let streamList = updateOrGetWebViewTypes(None, None)
+                for kvp in streamList do
+                    let item = kvp.Value
+                    let url = _dsl.GetScreen(kvp.Key.Split(':').[0]).URL
+                    if _backFrame.ContainsKey(url) then
+                        let backFrame = getBackFrameOrNotNullUpdate(url, None) 
+
+                        let imgInfos = getImageInfos url
+                        let frontFrame = getFrontImage(item, imgInfos) 
+                        let backSize = backFrame.Size
+
+                        //CvInvoke.Imdecode(frontImg, ImreadModes.Color, frontFrame)
+                        //frontFrame <- OpenCVUtils.ResizeImage(frontFrame, backSize.Width, backSize.Height)
+                        let mixFrame = OpenCVUtils.AlphaBlend(frontFrame, new Point(0, 0), backFrame)
+                        let compressedImage = OpenCVUtils.CompressImage mixFrame
+                        _webStreamSet.[kvp.Key] <- compressedImage
+                    do! Async.Sleep(1)
+            frontFrame.Dispose()
+            mixFrame.Dispose()
+        }
+
+        Async.Start(streamingTask, cancellationToken = cts.Token) |> ignore
+
+    do
+        _dsl.DsSystem.LayoutChannels |> Seq.iter streamingBackFrame
+        streamingFrontFrame()
+
+
+    member x.DsLayout = _dsl
+    member x.GetImageInfos (url:string) = getImageInfos url
     member x.ImageStreaming(webSocket:WebSocket, screenId, viewmodeName, ipPort) =
         async { 
             let viewKey = $"{screenId}:{ipPort}"
             try
-                let url = _dsLayoutLoader.GetScreen(screenId).URL
+                let url = _dsl.GetScreen(screenId).URL
                 let viewKey = $"{screenId}:{ipPort}";
                 let viewType = getViewType(viewmodeName)
                 updateOrGetWebViewTypes(Some viewKey, Some viewType) |> ignore
@@ -73,63 +109,4 @@ type DsStreaming() =
         }   |> Async.StartAsTask
     
    
-
-    member x.StreamingBackFrame(url:string) =
-        let cts = new CancellationTokenSource()
-        let capture = new VideoCapture(url, VideoCapture.API.Ffmpeg)
-        let backFrame = new Mat()
-
-        Async.Start (async {
-            while not cts.Token.IsCancellationRequested do
-                capture.Read backFrame |> ignore
-                getBackFrameOrNotNullUpdate(url, Some backFrame) |> ignore
-                do! Async.Sleep(_delayCCTV)
-        }, cancellationToken = cts.Token)
-        |> ignore
-
-
-    member x.GetFrontImage(viewType) =
-        let r = Random()
-        let dt = OpenCVUtils.GetSampleDataTable(r.Next(10, 30))
-
-        let img =
-            match viewType with
-            | ViewType.Table -> OxyChart.visualizeImage().ToArray()
-               //camTable.ConvertToImage([dt]) |> Seq.head
-            | ViewType.Chart -> OxyChart.visualizeImage().ToArray()
-            | _ -> failwithf $"GetFrontImage {viewType}: error Type"
-        img
-
-    member x.StreamingFrontFrame() =
-        let cts = new CancellationTokenSource()
-
-        let streamingTask = async {
-            let frontFrame = new Mat()
-            let mixFrame = new Mat()
-            while not cts.Token.IsCancellationRequested do
-                let streamList = updateOrGetWebViewTypes(None, None)
-                for kvp in streamList do
-                    let item = kvp.Value
-                    let url = _dsLayoutLoader.GetScreen(kvp.Key.Split(':').[0]).URL
-                    if _backFrame.ContainsKey(url) then
-                        let backFrame = getBackFrameOrNotNullUpdate(url, None) 
-                        let frontImg = x.GetFrontImage(item) 
-                        let backSize = backFrame.Size
-
-                        CvInvoke.Imdecode(frontImg, ImreadModes.Color, frontFrame)
-                        //frontFrame <- OpenCVUtils.ResizeImage(frontFrame, backSize.Width, backSize.Height)
-                        let mixFrame = OpenCVUtils.AlphaBlend(frontFrame, new Point(0, 0), backFrame)
-                        let compressedImage = OpenCVUtils.CompressImage mixFrame
-                        _webStreamSet.[kvp.Key] <- compressedImage
-                    do! Async.Sleep(5)
-            frontFrame.Dispose()
-            mixFrame.Dispose()
-        }
-
-        Async.Start(streamingTask, cancellationToken = cts.Token) |> ignore
-
-
-    member x.Streaming(urls) =
-        urls |> Seq.iter x.StreamingBackFrame
-        x.StreamingFrontFrame()
 

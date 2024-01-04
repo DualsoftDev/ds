@@ -81,7 +81,7 @@ module RunTime =
                 for s in statements do s.Do()
                 use _ = CpusEvent.ValueSubject
                                  .Where(fun (_, stg, _) -> stg.TagKind <> skipValueChangedForTagKind) //timer, counter 제외 timer.DN, ctn.UP, ctn.DN 은 TagKind 부여해서 동작
-                                 .Subscribe(fun (_, stg, _) -> if not(ctsScan.IsCancellationRequested) then ctsScan.Cancel())
+                                 .Subscribe(fun _ -> if not(ctsScan.IsCancellationRequested) then ctsScan.Cancel())
                 
                 while run do
                     scanOnce() |> ignore 

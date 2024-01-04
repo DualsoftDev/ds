@@ -1,37 +1,40 @@
 @* PageQuery *@
 @page "/dashboards/query"
+@using static Engine.Core.InfoPackageModule
 
 <CompTitle Icon="oi oi-zoom-out" Title="Query" />
 
+<CompPeriodSelector ShowTime="_showTime" @bind-StartDate="StartDate" @bind-EndDate="EndDate" />
 
-<sapn class="ds-bordered">
-    <DxCheckBox @bind-Checked="_showTime">Show Time</DxCheckBox>
-</sapn>
 
-<label for="startDate" class="demo-text cw-320 mb-1">
-    &nbsp;시작:&nbsp;
-</label>
-<DxDateEdit @bind-Date="@StartDate"
-            TimeSectionVisible="@_showTime"
-            CssClass="@(_showTime ? "cw-200": "cw-150")"
-            InputId="startDate" />
+<CompDashboardInfoFetcher OnInfoSystemUpdated="onInfoSystemUpdated" @ref="_compDashboardInfoFetcher" />
 
-<span>&nbsp; ~ &nbsp;</span>
-
-<label for="finishDate" class="demo-text cw-320 mb-1">
-    종료:&nbsp;
-</label>
-<DxDateEdit @bind-Date="@EndDate"
-            TimeSectionVisible="@_showTime"
-            CssClass="@(_showTime ? "cw-200": "cw-150")"
-            InputId="finishDate" />
-<span>&nbsp;&nbsp;&nbsp;</span>
-
+@if (_compDashboardInfoFetcher == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <CompFqdnSelectorOverlay System="_compDashboardInfoFetcher.InfoSystem" OnItemSelected="onItemSelected">
+        <DsInfoGridSingle Info="_selected" ClientSettings="@ClientGlobal.ClientSettings" />
+    </CompFqdnSelectorOverlay>
+}
 
 
 @code {
+    CompDashboardInfoFetcher _compDashboardInfoFetcher;
+    IInfoBase _selected;
+
     bool _showTime = false;
     DateTime StartDate { get; set; } = DateTime.Now.Date.AddDays(-1);
     DateTime EndDate { get; set; } = DateTime.Now.Date;
 
+    void onInfoSystemUpdated(InfoSystem infoSystem)
+    {
+    }
+    void onItemSelected(IInfoBase info)
+    {
+        Console.WriteLine($"StartDate={StartDate}");
+        _selected = info;
+    }
 }

@@ -2,46 +2,43 @@
 
 @using static Engine.Core.InfoPackageModule
 
-@if (Systems != null)
+@if (System != null)
 {
     <RadzenTree Expand=@OnExpand Collapse=@OnCollapse Change=@OnChange SingleExpand="false">        @* Style="width: 100%; height: 300px; " *@
-        @foreach (var system in Systems)
-        {
-            <RadzenTreeItem Expanded="true" Text="@(system.Name)" Value="system">
-                <ChildContent>
-                    @foreach (var flow in system.InfoFlows)
-                    {
-                        <RadzenTreeItem Expanded="true" Text="@("🏭 " + flow.Name)" Value="flow">
-                            <ChildContent>
-                                @foreach (var real in flow.InfoReals)
-                                {
-                                    <RadzenTreeItem Expanded="true" Text="@("✨ " + real.Name)" Value="real">
+        <RadzenTreeItem Expanded="true" Text="@(System.Name)" Value="System">
+            <ChildContent>
+                @foreach (var flow in System.InfoFlows)
+                {
+                    <RadzenTreeItem Expanded="true" Text="@("🏭 " + flow.Name)" Value="flow">
+                        <ChildContent>
+                            @foreach (var real in flow.InfoReals)
+                            {
+                                <RadzenTreeItem Expanded="true" Text="@("✨ " + real.Name)" Value="real">
                                     @foreach (var call in real.InfoCalls)
                                     {
                                         <RadzenTreeItem Expanded="true" Text="@("📞" + call.Name)" Value="call">
-                                        @foreach (var device in call.InfoDevices)
-                                        {
-                                            <RadzenTreeItem Text="@("🖥️ " + device.Name)" Value="device" />
-                                        }
+                                            @foreach (var device in call.InfoDevices)
+                                            {
+                                                <RadzenTreeItem Text="@("🖥️ " + device.Name)" Value="device" />
+                                            }
                                         </RadzenTreeItem>
                                     }
-                                    </RadzenTreeItem>
-                                }
-                            </ChildContent>
-                        </RadzenTreeItem>
-                    }
-                </ChildContent>
-                <Template>
-                    <img alt="System" src="images/kia_log_circle_red.svg" style="width: 60px;" />
-                    <b>@context.Text</b>
-                </Template>
-            </RadzenTreeItem>
-        }
+                                </RadzenTreeItem>
+                            }
+                        </ChildContent>
+                    </RadzenTreeItem>
+                }
+            </ChildContent>
+            <Template>
+                <img alt="System" src="images/kia_log_circle_red.svg" style="width: 60px;" />
+                <b>@context.Text</b>
+            </Template>
+        </RadzenTreeItem>
     </RadzenTree>
 }
 
 @code {
-    [Parameter] public InfoSystem[] Systems { get; set; }
+    [Parameter] public InfoSystem System { get; set; }
 
     [Parameter] public EventCallback<IInfoBase> OnItemSelected { get; set; }      // obj = {InfoBase, InfoDevice}
 

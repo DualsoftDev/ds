@@ -23,7 +23,7 @@ https://supportcenter.devexpress.com/ticket/details/t1135370/grid-for-blazor-how
         {
             object row = context.DataItem;
             // return @<DxButton Text="@Caption" RenderStyle="ButtonRenderStyle.Primary" Click=@(() => OnClick.InvokeSafeAsync(context.DataItem)) />;
-            return@<AutoManualSelector Selector="SelectorGetter.Invoke(row)" />    ;
+            return@<AutoManualModeSelector Selector="SelectorGetter.Invoke(row)" />    ;
         };
     }
 }

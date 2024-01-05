@@ -24,7 +24,7 @@ else
                 </CellDisplayTemplate>
             </DxGridCommandColumn>
 
-            <AutoManualSelectorColumn Caption="Auto/Manual" SelectorGetter="@((dataItem) =>((HMIFlow)dataItem).AutoManualSelectLampMode)" />
+            <AutoManualModeSelectorColumn Caption="Auto/Manual" SelectorGetter="@((dataItem) =>((HMIFlow)dataItem).AutoManualSelectLampMode)" />
 
             <CompHmiButtonLampModeColumn Caption="Drive"    ButtonLampModeGetter="@((dataItem) =>((HMIFlow)dataItem).DrivePushLampMode)" />
             <CompHmiButtonLampModeColumn Caption="Stop"     ButtonLampModeGetter="@((dataItem) =>((HMIFlow)dataItem).StopPushLampMode)" />

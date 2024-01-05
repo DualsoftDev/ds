@@ -1,0 +1,117 @@
+@* AutoManualSelectorBase *@
+<style>
+    .transparent {
+        color: transparent;
+    }
+</style>
+
+
+@if (!_loading)
+{
+    <span style="display: flex; align-items: center; justify-content: space-evenly;">
+        <span>
+            @* mode 가 성립하면, button 외곽에 bolt 표시 : lamp 가 on 되어도 여타 다른 조건이 안 맞으면 mode 가 성립하지 않음. *@
+            @if (AutoMode != null)
+            {
+                <span class="@(() => "oi oi-bolt ds-color-primary" + ((bool)AutoMode.Value ? "" : " transparent"))" />
+            }
+
+            @* lamp 값을 서버로부터 다시 읽은 것을 반영해서 check 표시 *@
+            <DxButton Text="Auto"
+                      RenderStyleMode="ButtonRenderStyleMode.Outline"
+                      IconCssClass="@((bool)AutoLamp.Value ? "oi oi-circle-check" : "oi oi-circle-check transparent")"
+                      Click="onAutoClick" />
+        </span>
+        <span>
+            @if (ManualMode != null)
+            {
+                <span class="@(() => "oi oi-bolt ds-color-primary" + ((bool)ManualMode.Value ? "" : " transparent"))" />
+            }
+            <DxButton Text="Manual"
+                      RenderStyleMode="ButtonRenderStyleMode.Outline"
+                      IconCssClass="@((bool)ManualLamp.Value ? "oi oi-circle-check" : "oi oi-circle-check transparent")"
+                      Click="onManualClick" />
+        </span>
+    </span>
+}
+
+@code {
+    bool _loading = true;
+
+    [Parameter] public TagWeb AutoButton { get; set; }
+    [Parameter] public TagWeb ManualButton { get; set; }
+    [Parameter] public TagWeb AutoLamp { get; set; }
+    [Parameter] public TagWeb ManualLamp { get; set; }
+    [Parameter] public TagWeb AutoMode { get; set; }
+    [Parameter] public TagWeb ManualMode { get; set; }
+
+    IDisposable _subscription;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        // Console.WriteLine($"::: Auto push tag: {autoPushTag.Name}");
+        // Console.WriteLine($"::: Auto lamp tag: {autoLamp.Name}");
+        // Console.WriteLine($"::: Auto mode tag: {autoMode.Name}");
+        // Console.WriteLine($"::: Manual push tag: {manualPushTag.Name}");
+        // Console.WriteLine($"::: Manual lamp tag: {manualLamp.Name}");
+        // Console.WriteLine($"::: Manual mode tag: {manualMode.Name}");
+
+        _subscription =
+            ClientGlobal.TagChangedSubject.Subscribe(tag =>
+            {
+                Console.WriteLine($"::: Detected tag change: {tag.Name} = {tag.Value}({tag.KindDescription})");
+                if (tag.IsEqual(AutoButton))
+                    Console.WriteLine($"----------- Detected auto push button change: {AutoButton.Value}");
+                if (tag.IsEqual(ManualButton))
+                    Console.WriteLine($"----------- Detected manual push button change: {ManualButton.Value}");
+
+                if (tag.IsEqual(AutoLamp))
+                {
+                    AutoLamp = tag;
+                    Console.WriteLine($"----------- Updating auto lamp: {AutoLamp.Value}");
+                    StateHasChanged();
+                }
+                else if (tag.IsEqual(AutoMode))
+                {
+                    AutoMode = tag;
+                    Console.WriteLine($"----------- Updating auto mode: {AutoMode.Value}");
+                    StateHasChanged();
+                }
+                else if (tag.IsEqual(ManualLamp))
+                {
+                    ManualLamp = tag;
+                    Console.WriteLine($"----------- Updating manual lamp: {ManualLamp.Value}");
+                    StateHasChanged();
+                }
+                else if (tag.IsEqual(ManualMode))
+                {
+                    ManualMode = tag;
+                    Console.WriteLine($"----------- Updating manual mode: {AutoMode.Value}");
+                    StateHasChanged();
+                }
+            });
+
+
+        _loading = false;
+    }
+
+    void onError(string err) => JsDual.Alert(err);
+    async Task onAutoClick()
+    {
+        AutoButton.SetValue(true);
+        ManualButton.SetValue(false);
+        await AutoButton.PostAsync(Http, onError);
+        await ManualButton.PostAsync(Http, onError);
+    }
+
+
+    async Task onManualClick()
+    {
+        AutoButton.SetValue(false);
+        ManualButton.SetValue(true);
+        await AutoButton.PostAsync(Http, onError);
+        await ManualButton.PostAsync(Http, onError);
+    }
+}

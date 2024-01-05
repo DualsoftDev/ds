@@ -1,0 +1,49 @@
+@* AutoManualSelector *@
+@inherits AutoManualSelectorBase
+@if(! _loading)
+{
+    @base.BuildRenderTree
+}
+
+
+@code {
+    bool _loading = true;
+    IDisposable _subscription;
+
+    [Parameter] public CsHMISelectLampMode Selector { get; set; }
+    protected async override Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var (auto, manual) = (Selector.Item1, Selector.Item2);
+        ((AutoButton, AutoLamp), AutoMode) = auto;
+        ((ManualButton, ManualLamp), ManualMode) = manual;
+
+        // Console.WriteLine($"::: Auto push tag: {autoPushTag.Name}");
+        // Console.WriteLine($"::: Auto lamp tag: {autoLamp.Name}");
+        // Console.WriteLine($"::: Auto mode tag: {autoMode.Name}");
+        // Console.WriteLine($"::: Manual push tag: {manualPushTag.Name}");
+        // Console.WriteLine($"::: Manual lamp tag: {manualLamp.Name}");
+        // Console.WriteLine($"::: Manual mode tag: {manualMode.Name}");
+
+        // _subscription =
+        //     ClientGlobal.TagChangedSubject.Subscribe(tag =>
+        //     {
+        //         if (tag.IsEqual(AutoMode))
+        //         {
+        //             AutoMode = tag;
+        //             Console.WriteLine($"----------- Updating auto mode: {AutoMode.Value}");
+        //             StateHasChanged();
+        //         }
+        //         else if (tag.IsEqual(ManualMode))
+        //         {
+        //             ManualMode = tag;
+        //             Console.WriteLine($"----------- Updating manual mode: {AutoMode.Value}");
+        //             StateHasChanged();
+        //         }
+        //     });
+
+
+        _loading = false;
+    }
+
+}

@@ -34,7 +34,7 @@ else
         <p>
             <WgtGridPbLamp Text="Auto"     DataItem="@(_system.AutoManualSelectLamp.Item1)" ButtonLampGetter="@_buttonLampGetter" />
             <WgtGridPbLamp Text="Manual"   DataItem="@(_system.AutoManualSelectLamp.Item2)" ButtonLampGetter="@_buttonLampGetter" />
-
+            @* <AutoManualSelector Selector="_system.AutoManualSelectLamp" /> *@
             <WgtGridPbLamp Text="Ready"    DataItem="@(_system.ReadyPushLamp)"     ButtonLampGetter="@_buttonLampGetter" />
             <WgtGridPbLamp Text="Drive"    DataItem="@(_system.DrivePushLamp)"     ButtonLampGetter="@_buttonLampGetter" />
             <WgtGridPbLamp Text="Home"     DataItem="@(_system.HomePushLamp)"      ButtonLampGetter="@_buttonLampGetter" />

@@ -23,24 +23,9 @@ else
                               RenderStyle="ButtonRenderStyle.Info" />
                 </CellDisplayTemplate>
             </DxGridCommandColumn>
-@* 
-            <DxGridCommandColumn Caption="Auto/Manual">
-                <HeaderTemplate>
-                    Auto/Manual
-                </HeaderTemplate>
-                <CellDisplayTemplate>
-                    <WgtAutoManualSelectorPb
-                        TagAuto="(((HMIFlow)context.DataItem).GetAuto())"
-                        TagManual="(((HMIFlow)context.DataItem).GetManual())"
-                        FlowName="@(((HMIFlow)context.DataItem).Name)"
-                        />
-                </CellDisplayTemplate>
-            </DxGridCommandColumn>
- *@
+
             <AutoManualSelectorColumn Caption="Auto/Manual" SelectorGetter="@((dataItem) =>((HMIFlow)dataItem).AutoManualSelectLampMode)" />
-@*             <CompHmiButtonLampModeColumn Caption="Auto"     ButtonLampModeGetter="@((dataItem) =>((HMIFlow)dataItem).AutoManualSelectLampMode.Item1)" />
-            <CompHmiButtonLampModeColumn Caption="Manual"   ButtonLampModeGetter="@((dataItem) =>((HMIFlow)dataItem).AutoManualSelectLampMode.Item2)" />
- *@
+
             <CompHmiButtonLampModeColumn Caption="Drive"    ButtonLampModeGetter="@((dataItem) =>((HMIFlow)dataItem).DrivePushLampMode)" />
             <CompHmiButtonLampModeColumn Caption="Stop"     ButtonLampModeGetter="@((dataItem) =>((HMIFlow)dataItem).StopPushLampMode)" />
             <CompHmiButtonLampColumn     Caption="Clear"        ButtonLampGetter="@((dataItem) =>((HMIFlow)dataItem).ClearPushLamp)" />

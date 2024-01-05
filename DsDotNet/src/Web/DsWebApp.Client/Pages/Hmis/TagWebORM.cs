@@ -1,4 +1,8 @@
+using Dual.Web.Blazor.ClientSide;
+
 using Engine.Core;
+
+using static System.Net.WebRequestMethods;
 
 namespace DsWebApp.Client.Pages.Hmis;
 
@@ -14,4 +18,16 @@ public class TagWebORM(TagWeb tagWeb)
     }
     public int Kind => tagWeb.Kind;
     public string KindDescription => tagWeb.KindDescription;
+}
+
+
+public static class TagWebExtension
+{
+    public static async Task PostAsync(this TagWeb tagWeb, HttpClient http, Action<string> onError)
+    {
+        var result = await http.PostAsJsonResultSimpleAsync("api/hmi/tag", tagWeb);
+        result.Iter(
+            ok => { },
+            err => onError(err));
+    }
 }

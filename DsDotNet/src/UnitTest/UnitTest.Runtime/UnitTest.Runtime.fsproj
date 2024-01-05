@@ -5,6 +5,7 @@
 		<LangVersion>8.0</LangVersion>
 		<IsPackable>false</IsPackable>
 		<GenerateProgramFile>false</GenerateProgramFile>
+		<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
 		<IsTestProject>true</IsTestProject>
 	</PropertyGroup>
 

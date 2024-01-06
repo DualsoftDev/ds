@@ -11,10 +11,7 @@ https://supportcenter.devexpress.com/ticket/details/t1135370/grid-for-blazor-how
 
 
 @code {
-    [CascadingParameter] public IGrid MyGrid { get; set; }
-
     [Parameter] public Func<object, CsHMISelectLampMode> SelectorGetter { get; set; }
-
 
     protected override void OnInitialized() {
         base.OnInitialized();
@@ -22,7 +19,6 @@ https://supportcenter.devexpress.com/ticket/details/t1135370/grid-for-blazor-how
         CellDisplayTemplate = context =>
         {
             object row = context.DataItem;
-            // return @<DxButton Text="@Caption" RenderStyle="ButtonRenderStyle.Primary" Click=@(() => OnClick.InvokeSafeAsync(context.DataItem)) />;
             return@<AutoManualModeSelector Selector="SelectorGetter.Invoke(row)" />    ;
         };
     }

@@ -1,0 +1,36 @@
+@* Button *@
+
+
+
+@if (!_loading)
+{
+    <span>
+        <DxButton Text="@_text"
+                  RenderStyle="ButtonRenderStyle.Primary"
+                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                  Click="onClick" />
+
+    </span>
+}
+
+
+@code {
+    bool _loading = true;
+    string _text;
+
+    [Parameter] public TagWeb TagWeb { get; set; }
+    [Parameter] public string Text { get; set; }
+    [CascadingParameter(Name = "TagManager")] public CompHmiTagManager TagManager { get; set; }
+    protected async override Task OnInitializedAsync()
+    {
+        // base initializer 를 후반에 배치. 위의 값들을 먼저 설정한 후에 수행
+        await base.OnInitializedAsync();
+        _text = Text ?? TagWeb.Name;
+        _loading = false;
+    }
+
+    async Task onClick()
+    {
+        await TagManager.PostTag(TagWeb, true);
+    }
+}

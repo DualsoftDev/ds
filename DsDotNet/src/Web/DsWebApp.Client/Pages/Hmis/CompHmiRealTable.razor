@@ -14,12 +14,11 @@ else
     <DxGrid Data="Reals">
         <Columns>
             <DxGridDataColumn FieldName="Name" Caption="Real"></DxGridDataColumn>
-            <CompHmiRealLampColumn/>
-            <CompHmiButtonColumn ForceWidth=120 Caption="자동시작" TagGetter="@((dataItem) =>((HMIReal)dataItem).StartPush)" />
-            <CompHmiButtonColumn ForceWidth=120 Caption="자동복귀" TagGetter="@((dataItem) =>((HMIReal)dataItem).ResetPush)" />
-            <CompHmiButtonColumn ForceWidth=160 Caption="작업완료SET" TagGetter="@((dataItem) =>((HMIReal)dataItem).ONPush)" />
-            <CompHmiButtonColumn ForceWidth=160 Caption="작업완료RST" TagGetter="@((dataItem) =>((HMIReal)dataItem).OFFPush)" />
-
+            <CompHmiRealLampColumn Caption="상태(RGFH)"/>
+            <ButtonColumn Caption="자동시작" TagGetter="@((dataItem) =>((HMIReal)dataItem).StartPush)" />
+            <ButtonColumn Caption="자동복귀" TagGetter="@((dataItem) =>((HMIReal)dataItem).ResetPush)" />
+            <ButtonColumn Caption="작업완료SET" TagGetter="@((dataItem) =>((HMIReal)dataItem).ONPush)" />
+            <ButtonColumn Caption="작업완료RST" TagGetter="@((dataItem) =>((HMIReal)dataItem).OFFPush)" />
         </Columns>
     </DxGrid>
 }

@@ -8,11 +8,7 @@
 
 
 @code {
-    [CascadingParameter] public IGrid MyGrid { get; set; }
-    // [Parameter] public EventCallback<object> OnClick { get; set; }
     [Parameter] public Nullable<int> ForceWidth { get; set; }
-
-
     protected override bool ShouldRender() => false;
 
     protected override void OnInitialized() {

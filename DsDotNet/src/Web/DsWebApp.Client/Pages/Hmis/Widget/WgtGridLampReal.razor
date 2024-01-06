@@ -1,18 +1,15 @@
 @* WgtGridLampReal *@
 @if (!_loading)
 {
-    <button class="btn btn-outline-primary" onclick="@Click">
-        <div style="display: flex; align-items: center;">
-            <WgtEmbeddedLampReal Real=Real @ref="_lampRef" />
-            <div id="@_guid">@_text</div>
-        </div>
-    </button>
+    <div style="display: flex; align-items: center;">
+        <WgtEmbeddedLampReal Real=Real @ref="_lampRef" />
+        <div id="@_guid">@_text</div>
+    </div>
 }
 
 
 @code {
     WgtEmbeddedLampReal _lampRef;
-    [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
 
     [Parameter] public HMIReal Real { get; set; }
 

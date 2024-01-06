@@ -1,4 +1,4 @@
-@* AutoManualSelector *@
+@* AutoManualModeSelector *@
 @inherits AutoManualSelectorBase
 @if(! _loading)
 {
@@ -13,10 +13,12 @@
     [Parameter] public CsHMISelectLampMode Selector { get; set; }
     protected async override Task OnInitializedAsync()
     {
-        await base.OnInitializedAsync();
         var (auto, manual) = (Selector.Item1, Selector.Item2);
         ((AutoButton, AutoLamp), AutoMode) = auto;
         ((ManualButton, ManualLamp), ManualMode) = manual;
+
+        // base initializer 를 후반에 배치. 위의 값들을 먼저 설정한 후에 수행
+        await base.OnInitializedAsync();
 
         // Console.WriteLine($"::: Auto push tag: {autoPushTag.Name}");
         // Console.WriteLine($"::: Auto lamp tag: {autoLamp.Name}");

@@ -22,7 +22,7 @@
 @attribute [Authorize(Roles = "Administrator")]
 
 @* https://supportcenter.devexpress.com/ticket/details/t1017286/datagrid-for-blazor-how-to-set-the-100-height *@
-<CompFullScreenManager FullScreenElementId="auto" />      @* FullScreenStateChanged="@onFullScreenStateChanged" *@ 
+<CompFullScreenManager FullScreenElementId="auto" />      @* FullScreenStateChanged="@onFullScreenStateChanged" *@
 
 @if (_loading)
 {
@@ -30,21 +30,21 @@
 }
 else
 {
-    <div id="auto">
+    <div id="auto" class="ds-inline">
         <p>
-            <WgtGridPbLamp Text="Auto"     DataItem="@(_system.AutoManualSelectLamp.Item1)" ButtonLampGetter="@_buttonLampGetter" />
-            <WgtGridPbLamp Text="Manual"   DataItem="@(_system.AutoManualSelectLamp.Item2)" ButtonLampGetter="@_buttonLampGetter" />
-            @* <AutoManualSelector Selector="_system.AutoManualSelectLamp" /> *@
-            <WgtGridPbLamp Text="Ready"    DataItem="@(_system.ReadyPushLamp)"     ButtonLampGetter="@_buttonLampGetter" />
-            <WgtGridPbLamp Text="Drive"    DataItem="@(_system.DrivePushLamp)"     ButtonLampGetter="@_buttonLampGetter" />
-            <WgtGridPbLamp Text="Home"     DataItem="@(_system.HomePushLamp)"      ButtonLampGetter="@_buttonLampGetter" />
-            <WgtGridPbLamp Text="Clear"    DataItem="@(_system.ClearPushLamp)"     ButtonLampGetter="@_buttonLampGetter" />
-            <WgtGridPbLamp Text="Stop"     DataItem="@(_system.StopPushLamp)"      ButtonLampGetter="@_buttonLampGetter" />
-            <WgtGridPbLamp Text="Em Stop"  DataItem="@(_system.EmergencyPushLamp)" ButtonLampGetter="@_buttonLampGetter" />
-            <WgtGridPbLamp Text="Test"     DataItem="@(_system.TestPushLamp)"      ButtonLampGetter="@_buttonLampGetter" />
+            <div class="ds-inline">
+                <AutoManualSelector Selector="_system.AutoManualSelectLamp" />
+            </div>
+            <WgtGridPbLamp Text="Ready" DataItem="@(_system.ReadyPushLamp)" ButtonLampGetter="@_buttonLampGetter" />
+            <WgtGridPbLamp Text="Drive" DataItem="@(_system.DrivePushLamp)" ButtonLampGetter="@_buttonLampGetter" />
+            <WgtGridPbLamp Text="Home" DataItem="@(_system.HomePushLamp)" ButtonLampGetter="@_buttonLampGetter" />
+            <WgtGridPbLamp Text="Clear" DataItem="@(_system.ClearPushLamp)" ButtonLampGetter="@_buttonLampGetter" />
+            <WgtGridPbLamp Text="Stop" DataItem="@(_system.StopPushLamp)" ButtonLampGetter="@_buttonLampGetter" />
+            <WgtGridPbLamp Text="Em Stop" DataItem="@(_system.EmergencyPushLamp)" ButtonLampGetter="@_buttonLampGetter" />
+            <WgtGridPbLamp Text="Test" DataItem="@(_system.TestPushLamp)" ButtonLampGetter="@_buttonLampGetter" />
         </p>
 
-        <CompHmiFlowTable Flows="@_system.Flows"/>
+        <CompHmiFlowTable Flows="@_system.Flows" />
     </div>
 }
 
@@ -61,3 +61,9 @@ else
         Console.WriteLine($"Disposing PageHmiAuto.razor");
     }
 }
+
+<style>
+    .ds-inline {
+        display: inline-block; /* 또는 'inline'을 사용할 수 있습니다 */
+    }
+</style>

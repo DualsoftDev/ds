@@ -1,0 +1,31 @@
+@* HmiTagHubMonitor *@
+
+@code {
+    [Parameter] public EventCallback<TagWeb> OnTagWebChanged { get; set; }
+    HubConnectionManager _hubConnectionManager;
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        HubConnection hubConnection = await NavigationManager.ToAbsoluteUri("/hub/hmi/tag").StartHubAsync();
+        _hubConnectionManager = new HubConnectionManager(hubConnection, registerHubConnection);
+
+        Console.WriteLine($"Hub initialized on {nameof(HmiTagHubMonitor)}.razor");
+
+        IDisposable registerHubConnection(HubConnection hubConnection)
+        {
+            return hubConnection.On<TagWeb>(SK.S2CNTagWebChanged, async (TagWeb change) =>
+            {
+                // Console.WriteLine($"TagWeb change notification received with {change.Name}/{change.Kind}/{change.KindDescription}={change.Value}.");
+                await OnTagWebChanged.InvokeAsync(change);
+            });
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _hubConnectionManager.DisposeAsync();
+        Console.WriteLine($"Page {nameof(HmiTagHubMonitor)}.razor disposed!");
+    }
+
+}

@@ -1,6 +1,7 @@
 namespace Engine.Runtime
 
 open Engine.Core
+open Engine.Parser.FS
 
 module testMain =
 
@@ -10,4 +11,5 @@ module testMain =
         RuntimeDS.Package <- RuntimePackage.StandardPC
         let testRuntimeModel = new RuntimeModel(testFile)
         let _ = testRuntimeModel.HMIPackage
+
         0

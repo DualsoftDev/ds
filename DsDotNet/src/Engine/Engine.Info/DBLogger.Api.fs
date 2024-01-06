@@ -24,14 +24,14 @@ module DBLoggerApi =
         if (x.DriveSpan + x.ErrorSpan > 0.0) then
             x.Efficiency <- x.DriveSpan / (x.DriveSpan + x.ErrorSpan)
 
-        // todo: remove random test data
-        x.DriveSpan    <- random.Next(0, 1000)
-        x.DriveAverage <- random.Next(0, 1000)
-        x.ErrorSpan    <- random.Next(0, 1000)
-        x.ErrorAverage <- random.Next(0, 1000)
-        x.ErrorCount   <- random.Next(0, 1000)
-        x.PauseCount   <- random.Next(0, 1000)
-        x.Efficiency   <- random.Next(0, 1000)
+        //// todo: remove random test data
+        //x.DriveSpan    <- random.Next(0, 1000)
+        //x.DriveAverage <- random.Next(0, 1000)
+        //x.ErrorSpan    <- random.Next(0, 1000)
+        //x.ErrorAverage <- random.Next(0, 1000)
+        //x.ErrorCount   <- random.Next(0, 1000)
+        //x.PauseCount   <- random.Next(0, 1000)
+        //x.Efficiency   <- random.Next(0, 1000)
 
     let getInfoDevices (xs:Device seq) : InfoDevice seq = 
         if xs.isEmpty()
@@ -107,7 +107,7 @@ module DBLoggerApi =
 
     let getInfoSystem (x:DsSystem) : InfoSystem = 
         let infoSys = InfoSystem.Create(x)
-        updateInfoBase (infoSys, x.QualifiedName, SystemTag.sysDrive|>int,  SystemTag.sysStopError|>int, SystemTag.sysStopPause|>int)
+        updateInfoBase (infoSys, x.QualifiedName, SystemTag.driveState|>int,  SystemTag.sysStopError|>int, SystemTag.sysStopPause|>int)
         let infoFlows = x.Flows.Select(getInfoFlow)
         infoSys.InfoFlows.AddRange(infoFlows) |>ignore
         infoSys

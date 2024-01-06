@@ -1,0 +1,9 @@
+- `ds\DsDotNet\Ds.sln` 을 Visual Studio 2022로 실행한다.
+- Devexpress 23.2.3버전 설치 필요
+- 빌드 옵션 `Release` 로 설정
+- PowerPointAddIn For Dualsoft Setup 의 버전을 1 올린다.
+- 전체 검색으로 PowerPointAddIn For Dualsoft Setup의 예전 버전 (ex. 0.9.2.22) 를 통해 Engine.Common.Assembly.cs, Engine.Common.Assembly.fs 을 찾고 동일한 버전을 입력한다.
+- 솔루션을 다시 빌드한다.
+- PowerPointAddInForDualsoft 을 publish 한다.
+- PowerPointAddIn For Dualsoft Setup을 다시 빌드한다.
+- `~\DsDotNet\Apps\OfficeAddIn\PowerPointAddIn For Dualsoft Setup\SetupRelease`  에 PowerPointAddIn For Dualsoft Setup.msi 와 setup.exe가 생성된다.

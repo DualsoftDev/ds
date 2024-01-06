@@ -134,7 +134,7 @@ module rec TimerModule =
         interface IStorage with
             member _.DsSystem = sys
             member x.Target = None
-            member x.TagKind = -1
+            member x.TagKind = skipValueChangedForTagKind //CpusEvent.ValueSubject TagKind  -1 필터링 용도로 사용
             member x.TagChanged  with get() = tagChanged and set(v) = tagChanged <- v
             member x.Name with get() = x.Name and set(_v) = unsupported()
             member _.Address with get() = unsupported() and set(_v) = unsupported()
@@ -172,6 +172,12 @@ module rec TimerModule =
             if not (isItNull t) then
                 storages.Add(t.Name, t)
 
+    let createUShortTagKind name iniValue tagKind = fwdCreateUShortMemberVariable name iniValue tagKind
+    let createUShort name iniValue  = createUShortTagKind name iniValue -1
+
+    let createBoolWithTagKind name iniValue tagKind = fwdCreateBoolMemberVariable name iniValue tagKind
+    let createBool name iniValue  = createBoolWithTagKind name iniValue -1
+
     type TimerStruct private(typ:TimerType, name, en, tt, dn, pre, acc, res, sys) =
         inherit TimerCounterBaseStruct(name, dn, pre, acc, res, sys)
 
@@ -188,13 +194,13 @@ module rec TimerModule =
                 | AB -> "EN", "TT", "DN", "PRE", "ACC", "RES"
                 | _ -> failwithlog "NOT yet supported"
 
-            let en  = fwdCreateBoolMemberVariable   $"{name}.{en }" false
-            let tt  = fwdCreateBoolMemberVariable   $"{name}.{tt }" false
-            let dn  = fwdCreateBoolMemberVariable   $"{name}.{dn }" false  // Done
-            let pre = fwdCreateUShortMemberVariable $"{name}.{pre}" preset
-            let acc = fwdCreateUShortMemberVariable $"{name}.{acc}" accum
-            let res = fwdCreateBoolMemberVariable   $"{name}.{res}" false
-
+            let en  = createBool              $"{name}.{en }" false
+            let tt  = createBool              $"{name}.{tt }" false
+            let dn  = createBoolWithTagKind   $"{name}.{dn }" false (VariableTag.PcSysVariable|>int) // Done
+            let pre = createUShort            $"{name}.{pre}" preset
+            let acc = createUShort            $"{name}.{acc}" accum
+            let res = createBool              $"{name}.{res}" false
+            
             storages.Add(en.Name, en)
             storages.Add(tt.Name, tt)
             storages.Add(dn.Name, dn)

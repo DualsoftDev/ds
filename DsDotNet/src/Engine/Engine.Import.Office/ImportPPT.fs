@@ -138,7 +138,6 @@ module ImportPPTModule =
                             ExternalSystem(sRepo[key], paras) :> LoadedSystem
                         else
                             let newSys = DsSystem(paras.LoadedName)
-                            //let newSys = DsSystem(paras.LoadedName, "localhost")  ///test ahn :  ExternalSystem parser에서"ip" 없어도 열때 까지 임시로 "localhost"
                             addNewLoadedSys (newSys, true, node.NodeType = OPEN_EXSYS_LINK)
 
                     theSys.AddLoadedSystem(exSys)
@@ -294,8 +293,5 @@ module ImportPPTModule =
         [<Extension>]
         static member GetRuntimeZipFromPPT(fullName: string)=
                 let ret = ImportPPT.GetDSFromPPTWithLib(fullName)
-
-                RuntimeDS.Package <- RuntimePackage.StandardPC
-                
                 ModelLoaderExt.saveModelZip(ret.LoadingPaths , ret.ActivePath)
 

@@ -62,3 +62,4 @@ Grammar/CsParser/bin/
 /DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/Utils/*.xlsx
 /DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/Utils/*.ds
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/Sample.7z
+/DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/exportDS.Zip

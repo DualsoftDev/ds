@@ -3,6 +3,7 @@ namespace Engine.Core
 open System.Collections.Generic
 open System
 open System.Linq
+open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module InfoPackageModule =
@@ -31,7 +32,7 @@ module InfoPackageModule =
         ///총발생한 에러 메시지
         member val ErrorMessages = ResizeArray<string>() with get, set
         ///총 효율 %
-        member val Efficiency = Nullable<double>() with get, set
+        member val Efficiency = 0.0 with get, set
         ///총멈춤 횟수
         member val PauseCount = 0 with get, set
 
@@ -62,7 +63,7 @@ module InfoPackageModule =
         ///고장 횟수
         member val ErrorCount = 0 with get, set
         ///평균 고장 시간
-        member val RepairAverage = Nullable<double>() with get, set
+        member val RepairAverage = 0.0 with get, set
         ///총발생한 에러 메시지
         member val ErrorMessages = ResizeArray<string>() with get, set
         member x.IsEqual (y:IInfoBase) =
@@ -71,7 +72,7 @@ module InfoPackageModule =
             && x.Fqdn = o.Fqdn
             && x.GoingCount = o.GoingCount
             && x.ErrorCount = o.ErrorCount
-            && x.RepairAverage.Value = o.RepairAverage.Value
+            && x.RepairAverage = o.RepairAverage
             && x.ErrorMessages.SequenceEqual(o.ErrorMessages)
         static member Create(x:Device) =
             let info = new InfoDevice(Name=x.Name, Fqdn = x.QualifiedName, Id=x.Id)
@@ -152,3 +153,34 @@ module InfoPackageModule =
         static member Create(x:DsSystem) =
             let info = new InfoSystem(Name=x.Name, Fqdn = x.QualifiedName)
             info
+
+[<Extension>]
+type InfoExt =
+    [<Extension>]
+    static member FindInfo (info:InfoSystem, fqdn:string): IInfoBase option =
+        // 각 구조를 순회하면서 fqdn 이 동일한 항목을 찾아서 반환
+        if info.Fqdn = fqdn then
+            info :> IInfoBase |> Some
+        else
+            info.InfoFlows |> Seq.tryPick(fun f ->
+                if f.Fqdn = fqdn then
+                    Some (f :> IInfoBase)
+                else
+                    f.InfoReals |> Seq.tryPick(fun r -> 
+                        if r.Fqdn = fqdn then
+                            r :> IInfoBase |> Some
+                        else
+                            r.InfoCalls  |> Seq.tryPick(fun c -> 
+                                if c.Fqdn = fqdn then
+                                    c :> IInfoBase |> Some
+                                else
+                                    c.InfoDevices |> Seq.tryPick(fun d -> 
+                                        if d.Fqdn = fqdn then
+                                            d :> IInfoBase |> Some
+                                        else
+                                            None
+                                    )
+                            )
+                    )
+            )
+

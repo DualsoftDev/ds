@@ -13,6 +13,7 @@ using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.EdgeExt;
 using static Engine.Core.Interface;
+using static Engine.Core.TagKindList;
 using static Engine.Core.TagKindModule;
 using static Engine.Core.TagKindModule.TagDS;
 using static Engine.Import.Office.ViewModule;

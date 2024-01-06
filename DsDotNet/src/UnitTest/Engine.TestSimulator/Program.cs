@@ -1,12 +1,14 @@
 using Engine.Core;
 using Engine.Info;
 using Engine.Runtime;
+using Engine.TestSimulator;
 using System;
+using System.Drawing;
 using System.IO;
 using static Engine.Core.CoreModule;
 using static Engine.Core.RuntimeGeneratorModule;
 
-namespace DsWebApp.Simulator
+namespace Engine.TestSimulator
 {
     internal class Program
     {
@@ -27,7 +29,7 @@ namespace DsWebApp.Simulator
 
             ModelCompileInfo mci = new(runModel.JsonPath, runModel.JsonPath);
             _ = DBLogger.InitializeLogWriterOnDemandAsync(commonAppSettings, systems, mci);
-            _ = DsSimulator.Do(runModel.System, runModel.Cpu);
+            _ = DsSimulator.Do(runModel.Cpu);
             Console.ReadKey();  
         }
     }

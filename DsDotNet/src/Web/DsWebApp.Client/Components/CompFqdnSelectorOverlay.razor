@@ -2,7 +2,7 @@
 @* CompDsObjectSelector *@
 
 
-@if (Systems == null)
+@if (System == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -13,7 +13,9 @@ else
     <div class="ds-sticky-container">
         <CompShowHide @ref="_refCompShowHide" ShowOnInit="true">
             <div class="ds-non-sticky">
-                <CompFqdnSelector Systems="Systems" OnItemSelected="OnItemSelected" />
+                @HeaderContent
+                <CompFqdnSelector System="System" OnItemSelected="OnItemSelected" />
+                @FooterContent
             </div>
         </CompShowHide>
 
@@ -30,8 +32,10 @@ else
     string _showOrHide => (_refCompShowHide == null || _refCompShowHide.IsVisible) ? "Hide" : "Show";
     IInfoBase _selected;
     InfoBase Selected { get; set; }
-    [Parameter] public InfoSystem[] Systems { get; set; }
+    [Parameter] public InfoSystem System { get; set; }
 
     [Parameter] public EventCallback<IInfoBase> OnItemSelected { get; set; }      // obj = {InfoBase, InfoDevice}
     [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public RenderFragment HeaderContent { get; set; }
+    [Parameter] public RenderFragment FooterContent { get; set; }
 }

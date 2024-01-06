@@ -79,6 +79,7 @@ module ErrID =
     let _61 = "Layout 이름에 해당 디바이스가 없습니다."
     let _62 = "Layout 페이지에만 정의 가능, Utils 메뉴에 Add Layout 실행하세요."
     let _63 = "Layout 페이지에 [Path] 경로 Textbox가 없습니다."
+    let _64 = "중복된 Lamp 이름이 존재합니다."
     
     // IO Mapping Error (1001 ~ )
     let _1001 = "시스템에 버튼 이름이 없습니다."

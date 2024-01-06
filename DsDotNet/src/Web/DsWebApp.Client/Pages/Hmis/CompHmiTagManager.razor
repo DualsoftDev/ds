@@ -23,7 +23,7 @@
             return hubConnection.On<TagWeb>(SK.S2CNTagWebChanged, (TagWeb change) =>
             {
                 Console.WriteLine($"TagWeb change notification received with {change.Name}/{change.Kind}/{change.KindDescription}={change.Value}.");
-                ToastService.ShowInfo($"TagWeb change: {change.Name}/{change.Kind}={change.Value}.");
+                //ToastService.ShowInfo($"TagWeb change: {change.Name}/{change.Kind}={change.Value}.");
                 ClientGlobal.TagChangedSubject.OnNext(change);
             });
         }

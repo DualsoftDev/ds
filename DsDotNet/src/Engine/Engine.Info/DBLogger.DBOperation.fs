@@ -97,7 +97,7 @@ module internal DBLoggerImpl =
                 |> map (fun s -> s.TagManager)
                 |> distinct
                 |> Seq.collect (fun tagManager -> tagManager.Storages.Values)
-                |> filter (fun s -> s.TagKind <> InnerTag) // 내부변수
+                |> filter (fun s -> s.TagKind <> skipValueChangedForTagKind) // 내부변수
                 |> distinct
                 |> map Storage
                 |> toArray

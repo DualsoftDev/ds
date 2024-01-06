@@ -273,21 +273,32 @@ module ImportU =
         [<Extension>]
         static member MakeLamps(doc: pptDoc, mySys: DsSystem) =
             let dicFlow = doc.DicFlow
+            let headPageLamps=  doc.NodesHeadPage |> Seq.filter (fun node -> node.LampHeadPageDefs.any())
+            let flowPageLamps=  doc.Nodes |> Seq.filter (fun node -> node.LampDefs.any())
+            let allLampNodes = headPageLamps @ flowPageLamps
 
-            doc.Nodes
-            |> Seq.filter (fun node -> node.LampDefs.any ())
+            let duplicateNames =
+                allLampNodes
+                |> Seq.groupBy (fun node -> node.Name)
+                |> Seq.filter (fun (_, nodes) -> Seq.length nodes > 1)
+                |> Seq.map fst
+
+            if Seq.length duplicateNames > 0 then
+                let duplicateName = duplicateNames.First()
+                let duplicateNode = allLampNodes.First(fun f->f.Name = duplicateName)
+                Office.ErrorName(duplicateNode.Shape, ErrID._64, duplicateNode.PageNum)
+
+
+            flowPageLamps
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.LampDefs.ForEach(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", flow, new HashSet<Func>())))
+                node.LampDefs.ForEach(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", Some flow, new HashSet<Func>())))
             
-            doc.NodesHeadPage
-            |> Seq.filter (fun node -> node.LampHeadPageDefs.any())
+            headPageLamps
             |> Seq.iter (fun node ->
-                dicFlow.Iter(fun flow ->
-                    if dicFlow.length() = 0 then Office.ErrorShape(node.Shape, ErrID._60, node.PageNum)
-                    else 
-                        node.LampHeadPageDefs.ForEach(fun l -> mySys.AddLamp(l.Value, $"{l.Key}_{flow.Value.Name}", "", "", flow.Value, new HashSet<Func>())))
-                )      
+                node.LampDefs.ForEach(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", None, new HashSet<Func>())))
+                
+                
         //MakeLayout 만들기
         [<Extension>]
         static member MakeLayout(doc: pptDoc, mySys: DsSystem) =

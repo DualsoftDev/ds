@@ -10,9 +10,9 @@
     "UseHttpsRedirection": true,
     "RuntimeModelDsZipPath": "C:\\ProgramData\\Dualsoft\\DsModel\\exportDS.zip",
     "AutoStartOnSystemPowerUp": true,
-    "SimulationMode": true,
     "JwtTokenValidityMinutes": 1440,
     "RuntimePackageCs": "StandardPC",
+    "_RuntimePackageCs_Samples": [ "StandardPC", "StandardPLC", "LightPC", "LightPLC", "Simulation", "SimulationDubug" ],
     "DexaSettings": {
       "DatabaseType": "sqlserver",
       "ConnectionString": "Server=.;Database=lpb;User Id=sa;Password=dual@123;MultipleActiveResultSets=True;",

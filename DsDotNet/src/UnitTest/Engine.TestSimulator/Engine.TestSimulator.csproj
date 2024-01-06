@@ -10,10 +10,14 @@
 
     <ItemGroup>
 		<Content Include="..\..\..\src\Engine\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
-		<Content Include="..\..\..\Apps\CommonAppSettings.json" Link="CommonAppSettings.json" >
+		<Content Include="..\..\..\Apps\CommonAppSettings.json" Link="CommonAppSettings.json">
 		    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="System.Reactive.Linq" Version="6.0.0" />
+    </ItemGroup>
 
 
     <ItemGroup>

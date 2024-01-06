@@ -38,7 +38,7 @@ module TagModule =
 
     let createVariable (name:string) (boxedValue:BoxedObjectHolder) : IVariable =
         let v = boxedValue.Object
-        let createParam () = {defaultStorageCreationParams(unbox v) with Name=name; }
+        let createParam () = {defaultStorageCreationParams(unbox v) (VariableTag.PcUserVariable|>int) with Name=name; }
         match v.GetType().Name with
         | BOOL   -> new Variable<bool>   (createParam())
         | CHAR   -> new Variable<char>   (createParam())

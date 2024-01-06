@@ -136,7 +136,7 @@ module rec TypeConvertorModule =
         | _ -> ()
 
         let createParam () =
-            { defaultStorageCreationParams (unbox initValue) with
+            { defaultStorageCreationParams (unbox initValue) (VariableTag.PlcUserVariable|>int) with
                 Name = name
                 Comment = Some comment }
 
@@ -171,7 +171,7 @@ module rec TypeConvertorModule =
         let name = $"_tmp{nameHint}{autoVariableCounter}"
 
         let param =
-            { defaultStorageCreationParams (initValue) with
+            { defaultStorageCreationParams (initValue) (VariableTag.PlcUserVariable|>int) with
                 Name = name
                 Comment = Some comment }
 

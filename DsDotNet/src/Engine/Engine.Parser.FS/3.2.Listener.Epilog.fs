@@ -129,12 +129,21 @@ module EtcListenerModule =
                     let flowLampInfo =
                         [ for ld in lampDefs do
                               option {
-                                  let! flowNameCtx = ld.TryFindFirstChild<FlowNameContext>()
+                                  let! flowNameCtxs = ld.Descendants<FlowNameContext>().ToArray()
+                                  
                                   let lmpName, addrIn, addrOut = getHwSysItem ld
-
-                                  let! flow = flowNameCtx.GetText() |> system.TryFindFlow
+                                  if flowNameCtxs.length() > 1
+                                  then 
+                                       let flowNames = String.Join(", ", flowNameCtxs.Select(fun f->f.GetText()))
+                                       failwith $"lamp flow assign error [ex: flow lamp : 1Lamp=1Flow, system lamp : 1Lamp=0Flow] ({lmpName} : {flowNames})"
+                                    
                                   let funcSet = commonFunctionSetter lmpName lampFuncs
-                                  return targetLmpType, lmpName, addrIn, addrOut, flow, funcSet //test
+                                  if flowNameCtxs.length() = 0
+                                  then
+                                       return targetLmpType, lmpName, addrIn, addrOut, None, funcSet 
+                                  else
+                                       let! flow = flowNameCtxs.First().GetText() |> system.TryFindFlow
+                                       return targetLmpType, lmpName, addrIn, addrOut, Some flow, funcSet 
                               } ]
 
                     flowLampInfo |> List.choose id |> List.iter (system.AddLamp)

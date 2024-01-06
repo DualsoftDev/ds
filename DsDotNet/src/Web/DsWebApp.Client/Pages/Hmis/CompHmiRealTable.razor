@@ -1,8 +1,6 @@
 @* CompHmiRealTable *@
 
 @using Engine.Core
-@using System.Reactive.Subjects
-
 
 @if (_loading)
 {
@@ -10,7 +8,6 @@
 }
 else
 {
-    // todo : Lamp 표시 (R/G/F/H)
     <DxGrid Data="Reals">
         <Columns>
             <DxGridDataColumn FieldName="Name" Caption="Real"></DxGridDataColumn>

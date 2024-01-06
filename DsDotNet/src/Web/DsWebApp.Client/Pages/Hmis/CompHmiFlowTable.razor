@@ -21,6 +21,8 @@ else
                 </CellDisplayTemplate>
             </DxGridCommandColumn>
 
+            <LampFlowColumn Caption="상태" />
+
             <AutoManualModeSelectorColumn Caption="Auto/Manual" SelectorGetter="@((dataItem) =>((HMIFlow)dataItem).AutoManualSelectLampMode)" />
 
             <ButtonLampModeColumn    Caption="Drive"   CompositeGetter="@((dataItem) =>((HMIFlow)dataItem).DrivePushLampMode)" />

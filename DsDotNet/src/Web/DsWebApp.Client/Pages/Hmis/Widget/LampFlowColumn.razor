@@ -1,0 +1,24 @@
+@* LampRealColumn *@
+
+@using System.Reactive.Subjects
+
+
+@inherits DxGridCommandColumn
+@base.BuildRenderTree
+
+
+@code {
+    [Parameter] public Nullable<int> ForceWidth { get; set; }
+    protected override bool ShouldRender() => false;
+
+    protected override void OnInitialized() {
+        base.OnInitialized();
+        Width = (ForceWidth == null) ? "80px" : $"{ForceWidth}px";
+        HeaderTemplate = context => @<span>@Caption</span>;
+        CellDisplayTemplate = context =>
+        {
+            object row = context.DataItem;
+            return@<LampFlow Flow="@((HMIFlow)row)" />    ;      // Text="@Caption"
+        };
+    }
+}

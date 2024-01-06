@@ -123,8 +123,8 @@
     {
         AutoButton.SetValue(true);
         ManualButton.SetValue(false);
-        await TagManager.PostTag(AutoButton, true);
-        await TagManager.PostTag(ManualButton, false);
+        await TagManager.PostTagAsync(AutoButton, true);
+        await TagManager.PostTagAsync(ManualButton, false);
         // await AutoButton.PostAsync(Http, onError);
         // await ManualButton.PostAsync(Http, onError);
     }
@@ -134,8 +134,8 @@
     {
         AutoButton.SetValue(false);
         ManualButton.SetValue(true);
-        await TagManager.PostTag(AutoButton, false);
-        await TagManager.PostTag(ManualButton, true);
+        await TagManager.PostTagAsync(AutoButton, false);
+        await TagManager.PostTagAsync(ManualButton, true);
         // await AutoButton.PostAsync(Http, onError);
         // await ManualButton.PostAsync(Http, onError);
     }

@@ -61,13 +61,13 @@ else
     async Task onAuto(object dataItem)
     {
         var flow = (HMIFlow)dataItem;
-        await TagManager.PostTag(flow.GetAuto(), true);
+        await TagManager.PostTagAsync(flow.GetAuto(), true);
     }
 
     async Task onManual(object dataItem)
     {
         var flow = (HMIFlow)dataItem;
-        await TagManager.PostTag(flow.GetManual(), true);
+        await TagManager.PostTagAsync(flow.GetManual(), true);
     }
 }
 

@@ -10,12 +10,11 @@
     protected HubConnectionManager _hubConnectionManager;
     protected override async Task OnInitializedAsync()
     {
-        Console.WriteLine($"-------------------------------------- Hub initialized on CompHmiTagManager.razor");
         HubConnection hubConnection = await NavigationManager.ToAbsoluteUri("/hub/hmi/tag").StartHubAsync();
         _hubConnectionManager = new HubConnectionManager(hubConnection, registerHubConnection);
 
         await base.OnInitializedAsync();
-        Console.WriteLine($"++++++++++++++++++++++++++++++++++++++ Hub initialized on CompHmiTagManager.razor");
+        Console.WriteLine($"Hub initialized on CompHmiTagManager.razor");
         await OnLoaded.InvokeAsync();
 
         IDisposable registerHubConnection(HubConnection hubConnection)
@@ -35,7 +34,7 @@
     }
 
 
-    public async Task PostTag(TagWeb tag, bool value = true)
+    public async Task PostTagAsync(TagWeb tag, bool value = true)
     {
         tag.SetValue(value);
         var result = await Http.PostTagAsync(tag, AuthenticationStateProvider, NavigationManager);

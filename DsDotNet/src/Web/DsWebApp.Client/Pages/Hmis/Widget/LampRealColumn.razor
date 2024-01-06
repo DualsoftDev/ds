@@ -1,4 +1,4 @@
-@* CompHmiRealLampColumn *@
+@* LampRealColumn *@
 
 @using System.Reactive.Subjects
 
@@ -18,7 +18,7 @@
         CellDisplayTemplate = context =>
         {
             object row = context.DataItem;
-            return@<WgtGridLampReal Real="@((HMIReal)row)" />    ;      // Text="@Caption"
+            return@<LampReal Real="@((HMIReal)row)" />    ;      // Text="@Caption"
         };
     }
 }

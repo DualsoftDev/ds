@@ -1,4 +1,4 @@
-@* WgtGridLampReal *@
+@* LampReal *@
 
 @implements IDisposable
 
@@ -6,15 +6,13 @@
 @if (!_loading)
 {
     <div style="display: flex; align-items: center;">
-        <WgtEmbeddedLampReal Real=Real @ref="_lampRef" />
+        <div class="@getClass()" id="@_guid"></div>
         <div id="@_guid">@_text</div>
     </div>
 }
 
 
 @code {
-    WgtEmbeddedLampReal _lampRef;
-
     [Parameter] public HMIReal Real { get; set; }
     [CascadingParameter(Name = "TagManager")] public CompHmiTagManager TagManager { get; set; }
 
@@ -26,7 +24,7 @@
     {
         await base.OnInitializedAsync();
         if (TagManager == null)
-            throw new Exception("TagManager is null on WgtGridLampReal.");
+            throw new Exception("TagManager is null on LampReal.");
         _subscription =
             ClientGlobal.TagChangedSubject.Subscribe(onTagWebChanged);
 
@@ -56,6 +54,11 @@
         else
             return "Not Yet!";
     }
+    string getClass()
+    {
+        var xxx = getText();
+        return $"embedded-lamp-real {xxx}";
+    }
 
     public void Dispose()
     {
@@ -81,3 +84,17 @@
     }
 }
 
+<style>
+    .embedded-lamp-real {
+        width: 10px;
+        height: 20px;
+        border-radius: 10%;
+        background-color: red;  /* erroneous */
+        margin-right: 10px;
+        display: inline-block;
+    }
+        .embedded-lamp-real.Ready { background-color: green; }
+        .embedded-lamp-real.Going { background-color: darkorange; }
+        .embedded-lamp-real.Finish { background-color: blue; }
+        .embedded-lamp-real.Homing { background-color: gray; }
+</style>

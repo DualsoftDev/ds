@@ -14,7 +14,7 @@ else
     <DxGrid Data="Reals">
         <Columns>
             <DxGridDataColumn FieldName="Name" Caption="Real"></DxGridDataColumn>
-            <CompHmiRealLampColumn Caption="상태(RGFH)"/>
+            <LampRealColumn Caption="상태(RGFH)"/>
             <ButtonColumn Caption="자동시작" TagGetter="@((dataItem) =>((HMIReal)dataItem).StartPush)" />
             <ButtonColumn Caption="자동복귀" TagGetter="@((dataItem) =>((HMIReal)dataItem).ResetPush)" />
             <ButtonColumn Caption="작업완료SET" TagGetter="@((dataItem) =>((HMIReal)dataItem).ONPush)" />

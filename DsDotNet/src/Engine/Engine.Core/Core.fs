@@ -93,6 +93,9 @@ module CoreModule =
         let loadedSystems = createNamedHashSet<LoadedSystem>()
         let apiUsages = ResizeArray<ApiItem>()
         let addApiItemsForDevice (device: LoadedSystem) = device.ReferenceSystem.ApiItems |> apiUsages.AddRange
+        let channelInfos = loadedSystems 
+                            |> Seq.collect(fun s-> 
+                            s.ChannelPoints.Select(fun (path, xywh) -> { DeviceName = s.LoadedName; Path= path; Xywh = xywh})) 
 
         interface ISystem 
         member _.AddLoadedSystem(childSys) = 
@@ -104,10 +107,8 @@ module CoreModule =
         member _.LoadedSystems = loadedSystems |> seq
         member _.Devices = loadedSystems.OfType<Device>() |> Seq.toArray 
         member _.ExternalSystems = loadedSystems.OfType<ExternalSystem>() |> Seq.toArray
-        member _.LayoutChannels = loadedSystems |> Seq.collect(fun s->s.ChannelPoints |> Seq.map(fst)) |> distinct
-        member _.LayoutInfos = loadedSystems 
-                               |> Seq.collect(fun s-> 
-                                s.ChannelPoints.Select(fun (path, xywh) -> { DeviceName = s.LoadedName; Path= path; Xywh = xywh})) 
+        member _.LayoutChannels = channelInfos |> Seq.map(fun f->f.Path) |> Seq.filter(fun f-> f <> TextEmtpyChannel) |> distinct
+        member _.LayoutInfos = channelInfos
         member _.ApiUsages = apiUsages |> seq
         member val Jobs = ResizeArray<Job>()
         member val Flows = createNamedHashSet<Flow>()

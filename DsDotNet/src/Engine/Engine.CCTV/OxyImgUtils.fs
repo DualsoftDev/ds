@@ -2,15 +2,10 @@ module OxyImgUtils
 
 open OxyPlot
 open OxyPlot.Series
-open OxyPlot.Axes
 open OxyPlot.SkiaSharp
 open System.IO
-open System.Linq
-open Engine.Core
 open System.Drawing
 open OxyPlot.Annotations
-open System.Drawing.Text
-open System
 
 let oxyColor (color:Color) =  OxyColor.FromUInt32(color.ToArgb()|>uint)
 
@@ -26,7 +21,7 @@ let createBoxImage (name: string, rect:Rectangle, backColor:Color) =
 
     ta.FontWeight <- FontWeights.Bold // 텍스트 굵기 설정
     ta.Font <- (new Font("Tahoma", 1.0f)).ToString() // 폰트 설정
-    ta.FontSize <- 11
+    ta.FontSize <- 30
     ta.TextVerticalAlignment <- VerticalAlignment.Middle
     ta.TextPosition <- new DataPoint((rect.Width|>float)/2.0, 0.0) // 텍스트 위치 설정
     ta.Padding <- OxyThickness(rect.Width)
@@ -43,14 +38,14 @@ let createBoxImage (name: string, rect:Rectangle, backColor:Color) =
 
 let createPieChartImage (name: string,  rect:Rectangle, runCnt:int, errCnt:int) =
     let model = PlotModel(Title = name)
-    model.TitleColor <- Color.SkyBlue |> oxyColor
+    model.TitleColor <- Color.Goldenrod |> oxyColor
     let pieSeries = 
         PieSeries(
             StartAngle = 0.0,
             InsideLabelPosition = 0.3,
             AngleSpan = 360.0,
             Diameter = 1.0,
-            StrokeThickness = 0.2,
+            StrokeThickness = 0.00,
             FontSize = 15,
             InsideLabelFormat = "{0}\n{1}",
             OutsideLabelFormat = null,// 내부 라벨만 표시하도록 설정

@@ -18,7 +18,6 @@
 @using Engine.Core
 @using static Engine.Core.TagWebModule
 @inherits CompHmiLoader
-@implements IDisposable
 @attribute [Authorize(Roles = "Administrator")]
 
 @* https://supportcenter.devexpress.com/ticket/details/t1017286/datagrid-for-blazor-how-to-set-the-100-height *@
@@ -30,18 +29,42 @@
 }
 else
 {
-    <div id="auto" class="ds-inline">
+    <div id="auto">
         <p>
             <div class="ds-inline">
                 <AutoManualSelector Selector="_system.AutoManualSelectLamp" />
             </div>
-            <WgtGridPbLamp Text="Ready" DataItem="@(_system.ReadyPushLamp)" ButtonLampGetter="@_buttonLampGetter" />
-            <WgtGridPbLamp Text="Drive" DataItem="@(_system.DrivePushLamp)" ButtonLampGetter="@_buttonLampGetter" />
-            <WgtGridPbLamp Text="Home" DataItem="@(_system.HomePushLamp)" ButtonLampGetter="@_buttonLampGetter" />
-            <WgtGridPbLamp Text="Clear" DataItem="@(_system.ClearPushLamp)" ButtonLampGetter="@_buttonLampGetter" />
-            <WgtGridPbLamp Text="Stop" DataItem="@(_system.StopPushLamp)" ButtonLampGetter="@_buttonLampGetter" />
-            <WgtGridPbLamp Text="Em Stop" DataItem="@(_system.EmergencyPushLamp)" ButtonLampGetter="@_buttonLampGetter" />
-            <WgtGridPbLamp Text="Test" DataItem="@(_system.TestPushLamp)" ButtonLampGetter="@_buttonLampGetter" />
+            <div class="ds-inline">
+                <ButtonLamp Text="Ready" Composite="@(_system.ReadyPushLamp)" />
+            </div>
+            <div class="ds-inline">
+                <ButtonLamp Text="Drive" Composite="@(_system.DrivePushLamp)" />
+            </div>
+            <div class="ds-inline">
+                <ButtonLamp Text="Home" Composite="@(_system.HomePushLamp)" />
+            </div>
+            <div class="ds-inline">
+                <ButtonLamp Text="Clear" Composite="@(_system.ClearPushLamp)" />
+            </div>
+            <div class="ds-inline">
+                <ButtonLamp Text="Stop" Composite="@(_system.StopPushLamp)" />
+            </div>
+            <div class="ds-inline">
+                <ButtonLamp Text="Em Stop" Composite="@(_system.EmergencyPushLamp)" />
+            </div>
+            <div class="ds-inline">
+                <ButtonLamp Text="Test" Composite="@(_system.TestPushLamp)" />
+            </div>
+@* 
+            <AutoManualSelector Selector="_system.AutoManualSelectLamp" />
+            <ButtonLamp Text="Ready" Composite="@(_system.ReadyPushLamp)" />
+            <ButtonLamp Text="Drive" Composite="@(_system.DrivePushLamp)" />
+            <ButtonLamp Text="Home" Composite="@(_system.HomePushLamp)" />
+            <ButtonLamp Text="Clear" Composite="@(_system.ClearPushLamp)" />
+            <ButtonLamp Text="Stop" Composite="@(_system.StopPushLamp)" />
+            <ButtonLamp Text="Em Stop" Composite="@(_system.EmergencyPushLamp)" />
+            <ButtonLamp Text="Test" Composite="@(_system.TestPushLamp)" />
+ *@
         </p>
 
         <CompHmiFlowTable Flows="@_system.Flows" />
@@ -50,20 +73,9 @@ else
 
 
 @code {
-    CsHMIPushLamp _buttonLampGetter(object dataItem) => (CsHMIPushLamp)dataItem;
-
     // protected override async Task OnInitializedAsync()
     // {
     //     await base.OnInitializedAsync();
     // }
-    public void Dispose()
-    {
-        Console.WriteLine($"Disposing PageHmiAuto.razor");
-    }
 }
 
-<style>
-    .ds-inline {
-        display: inline-block; /* 또는 'inline'을 사용할 수 있습니다 */
-    }
-</style>

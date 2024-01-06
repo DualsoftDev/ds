@@ -1,0 +1,24 @@
+@* ButtonLamp *@
+
+
+@inherits ButtonLampModeBase
+@if (!_loading)
+{
+    @base.BuildRenderTree
+}
+
+
+@code {
+    bool _loading = true;
+
+    [Parameter] public CsHMIPushLamp Composite { get; set; }
+    protected async override Task OnInitializedAsync()
+    {
+        (Button, Lamp) = (Composite.Item1, Composite.Item2);
+
+        // base initializer 를 후반에 배치. 위의 값들을 먼저 설정한 후에 수행
+        await base.OnInitializedAsync();
+
+        _loading = false;
+    }
+}

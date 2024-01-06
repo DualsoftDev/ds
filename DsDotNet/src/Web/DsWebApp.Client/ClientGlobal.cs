@@ -42,7 +42,14 @@ public class ClientGlobal : ClientGlobalBase
     public async Task<ResultSerializable<RuntimeModelDto, ErrorMessage>> GetModelDtoAsync(HttpClient http)
     {
         if (_modelDto == null)
-            return await http.GetResultSimpleAsync<RuntimeModelDto>($"api/model");
+        {
+            var result = await http.GetResultSimpleAsync<RuntimeModelDto>($"api/model");
+            result.Iter(
+                ok => _modelDto = ok,
+                err => Console.Error.WriteLine($"Error: {err}"));
+
+            return result;
+        }
 
         return ResultSerializable<RuntimeModelDto, ErrorMessage>.Ok(_modelDto);
     }

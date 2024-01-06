@@ -9,8 +9,7 @@
 @if (!_loading)
 {
     <HmiTagHubMonitor OnTagWebChanged="onTagWebChanged"/>
-
-    <span style="display: flex; align-items: center; justify-content: space-evenly;">
+    <div class="ds-inline" style="display: flex; align-items: center; justify-content: space-evenly;">
         <span>
             @* mode 가 성립하면, button 외곽에 bolt 표시 : lamp 가 on 되어도 여타 다른 조건이 안 맞으면 mode 가 성립하지 않음. *@
             @if (AutoMode != null)
@@ -34,7 +33,7 @@
                       IconCssClass="@((bool)ManualLamp.Value ? "oi oi-circle-check" : "oi oi-circle-check transparent")"
                       Click="onManualClick" />
         </span>
-    </span>
+    </div>
 }
 
 @code {

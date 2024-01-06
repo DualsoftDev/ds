@@ -77,7 +77,7 @@ module ImportUtilForLib =
         let getLoadedTasks (loadedSys:DsSystem) (newloadedName:string)  =
             let devOrg= addOrGetExistSystem loadedSys newloadedName
             let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
-            TaskDev(api, "", "", newloadedName) :> DsTask
+            TaskDev(api, "", "", newloadedName) :> TaskDev
 
         let devOrg, _ = ParserLoader.LoadFromActivePath libFilePath
         if not (devOrg.ApiItems.any (fun f -> f.Name = apiPureName)) then
@@ -85,7 +85,7 @@ module ImportUtilForLib =
 
 
         let job =
-            let tasks = HashSet<DsTask>()
+            let tasks = HashSet<TaskDev>()
             match getJobActionType apiName with
             | MultiAction cnt ->  
                 for i in [1..cnt] do

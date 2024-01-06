@@ -483,7 +483,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
                 let funcSet = commonFunctionSetter jobName jobFuncs
                 assert (apiItems.Any())
-                let job = Job(jobName, apiItems.Cast<DsTask>() |> Seq.toList)
+                let job = Job(jobName, apiItems.Cast<TaskDev>() |> Seq.toList)
                 job.SetFuncs(funcSet)
                 job |> system.Jobs.Add
 
@@ -562,7 +562,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     tryParseAndReturn (getText (xywh.h ()))
                 )
 
-            //let putXywh (task: DsTask) (xywh: Xywh)  (channel: string) =
+            //let putXywh (task: TaskDev) (xywh: Xywh)  (channel: string) =
             //    task.ApiItem.Channels.Add channel |>ignore
             //    task.ApiItem.Xywh <- xywh
 

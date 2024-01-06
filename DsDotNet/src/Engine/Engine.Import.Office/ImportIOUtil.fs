@@ -66,10 +66,10 @@ module ImportIOUtil =
        // if newAddr = TextSkip then TextAddrEmpty else newAddr
         newAddr
 
-    let getValidDevAddress (taskDev: TaskDev, bInput: bool) =
-        let isSkip = if bInput then taskDev.ApiItem.RXs.Count = 0 else taskDev.ApiItem.TXs.Count = 0
-        let address =  if bInput then taskDev.InAddress else taskDev.OutAddress
-        getValidAddress(address, taskDev.QualifiedName, isSkip, bInput)
+    let getValidDevAddress (TaskDev: TaskDev, bInput: bool) =
+        let isSkip = if bInput then TaskDev.ApiItem.RXs.Count = 0 else TaskDev.ApiItem.TXs.Count = 0
+        let address =  if bInput then TaskDev.InAddress else TaskDev.OutAddress
+        getValidAddress(address, TaskDev.QualifiedName, isSkip, bInput)
 
     let private getValidBtnHwItem (hwItem:HwSystemDef) (skipIn:bool) (skipOut:bool) =
         let inAddr = getValidAddress(hwItem.InAddress, hwItem.Name, skipIn, true)

@@ -147,8 +147,8 @@ module ConvertCodeCoreExt =
        
 
         member private x.GenerationTaskDevIO() =
-            let taskDevices = x.Jobs |> Seq.collect(fun j -> j.DeviceDefs) |> Seq.sortBy(fun d-> d.QualifiedName) 
-            for b in taskDevices do
+            let TaskDevices = x.Jobs |> Seq.collect(fun j -> j.DeviceDefs) |> Seq.sortBy(fun d-> d.QualifiedName) 
+            for b in TaskDevices do
                 if b.ApiItem.RXs.length() = 0 && b.ApiItem.TXs.length() = 0
                 then failwith $"Error {getFuncName()}"
 

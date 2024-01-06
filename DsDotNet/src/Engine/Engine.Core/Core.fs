@@ -237,7 +237,7 @@ module CoreModule =
         member _.TargetWrapper = target
 
     /// Job 정의: Call 이 호출하는 Job 항목
-    type Job (name:string, tasks:DsTask list) =
+    type Job (name:string, tasks:TaskDev list) =
         inherit Named(name)
         let mutable funcs = HashSet<Func>()
         member x.ActionType:JobActionType = getJobActionType name
@@ -248,22 +248,15 @@ module CoreModule =
         member x.Funcs = funcs.ToArray() //일괄 셋팅만 가능 append 불가
 
     type TagAddress = string
-    [<AbstractClass>]
-    [<DebuggerDisplay("{ApiName}")>]
-    type DsTask (api:ApiItem, loadedName:string) as this =
-        inherit FqdnObject(api.Name, createFqdnObject([|loadedName|]))
+    /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
+    /// Old name : JobDef
+    type TaskDev (api:ApiItem, inAddress:TagAddress, outAddress:TagAddress, deviceName:string) as this =
+        inherit FqdnObject(api.Name, createFqdnObject([|deviceName|]))
         member _.ApiItem = api
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
         member val ApiName = this.QualifiedName
-        member val DeviceName = loadedName
+        member val DeviceName = deviceName
         member val Funcs  = HashSet<Func>() with get, set
-
-
-    /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
-    ///
-    /// Old name : JobDef
-    type TaskDev (api:ApiItem, inAddress:TagAddress, outAddress:TagAddress, deviceName:string) =
-        inherit DsTask(api, deviceName)
         member val InAddress   = inAddress  with get, set
         member val OutAddress  = outAddress with get, set
         //CPU 생성시 할당됨 InTag

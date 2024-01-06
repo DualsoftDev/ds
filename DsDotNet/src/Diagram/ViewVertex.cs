@@ -19,7 +19,7 @@ public class ViewVertex
     public IEnumerable<ViewNode> Nodes => _nodes;
     public ViewNode FlowNode { get; set; } //UcViewNode
     public Status4 Status { get; set; }
-    public List<DsTask> DsTasks { get; set; }
+    public List<TaskDev> TaskDevs { get; set; }
     public bool IsError { get; set; }
     public bool LampInput { get; set; }
     public bool LampOutput { get; set; }

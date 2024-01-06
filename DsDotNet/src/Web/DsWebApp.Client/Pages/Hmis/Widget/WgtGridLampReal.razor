@@ -1,4 +1,8 @@
 @* WgtGridLampReal *@
+
+@implements IDisposable
+
+
 @if (!_loading)
 {
     <div style="display: flex; align-items: center;">
@@ -12,13 +16,20 @@
     WgtEmbeddedLampReal _lampRef;
 
     [Parameter] public HMIReal Real { get; set; }
+    [CascadingParameter(Name = "TagManager")] public CompHmiTagManager TagManager { get; set; }
 
     string _guid;
     string _text;
     bool _loading = true;
+    IDisposable _subscription;
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        if (TagManager == null)
+            throw new Exception("TagManager is null on WgtGridLampReal.");
+        _subscription =
+            ClientGlobal.TagChangedSubject.Subscribe(onTagWebChanged);
+
         _guid = Guid.NewGuid().ToString();
         _text = getText();
         _loading = false;
@@ -46,18 +57,27 @@
             return "Not Yet!";
     }
 
+    public void Dispose()
+    {
+        _subscription.Dispose();
+    }
+    void onTagWebChanged(TagWeb tag)
+    {
+        TagWeb[] lampTags = [
+            Real.ErrorRxLamp,
+            Real.ReadyLamp,
+            Real.GoingLamp,
+            Real.FinishLamp,
+            Real.HomingLamp,
+            Real.OriginLamp,
+            Real.PauseLamp,
+        ];
 
-
-
-
-    // public async Task SetStatus4Async(Status4 status4)
-    // {
-    //     Console.WriteLine($"New lamp state: {status4}");
-    //     _status4 = status4;
-
-    //     await _lampRef.SetLampStateAsync(_status4);
-
-    //     await JsDual.SetInnerText(_guid, getText());
-    // }
+        if (lampTags.Any(t => t.IsEqual(tag)))
+        {
+            _text = getText();
+            StateHasChanged();
+        }
+    }
 }
 

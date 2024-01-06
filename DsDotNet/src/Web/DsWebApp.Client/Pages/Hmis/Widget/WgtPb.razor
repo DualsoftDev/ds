@@ -10,17 +10,13 @@
 }
 else
 {
-    @* <DxButton Click="@Click" Text="@Text" Enabled="@_enabled" /> *@
     <DxButton Click="@onClick" Text="@_text" Enabled="@_enabled" RenderStyleMode="@_style" RenderStyle="ButtonRenderStyle.Primary" />
 }
 
 
 @code {
-    bool _loading { get; set; } = true;
-
-    // [Parameter] public EventCallback<MouseEventArgs> Click { get; set; }
+    bool _loading = true;
     [Parameter] public Func<object, TagWeb> TagGetter { get; set; }
-    // [Parameter] public TagWeb Tag { get; set; }
     [Parameter] public string Text { get; set; }
     [Parameter] public object DataItem { get; set; }
 

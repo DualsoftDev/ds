@@ -1,6 +1,6 @@
 @* AutoManualSelectorBase *@
 
-@implements IAsyncDisposable
+@implements IDisposable
 <style>
     .transparent {
         color: transparent;
@@ -74,7 +74,7 @@
         _loading = false;
     }
 
-    public async ValueTask DisposeAsync()
+    public void Dispose()
     {
         _subscription.Dispose();
     }

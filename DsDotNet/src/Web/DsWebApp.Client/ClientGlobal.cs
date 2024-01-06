@@ -21,6 +21,7 @@ namespace DsWebApp.Client;
 public class ClientGlobal : ClientGlobalBase
 {
     public HMIPackage HmiPackage { get; set; }
+
     public Subject<TagWeb> TagChangedSubject = new Subject<TagWeb>();
 
     public ServerSettings ServerSettings { get; private set; }

@@ -6,17 +6,17 @@
 @implements IAsyncDisposable
 
 @code {
-    bool _loading { get; set; } = true;
+    [Parameter] public EventCallback OnLoaded { get; set; }
     protected HubConnectionManager _hubConnectionManager;
-    protected string ComponentName { get; set; }
-
     protected override async Task OnInitializedAsync()
     {
+        Console.WriteLine($"-------------------------------------- Hub initialized on CompHmiTagManager.razor");
         HubConnection hubConnection = await NavigationManager.ToAbsoluteUri("/hub/hmi/tag").StartHubAsync();
         _hubConnectionManager = new HubConnectionManager(hubConnection, registerHubConnection);
 
-        Console.WriteLine($"Hub initialized on PageHmiTagTest.razor");
         await base.OnInitializedAsync();
+        Console.WriteLine($"++++++++++++++++++++++++++++++++++++++ Hub initialized on CompHmiTagManager.razor");
+        await OnLoaded.InvokeAsync();
 
         IDisposable registerHubConnection(HubConnection hubConnection)
         {
@@ -27,17 +27,15 @@
                 ClientGlobal.TagChangedSubject.OnNext(change);
             });
         }
-
-        _loading = false;
     }
+
     public async ValueTask DisposeAsync()
     {
         await _hubConnectionManager.DisposeAsync();
-        Console.WriteLine($"{ComponentName} disposed!");
     }
 
 
-    protected async Task PostTag(TagWeb tag, bool value = true)
+    public async Task PostTag(TagWeb tag, bool value = true)
     {
         tag.SetValue(value);
         var result = await Http.PostTagAsync(tag, AuthenticationStateProvider, NavigationManager);

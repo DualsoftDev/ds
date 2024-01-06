@@ -5,11 +5,10 @@
     }
 </style>
 
+@implements IDisposable
 
 @if (!_loading)
 {
-    <HmiTagHubMonitor OnTagWebChanged="onTagWebChanged"/>
-
     <span class="ds-inline" style="display: flex; align-items: center; justify-content: space-evenly;">
         @* mode 가 성립하면, button 외곽에 bolt 표시 : lamp 가 on 되어도 여타 다른 조건이 안 맞으면 mode 가 성립하지 않음. *@
         @if (Mode != null)
@@ -27,19 +26,29 @@
 
 @code {
     bool _loading = true;
+    IDisposable _subscription;
 
     public TagWeb Button { get; set; }
     public TagWeb Lamp { get; set; }
     public TagWeb Mode { get; set; }
+    [CascadingParameter(Name = "TagManager")] public CompHmiTagManager TagManager { get; set; }
     [Parameter] public string Text { get; set; }
 
     protected async override Task OnInitializedAsync()
     {
+        if (TagManager == null)
+            throw new Exception("TagManager is null on ButtonLampModeBase.");
+
         await base.OnInitializedAsync();
 
         Console.WriteLine($"::: Auto push tag: {Button.Name}/{Button.KindDescription}/{Button.Kind}");
         Console.WriteLine($"::: Auto lamp tag: {Lamp.Name}/{Lamp.KindDescription}/{Lamp.Kind}");
         Console.WriteLine($"::: Auto mode tag: {Mode?.Name}/{Mode?.KindDescription}/{Mode?.Kind}");
+        _subscription =
+            ClientGlobal.TagChangedSubject.Subscribe(async tag =>
+            {
+                await onTagWebChanged(tag);
+            });
 
 
         _loading = false;
@@ -74,5 +83,10 @@
     {
         Button.SetValue(true);
         await Button.PostAsync(Http, onError);
+    }
+
+    public void Dispose()
+    {
+        _subscription.Dispose();
     }
 }

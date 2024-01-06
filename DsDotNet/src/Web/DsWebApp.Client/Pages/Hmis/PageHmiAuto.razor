@@ -22,40 +22,43 @@
 
 @* https://supportcenter.devexpress.com/ticket/details/t1017286/datagrid-for-blazor-how-to-set-the-100-height *@
 <CompFullScreenManager FullScreenElementId="auto" />      @* FullScreenStateChanged="@onFullScreenStateChanged" *@
+<CompHmiTagManager @ref="TagManager" OnLoaded="@(() => _tagManagerLoading=false)" />
 
-@if (_loading)
+@if (_loading || _tagManagerLoading)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
-    <div id="auto">
-        <p>
-            <div class="ds-inline">
-                <AutoManualSelector Selector="_system.AutoManualSelectLamp" />
-            </div>
-            <div class="ds-inline">
-                <ButtonLamp Text="Ready" Composite="@(_system.ReadyPushLamp)" />
-            </div>
-            <div class="ds-inline">
-                <ButtonLamp Text="Drive" Composite="@(_system.DrivePushLamp)" />
-            </div>
-            <div class="ds-inline">
-                <ButtonLamp Text="Home" Composite="@(_system.HomePushLamp)" />
-            </div>
-            <div class="ds-inline">
-                <ButtonLamp Text="Clear" Composite="@(_system.ClearPushLamp)" />
-            </div>
-            <div class="ds-inline">
-                <ButtonLamp Text="Stop" Composite="@(_system.StopPushLamp)" />
-            </div>
-            <div class="ds-inline">
-                <ButtonLamp Text="Em Stop" Composite="@(_system.EmergencyPushLamp)" />
-            </div>
-            <div class="ds-inline">
-                <ButtonLamp Text="Test" Composite="@(_system.TestPushLamp)" />
-            </div>
-@* 
+    Console.WriteLine($"--------------------- TagManager={TagManager}");
+    <CascadingValue Name="TagManager" Value="@TagManager">
+        <div id="auto">
+            <p>
+                <div class="ds-inline">
+                    <AutoManualSelector Selector="_system.AutoManualSelectLamp" />
+                </div>
+                <div class="ds-inline">
+                    <ButtonLamp Text="Ready" Composite="@(_system.ReadyPushLamp)" />
+                </div>
+                <div class="ds-inline">
+                    <ButtonLamp Text="Drive" Composite="@(_system.DrivePushLamp)" />
+                </div>
+                <div class="ds-inline">
+                    <ButtonLamp Text="Home" Composite="@(_system.HomePushLamp)" />
+                </div>
+                <div class="ds-inline">
+                    <ButtonLamp Text="Clear" Composite="@(_system.ClearPushLamp)" />
+                </div>
+                <div class="ds-inline">
+                    <ButtonLamp Text="Stop" Composite="@(_system.StopPushLamp)" />
+                </div>
+                <div class="ds-inline">
+                    <ButtonLamp Text="Em Stop" Composite="@(_system.EmergencyPushLamp)" />
+                </div>
+                <div class="ds-inline">
+                    <ButtonLamp Text="Test" Composite="@(_system.TestPushLamp)" />
+                </div>
+                @*
             <AutoManualSelector Selector="_system.AutoManualSelectLamp" />
             <ButtonLamp Text="Ready" Composite="@(_system.ReadyPushLamp)" />
             <ButtonLamp Text="Drive" Composite="@(_system.DrivePushLamp)" />
@@ -64,15 +67,18 @@ else
             <ButtonLamp Text="Stop" Composite="@(_system.StopPushLamp)" />
             <ButtonLamp Text="Em Stop" Composite="@(_system.EmergencyPushLamp)" />
             <ButtonLamp Text="Test" Composite="@(_system.TestPushLamp)" />
- *@
-        </p>
+            *@
+            </p>
 
-        <CompHmiFlowTable Flows="@_system.Flows" />
-    </div>
+            <CompHmiFlowTable Flows="@_system.Flows" />
+        </div>
+    </CascadingValue>
 }
 
 
 @code {
+    bool _tagManagerLoading = true;
+    public CompHmiTagManager TagManager {get; set; }
     // protected override async Task OnInitializedAsync()
     // {
     //     await base.OnInitializedAsync();

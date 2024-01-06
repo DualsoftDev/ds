@@ -3,9 +3,6 @@
 @using Engine.Core
 @using System.Reactive.Subjects
 
-@inherits CompHmiTagManager
-@implements IAsyncDisposable
-
 
 @if (_loading)
 {
@@ -14,7 +11,7 @@
 else
 {
     // todo : Lamp 표시 (R/G/F/H)
-    <DxGrid Data="Reals" @ref="MyGrid">
+    <DxGrid Data="Reals">
         <Columns>
             <DxGridDataColumn FieldName="Name" Caption="Real"></DxGridDataColumn>
             <CompHmiRealLampColumn/>
@@ -28,14 +25,12 @@ else
 }
 
 @code {
-        bool _loading { get; set; } = true;
-        IGrid MyGrid { get; set; }
-        [Parameter] public HMIReal[] Reals { get; set; }
+    bool _loading = true;
+    [Parameter] public HMIReal[] Reals { get; set; }
 
 
     protected override async Task OnInitializedAsync()
     {
-        base.ComponentName = "CompHmiRealTable.razor";
         await base.OnInitializedAsync();
         _loading = false;
     }

@@ -3,14 +3,11 @@
 @using Engine.Core
 @using System.Reactive.Subjects
 
-@inherits CompHmiTagManager
-@implements IAsyncDisposable
-
 @if (_loading)
 {
     <p><em>Loading flow tables...</em></p>
 }
-else
+else    
 {
     <DxGrid Data="Flows" @ref="MyGrid">
         <Columns>
@@ -40,14 +37,14 @@ else
 
 @code {
     IGrid MyGrid { get; set; }
-    bool _loading { get; set; } = true;
+    bool _loading = true;
+    [CascadingParameter] public CompHmiTagManager TagManager { get; set; }
     [Parameter] public HMIFlow[] Flows { get; set; }
 
 
 
     protected override async Task OnInitializedAsync()
     {
-        base.ComponentName = "CompHmiFlowTable.razor";
         await base.OnInitializedAsync();
         _loading = false;
     }
@@ -64,13 +61,13 @@ else
     async Task onAuto(object dataItem)
     {
         var flow = (HMIFlow)dataItem;
-        await PostTag(flow.GetAuto(), true);
+        await TagManager.PostTag(flow.GetAuto(), true);
     }
 
     async Task onManual(object dataItem)
     {
         var flow = (HMIFlow)dataItem;
-        await PostTag(flow.GetManual(), true);
+        await TagManager.PostTag(flow.GetManual(), true);
     }
 }
 

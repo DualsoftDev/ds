@@ -51,7 +51,7 @@ module ImportU =
                                 Call.Create(job, DuParentReal(parentReal.Value))
                             else
                                 Call.Create(job, DuParentFlow(parentFlow.Value))
-                        updateCallLayout (call, node.Position)
+                        //updateCallLayout (call, node.Position)
                         
                         call
                     else

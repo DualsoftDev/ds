@@ -9,15 +9,27 @@ open System.Linq
 open System
 open Engine.CodeGenCPU
 
-[<AutoOpen>]
-type ScreenInfo() =
-    member val Id = 0 with get, set
-    member val URL = "" with get, set
-
 [<Flags>]    
 type ViewType =
     | Normal = 0
     | Error  = 1
+
+[<AutoOpen>]
+type ScreenInfo = {
+        Id :int 
+        IpPort : string
+        URL :string 
+        ViewType : ViewType
+    }
+    with member x.Key = $"{x.Id}:{x.IpPort}";
+
+
+[<AutoOpen>]
+type CCTVInfo() =
+    member val Id = 0 with get, set
+    member val URL = "" with get, set
+
+
     
 type DsLayoutLoader() =
     let mutable _dsSystem:DsSystem option = None
@@ -37,16 +49,15 @@ type DsLayoutLoader() =
     member x.LayoutInfos = _dsSystem.Value.LayoutInfos
 
     member x.GetScreens() =
-        let screens = HashSet<ScreenInfo>()
+        let screens = HashSet<CCTVInfo>()
         let chs = x.DsSystem.LayoutChannels.ToList()
-        for i = 0 to chs.Count - 1 do
-            screens.Add(ScreenInfo(Id = i + 1, URL = $"{chs.[i]}")) |> ignore
+        for i = 1 to chs.Count  do
+            screens.Add(new CCTVInfo(Id = i, URL = $"{chs.[i-1]}")) |> ignore
 
         screens
 
-    member x.GetScreen(id:string) =
-        let find = Convert.ToInt32(id)
-        x.GetScreens().FirstOrDefault(fun x -> x.Id = find)
+    member x.GetScreenUrl(id:int) =
+        x.GetScreens().First(fun f-> f.Id = id).URL
 
     member x.GetViewTypeList() = 
         Enum.GetNames(typeof<ViewType>) 

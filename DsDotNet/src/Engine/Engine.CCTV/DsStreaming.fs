@@ -15,21 +15,18 @@ open Engine.Core
 open DsStreamingFrontModule
 open DsStreamingBackModule
 
-
-
-
 [<AutoOpen>]
 type DsStreaming() =
     let _delayFps = 1000 / 60
-    let _webViewTypes = Dictionary<string, ViewType>()
+    let _webViewTypes = Dictionary<WebSocket, ScreenInfo>()
     let _webStreamSet = Dictionary<string, byte[]>()
     let _dsl = new DsLayoutLoader()
 
     let _lockWebViewTypes = obj()
-    let updateOrGetWebViewTypes (url:string option, viewType:ViewType option)  =
+    let updateOrGetWebViewTypes (url:WebSocket option, screenInfo:ScreenInfo option)  =
         lock _lockWebViewTypes (fun () ->
-            if viewType.IsSome then
-                _webViewTypes.[url.Value] <- viewType.Value
+            if screenInfo.IsSome then
+                _webViewTypes.[url.Value] <- screenInfo.Value
             Seq.toList _webViewTypes
         )
 
@@ -51,27 +48,25 @@ type DsStreaming() =
         let cts = new CancellationTokenSource()
 
         let streamingTask = async {
-            let frontFrame = new Mat()
             let mixFrame = new Mat()
             while not cts.Token.IsCancellationRequested do
                 let streamList = updateOrGetWebViewTypes(None, None)
                 for kvp in streamList do
                     let item = kvp.Value
-                    let url = _dsl.GetScreen(kvp.Key.Split(':').[0]).URL
+                    let url = item.URL
                     if _backFrame.ContainsKey(url) then
                         let backFrame = getBackFrameOrNotNullUpdate(url, None) 
 
                         let imgInfos = getImageInfos url
-                        let frontFrame = getFrontImage(item, imgInfos) 
+                        let frontFrame = getFrontImage(item.ViewType, imgInfos) 
                         let backSize = backFrame.Size
 
-                        //CvInvoke.Imdecode(frontImg, ImreadModes.Color, frontFrame)
-                        //frontFrame <- OpenCVUtils.ResizeImage(frontFrame, backSize.Width, backSize.Height)
-                        let mixFrame = OpenCVUtils.AlphaBlend(frontFrame, new Point(0, 0), backFrame)
+                        let frontFrameResize = OpenCVUtils.ResizeImage(frontFrame, backSize.Width, backSize.Height)
+                        let mixFrame = OpenCVUtils.AlphaBlend(frontFrameResize, new Point(0, 0), backFrame)
                         let compressedImage = OpenCVUtils.CompressImage mixFrame
-                        _webStreamSet.[kvp.Key] <- compressedImage
+                        _webStreamSet.[item.Key] <- compressedImage
                     do! Async.Sleep(1)
-            frontFrame.Dispose()
+
             mixFrame.Dispose()
         }
 
@@ -84,14 +79,15 @@ type DsStreaming() =
 
     member x.DsLayout = _dsl
     member x.GetImageInfos (url:string) = getImageInfos url
-    member x.ImageStreaming(webSocket:WebSocket, screenId, viewmodeName, ipPort) =
+    member x.ImageStreaming(webSocket:WebSocket, screenId:string, viewmodeName, ipPort) =
         async { 
-            let viewKey = $"{screenId}:{ipPort}"
             try
-                let url = _dsl.GetScreen(screenId).URL
                 let viewKey = $"{screenId}:{ipPort}";
                 let viewType = getViewType(viewmodeName)
-                updateOrGetWebViewTypes(Some viewKey, Some viewType) |> ignore
+                let id = Convert.ToInt32(screenId)
+
+                let screenInfo = { Id = id; IpPort = ipPort; URL = _dsl.GetScreenUrl(id); ViewType = viewType}
+                updateOrGetWebViewTypes(Some webSocket, Some screenInfo) |> ignore
             
                 try
                     while webSocket.State = WebSocketState.Open do
@@ -103,9 +99,9 @@ type DsStreaming() =
                 | ex -> 
                     Console.WriteLine($"Error in image streaming: {ex.Message}")
             finally
-                webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Image streaming ended", CancellationToken.None) |> Async.AwaitTask |> ignore
                 Console.WriteLine($"\"Image streaming ended\" in image streaming: {ipPort}")
-                _webViewTypes.Remove(viewKey) |> ignore
+                webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Image streaming ended", CancellationToken.None) |> Async.AwaitTask |> ignore
+                _webViewTypes.Remove(webSocket) |> ignore
         }   |> Async.StartAsTask
     
    

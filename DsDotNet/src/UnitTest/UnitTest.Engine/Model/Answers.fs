@@ -75,10 +75,6 @@ module ModelAnswers =
         [layouts file="C:/Windows/Web/Wallpaper/Windows/img0.jpg"] = {
             A = (1309, 405, 205, 83);
             C = (1600, 500, 300, 300);
-            B."+" = (1400, 300, 300, 300);
-        }
-        [layouts file="C:/Windows/Web/Screen/img100.jpg"] = {
-            B."-" = (1600, 500, 300, 300);
         }
         [finish] = {
             F.R2;
@@ -88,9 +84,9 @@ module ModelAnswers =
             F.Main.Ap;
         }
     }
-    [device file="cylinder.ds"] A; // D:/ds/dsA/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
-    [device file="cylinder.ds"] B; // D:/ds/dsA/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
-    [external file="station.ds"] C; // D:/ds/dsA/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/station.ds
+    [device file="cylinder.ds"] A; // C:/dsa/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
+    [device file="cylinder.ds"] B; // C:/dsa/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
+    [external file="station.ds"] C; // C:/dsa/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/station.ds
 }
 """
 
@@ -164,7 +160,6 @@ module ModelAnswers =
     [prop] = {
         [layouts] = {
             A = (945, 123, 45, 67);
-            B."+" = (1244, 254, 56, 54);
         }
     }
     [device file="cylinder.ds"] A; // E:\projects\dualsoft\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds

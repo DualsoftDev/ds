@@ -562,16 +562,16 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     tryParseAndReturn (getText (xywh.h ()))
                 )
 
-            let putXywh (task: DsTask) (xywh: Xywh)  (channel: string) =
-                task.ApiItem.Channels.Add channel |>ignore
-                task.ApiItem.Xywh <- xywh
+            //let putXywh (task: DsTask) (xywh: Xywh)  (channel: string) =
+            //    task.ApiItem.Channels.Add channel |>ignore
+            //    task.ApiItem.Xywh <- xywh
 
-            let iterTasks (nameCompo: Fqdn) (xywh: Xywh)  (channel: string) (tasks: List<'T>) =
-                if tasks.Any() then
-                    let task = tasks.TryFindWithNameComponents(nameCompo)
+            //let iterTasks (nameCompo: Fqdn) (xywh: Xywh)  (channel: string) (tasks: List<'T>) =
+            //    if tasks.Any() then
+            //        let task = tasks.TryFindWithNameComponents(nameCompo)
 
-                    if task.IsSome then
-                        putXywh task.Value xywh channel
+            //        if task.IsSome then
+            //            putXywh task.Value xywh channel
 
       
 
@@ -591,16 +591,16 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     let xywh = positionDef.TryFindFirstChild<XywhContext>() |> Option.get |> genXywh
                     let nameCompo = collectNameComponents nameCtx
 
-                    match (nameCompo).Count() with
-                    | 1 ->
+                    if (nameCompo).Count() = 1
+                    then 
                         let device = FindExtension.TryFindLoadedSystem(system, name) |> Option.get
                         device.Xywh <- xywh
                         device.Channels.Add filePath |>ignore
-                    | 2 ->
-                        system.Jobs
-                        |> iter (fun job ->
-                            job.DeviceDefs.ToList() |> iterTasks nameCompo xywh filePath)
-                    | _ -> failwithlog "invalid name component"
+                    //| 2 ->
+                    //    system.Jobs
+                    //    |> iter (fun job ->
+                    //        job.DeviceDefs.ToList() |> iterTasks nameCompo xywh filePath)
+                    //| _ -> failwithlog "invalid name component"
 
         let fillFinished (system: DsSystem) (listFinishedCtx: List<dsParser.FinishBlockContext>) =
             for finishedCtx in listFinishedCtx do

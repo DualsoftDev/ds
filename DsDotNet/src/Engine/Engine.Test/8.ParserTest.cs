@@ -54,7 +54,6 @@ namespace Engine
     [prop] = {
         [layouts] = {
             A = (945, 123, 45, 67);
-            B.""+"" = (1244, 254, 56, 54)
         }
     }
     [device file=""cylinder.ds""] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds

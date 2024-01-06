@@ -35,9 +35,10 @@ module ImportUtilForLib =
     let updateCallLayout (call:Call, xyhw:Xywh) =
         call.TargetJob.DeviceDefs
             .OfType<TaskDev>()
-            .Iter(fun a ->
-                    a.ApiItem.Xywh <- xyhw
-                    a.ApiItem.Channels.Add(TextEmtpyChannel) |>ignore
+            .Iter(fun d ->
+                    let dev = d.GetDevice(call.Parent.GetSystem())
+                    dev.Xywh <- xyhw
+                    dev.Channels.Add(TextEmtpyChannel) |>ignore
                     )
 
     let addLoadedLibSystemNCall

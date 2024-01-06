@@ -170,4 +170,9 @@ type SystemExt =
                     failwithf $"Add I/O Table을 수행하세요 \n\n{String.Join('\n', inValidActionTags)}"
                 if inValidHwSystemTag.Any() then
                     failwithf $"HW 조작 IO Table을 작성하세요 \n\n{String.Join('\n', inValidHwSystemTag)}"
+    [<Extension>]
+    static member GetDevice(x:TaskDev, sys:DsSystem) =  
+                sys.Devices.First(fun f->f.Name  = x.DeviceName)
+
+                    
 

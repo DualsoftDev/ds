@@ -9,9 +9,9 @@ open System.Drawing
 open Engine.Core
 
 
-let rect (xywh:Xywh) = Rectangle(xywh.X, xywh.Y //w, h 없을시에 200 기본값
-                , if xywh.W.HasValue then xywh.W.Value else 200
-                , if xywh.H.HasValue then xywh.H.Value else 200)
+let rect (xywh:Xywh) = Rectangle(xywh.X, xywh.Y //w, h 없을시에 300 기본값
+                , if xywh.W.HasValue then xywh.W.Value else 300
+                , if xywh.H.HasValue then xywh.H.Value else 300)
 
 [<AutoOpen>]
 type OpenCVUtils() =

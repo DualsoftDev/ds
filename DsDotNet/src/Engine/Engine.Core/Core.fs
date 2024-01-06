@@ -63,10 +63,10 @@ module CoreModule =
      
         member _.LoadedName with get() = loadedName and set(value) = loadedName <- value
 
-        member val Xywh:Xywh = null with get, set
+        //member val Xywh:Xywh = null with get, set
         ///CCTV 경로 및 배경 이미지 경로 복수의 경로에 배치가능
-        member val Channels = HashSet<string>()
-
+        member val ChannelPoints = HashSet<string*Xywh>()
+        
 
 
         /// 다른 장치를 로딩하려는 시스템에서 로딩된 시스템을 참조합니다.
@@ -104,10 +104,10 @@ module CoreModule =
         member _.LoadedSystems = loadedSystems |> seq
         member _.Devices = loadedSystems.OfType<Device>() |> Seq.toArray 
         member _.ExternalSystems = loadedSystems.OfType<ExternalSystem>() |> Seq.toArray
-        member _.LayoutChannels = loadedSystems |> Seq.collect(fun s->s.Channels) |> distinct
+        member _.LayoutChannels = loadedSystems |> Seq.collect(fun s->s.ChannelPoints |> Seq.map(fst)) |> distinct
         member _.LayoutInfos = loadedSystems 
                                |> Seq.collect(fun s-> 
-                                s.Channels.Select(fun path-> { DeviceName = s.LoadedName; Path= path; Xywh = s.Xywh})) 
+                                s.ChannelPoints.Select(fun (path, xywh) -> { DeviceName = s.LoadedName; Path= path; Xywh = xywh})) 
         member _.ApiUsages = apiUsages |> seq
         member val Jobs = ResizeArray<Job>()
         member val Flows = createNamedHashSet<Flow>()

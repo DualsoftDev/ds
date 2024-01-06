@@ -292,31 +292,17 @@ module internal ToDsTextModule =
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
-            let getFiltered filter (container:IEnumerable<'T>) = 
-                container
-                |> Seq.where filter
-                |> Seq.toList
-            //let getSelectedAndFiltered selecter filter (container:IEnumerable<'T>)= 
-            //    container
-            //    |> Seq.map selecter
-            //    |> Seq.flatten
-            //    |> getFiltered filter
-
-
-
-            let devicesWithLayouts = 
-                system.LoadedSystems |> getFiltered (fun device -> device.Xywh <> null)
-            //let deviceApisWithLayouts = 
-            //    system.Jobs |> getSelectedAndFiltered(fun job -> job.DeviceDefs) (fun dev -> dev.ApiItem.Xywh <> null)
-
-            let layoutList = devicesWithLayouts|> Seq.collect (fun f->f.Channels) 
-                             //|> Seq.append (deviceApisWithLayouts |> Seq.collect(fun f-> f.ApiItem.Channels))
-                             |> Seq.filter(fun f->f <> TextEmtpyChannel)
+            let layoutList = system.LoadedSystems 
+                             |> Seq.collect (fun f-> f.ChannelPoints.Select(fst))
                              |> Seq.distinct
 
-            let noChannelDev = devicesWithLayouts.Where(fun f->f.Channels.Contains(TextEmtpyChannel))
-            //let noChannelApi = deviceApisWithLayouts.Where(fun f->f.ApiItem.Channels.Contains(TextEmtpyChannel))
-                            
+            let layoutPointDic = layoutList
+                                 |> Seq.map (fun f-> f, system.LoadedSystems 
+                                                        |> Seq.collect (fun dev-> dev.ChannelPoints.Select(fun (ch,x)-> dev.Name, ch, x))
+                                                        |> Seq.filter (fun (_, ch, _)-> ch = f)
+                                                        )
+                                 |> dict
+
             let layouts =
                 let makeList (name:string) (xywh:Xywh) =
                     let posi =
@@ -326,18 +312,20 @@ module internal ToDsTextModule =
                             $"({xywh.X}, {xywh.Y});"
                     $"{tab3}{name} = {posi}"
                 [
-                    if (noChannelDev.Any() )
+                    if layoutList.any()
                     then
-                        yield $"{tab2}[layouts] = {lb}"
-                        for device in noChannelDev do
-                            yield makeList device.Name device.Xywh
-                        yield $"{tab2}{rb}"
 
-                    for file in layoutList do
-                        yield $"{tab2}[layouts file={quote file}] = {lb}"
-                        for device in devicesWithLayouts.Where(fun f->f.Channels.Contains file) do
-                            yield makeList device.Name device.Xywh
-                        yield $"{tab2}{rb}"
+                        for file in layoutList do
+                            if file = TextEmtpyChannel 
+                            then
+                                yield $"{tab2}[layouts] = {lb}"
+                            else 
+                                yield $"{tab2}[layouts file={quote file}] = {lb}"
+
+                            for device, _, xy in layoutPointDic[file] do
+                                yield makeList device xy
+
+                            yield $"{tab2}{rb}"
 
                   
                 ] |> combineLines

@@ -46,8 +46,12 @@ module ExportLayoutTable =
               
         let rows = flows.SelectMany(fun f -> 
                         f.GetVerticesOfFlow().OfType<Call>().SelectMany(fun c->
-                                c.TargetJob.DeviceDefs.Select(fun d-> rowItem (d.DeviceName, f , d.GetDevice(f.System).Xywh ))
-                        ))
+                            c.TargetJob.DeviceDefs.Select(fun d->
+                                let xywh = d.GetDevice(f.System).ChannelPoints.First(fun (ch,_)->ch = TextEmtpyChannel) |> snd
+                                rowItem (d.DeviceName, f , xywh)
+                                )
+                            )
+                        )
         rows
         |> Seq.distinctBy (fun row -> row.First())      //디바이스 이름기준으로 중복 제거
         |> Seq.iter (fun row ->

@@ -37,8 +37,7 @@ module ImportUtilForLib =
             .OfType<TaskDev>()
             .Iter(fun d ->
                     let dev = d.GetDevice(call.Parent.GetSystem())
-                    dev.Xywh <- xyhw
-                    dev.Channels.Add(TextEmtpyChannel) |>ignore
+                    dev.ChannelPoints.Add(TextEmtpyChannel, xyhw) |>ignore
                     )
 
     let addLoadedLibSystemNCall
@@ -77,7 +76,7 @@ module ImportUtilForLib =
         let getLoadedTasks (loadedSys:DsSystem) (newloadedName:string)  =
             let devOrg= addOrGetExistSystem loadedSys newloadedName
             let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
-            TaskDev(api, "", "", newloadedName) :> TaskDev
+            TaskDev(api, "", "", newloadedName)
 
         let devOrg, _ = ParserLoader.LoadFromActivePath libFilePath
         if not (devOrg.ApiItems.any (fun f -> f.Name = apiPureName)) then

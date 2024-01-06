@@ -299,18 +299,19 @@ module ImportU =
                 node.LampDefs.ForEach(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", None, new HashSet<Func>())))
                 
                 
-        //MakeLayout 만들기
         [<Extension>]
-        static member MakeLayout(doc: pptDoc, mySys: DsSystem) =
+        static member MakeAnimationPoint(doc: pptDoc, mySys: DsSystem) =
             doc.Nodes
-            |> Seq.filter (fun node -> node.NodeType = LAYOUT)
+            |> Seq.filter (fun node -> node.NodeType = CALL)
             |> Seq.iter (fun node ->
-                let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = node.Name)
+                let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = node.CallName)
                 if dev.IsNull() 
                 then node.Shape.ErrorName(ErrID._61, node.PageNum)
-                else dev.Xywh <- Xywh(node.Position.X, node.Position.Y
+                else
+                    let xywh = Xywh(node.Position.X, node.Position.Y
                                    , node.Position.W, node.Position.H) 
-                                   )
+                    dev.ChannelPoints.Add(TextEmtpyChannel,xywh)|>ignore
+                    )
 
         //Condition 조건 적용
         [<Extension>]
@@ -647,8 +648,8 @@ module ImportU =
             layouts.Iter(fun (path, dev, rect)->
                 let device = sys.Devices.FirstOrDefault(fun f-> f.Name = dev)
                 if(device.IsNonNull()) 
-                then device.Xywh <- Xywh(rect.X, rect.Y, rect.Width, rect.Height)
-                     device.Channels.Add(path.Trim()) |> ignore
+                then let xywh = Xywh(rect.X, rect.Y, rect.Width, rect.Height)
+                     device.ChannelPoints.Add(path.Trim(), xywh) |> ignore
                 else Office.ErrorPPT(ErrorCase.Name, ErrID._61, $"layout {dev}", 0, 0u)
 
             )        
@@ -705,6 +706,6 @@ module ImportU =
             doc.MakeSafeties(sys)
             //ApiTxRx  만들기
             doc.MakeApiTxRx()
-            //Layout  만들기
-            doc.MakeLayout(sys)
+            //AnimationPoint  만들기
+            doc.MakeAnimationPoint(sys)
             doc.IsBuilded <- true

@@ -41,7 +41,7 @@ type DsStreaming() =
             layoutDic[url]
                 .Select(fun f-> _dsl.DsSystem.Devices.First(fun d->d.LoadedName = f.DeviceName))
         let infos = InfoPackageModuleExt.GetInfos(showDevs)
-        showDevs.Select(fun d-> infos.First(fun i->i.Name = d.Name), d.Xywh)
+        showDevs.Select(fun d-> infos.First(fun i->i.Name = d.Name), d.ChannelPoints.First(fun (ch,xy)-> ch = url)|>snd)
 
 
     let streamingFrontFrame() =
